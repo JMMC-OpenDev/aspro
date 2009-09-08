@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xmlns="http://www.jmmc.fr/aspro/0.1"
+            targetNamespace="http://www.jmmc.fr/aspro/0.1">
+
+  <xsd:annotation>
+    <xsd:documentation>
+        This xml schema describes the data model used in the ASPRO software
+
+        Created : 08/09/2009 :
+          Laurent : Initial revision
+    </xsd:documentation>
+  </xsd:annotation>
+
+
+<!-- OI Fits base model -->
+
+  <!-- OI_TARGET Table -->
+  <xsd:element name="OI_TARGET" type="OIFitsTargetTable">
+    <xsd:annotation>
+      <xsd:documentation>
+            OIFits Target Element
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+
+  <!-- OIFitsTargetTable -->
+  <xsd:complexType name="OIFitsTargetTable">
+    <xsd:annotation>
+      <xsd:documentation>
+        This type describes the OI_TARGET Table of the OIFits specification
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="OI_REVN" type="xsd:int">
+        <xsd:annotation>
+          <xsd:documentation>
+              Revision number of the table definition
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="target" type="OIFitsTarget" minOccurs="1" maxOccurs="unbounded"/>
+    </xsd:sequence>
+  </xsd:complexType>
+
+  <!-- OIFitsTarget -->
+  <xsd:complexType name="OIFitsTarget">
+    <xsd:annotation>
+      <xsd:documentation>
+          OIFits Target Definition
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="TARGET_ID" type="xsd:int">
+        <xsd:annotation>
+          <xsd:documentation>
+            Index number of this target
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="TARGET" type="xsd:string">
+        <xsd:annotation>
+          <xsd:documentation>
+            Target name (16 characters) : use string16 instead of xsd:string ?
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="RAEP0" type="xsd:double">
+        <xsd:annotation>
+          <xsd:documentation>
+            R.A. at mean equinox (deg)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="DECEP0" type="xsd:double">
+        <xsd:annotation>
+          <xsd:documentation>
+            Decl. at mean equinox (deg)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
+<!-- to be continued -->
+
+<!--
+TARGET_ID . . . . . . .           I (1) Index number
+TARGET . . . . . . . . . . .     A (16) Target name
+RAEP0 . . . . . . . . . . . . .  D (1)  R.A. at mean equinox (deg)
+DECEP0 . . . . . . . . . . . .   D (1)  Decl. at mean equinox (deg)
+EQUINOX . . . . . . . . .        E (1)  Equinox
+RA_ERR . . . . . . . . . . .     D (1)  Error in R.A. at mean equinox (deg)
+DEC_ERR . . . . . . . . . .      D (1)  Error in decl. at mean equinox (deg)
+SYSVEL . . . . . . . . . . .     D (1)  Systemic radial velocity (m s 1)
+VELTYP . . . . . . . . . . . .   A (8)  Reference for radial velocity (LSR, GEOCENTR, etc.)
+VELDEF . . . . . . . . . . .     A (8)  Deﬁnition of radial velocity (OPTICAL, RADIO)
+PMRA . . . . . . . . . . . . . . D (1)  Proper motion in R.A. (deg yr 1)
+PMDEC . . . . . . . . . . . .    D (1)  Proper motion in decl. (deg yr 1)
+PMRA_ERR . . . . . . .           D (1)  Error of proper motion in R.A. (deg yr 1)
+PMDEC_ERR . . . . . .            D (1)  Error of proper motion in decl. (deg yr 1)
+PARALLAX . . . . . . .           E (1)  Parallax (deg)
+PARA_ERR . . . . . . . .         E (1)  Error in parallax (deg)
+SPECTYP . . . . . . . . . .      A (16) Spectral type
+-->
+      </xsd:sequence>
+    </xsd:complexType>
+
+
+
+<!-- telescope description -->
+
+
+
+<!-- String types -->
+
+  <xsd:simpleType name="string8">
+    <xsd:restriction base="xsd:string">
+       <xsd:minLength value="1"/>
+       <xsd:maxLength value="8"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+
+  <xsd:simpleType name="string16">
+    <xsd:restriction base="xsd:string">
+       <xsd:minLength value="1"/>
+       <xsd:maxLength value="16"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+
+  </xsd:schema>
