@@ -14,44 +14,177 @@
   </xsd:annotation>
 
 
-<!-- OI Fits base model -->
 
-  <!-- OI_TARGET Table -->
-  <xsd:element name="OI_TARGET" type="OIFitsTargetTable">
+  <!-- Elements -->
+
+  <!-- OI_DATA element -->
+  <xsd:element name="OI_DATA" type="OIFitsFile">
     <xsd:annotation>
       <xsd:documentation>
-            OIFits Target Element : this defines the sources
+        this element contains a complete OIFits structure
       </xsd:documentation>
     </xsd:annotation>
   </xsd:element>
 
-  <!-- OIFitsTargetTable -->
-  <xsd:complexType name="OIFitsTargetTable">
+
+  <!-- OI_ARRAY element -->
+  <xsd:element name="OI_ARRAY" type="OIArrayTable">
+    <xsd:annotation>
+      <xsd:documentation>
+        this element contains only the telescope definition
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+
+
+  <!-- OI_TARGET element -->
+  <xsd:element name="OI_TARGET" type="OITargetTable">
+    <xsd:annotation>
+      <xsd:documentation>
+        this element contains only the target definition
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+
+
+
+
+<!-- OI Fits base model -->
+
+  <!-- OIFits structure -->
+  <xsd:complexType name="OIFitsFile">
+    <xsd:annotation>
+      <xsd:documentation>
+        This type describes the OIFits Table structure
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="OI_TARGET" type="OITargetTable">
+        <xsd:annotation>
+          <xsd:documentation>
+              A single required OI_TARGET Table
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
+      <!-- should we support multiple OI_ARRAY tables ? maxOccurs="unbounded" -->
+      <xsd:element name="OI_ARRAY" type="OIArrayTable" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>
+              An optional OI_ARRAY Table
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
+      <xsd:element name="OI_WAVELENGTH" type="OIWaveLengthTable" minOccurs="0" maxOccurs="unbounded">
+        <xsd:annotation>
+          <xsd:documentation>
+              0..n OI_WAVELENGTH Table(s) corresponding to the spectral responses for a given detector
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
+      <xsd:element name="OI_VIS" type="OIVisTable" minOccurs="1" maxOccurs="unbounded">
+        <xsd:annotation>
+          <xsd:documentation>
+              1..n OI_VIS Table(s) corresponding to the complex visiblity for a given detector
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
+      <xsd:element name="OI_VIS2" type="OIVis2Table" minOccurs="1" maxOccurs="unbounded">
+        <xsd:annotation>
+          <xsd:documentation>
+              1..n OI_VIS2 Table(s) corresponding to the squared visiblity for a given detector
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
+      <xsd:element name="OI_T3" type="OIT3Table" minOccurs="1" maxOccurs="unbounded">
+        <xsd:annotation>
+          <xsd:documentation>
+              1..n OI_T3 Table(s) corresponding to the squared visiblity for a given detector
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
+    </xsd:sequence>
+  </xsd:complexType>
+
+
+<!-- abstract OIFitsTable -->
+  <xsd:complexType name="OIFitsTable" abstract="true">
+    <xsd:annotation>
+      <xsd:documentation>
+        This type describes the abstract OIFITS table
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="EXTVER" type="xsd:int">
+        <xsd:annotation>
+          <xsd:documentation>
+            FITS Extension keyword used to index tables with the same EXTNAME
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+
+
+
+
+
+<!-- Telescope section -->
+
+  <!-- OIArrayTable -->
+  <xsd:complexType name="OIArrayTable">
+    <xsd:annotation>
+      <xsd:documentation>
+        This type describes the OI_ARRAY Table of the OIFits specification
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexContent>
+      <xsd:extension base="OIFitsTable">
+        <!-- TBD -->
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+
+
+
+
+<!-- Target section -->
+
+  <!-- OITargetTable -->
+  <xsd:complexType name="OITargetTable">
     <xsd:annotation>
       <xsd:documentation>
         This type describes the OI_TARGET Table of the OIFits specification
       </xsd:documentation>
     </xsd:annotation>
-    <xsd:sequence>
-      <xsd:element name="OI_REVN" type="xsd:int">
-        <xsd:annotation>
-          <xsd:documentation>
-              Revision number of the table definition
-          </xsd:documentation>
-        </xsd:annotation>
-      </xsd:element>
+    <xsd:complexContent>
+      <xsd:extension base="OIFitsTable">
+        <xsd:sequence>
+          <xsd:element name="OI_REVN" type="xsd:int">
+            <xsd:annotation>
+              <xsd:documentation>
+                  Revision number of the table definition
+              </xsd:documentation>
+            </xsd:annotation>
+          </xsd:element>
 
-      <!-- define an element for the source number = ASPRO variable oipt%n_sources ? Certainly a fortran issue -->
-
-      <xsd:element name="target" type="OIFitsTarget" minOccurs="1" maxOccurs="unbounded"/>
-    </xsd:sequence>
+          <xsd:element name="TARGET" type="OITarget" minOccurs="1" maxOccurs="unbounded"/>
+        </xsd:sequence>
+      </xsd:extension>
+    </xsd:complexContent>
   </xsd:complexType>
 
-  <!-- OIFitsTarget -->
-  <xsd:complexType name="OIFitsTarget">
+
+  <!-- OITargetEntry -->
+  <xsd:complexType name="OITarget">
     <xsd:annotation>
       <xsd:documentation>
-OIFits Target List :
+OIFits Target Definition = one row in the OI_TARGET Table :
 
 TARGET_ID . . . . . . .          I (1) Index number
 TARGET . . . . . . . . . . .     A (16) Target name
@@ -151,7 +284,7 @@ SPECTYP . . . . . . . . . .      A (16) Spectral type
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
-      <xsd:element name="VELDEF" type="string8">
+      <xsd:element name="VELDEF" type="VelocityDefinition">
         <xsd:annotation>
           <xsd:documentation>
             Definition of radial velocity (OPTICAL, RADIO)
@@ -226,9 +359,10 @@ SPECTYP . . . . . . . . . .      A (16) Spectral type
   </xsd:complexType>
 
 
+  <!-- Velocity Type used by OITargetEntry.VELTYP -->
   <xsd:simpleType name="VelocityType">
     <xsd:annotation>
-      <xsd:documentation>Possible values for OI_TARGET.VELTYP</xsd:documentation>
+      <xsd:documentation>Possible values for the Velocity Type</xsd:documentation>
     </xsd:annotation>
     <xsd:restriction base="string8">
       <xsd:enumeration value="LSR">
@@ -260,8 +394,101 @@ SPECTYP . . . . . . . . . .      A (16) Spectral type
   </xsd:simpleType>
 
 
+  <!-- Velocity Definition used by OITargetEntry.VELDEF -->
+  <xsd:simpleType name="VelocityDefinition">
+    <xsd:annotation>
+      <xsd:documentation>Possible values for the Velocity Definition</xsd:documentation>
+    </xsd:annotation>
+    <xsd:restriction base="string8">
+      <xsd:enumeration value="OPTICAL">
+        <xsd:annotation>
+          <xsd:documentation>Optical</xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="RADIO">
+        <xsd:annotation>
+          <xsd:documentation>Radio</xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+    </xsd:restriction>
+  </xsd:simpleType>
 
-<!-- telescope description -->
+
+
+
+<!-- WaveLength section -->
+
+  <!-- OIWaveLengthTable -->
+  <xsd:complexType name="OIWaveLengthTable">
+    <xsd:annotation>
+      <xsd:documentation>
+        This type describes the OI_WAVELENGTH Table of the OIFits specification
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexContent>
+      <xsd:extension base="OIFitsTable">
+        <!-- TBD -->
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+
+
+
+
+<!-- Complex Visibility section -->
+
+  <!-- OIVisTable -->
+  <xsd:complexType name="OIVisTable">
+    <xsd:annotation>
+      <xsd:documentation>
+        This type describes the OI_VIS Table of the OIFits specification
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexContent>
+      <xsd:extension base="OIFitsTable">
+        <!-- TBD -->
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+
+
+
+
+<!-- Squared Visibility section -->
+
+  <!-- OIVis2Table -->
+  <xsd:complexType name="OIVis2Table">
+    <xsd:annotation>
+      <xsd:documentation>
+        This type describes the OI_VIS2 Table of the OIFits specification
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexContent>
+      <xsd:extension base="OIFitsTable">
+        <!-- TBD -->
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+
+
+
+
+<!-- Triple Product section -->
+
+  <!-- OIT3Table -->
+  <xsd:complexType name="OIT3Table">
+    <xsd:annotation>
+      <xsd:documentation>
+        This type describes the OI_T3 Table of the OIFits specification
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexContent>
+      <xsd:extension base="OIFitsTable">
+        <!-- TBD -->
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+
 
 
 
@@ -269,14 +496,14 @@ SPECTYP . . . . . . . . . .      A (16) Spectral type
 
   <xsd:simpleType name="string8">
     <xsd:restriction base="xsd:string">
-      <xsd:minLength value="1"/>
+      <xsd:minLength value="0"/>
       <xsd:maxLength value="8"/>
     </xsd:restriction>
   </xsd:simpleType>
 
   <xsd:simpleType name="string16">
     <xsd:restriction base="xsd:string">
-      <xsd:minLength value="1"/>
+      <xsd:minLength value="0"/>
       <xsd:maxLength value="16"/>
     </xsd:restriction>
   </xsd:simpleType>
