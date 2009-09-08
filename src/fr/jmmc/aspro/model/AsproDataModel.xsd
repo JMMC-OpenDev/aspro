@@ -20,7 +20,7 @@
   <xsd:element name="OI_TARGET" type="OIFitsTargetTable">
     <xsd:annotation>
       <xsd:documentation>
-            OIFits Target Element
+            OIFits Target Element : this defines the sources
       </xsd:documentation>
     </xsd:annotation>
   </xsd:element>
@@ -40,6 +40,9 @@
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
+
+      <!-- define an element for the source number = ASPRO variable oipt%n_sources ? Certainly a fortran issue -->
+
       <xsd:element name="target" type="OIFitsTarget" minOccurs="1" maxOccurs="unbounded"/>
     </xsd:sequence>
   </xsd:complexType>
@@ -48,43 +51,9 @@
   <xsd:complexType name="OIFitsTarget">
     <xsd:annotation>
       <xsd:documentation>
-          OIFits Target Definition
-      </xsd:documentation>
-    </xsd:annotation>
-    <xsd:sequence>
-      <xsd:element name="TARGET_ID" type="xsd:int">
-        <xsd:annotation>
-          <xsd:documentation>
-            Index number of this target
-          </xsd:documentation>
-        </xsd:annotation>
-      </xsd:element>
-      <xsd:element name="TARGET" type="xsd:string">
-        <xsd:annotation>
-          <xsd:documentation>
-            Target name (16 characters) : use string16 instead of xsd:string ?
-          </xsd:documentation>
-        </xsd:annotation>
-      </xsd:element>
-      <xsd:element name="RAEP0" type="xsd:double">
-        <xsd:annotation>
-          <xsd:documentation>
-            R.A. at mean equinox (deg)
-          </xsd:documentation>
-        </xsd:annotation>
-      </xsd:element>
-      <xsd:element name="DECEP0" type="xsd:double">
-        <xsd:annotation>
-          <xsd:documentation>
-            Decl. at mean equinox (deg)
-          </xsd:documentation>
-        </xsd:annotation>
-      </xsd:element>
+OIFits Target List :
 
-<!-- to be continued -->
-
-<!--
-TARGET_ID . . . . . . .           I (1) Index number
+TARGET_ID . . . . . . .          I (1) Index number
 TARGET . . . . . . . . . . .     A (16) Target name
 RAEP0 . . . . . . . . . . . . .  D (1)  R.A. at mean equinox (deg)
 DECEP0 . . . . . . . . . . . .   D (1)  Decl. at mean equinox (deg)
@@ -101,9 +70,194 @@ PMDEC_ERR . . . . . .            D (1)  Error of proper motion in decl. (deg yr 
 PARALLAX . . . . . . .           E (1)  Parallax (deg)
 PARA_ERR . . . . . . . .         E (1)  Error in parallax (deg)
 SPECTYP . . . . . . . . . .      A (16) Spectral type
--->
-      </xsd:sequence>
-    </xsd:complexType>
+
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="TARGET_ID" type="xsd:int">
+        <xsd:annotation>
+          <xsd:documentation>
+            Index number of this target
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="TARGET" type="string16">
+        <xsd:annotation>
+          <xsd:documentation>
+            Target name (16 characters)
+              ASPRO variable = DEFSRCE%SOUNAME_%i%
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
+<!-- position -->
+      <xsd:element name="RAEP0" type="xsd:double">
+        <xsd:annotation>
+          <xsd:documentation>
+            R.A. at mean equinox (deg).
+              ASPRO variable = DEFSRCE%RA_%i%
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="DECEP0" type="xsd:double">
+        <xsd:annotation>
+          <xsd:documentation>
+            Decl. at mean equinox (deg)
+              ASPRO variable = DEFSRCE%DEC_%i%
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="EQUINOX" type="xsd:float">
+        <xsd:annotation>
+          <xsd:documentation>
+            The EQUINOX field contains a (ﬂoating point) Julian year, giving both the
+            epoch of the position (RAEP0 and DECEP0) and the equinox for the celestial
+            coordinate system in which the position is expressed
+              ASPRO variable = DEFSRCE%EPO_%i%
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="RA_ERR" type="xsd:double">
+        <xsd:annotation>
+          <xsd:documentation>
+            Error in R.A. at mean equinox (deg)
+              ASPRO variable = NONE
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="DEC_ERR" type="xsd:double">
+        <xsd:annotation>
+          <xsd:documentation>
+            Error in decl. at mean equinox (deg)
+              ASPRO variable = NONE
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
+<!-- velocity -->
+      <xsd:element name="SYSVEL" type="xsd:double">
+        <xsd:annotation>
+          <xsd:documentation>
+            Systemic radial velocity (m s 1)
+              ASPRO variable = NONE
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="VELTYP" type="VelocityType">
+        <xsd:annotation>
+          <xsd:documentation>
+            Reference for radial velocity (LSR, GEOCENTR, etc.)
+              ASPRO variable = NONE
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="VELDEF" type="string8">
+        <xsd:annotation>
+          <xsd:documentation>
+            Definition of radial velocity (OPTICAL, RADIO)
+              ASPRO variable = NONE
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
+<!-- proper motion -->
+      <xsd:element name="PMRA" type="xsd:double">
+        <xsd:annotation>
+          <xsd:documentation>
+            Proper motion in R.A. (deg yr 1)
+              ASPRO variable = NONE
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="PMDEC" type="xsd:double">
+        <xsd:annotation>
+          <xsd:documentation>
+            Proper motion in decl. (deg yr 1)
+              ASPRO variable = NONE
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="PMRA_ERR" type="xsd:double">
+        <xsd:annotation>
+          <xsd:documentation>
+            Error of proper motion in R.A. (deg yr 1)
+              ASPRO variable = NONE
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="PMDEC_ERR" type="xsd:double">
+        <xsd:annotation>
+          <xsd:documentation>
+            Error of proper motion in decl. (deg yr 1)
+              ASPRO variable = NONE
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
+<!-- parallax -->
+      <xsd:element name="PARALLAX" type="xsd:float">
+        <xsd:annotation>
+          <xsd:documentation>
+            Parallax (deg)
+              ASPRO variable = NONE
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="PARA_ERR" type="xsd:double">
+        <xsd:annotation>
+          <xsd:documentation>
+            Error in parallax (deg)
+              ASPRO variable = NONE
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
+<!-- spectral type -->
+      <xsd:element name="SPECTYP" type="string16">
+        <xsd:annotation>
+          <xsd:documentation>
+            Spectral type
+              ASPRO variable = NONE
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
+    </xsd:sequence>
+  </xsd:complexType>
+
+
+  <xsd:simpleType name="VelocityType">
+    <xsd:annotation>
+      <xsd:documentation>Possible values for OI_TARGET.VELTYP</xsd:documentation>
+    </xsd:annotation>
+    <xsd:restriction base="string8">
+      <xsd:enumeration value="LSR">
+        <xsd:annotation>
+          <xsd:documentation>Local Standard of rest</xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="HELIOCEN">
+        <xsd:annotation>
+          <xsd:documentation>Relative to the Sun</xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="BARYCENT">
+        <xsd:annotation>
+          <xsd:documentation>Solar system barycenter</xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="GEOCENTR">
+        <xsd:annotation>
+          <xsd:documentation>Center of mass of the Earth</xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="TOPOCENT">
+        <xsd:annotation>
+          <xsd:documentation>Uncorrected</xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+    </xsd:restriction>
+  </xsd:simpleType>
 
 
 
@@ -115,16 +269,16 @@ SPECTYP . . . . . . . . . .      A (16) Spectral type
 
   <xsd:simpleType name="string8">
     <xsd:restriction base="xsd:string">
-       <xsd:minLength value="1"/>
-       <xsd:maxLength value="8"/>
+      <xsd:minLength value="1"/>
+      <xsd:maxLength value="8"/>
     </xsd:restriction>
   </xsd:simpleType>
 
   <xsd:simpleType name="string16">
     <xsd:restriction base="xsd:string">
-       <xsd:minLength value="1"/>
-       <xsd:maxLength value="16"/>
+      <xsd:minLength value="1"/>
+      <xsd:maxLength value="16"/>
     </xsd:restriction>
   </xsd:simpleType>
 
-  </xsd:schema>
+</xsd:schema>
