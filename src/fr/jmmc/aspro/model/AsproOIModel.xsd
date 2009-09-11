@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xmlns="http://www.jmmc.fr/aspro-oi/0.1"
+            targetNamespace="http://www.jmmc.fr/aspro-oi/0.1">
+
+  <xsd:annotation>
+    <xsd:documentation>
+        This xml schema describes the optical interferometer 
+
+        Created : 08/09/2009 :
+          Laurent : Initial revision
+    </xsd:documentation>
+  </xsd:annotation>
+
+
+<!-- Elements -->
+
+  <!-- Observatory element -->
+  <xsd:element name="ObservatoryConfiguration" type="Observatory">
+    <xsd:annotation>
+      <xsd:documentation>
+        this element contains a complete Observatory description 
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+
+
+<!-- Class Types -->
+
+<!-- Observation -->
+  <xsd:complexType name="Observation">
+    <xsd:annotation>
+      <xsd:documentation>
+        This type describes the settings for a given date + target + interferometer
+
+        - date+time / period
+        - atmosphere Quality (atmoQual)
+        - min elevation for the target
+
+        - target(s)
+      </xsd:documentation>
+
+      <!-- TBD -->
+    </xsd:annotation>
+  </xsd:complexType>
+
+
+  <!-- Observatory -->
+    <xsd:complexType name="Observatory">
+      <xsd:annotation>
+        <xsd:documentation>
+        This type describes the observatory site
+        </xsd:documentation>
+      </xsd:annotation>
+      <xsd:sequence>
+        <xsd:element name="id" type="xsd:ID">
+          <xsd:annotation>
+            <xsd:documentation>
+              Identifier for this Observatory
+            </xsd:documentation>
+          </xsd:annotation>
+        </xsd:element>
+        <xsd:element name="name" type="xsd:string">
+          <xsd:annotation>
+            <xsd:documentation>
+              Name of the Observatory (VLTI)
+            </xsd:documentation>
+          </xsd:annotation>
+        </xsd:element>
+        <xsd:element name="description" type="xsd:string">
+          <xsd:annotation>
+            <xsd:documentation>
+              Description of the Observatory
+            </xsd:documentation>
+          </xsd:annotation>
+        </xsd:element>
+        <xsd:element name="location" type="PosLngLat">
+          <xsd:annotation>
+            <xsd:documentation>
+              Observatory location (longitude, latitude)
+            </xsd:documentation>
+          </xsd:annotation>
+        </xsd:element>
+        <xsd:element name="altitude" type="xsd:double">
+          <xsd:annotation>
+            <xsd:documentation>
+              Observatory altitude (m)
+            </xsd:documentation>
+          </xsd:annotation>
+        </xsd:element>
+
+      <!--
+        SLIMIT = Sun avoidance radius ???
+      -->
+
+
+
+        <xsd:element name="telescope" type="Telescope" minOccurs="1" maxOccurs="unbounded">
+          <xsd:annotation>
+            <xsd:documentation>
+              The list of telescopes for this observatory
+            </xsd:documentation>
+          </xsd:annotation>
+        </xsd:element>
+
+        <xsd:element name="station" type="Station" minOccurs="1" maxOccurs="unbounded">
+          <xsd:annotation>
+            <xsd:documentation>
+              The list of stations for this observatory
+            </xsd:documentation>
+          </xsd:annotation>
+        </xsd:element>
+
+      </xsd:sequence>
+    </xsd:complexType>
+
+
+  <!-- Telescope -->
+    <xsd:complexType name="Telescope">
+      <xsd:annotation>
+        <xsd:documentation>
+        This type describes a telescope
+        </xsd:documentation>
+      </xsd:annotation>
+      <xsd:sequence>
+        <xsd:element name="id" type="xsd:ID">
+          <xsd:annotation>
+            <xsd:documentation>
+              Identifier for this Telescope
+            </xsd:documentation>
+          </xsd:annotation>
+        </xsd:element>
+        <xsd:element name="name" type="xsd:string">
+          <xsd:annotation>
+            <xsd:documentation>
+              Name of this telescope (UT1, AT1 ...)
+            </xsd:documentation>
+          </xsd:annotation>
+        </xsd:element>
+        <xsd:element name="diameter" type="xsd:double">
+          <xsd:annotation>
+            <xsd:documentation>
+              Telescope diameter (m)
+            </xsd:documentation>
+          </xsd:annotation>
+        </xsd:element>
+
+      <!-- TBD -->
+      </xsd:sequence>
+    </xsd:complexType>
+
+
+  <!-- Station -->
+    <xsd:complexType name="Station">
+      <xsd:annotation>
+        <xsd:documentation>
+        This type describes a station for a given telescope
+        </xsd:documentation>
+      </xsd:annotation>
+      <xsd:sequence>
+        <xsd:element name="telescope" type="xsd:IDREF">
+          <xsd:annotation>
+            <xsd:documentation>
+              Telescope Reference
+            </xsd:documentation>
+          </xsd:annotation>
+        </xsd:element>
+        <xsd:element name="relativePosition" type="Position3D">
+          <xsd:annotation>
+            <xsd:documentation>
+              Relative position (m) to the observatory location
+            </xsd:documentation>
+          </xsd:annotation>
+        </xsd:element>
+        <xsd:element name="delayLineFixedOffset" type="xsd:double" minOccurs="0">
+          <xsd:annotation>
+            <xsd:documentation>
+             Delay fixed offset ???
+             If present, sets a fixed offset whatever the switchyard
+             (or if no sw at all, for ex. 1 delay line only).
+             will eventually be update by the switchyard file
+            </xsd:documentation>
+          </xsd:annotation>
+        </xsd:element>
+        <xsd:element name="horizon" type="xsd:string">
+          <xsd:annotation>
+            <xsd:documentation>
+              To be defined : Polygons or segments ???
+              cf : http://www.eso.org/sci/facilities/paranal/telescopes/vlti/pointing/index.html
+            </xsd:documentation>
+          </xsd:annotation>
+        </xsd:element>
+      </xsd:sequence>
+
+      <!-- TBD -->
+    </xsd:complexType>
+
+
+  <!-- DelayLine -->
+    <xsd:complexType name="DelayLine">
+      <xsd:annotation>
+        <xsd:documentation>
+        This type describes a delay line (DL) for a given telescope
+        </xsd:documentation>
+      </xsd:annotation>
+      <xsd:sequence>
+      <!-- warning : DL1 can be used several times in a document gathering multiple observatories -->
+        <xsd:element name="name" type="xsd:ID">
+          <xsd:annotation>
+            <xsd:documentation>
+              Delay Line (DL1 ...)
+            </xsd:documentation>
+          </xsd:annotation>
+        </xsd:element>
+        <xsd:element name="maximumThrow" type="xsd:double">
+          <xsd:annotation>
+            <xsd:documentation>
+              Maximum throw in m == maximum length ???
+            </xsd:documentation>
+          </xsd:annotation>
+        </xsd:element>
+      </xsd:sequence>
+
+      <!-- TBD -->
+    </xsd:complexType>
+
+<!-- simple types restrictions -->
+
+    <xsd:simpleType name="string16">
+      <xsd:restriction base="xsd:string">
+        <xsd:minLength value="0"/>
+        <xsd:maxLength value="16"/>
+      </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:complexType name="Position3D">
+      <xsd:annotation>
+        <xsd:documentation>
+        This data type describes a carthesian position (x,y,z) in meters
+        </xsd:documentation>
+      </xsd:annotation>
+      <xsd:sequence>
+        <xsd:element name="posX" type="xsd:double">
+          <xsd:annotation>
+            <xsd:documentation>
+              X position value (m)
+            </xsd:documentation>
+          </xsd:annotation>
+        </xsd:element>
+        <xsd:element name="posY" type="xsd:double">
+          <xsd:annotation>
+            <xsd:documentation>
+              Y position value (m)
+            </xsd:documentation>
+          </xsd:annotation>
+        </xsd:element>
+        <xsd:element name="posZ" type="xsd:double">
+          <xsd:annotation>
+            <xsd:documentation>
+              Z position value (m)
+            </xsd:documentation>
+          </xsd:annotation>
+        </xsd:element>
+      </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="PosLngLat">
+      <xsd:annotation>
+        <xsd:documentation>
+        This data type describes a position given by the couple longitude / latitude in degrees
+        </xsd:documentation>
+      </xsd:annotation>
+      <xsd:sequence>
+        <xsd:element name="lng" type="xsd:double">
+          <xsd:annotation>
+            <xsd:documentation>
+              Longitude position value (deg)
+            </xsd:documentation>
+          </xsd:annotation>
+        </xsd:element>
+        <xsd:element name="lat" type="xsd:double">
+          <xsd:annotation>
+            <xsd:documentation>
+              Latitude position value (deg)
+            </xsd:documentation>
+          </xsd:annotation>
+        </xsd:element>
+      </xsd:sequence>
+    </xsd:complexType>
+
+  </xsd:schema>
