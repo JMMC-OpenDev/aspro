@@ -164,7 +164,7 @@
           <xsd:element name="FRAME" type="CoordinateFrame">
             <xsd:annotation>
               <xsd:documentation>
-                  Array name, for cross-referencing
+                  Coordinate Frame
               </xsd:documentation>
             </xsd:annotation>
           </xsd:element>
