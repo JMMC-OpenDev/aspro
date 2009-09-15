@@ -340,7 +340,7 @@ Fringe Tracker
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
-      <xsd:element name="horizon" type="xsd:string">
+      <xsd:element name="horizon" type="xsd:string" minOccurs="0">
         <xsd:annotation>
           <xsd:documentation>
               To be defined : Polygons or segments ??? degrees ?
