@@ -14,9 +14,12 @@
   </xsd:annotation>
 
 
+
+
+
 <!-- Elements -->
 
-  <xsd:element name="InterferometerConfiguration" type="Interferometer">
+  <xsd:element name="interferometerSetting" type="InterferometerSetting">
     <xsd:annotation>
       <xsd:documentation>
         this element contains a complete Interferometer description
@@ -24,7 +27,7 @@
     </xsd:annotation>
   </xsd:element>
 
-  <xsd:element name="ObservationSettings" type="Observation">
+  <xsd:element name="observationSetting" type="Observation">
     <xsd:annotation>
       <xsd:documentation>
         this element contains a complete Observation description
@@ -33,7 +36,36 @@
   </xsd:element>
 
 
+
+
 <!-- Class Types -->
+
+  <xsd:complexType name="InterferometerSetting">
+    <xsd:annotation>
+      <xsd:documentation>
+        This type describes the interferometer and its configurations
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="description" type="InterferometerDescription">
+        <xsd:annotation>
+          <xsd:documentation>
+            this element contains a complete Interferometer description
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="configuration" type="InterferometerConfiguration">
+        <xsd:annotation>
+          <xsd:documentation>
+            this element contains the list of possible Interferometer configuration in the sense of a Call for Proposal
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+
+
+
 
 <!-- Observation -->
   <xsd:complexType name="Observation">
@@ -42,16 +74,16 @@
         This type describes the observation settings
 
         Information to add :
-        - atmosphere Quality (atmoQual)
-        - min elevation for the target (minElev)
-  let oipt%minElev 'oipt%minElev' /prompt "Min. Elevation (degrees)" /range oipt%obsMinElev 90
-
 
         - focal instrument (focalinst)
         - configuration (configIndex)
         - insMode
         - insNchan
         - insRes
+
+
+        - atmosphere Quality (atmoQual)
+        - min elevation for the target (minElev) "Min. Elevation (degrees)" /range oipt%obsMinElev 90
 
         - polychromatic (flag)
 
@@ -60,27 +92,17 @@
         - target(s)
 
 
-   let oipt%wavelength 'oipt%wavelength' /prompt "Observing Wavelength (microns)" /range oipt%lambdamin oipt%lambdamax *
-
    let oipt%popslist 'oipt%popslist' /Prompt "Pops Config (eg. 1234, 0000=none)"
-
 
    let oipt%atmoQual 'oipt%atmoQual' /prompt "Atmosphere Quality" /choice "Excellent" "Good" "Average" "Bad" "Awful"
 
-   let oipt%FTMode 'oipt%FTMode' /prompt "FT Mode" /INDEX oipt%vlti%FT%Mode
-   let oipt%insMode 'oipt%insMode' /prompt "Spectral Mode" /INDEX oipt%vlti%amber%insMode
-
    let oipt%dit 'oipt%dit' /prompt "Detector Integration Time" /Choice 25 50 100
 
-   let oipt%insMode 'oipt%insMode' /prompt "Spectral Mode" /INDEX oipt%vlti%midi%insMode
-   let oipt%FTMode 'oipt%FTMode' /prompt "FT Mode" /INDEX oipt%vlti%FT%Mode
-   let oipt%FTUsed 'oipt%FTUsed' /prompt "Use MROI`s Fringe Tracker"
+   let oipt%insMode 'oipt%insMode' /prompt "Spectral Mode" /INDEX oipt%vlti%amber%insMode
 
    let oipt%polychromatic 'oipt%polychromatic' /prompt "Simulate Instrument`s spectral resolution"
 
    let oipt%obsDuration 'oipt%obsDuration' /prompt "Total Integration Time (s) per calibrated point"
-
-   SIC\LET oipt%warnLimitingMagnitudes 'oipt%warnLimitingMagnitudes' /prompt "use faint object warnings"
 
   let oipt%ha1 'oipt%ha1' /prompt "Hour Angle Start" /range -12 12 *
   let oipt%ha2 'oipt%ha2' /prompt "Hour Angle End" /range -12 12 *
@@ -114,15 +136,6 @@
         </xsd:annotation>
       </xsd:element>
 
-      <xsd:element name="wavelength" type="xsd:double">
-        <xsd:annotation>
-          <xsd:documentation>
-              Observing Wavelength (microns)
-              Range LambdaMin / Lambda Max
-          </xsd:documentation>
-        </xsd:annotation>
-      </xsd:element>
-
     </xsd:sequence>
 
 
@@ -132,53 +145,112 @@
 
 
 
+  <!-- InterferometerConfiguration -->
+  <xsd:complexType name="InterferometerConfiguration">
+    <xsd:annotation>
+      <xsd:documentation>
+        This type describes the configuration for a given interferometer and its instruments
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="name" type="xsd:string">
+        <xsd:annotation>
+          <xsd:documentation>
+              Name of the configuration (VLTI CP 85)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
+      <xsd:element name="interferometer" type="xsd:IDREF">
+        <xsd:annotation>
+          <xsd:documentation>
+              The interferometer associated with this configuration
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
+      <xsd:element name="instrument" type="FocalInstrumentConfiguration" minOccurs="0" maxOccurs="unbounded">
+        <xsd:annotation>
+          <xsd:documentation>
+              The list of  configuration for a focal instrument
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
+      <!-- TBD -->
+    </xsd:sequence>
+  </xsd:complexType>
+
+
+  <!-- FocalInstrumentConfiguration -->
+  <xsd:complexType name="FocalInstrumentConfiguration">
+    <xsd:annotation>
+      <xsd:documentation>
+        This type describes a focal instrument configuration (AMBER : UT1-UT2-UT4, A0-K0-G1, MIDI : UT1-UT3-102m, E0-I1-68.8m)
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="focalInstrument" type="xsd:IDREF">
+        <xsd:annotation>
+          <xsd:documentation>
+              The focal instrument associated with this configuration
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="configuration" type="FocalInstrumentConfigurationItem" minOccurs="1" maxOccurs="unbounded">
+        <xsd:annotation>
+          <xsd:documentation>
+              The list of configuration for the focal instrument
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
+      <!-- TBD -->
+    </xsd:sequence>
+  </xsd:complexType>
+  
+
+  <!-- FocalInstrumentConfigurationItem -->
+  <xsd:complexType name="FocalInstrumentConfigurationItem">
+    <xsd:annotation>
+      <xsd:documentation>
+        This type describes a focal instrument configuration item (AMBER : U1-U2-U4)
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="name" type="xsd:string">
+        <xsd:annotation>
+          <xsd:documentation>
+              The name of this configuration
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="station" type="xsd:IDREFS">
+        <xsd:annotation>
+          <xsd:documentation>
+              The list of stations for this configuration (U1-U2-U4)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <!-- TBD -->
+    </xsd:sequence>
+  </xsd:complexType>
+
+
+
+
+
+
 
   <!-- Interferometer -->
-  <xsd:complexType name="Interferometer">
+  <xsd:complexType name="InterferometerDescription">
     <xsd:annotation>
       <xsd:documentation>
         This type describes the interferometer site
 
         Information to add :
 
-        SLIMIT = Sun avoidance radius ???
         obsMinElev 20
-
-
-  TBD variables :
-
-Adaptive Optics :
- let oipt%AOExist YES
- let oipt%AOBand "V" ! a default AO band
- let oipt%AOnbAct 2-64  ! Number of Actuators of AO
-
-Fringe Tracker
- let oipt%FTExist YES
- let oipt%FTBand "H" ! same for FTs
- let oipt%FTUsed NO
- let oipt%FTMode 0
- let oipt%FTVisibility 0.9
- let oipt%FTLimit 12
- let oipt%FTMaxInt 60.0
-
- let oipt%insMode 1
- let oipt%configIndex 1
- let oipt%obsMinElev 20
-
- let oipt%samplingTime 60
- let oipt%insRes 0
- let oipt%insNchan 1
- let oipt%transmission 0.02
- let oipt%dit 100 !ms
- let oipt%ron 10 !e
- let oipt%detsaturation 24000
- let oipt%instrumentalVisibility 0.9
- let oipt%instrumentalVisibilityBias 2
- let oipt%instrumentalPhaseBias 2
- let oipt%nbPixI 32
- let oipt%nbPixP 32
- let oipt%fracFluxForI 0.5
- let oipt%warnLimitingMagnitudes NO
 
       </xsd:documentation>
     </xsd:annotation>
@@ -250,6 +322,14 @@ Fringe Tracker
         </xsd:annotation>
       </xsd:element>
 
+      <xsd:element name="fringeTracker" type="FringeTracker" minOccurs="0" maxOccurs="1">
+        <xsd:annotation>
+          <xsd:documentation>
+              The interferometer has a fringe tracker system (optional)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
 
       <xsd:element name="focalInstrument" type="FocalInstrument" minOccurs="1" maxOccurs="unbounded">
         <xsd:annotation>
@@ -295,10 +375,18 @@ Fringe Tracker
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
-
+      <xsd:element name="adaptiveOptics" type="AdaptiveOptics" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>
+              Telescope has an Adaptive Optics system (optional)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
       <!-- TBD -->
     </xsd:sequence>
   </xsd:complexType>
+
+
 
 
   <!-- Station -->
@@ -356,11 +444,11 @@ Fringe Tracker
         http://www.eso.org/sci/facilities/paranal/telescopes/vlti/configuration/index.html
       -->
 
-<!-- switchyard = fixed delay -->
-
 
       <!-- TBD -->
   </xsd:complexType>
+
+
 
 
   <!-- DelayLine -->
@@ -391,6 +479,8 @@ Fringe Tracker
   </xsd:complexType>
 
 
+
+
   <!-- FocalInstrument -->
   <xsd:complexType name="FocalInstrument">
     <xsd:annotation>
@@ -398,17 +488,10 @@ Fringe Tracker
         This type describes a focal instrument (AMBER, MIDI ...)
 
         Information to add :
-
-      allowedSpectralBand (V, K, I, H, N, J) [1-3]
-      AOExist YES
-      FTExist YES
-      FTVisibility
-      FTLimit
-      FTMaxInt
       </xsd:documentation>
     </xsd:annotation>
     <xsd:sequence>
-      <xsd:element name="name" type="xsd:string">
+      <xsd:element name="name" type="xsd:ID">
         <xsd:annotation>
           <xsd:documentation>
               Name of the focal instrument (AMBER, MIDI ...)
@@ -423,10 +506,10 @@ Fringe Tracker
         </xsd:annotation>
       </xsd:element>
 
-      <xsd:element name="configuration" type="FocalInstrumentConfiguration" minOccurs="1" maxOccurs="unbounded">
+      <xsd:element name="mode" type="FocalInstrumentMode" minOccurs="0" maxOccurs="unbounded">
         <xsd:annotation>
           <xsd:documentation>
-              The list of configuration for this focal instrument
+              The list of mode for this focal instrument
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
@@ -436,30 +519,44 @@ Fringe Tracker
   </xsd:complexType>
 
 
-  <!-- FocalInstrumentConfiguration -->
-  <xsd:complexType name="FocalInstrumentConfiguration">
+
+
+
+
+
+  <!-- FocalInstrumentMode -->
+  <xsd:complexType name="FocalInstrumentMode">
     <xsd:annotation>
       <xsd:documentation>
-        This type describes a focal instrument configuration (AMBER : UT1-UT2-UT4, A0-K0-G1, MIDI : UT1-UT3-102m, E0-I1-68.8m)
+        This type describes a focal instrument mode (AMBER : "Low_HK" ... "Medium_K_1_2300" ... "High_K_1_2481")
       </xsd:documentation>
     </xsd:annotation>
     <xsd:sequence>
       <xsd:element name="name" type="xsd:string">
-      </xsd:element>
-
-      <xsd:element name="station" type="xsd:IDREF" minOccurs="2" maxOccurs="unbounded">
         <xsd:annotation>
           <xsd:documentation>
-              The list of stations for this configuration
+              The name of this mode
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
+      <xsd:element name="waveLengthMin" type="xsd:double">
+        <xsd:annotation>
+          <xsd:documentation>
+              The lower wave length
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="waveLengthMax" type="xsd:double">
+        <xsd:annotation>
+          <xsd:documentation>
+              The upper wave length
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <!-- TBD : add generic parameter settings ? -->
 
-      <!-- TBD -->
     </xsd:sequence>
   </xsd:complexType>
-
-
 
 
 
@@ -483,6 +580,119 @@ Fringe Tracker
       </xsd:element>
     </xsd:sequence>
   </xsd:complexType>
+
+
+
+
+  <!-- AdaptiveOptics -->
+  <xsd:complexType name="AdaptiveOptics">
+    <xsd:annotation>
+      <xsd:documentation>
+        This type describes an Adaptive Optics system
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="band" type="SpectralBand">
+        <xsd:annotation>
+          <xsd:documentation>
+              Spectral Band
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="numberActuators" type="xsd:int">
+        <xsd:annotation>
+          <xsd:documentation>
+              Number of actuators
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+
+
+
+
+  <!-- FringeTracker -->
+  <xsd:complexType name="FringeTracker">
+    <xsd:annotation>
+      <xsd:documentation>
+        This type describes a Fringe Tracker system :
+
+! Fringe Tracker
+  define logical oipt%FTUsed /global ! FT in Use
+  define real oipt%FTVisibility /global
+  define real oipt%FTLimit /global
+  define real oipt%FTMaxInt /global
+  define integer oipt%FTMode /global
+  define character oipt%FTBand*1 /global ! FT observing band
+
+Fringe Tracker
+ let oipt%FTExist YES
+ let oipt%FTBand "H" ! same for FTs
+ let oipt%FTUsed NO
+ let oipt%FTMode 0
+ let oipt%FTVisibility 0.9
+ let oipt%FTLimit 12
+ let oipt%FTMaxInt 60.0
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <!-- TBD -->
+    </xsd:sequence>
+  </xsd:complexType>
+
+
+
+  <!-- SpectralBand -->
+  <xsd:simpleType name="SpectralBand">
+    <xsd:annotation>
+      <xsd:documentation>
+        Possible values for the SpectralBand (UBVRIJHKLMNQ)
+        http://fr.wikipedia.org/wiki/Syst%C3%A8me_photom%C3%A9trique
+
+        ASPRO : allowedSpectralBand (V, K, I, H, N, J) [1-3]
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:restriction base="xsd:string">
+      <xsd:enumeration value="V">
+        <xsd:annotation>
+          <xsd:documentation>V band</xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="R">
+        <xsd:annotation>
+          <xsd:documentation>R band</xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="I">
+        <xsd:annotation>
+          <xsd:documentation>I band</xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="J">
+        <xsd:annotation>
+          <xsd:documentation>J band</xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="H">
+        <xsd:annotation>
+          <xsd:documentation>H band</xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="K">
+        <xsd:annotation>
+          <xsd:documentation>K band</xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="N">
+        <xsd:annotation>
+          <xsd:documentation>N band</xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+    </xsd:restriction>
+  </xsd:simpleType>
+
+
 
 
 
