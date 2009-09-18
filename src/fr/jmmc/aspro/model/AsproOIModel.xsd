@@ -136,6 +136,10 @@
         </xsd:annotation>
       </xsd:element>
 
+      <!-- Guidage : etoile visee (position), magnitude dans la bande spectrale -->
+
+
+
     </xsd:sequence>
 
 
@@ -218,14 +222,14 @@
       </xsd:documentation>
     </xsd:annotation>
     <xsd:sequence>
-      <xsd:element name="name" type="xsd:string">
+      <xsd:element name="name" type="xsd:string" minOccurs="0">
         <xsd:annotation>
           <xsd:documentation>
-              The name of this configuration
+              The name of this configuration (optional)
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
-      <xsd:element name="station" type="xsd:IDREFS">
+      <xsd:element name="stations" type="xsd:IDREFS">
         <xsd:annotation>
           <xsd:documentation>
               The list of stations for this configuration (U1-U2-U4)
@@ -306,6 +310,22 @@
         </xsd:annotation>
       </xsd:element>
 
+      <xsd:element name="channel" type="Channel" minOccurs="1" maxOccurs="unbounded">
+        <xsd:annotation>
+          <xsd:documentation>
+              The list of channels for this interferometer
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
+      <xsd:element name="switchyard" type="SwitchYard" minOccurs="0" maxOccurs="1">
+        <xsd:annotation>
+          <xsd:documentation>
+              The switchyard for this interferometer (optional)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
       <xsd:element name="delayLine" type="DelayLine" minOccurs="1" maxOccurs="unbounded">
         <xsd:annotation>
           <xsd:documentation>
@@ -330,7 +350,6 @@
         </xsd:annotation>
       </xsd:element>
 
-
       <xsd:element name="focalInstrument" type="FocalInstrument" minOccurs="1" maxOccurs="unbounded">
         <xsd:annotation>
           <xsd:documentation>
@@ -338,7 +357,6 @@
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
-
 
     </xsd:sequence>
   </xsd:complexType>
@@ -350,14 +368,14 @@
   <xsd:complexType name="Telescope">
     <xsd:annotation>
       <xsd:documentation>
-        This type describes a telescope
+        This type describes a telescope or a telescope family ...
       </xsd:documentation>
     </xsd:annotation>
     <xsd:sequence>
       <xsd:element name="id" type="xsd:ID">
         <xsd:annotation>
           <xsd:documentation>
-              Identifier for this Telescope
+              Identifier for this Telescope or family
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
@@ -382,7 +400,42 @@
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
+
+      <!-- ActiveOptics ?? -->
+
+
+      <!-- Guidage : spectral band, magnitude limite, champ de vue ... -->
+
+
       <!-- TBD -->
+    </xsd:sequence>
+  </xsd:complexType>
+
+
+
+
+  <!-- AdaptiveOptics -->
+  <xsd:complexType name="AdaptiveOptics">
+    <xsd:annotation>
+      <xsd:documentation>
+        This type describes an Adaptive Optics system
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="band" type="SpectralBand">
+        <xsd:annotation>
+          <xsd:documentation>
+              Spectral Band
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="numberActuators" type="xsd:int">
+        <xsd:annotation>
+          <xsd:documentation>
+              Number of actuators
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
     </xsd:sequence>
   </xsd:complexType>
 
@@ -400,7 +453,7 @@
       <xsd:element name="name" type="xsd:ID">
         <xsd:annotation>
           <xsd:documentation>
-              Name of this Station (U1, A0, K0, G1 ...)
+              Name / Identifier of this Station (U1, A0, K0, G1 ...)
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
@@ -444,8 +497,84 @@
         http://www.eso.org/sci/facilities/paranal/telescopes/vlti/configuration/index.html
       -->
 
-
       <!-- TBD -->
+  </xsd:complexType>
+
+
+
+
+  <!-- Channel -->
+  <xsd:complexType name="Channel">
+    <xsd:annotation>
+      <xsd:documentation>
+        This type describes an interferometer channel
+        corresponding to a beam arriving in the interferometer focal plane
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="name" type="xsd:ID">
+        <xsd:annotation>
+          <xsd:documentation>
+              Channel name / Identifier
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+
+
+
+
+  <!-- SwitchYard -->
+  <xsd:complexType name="SwitchYard">
+    <xsd:annotation>
+      <xsd:documentation>
+        This type describes a interferometer switchyard
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="connection" type="Connection" minOccurs="1" maxOccurs="unbounded">
+        <xsd:annotation>
+          <xsd:documentation>
+              The list of delay lines for this interferometer
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+
+
+
+
+  <xsd:complexType name="Connection">
+    <xsd:annotation>
+      <xsd:documentation>
+        This type describes a connection between a station and a channel to give its optical length
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="station" type="xsd:IDREF">
+        <xsd:annotation>
+          <xsd:documentation>
+              The starting point of the connection = the station
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="channel" type="xsd:IDREF">
+        <xsd:annotation>
+          <xsd:documentation>
+              The ending point of the connection = the channel
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="opticalLength" type="xsd:double">
+        <xsd:annotation>
+          <xsd:documentation>
+              The length of this connection in meter
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
   </xsd:complexType>
 
 
@@ -455,7 +584,7 @@
   <xsd:complexType name="DelayLine">
     <xsd:annotation>
       <xsd:documentation>
-        This type describes a delay line (DL) for a given telescope
+        This type describes a delay line (DL) present in the interferometer
       </xsd:documentation>
     </xsd:annotation>
     <xsd:sequence>
@@ -470,13 +599,37 @@
       <xsd:element name="maximumThrow" type="xsd:double">
         <xsd:annotation>
           <xsd:documentation>
-              Maximum throw in m == maximum length ???
+              Maximum throw in m
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
     </xsd:sequence>
       <!-- TBD -->
   </xsd:complexType>
+
+
+
+
+  <!-- Pop -->
+  <xsd:complexType name="Pop">
+    <xsd:annotation>
+      <xsd:documentation>
+        This type describes a Pop
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+        <!-- cf CHARA.pops == pop list is associated to a delay line or not ??? -->
+      <xsd:element name="value" type="xsd:double" minOccurs="1" maxOccurs="unbounded">
+        <xsd:annotation>
+          <xsd:documentation>
+              Pop value in meter
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+
+
 
 
 
@@ -502,6 +655,13 @@
         <xsd:annotation>
           <xsd:documentation>
               Description of the instrument
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="defaultChannels" type="xsd:IDREFS">
+        <xsd:annotation>
+          <xsd:documentation>
+              The list of channels used by this instrument
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
@@ -560,54 +720,6 @@
 
 
 
-
-
-  <!-- Pop -->
-  <xsd:complexType name="Pop">
-    <xsd:annotation>
-      <xsd:documentation>
-        This type describes a Pop
-      </xsd:documentation>
-    </xsd:annotation>
-    <xsd:sequence>
-        <!-- cf CHARA.pops == pop list is associated to a delay line or not ??? -->
-      <xsd:element name="value" type="xsd:double" minOccurs="1" maxOccurs="unbounded">
-        <xsd:annotation>
-          <xsd:documentation>
-              Pop value in meter
-          </xsd:documentation>
-        </xsd:annotation>
-      </xsd:element>
-    </xsd:sequence>
-  </xsd:complexType>
-
-
-
-
-  <!-- AdaptiveOptics -->
-  <xsd:complexType name="AdaptiveOptics">
-    <xsd:annotation>
-      <xsd:documentation>
-        This type describes an Adaptive Optics system
-      </xsd:documentation>
-    </xsd:annotation>
-    <xsd:sequence>
-      <xsd:element name="band" type="SpectralBand">
-        <xsd:annotation>
-          <xsd:documentation>
-              Spectral Band
-          </xsd:documentation>
-        </xsd:annotation>
-      </xsd:element>
-      <xsd:element name="numberActuators" type="xsd:int">
-        <xsd:annotation>
-          <xsd:documentation>
-              Number of actuators
-          </xsd:documentation>
-        </xsd:annotation>
-      </xsd:element>
-    </xsd:sequence>
-  </xsd:complexType>
 
 
 

@@ -347,6 +347,53 @@
       </relativePosition>
     </station>
 
+    <channel>
+      <name>Channel1</name>
+    </channel>
+    <channel>
+      <name>Channel2</name>
+    </channel>
+    <channel>
+      <name>Channel3</name>
+    </channel>
+    <channel>
+      <name>Channel4</name>
+    </channel>
+    <channel>
+      <name>Channel5</name>
+    </channel>
+    <channel>
+      <name>Channel6</name>
+    </channel>
+    <channel>
+      <name>Channel7</name>
+    </channel>
+    <channel>
+      <name>Channel8</name>
+    </channel>
+
+    <switchyard>
+      <connection>
+        <station>U1</station>
+        <channel>Channel1</channel>
+        <opticalLength>165.8497</opticalLength>
+      </connection>
+      <connection>
+        <station>U1</station>
+        <channel>Channel2</channel>
+        <opticalLength>167.1097</opticalLength>
+      </connection>
+      <connection>
+        <station>U1</station>
+        <channel>Channel5</channel>
+        <opticalLength>173.8097</opticalLength>
+      </connection>
+      <connection>
+        <station>U1</station>
+        <channel>Channel6</channel>
+        <opticalLength>175.0697</opticalLength>
+      </connection>
+    </switchyard>
 
     <delayLine>
       <name>DL1</name>
@@ -379,6 +426,7 @@
     <focalInstrument>
       <name>AMBER</name>
       <description></description>
+      <defaultChannels>Channel2 Channel3 Channel5</defaultChannels>
       <mode>
         <name>Low_HK</name>
         <waveLengthMin>1.469</waveLengthMin>
@@ -393,8 +441,13 @@
     <instrument>
       <focalInstrument>AMBER</focalInstrument>
       <configuration>
-        <name>U1 U2 U3</name>
-        <station>U1 U2 U3</station>
+        <stations>U1 U2 U3</stations>
+      </configuration>
+      <configuration>
+        <stations>U1 U2</stations>
+      </configuration>
+      <configuration>
+        <stations>U1 U4</stations>
       </configuration>
     </instrument>
   </configuration>
