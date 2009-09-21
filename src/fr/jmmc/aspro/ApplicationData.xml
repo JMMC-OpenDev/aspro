@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<ApplicationData link="http://www.jmmc.fr/aspro">
+  <program name="Aspro" version="0.0.1"/>
+  <compilation date="21/09/2009" compiler="JDK 1.5.0_16"/>
+  <text>
+    <![CDATA[ASPRO is a complete observation preparation tool developed and maintained by the JMMC
+    that allows to prepare interferometric observations with the VLTI or other interferometers.
+    It allows in particular to simulate the projected baseline evolution during the observations (supersynthesis),
+    derive the visibilities for a given object (single star, binaries, user defined FITS image,...),
+    and offers many additional useful functions.
+    ]]>
+  </text>
+  <dependences>
+    <package name="Commons" description="general libraries, provided by The Apache Software Foundation." link="http://commons.apache.org/"/>
+  </dependences>
+  <menubar>
+    <menu label="File">
+    </menu>
+  </menubar>
+  <releasenotes>
+    <release version="0.0.1">
+      <prerelease version="0.0" tag="ASPRO_">
+        <change>Complete rewrite of the ASPRO software as a desktop Java application.</change>
+      </prerelease>
+    </release>
+  </releasenotes>
+  <acknowledgment><![CDATA[TBD]]>
+  </acknowledgment>
+</ApplicationData>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project name="ASPRO 2010" default="about" basedir=".">
+<project name="ASPRO 2" default="about" basedir=".">
 
   <description>
   	Aspro ant build file
