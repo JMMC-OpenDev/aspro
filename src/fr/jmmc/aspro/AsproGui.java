@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproGui.java,v 1.1 2009-09-21 15:38:50 bourgesl Exp $"
+ * "@(#) $Id: AsproGui.java,v 1.2 2009-10-02 15:20:18 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2009/09/21 15:38:50  bourgesl
+ * initial jmcs gui + jaxb loader
+ *
  *
  ******************************************************************************/
 package fr.jmmc.aspro;
@@ -26,7 +29,9 @@ public class AsproGui extends App {
    * @param args command line arguments
    */
   public AsproGui(final String[] args) {
-    super(args);
+/*    super(args); */
+    // no splash screen during the developments :
+    super(args, false, false);
   }
 
   /** Initialize application objects */

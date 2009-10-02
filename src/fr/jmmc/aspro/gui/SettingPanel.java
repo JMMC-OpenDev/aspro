@@ -10,20 +10,23 @@
  */
 package fr.jmmc.aspro.gui;
 
+import javax.swing.JPanel;
 import javax.swing.JTree;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreeModel;
+import javax.swing.tree.TreeSelectionModel;
 
 /**
  *
  * @author bourgesl
  */
-public class SettingPanel extends javax.swing.JPanel {
+public class SettingPanel extends JPanel implements TreeSelectionListener {
 
   /** Creates new form SettingPanel */
   public SettingPanel() {
     initComponents();
+    postInit();
   }
 
   /** This method is called from within the constructor to
@@ -38,18 +41,18 @@ public class SettingPanel extends javax.swing.JPanel {
     jSplitPane1 = new javax.swing.JSplitPane();
     jSplitPane2 = new javax.swing.JSplitPane();
     jScrollPane1 = new javax.swing.JScrollPane();
-    jTree1 = new JTree(getModel());
-    targetPanel1 = new fr.jmmc.aspro.gui.TargetPanel();
+    jTreeSetting = new JTree(new SettingTreeModel());
+    targetPanel = new fr.jmmc.aspro.gui.TargetPanel();
     jPanel1 = new javax.swing.JPanel();
 
     jSplitPane1.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
 
     jSplitPane2.setDividerLocation(200);
 
-    jScrollPane1.setViewportView(jTree1);
+    jScrollPane1.setViewportView(jTreeSetting);
 
     jSplitPane2.setLeftComponent(jScrollPane1);
-    jSplitPane2.setRightComponent(targetPanel1);
+    jSplitPane2.setRightComponent(targetPanel);
 
     jSplitPane1.setTopComponent(jSplitPane2);
 
@@ -63,7 +66,7 @@ public class SettingPanel extends javax.swing.JPanel {
     );
     jPanel1Layout.setVerticalGroup(
       jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGap(0, 347, Short.MAX_VALUE)
+      .addGap(0, 297, Short.MAX_VALUE)
     );
 
     jSplitPane1.setRightComponent(jPanel1);
@@ -80,38 +83,39 @@ public class SettingPanel extends javax.swing.JPanel {
     );
   }// </editor-fold>//GEN-END:initComponents
 
-  /**
-   * Creates and returns the <code>TreeModel</code>.
-   *
-   * @return the default <code>TreeModel</code>
-   */
-  protected TreeModel getModel() {
-    DefaultMutableTreeNode root = new DefaultMutableTreeNode("Setting Name");
-    DefaultMutableTreeNode parent;
+  private void postInit() {
+    //Where the tree is initialized:
+    jTreeSetting.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
 
-    parent = new DefaultMutableTreeNode("When : 01/10/2009 - 31/03/2010");
-    root.add(parent);
-
-    parent = new DefaultMutableTreeNode("Interferometer : VLTI");
-    root.add(parent);
-
-    parent = new DefaultMutableTreeNode("Instrument : AMBER");
-    root.add(parent);
-
-    parent = new DefaultMutableTreeNode("Targets");
-    root.add(parent);
-    parent.add(new DefaultMutableTreeNode("Star 1"));
-    parent.add(new DefaultMutableTreeNode("Star 2"));
-
-    return new DefaultTreeModel(root);
+    //Listen for when the selection changes.
+    jTreeSetting.addTreeSelectionListener(this);
   }
+
+  /**
+   * Tree selection event
+   * @param e Tree selection event
+   */
+  public void valueChanged(final TreeSelectionEvent e) {
+    //Returns the last path element of the selection.
+    final DefaultMutableTreeNode node = (DefaultMutableTreeNode) jTreeSetting.getLastSelectedPathComponent();
+
+    if (node == null) {
+      //Nothing is selected.
+      return;
+    }
+
+    final Object nodeInfo = node.getUserObject();
+    System.out.println("selected object : " + nodeInfo);
+
+  }
+
   
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JPanel jPanel1;
   private javax.swing.JScrollPane jScrollPane1;
   private javax.swing.JSplitPane jSplitPane1;
   private javax.swing.JSplitPane jSplitPane2;
-  private javax.swing.JTree jTree1;
-  private fr.jmmc.aspro.gui.TargetPanel targetPanel1;
+  private javax.swing.JTree jTreeSetting;
+  private fr.jmmc.aspro.gui.TargetPanel targetPanel;
   // End of variables declaration//GEN-END:variables
 }

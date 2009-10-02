@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: MainFrame.java,v 1.2 2009-10-01 16:06:25 bourgesl Exp $"
+ * "@(#) $Id: MainFrame.java,v 1.3 2009-10-02 15:20:18 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2009/10/01 16:06:25  bourgesl
+ * demo UI
+ *
  * Revision 1.1  2009/09/21 15:38:50  bourgesl
  * initial jmcs gui + jaxb loader
  *
@@ -68,7 +71,7 @@ public class MainFrame extends JFrame {
 
   private void initComponents() {
 
-    final Dimension dim = new Dimension(1000, 750);
+    final Dimension dim = new Dimension(800, 600);
     setMinimumSize(dim);
     addComponentListener(new ComponentResizeAdapter(dim));
 
@@ -97,6 +100,9 @@ public class MainFrame extends JFrame {
     StatusBar.show("Application started");
   }
 
+  /**
+   * Create the main content :
+   */
   private void createContent() {
 
     this.tabs = new JTabbedPane(JTabbedPane.TOP);
@@ -104,6 +110,9 @@ public class MainFrame extends JFrame {
     getContentPane().add(tabs, BorderLayout.CENTER);
   }
 
+  /**
+   * Create the default tab (dev)
+   */
   private void addDefaultTabs() {
 
     final SettingPanel setting = new SettingPanel();

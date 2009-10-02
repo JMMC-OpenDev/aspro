@@ -2,7 +2,10 @@
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xmlns="http://www.jmmc.fr/aspro-oi/0.1"
-            targetNamespace="http://www.jmmc.fr/aspro-oi/0.1">
+            targetNamespace="http://www.jmmc.fr/aspro-oi/0.1"
+            xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
+            xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
+            jaxb:version="2.1" jaxb:extensionBindingPrefixes="xjc">
 
   <xsd:annotation>
     <xsd:documentation>
@@ -11,6 +14,12 @@
         Created : 08/09/2009 :
           Laurent : Initial revision
     </xsd:documentation>
+    <xsd:appinfo>
+        <jaxb:globalBindings>
+          <xjc:superClass name="fr.jmmc.aspro.model.OIBase"/>
+          <xjc:simple />
+        </jaxb:globalBindings>
+    </xsd:appinfo>
   </xsd:annotation>
 
 
@@ -71,7 +80,7 @@
   <xsd:complexType name="Observation">
     <xsd:annotation>
       <xsd:documentation>
-        This type describes the observation settings
+        This type describes the observation settings (when, where, what)
 
         Information to add :
 
@@ -81,16 +90,12 @@
         - insNchan
         - insRes
 
-
         - atmosphere Quality (atmoQual)
         - min elevation for the target (minElev) "Min. Elevation (degrees)" /range oipt%obsMinElev 90
 
         - polychromatic (flag)
 
-
-
         - target(s)
-
 
    let oipt%popslist 'oipt%popslist' /Prompt "Pops Config (eg. 1234, 0000=none)"
 
@@ -120,18 +125,34 @@
         </xsd:annotation>
       </xsd:element>
 
-      <!-- date / time : should we support a date range ? -->
-      <xsd:element name="date" type="xsd:date">
+      <xsd:element name="when" type="WhenSetting">
         <xsd:annotation>
           <xsd:documentation>
-              Observation Date (YYYY-MM-DD)
+              When information
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
-      <xsd:element name="time" type="xsd:time">
+
+      <xsd:element name="interferometerConfiguration" type="InterferometerConfigurationChoice">
         <xsd:annotation>
           <xsd:documentation>
-              Observation Time (hh:mm:ss)
+              Selected interferometer
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
+      <xsd:element name="instrumentConfiguration" type="FocalInstrumentConfigurationChoice">
+        <xsd:annotation>
+          <xsd:documentation>
+              Selected configuration
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
+      <xsd:element name="target" type="Target" minOccurs="1" maxOccurs="unbounded">
+        <xsd:annotation>
+          <xsd:documentation>
+              One or more target(s)
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
@@ -148,6 +169,134 @@
 
 
 
+  <!-- WhenSetting -->
+  <xsd:complexType name="WhenSetting">
+    <xsd:annotation>
+      <xsd:documentation>
+        This type describes when the observation will happen
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <!-- date / time : should we support a date range ? -->
+      <xsd:element name="dateFrom" type="xsd:dateTime">
+        <xsd:annotation>
+          <xsd:documentation>
+              Observation Date (YYYY-MM-DD) + time if necessary
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="dateTo" type="xsd:dateTime">
+        <xsd:annotation>
+          <xsd:documentation>
+              Observation Date (YYYY-MM-DD) + time if necessary
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+
+
+
+
+
+  <!-- InterferometerConfigurationChoice -->
+  <xsd:complexType name="InterferometerConfigurationChoice">
+    <xsd:annotation>
+      <xsd:documentation>
+        This type describes the chosen interferometer and its parameters
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="name" type="xsd:string">
+        <xsd:annotation>
+          <xsd:documentation>
+              The interferometer configuration (InterferometerConfiguration identifier)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <!-- other parameters -->
+    </xsd:sequence>
+  </xsd:complexType>
+
+
+
+
+  <!-- FocalInstrumentConfigurationChoice -->
+  <xsd:complexType name="FocalInstrumentConfigurationChoice">
+    <xsd:annotation>
+      <xsd:documentation>
+        This type describes the chosen instrument and its parameters
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="name" type="xsd:string">
+        <xsd:annotation>
+          <xsd:documentation>
+              The focal instrument configuration (InterferometerConfiguration identifier)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <!-- other parameters -->
+    </xsd:sequence>
+  </xsd:complexType>
+
+
+
+
+  <!-- OITarget -->
+  <xsd:complexType name="Target">
+    <xsd:annotation>
+      <xsd:documentation>
+        This type describes a target
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="name" type="xsd:string">
+        <xsd:annotation>
+          <xsd:documentation>
+            Target name
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
+<!-- position -->
+      <xsd:element name="RA" type="xsd:double">
+        <xsd:annotation>
+          <xsd:documentation>
+            R.A. at mean equinox (deg)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="DEC" type="xsd:double">
+        <xsd:annotation>
+          <xsd:documentation>
+            Decl. at mean equinox (deg)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="EQUINOX" type="xsd:float">
+        <xsd:annotation>
+          <xsd:documentation>
+            The EQUINOX field contains a (ﬂoating point) Julian year, giving both the
+            epoch of the position (RA and DEC) and the equinox for the celestial
+            coordinate system in which the position is expressed
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
+<!-- other fields from OI TARGET -->
+<!-- velocity -->
+<!-- proper motion -->
+<!-- parallax -->
+<!-- spectral type -->
+
+    </xsd:sequence>
+  </xsd:complexType>
+
+
+
+
+<!-- Interferometer Configuration associated to a particular configuration / period (like VLTI Period 85) -->
 
   <!-- InterferometerConfiguration -->
   <xsd:complexType name="InterferometerConfiguration">
@@ -186,6 +335,8 @@
   </xsd:complexType>
 
 
+
+
   <!-- FocalInstrumentConfiguration -->
   <xsd:complexType name="FocalInstrumentConfiguration">
     <xsd:annotation>
@@ -212,7 +363,9 @@
       <!-- TBD -->
     </xsd:sequence>
   </xsd:complexType>
-  
+
+
+
 
   <!-- FocalInstrumentConfigurationItem -->
   <xsd:complexType name="FocalInstrumentConfigurationItem">
@@ -244,7 +397,7 @@
 
 
 
-
+<!-- Generic Interferometer Description i.e. not related to a particular configuration / period -->
 
   <!-- Interferometer -->
   <xsd:complexType name="InterferometerDescription">

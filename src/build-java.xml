@@ -15,12 +15,34 @@
   <property name="sources" location="${root}/src"/>
 
 
-  <taskdef name="xjc" classname="com.sun.tools.xjc.XJCTask">
-    <classpath>
-      <fileset dir="${libs}/jaxb" includes="*.jar" />
-    </classpath>
-  </taskdef>
+  <!-- custom macro to enhance XJC -->
+  <macrodef name="xjc">
+    <attribute name="destdir"/>
+    <attribute name="schema"/>
+    <attribute name="package"/>
 
+    <sequential>
+      <java jar="${libs}/jaxb/jaxb-xjc.jar">
+        <arg value="-classpath"/>
+        <arg value="${libs}/jaxb/simple-regenerator-1.0.jar"/>
+
+        <arg value="-extension"/>
+        <!-- preserve code extension -->
+        <arg value="-simple-preserve"/>
+
+        <arg value="-d"/>
+        <arg value="@{destdir}"/>
+
+        <arg value="-p"/>
+        <arg value="@{package}"/>
+
+        <arg value="@{schema}"/>
+      </java>
+      <delete dir="@{destdir}">
+        <include name="**/*.java.backup"/>
+      </delete>
+      </sequential>
+  </macrodef>
 
 
   <!-- targets -->
@@ -59,17 +81,15 @@
 
     <echo>generating java code for AsproOIModel.xsd</echo>
     <mkdir dir="${sources}/fr/jmmc/aspro/model/oi" />
-    <xjc destdir="${sources}" schema="${sources}/fr/jmmc/aspro/model/AsproOIModel.xsd"
-         removeOldOutput="yes" package="fr.jmmc.aspro.model.oi">
-      <produces dir="${sources}/fr/jmmc/aspro/model/oi" includes="*.java" />
-    </xjc>
+
+    <xjc destdir="${sources}" package="fr.jmmc.aspro.model.oi"
+         schema="${sources}/fr/jmmc/aspro/model/AsproOIModel.xsd" />
 
     <echo>generating java code for AsproDataModel.xsd</echo>
+
     <mkdir dir="${sources}/fr/jmmc/aspro/model/oifits" />
-    <xjc destdir="${sources}" schema="${sources}/fr/jmmc/aspro/model/AsproDataModel.xsd"
-         removeOldOutput="yes" package="fr.jmmc.aspro.model.oifits">
-      <produces dir="${sources}/fr/jmmc/aspro/model/oifits" includes="*.java" />
-    </xjc>
+    <xjc destdir="${sources}" package="fr.jmmc.aspro.model.oifits"
+         schema="${sources}/fr/jmmc/aspro/model/AsproDataModel.xsd" />
 
   </target>
 
