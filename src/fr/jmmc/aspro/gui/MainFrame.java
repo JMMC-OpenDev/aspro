@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: MainFrame.java,v 1.3 2009-10-02 15:20:18 bourgesl Exp $"
+ * "@(#) $Id: MainFrame.java,v 1.4 2009-10-13 16:02:37 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2009/10/02 15:20:18  bourgesl
+ * updated model + stupid tree model
+ *
  * Revision 1.2  2009/10/01 16:06:25  bourgesl
  * demo UI
  *
@@ -121,10 +124,12 @@ public class MainFrame extends JFrame {
     final JScrollPane settingScrollPane = new JScrollPane(setting);
 
     // The tab is added to the tabbed panel :
-    final int pos = tabs.getTabCount();
-    tabs.insertTab("new settings", null, settingScrollPane, null, pos);
+    int pos = tabs.getTabCount();
+    tabs.insertTab("new settings", null, settingScrollPane, null, pos++);
+    tabs.insertTab("plot", null, new UVChartPanel(), null, pos);
+
     tabs.setSelectedIndex(pos);
-  }
+}
 
   /**
    * Window adapter to handle windowClosing event.
