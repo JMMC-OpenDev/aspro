@@ -16,7 +16,6 @@
    xsi:schemaLocation='http://www.jmmc.fr/aspro-oi/0.1 AsproOIModel.xsd'>
 
   <description>
-    <id>VLTI</id>
     <name>VLTI</name>
 
     <description>VLTI</description>
@@ -29,13 +28,11 @@
 
     <!-- For now we have only one shared instance of UT because all UTs are considered equivalent -->
     <telescope>
-      <id>UT</id>
       <name>UT</name>
       <diameter>8.2</diameter>
     </telescope>
     <!-- For now we have only one shared instance of AT because all ATs are considered equivalent -->
     <telescope>
-      <id>AT</id>
       <name>AT</name>
       <diameter>1.8</diameter>
     </telescope>
@@ -432,6 +429,117 @@
         <waveLengthMin>1.469</waveLengthMin>
         <waveLengthMax>2.54</waveLengthMax>
       </mode>
+      <mode>
+        <name>Medium_K_1_2100</name>
+        <waveLengthMin>1.926</waveLengthMin>
+        <waveLengthMax>2.275</waveLengthMax>
+      </mode>
+      <mode>
+        <name>Medium_K_1_2300</name>
+        <waveLengthMin>2.126</waveLengthMin>
+        <waveLengthMax>2.474</waveLengthMax>
+      </mode>
+      <mode>
+        <name>Medium_H_1_1650</name>
+        <waveLengthMin>1.54</waveLengthMin>
+        <waveLengthMax>1.82</waveLengthMax>
+      </mode>
+      <mode>
+        <name>High_K_1_1979</name>
+        <waveLengthMin>1.955</waveLengthMin>
+        <waveLengthMax>2.003</waveLengthMax>
+      </mode>
+      <mode>
+        <name>High_K_1_2018</name>
+        <waveLengthMin>1.994</waveLengthMin>
+        <waveLengthMax>2.042</waveLengthMax>
+      </mode>
+      <mode>
+        <name>High_K_1_2056</name>
+        <waveLengthMin>2.032</waveLengthMin>
+        <waveLengthMax>2.079</waveLengthMax>
+      </mode>
+      <mode>
+        <name>High_K_1_2095</name>
+        <waveLengthMin>2.071</waveLengthMin>
+        <waveLengthMax>2.118</waveLengthMax>
+      </mode>
+      <mode>
+        <name>High_K_1_2133</name>
+        <waveLengthMin>2.110</waveLengthMin>
+        <waveLengthMax>2.156</waveLengthMax>
+      </mode>
+      <mode>
+        <name>High_K_1_2172</name>
+        <waveLengthMin>2.149</waveLengthMin>
+        <waveLengthMax>2.195</waveLengthMax>
+      </mode>
+      <mode>
+        <name>High_K_1_2211</name>
+        <waveLengthMin>2.187</waveLengthMin>
+        <waveLengthMax>2.235</waveLengthMax>
+      </mode>
+      <mode>
+        <name>High_K_1_2249</name>
+        <waveLengthMin>2.226</waveLengthMin>
+        <waveLengthMax>2.272</waveLengthMax>
+      </mode>
+      <mode>
+        <name>High_K_1_2288</name>
+        <waveLengthMin>2.265</waveLengthMin>
+        <waveLengthMax>2.311</waveLengthMax>
+      </mode>
+      <mode>
+        <name>High_K_1_2326</name>
+        <waveLengthMin>2.303</waveLengthMin>
+        <waveLengthMax>2.348</waveLengthMax>
+      </mode>
+      <mode>
+        <name>High_K_1_2365</name>
+        <waveLengthMin>2.342</waveLengthMin>
+        <waveLengthMax>2.387</waveLengthMax>
+      </mode>
+      <mode>
+        <name>High_K_1_2403</name>
+        <waveLengthMin>2.381</waveLengthMin>
+        <waveLengthMax>2.425</waveLengthMax>
+      </mode>
+      <mode>
+        <name>High_K_1_2442</name>
+        <waveLengthMin>2.420</waveLengthMin>
+        <waveLengthMax>2.464</waveLengthMax>
+      </mode>
+      <mode>
+        <name>High_K_1_2481</name>
+        <waveLengthMin>2.459</waveLengthMin>
+        <waveLengthMax>2.503</waveLengthMax>
+      </mode>
+    </focalInstrument>
+
+    <focalInstrument>
+      <name>MIDI</name>
+      <description></description>
+      <defaultChannels>Channel1 Channel2</defaultChannels>
+      <mode>
+        <name>HIGH_SENS+PRISM</name>
+        <waveLengthMin>8</waveLengthMin>
+        <waveLengthMax>13</waveLengthMax>
+      </mode>
+      <mode>
+        <name>HIGH_SENS+GRISM</name>
+        <waveLengthMin>8</waveLengthMin>
+        <waveLengthMax>13</waveLengthMax>
+      </mode>
+      <mode>
+        <name>SCI_PHOT+PRISM</name>
+        <waveLengthMin>8</waveLengthMin>
+        <waveLengthMax>13</waveLengthMax>
+      </mode>
+      <mode>
+        <name>SCI_PHOT+GRISM</name>
+        <waveLengthMin>8</waveLengthMin>
+        <waveLengthMax>13</waveLengthMax>
+      </mode>
     </focalInstrument>
   </description>
 
@@ -444,10 +552,76 @@
         <stations>U1 U2 U3</stations>
       </configuration>
       <configuration>
+        <stations>U1 U2 U4</stations>
+      </configuration>
+      <configuration>
+        <stations>U1 U3 U4</stations>
+      </configuration>
+      <configuration>
+        <stations>U2 U3 U4</stations>
+      </configuration>
+      <configuration>
+        <stations>E0 G0 H0</stations>
+      </configuration>
+      <configuration>
+        <stations>A0 D0 H0</stations>
+      </configuration>
+      <configuration>
+        <stations>D0 H0 G1</stations>
+      </configuration>
+      <configuration>
+        <stations>A0 K0 G1</stations>
+      </configuration>
+    </instrument>
+    <instrument>
+      <focalInstrument>MIDI</focalInstrument>
+      <configuration>
         <stations>U1 U2</stations>
       </configuration>
       <configuration>
+        <stations>U1 U3</stations>
+      </configuration>
+      <configuration>
         <stations>U1 U4</stations>
+      </configuration>
+      <configuration>
+        <stations>U2 U3</stations>
+      </configuration>
+      <configuration>
+        <stations>U2 U4</stations>
+      </configuration>
+      <configuration>
+        <stations>U3 U4</stations>
+      </configuration>
+      <configuration>
+        <stations>E0 G0</stations>
+      </configuration>
+      <configuration>
+        <stations>G0 H0</stations>
+      </configuration>
+      <configuration>
+        <stations>G0 K0</stations>
+      </configuration>
+      <configuration>
+        <stations>D0 H0</stations>
+      </configuration>
+      <configuration>
+        <stations>A0 H0</stations>
+      </configuration>
+      <configuration>
+        <stations>A0 K0</stations>
+      </configuration>
+      <configuration>
+        <stations>D0 G1</stations>
+      </configuration>
+      <configuration>
+        <stations>H0 G1</stations>
+      </configuration>
+      <configuration>
+        <stations>A0 G1</stations>
+      </configuration>
+      <configuration>
+        <stations>K0 G1</stations>
       </configuration>
     </instrument>
   </configuration>

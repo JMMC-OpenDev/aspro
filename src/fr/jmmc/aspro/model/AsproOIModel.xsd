@@ -15,10 +15,10 @@
           Laurent : Initial revision
     </xsd:documentation>
     <xsd:appinfo>
-        <jaxb:globalBindings>
-          <xjc:superClass name="fr.jmmc.aspro.model.OIBase"/>
-          <xjc:simple />
-        </jaxb:globalBindings>
+      <jaxb:globalBindings>
+        <xjc:superClass name="fr.jmmc.aspro.model.OIBase"/>
+        <xjc:simple />
+      </jaxb:globalBindings>
     </xsd:appinfo>
   </xsd:annotation>
 
@@ -319,6 +319,11 @@
           <xsd:documentation>
               The interferometer associated with this configuration
           </xsd:documentation>
+          <xsd:appinfo>
+            <jaxb:property>
+              <jaxb:baseType name="InterferometerDescription" />
+            </jaxb:property>
+          </xsd:appinfo>
         </xsd:annotation>
       </xsd:element>
 
@@ -350,6 +355,11 @@
           <xsd:documentation>
               The focal instrument associated with this configuration
           </xsd:documentation>
+          <xsd:appinfo>
+            <jaxb:property>
+              <jaxb:baseType name="FocalInstrument" />
+            </jaxb:property>
+          </xsd:appinfo>
         </xsd:annotation>
       </xsd:element>
       <xsd:element name="configuration" type="FocalInstrumentConfigurationItem" minOccurs="1" maxOccurs="unbounded">
@@ -387,6 +397,11 @@
           <xsd:documentation>
               The list of stations for this configuration (U1-U2-U4)
           </xsd:documentation>
+          <xsd:appinfo>
+            <jaxb:property>
+              <jaxb:baseType name="Station" />
+            </jaxb:property>
+          </xsd:appinfo>
         </xsd:annotation>
       </xsd:element>
       <!-- TBD -->
@@ -412,17 +427,10 @@
       </xsd:documentation>
     </xsd:annotation>
     <xsd:sequence>
-      <xsd:element name="id" type="xsd:ID">
+      <xsd:element name="name" type="xsd:ID">
         <xsd:annotation>
           <xsd:documentation>
-              Identifier for this Interferometer
-          </xsd:documentation>
-        </xsd:annotation>
-      </xsd:element>
-      <xsd:element name="name" type="xsd:string">
-        <xsd:annotation>
-          <xsd:documentation>
-              Name of the Interferometer (VLTI)
+              Name/Identifier for this Interferometer (VLTI)
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
@@ -525,17 +533,10 @@
       </xsd:documentation>
     </xsd:annotation>
     <xsd:sequence>
-      <xsd:element name="id" type="xsd:ID">
+      <xsd:element name="name" type="xsd:ID">
         <xsd:annotation>
           <xsd:documentation>
-              Identifier for this Telescope or family
-          </xsd:documentation>
-        </xsd:annotation>
-      </xsd:element>
-      <xsd:element name="name" type="xsd:string">
-        <xsd:annotation>
-          <xsd:documentation>
-              Name of this telescope (UT1, AT1 ...)
+              Name/Identifier for this telescope or telescope family (UT, AT ...)
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
@@ -615,6 +616,11 @@
           <xsd:documentation>
               Telescope Reference
           </xsd:documentation>
+          <xsd:appinfo>
+            <jaxb:property>
+              <jaxb:baseType name="Telescope" />
+            </jaxb:property>
+          </xsd:appinfo>
         </xsd:annotation>
       </xsd:element>
       <xsd:element name="relativePosition" type="Position3D">
@@ -711,6 +717,11 @@
           <xsd:documentation>
               The starting point of the connection = the station
           </xsd:documentation>
+          <xsd:appinfo>
+            <jaxb:property>
+              <jaxb:baseType name="Station" />
+            </jaxb:property>
+          </xsd:appinfo>
         </xsd:annotation>
       </xsd:element>
       <xsd:element name="channel" type="xsd:IDREF">
@@ -718,6 +729,11 @@
           <xsd:documentation>
               The ending point of the connection = the channel
           </xsd:documentation>
+          <xsd:appinfo>
+            <jaxb:property>
+              <jaxb:baseType name="Channel" />
+            </jaxb:property>
+          </xsd:appinfo>
         </xsd:annotation>
       </xsd:element>
       <xsd:element name="opticalLength" type="xsd:double">
@@ -816,6 +832,11 @@
           <xsd:documentation>
               The list of channels used by this instrument
           </xsd:documentation>
+          <xsd:appinfo>
+            <jaxb:property>
+              <jaxb:baseType name="Channel" />
+            </jaxb:property>
+          </xsd:appinfo>
         </xsd:annotation>
       </xsd:element>
 
