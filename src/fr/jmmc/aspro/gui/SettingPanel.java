@@ -11,17 +11,14 @@
 package fr.jmmc.aspro.gui;
 
 import javax.swing.JPanel;
-import javax.swing.JTree;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.TreeSelectionModel;
 
 /**
  *
  * @author bourgesl
  */
-public class SettingPanel extends JPanel implements TreeSelectionListener {
+public class SettingPanel extends JPanel {
+
+  private BasicObservationForm observationForm = null;
 
   /** Creates new form SettingPanel */
   public SettingPanel() {
@@ -39,83 +36,29 @@ public class SettingPanel extends JPanel implements TreeSelectionListener {
   private void initComponents() {
 
     jSplitPane1 = new javax.swing.JSplitPane();
-    jSplitPane2 = new javax.swing.JSplitPane();
-    jScrollPane1 = new javax.swing.JScrollPane();
-    jTreeSetting = new JTree(new SettingTreeModel());
-    targetPanel = new fr.jmmc.aspro.gui.TargetPanel();
     jPanel1 = new javax.swing.JPanel();
+
+    setLayout(new java.awt.BorderLayout());
 
     jSplitPane1.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
 
-    jSplitPane2.setDividerLocation(200);
-
-    jScrollPane1.setViewportView(jTreeSetting);
-
-    jSplitPane2.setLeftComponent(jScrollPane1);
-    jSplitPane2.setRightComponent(targetPanel);
-
-    jSplitPane1.setTopComponent(jSplitPane2);
-
     jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Plots"));
-
-    javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-    jPanel1.setLayout(jPanel1Layout);
-    jPanel1Layout.setHorizontalGroup(
-      jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGap(0, 477, Short.MAX_VALUE)
-    );
-    jPanel1Layout.setVerticalGroup(
-      jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGap(0, 297, Short.MAX_VALUE)
-    );
-
+    jPanel1.setLayout(new java.awt.BorderLayout());
     jSplitPane1.setRightComponent(jPanel1);
 
-    javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
-    this.setLayout(layout);
-    layout.setHorizontalGroup(
-      layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 489, Short.MAX_VALUE)
-    );
-    layout.setVerticalGroup(
-      layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 461, Short.MAX_VALUE)
-    );
+    add(jSplitPane1, java.awt.BorderLayout.CENTER);
   }// </editor-fold>//GEN-END:initComponents
 
-  private void postInit() {
-    //Where the tree is initialized:
-    jTreeSetting.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-
-    //Listen for when the selection changes.
-    jTreeSetting.addTreeSelectionListener(this);
-  }
-
   /**
-   * Tree selection event
-   * @param e Tree selection event
+   * This method is useful to set the models and specific features of initialized swing components :
    */
-  public void valueChanged(final TreeSelectionEvent e) {
-    //Returns the last path element of the selection.
-    final DefaultMutableTreeNode node = (DefaultMutableTreeNode) jTreeSetting.getLastSelectedPathComponent();
-
-    if (node == null) {
-      //Nothing is selected.
-      return;
-    }
-
-    final Object nodeInfo = node.getUserObject();
-    System.out.println("selected object : " + nodeInfo);
-
+  private void postInit() {
+    observationForm = new BasicObservationForm();
+    jSplitPane1.setLeftComponent(observationForm);
   }
-
   
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JPanel jPanel1;
-  private javax.swing.JScrollPane jScrollPane1;
   private javax.swing.JSplitPane jSplitPane1;
-  private javax.swing.JSplitPane jSplitPane2;
-  private javax.swing.JTree jTreeSetting;
-  private fr.jmmc.aspro.gui.TargetPanel targetPanel;
   // End of variables declaration//GEN-END:variables
 }

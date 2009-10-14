@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: MainFrame.java,v 1.4 2009-10-13 16:02:37 bourgesl Exp $"
+ * "@(#) $Id: MainFrame.java,v 1.5 2009-10-14 15:54:38 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2009/10/13 16:02:37  bourgesl
+ * simple uv plot demo
+ *
  * Revision 1.3  2009/10/02 15:20:18  bourgesl
  * updated model + stupid tree model
  *
@@ -125,10 +128,10 @@ public class MainFrame extends JFrame {
 
     // The tab is added to the tabbed panel :
     int pos = tabs.getTabCount();
-    tabs.insertTab("new settings", null, settingScrollPane, null, pos++);
-    tabs.insertTab("plot", null, new UVChartPanel(), null, pos);
-
+    tabs.insertTab("new settings", null, settingScrollPane, null, pos);
     tabs.setSelectedIndex(pos);
+
+//    tabs.insertTab("plot", null, new UVChartPanel(), null, pos);
 }
 
   /**

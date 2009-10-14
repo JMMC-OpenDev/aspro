@@ -2,14 +2,11 @@
 
 <!--
     Document   : AsproOIModel.xml
-    Created on : 15 septembre 2009, 15:56
+    Created on : 15 septembre 2009
     Author     : mella
     Description:
-        Sample instance of one interferometer.
+        VLTI interferometer.
 -->
-
-
-
 
 <ns0:interferometerSetting  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
    xmlns:ns0='http://www.jmmc.fr/aspro-oi/0.1'
@@ -18,7 +15,7 @@
   <description>
     <name>VLTI</name>
 
-    <description>VLTI</description>
+    <description>VLTI ...</description>
 
     <position>
       <posX>1942042.8584924</posX>
@@ -544,8 +541,93 @@
   </description>
 
   <configuration>
-    <name>VLTI Period 85</name>
+    <version>Period 85</version>
     <interferometer>VLTI</interferometer>
+
+    <instrument>
+      <focalInstrument>AMBER</focalInstrument>
+      <configuration>
+        <stations>U1 U2 U3</stations>
+      </configuration>
+      <configuration>
+        <stations>U1 U2 U4</stations>
+      </configuration>
+      <configuration>
+        <stations>U1 U3 U4</stations>
+      </configuration>
+      <configuration>
+        <stations>U2 U3 U4</stations>
+      </configuration>
+      <configuration>
+        <stations>E0 G0 H0</stations>
+      </configuration>
+      <configuration>
+        <stations>A0 D0 H0</stations>
+      </configuration>
+      <configuration>
+        <stations>D0 H0 G1</stations>
+      </configuration>
+      <configuration>
+        <stations>A0 K0 G1</stations>
+      </configuration>
+    </instrument>
+    <instrument>
+      <focalInstrument>MIDI</focalInstrument>
+      <configuration>
+        <stations>U1 U2</stations>
+      </configuration>
+      <configuration>
+        <stations>U1 U3</stations>
+      </configuration>
+      <configuration>
+        <stations>U1 U4</stations>
+      </configuration>
+      <configuration>
+        <stations>U2 U3</stations>
+      </configuration>
+      <configuration>
+        <stations>U2 U4</stations>
+      </configuration>
+      <configuration>
+        <stations>U3 U4</stations>
+      </configuration>
+      <configuration>
+        <stations>E0 G0</stations>
+      </configuration>
+      <configuration>
+        <stations>G0 H0</stations>
+      </configuration>
+      <configuration>
+        <stations>G0 K0</stations>
+      </configuration>
+      <configuration>
+        <stations>D0 H0</stations>
+      </configuration>
+      <configuration>
+        <stations>A0 H0</stations>
+      </configuration>
+      <configuration>
+        <stations>A0 K0</stations>
+      </configuration>
+      <configuration>
+        <stations>D0 G1</stations>
+      </configuration>
+      <configuration>
+        <stations>H0 G1</stations>
+      </configuration>
+      <configuration>
+        <stations>A0 G1</stations>
+      </configuration>
+      <configuration>
+        <stations>K0 G1</stations>
+      </configuration>
+    </instrument>
+  </configuration>
+
+  <configuration>
+    <version>Current Period</version>
+    <interferometer>VLTI</interferometer>
+
     <instrument>
       <focalInstrument>AMBER</focalInstrument>
       <configuration>

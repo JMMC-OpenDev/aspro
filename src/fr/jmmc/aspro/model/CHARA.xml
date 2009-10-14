@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+    Document   : CHARA.xml
+    Created on : 14 october 2009
+    Author     : mella
+    Description:
+        CHARA interferometer.
+-->
+
+<ns0:interferometerSetting  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+   xmlns:ns0='http://www.jmmc.fr/aspro-oi/0.1'
+   xsi:schemaLocation='http://www.jmmc.fr/aspro-oi/0.1 AsproOIModel.xsd'>
+
+  <description>
+    <name>CHARA</name>
+
+    <description>CHARA ...</description>
+
+    <position>
+      <posX>-2476998.0473108</posX>
+      <posY>-4647390.0900888</posY>
+      <posZ>3582240.6122693</posZ>
+    </position>
+
+    <telescope>
+      <name>T</name>
+      <diameter>1.0</diameter>
+    </telescope>
+
+    <station>
+      <name>S1</name>
+      <telescope>T</telescope>
+      <relativePosition>
+        <posX>0.0</posX>
+        <posY>0.0</posY>
+        <posZ>0.0</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>0.0</delayLineFixedOffset>
+    </station>
+
+    <station>
+      <name>S2</name>
+      <telescope>T</telescope>
+      <relativePosition>
+        <posX>-18.354945174</posX>
+        <posY>-5.748393059</posY>
+        <posZ>28.128580103</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>4.532654762</delayLineFixedOffset>
+    </station>
+
+    <station>
+      <name>E1</name>
+      <telescope>T</telescope>
+      <relativePosition>
+        <posX>-176.947579603</posX>
+        <posY>125.349003099</posY>
+        <posZ>249.643974581</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>15.309717902</delayLineFixedOffset>
+    </station>
+
+    <station>
+      <name>E2</name>
+      <telescope>T</telescope>
+      <relativePosition>
+        <posX>-154.003121030</posX>
+        <posY>70.400864470</posY>
+        <posZ>221.444997474</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>26.721359853</delayLineFixedOffset>
+    </station>
+
+    <station>
+      <name>W1</name>
+      <telescope>T</telescope>
+      <relativePosition>
+        <posX>-130.620014605</posX>
+        <posY>-175.068583489</posY>
+        <posZ>172.774093891</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>29.087218284</delayLineFixedOffset>
+    </station>
+
+    <station>
+      <name>W2</name>
+      <telescope>T</telescope>
+      <relativePosition>
+        <posX>-111.736598481</posX>
+        <posY>-69.088236186</posY>
+        <posZ>165.067607370</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>-5.413000000</delayLineFixedOffset>
+    </station>
+
+    <channel>
+      <name>Channel1</name>
+    </channel>
+    <channel>
+      <name>Channel2</name>
+    </channel>
+    <channel>
+      <name>Channel3</name>
+    </channel>
+    <channel>
+      <name>Channel4</name>
+    </channel>
+
+<!-- no switchyard -->
+
+    <delayLine>
+      <name>DL1</name>
+      <maximumThrow>46</maximumThrow>
+    </delayLine>
+    <delayLine>
+      <name>DL2</name>
+      <maximumThrow>46</maximumThrow>
+    </delayLine>
+    <delayLine>
+      <name>DL3</name>
+      <maximumThrow>46</maximumThrow>
+    </delayLine>
+    <delayLine>
+      <name>DL4</name>
+      <maximumThrow>46</maximumThrow>
+    </delayLine>
+
+    <!-- pop on CHARA -->
+
+<!--
+5         ! must be in same order as stations!!!
+   0.000   36.576  73.152  109.728  146.304 S1
+ -36.576    0.000  36.576   73.152  109.728 S2
+   0.000   36.576  73.152  109.728  146.304 E1
+ -73.152  -36.576   0.000   36.576   73.152 E2
+ -73.152  -36.576   0.000   36.576   73.152 W1
+-146.304 -109.728 -73.152  -36.576    0.000 W2
+-->
+
+    <!-- TBC -->
+    <focalInstrument>
+      <name>VEGA</name>
+      <description></description>
+      <defaultChannels>Channel1 Channel2 Channel3</defaultChannels>
+    </focalInstrument>
+
+    <focalInstrument>
+      <name>MIRC</name>
+      <description></description>
+      <defaultChannels>Channel1 Channel2 Channel3 Channel4</defaultChannels>
+      <mode>
+        <name>Low_H</name>
+        <waveLengthMin>1.5</waveLengthMin>
+        <waveLengthMax>1.8</waveLengthMax>
+      </mode>
+      <mode>
+        <name>Low_K</name>
+        <waveLengthMin>2.0</waveLengthMin>
+        <waveLengthMax>2.5</waveLengthMax>
+      </mode>
+      <mode>
+        <name>Medium_H</name>
+        <waveLengthMin>1.5</waveLengthMin>
+        <waveLengthMax>1.8</waveLengthMax>
+      </mode>
+      <mode>
+        <name>Medium_K</name>
+        <waveLengthMin>2.0</waveLengthMin>
+        <waveLengthMax>2.5</waveLengthMax>
+      </mode>
+      <mode>
+        <name>High_H</name>
+        <waveLengthMin>1.5</waveLengthMin>
+        <waveLengthMax>1.8</waveLengthMax>
+      </mode>
+      <mode>
+        <name>High_K</name>
+        <waveLengthMin>2.0</waveLengthMin>
+        <waveLengthMax>2.5</waveLengthMax>
+      </mode>
+    </focalInstrument>
+  </description>
+
+  <configuration>
+    <interferometer>CHARA</interferometer>
+
+    <instrument>
+      <focalInstrument>VEGA</focalInstrument>
+    </instrument>
+    <instrument>
+      <focalInstrument>MIRC</focalInstrument>
+    </instrument>
+  </configuration>
+
+</ns0:interferometerSetting>

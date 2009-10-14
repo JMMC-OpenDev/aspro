@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+    Document   : AsproOIConfigurations.xml
+    Created on : 14 octobre 2009, 14:31
+    Author     : bourgesl
+    Description:
+        This file lists all interferometer configuration files.
+-->
+
+<ns0:configurations  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+   xmlns:ns0='http://www.jmmc.fr/aspro-oi/0.1'
+   xsi:schemaLocation='http://www.jmmc.fr/aspro-oi/0.1 AsproOIModel.xsd'>
+
+  <file>VLTI.xml</file>
+  <file>CHARA.xml</file>
+
+</ns0:configurations>

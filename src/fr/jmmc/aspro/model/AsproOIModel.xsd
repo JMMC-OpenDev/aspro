@@ -27,6 +27,13 @@
 
 
 <!-- Elements -->
+  <xsd:element name="configurations" type="InterferometerFiles">
+    <xsd:annotation>
+      <xsd:documentation>
+        this element contains a list of interferometer files
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
 
   <xsd:element name="interferometerSetting" type="InterferometerSetting">
     <xsd:annotation>
@@ -49,6 +56,26 @@
 
 <!-- Class Types -->
 
+  <xsd:complexType name="InterferometerFiles">
+    <xsd:annotation>
+      <xsd:documentation>
+        This type describes the list of interferometer files
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="file" type="xsd:string" minOccurs="1" maxOccurs="unbounded">
+        <xsd:annotation>
+          <xsd:documentation>
+            this element contains the file name of an interferometer file
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+
+
+
+
   <xsd:complexType name="InterferometerSetting">
     <xsd:annotation>
       <xsd:documentation>
@@ -63,7 +90,7 @@
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
-      <xsd:element name="configuration" type="InterferometerConfiguration">
+      <xsd:element name="configuration" type="InterferometerConfiguration" maxOccurs="unbounded">
         <xsd:annotation>
           <xsd:documentation>
             this element contains the list of possible Interferometer configuration in the sense of a Call for Proposal
@@ -306,10 +333,17 @@
       </xsd:documentation>
     </xsd:annotation>
     <xsd:sequence>
-      <xsd:element name="name" type="xsd:string">
+      <xsd:element name="name" type="xsd:string" minOccurs="0">
         <xsd:annotation>
           <xsd:documentation>
-              Name of the configuration (VLTI CP 85)
+              Name of the configuration (optional)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="version" type="xsd:string" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>
+              Version is useful for the VLTI to set the Period (Period 85)
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
@@ -362,10 +396,11 @@
           </xsd:appinfo>
         </xsd:annotation>
       </xsd:element>
-      <xsd:element name="configuration" type="FocalInstrumentConfigurationItem" minOccurs="1" maxOccurs="unbounded">
+      <xsd:element name="configuration" type="FocalInstrumentConfigurationItem" minOccurs="0" maxOccurs="unbounded">
         <xsd:annotation>
           <xsd:documentation>
-              The list of configuration for the focal instrument
+              The list of configuration for the focal instrument. (optional)
+              If this list is undefined, any station can be used.
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
@@ -783,7 +818,7 @@
   <xsd:complexType name="Pop">
     <xsd:annotation>
       <xsd:documentation>
-        This type describes a Pop
+        This type describes a Pop (TBC)
       </xsd:documentation>
     </xsd:annotation>
     <xsd:sequence>
