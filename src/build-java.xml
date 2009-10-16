@@ -26,6 +26,8 @@
         <arg value="-classpath"/>
         <arg value="${libs}/jaxb/simple-regenerator-1.0.jar"/>
 
+        <arg value="-no-header"/>
+
         <arg value="-extension"/>
         <!-- preserve code extension -->
         <arg value="-simple-preserve"/>

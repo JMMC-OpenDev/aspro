@@ -12,10 +12,13 @@
 package fr.jmmc.aspro.gui;
 
 import fr.jmmc.aspro.model.ConfigurationManager;
-import fr.jmmc.aspro.model.ObservationManager;
-import fr.jmmc.aspro.model.oi.FocalInstrumentConfigurationChoice;
+import fr.jmmc.mcs.astro.star.Star;
+import fr.jmmc.mcs.astro.star.StarResolverWidget;
+import java.awt.GridBagConstraints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.Vector;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JSpinner;
@@ -26,7 +29,9 @@ import javax.swing.event.ChangeListener;
  *
  * @author bourgesl
  */
-public class BasicObservationForm extends javax.swing.JPanel implements ChangeListener, ActionListener {
+public class BasicObservationForm extends javax.swing.JPanel implements ChangeListener, ActionListener, Observer {
+
+  private StarResolverWidget starSearchField;
 
     /** Creates new form BasicObservationForm */
     public BasicObservationForm() {
@@ -112,7 +117,6 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 3;
-    gridBagConstraints.gridheight = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.ipadx = 2;
     gridBagConstraints.ipady = 1;
@@ -140,6 +144,20 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
    * This method is useful to set the models and specific features of initialized swing components :
    */
   private void postInit() {
+
+    // add StarResolverWidget :
+    final Star star = new Star();
+    star.addObserver(this);
+
+    this.starSearchField = new StarResolverWidget(star);
+
+    GridBagConstraints gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridwidth = 2;
+    add(starSearchField, gridBagConstraints);
+
+    // update component models :
     jDateSpinner.setEditor(new JSpinner.DateEditor(jDateSpinner, "dd/MM/yyyy"));
     jDateSpinner.addChangeListener(this);
 
@@ -198,6 +216,17 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
       System.out.println("Date changed : " + jDateSpinner.getModel().getValue());
     }
     updateObservation();
+  }
+
+  /**
+   * Observer implementation used for the StarResolver
+   * @param o Observable instance
+   * @param arg optional argument
+   */
+  public void update(Observable o, Object arg) {
+    if (o instanceof Star) {
+      System.out.println("Star changed:\n" + o);
+    }
   }
 
   private void updateObservation() {

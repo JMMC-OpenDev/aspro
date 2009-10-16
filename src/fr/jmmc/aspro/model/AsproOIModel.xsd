@@ -488,6 +488,14 @@
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
+      <xsd:element name="posSph" type="LonLatAlt" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>
+            These coordinates are computed internally and must not be provided in the configuration file
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
       
 
       <xsd:element name="telescope" type="Telescope" minOccurs="1" maxOccurs="unbounded">
@@ -665,6 +673,14 @@
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
+      <xsd:element name="posSph" type="LonLatAlt" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>
+            These coordinates are computed internally and must not be provided in the configuration file
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
       <xsd:element name="delayLineFixedOffset" type="xsd:double" minOccurs="0">
         <xsd:annotation>
           <xsd:documentation>
@@ -1051,6 +1067,37 @@ Fringe Tracker
         <xsd:annotation>
           <xsd:documentation>
               Z position value (m)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+
+  <xsd:complexType name="LonLatAlt">
+    <xsd:annotation>
+      <xsd:documentation>
+        This data type describes a geographic position (longitude,latitude,altitude)
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="longitude" type="xsd:double">
+        <xsd:annotation>
+          <xsd:documentation>
+              Longitude (rad)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="latitude" type="xsd:double">
+        <xsd:annotation>
+          <xsd:documentation>
+              Latitude (rad)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="altitude" type="xsd:double">
+        <xsd:annotation>
+          <xsd:documentation>
+              Altitude (m)
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
