@@ -204,18 +204,10 @@
       </xsd:documentation>
     </xsd:annotation>
     <xsd:sequence>
-      <!-- date / time : should we support a date range ? -->
-      <xsd:element name="dateFrom" type="xsd:dateTime">
+      <xsd:element name="date" type="xsd:date">
         <xsd:annotation>
           <xsd:documentation>
-              Observation Date (YYYY-MM-DD) + time if necessary
-          </xsd:documentation>
-        </xsd:annotation>
-      </xsd:element>
-      <xsd:element name="dateTo" type="xsd:dateTime">
-        <xsd:annotation>
-          <xsd:documentation>
-              Observation Date (YYYY-MM-DD) + time if necessary
+              Observation Date (YYYY-MM-DD) in GMT
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>

@@ -24,8 +24,7 @@ import fr.jmmc.aspro.model.OIBase;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="dateFrom" type="{http://www.w3.org/2001/XMLSchema}dateTime"/>
- *         &lt;element name="dateTo" type="{http://www.w3.org/2001/XMLSchema}dateTime"/>
+ *         &lt;element name="date" type="{http://www.w3.org/2001/XMLSchema}date"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -36,66 +35,38 @@ import fr.jmmc.aspro.model.OIBase;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "WhenSetting", propOrder = {
-    "dateFrom",
-    "dateTo"
+    "date"
 })
 public class WhenSetting
     extends OIBase
 {
 
     @XmlElement(required = true)
-    @XmlSchemaType(name = "dateTime")
-    protected XMLGregorianCalendar dateFrom;
-    @XmlElement(required = true)
-    @XmlSchemaType(name = "dateTime")
-    protected XMLGregorianCalendar dateTo;
+    @XmlSchemaType(name = "date")
+    protected XMLGregorianCalendar date;
 
     /**
-     * Gets the value of the dateFrom property.
+     * Gets the value of the date property.
      * 
      * @return
      *     possible object is
      *     {@link XMLGregorianCalendar }
      *     
      */
-    public XMLGregorianCalendar getDateFrom() {
-        return dateFrom;
+    public XMLGregorianCalendar getDate() {
+        return date;
     }
 
     /**
-     * Sets the value of the dateFrom property.
+     * Sets the value of the date property.
      * 
      * @param value
      *     allowed object is
      *     {@link XMLGregorianCalendar }
      *     
      */
-    public void setDateFrom(XMLGregorianCalendar value) {
-        this.dateFrom = value;
-    }
-
-    /**
-     * Gets the value of the dateTo property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link XMLGregorianCalendar }
-     *     
-     */
-    public XMLGregorianCalendar getDateTo() {
-        return dateTo;
-    }
-
-    /**
-     * Sets the value of the dateTo property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link XMLGregorianCalendar }
-     *     
-     */
-    public void setDateTo(XMLGregorianCalendar value) {
-        this.dateTo = value;
+    public void setDate(XMLGregorianCalendar value) {
+        this.date = value;
     }
 
 }

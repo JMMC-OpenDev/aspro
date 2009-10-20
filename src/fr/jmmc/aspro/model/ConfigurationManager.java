@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ConfigurationManager.java,v 1.3 2009-10-16 15:25:30 bourgesl Exp $"
+ * "@(#) $Id: ConfigurationManager.java,v 1.4 2009-10-20 13:08:51 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2009/10/16 15:25:30  bourgesl
+ * removed jaxb header + XYZ coords to Long/Lat/Alt for interferometer + stations
+ *
  * Revision 1.2  2009/10/14 15:54:38  bourgesl
  * added basicObservationForm + CHARA.xml
  *
@@ -42,7 +45,7 @@ import uk.ac.starlink.pal.Spherical;
 public class ConfigurationManager extends BaseOIManager {
 
   /** Class Name */
-  private static final String className_ = "fr.jmmc.aspro.config.ConfigurationManager";
+  private static final String className_ = "fr.jmmc.aspro.model.ConfigurationManager";
   /** Class logger */
   private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
@@ -110,9 +113,6 @@ public class ConfigurationManager extends BaseOIManager {
       // reverse mapping :
       is.getDescription().getConfigurations().add(c);
     }
-
-    // TODO : store the mapping in the same hierarchy ...
-
   }
 
   /**
@@ -249,17 +249,6 @@ public class ConfigurationManager extends BaseOIManager {
 
       GeocentricCoords.dump(d.getName(), sph);
     }
-
-    /*
-         ALTITUDE = 2.681D0
-         LONLAT(1) = -70.40479659D0
-         LONLAT(2) = -24.62794830D0
-* but with google earth, the position of 0,0 looks more like -24.62735,-70.40470
-         LONLAT(1) = -70.40470D0
-         LONLAT(2) = -24.62735D0
-
-     -24.62794830
-     */
   }
 
 }
