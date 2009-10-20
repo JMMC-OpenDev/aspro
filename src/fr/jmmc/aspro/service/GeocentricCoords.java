@@ -4,6 +4,7 @@
  */
 package fr.jmmc.aspro.service;
 
+import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.oi.Position3D;
 import uk.ac.starlink.pal.Cartesian;
 import uk.ac.starlink.pal.Pal;
@@ -20,8 +21,6 @@ public class GeocentricCoords {
   /** Class logger */
   private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
-  /** fixed earth radius constant from ASPRO Fortran code */
-  private final static double EARTH_RADIUS = 6367435d;
   /** AstroLib Positional astronomical Library instance */
   private static Pal pal = new Pal();
 
@@ -63,6 +62,6 @@ public class GeocentricCoords {
    * @return altitude (m)
    */
   private static double altitude(final Spherical sph) {
-    return sph.getRadial() - EARTH_RADIUS;
+    return sph.getRadial() - AsproConstants.EARTH_RADIUS;
   }
 }

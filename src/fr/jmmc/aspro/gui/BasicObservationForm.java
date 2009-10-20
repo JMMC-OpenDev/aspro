@@ -175,7 +175,6 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
 
     jComboBoxInterferometer.addActionListener(this);
     jComboBoxInterferometer.setModel(new DefaultComboBoxModel(ConfigurationManager.getInstance().getInterferometerNames()));
-    jComboBoxInterferometer.setEnabled((jComboBoxInterferometer.getModel().getSize() > 1));
 
     // dependent combo boxes :
     jComboBoxPeriod.addActionListener(this);
@@ -191,13 +190,11 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
   private void updateComboPeriod() {
     final Vector v = ConfigurationManager.getInstance().getInterferometerConfigurationNames((String) jComboBoxInterferometer.getSelectedItem());
     jComboBoxPeriod.setModel(new DefaultComboBoxModel(v));
-    jComboBoxPeriod.setEnabled((v.size() > 1));
   }
 
   private void updateComboInstrument() {
     final Vector v = ConfigurationManager.getInstance().getInterferometerInstrumentNames((String) jComboBoxPeriod.getSelectedItem());
     jComboBoxInstrument.setModel(new DefaultComboBoxModel(v));
-    jComboBoxInstrument.setEnabled((v.size() > 1));
   }
 
   public void actionPerformed(ActionEvent e) {
@@ -240,15 +237,37 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
    */
   public void update(Observable o, Object arg) {
     if (o instanceof Star) {
+      final Star s = (Star)o;
       if (logger.isLoggable(Level.FINE)) {
-        logger.fine("Star search Field : " + this.starSearchField.getText() + "\n" + o);
+        logger.fine("Star search Field : " + this.starSearchField.getText() + "\n" + s);
       }
       /*
       Strings = {OTYPELIST=IR,X,*,Be*,UV,**,*iC,*iN,Em*, RA=03 47 29.0765, DEC=+24 06 18.494}
       Doubles = {FLUX_H=2.735, RA_d=56.8711521, DEC_d=24.1051372, FLUX_K=2.636, FLUX_J=2.735, FLUX_V=2.873}
        */
+      // TODO : voir avec sylvain comment eviter des appels récurrents
+
+      // degrees :
+      final Double RA_d = s.getPropertyAsDouble(Star.Property.RA_d);
+      final Double DE_d = s.getPropertyAsDouble(Star.Property.DEC_d);
+      if (RA_d != null && DE_d != null) {
+        final String name = this.starSearchField.getText().toUpperCase();
+
+        if (om.addTarget(name, RA_d, DE_d)) {
+          // update target list :
+          updateComboTargets();
+
+          om.fireObservationChanged();
+        }
+      }
     }
   }
+
+  private void updateComboTargets() {
+    final Vector v = om.getTargetNames();
+    jComboBoxTargets.setModel(new DefaultComboBoxModel(v));
+  }
+
 
   private void updateObservation() {
 

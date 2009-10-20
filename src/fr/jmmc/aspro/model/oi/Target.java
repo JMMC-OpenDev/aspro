@@ -126,4 +126,14 @@ public class Target
         this.equinox = value;
     }
 
+//--simple--preserve
+
+    @Override
+    public String toString() {
+      return "Target [" + ((this.name != null) ? this.name : "undefined") + "]"
+              + " RA = " + getRA() + " DEC = " + getDEC();
+    }
+
+//--simple--preserve
+
 }
