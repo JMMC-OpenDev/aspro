@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.1 2009-10-22 15:47:22 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.2 2009-10-22 15:51:18 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2009/10/22 15:47:22  bourgesl
+ * beginning of observability computation with jSkyCalc
+ *
  *
  *
  ******************************************************************************/
@@ -49,6 +52,12 @@ public class ObservabilityService {
 
     final XMLGregorianCalendar cal = observation.getWhen().getDate();
     sc.defineDate(cal.getYear(), cal.getMonth(), cal.getDay());
+
+    // 1 - Trouver la nuit : sun rise/set with twilight : see NightlyAlmanac
+
+    // 2 - Pour chaque source, etudier sa progression en altitude (degrees) pour voir ensuite si cet angle est possible avec les telescopes ...
+
+
 
     } catch (RuntimeException re) {
       logger.log(Level.SEVERE, "calcObservability failure :", re);

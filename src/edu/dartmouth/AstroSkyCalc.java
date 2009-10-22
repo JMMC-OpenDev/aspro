@@ -62,6 +62,30 @@ public class AstroSkyCalc {
 
   }
 
+  public void defineTarget() {
+
+    // TBC
+
+    // RA (decimal hours), DEC (degrees)
+    final Celest target = new Celest(10.0d, -60.0d, 2000.d);
+
+    System.out.println("Target [RA/DEC/EPOCH] :"+ target.checkstring());
+
+    Observation obs = new Observation(when, target);
+
+    obs.ComputeSky();
+
+    System.out.println("Observation dump :");
+
+    System.out.printf("ha       : %f\n", obs.ha.degrees());
+    System.out.printf("altitude : %f\n", obs.altitude);
+    System.out.printf("azimuth  : %f\n", obs.azimuth);
+    System.out.printf("parallac : %f\n", obs.parallactic);
+
+    System.out.printf("airmass  : %f\n", obs.airmass);
+
+  }
+
   public double angle2hours(final double angle) {
     return Math.toDegrees(angle) / 15.0d;
   }
