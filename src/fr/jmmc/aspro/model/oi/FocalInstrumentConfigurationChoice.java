@@ -66,4 +66,19 @@ public class FocalInstrumentConfigurationChoice
         this.name = value;
     }
 
+//--simple--preserve
+  /** resolved reference to the focal instrument configuration (read only) */
+  @javax.xml.bind.annotation.XmlTransient
+  private FocalInstrumentConfiguration instrumentConfiguration = null;
+
+  public FocalInstrumentConfiguration getInstrumentConfiguration() {
+    return instrumentConfiguration;
+  }
+
+  public void setInstrumentConfiguration(FocalInstrumentConfiguration instrumentConfiguration) {
+    this.instrumentConfiguration = instrumentConfiguration;
+  }
+
+//--simple--preserve
+
 }

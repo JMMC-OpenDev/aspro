@@ -1,13 +1,14 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/*
- * SettingPanel.java
+/*******************************************************************************
+ * JMMC project
  *
- * Created on 1 oct. 2009, 17:07:52
- */
+ * "@(#) $Id: SettingPanel.java,v 1.4 2009-10-22 15:47:22 bourgesl Exp $"
+ *
+ * History
+ * -------
+ * $Log: not supported by cvs2svn $
+ *
+ *
+ ******************************************************************************/
 package fr.jmmc.aspro.gui;
 
 import javax.swing.JPanel;

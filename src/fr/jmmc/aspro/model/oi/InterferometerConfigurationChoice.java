@@ -66,4 +66,19 @@ public class InterferometerConfigurationChoice
         this.name = value;
     }
 
+//--simple--preserve
+  /** resolved reference to the interferometer configuration (read only) */
+  @javax.xml.bind.annotation.XmlTransient
+  private InterferometerConfiguration interferometerConfiguration = null;
+
+  public InterferometerConfiguration getInterferometerConfiguration() {
+    return interferometerConfiguration;
+  }
+
+  public void setInterferometerConfiguration(InterferometerConfiguration interferometerConfiguration) {
+    this.interferometerConfiguration = interferometerConfiguration;
+  }
+
+//--simple--preserve
+
 }

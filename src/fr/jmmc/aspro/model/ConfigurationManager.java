@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ConfigurationManager.java,v 1.4 2009-10-20 13:08:51 bourgesl Exp $"
+ * "@(#) $Id: ConfigurationManager.java,v 1.5 2009-10-22 15:47:22 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2009/10/20 13:08:51  bourgesl
+ * ObservationManager has methods to store observation properties
+ *
  * Revision 1.3  2009/10/16 15:25:30  bourgesl
  * removed jaxb header + XYZ coords to Long/Lat/Alt for interferometer + stations
  *
@@ -147,7 +150,7 @@ public class ConfigurationManager extends BaseOIManager {
       sph = GeocentricCoords.getLonLatAlt(absPos);
 
       GeocentricCoords.dump(s.getName(), sph);
-      
+
       s.setPosSph(new LonLatAlt(sph.getLong(), sph.getLat(), sph.getRadial()));
     }
 
@@ -174,9 +177,7 @@ public class ConfigurationManager extends BaseOIManager {
     return name;
   }
 
-
   // Getter / Setter / API :
-
   public Map<String, InterferometerDescription> getInterferometerDescriptions() {
     return interferometerDescriptions;
   }
@@ -229,6 +230,18 @@ public class ConfigurationManager extends BaseOIManager {
     return v;
   }
 
+  public FocalInstrumentConfiguration getInterferometerInstrumentConfiguration(final String configurationName, final String instrumentName) {
+    final InterferometerConfiguration c = getInterferometerConfiguration(configurationName);
+    if (c != null) {
+      for (FocalInstrumentConfiguration ic : c.getInstruments()) {
+        if (ic.getFocalInstrument().getName().equals(instrumentName)) {
+          return ic;
+        }
+      }
+    }
+    return null;
+  }
+
   /**
    * Test code
    */
@@ -250,5 +263,4 @@ public class ConfigurationManager extends BaseOIManager {
       GeocentricCoords.dump(d.getName(), sph);
     }
   }
-
 }

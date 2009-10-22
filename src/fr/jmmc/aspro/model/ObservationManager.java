@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationManager.java,v 1.3 2009-10-20 15:50:16 bourgesl Exp $"
+ * "@(#) $Id: ObservationManager.java,v 1.4 2009-10-22 15:47:22 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2009/10/20 15:50:16  bourgesl
+ * add a target once simbad data are back
+ *
  * Revision 1.2  2009/10/20 13:08:51  bourgesl
  * ObservationManager has methods to store observation properties
  *
@@ -17,16 +20,17 @@
  ******************************************************************************/
 package fr.jmmc.aspro.model;
 
-import fr.jmmc.aspro.model.oi.FocalInstrumentConfiguration;
 import fr.jmmc.aspro.model.oi.FocalInstrumentConfigurationChoice;
-import fr.jmmc.aspro.model.oi.InterferometerConfiguration;
 import fr.jmmc.aspro.model.oi.InterferometerConfigurationChoice;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.WhenSetting;
-import java.util.Collections;
+import fr.jmmc.aspro.service.ObservabilityService;
+import java.io.File;
+import java.io.IOException;
 import java.util.Date;
 import java.util.Vector;
+import java.util.logging.Level;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 /**
@@ -40,14 +44,11 @@ public class ObservationManager extends BaseOIManager {
   /** Class logger */
   private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
-
   /** singleton pattern */
   private static ObservationManager instance = new ObservationManager();
-
   // members :
   /** observation (single for now) */
   private ObservationSetting observation = null;
-
 
   /**
    * Return the ObservationManager singleton
@@ -72,7 +73,7 @@ public class ObservationManager extends BaseOIManager {
     this.observation.setInstrumentConfiguration(new FocalInstrumentConfigurationChoice());
     this.observation.setInterferometerConfiguration(new InterferometerConfigurationChoice());
   }
-  
+
   public ObservationSetting getObservation() {
     return observation;
   }
@@ -91,7 +92,6 @@ public class ObservationManager extends BaseOIManager {
   }
 
   // API :
-
   /**
    * Set the observation date (no time)
    * @param date date to use
@@ -109,22 +109,25 @@ public class ObservationManager extends BaseOIManager {
     return changed;
   }
 
-  public boolean setInterferometerName(final String name) {
-    final InterferometerConfigurationChoice interferometerName = getObservation().getInterferometerConfiguration();
+  public boolean setInterferometerConfigurationName(final String name) {
+    final InterferometerConfigurationChoice interferometerChoice = getObservation().getInterferometerConfiguration();
 
-    boolean changed = !name.equals(interferometerName.getName());
+    boolean changed = !name.equals(interferometerChoice.getName());
     if (changed) {
-      interferometerName.setName(name);
+      interferometerChoice.setName(name);
+      interferometerChoice.setInterferometerConfiguration(ConfigurationManager.getInstance().getInterferometerConfiguration(name));
     }
     return changed;
   }
 
-  public boolean setInstrumentName(final String name) {
-    final FocalInstrumentConfigurationChoice instrumentName = getObservation().getInstrumentConfiguration();
+  public boolean setInstrumentConfigurationName(final String name) {
+    final FocalInstrumentConfigurationChoice instrumentChoice = getObservation().getInstrumentConfiguration();
 
-    boolean changed = !name.equals(instrumentName.getName());
+    boolean changed = !name.equals(instrumentChoice.getName());
     if (changed) {
-      instrumentName.setName(name);
+      instrumentChoice.setName(name);
+      instrumentChoice.setInstrumentConfiguration(ConfigurationManager.getInstance().getInterferometerInstrumentConfiguration(
+              getObservation().getInterferometerConfiguration().getName(), name));
     }
     return changed;
   }
@@ -170,12 +173,30 @@ public class ObservationManager extends BaseOIManager {
     return v;
   }
 
-
   /**
    * Future model listener notify all pattern
    */
   public void fireObservationChanged() {
     logger.severe("fireObservationChanged : " + toString(getObservation()));
+
+    final File tmp;
+    try {
+      tmp = File.createTempFile("observation", ".xml");
+      tmp.deleteOnExit();
+
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("output file = " + tmp.getAbsolutePath());
+      }
+
+      save(tmp, getObservation());
+
+    } catch (IOException ioe) {
+      logger.log(Level.SEVERE, "unable to create temporary file", ioe);
+    }
+
+    // TODO : find what operation to do ?
+
+    ObservabilityService.calcObservability(getObservation());
+
   }
-  
 }

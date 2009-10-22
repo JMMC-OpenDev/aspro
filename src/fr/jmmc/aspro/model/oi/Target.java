@@ -125,7 +125,7 @@ public class Target
     public void setEQUINOX(float value) {
         this.equinox = value;
     }
-
+    
 //--simple--preserve
 
     @Override

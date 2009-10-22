@@ -1,7 +1,14 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+/*******************************************************************************
+ * JMMC project
+ *
+ * "@(#) $Id: GeocentricCoords.java,v 1.3 2009-10-22 15:47:22 bourgesl Exp $"
+ *
+ * History
+ * -------
+ * $Log: not supported by cvs2svn $
+ *
+ *
+ ******************************************************************************/
 package fr.jmmc.aspro.service;
 
 import fr.jmmc.aspro.AsproConstants;

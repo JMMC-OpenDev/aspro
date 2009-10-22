@@ -222,11 +222,11 @@ public class ObservationSetting
     
 //--simple--preserve
 
-    @Override
-    public String toString() {
-      return "Observation : " + ((this.name != null) ? this.name : "undefined");
-    }
-
+  @Override
+  public String toString() {
+    return "Observation : " + ((this.name != null) ? this.name : "undefined");
+  }
+  
 //--simple--preserve
 
 }
