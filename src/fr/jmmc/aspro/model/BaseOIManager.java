@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BaseOIManager.java,v 1.3 2009-10-20 13:08:51 bourgesl Exp $"
+ * "@(#) $Id: BaseOIManager.java,v 1.4 2009-10-27 16:47:17 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2009/10/20 13:08:51  bourgesl
+ * ObservationManager has methods to store observation properties
+ *
  * Revision 1.2  2009/10/19 15:35:18  mella
  * add save method
  *
@@ -102,10 +105,12 @@ public class BaseOIManager {
     final GregorianCalendar calendar = new GregorianCalendar();
     calendar.setTime(date);
 
+    // the month field is given in the range [0;11]
+
     // Create an XMLGregorianCalendar with the given date :
     return this.df.newXMLGregorianCalendarDate(
             calendar.get(Calendar.YEAR),
-            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.MONTH) + 1,
             calendar.get(Calendar.DAY_OF_MONTH),
             DatatypeConstants.FIELD_UNDEFINED);
   }
