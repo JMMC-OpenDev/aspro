@@ -1907,12 +1907,13 @@ class Site implements Cloneable {
     this.name = name;
     this.longit = new longitude(lon);
     this.lat = new latitude(lat);
-    stdz = 0.d;
-    use_dst = 0;
-    timezone_name = "";
-    zone_abbrev = "";
-    elevsea = alt;
-    elevhoriz = alt;
+    /** approximate the time zone offset : used by nightly almanach */
+    this.stdz = Math.floor(lon);
+    this.use_dst = 0;
+    this.timezone_name = "";
+    this.zone_abbrev = "";
+    this.elevsea = alt;
+    this.elevhoriz = alt;
   }
   
   Site(String[] sitepars) {
