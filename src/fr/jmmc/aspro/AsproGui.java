@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproGui.java,v 1.2 2009-10-02 15:20:18 bourgesl Exp $"
+ * "@(#) $Id: AsproGui.java,v 1.3 2009-11-03 16:57:56 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2009/10/02 15:20:18  bourgesl
+ * updated model + stupid tree model
+ *
  * Revision 1.1  2009/09/21 15:38:50  bourgesl
  * initial jmcs gui + jaxb loader
  *
@@ -17,6 +20,7 @@ import fr.jmmc.aspro.gui.MainFrame;
 import fr.jmmc.mcs.gui.App;
 import java.awt.EventQueue;
 import java.util.Locale;
+import java.util.TimeZone;
 
 /**
  * This class represents the Aspro GUI application
@@ -39,7 +43,8 @@ public class AsproGui extends App {
   protected void init(String[] args) {
     // Set the default locale to en-US locale (for Numerical Fields "." ",")
     Locale.setDefault(new Locale("en", "US"));
-
+    // Set the default timezone to GMT to handle properly the date in UTC :
+    TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
   }
 
   /** Execute application body */

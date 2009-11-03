@@ -4,9 +4,14 @@
  */
 package edu.dartmouth;
 
+import edu.dartmouth.SunAlmanachTime.SunAlmanachType;
 import fr.jmmc.aspro.AsproConstants;
+import fr.jmmc.aspro.model.oi.AzAlt;
 import fr.jmmc.aspro.model.oi.LonLatAlt;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.TreeSet;
 import java.util.logging.Level;
@@ -24,22 +29,16 @@ public class AstroSkyCalc {
   private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
 
-  public enum SunAlmanachType {
-
-    SunTwlRise,
-    SunRise,
-    SunTwlSet,
-    SunSet;
-  }
   /** site location */
   private Site site;
-  /** date time info */
-  private InstantInTime time;
   /** time / site info */
   private WhenWhere when;
   /** target info */
   private Observation observation;
 
+  /**
+   * Constructor
+   */
   public AstroSkyCalc() {
     // nothing to do
   }
@@ -84,10 +83,13 @@ public class AstroSkyCalc {
     }
 
     // UTC time :
-    this.time = new InstantInTime(dateTime, this.site.stdz, this.site.use_dst, true);
+    final InstantInTime time = new InstantInTime(dateTime, this.site.stdz, this.site.use_dst, true);
 
-    this.when = new WhenWhere(this.time, this.site);
-    dumpWhen(this.when, "When");
+    this.when = new WhenWhere(time, this.site);
+
+    if (logger.isLoggable(Level.FINE)) {
+      dumpWhen(this.when, "When");
+    }
 
 // Moon fraction illumination fraction :
 //    this.when.moonillum
@@ -102,9 +104,22 @@ public class AstroSkyCalc {
    * @return jd corresponding to the lst = 0 for the current date
    */
   public double findLst0() {
+    return findLst0(this.when.when.jd);
+  }
+
+  /**
+   * Find the jd time value corresponding to the lst = 0 for the current date
+   *
+   * Note : accurate +/-12 h within the given date
+   *
+   * @return jd corresponding to the lst = 0 for the current date
+   */
+  public double findLst0(final double jd) {
+
+    final WhenWhere ww = new WhenWhere(jd, this.site);
 
     // decimal hours :
-    double error = this.when.sidereal;
+    double error = ww.sidereal;
     int n = 0;
 
     while (error > 1e-3 && n < 9) {
@@ -115,20 +130,52 @@ public class AstroSkyCalc {
         error *= -1d;
       }
 
-      this.when.ChangeWhen(this.time.jd + (error / 24.d));
+      ww.ChangeWhen(ww.when.jd + (error / 24.d));
 
 //    dumpWhen(this.when, "When");
 
       // next pass :
-      error = this.when.sidereal;
+      error = ww.sidereal;
       n++;
     }
 
-    dumpWhen(this.when, "LST 0");
+    if (logger.isLoggable(Level.FINE)) {
+      dumpWhen(ww, "LST=0");
+    }
 
-    return this.time.jd;
+    return ww.when.jd;
   }
 
+  /**
+   * Convert a julian date to a gregorian date (precise up to the second)
+   * @param jd julian date
+   * @return Date object
+   */
+  public Date toDate(final double jd, final boolean useLst) {
+    final WhenWhere ww = new WhenWhere(jd, this.site);
+
+    final InstantInTime t = ww.when;
+
+    // The default TimeZone is already set to GMT :
+    final Calendar cal = new GregorianCalendar();
+    /* note : month is in range [0;11] in java Calendar */
+    if (useLst) {
+      // ignore the date info as the LST has only time :
+      cal.set(Calendar.HOUR_OF_DAY, ww.siderealobj.sex.hour);
+      cal.set(Calendar.MINUTE, ww.siderealobj.sex.minute);
+      cal.set(Calendar.SECOND, (int)Math.round(ww.siderealobj.sex.second));
+    } else {
+      cal.set(t.UTDate.year, t.UTDate.month - 1, t.UTDate.day, t.UTDate.timeofday.hour, t.UTDate.timeofday.minute, (int)Math.round(t.UTDate.timeofday.second));
+    }
+
+    return cal.getTime();
+  }
+
+  /**
+   * Log the time info (UTC + sideral time)
+   * @param ww WhenWhere instance
+   * @param label message to log
+   */
   private void dumpWhen(final WhenWhere ww, final String label) {
     if (logger.isLoggable(Level.FINE)) {
       final InstantInTime t = ww.when;
@@ -143,14 +190,19 @@ public class AstroSkyCalc {
     }
   }
 
-  public void findSunRiseSet() {
+  /**
+   * Return the list of Sun events inside the given jd interval [jd0; jd1]
+   * @param jd0 initial julian date
+   * @param jd1 final   julian date
+   * @return list of Sun events
+   */
+  public List<SunAlmanachTime> findSunRiseSet(final double jd0, final double jd1) {
     final TreeSet<SunAlmanachTime> ts = new TreeSet<SunAlmanachTime>();
 
-    double jd0 = this.time.jd;
-    double jd1 = this.time.jd + 1d;
     addAlmanach(ts, jd0 - 1d);
     addAlmanach(ts, jd0);
     addAlmanach(ts, jd1);
+    addAlmanach(ts, jd1 + 1d);
 
     final List<SunAlmanachTime> sorted = new ArrayList(ts);
 
@@ -158,51 +210,73 @@ public class AstroSkyCalc {
     int i0 = -1;
     int i1 = -1;
     SunAlmanachTime st;
-    WhenWhere ww;
+
     for (int i = 0, len = sorted.size(); i < len; i++) {
       st = sorted.get(i);
-      ww = st.ww;
-
-//      dumpWhen(ww, st.type.name());
-
-      if (ww.when.jd >= jd0) {
+/*
+      if (logger.isLoggable(Level.FINE)) {
+        dumpWhen(new WhenWhere(st.getJd(), this.site), st.getType().name());
+      }
+*/
+      if (st.getJd() >= jd0) {
         if (i0 == -1) {
           // include previous event :
           i0 = i - 1;
         }
       }
 
-      if (ww.when.jd > jd1) {
+      if (st.getJd() > jd1) {
         // include next event :
         i1 = i;
         break;
       }
     }
 
-    logger.fine("filtered sun events :");
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("filtered sun events :");
+    }
 
     final List<SunAlmanachTime> result = new ArrayList<SunAlmanachTime>();
 
     for (int i = i0; i <= i1; i++) {
       st = sorted.get(i);
-      ww = st.ww;
 
-      dumpWhen(ww, st.type.name());
+      if (logger.isLoggable(Level.FINE)) {
+        dumpWhen(new WhenWhere(st.getJd(), this.site), st.getType().name());
+      }
+
+      // define jd limits :
+      if (st.getJd() < jd0) {
+        st.setJd(jd0);
+      } else if (st.getJd() > jd1) {
+        st.setJd(jd1);
+      }
 
       result.add(st);
     }
 
+    return result;
   }
 
+  /**
+   * Add the sun almanach info as SunAlmanachTime objects for the given date
+   * @param ts set to store the SunAlmanachTime objects
+   * @param jd julian date
+   */
   private void addAlmanach(final TreeSet<SunAlmanachTime> ts, final double jd) {
     final NightlyAlmanac na = new NightlyAlmanac(new WhenWhere(jd, this.site));
 
-    ts.add(new SunAlmanachTime(na.morningTwilight, SunAlmanachType.SunTwlRise));
-    ts.add(new SunAlmanachTime(na.sunrise, SunAlmanachType.SunRise));
-    ts.add(new SunAlmanachTime(na.sunset, SunAlmanachType.SunSet));
-    ts.add(new SunAlmanachTime(na.eveningTwilight, SunAlmanachType.SunTwlSet));
+    ts.add(new SunAlmanachTime(na.morningTwilight.when.jd, SunAlmanachType.SunTwlRise));
+    ts.add(new SunAlmanachTime(na.sunrise.when.jd, SunAlmanachType.SunRise));
+    ts.add(new SunAlmanachTime(na.sunset.when.jd, SunAlmanachType.SunSet));
+    ts.add(new SunAlmanachTime(na.eveningTwilight.when.jd, SunAlmanachType.SunTwlSet));
   }
 
+  /**
+   * Define a target by its RA/dec coordinates in degrees
+   * @param ra right ascension (deg)
+   * @param dec declination (deg)
+   */
   public void defineTarget(final double ra, final double dec) {
 
     // RA (decimal hours), DEC (degrees)
@@ -215,20 +289,22 @@ public class AstroSkyCalc {
     this.observation = new Observation(this.when, target);
   }
 
-  public LonLatAlt getTargetPosition(final double jd) {
+  public AzAlt getTargetPosition(final double jd) {
 
     this.observation.w.ChangeWhen(jd);
     this.observation.ComputeSky();
 
     if (logger.isLoggable(Level.FINE)) {
       dumpWhen(this.observation.w, "Target");
-      logger.fine("ha|alt : " + this.observation.ha.degrees() + " " + this.observation.altitude);
-//      logger.fine("azimuth  : " + this.observation.azimuth);
+//      logger.fine("ha|delta : " + this.observation.ha.degrees() + " " + this.observation.current.Delta.degrees());
+      logger.fine("az|alt   : " + this.observation.azimuth + " " + this.observation.altitude);
 //      logger.fine("parallac : " + this.observation.parallactic);
     }
 
-    return new LonLatAlt(this.observation.ha.degrees(), this.observation.altitude, 0d);
+    return new AzAlt(deg2rad(this.observation.azimuth), deg2rad(this.observation.altitude));
   }
+
+  /* utility methods */
 
   public double rad2hours(final double angrad) {
     return deg2hours(Math.toDegrees(angrad));
@@ -238,54 +314,7 @@ public class AstroSkyCalc {
     return angdeg / 15.0d;
   }
 
-  private static class SunAlmanachTime implements Comparable<SunAlmanachTime> {
-
-    /** julian date */
-    private final double jd;
-    /** internal when date */
-    private final WhenWhere ww;
-    /** event type */
-    private final SunAlmanachType type;
-
-    protected SunAlmanachTime(final WhenWhere when, final SunAlmanachType type) {
-      this.ww = when;
-      this.jd = when.when.jd;
-      this.type = type;
-    }
-
-    protected double getJd() {
-      return jd;
-    }
-
-    protected SunAlmanachType getType() {
-      return type;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-      if (obj == null) {
-        return false;
-      }
-      if (getClass() != obj.getClass()) {
-        return false;
-      }
-      final SunAlmanachTime other = (SunAlmanachTime) obj;
-      if (this.jd != other.jd) {
-        return false;
-      }
-      return true;
-    }
-
-    @Override
-    public int hashCode() {
-      int hash = 7;
-      hash = 37 * hash + (int) (Double.doubleToLongBits(this.jd) ^ (Double.doubleToLongBits(this.jd) >>> 32));
-      hash = 37 * hash + this.type.hashCode();
-      return hash;
-    }
-
-    public int compareTo(SunAlmanachTime t) {
-      return Double.compare(this.jd, t.jd);
-    }
+  public double deg2rad(final double angdeg) {
+    return Math.toRadians(angdeg);
   }
 }

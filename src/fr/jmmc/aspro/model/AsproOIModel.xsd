@@ -1024,7 +1024,6 @@ Fringe Tracker
 
 
 
-
 <!-- simple types restrictions -->
 
   <xsd:simpleType name="string16">
@@ -1095,5 +1094,30 @@ Fringe Tracker
       </xsd:element>
     </xsd:sequence>
   </xsd:complexType>
+
+  <xsd:complexType name="AzAlt">
+    <xsd:annotation>
+      <xsd:documentation>
+        This data type describes a celestial coordinates in the horizontal frame (azimuth, altitude)
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="azimuth" type="xsd:double">
+        <xsd:annotation>
+          <xsd:documentation>
+              azimuth angle (rad)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="altitude" type="xsd:double">
+        <xsd:annotation>
+          <xsd:documentation>
+              Altitude / Elevation (rad)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+
 
 </xsd:schema>

@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: MainFrame.java,v 1.5 2009-10-14 15:54:38 bourgesl Exp $"
+ * "@(#) $Id: MainFrame.java,v 1.6 2009-11-03 16:57:55 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2009/10/14 15:54:38  bourgesl
+ * added basicObservationForm + CHARA.xml
+ *
  * Revision 1.4  2009/10/13 16:02:37  bourgesl
  * simple uv plot demo
  *
@@ -52,6 +55,7 @@ public class MainFrame extends JFrame {
   private static MainFrame instance = null;
 
   /* Swing Components */
+  /** tabs */
   protected JTabbedPane tabs;
   /** Status Bar */
   protected StatusBar statusBar;
@@ -127,11 +131,9 @@ public class MainFrame extends JFrame {
     final JScrollPane settingScrollPane = new JScrollPane(setting);
 
     // The tab is added to the tabbed panel :
-    int pos = tabs.getTabCount();
-    tabs.insertTab("new settings", null, settingScrollPane, null, pos);
-    tabs.setSelectedIndex(pos);
+    tabs.addTab("new settings", null, settingScrollPane, null);
 
-//    tabs.insertTab("plot", null, new UVChartPanel(), null, pos);
+//    tabs.insertTab("plot", null, new UVChartPanel(), null, pos + 1);
 }
 
   /**

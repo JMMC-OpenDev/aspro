@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.4 2009-10-30 16:25:42 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.5 2009-11-03 16:57:56 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2009/10/30 16:25:42  bourgesl
+ * added sun twilight times + get target position
+ *
  * Revision 1.3  2009/10/27 16:47:17  bourgesl
  * fixed bug on month conversion
  *
@@ -21,9 +24,16 @@
 package fr.jmmc.aspro.service;
 
 import edu.dartmouth.AstroSkyCalc;
+import edu.dartmouth.SunAlmanachTime;
+import fr.jmmc.aspro.model.ObservabilityData;
+import fr.jmmc.aspro.model.SunTimeInterval;
+import fr.jmmc.aspro.model.oi.AzAlt;
 import fr.jmmc.aspro.model.oi.InterferometerConfiguration;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Target;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 import java.util.logging.Level;
 import javax.xml.datatype.XMLGregorianCalendar;
 
@@ -41,77 +51,98 @@ public class ObservabilityService {
           className_);
 
   /**
-   * Main operation
+   * Main operation to determine the source observability for a given interferometer configuration
    *
-   * @param observation
-   * @return undefined
+   * @param observation observation settings
+   * @param useLst true indicates to return date/time values in LST, false to use UTC reference
+   * @param minElev minimum elevation
+   * @return ObservabilityData container
    */
-  public static Object calcObservability(final ObservationSetting observation) {
-    logger.severe("start : " + observation);
+  public static ObservabilityData calcObservability(final ObservationSetting observation, final boolean useLST, final double minElev) {
+    if (logger.isLoggable(Level.SEVERE)) {
+      logger.severe("start : " + observation);
+    }
+
+    final ObservabilityData data = new ObservabilityData();
 
     long start = System.nanoTime();
 
     try {
 
-    final AstroSkyCalc sc = new AstroSkyCalc();
+      final AstroSkyCalc sc = new AstroSkyCalc();
 
-    final InterferometerConfiguration ic = observation.getInterferometerConfiguration().getInterferometerConfiguration();
+      final InterferometerConfiguration ic = observation.getInterferometerConfiguration().getInterferometerConfiguration();
 
-    sc.defineSite(ic.getName(), ic.getInterferometer().getPosSph());
+      sc.defineSite(ic.getName(), ic.getInterferometer().getPosSph());
 
-    final XMLGregorianCalendar cal = observation.getWhen().getDate();
+      final XMLGregorianCalendar cal = observation.getWhen().getDate();
 
-    double jdMin, jdMax;
-/*
-    for (int i = 1; i <=12; i++) {
+      sc.defineDate(cal.getYear(), cal.getMonth(), cal.getDay());
 
-      logger.severe("test month : " + i);
+      // 0 - Trouver l'origine LST=0 par rapport a la date donnee :
+      final double jdMin = sc.findLst0();
+      // note = in LST : remove 1s to avoid 00:00:00 :
+      final double jdMax = sc.findLst0(jdMin + 1d) - 1d / 86400d;
 
-      sc.defineDate(cal.getYear(), i, cal.getDay());
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("jd   min = " + jdMin);
+        logger.fine("jd   max = " + jdMax);
+      }
 
-      jdLst0 = sc.findLst0();
-    }
-*/
-    sc.defineDate(cal.getYear(), cal.getMonth(), cal.getDay());
+      data.setDateMin(sc.toDate(jdMin, useLST));
+      data.setDateMax(sc.toDate(jdMax, useLST));
 
-    // 0 - Trouver l'origine LST=0 par rapport a la date donnee :
-    jdMin = sc.findLst0();
-    jdMax = jdMin + 1d;
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("date min = " + data.getDateMin());
+        logger.fine("date max = " + data.getDateMax());
+      }
 
-    // 10 minutes :
-    final double jdStep = (1d/6d) / 24d;
+      // 1 - Trouver la nuit : sun rise/set with twilight : see NightlyAlmanac
 
-    // 1 - Trouver la nuit : sun rise/set with twilight : see NightlyAlmanac
-    // TODO : convert in standard timestep data :
-    sc.findSunRiseSet();
+      final List<SunAlmanachTime> sunEvents = sc.findSunRiseSet(jdMin, jdMax);
+      data.setSunIntervals(convertSunAlmanach(sc, sunEvents, useLST));
 
+      // indicateur pour cette date mais ne pas se limiter a la nuit et utiliser le domaine LST [0;24h]
 
-    // indicateur pour cette date mais ne pas se limiter a la nuit et utiliser le domaine LST [0;24h]
+      // 2 - Pour chaque source, etudier sa progression en altitude (degrees) pour voir ensuite si cet angle est possible avec les telescopes ...
 
-    // 2 - Pour chaque source, etudier sa progression en altitude (degrees) pour voir ensuite si cet angle est possible avec les telescopes ...
+      if (observation.getTargets().isEmpty()) {
+        if (logger.isLoggable(Level.FINE)) {
+          logger.fine("No target defined.");
+        }
+      } else {
+        double jd;
 
+        // 10 minutes :
+        final double jdStep = (10d / 60d) / 24d;
 
-    if (observation.getTargets().isEmpty()) {
-      logger.fine("No target defined !");
-    } else {
-      double jd;
+        AzAlt azAlt;
 
-      for (Target target : observation.getTargets()) {
-        sc.defineTarget(target.getRA(), target.getDEC());
+        for (Target target : observation.getTargets()) {
+          sc.defineTarget(target.getRA(), target.getDEC());
 
-        jd = jdMin;
+          jd = jdMin;
 
-        while (jd < jdMax) {
+          boolean overHorizon = false;
 
-          sc.getTargetPosition(jd);
+          while (jd < jdMax) {
 
-          //
-          jd += jdStep;
+            azAlt = sc.getTargetPosition(jd);
+
+            overHorizon = azAlt.getAltitude() > minElev;
+
+            if (overHorizon) {
+              // Check Shadowing
+
+            }
+
+            //
+            jd += jdStep;
+
+          }
 
         }
-
       }
-    }
 
 
 
@@ -119,8 +150,54 @@ public class ObservabilityService {
       logger.log(Level.SEVERE, "calcObservability failure :", re);
     }
 
-    logger.severe("calcObservability : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
+    if (logger.isLoggable(Level.SEVERE)) {
+      logger.severe("calcObservability : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
+    }
 
-    return null;
+    return data;
+  }
+
+  private static List<SunTimeInterval> convertSunAlmanach(final AstroSkyCalc sc, final List<SunAlmanachTime> sunEvents, final boolean useLST) {
+    List<SunTimeInterval> result = null;
+
+    if (sunEvents != null && !sunEvents.isEmpty()) {
+      final int nbInterval = sunEvents.size() - 1;
+      result = new ArrayList<SunTimeInterval>(nbInterval);
+
+      SunAlmanachTime stFrom, stTo;
+      Date from, to;
+      SunTimeInterval.SunType type;
+
+      for (int i = 0; i < nbInterval; i++) {
+        stFrom = sunEvents.get(i);
+        stTo = sunEvents.get(i + 1);
+
+        from = sc.toDate(stFrom.getJd(), useLST);
+        to = sc.toDate(stTo.getJd(), useLST);
+
+        switch (stFrom.getType()) {
+          case SunRise:
+            type = SunTimeInterval.SunType.Day;
+            break;
+          case SunSet:
+            type = SunTimeInterval.SunType.Twilight;
+            break;
+          default:
+          case SunTwlRise:
+            type = SunTimeInterval.SunType.Twilight;
+            break;
+          case SunTwlSet:
+            type = SunTimeInterval.SunType.Night;
+        }
+
+        if (logger.isLoggable(Level.FINE)) {
+          logger.fine("SunInterval[" + from + " - " + to + "] : " + type);
+        }
+
+        result.add(new SunTimeInterval(from, to, type));
+      }
+    }
+
+    return result;
   }
 }

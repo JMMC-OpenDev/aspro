@@ -65,7 +65,7 @@ public class FocalInstrumentConfigurationChoice
     public void setName(String value) {
         this.name = value;
     }
-
+    
 //--simple--preserve
   /** resolved reference to the focal instrument configuration (read only) */
   @javax.xml.bind.annotation.XmlTransient

@@ -4,7 +4,6 @@ import fr.jmmc.aspro.gui.chart.ChartUtils;
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.Rectangle;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;

@@ -65,7 +65,7 @@ public class InterferometerConfigurationChoice
     public void setName(String value) {
         this.name = value;
     }
-
+    
 //--simple--preserve
   /** resolved reference to the interferometer configuration (read only) */
   @javax.xml.bind.annotation.XmlTransient

@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationManager.java,v 1.4 2009-10-22 15:47:22 bourgesl Exp $"
+ * "@(#) $Id: ObservationManager.java,v 1.5 2009-11-03 16:57:55 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2009/10/22 15:47:22  bourgesl
+ * beginning of observability computation with jSkyCalc
+ *
  * Revision 1.3  2009/10/20 15:50:16  bourgesl
  * add a target once simbad data are back
  *
@@ -28,7 +31,9 @@ import fr.jmmc.aspro.model.oi.WhenSetting;
 import fr.jmmc.aspro.service.ObservabilityService;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Vector;
 import java.util.logging.Level;
 import javax.xml.datatype.XMLGregorianCalendar;
@@ -46,9 +51,11 @@ public class ObservationManager extends BaseOIManager {
           className_);
   /** singleton pattern */
   private static ObservationManager instance = new ObservationManager();
-  // members :
+  /* members */
   /** observation (single for now) */
   private ObservationSetting observation = null;
+  /** observation listeners */
+  private List<ObservationListener> listeners = new ArrayList<ObservationListener>();
 
   /**
    * Return the ObservationManager singleton
@@ -72,6 +79,14 @@ public class ObservationManager extends BaseOIManager {
     this.observation.setWhen(new WhenSetting());
     this.observation.setInstrumentConfiguration(new FocalInstrumentConfigurationChoice());
     this.observation.setInterferometerConfiguration(new InterferometerConfigurationChoice());
+  }
+
+  public void register(final ObservationListener listener) {
+    this.listeners.add(listener);
+  }
+
+  public void unregister(final ObservationListener listener) {
+    this.listeners.remove(listener);
   }
 
   public ObservationSetting getObservation() {
@@ -194,9 +209,10 @@ public class ObservationManager extends BaseOIManager {
       logger.log(Level.SEVERE, "unable to create temporary file", ioe);
     }
 
-    // TODO : find what operation to do ?
-
-    ObservabilityService.calcObservability(getObservation());
+    // Call listeners with a copy of the listener list to avoid concurrent modification :
+    for (ObservationListener listener : listeners.toArray(new ObservationListener[listeners.size()])) {
+      listener.onChange(getObservation());
+    }
 
   }
 }
