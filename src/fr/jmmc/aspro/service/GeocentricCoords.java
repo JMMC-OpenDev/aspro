@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: GeocentricCoords.java,v 1.3 2009-10-22 15:47:22 bourgesl Exp $"
+ * "@(#) $Id: GeocentricCoords.java,v 1.4 2009-11-05 12:59:39 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2009/10/22 15:47:22  bourgesl
+ * beginning of observability computation with jSkyCalc
+ *
  *
  *
  ******************************************************************************/
@@ -13,6 +16,7 @@ package fr.jmmc.aspro.service;
 
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.oi.Position3D;
+import java.util.logging.Level;
 import uk.ac.starlink.pal.Cartesian;
 import uk.ac.starlink.pal.Pal;
 import uk.ac.starlink.pal.Spherical;
@@ -48,7 +52,9 @@ public class GeocentricCoords {
    * @param sph longitude, latitude in radians and the distance (m)
    */
   public static void dump(final String msg, final Spherical sph) {
-    logger.severe(msg + " = " + toString(sph.getLong(), sph.getLat(), sph.getRadial()));
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine(msg + " = " + toString(sph.getLong(), sph.getLat(), sph.getRadial()));
+    }
   }
 
   /**

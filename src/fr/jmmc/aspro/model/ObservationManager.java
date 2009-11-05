@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationManager.java,v 1.5 2009-11-03 16:57:55 bourgesl Exp $"
+ * "@(#) $Id: ObservationManager.java,v 1.6 2009-11-05 12:59:39 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2009/11/03 16:57:55  bourgesl
+ * added observability plot with LST/UTC support containing only day/night/twilight zones
+ *
  * Revision 1.4  2009/10/22 15:47:22  bourgesl
  * beginning of observability computation with jSkyCalc
  *
@@ -28,11 +31,11 @@ import fr.jmmc.aspro.model.oi.InterferometerConfigurationChoice;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.WhenSetting;
-import fr.jmmc.aspro.service.ObservabilityService;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 import java.util.logging.Level;
@@ -54,6 +57,8 @@ public class ObservationManager extends BaseOIManager {
   /* members */
   /** observation (single for now) */
   private ObservationSetting observation = null;
+  /** temporary file to save the observation settings */
+  private File observationFile = null;
   /** observation listeners */
   private List<ObservationListener> listeners = new ArrayList<ObservationListener>();
 
@@ -171,6 +176,28 @@ public class ObservationManager extends BaseOIManager {
     return changed;
   }
 
+  /**
+   * Remove a target given its unique name
+   * @param name target name
+   * @return true if the target list changed
+   */
+  public boolean removeTarget(final String name) {
+    boolean changed = false;
+    if (name != null && name.length() > 0) {
+      Target t;
+      for (Iterator<Target> it = getObservation().getTargets().iterator(); it.hasNext();) {
+        t = it.next();
+        if (t.getName().equals(name)) {
+          changed = true;
+          it.remove();
+          break;
+        }
+      }
+    }
+    return changed;
+  }
+
+
   public Target getTarget(final String name) {
     for (Target t : getObservation().getTargets()) {
       if (t.getName().equals(name)) {
@@ -192,18 +219,21 @@ public class ObservationManager extends BaseOIManager {
    * Future model listener notify all pattern
    */
   public void fireObservationChanged() {
-    logger.severe("fireObservationChanged : " + toString(getObservation()));
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("fireObservationChanged : " + toString(getObservation()));
+    }
 
-    final File tmp;
     try {
-      tmp = File.createTempFile("observation", ".xml");
-      tmp.deleteOnExit();
-
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("output file = " + tmp.getAbsolutePath());
+      if (this.observationFile == null) {
+        this.observationFile = File.createTempFile("observation", ".xml");
+        this.observationFile.deleteOnExit();
       }
 
-      save(tmp, getObservation());
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("output file = " + this.observationFile.getAbsolutePath());
+      }
+
+      save(this.observationFile, getObservation());
 
     } catch (IOException ioe) {
       logger.log(Level.SEVERE, "unable to create temporary file", ioe);

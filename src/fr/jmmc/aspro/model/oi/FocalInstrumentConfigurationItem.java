@@ -116,7 +116,16 @@ public class FocalInstrumentConfigurationItem
       return "FocalInstrumentConfigurationItem [" + getName() + "]";
     }
 
-    private void generateName() {
+    public String getShortName() {
+      String s = getName();
+      if (s == null) {
+        generateName();
+        s = getName();
+      }
+      return s;
+    }
+
+    protected void generateName() {
       synchronized(this) {
         if (getName() == null) {
           final StringBuilder sb = new StringBuilder();

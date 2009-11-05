@@ -1,35 +1,40 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityPanel.java,v 1.1 2009-11-03 16:57:55 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityPanel.java,v 1.2 2009-11-05 12:59:39 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2009/11/03 16:57:55  bourgesl
+ * added observability plot with LST/UTC support containing only day/night/twilight zones
+ *
  *
  *
  *
  ******************************************************************************/
 package fr.jmmc.aspro.gui;
 
+import fr.jmmc.aspro.model.DateTimeInterval;
 import fr.jmmc.aspro.model.ObservabilityData;
 import fr.jmmc.aspro.model.ObservationListener;
 import fr.jmmc.aspro.model.ObservationManager;
+import fr.jmmc.aspro.model.StarObservability;
 import fr.jmmc.aspro.model.SunTimeInterval;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.service.ObservabilityService;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Font;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
+import javax.swing.SwingWorker;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.annotations.XYPointerAnnotation;
 import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.axis.SymbolAxis;
 import org.jfree.chart.event.ChartProgressEvent;
@@ -42,12 +47,7 @@ import org.jfree.data.gantt.Task;
 import org.jfree.data.gantt.TaskSeries;
 import org.jfree.data.gantt.TaskSeriesCollection;
 import org.jfree.data.gantt.XYTaskDataset;
-import org.jfree.data.time.Day;
-import org.jfree.data.time.Hour;
-import org.jfree.data.xy.IntervalXYDataset;
 import org.jfree.ui.Layer;
-import org.jfree.ui.RectangleAnchor;
-import org.jfree.ui.TextAnchor;
 
 /**
  * This panel represents the observability plot
@@ -70,6 +70,11 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
   private JFreeChart localJFreeChart;
   /** xy plot instance */
   private XYPlot localXYPlot;
+  /** 
+   * Current (or old) worker reference
+   * (can be a leaked reference if the computation is done)
+   */
+  private SwingWorker currentWorker = null;
 
   /**
    * Constructor
@@ -134,66 +139,130 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
 
     // Use a swing worker to compute the data :
 
-    // Get the computation results with all data necessary to produce the plot :
-    // -
+    /* plot options */
+    final boolean useLst = true;
+    final double minElev = 20d;
 
-    boolean useLst = true;
-    double minElev = 20d;
+    /*
+     * Requires the java 5 SwingWorker backport = swing-worker-1.2.jar
+     */
+    final SwingWorker worker = new SwingWorker<ObservabilityData, Void>() {
 
-    final ObservabilityData data = ObservabilityService.calcObservability(observation, useLst, minElev);
+      /**
+       * Compute the observability data in background
+       * @return observability data
+       */
+      @Override
+      public ObservabilityData doInBackground() {
+        logger.fine("SwingWorker.doInBackground : IN");
 
-    updateChart(createDataset());
+        ObservabilityData data = ObservabilityService.calcObservability(observation, useLst, minElev);
 
-    updateDateAxis((useLst) ? "L.S.T" : "U.T.C", data.getDateMin(), data.getDateMax());
+        if (isCancelled()) {
+          logger.fine("SwingWorker.doInBackground : CANCELLED");
+          // no result if task is cancelled :
+          data = null;
+        } else {
+          logger.fine("SwingWorker.doInBackground : OUT");
+        }
+        return data;
+      }
 
-    updateSunMarkers(data.getSunIntervals());
+      /**
+       * Refresh the plot using the computed observability data
+       */
+      @Override
+      public void done() {
+        if (!isCancelled()) {
+          logger.fine("SwingWorker.done : IN");
+          try {
+            // Get the computation results with all data necessary to draw the plot :
+            final ObservabilityData data = get();
 
-    // update theme :
-    ChartUtilities.applyCurrentTheme(this.localJFreeChart);
+            if (data != null) {
+              // computed data are valid :
+              updateChart(data.getStarVisibilities());
+
+              updateDateAxis((useLst) ? "L.S.T" : "U.T.C", data.getDateMin(), data.getDateMax());
+
+              updateSunMarkers(data.getSunIntervals());
+
+              // update theme at end :
+              ChartUtilities.applyCurrentTheme(localJFreeChart);
+            }
+
+          } catch (InterruptedException ignore) {
+          } catch (ExecutionException ee) {
+            logger.log(Level.SEVERE, "Error : ", ee);
+          }
+          logger.fine("SwingWorker.done : OUT");
+        }
+      }
+    };
+
+    if (this.currentWorker != null && !this.currentWorker.isDone()) {
+      // interrupt if running :
+      this.currentWorker.cancel(true);
+    }
+    // memorize the reference to the new worker before execution :
+    this.currentWorker = worker;
+
+    // start the new worker :
+    worker.execute();
   }
 
-  private static IntervalXYDataset createDataset() {
+  /**
+   * Update the dataset and the symbol axis given the star observability data
+   * @param starVis star observability data
+   */
+  private void updateChart(final List<StarObservability> starVis) {
+    final String[] targetNames = new String[starVis.size()];
+
     final TaskSeriesCollection localTaskSeriesCollection = new TaskSeriesCollection();
 
-    final TaskSeries localTaskSeries1 = new TaskSeries("Star 1");
+    int i = 0;
+    int j;
+    String name;
+    TaskSeries taskSeries;
+    for (StarObservability so : starVis) {
+      name = so.getName();
+      // use the target name as the name of the serie :
+      targetNames[i++] = name;
+      taskSeries = new TaskSeries(name);
 
-//    Task localTask1 = new Task("Write Proposal", date(1, 3, 2001), date(5, 3, 2001));
+      j = 1;
 
+      for (DateTimeInterval interval : so.getVisible()) {
+        taskSeries.add(new Task("T" + j, interval.getStartDate(), interval.getEndDate()));
+      }
 
-    localTaskSeries1.add(new Task("T1a", new Hour(11, new Day())));
-    localTaskSeries1.add(new Task("T1b", new Hour(14, new Day())));
-    localTaskSeries1.add(new Task("T1c", new Hour(16, new Day())));
-
-    localTaskSeriesCollection.add(localTaskSeries1);
-
-    return new XYTaskDataset(localTaskSeriesCollection);
-  }
-
-  private void updateChart(final IntervalXYDataset paramIntervalXYDataset) {
+      localTaskSeriesCollection.add(taskSeries);
+    }
 
     // set the main data set :
-    localXYPlot.setDataset(paramIntervalXYDataset);
+    localXYPlot.setDataset(new XYTaskDataset(localTaskSeriesCollection));
 
     // change the Domain axis (vertical) :
-    final SymbolAxis localSymbolAxis = new SymbolAxis("Source", new String[]{"Star 1"});
+    final SymbolAxis localSymbolAxis = new SymbolAxis("Source", targetNames);
     localSymbolAxis.setGridBandsVisible(false);
     localSymbolAxis.setAutoRange(false);
-    localSymbolAxis.setRangeWithMargins(-1d, 1d);
+    localSymbolAxis.setRangeWithMargins(-1d, targetNames.length);
     localXYPlot.setDomainAxis(localSymbolAxis);
 
+/*
     final XYBarRenderer localXYBarRenderer = (XYBarRenderer) localXYPlot.getRenderer();
-
     // remove Annotations :
     localXYBarRenderer.removeAnnotations();
 
     // add the Annotations :
 
     // 0D corresponds to the first Star :
-    final XYPointerAnnotation localXYPointerAnnotation1 = new XYPointerAnnotation("TEST", 0D, new Hour(13, new Day()).getFirstMillisecond(), 45D);
-    localXYPointerAnnotation1.setTextAnchor(TextAnchor.BOTTOM_CENTER);
+    final XYPointerAnnotation localXYPointerAnnotation1 = new XYPointerAnnotation("TEST", 0D, new Hour(13, new Day()).getFirstMillisecond(), Math.PI / 2d);
+    localXYPointerAnnotation1.setTextAnchor(TextAnchor.BOTTOM_LEFT);
     localXYPointerAnnotation1.setPaint(Color.black);
     localXYPointerAnnotation1.setArrowPaint(Color.black);
     localXYBarRenderer.addAnnotation(localXYPointerAnnotation1);
+     */
   }
 
   private void updateDateAxis(final String label, final Date from, final Date to) {

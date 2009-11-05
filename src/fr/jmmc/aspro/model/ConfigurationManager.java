@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ConfigurationManager.java,v 1.5 2009-10-22 15:47:22 bourgesl Exp $"
+ * "@(#) $Id: ConfigurationManager.java,v 1.6 2009-11-05 12:59:39 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2009/10/22 15:47:22  bourgesl
+ * beginning of observability computation with jSkyCalc
+ *
  * Revision 1.4  2009/10/20 13:08:51  bourgesl
  * ObservationManager has methods to store observation properties
  *
@@ -27,6 +30,7 @@ package fr.jmmc.aspro.model;
 
 import fr.jmmc.aspro.model.oi.Configurations;
 import fr.jmmc.aspro.model.oi.FocalInstrumentConfiguration;
+import fr.jmmc.aspro.model.oi.FocalInstrumentConfigurationItem;
 import fr.jmmc.aspro.model.oi.InterferometerConfiguration;
 import fr.jmmc.aspro.model.oi.InterferometerDescription;
 import fr.jmmc.aspro.model.oi.InterferometerSetting;
@@ -212,8 +216,8 @@ public class ConfigurationManager extends BaseOIManager {
       for (InterferometerConfiguration c : i.getConfigurations()) {
         v.add(c.getName());
       }
+      Collections.sort(v);
     }
-    Collections.sort(v);
     return v;
   }
 
@@ -225,8 +229,8 @@ public class ConfigurationManager extends BaseOIManager {
       for (FocalInstrumentConfiguration ic : c.getInstruments()) {
         v.add(ic.getFocalInstrument().getName());
       }
+      Collections.sort(v);
     }
-    Collections.sort(v);
     return v;
   }
 
@@ -240,6 +244,18 @@ public class ConfigurationManager extends BaseOIManager {
       }
     }
     return null;
+  }
+
+  public Vector<String> getInstrumentConfigurationNames(final String configurationName, final String instrumentName) {
+    final Vector v = new Vector();
+
+    final FocalInstrumentConfiguration ic = getInterferometerInstrumentConfiguration(configurationName, instrumentName);
+    if (ic != null) {
+      for (FocalInstrumentConfigurationItem c : ic.getConfigurations()) {
+        v.add(c.getShortName());
+      }
+    }
+    return v;
   }
 
   /**

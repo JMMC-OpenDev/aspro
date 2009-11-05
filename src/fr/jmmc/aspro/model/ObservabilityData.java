@@ -5,6 +5,7 @@
 
 package fr.jmmc.aspro.model;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -18,8 +19,10 @@ public class ObservabilityData {
   private Date dateMin = null;
   /** ending date */
   private Date dateMax = null;
-  /** list of sun time interval */
+  /** list of sun time intervals */
   private List<SunTimeInterval> sunIntervals = null;
+  /** list of star visibility intervals */
+  private List<StarObservability> starVisibilities = new ArrayList<StarObservability>();
 
   /**
    * Constuctor
@@ -54,6 +57,9 @@ public class ObservabilityData {
     this.sunIntervals = sunIntervals;
   }
 
-  
+  public List<StarObservability> getStarVisibilities() {
+    return starVisibilities;
+  }
+
 
 }

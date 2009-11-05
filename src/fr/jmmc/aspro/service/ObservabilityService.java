@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.5 2009-11-03 16:57:56 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.6 2009-11-05 12:59:39 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2009/11/03 16:57:56  bourgesl
+ * added observability plot with LST/UTC support containing only day/night/twilight zones
+ *
  * Revision 1.4  2009/10/30 16:25:42  bourgesl
  * added sun twilight times + get target position
  *
@@ -25,7 +28,9 @@ package fr.jmmc.aspro.service;
 
 import edu.dartmouth.AstroSkyCalc;
 import edu.dartmouth.SunAlmanachTime;
+import fr.jmmc.aspro.model.DateTimeInterval;
 import fr.jmmc.aspro.model.ObservabilityData;
+import fr.jmmc.aspro.model.StarObservability;
 import fr.jmmc.aspro.model.SunTimeInterval;
 import fr.jmmc.aspro.model.oi.AzAlt;
 import fr.jmmc.aspro.model.oi.InterferometerConfiguration;
@@ -59,13 +64,15 @@ public class ObservabilityService {
    * @return ObservabilityData container
    */
   public static ObservabilityData calcObservability(final ObservationSetting observation, final boolean useLST, final double minElev) {
-    if (logger.isLoggable(Level.SEVERE)) {
-      logger.severe("start : " + observation);
+    if (logger.isLoggable(Level.FINE)) {
+        logger.fine("start : " + observation);
     }
+    // Get the current thread to check if the computation is interrupted :
+    final Thread currentThread = Thread.currentThread();
 
     final ObservabilityData data = new ObservabilityData();
 
-    long start = System.nanoTime();
+    final long start = System.nanoTime();
 
     try {
 
@@ -75,9 +82,18 @@ public class ObservabilityService {
 
       sc.defineSite(ic.getName(), ic.getInterferometer().getPosSph());
 
+      // Get chosen stations
+
+
+
       final XMLGregorianCalendar cal = observation.getWhen().getDate();
 
       sc.defineDate(cal.getYear(), cal.getMonth(), cal.getDay());
+
+      // fast interrupt :
+      if (currentThread.isInterrupted()) {
+        return null;
+      }
 
       // 0 - Trouver l'origine LST=0 par rapport a la date donnee :
       final double jdMin = sc.findLst0();
@@ -97,12 +113,21 @@ public class ObservabilityService {
         logger.fine("date max = " + data.getDateMax());
       }
 
+      // fast interrupt :
+      if (currentThread.isInterrupted()) {
+        return null;
+      }
+
       // 1 - Trouver la nuit : sun rise/set with twilight : see NightlyAlmanac
+      // indicateur pour cette date mais ne pas se limiter a la nuit et utiliser le domaine LST [0;24h]
 
       final List<SunAlmanachTime> sunEvents = sc.findSunRiseSet(jdMin, jdMax);
       data.setSunIntervals(convertSunAlmanach(sc, sunEvents, useLST));
 
-      // indicateur pour cette date mais ne pas se limiter a la nuit et utiliser le domaine LST [0;24h]
+      // fast interrupt :
+      if (currentThread.isInterrupted()) {
+        return null;
+      }
 
       // 2 - Pour chaque source, etudier sa progression en altitude (degrees) pour voir ensuite si cet angle est possible avec les telescopes ...
 
@@ -116,42 +141,99 @@ public class ObservabilityService {
         // 10 minutes :
         final double jdStep = (10d / 60d) / 24d;
 
+        final double minElevRad = Math.toRadians(minElev);
+
         AzAlt azAlt;
+        
+        final List<StarObservability> starVis = data.getStarVisibilities();
+
+        StarObservability starObs;
+        List<DateTimeInterval> intervals;
+        DateTimeInterval interval;
+
+        boolean last = false;
+        boolean overHorizon = false;
+        boolean visible = false;
 
         for (Target target : observation.getTargets()) {
           sc.defineTarget(target.getRA(), target.getDEC());
 
+          starObs = new StarObservability(target.getName());
+          starVis.add(starObs);
+
+          intervals = starObs.getVisible();
+
           jd = jdMin;
 
-          boolean overHorizon = false;
+          last = false;
+          overHorizon = false;
+          visible = false;
+          interval = new DateTimeInterval();
 
           while (jd < jdMax) {
 
+            // fast interrupt :
+            if (currentThread.isInterrupted()) {
+              return null;
+            }
+
             azAlt = sc.getTargetPosition(jd);
 
-            overHorizon = azAlt.getAltitude() > minElev;
+            overHorizon = azAlt.getAltitude() > minElevRad;
 
             if (overHorizon) {
-              // Check Shadowing
+              // Check Shadowing for every stations
+              // Base lines : vector
+              // Check delay lines / switchyard / pops ?
 
+              visible = true;
+            } else {
+              visible = false;
+            }
+
+            // manage intervals :
+            if (visible) {
+              if (!last) {
+                last = true;
+                // start point
+                interval.setStartDate(sc.toDate(jd, useLST));
+              }
+            } else {
+              if (last) {
+                last = false;
+                // end point
+                interval.setEndDate(sc.toDate(jd, useLST));
+                intervals.add(interval);
+                interval = new DateTimeInterval();
+              }
             }
 
             //
             jd += jdStep;
-
           }
 
+          // close last interval if open :
+          if (interval.getStartDate() != null) {
+            interval.setEndDate(sc.toDate(jdMax, useLST));
+            intervals.add(interval);
+          }
         }
+
+        // dump star visibilities :
+        logger.severe("star visibilities : ");
+
+        for (StarObservability so : starVis) {
+          logger.severe(so.toString());
+        }
+
       }
-
-
 
     } catch (RuntimeException re) {
       logger.log(Level.SEVERE, "calcObservability failure :", re);
     }
 
-    if (logger.isLoggable(Level.SEVERE)) {
-      logger.severe("calcObservability : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
+    if (logger.isLoggable(Level.INFO)) {
+      logger.info("calcObservability : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
     }
 
     return data;
