@@ -176,6 +176,19 @@
         </xsd:annotation>
       </xsd:element>
 
+      <xsd:element name="stations" type="xsd:IDREFS">
+        <xsd:annotation>
+          <xsd:documentation>
+              The list of stations (U1 U2 U4)
+          </xsd:documentation>
+          <xsd:appinfo>
+            <jaxb:property>
+              <jaxb:baseType name="Station" />
+            </jaxb:property>
+          </xsd:appinfo>
+        </xsd:annotation>
+      </xsd:element>
+
       <xsd:element name="target" type="Target" minOccurs="1" maxOccurs="unbounded">
         <xsd:annotation>
           <xsd:documentation>
@@ -422,7 +435,7 @@
       <xsd:element name="stations" type="xsd:IDREFS">
         <xsd:annotation>
           <xsd:documentation>
-              The list of stations for this configuration (U1-U2-U4)
+              The list of stations for this configuration (U1 U2 U4)
           </xsd:documentation>
           <xsd:appinfo>
             <jaxb:property>
