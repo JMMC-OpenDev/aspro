@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityPanel.java,v 1.2 2009-11-05 12:59:39 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityPanel.java,v 1.3 2009-11-16 14:47:46 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2009/11/05 12:59:39  bourgesl
+ * first simple source observability (only min elevation condition)
+ *
  * Revision 1.1  2009/11/03 16:57:55  bourgesl
  * added observability plot with LST/UTC support containing only day/night/twilight zones
  *
@@ -54,6 +57,8 @@ import org.jfree.ui.Layer;
  * @author bourgesl
  */
 public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgressListener, ObservationListener {
+  /** default serial UID for Serializable interface */
+  private static final long serialVersionUID = 1;
 
   /** Class Name */
   private static final String className_ = "fr.jmmc.aspro.gui.ObservabilityPanel";
@@ -74,7 +79,7 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
    * Current (or old) worker reference
    * (can be a leaked reference if the computation is done)
    */
-  private SwingWorker currentWorker = null;
+  private SwingWorker<ObservabilityData, Void> currentWorker = null;
 
   /**
    * Constructor
@@ -141,12 +146,12 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
 
     /* plot options */
     final boolean useLst = true;
-    final double minElev = 20d;
+    final double minElev = 0d;
 
     /*
      * Requires the java 5 SwingWorker backport = swing-worker-1.2.jar
      */
-    final SwingWorker worker = new SwingWorker<ObservabilityData, Void>() {
+    final SwingWorker<ObservabilityData, Void> worker = new SwingWorker<ObservabilityData, Void>() {
 
       /**
        * Compute the observability data in background
@@ -313,6 +318,7 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
         case ChartProgressEvent.DRAWING_FINISHED:
           logger.fine("Drawing chart time : " + (System.currentTimeMillis() - lastTime) + " ms.");
           lastTime = 0l;
+        break;
         default:
       }
     }

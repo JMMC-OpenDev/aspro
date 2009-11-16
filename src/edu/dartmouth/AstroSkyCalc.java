@@ -28,7 +28,6 @@ public class AstroSkyCalc {
   /** Class logger */
   private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
-
   /** site location */
   private Site site;
   /** time / site info */
@@ -158,14 +157,14 @@ public class AstroSkyCalc {
 
     // The default TimeZone is already set to GMT :
     final Calendar cal = new GregorianCalendar();
-    /* note : month is in range [0;11] in java Calendar */
     if (useLst) {
       // ignore the date info as the LST has only time :
       cal.set(Calendar.HOUR_OF_DAY, ww.siderealobj.sex.hour);
       cal.set(Calendar.MINUTE, ww.siderealobj.sex.minute);
-      cal.set(Calendar.SECOND, (int)Math.round(ww.siderealobj.sex.second));
+      cal.set(Calendar.SECOND, (int) Math.round(ww.siderealobj.sex.second));
     } else {
-      cal.set(t.UTDate.year, t.UTDate.month - 1, t.UTDate.day, t.UTDate.timeofday.hour, t.UTDate.timeofday.minute, (int)Math.round(t.UTDate.timeofday.second));
+      /* note : month is in range [0;11] in java Calendar */
+      cal.set(t.UTDate.year, t.UTDate.month - 1, t.UTDate.day, t.UTDate.timeofday.hour, t.UTDate.timeofday.minute, (int) Math.round(t.UTDate.timeofday.second));
     }
 
     return cal.getTime();
@@ -204,7 +203,7 @@ public class AstroSkyCalc {
     addAlmanach(ts, jd1);
     addAlmanach(ts, jd1 + 1d);
 
-    final List<SunAlmanachTime> sorted = new ArrayList(ts);
+    final List<SunAlmanachTime> sorted = new ArrayList<SunAlmanachTime>(ts);
 
     // find indexes inside the lst range [jd0;jd1] :
     int i0 = -1;
@@ -213,11 +212,11 @@ public class AstroSkyCalc {
 
     for (int i = 0, len = sorted.size(); i < len; i++) {
       st = sorted.get(i);
-/*
+      /*
       if (logger.isLoggable(Level.FINE)) {
-        dumpWhen(new WhenWhere(st.getJd(), this.site), st.getType().name());
+      dumpWhen(new WhenWhere(st.getJd(), this.site), st.getType().name());
       }
-*/
+       */
       if (st.getJd() >= jd0) {
         if (i0 == -1) {
           // include previous event :
@@ -294,18 +293,77 @@ public class AstroSkyCalc {
     this.observation.w.ChangeWhen(jd);
     this.observation.ComputeSky();
 
+    /*
     if (logger.isLoggable(Level.FINE)) {
-      dumpWhen(this.observation.w, "Target");
-//      logger.fine("ha|delta : " + this.observation.ha.degrees() + " " + this.observation.current.Delta.degrees());
-      logger.fine("az|alt   : " + this.observation.azimuth + " " + this.observation.altitude);
-//      logger.fine("parallac : " + this.observation.parallactic);
+    dumpWhen(this.observation.w, "Target");
+    logger.fine("az|alt   : " + this.observation.azimuth + " " + this.observation.altitude);
     }
-
+     */
     return new AzAlt(deg2rad(this.observation.azimuth), deg2rad(this.observation.altitude));
   }
 
-  /* utility methods */
+  public void getTargetMinMaxAlt() {
+    final double[] minmax = Spherical.min_max_alt(this.site.lat.value, this.observation.current.Delta.value);
 
+    // degrees :
+    logger.info("min/max alt = " + minmax[0] + " / " + minmax[1]);
+  }
+
+  /**
+   * Computes the hour angle corresponding to the given elevation for the current target
+   * @param jd julian date
+   * @param minElev min elevation (rad)
+   * @return array of double [jd_rise;jd_set]
+   */
+  public double[] getTimeIntervalForAltitude(final double jd, final double minElev) {
+
+    this.observation.w.ChangeWhen(jd);
+    this.observation.ComputeSky();
+
+    if (logger.isLoggable(Level.INFO)) {
+      getTargetMinMaxAlt();
+    }
+
+    final double dec = this.observation.current.Delta.value;
+    final double ra = this.observation.current.Alpha.value;
+
+    if (logger.isLoggable(Level.INFO)) {
+      logger.info("ra  = " + ra);
+      logger.info("dec = " + dec);
+    }
+
+    final double ha = Spherical.ha_alt(dec, this.site.lat.value, Math.toDegrees(minElev));
+
+    if (ha == -1000d || ha == 1000d) {
+      // impossible to determine ha :
+      return null;
+    }
+
+    if (logger.isLoggable(Level.INFO)) {
+      logger.info("ha = " + ha);
+    }
+
+    final double lstRise = ra - ha;
+    final double lstSet = ra + ha;
+
+    if (logger.isLoggable(Level.INFO)) {
+      logger.info("lst rise = " + lstRise + " h");
+      logger.info("lst set = " + lstSet + " h");
+    }
+
+    // apply the sideral / solar ratio :
+    final double jdRise = jd + lstRise / (24. * Const.SID_RATE);
+    final double jdSet = jd + lstSet / (24. * Const.SID_RATE);
+
+    if (logger.isLoggable(Level.INFO)) {
+      logger.info("rise = " + toDate(jdRise, true));
+      logger.info("set = " + toDate(jdSet, true));
+    }
+
+    return new double[]{jdRise, jdSet};
+  }
+
+  /* utility methods */
   public double rad2hours(final double angrad) {
     return deg2hours(Math.toDegrees(angrad));
   }

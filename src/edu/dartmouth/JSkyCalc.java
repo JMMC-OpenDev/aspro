@@ -112,6 +112,7 @@ class sexagesimal implements Cloneable {
     value = v;
   }
 
+  @Override
   public sexagesimal clone() {
     try {
       sexagesimal copy = (sexagesimal) super.clone();
@@ -299,6 +300,7 @@ UT or local - that's handled by InstantInTime. */
     CalFromJD(jdin);
   }
 
+  @Override
   public GenericCalDat clone() {
     try {
       GenericCalDat copy = (GenericCalDat) super.clone();
@@ -651,6 +653,7 @@ FindDSTBounds figures out whether DST is actually in effect.
     SetInstant(jdnow, stdzin, use_dst, true);
   }
 
+  @Override
   public InstantInTime clone() {
     try {
       InstantInTime copy = (InstantInTime) super.clone();
@@ -1153,6 +1156,7 @@ class RA implements Cloneable {
     sex.tosex(value);
   }
 
+  @Override
   public RA clone() {
     try {
       RA copy = (RA) super.clone();
@@ -1245,6 +1249,7 @@ class HA implements Cloneable {
     sex.tosex(value);
   }
 
+  @Override
   public HA clone() {
     try {
       HA copy = (HA) super.clone();
@@ -1335,6 +1340,7 @@ class dec implements Cloneable {
     value = sex.value;
   }
 
+  @Override
   public dec clone() {
     try {
       dec copy = (dec) super.clone();
@@ -1451,6 +1457,7 @@ class Celest implements Cloneable {
     distance = 0.;
   }
 
+  @Override
   public boolean equals(Object arg) {
     // override (I hope) the Object equals method to use in at least one test later.
     if ((arg != null) && (arg instanceof Celest)) {
@@ -1473,6 +1480,7 @@ class Celest implements Cloneable {
     Equinox = Double.parseDouble(eqstr);
   }
 
+  @Override
   public Celest clone() {
     try {
       Celest copy = (Celest) super.clone();
@@ -1679,6 +1687,7 @@ class latitude extends dec implements Cloneable {
     super(s);
   }
 
+  @Override
   public latitude clone() {
     //try {
     latitude copy = (latitude) super.clone();
@@ -1938,6 +1947,7 @@ class Site implements Cloneable {
     System.out.printf("Zone offset from UT %6.3f hours\n", stdz);
   }
 
+  @Override
   public boolean equals(Object arg) {
     if ((arg != null) && (arg instanceof Site)) {
       Site ss = (Site) arg;
@@ -2497,6 +2507,7 @@ class Sun implements Cloneable {
     topopos.distance = 0.;
   }
 
+  @Override
   public Sun clone() {
     try {
       Sun copy = (Sun) super.clone();
@@ -2651,6 +2662,7 @@ class Moon implements Cloneable {
     topopos = Topo.topocorr(geopos, when, where, sidereal);
   }
 
+  @Override
   public Moon clone() {
     try {
       Moon copy = (Moon) super.clone();
@@ -2976,6 +2988,7 @@ class WhenWhere implements Cloneable {
     return c;
   }
 
+  @Override
   public WhenWhere clone() {  // override clone method to make it public
     try {
       WhenWhere copy = (WhenWhere) super.clone();   // this needs to be try/catch to make it work
@@ -3003,27 +3016,27 @@ class WhenWhere implements Cloneable {
   }
 
   static double lstcalc(double jdin, double longitin) {
-    double tt, ut, jdmid, jdint, jdfrac, sid_g, sid;
+    double tt, ut, jdmid, jdfrac, sid_g;
     long jdintt, sid_int;
 
     jdintt = (long) jdin;
     jdfrac = jdin - jdintt;
-    if (jdfrac < 0.5) {
-      jdmid = jdintt - 0.5;
-      ut = jdfrac + 0.5;
+    if (jdfrac < 0.5d) {
+      jdmid = jdintt - 0.5d;
+      ut = jdfrac + 0.5d;
     } else {
-      jdmid = jdintt + 0.5;
-      ut = jdfrac - 0.5;
+      jdmid = jdintt + 0.5d;
+      ut = jdfrac - 0.5d;
     }
-    tt = (jdmid - Const.J2000) / 36525;
-    sid_g = (24110.54841 + 8640184.812866 * tt + 0.093104 * tt * tt - 6.2e-6 * tt * tt * tt) / 86400.;
+    tt = (jdmid - Const.J2000) / 36525d;
+    sid_g = (24110.54841d + 8640184.812866d * tt + 0.093104d * tt * tt - 6.2e-6d * tt * tt * tt) / 86400d;
     sid_int = (long) sid_g;
     sid_g = sid_g - (double) sid_int;
-    sid_g = sid_g + 1.0027379093 * ut - longitin / 24.;
+    sid_g = sid_g + 1.0027379093d * ut - longitin / 24d;
     sid_int = (long) sid_g;
-    sid_g = (sid_g - (double) sid_int) * 24.;
-    if (sid_g < 0.) {
-      sid_g = sid_g + 24.;
+    sid_g = (sid_g - (double) sid_int) * 24d;
+    if (sid_g < 0d) {
+      sid_g = sid_g + 24d;
     }
     return sid_g;
   }
@@ -3179,6 +3192,7 @@ class Observation implements Cloneable {
 
   // Split off the sun, moon, barycenter etc. to save time -- they're
   // not always needed in every instance.
+  @Override
   public Observation clone() {  // override clone method to make it public
     try {
       Observation copy = (Observation) super.clone();   // this needs to be try/catch to make it work

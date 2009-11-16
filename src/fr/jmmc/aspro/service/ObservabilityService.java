@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.6 2009-11-05 12:59:39 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.7 2009-11-16 14:47:46 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2009/11/05 12:59:39  bourgesl
+ * first simple source observability (only min elevation condition)
+ *
  * Revision 1.5  2009/11/03 16:57:56  bourgesl
  * added observability plot with LST/UTC support containing only day/night/twilight zones
  *
@@ -32,7 +35,6 @@ import fr.jmmc.aspro.model.DateTimeInterval;
 import fr.jmmc.aspro.model.ObservabilityData;
 import fr.jmmc.aspro.model.StarObservability;
 import fr.jmmc.aspro.model.SunTimeInterval;
-import fr.jmmc.aspro.model.oi.AzAlt;
 import fr.jmmc.aspro.model.oi.InterferometerConfiguration;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Target;
@@ -65,7 +67,7 @@ public class ObservabilityService {
    */
   public static ObservabilityData calcObservability(final ObservationSetting observation, final boolean useLST, final double minElev) {
     if (logger.isLoggable(Level.FINE)) {
-        logger.fine("start : " + observation);
+      logger.fine("start : " + observation);
     }
     // Get the current thread to check if the computation is interrupted :
     final Thread currentThread = Thread.currentThread();
@@ -82,7 +84,7 @@ public class ObservabilityService {
 
       sc.defineSite(ic.getName(), ic.getInterferometer().getPosSph());
 
-      // Get chosen stations
+      // Get chosen stations / switchyard / 
 
 
 
@@ -97,7 +99,7 @@ public class ObservabilityService {
 
       // 0 - Trouver l'origine LST=0 par rapport a la date donnee :
       final double jdMin = sc.findLst0();
-      // note = in LST : remove 1s to avoid 00:00:00 :
+      // warning : in LST, remove 1s to avoid 00:00:00 :
       final double jdMax = sc.findLst0(jdMin + 1d) - 1d / 86400d;
 
       if (logger.isLoggable(Level.FINE)) {
@@ -136,26 +138,33 @@ public class ObservabilityService {
           logger.fine("No target defined.");
         }
       } else {
-        double jd;
-
-        // 10 minutes :
-        final double jdStep = (10d / 60d) / 24d;
 
         final double minElevRad = Math.toRadians(minElev);
 
-        AzAlt azAlt;
-        
         final List<StarObservability> starVis = data.getStarVisibilities();
 
         StarObservability starObs;
         List<DateTimeInterval> intervals;
+
+/*
         DateTimeInterval interval;
 
+        AzAlt azAlt;
         boolean last = false;
         boolean overHorizon = false;
         boolean visible = false;
 
+        double jdi1 = 0;
+        double jdi2 = 0;
+
+        double jd;
+
+        // 1 minutes :
+        final double jdStep = (1d / 3600d) / 24d;
+*/
+
         for (Target target : observation.getTargets()) {
+
           sc.defineTarget(target.getRA(), target.getDEC());
 
           starObs = new StarObservability(target.getName());
@@ -163,6 +172,13 @@ public class ObservabilityService {
 
           intervals = starObs.getVisible();
 
+          // fast interrupt :
+          if (currentThread.isInterrupted()) {
+            return null;
+          }
+
+          findTargetObservability(sc, intervals, minElevRad, jdMin, jdMax, useLST);
+/*
           jd = jdMin;
 
           last = false;
@@ -196,12 +212,17 @@ public class ObservabilityService {
               if (!last) {
                 last = true;
                 // start point
+                jdi1 = jd;
                 interval.setStartDate(sc.toDate(jd, useLST));
               }
             } else {
               if (last) {
                 last = false;
                 // end point
+                jdi2 = jd;
+
+                logger.severe("interval center LST = " + sc.toDate(jdi1 + (jdi2 - jdi1) / 2d, true));
+
                 interval.setEndDate(sc.toDate(jd, useLST));
                 intervals.add(interval);
                 interval = new DateTimeInterval();
@@ -217,13 +238,17 @@ public class ObservabilityService {
             interval.setEndDate(sc.toDate(jdMax, useLST));
             intervals.add(interval);
           }
-        }
+
+          */
+        } // for Target
 
         // dump star visibilities :
-        logger.severe("star visibilities : ");
+        if (logger.isLoggable(Level.INFO)) {
+          logger.info("star visibilities : ");
 
-        for (StarObservability so : starVis) {
-          logger.severe(so.toString());
+          for (StarObservability so : starVis) {
+            logger.info(so.toString());
+          }
         }
 
       }
@@ -281,5 +306,64 @@ public class ObservabilityService {
     }
 
     return result;
+  }
+
+  private static void findTargetObservability(final AstroSkyCalc sc, final List<DateTimeInterval> intervals,
+          final double minElevRad, final double jdMin, final double jdMax, final boolean useLST) {
+
+    DateTimeInterval interval;
+
+    /*
+     * Find lst interval corresponding to the rise / set of the target :
+     */
+    final double[] jdInterval = sc.getTimeIntervalForAltitude(jdMin, minElevRad);
+    if (jdInterval != null) {
+      final double jdRise = jdInterval[0];
+      final double jdSet = jdInterval[1];
+
+      if (jdRise > jdMin) {
+
+        if (jdSet < jdMax) {
+
+          // single interval [jdRise;jdSet]
+          interval = new DateTimeInterval();
+          interval.setStartDate(sc.toDate(jdRise, useLST));
+          interval.setEndDate(sc.toDate(jdSet, useLST));
+          intervals.add(interval);
+
+        } else {
+
+          // interval [jdRise;jdMax]
+          interval = new DateTimeInterval();
+          interval.setStartDate(sc.toDate(jdRise, useLST));
+          interval.setEndDate(sc.toDate(jdMax, useLST));
+          intervals.add(interval);
+
+          // add the second interval [jdMin;jdSet - 1]
+
+          interval = new DateTimeInterval();
+          interval.setStartDate(sc.toDate(jdMin, useLST));
+          interval.setEndDate(sc.toDate(jdSet - 1d, useLST));
+          intervals.add(interval);
+        }
+
+      } else {
+        // rise occurs before jd0 :
+
+        // interval [jdMin;jdSet]
+        interval = new DateTimeInterval();
+        interval.setStartDate(sc.toDate(jdMin, useLST));
+        interval.setEndDate(sc.toDate(jdSet, useLST));
+        intervals.add(interval);
+
+        // add the second interval [jdRise + 1;jdMax]
+
+        interval = new DateTimeInterval();
+        interval.setStartDate(sc.toDate(jdRise + 1d, useLST));
+        interval.setEndDate(sc.toDate(jdMax, useLST));
+        intervals.add(interval);
+      }
+    }
+
   }
 }
