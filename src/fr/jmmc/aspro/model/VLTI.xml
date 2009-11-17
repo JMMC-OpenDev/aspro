@@ -420,7 +420,7 @@
     <focalInstrument>
       <name>AMBER</name>
       <description></description>
-      <defaultChannels>Channel2 Channel3 Channel5</defaultChannels>
+      <numberChannels>3</numberChannels>
       <mode>
         <name>Low_HK</name>
         <waveLengthMin>1.469</waveLengthMin>
@@ -516,7 +516,7 @@
     <focalInstrument>
       <name>MIDI</name>
       <description></description>
-      <defaultChannels>Channel1 Channel2</defaultChannels>
+      <numberChannels>2</numberChannels>
       <mode>
         <name>HIGH_SENS+PRISM</name>
         <waveLengthMin>8</waveLengthMin>

@@ -883,16 +883,11 @@
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
-      <xsd:element name="defaultChannels" type="xsd:IDREFS">
+      <xsd:element name="numberChannels" type="xsd:integer">
         <xsd:annotation>
           <xsd:documentation>
-              The list of channels used by this instrument
+              The number of channels used by this instrument
           </xsd:documentation>
-          <xsd:appinfo>
-            <jaxb:property>
-              <jaxb:baseType name="Channel" />
-            </jaxb:property>
-          </xsd:appinfo>
         </xsd:annotation>
       </xsd:element>
 

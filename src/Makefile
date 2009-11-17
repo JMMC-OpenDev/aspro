@@ -1,13 +1,16 @@
 #*******************************************************************************
 # JMMC project
 #
-# "@(#) $Id: Makefile,v 1.1 2009-09-08 08:15:21 ccmgr Exp $"
+# "@(#) $Id: Makefile,v 1.2 2009-11-17 09:44:39 mella Exp $"
 #
 # Makefile of aspro module
 #
 # History
 # -------
 # $Log: not supported by cvs2svn $
+# Revision 1.1  2009/09/08 08:15:21  ccmgr
+# Fix directory structure and add additional files
+#
 #*******************************************************************************
 # REMARKS
 #    Makefile based on the VLT/ALMA Makefile
@@ -37,7 +40,7 @@
 # C programs (public and local)
 # -----------------------------
 EXECUTABLES     =
-EXECUTABLES_L   = 
+EXECUTABLES_L   = asproGenInstConfigs
 
 #
 # <brief description of xxxxx program>
