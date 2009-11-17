@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityPanel.java,v 1.3 2009-11-16 14:47:46 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityPanel.java,v 1.4 2009-11-17 17:00:28 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2009/11/16 14:47:46  bourgesl
+ * determine the hour angle for a target over a min elevation to get the simple observability
+ *
  * Revision 1.2  2009/11/05 12:59:39  bourgesl
  * first simple source observability (only min elevation condition)
  *
@@ -146,7 +149,7 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
 
     /* plot options */
     final boolean useLst = true;
-    final double minElev = 0d;
+    final double minElev = 20d;
 
     /*
      * Requires the java 5 SwingWorker backport = swing-worker-1.2.jar

@@ -213,4 +213,13 @@ public class Station
         this.horizon = value;
     }
 
+//--simple--preserve
+
+  @Override
+  public String toString() {
+    return "Station : " + ((this.name != null) ? this.name : "undefined");
+  }
+
+//--simple--preserve
+
 }

@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.7 2009-11-16 14:47:46 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.8 2009-11-17 17:00:28 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2009/11/16 14:47:46  bourgesl
+ * determine the hour angle for a target over a min elevation to get the simple observability
+ *
  * Revision 1.6  2009/11/05 12:59:39  bourgesl
  * first simple source observability (only min elevation condition)
  *
@@ -37,6 +40,7 @@ import fr.jmmc.aspro.model.StarObservability;
 import fr.jmmc.aspro.model.SunTimeInterval;
 import fr.jmmc.aspro.model.oi.InterferometerConfiguration;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
+import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.Target;
 import java.util.ArrayList;
 import java.util.Date;
@@ -84,7 +88,9 @@ public class ObservabilityService {
 
       sc.defineSite(ic.getName(), ic.getInterferometer().getPosSph());
 
-      // Get chosen stations / switchyard / 
+      // Get chosen stations / switchyard / delay line / pops
+
+      prepareBaseLines(observation);
 
 
 
@@ -366,4 +372,107 @@ public class ObservabilityService {
     }
 
   }
+
+
+  private static List<?> prepareBaseLines(final ObservationSetting observation) {
+
+    final List<Station> stations = observation.getInstrumentConfiguration().getStationList();
+
+    logger.severe("stations = " + stations);
+
+
+    // Pour chaque station :
+    // switchyard value [dl or channel : station]
+    // pop value []
+
+/*
+ * SLIST = station index
+ *
+ *
+*     Zero MyPops First
+      DO I=1,NSTAT
+         MYPOPS(I)=0.0
+      ENDDO
+ *
+       POPSLOOP :  DO I=1,NSTAT
+!     convert the configuration like '1223' to integers, .
+            READ(ARGLIST(I:I),'(I1)',IOSTAT=IER) KPOPS
+            IF (IER.NE.0) THEN
+               DDO_POPS=.FALSE.
+               EXIT POPSLOOP
+            ELSE
+               KPOPS=MAX(KPOPS,1)
+               KPOPS=MIN(KPOPS,NPOPS)
+               MYPOPS(I)=POPS(KPOPS,SLIST(I))
+            ENDIF
+         ENDDO POPSLOOP
+ *
+ *
+ * 
+ *
+         DO I=1,OBS_NDL
+            DLALLOCATED(I)=.FALSE.
+         ENDDO
+         CHAIN='I-HORIZON, No DLs specified, using: '
+         LC = LENC(CHAIN)
+!     ...following the SW possibilities...
+         DO I=1,NSTAT
+            DO J=1,OBS_NDL
+               IF ((.NOT.DLALLOCATED(J)).AND.
+     &              SWITCH_OPD(J,SLIST(I)).NE.SWITCH_BLANK) THEN
+                  DLALLOCATED(J)=.TRUE.
+                  DLLIST(I)=J
+                  T(I) = SWITCH_OPD(DLLIST(I),SLIST(I))
+!     Add pops value
+                  IF (DDO_POPS) THEN
+                     write(*,*) 'adding pops[',i,']=',MYPOPS(I)
+                     T(I) = T(I) + MYPOPS(I)
+                  ENDIF
+                  WRITE(CHAIN(LC+1:),'(A,A)') DL_NAME(DLLIST(I)),','
+                  LC = LENC(CHAIN)
+                  GOTO 22
+               ENDIF
+            ENDDO
+ *
+ *
+ * BaseLine :
+ *
+!     Now for the delay lines
+      KKK=0
+      DO I=1,NSTAT-1
+         DO J=I+1,NSTAT
+            KKK=KKK+1
+            XXX(KKK)= -STATX(SLIST(J))+STATX(SLIST(I))
+            YYY(KKK)= -STATY(SLIST(J))+STATY(SLIST(I))
+            ZZZ(KKK)= -STATZ(SLIST(J))+STATZ(SLIST(I))
+            TTT(KKK)= T(I)-T(J)-DL_THROW(DLLIST(J))
+            THROW(KKK)= T(I)-T(J)+DL_THROW(DLLIST(I))
+            SNAM(1,KKK)=STATION_NAME(SLIST(I))
+            SNAM(2,KKK)=STATION_NAME(SLIST(J))
+         ENDDO
+      ENDDO
+ *
+ *
+         CALL PLOT_HORIZON_DL(XXX,YYY,ZZZ,TTT,SNAM,THROW,KKK,
+     &        TIME_STAMP,UT_STAMP,PROJECT,ERROR)
+ * {
+              CALL DL_INTERVAL_LIST(TTT,THROW,KKK,DEC,LATITUD,
+           &  XXX,YYY,ZZZ,SNAM,HLONGLIST,NHLIST,MEMORY(IPWH),
+           &  MEMORY(IPWHI),MEMORY(IPIWH))
+
+!     -----------------------------------------------------------------------
+!     Finds the intervals in hour angle where w(h) is .GE.WMIN AND .LE.WMAX
+!     for ALL the WMIN and WMAX (and corresponding X Y & Z).
+!     Result is a list of start-end times in HLIST
+!     WH and IWH are work arrays of size 6*M
+!     -----------------------------------------------------------------------
+ *
+ * }
+ *
+*/
+    return null;
+  }
+
+
+
 }

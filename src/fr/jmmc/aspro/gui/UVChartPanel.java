@@ -32,8 +32,10 @@ import org.jfree.data.xy.XYSeriesCollection;
  * @author bourgesl
  */
 public class UVChartPanel extends javax.swing.JPanel implements ChartProgressListener {
+  /** default serial UID for Serializable interface */
+  private static final long serialVersionUID = 1;
 
-    private ChartPanel chartPanel;
+  private ChartPanel chartPanel;
 
 
   public UVChartPanel() {

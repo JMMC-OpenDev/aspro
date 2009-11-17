@@ -10,7 +10,7 @@ import fr.jmmc.aspro.model.OIBase;
 
 /**
  * 
- *         This type describes the chosen instrument and its parameters
+ *         This type describes the chosen instrument, stations and its parameters
  *       
  * 
  * <p>Java class for FocalInstrumentConfigurationChoice complex type.
@@ -23,6 +23,7 @@ import fr.jmmc.aspro.model.OIBase;
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
  *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *         &lt;element name="stations" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -33,7 +34,8 @@ import fr.jmmc.aspro.model.OIBase;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "FocalInstrumentConfigurationChoice", propOrder = {
-    "name"
+    "name",
+    "stations"
 })
 public class FocalInstrumentConfigurationChoice
     extends OIBase
@@ -41,6 +43,8 @@ public class FocalInstrumentConfigurationChoice
 
     @XmlElement(required = true)
     protected String name;
+    @XmlElement(required = true)
+    protected String stations;
 
     /**
      * Gets the value of the name property.
@@ -65,6 +69,30 @@ public class FocalInstrumentConfigurationChoice
     public void setName(String value) {
         this.name = value;
     }
+
+    /**
+     * Gets the value of the stations property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getStations() {
+        return stations;
+    }
+
+    /**
+     * Sets the value of the stations property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setStations(String value) {
+        this.stations = value;
+    }
     
 //--simple--preserve
   /** resolved reference to the focal instrument configuration (read only) */
@@ -77,6 +105,18 @@ public class FocalInstrumentConfigurationChoice
 
   public void setInstrumentConfiguration(FocalInstrumentConfiguration instrumentConfiguration) {
     this.instrumentConfiguration = instrumentConfiguration;
+  }
+
+  /** resolved reference to the stations (read only) */
+  @javax.xml.bind.annotation.XmlTransient
+  private java.util.List<Station> stationList = null;
+
+  public java.util.List<Station> getStationList() {
+    return stationList;
+  }
+
+  public void setStationList(java.util.List<Station> stationList) {
+    this.stationList = stationList;
   }
 
 //--simple--preserve

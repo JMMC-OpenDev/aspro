@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationManager.java,v 1.6 2009-11-05 12:59:39 bourgesl Exp $"
+ * "@(#) $Id: ObservationManager.java,v 1.7 2009-11-17 17:00:28 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2009/11/05 12:59:39  bourgesl
+ * first simple source observability (only min elevation condition)
+ *
  * Revision 1.5  2009/11/03 16:57:55  bourgesl
  * added observability plot with LST/UTC support containing only day/night/twilight zones
  *
@@ -104,6 +107,7 @@ public class ObservationManager extends BaseOIManager {
     sb.append(" when : ").append(obs.getWhen().getDate());
     sb.append(" interferometer : ").append(obs.getInterferometerConfiguration().getName());
     sb.append(" instrument : ").append(obs.getInstrumentConfiguration().getName());
+    sb.append(" stations : ").append(obs.getInstrumentConfiguration().getStations());
     if (!obs.getTargets().isEmpty()) {
       sb.append(" targets : \n").append(obs.getTargets());
     }
@@ -148,6 +152,18 @@ public class ObservationManager extends BaseOIManager {
       instrumentChoice.setName(name);
       instrumentChoice.setInstrumentConfiguration(ConfigurationManager.getInstance().getInterferometerInstrumentConfiguration(
               getObservation().getInterferometerConfiguration().getName(), name));
+    }
+    return changed;
+  }
+
+  public boolean setInstrumentConfigurationStations(final String stations) {
+    final FocalInstrumentConfigurationChoice instrumentChoice = getObservation().getInstrumentConfiguration();
+
+    boolean changed = !stations.equals(instrumentChoice.getStations());
+    if (changed) {
+      instrumentChoice.setStations(stations);
+      instrumentChoice.setStationList(ConfigurationManager.getInstance().getInstrumentConfigurationStations(
+              getObservation().getInterferometerConfiguration().getName(), getObservation().getInstrumentConfiguration().getName(), stations));
     }
     return changed;
   }
@@ -208,7 +224,7 @@ public class ObservationManager extends BaseOIManager {
   }
 
   public Vector<String> getTargetNames() {
-    final Vector v = new Vector();
+    final Vector<String> v = new Vector<String>();
     for (Target t : getObservation().getTargets()) {
       v.add(t.getName());
     }

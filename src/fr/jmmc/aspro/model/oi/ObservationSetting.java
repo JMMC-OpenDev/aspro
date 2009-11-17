@@ -6,10 +6,7 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlIDREF;
-import javax.xml.bind.annotation.XmlList;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 import fr.jmmc.aspro.model.OIBase;
 
@@ -20,35 +17,27 @@ import fr.jmmc.aspro.model.OIBase;
  * 
  *         Information to add :
  * 
- *         - focal instrument (focalinst)
- *         - configuration (configIndex)
- *         - insMode
+ *         - insMode "Spectral Mode" /INDEX oipt%vlti%amber%insMode
  *         - insNchan
  *         - insRes
  * 
- *         - atmosphere Quality (atmoQual)
+ *         - atmosphere Quality (atmoQual) "Excellent" "Good" "Average" "Bad" "Awful"
  *         - min elevation for the target (minElev) "Min. Elevation (degrees)" /range oipt%obsMinElev 90
  * 
  *         - polychromatic (flag)
  * 
- *         - target(s)
+ *         - popslist "Pops Config (eg. 1234, 0000=none)"
  * 
- *    let oipt%popslist 'oipt%popslist' /Prompt "Pops Config (eg. 1234, 0000=none)"
+ *         - polychromatic "Simulate Instrument`s spectral resolution"
  * 
- *    let oipt%atmoQual 'oipt%atmoQual' /prompt "Atmosphere Quality" /choice "Excellent" "Good" "Average" "Bad" "Awful"
+ *         - dit "Detector Integration Time" /Choice 25 50 100
+ *         - obsDuration "Total Integration Time (s) per calibrated point"
+ *         - samplingTime "Observing Sampling Periodicity (min)"
  * 
- *    let oipt%dit 'oipt%dit' /prompt "Detector Integration Time" /Choice 25 50 100
+ *         - ha1 "Hour Angle Start" /range -12 12 *
+ *         - ha2 "Hour Angle End" /range -12 12 *
  * 
- *    let oipt%insMode 'oipt%insMode' /prompt "Spectral Mode" /INDEX oipt%vlti%amber%insMode
- * 
- *    let oipt%polychromatic 'oipt%polychromatic' /prompt "Simulate Instrument`s spectral resolution"
- * 
- *    let oipt%obsDuration 'oipt%obsDuration' /prompt "Total Integration Time (s) per calibrated point"
- * 
- *   let oipt%ha1 'oipt%ha1' /prompt "Hour Angle Start" /range -12 12 *
- *   let oipt%ha2 'oipt%ha2' /prompt "Hour Angle End" /range -12 12 *
- *   let oipt%minElev 'oipt%minElev' /prompt "Min. Elevation (degrees)" /range oipt%obsMinElev 90
- *   let oipt%samplingTime 'oipt%samplingTime' /prompt "Observing Sampling Periodicity (min)"
+ *        Guidage : etoile visee (position), magnitude dans la bande spectrale ?
  * 
  *       
  * 
@@ -65,7 +54,6 @@ import fr.jmmc.aspro.model.OIBase;
  *         &lt;element name="when" type="{http://www.jmmc.fr/aspro-oi/0.1}WhenSetting"/>
  *         &lt;element name="interferometerConfiguration" type="{http://www.jmmc.fr/aspro-oi/0.1}InterferometerConfigurationChoice"/>
  *         &lt;element name="instrumentConfiguration" type="{http://www.jmmc.fr/aspro-oi/0.1}FocalInstrumentConfigurationChoice"/>
- *         &lt;element name="stations" type="{http://www.w3.org/2001/XMLSchema}IDREFS"/>
  *         &lt;element name="target" type="{http://www.jmmc.fr/aspro-oi/0.1}Target" maxOccurs="unbounded"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
@@ -81,7 +69,6 @@ import fr.jmmc.aspro.model.OIBase;
     "when",
     "interferometerConfiguration",
     "instrumentConfiguration",
-    "stations",
     "targets"
 })
 @XmlRootElement(name = "observationSetting")
@@ -97,11 +84,6 @@ public class ObservationSetting
     protected InterferometerConfigurationChoice interferometerConfiguration;
     @XmlElement(required = true)
     protected FocalInstrumentConfigurationChoice instrumentConfiguration;
-    @XmlList
-    @XmlElement(required = true, type = Object.class)
-    @XmlIDREF
-    @XmlSchemaType(name = "IDREFS")
-    protected List<Station> stations;
     @XmlElement(name = "target", required = true)
     protected List<Target> targets;
 
@@ -199,35 +181,6 @@ public class ObservationSetting
      */
     public void setInstrumentConfiguration(FocalInstrumentConfigurationChoice value) {
         this.instrumentConfiguration = value;
-    }
-
-    /**
-     * Gets the value of the stations property.
-     * 
-     * <p>
-     * This accessor method returns a reference to the live list,
-     * not a snapshot. Therefore any modification you make to the
-     * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the stations property.
-     * 
-     * <p>
-     * For example, to add a new item, do as follows:
-     * <pre>
-     *    getStations().add(newItem);
-     * </pre>
-     * 
-     * 
-     * <p>
-     * Objects of the following type(s) are allowed in the list
-     * {@link Object }
-     * 
-     * 
-     */
-    public List<Station> getStations() {
-        if (stations == null) {
-            stations = new ArrayList<Station>();
-        }
-        return this.stations;
     }
 
     /**

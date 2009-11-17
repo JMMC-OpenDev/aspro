@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SettingPanel.java,v 1.5 2009-11-03 16:57:55 bourgesl Exp $"
+ * "@(#) $Id: SettingPanel.java,v 1.6 2009-11-17 17:00:28 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2009/11/03 16:57:55  bourgesl
+ * added observability plot with LST/UTC support containing only day/night/twilight zones
+ *
  * Revision 1.4  2009/10/22 15:47:22  bourgesl
  * beginning of observability computation with jSkyCalc
  *
@@ -26,6 +29,8 @@ import javax.swing.JTabbedPane;
  * @author bourgesl
  */
 public class SettingPanel extends JPanel implements ObservationListener {
+  /** default serial UID for Serializable interface */
+  private static final long serialVersionUID = 1;
 
   /** Class Name */
   private static final String className_ = "fr.jmmc.aspro.gui.SettingPanel";

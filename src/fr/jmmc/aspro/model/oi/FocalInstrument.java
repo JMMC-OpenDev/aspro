@@ -1,14 +1,13 @@
 
 package fr.jmmc.aspro.model.oi;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlID;
-import javax.xml.bind.annotation.XmlIDREF;
-import javax.xml.bind.annotation.XmlList;
 import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
@@ -34,7 +33,7 @@ import fr.jmmc.aspro.model.OIBase;
  *       &lt;sequence>
  *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}ID"/>
  *         &lt;element name="description" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="defaultChannels" type="{http://www.w3.org/2001/XMLSchema}IDREFS"/>
+ *         &lt;element name="numberChannels" type="{http://www.w3.org/2001/XMLSchema}integer"/>
  *         &lt;element name="mode" type="{http://www.jmmc.fr/aspro-oi/0.1}FocalInstrumentMode" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
@@ -48,7 +47,7 @@ import fr.jmmc.aspro.model.OIBase;
 @XmlType(name = "FocalInstrument", propOrder = {
     "name",
     "description",
-    "defaultChannels",
+    "numberChannels",
     "modes"
 })
 public class FocalInstrument
@@ -62,11 +61,8 @@ public class FocalInstrument
     protected String name;
     @XmlElement(required = true)
     protected String description;
-    @XmlList
-    @XmlElement(required = true, type = Object.class)
-    @XmlIDREF
-    @XmlSchemaType(name = "IDREFS")
-    protected List<Channel> defaultChannels;
+    @XmlElement(required = true)
+    protected BigInteger numberChannels;
     @XmlElement(name = "mode")
     protected List<FocalInstrumentMode> modes;
 
@@ -119,32 +115,27 @@ public class FocalInstrument
     }
 
     /**
-     * Gets the value of the defaultChannels property.
+     * Gets the value of the numberChannels property.
      * 
-     * <p>
-     * This accessor method returns a reference to the live list,
-     * not a snapshot. Therefore any modification you make to the
-     * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the defaultChannels property.
-     * 
-     * <p>
-     * For example, to add a new item, do as follows:
-     * <pre>
-     *    getDefaultChannels().add(newItem);
-     * </pre>
-     * 
-     * 
-     * <p>
-     * Objects of the following type(s) are allowed in the list
-     * {@link Object }
-     * 
-     * 
+     * @return
+     *     possible object is
+     *     {@link BigInteger }
+     *     
      */
-    public List<Channel> getDefaultChannels() {
-        if (defaultChannels == null) {
-            defaultChannels = new ArrayList<Channel>();
-        }
-        return this.defaultChannels;
+    public BigInteger getNumberChannels() {
+        return numberChannels;
+    }
+
+    /**
+     * Sets the value of the numberChannels property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link BigInteger }
+     *     
+     */
+    public void setNumberChannels(BigInteger value) {
+        this.numberChannels = value;
     }
 
     /**

@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: MainFrame.java,v 1.6 2009-11-03 16:57:55 bourgesl Exp $"
+ * "@(#) $Id: MainFrame.java,v 1.7 2009-11-17 17:00:28 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2009/11/03 16:57:55  bourgesl
+ * added observability plot with LST/UTC support containing only day/night/twilight zones
+ *
  * Revision 1.5  2009/10/14 15:54:38  bourgesl
  * added basicObservationForm + CHARA.xml
  *
@@ -43,6 +46,8 @@ import javax.swing.JTabbedPane;
  * @author bourgesl
  */
 public class MainFrame extends JFrame {
+  /** default serial UID for Serializable interface */
+  private static final long serialVersionUID = 1;
 
   /** Class Name */
   private static final String className_ = "fr.jmmc.aspro.gui.MainFrame";

@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BasicObservationForm.java,v 1.6 2009-11-05 12:59:39 bourgesl Exp $"
+ * "@(#) $Id: BasicObservationForm.java,v 1.7 2009-11-17 17:00:28 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2009/11/05 12:59:39  bourgesl
+ * first simple source observability (only min elevation condition)
+ *
  * Revision 1.5  2009/10/22 15:47:22  bourgesl
  * beginning of observability computation with jSkyCalc
  *
@@ -37,6 +40,8 @@ import javax.swing.event.ChangeListener;
  */
 public class BasicObservationForm extends javax.swing.JPanel implements ChangeListener, ActionListener, Observer {
 
+  /** default serial UID for Serializable interface */
+  private static final long serialVersionUID = 1;
   /** Class Name */
   private static final String className_ = "fr.jmmc.aspro.gui.BasicObservationForm";
   /** Class logger */
@@ -216,15 +221,16 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
     add(starSearchField, gridBagConstraints);
 
     // update component models :
-    jDateSpinner.addChangeListener(this);
     jDateSpinner.setEditor(new JSpinner.DateEditor(jDateSpinner, "dd/MM/yyyy"));
 
-    jComboBoxInterferometer.addActionListener(this);
     jComboBoxInterferometer.setModel(new DefaultComboBoxModel(ConfigurationManager.getInstance().getInterferometerNames()));
 
-    // dependent combo boxes :
+    // define change listeners :
+    jDateSpinner.addChangeListener(this);
+    jComboBoxInterferometer.addActionListener(this);
     jComboBoxInterferometerConfiguration.addActionListener(this);
     jComboBoxInstrument.addActionListener(this);
+    jComboBoxInstrumentConfiguration.addActionListener(this);
 
     updateComboInterferometerConfiguration();
     updateComboInstrument();
@@ -236,7 +242,7 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
   }
 
   private void updateComboInterferometerConfiguration() {
-    final Vector v = ConfigurationManager.getInstance().getInterferometerConfigurationNames((String) jComboBoxInterferometer.getSelectedItem());
+    final Vector<String> v = ConfigurationManager.getInstance().getInterferometerConfigurationNames((String) jComboBoxInterferometer.getSelectedItem());
     jComboBoxInterferometerConfiguration.setModel(new DefaultComboBoxModel(v));
     final boolean visible = (v.size() > 1);
     jLabelPeriod.setVisible(visible);
@@ -244,12 +250,12 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
   }
 
   private void updateComboInstrument() {
-    final Vector v = ConfigurationManager.getInstance().getInterferometerInstrumentNames((String) jComboBoxInterferometerConfiguration.getSelectedItem());
+    final Vector<String> v = ConfigurationManager.getInstance().getInterferometerInstrumentNames((String) jComboBoxInterferometerConfiguration.getSelectedItem());
     jComboBoxInstrument.setModel(new DefaultComboBoxModel(v));
   }
 
   private void updateComboInstrumentConfiguration() {
-    final Vector v = ConfigurationManager.getInstance().getInstrumentConfigurationNames((String) jComboBoxInterferometerConfiguration.getSelectedItem(),
+    final Vector<String> v = ConfigurationManager.getInstance().getInstrumentConfigurationNames((String) jComboBoxInterferometerConfiguration.getSelectedItem(),
             (String) jComboBoxInstrument.getSelectedItem());
     jComboBoxInstrumentConfiguration.setModel(new DefaultComboBoxModel(v));
     final boolean visible = (v.size() > 1);
@@ -258,7 +264,7 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
   }
 
   private void updateListTargets() {
-    final Vector v = om.getTargetNames();
+    final Vector<String> v = om.getTargetNames();
     jListTargets.setModel(new DefaultComboBoxModel(v));
     jButtonRemoveTarget.setEnabled(!v.isEmpty());
   }
@@ -282,6 +288,10 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
         logger.fine("Instrument changed : " + jComboBoxInstrument.getSelectedItem());
       }
       updateComboInstrumentConfiguration();
+    } else if (e.getSource() == jComboBoxInstrumentConfiguration) {
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("Instrument Configuration changed : " + jComboBoxInstrumentConfiguration.getSelectedItem());
+      }
     }
     updateObservation();
   }
@@ -306,12 +316,11 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
       if (logger.isLoggable(Level.FINE)) {
         logger.fine("Star search Field : " + this.starSearchField.getText() + "\n" + s);
       }
+
       /*
       Strings = {OTYPELIST=IR,X,*,Be*,UV,**,*iC,*iN,Em*, RA=03 47 29.0765, DEC=+24 06 18.494}
       Doubles = {FLUX_H=2.735, RA_d=56.8711521, DEC_d=24.1051372, FLUX_K=2.636, FLUX_J=2.735, FLUX_V=2.873}
        */
-      // TODO : voir avec sylvain comment eviter des appels récurrents
-
       // degrees :
       final Double RA_d = s.getPropertyAsDouble(Star.Property.RA_d);
       final Double DE_d = s.getPropertyAsDouble(Star.Property.DEC_d);
@@ -335,6 +344,7 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
     changed |= om.setWhen((Date) jDateSpinner.getModel().getValue());
     changed |= om.setInterferometerConfigurationName((String) jComboBoxInterferometerConfiguration.getSelectedItem());
     changed |= om.setInstrumentConfigurationName((String) jComboBoxInstrument.getSelectedItem());
+    changed |= om.setInstrumentConfigurationStations((String) jComboBoxInstrumentConfiguration.getSelectedItem());
 
     // Then fire the refresh model event :
     if (changed) {

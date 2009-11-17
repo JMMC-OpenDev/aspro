@@ -111,35 +111,27 @@
 
         Information to add :
 
-        - focal instrument (focalinst)
-        - configuration (configIndex)
-        - insMode
+        - insMode "Spectral Mode" /INDEX oipt%vlti%amber%insMode
         - insNchan
         - insRes
 
-        - atmosphere Quality (atmoQual)
+        - atmosphere Quality (atmoQual) "Excellent" "Good" "Average" "Bad" "Awful"
         - min elevation for the target (minElev) "Min. Elevation (degrees)" /range oipt%obsMinElev 90
 
         - polychromatic (flag)
 
-        - target(s)
+        - popslist "Pops Config (eg. 1234, 0000=none)"
 
-   let oipt%popslist 'oipt%popslist' /Prompt "Pops Config (eg. 1234, 0000=none)"
+        - polychromatic "Simulate Instrument`s spectral resolution"
 
-   let oipt%atmoQual 'oipt%atmoQual' /prompt "Atmosphere Quality" /choice "Excellent" "Good" "Average" "Bad" "Awful"
+        - dit "Detector Integration Time" /Choice 25 50 100
+        - obsDuration "Total Integration Time (s) per calibrated point"
+        - samplingTime "Observing Sampling Periodicity (min)"
 
-   let oipt%dit 'oipt%dit' /prompt "Detector Integration Time" /Choice 25 50 100
+        - ha1 "Hour Angle Start" /range -12 12 *
+        - ha2 "Hour Angle End" /range -12 12 *
 
-   let oipt%insMode 'oipt%insMode' /prompt "Spectral Mode" /INDEX oipt%vlti%amber%insMode
-
-   let oipt%polychromatic 'oipt%polychromatic' /prompt "Simulate Instrument`s spectral resolution"
-
-   let oipt%obsDuration 'oipt%obsDuration' /prompt "Total Integration Time (s) per calibrated point"
-
-  let oipt%ha1 'oipt%ha1' /prompt "Hour Angle Start" /range -12 12 *
-  let oipt%ha2 'oipt%ha2' /prompt "Hour Angle End" /range -12 12 *
-  let oipt%minElev 'oipt%minElev' /prompt "Min. Elevation (degrees)" /range oipt%obsMinElev 90
-  let oipt%samplingTime 'oipt%samplingTime' /prompt "Observing Sampling Periodicity (min)"
+       Guidage : etoile visee (position), magnitude dans la bande spectrale ?
 
       </xsd:documentation>
     </xsd:annotation>
@@ -176,19 +168,6 @@
         </xsd:annotation>
       </xsd:element>
 
-      <xsd:element name="stations" type="xsd:IDREFS">
-        <xsd:annotation>
-          <xsd:documentation>
-              The list of stations (U1 U2 U4)
-          </xsd:documentation>
-          <xsd:appinfo>
-            <jaxb:property>
-              <jaxb:baseType name="Station" />
-            </jaxb:property>
-          </xsd:appinfo>
-        </xsd:annotation>
-      </xsd:element>
-
       <xsd:element name="target" type="Target" minOccurs="1" maxOccurs="unbounded">
         <xsd:annotation>
           <xsd:documentation>
@@ -197,12 +176,7 @@
         </xsd:annotation>
       </xsd:element>
 
-      <!-- Guidage : etoile visee (position), magnitude dans la bande spectrale -->
-
-
-
     </xsd:sequence>
-
 
   </xsd:complexType>
 
@@ -257,7 +231,7 @@
   <xsd:complexType name="FocalInstrumentConfigurationChoice">
     <xsd:annotation>
       <xsd:documentation>
-        This type describes the chosen instrument and its parameters
+        This type describes the chosen instrument, stations and its parameters
       </xsd:documentation>
     </xsd:annotation>
     <xsd:sequence>
@@ -268,6 +242,15 @@
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
+
+      <xsd:element name="stations" type="xsd:string">
+        <xsd:annotation>
+          <xsd:documentation>
+              The list of stations (U1 U2 U4)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
       <!-- other parameters -->
     </xsd:sequence>
   </xsd:complexType>
@@ -843,7 +826,12 @@
       </xsd:documentation>
     </xsd:annotation>
     <xsd:sequence>
-        <!-- cf CHARA.pops == pop list is associated to a delay line or not ??? -->
+        <!-- cf CHARA.pops == pop list is associated to a station -->
+
+        <!--
+        add the station reference
+        -->
+
       <xsd:element name="value" type="xsd:double" minOccurs="1" maxOccurs="unbounded">
         <xsd:annotation>
           <xsd:documentation>

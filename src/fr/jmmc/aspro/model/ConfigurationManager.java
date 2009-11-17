@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ConfigurationManager.java,v 1.6 2009-11-05 12:59:39 bourgesl Exp $"
+ * "@(#) $Id: ConfigurationManager.java,v 1.7 2009-11-17 17:00:28 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2009/11/05 12:59:39  bourgesl
+ * first simple source observability (only min elevation condition)
+ *
  * Revision 1.5  2009/10/22 15:47:22  bourgesl
  * beginning of observability computation with jSkyCalc
  *
@@ -28,6 +31,7 @@
  ******************************************************************************/
 package fr.jmmc.aspro.model;
 
+import fr.jmmc.aspro.model.oi.Channel;
 import fr.jmmc.aspro.model.oi.Configurations;
 import fr.jmmc.aspro.model.oi.FocalInstrumentConfiguration;
 import fr.jmmc.aspro.model.oi.FocalInstrumentConfigurationItem;
@@ -40,6 +44,7 @@ import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.service.GeocentricCoords;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 import java.util.logging.Level;
@@ -145,7 +150,8 @@ public class ConfigurationManager extends BaseOIManager {
       staPos = s.getRelativePosition();
 
       // change here the coordinates :
-      // station coordinates are relative to the center in the tangent plane ?
+      // station coordinates are rotated in the horizontal plane
+      // so X axis points to the local meridian instead of the Greenwich meridian (longitude)
 
       absPos.setPosX(center.getPosX() + staPos.getPosX());
       absPos.setPosY(center.getPosY() + staPos.getPosY());
@@ -199,7 +205,7 @@ public class ConfigurationManager extends BaseOIManager {
   }
 
   public Vector<String> getInterferometerNames() {
-    final Vector v = new Vector();
+    final Vector<String> v = new Vector<String>();
 
     for (InterferometerDescription i : getInterferometerDescriptions().values()) {
       v.add(i.getName());
@@ -209,7 +215,7 @@ public class ConfigurationManager extends BaseOIManager {
   }
 
   public Vector<String> getInterferometerConfigurationNames(final String name) {
-    final Vector v = new Vector();
+    final Vector<String> v = new Vector<String>();
 
     final InterferometerDescription i = getInterferometerDescription(name);
     if (i != null) {
@@ -222,7 +228,7 @@ public class ConfigurationManager extends BaseOIManager {
   }
 
   public Vector<String> getInterferometerInstrumentNames(final String configurationName) {
-    final Vector v = new Vector();
+    final Vector<String> v = new Vector<String>();
 
     final InterferometerConfiguration c = getInterferometerConfiguration(configurationName);
     if (c != null) {
@@ -247,7 +253,7 @@ public class ConfigurationManager extends BaseOIManager {
   }
 
   public Vector<String> getInstrumentConfigurationNames(final String configurationName, final String instrumentName) {
-    final Vector v = new Vector();
+    final Vector<String> v = new Vector<String>();
 
     final FocalInstrumentConfiguration ic = getInterferometerInstrumentConfiguration(configurationName, instrumentName);
     if (ic != null) {
@@ -256,6 +262,27 @@ public class ConfigurationManager extends BaseOIManager {
       }
     }
     return v;
+  }
+
+  public List<Station> getInstrumentConfigurationStations(final String configurationName, final String instrumentName, final String instrumentConfigurationName) {
+    final FocalInstrumentConfiguration ic = getInterferometerInstrumentConfiguration(configurationName, instrumentName);
+    if (ic != null) {
+      for (FocalInstrumentConfigurationItem c : ic.getConfigurations()) {
+        if (c.getShortName().equals(instrumentConfigurationName)) {
+          return c.getStations();
+        }
+      }
+    }
+    return null;
+  }
+
+
+  public void getSwitchYardValue(final Station station, final Channel channel) {
+    /* Is it channel or delay line ? */
+  }
+
+  public void getPopValue(final Station station, final Integer popIndex) {
+
   }
 
   /**
