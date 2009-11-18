@@ -40,8 +40,8 @@ import fr.jmmc.aspro.model.OIBase;
  *         &lt;element name="telescope" type="{http://www.jmmc.fr/aspro-oi/0.1}Telescope" maxOccurs="unbounded"/>
  *         &lt;element name="station" type="{http://www.jmmc.fr/aspro-oi/0.1}Station" maxOccurs="unbounded"/>
  *         &lt;element name="channel" type="{http://www.jmmc.fr/aspro-oi/0.1}Channel" maxOccurs="unbounded"/>
- *         &lt;element name="switchyard" type="{http://www.jmmc.fr/aspro-oi/0.1}SwitchYard" minOccurs="0"/>
  *         &lt;element name="delayLine" type="{http://www.jmmc.fr/aspro-oi/0.1}DelayLine" maxOccurs="unbounded"/>
+ *         &lt;element name="switchyard" type="{http://www.jmmc.fr/aspro-oi/0.1}SwitchYard" minOccurs="0"/>
  *         &lt;element name="pop" type="{http://www.jmmc.fr/aspro-oi/0.1}Pop" maxOccurs="unbounded" minOccurs="0"/>
  *         &lt;element name="fringeTracker" type="{http://www.jmmc.fr/aspro-oi/0.1}FringeTracker" minOccurs="0"/>
  *         &lt;element name="focalInstrument" type="{http://www.jmmc.fr/aspro-oi/0.1}FocalInstrument" maxOccurs="unbounded"/>
@@ -62,8 +62,8 @@ import fr.jmmc.aspro.model.OIBase;
     "telescopes",
     "stations",
     "channels",
-    "switchyard",
     "delayLines",
+    "switchyard",
     "pops",
     "fringeTracker",
     "focalInstruments"
@@ -88,9 +88,9 @@ public class InterferometerDescription
     protected List<Station> stations;
     @XmlElement(name = "channel", required = true)
     protected List<Channel> channels;
-    protected SwitchYard switchyard;
     @XmlElement(name = "delayLine", required = true)
     protected List<DelayLine> delayLines;
+    protected SwitchYard switchyard;
     @XmlElement(name = "pop")
     protected List<Pop> pops;
     protected FringeTracker fringeTracker;
@@ -281,30 +281,6 @@ public class InterferometerDescription
     }
 
     /**
-     * Gets the value of the switchyard property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link SwitchYard }
-     *     
-     */
-    public SwitchYard getSwitchyard() {
-        return switchyard;
-    }
-
-    /**
-     * Sets the value of the switchyard property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link SwitchYard }
-     *     
-     */
-    public void setSwitchyard(SwitchYard value) {
-        this.switchyard = value;
-    }
-
-    /**
      * Gets the value of the delayLines property.
      * 
      * <p>
@@ -331,6 +307,30 @@ public class InterferometerDescription
             delayLines = new ArrayList<DelayLine>();
         }
         return this.delayLines;
+    }
+
+    /**
+     * Gets the value of the switchyard property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link SwitchYard }
+     *     
+     */
+    public SwitchYard getSwitchyard() {
+        return switchyard;
+    }
+
+    /**
+     * Sets the value of the switchyard property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link SwitchYard }
+     *     
+     */
+    public void setSwitchyard(SwitchYard value) {
+        this.switchyard = value;
     }
 
     /**

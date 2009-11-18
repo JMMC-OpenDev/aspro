@@ -212,7 +212,7 @@ public class Station
     public void setHorizon(String value) {
         this.horizon = value;
     }
-
+    
 //--simple--preserve
 
   @Override

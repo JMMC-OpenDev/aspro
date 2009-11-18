@@ -30,67 +30,11 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link LonLatAlt }
+     * Create an instance of {@link FocalInstrumentMode }
      * 
      */
-    public LonLatAlt createLonLatAlt() {
-        return new LonLatAlt();
-    }
-
-    /**
-     * Create an instance of {@link Station }
-     * 
-     */
-    public Station createStation() {
-        return new Station();
-    }
-
-    /**
-     * Create an instance of {@link InterferometerDescription }
-     * 
-     */
-    public InterferometerDescription createInterferometerDescription() {
-        return new InterferometerDescription();
-    }
-
-    /**
-     * Create an instance of {@link Telescope }
-     * 
-     */
-    public Telescope createTelescope() {
-        return new Telescope();
-    }
-
-    /**
-     * Create an instance of {@link ObservationSetting }
-     * 
-     */
-    public ObservationSetting createObservationSetting() {
-        return new ObservationSetting();
-    }
-
-    /**
-     * Create an instance of {@link FocalInstrumentConfigurationChoice }
-     * 
-     */
-    public FocalInstrumentConfigurationChoice createFocalInstrumentConfigurationChoice() {
-        return new FocalInstrumentConfigurationChoice();
-    }
-
-    /**
-     * Create an instance of {@link InterferometerConfiguration }
-     * 
-     */
-    public InterferometerConfiguration createInterferometerConfiguration() {
-        return new InterferometerConfiguration();
-    }
-
-    /**
-     * Create an instance of {@link Pop }
-     * 
-     */
-    public Pop createPop() {
-        return new Pop();
+    public FocalInstrumentMode createFocalInstrumentMode() {
+        return new FocalInstrumentMode();
     }
 
     /**
@@ -99,30 +43,6 @@ public class ObjectFactory {
      */
     public Channel createChannel() {
         return new Channel();
-    }
-
-    /**
-     * Create an instance of {@link SwitchYard }
-     * 
-     */
-    public SwitchYard createSwitchYard() {
-        return new SwitchYard();
-    }
-
-    /**
-     * Create an instance of {@link Configurations }
-     * 
-     */
-    public Configurations createConfigurations() {
-        return new Configurations();
-    }
-
-    /**
-     * Create an instance of {@link Connection }
-     * 
-     */
-    public Connection createConnection() {
-        return new Connection();
     }
 
     /**
@@ -142,19 +62,35 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link InterferometerConfigurationChoice }
-     * 
-     */
-    public InterferometerConfigurationChoice createInterferometerConfigurationChoice() {
-        return new InterferometerConfigurationChoice();
-    }
-
-    /**
      * Create an instance of {@link WhenSetting }
      * 
      */
     public WhenSetting createWhenSetting() {
         return new WhenSetting();
+    }
+
+    /**
+     * Create an instance of {@link LonLatAlt }
+     * 
+     */
+    public LonLatAlt createLonLatAlt() {
+        return new LonLatAlt();
+    }
+
+    /**
+     * Create an instance of {@link FocalInstrument }
+     * 
+     */
+    public FocalInstrument createFocalInstrument() {
+        return new FocalInstrument();
+    }
+
+    /**
+     * Create an instance of {@link FocalInstrumentConfiguration }
+     * 
+     */
+    public FocalInstrumentConfiguration createFocalInstrumentConfiguration() {
+        return new FocalInstrumentConfiguration();
     }
 
     /**
@@ -166,11 +102,59 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link FocalInstrument }
+     * Create an instance of {@link Station }
      * 
      */
-    public FocalInstrument createFocalInstrument() {
-        return new FocalInstrument();
+    public Station createStation() {
+        return new Station();
+    }
+
+    /**
+     * Create an instance of {@link InterferometerDescription }
+     * 
+     */
+    public InterferometerDescription createInterferometerDescription() {
+        return new InterferometerDescription();
+    }
+
+    /**
+     * Create an instance of {@link FringeTracker }
+     * 
+     */
+    public FringeTracker createFringeTracker() {
+        return new FringeTracker();
+    }
+
+    /**
+     * Create an instance of {@link ChannelLink }
+     * 
+     */
+    public ChannelLink createChannelLink() {
+        return new ChannelLink();
+    }
+
+    /**
+     * Create an instance of {@link FocalInstrumentConfigurationChoice }
+     * 
+     */
+    public FocalInstrumentConfigurationChoice createFocalInstrumentConfigurationChoice() {
+        return new FocalInstrumentConfigurationChoice();
+    }
+
+    /**
+     * Create an instance of {@link Telescope }
+     * 
+     */
+    public Telescope createTelescope() {
+        return new Telescope();
+    }
+
+    /**
+     * Create an instance of {@link InterferometerConfiguration }
+     * 
+     */
+    public InterferometerConfiguration createInterferometerConfiguration() {
+        return new InterferometerConfiguration();
     }
 
     /**
@@ -190,27 +174,27 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link FocalInstrumentConfiguration }
+     * Create an instance of {@link InterferometerConfigurationChoice }
      * 
      */
-    public FocalInstrumentConfiguration createFocalInstrumentConfiguration() {
-        return new FocalInstrumentConfiguration();
+    public InterferometerConfigurationChoice createInterferometerConfigurationChoice() {
+        return new InterferometerConfigurationChoice();
     }
 
     /**
-     * Create an instance of {@link FringeTracker }
+     * Create an instance of {@link Configurations }
      * 
      */
-    public FringeTracker createFringeTracker() {
-        return new FringeTracker();
+    public Configurations createConfigurations() {
+        return new Configurations();
     }
 
     /**
-     * Create an instance of {@link DelayLine }
+     * Create an instance of {@link ObservationSetting }
      * 
      */
-    public DelayLine createDelayLine() {
-        return new DelayLine();
+    public ObservationSetting createObservationSetting() {
+        return new ObservationSetting();
     }
 
     /**
@@ -222,11 +206,35 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link FocalInstrumentMode }
+     * Create an instance of {@link DelayLine }
      * 
      */
-    public FocalInstrumentMode createFocalInstrumentMode() {
-        return new FocalInstrumentMode();
+    public DelayLine createDelayLine() {
+        return new DelayLine();
+    }
+
+    /**
+     * Create an instance of {@link StationLinks }
+     * 
+     */
+    public StationLinks createStationLinks() {
+        return new StationLinks();
+    }
+
+    /**
+     * Create an instance of {@link Pop }
+     * 
+     */
+    public Pop createPop() {
+        return new Pop();
+    }
+
+    /**
+     * Create an instance of {@link SwitchYard }
+     * 
+     */
+    public SwitchYard createSwitchYard() {
+        return new SwitchYard();
     }
 
 }
