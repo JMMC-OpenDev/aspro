@@ -510,18 +510,18 @@
         </xsd:annotation>
       </xsd:element>
 
-      <xsd:element name="switchyard" type="SwitchYard" minOccurs="0" maxOccurs="1">
-        <xsd:annotation>
-          <xsd:documentation>
-              The switchyard for this interferometer (optional)
-          </xsd:documentation>
-        </xsd:annotation>
-      </xsd:element>
-
       <xsd:element name="delayLine" type="DelayLine" minOccurs="1" maxOccurs="unbounded">
         <xsd:annotation>
           <xsd:documentation>
               The list of delay lines for this interferometer
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
+      <xsd:element name="switchyard" type="SwitchYard" minOccurs="0" maxOccurs="1">
+        <xsd:annotation>
+          <xsd:documentation>
+              The switchyard for this interferometer (optional)
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
@@ -727,14 +727,16 @@
   <xsd:complexType name="SwitchYard">
     <xsd:annotation>
       <xsd:documentation>
-        This type describes a interferometer switchyard
+        This type describes a possible switchyard for the interferometer
+        i.e. the fixed distance between a station and a channel in the focal plane
+        (opd = 0, time reference)
       </xsd:documentation>
     </xsd:annotation>
     <xsd:sequence>
-      <xsd:element name="connection" type="Connection" minOccurs="1" maxOccurs="unbounded">
+      <xsd:element name="stationLinks" type="StationLinks" minOccurs="1" maxOccurs="unbounded">
         <xsd:annotation>
           <xsd:documentation>
-              The list of delay lines for this interferometer
+              The list of the links between a station and the channels for this interferometer
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
@@ -744,17 +746,17 @@
 
 
 
-  <xsd:complexType name="Connection">
+  <xsd:complexType name="StationLinks">
     <xsd:annotation>
       <xsd:documentation>
-        This type describes a connection between a station and a channel to give its optical length
+        This type describes the links between a station and the channels
       </xsd:documentation>
     </xsd:annotation>
     <xsd:sequence>
       <xsd:element name="station" type="xsd:IDREF">
         <xsd:annotation>
           <xsd:documentation>
-              The starting point of the connection = the station
+              The starting point of the link = the station
           </xsd:documentation>
           <xsd:appinfo>
             <jaxb:property>
@@ -763,10 +765,30 @@
           </xsd:appinfo>
         </xsd:annotation>
       </xsd:element>
+      <xsd:element name="channelLink" type="ChannelLink" minOccurs="1" maxOccurs="unbounded">
+        <xsd:annotation>
+          <xsd:documentation>
+              The ending point of the link = the channel
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+
+
+
+
+  <xsd:complexType name="ChannelLink">
+    <xsd:annotation>
+      <xsd:documentation>
+        This type describes a link to a channel with its optical length
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
       <xsd:element name="channel" type="xsd:IDREF">
         <xsd:annotation>
           <xsd:documentation>
-              The ending point of the connection = the channel
+              The ending point of the link = the channel
           </xsd:documentation>
           <xsd:appinfo>
             <jaxb:property>
@@ -778,7 +800,7 @@
       <xsd:element name="opticalLength" type="xsd:double">
         <xsd:annotation>
           <xsd:documentation>
-              The length of this connection in meter
+              The length in meter of this link
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
@@ -878,6 +900,8 @@
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
+
+      <!-- should we have an explicit list of channels used by this focal instrument -->
 
       <xsd:element name="mode" type="FocalInstrumentMode" minOccurs="0" maxOccurs="unbounded">
         <xsd:annotation>

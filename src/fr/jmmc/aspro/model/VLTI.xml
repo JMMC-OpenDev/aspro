@@ -366,29 +366,6 @@
       <name>Channel8</name>
     </channel>
 
-    <switchyard>
-      <connection>
-        <station>U1</station>
-        <channel>Channel1</channel>
-        <opticalLength>165.8497</opticalLength>
-      </connection>
-      <connection>
-        <station>U1</station>
-        <channel>Channel2</channel>
-        <opticalLength>167.1097</opticalLength>
-      </connection>
-      <connection>
-        <station>U1</station>
-        <channel>Channel5</channel>
-        <opticalLength>173.8097</opticalLength>
-      </connection>
-      <connection>
-        <station>U1</station>
-        <channel>Channel6</channel>
-        <opticalLength>175.0697</opticalLength>
-      </connection>
-    </switchyard>
-
     <delayLine>
       <name>DL1</name>
       <maximumThrow>90</maximumThrow>
@@ -413,6 +390,28 @@
       <name>DL6</name>
       <maximumThrow>90</maximumThrow>
     </delayLine>
+
+    <switchyard>
+      <stationLinks>
+        <station>U1</station>
+        <channelLink>
+          <channel>Channel1</channel>
+          <opticalLength>165.8497</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>Channel2</channel>
+          <opticalLength>167.1097</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>Channel5</channel>
+          <opticalLength>173.8097</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>Channel6</channel>
+          <opticalLength>175.0697</opticalLength>
+        </channelLink>
+      </stationLinks>
+    </switchyard>
 
     <!-- No pop on vlti-->
 
