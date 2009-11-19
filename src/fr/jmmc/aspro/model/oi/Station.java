@@ -32,7 +32,7 @@ import fr.jmmc.aspro.model.OIBase;
  *         &lt;element name="relativePosition" type="{http://www.jmmc.fr/aspro-oi/0.1}Position3D"/>
  *         &lt;element name="posSph" type="{http://www.jmmc.fr/aspro-oi/0.1}LonLatAlt" minOccurs="0"/>
  *         &lt;element name="delayLineFixedOffset" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
- *         &lt;element name="horizon" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ *         &lt;element name="horizon" type="{http://www.jmmc.fr/aspro-oi/0.1}HorizonProfile" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -67,7 +67,7 @@ public class Station
     protected Position3D relativePosition;
     protected LonLatAlt posSph;
     protected Double delayLineFixedOffset;
-    protected String horizon;
+    protected HorizonProfile horizon;
 
     /**
      * Gets the value of the name property.
@@ -194,10 +194,10 @@ public class Station
      * 
      * @return
      *     possible object is
-     *     {@link String }
+     *     {@link HorizonProfile }
      *     
      */
-    public String getHorizon() {
+    public HorizonProfile getHorizon() {
         return horizon;
     }
 
@@ -206,10 +206,10 @@ public class Station
      * 
      * @param value
      *     allowed object is
-     *     {@link String }
+     *     {@link HorizonProfile }
      *     
      */
-    public void setHorizon(String value) {
+    public void setHorizon(HorizonProfile value) {
         this.horizon = value;
     }
     

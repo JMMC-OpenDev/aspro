@@ -15,6 +15,8 @@ import fr.jmmc.aspro.model.OIBase;
 /**
  * 
  *         This type describes the configuration for a given interferometer and its instruments
+ * 
+ *         http://www.eso.org/sci/facilities/paranal/telescopes/vlti/configuration/index.html
  *       
  * 
  * <p>Java class for InterferometerConfiguration complex type.

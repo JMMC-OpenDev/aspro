@@ -6,7 +6,7 @@ package edu.dartmouth;
 
 import edu.dartmouth.SunAlmanachTime.SunAlmanachType;
 import fr.jmmc.aspro.AsproConstants;
-import fr.jmmc.aspro.model.oi.AzAlt;
+import fr.jmmc.aspro.model.oi.AzEl;
 import fr.jmmc.aspro.model.oi.LonLatAlt;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -288,7 +288,7 @@ public class AstroSkyCalc {
     this.observation = new Observation(this.when, target);
   }
 
-  public AzAlt getTargetPosition(final double jd) {
+  public AzEl getTargetPosition(final double jd) {
 
     this.observation.w.ChangeWhen(jd);
     this.observation.ComputeSky();
@@ -299,7 +299,7 @@ public class AstroSkyCalc {
     logger.fine("az|alt   : " + this.observation.azimuth + " " + this.observation.altitude);
     }
      */
-    return new AzAlt(deg2rad(this.observation.azimuth), deg2rad(this.observation.altitude));
+    return new AzEl(deg2rad(this.observation.azimuth), deg2rad(this.observation.altitude));
   }
 
   public void getTargetMinMaxAlt() {
