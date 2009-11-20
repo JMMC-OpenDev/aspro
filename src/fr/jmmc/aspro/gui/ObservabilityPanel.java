@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityPanel.java,v 1.4 2009-11-17 17:00:28 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityPanel.java,v 1.5 2009-11-20 10:17:02 mella Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2009/11/17 17:00:28  bourgesl
+ * chosen instrument configuration propagated to observation
+ *
  * Revision 1.3  2009/11/16 14:47:46  bourgesl
  * determine the hour angle for a target over a min elevation to get the simple observability
  *
@@ -36,7 +39,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
-import javax.swing.SwingWorker;
+// import javax.swing.SwingWorker;
+import org.jdesktop.swingworker.SwingWorker;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.ChartUtilities;
