@@ -57,19 +57,11 @@
         </point>
         <point>
           <azimuth>247.0</azimuth>
-          <elevation>6.0</elevation>
-        </point>
-        <point>
-          <azimuth>247.0</azimuth>
           <elevation>7.0</elevation>
         </point>
         <point>
           <azimuth>233.0</azimuth>
           <elevation>7.0</elevation>
-        </point>
-        <point>
-          <azimuth>233.0</azimuth>
-          <elevation>6.0</elevation>
         </point>
         <point>
           <azimuth>232.0</azimuth>
@@ -89,14 +81,6 @@
         </point>
         <point>
           <azimuth>224.0</azimuth>
-          <elevation>13.0</elevation>
-        </point>
-        <point>
-          <azimuth>224.0</azimuth>
-          <elevation>15.0</elevation>
-        </point>
-        <point>
-          <azimuth>223.0</azimuth>
           <elevation>15.0</elevation>
         </point>
         <point>
@@ -105,14 +89,6 @@
         </point>
         <point>
           <azimuth>222.0</azimuth>
-          <elevation>16.0</elevation>
-        </point>
-        <point>
-          <azimuth>222.0</azimuth>
-          <elevation>17.0</elevation>
-        </point>
-        <point>
-          <azimuth>221.0</azimuth>
           <elevation>17.0</elevation>
         </point>
         <point>
@@ -121,22 +97,10 @@
         </point>
         <point>
           <azimuth>219.0</azimuth>
-          <elevation>18.0</elevation>
-        </point>
-        <point>
-          <azimuth>219.0</azimuth>
           <elevation>19.0</elevation>
         </point>
         <point>
           <azimuth>216.0</azimuth>
-          <elevation>19.0</elevation>
-        </point>
-        <point>
-          <azimuth>216.0</azimuth>
-          <elevation>20.0</elevation>
-        </point>
-        <point>
-          <azimuth>210.0</azimuth>
           <elevation>20.0</elevation>
         </point>
         <point>
@@ -148,56 +112,28 @@
           <elevation>21.0</elevation>
         </point>
         <point>
-          <azimuth>201.0</azimuth>
-          <elevation>20.0</elevation>
-        </point>
-        <point>
           <azimuth>195.0</azimuth>
           <elevation>20.0</elevation>
-        </point>
-        <point>
-          <azimuth>195.0</azimuth>
-          <elevation>19.0</elevation>
         </point>
         <point>
           <azimuth>192.0</azimuth>
           <elevation>19.0</elevation>
         </point>
         <point>
-          <azimuth>192.0</azimuth>
-          <elevation>18.0</elevation>
-        </point>
-        <point>
           <azimuth>190.0</azimuth>
           <elevation>18.0</elevation>
-        </point>
-        <point>
-          <azimuth>190.0</azimuth>
-          <elevation>17.0</elevation>
         </point>
         <point>
           <azimuth>189.0</azimuth>
           <elevation>17.0</elevation>
         </point>
         <point>
-          <azimuth>189.0</azimuth>
-          <elevation>16.0</elevation>
-        </point>
-        <point>
           <azimuth>188.0</azimuth>
           <elevation>16.0</elevation>
         </point>
         <point>
-          <azimuth>188.0</azimuth>
-          <elevation>15.0</elevation>
-        </point>
-        <point>
           <azimuth>187.0</azimuth>
           <elevation>15.0</elevation>
-        </point>
-        <point>
-          <azimuth>187.0</azimuth>
-          <elevation>13.0</elevation>
         </point>
         <point>
           <azimuth>186.0</azimuth>
@@ -244,22 +180,10 @@
         </point>
         <point>
           <azimuth>272.0</azimuth>
-          <elevation>9.0</elevation>
-        </point>
-        <point>
-          <azimuth>272.0</azimuth>
           <elevation>10.0</elevation>
         </point>
         <point>
           <azimuth>270.0</azimuth>
-          <elevation>10.0</elevation>
-        </point>
-        <point>
-          <azimuth>270.0</azimuth>
-          <elevation>11.0</elevation>
-        </point>
-        <point>
-          <azimuth>264.0</azimuth>
           <elevation>11.0</elevation>
         </point>
         <point>
@@ -271,24 +195,12 @@
           <elevation>12.0</elevation>
         </point>
         <point>
-          <azimuth>257.0</azimuth>
-          <elevation>11.0</elevation>
-        </point>
-        <point>
           <azimuth>252.0</azimuth>
           <elevation>11.0</elevation>
         </point>
         <point>
-          <azimuth>252.0</azimuth>
-          <elevation>10.0</elevation>
-        </point>
-        <point>
           <azimuth>250.0</azimuth>
           <elevation>10.0</elevation>
-        </point>
-        <point>
-          <azimuth>250.0</azimuth>
-          <elevation>9.0</elevation>
         </point>
         <point>
           <azimuth>249.0</azimuth>
@@ -308,14 +220,6 @@
         </point>
         <point>
           <azimuth>242.0</azimuth>
-          <elevation>18.0</elevation>
-        </point>
-        <point>
-          <azimuth>242.0</azimuth>
-          <elevation>19.0</elevation>
-        </point>
-        <point>
-          <azimuth>241.0</azimuth>
           <elevation>19.0</elevation>
         </point>
         <point>
@@ -324,14 +228,6 @@
         </point>
         <point>
           <azimuth>239.0</azimuth>
-          <elevation>21.0</elevation>
-        </point>
-        <point>
-          <azimuth>239.0</azimuth>
-          <elevation>22.0</elevation>
-        </point>
-        <point>
-          <azimuth>238.0</azimuth>
           <elevation>22.0</elevation>
         </point>
         <point>
@@ -340,14 +236,6 @@
         </point>
         <point>
           <azimuth>236.0</azimuth>
-          <elevation>23.0</elevation>
-        </point>
-        <point>
-          <azimuth>236.0</azimuth>
-          <elevation>24.0</elevation>
-        </point>
-        <point>
-          <azimuth>234.0</azimuth>
           <elevation>24.0</elevation>
         </point>
         <point>
@@ -356,14 +244,6 @@
         </point>
         <point>
           <azimuth>230.0</azimuth>
-          <elevation>25.0</elevation>
-        </point>
-        <point>
-          <azimuth>230.0</azimuth>
-          <elevation>26.0</elevation>
-        </point>
-        <point>
-          <azimuth>224.0</azimuth>
           <elevation>26.0</elevation>
         </point>
         <point>
@@ -375,72 +255,36 @@
           <elevation>27.0</elevation>
         </point>
         <point>
-          <azimuth>215.0</azimuth>
-          <elevation>26.0</elevation>
-        </point>
-        <point>
           <azimuth>209.0</azimuth>
           <elevation>26.0</elevation>
-        </point>
-        <point>
-          <azimuth>209.0</azimuth>
-          <elevation>25.0</elevation>
         </point>
         <point>
           <azimuth>205.0</azimuth>
           <elevation>25.0</elevation>
         </point>
         <point>
-          <azimuth>205.0</azimuth>
-          <elevation>24.0</elevation>
-        </point>
-        <point>
           <azimuth>203.0</azimuth>
           <elevation>24.0</elevation>
-        </point>
-        <point>
-          <azimuth>203.0</azimuth>
-          <elevation>23.0</elevation>
         </point>
         <point>
           <azimuth>201.0</azimuth>
           <elevation>23.0</elevation>
         </point>
         <point>
-          <azimuth>201.0</azimuth>
-          <elevation>22.0</elevation>
-        </point>
-        <point>
           <azimuth>200.0</azimuth>
           <elevation>22.0</elevation>
-        </point>
-        <point>
-          <azimuth>200.0</azimuth>
-          <elevation>21.0</elevation>
         </point>
         <point>
           <azimuth>199.0</azimuth>
           <elevation>21.0</elevation>
         </point>
         <point>
-          <azimuth>199.0</azimuth>
-          <elevation>20.0</elevation>
-        </point>
-        <point>
           <azimuth>198.0</azimuth>
           <elevation>20.0</elevation>
         </point>
         <point>
-          <azimuth>198.0</azimuth>
-          <elevation>19.0</elevation>
-        </point>
-        <point>
           <azimuth>197.0</azimuth>
           <elevation>19.0</elevation>
-        </point>
-        <point>
-          <azimuth>197.0</azimuth>
-          <elevation>17.0</elevation>
         </point>
         <point>
           <azimuth>196.0</azimuth>
@@ -460,14 +304,6 @@
         </point>
         <point>
           <azimuth>44.0</azimuth>
-          <elevation>13.0</elevation>
-        </point>
-        <point>
-          <azimuth>44.0</azimuth>
-          <elevation>15.0</elevation>
-        </point>
-        <point>
-          <azimuth>43.0</azimuth>
           <elevation>15.0</elevation>
         </point>
         <point>
@@ -476,14 +312,6 @@
         </point>
         <point>
           <azimuth>42.0</azimuth>
-          <elevation>16.0</elevation>
-        </point>
-        <point>
-          <azimuth>42.0</azimuth>
-          <elevation>17.0</elevation>
-        </point>
-        <point>
-          <azimuth>41.0</azimuth>
           <elevation>17.0</elevation>
         </point>
         <point>
@@ -492,22 +320,10 @@
         </point>
         <point>
           <azimuth>39.0</azimuth>
-          <elevation>18.0</elevation>
-        </point>
-        <point>
-          <azimuth>39.0</azimuth>
           <elevation>19.0</elevation>
         </point>
         <point>
           <azimuth>36.0</azimuth>
-          <elevation>19.0</elevation>
-        </point>
-        <point>
-          <azimuth>36.0</azimuth>
-          <elevation>20.0</elevation>
-        </point>
-        <point>
-          <azimuth>30.0</azimuth>
           <elevation>20.0</elevation>
         </point>
         <point>
@@ -519,56 +335,28 @@
           <elevation>21.0</elevation>
         </point>
         <point>
-          <azimuth>21.0</azimuth>
-          <elevation>20.0</elevation>
-        </point>
-        <point>
           <azimuth>15.0</azimuth>
           <elevation>20.0</elevation>
-        </point>
-        <point>
-          <azimuth>15.0</azimuth>
-          <elevation>19.0</elevation>
         </point>
         <point>
           <azimuth>12.0</azimuth>
           <elevation>19.0</elevation>
         </point>
         <point>
-          <azimuth>12.0</azimuth>
-          <elevation>18.0</elevation>
-        </point>
-        <point>
           <azimuth>10.0</azimuth>
           <elevation>18.0</elevation>
-        </point>
-        <point>
-          <azimuth>10.0</azimuth>
-          <elevation>17.0</elevation>
         </point>
         <point>
           <azimuth>9.0</azimuth>
           <elevation>17.0</elevation>
         </point>
         <point>
-          <azimuth>9.0</azimuth>
-          <elevation>16.0</elevation>
-        </point>
-        <point>
           <azimuth>8.0</azimuth>
           <elevation>16.0</elevation>
         </point>
         <point>
-          <azimuth>8.0</azimuth>
-          <elevation>15.0</elevation>
-        </point>
-        <point>
           <azimuth>7.0</azimuth>
           <elevation>15.0</elevation>
-        </point>
-        <point>
-          <azimuth>7.0</azimuth>
-          <elevation>13.0</elevation>
         </point>
         <point>
           <azimuth>6.0</azimuth>
@@ -615,14 +403,6 @@
         </point>
         <point>
           <azimuth>307.0</azimuth>
-          <elevation>11.0</elevation>
-        </point>
-        <point>
-          <azimuth>307.0</azimuth>
-          <elevation>13.0</elevation>
-        </point>
-        <point>
-          <azimuth>306.0</azimuth>
           <elevation>13.0</elevation>
         </point>
         <point>
@@ -631,22 +411,10 @@
         </point>
         <point>
           <azimuth>304.0</azimuth>
-          <elevation>15.0</elevation>
-        </point>
-        <point>
-          <azimuth>304.0</azimuth>
           <elevation>16.0</elevation>
         </point>
         <point>
           <azimuth>302.0</azimuth>
-          <elevation>16.0</elevation>
-        </point>
-        <point>
-          <azimuth>302.0</azimuth>
-          <elevation>17.0</elevation>
-        </point>
-        <point>
-          <azimuth>298.0</azimuth>
           <elevation>17.0</elevation>
         </point>
         <point>
@@ -658,40 +426,20 @@
           <elevation>18.0</elevation>
         </point>
         <point>
-          <azimuth>283.0</azimuth>
-          <elevation>17.0</elevation>
-        </point>
-        <point>
           <azimuth>278.0</azimuth>
           <elevation>17.0</elevation>
-        </point>
-        <point>
-          <azimuth>278.0</azimuth>
-          <elevation>16.0</elevation>
         </point>
         <point>
           <azimuth>276.0</azimuth>
           <elevation>16.0</elevation>
         </point>
         <point>
-          <azimuth>276.0</azimuth>
-          <elevation>15.0</elevation>
-        </point>
-        <point>
           <azimuth>275.0</azimuth>
           <elevation>15.0</elevation>
         </point>
         <point>
-          <azimuth>275.0</azimuth>
-          <elevation>14.0</elevation>
-        </point>
-        <point>
           <azimuth>274.0</azimuth>
           <elevation>14.0</elevation>
-        </point>
-        <point>
-          <azimuth>274.0</azimuth>
-          <elevation>13.0</elevation>
         </point>
         <point>
           <azimuth>273.0</azimuth>
@@ -711,14 +459,6 @@
         </point>
         <point>
           <azimuth>234.0</azimuth>
-          <elevation>6.0</elevation>
-        </point>
-        <point>
-          <azimuth>234.0</azimuth>
-          <elevation>7.0</elevation>
-        </point>
-        <point>
-          <azimuth>232.0</azimuth>
           <elevation>7.0</elevation>
         </point>
         <point>
@@ -730,16 +470,8 @@
           <elevation>8.0</elevation>
         </point>
         <point>
-          <azimuth>218.0</azimuth>
-          <elevation>7.0</elevation>
-        </point>
-        <point>
           <azimuth>217.0</azimuth>
           <elevation>7.0</elevation>
-        </point>
-        <point>
-          <azimuth>217.0</azimuth>
-          <elevation>6.0</elevation>
         </point>
         <point>
           <azimuth>216.0</azimuth>
@@ -759,14 +491,6 @@
         </point>
         <point>
           <azimuth>62.0</azimuth>
-          <elevation>18.0</elevation>
-        </point>
-        <point>
-          <azimuth>62.0</azimuth>
-          <elevation>19.0</elevation>
-        </point>
-        <point>
-          <azimuth>61.0</azimuth>
           <elevation>19.0</elevation>
         </point>
         <point>
@@ -775,14 +499,6 @@
         </point>
         <point>
           <azimuth>59.0</azimuth>
-          <elevation>21.0</elevation>
-        </point>
-        <point>
-          <azimuth>59.0</azimuth>
-          <elevation>22.0</elevation>
-        </point>
-        <point>
-          <azimuth>58.0</azimuth>
           <elevation>22.0</elevation>
         </point>
         <point>
@@ -791,14 +507,6 @@
         </point>
         <point>
           <azimuth>56.0</azimuth>
-          <elevation>23.0</elevation>
-        </point>
-        <point>
-          <azimuth>56.0</azimuth>
-          <elevation>24.0</elevation>
-        </point>
-        <point>
-          <azimuth>54.0</azimuth>
           <elevation>24.0</elevation>
         </point>
         <point>
@@ -807,14 +515,6 @@
         </point>
         <point>
           <azimuth>50.0</azimuth>
-          <elevation>25.0</elevation>
-        </point>
-        <point>
-          <azimuth>50.0</azimuth>
-          <elevation>26.0</elevation>
-        </point>
-        <point>
-          <azimuth>44.0</azimuth>
           <elevation>26.0</elevation>
         </point>
         <point>
@@ -826,72 +526,36 @@
           <elevation>27.0</elevation>
         </point>
         <point>
-          <azimuth>35.0</azimuth>
-          <elevation>26.0</elevation>
-        </point>
-        <point>
           <azimuth>29.0</azimuth>
           <elevation>26.0</elevation>
-        </point>
-        <point>
-          <azimuth>29.0</azimuth>
-          <elevation>25.0</elevation>
         </point>
         <point>
           <azimuth>25.0</azimuth>
           <elevation>25.0</elevation>
         </point>
         <point>
-          <azimuth>25.0</azimuth>
-          <elevation>24.0</elevation>
-        </point>
-        <point>
           <azimuth>23.0</azimuth>
           <elevation>24.0</elevation>
-        </point>
-        <point>
-          <azimuth>23.0</azimuth>
-          <elevation>23.0</elevation>
         </point>
         <point>
           <azimuth>21.0</azimuth>
           <elevation>23.0</elevation>
         </point>
         <point>
-          <azimuth>21.0</azimuth>
-          <elevation>22.0</elevation>
-        </point>
-        <point>
           <azimuth>20.0</azimuth>
           <elevation>22.0</elevation>
-        </point>
-        <point>
-          <azimuth>20.0</azimuth>
-          <elevation>21.0</elevation>
         </point>
         <point>
           <azimuth>19.0</azimuth>
           <elevation>21.0</elevation>
         </point>
         <point>
-          <azimuth>19.0</azimuth>
-          <elevation>20.0</elevation>
-        </point>
-        <point>
           <azimuth>18.0</azimuth>
           <elevation>20.0</elevation>
         </point>
         <point>
-          <azimuth>18.0</azimuth>
-          <elevation>19.0</elevation>
-        </point>
-        <point>
           <azimuth>17.0</azimuth>
           <elevation>19.0</elevation>
-        </point>
-        <point>
-          <azimuth>17.0</azimuth>
-          <elevation>17.0</elevation>
         </point>
         <point>
           <azimuth>16.0</azimuth>
@@ -946,19 +610,11 @@
         </point>
         <point>
           <azimuth>183.0</azimuth>
-          <elevation>7.0</elevation>
-        </point>
-        <point>
-          <azimuth>183.0</azimuth>
           <elevation>8.0</elevation>
         </point>
         <point>
           <azimuth>169.0</azimuth>
           <elevation>8.0</elevation>
-        </point>
-        <point>
-          <azimuth>169.0</azimuth>
-          <elevation>7.0</elevation>
         </point>
         <point>
           <azimuth>167.0</azimuth>
@@ -978,14 +634,6 @@
         </point>
         <point>
           <azimuth>127.0</azimuth>
-          <elevation>11.0</elevation>
-        </point>
-        <point>
-          <azimuth>127.0</azimuth>
-          <elevation>13.0</elevation>
-        </point>
-        <point>
-          <azimuth>126.0</azimuth>
           <elevation>13.0</elevation>
         </point>
         <point>
@@ -994,22 +642,10 @@
         </point>
         <point>
           <azimuth>124.0</azimuth>
-          <elevation>15.0</elevation>
-        </point>
-        <point>
-          <azimuth>124.0</azimuth>
           <elevation>16.0</elevation>
         </point>
         <point>
           <azimuth>122.0</azimuth>
-          <elevation>16.0</elevation>
-        </point>
-        <point>
-          <azimuth>122.0</azimuth>
-          <elevation>17.0</elevation>
-        </point>
-        <point>
-          <azimuth>118.0</azimuth>
           <elevation>17.0</elevation>
         </point>
         <point>
@@ -1021,40 +657,20 @@
           <elevation>18.0</elevation>
         </point>
         <point>
-          <azimuth>103.0</azimuth>
-          <elevation>17.0</elevation>
-        </point>
-        <point>
           <azimuth>98.0</azimuth>
           <elevation>17.0</elevation>
-        </point>
-        <point>
-          <azimuth>98.0</azimuth>
-          <elevation>16.0</elevation>
         </point>
         <point>
           <azimuth>96.0</azimuth>
           <elevation>16.0</elevation>
         </point>
         <point>
-          <azimuth>96.0</azimuth>
-          <elevation>15.0</elevation>
-        </point>
-        <point>
           <azimuth>95.0</azimuth>
           <elevation>15.0</elevation>
         </point>
         <point>
-          <azimuth>95.0</azimuth>
-          <elevation>14.0</elevation>
-        </point>
-        <point>
           <azimuth>94.0</azimuth>
           <elevation>14.0</elevation>
-        </point>
-        <point>
-          <azimuth>94.0</azimuth>
-          <elevation>13.0</elevation>
         </point>
         <point>
           <azimuth>93.0</azimuth>
@@ -1074,14 +690,6 @@
         </point>
         <point>
           <azimuth>90.0</azimuth>
-          <elevation>10.0</elevation>
-        </point>
-        <point>
-          <azimuth>90.0</azimuth>
-          <elevation>11.0</elevation>
-        </point>
-        <point>
-          <azimuth>84.0</azimuth>
           <elevation>11.0</elevation>
         </point>
         <point>
@@ -1093,24 +701,12 @@
           <elevation>12.0</elevation>
         </point>
         <point>
-          <azimuth>77.0</azimuth>
-          <elevation>11.0</elevation>
-        </point>
-        <point>
           <azimuth>72.0</azimuth>
           <elevation>11.0</elevation>
         </point>
         <point>
-          <azimuth>72.0</azimuth>
-          <elevation>10.0</elevation>
-        </point>
-        <point>
           <azimuth>70.0</azimuth>
           <elevation>10.0</elevation>
-        </point>
-        <point>
-          <azimuth>70.0</azimuth>
-          <elevation>9.0</elevation>
         </point>
         <point>
           <azimuth>69.0</azimuth>
@@ -1130,19 +726,11 @@
         </point>
         <point>
           <azimuth>67.0</azimuth>
-          <elevation>6.0</elevation>
-        </point>
-        <point>
-          <azimuth>67.0</azimuth>
           <elevation>7.0</elevation>
         </point>
         <point>
           <azimuth>53.0</azimuth>
           <elevation>7.0</elevation>
-        </point>
-        <point>
-          <azimuth>53.0</azimuth>
-          <elevation>6.0</elevation>
         </point>
         <point>
           <azimuth>52.0</azimuth>
@@ -1213,14 +801,6 @@
         </point>
         <point>
           <azimuth>212.0</azimuth>
-          <elevation>33.0</elevation>
-        </point>
-        <point>
-          <azimuth>212.0</azimuth>
-          <elevation>36.0</elevation>
-        </point>
-        <point>
-          <azimuth>211.0</azimuth>
           <elevation>36.0</elevation>
         </point>
         <point>
@@ -1229,14 +809,6 @@
         </point>
         <point>
           <azimuth>210.0</azimuth>
-          <elevation>37.0</elevation>
-        </point>
-        <point>
-          <azimuth>210.0</azimuth>
-          <elevation>38.0</elevation>
-        </point>
-        <point>
-          <azimuth>209.0</azimuth>
           <elevation>38.0</elevation>
         </point>
         <point>
@@ -1245,14 +817,6 @@
         </point>
         <point>
           <azimuth>208.0</azimuth>
-          <elevation>39.0</elevation>
-        </point>
-        <point>
-          <azimuth>208.0</azimuth>
-          <elevation>40.0</elevation>
-        </point>
-        <point>
-          <azimuth>206.0</azimuth>
           <elevation>40.0</elevation>
         </point>
         <point>
@@ -1261,14 +825,6 @@
         </point>
         <point>
           <azimuth>205.0</azimuth>
-          <elevation>41.0</elevation>
-        </point>
-        <point>
-          <azimuth>205.0</azimuth>
-          <elevation>42.0</elevation>
-        </point>
-        <point>
-          <azimuth>202.0</azimuth>
           <elevation>42.0</elevation>
         </point>
         <point>
@@ -1277,14 +833,6 @@
         </point>
         <point>
           <azimuth>199.0</azimuth>
-          <elevation>43.0</elevation>
-        </point>
-        <point>
-          <azimuth>199.0</azimuth>
-          <elevation>44.0</elevation>
-        </point>
-        <point>
-          <azimuth>195.0</azimuth>
           <elevation>44.0</elevation>
         </point>
         <point>
@@ -1296,72 +844,36 @@
           <elevation>45.0</elevation>
         </point>
         <point>
-          <azimuth>179.0</azimuth>
-          <elevation>44.0</elevation>
-        </point>
-        <point>
           <azimuth>175.0</azimuth>
           <elevation>44.0</elevation>
-        </point>
-        <point>
-          <azimuth>175.0</azimuth>
-          <elevation>43.0</elevation>
         </point>
         <point>
           <azimuth>172.0</azimuth>
           <elevation>43.0</elevation>
         </point>
         <point>
-          <azimuth>172.0</azimuth>
-          <elevation>42.0</elevation>
-        </point>
-        <point>
           <azimuth>170.0</azimuth>
           <elevation>42.0</elevation>
-        </point>
-        <point>
-          <azimuth>170.0</azimuth>
-          <elevation>41.0</elevation>
         </point>
         <point>
           <azimuth>168.0</azimuth>
           <elevation>41.0</elevation>
         </point>
         <point>
-          <azimuth>168.0</azimuth>
-          <elevation>40.0</elevation>
-        </point>
-        <point>
           <azimuth>166.0</azimuth>
           <elevation>40.0</elevation>
-        </point>
-        <point>
-          <azimuth>166.0</azimuth>
-          <elevation>39.0</elevation>
         </point>
         <point>
           <azimuth>165.0</azimuth>
           <elevation>39.0</elevation>
         </point>
         <point>
-          <azimuth>165.0</azimuth>
-          <elevation>38.0</elevation>
-        </point>
-        <point>
           <azimuth>164.0</azimuth>
           <elevation>38.0</elevation>
         </point>
         <point>
-          <azimuth>164.0</azimuth>
-          <elevation>37.0</elevation>
-        </point>
-        <point>
           <azimuth>163.0</azimuth>
           <elevation>37.0</elevation>
-        </point>
-        <point>
-          <azimuth>163.0</azimuth>
-          <elevation>35.0</elevation>
         </point>
         <point>
           <azimuth>162.0</azimuth>
@@ -1408,19 +920,11 @@
         </point>
         <point>
           <azimuth>228.0</azimuth>
-          <elevation>7.0</elevation>
-        </point>
-        <point>
-          <azimuth>228.0</azimuth>
           <elevation>8.0</elevation>
         </point>
         <point>
           <azimuth>220.0</azimuth>
           <elevation>8.0</elevation>
-        </point>
-        <point>
-          <azimuth>220.0</azimuth>
-          <elevation>7.0</elevation>
         </point>
         <point>
           <azimuth>218.0</azimuth>
@@ -1440,14 +944,6 @@
         </point>
         <point>
           <azimuth>207.0</azimuth>
-          <elevation>4.0</elevation>
-        </point>
-        <point>
-          <azimuth>207.0</azimuth>
-          <elevation>8.0</elevation>
-        </point>
-        <point>
-          <azimuth>204.0</azimuth>
           <elevation>8.0</elevation>
         </point>
         <point>
@@ -1456,14 +952,6 @@
         </point>
         <point>
           <azimuth>201.0</azimuth>
-          <elevation>9.0</elevation>
-        </point>
-        <point>
-          <azimuth>201.0</azimuth>
-          <elevation>12.0</elevation>
-        </point>
-        <point>
-          <azimuth>198.0</azimuth>
           <elevation>12.0</elevation>
         </point>
         <point>
@@ -1472,14 +960,6 @@
         </point>
         <point>
           <azimuth>197.0</azimuth>
-          <elevation>13.0</elevation>
-        </point>
-        <point>
-          <azimuth>197.0</azimuth>
-          <elevation>24.0</elevation>
-        </point>
-        <point>
-          <azimuth>196.0</azimuth>
           <elevation>24.0</elevation>
         </point>
         <point>
@@ -1488,14 +968,6 @@
         </point>
         <point>
           <azimuth>195.0</azimuth>
-          <elevation>25.0</elevation>
-        </point>
-        <point>
-          <azimuth>195.0</azimuth>
-          <elevation>26.0</elevation>
-        </point>
-        <point>
-          <azimuth>194.0</azimuth>
           <elevation>26.0</elevation>
         </point>
         <point>
@@ -1504,26 +976,10 @@
         </point>
         <point>
           <azimuth>192.0</azimuth>
-          <elevation>27.0</elevation>
-        </point>
-        <point>
-          <azimuth>192.0</azimuth>
           <elevation>28.0</elevation>
         </point>
         <point>
           <azimuth>190.0</azimuth>
-          <elevation>28.0</elevation>
-        </point>
-        <point>
-          <azimuth>190.0</azimuth>
-          <elevation>29.0</elevation>
-        </point>
-        <point>
-          <azimuth>188.0</azimuth>
-          <elevation>29.0</elevation>
-        </point>
-        <point>
-          <azimuth>187.0</azimuth>
           <elevation>29.0</elevation>
         </point>
         <point>
@@ -1535,44 +991,20 @@
           <elevation>30.0</elevation>
         </point>
         <point>
-          <azimuth>171.0</azimuth>
-          <elevation>29.0</elevation>
-        </point>
-        <point>
           <azimuth>168.0</azimuth>
           <elevation>29.0</elevation>
         </point>
         <point>
-          <azimuth>168.0</azimuth>
-          <elevation>28.0</elevation>
-        </point>
-        <point>
           <azimuth>166.0</azimuth>
           <elevation>28.0</elevation>
-        </point>
-        <point>
-          <azimuth>166.0</azimuth>
-          <elevation>27.0</elevation>
-        </point>
-        <point>
-          <azimuth>164.0</azimuth>
-          <elevation>27.0</elevation>
         </point>
         <point>
           <azimuth>164.0</azimuth>
           <elevation>26.0</elevation>
         </point>
         <point>
-          <azimuth>163.0</azimuth>
-          <elevation>25.0</elevation>
-        </point>
-        <point>
           <azimuth>162.0</azimuth>
           <elevation>25.0</elevation>
-        </point>
-        <point>
-          <azimuth>162.0</azimuth>
-          <elevation>24.0</elevation>
         </point>
         <point>
           <azimuth>161.0</azimuth>
@@ -3697,10 +3129,6 @@
         </point>
         <point>
           <azimuth>208.0</azimuth>
-          <elevation>4.0</elevation>
-        </point>
-        <point>
-          <azimuth>208.0</azimuth>
           <elevation>5.0</elevation>
         </point>
         <point>
@@ -3721,10 +3149,6 @@
         </point>
         <point>
           <azimuth>201.0</azimuth>
-          <elevation>10.0</elevation>
-        </point>
-        <point>
-          <azimuth>201.0</azimuth>
           <elevation>11.0</elevation>
         </point>
         <point>
@@ -3737,22 +3161,10 @@
         </point>
         <point>
           <azimuth>190.0</azimuth>
-          <elevation>16.0</elevation>
-        </point>
-        <point>
-          <azimuth>190.0</azimuth>
           <elevation>17.0</elevation>
         </point>
         <point>
           <azimuth>188.0</azimuth>
-          <elevation>17.0</elevation>
-        </point>
-        <point>
-          <azimuth>188.0</azimuth>
-          <elevation>18.0</elevation>
-        </point>
-        <point>
-          <azimuth>183.0</azimuth>
           <elevation>18.0</elevation>
         </point>
         <point>
@@ -3764,24 +3176,12 @@
           <elevation>19.0</elevation>
         </point>
         <point>
-          <azimuth>175.0</azimuth>
-          <elevation>18.0</elevation>
-        </point>
-        <point>
           <azimuth>170.0</azimuth>
           <elevation>18.0</elevation>
         </point>
         <point>
-          <azimuth>170.0</azimuth>
-          <elevation>17.0</elevation>
-        </point>
-        <point>
           <azimuth>168.0</azimuth>
           <elevation>17.0</elevation>
-        </point>
-        <point>
-          <azimuth>168.0</azimuth>
-          <elevation>16.0</elevation>
         </point>
         <point>
           <azimuth>167.0</azimuth>
@@ -3801,14 +3201,6 @@
         </point>
         <point>
           <azimuth>158.0</azimuth>
-          <elevation>35.0</elevation>
-        </point>
-        <point>
-          <azimuth>158.0</azimuth>
-          <elevation>37.0</elevation>
-        </point>
-        <point>
-          <azimuth>157.0</azimuth>
           <elevation>37.0</elevation>
         </point>
         <point>
@@ -3817,14 +3209,6 @@
         </point>
         <point>
           <azimuth>156.0</azimuth>
-          <elevation>38.0</elevation>
-        </point>
-        <point>
-          <azimuth>156.0</azimuth>
-          <elevation>39.0</elevation>
-        </point>
-        <point>
-          <azimuth>155.0</azimuth>
           <elevation>39.0</elevation>
         </point>
         <point>
@@ -3833,14 +3217,6 @@
         </point>
         <point>
           <azimuth>153.0</azimuth>
-          <elevation>40.0</elevation>
-        </point>
-        <point>
-          <azimuth>153.0</azimuth>
-          <elevation>41.0</elevation>
-        </point>
-        <point>
-          <azimuth>151.0</azimuth>
           <elevation>41.0</elevation>
         </point>
         <point>
@@ -3849,22 +3225,10 @@
         </point>
         <point>
           <azimuth>149.0</azimuth>
-          <elevation>42.0</elevation>
-        </point>
-        <point>
-          <azimuth>149.0</azimuth>
           <elevation>43.0</elevation>
         </point>
         <point>
           <azimuth>146.0</azimuth>
-          <elevation>43.0</elevation>
-        </point>
-        <point>
-          <azimuth>146.0</azimuth>
-          <elevation>44.0</elevation>
-        </point>
-        <point>
-          <azimuth>142.0</azimuth>
           <elevation>44.0</elevation>
         </point>
         <point>
@@ -3876,80 +3240,40 @@
           <elevation>45.0</elevation>
         </point>
         <point>
-          <azimuth>126.0</azimuth>
-          <elevation>44.0</elevation>
-        </point>
-        <point>
           <azimuth>122.0</azimuth>
           <elevation>44.0</elevation>
-        </point>
-        <point>
-          <azimuth>122.0</azimuth>
-          <elevation>43.0</elevation>
         </point>
         <point>
           <azimuth>119.0</azimuth>
           <elevation>43.0</elevation>
         </point>
         <point>
-          <azimuth>119.0</azimuth>
-          <elevation>42.0</elevation>
-        </point>
-        <point>
           <azimuth>116.0</azimuth>
           <elevation>42.0</elevation>
-        </point>
-        <point>
-          <azimuth>116.0</azimuth>
-          <elevation>41.0</elevation>
         </point>
         <point>
           <azimuth>115.0</azimuth>
           <elevation>41.0</elevation>
         </point>
         <point>
-          <azimuth>115.0</azimuth>
-          <elevation>40.0</elevation>
-        </point>
-        <point>
           <azimuth>113.0</azimuth>
           <elevation>40.0</elevation>
-        </point>
-        <point>
-          <azimuth>113.0</azimuth>
-          <elevation>39.0</elevation>
         </point>
         <point>
           <azimuth>112.0</azimuth>
           <elevation>39.0</elevation>
         </point>
         <point>
-          <azimuth>112.0</azimuth>
-          <elevation>38.0</elevation>
-        </point>
-        <point>
           <azimuth>111.0</azimuth>
           <elevation>38.0</elevation>
-        </point>
-        <point>
-          <azimuth>111.0</azimuth>
-          <elevation>37.0</elevation>
         </point>
         <point>
           <azimuth>110.0</azimuth>
           <elevation>37.0</elevation>
         </point>
         <point>
-          <azimuth>110.0</azimuth>
-          <elevation>36.0</elevation>
-        </point>
-        <point>
           <azimuth>109.0</azimuth>
           <elevation>36.0</elevation>
-        </point>
-        <point>
-          <azimuth>109.0</azimuth>
-          <elevation>33.0</elevation>
         </point>
         <point>
           <azimuth>108.0</azimuth>
@@ -5470,14 +4794,6 @@
         </point>
         <point>
           <azimuth>211.0</azimuth>
-          <elevation>17.0</elevation>
-        </point>
-        <point>
-          <azimuth>211.0</azimuth>
-          <elevation>18.0</elevation>
-        </point>
-        <point>
-          <azimuth>209.0</azimuth>
           <elevation>18.0</elevation>
         </point>
         <point>
@@ -5489,24 +4805,12 @@
           <elevation>19.0</elevation>
         </point>
         <point>
-          <azimuth>194.0</azimuth>
-          <elevation>18.0</elevation>
-        </point>
-        <point>
           <azimuth>191.0</azimuth>
           <elevation>18.0</elevation>
         </point>
         <point>
-          <azimuth>191.0</azimuth>
-          <elevation>17.0</elevation>
-        </point>
-        <point>
           <azimuth>190.0</azimuth>
           <elevation>17.0</elevation>
-        </point>
-        <point>
-          <azimuth>190.0</azimuth>
-          <elevation>16.0</elevation>
         </point>
         <point>
           <azimuth>189.0</azimuth>
@@ -5534,14 +4838,6 @@
         </point>
         <point>
           <azimuth>169.0</azimuth>
-          <elevation>12.0</elevation>
-        </point>
-        <point>
-          <azimuth>169.0</azimuth>
-          <elevation>13.0</elevation>
-        </point>
-        <point>
-          <azimuth>167.0</azimuth>
           <elevation>13.0</elevation>
         </point>
         <point>
@@ -5553,16 +4849,8 @@
           <elevation>14.0</elevation>
         </point>
         <point>
-          <azimuth>154.0</azimuth>
-          <elevation>13.0</elevation>
-        </point>
-        <point>
           <azimuth>152.0</azimuth>
           <elevation>13.0</elevation>
-        </point>
-        <point>
-          <azimuth>152.0</azimuth>
-          <elevation>12.0</elevation>
         </point>
         <point>
           <azimuth>151.0</azimuth>
@@ -5582,14 +4870,6 @@
         </point>
         <point>
           <azimuth>141.0</azimuth>
-          <elevation>15.0</elevation>
-        </point>
-        <point>
-          <azimuth>141.0</azimuth>
-          <elevation>16.0</elevation>
-        </point>
-        <point>
-          <azimuth>137.0</azimuth>
           <elevation>16.0</elevation>
         </point>
         <point>
@@ -5601,16 +4881,8 @@
           <elevation>17.0</elevation>
         </point>
         <point>
-          <azimuth>126.0</azimuth>
-          <elevation>16.0</elevation>
-        </point>
-        <point>
           <azimuth>122.0</azimuth>
           <elevation>16.0</elevation>
-        </point>
-        <point>
-          <azimuth>122.0</azimuth>
-          <elevation>15.0</elevation>
         </point>
         <point>
           <azimuth>121.0</azimuth>
@@ -5630,14 +4902,6 @@
         </point>
         <point>
           <azimuth>102.0</azimuth>
-          <elevation>14.0</elevation>
-        </point>
-        <point>
-          <azimuth>102.0</azimuth>
-          <elevation>15.0</elevation>
-        </point>
-        <point>
-          <azimuth>99.0</azimuth>
           <elevation>15.0</elevation>
         </point>
         <point>
@@ -5649,16 +4913,8 @@
           <elevation>16.0</elevation>
         </point>
         <point>
-          <azimuth>86.0</azimuth>
-          <elevation>15.0</elevation>
-        </point>
-        <point>
           <azimuth>83.0</azimuth>
           <elevation>15.0</elevation>
-        </point>
-        <point>
-          <azimuth>83.0</azimuth>
-          <elevation>14.0</elevation>
         </point>
         <point>
           <azimuth>82.0</azimuth>
@@ -8030,14 +7286,6 @@
         </point>
         <point>
           <azimuth>191.0</azimuth>
-          <elevation>21.0</elevation>
-        </point>
-        <point>
-          <azimuth>191.0</azimuth>
-          <elevation>22.0</elevation>
-        </point>
-        <point>
-          <azimuth>190.0</azimuth>
           <elevation>22.0</elevation>
         </point>
         <point>
@@ -8046,22 +7294,10 @@
         </point>
         <point>
           <azimuth>188.0</azimuth>
-          <elevation>23.0</elevation>
-        </point>
-        <point>
-          <azimuth>188.0</azimuth>
           <elevation>24.0</elevation>
         </point>
         <point>
           <azimuth>185.0</azimuth>
-          <elevation>24.0</elevation>
-        </point>
-        <point>
-          <azimuth>185.0</azimuth>
-          <elevation>25.0</elevation>
-        </point>
-        <point>
-          <azimuth>180.0</azimuth>
           <elevation>25.0</elevation>
         </point>
         <point>
@@ -8071,10 +7307,6 @@
         <point>
           <azimuth>173.0</azimuth>
           <elevation>26.0</elevation>
-        </point>
-        <point>
-          <azimuth>173.0</azimuth>
-          <elevation>25.0</elevation>
         </point>
         <point>
           <azimuth>168.0</azimuth>
@@ -8082,27 +7314,11 @@
         </point>
         <point>
           <azimuth>165.0</azimuth>
-          <elevation>24.0</elevation>
-        </point>
-        <point>
-          <azimuth>165.0</azimuth>
-          <elevation>23.0</elevation>
-        </point>
-        <point>
-          <azimuth>163.0</azimuth>
           <elevation>23.0</elevation>
         </point>
         <point>
           <azimuth>163.0</azimuth>
           <elevation>22.0</elevation>
-        </point>
-        <point>
-          <azimuth>162.0</azimuth>
-          <elevation>22.0</elevation>
-        </point>
-        <point>
-          <azimuth>162.0</azimuth>
-          <elevation>21.0</elevation>
         </point>
         <point>
           <azimuth>161.0</azimuth>
@@ -8122,19 +7338,11 @@
         </point>
         <point>
           <azimuth>149.0</azimuth>
-          <elevation>12.0</elevation>
-        </point>
-        <point>
-          <azimuth>149.0</azimuth>
           <elevation>13.0</elevation>
         </point>
         <point>
           <azimuth>135.0</azimuth>
           <elevation>13.0</elevation>
-        </point>
-        <point>
-          <azimuth>135.0</azimuth>
-          <elevation>12.0</elevation>
         </point>
         <point>
           <azimuth>133.0</azimuth>
@@ -8154,19 +7362,11 @@
         </point>
         <point>
           <azimuth>122.0</azimuth>
-          <elevation>12.0</elevation>
-        </point>
-        <point>
-          <azimuth>122.0</azimuth>
           <elevation>13.0</elevation>
         </point>
         <point>
           <azimuth>109.0</azimuth>
           <elevation>13.0</elevation>
-        </point>
-        <point>
-          <azimuth>109.0</azimuth>
-          <elevation>12.0</elevation>
         </point>
         <point>
           <azimuth>107.0</azimuth>
@@ -8186,19 +7386,11 @@
         </point>
         <point>
           <azimuth>93.0</azimuth>
-          <elevation>10.0</elevation>
-        </point>
-        <point>
-          <azimuth>93.0</azimuth>
           <elevation>11.0</elevation>
         </point>
         <point>
           <azimuth>80.0</azimuth>
           <elevation>11.0</elevation>
-        </point>
-        <point>
-          <azimuth>80.0</azimuth>
-          <elevation>10.0</elevation>
         </point>
         <point>
           <azimuth>79.0</azimuth>
