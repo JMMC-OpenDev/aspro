@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<jnlp spec="1.0+" codebase="REPLACECODEBASE" href="REPLACEHREF">
+	<information>
+		<title>Aspro Alpha</title>
+		<vendor>JMMC</vendor>
+        <homepage href="http://www.jmmc.fr/aspro"/>
+		<description>This application is the new jmmc prototype for the next
+            tool dedicated to prepare your interferometric observations.</description>
+	</information>
+	<security>
+		<all-permissions/>
+	</security>
+	<resources>
+        <j2se version="1.5+" initial-heap-size="256m" max-heap-size="1024m"/>
+        <property name="apple.laf.useScreenMenuBar" value="true"/>
+        <jar href="jar/aspro.jar" />
+        <jar href="jar/Jmcs.jar" />
+        
+        <jar href="jar/jfreechart-1.0.13.jar" />
+        <jar href="jar/jcommon-1.0.16.jar" />
+        
+        <jar href="jar/jaxb-api.jar" />
+        <jar href="jar/jaxb-impl.jar" />
+        <jar href="jar/jsr173_1.0_api.jar" />
+
+        <jar href="jar/pal.jar" />
+        <jar href="jar/swing-worker-1.2.jar" />
+
+	</resources>
+    <application-desc main-class="fr.jmmc.aspro.AsproGui"/>
+</jnlp>

@@ -1,13 +1,16 @@
 #*******************************************************************************
 # JMMC project
 #
-# "@(#) $Id: Makefile,v 1.2 2009-11-17 09:44:39 mella Exp $"
+# "@(#) $Id: Makefile,v 1.3 2009-11-20 10:17:29 mella Exp $"
 #
 # Makefile of aspro module
 #
 # History
 # -------
 # $Log: not supported by cvs2svn $
+# Revision 1.2  2009/11/17 09:44:39  mella
+# add new util tool
+#
 # Revision 1.1  2009/09/08 08:15:21  ccmgr
 # Fix directory structure and add additional files
 #
@@ -104,21 +107,23 @@ PY_SCRIPTS_L   =
 #
 # Jarfiles and their directories
 # ---------------------------------
-JARFILES        =
+JARFILES        = aspro
 
 #
-# <brief description of jjjfff jar files>
-jjjfff_DIRS     =
-jjjfff_EXTRAS   = 
+# <brief description of aspro jar files>
+aspro_DIRS     = fr \
+				 edu
+aspro_EXTRAS   = fr/jmmc/aspro/*.xml \
+				 fr/jmmc/aspro/model/*.xml
 
 #
 # Java programs
 # ---------------------------------
-JAVA_EXECUTABLES=
+JAVA_EXECUTABLES= AsproGUI
 
 #
 # <brief description of jjjjjj java program>
-jjjjjj_CLASS    =
+AsproGUI_CLASS    = fr.jmmc.aspro.AsproGui
 
 #
 # Command Definition Files (CDF)
