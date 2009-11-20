@@ -1,13 +1,16 @@
 #*******************************************************************************
 # JMMC project
 #
-# "@(#) $Id: Makefile,v 1.3 2009-11-20 10:17:29 mella Exp $"
+# "@(#) $Id: Makefile,v 1.4 2009-11-20 10:22:40 mella Exp $"
 #
 # Makefile of aspro module
 #
 # History
 # -------
 # $Log: not supported by cvs2svn $
+# Revision 1.3  2009/11/20 10:17:29  mella
+# add jnlp to deploy aspro gui app
+#
 # Revision 1.2  2009/11/17 09:44:39  mella
 # add new util tool
 #
@@ -161,6 +164,7 @@ CSOURCENAMES = \
 MAKEDIR = $(MCSROOT)/include
 include $(MAKEDIR)/mkfMakefile
 
+JNLP=AsproGui
 #
 # TARGETS
 # -------
@@ -174,6 +178,9 @@ man   : do_man
 	@echo " . . . man page(s) done"
 
 install : install_all
+	@echo "Deploy $(JNLP).jnlp"
+	jmcsDeployJnlp $(JNLP).jnlp
+
 	@echo " . . . installation done"
 
 #___oOo___
