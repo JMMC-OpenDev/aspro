@@ -1,4 +1,3 @@
-
 package fr.jmmc.aspro.model.oi;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -10,7 +9,6 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import fr.jmmc.aspro.model.OIBase;
-
 
 /**
  * 
@@ -38,58 +36,63 @@ import fr.jmmc.aspro.model.OIBase;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "DelayLine", propOrder = {
-    "name",
-    "maximumThrow"
+  "name",
+  "maximumThrow"
 })
 public class DelayLine
-    extends OIBase
-{
+        extends OIBase {
 
-    @XmlElement(required = true)
-    @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
-    @XmlID
-    @XmlSchemaType(name = "ID")
-    protected String name;
-    protected double maximumThrow;
+  @XmlElement(required = true)
+  @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
+  @XmlID
+  @XmlSchemaType(name = "ID")
+  protected String name;
+  protected double maximumThrow;
 
-    /**
-     * Gets the value of the name property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getName() {
-        return name;
-    }
+  /**
+   * Gets the value of the name property.
+   *
+   * @return
+   *     possible object is
+   *     {@link String }
+   *
+   */
+  public String getName() {
+    return name;
+  }
 
-    /**
-     * Sets the value of the name property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setName(String value) {
-        this.name = value;
-    }
+  /**
+   * Sets the value of the name property.
+   *
+   * @param value
+   *     allowed object is
+   *     {@link String }
+   *
+   */
+  public void setName(String value) {
+    this.name = value;
+  }
 
-    /**
-     * Gets the value of the maximumThrow property.
-     * 
-     */
-    public double getMaximumThrow() {
-        return maximumThrow;
-    }
+  /**
+   * Gets the value of the maximumThrow property.
+   *
+   */
+  public double getMaximumThrow() {
+    return maximumThrow;
+  }
 
-    /**
-     * Sets the value of the maximumThrow property.
-     * 
-     */
-    public void setMaximumThrow(double value) {
-        this.maximumThrow = value;
-    }
+  /**
+   * Sets the value of the maximumThrow property.
+   *
+   */
+  public void setMaximumThrow(double value) {
+    this.maximumThrow = value;
+  }
+//--simple--preserve
 
+  @Override
+  public String toString() {
+    return "DelayLine : " + ((this.name != null) ? this.name : "undefined") + " = " + maximumThrow;
+  }
+//--simple--preserve
 }

@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ConfigurationManager.java,v 1.7 2009-11-17 17:00:28 bourgesl Exp $"
+ * "@(#) $Id: ConfigurationManager.java,v 1.8 2009-11-20 16:55:47 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2009/11/17 17:00:28  bourgesl
+ * chosen instrument configuration propagated to observation
+ *
  * Revision 1.6  2009/11/05 12:59:39  bourgesl
  * first simple source observability (only min elevation condition)
  *
@@ -41,6 +44,7 @@ import fr.jmmc.aspro.model.oi.InterferometerSetting;
 import fr.jmmc.aspro.model.oi.LonLatAlt;
 import fr.jmmc.aspro.model.oi.Position3D;
 import fr.jmmc.aspro.model.oi.Station;
+import fr.jmmc.aspro.model.oi.StationLinks;
 import fr.jmmc.aspro.service.GeocentricCoords;
 import java.util.Collections;
 import java.util.HashMap;
@@ -192,40 +196,64 @@ public class ConfigurationManager extends BaseOIManager {
     return interferometerDescriptions;
   }
 
-  public Map<String, InterferometerConfiguration> getInterferometerConfigurations() {
-    return interferometerConfigurations;
-  }
-
   public InterferometerDescription getInterferometerDescription(final String name) {
     return interferometerDescriptions.get(name);
-  }
-
-  public InterferometerConfiguration getInterferometerConfiguration(final String name) {
-    return interferometerConfigurations.get(name);
   }
 
   public Vector<String> getInterferometerNames() {
     final Vector<String> v = new Vector<String>();
 
-    for (InterferometerDescription i : getInterferometerDescriptions().values()) {
-      v.add(i.getName());
+    for (InterferometerDescription id : getInterferometerDescriptions().values()) {
+      v.add(id.getName());
     }
     Collections.sort(v);
     return v;
   }
 
-  public Vector<String> getInterferometerConfigurationNames(final String name) {
+  public Vector<String> getInterferometerConfigurationNames(final String interferometerName) {
     final Vector<String> v = new Vector<String>();
 
-    final InterferometerDescription i = getInterferometerDescription(name);
-    if (i != null) {
-      for (InterferometerConfiguration c : i.getConfigurations()) {
+    final InterferometerDescription id = getInterferometerDescription(interferometerName);
+    if (id != null) {
+      for (InterferometerConfiguration c : id.getConfigurations()) {
         v.add(c.getName());
       }
       Collections.sort(v);
     }
     return v;
   }
+
+
+  public StationLinks getStationLinks(final InterferometerDescription id, final Station station) {
+    if (id.getSwitchyard() != null) {
+      for (StationLinks sl : id.getSwitchyard().getStationLinks()) {
+        if (sl.getStation().equals(station)) {
+          return sl;
+        }
+      }
+    }
+    return null;
+  }
+
+
+  public void getSwitchYardValue(final Station station, final Channel channel) {
+    /* Is it channel or delay line ? */
+  }
+
+  public void getPopValue(final Station station, final Integer popIndex) {
+
+  }
+
+  /** InterferometerConfiguration */
+
+  public Map<String, InterferometerConfiguration> getInterferometerConfigurations() {
+    return interferometerConfigurations;
+  }
+
+  public InterferometerConfiguration getInterferometerConfiguration(final String name) {
+    return interferometerConfigurations.get(name);
+  }
+
 
   public Vector<String> getInterferometerInstrumentNames(final String configurationName) {
     final Vector<String> v = new Vector<String>();
@@ -274,15 +302,6 @@ public class ConfigurationManager extends BaseOIManager {
       }
     }
     return null;
-  }
-
-
-  public void getSwitchYardValue(final Station station, final Channel channel) {
-    /* Is it channel or delay line ? */
-  }
-
-  public void getPopValue(final Station station, final Integer popIndex) {
-
   }
 
   /**

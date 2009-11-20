@@ -28,6 +28,11 @@ public class AstroSkyCalc {
   /** Class logger */
   private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
+
+  /** lst to jd ratio */
+  private static double LST_TO_JD = 24d * Const.SID_RATE;
+
+  /* members */
   /** site location */
   private Site site;
   /** time / site info */
@@ -166,6 +171,8 @@ public class AstroSkyCalc {
       /* note : month is in range [0;11] in java Calendar */
       cal.set(t.UTDate.year, t.UTDate.month - 1, t.UTDate.day, t.UTDate.timeofday.hour, t.UTDate.timeofday.minute, (int) Math.round(t.UTDate.timeofday.second));
     }
+    // fix milliseconds to 0 to be able to compare date instances :
+    cal.set(Calendar.MILLISECOND, 0);
 
     return cal.getTime();
   }
@@ -311,13 +318,13 @@ public class AstroSkyCalc {
 
   /**
    * Computes the hour angle corresponding to the given elevation for the current target
-   * @param jd julian date
+   * @param jd julian date corresponding to LST = 0
    * @param minElev min elevation (rad)
    * @return array of double [jd_rise;jd_set]
    */
-  public double[] getTimeIntervalForAltitude(final double jd, final double minElev) {
+  public double[] getTimeIntervalForAltitude(final double jdLst0, final double minElev) {
 
-    this.observation.w.ChangeWhen(jd);
+    this.observation.w.ChangeWhen(jdLst0);
     this.observation.ComputeSky();
 
     if (logger.isLoggable(Level.INFO)) {
@@ -352,8 +359,8 @@ public class AstroSkyCalc {
     }
 
     // apply the sideral / solar ratio :
-    final double jdRise = jd + lstRise / (24. * Const.SID_RATE);
-    final double jdSet = jd + lstSet / (24. * Const.SID_RATE);
+    final double jdRise = jdLst0 + lstRise / LST_TO_JD;
+    final double jdSet = jdLst0 + lstSet / LST_TO_JD;
 
     if (logger.isLoggable(Level.INFO)) {
       logger.info("rise = " + toDate(jdRise, true));
@@ -364,15 +371,15 @@ public class AstroSkyCalc {
   }
 
   /* utility methods */
-  public double rad2hours(final double angrad) {
+  public static double rad2hours(final double angrad) {
     return deg2hours(Math.toDegrees(angrad));
   }
 
-  public double deg2hours(final double angdeg) {
+  public static double deg2hours(final double angdeg) {
     return angdeg / 15.0d;
   }
 
-  public double deg2rad(final double angdeg) {
+  public static double deg2rad(final double angdeg) {
     return Math.toRadians(angdeg);
   }
 }

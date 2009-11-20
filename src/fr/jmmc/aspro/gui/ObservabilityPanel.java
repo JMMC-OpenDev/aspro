@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityPanel.java,v 1.5 2009-11-20 10:17:02 mella Exp $"
+ * "@(#) $Id: ObservabilityPanel.java,v 1.6 2009-11-20 16:55:47 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2009/11/20 10:17:02  mella
+ * force the use of the swingworker backport
+ *
  * Revision 1.4  2009/11/17 17:00:28  bourgesl
  * chosen instrument configuration propagated to observation
  *
@@ -35,16 +38,18 @@ import fr.jmmc.aspro.service.ObservabilityService;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.text.DateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
-// import javax.swing.SwingWorker;
 import org.jdesktop.swingworker.SwingWorker;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.annotations.XYTextAnnotation;
 import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.axis.SymbolAxis;
 import org.jfree.chart.event.ChartProgressEvent;
@@ -58,6 +63,7 @@ import org.jfree.data.gantt.TaskSeries;
 import org.jfree.data.gantt.TaskSeriesCollection;
 import org.jfree.data.gantt.XYTaskDataset;
 import org.jfree.ui.Layer;
+import org.jfree.ui.TextAnchor;
 
 /**
  * This panel represents the observability plot
@@ -153,7 +159,7 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
 
     /* plot options */
     final boolean useLst = true;
-    final double minElev = 20d;
+    final double minElev = Math.toRadians(20d);
 
     /*
      * Requires the java 5 SwingWorker backport = swing-worker-1.2.jar
@@ -168,7 +174,7 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
       public ObservabilityData doInBackground() {
         logger.fine("SwingWorker.doInBackground : IN");
 
-        ObservabilityData data = ObservabilityService.calcObservability(observation, useLst, minElev);
+        ObservabilityData data = new ObservabilityService(observation, useLst, minElev).calcObservability();
 
         if (isCancelled()) {
           logger.fine("SwingWorker.doInBackground : CANCELLED");
@@ -193,7 +199,7 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
 
             if (data != null) {
               // computed data are valid :
-              updateChart(data.getStarVisibilities());
+              updateChart(data.getStarVisibilities(), data.getDateMin(), data.getDateMax());
 
               updateDateAxis((useLst) ? "L.S.T" : "U.T.C", data.getDateMin(), data.getDateMax());
 
@@ -227,7 +233,7 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
    * Update the dataset and the symbol axis given the star observability data
    * @param starVis star observability data
    */
-  private void updateChart(final List<StarObservability> starVis) {
+  private void updateChart(final List<StarObservability> starVis, final Date min, final Date max) {
     final String[] targetNames = new String[starVis.size()];
 
     final TaskSeriesCollection localTaskSeriesCollection = new TaskSeriesCollection();
@@ -261,20 +267,38 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
     localSymbolAxis.setRangeWithMargins(-1d, targetNames.length);
     localXYPlot.setDomainAxis(localSymbolAxis);
 
-/*
     final XYBarRenderer localXYBarRenderer = (XYBarRenderer) localXYPlot.getRenderer();
     // remove Annotations :
     localXYBarRenderer.removeAnnotations();
 
     // add the Annotations :
+    // 24h date formatter :
+    final DateFormat df = DateFormat.getTimeInstance(DateFormat.SHORT, Locale.FRANCE);
 
-    // 0D corresponds to the first Star :
-    final XYPointerAnnotation localXYPointerAnnotation1 = new XYPointerAnnotation("TEST", 0D, new Hour(13, new Day()).getFirstMillisecond(), Math.PI / 2d);
-    localXYPointerAnnotation1.setTextAnchor(TextAnchor.BOTTOM_LEFT);
-    localXYPointerAnnotation1.setPaint(Color.black);
-    localXYPointerAnnotation1.setArrowPaint(Color.black);
-    localXYBarRenderer.addAnnotation(localXYPointerAnnotation1);
-     */
+    i = 0;
+    for (StarObservability so : starVis) {
+
+      for (DateTimeInterval interval : so.getVisible()) {
+
+        if (!interval.getStartDate().equals(min)) {
+          final XYTextAnnotation aStart = new XYTextAnnotation(df.format(interval.getStartDate()), i, interval.getStartDate().getTime());
+          aStart.setTextAnchor(TextAnchor.BASELINE_CENTER);
+          aStart.setPaint(Color.BLACK);
+          aStart.setRotationAngle(Math.PI / 2);
+          localXYBarRenderer.addAnnotation(aStart);
+        }
+
+        if (!interval.getEndDate().equals(max)) {
+          final XYTextAnnotation aEnd = new XYTextAnnotation(df.format(interval.getEndDate()), i, interval.getEndDate().getTime());
+          aEnd.setTextAnchor(TextAnchor.BASELINE_CENTER);
+          aEnd.setPaint(Color.BLACK);
+          aEnd.setRotationAngle(Math.PI / 2);
+          localXYBarRenderer.addAnnotation(aEnd);
+        }
+      }
+
+      i++;
+    }
   }
 
   private void updateDateAxis(final String label, final Date from, final Date to) {

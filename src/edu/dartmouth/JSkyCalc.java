@@ -1572,21 +1572,21 @@ class Celest implements Cloneable {
     enough for most puropses. */
     double ti, tf, zeta, z, theta;
     double cosz, coszeta, costheta, sinz, sinzeta, sintheta;
-    double[][] p = {{0., 0., 0.,}, {0., 0., 0.}, {0., 0., 0.}};
-    double[] orig = {0., 0., 0.};
-    double[] fin = {0., 0., 0.};
+    double[][] p = new double[3][3];
+    double[] orig = new double[3];
+    double[] fin = new double[3];
 
     int i, j;
 
 
     //System.out.printf("equinoxes %f %f\n",Equinox,NewEquinox);
-    ti = (Equinox - 2000.) / 100.;
-    tf = (NewEquinox - 2000. - 100. * ti) / 100.;
+    ti = (Equinox - 2000d) / 100d;
+    tf = (NewEquinox - 2000d - 100d * ti) / 100d;
 
-    zeta = (2306.2181 + 1.39656 * ti + 0.000139 * ti * ti) * tf +
-            (0.30188 - 0.000344 * ti) * tf * tf + 0.017998 * tf * tf * tf;
-    z = zeta + (0.79280 + 0.000410 * ti) * tf * tf + 0.000205 * tf * tf * tf;
-    theta = (2004.3109 - 0.8533 * ti - 0.000217 * ti * ti) * tf - (0.42665 + 0.000217 * ti) * tf * tf - 0.041833 * tf * tf * tf;
+    zeta = (2306.2181d + 1.39656d * ti + 0.000139d * ti * ti) * tf +
+            (0.30188d - 0.000344d * ti) * tf * tf + 0.017998d * tf * tf * tf;
+    z = zeta + (0.79280d + 0.000410d * ti) * tf * tf + 0.000205d * tf * tf * tf;
+    theta = (2004.3109d - 0.8533d * ti - 0.000217d * ti * ti) * tf - (0.42665d + 0.000217d * ti) * tf * tf - 0.041833d * tf * tf * tf;
 
     cosz = Math.cos(z / Const.ARCSEC_IN_RADIAN);
     coszeta = Math.cos(zeta / Const.ARCSEC_IN_RADIAN);
@@ -1596,20 +1596,23 @@ class Celest implements Cloneable {
     sintheta = Math.sin(theta / Const.ARCSEC_IN_RADIAN);
 
     p[0][0] = coszeta * cosz * costheta - sinzeta * sinz;
-    p[0][1] = -1. * sinzeta * cosz * costheta - coszeta * sinz;
-    p[0][2] = -1. * cosz * sintheta;
+    p[0][1] = -1d * sinzeta * cosz * costheta - coszeta * sinz;
+    p[0][2] = -1d * cosz * sintheta;
 
     p[1][0] = coszeta * sinz * costheta + sinzeta * cosz;
-    p[1][1] = -1. * sinzeta * sinz * costheta + coszeta * cosz;
-    p[1][2] = -1. * sinz * sintheta;
+    p[1][1] = -1d * sinzeta * sinz * costheta + coszeta * cosz;
+    p[1][2] = -1d * sinz * sintheta;
 
     p[2][0] = coszeta * sintheta;
-    p[2][1] = -1. * sinzeta * sintheta;
+    p[2][1] = -1d * sinzeta * sintheta;
     p[2][2] = costheta;
 
-    orig[0] = Math.cos(Delta.radians()) * Math.cos(Alpha.radians());
-    orig[1] = Math.cos(Delta.radians()) * Math.sin(Alpha.radians());
-    orig[2] = Math.sin(Delta.radians());
+    final double alpha = Alpha.radians();
+    final double delta = Delta.radians();
+
+    orig[0] = Math.cos(delta) * Math.cos(alpha);
+    orig[1] = Math.cos(delta) * Math.sin(alpha);
+    orig[2] = Math.sin(delta);
 
     for (i = 0; i < 3; i++) {  // matrix multiplication
       fin[i] = 0.;
@@ -1918,6 +1921,7 @@ class Site implements Cloneable {
     this.lat = new latitude(lat);
     /** approximate the time zone offset : used by nightly almanach */
     this.stdz = Math.floor(lon);
+    // no daylight saving time :
     this.use_dst = 0;
     this.timezone_name = "";
     this.zone_abbrev = "";
