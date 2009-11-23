@@ -22,9 +22,9 @@
     <attribute name="package"/>
 
     <sequential>
-      <java jar="${libs}/jaxb/jaxb-xjc.jar">
+      <java jar="${libs}/jaxb-xjc.jar">
         <arg value="-classpath"/>
-        <arg value="${libs}/jaxb/simple-regenerator-1.0.jar"/>
+        <arg value="${libs}/simple-regenerator-1.0.jar"/>
 
         <arg value="-no-header"/>
 
