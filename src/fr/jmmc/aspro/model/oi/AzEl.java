@@ -1,9 +1,11 @@
+
 package fr.jmmc.aspro.model.oi;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
 import fr.jmmc.aspro.model.OIBase;
+
 
 /**
  * 
@@ -31,47 +33,48 @@ import fr.jmmc.aspro.model.OIBase;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "AzEl", propOrder = {
-  "azimuth",
-  "elevation"
+    "azimuth",
+    "elevation"
 })
 public class AzEl
-        extends OIBase {
+    extends OIBase
+{
 
-  protected double azimuth;
-  protected double elevation;
+    protected double azimuth;
+    protected double elevation;
 
-  /**
-   * Gets the value of the azimuth property.
-   *
-   */
-  public double getAzimuth() {
-    return azimuth;
-  }
+    /**
+     * Gets the value of the azimuth property.
+     * 
+     */
+    public double getAzimuth() {
+        return azimuth;
+    }
 
-  /**
-   * Sets the value of the azimuth property.
-   *
-   */
-  public void setAzimuth(double value) {
-    this.azimuth = value;
-  }
+    /**
+     * Sets the value of the azimuth property.
+     * 
+     */
+    public void setAzimuth(double value) {
+        this.azimuth = value;
+    }
 
-  /**
-   * Gets the value of the elevation property.
-   *
-   */
-  public double getElevation() {
-    return elevation;
-  }
+    /**
+     * Gets the value of the elevation property.
+     * 
+     */
+    public double getElevation() {
+        return elevation;
+    }
 
-  /**
-   * Sets the value of the elevation property.
-   *
-   */
-  public void setElevation(double value) {
-    this.elevation = value;
-  }
-
+    /**
+     * Sets the value of the elevation property.
+     * 
+     */
+    public void setElevation(double value) {
+        this.elevation = value;
+    }
+    
 //--simple--preserve
   /**
    * Empty constructor for JAXB
@@ -86,4 +89,5 @@ public class AzEl
     this.elevation = el;
   }
 //--simple--preserve
+
 }

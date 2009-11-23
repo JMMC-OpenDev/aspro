@@ -1,3 +1,4 @@
+
 package fr.jmmc.aspro.model.oi;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -9,6 +10,7 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import fr.jmmc.aspro.model.OIBase;
+
 
 /**
  * 
@@ -36,45 +38,47 @@ import fr.jmmc.aspro.model.OIBase;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "Channel", propOrder = {
-  "name"
+    "name"
 })
 public class Channel
-        extends OIBase {
+    extends OIBase
+{
 
-  @XmlElement(required = true)
-  @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
-  @XmlID
-  @XmlSchemaType(name = "ID")
-  protected String name;
+    @XmlElement(required = true)
+    @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
+    @XmlID
+    @XmlSchemaType(name = "ID")
+    protected String name;
 
-  /**
-   * Gets the value of the name property.
-   *
-   * @return
-   *     possible object is
-   *     {@link String }
-   *
-   */
-  public String getName() {
-    return name;
-  }
+    /**
+     * Gets the value of the name property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getName() {
+        return name;
+    }
 
-  /**
-   * Sets the value of the name property.
-   *
-   * @param value
-   *     allowed object is
-   *     {@link String }
-   *
-   */
-  public void setName(String value) {
-    this.name = value;
-  }
-
+    /**
+     * Sets the value of the name property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setName(String value) {
+        this.name = value;
+    }
+    
 //--simple--preserve
   @Override
   public String toString() {
     return "Channel : " + ((this.name != null) ? this.name : "undefined");
   }
 //--simple--preserve
+
 }

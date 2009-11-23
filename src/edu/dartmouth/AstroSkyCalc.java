@@ -29,8 +29,8 @@ public class AstroSkyCalc {
   private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
 
-  /** lst to jd ratio */
-  private static double LST_TO_JD = 24d * Const.SID_RATE;
+  /** time ratio : lst to jd */
+  public static double LST_TO_JD = 24d * Const.SID_RATE;
 
   /* members */
   /** site location */
@@ -280,10 +280,12 @@ public class AstroSkyCalc {
 
   /**
    * Define a target by its RA/dec coordinates in degrees
+   * @param jd julian date corresponding to LST = 0
    * @param ra right ascension (deg)
    * @param dec declination (deg)
+   * @return double[] containing ra (dec hours) / dec (deg)
    */
-  public void defineTarget(final double ra, final double dec) {
+  public double[] defineTarget(final double jdLst0, final double ra, final double dec) {
 
     // RA (decimal hours), DEC (degrees)
     final Celest target = new Celest(deg2hours(ra), dec, AsproConstants.EPOCH_J2000);
@@ -292,9 +294,19 @@ public class AstroSkyCalc {
       logger.fine("Target [RA/DEC/EPOCH] :" + target.checkstring());
     }
 
+    // define jd :
+    this.when.ChangeWhen(jdLst0);
+
     this.observation = new Observation(this.when, target);
+
+    return new double[] {this.observation.current.Alpha.value, this.observation.current.Delta.value};
   }
 
+  /**
+   * Return the current target position (azimuth / elevation) in degrees
+   * @param jd julian date
+   * @return azimuth / elevation in degrees
+   */
   public AzEl getTargetPosition(final double jd) {
 
     this.observation.w.ChangeWhen(jd);
@@ -306,68 +318,42 @@ public class AstroSkyCalc {
     logger.fine("az|alt   : " + this.observation.azimuth + " " + this.observation.altitude);
     }
      */
-    return new AzEl(deg2rad(this.observation.azimuth), deg2rad(this.observation.altitude));
+    return new AzEl(this.observation.azimuth, this.observation.altitude);
   }
 
   public void getTargetMinMaxAlt() {
     final double[] minmax = Spherical.min_max_alt(this.site.lat.value, this.observation.current.Delta.value);
 
     // degrees :
-    logger.info("min/max alt = " + minmax[0] + " / " + minmax[1]);
+    if (logger.isLoggable(Level.INFO)) {
+      logger.info("min/max alt = " + minmax[0] + " / " + minmax[1]);
+    }
   }
 
   /**
    * Computes the hour angle corresponding to the given elevation for the current target
-   * @param jd julian date corresponding to LST = 0
+   * @param dec target declination (corrected for the given julian date)
    * @param minElev min elevation (rad)
-   * @return array of double [jd_rise;jd_set]
+   * @return hour angle or -1 if the target never reaches this elevation
    */
-  public double[] getTimeIntervalForAltitude(final double jdLst0, final double minElev) {
-
-    this.observation.w.ChangeWhen(jdLst0);
-    this.observation.ComputeSky();
+  public double getHAForElevation(final double dec, final double minElev) {
 
     if (logger.isLoggable(Level.INFO)) {
       getTargetMinMaxAlt();
-    }
-
-    final double dec = this.observation.current.Delta.value;
-    final double ra = this.observation.current.Alpha.value;
-
-    if (logger.isLoggable(Level.INFO)) {
-      logger.info("ra  = " + ra);
-      logger.info("dec = " + dec);
     }
 
     final double ha = Spherical.ha_alt(dec, this.site.lat.value, Math.toDegrees(minElev));
 
     if (ha == -1000d || ha == 1000d) {
       // impossible to determine ha :
-      return null;
+      return -1d;
     }
 
     if (logger.isLoggable(Level.INFO)) {
       logger.info("ha = " + ha);
     }
 
-    final double lstRise = ra - ha;
-    final double lstSet = ra + ha;
-
-    if (logger.isLoggable(Level.INFO)) {
-      logger.info("lst rise = " + lstRise + " h");
-      logger.info("lst set = " + lstSet + " h");
-    }
-
-    // apply the sideral / solar ratio :
-    final double jdRise = jdLst0 + lstRise / LST_TO_JD;
-    final double jdSet = jdLst0 + lstSet / LST_TO_JD;
-
-    if (logger.isLoggable(Level.INFO)) {
-      logger.info("rise = " + toDate(jdRise, true));
-      logger.info("set = " + toDate(jdSet, true));
-    }
-
-    return new double[]{jdRise, jdSet};
+    return ha;
   }
 
   /* utility methods */
@@ -381,5 +367,14 @@ public class AstroSkyCalc {
 
   public static double deg2rad(final double angdeg) {
     return Math.toRadians(angdeg);
+  }
+
+  /**
+   * Converts lst hours to jd hours
+   * @param lst dec hours in LST
+   * @return dec hours in JD
+   */
+  public static double lst2jd(final double lst) {
+    return lst / AstroSkyCalc.LST_TO_JD;
   }
 }

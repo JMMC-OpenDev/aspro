@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.9 2009-11-20 16:55:47 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.10 2009-11-23 16:49:17 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.9  2009/11/20 16:55:47  bourgesl
+ * Added Beam / Delay Line definition
+ * ObservabilityService is stateless to simplify coding
+ *
  * Revision 1.8  2009/11/17 17:00:28  bourgesl
  * chosen instrument configuration propagated to observation
  *
@@ -45,6 +49,7 @@ import fr.jmmc.aspro.model.ObservabilityData;
 import fr.jmmc.aspro.model.Range;
 import fr.jmmc.aspro.model.StarObservability;
 import fr.jmmc.aspro.model.SunTimeInterval;
+import fr.jmmc.aspro.model.oi.AzEl;
 import fr.jmmc.aspro.model.oi.Channel;
 import fr.jmmc.aspro.model.oi.ChannelLink;
 import fr.jmmc.aspro.model.oi.DelayLine;
@@ -54,6 +59,7 @@ import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.StationLinks;
 import fr.jmmc.aspro.model.oi.Target;
+import fr.jmmc.aspro.service.HorizonService.Profile;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -87,6 +93,8 @@ public class ObservabilityService {
   private boolean useLST;
   /** minimum of elevation to observe any target (rad) */
   private double minElev;
+  /** flag to enable the observability restriction due to the night */
+  private boolean useNightLimit = true;
 
   /* internal */
   /** sky calc instance */
@@ -101,21 +109,23 @@ public class ObservabilityService {
   private FocalInstrument instrument;
   /** beam list */
   private List<Beam> beams;
+  /** flag to indicate that stations have horizon profile */
+  private boolean doCheckHorizon = false;
   /** base line list */
   private List<BaseLine> baseLines = new ArrayList<BaseLine>();
   /** W ranges */
   private List<Range> wRanges = new ArrayList<Range>();
+  /** Night ranges defined in julian day */
+  private List<Range> nightLimits = null;
 
   /**
    * This service is stateless so it can not be reused
    */
   public ObservabilityService(final ObservationSetting observation, final boolean useLST, final double minElev) {
-
     // Inputs :
     this.observation = observation;
     this.useLST = useLST;
     this.minElev = minElev;
-
   }
 
   /**
@@ -159,7 +169,7 @@ public class ObservabilityService {
         return null;
       }
 
-      // 0 - Trouver l'origine LST=0 par rapport a la date donnee :
+      // 0 - Find the julian date corresponding to the LST origin LST=0 for the given date :
       this.jdLst0 = this.sc.findLst0();
       // warning : in LST, remove 1s to avoid 00:00:00 :
       this.jdLst24 = this.sc.findLst0(this.jdLst0 + 1d) - 1d / 86400d;
@@ -182,19 +192,20 @@ public class ObservabilityService {
         return null;
       }
 
-      // 1 - Trouver la nuit : sun rise/set with twilight : see NightlyAlmanac
-      // indicateur pour cette date mais ne pas se limiter a la nuit et utiliser le domaine LST [0;24h]
+      // 1 - Find the day / twlight / night zones : sun rise/set with twilight : see NightlyAlmanac
+      // Anyway use the LST range [0;24h]
+      if (useNightLimit) {
+        final List<SunAlmanachTime> sunEvents = this.sc.findSunRiseSet(this.jdLst0, this.jdLst24);
 
-      final List<SunAlmanachTime> sunEvents = this.sc.findSunRiseSet(this.jdLst0, this.jdLst24);
-
-      processSunAlmanach(sunEvents);
+        processSunAlmanach(sunEvents);
+      }
 
       // fast interrupt :
       if (currentThread.isInterrupted()) {
         return null;
       }
 
-      // 2 - Pour chaque source, etudier sa progression en altitude (degrees) pour voir ensuite si cet angle est possible avec les telescopes ...
+      // 2 - Observability per target :
 
       if (this.observation.getTargets().isEmpty()) {
         if (logger.isLoggable(Level.FINE)) {
@@ -206,23 +217,7 @@ public class ObservabilityService {
 
         StarObservability starObs;
 
-        /*
-        DateTimeInterval interval;
-
-        AzAlt azAlt;
-        boolean last = false;
-        boolean overHorizon = false;
-        boolean visible = false;
-
-        double jd;
-
-        // 1 minutes :
-        final double jdStep = (1d / 3600d) / 24d;
-         */
-
         for (Target target : this.observation.getTargets()) {
-
-          this.sc.defineTarget(target.getRA(), target.getDEC());
 
           starObs = new StarObservability(target.getName());
           starVis.add(starObs);
@@ -232,97 +227,42 @@ public class ObservabilityService {
             return null;
           }
 
-          findTargetObservability(starObs.getVisible());
+          findTargetObservability(target, starObs.getVisible());
 
           // solve baseline limits :
 
           // check horizon profiles
 
-    /*
-     CALL PLOT_HORIZON(XXX,YYY,ZZZ,TTT,SNAM,THROW,KKK,
-     &        PROJECT,ERROR)
-
-    CALL DL_INTERVAL_LIST(TTT,THROW,KKK,RIGHTA(I),DECLIN(I),LATITUD,
-     &  HORIZ(1),iTw,
-     &  XXX,YYY,ZZZ,SNAM,HLONGLIST,NHLIST,MEMORY(IPWH),
-     &  MEMORY(IPWHI),MEMORY(IPIWH))
-
-      SUBROUTINE DL_INTERVAL_LIST(WMIN,WMAX,M,RA,D,LAT,Elev,iTw,
-     &     X,Y,Z,SNAM,
-     &     HLIST,N,
-     &     WH,WHI,IWH)
-
-     !     -----------------------------------------------------------------------
-    !     Finds the intervals in hour angle where w(h) is .GE.WMIN AND .LE.WMAX
-    !     for ALL the WMIN and WMAX (and corresponding X Y & Z).
-    !     Result is a list of start-end times in HLIST
-    !     WH and IWH are work arrays of size 6*M
-    !     -----------------------------------------------------------------------
-     */
-
-
-
-
-
+          // finally : merge intervals and return date intervals :
 
           /*
-          jd = jdMin;
+          CALL PLOT_HORIZON(XXX,YYY,ZZZ,TTT,SNAM,THROW,KKK,
+          &        PROJECT,ERROR)
 
-          last = false;
-          overHorizon = false;
-          visible = false;
-          interval = new DateTimeInterval();
+          CALL DL_INTERVAL_LIST(TTT,THROW,KKK,RIGHTA(I),DECLIN(I),LATITUD,
+          &  HORIZ(1),iTw,
+          &  XXX,YYY,ZZZ,SNAM,HLONGLIST,NHLIST,MEMORY(IPWH),
+          &  MEMORY(IPWHI),MEMORY(IPIWH))
 
-          while (jd < jdMax) {
+          SUBROUTINE DL_INTERVAL_LIST(WMIN,WMAX,M,RA,D,LAT,Elev,iTw,
+          &     X,Y,Z,SNAM,
+          &     HLIST,N,
+          &     WH,WHI,IWH)
 
-          // fast interrupt :
-          if (currentThread.isInterrupted()) {
-          return null;
-          }
-
-          azAlt = this.sc.getTargetPosition(jd);
-
-          overHorizon = azAlt.getAltitude() > minElevRad;
-
-          if (overHorizon) {
-          // Check Shadowing for every stations
-          // Base lines : vector
-          // Check delay lines / switchyard / pops ?
-
-          visible = true;
-          } else {
-          visible = false;
-          }
-
-          // manage intervals :
-          if (visible) {
-          if (!last) {
-          last = true;
-          // start point
-          interval.setStartDate(jdToDate(jd));
-          }
-          } else {
-          if (last) {
-          last = false;
-          // end point
-          interval.setEndDate(jdToDate(jd));
-          intervals.add(interval);
-          interval = new DateTimeInterval();
-          }
-          }
-
-          //
-          jd += jdStep;
-          }
-
-          // close last interval if open :
-          if (interval.getStartDate() != null) {
-          interval.setEndDate(jdToDate(jdMax));
-          intervals.add(interval);
-          }
-
+          !     -----------------------------------------------------------------------
+          !     Finds the intervals in hour angle where w(h) is .GE.WMIN AND .LE.WMAX
+          !     for ALL the WMIN and WMAX (and corresponding X Y & Z).
+          !     Result is a list of start-end times in HLIST
+          !     WH and IWH are work arrays of size 6*M
+          !     -----------------------------------------------------------------------
            */
+
         } // for Target
+
+        // fast interrupt :
+        if (currentThread.isInterrupted()) {
+          return null;
+        }
 
         // dump star visibilities :
         if (logger.isLoggable(Level.INFO)) {
@@ -356,6 +296,7 @@ public class ObservabilityService {
       intervals = new ArrayList<SunTimeInterval>(nbInterval);
 
       SunAlmanachTime stFrom, stTo;
+      double jdFrom, jdTo;
       Date from, to;
       SunTimeInterval.SunType type = null;
 
@@ -363,8 +304,11 @@ public class ObservabilityService {
         stFrom = sunEvents.get(i);
         stTo = sunEvents.get(i + 1);
 
-        from = jdToDate(stFrom.getJd());
-        to = jdToDate(stTo.getJd());
+        jdFrom = stFrom.getJd();
+        jdTo = stTo.getJd();
+
+        from = jdToDate(jdFrom);
+        to = jdToDate(jdTo);
 
         switch (stFrom.getType()) {
           case SunRise:
@@ -387,67 +331,144 @@ public class ObservabilityService {
         }
 
         intervals.add(new SunTimeInterval(from, to, type));
+
+        if (type == SunTimeInterval.SunType.Night) {
+          if (nightLimits == null) {
+            nightLimits = new ArrayList<Range>(2);
+          }
+          nightLimits.add(new Range(jdFrom, jdTo));
+        }
+
       }
     }
 
     this.data.setSunIntervals(intervals);
   }
 
-  private void findTargetObservability(final List<DateTimeInterval> intervals) {
+  private void findTargetObservability(final Target target, final List<DateTimeInterval> intervals) {
 
-    DateTimeInterval interval;
+    // Target coordinates precessed to jd :
+    double[] raDec = this.sc.defineTarget(jdLst0, target.getRA(), target.getDEC());
 
-    // Find lst interval corresponding to the rise / set of the target :
+    // target right ascension in decimal hours :
+    double ra = raDec[0];
 
-    final double[] jdInterval = this.sc.getTimeIntervalForAltitude(this.jdLst0, this.minElev);
-    if (jdInterval != null) {
-      final double jdRise = jdInterval[0];
-      final double jdSet = jdInterval[1];
+    // target declination in degrees :
+    double dec = raDec[1];
 
-      if (jdRise > this.jdLst0) {
+    // Find LST range corresponding to the rise / set of the target :
+    final double haElev = this.sc.getHAForElevation(dec, this.minElev);
 
-        if (jdSet < this.jdLst24) {
+    if (haElev > 0d) {
+      // observable ranges :
+      final List<Range> obsRanges = new ArrayList<Range>();
 
-          // single interval [jdRise;jdSet]
-          interval = new DateTimeInterval();
-          interval.setStartDate(jdToDate(jdRise));
-          interval.setEndDate(jdToDate(jdSet));
-          intervals.add(interval);
+      // rise/set range :
+      final Range rangeHARiseSet = new Range(-haElev, haElev);
 
-        } else {
+      final Range rangeJDRiseSet = convertHARange(rangeHARiseSet, ra);
 
-          // interval [jdRise;jdMax]
-          interval = new DateTimeInterval();
-          interval.setStartDate(jdToDate(jdRise));
-          interval.setEndDate(jdToDate(this.jdLst24));
-          intervals.add(interval);
+      if (doCheckHorizon) {
+        // check horizon profiles :
+        final List<Range> hozRanges = checkHorizonProfile(rangeJDRiseSet);
 
-          // add the second interval [jdMin;jdSet - 1]
-
-          interval = new DateTimeInterval();
-          interval.setStartDate(jdToDate(this.jdLst0));
-          interval.setEndDate(jdToDate(jdSet - 1d));
-          intervals.add(interval);
-        }
-
+        obsRanges.addAll(hozRanges);
       } else {
-        // rise occurs before jd0 :
 
-        // interval [jdMin;jdSet]
-        interval = new DateTimeInterval();
-        interval.setStartDate(jdToDate(this.jdLst0));
-        interval.setEndDate(jdToDate(jdSet));
-        intervals.add(interval);
+        // TODO : Check Shadowing for every stations ?
 
-        // add the second interval [jdRise + 1;jdMax]
+        obsRanges.add(rangeJDRiseSet);
+      }
 
-        interval = new DateTimeInterval();
-        interval.setStartDate(jdToDate(jdRise + 1d));
-        interval.setEndDate(jdToDate(this.jdLst24));
-        intervals.add(interval);
+      // TODO : Intersect Rise/Set with night limits (merge operation)
+
+      for (Range range : obsRanges) {
+        convertRangeToDateInterval(range, intervals);
+      }
+    } else {
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("Target never rise : " + target);
+      }
+    }
+  }
+
+  private List<Range> checkHorizonProfile(final Range jdRiseSet) {
+    // output :
+    final List<Range> hozRanges = new ArrayList<Range>();
+
+    // Get the current thread to check if the computation is interrupted :
+    final Thread currentThread = Thread.currentThread();
+
+    // Prepare profiles :
+    final HorizonService hs = HorizonService.getInstance();
+
+    final List<Profile> profiles = new ArrayList<Profile>(this.beams.size());
+
+    for (Beam b : this.beams) {
+      profiles.add(hs.getProfile(this.interferometer.getName(), b.getStation()));
+    }
+
+    // 1 minutes :
+    final double jdStep = (1d / 60d) / 24d;
+
+    final double jdMin = jdRiseSet.getMin();
+    final double jdMax = jdRiseSet.getMax();
+
+    AzEl azEl;
+    boolean visible = false;
+    boolean last = false;
+
+    Range range = new Range();
+
+    for (double jd = jdMin; jd < jdMax; jd += jdStep) {
+
+      // fast interrupt :
+      if (currentThread.isInterrupted()) {
+        return null;
+      }
+
+      azEl = this.sc.getTargetPosition(jd);
+
+      // For every beam (station) :
+      // check if there is no horizon obstruction :
+      visible = true;
+
+      for (Profile p : profiles) {
+        if (!hs.checkProfile(p, azEl.getAzimuth(), azEl.getElevation())) {
+          if (logger.isLoggable(Level.INFO)) {
+            logger.info("target is hidden by horizon profile = " + p.getName() + " [" +
+                    azEl.getAzimuth() + ", " + azEl.getElevation() + "] @ " +this.sc.toDate(jd, true));
+          }
+          visible = false;
+          break;
+        }
+      }
+
+      // manage intervals :
+      if (visible) {
+        if (!last) {
+          last = true;
+          // start point
+          range.setMin(jd);
+        }
+      } else {
+        if (last) {
+          last = false;
+          // end point
+          range.setMax(jd);
+          hozRanges.add(range);
+          range = new Range();
+        }
       }
     }
 
+    // close last interval if opened :
+    if (range.getMin() > 0d) {
+      range.setMax(jdMax);
+      hozRanges.add(range);
+    }
+
+    return hozRanges;
   }
 
   private void prepareObservation() {
@@ -475,6 +496,10 @@ public class ObservabilityService {
 
     for (Station s : stations) {
       this.beams.add(new Beam(s));
+
+      if (s.getHorizon() != null) {
+        doCheckHorizon = true;
+      }
     }
 
     // Get delay Lines :
@@ -520,31 +545,31 @@ public class ObservabilityService {
       }
 
 
-    /*
-    DO I=1,OBS_NDL
-    DLALLOCATED(I)=.FALSE.
-    ENDDO
-    CHAIN='I-HORIZON, No DLs specified, using: '
-    LC = LENC(CHAIN)
-    !     ...following the SW possibilities...
-    DO I=1,NSTAT
-    DO J=1,OBS_NDL
-    IF ((.NOT.DLALLOCATED(J)).AND.
-    &              SWITCH_OPD(J,SLIST(I)).NE.SWITCH_BLANK) THEN
-    DLALLOCATED(J)=.TRUE.
-    DLLIST(I)=J
-    T(I) = SWITCH_OPD(DLLIST(I),SLIST(I))
-    !     Add pops value
-    IF (DDO_POPS) THEN
-    write(*,*) 'adding pops[',i,']=',MYPOPS(I)
-    T(I) = T(I) + MYPOPS(I)
-    ENDIF
-    WRITE(CHAIN(LC+1:),'(A,A)') DL_NAME(DLLIST(I)),','
-    LC = LENC(CHAIN)
-    GOTO 22
-    ENDIF
-    ENDDO
-    */
+      /*
+      DO I=1,OBS_NDL
+      DLALLOCATED(I)=.FALSE.
+      ENDDO
+      CHAIN='I-HORIZON, No DLs specified, using: '
+      LC = LENC(CHAIN)
+      !     ...following the SW possibilities...
+      DO I=1,NSTAT
+      DO J=1,OBS_NDL
+      IF ((.NOT.DLALLOCATED(J)).AND.
+      &              SWITCH_OPD(J,SLIST(I)).NE.SWITCH_BLANK) THEN
+      DLALLOCATED(J)=.TRUE.
+      DLLIST(I)=J
+      T(I) = SWITCH_OPD(DLLIST(I),SLIST(I))
+      !     Add pops value
+      IF (DDO_POPS) THEN
+      write(*,*) 'adding pops[',i,']=',MYPOPS(I)
+      T(I) = T(I) + MYPOPS(I)
+      ENDIF
+      WRITE(CHAIN(LC+1:),'(A,A)') DL_NAME(DLLIST(I)),','
+      LC = LENC(CHAIN)
+      GOTO 22
+      ENDIF
+      ENDDO
+       */
 
       // Associate a delay line to the beam :
       // Simple association between DL / Channel = DL_n linked to Channel_n
@@ -591,7 +616,7 @@ public class ObservabilityService {
 
     // TODO : Pops for CHARA :
 
-     /*
+    /*
      *     Zero MyPops First
      *     DO I=1,NSTAT
      *        MYPOPS(I)=0.0
@@ -624,7 +649,7 @@ public class ObservabilityService {
 
     Beam b1, b2;
 
-    double x,y,z,t, wMin, wMax;
+    double x, y, z, t, wMin, wMax;
     for (int i = 0; i < nBeams; i++) {
       for (int j = i + 1; j < nBeams; j++) {
         b1 = this.beams.get(i);
@@ -635,26 +660,116 @@ public class ObservabilityService {
         z = b1.getStation().getRelativePosition().getPosZ() - b2.getStation().getRelativePosition().getPosZ();
 
         t = b1.getOpticalLength() - b2.getOpticalLength();
-        
+
         // 2 DL for 2 telescopes => double throw :
         // note : for now, all DLs are equivalent (same throw).
 
         wMin = t - b2.getDelayLine().getMaximumThrow();
         wMax = t + b1.getDelayLine().getMaximumThrow();
 
-/*
+        /*
         XXX(KKK)= -STATX(SLIST(J))+STATX(SLIST(I))
         YYY(KKK)= -STATY(SLIST(J))+STATY(SLIST(I))
         ZZZ(KKK)= -STATZ(SLIST(J))+STATZ(SLIST(I))
         TTT(KKK)= T(I)-T(J)-DL_THROW(DLLIST(J))
         THROW(KKK)= T(I)-T(J)+DL_THROW(DLLIST(I))
- */
+         */
 
         this.baseLines.add(new BaseLine(b1, b2, x, y, z));
 
         this.wRanges.add(new Range(wMin, wMax));
       }
     }
+  }
+
+  /**
+   * Converts an HA range to a JD range
+   * @param range given in hour angle (dec hours)
+   * @param right ascension (dec hours)
+   * @return JD range
+   */
+  private Range convertHARange(final Range rangeHA, final double ra) {
+
+    final double ha1 = rangeHA.getMin();
+    final double ha2 = rangeHA.getMax();
+
+    if (logger.isLoggable(Level.INFO)) {
+      logger.info("ha1 = " + ha1);
+      logger.info("ha2 = " + ha2);
+    }
+
+    final double lst1 = ra + ha1;
+    final double lst2 = ra + ha2;
+
+    if (logger.isLoggable(Level.INFO)) {
+      logger.info("lst1 = " + lst1 + " h");
+      logger.info("lst2 = " + lst2 + " h");
+    }
+
+    // apply the sideral / solar ratio :
+    final double jd1 = this.jdLst0 + AstroSkyCalc.lst2jd(lst1);
+    final double jd2 = this.jdLst0 + AstroSkyCalc.lst2jd(lst2);
+
+    if (logger.isLoggable(Level.INFO)) {
+      logger.info("jd1 = " + this.sc.toDate(jd1, true));
+      logger.info("jd2 = " + this.sc.toDate(jd2, true));
+    }
+
+    return new Range(jd1, jd2);
+  }
+
+  private void convertRangeToDateInterval(final Range rangeJD, final List<DateTimeInterval> intervals) {
+    DateTimeInterval interval;
+
+    final double jdStart = rangeJD.getMin();
+    final double jdEnd = rangeJD.getMax();
+
+    if (jdStart > this.jdLst0) {
+
+      if (jdEnd < this.jdLst24) {
+
+        // single interval [jdStart;jdEnd]
+        interval = new DateTimeInterval();
+        interval.setStartDate(jdToDate(jdStart));
+        interval.setEndDate(jdToDate(jdEnd));
+        intervals.add(interval);
+
+      } else {
+        // end occurs after jdLst24 :
+
+        // interval [jdStart;jdLst24]
+        interval = new DateTimeInterval();
+        interval.setStartDate(jdToDate(jdStart));
+        interval.setEndDate(jdToDate(this.jdLst24));
+        intervals.add(interval);
+
+        // add the second interval [jdLst0;jdEnd - 1]
+        // note : -1 means one day before
+
+        interval = new DateTimeInterval();
+        interval.setStartDate(jdToDate(this.jdLst0));
+        interval.setEndDate(jdToDate(jdEnd - 1d));
+        intervals.add(interval);
+      }
+
+    } else {
+      // start occurs before jdLst0 :
+
+      // interval [jdLst0;jdEnd]
+      interval = new DateTimeInterval();
+      interval.setStartDate(jdToDate(this.jdLst0));
+      interval.setEndDate(jdToDate(jdEnd));
+      intervals.add(interval);
+
+      // add the second interval [jdStart + 1;jdLst24]
+      // note : +1 means one day after
+
+      interval = new DateTimeInterval();
+      interval.setStartDate(jdToDate(jdStart + 1d));
+      interval.setEndDate(jdToDate(this.jdLst24));
+      intervals.add(interval);
+    }
+
   }
 
   private Date jdToDate(final double jd) {
