@@ -1,18 +1,24 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: DelayLineService.java,v 1.1 2009-11-24 15:12:09 bourgesl Exp $"
+ * "@(#) $Id: DelayLineService.java,v 1.2 2009-11-24 16:30:54 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
-*/
+ * Revision 1.1  2009/11/24 15:12:09  bourgesl
+ * first step to handle delay line limits
+ *
+ */
 package fr.jmmc.aspro.service;
 
 import fr.jmmc.aspro.model.BaseLine;
 import fr.jmmc.aspro.model.Range;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.logging.Level;
 
 /**
  * This class manages the computation to find the base line limits
@@ -27,7 +33,8 @@ public class DelayLineService {
           className_);
 
   /**
-   * Return the intervals (hour angles) for all base lines compatible with wMin < w(h) < wMax given by wRanges
+   * Return the intervals (hour angles) for all base lines compatible with wMin < w(h) < wMax,
+   * wMin and wMax are given by wRanges
    *
    * see astro_delayline.DL_INTERVAL_LIST(...)
    *
@@ -45,7 +52,7 @@ public class DelayLineService {
 
     final int size = baseLines.size();
 
-    List<List<Range>> rangesBL = new ArrayList<List<Range>>();
+    final List<List<Range>> rangesBL = new ArrayList<List<Range>>();
 
     BaseLine bl;
     Range wRange;
@@ -63,26 +70,8 @@ public class DelayLineService {
 
     // Intersect all intervals :
 
+    logger.severe("rangesBL : " + rangesBL);
 
-    /*
-
-    CALL DL_INTERVAL_LIST(TTT,THROW,KKK,RIGHTA(I),DECLIN(I),LATITUD,
-    &  HORIZ(1),iTw,
-    &  XXX,YYY,ZZZ,SNAM,HLONGLIST,NHLIST,MEMORY(IPWH),
-    &  MEMORY(IPWHI),MEMORY(IPIWH))
-
-    SUBROUTINE DL_INTERVAL_LIST(WMIN,WMAX,M,RA,D,LAT,Elev,iTw,
-    &     X,Y,Z,SNAM,
-    &     HLIST,N,
-    &     WH,WHI,IWH)
-
-     * -----------------------------------------------------------------------
-     * Finds the intervals in hour angle where w(h) is .GE.WMIN AND .LE.WMAX
-     * for ALL the WMIN and WMAX (and corresponding X Y & Z).
-     * Result is a list of start-end times in HLIST
-     * WH and IWH are work arrays of size 6*M
-     * -----------------------------------------------------------------------
-     */
     return ranges;
   }
 
@@ -96,11 +85,13 @@ public class DelayLineService {
    * @param dec target declination (rad)
    * @param baseLine base line
    * @param wRange [wMin - wMax] range
-   * @return intervals (hour angles)
+   * @return intervals (hour angles) in dec hours.
    */
   private static List<Range> findHAIntervalsForBaseLine(final double dec, final BaseLine baseLine, final Range wRange) {
-    logger.severe("baseLine : " + baseLine);
-    logger.severe("W range  : " + wRange);
+    if (logger.isLoggable(Level.INFO)) {
+      logger.info("baseLine : " + baseLine);
+      logger.info("W range  : " + wRange);
+    }
 
     // First check the W limits :
     final double[] wExtrema = findWExtrema(dec, baseLine);
@@ -114,71 +105,89 @@ public class DelayLineService {
     final double w1 = Math.min(wExtrema[0], wExtrema[1]);
     final double w2 = Math.max(wExtrema[0], wExtrema[1]);
 
-    logger.severe("W extrema = " + w1 + ", " + w2);
+    if (logger.isLoggable(Level.INFO)) {
+      logger.info("W extrema = " + w1 + ", " + w2);
+    }
 
     final double wMin = wRange.getMin();
     final double wMax = wRange.getMax();
     if (wMax < w1 || wMin > w2) {
       // outside range, no solution :
+      if (logger.isLoggable(Level.INFO)) {
+        logger.info("W outside range : " + baseLine.getName() + " : " + wRange);
+      }
       return null;
     }
-    logger.severe("there are ha solutions ...");
+    if (w1 > wMin && w2 < wMax) {
+      // always inside range = full interval [-12h;12h]:
+      if (logger.isLoggable(Level.INFO)) {
+        logger.info("W inside range : " + baseLine.getName() + " : " + wRange);
+      }
+      return Arrays.asList(new Range(-12d, 12d));
+    }
 
+    double[] haValues;
+
+    // list of hour angles (rad) in [-PI;PI] range :
+    final List<Double> haList = new ArrayList<Double>(6);
+
+    // define ha limits :
+    haList.add(-Math.PI);
+    haList.add(Math.PI);
+
+    haValues = solveDelays(dec, baseLine, wMin);
+
+    if (haValues != null) {
+      for (double ha : haValues) {
+        haList.add(ha);
+      }
+    }
+
+    haValues = solveDelays(dec, baseLine, wMax);
+
+    if (haValues != null) {
+      for (double ha : haValues) {
+        haList.add(ha);
+      }
+    }
+
+    // We have then the (at max 6) peculiar hour angles.
+    // Sort them by ascending order
+    Collections.sort(haList);
+
+    if (logger.isLoggable(Level.INFO)) {
+      logger.info("haList : " + haList);
+    }
+
+    final int size = haList.size() - 1;
     // output :
-    final List<Range> ranges = new ArrayList<Range>();
+    final List<Range> ranges = new ArrayList<Range>(size);
 
+    // Look if midpoints values are or not in the HMAX-HMIN interval
+    // to find which intervals are correct :
 
-    /*
-    !
-    N=0
-    NHH=0
-    SIND=SIN(D)
-    COSD=COS(D)
-    CALL FIND_THROW_LIMS(D,X,Y,Z,MAXH,MAXW,NMAXW)
-    IF (NMAXW.NE.2) RETURN    !? no solution
-    !     test if [WMIN,WMAX] has intersection with MAXW[1-2]
-    W1=MIN(MAXW(1),MAXW(2))
-    W2=MAX(MAXW(1),MAXW(2))
-    !     outside range
-    IF (WMAX.LT.W1.OR.WMIN.GT.W2) RETURN ! No solution
-    !     create list of peculiar points:
-    !     Since the 'no way' case is out, at least there is one solution:
-    NHH=2                     !1 range
-    HH(1)=-PI
-    HH(2)=PI
-    CALL SOLVE_DELAYS(WMIN,D,X,Y,Z,HMIN,NHMIN)
-    DO I=1,NHMIN
-    NHH=NHH+1
-    HH(NHH)=HMIN(I)
-    ENDDO
-    CALL SOLVE_DELAYS(WMAX,D,X,Y,Z,HMAX,NHMAX)
-    DO I=1,NHMAX
-    NHH=NHH+1
-    HH(NHH)=HMAX(I)
-    ENDDO
-    !     We have then the (at max 6) peculiar hour angles.
-    !     Sort them by ascending order
-    CALL GR8_TRIE(HH,IH,NHH,ERROR)
-    IF(ERROR) THEN
-    CALL GAGOUT ('Error in Delays_Interval (1) !')
-    N=0
-    RETURN
-    ENDIF
-    !     look if midpoints values are or not in the HMAX-HMIN interval.
-    !     update accordingly the output array
-    DO I=1,NHH-1
-    !     test value of w in-between
-    H=0.5*(HH(I)+HH(I+1))
-    W = COSD*(-SIN(H)*Y+COS(H)*X)+SIND*Z
-    IF (W.GE.WMIN.AND.W.LE.WMAX) THEN ! H interval is OK
-    N=N+1               !another valid range
-    HLIST(1,N)=HH(I)
-    HLIST(2,N)=HH(I+1)
-    ENDIF
-    ENDDO
-    RETURN
-    END
-     */
+    double ha1, ha2, ha, w;
+    for (int i = 0; i < size; i++) {
+      ha1 = haList.get(i);
+      ha2 = haList.get(i + 1);
+
+      ha = (ha1 + ha2) / 2d;
+
+      w = computeW(dec, baseLine, ha);
+
+      if (logger.isLoggable(Level.INFO)) {
+        logger.info("W("+ha+") = " + w);
+      }
+
+      if (w >= wMin && w <= wMax) {
+        // this ha interval is valid :
+        ranges.add(new Range(rad2hours(ha1), rad2hours(ha2)));
+      }
+    }
+
+    if (logger.isLoggable(Level.INFO)) {
+      logger.info("valid intervals (dec hours) : " + ranges);
+    }
 
     return ranges;
   }
@@ -221,7 +230,7 @@ public class DelayLineService {
    * @param dec target declination (rad)
    * @param baseLine used base line
    * @param wThrow w limit value (throw)
-   * @return ha solutions (rad) in [-PI;PI] range (0 or 2)
+   * @return ha solutions (rad) in [-PI;PI] range (0 or 2 solutions)
    */
   private static double[] solveDelays(final double dec, final BaseLine baseLine, final double wThrow) {
     // output :
@@ -274,7 +283,7 @@ public class DelayLineService {
    * 
    * @param dec target declination (rad)
    * @param baseLine used base line
-   * @return wMin - wMax couple or null
+   * @return 2 W extrema or null
    */
   private static double[] findWExtrema(final double dec, final BaseLine baseLine) {
     // output :
@@ -373,5 +382,10 @@ public class DelayLineService {
     }
 
     return h0;
+  }
+
+  /* utility methods */
+  public static double rad2hours(final double angrad) {
+    return Math.toDegrees(angrad) / 15.0d;
   }
 }

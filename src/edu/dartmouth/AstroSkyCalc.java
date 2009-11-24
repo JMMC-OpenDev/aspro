@@ -334,7 +334,7 @@ public class AstroSkyCalc {
    * Computes the hour angle corresponding to the given elevation for the current target
    * @param dec target declination (corrected for the given julian date)
    * @param minElev min elevation (rad)
-   * @return hour angle or -1 if the target never reaches this elevation
+   * @return hour angle (dec hours) or -1 if the target never reaches this elevation
    */
   public double getHAForElevation(final double dec, final double minElev) {
 
@@ -358,7 +358,7 @@ public class AstroSkyCalc {
 
   /* utility methods */
   public static double rad2hours(final double angrad) {
-    return deg2hours(Math.toDegrees(angrad));
+    return Math.toDegrees(angrad) / 15.0d;
   }
 
   public static double deg2hours(final double angdeg) {
