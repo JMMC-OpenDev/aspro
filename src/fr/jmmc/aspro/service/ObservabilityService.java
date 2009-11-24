@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.11 2009-11-24 15:12:09 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.12 2009-11-24 17:27:12 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.11  2009/11/24 15:12:09  bourgesl
+ * first step to handle delay line limits
+ *
  * Revision 1.10  2009/11/23 16:49:17  bourgesl
  * added horizonService to check horizon profiles (VLTI)
  *
@@ -335,36 +338,53 @@ public class ObservabilityService {
     final double haElev = this.sc.getHAForElevation(dec, this.minElev);
 
     if (haElev > 0d) {
-      // observable ranges :
+      // observable ranges (jd) :
       final List<Range> obsRanges = new ArrayList<Range>();
 
       // rise/set range :
       final Range rangeHARiseSet = new Range(-haElev, haElev);
 
+      // convert HA range to JD range :
       final Range rangeJDRiseSet = convertHARange(rangeHARiseSet, ra);
 
       if (this.doCheckHorizon) {
         // check horizon profiles :
-        final List<Range> hozRanges = checkHorizonProfile(rangeJDRiseSet);
+        final List<Range> rangesJDHoz = checkHorizonProfile(rangeJDRiseSet);
 
-        obsRanges.addAll(hozRanges);
+        obsRanges.addAll(rangesJDHoz);
       } else {
-
         // TODO : Check Shadowing for every stations ?
 
         obsRanges.add(rangeJDRiseSet);
       }
 
-      // solve baseline limits :
+      // Get intervals (HA) compatible with all base lines (switchyard / delay line / pops) :
+      final List<Range> rangesHABaseLines = DelayLineService.findHAIntervals(Math.toRadians(dec), this.baseLines, this.wRanges);
 
-      // Get intervals (HA) compatible with all beams (opd) :
-      final List<Range> dlRanges = DelayLineService.findHAIntervals(Math.toRadians(dec), this.baseLines, this.wRanges);
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("rangesHABL : " + rangesHABaseLines);
+      }
 
-      // finally : merge intervals and return date intervals :
+      // convert HA ranges to JD range :
+      for (Range range : rangesHABaseLines) {
+        obsRanges.add(convertHARange(range, ra));
+      }
+
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("obsRanges : " + obsRanges);
+      }
 
       // TODO : Intersect Rise/Set with night limits (merge operation)
 
-      for (Range range : obsRanges) {
+      // finally : merge intervals and return date intervals :
+      // nValid = 1 [dl] + 1 [obs] = 2
+      final List<Range> finalRanges = Range.mergeRanges(obsRanges, 2);
+
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("finalRanges : " + finalRanges);
+      }
+
+      for (Range range : finalRanges) {
         convertRangeToDateInterval(range, intervals);
       }
     } else {

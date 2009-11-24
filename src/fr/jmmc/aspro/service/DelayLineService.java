@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: DelayLineService.java,v 1.2 2009-11-24 16:30:54 bourgesl Exp $"
+ * "@(#) $Id: DelayLineService.java,v 1.3 2009-11-24 17:27:12 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2009/11/24 16:30:54  bourgesl
+ * correct HA intervals per base line
+ *
  * Revision 1.1  2009/11/24 15:12:09  bourgesl
  * first step to handle delay line limits
  *
@@ -44,15 +47,13 @@ public class DelayLineService {
    * @return intervals (hour angles)
    */
   public static List<Range> findHAIntervals(final double dec, final List<BaseLine> baseLines, final List<Range> wRanges) {
-    // output :
-    final List<Range> ranges = new ArrayList<Range>();
 
     // Get the current thread to check if the computation is interrupted :
     final Thread currentThread = Thread.currentThread();
 
     final int size = baseLines.size();
 
-    final List<List<Range>> rangesBL = new ArrayList<List<Range>>();
+    final List<Range> rangesBL = new ArrayList<Range>();
 
     BaseLine bl;
     Range wRange;
@@ -65,14 +66,13 @@ public class DelayLineService {
         return null;
       }
 
-      rangesBL.add(findHAIntervalsForBaseLine(dec, bl, wRange));
+      rangesBL.addAll(findHAIntervalsForBaseLine(dec, bl, wRange));
     }
-
-    // Intersect all intervals :
 
     logger.severe("rangesBL : " + rangesBL);
 
-    return ranges;
+    // Intersect all intervals :
+    return Range.mergeRanges(rangesBL, size);
   }
 
   /**
@@ -87,7 +87,7 @@ public class DelayLineService {
    * @param wRange [wMin - wMax] range
    * @return intervals (hour angles) in dec hours.
    */
-  private static List<Range> findHAIntervalsForBaseLine(final double dec, final BaseLine baseLine, final Range wRange) {
+  public static List<Range> findHAIntervalsForBaseLine(final double dec, final BaseLine baseLine, final Range wRange) {
     if (logger.isLoggable(Level.INFO)) {
       logger.info("baseLine : " + baseLine);
       logger.info("W range  : " + wRange);
