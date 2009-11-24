@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: Range.java,v 1.2 2009-11-23 16:49:17 bourgesl Exp $"
+ * "@(#) $Id: Range.java,v 1.3 2009-11-24 15:12:09 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2009/11/23 16:49:17  bourgesl
+ * added horizonService to check horizon profiles (VLTI)
+ *
  * Revision 1.1  2009/11/20 16:55:47  bourgesl
  * Added Beam / Delay Line definition
  * ObservabilityService is stateless to simplify coding
@@ -47,4 +50,10 @@ public class Range {
   public void setMax(double max) {
     this.max = max;
   }
+
+  @Override
+  public String toString() {
+    return "[" + this.min + ", " + this.max + "]";
+  }
+
 }

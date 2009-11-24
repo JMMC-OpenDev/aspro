@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.10 2009-11-23 16:49:17 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.11 2009-11-24 15:12:09 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.10  2009/11/23 16:49:17  bourgesl
+ * added horizonService to check horizon profiles (VLTI)
+ *
  * Revision 1.9  2009/11/20 16:55:47  bourgesl
  * Added Beam / Delay Line definition
  * ObservabilityService is stateless to simplify coding
@@ -194,7 +197,7 @@ public class ObservabilityService {
 
       // 1 - Find the day / twlight / night zones : sun rise/set with twilight : see NightlyAlmanac
       // Anyway use the LST range [0;24h]
-      if (useNightLimit) {
+      if (this.useNightLimit) {
         final List<SunAlmanachTime> sunEvents = this.sc.findSunRiseSet(this.jdLst0, this.jdLst24);
 
         processSunAlmanach(sunEvents);
@@ -228,34 +231,6 @@ public class ObservabilityService {
           }
 
           findTargetObservability(target, starObs.getVisible());
-
-          // solve baseline limits :
-
-          // check horizon profiles
-
-          // finally : merge intervals and return date intervals :
-
-          /*
-          CALL PLOT_HORIZON(XXX,YYY,ZZZ,TTT,SNAM,THROW,KKK,
-          &        PROJECT,ERROR)
-
-          CALL DL_INTERVAL_LIST(TTT,THROW,KKK,RIGHTA(I),DECLIN(I),LATITUD,
-          &  HORIZ(1),iTw,
-          &  XXX,YYY,ZZZ,SNAM,HLONGLIST,NHLIST,MEMORY(IPWH),
-          &  MEMORY(IPWHI),MEMORY(IPIWH))
-
-          SUBROUTINE DL_INTERVAL_LIST(WMIN,WMAX,M,RA,D,LAT,Elev,iTw,
-          &     X,Y,Z,SNAM,
-          &     HLIST,N,
-          &     WH,WHI,IWH)
-
-          !     -----------------------------------------------------------------------
-          !     Finds the intervals in hour angle where w(h) is .GE.WMIN AND .LE.WMAX
-          !     for ALL the WMIN and WMAX (and corresponding X Y & Z).
-          !     Result is a list of start-end times in HLIST
-          !     WH and IWH are work arrays of size 6*M
-          !     -----------------------------------------------------------------------
-           */
 
         } // for Target
 
@@ -368,7 +343,7 @@ public class ObservabilityService {
 
       final Range rangeJDRiseSet = convertHARange(rangeHARiseSet, ra);
 
-      if (doCheckHorizon) {
+      if (this.doCheckHorizon) {
         // check horizon profiles :
         final List<Range> hozRanges = checkHorizonProfile(rangeJDRiseSet);
 
@@ -379,6 +354,13 @@ public class ObservabilityService {
 
         obsRanges.add(rangeJDRiseSet);
       }
+
+      // solve baseline limits :
+
+      // Get intervals (HA) compatible with all beams (opd) :
+      final List<Range> dlRanges = DelayLineService.findHAIntervals(Math.toRadians(dec), this.baseLines, this.wRanges);
+
+      // finally : merge intervals and return date intervals :
 
       // TODO : Intersect Rise/Set with night limits (merge operation)
 
@@ -394,7 +376,7 @@ public class ObservabilityService {
 
   private List<Range> checkHorizonProfile(final Range jdRiseSet) {
     // output :
-    final List<Range> hozRanges = new ArrayList<Range>();
+    final List<Range> ranges = new ArrayList<Range>();
 
     // Get the current thread to check if the computation is interrupted :
     final Thread currentThread = Thread.currentThread();
@@ -456,7 +438,7 @@ public class ObservabilityService {
           last = false;
           // end point
           range.setMax(jd);
-          hozRanges.add(range);
+          ranges.add(range);
           range = new Range();
         }
       }
@@ -465,10 +447,10 @@ public class ObservabilityService {
     // close last interval if opened :
     if (range.getMin() > 0d) {
       range.setMax(jdMax);
-      hozRanges.add(range);
+      ranges.add(range);
     }
 
-    return hozRanges;
+    return ranges;
   }
 
   private void prepareObservation() {
@@ -498,7 +480,7 @@ public class ObservabilityService {
       this.beams.add(new Beam(s));
 
       if (s.getHorizon() != null) {
-        doCheckHorizon = true;
+        this.doCheckHorizon = true;
       }
     }
 
@@ -543,33 +525,6 @@ public class ObservabilityService {
           throw new IllegalStateException("Impossible to associate a channel to every station among [" + stations + "].");
         }
       }
-
-
-      /*
-      DO I=1,OBS_NDL
-      DLALLOCATED(I)=.FALSE.
-      ENDDO
-      CHAIN='I-HORIZON, No DLs specified, using: '
-      LC = LENC(CHAIN)
-      !     ...following the SW possibilities...
-      DO I=1,NSTAT
-      DO J=1,OBS_NDL
-      IF ((.NOT.DLALLOCATED(J)).AND.
-      &              SWITCH_OPD(J,SLIST(I)).NE.SWITCH_BLANK) THEN
-      DLALLOCATED(J)=.TRUE.
-      DLLIST(I)=J
-      T(I) = SWITCH_OPD(DLLIST(I),SLIST(I))
-      !     Add pops value
-      IF (DDO_POPS) THEN
-      write(*,*) 'adding pops[',i,']=',MYPOPS(I)
-      T(I) = T(I) + MYPOPS(I)
-      ENDIF
-      WRITE(CHAIN(LC+1:),'(A,A)') DL_NAME(DLLIST(I)),','
-      LC = LENC(CHAIN)
-      GOTO 22
-      ENDIF
-      ENDDO
-       */
 
       // Associate a delay line to the beam :
       // Simple association between DL / Channel = DL_n linked to Channel_n
@@ -674,6 +629,13 @@ public class ObservabilityService {
         TTT(KKK)= T(I)-T(J)-DL_THROW(DLLIST(J))
         THROW(KKK)= T(I)-T(J)+DL_THROW(DLLIST(I))
          */
+
+        /*
+!     The problem to solve is to find the range of hour angles h for which
+!     0 < w(stat2-stat1)(h)+wfix < throw(stat2),
+!     where wfix is tt(stat2)- [tt(stat1) + 0 or + throw(stat1)]
+!     so we want -wfix < w(h) < throw(stat2)-wfix
+        */
 
         this.baseLines.add(new BaseLine(b1, b2, x, y, z));
 

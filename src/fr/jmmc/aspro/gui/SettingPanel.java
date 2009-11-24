@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SettingPanel.java,v 1.6 2009-11-17 17:00:28 bourgesl Exp $"
+ * "@(#) $Id: SettingPanel.java,v 1.7 2009-11-24 15:12:09 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2009/11/17 17:00:28  bourgesl
+ * chosen instrument configuration propagated to observation
+ *
  * Revision 1.5  2009/11/03 16:57:55  bourgesl
  * added observability plot with LST/UTC support containing only day/night/twilight zones
  *
@@ -76,21 +79,18 @@ public class SettingPanel extends JPanel implements ObservationListener {
     add(jSplitPane1, java.awt.BorderLayout.CENTER);
   }// </editor-fold>//GEN-END:initComponents
 
-
-
-
   /**
    * This method is useful to set the models and specific features of initialized swing components :
    */
   private void postInit() {
     this.tabs = new JTabbedPane(JTabbedPane.TOP);
-    jPanel1.add(this.tabs, BorderLayout.CENTER);
+    this.jPanel1.add(this.tabs, BorderLayout.CENTER);
 
     // register this as an observation listener :
-    om.register(this);
+    this.om.register(this);
 
-    observationForm = new BasicObservationForm();
-    jSplitPane1.setLeftComponent(observationForm);
+    this.observationForm = new BasicObservationForm();
+    this.jSplitPane1.setLeftComponent(observationForm);
   }
   
   // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -101,7 +101,7 @@ public class SettingPanel extends JPanel implements ObservationListener {
   public void onChange(final ObservationSetting observation) {
     logger.fine("onChange occured : " + observation);
 
-    if (observabilityPanel == null) {
+    if (this.observabilityPanel == null) {
       this.observabilityPanel = new ObservabilityPanel();
       this.tabs.addTab("observability", this.observabilityPanel);
 
