@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityPanel.java,v 1.6 2009-11-20 16:55:47 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityPanel.java,v 1.7 2009-11-25 17:14:32 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2009/11/20 16:55:47  bourgesl
+ * Added Beam / Delay Line definition
+ * ObservabilityService is stateless to simplify coding
+ *
  * Revision 1.5  2009/11/20 10:17:02  mella
  * force the use of the swingworker backport
  *
@@ -21,9 +25,6 @@
  * Revision 1.1  2009/11/03 16:57:55  bourgesl
  * added observability plot with LST/UTC support containing only day/night/twilight zones
  *
- *
- *
- *
  ******************************************************************************/
 package fr.jmmc.aspro.gui;
 
@@ -37,7 +38,6 @@ import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.service.ObservabilityService;
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.List;
@@ -49,6 +49,7 @@ import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.StandardChartTheme;
 import org.jfree.chart.annotations.XYTextAnnotation;
 import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.axis.SymbolAxis;
@@ -70,14 +71,16 @@ import org.jfree.ui.TextAnchor;
  * @author bourgesl
  */
 public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgressListener, ObservationListener {
+
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
-
   /** Class Name */
   private static final String className_ = "fr.jmmc.aspro.gui.ObservabilityPanel";
   /** Class logger */
   private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
+  /** debug flag : enables the zoom in / out */
+  private static boolean ENABLE_ZOOM = true;
 
   /* members */
   /** observation manager */
@@ -110,17 +113,34 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
    */
   private void initComponents() {
 
+    // Disable bar shadows before creating any chart :
+    if (ChartFactory.getChartTheme() instanceof StandardChartTheme) {
+      final StandardChartTheme theme = (StandardChartTheme) ChartFactory.getChartTheme();
+      theme.setShadowVisible(false);
+    }
+
     this.localJFreeChart = createChart();
     this.localXYPlot = (XYPlot) localJFreeChart.getPlot();
 
     // add listener :
     this.localJFreeChart.addProgressListener(this);
 
-    // disable all zoom functions :
-    this.chartPanel = new ChartPanel(this.localJFreeChart, false, true, false, false, false);
-    this.chartPanel.setPreferredSize(new Dimension(800, 600));
-    this.chartPanel.setDomainZoomable(false);
-    this.chartPanel.setRangeZoomable(false);
+    this.chartPanel = new ChartPanel(this.localJFreeChart,
+            800, 500, /* prefered size */
+            300, 200, /* minimum size before scaling */
+            1900, 1200, /* maximum size before scaling */
+            true, /* use buffer */
+            false, true, false, false, false);
+
+    /*
+    public ChartPanel(JFreeChart chart, int width, int height,
+    int minimumDrawWidth, int minimumDrawHeight, int maximumDrawWidth,
+    int maximumDrawHeight, boolean useBuffer, boolean properties,
+    boolean save, boolean print, boolean zoom, boolean tooltips)
+     */
+
+    this.chartPanel.setDomainZoomable(ENABLE_ZOOM);
+    this.chartPanel.setRangeZoomable(ENABLE_ZOOM);
 
     this.add(chartPanel);
   }
@@ -160,6 +180,7 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
     /* plot options */
     final boolean useLst = true;
     final double minElev = Math.toRadians(20d);
+    final boolean doDetails = false;
 
     /*
      * Requires the java 5 SwingWorker backport = swing-worker-1.2.jar
@@ -174,7 +195,7 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
       public ObservabilityData doInBackground() {
         logger.fine("SwingWorker.doInBackground : IN");
 
-        ObservabilityData data = new ObservabilityService(observation, useLst, minElev).calcObservability();
+        ObservabilityData data = new ObservabilityService(observation, useLst, minElev, doDetails).calcObservability();
 
         if (isCancelled()) {
           logger.fine("SwingWorker.doInBackground : CANCELLED");
@@ -349,7 +370,7 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
         case ChartProgressEvent.DRAWING_FINISHED:
           logger.fine("Drawing chart time : " + (System.currentTimeMillis() - lastTime) + " ms.");
           lastTime = 0l;
-        break;
+          break;
         default:
       }
     }

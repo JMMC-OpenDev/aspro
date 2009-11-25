@@ -28,7 +28,6 @@ public class AstroSkyCalc {
   /** Class logger */
   private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
-
   /** time ratio : lst to jd */
   public static double LST_TO_JD = 24d * Const.SID_RATE;
 
@@ -197,12 +196,77 @@ public class AstroSkyCalc {
   }
 
   /**
+   * Return the list of Sun events arround LST [0;24] +- 12h
+   * @param jdLst0 initial julian date
+   * @return list of Sun events
+   */
+  public List<SunAlmanachTime> findSunRiseSet(final double jdLst0) {
+    // unique sorted JD time stamps :
+    final TreeSet<SunAlmanachTime> ts = new TreeSet<SunAlmanachTime>();
+
+    addAlmanach(ts, jdLst0 - 1d);
+    addAlmanach(ts, jdLst0);
+    addAlmanach(ts, jdLst0 + 1d);
+    addAlmanach(ts, jdLst0 + 2d);
+
+    final List<SunAlmanachTime> sorted = new ArrayList<SunAlmanachTime>(ts);
+
+    // return events in LST [0;24] +- 12h :
+    final double jd0 = jdLst0 - 0.5d;
+    final double jd1 = jdLst0 + 1.5d;
+
+    // find indexes inside the lst range [jd0;jd1] :
+    int i0 = -1;
+    int i1 = -1;
+    SunAlmanachTime st;
+
+    for (int i = 0, len = sorted.size(); i < len; i++) {
+      st = sorted.get(i);
+      /*
+      if (logger.isLoggable(Level.FINE)) {
+      dumpWhen(new WhenWhere(st.getJd(), this.site), st.getType().name());
+      }
+       */
+      if (st.getJd() >= jd0) {
+        if (i0 == -1) {
+          // include previous event :
+          i0 = i - 1;
+        }
+      }
+
+      if (st.getJd() > jd1) {
+        // include next event :
+        i1 = i;
+        break;
+      }
+    }
+
+    if (logger.isLoggable(Level.FINEST)) {
+      logger.finest("filtered sun events :");
+    }
+
+    final List<SunAlmanachTime> result = new ArrayList<SunAlmanachTime>();
+
+    for (int i = i0; i <= i1; i++) {
+      st = sorted.get(i);
+
+      if (logger.isLoggable(Level.FINEST)) {
+        dumpWhen(new WhenWhere(st.getJd(), this.site), st.getType().name());
+      }
+
+      result.add(st);
+    }
+
+    return result;
+  }
+
+  /**
    * Return the list of Sun events inside the given jd interval [jd0; jd1]
    * @param jd0 initial julian date
    * @param jd1 final   julian date
    * @return list of Sun events
    */
-  public List<SunAlmanachTime> findSunRiseSet(final double jd0, final double jd1) {
+  public List<SunAlmanachTime> findSunRiseSetOLD(final double jd0, final double jd1) {
     final TreeSet<SunAlmanachTime> ts = new TreeSet<SunAlmanachTime>();
 
     addAlmanach(ts, jd0 - 1d);
@@ -299,7 +363,7 @@ public class AstroSkyCalc {
 
     this.observation = new Observation(this.when, target);
 
-    return new double[] {this.observation.current.Alpha.value, this.observation.current.Delta.value};
+    return new double[]{this.observation.current.Alpha.value, this.observation.current.Delta.value};
   }
 
   /**
@@ -325,8 +389,8 @@ public class AstroSkyCalc {
     final double[] minmax = Spherical.min_max_alt(this.site.lat.value, this.observation.current.Delta.value);
 
     // degrees :
-    if (logger.isLoggable(Level.INFO)) {
-      logger.info("min/max alt = " + minmax[0] + " / " + minmax[1]);
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("min/max alt = " + minmax[0] + " / " + minmax[1]);
     }
   }
 
@@ -349,8 +413,8 @@ public class AstroSkyCalc {
       return -1d;
     }
 
-    if (logger.isLoggable(Level.INFO)) {
-      logger.info("ha = " + ha);
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("ha = " + ha);
     }
 
     return ha;

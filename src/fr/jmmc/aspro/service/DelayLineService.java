@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: DelayLineService.java,v 1.3 2009-11-24 17:27:12 bourgesl Exp $"
+ * "@(#) $Id: DelayLineService.java,v 1.4 2009-11-25 17:14:32 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2009/11/24 17:27:12  bourgesl
+ * first attempt to merge ranges
+ *
  * Revision 1.2  2009/11/24 16:30:54  bourgesl
  * correct HA intervals per base line
  *
@@ -46,14 +49,14 @@ public class DelayLineService {
    * @param wRanges [wMin - wMax] ranges per base line
    * @return intervals (hour angles)
    */
-  public static List<Range> findHAIntervals(final double dec, final List<BaseLine> baseLines, final List<Range> wRanges) {
+  public static List<List<Range>> findHAIntervals(final double dec, final List<BaseLine> baseLines, final List<Range> wRanges) {
 
     // Get the current thread to check if the computation is interrupted :
     final Thread currentThread = Thread.currentThread();
 
     final int size = baseLines.size();
 
-    final List<Range> rangesBL = new ArrayList<Range>();
+    final List<List<Range>> rangesBL = new ArrayList<List<Range>>();
 
     BaseLine bl;
     Range wRange;
@@ -66,13 +69,10 @@ public class DelayLineService {
         return null;
       }
 
-      rangesBL.addAll(findHAIntervalsForBaseLine(dec, bl, wRange));
+      rangesBL.add(findHAIntervalsForBaseLine(dec, bl, wRange));
     }
 
-    logger.severe("rangesBL : " + rangesBL);
-
-    // Intersect all intervals :
-    return Range.mergeRanges(rangesBL, size);
+    return rangesBL;
   }
 
   /**
@@ -88,9 +88,9 @@ public class DelayLineService {
    * @return intervals (hour angles) in dec hours.
    */
   public static List<Range> findHAIntervalsForBaseLine(final double dec, final BaseLine baseLine, final Range wRange) {
-    if (logger.isLoggable(Level.INFO)) {
-      logger.info("baseLine : " + baseLine);
-      logger.info("W range  : " + wRange);
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("baseLine : " + baseLine);
+      logger.fine("W range  : " + wRange);
     }
 
     // First check the W limits :
@@ -105,23 +105,23 @@ public class DelayLineService {
     final double w1 = Math.min(wExtrema[0], wExtrema[1]);
     final double w2 = Math.max(wExtrema[0], wExtrema[1]);
 
-    if (logger.isLoggable(Level.INFO)) {
-      logger.info("W extrema = " + w1 + ", " + w2);
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("W extrema = " + w1 + ", " + w2);
     }
 
     final double wMin = wRange.getMin();
     final double wMax = wRange.getMax();
     if (wMax < w1 || wMin > w2) {
       // outside range, no solution :
-      if (logger.isLoggable(Level.INFO)) {
-        logger.info("W outside range : " + baseLine.getName() + " : " + wRange);
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("W outside range : " + baseLine.getName() + " : " + wRange);
       }
       return null;
     }
     if (w1 > wMin && w2 < wMax) {
       // always inside range = full interval [-12h;12h]:
-      if (logger.isLoggable(Level.INFO)) {
-        logger.info("W inside range : " + baseLine.getName() + " : " + wRange);
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("W inside range : " + baseLine.getName() + " : " + wRange);
       }
       return Arrays.asList(new Range(-12d, 12d));
     }
@@ -155,8 +155,8 @@ public class DelayLineService {
     // Sort them by ascending order
     Collections.sort(haList);
 
-    if (logger.isLoggable(Level.INFO)) {
-      logger.info("haList : " + haList);
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("haList : " + haList);
     }
 
     final int size = haList.size() - 1;
@@ -175,8 +175,8 @@ public class DelayLineService {
 
       w = computeW(dec, baseLine, ha);
 
-      if (logger.isLoggable(Level.INFO)) {
-        logger.info("W("+ha+") = " + w);
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("W(" + ha + ") = " + w);
       }
 
       if (w >= wMin && w <= wMax) {
@@ -185,8 +185,8 @@ public class DelayLineService {
       }
     }
 
-    if (logger.isLoggable(Level.INFO)) {
-      logger.info("valid intervals (dec hours) : " + ranges);
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("valid intervals (dec hours) : " + ranges);
     }
 
     return ranges;

@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.12 2009-11-24 17:27:12 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.13 2009-11-25 17:14:32 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.12  2009/11/24 17:27:12  bourgesl
+ * first attempt to merge ranges
+ *
  * Revision 1.11  2009/11/24 15:12:09  bourgesl
  * first step to handle delay line limits
  *
@@ -94,14 +97,18 @@ public class ObservabilityService {
 
   /* inputs */
   /** observation settings */
-  private ObservationSetting observation;
+  private final ObservationSetting observation;
   /** indicates if the timestamps are expressed in LST or in UTC */
-  private boolean useLST;
+  private final boolean useLST;
   /** minimum of elevation to observe any target (rad) */
-  private double minElev;
+  private final double minElev;
+  /** flag to produce detailed output with all BL / horizon / rise intervals per target */
+  private final boolean doDetails;
   /** flag to enable the observability restriction due to the night */
   private boolean useNightLimit = true;
 
+  /* TODO : debug here = useNightLimit */
+  
   /* internal */
   /** sky calc instance */
   private final AstroSkyCalc sc = new AstroSkyCalc();
@@ -113,10 +120,10 @@ public class ObservabilityService {
   private InterferometerDescription interferometer;
   /** focal instrument description */
   private FocalInstrument instrument;
+  /** flag to indicate that a station has an horizon profile */
+  private boolean doCheckHorizon = false;
   /** beam list */
   private List<Beam> beams;
-  /** flag to indicate that stations have horizon profile */
-  private boolean doCheckHorizon = false;
   /** base line list */
   private List<BaseLine> baseLines = new ArrayList<BaseLine>();
   /** W ranges */
@@ -127,11 +134,12 @@ public class ObservabilityService {
   /**
    * This service is stateless so it can not be reused
    */
-  public ObservabilityService(final ObservationSetting observation, final boolean useLST, final double minElev) {
+  public ObservabilityService(final ObservationSetting observation, final boolean useLST, final double minElev, final boolean doDetails) {
     // Inputs :
     this.observation = observation;
     this.useLST = useLST;
     this.minElev = minElev;
+    this.doDetails = doDetails;
   }
 
   /**
@@ -163,11 +171,12 @@ public class ObservabilityService {
       // Prepare the base line (XYZ vector, wRange) :
       prepareBaseLines();
 
-
+      // define site :
       this.sc.defineSite(this.interferometer.getName(), this.interferometer.getPosSph());
 
       final XMLGregorianCalendar cal = this.observation.getWhen().getDate();
 
+      // define date :
       this.sc.defineDate(cal.getYear(), cal.getMonth(), cal.getDay());
 
       // fast interrupt :
@@ -198,10 +207,16 @@ public class ObservabilityService {
         return null;
       }
 
-      // 1 - Find the day / twlight / night zones : sun rise/set with twilight : see NightlyAlmanac
-      // Anyway use the LST range [0;24h]
-      if (this.useNightLimit) {
-        final List<SunAlmanachTime> sunEvents = this.sc.findSunRiseSet(this.jdLst0, this.jdLst24);
+      // 1 - Find the day / twlight / night zones :
+      if (this.useNightLimit && !this.doDetails) {
+
+        //  sun rise/set with twilight : see NightlyAlmanac
+
+        /*
+          Use the LST range [0;24h] +- 12h to have valid night ranges to merge with target ranges :
+         */
+
+        final List<SunAlmanachTime> sunEvents = this.sc.findSunRiseSet(this.jdLst0);
 
         processSunAlmanach(sunEvents);
       }
@@ -219,21 +234,14 @@ public class ObservabilityService {
         }
       } else {
 
-        final List<StarObservability> starVis = this.data.getStarVisibilities();
-
-        StarObservability starObs;
-
         for (Target target : this.observation.getTargets()) {
-
-          starObs = new StarObservability(target.getName());
-          starVis.add(starObs);
 
           // fast interrupt :
           if (currentThread.isInterrupted()) {
             return null;
           }
 
-          findTargetObservability(target, starObs.getVisible());
+          findTargetObservability(target);
 
         } // for Target
 
@@ -243,11 +251,11 @@ public class ObservabilityService {
         }
 
         // dump star visibilities :
-        if (logger.isLoggable(Level.INFO)) {
-          logger.info("star visibilities : ");
+        if (logger.isLoggable(Level.FINE)) {
+          logger.fine("Star observability intervals : ");
 
-          for (StarObservability so : starVis) {
-            logger.info(so.toString());
+          for (StarObservability so : this.data.getStarVisibilities()) {
+            logger.fine(so.toString());
           }
         }
 
@@ -285,9 +293,6 @@ public class ObservabilityService {
         jdFrom = stFrom.getJd();
         jdTo = stTo.getJd();
 
-        from = jdToDate(jdFrom);
-        to = jdToDate(jdTo);
-
         switch (stFrom.getType()) {
           case SunRise:
             type = SunTimeInterval.SunType.Day;
@@ -304,89 +309,192 @@ public class ObservabilityService {
           default:
         }
 
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("SunInterval[" + from + " - " + to + "] : " + type);
+        if (type == SunTimeInterval.SunType.Night) {
+          if (this.nightLimits == null) {
+            this.nightLimits = new ArrayList<Range>(2);
+          }
+          this.nightLimits.add(new Range(jdFrom, jdTo));
         }
 
-        intervals.add(new SunTimeInterval(from, to, type));
+        // BUG HERE
 
-        if (type == SunTimeInterval.SunType.Night) {
-          if (nightLimits == null) {
-            nightLimits = new ArrayList<Range>(2);
+        if (jdFrom > this.jdLst0 || jdTo < this.jdLst24) {
+
+          // trim :
+          if (jdFrom < this.jdLst0) {
+            jdFrom = this.jdLst0;
           }
-          nightLimits.add(new Range(jdFrom, jdTo));
+          if (jdTo > this.jdLst24) {
+            jdTo = this.jdLst24;
+          }
+
+          from = jdToDate(jdFrom);
+          to = jdToDate(jdTo);
+
+          if (logger.isLoggable(Level.FINE)) {
+            logger.fine("SunInterval[" + from + " - " + to + "] : " + type);
+          }
+
+          intervals.add(new SunTimeInterval(from, to, type));
         }
 
       }
+
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("nightLimits : " + nightLimits);
+      }
+
     }
 
     this.data.setSunIntervals(intervals);
   }
 
-  private void findTargetObservability(final Target target, final List<DateTimeInterval> intervals) {
+  private void findTargetObservability(final Target target) {
+
+    final StarObservability starObs = new StarObservability(target.getName());
+    // add the result to keep an unobservable target :
+    this.data.getStarVisibilities().add(starObs);
+
+    double targetRA = target.getRA();
+
+    if (this.doDetails) {
+      // In this case, the right ascension is ignored to have HA intervals centered arround LST = 12h
+//      targetRA = 180d;
+    }
 
     // Target coordinates precessed to jd :
-    double[] raDec = this.sc.defineTarget(jdLst0, target.getRA(), target.getDEC());
+    final double[] raDec = this.sc.defineTarget(jdLst0, targetRA, target.getDEC());
 
     // target right ascension in decimal hours :
-    double ra = raDec[0];
+    final double precRA = raDec[0];
 
     // target declination in degrees :
-    double dec = raDec[1];
+    final double precDEC = raDec[1];
+
+    // offset used to convert HA to LST = ra in dec hours :
+    final double lstOffset = precRA;
 
     // Find LST range corresponding to the rise / set of the target :
-    final double haElev = this.sc.getHAForElevation(dec, this.minElev);
+    final double haElev = this.sc.getHAForElevation(precDEC, this.minElev);
 
+    // target rise :
     if (haElev > 0d) {
-      // observable ranges (jd) :
-      final List<Range> obsRanges = new ArrayList<Range>();
-
       // rise/set range :
       final Range rangeHARiseSet = new Range(-haElev, haElev);
 
       // convert HA range to JD range :
-      final Range rangeJDRiseSet = convertHARange(rangeHARiseSet, ra);
+      final Range rangeJDRiseSet = convertHARange(rangeHARiseSet, lstOffset);
 
+      List<Range> rangesJDHz = null;
       if (this.doCheckHorizon) {
-        // check horizon profiles :
-        final List<Range> rangesJDHoz = checkHorizonProfile(rangeJDRiseSet);
+        // check horizon profiles inside rise/set range :
+        rangesJDHz = checkHorizonProfile(rangeJDRiseSet);
+      }
 
-        obsRanges.addAll(rangesJDHoz);
+      // Get intervals (HA) compatible with all base lines (switchyard / delay line / pops) :
+      final List<List<Range>> rangesHABaseLines = DelayLineService.findHAIntervals(Math.toRadians(precDEC), this.baseLines, this.wRanges);
+
+      // observable ranges (jd) :
+      final List<Range> obsRanges = new ArrayList<Range>();
+
+      if (this.doDetails) {
+
+        // Add Rise/Set :
+        final StarObservability soRiseSet = new StarObservability(target.getName() + " - Rise");
+        this.data.getStarVisibilities().add(soRiseSet);
+
+        convertRangeToDateInterval(rangeJDRiseSet, soRiseSet.getVisible());
+
+        if (rangesJDHz != null) {
+          // Add Horizon :
+          final StarObservability soHz = new StarObservability(target.getName() + " - Hz");
+          this.data.getStarVisibilities().add(soHz);
+
+          for (Range range : rangesJDHz) {
+            convertRangeToDateInterval(range, soHz.getVisible());
+          }
+        }
+
+        // Add ranges per BL :
+        BaseLine baseLine;
+        List<Range> ranges;
+        StarObservability soBl;
+        for (int i = 0, size = this.baseLines.size(); i < size; i++) {
+          baseLine = this.baseLines.get(i);
+          ranges = rangesHABaseLines.get(i);
+
+          for (Range range : ranges) {
+            obsRanges.add(convertHARange(range, lstOffset));
+          }
+
+          if (logger.isLoggable(Level.FINE)) {
+            logger.fine("baseLine : " + baseLine);
+            logger.fine("JD ranges  : " + obsRanges);
+          }
+
+          soBl = new StarObservability(target.getName() + " - " + baseLine.getName());
+          this.data.getStarVisibilities().add(soBl);
+
+          for (Range range : obsRanges) {
+            convertRangeToDateInterval(range, soBl.getVisible());
+          }
+
+          if (logger.isLoggable(Level.FINE)) {
+            logger.fine("Date ranges  : " + soBl.getVisible());
+          }
+
+          obsRanges.clear();
+        }
+      }
+
+      // Merge then all JD intervals :
+
+      // nValid = nBL [dl] + 1 [rise or horizon] + 1 if night limits
+      int nValid = 0;
+
+      // flatten and convert HA ranges to JD range :
+      for (List<Range> ranges : rangesHABaseLines) {
+        for (Range range : ranges) {
+          obsRanges.add(convertHARange(range, lstOffset));
+        }
+        nValid++;
+      }
+
+      if (rangesJDHz != null) {
+        obsRanges.addAll(rangesJDHz);
       } else {
         // TODO : Check Shadowing for every stations ?
 
         obsRanges.add(rangeJDRiseSet);
       }
+      nValid++;
 
-      // Get intervals (HA) compatible with all base lines (switchyard / delay line / pops) :
-      final List<Range> rangesHABaseLines = DelayLineService.findHAIntervals(Math.toRadians(dec), this.baseLines, this.wRanges);
-
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("rangesHABL : " + rangesHABaseLines);
-      }
-
-      // convert HA ranges to JD range :
-      for (Range range : rangesHABaseLines) {
-        obsRanges.add(convertHARange(range, ra));
+      // Intersect with night limits :
+      if (this.useNightLimit && !this.doDetails) {
+        obsRanges.addAll(nightLimits);
+        nValid++;
       }
 
       if (logger.isLoggable(Level.FINE)) {
         logger.fine("obsRanges : " + obsRanges);
       }
 
-      // TODO : Intersect Rise/Set with night limits (merge operation)
-
       // finally : merge intervals and return date intervals :
-      // nValid = 1 [dl] + 1 [obs] = 2
-      final List<Range> finalRanges = Range.mergeRanges(obsRanges, 2);
+      final List<Range> finalRanges = Range.mergeRanges(obsRanges, nValid);
 
       if (logger.isLoggable(Level.FINE)) {
         logger.fine("finalRanges : " + finalRanges);
       }
 
+      // store merge result as date intervals :
       for (Range range : finalRanges) {
-        convertRangeToDateInterval(range, intervals);
+        convertRangeToDateInterval(range, starObs.getVisible());
+        /*
+        know bug : due to HA limit [12h or -12h], the converted JD / Date ranges
+        can have a discontinuity on the LST/UTC axis !
+         */
       }
+
     } else {
       if (logger.isLoggable(Level.FINE)) {
         logger.fine("Target never rise : " + target);
@@ -437,9 +545,9 @@ public class ObservabilityService {
 
       for (Profile p : profiles) {
         if (!hs.checkProfile(p, azEl.getAzimuth(), azEl.getElevation())) {
-          if (logger.isLoggable(Level.INFO)) {
-            logger.info("target is hidden by horizon profile = " + p.getName() + " [" +
-                    azEl.getAzimuth() + ", " + azEl.getElevation() + "] @ " +this.sc.toDate(jd, true));
+          if (logger.isLoggable(Level.FINE)) {
+            logger.fine("target is hidden by horizon profile = " + p.getName() + " [" +
+                    azEl.getAzimuth() + ", " + azEl.getElevation() + "] @ " + this.sc.toDate(jd, true));
           }
           visible = false;
           break;
@@ -477,9 +585,9 @@ public class ObservabilityService {
     this.interferometer = this.observation.getInterferometerConfiguration().getInterferometerConfiguration().getInterferometer();
     this.instrument = this.observation.getInstrumentConfiguration().getInstrumentConfiguration().getFocalInstrument();
 
-    if (logger.isLoggable(Level.INFO)) {
-      logger.info("interferometer = " + this.interferometer.getName());
-      logger.info("instrument     = " + this.instrument.getName());
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("interferometer = " + this.interferometer.getName());
+      logger.fine("instrument     = " + this.instrument.getName());
     }
   }
 
@@ -488,8 +596,8 @@ public class ObservabilityService {
     // Get chosen stations :
     final List<Station> stations = this.observation.getInstrumentConfiguration().getStationList();
 
-    if (logger.isLoggable(Level.INFO)) {
-      logger.info("stations = " + stations);
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("stations = " + stations);
     }
 
     final int nBeams = stations.size();
@@ -535,8 +643,8 @@ public class ObservabilityService {
             b.setChannel(cl.getChannel());
             b.addOpticalLength(cl.getOpticalLength());
 
-            if (logger.isLoggable(Level.INFO)) {
-              logger.info("station = " + b.getStation() + " = " + b.getChannel().getName());
+            if (logger.isLoggable(Level.FINE)) {
+              logger.fine("station = " + b.getStation() + " = " + b.getChannel().getName());
             }
             break;
           }
@@ -567,7 +675,7 @@ public class ObservabilityService {
       }
 
     } else {
-      // Simpler interferometer : no channel definition or switchyard :
+      // Simpler interferometer : no channel definition nor switchyard :
 
       // Simple association between DL / Station = DL_n linked to Station_n
       // Use the fixed offset of every station :
@@ -613,8 +721,8 @@ public class ObservabilityService {
      *
      */
 
-    if (logger.isLoggable(Level.INFO)) {
-      logger.info("Beams = " + this.beams);
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("Beams = " + this.beams);
     }
   }
 
@@ -637,7 +745,7 @@ public class ObservabilityService {
         t = b1.getOpticalLength() - b2.getOpticalLength();
 
         // 2 DL for 2 telescopes => double throw :
-        // note : for now, all DLs are equivalent (same throw).
+        // note : for now, all DLs are equivalent (same throw) :
 
         wMin = t - b2.getDelayLine().getMaximumThrow();
         wMax = t + b1.getDelayLine().getMaximumThrow();
@@ -651,11 +759,11 @@ public class ObservabilityService {
          */
 
         /*
-!     The problem to solve is to find the range of hour angles h for which
-!     0 < w(stat2-stat1)(h)+wfix < throw(stat2),
-!     where wfix is tt(stat2)- [tt(stat1) + 0 or + throw(stat1)]
-!     so we want -wfix < w(h) < throw(stat2)-wfix
-        */
+        !     The problem to solve is to find the range of hour angles h for which
+        !     0 < w(stat2-stat1)(h)+wfix < throw(stat2),
+        !     where wfix is tt(stat2)- [tt(stat1) + 0 or + throw(stat1)]
+        !     so we want -wfix < w(h) < throw(stat2)-wfix
+         */
 
         this.baseLines.add(new BaseLine(b1, b2, x, y, z));
 
@@ -666,49 +774,52 @@ public class ObservabilityService {
 
   /**
    * Converts an HA range to a JD range
-   * @param range given in hour angle (dec hours)
-   * @param right ascension (dec hours)
+   * @param rangeHA given in hour angle (dec hours)
+   * @param lstOffset right ascension (dec hours)
    * @return JD range
    */
-  private Range convertHARange(final Range rangeHA, final double ra) {
+  private Range convertHARange(final Range rangeHA, final double lstOffset) {
 
     final double ha1 = rangeHA.getMin();
     final double ha2 = rangeHA.getMax();
 
-    if (logger.isLoggable(Level.INFO)) {
-      logger.info("ha1 = " + ha1);
-      logger.info("ha2 = " + ha2);
+    if (logger.isLoggable(Level.FINEST)) {
+      logger.finest("ha1 = " + ha1);
+      logger.finest("ha2 = " + ha2);
     }
 
-    final double lst1 = ra + ha1;
-    final double lst2 = ra + ha2;
+    final double lst1 = lstOffset + ha1;
+    final double lst2 = lstOffset + ha2;
 
-    if (logger.isLoggable(Level.INFO)) {
-      logger.info("lst1 = " + lst1 + " h");
-      logger.info("lst2 = " + lst2 + " h");
+    if (logger.isLoggable(Level.FINEST)) {
+      logger.finest("lst1 = " + lst1 + " h");
+      logger.finest("lst2 = " + lst2 + " h");
     }
 
     // apply the sideral / solar ratio :
     final double jd1 = this.jdLst0 + AstroSkyCalc.lst2jd(lst1);
     final double jd2 = this.jdLst0 + AstroSkyCalc.lst2jd(lst2);
 
-    if (logger.isLoggable(Level.INFO)) {
-      logger.info("jd1 = " + this.sc.toDate(jd1, true));
-      logger.info("jd2 = " + this.sc.toDate(jd2, true));
+    if (logger.isLoggable(Level.FINEST)) {
+      logger.finest("jd1 = " + this.sc.toDate(jd1, true));
+      logger.finest("jd2 = " + this.sc.toDate(jd2, true));
     }
 
     return new Range(jd1, jd2);
   }
 
   private void convertRangeToDateInterval(final Range rangeJD, final List<DateTimeInterval> intervals) {
+    // one Day in LST is diffrent than one Day in JD :
+    final double day = AstroSkyCalc.lst2jd(24d);
+
     DateTimeInterval interval;
 
     final double jdStart = rangeJD.getMin();
     final double jdEnd = rangeJD.getMax();
 
-    if (jdStart > this.jdLst0) {
+    if (jdStart >= this.jdLst0) {
 
-      if (jdEnd < this.jdLst24) {
+      if (jdEnd <= this.jdLst24) {
 
         // single interval [jdStart;jdEnd]
         interval = new DateTimeInterval();
@@ -717,39 +828,61 @@ public class ObservabilityService {
         intervals.add(interval);
 
       } else {
-        // end occurs after jdLst24 :
 
-        // interval [jdStart;jdLst24]
-        interval = new DateTimeInterval();
-        interval.setStartDate(jdToDate(jdStart));
-        interval.setEndDate(jdToDate(this.jdLst24));
-        intervals.add(interval);
+        if (jdStart > this.jdLst24) {
+          // two points over LST 24 :
 
-        // add the second interval [jdLst0;jdEnd - 1]
-        // note : -1 means one day before
+          // single interval [jdStart - day;jdEnd - day]
+          interval = new DateTimeInterval();
+          interval.setStartDate(jdToDate(jdStart - day));
+          interval.setEndDate(jdToDate(jdEnd - day));
+          intervals.add(interval);
 
-        interval = new DateTimeInterval();
-        interval.setStartDate(jdToDate(this.jdLst0));
-        interval.setEndDate(jdToDate(jdEnd - 1d));
-        intervals.add(interval);
+        } else {
+          // end occurs after LST 24 :
+
+          // interval [jdStart;jdLst24]
+          interval = new DateTimeInterval();
+          interval.setStartDate(jdToDate(jdStart));
+          interval.setEndDate(jdToDate(this.jdLst24));
+          intervals.add(interval);
+
+          // add the second interval [jdLst0;jdEnd - day]
+
+          interval = new DateTimeInterval();
+          interval.setStartDate(jdToDate(this.jdLst0));
+          interval.setEndDate(jdToDate(jdEnd - day));
+          intervals.add(interval);
+        }
       }
 
     } else {
-      // start occurs before jdLst0 :
+      // start occurs before LST 0h :
 
-      // interval [jdLst0;jdEnd]
-      interval = new DateTimeInterval();
-      interval.setStartDate(jdToDate(this.jdLst0));
-      interval.setEndDate(jdToDate(jdEnd));
-      intervals.add(interval);
+      if (jdEnd < this.jdLst0) {
+        // two points before LST 0h :
 
-      // add the second interval [jdStart + 1;jdLst24]
-      // note : +1 means one day after
+        // single interval [jdStart + day;jdEnd + day]
+        interval = new DateTimeInterval();
+        interval.setStartDate(jdToDate(jdStart + day));
+        interval.setEndDate(jdToDate(jdEnd + day));
+        intervals.add(interval);
 
-      interval = new DateTimeInterval();
-      interval.setStartDate(jdToDate(jdStart + 1d));
-      interval.setEndDate(jdToDate(this.jdLst24));
-      intervals.add(interval);
+      } else {
+
+        // interval [jdLst0;jdEnd]
+        interval = new DateTimeInterval();
+        interval.setStartDate(jdToDate(this.jdLst0));
+        interval.setEndDate(jdToDate(jdEnd));
+        intervals.add(interval);
+
+        // add the second interval [jdStart + day;jdLst24]
+
+        interval = new DateTimeInterval();
+        interval.setStartDate(jdToDate(jdStart + day));
+        interval.setEndDate(jdToDate(this.jdLst24));
+        intervals.add(interval);
+      }
     }
 
   }
