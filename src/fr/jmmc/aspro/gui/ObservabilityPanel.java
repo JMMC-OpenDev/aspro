@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityPanel.java,v 1.7 2009-11-25 17:14:32 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityPanel.java,v 1.8 2009-11-26 17:04:11 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2009/11/25 17:14:32  bourgesl
+ * fixed bugs on HA limits + merge JD intervals
+ *
  * Revision 1.6  2009/11/20 16:55:47  bourgesl
  * Added Beam / Delay Line definition
  * ObservabilityService is stateless to simplify coding
@@ -28,6 +31,7 @@
  ******************************************************************************/
 package fr.jmmc.aspro.gui;
 
+import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.DateTimeInterval;
 import fr.jmmc.aspro.model.ObservabilityData;
 import fr.jmmc.aspro.model.ObservationListener;
@@ -38,12 +42,22 @@ import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.service.ObservabilityService;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import org.jdesktop.swingworker.SwingWorker;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -59,6 +73,7 @@ import org.jfree.chart.plot.IntervalMarker;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYBarRenderer;
+import org.jfree.chart.title.TextTitle;
 import org.jfree.data.gantt.Task;
 import org.jfree.data.gantt.TaskSeries;
 import org.jfree.data.gantt.TaskSeriesCollection;
@@ -81,16 +96,36 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
           className_);
   /** debug flag : enables the zoom in / out */
   private static boolean ENABLE_ZOOM = true;
+  /** The default font for titles. */
+  private static final Font DEFAULT_TITLE_FONT = new Font("SansSerif", Font.BOLD, 14);
 
   /* members */
   /** observation manager */
   private ObservationManager om = ObservationManager.getInstance();
-  /** chart panel */
-  private ChartPanel chartPanel;
   /** jFreeChart instance */
   private JFreeChart localJFreeChart;
   /** xy plot instance */
   private XYPlot localXYPlot;
+  
+  /* swing */
+  /** chart panel */
+  private ChartPanel chartPanel;
+  /* checkbox Night Limit */
+  private JCheckBox jCheckBoxNightLimit;
+  /* checkbox BaseLine Limits */
+  private JCheckBox jCheckBoxBaseLineLimits;
+  /* checkbox Details */
+  private JCheckBox jCheckBoxDetails;
+
+  /* plot options */
+  /** flag to enable the observability restriction due to the night */
+  private boolean useNightLimit = true;
+  /** indicates if the timestamps are expressed in LST or in UTC */
+  private boolean useLST = true;
+  /** flag to find baseline limits */
+  private boolean doBaseLineLimits = false;
+  /** flag to produce detailed output with all BL / horizon / rise intervals per target */
+  private boolean doDetailedOutput = false;
   /** 
    * Current (or old) worker reference
    * (can be a leaked reference if the computation is done)
@@ -142,7 +177,73 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
     this.chartPanel.setDomainZoomable(ENABLE_ZOOM);
     this.chartPanel.setRangeZoomable(ENABLE_ZOOM);
 
-    this.add(chartPanel);
+    this.setLayout(new BorderLayout());
+
+    this.add(chartPanel, BorderLayout.CENTER);
+
+    final JPanel panelOptions = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 2));
+
+    this.jCheckBoxNightLimit = new JCheckBox("Night restriction");
+    this.jCheckBoxNightLimit.setSelected(this.useNightLimit);
+    this.jCheckBoxNightLimit.addItemListener(new ItemListener() {
+
+      public void itemStateChanged(final ItemEvent e) {
+        useNightLimit = e.getStateChange() == ItemEvent.SELECTED;
+        refreshPlot();
+      }
+    });
+
+    panelOptions.add(jCheckBoxNightLimit);
+
+    panelOptions.add(new JLabel("Time :"));
+
+    final JComboBox jComboTime = new JComboBox(new String[]{"LST", "UTC"});
+    jComboTime.addActionListener(new ActionListener() {
+
+      public void actionPerformed(final ActionEvent e) {
+        useLST = jComboTime.getSelectedItem().toString().equals("LST");
+        refreshPlot();
+      }
+    });
+    panelOptions.add(jComboTime);
+
+    jCheckBoxBaseLineLimits = new JCheckBox("BaseLine limits");
+    jCheckBoxBaseLineLimits.setSelected(this.doBaseLineLimits);
+    jCheckBoxBaseLineLimits.addItemListener(new ItemListener() {
+
+      public void itemStateChanged(final ItemEvent e) {
+        doBaseLineLimits = e.getStateChange() == ItemEvent.SELECTED;
+        if (doBaseLineLimits) {
+          useNightLimit = false;
+          jCheckBoxNightLimit.setSelected(useNightLimit);
+          doDetailedOutput = false;
+          jCheckBoxDetails.setSelected(doDetailedOutput);
+        }
+
+        jCheckBoxNightLimit.setEnabled(!doBaseLineLimits);
+        jCheckBoxDetails.setEnabled(!doBaseLineLimits);
+        refreshPlot();
+      }
+    });
+
+    panelOptions.add(jCheckBoxBaseLineLimits);
+
+    if (AsproConstants.DEBUG_MODE) {
+
+      jCheckBoxDetails = new JCheckBox("Details");
+      jCheckBoxDetails.setSelected(this.doDetailedOutput);
+      jCheckBoxDetails.addItemListener(new ItemListener() {
+
+        public void itemStateChanged(final ItemEvent e) {
+          doDetailedOutput = e.getStateChange() == ItemEvent.SELECTED;
+          refreshPlot();
+        }
+      });
+
+      panelOptions.add(jCheckBoxDetails);
+    }
+
+    this.add(panelOptions, BorderLayout.PAGE_END);
   }
 
   /**
@@ -150,7 +251,8 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
    * @return jFreeChart instance
    */
   private static JFreeChart createChart() {
-    final JFreeChart localJFreeChart = ChartFactory.createXYBarChart("Source Observability", null, false, null, null, PlotOrientation.HORIZONTAL, false, false, false);
+    // no title :
+    final JFreeChart localJFreeChart = ChartFactory.createXYBarChart("", null, false, null, null, PlotOrientation.HORIZONTAL, false, false, false);
 
     final XYPlot localXYPlot = (XYPlot) localJFreeChart.getPlot();
     localXYPlot.setDomainPannable(false);
@@ -166,6 +268,10 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
     return localJFreeChart;
   }
 
+  protected void refreshPlot() {
+    this.onChange(om.getObservation());
+  }
+
   /**
    * OnChange implementation to compute observability data and refresh the plot
    * @param observation updated observation
@@ -177,10 +283,8 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
 
     // Use a swing worker to compute the data :
 
-    /* plot options */
-    final boolean useLst = true;
+    // TODO : move the min Elevation to preferences or in observation form :
     final double minElev = Math.toRadians(20d);
-    final boolean doDetails = false;
 
     /*
      * Requires the java 5 SwingWorker backport = swing-worker-1.2.jar
@@ -195,7 +299,7 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
       public ObservabilityData doInBackground() {
         logger.fine("SwingWorker.doInBackground : IN");
 
-        ObservabilityData data = new ObservabilityService(observation, useLst, minElev, doDetails).calcObservability();
+        ObservabilityData data = new ObservabilityService(observation, minElev, useNightLimit, useLST, doDetailedOutput, doBaseLineLimits).calcObservability();
 
         if (isCancelled()) {
           logger.fine("SwingWorker.doInBackground : CANCELLED");
@@ -219,10 +323,21 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
             final ObservabilityData data = get();
 
             if (data != null) {
+              final String title = observation.getInterferometerConfiguration().getName() +
+                      " - " + observation.getInstrumentConfiguration().getStations();
+
+              localJFreeChart.clearSubtitles();
+              // interferometer + stations :
+              localJFreeChart.addSubtitle(new TextTitle(title, DEFAULT_TITLE_FONT));
+              if (useNightLimit) {
+                // date :
+                localJFreeChart.addSubtitle(new TextTitle("Day : " + observation.getWhen().getDate().toString(), DEFAULT_TITLE_FONT));
+              }
+
               // computed data are valid :
               updateChart(data.getStarVisibilities(), data.getDateMin(), data.getDateMax());
 
-              updateDateAxis((useLst) ? "L.S.T" : "U.T.C", data.getDateMin(), data.getDateMax());
+              updateDateAxis((useLST) ? "LST" : "UTC", data.getDateMin(), data.getDateMax());
 
               updateSunMarkers(data.getSunIntervals());
 
@@ -282,7 +397,7 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
     localXYPlot.setDataset(new XYTaskDataset(localTaskSeriesCollection));
 
     // change the Domain axis (vertical) :
-    final SymbolAxis localSymbolAxis = new SymbolAxis("Source", targetNames);
+    final SymbolAxis localSymbolAxis = new SymbolAxis("", targetNames);
     localSymbolAxis.setGridBandsVisible(false);
     localSymbolAxis.setAutoRange(false);
     localSymbolAxis.setRangeWithMargins(-1d, targetNames.length);
@@ -292,33 +407,35 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
     // remove Annotations :
     localXYBarRenderer.removeAnnotations();
 
-    // add the Annotations :
-    // 24h date formatter :
-    final DateFormat df = DateFormat.getTimeInstance(DateFormat.SHORT, Locale.FRANCE);
+    if (!this.doBaseLineLimits) {
+      // add the Annotations :
+      // 24h date formatter :
+      final DateFormat df = DateFormat.getTimeInstance(DateFormat.SHORT, Locale.FRANCE);
 
-    i = 0;
-    for (StarObservability so : starVis) {
+      i = 0;
+      for (StarObservability so : starVis) {
 
-      for (DateTimeInterval interval : so.getVisible()) {
+        for (DateTimeInterval interval : so.getVisible()) {
 
-        if (!interval.getStartDate().equals(min)) {
-          final XYTextAnnotation aStart = new XYTextAnnotation(df.format(interval.getStartDate()), i, interval.getStartDate().getTime());
-          aStart.setTextAnchor(TextAnchor.BASELINE_CENTER);
-          aStart.setPaint(Color.BLACK);
-          aStart.setRotationAngle(Math.PI / 2);
-          localXYBarRenderer.addAnnotation(aStart);
+          if (!interval.getStartDate().equals(min)) {
+            final XYTextAnnotation aStart = new XYTextAnnotation(df.format(interval.getStartDate()), i, interval.getStartDate().getTime());
+            aStart.setTextAnchor(TextAnchor.BASELINE_CENTER);
+            aStart.setPaint(Color.BLACK);
+            aStart.setRotationAngle(Math.PI / 2);
+            localXYBarRenderer.addAnnotation(aStart);
+          }
+
+          if (!interval.getEndDate().equals(max)) {
+            final XYTextAnnotation aEnd = new XYTextAnnotation(df.format(interval.getEndDate()), i, interval.getEndDate().getTime());
+            aEnd.setTextAnchor(TextAnchor.BASELINE_CENTER);
+            aEnd.setPaint(Color.BLACK);
+            aEnd.setRotationAngle(Math.PI / 2);
+            localXYBarRenderer.addAnnotation(aEnd);
+          }
         }
 
-        if (!interval.getEndDate().equals(max)) {
-          final XYTextAnnotation aEnd = new XYTextAnnotation(df.format(interval.getEndDate()), i, interval.getEndDate().getTime());
-          aEnd.setTextAnchor(TextAnchor.BASELINE_CENTER);
-          aEnd.setPaint(Color.BLACK);
-          aEnd.setRotationAngle(Math.PI / 2);
-          localXYBarRenderer.addAnnotation(aEnd);
-        }
+        i++;
       }
-
-      i++;
     }
   }
 

@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.13 2009-11-25 17:14:32 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.14 2009-11-26 17:04:11 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.13  2009/11/25 17:14:32  bourgesl
+ * fixed bugs on HA limits + merge JD intervals
+ *
  * Revision 1.12  2009/11/24 17:27:12  bourgesl
  * first attempt to merge ranges
  *
@@ -50,6 +53,7 @@ package fr.jmmc.aspro.service;
 
 import edu.dartmouth.AstroSkyCalc;
 import edu.dartmouth.SunAlmanachTime;
+import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.BaseLine;
 import fr.jmmc.aspro.model.Beam;
 import fr.jmmc.aspro.model.ConfigurationManager;
@@ -98,17 +102,17 @@ public class ObservabilityService {
   /* inputs */
   /** observation settings */
   private final ObservationSetting observation;
-  /** indicates if the timestamps are expressed in LST or in UTC */
-  private final boolean useLST;
   /** minimum of elevation to observe any target (rad) */
   private final double minElev;
+  /** flag to enable the observability restriction due to the night */
+  private boolean useNightLimit;
+  /** indicates if the timestamps are expressed in LST or in UTC */
+  private final boolean useLST;
+  /** flag to find baseline limits */
+  private final boolean doBaseLineLimits;
   /** flag to produce detailed output with all BL / horizon / rise intervals per target */
   private final boolean doDetails;
-  /** flag to enable the observability restriction due to the night */
-  private boolean useNightLimit = true;
 
-  /* TODO : debug here = useNightLimit */
-  
   /* internal */
   /** sky calc instance */
   private final AstroSkyCalc sc = new AstroSkyCalc();
@@ -132,14 +136,23 @@ public class ObservabilityService {
   private List<Range> nightLimits = null;
 
   /**
-   * This service is stateless so it can not be reused
+   * This service is statefull so it can not be reused by several calls
+   *
+   * @param observation observation settings
+   * @param minElev minimum of elevation to observe any target (rad)
+   * @param useNightLimit flag to enable the observability restriction due to the night
+   * @param useLST indicates if the timestamps are expressed in LST or in UTC
+   * @param doDetails flag to produce detailed output with all BL / horizon / rise intervals per target
    */
-  public ObservabilityService(final ObservationSetting observation, final boolean useLST, final double minElev, final boolean doDetails) {
+  public ObservabilityService(final ObservationSetting observation, final double minElev,
+          final boolean useNightLimit, final boolean useLST, final boolean doDetails, final boolean doBaseLineLimits) {
     // Inputs :
     this.observation = observation;
-    this.useLST = useLST;
     this.minElev = minElev;
+    this.useNightLimit = useNightLimit;
+    this.useLST = useLST;
     this.doDetails = doDetails;
+    this.doBaseLineLimits = doBaseLineLimits;
   }
 
   /**
@@ -164,6 +177,13 @@ public class ObservabilityService {
     try {
       // Get interferometer / instrument :
       prepareObservation();
+
+      final List<Target> targets;
+      if (this.doBaseLineLimits) {
+        targets = generateTargetsForBaseLineLimits();
+      } else {
+        targets = observation.getTargets();
+      }
 
       // Prepare the beams (station / channel / delay line) :
       prepareBeams();
@@ -208,12 +228,11 @@ public class ObservabilityService {
       }
 
       // 1 - Find the day / twlight / night zones :
-      if (this.useNightLimit && !this.doDetails) {
-
+      if (this.useNightLimit) {
         //  sun rise/set with twilight : see NightlyAlmanac
 
         /*
-          Use the LST range [0;24h] +- 12h to have valid night ranges to merge with target ranges :
+        Use the LST range [0;24h] +- 12h to have valid night ranges to merge with target ranges :
          */
 
         final List<SunAlmanachTime> sunEvents = this.sc.findSunRiseSet(this.jdLst0);
@@ -228,13 +247,13 @@ public class ObservabilityService {
 
       // 2 - Observability per target :
 
-      if (this.observation.getTargets().isEmpty()) {
+      if (targets == null || targets.isEmpty()) {
         if (logger.isLoggable(Level.FINE)) {
           logger.fine("No target defined.");
         }
       } else {
 
-        for (Target target : this.observation.getTargets()) {
+        for (Target target : targets) {
 
           // fast interrupt :
           if (currentThread.isInterrupted()) {
@@ -274,6 +293,10 @@ public class ObservabilityService {
     return this.data;
   }
 
+  /**
+   * Process the sun time stamps to have
+   * @param sunEvents
+   */
   private void processSunAlmanach(final List<SunAlmanachTime> sunEvents) {
     List<SunTimeInterval> intervals = null;
 
@@ -320,6 +343,10 @@ public class ObservabilityService {
 
         if (jdFrom > this.jdLst0 || jdTo < this.jdLst24) {
 
+          if (logger.isLoggable(Level.FINE)) {
+            logger.fine("Range[" + jdFrom + " - " + jdTo + "] : " + type);
+          }
+
           // trim :
           if (jdFrom < this.jdLst0) {
             jdFrom = this.jdLst0;
@@ -359,7 +386,8 @@ public class ObservabilityService {
 
     if (this.doDetails) {
       // In this case, the right ascension is ignored to have HA intervals centered arround LST = 12h
-//      targetRA = 180d;
+      // disabled :
+      /* targetRA = 180d; */
     }
 
     // Target coordinates precessed to jd :
@@ -400,14 +428,14 @@ public class ObservabilityService {
       if (this.doDetails) {
 
         // Add Rise/Set :
-        final StarObservability soRiseSet = new StarObservability(target.getName() + " - Rise");
+        final StarObservability soRiseSet = new StarObservability(target.getName() + " Rise/Set");
         this.data.getStarVisibilities().add(soRiseSet);
 
         convertRangeToDateInterval(rangeJDRiseSet, soRiseSet.getVisible());
 
         if (rangesJDHz != null) {
           // Add Horizon :
-          final StarObservability soHz = new StarObservability(target.getName() + " - Hz");
+          final StarObservability soHz = new StarObservability(target.getName() + " Horizon");
           this.data.getStarVisibilities().add(soHz);
 
           for (Range range : rangesJDHz) {
@@ -423,16 +451,17 @@ public class ObservabilityService {
           baseLine = this.baseLines.get(i);
           ranges = rangesHABaseLines.get(i);
 
-          for (Range range : ranges) {
-            obsRanges.add(convertHARange(range, lstOffset));
+          if (ranges != null) {
+            for (Range range : ranges) {
+              obsRanges.add(convertHARange(range, lstOffset));
+            }
           }
-
           if (logger.isLoggable(Level.FINE)) {
             logger.fine("baseLine : " + baseLine);
             logger.fine("JD ranges  : " + obsRanges);
           }
 
-          soBl = new StarObservability(target.getName() + " - " + baseLine.getName());
+          soBl = new StarObservability(target.getName() + " " + baseLine.getName());
           this.data.getStarVisibilities().add(soBl);
 
           for (Range range : obsRanges) {
@@ -454,8 +483,10 @@ public class ObservabilityService {
 
       // flatten and convert HA ranges to JD range :
       for (List<Range> ranges : rangesHABaseLines) {
-        for (Range range : ranges) {
-          obsRanges.add(convertHARange(range, lstOffset));
+        if (ranges != null) {
+          for (Range range : ranges) {
+            obsRanges.add(convertHARange(range, lstOffset));
+          }
         }
         nValid++;
       }
@@ -470,7 +501,7 @@ public class ObservabilityService {
       nValid++;
 
       // Intersect with night limits :
-      if (this.useNightLimit && !this.doDetails) {
+      if (this.useNightLimit) {
         obsRanges.addAll(nightLimits);
         nValid++;
       }
@@ -750,21 +781,6 @@ public class ObservabilityService {
         wMin = t - b2.getDelayLine().getMaximumThrow();
         wMax = t + b1.getDelayLine().getMaximumThrow();
 
-        /*
-        XXX(KKK)= -STATX(SLIST(J))+STATX(SLIST(I))
-        YYY(KKK)= -STATY(SLIST(J))+STATY(SLIST(I))
-        ZZZ(KKK)= -STATZ(SLIST(J))+STATZ(SLIST(I))
-        TTT(KKK)= T(I)-T(J)-DL_THROW(DLLIST(J))
-        THROW(KKK)= T(I)-T(J)+DL_THROW(DLLIST(I))
-         */
-
-        /*
-        !     The problem to solve is to find the range of hour angles h for which
-        !     0 < w(stat2-stat1)(h)+wfix < throw(stat2),
-        !     where wfix is tt(stat2)- [tt(stat1) + 0 or + throw(stat1)]
-        !     so we want -wfix < w(h) < throw(stat2)-wfix
-         */
-
         this.baseLines.add(new BaseLine(b1, b2, x, y, z));
 
         this.wRanges.add(new Range(wMin, wMax));
@@ -809,7 +825,7 @@ public class ObservabilityService {
   }
 
   private void convertRangeToDateInterval(final Range rangeJD, final List<DateTimeInterval> intervals) {
-    // one Day in LST is diffrent than one Day in JD :
+    // one Day in LST is different than one Day in JD :
     final double day = AstroSkyCalc.lst2jd(24d);
 
     DateTimeInterval interval;
@@ -889,5 +905,33 @@ public class ObservabilityService {
 
   private Date jdToDate(final double jd) {
     return this.sc.toDate(jd, this.useLST);
+  }
+
+  private List<Target> generateTargetsForBaseLineLimits() {
+
+    final double obsLat = Math.toDegrees(this.interferometer.getPosSph().getLatitude());
+
+    final double minElevDeg = Math.toDegrees(this.minElev);
+
+    int decMin = 5 * (int)Math.round((obsLat - 90d + minElevDeg)/5d);
+    decMin = Math.max(decMin, -85);
+
+    int decMax = 5 * (int)Math.round((obsLat + 90 - minElevDeg)/5d);
+    decMax = Math.min(decMax, 85);
+
+    final List<Target> targets = new ArrayList<Target>();
+    Target t;
+    for (int i = decMin; i <= decMax; i += 5) {
+      t = new Target();
+      // delta = x
+      t.setName("\u0394 = " + Integer.toString(i));
+      // 12:00:00
+      t.setRA(180d);
+      t.setDEC(i);
+      t.setEQUINOX(AsproConstants.EPOCH_J2000);
+
+      targets.add(t);
+    }
+    return targets;
   }
 }

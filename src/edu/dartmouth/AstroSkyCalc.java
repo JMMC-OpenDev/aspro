@@ -211,7 +211,7 @@ public class AstroSkyCalc {
 
     final List<SunAlmanachTime> sorted = new ArrayList<SunAlmanachTime>(ts);
 
-    // return events in LST [0;24] +- 12h :
+    // return events in LST [0;24] +/- 12h :
     final double jd0 = jdLst0 - 0.5d;
     final double jd1 = jdLst0 + 1.5d;
 

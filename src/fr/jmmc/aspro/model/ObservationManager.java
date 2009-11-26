@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationManager.java,v 1.7 2009-11-17 17:00:28 bourgesl Exp $"
+ * "@(#) $Id: ObservationManager.java,v 1.8 2009-11-26 17:04:11 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2009/11/17 17:00:28  bourgesl
+ * chosen instrument configuration propagated to observation
+ *
  * Revision 1.6  2009/11/05 12:59:39  bourgesl
  * first simple source observability (only min elevation condition)
  *
@@ -29,6 +32,7 @@
  ******************************************************************************/
 package fr.jmmc.aspro.model;
 
+import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.oi.FocalInstrumentConfigurationChoice;
 import fr.jmmc.aspro.model.oi.InterferometerConfigurationChoice;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
@@ -184,7 +188,7 @@ public class ObservationManager extends BaseOIManager {
         t.setName(name);
         t.setRA(ra);
         t.setDEC(dec);
-        t.setEQUINOX(2000f);
+        t.setEQUINOX(AsproConstants.EPOCH_J2000);
         // other fields (mag) ...
         getObservation().getTargets().add(t);
       }
@@ -212,7 +216,6 @@ public class ObservationManager extends BaseOIManager {
     }
     return changed;
   }
-
 
   public Target getTarget(final String name) {
     for (Target t : getObservation().getTargets()) {
