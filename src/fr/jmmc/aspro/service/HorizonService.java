@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: HorizonService.java,v 1.1 2009-11-23 16:49:17 bourgesl Exp $"
+ * "@(#) $Id: HorizonService.java,v 1.2 2009-11-27 16:37:51 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2009/11/23 16:49:17  bourgesl
+ * added horizonService to check horizon profiles (VLTI)
+ *
  */
 package fr.jmmc.aspro.service;
 
@@ -91,8 +94,23 @@ public class HorizonService {
     return profile;
   }
 
+  /**
+   * Checks if the az/el position in hidden by the given horizon profile
+   * @param profile profile horizon to check
+   * @param az azimuth (deg : 0 = north, positive toward east)
+   * @param elev elevation (deg)
+   * @return true if no obstruction
+   */
   public boolean checkProfile(final Profile profile, final double az, final double elev) {
-    return profile.check(az, elev);
+    // adjust azimuth to be compatible with vlti profiles :
+
+    // 0 = meridian (north-south) positive toward east :
+    double adjAz = az - 180;
+
+    if (adjAz < 0d) {
+      adjAz += 360d;
+    }
+    return profile.check(adjAz, elev);
   }
 
   /**
