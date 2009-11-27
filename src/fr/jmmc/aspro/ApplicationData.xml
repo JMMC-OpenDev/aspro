@@ -19,8 +19,13 @@
     </menu>
   </menubar>
   <releasenotes>
-    <release version="0.0.1">
-      <prerelease version="0.0" tag="ASPRO_">
+    <release version="0.0.2">
+      <prerelease version="0.0.2" tag="ASPRO_">
+        <change>Added delay line / switchyard / channels in observability plot.</change>
+        <change>Added base line limits</change>
+        <change>Enhanced GUI to set min elevation / detailed plot ...</change>
+      </prerelease>
+      <prerelease version="0.0.1" tag="ASPRO_">
         <change>Complete rewrite of the ASPRO software as a desktop Java application.</change>
       </prerelease>
     </release>
