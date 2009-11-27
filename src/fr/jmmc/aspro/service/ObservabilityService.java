@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.15 2009-11-27 10:13:19 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.16 2009-11-27 16:38:17 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.15  2009/11/27 10:13:19  bourgesl
+ * fixed LST day/night intervals
+ * fixed NPE on computation cancellation
+ *
  * Revision 1.14  2009/11/26 17:04:11  bourgesl
  * added observability plots options (night/detail / UTC/LST)
  * added base line limits
@@ -116,7 +120,7 @@ public class ObservabilityService {
   /** flag to find baseline limits */
   private final boolean doBaseLineLimits;
   /** flag to produce detailed output with all BL / horizon / rise intervals per target */
-  private final boolean doDetails;
+  private boolean doDetails;
 
   /* internal */
   /** sky calc instance */
@@ -601,10 +605,12 @@ public class ObservabilityService {
 
       for (Profile p : profiles) {
         if (!hs.checkProfile(p, azEl.getAzimuth(), azEl.getElevation())) {
+/*
           if (logger.isLoggable(Level.FINE)) {
-            logger.fine("target is hidden by horizon profile = " + p.getName() + " [" +
-                    azEl.getAzimuth() + ", " + azEl.getElevation() + "] @ " + this.sc.toDate(jd, true));
+            logger.fine("Target hidden by horizon profile = " + p.getName() + " [" +
+                    azEl.getAzimuth() + ", " + azEl.getElevation() + "]");
           }
+ */
           visible = false;
           break;
         }
@@ -939,10 +945,12 @@ public class ObservabilityService {
     final double minElevDeg = Math.toDegrees(this.minElev);
 
     int decMin = 5 * (int) Math.round((obsLat - 90d + minElevDeg) / 5d);
-    decMin = Math.max(decMin, -85);
+    decMin = Math.max(decMin, -90);
 
     int decMax = 5 * (int) Math.round((obsLat + 90 - minElevDeg) / 5d);
-    decMax = Math.min(decMax, 85);
+    decMax = Math.min(decMax, 90);
+
+//    decMax = -90;
 
     final List<Target> targets = new ArrayList<Target>();
     Target t;

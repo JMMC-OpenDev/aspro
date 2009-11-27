@@ -369,7 +369,7 @@ public class AstroSkyCalc {
   /**
    * Return the current target position (azimuth / elevation) in degrees
    * @param jd julian date
-   * @return azimuth / elevation in degrees
+   * @return azimuth (0 to north) / elevation in degrees
    */
   public AzEl getTargetPosition(final double jd) {
 
@@ -408,9 +408,14 @@ public class AstroSkyCalc {
 
     final double ha = Spherical.ha_alt(dec, this.site.lat.value, Math.toDegrees(minElev));
 
-    if (ha == -1000d || ha == 1000d) {
-      // impossible to determine ha :
+    if (ha == -1000d) {
+      // never rise (target is never over the min elevation) :
       return -1d;
+    }
+
+    if (ha == 1000d) {
+      // always rise (target is always over the min elevation) :
+      return 12d;
     }
 
     if (logger.isLoggable(Level.FINE)) {
