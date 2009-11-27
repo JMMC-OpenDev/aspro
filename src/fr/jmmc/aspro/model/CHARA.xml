@@ -106,30 +106,36 @@
     <channel>
       <name>Channel4</name>
     </channel>
+    <channel>
+      <name>Channel5</name>
+    </channel>
+    <channel>
+      <name>Channel6</name>
+    </channel>
 
     <delayLine>
       <name>DL1</name>
-      <maximumThrow>94.8</maximumThrow>
+      <maximumThrow>43.0</maximumThrow>
     </delayLine>
     <delayLine>
       <name>DL2</name>
-      <maximumThrow>94.8</maximumThrow>
+      <maximumThrow>43.0</maximumThrow>
     </delayLine>
     <delayLine>
       <name>DL3</name>
-      <maximumThrow>94.8</maximumThrow>
+      <maximumThrow>43.0</maximumThrow>
     </delayLine>
     <delayLine>
       <name>DL4</name>
-      <maximumThrow>94.8</maximumThrow>
+      <maximumThrow>43.0</maximumThrow>
     </delayLine>
     <delayLine>
       <name>DL5</name>
-      <maximumThrow>94.8</maximumThrow>
+      <maximumThrow>43.0</maximumThrow>
     </delayLine>
     <delayLine>
       <name>DL6</name>
-      <maximumThrow>94.8</maximumThrow>
+      <maximumThrow>43.0</maximumThrow>
     </delayLine>
 
 <!-- no switchyard -->
