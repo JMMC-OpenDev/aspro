@@ -135,11 +135,10 @@ public class AsproGenConfig {
   224.000000000000       0.000000000000000E+000
   ...
    */
-  private static void convertHorizon(final String station, final String absFileName) {
+  private static void convertHorizon(final String station, final String absFileName, final StringBuilder sb) {
 
-    logger.severe("convertHorizon : " + station);
-
-    final StringBuilder sb = new StringBuilder(16384);
+    sb.append("<station>\n");
+    sb.append("<name>").append(station).append("</name>\n");
     sb.append("<horizon>\n");
 
     // number of columns filled with double values :
@@ -207,8 +206,8 @@ public class AsproGenConfig {
     }
 
     sb.append("</horizon>\n");
+    sb.append("</station>\n");
 
-    logger.severe("convertHorizon : " + station + " - output :\n" + sb.toString());
   }
 
   /**
@@ -223,8 +222,11 @@ public class AsproGenConfig {
       "C0", "C1", "C2", "C3", "D0", "D1", "D2", "E0", "G0", "G1", "G2", "H0",
       "I1", "J1", "J2", "J3", "J4", "J5", "J6", "K0", "L0", "M0"};
 
+    final StringBuilder sb = new StringBuilder(65535);
+
     for (String station : vltStations) {
-      convertHorizon(station, asproPath + station + ".horizon");
+      convertHorizon(station, asproPath + station + ".horizon", sb);
     }
+    logger.severe("convertHorizons : \n" + sb.toString());
   }
 }
