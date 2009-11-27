@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: DelayLineService.java,v 1.4 2009-11-25 17:14:32 bourgesl Exp $"
+ * "@(#) $Id: DelayLineService.java,v 1.5 2009-11-27 10:13:19 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2009/11/25 17:14:32  bourgesl
+ * fixed bugs on HA limits + merge JD intervals
+ *
  * Revision 1.3  2009/11/24 17:27:12  bourgesl
  * first attempt to merge ranges
  *
@@ -40,14 +43,14 @@ public class DelayLineService {
 
   /**
    * Return the intervals (hour angles) for all base lines compatible with wMin < w(h) < wMax,
-   * wMin and wMax are given by wRanges
+   * wMin and wMax are given by wRanges.
    *
    * see astro_delayline.DL_INTERVAL_LIST(...)
    *
    * @param dec target declination (rad)
    * @param baseLines base line list
    * @param wRanges [wMin - wMax] ranges per base line
-   * @return intervals (hour angles)
+   * @return intervals (hour angles) or null if thread interrupted
    */
   public static List<List<Range>> findHAIntervals(final double dec, final List<BaseLine> baseLines, final List<Range> wRanges) {
 

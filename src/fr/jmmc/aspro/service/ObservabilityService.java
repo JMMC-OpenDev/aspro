@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.14 2009-11-26 17:04:11 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.15 2009-11-27 10:13:19 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.14  2009/11/26 17:04:11  bourgesl
+ * added observability plots options (night/detail / UTC/LST)
+ * added base line limits
+ *
  * Revision 1.13  2009/11/25 17:14:32  bourgesl
  * fixed bugs on HA limits + merge JD intervals
  *
@@ -59,6 +63,7 @@ import fr.jmmc.aspro.model.Beam;
 import fr.jmmc.aspro.model.ConfigurationManager;
 import fr.jmmc.aspro.model.DateTimeInterval;
 import fr.jmmc.aspro.model.ObservabilityData;
+import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.Range;
 import fr.jmmc.aspro.model.StarObservability;
 import fr.jmmc.aspro.model.SunTimeInterval;
@@ -282,6 +287,7 @@ public class ObservabilityService {
 
     } catch (RuntimeException re) {
       logger.log(Level.SEVERE, "calcObservability failure :", re);
+      logger.log(Level.SEVERE, "observation :" + ObservationManager.getInstance().toString(observation));
       // clear invalid data :
       this.data = null;
     }
@@ -294,8 +300,9 @@ public class ObservabilityService {
   }
 
   /**
-   * Process the sun time stamps to have
-   * @param sunEvents
+   * Process the sun time stamps to have both night limits in the LST range [0;24] +/- 12h
+   * and all intervals (day/night/twilight) in the LST range [0;24]
+   * @param sunEvents jd sun events in the LST range [0;24] +/- 12h
    */
   private void processSunAlmanach(final List<SunAlmanachTime> sunEvents) {
     List<SunTimeInterval> intervals = null;
@@ -339,15 +346,14 @@ public class ObservabilityService {
           this.nightLimits.add(new Range(jdFrom, jdTo));
         }
 
-        // BUG HERE
-
-        if (jdFrom > this.jdLst0 || jdTo < this.jdLst24) {
+        // Keep intervals that are inside or overlapping the LST [0;24] range :
+        if ((jdFrom >= this.jdLst0 && jdFrom <= this.jdLst24) || (jdTo >= this.jdLst0 && jdTo <= this.jdLst24)) {
 
           if (logger.isLoggable(Level.FINE)) {
             logger.fine("Range[" + jdFrom + " - " + jdTo + "] : " + type);
           }
 
-          // trim :
+          // adjust range limits :
           if (jdFrom < this.jdLst0) {
             jdFrom = this.jdLst0;
           }
@@ -377,6 +383,9 @@ public class ObservabilityService {
   }
 
   private void findTargetObservability(final Target target) {
+
+    // Get the current thread to check if the computation is interrupted :
+    final Thread currentThread = Thread.currentThread();
 
     final StarObservability starObs = new StarObservability(target.getName());
     // add the result to keep an unobservable target :
@@ -417,10 +426,21 @@ public class ObservabilityService {
       if (this.doCheckHorizon) {
         // check horizon profiles inside rise/set range :
         rangesJDHz = checkHorizonProfile(rangeJDRiseSet);
+
+        // fast interrupt :
+        if (currentThread.isInterrupted()) {
+          return;
+        }
       }
 
       // Get intervals (HA) compatible with all base lines (switchyard / delay line / pops) :
       final List<List<Range>> rangesHABaseLines = DelayLineService.findHAIntervals(Math.toRadians(precDEC), this.baseLines, this.wRanges);
+
+      // rangesHABaseLines can be null if the thread was interrupted :
+      // fast interrupt :
+      if (currentThread.isInterrupted()) {
+        return;
+      }
 
       // observable ranges (jd) :
       final List<Range> obsRanges = new ArrayList<Range>();
@@ -533,6 +553,11 @@ public class ObservabilityService {
     }
   }
 
+  /**
+   * Check the horizon profiles for all stations given the target rise/set range (JD)
+   * @param jdRiseSet target rise/set range (JD)
+   * @return list of observable ranges (no obstruction) or null if thread interrupted
+   */
   private List<Range> checkHorizonProfile(final Range jdRiseSet) {
     // output :
     final List<Range> ranges = new ArrayList<Range>();
@@ -913,10 +938,10 @@ public class ObservabilityService {
 
     final double minElevDeg = Math.toDegrees(this.minElev);
 
-    int decMin = 5 * (int)Math.round((obsLat - 90d + minElevDeg)/5d);
+    int decMin = 5 * (int) Math.round((obsLat - 90d + minElevDeg) / 5d);
     decMin = Math.max(decMin, -85);
 
-    int decMax = 5 * (int)Math.round((obsLat + 90 - minElevDeg)/5d);
+    int decMax = 5 * (int) Math.round((obsLat + 90 - minElevDeg) / 5d);
     decMax = Math.min(decMax, 85);
 
     final List<Target> targets = new ArrayList<Target>();
