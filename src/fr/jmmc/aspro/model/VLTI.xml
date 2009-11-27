@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-    Document   : AsproOIModel.xml
+    Document   : VLTI.xml
     Created on : 15 septembre 2009
-    Author     : mella
+    Author     : bourgesl
     Description:
         VLTI interferometer.
 -->
@@ -7867,7 +7867,6 @@
           <elevation>90.0</elevation>
         </point>
       </horizon>
-
     </station>
 
     <channel>

@@ -109,19 +109,27 @@
 
     <delayLine>
       <name>DL1</name>
-      <maximumThrow>46</maximumThrow>
+      <maximumThrow>94.8</maximumThrow>
     </delayLine>
     <delayLine>
       <name>DL2</name>
-      <maximumThrow>46</maximumThrow>
+      <maximumThrow>94.8</maximumThrow>
     </delayLine>
     <delayLine>
       <name>DL3</name>
-      <maximumThrow>46</maximumThrow>
+      <maximumThrow>94.8</maximumThrow>
     </delayLine>
     <delayLine>
       <name>DL4</name>
-      <maximumThrow>46</maximumThrow>
+      <maximumThrow>94.8</maximumThrow>
+    </delayLine>
+    <delayLine>
+      <name>DL5</name>
+      <maximumThrow>94.8</maximumThrow>
+    </delayLine>
+    <delayLine>
+      <name>DL6</name>
+      <maximumThrow>94.8</maximumThrow>
     </delayLine>
 
 <!-- no switchyard -->
