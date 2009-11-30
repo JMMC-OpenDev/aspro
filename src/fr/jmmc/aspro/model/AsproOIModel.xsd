@@ -529,7 +529,7 @@
       <xsd:element name="pop" type="Pop" minOccurs="0" maxOccurs="unbounded">
         <xsd:annotation>
           <xsd:documentation>
-              The list of pops for this interferometer (optional)
+              The list of POPs for this interferometer (optional)
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
@@ -679,10 +679,52 @@
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
+
+      <xsd:element name="popLink" type="PopLink" minOccurs="0" maxOccurs="unbounded">
+        <xsd:annotation>
+          <xsd:documentation>
+              The list of the links between a station and the POPs for this interferometer
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
       <xsd:element name="horizon" type="HorizonProfile" minOccurs="0">
         <xsd:annotation>
           <xsd:documentation>
             An optional horizon profile seen from this station
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+
+
+
+
+  <!-- PopLink -->
+  <xsd:complexType name="PopLink">
+    <xsd:annotation>
+      <xsd:documentation>
+        This type describes a link to a POP with its optical length
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="pop" type="xsd:IDREF">
+        <xsd:annotation>
+          <xsd:documentation>
+              The associated POP
+          </xsd:documentation>
+          <xsd:appinfo>
+            <jaxb:property>
+              <jaxb:baseType name="Pop" />
+            </jaxb:property>
+          </xsd:appinfo>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="opticalLength" type="xsd:double">
+        <xsd:annotation>
+          <xsd:documentation>
+              The length in meter corresponding to the delay due to the associated POP
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
@@ -861,20 +903,16 @@
   <xsd:complexType name="Pop">
     <xsd:annotation>
       <xsd:documentation>
-        This type describes a Pop (TBC)
+        This type describes a Pipe of Pan (POP) present in the interferometer.
+        This only defines the identifier / name of the POP that is then used in
+        the station definition to give the fixed delay due to the POP.
       </xsd:documentation>
     </xsd:annotation>
     <xsd:sequence>
-        <!-- cf CHARA.pops == pop list is associated to a station -->
-
-        <!--
-        add the station reference
-        -->
-
-      <xsd:element name="value" type="xsd:double" minOccurs="1" maxOccurs="unbounded">
+      <xsd:element name="name" type="xsd:ID">
         <xsd:annotation>
           <xsd:documentation>
-              Pop value in meter
+              POP identifier (Pop1 ...)
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>

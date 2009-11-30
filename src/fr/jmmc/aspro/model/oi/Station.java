@@ -1,6 +1,8 @@
 
 package fr.jmmc.aspro.model.oi;
 
+import java.util.ArrayList;
+import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -32,6 +34,7 @@ import fr.jmmc.aspro.model.OIBase;
  *         &lt;element name="relativePosition" type="{http://www.jmmc.fr/aspro-oi/0.1}Position3D"/>
  *         &lt;element name="posSph" type="{http://www.jmmc.fr/aspro-oi/0.1}LonLatAlt" minOccurs="0"/>
  *         &lt;element name="delayLineFixedOffset" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
+ *         &lt;element name="popLink" type="{http://www.jmmc.fr/aspro-oi/0.1}PopLink" maxOccurs="unbounded" minOccurs="0"/>
  *         &lt;element name="horizon" type="{http://www.jmmc.fr/aspro-oi/0.1}HorizonProfile" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
@@ -48,6 +51,7 @@ import fr.jmmc.aspro.model.OIBase;
     "relativePosition",
     "posSph",
     "delayLineFixedOffset",
+    "popLinks",
     "horizon"
 })
 public class Station
@@ -67,6 +71,8 @@ public class Station
     protected Position3D relativePosition;
     protected LonLatAlt posSph;
     protected Double delayLineFixedOffset;
+    @XmlElement(name = "popLink")
+    protected List<PopLink> popLinks;
     protected HorizonProfile horizon;
 
     /**
@@ -187,6 +193,35 @@ public class Station
      */
     public void setDelayLineFixedOffset(Double value) {
         this.delayLineFixedOffset = value;
+    }
+
+    /**
+     * Gets the value of the popLinks property.
+     * 
+     * <p>
+     * This accessor method returns a reference to the live list,
+     * not a snapshot. Therefore any modification you make to the
+     * returned list will be present inside the JAXB object.
+     * This is why there is not a <CODE>set</CODE> method for the popLinks property.
+     * 
+     * <p>
+     * For example, to add a new item, do as follows:
+     * <pre>
+     *    getPopLinks().add(newItem);
+     * </pre>
+     * 
+     * 
+     * <p>
+     * Objects of the following type(s) are allowed in the list
+     * {@link PopLink }
+     * 
+     * 
+     */
+    public List<PopLink> getPopLinks() {
+        if (popLinks == null) {
+            popLinks = new ArrayList<PopLink>();
+        }
+        return this.popLinks;
     }
 
     /**

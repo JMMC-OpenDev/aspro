@@ -37,6 +37,27 @@
         <posZ>0.0</posZ>
       </relativePosition>
       <delayLineFixedOffset>0.0</delayLineFixedOffset>
+
+      <popLink>
+        <pop>POP1</pop>
+        <opticalLength>0.000</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>POP2</pop>
+        <opticalLength>36.576</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>POP3</pop>
+        <opticalLength>73.152</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>POP4</pop>
+        <opticalLength>109.728</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>POP5</pop>
+        <opticalLength>146.304</opticalLength>
+      </popLink>
     </station>
 
     <station>
@@ -48,6 +69,27 @@
         <posZ>28.128580103</posZ>
       </relativePosition>
       <delayLineFixedOffset>4.532654762</delayLineFixedOffset>
+
+      <popLink>
+        <pop>POP1</pop>
+        <opticalLength>-36.576</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>POP2</pop>
+        <opticalLength>0.000</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>POP3</pop>
+        <opticalLength>36.576</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>POP4</pop>
+        <opticalLength>73.152</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>POP5</pop>
+        <opticalLength>109.728</opticalLength>
+      </popLink>
     </station>
 
     <station>
@@ -59,6 +101,27 @@
         <posZ>249.643974581</posZ>
       </relativePosition>
       <delayLineFixedOffset>15.309717902</delayLineFixedOffset>
+
+      <popLink>
+        <pop>POP1</pop>
+        <opticalLength>0.000</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>POP2</pop>
+        <opticalLength>36.576</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>POP3</pop>
+        <opticalLength>73.152</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>POP4</pop>
+        <opticalLength>109.728</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>POP5</pop>
+        <opticalLength>146.304</opticalLength>
+      </popLink>
     </station>
 
     <station>
@@ -70,6 +133,27 @@
         <posZ>221.444997474</posZ>
       </relativePosition>
       <delayLineFixedOffset>26.721359853</delayLineFixedOffset>
+
+      <popLink>
+        <pop>POP1</pop>
+        <opticalLength>-73.152</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>POP2</pop>
+        <opticalLength>-36.576</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>POP3</pop>
+        <opticalLength>0.000</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>POP4</pop>
+        <opticalLength>36.576</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>POP5</pop>
+        <opticalLength>73.152</opticalLength>
+      </popLink>
     </station>
 
     <station>
@@ -81,6 +165,28 @@
         <posZ>172.774093891</posZ>
       </relativePosition>
       <delayLineFixedOffset>29.087218284</delayLineFixedOffset>
+
+
+      <popLink>
+        <pop>POP1</pop>
+        <opticalLength>-73.152</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>POP2</pop>
+        <opticalLength>-36.576</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>POP3</pop>
+        <opticalLength>0.000</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>POP4</pop>
+        <opticalLength>36.576</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>POP5</pop>
+        <opticalLength>73.152</opticalLength>
+      </popLink>
     </station>
 
     <station>
@@ -92,6 +198,27 @@
         <posZ>165.067607370</posZ>
       </relativePosition>
       <delayLineFixedOffset>-5.413000000</delayLineFixedOffset>
+
+      <popLink>
+        <pop>POP1</pop>
+        <opticalLength>-146.304</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>POP2</pop>
+        <opticalLength>-109.728</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>POP3</pop>
+        <opticalLength>-73.152</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>POP4</pop>
+        <opticalLength>-36.576</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>POP5</pop>
+        <opticalLength>0.000</opticalLength>
+      </popLink>
     </station>
 
     <channel>
@@ -141,6 +268,21 @@
 <!-- no switchyard -->
 
     <!-- pop on CHARA -->
+    <pop>
+      <name>POP1</name>
+    </pop>
+    <pop>
+      <name>POP2</name>
+    </pop>
+    <pop>
+      <name>POP3</name>
+    </pop>
+    <pop>
+      <name>POP4</name>
+    </pop>
+    <pop>
+      <name>POP5</name>
+    </pop>
 
 <!--
 5         ! must be in same order as stations!!!
@@ -152,7 +294,6 @@
 -146.304 -109.728 -73.152  -36.576    0.000 W2
 -->
 
-    <!-- TBC -->
     <focalInstrument>
       <name>VEGA</name>
       <description></description>
@@ -262,6 +403,7 @@
         <stations>E2 W1 W2</stations>
       </configuration>
     </instrument>
+
     <instrument>
       <focalInstrument>MIRC</focalInstrument>
       <configuration>

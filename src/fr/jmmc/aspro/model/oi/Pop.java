@@ -1,18 +1,22 @@
 
 package fr.jmmc.aspro.model.oi;
 
-import java.util.ArrayList;
-import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlID;
+import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import fr.jmmc.aspro.model.OIBase;
 
 
 /**
  * 
- *         This type describes a Pop (TBC)
+ *         This type describes a Pipe of Pan (POP) present in the interferometer.
+ *         This only defines the identifier / name of the POP that is then used in
+ *         the station definition to give the fixed delay due to the POP.
  *       
  * 
  * <p>Java class for Pop complex type.
@@ -24,7 +28,7 @@ import fr.jmmc.aspro.model.OIBase;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="value" type="{http://www.w3.org/2001/XMLSchema}double" maxOccurs="unbounded"/>
+ *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}ID"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -35,42 +39,40 @@ import fr.jmmc.aspro.model.OIBase;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "Pop", propOrder = {
-    "values"
+    "name"
 })
 public class Pop
     extends OIBase
 {
 
-    @XmlElement(name = "value", type = Double.class)
-    protected List<Double> values;
+    @XmlElement(required = true)
+    @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
+    @XmlID
+    @XmlSchemaType(name = "ID")
+    protected String name;
 
     /**
-     * Gets the value of the values property.
+     * Gets the value of the name property.
      * 
-     * <p>
-     * This accessor method returns a reference to the live list,
-     * not a snapshot. Therefore any modification you make to the
-     * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the values property.
-     * 
-     * <p>
-     * For example, to add a new item, do as follows:
-     * <pre>
-     *    getValues().add(newItem);
-     * </pre>
-     * 
-     * 
-     * <p>
-     * Objects of the following type(s) are allowed in the list
-     * {@link Double }
-     * 
-     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
      */
-    public List<Double> getValues() {
-        if (values == null) {
-            values = new ArrayList<Double>();
-        }
-        return this.values;
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Sets the value of the name property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setName(String value) {
+        this.name = value;
     }
 
 }
