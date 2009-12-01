@@ -502,10 +502,10 @@
         </xsd:annotation>
       </xsd:element>
 
-      <xsd:element name="channel" type="Channel" minOccurs="1" maxOccurs="unbounded">
+      <xsd:element name="channel" type="Channel" minOccurs="0" maxOccurs="unbounded">
         <xsd:annotation>
           <xsd:documentation>
-              The list of channels for this interferometer
+              The list of channels for this interferometer (optional)
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>

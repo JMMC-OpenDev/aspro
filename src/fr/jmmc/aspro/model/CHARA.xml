@@ -39,23 +39,23 @@
       <delayLineFixedOffset>0.0</delayLineFixedOffset>
 
       <popLink>
-        <pop>POP1</pop>
+        <pop>PoP1</pop>
         <opticalLength>0.000</opticalLength>
       </popLink>
       <popLink>
-        <pop>POP2</pop>
+        <pop>PoP2</pop>
         <opticalLength>36.576</opticalLength>
       </popLink>
       <popLink>
-        <pop>POP3</pop>
+        <pop>PoP3</pop>
         <opticalLength>73.152</opticalLength>
       </popLink>
       <popLink>
-        <pop>POP4</pop>
+        <pop>PoP4</pop>
         <opticalLength>109.728</opticalLength>
       </popLink>
       <popLink>
-        <pop>POP5</pop>
+        <pop>PoP5</pop>
         <opticalLength>146.304</opticalLength>
       </popLink>
     </station>
@@ -71,23 +71,23 @@
       <delayLineFixedOffset>4.532654762</delayLineFixedOffset>
 
       <popLink>
-        <pop>POP1</pop>
+        <pop>PoP1</pop>
         <opticalLength>-36.576</opticalLength>
       </popLink>
       <popLink>
-        <pop>POP2</pop>
+        <pop>PoP2</pop>
         <opticalLength>0.000</opticalLength>
       </popLink>
       <popLink>
-        <pop>POP3</pop>
+        <pop>PoP3</pop>
         <opticalLength>36.576</opticalLength>
       </popLink>
       <popLink>
-        <pop>POP4</pop>
+        <pop>PoP4</pop>
         <opticalLength>73.152</opticalLength>
       </popLink>
       <popLink>
-        <pop>POP5</pop>
+        <pop>PoP5</pop>
         <opticalLength>109.728</opticalLength>
       </popLink>
     </station>
@@ -103,23 +103,23 @@
       <delayLineFixedOffset>15.309717902</delayLineFixedOffset>
 
       <popLink>
-        <pop>POP1</pop>
+        <pop>PoP1</pop>
         <opticalLength>0.000</opticalLength>
       </popLink>
       <popLink>
-        <pop>POP2</pop>
+        <pop>PoP2</pop>
         <opticalLength>36.576</opticalLength>
       </popLink>
       <popLink>
-        <pop>POP3</pop>
+        <pop>PoP3</pop>
         <opticalLength>73.152</opticalLength>
       </popLink>
       <popLink>
-        <pop>POP4</pop>
+        <pop>PoP4</pop>
         <opticalLength>109.728</opticalLength>
       </popLink>
       <popLink>
-        <pop>POP5</pop>
+        <pop>PoP5</pop>
         <opticalLength>146.304</opticalLength>
       </popLink>
     </station>
@@ -135,23 +135,23 @@
       <delayLineFixedOffset>26.721359853</delayLineFixedOffset>
 
       <popLink>
-        <pop>POP1</pop>
+        <pop>PoP1</pop>
         <opticalLength>-73.152</opticalLength>
       </popLink>
       <popLink>
-        <pop>POP2</pop>
+        <pop>PoP2</pop>
         <opticalLength>-36.576</opticalLength>
       </popLink>
       <popLink>
-        <pop>POP3</pop>
+        <pop>PoP3</pop>
         <opticalLength>0.000</opticalLength>
       </popLink>
       <popLink>
-        <pop>POP4</pop>
+        <pop>PoP4</pop>
         <opticalLength>36.576</opticalLength>
       </popLink>
       <popLink>
-        <pop>POP5</pop>
+        <pop>PoP5</pop>
         <opticalLength>73.152</opticalLength>
       </popLink>
     </station>
@@ -168,23 +168,23 @@
 
 
       <popLink>
-        <pop>POP1</pop>
+        <pop>PoP1</pop>
         <opticalLength>-73.152</opticalLength>
       </popLink>
       <popLink>
-        <pop>POP2</pop>
+        <pop>PoP2</pop>
         <opticalLength>-36.576</opticalLength>
       </popLink>
       <popLink>
-        <pop>POP3</pop>
+        <pop>PoP3</pop>
         <opticalLength>0.000</opticalLength>
       </popLink>
       <popLink>
-        <pop>POP4</pop>
+        <pop>PoP4</pop>
         <opticalLength>36.576</opticalLength>
       </popLink>
       <popLink>
-        <pop>POP5</pop>
+        <pop>PoP5</pop>
         <opticalLength>73.152</opticalLength>
       </popLink>
     </station>
@@ -200,45 +200,26 @@
       <delayLineFixedOffset>-5.413000000</delayLineFixedOffset>
 
       <popLink>
-        <pop>POP1</pop>
+        <pop>PoP1</pop>
         <opticalLength>-146.304</opticalLength>
       </popLink>
       <popLink>
-        <pop>POP2</pop>
+        <pop>PoP2</pop>
         <opticalLength>-109.728</opticalLength>
       </popLink>
       <popLink>
-        <pop>POP3</pop>
+        <pop>PoP3</pop>
         <opticalLength>-73.152</opticalLength>
       </popLink>
       <popLink>
-        <pop>POP4</pop>
+        <pop>PoP4</pop>
         <opticalLength>-36.576</opticalLength>
       </popLink>
       <popLink>
-        <pop>POP5</pop>
+        <pop>PoP5</pop>
         <opticalLength>0.000</opticalLength>
       </popLink>
     </station>
-
-    <channel>
-      <name>Channel1</name>
-    </channel>
-    <channel>
-      <name>Channel2</name>
-    </channel>
-    <channel>
-      <name>Channel3</name>
-    </channel>
-    <channel>
-      <name>Channel4</name>
-    </channel>
-    <channel>
-      <name>Channel5</name>
-    </channel>
-    <channel>
-      <name>Channel6</name>
-    </channel>
 
     <delayLine>
       <name>DL1</name>
@@ -269,19 +250,19 @@
 
     <!-- pop on CHARA -->
     <pop>
-      <name>POP1</name>
+      <name>PoP1</name>
     </pop>
     <pop>
-      <name>POP2</name>
+      <name>PoP2</name>
     </pop>
     <pop>
-      <name>POP3</name>
+      <name>PoP3</name>
     </pop>
     <pop>
-      <name>POP4</name>
+      <name>PoP4</name>
     </pop>
     <pop>
-      <name>POP5</name>
+      <name>PoP5</name>
     </pop>
 
 <!--

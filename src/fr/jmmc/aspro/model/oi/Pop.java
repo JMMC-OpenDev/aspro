@@ -75,4 +75,13 @@ public class Pop
         this.name = value;
     }
 
+//--simple--preserve
+
+  @Override
+  public String toString() {
+    return this.name;
+  }
+
+//--simple--preserve
+
 }

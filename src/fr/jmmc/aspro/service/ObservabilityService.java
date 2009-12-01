@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.16 2009-11-27 16:38:17 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.17 2009-12-01 17:14:45 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.16  2009/11/27 16:38:17  bourgesl
+ * added minElev to GUI + fixed horizon profiles
+ *
  * Revision 1.15  2009/11/27 10:13:19  bourgesl
  * fixed LST day/night intervals
  * fixed NPE on computation cancellation
@@ -78,11 +81,16 @@ import fr.jmmc.aspro.model.oi.DelayLine;
 import fr.jmmc.aspro.model.oi.FocalInstrument;
 import fr.jmmc.aspro.model.oi.InterferometerDescription;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
+import fr.jmmc.aspro.model.oi.Pop;
+import fr.jmmc.aspro.model.oi.PopLink;
 import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.StationLinks;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.service.HorizonService.Profile;
+import fr.jmmc.aspro.util.CombinationGenerator;
+import fr.jmmc.aspro.util.PermutationGenerator;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -129,20 +137,26 @@ public class ObservabilityService {
   private double jdLst0;
   /** jd corresponding to LST=23:59:59 for the observation date */
   private double jdLst24;
+  /** Night ranges defined in julian day */
+  private List<Range> nightLimits = null;
   /** interferometer description */
   private InterferometerDescription interferometer;
   /** focal instrument description */
   private FocalInstrument instrument;
   /** flag to indicate that a station has an horizon profile */
-  private boolean doCheckHorizon = false;
+  private boolean hasHorizon = false;
+  /** flag to indicate that pops are used */
+  private boolean hasPops = false;
   /** beam list */
   private List<Beam> beams;
   /** base line list */
   private List<BaseLine> baseLines = new ArrayList<BaseLine>();
-  /** W ranges */
+  /** W ranges corresponding to the base line list */
   private List<Range> wRanges = new ArrayList<Range>();
-  /** Night ranges defined in julian day */
-  private List<Range> nightLimits = null;
+  /** list of Pop combinations */
+  private List<List<Pop>> popCombinations = new ArrayList<List<Pop>>();
+  /** list of Pop offsets per base line */
+  private List<List<Double>> popOffsets = new ArrayList<List<Double>>();
 
   /**
    * This service is statefull so it can not be reused by several calls
@@ -193,12 +207,6 @@ public class ObservabilityService {
       } else {
         targets = observation.getTargets();
       }
-
-      // Prepare the beams (station / channel / delay line) :
-      prepareBeams();
-
-      // Prepare the base line (XYZ vector, wRange) :
-      prepareBaseLines();
 
       // define site :
       this.sc.defineSite(this.interferometer.getName(), this.interferometer.getPosSph());
@@ -261,6 +269,17 @@ public class ObservabilityService {
           logger.fine("No target defined.");
         }
       } else {
+
+        // Prepare the beams (station / channel / delay line) :
+        prepareBeams();
+
+        // Prepare the base line (XYZ vector, wRange) :
+        prepareBaseLines();
+
+        // Prepare the pops :
+        if (this.hasPops) {
+          preparePopCombinations(this.interferometer.getPops(), this.beams.size());
+        }
 
         for (Target target : targets) {
 
@@ -374,7 +393,6 @@ public class ObservabilityService {
 
           intervals.add(new SunTimeInterval(from, to, type));
         }
-
       }
 
       if (logger.isLoggable(Level.FINE)) {
@@ -395,16 +413,8 @@ public class ObservabilityService {
     // add the result to keep an unobservable target :
     this.data.getStarVisibilities().add(starObs);
 
-    double targetRA = target.getRA();
-
-    if (this.doDetails) {
-      // In this case, the right ascension is ignored to have HA intervals centered arround LST = 12h
-      // disabled :
-      /* targetRA = 180d; */
-    }
-
-    // Target coordinates precessed to jd :
-    final double[] raDec = this.sc.defineTarget(jdLst0, targetRA, target.getDEC());
+    // Target coordinates precessed to jd and to get position from JSkyCalc :
+    final double[] raDec = this.sc.defineTarget(jdLst0, target.getRA(), target.getDEC());
 
     // target right ascension in decimal hours :
     final double precRA = raDec[0];
@@ -426,8 +436,9 @@ public class ObservabilityService {
       // convert HA range to JD range :
       final Range rangeJDRiseSet = convertHARange(rangeHARiseSet, lstOffset);
 
+      // For now : only VLTI has horizon profiles :
       List<Range> rangesJDHz = null;
-      if (this.doCheckHorizon) {
+      if (this.hasHorizon) {
         // check horizon profiles inside rise/set range :
         rangesJDHz = checkHorizonProfile(rangeJDRiseSet);
 
@@ -437,8 +448,18 @@ public class ObservabilityService {
         }
       }
 
-      // Get intervals (HA) compatible with all base lines (switchyard / delay line / pops) :
-      final List<List<Range>> rangesHABaseLines = DelayLineService.findHAIntervals(Math.toRadians(precDEC), this.baseLines, this.wRanges);
+      // HA intervals for every base line :
+      List<List<Range>> rangesHABaseLines;
+
+      if (this.hasPops) {
+        // handle here all possible combinations for POPs :
+        // keep only the POPs that maximize the DL+rise intersection ...
+        rangesHABaseLines = findHAIntervalsWithPops(Math.toRadians(precDEC), rangeHARiseSet, starObs);
+
+      } else {
+        // Get intervals (HA) compatible with all base lines (switchyard / delay line / pops) :
+        rangesHABaseLines = DelayLineService.findHAIntervals(Math.toRadians(precDEC), this.baseLines, this.wRanges);
+      }
 
       // rangesHABaseLines can be null if the thread was interrupted :
       // fast interrupt :
@@ -450,16 +471,17 @@ public class ObservabilityService {
       final List<Range> obsRanges = new ArrayList<Range>();
 
       if (this.doDetails) {
+        final String prefix = target.getName() + " ";
 
         // Add Rise/Set :
-        final StarObservability soRiseSet = new StarObservability(target.getName() + " Rise/Set");
+        final StarObservability soRiseSet = new StarObservability(prefix + "Rise/Set");
         this.data.getStarVisibilities().add(soRiseSet);
 
         convertRangeToDateInterval(rangeJDRiseSet, soRiseSet.getVisible());
 
         if (rangesJDHz != null) {
           // Add Horizon :
-          final StarObservability soHz = new StarObservability(target.getName() + " Horizon");
+          final StarObservability soHz = new StarObservability(prefix + "Horizon");
           this.data.getStarVisibilities().add(soHz);
 
           for (Range range : rangesJDHz) {
@@ -485,7 +507,7 @@ public class ObservabilityService {
             logger.fine("JD ranges  : " + obsRanges);
           }
 
-          soBl = new StarObservability(target.getName() + " " + baseLine.getName());
+          soBl = new StarObservability(prefix + baseLine.getName());
           this.data.getStarVisibilities().add(soBl);
 
           for (Range range : obsRanges) {
@@ -534,7 +556,7 @@ public class ObservabilityService {
         logger.fine("obsRanges : " + obsRanges);
       }
 
-      // finally : merge intervals and return date intervals :
+      // finally : merge intervals :
       final List<Range> finalRanges = Range.mergeRanges(obsRanges, nValid);
 
       if (logger.isLoggable(Level.FINE)) {
@@ -545,7 +567,7 @@ public class ObservabilityService {
       for (Range range : finalRanges) {
         convertRangeToDateInterval(range, starObs.getVisible());
         /*
-        know bug : due to HA limit [12h or -12h], the converted JD / Date ranges
+        know bug : due to HA limit [+/-12h], the converted JD / Date ranges
         can have a discontinuity on the LST/UTC axis !
          */
       }
@@ -555,6 +577,129 @@ public class ObservabilityService {
         logger.fine("Target never rise : " + target);
       }
     }
+  }
+
+  /**
+   * Return the intervals (hour angles) for all base lines compatible with wMin < w(h) < wMax,
+   * wMin and wMax are given by wRanges.
+   *
+   * @param dec target declination (rad)
+   * @return intervals (hour angles) or null if thread interrupted
+   */
+  public List<List<Range>> findHAIntervalsWithPops(final double dec, final Range rangeHARiseSet, final StarObservability starObs) {
+    
+    // Get the current thread to check if the computation is interrupted :
+    final Thread currentThread = Thread.currentThread();
+
+    final int sizeBL = this.baseLines.size();
+    final int sizeCb = this.popCombinations.size();
+
+    BaseLine bl;
+    Range wRange;
+    Double offset;
+
+    // w range using the pop offset for a given base line :
+    final Range wRangeWithOffset = new Range();
+
+    // First Pass :
+    // For all PoP combinations : find the HA interval merged with the HA Rise/set interval
+    List<Range> rangesPoP = new ArrayList<Range>();
+    final List<List<Range>> rangesPoPs = new ArrayList<List<Range>>(sizeCb);
+
+    List<Pop> popComb;
+    List<Double> popOffset;
+
+    for (int k = 0; k < sizeCb; k++) {
+      popOffset = this.popOffsets.get(k);
+
+      for (int i = 0; i < sizeBL; i++) {
+        bl = this.baseLines.get(i);
+        wRange = this.wRanges.get(i);
+        offset = popOffset.get(i);
+
+        wRangeWithOffset.setMin(wRange.getMin() + offset.doubleValue());
+        wRangeWithOffset.setMax(wRange.getMax() + offset.doubleValue());
+
+        // fast interrupt :
+        if (currentThread.isInterrupted()) {
+          return null;
+        }
+
+        rangesPoP.addAll(DelayLineService.findHAIntervalsForBaseLine(dec, bl, wRangeWithOffset));
+      }
+      
+      // Merge HA ranges with HA Rise/set ranges :
+      rangesPoP.add(rangeHARiseSet);
+      
+      rangesPoPs.add(Range.mergeRanges(rangesPoP, sizeBL + 1));
+
+      // reset :
+      rangesPoP.clear();
+    }
+
+    // Find the PoP that gives the better ranges :
+    int maxIdx = -1;
+    double maxGlobal = 0d;
+
+    double maxPop = 0d;
+    double len;
+    for (int k = 0; k < sizeCb; k++) {
+      popComb = this.popCombinations.get(k);
+      rangesPoP = rangesPoPs.get(k);
+
+      // maximum length per Pop combination :
+      maxPop = 0d;
+      for (Range range : rangesPoP) {
+        len = range.getLength();
+        if (len > maxPop) {
+          maxPop = len;
+        }
+      }
+
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("pop : " + popComb + " = " + maxPop);
+      }
+
+      // maximum length for all combination :
+      if (maxPop > maxGlobal) {
+        maxGlobal = maxPop;
+        maxIdx = k;
+      }
+
+    }
+
+    if (maxIdx != -1) {
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("pop : " + this.popCombinations.get(maxIdx) + " = " + maxGlobal);
+      }
+
+      popComb = this.popCombinations.get(maxIdx);
+      popOffset = this.popOffsets.get(maxIdx);
+
+      starObs.setName(starObs.getName() + " " + popComb);
+
+      // Second Pass :
+      // For a particular PoP combination : find the HA interval (not merged)
+      final List<List<Range>> rangesBL = new ArrayList<List<Range>>();
+
+      for (int i = 0; i < sizeBL; i++) {
+        bl = this.baseLines.get(i);
+        wRange = this.wRanges.get(i);
+        offset = popOffset.get(i);
+
+        wRangeWithOffset.setMin(wRange.getMin() + offset.doubleValue());
+        wRangeWithOffset.setMax(wRange.getMax() + offset.doubleValue());
+
+        // fast interrupt :
+        if (currentThread.isInterrupted()) {
+          return null;
+        }
+
+        rangesBL.add(DelayLineService.findHAIntervalsForBaseLine(dec, bl, wRangeWithOffset));
+      }
+      return rangesBL;
+    }
+    return Collections.emptyList();
   }
 
   /**
@@ -605,12 +750,12 @@ public class ObservabilityService {
 
       for (Profile p : profiles) {
         if (!hs.checkProfile(p, azEl.getAzimuth(), azEl.getElevation())) {
-/*
+          /*
           if (logger.isLoggable(Level.FINE)) {
-            logger.fine("Target hidden by horizon profile = " + p.getName() + " [" +
-                    azEl.getAzimuth() + ", " + azEl.getElevation() + "]");
+          logger.fine("Target hidden by horizon profile = " + p.getName() + " [" +
+          azEl.getAzimuth() + ", " + azEl.getElevation() + "]");
           }
- */
+           */
           visible = false;
           break;
         }
@@ -647,6 +792,8 @@ public class ObservabilityService {
     this.interferometer = this.observation.getInterferometerConfiguration().getInterferometerConfiguration().getInterferometer();
     this.instrument = this.observation.getInstrumentConfiguration().getInstrumentConfiguration().getFocalInstrument();
 
+    this.hasPops = !this.interferometer.getPops().isEmpty();
+
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("interferometer = " + this.interferometer.getName());
       logger.fine("instrument     = " + this.instrument.getName());
@@ -669,12 +816,12 @@ public class ObservabilityService {
     for (Station s : stations) {
       this.beams.add(new Beam(s));
 
-      if (s.getHorizon() != null) {
-        this.doCheckHorizon = true;
+      if (s.getHorizon() != null && !s.getHorizon().getPoints().isEmpty()) {
+        this.hasHorizon = true;
       }
     }
 
-    // Get delay Lines :
+    // Get channels :
     final List<Channel> channels = this.interferometer.getChannels();
 
     // Get delay Lines :
@@ -684,7 +831,7 @@ public class ObservabilityService {
 
     // Has switchyard ?
 
-    if (channels != null && this.interferometer.getSwitchyard() != null) {
+    if (!channels.isEmpty() && this.interferometer.getSwitchyard() != null) {
       // Case Interferometer with a switchyard (VLTI) :
 
       // used channels :
@@ -757,35 +904,98 @@ public class ObservabilityService {
 
     }
 
-    // Finally add Pops :
-
-    // TODO : Pops for CHARA :
-
-    /*
-     *     Zero MyPops First
-     *     DO I=1,NSTAT
-     *        MYPOPS(I)=0.0
-     *     ENDDO
-     *
-    POPSLOOP :  DO I=1,NSTAT
-    !     convert the configuration like '1223' to integers, .
-    READ(ARGLIST(I:I),'(I1)',IOSTAT=IER) KPOPS
-    IF (IER.NE.0) THEN
-    DDO_POPS=.FALSE.
-    EXIT POPSLOOP
-    ELSE
-    KPOPS=MAX(KPOPS,1)
-    KPOPS=MIN(KPOPS,NPOPS)
-    MYPOPS(I)=POPS(KPOPS,SLIST(I))
-    ENDIF
-    ENDDO POPSLOOP
-     *
-     *
-     */
-
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("Beams = " + this.beams);
     }
+  }
+
+  /**
+   * Generates all Pop combinations for the given number of beams
+   * @param pops list of pops for the interferometer
+   * @param nBeams number of beams
+   */
+  private void preparePopCombinations(final List<Pop> pops, final int nBeams) {
+
+    this.popCombinations = new ArrayList<List<Pop>>();
+
+    final int n = pops.size();
+    final int p = nBeams;
+
+    final CombinationGenerator cg = new CombinationGenerator(n, nBeams);
+
+    PermutationGenerator<Integer> pg;
+
+    int[] indices;
+    List<Pop> comb;
+    final Integer[] ints = new Integer[p];
+
+    while (cg.hasMore()) {
+      indices = cg.getNext();
+
+      int j = 0;
+      for (int i : indices) {
+        ints[j++] = Integer.valueOf(i);
+      }
+      pg = new PermutationGenerator<Integer>(ints);
+
+      while (pg.next()) {
+        comb = new ArrayList<Pop>(p);
+        for (int i = 0; i < p; i++) {
+          comb.add(pops.get(ints[i]));
+        }
+
+        this.popCombinations.add(comb);
+      }
+    }
+
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("popCombinations : " + this.popCombinations);
+    }
+
+    // Compute the offset for every base line and every pop combination :
+    this.popOffsets = new ArrayList<List<Double>>(this.popCombinations.size());
+
+    // Note : the beams are in the same order as the stations :
+
+    Beam b1, b2;
+    Pop p1, p2;
+
+    List<Double> poList;
+    double t;
+
+    for (List<Pop> pList : this.popCombinations) {
+
+      poList = new ArrayList<Double>(this.baseLines.size());
+
+      for (int i = 0; i < nBeams; i++) {
+        for (int j = i + 1; j < nBeams; j++) {
+          b1 = this.beams.get(i);
+          p1 = pList.get(i);
+
+          b2 = this.beams.get(j);
+          p2 = pList.get(j);
+
+          // optical path difference = difference of pops delays :
+          t = getPopOpticalLength(b1.getStation(), p1) - getPopOpticalLength(b2.getStation(), p2);
+
+          poList.add(Double.valueOf(t));
+        }
+      }
+      this.popOffsets.add(poList);
+    }
+
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("popOffsets : " + this.popOffsets);
+    }
+  }
+
+  private double getPopOpticalLength(final Station station, final Pop pop) {
+    for (PopLink pl : station.getPopLinks()) {
+      if (pl.getPop().equals(pop)) {
+        return pl.getOpticalLength();
+      }
+    }
+    return 0d;
   }
 
   private void prepareBaseLines() {
@@ -804,6 +1014,9 @@ public class ObservabilityService {
         y = b1.getStation().getRelativePosition().getPosY() - b2.getStation().getRelativePosition().getPosY();
         z = b1.getStation().getRelativePosition().getPosZ() - b2.getStation().getRelativePosition().getPosZ();
 
+        // a Base line defines only the geometry :
+        this.baseLines.add(new BaseLine(b1, b2, x, y, z));
+
         t = b1.getOpticalLength() - b2.getOpticalLength();
 
         // 2 DL for 2 telescopes => double throw :
@@ -812,8 +1025,7 @@ public class ObservabilityService {
         wMin = t - b2.getDelayLine().getMaximumThrow();
         wMax = t + b1.getDelayLine().getMaximumThrow();
 
-        this.baseLines.add(new BaseLine(b1, b2, x, y, z));
-
+        // the range contains the w delay limits for the corresponding base line :
         this.wRanges.add(new Range(wMin, wMax));
       }
     }
@@ -949,8 +1161,6 @@ public class ObservabilityService {
 
     int decMax = 5 * (int) Math.round((obsLat + 90 - minElevDeg) / 5d);
     decMax = Math.min(decMax, 90);
-
-//    decMax = -90;
 
     final List<Target> targets = new ArrayList<Target>();
     Target t;

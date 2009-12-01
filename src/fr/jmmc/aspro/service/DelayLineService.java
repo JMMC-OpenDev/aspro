@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: DelayLineService.java,v 1.5 2009-11-27 10:13:19 bourgesl Exp $"
+ * "@(#) $Id: DelayLineService.java,v 1.6 2009-12-01 17:14:45 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2009/11/27 10:13:19  bourgesl
+ * fixed LST day/night intervals
+ * fixed NPE on computation cancellation
+ *
  * Revision 1.4  2009/11/25 17:14:32  bourgesl
  * fixed bugs on HA limits + merge JD intervals
  *
@@ -61,6 +65,7 @@ public class DelayLineService {
 
     final List<List<Range>> rangesBL = new ArrayList<List<Range>>();
 
+    //List<Range>
     BaseLine bl;
     Range wRange;
     for (int i = 0; i < size; i++) {
@@ -101,7 +106,7 @@ public class DelayLineService {
 
     if (wExtrema == null) {
       // no solution :
-      return null;
+      return Collections.emptyList();
     }
 
     // test if [WMIN,WMAX] has intersection with MAXW[1-2] :
@@ -119,7 +124,7 @@ public class DelayLineService {
       if (logger.isLoggable(Level.FINE)) {
         logger.fine("W outside range : " + baseLine.getName() + " : " + wRange);
       }
-      return null;
+      return Collections.emptyList();
     }
     if (w1 > wMin && w2 < wMax) {
       // always inside range = full interval [-12h;12h]:

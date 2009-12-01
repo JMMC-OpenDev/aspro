@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: Range.java,v 1.4 2009-11-24 17:27:12 bourgesl Exp $"
+ * "@(#) $Id: Range.java,v 1.5 2009-12-01 17:14:45 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2009/11/24 17:27:12  bourgesl
+ * first attempt to merge ranges
+ *
  * Revision 1.3  2009/11/24 15:12:09  bourgesl
  * first step to handle delay line limits
  *
@@ -56,6 +59,10 @@ public class Range {
 
   public void setMax(double max) {
     this.max = max;
+  }
+
+  public double getLength() {
+    return this.max - this.min;
   }
 
   @Override
