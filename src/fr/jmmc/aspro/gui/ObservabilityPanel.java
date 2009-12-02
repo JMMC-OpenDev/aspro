@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityPanel.java,v 1.9 2009-11-27 16:38:17 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityPanel.java,v 1.10 2009-12-02 17:23:51 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.9  2009/11/27 16:38:17  bourgesl
+ * added minElev to GUI + fixed horizon profiles
+ *
  * Revision 1.8  2009/11/26 17:04:11  bourgesl
  * added observability plots options (night/detail / UTC/LST)
  * added base line limits
@@ -430,6 +433,7 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
 
     // change the Domain axis (vertical) :
     final SymbolAxis localSymbolAxis = new SymbolAxis("", targetNames);
+    localSymbolAxis.setInverted(true);
     localSymbolAxis.setGridBandsVisible(false);
     localSymbolAxis.setAutoRange(false);
     localSymbolAxis.setRangeWithMargins(-1d, targetNames.length);

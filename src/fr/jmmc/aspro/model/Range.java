@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: Range.java,v 1.5 2009-12-01 17:14:45 bourgesl Exp $"
+ * "@(#) $Id: Range.java,v 1.6 2009-12-02 17:23:51 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2009/12/01 17:14:45  bourgesl
+ * first try to add the pop configuration finder
+ *
  * Revision 1.4  2009/11/24 17:27:12  bourgesl
  * first attempt to merge ranges
  *
@@ -78,6 +81,18 @@ public class Range {
    * @return new list of ranges
    */
   public static List<Range> mergeRanges(final List<Range> ranges, final int nValid) {
+    return mergeRanges(ranges, nValid, null);
+  }
+
+  /**
+   * Merge a list of overlapping ranges according to the nValid parameter that indicates how many times a point must be inside a range
+   * to consider the point as valid
+   * @param ranges list of ranges to merge
+   * @param nValid number of ranges to consider a point is valid
+   * @param results output list of ranges
+   * @return new list of ranges or null
+   */
+  public static List<Range> mergeRanges(final List<Range> ranges, final int nValid, final List<Range> results) {
     // table of start/end time :
     final List<RangeLimit> limits = new ArrayList<RangeLimit>(ranges.size() * 2);
 
@@ -92,7 +107,7 @@ public class Range {
     //  Explore range. When the running sum of flag is equal to the
     //  number nValid, we are in a valid range
 
-    final List<Range> mRanges = new ArrayList<Range>();
+    List<Range> mRanges = results;
 
     int s = 0;
     RangeLimit limit;
@@ -103,6 +118,10 @@ public class Range {
       s += limit.getFlag();
 
       if (s == nValid) {
+        if (mRanges == null) {
+          // lazy instanciation :
+          mRanges = new ArrayList<Range>();
+        }
         mRanges.add(new Range(limit.getPosition(), limits.get(i+1).getPosition()));
       }
     }
@@ -110,7 +129,7 @@ public class Range {
     return mRanges;
   }
 
-  private static class RangeLimit implements Comparable<RangeLimit> {
+  private static final class RangeLimit implements Comparable<RangeLimit> {
     /** limit position */
     private final double position;
     /** integer value to indicate the start [+1] or end of the initial range */

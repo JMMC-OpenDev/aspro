@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.17 2009-12-01 17:14:45 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.18 2009-12-02 17:23:51 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.17  2009/12/01 17:14:45  bourgesl
+ * first try to add the pop configuration finder
+ *
  * Revision 1.16  2009/11/27 16:38:17  bourgesl
  * added minElev to GUI + fixed horizon profiles
  *
@@ -71,6 +74,7 @@ import fr.jmmc.aspro.model.ConfigurationManager;
 import fr.jmmc.aspro.model.DateTimeInterval;
 import fr.jmmc.aspro.model.ObservabilityData;
 import fr.jmmc.aspro.model.ObservationManager;
+import fr.jmmc.aspro.model.PopObservabilityData;
 import fr.jmmc.aspro.model.Range;
 import fr.jmmc.aspro.model.StarObservability;
 import fr.jmmc.aspro.model.SunTimeInterval;
@@ -248,10 +252,7 @@ public class ObservabilityService {
       if (this.useNightLimit) {
         //  sun rise/set with twilight : see NightlyAlmanac
 
-        /*
-        Use the LST range [0;24h] +- 12h to have valid night ranges to merge with target ranges :
-         */
-
+        // Use the LST range [0;24h] +- 12h to have valid night ranges to merge with target ranges :
         final List<SunAlmanachTime> sunEvents = this.sc.findSunRiseSet(this.jdLst0);
 
         processSunAlmanach(sunEvents);
@@ -291,6 +292,10 @@ public class ObservabilityService {
           findTargetObservability(target);
 
         } // for Target
+
+        // PoPs : Compatible Mode :
+        // Objective : find the pop combination that maximize the observability of the all list of target
+        // Post processing here of intermediate results
 
         // fast interrupt :
         if (currentThread.isInterrupted()) {
@@ -410,7 +415,7 @@ public class ObservabilityService {
     final Thread currentThread = Thread.currentThread();
 
     final StarObservability starObs = new StarObservability(target.getName());
-    // add the result to keep an unobservable target :
+    // add the result to have also unobservable targets :
     this.data.getStarVisibilities().add(starObs);
 
     // Target coordinates precessed to jd and to get position from JSkyCalc :
@@ -471,7 +476,8 @@ public class ObservabilityService {
       final List<Range> obsRanges = new ArrayList<Range>();
 
       if (this.doDetails) {
-        final String prefix = target.getName() + " ";
+        // Get the current target name + pop combination :
+        final String prefix = starObs.getName() + " ";
 
         // Add Rise/Set :
         final StarObservability soRiseSet = new StarObservability(prefix + "Rise/Set");
@@ -490,42 +496,44 @@ public class ObservabilityService {
         }
 
         // Add ranges per BL :
-        BaseLine baseLine;
-        List<Range> ranges;
-        StarObservability soBl;
-        for (int i = 0, size = this.baseLines.size(); i < size; i++) {
-          baseLine = this.baseLines.get(i);
-          ranges = rangesHABaseLines.get(i);
+        if (!rangesHABaseLines.isEmpty()) {
+          BaseLine baseLine;
+          List<Range> ranges;
+          StarObservability soBl;
+          for (int i = 0, size = this.baseLines.size(); i < size; i++) {
+            baseLine = this.baseLines.get(i);
+            ranges = rangesHABaseLines.get(i);
 
-          if (ranges != null) {
-            for (Range range : ranges) {
-              obsRanges.add(convertHARange(range, lstOffset));
+            if (ranges != null) {
+              for (Range range : ranges) {
+                obsRanges.add(convertHARange(range, lstOffset));
+              }
             }
-          }
-          if (logger.isLoggable(Level.FINE)) {
-            logger.fine("baseLine : " + baseLine);
-            logger.fine("JD ranges  : " + obsRanges);
-          }
+            if (logger.isLoggable(Level.FINE)) {
+              logger.fine("baseLine : " + baseLine);
+              logger.fine("JD ranges  : " + obsRanges);
+            }
 
-          soBl = new StarObservability(prefix + baseLine.getName());
-          this.data.getStarVisibilities().add(soBl);
+            soBl = new StarObservability(prefix + baseLine.getName());
+            this.data.getStarVisibilities().add(soBl);
 
-          for (Range range : obsRanges) {
-            convertRangeToDateInterval(range, soBl.getVisible());
+            for (Range range : obsRanges) {
+              convertRangeToDateInterval(range, soBl.getVisible());
+            }
+
+            if (logger.isLoggable(Level.FINE)) {
+              logger.fine("Date ranges  : " + soBl.getVisible());
+            }
+
+            obsRanges.clear();
           }
-
-          if (logger.isLoggable(Level.FINE)) {
-            logger.fine("Date ranges  : " + soBl.getVisible());
-          }
-
-          obsRanges.clear();
         }
       }
 
       // Merge then all JD intervals :
 
       // nValid = nBL [dl] + 1 [rise or horizon] + 1 if night limits
-      int nValid = 0;
+      int nValid = this.baseLines.size() + 1;
 
       // flatten and convert HA ranges to JD range :
       for (List<Range> ranges : rangesHABaseLines) {
@@ -534,7 +542,6 @@ public class ObservabilityService {
             obsRanges.add(convertHARange(range, lstOffset));
           }
         }
-        nValid++;
       }
 
       if (rangesJDHz != null) {
@@ -544,7 +551,6 @@ public class ObservabilityService {
 
         obsRanges.add(rangeJDRiseSet);
       }
-      nValid++;
 
       // Intersect with night limits :
       if (this.useNightLimit) {
@@ -564,12 +570,14 @@ public class ObservabilityService {
       }
 
       // store merge result as date intervals :
-      for (Range range : finalRanges) {
-        convertRangeToDateInterval(range, starObs.getVisible());
-        /*
-        know bug : due to HA limit [+/-12h], the converted JD / Date ranges
-        can have a discontinuity on the LST/UTC axis !
-         */
+      if (finalRanges != null) {
+        for (Range range : finalRanges) {
+          convertRangeToDateInterval(range, starObs.getVisible());
+          /*
+           * know bug : due to HA limit [+/-12h], the converted JD / Date ranges
+           * can have a discontinuity on the LST/UTC axis !
+           */
+        }
       }
 
     } else {
@@ -582,12 +590,15 @@ public class ObservabilityService {
   /**
    * Return the intervals (hour angles) for all base lines compatible with wMin < w(h) < wMax,
    * wMin and wMax are given by wRanges.
+   * 
+   * This method is similar to DelayLineService.findHAIntervals(...) but it takes into account the PoPs i.e.
+   * it finds the best PoP combination to maximize the HA interval (delay line + rise/set)
    *
    * @param dec target declination (rad)
    * @return intervals (hour angles) or null if thread interrupted
    */
   public List<List<Range>> findHAIntervalsWithPops(final double dec, final Range rangeHARiseSet, final StarObservability starObs) {
-    
+
     // Get the current thread to check if the computation is interrupted :
     final Thread currentThread = Thread.currentThread();
 
@@ -603,20 +614,40 @@ public class ObservabilityService {
 
     // First Pass :
     // For all PoP combinations : find the HA interval merged with the HA Rise/set interval
-    List<Range> rangesPoP = new ArrayList<Range>();
-    final List<List<Range>> rangesPoPs = new ArrayList<List<Range>>(sizeCb);
+    // list of observability data associated to a pop combination :
+    final List<PopObservabilityData> popDataList = new ArrayList<PopObservabilityData>();
+
+    // Current pop observability :
+    PopObservabilityData popData;
+
+    // list of HA ranges for all base lines :
+    final List<List<Range>> rangesBL = new ArrayList<List<Range>>();
+
+    // Current list of HA ranges for a base line :
+    List<Range> ranges;
+
+    // Temporary lists to merge HA ranges with Rise/set range :
+    final List<Range> flatRanges = new ArrayList<Range>();
+    final List<Range> mergeRanges = new ArrayList<Range>();
 
     List<Pop> popComb;
     List<Double> popOffset;
 
+    boolean skip = false;
+
+    // For every Pop Combination :
     for (int k = 0; k < sizeCb; k++) {
       popOffset = this.popOffsets.get(k);
 
+      skip = false;
+
+      // For every Base Line :
       for (int i = 0; i < sizeBL; i++) {
         bl = this.baseLines.get(i);
         wRange = this.wRanges.get(i);
         offset = popOffset.get(i);
 
+        // adjust w range with the current pop combination's Offset :
         wRangeWithOffset.setMin(wRange.getMin() + offset.doubleValue());
         wRangeWithOffset.setMax(wRange.getMax() + offset.doubleValue());
 
@@ -625,79 +656,59 @@ public class ObservabilityService {
           return null;
         }
 
-        rangesPoP.addAll(DelayLineService.findHAIntervalsForBaseLine(dec, bl, wRangeWithOffset));
-      }
-      
-      // Merge HA ranges with HA Rise/set ranges :
-      rangesPoP.add(rangeHARiseSet);
-      
-      rangesPoPs.add(Range.mergeRanges(rangesPoP, sizeBL + 1));
+        ranges = DelayLineService.findHAIntervalsForBaseLine(dec, bl, wRangeWithOffset);
 
-      // reset :
-      rangesPoP.clear();
-    }
-
-    // Find the PoP that gives the better ranges :
-    int maxIdx = -1;
-    double maxGlobal = 0d;
-
-    double maxPop = 0d;
-    double len;
-    for (int k = 0; k < sizeCb; k++) {
-      popComb = this.popCombinations.get(k);
-      rangesPoP = rangesPoPs.get(k);
-
-      // maximum length per Pop combination :
-      maxPop = 0d;
-      for (Range range : rangesPoP) {
-        len = range.getLength();
-        if (len > maxPop) {
-          maxPop = len;
+        if (ranges.isEmpty()) {
+          // this base line is incompatible with that W range :
+          skip = true;
+          break;
+        } else {
+          rangesBL.add(ranges);
         }
       }
 
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("pop : " + popComb + " = " + maxPop);
+      if (!skip) {
+        popComb = this.popCombinations.get(k);
+
+        popData = new PopObservabilityData(popComb, new ArrayList<List<Range>>(rangesBL));
+
+        flatRanges.add(rangeHARiseSet);
+
+        popData.computeMaxLength(sizeBL + 1, flatRanges, mergeRanges);
+
+        if (popData.getMaxLength() > 0d) {
+          // skip pop solutions outside Rise/Set HA range :
+          popDataList.add(popData);
+        }
       }
 
-      // maximum length for all combination :
-      if (maxPop > maxGlobal) {
-        maxGlobal = maxPop;
-        maxIdx = k;
-      }
-
+      rangesBL.clear();
     }
 
-    if (maxIdx != -1) {
+    // Find the PoP combination that gives the longest HA interval :
+    if (!popDataList.isEmpty()) {
+      // Sort pop observability data according to max length :
+      Collections.sort(popDataList);
+
       if (logger.isLoggable(Level.FINE)) {
-        logger.fine("pop : " + this.popCombinations.get(maxIdx) + " = " + maxGlobal);
+        logger.fine("popDataList : " + popDataList);
       }
 
-      popComb = this.popCombinations.get(maxIdx);
-      popOffset = this.popOffsets.get(maxIdx);
+      // maximum length for this Pop Combination :
+      popData = popDataList.get(popDataList.size() - 1);
 
-      starObs.setName(starObs.getName() + " " + popComb);
-
-      // Second Pass :
-      // For a particular PoP combination : find the HA interval (not merged)
-      final List<List<Range>> rangesBL = new ArrayList<List<Range>>();
-
-      for (int i = 0; i < sizeBL; i++) {
-        bl = this.baseLines.get(i);
-        wRange = this.wRanges.get(i);
-        offset = popOffset.get(i);
-
-        wRangeWithOffset.setMin(wRange.getMin() + offset.doubleValue());
-        wRangeWithOffset.setMax(wRange.getMax() + offset.doubleValue());
-
-        // fast interrupt :
-        if (currentThread.isInterrupted()) {
-          return null;
-        }
-
-        rangesBL.add(DelayLineService.findHAIntervalsForBaseLine(dec, bl, wRangeWithOffset));
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("best PoP : " + popData.getPopCombination() + " = " + popData.getMaxLength());
       }
-      return rangesBL;
+
+      final StringBuffer sb = new StringBuffer().append(" (");
+      for (Pop pop : popData.getPopCombination()) {
+        sb.append(" ").append(pop.getName());
+      }
+      sb.append(")");
+      starObs.setName(starObs.getName() + sb.toString());
+
+      return popData.getRangesBL();
     }
     return Collections.emptyList();
   }
@@ -1164,7 +1175,7 @@ public class ObservabilityService {
 
     final List<Target> targets = new ArrayList<Target>();
     Target t;
-    for (int i = decMin; i <= decMax; i += 5) {
+    for (int i = decMax; i > decMin; i -= 5) {
       t = new Target();
       // delta = x
       t.setName("\u0394 = " + Integer.toString(i));

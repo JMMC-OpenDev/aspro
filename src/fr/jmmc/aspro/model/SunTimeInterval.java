@@ -1,6 +1,11 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+/*******************************************************************************
+ * JMMC project
+ *
+ * "@(#) $Id: SunTimeInterval.java,v 1.3 2009-12-02 17:23:51 bourgesl Exp $"
+ *
+ * History
+ * -------
+ * $Log: not supported by cvs2svn $
  */
 package fr.jmmc.aspro.model;
 
