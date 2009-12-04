@@ -1,14 +1,11 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SaveObservationAction.java,v 1.2 2009-12-04 16:26:58 bourgesl Exp $"
+ * "@(#) $Id: LoadObservationAction.java,v 1.1 2009-12-04 16:26:58 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
- * Revision 1.1  2009/12/04 15:38:27  bourgesl
- * Added Save action in the menu bar
- *
  */
 package fr.jmmc.aspro.gui.action;
 
@@ -25,14 +22,14 @@ import javax.swing.JOptionPane;
  * Save observation settings action
  * @author bourgesl
  */
-public class SaveObservationAction extends RegisteredAction {
+public class LoadObservationAction extends RegisteredAction {
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
   /** Class name. This name is used to register to the ActionRegistrar */
-  public final static String className = "fr.jmmc.aspro.gui.action.SaveObservationAction";
+  public final static String className = "fr.jmmc.aspro.gui.action.LoadObservationAction";
   /** Action name. This name is used to register to the ActionRegistrar */
-  public final static String actionName = "saveObservation";
+  public final static String actionName = "loadObservation";
   /** Class logger */
   private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(className);
 
@@ -40,7 +37,7 @@ public class SaveObservationAction extends RegisteredAction {
   /** last directory used to save a file; by default = user home */
   private String lastDir = System.getProperty("user.home");
 
-  public SaveObservationAction() {
+  public LoadObservationAction() {
     super(className, actionName);
   }
 
@@ -51,25 +48,19 @@ public class SaveObservationAction extends RegisteredAction {
 
     final ObservationManager om = ObservationManager.getInstance();
 
-    File file = om.getObservationFile();
+    File file = null;
 
     JFileChooser fileChooser = new JFileChooser();
-    fileChooser.setSelectedFile(file);
+
     if (this.lastDir != null) {
       fileChooser.setCurrentDirectory(new File(this.lastDir));
     }
 
-    fileChooser.setDialogTitle("Save the current observation settings");
+    fileChooser.setDialogTitle("Load observation settings");
 
-    final int returnVal = fileChooser.showSaveDialog(null);
+    final int returnVal = fileChooser.showOpenDialog(null);
     if (returnVal == JFileChooser.APPROVE_OPTION) {
       file = fileChooser.getSelectedFile();
-      if (file.exists()) {
-        final int answer = JOptionPane.showConfirmDialog(null, "File \'" + file.getName() + "\' already exists\nDo you want to overwrite this file ?");
-        if (answer != JOptionPane.YES_OPTION) {
-          file = null;
-        }
-      }
     } else {
       file = null;
     }
@@ -79,14 +70,14 @@ public class SaveObservationAction extends RegisteredAction {
       this.lastDir = file.getParent();
 
       try {
-        om.save(file);
-        StatusBar.show("file saved : " + file.getName());
+        om.load(file);
+        StatusBar.show("file loaded : " + file.getName());
 
       } catch (RuntimeException re) {
         logger.log(Level.SEVERE, "runtime failure : ", re);
 
         JOptionPane.showMessageDialog(null,
-            "Could not save file " + file.getName(),
+            "Could not load file " + file.getName(),
             "Error", JOptionPane.ERROR_MESSAGE);
       }
 

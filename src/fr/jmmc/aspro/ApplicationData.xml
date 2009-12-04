@@ -16,6 +16,8 @@
   </dependences>
   <menubar>
     <menu label="File">
+      <menu label="Load" classpath="fr.jmmc.aspro.gui.action.LoadObservationAction" action="loadObservation" accelerator="L"
+            icon="/fr/jmmc/aspro/gui/icons/fileopen.png"/>
       <menu label="Save" classpath="fr.jmmc.aspro.gui.action.SaveObservationAction" action="saveObservation" accelerator="S"
             icon="/fr/jmmc/aspro/gui/icons/filesaveas.png"/>
     </menu>

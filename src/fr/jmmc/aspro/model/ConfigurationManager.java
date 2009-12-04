@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ConfigurationManager.java,v 1.9 2009-12-04 15:38:27 bourgesl Exp $"
+ * "@(#) $Id: ConfigurationManager.java,v 1.10 2009-12-04 16:26:58 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.9  2009/12/04 15:38:27  bourgesl
+ * Added Save action in the menu bar
+ *
  * Revision 1.8  2009/11/20 16:55:47  bourgesl
  * Added Beam / Delay Line definition
  * ObservabilityService is stateless to simplify coding
@@ -97,14 +100,14 @@ public class ConfigurationManager extends BaseOIManager {
 
   private void initialize() {
     try {
-      final Configurations conf = (Configurations) load(CONF_FILE);
+      final Configurations conf = (Configurations) loadObject(CONF_FILE);
 
       InterferometerSetting is;
       for (String fileName : conf.getFiles()) {
         if (logger.isLoggable(Level.CONFIG)) {
           logger.config("ConfigurationManager : loading configuration file = " + fileName);
         }
-        is = (InterferometerSetting) load(fileName);
+        is = (InterferometerSetting) loadObject(fileName);
 
         addInterferometerSetting(is);
       }

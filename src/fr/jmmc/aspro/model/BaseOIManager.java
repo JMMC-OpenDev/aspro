@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BaseOIManager.java,v 1.5 2009-12-04 15:38:27 bourgesl Exp $"
+ * "@(#) $Id: BaseOIManager.java,v 1.6 2009-12-04 16:26:58 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2009/12/04 15:38:27  bourgesl
+ * Added Save action in the menu bar
+ *
  * Revision 1.4  2009/10/27 16:47:17  bourgesl
  * fixed bug on month conversion
  *
@@ -79,7 +82,7 @@ public class BaseOIManager {
    * @return unmarshalled object
    * @throws RuntimeException if the load operation failed
    */
-  protected Object load(final String uri) {
+  protected Object loadObject(final String uri) {
     final Unmarshaller u = this.jf.createUnMarshaller();
 
     Object result = null;
@@ -97,7 +100,7 @@ public class BaseOIManager {
    * @return unmarshalled object
    * @throws RuntimeException if the load operation failed
    */
-  protected Object load(final File inputFile) {
+  protected Object loadObject(final File inputFile) {
     final Unmarshaller u = this.jf.createUnMarshaller();
 
     Object result = null;
@@ -115,7 +118,7 @@ public class BaseOIManager {
    * @param object to marshall
    * @throws RuntimeException if the save operation failed
    */
-  protected void save(final File outputFile, final Object object) throws RuntimeException {
+  protected void saveObject(final File outputFile, final Object object) throws RuntimeException {
     final Marshaller marshaller = this.jf.createMarshaller();
     try {
       marshaller.marshal(object, outputFile);

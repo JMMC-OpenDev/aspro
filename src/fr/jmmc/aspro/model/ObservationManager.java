@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationManager.java,v 1.9 2009-12-04 15:38:27 bourgesl Exp $"
+ * "@(#) $Id: ObservationManager.java,v 1.10 2009-12-04 16:26:58 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.9  2009/12/04 15:38:27  bourgesl
+ * Added Save action in the menu bar
+ *
  * Revision 1.8  2009/11/26 17:04:11  bourgesl
  * added observability plots options (night/detail / UTC/LST)
  * added base line limits
@@ -44,7 +47,6 @@ import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.WhenSetting;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -92,10 +94,22 @@ public class ObservationManager extends BaseOIManager {
 
   private void createObservation() {
     this.observation = new ObservationSetting();
-    this.observation.setName("default");
-    this.observation.setWhen(new WhenSetting());
-    this.observation.setInstrumentConfiguration(new FocalInstrumentConfigurationChoice());
-    this.observation.setInterferometerConfiguration(new InterferometerConfigurationChoice());
+    defineDefaults(this.observation);
+  }
+
+  private void defineDefaults(final ObservationSetting obs) {
+    if (obs.getName() == null || obs.getName().length() == 0) {
+      this.observation.setName("default");
+    }
+    if (obs.getWhen() == null) {
+      obs.setWhen(new WhenSetting());
+    }
+    if (obs.getInstrumentConfiguration() == null) {
+      obs.setInstrumentConfiguration(new FocalInstrumentConfigurationChoice());
+    }
+    if (obs.getInterferometerConfiguration() == null) {
+      obs.setInterferometerConfiguration(new InterferometerConfigurationChoice());
+    }
   }
 
   public void register(final ObservationListener listener) {
@@ -181,6 +195,22 @@ public class ObservationManager extends BaseOIManager {
     return changed;
   }
 
+  private void updateObservation() {
+    // ugly code to update all resolved references used on post load :
+    final InterferometerConfigurationChoice interferometerChoice = getObservation().getInterferometerConfiguration();
+
+    interferometerChoice.setInterferometerConfiguration(ConfigurationManager.getInstance().getInterferometerConfiguration(interferometerChoice.getName()));
+
+    final FocalInstrumentConfigurationChoice instrumentChoice = getObservation().getInstrumentConfiguration();
+
+    instrumentChoice.setInstrumentConfiguration(ConfigurationManager.getInstance().getInterferometerInstrumentConfiguration(
+              interferometerChoice.getName(), instrumentChoice.getName()));
+
+    instrumentChoice.setStationList(ConfigurationManager.getInstance().getInstrumentConfigurationStations(
+            interferometerChoice.getName(), instrumentChoice.getName(), instrumentChoice.getStations()));
+
+  }
+
   /**
    * Add a target given its unique name
    * @param name target name
@@ -257,15 +287,57 @@ public class ObservationManager extends BaseOIManager {
     }
   }
 
-  public void save(final File outputFile) {
-    if (outputFile != null) {
-      this.observationFile = outputFile;
+  /**
+   * Save the current observation in the given file
+   * @param file file to save
+   * @throws RuntimeException if the save operation failed
+   */
+  public void save(final File file) throws RuntimeException {
+    if (file != null) {
+      this.observationFile = file;
 
       if (logger.isLoggable(Level.INFO)) {
         logger.info("Save observation to : " + this.observationFile);
       }
-      save(this.observationFile, getObservation());
+      saveObject(this.observationFile, getObservation());
     }
   }
 
+  /**
+   * Load an observation from the given file
+   * @param file file to load
+   * @throws RuntimeException if the load operation failed
+   */
+  public void load(final File file) throws RuntimeException {
+    if (file != null) {
+      this.observationFile = file;
+
+      if (logger.isLoggable(Level.INFO)) {
+        logger.info("Load observation from : " + this.observationFile);
+      }
+      final Object loaded = loadObject(this.observationFile);
+
+      if (!(loaded instanceof ObservationSetting)) {
+        throw new RuntimeException("The file does not correspond to observation settings : " + file);
+      }
+
+      final ObservationSetting newObservation = (ObservationSetting) loaded;
+      defineDefaults(newObservation);
+
+      // change the current observation :
+      this.observation = newObservation;
+
+      // update references :
+      updateObservation();
+
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("fireObservationLoaded : " + toString(getObservation()));
+      }
+
+      // Call listeners with a copy of the listener list to avoid concurrent modification :
+      for (ObservationListener listener : listeners.toArray(new ObservationListener[listeners.size()])) {
+        listener.onProcess(ObservationEventType.LOADED, getObservation());
+      }
+    }
+  }
 }

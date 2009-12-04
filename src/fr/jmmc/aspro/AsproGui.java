@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproGui.java,v 1.4 2009-12-04 15:37:32 bourgesl Exp $"
+ * "@(#) $Id: AsproGui.java,v 1.5 2009-12-04 16:26:58 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2009/12/04 15:37:32  bourgesl
+ * fixed application startup using the App frame instead of MainFrame
+ *
  * Revision 1.3  2009/11/03 16:57:56  bourgesl
  * added observability plot with LST/UTC support containing only day/night/twilight zones
  *
@@ -20,6 +23,7 @@
 package fr.jmmc.aspro;
 
 import fr.jmmc.aspro.gui.SettingPanel;
+import fr.jmmc.aspro.gui.action.LoadObservationAction;
 import fr.jmmc.aspro.gui.action.SaveObservationAction;
 import fr.jmmc.aspro.gui.util.ComponentResizeAdapter;
 import fr.jmmc.aspro.model.ConfigurationManager;
@@ -130,6 +134,8 @@ public class AsproGui extends App {
    * Create the main actions present in the menu bar
    */
   private void registerActions() {
+    // load observation :
+    new LoadObservationAction();
     // save observation :
     new SaveObservationAction();
   }
