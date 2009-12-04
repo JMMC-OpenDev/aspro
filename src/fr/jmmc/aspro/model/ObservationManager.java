@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationManager.java,v 1.8 2009-11-26 17:04:11 bourgesl Exp $"
+ * "@(#) $Id: ObservationManager.java,v 1.9 2009-12-04 15:38:27 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.8  2009/11/26 17:04:11  bourgesl
+ * added observability plots options (night/detail / UTC/LST)
+ * added base line limits
+ *
  * Revision 1.7  2009/11/17 17:00:28  bourgesl
  * chosen instrument configuration propagated to observation
  *
@@ -33,6 +37,7 @@
 package fr.jmmc.aspro.model;
 
 import fr.jmmc.aspro.AsproConstants;
+import fr.jmmc.aspro.model.ObservationListener.ObservationEventType;
 import fr.jmmc.aspro.model.oi.FocalInstrumentConfigurationChoice;
 import fr.jmmc.aspro.model.oi.InterferometerConfigurationChoice;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
@@ -62,9 +67,9 @@ public class ObservationManager extends BaseOIManager {
   /** singleton pattern */
   private static ObservationManager instance = new ObservationManager();
   /* members */
-  /** observation (single for now) */
+  /** observation settings */
   private ObservationSetting observation = null;
-  /** temporary file to save the observation settings */
+  /** associated file to the observation settings */
   private File observationFile = null;
   /** observation listeners */
   private List<ObservationListener> listeners = new ArrayList<ObservationListener>();
@@ -103,6 +108,10 @@ public class ObservationManager extends BaseOIManager {
 
   public ObservationSetting getObservation() {
     return observation;
+  }
+
+  public File getObservationFile() {
+    return observationFile;
   }
 
   public String toString(final ObservationSetting obs) {
@@ -235,33 +244,28 @@ public class ObservationManager extends BaseOIManager {
   }
 
   /**
-   * Future model listener notify all pattern
+   * This fires a changed observation event to all registered listeners
    */
   public void fireObservationChanged() {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("fireObservationChanged : " + toString(getObservation()));
     }
 
-    try {
-      if (this.observationFile == null) {
-        this.observationFile = File.createTempFile("observation", ".xml");
-        this.observationFile.deleteOnExit();
-      }
-
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("output file = " + this.observationFile.getAbsolutePath());
-      }
-
-      save(this.observationFile, getObservation());
-
-    } catch (IOException ioe) {
-      logger.log(Level.SEVERE, "unable to create temporary file", ioe);
-    }
-
     // Call listeners with a copy of the listener list to avoid concurrent modification :
     for (ObservationListener listener : listeners.toArray(new ObservationListener[listeners.size()])) {
-      listener.onChange(getObservation());
+      listener.onProcess(ObservationEventType.CHANGED, getObservation());
     }
-
   }
+
+  public void save(final File outputFile) {
+    if (outputFile != null) {
+      this.observationFile = outputFile;
+
+      if (logger.isLoggable(Level.INFO)) {
+        logger.info("Save observation to : " + this.observationFile);
+      }
+      save(this.observationFile, getObservation());
+    }
+  }
+
 }

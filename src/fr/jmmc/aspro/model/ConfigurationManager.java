@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ConfigurationManager.java,v 1.8 2009-11-20 16:55:47 bourgesl Exp $"
+ * "@(#) $Id: ConfigurationManager.java,v 1.9 2009-12-04 15:38:27 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.8  2009/11/20 16:55:47  bourgesl
+ * Added Beam / Delay Line definition
+ * ObservabilityService is stateless to simplify coding
+ *
  * Revision 1.7  2009/11/17 17:00:28  bourgesl
  * chosen instrument configuration propagated to observation
  *
@@ -92,21 +96,25 @@ public class ConfigurationManager extends BaseOIManager {
   }
 
   private void initialize() {
-    final Configurations conf = (Configurations) load(CONF_FILE);
+    try {
+      final Configurations conf = (Configurations) load(CONF_FILE);
 
-    InterferometerSetting is;
-    for (String fileName : conf.getFiles()) {
-      if (logger.isLoggable(Level.CONFIG)) {
-        logger.log(Level.CONFIG, "ConfigurationManager : loading configuration file = " + fileName);
+      InterferometerSetting is;
+      for (String fileName : conf.getFiles()) {
+        if (logger.isLoggable(Level.CONFIG)) {
+          logger.config("ConfigurationManager : loading configuration file = " + fileName);
+        }
+        is = (InterferometerSetting) load(fileName);
+
+        addInterferometerSetting(is);
       }
-      is = (InterferometerSetting) load(fileName);
 
-      addInterferometerSetting(is);
-    }
-
-    if (logger.isLoggable(Level.CONFIG)) {
-      logger.log(Level.CONFIG, "ConfigurationManager : descriptions   = " + getInterferometerDescriptions());
-      logger.log(Level.CONFIG, "ConfigurationManager : configurations = " + getInterferometerConfigurations());
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("ConfigurationManager : descriptions   = " + getInterferometerDescriptions());
+        logger.fine("ConfigurationManager : configurations = " + getInterferometerConfigurations());
+      }
+    } catch (RuntimeException re) {
+      logger.log(Level.SEVERE, "runtime failure : ", re);
     }
   }
 

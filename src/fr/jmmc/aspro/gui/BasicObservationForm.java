@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BasicObservationForm.java,v 1.8 2009-11-24 15:12:09 bourgesl Exp $"
+ * "@(#) $Id: BasicObservationForm.java,v 1.9 2009-12-04 15:38:27 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.8  2009/11/24 15:12:09  bourgesl
+ * first step to handle delay line limits
+ *
  * Revision 1.7  2009/11/17 17:00:28  bourgesl
  * chosen instrument configuration propagated to observation
  *
@@ -21,7 +24,9 @@
 package fr.jmmc.aspro.gui;
 
 import fr.jmmc.aspro.model.ConfigurationManager;
+import fr.jmmc.aspro.model.ObservationListener;
 import fr.jmmc.aspro.model.ObservationManager;
+import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.mcs.astro.star.Star;
 import fr.jmmc.mcs.astro.star.StarResolverWidget;
 import java.awt.GridBagConstraints;
@@ -38,10 +43,10 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 /**
- *
+ * This form allows the user to select main observation settings : date, interferometer, configuration, stations and targets ...
  * @author bourgesl
  */
-public class BasicObservationForm extends javax.swing.JPanel implements ChangeListener, ActionListener, Observer {
+public class BasicObservationForm extends javax.swing.JPanel implements ChangeListener, ActionListener, Observer, ObservationListener {
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
@@ -50,6 +55,8 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
   /** Class logger */
   private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
+
+  /* members */
   /** observation manager */
   private ObservationManager om = ObservationManager.getInstance();
   /** star resolver widget */
@@ -273,7 +280,7 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
     jButtonRemoveTarget.setEnabled(!v.isEmpty());
   }
 
-  public void actionPerformed(ActionEvent e) {
+  public void actionPerformed(final ActionEvent e) {
     if (e.getSource() == jComboBoxInterferometer) {
       if (logger.isLoggable(Level.FINE)) {
         logger.fine("Interferometer changed : " + jComboBoxInterferometer.getSelectedItem());
@@ -355,6 +362,25 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
       om.fireObservationChanged();
     }
   }
+
+  /**
+   * Handle the given event on the given observation =
+   * add the missing plot panels
+   *
+   * @param type event type
+   * @param observation observation
+   */
+  public void onProcess(final ObservationEventType type, final ObservationSetting observation) {
+    if (type == ObservationEventType.LOADED) {
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("loaded occured : " + observation);
+      }
+    }
+  }
+
+
+
+
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JButton jButtonRemoveTarget;
   private javax.swing.JComboBox jComboBoxInstrument;
@@ -371,4 +397,5 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
   private javax.swing.JList jListTargets;
   private javax.swing.JScrollPane jScrollPane1;
   // End of variables declaration//GEN-END:variables
+
 }

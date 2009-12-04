@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BaseOIManager.java,v 1.4 2009-10-27 16:47:17 bourgesl Exp $"
+ * "@(#) $Id: BaseOIManager.java,v 1.5 2009-12-04 15:38:27 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2009/10/27 16:47:17  bourgesl
+ * fixed bug on month conversion
+ *
  * Revision 1.3  2009/10/20 13:08:51  bourgesl
  * ObservationManager has methods to store observation properties
  *
@@ -74,6 +77,7 @@ public class BaseOIManager {
    * Protected load method
    * @param uri relative URI of the document to load
    * @return unmarshalled object
+   * @throws RuntimeException if the load operation failed
    */
   protected Object load(final String uri) {
     final Unmarshaller u = this.jf.createUnMarshaller();
@@ -82,22 +86,41 @@ public class BaseOIManager {
     try {
       result = u.unmarshal(this.getClass().getResource(uri));
     } catch (JAXBException je) {
-      logger.log(Level.SEVERE, "load failure : ", je);
+      throw new RuntimeException("Load failure on " + uri, je);
+    }
+    return result;
+  }
+
+  /**
+   * Protected load method
+   * @param inputFile File to load
+   * @return unmarshalled object
+   * @throws RuntimeException if the load operation failed
+   */
+  protected Object load(final File inputFile) {
+    final Unmarshaller u = this.jf.createUnMarshaller();
+
+    Object result = null;
+    try {
+      result = u.unmarshal(inputFile);
+    } catch (JAXBException je) {
+      throw new RuntimeException("Load failure on " + inputFile, je);
     }
     return result;
   }
 
   /**
    * Protected save method
-   * @param uri relative URI of the document to save
-   * @return unmarshalled object
+   * @param outputFile File to save
+   * @param object to marshall
+   * @throws RuntimeException if the save operation failed
    */
-  protected void save(final File outputFile, Object object) {
+  protected void save(final File outputFile, final Object object) throws RuntimeException {
     final Marshaller marshaller = this.jf.createMarshaller();
     try {
       marshaller.marshal(object, outputFile);
     } catch (JAXBException je) {
-      logger.log(Level.SEVERE, "save failure : ", je);
+      throw new RuntimeException("Save failure on " + outputFile, je);
     }
   }
 

@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityPanel.java,v 1.10 2009-12-02 17:23:51 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityPanel.java,v 1.11 2009-12-04 15:38:27 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.10  2009/12/02 17:23:51  bourgesl
+ * fixed several bugs on pop finder + refactoring
+ *
  * Revision 1.9  2009/11/27 16:38:17  bourgesl
  * added minElev to GUI + fixed horizon profiles
  *
@@ -47,6 +50,7 @@ import fr.jmmc.aspro.model.StarObservability;
 import fr.jmmc.aspro.model.SunTimeInterval;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.service.ObservabilityService;
+import fr.jmmc.mcs.gui.StatusBar;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FlowLayout;
@@ -111,8 +115,6 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
   private static final Font DEFAULT_TITLE_FONT = new Font("SansSerif", Font.BOLD, 14);
 
   /* members */
-  /** observation manager */
-  private ObservationManager om = ObservationManager.getInstance();
   /** jFreeChart instance */
   private JFreeChart localJFreeChart;
   /** xy plot instance */
@@ -154,7 +156,7 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
     initComponents();
 
     // register this as an observation listener :
-    om.register(this);
+    ObservationManager.getInstance().register(this);
   }
 
   /**
@@ -307,22 +309,31 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
   }
 
   protected void refreshPlot() {
-    this.onChange(om.getObservation());
+    this.plot(ObservationManager.getInstance().getObservation());
   }
 
   /**
-   * OnChange implementation to compute observability data and refresh the plot
-   * @param observation updated observation
+   * Handle the given event on the given observation =
+   * compute observability data and refresh the plot
+   * @param type event type
+   * @param observation observation
    */
-  public void onChange(final ObservationSetting observation) {
+  public void onProcess(final ObservationEventType type, final ObservationSetting observation) {
+    if (type == ObservationEventType.CHANGED) {
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("onChange occured : " + observation.getName());
+      }
+      this.plot(observation);
+    }
+  }
+
+  protected void plot(final ObservationSetting observation) {
     if (logger.isLoggable(Level.FINE)) {
-      logger.fine("onChange occured : " + observation);
+      logger.fine("plot : " + observation);
     }
 
-    // Use a swing worker to compute the data :
-
     /*
-     * Requires the java 5 SwingWorker backport = swing-worker-1.2.jar
+     * Use the SwingWorker backport for Java 5 = swing-worker-1.2.jar (org.jdesktop.swingworker.SwingWorker)
      */
     final SwingWorker<ObservabilityData, Void> worker = new SwingWorker<ObservabilityData, Void>() {
 
@@ -358,6 +369,9 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
             final ObservabilityData data = get();
 
             if (data != null) {
+              // update the status bar :
+              StatusBar.show("observability done.");
+
               final String title = observation.getInterferometerConfiguration().getName() +
                       " - " + observation.getInstrumentConfiguration().getStations();
 
@@ -395,6 +409,9 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
     }
     // memorize the reference to the new worker before execution :
     this.currentWorker = worker;
+
+    // update the status bar :
+    StatusBar.show("computing observability ... (please wait, this may take a while)");
 
     // start the new worker :
     worker.execute();
