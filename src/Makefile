@@ -1,13 +1,16 @@
 #*******************************************************************************
 # JMMC project
 #
-# "@(#) $Id: Makefile,v 1.4 2009-11-20 10:22:40 mella Exp $"
+# "@(#) $Id: Makefile,v 1.5 2009-12-07 15:31:09 bourgesl Exp $"
 #
 # Makefile of aspro module
 #
 # History
 # -------
 # $Log: not supported by cvs2svn $
+# Revision 1.4  2009/11/20 10:22:40  mella
+# Add jnlp deployement during installation step
+#
 # Revision 1.3  2009/11/20 10:17:29  mella
 # add jnlp to deploy aspro gui app
 #
@@ -115,9 +118,10 @@ JARFILES        = aspro
 #
 # <brief description of aspro jar files>
 aspro_DIRS     = fr \
-				 edu
+		 edu
 aspro_EXTRAS   = fr/jmmc/aspro/*.xml \
-				 fr/jmmc/aspro/model/*.xml
+		 fr/jmmc/aspro/model/*.xml \
+		 fr/jmmc/aspro/gui/icons/*.png
 
 #
 # Java programs
