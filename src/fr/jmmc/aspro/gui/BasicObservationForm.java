@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BasicObservationForm.java,v 1.9 2009-12-04 15:38:27 bourgesl Exp $"
+ * "@(#) $Id: BasicObservationForm.java,v 1.10 2009-12-07 15:17:59 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.9  2009/12/04 15:38:27  bourgesl
+ * Added Save action in the menu bar
+ *
  * Revision 1.8  2009/11/24 15:12:09  bourgesl
  * first step to handle delay line limits
  *
@@ -26,6 +29,9 @@ package fr.jmmc.aspro.gui;
 import fr.jmmc.aspro.model.ConfigurationManager;
 import fr.jmmc.aspro.model.ObservationListener;
 import fr.jmmc.aspro.model.ObservationManager;
+import fr.jmmc.aspro.model.oi.FocalInstrumentConfigurationChoice;
+import fr.jmmc.aspro.model.oi.InterferometerConfiguration;
+import fr.jmmc.aspro.model.oi.InterferometerConfigurationChoice;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.mcs.astro.star.Star;
 import fr.jmmc.mcs.astro.star.StarResolverWidget;
@@ -41,6 +47,7 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JSpinner;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.xml.datatype.XMLGregorianCalendar;
 
 /**
  * This form allows the user to select main observation settings : date, interferometer, configuration, stations and targets ...
@@ -61,6 +68,8 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
   private ObservationManager om = ObservationManager.getInstance();
   /** star resolver widget */
   private StarResolverWidget starSearchField;
+  /** flag to enable / disable the automatic update of the observation when any swing component changes */
+  private boolean doAutoUpdateObservation = true;
 
   /** Creates new form BasicObservationForm */
   public BasicObservationForm() {
@@ -203,21 +212,30 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
     add(jComboBoxInstrumentConfiguration, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
 
+  /**
+   * Process the remove target action
+   * @param evt action event
+   */
   private void jButtonRemoveTargetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonRemoveTargetActionPerformed
     // remove target action :
-    final String name = (String) jListTargets.getSelectedValue();
-    if (om.removeTarget(name)) {
+    final String name = (String) this.jListTargets.getSelectedValue();
+    if (this.om.removeTarget(name)) {
       // update target list :
       updateListTargets();
 
-      om.fireObservationChanged();
+      this.om.fireObservationChanged();
     }
   }//GEN-LAST:event_jButtonRemoveTargetActionPerformed
 
   /**
-   * This method is useful to set the models and specific features of initialized swing components :
+   * This method is useful to set the models and specific features of initialized swing components.
+   * Add the star search field and refresh content of the combo boxes.
+   * Finally update the observation according to the form state
    */
   private void postInit() {
+
+    // register this as an observation listener :
+    this.om.register(this);
 
     // add StarResolverWidget :
     final Star star = new Star();
@@ -229,19 +247,19 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
     gridBagConstraints.gridx = 3;
     gridBagConstraints.gridy = 3;
     gridBagConstraints.gridwidth = 2;
-    add(starSearchField, gridBagConstraints);
+    add(this.starSearchField, gridBagConstraints);
 
     // update component models :
-    jDateSpinner.setEditor(new JSpinner.DateEditor(jDateSpinner, "dd/MM/yyyy"));
+    this.jDateSpinner.setEditor(new JSpinner.DateEditor(jDateSpinner, "yyyy/MM/dd"));
 
-    jComboBoxInterferometer.setModel(new DefaultComboBoxModel(ConfigurationManager.getInstance().getInterferometerNames()));
+    this.jComboBoxInterferometer.setModel(new DefaultComboBoxModel(ConfigurationManager.getInstance().getInterferometerNames()));
 
     // define change listeners :
-    jDateSpinner.addChangeListener(this);
-    jComboBoxInterferometer.addActionListener(this);
-    jComboBoxInterferometerConfiguration.addActionListener(this);
-    jComboBoxInstrument.addActionListener(this);
-    jComboBoxInstrumentConfiguration.addActionListener(this);
+    this.jDateSpinner.addChangeListener(this);
+    this.jComboBoxInterferometer.addActionListener(this);
+    this.jComboBoxInterferometerConfiguration.addActionListener(this);
+    this.jComboBoxInstrument.addActionListener(this);
+    this.jComboBoxInstrumentConfiguration.addActionListener(this);
 
     updateComboInterferometerConfiguration();
     updateComboInstrument();
@@ -252,72 +270,96 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
     updateObservation();
   }
 
+  /**
+   * Refresh the list of interferometer configurations : depends on the chosen interferometer
+   */
   private void updateComboInterferometerConfiguration() {
-    final Vector<String> v = ConfigurationManager.getInstance().getInterferometerConfigurationNames((String) jComboBoxInterferometer.getSelectedItem());
-    jComboBoxInterferometerConfiguration.setModel(new DefaultComboBoxModel(v));
+    final Vector<String> v = ConfigurationManager.getInstance().getInterferometerConfigurationNames((String) this.jComboBoxInterferometer.getSelectedItem());
+    this.jComboBoxInterferometerConfiguration.setModel(new DefaultComboBoxModel(v));
     final boolean visible = (v.size() > 1);
-    jLabelPeriod.setVisible(visible);
-    jComboBoxInterferometerConfiguration.setVisible(visible);
+    this.jLabelPeriod.setVisible(visible);
+    this.jComboBoxInterferometerConfiguration.setVisible(visible);
   }
 
+  /**
+   * Refresh the list of instruments : depends on the chosen interferometer configuration
+   */
   private void updateComboInstrument() {
-    final Vector<String> v = ConfigurationManager.getInstance().getInterferometerInstrumentNames((String) jComboBoxInterferometerConfiguration.getSelectedItem());
-    jComboBoxInstrument.setModel(new DefaultComboBoxModel(v));
+    final Vector<String> v = ConfigurationManager.getInstance().getInterferometerInstrumentNames((String) this.jComboBoxInterferometerConfiguration.getSelectedItem());
+    this.jComboBoxInstrument.setModel(new DefaultComboBoxModel(v));
   }
 
+  /**
+   * Refresh the list of instrument configurations : depends on the chosen instrument (also the interferometer configuration)
+   */
   private void updateComboInstrumentConfiguration() {
-    final Vector<String> v = ConfigurationManager.getInstance().getInstrumentConfigurationNames((String) jComboBoxInterferometerConfiguration.getSelectedItem(),
-            (String) jComboBoxInstrument.getSelectedItem());
-    jComboBoxInstrumentConfiguration.setModel(new DefaultComboBoxModel(v));
+    final Vector<String> v = ConfigurationManager.getInstance().getInstrumentConfigurationNames((String) this.jComboBoxInterferometerConfiguration.getSelectedItem(),
+            (String) this.jComboBoxInstrument.getSelectedItem());
+    this.jComboBoxInstrumentConfiguration.setModel(new DefaultComboBoxModel(v));
     final boolean visible = (v.size() > 1);
-    jLabelConfiguration.setVisible(visible);
-    jComboBoxInstrumentConfiguration.setVisible(visible);
+    this.jLabelConfiguration.setVisible(visible);
+    this.jComboBoxInstrumentConfiguration.setVisible(visible);
   }
 
+  /**
+   * Refresh the target list
+   */
   private void updateListTargets() {
-    final Vector<String> v = om.getTargetNames();
-    jListTargets.setModel(new DefaultComboBoxModel(v));
-    jButtonRemoveTarget.setEnabled(!v.isEmpty());
+    final Vector<String> v = this.om.getTargetNames();
+    this.jListTargets.setModel(new DefaultComboBoxModel(v));
+    this.jButtonRemoveTarget.setEnabled(!v.isEmpty());
   }
 
+  /**
+   * Process any comboBox change event (interferometer, interferometer configuration, instrument, instrument configuration).
+   * Refresh the dependent combo boxes and update the observation according to the form state
+   * @param e action event
+   */
   public void actionPerformed(final ActionEvent e) {
-    if (e.getSource() == jComboBoxInterferometer) {
+    if (e.getSource() == this.jComboBoxInterferometer) {
       if (logger.isLoggable(Level.FINE)) {
-        logger.fine("Interferometer changed : " + jComboBoxInterferometer.getSelectedItem());
+        logger.fine("Interferometer changed : " + this.jComboBoxInterferometer.getSelectedItem());
       }
       updateComboInterferometerConfiguration();
       updateComboInstrument();
       updateComboInstrumentConfiguration();
-    } else if (e.getSource() == jComboBoxInterferometerConfiguration) {
+    } else if (e.getSource() == this.jComboBoxInterferometerConfiguration) {
       if (logger.isLoggable(Level.FINE)) {
-        logger.fine("Interferometer Configuration changed : " + jComboBoxInterferometerConfiguration.getSelectedItem());
+        logger.fine("Interferometer Configuration changed : " + this.jComboBoxInterferometerConfiguration.getSelectedItem());
       }
       updateComboInstrument();
       updateComboInstrumentConfiguration();
-    } else if (e.getSource() == jComboBoxInstrument) {
+    } else if (e.getSource() == this.jComboBoxInstrument) {
       if (logger.isLoggable(Level.FINE)) {
-        logger.fine("Instrument changed : " + jComboBoxInstrument.getSelectedItem());
+        logger.fine("Instrument changed : " + this.jComboBoxInstrument.getSelectedItem());
       }
       updateComboInstrumentConfiguration();
-    } else if (e.getSource() == jComboBoxInstrumentConfiguration) {
+    } else if (e.getSource() == this.jComboBoxInstrumentConfiguration) {
       if (logger.isLoggable(Level.FINE)) {
-        logger.fine("Instrument Configuration changed : " + jComboBoxInstrumentConfiguration.getSelectedItem());
-      }
-    }
-    updateObservation();
-  }
-
-  public void stateChanged(final ChangeEvent ce) {
-    if (ce.getSource() == jDateSpinner) {
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("Date changed : " + jDateSpinner.getModel().getValue());
+        logger.fine("Instrument Configuration changed : " + this.jComboBoxInstrumentConfiguration.getSelectedItem());
       }
     }
     updateObservation();
   }
 
   /**
-   * Observer implementation used for the StarResolver
+   * Process the date spinner change event.
+   * Update the observation according to the form state
+   * @param ce change event
+   */
+  public void stateChanged(final ChangeEvent ce) {
+    if (ce.getSource() == this.jDateSpinner) {
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("Date changed : " + this.jDateSpinner.getModel().getValue());
+      }
+      updateObservation();
+    }
+  }
+
+  /**
+   * Observer implementation used for the StarResolver.
+   * Create a new Target object with the retrieved data from SimBAD and
+   * fire an observation change event
    * @param o Observable instance
    * @param arg unused argument
    */
@@ -338,34 +380,40 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
       if (RA_d != null && DE_d != null) {
         final String name = this.starSearchField.getText().toUpperCase();
 
-        if (om.addTarget(name, RA_d, DE_d)) {
-          // update target list :
+        if (this.om.addTarget(name, RA_d, DE_d)) {
+          // update the target list :
           updateListTargets();
 
-          om.fireObservationChanged();
+          this.om.fireObservationChanged();
         }
       }
     }
   }
 
+  /**
+   * Update the observation with the form fields.
+   * If the observation changed, then fire an observation change event
+   */
   private void updateObservation() {
+    // check if the automatic update is enabled :
+    if (this.doAutoUpdateObservation) {
+      boolean changed = false;
 
-    boolean changed = false;
+      changed |= this.om.setWhen((Date) this.jDateSpinner.getModel().getValue());
+      changed |= this.om.setInterferometerConfigurationName((String) this.jComboBoxInterferometerConfiguration.getSelectedItem());
+      changed |= this.om.setInstrumentConfigurationName((String) this.jComboBoxInstrument.getSelectedItem());
+      changed |= this.om.setInstrumentConfigurationStations((String) this.jComboBoxInstrumentConfiguration.getSelectedItem());
 
-    changed |= om.setWhen((Date) jDateSpinner.getModel().getValue());
-    changed |= om.setInterferometerConfigurationName((String) jComboBoxInterferometerConfiguration.getSelectedItem());
-    changed |= om.setInstrumentConfigurationName((String) jComboBoxInstrument.getSelectedItem());
-    changed |= om.setInstrumentConfigurationStations((String) jComboBoxInstrumentConfiguration.getSelectedItem());
-
-    // Then fire the refresh model event :
-    if (changed) {
-      om.fireObservationChanged();
+      if (changed) {
+        // fire an observation change event :
+        this.om.fireObservationChanged();
+      }
     }
   }
 
   /**
-   * Handle the given event on the given observation =
-   * add the missing plot panels
+   * Handle the given event on the given observation.
+   * Refresh the UI component according to the loaded observation settings
    *
    * @param type event type
    * @param observation observation
@@ -375,12 +423,46 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
       if (logger.isLoggable(Level.FINE)) {
         logger.fine("loaded occured : " + observation);
       }
+
+      try {
+        // first disable the automatic update observation from field changes :
+        this.doAutoUpdateObservation = false;
+
+        // update the date spinner :
+        final XMLGregorianCalendar date = observation.getWhen().getDate();
+        if (date != null) {
+          this.jDateSpinner.setValue(date.toGregorianCalendar().getTime());
+        }
+
+        // update the interferometer and interferometer configuration :
+        final InterferometerConfigurationChoice interferometerChoice = observation.getInterferometerConfiguration();
+
+        final InterferometerConfiguration ic = interferometerChoice.getInterferometerConfiguration();
+
+        if (ic != null) {
+          // update the selected interferometer :
+          this.jComboBoxInterferometer.setSelectedItem(ic.getInterferometer().getName());
+          // update the selected interferometer configuration :
+          this.jComboBoxInterferometerConfiguration.setSelectedItem(ic.getName());
+        }
+
+        final FocalInstrumentConfigurationChoice instrumentChoice = observation.getInstrumentConfiguration();
+
+        // update the selected instrument :
+        this.jComboBoxInstrument.setSelectedItem(instrumentChoice.getName());
+
+        // update the selected instrument configuration (stations) :
+        this.jComboBoxInstrumentConfiguration.setSelectedItem(instrumentChoice.getStations());
+
+        // update the target list :
+        updateListTargets();
+
+      } finally {
+        // restore the automatic update observation from field changes :
+        this.doAutoUpdateObservation = true;
+      }
     }
   }
-
-
-
-
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JButton jButtonRemoveTarget;
   private javax.swing.JComboBox jComboBoxInstrument;
@@ -397,5 +479,4 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
   private javax.swing.JList jListTargets;
   private javax.swing.JScrollPane jScrollPane1;
   // End of variables declaration//GEN-END:variables
-
 }

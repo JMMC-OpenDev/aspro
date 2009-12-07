@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityPanel.java,v 1.11 2009-12-04 15:38:27 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityPanel.java,v 1.12 2009-12-07 15:18:00 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.11  2009/12/04 15:38:27  bourgesl
+ * Added Save action in the menu bar
+ *
  * Revision 1.10  2009/12/02 17:23:51  bourgesl
  * fixed several bugs on pop finder + refactoring
  *
@@ -372,13 +375,14 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
               // update the status bar :
               StatusBar.show("observability done.");
 
+              localJFreeChart.clearSubtitles();
+
               final String title = observation.getInterferometerConfiguration().getName() +
                       " - " + observation.getInstrumentConfiguration().getStations();
 
-              localJFreeChart.clearSubtitles();
-              // interferometer + stations :
               localJFreeChart.addSubtitle(new TextTitle(title, DEFAULT_TITLE_FONT));
-              if (useNightLimit) {
+
+              if (useNightLimit || !useLST) {
                 // date :
                 localJFreeChart.addSubtitle(new TextTitle("Day : " + observation.getWhen().getDate().toString(), DEFAULT_TITLE_FONT));
               }

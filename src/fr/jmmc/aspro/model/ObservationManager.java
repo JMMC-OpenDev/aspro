@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationManager.java,v 1.10 2009-12-04 16:26:58 bourgesl Exp $"
+ * "@(#) $Id: ObservationManager.java,v 1.11 2009-12-07 15:18:00 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.10  2009/12/04 16:26:58  bourgesl
+ * Added Load action in the menu bar (partially handled)
+ *
  * Revision 1.9  2009/12/04 15:38:27  bourgesl
  * Added Save action in the menu bar
  *
@@ -121,11 +124,11 @@ public class ObservationManager extends BaseOIManager {
   }
 
   public ObservationSetting getObservation() {
-    return observation;
+    return this.observation;
   }
 
   public File getObservationFile() {
-    return observationFile;
+    return this.observationFile;
   }
 
   public String toString(final ObservationSetting obs) {
@@ -204,7 +207,7 @@ public class ObservationManager extends BaseOIManager {
     final FocalInstrumentConfigurationChoice instrumentChoice = getObservation().getInstrumentConfiguration();
 
     instrumentChoice.setInstrumentConfiguration(ConfigurationManager.getInstance().getInterferometerInstrumentConfiguration(
-              interferometerChoice.getName(), instrumentChoice.getName()));
+            interferometerChoice.getName(), instrumentChoice.getName()));
 
     instrumentChoice.setStationList(ConfigurationManager.getInstance().getInstrumentConfigurationStations(
             interferometerChoice.getName(), instrumentChoice.getName(), instrumentChoice.getStations()));
@@ -274,20 +277,6 @@ public class ObservationManager extends BaseOIManager {
   }
 
   /**
-   * This fires a changed observation event to all registered listeners
-   */
-  public void fireObservationChanged() {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("fireObservationChanged : " + toString(getObservation()));
-    }
-
-    // Call listeners with a copy of the listener list to avoid concurrent modification :
-    for (ObservationListener listener : listeners.toArray(new ObservationListener[listeners.size()])) {
-      listener.onProcess(ObservationEventType.CHANGED, getObservation());
-    }
-  }
-
-  /**
    * Save the current observation in the given file
    * @param file file to save
    * @throws RuntimeException if the save operation failed
@@ -330,13 +319,51 @@ public class ObservationManager extends BaseOIManager {
       // update references :
       updateObservation();
 
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("fireObservationLoaded : " + toString(getObservation()));
-      }
+      // fire an observation load event :
+      fireObservationLoaded();
 
+      // fire an observation change event :
+      fireObservationChanged();
+    }
+  }
+
+  /**
+   * This fires an observation load event to all registered listeners
+   */
+  public void fireObservationLoaded() {
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("fireObservationLoaded : " + toString(getObservation()));
+    }
+
+    fireEvent(ObservationEventType.LOADED);
+  }
+
+  /**
+   * This fires an observation change event to all registered listeners
+   */
+  public void fireObservationChanged() {
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("fireObservationChanged : " + toString(getObservation()));
+    }
+
+    fireEvent(ObservationEventType.CHANGED);
+  }
+
+  /**
+   * Send an event to the registered listeners.
+   * Note : any new listener registered during the processing of this event, will not be called
+   * @param type event type
+   */
+  private void fireEvent(final ObservationEventType type) {
+    if (!this.listeners.isEmpty()) {
       // Call listeners with a copy of the listener list to avoid concurrent modification :
-      for (ObservationListener listener : listeners.toArray(new ObservationListener[listeners.size()])) {
-        listener.onProcess(ObservationEventType.LOADED, getObservation());
+      final ObservationListener[] eventListeners = new ObservationListener[this.listeners.size()];
+
+      // copy the listener references :
+      this.listeners.toArray(eventListeners);
+
+      for (ObservationListener listener : eventListeners) {
+        listener.onProcess(type, getObservation());
       }
     }
   }

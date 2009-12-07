@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.18 2009-12-02 17:23:51 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.19 2009-12-07 15:18:00 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.18  2009/12/02 17:23:51  bourgesl
+ * fixed several bugs on pop finder + refactoring
+ *
  * Revision 1.17  2009/12/01 17:14:45  bourgesl
  * first try to add the pop configuration finder
  *
@@ -401,7 +404,7 @@ public class ObservabilityService {
       }
 
       if (logger.isLoggable(Level.FINE)) {
-        logger.fine("nightLimits : " + nightLimits);
+        logger.fine("nightLimits : " + this.nightLimits);
       }
 
     }
@@ -554,7 +557,7 @@ public class ObservabilityService {
 
       // Intersect with night limits :
       if (this.useNightLimit) {
-        obsRanges.addAll(nightLimits);
+        obsRanges.addAll(this.nightLimits);
         nValid++;
       }
 
@@ -703,8 +706,9 @@ public class ObservabilityService {
 
       final StringBuffer sb = new StringBuffer().append(" (");
       for (Pop pop : popData.getPopCombination()) {
-        sb.append(" ").append(pop.getName());
+        sb.append(pop.getName()).append(" ");
       }
+      sb.deleteCharAt(sb.length() - 1);
       sb.append(")");
       starObs.setName(starObs.getName() + sb.toString());
 
