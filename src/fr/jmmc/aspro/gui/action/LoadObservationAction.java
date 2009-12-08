@@ -1,17 +1,19 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: LoadObservationAction.java,v 1.1 2009-12-04 16:26:58 bourgesl Exp $"
+ * "@(#) $Id: LoadObservationAction.java,v 1.2 2009-12-08 13:09:55 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2009/12/04 16:26:58  bourgesl
+ * Added Load action in the menu bar (partially handled)
+ *
  */
 package fr.jmmc.aspro.gui.action;
 
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.mcs.gui.StatusBar;
-import fr.jmmc.mcs.util.RegisteredAction;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.util.logging.Level;
@@ -22,7 +24,7 @@ import javax.swing.JOptionPane;
  * Save observation settings action
  * @author bourgesl
  */
-public class LoadObservationAction extends RegisteredAction {
+public class LoadObservationAction extends ObservationFileAction {
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
@@ -33,10 +35,6 @@ public class LoadObservationAction extends RegisteredAction {
   /** Class logger */
   private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(className);
 
-  /* members */
-  /** last directory used to save a file; by default = user home */
-  private String lastDir = System.getProperty("user.home");
-
   public LoadObservationAction() {
     super(className, actionName);
   }
@@ -45,15 +43,15 @@ public class LoadObservationAction extends RegisteredAction {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("actionPerformed");
     }
-
     final ObservationManager om = ObservationManager.getInstance();
 
     File file = null;
 
-    JFileChooser fileChooser = new JFileChooser();
+    final JFileChooser fileChooser = new JFileChooser();
+    fileChooser.setFileFilter(getObservationFileFilter());
 
-    if (this.lastDir != null) {
-      fileChooser.setCurrentDirectory(new File(this.lastDir));
+    if (this.getLastDir() != null) {
+      fileChooser.setCurrentDirectory(new File(this.getLastDir()));
     }
 
     fileChooser.setDialogTitle("Load observation settings");
@@ -67,7 +65,7 @@ public class LoadObservationAction extends RegisteredAction {
 
     // If a file was defined (No cancel in the dialog)
     if (file != null) {
-      this.lastDir = file.getParent();
+      this.setLastDir(file.getParent());
 
       try {
         om.load(file);
@@ -77,8 +75,8 @@ public class LoadObservationAction extends RegisteredAction {
         logger.log(Level.SEVERE, "runtime failure : ", re);
 
         JOptionPane.showMessageDialog(null,
-            "Could not load file " + file.getName(),
-            "Error", JOptionPane.ERROR_MESSAGE);
+                "Could not load file " + file.getName(),
+                "Error", JOptionPane.ERROR_MESSAGE);
       }
 
     }
