@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.19 2009-12-07 15:18:00 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.20 2009-12-08 14:54:18 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.19  2009/12/07 15:18:00  bourgesl
+ * Load observation action now refreshes the observation form completely
+ *
  * Revision 1.18  2009/12/02 17:23:51  bourgesl
  * fixed several bugs on pop finder + refactoring
  *
@@ -212,7 +215,8 @@ public class ObservabilityService {
       if (this.doBaseLineLimits) {
         targets = generateTargetsForBaseLineLimits();
       } else {
-        targets = observation.getTargets();
+        // copy the list to avoid concurrent modification during iteration :
+        targets = new ArrayList<Target>(observation.getTargets());
       }
 
       // define site :
