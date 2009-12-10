@@ -44,7 +44,7 @@
       </popLink>
       <popLink>
         <pop>PoP2</pop>
-        <opticalLength>36.576</opticalLength>
+        <opticalLength>36.562016633</opticalLength>
       </popLink>
       <popLink>
         <pop>PoP3</pop>
@@ -52,11 +52,11 @@
       </popLink>
       <popLink>
         <pop>PoP4</pop>
-        <opticalLength>109.728</opticalLength>
+        <opticalLength>109.723466599</opticalLength>
       </popLink>
       <popLink>
         <pop>PoP5</pop>
-        <opticalLength>146.304</opticalLength>
+        <opticalLength>143.089005503</opticalLength>
       </popLink>
     </station>
 
@@ -64,11 +64,11 @@
       <name>S2</name>
       <telescope>T</telescope>
       <relativePosition>
-        <posX>-18.354945174</posX>
-        <posY>-5.748393059</posY>
-        <posZ>28.128580103</posZ>
+        <posX>-18.364916206804995</posX>
+        <posY>-5.7444145760000005</posY>
+        <posZ>28.12661922364987</posZ>
       </relativePosition>
-      <delayLineFixedOffset>4.532654762</delayLineFixedOffset>
+      <delayLineFixedOffset>4.74371459</delayLineFixedOffset>
 
       <popLink>
         <pop>PoP1</pop>
@@ -84,11 +84,11 @@
       </popLink>
       <popLink>
         <pop>PoP4</pop>
-        <opticalLength>73.152</opticalLength>
+        <opticalLength>73.1514482</opticalLength>
       </popLink>
       <popLink>
         <pop>PoP5</pop>
-        <opticalLength>109.728</opticalLength>
+        <opticalLength>106.479</opticalLength>
       </popLink>
     </station>
 
@@ -96,11 +96,11 @@
       <name>E1</name>
       <telescope>T</telescope>
       <relativePosition>
-        <posX>-176.947579603</posX>
-        <posY>125.349003099</posY>
-        <posZ>249.643974581</posZ>
+        <posX>-176.95914597777053</posX>
+        <posY>125.33313329999999</posY>
+        <posZ>249.6252027666933</posZ>
       </relativePosition>
-      <delayLineFixedOffset>15.309717902</delayLineFixedOffset>
+      <delayLineFixedOffset>15.504650597999998</delayLineFixedOffset>
 
       <popLink>
         <pop>PoP1</pop>
@@ -108,19 +108,19 @@
       </popLink>
       <popLink>
         <pop>PoP2</pop>
-        <opticalLength>36.576</opticalLength>
+        <opticalLength>36.58474034</opticalLength>
       </popLink>
       <popLink>
         <pop>PoP3</pop>
-        <opticalLength>73.152</opticalLength>
+        <opticalLength>73.120904598</opticalLength>
       </popLink>
       <popLink>
         <pop>PoP4</pop>
-        <opticalLength>109.728</opticalLength>
+        <opticalLength>109.712561407</opticalLength>
       </popLink>
       <popLink>
         <pop>PoP5</pop>
-        <opticalLength>146.304</opticalLength>
+        <opticalLength>143.021961601</opticalLength>
       </popLink>
     </station>
 
@@ -128,19 +128,19 @@
       <name>E2</name>
       <telescope>T</telescope>
       <relativePosition>
-        <posX>-154.003121030</posX>
-        <posY>70.400864470</posY>
-        <posZ>221.444997474</posZ>
+        <posX>-154.01434025673439</posX>
+        <posY>70.3891451</posY>
+        <posZ>221.43497871824562</posZ>
       </relativePosition>
-      <delayLineFixedOffset>26.721359853</delayLineFixedOffset>
+      <delayLineFixedOffset>26.372594395</delayLineFixedOffset>
 
       <popLink>
         <pop>PoP1</pop>
-        <opticalLength>-73.152</opticalLength>
+        <opticalLength>-73.125</opticalLength>
       </popLink>
       <popLink>
         <pop>PoP2</pop>
-        <opticalLength>-36.576</opticalLength>
+        <opticalLength>-36.516</opticalLength>
       </popLink>
       <popLink>
         <pop>PoP3</pop>
@@ -148,11 +148,11 @@
       </popLink>
       <popLink>
         <pop>PoP4</pop>
-        <opticalLength>36.576</opticalLength>
+        <opticalLength>36.575</opticalLength>
       </popLink>
       <popLink>
         <pop>PoP5</pop>
-        <opticalLength>73.152</opticalLength>
+        <opticalLength>69.986</opticalLength>
       </popLink>
     </station>
 
@@ -160,16 +160,15 @@
       <name>W1</name>
       <telescope>T</telescope>
       <relativePosition>
-        <posX>-130.620014605</posX>
-        <posY>-175.068583489</posY>
-        <posZ>172.774093891</posZ>
+        <posX>-130.59792281771624</posX>
+        <posY>-175.0684101</posY>
+        <posZ>172.79538958138997</posZ>
       </relativePosition>
-      <delayLineFixedOffset>29.087218284</delayLineFixedOffset>
-
+      <delayLineFixedOffset>29.157963303</delayLineFixedOffset>
 
       <popLink>
         <pop>PoP1</pop>
-        <opticalLength>-73.152</opticalLength>
+        <opticalLength>-73.1508235</opticalLength>
       </popLink>
       <popLink>
         <pop>PoP2</pop>
@@ -181,11 +180,11 @@
       </popLink>
       <popLink>
         <pop>PoP4</pop>
-        <opticalLength>36.576</opticalLength>
+        <opticalLength>36.5531077</opticalLength>
       </popLink>
       <popLink>
         <pop>PoP5</pop>
-        <opticalLength>73.152</opticalLength>
+        <opticalLength>69.903</opticalLength>
       </popLink>
     </station>
 
@@ -193,27 +192,27 @@
       <name>W2</name>
       <telescope>T</telescope>
       <relativePosition>
-        <posX>-111.736598481</posX>
-        <posY>-69.088236186</posY>
-        <posZ>165.067607370</posZ>
+        <posX>-111.72810585237123</posX>
+        <posY>-69.0845925</posY>
+        <posZ>165.08924273662112</posZ>
       </relativePosition>
-      <delayLineFixedOffset>-5.413000000</delayLineFixedOffset>
+      <delayLineFixedOffset>-8.450162002</delayLineFixedOffset>
 
       <popLink>
         <pop>PoP1</pop>
-        <opticalLength>-146.304</opticalLength>
+        <opticalLength>-143.055</opticalLength>
       </popLink>
       <popLink>
         <pop>PoP2</pop>
-        <opticalLength>-109.728</opticalLength>
+        <opticalLength>-106.479</opticalLength>
       </popLink>
       <popLink>
         <pop>PoP3</pop>
-        <opticalLength>-73.152</opticalLength>
+        <opticalLength>-69.903</opticalLength>
       </popLink>
       <popLink>
         <pop>PoP4</pop>
-        <opticalLength>-36.576</opticalLength>
+        <opticalLength>-33.3061869</opticalLength>
       </popLink>
       <popLink>
         <pop>PoP5</pop>
@@ -223,27 +222,27 @@
 
     <delayLine>
       <name>DL1</name>
-      <maximumThrow>43.0</maximumThrow>
+      <maximumThrow>88.0</maximumThrow>
     </delayLine>
     <delayLine>
       <name>DL2</name>
-      <maximumThrow>43.0</maximumThrow>
+      <maximumThrow>88.0</maximumThrow>
     </delayLine>
     <delayLine>
       <name>DL3</name>
-      <maximumThrow>43.0</maximumThrow>
+      <maximumThrow>88.0</maximumThrow>
     </delayLine>
     <delayLine>
       <name>DL4</name>
-      <maximumThrow>43.0</maximumThrow>
+      <maximumThrow>88.0</maximumThrow>
     </delayLine>
     <delayLine>
       <name>DL5</name>
-      <maximumThrow>43.0</maximumThrow>
+      <maximumThrow>88.0</maximumThrow>
     </delayLine>
     <delayLine>
       <name>DL6</name>
-      <maximumThrow>43.0</maximumThrow>
+      <maximumThrow>88.0</maximumThrow>
     </delayLine>
 
 <!-- no switchyard -->
