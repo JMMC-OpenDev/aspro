@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.20 2009-12-08 14:54:18 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.21 2009-12-10 17:08:53 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.20  2009/12/08 14:54:18  bourgesl
+ * fixed concurrentModification on target iteration
+ *
  * Revision 1.19  2009/12/07 15:18:00  bourgesl
  * Load observation action now refreshes the observation form completely
  *
@@ -97,8 +100,6 @@ import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.StationLinks;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.service.HorizonService.Profile;
-import fr.jmmc.aspro.util.CombinationGenerator;
-import fr.jmmc.aspro.util.PermutationGenerator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -940,31 +941,37 @@ public class ObservabilityService {
     final int n = pops.size();
     final int p = nBeams;
 
-    final CombinationGenerator cg = new CombinationGenerator(n, nBeams);
-
-    PermutationGenerator<Integer> pg;
-
-    int[] indices;
     List<Pop> comb;
-    final Integer[] ints = new Integer[p];
 
-    while (cg.hasMore()) {
-      indices = cg.getNext();
-
-      int j = 0;
-      for (int i : indices) {
-        ints[j++] = Integer.valueOf(i);
-      }
-      pg = new PermutationGenerator<Integer>(ints);
-
-      while (pg.next()) {
-        comb = new ArrayList<Pop>(p);
-        for (int i = 0; i < p; i++) {
-          comb.add(pops.get(ints[i]));
+    if (p == 3) {
+      for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+          for (int k = 0; k < n; k++) {
+            comb = new ArrayList<Pop>(p);
+            comb.add(pops.get(i));
+            comb.add(pops.get(j));
+            comb.add(pops.get(k));
+            this.popCombinations.add(comb);
+          }
         }
-
-        this.popCombinations.add(comb);
       }
+    } else if (p == 4) {
+      for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+          for (int k = 0; k < n; k++) {
+            for (int l = 0; l < n; l++) {
+              comb = new ArrayList<Pop>(p);
+              comb.add(pops.get(i));
+              comb.add(pops.get(j));
+              comb.add(pops.get(k));
+              comb.add(pops.get(l));
+              this.popCombinations.add(comb);
+            }
+          }
+        }
+      }
+    } else {
+      throw new UnsupportedOperationException("This number of stations is not supported with PoPs !");
     }
 
     if (logger.isLoggable(Level.FINE)) {
@@ -1014,7 +1021,7 @@ public class ObservabilityService {
         return pl.getOpticalLength();
       }
     }
-    return 0d;
+    throw new IllegalStateException("No pop value for couple (" + station.getName() + " - " + pop + ") !");
   }
 
   private void prepareBaseLines() {
