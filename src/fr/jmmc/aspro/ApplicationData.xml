@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <ApplicationData link="http://www.jmmc.fr/aspro">
-  <program name="Aspro" version="0.0.1"/>
+  <program name="Aspro" version="0.1b3"/>
   <compilation date="21/09/2009" compiler="JDK 1.5.0_16"/>
   <text>
     <![CDATA[ASPRO is a complete observation preparation tool developed and maintained by the JMMC
@@ -30,13 +30,17 @@
     </menu>
   </menubar>
   <releasenotes>
-    <release version="0.0.2">
-      <prerelease version="0.0.2" tag="ASPRO_">
+    <release version="0.1">
+      <prerelease version="0.1b3">
+        <change>Added PoP support</change>
+        <change>Evaluate the best PoP configuration that gives the best observability range for a single target</change>
+      </prerelease>
+      <prerelease version="0.1b2">
         <change>Added delay line / switchyard / channels in observability plot.</change>
         <change>Added base line limits</change>
         <change>Enhanced GUI to set min elevation / detailed plot ...</change>
       </prerelease>
-      <prerelease version="0.0.1" tag="ASPRO_">
+      <prerelease version="0.1b1">
         <change>Complete rewrite of the ASPRO software as a desktop Java application.</change>
       </prerelease>
     </release>
