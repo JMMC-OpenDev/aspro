@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.21 2009-12-10 17:08:53 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.22 2009-12-11 15:15:42 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.21  2009/12/10 17:08:53  bourgesl
+ * generate all pops combinations without any restrictions
+ *
  * Revision 1.20  2009/12/08 14:54:18  bourgesl
  * fixed concurrentModification on target iteration
  *
@@ -488,14 +491,14 @@ public class ObservabilityService {
         final String prefix = starObs.getName() + " ";
 
         // Add Rise/Set :
-        final StarObservability soRiseSet = new StarObservability(prefix + "Rise/Set");
+        final StarObservability soRiseSet = new StarObservability(target.getName() + " Rise/Set");
         this.data.getStarVisibilities().add(soRiseSet);
 
         convertRangeToDateInterval(rangeJDRiseSet, soRiseSet.getVisible());
 
         if (rangesJDHz != null) {
           // Add Horizon :
-          final StarObservability soHz = new StarObservability(prefix + "Horizon");
+          final StarObservability soHz = new StarObservability(target.getName() + " Horizon");
           this.data.getStarVisibilities().add(soHz);
 
           for (Range range : rangesJDHz) {
@@ -703,21 +706,39 @@ public class ObservabilityService {
       }
 
       // maximum length for this Pop Combination :
-      popData = popDataList.get(popDataList.size() - 1);
+      final int end = popDataList.size() - 1;
 
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("best PoP : " + popData.getPopCombination() + " = " + popData.getMaxLength());
+      final PopObservabilityData popBestData = popDataList.get(end);
+
+      // find all equivalent pop combinations :
+      final List<PopObservabilityData> bestPoPs = new ArrayList<PopObservabilityData>();
+      for (int i = end; i > 0; i--) {
+        popData = popDataList.get(i);
+        if (popBestData.getMaxLength() == popData.getMaxLength()) {
+          bestPoPs.add(popData);
+        } else {
+          break;
+        }
       }
 
-      final StringBuffer sb = new StringBuffer().append(" (");
-      for (Pop pop : popData.getPopCombination()) {
-        sb.append(pop.getName()).append(" ");
+      if (logger.isLoggable(Level.INFO)) {
+        logger.info("best PoPs : " + bestPoPs);
       }
-      sb.deleteCharAt(sb.length() - 1);
-      sb.append(")");
+
+      final StringBuffer sb = new StringBuffer().append(" [");
+      String popName;
+      for (Pop pop : popBestData.getPopCombination()) {
+        popName = pop.getName();
+        for (int i = 0, size = popName.length(); i < size; i++) {
+          if (Character.isDigit(popName.charAt(i))) {
+            sb.append(popName.charAt(i));
+          }
+        }
+      }
+      sb.append("]");
       starObs.setName(starObs.getName() + sb.toString());
 
-      return popData.getRangesBL();
+      return popBestData.getRangesBL();
     }
     return Collections.emptyList();
   }
