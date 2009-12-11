@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BasicObservationForm.java,v 1.10 2009-12-07 15:17:59 bourgesl Exp $"
+ * "@(#) $Id: BasicObservationForm.java,v 1.11 2009-12-11 16:37:32 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.10  2009/12/07 15:17:59  bourgesl
+ * Load observation action now refreshes the observation form completely
+ *
  * Revision 1.9  2009/12/04 15:38:27  bourgesl
  * Added Save action in the menu bar
  *
@@ -102,6 +105,8 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
     jListTargets = new javax.swing.JList();
     jLabelConfiguration = new javax.swing.JLabel();
     jComboBoxInstrumentConfiguration = new javax.swing.JComboBox();
+    jLabelPops = new javax.swing.JLabel();
+    jTextPoPs = new javax.swing.JTextField();
 
     setLayout(new java.awt.GridBagLayout());
 
@@ -210,6 +215,20 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
     gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     add(jComboBoxInstrumentConfiguration, gridBagConstraints);
+
+    jLabelPops.setText("PoPs");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 5;
+    gridBagConstraints.gridy = 2;
+    add(jLabelPops, gridBagConstraints);
+
+    jTextPoPs.setColumns(5);
+    jTextPoPs.setToolTipText("optional PoPs configuration");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 6;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    add(jTextPoPs, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
 
   /**
@@ -261,6 +280,7 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
     this.jComboBoxInstrument.addActionListener(this);
     this.jComboBoxInstrumentConfiguration.addActionListener(this);
 
+    checkPops();
     updateComboInterferometerConfiguration();
     updateComboInstrument();
     updateComboInstrumentConfiguration();
@@ -320,6 +340,7 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
       if (logger.isLoggable(Level.FINE)) {
         logger.fine("Interferometer changed : " + this.jComboBoxInterferometer.getSelectedItem());
       }
+      checkPops();
       updateComboInterferometerConfiguration();
       updateComboInstrument();
       updateComboInstrumentConfiguration();
@@ -340,6 +361,12 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
       }
     }
     updateObservation();
+  }
+
+  private void checkPops() {
+    final boolean hasPops = ConfigurationManager.getInstance().hasPoPs((String) this.jComboBoxInterferometer.getSelectedItem());
+    this.jLabelPops.setVisible(hasPops);
+    this.jTextPoPs.setVisible(hasPops);
   }
 
   /**
@@ -476,7 +503,9 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
   private javax.swing.JLabel jLabel4;
   private javax.swing.JLabel jLabelConfiguration;
   private javax.swing.JLabel jLabelPeriod;
+  private javax.swing.JLabel jLabelPops;
   private javax.swing.JList jListTargets;
   private javax.swing.JScrollPane jScrollPane1;
+  private javax.swing.JTextField jTextPoPs;
   // End of variables declaration//GEN-END:variables
 }

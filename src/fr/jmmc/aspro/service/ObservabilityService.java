@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.22 2009-12-11 15:15:42 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.23 2009-12-11 16:37:32 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.22  2009/12/11 15:15:42  bourgesl
+ * log info the list of best PoP combinations
+ *
  * Revision 1.21  2009/12/10 17:08:53  bourgesl
  * generate all pops combinations without any restrictions
  *
@@ -726,14 +729,8 @@ public class ObservabilityService {
       }
 
       final StringBuffer sb = new StringBuffer().append(" [");
-      String popName;
       for (Pop pop : popBestData.getPopCombination()) {
-        popName = pop.getName();
-        for (int i = 0, size = popName.length(); i < size; i++) {
-          if (Character.isDigit(popName.charAt(i))) {
-            sb.append(popName.charAt(i));
-          }
-        }
+        sb.append(pop.getIndex());
       }
       sb.append("]");
       starObs.setName(starObs.getName() + sb.toString());

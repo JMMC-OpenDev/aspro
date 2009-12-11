@@ -39,7 +39,7 @@ import fr.jmmc.aspro.model.OIBase;
  *         &lt;element name="posSph" type="{http://www.jmmc.fr/aspro-oi/0.1}LonLatAlt" minOccurs="0"/>
  *         &lt;element name="telescope" type="{http://www.jmmc.fr/aspro-oi/0.1}Telescope" maxOccurs="unbounded"/>
  *         &lt;element name="station" type="{http://www.jmmc.fr/aspro-oi/0.1}Station" maxOccurs="unbounded"/>
- *         &lt;element name="channel" type="{http://www.jmmc.fr/aspro-oi/0.1}Channel" maxOccurs="unbounded"/>
+ *         &lt;element name="channel" type="{http://www.jmmc.fr/aspro-oi/0.1}Channel" maxOccurs="unbounded" minOccurs="0"/>
  *         &lt;element name="delayLine" type="{http://www.jmmc.fr/aspro-oi/0.1}DelayLine" maxOccurs="unbounded"/>
  *         &lt;element name="switchyard" type="{http://www.jmmc.fr/aspro-oi/0.1}SwitchYard" minOccurs="0"/>
  *         &lt;element name="pop" type="{http://www.jmmc.fr/aspro-oi/0.1}Pop" maxOccurs="unbounded" minOccurs="0"/>
@@ -86,7 +86,7 @@ public class InterferometerDescription
     protected List<Telescope> telescopes;
     @XmlElement(name = "station", required = true)
     protected List<Station> stations;
-    @XmlElement(name = "channel", required = true)
+    @XmlElement(name = "channel")
     protected List<Channel> channels;
     @XmlElement(name = "delayLine", required = true)
     protected List<DelayLine> delayLines;

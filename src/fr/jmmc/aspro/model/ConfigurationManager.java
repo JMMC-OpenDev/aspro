@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ConfigurationManager.java,v 1.10 2009-12-04 16:26:58 bourgesl Exp $"
+ * "@(#) $Id: ConfigurationManager.java,v 1.11 2009-12-11 16:37:32 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.10  2009/12/04 16:26:58  bourgesl
+ * Added Load action in the menu bar (partially handled)
+ *
  * Revision 1.9  2009/12/04 15:38:27  bourgesl
  * Added Save action in the menu bar
  *
@@ -41,7 +44,6 @@
  ******************************************************************************/
 package fr.jmmc.aspro.model;
 
-import fr.jmmc.aspro.model.oi.Channel;
 import fr.jmmc.aspro.model.oi.Configurations;
 import fr.jmmc.aspro.model.oi.FocalInstrumentConfiguration;
 import fr.jmmc.aspro.model.oi.FocalInstrumentConfigurationItem;
@@ -130,7 +132,7 @@ public class ConfigurationManager extends BaseOIManager {
       throw new IllegalStateException("This interferometer is already present in the loaded configuration !");
     }
 
-    computeSphericalPositions(d);
+    computeInterferometerLocation(d);
 
     interferometerDescriptions.put(d.getName(), d);
 
@@ -143,42 +145,18 @@ public class ConfigurationManager extends BaseOIManager {
   }
 
   /**
-   * Compute the spherical coordinates for the interferometer and its stations
+   * Compute the spherical coordinates for the interferometer
    * @param d interferometer description
    */
-  private void computeSphericalPositions(final InterferometerDescription d) {
+  private void computeInterferometerLocation(final InterferometerDescription d) {
 
-    Spherical sph;
-
-    // interferometer center :
+    // Interferometer center :
     final Position3D center = d.getPosition();
-    sph = GeocentricCoords.getLonLatAlt(center);
+    final Spherical sph = GeocentricCoords.getLonLatAlt(center);
 
     d.setPosSph(new LonLatAlt(sph.getLong(), sph.getLat(), sph.getRadial()));
 
     GeocentricCoords.dump(d.getName(), sph);
-
-    final Position3D absPos = new Position3D();
-
-    Position3D staPos;
-    for (Station s : d.getStations()) {
-      staPos = s.getRelativePosition();
-
-      // change here the coordinates :
-      // station coordinates are rotated in the horizontal plane
-      // so X axis points to the local meridian instead of the Greenwich meridian (longitude)
-
-      absPos.setPosX(center.getPosX() + staPos.getPosX());
-      absPos.setPosY(center.getPosY() + staPos.getPosY());
-      absPos.setPosZ(center.getPosZ() + staPos.getPosZ());
-
-      sph = GeocentricCoords.getLonLatAlt(absPos);
-
-      GeocentricCoords.dump(s.getName(), sph);
-
-      s.setPosSph(new LonLatAlt(sph.getLong(), sph.getLat(), sph.getRadial()));
-    }
-
   }
 
   /**
@@ -246,13 +224,13 @@ public class ConfigurationManager extends BaseOIManager {
     return null;
   }
 
-
-  public void getSwitchYardValue(final Station station, final Channel channel) {
-    /* Is it channel or delay line ? */
-  }
-
-  public void getPopValue(final Station station, final Integer popIndex) {
-
+  public boolean hasPoPs(final String interferometerName) {
+    boolean hasPops = false;
+    final InterferometerDescription id = getInterferometerDescription(interferometerName);
+    if (id != null) {
+      hasPops = !id.getPops().isEmpty();
+    }
+    return hasPops;
   }
 
   /** InterferometerConfiguration */

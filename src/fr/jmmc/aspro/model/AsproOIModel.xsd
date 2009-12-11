@@ -251,6 +251,14 @@
         </xsd:annotation>
       </xsd:element>
 
+      <xsd:element name="pops" type="xsd:string" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>
+              The list of pops (124)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
       <!-- other parameters -->
     </xsd:sequence>
   </xsd:complexType>
@@ -661,21 +669,11 @@
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
-      <xsd:element name="posSph" type="LonLatAlt" minOccurs="0">
-        <xsd:annotation>
-          <xsd:documentation>
-            These coordinates are computed internally and must not be provided in the configuration file
-          </xsd:documentation>
-        </xsd:annotation>
-      </xsd:element>
 
       <xsd:element name="delayLineFixedOffset" type="xsd:double" minOccurs="0">
         <xsd:annotation>
           <xsd:documentation>
-             Delay fixed offset ???
-             If present, sets a fixed offset whatever the switchyard
-             (or if no sw at all, for ex. 1 delay line only).
-             will eventually be update by the switchyard file
+             Delay Line fixed offset for this station
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
@@ -913,6 +911,13 @@
         <xsd:annotation>
           <xsd:documentation>
               POP identifier (Pop1 ...)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="index" type="xsd:int">
+        <xsd:annotation>
+          <xsd:documentation>
+              POP index (1 2 3 4 5 ...)
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>

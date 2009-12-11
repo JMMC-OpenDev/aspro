@@ -29,6 +29,7 @@ import fr.jmmc.aspro.model.OIBase;
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
  *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}ID"/>
+ *         &lt;element name="index" type="{http://www.w3.org/2001/XMLSchema}int"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -39,7 +40,8 @@ import fr.jmmc.aspro.model.OIBase;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "Pop", propOrder = {
-    "name"
+    "name",
+    "index"
 })
 public class Pop
     extends OIBase
@@ -50,6 +52,7 @@ public class Pop
     @XmlID
     @XmlSchemaType(name = "ID")
     protected String name;
+    protected int index;
 
     /**
      * Gets the value of the name property.
@@ -75,6 +78,22 @@ public class Pop
         this.name = value;
     }
 
+    /**
+     * Gets the value of the index property.
+     * 
+     */
+    public int getIndex() {
+        return index;
+    }
+
+    /**
+     * Sets the value of the index property.
+     * 
+     */
+    public void setIndex(int value) {
+        this.index = value;
+    }
+    
 //--simple--preserve
 
   @Override

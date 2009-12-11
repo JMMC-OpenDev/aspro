@@ -32,7 +32,6 @@ import fr.jmmc.aspro.model.OIBase;
  *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}ID"/>
  *         &lt;element name="telescope" type="{http://www.w3.org/2001/XMLSchema}IDREF"/>
  *         &lt;element name="relativePosition" type="{http://www.jmmc.fr/aspro-oi/0.1}Position3D"/>
- *         &lt;element name="posSph" type="{http://www.jmmc.fr/aspro-oi/0.1}LonLatAlt" minOccurs="0"/>
  *         &lt;element name="delayLineFixedOffset" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
  *         &lt;element name="popLink" type="{http://www.jmmc.fr/aspro-oi/0.1}PopLink" maxOccurs="unbounded" minOccurs="0"/>
  *         &lt;element name="horizon" type="{http://www.jmmc.fr/aspro-oi/0.1}HorizonProfile" minOccurs="0"/>
@@ -49,7 +48,6 @@ import fr.jmmc.aspro.model.OIBase;
     "name",
     "telescope",
     "relativePosition",
-    "posSph",
     "delayLineFixedOffset",
     "popLinks",
     "horizon"
@@ -69,7 +67,6 @@ public class Station
     protected Telescope telescope;
     @XmlElement(required = true)
     protected Position3D relativePosition;
-    protected LonLatAlt posSph;
     protected Double delayLineFixedOffset;
     @XmlElement(name = "popLink")
     protected List<PopLink> popLinks;
@@ -145,30 +142,6 @@ public class Station
      */
     public void setRelativePosition(Position3D value) {
         this.relativePosition = value;
-    }
-
-    /**
-     * Gets the value of the posSph property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link LonLatAlt }
-     *     
-     */
-    public LonLatAlt getPosSph() {
-        return posSph;
-    }
-
-    /**
-     * Sets the value of the posSph property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link LonLatAlt }
-     *     
-     */
-    public void setPosSph(LonLatAlt value) {
-        this.posSph = value;
     }
 
     /**

@@ -24,6 +24,7 @@ import fr.jmmc.aspro.model.OIBase;
  *       &lt;sequence>
  *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *         &lt;element name="stations" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *         &lt;element name="pops" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -35,7 +36,8 @@ import fr.jmmc.aspro.model.OIBase;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "FocalInstrumentConfigurationChoice", propOrder = {
     "name",
-    "stations"
+    "stations",
+    "pops"
 })
 public class FocalInstrumentConfigurationChoice
     extends OIBase
@@ -45,6 +47,7 @@ public class FocalInstrumentConfigurationChoice
     protected String name;
     @XmlElement(required = true)
     protected String stations;
+    protected String pops;
 
     /**
      * Gets the value of the name property.
@@ -92,6 +95,30 @@ public class FocalInstrumentConfigurationChoice
      */
     public void setStations(String value) {
         this.stations = value;
+    }
+
+    /**
+     * Gets the value of the pops property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getPops() {
+        return pops;
+    }
+
+    /**
+     * Sets the value of the pops property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setPops(String value) {
+        this.pops = value;
     }
     
 //--simple--preserve
