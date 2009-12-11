@@ -245,23 +245,28 @@
       <maximumThrow>88.0</maximumThrow>
     </delayLine>
 
-<!-- no switchyard -->
+    <!-- no switchyard -->
 
     <!-- pop on CHARA -->
     <pop>
       <name>PoP1</name>
+      <index>1</index>
     </pop>
     <pop>
       <name>PoP2</name>
+      <index>2</index>
     </pop>
     <pop>
       <name>PoP3</name>
+      <index>3</index>
     </pop>
     <pop>
       <name>PoP4</name>
+      <index>4</index>
     </pop>
     <pop>
       <name>PoP5</name>
+      <index>5</index>
     </pop>
 
 <!--
