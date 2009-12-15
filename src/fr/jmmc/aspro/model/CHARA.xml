@@ -220,6 +220,19 @@
       </popLink>
     </station>
 
+    <channel>
+      <name>Channel1</name>
+    </channel>
+    <channel>
+      <name>Channel2</name>
+    </channel>
+    <channel>
+      <name>Channel3</name>
+    </channel>
+    <channel>
+      <name>Channel4</name>
+    </channel>
+
     <delayLine>
       <name>DL1</name>
       <maximumThrow>88.0</maximumThrow>
@@ -236,16 +249,123 @@
       <name>DL4</name>
       <maximumThrow>88.0</maximumThrow>
     </delayLine>
-    <delayLine>
-      <name>DL5</name>
-      <maximumThrow>88.0</maximumThrow>
-    </delayLine>
-    <delayLine>
-      <name>DL6</name>
-      <maximumThrow>88.0</maximumThrow>
-    </delayLine>
 
-    <!-- no switchyard -->
+    <switchyard>
+      <stationLinks>
+        <station>S1</station>
+        <channelLink>
+          <channel>Channel1</channel>
+          <opticalLength>0</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>Channel2</channel>
+          <opticalLength>0.0762</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>Channel3</channel>
+          <opticalLength>0.1524</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>Channel4</channel>
+          <opticalLength>0.2286</opticalLength>
+        </channelLink>
+      </stationLinks>
+      <stationLinks>
+        <station>S2</station>
+        <channelLink>
+          <channel>Channel1</channel>
+          <opticalLength>0.5842</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>Channel2</channel>
+          <opticalLength>0.6604</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>Channel3</channel>
+          <opticalLength>0.7366</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>Channel4</channel>
+          <opticalLength>0.8128</opticalLength>
+        </channelLink>
+      </stationLinks>
+      <stationLinks>
+        <station>W1</station>
+        <channelLink>
+          <channel>Channel1</channel>
+          <opticalLength>1.8288</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>Channel2</channel>
+          <opticalLength>1.905</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>Channel3</channel>
+          <opticalLength>1.9812</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>Channel4</channel>
+          <opticalLength>2.0574</opticalLength>
+        </channelLink>
+      </stationLinks>
+      <stationLinks>
+        <station>W2</station>
+        <channelLink>
+          <channel>Channel1</channel>
+          <opticalLength>2.413</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>Channel2</channel>
+          <opticalLength>2.4892</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>Channel3</channel>
+          <opticalLength>2.5654</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>Channel4</channel>
+          <opticalLength>2.6416</opticalLength>
+        </channelLink>
+      </stationLinks>
+      <stationLinks>
+        <station>E1</station>
+        <channelLink>
+          <channel>Channel1</channel>
+          <opticalLength>4.2418</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>Channel2</channel>
+          <opticalLength>4.318</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>Channel3</channel>
+          <opticalLength>4.3942</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>Channel4</channel>
+          <opticalLength>4.4704</opticalLength>
+        </channelLink>
+      </stationLinks>
+      <stationLinks>
+        <station>E2</station>
+        <channelLink>
+          <channel>Channel1</channel>
+          <opticalLength>3.6576</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>Channel2</channel>
+          <opticalLength>3.7338</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>Channel3</channel>
+          <opticalLength>3.81</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>Channel4</channel>
+          <opticalLength>3.8862</opticalLength>
+        </channelLink>
+      </stationLinks>
+    </switchyard>
 
     <!-- pop on CHARA -->
     <pop>
@@ -268,16 +388,6 @@
       <name>PoP5</name>
       <index>5</index>
     </pop>
-
-<!--
-5         ! must be in same order as stations!!!
-   0.000   36.576  73.152  109.728  146.304 S1
- -36.576    0.000  36.576   73.152  109.728 S2
-   0.000   36.576  73.152  109.728  146.304 E1
- -73.152  -36.576   0.000   36.576   73.152 E2
- -73.152  -36.576   0.000   36.576   73.152 W1
--146.304 -109.728 -73.152  -36.576    0.000 W2
--->
 
     <focalInstrument>
       <name>VEGA</name>
