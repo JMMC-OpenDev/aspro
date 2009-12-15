@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BasicObservationForm.java,v 1.11 2009-12-11 16:37:32 bourgesl Exp $"
+ * "@(#) $Id: BasicObservationForm.java,v 1.12 2009-12-15 16:32:44 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.11  2009/12/11 16:37:32  bourgesl
+ * added Pop field in observation form
+ *
  * Revision 1.10  2009/12/07 15:17:59  bourgesl
  * Load observation action now refreshes the observation form completely
  *
@@ -36,20 +39,28 @@ import fr.jmmc.aspro.model.oi.FocalInstrumentConfigurationChoice;
 import fr.jmmc.aspro.model.oi.InterferometerConfiguration;
 import fr.jmmc.aspro.model.oi.InterferometerConfigurationChoice;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
+import fr.jmmc.aspro.model.oi.Pop;
 import fr.jmmc.mcs.astro.star.Star;
 import fr.jmmc.mcs.astro.star.StarResolverWidget;
 import java.awt.GridBagConstraints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.text.DecimalFormat;
+import java.text.ParseException;
 import java.util.Date;
+import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Vector;
 import java.util.logging.Level;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JFormattedTextField;
 import javax.swing.JSpinner;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.text.NumberFormatter;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 /**
@@ -106,7 +117,7 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
     jLabelConfiguration = new javax.swing.JLabel();
     jComboBoxInstrumentConfiguration = new javax.swing.JComboBox();
     jLabelPops = new javax.swing.JLabel();
-    jTextPoPs = new javax.swing.JTextField();
+    jTextPoPs = new JFormattedTextField(getPopsFormatter());
 
     setLayout(new java.awt.GridBagLayout());
 
@@ -222,8 +233,7 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
     gridBagConstraints.gridy = 2;
     add(jLabelPops, gridBagConstraints);
 
-    jTextPoPs.setColumns(5);
-    jTextPoPs.setToolTipText("optional PoPs configuration");
+    jTextPoPs.setColumns(4);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 6;
     gridBagConstraints.gridy = 2;
@@ -245,6 +255,34 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
       this.om.fireObservationChanged();
     }
   }//GEN-LAST:event_jButtonRemoveTargetActionPerformed
+
+  /**
+   * Return the Pops custom formatter : number format that accepts null values
+   * @return number formatter
+   */
+  private NumberFormatter getPopsFormatter() {
+    final NumberFormatter nf = new NumberFormatter(new DecimalFormat("####")) {
+
+      /** default serial UID for Serializable interface */
+      private static final long serialVersionUID = 1;
+
+      /**
+       * Hack to allow empty string
+       */
+      @Override
+      public Object stringToValue(String text) throws ParseException {
+        if (text == null || text.length() == 0) {
+          return null;
+        }
+        return super.stringToValue(text);
+      }
+    };
+    nf.setValueClass(Integer.class);
+    // reject invalid characters (digits only)
+    nf.setAllowsInvalid(false);
+    nf.setCommitsOnValidEdit(false);
+    return nf;
+  }
 
   /**
    * This method is useful to set the models and specific features of initialized swing components.
@@ -280,11 +318,18 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
     this.jComboBoxInstrument.addActionListener(this);
     this.jComboBoxInstrumentConfiguration.addActionListener(this);
 
-    checkPops();
+    this.jTextPoPs.addPropertyChangeListener("value", new PropertyChangeListener() {
+
+      public void propertyChange(final PropertyChangeEvent evt) {
+        jTextPoPsPropertyChange(evt);
+      }
+    });
+
     updateComboInterferometerConfiguration();
     updateComboInstrument();
     updateComboInstrumentConfiguration();
     updateListTargets();
+    checkPops();
 
     // initial observation synchronization :
     updateObservation();
@@ -340,10 +385,10 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
       if (logger.isLoggable(Level.FINE)) {
         logger.fine("Interferometer changed : " + this.jComboBoxInterferometer.getSelectedItem());
       }
-      checkPops();
       updateComboInterferometerConfiguration();
       updateComboInstrument();
       updateComboInstrumentConfiguration();
+      checkPops();
     } else if (e.getSource() == this.jComboBoxInterferometerConfiguration) {
       if (logger.isLoggable(Level.FINE)) {
         logger.fine("Interferometer Configuration changed : " + this.jComboBoxInterferometerConfiguration.getSelectedItem());
@@ -355,6 +400,8 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
         logger.fine("Instrument changed : " + this.jComboBoxInstrument.getSelectedItem());
       }
       updateComboInstrumentConfiguration();
+      checkPops();
+
     } else if (e.getSource() == this.jComboBoxInstrumentConfiguration) {
       if (logger.isLoggable(Level.FINE)) {
         logger.fine("Instrument Configuration changed : " + this.jComboBoxInstrumentConfiguration.getSelectedItem());
@@ -367,6 +414,41 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
     final boolean hasPops = ConfigurationManager.getInstance().hasPoPs((String) this.jComboBoxInterferometer.getSelectedItem());
     this.jLabelPops.setVisible(hasPops);
     this.jTextPoPs.setVisible(hasPops);
+    // reset the pops configuration because it can be invalid because of the chosen instrument
+    resetPops();
+  }
+
+  /**
+   * Process the change event for the PoPs configuration text field.
+   * Validates the new input (digits corresponds to valid PoPs indices)
+   * @param e action event
+   */
+  public void jTextPoPsPropertyChange(final PropertyChangeEvent evt) {
+    List<Pop> listPoPs = null;
+
+    if (evt.getNewValue() != null) {
+      final String popConfig = evt.getNewValue().toString();
+
+      // parse the configuration (instrument = number of channels) + (interferometer = pop indexes [1-5]) :
+
+      listPoPs = ConfigurationManager.getInstance().parseInstrumentPoPs((String) this.jComboBoxInterferometerConfiguration.getSelectedItem(),
+              (String) this.jComboBoxInstrument.getSelectedItem(), popConfig);
+    }
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("Pops changed = " + evt.getNewValue() + " : " + listPoPs);
+    }
+
+    if (listPoPs == null && evt.getNewValue() != null) {
+      // invalid, reset the field to empty :
+      resetPops();
+    }
+    // then update the observation :
+    updateObservation();
+  }
+
+  private void resetPops() {
+    // note : setValue() fires a property change event :
+    this.jTextPoPs.setValue(null);
   }
 
   /**
@@ -430,6 +512,7 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
       changed |= this.om.setInterferometerConfigurationName((String) this.jComboBoxInterferometerConfiguration.getSelectedItem());
       changed |= this.om.setInstrumentConfigurationName((String) this.jComboBoxInstrument.getSelectedItem());
       changed |= this.om.setInstrumentConfigurationStations((String) this.jComboBoxInstrumentConfiguration.getSelectedItem());
+      changed |= this.om.setInstrumentConfigurationPoPs(this.jTextPoPs.getText());
 
       if (changed) {
         // fire an observation change event :
@@ -481,6 +564,10 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
         // update the selected instrument configuration (stations) :
         this.jComboBoxInstrumentConfiguration.setSelectedItem(instrumentChoice.getStations());
 
+        // update the selected pops (pops) :
+        // note : setText() does not fire a property change event :
+        this.jTextPoPs.setText(instrumentChoice.getPops());
+
         // update the target list :
         updateListTargets();
 
@@ -506,6 +593,6 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
   private javax.swing.JLabel jLabelPops;
   private javax.swing.JList jListTargets;
   private javax.swing.JScrollPane jScrollPane1;
-  private javax.swing.JTextField jTextPoPs;
+  private javax.swing.JFormattedTextField jTextPoPs;
   // End of variables declaration//GEN-END:variables
 }

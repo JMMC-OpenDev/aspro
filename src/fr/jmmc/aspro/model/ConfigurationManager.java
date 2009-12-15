@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ConfigurationManager.java,v 1.11 2009-12-11 16:37:32 bourgesl Exp $"
+ * "@(#) $Id: ConfigurationManager.java,v 1.12 2009-12-15 16:32:44 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.11  2009/12/11 16:37:32  bourgesl
+ * added Pop field in observation form
+ *
  * Revision 1.10  2009/12/04 16:26:58  bourgesl
  * Added Load action in the menu bar (partially handled)
  *
@@ -51,10 +54,12 @@ import fr.jmmc.aspro.model.oi.InterferometerConfiguration;
 import fr.jmmc.aspro.model.oi.InterferometerDescription;
 import fr.jmmc.aspro.model.oi.InterferometerSetting;
 import fr.jmmc.aspro.model.oi.LonLatAlt;
+import fr.jmmc.aspro.model.oi.Pop;
 import fr.jmmc.aspro.model.oi.Position3D;
 import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.StationLinks;
 import fr.jmmc.aspro.service.GeocentricCoords;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -287,6 +292,42 @@ public class ConfigurationManager extends BaseOIManager {
       for (FocalInstrumentConfigurationItem c : ic.getConfigurations()) {
         if (c.getShortName().equals(instrumentConfigurationName)) {
           return c.getStations();
+        }
+      }
+    }
+    return null;
+  }
+
+  public List<Pop> parseInstrumentPoPs(final String configurationName, final String instrumentName, final String configPoPs) {
+    if (configPoPs != null && configPoPs.length() > 0) {
+      final FocalInstrumentConfiguration ic = getInterferometerInstrumentConfiguration(configurationName, instrumentName);
+      if (ic != null) {
+        // number of channels :
+        final int numChannels = ic.getFocalInstrument().getNumberChannels();
+
+        if (configPoPs.length() == numChannels) {
+          // valid length :
+
+          final InterferometerConfiguration c = getInterferometerConfiguration(configurationName);
+          if (c != null) {
+            final List<Pop> listPoPs = c.getInterferometer().getPops();
+
+            final List<Pop> config = new ArrayList<Pop>(numChannels);
+
+            int idx;
+            for (char ch : configPoPs.toCharArray()) {
+              idx = Character.digit(ch, 10);
+              if (idx <= 0) {
+                return null;
+              }
+              for (Pop pop : listPoPs) {
+                if (pop.getIndex() == idx) {
+                  config.add(pop);
+                }
+              }
+            }
+            return config;
+          }
         }
       }
     }

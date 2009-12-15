@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationManager.java,v 1.11 2009-12-07 15:18:00 bourgesl Exp $"
+ * "@(#) $Id: ObservationManager.java,v 1.12 2009-12-15 16:32:44 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.11  2009/12/07 15:18:00  bourgesl
+ * Load observation action now refreshes the observation form completely
+ *
  * Revision 1.10  2009/12/04 16:26:58  bourgesl
  * Added Load action in the menu bar (partially handled)
  *
@@ -138,6 +141,9 @@ public class ObservationManager extends BaseOIManager {
     sb.append(" interferometer : ").append(obs.getInterferometerConfiguration().getName());
     sb.append(" instrument : ").append(obs.getInstrumentConfiguration().getName());
     sb.append(" stations : ").append(obs.getInstrumentConfiguration().getStations());
+    if (obs.getInstrumentConfiguration().getPops() != null) {
+      sb.append(" pops : ").append(obs.getInstrumentConfiguration().getPops());
+    }
     if (!obs.getTargets().isEmpty()) {
       sb.append(" targets : \n").append(obs.getTargets());
     }
@@ -198,6 +204,23 @@ public class ObservationManager extends BaseOIManager {
     return changed;
   }
 
+  public boolean setInstrumentConfigurationPoPs(final String pops) {
+    final FocalInstrumentConfigurationChoice instrumentChoice = getObservation().getInstrumentConfiguration();
+
+    // pops can be null
+    boolean changed = (  (pops == null && instrumentChoice.getPops() != null)
+                      || (pops != null && instrumentChoice.getPops() == null)
+                      || !pops.equals(instrumentChoice.getPops())
+                      );
+
+    if (changed) {
+      instrumentChoice.setPops(pops);
+      instrumentChoice.setPopList(ConfigurationManager.getInstance().parseInstrumentPoPs(
+              getObservation().getInterferometerConfiguration().getName(), getObservation().getInstrumentConfiguration().getName(), pops));
+    }
+    return changed;
+  }
+
   private void updateObservation() {
     // ugly code to update all resolved references used on post load :
     final InterferometerConfigurationChoice interferometerChoice = getObservation().getInterferometerConfiguration();
@@ -211,6 +234,9 @@ public class ObservationManager extends BaseOIManager {
 
     instrumentChoice.setStationList(ConfigurationManager.getInstance().getInstrumentConfigurationStations(
             interferometerChoice.getName(), instrumentChoice.getName(), instrumentChoice.getStations()));
+
+    instrumentChoice.setPopList(ConfigurationManager.getInstance().parseInstrumentPoPs(
+            interferometerChoice.getName(), instrumentChoice.getName(), instrumentChoice.getPops()));
 
   }
 

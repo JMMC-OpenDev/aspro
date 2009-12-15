@@ -146,6 +146,18 @@ public class FocalInstrumentConfigurationChoice
     this.stationList = stationList;
   }
 
+  /** resolved reference to the PoPs (read only) */
+  @javax.xml.bind.annotation.XmlTransient
+  private java.util.List<Pop> popList = null;
+
+  public java.util.List<Pop> getPopList() {
+    return popList;
+  }
+
+  public void setPopList(java.util.List<Pop> popList) {
+    this.popList = popList;
+  }
+
 //--simple--preserve
 
 }

@@ -1,7 +1,6 @@
 
 package fr.jmmc.aspro.model.oi;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -33,7 +32,7 @@ import fr.jmmc.aspro.model.OIBase;
  *       &lt;sequence>
  *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}ID"/>
  *         &lt;element name="description" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="numberChannels" type="{http://www.w3.org/2001/XMLSchema}integer"/>
+ *         &lt;element name="numberChannels" type="{http://www.w3.org/2001/XMLSchema}int"/>
  *         &lt;element name="mode" type="{http://www.jmmc.fr/aspro-oi/0.1}FocalInstrumentMode" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
@@ -61,8 +60,7 @@ public class FocalInstrument
     protected String name;
     @XmlElement(required = true)
     protected String description;
-    @XmlElement(required = true)
-    protected BigInteger numberChannels;
+    protected int numberChannels;
     @XmlElement(name = "mode")
     protected List<FocalInstrumentMode> modes;
 
@@ -117,24 +115,16 @@ public class FocalInstrument
     /**
      * Gets the value of the numberChannels property.
      * 
-     * @return
-     *     possible object is
-     *     {@link BigInteger }
-     *     
      */
-    public BigInteger getNumberChannels() {
+    public int getNumberChannels() {
         return numberChannels;
     }
 
     /**
      * Sets the value of the numberChannels property.
      * 
-     * @param value
-     *     allowed object is
-     *     {@link BigInteger }
-     *     
      */
-    public void setNumberChannels(BigInteger value) {
+    public void setNumberChannels(int value) {
         this.numberChannels = value;
     }
 
