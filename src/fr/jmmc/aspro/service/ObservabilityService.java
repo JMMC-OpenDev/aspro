@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.23 2009-12-11 16:37:32 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.24 2009-12-15 16:35:26 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.23  2009/12/11 16:37:32  bourgesl
+ * added Pop field in observation form
+ *
  * Revision 1.22  2009/12/11 15:15:42  bourgesl
  * log info the list of best PoP combinations
  *
@@ -171,9 +174,9 @@ public class ObservabilityService {
   /** W ranges corresponding to the base line list */
   private List<Range> wRanges = new ArrayList<Range>();
   /** list of Pop combinations */
-  private List<List<Pop>> popCombinations = new ArrayList<List<Pop>>();
+  private List<List<Pop>> popCombinations = null;
   /** list of Pop offsets per base line */
-  private List<List<Double>> popOffsets = new ArrayList<List<Double>>();
+  private List<List<Double>> popOffsets = null;
 
   /**
    * This service is statefull so it can not be reused by several calls
@@ -293,7 +296,7 @@ public class ObservabilityService {
 
         // Prepare the pops :
         if (this.hasPops) {
-          preparePopCombinations(this.interferometer.getPops(), this.beams.size());
+          preparePopCombinations();
         }
 
         for (Target target : targets) {
@@ -851,6 +854,7 @@ public class ObservabilityService {
 
     this.beams = new ArrayList<Beam>(nBeams);
 
+    // Beams are defined in the same ordering than stations :
     for (Station s : stations) {
       this.beams.add(new Beam(s));
 
@@ -870,7 +874,7 @@ public class ObservabilityService {
     // Has switchyard ?
 
     if (!channels.isEmpty() && this.interferometer.getSwitchyard() != null) {
-      // Case Interferometer with a switchyard (VLTI) :
+      // Case Interferometer with a switchyard (VLTI and CHARA) :
 
       // used channels :
       final HashSet<Channel> channelSet = new HashSet<Channel>();
@@ -887,11 +891,18 @@ public class ObservabilityService {
 
           if (!channelSet.contains(cl.getChannel())) {
             channelSet.add(cl.getChannel());
+
+            // optical path = switchyard + station fixed offset
             b.setChannel(cl.getChannel());
             b.addOpticalLength(cl.getOpticalLength());
 
+            // fixed offset (CHARA) :
+            b.addOpticalLength(b.getStation().getDelayLineFixedOffset());
+
             if (logger.isLoggable(Level.FINE)) {
-              logger.fine("station = " + b.getStation() + " = " + b.getChannel().getName());
+              logger.fine("station = " + b.getStation() + ", Channel = " + b.getChannel().getName());
+              logger.fine("switchyard = " + cl.getOpticalLength() + ", fixed = " + b.getStation().getDelayLineFixedOffset());
+              logger.fine("total = " + b.getOpticalLength());
             }
             break;
           }
@@ -948,48 +959,63 @@ public class ObservabilityService {
   }
 
   /**
-   * Generates all Pop combinations for the given number of beams
+   * Generates all PoP combinations and offsets for the given number of beams
    * @param pops list of pops for the interferometer
-   * @param nBeams number of beams
    */
-  private void preparePopCombinations(final List<Pop> pops, final int nBeams) {
+  private void preparePopCombinations() {
 
-    this.popCombinations = new ArrayList<List<Pop>>();
+    final int nBeams = this.beams.size();
 
-    final int n = pops.size();
-    final int p = nBeams;
+    // Get chosen PoPs :
+    final List<Pop> userPoPs = this.observation.getInstrumentConfiguration().getPopList();
 
-    List<Pop> comb;
+    if (userPoPs == null) {
+      // Generate all PoP combinations for 3T or 4T :
+      final List<Pop> pops = this.interferometer.getPops();
 
-    if (p == 3) {
-      for (int i = 0; i < n; i++) {
-        for (int j = 0; j < n; j++) {
-          for (int k = 0; k < n; k++) {
-            comb = new ArrayList<Pop>(p);
-            comb.add(pops.get(i));
-            comb.add(pops.get(j));
-            comb.add(pops.get(k));
-            this.popCombinations.add(comb);
-          }
-        }
-      }
-    } else if (p == 4) {
-      for (int i = 0; i < n; i++) {
-        for (int j = 0; j < n; j++) {
-          for (int k = 0; k < n; k++) {
-            for (int l = 0; l < n; l++) {
+      final int n = pops.size();
+      final int p = nBeams;
+
+      List<Pop> comb;
+
+      if (p == 3) {
+        this.popCombinations = new ArrayList<List<Pop>>(n * n * n);
+
+        for (int i = 0; i < n; i++) {
+          for (int j = 0; j < n; j++) {
+            for (int k = 0; k < n; k++) {
               comb = new ArrayList<Pop>(p);
               comb.add(pops.get(i));
               comb.add(pops.get(j));
               comb.add(pops.get(k));
-              comb.add(pops.get(l));
               this.popCombinations.add(comb);
             }
           }
         }
+      } else if (p == 4) {
+        this.popCombinations = new ArrayList<List<Pop>>(n * n * n * n);
+
+        for (int i = 0; i < n; i++) {
+          for (int j = 0; j < n; j++) {
+            for (int k = 0; k < n; k++) {
+              for (int l = 0; l < n; l++) {
+                comb = new ArrayList<Pop>(p);
+                comb.add(pops.get(i));
+                comb.add(pops.get(j));
+                comb.add(pops.get(k));
+                comb.add(pops.get(l));
+                this.popCombinations.add(comb);
+              }
+            }
+          }
+        }
+      } else {
+        throw new UnsupportedOperationException("This number of stations is not supported with PoPs !");
       }
     } else {
-      throw new UnsupportedOperationException("This number of stations is not supported with PoPs !");
+      // use the user defined PoPs configuration :
+      this.popCombinations = new ArrayList<List<Pop>>(1);
+      this.popCombinations.add(userPoPs);
     }
 
     if (logger.isLoggable(Level.FINE)) {
