@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SettingPanel.java,v 1.8 2009-12-04 15:38:27 bourgesl Exp $"
+ * "@(#) $Id: SettingPanel.java,v 1.9 2009-12-15 16:31:49 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.8  2009/12/04 15:38:27  bourgesl
+ * Added Save action in the menu bar
+ *
  * Revision 1.7  2009/11/24 15:12:09  bourgesl
  * first step to handle delay line limits
  *
@@ -50,6 +53,9 @@ public class SettingPanel extends JPanel implements ObservationListener {
   private BasicObservationForm observationForm = null;
   /** observability panel */
   private ObservabilityPanel observabilityPanel = null;
+  /** uv coverage panel */
+  private UVChartPanel uvpanel = null;
+
 
   /** Creates new form SettingPanel */
   public SettingPanel() {
@@ -119,6 +125,13 @@ public class SettingPanel extends JPanel implements ObservationListener {
 
         // first time, the onChange event must be propagated to the new registered listener :
         this.observabilityPanel.onProcess(type, observation);
+      }
+
+      if (this.uvpanel == null) {
+        /*
+        this.uvpanel = new UVChartPanel();
+        this.tabs.addTab("UV coverage", this.uvpanel);
+         */
       }
     }
   }
