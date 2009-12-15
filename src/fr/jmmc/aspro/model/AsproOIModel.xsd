@@ -953,7 +953,7 @@
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
-      <xsd:element name="numberChannels" type="xsd:integer">
+      <xsd:element name="numberChannels" type="xsd:int">
         <xsd:annotation>
           <xsd:documentation>
               The number of channels used by this instrument
