@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <ApplicationData link="http://www.jmmc.fr/aspro">
-  <program name="Aspro" version="0.1b3"/>
+  <program name="Aspro" version="0.1b4"/>
   <compilation date="21/09/2009" compiler="JDK 1.5.0_16"/>
   <text>
     <![CDATA[ASPRO is a complete observation preparation tool developed and maintained by the JMMC
@@ -31,6 +31,10 @@
   </menubar>
   <releasenotes>
     <release version="0.1">
+      <prerelease version="0.1b4">
+        <change>Added PoP user configuration</change>
+        <change>Added CHARA switchyard (beam / station)</change>
+      </prerelease>
       <prerelease version="0.1b3">
         <change>Added PoP support</change>
         <change>Evaluate the best PoP configuration that gives the best observability range for a single target</change>
