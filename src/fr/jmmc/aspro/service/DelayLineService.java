@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: DelayLineService.java,v 1.6 2009-12-01 17:14:45 bourgesl Exp $"
+ * "@(#) $Id: DelayLineService.java,v 1.7 2009-12-16 16:05:51 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2009/12/01 17:14:45  bourgesl
+ * first try to add the pop configuration finder
+ *
  * Revision 1.5  2009/11/27 10:13:19  bourgesl
  * fixed LST day/night intervals
  * fixed NPE on computation cancellation
@@ -54,12 +57,9 @@ public class DelayLineService {
    * @param dec target declination (rad)
    * @param baseLines base line list
    * @param wRanges [wMin - wMax] ranges per base line
-   * @return intervals (hour angles) or null if thread interrupted
+   * @return intervals (hour angles)
    */
   public static List<List<Range>> findHAIntervals(final double dec, final List<BaseLine> baseLines, final List<Range> wRanges) {
-
-    // Get the current thread to check if the computation is interrupted :
-    final Thread currentThread = Thread.currentThread();
 
     final int size = baseLines.size();
 
@@ -71,11 +71,6 @@ public class DelayLineService {
     for (int i = 0; i < size; i++) {
       bl = baseLines.get(i);
       wRange = wRanges.get(i);
-
-      // fast interrupt :
-      if (currentThread.isInterrupted()) {
-        return null;
-      }
 
       rangesBL.add(findHAIntervalsForBaseLine(dec, bl, wRange));
     }

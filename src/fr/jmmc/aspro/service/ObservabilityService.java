@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.25 2009-12-16 08:44:40 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.26 2009-12-16 16:05:51 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.25  2009/12/16 08:44:40  bourgesl
+ * fixed NPE if station fixed offset is undefined (VLTI)
+ *
  * Revision 1.24  2009/12/15 16:35:26  bourgesl
  * user PoPs config + CHARA switchyard
  *
@@ -154,6 +157,8 @@ public class ObservabilityService {
   private boolean doDetails;
 
   /* internal */
+  /** Get the current thread to check if the computation is interrupted */
+  private final Thread currentThread = Thread.currentThread();
   /** sky calc instance */
   private final AstroSkyCalc sc = new AstroSkyCalc();
   /** jd corresponding to LST=0 for the observation date */
@@ -211,11 +216,8 @@ public class ObservabilityService {
    */
   public ObservabilityData calcObservability() {
     if (logger.isLoggable(Level.FINE)) {
-      logger.fine("start : " + observation);
+      logger.fine("start : " + this.observation);
     }
-
-    // Get the current thread to check if the computation is interrupted :
-    final Thread currentThread = Thread.currentThread();
 
     // Start the computations :
     final long start = System.nanoTime();
@@ -224,28 +226,28 @@ public class ObservabilityService {
       // Get interferometer / instrument :
       prepareObservation();
 
+      // Define target list :
       final List<Target> targets;
       if (this.doBaseLineLimits) {
         targets = generateTargetsForBaseLineLimits();
       } else {
         // copy the list to avoid concurrent modification during iteration :
-        targets = new ArrayList<Target>(observation.getTargets());
+        targets = new ArrayList<Target>(this.observation.getTargets());
       }
 
       // define site :
       this.sc.defineSite(this.interferometer.getName(), this.interferometer.getPosSph());
 
-      final XMLGregorianCalendar cal = this.observation.getWhen().getDate();
-
       // define date :
+      final XMLGregorianCalendar cal = this.observation.getWhen().getDate();
       this.sc.defineDate(cal.getYear(), cal.getMonth(), cal.getDay());
 
       // fast interrupt :
-      if (currentThread.isInterrupted()) {
+      if (this.currentThread.isInterrupted()) {
         return null;
       }
 
-      // 0 - Find the julian date corresponding to the LST origin LST=0 for the given date :
+      // Find the julian date corresponding to the LST origin LST=0h for the given date :
       this.jdLst0 = this.sc.findLst0();
       // warning : in LST, remove 1s to avoid 00:00:00 :
       this.jdLst24 = this.sc.findLst0(this.jdLst0 + 1d) - 1d / 86400d;
@@ -264,7 +266,7 @@ public class ObservabilityService {
       }
 
       // fast interrupt :
-      if (currentThread.isInterrupted()) {
+      if (this.currentThread.isInterrupted()) {
         return null;
       }
 
@@ -279,7 +281,7 @@ public class ObservabilityService {
       }
 
       // fast interrupt :
-      if (currentThread.isInterrupted()) {
+      if (this.currentThread.isInterrupted()) {
         return null;
       }
 
@@ -302,23 +304,10 @@ public class ObservabilityService {
           preparePopCombinations();
         }
 
-        for (Target target : targets) {
-
-          // fast interrupt :
-          if (currentThread.isInterrupted()) {
-            return null;
-          }
-
-          findTargetObservability(target);
-
-        } // for Target
-
-        // PoPs : Compatible Mode :
-        // Objective : find the pop combination that maximize the observability of the all list of target
-        // Post processing here of intermediate results
+        findObservability(targets);
 
         // fast interrupt :
-        if (currentThread.isInterrupted()) {
+        if (this.currentThread.isInterrupted()) {
           return null;
         }
 
@@ -335,7 +324,7 @@ public class ObservabilityService {
 
     } catch (RuntimeException re) {
       logger.log(Level.SEVERE, "calcObservability failure :", re);
-      logger.log(Level.SEVERE, "observation :" + ObservationManager.getInstance().toString(observation));
+      logger.log(Level.SEVERE, "observation :" + ObservationManager.getInstance().toString(this.observation));
       // clear invalid data :
       this.data = null;
     }
@@ -348,97 +337,38 @@ public class ObservabilityService {
   }
 
   /**
-   * Process the sun time stamps to have both night limits in the LST range [0;24] +/- 12h
-   * and all intervals (day/night/twilight) in the LST range [0;24]
-   * @param sunEvents jd sun events in the LST range [0;24] +/- 12h
+   * Find the observability ranges for the complete list of targets
+   * @param targets target list
    */
-  private void processSunAlmanach(final List<SunAlmanachTime> sunEvents) {
-    List<SunTimeInterval> intervals = null;
+  private void findObservability(final List<Target> targets) {
 
-    if (sunEvents != null && !sunEvents.isEmpty()) {
-      final int nbInterval = sunEvents.size() - 1;
-      intervals = new ArrayList<SunTimeInterval>(nbInterval);
+    for (Target target : targets) {
 
-      SunAlmanachTime stFrom, stTo;
-      double jdFrom, jdTo;
-      Date from, to;
-      SunTimeInterval.SunType type = null;
-
-      for (int i = 0; i < nbInterval; i++) {
-        stFrom = sunEvents.get(i);
-        stTo = sunEvents.get(i + 1);
-
-        jdFrom = stFrom.getJd();
-        jdTo = stTo.getJd();
-
-        switch (stFrom.getType()) {
-          case SunRise:
-            type = SunTimeInterval.SunType.Day;
-            break;
-          case SunSet:
-            type = SunTimeInterval.SunType.Twilight;
-            break;
-          case SunTwlRise:
-            type = SunTimeInterval.SunType.Twilight;
-            break;
-          case SunTwlSet:
-            type = SunTimeInterval.SunType.Night;
-            break;
-          default:
-        }
-
-        if (type == SunTimeInterval.SunType.Night) {
-          if (this.nightLimits == null) {
-            this.nightLimits = new ArrayList<Range>(2);
-          }
-          this.nightLimits.add(new Range(jdFrom, jdTo));
-        }
-
-        // Keep intervals that are inside or overlapping the LST [0;24] range :
-        if ((jdFrom >= this.jdLst0 && jdFrom <= this.jdLst24) || (jdTo >= this.jdLst0 && jdTo <= this.jdLst24)) {
-
-          if (logger.isLoggable(Level.FINE)) {
-            logger.fine("Range[" + jdFrom + " - " + jdTo + "] : " + type);
-          }
-
-          // adjust range limits :
-          if (jdFrom < this.jdLst0) {
-            jdFrom = this.jdLst0;
-          }
-          if (jdTo > this.jdLst24) {
-            jdTo = this.jdLst24;
-          }
-
-          from = jdToDate(jdFrom);
-          to = jdToDate(jdTo);
-
-          if (logger.isLoggable(Level.FINE)) {
-            logger.fine("SunInterval[" + from + " - " + to + "] : " + type);
-          }
-
-          intervals.add(new SunTimeInterval(from, to, type));
-        }
+      // fast interrupt :
+      if (this.currentThread.isInterrupted()) {
+        return;
       }
 
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("nightLimits : " + this.nightLimits);
-      }
+      findTargetObservability(target);
 
-    }
+    } // for Target
 
-    this.data.setSunIntervals(intervals);
+    // PoPs : Compatible Mode :
+    // Objective : find the pop combination that maximize the observability of the all list of target
+    // Post processing here of intermediate results
   }
 
+  /**
+   * Finds the observability ranges for the given target
+   * @param target target to use
+   */
   private void findTargetObservability(final Target target) {
-
-    // Get the current thread to check if the computation is interrupted :
-    final Thread currentThread = Thread.currentThread();
 
     final StarObservability starObs = new StarObservability(target.getName());
     // add the result to have also unobservable targets :
     this.data.getStarVisibilities().add(starObs);
 
-    // Target coordinates precessed to jd and to get position from JSkyCalc :
+    // Target coordinates precessed to jd and to get az/alt positions from JSkyCalc :
     final double[] raDec = this.sc.defineTarget(jdLst0, target.getRA(), target.getDEC());
 
     // target right ascension in decimal hours :
@@ -446,9 +376,6 @@ public class ObservabilityService {
 
     // target declination in degrees :
     final double precDEC = raDec[1];
-
-    // offset used to convert HA to LST = ra in dec hours :
-    final double lstOffset = precRA;
 
     // Find LST range corresponding to the rise / set of the target :
     final double haElev = this.sc.getHAForElevation(precDEC, this.minElev);
@@ -459,7 +386,7 @@ public class ObservabilityService {
       final Range rangeHARiseSet = new Range(-haElev, haElev);
 
       // convert HA range to JD range :
-      final Range rangeJDRiseSet = convertHARange(rangeHARiseSet, lstOffset);
+      final Range rangeJDRiseSet = convertHARange(rangeHARiseSet, precRA);
 
       // For now : only VLTI has horizon profiles :
       List<Range> rangesJDHz = null;
@@ -468,7 +395,7 @@ public class ObservabilityService {
         rangesJDHz = checkHorizonProfile(rangeJDRiseSet);
 
         // fast interrupt :
-        if (currentThread.isInterrupted()) {
+        if (this.currentThread.isInterrupted()) {
           return;
         }
       }
@@ -482,13 +409,13 @@ public class ObservabilityService {
         rangesHABaseLines = findHAIntervalsWithPops(Math.toRadians(precDEC), rangeHARiseSet, starObs);
 
       } else {
-        // Get intervals (HA) compatible with all base lines (switchyard / delay line / pops) :
+        // Get intervals (HA) compatible with all base lines :
         rangesHABaseLines = DelayLineService.findHAIntervals(Math.toRadians(precDEC), this.baseLines, this.wRanges);
       }
 
       // rangesHABaseLines can be null if the thread was interrupted :
       // fast interrupt :
-      if (currentThread.isInterrupted()) {
+      if (this.currentThread.isInterrupted()) {
         return;
       }
 
@@ -496,7 +423,7 @@ public class ObservabilityService {
       final List<Range> obsRanges = new ArrayList<Range>();
 
       if (this.doDetails) {
-        // Get the current target name + pop combination :
+        // Get the current target name (+ pop combination) :
         final String prefix = starObs.getName() + " ";
 
         // Add Rise/Set :
@@ -526,7 +453,7 @@ public class ObservabilityService {
 
             if (ranges != null) {
               for (Range range : ranges) {
-                obsRanges.add(convertHARange(range, lstOffset));
+                obsRanges.add(convertHARange(range, precRA));
               }
             }
             if (logger.isLoggable(Level.FINE)) {
@@ -559,7 +486,7 @@ public class ObservabilityService {
       for (List<Range> ranges : rangesHABaseLines) {
         if (ranges != null) {
           for (Range range : ranges) {
-            obsRanges.add(convertHARange(range, lstOffset));
+            obsRanges.add(convertHARange(range, precRA));
           }
         }
       }
@@ -615,12 +542,11 @@ public class ObservabilityService {
    * it finds the best PoP combination to maximize the HA interval (delay line + rise/set)
    *
    * @param dec target declination (rad)
+   * @param rangeHARiseSet HA range for target rise/set
+   * @param starObs star observability bean to set the final PoP combination
    * @return intervals (hour angles) or null if thread interrupted
    */
   public List<List<Range>> findHAIntervalsWithPops(final double dec, final Range rangeHARiseSet, final StarObservability starObs) {
-
-    // Get the current thread to check if the computation is interrupted :
-    final Thread currentThread = Thread.currentThread();
 
     final int sizeBL = this.baseLines.size();
     final int sizeCb = this.popCombinations.size();
@@ -672,7 +598,7 @@ public class ObservabilityService {
         wRangeWithOffset.setMax(wRange.getMax() + offset.doubleValue());
 
         // fast interrupt :
-        if (currentThread.isInterrupted()) {
+        if (this.currentThread.isInterrupted()) {
           return null;
         }
 
@@ -719,27 +645,29 @@ public class ObservabilityService {
 
       final PopObservabilityData popBestData = popDataList.get(end);
 
-      // find all equivalent pop combinations :
-      final List<PopObservabilityData> bestPoPs = new ArrayList<PopObservabilityData>();
-      for (int i = end; i > 0; i--) {
-        popData = popDataList.get(i);
-        if (popBestData.getMaxLength() == popData.getMaxLength()) {
-          bestPoPs.add(popData);
-        } else {
-          break;
+      if (this.popCombinations.size() > 1) {
+        // find all equivalent pop combinations :
+        final List<PopObservabilityData> bestPoPs = new ArrayList<PopObservabilityData>();
+        for (int i = end; i >= 0; i--) {
+          popData = popDataList.get(i);
+          if (popBestData.getMaxLength() == popData.getMaxLength()) {
+            bestPoPs.add(popData);
+          } else {
+            break;
+          }
+        }
+
+        if (logger.isLoggable(Level.INFO)) {
+          logger.info("best PoPs : " + bestPoPs);
         }
       }
 
-      if (logger.isLoggable(Level.INFO)) {
-        logger.info("best PoPs : " + bestPoPs);
-      }
-
-      final StringBuffer sb = new StringBuffer().append(" [");
+      final StringBuffer sb = new StringBuffer(starObs.getName()).append(" [");
       for (Pop pop : popBestData.getPopCombination()) {
         sb.append(pop.getIndex());
       }
       sb.append("]");
-      starObs.setName(starObs.getName() + sb.toString());
+      starObs.setName(sb.toString());
 
       return popBestData.getRangesBL();
     }
@@ -754,9 +682,6 @@ public class ObservabilityService {
   private List<Range> checkHorizonProfile(final Range jdRiseSet) {
     // output :
     final List<Range> ranges = new ArrayList<Range>();
-
-    // Get the current thread to check if the computation is interrupted :
-    final Thread currentThread = Thread.currentThread();
 
     // Prepare profiles :
     final HorizonService hs = HorizonService.getInstance();
@@ -782,7 +707,7 @@ public class ObservabilityService {
     for (double jd = jdMin; jd < jdMax; jd += jdStep) {
 
       // fast interrupt :
-      if (currentThread.isInterrupted()) {
+      if (this.currentThread.isInterrupted()) {
         return null;
       }
 
@@ -1110,6 +1035,88 @@ public class ObservabilityService {
   }
 
   /**
+   * Process the sun time stamps to have both night limits in the LST range [0;24] +/- 12h
+   * and all intervals (day/night/twilight) in the LST range [0;24]
+   * @param sunEvents jd sun events in the LST range [0;24] +/- 12h
+   */
+  private void processSunAlmanach(final List<SunAlmanachTime> sunEvents) {
+    List<SunTimeInterval> intervals = null;
+
+    if (sunEvents != null && !sunEvents.isEmpty()) {
+      final int nbInterval = sunEvents.size() - 1;
+      intervals = new ArrayList<SunTimeInterval>(nbInterval);
+
+      SunAlmanachTime stFrom, stTo;
+      double jdFrom, jdTo;
+      Date from, to;
+      SunTimeInterval.SunType type = null;
+
+      for (int i = 0; i < nbInterval; i++) {
+        stFrom = sunEvents.get(i);
+        stTo = sunEvents.get(i + 1);
+
+        jdFrom = stFrom.getJd();
+        jdTo = stTo.getJd();
+
+        switch (stFrom.getType()) {
+          case SunRise:
+            type = SunTimeInterval.SunType.Day;
+            break;
+          case SunSet:
+            type = SunTimeInterval.SunType.Twilight;
+            break;
+          case SunTwlRise:
+            type = SunTimeInterval.SunType.Twilight;
+            break;
+          case SunTwlSet:
+            type = SunTimeInterval.SunType.Night;
+            break;
+          default:
+        }
+
+        if (type == SunTimeInterval.SunType.Night) {
+          if (this.nightLimits == null) {
+            this.nightLimits = new ArrayList<Range>(2);
+          }
+          this.nightLimits.add(new Range(jdFrom, jdTo));
+        }
+
+        // Keep intervals that are inside or overlapping the LST [0;24] range :
+        if ((jdFrom >= this.jdLst0 && jdFrom <= this.jdLst24) || (jdTo >= this.jdLst0 && jdTo <= this.jdLst24)) {
+
+          if (logger.isLoggable(Level.FINE)) {
+            logger.fine("Range[" + jdFrom + " - " + jdTo + "] : " + type);
+          }
+
+          // adjust range limits :
+          if (jdFrom < this.jdLst0) {
+            jdFrom = this.jdLst0;
+          }
+          if (jdTo > this.jdLst24) {
+            jdTo = this.jdLst24;
+          }
+
+          from = jdToDate(jdFrom);
+          to = jdToDate(jdTo);
+
+          if (logger.isLoggable(Level.FINE)) {
+            logger.fine("SunInterval[" + from + " - " + to + "] : " + type);
+          }
+
+          intervals.add(new SunTimeInterval(from, to, type));
+        }
+      }
+
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("nightLimits : " + this.nightLimits);
+      }
+
+    }
+
+    this.data.setSunIntervals(intervals);
+  }
+
+  /**
    * Converts an HA range to a JD range
    * @param rangeHA given in hour angle (dec hours)
    * @param lstOffset right ascension (dec hours)
@@ -1228,6 +1235,10 @@ public class ObservabilityService {
     return this.sc.toDate(jd, this.useLST);
   }
 
+  /**
+   * Generate a target list for the base line limits (every 5 deg)
+   * @return target list
+   */
   private List<Target> generateTargetsForBaseLineLimits() {
 
     final double obsLat = Math.toDegrees(this.interferometer.getPosSph().getLatitude());
@@ -1244,7 +1255,7 @@ public class ObservabilityService {
     Target t;
     for (int i = decMax; i > decMin; i -= 5) {
       t = new Target();
-      // delta = x
+      // delta = n (deg)
       t.setName("\u0394 = " + Integer.toString(i));
       // 12:00:00
       t.setRA(180d);
