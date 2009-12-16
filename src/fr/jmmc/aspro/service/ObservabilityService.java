@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.24 2009-12-15 16:35:26 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.25 2009-12-16 08:44:40 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.24  2009/12/15 16:35:26  bourgesl
+ * user PoPs config + CHARA switchyard
+ *
  * Revision 1.23  2009/12/11 16:37:32  bourgesl
  * added Pop field in observation form
  *
@@ -897,7 +900,9 @@ public class ObservabilityService {
             b.addOpticalLength(cl.getOpticalLength());
 
             // fixed offset (CHARA) :
-            b.addOpticalLength(b.getStation().getDelayLineFixedOffset());
+            if (b.getStation().getDelayLineFixedOffset() != null) {
+              b.addOpticalLength(b.getStation().getDelayLineFixedOffset());
+            }
 
             if (logger.isLoggable(Level.FINE)) {
               logger.fine("station = " + b.getStation() + ", Channel = " + b.getChannel().getName());
@@ -942,6 +947,9 @@ public class ObservabilityService {
 
         if (i < nDelayLines) {
           b.setDelayLine(delayLines.get(i));
+          if (b.getStation().getDelayLineFixedOffset() == null) {
+            throw new IllegalStateException("Missing fixed offset for station [" + b.getStation() + "].");
+          }
           b.addOpticalLength(b.getStation().getDelayLineFixedOffset());
         } else {
           // no delay line ?
