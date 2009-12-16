@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.26 2009-12-16 16:05:51 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.27 2009-12-16 16:47:24 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.26  2009/12/16 16:05:51  bourgesl
+ * refactoring
+ *
  * Revision 1.25  2009/12/16 08:44:40  bourgesl
  * fixed NPE if station fixed offset is undefined (VLTI)
  *
@@ -304,6 +307,7 @@ public class ObservabilityService {
           preparePopCombinations();
         }
 
+        // Find the observability intervals for the target list :
         findObservability(targets);
 
         // fast interrupt :
@@ -385,21 +389,6 @@ public class ObservabilityService {
       // rise/set range :
       final Range rangeHARiseSet = new Range(-haElev, haElev);
 
-      // convert HA range to JD range :
-      final Range rangeJDRiseSet = convertHARange(rangeHARiseSet, precRA);
-
-      // For now : only VLTI has horizon profiles :
-      List<Range> rangesJDHz = null;
-      if (this.hasHorizon) {
-        // check horizon profiles inside rise/set range :
-        rangesJDHz = checkHorizonProfile(rangeJDRiseSet);
-
-        // fast interrupt :
-        if (this.currentThread.isInterrupted()) {
-          return;
-        }
-      }
-
       // HA intervals for every base line :
       List<List<Range>> rangesHABaseLines;
 
@@ -417,6 +406,21 @@ public class ObservabilityService {
       // fast interrupt :
       if (this.currentThread.isInterrupted()) {
         return;
+      }
+
+      // convert HA range to JD range :
+      final Range rangeJDRiseSet = convertHARange(rangeHARiseSet, precRA);
+
+      // For now : only VLTI has horizon profiles :
+      List<Range> rangesJDHz = null;
+      if (this.hasHorizon) {
+        // check horizon profiles inside rise/set range :
+        rangesJDHz = checkHorizonProfile(rangeJDRiseSet);
+
+        // fast interrupt :
+        if (this.currentThread.isInterrupted()) {
+          return;
+        }
       }
 
       // observable ranges (jd) :
@@ -757,6 +761,9 @@ public class ObservabilityService {
     return ranges;
   }
 
+  /**
+   * Define the interferometer and instrument and check if the interferometer has PoPs
+   */
   private void prepareObservation() {
     this.interferometer = this.observation.getInterferometerConfiguration().getInterferometerConfiguration().getInterferometer();
     this.instrument = this.observation.getInstrumentConfiguration().getInstrumentConfiguration().getFocalInstrument();
@@ -769,6 +776,10 @@ public class ObservabilityService {
     }
   }
 
+  /**
+   * Define the beams from the user station list, associates a channel to the beam (first channel not used) and a delay line.
+   * Computes the fixed offset for the beam from the station fixed offset and the interferometer switchyard
+   */
   private void prepareBeams() {
 
     // Get chosen stations :
@@ -892,7 +903,7 @@ public class ObservabilityService {
   }
 
   /**
-   * Generates all PoP combinations and offsets for the given number of beams
+   * Generate all PoP combinations and offsets for the given number of beams
    * @param pops list of pops for the interferometer
    */
   private void preparePopCombinations() {
@@ -1001,6 +1012,10 @@ public class ObservabilityService {
     throw new IllegalStateException("No pop value for couple (" + station.getName() + " - " + pop + ") !");
   }
 
+  /**
+   * Define the base lines using the predefined beams and computes the range [W min; W max]
+   * corresponding to the fixed optical path difference +- the delay line throw
+   */
   private void prepareBaseLines() {
 
     final int nBeams = this.beams.size();
@@ -1117,7 +1132,7 @@ public class ObservabilityService {
   }
 
   /**
-   * Converts an HA range to a JD range
+   * Convert an HA range to a JD range
    * @param rangeHA given in hour angle (dec hours)
    * @param lstOffset right ascension (dec hours)
    * @return JD range
@@ -1152,6 +1167,14 @@ public class ObservabilityService {
     return new Range(jd1, jd2);
   }
 
+  /**
+   * Convert a JD range to a date interval with respect for the LST range [0;24]
+   * Know bug : due to HA limit [+/-12h], the converted JD / Date ranges
+   * can have a discontinuity on the LST/UTC axis !
+   *
+   * @param rangeJD range to convert
+   * @param intervals interval list where new date intervals will be added
+   */
   private void convertRangeToDateInterval(final Range rangeJD, final List<DateTimeInterval> intervals) {
     // one Day in LST is different than one Day in JD :
     final double day = AstroSkyCalc.lst2jd(24d);

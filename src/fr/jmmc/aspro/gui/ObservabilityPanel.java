@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityPanel.java,v 1.13 2009-12-08 11:30:35 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityPanel.java,v 1.14 2009-12-16 16:47:24 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.13  2009/12/08 11:30:35  bourgesl
+ * when an observation is loaded, reset plot options to defaults
+ *
  * Revision 1.12  2009/12/07 15:18:00  bourgesl
  * Load observation action now refreshes the observation form completely
  *
@@ -485,6 +488,7 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
     int j;
     String name;
     TaskSeries taskSeries;
+    Task task;
     for (StarObservability so : starVis) {
       name = so.getName();
       // use the target name as the name of the serie :
@@ -494,7 +498,9 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
       j = 1;
 
       for (DateTimeInterval interval : so.getVisible()) {
-        taskSeries.add(new Task("T" + j, interval.getStartDate(), interval.getEndDate()));
+        task = new Task("T" + j, interval.getStartDate(), interval.getEndDate());
+        taskSeries.add(task);
+        j++;
       }
 
       localTaskSeriesCollection.add(taskSeries);
