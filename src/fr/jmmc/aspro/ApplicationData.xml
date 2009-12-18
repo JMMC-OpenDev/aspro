@@ -32,6 +32,8 @@
   <releasenotes>
     <release version="0.1">
       <prerelease version="0.1b4">
+        <change>Added a best PoPs algorithm for the complete list of targets</change>
+        <change>Fixed JMCS Star resolver for targets without proper motion nor parallax</change>
         <change>Added PoP user configuration</change>
         <change>Added CHARA switchyard (beam / station)</change>
       </prerelease>
