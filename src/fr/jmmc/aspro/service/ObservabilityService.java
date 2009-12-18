@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.28 2009-12-18 11:52:02 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.29 2009-12-18 14:49:31 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.28  2009/12/18 11:52:02  bourgesl
+ * added Pops Finder Compatible Mode for a list of targets
+ *
  * Revision 1.27  2009/12/16 16:47:24  bourgesl
  * comments
  *
@@ -743,7 +746,7 @@ public class ObservabilityService {
     PopObservabilityData popData;
 
     // Find the PoP combination that gives the longest HA interval :
-    if (!popDataList.isEmpty()) {
+    if (popDataList != null && !popDataList.isEmpty()) {
       // Sort pop observability data according to max length :
       Collections.sort(popDataList);
 
