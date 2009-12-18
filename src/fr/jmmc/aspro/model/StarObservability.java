@@ -1,9 +1,19 @@
+/*******************************************************************************
+ * JMMC project
+ *
+ * "@(#) $Id: StarObservability.java,v 1.3 2009-12-18 11:52:02 bourgesl Exp $"
+ *
+ * History
+ * -------
+ * $Log: not supported by cvs2svn $
+ */
 package fr.jmmc.aspro.model;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * This class contains several results for the observability of a target
  *
  * @author bourgesl
  */
