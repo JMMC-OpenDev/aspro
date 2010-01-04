@@ -390,7 +390,13 @@
     </pop>
 
     <focalInstrument>
-      <name>VEGA</name>
+      <name>VEGA_2T</name>
+      <description></description>
+      <numberChannels>2</numberChannels>
+    </focalInstrument>
+
+    <focalInstrument>
+      <name>VEGA_3T</name>
       <description></description>
       <numberChannels>3</numberChannels>
     </focalInstrument>
@@ -436,7 +442,56 @@
     <interferometer>CHARA</interferometer>
 
     <instrument>
-      <focalInstrument>VEGA</focalInstrument>
+      <focalInstrument>VEGA_2T</focalInstrument>
+      <configuration>
+        <stations>S1 S2</stations>
+      </configuration>
+      <configuration>
+        <stations>S1 E1</stations>
+      </configuration>
+      <configuration>
+        <stations>S1 E2</stations>
+      </configuration>
+      <configuration>
+        <stations>S1 W1</stations>
+      </configuration>
+      <configuration>
+        <stations>S1 W2</stations>
+      </configuration>
+      <configuration>
+        <stations>S2 E1</stations>
+      </configuration>
+      <configuration>
+        <stations>S2 E2</stations>
+      </configuration>
+      <configuration>
+        <stations>S2 W1</stations>
+      </configuration>
+      <configuration>
+        <stations>S2 W2</stations>
+      </configuration>
+      <configuration>
+        <stations>E1 E2</stations>
+      </configuration>
+      <configuration>
+        <stations>E1 W1</stations>
+      </configuration>
+      <configuration>
+        <stations>E1 W2</stations>
+      </configuration>
+      <configuration>
+        <stations>E2 W1</stations>
+      </configuration>
+      <configuration>
+        <stations>E2 W2</stations>
+      </configuration>
+      <configuration>
+        <stations>W1 W2</stations>
+      </configuration>
+    </instrument>
+
+    <instrument>
+      <focalInstrument>VEGA_3T</focalInstrument>
       <configuration>
         <stations>S1 S2 E1</stations>
       </configuration>
