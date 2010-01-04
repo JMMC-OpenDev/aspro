@@ -26,6 +26,17 @@ import fr.jmmc.aspro.model.OIBase;
  *         &lt;element name="RA" type="{http://www.w3.org/2001/XMLSchema}double"/>
  *         &lt;element name="DEC" type="{http://www.w3.org/2001/XMLSchema}double"/>
  *         &lt;element name="EQUINOX" type="{http://www.w3.org/2001/XMLSchema}float"/>
+ *         &lt;element name="PMRA" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
+ *         &lt;element name="PMDEC" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
+ *         &lt;element name="PARALLAX" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
+ *         &lt;element name="PARA_ERR" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
+ *         &lt;element name="SPECTYP" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ *         &lt;element name="FLUX_V" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
+ *         &lt;element name="FLUX_I" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
+ *         &lt;element name="FLUX_J" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
+ *         &lt;element name="FLUX_H" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
+ *         &lt;element name="FLUX_K" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
+ *         &lt;element name="FLUX_N" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -39,7 +50,18 @@ import fr.jmmc.aspro.model.OIBase;
     "name",
     "ra",
     "dec",
-    "equinox"
+    "equinox",
+    "pmra",
+    "pmdec",
+    "parallax",
+    "paraerr",
+    "spectyp",
+    "fluxv",
+    "fluxi",
+    "fluxj",
+    "fluxh",
+    "fluxk",
+    "fluxn"
 })
 public class Target
     extends OIBase
@@ -53,6 +75,28 @@ public class Target
     protected double dec;
     @XmlElement(name = "EQUINOX")
     protected float equinox;
+    @XmlElement(name = "PMRA")
+    protected Double pmra;
+    @XmlElement(name = "PMDEC")
+    protected Double pmdec;
+    @XmlElement(name = "PARALLAX")
+    protected Double parallax;
+    @XmlElement(name = "PARA_ERR")
+    protected Double paraerr;
+    @XmlElement(name = "SPECTYP")
+    protected String spectyp;
+    @XmlElement(name = "FLUX_V")
+    protected Double fluxv;
+    @XmlElement(name = "FLUX_I")
+    protected Double fluxi;
+    @XmlElement(name = "FLUX_J")
+    protected Double fluxj;
+    @XmlElement(name = "FLUX_H")
+    protected Double fluxh;
+    @XmlElement(name = "FLUX_K")
+    protected Double fluxk;
+    @XmlElement(name = "FLUX_N")
+    protected Double fluxn;
 
     /**
      * Gets the value of the name property.
@@ -124,6 +168,270 @@ public class Target
      */
     public void setEQUINOX(float value) {
         this.equinox = value;
+    }
+
+    /**
+     * Gets the value of the pmra property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getPMRA() {
+        return pmra;
+    }
+
+    /**
+     * Sets the value of the pmra property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setPMRA(Double value) {
+        this.pmra = value;
+    }
+
+    /**
+     * Gets the value of the pmdec property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getPMDEC() {
+        return pmdec;
+    }
+
+    /**
+     * Sets the value of the pmdec property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setPMDEC(Double value) {
+        this.pmdec = value;
+    }
+
+    /**
+     * Gets the value of the parallax property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getPARALLAX() {
+        return parallax;
+    }
+
+    /**
+     * Sets the value of the parallax property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setPARALLAX(Double value) {
+        this.parallax = value;
+    }
+
+    /**
+     * Gets the value of the paraerr property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getPARAERR() {
+        return paraerr;
+    }
+
+    /**
+     * Sets the value of the paraerr property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setPARAERR(Double value) {
+        this.paraerr = value;
+    }
+
+    /**
+     * Gets the value of the spectyp property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getSPECTYP() {
+        return spectyp;
+    }
+
+    /**
+     * Sets the value of the spectyp property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setSPECTYP(String value) {
+        this.spectyp = value;
+    }
+
+    /**
+     * Gets the value of the fluxv property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getFLUXV() {
+        return fluxv;
+    }
+
+    /**
+     * Sets the value of the fluxv property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setFLUXV(Double value) {
+        this.fluxv = value;
+    }
+
+    /**
+     * Gets the value of the fluxi property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getFLUXI() {
+        return fluxi;
+    }
+
+    /**
+     * Sets the value of the fluxi property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setFLUXI(Double value) {
+        this.fluxi = value;
+    }
+
+    /**
+     * Gets the value of the fluxj property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getFLUXJ() {
+        return fluxj;
+    }
+
+    /**
+     * Sets the value of the fluxj property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setFLUXJ(Double value) {
+        this.fluxj = value;
+    }
+
+    /**
+     * Gets the value of the fluxh property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getFLUXH() {
+        return fluxh;
+    }
+
+    /**
+     * Sets the value of the fluxh property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setFLUXH(Double value) {
+        this.fluxh = value;
+    }
+
+    /**
+     * Gets the value of the fluxk property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getFLUXK() {
+        return fluxk;
+    }
+
+    /**
+     * Sets the value of the fluxk property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setFLUXK(Double value) {
+        this.fluxk = value;
+    }
+
+    /**
+     * Gets the value of the fluxn property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getFLUXN() {
+        return fluxn;
+    }
+
+    /**
+     * Sets the value of the fluxn property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setFLUXN(Double value) {
+        this.fluxn = value;
     }
     
 //--simple--preserve

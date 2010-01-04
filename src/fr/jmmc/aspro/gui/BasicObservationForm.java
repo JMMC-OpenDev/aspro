@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BasicObservationForm.java,v 1.13 2009-12-18 14:50:11 bourgesl Exp $"
+ * "@(#) $Id: BasicObservationForm.java,v 1.14 2010-01-04 15:42:47 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.13  2009/12/18 14:50:11  bourgesl
+ * check StarResolverWidget notification to process only valid CDS star results
+ *
  * Revision 1.12  2009/12/15 16:32:44  bourgesl
  * added user PoP configuration based on PoP indices
  *
@@ -61,6 +64,7 @@ import java.util.logging.Level;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JFormattedTextField;
 import javax.swing.JSpinner;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.text.NumberFormatter;
@@ -477,34 +481,36 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
    */
   public void update(final Observable o, final Object arg) {
     if (o instanceof Star) {
-      final Star s = (Star) o;
+      final Star star = (Star) o;
 
       final Star.Notification notification = (Star.Notification) arg;
 
       if (notification == Star.Notification.QUERY_COMPLETE) {
         if (logger.isLoggable(Level.FINE)) {
-          logger.fine("Star search Field : " + this.starSearchField.getText() + "\n" + s);
+          logger.fine("Star search Field : " + this.starSearchField.getText() + "\n" + star);
         }
 
-        // concurrent notification protection :
-        synchronized (s) {
-          /*
-          Strings = {OTYPELIST=IR,X,*,Be*,UV,**,*iC,*iN,Em*, RA=03 47 29.0765, DEC=+24 06 18.494}
-          Doubles = {FLUX_H=2.735, RA_d=56.8711521, DEC_d=24.1051372, FLUX_K=2.636, FLUX_J=2.735, FLUX_V=2.873}
-           */
-          // degrees :
-          final Double RA_d = s.getPropertyAsDouble(Star.Property.RA_d);
-          final Double DE_d = s.getPropertyAsDouble(Star.Property.DEC_d);
-          if (RA_d != null && DE_d != null) {
-            final String name = this.starSearchField.getText().toUpperCase();
+        boolean changed = false;
 
-            if (this.om.addTarget(name, RA_d, DE_d)) {
+        // concurrent notification protection :
+        synchronized (star) {
+          final String name = this.starSearchField.getText().toUpperCase();
+
+          if (this.om.addTarget(name, star)) {
+            changed = true;
+          }
+        } // synchronized
+
+        if (changed) {
+          SwingUtilities.invokeLater(new Runnable() {
+
+            public void run() {
               // update the target list :
               updateListTargets();
 
-              this.om.fireObservationChanged();
+              om.fireObservationChanged();
             }
-          }
+          });
         }
       }
     }

@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationManager.java,v 1.12 2009-12-15 16:32:44 bourgesl Exp $"
+ * "@(#) $Id: ObservationManager.java,v 1.13 2010-01-04 15:42:47 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.12  2009/12/15 16:32:44  bourgesl
+ * added user PoP configuration based on PoP indices
+ *
  * Revision 1.11  2009/12/07 15:18:00  bourgesl
  * Load observation action now refreshes the observation form completely
  *
@@ -52,6 +55,7 @@ import fr.jmmc.aspro.model.oi.InterferometerConfigurationChoice;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.WhenSetting;
+import fr.jmmc.mcs.astro.star.Star;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
@@ -208,10 +212,7 @@ public class ObservationManager extends BaseOIManager {
     final FocalInstrumentConfigurationChoice instrumentChoice = getObservation().getInstrumentConfiguration();
 
     // pops can be null
-    boolean changed = (  (pops == null && instrumentChoice.getPops() != null)
-                      || (pops != null && instrumentChoice.getPops() == null)
-                      || !pops.equals(instrumentChoice.getPops())
-                      );
+    boolean changed = ((pops == null && instrumentChoice.getPops() != null) || (pops != null && instrumentChoice.getPops() == null) || !pops.equals(instrumentChoice.getPops()));
 
     if (changed) {
       instrumentChoice.setPops(pops);
@@ -243,21 +244,46 @@ public class ObservationManager extends BaseOIManager {
   /**
    * Add a target given its unique name
    * @param name target name
-   * @param ra right ascension in degrees
-   * @param dec declination in degrees
+   * @param star object
    * @return true if the target list changed
    */
-  public boolean addTarget(final String name, final double ra, final double dec) {
+  public boolean addTarget(final String name, final Star star) {
     boolean changed = false;
     if (name != null && name.length() > 0) {
       changed = (getTarget(name) == null);
       if (changed) {
         final Target t = new Target();
         t.setName(name);
-        t.setRA(ra);
-        t.setDEC(dec);
+
+        /*
+        Strings = {DEC=+43 49 23.910, RA=05 01 58.1341, OTYPELIST=**,Al*,SB*,*,Em*,V*,IR,UV, SPECTRALTYPES=A8Iab:}
+        Doubles = {PROPERMOTION_RA=0.18, PARALLAX=1.6, DEC_d=43.8233083, FLUX_J=1.88, PROPERMOTION_DEC=-2.31, FLUX_K=1.533, PARALLAX_err=1.16, FLUX_V=3.039, FLUX_H=1.702, RA_d=75.4922254}
+         */
+
+        // coordinates (deg) :
+        t.setRA(star.getPropertyAsDouble(Star.Property.RA_d).doubleValue());
+        t.setDEC(star.getPropertyAsDouble(Star.Property.DEC_d).doubleValue());
         t.setEQUINOX(AsproConstants.EPOCH_J2000);
-        // other fields (mag) ...
+
+        // Proper motion :
+        t.setPMRA(star.getPropertyAsDouble(Star.Property.PROPERMOTION_RA));
+        t.setPMDEC(star.getPropertyAsDouble(Star.Property.PROPERMOTION_DEC));
+
+        // Parallax :
+        t.setPARALLAX(star.getPropertyAsDouble(Star.Property.PARALLAX));
+        t.setPARAERR(star.getPropertyAsDouble(Star.Property.PARALLAX_err));
+
+        // Spectral type :
+        t.setSPECTYP(star.getPropertyAsString(Star.Property.SPECTRALTYPES));
+
+        // Magnitudes :
+        t.setFLUXV(star.getPropertyAsDouble(Star.Property.FLUX_V));
+        t.setFLUXI(star.getPropertyAsDouble(Star.Property.FLUX_I));
+        t.setFLUXJ(star.getPropertyAsDouble(Star.Property.FLUX_J));
+        t.setFLUXH(star.getPropertyAsDouble(Star.Property.FLUX_H));
+        t.setFLUXK(star.getPropertyAsDouble(Star.Property.FLUX_K));
+        t.setFLUXN(star.getPropertyAsDouble(Star.Property.FLUX_N));
+
         getObservation().getTargets().add(t);
       }
     }

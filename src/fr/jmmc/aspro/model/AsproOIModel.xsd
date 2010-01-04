@@ -266,7 +266,7 @@
 
 
 
-  <!-- OITarget -->
+  <!-- Target definition -->
   <xsd:complexType name="Target">
     <xsd:annotation>
       <xsd:documentation>
@@ -307,11 +307,99 @@
         </xsd:annotation>
       </xsd:element>
 
-<!-- other fields from OI TARGET -->
-<!-- velocity -->
+<!-- other fields from OIFits TARGET -->
+
+<!-- radial velocity : SYSVEL, VELDEF, VELTYP -->
+
 <!-- proper motion -->
+      <xsd:element name="PMRA" type="xsd:double" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>
+            Proper motion in R.A. (deg yr 1)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="PMDEC" type="xsd:double" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>
+            Proper motion in decl. (deg yr 1)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
 <!-- parallax -->
+      <xsd:element name="PARALLAX" type="xsd:double" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>
+            Parallax (deg)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="PARA_ERR" type="xsd:double" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>
+            Error in parallax (deg)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
 <!-- spectral type -->
+      <xsd:element name="SPECTYP" type="xsd:string" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>
+            Spectral type
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
+<!-- magnitudes -->
+      <xsd:element name="FLUX_V" type="xsd:double" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>
+            Flux magnitude in band V
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
+      <xsd:element name="FLUX_I" type="xsd:double" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>
+            Flux magnitude in band I
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
+      <xsd:element name="FLUX_J" type="xsd:double" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>
+            Flux magnitude in band J
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
+      <xsd:element name="FLUX_H" type="xsd:double" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>
+            Flux magnitude in band H
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
+      <xsd:element name="FLUX_K" type="xsd:double" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>
+            Flux magnitude in band K
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
+      <xsd:element name="FLUX_N" type="xsd:double" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>
+            Flux magnitude in band N
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
 
     </xsd:sequence>
   </xsd:complexType>
