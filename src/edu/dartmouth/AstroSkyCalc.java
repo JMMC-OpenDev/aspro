@@ -439,11 +439,20 @@ public class AstroSkyCalc {
   }
 
   /**
-   * Converts lst hours to jd hours
+   * Convert lst hours to jd hours
    * @param lst dec hours in LST
    * @return dec hours in JD
    */
   public static double lst2jd(final double lst) {
     return lst / AstroSkyCalc.LST_TO_JD;
+  }
+
+  /**
+   * Convert jd hours to lst hours
+   * @param jd dec hours
+   * @return dec hours in LST
+   */
+  public static double jd2lst(final double jd) {
+    return jd * AstroSkyCalc.LST_TO_JD;
   }
 }

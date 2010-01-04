@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.29 2009-12-18 14:49:31 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.30 2010-01-04 16:57:00 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.29  2009/12/18 14:49:31  bourgesl
+ * fixed NPE
+ *
  * Revision 1.28  2009/12/18 11:52:02  bourgesl
  * added Pops Finder Compatible Mode for a list of targets
  *
@@ -357,7 +360,7 @@ public class ObservabilityService {
 
     // PoPs : Compatible Mode if no user defined Pop Combination :
     if (this.hasPops && targets.size() > 1 && this.popCombinations.size() > 1) {
-      // Objective : find the pop combination that maximize the observability of the all list of target
+      // Objective : find the pop combination that maximize the observability of the complete list of target
 
       final PopCombination bestPopCombination = findCompatiblePoPs(targets);
 
@@ -520,7 +523,10 @@ public class ObservabilityService {
   private List<PopObservabilityData> findPoPsForTargetObservability(final Target target) {
 
     // Target coordinates precessed to jd and to get az/alt positions from JSkyCalc :
-    final double[] raDec = this.sc.defineTarget(jdLst0, target.getRA(), target.getDEC());
+    final double[] raDec = this.sc.defineTarget(this.jdLst0, target.getRA(), target.getDEC());
+
+    // target right ascension in decimal hours :
+    final double precRA = raDec[0];
 
     // target declination in degrees :
     final double precDEC = raDec[1];
@@ -537,7 +543,27 @@ public class ObservabilityService {
       // rise/set range :
       final Range rangeHARiseSet = new Range(-haElev, haElev);
 
-      popDataList = getPopObservabilityData(target.getName(), Math.toRadians(precDEC), rangeHARiseSet);
+      final List<Range> rangesTarget = new ArrayList<Range>(4);
+      rangesTarget.add(rangeHARiseSet);
+
+      if (this.useNightLimit) {
+        final List<Range> haNightLimits = new ArrayList<Range>(2);
+
+        Range rangeHA = null;
+        for (Range rangeJD : this.nightLimits) {
+          rangeHA = convertJDToHARange(rangeJD, precRA);
+          if (rangeHA != null) {
+            haNightLimits.add(rangeHA);
+          }
+        }
+
+        if (logger.isLoggable(Level.FINE)) {
+          logger.fine("HA night limits = " + haNightLimits);
+        }
+        rangesTarget.addAll(haNightLimits);
+      }
+
+      popDataList = getPopObservabilityData(target.getName(), Math.toRadians(precDEC), rangesTarget);
 
     } else {
       if (logger.isLoggable(Level.FINE)) {
@@ -558,7 +584,7 @@ public class ObservabilityService {
     this.data.getStarVisibilities().add(starObs);
 
     // Target coordinates precessed to jd and to get az/alt positions from JSkyCalc :
-    final double[] raDec = this.sc.defineTarget(jdLst0, target.getRA(), target.getDEC());
+    final double[] raDec = this.sc.defineTarget(this.jdLst0, target.getRA(), target.getDEC());
 
     // target right ascension in decimal hours :
     final double precRA = raDec[0];
@@ -580,7 +606,28 @@ public class ObservabilityService {
       if (this.hasPops) {
         // handle here all possible combinations for POPs :
         // keep only the POPs that maximize the DL+rise intersection ...
-        rangesHABaseLines = findHAIntervalsWithPops(Math.toRadians(precDEC), rangeHARiseSet, starObs);
+
+        final List<Range> rangesTarget = new ArrayList<Range>(4);
+        rangesTarget.add(rangeHARiseSet);
+
+        if (this.useNightLimit) {
+          final List<Range> haNightLimits = new ArrayList<Range>(2);
+
+          Range rangeHA = null;
+          for (Range rangeJD : this.nightLimits) {
+            rangeHA = convertJDToHARange(rangeJD, precRA);
+            if (rangeHA != null) {
+              haNightLimits.add(rangeHA);
+            }
+          }
+
+          if (logger.isLoggable(Level.FINE)) {
+            logger.fine("HA night limits = " + haNightLimits);
+          }
+          rangesTarget.addAll(haNightLimits);
+        }
+
+        rangesHABaseLines = findHAIntervalsWithPops(Math.toRadians(precDEC), rangesTarget, starObs);
 
       } else {
         // Get intervals (HA) compatible with all base lines :
@@ -594,7 +641,7 @@ public class ObservabilityService {
       }
 
       // convert HA range to JD range :
-      final Range rangeJDRiseSet = convertHARange(rangeHARiseSet, precRA);
+      final Range rangeJDRiseSet = convertHAToJDRange(rangeHARiseSet, precRA);
 
       // For now : only VLTI has horizon profiles :
       List<Range> rangesJDHz = null;
@@ -642,7 +689,7 @@ public class ObservabilityService {
 
             if (ranges != null) {
               for (Range range : ranges) {
-                obsRanges.add(convertHARange(range, precRA));
+                obsRanges.add(convertHAToJDRange(range, precRA));
               }
             }
             if (logger.isLoggable(Level.FINE)) {
@@ -675,7 +722,7 @@ public class ObservabilityService {
       for (List<Range> ranges : rangesHABaseLines) {
         if (ranges != null) {
           for (Range range : ranges) {
-            obsRanges.add(convertHARange(range, precRA));
+            obsRanges.add(convertHAToJDRange(range, precRA));
           }
         }
       }
@@ -731,16 +778,16 @@ public class ObservabilityService {
    * it finds the best PoP combination to maximize the HA interval (delay line + rise/set)
    *
    * @param dec target declination (rad)
-   * @param rangeHARiseSet HA range for target rise/set
+   * @param rangesTarget HA ranges for target rise/set and night limits
    * @param starObs star observability bean to set the final PoP combination
    * @return intervals (hour angles) or null if thread interrupted
    */
-  public List<List<Range>> findHAIntervalsWithPops(final double dec, final Range rangeHARiseSet, final StarObservability starObs) {
+  public List<List<Range>> findHAIntervalsWithPops(final double dec, final List<Range> rangesTarget, final StarObservability starObs) {
 
     // First Pass :
     // For all PoP combinations : find the HA interval merged with the HA Rise/set interval
     // list of observability data associated to a pop combination :
-    final List<PopObservabilityData> popDataList = getPopObservabilityData(starObs.getName(), dec, rangeHARiseSet);
+    final List<PopObservabilityData> popDataList = getPopObservabilityData(starObs.getName(), dec, rangesTarget);
 
     // Current pop observability :
     PopObservabilityData popData;
@@ -796,10 +843,10 @@ public class ObservabilityService {
    *
    * @param targetName name of the target
    * @param dec target declination (rad)
-   * @param rangeHARiseSet HA range for target rise/set
+   * @param rangesTarget HA ranges for target rise/set and night limits
    * @return intervals (hour angles) or null if thread interrupted
    */
-  public List<PopObservabilityData> getPopObservabilityData(final String targetName, final double dec, final Range rangeHARiseSet) {
+  public List<PopObservabilityData> getPopObservabilityData(final String targetName, final double dec, final List<Range> rangesTarget) {
 
     // For all PoP combinations : find the HA interval merged with the HA Rise/set interval
     // list of observability data associated to a pop combination :
@@ -869,10 +916,12 @@ public class ObservabilityService {
       if (!skip) {
         popData = new PopObservabilityData(targetName, popComb, new ArrayList<List<Range>>(rangesBL));
 
-        flatRanges.add(rangeHARiseSet);
+        flatRanges.addAll(rangesTarget);
 
-        // merge the baseline ranges with the rise / set :
-        popData.computeMaxLength(sizeBL + 1, flatRanges);
+        // note : rangesTarget contains both rise/set intervals + night limits in HA
+
+        // merge the baseline ranges with the target intervals :
+        popData.computeMaxLength(sizeBL + 1 + ((this.useNightLimit) ? 1 : 0), flatRanges);
 
         if (popData.getMaxLength() > 0d) {
           // skip pop solutions outside Rise/Set HA range :
@@ -1351,7 +1400,7 @@ public class ObservabilityService {
    * @param lstOffset right ascension (dec hours)
    * @return JD range
    */
-  private Range convertHARange(final Range rangeHA, final double lstOffset) {
+  private Range convertHAToJDRange(final Range rangeHA, final double lstOffset) {
 
     final double ha1 = rangeHA.getMin();
     final double ha2 = rangeHA.getMax();
@@ -1379,6 +1428,57 @@ public class ObservabilityService {
     }
 
     return new Range(jd1, jd2);
+  }
+
+  /**
+   * Convert a JD range to an HA range
+   * @param rangeJD given in hour angle (dec hours)
+   * @param lstOffset right ascension (dec hours)
+   * @return JD range
+   */
+  private Range convertJDToHARange(final Range rangeJD, final double lstOffset) {
+
+    final double jd1 = rangeJD.getMin();
+    final double jd2 = rangeJD.getMax();
+
+    if (logger.isLoggable(Level.FINEST)) {
+      logger.finest("jd1 = " + this.sc.toDate(jd1, true));
+      logger.finest("jd2 = " + this.sc.toDate(jd2, true));
+    }
+
+    // apply the sideral / solar ratio :
+    final double lst1 = AstroSkyCalc.jd2lst(jd1 - this.jdLst0);
+    final double lst2 = AstroSkyCalc.jd2lst(jd2 - this.jdLst0);
+
+    if (logger.isLoggable(Level.FINEST)) {
+      logger.finest("lst1 = " + lst1 + " h");
+      logger.finest("lst2 = " + lst2 + " h");
+    }
+
+    double ha1 = lst1 - lstOffset;
+    double ha2 = lst2 - lstOffset;
+
+    if (ha1 < -12d) {
+      ha1 = -12d;
+    }
+    if (ha1 > 12d) {
+      // invalid range :
+      return null;
+    }
+    if (ha2 < -12d) {
+      // invalid range :
+      return null;
+    }
+    if (ha2 > 12d) {
+      ha2 = 12d;
+    }
+
+    if (logger.isLoggable(Level.FINEST)) {
+      logger.finest("ha1 = " + ha1 + " h");
+      logger.finest("ha2 = " + ha2 + " h");
+    }
+
+    return new Range(ha1, ha2);
   }
 
   /**
