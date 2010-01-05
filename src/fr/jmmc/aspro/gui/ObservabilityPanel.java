@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityPanel.java,v 1.14 2009-12-16 16:47:24 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityPanel.java,v 1.15 2010-01-05 17:18:56 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.14  2009/12/16 16:47:24  bourgesl
+ * comments
+ *
  * Revision 1.13  2009/12/08 11:30:35  bourgesl
  * when an observation is loaded, reset plot options to defaults
  *
@@ -209,8 +212,6 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
 
     this.chartPanel.setDomainZoomable(ENABLE_ZOOM);
     this.chartPanel.setRangeZoomable(ENABLE_ZOOM);
-
-    this.setLayout(new BorderLayout());
 
     this.add(this.chartPanel, BorderLayout.CENTER);
 
@@ -507,7 +508,7 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
     }
 
     // set the main data set :
-    localXYPlot.setDataset(new XYTaskDataset(localTaskSeriesCollection));
+    this.localXYPlot.setDataset(new XYTaskDataset(localTaskSeriesCollection));
 
     // change the Domain axis (vertical) :
     final SymbolAxis localSymbolAxis = new SymbolAxis("", targetNames);
@@ -515,9 +516,9 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
     localSymbolAxis.setGridBandsVisible(false);
     localSymbolAxis.setAutoRange(false);
     localSymbolAxis.setRangeWithMargins(-1d, targetNames.length);
-    localXYPlot.setDomainAxis(localSymbolAxis);
+    this.localXYPlot.setDomainAxis(localSymbolAxis);
 
-    final XYBarRenderer localXYBarRenderer = (XYBarRenderer) localXYPlot.getRenderer();
+    final XYBarRenderer localXYBarRenderer = (XYBarRenderer) this.localXYPlot.getRenderer();
     // remove Annotations :
     localXYBarRenderer.removeAnnotations();
 
@@ -563,7 +564,7 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
 
   private void updateSunMarkers(final List<SunTimeInterval> intervals) {
     // remove Markers :
-    localXYPlot.clearRangeMarkers();
+    this.localXYPlot.clearRangeMarkers();
 
     // add the Markers :
     if (intervals != null) {
@@ -585,7 +586,7 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
         localIntervalMarker = new IntervalMarker(interval.getStartDate().getTime(),
                 interval.getEndDate().getTime(), col);
         localIntervalMarker.setAlpha(0.4f);
-        localXYPlot.addRangeMarker(localIntervalMarker, Layer.BACKGROUND);
+        this.localXYPlot.addRangeMarker(localIntervalMarker, Layer.BACKGROUND);
       }
     }
   }
@@ -596,11 +597,11 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
     if (logger.isLoggable(Level.FINE)) {
       switch (event.getType()) {
         case ChartProgressEvent.DRAWING_STARTED:
-          lastTime = System.currentTimeMillis();
+          this.lastTime = System.currentTimeMillis();
           break;
         case ChartProgressEvent.DRAWING_FINISHED:
           logger.fine("Drawing chart time : " + (System.currentTimeMillis() - lastTime) + " ms.");
-          lastTime = 0l;
+          this.lastTime = 0l;
           break;
         default:
       }
