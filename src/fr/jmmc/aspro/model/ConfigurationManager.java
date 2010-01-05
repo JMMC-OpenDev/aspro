@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ConfigurationManager.java,v 1.12 2009-12-15 16:32:44 bourgesl Exp $"
+ * "@(#) $Id: ConfigurationManager.java,v 1.13 2010-01-05 17:17:28 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.12  2009/12/15 16:32:44  bourgesl
+ * added user PoP configuration based on PoP indices
+ *
  * Revision 1.11  2009/12/11 16:37:32  bourgesl
  * added Pop field in observation form
  *
@@ -257,7 +260,6 @@ public class ConfigurationManager extends BaseOIManager {
       for (FocalInstrumentConfiguration ic : c.getInstruments()) {
         v.add(ic.getFocalInstrument().getName());
       }
-      Collections.sort(v);
     }
     return v;
   }
