@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: DelayLineService.java,v 1.7 2009-12-16 16:05:51 bourgesl Exp $"
+ * "@(#) $Id: DelayLineService.java,v 1.8 2010-01-05 17:17:50 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2009/12/16 16:05:51  bourgesl
+ * refactoring
+ *
  * Revision 1.6  2009/12/01 17:14:45  bourgesl
  * first try to add the pop configuration finder
  *
@@ -176,7 +179,7 @@ public class DelayLineService {
 
       ha = (ha1 + ha2) / 2d;
 
-      w = computeW(dec, baseLine, ha);
+      w = CalcUVW.computeW(dec, baseLine, ha);
 
       if (logger.isLoggable(Level.FINE)) {
         logger.fine("W(" + ha + ") = " + w);
@@ -308,26 +311,12 @@ public class DelayLineService {
       wValues = new double[2];
 
       for (int i = 0; i < 2; i++) {
-        wValues[i] = computeW(dec, baseLine, haValues[i]);
+        wValues[i] = CalcUVW.computeW(dec, baseLine, haValues[i]);
       }
 
     }
 
     return wValues;
-  }
-
-  /**
-   * Compute W(ha) = cos(D)(cos(H)*X-sin(H)*Y)+sin(D)*Z
-   */
-  public static double computeW(final double dec, final BaseLine baseLine, final double ha) {
-    return computeW(Math.cos(dec), Math.sin(dec), baseLine, ha);
-  }
-
-  /**
-   * Compute W(ha) = cos(D)(cos(H)*X-sin(H)*Y)+sin(D)*Z
-   */
-  public static double computeW(final double cosDec, final double sinDec, final BaseLine baseLine, final double ha) {
-    return cosDec * (Math.cos(ha) * baseLine.getX() - Math.sin(ha) * baseLine.getY()) + sinDec * baseLine.getZ();
   }
 
   /**
