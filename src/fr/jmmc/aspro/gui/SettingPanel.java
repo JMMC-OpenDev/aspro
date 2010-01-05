@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SettingPanel.java,v 1.9 2009-12-15 16:31:49 bourgesl Exp $"
+ * "@(#) $Id: SettingPanel.java,v 1.10 2010-01-05 17:19:29 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.9  2009/12/15 16:31:49  bourgesl
+ * added uv panel
+ *
  * Revision 1.8  2009/12/04 15:38:27  bourgesl
  * Added Save action in the menu bar
  *
@@ -127,11 +130,23 @@ public class SettingPanel extends JPanel implements ObservationListener {
         this.observabilityPanel.onProcess(type, observation);
       }
 
+      // UV coverage plot :
       if (this.uvpanel == null) {
-        /*
         this.uvpanel = new UVChartPanel();
-        this.tabs.addTab("UV coverage", this.uvpanel);
-         */
+      }
+
+      final boolean hasTarget = !observation.getTargets().isEmpty();
+
+      final int uvPanelIndex = this.tabs.indexOfComponent(this.uvpanel);
+
+      if (hasTarget) {
+        if (uvPanelIndex == -1) {
+          this.tabs.addTab("UV coverage", this.uvpanel);
+        }
+      } else {
+        if (uvPanelIndex != -1) {
+          this.tabs.removeTabAt(uvPanelIndex);
+        }
       }
     }
   }
