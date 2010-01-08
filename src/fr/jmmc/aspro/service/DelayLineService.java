@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: DelayLineService.java,v 1.8 2010-01-05 17:17:50 bourgesl Exp $"
+ * "@(#) $Id: DelayLineService.java,v 1.9 2010-01-08 16:51:17 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.8  2010/01/05 17:17:50  bourgesl
+ * added U,V,W computation
+ *
  * Revision 1.7  2009/12/16 16:05:51  bourgesl
  * refactoring
  *
@@ -33,6 +36,7 @@ package fr.jmmc.aspro.service;
 
 import fr.jmmc.aspro.model.BaseLine;
 import fr.jmmc.aspro.model.Range;
+import fr.jmmc.aspro.util.AngleUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -187,7 +191,7 @@ public class DelayLineService {
 
       if (w >= wMin && w <= wMax) {
         // this ha interval is valid :
-        ranges.add(new Range(rad2hours(ha1), rad2hours(ha2)));
+        ranges.add(new Range(AngleUtils.rad2hours(ha1), AngleUtils.rad2hours(ha2)));
       }
     }
 
@@ -374,10 +378,5 @@ public class DelayLineService {
     }
 
     return h0;
-  }
-
-  /* utility methods */
-  public static double rad2hours(final double angrad) {
-    return Math.toDegrees(angrad) / 15.0d;
   }
 }

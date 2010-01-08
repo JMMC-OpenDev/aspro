@@ -1,3 +1,12 @@
+/*******************************************************************************
+ * JMMC project
+ *
+ * "@(#) $Id: SunAlmanachTime.java,v 1.2 2010-01-08 16:51:18 bourgesl Exp $"
+ *
+ * History
+ * -------
+ * $Log: not supported by cvs2svn $
+ */
 package edu.dartmouth;
 
 /**

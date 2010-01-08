@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SettingPanel.java,v 1.10 2010-01-05 17:19:29 bourgesl Exp $"
+ * "@(#) $Id: SettingPanel.java,v 1.11 2010-01-08 16:51:17 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.10  2010/01/05 17:19:29  bourgesl
+ * updated basic UV panel
+ *
  * Revision 1.9  2009/12/15 16:31:49  bourgesl
  * added uv panel
  *
@@ -57,8 +60,7 @@ public class SettingPanel extends JPanel implements ObservationListener {
   /** observability panel */
   private ObservabilityPanel observabilityPanel = null;
   /** uv coverage panel */
-  private UVChartPanel uvpanel = null;
-
+  private asprogui uvpanel = null;
 
   /** Creates new form SettingPanel */
   public SettingPanel() {
@@ -100,7 +102,7 @@ public class SettingPanel extends JPanel implements ObservationListener {
     // register this as an observation listener :
     ObservationManager.getInstance().register(this);
 
-    // add the observation form that will send an onChange event on the current observation :
+    // add the observation form that will send an onProcess event on the current observation :
     this.observationForm = new BasicObservationForm();
     this.jSplitPane1.setLeftComponent(observationForm);
   }
@@ -119,33 +121,43 @@ public class SettingPanel extends JPanel implements ObservationListener {
   public void onProcess(final ObservationEventType type, final ObservationSetting observation) {
     if (type == ObservationEventType.CHANGED) {
       if (logger.isLoggable(Level.FINE)) {
-        logger.fine("onChange occured : " + observation.getName());
+        logger.fine("onChange occured : " + ObservationManager.toString(observation));
       }
 
       if (this.observabilityPanel == null) {
         this.observabilityPanel = new ObservabilityPanel();
         this.tabs.addTab("Observability", this.observabilityPanel);
 
-        // first time, the onChange event must be propagated to the new registered listener :
+        // first time, the onProcess event must be propagated to the new registered listener :
         this.observabilityPanel.onProcess(type, observation);
       }
 
       // UV coverage plot :
-      if (this.uvpanel == null) {
-        this.uvpanel = new UVChartPanel();
-      }
-
       final boolean hasTarget = !observation.getTargets().isEmpty();
 
-      final int uvPanelIndex = this.tabs.indexOfComponent(this.uvpanel);
+      int uvPanelIndex = -1;
+      if (this.uvpanel != null) {
+        uvPanelIndex = this.tabs.indexOfComponent(this.uvpanel);
+      }
 
       if (hasTarget) {
         if (uvPanelIndex == -1) {
+          this.uvpanel = new asprogui();
+
           this.tabs.addTab("UV coverage", this.uvpanel);
+
+          // first time, the onProcess event must be propagated to the new registered listener :
+          this.uvpanel.onProcess(type, observation);
         }
       } else {
         if (uvPanelIndex != -1) {
+          // remove the uv panel :
           this.tabs.removeTabAt(uvPanelIndex);
+
+          // unregister the uv panel :
+          ObservationManager.getInstance().unregister(this.uvpanel);
+
+          this.uvpanel = null;
         }
       }
     }

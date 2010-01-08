@@ -393,12 +393,22 @@
       <name>VEGA_2T</name>
       <description></description>
       <numberChannels>2</numberChannels>
+      <mode>
+        <name>default</name>
+        <waveLengthMin>0.48</waveLengthMin>
+        <waveLengthMax>0.82</waveLengthMax>
+      </mode>
     </focalInstrument>
 
     <focalInstrument>
       <name>VEGA_3T</name>
       <description></description>
       <numberChannels>3</numberChannels>
+      <mode>
+        <name>default</name>
+        <waveLengthMin>0.48</waveLengthMin>
+        <waveLengthMax>0.82</waveLengthMax>
+      </mode>
     </focalInstrument>
 
     <focalInstrument>

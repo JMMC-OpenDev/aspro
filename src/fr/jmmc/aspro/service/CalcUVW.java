@@ -1,11 +1,13 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: CalcUVW.java,v 1.1 2010-01-05 17:17:50 bourgesl Exp $"
+ * "@(#) $Id: CalcUVW.java,v 1.2 2010-01-08 16:51:17 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2010/01/05 17:17:50  bourgesl
+ * added U,V,W computation
  */
 package fr.jmmc.aspro.service;
 

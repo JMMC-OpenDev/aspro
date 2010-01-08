@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.30 2010-01-04 16:57:00 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.31 2010-01-08 16:51:17 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.30  2010/01/04 16:57:00  bourgesl
+ * modified best PoPs algorithm to take into account the night limits
+ *
  * Revision 1.29  2009/12/18 14:49:31  bourgesl
  * fixed NPE
  *
@@ -107,15 +110,16 @@ import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.BaseLine;
 import fr.jmmc.aspro.model.Beam;
 import fr.jmmc.aspro.model.ConfigurationManager;
-import fr.jmmc.aspro.model.DateTimeInterval;
-import fr.jmmc.aspro.model.ObservabilityData;
+import fr.jmmc.aspro.model.observability.DateTimeInterval;
+import fr.jmmc.aspro.model.observability.ObservabilityData;
 import fr.jmmc.aspro.model.ObservationManager;
-import fr.jmmc.aspro.model.PopCombination;
-import fr.jmmc.aspro.model.GroupedPopObservabilityData;
-import fr.jmmc.aspro.model.PopObservabilityData;
+import fr.jmmc.aspro.model.observability.PopCombination;
+import fr.jmmc.aspro.model.observability.GroupedPopObservabilityData;
+import fr.jmmc.aspro.model.observability.PopObservabilityData;
 import fr.jmmc.aspro.model.Range;
-import fr.jmmc.aspro.model.StarObservability;
-import fr.jmmc.aspro.model.SunTimeInterval;
+import fr.jmmc.aspro.model.observability.StarData;
+import fr.jmmc.aspro.model.observability.StarObservabilityData;
+import fr.jmmc.aspro.model.observability.SunTimeInterval;
 import fr.jmmc.aspro.model.oi.AzEl;
 import fr.jmmc.aspro.model.oi.Channel;
 import fr.jmmc.aspro.model.oi.ChannelLink;
@@ -202,7 +206,8 @@ public class ObservabilityService {
   private List<PopCombination> popCombinations = null;
 
   /**
-   * This service is statefull so it can not be reused by several calls
+   * Constructor.
+   * Note : This service is statefull so it can not be reused by several calls.
    *
    * @param observation observation settings
    * @param minElev minimum of elevation to observe any target (rad)
@@ -224,14 +229,11 @@ public class ObservabilityService {
   /**
    * Main operation to determine the source observability for a given interferometer configuration
    *
-   * @param observation observation settings
-   * @param useLst true indicates to return date/time values in LST, false to use UTC reference
-   * @param minElev minimum elevation (rad)
    * @return ObservabilityData container
    */
-  public ObservabilityData calcObservability() {
+  public ObservabilityData compute() {
     if (logger.isLoggable(Level.FINE)) {
-      logger.fine("start : " + this.observation);
+      logger.fine("compute : " + this.observation);
     }
 
     // Start the computations :
@@ -331,7 +333,7 @@ public class ObservabilityService {
         if (logger.isLoggable(Level.FINE)) {
           logger.fine("Star observability intervals : ");
 
-          for (StarObservability so : this.data.getStarVisibilities()) {
+          for (StarObservabilityData so : this.data.getStarVisibilities()) {
             logger.fine(so.toString());
           }
         }
@@ -339,14 +341,14 @@ public class ObservabilityService {
       }
 
     } catch (RuntimeException re) {
-      logger.log(Level.SEVERE, "calcObservability failure :", re);
-      logger.log(Level.SEVERE, "observation :" + ObservationManager.getInstance().toString(this.observation));
+      logger.log(Level.SEVERE, "compute failure :", re);
+      logger.log(Level.SEVERE, "observation : " + ObservationManager.toString(this.observation));
       // clear invalid data :
       this.data = null;
     }
 
     if (logger.isLoggable(Level.INFO)) {
-      logger.info("calcObservability : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
+      logger.info("compute : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
     }
 
     return this.data;
@@ -525,10 +527,10 @@ public class ObservabilityService {
     // Target coordinates precessed to jd and to get az/alt positions from JSkyCalc :
     final double[] raDec = this.sc.defineTarget(this.jdLst0, target.getRA(), target.getDEC());
 
-    // target right ascension in decimal hours :
+    // precessed target right ascension in decimal hours :
     final double precRA = raDec[0];
 
-    // target declination in degrees :
+    // precessed target declination in degrees :
     final double precDEC = raDec[1];
 
     // Find LST range corresponding to the rise / set of the target :
@@ -579,21 +581,29 @@ public class ObservabilityService {
    */
   private void findTargetObservability(final Target target) {
 
-    final StarObservability starObs = new StarObservability(target.getName());
+    final StarObservabilityData starObs = new StarObservabilityData(target.getName());
     // add the result to have also unobservable targets :
     this.data.getStarVisibilities().add(starObs);
+
+    final StarData starData = new StarData(target.getName());
+    this.data.addStarData(starData);
 
     // Target coordinates precessed to jd and to get az/alt positions from JSkyCalc :
     final double[] raDec = this.sc.defineTarget(this.jdLst0, target.getRA(), target.getDEC());
 
-    // target right ascension in decimal hours :
+    // precessed target right ascension in decimal hours :
     final double precRA = raDec[0];
 
-    // target declination in degrees :
+    // precessed target declination in degrees :
     final double precDEC = raDec[1];
 
     // Find LST range corresponding to the rise / set of the target :
     final double haElev = this.sc.getHAForElevation(precDEC, this.minElev);
+
+    // update Star Data :
+    starData.setPrecRA(precRA);
+    starData.setPrecDEC(precDEC);
+    starData.setHaElev(haElev);
 
     // target rise :
     if (haElev > 0d) {
@@ -663,14 +673,14 @@ public class ObservabilityService {
         final String prefix = starObs.getName() + " ";
 
         // Add Rise/Set :
-        final StarObservability soRiseSet = new StarObservability(target.getName() + " Rise/Set");
+        final StarObservabilityData soRiseSet = new StarObservabilityData(target.getName() + " Rise/Set");
         this.data.getStarVisibilities().add(soRiseSet);
 
         convertRangeToDateInterval(rangeJDRiseSet, soRiseSet.getVisible());
 
         if (rangesJDHz != null) {
           // Add Horizon :
-          final StarObservability soHz = new StarObservability(target.getName() + " Horizon");
+          final StarObservabilityData soHz = new StarObservabilityData(target.getName() + " Horizon");
           this.data.getStarVisibilities().add(soHz);
 
           for (Range range : rangesJDHz) {
@@ -682,7 +692,7 @@ public class ObservabilityService {
         if (!rangesHABaseLines.isEmpty()) {
           BaseLine baseLine;
           List<Range> ranges;
-          StarObservability soBl;
+          StarObservabilityData soBl;
           for (int i = 0, size = this.baseLines.size(); i < size; i++) {
             baseLine = this.baseLines.get(i);
             ranges = rangesHABaseLines.get(i);
@@ -697,7 +707,7 @@ public class ObservabilityService {
               logger.fine("JD ranges  : " + obsRanges);
             }
 
-            soBl = new StarObservability(prefix + baseLine.getName());
+            soBl = new StarObservabilityData(prefix + baseLine.getName());
             this.data.getStarVisibilities().add(soBl);
 
             for (Range range : obsRanges) {
@@ -730,7 +740,7 @@ public class ObservabilityService {
       if (rangesJDHz != null) {
         obsRanges.addAll(rangesJDHz);
       } else {
-        // TODO : Check Shadowing for every stations ?
+        // Check Shadowing for every stations ?
 
         obsRanges.add(rangeJDRiseSet);
       }
@@ -761,6 +771,22 @@ public class ObservabilityService {
            * can have a discontinuity on the LST/UTC axis !
            */
         }
+
+        // update Star Data :
+        final List<Range> haObsRanges = new ArrayList<Range>(2);
+
+        Range rangeHA = null;
+        for (Range rangeJD : finalRanges) {
+          rangeHA = convertJDToHARange(rangeJD, precRA);
+          if (rangeHA != null) {
+            haObsRanges.add(rangeHA);
+          }
+        }
+
+        if (logger.isLoggable(Level.FINE)) {
+          logger.fine("HA observability = " + haObsRanges);
+        }
+        starData.setObsRangesHA(haObsRanges);
       }
 
     } else {
@@ -782,7 +808,7 @@ public class ObservabilityService {
    * @param starObs star observability bean to set the final PoP combination
    * @return intervals (hour angles) or null if thread interrupted
    */
-  public List<List<Range>> findHAIntervalsWithPops(final double dec, final List<Range> rangesTarget, final StarObservability starObs) {
+  public List<List<Range>> findHAIntervalsWithPops(final double dec, final List<Range> rangesTarget, final StarObservabilityData starObs) {
 
     // First Pass :
     // For all PoP combinations : find the HA interval merged with the HA Rise/set interval
@@ -1310,6 +1336,8 @@ public class ObservabilityService {
         this.wRanges.add(new Range(wMin, wMax));
       }
     }
+
+    this.data.setBaseLines(this.baseLines);
   }
 
   /**
@@ -1431,7 +1459,7 @@ public class ObservabilityService {
   }
 
   /**
-   * Convert a JD range to an HA range
+   * Convert a JD range to an HA range but keep only ranges with an HA in [-12;12]
    * @param rangeJD given in hour angle (dec hours)
    * @param lstOffset right ascension (dec hours)
    * @return JD range

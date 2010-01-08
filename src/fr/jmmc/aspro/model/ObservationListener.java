@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationListener.java,v 1.2 2009-12-04 15:38:27 bourgesl Exp $"
+ * "@(#) $Id: ObservationListener.java,v 1.3 2010-01-08 16:51:17 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2009/12/04 15:38:27  bourgesl
+ * Added Save action in the menu bar
+ *
  * Revision 1.1  2009/11/03 16:57:55  bourgesl
  * added observability plot with LST/UTC support containing only day/night/twilight zones
  *
@@ -26,7 +29,9 @@ public interface ObservationListener {
     /** one or more attribute(s) changed */
     CHANGED,
     /** the observation was loaded */
-    LOADED
+    LOADED,
+    /** the observability was computed */
+    OBSERVABILITY_DONE
   }
 
   /**

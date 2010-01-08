@@ -214,6 +214,18 @@ public class ObservationSetting
     
 //--simple--preserve
 
+  /** computed observability data (read only) */
+  @javax.xml.bind.annotation.XmlTransient
+  private fr.jmmc.aspro.model.observability.ObservabilityData observabilityData = null;
+
+  public fr.jmmc.aspro.model.observability.ObservabilityData getObservabilityData() {
+    return observabilityData;
+  }
+
+  public void setObservabilityData(final fr.jmmc.aspro.model.observability.ObservabilityData obsData) {
+    this.observabilityData = obsData;
+  }
+
   @Override
   public String toString() {
     return "Observation : " + ((this.name != null) ? this.name : "undefined");

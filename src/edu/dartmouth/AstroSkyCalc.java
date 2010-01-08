@@ -1,6 +1,11 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+/*******************************************************************************
+ * JMMC project
+ *
+ * "@(#) $Id: AstroSkyCalc.java,v 1.15 2010-01-08 16:51:18 bourgesl Exp $"
+ *
+ * History
+ * -------
+ * $Log: not supported by cvs2svn $
  */
 package edu.dartmouth;
 
@@ -8,6 +13,7 @@ import edu.dartmouth.SunAlmanachTime.SunAlmanachType;
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.oi.AzEl;
 import fr.jmmc.aspro.model.oi.LonLatAlt;
+import fr.jmmc.aspro.util.AngleUtils;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -59,7 +65,7 @@ public class AstroSkyCalc {
 
     // note : the given longitude is hours west in jSkyCalc :
     this.site = new Site(name,
-            -rad2hours(position.getLongitude()),
+            -AngleUtils.rad2hours(position.getLongitude()),
             Math.toDegrees(position.getLatitude()),
             position.getAltitude());
 
@@ -352,7 +358,7 @@ public class AstroSkyCalc {
   public double[] defineTarget(final double jdLst0, final double ra, final double dec) {
 
     // RA (decimal hours), DEC (degrees)
-    final Celest target = new Celest(deg2hours(ra), dec, AsproConstants.EPOCH_J2000);
+    final Celest target = new Celest(AngleUtils.deg2hours(ra), dec, AsproConstants.EPOCH_J2000);
 
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("Target [RA/DEC/EPOCH] :" + target.checkstring());
@@ -423,19 +429,6 @@ public class AstroSkyCalc {
     }
 
     return ha;
-  }
-
-  /* utility methods */
-  public static double rad2hours(final double angrad) {
-    return Math.toDegrees(angrad) / 15.0d;
-  }
-
-  public static double deg2hours(final double angdeg) {
-    return angdeg / 15.0d;
-  }
-
-  public static double deg2rad(final double angdeg) {
-    return Math.toRadians(angdeg);
   }
 
   /**

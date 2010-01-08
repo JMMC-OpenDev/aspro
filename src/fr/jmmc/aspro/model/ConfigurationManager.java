@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ConfigurationManager.java,v 1.13 2010-01-05 17:17:28 bourgesl Exp $"
+ * "@(#) $Id: ConfigurationManager.java,v 1.14 2010-01-08 16:51:17 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.13  2010/01/05 17:17:28  bourgesl
+ * instruments are no more sorted in UI
+ *
  * Revision 1.12  2009/12/15 16:32:44  bourgesl
  * added user PoP configuration based on PoP indices
  *
@@ -53,6 +56,7 @@ package fr.jmmc.aspro.model;
 import fr.jmmc.aspro.model.oi.Configurations;
 import fr.jmmc.aspro.model.oi.FocalInstrumentConfiguration;
 import fr.jmmc.aspro.model.oi.FocalInstrumentConfigurationItem;
+import fr.jmmc.aspro.model.oi.FocalInstrumentMode;
 import fr.jmmc.aspro.model.oi.InterferometerConfiguration;
 import fr.jmmc.aspro.model.oi.InterferometerDescription;
 import fr.jmmc.aspro.model.oi.InterferometerSetting;
@@ -220,7 +224,6 @@ public class ConfigurationManager extends BaseOIManager {
     return v;
   }
 
-
   public StationLinks getStationLinks(final InterferometerDescription id, final Station station) {
     if (id.getSwitchyard() != null) {
       for (StationLinks sl : id.getSwitchyard().getStationLinks()) {
@@ -242,7 +245,6 @@ public class ConfigurationManager extends BaseOIManager {
   }
 
   /** InterferometerConfiguration */
-
   public Map<String, InterferometerConfiguration> getInterferometerConfigurations() {
     return interferometerConfigurations;
   }
@@ -250,7 +252,6 @@ public class ConfigurationManager extends BaseOIManager {
   public InterferometerConfiguration getInterferometerConfiguration(final String name) {
     return interferometerConfigurations.get(name);
   }
-
 
   public Vector<String> getInterferometerInstrumentNames(final String configurationName) {
     final Vector<String> v = new Vector<String>();
@@ -286,6 +287,32 @@ public class ConfigurationManager extends BaseOIManager {
       }
     }
     return v;
+  }
+
+  public Vector<String> getInstrumentModes(final String configurationName, final String instrumentName) {
+    final Vector<String> v = new Vector<String>();
+
+    final FocalInstrumentConfiguration ic = getInterferometerInstrumentConfiguration(configurationName, instrumentName);
+    if (ic != null) {
+      for (FocalInstrumentMode m : ic.getFocalInstrument().getModes()) {
+        v.add(m.getName());
+      }
+    }
+    return v;
+  }
+
+  public FocalInstrumentMode getInstrumentMode(final String configurationName, final String instrumentName, final String instrumentMode) {
+    final Vector<String> v = new Vector<String>();
+
+    final FocalInstrumentConfiguration ic = getInterferometerInstrumentConfiguration(configurationName, instrumentName);
+    if (ic != null) {
+      for (FocalInstrumentMode m : ic.getFocalInstrument().getModes()) {
+        if (m.getName().equals(instrumentMode)) {
+          return m;
+        }
+      }
+    }
+    return null;
   }
 
   public List<Station> getInstrumentConfigurationStations(final String configurationName, final String instrumentName, final String instrumentConfigurationName) {

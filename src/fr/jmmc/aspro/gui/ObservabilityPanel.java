@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityPanel.java,v 1.15 2010-01-05 17:18:56 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityPanel.java,v 1.16 2010-01-08 16:51:17 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.15  2010/01/05 17:18:56  bourgesl
+ * syntax changes
+ *
  * Revision 1.14  2009/12/16 16:47:24  bourgesl
  * comments
  *
@@ -54,19 +57,19 @@
 package fr.jmmc.aspro.gui;
 
 import fr.jmmc.aspro.AsproConstants;
-import fr.jmmc.aspro.model.DateTimeInterval;
-import fr.jmmc.aspro.model.ObservabilityData;
+import fr.jmmc.aspro.gui.chart.ChartUtils;
+import fr.jmmc.aspro.model.observability.DateTimeInterval;
+import fr.jmmc.aspro.model.observability.ObservabilityData;
 import fr.jmmc.aspro.model.ObservationListener;
 import fr.jmmc.aspro.model.ObservationManager;
-import fr.jmmc.aspro.model.StarObservability;
-import fr.jmmc.aspro.model.SunTimeInterval;
+import fr.jmmc.aspro.model.observability.StarObservabilityData;
+import fr.jmmc.aspro.model.observability.SunTimeInterval;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.service.ObservabilityService;
 import fr.jmmc.mcs.gui.StatusBar;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FlowLayout;
-import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -100,7 +103,6 @@ import org.jfree.chart.plot.IntervalMarker;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYBarRenderer;
-import org.jfree.chart.title.TextTitle;
 import org.jfree.data.gantt.Task;
 import org.jfree.data.gantt.TaskSeries;
 import org.jfree.data.gantt.TaskSeriesCollection;
@@ -121,10 +123,6 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
   /** Class logger */
   private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
-  /** debug flag : enables the zoom in / out */
-  private static boolean ENABLE_ZOOM = true;
-  /** The default font for titles. */
-  private static final Font DEFAULT_TITLE_FONT = new Font("SansSerif", Font.BOLD, 14);
 
   /* time references */
   /** LST time reference */
@@ -133,8 +131,6 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
   private static final String TIME_UTC = "UTC";
 
   /* default plot options */
-  /** default minimum elevation = 20 degrees */
-  private static final double DEFAULT_MIN_ELEVATION = 20d;
   /** default value for checkbox Night Limit = true */
   private static final boolean DEFAULT_USE_NIGHT_LIMITS = true;
   /** default value for the checkbox BaseLine Limits */
@@ -191,7 +187,7 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
     }
 
     this.localJFreeChart = createChart();
-    this.localXYPlot = (XYPlot) localJFreeChart.getPlot();
+    this.localXYPlot = (XYPlot) this.localJFreeChart.getPlot();
 
     // add listener :
     this.localJFreeChart.addProgressListener(this);
@@ -203,15 +199,8 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
             true, /* use buffer */
             false, true, false, false, false);
 
-    /*
-    public ChartPanel(JFreeChart chart, int width, int height,
-    int minimumDrawWidth, int minimumDrawHeight, int maximumDrawWidth,
-    int maximumDrawHeight, boolean useBuffer, boolean properties,
-    boolean save, boolean print, boolean zoom, boolean tooltips)
-     */
-
-    this.chartPanel.setDomainZoomable(ENABLE_ZOOM);
-    this.chartPanel.setRangeZoomable(ENABLE_ZOOM);
+    this.chartPanel.setDomainZoomable(AsproConstants.ENABLE_ZOOM);
+    this.chartPanel.setRangeZoomable(AsproConstants.ENABLE_ZOOM);
 
     this.add(this.chartPanel, BorderLayout.CENTER);
 
@@ -221,7 +210,7 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
 
     this.jFieldMinElev = new JFormattedTextField(NumberFormat.getNumberInstance());
     this.jFieldMinElev.setColumns(3);
-    this.jFieldMinElev.setValue(DEFAULT_MIN_ELEVATION);
+    this.jFieldMinElev.setValue(AsproConstants.DEFAULT_MIN_ELEVATION);
     this.jFieldMinElev.addPropertyChangeListener("value", new PropertyChangeListener() {
 
       public void propertyChange(final PropertyChangeEvent evt) {
@@ -229,7 +218,7 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
 
         if (minElevNew < 0d || minElevNew >= 90d) {
           // invalid value :
-          jFieldMinElev.setValue(DEFAULT_MIN_ELEVATION);
+          jFieldMinElev.setValue(AsproConstants.DEFAULT_MIN_ELEVATION);
         }
         refreshPlot();
       }
@@ -300,7 +289,7 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
       // first disable the automatic refresh from field changes :
       this.doAutoRefresh = false;
 
-      this.jFieldMinElev.setValue(DEFAULT_MIN_ELEVATION);
+      this.jFieldMinElev.setValue(AsproConstants.DEFAULT_MIN_ELEVATION);
 
       this.jComboTimeRef.setSelectedItem(TIME_LST);
 
@@ -322,6 +311,8 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
     final JFreeChart localJFreeChart = ChartFactory.createXYBarChart("", null, false, null, null, PlotOrientation.HORIZONTAL, false, false, false);
 
     final XYPlot localXYPlot = (XYPlot) localJFreeChart.getPlot();
+    localXYPlot.setNoDataMessage("NO DATA");
+
     localXYPlot.setDomainPannable(false);
     localXYPlot.setRangePannable(false);
 
@@ -354,13 +345,13 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
     switch (type) {
       case CHANGED:
         if (logger.isLoggable(Level.FINE)) {
-          logger.fine("onChange occured : " + observation.getName());
+          logger.fine("onChange occured : " + ObservationManager.toString(observation));
         }
         this.plot(observation);
         break;
       case LOADED:
         if (logger.isLoggable(Level.FINE)) {
-          logger.fine("onLoad occured : " + observation.getName());
+          logger.fine("onLoad occured : " + ObservationManager.toString(observation));
         }
         resetOptions();
         break;
@@ -368,9 +359,14 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
     }
   }
 
+  /**
+   * Plot the observability using a SwingWorker to do the computation in the background.
+   * This code is executed by the Swing Event Dispatcher thread (EDT)
+   * @param observation observation data to use
+   */
   protected void plot(final ObservationSetting observation) {
     if (logger.isLoggable(Level.FINE)) {
-      logger.fine("plot : " + observation);
+      logger.fine("plot : " + ObservationManager.toString(observation));
     }
 
     /* get plot options from swing components */
@@ -401,53 +397,63 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
        */
       @Override
       public ObservabilityData doInBackground() {
-        logger.fine("SwingWorker.doInBackground : IN");
+        logger.fine("SwingWorker[Observability].doInBackground : IN");
 
-        ObservabilityData data = new ObservabilityService(observation, minElev, useNightLimit, useLST, doDetailedOutput, doBaseLineLimits).calcObservability();
+        ObservabilityData obsData = null;
+
+        // first reset the observability data in the current observation :
+        ObservationManager.getInstance().setObservabilityData(null);
+
+        // compute the observability data with the UI parameters :
+        obsData = new ObservabilityService(observation, minElev, useNightLimit, useLST, doDetailedOutput, doBaseLineLimits).compute();
 
         if (isCancelled()) {
-          logger.fine("SwingWorker.doInBackground : CANCELLED");
+          logger.fine("SwingWorker[Observability].doInBackground : CANCELLED");
           // no result if task is cancelled :
-          data = null;
+          obsData = null;
         } else {
-          logger.fine("SwingWorker.doInBackground : OUT");
+          logger.fine("SwingWorker[Observability].doInBackground : OUT");
         }
-        return data;
+        return obsData;
       }
 
       /**
-       * Refresh the plot using the computed observability data
+       * Refresh the plot using the computed observability data.
+       * This code is executed by the Swing Event Dispatcher thread (EDT)
        */
       @Override
       public void done() {
+        // check if the worker was cancelled :
         if (!isCancelled()) {
-          logger.fine("SwingWorker.done : IN");
+          logger.fine("SwingWorker[Observability].done : IN");
           try {
             // Get the computation results with all data necessary to draw the plot :
-            final ObservabilityData data = get();
+            final ObservabilityData obsData = get();
 
-            if (data != null) {
-              // update the status bar :
-              StatusBar.show("observability done.");
+            if (obsData != null) {
+              logger.fine("SwingWorker[Observability].done : refresh Chart");
+
+              // update the observability data in the current observation :
+              ObservationManager.getInstance().setObservabilityData(obsData);
 
               localJFreeChart.clearSubtitles();
 
               final String title = observation.getInterferometerConfiguration().getName() +
                       " - " + observation.getInstrumentConfiguration().getStations();
 
-              localJFreeChart.addSubtitle(new TextTitle(title, DEFAULT_TITLE_FONT));
+              ChartUtils.addSubtitle(localJFreeChart, title);
 
               if (useNightLimit || !useLST) {
                 // date :
-                localJFreeChart.addSubtitle(new TextTitle("Day : " + observation.getWhen().getDate().toString(), DEFAULT_TITLE_FONT));
+                ChartUtils.addSubtitle(localJFreeChart, "Day : " + observation.getWhen().getDate().toString());
               }
 
               // computed data are valid :
-              updateChart(data.getStarVisibilities(), data.getDateMin(), data.getDateMax());
+              updateChart(obsData.getStarVisibilities(), obsData.getDateMin(), obsData.getDateMax());
 
-              updateDateAxis((useLST) ? "LST" : "UTC", data.getDateMin(), data.getDateMax());
+              updateDateAxis((useLST) ? "LST" : "UTC", obsData.getDateMin(), obsData.getDateMax());
 
-              updateSunMarkers(data.getSunIntervals());
+              updateSunMarkers(obsData.getSunIntervals());
 
               // update theme at end :
               ChartUtilities.applyCurrentTheme(localJFreeChart);
@@ -457,30 +463,37 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
           } catch (ExecutionException ee) {
             logger.log(Level.SEVERE, "Error : ", ee);
           }
-          logger.fine("SwingWorker.done : OUT");
+
+          // update the status bar :
+          StatusBar.show("observability done.");
+
+          logger.fine("SwingWorker[Observability].done : OUT");
         }
       }
     };
 
-    if (this.currentWorker != null && !this.currentWorker.isDone()) {
-      // interrupt if running :
-      this.currentWorker.cancel(true);
-    }
-    // memorize the reference to the new worker before execution :
-    this.currentWorker = worker;
-
     // update the status bar :
     StatusBar.show("computing observability ... (please wait, this may take a while)");
+
+    // first, cancel the current running worker :
+    if (this.currentWorker != null) {
+      // note : if the worker was previously cancelled, it has no effect.
+      // interrupt the thread to have Thread.isInterrupted() == true :
+      this.currentWorker.cancel(true);
+    }
+
+    // memorize the reference to the new worker before execution :
+    this.currentWorker = worker;
 
     // start the new worker :
     worker.execute();
   }
 
   /**
-   * Update the dataset and the symbol axis given the star observability data
+   * Update the datasets and the symbol axis given the star observability data
    * @param starVis star observability data
    */
-  private void updateChart(final List<StarObservability> starVis, final Date min, final Date max) {
+  private void updateChart(final List<StarObservabilityData> starVis, final Date min, final Date max) {
     final String[] targetNames = new String[starVis.size()];
 
     final TaskSeriesCollection localTaskSeriesCollection = new TaskSeriesCollection();
@@ -490,11 +503,12 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
     String name;
     TaskSeries taskSeries;
     Task task;
-    for (StarObservability so : starVis) {
+    for (StarObservabilityData so : starVis) {
       name = so.getName();
       // use the target name as the name of the serie :
       targetNames[i++] = name;
       taskSeries = new TaskSeries(name);
+      taskSeries.setNotify(false);
 
       j = 1;
 
@@ -504,6 +518,7 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
         j++;
       }
 
+      taskSeries.setNotify(true);
       localTaskSeriesCollection.add(taskSeries);
     }
 
@@ -524,11 +539,11 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
 
     if (!this.jCheckBoxBaseLineLimits.isSelected()) {
       // add the Annotations :
-      // 24h date formatter :
+      // 24h date formatter like in france :
       final DateFormat df = DateFormat.getTimeInstance(DateFormat.SHORT, Locale.FRANCE);
 
       i = 0;
-      for (StarObservability so : starVis) {
+      for (StarObservabilityData so : starVis) {
 
         for (DateTimeInterval interval : so.getVisible()) {
 

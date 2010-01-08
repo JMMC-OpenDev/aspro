@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BasicObservationForm.java,v 1.14 2010-01-04 15:42:47 bourgesl Exp $"
+ * "@(#) $Id: BasicObservationForm.java,v 1.15 2010-01-08 16:51:17 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.14  2010/01/04 15:42:47  bourgesl
+ * added missing fields in Target : proper motion, parallax, magnitudes and spectral types (cds raw data)
+ *
  * Revision 1.13  2009/12/18 14:50:11  bourgesl
  * check StarResolverWidget notification to process only valid CDS star results
  *
@@ -548,7 +551,7 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
   public void onProcess(final ObservationEventType type, final ObservationSetting observation) {
     if (type == ObservationEventType.LOADED) {
       if (logger.isLoggable(Level.FINE)) {
-        logger.fine("loaded occured : " + observation);
+        logger.fine("loaded occured : " + ObservationManager.toString(observation));
       }
 
       try {

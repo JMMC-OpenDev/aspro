@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproGui.java,v 1.5 2009-12-04 16:26:58 bourgesl Exp $"
+ * "@(#) $Id: AsproGui.java,v 1.6 2010-01-08 16:51:18 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2009/12/04 16:26:58  bourgesl
+ * Added Load action in the menu bar (partially handled)
+ *
  * Revision 1.4  2009/12/04 15:37:32  bourgesl
  * fixed application startup using the App frame instead of MainFrame
  *
@@ -94,7 +97,7 @@ public class AsproGui extends App {
   private void prepareFrame(final JFrame frame) {
     frame.setTitle(App.getSharedApplicationDataModel().getProgramName() + " v" + App.getSharedApplicationDataModel().getProgramVersion());
 
-    final Dimension dim = new Dimension(800, 600);
+    final Dimension dim = new Dimension(900, 750);
     frame.setMinimumSize(dim);
     frame.addComponentListener(new ComponentResizeAdapter(dim));
 

@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationManager.java,v 1.13 2010-01-04 15:42:47 bourgesl Exp $"
+ * "@(#) $Id: ObservationManager.java,v 1.14 2010-01-08 16:51:18 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.13  2010/01/04 15:42:47  bourgesl
+ * added missing fields in Target : proper motion, parallax, magnitudes and spectral types (cds raw data)
+ *
  * Revision 1.12  2009/12/15 16:32:44  bourgesl
  * added user PoP configuration based on PoP indices
  *
@@ -48,6 +51,7 @@
  ******************************************************************************/
 package fr.jmmc.aspro.model;
 
+import fr.jmmc.aspro.model.observability.ObservabilityData;
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.ObservationListener.ObservationEventType;
 import fr.jmmc.aspro.model.oi.FocalInstrumentConfigurationChoice;
@@ -138,7 +142,7 @@ public class ObservationManager extends BaseOIManager {
     return this.observationFile;
   }
 
-  public String toString(final ObservationSetting obs) {
+  public static String toString(final ObservationSetting obs) {
     final StringBuffer sb = new StringBuffer();
     sb.append("name : ").append(obs.getName());
     sb.append(" when : ").append(obs.getWhen().getDate());
@@ -329,6 +333,22 @@ public class ObservationManager extends BaseOIManager {
   }
 
   /**
+   * Defines the computed observability data in the observation for later reuse (UV Coverage)
+   * @param obsData observability data
+   */
+  public void setObservabilityData(final ObservabilityData obsData) {
+    if (logger.isLoggable(Level.INFO)) {
+      logger.info("setObservabilityData : " + obsData);
+    }
+
+    getObservation().setObservabilityData(obsData);
+
+    if (obsData != null) {
+      fireObservabilityDoneChanged();
+    }
+  }
+
+  /**
    * Save the current observation in the given file
    * @param file file to save
    * @throws RuntimeException if the save operation failed
@@ -399,6 +419,17 @@ public class ObservationManager extends BaseOIManager {
     }
 
     fireEvent(ObservationEventType.CHANGED);
+  }
+
+  /**
+   * This fires an observability done event to all registered listeners
+   */
+  public void fireObservabilityDoneChanged() {
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("fireObservabilityDoneChanged : " + toString(getObservation()));
+    }
+
+    fireEvent(ObservationEventType.OBSERVABILITY_DONE);
   }
 
   /**
