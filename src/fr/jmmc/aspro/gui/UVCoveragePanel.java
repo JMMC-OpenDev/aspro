@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: asprogui.java,v 1.1 2010-01-08 16:48:30 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.1 2010-01-11 13:58:43 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2010/01/08 16:48:30  bourgesl
+ * package refactoring
+ *
  */
 package fr.jmmc.aspro.gui;
 
@@ -44,7 +47,7 @@ import org.jfree.data.xy.XYSeriesCollection;
  * This panel presents the UV coverage plot with its parameters (target, instrument mode ...)
  * @author bourgesl
  */
-public class asprogui extends javax.swing.JPanel implements ChartProgressListener, ActionListener, ObservationListener {
+public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgressListener, ActionListener, ObservationListener {
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
@@ -73,7 +76,7 @@ public class asprogui extends javax.swing.JPanel implements ChartProgressListene
   /**
    * Constructor
    */
-  public asprogui() {
+  public UVCoveragePanel() {
     initComponents();
 
     postInit();

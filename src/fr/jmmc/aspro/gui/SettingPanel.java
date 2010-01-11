@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SettingPanel.java,v 1.11 2010-01-08 16:51:17 bourgesl Exp $"
+ * "@(#) $Id: SettingPanel.java,v 1.12 2010-01-11 13:58:43 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.11  2010/01/08 16:51:17  bourgesl
+ * initial uv coverage
+ *
  * Revision 1.10  2010/01/05 17:19:29  bourgesl
  * updated basic UV panel
  *
@@ -60,7 +63,7 @@ public class SettingPanel extends JPanel implements ObservationListener {
   /** observability panel */
   private ObservabilityPanel observabilityPanel = null;
   /** uv coverage panel */
-  private asprogui uvpanel = null;
+  private UVCoveragePanel uvpanel = null;
 
   /** Creates new form SettingPanel */
   public SettingPanel() {
@@ -142,7 +145,7 @@ public class SettingPanel extends JPanel implements ObservationListener {
 
       if (hasTarget) {
         if (uvPanelIndex == -1) {
-          this.uvpanel = new asprogui();
+          this.uvpanel = new UVCoveragePanel();
 
           this.tabs.addTab("UV coverage", this.uvpanel);
 
