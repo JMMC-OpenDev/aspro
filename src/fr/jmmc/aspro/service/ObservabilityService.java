@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.31 2010-01-08 16:51:17 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.32 2010-01-12 16:54:19 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.31  2010/01/08 16:51:17  bourgesl
+ * initial uv coverage
+ *
  * Revision 1.30  2010/01/04 16:57:00  bourgesl
  * modified best PoPs algorithm to take into account the night limits
  *
@@ -367,6 +370,8 @@ public class ObservabilityService {
       final PopCombination bestPopCombination = findCompatiblePoPs(targets);
 
       if (bestPopCombination != null) {
+        this.data.setBestPops(bestPopCombination);
+
         // use the user defined PoPs configuration :
         this.popCombinations.clear();
         this.popCombinations.add(bestPopCombination);
@@ -853,6 +858,10 @@ public class ObservabilityService {
       sb.append(popBestData.getPopCombination().getIdentifier());
       sb.append("]");
       starObs.setName(sb.toString());
+
+      if (this.data.getBestPops() == null) {
+        this.data.setBestPops(popBestData.getPopCombination());
+      }
 
       return popBestData.getRangesBL();
     }

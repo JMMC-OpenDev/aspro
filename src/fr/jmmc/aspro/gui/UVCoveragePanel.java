@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.1 2010-01-11 13:58:43 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.2 2010-01-12 16:54:19 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2010/01/11 13:58:43  bourgesl
+ * bad class name for UV Coverage Panel
+ *
  * Revision 1.1  2010/01/08 16:48:30  bourgesl
  * package refactoring
  *
@@ -14,16 +17,17 @@ package fr.jmmc.aspro.gui;
 
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.gui.chart.ChartUtils;
+import fr.jmmc.aspro.gui.chart.SquareChartPanel;
 import fr.jmmc.aspro.model.ConfigurationManager;
 import fr.jmmc.aspro.model.ObservationListener;
 import fr.jmmc.aspro.model.ObservationManager;
+import fr.jmmc.aspro.model.observability.ObservabilityData;
 import fr.jmmc.aspro.model.uvcoverage.UVCoverageData;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
+import fr.jmmc.aspro.model.oi.Pop;
 import fr.jmmc.aspro.model.uvcoverage.UVBaseLineData;
 import fr.jmmc.aspro.service.UVCoverageService;
 import fr.jmmc.mcs.gui.StatusBar;
-import java.awt.BasicStroke;
-import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
@@ -37,9 +41,7 @@ import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.event.ChartProgressEvent;
 import org.jfree.chart.event.ChartProgressListener;
-import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
@@ -158,38 +160,28 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
    */
   private void postInit() {
 
-    this.localJFreeChart = createChart();
+    this.localJFreeChart = ChartUtils.createSquareXYLineChart("U (m)", "V (m)");
     this.localXYPlot = (XYPlot) localJFreeChart.getPlot();
 
     // add listener :
     this.localJFreeChart.addProgressListener(this);
 
-    this.chartPanel = new ChartPanel(this.localJFreeChart,
+    this.chartPanel = new SquareChartPanel(this.localJFreeChart,
             400, 400, /* prefered size */
             200, 200, /* minimum size before scaling */
-            1200, 1200, /* maximum size before scaling */
+            1600, 1600, /* maximum size before scaling */
             true, /* use buffer */
-            false, true, false, false, false) {
+            false, /* properties */
+            true, /* copy */
+            true, /* save */
+            true, /* print */
+            false, /* zoom */
+            false /* tooltips */);
 
-      /** default serial UID for Serializable interface */
-      private static final long serialVersionUID = 1;
-
-      /**
-       * Hack : return the min(width, height) to get a square plot
-       */
-      @Override
-      public Dimension getSize() {
-        final int width = getWidth();
-        final int height = getHeight();
-
-        final int min = Math.min(width, height);
-
-        return new Dimension(min, min);
-      }
-    };
-
+    // zoom options :
     this.chartPanel.setDomainZoomable(AsproConstants.ENABLE_ZOOM);
     this.chartPanel.setRangeZoomable(AsproConstants.ENABLE_ZOOM);
+    this.chartPanel.setMouseWheelEnabled(AsproConstants.ENABLE_ZOOM);
 
     add(chartPanel, java.awt.BorderLayout.CENTER);
 
@@ -212,33 +204,6 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     }
   }
 
-  /**
-   * Create the basic XYBarChart
-   * @return jFreeChart instance
-   */
-  private static JFreeChart createChart() {
-    final JFreeChart localJFreeChart = ChartUtils.createSquareXYLineChart(null, "U (m)", "V (m)", null, PlotOrientation.VERTICAL, true, false, false);
-
-    final XYPlot localXYPlot = (XYPlot) localJFreeChart.getPlot();
-    localXYPlot.setNoDataMessage("NO DATA");
-
-    localXYPlot.setDomainPannable(false);
-    localXYPlot.setRangePannable(false);
-
-    // display axes at [0,0] :
-    localXYPlot.setDomainZeroBaselineVisible(true);
-    localXYPlot.setRangeZeroBaselineVisible(true);
-
-    localXYPlot.getRangeAxis().setStandardTickUnits(ChartUtils.createScientificTickUnits());
-    localXYPlot.getDomainAxis().setStandardTickUnits(ChartUtils.createScientificTickUnits());
-
-    final XYLineAndShapeRenderer localLineAndShapeRenderer = (XYLineAndShapeRenderer) localXYPlot.getRenderer();
-
-    localLineAndShapeRenderer.setAutoPopulateSeriesStroke(false);
-    localLineAndShapeRenderer.setBaseStroke(new BasicStroke(2.0F));
-
-    return localJFreeChart;
-  }
 
   protected void refreshPlot() {
     if (logger.isLoggable(Level.FINE)) {
@@ -263,9 +228,6 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
 
         // When the observation changes, it means that the observability will be computed in background.
         // Only refresh the UI widgets
-
-        // TODO : TBC
-        logger.severe("instrument = " + observation.getInstrumentConfiguration().getInstrumentConfiguration().getFocalInstrument());
 
         // refresh the targets :
         updateComboTarget();
@@ -328,92 +290,105 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
 
     final String targetName = (String) this.jComboBoxTarget.getSelectedItem();
 
-    /*
-     * Use the SwingWorker backport for Java 5 = swing-worker-1.2.jar (org.jdesktop.swingworker.SwingWorker)
-     */
-    final SwingWorker<UVCoverageData, Void> worker = new SwingWorker<UVCoverageData, Void>() {
+    // check if observability data are available :
+    final ObservabilityData obsData = observation.getObservabilityData();
 
-      /**
-       * Compute the UV Coverage data in background
-       * @return UV Coverage data
+    if (obsData != null) {
+
+      /*
+       * Use the SwingWorker backport for Java 5 = swing-worker-1.2.jar (org.jdesktop.swingworker.SwingWorker)
        */
-      @Override
-      public UVCoverageData doInBackground() {
-        logger.fine("SwingWorker[UV].doInBackground : IN");
+      final SwingWorker<UVCoverageData, Void> worker = new SwingWorker<UVCoverageData, Void>() {
 
-        UVCoverageData uvData = new UVCoverageService(observation, targetName).compute();
+        /**
+         * Compute the UV Coverage data in background
+         * @return UV Coverage data
+         */
+        @Override
+        public UVCoverageData doInBackground() {
+          logger.fine("SwingWorker[UV].doInBackground : IN");
 
-        if (isCancelled()) {
-          logger.fine("SwingWorker[UV].doInBackground : CANCELLED");
-          // no result if task is cancelled :
-          uvData = null;
-        } else {
-          logger.fine("SwingWorker[UV].doInBackground : OUT");
+          UVCoverageData uvData = new UVCoverageService(observation, targetName).compute();
+
+          if (isCancelled()) {
+            logger.fine("SwingWorker[UV].doInBackground : CANCELLED");
+            // no result if task is cancelled :
+            uvData = null;
+          } else {
+            logger.fine("SwingWorker[UV].doInBackground : OUT");
+          }
+          return uvData;
         }
-        return uvData;
-      }
 
-      /**
-       * Refresh the plot using the computed UV Coverage data.
-       * This code is executed by the Swing Event Dispatcher thread (EDT)
-       */
-      @Override
-      public void done() {
-        // check if the worker was cancelled :
-        if (!isCancelled()) {
-          logger.fine("SwingWorker[UV].done : IN");
-          try {
-            // Get the computation results with all data necessary to draw the plot :
-            final UVCoverageData uvData = get();
+        /**
+         * Refresh the plot using the computed UV Coverage data.
+         * This code is executed by the Swing Event Dispatcher thread (EDT)
+         */
+        @Override
+        public void done() {
+          // check if the worker was cancelled :
+          if (!isCancelled()) {
+            logger.fine("SwingWorker[UV].done : IN");
+            try {
+              // Get the computation results with all data necessary to draw the plot :
+              final UVCoverageData uvData = get();
 
-            if (uvData != null) {
-              logger.fine("SwingWorker[UV].done : refresh Chart");
+              if (uvData != null) {
+                logger.fine("SwingWorker[UV].done : refresh Chart");
 
-              ChartUtils.clearTextSubTitle(localJFreeChart);
+                ChartUtils.clearTextSubTitle(localJFreeChart);
 
-              final String title = observation.getInterferometerConfiguration().getName() +
-                      " - " + observation.getInstrumentConfiguration().getStations();
+                // title :
+                final StringBuilder title = new StringBuilder(observation.getInterferometerConfiguration().getName());
+                title.append(" - ").append(observation.getInstrumentConfiguration().getStations());
 
-              ChartUtils.addSubtitle(localJFreeChart, title);
+                if (obsData.getBestPops() != null) {
+                  title.append(" + ");
+                  for (Pop pop : obsData.getBestPops().getPopList()) {
+                    title.append(pop.getName()).append(" ");
+                  }
+                }
+                ChartUtils.addSubtitle(localJFreeChart, title.toString());
 
-              // source :
-              ChartUtils.addSubtitle(localJFreeChart, "Source : " + uvData.getName());
+                // source :
+                ChartUtils.addSubtitle(localJFreeChart, "Source : " + uvData.getName());
 
-              // computed data are valid :
-              updateChart(uvData);
+                // computed data are valid :
+                updateChart(uvData);
 
-              // update theme at end :
-              ChartUtilities.applyCurrentTheme(localJFreeChart);
+                // update theme at end :
+                ChartUtilities.applyCurrentTheme(localJFreeChart);
+              }
+
+            } catch (InterruptedException ignore) {
+            } catch (ExecutionException ee) {
+              logger.log(Level.SEVERE, "Error : ", ee);
             }
 
-          } catch (InterruptedException ignore) {
-          } catch (ExecutionException ee) {
-            logger.log(Level.SEVERE, "Error : ", ee);
+            // update the status bar :
+            StatusBar.show("uv coverage done.");
+
+            logger.fine("SwingWorker[UV].done : OUT");
           }
-
-          // update the status bar :
-          StatusBar.show("uv coverage done.");
-
-          logger.fine("SwingWorker[UV].done : OUT");
         }
+      };
+
+      // update the status bar :
+      StatusBar.show("computing uv coverage ... (please wait, this may take a while)");
+
+      // first, cancel the current running worker :
+      if (this.currentWorker != null) {
+        // note : if the worker was previously cancelled, it has no effect.
+        // interrupt the thread to have Thread.isInterrupted() == true :
+        this.currentWorker.cancel(true);
       }
-    };
 
-    // update the status bar :
-    StatusBar.show("computing uv coverage ... (please wait, this may take a while)");
+      // memorize the reference to the new worker before execution :
+      this.currentWorker = worker;
 
-    // first, cancel the current running worker :
-    if (this.currentWorker != null) {
-      // note : if the worker was previously cancelled, it has no effect.
-      // interrupt the thread to have Thread.isInterrupted() == true :
-      this.currentWorker.cancel(true);
+      // start the new worker :
+      worker.execute();
     }
-
-    // memorize the reference to the new worker before execution :
-    this.currentWorker = worker;
-
-    // start the new worker :
-    worker.execute();
   }
 
   /**

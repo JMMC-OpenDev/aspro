@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityPanel.java,v 1.16 2010-01-08 16:51:17 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityPanel.java,v 1.17 2010-01-12 16:54:19 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.16  2010/01/08 16:51:17  bourgesl
+ * initial uv coverage
+ *
  * Revision 1.15  2010/01/05 17:18:56  bourgesl
  * syntax changes
  *
@@ -65,6 +68,7 @@ import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.observability.StarObservabilityData;
 import fr.jmmc.aspro.model.observability.SunTimeInterval;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
+import fr.jmmc.aspro.model.oi.Pop;
 import fr.jmmc.aspro.service.ObservabilityService;
 import fr.jmmc.mcs.gui.StatusBar;
 import java.awt.BorderLayout;
@@ -89,18 +93,15 @@ import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import org.jdesktop.swingworker.SwingWorker;
-import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.StandardChartTheme;
 import org.jfree.chart.annotations.XYTextAnnotation;
 import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.axis.SymbolAxis;
 import org.jfree.chart.event.ChartProgressEvent;
 import org.jfree.chart.event.ChartProgressListener;
 import org.jfree.chart.plot.IntervalMarker;
-import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYBarRenderer;
 import org.jfree.data.gantt.Task;
@@ -180,13 +181,7 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
    */
   private void initComponents() {
 
-    // Disable bar shadows before creating any chart :
-    if (ChartFactory.getChartTheme() instanceof StandardChartTheme) {
-      final StandardChartTheme theme = (StandardChartTheme) ChartFactory.getChartTheme();
-      theme.setShadowVisible(false);
-    }
-
-    this.localJFreeChart = createChart();
+    this.localJFreeChart = ChartUtils.createXYBarChart();
     this.localXYPlot = (XYPlot) this.localJFreeChart.getPlot();
 
     // add listener :
@@ -197,10 +192,17 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
             300, 200, /* minimum size before scaling */
             1900, 1200, /* maximum size before scaling */
             true, /* use buffer */
-            false, true, false, false, false);
+            false, /* properties */
+            true, /* copy */
+            true, /* save */
+            true, /* print */
+            false, /* zoom */
+            false /* tooltips */);
 
-    this.chartPanel.setDomainZoomable(AsproConstants.ENABLE_ZOOM);
-    this.chartPanel.setRangeZoomable(AsproConstants.ENABLE_ZOOM);
+    // zoom options :
+    this.chartPanel.setDomainZoomable(false);
+    this.chartPanel.setRangeZoomable(false);
+    this.chartPanel.setMouseWheelEnabled(false);
 
     this.add(this.chartPanel, BorderLayout.CENTER);
 
@@ -300,30 +302,6 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
       // restore the automatic refresh from field changes :
       this.doAutoRefresh = true;
     }
-  }
-
-  /**
-   * Create the basic XYBarChart
-   * @return jFreeChart instance
-   */
-  private static JFreeChart createChart() {
-    // no title :
-    final JFreeChart localJFreeChart = ChartFactory.createXYBarChart("", null, false, null, null, PlotOrientation.HORIZONTAL, false, false, false);
-
-    final XYPlot localXYPlot = (XYPlot) localJFreeChart.getPlot();
-    localXYPlot.setNoDataMessage("NO DATA");
-
-    localXYPlot.setDomainPannable(false);
-    localXYPlot.setRangePannable(false);
-
-    localXYPlot.getDomainAxis().setVisible(false);
-    localXYPlot.getRangeAxis().setVisible(false);
-
-    final XYBarRenderer localXYBarRenderer = (XYBarRenderer) localXYPlot.getRenderer();
-    localXYBarRenderer.setUseYInterval(true);
-
-    ChartUtilities.applyCurrentTheme(localJFreeChart);
-    return localJFreeChart;
   }
 
   protected void refreshPlot() {
@@ -438,10 +416,18 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
 
               localJFreeChart.clearSubtitles();
 
-              final String title = observation.getInterferometerConfiguration().getName() +
-                      " - " + observation.getInstrumentConfiguration().getStations();
+              // title :
+              final StringBuilder title = new StringBuilder(observation.getInterferometerConfiguration().getName());
+              title.append(" - ").append(observation.getInstrumentConfiguration().getStations());
 
-              ChartUtils.addSubtitle(localJFreeChart, title);
+              if (obsData.getBestPops() != null) {
+                title.append(" + ");
+                for (Pop pop : obsData.getBestPops().getPopList()) {
+                  title.append(pop.getName()).append(" ");
+                }
+              }
+
+              ChartUtils.addSubtitle(localJFreeChart, title.toString());
 
               if (useNightLimit || !useLST) {
                 // date :

@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityData.java,v 1.1 2010-01-08 16:48:30 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityData.java,v 1.2 2010-01-12 16:54:19 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2010/01/08 16:48:30  bourgesl
+ * package refactoring
+ *
  * Revision 1.3  2009/12/02 17:23:51  bourgesl
  * fixed several bugs on pop finder + refactoring
  *
@@ -13,7 +16,6 @@
 package fr.jmmc.aspro.model.observability;
 
 import fr.jmmc.aspro.model.*;
-import fr.jmmc.aspro.model.observability.SunTimeInterval;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -27,7 +29,6 @@ import java.util.Map;
 public class ObservabilityData {
 
   /* observability plot data */
-
   /** starting date */
   private Date dateMin = null;
   /** ending date */
@@ -36,6 +37,9 @@ public class ObservabilityData {
   private List<SunTimeInterval> sunIntervals = null;
   /** list of star visibility intervals */
   private List<StarObservabilityData> starVisibilities = new ArrayList<StarObservabilityData>();
+  /** optional */
+  /** best PoPs combination */
+  private PopCombination bestPops;
 
   /* other useful data for UV coverage */
   /** base line list */
@@ -51,7 +55,6 @@ public class ObservabilityData {
   }
 
   /* Getter - Setter */
-
   public Date getDateMin() {
     return dateMin;
   }
@@ -80,6 +83,14 @@ public class ObservabilityData {
     return starVisibilities;
   }
 
+  public PopCombination getBestPops() {
+    return bestPops;
+  }
+
+  public void setBestPops(PopCombination bestPops) {
+    this.bestPops = bestPops;
+  }
+
   public List<BaseLine> getBaseLines() {
     return baseLines;
   }
@@ -95,5 +106,4 @@ public class ObservabilityData {
   public StarData getStarData(final String name) {
     return this.mapStarDatas.get(name);
   }
-
 }
