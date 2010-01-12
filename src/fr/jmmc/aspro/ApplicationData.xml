@@ -32,7 +32,7 @@
   <releasenotes>
     <release version="0.1">
       <prerelease version="0.1b5">
-        <change>UV Coverage (in progress)</change>
+        <change>UV Coverage plot showing only the rise/set tracks</change>
       </prerelease>
       <prerelease version="0.1b4">
         <change>Added a best PoPs algorithm for the complete list of targets</change>
