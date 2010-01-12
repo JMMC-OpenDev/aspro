@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationManager.java,v 1.14 2010-01-08 16:51:18 bourgesl Exp $"
+ * "@(#) $Id: ObservationManager.java,v 1.15 2010-01-12 17:10:08 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.14  2010/01/08 16:51:18  bourgesl
+ * initial uv coverage
+ *
  * Revision 1.13  2010/01/04 15:42:47  bourgesl
  * added missing fields in Target : proper motion, parallax, magnitudes and spectral types (cds raw data)
  *
@@ -337,8 +340,8 @@ public class ObservationManager extends BaseOIManager {
    * @param obsData observability data
    */
   public void setObservabilityData(final ObservabilityData obsData) {
-    if (logger.isLoggable(Level.INFO)) {
-      logger.info("setObservabilityData : " + obsData);
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("setObservabilityData : " + obsData);
     }
 
     getObservation().setObservabilityData(obsData);

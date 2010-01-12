@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoverageService.java,v 1.1 2010-01-08 16:50:53 bourgesl Exp $"
+ * "@(#) $Id: UVCoverageService.java,v 1.2 2010-01-12 17:10:08 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2010/01/08 16:50:53  bourgesl
+ * initial uv coverage
+ *
  */
 package fr.jmmc.aspro.service;
 
@@ -88,13 +91,13 @@ public class UVCoverageService {
         this.data = null;
       } else {
 
-        logger.severe("observabilityData : " + obsData);
-
         this.baseLines = obsData.getBaseLines();
 
         this.starData = obsData.getStarData(this.targetName);
 
-        logger.severe("starData : " + this.starData);
+        if (logger.isLoggable(Level.FINE)) {
+          logger.fine("starData : " + this.starData);
+        }
 
         // target name :
         this.data.setName(this.targetName);
@@ -102,7 +105,6 @@ public class UVCoverageService {
         if (this.starData.getHaElev() > 0d) {
 
           computeUVSupport();
-
         }
       }
 
