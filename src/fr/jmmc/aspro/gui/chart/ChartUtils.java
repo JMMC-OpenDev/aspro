@@ -1,39 +1,43 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ChartUtils.java,v 1.2 2010-01-08 16:51:17 bourgesl Exp $"
+ * "@(#) $Id: ChartUtils.java,v 1.3 2010-01-12 16:53:34 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2010/01/08 16:51:17  bourgesl
+ * initial uv coverage
+ *
  */
 package fr.jmmc.aspro.gui.chart;
 
+import java.awt.BasicStroke;
 import java.awt.Font;
 import java.text.DecimalFormat;
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.StandardChartTheme;
 import org.jfree.chart.axis.NumberTickUnit;
 import org.jfree.chart.axis.TickUnitSource;
 import org.jfree.chart.axis.TickUnits;
-import org.jfree.chart.axis.ValueAxis;
-import org.jfree.chart.event.ChartChangeEventType;
-import org.jfree.chart.event.PlotChangeEvent;
 import org.jfree.chart.labels.StandardXYToolTipGenerator;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.XYBarRenderer;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.chart.title.LegendTitle;
 import org.jfree.chart.title.TextTitle;
 import org.jfree.chart.title.Title;
 import org.jfree.chart.urls.StandardXYURLGenerator;
-import org.jfree.data.Range;
-import org.jfree.data.general.DatasetChangeEvent;
 import org.jfree.data.xy.XYDataset;
+import org.jfree.ui.RectangleEdge;
+import org.jfree.ui.RectangleInsets;
 
 /**
- *
+ * Several static methods related to the JFreeChart library
  * @author bourgesl
  */
 public class ChartUtils {
@@ -42,78 +46,93 @@ public class ChartUtils {
   private static final Font DEFAULT_TITLE_FONT = new Font("SansSerif", Font.BOLD, 14);
   /** scientific tick units singleton */
   private static TickUnits SCIENTIFIC_TICK_UNITS = null;
+  /** default tick label rectangle insets */
+  public final static RectangleInsets TICK_LABEL_INSETS = new RectangleInsets(1.0, 1.0, 1.0, 1.0);
+  /** default axis offset */
+  public final static RectangleInsets ZERO_AXIS_OFFSET = new RectangleInsets(0.0, 0.0, 0.0, 0.0);
 
-  public static void clearTextSubTitle(final JFreeChart localJFreeChart) {
-    Title legend = null;
-    Title title;
-    for (int i = 0; i < localJFreeChart.getSubtitleCount(); i++) {
-      title = localJFreeChart.getSubtitle(i);
-      if (title instanceof LegendTitle) {
-        legend = title;
-        break;
-      }
+  /**
+   * Forbidden constructor
+   */
+  private ChartUtils() {
+    // no-op
+  }
+
+  static {
+
+    // Change the default chart theme before creating any chart :
+    if (ChartFactory.getChartTheme() instanceof StandardChartTheme) {
+      final StandardChartTheme theme = (StandardChartTheme) ChartFactory.getChartTheme();
+
+      // Disable bar shadows :
+      theme.setShadowVisible(false);
+
+      theme.setAxisOffset(ZERO_AXIS_OFFSET);
     }
-    localJFreeChart.clearSubtitles();
-    if (legend != null) {
-      localJFreeChart.addSubtitle(legend);
-    }
+
   }
 
   /**
-   * Add a sub title to the given chart
-   * @param localJFreeChart chart
-   * @param text sub title content
+   * Create an empty XYBarChart for the observability chart
+   * @return jFreeChart instance
    */
-  public static void addSubtitle(final JFreeChart localJFreeChart, final String text) {
-    localJFreeChart.addSubtitle(new TextTitle(text, DEFAULT_TITLE_FONT));
+  public static JFreeChart createXYBarChart() {
+    // no title :
+    final JFreeChart localJFreeChart = ChartFactory.createXYBarChart("", null, false, null, null, PlotOrientation.HORIZONTAL, false, false, false);
+
+    final XYPlot localXYPlot = (XYPlot) localJFreeChart.getPlot();
+    localXYPlot.setNoDataMessage("NO DATA");
+
+    localXYPlot.getDomainAxis().setVisible(false);
+    localXYPlot.getRangeAxis().setVisible(false);
+
+    final XYBarRenderer localXYBarRenderer = (XYBarRenderer) localXYPlot.getRenderer();
+    localXYBarRenderer.setUseYInterval(true);
+
+    return localJFreeChart;
   }
 
   /**
-   * Returns a collection of tick units for integer values.
-   *
-   * @return A collection of tick units for integer values.
-   *
-   * @see #setStandardTickUnits(TickUnitSource)
-   * @see #createStandardTickUnits()
+   * Create the custom Square XY Line Chart for the UV coverage chart
+   * @param xLabel label for the x axis (range)
+   * @param yLabel label for the y axis (domain)
+   * @return jFreeChart instance
    */
-  public static TickUnitSource createScientificTickUnits() {
-    if (SCIENTIFIC_TICK_UNITS == null) {
-      final TickUnits units = new TickUnits();
-      final DecimalFormat df0 = new DecimalFormat("0");
-      final DecimalFormat df1 = new DecimalFormat("0.00E00");
+  public static JFreeChart createSquareXYLineChart(final String xLabel, final String yLabel) {
+    final JFreeChart localJFreeChart = createSquareXYLineChart(null, xLabel, yLabel, null, PlotOrientation.VERTICAL, true, false, false);
 
-      units.add(new NumberTickUnit(1, df0, 2));
-      units.add(new NumberTickUnit(5, df0, 5));
-      units.add(new NumberTickUnit(10, df0, 2));
-      units.add(new NumberTickUnit(50, df0, 5));
-      units.add(new NumberTickUnit(100, df0, 2));
-      units.add(new NumberTickUnit(500, df0, 5));
+    final XYPlot localXYPlot = (XYPlot) localJFreeChart.getPlot();
+    localXYPlot.setNoDataMessage("NO DATA");
 
-      units.add(new NumberTickUnit(1000, df1, 2));
-      units.add(new NumberTickUnit(5000, df1, 5));
-      units.add(new NumberTickUnit(10000, df1, 2));
-      units.add(new NumberTickUnit(50000, df1, 5));
-      units.add(new NumberTickUnit(100000, df1, 2));
-      units.add(new NumberTickUnit(500000, df1, 5));
-      units.add(new NumberTickUnit(1000000, df1, 2));
-      units.add(new NumberTickUnit(5000000, df1, 5));
-      units.add(new NumberTickUnit(10000000, df1, 2));
-      units.add(new NumberTickUnit(50000000, df1, 5));
-      units.add(new NumberTickUnit(100000000, df1, 2));
-      units.add(new NumberTickUnit(500000000, df1, 5));
-      units.add(new NumberTickUnit(1000000000, df1, 2));
-      units.add(new NumberTickUnit(5000000000.0, df1, 5));
-      units.add(new NumberTickUnit(10000000000.0, df1, 2));
+    // show crosshair :
+    /*
+    localXYPlot.setDomainCrosshairVisible(true);
+    localXYPlot.setRangeCrosshairVisible(true);
+     */
 
-      SCIENTIFIC_TICK_UNITS = units;
-    }
-    return SCIENTIFIC_TICK_UNITS;
+    // display axes at [0,0] :
+    localXYPlot.setDomainZeroBaselineVisible(true);
+    localXYPlot.setRangeZeroBaselineVisible(true);
+
+    // use custom units :
+    localXYPlot.getRangeAxis().setStandardTickUnits(ChartUtils.createScientificTickUnits());
+    localXYPlot.getDomainAxis().setStandardTickUnits(ChartUtils.createScientificTickUnits());
+
+    final XYLineAndShapeRenderer localLineAndShapeRenderer = (XYLineAndShapeRenderer) localXYPlot.getRenderer();
+
+    // force to use the base stroke :
+    localLineAndShapeRenderer.setAutoPopulateSeriesStroke(false);
+    localLineAndShapeRenderer.setBaseStroke(new BasicStroke(2.0F));
+
+    // update theme at end :
+    ChartUtilities.applyCurrentTheme(localJFreeChart);
+
+    return localJFreeChart;
   }
-
 
   /**
    * Creates a line chart (based on an {@link XYDataset}) with default
-   * settings.
+   * settings BUT using a Square data area with consistent zooming in/out
    *
    * @param title  the chart title (<code>null</code> permitted).
    * @param xAxisLabel  a label for the X-axis (<code>null</code> permitted).
@@ -139,66 +158,20 @@ public class ChartUtils {
     if (orientation == null) {
       throw new IllegalArgumentException("Null 'orientation' argument.");
     }
-    final NumberAxis xAxis = new NumberAxis(xAxisLabel);
+
+    // Axes are bounded to avoid zooming out where there is no data :
+
+    final BoundedNumberAxis xAxis = new BoundedNumberAxis(xAxisLabel);
     xAxis.setAutoRangeIncludesZero(false);
-    final NumberAxis yAxis = new NumberAxis(yAxisLabel);
+    final BoundedNumberAxis yAxis = new BoundedNumberAxis(yAxisLabel);
+    yAxis.setAutoRangeIncludesZero(false);
+
+    // only lines are rendered :
     final XYItemRenderer renderer = new XYLineAndShapeRenderer(true, false);
 
-    // HACK :
-    final XYPlot plot = new XYPlot(dataset, xAxis, yAxis, renderer) {
+    // customized XYPlot to have a square data area :
+    final XYPlot plot = new SquareXYPlot(dataset, xAxis, yAxis, renderer);
 
-      /** default serial UID for Serializable interface */
-      private static final long serialVersionUID = 1;
-
-      /**
-       * Hack : return the min(width, height) to get a square plot
-       */
-      @Override
-      public void datasetChanged(final DatasetChangeEvent event) {
-        configureDomainAxes();
-        configureRangeAxes();
-
-        double xMin = 0d;
-        double xMax = 0d;
-        double yMin = 0d;
-        double yMax = 0d;
-
-        final ValueAxis domainAxis = getDomainAxis(0);
-        if (domainAxis != null) {
-            Range xRange = domainAxis.getRange();
-
-            xMin = xRange.getLowerBound();
-            xMax = xRange.getUpperBound();
-        }
-
-        final ValueAxis rangeAxis = getRangeAxis(0);
-        if (rangeAxis != null) {
-            Range yRange = rangeAxis.getRange();
-
-            yMin = yRange.getLowerBound();
-            yMax = yRange.getUpperBound();
-        }
-
-        xMin = Math.abs(xMin);
-        xMax = Math.abs(xMax);
-        yMin = Math.abs(yMin);
-        yMax = Math.abs(yMax);
-
-        double max = Math.max(xMin, xMax);
-        max = Math.max(max, yMin);
-        max = Math.max(max, yMax);
-
-        if (rangeAxis != null) {
-          // do not disable auto range :
-          domainAxis.setRange(new Range(-max, max), false, true);
-          rangeAxis.setRange(new Range(-max, max), false, true);
-        }
-
-        final PlotChangeEvent e = new PlotChangeEvent(this);
-        e.setType(ChartChangeEventType.DATASET_UPDATED);
-        notifyListeners(e);
-      }
-    };
     plot.setOrientation(orientation);
     if (tooltips) {
       renderer.setBaseToolTipGenerator(new StandardXYToolTipGenerator());
@@ -210,6 +183,79 @@ public class ChartUtils {
     final JFreeChart chart = new JFreeChart(title, JFreeChart.DEFAULT_TITLE_FONT,
             plot, legend);
 
+    chart.getLegend().setPosition(RectangleEdge.RIGHT);
+
     return chart;
+  }
+
+  /**
+   * Add a sub title to the given chart
+   * @param localJFreeChart chart
+   * @param text sub title content
+   */
+  public static void addSubtitle(final JFreeChart localJFreeChart, final String text) {
+    localJFreeChart.addSubtitle(new TextTitle(text, DEFAULT_TITLE_FONT));
+  }
+
+  /**
+   * Clear the sub titles except the legend
+   * @param localJFreeChart chart to process
+   */
+  public static void clearTextSubTitle(final JFreeChart localJFreeChart) {
+    Title legend = null;
+    Title title;
+    for (int i = 0; i < localJFreeChart.getSubtitleCount(); i++) {
+      title = localJFreeChart.getSubtitle(i);
+      if (title instanceof LegendTitle) {
+        legend = title;
+        break;
+      }
+    }
+    localJFreeChart.clearSubtitles();
+    if (legend != null) {
+      localJFreeChart.addSubtitle(legend);
+    }
+  }
+
+  /**
+   * Returns a collection of tick units for integer values.
+   *
+   * @return A collection of tick units for integer values.
+   *
+   * @see #setStandardTickUnits(TickUnitSource)
+   * @see #createStandardTickUnits()
+   */
+  public static TickUnitSource createScientificTickUnits() {
+    if (SCIENTIFIC_TICK_UNITS == null) {
+      final TickUnits units = new TickUnits();
+      final DecimalFormat df0 = new DecimalFormat("0");
+      final DecimalFormat df1 = new DecimalFormat("0.00E00");
+
+      units.add(new NumberTickUnit(1, df0));
+      units.add(new NumberTickUnit(5, df0));
+      units.add(new NumberTickUnit(10, df0));
+      units.add(new NumberTickUnit(50, df0));
+      units.add(new NumberTickUnit(100, df0));
+      units.add(new NumberTickUnit(500, df0));
+
+      units.add(new NumberTickUnit(1000, df1));
+      units.add(new NumberTickUnit(5000, df1));
+      units.add(new NumberTickUnit(10000, df1));
+      units.add(new NumberTickUnit(50000, df1));
+      units.add(new NumberTickUnit(100000, df1));
+      units.add(new NumberTickUnit(500000, df1));
+      units.add(new NumberTickUnit(1000000, df1));
+      units.add(new NumberTickUnit(5000000, df1));
+      units.add(new NumberTickUnit(10000000, df1));
+      units.add(new NumberTickUnit(50000000, df1));
+      units.add(new NumberTickUnit(100000000, df1));
+      units.add(new NumberTickUnit(500000000, df1));
+      units.add(new NumberTickUnit(1000000000, df1));
+      units.add(new NumberTickUnit(5000000000.0, df1));
+      units.add(new NumberTickUnit(10000000000.0, df1));
+
+      SCIENTIFIC_TICK_UNITS = units;
+    }
+    return SCIENTIFIC_TICK_UNITS;
   }
 }
