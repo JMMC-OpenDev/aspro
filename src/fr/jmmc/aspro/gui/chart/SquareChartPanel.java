@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SquareChartPanel.java,v 1.1 2010-01-12 16:53:20 bourgesl Exp $"
+ * "@(#) $Id: SquareChartPanel.java,v 1.2 2010-01-13 16:12:08 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2010/01/12 16:53:20  bourgesl
+ * customized JFreeChart classes to get a square XY Plot supporting zooming in/out with mouse and mouse wheel
+ *
  */
 package fr.jmmc.aspro.gui.chart;
 
@@ -20,6 +23,10 @@ import org.jfree.chart.plot.PlotRenderingInfo;
 import org.jfree.chart.plot.Zoomable;
 
 /**
+ * This class extends the ChartPanel to customize the zoom() and  restoreAutoBounds() methods 
+ * in order to maintain a square data area.
+ *
+ * Note : this class must support the inherited cloneable interface.
  *
  * @author bourgesl
  */
