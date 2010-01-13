@@ -1,13 +1,16 @@
 #*******************************************************************************
 # JMMC project
 #
-# "@(#) $Id: Makefile,v 1.5 2009-12-07 15:31:09 bourgesl Exp $"
+# "@(#) $Id: Makefile,v 1.6 2010-01-13 16:17:29 bourgesl Exp $"
 #
 # Makefile of aspro module
 #
 # History
 # -------
 # $Log: not supported by cvs2svn $
+# Revision 1.5  2009/12/07 15:31:09  bourgesl
+# added missing icons
+#
 # Revision 1.4  2009/11/20 10:22:40  mella
 # Add jnlp deployement during installation step
 #
@@ -121,7 +124,8 @@ aspro_DIRS     = fr \
 		 edu
 aspro_EXTRAS   = fr/jmmc/aspro/*.xml \
 		 fr/jmmc/aspro/model/*.xml \
-		 fr/jmmc/aspro/gui/icons/*.png
+		 fr/jmmc/aspro/gui/icons/*.png \
+		 fr/jmmc/aspro/gui/icons/*.gif
 
 #
 # Java programs
