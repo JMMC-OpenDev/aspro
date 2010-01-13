@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityPanel.java,v 1.17 2010-01-12 16:54:19 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityPanel.java,v 1.18 2010-01-13 16:12:31 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.17  2010/01/12 16:54:19  bourgesl
+ * added PoPs in title + several changes on charts
+ *
  * Revision 1.16  2010/01/08 16:51:17  bourgesl
  * initial uv coverage
  *
@@ -60,6 +63,7 @@
 package fr.jmmc.aspro.gui;
 
 import fr.jmmc.aspro.AsproConstants;
+import fr.jmmc.aspro.gui.action.ExportPDFAction;
 import fr.jmmc.aspro.gui.chart.ChartUtils;
 import fr.jmmc.aspro.model.observability.DateTimeInterval;
 import fr.jmmc.aspro.model.observability.ObservabilityData;
@@ -87,6 +91,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFormattedTextField;
@@ -157,6 +162,9 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
   private JCheckBox jCheckBoxBaseLineLimits;
   /* checkbox Detailed output */
   private JCheckBox jCheckBoxDetailedOutput;
+  /** pdf export button */
+  private JButton jButtonPDF;
+
   /** flag to enable / disable the automatic refresh of the plot when any swing component changes */
   private boolean doAutoRefresh = true;
   /** 
@@ -283,7 +291,25 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
       panelOptions.add(this.jCheckBoxDetailedOutput);
     }
 
+    this.jButtonPDF = new javax.swing.JButton();
+    this.jButtonPDF.setIcon(new javax.swing.ImageIcon(getClass().getResource("/fr/jmmc/aspro/gui/icons/icon_pdf.gif"))); // NOI18N
+    this.jButtonPDF.setMargin(new java.awt.Insets(0, 0, 0, 0));
+    this.jButtonPDF.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jButtonPDFActionPerformed(evt);
+      }
+    });
+    panelOptions.add(this.jButtonPDF);
+
     this.add(panelOptions, BorderLayout.PAGE_END);
+  }
+
+  private void jButtonPDFActionPerformed(java.awt.event.ActionEvent evt) {
+
+    // set the source with the chart :
+    evt.setSource(this.localJFreeChart);
+
+    ExportPDFAction.getInstance().actionPerformed(evt);
   }
 
   private void resetOptions() {
@@ -574,19 +600,19 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
       for (SunTimeInterval interval : intervals) {
         switch (interval.getType()) {
           case Day:
-            col = Color.WHITE;
+            col = new Color(224,224,224);
             break;
           case Night:
-            col = Color.BLACK;
+            col = new Color(96,96,96);
             break;
           default:
           case Twilight:
-            col = Color.LIGHT_GRAY;
+            col = new Color(192,192,192);
             break;
         }
         localIntervalMarker = new IntervalMarker(interval.getStartDate().getTime(),
                 interval.getEndDate().getTime(), col);
-        localIntervalMarker.setAlpha(0.4f);
+        localIntervalMarker.setAlpha(1.0f);
         this.localXYPlot.addRangeMarker(localIntervalMarker, Layer.BACKGROUND);
       }
     }

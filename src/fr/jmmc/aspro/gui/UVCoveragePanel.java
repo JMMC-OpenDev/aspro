@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.2 2010-01-12 16:54:19 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.3 2010-01-13 16:12:31 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2010/01/12 16:54:19  bourgesl
+ * added PoPs in title + several changes on charts
+ *
  * Revision 1.1  2010/01/11 13:58:43  bourgesl
  * bad class name for UV Coverage Panel
  *
@@ -16,6 +19,7 @@
 package fr.jmmc.aspro.gui;
 
 import fr.jmmc.aspro.AsproConstants;
+import fr.jmmc.aspro.gui.action.ExportPDFAction;
 import fr.jmmc.aspro.gui.chart.ChartUtils;
 import fr.jmmc.aspro.gui.chart.SquareChartPanel;
 import fr.jmmc.aspro.model.ConfigurationManager;
@@ -104,6 +108,7 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     jComboBoxInstrumentMode = new javax.swing.JComboBox();
     jLabel3 = new javax.swing.JLabel();
     jFormattedTextField1 = new javax.swing.JFormattedTextField();
+    jButtonPDF = new javax.swing.JButton();
 
     setLayout(new javax.swing.BoxLayout(this, javax.swing.BoxLayout.X_AXIS));
 
@@ -152,8 +157,29 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     gridBagConstraints.gridy = 5;
     jPanelRight.add(jFormattedTextField1, gridBagConstraints);
 
+    jButtonPDF.setIcon(new javax.swing.ImageIcon(getClass().getResource("/fr/jmmc/aspro/gui/icons/icon_pdf.gif"))); // NOI18N
+    jButtonPDF.setMargin(new java.awt.Insets(0, 0, 0, 0));
+    jButtonPDF.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jButtonPDFActionPerformed(evt);
+      }
+    });
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 6;
+    gridBagConstraints.insets = new java.awt.Insets(8, 0, 0, 0);
+    jPanelRight.add(jButtonPDF, gridBagConstraints);
+
     add(jPanelRight);
   }// </editor-fold>//GEN-END:initComponents
+
+  private void jButtonPDFActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonPDFActionPerformed
+    
+    // set the source with the chart :
+    evt.setSource(this.localJFreeChart);
+
+    ExportPDFAction.getInstance().actionPerformed(evt);
+  }//GEN-LAST:event_jButtonPDFActionPerformed
 
   /**
    * This method is useful to set the models and specific features of initialized swing components :
@@ -203,7 +229,6 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
       refreshPlot();
     }
   }
-
 
   protected void refreshPlot() {
     if (logger.isLoggable(Level.FINE)) {
@@ -436,6 +461,7 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     this.localXYPlot.setDataset(dataset);
   }
   // Variables declaration - do not modify//GEN-BEGIN:variables
+  private javax.swing.JButton jButtonPDF;
   private javax.swing.JComboBox jComboBoxInstrumentMode;
   private javax.swing.JComboBox jComboBoxTarget;
   private javax.swing.JFormattedTextField jFormattedTextField1;
