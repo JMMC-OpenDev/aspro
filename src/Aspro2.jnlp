@@ -27,6 +27,8 @@
         <jar href="jar/pal.jar" />
         <jar href="jar/swing-worker-1.2.jar" />
 
+        <jar href="jar/iText-2.1.5.jar" />
+
 	</resources>
     <application-desc main-class="fr.jmmc.aspro.AsproGui"/>
 </jnlp>
