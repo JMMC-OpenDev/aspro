@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.3 2010-01-13 16:12:31 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.4 2010-01-14 17:03:37 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2010/01/13 16:12:31  bourgesl
+ * added export to PDF button
+ *
  * Revision 1.2  2010/01/12 16:54:19  bourgesl
  * added PoPs in title + several changes on charts
  *
@@ -73,6 +76,10 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
   /* swing */
   /** chart panel */
   private ChartPanel chartPanel;
+  /** flag to enable / disable the automatic refresh of the plot when any swing component changes */
+  private boolean doAutoRefresh = true;
+  /** flag to enable / disable the automatic update of the observation when any swing component changes */
+  private boolean doAutoUpdateObservation = true;
   /**
    * Current (or old) worker reference
    * (can be a leaked reference if the computation is done)
@@ -173,8 +180,12 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     add(jPanelRight);
   }// </editor-fold>//GEN-END:initComponents
 
+  /**
+   * Export the current chart as a PDF document
+   * @param evt action event
+   */
   private void jButtonPDFActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonPDFActionPerformed
-    
+
     // set the source with the chart :
     evt.setSource(this.localJFreeChart);
 
@@ -217,61 +228,6 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
   }
 
   /**
-   * Process any comboBox change event (interferometer, interferometer configuration, instrument, instrument configuration).
-   * Refresh the dependent combo boxes and update the observation according to the form state
-   * @param e action event
-   */
-  public void actionPerformed(final ActionEvent e) {
-    if (e.getSource() == this.jComboBoxTarget) {
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("target changed : " + this.jComboBoxTarget.getSelectedItem());
-      }
-      refreshPlot();
-    }
-  }
-
-  protected void refreshPlot() {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("refreshPlot");
-    }
-    this.plot(ObservationManager.getInstance().getObservation());
-  }
-
-  /**
-   * Handle the given event on the given observation =
-   * 1/ If the observation changed, refresh the UI widgets (targets ...)
-   * 2/ If the observability is computed, then refresh the plot
-   * @param type event type
-   * @param observation observation
-   */
-  public void onProcess(final ObservationEventType type, final ObservationSetting observation) {
-    switch (type) {
-      case CHANGED:
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("onChange occured : " + ObservationManager.toString(observation));
-        }
-
-        // When the observation changes, it means that the observability will be computed in background.
-        // Only refresh the UI widgets
-
-        // refresh the targets :
-        updateComboTarget();
-
-        // refresh the instrument modes :
-        updateComboInstrumentModes(observation);
-
-        break;
-      case OBSERVABILITY_DONE:
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("observabilityDone occured : " + ObservationManager.toString(observation));
-        }
-        this.plot(observation);
-        break;
-      default:
-    }
-  }
-
-  /**
    * Refresh the target list
    */
   private void updateComboTarget() {
@@ -283,6 +239,9 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     // restore previous selected item :
     if (oldValue != null) {
       this.jComboBoxTarget.setSelectedItem(oldValue);
+    }
+    if (logger.isLoggable(Level.FINEST)) {
+      logger.finest("jComboBoxTarget updated : "+ this.jComboBoxTarget.getSelectedItem());
     }
   }
 
@@ -300,6 +259,149 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     // restore previous selected item :
     if (oldValue != null) {
       this.jComboBoxInstrumentMode.setSelectedItem(oldValue);
+    }
+    if (logger.isLoggable(Level.FINEST)) {
+      logger.finest("jComboBoxInstrumentMode updated : "+ this.jComboBoxInstrumentMode.getSelectedItem());
+    }
+  }
+
+  /**
+   * Process any comboBox change event (interferometer, interferometer configuration, instrument, instrument configuration).
+   * Refresh the dependent combo boxes and update the observation according to the form state
+   * @param e action event
+   */
+  public void actionPerformed(final ActionEvent e) {
+    if (e.getSource() == this.jComboBoxTarget) {
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("target changed : " + this.jComboBoxTarget.getSelectedItem());
+      }
+      refreshPlot();
+    } else if (e.getSource() == this.jComboBoxInstrumentMode) {
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("instrument mode changed : " + this.jComboBoxInstrumentMode.getSelectedItem());
+      }
+      updateObservation();
+      refreshPlot();
+    }
+  }
+
+  /**
+   * Update the observation with the form fields if the automatic update flag is enabled.
+   */
+  private void updateObservation() {
+    // check if the automatic update flag is enabled :
+    if (this.doAutoUpdateObservation) {
+
+      // Change the instrument mode :
+
+      this.om.setInstrumentMode((String) this.jComboBoxInstrumentMode.getSelectedItem());
+
+      // TODO : fire event ??
+
+      // NOTE : the onChange event is already handled : risk of cyclic loop !
+    }
+  }
+
+  /**
+   * Update the UI widgets from the given changed observation
+   * @param observation observation
+   */
+  private void onChangeObservation(final ObservationSetting observation) {
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("observation :\n" + ObservationManager.toString(observation));
+    }
+
+    // When the observation changes, it means that the observability will be computed in background,
+    // and soon an ObservabilityDone event will be sent.
+
+    // Only refresh the UI widgets and NOT the plot :
+
+    try {
+      // first disable the automatic refresh from field changes :
+      this.doAutoRefresh = false;
+
+      // refresh the targets :
+      updateComboTarget();
+
+      // refresh the instrument modes :
+      updateComboInstrumentModes(observation);
+
+    } finally {
+      // restore the automatic refresh from field changes :
+      this.doAutoRefresh = true;
+    }
+  }
+
+  /**
+   * Update the UI widgets from the given loaded observation
+   *
+   * @param observation observation
+   */
+  private void onLoadObservation(final ObservationSetting observation) {
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("onLoadObservation :\n" + ObservationManager.toString(observation));
+    }
+    try {
+      // first disable the automatic update observation from field changes :
+      this.doAutoUpdateObservation = false;
+      // first disable the automatic refresh from field changes :
+      this.doAutoRefresh = false;
+
+      // refresh the targets :
+      updateComboTarget();
+
+      // refresh the instrument modes :
+      updateComboInstrumentModes(observation);
+
+      // update the selected instrument mode :
+      this.jComboBoxInstrumentMode.setSelectedItem(observation.getInstrumentConfiguration().getInstrumentMode());
+
+    } finally {
+      // restore the automatic refresh from field changes :
+      this.doAutoRefresh = true;
+      // restore the automatic update observation from field changes :
+      this.doAutoUpdateObservation = true;
+    }
+  }
+
+  /**
+   * Handle the given event on the given observation =
+   * 1/ If the observation changed, refresh the UI widgets (targets ...)
+   * 2/ If the observability is computed, then refresh the plot
+   * @param type event type
+   * @param observation observation
+   */
+  public void onProcess(final ObservationEventType type, final ObservationSetting observation) {
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("event [" + type + "] process IN");
+    }
+    switch (type) {
+      case CHANGED:
+        this.onChangeObservation(observation);
+        break;
+      case LOADED:
+        this.onLoadObservation(observation);
+        break;
+      case OBSERVABILITY_DONE:
+        this.plot(observation);
+        break;
+      default:
+    }
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("event [" + type + "] process OUT");
+    }
+  }
+
+  /**
+   * Refresh the plot when an UI widget changes.
+   * Check the doAutoRefresh flag to avoid unwanted refresh (resetOptions)
+   */
+  protected void refreshPlot() {
+    if (this.doAutoRefresh) {
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("refreshPlot");
+      }
+      this.plot(ObservationManager.getInstance().getObservation());
     }
   }
 

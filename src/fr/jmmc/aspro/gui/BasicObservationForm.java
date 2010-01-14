@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BasicObservationForm.java,v 1.15 2010-01-08 16:51:17 bourgesl Exp $"
+ * "@(#) $Id: BasicObservationForm.java,v 1.16 2010-01-14 17:03:37 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.15  2010/01/08 16:51:17  bourgesl
+ * initial uv coverage
+ *
  * Revision 1.14  2010/01/04 15:42:47  bourgesl
  * added missing fields in Target : proper motion, parallax, magnitudes and spectral types (cds raw data)
  *
@@ -520,11 +523,11 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
   }
 
   /**
-   * Update the observation with the form fields.
+   * Update the observation with the form fields if the automatic update flag is enabled.
    * If the observation changed, then fire an observation change event
    */
   private void updateObservation() {
-    // check if the automatic update is enabled :
+    // check if the automatic update flag is enabled :
     if (this.doAutoUpdateObservation) {
       boolean changed = false;
 
@@ -542,6 +545,58 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
   }
 
   /**
+   * Update the UI widgets from the given loaded observation
+   * 
+   * @param observation observation
+   */
+  private void onLoadObservation(final ObservationSetting observation) {
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("onLoadObservation :\n" + ObservationManager.toString(observation));
+    }
+    try {
+      // first disable the automatic update observation from field changes :
+      this.doAutoUpdateObservation = false;
+
+      // update the date spinner :
+      final XMLGregorianCalendar date = observation.getWhen().getDate();
+      if (date != null) {
+        this.jDateSpinner.setValue(date.toGregorianCalendar().getTime());
+      }
+
+      // update the interferometer and interferometer configuration :
+      final InterferometerConfigurationChoice interferometerChoice = observation.getInterferometerConfiguration();
+
+      final InterferometerConfiguration ic = interferometerChoice.getInterferometerConfiguration();
+
+      if (ic != null) {
+        // update the selected interferometer :
+        this.jComboBoxInterferometer.setSelectedItem(ic.getInterferometer().getName());
+        // update the selected interferometer configuration :
+        this.jComboBoxInterferometerConfiguration.setSelectedItem(ic.getName());
+      }
+
+      final FocalInstrumentConfigurationChoice instrumentChoice = observation.getInstrumentConfiguration();
+
+      // update the selected instrument :
+      this.jComboBoxInstrument.setSelectedItem(instrumentChoice.getName());
+
+      // update the selected instrument configuration (stations) :
+      this.jComboBoxInstrumentConfiguration.setSelectedItem(instrumentChoice.getStations());
+
+      // update the selected pops (pops) :
+      // note : setText() does not fire a property change event :
+      this.jTextPoPs.setText(instrumentChoice.getPops());
+
+      // update the target list :
+      updateListTargets();
+
+    } finally {
+      // restore the automatic update observation from field changes :
+      this.doAutoUpdateObservation = true;
+    }
+  }
+
+  /**
    * Handle the given event on the given observation.
    * Refresh the UI component according to the loaded observation settings
    *
@@ -549,52 +604,14 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
    * @param observation observation
    */
   public void onProcess(final ObservationEventType type, final ObservationSetting observation) {
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("event [" + type + "] process IN");
+    }
     if (type == ObservationEventType.LOADED) {
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("loaded occured : " + ObservationManager.toString(observation));
-      }
-
-      try {
-        // first disable the automatic update observation from field changes :
-        this.doAutoUpdateObservation = false;
-
-        // update the date spinner :
-        final XMLGregorianCalendar date = observation.getWhen().getDate();
-        if (date != null) {
-          this.jDateSpinner.setValue(date.toGregorianCalendar().getTime());
-        }
-
-        // update the interferometer and interferometer configuration :
-        final InterferometerConfigurationChoice interferometerChoice = observation.getInterferometerConfiguration();
-
-        final InterferometerConfiguration ic = interferometerChoice.getInterferometerConfiguration();
-
-        if (ic != null) {
-          // update the selected interferometer :
-          this.jComboBoxInterferometer.setSelectedItem(ic.getInterferometer().getName());
-          // update the selected interferometer configuration :
-          this.jComboBoxInterferometerConfiguration.setSelectedItem(ic.getName());
-        }
-
-        final FocalInstrumentConfigurationChoice instrumentChoice = observation.getInstrumentConfiguration();
-
-        // update the selected instrument :
-        this.jComboBoxInstrument.setSelectedItem(instrumentChoice.getName());
-
-        // update the selected instrument configuration (stations) :
-        this.jComboBoxInstrumentConfiguration.setSelectedItem(instrumentChoice.getStations());
-
-        // update the selected pops (pops) :
-        // note : setText() does not fire a property change event :
-        this.jTextPoPs.setText(instrumentChoice.getPops());
-
-        // update the target list :
-        updateListTargets();
-
-      } finally {
-        // restore the automatic update observation from field changes :
-        this.doAutoUpdateObservation = true;
-      }
+      onLoadObservation(observation);
+    }
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("event [" + type + "] process OUT");
     }
   }
   // Variables declaration - do not modify//GEN-BEGIN:variables

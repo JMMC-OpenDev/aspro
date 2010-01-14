@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SettingPanel.java,v 1.12 2010-01-11 13:58:43 bourgesl Exp $"
+ * "@(#) $Id: SettingPanel.java,v 1.13 2010-01-14 17:03:37 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.12  2010/01/11 13:58:43  bourgesl
+ * bad class name for UV Coverage Panel
+ *
  * Revision 1.11  2010/01/08 16:51:17  bourgesl
  * initial uv coverage
  *
@@ -122,9 +125,13 @@ public class SettingPanel extends JPanel implements ObservationListener {
    * @param observation observation
    */
   public void onProcess(final ObservationEventType type, final ObservationSetting observation) {
-    if (type == ObservationEventType.CHANGED) {
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("event [" + type + "] process IN");
+    }
+    if (type == ObservationEventType.CHANGED ||
+        type == ObservationEventType.LOADED) {
       if (logger.isLoggable(Level.FINE)) {
-        logger.fine("onChange occured : " + ObservationManager.toString(observation));
+        logger.fine("observation :\n" + ObservationManager.toString(observation));
       }
 
       if (this.observabilityPanel == null) {
@@ -163,6 +170,9 @@ public class SettingPanel extends JPanel implements ObservationListener {
           this.uvpanel = null;
         }
       }
+    }
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("event [" + type + "] process OUT");
     }
   }
 }
