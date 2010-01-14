@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityPanel.java,v 1.18 2010-01-13 16:12:31 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityPanel.java,v 1.19 2010-01-14 17:03:06 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.18  2010/01/13 16:12:31  bourgesl
+ * added export to PDF button
+ *
  * Revision 1.17  2010/01/12 16:54:19  bourgesl
  * added PoPs in title + several changes on charts
  *
@@ -129,6 +132,12 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
   /** Class logger */
   private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
+  /** background color corresponding to the DAY zone */
+  public static final Color DAY_COLOR = new Color(224, 224, 224);
+  /** background color corresponding to the TWILIGHT zone */
+  public static final Color TWILIGHT_COLOR = new Color(192, 192, 192);
+  /** background color corresponding to the NIGHT zone */
+  public static final Color NIGHT_COLOR = new Color(128, 128, 128);
 
   /* time references */
   /** LST time reference */
@@ -164,7 +173,6 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
   private JCheckBox jCheckBoxDetailedOutput;
   /** pdf export button */
   private JButton jButtonPDF;
-
   /** flag to enable / disable the automatic refresh of the plot when any swing component changes */
   private boolean doAutoRefresh = true;
   /** 
@@ -291,10 +299,12 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
       panelOptions.add(this.jCheckBoxDetailedOutput);
     }
 
+    // same generated code in UVCoveragePanel :
     this.jButtonPDF = new javax.swing.JButton();
     this.jButtonPDF.setIcon(new javax.swing.ImageIcon(getClass().getResource("/fr/jmmc/aspro/gui/icons/icon_pdf.gif"))); // NOI18N
     this.jButtonPDF.setMargin(new java.awt.Insets(0, 0, 0, 0));
     this.jButtonPDF.addActionListener(new java.awt.event.ActionListener() {
+
       public void actionPerformed(java.awt.event.ActionEvent evt) {
         jButtonPDFActionPerformed(evt);
       }
@@ -304,6 +314,10 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
     this.add(panelOptions, BorderLayout.PAGE_END);
   }
 
+  /**
+   * Export the current chart as a PDF document
+   * @param evt action event
+   */
   private void jButtonPDFActionPerformed(java.awt.event.ActionEvent evt) {
 
     // set the source with the chart :
@@ -312,7 +326,15 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
     ExportPDFAction.getInstance().actionPerformed(evt);
   }
 
-  private void resetOptions() {
+  /**
+   * Update the UI widgets from the given loaded observation
+   *
+   * @param observation observation (unused)
+   */
+  private void onLoadObservation(final ObservationSetting observation) {
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("onLoadObservation :\n" + ObservationManager.toString(observation));
+    }
     try {
       // first disable the automatic refresh from field changes :
       this.doAutoRefresh = false;
@@ -329,7 +351,35 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
       this.doAutoRefresh = true;
     }
   }
+  
+  /**
+   * Handle the given event on the given observation =
+   * compute observability data and refresh the plot
+   * @param type event type
+   * @param observation observation
+   */
+  public void onProcess(final ObservationEventType type, final ObservationSetting observation) {
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("event [" + type + "] process IN");
+    }
+    switch (type) {
+      case CHANGED:
+        this.plot(observation);
+        break;
+      case LOADED:
+        this.onLoadObservation(observation);
+        break;
+      default:
+    }
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("event [" + type + "] process OUT");
+    }
+  }
 
+  /**
+   * Refresh the plot when an UI widget changes.
+   * Check the doAutoRefresh flag to avoid unwanted refresh (onLoadObservation)
+   */
   protected void refreshPlot() {
     if (this.doAutoRefresh) {
       if (logger.isLoggable(Level.FINE)) {
@@ -338,31 +388,7 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
       this.plot(ObservationManager.getInstance().getObservation());
     }
   }
-
-  /**
-   * Handle the given event on the given observation =
-   * compute observability data and refresh the plot
-   * @param type event type
-   * @param observation observation
-   */
-  public void onProcess(final ObservationEventType type, final ObservationSetting observation) {
-    switch (type) {
-      case CHANGED:
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("onChange occured : " + ObservationManager.toString(observation));
-        }
-        this.plot(observation);
-        break;
-      case LOADED:
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("onLoad occured : " + ObservationManager.toString(observation));
-        }
-        resetOptions();
-        break;
-      default:
-    }
-  }
-
+  
   /**
    * Plot the observability using a SwingWorker to do the computation in the background.
    * This code is executed by the Swing Event Dispatcher thread (EDT)
@@ -535,17 +561,29 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
     }
 
     // set the main data set :
-    this.localXYPlot.setDataset(new XYTaskDataset(localTaskSeriesCollection));
+    final XYTaskDataset dataset = new XYTaskDataset(localTaskSeriesCollection);
+
+    // adjust bar width :
+    if (targetNames.length > 1) {
+      dataset.setSeriesWidth(0.5d);
+    } else {
+      dataset.setSeriesWidth(0.25d);
+    }
+
+    this.localXYPlot.setDataset(dataset);
 
     // change the Domain axis (vertical) :
-    final SymbolAxis localSymbolAxis = new SymbolAxis("", targetNames);
+    final SymbolAxis localSymbolAxis = new SymbolAxis(null, targetNames);
     localSymbolAxis.setInverted(true);
     localSymbolAxis.setGridBandsVisible(false);
     localSymbolAxis.setAutoRange(false);
-    localSymbolAxis.setRangeWithMargins(-1d, targetNames.length);
+    if (targetNames.length > 0) {
+      localSymbolAxis.setRange(-0.5d, targetNames.length - 0.5d);
+    }
     this.localXYPlot.setDomainAxis(localSymbolAxis);
 
     final XYBarRenderer localXYBarRenderer = (XYBarRenderer) this.localXYPlot.getRenderer();
+
     // remove Annotations :
     localXYBarRenderer.removeAnnotations();
 
@@ -600,19 +638,22 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
       for (SunTimeInterval interval : intervals) {
         switch (interval.getType()) {
           case Day:
-            col = new Color(224,224,224);
+            col = DAY_COLOR;
             break;
           case Night:
-            col = new Color(96,96,96);
+            col = NIGHT_COLOR;
             break;
           default:
           case Twilight:
-            col = new Color(192,192,192);
+            col = TWILIGHT_COLOR;
             break;
         }
         localIntervalMarker = new IntervalMarker(interval.getStartDate().getTime(),
                 interval.getEndDate().getTime(), col);
+
+        // force Alpha to 1.0 to avoid PDF rendering problems (alpha layer ordering) :
         localIntervalMarker.setAlpha(1.0f);
+
         this.localXYPlot.addRangeMarker(localIntervalMarker, Layer.BACKGROUND);
       }
     }

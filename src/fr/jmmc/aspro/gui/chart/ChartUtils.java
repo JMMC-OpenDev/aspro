@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ChartUtils.java,v 1.3 2010-01-12 16:53:34 bourgesl Exp $"
+ * "@(#) $Id: ChartUtils.java,v 1.4 2010-01-14 17:03:06 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2010/01/12 16:53:34  bourgesl
+ * customized JFreeChart classes to get a square XY Plot supporting zooming in/out with mouse and mouse wheel
+ *
  * Revision 1.2  2010/01/08 16:51:17  bourgesl
  * initial uv coverage
  *
@@ -25,6 +28,7 @@ import org.jfree.chart.axis.TickUnits;
 import org.jfree.chart.labels.StandardXYToolTipGenerator;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.StandardXYBarPainter;
 import org.jfree.chart.renderer.xy.XYBarRenderer;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
@@ -64,9 +68,13 @@ public class ChartUtils {
     if (ChartFactory.getChartTheme() instanceof StandardChartTheme) {
       final StandardChartTheme theme = (StandardChartTheme) ChartFactory.getChartTheme();
 
-      // Disable bar shadows :
+      // Disable Bar shadows :
       theme.setShadowVisible(false);
 
+      // Disable Bar gradient :
+      theme.setXYBarPainter(new StandardXYBarPainter());
+
+      // Axis offset = gap between the axis line and the data area :
       theme.setAxisOffset(ZERO_AXIS_OFFSET);
     }
 
@@ -88,6 +96,7 @@ public class ChartUtils {
 
     final XYBarRenderer localXYBarRenderer = (XYBarRenderer) localXYPlot.getRenderer();
     localXYBarRenderer.setUseYInterval(true);
+    localXYBarRenderer.setDrawBarOutline(true);
 
     return localJFreeChart;
   }
