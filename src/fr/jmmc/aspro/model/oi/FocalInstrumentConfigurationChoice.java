@@ -25,6 +25,7 @@ import fr.jmmc.aspro.model.OIBase;
  *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *         &lt;element name="stations" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *         &lt;element name="pops" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ *         &lt;element name="instrumentMode" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -37,7 +38,8 @@ import fr.jmmc.aspro.model.OIBase;
 @XmlType(name = "FocalInstrumentConfigurationChoice", propOrder = {
     "name",
     "stations",
-    "pops"
+    "pops",
+    "instrumentMode"
 })
 public class FocalInstrumentConfigurationChoice
     extends OIBase
@@ -48,6 +50,8 @@ public class FocalInstrumentConfigurationChoice
     @XmlElement(required = true)
     protected String stations;
     protected String pops;
+    @XmlElement(required = true)
+    protected String instrumentMode;
 
     /**
      * Gets the value of the name property.
@@ -120,6 +124,30 @@ public class FocalInstrumentConfigurationChoice
     public void setPops(String value) {
         this.pops = value;
     }
+
+    /**
+     * Gets the value of the instrumentMode property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getInstrumentMode() {
+        return instrumentMode;
+    }
+
+    /**
+     * Sets the value of the instrumentMode property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setInstrumentMode(String value) {
+        this.instrumentMode = value;
+    }
     
 //--simple--preserve
   /** resolved reference to the focal instrument configuration (read only) */
@@ -158,6 +186,17 @@ public class FocalInstrumentConfigurationChoice
     this.popList = popList;
   }
 
+  /** resolved reference to the instrument mode (read only) */
+  @javax.xml.bind.annotation.XmlTransient
+  private FocalInstrumentMode focalInstrumentMode = null;
+
+  public FocalInstrumentMode getFocalInstrumentMode() {
+    return focalInstrumentMode;
+  }
+
+  public void setFocalInstrumentMode(FocalInstrumentMode focalInstrumentMode) {
+    this.focalInstrumentMode = focalInstrumentMode;
+  }
 //--simple--preserve
 
 }

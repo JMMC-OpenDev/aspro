@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationManager.java,v 1.15 2010-01-12 17:10:08 bourgesl Exp $"
+ * "@(#) $Id: ObservationManager.java,v 1.16 2010-01-14 17:04:15 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.15  2010/01/12 17:10:08  bourgesl
+ * less log INFO outputs
+ *
  * Revision 1.14  2010/01/08 16:51:18  bourgesl
  * initial uv coverage
  *
@@ -150,10 +153,14 @@ public class ObservationManager extends BaseOIManager {
     sb.append("name : ").append(obs.getName());
     sb.append(" when : ").append(obs.getWhen().getDate());
     sb.append(" interferometer : ").append(obs.getInterferometerConfiguration().getName());
+    // instrument :
     sb.append(" instrument : ").append(obs.getInstrumentConfiguration().getName());
     sb.append(" stations : ").append(obs.getInstrumentConfiguration().getStations());
     if (obs.getInstrumentConfiguration().getPops() != null) {
       sb.append(" pops : ").append(obs.getInstrumentConfiguration().getPops());
+    }
+    if (obs.getInstrumentConfiguration().getInstrumentMode() != null) {
+      sb.append(" mode : ").append(obs.getInstrumentConfiguration().getInstrumentMode());
     }
     if (!obs.getTargets().isEmpty()) {
       sb.append(" targets : \n").append(obs.getTargets());
@@ -229,6 +236,18 @@ public class ObservationManager extends BaseOIManager {
     return changed;
   }
 
+  public boolean setInstrumentMode(final String mode) {
+    final FocalInstrumentConfigurationChoice instrumentChoice = getObservation().getInstrumentConfiguration();
+
+    boolean changed = !mode.equals(instrumentChoice.getInstrumentMode());
+    if (changed) {
+      instrumentChoice.setInstrumentMode(mode);
+      instrumentChoice.setFocalInstrumentMode(ConfigurationManager.getInstance().getInstrumentMode(
+              getObservation().getInterferometerConfiguration().getName(), getObservation().getInstrumentConfiguration().getName(), mode));
+    }
+    return changed;
+  }
+
   private void updateObservation() {
     // ugly code to update all resolved references used on post load :
     final InterferometerConfigurationChoice interferometerChoice = getObservation().getInterferometerConfiguration();
@@ -245,6 +264,9 @@ public class ObservationManager extends BaseOIManager {
 
     instrumentChoice.setPopList(ConfigurationManager.getInstance().parseInstrumentPoPs(
             interferometerChoice.getName(), instrumentChoice.getName(), instrumentChoice.getPops()));
+
+    instrumentChoice.setFocalInstrumentMode(ConfigurationManager.getInstance().getInstrumentMode(
+            interferometerChoice.getName(), instrumentChoice.getName(), instrumentChoice.getInstrumentMode()));
 
   }
 

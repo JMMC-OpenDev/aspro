@@ -220,7 +220,15 @@
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
-      <!-- other parameters -->
+
+      <xsd:element name="minElevation" type="xsd:double">
+        <xsd:annotation>
+          <xsd:documentation>
+            minimum elevation for the telescopes (deg). 
+            Must be in the range [0;90]
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
     </xsd:sequence>
   </xsd:complexType>
 
@@ -254,12 +262,19 @@
       <xsd:element name="pops" type="xsd:string" minOccurs="0">
         <xsd:annotation>
           <xsd:documentation>
-              The list of pops (124)
+              The list of pops (124 means Pop1, Pop2, Pop4 respectively for U1, U2, U4 i.e. same ordering).
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
 
-      <!-- other parameters -->
+      <xsd:element name="instrumentMode" type="xsd:string">
+        <xsd:annotation>
+          <xsd:documentation>
+              The instrument mode (bandpass)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
     </xsd:sequence>
   </xsd:complexType>
 
@@ -1049,7 +1064,7 @@
         </xsd:annotation>
       </xsd:element>
 
-      <!-- should we have an explicit list of channels used by this focal instrument -->
+      <!-- should we have an explicit list of channels used by this focal instrument ? -->
 
       <xsd:element name="mode" type="FocalInstrumentMode" minOccurs="0" maxOccurs="unbounded">
         <xsd:annotation>

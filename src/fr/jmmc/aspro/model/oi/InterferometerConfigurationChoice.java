@@ -23,6 +23,7 @@ import fr.jmmc.aspro.model.OIBase;
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
  *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *         &lt;element name="minElevation" type="{http://www.w3.org/2001/XMLSchema}double"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -33,7 +34,8 @@ import fr.jmmc.aspro.model.OIBase;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "InterferometerConfigurationChoice", propOrder = {
-    "name"
+    "name",
+    "minElevation"
 })
 public class InterferometerConfigurationChoice
     extends OIBase
@@ -41,6 +43,7 @@ public class InterferometerConfigurationChoice
 
     @XmlElement(required = true)
     protected String name;
+    protected double minElevation;
 
     /**
      * Gets the value of the name property.
@@ -64,6 +67,22 @@ public class InterferometerConfigurationChoice
      */
     public void setName(String value) {
         this.name = value;
+    }
+
+    /**
+     * Gets the value of the minElevation property.
+     * 
+     */
+    public double getMinElevation() {
+        return minElevation;
+    }
+
+    /**
+     * Sets the value of the minElevation property.
+     * 
+     */
+    public void setMinElevation(double value) {
+        this.minElevation = value;
     }
     
 //--simple--preserve
