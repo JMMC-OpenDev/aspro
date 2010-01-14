@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportPDFAction.java,v 1.1 2010-01-13 16:11:43 bourgesl Exp $"
+ * "@(#) $Id: ExportPDFAction.java,v 1.2 2010-01-14 17:02:38 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2010/01/13 16:11:43  bourgesl
+ * pdf related classes
+ *
  */
 package fr.jmmc.aspro.gui.action;
 
@@ -60,6 +63,8 @@ public class ExportPDFAction {
    */
   private ExportPDFAction() {
     super();
+
+    FileFilterRepository.getInstance().put(PDF_MIME_TYPE, "pdf", "Portable Document Format (PDF)");
   }
 
   /**
@@ -125,17 +130,7 @@ public class ExportPDFAction {
   }
 
   protected FileFilter getPDFFileFilter() {
-    final FileFilterRepository fileFilterRepository = FileFilterRepository.getInstance();
-
-    FileFilter filter = fileFilterRepository.get(PDF_MIME_TYPE);
-
-    if (filter == null) {
-      fileFilterRepository.put(PDF_MIME_TYPE, "pdf", "Portable Document Format (PDF)");
-
-      filter = fileFilterRepository.get(PDF_MIME_TYPE);
-    }
-
-    return filter;
+    return FileFilterRepository.getInstance().get(PDF_MIME_TYPE);
   }
 
   protected File checkPDFFileExtension(final File file) {

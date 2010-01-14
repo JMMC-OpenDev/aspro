@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationFileAction.java,v 1.1 2009-12-08 13:09:55 bourgesl Exp $"
+ * "@(#) $Id: ObservationFileAction.java,v 1.2 2010-01-14 17:02:38 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2009/12/08 13:09:55  bourgesl
+ * Added FileFilter for observation settings
+ *
  */
 package fr.jmmc.aspro.gui.action;
 
@@ -38,20 +41,12 @@ public abstract class ObservationFileAction extends RegisteredAction {
    */
   public ObservationFileAction(final String classPath, final String fieldName) {
     super(classPath, fieldName);
+
+    FileFilterRepository.getInstance().put(OBSERVATION_MIME_TYPE, "xml", "Aspro Observation Settings (xml)");
   }
 
   protected FileFilter getObservationFileFilter() {
-    final FileFilterRepository fileFilterRepository = FileFilterRepository.getInstance();
-
-    FileFilter filter = fileFilterRepository.get(OBSERVATION_MIME_TYPE);
-
-    if (filter == null) {
-      fileFilterRepository.put(OBSERVATION_MIME_TYPE, "xml", "Aspro Observation Settings (xml)");
-
-      filter = fileFilterRepository.get(OBSERVATION_MIME_TYPE);
-    }
-
-    return filter;
+    return FileFilterRepository.getInstance().get(OBSERVATION_MIME_TYPE);
   }
 
   public String getLastDir() {
@@ -61,6 +56,4 @@ public abstract class ObservationFileAction extends RegisteredAction {
   public void setLastDir(String lastDir) {
     this.lastDir = lastDir;
   }
-
-  
 }
