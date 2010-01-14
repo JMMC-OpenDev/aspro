@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AstroSkyCalc.java,v 1.15 2010-01-08 16:51:18 bourgesl Exp $"
+ * "@(#) $Id: AstroSkyCalc.java,v 1.16 2010-01-14 15:23:01 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.15  2010/01/08 16:51:18  bourgesl
+ * initial uv coverage
+ *
  */
 package edu.dartmouth;
 
@@ -30,7 +33,7 @@ import java.util.logging.Level;
 public class AstroSkyCalc {
 
   /** Class Name */
-  private static final String className_ = "fr.jmmc.aspro.AstroSkyCalc";
+  private static final String className_ = "edu.dartmouth.AstroSkyCalc";
   /** Class logger */
   private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
