@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.5 2010-01-15 13:52:14 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.6 2010-01-15 16:14:16 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2010/01/15 13:52:14  bourgesl
+ * instrumentMode synchronized properly between the observation and the UI widgets (load/change/reset)
+ *
  * Revision 1.4  2010/01/14 17:03:37  bourgesl
  * refactoring for observation LOAD / CHANGE events
  *
@@ -36,10 +39,13 @@ import fr.jmmc.aspro.model.uvcoverage.UVCoverageData;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Pop;
 import fr.jmmc.aspro.model.uvcoverage.UVBaseLineData;
+import fr.jmmc.aspro.model.uvcoverage.UVRangeBaseLineData;
 import fr.jmmc.aspro.service.UVCoverageService;
 import fr.jmmc.mcs.gui.StatusBar;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.ExecutionException;
@@ -68,6 +74,8 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
   /** Class logger */
   private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
+  /** scaling factor to Mega Lambda for U,V points */
+  private final static double MEGA_SCALE = 1e-6;
 
   /* members */
   /** observation manager */
@@ -117,7 +125,7 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     jLabel2 = new javax.swing.JLabel();
     jComboBoxInstrumentMode = new javax.swing.JComboBox();
     jLabel3 = new javax.swing.JLabel();
-    jFormattedTextField1 = new javax.swing.JFormattedTextField();
+    jFieldSamplingPeriod = new javax.swing.JFormattedTextField();
     jButtonPDF = new javax.swing.JButton();
 
     setLayout(new javax.swing.BoxLayout(this, javax.swing.BoxLayout.X_AXIS));
@@ -160,12 +168,12 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     gridBagConstraints.insets = new java.awt.Insets(10, 0, 0, 0);
     jPanelRight.add(jLabel3, gridBagConstraints);
 
-    jFormattedTextField1.setColumns(3);
-    jFormattedTextField1.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter()));
+    jFieldSamplingPeriod.setColumns(3);
+    jFieldSamplingPeriod.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter()));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 5;
-    jPanelRight.add(jFormattedTextField1, gridBagConstraints);
+    jPanelRight.add(jFieldSamplingPeriod, gridBagConstraints);
 
     jButtonPDF.setIcon(new javax.swing.ImageIcon(getClass().getResource("/fr/jmmc/aspro/gui/icons/icon_pdf.gif"))); // NOI18N
     jButtonPDF.setMargin(new java.awt.Insets(0, 0, 0, 0));
@@ -200,7 +208,7 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
    */
   private void postInit() {
 
-    this.localJFreeChart = ChartUtils.createSquareXYLineChart("U (m)", "V (m)");
+    this.localJFreeChart = ChartUtils.createSquareXYLineChart("U (M\u03BB)", "V (M\u03BB)");
     this.localXYPlot = (XYPlot) localJFreeChart.getPlot();
 
     // add listener :
@@ -228,6 +236,27 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     // define change listeners :
     this.jComboBoxTarget.addActionListener(this);
     this.jComboBoxInstrumentMode.addActionListener(this);
+
+    // default sampling Period and property change listener :
+    this.jFieldSamplingPeriod.setValue(AsproConstants.DEFAULT_SAMPLING_PERIOD);
+    this.jFieldSamplingPeriod.addPropertyChangeListener("value", new PropertyChangeListener() {
+
+      public void propertyChange(final PropertyChangeEvent evt) {
+        final double samplingNew = ((Number) jFieldSamplingPeriod.getValue()).doubleValue();
+
+        if (samplingNew < 0d) {
+          // invalid value :
+          jFieldSamplingPeriod.setValue(AsproConstants.DEFAULT_SAMPLING_PERIOD);
+        }
+
+        if (logger.isLoggable(Level.FINE)) {
+          logger.fine("samplingPeriod changed : " + samplingNew);
+        }
+        updateObservation();
+        refreshPlot();
+      }
+    });
+
   }
 
   /**
@@ -299,12 +328,17 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
 
       if (targetName != null) {
         // Change the instrument mode :
-
         this.om.setInstrumentMode((String) this.jComboBoxInstrumentMode.getSelectedItem());
+
+        // Update the sampling period :
+        final Number samplingPeriod = (Number)this.jFieldSamplingPeriod.getValue();
+        this.om.setInstrumentSamplingPeriod(Double.valueOf(samplingPeriod.doubleValue()));
+
       } else {
         // clean up i.e. the panel is then invalid :
 
         this.om.setInstrumentMode(null);
+        this.om.setInstrumentSamplingPeriod(null);
       }
 
       // TODO : fire event ??
@@ -543,7 +577,7 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     final List<UVBaseLineData> targetUVRiseSet = uvData.getTargetUVRiseSet();
 
     if (targetUVRiseSet != null) {
-      // target is observable :
+      // target is visible :
 
       XYSeries xySeriesBL;
 
@@ -558,14 +592,57 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
         v = uvBL.getV();
 
         for (int i = 0, size = uvBL.getNPoints(); i < size; i++) {
-          xySeriesBL.add(-u[i], -v[i]);
+          xySeriesBL.add(-u[i] * MEGA_SCALE, -v[i] * MEGA_SCALE);
         } // points
 
         // add an invalid point to break the line between the 2 segments :
         xySeriesBL.add(Double.NaN, Double.NaN);
 
         for (int i = 0, size = uvBL.getNPoints(); i < size; i++) {
-          xySeriesBL.add(u[i], v[i]);
+          xySeriesBL.add(u[i] * MEGA_SCALE, v[i] * MEGA_SCALE);
+        } // points
+
+        xySeriesBL.setNotify(true);
+        dataset.addSeries(xySeriesBL);
+      } // BL
+    }
+
+    // process uv rise/set :
+    final List<UVRangeBaseLineData> targetUVObservability = uvData.getTargetUVObservability();
+
+    if (targetUVObservability != null) {
+      // target is observable :
+
+      XYSeries xySeriesBL;
+
+      double[] u;
+      double[] v;
+      double[] u2;
+      double[] v2;
+
+      for (UVRangeBaseLineData uvBL : targetUVObservability) {
+        xySeriesBL = new XYSeries(uvBL.getName(), false);
+        xySeriesBL.setNotify(false);
+
+        u = uvBL.getU();
+        v = uvBL.getV();
+        u2 = uvBL.getU2();
+        v2 = uvBL.getV2();
+
+        for (int i = 0, size = uvBL.getNPoints(); i < size; i++) {
+          xySeriesBL.add(-u[i] * MEGA_SCALE, -v[i] * MEGA_SCALE);
+          xySeriesBL.add(-u2[i] * MEGA_SCALE, -v2[i] * MEGA_SCALE);
+
+          // add an invalid point to break the line between the 2 segments :
+          xySeriesBL.add(Double.NaN, Double.NaN);
+        } // points
+
+        for (int i = 0, size = uvBL.getNPoints(); i < size; i++) {
+          xySeriesBL.add(u[i] * MEGA_SCALE, v[i] * MEGA_SCALE);
+          xySeriesBL.add(u2[i] * MEGA_SCALE, v2[i] * MEGA_SCALE);
+
+          // add an invalid point to break the line between the 2 segments :
+          xySeriesBL.add(Double.NaN, Double.NaN);
         } // points
 
         xySeriesBL.setNotify(true);
@@ -580,7 +657,7 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
   private javax.swing.JButton jButtonPDF;
   private javax.swing.JComboBox jComboBoxInstrumentMode;
   private javax.swing.JComboBox jComboBoxTarget;
-  private javax.swing.JFormattedTextField jFormattedTextField1;
+  private javax.swing.JFormattedTextField jFieldSamplingPeriod;
   private javax.swing.JLabel jLabel1;
   private javax.swing.JLabel jLabel2;
   private javax.swing.JLabel jLabel3;

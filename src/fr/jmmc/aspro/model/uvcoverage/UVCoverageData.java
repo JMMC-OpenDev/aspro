@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoverageData.java,v 1.1 2010-01-08 16:50:53 bourgesl Exp $"
+ * "@(#) $Id: UVCoverageData.java,v 1.2 2010-01-15 16:14:16 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2010/01/08 16:50:53  bourgesl
+ * initial uv coverage
+ *
  */
 package fr.jmmc.aspro.model.uvcoverage;
 
@@ -21,8 +24,8 @@ public class UVCoverageData {
   private String name;
   /** list of uv points corresponding to the target rise/set */
   private List<UVBaseLineData> targetUVRiseSet;
-  /** list of uv points corresponding to the target rise/set */
-  private List<UVBaseLineData> targetUVObservability;
+  /** list of uv point couples corresponding to the target observability */
+  private List<UVRangeBaseLineData> targetUVObservability;
 
   /**
    * Constructor
@@ -46,11 +49,11 @@ public class UVCoverageData {
     this.targetUVRiseSet = targetUVRiseSet;
   }
 
-  public List<UVBaseLineData> getTargetUVObservability() {
+  public List<UVRangeBaseLineData> getTargetUVObservability() {
     return targetUVObservability;
   }
 
-  public void setTargetUVObservability(List<UVBaseLineData> targetUVObservability) {
+  public void setTargetUVObservability(List<UVRangeBaseLineData> targetUVObservability) {
     this.targetUVObservability = targetUVObservability;
   }
 }

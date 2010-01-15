@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoverageService.java,v 1.3 2010-01-15 13:51:27 bourgesl Exp $"
+ * "@(#) $Id: UVCoverageService.java,v 1.4 2010-01-15 16:14:16 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2010/01/15 13:51:27  bourgesl
+ * illegalStateException if any transient field is undefined
+ *
  * Revision 1.2  2010/01/12 17:10:08  bourgesl
  * less log INFO outputs
  *
@@ -18,11 +21,13 @@ package fr.jmmc.aspro.service;
 import fr.jmmc.aspro.model.BaseLine;
 import fr.jmmc.aspro.model.observability.ObservabilityData;
 import fr.jmmc.aspro.model.ObservationManager;
+import fr.jmmc.aspro.model.Range;
 import fr.jmmc.aspro.model.observability.StarData;
 import fr.jmmc.aspro.model.oi.FocalInstrumentMode;
 import fr.jmmc.aspro.model.uvcoverage.UVCoverageData;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.uvcoverage.UVBaseLineData;
+import fr.jmmc.aspro.model.uvcoverage.UVRangeBaseLineData;
 import fr.jmmc.aspro.util.AngleUtils;
 import java.util.ArrayList;
 import java.util.List;
@@ -55,6 +60,8 @@ public class UVCoverageService {
   /* internal */
   /** Get the current thread to check if the computation is interrupted */
   private final Thread currentThread = Thread.currentThread();
+  /** hour angle step (see samplingPeriod) */
+  private double haStep;
   /** minimal wavelength */
   private double lambdaMin;
   /** central wavelength */
@@ -113,7 +120,14 @@ public class UVCoverageService {
         if (this.starData.getHaElev() > 0d) {
 
           computeUVSupport();
+
+          computeObservableUV();
         }
+      }
+
+      // fast interrupt :
+      if (this.currentThread.isInterrupted()) {
+        return null;
       }
 
     } catch (IllegalStateException ise) {
@@ -179,6 +193,11 @@ public class UVCoverageService {
         u[j] = CalcUVW.computeU(baseLine, haRad);
         v[j] = CalcUVW.computeV(precDEC, baseLine, haRad);
 
+        // wavelength correction :
+
+        u[j] = u[j] / this.lambda;
+        v[j] = v[j] / this.lambda;
+
         j++;
       }
 
@@ -187,9 +206,115 @@ public class UVCoverageService {
       uvData.setV(v);
 
       targetUVRiseSet.add(uvData);
+
+      // fast interrupt :
+      if (this.currentThread.isInterrupted()) {
+        return;
+      }
+
     }
 
     this.data.setTargetUVRiseSet(targetUVRiseSet);
+  }
+
+  private void computeObservableUV() {
+
+    final List<Range> obsRangesHA = this.starData.getObsRangesHA();
+
+    logger.severe("obsRangesHA = " + obsRangesHA);
+
+    if (obsRangesHA != null) {
+
+      // TODO : get haMin / haMax from parameters :
+      final double haMin = -12d;
+      final double haMax = 12d;
+
+      final double step = this.haStep;
+
+      // precessed target declination in rad :
+      final double precDEC = Math.toRadians(this.starData.getPrecDEC());
+
+      final int sizeBL = this.baseLines.size();
+
+      final List<UVRangeBaseLineData> targetUVObservability = new ArrayList<UVRangeBaseLineData>(sizeBL);
+
+      UVRangeBaseLineData uvData;
+      BaseLine baseLine;
+      double[] u;
+      double[] v;
+      double[] u2;
+      double[] v2;
+      int j, n;
+
+      double haRad;
+
+      boolean observable;
+
+      for (int i = 0, size = this.baseLines.size(); i < size; i++) {
+        baseLine = this.baseLines.get(i);
+
+        uvData = new UVRangeBaseLineData(baseLine.getName());
+
+        n = (int) Math.round((haMax - haMin) / step) + 1;
+
+        u = new double[n];
+        v = new double[n];
+        u2 = new double[n];
+        v2 = new double[n];
+
+        j = 0;
+
+        for (double ha = haMin; ha <= haMax; ha += step) {
+
+          // check HA :
+          observable = checkObservability(ha, obsRangesHA);
+
+          if (observable) {
+            haRad = AngleUtils.hours2rad(ha);
+            u[j] = CalcUVW.computeU(baseLine, haRad);
+            v[j] = CalcUVW.computeV(precDEC, baseLine, haRad);
+
+            u2[j] = u[j];
+            v2[j] = v[j];
+
+            // wavelength correction :
+
+            u[j] = u[j] / this.lambdaMin;
+            v[j] = v[j] / this.lambdaMin;
+
+            u2[j] = u2[j] / this.lambdaMax;
+            v2[j] = v2[j] / this.lambdaMax;
+
+            j++;
+          }
+        }
+
+        uvData.setNPoints(j);
+        uvData.setU(u);
+        uvData.setV(v);
+        uvData.setU2(u2);
+        uvData.setV2(v2);
+
+        targetUVObservability.add(uvData);
+
+        // fast interrupt :
+        if (this.currentThread.isInterrupted()) {
+          return;
+        }
+
+      }
+
+      this.data.setTargetUVObservability(targetUVObservability);
+    }
+  }
+
+  private boolean checkObservability(final double ha, final List<Range> obsRangesHA) {
+    for (Range range : obsRangesHA) {
+      if (ha > range.getMin() && ha < range.getMax()) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**
@@ -220,6 +345,9 @@ public class UVCoverageService {
     this.lambdaMax = insMode.getWaveLengthMax() * 1e-6d;
 
     this.lambda = (this.lambdaMax + this.lambdaMin) / 2d;
+
+    // hour angle step in decimal hour :
+    this.haStep = this.observation.getInstrumentConfiguration().getSamplingPeriod() / 60d;
 
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("lambdaMin : " + this.lambdaMin);
