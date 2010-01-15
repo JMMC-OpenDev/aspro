@@ -90,11 +90,19 @@ public class InterferometerConfigurationChoice
   @javax.xml.bind.annotation.XmlTransient
   private InterferometerConfiguration interferometerConfiguration = null;
 
+  /**
+   * Return the reference to the interferometer configuration (read only)
+   * @return interferometer configuration or null
+   */
   public InterferometerConfiguration getInterferometerConfiguration() {
     return interferometerConfiguration;
   }
 
-  public void setInterferometerConfiguration(InterferometerConfiguration interferometerConfiguration) {
+  /**
+   * Define the reference to the interferometer configuration (read only)
+   * @param interferometerConfiguration interferometer configuration
+   */
+  public void setInterferometerConfiguration(final InterferometerConfiguration interferometerConfiguration) {
     this.interferometerConfiguration = interferometerConfiguration;
   }
 

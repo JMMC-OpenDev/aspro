@@ -154,35 +154,59 @@ public class FocalInstrumentConfigurationChoice
   @javax.xml.bind.annotation.XmlTransient
   private FocalInstrumentConfiguration instrumentConfiguration = null;
 
+  /**
+   * Return the reference to the focal instrument configuration (read only)
+   * @return focal instrument configuration or null
+   */
   public FocalInstrumentConfiguration getInstrumentConfiguration() {
     return instrumentConfiguration;
   }
 
-  public void setInstrumentConfiguration(FocalInstrumentConfiguration instrumentConfiguration) {
+  /**
+   * Define the reference to the focal instrument configuration (read only)
+   * @param instrumentConfiguration focal instrument configuration
+   */
+  public void setInstrumentConfiguration(final FocalInstrumentConfiguration instrumentConfiguration) {
     this.instrumentConfiguration = instrumentConfiguration;
   }
 
-  /** resolved reference to the stations (read only) */
+  /** resolved reference to the list of Stations (read only) */
   @javax.xml.bind.annotation.XmlTransient
   private java.util.List<Station> stationList = null;
 
+  /**
+   * Return the reference to the list of Stations (read only)
+   * @return list of Stations or null
+   */
   public java.util.List<Station> getStationList() {
     return stationList;
   }
 
-  public void setStationList(java.util.List<Station> stationList) {
+  /**
+   * Define the reference to the list of Stations (read only)
+   * @param stationList list of Stations
+   */
+  public void setStationList(final java.util.List<Station> stationList) {
     this.stationList = stationList;
   }
 
-  /** resolved reference to the PoPs (read only) */
+  /** resolved reference to the list of PoPs (read only) */
   @javax.xml.bind.annotation.XmlTransient
   private java.util.List<Pop> popList = null;
 
+  /**
+   * Return the reference to the list of PoPs (read only)
+   * @return list of PoPs or null
+   */
   public java.util.List<Pop> getPopList() {
     return popList;
   }
 
-  public void setPopList(java.util.List<Pop> popList) {
+  /**
+   * Define the reference to the list of PoPs (read only)
+   * @param popList list of PoPs
+   */
+  public void setPopList(final java.util.List<Pop> popList) {
     this.popList = popList;
   }
 
@@ -190,13 +214,22 @@ public class FocalInstrumentConfigurationChoice
   @javax.xml.bind.annotation.XmlTransient
   private FocalInstrumentMode focalInstrumentMode = null;
 
+  /**
+   * Return the reference to the instrument mode (read only)
+   * @return instrument mode or null
+   */
   public FocalInstrumentMode getFocalInstrumentMode() {
     return focalInstrumentMode;
   }
 
-  public void setFocalInstrumentMode(FocalInstrumentMode focalInstrumentMode) {
+  /**
+   * Define the reference to the instrument mode (read only)
+   * @param focalInstrumentMode instrument mode
+   */
+  public void setFocalInstrumentMode(final FocalInstrumentMode focalInstrumentMode) {
     this.focalInstrumentMode = focalInstrumentMode;
   }
+  
 //--simple--preserve
 
 }

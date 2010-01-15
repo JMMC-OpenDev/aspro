@@ -424,6 +424,7 @@ public class InterferometerDescription
   private List<InterferometerConfiguration> configurations = null;
 
   /**
+   * Return the list of configurations using this interferometer (read only)
    * @return list of configurations using this interferometer
    */
   public List<InterferometerConfiguration> getConfigurations() {
