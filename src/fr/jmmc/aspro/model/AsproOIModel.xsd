@@ -267,10 +267,19 @@
         </xsd:annotation>
       </xsd:element>
 
-      <xsd:element name="instrumentMode" type="xsd:string">
+      <!-- UV coverage data -->
+      <xsd:element name="instrumentMode" type="xsd:string" minOccurs="0">
         <xsd:annotation>
           <xsd:documentation>
               The instrument mode (bandpass)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
+      <xsd:element name="samplingPeriod" type="xsd:double" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>
+              The observing sampling period (min)
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>

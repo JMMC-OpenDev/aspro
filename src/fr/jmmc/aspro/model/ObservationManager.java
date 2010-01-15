@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationManager.java,v 1.17 2010-01-15 13:50:17 bourgesl Exp $"
+ * "@(#) $Id: ObservationManager.java,v 1.18 2010-01-15 16:13:16 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.17  2010/01/15 13:50:17  bourgesl
+ * added logs on setters
+ * supports instrumentMode is null
+ *
  * Revision 1.16  2010/01/14 17:04:15  bourgesl
  * added instrument mode + min elevation in the observation settings
  *
@@ -242,7 +246,6 @@ public class ObservationManager extends BaseOIManager {
 
     // pops can be null :
     boolean changed = isChanged(pops, instrumentChoice.getPops());
-
     if (changed) {
       if (logger.isLoggable(Level.FINEST)) {
         logger.finest("setInstrumentConfigurationPoPs : " + pops);
@@ -259,7 +262,6 @@ public class ObservationManager extends BaseOIManager {
 
     // mode can be null :
     boolean changed = isChanged(mode, instrumentChoice.getInstrumentMode());
-
     if (changed) {
       if (logger.isLoggable(Level.FINEST)) {
         logger.finest("setInstrumentMode : " + mode);
@@ -271,13 +273,27 @@ public class ObservationManager extends BaseOIManager {
     return changed;
   }
 
+  public boolean setInstrumentSamplingPeriod(final Double samplingPeriod) {
+    final FocalInstrumentConfigurationChoice instrumentChoice = getObservation().getInstrumentConfiguration();
+
+    // period can be null :
+    boolean changed = isChanged(samplingPeriod, instrumentChoice.getSamplingPeriod());
+    if (changed) {
+      if (logger.isLoggable(Level.FINEST)) {
+        logger.finest("setInstrumentSamplingPeriod : " + samplingPeriod);
+      }
+      instrumentChoice.setSamplingPeriod(samplingPeriod);
+    }
+    return changed;
+  }
+
   /**
-   * Check if the strings are different supporting null values
+   * Check if the objects are different supporting null values
    * @param value1 string 1
    * @param value2 string 2
-   * @return true only if strings are different
+   * @return true only if objects are different
    */
-  private boolean isChanged(final String value1, final String value2) {
+  private boolean isChanged(final Object value1, final Object value2) {
     return (value1 == null && value2 != null) || (value1 != null && value2 == null) || (value1 != null && value2 != null && !value1.equals(value2));
   }
 

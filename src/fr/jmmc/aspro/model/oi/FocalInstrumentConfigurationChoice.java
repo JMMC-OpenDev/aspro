@@ -25,7 +25,8 @@ import fr.jmmc.aspro.model.OIBase;
  *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *         &lt;element name="stations" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *         &lt;element name="pops" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="instrumentMode" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *         &lt;element name="instrumentMode" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ *         &lt;element name="samplingPeriod" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -39,7 +40,8 @@ import fr.jmmc.aspro.model.OIBase;
     "name",
     "stations",
     "pops",
-    "instrumentMode"
+    "instrumentMode",
+    "samplingPeriod"
 })
 public class FocalInstrumentConfigurationChoice
     extends OIBase
@@ -50,8 +52,8 @@ public class FocalInstrumentConfigurationChoice
     @XmlElement(required = true)
     protected String stations;
     protected String pops;
-    @XmlElement(required = true)
     protected String instrumentMode;
+    protected Double samplingPeriod;
 
     /**
      * Gets the value of the name property.
@@ -147,6 +149,30 @@ public class FocalInstrumentConfigurationChoice
      */
     public void setInstrumentMode(String value) {
         this.instrumentMode = value;
+    }
+
+    /**
+     * Gets the value of the samplingPeriod property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getSamplingPeriod() {
+        return samplingPeriod;
+    }
+
+    /**
+     * Sets the value of the samplingPeriod property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setSamplingPeriod(Double value) {
+        this.samplingPeriod = value;
     }
     
 //--simple--preserve
