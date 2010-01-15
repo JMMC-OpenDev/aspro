@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SettingPanel.java,v 1.13 2010-01-14 17:03:37 bourgesl Exp $"
+ * "@(#) $Id: SettingPanel.java,v 1.14 2010-01-15 13:52:14 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.13  2010/01/14 17:03:37  bourgesl
+ * refactoring for observation LOAD / CHANGE events
+ *
  * Revision 1.12  2010/01/11 13:58:43  bourgesl
  * bad class name for UV Coverage Panel
  *
@@ -130,9 +133,6 @@ public class SettingPanel extends JPanel implements ObservationListener {
     }
     if (type == ObservationEventType.CHANGED ||
         type == ObservationEventType.LOADED) {
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("observation :\n" + ObservationManager.toString(observation));
-      }
 
       if (this.observabilityPanel == null) {
         this.observabilityPanel = new ObservabilityPanel();
@@ -164,7 +164,7 @@ public class SettingPanel extends JPanel implements ObservationListener {
           // remove the uv panel :
           this.tabs.removeTabAt(uvPanelIndex);
 
-          // unregister the uv panel :
+          // unregister the uv panel for the next event :
           ObservationManager.getInstance().unregister(this.uvpanel);
 
           this.uvpanel = null;

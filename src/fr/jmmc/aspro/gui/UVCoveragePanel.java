@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.4 2010-01-14 17:03:37 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.5 2010-01-15 13:52:14 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2010/01/14 17:03:37  bourgesl
+ * refactoring for observation LOAD / CHANGE events
+ *
  * Revision 1.3  2010/01/13 16:12:31  bourgesl
  * added export to PDF button
  *
@@ -292,9 +295,17 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     // check if the automatic update flag is enabled :
     if (this.doAutoUpdateObservation) {
 
-      // Change the instrument mode :
+      final String targetName = (String) this.jComboBoxTarget.getSelectedItem();
 
-      this.om.setInstrumentMode((String) this.jComboBoxInstrumentMode.getSelectedItem());
+      if (targetName != null) {
+        // Change the instrument mode :
+
+        this.om.setInstrumentMode((String) this.jComboBoxInstrumentMode.getSelectedItem());
+      } else {
+        // clean up i.e. the panel is then invalid :
+
+        this.om.setInstrumentMode(null);
+      }
 
       // TODO : fire event ??
 
@@ -325,6 +336,8 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
 
       // refresh the instrument modes :
       updateComboInstrumentModes(observation);
+
+      updateObservation();
 
     } finally {
       // restore the automatic refresh from field changes :
@@ -515,7 +528,8 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
 
       // start the new worker :
       worker.execute();
-    }
+
+    } // observability data check
   }
 
   /**
