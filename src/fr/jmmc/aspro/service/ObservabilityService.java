@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.32 2010-01-12 16:54:19 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.33 2010-01-15 13:51:27 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.32  2010/01/12 16:54:19  bourgesl
+ * added PoPs in title + several changes on charts
+ *
  * Revision 1.31  2010/01/08 16:51:17  bourgesl
  * initial uv coverage
  *
@@ -128,6 +131,8 @@ import fr.jmmc.aspro.model.oi.Channel;
 import fr.jmmc.aspro.model.oi.ChannelLink;
 import fr.jmmc.aspro.model.oi.DelayLine;
 import fr.jmmc.aspro.model.oi.FocalInstrument;
+import fr.jmmc.aspro.model.oi.FocalInstrumentConfiguration;
+import fr.jmmc.aspro.model.oi.InterferometerConfiguration;
 import fr.jmmc.aspro.model.oi.InterferometerDescription;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Pop;
@@ -192,15 +197,15 @@ public class ObservabilityService {
   /** Night ranges defined in julian day */
   private List<Range> nightLimits = null;
   /** interferometer description */
-  private InterferometerDescription interferometer;
+  private InterferometerDescription interferometer = null;
   /** focal instrument description */
-  private FocalInstrument instrument;
+  private FocalInstrument instrument = null;
   /** flag to indicate that a station has an horizon profile */
   private boolean hasHorizon = false;
   /** flag to indicate that pops are used */
   private boolean hasPops = false;
   /** beam list */
-  private List<Beam> beams;
+  private List<Beam> beams = null;
   /** base line list */
   private List<BaseLine> baseLines = new ArrayList<BaseLine>();
   /** W ranges corresponding to the base line list */
@@ -343,9 +348,18 @@ public class ObservabilityService {
 
       }
 
+    } catch (IllegalStateException ise) {
+      if (logger.isLoggable(Level.WARNING)) {
+        logger.log(Level.WARNING, "invalid observation :", ise);
+        logger.log(Level.WARNING, "observation : " + ObservationManager.toString(this.observation));
+      }
+      // clear invalid data :
+      this.data = null;
     } catch (RuntimeException re) {
-      logger.log(Level.SEVERE, "compute failure :", re);
-      logger.log(Level.SEVERE, "observation : " + ObservationManager.toString(this.observation));
+      if (logger.isLoggable(Level.SEVERE)) {
+        logger.log(Level.SEVERE, "compute failure :", re);
+        logger.log(Level.SEVERE, "observation : " + ObservationManager.toString(this.observation));
+      }
       // clear invalid data :
       this.data = null;
     }
@@ -1054,12 +1068,25 @@ public class ObservabilityService {
   }
 
   /**
-   * Define the interferometer and instrument and check if the interferometer has PoPs
+   * Define the interferometer and instrument configurations and check if the interferometer has PoPs
+   * @throws IllegalStateException if the interferometer configuration or instrument configuration is undefined
    */
-  private void prepareObservation() {
-    this.interferometer = this.observation.getInterferometerConfiguration().getInterferometerConfiguration().getInterferometer();
-    this.instrument = this.observation.getInstrumentConfiguration().getInstrumentConfiguration().getFocalInstrument();
+  private void prepareObservation() throws IllegalStateException {
+    final InterferometerConfiguration intConf = this.observation.getInterferometerConfiguration().getInterferometerConfiguration();
+    if (intConf == null) {
+      throw new IllegalStateException("prepareObservation : the interferometerConfiguration is null !");
+    }
 
+    this.interferometer = intConf.getInterferometer();
+
+    final FocalInstrumentConfiguration insConf = this.observation.getInstrumentConfiguration().getInstrumentConfiguration();
+    if (insConf == null) {
+      throw new IllegalStateException("prepareObservation : the instrumentConfiguration is null !");
+    }
+
+    this.instrument = insConf.getFocalInstrument();
+
+    // check Pops :
     this.hasPops = !this.interferometer.getPops().isEmpty();
 
     if (logger.isLoggable(Level.FINE)) {
@@ -1071,11 +1098,14 @@ public class ObservabilityService {
   /**
    * Define the beams from the user station list, associates a channel to the beam (first channel not used) and a delay line.
    * Computes the fixed offset for the beam from the station fixed offset and the interferometer switchyard
+   * @throws IllegalStateException if the station list is undefined
    */
   private void prepareBeams() {
-
     // Get chosen stations :
     final List<Station> stations = this.observation.getInstrumentConfiguration().getStationList();
+    if (stations == null) {
+      throw new IllegalStateException("prepareBeams : the station list is null !");
+    }
 
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("stations = " + stations);

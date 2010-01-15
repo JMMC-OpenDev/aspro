@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoverageService.java,v 1.2 2010-01-12 17:10:08 bourgesl Exp $"
+ * "@(#) $Id: UVCoverageService.java,v 1.3 2010-01-15 13:51:27 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2010/01/12 17:10:08  bourgesl
+ * less log INFO outputs
+ *
  * Revision 1.1  2010/01/08 16:50:53  bourgesl
  * initial uv coverage
  *
@@ -16,6 +19,7 @@ import fr.jmmc.aspro.model.BaseLine;
 import fr.jmmc.aspro.model.observability.ObservabilityData;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.observability.StarData;
+import fr.jmmc.aspro.model.oi.FocalInstrumentMode;
 import fr.jmmc.aspro.model.uvcoverage.UVCoverageData;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.uvcoverage.UVBaseLineData;
@@ -51,12 +55,20 @@ public class UVCoverageService {
   /* internal */
   /** Get the current thread to check if the computation is interrupted */
   private final Thread currentThread = Thread.currentThread();
+  /** minimal wavelength */
+  private double lambdaMin;
+  /** central wavelength */
+  private double lambda;
+  /** maximal wavelength */
+  private double lambdaMax;
 
   /* reused observability data */
+  /** observability data */
+  private ObservabilityData obsData = null;
   /** base line list */
   private List<BaseLine> baseLines = null;
   /** star data */
-  private StarData starData;
+  private StarData starData = null;
 
   /**
    * Constructor.
@@ -85,32 +97,37 @@ public class UVCoverageService {
 
     try {
       // check if observability data are available :
-      final ObservabilityData obsData = this.observation.getObservabilityData();
+      this.obsData = this.observation.getObservabilityData();
 
-      if (obsData == null) {
+      if (this.obsData == null) {
+        // invalid data because the observability data are not available :
         this.data = null;
       } else {
-
-        this.baseLines = obsData.getBaseLines();
-
-        this.starData = obsData.getStarData(this.targetName);
-
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("starData : " + this.starData);
-        }
+        // Get instrument and observability data :
+        prepareObservation();
 
         // target name :
         this.data.setName(this.targetName);
 
+        // Is the target visible :
         if (this.starData.getHaElev() > 0d) {
 
           computeUVSupport();
         }
       }
 
+    } catch (IllegalStateException ise) {
+      if (logger.isLoggable(Level.WARNING)) {
+        logger.log(Level.WARNING, "invalid observation :", ise);
+        logger.log(Level.WARNING, "observation : " + ObservationManager.toString(this.observation));
+      }
+      // clear invalid data :
+      this.data = null;
     } catch (RuntimeException re) {
-      logger.log(Level.SEVERE, "compute failure :", re);
-      logger.log(Level.SEVERE, "observation : " + ObservationManager.toString(this.observation));
+      if (logger.isLoggable(Level.SEVERE)) {
+        logger.log(Level.SEVERE, "compute failure :", re);
+        logger.log(Level.SEVERE, "observation : " + ObservationManager.toString(this.observation));
+      }
       // clear invalid data :
       this.data = null;
     }
@@ -173,5 +190,41 @@ public class UVCoverageService {
     }
 
     this.data.setTargetUVRiseSet(targetUVRiseSet);
+  }
+
+  /**
+   * Define the baselines, star data and instrument mode's wavelengths
+   * @throws IllegalStateException if the instrument mode is undefined
+   */
+  private void prepareObservation() throws IllegalStateException {
+    // Get baselines :
+    this.baseLines = this.obsData.getBaseLines();
+
+    // Get starData for the selected target name :
+    this.starData = this.obsData.getStarData(this.targetName);
+
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("starData : " + this.starData);
+    }
+
+    final FocalInstrumentMode insMode = this.observation.getInstrumentConfiguration().getFocalInstrumentMode();
+    if (insMode == null) {
+      throw new IllegalStateException("prepareObservation : the instrumentMode is null !");
+    }
+
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("instrumentMode : " + insMode.getName());
+    }
+
+    this.lambdaMin = insMode.getWaveLengthMin() * 1e-6d;
+    this.lambdaMax = insMode.getWaveLengthMax() * 1e-6d;
+
+    this.lambda = (this.lambdaMax + this.lambdaMin) / 2d;
+
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("lambdaMin : " + this.lambdaMin);
+      logger.fine("lambda    : " + this.lambda);
+      logger.fine("lambdaMax : " + this.lambdaMax);
+    }
   }
 }
