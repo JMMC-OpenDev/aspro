@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationManager.java,v 1.16 2010-01-14 17:04:15 bourgesl Exp $"
+ * "@(#) $Id: ObservationManager.java,v 1.17 2010-01-15 13:50:17 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.16  2010/01/14 17:04:15  bourgesl
+ * added instrument mode + min elevation in the observation settings
+ *
  * Revision 1.15  2010/01/12 17:10:08  bourgesl
  * less log INFO outputs
  *
@@ -182,6 +185,9 @@ public class ObservationManager extends BaseOIManager {
 
     boolean changed = !newValue.equals(when.getDate());
     if (changed) {
+      if (logger.isLoggable(Level.FINEST)) {
+        logger.finest("setWhen : " + newValue);
+      }
       when.setDate(newValue);
     }
     return changed;
@@ -192,6 +198,9 @@ public class ObservationManager extends BaseOIManager {
 
     boolean changed = !name.equals(interferometerChoice.getName());
     if (changed) {
+      if (logger.isLoggable(Level.FINEST)) {
+        logger.finest("setInterferometerConfigurationName : " + name);
+      }
       interferometerChoice.setName(name);
       interferometerChoice.setInterferometerConfiguration(ConfigurationManager.getInstance().getInterferometerConfiguration(name));
     }
@@ -203,6 +212,9 @@ public class ObservationManager extends BaseOIManager {
 
     boolean changed = !name.equals(instrumentChoice.getName());
     if (changed) {
+      if (logger.isLoggable(Level.FINEST)) {
+        logger.finest("setInstrumentConfigurationName : " + name);
+      }
       instrumentChoice.setName(name);
       instrumentChoice.setInstrumentConfiguration(ConfigurationManager.getInstance().getInterferometerInstrumentConfiguration(
               getObservation().getInterferometerConfiguration().getName(), name));
@@ -215,6 +227,9 @@ public class ObservationManager extends BaseOIManager {
 
     boolean changed = !stations.equals(instrumentChoice.getStations());
     if (changed) {
+      if (logger.isLoggable(Level.FINEST)) {
+        logger.finest("setInstrumentConfigurationStations : " + stations);
+      }
       instrumentChoice.setStations(stations);
       instrumentChoice.setStationList(ConfigurationManager.getInstance().getInstrumentConfigurationStations(
               getObservation().getInterferometerConfiguration().getName(), getObservation().getInstrumentConfiguration().getName(), stations));
@@ -225,10 +240,13 @@ public class ObservationManager extends BaseOIManager {
   public boolean setInstrumentConfigurationPoPs(final String pops) {
     final FocalInstrumentConfigurationChoice instrumentChoice = getObservation().getInstrumentConfiguration();
 
-    // pops can be null
-    boolean changed = ((pops == null && instrumentChoice.getPops() != null) || (pops != null && instrumentChoice.getPops() == null) || !pops.equals(instrumentChoice.getPops()));
+    // pops can be null :
+    boolean changed = isChanged(pops, instrumentChoice.getPops());
 
     if (changed) {
+      if (logger.isLoggable(Level.FINEST)) {
+        logger.finest("setInstrumentConfigurationPoPs : " + pops);
+      }
       instrumentChoice.setPops(pops);
       instrumentChoice.setPopList(ConfigurationManager.getInstance().parseInstrumentPoPs(
               getObservation().getInterferometerConfiguration().getName(), getObservation().getInstrumentConfiguration().getName(), pops));
@@ -239,13 +257,28 @@ public class ObservationManager extends BaseOIManager {
   public boolean setInstrumentMode(final String mode) {
     final FocalInstrumentConfigurationChoice instrumentChoice = getObservation().getInstrumentConfiguration();
 
-    boolean changed = !mode.equals(instrumentChoice.getInstrumentMode());
+    // mode can be null :
+    boolean changed = isChanged(mode, instrumentChoice.getInstrumentMode());
+
     if (changed) {
+      if (logger.isLoggable(Level.FINEST)) {
+        logger.finest("setInstrumentMode : " + mode);
+      }
       instrumentChoice.setInstrumentMode(mode);
       instrumentChoice.setFocalInstrumentMode(ConfigurationManager.getInstance().getInstrumentMode(
               getObservation().getInterferometerConfiguration().getName(), getObservation().getInstrumentConfiguration().getName(), mode));
     }
     return changed;
+  }
+
+  /**
+   * Check if the strings are different supporting null values
+   * @param value1 string 1
+   * @param value2 string 2
+   * @return true only if strings are different
+   */
+  private boolean isChanged(final String value1, final String value2) {
+    return (value1 == null && value2 != null) || (value1 != null && value2 == null) || (value1 != null && value2 != null && !value1.equals(value2));
   }
 
   private void updateObservation() {
@@ -268,6 +301,9 @@ public class ObservationManager extends BaseOIManager {
     instrumentChoice.setFocalInstrumentMode(ConfigurationManager.getInstance().getInstrumentMode(
             interferometerChoice.getName(), instrumentChoice.getName(), instrumentChoice.getInstrumentMode()));
 
+    if (logger.isLoggable(Level.FINEST)) {
+      logger.finest("updateObservation : " + toString(getObservation()));
+    }
   }
 
   /**
@@ -281,6 +317,10 @@ public class ObservationManager extends BaseOIManager {
     if (name != null && name.length() > 0) {
       changed = (getTarget(name) == null);
       if (changed) {
+        if (logger.isLoggable(Level.FINEST)) {
+          logger.finest("addTarget : " + name);
+        }
+
         final Target t = new Target();
         t.setName(name);
 
@@ -331,6 +371,9 @@ public class ObservationManager extends BaseOIManager {
       for (Iterator<Target> it = getObservation().getTargets().iterator(); it.hasNext();) {
         t = it.next();
         if (t.getName().equals(name)) {
+          if (logger.isLoggable(Level.FINEST)) {
+            logger.finest("removeTarget : " + name);
+          }
           changed = true;
           it.remove();
           break;

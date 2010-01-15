@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ConfigurationManager.java,v 1.14 2010-01-08 16:51:17 bourgesl Exp $"
+ * "@(#) $Id: ConfigurationManager.java,v 1.15 2010-01-15 13:50:17 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.14  2010/01/08 16:51:17  bourgesl
+ * initial uv coverage
+ *
  * Revision 1.13  2010/01/05 17:17:28  bourgesl
  * instruments are no more sorted in UI
  *
@@ -302,13 +305,13 @@ public class ConfigurationManager extends BaseOIManager {
   }
 
   public FocalInstrumentMode getInstrumentMode(final String configurationName, final String instrumentName, final String instrumentMode) {
-    final Vector<String> v = new Vector<String>();
-
-    final FocalInstrumentConfiguration ic = getInterferometerInstrumentConfiguration(configurationName, instrumentName);
-    if (ic != null) {
-      for (FocalInstrumentMode m : ic.getFocalInstrument().getModes()) {
-        if (m.getName().equals(instrumentMode)) {
-          return m;
+    if (instrumentMode != null && instrumentMode.length() > 0) {
+      final FocalInstrumentConfiguration ic = getInterferometerInstrumentConfiguration(configurationName, instrumentName);
+      if (ic != null) {
+        for (FocalInstrumentMode m : ic.getFocalInstrument().getModes()) {
+          if (m.getName().equals(instrumentMode)) {
+            return m;
+          }
         }
       }
     }
@@ -361,27 +364,5 @@ public class ConfigurationManager extends BaseOIManager {
       }
     }
     return null;
-  }
-
-  /**
-   * Test code
-   */
-  public static void main(final String[] args) {
-    final ConfigurationManager cm = ConfigurationManager.getInstance();
-
-    logger.log(Level.SEVERE, "interferometer Names = " + cm.getInterferometerNames());
-
-    InterferometerDescription d;
-
-    Spherical sph;
-    for (String id : cm.getInterferometerNames()) {
-      logger.log(Level.SEVERE, "configuration Names = " + cm.getInterferometerConfigurationNames(id));
-
-      d = cm.getInterferometerDescription(id);
-
-      sph = GeocentricCoords.getLonLatAlt(d.getPosition());
-
-      GeocentricCoords.dump(d.getName(), sph);
-    }
   }
 }
