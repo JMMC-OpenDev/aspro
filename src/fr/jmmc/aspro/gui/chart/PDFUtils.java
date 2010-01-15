@@ -1,14 +1,16 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: PDFUtils.java,v 1.1 2010-01-13 16:11:43 bourgesl Exp $"
+ * "@(#) $Id: PDFUtils.java,v 1.2 2010-01-15 16:13:27 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2010/01/13 16:11:43  bourgesl
+ * pdf related classes
+ *
  */
 package fr.jmmc.aspro.gui.chart;
-
 
 import com.lowagie.text.Document;
 import com.lowagie.text.DocumentException;
@@ -78,8 +80,21 @@ public class PDFUtils {
 
     final Rectangle pdfRectangle = document.getPageSize();
 
-    final int width = (int) pdfRectangle.getWidth();
-    final int height = (int) pdfRectangle.getHeight();
+    final float width = (int) pdfRectangle.getWidth();
+    final float height = (int) pdfRectangle.getHeight();
+
+    /*
+    Measurements
+    When creating a rectangle or choosing a margin, you might wonder what measurement unit is used:
+    centimeters, inches or pixels.
+    In fact, the default measurement system roughly corresponds to the various definitions of the typographic
+    unit of measurement known as the point. There are 72 points in 1 inch (2.54 cm).
+     */
+
+    final float margin = 72f / 2.54f;
+
+    final float innerWidth = width - 2 * margin;
+    final float innerHeight = height - 2 * margin;
 
     try {
       final PdfWriter localPdfWriter = PdfWriter.getInstance(document, outputStream);
@@ -89,14 +104,15 @@ public class PDFUtils {
       definePDFProperties(document);
 
       final PdfContentByte pdfContentByte = localPdfWriter.getDirectContent();
+
       final PdfTemplate pdfTemplate = pdfContentByte.createTemplate(width, height);
 
-      g2 = pdfTemplate.createGraphics(width, height, fontMapper);
-      final Rectangle2D.Double localDouble = new Rectangle2D.Double(0.0D, 0.0D, width, height);
+      g2 = pdfTemplate.createGraphics(innerWidth, innerHeight, fontMapper);
+      final Rectangle2D.Float drawArea = new Rectangle2D.Float(0F, 0F, innerWidth, innerHeight);
 
-      chart.draw(g2, localDouble);
+      chart.draw(g2, drawArea);
 
-      pdfContentByte.addTemplate(pdfTemplate, 0.0F, 0.0F);
+      pdfContentByte.addTemplate(pdfTemplate, margin, margin);
     } catch (DocumentException de) {
       logger.log(Level.SEVERE, "document exception : ", de);
     } finally {
@@ -112,8 +128,6 @@ public class PDFUtils {
    * @param document pdf document
    */
   private static void definePDFProperties(final Document document) {
-    document.setMargins(50.0F, 50.0F, 50.0F, 50.0F);
-
     document.addCreator(App.getSharedApplicationDataModel().getProgramName() + " v" + App.getSharedApplicationDataModel().getProgramVersion());
   }
 }
