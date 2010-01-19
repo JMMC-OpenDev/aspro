@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: PDFUtils.java,v 1.2 2010-01-15 16:13:27 bourgesl Exp $"
+ * "@(#) $Id: PDFUtils.java,v 1.3 2010-01-19 11:01:08 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2010/01/15 16:13:27  bourgesl
+ * fixed margins
+ *
  * Revision 1.1  2010/01/13 16:11:43  bourgesl
  * pdf related classes
  *
@@ -44,6 +47,19 @@ public class PDFUtils {
   /** Class logger */
   private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
+  /** 
+   * Force text rendering to use java rendering as Shapes.
+   * This is a workaround to get unicode greek characters rendered properly.
+   * Embedding fonts in the PDF may depend on the java/os font configuration ...
+   */
+  public final static boolean RENDER_TEXT_AS_SHAPES = true;
+
+  /**
+   * Private Constructor
+   */
+  private PDFUtils() {
+    // no-op
+  }
 
   /**
    * Save the given chart as a PDF document in the given file
@@ -91,6 +107,7 @@ public class PDFUtils {
     unit of measurement known as the point. There are 72 points in 1 inch (2.54 cm).
      */
 
+    // margin = 1 cm :
     final float margin = 72f / 2.54f;
 
     final float innerWidth = width - 2 * margin;
@@ -107,7 +124,14 @@ public class PDFUtils {
 
       final PdfTemplate pdfTemplate = pdfContentByte.createTemplate(width, height);
 
-      g2 = pdfTemplate.createGraphics(innerWidth, innerHeight, fontMapper);
+      if (RENDER_TEXT_AS_SHAPES) {
+        // text rendered as shapes so the file is bigger but correct
+        g2 = pdfTemplate.createGraphicsShapes(innerWidth, innerHeight);
+      } else {
+        // text rendered as text + font but unicode characters are not rendered
+        g2 = pdfTemplate.createGraphics(innerWidth, innerHeight, fontMapper);
+      }
+
       final Rectangle2D.Float drawArea = new Rectangle2D.Float(0F, 0F, innerWidth, innerHeight);
 
       chart.draw(g2, drawArea);
