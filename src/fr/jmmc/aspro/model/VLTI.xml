@@ -8694,8 +8694,9 @@
     </focalInstrument>
   </description>
 
+
   <configuration>
-    <version>Period 85</version>
+    <version>Period 84</version>
     <interferometer>VLTI</interferometer>
 
     <instrument>
@@ -8725,6 +8726,7 @@
         <stations>A0 K0 G1</stations>
       </configuration>
     </instrument>
+
     <instrument>
       <focalInstrument>MIDI</focalInstrument>
       <configuration>
@@ -8778,8 +8780,9 @@
     </instrument>
   </configuration>
 
+
   <configuration>
-    <version>Current Period</version>
+    <version>Period 85</version>
     <interferometer>VLTI</interferometer>
 
     <instrument>
@@ -8797,18 +8800,49 @@
         <stations>U2 U3 U4</stations>
       </configuration>
       <configuration>
-        <stations>E0 G0 H0</stations>
+        <stations>A0 D0 H0</stations>
       </configuration>
       <configuration>
-        <stations>A0 D0 H0</stations>
+        <stations>D0 H0 K0</stations>
+      </configuration>
+      <configuration>
+        <stations>A0 K0 G1</stations>
+      </configuration>
+      <configuration>
+        <stations>A0 K0 I1</stations>
+      </configuration>
+      <configuration>
+        <stations>A0 G1 I1</stations>
+      </configuration>
+      <configuration>
+        <stations>K0 G1 I1</stations>
       </configuration>
       <configuration>
         <stations>D0 H0 G1</stations>
       </configuration>
       <configuration>
-        <stations>A0 K0 G1</stations>
+        <stations>D0 H0 I1</stations>
+      </configuration>
+      <configuration>
+        <stations>D0 G1 I1</stations>
+      </configuration>
+      <configuration>
+        <stations>H0 G1 I1</stations>
+      </configuration>
+      <configuration>
+        <stations>E0 G0 H0</stations>
+      </configuration>
+      <configuration>
+        <stations>E0 G0 I1</stations>
+      </configuration>
+      <configuration>
+        <stations>E0 H0 I1</stations>
+      </configuration>
+      <configuration>
+        <stations>G0 H0 I1</stations>
       </configuration>
     </instrument>
+
     <instrument>
       <focalInstrument>MIDI</focalInstrument>
       <configuration>
@@ -8830,34 +8864,52 @@
         <stations>U3 U4</stations>
       </configuration>
       <configuration>
-        <stations>E0 G0</stations>
-      </configuration>
-      <configuration>
-        <stations>G0 H0</stations>
-      </configuration>
-      <configuration>
-        <stations>G0 K0</stations>
-      </configuration>
-      <configuration>
-        <stations>D0 H0</stations>
-      </configuration>
-      <configuration>
-        <stations>A0 H0</stations>
-      </configuration>
-      <configuration>
         <stations>A0 K0</stations>
-      </configuration>
-      <configuration>
-        <stations>D0 G1</stations>
-      </configuration>
-      <configuration>
-        <stations>H0 G1</stations>
       </configuration>
       <configuration>
         <stations>A0 G1</stations>
       </configuration>
       <configuration>
+        <stations>A0 I1</stations>
+      </configuration>
+      <configuration>
         <stations>K0 G1</stations>
+      </configuration>
+      <configuration>
+        <stations>K0 I1</stations>
+      </configuration>
+      <configuration>
+        <stations>D0 H0</stations>
+      </configuration>
+      <configuration>
+        <stations>D0 G1</stations>
+      </configuration>
+      <configuration>
+        <stations>D0 I1</stations>
+      </configuration>
+      <configuration>
+        <stations>G1 I1</stations>
+      </configuration>
+      <configuration>
+        <stations>H0 I1</stations>
+      </configuration>
+      <configuration>
+        <stations>H0 G1</stations>
+      </configuration>
+      <configuration>
+        <stations>E0 H0</stations>
+      </configuration>
+      <configuration>
+        <stations>E0 G0</stations>
+      </configuration>
+      <configuration>
+        <stations>E0 I1</stations>
+      </configuration>
+      <configuration>
+        <stations>G0 H0</stations>
+      </configuration>
+      <configuration>
+        <stations>G0 I1</stations>
       </configuration>
     </instrument>
   </configuration>
