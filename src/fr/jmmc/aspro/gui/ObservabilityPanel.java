@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityPanel.java,v 1.19 2010-01-14 17:03:06 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityPanel.java,v 1.20 2010-01-19 13:20:35 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.19  2010/01/14 17:03:06  bourgesl
+ * No more gradient paint + smaller bar width
+ *
  * Revision 1.18  2010/01/13 16:12:31  bourgesl
  * added export to PDF button
  *
@@ -275,6 +278,8 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
         if (doBaseLineLimits) {
           jCheckBoxNightLimit.setSelected(false);
           jCheckBoxDetailedOutput.setSelected(false);
+        } else {
+          jCheckBoxNightLimit.setSelected(true);
         }
 
         jCheckBoxNightLimit.setEnabled(!doBaseLineLimits);
