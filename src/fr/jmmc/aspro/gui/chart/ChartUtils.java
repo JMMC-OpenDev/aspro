@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ChartUtils.java,v 1.4 2010-01-14 17:03:06 bourgesl Exp $"
+ * "@(#) $Id: ChartUtils.java,v 1.5 2010-01-19 11:00:50 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2010/01/14 17:03:06  bourgesl
+ * No more gradient paint + smaller bar width
+ *
  * Revision 1.3  2010/01/12 16:53:34  bourgesl
  * customized JFreeChart classes to get a square XY Plot supporting zooming in/out with mouse and mouse wheel
  *
@@ -131,7 +134,7 @@ public class ChartUtils {
 
     // force to use the base stroke :
     localLineAndShapeRenderer.setAutoPopulateSeriesStroke(false);
-    localLineAndShapeRenderer.setBaseStroke(new BasicStroke(2.0F));
+    localLineAndShapeRenderer.setBaseStroke(new BasicStroke(1.25F));
 
     // update theme at end :
     ChartUtilities.applyCurrentTheme(localJFreeChart);
