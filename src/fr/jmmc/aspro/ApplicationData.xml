@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <ApplicationData link="http://www.jmmc.fr/aspro">
-  <program name="Aspro" version="0.1b5"/>
+  <program name="Aspro" version="0.1b6"/>
   <compilation date="21/09/2009" compiler="JDK 1.5.0_16"/>
   <text>
     <![CDATA[ASPRO is a complete observation preparation tool developed and maintained by the JMMC
@@ -17,9 +17,12 @@
 
     <package name="JFreeChart" description="JFreeChart is a free 100% Java chart library that makes it easy for developers to display professional quality charts in their applications" link="http://www.jfree.org/jfreechart/"/>
 
+    <package name="iText" description="iText is a library that allows you to generate PDF files on the fly" link="http://itextpdf.com/"/>
+
     <package name="JAXB" description="Java Architecture for XML Binding (JAXB) allows Java developers to map Java classes to XML representations" link="https://jaxb.dev.java.net/"/>
 
     <package name="SwingWorker" description="backport of SwingWorker included into Java 1.6" link="https://swingworker.dev.java.net/"/>
+
   </dependences>
   <menubar>
     <menu label="File">
@@ -31,8 +34,15 @@
   </menubar>
   <releasenotes>
     <release version="0.1">
+      <prerelease version="0.1b6">
+        <change>Minor bug fixed on UV Coverage plot when the observability displays the baseline limits</change>
+        <change>Fixed PDF text rendering to support greek unicode characters</change>
+      </prerelease>
       <prerelease version="0.1b5">
-        <change>UV Coverage plot showing only the rise/set tracks</change>
+        <change>UV Coverage plot showing observable ranges (sampling, instrument mode)</change>
+        <change>UV Coverage plot showing rise/set tracks</change>
+        <change>Star resolver bug fix for empty proper motion and parallax fields</change>
+        <change>Added PDF generation for plots</change>
       </prerelease>
       <prerelease version="0.1b4">
         <change>Added a best PoPs algorithm for the complete list of targets</change>
