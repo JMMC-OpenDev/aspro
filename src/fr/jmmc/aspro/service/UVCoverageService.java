@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoverageService.java,v 1.4 2010-01-15 16:14:16 bourgesl Exp $"
+ * "@(#) $Id: UVCoverageService.java,v 1.5 2010-01-19 13:20:20 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2010/01/15 16:14:16  bourgesl
+ * added computation of UV points compatible with observability ranges, bandpass and sampling periodicity
+ *
  * Revision 1.3  2010/01/15 13:51:27  bourgesl
  * illegalStateException if any transient field is undefined
  *
@@ -113,15 +116,20 @@ public class UVCoverageService {
         // Get instrument and observability data :
         prepareObservation();
 
-        // target name :
-        this.data.setName(this.targetName);
+        if (this.starData != null) {
+          // Note : for Baseline limits, the starData is null
+          // (target observability is not available) :
 
-        // Is the target visible :
-        if (this.starData.getHaElev() > 0d) {
+          // target name :
+          this.data.setName(this.targetName);
 
-          computeUVSupport();
+          // Is the target visible :
+          if (this.starData.getHaElev() > 0d) {
 
-          computeObservableUV();
+            computeUVSupport();
+
+            computeObservableUV();
+          }
         }
       }
 
@@ -221,7 +229,9 @@ public class UVCoverageService {
 
     final List<Range> obsRangesHA = this.starData.getObsRangesHA();
 
-    logger.severe("obsRangesHA = " + obsRangesHA);
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("obsRangesHA = " + obsRangesHA);
+    }
 
     if (obsRangesHA != null) {
 
@@ -346,7 +356,7 @@ public class UVCoverageService {
 
     this.lambda = (this.lambdaMax + this.lambdaMin) / 2d;
 
-    // hour angle step in decimal hour :
+    // hour angle step in decimal hours :
     this.haStep = this.observation.getInstrumentConfiguration().getSamplingPeriod() / 60d;
 
     if (logger.isLoggable(Level.FINE)) {

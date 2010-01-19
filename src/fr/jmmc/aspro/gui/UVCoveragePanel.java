@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.6 2010-01-15 16:14:16 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.7 2010-01-19 13:20:20 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2010/01/15 16:14:16  bourgesl
+ * added computation of UV points compatible with observability ranges, bandpass and sampling periodicity
+ *
  * Revision 1.5  2010/01/15 13:52:14  bourgesl
  * instrumentMode synchronized properly between the observation and the UI widgets (load/change/reset)
  *
@@ -273,7 +276,7 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
       this.jComboBoxTarget.setSelectedItem(oldValue);
     }
     if (logger.isLoggable(Level.FINEST)) {
-      logger.finest("jComboBoxTarget updated : "+ this.jComboBoxTarget.getSelectedItem());
+      logger.finest("jComboBoxTarget updated : " + this.jComboBoxTarget.getSelectedItem());
     }
   }
 
@@ -293,7 +296,7 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
       this.jComboBoxInstrumentMode.setSelectedItem(oldValue);
     }
     if (logger.isLoggable(Level.FINEST)) {
-      logger.finest("jComboBoxInstrumentMode updated : "+ this.jComboBoxInstrumentMode.getSelectedItem());
+      logger.finest("jComboBoxInstrumentMode updated : " + this.jComboBoxInstrumentMode.getSelectedItem());
     }
   }
 
@@ -331,7 +334,7 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
         this.om.setInstrumentMode((String) this.jComboBoxInstrumentMode.getSelectedItem());
 
         // Update the sampling period :
-        final Number samplingPeriod = (Number)this.jFieldSamplingPeriod.getValue();
+        final Number samplingPeriod = (Number) this.jFieldSamplingPeriod.getValue();
         this.om.setInstrumentSamplingPeriod(Double.valueOf(samplingPeriod.doubleValue()));
 
       } else {
@@ -512,23 +515,29 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
 
                 ChartUtils.clearTextSubTitle(localJFreeChart);
 
-                // title :
-                final StringBuilder title = new StringBuilder(observation.getInterferometerConfiguration().getName());
-                title.append(" - ").append(observation.getInstrumentConfiguration().getStations());
+                // source is defined :
+                if (uvData.getName() == null) {
+                  // reset dataset for baseline limits :
+                  localXYPlot.setDataset(null);
+                } else {
 
-                if (obsData.getBestPops() != null) {
-                  title.append(" + ");
-                  for (Pop pop : obsData.getBestPops().getPopList()) {
-                    title.append(pop.getName()).append(" ");
+                  // title :
+                  final StringBuilder title = new StringBuilder(observation.getInterferometerConfiguration().getName());
+                  title.append(" - ").append(observation.getInstrumentConfiguration().getStations());
+
+                  if (obsData.getBestPops() != null) {
+                    title.append(" + ");
+                    for (Pop pop : obsData.getBestPops().getPopList()) {
+                      title.append(pop.getName()).append(" ");
+                    }
                   }
+                  ChartUtils.addSubtitle(localJFreeChart, title.toString());
+
+                  ChartUtils.addSubtitle(localJFreeChart, "Source : " + uvData.getName());
+
+                  // computed data are valid :
+                  updateChart(uvData);
                 }
-                ChartUtils.addSubtitle(localJFreeChart, title.toString());
-
-                // source :
-                ChartUtils.addSubtitle(localJFreeChart, "Source : " + uvData.getName());
-
-                // computed data are valid :
-                updateChart(uvData);
 
                 // update theme at end :
                 ChartUtilities.applyCurrentTheme(localJFreeChart);
@@ -573,6 +582,20 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
   private void updateChart(final UVCoverageData uvData) {
     final XYSeriesCollection dataset = new XYSeriesCollection();
 
+    this.updateUVTracks(dataset, uvData);
+    this.updateUVTracksRiseSet(dataset, uvData);
+
+    // set the main data set :
+    this.localXYPlot.setDataset(dataset);
+  }
+
+  /**
+   * Update the dataset with UV rise/set tracks
+   * @param dataset dataset to use
+   * @param uvData uv coverage data
+   */
+  private void updateUVTracksRiseSet(final XYSeriesCollection dataset, final UVCoverageData uvData) {
+
     // process uv rise/set :
     final List<UVBaseLineData> targetUVRiseSet = uvData.getTargetUVRiseSet();
 
@@ -583,31 +606,46 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
 
       double[] u;
       double[] v;
+      double x, y;
 
       for (UVBaseLineData uvBL : targetUVRiseSet) {
-        xySeriesBL = new XYSeries(uvBL.getName(), false);
+        xySeriesBL = new XYSeries("Rise/Set " + uvBL.getName(), false);
         xySeriesBL.setNotify(false);
 
         u = uvBL.getU();
         v = uvBL.getV();
 
         for (int i = 0, size = uvBL.getNPoints(); i < size; i++) {
-          xySeriesBL.add(-u[i] * MEGA_SCALE, -v[i] * MEGA_SCALE);
+          x = -u[i] * MEGA_SCALE;
+          y = -v[i] * MEGA_SCALE;
+
+          xySeriesBL.add(x, y);
         } // points
 
         // add an invalid point to break the line between the 2 segments :
         xySeriesBL.add(Double.NaN, Double.NaN);
 
         for (int i = 0, size = uvBL.getNPoints(); i < size; i++) {
-          xySeriesBL.add(u[i] * MEGA_SCALE, v[i] * MEGA_SCALE);
+          x = u[i] * MEGA_SCALE;
+          y = v[i] * MEGA_SCALE;
+
+          xySeriesBL.add(x, y);
         } // points
 
         xySeriesBL.setNotify(true);
         dataset.addSeries(xySeriesBL);
       } // BL
     }
+  }
 
-    // process uv rise/set :
+  /**
+   * Update the dataset with UV observable tracks
+   * @param dataset dataset to use
+   * @param uvData uv coverage data
+   */
+  private void updateUVTracks(final XYSeriesCollection dataset, final UVCoverageData uvData) {
+
+    // process observable uv ranges :
     final List<UVRangeBaseLineData> targetUVObservability = uvData.getTargetUVObservability();
 
     if (targetUVObservability != null) {
@@ -619,9 +657,10 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
       double[] v;
       double[] u2;
       double[] v2;
+      double x1, y1, x2, y2;
 
       for (UVRangeBaseLineData uvBL : targetUVObservability) {
-        xySeriesBL = new XYSeries(uvBL.getName(), false);
+        xySeriesBL = new XYSeries("Observable " + uvBL.getName(), false);
         xySeriesBL.setNotify(false);
 
         u = uvBL.getU();
@@ -630,16 +669,28 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
         v2 = uvBL.getV2();
 
         for (int i = 0, size = uvBL.getNPoints(); i < size; i++) {
-          xySeriesBL.add(-u[i] * MEGA_SCALE, -v[i] * MEGA_SCALE);
-          xySeriesBL.add(-u2[i] * MEGA_SCALE, -v2[i] * MEGA_SCALE);
+          x1 = -u[i] * MEGA_SCALE;
+          y1 = -v[i] * MEGA_SCALE;
+
+          x2 = -u2[i] * MEGA_SCALE;
+          y2 = -v2[i] * MEGA_SCALE;
+
+          xySeriesBL.add(x1, y1);
+          xySeriesBL.add(x2, y2);
 
           // add an invalid point to break the line between the 2 segments :
           xySeriesBL.add(Double.NaN, Double.NaN);
         } // points
 
         for (int i = 0, size = uvBL.getNPoints(); i < size; i++) {
-          xySeriesBL.add(u[i] * MEGA_SCALE, v[i] * MEGA_SCALE);
-          xySeriesBL.add(u2[i] * MEGA_SCALE, v2[i] * MEGA_SCALE);
+          x1 = u[i] * MEGA_SCALE;
+          y1 = v[i] * MEGA_SCALE;
+
+          x2 = u2[i] * MEGA_SCALE;
+          y2 = v2[i] * MEGA_SCALE;
+
+          xySeriesBL.add(x1, y1);
+          xySeriesBL.add(x2, y2);
 
           // add an invalid point to break the line between the 2 segments :
           xySeriesBL.add(Double.NaN, Double.NaN);
@@ -649,9 +700,6 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
         dataset.addSeries(xySeriesBL);
       } // BL
     }
-
-    // set the main data set :
-    this.localXYPlot.setDataset(dataset);
   }
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JButton jButtonPDF;
