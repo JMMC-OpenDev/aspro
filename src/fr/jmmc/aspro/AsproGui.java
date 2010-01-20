@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproGui.java,v 1.6 2010-01-08 16:51:18 bourgesl Exp $"
+ * "@(#) $Id: AsproGui.java,v 1.7 2010-01-20 16:18:38 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2010/01/08 16:51:18  bourgesl
+ * initial uv coverage
+ *
  * Revision 1.5  2009/12/04 16:26:58  bourgesl
  * Added Load action in the menu bar (partially handled)
  *
@@ -38,6 +41,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Locale;
 import java.util.TimeZone;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 
@@ -61,6 +65,14 @@ public class AsproGui extends App {
   protected StatusBar statusBar;
 
   /**
+   * Return AsproGui singleton
+   * @return AsproGui singleton
+   */
+  public static AsproGui getInstance() {
+    return (AsproGui) App.getSharedInstance();
+  }
+
+  /**
    * Public constructor with command line arguments
    * @param args command line arguments
    */
@@ -73,11 +85,6 @@ public class AsproGui extends App {
   @Override
   protected void init(final String[] args) {
     logger.fine("init : enter");
-
-    // Set the default locale to en-US locale (for Numerical Fields "." ",")
-    Locale.setDefault(new Locale("en", "US"));
-    // Set the default timezone to GMT to handle properly the date in UTC :
-    TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
 
     // Preload configurations :
     ConfigurationManager.getInstance();
@@ -143,6 +150,10 @@ public class AsproGui extends App {
     new SaveObservationAction();
   }
 
+  public SettingPanel getSettingPanel() {
+    return settingPanel;
+  }
+
   /**
    * Window adapter to handle windowClosing event.
    */
@@ -160,6 +171,14 @@ public class AsproGui extends App {
    * @param args command line arguments
    */
   public static void main(final String[] args) {
+    // Set the default locale to en-US locale (for Numerical Fields "." ",")
+    Locale.setDefault(Locale.US);
+    // Set the default timezone to GMT to handle properly the date in UTC :
+    TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
+
+    // force Locale for Swing Components :
+    JComponent.setDefaultLocale(Locale.US);
+    
     // Start application with the command line arguments
     new AsproGui(args);
   }

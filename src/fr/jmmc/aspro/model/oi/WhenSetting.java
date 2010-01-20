@@ -25,6 +25,7 @@ import fr.jmmc.aspro.model.OIBase;
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
  *         &lt;element name="date" type="{http://www.w3.org/2001/XMLSchema}date"/>
+ *         &lt;element name="nightRestriction" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -35,7 +36,8 @@ import fr.jmmc.aspro.model.OIBase;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "WhenSetting", propOrder = {
-    "date"
+    "date",
+    "nightRestriction"
 })
 public class WhenSetting
     extends OIBase
@@ -44,6 +46,8 @@ public class WhenSetting
     @XmlElement(required = true)
     @XmlSchemaType(name = "date")
     protected XMLGregorianCalendar date;
+    @XmlElement(defaultValue = "true")
+    protected boolean nightRestriction;
 
     /**
      * Gets the value of the date property.
@@ -67,6 +71,22 @@ public class WhenSetting
      */
     public void setDate(XMLGregorianCalendar value) {
         this.date = value;
+    }
+
+    /**
+     * Gets the value of the nightRestriction property.
+     * 
+     */
+    public boolean isNightRestriction() {
+        return nightRestriction;
+    }
+
+    /**
+     * Sets the value of the nightRestriction property.
+     * 
+     */
+    public void setNightRestriction(boolean value) {
+        this.nightRestriction = value;
     }
 
 }

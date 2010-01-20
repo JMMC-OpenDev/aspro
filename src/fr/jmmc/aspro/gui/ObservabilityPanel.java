@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityPanel.java,v 1.20 2010-01-19 13:20:35 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityPanel.java,v 1.21 2010-01-20 16:18:38 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.20  2010/01/19 13:20:35  bourgesl
+ * no message
+ *
  * Revision 1.19  2010/01/14 17:03:06  bourgesl
  * No more gradient paint + smaller bar width
  *
@@ -88,10 +91,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.text.DateFormat;
-import java.text.NumberFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -100,7 +100,6 @@ import java.util.logging.Level;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
-import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import org.jdesktop.swingworker.SwingWorker;
@@ -149,8 +148,6 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
   private static final String TIME_UTC = "UTC";
 
   /* default plot options */
-  /** default value for checkbox Night Limit = true */
-  private static final boolean DEFAULT_USE_NIGHT_LIMITS = true;
   /** default value for the checkbox BaseLine Limits */
   private static final boolean DEFAULT_DO_BASELINE_LIMITS = false;
   /** default value for the checkbox Details */
@@ -164,12 +161,8 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
   /* swing */
   /** chart panel */
   private ChartPanel chartPanel;
-  /* min elevation field */
-  private JFormattedTextField jFieldMinElev;
   /** time reference combo box */
   private JComboBox jComboTimeRef;
-  /* checkbox Night Limit */
-  private JCheckBox jCheckBoxNightLimit;
   /* checkbox BaseLine Limits */
   private JCheckBox jCheckBoxBaseLineLimits;
   /* checkbox Detailed output */
@@ -227,37 +220,6 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
 
     final JPanel panelOptions = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 2));
 
-    panelOptions.add(new JLabel("min. Elevation :"));
-
-    this.jFieldMinElev = new JFormattedTextField(NumberFormat.getNumberInstance());
-    this.jFieldMinElev.setColumns(3);
-    this.jFieldMinElev.setValue(AsproConstants.DEFAULT_MIN_ELEVATION);
-    this.jFieldMinElev.addPropertyChangeListener("value", new PropertyChangeListener() {
-
-      public void propertyChange(final PropertyChangeEvent evt) {
-        final double minElevNew = ((Number) jFieldMinElev.getValue()).doubleValue();
-
-        if (minElevNew < 0d || minElevNew >= 90d) {
-          // invalid value :
-          jFieldMinElev.setValue(AsproConstants.DEFAULT_MIN_ELEVATION);
-        }
-        refreshPlot();
-      }
-    });
-
-    panelOptions.add(this.jFieldMinElev);
-
-    this.jCheckBoxNightLimit = new JCheckBox("Night restriction");
-    this.jCheckBoxNightLimit.setSelected(DEFAULT_USE_NIGHT_LIMITS);
-    this.jCheckBoxNightLimit.addItemListener(new ItemListener() {
-
-      public void itemStateChanged(final ItemEvent e) {
-        refreshPlot();
-      }
-    });
-
-    panelOptions.add(this.jCheckBoxNightLimit);
-
     panelOptions.add(new JLabel("Time :"));
 
     this.jComboTimeRef = new JComboBox(new String[]{TIME_LST, TIME_UTC});
@@ -276,13 +238,9 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
       public void itemStateChanged(final ItemEvent e) {
         final boolean doBaseLineLimits = e.getStateChange() == ItemEvent.SELECTED;
         if (doBaseLineLimits) {
-          jCheckBoxNightLimit.setSelected(false);
           jCheckBoxDetailedOutput.setSelected(false);
-        } else {
-          jCheckBoxNightLimit.setSelected(true);
         }
 
-        jCheckBoxNightLimit.setEnabled(!doBaseLineLimits);
         jCheckBoxDetailedOutput.setEnabled(!doBaseLineLimits);
         refreshPlot();
       }
@@ -344,11 +302,8 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
       // first disable the automatic refresh from field changes :
       this.doAutoRefresh = false;
 
-      this.jFieldMinElev.setValue(AsproConstants.DEFAULT_MIN_ELEVATION);
-
       this.jComboTimeRef.setSelectedItem(TIME_LST);
 
-      this.jCheckBoxNightLimit.setSelected(DEFAULT_USE_NIGHT_LIMITS);
       this.jCheckBoxBaseLineLimits.setSelected(DEFAULT_DO_BASELINE_LIMITS);
       this.jCheckBoxDetailedOutput.setSelected(DEFAULT_DO_DETAILED_OUTPUT);
     } finally {
@@ -356,7 +311,7 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
       this.doAutoRefresh = true;
     }
   }
-  
+
   /**
    * Handle the given event on the given observation =
    * compute observability data and refresh the plot
@@ -393,7 +348,7 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
       this.plot(ObservationManager.getInstance().getObservation());
     }
   }
-  
+
   /**
    * Plot the observability using a SwingWorker to do the computation in the background.
    * This code is executed by the Swing Event Dispatcher thread (EDT)
@@ -405,12 +360,6 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
     }
 
     /* get plot options from swing components */
-
-    /** minimum of elevation to observe any target (rad) */
-    final double minElev = Math.toRadians(((Number) this.jFieldMinElev.getValue()).doubleValue());
-
-    /** flag to enable the observability restriction due to the night */
-    final boolean useNightLimit = this.jCheckBoxNightLimit.isSelected();
 
     /** indicates if the timestamps are expressed in LST or in UTC */
     final boolean useLST = TIME_LST.equals(this.jComboTimeRef.getSelectedItem());
@@ -440,7 +389,7 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
         ObservationManager.getInstance().setObservabilityData(null);
 
         // compute the observability data with the UI parameters :
-        obsData = new ObservabilityService(observation, minElev, useNightLimit, useLST, doDetailedOutput, doBaseLineLimits).compute();
+        obsData = new ObservabilityService(observation, useLST, doDetailedOutput, doBaseLineLimits).compute();
 
         if (isCancelled()) {
           logger.fine("SwingWorker[Observability].doInBackground : CANCELLED");
@@ -486,7 +435,7 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
 
               ChartUtils.addSubtitle(localJFreeChart, title.toString());
 
-              if (useNightLimit || !useLST) {
+              if (observation.getWhen().isNightRestriction() || !useLST) {
                 // date :
                 ChartUtils.addSubtitle(localJFreeChart, "Day : " + observation.getWhen().getDate().toString());
               }

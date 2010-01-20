@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.34 2010-01-20 09:56:13 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.35 2010-01-20 16:18:38 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.34  2010/01/20 09:56:13  bourgesl
+ * removed Pop identifiers with the target name
+ * added log of the best PoPs collection for a given list of targets
+ *
  * Revision 1.33  2010/01/15 13:51:27  bourgesl
  * illegalStateException if any transient field is undefined
  *
@@ -177,16 +181,12 @@ public class ObservabilityService {
   /* inputs */
   /** observation settings */
   private final ObservationSetting observation;
-  /** minimum of elevation to observe any target (rad) */
-  private final double minElev;
-  /** flag to enable the observability restriction due to the night */
-  private boolean useNightLimit;
   /** indicates if the timestamps are expressed in LST or in UTC */
   private final boolean useLST;
   /** flag to find baseline limits */
   private final boolean doBaseLineLimits;
   /** flag to produce detailed output with all BL / horizon / rise intervals per target */
-  private boolean doDetails;
+  private final boolean doDetails;
 
   /* internal */
   /** Get the current thread to check if the computation is interrupted */
@@ -197,8 +197,12 @@ public class ObservabilityService {
   private double jdLst0;
   /** jd corresponding to LST=23:59:59 for the observation date */
   private double jdLst24;
+  /** flag to enable the observability restriction due to the night */
+  private boolean useNightLimit;
   /** Night ranges defined in julian day */
   private List<Range> nightLimits = null;
+  /** minimum of elevation to observe any target (rad) */
+  private double minElev;
   /** interferometer description */
   private InterferometerDescription interferometer = null;
   /** focal instrument description */
@@ -221,17 +225,14 @@ public class ObservabilityService {
    * Note : This service is statefull so it can not be reused by several calls.
    *
    * @param observation observation settings
-   * @param minElev minimum of elevation to observe any target (rad)
    * @param useNightLimit flag to enable the observability restriction due to the night
    * @param useLST indicates if the timestamps are expressed in LST or in UTC
    * @param doDetails flag to produce detailed output with all BL / horizon / rise intervals per target
    */
-  public ObservabilityService(final ObservationSetting observation, final double minElev,
-          final boolean useNightLimit, final boolean useLST, final boolean doDetails, final boolean doBaseLineLimits) {
+  public ObservabilityService(final ObservationSetting observation,
+                              final boolean useLST, final boolean doDetails, final boolean doBaseLineLimits) {
     // Inputs :
     this.observation = observation;
-    this.minElev = minElev;
-    this.useNightLimit = useNightLimit;
     this.useLST = useLST;
     this.doDetails = doDetails;
     this.doBaseLineLimits = doBaseLineLimits;
@@ -1084,10 +1085,19 @@ public class ObservabilityService {
   }
 
   /**
-   * Define the interferometer and instrument configurations and check if the interferometer has PoPs
+   * Use the observation to define the interferometer and instrument configurations and check if the interferometer has PoPs
    * @throws IllegalStateException if the interferometer configuration or instrument configuration is undefined
    */
   private void prepareObservation() throws IllegalStateException {
+    this.minElev = Math.toRadians(this.observation.getInterferometerConfiguration().getMinElevation());
+
+    if (doBaseLineLimits) {
+      // ignore night limits :
+      this.useNightLimit = false;
+    } else {
+      this.useNightLimit = this.observation.getWhen().isNightRestriction();
+    }
+
     final InterferometerConfiguration intConf = this.observation.getInterferometerConfiguration().getInterferometerConfiguration();
     if (intConf == null) {
       throw new IllegalStateException("prepareObservation : the interferometerConfiguration is null !");

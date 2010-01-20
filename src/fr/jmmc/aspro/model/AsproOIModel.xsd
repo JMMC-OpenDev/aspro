@@ -198,6 +198,15 @@
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
+
+      <xsd:element name="nightRestriction" type="xsd:boolean" default="true">
+        <xsd:annotation>
+          <xsd:documentation>
+              Use the night restrictions associated to the observation date
+              to determine both observability and UV points
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
     </xsd:sequence>
   </xsd:complexType>
 
@@ -271,7 +280,7 @@
       <xsd:element name="instrumentMode" type="xsd:string" minOccurs="0">
         <xsd:annotation>
           <xsd:documentation>
-              The instrument mode (bandpass)
+              The instrument mode (FocalInstrumentMode identifier) defining the bandpass
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
@@ -1069,6 +1078,13 @@
         <xsd:annotation>
           <xsd:documentation>
               The number of channels used by this instrument
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="defaultSamplingTime" type="xsd:int">
+        <xsd:annotation>
+          <xsd:documentation>
+              The default sampling time for this instrument (min)
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>

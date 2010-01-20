@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.7 2010-01-19 13:20:20 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.8 2010-01-20 16:18:38 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2010/01/19 13:20:20  bourgesl
+ * NPE fixed when the observability displays the baseline limits
+ *
  * Revision 1.6  2010/01/15 16:14:16  bourgesl
  * added computation of UV points compatible with observability ranges, bandpass and sampling periodicity
  *
@@ -532,8 +535,12 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
                     }
                   }
                   ChartUtils.addSubtitle(localJFreeChart, title.toString());
-
                   ChartUtils.addSubtitle(localJFreeChart, "Source : " + uvData.getName());
+
+                  if (observation.getWhen().isNightRestriction()) {
+                    // date :
+                    ChartUtils.addSubtitle(localJFreeChart, "Day : " + observation.getWhen().getDate().toString());
+                  }
 
                   // computed data are valid :
                   updateChart(uvData);

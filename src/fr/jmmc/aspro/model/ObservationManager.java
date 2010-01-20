@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationManager.java,v 1.18 2010-01-15 16:13:16 bourgesl Exp $"
+ * "@(#) $Id: ObservationManager.java,v 1.19 2010-01-20 16:18:37 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.18  2010/01/15 16:13:16  bourgesl
+ * added sampling periodicity
+ *
  * Revision 1.17  2010/01/15 13:50:17  bourgesl
  * added logs on setters
  * supports instrumentMode is null
@@ -193,6 +196,37 @@ public class ObservationManager extends BaseOIManager {
         logger.finest("setWhen : " + newValue);
       }
       when.setDate(newValue);
+    }
+    return changed;
+  }
+
+  /**
+   * Set the night restriction
+   * @param date date to use
+   * @return true if the date changed
+   */
+  public boolean setNightRestriction(final boolean useNightLimits) {
+    final WhenSetting when = getObservation().getWhen();
+
+    boolean changed = when.isNightRestriction() != useNightLimits;
+    if (changed) {
+      if (logger.isLoggable(Level.FINEST)) {
+        logger.finest("setNightRestriction : " + useNightLimits);
+      }
+      when.setNightRestriction(useNightLimits);
+    }
+    return changed;
+  }
+
+  public boolean setMinElevation(final double minElev) {
+    final InterferometerConfigurationChoice interferometerChoice = getObservation().getInterferometerConfiguration();
+
+    boolean changed = interferometerChoice.getMinElevation() != minElev;
+    if (changed) {
+      if (logger.isLoggable(Level.FINEST)) {
+        logger.finest("setInterferometerMinElevation : " + minElev);
+      }
+      interferometerChoice.setMinElevation(minElev);
     }
     return changed;
   }

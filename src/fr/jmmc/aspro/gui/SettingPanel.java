@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SettingPanel.java,v 1.14 2010-01-15 13:52:14 bourgesl Exp $"
+ * "@(#) $Id: SettingPanel.java,v 1.15 2010-01-20 16:18:37 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.14  2010/01/15 13:52:14  bourgesl
+ * instrumentMode synchronized properly between the observation and the UI widgets (load/change/reset)
+ *
  * Revision 1.13  2010/01/14 17:03:37  bourgesl
  * refactoring for observation LOAD / CHANGE events
  *
@@ -93,7 +96,6 @@ public class SettingPanel extends JPanel implements ObservationListener {
 
     jSplitPane1.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
 
-    jPlotPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Plots"));
     jPlotPanel.setLayout(new java.awt.BorderLayout());
     jSplitPane1.setRightComponent(jPlotPanel);
 
@@ -132,7 +134,7 @@ public class SettingPanel extends JPanel implements ObservationListener {
       logger.fine("event [" + type + "] process IN");
     }
     if (type == ObservationEventType.CHANGED ||
-        type == ObservationEventType.LOADED) {
+            type == ObservationEventType.LOADED) {
 
       if (this.observabilityPanel == null) {
         this.observabilityPanel = new ObservabilityPanel();
@@ -174,5 +176,17 @@ public class SettingPanel extends JPanel implements ObservationListener {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("event [" + type + "] process OUT");
     }
+  }
+
+  public ObservabilityPanel getObservabilityPanel() {
+    return observabilityPanel;
+  }
+
+  public BasicObservationForm getObservationForm() {
+    return observationForm;
+  }
+
+  public UVCoveragePanel getUvpanel() {
+    return uvpanel;
   }
 }
