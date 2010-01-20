@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.33 2010-01-15 13:51:27 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.34 2010-01-20 09:56:13 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.33  2010/01/15 13:51:27  bourgesl
+ * illegalStateException if any transient field is undefined
+ *
  * Revision 1.32  2010/01/12 16:54:19  bourgesl
  * added PoPs in title + several changes on charts
  *
@@ -524,8 +527,26 @@ public class ObservabilityService {
 
       final GroupedPopObservabilityData popBestData = popMergeList.get(end);
 
-      if (logger.isLoggable(Level.INFO)) {
-        logger.info("best PoPs : " + popBestData);
+      if (popMergeList.size() > 1) {
+        GroupedPopObservabilityData pm;
+
+        // find all equivalent pop combinations :
+        final List<GroupedPopObservabilityData> bestPoPs = new ArrayList<GroupedPopObservabilityData>();
+        for (int i = end; i >= 0; i--) {
+          pm = popMergeList.get(i);
+          if (popBestData.getEstimation() == pm.getEstimation()) {
+            bestPoPs.add(pm);
+          } else {
+            break;
+          }
+        }
+        if (logger.isLoggable(Level.INFO)) {
+          logger.info("best PoPs : " + bestPoPs);
+        }
+      } else {
+        if (logger.isLoggable(Level.INFO)) {
+          logger.info("best PoPs : " + popBestData);
+        }
       }
 
       bestPopCombination = popBestData.getPopCombination();
@@ -867,11 +888,6 @@ public class ObservabilityService {
           logger.info("best PoPs : " + bestPoPs);
         }
       }
-
-      final StringBuffer sb = new StringBuffer(starObs.getName()).append(" [");
-      sb.append(popBestData.getPopCombination().getIdentifier());
-      sb.append("]");
-      starObs.setName(sb.toString());
 
       if (this.data.getBestPops() == null) {
         this.data.setBestPops(popBestData.getPopCombination());
