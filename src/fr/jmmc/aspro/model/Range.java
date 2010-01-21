@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: Range.java,v 1.6 2009-12-02 17:23:51 bourgesl Exp $"
+ * "@(#) $Id: Range.java,v 1.7 2010-01-21 16:39:49 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2009/12/02 17:23:51  bourgesl
+ * fixed several bugs on pop finder + refactoring
+ *
  * Revision 1.5  2009/12/01 17:14:45  bourgesl
  * first try to add the pop configuration finder
  *
@@ -71,6 +74,34 @@ public class Range {
   @Override
   public String toString() {
     return "[" + this.min + ", " + this.max + "]";
+  }
+
+  /* utility methods */
+
+  public static Double getMinimum(final List<Range> ranges) {
+    if (ranges != null && !ranges.isEmpty()) {
+      double min = Double.MAX_VALUE;
+      for (Range range : ranges) {
+        if (min > range.getMin()) {
+          min = range.getMin();
+        }
+      }
+      return min;
+    }
+    return null;
+  }
+
+  public static Double getMaximum(final List<Range> ranges) {
+    if (ranges != null && !ranges.isEmpty()) {
+      double max = Double.MIN_VALUE;
+      for (Range range : ranges) {
+        if (max < range.getMax()) {
+          max = range.getMax();
+        }
+      }
+      return max;
+    }
+    return null;
   }
 
   /**
