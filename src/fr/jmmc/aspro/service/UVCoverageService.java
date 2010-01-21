@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoverageService.java,v 1.5 2010-01-19 13:20:20 bourgesl Exp $"
+ * "@(#) $Id: UVCoverageService.java,v 1.6 2010-01-21 16:41:30 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2010/01/19 13:20:20  bourgesl
+ * NPE fixed when the observability displays the baseline limits
+ *
  * Revision 1.4  2010/01/15 16:14:16  bourgesl
  * added computation of UV points compatible with observability ranges, bandpass and sampling periodicity
  *
@@ -59,6 +62,10 @@ public class UVCoverageService {
   private final ObservationSetting observation;
   /** target to use */
   private final String targetName;
+  /** HA min in decimal hours */
+  private final double haMin;
+  /** HA max */
+  private final double haMax;
 
   /* internal */
   /** Get the current thread to check if the computation is interrupted */
@@ -86,10 +93,14 @@ public class UVCoverageService {
    *
    * @param observation observation settings
    * @param targetName target name
+   * @param haMin HA min in decimal hours
+   * @param haMax HA max in decimal hours
    */
-  public UVCoverageService(final ObservationSetting observation, final String targetName) {
+  public UVCoverageService(final ObservationSetting observation, final String targetName,final double haMin, final double haMax) {
     this.observation = observation;
     this.targetName = targetName;
+    this.haMin = haMin;
+    this.haMax = haMax;
   }
 
   /**
@@ -235,9 +246,8 @@ public class UVCoverageService {
 
     if (obsRangesHA != null) {
 
-      // TODO : get haMin / haMax from parameters :
-      final double haMin = -12d;
-      final double haMax = 12d;
+      final double ha1 = this.haMin; /* -12d */
+      final double ha2 = this.haMax; /* +12d */
 
       final double step = this.haStep;
 
@@ -265,7 +275,7 @@ public class UVCoverageService {
 
         uvData = new UVRangeBaseLineData(baseLine.getName());
 
-        n = (int) Math.round((haMax - haMin) / step) + 1;
+        n = (int) Math.round((ha2 - ha1) / step) + 1;
 
         u = new double[n];
         v = new double[n];
@@ -274,7 +284,7 @@ public class UVCoverageService {
 
         j = 0;
 
-        for (double ha = haMin; ha <= haMax; ha += step) {
+        for (double ha = ha1; ha <= ha2; ha += step) {
 
           // check HA :
           observable = checkObservability(ha, obsRangesHA);
@@ -320,7 +330,7 @@ public class UVCoverageService {
 
   private boolean checkObservability(final double ha, final List<Range> obsRangesHA) {
     for (Range range : obsRangesHA) {
-      if (ha > range.getMin() && ha < range.getMax()) {
+      if (ha >= range.getMin() && ha <= range.getMax()) {
         return true;
       }
     }
