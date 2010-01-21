@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityPanel.java,v 1.21 2010-01-20 16:18:38 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityPanel.java,v 1.22 2010-01-21 16:39:24 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.21  2010/01/20 16:18:38  bourgesl
+ * observation form refactoring
+ *
  * Revision 1.20  2010/01/19 13:20:35  bourgesl
  * no message
  *
@@ -218,7 +221,7 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
 
     this.add(this.chartPanel, BorderLayout.CENTER);
 
-    final JPanel panelOptions = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 2));
+    final JPanel panelOptions = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 1));
 
     panelOptions.add(new JLabel("Time :"));
 
