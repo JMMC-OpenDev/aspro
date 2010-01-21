@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BasicObservationForm.java,v 1.17 2010-01-20 16:18:37 bourgesl Exp $"
+ * "@(#) $Id: BasicObservationForm.java,v 1.18 2010-01-21 16:39:11 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.17  2010/01/20 16:18:37  bourgesl
+ * observation form refactoring
+ *
  * Revision 1.16  2010/01/14 17:03:37  bourgesl
  * refactoring for observation LOAD / CHANGE events
  *
@@ -57,9 +60,6 @@ import fr.jmmc.aspro.model.oi.InterferometerConfigurationChoice;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Pop;
 import fr.jmmc.mcs.astro.star.Star;
-import fr.jmmc.mcs.astro.star.StarResolverWidget;
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -101,8 +101,6 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
   /* members */
   /** observation manager */
   private ObservationManager om = ObservationManager.getInstance();
-  /** star resolver widget */
-  private StarResolverWidget starSearchField;
   /** flag to enable / disable the automatic update of the observation when any swing component changes */
   private boolean doAutoUpdateObservation = true;
 
@@ -138,6 +136,7 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
     jScrollPane1 = new javax.swing.JScrollPane();
     jListTargets = new javax.swing.JList();
     jButtonRemoveTarget = new javax.swing.JButton();
+    starSearchField = new fr.jmmc.mcs.astro.star.StarResolverWidget();
     jPanelOptions = new javax.swing.JPanel();
     jLabel1 = new javax.swing.JLabel();
     jDateSpinner = new javax.swing.JSpinner();
@@ -252,7 +251,7 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
     jPanelMain.add(jScrollPane1, gridBagConstraints);
 
-    jButtonRemoveTarget.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+    jButtonRemoveTarget.setFont(new java.awt.Font("Dialog", 1, 14));
     jButtonRemoveTarget.setIcon(new javax.swing.ImageIcon(getClass().getResource("/fr/jmmc/aspro/gui/icons/delete.png"))); // NOI18N
     jButtonRemoveTarget.setMargin(new java.awt.Insets(0, 0, 0, 0));
     jButtonRemoveTarget.addActionListener(new java.awt.event.ActionListener() {
@@ -265,6 +264,13 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
     gridBagConstraints.gridy = 2;
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
     jPanelMain.add(jButtonRemoveTarget, gridBagConstraints);
+
+    starSearchField.setMinimumSize(new java.awt.Dimension(80, 23));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 3;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridwidth = 2;
+    jPanelMain.add(starSearchField, gridBagConstraints);
 
     add(jPanelMain);
 
@@ -375,18 +381,8 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
     // register this as an observation listener :
     this.om.register(this);
 
-    // add StarResolverWidget :
-    final Star star = new Star();
-    star.addObserver(this);
-
-    this.starSearchField = new StarResolverWidget(star);
-    this.starSearchField.setMinimumSize(new Dimension(80, 25));
-
-    GridBagConstraints gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 3;
-    gridBagConstraints.gridy = 2;
-    gridBagConstraints.gridwidth = 2;
-    this.jPanelMain.add(this.starSearchField, gridBagConstraints);
+    // add observer to the StarResolverWidget :
+    this.starSearchField.getStar().addObserver(this);
 
     // update component models :
     this.jDateSpinner.setEditor(new JSpinner.DateEditor(jDateSpinner, "yyyy/MM/dd"));
@@ -587,19 +583,16 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
 
       if (notification == Star.Notification.QUERY_COMPLETE) {
         if (logger.isLoggable(Level.FINE)) {
-          logger.fine("Star search Field : " + this.starSearchField.getText() + "\n" + star);
+          logger.fine("Star resolved : \n" + star);
         }
 
         boolean changed = false;
 
-        // concurrent notification protection :
-        synchronized (star) {
-          final String name = this.starSearchField.getText().toUpperCase();
+        final String name = star.getName().toUpperCase();
 
-          if (this.om.addTarget(name, star)) {
-            changed = true;
-          }
-        } // synchronized
+        if (this.om.addTarget(name, star)) {
+          changed = true;
+        }
 
         if (changed) {
           // This method was called by the StarResolverThread (not EDT) :
@@ -746,5 +739,6 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
   private javax.swing.JPanel jPanelOptions;
   private javax.swing.JScrollPane jScrollPane1;
   private javax.swing.JFormattedTextField jTextPoPs;
+  private fr.jmmc.mcs.astro.star.StarResolverWidget starSearchField;
   // End of variables declaration//GEN-END:variables
 }
