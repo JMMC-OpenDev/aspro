@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityData.java,v 1.2 2010-01-12 16:54:19 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityData.java,v 1.3 2010-01-22 13:16:44 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2010/01/12 16:54:19  bourgesl
+ * added PoPs in title + several changes on charts
+ *
  * Revision 1.1  2010/01/08 16:48:30  bourgesl
  * package refactoring
  *
@@ -15,7 +18,7 @@
  */
 package fr.jmmc.aspro.model.observability;
 
-import fr.jmmc.aspro.model.*;
+import fr.jmmc.aspro.model.BaseLine;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;

@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.35 2010-01-20 16:18:38 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.36 2010-01-22 13:16:44 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.35  2010/01/20 16:18:38  bourgesl
+ * observation form refactoring
+ *
  * Revision 1.34  2010/01/20 09:56:13  bourgesl
  * removed Pop identifiers with the target name
  * added log of the best PoPs collection for a given list of targets
@@ -622,7 +625,7 @@ public class ObservabilityService {
    */
   private void findTargetObservability(final Target target) {
 
-    final StarObservabilityData starObs = new StarObservabilityData(target.getName());
+    final StarObservabilityData starObs = new StarObservabilityData(target.getName(), StarObservabilityData.TYPE_STAR);
     // add the result to have also unobservable targets :
     this.data.getStarVisibilities().add(starObs);
 
@@ -710,18 +713,18 @@ public class ObservabilityService {
       final List<Range> obsRanges = new ArrayList<Range>();
 
       if (this.doDetails) {
-        // Get the current target name (+ pop combination) :
+        // Get the current target name :
         final String prefix = starObs.getName() + " ";
 
         // Add Rise/Set :
-        final StarObservabilityData soRiseSet = new StarObservabilityData(target.getName() + " Rise/Set");
+        final StarObservabilityData soRiseSet = new StarObservabilityData(target.getName() + " Rise/Set", StarObservabilityData.TYPE_RISE_SET);
         this.data.getStarVisibilities().add(soRiseSet);
 
         convertRangeToDateInterval(rangeJDRiseSet, soRiseSet.getVisible());
 
         if (rangesJDHz != null) {
           // Add Horizon :
-          final StarObservabilityData soHz = new StarObservabilityData(target.getName() + " Horizon");
+          final StarObservabilityData soHz = new StarObservabilityData(target.getName() + " Horizon", StarObservabilityData.TYPE_HORIZON);
           this.data.getStarVisibilities().add(soHz);
 
           for (Range range : rangesJDHz) {
@@ -748,7 +751,7 @@ public class ObservabilityService {
               logger.fine("JD ranges  : " + obsRanges);
             }
 
-            soBl = new StarObservabilityData(prefix + baseLine.getName());
+            soBl = new StarObservabilityData(prefix + baseLine.getName(), StarObservabilityData.TYPE_BASE_LINE + i);
             this.data.getStarVisibilities().add(soBl);
 
             for (Range range : obsRanges) {
