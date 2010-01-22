@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.10 2010-01-22 13:17:20 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.11 2010-01-22 14:25:29 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.10  2010/01/22 13:17:20  bourgesl
+ * change color association to plots
+ *
  * Revision 1.9  2010/01/21 16:41:30  bourgesl
  * added HA min / max sliders and used only to constraint the UV tracks
  *
@@ -605,8 +608,8 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
         this.jTargetHAMax.setText(format(jFieldHAMin, max));
 
         if (logger.isLoggable(Level.FINE)) {
-          logger.severe("target HA min : " + min);
-          logger.severe("target HA max : " + min);
+          logger.fine("target HA min : " + min);
+          logger.fine("target HA max : " + min);
         }
       }
     }
