@@ -1,15 +1,18 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: StarData.java,v 1.1 2010-01-08 16:48:30 bourgesl Exp $"
+ * "@(#) $Id: StarData.java,v 1.2 2010-01-22 13:16:19 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2010/01/08 16:48:30  bourgesl
+ * package refactoring
+ *
  */
 package fr.jmmc.aspro.model.observability;
 
-import fr.jmmc.aspro.model.*;
+import fr.jmmc.aspro.model.Range;
 import java.util.List;
 
 /**

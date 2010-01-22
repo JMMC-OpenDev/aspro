@@ -1,18 +1,21 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: PopObservabilityData.java,v 1.1 2010-01-08 16:48:30 bourgesl Exp $"
+ * "@(#) $Id: PopObservabilityData.java,v 1.2 2010-01-22 13:16:18 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2010/01/08 16:48:30  bourgesl
+ * package refactoring
+ *
  * Revision 1.2  2009/12/18 11:52:02  bourgesl
  * added Pops Finder Compatible Mode for a list of targets
  *
  */
 package fr.jmmc.aspro.model.observability;
 
-import fr.jmmc.aspro.model.*;
+import fr.jmmc.aspro.model.Range;
 import java.util.List;
 
 /**
