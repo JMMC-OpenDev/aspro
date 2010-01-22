@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityPanel.java,v 1.22 2010-01-21 16:39:24 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityPanel.java,v 1.23 2010-01-22 13:17:20 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.22  2010/01/21 16:39:24  bourgesl
+ * smaller margins
+ *
  * Revision 1.21  2010/01/20 16:18:38  bourgesl
  * observation form refactoring
  *
@@ -77,6 +80,7 @@ package fr.jmmc.aspro.gui;
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.gui.action.ExportPDFAction;
 import fr.jmmc.aspro.gui.chart.ChartUtils;
+import fr.jmmc.aspro.gui.util.ColorPalette;
 import fr.jmmc.aspro.model.observability.DateTimeInterval;
 import fr.jmmc.aspro.model.observability.ObservabilityData;
 import fr.jmmc.aspro.model.ObservationListener;
@@ -489,19 +493,29 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
    * @param starVis star observability data
    */
   private void updateChart(final List<StarObservabilityData> starVis, final Date min, final Date max) {
-    final String[] targetNames = new String[starVis.size()];
+    final ColorPalette palette = ColorPalette.getDefaultColorPalette();
 
+    // renderer :
+    final XYBarRenderer renderer = (XYBarRenderer) this.localXYPlot.getRenderer();
+
+    // reset colors :
+    renderer.clearSeriesPaints(false);
+    // side effect with chart theme :
+    renderer.setAutoPopulateSeriesPaint(false);
+
+    final String[] targetNames = new String[starVis.size()];
     final TaskSeriesCollection localTaskSeriesCollection = new TaskSeriesCollection();
 
-    int i = 0;
+    int n = 0;
     int j;
     String name;
     TaskSeries taskSeries;
     Task task;
+
     for (StarObservabilityData so : starVis) {
       name = so.getName();
       // use the target name as the name of the serie :
-      targetNames[i++] = name;
+      targetNames[n] = name;
       taskSeries = new TaskSeries(name);
       taskSeries.setNotify(false);
 
@@ -515,6 +529,11 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
 
       taskSeries.setNotify(true);
       localTaskSeriesCollection.add(taskSeries);
+
+      // color :
+      renderer.setSeriesPaint(n, palette.getColor(so.getType()), false);
+
+      n++;
     }
 
     // set the main data set :
@@ -539,39 +558,37 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
     }
     this.localXYPlot.setDomainAxis(localSymbolAxis);
 
-    final XYBarRenderer localXYBarRenderer = (XYBarRenderer) this.localXYPlot.getRenderer();
-
     // remove Annotations :
-    localXYBarRenderer.removeAnnotations();
+    renderer.removeAnnotations();
 
     if (!this.jCheckBoxBaseLineLimits.isSelected()) {
       // add the Annotations :
       // 24h date formatter like in france :
       final DateFormat df = DateFormat.getTimeInstance(DateFormat.SHORT, Locale.FRANCE);
 
-      i = 0;
+      n = 0;
       for (StarObservabilityData so : starVis) {
 
         for (DateTimeInterval interval : so.getVisible()) {
 
           if (!interval.getStartDate().equals(min)) {
-            final XYTextAnnotation aStart = new XYTextAnnotation(df.format(interval.getStartDate()), i, interval.getStartDate().getTime());
+            final XYTextAnnotation aStart = new XYTextAnnotation(df.format(interval.getStartDate()), n, interval.getStartDate().getTime());
             aStart.setTextAnchor(TextAnchor.BASELINE_CENTER);
             aStart.setPaint(Color.BLACK);
             aStart.setRotationAngle(Math.PI / 2);
-            localXYBarRenderer.addAnnotation(aStart);
+            renderer.addAnnotation(aStart);
           }
 
           if (!interval.getEndDate().equals(max)) {
-            final XYTextAnnotation aEnd = new XYTextAnnotation(df.format(interval.getEndDate()), i, interval.getEndDate().getTime());
+            final XYTextAnnotation aEnd = new XYTextAnnotation(df.format(interval.getEndDate()), n, interval.getEndDate().getTime());
             aEnd.setTextAnchor(TextAnchor.BASELINE_CENTER);
             aEnd.setPaint(Color.BLACK);
             aEnd.setRotationAngle(Math.PI / 2);
-            localXYBarRenderer.addAnnotation(aEnd);
+            renderer.addAnnotation(aEnd);
           }
         }
 
-        i++;
+        n++;
       }
     }
   }

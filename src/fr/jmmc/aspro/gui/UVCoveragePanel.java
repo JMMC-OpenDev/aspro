@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.9 2010-01-21 16:41:30 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.10 2010-01-22 13:17:20 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.9  2010/01/21 16:41:30  bourgesl
+ * added HA min / max sliders and used only to constraint the UV tracks
+ *
  * Revision 1.8  2010/01/20 16:18:38  bourgesl
  * observation form refactoring
  *
@@ -40,6 +43,7 @@ import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.gui.action.ExportPDFAction;
 import fr.jmmc.aspro.gui.chart.ChartUtils;
 import fr.jmmc.aspro.gui.chart.SquareChartPanel;
+import fr.jmmc.aspro.gui.util.ColorPalette;
 import fr.jmmc.aspro.gui.util.FieldSliderAdapter;
 import fr.jmmc.aspro.model.ConfigurationManager;
 import fr.jmmc.aspro.model.ObservationListener;
@@ -74,6 +78,7 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.event.ChartProgressEvent;
 import org.jfree.chart.event.ChartProgressListener;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
@@ -753,6 +758,14 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
    * @param uvData uv coverage data
    */
   private void updateChart(final UVCoverageData uvData) {
+    // renderer :
+    final XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) this.localXYPlot.getRenderer();
+
+    // reset colors :
+    renderer.clearSeriesPaints(false);
+    // side effect with chart theme :
+    renderer.setAutoPopulateSeriesPaint(false);
+
     final XYSeriesCollection dataset = new XYSeriesCollection();
 
     this.updateUVTracks(dataset, uvData);
@@ -768,6 +781,10 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
    * @param uvData uv coverage data
    */
   private void updateUVTracksRiseSet(final XYSeriesCollection dataset, final UVCoverageData uvData) {
+    final ColorPalette palette = ColorPalette.getDefaultColorPalette();
+
+    // renderer :
+    final XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) this.localXYPlot.getRenderer();
 
     // process uv rise/set :
     final List<UVBaseLineData> targetUVRiseSet = uvData.getTargetUVRiseSet();
@@ -780,6 +797,10 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
       double[] u;
       double[] v;
       double x, y;
+      int n = 0;
+      // serie offset :
+      final int offset = dataset.getSeriesCount();
+
 
       for (UVBaseLineData uvBL : targetUVRiseSet) {
         xySeriesBL = new XYSeries("Rise/Set " + uvBL.getName(), false);
@@ -807,6 +828,11 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
 
         xySeriesBL.setNotify(true);
         dataset.addSeries(xySeriesBL);
+
+        // color :
+        renderer.setSeriesPaint(n + offset, palette.getColor(n), false);
+
+        n++;
       } // BL
     }
   }
@@ -817,6 +843,10 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
    * @param uvData uv coverage data
    */
   private void updateUVTracks(final XYSeriesCollection dataset, final UVCoverageData uvData) {
+    final ColorPalette palette = ColorPalette.getDefaultColorPalette();
+
+    // renderer :
+    final XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) this.localXYPlot.getRenderer();
 
     // process observable uv ranges :
     final List<UVRangeBaseLineData> targetUVObservability = uvData.getTargetUVObservability();
@@ -831,6 +861,7 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
       double[] u2;
       double[] v2;
       double x1, y1, x2, y2;
+      int n = 0;
 
       for (UVRangeBaseLineData uvBL : targetUVObservability) {
         xySeriesBL = new XYSeries("Observable " + uvBL.getName(), false);
@@ -871,6 +902,11 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
 
         xySeriesBL.setNotify(true);
         dataset.addSeries(xySeriesBL);
+
+        // color :
+        renderer.setSeriesPaint(n, palette.getColor(n), false);
+
+        n++;
       } // BL
     }
   }
