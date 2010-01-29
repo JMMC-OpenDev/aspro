@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+Document   : targetModel.xsd
+Created on : 26 january 2010, 16:25
+Author     : bourgesl
+Description:
+
+This model is a subset of the model fitting model that describes models for a target
+
+-->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xmlns="http://www.jmmc.fr/jmcs/models/0.1"
+            targetNamespace="http://www.jmmc.fr/jmcs/models/0.1"
+            xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
+            xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
+            jaxb:version="2.1" jaxb:extensionBindingPrefixes="xjc">
+
+  <xsd:annotation>
+    <xsd:documentation>
+      Jmmc target model Xml Schema.
+    </xsd:documentation>
+    <xsd:appinfo>
+      <jaxb:schemaBindings>
+        <jaxb:package name="fr.jmmc.mcs.model.targetmodel"/>
+      </jaxb:schemaBindings>
+    </xsd:appinfo>
+  </xsd:annotation>
+
+
+  <!--
+    Basic model representation. This model also correspond to composite model
+  -->
+  <xsd:element name="model">
+    <xsd:annotation>
+      <xsd:documentation>
+        A common representation of every models.
+      </xsd:documentation>
+    </xsd:annotation>
+
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element ref="model" minOccurs="0" maxOccurs="unbounded"/>
+        <xsd:element name="desc" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+        <xsd:element ref="parameter" minOccurs="0" maxOccurs="unbounded"/>
+        <xsd:element ref="parameterLink" minOccurs="0" maxOccurs="unbounded" />
+      </xsd:sequence>
+      <xsd:attributeGroup ref="ModelAttributes"/>
+    </xsd:complexType>
+  </xsd:element>
+
+  <!-- Model attributes -->
+  <xsd:attributeGroup name="ModelAttributes">
+    <xsd:attribute name="name" type="xsd:string" use="required"/>
+    <xsd:attribute name="type" type="xsd:string" use="required"/>
+  </xsd:attributeGroup>
+
+
+  <!--
+    Model parameter representation.
+  -->
+  <xsd:element name="parameter">
+    <xsd:annotation>
+      <xsd:documentation>
+        A common representation of every model parameters.
+      </xsd:documentation>
+    </xsd:annotation>
+
+    <xsd:complexType>
+      <xsd:all>
+        <xsd:element name="desc" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+        <xsd:element name="units" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+        <xsd:element name="value" type="xsd:double" minOccurs="1" maxOccurs="1"/>
+        <xsd:element name="minValue" type="xsd:double" minOccurs="0" maxOccurs="1"/>
+        <xsd:element name="maxValue" type="xsd:double" minOccurs="0" maxOccurs="1"/>
+        <xsd:element name="scale" type="xsd:double" minOccurs="0" maxOccurs="1"/>
+        <xsd:element name="hasFixedValue" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+        <xsd:element name="editable" type="xsd:boolean" minOccurs="0" maxOccurs="1"/>
+      </xsd:all>
+      <xsd:attributeGroup ref="ParameterAttributes"/>
+    </xsd:complexType>
+  </xsd:element>
+
+
+  <!--
+    Parameter link used by target's models to reference existing parameters
+    by their id.
+  -->
+  <xsd:element name="parameterLink">
+    <xsd:annotation>
+      <xsd:documentation>
+        Parameter link.
+      </xsd:documentation>
+    </xsd:annotation>
+
+    <xsd:complexType>
+      <xsd:attribute name="parameterRef" type="xsd:IDREF" use="required">
+        <xsd:annotation>
+          <xsd:appinfo>
+            <jaxb:property>
+              <jaxb:baseType name="Parameter" />
+            </jaxb:property>
+          </xsd:appinfo>
+        </xsd:annotation>
+      </xsd:attribute>
+      <xsd:attribute name="type" type="xsd:string" />
+    </xsd:complexType>
+
+  </xsd:element>
+
+  <!-- Parameters attributes -->
+  <xsd:attributeGroup name="ParameterAttributes">
+    <xsd:attribute name="name" type="xsd:string" use="required"/>
+    <xsd:attribute name="type" type="xsd:string" use="required"/>
+    <xsd:attribute name="id" type="xsd:ID"/>
+  </xsd:attributeGroup>
+
+</xsd:schema>
+

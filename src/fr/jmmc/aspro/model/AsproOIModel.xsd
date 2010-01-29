@@ -3,6 +3,7 @@
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xmlns="http://www.jmmc.fr/aspro-oi/0.1"
             targetNamespace="http://www.jmmc.fr/aspro-oi/0.1"
+            xmlns:tm="http://www.jmmc.fr/jmcs/models/0.1"
             xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
             xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
             jaxb:version="2.1" jaxb:extensionBindingPrefixes="xjc">
@@ -19,11 +20,15 @@
         <xjc:superClass name="fr.jmmc.aspro.model.OIBase"/>
         <xjc:simple />
       </jaxb:globalBindings>
+
+      <jaxb:schemaBindings>
+        <jaxb:package name="fr.jmmc.aspro.model.oi"/>
+      </jaxb:schemaBindings>
     </xsd:appinfo>
   </xsd:annotation>
 
 
-
+  <xsd:import namespace="http://www.jmmc.fr/jmcs/models/0.1" schemaLocation="./targetModel.xsd"/>
 
 
 <!-- Elements -->
@@ -433,6 +438,9 @@
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
+
+      <!-- target models -->
+      <xsd:element ref="tm:model" minOccurs="0" maxOccurs="unbounded"/>
 
     </xsd:sequence>
   </xsd:complexType>

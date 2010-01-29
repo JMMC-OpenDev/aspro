@@ -6,9 +6,6 @@
   	Aspro ant build file
   </description>
 
-  <!-- first load local config file -->
-  <property file="build.properties"/>
-
   <property name="root" location=".."/>
 
   <property name="libs" location="${root}/lib"/>
@@ -19,7 +16,6 @@
   <macrodef name="xjc">
     <attribute name="destdir"/>
     <attribute name="schema"/>
-    <attribute name="package"/>
 
     <sequential>
       <java jar="${libs}/jaxb-xjc.jar">
@@ -35,11 +31,9 @@
         <arg value="-d"/>
         <arg value="@{destdir}"/>
 
-        <arg value="-p"/>
-        <arg value="@{package}"/>
-
         <arg value="@{schema}"/>
       </java>
+
       <delete dir="@{destdir}">
         <include name="**/*.java.backup"/>
       </delete>
@@ -50,7 +44,7 @@
   <!-- targets -->
 
   <!-- target about : -->
-  <target name="about" depends="init" description="show information for public targets">
+  <target name="about" description="show information for public targets">
     <echo>available ant targets : </echo>
     <echo>-------------------------------------------------------------------------------</echo>
     <echo>  - genXsdCode         : generates the java code from xml schema (xsd)</echo>
@@ -58,41 +52,27 @@
   </target>
 
 
-  <!-- target init : timestamp -->
-  <target name="init">
-    <tstamp>
-      <format property="build.date" pattern="dd/MM/yyyy HH:mm:ss" />
-    </tstamp>
-
-    <echo>-------------------------------------------------------------------------------</echo>
-    <echo>  ${vendor}  ::  ${title} - ${version} </echo>
-    <echo>-------------------------------------------------------------------------------</echo>
-    <echo> Build File </echo>
-    <echo>-------------------------------------------------------------------------------</echo>
-    <echo> contacts     : ${build.by}  </echo>
-    <echo> build date   : ${build.date} </echo>
-    <echo></echo>
-    <echo>-------------------------------------------------------------------------------</echo>
-
-  </target>
 
 
-
-
-  <target name="genXsdCode" depends="init">
+  <target name="genXsdCode">
 
     <echo>generating java code for AsproOIModel.xsd</echo>
     <mkdir dir="${sources}/fr/jmmc/aspro/model/oi" />
 
-    <xjc destdir="${sources}" package="fr.jmmc.aspro.model.oi"
+    <xjc destdir="${sources}"
          schema="${sources}/fr/jmmc/aspro/model/AsproOIModel.xsd" />
 
+    <!-- remove generated classes for jmcs package -->
+    
+    <delete dir="${sources}/fr/jmmc/mcs/" />
+
+<!--
     <echo>generating java code for AsproDataModel.xsd</echo>
 
     <mkdir dir="${sources}/fr/jmmc/aspro/model/oifits" />
-    <xjc destdir="${sources}" package="fr.jmmc.aspro.model.oifits"
+    <xjc destdir="${sources}"
          schema="${sources}/fr/jmmc/aspro/model/AsproDataModel.xsd" />
-
+-->
   </target>
 
 

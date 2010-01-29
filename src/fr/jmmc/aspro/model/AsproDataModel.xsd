@@ -2,7 +2,10 @@
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xmlns="http://www.jmmc.fr/aspro/0.1"
-            targetNamespace="http://www.jmmc.fr/aspro/0.1">
+            targetNamespace="http://www.jmmc.fr/aspro/0.1"
+            xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
+            xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
+            jaxb:version="2.1" jaxb:extensionBindingPrefixes="xjc">
 
   <xsd:annotation>
     <xsd:documentation>
@@ -11,8 +14,16 @@
         Created : 08/09/2009 :
           Laurent : Initial revision
     </xsd:documentation>
-  </xsd:annotation>
+    <xsd:appinfo>
+      <jaxb:globalBindings>
+        <xjc:simple />
+      </jaxb:globalBindings>
 
+      <jaxb:schemaBindings>
+        <jaxb:package name="fr.jmmc.aspro.model.oifits"/>
+      </jaxb:schemaBindings>
+    </xsd:appinfo>
+  </xsd:annotation>
 
 
   <!-- Elements -->
