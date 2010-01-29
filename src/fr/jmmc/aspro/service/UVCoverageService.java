@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoverageService.java,v 1.6 2010-01-21 16:41:30 bourgesl Exp $"
+ * "@(#) $Id: UVCoverageService.java,v 1.7 2010-01-29 16:01:20 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2010/01/21 16:41:30  bourgesl
+ * added HA min / max sliders and used only to constraint the UV tracks
+ *
  * Revision 1.5  2010/01/19 13:20:20  bourgesl
  * NPE fixed when the observability displays the baseline limits
  *
@@ -78,6 +81,8 @@ public class UVCoverageService {
   private double lambda;
   /** maximal wavelength */
   private double lambdaMax;
+  /** maximum value for any U or V coordinate */
+  private double uvMax = Double.MIN_VALUE;
 
   /* reused observability data */
   /** observability data */
@@ -96,7 +101,7 @@ public class UVCoverageService {
    * @param haMin HA min in decimal hours
    * @param haMax HA max in decimal hours
    */
-  public UVCoverageService(final ObservationSetting observation, final String targetName,final double haMin, final double haMax) {
+  public UVCoverageService(final ObservationSetting observation, final String targetName, final double haMin, final double haMax) {
     this.observation = observation;
     this.targetName = targetName;
     this.haMin = haMin;
@@ -140,7 +145,17 @@ public class UVCoverageService {
             computeUVSupport();
 
             computeObservableUV();
+
+            if (logger.isLoggable(Level.FINE)) {
+              logger.fine("UV coordinate maximum = [" + this.uvMax + "]");
+            }
           }
+
+          // Compute Target Model for the UV coverage limits :
+
+          // TODO :
+          // ModelManager.computeUVMap()
+
         }
       }
 
@@ -174,7 +189,7 @@ public class UVCoverageService {
 
   private void computeUVSupport() {
 
-    // 10 minutes :
+    // 10 minutes is enough to get pretty ellipse :
     final double step = 10d / 60d;
 
     final double haElev = this.starData.getHaElev();
@@ -209,13 +224,19 @@ public class UVCoverageService {
       for (double ha = -haElev; ha <= haElev; ha += step) {
 
         haRad = AngleUtils.hours2rad(ha);
+
+        // Baseline projected vector (m) :
         u[j] = CalcUVW.computeU(baseLine, haRad);
         v[j] = CalcUVW.computeV(precDEC, baseLine, haRad);
 
         // wavelength correction :
 
+        // Spatial frequency (rad-1) :
         u[j] = u[j] / this.lambda;
         v[j] = v[j] / this.lambda;
+
+        // check min / max :
+        checkUVCoordinate(u[j], v[j]);
 
         j++;
       }
@@ -291,6 +312,7 @@ public class UVCoverageService {
 
           if (observable) {
             haRad = AngleUtils.hours2rad(ha);
+            // Baseline projected vector (m) :
             u[j] = CalcUVW.computeU(baseLine, haRad);
             v[j] = CalcUVW.computeV(precDEC, baseLine, haRad);
 
@@ -299,11 +321,18 @@ public class UVCoverageService {
 
             // wavelength correction :
 
+            // Spatial frequency (rad-1) :
             u[j] = u[j] / this.lambdaMin;
             v[j] = v[j] / this.lambdaMin;
 
+            // check min / max :
+            checkUVCoordinate(u[j], v[j]);
+
             u2[j] = u2[j] / this.lambdaMax;
             v2[j] = v2[j] / this.lambdaMax;
+
+            // check min / max :
+            checkUVCoordinate(u2[j], v2[j]);
 
             j++;
           }
@@ -373,6 +402,13 @@ public class UVCoverageService {
       logger.fine("lambdaMin : " + this.lambdaMin);
       logger.fine("lambda    : " + this.lambda);
       logger.fine("lambdaMax : " + this.lambdaMax);
+    }
+  }
+
+  private void checkUVCoordinate(final double u, final double v) {
+    final double value = Math.max(Math.abs(u), Math.abs(v));
+    if (value > this.uvMax) {
+      this.uvMax = value;
     }
   }
 }
