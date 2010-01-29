@@ -33,6 +33,7 @@ import fr.jmmc.aspro.model.OIBase;
  *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}ID"/>
  *         &lt;element name="description" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *         &lt;element name="numberChannels" type="{http://www.w3.org/2001/XMLSchema}int"/>
+ *         &lt;element name="defaultSamplingTime" type="{http://www.w3.org/2001/XMLSchema}int"/>
  *         &lt;element name="mode" type="{http://www.jmmc.fr/aspro-oi/0.1}FocalInstrumentMode" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
@@ -47,6 +48,7 @@ import fr.jmmc.aspro.model.OIBase;
     "name",
     "description",
     "numberChannels",
+    "defaultSamplingTime",
     "modes"
 })
 public class FocalInstrument
@@ -61,6 +63,7 @@ public class FocalInstrument
     @XmlElement(required = true)
     protected String description;
     protected int numberChannels;
+    protected int defaultSamplingTime;
     @XmlElement(name = "mode")
     protected List<FocalInstrumentMode> modes;
 
@@ -126,6 +129,22 @@ public class FocalInstrument
      */
     public void setNumberChannels(int value) {
         this.numberChannels = value;
+    }
+
+    /**
+     * Gets the value of the defaultSamplingTime property.
+     * 
+     */
+    public int getDefaultSamplingTime() {
+        return defaultSamplingTime;
+    }
+
+    /**
+     * Sets the value of the defaultSamplingTime property.
+     * 
+     */
+    public void setDefaultSamplingTime(int value) {
+        this.defaultSamplingTime = value;
     }
 
     /**
