@@ -1,21 +1,27 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/*
- * TargetModelForm.java
+/*******************************************************************************
+ * JMMC project
  *
- * Created on 22 janv. 2010, 16:19:43
+ * "@(#) $Id: TargetModelForm.java,v 1.2 2010-02-01 09:43:49 bourgesl Exp $"
+ *
+ * History
+ * -------
+ * $Log: not supported by cvs2svn $
  */
-
 package fr.jmmc.aspro.gui;
 
 /**
- *
+ * This class represents the target model editor ...
  * @author bourgesl
  */
 public class TargetModelForm extends javax.swing.JPanel {
+
+  /** default serial UID for Serializable interface */
+  private static final long serialVersionUID = 1;
+  /** Class Name */
+  private static final String className_ = "fr.jmmc.aspro.gui.TargetModelForm";
+  /** Class logger */
+  private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
+          className_);
 
     /** Creates new form TargetModelForm */
     public TargetModelForm() {
