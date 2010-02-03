@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SquareXYPlot.java,v 1.3 2010-02-03 09:48:53 bourgesl Exp $"
+ * "@(#) $Id: SquareXYPlot.java,v 1.4 2010-02-03 16:07:49 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2010/02/03 09:48:53  bourgesl
+ * target model uvmap added on the uv coverage with zooming supported
+ *
  * Revision 1.2  2010/01/13 16:12:08  bourgesl
  * comments
  *
@@ -18,7 +21,6 @@ package fr.jmmc.aspro.gui.chart;
 import java.awt.Graphics2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
-import java.util.logging.Level;
 import org.jfree.chart.axis.AxisSpace;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.plot.PlotRenderingInfo;

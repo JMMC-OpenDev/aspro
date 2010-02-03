@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ZoomEvent.java,v 1.1 2010-02-03 09:48:53 bourgesl Exp $"
+ * "@(#) $Id: ZoomEvent.java,v 1.2 2010-02-03 16:07:49 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2010/02/03 09:48:53  bourgesl
+ * target model uvmap added on the uv coverage with zooming supported
+ *
  */
 package fr.jmmc.aspro.gui.chart;
 
@@ -14,15 +17,13 @@ package fr.jmmc.aspro.gui.chart;
  * @author bourgesl
  */
 public class ZoomEvent {
+
   /** domain lower bound */
   private final double domainLowerBound;
-
   /** domain Upper bound */
   private final double domainUpperBound;
-
   /** range lower bound */
   private final double rangeLowerBound;
-
   /** range Upper bound */
   private final double rangeUpperBound;
 
@@ -53,4 +54,33 @@ public class ZoomEvent {
     return rangeUpperBound;
   }
 
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    final ZoomEvent other = (ZoomEvent) obj;
+    if (this.domainLowerBound != other.domainLowerBound) {
+      return false;
+    }
+    if (this.domainUpperBound != other.domainUpperBound) {
+      return false;
+    }
+    if (this.rangeLowerBound != other.rangeLowerBound) {
+      return false;
+    }
+    if (this.rangeUpperBound != other.rangeUpperBound) {
+      return false;
+    }
+    return true;
+  }
+
+  @Override
+  public int hashCode() {
+    int hash = 5;
+    return hash;
+  }
 }

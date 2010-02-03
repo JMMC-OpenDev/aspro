@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityPanel.java,v 1.24 2010-02-03 09:48:18 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityPanel.java,v 1.25 2010-02-03 16:07:49 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.24  2010/02/03 09:48:18  bourgesl
+ * minor chart style corrections
+ *
  * Revision 1.23  2010/01/22 13:17:20  bourgesl
  * change color association to plots
  *
@@ -84,6 +87,7 @@ import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.gui.action.ExportPDFAction;
 import fr.jmmc.aspro.gui.chart.ChartUtils;
 import fr.jmmc.aspro.gui.util.ColorPalette;
+import fr.jmmc.aspro.gui.util.SwingWorkerExecutor;
 import fr.jmmc.aspro.model.observability.DateTimeInterval;
 import fr.jmmc.aspro.model.observability.ObservabilityData;
 import fr.jmmc.aspro.model.ObservationListener;
@@ -181,11 +185,6 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
   private JButton jButtonPDF;
   /** flag to enable / disable the automatic refresh of the plot when any swing component changes */
   private boolean doAutoRefresh = true;
-  /** 
-   * Current (or old) worker reference
-   * (can be a leaked reference if the computation is done)
-   */
-  private SwingWorker<ObservabilityData, Void> currentWorker = null;
 
   /**
    * Constructor
@@ -481,18 +480,8 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
     // update the status bar :
     StatusBar.show("computing observability ... (please wait, this may take a while)");
 
-    // first, cancel the current running worker :
-    if (this.currentWorker != null) {
-      // note : if the worker was previously cancelled, it has no effect.
-      // interrupt the thread to have Thread.isInterrupted() == true :
-      this.currentWorker.cancel(true);
-    }
-
-    // memorize the reference to the new worker before execution :
-    this.currentWorker = worker;
-
-    // start the new worker :
-    worker.execute();
+    // Cancel other uv map task and execute this new uv map task :
+    SwingWorkerExecutor.getInstance().execute("Observability", worker);
   }
 
   /**
