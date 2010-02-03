@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityPanel.java,v 1.23 2010-01-22 13:17:20 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityPanel.java,v 1.24 2010-02-03 09:48:18 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.23  2010/01/22 13:17:20  bourgesl
+ * change color association to plots
+ *
  * Revision 1.22  2010/01/21 16:39:24  bourgesl
  * smaller margins
  *
@@ -453,6 +456,10 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
               updateDateAxis((useLST) ? "LST" : "UTC", obsData.getDateMin(), obsData.getDateMax());
 
               updateSunMarkers(obsData.getSunIntervals());
+
+              // tick color :
+              localXYPlot.getRangeAxis().setTickMarkPaint(Color.BLACK);
+              localXYPlot.getDomainAxis().setTickMarkPaint(Color.BLACK);
 
               // update theme at end :
               ChartUtilities.applyCurrentTheme(localJFreeChart);
