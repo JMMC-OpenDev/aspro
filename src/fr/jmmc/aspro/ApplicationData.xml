@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <ApplicationData link="http://www.jmmc.fr/aspro">
-  <program name="Aspro" version="0.1b6"/>
+  <program name="Aspro" version="0.1b7"/>
   <compilation date="21/09/2009" compiler="JDK 1.5.0_16"/>
   <text>
     <![CDATA[ASPRO is a complete observation preparation tool developed and maintained by the JMMC
@@ -34,6 +34,11 @@
   </menubar>
   <releasenotes>
     <release version="0.1">
+      <prerelease version="0.1b7">
+        <change>Imported Target Model from jmcs</change>
+        <change>Corrected several minor style on charts</change>
+        <change>Added target Model uv map on the uv coverage plot with zomming supported</change>
+      </prerelease>
       <prerelease version="0.1b6">
         <change>Minor bug fixed on UV Coverage plot when the observability displays the baseline limits</change>
         <change>Fixed PDF text rendering to support greek unicode characters</change>
