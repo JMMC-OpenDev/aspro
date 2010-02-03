@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ConfigurationManager.java,v 1.15 2010-01-15 13:50:17 bourgesl Exp $"
+ * "@(#) $Id: ConfigurationManager.java,v 1.16 2010-02-03 09:48:53 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.15  2010/01/15 13:50:17  bourgesl
+ * added logs on setters
+ * supports instrumentMode is null
+ *
  * Revision 1.14  2010/01/08 16:51:17  bourgesl
  * initial uv coverage
  *
@@ -148,6 +152,7 @@ public class ConfigurationManager extends BaseOIManager {
     }
 
     computeInterferometerLocation(d);
+    computeMaxUVCoverage(d);
 
     interferometerDescriptions.put(d.getName(), d);
 
@@ -172,6 +177,36 @@ public class ConfigurationManager extends BaseOIManager {
     d.setPosSph(new LonLatAlt(sph.getLong(), sph.getLat(), sph.getRadial()));
 
     GeocentricCoords.dump(d.getName(), sph);
+  }
+
+  private void computeMaxUVCoverage(final InterferometerDescription d) {
+    double maxUV = 0d;
+
+    final List<Station> stations = d.getStations();
+    final int size = stations.size();
+
+    double x, y, z, dist;
+    Station s1, s2;
+    for (int i = 0; i < size; i++) {
+      s1 = stations.get(i);
+      for (int j = i + 1; j < size; j++) {
+        s2 = stations.get(j);
+
+        x = s2.getRelativePosition().getPosX() - s1.getRelativePosition().getPosX();
+        y = s2.getRelativePosition().getPosY() - s1.getRelativePosition().getPosY();
+        z = s2.getRelativePosition().getPosZ() - s1.getRelativePosition().getPosZ();
+
+        dist = Math.sqrt(x * x + y * y + z * z);
+
+        maxUV = Math.max(maxUV, dist);
+      }
+    }
+
+    d.setMaxUVCoverage(maxUV);
+
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("maxUVCoverage [" + d.getName() + "] = " + maxUV + " m");
+    }
   }
 
   /**

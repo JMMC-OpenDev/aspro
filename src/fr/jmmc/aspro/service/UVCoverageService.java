@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoverageService.java,v 1.7 2010-01-29 16:01:20 bourgesl Exp $"
+ * "@(#) $Id: UVCoverageService.java,v 1.8 2010-02-03 09:48:53 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2010/01/29 16:01:20  bourgesl
+ * added comments + uv max
+ *
  * Revision 1.6  2010/01/21 16:41:30  bourgesl
  * added HA min / max sliders and used only to constraint the UV tracks
  *
@@ -38,6 +41,8 @@ import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.uvcoverage.UVBaseLineData;
 import fr.jmmc.aspro.model.uvcoverage.UVRangeBaseLineData;
 import fr.jmmc.aspro.util.AngleUtils;
+import fr.jmmc.mcs.image.ColorModels;
+import fr.jmmc.mcs.model.ModelUVMapService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -152,10 +157,11 @@ public class UVCoverageService {
           }
 
           // Compute Target Model for the UV coverage limits :
-
-          // TODO :
-          // ModelManager.computeUVMap()
-
+          this.data.setUvMap(ModelUVMapService.computeUVMap(
+                  ObservationManager.getTarget(this.observation, this.targetName).getModels(),
+                  -uvMax, uvMax,
+                  -uvMax, uvMax,
+                  ModelUVMapService.ImageMode.AMP));
         }
       }
 

@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SquareXYPlot.java,v 1.2 2010-01-13 16:12:08 bourgesl Exp $"
+ * "@(#) $Id: SquareXYPlot.java,v 1.3 2010-02-03 09:48:53 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2010/01/13 16:12:08  bourgesl
+ * comments
+ *
  * Revision 1.1  2010/01/12 16:53:21  bourgesl
  * customized JFreeChart classes to get a square XY Plot supporting zooming in/out with mouse and mouse wheel
  *
@@ -15,10 +18,9 @@ package fr.jmmc.aspro.gui.chart;
 import java.awt.Graphics2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.util.logging.Level;
 import org.jfree.chart.axis.AxisSpace;
 import org.jfree.chart.axis.ValueAxis;
-import org.jfree.chart.event.ChartChangeEventType;
-import org.jfree.chart.event.PlotChangeEvent;
 import org.jfree.chart.plot.PlotRenderingInfo;
 import org.jfree.chart.plot.PlotState;
 import org.jfree.chart.plot.XYPlot;
@@ -39,6 +41,11 @@ public class SquareXYPlot extends XYPlot {
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
+  /** Class Name */
+  private static final String className_ = "fr.jmmc.aspro.gui.chart.SquareXYPlot";
+  /** Class logger */
+  private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
+          className_);
 
   /**
    * Creates a new plot with the specified dataset, axes and renderer.  Any
@@ -101,7 +108,11 @@ public class SquareXYPlot extends XYPlot {
     final double marginHeight = (area.getHeight() - adjustedHeight) / 2d;
 
     final Rectangle2D adjustedArea = new Rectangle2D.Double();
-    adjustedArea.setRect(area.getX() + marginWidth, area.getY() + marginHeight, adjustedWidth, adjustedHeight);
+
+    // note : 
+    // - rounding is required to have the background image fitted (int coordinates) in the plot area (double rectangle) :
+    // - there can be some rounding issue that adjust lightly the square shape :
+    adjustedArea.setRect(Math.round(area.getX() + marginWidth), Math.round(area.getY() + marginHeight), Math.round(adjustedWidth), Math.round(adjustedHeight));
 
     super.draw(g2, adjustedArea, anchor, parentState, info);
   }
@@ -135,10 +146,6 @@ public class SquareXYPlot extends XYPlot {
 
       rangeAxis.setRange(bounds, false, false);
     }
-
-    final PlotChangeEvent e = new PlotChangeEvent(this);
-    e.setType(ChartChangeEventType.DATASET_UPDATED);
-    notifyListeners(e);
   }
 
   /**
@@ -162,35 +169,36 @@ public class SquareXYPlot extends XYPlot {
     configureDomainAxes();
     configureRangeAxes();
 
-    double xMin = 0d;
-    double xMax = 0d;
-    double yMin = 0d;
-    double yMax = 0d;
+    double domainLowerBound = 0d;
+    double domainUpperBound = 0d;
+    double rangeLowerBound = 0d;
+    double rangeUpperBound = 0d;
 
     if (domainAxis != null) {
-      Range xRange = domainAxis.getRange();
+      final Range xRange = domainAxis.getRange();
 
-      xMin = xRange.getLowerBound();
-      xMax = xRange.getUpperBound();
+      domainLowerBound = xRange.getLowerBound();
+      domainUpperBound = xRange.getUpperBound();
     }
 
     if (rangeAxis != null) {
-      Range yRange = rangeAxis.getRange();
+      final Range yRange = rangeAxis.getRange();
 
-      yMin = yRange.getLowerBound();
-      yMax = yRange.getUpperBound();
+      rangeLowerBound = yRange.getLowerBound();
+      rangeUpperBound = yRange.getUpperBound();
     }
 
-    xMin = Math.abs(xMin);
-    xMax = Math.abs(xMax);
-    yMin = Math.abs(yMin);
-    yMax = Math.abs(yMax);
+    domainLowerBound = Math.abs(domainLowerBound);
+    domainUpperBound = Math.abs(domainUpperBound);
+    rangeLowerBound = Math.abs(rangeLowerBound);
+    rangeUpperBound = Math.abs(rangeUpperBound);
 
-    double max = Math.max(xMin, xMax);
-    max = Math.max(max, yMin);
-    max = Math.max(max, yMax);
+    double max = Math.max(domainLowerBound, domainUpperBound);
+    max = Math.max(max, rangeLowerBound);
+    max = Math.max(max, rangeUpperBound);
 
     if (rangeAxis != null) {
+      // same range on both axes :
       final Range bounds = new Range(-max, max);
 
       domainAxis.setBounds(bounds);

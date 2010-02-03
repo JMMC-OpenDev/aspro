@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ChartUtils.java,v 1.5 2010-01-19 11:00:50 bourgesl Exp $"
+ * "@(#) $Id: ChartUtils.java,v 1.6 2010-02-03 09:48:52 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2010/01/19 11:00:50  bourgesl
+ * changed base line stroke
+ *
  * Revision 1.4  2010/01/14 17:03:06  bourgesl
  * No more gradient paint + smaller bar width
  *
@@ -19,6 +22,7 @@
 package fr.jmmc.aspro.gui.chart;
 
 import java.awt.BasicStroke;
+import java.awt.Color;
 import java.awt.Font;
 import java.text.DecimalFormat;
 import org.jfree.chart.ChartFactory;
@@ -79,6 +83,13 @@ public class ChartUtils {
 
       // Axis offset = gap between the axis line and the data area :
       theme.setAxisOffset(ZERO_AXIS_OFFSET);
+
+      // plot outline :
+      theme.setPlotOutlinePaint(Color.BLACK);
+
+      // axis colors :
+      theme.setAxisLabelPaint(Color.BLACK);
+      theme.setTickLabelPaint(Color.BLACK);
     }
 
   }
@@ -96,6 +107,9 @@ public class ChartUtils {
 
     localXYPlot.getDomainAxis().setVisible(false);
     localXYPlot.getRangeAxis().setVisible(false);
+
+    // Adjust outline :
+    localXYPlot.setOutlineStroke(new BasicStroke(1.f));
 
     final XYBarRenderer localXYBarRenderer = (XYBarRenderer) localXYPlot.getRenderer();
     localXYBarRenderer.setUseYInterval(true);
@@ -129,6 +143,10 @@ public class ChartUtils {
     // use custom units :
     localXYPlot.getRangeAxis().setStandardTickUnits(ChartUtils.createScientificTickUnits());
     localXYPlot.getDomainAxis().setStandardTickUnits(ChartUtils.createScientificTickUnits());
+
+    // tick color :
+    localXYPlot.getRangeAxis().setTickMarkPaint(Color.BLACK);
+    localXYPlot.getDomainAxis().setTickMarkPaint(Color.BLACK);
 
     final XYLineAndShapeRenderer localLineAndShapeRenderer = (XYLineAndShapeRenderer) localXYPlot.getRenderer();
 
@@ -241,7 +259,7 @@ public class ChartUtils {
     if (SCIENTIFIC_TICK_UNITS == null) {
       final TickUnits units = new TickUnits();
       final DecimalFormat df0 = new DecimalFormat("0");
-      final DecimalFormat df1 = new DecimalFormat("0.00E00");
+      final DecimalFormat df1 = new DecimalFormat("0.0E0");
 
       units.add(new NumberTickUnit(1, df0));
       units.add(new NumberTickUnit(5, df0));

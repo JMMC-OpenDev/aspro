@@ -434,6 +434,26 @@ public class InterferometerDescription
     return configurations;
   }
 
+  /** maximum distance between 2 stations in meter */
+  @javax.xml.bind.annotation.XmlTransient
+  private double maxUVCoverage = 0d;
+
+  /**
+   * Return the maximum distance between 2 stations in meter
+   * @return maximum distance between 2 stations in meter
+   */
+  public double getMaxUVCoverage() {
+    return maxUVCoverage;
+  }
+
+  /**
+   * Define the maximum distance between 2 stations in meter
+   * @param maxUVCoverage maximum distance between 2 stations in meter
+   */
+  public void setMaxUVCoverage(final double maxUVCoverage) {
+    this.maxUVCoverage = maxUVCoverage;
+  }
+
   @Override
   public String toString() {
     return "InterferometerDescription [" + ((this.name != null) ? this.name : "undefined") + "]";

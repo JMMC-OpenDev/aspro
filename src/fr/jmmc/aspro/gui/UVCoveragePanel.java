@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.11 2010-01-22 14:25:29 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.12 2010-02-03 09:48:53 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.11  2010/01/22 14:25:29  bourgesl
+ * fixed log level
+ *
  * Revision 1.10  2010/01/22 13:17:20  bourgesl
  * change color association to plots
  *
@@ -46,6 +49,8 @@ import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.gui.action.ExportPDFAction;
 import fr.jmmc.aspro.gui.chart.ChartUtils;
 import fr.jmmc.aspro.gui.chart.SquareChartPanel;
+import fr.jmmc.aspro.gui.chart.ZoomEvent;
+import fr.jmmc.aspro.gui.chart.ZoomEventListener;
 import fr.jmmc.aspro.gui.util.ColorPalette;
 import fr.jmmc.aspro.gui.util.FieldSliderAdapter;
 import fr.jmmc.aspro.model.ConfigurationManager;
@@ -57,15 +62,26 @@ import fr.jmmc.aspro.model.observability.StarData;
 import fr.jmmc.aspro.model.uvcoverage.UVCoverageData;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Pop;
+import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.uvcoverage.UVBaseLineData;
 import fr.jmmc.aspro.model.uvcoverage.UVRangeBaseLineData;
 import fr.jmmc.aspro.service.UVCoverageService;
 import fr.jmmc.mcs.gui.StatusBar;
+import fr.jmmc.mcs.image.ColorModels;
+import fr.jmmc.mcs.model.ModelFunction;
+import fr.jmmc.mcs.model.ModelManager;
+import fr.jmmc.mcs.model.ModelUVMapService;
+import fr.jmmc.mcs.model.function.DiskModelFunction;
+import fr.jmmc.mcs.model.targetmodel.Model;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.ExecutionException;
@@ -75,7 +91,6 @@ import javax.swing.JFormattedTextField;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import org.jdesktop.swingworker.SwingWorker;
-import org.jfree.chart.ChartPanel;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.event.ChartProgressEvent;
@@ -89,7 +104,8 @@ import org.jfree.data.xy.XYSeriesCollection;
  * This panel presents the UV coverage plot with its parameters (target, instrument mode ...)
  * @author bourgesl
  */
-public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgressListener, ActionListener, ChangeListener, ObservationListener {
+public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgressListener, ZoomEventListener,
+        ActionListener, ChangeListener, ObservationListener {
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
@@ -112,7 +128,7 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
   private XYPlot localXYPlot;
   /* swing */
   /** chart panel */
-  private ChartPanel chartPanel;
+  private SquareChartPanel chartPanel;
   /** flag to enable / disable the automatic refresh of the plot when any swing component changes */
   private boolean doAutoRefresh = true;
   /** flag to enable / disable the automatic update of the observation when any swing component changes */
@@ -328,6 +344,11 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     this.localJFreeChart = ChartUtils.createSquareXYLineChart("U (M\u03BB)", "V (M\u03BB)");
     this.localXYPlot = (XYPlot) localJFreeChart.getPlot();
 
+    // Adjust background settings :
+    this.localXYPlot.setBackgroundImageAlpha(1.0f);
+    // Adjust outline :
+    this.localXYPlot.setOutlineStroke(new BasicStroke(1.f));
+
     // add listener :
     this.localJFreeChart.addProgressListener(this);
 
@@ -346,7 +367,10 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     // zoom options :
     this.chartPanel.setDomainZoomable(AsproConstants.ENABLE_ZOOM);
     this.chartPanel.setRangeZoomable(AsproConstants.ENABLE_ZOOM);
-    this.chartPanel.setMouseWheelEnabled(AsproConstants.ENABLE_ZOOM);
+    this.chartPanel.setMouseWheelEnabled(false);
+
+    // define zoom listener :
+    this.chartPanel.setZoomEventListener(this);
 
     add(chartPanel, java.awt.BorderLayout.CENTER);
 
@@ -488,7 +512,6 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
       }
 
       // TODO : fire event ??
-
       // NOTE : the onChange event is already handled : risk of cyclic loop !
     }
   }
@@ -644,6 +667,13 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     final double haMin = this.haMinAdapter.getValue();
     final double haMax = this.haMaxAdapter.getValue();
 
+    // TODO : KILL
+    final Target target = ObservationManager.getTarget(observation, targetName);
+    if (target != null) {
+      target.getModels().clear();
+      target.getModels().addAll(diskModels());
+    }
+
     // check if observability data are available :
     final ObservabilityData obsData = observation.getObservabilityData();
 
@@ -718,6 +748,9 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
 
                   // computed data are valid :
                   updateChart(uvData);
+
+                  // update the background image :
+                  updateUVMap(uvData.getUvMap());
                 }
 
                 // update theme at end :
@@ -776,6 +809,48 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
 
     // set the main data set :
     this.localXYPlot.setDataset(dataset);
+  }
+
+  /**
+   * Process the zoom event to refresh the model UV map according to the new coordinates
+   * @param ze zoom event
+   */
+  public void chartChanged(final ZoomEvent ze) {
+    // synchronous for now :
+    Image uvMap = null;
+
+    final String targetName = (String) this.jComboBoxTarget.getSelectedItem();
+
+    final List<Model> models = ObservationManager.getTarget(ObservationManager.getInstance().getObservation(), targetName).getModels();
+
+    if (models.size() > 0) {
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("computing model uv map ...");
+      }
+      
+      uvMap = ModelUVMapService.computeUVMap(
+              models,
+              ze.getDomainLowerBound() / MEGA_SCALE, ze.getDomainUpperBound() / MEGA_SCALE,
+              ze.getRangeLowerBound() / MEGA_SCALE, ze.getRangeUpperBound() / MEGA_SCALE,
+              ModelUVMapService.ImageMode.AMP);
+    }
+    
+    // update the background image :
+    updateUVMap(uvMap);
+  }
+
+  /**
+   * Update the background image of the chart with the UV Map
+   * @param uvMap image or null
+   */
+  private void updateUVMap(final Image uvMap) {
+    if (uvMap != null) {
+      this.localXYPlot.setBackgroundPaint(null);
+      this.localXYPlot.setBackgroundImage(uvMap);
+    } else {
+      this.localXYPlot.setBackgroundPaint(Color.lightGray);
+      this.localXYPlot.setBackgroundImage(null);
+    }
   }
 
   /**
@@ -957,5 +1032,27 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
       logger.log(Level.SEVERE, "parsing exception", pe);
     }
     return res;
+  }
+
+  /**
+   * TODO KILL
+   * @return sample disk model
+   */
+  private static List<Model> diskModels() {
+
+    final ModelManager mm = ModelManager.getInstance();
+
+    final List<Model> models = new ArrayList<Model>();
+
+    final Model model = mm.createModel(ModelFunction.MODEL_DISK);
+
+    ModelManager.setParameterValue(model, ModelFunction.PARAM_FLUX_WEIGHT, 1.0);
+    ModelManager.setParameterValue(model, ModelFunction.PARAM_X, 0);
+    ModelManager.setParameterValue(model, ModelFunction.PARAM_Y, 0);
+    ModelManager.setParameterValue(model, DiskModelFunction.PARAM_DIAMETER, 2);
+
+    models.add(model);
+
+    return models;
   }
 }

@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationManager.java,v 1.19 2010-01-20 16:18:37 bourgesl Exp $"
+ * "@(#) $Id: ObservationManager.java,v 1.20 2010-02-03 09:48:53 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.19  2010/01/20 16:18:37  bourgesl
+ * observation form refactoring
+ *
  * Revision 1.18  2010/01/15 16:13:16  bourgesl
  * added sampling periodicity
  *
@@ -433,13 +436,17 @@ public class ObservationManager extends BaseOIManager {
     return changed;
   }
 
-  public Target getTarget(final String name) {
-    for (Target t : getObservation().getTargets()) {
+  public static Target getTarget(final ObservationSetting obs, final String name) {
+    for (Target t : obs.getTargets()) {
       if (t.getName().equals(name)) {
         return t;
       }
     }
     return null;
+  }
+
+  public Target getTarget(final String name) {
+    return getTarget(getObservation(), name);
   }
 
   public Vector<String> getTargetNames() {
