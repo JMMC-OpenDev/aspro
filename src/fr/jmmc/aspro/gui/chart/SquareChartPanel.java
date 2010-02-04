@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SquareChartPanel.java,v 1.3 2010-02-03 09:48:53 bourgesl Exp $"
+ * "@(#) $Id: SquareChartPanel.java,v 1.4 2010-02-04 14:45:43 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2010/02/03 09:48:53  bourgesl
+ * target model uvmap added on the uv coverage with zooming supported
+ *
  * Revision 1.2  2010/01/13 16:12:08  bourgesl
  * comments
  *
@@ -117,15 +120,19 @@ public class SquareChartPanel extends ChartPanel {
     // here we tweak the notify flag on the plot so that only
     // one notification happens even though we update multiple
     // axes...
-    boolean savedNotify = plot.isNotify();
-    plot.setNotify(false);
-    zoomInDomain(x, y);
-    zoomInRange(x, y);
+    final boolean savedNotify = plot.isNotify();
+    try {
+      plot.setNotify(false);
 
-    // HACK to get new axis ranges after zoom :
-    fireZoomEvent((SquareXYPlot) plot);
+      zoomInDomain(x, y);
+      zoomInRange(x, y);
 
-    plot.setNotify(savedNotify);
+      // HACK to get new axis ranges after zoom :
+      fireZoomEvent((SquareXYPlot) plot);
+
+    } finally {
+      plot.setNotify(savedNotify);
+    }
   }
 
   /**
@@ -143,15 +150,19 @@ public class SquareChartPanel extends ChartPanel {
     // here we tweak the notify flag on the plot so that only
     // one notification happens even though we update multiple
     // axes...
-    boolean savedNotify = plot.isNotify();
-    plot.setNotify(false);
-    zoomOutDomain(x, y);
-    zoomOutRange(x, y);
+    final boolean savedNotify = plot.isNotify();
+    try {
+      plot.setNotify(false);
 
-    // HACK to get new axis ranges after zoom :
-    fireZoomEvent((SquareXYPlot) plot);
+      zoomOutDomain(x, y);
+      zoomOutRange(x, y);
 
-    plot.setNotify(savedNotify);
+      // HACK to get new axis ranges after zoom :
+      fireZoomEvent((SquareXYPlot) plot);
+
+    } finally {
+      plot.setNotify(savedNotify);
+    }
   }
 
   /**
@@ -198,21 +209,26 @@ public class SquareChartPanel extends ChartPanel {
         // here we tweak the notify flag on the plot so that only
         // one notification happens even though we update multiple
         // axes...
+
         final boolean savedNotify = plot.isNotify();
-        plot.setNotify(false);
-        final Zoomable z = (Zoomable) plot;
-        if (z.getOrientation() == PlotOrientation.HORIZONTAL) {
-          z.zoomDomainAxes(vLower, vUpper, plotInfo, selectOrigin);
-          z.zoomRangeAxes(hLower, hUpper, plotInfo, selectOrigin);
-        } else {
-          z.zoomDomainAxes(hLower, hUpper, plotInfo, selectOrigin);
-          z.zoomRangeAxes(vLower, vUpper, plotInfo, selectOrigin);
+        try {
+          plot.setNotify(false);
+
+          final Zoomable z = (Zoomable) plot;
+          if (z.getOrientation() == PlotOrientation.HORIZONTAL) {
+            z.zoomDomainAxes(vLower, vUpper, plotInfo, selectOrigin);
+            z.zoomRangeAxes(hLower, hUpper, plotInfo, selectOrigin);
+          } else {
+            z.zoomDomainAxes(hLower, hUpper, plotInfo, selectOrigin);
+            z.zoomRangeAxes(vLower, vUpper, plotInfo, selectOrigin);
+          }
+
+          // HACK to get new axis ranges after zoom :
+          fireZoomEvent((SquareXYPlot) plot);
+
+        } finally {
+          plot.setNotify(savedNotify);
         }
-
-        // HACK to get new axis ranges after zoom :
-        fireZoomEvent((SquareXYPlot) plot);
-
-        plot.setNotify(savedNotify);
       }
     }
   }
@@ -234,17 +250,24 @@ public class SquareChartPanel extends ChartPanel {
     // here we tweak the notify flag on the plot so that only
     // one notification happens even though we update multiple
     // axes...
-    boolean savedNotify = plot.isNotify();
-    plot.setNotify(false);
+    final boolean savedNotify = plot.isNotify();
+    try {
+      plot.setNotify(false);
 
-    ((SquareXYPlot) plot).restoreAxesBounds();
+      ((SquareXYPlot) plot).restoreAxesBounds();
 
-    // HACK to get new axis ranges after zoom :
-    fireZoomEvent((SquareXYPlot) plot);
+      // HACK to get new axis ranges after zoom :
+      fireZoomEvent((SquareXYPlot) plot);
 
-    plot.setNotify(savedNotify);
+    } finally {
+      plot.setNotify(savedNotify);
+    }
   }
 
+  /**
+   * This method fires a Zoom event
+   * @param plot plot that causes the event
+   */
   protected void fireZoomEvent(final SquareXYPlot plot) {
     final ValueAxis domainAxis = plot.getDomainAxis(0);
     final ValueAxis rangeAxis = plot.getRangeAxis(0);
@@ -364,25 +387,28 @@ public class SquareChartPanel extends ChartPanel {
         direction = 1;
       }
 
-      boolean old = plot.isNotify();
+      // here we tweak the notify flag on the plot so that only
+      // one notification happens even though we update multiple
+      // axes...
+      final boolean savedNotify = plot.isNotify();
+      try {
+        plot.setNotify(false);
 
-      // do not notify while zooming each axis
-      plot.setNotify(false);
+        final double increment = 1.0 + this.zoomFactor;
+        if (direction > 0) {
+          zoomable.zoomDomainAxes(increment, pinfo, p, true);
+          zoomable.zoomRangeAxes(increment, pinfo, p, true);
+        } else if (direction < 0) {
+          zoomable.zoomDomainAxes(1.0 / increment, pinfo, p, true);
+          zoomable.zoomRangeAxes(1.0 / increment, pinfo, p, true);
+        }
 
-      final double increment = 1.0 + this.zoomFactor;
-      if (direction > 0) {
-        zoomable.zoomDomainAxes(increment, pinfo, p, true);
-        zoomable.zoomRangeAxes(increment, pinfo, p, true);
-      } else if (direction < 0) {
-        zoomable.zoomDomainAxes(1.0 / increment, pinfo, p, true);
-        zoomable.zoomRangeAxes(1.0 / increment, pinfo, p, true);
+        // HACK to get new axis ranges after zoom :
+        fireZoomEvent((SquareXYPlot) plot);
+        
+      } finally {
+        plot.setNotify(savedNotify);
       }
-
-      // HACK to get new axis ranges after zoom :
-      fireZoomEvent((SquareXYPlot) plot);
-
-      // set the old notify status
-      plot.setNotify(old);
     }
   }
 }
