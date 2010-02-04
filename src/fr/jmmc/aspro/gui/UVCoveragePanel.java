@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.14 2010-02-04 14:54:11 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.15 2010-02-04 17:05:06 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.14  2010/02/04 14:54:11  bourgesl
+ * UVMapData refactoring (uvRect, min/max values) to keep the color mapping consistent when zooming
+ * Compute an sub Image when a zoom occurs while the correct model is computed in the background
+ *
  * Revision 1.13  2010/02/03 16:07:49  bourgesl
  * refactoring to use the custom swing worker executor
  * when zomming uv map is computed asynchronously
@@ -56,6 +60,7 @@ import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.gui.action.ExportPDFAction;
 import fr.jmmc.aspro.gui.chart.ChartUtils;
 import fr.jmmc.aspro.gui.chart.SquareChartPanel;
+import fr.jmmc.aspro.gui.chart.SquareXYPlot;
 import fr.jmmc.aspro.gui.chart.ZoomEvent;
 import fr.jmmc.aspro.gui.chart.ZoomEventListener;
 import fr.jmmc.aspro.gui.util.ColorPalette;
@@ -104,7 +109,6 @@ import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.event.ChartProgressEvent;
 import org.jfree.chart.event.ChartProgressListener;
-import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
@@ -124,7 +128,7 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
   private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
   /** scaling factor to Mega Lambda for U,V points */
-  private final static double MEGA_SCALE = 1e-6;
+  private final static double MEGA_LAMBDA_SCALE = 1e-6;
 
   /* members */
   /** observation manager */
@@ -132,7 +136,9 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
   /** jFreeChart instance */
   private JFreeChart localJFreeChart;
   /** xy plot instance */
-  private XYPlot localXYPlot;
+  private SquareXYPlot localXYPlot;
+  /** uv coordinates scaling factor */
+  private double uvPlotScalingFactor = MEGA_LAMBDA_SCALE;
   /* cached data */
   /* last computed Observability Data to get star data */
   private ObservabilityData currentObsData = null;
@@ -352,7 +358,7 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
   private void postInit() {
 
     this.localJFreeChart = ChartUtils.createSquareXYLineChart("U (M\u03BB)", "V (M\u03BB)");
-    this.localXYPlot = (XYPlot) localJFreeChart.getPlot();
+    this.localXYPlot = (SquareXYPlot) localJFreeChart.getPlot();
 
     // Adjust background settings :
     this.localXYPlot.setBackgroundImageAlpha(1.0f);
@@ -649,6 +655,10 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
           logger.fine("target HA min : " + min);
           logger.fine("target HA max : " + min);
         }
+      } else {
+        // baseline limits case :
+        this.jTargetHAMin.setText("");
+        this.jTargetHAMax.setText("");
       }
     }
   }
@@ -735,12 +745,22 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
               if (uvData != null) {
                 logger.fine("SwingWorker[UV].done : refresh Chart");
 
+                lastZoomEvent = null;
+                currentUVMapData = null;
+
                 ChartUtils.clearTextSubTitle(localJFreeChart);
 
                 // source is defined :
                 if (uvData.getName() == null) {
+
+                  // Baseline limits case :
+                  // reset bounds to [-1;1] (before setDataset) :
+                  localXYPlot.defineBounds(1d);
                   // reset dataset for baseline limits :
                   localXYPlot.setDataset(null);
+
+                  // update the background image :
+                  updateUVMap(null);
                 } else {
 
                   // title :
@@ -761,11 +781,17 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
                     ChartUtils.addSubtitle(localJFreeChart, "Day : " + observation.getWhen().getDate().toString());
                   }
 
+                  // change the scaling factor : (???)
+                  // lambda ??
+                  setUvPlotScalingFactor(MEGA_LAMBDA_SCALE);
+
                   // computed data are valid :
                   updateChart(uvData);
 
                   // update the uv map data :
                   currentUVMapData = uvData.getUvMapData();
+
+                  // update the background image :
                   updateUVMap(uvData.getUvMapData().getUvMap());
                 }
 
@@ -801,7 +827,7 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
    */
   public void chartChanged(final ZoomEvent ze) {
     // check if the zoom changed :
-    if (!ze.equals(this.lastZoomEvent)) {
+    if (this.currentUVMapData != null && !ze.equals(this.lastZoomEvent)) {
       this.lastZoomEvent = ze;
 
       final String targetName = (String) this.jComboBoxTarget.getSelectedItem();
@@ -812,15 +838,15 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
 
         final Rectangle2D.Float uvRect = new Rectangle2D.Float();
         uvRect.setFrameFromDiagonal(
-                ze.getDomainLowerBound() / MEGA_SCALE,  ze.getRangeLowerBound() / MEGA_SCALE,
-                ze.getDomainUpperBound() / MEGA_SCALE, ze.getRangeUpperBound() / MEGA_SCALE);
+                fromUVPlotScale(ze.getDomainLowerBound()), fromUVPlotScale(ze.getRangeLowerBound()),
+                fromUVPlotScale(ze.getDomainUpperBound()), fromUVPlotScale(ze.getRangeUpperBound()));
 
         // compute an approximated uv map from the reference UV Map :
         computeSubUVMap(uvRect);
 
         // visibility reference extrema :
-        final float refMin = this.currentUVMapData.getMin();
-        final float refMax = this.currentUVMapData.getMax();
+        final Float refMin = Float.valueOf(this.currentUVMapData.getMin());
+        final Float refMax = Float.valueOf(this.currentUVMapData.getMax());
 
         if (logger.isLoggable(Level.FINE)) {
           logger.fine("computing model uv map ...");
@@ -897,43 +923,49 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     }
   }
 
+  /**
+   * Compute a sub image for the UV Map given the new uv area
+   * @param uvRect uv area
+   */
   private void computeSubUVMap(final Rectangle2D.Float uvRect) {
+    if (this.currentUVMapData != null) {
+      final int imageSize = this.currentUVMapData.getImageSize();
+      // uv area reference :
+      final Rectangle2D.Float uvRectRef = this.currentUVMapData.getUvRect();
 
-    final int imageSize = this.currentUVMapData.getImageSize();
-    final Rectangle2D.Float uvRectRef = this.currentUVMapData.getUvRect();
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("uv map rect     = " + uvRect);
+        logger.fine("uv map rect REF = " + uvRectRef);
+      }
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("uv map rect     = " + uvRect);
-      logger.fine("uv map rect REF = " + uvRectRef);
+      // note : floor/ceil to be sure to have at least 1x1 pixel image
+      final int x = (int) Math.floor(imageSize * (uvRect.getX() - uvRectRef.getX()) / uvRectRef.getWidth());
+      int y = (int) Math.floor(imageSize * (uvRect.getY() - uvRectRef.getY()) / uvRectRef.getHeight());
+      final int w = (int) Math.ceil(imageSize * uvRect.getWidth() / uvRectRef.getWidth());
+      final int h = (int) Math.ceil(imageSize * uvRect.getHeight() / uvRectRef.getHeight());
+
+      // Note : the image is produced from an array where 0,0 corresponds to the upper left corner
+      // whereas it corresponds in UV to the lower U and Upper V coordinates => inverse the V axis
+
+      // Inverse V axis issue :
+      y = imageSize - y - h;
+
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("sub uvMap [" + x + ", " + y + " - " + w + ", " + h + "]");
+      }
+
+      Image subUVMap = null;
+      try {
+        // crop a small sub image waiting for the correct model to be computed :
+        subUVMap = this.currentUVMapData.getUvMap().getSubimage(x, y, w, h);
+
+      } catch (RuntimeException re) {
+        logger.log(Level.SEVERE, "subImage failure : ", re);
+      }
+
+      // update the background image :
+      updateUVMap(subUVMap);
     }
-
-    // note : floor/ceil to be sure to have at least 1x1 pixel image 
-    final int x = (int) Math.floor(imageSize * (uvRect.getX() - uvRectRef.getX()) / uvRectRef.getWidth());
-    int y = (int) Math.floor(imageSize * (uvRect.getY() - uvRectRef.getY()) / uvRectRef.getHeight());
-    final int w = (int) Math.ceil(imageSize * uvRect.getWidth() / uvRectRef.getWidth());
-    final int h = (int) Math.ceil(imageSize * uvRect.getHeight() / uvRectRef.getHeight());
-
-    // Note : the image is produced from an array where 0,0 corresponds to the upper left corner
-    // whereas it corresponds in UV to the lower U and Upper V coordinates => inverse the V axis
-
-    // Inverse V axis issue :
-    y = imageSize - y - h;
-
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("sub uvMap [" + x + ", " + y + " - " + w + ", " + h + "]");
-    }
-
-    Image subUVMap = null;
-    try {
-      // crop a small sub image waiting for the correct model to be computed :
-      subUVMap = this.currentUVMapData.getUvMap().getSubimage(x, y, w, h);
-
-    } catch (RuntimeException re) {
-      logger.log(Level.SEVERE, "subImage failure : ", re);
-    }
-
-    // update the background image :
-    updateUVMap(subUVMap);
   }
 
   /**
@@ -967,6 +999,9 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
 
     this.updateUVTracks(dataset, uvData);
     this.updateUVTracksRiseSet(dataset, uvData);
+
+    // define bounds to the uv maximum value (before setDataset) :
+    this.localXYPlot.defineBounds(toUVPlotScale(uvData.getUvMax()));
 
     // set the main data set :
     this.localXYPlot.setDataset(dataset);
@@ -1006,9 +1041,10 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
         u = uvBL.getU();
         v = uvBL.getV();
 
+        // first ellipse line :
         for (int i = 0, size = uvBL.getNPoints(); i < size; i++) {
-          x = -u[i] * MEGA_SCALE;
-          y = -v[i] * MEGA_SCALE;
+          x = toUVPlotScale(u[i]);
+          y = toUVPlotScale(v[i]);
 
           xySeriesBL.add(x, y);
         } // points
@@ -1016,9 +1052,10 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
         // add an invalid point to break the line between the 2 segments :
         xySeriesBL.add(Double.NaN, Double.NaN);
 
+        // second symetric ellipse line :
         for (int i = 0, size = uvBL.getNPoints(); i < size; i++) {
-          x = u[i] * MEGA_SCALE;
-          y = v[i] * MEGA_SCALE;
+          x = toUVPlotScale(-u[i]);
+          y = toUVPlotScale(-v[i]);
 
           xySeriesBL.add(x, y);
         } // points
@@ -1070,31 +1107,26 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
         v2 = uvBL.getV2();
 
         for (int i = 0, size = uvBL.getNPoints(); i < size; i++) {
-          x1 = -u[i] * MEGA_SCALE;
-          y1 = -v[i] * MEGA_SCALE;
+          x1 = toUVPlotScale(u[i]);
+          y1 = toUVPlotScale(v[i]);
 
-          x2 = -u2[i] * MEGA_SCALE;
-          y2 = -v2[i] * MEGA_SCALE;
+          x2 = toUVPlotScale(u2[i]);
+          y2 = toUVPlotScale(v2[i]);
 
+          // first segment :
           xySeriesBL.add(x1, y1);
           xySeriesBL.add(x2, y2);
 
           // add an invalid point to break the line between the 2 segments :
           xySeriesBL.add(Double.NaN, Double.NaN);
-        } // points
 
-        for (int i = 0, size = uvBL.getNPoints(); i < size; i++) {
-          x1 = u[i] * MEGA_SCALE;
-          y1 = v[i] * MEGA_SCALE;
-
-          x2 = u2[i] * MEGA_SCALE;
-          y2 = v2[i] * MEGA_SCALE;
-
-          xySeriesBL.add(x1, y1);
-          xySeriesBL.add(x2, y2);
+          // second symetric segment :
+          xySeriesBL.add(-x1, -y1);
+          xySeriesBL.add(-x2, -y2);
 
           // add an invalid point to break the line between the 2 segments :
           xySeriesBL.add(Double.NaN, Double.NaN);
+
         } // points
 
         xySeriesBL.setNotify(true);
@@ -1153,6 +1185,28 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     return res;
   }
 
+  public void setUvPlotScalingFactor(double uvPlotScalingFactor) {
+    this.uvPlotScalingFactor = uvPlotScalingFactor;
+  }
+
+  /**
+   * Convert the given value (u or v) to the plot scale
+   * @param value u or v coordinate in rad-1
+   * @return u or v coordinate in the plot unit
+   */
+  private final double toUVPlotScale(final double value) {
+    return uvPlotScalingFactor * value;
+  }
+
+  /**
+   * Convert the given plot value (u or v) to the standard unit (rad-1)
+   * @param value u or v coordinate in the plot unit
+   * @return u or v coordinate in rad-1
+   */
+  private final double fromUVPlotScale(final double value) {
+    return value / uvPlotScalingFactor;
+  }
+
   /**
    * TODO KILL
    * @return sample disk model
@@ -1168,7 +1222,7 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     ModelManager.setParameterValue(model, ModelFunction.PARAM_FLUX_WEIGHT, 1.0);
     ModelManager.setParameterValue(model, ModelFunction.PARAM_X, 0);
     ModelManager.setParameterValue(model, ModelFunction.PARAM_Y, 0);
-    ModelManager.setParameterValue(model, DiskModelFunction.PARAM_DIAMETER, 2);
+    ModelManager.setParameterValue(model, DiskModelFunction.PARAM_DIAMETER, 5);
 
     models.add(model);
 

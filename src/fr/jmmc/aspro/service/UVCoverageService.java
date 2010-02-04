@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoverageService.java,v 1.9 2010-02-04 14:54:11 bourgesl Exp $"
+ * "@(#) $Id: UVCoverageService.java,v 1.10 2010-02-04 17:05:06 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.9  2010/02/04 14:54:11  bourgesl
+ * UVMapData refactoring (uvRect, min/max values) to keep the color mapping consistent when zooming
+ * Compute an sub Image when a zoom occurs while the correct model is computed in the background
+ *
  * Revision 1.8  2010/02/03 09:48:53  bourgesl
  * target model uvmap added on the uv coverage with zooming supported
  *
@@ -33,12 +37,15 @@
  */
 package fr.jmmc.aspro.service;
 
+import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.BaseLine;
 import fr.jmmc.aspro.model.observability.ObservabilityData;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.Range;
 import fr.jmmc.aspro.model.observability.StarData;
 import fr.jmmc.aspro.model.oi.FocalInstrumentMode;
+import fr.jmmc.aspro.model.oi.InterferometerConfiguration;
+import fr.jmmc.aspro.model.oi.InterferometerDescription;
 import fr.jmmc.aspro.model.uvcoverage.UVCoverageData;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.uvcoverage.UVBaseLineData;
@@ -61,6 +68,8 @@ public class UVCoverageService {
   /** Class logger */
   private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
+  /** uv margin = 10% */
+  private static final double UV_MARGIN_FACTOR = 1.1d;
 
   /* members */
 
@@ -89,8 +98,8 @@ public class UVCoverageService {
   private double lambda;
   /** maximal wavelength */
   private double lambdaMax;
-  /** maximum value for any U or V coordinate */
-  private double uvMax = Double.MIN_VALUE;
+  /** maximum U or V coordinate (corrected by the minimal wavelength) */
+  private double uvMax;
 
   /* reused observability data */
   /** observability data */
@@ -147,6 +156,9 @@ public class UVCoverageService {
           // target name :
           this.data.setName(this.targetName);
 
+          // wave length :
+          this.data.setLambda(this.lambda);
+
           // Is the target visible :
           if (this.starData.getHaElev() > 0d) {
 
@@ -159,10 +171,10 @@ public class UVCoverageService {
             }
           }
 
-          // margin : TODO : remove
-          this.uvMax = 1.1d * this.uvMax;
+          // TODO : get max base line from user choice :
 
-          // TODO : change the uvMax by the interferometer maximum base line :
+          // uv Max = max base line * uv margin / minimum wave length
+          this.data.setUvMax(this.uvMax);
 
           final Rectangle2D.Float uvRect = new Rectangle2D.Float();
           uvRect.setFrameFromDiagonal(-uvMax, -uvMax, uvMax, uvMax);
@@ -251,9 +263,6 @@ public class UVCoverageService {
         u[j] = u[j] / this.lambda;
         v[j] = v[j] / this.lambda;
 
-        // check min / max :
-        checkUVCoordinate(u[j], v[j]);
-
         j++;
       }
 
@@ -341,14 +350,8 @@ public class UVCoverageService {
             u[j] = u[j] / this.lambdaMin;
             v[j] = v[j] / this.lambdaMin;
 
-            // check min / max :
-            checkUVCoordinate(u[j], v[j]);
-
             u2[j] = u2[j] / this.lambdaMax;
             v2[j] = v2[j] / this.lambdaMax;
-
-            // check min / max :
-            checkUVCoordinate(u2[j], v2[j]);
 
             j++;
           }
@@ -406,8 +409,8 @@ public class UVCoverageService {
       logger.fine("instrumentMode : " + insMode.getName());
     }
 
-    this.lambdaMin = insMode.getWaveLengthMin() * 1e-6d;
-    this.lambdaMax = insMode.getWaveLengthMax() * 1e-6d;
+    this.lambdaMin = insMode.getWaveLengthMin() * AsproConstants.MICRO_METER;
+    this.lambdaMax = insMode.getWaveLengthMax() * AsproConstants.MICRO_METER;
 
     this.lambda = (this.lambdaMax + this.lambdaMin) / 2d;
 
@@ -419,12 +422,19 @@ public class UVCoverageService {
       logger.fine("lambda    : " + this.lambda);
       logger.fine("lambdaMax : " + this.lambdaMax);
     }
-  }
 
-  private void checkUVCoordinate(final double u, final double v) {
-    final double value = Math.max(Math.abs(u), Math.abs(v));
-    if (value > this.uvMax) {
-      this.uvMax = value;
+    final InterferometerConfiguration intConf = this.observation.getInterferometerConfiguration().getInterferometerConfiguration();
+    if (intConf == null) {
+      throw new IllegalStateException("prepareObservation : the interferometerConfiguration is null !");
+    }
+
+    final InterferometerDescription interferometer = intConf.getInterferometer();
+
+    // uv Max = max base line * uv margin / minimum wave length
+    this.uvMax = Math.round(UV_MARGIN_FACTOR * interferometer.getMaxBaseLine() / this.lambdaMin);
+
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("uvMax : " + this.uvMax);
     }
   }
 }

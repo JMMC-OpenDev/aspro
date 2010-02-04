@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoverageData.java,v 1.4 2010-02-04 14:54:11 bourgesl Exp $"
+ * "@(#) $Id: UVCoverageData.java,v 1.5 2010-02-04 17:05:05 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2010/02/04 14:54:11  bourgesl
+ * UVMapData refactoring (uvRect, min/max values) to keep the color mapping consistent when zooming
+ * Compute an sub Image when a zoom occurs while the correct model is computed in the background
+ *
  * Revision 1.3  2010/02/03 09:48:53  bourgesl
  * target model uvmap added on the uv coverage with zooming supported
  *
@@ -29,6 +33,10 @@ public class UVCoverageData {
 
   /** name of the target */
   private String name;
+  /** maximum U or V coordinate (scale) */
+  private double uvMax;
+  /** wave length */
+  private double lambda;
   /** list of uv points corresponding to the target rise/set */
   private List<UVBaseLineData> targetUVRiseSet;
   /** list of uv point couples corresponding to the target observability */
@@ -48,6 +56,22 @@ public class UVCoverageData {
 
   public void setName(String name) {
     this.name = name;
+  }
+
+  public double getLambda() {
+    return lambda;
+  }
+
+  public void setLambda(double lambda) {
+    this.lambda = lambda;
+  }
+
+  public double getUvMax() {
+    return uvMax;
+  }
+
+  public void setUvMax(double uvMax) {
+    this.uvMax = uvMax;
   }
 
   public List<UVBaseLineData> getTargetUVRiseSet() {

@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SquareXYPlot.java,v 1.4 2010-02-03 16:07:49 bourgesl Exp $"
+ * "@(#) $Id: SquareXYPlot.java,v 1.5 2010-02-04 17:05:06 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2010/02/03 16:07:49  bourgesl
+ * refactoring to use the custom swing worker executor
+ * when zomming uv map is computed asynchronously
+ *
  * Revision 1.3  2010/02/03 09:48:53  bourgesl
  * target model uvmap added on the uv coverage with zooming supported
  *
@@ -129,8 +133,27 @@ public class SquareXYPlot extends XYPlot {
    */
   @Override
   public void datasetChanged(final DatasetChangeEvent event) {
-    findAxesBounds();
     restoreAxesBounds();
+  }
+
+  /**
+   * Define the bounds for both range and domain axes using the given maximum value.
+   *
+   * Note : this method must be called before calling plot.setDataset(...)
+   *
+   * @param max maximum value
+   */
+  public void defineBounds(final double max) {
+    final BoundedNumberAxis domainAxis = (BoundedNumberAxis) getDomainAxis(0);
+    final BoundedNumberAxis rangeAxis = (BoundedNumberAxis) getRangeAxis(0);
+
+    if (rangeAxis != null) {
+      // same range on both axes :
+      final Range bounds = new Range(-max, max);
+
+      domainAxis.setBounds(bounds);
+      rangeAxis.setBounds(bounds);
+    }
   }
 
   /**
@@ -143,68 +166,13 @@ public class SquareXYPlot extends XYPlot {
     if (rangeAxis != null) {
       // same bounds for both axes :
       final Range bounds = rangeAxis.getBounds();
-      // do not disable auto range :
-      domainAxis.setRange(bounds, false, false);
 
-      rangeAxis.setRange(bounds, false, false);
-    }
-  }
+      if (bounds != null) {
+        // do not disable auto range :
+        domainAxis.setRange(bounds, false, false);
 
-  /**
-   * Find the bounds for both range and domain axes and defines the largest bounds to both axes to get a square area
-   */
-  private void findAxesBounds() {
-    final BoundedNumberAxis domainAxis = (BoundedNumberAxis) getDomainAxis(0);
-    final BoundedNumberAxis rangeAxis = (BoundedNumberAxis) getRangeAxis(0);
-
-    if (domainAxis != null) {
-      // do not notify :
-      domainAxis.setAutoRange(true, false);
-      domainAxis.setBounds(null);
-    }
-    if (rangeAxis != null) {
-      // do not notify :
-      rangeAxis.setAutoRange(true, false);
-      rangeAxis.setBounds(null);
-    }
-
-    configureDomainAxes();
-    configureRangeAxes();
-
-    double domainLowerBound = 0d;
-    double domainUpperBound = 0d;
-    double rangeLowerBound = 0d;
-    double rangeUpperBound = 0d;
-
-    if (domainAxis != null) {
-      final Range xRange = domainAxis.getRange();
-
-      domainLowerBound = xRange.getLowerBound();
-      domainUpperBound = xRange.getUpperBound();
-    }
-
-    if (rangeAxis != null) {
-      final Range yRange = rangeAxis.getRange();
-
-      rangeLowerBound = yRange.getLowerBound();
-      rangeUpperBound = yRange.getUpperBound();
-    }
-
-    domainLowerBound = Math.abs(domainLowerBound);
-    domainUpperBound = Math.abs(domainUpperBound);
-    rangeLowerBound = Math.abs(rangeLowerBound);
-    rangeUpperBound = Math.abs(rangeUpperBound);
-
-    double max = Math.max(domainLowerBound, domainUpperBound);
-    max = Math.max(max, rangeLowerBound);
-    max = Math.max(max, rangeUpperBound);
-
-    if (rangeAxis != null) {
-      // same range on both axes :
-      final Range bounds = new Range(-max, max);
-
-      domainAxis.setBounds(bounds);
-      rangeAxis.setBounds(bounds);
+        rangeAxis.setRange(bounds, false, false);
+      }
     }
   }
 }

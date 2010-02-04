@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproConstants.java,v 1.5 2010-01-20 16:18:38 bourgesl Exp $"
+ * "@(#) $Id: AsproConstants.java,v 1.6 2010-02-04 17:05:06 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2010/01/20 16:18:38  bourgesl
+ * observation form refactoring
+ *
  * Revision 1.4  2010/01/15 13:49:32  bourgesl
  * comments
  *
@@ -32,6 +35,9 @@ public interface AsproConstants {
   public final static float EPOCH_J2000 = 2000.f;
   /** fixed earth radius constant from ASPRO Fortran code */
   public final static double EARTH_RADIUS = 6367435d;
+
+  /** micrometres to meter */
+  public final static double MICRO_METER = 1e-6;
 
   /* UI Defaults */
   /** default minimum elevation = 20 degrees */

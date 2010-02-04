@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ConfigurationManager.java,v 1.16 2010-02-03 09:48:53 bourgesl Exp $"
+ * "@(#) $Id: ConfigurationManager.java,v 1.17 2010-02-04 17:05:06 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.16  2010/02/03 09:48:53  bourgesl
+ * target model uvmap added on the uv coverage with zooming supported
+ *
  * Revision 1.15  2010/01/15 13:50:17  bourgesl
  * added logs on setters
  * supports instrumentMode is null
@@ -202,7 +205,7 @@ public class ConfigurationManager extends BaseOIManager {
       }
     }
 
-    d.setMaxUVCoverage(maxUV);
+    d.setMaxBaseLine(maxUV);
 
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("maxUVCoverage [" + d.getName() + "] = " + maxUV + " m");

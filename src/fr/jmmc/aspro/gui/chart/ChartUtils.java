@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ChartUtils.java,v 1.6 2010-02-03 09:48:52 bourgesl Exp $"
+ * "@(#) $Id: ChartUtils.java,v 1.7 2010-02-04 17:05:06 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2010/02/03 09:48:52  bourgesl
+ * target model uvmap added on the uv coverage with zooming supported
+ *
  * Revision 1.5  2010/01/19 11:00:50  bourgesl
  * changed base line stroke
  *
@@ -127,7 +130,7 @@ public class ChartUtils {
   public static JFreeChart createSquareXYLineChart(final String xLabel, final String yLabel) {
     final JFreeChart localJFreeChart = createSquareXYLineChart(null, xLabel, yLabel, null, PlotOrientation.VERTICAL, true, false, false);
 
-    final XYPlot localXYPlot = (XYPlot) localJFreeChart.getPlot();
+    final SquareXYPlot localXYPlot = (SquareXYPlot) localJFreeChart.getPlot();
     localXYPlot.setNoDataMessage("NO DATA");
 
     // show crosshair :
@@ -135,6 +138,9 @@ public class ChartUtils {
     localXYPlot.setDomainCrosshairVisible(true);
     localXYPlot.setRangeCrosshairVisible(true);
      */
+
+    // reset bounds to [-1;1]
+    localXYPlot.defineBounds(1);
 
     // display axes at [0,0] :
     localXYPlot.setDomainZeroBaselineVisible(true);
