@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoverageData.java,v 1.3 2010-02-03 09:48:53 bourgesl Exp $"
+ * "@(#) $Id: UVCoverageData.java,v 1.4 2010-02-04 14:54:11 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2010/02/03 09:48:53  bourgesl
+ * target model uvmap added on the uv coverage with zooming supported
+ *
  * Revision 1.2  2010/01/15 16:14:16  bourgesl
  * added computation of UV points compatible with observability ranges, bandpass and sampling periodicity
  *
@@ -15,7 +18,7 @@
  */
 package fr.jmmc.aspro.model.uvcoverage;
 
-import java.awt.Image;
+import fr.jmmc.mcs.model.UVMapData;
 import java.util.List;
 
 /**
@@ -30,8 +33,8 @@ public class UVCoverageData {
   private List<UVBaseLineData> targetUVRiseSet;
   /** list of uv point couples corresponding to the target observability */
   private List<UVRangeBaseLineData> targetUVObservability;
-  /** uv map */
-  private Image uvMap;
+  /** uv map data */
+  private UVMapData uvMapData;
 
   /**
    * Constructor
@@ -63,11 +66,11 @@ public class UVCoverageData {
     this.targetUVObservability = targetUVObservability;
   }
 
-  public Image getUvMap() {
-    return uvMap;
+  public UVMapData getUvMapData() {
+    return uvMapData;
   }
 
-  public void setUvMap(Image uvMap) {
-    this.uvMap = uvMap;
+  public void setUvMapData(UVMapData uvMapData) {
+    this.uvMapData = uvMapData;
   }
 }

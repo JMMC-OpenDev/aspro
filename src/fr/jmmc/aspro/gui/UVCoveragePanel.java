@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.13 2010-02-03 16:07:49 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.14 2010-02-04 14:54:11 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.13  2010/02/03 16:07:49  bourgesl
+ * refactoring to use the custom swing worker executor
+ * when zomming uv map is computed asynchronously
+ *
  * Revision 1.12  2010/02/03 09:48:53  bourgesl
  * target model uvmap added on the uv coverage with zooming supported
  *
@@ -74,6 +78,7 @@ import fr.jmmc.mcs.gui.StatusBar;
 import fr.jmmc.mcs.model.ModelFunction;
 import fr.jmmc.mcs.model.ModelManager;
 import fr.jmmc.mcs.model.ModelUVMapService;
+import fr.jmmc.mcs.model.UVMapData;
 import fr.jmmc.mcs.model.function.DiskModelFunction;
 import fr.jmmc.mcs.model.targetmodel.Model;
 import java.awt.BasicStroke;
@@ -81,6 +86,7 @@ import java.awt.Color;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.geom.Rectangle2D;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.ParseException;
@@ -123,14 +129,17 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
   /* members */
   /** observation manager */
   private ObservationManager om = ObservationManager.getInstance();
-  /* last computed Observability Data to get star data */
-  private ObservabilityData currentObsData = null;
   /** jFreeChart instance */
   private JFreeChart localJFreeChart;
   /** xy plot instance */
   private XYPlot localXYPlot;
+  /* cached data */
+  /* last computed Observability Data to get star data */
+  private ObservabilityData currentObsData = null;
   /** last zoom event to check if the zoom area changed */
   private ZoomEvent lastZoomEvent = null;
+  /** last computed UV Map Data to have a reference UV Map */
+  private UVMapData currentUVMapData = null;
   /* swing */
   /** chart panel */
   private SquareChartPanel chartPanel;
@@ -577,6 +586,11 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
       this.haMinAdapter.setValue(-12D);
       this.haMaxAdapter.setValue(12D);
 
+      // reset cached data :
+      this.currentObsData = null;
+      this.lastZoomEvent = null;
+      this.currentUVMapData = null;
+
     } finally {
       // restore the automatic refresh from field changes :
       this.doAutoRefresh = true;
@@ -750,8 +764,9 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
                   // computed data are valid :
                   updateChart(uvData);
 
-                  // update the background image :
-                  updateUVMap(uvData.getUvMap());
+                  // update the uv map data :
+                  currentUVMapData = uvData.getUvMapData();
+                  updateUVMap(uvData.getUvMapData().getUvMap());
                 }
 
                 // update theme at end :
@@ -794,40 +809,50 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
       final List<Model> models = ObservationManager.getTarget(ObservationManager.getInstance().getObservation(), targetName).getModels();
 
       if (models.size() > 0) {
+
+        final Rectangle2D.Float uvRect = new Rectangle2D.Float();
+        uvRect.setFrameFromDiagonal(
+                ze.getDomainLowerBound() / MEGA_SCALE,  ze.getRangeLowerBound() / MEGA_SCALE,
+                ze.getDomainUpperBound() / MEGA_SCALE, ze.getRangeUpperBound() / MEGA_SCALE);
+
+        // compute an approximated uv map from the reference UV Map :
+        computeSubUVMap(uvRect);
+
+        // visibility reference extrema :
+        final float refMin = this.currentUVMapData.getMin();
+        final float refMax = this.currentUVMapData.getMax();
+
         if (logger.isLoggable(Level.FINE)) {
           logger.fine("computing model uv map ...");
         }
 
-        // hide the background image :
-        updateUVMap(null);
-
         /*
          * Use the SwingWorker backport for Java 5 = swing-worker-1.2.jar (org.jdesktop.swingworker.SwingWorker)
          */
-        final SwingWorker<Image, Void> worker = new SwingWorker<Image, Void>() {
+        final SwingWorker<UVMapData, Void> worker = new SwingWorker<UVMapData, Void>() {
 
           /**
            * Compute the UV Map in background
            * @return Image
            */
           @Override
-          public Image doInBackground() {
+          public UVMapData doInBackground() {
             logger.fine("SwingWorker[UVMap].doInBackground : IN");
 
-            Image uvMap = ModelUVMapService.computeUVMap(
+            UVMapData uvMapData = ModelUVMapService.computeUVMap(
                     models,
-                    ze.getDomainLowerBound() / MEGA_SCALE, ze.getDomainUpperBound() / MEGA_SCALE,
-                    ze.getRangeLowerBound() / MEGA_SCALE, ze.getRangeUpperBound() / MEGA_SCALE,
+                    uvRect,
+                    refMin, refMax,
                     ModelUVMapService.ImageMode.AMP);
 
             if (isCancelled()) {
               logger.fine("SwingWorker[UVMap].doInBackground : CANCELLED");
               // no result if task is cancelled :
-              uvMap = null;
+              uvMapData = null;
             } else {
               logger.fine("SwingWorker[UVMap].doInBackground : OUT");
             }
-            return uvMap;
+            return uvMapData;
           }
 
           /**
@@ -841,13 +866,13 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
               logger.fine("SwingWorker[UVMap].done : IN");
               try {
                 // Get the computation results with all data necessary to draw the plot :
-                final Image uvMap = get();
+                final UVMapData uvMapData = get();
 
-                if (uvMap != null) {
+                if (uvMapData != null) {
                   logger.fine("SwingWorker[UVMap].done : refresh Chart");
 
                   // update the background image :
-                  updateUVMap(uvMap);
+                  updateUVMap(uvMapData.getUvMap());
                 }
 
               } catch (InterruptedException ignore) {
@@ -870,6 +895,45 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
         SwingWorkerExecutor.getInstance().execute("UVMap", worker);
       }
     }
+  }
+
+  private void computeSubUVMap(final Rectangle2D.Float uvRect) {
+
+    final int imageSize = this.currentUVMapData.getImageSize();
+    final Rectangle2D.Float uvRectRef = this.currentUVMapData.getUvRect();
+
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("uv map rect     = " + uvRect);
+      logger.fine("uv map rect REF = " + uvRectRef);
+    }
+
+    // note : floor/ceil to be sure to have at least 1x1 pixel image 
+    final int x = (int) Math.floor(imageSize * (uvRect.getX() - uvRectRef.getX()) / uvRectRef.getWidth());
+    int y = (int) Math.floor(imageSize * (uvRect.getY() - uvRectRef.getY()) / uvRectRef.getHeight());
+    final int w = (int) Math.ceil(imageSize * uvRect.getWidth() / uvRectRef.getWidth());
+    final int h = (int) Math.ceil(imageSize * uvRect.getHeight() / uvRectRef.getHeight());
+
+    // Note : the image is produced from an array where 0,0 corresponds to the upper left corner
+    // whereas it corresponds in UV to the lower U and Upper V coordinates => inverse the V axis
+
+    // Inverse V axis issue :
+    y = imageSize - y - h;
+
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("sub uvMap [" + x + ", " + y + " - " + w + ", " + h + "]");
+    }
+
+    Image subUVMap = null;
+    try {
+      // crop a small sub image waiting for the correct model to be computed :
+      subUVMap = this.currentUVMapData.getUvMap().getSubimage(x, y, w, h);
+
+    } catch (RuntimeException re) {
+      logger.log(Level.SEVERE, "subImage failure : ", re);
+    }
+
+    // update the background image :
+    updateUVMap(subUVMap);
   }
 
   /**

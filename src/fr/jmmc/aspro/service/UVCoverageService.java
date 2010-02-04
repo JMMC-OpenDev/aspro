@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoverageService.java,v 1.8 2010-02-03 09:48:53 bourgesl Exp $"
+ * "@(#) $Id: UVCoverageService.java,v 1.9 2010-02-04 14:54:11 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.8  2010/02/03 09:48:53  bourgesl
+ * target model uvmap added on the uv coverage with zooming supported
+ *
  * Revision 1.7  2010/01/29 16:01:20  bourgesl
  * added comments + uv max
  *
@@ -41,8 +44,8 @@ import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.uvcoverage.UVBaseLineData;
 import fr.jmmc.aspro.model.uvcoverage.UVRangeBaseLineData;
 import fr.jmmc.aspro.util.AngleUtils;
-import fr.jmmc.mcs.image.ColorModels;
 import fr.jmmc.mcs.model.ModelUVMapService;
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -156,11 +159,18 @@ public class UVCoverageService {
             }
           }
 
+          // margin : TODO : remove
+          this.uvMax = 1.1d * this.uvMax;
+
+          // TODO : change the uvMax by the interferometer maximum base line :
+
+          final Rectangle2D.Float uvRect = new Rectangle2D.Float();
+          uvRect.setFrameFromDiagonal(-uvMax, -uvMax, uvMax, uvMax);
+
           // Compute Target Model for the UV coverage limits :
-          this.data.setUvMap(ModelUVMapService.computeUVMap(
+          this.data.setUvMapData(ModelUVMapService.computeUVMap(
                   ObservationManager.getTarget(this.observation, this.targetName).getModels(),
-                  -uvMax, uvMax,
-                  -uvMax, uvMax,
+                  uvRect,
                   ModelUVMapService.ImageMode.AMP));
         }
       }
