@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoverageService.java,v 1.10 2010-02-04 17:05:06 bourgesl Exp $"
+ * "@(#) $Id: UVCoverageService.java,v 1.11 2010-02-05 09:46:00 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.10  2010/02/04 17:05:06  bourgesl
+ * UV bounds are coming from UVCoverageService
+ *
  * Revision 1.9  2010/02/04 14:54:11  bourgesl
  * UVMapData refactoring (uvRect, min/max values) to keep the color mapping consistent when zooming
  * Compute an sub Image when a zoom occurs while the correct model is computed in the background
@@ -68,8 +71,6 @@ public class UVCoverageService {
   /** Class logger */
   private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
-  /** uv margin = 10% */
-  private static final double UV_MARGIN_FACTOR = 1.1d;
 
   /* members */
 
@@ -431,7 +432,10 @@ public class UVCoverageService {
     final InterferometerDescription interferometer = intConf.getInterferometer();
 
     // uv Max = max base line * uv margin / minimum wave length
-    this.uvMax = Math.round(UV_MARGIN_FACTOR * interferometer.getMaxBaseLine() / this.lambdaMin);
+
+    // note : use the minimum wave length to make all uv segment visible :
+
+    this.uvMax = Math.round(interferometer.getMaxBaseLine() / this.lambdaMin);
 
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("uvMax : " + this.uvMax);
