@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.15 2010-02-04 17:05:06 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.16 2010-02-05 13:13:30 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.15  2010/02/04 17:05:06  bourgesl
+ * UV bounds are coming from UVCoverageService
+ *
  * Revision 1.14  2010/02/04 14:54:11  bourgesl
  * UVMapData refactoring (uvRect, min/max values) to keep the color mapping consistent when zooming
  * Compute an sub Image when a zoom occurs while the correct model is computed in the background
@@ -792,7 +795,9 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
                   currentUVMapData = uvData.getUvMapData();
 
                   // update the background image :
-                  updateUVMap(uvData.getUvMapData().getUvMap());
+                  if (currentUVMapData != null) {
+                    updateUVMap(currentUVMapData.getUvMap());
+                  }
                 }
 
                 // update theme at end :
