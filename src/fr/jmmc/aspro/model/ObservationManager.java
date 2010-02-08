@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationManager.java,v 1.20 2010-02-03 09:48:53 bourgesl Exp $"
+ * "@(#) $Id: ObservationManager.java,v 1.21 2010-02-08 17:00:35 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.20  2010/02/03 09:48:53  bourgesl
+ * target model uvmap added on the uv coverage with zooming supported
+ *
  * Revision 1.19  2010/01/20 16:18:37  bourgesl
  * observation form refactoring
  *
@@ -334,29 +337,44 @@ public class ObservationManager extends BaseOIManager {
     return (value1 == null && value2 != null) || (value1 != null && value2 == null) || (value1 != null && value2 != null && !value1.equals(value2));
   }
 
-  private void updateObservation() {
+  private void updateObservation(final ObservationSetting obs) {
     // ugly code to update all resolved references used on post load :
-    final InterferometerConfigurationChoice interferometerChoice = getObservation().getInterferometerConfiguration();
+    final InterferometerConfigurationChoice interferometerChoice = obs.getInterferometerConfiguration();
 
     interferometerChoice.setInterferometerConfiguration(ConfigurationManager.getInstance().getInterferometerConfiguration(interferometerChoice.getName()));
 
-    final FocalInstrumentConfigurationChoice instrumentChoice = getObservation().getInstrumentConfiguration();
+    if (interferometerChoice.getInterferometerConfiguration() == null) {
+      throw new IllegalStateException("the interferometer configuration [" + interferometerChoice.getName() + "] is not found !");
+    }
+
+    final FocalInstrumentConfigurationChoice instrumentChoice = obs.getInstrumentConfiguration();
 
     instrumentChoice.setInstrumentConfiguration(ConfigurationManager.getInstance().getInterferometerInstrumentConfiguration(
             interferometerChoice.getName(), instrumentChoice.getName()));
 
+    if (instrumentChoice.getInstrumentConfiguration() == null) {
+      throw new IllegalStateException("the instrument configuration [" + instrumentChoice.getName() + "] is not found !");
+    }
+
     instrumentChoice.setStationList(ConfigurationManager.getInstance().getInstrumentConfigurationStations(
             interferometerChoice.getName(), instrumentChoice.getName(), instrumentChoice.getStations()));
 
+    if (instrumentChoice.getStationList() == null) {
+      throw new IllegalStateException("the station list is empty !");
+    }
+
+    // pops can be undefined :
     instrumentChoice.setPopList(ConfigurationManager.getInstance().parseInstrumentPoPs(
             interferometerChoice.getName(), instrumentChoice.getName(), instrumentChoice.getPops()));
 
+    // instrument mode can be undefined :
     instrumentChoice.setFocalInstrumentMode(ConfigurationManager.getInstance().getInstrumentMode(
             interferometerChoice.getName(), instrumentChoice.getName(), instrumentChoice.getInstrumentMode()));
 
     if (logger.isLoggable(Level.FINEST)) {
-      logger.finest("updateObservation : " + toString(getObservation()));
+      logger.finest("updateObservation : " + toString(obs));
     }
+
   }
 
   /**
@@ -510,11 +528,12 @@ public class ObservationManager extends BaseOIManager {
       final ObservationSetting newObservation = (ObservationSetting) loaded;
       defineDefaults(newObservation);
 
+      // update references :
+      // can throw IllegalStateException if an invalid reference was found :
+      updateObservation(newObservation);
+
       // change the current observation :
       this.observation = newObservation;
-
-      // update references :
-      updateObservation();
 
       // fire an observation load event :
       fireObservationLoaded();

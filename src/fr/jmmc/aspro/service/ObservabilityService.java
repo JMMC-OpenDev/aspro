@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.36 2010-01-22 13:16:44 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.37 2010-02-08 17:00:35 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.36  2010/01/22 13:16:44  bourgesl
+ * added star observability type to change bar colors easily
+ *
  * Revision 1.35  2010/01/20 16:18:38  bourgesl
  * observation form refactoring
  *
@@ -1102,16 +1105,10 @@ public class ObservabilityService {
     }
 
     final InterferometerConfiguration intConf = this.observation.getInterferometerConfiguration().getInterferometerConfiguration();
-    if (intConf == null) {
-      throw new IllegalStateException("prepareObservation : the interferometerConfiguration is null !");
-    }
 
     this.interferometer = intConf.getInterferometer();
 
     final FocalInstrumentConfiguration insConf = this.observation.getInstrumentConfiguration().getInstrumentConfiguration();
-    if (insConf == null) {
-      throw new IllegalStateException("prepareObservation : the instrumentConfiguration is null !");
-    }
 
     this.instrument = insConf.getFocalInstrument();
 
