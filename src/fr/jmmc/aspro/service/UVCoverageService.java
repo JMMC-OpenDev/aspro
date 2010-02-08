@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoverageService.java,v 1.11 2010-02-05 09:46:00 bourgesl Exp $"
+ * "@(#) $Id: UVCoverageService.java,v 1.12 2010-02-08 17:00:16 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.11  2010/02/05 09:46:00  bourgesl
+ * no more margin on max UV coordinates
+ *
  * Revision 1.10  2010/02/04 17:05:06  bourgesl
  * UV bounds are coming from UVCoverageService
  *
@@ -47,8 +50,6 @@ import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.Range;
 import fr.jmmc.aspro.model.observability.StarData;
 import fr.jmmc.aspro.model.oi.FocalInstrumentMode;
-import fr.jmmc.aspro.model.oi.InterferometerConfiguration;
-import fr.jmmc.aspro.model.oi.InterferometerDescription;
 import fr.jmmc.aspro.model.uvcoverage.UVCoverageData;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.uvcoverage.UVBaseLineData;
@@ -87,6 +88,10 @@ public class UVCoverageService {
   private final double haMin;
   /** HA max */
   private final double haMax;
+  /** flag to compute the UV support */
+  private final boolean doUVSupport;
+  /** flag to compute the model image */
+  private final boolean doModelImage;
 
   /* internal */
   /** Get the current thread to check if the computation is interrupted */
@@ -118,12 +123,19 @@ public class UVCoverageService {
    * @param targetName target name
    * @param haMin HA min in decimal hours
    * @param haMax HA max in decimal hours
+   * @param uvMax U-V max in meter
+   * @param doUVSupport flag to compute the UV support
+   * @param doModelImage flag to compute the model image
    */
-  public UVCoverageService(final ObservationSetting observation, final String targetName, final double haMin, final double haMax) {
+  public UVCoverageService(final ObservationSetting observation, final String targetName, final double haMin, final double haMax,
+          final double uvMax, final boolean doUVSupport, final boolean doModelImage) {
     this.observation = observation;
     this.targetName = targetName;
     this.haMin = haMin;
     this.haMax = haMax;
+    this.uvMax = uvMax;
+    this.doUVSupport = doUVSupport;
+    this.doModelImage = doModelImage;
   }
 
   /**
@@ -163,7 +175,9 @@ public class UVCoverageService {
           // Is the target visible :
           if (this.starData.getHaElev() > 0d) {
 
-            computeUVSupport();
+            if (this.doUVSupport) {
+              computeUVSupport();
+            }
 
             computeObservableUV();
 
@@ -177,14 +191,16 @@ public class UVCoverageService {
           // uv Max = max base line * uv margin / minimum wave length
           this.data.setUvMax(this.uvMax);
 
-          final Rectangle2D.Float uvRect = new Rectangle2D.Float();
-          uvRect.setFrameFromDiagonal(-uvMax, -uvMax, uvMax, uvMax);
+          if (this.doModelImage) {
+            final Rectangle2D.Float uvRect = new Rectangle2D.Float();
+            uvRect.setFrameFromDiagonal(-uvMax, -uvMax, uvMax, uvMax);
 
-          // Compute Target Model for the UV coverage limits :
-          this.data.setUvMapData(ModelUVMapService.computeUVMap(
-                  ObservationManager.getTarget(this.observation, this.targetName).getModels(),
-                  uvRect,
-                  ModelUVMapService.ImageMode.AMP));
+            // Compute Target Model for the UV coverage limits :
+            this.data.setUvMapData(ModelUVMapService.computeUVMap(
+                    ObservationManager.getTarget(this.observation, this.targetName).getModels(),
+                    uvRect,
+                    ModelUVMapService.ImageMode.AMP));
+          }
         }
       }
 
@@ -424,18 +440,10 @@ public class UVCoverageService {
       logger.fine("lambdaMax : " + this.lambdaMax);
     }
 
-    final InterferometerConfiguration intConf = this.observation.getInterferometerConfiguration().getInterferometerConfiguration();
-    if (intConf == null) {
-      throw new IllegalStateException("prepareObservation : the interferometerConfiguration is null !");
-    }
-
-    final InterferometerDescription interferometer = intConf.getInterferometer();
-
-    // uv Max = max base line * uv margin / minimum wave length
-
+    // Adjust the user uv Max = max base line / minimum wave length
     // note : use the minimum wave length to make all uv segment visible :
 
-    this.uvMax = Math.round(interferometer.getMaxBaseLine() / this.lambdaMin);
+    this.uvMax = Math.round(this.uvMax / this.lambdaMin);
 
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("uvMax : " + this.uvMax);

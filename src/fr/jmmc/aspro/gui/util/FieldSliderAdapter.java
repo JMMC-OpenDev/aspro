@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: FieldSliderAdapter.java,v 1.1 2010-01-21 16:38:42 bourgesl Exp $"
+ * "@(#) $Id: FieldSliderAdapter.java,v 1.2 2010-02-08 17:00:17 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2010/01/21 16:38:42  bourgesl
+ * Custom Numeric text field binding with a JSlider
+ *
  */
 package fr.jmmc.aspro.gui.util;
 
@@ -74,26 +77,38 @@ public class FieldSliderAdapter implements ChangeListener, PropertyChangeListene
     this.slider = slider;
     this.field = field;
 
-    this.minLimit = min;
-
-    this.minValue = min;
-    this.maxValue = max;
-
-    this.defValue = def;
-    this.sliderRatio = (max - min) / (this.slider.getModel().getMaximum() - this.slider.getModel().getMinimum());
+    reset(min, max, def);
 
     init();
   }
 
   /**
-   * Declare this class as a change listener for both slider and text field and set the default value
+   * Redefine the extrema and set the default value
+   * @param min minimum value
+   * @param max maximum value
+   * @param def default value
+   */
+  public void reset(final double min, final double max, final double def) {
+
+    this.minLimit = min;
+    this.minValue = min;
+    
+    this.maxValue = max;
+
+    this.defValue = def;
+    
+    this.sliderRatio = (max - min) / (this.slider.getModel().getMaximum() - this.slider.getModel().getMinimum());
+
+    this.field.setValue(Double.valueOf(this.defValue));
+  }
+
+  /**
+   * Declare this class as a change listener for both slider and text field
    */
   private void init() {
     this.slider.addChangeListener(this);
 
     this.field.addPropertyChangeListener("value", this);
-
-    this.field.setValue(Double.valueOf(this.defValue));
   }
 
   /** 
@@ -254,6 +269,14 @@ public class FieldSliderAdapter implements ChangeListener, PropertyChangeListene
       logger.finest("minValue changed : " + minValue);
     }
     this.minValue = minValue;
+  }
+
+  public double getDefValue() {
+    return defValue;
+  }
+
+  public void setDefValue(double defValue) {
+    this.defValue = defValue;
   }
 
   /**
