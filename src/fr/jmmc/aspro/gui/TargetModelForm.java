@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetModelForm.java,v 1.2 2010-02-01 09:43:49 bourgesl Exp $"
+ * "@(#) $Id: TargetModelForm.java,v 1.3 2010-02-08 17:00:47 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2010/02/01 09:43:49  bourgesl
+ * header + comments
+ *
  */
 package fr.jmmc.aspro.gui;
 
@@ -171,7 +174,10 @@ public class TargetModelForm extends javax.swing.JPanel {
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     jPanel1.add(jLabel2, gridBagConstraints);
 
+    jTextField1.setEditable(false);
     jTextField1.setText("RA");
+    jTextField1.setMinimumSize(new java.awt.Dimension(100, 19));
+    jTextField1.setPreferredSize(new java.awt.Dimension(100, 19));
     jTextField1.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(java.awt.event.ActionEvent evt) {
         jTextField1ActionPerformed(evt);
@@ -181,7 +187,10 @@ public class TargetModelForm extends javax.swing.JPanel {
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     jPanel1.add(jTextField1, gridBagConstraints);
 
+    jTextField2.setEditable(false);
     jTextField2.setText("DEC");
+    jTextField2.setMinimumSize(new java.awt.Dimension(100, 19));
+    jTextField2.setPreferredSize(new java.awt.Dimension(100, 19));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 1;
