@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.18 2010-02-08 17:00:16 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.19 2010-02-09 16:51:09 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.18  2010/02/08 17:00:16  bourgesl
+ * added U-V max selector + checkboxes
+ *
  * Revision 1.17  2010/02/05 16:17:01  bourgesl
  * added widgets for UV Model
  *
@@ -93,6 +96,7 @@ import fr.jmmc.mcs.gui.StatusBar;
 import fr.jmmc.mcs.model.ModelFunction;
 import fr.jmmc.mcs.model.ModelManager;
 import fr.jmmc.mcs.model.ModelUVMapService;
+import fr.jmmc.mcs.model.ModelUVMapService.ImageMode;
 import fr.jmmc.mcs.model.UVMapData;
 import fr.jmmc.mcs.model.function.DiskModelFunction;
 import fr.jmmc.mcs.model.targetmodel.Model;
@@ -544,6 +548,8 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
       }
     });
 
+    this.jComboBoxImageMode.addActionListener(this);
+
     this.jTargetHAMin.setText(null);
     this.jTargetHAMax.setText(null);
   }
@@ -603,6 +609,11 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
         logger.fine("instrument mode changed : " + this.jComboBoxInstrumentMode.getSelectedItem());
       }
       updateObservation();
+      refreshPlot();
+    } else if (e.getSource() == this.jComboBoxImageMode) {
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("image mode changed : " + this.jComboBoxImageMode.getSelectedItem());
+      }
       refreshPlot();
     }
   }
@@ -727,6 +738,7 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
       // reset defaults :
       this.jCheckBoxPlotUVSupport.setSelected(true);
       this.jCheckBoxModelImage.setSelected(true);
+      this.jComboBoxImageMode.setSelectedItem(ImageMode.AMP);
 
       // reset cached data :
       this.currentObsData = null;
@@ -856,6 +868,8 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     final boolean doUVSupport = this.jCheckBoxPlotUVSupport.isSelected();
     final boolean doModelImage = this.jCheckBoxModelImage.isSelected();
 
+    final ImageMode imageMode = (ImageMode) this.jComboBoxImageMode.getSelectedItem();
+
     // TODO : KILL
     final Target target = ObservationManager.getTarget(observation, targetName);
     if (target != null) {
@@ -881,7 +895,7 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
         public UVCoverageData doInBackground() {
           logger.fine("SwingWorker[UV].doInBackground : IN");
 
-          UVCoverageData uvData = new UVCoverageService(observation, targetName, haMin, haMax, uvMax, doUVSupport, doModelImage).compute();
+          UVCoverageData uvData = new UVCoverageService(observation, targetName, haMin, haMax, uvMax, doUVSupport, doModelImage, imageMode).compute();
 
           if (isCancelled()) {
             logger.fine("SwingWorker[UV].doInBackground : CANCELLED");
@@ -1016,6 +1030,8 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
         final Float refMin = Float.valueOf(this.currentUVMapData.getMin());
         final Float refMax = Float.valueOf(this.currentUVMapData.getMax());
 
+        final ImageMode imageMode = (ImageMode) this.jComboBoxImageMode.getSelectedItem();
+
         if (logger.isLoggable(Level.FINE)) {
           logger.fine("computing model uv map ...");
         }
@@ -1034,10 +1050,7 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
             logger.fine("SwingWorker[UVMap].doInBackground : IN");
 
             UVMapData uvMapData = ModelUVMapService.computeUVMap(
-                    models,
-                    uvRect,
-                    refMin, refMax,
-                    ModelUVMapService.ImageMode.AMP);
+                    models, uvRect, refMin, refMax, imageMode);
 
             if (isCancelled()) {
               logger.fine("SwingWorker[UVMap].doInBackground : CANCELLED");

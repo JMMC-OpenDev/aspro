@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoverageService.java,v 1.12 2010-02-08 17:00:16 bourgesl Exp $"
+ * "@(#) $Id: UVCoverageService.java,v 1.13 2010-02-09 16:51:09 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.12  2010/02/08 17:00:16  bourgesl
+ * added U-V max selector + checkboxes
+ *
  * Revision 1.11  2010/02/05 09:46:00  bourgesl
  * no more margin on max UV coordinates
  *
@@ -56,6 +59,7 @@ import fr.jmmc.aspro.model.uvcoverage.UVBaseLineData;
 import fr.jmmc.aspro.model.uvcoverage.UVRangeBaseLineData;
 import fr.jmmc.aspro.util.AngleUtils;
 import fr.jmmc.mcs.model.ModelUVMapService;
+import fr.jmmc.mcs.model.ModelUVMapService.ImageMode;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
@@ -92,6 +96,8 @@ public class UVCoverageService {
   private final boolean doUVSupport;
   /** flag to compute the model image */
   private final boolean doModelImage;
+  /** image mode (amplitude or phase) */
+  private ImageMode imageMode;
 
   /* internal */
   /** Get the current thread to check if the computation is interrupted */
@@ -126,9 +132,10 @@ public class UVCoverageService {
    * @param uvMax U-V max in meter
    * @param doUVSupport flag to compute the UV support
    * @param doModelImage flag to compute the model image
+   * @param imageMode image mode (amplitude or phase)
    */
   public UVCoverageService(final ObservationSetting observation, final String targetName, final double haMin, final double haMax,
-          final double uvMax, final boolean doUVSupport, final boolean doModelImage) {
+          final double uvMax, final boolean doUVSupport, final boolean doModelImage, final ImageMode imageMode) {
     this.observation = observation;
     this.targetName = targetName;
     this.haMin = haMin;
@@ -136,6 +143,7 @@ public class UVCoverageService {
     this.uvMax = uvMax;
     this.doUVSupport = doUVSupport;
     this.doModelImage = doModelImage;
+    this.imageMode = imageMode;
   }
 
   /**
@@ -198,8 +206,7 @@ public class UVCoverageService {
             // Compute Target Model for the UV coverage limits :
             this.data.setUvMapData(ModelUVMapService.computeUVMap(
                     ObservationManager.getTarget(this.observation, this.targetName).getModels(),
-                    uvRect,
-                    ModelUVMapService.ImageMode.AMP));
+                    uvRect, this.imageMode));
           }
         }
       }
