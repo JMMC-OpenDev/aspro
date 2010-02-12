@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BoundedNumberAxis.java,v 1.2 2010-01-13 16:12:08 bourgesl Exp $"
+ * "@(#) $Id: BoundedNumberAxis.java,v 1.3 2010-02-12 15:53:25 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2010/01/13 16:12:08  bourgesl
+ * comments
+ *
  * Revision 1.1  2010/01/12 16:53:20  bourgesl
  * customized JFreeChart classes to get a square XY Plot supporting zooming in/out with mouse and mouse wheel
  *
@@ -22,7 +25,7 @@ import org.jfree.ui.RectangleInsets;
  * Note : this class must support the inherited cloneable interface.
  *
  * @author bourgesl
-  */
+ */
 public class BoundedNumberAxis extends NumberAxis {
 
   /** default serial UID for Serializable interface */
@@ -51,19 +54,19 @@ public class BoundedNumberAxis extends NumberAxis {
     setTickLabelInsets(TICK_LABEL_INSETS);
   }
 
-    /**
-     * Returns a clone of the object.
-     *
-     * @return A clone.
-     *
-     * @throws CloneNotSupportedException if some component of the axis does
-     *         not support cloning.
-     */
+  /**
+   * Returns a clone of the object.
+   *
+   * @return A clone.
+   *
+   * @throws CloneNotSupportedException if some component of the axis does
+   *         not support cloning.
+   */
   @Override
-    public Object clone() throws CloneNotSupportedException {
-      BoundedNumberAxis clone = (BoundedNumberAxis) super.clone();
-      return clone;
-    }
+  public Object clone() throws CloneNotSupportedException {
+    BoundedNumberAxis clone = (BoundedNumberAxis) super.clone();
+    return clone;
+  }
 
   /**
    * Return the axis bounds

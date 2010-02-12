@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: OIBase.java,v 1.3 2010-01-05 17:16:59 bourgesl Exp $"
+ * "@(#) $Id: OIBase.java,v 1.4 2010-02-12 15:53:25 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2010/01/05 17:16:59  bourgesl
+ * add Cloneable support
+ *
  * Revision 1.2  2009/10/22 15:47:22  bourgesl
  * beginning of observability computation with jSkyCalc
  *
@@ -21,6 +24,13 @@ package fr.jmmc.aspro.model;
 public class OIBase implements Cloneable {
 
   /**
+   * Public Constructor
+   */
+  public OIBase() {
+    super();
+  }
+
+  /**
    * Return by default the simple class name
    * @return simple class name
    */
@@ -28,11 +38,6 @@ public class OIBase implements Cloneable {
   public String toString() {
     return getClass().getSimpleName();
   }
-
-//--simple--preserve
-
-  /* In any child class, this comments indicate a custom section to be kept
-  if the java code is generated again by XJC */
 
   /**
    * Return a "shallow copy" of this instance
@@ -46,5 +51,4 @@ public class OIBase implements Cloneable {
     }
     return null;
   }
-//--simple--preserve
 }

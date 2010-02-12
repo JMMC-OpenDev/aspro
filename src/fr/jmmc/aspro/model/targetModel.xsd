@@ -22,6 +22,16 @@ This model is a subset of the model fitting model that describes models for a ta
       Jmmc target model Xml Schema.
     </xsd:documentation>
     <xsd:appinfo>
+      <!--
+       Comment the jaxb:globalBindings element in embedded xml schema used with XJC
+      -->
+      <!--
+      <jaxb:globalBindings>
+        <xjc:superClass name="fr.jmmc.mcs.model.CloneableObject"/>
+        <xjc:simple />
+      </jaxb:globalBindings>
+      -->
+
       <jaxb:schemaBindings>
         <jaxb:package name="fr.jmmc.mcs.model.targetmodel"/>
       </jaxb:schemaBindings>
