@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproGui.java,v 1.7 2010-01-20 16:18:38 bourgesl Exp $"
+ * "@(#) $Id: AsproGui.java,v 1.8 2010-02-12 15:53:18 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2010/01/20 16:18:38  bourgesl
+ * observation form refactoring
+ *
  * Revision 1.6  2010/01/08 16:51:18  bourgesl
  * initial uv coverage
  *
@@ -90,15 +93,19 @@ public class AsproGui extends App {
     ConfigurationManager.getInstance();
 
     // Initializes the swing components with their actions :
-    prepareFrame((JFrame) getFrame());
+    prepareFrame(getRootFrame());
 
     logger.fine("init : exit");
+  }
+
+  public JFrame getRootFrame() {
+    return (JFrame) getFrame();
   }
 
   /** Execute application body */
   @Override
   protected void execute() {
-    getFrame().setVisible(true);
+    getRootFrame().setVisible(true);
   }
 
   private void prepareFrame(final JFrame frame) {

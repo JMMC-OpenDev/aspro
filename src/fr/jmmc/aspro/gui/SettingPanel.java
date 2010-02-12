@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SettingPanel.java,v 1.15 2010-01-20 16:18:37 bourgesl Exp $"
+ * "@(#) $Id: SettingPanel.java,v 1.16 2010-02-12 15:53:18 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.15  2010/01/20 16:18:37  bourgesl
+ * observation form refactoring
+ *
  * Revision 1.14  2010/01/15 13:52:14  bourgesl
  * instrumentMode synchronized properly between the observation and the UI widgets (load/change/reset)
  *
@@ -47,10 +50,8 @@ package fr.jmmc.aspro.gui;
 import fr.jmmc.aspro.model.ObservationListener;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
-import java.awt.BorderLayout;
 import java.util.logging.Level;
 import javax.swing.JPanel;
-import javax.swing.JTabbedPane;
 
 /**
  * This panel corresponds to the single observation setting panel
@@ -65,8 +66,7 @@ public class SettingPanel extends JPanel implements ObservationListener {
   /** Class logger */
   private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
-  /** tabs present in the plots panel */
-  protected JTabbedPane tabs;
+  /* members */
   /** basic observation form */
   private BasicObservationForm observationForm = null;
   /** observability panel */
@@ -74,8 +74,14 @@ public class SettingPanel extends JPanel implements ObservationListener {
   /** uv coverage panel */
   private UVCoveragePanel uvpanel = null;
 
-  /** Creates new form SettingPanel */
+  /** 
+   * Creates new form SettingPanel
+   */
   public SettingPanel() {
+
+    // register this as an observation listener :
+    ObservationManager.getInstance().register(this);
+
     initComponents();
     postInit();
   }
@@ -91,12 +97,15 @@ public class SettingPanel extends JPanel implements ObservationListener {
 
     jSplitPane1 = new javax.swing.JSplitPane();
     jPlotPanel = new javax.swing.JPanel();
+    jTabbedPane = new javax.swing.JTabbedPane();
 
     setLayout(new java.awt.BorderLayout());
 
     jSplitPane1.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
 
     jPlotPanel.setLayout(new java.awt.BorderLayout());
+    jPlotPanel.add(jTabbedPane, java.awt.BorderLayout.CENTER);
+
     jSplitPane1.setRightComponent(jPlotPanel);
 
     add(jSplitPane1, java.awt.BorderLayout.CENTER);
@@ -106,12 +115,6 @@ public class SettingPanel extends JPanel implements ObservationListener {
    * This method is useful to set the models and specific features of initialized swing components :
    */
   private void postInit() {
-    // prepare the tabs panel :
-    this.tabs = new JTabbedPane(JTabbedPane.TOP);
-    this.jPlotPanel.add(this.tabs, BorderLayout.CENTER);
-
-    // register this as an observation listener :
-    ObservationManager.getInstance().register(this);
 
     // add the observation form that will send an onProcess event on the current observation :
     this.observationForm = new BasicObservationForm();
@@ -120,6 +123,7 @@ public class SettingPanel extends JPanel implements ObservationListener {
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JPanel jPlotPanel;
   private javax.swing.JSplitPane jSplitPane1;
+  private javax.swing.JTabbedPane jTabbedPane;
   // End of variables declaration//GEN-END:variables
 
   /**
@@ -138,7 +142,7 @@ public class SettingPanel extends JPanel implements ObservationListener {
 
       if (this.observabilityPanel == null) {
         this.observabilityPanel = new ObservabilityPanel();
-        this.tabs.addTab("Observability", this.observabilityPanel);
+        this.jTabbedPane.addTab("Observability", this.observabilityPanel);
 
         // first time, the onProcess event must be propagated to the new registered listener :
         this.observabilityPanel.onProcess(type, observation);
@@ -149,14 +153,14 @@ public class SettingPanel extends JPanel implements ObservationListener {
 
       int uvPanelIndex = -1;
       if (this.uvpanel != null) {
-        uvPanelIndex = this.tabs.indexOfComponent(this.uvpanel);
+        uvPanelIndex = this.jTabbedPane.indexOfComponent(this.uvpanel);
       }
 
       if (hasTarget) {
         if (uvPanelIndex == -1) {
           this.uvpanel = new UVCoveragePanel();
 
-          this.tabs.addTab("UV coverage", this.uvpanel);
+          this.jTabbedPane.addTab("UV coverage", this.uvpanel);
 
           // first time, the onProcess event must be propagated to the new registered listener :
           this.uvpanel.onProcess(type, observation);
@@ -164,7 +168,7 @@ public class SettingPanel extends JPanel implements ObservationListener {
       } else {
         if (uvPanelIndex != -1) {
           // remove the uv panel :
-          this.tabs.removeTabAt(uvPanelIndex);
+          this.jTabbedPane.removeTabAt(uvPanelIndex);
 
           // unregister the uv panel for the next event :
           ObservationManager.getInstance().unregister(this.uvpanel);

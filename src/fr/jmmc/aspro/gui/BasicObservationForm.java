@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BasicObservationForm.java,v 1.18 2010-01-21 16:39:11 bourgesl Exp $"
+ * "@(#) $Id: BasicObservationForm.java,v 1.19 2010-02-12 15:53:18 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.18  2010/01/21 16:39:11  bourgesl
+ * simplified StarResolverWidget integration
+ *
  * Revision 1.17  2010/01/20 16:18:37  bourgesl
  * observation form refactoring
  *
@@ -137,6 +140,7 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
     jListTargets = new javax.swing.JList();
     jButtonRemoveTarget = new javax.swing.JButton();
     starSearchField = new fr.jmmc.mcs.astro.star.StarResolverWidget();
+    jButtonModelEditor = new javax.swing.JButton();
     jPanelOptions = new javax.swing.JPanel();
     jLabel1 = new javax.swing.JLabel();
     jDateSpinner = new javax.swing.JSpinner();
@@ -272,6 +276,19 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
     gridBagConstraints.gridwidth = 2;
     jPanelMain.add(starSearchField, gridBagConstraints);
 
+    jButtonModelEditor.setText("Model editor");
+    jButtonModelEditor.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jButtonModelEditorActionPerformed(evt);
+      }
+    });
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 5;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    jPanelMain.add(jButtonModelEditor, gridBagConstraints);
+
     add(jPanelMain);
 
     jPanelOptions.setBorder(javax.swing.BorderFactory.createTitledBorder("Constraints"));
@@ -342,6 +359,15 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
       }
     }
   }//GEN-LAST:event_jButtonRemoveTargetActionPerformed
+
+  private void jButtonModelEditorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonModelEditorActionPerformed
+
+    // show model editor :
+    TargetModelForm.showModelEditor((String)this.jListTargets.getSelectedValue());
+
+    // fire an observation change event :
+    this.om.fireObservationChanged();
+  }//GEN-LAST:event_jButtonModelEditorActionPerformed
 
   /**
    * Return the Pops custom formatter : number format that accepts null values
@@ -475,7 +501,10 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
   private void updateListTargets() {
     final Vector<String> v = this.om.getTargetNames();
     this.jListTargets.setModel(new DefaultComboBoxModel(v));
+
+    // disable buttons if the target list is empty :
     this.jButtonRemoveTarget.setEnabled(!v.isEmpty());
+    this.jButtonModelEditor.setEnabled(!v.isEmpty());
   }
 
   /**
@@ -718,6 +747,7 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
     }
   }
   // Variables declaration - do not modify//GEN-BEGIN:variables
+  private javax.swing.JButton jButtonModelEditor;
   private javax.swing.JButton jButtonRemoveTarget;
   private javax.swing.JCheckBox jCheckBoxNightLimit;
   private javax.swing.JComboBox jComboBoxInstrument;

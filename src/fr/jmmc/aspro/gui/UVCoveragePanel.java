@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.19 2010-02-09 16:51:09 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.20 2010-02-12 15:53:18 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.19  2010/02/09 16:51:09  bourgesl
+ * added change listener for image modes
+ *
  * Revision 1.18  2010/02/08 17:00:16  bourgesl
  * added U-V max selector + checkboxes
  *
@@ -227,6 +230,7 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     jSliderUVMax = new javax.swing.JSlider();
     jFieldUVMax = new javax.swing.JFormattedTextField();
     jLabel7 = new javax.swing.JLabel();
+    jButtonModelEditor = new javax.swing.JButton();
 
     setLayout(new javax.swing.BoxLayout(this, javax.swing.BoxLayout.X_AXIS));
 
@@ -254,14 +258,14 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     jLabel2.setText("Instrument mode");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridy = 3;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
     jPanelRight.add(jLabel2, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridy = 4;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
@@ -270,7 +274,7 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     jLabel3.setText("Sampling Periodicity (min)");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 8;
+    gridBagConstraints.gridy = 9;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
     jPanelRight.add(jLabel3, gridBagConstraints);
@@ -281,7 +285,7 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     jFieldSamplingPeriod.setPreferredSize(new java.awt.Dimension(40, 19));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 9;
+    gridBagConstraints.gridy = 10;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
     jPanelRight.add(jFieldSamplingPeriod, gridBagConstraints);
@@ -295,7 +299,7 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     });
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 20;
+    gridBagConstraints.gridy = 21;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
     jPanelRight.add(jButtonPDF, gridBagConstraints);
@@ -303,7 +307,7 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     jLabel4.setText("HA min");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 10;
+    gridBagConstraints.gridy = 11;
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
     jPanelRight.add(jLabel4, gridBagConstraints);
 
@@ -313,7 +317,7 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     jSliderHAMin.setMinimumSize(new java.awt.Dimension(100, 27));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 11;
+    gridBagConstraints.gridy = 12;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
     jPanelRight.add(jSliderHAMin, gridBagConstraints);
@@ -321,7 +325,7 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     jLabel5.setText("HA max");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 12;
+    gridBagConstraints.gridy = 13;
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
     jPanelRight.add(jLabel5, gridBagConstraints);
 
@@ -330,7 +334,7 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     jSliderHAMax.setPaintTicks(true);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 13;
+    gridBagConstraints.gridy = 14;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
     jPanelRight.add(jSliderHAMax, gridBagConstraints);
@@ -340,7 +344,7 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     jFieldHAMin.setMinimumSize(new java.awt.Dimension(50, 19));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 11;
+    gridBagConstraints.gridy = 12;
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
     jPanelRight.add(jFieldHAMin, gridBagConstraints);
 
@@ -349,28 +353,28 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     jFieldHAMax.setMinimumSize(new java.awt.Dimension(50, 19));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 13;
+    gridBagConstraints.gridy = 14;
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
     jPanelRight.add(jFieldHAMax, gridBagConstraints);
 
     jTargetHAMin.setText("targetHAMin");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 10;
+    gridBagConstraints.gridy = 11;
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
     jPanelRight.add(jTargetHAMin, gridBagConstraints);
 
     jTargetHAMax.setText("targetHAMax");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 12;
+    gridBagConstraints.gridy = 13;
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
     jPanelRight.add(jTargetHAMax, gridBagConstraints);
 
     jComboBoxImageMode.setModel(new DefaultComboBoxModel(ModelUVMapService.ImageMode.values()));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 17;
+    gridBagConstraints.gridy = 18;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
     jPanelRight.add(jComboBoxImageMode, gridBagConstraints);
@@ -379,20 +383,20 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     jCheckBoxModelImage.setText("Underplot a model image");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 16;
+    gridBagConstraints.gridy = 17;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
     jPanelRight.add(jCheckBoxModelImage, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 15;
+    gridBagConstraints.gridy = 16;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
     jPanelRight.add(jSeparator1, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 19;
+    gridBagConstraints.gridy = 20;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
@@ -402,7 +406,7 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     jCheckBoxPlotUVSupport.setText("Plot rise/set uv tracks");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 7;
+    gridBagConstraints.gridy = 8;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
     jPanelRight.add(jCheckBoxPlotUVSupport, gridBagConstraints);
@@ -410,12 +414,12 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     jLabel6.setText("Plot what ...");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 17;
+    gridBagConstraints.gridy = 18;
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
     jPanelRight.add(jLabel6, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 6;
+    gridBagConstraints.gridy = 7;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
@@ -426,7 +430,7 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     jSliderUVMax.setValue(100);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 5;
+    gridBagConstraints.gridy = 6;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
     jPanelRight.add(jSliderUVMax, gridBagConstraints);
@@ -436,17 +440,30 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     jFieldUVMax.setMinimumSize(new java.awt.Dimension(50, 19));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 5;
+    gridBagConstraints.gridy = 6;
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
     jPanelRight.add(jFieldUVMax, gridBagConstraints);
 
     jLabel7.setText("U-V range to plot");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridy = 5;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
     jPanelRight.add(jLabel7, gridBagConstraints);
+
+    jButtonModelEditor.setText("Model Editor");
+    jButtonModelEditor.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jButtonModelEditorActionPerformed(evt);
+      }
+    });
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    jPanelRight.add(jButtonModelEditor, gridBagConstraints);
 
     add(jPanelRight);
   }// </editor-fold>//GEN-END:initComponents
@@ -462,6 +479,16 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
 
     ExportPDFAction.getInstance().actionPerformed(evt);
   }//GEN-LAST:event_jButtonPDFActionPerformed
+
+  private void jButtonModelEditorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonModelEditorActionPerformed
+
+    final String targetName = (String) this.jComboBoxTarget.getSelectedItem();
+
+    // show model editor :
+    TargetModelForm.showModelEditor(targetName);
+
+    refreshPlot();
+}//GEN-LAST:event_jButtonModelEditorActionPerformed
 
   /**
    * This method is useful to set the models and specific features of initialized swing components :
@@ -1321,6 +1348,7 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     }
   }
   // Variables declaration - do not modify//GEN-BEGIN:variables
+  private javax.swing.JButton jButtonModelEditor;
   private javax.swing.JButton jButtonPDF;
   private javax.swing.JCheckBox jCheckBoxModelImage;
   private javax.swing.JCheckBox jCheckBoxPlotUVSupport;
