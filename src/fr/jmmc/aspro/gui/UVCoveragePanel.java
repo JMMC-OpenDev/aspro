@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.20 2010-02-12 15:53:18 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.21 2010-02-15 16:47:26 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.20  2010/02/12 15:53:18  bourgesl
+ * added target model editor
+ *
  * Revision 1.19  2010/02/09 16:51:09  bourgesl
  * added change listener for image modes
  *
@@ -91,17 +94,13 @@ import fr.jmmc.aspro.model.oi.InterferometerConfiguration;
 import fr.jmmc.aspro.model.uvcoverage.UVCoverageData;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Pop;
-import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.uvcoverage.UVBaseLineData;
 import fr.jmmc.aspro.model.uvcoverage.UVRangeBaseLineData;
 import fr.jmmc.aspro.service.UVCoverageService;
 import fr.jmmc.mcs.gui.StatusBar;
-import fr.jmmc.mcs.model.ModelFunction;
-import fr.jmmc.mcs.model.ModelManager;
 import fr.jmmc.mcs.model.ModelUVMapService;
 import fr.jmmc.mcs.model.ModelUVMapService.ImageMode;
 import fr.jmmc.mcs.model.UVMapData;
-import fr.jmmc.mcs.model.function.DiskModelFunction;
 import fr.jmmc.mcs.model.targetmodel.Model;
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -114,7 +113,6 @@ import java.awt.geom.Rectangle2D;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.ExecutionException;
@@ -897,13 +895,6 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
 
     final ImageMode imageMode = (ImageMode) this.jComboBoxImageMode.getSelectedItem();
 
-    // TODO : KILL
-    final Target target = ObservationManager.getTarget(observation, targetName);
-    if (target != null) {
-      target.getModels().clear();
-      target.getModels().addAll(diskModels());
-    }
-
     // check if observability data are available :
     final ObservabilityData obsData = observation.getObservabilityData();
 
@@ -1424,27 +1415,5 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
    */
   private final double fromUVPlotScale(final double value) {
     return value / uvPlotScalingFactor;
-  }
-
-  /**
-   * TODO KILL
-   * @return sample disk model
-   */
-  private static List<Model> diskModels() {
-
-    final ModelManager mm = ModelManager.getInstance();
-
-    final List<Model> models = new ArrayList<Model>();
-
-    final Model model = mm.createModel(ModelFunction.MODEL_DISK);
-
-    ModelManager.setParameterValue(model, ModelFunction.PARAM_FLUX_WEIGHT, 1.0);
-    ModelManager.setParameterValue(model, ModelFunction.PARAM_X, 0);
-    ModelManager.setParameterValue(model, ModelFunction.PARAM_Y, 0);
-    ModelManager.setParameterValue(model, DiskModelFunction.PARAM_DIAMETER, 5);
-
-    models.add(model);
-
-    return models;
   }
 }

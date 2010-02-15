@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetModelForm.java,v 1.4 2010-02-12 15:53:18 bourgesl Exp $"
+ * "@(#) $Id: TargetModelForm.java,v 1.5 2010-02-15 16:47:26 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2010/02/12 15:53:18  bourgesl
+ * added target model editor
+ *
  * Revision 1.3  2010/02/08 17:00:47  bourgesl
  * L&F changes
  *
@@ -19,31 +22,38 @@ import fr.jmmc.aspro.AsproGui;
 import fr.jmmc.aspro.gui.util.ComponentResizeAdapter;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.oi.Target;
-import fr.jmmc.mcs.model.ModelFunction;
 import fr.jmmc.mcs.model.ModelManager;
-import fr.jmmc.mcs.model.function.DiskModelFunction;
 import fr.jmmc.mcs.model.gui.ModelParameterTableModel;
 import fr.jmmc.mcs.model.gui.ModelParameterTableModel.Mode;
 import fr.jmmc.mcs.model.targetmodel.Model;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import javax.swing.DefaultCellEditor;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JTree;
+import javax.swing.ListSelectionModel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
+import javax.swing.tree.TreeSelectionModel;
 
 /**
  * This class represents the target model editor ...
  * @author bourgesl
  */
-public class TargetModelForm extends javax.swing.JPanel implements ActionListener {
+public class TargetModelForm extends javax.swing.JPanel implements ActionListener, TreeSelectionListener, ListSelectionListener {
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
@@ -53,60 +63,12 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
   private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
 
+  /* members */
+  /* last model type to detect type changes to update the model description */
+  private String lastModelType = null;
   /* swing */
   /** dialog window */
   private JDialog dialog;
-
-  /**
-   * TODO KILL
-   * @return sample disk model
-   */
-  private static List<Model> diskModels() {
-
-    final ModelManager mm = ModelManager.getInstance();
-
-    final List<Model> models = new ArrayList<Model>();
-
-    Model model;
-
-    model = mm.createModel(ModelFunction.MODEL_DISK);
-
-    model.setName("disk1");
-
-    ModelManager.setParameterValue(model, ModelFunction.PARAM_FLUX_WEIGHT, 1.0);
-    ModelManager.setParameterValue(model, ModelFunction.PARAM_X, 0);
-    ModelManager.setParameterValue(model, ModelFunction.PARAM_Y, 0);
-    ModelManager.setParameterValue(model, DiskModelFunction.PARAM_DIAMETER, 5);
-
-    models.add(model);
-
-    model = mm.createModel(ModelFunction.MODEL_DISK);
-
-    model.setName("disk2");
-
-    ModelManager.setParameterValue(model, ModelFunction.PARAM_FLUX_WEIGHT, 1.0);
-    ModelManager.setParameterValue(model, ModelFunction.PARAM_X, 1);
-    ModelManager.setParameterValue(model, ModelFunction.PARAM_Y, 2);
-    ModelManager.setParameterValue(model, DiskModelFunction.PARAM_DIAMETER, 3);
-
-    models.add(model);
-
-    model = mm.createModel(ModelFunction.MODEL_PUNCT);
-    model.setName("group1");
-
-    models.add(model);
-
-    final Model subModel = mm.createModel(ModelFunction.MODEL_PUNCT);
-    model.setName("punct1");
-
-    ModelManager.setParameterValue(model, ModelFunction.PARAM_FLUX_WEIGHT, 1.0);
-    ModelManager.setParameterValue(model, ModelFunction.PARAM_X, 0);
-    ModelManager.setParameterValue(model, ModelFunction.PARAM_Y, 0);
-
-    model.getModels().add(subModel);
-
-    return models;
-  }
 
   /**
    * Display the model editor using the given target as the initial selected target
@@ -118,37 +80,34 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
       logger.fine("showing Model Editor : " + targetName);
     }
 
-    final TargetModelForm form = new TargetModelForm();
-
-    form.defineModels(diskModels());
-
+    final TargetModelForm form = new TargetModelForm(targetName);
 
     JDialog dialog = null;
 
     try {
-      //1. Create the dialog
+      // 1. Create the dialog
       dialog = new JDialog(AsproGui.getInstance().getRootFrame(), "Model Editor", true);
 
-      final Dimension dim = new Dimension(600, 700);
+      final Dimension dim = new Dimension(600, 600);
       dialog.setMinimumSize(dim);
       dialog.addComponentListener(new ComponentResizeAdapter(dim));
 
-      //2. Optional: What happens when the dialog closes ?
+      // 2. Optional: What happens when the dialog closes ?
       dialog.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-      //3. Create components and put them in the dialog
+      // 3. Create components and put them in the dialog
       dialog.add(form);
 
-      // associate the dialog to the form :
+      // Associate the dialog to the form :
       form.setDialog(dialog);
 
-      //4. Size the dialog.
+      // 4. Size the dialog.
       dialog.pack();
 
-      // center it :
+      // Center it :
       dialog.setLocationRelativeTo(dialog.getOwner());
 
-      //5. Show it.
+      // 5. Show it.
       dialog.setVisible(true);
     } finally {
       if (dialog != null) {
@@ -162,59 +121,243 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
     return true;
   }
 
-  /** Creates new form TargetModelForm */
-  public TargetModelForm() {
+  /**
+   * Creates new form TargetModelForm
+   * @param targetName single target mode
+   */
+  public TargetModelForm(final String targetName) {
     initComponents();
 
-    postInit();
+    postInit(targetName);
   }
 
   /**
    * This method is useful to set the models and specific features of initialized swing components.
+   * @param targetName single target mode
    */
-  private void postInit() {
+  private void postInit(final String targetName) {
 
     // model type choice :
     this.jComboBoxModelType.setModel(new DefaultComboBoxModel(ModelManager.getInstance().getSupportedModels()));
     this.jComboBoxModelType.addActionListener(this);
 
     // set one click edition on following table and show all decimals in numerical values
-    ((DefaultCellEditor) jTableModelParameters.getDefaultEditor(String.class)).setClickCountToStart(1);
-    jTableModelParameters.setDefaultEditor(Double.class, jTableModelParameters.getDefaultEditor(String.class));
-    jTableModelParameters.setDefaultRenderer(Double.class, jTableModelParameters.getDefaultRenderer(String.class));
+    ((DefaultCellEditor) this.jTableModelParameters.getDefaultEditor(String.class)).setClickCountToStart(1);
+    this.jTableModelParameters.setDefaultEditor(Double.class, this.jTableModelParameters.getDefaultEditor(String.class));
+    this.jTableModelParameters.setDefaultRenderer(Double.class, this.jTableModelParameters.getDefaultRenderer(String.class));
 
-    // update tree :
-    generateTree();
+    // single table selection :
+    this.jTableModelParameters.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+    this.jTableModelParameters.getSelectionModel().addListSelectionListener(this);
+
+    // Fix lost focus issues :
+    this.jTableModelParameters.putClientProperty("terminateEditOnFocusLost", Boolean.TRUE);
+
+    // single tree selection :
+    this.jTreeModels.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+    this.jTreeModels.addTreeSelectionListener(this);
+
+    // generate the target/model tree :
+    generateTree(targetName);
 
     updateModelDescription();
   }
 
+  /* Tree related methods */
   /**
-   * Generates the tree from the complete observation (targets + models)
+   * Return the tree model
+   * @return tree model
    */
-  private void generateTree() {
-    final List<Target> targets = ObservationManager.getInstance().getObservation().getTargets();
-
-    final DefaultMutableTreeNode rootNode = (DefaultMutableTreeNode) this.jTreeModels.getModel().getRoot();
-
-    DefaultMutableTreeNode node;
-    for (Target target : targets) {
-      node = new DefaultMutableTreeNode(target);
-
-      rootNode.add(node);
-    }
-
-    ((DefaultTreeModel)this.jTreeModels.getModel()).nodeStructureChanged(rootNode);
+  private DefaultTreeModel getTreeModelsModel() {
+    return ((DefaultTreeModel) this.jTreeModels.getModel());
   }
 
-  public void defineModels(final Model model) {
+  /**
+   * Return the root node (Models)
+   * @return root node
+   */
+  private DefaultMutableTreeNode getRootNode() {
+    return (DefaultMutableTreeNode) getTreeModelsModel().getRoot();
+  }
+
+  /**
+   * Return the node corresponding to the last selected path in the tree
+   * @return node or null
+   */
+  private DefaultMutableTreeNode getLastSelectedNode() {
+    return (DefaultMutableTreeNode) this.jTreeModels.getLastSelectedPathComponent();
+  }
+
+  /**
+   * Generate the tree from the complete observation (targets + models) using the given target name to restrict the tree to this single target
+   * @param targetName single target mode
+   */
+  private void generateTree(final String targetName) {
+    final List<Target> targets = ObservationManager.getInstance().getObservation().getTargets();
+
+    final DefaultMutableTreeNode rootNode = getRootNode();
+
+    DefaultMutableTreeNode targetNode;
+    for (Target target : targets) {
+      if (targetName == null || target.getName().equals(targetName)) {
+
+        // May need clone target and model to allow undo/cancel actions :
+
+        targetNode = new DefaultMutableTreeNode(target);
+
+        for (Model model : target.getModels()) {
+          this.generateModelNodes(targetNode, model);
+        }
+
+        rootNode.add(targetNode);
+      }
+    }
+    // fire node structure changed :
+    getTreeModelsModel().nodeStructureChanged(rootNode);
+
+    selectFirstTarget(rootNode);
+  }
+
+  /**
+   * Generate the model nodes recursively
+   *
+   * @param parentNode parent node to append nodes
+   * @param model model to process
+   */
+  private void generateModelNodes(final DefaultMutableTreeNode parentNode, final Model model) {
+
+    // May need clone target and model to allow undo/cancel actions :
+
+    final DefaultMutableTreeNode modelNode = new DefaultMutableTreeNode(model);
+
+    parentNode.add(modelNode);
+
+    final List<Model> children = model.getModels();
+    if (!children.isEmpty()) {
+      for (Model child : children) {
+        generateModelNodes(modelNode, child);
+      }
+    }
+  }
+
+  /**
+   * Select the first target
+   * @param rootNode root node
+   */
+  private void selectFirstTarget(final DefaultMutableTreeNode rootNode) {
+    // first child = first target :
+    final DefaultMutableTreeNode firstChild = (DefaultMutableTreeNode)rootNode.getFirstChild();
+
+    final TreePath path = new TreePath(firstChild.getPath());
+
+    this.jTreeModels.setSelectionPath(path);
+
+    if (!firstChild.isLeaf()) {
+      final DefaultMutableTreeNode secondChild = (DefaultMutableTreeNode)firstChild.getFirstChild();
+
+      this.jTreeModels.scrollPathToVisible(new TreePath(secondChild.getPath()));
+    }
+  }
+
+  /**
+   * Process the tree selection events
+   * @param e tree selection event
+   */
+  public void valueChanged(final TreeSelectionEvent e) {
+    final DefaultMutableTreeNode node = getLastSelectedNode();
+
+    /* if nothing is selected */
+    if (node == null) {
+      return;
+    }
+
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("tree selection node : " + node);
+    }
+
+    /* React to the node selection. */
+
+    // Check if it is the root node :
+    final DefaultMutableTreeNode rootNode = getRootNode();
+    if (node == rootNode) {
+      selectFirstTarget(rootNode);
+      return;
+    }
+
+    /* retrieve the node that was selected */
+    final Object userObject = node.getUserObject();
+
+    if (userObject != null) {
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("tree selection : " + userObject);
+      }
+
+      if (userObject instanceof Target) {
+        // Target :
+        this.processTargetSelection((Target) userObject);
+      } else if (userObject instanceof Model) {
+        // Model :
+        this.processModelSelection((Model) userObject);
+      }
+    }
+  }
+
+  /**
+   * Update the UI when a target is selected in the target/model tree
+   * @param target selected target
+   */
+  private void processTargetSelection(final Target target) {
+    this.jButtonAdd.setEnabled(true);
+    this.jButtonUpdate.setEnabled(false);
+    this.jButtonRemove.setEnabled(false);
+
+    // reset text field name :
+    this.jTextFieldName.setText(null);
+
+    // update parameter table model :
+    this.defineModels(target.getModels());
+  }
+
+  /**
+   * Update the UI when a model is selected in the target/model tree
+   * @param model selected model
+   */
+  private void processModelSelection(final Model model) {
+    // check if the model is a group ?
+    this.jButtonAdd.setEnabled(false);
+    this.jButtonUpdate.setEnabled(true);
+    this.jButtonRemove.setEnabled(true);
+
+    // update text field name :
+    this.jTextFieldName.setText(model.getName());
+
+    // update model type :
+    this.jComboBoxModelType.setSelectedItem(model.getType());
+
+    // update parameter table model :
+    this.defineModels(model);
+  }
+
+  /**
+   * Define the model to use in the table of parameters
+   * @param model model to use
+   */
+  private void defineModels(final Model model) {
     getModelParameterTableModel().setData(model);
   }
 
-  public void defineModels(final List<Model> models) {
+  /**
+   * Define the list of models to use in the table of parameters
+   * @param models models to use
+   */
+  private void defineModels(final List<Model> models) {
     getModelParameterTableModel().setData(models);
   }
 
+  /**
+   * Return the custom table model
+   * @return ModelParameterTableModel
+   */
   private ModelParameterTableModel getModelParameterTableModel() {
     return (ModelParameterTableModel) this.jTableModelParameters.getModel();
   }
@@ -233,18 +376,52 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
     }
   }
 
+  /**
+   * Update the model description according to the selected model type
+   */
   private void updateModelDescription() {
     updateModelDescription((String) this.jComboBoxModelType.getSelectedItem());
   }
 
+  /**
+   * Update the model description given the model type
+   * @param type model type to use
+   */
   private void updateModelDescription(final String type) {
-    final String desc = ModelManager.getInstance().getModelDescription(type);
+    if (!type.equals(this.lastModelType)) {
+      this.lastModelType = type;
 
-    // note : use html to have multi line label :
-    this.jLabelModelDescrption.setText("<html>" + desc.replaceAll("\n", "<br>") + "</html>");
+      final String desc = ModelManager.getInstance().getModelDescription(type);
+
+      // note : use html to have multi line label :
+      this.jLabelModelDescrption.setText("<html>" + desc.replaceAll("\n", "<br>") + "</html>");
+    }
   }
 
-  /** This method is called from within the constructor to
+  /* JTable selection listener */
+  /**
+   * Called whenever the value of the selection changes.
+   * @param e the event that characterizes the change.
+   */
+  public void valueChanged(final ListSelectionEvent e) {
+    final ListSelectionModel lsm = (ListSelectionModel) e.getSource();
+
+    if (e.getValueIsAdjusting() || lsm.isSelectionEmpty()) {
+      return;
+    }
+
+    // Find out which indexes are selected.
+    final int minIndex = lsm.getMinSelectionIndex();
+
+    if (minIndex != -1) {
+      final Model model = getModelParameterTableModel().getModelAt(minIndex);
+
+      this.updateModelDescription(model.getType());
+    }
+  }
+
+  /**
+   * This method is called from within the constructor to
    * initialize the form.
    * WARNING: Do NOT modify this code. The content of this method is
    * always regenerated by the Form Editor.
@@ -255,21 +432,21 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
     java.awt.GridBagConstraints gridBagConstraints;
 
     jPanelTargets = new javax.swing.JPanel();
-    jScrollPane2 = new javax.swing.JScrollPane();
+    jScrollPaneTreeModels = new javax.swing.JScrollPane();
     jTreeModels = createJTree();
     jPanel4 = new javax.swing.JPanel();
     jComboBoxModelType = new javax.swing.JComboBox();
-    addModelButton = new javax.swing.JButton();
-    removeModelButton = new javax.swing.JButton();
-    jButtonChangeType = new javax.swing.JButton();
+    jButtonAdd = new javax.swing.JButton();
+    jButtonRemove = new javax.swing.JButton();
+    jButtonUpdate = new javax.swing.JButton();
     jLabel3 = new javax.swing.JLabel();
     jLabel5 = new javax.swing.JLabel();
-    jTextField1 = new javax.swing.JTextField();
+    jTextFieldName = new javax.swing.JTextField();
     jPanelDescription = new javax.swing.JPanel();
-    jScrollPane3 = new javax.swing.JScrollPane();
+    jScrollPaneModelDescription = new javax.swing.JScrollPane();
     jLabelModelDescrption = new javax.swing.JLabel();
     jPanelParameters = new javax.swing.JPanel();
-    jScrollPane1 = new javax.swing.JScrollPane();
+    jScrollPaneTableModelParameters = new javax.swing.JScrollPane();
     jTableModelParameters = new javax.swing.JTable();
     jPanelButtons = new javax.swing.JPanel();
     jButtonOK = new javax.swing.JButton();
@@ -281,12 +458,12 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
     jPanelTargets.setPreferredSize(new java.awt.Dimension(300, 100));
     jPanelTargets.setLayout(new java.awt.GridBagLayout());
 
+    jScrollPaneTreeModels.setMinimumSize(new java.awt.Dimension(100, 100));
+    jScrollPaneTreeModels.setPreferredSize(new java.awt.Dimension(100, 100));
+
     javax.swing.tree.DefaultMutableTreeNode treeNode1 = new javax.swing.tree.DefaultMutableTreeNode("Models");
     jTreeModels.setModel(new javax.swing.tree.DefaultTreeModel(treeNode1));
-    jTreeModels.setMinimumSize(new java.awt.Dimension(100, 100));
-    jTreeModels.setPreferredSize(new java.awt.Dimension(100, 100));
-    jTreeModels.setVisibleRowCount(10);
-    jScrollPane2.setViewportView(jTreeModels);
+    jScrollPaneTreeModels.setViewportView(jTreeModels);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -295,9 +472,9 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
     gridBagConstraints.weightx = 0.4;
     gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-    jPanelTargets.add(jScrollPane2, gridBagConstraints);
+    jPanelTargets.add(jScrollPaneTreeModels, gridBagConstraints);
 
-    jPanel4.setBorder(javax.swing.BorderFactory.createTitledBorder("Model list"));
+    jPanel4.setBorder(javax.swing.BorderFactory.createTitledBorder("Model actions"));
     jPanel4.setMinimumSize(new java.awt.Dimension(200, 80));
     jPanel4.setPreferredSize(new java.awt.Dimension(200, 80));
     jPanel4.setLayout(new java.awt.GridBagLayout());
@@ -310,31 +487,47 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
     jPanel4.add(jComboBoxModelType, gridBagConstraints);
 
-    addModelButton.setText("Add");
+    jButtonAdd.setText("Add");
+    jButtonAdd.setEnabled(false);
+    jButtonAdd.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jButtonAddActionPerformed(evt);
+      }
+    });
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-    jPanel4.add(addModelButton, gridBagConstraints);
+    jPanel4.add(jButtonAdd, gridBagConstraints);
 
-    removeModelButton.setText("Remove");
-    removeModelButton.setEnabled(false);
+    jButtonRemove.setText("Remove");
+    jButtonRemove.setEnabled(false);
+    jButtonRemove.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jButtonRemoveActionPerformed(evt);
+      }
+    });
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 3;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-    jPanel4.add(removeModelButton, gridBagConstraints);
+    jPanel4.add(jButtonRemove, gridBagConstraints);
 
-    jButtonChangeType.setText("Update");
-    jButtonChangeType.setEnabled(false);
+    jButtonUpdate.setText("Update");
+    jButtonUpdate.setEnabled(false);
+    jButtonUpdate.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jButtonUpdateActionPerformed(evt);
+      }
+    });
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-    jPanel4.add(jButtonChangeType, gridBagConstraints);
+    jPanel4.add(jButtonUpdate, gridBagConstraints);
 
     jLabel3.setText("model type");
     gridBagConstraints = new java.awt.GridBagConstraints();
@@ -352,13 +545,15 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
     jPanel4.add(jLabel5, gridBagConstraints);
 
-    jTextField1.setColumns(15);
+    jTextFieldName.setColumns(15);
+    jTextFieldName.setEditable(false);
+    jTextFieldName.setMinimumSize(new java.awt.Dimension(100, 19));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-    jPanel4.add(jTextField1, gridBagConstraints);
+    jPanel4.add(jTextFieldName, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
@@ -383,9 +578,9 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
     jPanelDescription.setLayout(new java.awt.GridBagLayout());
 
     jLabelModelDescrption.setBackground(new java.awt.Color(255, 255, 255));
-    jLabelModelDescrption.setFont(new java.awt.Font("Dialog", 0, 12));
+    jLabelModelDescrption.setFont(new java.awt.Font("Dialog", 0, 12)); // NOI18N
     jLabelModelDescrption.setOpaque(true);
-    jScrollPane3.setViewportView(jLabelModelDescrption);
+    jScrollPaneModelDescription.setViewportView(jLabelModelDescrption);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -393,13 +588,13 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
-    jPanelDescription.add(jScrollPane3, gridBagConstraints);
+    jPanelDescription.add(jScrollPaneModelDescription, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.weighty = 0.1;
+    gridBagConstraints.weighty = 0.2;
     add(jPanelDescription, gridBagConstraints);
 
     jPanelParameters.setBorder(javax.swing.BorderFactory.createTitledBorder("Model Parameters"));
@@ -407,15 +602,13 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
     jPanelParameters.setPreferredSize(new java.awt.Dimension(300, 100));
     jPanelParameters.setLayout(new java.awt.GridBagLayout());
 
-    jScrollPane1.setMinimumSize(new java.awt.Dimension(200, 100));
-    jScrollPane1.setPreferredSize(new java.awt.Dimension(200, 100));
+    jScrollPaneTableModelParameters.setMinimumSize(new java.awt.Dimension(200, 100));
+    jScrollPaneTableModelParameters.setPreferredSize(new java.awt.Dimension(200, 100));
 
-    jTableModelParameters.setModel(new ModelParameterTableModel(Mode.LITPRO));
+    jTableModelParameters.setModel(new ModelParameterTableModel(Mode.ASPRO));
     jTableModelParameters.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_ALL_COLUMNS);
     jTableModelParameters.setFillsViewportHeight(true);
-    jTableModelParameters.setMinimumSize(new java.awt.Dimension(200, 50));
-    jTableModelParameters.setPreferredSize(new java.awt.Dimension(200, 50));
-    jScrollPane1.setViewportView(jTableModelParameters);
+    jScrollPaneTableModelParameters.setViewportView(jTableModelParameters);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -425,7 +618,7 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-    jPanelParameters.add(jScrollPane1, gridBagConstraints);
+    jPanelParameters.add(jScrollPaneTableModelParameters, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -433,7 +626,7 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
     gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.weighty = 0.7;
+    gridBagConstraints.weighty = 0.5;
     add(jPanelParameters, gridBagConstraints);
 
     jButtonOK.setText("OK");
@@ -452,15 +645,144 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
     add(jPanelButtons, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
 
+  /**
+   * Process the OK action
+   * @param evt action event
+   */
   private void jButtonOKActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonOKActionPerformed
     if (this.dialog != null) {
       this.dialog.setVisible(false);
     }
   }//GEN-LAST:event_jButtonOKActionPerformed
+
+  /**
+   * Process the Update action
+   * @param evt action event
+   */
+  private void jButtonUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonUpdateActionPerformed
+
+    // TODO : later
+    JOptionPane.showMessageDialog(this, "Not implemented !");
+
+  }//GEN-LAST:event_jButtonUpdateActionPerformed
+
+  /**
+   * Process the Remove action
+   * @param evt action event
+   */
+  private void jButtonRemoveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonRemoveActionPerformed
+    final DefaultMutableTreeNode currentNode = getLastSelectedNode();
+
+    if (currentNode == null) {
+      return;
+    }
+
+    if (currentNode.getUserObject() instanceof Model) {
+
+      final Model model = (Model) currentNode.getUserObject();
+
+      if (model != null) {
+        // Parent can be a target or a model :
+
+        final DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode)currentNode.getParent();
+
+        if (parentNode.getUserObject() instanceof Target) {
+
+          final Target target = (Target) parentNode.getUserObject();
+
+          if (logger.isLoggable(Level.FINE)) {
+            logger.fine("remove model : " + model);
+          }
+
+          // Remove model from target :
+          target.getModels().remove(model);
+
+          // Remove node :
+          parentNode.remove(currentNode);
+
+          // fire node structure changed :
+          getTreeModelsModel().nodeStructureChanged(parentNode);
+
+          // show the parent node :
+          final TreePath path = new TreePath(parentNode.getPath());
+
+          // Select the parent node = target :
+          // This will send a selection event changed that will refresh the widgets (buttons + parameters table) :
+          this.jTreeModels.setSelectionPath(path);
+          this.jTreeModels.scrollPathToVisible(path);
+
+        } else if (parentNode.getUserObject() instanceof Model) {
+
+          // TODO : later
+          JOptionPane.showMessageDialog(this, "Not implemented !");
+        }
+      }
+    } else {
+      if (logger.isLoggable(Level.SEVERE)) {
+        logger.severe("invalid selected node to perform the remove operation = " + currentNode);
+      }
+    }
+
+  }//GEN-LAST:event_jButtonRemoveActionPerformed
+
+  /**
+   * Process the Add action
+   * @param evt action event
+   */
+  private void jButtonAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAddActionPerformed
+    final DefaultMutableTreeNode currentNode = getLastSelectedNode();
+
+    if (currentNode == null) {
+      return;
+    }
+
+    if (currentNode.getUserObject() instanceof Target) {
+
+      final Target target = (Target) currentNode.getUserObject();
+
+      if (target != null) {
+        final String type = (String) this.jComboBoxModelType.getSelectedItem();
+
+        final Model newModel = ModelManager.getInstance().createModel(type);
+
+        String name = this.jTextFieldName.getText();
+        if (name == null || name.isEmpty()) {
+          // generate an unique identifier for this target :
+          name = generateUniqueIdentifier(type, target);
+        }
+        newModel.setName(name);
+
+        if (logger.isLoggable(Level.FINE)) {
+          logger.fine("add model : " + newModel);
+        }
+
+        // Add model to target :
+        target.getModels().add(newModel);
+        // Add node :
+        final DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(newModel);
+        currentNode.add(newNode);
+
+        // fire node structure changed :
+        getTreeModelsModel().nodeStructureChanged(currentNode);
+
+        // show the new node :
+        this.jTreeModels.scrollPathToVisible(new TreePath(newNode.getPath()));
+
+        // update parameter table model :
+        this.defineModels(target.getModels());
+
+      }
+    } else {
+      if (logger.isLoggable(Level.SEVERE)) {
+        logger.severe("invalid selected node to perform the add operation = " + currentNode);
+      }
+    }
+  }//GEN-LAST:event_jButtonAddActionPerformed
   // Variables declaration - do not modify//GEN-BEGIN:variables
-  private javax.swing.JButton addModelButton;
-  private javax.swing.JButton jButtonChangeType;
+  private javax.swing.JButton jButtonAdd;
   private javax.swing.JButton jButtonOK;
+  private javax.swing.JButton jButtonRemove;
+  private javax.swing.JButton jButtonUpdate;
   private javax.swing.JComboBox jComboBoxModelType;
   private javax.swing.JLabel jLabel3;
   private javax.swing.JLabel jLabel5;
@@ -470,21 +792,27 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
   private javax.swing.JPanel jPanelDescription;
   private javax.swing.JPanel jPanelParameters;
   private javax.swing.JPanel jPanelTargets;
-  private javax.swing.JScrollPane jScrollPane1;
-  private javax.swing.JScrollPane jScrollPane2;
-  private javax.swing.JScrollPane jScrollPane3;
+  private javax.swing.JScrollPane jScrollPaneModelDescription;
+  private javax.swing.JScrollPane jScrollPaneTableModelParameters;
+  private javax.swing.JScrollPane jScrollPaneTreeModels;
   private javax.swing.JTable jTableModelParameters;
-  private javax.swing.JTextField jTextField1;
+  private javax.swing.JTextField jTextFieldName;
   private javax.swing.JTree jTreeModels;
-  private javax.swing.JButton removeModelButton;
   // End of variables declaration//GEN-END:variables
+
+  /**
+   * Define the JDialog for this form
+   * @param dialog JDialog instance
+   */
+  protected void setDialog(final JDialog dialog) {
+    this.dialog = dialog;
+  }
 
   /**
    * Create a custom JTree which convertValueToText() method is overriden
    * @return JTree
    */
   private static JTree createJTree() {
-
     return new JTree() {
 
       /** default serial UID for Serializable interface */
@@ -510,30 +838,35 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
               final boolean expanded, final boolean leaf, final int row,
               final boolean hasFocus) {
         if (value != null) {
-          final Class<?> type = value.getClass();
-
           String sValue = null;
 
-          if (DefaultMutableTreeNode.class == type) {
-            final DefaultMutableTreeNode node = (DefaultMutableTreeNode)value;
+          if (value instanceof DefaultMutableTreeNode) {
+            final DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
 
             final Object userObject = node.getUserObject();
 
             if (userObject != null) {
-              final Class<?> userType = userObject.getClass();
 
-              if (String.class == userType) {
+              if (userObject instanceof String) {
+                // String type = root node :
                 sValue = userObject.toString();
-              } else if (Target.class == userType) {
+              } else if (userObject instanceof Target) {
                 // Target :
                 sValue = ((Target) userObject).getName();
+              } else if (userObject instanceof Model) {
+                // Model :
+                sValue = ((Model) userObject).getName();
               } else {
-                logger.severe("unsupported class type = " + userType);
+                if (logger.isLoggable(Level.SEVERE)) {
+                  logger.severe("unsupported class type = " + userObject.getClass());
+                }
               }
             }
 
           } else {
-            logger.severe("unsupported class type = " + type);
+            if (logger.isLoggable(Level.SEVERE)) {
+              logger.severe("unsupported class type = " + value.getClass());
+            }
             sValue = value.toString();
           }
 
@@ -546,7 +879,47 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
     };
   }
 
-  protected void setDialog(final JDialog dialog) {
-    this.dialog = dialog;
+  private String generateUniqueIdentifier(final String type, final Target target) {
+    final Map<String, Boolean> ids = generateIdentifierMap(target);
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("ids = " + ids);
+    }
+
+    String id;
+
+    int i = 1;
+    final StringBuilder sb = new StringBuilder();
+
+    sb.append(type).append(i);
+    id = sb.toString();
+    sb.setLength(0);
+
+    for (; ids.containsKey(id); i++) {
+      sb.append(type).append(i);
+      id = sb.toString();
+      sb.setLength(0);
+    }
+
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("id = " + id);
+    }
+    return id;
+  }
+
+  private Map<String, Boolean> generateIdentifierMap(final Target target) {
+    final Map<String, Boolean> ids = new HashMap<String, Boolean>();
+
+    for (Model model : target.getModels()) {
+      generateIdentifierMap(model, ids);
+    }
+    return ids;
+  }
+
+  private void generateIdentifierMap(final Model model, final Map<String, Boolean> ids) {
+    ids.put(model.getName(), Boolean.TRUE);
+
+    for (Model child : model.getModels()) {
+      generateIdentifierMap(child, ids);
+    }
   }
 }
