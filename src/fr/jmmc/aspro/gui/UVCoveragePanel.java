@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.21 2010-02-15 16:47:26 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.22 2010-02-16 14:48:26 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.21  2010/02/15 16:47:26  bourgesl
+ * model editor supports add / remove model
+ *
  * Revision 1.20  2010/02/12 15:53:18  bourgesl
  * added target model editor
  *
@@ -483,9 +486,9 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     final String targetName = (String) this.jComboBoxTarget.getSelectedItem();
 
     // show model editor :
-    TargetModelForm.showModelEditor(targetName);
-
-    refreshPlot();
+    if (TargetModelForm.showModelEditor(targetName)) {
+      refreshPlot();
+    }
 }//GEN-LAST:event_jButtonModelEditorActionPerformed
 
   /**

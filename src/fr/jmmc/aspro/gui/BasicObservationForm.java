@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BasicObservationForm.java,v 1.19 2010-02-12 15:53:18 bourgesl Exp $"
+ * "@(#) $Id: BasicObservationForm.java,v 1.20 2010-02-16 14:48:26 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.19  2010/02/12 15:53:18  bourgesl
+ * added target model editor
+ *
  * Revision 1.18  2010/01/21 16:39:11  bourgesl
  * simplified StarResolverWidget integration
  *
@@ -345,12 +348,12 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
    * @param evt action event
    */
   private void jButtonRemoveTargetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonRemoveTargetActionPerformed
-    final String name = (String) this.jListTargets.getSelectedValue();
+    final String targetName = (String) this.jListTargets.getSelectedValue();
 
-    if (name != null) {
-      final int answer = JOptionPane.showConfirmDialog(this.jButtonRemoveTarget, "Do you want to remove the target [" + name + "] ?");
+    if (targetName != null) {
+      final int answer = JOptionPane.showConfirmDialog(this.jButtonRemoveTarget, "Do you want to remove the target [" + targetName + "] ?");
       if (answer == JOptionPane.YES_OPTION) {
-        if (this.om.removeTarget(name)) {
+        if (this.om.removeTarget(targetName)) {
           // update target list :
           updateListTargets();
 
@@ -362,11 +365,13 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
 
   private void jButtonModelEditorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonModelEditorActionPerformed
 
-    // show model editor :
-    TargetModelForm.showModelEditor((String)this.jListTargets.getSelectedValue());
+    final String targetName = (String) this.jListTargets.getSelectedValue();
 
-    // fire an observation change event :
-    this.om.fireObservationChanged();
+    // show model editor :
+    if (TargetModelForm.showModelEditor(targetName)) {
+      // fire an observation change event :
+      this.om.fireObservationChanged();
+    }
   }//GEN-LAST:event_jButtonModelEditorActionPerformed
 
   /**
