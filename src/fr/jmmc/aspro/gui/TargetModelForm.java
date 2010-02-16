@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetModelForm.java,v 1.5 2010-02-15 16:47:26 bourgesl Exp $"
+ * "@(#) $Id: TargetModelForm.java,v 1.6 2010-02-16 14:49:43 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2010/02/15 16:47:26  bourgesl
+ * model editor supports add / remove model
+ *
  * Revision 1.4  2010/02/12 15:53:18  bourgesl
  * added target model editor
  *
@@ -21,6 +24,7 @@ package fr.jmmc.aspro.gui;
 import fr.jmmc.aspro.AsproGui;
 import fr.jmmc.aspro.gui.util.ComponentResizeAdapter;
 import fr.jmmc.aspro.model.ObservationManager;
+import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.mcs.model.ModelManager;
 import fr.jmmc.mcs.model.gui.ModelParameterTableModel;
@@ -29,9 +33,9 @@ import fr.jmmc.mcs.model.targetmodel.Model;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 import javax.swing.DefaultCellEditor;
 import javax.swing.DefaultComboBoxModel;
@@ -46,6 +50,7 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
@@ -64,14 +69,18 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
           className_);
 
   /* members */
+  /** editor result = true if the user validates the inputs */
+  private boolean result = false;
+  /** list of edited targets (clone) */
+  private List<Target> editTargets = new ArrayList<Target>();
   /* last model type to detect type changes to update the model description */
   private String lastModelType = null;
-  /* swing */
+  /* Swing */
   /** dialog window */
   private JDialog dialog;
 
   /**
-   * Display the model editor using the given target as the initial selected target
+   * Display the model editor using the given target name as the initial selected target
    * @return true if the model editor changed anything
    */
   public static boolean showModelEditor(final String targetName) {
@@ -80,7 +89,24 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
       logger.fine("showing Model Editor : " + targetName);
     }
 
-    final TargetModelForm form = new TargetModelForm(targetName);
+    boolean result = false;
+
+    // Prepare the list of targets :
+    final ObservationSetting observation = ObservationManager.getInstance().getObservation();
+
+    List<Target> targets;
+    if (targetName != null) {
+      // single target editor :
+      targets = Arrays.asList(new Target[]{ObservationManager.getTarget(observation, targetName)});
+    } else {
+      // full editor :
+      targets = observation.getTargets();
+    }
+
+    final TargetModelForm form = new TargetModelForm();
+
+    // generate the target/model tree :
+    form.generateTree(targets);
 
     JDialog dialog = null;
 
@@ -109,6 +135,10 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
 
       // 5. Show it.
       dialog.setVisible(true);
+
+      // get editor result :
+      result = form.isResult();
+
     } finally {
       if (dialog != null) {
         if (logger.isLoggable(Level.FINE)) {
@@ -118,24 +148,32 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
       }
     }
 
-    return true;
+    if (result) {
+      if (targetName != null) {
+        // single target editor :
+        ObservationManager.replaceTarget(observation, form.getEditTargets().get(0));
+      } else {
+        // full editor :
+        ObservationManager.setTargets(observation, form.getEditTargets());
+      }
+    }
+
+    return result;
   }
 
   /**
    * Creates new form TargetModelForm
-   * @param targetName single target mode
    */
-  public TargetModelForm(final String targetName) {
+  public TargetModelForm() {
     initComponents();
 
-    postInit(targetName);
+    postInit();
   }
 
   /**
    * This method is useful to set the models and specific features of initialized swing components.
-   * @param targetName single target mode
    */
-  private void postInit(final String targetName) {
+  private void postInit() {
 
     // model type choice :
     this.jComboBoxModelType.setModel(new DefaultComboBoxModel(ModelManager.getInstance().getSupportedModels()));
@@ -150,15 +188,12 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
     this.jTableModelParameters.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     this.jTableModelParameters.getSelectionModel().addListSelectionListener(this);
 
-    // Fix lost focus issues :
+    // Fix lost focus issues on JTable :
     this.jTableModelParameters.putClientProperty("terminateEditOnFocusLost", Boolean.TRUE);
 
     // single tree selection :
     this.jTreeModels.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
     this.jTreeModels.addTreeSelectionListener(this);
-
-    // generate the target/model tree :
-    generateTree(targetName);
 
     updateModelDescription();
   }
@@ -189,32 +224,33 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
   }
 
   /**
-   * Generate the tree from the complete observation (targets + models) using the given target name to restrict the tree to this single target
-   * @param targetName single target mode
+   * Generate the tree from the complete observation (targets + models) using the given list of targets
+   * @param targets list of targets to edit
    */
-  private void generateTree(final String targetName) {
-    final List<Target> targets = ObservationManager.getInstance().getObservation().getTargets();
+  protected void generateTree(final List<Target> targets) {
 
     final DefaultMutableTreeNode rootNode = getRootNode();
 
+    Target target;
     DefaultMutableTreeNode targetNode;
-    for (Target target : targets) {
-      if (targetName == null || target.getName().equals(targetName)) {
+    for (Target t : targets) {
+      // clone target and models to allow undo/cancel actions :
+      target = (Target) t.clone();
 
-        // May need clone target and model to allow undo/cancel actions :
+      this.editTargets.add(target);
 
-        targetNode = new DefaultMutableTreeNode(target);
+      targetNode = new DefaultMutableTreeNode(target);
 
-        for (Model model : target.getModels()) {
-          this.generateModelNodes(targetNode, model);
-        }
-
-        rootNode.add(targetNode);
+      for (Model model : target.getModels()) {
+        this.generateModelNodes(targetNode, model);
       }
+
+      rootNode.add(targetNode);
     }
     // fire node structure changed :
     getTreeModelsModel().nodeStructureChanged(rootNode);
 
+    // select first target :
     selectFirstTarget(rootNode);
   }
 
@@ -246,14 +282,15 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
    */
   private void selectFirstTarget(final DefaultMutableTreeNode rootNode) {
     // first child = first target :
-    final DefaultMutableTreeNode firstChild = (DefaultMutableTreeNode)rootNode.getFirstChild();
+    final DefaultMutableTreeNode firstChild = (DefaultMutableTreeNode) rootNode.getFirstChild();
 
     final TreePath path = new TreePath(firstChild.getPath());
 
     this.jTreeModels.setSelectionPath(path);
 
+    // expand target node if there is at least one model :
     if (!firstChild.isLeaf()) {
-      final DefaultMutableTreeNode secondChild = (DefaultMutableTreeNode)firstChild.getFirstChild();
+      final DefaultMutableTreeNode secondChild = (DefaultMutableTreeNode) firstChild.getFirstChild();
 
       this.jTreeModels.scrollPathToVisible(new TreePath(secondChild.getPath()));
     }
@@ -296,8 +333,11 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
         // Target :
         this.processTargetSelection((Target) userObject);
       } else if (userObject instanceof Model) {
+        final TreeNode[] path = node.getPath();
+        // target is the root node child :
+        final Target target = (Target) ((DefaultMutableTreeNode) path[1]).getUserObject();
         // Model :
-        this.processModelSelection((Model) userObject);
+        this.processModelSelection(target, (Model) userObject);
       }
     }
   }
@@ -315,14 +355,14 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
     this.jTextFieldName.setText(null);
 
     // update parameter table model :
-    this.defineModels(target.getModels());
+    this.defineModels(target);
   }
 
   /**
    * Update the UI when a model is selected in the target/model tree
    * @param model selected model
    */
-  private void processModelSelection(final Model model) {
+  private void processModelSelection(final Target target, final Model model) {
     // check if the model is a group ?
     this.jButtonAdd.setEnabled(false);
     this.jButtonUpdate.setEnabled(true);
@@ -335,23 +375,18 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
     this.jComboBoxModelType.setSelectedItem(model.getType());
 
     // update parameter table model :
-    this.defineModels(model);
-  }
-
-  /**
-   * Define the model to use in the table of parameters
-   * @param model model to use
-   */
-  private void defineModels(final Model model) {
-    getModelParameterTableModel().setData(model);
+    this.defineModels(target);
   }
 
   /**
    * Define the list of models to use in the table of parameters
-   * @param models models to use
+   * @param target target models to use
    */
-  private void defineModels(final List<Model> models) {
-    getModelParameterTableModel().setData(models);
+  private void defineModels(final Target target) {
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("target changed : " + target);
+    }
+    getModelParameterTableModel().setData(target.getModels());
   }
 
   /**
@@ -410,12 +445,13 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
       return;
     }
 
-    // Find out which indexes are selected.
+    // Single selection mode :
     final int minIndex = lsm.getMinSelectionIndex();
 
     if (minIndex != -1) {
       final Model model = getModelParameterTableModel().getModelAt(minIndex);
 
+      // update the model description according to the current model used in the parameters table :
       this.updateModelDescription(model.getType());
     }
   }
@@ -450,6 +486,7 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
     jTableModelParameters = new javax.swing.JTable();
     jPanelButtons = new javax.swing.JPanel();
     jButtonOK = new javax.swing.JButton();
+    jButtonCancel = new javax.swing.JButton();
 
     setLayout(new java.awt.GridBagLayout());
 
@@ -578,7 +615,7 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
     jPanelDescription.setLayout(new java.awt.GridBagLayout());
 
     jLabelModelDescrption.setBackground(new java.awt.Color(255, 255, 255));
-    jLabelModelDescrption.setFont(new java.awt.Font("Dialog", 0, 12)); // NOI18N
+    jLabelModelDescrption.setFont(new java.awt.Font("Dialog", 0, 12));
     jLabelModelDescrption.setOpaque(true);
     jScrollPaneModelDescription.setViewportView(jLabelModelDescrption);
 
@@ -637,6 +674,14 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
     });
     jPanelButtons.add(jButtonOK);
 
+    jButtonCancel.setText("Cancel");
+    jButtonCancel.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jButtonCancelActionPerformed(evt);
+      }
+    });
+    jPanelButtons.add(jButtonCancel);
+
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 3;
@@ -650,6 +695,9 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
    * @param evt action event
    */
   private void jButtonOKActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonOKActionPerformed
+    // update the validation flag :
+    this.result = true;
+
     if (this.dialog != null) {
       this.dialog.setVisible(false);
     }
@@ -684,7 +732,7 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
       if (model != null) {
         // Parent can be a target or a model :
 
-        final DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode)currentNode.getParent();
+        final DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) currentNode.getParent();
 
         if (parentNode.getUserObject() instanceof Target) {
 
@@ -745,12 +793,8 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
 
         final Model newModel = ModelManager.getInstance().createModel(type);
 
-        String name = this.jTextFieldName.getText();
-        if (name == null || name.isEmpty()) {
-          // generate an unique identifier for this target :
-          name = generateUniqueIdentifier(type, target);
-        }
-        newModel.setName(name);
+        // generate an unique identifier for the new model :
+        newModel.setName(ModelManager.getInstance().generateUniqueIdentifier(type, target.getModels()));
 
         if (logger.isLoggable(Level.FINE)) {
           logger.fine("add model : " + newModel);
@@ -769,7 +813,7 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
         this.jTreeModels.scrollPathToVisible(new TreePath(newNode.getPath()));
 
         // update parameter table model :
-        this.defineModels(target.getModels());
+        this.defineModels(target);
 
       }
     } else {
@@ -778,8 +822,15 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
       }
     }
   }//GEN-LAST:event_jButtonAddActionPerformed
+
+  private void jButtonCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCancelActionPerformed
+    if (this.dialog != null) {
+      this.dialog.setVisible(false);
+    }
+  }//GEN-LAST:event_jButtonCancelActionPerformed
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JButton jButtonAdd;
+  private javax.swing.JButton jButtonCancel;
   private javax.swing.JButton jButtonOK;
   private javax.swing.JButton jButtonRemove;
   private javax.swing.JButton jButtonUpdate;
@@ -799,6 +850,18 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
   private javax.swing.JTextField jTextFieldName;
   private javax.swing.JTree jTreeModels;
   // End of variables declaration//GEN-END:variables
+
+  /**
+   * Return the editor result
+   * @return true if the user validated (ok button)
+   */
+  public boolean isResult() {
+    return result;
+  }
+
+  public List<Target> getEditTargets() {
+    return editTargets;
+  }
 
   /**
    * Define the JDialog for this form
@@ -877,49 +940,5 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
         return "";
       }
     };
-  }
-
-  private String generateUniqueIdentifier(final String type, final Target target) {
-    final Map<String, Boolean> ids = generateIdentifierMap(target);
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("ids = " + ids);
-    }
-
-    String id;
-
-    int i = 1;
-    final StringBuilder sb = new StringBuilder();
-
-    sb.append(type).append(i);
-    id = sb.toString();
-    sb.setLength(0);
-
-    for (; ids.containsKey(id); i++) {
-      sb.append(type).append(i);
-      id = sb.toString();
-      sb.setLength(0);
-    }
-
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("id = " + id);
-    }
-    return id;
-  }
-
-  private Map<String, Boolean> generateIdentifierMap(final Target target) {
-    final Map<String, Boolean> ids = new HashMap<String, Boolean>();
-
-    for (Model model : target.getModels()) {
-      generateIdentifierMap(model, ids);
-    }
-    return ids;
-  }
-
-  private void generateIdentifierMap(final Model model, final Map<String, Boolean> ids) {
-    ids.put(model.getName(), Boolean.TRUE);
-
-    for (Model child : model.getModels()) {
-      generateIdentifierMap(child, ids);
-    }
   }
 }
