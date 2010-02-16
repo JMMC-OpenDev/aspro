@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationManager.java,v 1.21 2010-02-08 17:00:35 bourgesl Exp $"
+ * "@(#) $Id: ObservationManager.java,v 1.22 2010-02-16 14:47:38 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.21  2010/02/08 17:00:35  bourgesl
+ * moved several reference checks to ObservationManager
+ *
  * Revision 1.20  2010/02/03 09:48:53  bourgesl
  * target model uvmap added on the uv coverage with zooming supported
  *
@@ -87,6 +90,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Vector;
 import java.util.logging.Level;
 import javax.xml.datatype.XMLGregorianCalendar;
@@ -465,6 +469,21 @@ public class ObservationManager extends BaseOIManager {
 
   public Target getTarget(final String name) {
     return getTarget(getObservation(), name);
+  }
+
+  public static void replaceTarget(final ObservationSetting obs, final Target target) {
+    Target t;
+    for (ListIterator<Target> it = obs.getTargets().listIterator(); it.hasNext();) {
+      t = it.next();
+      if (t.getName().equals(target.getName())) {
+        it.set(target);
+      }
+    }
+  }
+
+  public static void setTargets(final ObservationSetting obs, final List<Target> targets) {
+    obs.getTargets().clear();
+    obs.getTargets().addAll(targets);
   }
 
   public Vector<String> getTargetNames() {
