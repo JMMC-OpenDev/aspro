@@ -35,7 +35,7 @@
   <releasenotes>
     <release version="0.1">
       <prerelease version="0.1b9">
-        <change>First release of the model editor with only punct & disk models</change>
+        <change>First release of the model editor with only punct and disk models</change>
       </prerelease>
       <prerelease version="0.1b8">
         <change>Enhanced UV coverage plot with several gui widgets to control the plot (U-V range, amplitude or phase)</change>
