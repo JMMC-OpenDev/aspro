@@ -284,7 +284,6 @@
                   <Connection code="new ModelParameterTableModel(Mode.ASPRO)" type="code"/>
                 </Property>
                 <Property name="autoResizeMode" type="int" value="4"/>
-                <Property name="fillsViewportHeight" type="boolean" value="true"/>
               </Properties>
             </Component>
           </SubComponents>

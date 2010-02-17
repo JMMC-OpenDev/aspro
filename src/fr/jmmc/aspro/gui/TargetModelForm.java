@@ -1,11 +1,16 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetModelForm.java,v 1.7 2010-02-17 17:09:01 bourgesl Exp $"
+ * "@(#) $Id: TargetModelForm.java,v 1.8 2010-02-17 17:18:35 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2010/02/17 17:09:01  bourgesl
+ * added update model (change type)
+ * changed remove action to relocate models when the first model is removed
+ * change tree selection to follow user choices (add/update model, table current model)
+ *
  * Revision 1.6  2010/02/16 14:49:43  bourgesl
  * added OK/cancel i.e. use cloned targets in editor and use the ObservationManager to apply changes
  *
@@ -698,7 +703,6 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
 
     jTableModelParameters.setModel(new ModelParameterTableModel(Mode.ASPRO));
     jTableModelParameters.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_ALL_COLUMNS);
-    jTableModelParameters.setFillsViewportHeight(true);
     jScrollPaneTableModelParameters.setViewportView(jTableModelParameters);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
