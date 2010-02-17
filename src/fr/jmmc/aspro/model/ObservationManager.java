@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationManager.java,v 1.22 2010-02-16 14:47:38 bourgesl Exp $"
+ * "@(#) $Id: ObservationManager.java,v 1.23 2010-02-17 15:12:40 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.22  2010/02/16 14:47:38  bourgesl
+ * added replaceTarget and setTargets methods to update the edited models
+ *
  * Revision 1.21  2010/02/08 17:00:35  bourgesl
  * moved several reference checks to ObservationManager
  *
@@ -471,6 +474,14 @@ public class ObservationManager extends BaseOIManager {
     return getTarget(getObservation(), name);
   }
 
+  public Vector<String> getTargetNames() {
+    final Vector<String> v = new Vector<String>();
+    for (Target t : getObservation().getTargets()) {
+      v.add(t.getName());
+    }
+    return v;
+  }
+
   public static void replaceTarget(final ObservationSetting obs, final Target target) {
     Target t;
     for (ListIterator<Target> it = obs.getTargets().listIterator(); it.hasNext();) {
@@ -486,14 +497,6 @@ public class ObservationManager extends BaseOIManager {
     obs.getTargets().addAll(targets);
   }
 
-  public Vector<String> getTargetNames() {
-    final Vector<String> v = new Vector<String>();
-    for (Target t : getObservation().getTargets()) {
-      v.add(t.getName());
-    }
-    return v;
-  }
-
   /**
    * Defines the computed observability data in the observation for later reuse (UV Coverage)
    * @param obsData observability data
@@ -506,7 +509,7 @@ public class ObservationManager extends BaseOIManager {
     getObservation().setObservabilityData(obsData);
 
     if (obsData != null) {
-      fireObservabilityDoneChanged();
+      fireObservabilityDone();
     }
   }
 
@@ -587,9 +590,9 @@ public class ObservationManager extends BaseOIManager {
   /**
    * This fires an observability done event to all registered listeners
    */
-  public void fireObservabilityDoneChanged() {
+  public void fireObservabilityDone() {
     if (logger.isLoggable(Level.FINE)) {
-      logger.fine("fireObservabilityDoneChanged : " + toString(getObservation()));
+      logger.fine("fireObservabilityDone : " + toString(getObservation()));
     }
 
     fireEvent(ObservationEventType.OBSERVABILITY_DONE);
