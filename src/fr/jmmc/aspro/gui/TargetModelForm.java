@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetModelForm.java,v 1.6 2010-02-16 14:49:43 bourgesl Exp $"
+ * "@(#) $Id: TargetModelForm.java,v 1.7 2010-02-17 17:09:01 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2010/02/16 14:49:43  bourgesl
+ * added OK/cancel i.e. use cloned targets in editor and use the ObservationManager to apply changes
+ *
  * Revision 1.5  2010/02/15 16:47:26  bourgesl
  * model editor supports add / remove model
  *
@@ -73,8 +76,10 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
   private boolean result = false;
   /** list of edited targets (clone) */
   private List<Target> editTargets = new ArrayList<Target>();
-  /* last model type to detect type changes to update the model description */
-  private String lastModelType = null;
+  /** current edited target to detect target changes to update the table model */
+  private Target currentTarget = null;
+  /** current model type to detect type changes to update the model description */
+  private String currentModelType = null;
   /* Swing */
   /** dialog window */
   private JDialog dialog;
@@ -195,7 +200,8 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
     this.jTreeModels.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
     this.jTreeModels.addTreeSelectionListener(this);
 
-    updateModelDescription();
+    // update the model description :
+    this.updateModelDescription((String) this.jComboBoxModelType.getSelectedItem());
   }
 
   /* Tree related methods */
@@ -224,7 +230,7 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
   }
 
   /**
-   * Generate the tree from the complete observation (targets + models) using the given list of targets
+   * Generate the tree from the given list of targets (single or all)
    * @param targets list of targets to edit
    */
   protected void generateTree(final List<Target> targets) {
@@ -237,6 +243,7 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
       // clone target and models to allow undo/cancel actions :
       target = (Target) t.clone();
 
+      // add the cloned target to the edited targets :
       this.editTargets.add(target);
 
       targetNode = new DefaultMutableTreeNode(target);
@@ -252,6 +259,44 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
 
     // select first target :
     selectFirstTarget(rootNode);
+  }
+
+  /**
+   * Find the first tree node having the given user object
+   * @param userObject user object to locate in the tree
+   * @return tree node or null
+   */
+  private DefaultMutableTreeNode findTreeNode(final Object userObject) {
+    return findTreeNode(getRootNode(), userObject);
+  }
+
+  /**
+   * Find the first tree node having the given user object recursively
+   *
+   * @param node current node to traverse
+   * @param userObject user object to locate in the tree
+   * @return tree node or null
+   */
+  private static DefaultMutableTreeNode findTreeNode(final DefaultMutableTreeNode node, final Object userObject) {
+    if (node.getUserObject() == userObject) {
+      return node;
+    }
+
+    final int size = node.getChildCount();
+    if (size > 0) {
+      DefaultMutableTreeNode result = null;
+
+      DefaultMutableTreeNode childNode;
+      for (int i = 0; i < size; i++) {
+        childNode = (DefaultMutableTreeNode) node.getChildAt(i);
+
+        result = findTreeNode(childNode, userObject);
+        if (result != null) {
+          return result;
+        }
+      }
+    }
+    return null;
   }
 
   /**
@@ -284,9 +329,7 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
     // first child = first target :
     final DefaultMutableTreeNode firstChild = (DefaultMutableTreeNode) rootNode.getFirstChild();
 
-    final TreePath path = new TreePath(firstChild.getPath());
-
-    this.jTreeModels.setSelectionPath(path);
+    this.selectPath(new TreePath(firstChild.getPath()));
 
     // expand target node if there is at least one model :
     if (!firstChild.isLeaf()) {
@@ -294,6 +337,17 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
 
       this.jTreeModels.scrollPathToVisible(new TreePath(secondChild.getPath()));
     }
+  }
+
+  /**
+   * Change the selected path in the tree (target / models)
+   * This will send a selection event changed that will refresh the UI (buttons + parameters table)
+   *
+   * @param path tree path
+   */
+  private void selectPath(final TreePath path) {
+    this.jTreeModels.setSelectionPath(path);
+    this.jTreeModels.scrollPathToVisible(path);
   }
 
   /**
@@ -334,7 +388,7 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
         this.processTargetSelection((Target) userObject);
       } else if (userObject instanceof Model) {
         final TreeNode[] path = node.getPath();
-        // target is the root node child :
+        // target is after the root node in the tree path :
         final Target target = (Target) ((DefaultMutableTreeNode) path[1]).getUserObject();
         // Model :
         this.processModelSelection(target, (Model) userObject);
@@ -383,10 +437,13 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
    * @param target target models to use
    */
   private void defineModels(final Target target) {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("target changed : " + target);
+    if (target != currentTarget) {
+      this.currentTarget = target;
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("target changed : " + target);
+      }
+      getModelParameterTableModel().setData(target.getModels());
     }
-    getModelParameterTableModel().setData(target.getModels());
   }
 
   /**
@@ -412,19 +469,12 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
   }
 
   /**
-   * Update the model description according to the selected model type
-   */
-  private void updateModelDescription() {
-    updateModelDescription((String) this.jComboBoxModelType.getSelectedItem());
-  }
-
-  /**
    * Update the model description given the model type
    * @param type model type to use
    */
   private void updateModelDescription(final String type) {
-    if (!type.equals(this.lastModelType)) {
-      this.lastModelType = type;
+    if (!type.equals(this.currentModelType)) {
+      this.currentModelType = type;
 
       final String desc = ModelManager.getInstance().getModelDescription(type);
 
@@ -451,8 +501,12 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
     if (minIndex != -1) {
       final Model model = getModelParameterTableModel().getModelAt(minIndex);
 
-      // update the model description according to the current model used in the parameters table :
-      this.updateModelDescription(model.getType());
+      final DefaultMutableTreeNode modelNode = this.findTreeNode(model);
+
+      if (modelNode != null) {
+        // Select the model node :
+        this.selectPath(new TreePath(modelNode.getPath()));
+      }
     }
   }
 
@@ -605,7 +659,7 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.weighty = 0.1;
+    gridBagConstraints.weighty = 0.2;
     add(jPanelTargets, gridBagConstraints);
 
     jPanelDescription.setBorder(javax.swing.BorderFactory.createTitledBorder("Model description"));
@@ -709,9 +763,75 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
    */
   private void jButtonUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonUpdateActionPerformed
 
-    // TODO : later
-    JOptionPane.showMessageDialog(this, "Not implemented !");
+    final DefaultMutableTreeNode currentNode = getLastSelectedNode();
 
+    if (currentNode == null) {
+      return;
+    }
+
+    if (currentNode.getUserObject() instanceof Model) {
+
+      final Model model = (Model) currentNode.getUserObject();
+      if (model != null) {
+
+        final String type = (String) this.jComboBoxModelType.getSelectedItem();
+
+        // check if the type changed :
+        if (model.getType().equals(type)) {
+          return;
+        }
+
+        // Parent can be a target or a model :
+
+        final DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) currentNode.getParent();
+
+        if (parentNode.getUserObject() instanceof Target) {
+
+          final Target target = (Target) parentNode.getUserObject();
+
+          if (logger.isLoggable(Level.FINE)) {
+            logger.fine("update model : " + model);
+          }
+
+          // create a new model with defined names (model and parameters) replacing the selected model :
+          final Model newModel = ModelManager.getInstance().replaceModel(type, model, target.getModels());
+
+          if (logger.isLoggable(Level.FINE)) {
+            logger.fine("new merged model : " + newModel);
+          }
+
+          // Remove and add model at the right place :
+          int idx;
+          idx = target.getModels().indexOf(model);
+          target.getModels().remove(idx);
+          target.getModels().add(idx, newModel);
+
+          // Replace node :
+          final DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(newModel);
+          idx = parentNode.getIndex(currentNode);
+          parentNode.remove(idx);
+          parentNode.insert(newNode, idx);
+
+          // fire node structure changed :
+          getTreeModelsModel().nodeStructureChanged(parentNode);
+
+          // force to refresh table model :
+          this.currentTarget = null;
+
+          // Select the new node = model :
+          this.selectPath(new TreePath(newNode.getPath()));
+
+        } else if (parentNode.getUserObject() instanceof Model) {
+
+          // TODO : later
+          JOptionPane.showMessageDialog(this, "Not implemented !");
+        }
+      }
+    } else {
+      if (logger.isLoggable(Level.SEVERE)) {
+        logger.severe("invalid selected node to perform the update operation = " + currentNode);
+      }
+    }
   }//GEN-LAST:event_jButtonUpdateActionPerformed
 
   /**
@@ -743,7 +863,14 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
           }
 
           // Remove model from target :
-          target.getModels().remove(model);
+          int idx;
+          idx = target.getModels().indexOf(model);
+          target.getModels().remove(idx);
+
+          if (idx == 0) {
+            // first model is removed : special case : relocate other models :
+            ModelManager.relocateModels(target.getModels());
+          }
 
           // Remove node :
           parentNode.remove(currentNode);
@@ -751,13 +878,11 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
           // fire node structure changed :
           getTreeModelsModel().nodeStructureChanged(parentNode);
 
-          // show the parent node :
-          final TreePath path = new TreePath(parentNode.getPath());
+          // force to refresh table model :
+          this.currentTarget = null;
 
           // Select the parent node = target :
-          // This will send a selection event changed that will refresh the widgets (buttons + parameters table) :
-          this.jTreeModels.setSelectionPath(path);
-          this.jTreeModels.scrollPathToVisible(path);
+          this.selectPath(new TreePath(parentNode.getPath()));
 
         } else if (parentNode.getUserObject() instanceof Model) {
 
@@ -770,7 +895,6 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
         logger.severe("invalid selected node to perform the remove operation = " + currentNode);
       }
     }
-
   }//GEN-LAST:event_jButtonRemoveActionPerformed
 
   /**
@@ -791,10 +915,8 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
       if (target != null) {
         final String type = (String) this.jComboBoxModelType.getSelectedItem();
 
-        final Model newModel = ModelManager.getInstance().createModel(type);
-
-        // generate an unique identifier for the new model :
-        newModel.setName(ModelManager.getInstance().generateUniqueIdentifier(type, target.getModels()));
+        // create a new model with defined names (model and parameters) :
+        final Model newModel = ModelManager.getInstance().newModel(type, target.getModels());
 
         if (logger.isLoggable(Level.FINE)) {
           logger.fine("add model : " + newModel);
@@ -802,6 +924,7 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
 
         // Add model to target :
         target.getModels().add(newModel);
+
         // Add node :
         final DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(newModel);
         currentNode.add(newNode);
@@ -809,11 +932,11 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
         // fire node structure changed :
         getTreeModelsModel().nodeStructureChanged(currentNode);
 
-        // show the new node :
-        this.jTreeModels.scrollPathToVisible(new TreePath(newNode.getPath()));
+        // force to refresh table model :
+        this.currentTarget = null;
 
-        // update parameter table model :
-        this.defineModels(target);
+        // Select the new node = model :
+        this.selectPath(new TreePath(newNode.getPath()));
 
       }
     } else {
@@ -898,8 +1021,8 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
        */
       @Override
       public String convertValueToText(final Object value, final boolean selected,
-              final boolean expanded, final boolean leaf, final int row,
-              final boolean hasFocus) {
+                                       final boolean expanded, final boolean leaf, final int row,
+                                       final boolean hasFocus) {
         if (value != null) {
           String sValue = null;
 
