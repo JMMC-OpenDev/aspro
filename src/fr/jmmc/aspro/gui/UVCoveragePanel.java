@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.22 2010-02-16 14:48:26 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.23 2010-02-17 15:13:18 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.22  2010/02/16 14:48:26  bourgesl
+ * if the model editor was successfull (ok), update the plots
+ *
  * Revision 1.21  2010/02/15 16:47:26  bourgesl
  * model editor supports add / remove model
  *
@@ -572,6 +575,7 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     this.jCheckBoxModelImage.addItemListener(new ItemListener() {
 
       public void itemStateChanged(final ItemEvent e) {
+        jComboBoxImageMode.setEnabled(jCheckBoxModelImage.isSelected());
         refreshPlot();
       }
     });
