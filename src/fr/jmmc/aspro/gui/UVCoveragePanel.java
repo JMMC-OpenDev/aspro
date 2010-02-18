@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.23 2010-02-17 15:13:18 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.24 2010-02-18 15:52:38 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.23  2010/02/17 15:13:18  bourgesl
+ * image mode disabled if plot image unchecked
+ *
  * Revision 1.22  2010/02/16 14:48:26  bourgesl
  * if the model editor was successfull (ok), update the plots
  *
@@ -103,6 +106,7 @@ import fr.jmmc.aspro.model.oi.Pop;
 import fr.jmmc.aspro.model.uvcoverage.UVBaseLineData;
 import fr.jmmc.aspro.model.uvcoverage.UVRangeBaseLineData;
 import fr.jmmc.aspro.service.UVCoverageService;
+import fr.jmmc.mcs.gui.FeedbackReport;
 import fr.jmmc.mcs.gui.StatusBar;
 import fr.jmmc.mcs.model.ModelUVMapService;
 import fr.jmmc.mcs.model.ModelUVMapService.ImageMode;
@@ -125,6 +129,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JFormattedTextField;
+import javax.swing.JOptionPane;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import org.jdesktop.swingworker.SwingWorker;
@@ -933,6 +938,22 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
         }
 
         /**
+         * Reset the plot in case of baseline limits or model exception
+         */
+        public void reset() {
+          lastZoomEvent = null;
+          currentUVMapData = null;
+
+          // reset bounds to [-1;1] (before setDataset) :
+          localXYPlot.defineBounds(1d);
+          // reset dataset for baseline limits :
+          localXYPlot.setDataset(null);
+
+          // update the background image :
+          updateUVMap(null);
+        }
+
+        /**
          * Refresh the plot using the computed UV Coverage data.
          * This code is executed by the Swing Event Dispatcher thread (EDT)
          */
@@ -953,17 +974,9 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
 
                 ChartUtils.clearTextSubTitle(localJFreeChart);
 
-                // source is defined :
                 if (uvData.getName() == null) {
-
                   // Baseline limits case :
-                  // reset bounds to [-1;1] (before setDataset) :
-                  localXYPlot.defineBounds(1d);
-                  // reset dataset for baseline limits :
-                  localXYPlot.setDataset(null);
-
-                  // update the background image :
-                  updateUVMap(null);
+                  reset();
                 } else {
 
                   // title :
@@ -1008,7 +1021,13 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
 
             } catch (InterruptedException ignore) {
             } catch (ExecutionException ee) {
-              logger.log(Level.SEVERE, "Error : ", ee);
+              reset();
+              if (ee.getCause() instanceof IllegalArgumentException) {
+                JOptionPane.showMessageDialog(null, ee.getCause().getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+              } else {
+                logger.log(Level.SEVERE, "Error : ", ee);
+                new FeedbackReport(null, true, (Exception) ee.getCause());
+              }
             }
 
             // update the status bar :
@@ -1109,7 +1128,12 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
 
               } catch (InterruptedException ignore) {
               } catch (ExecutionException ee) {
-                logger.log(Level.SEVERE, "Error : ", ee);
+                if (ee.getCause() instanceof IllegalArgumentException) {
+                  JOptionPane.showMessageDialog(null, ee.getCause().getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                } else {
+                  logger.log(Level.SEVERE, "Error : ", ee);
+                  new FeedbackReport(null, true, (Exception) ee.getCause());
+                }
               }
 
               // update the status bar :

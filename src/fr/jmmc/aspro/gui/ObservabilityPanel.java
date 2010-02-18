@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityPanel.java,v 1.25 2010-02-03 16:07:49 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityPanel.java,v 1.26 2010-02-18 15:52:38 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.25  2010/02/03 16:07:49  bourgesl
+ * refactoring to use the custom swing worker executor
+ * when zomming uv map is computed asynchronously
+ *
  * Revision 1.24  2010/02/03 09:48:18  bourgesl
  * minor chart style corrections
  *
@@ -97,6 +101,7 @@ import fr.jmmc.aspro.model.observability.SunTimeInterval;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Pop;
 import fr.jmmc.aspro.service.ObservabilityService;
+import fr.jmmc.mcs.gui.FeedbackReport;
 import fr.jmmc.mcs.gui.StatusBar;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -467,6 +472,7 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
           } catch (InterruptedException ignore) {
           } catch (ExecutionException ee) {
             logger.log(Level.SEVERE, "Error : ", ee);
+            new FeedbackReport(null, true, (Exception)ee.getCause());
           }
 
           // update the status bar :

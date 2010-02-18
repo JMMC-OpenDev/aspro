@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoverageService.java,v 1.13 2010-02-09 16:51:09 bourgesl Exp $"
+ * "@(#) $Id: UVCoverageService.java,v 1.14 2010-02-18 15:52:38 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.13  2010/02/09 16:51:09  bourgesl
+ * added change listener for image modes
+ *
  * Revision 1.12  2010/02/08 17:00:16  bourgesl
  * added U-V max selector + checkboxes
  *
@@ -216,6 +219,9 @@ public class UVCoverageService {
         return null;
       }
 
+    } catch (IllegalArgumentException iae) {
+      // special case : the model can throw such exception to indicate that a parameter has an invalid value :
+      throw iae;
     } catch (IllegalStateException ise) {
       if (logger.isLoggable(Level.WARNING)) {
         logger.log(Level.WARNING, "invalid observation :", ise);

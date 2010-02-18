@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetModelForm.java,v 1.8 2010-02-17 17:18:35 bourgesl Exp $"
+ * "@(#) $Id: TargetModelForm.java,v 1.9 2010-02-18 15:52:38 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.8  2010/02/17 17:18:35  bourgesl
+ * removed java 1.6 JTable method
+ *
  * Revision 1.7  2010/02/17 17:09:01  bourgesl
  * added update model (change type)
  * changed remove action to relocate models when the first model is removed
@@ -753,6 +756,20 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
    * @param evt action event
    */
   private void jButtonOKActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonOKActionPerformed
+
+    // Validate the models :
+    for (Target target : this.editTargets) {
+      try {
+        ModelManager.getInstance().validateModels(target.getModels());
+      } catch (IllegalArgumentException iae) {
+        // single message at once :
+        JOptionPane.showMessageDialog(null, iae.getMessage(), "Error on target " + target.getName(), JOptionPane.ERROR_MESSAGE);
+
+        // stop and continue editing the form :
+        return;
+      }
+    }
+
     // update the validation flag :
     this.result = true;
 
