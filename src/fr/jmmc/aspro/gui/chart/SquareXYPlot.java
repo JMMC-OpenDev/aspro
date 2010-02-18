@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SquareXYPlot.java,v 1.5 2010-02-04 17:05:06 bourgesl Exp $"
+ * "@(#) $Id: SquareXYPlot.java,v 1.6 2010-02-18 09:52:37 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2010/02/04 17:05:06  bourgesl
+ * UV bounds are coming from UVCoverageService
+ *
  * Revision 1.4  2010/02/03 16:07:49  bourgesl
  * refactoring to use the custom swing worker executor
  * when zomming uv map is computed asynchronously
@@ -23,6 +26,7 @@
 package fr.jmmc.aspro.gui.chart;
 
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import org.jfree.chart.axis.AxisSpace;
@@ -119,6 +123,11 @@ public class SquareXYPlot extends XYPlot {
     // - rounding is required to have the background image fitted (int coordinates) in the plot area (double rectangle) :
     // - there can be some rounding issue that adjust lightly the square shape :
     adjustedArea.setRect(Math.round(area.getX() + marginWidth), Math.round(area.getY() + marginHeight), Math.round(adjustedWidth), Math.round(adjustedHeight));
+
+    // Force rendering hints :
+    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+    g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+    g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
 
     super.draw(g2, adjustedArea, anchor, parentState, info);
   }
