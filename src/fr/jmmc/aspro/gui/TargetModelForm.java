@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetModelForm.java,v 1.9 2010-02-18 15:52:38 bourgesl Exp $"
+ * "@(#) $Id: TargetModelForm.java,v 1.10 2010-02-19 16:06:27 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.9  2010/02/18 15:52:38  bourgesl
+ * added parameter argument validation with an user message
+ *
  * Revision 1.8  2010/02/17 17:18:35  bourgesl
  * removed java 1.6 JTable method
  *
@@ -39,6 +42,7 @@ import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.mcs.model.ModelManager;
 import fr.jmmc.mcs.model.gui.ModelParameterTableModel;
+import fr.jmmc.mcs.model.gui.ModelParameterTableModel.EditMode;
 import fr.jmmc.mcs.model.gui.ModelParameterTableModel.Mode;
 import fr.jmmc.mcs.model.targetmodel.Model;
 import java.awt.Dimension;
@@ -192,11 +196,15 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
     this.jComboBoxModelType.setModel(new DefaultComboBoxModel(ModelManager.getInstance().getSupportedModels()));
     this.jComboBoxModelType.addActionListener(this);
 
+    // update the model description :
+    this.updateModelDescription((String) this.jComboBoxModelType.getSelectedItem());
+
     // set one click edition on following table and show all decimals in numerical values
     ((DefaultCellEditor) this.jTableModelParameters.getDefaultEditor(String.class)).setClickCountToStart(1);
+/*
     this.jTableModelParameters.setDefaultEditor(Double.class, this.jTableModelParameters.getDefaultEditor(String.class));
     this.jTableModelParameters.setDefaultRenderer(Double.class, this.jTableModelParameters.getDefaultRenderer(String.class));
-
+*/
     // single table selection :
     this.jTableModelParameters.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     this.jTableModelParameters.getSelectionModel().addListSelectionListener(this);
@@ -208,8 +216,10 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
     this.jTreeModels.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
     this.jTreeModels.addTreeSelectionListener(this);
 
-    // update the model description :
-    this.updateModelDescription((String) this.jComboBoxModelType.getSelectedItem());
+    // edit mode :
+    this.jRadioButtonXY.addActionListener(this);
+    this.jRadioButtonRhoTheta.addActionListener(this);
+
   }
 
   /* Tree related methods */
@@ -370,10 +380,6 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
       return;
     }
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("tree selection node : " + node);
-    }
-
     /* React to the node selection. */
 
     // Check if it is the root node :
@@ -409,7 +415,6 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
    * @param target selected target
    */
   private void processTargetSelection(final Target target) {
-    this.jButtonAdd.setEnabled(true);
     this.jButtonUpdate.setEnabled(false);
     this.jButtonRemove.setEnabled(false);
 
@@ -425,8 +430,6 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
    * @param model selected model
    */
   private void processModelSelection(final Target target, final Model model) {
-    // check if the model is a group ?
-    this.jButtonAdd.setEnabled(false);
     this.jButtonUpdate.setEnabled(true);
     this.jButtonRemove.setEnabled(true);
 
@@ -445,12 +448,19 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
    * @param target target models to use
    */
   private void defineModels(final Target target) {
-    if (target != currentTarget) {
+    defineModels(target, getModelParameterTableModel().getEditMode());
+  }
+
+  /**
+   * Define the list of models to use in the table of parameters
+   * @param target target models to use
+   * @param editMode edition mode
+   */
+  private void defineModels(final Target target, final EditMode mode) {
+    final ModelParameterTableModel tableModel = getModelParameterTableModel();
+    if (target != currentTarget || mode != tableModel.getEditMode()) {
       this.currentTarget = target;
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("target changed : " + target);
-      }
-      getModelParameterTableModel().setData(target.getModels());
+      tableModel.setData(target.getModels(), mode);
     }
   }
 
@@ -463,7 +473,7 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
   }
 
   /**
-   * Process any comboBox change event
+   * Process any comboBox or radio change event
    * @param e action event
    */
   public void actionPerformed(final ActionEvent e) {
@@ -473,6 +483,18 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
         logger.fine("model type changed : " + type);
       }
       updateModelDescription(type);
+    } else if (e.getSource() == this.jRadioButtonXY) {
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("edit mode X/Y : " + this.jRadioButtonXY.isSelected());
+      }
+      // change edit mode to X/Y :
+      this.defineModels(this.currentTarget, EditMode.X_Y);
+    } else if (e.getSource() == this.jRadioButtonRhoTheta) {
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("edit mode Rho/Theta : " + this.jRadioButtonRhoTheta.isSelected());
+      }
+      // change edit mode to Rho/Theta :
+      this.defineModels(this.currentTarget, EditMode.RHO_THETA);
     }
   }
 
@@ -529,6 +551,7 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
   private void initComponents() {
     java.awt.GridBagConstraints gridBagConstraints;
 
+    buttonGroupEditMode = new javax.swing.ButtonGroup();
     jPanelTargets = new javax.swing.JPanel();
     jScrollPaneTreeModels = new javax.swing.JScrollPane();
     jTreeModels = createJTree();
@@ -546,6 +569,9 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
     jPanelParameters = new javax.swing.JPanel();
     jScrollPaneTableModelParameters = new javax.swing.JScrollPane();
     jTableModelParameters = new javax.swing.JTable();
+    jRadioButtonXY = new javax.swing.JRadioButton();
+    jRadioButtonRhoTheta = new javax.swing.JRadioButton();
+    jLabelOffsetEditMode = new javax.swing.JLabel();
     jPanelButtons = new javax.swing.JPanel();
     jButtonOK = new javax.swing.JButton();
     jButtonCancel = new javax.swing.JButton();
@@ -587,7 +613,6 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
     jPanel4.add(jComboBoxModelType, gridBagConstraints);
 
     jButtonAdd.setText("Add");
-    jButtonAdd.setEnabled(false);
     jButtonAdd.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(java.awt.event.ActionEvent evt) {
         jButtonAddActionPerformed(evt);
@@ -710,13 +735,38 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 1;
+    gridBagConstraints.gridy = 0;
     gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
     jPanelParameters.add(jScrollPaneTableModelParameters, gridBagConstraints);
+
+    buttonGroupEditMode.add(jRadioButtonXY);
+    jRadioButtonXY.setSelected(true);
+    jRadioButtonXY.setText("x / y (mas)");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.weightx = 0.5;
+    jPanelParameters.add(jRadioButtonXY, gridBagConstraints);
+
+    buttonGroupEditMode.add(jRadioButtonRhoTheta);
+    jRadioButtonRhoTheta.setText("rho (mas) / theta [-180°; 180°]");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.weightx = 0.5;
+    jPanelParameters.add(jRadioButtonRhoTheta, gridBagConstraints);
+
+    jLabelOffsetEditMode.setText("edit positions :");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 1;
+    jPanelParameters.add(jLabelOffsetEditMode, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -756,7 +806,6 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
    * @param evt action event
    */
   private void jButtonOKActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonOKActionPerformed
-
     // Validate the models :
     for (Target target : this.editTargets) {
       try {
@@ -783,7 +832,6 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
    * @param evt action event
    */
   private void jButtonUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonUpdateActionPerformed
-
     final DefaultMutableTreeNode currentNode = getLastSelectedNode();
 
     if (currentNode == null) {
@@ -791,62 +839,56 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
     }
 
     if (currentNode.getUserObject() instanceof Model) {
-
       final Model model = (Model) currentNode.getUserObject();
-      if (model != null) {
 
-        final String type = (String) this.jComboBoxModelType.getSelectedItem();
+      final String type = (String) this.jComboBoxModelType.getSelectedItem();
 
-        // check if the type changed :
-        if (model.getType().equals(type)) {
-          return;
+      // check if the type changed :
+      if (model.getType().equals(type)) {
+        return;
+      }
+
+      // Parent can be a target or a model :
+      final DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) currentNode.getParent();
+
+      if (parentNode.getUserObject() instanceof Target) {
+        final Target target = (Target) parentNode.getUserObject();
+
+        if (logger.isLoggable(Level.FINE)) {
+          logger.fine("update model : " + model);
         }
 
-        // Parent can be a target or a model :
+        // create a new model with defined names (model and parameters) replacing the selected model :
+        final Model newModel = ModelManager.getInstance().replaceModel(type, model, target.getModels());
 
-        final DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) currentNode.getParent();
-
-        if (parentNode.getUserObject() instanceof Target) {
-
-          final Target target = (Target) parentNode.getUserObject();
-
-          if (logger.isLoggable(Level.FINE)) {
-            logger.fine("update model : " + model);
-          }
-
-          // create a new model with defined names (model and parameters) replacing the selected model :
-          final Model newModel = ModelManager.getInstance().replaceModel(type, model, target.getModels());
-
-          if (logger.isLoggable(Level.FINE)) {
-            logger.fine("new merged model : " + newModel);
-          }
-
-          // Remove and add model at the right place :
-          int idx;
-          idx = target.getModels().indexOf(model);
-          target.getModels().remove(idx);
-          target.getModels().add(idx, newModel);
-
-          // Replace node :
-          final DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(newModel);
-          idx = parentNode.getIndex(currentNode);
-          parentNode.remove(idx);
-          parentNode.insert(newNode, idx);
-
-          // fire node structure changed :
-          getTreeModelsModel().nodeStructureChanged(parentNode);
-
-          // force to refresh table model :
-          this.currentTarget = null;
-
-          // Select the new node = model :
-          this.selectPath(new TreePath(newNode.getPath()));
-
-        } else if (parentNode.getUserObject() instanceof Model) {
-
-          // TODO : later
-          JOptionPane.showMessageDialog(this, "Not implemented !");
+        if (logger.isLoggable(Level.FINE)) {
+          logger.fine("new merged model : " + newModel);
         }
+
+        // Remove and add model at the right place :
+        int idx;
+        idx = target.getModels().indexOf(model);
+        target.getModels().remove(idx);
+        target.getModels().add(idx, newModel);
+
+        // Replace node :
+        final DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(newModel);
+        idx = parentNode.getIndex(currentNode);
+        parentNode.remove(idx);
+        parentNode.insert(newNode, idx);
+
+        // fire node structure changed :
+        getTreeModelsModel().nodeStructureChanged(parentNode);
+
+        // force to refresh table model :
+        this.currentTarget = null;
+
+        // Select the new node = model :
+        this.selectPath(new TreePath(newNode.getPath()));
+
+      } else if (parentNode.getUserObject() instanceof Model) {
+        // TODO : later
+        JOptionPane.showMessageDialog(this, "Not implemented !");
       }
     } else {
       if (logger.isLoggable(Level.SEVERE)) {
@@ -867,49 +909,44 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
     }
 
     if (currentNode.getUserObject() instanceof Model) {
-
       final Model model = (Model) currentNode.getUserObject();
 
-      if (model != null) {
-        // Parent can be a target or a model :
+      // Parent can be a target or a model :
 
-        final DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) currentNode.getParent();
+      final DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) currentNode.getParent();
 
-        if (parentNode.getUserObject() instanceof Target) {
+      if (parentNode.getUserObject() instanceof Target) {
+        final Target target = (Target) parentNode.getUserObject();
 
-          final Target target = (Target) parentNode.getUserObject();
-
-          if (logger.isLoggable(Level.FINE)) {
-            logger.fine("remove model : " + model);
-          }
-
-          // Remove model from target :
-          int idx;
-          idx = target.getModels().indexOf(model);
-          target.getModels().remove(idx);
-
-          if (idx == 0) {
-            // first model is removed : special case : relocate other models :
-            ModelManager.relocateModels(target.getModels());
-          }
-
-          // Remove node :
-          parentNode.remove(currentNode);
-
-          // fire node structure changed :
-          getTreeModelsModel().nodeStructureChanged(parentNode);
-
-          // force to refresh table model :
-          this.currentTarget = null;
-
-          // Select the parent node = target :
-          this.selectPath(new TreePath(parentNode.getPath()));
-
-        } else if (parentNode.getUserObject() instanceof Model) {
-
-          // TODO : later
-          JOptionPane.showMessageDialog(this, "Not implemented !");
+        if (logger.isLoggable(Level.FINE)) {
+          logger.fine("remove model : " + model);
         }
+
+        // Remove model from target :
+        int idx;
+        idx = target.getModels().indexOf(model);
+        target.getModels().remove(idx);
+
+        if (idx == 0) {
+          // first model is removed : special case : relocate other models :
+          ModelManager.relocateModels(target.getModels());
+        }
+
+        // Remove node :
+        parentNode.remove(currentNode);
+
+        // fire node structure changed :
+        getTreeModelsModel().nodeStructureChanged(parentNode);
+
+        // force to refresh table model :
+        this.currentTarget = null;
+
+        // Select the parent node = target :
+        this.selectPath(new TreePath(parentNode.getPath()));
+
+      } else if (parentNode.getUserObject() instanceof Model) {
+        // TODO : later
+        JOptionPane.showMessageDialog(this, "Not implemented !");
       }
     } else {
       if (logger.isLoggable(Level.SEVERE)) {
@@ -929,41 +966,57 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
       return;
     }
 
+    DefaultMutableTreeNode targetNode = null;
+    Target target = null;
+
     if (currentNode.getUserObject() instanceof Target) {
+      targetNode = currentNode;
+      target = (Target) currentNode.getUserObject();
 
-      final Target target = (Target) currentNode.getUserObject();
+    } else if (currentNode.getUserObject() instanceof Model) {
+      final DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) currentNode.getParent();
 
-      if (target != null) {
-        final String type = (String) this.jComboBoxModelType.getSelectedItem();
+      // Parent can be a target or a model :
 
-        // create a new model with defined names (model and parameters) :
-        final Model newModel = ModelManager.getInstance().newModel(type, target.getModels());
+      if (parentNode.getUserObject() instanceof Target) {
+        targetNode = parentNode;
+        target = (Target) parentNode.getUserObject();
 
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("add model : " + newModel);
-        }
-
-        // Add model to target :
-        target.getModels().add(newModel);
-
-        // Add node :
-        final DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(newModel);
-        currentNode.add(newNode);
-
-        // fire node structure changed :
-        getTreeModelsModel().nodeStructureChanged(currentNode);
-
-        // force to refresh table model :
-        this.currentTarget = null;
-
-        // Select the new node = model :
-        this.selectPath(new TreePath(newNode.getPath()));
-
+      } else if (parentNode.getUserObject() instanceof Model) {
+        // TODO : later
+        JOptionPane.showMessageDialog(this, "Not implemented !");
       }
     } else {
       if (logger.isLoggable(Level.SEVERE)) {
         logger.severe("invalid selected node to perform the add operation = " + currentNode);
       }
+    }
+
+    if (target != null) {
+      final String type = (String) this.jComboBoxModelType.getSelectedItem();
+
+      // create a new model with defined names (model and parameters) :
+      final Model newModel = ModelManager.getInstance().newModel(type, target.getModels());
+
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("add model : " + newModel);
+      }
+
+      // Add model to target :
+      target.getModels().add(newModel);
+
+      // Add node :
+      final DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(newModel);
+      targetNode.add(newNode);
+
+      // fire node structure changed :
+      getTreeModelsModel().nodeStructureChanged(targetNode);
+
+      // force to refresh table model :
+      this.currentTarget = null;
+
+      // Select the new node = model :
+      this.selectPath(new TreePath(newNode.getPath()));
     }
   }//GEN-LAST:event_jButtonAddActionPerformed
 
@@ -973,6 +1026,7 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
     }
   }//GEN-LAST:event_jButtonCancelActionPerformed
   // Variables declaration - do not modify//GEN-BEGIN:variables
+  private javax.swing.ButtonGroup buttonGroupEditMode;
   private javax.swing.JButton jButtonAdd;
   private javax.swing.JButton jButtonCancel;
   private javax.swing.JButton jButtonOK;
@@ -982,11 +1036,14 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
   private javax.swing.JLabel jLabel3;
   private javax.swing.JLabel jLabel5;
   private javax.swing.JLabel jLabelModelDescrption;
+  private javax.swing.JLabel jLabelOffsetEditMode;
   private javax.swing.JPanel jPanel4;
   private javax.swing.JPanel jPanelButtons;
   private javax.swing.JPanel jPanelDescription;
   private javax.swing.JPanel jPanelParameters;
   private javax.swing.JPanel jPanelTargets;
+  private javax.swing.JRadioButton jRadioButtonRhoTheta;
+  private javax.swing.JRadioButton jRadioButtonXY;
   private javax.swing.JScrollPane jScrollPaneModelDescription;
   private javax.swing.JScrollPane jScrollPaneTableModelParameters;
   private javax.swing.JScrollPane jScrollPaneTreeModels;
@@ -1041,9 +1098,11 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
        * @return the <code>String</code> representation of the node's value
        */
       @Override
-      public String convertValueToText(final Object value, final boolean selected,
-                                       final boolean expanded, final boolean leaf, final int row,
-                                       final boolean hasFocus) {
+      public String convertValueToText(
+              final Object value,
+              final boolean selected,
+              final boolean expanded, final boolean leaf, final int row,
+              final boolean hasFocus) {
         if (value != null) {
           String sValue = null;
 
@@ -1067,6 +1126,7 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
                 if (logger.isLoggable(Level.SEVERE)) {
                   logger.severe("unsupported class type = " + userObject.getClass());
                 }
+
               }
             }
 
@@ -1074,12 +1134,14 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
             if (logger.isLoggable(Level.SEVERE)) {
               logger.severe("unsupported class type = " + value.getClass());
             }
+
             sValue = value.toString();
           }
 
           if (sValue != null) {
             return sValue;
           }
+
         }
         return "";
       }
