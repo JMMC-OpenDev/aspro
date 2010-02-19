@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <ApplicationData link="http://www.jmmc.fr/aspro">
-  <program name="Aspro" version="0.1b9"/>
+  <program name="Aspro" version="0.1b10"/>
   <compilation date="21/09/2009" compiler="JDK 1.5.0_16"/>
   <text>
     <![CDATA[ASPRO is a complete observation preparation tool developed and maintained by the JMMC
@@ -34,6 +34,10 @@
   </menubar>
   <releasenotes>
     <release version="0.1">
+      <prerelease version="0.1b10">
+        <change>Added circle and elongated disk models</change>
+        <change>Rho / Theta editor instead of X/Y in the model editor</change>
+      </prerelease>
       <prerelease version="0.1b9">
         <change>First release of the model editor with only punct and disk models</change>
       </prerelease>
