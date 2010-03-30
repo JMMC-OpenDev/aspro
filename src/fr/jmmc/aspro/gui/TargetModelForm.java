@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetModelForm.java,v 1.10 2010-02-19 16:06:27 bourgesl Exp $"
+ * "@(#) $Id: TargetModelForm.java,v 1.11 2010-03-30 12:08:44 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.10  2010/02/19 16:06:27  bourgesl
+ * added minimal rho/theta editor for X/Y positions
+ *
  * Revision 1.9  2010/02/18 15:52:38  bourgesl
  * added parameter argument validation with an user message
  *
@@ -45,6 +48,7 @@ import fr.jmmc.mcs.model.gui.ModelParameterTableModel;
 import fr.jmmc.mcs.model.gui.ModelParameterTableModel.EditMode;
 import fr.jmmc.mcs.model.gui.ModelParameterTableModel.Mode;
 import fr.jmmc.mcs.model.targetmodel.Model;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -57,12 +61,16 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.JTable;
 import javax.swing.JTree;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
+import javax.swing.table.TableCellEditor;
+import javax.swing.text.JTextComponent;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
@@ -200,11 +208,8 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
     this.updateModelDescription((String) this.jComboBoxModelType.getSelectedItem());
 
     // set one click edition on following table and show all decimals in numerical values
-    ((DefaultCellEditor) this.jTableModelParameters.getDefaultEditor(String.class)).setClickCountToStart(1);
-/*
-    this.jTableModelParameters.setDefaultEditor(Double.class, this.jTableModelParameters.getDefaultEditor(String.class));
-    this.jTableModelParameters.setDefaultRenderer(Double.class, this.jTableModelParameters.getDefaultRenderer(String.class));
-*/
+    ((DefaultCellEditor) this.jTableModelParameters.getDefaultEditor(Double.class)).setClickCountToStart(1);
+
     // single table selection :
     this.jTableModelParameters.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     this.jTableModelParameters.getSelectionModel().addListSelectionListener(this);
@@ -568,7 +573,30 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
     jLabelModelDescrption = new javax.swing.JLabel();
     jPanelParameters = new javax.swing.JPanel();
     jScrollPaneTableModelParameters = new javax.swing.JScrollPane();
-    jTableModelParameters = new javax.swing.JTable();
+    jTableModelParameters = new JTable() {
+
+      /** default serial UID for Serializable interface */
+      private static final long serialVersionUID = 1;
+
+      /**
+      * HACK to have the content of edited cell selected to 'mimic' an overwrite edition
+      */
+      @Override
+      public Component prepareEditor(TableCellEditor editor, int row, int column) {
+        final Component c = super.prepareEditor(editor, row, column);
+
+        if (c instanceof JTextComponent) {
+          /* use invokeLater because of mouse events default behavior (caret ...) */
+          SwingUtilities.invokeLater(new Runnable()	{
+            public void run() {
+              ((JTextComponent) c).selectAll();
+            }
+          });
+        }
+        return c;
+      }
+
+    };
     jRadioButtonXY = new javax.swing.JRadioButton();
     jRadioButtonRhoTheta = new javax.swing.JRadioButton();
     jLabelOffsetEditMode = new javax.swing.JLabel();
