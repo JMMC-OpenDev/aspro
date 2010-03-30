@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.25 2010-02-19 16:06:08 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.26 2010-03-30 12:10:33 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.25  2010/02/19 16:06:08  bourgesl
+ * added image size & LUT combo boxes
+ *
  * Revision 1.24  2010/02/18 15:52:38  bourgesl
  * added parameter argument validation with an user message
  *
@@ -534,6 +537,7 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
 
     // show model editor :
     if (TargetModelForm.showModelEditor(targetName)) {
+      changeStateForModelImageWidgets();
       refreshPlot();
     }
 }//GEN-LAST:event_jButtonModelEditorActionPerformed
@@ -692,6 +696,7 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
       if (logger.isLoggable(Level.FINE)) {
         logger.fine("target changed : " + this.jComboBoxTarget.getSelectedItem());
       }
+      changeStateForModelImageWidgets();
       updateTargetHA();
       refreshPlot();
     } else if (e.getSource() == this.jComboBoxInstrumentMode) {
@@ -792,6 +797,7 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
 
       // refresh the targets :
       updateComboTarget();
+      changeStateForModelImageWidgets();
 
       // refresh the instrument modes :
       updateComboInstrumentModes(observation);
@@ -824,6 +830,7 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
 
       // refresh the targets :
       updateComboTarget();
+      changeStateForModelImageWidgets();
 
       // refresh the instrument modes :
       updateComboInstrumentModes(observation);
@@ -913,6 +920,22 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
         this.jTargetHAMax.setText(null);
       }
     }
+  }
+
+  /**
+   * If the current target has no model defined, then disable model options widgets
+   */
+  private void changeStateForModelImageWidgets() {
+    final String targetName = (String) this.jComboBoxTarget.getSelectedItem();
+
+    final List<Model> models = ObservationManager.getInstance().getTarget(targetName).getModels();
+
+    final boolean hasModel = (models != null && !models.isEmpty());
+
+    this.jCheckBoxModelImage.setEnabled(hasModel);
+    this.jComboBoxImageMode.setEnabled(hasModel);
+    this.jComboBoxImageSize.setEnabled(hasModel);
+    this.jComboBoxLUT.setEnabled(hasModel);
   }
 
   private void updateInteferometerData(final ObservationSetting observation) {
