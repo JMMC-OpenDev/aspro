@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproConstants.java,v 1.6 2010-02-04 17:05:06 bourgesl Exp $"
+ * "@(#) $Id: AsproConstants.java,v 1.7 2010-04-02 09:21:27 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2010/02/04 17:05:06  bourgesl
+ * UV bounds are coming from UVCoverageService
+ *
  * Revision 1.5  2010/01/20 16:18:38  bourgesl
  * observation form refactoring
  *
@@ -46,4 +49,11 @@ public interface AsproConstants {
   public static final double DEFAULT_SAMPLING_PERIOD = 40d;
   /** default value for checkbox Night Limit = true */
   public static final boolean DEFAULT_USE_NIGHT_LIMITS = true;
+
+  /** no value for combo boxes */
+  public static final String NONE = "None";
+
+  /* instrument names for specific features */
+  /** VLTI AMBER */
+  public static final String INS_AMBER = "AMBER";
 }
