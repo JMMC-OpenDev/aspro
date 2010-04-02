@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationManager.java,v 1.23 2010-02-17 15:12:40 bourgesl Exp $"
+ * "@(#) $Id: ObservationManager.java,v 1.24 2010-04-02 14:39:34 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.23  2010/02/17 15:12:40  bourgesl
+ * format
+ *
  * Revision 1.22  2010/02/16 14:47:38  bourgesl
  * added replaceTarget and setTargets methods to update the edited models
  *
@@ -214,9 +217,9 @@ public class ObservationManager extends BaseOIManager {
   }
 
   /**
-   * Set the night restriction
-   * @param date date to use
-   * @return true if the date changed
+   * Set the night restriction flag
+   * @param useNightLimits flag to enable/disable the night restriction (observability)
+   * @return true if the flag changed
    */
   public boolean setNightRestriction(final boolean useNightLimits) {
     final WhenSetting when = getObservation().getWhen();
@@ -412,11 +415,11 @@ public class ObservationManager extends BaseOIManager {
         t.setDEC(star.getPropertyAsDouble(Star.Property.DEC_d).doubleValue());
         t.setEQUINOX(AsproConstants.EPOCH_J2000);
 
-        // Proper motion :
+        // Proper motion (mas/yr) :
         t.setPMRA(star.getPropertyAsDouble(Star.Property.PROPERMOTION_RA));
         t.setPMDEC(star.getPropertyAsDouble(Star.Property.PROPERMOTION_DEC));
 
-        // Parallax :
+        // Parallax (mas) :
         t.setPARALLAX(star.getPropertyAsDouble(Star.Property.PARALLAX));
         t.setPARAERR(star.getPropertyAsDouble(Star.Property.PARALLAX_err));
 

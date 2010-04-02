@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: GeocentricCoords.java,v 1.4 2009-11-05 12:59:39 bourgesl Exp $"
+ * "@(#) $Id: GeocentricCoords.java,v 1.5 2010-04-02 14:37:52 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2009/11/05 12:59:39  bourgesl
+ * first simple source observability (only min elevation condition)
+ *
  * Revision 1.3  2009/10/22 15:47:22  bourgesl
  * beginning of observability computation with jSkyCalc
  *
@@ -59,9 +62,9 @@ public class GeocentricCoords {
 
   /**
    * Return a string representing the given coordinates
-   * @param long longitude in radians
-   * @param long latitude in radians
-   * @param long distance (m)
+   * @param lon longitude in radians
+   * @param lat latitude in radians
+   * @param d distance (m)
    */
   public static String toString(final double lon, final double lat, final double d) {
     return pal.Dr2af(lon) + ", " +
