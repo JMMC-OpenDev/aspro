@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SaveObservationAction.java,v 1.3 2009-12-08 13:09:55 bourgesl Exp $"
+ * "@(#) $Id: SaveObservationAction.java,v 1.4 2010-04-02 10:06:29 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2009/12/08 13:09:55  bourgesl
+ * Added FileFilter for observation settings
+ *
  * Revision 1.2  2009/12/04 16:26:58  bourgesl
  * Added Load action in the menu bar (partially handled)
  *
@@ -51,7 +54,7 @@ public class SaveObservationAction extends ObservationFileAction {
     File file = om.getObservationFile();
 
     final JFileChooser fileChooser = new JFileChooser();
-    fileChooser.setFileFilter(getObservationFileFilter());
+    fileChooser.setFileFilter(getFileFilter());
 
     fileChooser.setSelectedFile(file);
 
@@ -79,7 +82,10 @@ public class SaveObservationAction extends ObservationFileAction {
       this.setLastDir(file.getParent());
 
       try {
+        file = checkFileExtension(file);
+
         om.save(file);
+
         StatusBar.show("file saved : " + file.getName());
 
       } catch (RuntimeException re) {

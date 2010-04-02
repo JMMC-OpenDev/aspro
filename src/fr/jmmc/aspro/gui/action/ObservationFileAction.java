@@ -1,19 +1,24 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationFileAction.java,v 1.2 2010-01-14 17:02:38 bourgesl Exp $"
+ * "@(#) $Id: ObservationFileAction.java,v 1.3 2010-04-02 10:06:29 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2010/01/14 17:02:38  bourgesl
+ * FileFilter fix
+ *
  * Revision 1.1  2009/12/08 13:09:55  bourgesl
  * Added FileFilter for observation settings
  *
  */
 package fr.jmmc.aspro.gui.action;
 
+import fr.jmmc.aspro.util.FileUtils;
 import fr.jmmc.mcs.util.FileFilterRepository;
 import fr.jmmc.mcs.util.RegisteredAction;
+import java.io.File;
 import javax.swing.filechooser.FileFilter;
 
 /**
@@ -26,6 +31,8 @@ public abstract class ObservationFileAction extends RegisteredAction {
   private static final long serialVersionUID = 1;
   /** Observation settings mime type */
   public static final String OBSERVATION_MIME_TYPE = "application/x-aspro+xml";
+  /** Observation xml extension */
+  public static final String OBS_EXT = "xml";
 
   /* members */
   /** last directory used to save a file; by default = user home */
@@ -45,8 +52,17 @@ public abstract class ObservationFileAction extends RegisteredAction {
     FileFilterRepository.getInstance().put(OBSERVATION_MIME_TYPE, "xml", "Aspro Observation Settings (xml)");
   }
 
-  protected FileFilter getObservationFileFilter() {
+  protected FileFilter getFileFilter() {
     return FileFilterRepository.getInstance().get(OBSERVATION_MIME_TYPE);
+  }
+
+  protected File checkFileExtension(final File file) {
+    final String ext = FileUtils.getExtension(file);
+
+    if (!OBS_EXT.equals(ext)) {
+      return new File(file.getParentFile(), file.getName() + "." + OBS_EXT);
+    }
+    return file;
   }
 
   public String getLastDir() {
