@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ChartUtils.java,v 1.7 2010-02-04 17:05:06 bourgesl Exp $"
+ * "@(#) $Id: ChartUtils.java,v 1.8 2010-04-02 10:04:18 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2010/02/04 17:05:06  bourgesl
+ * UV bounds are coming from UVCoverageService
+ *
  * Revision 1.6  2010/02/03 09:48:52  bourgesl
  * target model uvmap added on the uv coverage with zooming supported
  *
@@ -27,6 +30,8 @@ package fr.jmmc.aspro.gui.chart;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.Polygon;
+import java.awt.Shape;
 import java.text.DecimalFormat;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartUtilities;
@@ -64,6 +69,8 @@ public class ChartUtils {
   public final static RectangleInsets TICK_LABEL_INSETS = new RectangleInsets(1.0, 1.0, 1.0, 1.0);
   /** default axis offset */
   public final static RectangleInsets ZERO_AXIS_OFFSET = new RectangleInsets(0.0, 0.0, 0.0, 0.0);
+  /** diamond shape */
+  public final static Shape DIAMOND_SHAPE;
 
   /**
    * Forbidden constructor
@@ -95,6 +102,12 @@ public class ChartUtils {
       theme.setTickLabelPaint(Color.BLACK);
     }
 
+    // diamond shape :
+    final int delta = 4;
+    final int[] xpoints = new int[] {0, delta, 0, -delta};
+    final int[] ypoints = new int[] {-delta, 0, delta, 0};
+
+    DIAMOND_SHAPE = new Polygon(xpoints, ypoints, 4);
   }
 
   /**
