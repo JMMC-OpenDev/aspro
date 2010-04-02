@@ -121,17 +121,11 @@
         - insRes
 
         - atmosphere Quality (atmoQual) "Excellent" "Good" "Average" "Bad" "Awful"
-        - min elevation for the target (minElev) "Min. Elevation (degrees)" /range oipt%obsMinElev 90
 
-        - polychromatic (flag)
-
-        - popslist "Pops Config (eg. 1234, 0000=none)"
-
-        - polychromatic "Simulate Instrument`s spectral resolution"
+        - polychromatic (flag) "Simulate Instrument`s spectral resolution"
 
         - dit "Detector Integration Time" /Choice 25 50 100
         - obsDuration "Total Integration Time (s) per calibrated point"
-        - samplingTime "Observing Sampling Periodicity (min)"
 
         - ha1 "Hour Angle Start" /range -12 12 *
         - ha2 "Hour Angle End" /range -12 12 *
@@ -439,8 +433,46 @@
         </xsd:annotation>
       </xsd:element>
 
+      <!-- fringe tracker configuration -->
+      <xsd:element name="fringeTrackerConfiguration" type="FringeTrackerConfiguration" minOccurs="0" maxOccurs="1">
+        <xsd:annotation>
+          <xsd:documentation>
+              Fringe Tracker configuration (optional)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
       <!-- target models -->
       <xsd:element ref="tm:model" minOccurs="0" maxOccurs="unbounded"/>
+
+    </xsd:sequence>
+  </xsd:complexType>
+
+
+
+
+  <!-- FringeTrackerConfiguration -->
+  <xsd:complexType name="FringeTrackerConfiguration">
+    <xsd:annotation>
+      <xsd:documentation>
+        This type describes the configuration of the fringe tracker system.
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="name" type="xsd:string">
+        <xsd:annotation>
+          <xsd:documentation>
+              The fringe tracker (FringeTracker identifier)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="mode" type="xsd:string">
+        <xsd:annotation>
+          <xsd:documentation>
+              The fringe tracker mode (among FringeTracker modes)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
 
     </xsd:sequence>
   </xsd:complexType>
@@ -1161,28 +1193,58 @@
   <xsd:complexType name="FringeTracker">
     <xsd:annotation>
       <xsd:documentation>
-        This type describes a Fringe Tracker system :
+        This type describes a Fringe Tracker system
 
-! Fringe Tracker
+User
   define logical oipt%FTUsed /global ! FT in Use
-  define real oipt%FTVisibility /global
-  define real oipt%FTLimit /global
-  define real oipt%FTMaxInt /global
-  define integer oipt%FTMode /global
-  define character oipt%FTBand*1 /global ! FT observing band
-
-Fringe Tracker
- let oipt%FTExist YES
- let oipt%FTBand "H" ! same for FTs
- let oipt%FTUsed NO
  let oipt%FTMode 0
- let oipt%FTVisibility 0.9
- let oipt%FTLimit 12
- let oipt%FTMaxInt 60.0
       </xsd:documentation>
     </xsd:annotation>
     <xsd:sequence>
-      <!-- TBD -->
+
+      <xsd:element name="name" type="xsd:string">
+        <xsd:annotation>
+          <xsd:documentation>
+              The name of this fringe tracker system (FINITO for VLTI)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="band" type="SpectralBand">
+        <xsd:annotation>
+          <xsd:documentation>
+              The observing band (FINITO = H)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="mode" type="xsd:string" minOccurs="0" maxOccurs="unbounded">
+        <xsd:annotation>
+          <xsd:documentation>
+              The list of possible modes (FINITO = GroupTrack or FringeTrack)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="instrumentVisibility" type="xsd:double">
+        <xsd:annotation>
+          <xsd:documentation>
+              The instrumental visibility (multiplicative) (FINITO = 0.9)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="magLimit" type="xsd:double">
+        <xsd:annotation>
+          <xsd:documentation>
+              The usage limit (mag) (FINITO = 12)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="maxIntegration" type="xsd:int">
+        <xsd:annotation>
+          <xsd:documentation>
+              The max Integration Time (s) (FINITO = 60)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
     </xsd:sequence>
   </xsd:complexType>
 

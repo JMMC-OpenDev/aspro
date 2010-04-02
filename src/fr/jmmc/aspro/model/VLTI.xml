@@ -35,7 +35,7 @@
     </telescope>
 
     <station>
-      <name>U1</name>
+      <name>UT1</name>
       <telescope>UT</telescope>
       <relativePosition>
         <posX>-0.73422599479242</posX>
@@ -158,7 +158,7 @@
       </horizon>
     </station>
     <station>
-      <name>U2</name>
+      <name>UT2</name>
       <telescope>UT</telescope>
       <relativePosition>
         <posX>20.45018397209875</posX>
@@ -381,7 +381,7 @@
       </horizon>
     </station>
     <station>
-      <name>U3</name>
+      <name>UT3</name>
       <telescope>UT</telescope>
       <relativePosition>
         <posX>35.32766648520568</posX>
@@ -580,7 +580,7 @@
       </horizon>
     </station>
     <station>
-      <name>U4</name>
+      <name>UT4</name>
       <telescope>UT</telescope>
       <relativePosition>
         <posX>26.07460640715816</posX>
@@ -7921,7 +7921,7 @@
 
     <switchyard>
       <stationLinks>
-        <station>U1</station>
+        <station>UT1</station>
         <channelLink>
           <channel>Channel1</channel>
           <opticalLength>165.8497</opticalLength>
@@ -7940,7 +7940,7 @@
         </channelLink>
       </stationLinks>
       <stationLinks>
-        <station>U2</station>
+        <station>UT2</station>
         <channelLink>
           <channel>Channel1</channel>
           <opticalLength>165.8497</opticalLength>
@@ -7959,7 +7959,7 @@
         </channelLink>
       </stationLinks>
       <stationLinks>
-        <station>U3</station>
+        <station>UT3</station>
         <channelLink>
           <channel>Channel3</channel>
           <opticalLength>177.9772</opticalLength>
@@ -7978,7 +7978,7 @@
         </channelLink>
       </stationLinks>
       <stationLinks>
-        <station>U4</station>
+        <station>UT4</station>
         <channelLink>
           <channel>Channel3</channel>
           <opticalLength>185.9627</opticalLength>
@@ -8570,98 +8570,113 @@
 
     <!-- No pop on vlti-->
 
+
+    <fringeTracker>
+      <name>FINITO</name>
+      <band>H</band>
+      
+      <mode>GroupTrack</mode>
+      <mode>FringeTrack</mode>
+
+      <instrumentVisibility>0.9</instrumentVisibility>
+      <magLimit>12</magLimit>
+      <maxIntegration>60</maxIntegration>
+
+    </fringeTracker>
+
     <!-- TBC -->
     <focalInstrument>
       <name>AMBER</name>
       <description></description>
       <numberChannels>3</numberChannels>
+      <defaultSamplingTime>60</defaultSamplingTime>
       <mode>
-        <name>Low_HK</name>
+        <name>Low_JHK</name>
         <waveLengthMin>1.469</waveLengthMin>
         <waveLengthMax>2.54</waveLengthMax>
       </mode>
       <mode>
-        <name>Medium_K_1_2100</name>
-        <waveLengthMin>1.926</waveLengthMin>
-        <waveLengthMax>2.275</waveLengthMax>
-      </mode>
-      <mode>
-        <name>Medium_K_1_2300</name>
-        <waveLengthMin>2.126</waveLengthMin>
-        <waveLengthMax>2.474</waveLengthMax>
-      </mode>
-      <mode>
-        <name>Medium_H_1_1650</name>
+        <name>Medium_H_1_1.65</name>
         <waveLengthMin>1.54</waveLengthMin>
         <waveLengthMax>1.82</waveLengthMax>
       </mode>
       <mode>
-        <name>High_K_1_1979</name>
+        <name>Medium_K_1_2.1</name>
+        <waveLengthMin>1.926</waveLengthMin>
+        <waveLengthMax>2.275</waveLengthMax>
+      </mode>
+      <mode>
+        <name>Medium_K_1_2.3</name>
+        <waveLengthMin>2.126</waveLengthMin>
+        <waveLengthMax>2.474</waveLengthMax>
+      </mode>
+      <mode>
+        <name>High_K_1_1.979</name>
         <waveLengthMin>1.955</waveLengthMin>
         <waveLengthMax>2.003</waveLengthMax>
       </mode>
       <mode>
-        <name>High_K_1_2018</name>
+        <name>High_K_1_2.018</name>
         <waveLengthMin>1.994</waveLengthMin>
         <waveLengthMax>2.042</waveLengthMax>
       </mode>
       <mode>
-        <name>High_K_1_2056</name>
+        <name>High_K_1_2.056</name>
         <waveLengthMin>2.032</waveLengthMin>
         <waveLengthMax>2.079</waveLengthMax>
       </mode>
       <mode>
-        <name>High_K_1_2095</name>
+        <name>High_K_1_2.095</name>
         <waveLengthMin>2.071</waveLengthMin>
         <waveLengthMax>2.118</waveLengthMax>
       </mode>
       <mode>
-        <name>High_K_1_2133</name>
+        <name>High_K_1_2.133</name>
         <waveLengthMin>2.110</waveLengthMin>
         <waveLengthMax>2.156</waveLengthMax>
       </mode>
       <mode>
-        <name>High_K_1_2172</name>
+        <name>High_K_1_2.172</name>
         <waveLengthMin>2.149</waveLengthMin>
         <waveLengthMax>2.195</waveLengthMax>
       </mode>
       <mode>
-        <name>High_K_1_2211</name>
+        <name>High_K_1_2.211</name>
         <waveLengthMin>2.187</waveLengthMin>
         <waveLengthMax>2.235</waveLengthMax>
       </mode>
       <mode>
-        <name>High_K_1_2249</name>
+        <name>High_K_1_2.249</name>
         <waveLengthMin>2.226</waveLengthMin>
         <waveLengthMax>2.272</waveLengthMax>
       </mode>
       <mode>
-        <name>High_K_1_2288</name>
+        <name>High_K_1_2.288</name>
         <waveLengthMin>2.265</waveLengthMin>
         <waveLengthMax>2.311</waveLengthMax>
       </mode>
       <mode>
-        <name>High_K_1_2326</name>
+        <name>High_K_1_2.326</name>
         <waveLengthMin>2.303</waveLengthMin>
         <waveLengthMax>2.348</waveLengthMax>
       </mode>
       <mode>
-        <name>High_K_1_2365</name>
+        <name>High_K_1_2.365</name>
         <waveLengthMin>2.342</waveLengthMin>
         <waveLengthMax>2.387</waveLengthMax>
       </mode>
       <mode>
-        <name>High_K_1_2403</name>
+        <name>High_K_1_2.403</name>
         <waveLengthMin>2.381</waveLengthMin>
         <waveLengthMax>2.425</waveLengthMax>
       </mode>
       <mode>
-        <name>High_K_1_2442</name>
+        <name>High_K_1_2.442</name>
         <waveLengthMin>2.420</waveLengthMin>
         <waveLengthMax>2.464</waveLengthMax>
       </mode>
       <mode>
-        <name>High_K_1_2481</name>
+        <name>High_K_1_2.481</name>
         <waveLengthMin>2.459</waveLengthMin>
         <waveLengthMax>2.503</waveLengthMax>
       </mode>
@@ -8671,6 +8686,7 @@
       <name>MIDI</name>
       <description></description>
       <numberChannels>2</numberChannels>
+      <defaultSamplingTime>60</defaultSamplingTime>
       <mode>
         <name>HIGH_SENS+PRISM</name>
         <waveLengthMin>8</waveLengthMin>
@@ -8702,16 +8718,16 @@
     <instrument>
       <focalInstrument>AMBER</focalInstrument>
       <configuration>
-        <stations>U1 U2 U3</stations>
+        <stations>UT1 UT2 UT3</stations>
       </configuration>
       <configuration>
-        <stations>U1 U2 U4</stations>
+        <stations>UT1 UT2 UT4</stations>
       </configuration>
       <configuration>
-        <stations>U1 U3 U4</stations>
+        <stations>UT1 UT3 UT4</stations>
       </configuration>
       <configuration>
-        <stations>U2 U3 U4</stations>
+        <stations>UT2 UT3 UT4</stations>
       </configuration>
       <configuration>
         <stations>E0 G0 H0</stations>
@@ -8730,22 +8746,22 @@
     <instrument>
       <focalInstrument>MIDI</focalInstrument>
       <configuration>
-        <stations>U1 U2</stations>
+        <stations>UT1 UT2</stations>
       </configuration>
       <configuration>
-        <stations>U1 U3</stations>
+        <stations>UT1 UT3</stations>
       </configuration>
       <configuration>
-        <stations>U1 U4</stations>
+        <stations>UT1 UT4</stations>
       </configuration>
       <configuration>
-        <stations>U2 U3</stations>
+        <stations>UT2 UT3</stations>
       </configuration>
       <configuration>
-        <stations>U2 U4</stations>
+        <stations>UT2 UT4</stations>
       </configuration>
       <configuration>
-        <stations>U3 U4</stations>
+        <stations>UT3 UT4</stations>
       </configuration>
       <configuration>
         <stations>E0 G0</stations>
@@ -8788,16 +8804,16 @@
     <instrument>
       <focalInstrument>AMBER</focalInstrument>
       <configuration>
-        <stations>U1 U2 U3</stations>
+        <stations>UT1 UT2 UT3</stations>
       </configuration>
       <configuration>
-        <stations>U1 U2 U4</stations>
+        <stations>UT1 UT2 UT4</stations>
       </configuration>
       <configuration>
-        <stations>U1 U3 U4</stations>
+        <stations>UT1 UT3 UT4</stations>
       </configuration>
       <configuration>
-        <stations>U2 U3 U4</stations>
+        <stations>UT2 UT3 UT4</stations>
       </configuration>
       <configuration>
         <stations>A0 D0 H0</stations>
@@ -8846,22 +8862,22 @@
     <instrument>
       <focalInstrument>MIDI</focalInstrument>
       <configuration>
-        <stations>U1 U2</stations>
+        <stations>UT1 UT2</stations>
       </configuration>
       <configuration>
-        <stations>U1 U3</stations>
+        <stations>UT1 UT3</stations>
       </configuration>
       <configuration>
-        <stations>U1 U4</stations>
+        <stations>UT1 UT4</stations>
       </configuration>
       <configuration>
-        <stations>U2 U3</stations>
+        <stations>UT2 UT3</stations>
       </configuration>
       <configuration>
-        <stations>U2 U4</stations>
+        <stations>UT2 UT4</stations>
       </configuration>
       <configuration>
-        <stations>U3 U4</stations>
+        <stations>UT3 UT4</stations>
       </configuration>
       <configuration>
         <stations>A0 K0</stations>

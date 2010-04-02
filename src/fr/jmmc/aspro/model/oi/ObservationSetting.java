@@ -22,17 +22,11 @@ import fr.jmmc.aspro.model.OIBase;
  *         - insRes
  * 
  *         - atmosphere Quality (atmoQual) "Excellent" "Good" "Average" "Bad" "Awful"
- *         - min elevation for the target (minElev) "Min. Elevation (degrees)" /range oipt%obsMinElev 90
  * 
- *         - polychromatic (flag)
- * 
- *         - popslist "Pops Config (eg. 1234, 0000=none)"
- * 
- *         - polychromatic "Simulate Instrument`s spectral resolution"
+ *         - polychromatic (flag) "Simulate Instrument`s spectral resolution"
  * 
  *         - dit "Detector Integration Time" /Choice 25 50 100
  *         - obsDuration "Total Integration Time (s) per calibrated point"
- *         - samplingTime "Observing Sampling Periodicity (min)"
  * 
  *         - ha1 "Hour Angle Start" /range -12 12 *
  *         - ha2 "Hour Angle End" /range -12 12 *
