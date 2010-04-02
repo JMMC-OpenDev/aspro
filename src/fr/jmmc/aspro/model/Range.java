@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: Range.java,v 1.7 2010-01-21 16:39:49 bourgesl Exp $"
+ * "@(#) $Id: Range.java,v 1.8 2010-04-02 14:39:54 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2010/01/21 16:39:49  bourgesl
+ * added static getMinimum(List) and getMaximum(List) methods
+ *
  * Revision 1.6  2009/12/02 17:23:51  bourgesl
  * fixed several bugs on pop finder + refactoring
  *
@@ -69,6 +72,10 @@ public class Range {
 
   public double getLength() {
     return this.max - this.min;
+  }
+
+  public boolean contains(final double value) {
+    return value >= this.min && value <= this.max;
   }
 
   @Override
