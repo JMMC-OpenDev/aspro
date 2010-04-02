@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AstroSkyCalc.java,v 1.17 2010-04-02 09:20:25 bourgesl Exp $"
+ * "@(#) $Id: AstroSkyCalc.java,v 1.18 2010-04-02 14:39:19 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.17  2010/04/02 09:20:25  bourgesl
+ * updated javadoc
+ * added toString(ra / dec in degrees) conversion
+ *
  * Revision 1.16  2010/01/14 15:23:01  bourgesl
  * changed logger's class name
  *
@@ -343,7 +347,7 @@ public class AstroSkyCalc {
   /**
    * Computes the hour angle corresponding to the given elevation for the current target
    * @param dec target declination (corrected for the given julian date)
-   * @param minElev min elevation (rad)
+   * @param minElev min elevation (deg)
    * @return hour angle (dec hours) or -1 if the target never reaches this elevation
    */
   public double getHAForElevation(final double dec, final double minElev) {
@@ -352,7 +356,7 @@ public class AstroSkyCalc {
       getTargetMinMaxAlt();
     }
 
-    final double ha = Spherical.ha_alt(dec, this.site.lat.value, Math.toDegrees(minElev));
+    final double ha = Spherical.ha_alt(dec, this.site.lat.value, minElev);
 
     if (ha == -1000d) {
       // never rise (target is never over the min elevation) :
