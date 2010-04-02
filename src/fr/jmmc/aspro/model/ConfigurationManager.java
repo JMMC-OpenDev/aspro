@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ConfigurationManager.java,v 1.17 2010-02-04 17:05:06 bourgesl Exp $"
+ * "@(#) $Id: ConfigurationManager.java,v 1.18 2010-04-02 14:39:44 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.17  2010/02/04 17:05:06  bourgesl
+ * UV bounds are coming from UVCoverageService
+ *
  * Revision 1.16  2010/02/03 09:48:53  bourgesl
  * target model uvmap added on the uv coverage with zooming supported
  *
@@ -63,10 +66,12 @@
  ******************************************************************************/
 package fr.jmmc.aspro.model;
 
+import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.oi.Configurations;
 import fr.jmmc.aspro.model.oi.FocalInstrumentConfiguration;
 import fr.jmmc.aspro.model.oi.FocalInstrumentConfigurationItem;
 import fr.jmmc.aspro.model.oi.FocalInstrumentMode;
+import fr.jmmc.aspro.model.oi.FringeTracker;
 import fr.jmmc.aspro.model.oi.InterferometerConfiguration;
 import fr.jmmc.aspro.model.oi.InterferometerDescription;
 import fr.jmmc.aspro.model.oi.InterferometerSetting;
@@ -306,6 +311,20 @@ public class ConfigurationManager extends BaseOIManager {
     return v;
   }
 
+  public Vector<String> getFringeTrackerModes(final String configurationName) {
+    final Vector<String> v = new Vector<String>();
+
+    final InterferometerConfiguration c = getInterferometerConfiguration(configurationName);
+    if (c != null) {
+      final FringeTracker ft = c.getInterferometer().getFringeTracker();
+      if (ft != null) {
+        v.add(AsproConstants.NONE);
+        v.addAll(ft.getModes());
+      }
+    }
+    return v;
+  }
+
   public FocalInstrumentConfiguration getInterferometerInstrumentConfiguration(final String configurationName, final String instrumentName) {
     final InterferometerConfiguration c = getInterferometerConfiguration(configurationName);
     if (c != null) {
@@ -403,4 +422,5 @@ public class ConfigurationManager extends BaseOIManager {
     }
     return null;
   }
+
 }
