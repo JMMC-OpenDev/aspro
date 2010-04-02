@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproGui.java,v 1.8 2010-02-12 15:53:18 bourgesl Exp $"
+ * "@(#) $Id: AsproGui.java,v 1.9 2010-04-02 09:21:49 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.8  2010/02/12 15:53:18  bourgesl
+ * added target model editor
+ *
  * Revision 1.7  2010/01/20 16:18:38  bourgesl
  * observation form refactoring
  *
@@ -62,8 +65,6 @@ public class AsproGui extends App {
 
   /* members */
   /* Swing Components */
-  /** observation setting panel */
-  protected SettingPanel settingPanel;
   /** Status Bar */
   protected StatusBar statusBar;
 
@@ -84,7 +85,10 @@ public class AsproGui extends App {
     super(args, false, !AsproConstants.DEBUG_MODE);
   }
 
-  /** Initialize application objects */
+  /**
+   * Initialize application objects
+   * @param args ignored arguments
+   */
   @Override
   protected void init(final String[] args) {
     logger.fine("init : enter");
@@ -98,16 +102,26 @@ public class AsproGui extends App {
     logger.fine("init : exit");
   }
 
+  /**
+   * Return the application frame
+   * @return application frame
+   */
   public JFrame getRootFrame() {
     return (JFrame) getFrame();
   }
 
-  /** Execute application body */
+  /** 
+   * Execute application body = make the application frame visible
+   */
   @Override
   protected void execute() {
     getRootFrame().setVisible(true);
   }
 
+  /**
+   * Prepare the frame widgets and define its minimum size
+   * @param frame
+   */
   private void prepareFrame(final JFrame frame) {
     frame.setTitle(App.getSharedApplicationDataModel().getProgramName() + " v" + App.getSharedApplicationDataModel().getProgramVersion());
 
@@ -135,14 +149,12 @@ public class AsproGui extends App {
   }
 
   /**
-   * Create the main content i.e. the observation setting panel
+   * Create the main content i.e. the setting panel
    */
   private void createContent() {
 
-    this.settingPanel = new SettingPanel();
-
     // adds the panel in scrollPane
-    final JScrollPane settingScrollPanel = new JScrollPane(this.settingPanel);
+    final JScrollPane settingScrollPanel = new JScrollPane(new SettingPanel());
 
     getFramePanel().add(settingScrollPanel, BorderLayout.CENTER);
   }
@@ -155,10 +167,6 @@ public class AsproGui extends App {
     new LoadObservationAction();
     // save observation :
     new SaveObservationAction();
-  }
-
-  public SettingPanel getSettingPanel() {
-    return settingPanel;
   }
 
   /**
@@ -174,7 +182,7 @@ public class AsproGui extends App {
   }
 
   /**
-   * Main entry point
+   * Main entry point : define the locale to US / GMT and then start the application
    * @param args command line arguments
    */
   public static void main(final String[] args) {
@@ -185,7 +193,7 @@ public class AsproGui extends App {
 
     // force Locale for Swing Components :
     JComponent.setDefaultLocale(Locale.US);
-    
+
     // Start application with the command line arguments
     new AsproGui(args);
   }
