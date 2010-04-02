@@ -35,6 +35,8 @@
   <releasenotes>
     <release version="0.1">
       <prerelease version="0.1b11">
+        <change>Added a transit mark and ticks for the elevation on the observability plot</change>
+        <change>Export VLTI AMBER Observing Block (OB) for a single target (simple)</change>
         <change>Disable model image widgets when the current target has no defined model</change>
         <change>Do not use Rho / Theta for the first model in the model editor</change>
         <change>Replace instead of Append behaviour in the parameter table of the model editor</change>
