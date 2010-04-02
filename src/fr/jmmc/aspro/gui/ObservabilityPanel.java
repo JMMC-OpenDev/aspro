@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityPanel.java,v 1.27 2010-04-02 10:05:08 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityPanel.java,v 1.28 2010-04-02 14:40:39 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.27  2010/04/02 10:05:08  bourgesl
+ * minor visual changes
+ *
  * Revision 1.26  2010/02/18 15:52:38  bourgesl
  * added parameter argument validation with an user message
  *
@@ -93,12 +96,15 @@ package fr.jmmc.aspro.gui;
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.gui.action.ExportPDFAction;
 import fr.jmmc.aspro.gui.chart.ChartUtils;
+import fr.jmmc.aspro.gui.chart.XYDiamondAnnotation;
+import fr.jmmc.aspro.gui.chart.XYTickAnnotation;
 import fr.jmmc.aspro.gui.util.ColorPalette;
 import fr.jmmc.aspro.gui.util.SwingWorkerExecutor;
 import fr.jmmc.aspro.model.observability.DateTimeInterval;
 import fr.jmmc.aspro.model.observability.ObservabilityData;
 import fr.jmmc.aspro.model.ObservationListener;
 import fr.jmmc.aspro.model.ObservationManager;
+import fr.jmmc.aspro.model.observability.ElevationDate;
 import fr.jmmc.aspro.model.observability.StarObservabilityData;
 import fr.jmmc.aspro.model.observability.SunTimeInterval;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
@@ -106,7 +112,6 @@ import fr.jmmc.aspro.model.oi.Pop;
 import fr.jmmc.aspro.service.ObservabilityService;
 import fr.jmmc.mcs.gui.FeedbackReport;
 import fr.jmmc.mcs.gui.StatusBar;
-import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FlowLayout;
@@ -114,7 +119,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.awt.geom.Rectangle2D;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.List;
@@ -130,7 +134,6 @@ import org.jdesktop.swingworker.SwingWorker;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.annotations.XYShapeAnnotation;
 import org.jfree.chart.annotations.XYTextAnnotation;
 import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.axis.SymbolAxis;
@@ -478,7 +481,7 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
           } catch (InterruptedException ignore) {
           } catch (ExecutionException ee) {
             logger.log(Level.SEVERE, "Error : ", ee);
-            new FeedbackReport(null, true, (Exception)ee.getCause());
+            new FeedbackReport(null, true, (Exception) ee.getCause());
           }
 
           // update the status bar :
@@ -577,6 +580,15 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
       n = 0;
       for (StarObservabilityData so : starVis) {
 
+        // transit annotation :
+        if (so.getType() == StarObservabilityData.TYPE_STAR) {
+          renderer.addAnnotation(new XYDiamondAnnotation(n, so.getTransitDate().getTime(), 10, 10));
+
+          for (ElevationDate ed : so.getElevations()) {
+            renderer.addAnnotation(new XYTickAnnotation(Integer.toString(ed.getElevation()) + "°", n, ed.getDate().getTime(), Math.PI / 2d));
+          }
+        }
+
         for (DateTimeInterval interval : so.getVisible()) {
 
           if (!interval.getStartDate().equals(min)) {
@@ -595,6 +607,7 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
             renderer.addAnnotation(aEnd);
           }
         }
+
         n++;
       }
     }

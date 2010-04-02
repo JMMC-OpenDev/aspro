@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: StarObservabilityData.java,v 1.2 2010-01-22 13:16:18 bourgesl Exp $"
+ * "@(#) $Id: StarObservabilityData.java,v 1.3 2010-04-02 14:40:39 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2010/01/22 13:16:18  bourgesl
+ * fixed imports
+ *
  * Revision 1.1  2010/01/08 16:48:29  bourgesl
  * package refactoring
  *
@@ -16,6 +19,7 @@
 package fr.jmmc.aspro.model.observability;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -45,9 +49,17 @@ public class StarObservabilityData {
   /* visible date intervals */
   private final List<DateTimeInterval> visible = new ArrayList<DateTimeInterval>();
 
+  /** transit date */
+  private Date transitDate;
+
+  /* visible date intervals */
+  private final List<ElevationDate> elevations = new ArrayList<ElevationDate>();
+
+
   /**
    * Constructor
    * @param name target name
+   * @param type type of observability
    */
   public StarObservabilityData(final String name, final int type) {
     this.name = name;
@@ -68,6 +80,18 @@ public class StarObservabilityData {
 
   public List<DateTimeInterval> getVisible() {
     return visible;
+  }
+
+  public Date getTransitDate() {
+    return transitDate;
+  }
+
+  public void setTransitDate(Date transitDate) {
+    this.transitDate = transitDate;
+  }
+
+  public List<ElevationDate> getElevations() {
+    return elevations;
   }
 
   @Override

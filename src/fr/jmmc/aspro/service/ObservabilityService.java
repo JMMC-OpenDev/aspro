@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.37 2010-02-08 17:00:35 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.38 2010-04-02 14:40:39 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.37  2010/02/08 17:00:35  bourgesl
+ * moved several reference checks to ObservationManager
+ *
  * Revision 1.36  2010/01/22 13:16:44  bourgesl
  * added star observability type to change bar colors easily
  *
@@ -136,6 +139,7 @@ import fr.jmmc.aspro.model.observability.PopCombination;
 import fr.jmmc.aspro.model.observability.GroupedPopObservabilityData;
 import fr.jmmc.aspro.model.observability.PopObservabilityData;
 import fr.jmmc.aspro.model.Range;
+import fr.jmmc.aspro.model.observability.ElevationDate;
 import fr.jmmc.aspro.model.observability.StarData;
 import fr.jmmc.aspro.model.observability.StarObservabilityData;
 import fr.jmmc.aspro.model.observability.SunTimeInterval;
@@ -231,9 +235,9 @@ public class ObservabilityService {
    * Note : This service is statefull so it can not be reused by several calls.
    *
    * @param observation observation settings
-   * @param useNightLimit flag to enable the observability restriction due to the night
    * @param useLST indicates if the timestamps are expressed in LST or in UTC
    * @param doDetails flag to produce detailed output with all BL / horizon / rise intervals per target
+   * @param doBaseLineLimits flag to find base line limits
    */
   public ObservabilityService(final ObservationSetting observation,
                               final boolean useLST, final boolean doDetails, final boolean doBaseLineLimits) {
@@ -568,6 +572,7 @@ public class ObservabilityService {
    * wMin and wMax are given by wRanges.
    *
    * @param target target to use
+   * @return list of Pop observability data
    */
   private List<PopObservabilityData> findPoPsForTargetObservability(final Target target) {
 
@@ -643,6 +648,9 @@ public class ObservabilityService {
 
     // precessed target declination in degrees :
     final double precDEC = raDec[1];
+
+    // define transit date (HA = 0) :
+    starObs.setTransitDate(jdToDate(convertHAToJD(0d, precRA)));
 
     // Find LST range corresponding to the rise / set of the target :
     final double haElev = this.sc.getHAForElevation(precDEC, this.minElev);
@@ -811,6 +819,8 @@ public class ObservabilityService {
 
       // store merge result as date intervals :
       if (finalRanges != null) {
+        findElevations(starObs, finalRanges, precRA, precDEC);
+
         for (Range range : finalRanges) {
           convertRangeToDateInterval(range, starObs.getVisible());
           /*
@@ -1095,7 +1105,7 @@ public class ObservabilityService {
    * @throws IllegalStateException if the interferometer configuration or instrument configuration is undefined
    */
   private void prepareObservation() throws IllegalStateException {
-    this.minElev = Math.toRadians(this.observation.getInterferometerConfiguration().getMinElevation());
+    this.minElev = this.observation.getInterferometerConfiguration().getMinElevation();
 
     if (doBaseLineLimits) {
       // ignore night limits :
@@ -1252,7 +1262,6 @@ public class ObservabilityService {
 
   /**
    * Generate all PoP combinations and offsets for the given number of beams
-   * @param pops list of pops for the interferometer
    */
   private void preparePopCombinations() {
 
@@ -1523,6 +1532,13 @@ public class ObservabilityService {
     return new Range(jd1, jd2);
   }
 
+  private double convertHAToJD(final double ha, final double lstOffset) {
+    final double lst = lstOffset + ha;
+
+    // apply the sideral / solar ratio :
+    return this.jdLst0 + AstroSkyCalc.lst2jd(lst);
+  }
+
   /**
    * Convert a JD range to an HA range but keep only ranges with an HA in [-12;12]
    * @param rangeJD given in hour angle (dec hours)
@@ -1673,12 +1689,10 @@ public class ObservabilityService {
 
     final double obsLat = Math.toDegrees(this.interferometer.getPosSph().getLatitude());
 
-    final double minElevDeg = Math.toDegrees(this.minElev);
-
-    int decMin = 5 * (int) Math.round((obsLat - 90d + minElevDeg) / 5d);
+    int decMin = 5 * (int) Math.round((obsLat - 90d + this.minElev) / 5d);
     decMin = Math.max(decMin, -90);
 
-    int decMax = 5 * (int) Math.round((obsLat + 90 - minElevDeg) / 5d);
+    int decMax = 5 * (int) Math.round((obsLat + 90 - this.minElev) / 5d);
     decMax = Math.min(decMax, 90);
 
     final List<Target> targets = new ArrayList<Target>();
@@ -1695,5 +1709,61 @@ public class ObservabilityService {
       targets.add(t);
     }
     return targets;
+  }
+
+  private void findElevations(final StarObservabilityData starObs, final List<Range> obsRangeJD, final double precRA, final double precDEC) {
+    final List<ElevationDate> elevations = starObs.getElevations();
+
+    int elev;
+    double jd;
+    double haElev;
+    // internal ticks for elevation :
+    for (elev = 20; elev <= 80; elev += 20) {
+      if (elev != this.minElev) {
+        haElev = this.sc.getHAForElevation(precDEC, elev);
+
+        if (haElev > 0) {
+          jd = convertHAToJD(-haElev, precRA);
+          if (checkRange(obsRangeJD, jd)) {
+            elevations.add(new ElevationDate(jdToDate(jd), elev));
+          }
+
+          jd = convertHAToJD(haElev, precRA);
+          if (checkRange(obsRangeJD, jd)) {
+            elevations.add(new ElevationDate(jdToDate(jd), elev));
+          }
+        }
+      }
+    }
+
+    // ticks for observability intervals (limits) :
+    AzEl azEl;
+    for (Range range : obsRangeJD) {
+      jd = range.getMin();
+      azEl = this.sc.getTargetPosition(jd);
+      elev = (int) Math.round(azEl.getElevation());
+      elevations.add(new ElevationDate(jdToDate(jd), elev));
+
+      jd = range.getMax();
+      azEl = this.sc.getTargetPosition(jd);
+      elev = (int) Math.round(azEl.getElevation());
+      elevations.add(new ElevationDate(jdToDate(jd), elev));
+    }
+
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("elevations : ");
+      for (ElevationDate elevationDate : elevations) {
+        logger.fine(elevationDate.toString());
+      }
+    }
+  }
+
+  private boolean checkRange(final List<Range> ranges, final double value) {
+    for (Range range : ranges) {
+      if (range.contains(value)) {
+        return true;
+      }
+    }
+    return false;
   }
 }
