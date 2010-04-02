@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityPanel.java,v 1.26 2010-02-18 15:52:38 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityPanel.java,v 1.27 2010-04-02 10:05:08 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.26  2010/02/18 15:52:38  bourgesl
+ * added parameter argument validation with an user message
+ *
  * Revision 1.25  2010/02/03 16:07:49  bourgesl
  * refactoring to use the custom swing worker executor
  * when zomming uv map is computed asynchronously
@@ -103,6 +106,7 @@ import fr.jmmc.aspro.model.oi.Pop;
 import fr.jmmc.aspro.service.ObservabilityService;
 import fr.jmmc.mcs.gui.FeedbackReport;
 import fr.jmmc.mcs.gui.StatusBar;
+import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FlowLayout;
@@ -110,6 +114,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.geom.Rectangle2D;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.List;
@@ -125,6 +130,7 @@ import org.jdesktop.swingworker.SwingWorker;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.annotations.XYShapeAnnotation;
 import org.jfree.chart.annotations.XYTextAnnotation;
 import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.axis.SymbolAxis;
@@ -589,7 +595,6 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
             renderer.addAnnotation(aEnd);
           }
         }
-
         n++;
       }
     }
