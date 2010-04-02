@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportPDFAction.java,v 1.2 2010-01-14 17:02:38 bourgesl Exp $"
+ * "@(#) $Id: ExportPDFAction.java,v 1.3 2010-04-02 10:07:11 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2010/01/14 17:02:38  bourgesl
+ * FileFilter fix
+ *
  * Revision 1.1  2010/01/13 16:11:43  bourgesl
  * pdf related classes
  *
@@ -64,7 +67,7 @@ public class ExportPDFAction {
   private ExportPDFAction() {
     super();
 
-    FileFilterRepository.getInstance().put(PDF_MIME_TYPE, "pdf", "Portable Document Format (PDF)");
+    FileFilterRepository.getInstance().put(PDF_MIME_TYPE, PDF_EXT, "Portable Document Format (PDF)");
   }
 
   /**
@@ -86,8 +89,7 @@ public class ExportPDFAction {
     File file = null;
 
     final JFileChooser fileChooser = new JFileChooser();
-    fileChooser.setFileFilter(getPDFFileFilter());
-    fileChooser.setName("untitled.pdf");
+    fileChooser.setFileFilter(getFileFilter());
 
     if (this.getLastDir() != null) {
       fileChooser.setCurrentDirectory(new File(this.getLastDir()));
@@ -113,7 +115,7 @@ public class ExportPDFAction {
       this.setLastDir(file.getParent());
 
       try {
-        file = checkPDFFileExtension(file);
+        file = checkFileExtension(file);
 
         PDFUtils.saveChartAsPDF(file, (JFreeChart) event.getSource());
 
@@ -129,11 +131,11 @@ public class ExportPDFAction {
     }
   }
 
-  protected FileFilter getPDFFileFilter() {
+  protected FileFilter getFileFilter() {
     return FileFilterRepository.getInstance().get(PDF_MIME_TYPE);
   }
 
-  protected File checkPDFFileExtension(final File file) {
+  protected File checkFileExtension(final File file) {
     final String ext = FileUtils.getExtension(file);
 
     if (!PDF_EXT.equals(ext)) {
