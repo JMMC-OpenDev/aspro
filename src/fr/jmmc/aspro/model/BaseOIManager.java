@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BaseOIManager.java,v 1.6 2009-12-04 16:26:58 bourgesl Exp $"
+ * "@(#) $Id: BaseOIManager.java,v 1.7 2010-04-02 10:08:17 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2009/12/04 16:26:58  bourgesl
+ * Added Load action in the menu bar (partially handled)
+ *
  * Revision 1.5  2009/12/04 15:38:27  bourgesl
  * Added Save action in the menu bar
  *
@@ -49,7 +52,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 public class BaseOIManager {
 
   /** Class Name */
-  private static final String className_ = "fr.jmmc.aspro.config.BaseOIManager";
+  private static final String className_ = "fr.jmmc.aspro.model.BaseOIManager";
   /** Class logger */
   private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
