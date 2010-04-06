@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: FileUtils.java,v 1.2 2010-04-02 14:40:16 bourgesl Exp $"
+ * "@(#) $Id: FileUtils.java,v 1.3 2010-04-06 08:31:44 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2010/04/02 14:40:16  bourgesl
+ * added writer methods for text files
+ *
  * Revision 1.1  2010/01/13 16:12:31  bourgesl
  * added export to PDF button
  *
@@ -63,14 +66,17 @@ public class FileUtils {
   /**
    * Find a file in the current classloader (application class Loader)
    *
-   * Accepts filename like /fr/jmmc/aspro/fileName.ext
+   * Accepts filename like fr/jmmc/aspro/fileName.ext
    *
    * @param fileName file name only no path included
    * @return URL to the file or null
    */
   public static final URL getResource(final String fileName) {
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("getResource : " + fileName);
+    }
     // Find properties in the classpath
-    final URL url = FileUtils.class.getClass().getResource(fileName);
+    final URL url = FileUtils.class.getClassLoader().getResource(fileName);
 
     if (url == null) {
       throw new RuntimeException("Unable to find the file in classpath : " + fileName);

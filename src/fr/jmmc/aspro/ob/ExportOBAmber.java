@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBAmber.java,v 1.1 2010-04-02 10:07:35 bourgesl Exp $"
+ * "@(#) $Id: ExportOBAmber.java,v 1.2 2010-04-06 08:31:44 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2010/04/02 10:07:35  bourgesl
+ * simple OB generation for AMBER
+ *
  */
 package fr.jmmc.aspro.ob;
 
@@ -32,7 +35,7 @@ public class ExportOBAmber {
   private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
   /** template name */
-  private final static String TEMPLATE_FILE = "/fr/jmmc/aspro/ob/AMBER_template.obx";
+  private final static String TEMPLATE_FILE = "fr/jmmc/aspro/ob/AMBER_template.obx";
   /** double formatter for magnitudes */
   private final static NumberFormat df3 = new DecimalFormat("0.000");
   /** double formatter for PM */
