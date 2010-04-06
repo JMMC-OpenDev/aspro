@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<jnlp spec="1.0+" codebase="REPLACECODEBASE" href="REPLACEHREF">
+  <information>
+    <title>Aspro Pal Jnlp</title>
+    <vendor>JMMC</vendor>
+    <homepage href="http://www.jmmc.fr/aspro"/>
+    <description>Jnlp dedicated to Pal library.</description>
+  </information>
+  <resources>
+    <j2se version="1.5+"/>
+        
+    <jar href="jar/pal.jar" />
+  </resources>
+  <component-desc/>
+</jnlp>
