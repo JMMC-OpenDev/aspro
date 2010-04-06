@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetModelForm.java,v 1.11 2010-03-30 12:08:44 bourgesl Exp $"
+ * "@(#) $Id: TargetModelForm.java,v 1.12 2010-04-06 13:58:37 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.11  2010/03/30 12:08:44  bourgesl
+ * table cell editor behaviour : replace value instead of append value
+ *
  * Revision 1.10  2010/02/19 16:06:27  bourgesl
  * added minimal rho/theta editor for X/Y positions
  *
@@ -699,7 +702,6 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
 
     jTextFieldName.setColumns(15);
     jTextFieldName.setEditable(false);
-    jTextFieldName.setMinimumSize(new java.awt.Dimension(100, 19));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 0;

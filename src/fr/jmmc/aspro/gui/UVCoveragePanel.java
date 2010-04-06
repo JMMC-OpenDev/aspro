@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.27 2010-04-02 10:05:24 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.28 2010-04-06 13:58:37 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.27  2010/04/02 10:05:24  bourgesl
+ * added OB for AMBER
+ *
  * Revision 1.26  2010/03/30 12:10:33  bourgesl
  * disable model image widgets for targets without any defined model
  *
@@ -265,15 +268,14 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     jComboBoxAtmQual = new javax.swing.JComboBox();
     jLabelFTMode = new javax.swing.JLabel();
     jComboBoxFTMode = new javax.swing.JComboBox();
+    jSplitPane1 = new javax.swing.JSplitPane();
 
-    setLayout(new javax.swing.BoxLayout(this, javax.swing.BoxLayout.X_AXIS));
+    setLayout(new java.awt.BorderLayout());
 
-    jScrollPane1.setMaximumSize(new java.awt.Dimension(220, 32767));
-    jScrollPane1.setPreferredSize(new java.awt.Dimension(220, 300));
+    jScrollPane1.setMaximumSize(new java.awt.Dimension(200, 32767));
+    jScrollPane1.setMinimumSize(new java.awt.Dimension(200, 22));
+    jScrollPane1.setPreferredSize(new java.awt.Dimension(200, 300));
 
-    jPanelRight.setMaximumSize(new java.awt.Dimension(200, 2147483647));
-    jPanelRight.setMinimumSize(new java.awt.Dimension(200, 300));
-    jPanelRight.setPreferredSize(new java.awt.Dimension(200, 400));
     jPanelRight.setLayout(new java.awt.GridBagLayout());
 
     jLabel1.setText("Target");
@@ -285,7 +287,7 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     gridBagConstraints.ipady = 2;
     jPanelRight.add(jLabel1, gridBagConstraints);
 
-    jPanelButtons.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 10, 0));
+    jPanelButtons.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 2, 2));
 
     jButtonModelEditor.setText("Model Editor");
     jButtonModelEditor.setMargin(new java.awt.Insets(0, 0, 0, 0));
@@ -316,9 +318,11 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     jPanelButtons.add(jButtonOB);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 0;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 0);
     jPanelRight.add(jPanelButtons, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
@@ -354,7 +358,6 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     jFieldSamplingPeriod.setColumns(3);
     jFieldSamplingPeriod.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter()));
     jFieldSamplingPeriod.setMinimumSize(new java.awt.Dimension(40, 19));
-    jFieldSamplingPeriod.setPreferredSize(new java.awt.Dimension(40, 19));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 15;
@@ -371,7 +374,8 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     jSliderHAMin.setMajorTickSpacing(30);
     jSliderHAMin.setMaximum(240);
     jSliderHAMin.setPaintTicks(true);
-    jSliderHAMin.setMinimumSize(new java.awt.Dimension(100, 27));
+    jSliderHAMin.setMaximumSize(new java.awt.Dimension(80, 27));
+    jSliderHAMin.setPreferredSize(new java.awt.Dimension(80, 27));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 17;
@@ -388,6 +392,8 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     jSliderHAMax.setMajorTickSpacing(30);
     jSliderHAMax.setMaximum(240);
     jSliderHAMax.setPaintTicks(true);
+    jSliderHAMax.setMaximumSize(new java.awt.Dimension(80, 32767));
+    jSliderHAMax.setPreferredSize(new java.awt.Dimension(80, 27));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 19;
@@ -404,7 +410,7 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
     jPanelRight.add(jFieldHAMin, gridBagConstraints);
 
-    jFieldHAMax.setColumns(4);
+    jFieldHAMax.setColumns(6);
     jFieldHAMax.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0.00"))));
     jFieldHAMax.setMinimumSize(new java.awt.Dimension(50, 19));
     gridBagConstraints = new java.awt.GridBagConstraints();
@@ -474,6 +480,8 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     jSliderUVMax.setMajorTickSpacing(10);
     jSliderUVMax.setPaintTicks(true);
     jSliderUVMax.setValue(100);
+    jSliderUVMax.setMaximumSize(new java.awt.Dimension(80, 32767));
+    jSliderUVMax.setPreferredSize(new java.awt.Dimension(80, 27));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 13;
@@ -555,7 +563,8 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
 
     jScrollPane1.setViewportView(jPanelRight);
 
-    add(jScrollPane1);
+    add(jScrollPane1, java.awt.BorderLayout.WEST);
+    add(jSplitPane1, java.awt.BorderLayout.PAGE_END);
   }// </editor-fold>//GEN-END:initComponents
 
   /**
@@ -1592,6 +1601,7 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
   private javax.swing.JSlider jSliderHAMax;
   private javax.swing.JSlider jSliderHAMin;
   private javax.swing.JSlider jSliderUVMax;
+  private javax.swing.JSplitPane jSplitPane1;
   private javax.swing.JLabel jTargetHAMax;
   private javax.swing.JLabel jTargetHAMin;
   // End of variables declaration//GEN-END:variables
