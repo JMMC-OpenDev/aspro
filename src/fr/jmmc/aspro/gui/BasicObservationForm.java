@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BasicObservationForm.java,v 1.21 2010-04-02 10:05:08 bourgesl Exp $"
+ * "@(#) $Id: BasicObservationForm.java,v 1.22 2010-04-06 14:40:47 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.21  2010/04/02 10:05:08  bourgesl
+ * minor visual changes
+ *
  * Revision 1.20  2010/02/16 14:48:26  bourgesl
  * if the model editor was successfull (ok), update the plots
  *
@@ -287,7 +290,6 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
     jPanelMain.add(starSearchField, gridBagConstraints);
 
     jButtonModelEditor.setText("Model editor");
-    jButtonModelEditor.setMargin(new java.awt.Insets(0, 0, 0, 0));
     jButtonModelEditor.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(java.awt.event.ActionEvent evt) {
         jButtonModelEditorActionPerformed(evt);

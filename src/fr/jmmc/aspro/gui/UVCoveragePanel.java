@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.28 2010-04-06 13:58:37 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.29 2010-04-06 14:40:47 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.28  2010/04/06 13:58:37  bourgesl
+ * minor UI changes for mac os & other LAF
+ *
  * Revision 1.27  2010/04/02 10:05:24  bourgesl
  * added OB for AMBER
  *
@@ -129,6 +132,7 @@ import fr.jmmc.mcs.model.UVMapData;
 import fr.jmmc.mcs.model.targetmodel.Model;
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -231,7 +235,7 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
   private void initComponents() {
     java.awt.GridBagConstraints gridBagConstraints;
 
-    jScrollPane1 = new javax.swing.JScrollPane();
+    jSplitPane = new javax.swing.JSplitPane();
     jPanelRight = new javax.swing.JPanel();
     jLabel1 = new javax.swing.JLabel();
     jPanelButtons = new javax.swing.JPanel();
@@ -268,14 +272,13 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     jComboBoxAtmQual = new javax.swing.JComboBox();
     jLabelFTMode = new javax.swing.JLabel();
     jComboBoxFTMode = new javax.swing.JComboBox();
-    jSplitPane1 = new javax.swing.JSplitPane();
 
     setLayout(new java.awt.BorderLayout());
 
-    jScrollPane1.setMaximumSize(new java.awt.Dimension(200, 32767));
-    jScrollPane1.setMinimumSize(new java.awt.Dimension(200, 22));
-    jScrollPane1.setPreferredSize(new java.awt.Dimension(200, 300));
+    jSplitPane.setResizeWeight(0.1);
 
+    jPanelRight.setMinimumSize(new java.awt.Dimension(200, 500));
+    jPanelRight.setPreferredSize(new java.awt.Dimension(200, 500));
     jPanelRight.setLayout(new java.awt.GridBagLayout());
 
     jLabel1.setText("Target");
@@ -291,6 +294,7 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
 
     jButtonModelEditor.setText("Model Editor");
     jButtonModelEditor.setMargin(new java.awt.Insets(0, 0, 0, 0));
+    jButtonModelEditor.setMinimumSize(new java.awt.Dimension(50, 25));
     jButtonModelEditor.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(java.awt.event.ActionEvent evt) {
         jButtonModelEditorActionPerformed(evt);
@@ -561,10 +565,9 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
     jPanelRight.add(jComboBoxFTMode, gridBagConstraints);
 
-    jScrollPane1.setViewportView(jPanelRight);
+    jSplitPane.setLeftComponent(jPanelRight);
 
-    add(jScrollPane1, java.awt.BorderLayout.WEST);
-    add(jSplitPane1, java.awt.BorderLayout.PAGE_END);
+    add(jSplitPane, java.awt.BorderLayout.CENTER);
   }// </editor-fold>//GEN-END:initComponents
 
   /**
@@ -643,7 +646,8 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     // define zoom listener :
     this.chartPanel.setZoomEventListener(this);
 
-    add(chartPanel, java.awt.BorderLayout.CENTER);
+    this.chartPanel.setMinimumSize(new Dimension(650, 500));
+    this.jSplitPane.setRightComponent(this.chartPanel);
 
     // define change listeners :
     this.jComboBoxTarget.addActionListener(this);
@@ -1595,13 +1599,12 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
   private javax.swing.JLabel jLabelFTMode;
   private javax.swing.JPanel jPanelButtons;
   private javax.swing.JPanel jPanelRight;
-  private javax.swing.JScrollPane jScrollPane1;
   private javax.swing.JSeparator jSeparator1;
   private javax.swing.JSeparator jSeparator3;
   private javax.swing.JSlider jSliderHAMax;
   private javax.swing.JSlider jSliderHAMin;
   private javax.swing.JSlider jSliderUVMax;
-  private javax.swing.JSplitPane jSplitPane1;
+  private javax.swing.JSplitPane jSplitPane;
   private javax.swing.JLabel jTargetHAMax;
   private javax.swing.JLabel jTargetHAMin;
   // End of variables declaration//GEN-END:variables
