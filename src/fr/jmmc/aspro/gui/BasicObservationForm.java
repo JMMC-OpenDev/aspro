@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BasicObservationForm.java,v 1.24 2010-04-08 14:22:04 bourgesl Exp $"
+ * "@(#) $Id: BasicObservationForm.java,v 1.25 2010-04-08 14:33:32 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.24  2010/04/08 14:22:04  bourgesl
+ * added tooltip on StarResolverWidget
+ *
  * Revision 1.23  2010/04/08 14:05:52  bourgesl
  * fixed several resizing issues (target list, search widget)
  * use the custom StarResolverWidget to have manually edited targets
@@ -79,6 +82,7 @@ import fr.jmmc.aspro.model.oi.InterferometerConfiguration;
 import fr.jmmc.aspro.model.oi.InterferometerConfigurationChoice;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Pop;
+import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.mcs.astro.star.Star;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -824,8 +828,14 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
         final int index = locationToIndex(evt.getPoint());
         // Get target name :
         final String targetName = (String) getModel().getElementAt(index);
-        // Return the tool tip text :
-        return ObservationManager.getInstance().getTarget(targetName).toHtml();
+        if (targetName != null) {
+          final Target target = ObservationManager.getInstance().getTarget(targetName);
+          if (target != null) {
+            // Return the tool tip text :
+            return target.toHtml();
+          }
+        }
+        return null;
       }
     };
   }
