@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetModelForm.java,v 1.12 2010-04-06 13:58:37 bourgesl Exp $"
+ * "@(#) $Id: TargetModelForm.java,v 1.13 2010-04-08 14:06:32 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.12  2010/04/06 13:58:37  bourgesl
+ * minor UI changes for mac os & other LAF
+ *
  * Revision 1.11  2010/03/30 12:08:44  bourgesl
  * table cell editor behaviour : replace value instead of append value
  *
@@ -109,6 +112,7 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
 
   /**
    * Display the model editor using the given target name as the initial selected target
+   * @param targetName optional target name to display only the models of this target
    * @return true if the model editor changed anything
    */
   public static boolean showModelEditor(final String targetName) {
@@ -435,6 +439,7 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
 
   /**
    * Update the UI when a model is selected in the target/model tree
+   * @param target selected target
    * @param model selected model
    */
   private void processModelSelection(final Target target, final Model model) {
@@ -462,7 +467,7 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
   /**
    * Define the list of models to use in the table of parameters
    * @param target target models to use
-   * @param editMode edition mode
+   * @param mode edition mode
    */
   private void defineModels(final Target target, final EditMode mode) {
     final ModelParameterTableModel tableModel = getModelParameterTableModel();

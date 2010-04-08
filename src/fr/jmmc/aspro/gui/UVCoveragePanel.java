@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.29 2010-04-06 14:40:47 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.30 2010-04-08 14:06:51 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.29  2010/04/06 14:40:47  bourgesl
+ * minor UI changes for mac os (II)
+ *
  * Revision 1.28  2010/04/06 13:58:37  bourgesl
  * minor UI changes for mac os & other LAF
  *
@@ -597,7 +600,7 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
 
     final ObservationSetting observation = ObservationManager.getInstance().getObservation();
     final String instrumentName = observation.getInstrumentConfiguration().getName();
-                
+
     if (AsproConstants.INS_AMBER.equals(instrumentName)) {
       // set the source with this instance :
       evt.setSource(this);
@@ -605,9 +608,9 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
       ExportOBAmberAction.getInstance().actionPerformed(evt);
     } else {
       JOptionPane.showMessageDialog(null, "The application can not generate an Observing Block for this instrument !",
-                "Error", JOptionPane.INFORMATION_MESSAGE);
+              "Error", JOptionPane.INFORMATION_MESSAGE);
     }
-    
+
   }//GEN-LAST:event_jButtonOBActionPerformed
 
   /**
@@ -741,6 +744,7 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
 
   /**
    * Refresh the instrument modes
+   * @param observation current observation settings
    */
   private void updateComboInstrumentModes(final ObservationSetting observation) {
     final Object oldValue = this.jComboBoxInstrumentMode.getSelectedItem();
@@ -761,6 +765,7 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
 
   /**
    * Refresh the fringe tracker modes
+   * @param observation current observation settings
    */
   private void updateComboFTModes(final ObservationSetting observation) {
     final Object oldValue = this.jComboBoxFTMode.getSelectedItem();
@@ -821,7 +826,10 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     }
   }
 
-  /** Handle the stateChanged event from the FieldSliderAdapter instances. */
+  /**
+   * Handle the stateChanged event from the FieldSliderAdapter instances
+   * @param ce change event
+   */
   public void stateChanged(final ChangeEvent ce) {
     final FieldSliderAdapter source = (FieldSliderAdapter) ce.getSource();
 

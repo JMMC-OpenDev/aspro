@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityPanel.java,v 1.28 2010-04-02 14:40:39 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityPanel.java,v 1.29 2010-04-08 14:06:06 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.28  2010/04/02 14:40:39  bourgesl
+ * added elevation data and transit date
+ *
  * Revision 1.27  2010/04/02 10:05:08  bourgesl
  * minor visual changes
  *
@@ -502,6 +505,8 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
   /**
    * Update the datasets and the symbol axis given the star observability data
    * @param starVis star observability data
+   * @param min lower date of the plot
+   * @param max upper date of the plot
    */
   private void updateChart(final List<StarObservabilityData> starVis, final Date min, final Date max) {
     final ColorPalette palette = ColorPalette.getDefaultColorPalette();
