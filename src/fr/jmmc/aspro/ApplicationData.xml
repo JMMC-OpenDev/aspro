@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <ApplicationData link="http://www.jmmc.fr/aspro">
-  <program name="Aspro" version="0.1b11"/>
+  <program name="Aspro" version="0.3b1"/>
   <compilation date="21/09/2009" compiler="JDK 1.5.0_16"/>
   <text>
     <![CDATA[ASPRO is a complete observation preparation tool developed and maintained by the JMMC
@@ -33,31 +33,42 @@
     </menu>
   </menubar>
   <releasenotes>
-    <release version="0.1">
-      <prerelease version="0.1b11">
+    <release version="0.3">
+      <prerelease version="0.3b1">
+        <change>The star resolver now supports RA/DEC coordinates to enter manually a new target
+                (useful when simbad is down or no internet connection)</change>
+        <change>Missing fluxes used in Observing Block set to -99</change>
+        <change>Several minor UI changes for mac OS X platform (10.4 and more)</change>
+        <change>Deployment : Pal library is embedded in its own Jnlp file to avoid signing issues</change>
+      </prerelease>
+    </release>
+    <release version="0.2">
+      <prerelease version="0.2b5"> <!-- 0.1b11 -->
         <change>Added a transit mark and ticks for the elevation on the observability plot</change>
         <change>Export VLTI AMBER Observing Block (OB) for a single target (simple)</change>
         <change>Disable model image widgets when the current target has no defined model</change>
         <change>Do not use Rho / Theta for the first model in the model editor</change>
         <change>Replace instead of Append behaviour in the parameter table of the model editor</change>
       </prerelease>
-      <prerelease version="0.1b10">
+      <prerelease version="0.2b4"> <!-- 0.1b10 -->
         <change>Added circle and elongated disk models</change>
         <change>Rho / Theta editor instead of X/Y in the model editor</change>
       </prerelease>
-      <prerelease version="0.1b9">
+      <prerelease version="0.2b3"> <!-- 0.1b9 -->
         <change>First release of the model editor with only punct and disk models</change>
       </prerelease>
-      <prerelease version="0.1b8">
+      <prerelease version="0.2b2"> <!-- 0.1b8 -->
         <change>Enhanced UV coverage plot with several gui widgets to control the plot (U-V range, amplitude or phase)</change>
         <change>Better RGB color (LUT) conversion (linear) for visibilities</change>
         <change>Force LUT Color models to be 256 colors wide with black arround minimum value</change>
       </prerelease>
-      <prerelease version="0.1b7">
+      <prerelease version="0.2b1"> <!-- 0.1b7 -->
         <change>Imported Target Model from jmcs</change>
         <change>Corrected several minor style on charts</change>
         <change>Added target Model uv map on the uv coverage plot with zomming supported</change>
       </prerelease>
+    </release>
+    <release version="0.1">
       <prerelease version="0.1b6">
         <change>Minor bug fixed on UV Coverage plot when the observability displays the baseline limits</change>
         <change>Fixed PDF text rendering to support greek unicode characters</change>
