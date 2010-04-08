@@ -341,7 +341,7 @@
 
 <!-- other fields from OIFits TARGET -->
 
-<!-- radial velocity : SYSVEL, VELDEF, VELTYP -->
+<!-- missing radial velocity : SYSVEL, VELDEF, VELTYP -->
 
 <!-- proper motion -->
       <xsd:element name="PMRA" type="xsd:double" minOccurs="0">
@@ -358,6 +358,8 @@
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
+
+<!-- missing PM RA/DEC errors -->
 
 <!-- parallax -->
       <xsd:element name="PARALLAX" type="xsd:double" minOccurs="0">
