@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproGui.java,v 1.9 2010-04-02 09:21:49 bourgesl Exp $"
+ * "@(#) $Id: AsproGui.java,v 1.10 2010-04-08 14:04:27 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.9  2010/04/02 09:21:49  bourgesl
+ * updated javadoc
+ *
  * Revision 1.8  2010/02/12 15:53:18  bourgesl
  * added target model editor
  *
@@ -50,6 +53,7 @@ import java.util.TimeZone;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
+import javax.swing.ToolTipManager;
 
 /**
  * This class represents the Aspro GUI application
@@ -193,6 +197,10 @@ public class AsproGui extends App {
 
     // force Locale for Swing Components :
     JComponent.setDefaultLocale(Locale.US);
+
+    // let the tooltip stay longer (30s) :
+    ToolTipManager.sharedInstance().setInitialDelay(100);
+    ToolTipManager.sharedInstance().setDismissDelay(30000);
 
     // Start application with the command line arguments
     new AsproGui(args);
