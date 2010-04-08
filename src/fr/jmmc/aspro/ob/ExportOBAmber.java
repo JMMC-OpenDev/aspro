@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBAmber.java,v 1.2 2010-04-06 08:31:44 bourgesl Exp $"
+ * "@(#) $Id: ExportOBAmber.java,v 1.3 2010-04-08 14:08:23 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2010/04/06 08:31:44  bourgesl
+ * fixed classloader issue with JNLP
+ *
  * Revision 1.1  2010/04/02 10:07:35  bourgesl
  * simple OB generation for AMBER
  *
@@ -113,7 +116,7 @@ public class ExportOBAmber {
     document = document.replaceFirst(KEY_RA, raDec[0]);
     document = document.replaceFirst(KEY_DEC, raDec[1]);
 
-    // PMRA / PMDEC :
+    // PMRA / PMDEC (optional) :
     document = document.replaceFirst(KEY_PM_RA,
             df6.format((target.getPMRA() != null) ? target.getPMRA().doubleValue() : 0d));
     document = document.replaceFirst(KEY_PM_DEC,
@@ -130,13 +133,13 @@ public class ExportOBAmber {
 
     // Magnitudes for H, K :
     document = document.replaceFirst(KEY_HMAG,
-            df3.format((target.getFLUXH() != null) ? target.getFLUXH().doubleValue() : 0d));
+            df3.format((target.getFLUXH() != null) ? target.getFLUXH().doubleValue() : -99d));
     document = document.replaceFirst(KEY_KMAG,
-            df3.format((target.getFLUXK() != null) ? target.getFLUXK().doubleValue() : 0d));
+            df3.format((target.getFLUXK() != null) ? target.getFLUXK().doubleValue() : -99d));
 
     // Coude Guided Star = Science (= mag V) :
     document = document.replaceFirst(KEY_COUDE_GS_MAG,
-            df3.format((target.getFLUXV() != null) ? target.getFLUXV().doubleValue() : 0d));
+            df3.format((target.getFLUXV() != null) ? target.getFLUXV().doubleValue() : -99d));
 
     // Later : ft sensor
     document = document.replaceFirst(KEY_FT_SENSOR, "NONE");
