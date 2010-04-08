@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationManager.java,v 1.24 2010-04-02 14:39:34 bourgesl Exp $"
+ * "@(#) $Id: ObservationManager.java,v 1.25 2010-04-08 14:07:21 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.24  2010/04/02 14:39:34  bourgesl
+ * javadoc
+ *
  * Revision 1.23  2010/02/17 15:12:40  bourgesl
  * format
  *
@@ -415,24 +418,24 @@ public class ObservationManager extends BaseOIManager {
         t.setDEC(star.getPropertyAsDouble(Star.Property.DEC_d).doubleValue());
         t.setEQUINOX(AsproConstants.EPOCH_J2000);
 
-        // Proper motion (mas/yr) :
+        // Proper motion (mas/yr) (optional) :
         t.setPMRA(star.getPropertyAsDouble(Star.Property.PROPERMOTION_RA));
         t.setPMDEC(star.getPropertyAsDouble(Star.Property.PROPERMOTION_DEC));
 
-        // Parallax (mas) :
+        // Parallax (mas) (optional) :
         t.setPARALLAX(star.getPropertyAsDouble(Star.Property.PARALLAX));
         t.setPARAERR(star.getPropertyAsDouble(Star.Property.PARALLAX_err));
 
-        // Spectral type :
-        t.setSPECTYP(star.getPropertyAsString(Star.Property.SPECTRALTYPES));
-
-        // Magnitudes :
+        // Magnitudes (optional) :
         t.setFLUXV(star.getPropertyAsDouble(Star.Property.FLUX_V));
         t.setFLUXI(star.getPropertyAsDouble(Star.Property.FLUX_I));
         t.setFLUXJ(star.getPropertyAsDouble(Star.Property.FLUX_J));
         t.setFLUXH(star.getPropertyAsDouble(Star.Property.FLUX_H));
         t.setFLUXK(star.getPropertyAsDouble(Star.Property.FLUX_K));
         t.setFLUXN(star.getPropertyAsDouble(Star.Property.FLUX_N));
+
+        // Spectral type :
+        t.setSPECTYP(star.getPropertyAsString(Star.Property.SPECTRALTYPES));
 
         getObservation().getTargets().add(t);
       }
