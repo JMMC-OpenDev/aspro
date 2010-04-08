@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BasicObservationForm.java,v 1.22 2010-04-06 14:40:47 bourgesl Exp $"
+ * "@(#) $Id: BasicObservationForm.java,v 1.23 2010-04-08 14:05:52 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.22  2010/04/06 14:40:47  bourgesl
+ * minor UI changes for mac os (II)
+ *
  * Revision 1.21  2010/04/02 10:05:08  bourgesl
  * minor visual changes
  *
@@ -76,6 +79,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.DecimalFormat;
@@ -88,6 +92,7 @@ import java.util.Vector;
 import java.util.logging.Level;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JFormattedTextField;
+import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JSpinner;
 import javax.swing.SwingUtilities;
@@ -146,10 +151,10 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
     jTextPoPs = new JFormattedTextField(getPopsFormatter());
     jLabel4 = new javax.swing.JLabel();
     jScrollPane1 = new javax.swing.JScrollPane();
-    jListTargets = new javax.swing.JList();
+    jListTargets = createTargetList();
     jButtonRemoveTarget = new javax.swing.JButton();
-    starSearchField = new fr.jmmc.mcs.astro.star.StarResolverWidget();
     jButtonModelEditor = new javax.swing.JButton();
+    starSearchField = new fr.jmmc.aspro.gui.star.EditableStarResolverWidget();
     jPanelOptions = new javax.swing.JPanel();
     jLabel1 = new javax.swing.JLabel();
     jDateSpinner = new javax.swing.JSpinner();
@@ -170,7 +175,7 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.ipadx = 5;
     gridBagConstraints.ipady = 4;
-    gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
+    gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
     jPanelMain.add(jLabel2, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
@@ -179,6 +184,7 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.ipadx = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+    gridBagConstraints.weightx = 0.1;
     gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
     jPanelMain.add(jComboBoxInterferometer, gridBagConstraints);
 
@@ -210,6 +216,7 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
     gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+    gridBagConstraints.weightx = 0.1;
     gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
     jPanelMain.add(jComboBoxInstrument, gridBagConstraints);
 
@@ -218,13 +225,14 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 3;
     gridBagConstraints.gridy = 1;
-    gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
+    gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
     jPanelMain.add(jLabelConfiguration, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 4;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.weightx = 0.1;
     gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
     jPanelMain.add(jComboBoxInstrumentConfiguration, gridBagConstraints);
 
@@ -233,7 +241,7 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 5;
     gridBagConstraints.gridy = 1;
-    gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
+    gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
     jPanelMain.add(jLabelPops, gridBagConstraints);
 
     jTextPoPs.setColumns(4);
@@ -263,6 +271,7 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 0.1;
     gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
     jPanelMain.add(jScrollPane1, gridBagConstraints);
@@ -278,16 +287,8 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 2;
-    gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
+    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
     jPanelMain.add(jButtonRemoveTarget, gridBagConstraints);
-
-    starSearchField.setMinimumSize(new java.awt.Dimension(80, 23));
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 3;
-    gridBagConstraints.gridy = 2;
-    gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
-    jPanelMain.add(starSearchField, gridBagConstraints);
 
     jButtonModelEditor.setText("Model editor");
     jButtonModelEditor.addActionListener(new java.awt.event.ActionListener() {
@@ -301,6 +302,16 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
     jPanelMain.add(jButtonModelEditor, gridBagConstraints);
+
+    starSearchField.setMinimumSize(new java.awt.Dimension(100, 23));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 3;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.weightx = 0.1;
+    gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
+    jPanelMain.add(starSearchField, gridBagConstraints);
 
     add(jPanelMain);
 
@@ -568,7 +579,7 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
   /**
    * Process the change event for the PoPs configuration text field.
    * Validates the new input (digits corresponds to valid PoPs indices)
-   * @param e action event
+   * @param evt property change event
    */
   public void jTextPoPsPropertyChange(final PropertyChangeEvent evt) {
     List<Pop> listPoPs = null;
@@ -784,6 +795,32 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
   private javax.swing.JPanel jPanelOptions;
   private javax.swing.JScrollPane jScrollPane1;
   private javax.swing.JFormattedTextField jTextPoPs;
-  private fr.jmmc.mcs.astro.star.StarResolverWidget starSearchField;
+  private fr.jmmc.aspro.gui.star.EditableStarResolverWidget starSearchField;
   // End of variables declaration//GEN-END:variables
+
+  /**
+   * Create the custom JList to support tooltips for targets
+   * @return JList
+   */
+  private static JList createTargetList() {
+    return new JList() {
+
+      /** default serial UID for Serializable interface */
+      private static final long serialVersionUID = 1;
+
+      /** This method is called as the cursor moves within the list */
+      @Override
+      public String getToolTipText(final MouseEvent evt) {
+        if (logger.isLoggable(Level.FINEST)) {
+          logger.finest("getToolTipText : " + evt);
+        }
+        // Get item index :
+        final int index = locationToIndex(evt.getPoint());
+        // Get target name :
+        final String targetName = (String) getModel().getElementAt(index);
+        // Return the tool tip text :
+        return ObservationManager.getInstance().getTarget(targetName).toHtml();
+      }
+    };
+  }
 }
