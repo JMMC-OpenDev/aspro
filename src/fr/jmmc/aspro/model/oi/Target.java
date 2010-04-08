@@ -504,6 +504,51 @@ public class Target
   }
 
   /**
+   * Return an HTML representation of the target used by tooltips
+   * @return HTML representation
+   */
+  public String toHtml() {
+    final StringBuilder sb = new StringBuilder(128);
+    sb.append("<html>");
+    sb.append("<b>Name</b> : ").append(getName());
+    sb.append("<br><b>Coord</b> : ").append(getRA()).append(" ").append(getDEC());
+    if (getPMRA() != null) {
+      sb.append("<br><b>Proper motion</b> (mas/yr) : ").append(getPMRA()).append(" ").append(getPMDEC());
+    }
+    if (getPARALLAX() != null) {
+      sb.append("<br><b>Parallax</b> (mas) : ").append(getPARALLAX()).append(" [").append(getPARAERR()).append("]");
+    }
+    if (getSPECTYP().length() > 0) {
+      sb.append("<br><b>Spectral type</b> : ").append(getSPECTYP());
+    }
+    // Fluxes :
+    if (getFLUXV() != null) {
+      sb.append("<br><b>Flux V</b> : ").append(getFLUXV());
+    }
+    if (getFLUXI() != null) {
+      sb.append("<br><b>Flux I</b> : ").append(getFLUXI());
+    }
+    if (getFLUXJ() != null) {
+      sb.append("<br><b>Flux J</b> : ").append(getFLUXJ());
+    }
+    if (getFLUXH() != null) {
+      sb.append("<br><b>Flux H</b> : ").append(getFLUXH());
+    }
+    if (getFLUXK() != null) {
+      sb.append("<br><b>Flux K</b> : ").append(getFLUXK());
+    }
+    if (getFLUXN() != null) {
+      sb.append("<br><b>Flux N</b> : ").append(getFLUXN());
+    }
+
+    // Ids ?
+
+    sb.append("</html>");
+    return sb.toString();
+  }
+
+
+  /**
    * Return a deep "copy" of this instance
    * @return deep "copy" of this instance
    */
