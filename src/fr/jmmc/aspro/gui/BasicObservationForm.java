@@ -1,11 +1,16 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BasicObservationForm.java,v 1.23 2010-04-08 14:05:52 bourgesl Exp $"
+ * "@(#) $Id: BasicObservationForm.java,v 1.24 2010-04-08 14:22:04 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.23  2010/04/08 14:05:52  bourgesl
+ * fixed several resizing issues (target list, search widget)
+ * use the custom StarResolverWidget to have manually edited targets
+ * added tooltips on the target list
+ *
  * Revision 1.22  2010/04/06 14:40:47  bourgesl
  * minor UI changes for mac os (II)
  *
@@ -303,6 +308,7 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
     gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
     jPanelMain.add(jButtonModelEditor, gridBagConstraints);
 
+    starSearchField.setToolTipText("<html>\nTarget identifier (SimBad resolution)<br/>\nor RA / DEC coordinates ('HMS DMS')\n</html>");
     starSearchField.setMinimumSize(new java.awt.Dimension(100, 23));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 3;
