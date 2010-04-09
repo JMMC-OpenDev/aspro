@@ -26,13 +26,17 @@ import fr.jmmc.mcs.model.targetmodel.Model;
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
  *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="RA" type="{http://www.w3.org/2001/XMLSchema}double"/>
- *         &lt;element name="DEC" type="{http://www.w3.org/2001/XMLSchema}double"/>
+ *         &lt;element name="RA" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *         &lt;element name="DEC" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *         &lt;element name="EQUINOX" type="{http://www.w3.org/2001/XMLSchema}float"/>
+ *         &lt;element name="SYSVEL" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
+ *         &lt;element name="VELTYP" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="PMRA" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
  *         &lt;element name="PMDEC" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
  *         &lt;element name="PARALLAX" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
  *         &lt;element name="PARA_ERR" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
+ *         &lt;element name="IDS" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ *         &lt;element name="OBJTYP" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="SPECTYP" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="FLUX_V" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
  *         &lt;element name="FLUX_I" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
@@ -56,10 +60,14 @@ import fr.jmmc.mcs.model.targetmodel.Model;
     "ra",
     "dec",
     "equinox",
+    "sysvel",
+    "veltyp",
     "pmra",
     "pmdec",
     "parallax",
     "paraerr",
+    "ids",
+    "objtyp",
     "spectyp",
     "fluxv",
     "fluxi",
@@ -76,12 +84,16 @@ public class Target
 
     @XmlElement(required = true)
     protected String name;
-    @XmlElement(name = "RA")
-    protected double ra;
-    @XmlElement(name = "DEC")
-    protected double dec;
+    @XmlElement(name = "RA", required = true)
+    protected String ra;
+    @XmlElement(name = "DEC", required = true)
+    protected String dec;
     @XmlElement(name = "EQUINOX")
     protected float equinox;
+    @XmlElement(name = "SYSVEL")
+    protected Double sysvel;
+    @XmlElement(name = "VELTYP")
+    protected String veltyp;
     @XmlElement(name = "PMRA")
     protected Double pmra;
     @XmlElement(name = "PMDEC")
@@ -90,6 +102,10 @@ public class Target
     protected Double parallax;
     @XmlElement(name = "PARA_ERR")
     protected Double paraerr;
+    @XmlElement(name = "IDS")
+    protected String ids;
+    @XmlElement(name = "OBJTYP")
+    protected String objtyp;
     @XmlElement(name = "SPECTYP")
     protected String spectyp;
     @XmlElement(name = "FLUX_V")
@@ -135,32 +151,48 @@ public class Target
     /**
      * Gets the value of the ra property.
      * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
      */
-    public double getRA() {
+    public String getRA() {
         return ra;
     }
 
     /**
      * Sets the value of the ra property.
      * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
      */
-    public void setRA(double value) {
+    public void setRA(String value) {
         this.ra = value;
     }
 
     /**
      * Gets the value of the dec property.
      * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
      */
-    public double getDEC() {
+    public String getDEC() {
         return dec;
     }
 
     /**
      * Sets the value of the dec property.
      * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
      */
-    public void setDEC(double value) {
+    public void setDEC(String value) {
         this.dec = value;
     }
 
@@ -178,6 +210,54 @@ public class Target
      */
     public void setEQUINOX(float value) {
         this.equinox = value;
+    }
+
+    /**
+     * Gets the value of the sysvel property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getSYSVEL() {
+        return sysvel;
+    }
+
+    /**
+     * Sets the value of the sysvel property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setSYSVEL(Double value) {
+        this.sysvel = value;
+    }
+
+    /**
+     * Gets the value of the veltyp property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getVELTYP() {
+        return veltyp;
+    }
+
+    /**
+     * Sets the value of the veltyp property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setVELTYP(String value) {
+        this.veltyp = value;
     }
 
     /**
@@ -274,6 +354,54 @@ public class Target
      */
     public void setPARAERR(Double value) {
         this.paraerr = value;
+    }
+
+    /**
+     * Gets the value of the ids property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getIDS() {
+        return ids;
+    }
+
+    /**
+     * Sets the value of the ids property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setIDS(String value) {
+        this.ids = value;
+    }
+
+    /**
+     * Gets the value of the objtyp property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getOBJTYP() {
+        return objtyp;
+    }
+
+    /**
+     * Sets the value of the objtyp property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setOBJTYP(String value) {
+        this.objtyp = value;
     }
 
     /**
@@ -498,6 +626,53 @@ public class Target
     }
     
 //--simple--preserve
+
+  /** computed RA in degrees */
+  @javax.xml.bind.annotation.XmlTransient
+  private double raDeg = Double.NaN;
+
+  /**
+   * Return the right ascension (RA) in degrees
+   * @return right ascension (RA) in degrees
+   */
+  public double getRADeg() {
+    if (Double.isNaN(this.raDeg)) {
+      this.raDeg = fr.jmmc.mcs.astro.ALX.parseHMS(getRA());
+    }
+    return this.raDeg;
+  }
+
+  /**
+   * Define the right ascension (RA) in degrees (read only)
+   * @param raDeg right ascension (RA) in degrees
+   */
+  public void setRADeg(final double raDeg) {
+    this.raDeg = raDeg;
+  }
+
+  /** computed DEC in degrees */
+  @javax.xml.bind.annotation.XmlTransient
+  private double decDeg = Double.NaN;
+
+  /**
+   * Return the declination (DEC) in degrees
+   * @return declination (DEC) in degrees
+   */
+  public double getDECDeg() {
+    if (Double.isNaN(this.decDeg)) {
+      this.decDeg = fr.jmmc.mcs.astro.ALX.parseDEC(getDEC());
+    }
+    return this.decDeg;
+  }
+
+  /**
+   * Define the declination (DEC) in degrees (read only)
+   * @param decDeg declination (DEC) in degrees
+   */
+  public void setDECDeg(final double decDeg) {
+    this.decDeg = decDeg;
+  }
+
   @Override
   public String toString() {
     return "Target [" + ((this.name != null) ? this.name : "undefined") + "]" + " RA = " + getRA() + " DEC = " + getDEC();
@@ -518,8 +693,17 @@ public class Target
     if (getPARALLAX() != null) {
       sb.append("<br><b>Parallax</b> (mas) : ").append(getPARALLAX()).append(" [").append(getPARAERR()).append("]");
     }
-    if (getSPECTYP().length() > 0) {
-      sb.append("<br><b>Spectral type</b> : ").append(getSPECTYP());
+    if (getSYSVEL() != null) {
+      sb.append("<br><b>Radial Velocity</b> (km/s) : ").append(getSYSVEL());
+      if (getVELTYP() != null) {
+        sb.append(" (").append(getVELTYP()).append(")");
+      }
+    }
+    if (getOBJTYP() != null && getOBJTYP().length() > 0) {
+      sb.append("<br><b>Object types</b> : ").append(getOBJTYP());
+    }
+    if (getSPECTYP() != null && getSPECTYP().length() > 0) {
+      sb.append("<br><b>Spectral types</b> : ").append(getSPECTYP());
     }
     // Fluxes :
     if (getFLUXV() != null) {
