@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationManager.java,v 1.25 2010-04-08 14:07:21 bourgesl Exp $"
+ * "@(#) $Id: ObservationManager.java,v 1.26 2010-04-09 10:21:09 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.25  2010/04/08 14:07:21  bourgesl
+ * comments
+ *
  * Revision 1.24  2010/04/02 14:39:34  bourgesl
  * javadoc
  *
@@ -414,8 +417,8 @@ public class ObservationManager extends BaseOIManager {
          */
 
         // coordinates (deg) :
-        t.setRA(star.getPropertyAsDouble(Star.Property.RA_d).doubleValue());
-        t.setDEC(star.getPropertyAsDouble(Star.Property.DEC_d).doubleValue());
+        t.setRA(star.getPropertyAsString(Star.Property.RA));
+        t.setDEC(star.getPropertyAsString(Star.Property.DEC));
         t.setEQUINOX(AsproConstants.EPOCH_J2000);
 
         // Proper motion (mas/yr) (optional) :
@@ -434,8 +437,18 @@ public class ObservationManager extends BaseOIManager {
         t.setFLUXK(star.getPropertyAsDouble(Star.Property.FLUX_K));
         t.setFLUXN(star.getPropertyAsDouble(Star.Property.FLUX_N));
 
-        // Spectral type :
+        // Spectral types :
         t.setSPECTYP(star.getPropertyAsString(Star.Property.SPECTRALTYPES));
+
+        // Object types :
+        t.setOBJTYP(star.getPropertyAsString(Star.Property.OTYPELIST));
+
+        // Radial velocity :
+        t.setSYSVEL(star.getPropertyAsDouble(Star.Property.RV));
+        t.setVELTYP(star.getPropertyAsString(Star.Property.RV_DEF));
+
+        // Object types :
+        t.setIDS(star.getPropertyAsString(Star.Property.IDS));
 
         getObservation().getTargets().add(t);
       }
