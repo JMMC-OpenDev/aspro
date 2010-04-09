@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: EditableStarResolverWidget.java,v 1.1 2010-04-08 14:04:08 bourgesl Exp $"
+ * "@(#) $Id: EditableStarResolverWidget.java,v 1.2 2010-04-09 09:25:07 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2010/04/08 14:04:08  bourgesl
+ * custom StarResolverWidget which allows the user to enter RA/DEC coordinates in 'HMS DMS' format and mimic the StarResolver behaviour
+ *
  *
  ******************************************************************************/
 package fr.jmmc.aspro.gui.star;
@@ -239,16 +242,16 @@ public class EditableStarResolverWidget extends StarResolverWidget {
         // Test cases :
 
         // 274,2489167 / -19,0759167 : OK
-        test(searchField, " 18:16:59.74  \t  -19:04:33.3  ");
+//        test(searchField, " 18:16:59.74  \t  -19:04:33.3  ");
 
         //  -274,2489167 / 19,0759167 : OK
-        test(searchField, "-18:16:59.74 +19:04:33.3");
+//        test(searchField, "-18:16:59.74 +19:04:33.3");
 
         //  -359,9999958 / 89,9999997 : OK
-        test(searchField, "-23:59:59.999 +89:59:59.999");
+//        test(searchField, "-23:59:59.999 +89:59:59.999");
 
         // 359,9999958 / -89,9999997 : OK
-        test(searchField, "+23:59:59.999 -89:59:59.999");
+//        test(searchField, "+23:59:59.999 -89:59:59.999");
 
         /*
         eta tau
