@@ -1,11 +1,18 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationManager.java,v 1.26 2010-04-09 10:21:09 bourgesl Exp $"
+ * "@(#) $Id: ObservationManager.java,v 1.27 2010-04-09 10:33:10 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.26  2010/04/09 10:21:09  bourgesl
+ * modified Target type :
+ * - RA/DEC in HMS/DMS
+ * - added radial velocity SYSVEL VELDEF
+ * - added object types OBJTYP
+ * - added identifiers IDS
+ *
  * Revision 1.25  2010/04/08 14:07:21  bourgesl
  * comments
  *
@@ -417,8 +424,8 @@ public class ObservationManager extends BaseOIManager {
          */
 
         // coordinates (deg) :
-        t.setRA(star.getPropertyAsString(Star.Property.RA));
-        t.setDEC(star.getPropertyAsString(Star.Property.DEC));
+        t.setRA(star.getPropertyAsString(Star.Property.RA).replace(' ', ':'));
+        t.setDEC(star.getPropertyAsString(Star.Property.DEC).replace(' ', ':'));
         t.setEQUINOX(AsproConstants.EPOCH_J2000);
 
         // Proper motion (mas/yr) (optional) :
