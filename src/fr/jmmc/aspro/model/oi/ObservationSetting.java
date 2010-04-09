@@ -17,7 +17,6 @@ import fr.jmmc.aspro.model.OIBase;
  * 
  *         Information to add :
  * 
- *         - insMode "Spectral Mode" /INDEX oipt%vlti%amber%insMode
  *         - insNchan
  *         - insRes
  * 
