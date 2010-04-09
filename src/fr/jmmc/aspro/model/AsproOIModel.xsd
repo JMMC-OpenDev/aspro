@@ -10,10 +10,7 @@
 
   <xsd:annotation>
     <xsd:documentation>
-        This xml schema describes the optical interferometer 
-
-        Created : 08/09/2009 :
-          Laurent : Initial revision
+        This xml schema describes the optical interferometers and observations.
     </xsd:documentation>
     <xsd:appinfo>
       <jaxb:globalBindings>
@@ -116,7 +113,6 @@
 
         Information to add :
 
-        - insMode "Spectral Mode" /INDEX oipt%vlti%amber%insMode
         - insNchan
         - insRes
 
@@ -315,20 +311,21 @@
       </xsd:element>
 
 <!-- position -->
-      <xsd:element name="RA" type="xsd:double">
+      <xsd:element name="RA" type="xsd:string">
         <xsd:annotation>
           <xsd:documentation>
-            R.A. at mean equinox (deg)
+            R.A. at mean equinox (HMS)
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
-      <xsd:element name="DEC" type="xsd:double">
+      <xsd:element name="DEC" type="xsd:string">
         <xsd:annotation>
           <xsd:documentation>
-            Decl. at mean equinox (deg)
+            Decl. at mean equinox (DMS)
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
+
       <xsd:element name="EQUINOX" type="xsd:float">
         <xsd:annotation>
           <xsd:documentation>
@@ -341,20 +338,35 @@
 
 <!-- other fields from OIFits TARGET -->
 
-<!-- missing radial velocity : SYSVEL, VELDEF, VELTYP -->
+<!-- radial velocity -->
+      <xsd:element name="SYSVEL" type="xsd:double" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>
+            Radial velocity (km/s)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
+      <xsd:element name="VELTYP" type="xsd:string" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>
+            Radial Velocity type (Radio, IR, Visible, UV, X, gamma)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
 
 <!-- proper motion -->
       <xsd:element name="PMRA" type="xsd:double" minOccurs="0">
         <xsd:annotation>
           <xsd:documentation>
-            Proper motion in R.A. (deg yr 1)
+            Proper motion in R.A. (mas/yr)
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
       <xsd:element name="PMDEC" type="xsd:double" minOccurs="0">
         <xsd:annotation>
           <xsd:documentation>
-            Proper motion in decl. (deg yr 1)
+            Proper motion in decl. (mas/yr)
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
@@ -365,23 +377,41 @@
       <xsd:element name="PARALLAX" type="xsd:double" minOccurs="0">
         <xsd:annotation>
           <xsd:documentation>
-            Parallax (deg)
+            Parallax (mas)
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
       <xsd:element name="PARA_ERR" type="xsd:double" minOccurs="0">
         <xsd:annotation>
           <xsd:documentation>
-            Error in parallax (deg)
+            Error in parallax (mas)
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
 
-<!-- spectral type -->
+<!-- identifiers -->
+      <xsd:element name="IDS" type="xsd:string" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>
+            Simbad Identifiers (comma separated list)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
+<!-- object types -->
+      <xsd:element name="OBJTYP" type="xsd:string" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>
+            Object types
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
+<!-- spectral types -->
       <xsd:element name="SPECTYP" type="xsd:string" minOccurs="0">
         <xsd:annotation>
           <xsd:documentation>
-            Spectral type
+            Spectral types
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
