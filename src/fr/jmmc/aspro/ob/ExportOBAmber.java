@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBAmber.java,v 1.3 2010-04-08 14:08:23 bourgesl Exp $"
+ * "@(#) $Id: ExportOBAmber.java,v 1.4 2010-04-09 10:22:26 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2010/04/08 14:08:23  bourgesl
+ * changed missing value for fluxes to -99
+ *
  * Revision 1.2  2010/04/06 08:31:44  bourgesl
  * fixed classloader issue with JNLP
  *
@@ -108,13 +111,9 @@ public class ExportOBAmber {
     // comments = spectral type :
     document = document.replaceFirst(KEY_COMMENTS, target.getSPECTYP());
 
-    // convert RA/DEC to String :
-    // TODO : use SimBad value instead (no conversion) :
-    final String[] raDec = AstroSkyCalc.toString(target.getRA(), target.getDEC());
-
     // RA / DEC :
-    document = document.replaceFirst(KEY_RA, raDec[0]);
-    document = document.replaceFirst(KEY_DEC, raDec[1]);
+    document = document.replaceFirst(KEY_RA, target.getRA());
+    document = document.replaceFirst(KEY_DEC, target.getDEC());
 
     // PMRA / PMDEC (optional) :
     document = document.replaceFirst(KEY_PM_RA,
