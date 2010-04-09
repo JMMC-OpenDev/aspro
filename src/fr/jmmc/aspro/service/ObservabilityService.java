@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.38 2010-04-02 14:40:39 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.39 2010-04-09 10:23:29 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.38  2010/04/02 14:40:39  bourgesl
+ * added elevation data and transit date
+ *
  * Revision 1.37  2010/02/08 17:00:35  bourgesl
  * moved several reference checks to ObservationManager
  *
@@ -577,7 +580,7 @@ public class ObservabilityService {
   private List<PopObservabilityData> findPoPsForTargetObservability(final Target target) {
 
     // Target coordinates precessed to jd and to get az/alt positions from JSkyCalc :
-    final double[] raDec = this.sc.defineTarget(this.jdLst0, target.getRA(), target.getDEC());
+    final double[] raDec = this.sc.defineTarget(this.jdLst0, target.getRADeg(), target.getDECDeg());
 
     // precessed target right ascension in decimal hours :
     final double precRA = raDec[0];
@@ -641,7 +644,7 @@ public class ObservabilityService {
     this.data.addStarData(starData);
 
     // Target coordinates precessed to jd and to get az/alt positions from JSkyCalc :
-    final double[] raDec = this.sc.defineTarget(this.jdLst0, target.getRA(), target.getDEC());
+    final double[] raDec = this.sc.defineTarget(this.jdLst0, target.getRADeg(), target.getDECDeg());
 
     // precessed target right ascension in decimal hours :
     final double precRA = raDec[0];
@@ -1702,8 +1705,8 @@ public class ObservabilityService {
       // delta = n (deg)
       t.setName("\u0394 = " + Integer.toString(i));
       // 12:00:00
-      t.setRA(180d);
-      t.setDEC(i);
+      t.setRADeg(180d);
+      t.setDECDeg(i);
       t.setEQUINOX(AsproConstants.EPOCH_J2000);
 
       targets.add(t);
