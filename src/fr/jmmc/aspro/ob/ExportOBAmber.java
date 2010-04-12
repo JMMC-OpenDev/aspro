@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBAmber.java,v 1.4 2010-04-09 10:22:26 bourgesl Exp $"
+ * "@(#) $Id: ExportOBAmber.java,v 1.5 2010-04-12 14:33:18 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2010/04/09 10:22:26  bourgesl
+ * use RA/DEC in HMS/DMS instead of angle conversion (deg)
+ *
  * Revision 1.3  2010/04/08 14:08:23  bourgesl
  * changed missing value for fluxes to -99
  *
@@ -111,17 +114,19 @@ public class ExportOBAmber {
     // comments = spectral type :
     document = document.replaceFirst(KEY_COMMENTS, target.getSPECTYP());
 
-    // RA / DEC :
-    document = document.replaceFirst(KEY_RA, target.getRA());
-    document = document.replaceFirst(KEY_DEC, target.getDEC());
+    // convert RA/DEC with mas up to 3 digits :
+    final String[] raDec = AstroSkyCalc.toString(target.getRADeg(), target.getDECDeg());
 
-    // PMRA / PMDEC (optional) :
+    document = document.replaceFirst(KEY_RA, raDec[0]);
+    document = document.replaceFirst(KEY_DEC, raDec[1]);
+
+    // PMRA / PMDEC (optional) converted to arcsec/year :
     document = document.replaceFirst(KEY_PM_RA,
-            df6.format((target.getPMRA() != null) ? target.getPMRA().doubleValue() : 0d));
+            df6.format((target.getPMRA() != null) ? target.getPMRA().doubleValue() / 1000d : 0d));
     document = document.replaceFirst(KEY_PM_DEC,
-            df6.format((target.getPMDEC() != null) ? target.getPMDEC().doubleValue() : 0d));
+            df6.format((target.getPMDEC() != null) ? target.getPMDEC().doubleValue() / 1000d : 0d));
 
-    // replace invalid characters :
+    // replace invalid characters (i.e. not alpha numeric) :
     final String altName = targetName.replaceAll("[^a-zA-Z_0-9]", "_");
     document = document.replaceFirst(KEY_TARGET_NAME, altName);
 
