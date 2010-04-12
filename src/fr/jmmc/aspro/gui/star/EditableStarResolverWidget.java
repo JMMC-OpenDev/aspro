@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: EditableStarResolverWidget.java,v 1.2 2010-04-09 09:25:07 bourgesl Exp $"
+ * "@(#) $Id: EditableStarResolverWidget.java,v 1.3 2010-04-12 14:32:27 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2010/04/09 09:25:07  bourgesl
+ * disable tests
+ *
  * Revision 1.1  2010/04/08 14:04:08  bourgesl
  * custom StarResolverWidget which allows the user to enter RA/DEC coordinates in 'HMS DMS' format and mimic the StarResolver behaviour
  *
@@ -21,6 +24,8 @@ import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.logging.Level;
@@ -43,7 +48,10 @@ public class EditableStarResolverWidget extends StarResolverWidget {
           "fr.jmmc.aspro.gui.star.EditableStarResolverWidget");
   /** double dot character to detect coordinates in the text field */
   private static final String DOUBLE_DOT = ":";
-
+  /** int formatter for HH:MM or DD:MM */
+  private final static NumberFormat DF_INT = new DecimalFormat("00");
+  /** double formatter for SS.mmm */
+  private final static NumberFormat DF_DBL = new DecimalFormat("00.000");
   /* members */
   private ActionListener standardAction = null;
 
@@ -126,30 +134,36 @@ public class EditableStarResolverWidget extends StarResolverWidget {
     final int pos = coords.indexOf(' ');
 
     if (pos == -1) {
-      throw new IllegalArgumentException("wrong RA/DEC format: '" + input + "'  must be of form '+30:00:00.00 +30:00:00.00'");
+      throw new IllegalArgumentException("wrong RA/DEC format: '" + input + "'  must be of form '+10:00:00.00 +30:00:00.00'");
     }
 
-    final String hmsRa = coords.substring(0, pos);
-    final String dmsDec = coords.substring(pos + 1);
+    final String inputRA = coords.substring(0, pos);
+    final String inputDEC = coords.substring(pos + 1);
 
     // Validate the format of the RA value
-    if (!hmsRa.matches("[+|-]?[0-9]+[:][0-9]+[:][0-9]+.?[0-9]*")) {
+    if (!inputRA.matches("[+|-]?[0-9]+[:][0-9]+[:][0-9]+.?[0-9]*")) {
       throw new IllegalArgumentException("wrong RA format: '" +
-              hmsRa + "' must be of form +30:00:00.00");
+              inputRA + "' must be of form +10:00:00.00");
     }
 
     // Validate the format of the given value
-    if (!dmsDec.matches("[+|-]?[0-9]+[:][0-9]+[:][0-9]+.?[0-9]*")) {
+    if (!inputDEC.matches("[+|-]?[0-9]+[:][0-9]+[:][0-9]+.?[0-9]*")) {
       throw new IllegalArgumentException("wrong DEC format: '" +
-              dmsDec + "' must be of form +30:00:00.00");
+              inputDEC + "' must be of form +30:00:00.00");
     }
+
+    // check hour, minute and second values and reformat value :
+    final String hmsRa = parseHMS(inputRA);
+
+    // check degree, minute and second values and reformat value :
+    final String dmsDec = parseDMS(inputDEC);
 
     // ra/dec in degrees :
     final double ra = ALX.parseHMS(hmsRa);
     final double dec = ALX.parseDEC(dmsDec);
 
-    // name equals ra dec :
-    final String name = input;
+    // name equals 'RA DEC' (given coordinates) :
+    final String name = hmsRa + " " + dmsDec;
 
     /*
      * At this stage parsing went fine, update the internal star model.
@@ -203,8 +217,143 @@ public class EditableStarResolverWidget extends StarResolverWidget {
     starModel.fireNotification(Star.Notification.QUERY_COMPLETE);
   }
 
-  // --- Test Code -------------------------------------------------------------
+  /**
+   * Parse the input HMS value (HH:MM:SS.mmm) to check its hour, minute and second values.
+   * Then format those values in HH:MM:SS.mmm (insert missing zero characters)
+   *
+   * @param raHms input HMS value
+   * @return formatted string
+   * @throws IllegalArgumentException if any value is invalid
+   */
+  protected String parseHMS(final String raHms) {
 
+    int hh;
+    int hm;
+    double hs;
+
+    // note : the input string matches the regexp [+|-]?[0-9]+[:][0-9]+[:][0-9]+.?[0-9]*
+
+    // Parse the given string according to the format HH:MM:SS.mmm
+    try {
+      final String[] tokens = raHms.split(DOUBLE_DOT);
+      hh = Integer.parseInt(tokens[0]);
+
+      if (Math.abs(hh) >= 24) {
+        throw new IllegalArgumentException("invalid hour value : '" +
+                raHms + "'");
+      }
+
+      hm = Integer.parseInt(tokens[1]);
+
+      if (hm >= 60) {
+        throw new IllegalArgumentException("invalid minute value: '" +
+                raHms + "'");
+      }
+
+      hs = Double.parseDouble(tokens[2]);
+
+      if (hs >= 60d) {
+        throw new IllegalArgumentException("invalid second value: '" +
+                raHms + "'");
+      }
+      if (_logger.isLoggable(Level.FINE)) {
+        _logger.fine("hs = '" + hs + "'");
+      }
+
+    } catch (IllegalArgumentException iae) {
+      throw iae;
+    } catch (Exception e) {
+      if (_logger.isLoggable(Level.SEVERE)) {
+        _logger.log(Level.SEVERE, "format error", e);
+      }
+      throw new IllegalArgumentException("invalid value : '" +
+              raHms + "'");
+    }
+
+    // Return a string with missing zero characters :
+
+    final StringBuilder sb = new StringBuilder();
+    sb.append(DF_INT.format(hh));
+    sb.append(DOUBLE_DOT);
+    sb.append(DF_INT.format(hm));
+    sb.append(DOUBLE_DOT);
+    sb.append(DF_DBL.format(hs));
+
+    if (_logger.isLoggable(Level.FINE)) {
+      _logger.fine("HMS = '" + sb.toString() + "'");
+    }
+
+    return sb.toString();
+  }
+
+  /**
+   * Parse the input DMS value (DD:MM:SS.mmm) to check its degree, minute and second values.
+   * Then format those values in DD:MM:SS.mmm (insert missing zero characters)
+   *
+   * @param decDms input DMS value
+   * @return formatted string
+   * @throws IllegalArgumentException if any value is invalid
+   */
+  protected String parseDMS(final String decDms) {
+
+    int dd;
+    int dm;
+    double ds;
+
+    // note : the input string matches the regexp [+|-]?[0-9]+[:][0-9]+[:][0-9]+.?[0-9]*
+
+    // Parse the given string according to the format DD:MM:SS.mmm
+    try {
+      final String[] tokens = decDms.split(DOUBLE_DOT);
+      dd = Integer.parseInt(tokens[0]);
+
+      if (Math.abs(dd) >= 90) {
+        throw new IllegalArgumentException("invalid degree value : '" +
+                decDms + "'");
+      }
+
+      dm = Integer.parseInt(tokens[1]);
+
+      if (dm >= 60) {
+        throw new IllegalArgumentException("invalid minute value: '" +
+                decDms + "'");
+      }
+
+      ds = Double.parseDouble(tokens[2]);
+
+      if (ds >= 60d) {
+        throw new IllegalArgumentException("invalid second value: '" +
+                decDms + "'");
+      }
+
+    } catch (IllegalArgumentException iae) {
+      throw iae;
+    } catch (Exception e) {
+      if (_logger.isLoggable(Level.SEVERE)) {
+        _logger.log(Level.SEVERE, "format error", e);
+      }
+      throw new IllegalArgumentException("invalid value : '" +
+              decDms + "'");
+    }
+
+    // Return a string with missing zero characters :
+
+    final StringBuilder sb = new StringBuilder();
+    sb.append(DF_INT.format(dd));
+    sb.append(DOUBLE_DOT);
+    sb.append(DF_INT.format(dm));
+    sb.append(DOUBLE_DOT);
+    sb.append(DF_DBL.format(ds));
+
+    if (_logger.isLoggable(Level.FINE)) {
+      _logger.fine("DMS = '" + sb.toString() + "'");
+    }
+
+    return sb.toString();
+  }
+
+
+  // --- Test Code -------------------------------------------------------------
   /**
    * Main - for EditableStarResolverWidget demonstration and test only.
    * @param args ignored arguments
