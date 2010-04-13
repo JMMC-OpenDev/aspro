@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproGui.java,v 1.10 2010-04-08 14:04:27 bourgesl Exp $"
+ * "@(#) $Id: AsproGui.java,v 1.11 2010-04-13 14:20:55 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.10  2010/04/08 14:04:27  bourgesl
+ * customized ToolTipManager timeouts
+ *
  * Revision 1.9  2010/04/02 09:21:49  bourgesl
  * updated javadoc
  *
@@ -53,6 +56,7 @@ import java.util.TimeZone;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
+import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 
 /**
@@ -66,19 +70,6 @@ public class AsproGui extends App {
   /** Class logger */
   private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
-
-  /* members */
-  /* Swing Components */
-  /** Status Bar */
-  protected StatusBar statusBar;
-
-  /**
-   * Return AsproGui singleton
-   * @return AsproGui singleton
-   */
-  public static AsproGui getInstance() {
-    return (AsproGui) App.getSharedInstance();
-  }
 
   /**
    * Public constructor with command line arguments
@@ -101,17 +92,9 @@ public class AsproGui extends App {
     ConfigurationManager.getInstance();
 
     // Initializes the swing components with their actions :
-    prepareFrame(getRootFrame());
+    prepareFrame(getFrame());
 
     logger.fine("init : exit");
-  }
-
-  /**
-   * Return the application frame
-   * @return application frame
-   */
-  public JFrame getRootFrame() {
-    return (JFrame) getFrame();
   }
 
   /** 
@@ -119,7 +102,7 @@ public class AsproGui extends App {
    */
   @Override
   protected void execute() {
-    getRootFrame().setVisible(true);
+    getFrame().setVisible(true);
   }
 
   /**
@@ -146,8 +129,7 @@ public class AsproGui extends App {
     registerActions();
 
     // Handle status bar
-    statusBar = new StatusBar();
-    getFramePanel().add(statusBar, BorderLayout.SOUTH);
+    getFramePanel().add(new StatusBar(), BorderLayout.SOUTH);
 
     StatusBar.show("application started.");
   }
@@ -156,7 +138,6 @@ public class AsproGui extends App {
    * Create the main content i.e. the setting panel
    */
   private void createContent() {
-
     // adds the panel in scrollPane
     final JScrollPane settingScrollPanel = new JScrollPane(new SettingPanel());
 
@@ -195,14 +176,20 @@ public class AsproGui extends App {
     // Set the default timezone to GMT to handle properly the date in UTC :
     TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
 
-    // force Locale for Swing Components :
-    JComponent.setDefaultLocale(Locale.US);
+    // Initialize Swing components in EDT :
+    SwingUtilities.invokeLater(new Runnable() {
 
-    // let the tooltip stay longer (30s) :
-    ToolTipManager.sharedInstance().setInitialDelay(100);
-    ToolTipManager.sharedInstance().setDismissDelay(30000);
+      public void run() {
+        // force Locale for Swing Components :
+        JComponent.setDefaultLocale(Locale.US);
 
-    // Start application with the command line arguments
-    new AsproGui(args);
+        // let the tooltip stay longer (30s) :
+        ToolTipManager.sharedInstance().setInitialDelay(100);
+        ToolTipManager.sharedInstance().setDismissDelay(30000);
+
+        // Start application with the command line arguments
+        new AsproGui(args);
+      }
+    });
   }
 }
