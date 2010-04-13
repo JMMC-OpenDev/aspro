@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.30 2010-04-08 14:06:51 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.31 2010-04-13 14:18:27 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.30  2010/04/08 14:06:51  bourgesl
+ * javadoc
+ *
  * Revision 1.29  2010/04/06 14:40:47  bourgesl
  * minor UI changes for mac os (II)
  *
@@ -280,8 +283,8 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
 
     jSplitPane.setResizeWeight(0.1);
 
-    jPanelRight.setMinimumSize(new java.awt.Dimension(200, 500));
-    jPanelRight.setPreferredSize(new java.awt.Dimension(200, 500));
+    jPanelRight.setMinimumSize(new java.awt.Dimension(200, 400));
+    jPanelRight.setPreferredSize(new java.awt.Dimension(200, 400));
     jPanelRight.setLayout(new java.awt.GridBagLayout());
 
     jLabel1.setText("Target");
@@ -364,7 +367,7 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
 
     jFieldSamplingPeriod.setColumns(3);
     jFieldSamplingPeriod.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter()));
-    jFieldSamplingPeriod.setMinimumSize(new java.awt.Dimension(40, 19));
+    jFieldSamplingPeriod.setMinimumSize(new java.awt.Dimension(40, 20));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 15;
@@ -381,8 +384,8 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     jSliderHAMin.setMajorTickSpacing(30);
     jSliderHAMin.setMaximum(240);
     jSliderHAMin.setPaintTicks(true);
-    jSliderHAMin.setMaximumSize(new java.awt.Dimension(80, 27));
-    jSliderHAMin.setPreferredSize(new java.awt.Dimension(80, 27));
+    jSliderHAMin.setMaximumSize(new java.awt.Dimension(80, 32767));
+    jSliderHAMin.setPreferredSize(new java.awt.Dimension(80, 30));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 17;
@@ -400,7 +403,7 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     jSliderHAMax.setMaximum(240);
     jSliderHAMax.setPaintTicks(true);
     jSliderHAMax.setMaximumSize(new java.awt.Dimension(80, 32767));
-    jSliderHAMax.setPreferredSize(new java.awt.Dimension(80, 27));
+    jSliderHAMax.setPreferredSize(new java.awt.Dimension(80, 30));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 19;
@@ -410,7 +413,7 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
 
     jFieldHAMin.setColumns(6);
     jFieldHAMin.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0.00"))));
-    jFieldHAMin.setMinimumSize(new java.awt.Dimension(50, 19));
+    jFieldHAMin.setMinimumSize(new java.awt.Dimension(50, 20));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 17;
@@ -419,7 +422,7 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
 
     jFieldHAMax.setColumns(6);
     jFieldHAMax.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0.00"))));
-    jFieldHAMax.setMinimumSize(new java.awt.Dimension(50, 19));
+    jFieldHAMax.setMinimumSize(new java.awt.Dimension(50, 20));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 19;
@@ -488,7 +491,7 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     jSliderUVMax.setPaintTicks(true);
     jSliderUVMax.setValue(100);
     jSliderUVMax.setMaximumSize(new java.awt.Dimension(80, 32767));
-    jSliderUVMax.setPreferredSize(new java.awt.Dimension(80, 27));
+    jSliderUVMax.setPreferredSize(new java.awt.Dimension(80, 30));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 13;
@@ -498,7 +501,7 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
 
     jFieldUVMax.setColumns(6);
     jFieldUVMax.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0.00"))));
-    jFieldUVMax.setMinimumSize(new java.awt.Dimension(50, 19));
+    jFieldUVMax.setMinimumSize(new java.awt.Dimension(50, 20));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 13;

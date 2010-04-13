@@ -31,10 +31,10 @@
         <Container class="javax.swing.JPanel" name="jPanelRight">
           <Properties>
             <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
-              <Dimension value="[200, 500]"/>
+              <Dimension value="[200, 400]"/>
             </Property>
             <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
-              <Dimension value="[200, 500]"/>
+              <Dimension value="[200, 400]"/>
             </Property>
           </Properties>
           <Constraints>
@@ -159,7 +159,7 @@
                   <Format subtype="0" type="0"/>
                 </Property>
                 <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
-                  <Dimension value="[40, 19]"/>
+                  <Dimension value="[40, 20]"/>
                 </Property>
               </Properties>
               <Constraints>
@@ -184,10 +184,10 @@
                 <Property name="maximum" type="int" value="240"/>
                 <Property name="paintTicks" type="boolean" value="true"/>
                 <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
-                  <Dimension value="[80, 27]"/>
+                  <Dimension value="[80, 32767]"/>
                 </Property>
                 <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
-                  <Dimension value="[80, 27]"/>
+                  <Dimension value="[80, 30]"/>
                 </Property>
               </Properties>
               <Constraints>
@@ -215,7 +215,7 @@
                   <Dimension value="[80, 32767]"/>
                 </Property>
                 <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
-                  <Dimension value="[80, 27]"/>
+                  <Dimension value="[80, 30]"/>
                 </Property>
               </Properties>
               <Constraints>
@@ -231,7 +231,7 @@
                   <Format format="#0.00" subtype="-1" type="0"/>
                 </Property>
                 <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
-                  <Dimension value="[50, 19]"/>
+                  <Dimension value="[50, 20]"/>
                 </Property>
               </Properties>
               <Constraints>
@@ -247,7 +247,7 @@
                   <Format format="#0.00" subtype="-1" type="0"/>
                 </Property>
                 <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
-                  <Dimension value="[50, 19]"/>
+                  <Dimension value="[50, 20]"/>
                 </Property>
               </Properties>
               <Constraints>
@@ -343,7 +343,7 @@
                   <Dimension value="[80, 32767]"/>
                 </Property>
                 <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
-                  <Dimension value="[80, 27]"/>
+                  <Dimension value="[80, 30]"/>
                 </Property>
               </Properties>
               <Constraints>
@@ -359,7 +359,7 @@
                   <Format format="#0.00" subtype="-1" type="0"/>
                 </Property>
                 <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
-                  <Dimension value="[50, 19]"/>
+                  <Dimension value="[50, 20]"/>
                 </Property>
               </Properties>
               <Constraints>
