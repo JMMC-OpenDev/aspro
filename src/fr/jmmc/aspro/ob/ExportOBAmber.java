@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBAmber.java,v 1.5 2010-04-12 14:33:18 bourgesl Exp $"
+ * "@(#) $Id: ExportOBAmber.java,v 1.6 2010-04-13 14:06:04 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2010/04/12 14:33:18  bourgesl
+ * restored RA/DEC conversion to have proper P2PP format
+ * Proper motion converted to arcsec/year
+ *
  * Revision 1.4  2010/04/09 10:22:26  bourgesl
  * use RA/DEC in HMS/DMS instead of angle conversion (deg)
  *
@@ -52,7 +56,7 @@ public class ExportOBAmber {
 
   /* keywords */
   /** keyword - name */
-  public final static String KEY_FILE_NAME = "<FILE-NAME>";
+  public final static String KEY_NAME = "<NAME>";
   /** keyword - comments */
   public final static String KEY_COMMENTS = "<COMMENTS>";
   /** keyword - ra */
@@ -102,8 +106,19 @@ public class ExportOBAmber {
     // get OB template :
     String document = readTemplate();
 
-    // Set file name :
-    document = document.replaceFirst(KEY_FILE_NAME, file.getName());
+    // Set name :
+    String name = file.getName();
+    // remove obx extension :
+    int pos = name.lastIndexOf('.');
+    if (pos != -1) {
+      name = name.substring(0, pos);
+    }
+    // maximum length :
+    if (name.length() > 32) {
+      name = name.substring(0, 31);
+    }
+
+    document = document.replaceFirst(KEY_NAME, name);
 
     // get observation and target :
     final ObservationSetting observation = ObservationManager.getInstance().getObservation();
