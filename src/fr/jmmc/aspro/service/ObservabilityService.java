@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.39 2010-04-09 10:23:29 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.40 2010-04-13 15:35:46 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.39  2010/04/09 10:23:29  bourgesl
+ * side effect of RA/DEC in HMS/DMS
+ * corrected Target raDeg/decDeg (degrees)
+ *
  * Revision 1.38  2010/04/02 14:40:39  bourgesl
  * added elevation data and transit date
  *
@@ -768,9 +772,12 @@ public class ObservabilityService {
             soBl = new StarObservabilityData(prefix + baseLine.getName(), StarObservabilityData.TYPE_BASE_LINE + i);
             this.data.getStarVisibilities().add(soBl);
 
+            // convert JD ranges to date ranges :
             for (Range range : obsRanges) {
               convertRangeToDateInterval(range, soBl.getVisible());
             }
+            // merge contiguous date ranges :
+            mergeDateIntervals(soBl.getVisible());
 
             if (logger.isLoggable(Level.FINE)) {
               logger.fine("Date ranges  : " + soBl.getVisible());
@@ -822,15 +829,15 @@ public class ObservabilityService {
 
       // store merge result as date intervals :
       if (finalRanges != null) {
+        // elevation marks :
         findElevations(starObs, finalRanges, precRA, precDEC);
 
+        // convert JD ranges to date ranges :
         for (Range range : finalRanges) {
           convertRangeToDateInterval(range, starObs.getVisible());
-          /*
-           * know bug : due to HA limit [+/-12h], the converted JD / Date ranges
-           * can have a discontinuity on the LST/UTC axis !
-           */
         }
+        // merge contiguous date ranges :
+        mergeDateIntervals(starObs.getVisible());
 
         // update Star Data :
         final List<Range> haObsRanges = new ArrayList<Range>(2);
@@ -1595,8 +1602,8 @@ public class ObservabilityService {
 
   /**
    * Convert a JD range to a date interval with respect for the LST range [0;24]
-   * Know bug : due to HA limit [+/-12h], the converted JD / Date ranges
-   * can have a discontinuity on the LST/UTC axis !
+   * Note : due to HA limit [+/-12h], the converted JD / Date ranges
+   * can have a discontinuity on the date axis !
    *
    * @param rangeJD range to convert
    * @param intervals interval list where new date intervals will be added
@@ -1604,8 +1611,6 @@ public class ObservabilityService {
   private void convertRangeToDateInterval(final Range rangeJD, final List<DateTimeInterval> intervals) {
     // one Day in LST is different than one Day in JD :
     final double day = AstroSkyCalc.lst2jd(24d);
-
-    DateTimeInterval interval;
 
     final double jdStart = rangeJD.getMin();
     final double jdEnd = rangeJD.getMax();
@@ -1615,10 +1620,7 @@ public class ObservabilityService {
       if (jdEnd <= this.jdLst24) {
 
         // single interval [jdStart;jdEnd]
-        interval = new DateTimeInterval();
-        interval.setStartDate(jdToDate(jdStart));
-        interval.setEndDate(jdToDate(jdEnd));
-        intervals.add(interval);
+        intervals.add(new DateTimeInterval(jdToDate(jdStart), jdToDate(jdEnd)));
 
       } else {
 
@@ -1626,26 +1628,16 @@ public class ObservabilityService {
           // two points over LST 24 :
 
           // single interval [jdStart - day;jdEnd - day]
-          interval = new DateTimeInterval();
-          interval.setStartDate(jdToDate(jdStart - day));
-          interval.setEndDate(jdToDate(jdEnd - day));
-          intervals.add(interval);
+          intervals.add(new DateTimeInterval(jdToDate(jdStart - day), jdToDate(jdEnd - day)));
 
         } else {
           // end occurs after LST 24 :
 
           // interval [jdStart;jdLst24]
-          interval = new DateTimeInterval();
-          interval.setStartDate(jdToDate(jdStart));
-          interval.setEndDate(jdToDate(this.jdLst24));
-          intervals.add(interval);
+          intervals.add(new DateTimeInterval(jdToDate(jdStart), jdToDate(this.jdLst24)));
 
           // add the second interval [jdLst0;jdEnd - day]
-
-          interval = new DateTimeInterval();
-          interval.setStartDate(jdToDate(this.jdLst0));
-          interval.setEndDate(jdToDate(jdEnd - day));
-          intervals.add(interval);
+          intervals.add(new DateTimeInterval(jdToDate(this.jdLst0), jdToDate(jdEnd - day)));
         }
       }
 
@@ -1656,28 +1648,46 @@ public class ObservabilityService {
         // two points before LST 0h :
 
         // single interval [jdStart + day;jdEnd + day]
-        interval = new DateTimeInterval();
-        interval.setStartDate(jdToDate(jdStart + day));
-        interval.setEndDate(jdToDate(jdEnd + day));
-        intervals.add(interval);
+        intervals.add(new DateTimeInterval(jdToDate(jdStart + day), jdToDate(jdEnd + day)));
 
       } else {
-
         // interval [jdLst0;jdEnd]
-        interval = new DateTimeInterval();
-        interval.setStartDate(jdToDate(this.jdLst0));
-        interval.setEndDate(jdToDate(jdEnd));
-        intervals.add(interval);
+        intervals.add(new DateTimeInterval(jdToDate(this.jdLst0), jdToDate(jdEnd)));
 
         // add the second interval [jdStart + day;jdLst24]
-
-        interval = new DateTimeInterval();
-        interval.setStartDate(jdToDate(jdStart + day));
-        interval.setEndDate(jdToDate(this.jdLst24));
-        intervals.add(interval);
+        intervals.add(new DateTimeInterval(jdToDate(jdStart + day), jdToDate(this.jdLst24)));
       }
     }
+  }
 
+  /**
+   * Traverse the given list of date intervals and merge contiguous intervals.
+   * This fixes the problem due to HA limit [+/-12h] i.e. the converted JD / Date ranges
+   * can have a discontinuity on the date axis.
+   *
+   * @param intervals date intervals to fix
+   */
+  private void mergeDateIntervals(final List<DateTimeInterval> intervals) {
+    final int size = intervals.size();
+    if (size > 1) {
+      // first sort date intervals :
+      Collections.sort(intervals);
+
+      DateTimeInterval interval = null;
+      DateTimeInterval interval2 = null;
+      for (int i = 0, j = 1, end = size - 1; i < end; i++, j++) {
+        interval = intervals.get(i);
+        interval2 = intervals.get(j);
+
+        if (interval.getEndDate().compareTo(interval2.getStartDate()) == 0) {
+          // merge interval :
+          intervals.set(i, new DateTimeInterval(interval.getStartDate(), interval2.getEndDate()));
+          // merge interval2 :
+          intervals.remove(j);
+          end--;
+        }
+      }
+    }
   }
 
   private Date jdToDate(final double jd) {
