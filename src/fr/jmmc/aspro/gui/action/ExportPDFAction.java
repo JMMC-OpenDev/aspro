@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportPDFAction.java,v 1.3 2010-04-02 10:07:11 bourgesl Exp $"
+ * "@(#) $Id: ExportPDFAction.java,v 1.4 2010-04-13 15:54:48 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2010/04/02 10:07:11  bourgesl
+ * refactoring
+ *
  * Revision 1.2  2010/01/14 17:02:38  bourgesl
  * FileFilter fix
  *
@@ -75,7 +78,7 @@ public class ExportPDFAction {
    *
    * Note : the action event's source must be the chart to export
    *
-   * @param e action event
+   * @param event action event
    */
   public void actionPerformed(final ActionEvent event) {
     if (!(event.getSource() instanceof JFreeChart)) {

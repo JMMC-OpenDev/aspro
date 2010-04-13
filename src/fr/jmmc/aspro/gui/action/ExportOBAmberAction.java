@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBAmberAction.java,v 1.1 2010-04-02 10:07:35 bourgesl Exp $"
+ * "@(#) $Id: ExportOBAmberAction.java,v 1.2 2010-04-13 15:54:48 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2010/04/02 10:07:35  bourgesl
+ * simple OB generation for AMBER
+ *
  */
 package fr.jmmc.aspro.gui.action;
 
@@ -69,7 +72,7 @@ public class ExportOBAmberAction {
    *
    * Note : the action event's source must be the UVCoveragePanel instance
    *
-   * @param e action event
+   * @param event action event
    */
   public void actionPerformed(final ActionEvent event) {
     if (!(event.getSource() instanceof UVCoveragePanel)) {
