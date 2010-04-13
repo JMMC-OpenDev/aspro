@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBAmber.java,v 1.6 2010-04-13 14:06:04 bourgesl Exp $"
+ * "@(#) $Id: ExportOBAmber.java,v 1.7 2010-04-13 15:55:14 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2010/04/13 14:06:04  bourgesl
+ * fixed Name keyword without file name extension and 32 character maximum length
+ *
  * Revision 1.5  2010/04/12 14:33:18  bourgesl
  * restored RA/DEC conversion to have proper P2PP format
  * Proper motion converted to arcsec/year
@@ -25,52 +28,22 @@
  */
 package fr.jmmc.aspro.ob;
 
-import edu.dartmouth.AstroSkyCalc;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
-import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.util.FileUtils;
 import java.io.File;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.logging.Level;
 
 /**
  * This class generates an observing block for the VLTI AMBER instrument
  * @author bourgesl
  */
-public class ExportOBAmber {
+public class ExportOBAmber extends ExportOBVLTI {
 
-  /** Class Name */
-  private static final String className_ = "fr.jmmc.aspro.ob.ExportOBAmber";
-  /** Class logger */
-  private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
-          className_);
   /** template name */
   private final static String TEMPLATE_FILE = "fr/jmmc/aspro/ob/AMBER_template.obx";
-  /** double formatter for magnitudes */
-  private final static NumberFormat df3 = new DecimalFormat("0.000");
-  /** double formatter for PM */
-  private final static NumberFormat df6 = new DecimalFormat("0.000000");
-
   /* keywords */
-  /** keyword - name */
-  public final static String KEY_NAME = "<NAME>";
-  /** keyword - comments */
-  public final static String KEY_COMMENTS = "<COMMENTS>";
-  /** keyword - ra */
-  public final static String KEY_RA = "<RA>";
-  /** keyword - dec */
-  public final static String KEY_DEC = "<DEC>";
-  /** keyword - propRA */
-  public final static String KEY_PM_RA = "<PMRA>";
-  /** keyword - propDEC */
-  public final static String KEY_PM_DEC = "<PMDEC>";
-  /** keyword - TARGET.NAME */
-  public final static String KEY_TARGET_NAME = "<TARGET-NAME>";
-  /** keyword - Baseline */
-  public final static String KEY_BASE_LINE = "<BASE-LINE>";
   /** keyword - HMAG */
   public final static String KEY_HMAG = "<HMAG>";
   /** keyword - HVIS */
@@ -90,7 +63,7 @@ public class ExportOBAmber {
    * Forbidden constructor
    */
   private ExportOBAmber() {
-    // no-op
+    super();
   }
 
   /**
@@ -104,51 +77,14 @@ public class ExportOBAmber {
     }
 
     // get OB template :
-    String document = readTemplate();
-
-    // Set name :
-    String name = file.getName();
-    // remove obx extension :
-    int pos = name.lastIndexOf('.');
-    if (pos != -1) {
-      name = name.substring(0, pos);
-    }
-    // maximum length :
-    if (name.length() > 32) {
-      name = name.substring(0, 31);
-    }
-
-    document = document.replaceFirst(KEY_NAME, name);
+    String template = FileUtils.readFile(TEMPLATE_FILE);
 
     // get observation and target :
     final ObservationSetting observation = ObservationManager.getInstance().getObservation();
     final Target target = ObservationManager.getTarget(observation, targetName);
 
-    // --- Target information ---
-
-    // comments = spectral type :
-    document = document.replaceFirst(KEY_COMMENTS, target.getSPECTYP());
-
-    // convert RA/DEC with mas up to 3 digits :
-    final String[] raDec = AstroSkyCalc.toString(target.getRADeg(), target.getDECDeg());
-
-    document = document.replaceFirst(KEY_RA, raDec[0]);
-    document = document.replaceFirst(KEY_DEC, raDec[1]);
-
-    // PMRA / PMDEC (optional) converted to arcsec/year :
-    document = document.replaceFirst(KEY_PM_RA,
-            df6.format((target.getPMRA() != null) ? target.getPMRA().doubleValue() / 1000d : 0d));
-    document = document.replaceFirst(KEY_PM_DEC,
-            df6.format((target.getPMDEC() != null) ? target.getPMDEC().doubleValue() / 1000d : 0d));
-
-    // replace invalid characters (i.e. not alpha numeric) :
-    final String altName = targetName.replaceAll("[^a-zA-Z_0-9]", "_");
-    document = document.replaceFirst(KEY_TARGET_NAME, altName);
-
-    // Later : atmosphere / seeing
-
-    // Base line :
-    document = document.replaceFirst(KEY_BASE_LINE, getBaseLine(observation));
+    // process common VLTI part :
+    String document = processCommon(template, targetName, observation, target);
 
     // Magnitudes for H, K :
     document = document.replaceFirst(KEY_HMAG,
@@ -168,21 +104,5 @@ public class ExportOBAmber {
 
     // Finally, write the file :
     FileUtils.writeFile(file, document);
-  }
-
-  public static String readTemplate() {
-    return FileUtils.readFile(TEMPLATE_FILE);
-  }
-
-  private static String getBaseLine(final ObservationSetting observation) {
-
-    final StringBuilder sb = new StringBuilder();
-
-    for (Station s : observation.getInstrumentConfiguration().getStationList()) {
-      sb.append(s.getName()).append("-");
-    }
-    sb.deleteCharAt(sb.length() - 1);
-
-    return sb.toString();
   }
 }
