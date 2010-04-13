@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetModelForm.java,v 1.13 2010-04-08 14:06:32 bourgesl Exp $"
+ * "@(#) $Id: TargetModelForm.java,v 1.14 2010-04-13 14:17:36 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.13  2010/04/08 14:06:32  bourgesl
+ * javadoc
+ *
  * Revision 1.12  2010/04/06 13:58:37  bourgesl
  * minor UI changes for mac os & other LAF
  *
@@ -44,11 +47,11 @@
  */
 package fr.jmmc.aspro.gui;
 
-import fr.jmmc.aspro.AsproGui;
 import fr.jmmc.aspro.gui.util.ComponentResizeAdapter;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Target;
+import fr.jmmc.mcs.gui.App;
 import fr.jmmc.mcs.model.ModelManager;
 import fr.jmmc.mcs.model.gui.ModelParameterTableModel;
 import fr.jmmc.mcs.model.gui.ModelParameterTableModel.EditMode;
@@ -144,7 +147,7 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
 
     try {
       // 1. Create the dialog
-      dialog = new JDialog(AsproGui.getInstance().getRootFrame(), "Model Editor", true);
+      dialog = new JDialog(App.getFrame(), "Model Editor", true);
 
       final Dimension dim = new Dimension(600, 600);
       dialog.setMinimumSize(dim);
