@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SunTimeInterval.java,v 1.1 2010-01-08 16:48:29 bourgesl Exp $"
+ * "@(#) $Id: SunTimeInterval.java,v 1.2 2010-04-13 15:26:21 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2010/01/08 16:48:29  bourgesl
+ * package refactoring
+ *
  * Revision 1.3  2009/12/02 17:23:51  bourgesl
  * fixed several bugs on pop finder + refactoring
  *
@@ -21,6 +24,7 @@ import java.util.Date;
 public class SunTimeInterval extends DateTimeInterval {
 
   public enum SunType {
+
     Day,
     Night,
     Twilight;
@@ -28,10 +32,8 @@ public class SunTimeInterval extends DateTimeInterval {
   /** type of the interval : twilight, rise, set */
   private final SunType type;
 
-  public SunTimeInterval(final Date start, final Date end, final SunType type) {
-    super();
-    setStartDate(start);
-    setEndDate(end);
+  public SunTimeInterval(final Date startDate, final Date endDate, final SunType type) {
+    super(startDate, endDate);
     this.type = type;
   }
 
