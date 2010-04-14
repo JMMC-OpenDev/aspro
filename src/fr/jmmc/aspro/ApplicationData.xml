@@ -35,6 +35,8 @@
   <releasenotes>
     <release version="0.3">
       <prerelease version="0.3b3">
+        <change>Added basic Observing Block for MIDI.</change>
+        <change>Fixed the contiguous date interval problem on observability plot.</change>
         <change>Minor corrections on AMBER observing blocks (proper motion and RA/DEC format).</change>
       </prerelease>
       <prerelease version="0.3b2">
