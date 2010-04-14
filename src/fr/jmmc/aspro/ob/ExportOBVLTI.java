@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBVLTI.java,v 1.1 2010-04-13 15:55:14 bourgesl Exp $"
+ * "@(#) $Id: ExportOBVLTI.java,v 1.2 2010-04-14 13:09:59 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2010/04/13 15:55:14  bourgesl
+ * extracted common part for VLTI
+ *
  * Revision 1.6  2010/04/13 14:06:04  bourgesl
  * fixed Name keyword without file name extension and 32 character maximum length
  *
@@ -29,9 +32,12 @@
 package fr.jmmc.aspro.ob;
 
 import edu.dartmouth.AstroSkyCalc;
+import fr.jmmc.aspro.AsproConstants;
+import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.Target;
+import java.io.File;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.logging.Level;
@@ -70,11 +76,44 @@ public class ExportOBVLTI {
   /** keyword - Baseline */
   public final static String KEY_BASE_LINE = "<BASE-LINE>";
 
+  /* keywords common to AMBER and MIDI */
+  /** keyword - xxx.HMAG */
+  public final static String KEY_HMAG = "<HMAG>";
+  /** keyword - TEL.COU.MAG or COU.GS.MAG */
+  public final static String KEY_COUDE_GS_MAG = "<COUDE-GS-MAG>";
+
   /**
    * Forbidden constructor
    */
   protected ExportOBVLTI() {
     // no-op
+  }
+
+  /**
+   * Generate the OB file for the given target.
+   * According to the instrument defined in the observation, it uses ExportOBAmber or ExportOBMidi.
+   * @param targetName target to process
+   * @param file file to save
+   */
+  public static void process(final String targetName, final File file) {
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("process " + targetName + " to " + file);
+    }
+
+    // get observation and target :
+    final ObservationSetting observation = ObservationManager.getInstance().getObservation();
+    final Target target = ObservationManager.getTarget(observation, targetName);
+
+    // Dispatch to AMBER or MIDI classes :
+    final String instrumentName = observation.getInstrumentConfiguration().getName();
+
+    if (AsproConstants.INS_AMBER.equals(instrumentName)) {
+      ExportOBAmber.generate(file, observation, target);
+    } else if (AsproConstants.INS_MIDI.equals(instrumentName)) {
+      ExportOBMidi.generate(file, observation, target);
+    } else {
+      throw new IllegalArgumentException("The application can not generate an Observing Block for this instrument [" + instrumentName + "] !");
+    }
   }
 
   /**
@@ -85,9 +124,9 @@ public class ExportOBVLTI {
    * @param target target to process
    * @return processed template
    */
-  public static String processCommon(final String template, final String fileName, final ObservationSetting observation, final Target target) {
+  protected static String processCommon(final String template, final String fileName, final ObservationSetting observation, final Target target) {
     if (logger.isLoggable(Level.FINE)) {
-      logger.fine("process " + target.getName());
+      logger.fine("processCommon " + target.getName());
     }
 
     // get OB template :

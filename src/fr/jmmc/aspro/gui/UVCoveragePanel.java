@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.31 2010-04-13 14:18:27 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.32 2010-04-14 13:09:59 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.31  2010/04/13 14:18:27  bourgesl
+ * uniform sizes for sliders and text fields
+ *
  * Revision 1.30  2010/04/08 14:06:51  bourgesl
  * javadoc
  *
@@ -105,7 +108,7 @@
 package fr.jmmc.aspro.gui;
 
 import fr.jmmc.aspro.AsproConstants;
-import fr.jmmc.aspro.gui.action.ExportOBAmberAction;
+import fr.jmmc.aspro.gui.action.ExportOBVLTIAction;
 import fr.jmmc.aspro.gui.action.ExportPDFAction;
 import fr.jmmc.aspro.gui.chart.ChartUtils;
 import fr.jmmc.aspro.gui.chart.SquareChartPanel;
@@ -318,7 +321,7 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     jPanelButtons.add(jButtonPDF);
 
     jButtonOB.setText("OB");
-    jButtonOB.setToolTipText("Only AMBER is supported");
+    jButtonOB.setToolTipText("Only VLTI AMBER or MIDI instruments are supported");
     jButtonOB.setMargin(new java.awt.Insets(0, 0, 0, 0));
     jButtonOB.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -604,13 +607,18 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     final ObservationSetting observation = ObservationManager.getInstance().getObservation();
     final String instrumentName = observation.getInstrumentConfiguration().getName();
 
-    if (AsproConstants.INS_AMBER.equals(instrumentName)) {
+    if (AsproConstants.INS_AMBER.equals(instrumentName) || AsproConstants.INS_MIDI.equals(instrumentName)) {
       // set the source with this instance :
       evt.setSource(this);
 
-      ExportOBAmberAction.getInstance().actionPerformed(evt);
+      try {
+        ExportOBVLTIAction.getInstance().actionPerformed(evt);
+      } catch (RuntimeException re) {
+        JOptionPane.showMessageDialog(null, re.getMessage(),
+                "Error", JOptionPane.INFORMATION_MESSAGE);
+      }
     } else {
-      JOptionPane.showMessageDialog(null, "The application can not generate an Observing Block for this instrument !",
+      JOptionPane.showMessageDialog(null, "The application can not generate an Observing Block for this instrument [" + instrumentName + "] !",
               "Error", JOptionPane.INFORMATION_MESSAGE);
     }
 

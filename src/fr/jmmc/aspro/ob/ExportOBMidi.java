@@ -1,7 +1,7 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBAmber.java,v 1.8 2010-04-14 13:09:59 bourgesl Exp $"
+ * "@(#) $Id: ExportOBMidi.java,v 1.1 2010-04-14 13:09:59 bourgesl Exp $"
  *
  * History
  * -------
@@ -38,25 +38,23 @@ import java.io.File;
 import java.util.logging.Level;
 
 /**
- * This class generates an observing block for the VLTI AMBER instrument
+ * This class generates an observing block for the VLTI MIDI instrument
  * @author bourgesl
  */
-public class ExportOBAmber extends ExportOBVLTI {
+public class ExportOBMidi extends ExportOBVLTI {
 
   /** template name */
-  private final static String TEMPLATE_FILE = "fr/jmmc/aspro/ob/AMBER_template.obx";
+  private final static String TEMPLATE_FILE = "fr/jmmc/aspro/ob/MIDI_template.obx";
   /* keywords */
-  /** keyword - SEQ.SOURCE.KMAG */
-  public final static String KEY_KMAG = "<KMAG>";
-  /** keyword - TEL.DEL.FTSENSOR */
-  public final static String KEY_FT_SENSOR = "<FT-SENSOR>";
-  /** keyword - OCS.OBS.SPECCONF */
-  public final static String KEY_SPEC_CONF = "<SPEC-CONF>";
+  /** keyword - GRIS-NAME */
+  public final static String KEY_GRIS_NAME = "<GRIS-NAME>";
+  /** keyword - OPT-NAME */
+  public final static String KEY_OPT_NAME = "<OPT-NAME>";
 
   /**
    * Forbidden constructor
    */
-  private ExportOBAmber() {
+  private ExportOBMidi() {
     super();
   }
 
@@ -77,21 +75,33 @@ public class ExportOBAmber extends ExportOBVLTI {
     // process common VLTI part :
     String document = processCommon(template, file.getName(), observation, target);
 
-    // Magnitudes for H, K :
+    /*
+     * TODO : compute fluxes from mag N in Jansky Jy unit :
+     *  
+     * SEQ.CORR.IRFLUX   "15"
+     * SEQ.UNCORR.IRFLUX "20"
+     */
+
+    // Magnitudes for H :
     document = document.replaceFirst(KEY_HMAG,
             df3.format((target.getFLUXH() != null) ? target.getFLUXH().doubleValue() : -99d));
-    document = document.replaceFirst(KEY_KMAG,
-            df3.format((target.getFLUXK() != null) ? target.getFLUXK().doubleValue() : -99d));
 
     // Coude Guided Star = Science (= mag V) :
     document = document.replaceFirst(KEY_COUDE_GS_MAG,
             df3.format((target.getFLUXV() != null) ? target.getFLUXV().doubleValue() : -99d));
 
-    // Later : ft sensor
-    document = document.replaceFirst(KEY_FT_SENSOR, "NONE");
+    final String instrumentMode = observation.getInstrumentConfiguration().getInstrumentMode();
 
-    // spectral configuration = instrument mode :
-    document = document.replaceFirst(KEY_SPEC_CONF, observation.getInstrumentConfiguration().getInstrumentMode());
+    /*
+     * Instrument modes are defined with the format : 'HIGH_SENS+PRISM' i.e. 'SENS'+'GRIS'
+     */
+    final String[] conf = instrumentMode.split("\\+");
+
+    // Beam combiner (HIGH_SENS or SCI_PHOT) :
+    document = document.replaceFirst(KEY_OPT_NAME, conf[0]);
+
+    // Dispersive element (GRIS or PRISM) :
+    document = document.replaceFirst(KEY_GRIS_NAME, conf[1]);
 
     // Finally, write the file :
     FileUtils.writeFile(file, document);

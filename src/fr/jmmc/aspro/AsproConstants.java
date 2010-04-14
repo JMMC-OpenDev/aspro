@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproConstants.java,v 1.7 2010-04-02 09:21:27 bourgesl Exp $"
+ * "@(#) $Id: AsproConstants.java,v 1.8 2010-04-14 13:09:59 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2010/04/02 09:21:27  bourgesl
+ * added AMBER and None constants
+ *
  * Revision 1.6  2010/02/04 17:05:06  bourgesl
  * UV bounds are coming from UVCoverageService
  *
@@ -56,4 +59,6 @@ public interface AsproConstants {
   /* instrument names for specific features */
   /** VLTI AMBER */
   public static final String INS_AMBER = "AMBER";
+  /** VLTI MIDI */
+  public static final String INS_MIDI = "MIDI";
 }
