@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBAmberAction.java,v 1.2 2010-04-13 15:54:48 bourgesl Exp $"
+ * "@(#) $Id: ExportOBVLTIAction.java,v 1.1 2010-04-14 13:09:23 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2010/04/13 15:54:48  bourgesl
+ * javadoc
+ *
  * Revision 1.1  2010/04/02 10:07:35  bourgesl
  * simple OB generation for AMBER
  *
@@ -13,7 +16,7 @@
 package fr.jmmc.aspro.gui.action;
 
 import fr.jmmc.aspro.gui.UVCoveragePanel;
-import fr.jmmc.aspro.ob.ExportOBAmber;
+import fr.jmmc.aspro.ob.ExportOBVLTI;
 import fr.jmmc.aspro.util.FileUtils;
 import fr.jmmc.mcs.gui.StatusBar;
 import fr.jmmc.mcs.util.FileFilterRepository;
@@ -25,13 +28,11 @@ import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileFilter;
 
 /**
- * This class implement the export to VLTI AMBER OB action.
- *
- * TODO : use the standard MCS action to add it in the menu.
+ * This class implements the OB generation for VLTI instruments.
  *
  * @author bourgesl
  */
-public class ExportOBAmberAction {
+public class ExportOBVLTIAction {
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
@@ -44,13 +45,13 @@ public class ExportOBAmberAction {
   /** PDF extension */
   public static final String OBX_EXT = "obx";
   /** action singleton */
-  private static ExportOBAmberAction instance = new ExportOBAmberAction();
+  private static ExportOBVLTIAction instance = new ExportOBVLTIAction();
 
   /**
    * Return the singleton ExportOBAmberAction instance
    * @return ExportOBAmberAction instance
    */
-  public static ExportOBAmberAction getInstance() {
+  public static ExportOBVLTIAction getInstance() {
     return instance;
   }
 
@@ -61,7 +62,7 @@ public class ExportOBAmberAction {
   /**
    * Forbidden Constructor
    */
-  private ExportOBAmberAction() {
+  private ExportOBVLTIAction() {
     super();
 
     FileFilterRepository.getInstance().put(OBX_MIME_TYPE, OBX_EXT, "Observing Block (OB)");
@@ -120,7 +121,7 @@ public class ExportOBAmberAction {
       try {
         file = checkFileExtension(file);
 
-        ExportOBAmber.process(targetName, file);
+        ExportOBVLTI.process(targetName, file);
 
         StatusBar.show(file.getName() + " created.");
 
