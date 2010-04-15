@@ -8709,7 +8709,6 @@
       </mode>
     </focalInstrument>
 
-    <!-- PIONIER TBC -->
     <focalInstrument>
       <name>PIONIER</name>
       <description>Prototype configuration for PIONIER instrument</description>
@@ -8717,8 +8716,8 @@
       <defaultSamplingTime>60</defaultSamplingTime>
       <mode>
         <name>standard</name>
-        <waveLengthMin>1.5</waveLengthMin>
-        <waveLengthMax>2.2</waveLengthMax>
+        <waveLengthMin>1.45</waveLengthMin>
+        <waveLengthMax>1.8</waveLengthMax>
       </mode>
     </focalInstrument>
 
