@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ConfigurationManager.java,v 1.18 2010-04-02 14:39:44 bourgesl Exp $"
+ * "@(#) $Id: ConfigurationManager.java,v 1.19 2010-04-15 12:54:27 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.18  2010/04/02 14:39:44  bourgesl
+ * added FringeTracker list
+ *
  * Revision 1.17  2010/02/04 17:05:06  bourgesl
  * UV bounds are coming from UVCoverageService
  *
@@ -265,7 +268,6 @@ public class ConfigurationManager extends BaseOIManager {
       for (InterferometerConfiguration c : id.getConfigurations()) {
         v.add(c.getName());
       }
-      Collections.sort(v);
     }
     return v;
   }
@@ -290,7 +292,7 @@ public class ConfigurationManager extends BaseOIManager {
     return hasPops;
   }
 
-  /** InterferometerConfiguration */
+  /* InterferometerConfiguration */
   public Map<String, InterferometerConfiguration> getInterferometerConfigurations() {
     return interferometerConfigurations;
   }
