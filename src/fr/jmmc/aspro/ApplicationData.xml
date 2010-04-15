@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <ApplicationData link="http://www.jmmc.fr/aspro">
-  <program name="Aspro" version="0.3b3"/>
+  <program name="Aspro" version="0.3b4"/>
   <compilation date="21/09/2009" compiler="JDK 1.5.0_16"/>
   <text>
     <![CDATA[ASPRO is a complete observation preparation tool developed and maintained by the JMMC
@@ -34,6 +34,10 @@
   </menubar>
   <releasenotes>
     <release version="0.3">
+      <prerelease version="0.3b4">
+        <change>Added VLTI configuration for the period 86 (idem period 85).</change>
+        <change>Added VLTI configuration for the future PIONIER instrument (period 86).</change>
+      </prerelease>
       <prerelease version="0.3b3">
         <change>Added basic Observing Block for MIDI.</change>
         <change>Fixed the contiguous date interval problem on observability plot.</change>
