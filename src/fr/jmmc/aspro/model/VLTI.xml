@@ -8708,11 +8708,26 @@
         <waveLengthMax>13</waveLengthMax>
       </mode>
     </focalInstrument>
+
+    <!-- PIONIER TBC -->
+    <focalInstrument>
+      <name>PIONIER</name>
+      <description>Prototype configuration for PIONIER instrument</description>
+      <numberChannels>4</numberChannels>
+      <defaultSamplingTime>60</defaultSamplingTime>
+      <mode>
+        <name>standard</name>
+        <waveLengthMin>1.5</waveLengthMin>
+        <waveLengthMax>2.2</waveLengthMax>
+      </mode>
+    </focalInstrument>
+
   </description>
 
 
+
   <configuration>
-    <version>Period 84</version>
+    <version>Period 86</version>
     <interferometer>VLTI</interferometer>
 
     <instrument>
@@ -8730,16 +8745,46 @@
         <stations>UT2 UT3 UT4</stations>
       </configuration>
       <configuration>
-        <stations>E0 G0 H0</stations>
+        <stations>A0 D0 H0</stations>
       </configuration>
       <configuration>
-        <stations>A0 D0 H0</stations>
+        <stations>D0 H0 K0</stations>
+      </configuration>
+      <configuration>
+        <stations>A0 K0 G1</stations>
+      </configuration>
+      <configuration>
+        <stations>A0 K0 I1</stations>
+      </configuration>
+      <configuration>
+        <stations>A0 G1 I1</stations>
+      </configuration>
+      <configuration>
+        <stations>K0 G1 I1</stations>
       </configuration>
       <configuration>
         <stations>D0 H0 G1</stations>
       </configuration>
       <configuration>
-        <stations>A0 K0 G1</stations>
+        <stations>D0 H0 I1</stations>
+      </configuration>
+      <configuration>
+        <stations>D0 G1 I1</stations>
+      </configuration>
+      <configuration>
+        <stations>H0 G1 I1</stations>
+      </configuration>
+      <configuration>
+        <stations>E0 G0 H0</stations>
+      </configuration>
+      <configuration>
+        <stations>E0 G0 I1</stations>
+      </configuration>
+      <configuration>
+        <stations>E0 H0 I1</stations>
+      </configuration>
+      <configuration>
+        <stations>G0 H0 I1</stations>
       </configuration>
     </instrument>
 
@@ -8764,38 +8809,72 @@
         <stations>UT3 UT4</stations>
       </configuration>
       <configuration>
-        <stations>E0 G0</stations>
-      </configuration>
-      <configuration>
-        <stations>G0 H0</stations>
-      </configuration>
-      <configuration>
-        <stations>G0 K0</stations>
-      </configuration>
-      <configuration>
-        <stations>D0 H0</stations>
-      </configuration>
-      <configuration>
-        <stations>A0 H0</stations>
-      </configuration>
-      <configuration>
         <stations>A0 K0</stations>
-      </configuration>
-      <configuration>
-        <stations>D0 G1</stations>
-      </configuration>
-      <configuration>
-        <stations>H0 G1</stations>
       </configuration>
       <configuration>
         <stations>A0 G1</stations>
       </configuration>
       <configuration>
+        <stations>A0 I1</stations>
+      </configuration>
+      <configuration>
         <stations>K0 G1</stations>
       </configuration>
+      <configuration>
+        <stations>K0 I1</stations>
+      </configuration>
+      <configuration>
+        <stations>D0 H0</stations>
+      </configuration>
+      <configuration>
+        <stations>D0 G1</stations>
+      </configuration>
+      <configuration>
+        <stations>D0 I1</stations>
+      </configuration>
+      <configuration>
+        <stations>G1 I1</stations>
+      </configuration>
+      <configuration>
+        <stations>H0 I1</stations>
+      </configuration>
+      <configuration>
+        <stations>H0 G1</stations>
+      </configuration>
+      <configuration>
+        <stations>E0 H0</stations>
+      </configuration>
+      <configuration>
+        <stations>E0 G0</stations>
+      </configuration>
+      <configuration>
+        <stations>E0 I1</stations>
+      </configuration>
+      <configuration>
+        <stations>G0 H0</stations>
+      </configuration>
+      <configuration>
+        <stations>G0 I1</stations>
+      </configuration>
     </instrument>
-  </configuration>
 
+    <instrument>
+      <focalInstrument>PIONIER</focalInstrument>
+      <configuration>
+        <stations>UT1 UT2 UT3 UT4</stations>
+      </configuration>
+      <configuration>
+        <stations>A0 G1 K0 I1</stations>
+      </configuration>
+      <configuration>
+        <stations>D0 H0 G1 I1</stations>
+      </configuration>
+      <configuration>
+        <stations>E0 G0 H0 I1</stations>
+      </configuration>
+    </instrument>
+
+  </configuration>
 
   <configuration>
     <version>Period 85</version>
@@ -8928,6 +9007,93 @@
         <stations>G0 I1</stations>
       </configuration>
     </instrument>
+
+  </configuration>
+
+  <configuration>
+    <version>Period 84</version>
+    <interferometer>VLTI</interferometer>
+
+    <instrument>
+      <focalInstrument>AMBER</focalInstrument>
+      <configuration>
+        <stations>UT1 UT2 UT3</stations>
+      </configuration>
+      <configuration>
+        <stations>UT1 UT2 UT4</stations>
+      </configuration>
+      <configuration>
+        <stations>UT1 UT3 UT4</stations>
+      </configuration>
+      <configuration>
+        <stations>UT2 UT3 UT4</stations>
+      </configuration>
+      <configuration>
+        <stations>E0 G0 H0</stations>
+      </configuration>
+      <configuration>
+        <stations>A0 D0 H0</stations>
+      </configuration>
+      <configuration>
+        <stations>D0 H0 G1</stations>
+      </configuration>
+      <configuration>
+        <stations>A0 K0 G1</stations>
+      </configuration>
+    </instrument>
+
+    <instrument>
+      <focalInstrument>MIDI</focalInstrument>
+      <configuration>
+        <stations>UT1 UT2</stations>
+      </configuration>
+      <configuration>
+        <stations>UT1 UT3</stations>
+      </configuration>
+      <configuration>
+        <stations>UT1 UT4</stations>
+      </configuration>
+      <configuration>
+        <stations>UT2 UT3</stations>
+      </configuration>
+      <configuration>
+        <stations>UT2 UT4</stations>
+      </configuration>
+      <configuration>
+        <stations>UT3 UT4</stations>
+      </configuration>
+      <configuration>
+        <stations>E0 G0</stations>
+      </configuration>
+      <configuration>
+        <stations>G0 H0</stations>
+      </configuration>
+      <configuration>
+        <stations>G0 K0</stations>
+      </configuration>
+      <configuration>
+        <stations>D0 H0</stations>
+      </configuration>
+      <configuration>
+        <stations>A0 H0</stations>
+      </configuration>
+      <configuration>
+        <stations>A0 K0</stations>
+      </configuration>
+      <configuration>
+        <stations>D0 G1</stations>
+      </configuration>
+      <configuration>
+        <stations>H0 G1</stations>
+      </configuration>
+      <configuration>
+        <stations>A0 G1</stations>
+      </configuration>
+      <configuration>
+        <stations>K0 G1</stations>
+      </configuration>
+    </instrument>
+
   </configuration>
 
 </ns0:interferometerSetting>
