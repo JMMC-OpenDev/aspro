@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoverageService.java,v 1.15 2010-02-19 16:06:07 bourgesl Exp $"
+ * "@(#) $Id: UVCoverageService.java,v 1.16 2010-05-05 14:34:00 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.15  2010/02/19 16:06:07  bourgesl
+ * added image size & LUT combo boxes
+ *
  * Revision 1.14  2010/02/18 15:52:38  bourgesl
  * added parameter argument validation with an user message
  *
@@ -144,11 +147,13 @@ public class UVCoverageService {
    * @param doUVSupport flag to compute the UV support
    * @param doModelImage flag to compute the model image
    * @param imageMode image mode (amplitude or phase)
+   * @param imageSize number of pixels for both width and height of the generated image
+   * @param colorModel color model to use
    */
   public UVCoverageService(final ObservationSetting observation, final String targetName,
-          final double haMin, final double haMax,
-          final double uvMax, final boolean doUVSupport, 
-          final boolean doModelImage, final ImageMode imageMode, final int imageSize, final IndexColorModel colorModel) {
+                           final double haMin, final double haMax,
+                           final double uvMax, final boolean doUVSupport,
+                           final boolean doModelImage, final ImageMode imageMode, final int imageSize, final IndexColorModel colorModel) {
     this.observation = observation;
     this.targetName = targetName;
     this.haMin = haMin;
@@ -208,8 +213,6 @@ public class UVCoverageService {
               logger.fine("UV coordinate maximum = [" + this.uvMax + "]");
             }
           }
-
-          // TODO : get max base line from user choice :
 
           // uv Max = max base line * uv margin / minimum wave length
           this.data.setUvMax(this.uvMax);
@@ -457,13 +460,17 @@ public class UVCoverageService {
 
     this.lambda = (this.lambdaMax + this.lambdaMin) / 2d;
 
-    // hour angle step in decimal hours :
-    this.haStep = this.observation.getInstrumentConfiguration().getSamplingPeriod() / 60d;
-
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("lambdaMin : " + this.lambdaMin);
       logger.fine("lambda    : " + this.lambda);
       logger.fine("lambdaMax : " + this.lambdaMax);
+    }
+
+    // hour angle step in decimal hours :
+    this.haStep = this.observation.getInstrumentConfiguration().getSamplingPeriod() / 60d;
+
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("ha step   : " + this.haStep);
     }
 
     // Adjust the user uv Max = max base line / minimum wave length
