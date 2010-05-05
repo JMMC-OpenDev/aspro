@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: FieldSliderAdapter.java,v 1.2 2010-02-08 17:00:17 bourgesl Exp $"
+ * "@(#) $Id: FieldSliderAdapter.java,v 1.3 2010-05-05 14:29:22 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2010/02/08 17:00:17  bourgesl
+ * added U-V max selector + checkboxes
+ *
  * Revision 1.1  2010/01/21 16:38:42  bourgesl
  * Custom Numeric text field binding with a JSlider
  *
@@ -113,6 +116,7 @@ public class FieldSliderAdapter implements ChangeListener, PropertyChangeListene
 
   /** 
    * Handle the stateChanged event from the slider.
+   * @param ce slider change event
    */
   public void stateChanged(final ChangeEvent ce) {
     if (!this.isEventHandling) {
@@ -243,7 +247,7 @@ public class FieldSliderAdapter implements ChangeListener, PropertyChangeListene
 
   /**
    * Set the public double value
-   * @param double value
+   * @param value double value
    */
   public void setValue(final double value) {
     this.field.setValue(value);
