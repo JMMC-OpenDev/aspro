@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBAmber.java,v 1.8 2010-04-14 13:09:59 bourgesl Exp $"
+ * "@(#) $Id: ExportOBAmber.java,v 1.9 2010-05-05 14:29:51 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.8  2010/04/14 13:09:59  bourgesl
+ * first minimal OB for MIDI
+ *
  * Revision 1.7  2010/04/13 15:55:14  bourgesl
  * extracted common part for VLTI
  *
@@ -65,8 +68,11 @@ public class ExportOBAmber extends ExportOBVLTI {
    * @param file file to save
    * @param observation observation settings
    * @param target target to process
+   * @param haMin HA min in decimal hours
+   * @param haMax HA max in decimal hours
    */
-  public static void generate(final File file, final ObservationSetting observation, final Target target) {
+  public static void generate(final File file, final ObservationSetting observation, final Target target,
+          final double haMin, final double haMax) {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("generate file : " + file);
     }
@@ -75,7 +81,7 @@ public class ExportOBAmber extends ExportOBVLTI {
     final String template = FileUtils.readFile(TEMPLATE_FILE);
 
     // process common VLTI part :
-    String document = processCommon(template, file.getName(), observation, target);
+    String document = processCommon(template, file.getName(), observation, target, haMin, haMax);
 
     // Magnitudes for H, K :
     document = document.replaceFirst(KEY_HMAG,
