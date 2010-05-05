@@ -8,6 +8,9 @@
 
   <property name="root" location=".."/>
 
+  <!-- JAXB library must be present in the jmcs module nearby -->
+  <property name="jaxb.libs" location="${root}/../jmcs/lib"/>
+
   <property name="libs" location="${root}/lib"/>
   <property name="sources" location="${root}/src"/>
 
@@ -18,7 +21,7 @@
     <attribute name="schema"/>
 
     <sequential>
-      <java jar="${libs}/jaxb-xjc.jar">
+      <java jar="${jaxb.libs}/jaxb-xjc.jar">
         <arg value="-classpath"/>
         <arg value="${libs}/simple-regenerator-1.0.jar"/>
 
@@ -49,6 +52,7 @@
     <echo>-------------------------------------------------------------------------------</echo>
     <echo>  - genXsdCode         : generates the java code from xml schema (xsd)</echo>
     <echo>-------------------------------------------------------------------------------</echo>
+    <echo> jaxb libraries : ${jaxb.libs}</echo>
   </target>
 
 
