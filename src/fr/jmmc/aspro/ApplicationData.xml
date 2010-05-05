@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <ApplicationData link="http://www.jmmc.fr/aspro">
-  <program name="Aspro" version="0.3b4"/>
+  <program name="Aspro" version="0.3b5"/>
   <compilation date="21/09/2009" compiler="JDK 1.5.0_16"/>
   <text>
     <![CDATA[ASPRO is a complete observation preparation tool developed and maintained by the JMMC
@@ -34,6 +34,12 @@
   </menubar>
   <releasenotes>
     <release version="0.3">
+      <prerelease version="0.3b5">
+        <change>Added VLTI configuration for the period 87 (new baselines) and fixed period 86.</change>
+        <change>Added date and time constraints on VLTI Observing Block : date is defined if night restrictions are enabled;
+        LST intervals are defined with the target observability (elevation > 30 deg + delay lines + shadowing)
+        restricted by the HA min / max defined in the UV Coverage Panel.</change>
+      </prerelease>
       <prerelease version="0.3b4">
         <change>Added VLTI configuration for the period 86 (idem period 85).</change>
         <change>Added VLTI configuration for the future PIONIER instrument (period 86).</change>
