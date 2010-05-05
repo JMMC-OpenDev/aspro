@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.40 2010-04-13 15:35:46 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.41 2010-05-05 14:33:43 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.40  2010/04/13 15:35:46  bourgesl
+ * Fixed bug on date intervals that have a discontinuity due to conversions from HA [-12;+12]
+ *
  * Revision 1.39  2010/04/09 10:23:29  bourgesl
  * side effect of RA/DEC in HMS/DMS
  * corrected Target raDeg/decDeg (degrees)
@@ -166,12 +169,15 @@ import fr.jmmc.aspro.model.oi.StationLinks;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.service.HorizonService.Profile;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.logging.Level;
 import javax.xml.datatype.XMLGregorianCalendar;
@@ -218,8 +224,8 @@ public class ObservabilityService {
   private boolean useNightLimit;
   /** Night ranges defined in julian day */
   private List<Range> nightLimits = null;
-  /** minimum of elevation to observe any target (rad) */
-  private double minElev;
+  /** minimum of elevation to observe any target (deg) */
+  private double minElev = Double.NaN;
   /** interferometer description */
   private InterferometerDescription interferometer = null;
   /** focal instrument description */
@@ -236,6 +242,8 @@ public class ObservabilityService {
   private List<Range> wRanges = new ArrayList<Range>();
   /** list of Pop combinations with pop delays per baseline */
   private List<PopCombination> popCombinations = null;
+  /** selected target (used by OB) */
+  private Target selectedTarget = null;
 
   /**
    * Constructor.
@@ -253,6 +261,26 @@ public class ObservabilityService {
     this.useLST = useLST;
     this.doDetails = doDetails;
     this.doBaseLineLimits = doBaseLineLimits;
+  }
+
+  /**
+   * Specific Constructor to prepare Observing blocks for a single target (LST)
+   * Note : This service is statefull so it can not be reused by several calls.
+   *
+   * @param observation observation settings
+   * @param target target to use
+   * @param minElev minimum elevation (deg)
+   */
+  public ObservabilityService(final ObservationSetting observation,
+                              final Target target, final double minElev) {
+    // use LST :
+    this(observation, true, false, false);
+
+    // select target :
+    this.selectedTarget = target;
+
+    // force to use the given minimum elevation :
+    this.minElev = minElev;
   }
 
   /**
@@ -277,8 +305,14 @@ public class ObservabilityService {
       if (this.doBaseLineLimits) {
         targets = generateTargetsForBaseLineLimits();
       } else {
-        // copy the list to avoid concurrent modification during iteration :
-        targets = new ArrayList<Target>(this.observation.getTargets());
+        if (this.selectedTarget == null) {
+          // copy the list to avoid concurrent modification during iteration :
+          targets = new ArrayList<Target>(this.observation.getTargets());
+        } else {
+          // use the given target (OB) :
+          targets = new ArrayList<Target>(1);
+          targets.add(selectedTarget);
+        }
       }
 
       // define site :
@@ -672,6 +706,10 @@ public class ObservabilityService {
       // rise/set range :
       final Range rangeHARiseSet = new Range(-haElev, haElev);
 
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("rangeHARiseSet = " + rangeHARiseSet);
+      }
+
       // HA intervals for every base line :
       List<List<Range>> rangesHABaseLines;
 
@@ -720,6 +758,10 @@ public class ObservabilityService {
       if (this.hasHorizon) {
         // check horizon profiles inside rise/set range :
         rangesJDHz = checkHorizonProfile(rangeJDRiseSet);
+
+        if (logger.isLoggable(Level.FINE)) {
+          logger.fine("rangesJDHz : " + rangesJDHz);
+        }
 
         // fast interrupt :
         if (this.currentThread.isInterrupted()) {
@@ -875,7 +917,7 @@ public class ObservabilityService {
    * @param starObs star observability bean to set the final PoP combination
    * @return intervals (hour angles) or null if thread interrupted
    */
-  public List<List<Range>> findHAIntervalsWithPops(final double dec, final List<Range> rangesTarget, final StarObservabilityData starObs) {
+  private List<List<Range>> findHAIntervalsWithPops(final double dec, final List<Range> rangesTarget, final StarObservabilityData starObs) {
 
     // First Pass :
     // For all PoP combinations : find the HA interval merged with the HA Rise/set interval
@@ -938,7 +980,7 @@ public class ObservabilityService {
    * @param rangesTarget HA ranges for target rise/set and night limits
    * @return intervals (hour angles) or null if thread interrupted
    */
-  public List<PopObservabilityData> getPopObservabilityData(final String targetName, final double dec, final List<Range> rangesTarget) {
+  private List<PopObservabilityData> getPopObservabilityData(final String targetName, final double dec, final List<Range> rangesTarget) {
 
     // For all PoP combinations : find the HA interval merged with the HA Rise/set interval
     // list of observability data associated to a pop combination :
@@ -1115,7 +1157,10 @@ public class ObservabilityService {
    * @throws IllegalStateException if the interferometer configuration or instrument configuration is undefined
    */
   private void prepareObservation() throws IllegalStateException {
-    this.minElev = this.observation.getInterferometerConfiguration().getMinElevation();
+    // If min elevation was defined in constructor, skip observation's value :
+    if (Double.isNaN(this.minElev)) {
+      this.minElev = this.observation.getInterferometerConfiguration().getMinElevation();
+    }
 
     if (doBaseLineLimits) {
       // ignore night limits :
@@ -1522,17 +1567,8 @@ public class ObservabilityService {
       logger.finest("ha2 = " + ha2);
     }
 
-    final double lst1 = lstOffset + ha1;
-    final double lst2 = lstOffset + ha2;
-
-    if (logger.isLoggable(Level.FINEST)) {
-      logger.finest("lst1 = " + lst1 + " h");
-      logger.finest("lst2 = " + lst2 + " h");
-    }
-
-    // apply the sideral / solar ratio :
-    final double jd1 = this.jdLst0 + AstroSkyCalc.lst2jd(lst1);
-    final double jd2 = this.jdLst0 + AstroSkyCalc.lst2jd(lst2);
+    final double jd1 = convertHAToJD(ha1, lstOffset);
+    final double jd2 = convertHAToJD(ha2, lstOffset);
 
     if (logger.isLoggable(Level.FINEST)) {
       logger.finest("jd1 = " + this.sc.toDate(jd1, true));
@@ -1542,6 +1578,12 @@ public class ObservabilityService {
     return new Range(jd1, jd2);
   }
 
+  /**
+   * Convert a decimal hour angle in Julian day
+   * @param ha decimal hour angle
+   * @param lstOffset precessed target right ascension in decimal hours
+   * @return JD value
+   */
   private double convertHAToJD(final double ha, final double lstOffset) {
     final double lst = lstOffset + ha;
 
@@ -1551,9 +1593,9 @@ public class ObservabilityService {
 
   /**
    * Convert a JD range to an HA range but keep only ranges with an HA in [-12;12]
-   * @param rangeJD given in hour angle (dec hours)
-   * @param lstOffset right ascension (dec hours)
-   * @return JD range
+   * @param rangeJD JD range
+   * @param lstOffset precessed target right ascension in decimal hours
+   * @return HA range
    */
   private Range convertJDToHARange(final Range rangeJD, final double lstOffset) {
 
@@ -1661,18 +1703,28 @@ public class ObservabilityService {
   }
 
   /**
-   * Traverse the given list of date intervals and merge contiguous intervals.
+   * Sort and traverse the given list of date intervals to merge contiguous intervals.
    * This fixes the problem due to HA limit [+/-12h] i.e. the converted JD / Date ranges
    * can have a discontinuity on the date axis.
    *
    * @param intervals date intervals to fix
    */
   private void mergeDateIntervals(final List<DateTimeInterval> intervals) {
+    // first sort date intervals :
+    Collections.sort(intervals);
+    mergeSortedDateIntervals(intervals);
+  }
+
+  /**
+   * Traverse the given list of date intervals to merge contiguous intervals.
+   * This fixes the problem due to HA limit [+/-12h] i.e. the converted JD / Date ranges
+   * can have a discontinuity on the date axis.
+   *
+   * @param intervals SORTED date intervals to fix
+   */
+  private void mergeSortedDateIntervals(final List<DateTimeInterval> intervals) {
     final int size = intervals.size();
     if (size > 1) {
-      // first sort date intervals :
-      Collections.sort(intervals);
-
       DateTimeInterval interval = null;
       DateTimeInterval interval2 = null;
       for (int i = 0, j = 1, end = size - 1; i < end; i++, j++) {
@@ -1690,6 +1742,12 @@ public class ObservabilityService {
     }
   }
 
+  /**
+   * Convert a JD value to a Date Object (LST or UTC)
+   * @see #useLST
+   * @param jd julian day
+   * @return Date Object (LST or UTC)
+   */
   private Date jdToDate(final double jd) {
     return this.sc.toDate(jd, this.useLST);
   }
@@ -1732,7 +1790,7 @@ public class ObservabilityService {
     double haElev;
     // internal ticks for elevation :
     for (elev = 20; elev <= 80; elev += 20) {
-      if (elev != this.minElev) {
+      if (elev != Math.round(this.minElev)) {
         haElev = this.sc.getHAForElevation(precDEC, elev);
 
         if (haElev > 0) {
@@ -1778,5 +1836,79 @@ public class ObservabilityService {
       }
     }
     return false;
+  }
+
+  /**
+   * Convert the given list of HA ranges to date intervals in LST (used by Export OB only)
+   *
+   * Note : date intervals that are over (00:00 or 24:00) are merged. 
+   * For example : 22:00->24:00 and 00:00->01:00 returns 22:00->01:00
+   *
+   * @see fr.jmmc.aspro.ob.ExportOBVLTI#processDateTime(document, observation, target, haMin, haMax)
+   * 
+   * @param ranges HA ranges
+   * @param precRA precessed target right ascension in decimal hours
+   * @return date intervals
+   */
+  public List<DateTimeInterval> convertHARangesToDateInterval(final List<Range> ranges, final double precRA) {
+    if (ranges != null) {
+      final List<Range> jdRanges = new ArrayList<Range>();
+      for (Range range : ranges) {
+        jdRanges.add(convertHAToJDRange(range, precRA));
+      }
+
+      final List<DateTimeInterval> dateIntervals = new ArrayList<DateTimeInterval>();
+      // convert JD ranges to date ranges :
+      for (Range range : jdRanges) {
+        convertRangeToDateInterval(range, dateIntervals);
+      }
+      // merge contiguous date ranges :
+      mergeDateIntervals(dateIntervals);
+
+      // Replace the 23:59:59 date by 00:00:00 to merge contiguous intervals in LST :
+      final Calendar cal = new GregorianCalendar();
+      cal.set(Calendar.HOUR_OF_DAY, 0);
+      cal.set(Calendar.MINUTE, 0);
+      cal.set(Calendar.SECOND, 0);
+      // fix milliseconds to 0 to be able to compare date instances :
+      cal.set(Calendar.MILLISECOND, 0);
+
+      final Date lst0 = cal.getTime();
+
+      cal.set(Calendar.HOUR_OF_DAY, 23);
+      cal.set(Calendar.MINUTE, 59);
+      cal.set(Calendar.SECOND, 59);
+
+      final Date lst24 = cal.getTime();
+
+      boolean found = false;
+      DateTimeInterval interval;
+      for (final ListIterator<DateTimeInterval> it = dateIntervals.listIterator(); it.hasNext();) {
+        interval = it.next();
+        if (lst24.equals(interval.getEndDate())) {
+          found = true;
+          it.set(new DateTimeInterval(interval.getStartDate(), lst0));
+        }
+      }
+
+      if (found && dateIntervals.size() > 1) {
+        // sort the intervals in reverse order :
+        Collections.sort(dateIntervals);
+        Collections.reverse(dateIntervals);
+
+        // merge contiguous date ranges :
+        mergeSortedDateIntervals(dateIntervals);
+
+        if (dateIntervals.size() > 1) {
+          Collections.sort(dateIntervals);
+        }
+      }
+
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("dateIntervals = " + dateIntervals);
+      }
+      return dateIntervals;
+    }
+    return null;
   }
 }
