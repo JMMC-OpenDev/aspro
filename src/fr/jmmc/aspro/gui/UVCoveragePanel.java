@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.32 2010-04-14 13:09:59 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.33 2010-05-05 14:28:48 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.32  2010/04/14 13:09:59  bourgesl
+ * first minimal OB for MIDI
+ *
  * Revision 1.31  2010/04/13 14:18:27  bourgesl
  * uniform sizes for sliders and text fields
  *
@@ -875,6 +878,7 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
       final String targetName = getSelectedTargetName();
 
       if (targetName != null) {
+
         // Change the instrument mode :
         this.om.setInstrumentMode((String) this.jComboBoxInstrumentMode.getSelectedItem());
 
@@ -958,6 +962,9 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
       // update the selected instrument mode :
       this.jComboBoxInstrumentMode.setSelectedItem(observation.getInstrumentConfiguration().getInstrumentMode());
 
+      // update the sampling period :
+      this.jFieldSamplingPeriod.setValue(Double.valueOf(observation.getInstrumentConfiguration().getSamplingPeriod()));
+
       // refresh the fringe tracker modes :
       updateComboFTModes(observation);
 
@@ -969,6 +976,8 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
       this.jCheckBoxPlotUVSupport.setSelected(true);
       this.jCheckBoxModelImage.setSelected(true);
       this.jComboBoxImageMode.setSelectedItem(ImageMode.AMP);
+      this.jComboBoxLUT.setSelectedItem("aspro");
+      this.jComboBoxImageSize.setSelectedIndex(1);
 
       // reset cached data :
       this.currentObsData = null;
@@ -1684,4 +1693,23 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
   public String getSelectedTargetName() {
     return (String) this.jComboBoxTarget.getSelectedItem();
   }
+
+  /**
+   * Return the current haMin value
+   * TODO : store this info in target
+   * @return haMin double
+   */
+  public double getHAMin() {
+    return this.haMinAdapter.getValue();
+  }
+
+  /**
+   * Return the current haMin value
+   * TODO : store this info in target
+   * @return haMin double
+   */
+  public double getHAMax() {
+    return this.haMaxAdapter.getValue();
+  }
+
 }
