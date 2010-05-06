@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.33 2010-05-05 14:28:48 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.34 2010-05-06 15:40:20 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.33  2010/05/05 14:28:48  bourgesl
+ * on load : restore sampling period + image defaults (size, lut)
+ * added ha Min / Max to generate OB with correct LST intervals
+ *
  * Revision 1.32  2010/04/14 13:09:59  bourgesl
  * first minimal OB for MIDI
  *
@@ -132,6 +136,7 @@ import fr.jmmc.aspro.model.uvcoverage.UVCoverageData;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Pop;
 import fr.jmmc.aspro.model.oi.Target;
+import fr.jmmc.aspro.model.oi.TargetConfiguration;
 import fr.jmmc.aspro.model.uvcoverage.UVBaseLineData;
 import fr.jmmc.aspro.model.uvcoverage.UVRangeBaseLineData;
 import fr.jmmc.aspro.service.UVCoverageService;
@@ -187,6 +192,10 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
   /** Class logger */
   private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
+  /** flag to log a stack trace in method updateObservation() to detect multiple calls */
+  private final static boolean DEBUG_UPDATE_EVENT = false;
+  /** flag to log a stack trace in method plot() to detect multiple calls */
+  private final static boolean DEBUG_PLOT_EVENT = false;
   /** image size choices */
   private final static Integer[] IMAGE_SIZES = {256, 512, 1024};
   /** scaling factor to Mega Lambda for U,V points */
@@ -607,7 +616,7 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
 
   private void jButtonOBActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonOBActionPerformed
 
-    final ObservationSetting observation = ObservationManager.getInstance().getObservation();
+    final ObservationSetting observation = this.om.getObservation();
     final String instrumentName = observation.getInstrumentConfiguration().getName();
 
     if (AsproConstants.INS_AMBER.equals(instrumentName) || AsproConstants.INS_MIDI.equals(instrumentName)) {
@@ -669,6 +678,7 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     // define change listeners :
     this.jComboBoxTarget.addActionListener(this);
     this.jComboBoxInstrumentMode.addActionListener(this);
+    this.jComboBoxFTMode.addActionListener(this);
 
     this.uvMaxAdapter = new FieldSliderAdapter(jSliderUVMax, jFieldUVMax, 0d, 0d, 0d);
     this.uvMaxAdapter.addChangeListener(this);
@@ -688,15 +698,16 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
         if (logger.isLoggable(Level.FINE)) {
           logger.fine("samplingPeriod changed : " + samplingNew);
         }
-        updateObservation();
-        refreshPlot();
+        if (updateObservation()) {
+          refreshPlot();
+        }
       }
     });
 
-    this.haMinAdapter = new FieldSliderAdapter(jSliderHAMin, jFieldHAMin, -12D, 12D, -12D);
+    this.haMinAdapter = new FieldSliderAdapter(jSliderHAMin, jFieldHAMin, AsproConstants.HA_MIN, AsproConstants.HA_MAX, AsproConstants.HA_MIN);
     this.haMinAdapter.addChangeListener(this);
 
-    this.haMaxAdapter = new FieldSliderAdapter(jSliderHAMax, jFieldHAMax, -12D, 12D, 12D);
+    this.haMaxAdapter = new FieldSliderAdapter(jSliderHAMax, jFieldHAMax, AsproConstants.HA_MIN, AsproConstants.HA_MAX, AsproConstants.HA_MAX);
     this.haMaxAdapter.addChangeListener(this);
 
     this.jTargetHAMin.setText(null);
@@ -738,21 +749,22 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     this.jComboBoxAtmQual.setVisible(false);
   }
 
-  /**
-   * Refresh the target list
-   */
-  private void updateComboTarget() {
-    final Object oldValue = getSelectedTargetName();
+  private void updateInteferometerData(final ObservationSetting observation) {
+    // note : can not be null :
+    final String intConfName = observation.getInterferometerConfiguration().getName();
+    // test if the interferometer changed :
+    boolean changed = !intConfName.equals(this.interferometerConfigurationName);
+    if (changed) {
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("interferometer configuration changed : " + intConfName);
+      }
+      this.interferometerConfigurationName = intConfName;
 
-    final Vector<String> v = this.om.getTargetNames();
-    this.jComboBoxTarget.setModel(new DefaultComboBoxModel(v));
+      final InterferometerConfiguration intConf = observation.getInterferometerConfiguration().getInterferometerConfiguration();
 
-    // restore previous selected item :
-    if (oldValue != null) {
-      this.jComboBoxTarget.setSelectedItem(oldValue);
-    }
-    if (logger.isLoggable(Level.FINEST)) {
-      logger.finest("jComboBoxTarget updated : " + getSelectedTargetName());
+      // update the UV Max :
+      final double maxBaseLine = intConf.getInterferometer().getMaxBaseLine();
+      this.uvMaxAdapter.reset(0, maxBaseLine, maxBaseLine);
     }
   }
 
@@ -804,6 +816,102 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
   }
 
   /**
+   * Refresh the target list
+   */
+  private void updateComboTarget() {
+    final Object oldValue = getSelectedTargetName();
+
+    final Vector<String> v = this.om.getTargetNames();
+    this.jComboBoxTarget.setModel(new DefaultComboBoxModel(v));
+
+    // restore previous selected item :
+    if (oldValue != null) {
+      this.jComboBoxTarget.setSelectedItem(oldValue);
+    }
+    if (logger.isLoggable(Level.FINEST)) {
+      logger.finest("jComboBoxTarget updated : " + getSelectedTargetName());
+    }
+  }
+
+  /**
+   * Update UI according to the target configuration
+   */
+  private void updateTargetConfiguration() {
+    final String targetName = getSelectedTargetName();
+
+    final TargetConfiguration targetConf = this.om.getTargetConfiguration(targetName);
+    if (targetConf != null) {
+
+      if (logger.isLoggable(Level.FINEST)) {
+        logger.finest("updateTargetConfiguration : " + targetName);
+      }
+
+      // disable the automatic update observation :
+      final boolean prevAutoUpdateObservation = this.setAutoUpdateObservation(false);
+      try {
+        // update HA Min / Max :
+        final Double haMin = targetConf.getHAMin();
+        this.haMinAdapter.setValue((haMin != null) ? haMin.doubleValue() : AsproConstants.HA_MIN);
+
+        final Double haMax = targetConf.getHAMax();
+        this.haMaxAdapter.setValue((haMax != null) ? haMax.doubleValue() : AsproConstants.HA_MAX);
+
+        // update ft mode :
+        if (this.jComboBoxFTMode.getModel().getSize() > 0) {
+          final String ftMode = targetConf.getFringeTrackerMode();
+          this.jComboBoxFTMode.setSelectedItem((ftMode != null) ? ftMode : AsproConstants.NONE);
+        }
+      } finally {
+        // restore the automatic update observation :
+        this.setAutoUpdateObservation(prevAutoUpdateObservation);
+      }
+    }
+  }
+
+  private void updateTargetHA() {
+    if (this.currentObsData != null) {
+      final String targetName = getSelectedTargetName();
+
+      final StarData starData = this.currentObsData.getStarData(targetName);
+      if (starData != null) {
+        final Double min = Range.getMinimum(starData.getObsRangesHA());
+        final Double max = Range.getMaximum(starData.getObsRangesHA());
+
+        this.jTargetHAMin.setText(format(jFieldHAMin, min));
+        this.jTargetHAMax.setText(format(jFieldHAMin, max));
+
+        if (logger.isLoggable(Level.FINE)) {
+          logger.fine("target HA min : " + min);
+          logger.fine("target HA max : " + min);
+        }
+      } else {
+        // baseline limits case :
+        this.jTargetHAMin.setText(null);
+        this.jTargetHAMax.setText(null);
+      }
+    }
+  }
+
+  /**
+   * If the current target has no model defined, then disable model options widgets
+   */
+  private void changeStateForModelImageWidgets() {
+    final String targetName = getSelectedTargetName();
+
+    final Target target = this.om.getTarget(targetName);
+    if (target != null) {
+      final List<Model> models = target.getModels();
+
+      final boolean hasModel = (models != null && !models.isEmpty());
+
+      this.jCheckBoxModelImage.setEnabled(hasModel);
+      this.jComboBoxImageMode.setEnabled(hasModel);
+      this.jComboBoxImageSize.setEnabled(hasModel);
+      this.jComboBoxLUT.setEnabled(hasModel);
+    }
+  }
+
+  /**
    * Process any comboBox change event (target, instrument mode, image mode ...).
    * Refresh the dependent combo boxes and update the observation according to the form state
    * @param e action event
@@ -813,15 +921,26 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
       if (logger.isLoggable(Level.FINE)) {
         logger.fine("target changed : " + getSelectedTargetName());
       }
-      changeStateForModelImageWidgets();
+      updateTargetConfiguration();
       updateTargetHA();
+      changeStateForModelImageWidgets();
       refreshPlot();
     } else if (e.getSource() == this.jComboBoxInstrumentMode) {
       if (logger.isLoggable(Level.FINE)) {
         logger.fine("instrument mode changed : " + this.jComboBoxInstrumentMode.getSelectedItem());
       }
+      if (updateObservation()) {
+        refreshPlot();
+      }
+    } else if (e.getSource() == this.jComboBoxFTMode) {
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("ft mode changed : " + this.jComboBoxFTMode.getSelectedItem());
+      }
       updateObservation();
+      /*
+      // ft mode is useless for now :
       refreshPlot();
+       */
     } else if (e.getSource() == this.jComboBoxImageMode) {
       if (logger.isLoggable(Level.FINE)) {
         logger.fine("image mode changed : " + this.jComboBoxImageMode.getSelectedItem());
@@ -852,14 +971,17 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
         logger.fine("haMin changed : " + source.getValue());
       }
       this.haMaxAdapter.setMinValue(source.getValue());
-      refreshPlot();
-
+      if (updateObservation()) {
+        refreshPlot();
+      }
     } else if (source == this.haMaxAdapter) {
       if (logger.isLoggable(Level.FINE)) {
         logger.fine("haMax changed : " + source.getValue());
       }
       this.haMinAdapter.setMaxValue(source.getValue());
-      refreshPlot();
+      if (updateObservation()) {
+        refreshPlot();
+      }
     } else if (source == this.uvMaxAdapter) {
       if (logger.isLoggable(Level.FINE)) {
         logger.fine("U-V Max changed : " + source.getValue());
@@ -870,32 +992,54 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
 
   /**
    * Update the observation with the form fields if the automatic update flag is enabled.
+   * @return true if the observation changed
    */
-  private void updateObservation() {
+  private boolean updateObservation() {
+    boolean changed = false;
     // check if the automatic update flag is enabled :
     if (this.doAutoUpdateObservation) {
+      if (DEBUG_UPDATE_EVENT) {
+        logger.log(Level.SEVERE, "UPDATE", new Throwable());
+      }
 
       final String targetName = getSelectedTargetName();
+
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("updateObservation : " + targetName);
+      }
 
       if (targetName != null) {
 
         // Change the instrument mode :
-        this.om.setInstrumentMode((String) this.jComboBoxInstrumentMode.getSelectedItem());
+        changed |= this.om.setInstrumentMode((String) this.jComboBoxInstrumentMode.getSelectedItem());
 
         // Update the sampling period :
         final Number samplingPeriod = (Number) this.jFieldSamplingPeriod.getValue();
-        this.om.setInstrumentSamplingPeriod(Double.valueOf(samplingPeriod.doubleValue()));
+        changed |= this.om.setInstrumentSamplingPeriod(Double.valueOf(samplingPeriod.doubleValue()));
+
+        // Update target HA Min/Max :
+        changed |= this.om.setTargetHAMin(targetName, Double.valueOf(this.haMinAdapter.getValue()));
+        changed |= this.om.setTargetHAMax(targetName, Double.valueOf(this.haMaxAdapter.getValue()));
+
+        // update ft mode :
+        changed |= this.om.setTargetFTMode(targetName, (String) this.jComboBoxFTMode.getSelectedItem());
 
       } else {
         // clean up i.e. the panel is then invalid :
 
+        // reset instrument configuration :
         this.om.setInstrumentMode(null);
         this.om.setInstrumentSamplingPeriod(null);
       }
 
       // TODO : fire event ??
       // NOTE : the onChange event is already handled : risk of cyclic loop !
+
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("updateObservation : " + changed);
+      }
     }
+    return changed;
   }
 
   /**
@@ -912,13 +1056,14 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
 
     // Only refresh the UI widgets and NOT the plot :
 
+    // disable the automatic update observation :
+    final boolean prevAutoUpdateObservation = this.setAutoUpdateObservation(false);
+    // disable the automatic refresh :
+    final boolean prevAutoRefresh = this.setAutoRefresh(false);
     try {
-      // first disable the automatic refresh from field changes :
-      this.doAutoRefresh = false;
 
-      // refresh the targets :
-      updateComboTarget();
-      changeStateForModelImageWidgets();
+      // update the data related to the interferometer :
+      updateInteferometerData(observation);
 
       // refresh the instrument modes :
       updateComboInstrumentModes(observation);
@@ -926,15 +1071,19 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
       // refresh the fringe tracker modes :
       updateComboFTModes(observation);
 
-      // update the data related to the interferometer :
-      updateInteferometerData(observation);
-
-      updateObservation();
+      // finally refresh the targets, that fires the target changed event
+      // refresh the fields HA Min/Max, FT Mode and computed HA Min / Max :
+      updateComboTarget();
 
     } finally {
-      // restore the automatic refresh from field changes :
-      this.doAutoRefresh = true;
+      // restore the automatic refresh :
+      this.setAutoRefresh(prevAutoRefresh);
+      // restore the automatic update observation :
+      this.setAutoUpdateObservation(prevAutoUpdateObservation);
     }
+
+    // finally, update the observation :
+    updateObservation();
   }
 
   /**
@@ -946,15 +1095,15 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("onLoadObservation :\n" + ObservationManager.toString(observation));
     }
+    // disable the automatic update observation :
+    final boolean prevAutoUpdateObservation = this.setAutoUpdateObservation(false);
+    // disable the automatic refresh :
+    final boolean prevAutoRefresh = this.setAutoRefresh(false);
     try {
-      // first disable the automatic update observation from field changes :
-      this.doAutoUpdateObservation = false;
-      // first disable the automatic refresh from field changes :
-      this.doAutoRefresh = false;
 
-      // refresh the targets :
-      updateComboTarget();
-      changeStateForModelImageWidgets();
+      // update the data related to the interferometer :
+      this.interferometerConfigurationName = null;
+      updateInteferometerData(observation);
 
       // refresh the instrument modes :
       updateComboInstrumentModes(observation);
@@ -969,10 +1118,14 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
       updateComboFTModes(observation);
 
       // reset HA limits :
-      this.haMinAdapter.setValue(-12D);
-      this.haMaxAdapter.setValue(12D);
+      this.haMinAdapter.setValue(AsproConstants.HA_MIN);
+      this.haMaxAdapter.setValue(AsproConstants.HA_MAX);
 
-      // reset defaults :
+      // finally refresh the targets, that fires the target changed event
+      // refresh the fields HA Min/Max, FT Mode and computed HA Min / Max :
+      updateComboTarget();
+
+      // reset to defaults :
       this.jCheckBoxPlotUVSupport.setSelected(true);
       this.jCheckBoxModelImage.setSelected(true);
       this.jComboBoxImageMode.setSelectedItem(ImageMode.AMP);
@@ -983,16 +1136,12 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
       this.currentObsData = null;
       this.lastZoomEvent = null;
       this.currentUVMapData = null;
-      this.interferometerConfigurationName = null;
-
-      // update the data related to the interferometer :
-      updateInteferometerData(observation);
 
     } finally {
-      // restore the automatic refresh from field changes :
-      this.doAutoRefresh = true;
-      // restore the automatic update observation from field changes :
-      this.doAutoUpdateObservation = true;
+      // restore the automatic refresh :
+      this.setAutoRefresh(prevAutoRefresh);
+      // restore the automatic update observation :
+      this.setAutoUpdateObservation(prevAutoUpdateObservation);
     }
   }
 
@@ -1030,68 +1179,6 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     updateTargetHA();
   }
 
-  private void updateTargetHA() {
-    if (this.currentObsData != null) {
-      final String targetName = getSelectedTargetName();
-
-      final StarData starData = this.currentObsData.getStarData(targetName);
-      if (starData != null) {
-        final Double min = Range.getMinimum(starData.getObsRangesHA());
-        final Double max = Range.getMaximum(starData.getObsRangesHA());
-
-        this.jTargetHAMin.setText(format(jFieldHAMin, min));
-        this.jTargetHAMax.setText(format(jFieldHAMin, max));
-
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("target HA min : " + min);
-          logger.fine("target HA max : " + min);
-        }
-      } else {
-        // baseline limits case :
-        this.jTargetHAMin.setText(null);
-        this.jTargetHAMax.setText(null);
-      }
-    }
-  }
-
-  /**
-   * If the current target has no model defined, then disable model options widgets
-   */
-  private void changeStateForModelImageWidgets() {
-    final String targetName = getSelectedTargetName();
-
-    final Target target = ObservationManager.getInstance().getTarget(targetName);
-    if (target != null) {
-      final List<Model> models = target.getModels();
-
-      final boolean hasModel = (models != null && !models.isEmpty());
-
-      this.jCheckBoxModelImage.setEnabled(hasModel);
-      this.jComboBoxImageMode.setEnabled(hasModel);
-      this.jComboBoxImageSize.setEnabled(hasModel);
-      this.jComboBoxLUT.setEnabled(hasModel);
-    }
-  }
-
-  private void updateInteferometerData(final ObservationSetting observation) {
-    // note : can not be null :
-    final String intConfName = observation.getInterferometerConfiguration().getName();
-    // test if the interferometer changed :
-    boolean changed = !intConfName.equals(this.interferometerConfigurationName);
-    if (changed) {
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("interferometer configuration changed : " + intConfName);
-      }
-      this.interferometerConfigurationName = intConfName;
-
-      final InterferometerConfiguration intConf = observation.getInterferometerConfiguration().getInterferometerConfiguration();
-
-      // update the UV Max :
-      final double maxBaseLine = intConf.getInterferometer().getMaxBaseLine();
-      this.uvMaxAdapter.reset(0, maxBaseLine, maxBaseLine);
-    }
-  }
-
   /**
    * Refresh the plot when an UI widget changes.
    * Check the doAutoRefresh flag to avoid unwanted refresh (resetOptions)
@@ -1101,7 +1188,7 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
       if (logger.isLoggable(Level.FINE)) {
         logger.fine("refreshPlot");
       }
-      this.plot(ObservationManager.getInstance().getObservation());
+      this.plot(this.om.getObservation());
     }
   }
 
@@ -1114,12 +1201,13 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("plot : " + ObservationManager.toString(observation));
     }
+    if (DEBUG_PLOT_EVENT) {
+      logger.log(Level.SEVERE, "PLOT", new Throwable());
+    }
+
+    /* get plot options from swing components */
 
     final String targetName = getSelectedTargetName();
-
-    // HA Limits :
-    final double haMin = this.haMinAdapter.getValue();
-    final double haMax = this.haMaxAdapter.getValue();
 
     final double uvMax = this.uvMaxAdapter.getValue();
 
@@ -1148,7 +1236,7 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
         public UVCoverageData doInBackground() {
           logger.fine("SwingWorker[UV].doInBackground : IN");
 
-          UVCoverageData uvData = new UVCoverageService(observation, targetName, haMin, haMax, uvMax,
+          UVCoverageData uvData = new UVCoverageService(observation, targetName, uvMax,
                   doUVSupport, doModelImage, imageMode, imageSize.intValue(), colorModel).compute();
 
           if (isCancelled()) {
@@ -1282,7 +1370,7 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
 
       final String targetName = getSelectedTargetName();
 
-      final List<Model> models = ObservationManager.getTarget(ObservationManager.getInstance().getObservation(), targetName).getModels();
+      final List<Model> models = ObservationManager.getTarget(this.om.getObservation(), targetName).getModels();
 
       if (models.size() > 0) {
 
@@ -1664,7 +1752,65 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     return res;
   }
 
-  public void setUvPlotScalingFactor(double uvPlotScalingFactor) {
+  /**
+   * Enable / Disable the automatic update of the observation when any swing component changes.
+   * Return its previous value.
+   *
+   * Typical use is as following :
+   * // first disable the automatic update observation :
+   * final boolean prevAutoUpdateObservation = this.setAutoUpdateObservation(false);
+   * try {
+   *   // operations ...
+   *
+   * } finally {
+   *   // restore the automatic update observation :
+   *   this.setAutoUpdateObservation(prevAutoUpdateObservation);
+   * }
+   *
+   * @param value new value
+   * @return previous value
+   */
+  private boolean setAutoUpdateObservation(final boolean value) {
+    // first backup the state of the automatic update observation :
+    final boolean previous = this.doAutoUpdateObservation;
+
+    // then change its state :
+    this.doAutoUpdateObservation = value;
+
+    // return previous state :
+    return previous;
+  }
+
+  /**
+   * Enable / Disable the automatic refresh of the plot when any swing component changes.
+   * Return its previous value.
+   *
+   * Typical use is as following :
+   * // disable the automatic refresh :
+   * final boolean prevAutoRefresh = this.setAutoRefresh(false);
+   * try {
+   *   // operations ...
+   *
+   * } finally {
+   *   // restore the automatic refresh :
+   *   this.setAutoRefresh(prevAutoRefresh);
+   * }
+   *
+   * @param value new value
+   * @return previous value
+   */
+  private boolean setAutoRefresh(final boolean value) {
+    // first backup the state of the automatic update observation :
+    final boolean previous = this.doAutoRefresh;
+
+    // then change its state :
+    this.doAutoRefresh = value;
+
+    // return previous state :
+    return previous;
+  }
+
+  private void setUvPlotScalingFactor(double uvPlotScalingFactor) {
     this.uvPlotScalingFactor = uvPlotScalingFactor;
   }
 
@@ -1693,23 +1839,4 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
   public String getSelectedTargetName() {
     return (String) this.jComboBoxTarget.getSelectedItem();
   }
-
-  /**
-   * Return the current haMin value
-   * TODO : store this info in target
-   * @return haMin double
-   */
-  public double getHAMin() {
-    return this.haMinAdapter.getValue();
-  }
-
-  /**
-   * Return the current haMin value
-   * TODO : store this info in target
-   * @return haMin double
-   */
-  public double getHAMax() {
-    return this.haMaxAdapter.getValue();
-  }
-
 }
