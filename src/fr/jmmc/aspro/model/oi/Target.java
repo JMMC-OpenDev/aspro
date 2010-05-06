@@ -44,8 +44,8 @@ import fr.jmmc.mcs.model.targetmodel.Model;
  *         &lt;element name="FLUX_H" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
  *         &lt;element name="FLUX_K" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
  *         &lt;element name="FLUX_N" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
- *         &lt;element name="fringeTrackerConfiguration" type="{http://www.jmmc.fr/aspro-oi/0.1}FringeTrackerConfiguration" minOccurs="0"/>
  *         &lt;element ref="{http://www.jmmc.fr/jmcs/models/0.1}model" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="configuration" type="{http://www.jmmc.fr/aspro-oi/0.1}TargetConfiguration" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -75,8 +75,8 @@ import fr.jmmc.mcs.model.targetmodel.Model;
     "fluxh",
     "fluxk",
     "fluxn",
-    "fringeTrackerConfiguration",
-    "models"
+    "models",
+    "configuration"
 })
 public class Target
     extends OIBase
@@ -120,9 +120,9 @@ public class Target
     protected Double fluxk;
     @XmlElement(name = "FLUX_N")
     protected Double fluxn;
-    protected FringeTrackerConfiguration fringeTrackerConfiguration;
     @XmlElement(name = "model", namespace = "http://www.jmmc.fr/jmcs/models/0.1")
     protected List<Model> models;
+    protected TargetConfiguration configuration;
 
     /**
      * Gets the value of the name property.
@@ -573,30 +573,6 @@ public class Target
     }
 
     /**
-     * Gets the value of the fringeTrackerConfiguration property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link FringeTrackerConfiguration }
-     *     
-     */
-    public FringeTrackerConfiguration getFringeTrackerConfiguration() {
-        return fringeTrackerConfiguration;
-    }
-
-    /**
-     * Sets the value of the fringeTrackerConfiguration property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link FringeTrackerConfiguration }
-     *     
-     */
-    public void setFringeTrackerConfiguration(FringeTrackerConfiguration value) {
-        this.fringeTrackerConfiguration = value;
-    }
-
-    /**
      * Gets the value of the models property.
      * 
      * <p>
@@ -623,6 +599,30 @@ public class Target
             models = new ArrayList<Model>();
         }
         return this.models;
+    }
+
+    /**
+     * Gets the value of the configuration property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link TargetConfiguration }
+     *     
+     */
+    public TargetConfiguration getConfiguration() {
+        return configuration;
+    }
+
+    /**
+     * Sets the value of the configuration property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link TargetConfiguration }
+     *     
+     */
+    public void setConfiguration(TargetConfiguration value) {
+        this.configuration = value;
     }
     
 //--simple--preserve

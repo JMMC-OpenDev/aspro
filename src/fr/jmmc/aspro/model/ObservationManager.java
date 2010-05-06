@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationManager.java,v 1.27 2010-04-09 10:33:10 bourgesl Exp $"
+ * "@(#) $Id: ObservationManager.java,v 1.28 2010-05-06 15:37:27 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.27  2010/04/09 10:33:10  bourgesl
+ * convert space character in simbad coords by double dot to have proper HMS / DMS format
+ *
  * Revision 1.26  2010/04/09 10:21:09  bourgesl
  * modified Target type :
  * - RA/DEC in HMS/DMS
@@ -102,6 +105,7 @@ import fr.jmmc.aspro.model.oi.FocalInstrumentConfigurationChoice;
 import fr.jmmc.aspro.model.oi.InterferometerConfigurationChoice;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Target;
+import fr.jmmc.aspro.model.oi.TargetConfiguration;
 import fr.jmmc.aspro.model.oi.WhenSetting;
 import fr.jmmc.mcs.astro.star.Star;
 import java.io.File;
@@ -521,6 +525,68 @@ public class ObservationManager extends BaseOIManager {
   public static void setTargets(final ObservationSetting obs, final List<Target> targets) {
     obs.getTargets().clear();
     obs.getTargets().addAll(targets);
+  }
+
+  public TargetConfiguration getTargetConfiguration(final String name) {
+    return getTargetConfiguration(getObservation(), name);
+  }
+
+  public static TargetConfiguration getTargetConfiguration(final ObservationSetting obs, final String name) {
+    final Target target = getTarget(obs, name);
+    if (target != null) {
+      TargetConfiguration targetConf = target.getConfiguration();
+      if (targetConf == null) {
+        targetConf = new TargetConfiguration();
+        target.setConfiguration(targetConf);
+      }
+      return targetConf;
+    }
+    return null;
+  }
+
+  public boolean setTargetHAMin(final String name, final Double haMin) {
+    final TargetConfiguration targetConf = getTargetConfiguration(name);
+
+    // haMin can be null :
+    boolean changed = isChanged(haMin, targetConf.getHAMin());
+    if (changed) {
+      if (logger.isLoggable(Level.FINEST)) {
+        logger.finest("setTargetHAMin : " + haMin);
+      }
+      targetConf.setHAMin(haMin);
+    }
+    return changed;
+  }
+
+  public boolean setTargetHAMax(final String name, final Double haMax) {
+    final TargetConfiguration targetConf = getTargetConfiguration(name);
+
+    // haMax can be null :
+    boolean changed = isChanged(haMax, targetConf.getHAMax());
+    if (changed) {
+      if (logger.isLoggable(Level.FINEST)) {
+        logger.finest("setTargetHAMax : " + haMax);
+      }
+      targetConf.setHAMax(haMax);
+    }
+    return changed;
+  }
+
+  public boolean setTargetFTMode(final String name, final String ftMode) {
+    final TargetConfiguration targetConf = getTargetConfiguration(name);
+
+    // special case : None
+    final String mode = (AsproConstants.NONE.equals(ftMode)) ? null : ftMode;
+
+    // ftMode can be null :
+    boolean changed = isChanged(mode, targetConf.getFringeTrackerMode());
+    if (changed) {
+      if (logger.isLoggable(Level.FINEST)) {
+        logger.finest("setTargetFTMode : " + mode);
+      }
+      targetConf.setFringeTrackerMode(mode);
+    }
+    return changed;
   }
 
   /**

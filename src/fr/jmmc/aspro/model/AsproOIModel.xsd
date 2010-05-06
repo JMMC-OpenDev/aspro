@@ -465,17 +465,17 @@
         </xsd:annotation>
       </xsd:element>
 
-      <!-- fringe tracker configuration -->
-      <xsd:element name="fringeTrackerConfiguration" type="FringeTrackerConfiguration" minOccurs="0" maxOccurs="1">
+      <!-- target models -->
+      <xsd:element ref="tm:model" minOccurs="0" maxOccurs="unbounded"/>
+
+      <!-- target configuration -->
+      <xsd:element name="configuration" type="TargetConfiguration" minOccurs="0" maxOccurs="1">
         <xsd:annotation>
           <xsd:documentation>
-              Fringe Tracker configuration (optional)
+              The specific configuration used to observe this target
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
-
-      <!-- target models -->
-      <xsd:element ref="tm:model" minOccurs="0" maxOccurs="unbounded"/>
 
     </xsd:sequence>
   </xsd:complexType>
@@ -483,29 +483,40 @@
 
 
 
-  <!-- FringeTrackerConfiguration -->
-  <xsd:complexType name="FringeTrackerConfiguration">
+  <!-- TargetConfiguration -->
+  <xsd:complexType name="TargetConfiguration">
     <xsd:annotation>
       <xsd:documentation>
-        This type describes the configuration of the fringe tracker system.
+        This type describes the configuration used during the observation of the target.
       </xsd:documentation>
     </xsd:annotation>
     <xsd:sequence>
-      <xsd:element name="name" type="xsd:string">
+      
+      <!-- HA Min / Max -->
+      <xsd:element name="HAMin" type="xsd:double" minOccurs="0">
         <xsd:annotation>
           <xsd:documentation>
-              The fringe tracker (FringeTracker identifier)
-          </xsd:documentation>
-        </xsd:annotation>
-      </xsd:element>
-      <xsd:element name="mode" type="xsd:string">
-        <xsd:annotation>
-          <xsd:documentation>
-              The fringe tracker mode (among FringeTracker modes)
+            minimum hour angle in decimal hours
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
 
+      <xsd:element name="HAMax" type="xsd:double" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>
+            maximum hour angle in decimal hours
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
+      <!-- fringe tracker mode -->
+      <xsd:element name="fringeTrackerMode" type="xsd:string" minOccurs="0" maxOccurs="1">
+        <xsd:annotation>
+          <xsd:documentation>
+              The fringe tracker mode (among possible FringeTracker modes)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
     </xsd:sequence>
   </xsd:complexType>
 
