@@ -8770,19 +8770,6 @@
       <configuration>
         <stations>H0 G1 I1</stations>
       </configuration>
-      <!-- E0 G0 H0 I1 -->
-      <configuration>
-        <stations>E0 G0 H0</stations>
-      </configuration>
-      <configuration>
-        <stations>E0 G0 I1</stations>
-      </configuration>
-      <configuration>
-        <stations>E0 H0 I1</stations>
-      </configuration>
-      <configuration>
-        <stations>G0 H0 I1</stations>
-      </configuration>
       <!-- A1 B2 C1 D0 -->
       <configuration>
         <stations>A1 B2 C1</stations>
@@ -8854,22 +8841,6 @@
       <configuration>
         <stations>H0 G1</stations>
       </configuration>
-      <!-- E0 G0 H0 I1 -->
-      <configuration>
-        <stations>E0 H0</stations>
-      </configuration>
-      <configuration>
-        <stations>E0 G0</stations>
-      </configuration>
-      <configuration>
-        <stations>E0 I1</stations>
-      </configuration>
-      <configuration>
-        <stations>G0 H0</stations>
-      </configuration>
-      <configuration>
-        <stations>G0 I1</stations>
-      </configuration>
       <!-- A1 B2 C1 D0 -->
       <configuration>
         <stations>A1 B2</stations>
@@ -8902,11 +8873,6 @@
       <configuration>
         <stations>D0 H0 G1 I1</stations>
       </configuration>
-      <!-- kill ? P87 -->
-      <configuration>
-        <stations>E0 G0 H0 I1</stations>
-      </configuration>
-      <!-- new ? P87 -->
       <configuration>
         <stations>A1 B2 C1 D0</stations>
       </configuration>
