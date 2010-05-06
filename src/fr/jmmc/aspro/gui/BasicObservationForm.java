@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BasicObservationForm.java,v 1.25 2010-04-08 14:33:32 bourgesl Exp $"
+ * "@(#) $Id: BasicObservationForm.java,v 1.26 2010-05-06 15:38:38 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.25  2010/04/08 14:33:32  bourgesl
+ * fixed NPE on tooltips
+ *
  * Revision 1.24  2010/04/08 14:22:04  bourgesl
  * added tooltip on StarResolverWidget
  *
@@ -123,6 +126,8 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
   /** Class logger */
   private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
+  /** flag to log a stack trace in method updateObservation() to detect multiple calls */
+  private final static boolean DEBUG_UPDATE_EVENT = false;
 
   /* members */
   /** observation manager */
@@ -615,8 +620,16 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
   }
 
   private void resetPops() {
-    // note : setValue() fires a property change event :
-    this.jTextPoPs.setValue(null);
+    // disable the automatic update observation :
+    final boolean prevAutoUpdateObservation = this.setAutoUpdateObservation(false);
+    try {
+      // note : setValue() can fire a property change event :
+      this.jTextPoPs.setValue(null);
+
+    } finally {
+      // restore the automatic update observation :
+      this.setAutoUpdateObservation(prevAutoUpdateObservation);
+    }
   }
 
   /**
@@ -667,6 +680,9 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
               // update the target list :
               updateListTargets();
 
+              if (DEBUG_UPDATE_EVENT) {
+                logger.log(Level.SEVERE, "UPDATE", new Throwable());
+              }
               om.fireObservationChanged();
             }
           });
@@ -682,6 +698,10 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
   private void updateObservation() {
     // check if the automatic update flag is enabled :
     if (this.doAutoUpdateObservation) {
+      if (DEBUG_UPDATE_EVENT) {
+        logger.log(Level.SEVERE, "UPDATE", new Throwable());
+      }
+
       boolean changed = false;
 
       // observation :
@@ -711,10 +731,9 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("onLoadObservation :\n" + ObservationManager.toString(observation));
     }
+    // disable the automatic update observation :
+    final boolean prevAutoUpdateObservation = this.setAutoUpdateObservation(false);
     try {
-      // first disable the automatic update observation from field changes :
-      this.doAutoUpdateObservation = false;
-
       // observation :
 
       // update the interferometer and interferometer configuration :
@@ -759,8 +778,8 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
       this.jCheckBoxNightLimit.setSelected(observation.getWhen().isNightRestriction());
 
     } finally {
-      // restore the automatic update observation from field changes :
-      this.doAutoUpdateObservation = true;
+      // restore the automatic update observation :
+      this.setAutoUpdateObservation(prevAutoUpdateObservation);
     }
   }
 
@@ -838,5 +857,34 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
         return null;
       }
     };
+  }
+
+  /**
+   * Enable / Disable the automatic update of the observation when any swing component changes.
+   * Return its previous value. 
+   * 
+   * Typical use is as following :
+   * // disable the automatic update observation :
+   * final boolean prevAutoUpdateObservation = this.setAutoUpdateObservation(false);
+   * try {
+   *   // operations ...
+   *
+   * } finally {
+   *   // restore the automatic update observation :
+   *   this.setAutoUpdateObservation(prevAutoUpdateObservation);
+   * }
+   * 
+   * @param value new value
+   * @return previous value
+   */
+  private boolean setAutoUpdateObservation(final boolean value) {
+    // first backup the state of the automatic update observation :
+    final boolean previous = this.doAutoUpdateObservation;
+
+    // then change its state :
+    this.doAutoUpdateObservation = value;
+    
+    // return previous state :
+    return previous;
   }
 }
