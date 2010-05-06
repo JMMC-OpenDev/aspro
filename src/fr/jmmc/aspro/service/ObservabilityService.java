@@ -1,11 +1,16 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.41 2010-05-05 14:33:43 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.42 2010-05-06 15:41:26 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.41  2010/05/05 14:33:43  bourgesl
+ * javadoc
+ * new constructor(target, minElev) to generate OB (z>30°)
+ * new method convertHARangesToDateInterval() to convert restricted HA ranges and merge them arround midnight
+ *
  * Revision 1.40  2010/04/13 15:35:46  bourgesl
  * Fixed bug on date intervals that have a discontinuity due to conversions from HA [-12;+12]
  *
@@ -1619,19 +1624,19 @@ public class ObservabilityService {
     double ha1 = lst1 - lstOffset;
     double ha2 = lst2 - lstOffset;
 
-    if (ha1 < -12d) {
-      ha1 = -12d;
+    if (ha1 < AsproConstants.HA_MIN) {
+      ha1 = AsproConstants.HA_MIN;
     }
-    if (ha1 > 12d) {
+    if (ha1 > AsproConstants.HA_MAX) {
       // invalid range :
       return null;
     }
-    if (ha2 < -12d) {
+    if (ha2 < AsproConstants.HA_MIN) {
       // invalid range :
       return null;
     }
-    if (ha2 > 12d) {
-      ha2 = 12d;
+    if (ha2 > AsproConstants.HA_MAX) {
+      ha2 = AsproConstants.HA_MAX;
     }
 
     if (logger.isLoggable(Level.FINEST)) {

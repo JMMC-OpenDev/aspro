@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: DelayLineService.java,v 1.9 2010-01-08 16:51:17 bourgesl Exp $"
+ * "@(#) $Id: DelayLineService.java,v 1.10 2010-05-06 15:41:20 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.9  2010/01/08 16:51:17  bourgesl
+ * initial uv coverage
+ *
  * Revision 1.8  2010/01/05 17:17:50  bourgesl
  * added U,V,W computation
  *
@@ -34,6 +37,7 @@
  */
 package fr.jmmc.aspro.service;
 
+import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.BaseLine;
 import fr.jmmc.aspro.model.Range;
 import fr.jmmc.aspro.util.AngleUtils;
@@ -54,6 +58,13 @@ public class DelayLineService {
   /** Class logger */
   private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
+
+  /**
+   * Forbidden contructor
+   */
+  private DelayLineService() {
+    super();
+  }
 
   /**
    * Return the intervals (hour angles) for all base lines compatible with wMin < w(h) < wMax,
@@ -133,7 +144,7 @@ public class DelayLineService {
       if (logger.isLoggable(Level.FINE)) {
         logger.fine("W inside range : " + baseLine.getName() + " : " + wRange);
       }
-      return Arrays.asList(new Range(-12d, 12d));
+      return Arrays.asList(new Range(AsproConstants.HA_MIN, AsproConstants.HA_MAX));
     }
 
     double[] haValues;
