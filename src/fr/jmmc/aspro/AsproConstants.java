@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproConstants.java,v 1.8 2010-04-14 13:09:59 bourgesl Exp $"
+ * "@(#) $Id: AsproConstants.java,v 1.9 2010-05-06 15:37:50 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.8  2010/04/14 13:09:59  bourgesl
+ * first minimal OB for MIDI
+ *
  * Revision 1.7  2010/04/02 09:21:27  bourgesl
  * added AMBER and None constants
  *
@@ -41,9 +44,14 @@ public interface AsproConstants {
   public final static float EPOCH_J2000 = 2000.f;
   /** fixed earth radius constant from ASPRO Fortran code */
   public final static double EARTH_RADIUS = 6367435d;
-
   /** micrometres to meter */
   public final static double MICRO_METER = 1e-6;
+
+  /* Hour angle ranges */
+  /** minimum decimal hour angle = -12h */
+  public final static double HA_MIN = -12D;
+  /** maximum decimal hour angle = +12h */
+  public final static double HA_MAX = 12D;
 
   /* UI Defaults */
   /** default minimum elevation = 20 degrees */
@@ -52,7 +60,6 @@ public interface AsproConstants {
   public static final double DEFAULT_SAMPLING_PERIOD = 40d;
   /** default value for checkbox Night Limit = true */
   public static final boolean DEFAULT_USE_NIGHT_LIMITS = true;
-
   /** no value for combo boxes */
   public static final String NONE = "None";
 
