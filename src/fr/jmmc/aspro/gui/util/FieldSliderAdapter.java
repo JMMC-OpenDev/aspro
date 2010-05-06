@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: FieldSliderAdapter.java,v 1.3 2010-05-05 14:29:22 bourgesl Exp $"
+ * "@(#) $Id: FieldSliderAdapter.java,v 1.4 2010-05-06 15:41:02 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2010/05/05 14:29:22  bourgesl
+ * javadoc
+ *
  * Revision 1.2  2010/02/08 17:00:17  bourgesl
  * added U-V max selector + checkboxes
  *
@@ -80,9 +83,9 @@ public class FieldSliderAdapter implements ChangeListener, PropertyChangeListene
     this.slider = slider;
     this.field = field;
 
-    reset(min, max, def);
+    initListeners();
 
-    init();
+    reset(min, max, def);
   }
 
   /**
@@ -108,7 +111,7 @@ public class FieldSliderAdapter implements ChangeListener, PropertyChangeListene
   /**
    * Declare this class as a change listener for both slider and text field
    */
-  private void init() {
+  private void initListeners() {
     this.slider.addChangeListener(this);
 
     this.field.addPropertyChangeListener("value", this);
