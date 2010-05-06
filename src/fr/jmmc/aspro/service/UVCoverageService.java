@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoverageService.java,v 1.16 2010-05-05 14:34:00 bourgesl Exp $"
+ * "@(#) $Id: UVCoverageService.java,v 1.17 2010-05-06 15:42:18 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.16  2010/05/05 14:34:00  bourgesl
+ * javadoc / comments
+ *
  * Revision 1.15  2010/02/19 16:06:07  bourgesl
  * added image size & LUT combo boxes
  *
@@ -64,6 +67,7 @@ import fr.jmmc.aspro.model.observability.StarData;
 import fr.jmmc.aspro.model.oi.FocalInstrumentMode;
 import fr.jmmc.aspro.model.uvcoverage.UVCoverageData;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
+import fr.jmmc.aspro.model.oi.TargetConfiguration;
 import fr.jmmc.aspro.model.uvcoverage.UVBaseLineData;
 import fr.jmmc.aspro.model.uvcoverage.UVRangeBaseLineData;
 import fr.jmmc.aspro.util.AngleUtils;
@@ -98,10 +102,6 @@ public class UVCoverageService {
   private final ObservationSetting observation;
   /** target to use */
   private final String targetName;
-  /** HA min in decimal hours */
-  private final double haMin;
-  /** HA max */
-  private final double haMax;
   /** flag to compute the UV support */
   private final boolean doUVSupport;
   /** flag to compute the model image */
@@ -126,6 +126,10 @@ public class UVCoverageService {
   private double lambdaMax;
   /** maximum U or V coordinate (corrected by the minimal wavelength) */
   private double uvMax;
+  /** HA min in decimal hours */
+  private double haMin = AsproConstants.HA_MIN;
+  /** HA max in decimal hours */
+  private double haMax = AsproConstants.HA_MAX;
 
   /* reused observability data */
   /** observability data */
@@ -141,8 +145,6 @@ public class UVCoverageService {
    *
    * @param observation observation settings
    * @param targetName target name
-   * @param haMin HA min in decimal hours
-   * @param haMax HA max in decimal hours
    * @param uvMax U-V max in meter
    * @param doUVSupport flag to compute the UV support
    * @param doModelImage flag to compute the model image
@@ -151,13 +153,10 @@ public class UVCoverageService {
    * @param colorModel color model to use
    */
   public UVCoverageService(final ObservationSetting observation, final String targetName,
-                           final double haMin, final double haMax,
                            final double uvMax, final boolean doUVSupport,
                            final boolean doModelImage, final ImageMode imageMode, final int imageSize, final IndexColorModel colorModel) {
     this.observation = observation;
     this.targetName = targetName;
-    this.haMin = haMin;
-    this.haMax = haMax;
     this.uvMax = uvMax;
     this.doUVSupport = doUVSupport;
     this.doModelImage = doModelImage;
@@ -338,8 +337,8 @@ public class UVCoverageService {
 
     if (obsRangesHA != null) {
 
-      final double ha1 = this.haMin; /* -12d */
-      final double ha2 = this.haMax; /* +12d */
+      final double ha1 = this.haMin;
+      final double ha2 = this.haMax;
 
       final double step = this.haStep;
 
@@ -464,6 +463,21 @@ public class UVCoverageService {
       logger.fine("lambdaMin : " + this.lambdaMin);
       logger.fine("lambda    : " + this.lambda);
       logger.fine("lambdaMax : " + this.lambdaMax);
+    }
+
+    // HA Min / Max :
+    final TargetConfiguration targetConf = ObservationManager.getTargetConfiguration(this.observation, targetName);
+    if (targetConf != null) {
+      if (targetConf.getHAMin() != null) {
+        this.haMin = targetConf.getHAMin().doubleValue();
+      }
+      if (targetConf.getHAMax() != null) {
+        this.haMax = targetConf.getHAMax().doubleValue();
+      }
+    }
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("ha min    : " + this.haMin);
+      logger.fine("ha max    : " + this.haMax);
     }
 
     // hour angle step in decimal hours :

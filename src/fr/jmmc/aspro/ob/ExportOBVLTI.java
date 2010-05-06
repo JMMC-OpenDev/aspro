@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBVLTI.java,v 1.3 2010-05-05 14:31:31 bourgesl Exp $"
+ * "@(#) $Id: ExportOBVLTI.java,v 1.4 2010-05-06 15:42:18 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2010/05/05 14:31:31  bourgesl
+ * Generate the date constraints if the night restrictions are active
+ * Generate the LST intervals by calling again the ObservabilityService (elevation >30°, LST) with ha Min / Max restriction
+ *
  * Revision 1.2  2010/04/14 13:09:59  bourgesl
  * first minimal OB for MIDI
  *
@@ -44,6 +48,7 @@ import fr.jmmc.aspro.model.observability.StarData;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.Target;
+import fr.jmmc.aspro.model.oi.TargetConfiguration;
 import fr.jmmc.aspro.service.ObservabilityService;
 import java.io.File;
 import java.text.DecimalFormat;
@@ -117,10 +122,8 @@ public class ExportOBVLTI {
    * According to the instrument defined in the observation, it uses ExportOBAmber or ExportOBMidi.
    * @param file file to save
    * @param targetName target to process
-   * @param haMin HA min in decimal hours
-   * @param haMax HA max in decimal hours
    */
-  public static void process(final File file, final String targetName, final double haMin, final double haMax) {
+  public static void process(final File file, final String targetName) {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("process " + targetName + " to " + file);
     }
@@ -133,9 +136,9 @@ public class ExportOBVLTI {
     final String instrumentName = observation.getInstrumentConfiguration().getName();
 
     if (AsproConstants.INS_AMBER.equals(instrumentName)) {
-      ExportOBAmber.generate(file, observation, target, haMin, haMax);
+      ExportOBAmber.generate(file, observation, target);
     } else if (AsproConstants.INS_MIDI.equals(instrumentName)) {
-      ExportOBMidi.generate(file, observation, target, haMin, haMax);
+      ExportOBMidi.generate(file, observation, target);
     } else {
       throw new IllegalArgumentException("The application can not generate an Observing Block for this instrument [" + instrumentName + "] !");
     }
@@ -147,12 +150,10 @@ public class ExportOBVLTI {
    * @param fileName OB file name
    * @param observation observation settings
    * @param target target to process
-   * @param haMin HA min in decimal hours
-   * @param haMax HA max in decimal hours
    * @return processed template
    */
-  protected static String processCommon(final String template, final String fileName, final ObservationSetting observation, final Target target,
-                                        final double haMin, final double haMax) {
+  protected static String processCommon(final String template, final String fileName,
+                                        final ObservationSetting observation, final Target target) {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("processCommon " + target.getName());
     }
@@ -176,7 +177,7 @@ public class ExportOBVLTI {
 
     // --- Date / Time constraints ---
 
-    document = processDateTime(document, observation, target, haMin, haMax);
+    document = processDateTime(document, observation, target);
 
     // --- Target information ---
 
@@ -224,12 +225,9 @@ public class ExportOBVLTI {
    * @param document OB document
    * @param observation observation settings
    * @param target target to process
-   * @param haMin HA min in decimal hours
-   * @param haMax HA max in decimal hours
    * @return processed template
    */
-  private static String processDateTime(String document, final ObservationSetting observation, final Target target,
-                                        final double haMin, final double haMax) {
+  private static String processDateTime(String document, final ObservationSetting observation, final Target target) {
 
     String lstTimeIntervals = "";
     String absTimeList = "";
@@ -248,6 +246,24 @@ public class ExportOBVLTI {
 
       if (obsRangesHA != null) {
         // target is observable :
+
+        double haMin = AsproConstants.HA_MIN;
+        double haMax = AsproConstants.HA_MAX;
+
+        // HA Min / Max :
+        final TargetConfiguration targetConf = ObservationManager.getTargetConfiguration(observation, target.getName());
+        if (targetConf != null) {
+          if (targetConf.getHAMin() != null) {
+            haMin = targetConf.getHAMin().doubleValue();
+          }
+          if (targetConf.getHAMax() != null) {
+            haMax = targetConf.getHAMax().doubleValue();
+          }
+        }
+        if (logger.isLoggable(Level.FINE)) {
+          logger.fine("ha min    : " + haMin);
+          logger.fine("ha max    : " + haMax);
+        }
 
         final List<Range> limRangesHA = restrictRange(obsRangesHA, haMin, haMax);
 

@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBVLTIAction.java,v 1.2 2010-05-05 14:29:09 bourgesl Exp $"
+ * "@(#) $Id: ExportOBVLTIAction.java,v 1.3 2010-05-06 15:42:18 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2010/05/05 14:29:09  bourgesl
+ * added ha Min / Max to generate OB with correct LST intervals
+ *
  * Revision 1.1  2010/04/14 13:09:23  bourgesl
  * renamed Amber action to VLTI action (AMBER + MIDI)
  *
@@ -90,8 +93,6 @@ public class ExportOBVLTIAction {
 
     // extract UV Coverage Panel information :
     final String targetName = uvCoveragePanel.getSelectedTargetName();
-    final double haMin = uvCoveragePanel.getHAMin();
-    final double haMax = uvCoveragePanel.getHAMax();
 
     File file = null;
 
@@ -129,8 +130,7 @@ public class ExportOBVLTIAction {
       try {
         file = checkFileExtension(file);
 
-        // TODO : haMin / max must be in the observation's target :
-        ExportOBVLTI.process(file, targetName, haMin, haMax);
+        ExportOBVLTI.process(file, targetName);
 
         StatusBar.show(file.getName() + " created.");
 
