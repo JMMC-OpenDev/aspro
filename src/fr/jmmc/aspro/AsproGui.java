@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproGui.java,v 1.11 2010-04-13 14:20:55 bourgesl Exp $"
+ * "@(#) $Id: AsproGui.java,v 1.12 2010-05-07 11:35:19 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.11  2010/04/13 14:20:55  bourgesl
+ * the application is launched using the EDT to be compliant with Swing constraints
+ *
  * Revision 1.10  2010/04/08 14:04:27  bourgesl
  * customized ToolTipManager timeouts
  *
@@ -176,20 +179,14 @@ public class AsproGui extends App {
     // Set the default timezone to GMT to handle properly the date in UTC :
     TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
 
-    // Initialize Swing components in EDT :
-    SwingUtilities.invokeLater(new Runnable() {
+    // force Locale for Swing Components :
+    JComponent.setDefaultLocale(Locale.US);
 
-      public void run() {
-        // force Locale for Swing Components :
-        JComponent.setDefaultLocale(Locale.US);
+    // let the tooltip stay longer (30s) :
+    ToolTipManager.sharedInstance().setInitialDelay(100);
+    ToolTipManager.sharedInstance().setDismissDelay(30000);
 
-        // let the tooltip stay longer (30s) :
-        ToolTipManager.sharedInstance().setInitialDelay(100);
-        ToolTipManager.sharedInstance().setDismissDelay(30000);
-
-        // Start application with the command line arguments
-        new AsproGui(args);
-      }
-    });
+    // Start application with the command line arguments
+    new AsproGui(args);
   }
 }
