@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityPanel.java,v 1.29 2010-04-08 14:06:06 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityPanel.java,v 1.30 2010-05-07 11:35:31 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.29  2010/04/08 14:06:06  bourgesl
+ * javadoc
+ *
  * Revision 1.28  2010/04/02 14:40:39  bourgesl
  * added elevation data and transit date
  *
@@ -274,19 +277,16 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
 
     panelOptions.add(this.jCheckBoxBaseLineLimits);
 
-    if (AsproConstants.DEBUG_MODE) {
+    this.jCheckBoxDetailedOutput = new JCheckBox("Details");
+    this.jCheckBoxDetailedOutput.setSelected(DEFAULT_DO_DETAILED_OUTPUT);
+    this.jCheckBoxDetailedOutput.addItemListener(new ItemListener() {
 
-      this.jCheckBoxDetailedOutput = new JCheckBox("Details");
-      this.jCheckBoxDetailedOutput.setSelected(DEFAULT_DO_DETAILED_OUTPUT);
-      this.jCheckBoxDetailedOutput.addItemListener(new ItemListener() {
+      public void itemStateChanged(final ItemEvent e) {
+        refreshPlot();
+      }
+    });
 
-        public void itemStateChanged(final ItemEvent e) {
-          refreshPlot();
-        }
-      });
-
-      panelOptions.add(this.jCheckBoxDetailedOutput);
-    }
+    panelOptions.add(this.jCheckBoxDetailedOutput);
 
     // same generated code in UVCoveragePanel :
     this.jButtonPDF = new javax.swing.JButton();
