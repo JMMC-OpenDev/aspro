@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproConstants.java,v 1.9 2010-05-06 15:37:50 bourgesl Exp $"
+ * "@(#) $Id: AsproConstants.java,v 1.10 2010-05-07 11:34:31 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.9  2010/05/06 15:37:50  bourgesl
+ * added HA_MIN/MAX
+ *
  * Revision 1.8  2010/04/14 13:09:59  bourgesl
  * first minimal OB for MIDI
  *
@@ -35,7 +38,7 @@ public interface AsproConstants {
 
   /* DEV */
   /** debug mode flag */
-  public final static boolean DEBUG_MODE = true;
+  public final static boolean DEBUG_MODE = false;
   /** chart : enables the zoom in / out */
   public final static boolean ENABLE_ZOOM = true;
 
