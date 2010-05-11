@@ -1,11 +1,16 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.34 2010-05-06 15:40:20 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.35 2010-05-11 12:04:56 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.34  2010/05/06 15:40:20  bourgesl
+ * added updateObservation and plot debug logs
+ * added better auto update/refresh flag handling
+ * HA Min/Max + FT Mode are related to the target (onLoad, onChange, updateObservation)
+ *
  * Revision 1.33  2010/05/05 14:28:48  bourgesl
  * on load : restore sampling period + image defaults (size, lut)
  * added ha Min / Max to generate OB with correct LST intervals
@@ -174,6 +179,7 @@ import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.event.ChartProgressEvent;
 import org.jfree.chart.event.ChartProgressListener;
+import org.jfree.chart.renderer.AbstractRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
@@ -641,7 +647,7 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
    */
   private void postInit() {
 
-    this.localJFreeChart = ChartUtils.createSquareXYLineChart("U (M\u03BB)", "V (M\u03BB)");
+    this.localJFreeChart = ChartUtils.createSquareXYLineChart("U (M\u03BB)", "V (M\u03BB)", true);
     this.localXYPlot = (SquareXYPlot) localJFreeChart.getPlot();
 
     // Adjust background settings :
@@ -667,7 +673,6 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     // zoom options :
     this.chartPanel.setDomainZoomable(AsproConstants.ENABLE_ZOOM);
     this.chartPanel.setRangeZoomable(AsproConstants.ENABLE_ZOOM);
-    this.chartPanel.setMouseWheelEnabled(false);
 
     // define zoom listener :
     this.chartPanel.setZoomEventListener(this);
@@ -1534,7 +1539,7 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
    */
   private void updateChart(final UVCoverageData uvData) {
     // renderer :
-    final XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) this.localXYPlot.getRenderer();
+    final AbstractRenderer renderer = (AbstractRenderer) this.localXYPlot.getRenderer();
 
     // reset colors :
     renderer.clearSeriesPaints(false);
@@ -1731,10 +1736,10 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     if (logger.isLoggable(Level.FINE)) {
       switch (event.getType()) {
         case ChartProgressEvent.DRAWING_STARTED:
-          this.lastTime = System.currentTimeMillis();
+          this.lastTime = System.nanoTime();
           break;
         case ChartProgressEvent.DRAWING_FINISHED:
-          logger.fine("Drawing chart time : " + (System.currentTimeMillis() - lastTime) + " ms.");
+          logger.fine("Drawing chart time : " +  1e-6d * (System.nanoTime() - this.lastTime) + " ms.");
           this.lastTime = 0l;
           break;
         default:
