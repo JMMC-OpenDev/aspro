@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <ApplicationData link="http://www.jmmc.fr/aspro">
-  <program name="Aspro" version="0.3b6"/>
+  <program name="Aspro" version="0.3b7"/>
   <compilation date="21/09/2009" compiler="JDK 1.5.0_16"/>
   <text>
     <![CDATA[ASPRO is a complete observation preparation tool developed and maintained by the JMMC
@@ -34,11 +34,14 @@
   </menubar>
   <releasenotes>
     <release version="0.3">
+      <prerelease version="0.3b7">
+        <change>Add one button to normalize the flux weights in the model editor</change>       
+      </prerelease>
       <prerelease version="0.3b6">
         <change>New Interferometer Map Plot to display station positions and the chosen baseline.</change>
         <change>One star name can be optionaly given to the star resolver in addition to the coordinates</change>
       </prerelease>
-      <prerelease version="0.3b5">
+      <prerelease version="0.3b5">        
         <change>Several UI changes to manage HA min / max and the fringe tracker mode fields depending on the selected target
         in the UV Coverage Panel.</change>
         <change>HA min / max and the fringe tracker mode are related to a specific target and persisted in the observation file.</change>
