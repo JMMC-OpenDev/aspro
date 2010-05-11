@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityPanel.java,v 1.30 2010-05-07 11:35:31 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityPanel.java,v 1.31 2010-05-11 09:49:28 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.30  2010/05/07 11:35:31  bourgesl
+ * detail mode always available
+ *
  * Revision 1.29  2010/04/08 14:06:06  bourgesl
  * javadoc
  *
@@ -99,7 +102,6 @@
  ******************************************************************************/
 package fr.jmmc.aspro.gui;
 
-import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.gui.action.ExportPDFAction;
 import fr.jmmc.aspro.gui.chart.ChartUtils;
 import fr.jmmc.aspro.gui.chart.XYDiamondAnnotation;
@@ -348,6 +350,7 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("event [" + type + "] process IN");
     }
+
     switch (type) {
       case CHANGED:
         this.plot(observation);
@@ -664,10 +667,10 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
     if (logger.isLoggable(Level.FINE)) {
       switch (event.getType()) {
         case ChartProgressEvent.DRAWING_STARTED:
-          this.lastTime = System.currentTimeMillis();
+          this.lastTime = System.nanoTime();
           break;
         case ChartProgressEvent.DRAWING_FINISHED:
-          logger.fine("Drawing chart time : " + (System.currentTimeMillis() - lastTime) + " ms.");
+          logger.fine("Drawing chart time : " +  1e-6d * (System.nanoTime() - this.lastTime) + " ms.");
           this.lastTime = 0l;
           break;
         default:
