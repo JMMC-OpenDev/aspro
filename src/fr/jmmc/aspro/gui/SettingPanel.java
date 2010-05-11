@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SettingPanel.java,v 1.16 2010-02-12 15:53:18 bourgesl Exp $"
+ * "@(#) $Id: SettingPanel.java,v 1.17 2010-05-11 12:08:27 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.16  2010/02/12 15:53:18  bourgesl
+ * added target model editor
+ *
  * Revision 1.15  2010/01/20 16:18:37  bourgesl
  * observation form refactoring
  *
@@ -115,6 +118,8 @@ public class SettingPanel extends JPanel implements ObservationListener {
    * This method is useful to set the models and specific features of initialized swing components :
    */
   private void postInit() {
+    // first observation event listener :
+    this.jTabbedPane.addTab("Map", new InterferometerMapPanel());
 
     // add the observation form that will send an onProcess event on the current observation :
     this.observationForm = new BasicObservationForm();
