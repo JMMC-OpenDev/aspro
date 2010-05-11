@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ChartUtils.java,v 1.8 2010-04-02 10:04:18 bourgesl Exp $"
+ * "@(#) $Id: ChartUtils.java,v 1.9 2010-05-11 12:01:54 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.8  2010/04/02 10:04:18  bourgesl
+ * added diamond shape
+ *
  * Revision 1.7  2010/02/04 17:05:06  bourgesl
  * UV bounds are coming from UVCoverageService
  *
@@ -138,10 +141,11 @@ public class ChartUtils {
    * Create the custom Square XY Line Chart for the UV coverage chart
    * @param xLabel label for the x axis (range)
    * @param yLabel label for the y axis (domain)
+   * @param legend create a legend ?
    * @return jFreeChart instance
    */
-  public static JFreeChart createSquareXYLineChart(final String xLabel, final String yLabel) {
-    final JFreeChart localJFreeChart = createSquareXYLineChart(null, xLabel, yLabel, null, PlotOrientation.VERTICAL, true, false, false);
+  public static JFreeChart createSquareXYLineChart(final String xLabel, final String yLabel, final boolean legend) {
+    final JFreeChart localJFreeChart = createSquareXYLineChart(null, xLabel, yLabel, null, PlotOrientation.VERTICAL, legend, false, false);
 
     final SquareXYPlot localXYPlot = (SquareXYPlot) localJFreeChart.getPlot();
     localXYPlot.setNoDataMessage("NO DATA");
@@ -232,7 +236,9 @@ public class ChartUtils {
     final JFreeChart chart = new JFreeChart(title, JFreeChart.DEFAULT_TITLE_FONT,
             plot, legend);
 
-    chart.getLegend().setPosition(RectangleEdge.RIGHT);
+    if (legend) {
+      chart.getLegend().setPosition(RectangleEdge.RIGHT);
+    }
 
     return chart;
   }
