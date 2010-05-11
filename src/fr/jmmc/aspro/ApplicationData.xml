@@ -35,6 +35,7 @@
   <releasenotes>
     <release version="0.3">
       <prerelease version="0.3b5">
+        <change>One star name can be optionaly given to the star resolver in addition to the coordinates</change>
         <change>Several UI changes to manage HA min / max and the fringe tracker mode fields depending on the selected target
         in the UV Coverage Panel.</change>
         <change>HA min / max and the fringe tracker mode are related to a specific target and persisted in the observation file.</change>
