@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BoundedNumberAxis.java,v 1.3 2010-02-12 15:53:25 bourgesl Exp $"
+ * "@(#) $Id: BoundedNumberAxis.java,v 1.4 2010-05-11 12:02:24 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2010/02/12 15:53:25  bourgesl
+ * comments
+ *
  * Revision 1.2  2010/01/13 16:12:08  bourgesl
  * comments
  *
@@ -51,6 +54,7 @@ public class BoundedNumberAxis extends NumberAxis {
    */
   public BoundedNumberAxis(String label) {
     super(label);
+    setAutoRange(false, false);
     setTickLabelInsets(TICK_LABEL_INSETS);
   }
 
