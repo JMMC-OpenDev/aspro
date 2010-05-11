@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBVLTIAction.java,v 1.3 2010-05-06 15:42:18 bourgesl Exp $"
+ * "@(#) $Id: ExportOBVLTIAction.java,v 1.4 2010-05-11 12:03:17 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2010/05/06 15:42:18  bourgesl
+ * use HA Min/Max + FT Mode for the target in the observation settings
+ *
  * Revision 1.2  2010/05/05 14:29:09  bourgesl
  * added ha Min / Max to generate OB with correct LST intervals
  *
@@ -112,7 +115,8 @@ public class ExportOBVLTIAction {
 
     final int returnVal = fileChooser.showSaveDialog(null);
     if (returnVal == JFileChooser.APPROVE_OPTION) {
-      file = fileChooser.getSelectedFile();
+      file = checkFileExtension(fileChooser.getSelectedFile());
+
       if (file.exists()) {
         final int answer = JOptionPane.showConfirmDialog(null, "File \'" + file.getName() + "\' already exists\nDo you want to overwrite this file ?");
         if (answer != JOptionPane.YES_OPTION) {
@@ -128,8 +132,6 @@ public class ExportOBVLTIAction {
       this.setLastDir(file.getParent());
 
       try {
-        file = checkFileExtension(file);
-
         ExportOBVLTI.process(file, targetName);
 
         StatusBar.show(file.getName() + " created.");

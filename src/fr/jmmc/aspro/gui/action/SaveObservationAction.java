@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SaveObservationAction.java,v 1.4 2010-04-02 10:06:29 bourgesl Exp $"
+ * "@(#) $Id: SaveObservationAction.java,v 1.5 2010-05-11 12:03:17 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2010/04/02 10:06:29  bourgesl
+ * add missing xml extension to the file name
+ *
  * Revision 1.3  2009/12/08 13:09:55  bourgesl
  * Added FileFilter for observation settings
  *
@@ -66,7 +69,8 @@ public class SaveObservationAction extends ObservationFileAction {
 
     final int returnVal = fileChooser.showSaveDialog(null);
     if (returnVal == JFileChooser.APPROVE_OPTION) {
-      file = fileChooser.getSelectedFile();
+      file = checkFileExtension(fileChooser.getSelectedFile());
+
       if (file.exists()) {
         final int answer = JOptionPane.showConfirmDialog(null, "File \'" + file.getName() + "\' already exists\nDo you want to overwrite this file ?");
         if (answer != JOptionPane.YES_OPTION) {
@@ -82,8 +86,6 @@ public class SaveObservationAction extends ObservationFileAction {
       this.setLastDir(file.getParent());
 
       try {
-        file = checkFileExtension(file);
-
         om.save(file);
 
         StatusBar.show("file saved : " + file.getName());

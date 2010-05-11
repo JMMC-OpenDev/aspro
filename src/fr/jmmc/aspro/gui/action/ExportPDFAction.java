@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportPDFAction.java,v 1.4 2010-04-13 15:54:48 bourgesl Exp $"
+ * "@(#) $Id: ExportPDFAction.java,v 1.5 2010-05-11 12:03:17 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2010/04/13 15:54:48  bourgesl
+ * javadoc
+ *
  * Revision 1.3  2010/04/02 10:07:11  bourgesl
  * refactoring
  *
@@ -102,7 +105,8 @@ public class ExportPDFAction {
 
     final int returnVal = fileChooser.showSaveDialog(null);
     if (returnVal == JFileChooser.APPROVE_OPTION) {
-      file = fileChooser.getSelectedFile();
+      file = checkFileExtension(fileChooser.getSelectedFile());
+
       if (file.exists()) {
         final int answer = JOptionPane.showConfirmDialog(null, "File \'" + file.getName() + "\' already exists\nDo you want to overwrite this file ?");
         if (answer != JOptionPane.YES_OPTION) {
@@ -118,8 +122,6 @@ public class ExportPDFAction {
       this.setLastDir(file.getParent());
 
       try {
-        file = checkFileExtension(file);
-
         PDFUtils.saveChartAsPDF(file, (JFreeChart) event.getSource());
 
         StatusBar.show(file.getName() + " created.");
