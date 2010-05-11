@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: EditableStarResolverWidget.java,v 1.3 2010-04-12 14:32:27 bourgesl Exp $"
+ * "@(#) $Id: EditableStarResolverWidget.java,v 1.4 2010-05-11 10:17:31 mella Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2010/04/12 14:32:27  bourgesl
+ * updated input validation to check HMS and DMS fields to be consistent
+ *
  * Revision 1.2  2010/04/09 09:25:07  bourgesl
  * disable tests
  *
@@ -123,7 +126,7 @@ public class EditableStarResolverWidget extends StarResolverWidget {
 
   /**
    * Parse the text value as RA/DEC coordinates, update the star model and notify the observers
-   * @param input text value (trimmed)
+   * @param input text value with optional star name field(trimmed)
    * @throws IllegalArgumentException if the RA/DEC format was wrong
    */
   protected void parseCoordinates(final String input) throws IllegalArgumentException {
@@ -137,8 +140,17 @@ public class EditableStarResolverWidget extends StarResolverWidget {
       throw new IllegalArgumentException("wrong RA/DEC format: '" + input + "'  must be of form '+10:00:00.00 +30:00:00.00'");
     }
 
+
     final String inputRA = coords.substring(0, pos);
-    final String inputDEC = coords.substring(pos + 1);
+    final String inputDEC;
+    // Search if we have one optional star name
+    final int namePos = coords.indexOf(' ',pos+4);
+    if(namePos == -1){
+        inputDEC = coords.substring(pos + 1);
+    }else{
+        inputDEC = coords.substring(pos + 1, namePos);
+    }
+
 
     // Validate the format of the RA value
     if (!inputRA.matches("[+|-]?[0-9]+[:][0-9]+[:][0-9]+.?[0-9]*")) {
@@ -162,8 +174,16 @@ public class EditableStarResolverWidget extends StarResolverWidget {
     final double ra = ALX.parseHMS(hmsRa);
     final double dec = ALX.parseDEC(dmsDec);
 
-    // name equals 'RA DEC' (given coordinates) :
-    final String name = hmsRa + " " + dmsDec;
+
+    // Set name with coordinates or name if given 
+    final String name;    
+    if( namePos==-1 ){
+        // set default name : 'RA DEC' (given coordinates)
+        name = hmsRa + " " + dmsDec;
+    }else{
+        // set given name
+        name=coords.substring(namePos+1);
+    }
 
     /*
      * At this stage parsing went fine, update the internal star model.
