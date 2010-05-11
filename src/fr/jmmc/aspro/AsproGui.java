@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproGui.java,v 1.12 2010-05-07 11:35:19 bourgesl Exp $"
+ * "@(#) $Id: AsproGui.java,v 1.13 2010-05-11 09:48:47 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.12  2010/05/07 11:35:19  bourgesl
+ * application starts not in EDT to display the splash screen (EDT wait and refresh issues) : solve later
+ *
  * Revision 1.11  2010/04/13 14:20:55  bourgesl
  * the application is launched using the EDT to be compliant with Swing constraints
  *
@@ -59,7 +62,6 @@ import java.util.TimeZone;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
-import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 
 /**
