@@ -35,7 +35,9 @@
   <releasenotes>
     <release version="0.3">
       <prerelease version="0.3b7">
-        <change>Add one button to normalize the flux weights in the model editor</change>       
+        <change>Add one button to normalize the flux weights in the model editor</change>
+        <change>Add one preference to choose the default style of display for positions (X_Y / Rho/Theta) in the model editor</change>
+        <change>Add the preferences window (displayed from the menu)</change>
       </prerelease>
       <prerelease version="0.3b6">
         <change>New Interferometer Map Plot to display station positions and the chosen baseline.</change>

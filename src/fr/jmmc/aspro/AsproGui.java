@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproGui.java,v 1.13 2010-05-11 09:48:47 bourgesl Exp $"
+ * "@(#) $Id: AsproGui.java,v 1.14 2010-05-12 08:44:10 mella Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.13  2010/05/11 09:48:47  bourgesl
+ * removed SwingUtilities import
+ *
  * Revision 1.12  2010/05/07 11:35:19  bourgesl
  * application starts not in EDT to display the splash screen (EDT wait and refresh issues) : solve later
  *
@@ -49,6 +52,7 @@ package fr.jmmc.aspro;
 import fr.jmmc.aspro.gui.SettingPanel;
 import fr.jmmc.aspro.gui.action.LoadObservationAction;
 import fr.jmmc.aspro.gui.action.SaveObservationAction;
+import fr.jmmc.aspro.gui.action.ShowPrefAction;
 import fr.jmmc.aspro.gui.util.ComponentResizeAdapter;
 import fr.jmmc.aspro.model.ConfigurationManager;
 import fr.jmmc.mcs.gui.App;
@@ -92,7 +96,7 @@ public class AsproGui extends App {
   @Override
   protected void init(final String[] args) {
     logger.fine("init : enter");
-
+   
     // Preload configurations :
     ConfigurationManager.getInstance();
 
@@ -157,6 +161,8 @@ public class AsproGui extends App {
     new LoadObservationAction();
     // save observation :
     new SaveObservationAction();
+    // show preferences :
+    new ShowPrefAction();
   }
 
   /**
