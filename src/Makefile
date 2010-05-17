@@ -1,13 +1,16 @@
 #*******************************************************************************
 # JMMC project
 #
-# "@(#) $Id: Makefile,v 1.7 2010-04-02 14:38:58 bourgesl Exp $"
+# "@(#) $Id: Makefile,v 1.8 2010-05-17 15:53:20 ccmgr Exp $"
 #
 # Makefile of aspro module
 #
 # History
 # -------
 # $Log: not supported by cvs2svn $
+# Revision 1.7  2010/04/02 14:38:58  bourgesl
+# added OBX files
+#
 # Revision 1.6  2010/01/13 16:17:29  bourgesl
 # added gif icons in the build
 #
@@ -176,7 +179,7 @@ CSOURCENAMES = \
 MAKEDIR = $(MCSROOT)/include
 include $(MAKEDIR)/mkfMakefile
 
-JNLP=AsproGui
+JNLP=Aspro2
 #
 # TARGETS
 # -------

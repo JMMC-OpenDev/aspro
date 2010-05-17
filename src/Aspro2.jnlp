@@ -25,7 +25,7 @@
 
     <jar href="jar/iText-2.1.5.jar" />
 
-    <extension href="AsproGuiPal.jnlp" />
+    <extension href="Aspro2Pal.jnlp" />
   </resources>
   <application-desc main-class="fr.jmmc.aspro.AsproGui"/>
 </jnlp>
