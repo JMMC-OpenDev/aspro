@@ -1,34 +1,40 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: PreferencesView.java,v 1.1 2010-05-12 08:44:10 mella Exp $"
+ * "@(#) $Id: PreferencesView.java,v 1.2 2010-05-17 16:09:03 mella Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2010/05/12 08:44:10  mella
+ * Add one preferences window first to choose the default style of display for positions
+ *
  *
  */
 package fr.jmmc.aspro.gui;
 
 import fr.jmmc.aspro.Preferences;
 import fr.jmmc.mcs.util.PreferencesException;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  * Preferences GUI
  */
-public class PreferencesView extends javax.swing.JFrame {
+public class PreferencesView extends javax.swing.JFrame implements Observer{
 
     static Preferences myPreferences = Preferences.getInstance();
 
     /** Creates new form PreferencesView */
     public PreferencesView() {
         initComponents();
-        // read prefs to set states of GUI elements
-        boolean preferXyMode = myPreferences.getPreferenceAsBoolean(Preferences.MODELEDITOR_PREFERXY);
-        this.jRadioButtonRhoTheta.setSelected(!preferXyMode);
-        this.jRadioButtonXY.setSelected(preferXyMode);
+
+        // update GUI
+        myPreferences.addObserver(this);
+        update(null, null);
+        
         // pack and center window
         pack();
         setLocationRelativeTo(null);
@@ -145,6 +151,17 @@ public class PreferencesView extends javax.swing.JFrame {
         myPreferences.resetToDefaultPreferences();
     }//GEN-LAST:event_jButtonDefaultActionPerformed
 
+    /**
+     * Listen to preferences changes
+     * @param o
+     * @param arg
+     */
+    public void update(Observable o, Object arg) {
+        // read prefs to set states of GUI elements
+        boolean preferXyMode = myPreferences.getPreferenceAsBoolean(Preferences.MODELEDITOR_PREFERXY);
+        this.jRadioButtonRhoTheta.setSelected(!preferXyMode);
+        this.jRadioButtonXY.setSelected(preferXyMode);
+    }
     /**
      * @param args the command line arguments
      */
