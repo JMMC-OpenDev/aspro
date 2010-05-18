@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <ApplicationData link="http://www.jmmc.fr/aspro">
-  <program name="Aspro" version="0.3b7"/>
+  <program name="Aspro" version="0.3b8"/>
   <compilation date="21/09/2009" compiler="JDK 1.5.0_16"/>
   <text>
     <![CDATA[ASPRO is a complete observation preparation tool developed and maintained by the JMMC
@@ -35,6 +35,8 @@
   <releasenotes>
     <release version="0.3">
       <prerelease version="0.3b8">
+        <change>Added the limb darkened disk model in the model editor</change>
+        <change>Added gaussian models in the model editor</change>
         <change>Added ring models in the model editor</change>
       </prerelease>
       <prerelease version="0.3b7">
