@@ -289,7 +289,7 @@
                 <Property name="autoResizeMode" type="int" value="4"/>
               </Properties>
               <AuxValues>
-                <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new JTable() {&#xa;&#xa;  /** default serial UID for Serializable interface */&#xa;  private static final long serialVersionUID = 1;&#xa;  &#xa;  /**&#xa;   * HACK to have the content of edited cell selected to &apos;mimic&apos; an overwrite edition&#xa;   */&#xa;  @Override&#xa;  public Component prepareEditor(TableCellEditor editor, int row, int column) {&#xa;    final Component c = super.prepareEditor(editor, row, column);&#xa;&#xa;    if (c instanceof JTextComponent) {&#xa;      /* use invokeLater because of mouse events default behavior (caret ...) */&#xa;      SwingUtilities.invokeLater(new Runnable()&#x9;{&#xa;&#x9;&#x9;&#x9;&#x9;public void run() {&#xa;          ((JTextComponent) c).selectAll();&#xa;        }&#xa;      });&#xa;    } &#xa;    return c;&#xa;  }&#xa;&#xa;}"/>
+                <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new fr.jmmc.mcs.gui.NumericJTable()"/>
               </AuxValues>
             </Component>
           </SubComponents>
