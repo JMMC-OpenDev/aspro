@@ -1,17 +1,15 @@
 <?xml version="1.0"?>
 <jnlp spec="1.0+" codebase="REPLACECODEBASE" href="REPLACEHREF">
   <information>
-    <title>Aspro Pal Jnlp</title>
+    <title>Aspro 2 Pal Jnlp</title>
     <vendor>JMMC</vendor>
     <homepage href="http://www.jmmc.fr/aspro"/>
-    <description>Jnlp dedicated to Pal library.</description>
+    <description>Jnlp dedicated to the astrogrid Pal signed java library.</description>
   </information>
   <security>
     <all-permissions/>
   </security>
   <resources>
-    <j2se version="1.5+"/>
-        
     <jar href="jar/pal.jar" />
   </resources>
   <component-desc/>

@@ -1,20 +1,20 @@
 <?xml version="1.0"?>
 <jnlp spec="1.0+" codebase="REPLACECODEBASE" href="REPLACEHREF">
   <information>
-    <title>Aspro Alpha</title>
+    <title>Aspro 2</title>
     <vendor>JMMC</vendor>
     <homepage href="http://www.jmmc.fr/aspro"/>
     <description>
-      This application is the new jmmc prototype for the next
-      tool dedicated to prepare your interferometric observations.
+      This application is the new version of the ASPRO tool to prepare your interferometric observations.
     </description>
   </information>
   <security>
     <all-permissions/>
   </security>
   <resources>
-    <j2se version="1.5+" initial-heap-size="128m" max-heap-size="256m"/>
+    <j2se version="1.5+" initial-heap-size="128m" max-heap-size="384m"/>
     <property name="apple.laf.useScreenMenuBar" value="true"/>
+
     <jar href="jar/aspro.jar" />
     <jar href="jar/Jmcs.jar" />
         
