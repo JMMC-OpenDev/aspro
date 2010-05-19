@@ -1,14 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <ApplicationData link="http://www.jmmc.fr/aspro">
-  <program name="Aspro" version="0.3b8"/>
+  <program name="Aspro2" version="0.5b1"/>
   <compilation date="21/09/2009" compiler="JDK 1.5.0_16"/>
   <text>
-    <![CDATA[ASPRO is a complete observation preparation tool developed and maintained by the JMMC
-    that allows to prepare interferometric observations with the VLTI or other interferometers.
-    It allows in particular to simulate the projected baseline evolution during the observations (supersynthesis),
-    derive the visibilities for a given object (single star, binaries, user defined FITS image,...),
-    and offers many additional useful functions.
+    <![CDATA[ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations
+    with the VLTI or other interferometers. This observation preparation tool is developed and maintained by the JMMC.
     ]]>
   </text>
   <dependences>
@@ -33,31 +30,38 @@
     </menu>
   </menubar>
   <releasenotes>
-    <release version="0.3">
-      <prerelease version="0.3b8">
+    <release version="0.5">
+      <prerelease version="0.5b1">
+        <change>First public release of Aspro 2</change>
+      </prerelease>
+    </release>
+    <release version="0.4">
+      <prerelease version="0.4b4"> <!-- 0.3b8 -->
         <change>Added the limb darkened disk model in the model editor</change>
         <change>Added gaussian models in the model editor</change>
         <change>Added ring models in the model editor</change>
       </prerelease>
-      <prerelease version="0.3b7">
+      <prerelease version="0.4b3"> <!-- 0.3b7 -->
         <change>Add one button to normalize the flux weights in the model editor</change>
         <change>Add one preference to choose the default style of display for positions (Rho_Theta by default or X_Y) in the model editor</change>
         <change>Add the preferences window (displayed from the menu)</change>
       </prerelease>
-      <prerelease version="0.3b6">
+      <prerelease version="0.4b2"> <!-- 0.3b6 -->
         <change>New Interferometer Map Plot to display station positions and the chosen baseline.</change>
-        <change>One star name can be optionaly given to the star resolver in addition to the coordinates</change>
+        <change>A star name can be optionaly given to the star resolver in addition to the coordinates to enter manually a new target</change>
       </prerelease>
-      <prerelease version="0.3b5">        
+      <prerelease version="0.4b1"> <!-- 0.3b5 -->
         <change>Several UI changes to manage HA min / max and the fringe tracker mode fields depending on the selected target
         in the UV Coverage Panel.</change>
         <change>HA min / max and the fringe tracker mode are related to a specific target and persisted in the observation file.</change>
         <change>Added date and time constraints on VLTI Observing Block : date is defined if night restrictions are enabled;
         LST intervals are defined with the target observability (elevation > 30 deg + delay lines + shadowing)
         restricted by the HA min / max defined in the UV Coverage Panel.</change>
-        <change>Added VLTI configuration for the period 87 (new baselines) and fixed period 86.</change>
       </prerelease>
+    </release>
+    <release version="0.3">
       <prerelease version="0.3b4">
+        <change>Added VLTI configuration for the period 87 (new baselines) and fixed period 86.</change>
         <change>Added VLTI configuration for the period 86 (idem period 85).</change>
         <change>Added VLTI configuration for the future PIONIER instrument (period 86).</change>
       </prerelease>
