@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproGui.java,v 1.14 2010-05-12 08:44:10 mella Exp $"
+ * "@(#) $Id: AsproGui.java,v 1.15 2010-05-19 12:49:49 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.14  2010/05/12 08:44:10  mella
+ * Add one preferences window first to choose the default style of display for positions
+ *
  * Revision 1.13  2010/05/11 09:48:47  bourgesl
  * removed SwingUtilities import
  *
@@ -57,12 +60,14 @@ import fr.jmmc.aspro.gui.util.ComponentResizeAdapter;
 import fr.jmmc.aspro.model.ConfigurationManager;
 import fr.jmmc.mcs.gui.App;
 import fr.jmmc.mcs.gui.StatusBar;
+import fr.jmmc.mcs.util.Urls;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Locale;
 import java.util.TimeZone;
+import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
@@ -119,7 +124,10 @@ public class AsproGui extends App {
    * @param frame
    */
   private void prepareFrame(final JFrame frame) {
-    frame.setTitle(App.getSharedApplicationDataModel().getProgramName() + " v" + App.getSharedApplicationDataModel().getProgramVersion());
+    frame.setTitle(App.getSharedApplicationDataModel().getProgramName());
+
+    // handle frame icon
+    frame.setIconImage(new ImageIcon(Urls.fixJarURL(getClass().getResource("/fr/jmmc/mcs/gui/favicon.png"))).getImage());
 
     final Dimension dim = new Dimension(900, 750);
     frame.setMinimumSize(dim);
