@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ConfigurationManager.java,v 1.19 2010-04-15 12:54:27 bourgesl Exp $"
+ * "@(#) $Id: ConfigurationManager.java,v 1.20 2010-05-19 09:30:06 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.19  2010/04/15 12:54:27  bourgesl
+ * don't sort the interferometer configuration names
+ *
  * Revision 1.18  2010/04/02 14:39:44  bourgesl
  * added FringeTracker list
  *
@@ -256,7 +259,6 @@ public class ConfigurationManager extends BaseOIManager {
     for (InterferometerDescription id : getInterferometerDescriptions().values()) {
       v.add(id.getName());
     }
-    Collections.sort(v);
     return v;
   }
 
