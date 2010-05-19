@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: PreferencesView.java,v 1.2 2010-05-17 16:09:03 mella Exp $"
+ * "@(#) $Id: PreferencesView.java,v 1.3 2010-05-19 09:08:10 mella Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2010/05/17 16:09:03  mella
+ * Add the preference view as preference observer
+ *
  * Revision 1.1  2010/05/12 08:44:10  mella
  * Add one preferences window first to choose the default style of display for positions
  *
@@ -59,7 +62,7 @@ public class PreferencesView extends javax.swing.JFrame implements Observer{
         jButtonSave = new javax.swing.JButton();
         jButtonDefault = new javax.swing.JButton();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Preferences");
 
         jPanel1.setLayout(new java.awt.GridBagLayout());
