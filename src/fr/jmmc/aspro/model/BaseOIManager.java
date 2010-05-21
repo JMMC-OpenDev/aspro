@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BaseOIManager.java,v 1.7 2010-04-02 10:08:17 bourgesl Exp $"
+ * "@(#) $Id: BaseOIManager.java,v 1.8 2010-05-21 15:10:20 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2010/04/02 10:08:17  bourgesl
+ * corrected logger name
+ *
  * Revision 1.6  2009/12/04 16:26:58  bourgesl
  * Added Load action in the menu bar (partially handled)
  *
@@ -90,7 +93,8 @@ public class BaseOIManager {
 
     Object result = null;
     try {
-      result = u.unmarshal(this.getClass().getResource(uri));
+      // use the class loader :
+      result = u.unmarshal(this.getClass().getClassLoader().getResource("fr/jmmc/aspro/model/" + uri));
     } catch (JAXBException je) {
       throw new RuntimeException("Load failure on " + uri, je);
     }
