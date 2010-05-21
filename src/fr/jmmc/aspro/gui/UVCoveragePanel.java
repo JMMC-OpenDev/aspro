@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.35 2010-05-11 12:04:56 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.36 2010-05-21 14:27:48 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.35  2010/05/11 12:04:56  bourgesl
+ * minor changes due to ChartUtils & chart duration
+ *
  * Revision 1.34  2010/05/06 15:40:20  bourgesl
  * added updateObservation and plot debug logs
  * added better auto update/refresh flag handling
@@ -120,6 +123,7 @@
 package fr.jmmc.aspro.gui;
 
 import fr.jmmc.aspro.AsproConstants;
+import fr.jmmc.aspro.Preferences;
 import fr.jmmc.aspro.gui.action.ExportOBVLTIAction;
 import fr.jmmc.aspro.gui.action.ExportPDFAction;
 import fr.jmmc.aspro.gui.chart.ChartUtils;
@@ -166,6 +170,8 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.ParseException;
 import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.Vector;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
@@ -189,7 +195,7 @@ import org.jfree.data.xy.XYSeriesCollection;
  * @author bourgesl
  */
 public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgressListener, ZoomEventListener,
-        ActionListener, ChangeListener, ObservationListener {
+        ActionListener, ChangeListener, ObservationListener, Observer {
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
@@ -202,8 +208,8 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
   private final static boolean DEBUG_UPDATE_EVENT = false;
   /** flag to log a stack trace in method plot() to detect multiple calls */
   private final static boolean DEBUG_PLOT_EVENT = false;
-  /** image size choices */
-  private final static Integer[] IMAGE_SIZES = {256, 512, 1024};
+  /** preference singleton */
+  private final static Preferences myPreferences = Preferences.getInstance();
   /** scaling factor to Mega Lambda for U,V points */
   private final static double MEGA_LAMBDA_SCALE = 1e-6;
 
@@ -249,6 +255,21 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
 
     // register this as an observation listener :
     om.register(this);
+
+    // register this as a preference listener :
+    myPreferences.addObserver(this);
+  }
+
+  /**
+   * Listen to preferences changes
+   * @param o unused
+   * @param arg unused
+   */
+  public void update(final Observable o, final Object arg) {
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("updated Preferences");
+    }
+    this.refreshPlot();
   }
 
   /**
@@ -291,10 +312,6 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     jSliderUVMax = new javax.swing.JSlider();
     jFieldUVMax = new javax.swing.JFormattedTextField();
     jLabel7 = new javax.swing.JLabel();
-    jLabel8 = new javax.swing.JLabel();
-    jLabel9 = new javax.swing.JLabel();
-    jComboBoxLUT = new javax.swing.JComboBox();
-    jComboBoxImageSize = new javax.swing.JComboBox();
     jLabelAtmQual = new javax.swing.JLabel();
     jComboBoxAtmQual = new javax.swing.JComboBox();
     jLabelFTMode = new javax.swing.JLabel();
@@ -536,32 +553,6 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     gridBagConstraints.gridwidth = 2;
     jPanelRight.add(jLabel7, gridBagConstraints);
 
-    jLabel8.setText("LUT table");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 25;
-    jPanelRight.add(jLabel8, gridBagConstraints);
-
-    jLabel9.setText("Image size");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 26;
-    jPanelRight.add(jLabel9, gridBagConstraints);
-
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 25;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
-    jPanelRight.add(jComboBoxLUT, gridBagConstraints);
-
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 26;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
-    jPanelRight.add(jComboBoxImageSize, gridBagConstraints);
-
     jLabelAtmQual.setText("Atmosphere quality");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -730,24 +721,12 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
       public void itemStateChanged(final ItemEvent e) {
         final boolean enabled = jCheckBoxModelImage.isSelected();
         jComboBoxImageMode.setEnabled(enabled);
-        jComboBoxLUT.setEnabled(enabled);
-        jComboBoxImageSize.setEnabled(enabled);
 
         refreshPlot();
       }
     });
 
     this.jComboBoxImageMode.addActionListener(this);
-
-    this.jComboBoxLUT.setModel(new DefaultComboBoxModel(ColorModels.getColorModelNames()));
-    this.jComboBoxLUT.setSelectedItem("aspro");
-
-    this.jComboBoxLUT.addActionListener(this);
-
-    this.jComboBoxImageSize.setModel(new DefaultComboBoxModel(IMAGE_SIZES));
-    this.jComboBoxImageSize.setSelectedIndex(1);
-
-    this.jComboBoxImageSize.addActionListener(this);
 
     // disable Atmosphere quality :
     this.jLabelAtmQual.setVisible(false);
@@ -911,8 +890,6 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
 
       this.jCheckBoxModelImage.setEnabled(hasModel);
       this.jComboBoxImageMode.setEnabled(hasModel);
-      this.jComboBoxImageSize.setEnabled(hasModel);
-      this.jComboBoxLUT.setEnabled(hasModel);
     }
   }
 
@@ -949,16 +926,6 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     } else if (e.getSource() == this.jComboBoxImageMode) {
       if (logger.isLoggable(Level.FINE)) {
         logger.fine("image mode changed : " + this.jComboBoxImageMode.getSelectedItem());
-      }
-      refreshPlot();
-    } else if (e.getSource() == this.jComboBoxLUT) {
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("LUT changed : " + this.jComboBoxLUT.getSelectedItem());
-      }
-      refreshPlot();
-    } else if (e.getSource() == this.jComboBoxImageSize) {
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("image size changed : " + this.jComboBoxImageSize.getSelectedItem());
       }
       refreshPlot();
     }
@@ -1134,8 +1101,6 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
       this.jCheckBoxPlotUVSupport.setSelected(true);
       this.jCheckBoxModelImage.setSelected(true);
       this.jComboBoxImageMode.setSelectedItem(ImageMode.AMP);
-      this.jComboBoxLUT.setSelectedItem("aspro");
-      this.jComboBoxImageSize.setSelectedIndex(1);
 
       // reset cached data :
       this.currentObsData = null;
@@ -1221,8 +1186,10 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
 
     // model image options :
     final ImageMode imageMode = (ImageMode) this.jComboBoxImageMode.getSelectedItem();
-    final Integer imageSize = (Integer) this.jComboBoxImageSize.getSelectedItem();
-    final IndexColorModel colorModel = ColorModels.getColorModel((String) this.jComboBoxLUT.getSelectedItem());
+
+    // Use model image Preferences :
+    final int imageSize = myPreferences.getPreferenceAsInt(Preferences.MODEL_IMAGE_SIZE);
+    final IndexColorModel colorModel = ColorModels.getColorModel(myPreferences.getPreference(Preferences.MODEL_IMAGE_LUT));
 
     // check if observability data are available :
     final ObservabilityData obsData = observation.getObservabilityData();
@@ -1242,7 +1209,7 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
           logger.fine("SwingWorker[UV].doInBackground : IN");
 
           UVCoverageData uvData = new UVCoverageService(observation, targetName, uvMax,
-                  doUVSupport, doModelImage, imageMode, imageSize.intValue(), colorModel).compute();
+                  doUVSupport, doModelImage, imageMode, imageSize, colorModel).compute();
 
           if (isCancelled()) {
             logger.fine("SwingWorker[UV].doInBackground : CANCELLED");
@@ -1393,8 +1360,10 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
 
         // model image options :
         final ImageMode imageMode = (ImageMode) this.jComboBoxImageMode.getSelectedItem();
-        final Integer imageSize = (Integer) this.jComboBoxImageSize.getSelectedItem();
-        final IndexColorModel colorModel = ColorModels.getColorModel((String) this.jComboBoxLUT.getSelectedItem());
+
+        // Use model image Preferences :
+        final int imageSize = myPreferences.getPreferenceAsInt(Preferences.MODEL_IMAGE_SIZE);
+        final IndexColorModel colorModel = ColorModels.getColorModel(myPreferences.getPreference(Preferences.MODEL_IMAGE_LUT));
 
         if (logger.isLoggable(Level.FINE)) {
           logger.fine("computing model uv map ...");
@@ -1414,8 +1383,7 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
             logger.fine("SwingWorker[UVMap].doInBackground : IN");
 
             UVMapData uvMapData = ModelUVMapService.computeUVMap(
-                    models, uvRect, refMin, refMax,
-                    imageMode, imageSize.intValue(), colorModel);
+                    models, uvRect, refMin, refMax, imageMode, imageSize, colorModel);
 
             if (isCancelled()) {
               logger.fine("SwingWorker[UVMap].doInBackground : CANCELLED");
@@ -1699,9 +1667,7 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
   private javax.swing.JComboBox jComboBoxAtmQual;
   private javax.swing.JComboBox jComboBoxFTMode;
   private javax.swing.JComboBox jComboBoxImageMode;
-  private javax.swing.JComboBox jComboBoxImageSize;
   private javax.swing.JComboBox jComboBoxInstrumentMode;
-  private javax.swing.JComboBox jComboBoxLUT;
   private javax.swing.JComboBox jComboBoxTarget;
   private javax.swing.JFormattedTextField jFieldHAMax;
   private javax.swing.JFormattedTextField jFieldHAMin;
@@ -1714,8 +1680,6 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
   private javax.swing.JLabel jLabel5;
   private javax.swing.JLabel jLabel6;
   private javax.swing.JLabel jLabel7;
-  private javax.swing.JLabel jLabel8;
-  private javax.swing.JLabel jLabel9;
   private javax.swing.JLabel jLabelAtmQual;
   private javax.swing.JLabel jLabelFTMode;
   private javax.swing.JPanel jPanelButtons;
@@ -1739,7 +1703,7 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
           this.lastTime = System.nanoTime();
           break;
         case ChartProgressEvent.DRAWING_FINISHED:
-          logger.fine("Drawing chart time : " +  1e-6d * (System.nanoTime() - this.lastTime) + " ms.");
+          logger.fine("Drawing chart time : " + 1e-6d * (System.nanoTime() - this.lastTime) + " ms.");
           this.lastTime = 0l;
           break;
         default:
