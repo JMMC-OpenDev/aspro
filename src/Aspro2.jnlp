@@ -7,6 +7,11 @@
     <description>
       This application is the new version of the ASPRO tool to prepare your interferometric observations.
     </description>
+    <offline-allowed/>
+    <shortcut online="false">
+      <desktop/>
+      <menu submenu="JMMC Apps"/>
+    </shortcut>
   </information>
   <security>
     <all-permissions/>
