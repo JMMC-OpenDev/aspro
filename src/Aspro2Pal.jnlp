@@ -5,6 +5,7 @@
     <vendor>JMMC</vendor>
     <homepage href="http://www.jmmc.fr/aspro2"/>
     <description>Jnlp dedicated to the astrogrid Pal signed java library.</description>
+    <offline-allowed/>
   </information>
   <security>
     <all-permissions/>

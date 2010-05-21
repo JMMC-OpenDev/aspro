@@ -16,7 +16,6 @@
   <security>
     <all-permissions/>
   </security>
-  <update check="timeout" policy="always"/>
   <resources>
     <j2se version="1.5+" initial-heap-size="128m" max-heap-size="384m"/>
     <property name="apple.laf.useScreenMenuBar" value="true"/>
