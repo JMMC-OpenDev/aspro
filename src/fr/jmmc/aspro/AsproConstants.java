@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproConstants.java,v 1.10 2010-05-07 11:34:31 bourgesl Exp $"
+ * "@(#) $Id: AsproConstants.java,v 1.11 2010-05-21 14:27:18 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.10  2010/05/07 11:34:31  bourgesl
+ * set debug mode to false
+ *
  * Revision 1.9  2010/05/06 15:37:50  bourgesl
  * added HA_MIN/MAX
  *
@@ -63,6 +66,12 @@ public interface AsproConstants {
   public static final double DEFAULT_SAMPLING_PERIOD = 40d;
   /** default value for checkbox Night Limit = true */
   public static final boolean DEFAULT_USE_NIGHT_LIMITS = true;
+  /** default image LUT */
+  public final static String DEFAULT_IMAGE_LUT = "aspro";
+  /** default image size */
+  public final static Integer DEFAULT_IMAGE_SIZE = Integer.valueOf(512);
+  /** image size choices */
+  public final static Integer[] IMAGE_SIZES = {Integer.valueOf(256), DEFAULT_IMAGE_SIZE, Integer.valueOf(1024)};
   /** no value for combo boxes */
   public static final String NONE = "None";
 
