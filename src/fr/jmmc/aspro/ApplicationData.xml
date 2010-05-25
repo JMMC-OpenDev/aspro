@@ -36,6 +36,10 @@
       </prerelease>
     </release>
     <release version="0.4">
+      <prerelease version="0.4b5">
+        <change>Better Look and Feel for the Preference View</change>
+        <change>Added Model Image options (lut and size) as Preferences</change>
+      </prerelease>
       <prerelease version="0.4b4"> <!-- 0.3b8 -->
         <change>Added the limb darkened disk model in the model editor</change>
         <change>Added gaussian models in the model editor</change>
