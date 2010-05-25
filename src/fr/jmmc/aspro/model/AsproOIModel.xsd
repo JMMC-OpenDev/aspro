@@ -641,7 +641,18 @@
           </xsd:appinfo>
         </xsd:annotation>
       </xsd:element>
-      <!-- TBD -->
+      <xsd:element name="channels" type="xsd:IDREFS" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>
+              The list of channels for this configuration (V1 V2) used by CHARA/Vega 
+          </xsd:documentation>
+          <xsd:appinfo>
+            <jaxb:property>
+              <jaxb:baseType name="Channel" />
+            </jaxb:property>
+          </xsd:appinfo>
+        </xsd:annotation>
+      </xsd:element>
     </xsd:sequence>
   </xsd:complexType>
 

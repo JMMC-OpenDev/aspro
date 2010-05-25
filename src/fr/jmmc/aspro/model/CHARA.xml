@@ -221,16 +221,16 @@
     </station>
 
     <channel>
-      <name>Channel1</name>
+      <name>V1</name>
     </channel>
     <channel>
-      <name>Channel2</name>
+      <name>V2</name>
     </channel>
     <channel>
-      <name>Channel3</name>
+      <name>V3</name>
     </channel>
     <channel>
-      <name>Channel4</name>
+      <name>V4</name>
     </channel>
 
     <delayLine>
@@ -254,114 +254,114 @@
       <stationLinks>
         <station>S1</station>
         <channelLink>
-          <channel>Channel1</channel>
+          <channel>V1</channel>
           <opticalLength>0</opticalLength>
         </channelLink>
         <channelLink>
-          <channel>Channel2</channel>
+          <channel>V2</channel>
           <opticalLength>0.0762</opticalLength>
         </channelLink>
         <channelLink>
-          <channel>Channel3</channel>
+          <channel>V3</channel>
           <opticalLength>0.1524</opticalLength>
         </channelLink>
         <channelLink>
-          <channel>Channel4</channel>
+          <channel>V4</channel>
           <opticalLength>0.2286</opticalLength>
         </channelLink>
       </stationLinks>
       <stationLinks>
         <station>S2</station>
         <channelLink>
-          <channel>Channel1</channel>
+          <channel>V1</channel>
           <opticalLength>0.5842</opticalLength>
         </channelLink>
         <channelLink>
-          <channel>Channel2</channel>
+          <channel>V2</channel>
           <opticalLength>0.6604</opticalLength>
         </channelLink>
         <channelLink>
-          <channel>Channel3</channel>
+          <channel>V3</channel>
           <opticalLength>0.7366</opticalLength>
         </channelLink>
         <channelLink>
-          <channel>Channel4</channel>
+          <channel>V4</channel>
           <opticalLength>0.8128</opticalLength>
         </channelLink>
       </stationLinks>
       <stationLinks>
         <station>W1</station>
         <channelLink>
-          <channel>Channel1</channel>
+          <channel>V1</channel>
           <opticalLength>1.8288</opticalLength>
         </channelLink>
         <channelLink>
-          <channel>Channel2</channel>
+          <channel>V2</channel>
           <opticalLength>1.905</opticalLength>
         </channelLink>
         <channelLink>
-          <channel>Channel3</channel>
+          <channel>V3</channel>
           <opticalLength>1.9812</opticalLength>
         </channelLink>
         <channelLink>
-          <channel>Channel4</channel>
+          <channel>V4</channel>
           <opticalLength>2.0574</opticalLength>
         </channelLink>
       </stationLinks>
       <stationLinks>
         <station>W2</station>
         <channelLink>
-          <channel>Channel1</channel>
+          <channel>V1</channel>
           <opticalLength>2.413</opticalLength>
         </channelLink>
         <channelLink>
-          <channel>Channel2</channel>
+          <channel>V2</channel>
           <opticalLength>2.4892</opticalLength>
         </channelLink>
         <channelLink>
-          <channel>Channel3</channel>
+          <channel>V3</channel>
           <opticalLength>2.5654</opticalLength>
         </channelLink>
         <channelLink>
-          <channel>Channel4</channel>
+          <channel>V4</channel>
           <opticalLength>2.6416</opticalLength>
         </channelLink>
       </stationLinks>
       <stationLinks>
         <station>E1</station>
         <channelLink>
-          <channel>Channel1</channel>
+          <channel>V1</channel>
           <opticalLength>4.2418</opticalLength>
         </channelLink>
         <channelLink>
-          <channel>Channel2</channel>
+          <channel>V2</channel>
           <opticalLength>4.318</opticalLength>
         </channelLink>
         <channelLink>
-          <channel>Channel3</channel>
+          <channel>V3</channel>
           <opticalLength>4.3942</opticalLength>
         </channelLink>
         <channelLink>
-          <channel>Channel4</channel>
+          <channel>V4</channel>
           <opticalLength>4.4704</opticalLength>
         </channelLink>
       </stationLinks>
       <stationLinks>
         <station>E2</station>
         <channelLink>
-          <channel>Channel1</channel>
+          <channel>V1</channel>
           <opticalLength>3.6576</opticalLength>
         </channelLink>
         <channelLink>
-          <channel>Channel2</channel>
+          <channel>V2</channel>
           <opticalLength>3.7338</opticalLength>
         </channelLink>
         <channelLink>
-          <channel>Channel3</channel>
+          <channel>V3</channel>
           <opticalLength>3.81</opticalLength>
         </channelLink>
         <channelLink>
-          <channel>Channel4</channel>
+          <channel>V4</channel>
           <opticalLength>3.8862</opticalLength>
         </channelLink>
       </stationLinks>
@@ -393,6 +393,7 @@
       <name>VEGA_2T</name>
       <description></description>
       <numberChannels>2</numberChannels>
+      <defaultSamplingTime>60</defaultSamplingTime>
       <mode>
         <name>standard</name>
         <waveLengthMin>0.48</waveLengthMin>
@@ -404,6 +405,7 @@
       <name>VEGA_3T</name>
       <description></description>
       <numberChannels>3</numberChannels>
+      <defaultSamplingTime>60</defaultSamplingTime>
       <mode>
         <name>standard</name>
         <waveLengthMin>0.48</waveLengthMin>
@@ -415,6 +417,7 @@
       <name>MIRC</name>
       <description></description>
       <numberChannels>4</numberChannels>
+      <defaultSamplingTime>60</defaultSamplingTime>
       <mode>
         <name>Low_H</name>
         <waveLengthMin>1.5</waveLengthMin>
@@ -455,48 +458,63 @@
       <focalInstrument>VEGA_2T</focalInstrument>
       <configuration>
         <stations>S1 S2</stations>
+        <channels>V3 V4</channels>
       </configuration>
       <configuration>
         <stations>S1 E1</stations>
+        <channels>V2 V1</channels>
       </configuration>
       <configuration>
         <stations>S1 E2</stations>
+        <channels>V2 V1</channels>
       </configuration>
       <configuration>
         <stations>S1 W1</stations>
+        <channels>V3 V2</channels>
       </configuration>
       <configuration>
         <stations>S1 W2</stations>
+        <channels>V3 V4</channels>
       </configuration>
       <configuration>
         <stations>S2 E1</stations>
+        <channels>V3 V2</channels>
       </configuration>
       <configuration>
         <stations>S2 E2</stations>
+        <channels>V3 V2</channels>
       </configuration>
       <configuration>
         <stations>S2 W1</stations>
+        <channels>V3 V2</channels>
       </configuration>
       <configuration>
         <stations>S2 W2</stations>
+        <channels>V3 V4</channels>
       </configuration>
       <configuration>
         <stations>E1 E2</stations>
+        <channels>V1 V2</channels>
       </configuration>
       <configuration>
         <stations>E1 W1</stations>
+        <channels>V1 V2</channels>
       </configuration>
       <configuration>
         <stations>E1 W2</stations>
+        <channels>V2 V3</channels>
       </configuration>
       <configuration>
         <stations>E2 W1</stations>
+        <channels>V1 V2</channels>
       </configuration>
       <configuration>
         <stations>E2 W2</stations>
+        <channels>V2 V3</channels>
       </configuration>
       <configuration>
         <stations>W1 W2</stations>
+        <channels>V3 V4</channels>
       </configuration>
     </instrument>
 
@@ -504,63 +522,83 @@
       <focalInstrument>VEGA_3T</focalInstrument>
       <configuration>
         <stations>S1 S2 E1</stations>
+        <channels>V3 V4 V1</channels>
       </configuration>
       <configuration>
         <stations>S1 S2 E2</stations>
+        <channels>V3 V4 V1</channels>
       </configuration>
       <configuration>
         <stations>S1 S2 W1</stations>
+        <channels>V3 V4 V1</channels>
       </configuration>
       <configuration>
         <stations>S1 S2 W2</stations>
+        <channels>V1 V3 V4</channels>
       </configuration>
       <configuration>
         <stations>S1 E1 E2</stations>
+        <channels>V4 V1 V2</channels>
       </configuration>
       <configuration>
         <stations>S1 E1 W1</stations>
+        <channels>V4 V1 V2</channels>
       </configuration>
       <configuration>
         <stations>S1 E1 W2</stations>
+        <channels>V3 V1 V4</channels>
       </configuration>
       <configuration>
         <stations>S1 E2 W1</stations>
+        <channels>V3 V1 V2</channels>
       </configuration>
       <configuration>
         <stations>S1 E2 W2</stations>
+        <channels>V3 V1 V4</channels>
       </configuration>
       <configuration>
         <stations>S1 W1 W2</stations>
+        <channels>V3 V1 V4</channels>
       </configuration>
       <configuration>
         <stations>S2 E1 E2</stations>
+        <channels>V4 V1 V2</channels>
       </configuration>
       <configuration>
         <stations>S2 E1 W1</stations>
+        <channels>V4 V1 V2</channels>
       </configuration>
       <configuration>
         <stations>S2 E1 W2</stations>
+        <channels>V3 V1 V4</channels>
       </configuration>
       <configuration>
         <stations>S2 E2 W1</stations>
+        <channels>V4 V1 V2</channels>
       </configuration>
       <configuration>
         <stations>S2 E2 W2</stations>
+        <channels>V3 V1 V4</channels>
       </configuration>
       <configuration>
         <stations>S2 W1 W2</stations>
+        <channels>V3 V1 V4</channels>
       </configuration>
       <configuration>
         <stations>E1 E2 W1</stations>
+        <channels>V1 V2 V4</channels>
       </configuration>
       <configuration>
         <stations>E1 E2 W2</stations>
+        <channels>V1 V2 V4</channels>
       </configuration>
       <configuration>
         <stations>E1 W1 W2</stations>
+        <channels>V1 V2 V4</channels>
       </configuration>
       <configuration>
         <stations>E2 W1 W2</stations>
+        <channels>V1 V2 V4</channels>
       </configuration>
     </instrument>
 
@@ -568,48 +606,63 @@
       <focalInstrument>MIRC</focalInstrument>
       <configuration>
         <stations>S1 S2 E1 E2</stations>
+        <channels>V3 V4 V1 V2</channels>
       </configuration>
       <configuration>
         <stations>S1 S2 E1 W1</stations>
+        <channels>V3 V4 V1 V2</channels>
       </configuration>
       <configuration>
         <stations>S1 S2 E1 W2</stations>
+        <channels>V2 V3 V1 V4</channels>
       </configuration>
       <configuration>
         <stations>S1 S2 E2 W1</stations>
+        <channels>V3 V4 V1 V2</channels>
       </configuration>
       <configuration>
         <stations>S1 S2 E2 W2</stations>
+        <channels>V2 V3 V1 V4</channels>
       </configuration>
       <configuration>
         <stations>S1 S2 W1 W2</stations>
+        <channels>V2 V3 V1 V4</channels>
       </configuration>
       <configuration>
         <stations>S1 E1 E2 W1</stations>
+        <channels>V4 V1 V2 V3</channels>
       </configuration>
       <configuration>
         <stations>S1 E1 E2 W2</stations>
+        <channels>V3 V1 V2 V4</channels>
       </configuration>
       <configuration>
         <stations>S1 E1 W1 W2</stations>
+        <channels>V3 V1 V2 V4</channels>
       </configuration>
       <configuration>
         <stations>S1 E2 W1 W2</stations>
+        <channels>V3 V1 V2 V4</channels>
       </configuration>
       <configuration>
         <stations>S2 E1 E2 W1</stations>
+        <channels>V4 V1 V2 V3</channels>
       </configuration>
       <configuration>
         <stations>S2 E1 E2 W2</stations>
+        <channels>V3 V1 V2 V4</channels>
       </configuration>
       <configuration>
         <stations>S2 E1 W1 W2</stations>
+        <channels>V3 V1 V2 V4</channels>
       </configuration>
       <configuration>
         <stations>S2 E2 W1 W2</stations>
+        <channels>V3 V1 V2 V4</channels>
       </configuration>
       <configuration>
         <stations>E1 E2 W1 W2</stations>
+        <channels>V1 V2 V3 V4</channels>
       </configuration>
     </instrument>
   </configuration>
