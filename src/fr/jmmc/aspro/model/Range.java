@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: Range.java,v 1.8 2010-04-02 14:39:54 bourgesl Exp $"
+ * "@(#) $Id: Range.java,v 1.9 2010-05-26 15:27:15 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.8  2010/04/02 14:39:54  bourgesl
+ * added contains method
+ *
  * Revision 1.7  2010/01/21 16:39:49  bourgesl
  * added static getMinimum(List) and getMaximum(List) methods
  *
@@ -109,6 +112,48 @@ public class Range {
       return max;
     }
     return null;
+  }
+
+  /**
+   * Return the list of ranges cropped to stay inside range [min;max]
+   * @param ranges list of ranges to use
+   * @param min lower bound
+   * @param max upper bound
+   * @return list of ranges inside range [min;max]
+   */
+  public static List<Range> restrictRange(final List<Range> ranges, final double min, final double max) {
+    final List<Range> intervals = new ArrayList<Range>(ranges.size());
+
+    double start, end;
+    for (Range range : ranges) {
+      start = range.getMin();
+      end = range.getMax();
+
+      if (start >= min) {
+        if (end <= max) {
+          // interval in inside [min;max]
+          intervals.add(range);
+        } else {
+          if (start > max) {
+            // two points over max : skip
+          } else {
+            // end occurs after max :
+            intervals.add(new Range(start, max));
+          }
+        }
+      } else {
+        // start occurs before min :
+        if (end < min) {
+          // two points before min : skip
+        } else if (end > max) {
+          // two points overlapping [min;max] : keep
+          intervals.add(new Range(min, max));
+        } else {
+          intervals.add(new Range(min, end));
+        }
+      }
+    }
+    return intervals;
   }
 
   /**
