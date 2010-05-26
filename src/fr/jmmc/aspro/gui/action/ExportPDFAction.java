@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportPDFAction.java,v 1.5 2010-05-11 12:03:17 bourgesl Exp $"
+ * "@(#) $Id: ExportPDFAction.java,v 1.6 2010-05-26 15:29:14 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2010/05/11 12:03:17  bourgesl
+ * fix : check the file extension before the existence of the file to display the confirm dialog
+ *
  * Revision 1.4  2010/04/13 15:54:48  bourgesl
  * javadoc
  *
@@ -53,7 +56,7 @@ public class ExportPDFAction {
   /** PDF extension */
   public static final String PDF_EXT = "pdf";
   /** action singleton */
-  private static ExportPDFAction instance = new ExportPDFAction();
+  private static final ExportPDFAction instance = new ExportPDFAction();
 
   /**
    * Return the singleton ExportPDFAction instance

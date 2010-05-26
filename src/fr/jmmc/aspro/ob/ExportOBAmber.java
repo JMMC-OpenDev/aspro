@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBAmber.java,v 1.10 2010-05-06 15:42:18 bourgesl Exp $"
+ * "@(#) $Id: ExportOBAmber.java,v 1.11 2010-05-26 15:29:13 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.10  2010/05/06 15:42:18  bourgesl
+ * use HA Min/Max + FT Mode for the target in the observation settings
+ *
  * Revision 1.9  2010/05/05 14:29:51  bourgesl
  * added ha Min / Max to generate OB with correct LST intervals
  *
@@ -84,14 +87,11 @@ public class ExportOBAmber extends ExportOBVLTI {
     String document = processCommon(template, file.getName(), observation, target);
 
     // Magnitudes for H, K :
-    document = document.replaceFirst(KEY_HMAG,
-            df3.format((target.getFLUXH() != null) ? target.getFLUXH().doubleValue() : -99d));
-    document = document.replaceFirst(KEY_KMAG,
-            df3.format((target.getFLUXK() != null) ? target.getFLUXK().doubleValue() : -99d));
+    document = document.replaceFirst(KEY_HMAG, df3.format(getMagnitude(target.getFLUXH())));
+    document = document.replaceFirst(KEY_KMAG, df3.format(getMagnitude(target.getFLUXK())));
 
     // Coude Guided Star = Science (= mag V) :
-    document = document.replaceFirst(KEY_COUDE_GS_MAG,
-            df3.format((target.getFLUXV() != null) ? target.getFLUXV().doubleValue() : -99d));
+    document = document.replaceFirst(KEY_COUDE_GS_MAG, df3.format(getMagnitude(target.getFLUXV())));
 
     // Later : ft sensor
     document = document.replaceFirst(KEY_FT_SENSOR, "NONE");

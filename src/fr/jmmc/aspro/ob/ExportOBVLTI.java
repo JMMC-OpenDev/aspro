@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBVLTI.java,v 1.4 2010-05-06 15:42:18 bourgesl Exp $"
+ * "@(#) $Id: ExportOBVLTI.java,v 1.5 2010-05-26 15:29:13 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2010/05/06 15:42:18  bourgesl
+ * use HA Min/Max + FT Mode for the target in the observation settings
+ *
  * Revision 1.3  2010/05/05 14:31:31  bourgesl
  * Generate the date constraints if the night restrictions are active
  * Generate the LST intervals by calling again the ObservabilityService (elevation >30°, LST) with ha Min / Max restriction
@@ -53,7 +56,6 @@ import fr.jmmc.aspro.service.ObservabilityService;
 import java.io.File;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
@@ -75,8 +77,10 @@ public class ExportOBVLTI {
   protected final static NumberFormat df3 = new DecimalFormat("0.000");
   /** double formatter for PM */
   protected final static NumberFormat df6 = new DecimalFormat("0.000000");
+  /** default value for undefined magnitude = -99 */
+  public final static double UNDEFINED_MAGNITUDE = -99d;
   /** minimum elevation for LST Time ranges = 30 deg */
-  public final static double VLTI_MIN_ELEV = 30d;
+  public final static double MIN_ELEV = 30d;
   /** absolute_times_list template value */
   public final static String VAL_ABS_TIME_LIST = "{<DATE>T00:00:00 <DATE>T00:00:00 1}";
   /** date keyword for absolute_times_list template value */
@@ -184,7 +188,7 @@ public class ExportOBVLTI {
     // comments = spectral type :
     document = document.replaceFirst(KEY_COMMENTS, target.getSPECTYP());
 
-    // convert RA/DEC with mas up to 3 digits :
+    // convert RA/DEC (mas) up to 3 digits :
     final String[] raDec = AstroSkyCalc.toString(target.getRADeg(), target.getDECDeg());
 
     document = document.replaceFirst(KEY_RA, raDec[0]);
@@ -233,7 +237,7 @@ public class ExportOBVLTI {
     String absTimeList = "";
 
     // Compute Observability data with min elevation = 30 deg (date and night restrictions depend on the current observation) :
-    final ObservabilityService os = new ObservabilityService(observation, target, VLTI_MIN_ELEV);
+    final ObservabilityService os = new ObservabilityService(observation, target, MIN_ELEV);
     final ObservabilityData obsData = os.compute();
 
     final StarData starData = obsData.getStarData(target.getName());
@@ -251,7 +255,7 @@ public class ExportOBVLTI {
         double haMax = AsproConstants.HA_MAX;
 
         // HA Min / Max :
-        final TargetConfiguration targetConf = ObservationManager.getTargetConfiguration(observation, target.getName());
+        final TargetConfiguration targetConf = target.getConfiguration();
         if (targetConf != null) {
           if (targetConf.getHAMin() != null) {
             haMin = targetConf.getHAMin().doubleValue();
@@ -265,7 +269,7 @@ public class ExportOBVLTI {
           logger.fine("ha max    : " + haMax);
         }
 
-        final List<Range> limRangesHA = restrictRange(obsRangesHA, haMin, haMax);
+        final List<Range> limRangesHA = Range.restrictRange(obsRangesHA, haMin, haMax);
 
         if (logger.isLoggable(Level.FINE)) {
           logger.fine("limRangesHA = " + limRangesHA);
@@ -315,41 +319,6 @@ public class ExportOBVLTI {
     return document;
   }
 
-  private static List<Range> restrictRange(final List<Range> ranges, final double min, final double max) {
-    final List<Range> intervals = new ArrayList<Range>(ranges.size());
-
-    double start, end;
-    for (Range range : ranges) {
-      start = range.getMin();
-      end = range.getMax();
-
-      if (start >= min) {
-        if (end <= max) {
-          // interval in inside [min;max]
-          intervals.add(range);
-        } else {
-          if (start > max) {
-            // two points over max : skip
-          } else {
-            // end occurs after max :
-            intervals.add(new Range(start, max));
-          }
-        }
-      } else {
-        // start occurs before min :
-        if (end < min) {
-          // two points before min : skip
-        } else if (end > max) {
-          // two points overlapping [min;max] : keep
-          intervals.add(new Range(min, max));
-        } else {
-          intervals.add(new Range(min, end));
-        }
-      }
-    }
-    return intervals;
-  }
-
   /**
    * Convert LST date intervals to STTimeIntervals format i.e. 'date1_in_seconds:date2_in_seconds;...'
    * @param dateIntervals LST intervals
@@ -386,5 +355,12 @@ public class ExportOBVLTI {
     final int m = cal.get(Calendar.MINUTE);
 
     return h * 3600 + (m + sign) * 60;
+  }
+
+  protected static double getMagnitude(final Double mag) {
+    if (mag != null) {
+      return mag.doubleValue();
+    }
+    return UNDEFINED_MAGNITUDE;
   }
 }

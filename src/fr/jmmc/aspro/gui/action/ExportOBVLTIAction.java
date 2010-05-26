@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBVLTIAction.java,v 1.4 2010-05-11 12:03:17 bourgesl Exp $"
+ * "@(#) $Id: ExportOBVLTIAction.java,v 1.5 2010-05-26 15:29:14 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2010/05/11 12:03:17  bourgesl
+ * fix : check the file extension before the existence of the file to display the confirm dialog
+ *
  * Revision 1.3  2010/05/06 15:42:18  bourgesl
  * use HA Min/Max + FT Mode for the target in the observation settings
  *
@@ -46,19 +49,19 @@ public class ExportOBVLTIAction {
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
   /** Class name. This name is used to register to the ActionRegistrar */
-  public final static String className = "fr.jmmc.aspro.gui.action.ExportOBAction";
+  public final static String className = "fr.jmmc.aspro.gui.action.ExportOBVLTIAction";
   /** Class logger */
   private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(className);
-  /** PDF mime type */
+  /** OBX mime type */
   public static final String OBX_MIME_TYPE = "application/obx";
-  /** PDF extension */
+  /** OBX extension */
   public static final String OBX_EXT = "obx";
   /** action singleton */
-  private static ExportOBVLTIAction instance = new ExportOBVLTIAction();
+  private static final ExportOBVLTIAction instance = new ExportOBVLTIAction();
 
   /**
-   * Return the singleton ExportOBAmberAction instance
-   * @return ExportOBAmberAction instance
+   * Return the singleton ExportOBVLTIAction instance
+   * @return ExportOBVLTIAction instance
    */
   public static ExportOBVLTIAction getInstance() {
     return instance;
@@ -140,7 +143,7 @@ public class ExportOBVLTIAction {
         logger.log(Level.SEVERE, "runtime failure : ", re);
 
         JOptionPane.showMessageDialog(null,
-                "Could not export to file " + file.getName(),
+                "Could not export to file " + file.getName() + "\n" + re.getMessage(),
                 "Error", JOptionPane.ERROR_MESSAGE);
       }
     }

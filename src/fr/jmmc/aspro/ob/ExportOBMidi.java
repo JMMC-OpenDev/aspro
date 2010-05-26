@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBMidi.java,v 1.3 2010-05-06 15:42:18 bourgesl Exp $"
+ * "@(#) $Id: ExportOBMidi.java,v 1.4 2010-05-26 15:29:13 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2010/05/06 15:42:18  bourgesl
+ * use HA Min/Max + FT Mode for the target in the observation settings
+ *
  * Revision 1.2  2010/05/05 14:29:51  bourgesl
  * added ha Min / Max to generate OB with correct LST intervals
  *
@@ -89,12 +92,10 @@ public class ExportOBMidi extends ExportOBVLTI {
      */
 
     // Magnitudes for H :
-    document = document.replaceFirst(KEY_HMAG,
-            df3.format((target.getFLUXH() != null) ? target.getFLUXH().doubleValue() : -99d));
+    document = document.replaceFirst(KEY_HMAG, df3.format(getMagnitude(target.getFLUXH())));
 
     // Coude Guided Star = Science (= mag V) :
-    document = document.replaceFirst(KEY_COUDE_GS_MAG,
-            df3.format((target.getFLUXV() != null) ? target.getFLUXV().doubleValue() : -99d));
+    document = document.replaceFirst(KEY_COUDE_GS_MAG, df3.format(getMagnitude(target.getFLUXV())));
 
     final String instrumentMode = observation.getInstrumentConfiguration().getInstrumentMode();
 
