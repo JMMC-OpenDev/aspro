@@ -731,6 +731,25 @@ public class Target
     return sb.toString();
   }
 
+  /**
+   * Return the star identifier corresponding to the catalog identifier
+   * @param catalogIdentifier complete catalog identifier (like 'HD' or 'HIP' ...)
+   * @return star identifier (HD 31964) or null
+   */
+  public String getIdentifier(final String catalogIdentifier) {
+    String res = null;
+    if (getIDS() != null) {
+      final String cat = catalogIdentifier + " ";
+      final String[] idArray = getIDS().split(",");
+      for (String id : idArray) {
+        if (id.startsWith(cat)) {
+          res = id;
+          break;
+        }
+      }
+    }
+    return res;
+  }
 
   /**
    * Return a deep "copy" of this instance
