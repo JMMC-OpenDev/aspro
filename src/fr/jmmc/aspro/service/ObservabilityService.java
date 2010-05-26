@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.44 2010-05-26 15:29:51 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.45 2010-05-26 15:33:06 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.44  2010/05/26 15:29:51  bourgesl
+ * added a constructor for CHARA OB to ignore night limits
+ *
  * Revision 1.43  2010/05/26 09:14:20  bourgesl
  * CHARA : use the predefined channel per station for a specific base line
  *
@@ -294,10 +297,23 @@ public class ObservabilityService {
    * @param observation observation settings
    * @param target target to use
    * @param minElev minimum elevation (deg)
-   * @param ignoreNightLimits true to disable the observability restriction due to the night
    */
   public ObservabilityService(final ObservationSetting observation,
-                              final Target target, final double minElev, final boolean ignoreNightLimits) {
+                              final Target target, final double minElev) {
+    this(observation, target, minElev, false);
+  }
+
+  /**
+   * Specific Constructor to prepare Observing blocks
+   * Note : This service is statefull so it can not be reused by several calls.
+   *
+   * @param observation observation settings
+   * @param target target to use
+   * @param minElev minimum elevation (deg)
+   * @param ignoreNightLimits true to disable the observability restriction due to the night
+   */
+  private ObservabilityService(final ObservationSetting observation,
+                               final Target target, final double minElev, final boolean ignoreNightLimits) {
     // use LST :
     this(observation, true, false, false);
 
