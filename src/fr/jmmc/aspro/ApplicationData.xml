@@ -36,6 +36,9 @@
       </prerelease>
     </release>
     <release version="0.4">
+      <prerelease version="0.4b6">
+        <change>Export CHARA VEGA Observing Block with all targets (Star List)</change>
+      </prerelease>
       <prerelease version="0.4b5">
         <change>Better Look and Feel for the Preference View</change>
         <change>Added Model Image options (lut and size) as Preferences</change>
