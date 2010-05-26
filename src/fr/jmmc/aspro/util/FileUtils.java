@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: FileUtils.java,v 1.3 2010-04-06 08:31:44 bourgesl Exp $"
+ * "@(#) $Id: FileUtils.java,v 1.4 2010-05-26 15:26:02 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2010/04/06 08:31:44  bourgesl
+ * fixed classloader issue with JNLP
+ *
  * Revision 1.2  2010/04/02 14:40:16  bourgesl
  * added writer methods for text files
  *
@@ -39,7 +42,7 @@ public class FileUtils {
   private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
   /** platform dependent line separator */
-  private static final String LINE_SEPARATOR = System.getProperty("line.separator");
+  public static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
   /**
    * Forbidden constructor
