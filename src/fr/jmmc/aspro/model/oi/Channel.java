@@ -73,8 +73,32 @@ public class Channel
     public void setName(String value) {
         this.name = value;
     }
+
     
 //--simple--preserve
+
+  @Override
+  public boolean equals(final Object obj) {
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    final Channel other = (Channel) obj;
+    if ((this.name == null) ? (other.name != null) : !this.name.equals(other.name)) {
+      return false;
+    }
+    return true;
+  }
+
+  @Override
+  public int hashCode() {
+    int hash = 7;
+    hash = 29 * hash + (this.name != null ? this.name.hashCode() : 0);
+    return hash;
+  }
+
   @Override
   public String toString() {
     return "Channel : " + ((this.name != null) ? this.name : "undefined");
