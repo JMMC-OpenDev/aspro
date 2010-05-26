@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproConstants.java,v 1.11 2010-05-21 14:27:18 bourgesl Exp $"
+ * "@(#) $Id: AsproConstants.java,v 1.12 2010-05-26 15:28:26 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.11  2010/05/21 14:27:18  bourgesl
+ * added default values for Model Image Lut & Size
+ *
  * Revision 1.10  2010/05/07 11:34:31  bourgesl
  * set debug mode to false
  *
@@ -80,4 +83,6 @@ public interface AsproConstants {
   public static final String INS_AMBER = "AMBER";
   /** VLTI MIDI */
   public static final String INS_MIDI = "MIDI";
+  /** CHARA VEGA (2T/3T) */
+  public static final String INS_VEGA = "VEGA_";
 }
