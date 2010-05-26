@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.42 2010-05-06 15:41:26 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.43 2010-05-26 09:14:20 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.42  2010/05/06 15:41:26  bourgesl
+ * use AsproConstants HA Min/Max
+ *
  * Revision 1.41  2010/05/05 14:33:43  bourgesl
  * javadoc
  * new constructor(target, minElev) to generate OB (z>30°)
@@ -1209,13 +1212,39 @@ public class ObservabilityService {
 
     final int nBeams = stations.size();
 
+    // find the optional channels associated to the stations in the instrument configuration :
+    // CHARA : predefined channel per station for a specific base line :
+    final List<Channel> relatedChannels = ConfigurationManager.getInstance().getInstrumentConfigurationChannels(
+            this.observation.getInterferometerConfiguration().getName(),
+            this.observation.getInstrumentConfiguration().getName(),
+            this.observation.getInstrumentConfiguration().getStations());
+
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("relatedChannels = " + relatedChannels);
+    }
+
+    final int nRelChannels = relatedChannels.size();
+    final boolean useRelatedChannels = nRelChannels > 0;
+
+    if (useRelatedChannels && nBeams != nRelChannels) {
+      throw new IllegalStateException("prepareBeams : the number of associated channels does not match the station list : " + stations + " <> " + relatedChannels);
+    }
+
     this.beams = new ArrayList<Beam>(nBeams);
 
     // Beams are defined in the same ordering than stations :
-    for (Station s : stations) {
-      this.beams.add(new Beam(s));
+    for (int i = 0; i < nBeams; i++) {
+      Station station = stations.get(i);
+      Beam beam = new Beam(station);
 
-      if (s.getHorizon() != null && !s.getHorizon().getPoints().isEmpty()) {
+      // predefined Channel (CHARA) :
+      if (useRelatedChannels && i < nRelChannels) {
+        beam.setChannel(relatedChannels.get(i));
+      }
+
+      this.beams.add(beam);
+
+      if (station.getHorizon() != null && !station.getHorizon().getPoints().isEmpty()) {
         this.hasHorizon = true;
       }
     }
@@ -1229,14 +1258,15 @@ public class ObservabilityService {
     final int nDelayLines = delayLines.size();
 
     // Has switchyard ?
-
     if (!channels.isEmpty() && this.interferometer.getSwitchyard() != null) {
       // Case Interferometer with a switchyard (VLTI and CHARA) :
 
+      // 2 cases ;
+      // CHARA : predefined channel per station for a specific base line
+      // VLTI : find an available channel for every station
+
       // used channels :
       final HashSet<Channel> channelSet = new HashSet<Channel>();
-
-      // find an available channel for every station :
 
       StationLinks sl;
       for (Beam b : this.beams) {
@@ -1244,13 +1274,28 @@ public class ObservabilityService {
         // for each station, get the possible channels in the switchyard configuration :
         sl = ConfigurationManager.getInstance().getStationLinks(this.interferometer, b.getStation());
 
+        // VLTI : find an available channel for every station :
+        if (!useRelatedChannels) {
+          for (ChannelLink cl : sl.getChannelLinks()) {
+
+            if (!channelSet.contains(cl.getChannel())) {
+              channelSet.add(cl.getChannel());
+
+              // use this channel for the beam :
+              b.setChannel(cl.getChannel());
+              break;
+            }
+          }
+        }
+        if (b.getChannel() == null) {
+          throw new IllegalStateException("Unable to associate a channel to every station [" + stations + "].");
+        }
+
+        // Use the channel link corresponding to the beam channel :
         for (ChannelLink cl : sl.getChannelLinks()) {
 
-          if (!channelSet.contains(cl.getChannel())) {
-            channelSet.add(cl.getChannel());
-
+          if (cl.getChannel().equals(b.getChannel())) {
             // optical path = switchyard + station fixed offset
-            b.setChannel(cl.getChannel());
             b.addOpticalLength(cl.getOpticalLength());
 
             // fixed offset (CHARA) :
@@ -1266,10 +1311,7 @@ public class ObservabilityService {
             break;
           }
         }
-        if (b.getChannel() == null) {
-          throw new IllegalStateException("Impossible to associate a channel to every station among [" + stations + "].");
-        }
-      }
+      } // for loop on beams
 
       // Associate a delay line to the beam :
       // Simple association between DL / Channel = DL_n linked to Channel_n
@@ -1294,8 +1336,10 @@ public class ObservabilityService {
     } else {
       // Simpler interferometer : no channel definition nor switchyard :
 
+      // Warning : Not tested because both CHARA and VLTI use a switchyard !
+
       // Simple association between DL / Station = DL_n linked to Station_n
-      // Use the fixed offset of every station :
+      // Use only the fixed offset of the station :
       int i = 0;
       for (Beam b : this.beams) {
 
