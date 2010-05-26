@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.36 2010-05-21 14:27:48 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.37 2010-05-26 15:30:24 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.36  2010/05/21 14:27:48  bourgesl
+ * use preferences for Model Image Lut & Size
+ * removed previous widgets
+ *
  * Revision 1.35  2010/05/11 12:04:56  bourgesl
  * minor changes due to ChartUtils & chart duration
  *
@@ -125,6 +129,7 @@ package fr.jmmc.aspro.gui;
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.Preferences;
 import fr.jmmc.aspro.gui.action.ExportOBVLTIAction;
+import fr.jmmc.aspro.gui.action.ExportOBVegaAction;
 import fr.jmmc.aspro.gui.action.ExportPDFAction;
 import fr.jmmc.aspro.gui.chart.ChartUtils;
 import fr.jmmc.aspro.gui.chart.SquareChartPanel;
@@ -620,12 +625,12 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
       // set the source with this instance :
       evt.setSource(this);
 
-      try {
-        ExportOBVLTIAction.getInstance().actionPerformed(evt);
-      } catch (RuntimeException re) {
-        JOptionPane.showMessageDialog(null, re.getMessage(),
-                "Error", JOptionPane.INFORMATION_MESSAGE);
-      }
+      ExportOBVLTIAction.getInstance().actionPerformed(evt);
+
+    } else if (instrumentName.startsWith(AsproConstants.INS_VEGA)) {
+
+      ExportOBVegaAction.getInstance().actionPerformed(evt);
+
     } else {
       JOptionPane.showMessageDialog(null, "The application can not generate an Observing Block for this instrument [" + instrumentName + "] !",
               "Error", JOptionPane.INFORMATION_MESSAGE);
