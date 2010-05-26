@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AstroSkyCalc.java,v 1.18 2010-04-02 14:39:19 bourgesl Exp $"
+ * "@(#) $Id: AstroSkyCalc.java,v 1.19 2010-05-26 15:28:09 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.18  2010/04/02 14:39:19  bourgesl
+ * elevation in degrees instead of rad
+ *
  * Revision 1.17  2010/04/02 09:20:25  bourgesl
  * updated javadoc
  * added toString(ra / dec in degrees) conversion
@@ -377,22 +380,32 @@ public class AstroSkyCalc {
 
   // static methods :
   /**
-   * Return a string representation for RA (hms) and DEC (dms)
+   * Return a string representation for RA (hms) and DEC (dms) with 3 digits
    * @param ra right ascension in deg
    * @param dec declination in deg
    * @return string[] containing RA (hms) and DEC (dms)
    */
   public static String[] toString(final double ra, final double dec) {
+    return toString(ra, 3, dec, 3);
+  }
 
+  /**
+   * Return a string representation for RA (hms) and DEC (dms) with the given precision (number of digits)
+   * @param ra right ascension in deg
+   * @param raDigits ra digits
+   * @param dec declination in deg
+   * @param decDigits ra digits
+   * @return string[] containing RA (hms) and DEC (dms)
+   */
+  public static String[] toString(final double ra, final int raDigits, final double dec, final int decDigits) {
     // RA (decimal hours), DEC (degrees)
     final Celest target = new Celest(AngleUtils.deg2hours(ra), dec, AsproConstants.EPOCH_J2000);
 
     return new String[]{
-              target.Alpha.RoundedRAString(3, ":"),
-              target.Delta.RoundedDecString(3, ":")
+              target.Alpha.RoundedRAString(raDigits, ":"),
+              target.Delta.RoundedDecString(decDigits, ":")
             };
   }
-
   /**
    * Convert lst hours to jd hours
    * @param lst dec hours in LST
