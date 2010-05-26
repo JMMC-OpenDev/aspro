@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.43 2010-05-26 09:14:20 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.44 2010-05-26 15:29:51 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.43  2010/05/26 09:14:20  bourgesl
+ * CHARA : use the predefined channel per station for a specific base line
+ *
  * Revision 1.42  2010/05/06 15:41:26  bourgesl
  * use AsproConstants HA Min/Max
  *
@@ -252,6 +255,8 @@ public class ObservabilityService {
   private List<PopCombination> popCombinations = null;
   /** selected target (used by OB) */
   private Target selectedTarget = null;
+  /** flag to disable the observability restriction due to the night */
+  private boolean ignoreUseNightLimit = false;
 
   /**
    * Constructor.
@@ -272,15 +277,27 @@ public class ObservabilityService {
   }
 
   /**
-   * Specific Constructor to prepare Observing blocks for a single target (LST)
+   * Specific Constructor to prepare CHARA Observing blocks for all targets (LST) ignoring night restrictions
+   * Note : This service is statefull so it can not be reused by several calls.
+   *
+   * @param observation observation settings
+   * @param minElev minimum elevation (deg)
+   */
+  public ObservabilityService(final ObservationSetting observation, final double minElev) {
+    this(observation, null, minElev, true);
+  }
+
+  /**
+   * Specific Constructor to prepare VLTI Observing blocks for a single target (LST)
    * Note : This service is statefull so it can not be reused by several calls.
    *
    * @param observation observation settings
    * @param target target to use
    * @param minElev minimum elevation (deg)
+   * @param ignoreNightLimits true to disable the observability restriction due to the night
    */
   public ObservabilityService(final ObservationSetting observation,
-                              final Target target, final double minElev) {
+                              final Target target, final double minElev, final boolean ignoreNightLimits) {
     // use LST :
     this(observation, true, false, false);
 
@@ -289,6 +306,9 @@ public class ObservabilityService {
 
     // force to use the given minimum elevation :
     this.minElev = minElev;
+
+    // ignore night restrictions :
+    this.ignoreUseNightLimit = ignoreNightLimits;
   }
 
   /**
@@ -1170,11 +1190,11 @@ public class ObservabilityService {
       this.minElev = this.observation.getInterferometerConfiguration().getMinElevation();
     }
 
-    if (doBaseLineLimits) {
+    this.useNightLimit = this.observation.getWhen().isNightRestriction();
+
+    if (this.doBaseLineLimits || this.ignoreUseNightLimit) {
       // ignore night limits :
       this.useNightLimit = false;
-    } else {
-      this.useNightLimit = this.observation.getWhen().isNightRestriction();
     }
 
     final InterferometerConfiguration intConf = this.observation.getInterferometerConfiguration().getInterferometerConfiguration();
