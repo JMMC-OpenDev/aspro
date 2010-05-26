@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ConfigurationManager.java,v 1.20 2010-05-19 09:30:06 bourgesl Exp $"
+ * "@(#) $Id: ConfigurationManager.java,v 1.21 2010-05-26 09:13:15 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.20  2010/05/19 09:30:06  bourgesl
+ * do not sort the interferometer list to keep the order defined in the AsproOIConfigurations.xml file
+ *
  * Revision 1.19  2010/04/15 12:54:27  bourgesl
  * don't sort the interferometer configuration names
  *
@@ -73,6 +76,7 @@
 package fr.jmmc.aspro.model;
 
 import fr.jmmc.aspro.AsproConstants;
+import fr.jmmc.aspro.model.oi.Channel;
 import fr.jmmc.aspro.model.oi.Configurations;
 import fr.jmmc.aspro.model.oi.FocalInstrumentConfiguration;
 import fr.jmmc.aspro.model.oi.FocalInstrumentConfigurationItem;
@@ -88,7 +92,6 @@ import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.StationLinks;
 import fr.jmmc.aspro.service.GeocentricCoords;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -385,6 +388,18 @@ public class ConfigurationManager extends BaseOIManager {
       for (FocalInstrumentConfigurationItem c : ic.getConfigurations()) {
         if (c.getShortName().equals(instrumentConfigurationName)) {
           return c.getStations();
+        }
+      }
+    }
+    return null;
+  }
+
+  public List<Channel> getInstrumentConfigurationChannels(final String configurationName, final String instrumentName, final String instrumentConfigurationName) {
+    final FocalInstrumentConfiguration ic = getInterferometerInstrumentConfiguration(configurationName, instrumentName);
+    if (ic != null) {
+      for (FocalInstrumentConfigurationItem c : ic.getConfigurations()) {
+        if (c.getShortName().equals(instrumentConfigurationName)) {
+          return c.getChannels();
         }
       }
     }

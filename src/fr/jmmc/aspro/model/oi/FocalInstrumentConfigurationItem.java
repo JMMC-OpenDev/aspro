@@ -29,6 +29,7 @@ import fr.jmmc.aspro.model.OIBase;
  *       &lt;sequence>
  *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="stations" type="{http://www.w3.org/2001/XMLSchema}IDREFS"/>
+ *         &lt;element name="channels" type="{http://www.w3.org/2001/XMLSchema}IDREFS" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -40,7 +41,8 @@ import fr.jmmc.aspro.model.OIBase;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "FocalInstrumentConfigurationItem", propOrder = {
     "name",
-    "stations"
+    "stations",
+    "channels"
 })
 public class FocalInstrumentConfigurationItem
     extends OIBase
@@ -52,6 +54,11 @@ public class FocalInstrumentConfigurationItem
     @XmlIDREF
     @XmlSchemaType(name = "IDREFS")
     protected List<Station> stations;
+    @XmlList
+    @XmlElement(type = Object.class)
+    @XmlIDREF
+    @XmlSchemaType(name = "IDREFS")
+    protected List<Channel> channels;
 
     /**
      * Gets the value of the name property.
@@ -104,6 +111,35 @@ public class FocalInstrumentConfigurationItem
             stations = new ArrayList<Station>();
         }
         return this.stations;
+    }
+
+    /**
+     * Gets the value of the channels property.
+     * 
+     * <p>
+     * This accessor method returns a reference to the live list,
+     * not a snapshot. Therefore any modification you make to the
+     * returned list will be present inside the JAXB object.
+     * This is why there is not a <CODE>set</CODE> method for the channels property.
+     * 
+     * <p>
+     * For example, to add a new item, do as follows:
+     * <pre>
+     *    getChannels().add(newItem);
+     * </pre>
+     * 
+     * 
+     * <p>
+     * Objects of the following type(s) are allowed in the list
+     * {@link Object }
+     * 
+     * 
+     */
+    public List<Channel> getChannels() {
+        if (channels == null) {
+            channels = new ArrayList<Channel>();
+        }
+        return this.channels;
     }
     
 //--simple--preserve
