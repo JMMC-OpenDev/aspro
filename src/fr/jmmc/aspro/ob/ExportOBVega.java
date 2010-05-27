@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBVega.java,v 1.1 2010-05-26 15:30:54 bourgesl Exp $"
+ * "@(#) $Id: ExportOBVega.java,v 1.2 2010-05-27 10:09:48 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2010/05/26 15:30:54  bourgesl
+ * new CHARA Vega Star List generation (OB like)
+ *
  */
 package fr.jmmc.aspro.ob;
 
@@ -110,17 +113,18 @@ public class ExportOBVega {
     // Prepare the Chara Setup according to the Pop configuration :
     final String charaSetup = prepareCharaSetup(observation, obsData.getBestPops().getPopList());
 
+    // Prepare the baseline suffix for observation name :
+    final String baseLine = observation.getInstrumentConfiguration().getStations().replaceAll(" ", "");
+
     // Generate the file content :
     final StringBuilder sb = new StringBuilder(512);
 
     // fill the buffer per target :
     for (Target target : observation.getTargets()) {
-      processTarget(sb, obsData, target, charaSetup);
+      processTarget(sb, obsData, target, baseLine, charaSetup);
     }
 
     final String document = sb.toString();
-
-    logger.severe("document = \n" + document);
 
     // Finally, write the file :
     FileUtils.writeFile(file, document);
@@ -135,8 +139,8 @@ public class ExportOBVega {
    *   4.HD number (string)
    *   5.Spectral Type (string)
    *   6.V magnitude (float)
-   *   7.J magnitude (float)
-   *   8.H magnitude (float)
+   *   7.J magnitude (float) : wrong replaced by H magnitude (float)
+   *   8.H magnitude (float) : wrong replaced by J magnitude (float)
    *   9.K magnitude (float)
    *   10.Angular diameter (float, mas)
    *   11.right ascension (hh:mm:ss.ss)
@@ -152,16 +156,21 @@ public class ExportOBVega {
    * @param sb string buffer
    * @param obsData observability results
    * @param target target to process
+   * @param baseLine baseline like S1S2 ...
    * @param charaSetup chara setup
    */
-  public static void processTarget(final StringBuilder sb, final ObservabilityData obsData, final Target target, final String charaSetup) {
+  public static void processTarget(final StringBuilder sb, final ObservabilityData obsData, final Target target, final String baseLine, final String charaSetup) {
 
     final String hdId = target.getIdentifier(HD_CATALOG);
-    logger.severe("target : " + target.getName() + " - " + hdId);
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("target : " + target.getName() + " - " + hdId);
+    }
 
     // Get target HA ranges :
     final List<Range> rangesHA = getTargetHARange(obsData, target);
-    logger.severe("rangesHA : " + rangesHA);
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("rangesHA : " + rangesHA);
+    }
 
     // Skip unobservable target ?
     // Skip target without HD identifier ?
@@ -173,9 +182,9 @@ public class ExportOBVega {
       sb.append(STAR_OBSV).append(SEPARATOR);
       //   2.TARGET or REFERENCE
       sb.append(STAR_TARGET).append(SEPARATOR);
-      // 3.Name of observation (string)
+      // 3.Name of observation (string) = target name (only alpha and digit characters) + Base Line
       final String altName = target.getName().replaceAll("[^a-zA-Z_0-9]", "");
-      sb.append(altName).append(SEPARATOR);
+      sb.append(altName).append(baseLine).append(SEPARATOR);
       // 4.HD number (string)
       sb.append(hdId.replace(" ", "")).append(SEPARATOR);
       // 5.Spectral Type (string)
@@ -183,10 +192,10 @@ public class ExportOBVega {
       sb.append(spectralType).append(SEPARATOR);
       // 6.V magnitude (float)
       sb.append(df2.format(getMagnitude(target.getFLUXV()))).append(SEPARATOR);
-      // 7.J magnitude (float)
-      sb.append(df2.format(getMagnitude(target.getFLUXJ()))).append(SEPARATOR);
-      // 8.H magnitude (float)
+      // 7.J magnitude (float) : wrong replaced by H magnitude (float)
       sb.append(df2.format(getMagnitude(target.getFLUXH()))).append(SEPARATOR);
+      // 8.H magnitude (float) : wrong replaced by J magnitude (float)
+      sb.append(df2.format(getMagnitude(target.getFLUXJ()))).append(SEPARATOR);
       // 9.K magnitude (float)
       sb.append(df2.format(getMagnitude(target.getFLUXK()))).append(SEPARATOR);
       // 10.Angular diameter (float, mas)
@@ -334,7 +343,9 @@ public class ExportOBVega {
       sb.append(telescope).append(SEPARATOR).append(pop).append(SEPARATOR).append(switchyard).append(SEPARATOR);
     }
 
-    logger.severe("Chara Setup : " + sb.toString());
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("Chara Setup : " + sb.toString());
+    }
 
     return sb.toString();
   }
