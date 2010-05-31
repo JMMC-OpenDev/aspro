@@ -458,7 +458,7 @@
       <focalInstrument>VEGA_2T</focalInstrument>
       <configuration>
         <stations>S1 S2</stations>
-        <channels>V3 V4</channels>
+        <channels>V4 V3</channels> <!-- Template D.M -->
       </configuration>
       <configuration>
         <stations>S1 E1</stations>
@@ -490,7 +490,7 @@
       </configuration>
       <configuration>
         <stations>S2 W2</stations>
-        <channels>V3 V4</channels>
+        <channels>V2 V3</channels> <!-- Template D.M -->
       </configuration>
       <configuration>
         <stations>E1 E2</stations>
@@ -514,7 +514,7 @@
       </configuration>
       <configuration>
         <stations>W1 W2</stations>
-        <channels>V3 V4</channels>
+        <channels>V4 V3</channels> <!-- Template D.M -->
       </configuration>
     </instrument>
 
