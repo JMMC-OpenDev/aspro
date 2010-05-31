@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBVega.java,v 1.2 2010-05-27 10:09:48 bourgesl Exp $"
+ * "@(#) $Id: ExportOBVega.java,v 1.3 2010-05-31 09:45:00 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2010/05/27 10:09:48  bourgesl
+ * inverted flux H and J to be closer to VEGA_PLAN output
+ * removed SEVERE traces
+ *
  * Revision 1.1  2010/05/26 15:30:54  bourgesl
  * new CHARA Vega Star List generation (OB like)
  *
@@ -59,17 +63,13 @@ public class ExportOBVega {
   /* CHARA Vega StarList File constants */
   /** field separator */
   public final static String SEPARATOR = " ";
-
-  /* Undefined value = OFF */
+  /** Undefined value = OFF */
   public final static String UNDEFINED = "OFF";
-
-  /* Star - observation = OBSV */
+  /** Star - observation = OBSV */
   public final static String STAR_OBSV = "OBSV";
-
-  /* Star - target = TARGET */
+  /** Star - target = TARGET */
   public final static String STAR_TARGET = "TARGET";
-
-  /* Default XOPLE reference = 0 */
+  /** Default XOPLE reference = 0 */
   public final static String DEFAULT_XOPLE_REF = "0";
   /**
    * Default Vega setup
@@ -139,8 +139,8 @@ public class ExportOBVega {
    *   4.HD number (string)
    *   5.Spectral Type (string)
    *   6.V magnitude (float)
-   *   7.J magnitude (float) : wrong replaced by H magnitude (float)
-   *   8.H magnitude (float) : wrong replaced by J magnitude (float)
+   *   7.J magnitude (float)
+   *   8.H magnitude (float)
    *   9.K magnitude (float)
    *   10.Angular diameter (float, mas)
    *   11.right ascension (hh:mm:ss.ss)
@@ -192,10 +192,10 @@ public class ExportOBVega {
       sb.append(spectralType).append(SEPARATOR);
       // 6.V magnitude (float)
       sb.append(df2.format(getMagnitude(target.getFLUXV()))).append(SEPARATOR);
-      // 7.J magnitude (float) : wrong replaced by H magnitude (float)
-      sb.append(df2.format(getMagnitude(target.getFLUXH()))).append(SEPARATOR);
-      // 8.H magnitude (float) : wrong replaced by J magnitude (float)
+      // 7.J magnitude (float)
       sb.append(df2.format(getMagnitude(target.getFLUXJ()))).append(SEPARATOR);
+      // 8.H magnitude (float)
+      sb.append(df2.format(getMagnitude(target.getFLUXH()))).append(SEPARATOR);
       // 9.K magnitude (float)
       sb.append(df2.format(getMagnitude(target.getFLUXK()))).append(SEPARATOR);
       // 10.Angular diameter (float, mas)
@@ -239,10 +239,13 @@ public class ExportOBVega {
     }
   }
 
+  /**
+   * Return the observable HA ranges restricted by the user defined HA Min / Max
+   * @param obsData observability results
+   * @param target target to use
+   * @return observable HA ranges
+   */
   private static List<Range> getTargetHARange(final ObservabilityData obsData, final Target target) {
-
-    // TODO : merge & simplify code with ExportOBVLTI.processDateTime ...
-
     final StarData starData = obsData.getStarData(target.getName());
     if (starData != null) {
       final List<Range> obsRangesHA = starData.getObsRangesHA();
@@ -350,6 +353,11 @@ public class ExportOBVega {
     return sb.toString();
   }
 
+  /**
+   * Return the given magnitude or the undefined magnitude value
+   * @param mag magnitude
+   * @return given magnitude or the undefined magnitude value
+   */
   protected static double getMagnitude(final Double mag) {
     if (mag != null) {
       return mag.doubleValue();
