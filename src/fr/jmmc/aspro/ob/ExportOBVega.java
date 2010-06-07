@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBVega.java,v 1.3 2010-05-31 09:45:00 bourgesl Exp $"
+ * "@(#) $Id: ExportOBVega.java,v 1.4 2010-06-07 16:03:48 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2010/05/31 09:45:00  bourgesl
+ * restored fluxes H and J
+ *
  * Revision 1.2  2010/05/27 10:09:48  bourgesl
  * inverted flux H and J to be closer to VEGA_PLAN output
  * removed SEVERE traces
@@ -55,8 +58,6 @@ public class ExportOBVega {
   public final static double UNDEFINED_MAGNITUDE = 99d;
   /** default value for undefined angular diameter = 99 */
   public final static double UNDEFINED_DIAMETER = 99d;
-  /** minimum elevation for HA Time ranges = 30 deg */
-  public final static double MIN_ELEV = 30d;
   /** HD catalog identifier (SimBad) */
   public final static String HD_CATALOG = "HD";
 
@@ -107,7 +108,7 @@ public class ExportOBVega {
     final ObservationSetting observation = ObservationManager.getInstance().getObservation();
 
     // Compute Observability data with min elevation = 30 deg and without night restrictions :
-    final ObservabilityService os = new ObservabilityService(observation, MIN_ELEV);
+    final ObservabilityService os = new ObservabilityService(observation, AsproConstants.OB_MIN_ELEVATION);
     final ObservabilityData obsData = os.compute();
 
     // Prepare the Chara Setup according to the Pop configuration :

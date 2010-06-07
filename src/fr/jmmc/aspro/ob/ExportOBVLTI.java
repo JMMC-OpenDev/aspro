@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBVLTI.java,v 1.5 2010-05-26 15:29:13 bourgesl Exp $"
+ * "@(#) $Id: ExportOBVLTI.java,v 1.6 2010-06-07 16:03:48 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2010/05/26 15:29:13  bourgesl
+ * light refactoring and javadoc
+ *
  * Revision 1.4  2010/05/06 15:42:18  bourgesl
  * use HA Min/Max + FT Mode for the target in the observation settings
  *
@@ -79,8 +82,6 @@ public class ExportOBVLTI {
   protected final static NumberFormat df6 = new DecimalFormat("0.000000");
   /** default value for undefined magnitude = -99 */
   public final static double UNDEFINED_MAGNITUDE = -99d;
-  /** minimum elevation for LST Time ranges = 30 deg */
-  public final static double MIN_ELEV = 30d;
   /** absolute_times_list template value */
   public final static String VAL_ABS_TIME_LIST = "{<DATE>T00:00:00 <DATE>T00:00:00 1}";
   /** date keyword for absolute_times_list template value */
@@ -237,7 +238,7 @@ public class ExportOBVLTI {
     String absTimeList = "";
 
     // Compute Observability data with min elevation = 30 deg (date and night restrictions depend on the current observation) :
-    final ObservabilityService os = new ObservabilityService(observation, target, MIN_ELEV);
+    final ObservabilityService os = new ObservabilityService(observation, target, AsproConstants.OB_MIN_ELEVATION);
     final ObservabilityData obsData = os.compute();
 
     final StarData starData = obsData.getStarData(target.getName());

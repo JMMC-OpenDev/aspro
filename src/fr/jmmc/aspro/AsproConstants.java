@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproConstants.java,v 1.12 2010-05-26 15:28:26 bourgesl Exp $"
+ * "@(#) $Id: AsproConstants.java,v 1.13 2010-06-07 16:03:48 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.12  2010/05/26 15:28:26  bourgesl
+ * added VEGA instrument constant
+ *
  * Revision 1.11  2010/05/21 14:27:18  bourgesl
  * added default values for Model Image Lut & Size
  *
@@ -63,8 +66,10 @@ public interface AsproConstants {
   public final static double HA_MAX = 12D;
 
   /* UI Defaults */
-  /** default minimum elevation = 20 degrees */
-  public static final double DEFAULT_MIN_ELEVATION = 20d;
+  /** default minimum elevation = 30 degrees */
+  public static final double DEFAULT_MIN_ELEVATION = 30d;
+  /** minimum elevation for OB generation = 30 degrees */
+  public static final double OB_MIN_ELEVATION = 30d;
   /** default sampling periodicity = 40 minutes */
   public static final double DEFAULT_SAMPLING_PERIOD = 40d;
   /** default value for checkbox Night Limit = true */
