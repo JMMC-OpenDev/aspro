@@ -97,7 +97,7 @@
                 <Component class="javax.swing.JButton" name="jButtonOB">
                   <Properties>
                     <Property name="text" type="java.lang.String" value="OB"/>
-                    <Property name="toolTipText" type="java.lang.String" value="Only VLTI AMBER or MIDI instruments are supported"/>
+                    <Property name="toolTipText" type="java.lang.String" value="Only CHARA VEGA or VLTI AMBER/MIDI instruments are supported"/>
                     <Property name="margin" type="java.awt.Insets" editor="org.netbeans.beaninfo.editors.InsetsEditor">
                       <Insets value="[0, 0, 0, 0]"/>
                     </Property>

@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.37 2010-05-26 15:30:24 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.38 2010-06-07 16:03:29 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.37  2010/05/26 15:30:24  bourgesl
+ * added CHARA Vega Star List generation (OB like)
+ *
  * Revision 1.36  2010/05/21 14:27:48  bourgesl
  * use preferences for Model Image Lut & Size
  * removed previous widgets
@@ -361,7 +364,7 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     jPanelButtons.add(jButtonPDF);
 
     jButtonOB.setText("OB");
-    jButtonOB.setToolTipText("Only VLTI AMBER or MIDI instruments are supported");
+    jButtonOB.setToolTipText("Only CHARA VEGA or VLTI AMBER/MIDI instruments are supported");
     jButtonOB.setMargin(new java.awt.Insets(0, 0, 0, 0));
     jButtonOB.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(java.awt.event.ActionEvent evt) {
