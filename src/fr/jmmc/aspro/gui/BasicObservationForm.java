@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BasicObservationForm.java,v 1.28 2010-05-20 12:14:13 bourgesl Exp $"
+ * "@(#) $Id: BasicObservationForm.java,v 1.29 2010-06-07 16:04:15 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.28  2010/05/20 12:14:13  bourgesl
+ * constraints are reordered : night restriction, date and min elevation
+ *
  * Revision 1.27  2010/05/11 10:17:31  mella
  * Add star name as optional field to put one new named star without simbad
  *
@@ -96,6 +99,8 @@ import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.mcs.astro.star.Star;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseEvent;
@@ -114,9 +119,11 @@ import javax.swing.JFormattedTextField;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JSpinner;
+import javax.swing.JSpinner.DateEditor;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.text.JTextComponent;
 import javax.swing.text.NumberFormatter;
 import javax.xml.datatype.XMLGregorianCalendar;
 
@@ -464,7 +471,34 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
     this.starSearchField.getStar().addObserver(this);
 
     // update component models :
-    this.jDateSpinner.setEditor(new JSpinner.DateEditor(jDateSpinner, "yyyy/MM/dd"));
+    final DateEditor de = new JSpinner.DateEditor(jDateSpinner, "yyyy/MM/dd");
+    this.jDateSpinner.setEditor(de);
+
+    // custom focus listener to let the user change the day field by default :
+    de.getTextField().addFocusListener(new FocusAdapter() {
+
+      @Override
+      public void focusGained(FocusEvent e) {
+        if (e.getSource() instanceof JTextComponent) {
+          final JTextComponent textComponent = ((JTextComponent) e.getSource());
+
+          SwingUtilities.invokeLater(new Runnable() {
+
+            public void run() {
+              final int last = textComponent.getDocument().getLength();
+              // select the day field to force the spinner to use it
+              textComponent.setCaretPosition(last - 2);
+              textComponent.moveCaretPosition(last);
+            }
+          });
+        }
+      }
+
+      @Override
+      public void focusLost(FocusEvent e) {
+        // nothing to do
+      }
+    });
 
     this.jComboBoxInterferometer.setModel(new DefaultComboBoxModel(ConfigurationManager.getInstance().getInterferometerNames()));
 
@@ -596,6 +630,9 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
     updateObservation();
   }
 
+  /**
+   * Check if this interferometer has PoPs. If false, disable and reset the PoPs text field
+   */
   private void checkPops() {
     final boolean hasPops = ConfigurationManager.getInstance().hasPoPs((String) this.jComboBoxInterferometer.getSelectedItem());
     this.jLabelPops.setVisible(hasPops);
@@ -632,6 +669,9 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
     updateObservation();
   }
 
+  /**
+   * Reset PoPs text field
+   */
   private void resetPops() {
     // disable the automatic update observation :
     final boolean prevAutoUpdateObservation = this.setAutoUpdateObservation(false);
@@ -896,7 +936,7 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
 
     // then change its state :
     this.doAutoUpdateObservation = value;
-    
+
     // return previous state :
     return previous;
   }
