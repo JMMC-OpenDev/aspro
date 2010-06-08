@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityPanel.java,v 1.31 2010-05-11 09:49:28 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityPanel.java,v 1.32 2010-06-08 12:32:31 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.31  2010/05/11 09:49:28  bourgesl
+ * plot duration use nanoseconds()
+ *
  * Revision 1.30  2010/05/07 11:35:31  bourgesl
  * detail mode always available
  *
@@ -199,9 +202,9 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
   private ChartPanel chartPanel;
   /** time reference combo box */
   private JComboBox jComboTimeRef;
-  /* checkbox BaseLine Limits */
+  /** checkbox BaseLine Limits */
   private JCheckBox jCheckBoxBaseLineLimits;
-  /* checkbox Detailed output */
+  /** checkbox Detailed output */
   private JCheckBox jCheckBoxDetailedOutput;
   /** pdf export button */
   private JButton jButtonPDF;
@@ -251,6 +254,18 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
 
     final JPanel panelOptions = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 1));
 
+    // same generated code in UVCoveragePanel :
+    this.jButtonPDF = new javax.swing.JButton();
+    this.jButtonPDF.setIcon(new javax.swing.ImageIcon(getClass().getResource("/fr/jmmc/aspro/gui/icons/icon_pdf.gif"))); // NOI18N
+    this.jButtonPDF.setMargin(new java.awt.Insets(0, 0, 0, 0));
+    this.jButtonPDF.addActionListener(new java.awt.event.ActionListener() {
+
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jButtonPDFActionPerformed(evt);
+      }
+    });
+    panelOptions.add(this.jButtonPDF);
+
     panelOptions.add(new JLabel("Time :"));
 
     this.jComboTimeRef = new JComboBox(new String[]{TIME_LST, TIME_UTC});
@@ -289,18 +304,6 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
     });
 
     panelOptions.add(this.jCheckBoxDetailedOutput);
-
-    // same generated code in UVCoveragePanel :
-    this.jButtonPDF = new javax.swing.JButton();
-    this.jButtonPDF.setIcon(new javax.swing.ImageIcon(getClass().getResource("/fr/jmmc/aspro/gui/icons/icon_pdf.gif"))); // NOI18N
-    this.jButtonPDF.setMargin(new java.awt.Insets(0, 0, 0, 0));
-    this.jButtonPDF.addActionListener(new java.awt.event.ActionListener() {
-
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        jButtonPDFActionPerformed(evt);
-      }
-    });
-    panelOptions.add(this.jButtonPDF);
 
     this.add(panelOptions, BorderLayout.PAGE_END);
   }
@@ -621,6 +624,12 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
     }
   }
 
+  /**
+   * Update the date axis i.e. the horizontal axis
+   * @param label axis label with units
+   * @param from starting date
+   * @param to ending date
+   */
   private void updateDateAxis(final String label, final Date from, final Date to) {
     // change the Range axis (horizontal) :
     final DateAxis dateAxis = new DateAxis(label);
@@ -629,6 +638,10 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
     this.localXYPlot.setRangeAxis(dateAxis);
   }
 
+  /**
+   * Update the sun zones : twilight and night zones
+   * @param intervals sun time intervals
+   */
   private void updateSunMarkers(final List<SunTimeInterval> intervals) {
     // remove Markers :
     this.localXYPlot.clearRangeMarkers();
@@ -663,6 +676,10 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
   /** drawing started time value */
   private long lastTime = 0l;
 
+  /**
+   * Handle the chart progress event to log the chart rendering delay
+   * @param event chart progress event
+   */
   public void chartProgress(final ChartProgressEvent event) {
     if (logger.isLoggable(Level.FINE)) {
       switch (event.getType()) {
@@ -670,7 +687,7 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
           this.lastTime = System.nanoTime();
           break;
         case ChartProgressEvent.DRAWING_FINISHED:
-          logger.fine("Drawing chart time : " +  1e-6d * (System.nanoTime() - this.lastTime) + " ms.");
+          logger.fine("Drawing chart time : " + 1e-6d * (System.nanoTime() - this.lastTime) + " ms.");
           this.lastTime = 0l;
           break;
         default:
