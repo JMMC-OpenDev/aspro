@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: InterferometerMapPanel.java,v 1.1 2010-05-11 12:08:27 bourgesl Exp $"
+ * "@(#) $Id: InterferometerMapPanel.java,v 1.2 2010-06-08 10:20:41 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2010/05/11 12:08:27  bourgesl
+ * simple Interferometer Map (stations + baselines) automatically refreshed when the chosen baseline configuration changes
+ *
  */
 package fr.jmmc.aspro.gui;
 
@@ -97,6 +100,8 @@ public class InterferometerMapPanel extends javax.swing.JPanel implements ChartP
 
     setLayout(new java.awt.BorderLayout());
 
+    jPanel1.setLayout(new java.awt.BorderLayout());
+
     jButtonPDF.setIcon(new javax.swing.ImageIcon(getClass().getResource("/fr/jmmc/aspro/gui/icons/icon_pdf.gif"))); // NOI18N
     jButtonPDF.setMargin(new java.awt.Insets(0, 0, 0, 0));
     jButtonPDF.addActionListener(new java.awt.event.ActionListener() {
@@ -104,7 +109,7 @@ public class InterferometerMapPanel extends javax.swing.JPanel implements ChartP
         jButtonPDFActionPerformed(evt);
       }
     });
-    jPanel1.add(jButtonPDF);
+    jPanel1.add(jButtonPDF, java.awt.BorderLayout.SOUTH);
 
     add(jPanel1, java.awt.BorderLayout.LINE_START);
   }// </editor-fold>//GEN-END:initComponents
