@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproGui.java,v 1.16 2010-06-08 13:41:48 bourgesl Exp $"
+ * "@(#) $Id: AsproGui.java,v 1.17 2010-06-08 14:17:15 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.16  2010/06/08 13:41:48  bourgesl
+ * use UI defaults to change default component size to small (mac os & nimbus)
+ *
  * Revision 1.15  2010/05/19 12:49:49  bourgesl
  * added standard frame icon
  * removed application version in the frame title
@@ -70,15 +73,12 @@ import java.awt.Dimension;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Locale;
-import java.util.Map.Entry;
 import java.util.TimeZone;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.ToolTipManager;
-import javax.swing.UIDefaults;
-import javax.swing.UIManager;
 
 /**
  * This class represents the Aspro GUI application
@@ -108,7 +108,7 @@ public class AsproGui extends App {
   @Override
   protected void init(final String[] args) {
     logger.fine("init : enter");
-   
+
     // Preload configurations :
     ConfigurationManager.getInstance();
 
@@ -210,7 +210,7 @@ public class AsproGui extends App {
   }
 
   /**
-   * Change several default values for Swing rendering :
+   * Change several default values for Swing rendering.
    */
   private static void changeSwingDefaults() {
 
@@ -221,11 +221,13 @@ public class AsproGui extends App {
     ToolTipManager.sharedInstance().setInitialDelay(100);
     ToolTipManager.sharedInstance().setDismissDelay(30000);
 
+    /*
     // Change component variant (nimbus or mac os Aqua) :
     final UIDefaults defaults = UIManager.getDefaults();
     // nimbus and mac os :
     defaults.put("JComponent.sizeVariant", "small");
     // mac os :
     defaults.put( "TabbedPane.useSmallLayout", Boolean.TRUE );
+     */
   }
 }
