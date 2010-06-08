@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: PreferencesView.java,v 1.4 2010-05-21 14:27:34 bourgesl Exp $"
+ * "@(#) $Id: PreferencesView.java,v 1.5 2010-06-08 12:32:46 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2010/05/21 14:27:34  bourgesl
+ * added preferences for Model Image Lut & Size
+ *
  * Revision 1.3  2010/05/19 09:08:10  mella
  * dispose on close
  *
@@ -58,6 +61,10 @@ public class PreferencesView extends javax.swing.JFrame implements Observer {
     setLocationRelativeTo(null);
   }
 
+  /**
+   * This method is useful to set the models and specific features of initialized swing components :
+   * Update the combo boxes with their models
+   */
   private void postInit() {
     // define custom models :
     this.jComboBoxLUT.setModel(new DefaultComboBoxModel(ColorModels.getColorModelNames()));

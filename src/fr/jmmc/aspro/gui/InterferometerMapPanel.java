@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: InterferometerMapPanel.java,v 1.2 2010-06-08 10:20:41 bourgesl Exp $"
+ * "@(#) $Id: InterferometerMapPanel.java,v 1.3 2010-06-08 12:32:11 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2010/06/08 10:20:41  bourgesl
+ * minor UI changes (layout / margins)
+ *
  * Revision 1.1  2010/05/11 12:08:27  bourgesl
  * simple Interferometer Map (stations + baselines) automatically refreshed when the chosen baseline configuration changes
  *
@@ -343,6 +346,10 @@ public class InterferometerMapPanel extends javax.swing.JPanel implements ChartP
   /** drawing started time value */
   private long lastTime = 0l;
 
+  /**
+   * Handle the chart progress event to log the chart rendering delay
+   * @param event chart progress event
+   */
   public void chartProgress(final ChartProgressEvent event) {
     if (logger.isLoggable(Level.FINE)) {
       switch (event.getType()) {
