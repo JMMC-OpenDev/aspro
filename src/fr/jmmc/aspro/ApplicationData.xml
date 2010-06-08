@@ -148,7 +148,6 @@
       </prerelease>
     </release>
   </releasenotes>
-    <acknowledgment><![CDATA[This research has made use of one of the services of the Jean-Marie Mariotti Center
-\footnote{Available at http://www.jmmc.fr}
-]]></acknowledgment>
+    <acknowledgment><![CDATA[This research has made use of the Jean-Marie Mariotti Center \texttt{Aspro}
+service \footnote{Available at http://www.jmmc.fr/aspro}.]]></acknowledgment>
 </ApplicationData>
