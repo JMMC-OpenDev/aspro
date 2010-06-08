@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproGui.java,v 1.15 2010-05-19 12:49:49 bourgesl Exp $"
+ * "@(#) $Id: AsproGui.java,v 1.16 2010-06-08 13:41:48 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.15  2010/05/19 12:49:49  bourgesl
+ * added standard frame icon
+ * removed application version in the frame title
+ *
  * Revision 1.14  2010/05/12 08:44:10  mella
  * Add one preferences window first to choose the default style of display for positions
  *
@@ -66,12 +70,15 @@ import java.awt.Dimension;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Locale;
+import java.util.Map.Entry;
 import java.util.TimeZone;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.ToolTipManager;
+import javax.swing.UIDefaults;
+import javax.swing.UIManager;
 
 /**
  * This class represents the Aspro GUI application
@@ -195,14 +202,30 @@ public class AsproGui extends App {
     // Set the default timezone to GMT to handle properly the date in UTC :
     TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
 
-    // force Locale for Swing Components :
-    JComponent.setDefaultLocale(Locale.US);
-
-    // let the tooltip stay longer (30s) :
-    ToolTipManager.sharedInstance().setInitialDelay(100);
-    ToolTipManager.sharedInstance().setDismissDelay(30000);
+    // Change Swing defaults :
+    changeSwingDefaults();
 
     // Start application with the command line arguments
     new AsproGui(args);
+  }
+
+  /**
+   * Change several default values for Swing rendering :
+   */
+  private static void changeSwingDefaults() {
+
+    // Force Locale for Swing Components :
+    JComponent.setDefaultLocale(Locale.US);
+
+    // Let the tooltip stay longer (30s) :
+    ToolTipManager.sharedInstance().setInitialDelay(100);
+    ToolTipManager.sharedInstance().setDismissDelay(30000);
+
+    // Change component variant (nimbus or mac os Aqua) :
+    final UIDefaults defaults = UIManager.getDefaults();
+    // nimbus and mac os :
+    defaults.put("JComponent.sizeVariant", "small");
+    // mac os :
+    defaults.put( "TabbedPane.useSmallLayout", Boolean.TRUE );
   }
 }
