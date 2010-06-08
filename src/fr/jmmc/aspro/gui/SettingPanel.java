@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SettingPanel.java,v 1.17 2010-05-11 12:08:27 bourgesl Exp $"
+ * "@(#) $Id: SettingPanel.java,v 1.18 2010-06-08 14:49:29 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.17  2010/05/11 12:08:27  bourgesl
+ * simple Interferometer Map (stations + baselines) automatically refreshed when the chosen baseline configuration changes
+ *
  * Revision 1.16  2010/02/12 15:53:18  bourgesl
  * added target model editor
  *
@@ -55,6 +58,8 @@ import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import java.util.logging.Level;
 import javax.swing.JPanel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 /**
  * This panel corresponds to the single observation setting panel
@@ -69,6 +74,15 @@ public class SettingPanel extends JPanel implements ObservationListener {
   /** Class logger */
   private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
+
+  /* Tab names */
+  /** name of the tab pane corresponding to the interferometer map */
+  private static final String TAB_INTERFEROMETER_MAP = "Map";
+  /** name of the tab pane corresponding to the observability plot */
+  private static final String TAB_OBSERVABILITY = "Observability";
+  /** name of the tab pane corresponding to the uv coverage plot */
+  private static final String TAB_UV_COVERAGE = "UV coverage";
+
   /* members */
   /** basic observation form */
   private BasicObservationForm observationForm = null;
@@ -98,20 +112,20 @@ public class SettingPanel extends JPanel implements ObservationListener {
   // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
   private void initComponents() {
 
-    jSplitPane1 = new javax.swing.JSplitPane();
+    jSplitPane = new javax.swing.JSplitPane();
     jPlotPanel = new javax.swing.JPanel();
     jTabbedPane = new javax.swing.JTabbedPane();
 
     setLayout(new java.awt.BorderLayout());
 
-    jSplitPane1.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
+    jSplitPane.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
 
     jPlotPanel.setLayout(new java.awt.BorderLayout());
     jPlotPanel.add(jTabbedPane, java.awt.BorderLayout.CENTER);
 
-    jSplitPane1.setRightComponent(jPlotPanel);
+    jSplitPane.setRightComponent(jPlotPanel);
 
-    add(jSplitPane1, java.awt.BorderLayout.CENTER);
+    add(jSplitPane, java.awt.BorderLayout.CENTER);
   }// </editor-fold>//GEN-END:initComponents
 
   /**
@@ -119,15 +133,32 @@ public class SettingPanel extends JPanel implements ObservationListener {
    */
   private void postInit() {
     // first observation event listener :
-    this.jTabbedPane.addTab("Map", new InterferometerMapPanel());
+    this.jTabbedPane.addTab(TAB_INTERFEROMETER_MAP, new InterferometerMapPanel());
 
     // add the observation form that will send an onProcess event on the current observation :
     this.observationForm = new BasicObservationForm();
-    this.jSplitPane1.setLeftComponent(observationForm);
+    this.jSplitPane.setLeftComponent(observationForm);
+
+    // Register a change listener for the tabbed panel :
+    this.jTabbedPane.addChangeListener(new ChangeListener() {
+
+      /**
+       * This method is called whenever the selected tab changes
+       * @param evt change event
+       */
+      public void stateChanged(final ChangeEvent evt) {
+        if (jTabbedPane.getSelectedComponent() != observabilityPanel) {
+          // check if the BaseLine Limits are active; if true, disable the checkbox
+          observabilityPanel.disableBaseLineLimits();
+        }
+
+      }
+    });
+
   }
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JPanel jPlotPanel;
-  private javax.swing.JSplitPane jSplitPane1;
+  private javax.swing.JSplitPane jSplitPane;
   private javax.swing.JTabbedPane jTabbedPane;
   // End of variables declaration//GEN-END:variables
 
@@ -147,7 +178,7 @@ public class SettingPanel extends JPanel implements ObservationListener {
 
       if (this.observabilityPanel == null) {
         this.observabilityPanel = new ObservabilityPanel();
-        this.jTabbedPane.addTab("Observability", this.observabilityPanel);
+        this.jTabbedPane.addTab(TAB_OBSERVABILITY, this.observabilityPanel);
 
         // first time, the onProcess event must be propagated to the new registered listener :
         this.observabilityPanel.onProcess(type, observation);
@@ -165,7 +196,7 @@ public class SettingPanel extends JPanel implements ObservationListener {
         if (uvPanelIndex == -1) {
           this.uvpanel = new UVCoveragePanel();
 
-          this.jTabbedPane.addTab("UV coverage", this.uvpanel);
+          this.jTabbedPane.addTab(TAB_UV_COVERAGE, this.uvpanel);
 
           // first time, the onProcess event must be propagated to the new registered listener :
           this.uvpanel.onProcess(type, observation);
@@ -187,14 +218,26 @@ public class SettingPanel extends JPanel implements ObservationListener {
     }
   }
 
-  public ObservabilityPanel getObservabilityPanel() {
-    return observabilityPanel;
-  }
-
+  /**
+   * Return the observation form
+   * @return observation form
+   */
   public BasicObservationForm getObservationForm() {
     return observationForm;
   }
 
+  /**
+   * Return the observability panel
+   * @return observability panel or null if undefined
+   */
+  public ObservabilityPanel getObservabilityPanel() {
+    return observabilityPanel;
+  }
+
+  /**
+   * Return the uv coverage panel
+   * @return uv coverage panel or null if undefined
+   */
   public UVCoveragePanel getUvpanel() {
     return uvpanel;
   }
