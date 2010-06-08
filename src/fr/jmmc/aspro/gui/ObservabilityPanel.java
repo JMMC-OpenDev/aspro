@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityPanel.java,v 1.32 2010-06-08 12:32:31 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityPanel.java,v 1.33 2010-06-08 14:48:39 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.32  2010/06/08 12:32:31  bourgesl
+ * javadoc + pdf button moved to left side
+ *
  * Revision 1.31  2010/05/11 09:49:28  bourgesl
  * plot duration use nanoseconds()
  *
@@ -252,7 +255,7 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
 
     this.add(this.chartPanel, BorderLayout.CENTER);
 
-    final JPanel panelOptions = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 1));
+    final JPanel panelBottom = new JPanel(new BorderLayout());
 
     // same generated code in UVCoveragePanel :
     this.jButtonPDF = new javax.swing.JButton();
@@ -264,7 +267,9 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
         jButtonPDFActionPerformed(evt);
       }
     });
-    panelOptions.add(this.jButtonPDF);
+    panelBottom.add(this.jButtonPDF, BorderLayout.WEST);
+
+    final JPanel panelOptions = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 1));
 
     panelOptions.add(new JLabel("Time :"));
 
@@ -305,7 +310,9 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
 
     panelOptions.add(this.jCheckBoxDetailedOutput);
 
-    this.add(panelOptions, BorderLayout.PAGE_END);
+    panelBottom.add(panelOptions, BorderLayout.CENTER);
+
+    this.add(panelBottom, BorderLayout.PAGE_END);
   }
 
   /**
@@ -318,6 +325,17 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
     evt.setSource(this.localJFreeChart);
 
     ExportPDFAction.getInstance().actionPerformed(evt);
+  }
+
+  /**
+   * This method is called by the SettingPanel when the selected tabbed panel is different from this
+   * to disable the 'BaseLine Limits' checkbox in order to have correct results in the UV Coverage Panel.
+   */
+  protected void disableBaseLineLimits() {
+    if (this.jCheckBoxBaseLineLimits.isSelected()) {
+      // this will send a refresh plot event ...
+      this.jCheckBoxBaseLineLimits.setSelected(false);
+    }
   }
 
   /**
