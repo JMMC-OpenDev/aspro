@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: Preferences.java,v 1.2 2010-05-21 14:27:34 bourgesl Exp $"
+ * "@(#) $Id: Preferences.java,v 1.3 2010-06-09 12:49:39 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2010/05/21 14:27:34  bourgesl
+ * added preferences for Model Image Lut & Size
+ *
  * Revision 1.1  2010/05/12 08:44:10  mella
  * Add one preferences window first to choose the default style of display for positions
  *
@@ -16,7 +19,9 @@ package fr.jmmc.aspro;
 import fr.jmmc.mcs.util.PreferencesException;
 
 /**
- * Handles preference of aspro
+ * Handles preferences for Aspro.
+ *
+ * Note : There is a special preference 'splash.screen.show' used to disable the splash screen (dev mode) if its value is 'false'.
  */
 public class Preferences extends fr.jmmc.mcs.util.Preferences {
 
@@ -28,6 +33,8 @@ public class Preferences extends fr.jmmc.mcs.util.Preferences {
   static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
   /* Preferences */
+  /** Preference : display splash screen */
+  public final static String SHOW_SPLASH_SCREEN = "splash.screen.show";
   /** Preference : show help tooltip */
   public final static String HELP_TOOLTIPS_SHOW = "help.tooltips.show";
   /** Preference : edit positions in XY (true) or rho/theta (false) in the model editor */
@@ -65,7 +72,7 @@ public class Preferences extends fr.jmmc.mcs.util.Preferences {
     logger.fine("Preferences.setDefaultPreferences()");
 
     /* Place general preferences  */
-    setDefaultPreference(HELP_TOOLTIPS_SHOW, "true");
+    setDefaultPreference(SHOW_SPLASH_SCREEN, "true");
 
     // Model editor :
     setDefaultPreference(MODELEDITOR_PREFERXY, "false");
@@ -93,5 +100,19 @@ public class Preferences extends fr.jmmc.mcs.util.Preferences {
   protected int getPreferencesVersionNumber() {
     logger.entering(className_, "getPreferencesVersionNumber");
     return 1;
+  }
+
+  /**
+   * Return true if the show splash screen preference is undefined or its value is not 'false'
+   * @return true if the show splash screen preference is undefined or its value is not 'false'
+   */
+  public boolean IsShowSplashScreen() {
+
+    final String value = getPreference(SHOW_SPLASH_SCREEN);
+
+    if (value != null && !Boolean.valueOf(value).booleanValue()) {
+      return false;
+    }
+    return true;
   }
 }
