@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBVegaAction.java,v 1.1 2010-05-26 15:30:54 bourgesl Exp $"
+ * "@(#) $Id: ExportOBVegaAction.java,v 1.2 2010-06-09 12:53:42 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2010/05/26 15:30:54  bourgesl
+ * new CHARA Vega Star List generation (OB like)
+ *
  *
  */
 package fr.jmmc.aspro.gui.action;
@@ -14,7 +17,6 @@ import fr.jmmc.aspro.ob.ExportOBVega;
 import fr.jmmc.aspro.util.FileUtils;
 import fr.jmmc.mcs.gui.StatusBar;
 import fr.jmmc.mcs.util.FileFilterRepository;
-import java.awt.event.ActionEvent;
 import java.io.File;
 import java.util.logging.Level;
 import javax.swing.JFileChooser;
@@ -64,12 +66,10 @@ public class ExportOBVegaAction {
 
   /**
    * Execute the action.
-   *
-   * @param event action event
    */
-  public void actionPerformed(final ActionEvent event) {
+  public void process() {
     if (logger.isLoggable(Level.FINE)) {
-      logger.fine("actionPerformed");
+      logger.fine("process");
     }
 
     File file = null;
@@ -119,10 +119,19 @@ public class ExportOBVegaAction {
     }
   }
 
+  /**
+   * Return the file filter
+   * @return file filter
+   */
   protected FileFilter getFileFilter() {
     return FileFilterRepository.getInstance().get(TXT_MIME_TYPE);
   }
 
+  /**
+   * Check if the given file has the correct extension. If not, return a new file with it
+   * @param file file to check
+   * @return given file or new file with the correct extension
+   */
   protected File checkFileExtension(final File file) {
     final String ext = FileUtils.getExtension(file);
 
@@ -132,11 +141,19 @@ public class ExportOBVegaAction {
     return file;
   }
 
-  public String getLastDir() {
-    return lastDir;
+  /**
+   * Return the last directory used
+   * @return last directory used
+   */
+  protected String getLastDir() {
+    return this.lastDir;
   }
 
-  public void setLastDir(String lastDir) {
+  /**
+   * Define the last directory used
+   * @param lastDir new value
+   */
+  protected void setLastDir(String lastDir) {
     this.lastDir = lastDir;
   }
 }

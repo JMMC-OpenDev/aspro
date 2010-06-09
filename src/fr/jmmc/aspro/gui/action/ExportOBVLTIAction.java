@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBVLTIAction.java,v 1.5 2010-05-26 15:29:14 bourgesl Exp $"
+ * "@(#) $Id: ExportOBVLTIAction.java,v 1.6 2010-06-09 12:53:42 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2010/05/26 15:29:14  bourgesl
+ * light refactoring and javadoc
+ *
  * Revision 1.4  2010/05/11 12:03:17  bourgesl
  * fix : check the file extension before the existence of the file to display the confirm dialog
  *
@@ -87,12 +90,12 @@ public class ExportOBVLTIAction {
    *
    * @param event action event
    */
-  public void actionPerformed(final ActionEvent event) {
+  public void process(final ActionEvent event) {
     if (!(event.getSource() instanceof UVCoveragePanel)) {
       return;
     }
     if (logger.isLoggable(Level.FINE)) {
-      logger.fine("actionPerformed");
+      logger.fine("process");
     }
 
     final UVCoveragePanel uvCoveragePanel = (UVCoveragePanel) event.getSource();
@@ -149,10 +152,19 @@ public class ExportOBVLTIAction {
     }
   }
 
+  /**
+   * Return the file filter
+   * @return file filter
+   */
   protected FileFilter getFileFilter() {
     return FileFilterRepository.getInstance().get(OBX_MIME_TYPE);
   }
 
+  /**
+   * Check if the given file has the correct extension. If not, return a new file with it
+   * @param file file to check
+   * @return given file or new file with the correct extension
+   */
   protected File checkFileExtension(final File file) {
     final String ext = FileUtils.getExtension(file);
 
@@ -162,11 +174,19 @@ public class ExportOBVLTIAction {
     return file;
   }
 
-  public String getLastDir() {
-    return lastDir;
+  /**
+   * Return the last directory used
+   * @return last directory used
+   */
+  protected String getLastDir() {
+    return this.lastDir;
   }
 
-  public void setLastDir(String lastDir) {
+  /**
+   * Define the last directory used
+   * @param lastDir new value
+   */
+  protected void setLastDir(String lastDir) {
     this.lastDir = lastDir;
   }
 }
