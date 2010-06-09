@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SettingPanel.java,v 1.18 2010-06-08 14:49:29 bourgesl Exp $"
+ * "@(#) $Id: SettingPanel.java,v 1.19 2010-06-09 12:51:53 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.18  2010/06/08 14:49:29  bourgesl
+ * fixed the 'baseLine Limits' bug that has a side effect = UV Coverage is unavailable
+ * javadoc
+ *
  * Revision 1.17  2010/05/11 12:08:27  bourgesl
  * simple Interferometer Map (stations + baselines) automatically refreshed when the chosen baseline configuration changes
  *
@@ -56,6 +60,7 @@ package fr.jmmc.aspro.gui;
 import fr.jmmc.aspro.model.ObservationListener;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
+import java.awt.Component;
 import java.util.logging.Level;
 import javax.swing.JPanel;
 import javax.swing.event.ChangeEvent;
@@ -89,7 +94,7 @@ public class SettingPanel extends JPanel implements ObservationListener {
   /** observability panel */
   private ObservabilityPanel observabilityPanel = null;
   /** uv coverage panel */
-  private UVCoveragePanel uvpanel = null;
+  private UVCoveragePanel uvCoveragePanel = null;
 
   /** 
    * Creates new form SettingPanel
@@ -151,10 +156,8 @@ public class SettingPanel extends JPanel implements ObservationListener {
           // check if the BaseLine Limits are active; if true, disable the checkbox
           observabilityPanel.disableBaseLineLimits();
         }
-
       }
     });
-
   }
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JPanel jPlotPanel;
@@ -188,18 +191,18 @@ public class SettingPanel extends JPanel implements ObservationListener {
       final boolean hasTarget = !observation.getTargets().isEmpty();
 
       int uvPanelIndex = -1;
-      if (this.uvpanel != null) {
-        uvPanelIndex = this.jTabbedPane.indexOfComponent(this.uvpanel);
+      if (this.uvCoveragePanel != null) {
+        uvPanelIndex = this.jTabbedPane.indexOfComponent(this.uvCoveragePanel);
       }
 
       if (hasTarget) {
         if (uvPanelIndex == -1) {
-          this.uvpanel = new UVCoveragePanel();
+          this.uvCoveragePanel = new UVCoveragePanel();
 
-          this.jTabbedPane.addTab(TAB_UV_COVERAGE, this.uvpanel);
+          this.jTabbedPane.addTab(TAB_UV_COVERAGE, this.uvCoveragePanel);
 
           // first time, the onProcess event must be propagated to the new registered listener :
-          this.uvpanel.onProcess(type, observation);
+          this.uvCoveragePanel.onProcess(type, observation);
         }
       } else {
         if (uvPanelIndex != -1) {
@@ -207,9 +210,9 @@ public class SettingPanel extends JPanel implements ObservationListener {
           this.jTabbedPane.removeTabAt(uvPanelIndex);
 
           // unregister the uv panel for the next event :
-          ObservationManager.getInstance().unregister(this.uvpanel);
+          ObservationManager.getInstance().unregister(this.uvCoveragePanel);
 
-          this.uvpanel = null;
+          this.uvCoveragePanel = null;
         }
       }
     }
@@ -219,10 +222,18 @@ public class SettingPanel extends JPanel implements ObservationListener {
   }
 
   /**
+   * Returns the currently selected component in the tabbedpane
+   * @return selected component or null if the tabbedpane is empty
+   */
+  public final Component getTabSelectedComponent() {
+    return jTabbedPane.getSelectedComponent();
+  }
+
+  /**
    * Return the observation form
    * @return observation form
    */
-  public BasicObservationForm getObservationForm() {
+  public final BasicObservationForm getObservationForm() {
     return observationForm;
   }
 
@@ -230,7 +241,7 @@ public class SettingPanel extends JPanel implements ObservationListener {
    * Return the observability panel
    * @return observability panel or null if undefined
    */
-  public ObservabilityPanel getObservabilityPanel() {
+  public final ObservabilityPanel getObservabilityPanel() {
     return observabilityPanel;
   }
 
@@ -238,7 +249,7 @@ public class SettingPanel extends JPanel implements ObservationListener {
    * Return the uv coverage panel
    * @return uv coverage panel or null if undefined
    */
-  public UVCoveragePanel getUvpanel() {
-    return uvpanel;
+  public final UVCoveragePanel getUVCoveragePanel() {
+    return uvCoveragePanel;
   }
 }
