@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: LoadObservationAction.java,v 1.3 2010-04-02 10:06:29 bourgesl Exp $"
+ * "@(#) $Id: LoadObservationAction.java,v 1.4 2010-06-09 12:54:12 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2010/04/02 10:06:29  bourgesl
+ * add missing xml extension to the file name
+ *
  * Revision 1.2  2009/12/08 13:09:55  bourgesl
  * Added FileFilter for observation settings
  *
@@ -38,10 +41,17 @@ public class LoadObservationAction extends ObservationFileAction {
   /** Class logger */
   private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(className);
 
+  /**
+   * Public constructor that automatically register the action in RegisteredAction.
+   */
   public LoadObservationAction() {
     super(className, actionName);
   }
 
+  /**
+   * Handle the action event
+   * @param evt action event
+   */
   public void actionPerformed(final ActionEvent e) {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("actionPerformed");

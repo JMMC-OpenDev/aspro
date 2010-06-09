@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationFileAction.java,v 1.3 2010-04-02 10:06:29 bourgesl Exp $"
+ * "@(#) $Id: ObservationFileAction.java,v 1.4 2010-06-09 12:54:12 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2010/04/02 10:06:29  bourgesl
+ * add missing xml extension to the file name
+ *
  * Revision 1.2  2010/01/14 17:02:38  bourgesl
  * FileFilter fix
  *
@@ -52,10 +55,19 @@ public abstract class ObservationFileAction extends RegisteredAction {
     FileFilterRepository.getInstance().put(OBSERVATION_MIME_TYPE, "xml", "Aspro Observation Settings (xml)");
   }
 
+  /**
+   * Return the file filter
+   * @return file filter
+   */
   protected FileFilter getFileFilter() {
     return FileFilterRepository.getInstance().get(OBSERVATION_MIME_TYPE);
   }
 
+  /**
+   * Check if the given file has the correct extension. If not, return a new file with it
+   * @param file file to check
+   * @return given file or new file with the correct extension
+   */
   protected File checkFileExtension(final File file) {
     final String ext = FileUtils.getExtension(file);
 
@@ -65,11 +77,19 @@ public abstract class ObservationFileAction extends RegisteredAction {
     return file;
   }
 
-  public String getLastDir() {
-    return lastDir;
+  /**
+   * Return the last directory used
+   * @return last directory used
+   */
+  protected String getLastDir() {
+    return this.lastDir;
   }
 
-  public void setLastDir(String lastDir) {
+  /**
+   * Define the last directory used
+   * @param lastDir new value
+   */
+  protected void setLastDir(String lastDir) {
     this.lastDir = lastDir;
   }
 }

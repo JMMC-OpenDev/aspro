@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SaveObservationAction.java,v 1.5 2010-05-11 12:03:17 bourgesl Exp $"
+ * "@(#) $Id: SaveObservationAction.java,v 1.6 2010-06-09 12:54:12 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2010/05/11 12:03:17  bourgesl
+ * fix : check the file extension before the existence of the file to display the confirm dialog
+ *
  * Revision 1.4  2010/04/02 10:06:29  bourgesl
  * add missing xml extension to the file name
  *
@@ -44,10 +47,17 @@ public class SaveObservationAction extends ObservationFileAction {
   /** Class logger */
   private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(className);
 
+  /**
+   * Public constructor that automatically register the action in RegisteredAction.
+   */
   public SaveObservationAction() {
     super(className, actionName);
   }
 
+  /**
+   * Handle the action event
+   * @param evt action event
+   */
   public void actionPerformed(final ActionEvent e) {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("actionPerformed");
