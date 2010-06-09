@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproConstants.java,v 1.13 2010-06-07 16:03:48 bourgesl Exp $"
+ * "@(#) $Id: AsproConstants.java,v 1.14 2010-06-09 12:48:05 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.13  2010/06/07 16:03:48  bourgesl
+ * minimum elevation changed to 30 degrees
+ *
  * Revision 1.12  2010/05/26 15:28:26  bourgesl
  * added VEGA instrument constant
  *
@@ -46,8 +49,6 @@ package fr.jmmc.aspro;
 public interface AsproConstants {
 
   /* DEV */
-  /** debug mode flag */
-  public final static boolean DEBUG_MODE = false;
   /** chart : enables the zoom in / out */
   public final static boolean ENABLE_ZOOM = true;
 
