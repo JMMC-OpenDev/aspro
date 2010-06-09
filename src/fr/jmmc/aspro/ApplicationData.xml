@@ -24,9 +24,15 @@
   <menubar>
     <menu label="File">
       <menu label="Load" classpath="fr.jmmc.aspro.gui.action.LoadObservationAction" action="loadObservation" accelerator="L"
-            icon="/fr/jmmc/aspro/gui/icons/fileopen.png"/>
+            icon="/fr/jmmc/aspro/gui/icons/fileopen.png" description="load an observation file"/>
       <menu label="Save" classpath="fr.jmmc.aspro.gui.action.SaveObservationAction" action="saveObservation" accelerator="S"
-            icon="/fr/jmmc/aspro/gui/icons/filesaveas.png"/>
+            icon="/fr/jmmc/aspro/gui/icons/filesaveas.png" description="save the current observation as an observation file"/>
+      <menu/> <!-- menu separator -->
+      <menu label="Export to an Observing Block" classpath="fr.jmmc.aspro.gui.action.ExportOBAction" action="exportOB" accelerator="O"
+            description="Export your observation to an Observing block (only valid inside the UV Coverage Panel)"/>
+      <menu/> <!-- menu separator -->
+      <menu label="Export plot to PDF" classpath="fr.jmmc.aspro.gui.action.ExportPDFAction" action="exportPDF" accelerator="P"
+            description="Export the current plot to a PDF document"/>
     </menu>
   </menubar>
   <releasenotes>
