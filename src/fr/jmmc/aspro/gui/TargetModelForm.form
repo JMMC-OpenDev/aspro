@@ -289,7 +289,7 @@
                 <Property name="autoResizeMode" type="int" value="4"/>
               </Properties>
               <AuxValues>
-                <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new fr.jmmc.mcs.gui.NumericJTable()"/>
+                <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="createJTable()"/>
               </AuxValues>
             </Component>
           </SubComponents>
