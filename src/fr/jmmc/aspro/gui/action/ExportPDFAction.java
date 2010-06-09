@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportPDFAction.java,v 1.6 2010-05-26 15:29:14 bourgesl Exp $"
+ * "@(#) $Id: ExportPDFAction.java,v 1.7 2010-06-09 12:57:15 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2010/05/26 15:29:14  bourgesl
+ * light refactoring and javadoc
+ *
  * Revision 1.5  2010/05/11 12:03:17  bourgesl
  * fix : check the file extension before the existence of the file to display the confirm dialog
  *
@@ -24,10 +27,16 @@
  */
 package fr.jmmc.aspro.gui.action;
 
+import fr.jmmc.aspro.AsproGui;
+import fr.jmmc.aspro.gui.PDFExportable;
 import fr.jmmc.aspro.gui.chart.PDFUtils;
 import fr.jmmc.aspro.util.FileUtils;
+import fr.jmmc.mcs.gui.App;
 import fr.jmmc.mcs.gui.StatusBar;
+import fr.jmmc.mcs.util.ActionRegistrar;
 import fr.jmmc.mcs.util.FileFilterRepository;
+import fr.jmmc.mcs.util.RegisteredAction;
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.util.logging.Level;
@@ -37,33 +46,39 @@ import javax.swing.filechooser.FileFilter;
 import org.jfree.chart.JFreeChart;
 
 /**
- * This class implement the export to PDF action.
- *
- * TODO : use the standard MCS action to add it in the menu.
+ * This registered action represents a File Menu entry to export any chart as a PDF document.
  *
  * @author bourgesl
  */
-public class ExportPDFAction {
+public class ExportPDFAction extends RegisteredAction {
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
   /** Class name. This name is used to register to the ActionRegistrar */
-  public final static String className = "fr.jmmc.aspro.gui.action.ExportPDFAction";
+  private final static String className = "fr.jmmc.aspro.gui.action.ExportPDFAction";
+  /** Action name. This name is used to register to the ActionRegistrar */
+  public final static String actionName = "exportPDF";
   /** Class logger */
   private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(className);
   /** PDF mime type */
   public static final String PDF_MIME_TYPE = "application/pdf";
   /** PDF extension */
   public static final String PDF_EXT = "pdf";
-  /** action singleton */
-  private static final ExportPDFAction instance = new ExportPDFAction();
 
   /**
    * Return the singleton ExportPDFAction instance
    * @return ExportPDFAction instance
    */
-  public static ExportPDFAction getInstance() {
-    return instance;
+  private static ExportPDFAction getInstance() {
+    return (ExportPDFAction) ActionRegistrar.getInstance().get(className, actionName);
+  }
+
+  /**
+   * Export the given chart as a PDF document
+   * @param chart chart to export
+   */
+  public static void exportPDF(final JFreeChart chart) {
+    getInstance().process(chart);
   }
 
   /* members */
@@ -71,28 +86,44 @@ public class ExportPDFAction {
   private String lastDir = System.getProperty("user.home");
 
   /**
-   * Forbidden Constructor
+   * Public constructor that automatically register the action in RegisteredAction.
    */
-  private ExportPDFAction() {
-    super();
+  public ExportPDFAction() {
+    super(className, actionName);
 
     FileFilterRepository.getInstance().put(PDF_MIME_TYPE, PDF_EXT, "Portable Document Format (PDF)");
   }
 
   /**
-   * Execute the action.
-   *
-   * Note : the action event's source must be the chart to export
-   *
-   * @param event action event
+   * Handle the action event
+   * @param evt action event
    */
-  public void actionPerformed(final ActionEvent event) {
-    if (!(event.getSource() instanceof JFreeChart)) {
-      return;
-    }
-
+  public void actionPerformed(final ActionEvent evt) {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("actionPerformed");
+    }
+    try {
+      final AsproGui app = (AsproGui) App.getSharedInstance();
+
+      final Component selectedPanel = app.getSettingPanel().getTabSelectedComponent();
+
+      // be sure the selected panel implements PDFExportable (not null of course) :
+      if (selectedPanel instanceof PDFExportable) {
+        ((PDFExportable) selectedPanel).performPDFAction();
+      }
+    } catch (Exception ex) {
+      // @todo handle this error at user level
+      logger.log(Level.SEVERE, "actionPerformed", ex);
+    }
+  }
+
+  /**
+   * Export the given chart as a PDF document
+   * @param chart chart to export
+   */
+  public void process(final JFreeChart chart) {
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("process");
     }
 
     File file = null;
@@ -125,7 +156,7 @@ public class ExportPDFAction {
       this.setLastDir(file.getParent());
 
       try {
-        PDFUtils.saveChartAsPDF(file, (JFreeChart) event.getSource());
+        PDFUtils.saveChartAsPDF(file, chart);
 
         StatusBar.show(file.getName() + " created.");
 
@@ -139,10 +170,19 @@ public class ExportPDFAction {
     }
   }
 
+  /**
+   * Return the file filter
+   * @return file filter
+   */
   protected FileFilter getFileFilter() {
     return FileFilterRepository.getInstance().get(PDF_MIME_TYPE);
   }
 
+  /**
+   * Check if the given file has the correct extension. If not, return a new file with it
+   * @param file file to check
+   * @return given file or new file with the correct extension
+   */
   protected File checkFileExtension(final File file) {
     final String ext = FileUtils.getExtension(file);
 
@@ -152,11 +192,19 @@ public class ExportPDFAction {
     return file;
   }
 
-  public String getLastDir() {
-    return lastDir;
+  /**
+   * Return the last directory used
+   * @return last directory used
+   */
+  protected String getLastDir() {
+    return this.lastDir;
   }
 
-  public void setLastDir(String lastDir) {
+  /**
+   * Define the last directory used
+   * @param lastDir new value
+   */
+  protected void setLastDir(String lastDir) {
     this.lastDir = lastDir;
   }
 }
