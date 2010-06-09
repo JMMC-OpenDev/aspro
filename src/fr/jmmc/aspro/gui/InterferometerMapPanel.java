@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: InterferometerMapPanel.java,v 1.3 2010-06-08 12:32:11 bourgesl Exp $"
+ * "@(#) $Id: InterferometerMapPanel.java,v 1.4 2010-06-09 12:51:09 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2010/06/08 12:32:11  bourgesl
+ * javadoc
+ *
  * Revision 1.2  2010/06/08 10:20:41  bourgesl
  * minor UI changes (layout / margins)
  *
@@ -57,7 +60,7 @@ import org.jfree.ui.TextAnchor;
  * @author bourgesl
  */
 public class InterferometerMapPanel extends javax.swing.JPanel implements ChartProgressListener,
-        ObservationListener {
+        ObservationListener, PDFExportable {
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
@@ -117,13 +120,20 @@ public class InterferometerMapPanel extends javax.swing.JPanel implements ChartP
     add(jPanel1, java.awt.BorderLayout.LINE_START);
   }// </editor-fold>//GEN-END:initComponents
 
+  /**
+   * Export the current chart as a PDF document
+   * @param evt action event
+   */
   private void jButtonPDFActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonPDFActionPerformed
-
-    // set the source with the chart :
-    evt.setSource(this.localJFreeChart);
-
-    ExportPDFAction.getInstance().actionPerformed(evt);
+    this.performPDFAction();
 }//GEN-LAST:event_jButtonPDFActionPerformed
+
+  /**
+   * Export the current chart as a PDF document
+   */
+  public void performPDFAction() {
+    ExportPDFAction.exportPDF(this.localJFreeChart);
+  }
 
   /**
    * This method is useful to set the models and specific features of initialized swing components :

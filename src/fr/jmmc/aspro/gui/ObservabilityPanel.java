@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityPanel.java,v 1.33 2010-06-08 14:48:39 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityPanel.java,v 1.34 2010-06-09 12:51:09 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.33  2010/06/08 14:48:39  bourgesl
+ * moved pdf button against the left side
+ *
  * Revision 1.32  2010/06/08 12:32:31  bourgesl
  * javadoc + pdf button moved to left side
  *
@@ -167,7 +170,8 @@ import org.jfree.ui.TextAnchor;
  * This panel represents the observability plot
  * @author bourgesl
  */
-public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgressListener, ObservationListener {
+public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgressListener,
+        ObservationListener, PDFExportable {
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
@@ -320,11 +324,14 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
    * @param evt action event
    */
   private void jButtonPDFActionPerformed(java.awt.event.ActionEvent evt) {
+    this.performPDFAction();
+  }
 
-    // set the source with the chart :
-    evt.setSource(this.localJFreeChart);
-
-    ExportPDFAction.getInstance().actionPerformed(evt);
+  /**
+   * Export the current chart as a PDF document
+   */
+  public void performPDFAction() {
+    ExportPDFAction.exportPDF(this.localJFreeChart);
   }
 
   /**

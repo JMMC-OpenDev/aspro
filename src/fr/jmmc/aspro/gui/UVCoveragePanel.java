@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.40 2010-06-08 12:39:06 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.41 2010-06-09 12:51:09 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.40  2010/06/08 12:39:06  bourgesl
+ * minor UI changes : pdf button moved to bottom, changed weight constraint (resizing issues)
+ * javadoc
+ *
  * Revision 1.39  2010/06/08 10:20:42  bourgesl
  * minor UI changes (layout / margins)
  *
@@ -209,7 +213,7 @@ import org.jfree.data.xy.XYSeriesCollection;
  * @author bourgesl
  */
 public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgressListener, ZoomEventListener,
-        ActionListener, ChangeListener, ObservationListener, Observer {
+        ActionListener, ChangeListener, ObservationListener, Observer, PDFExportable {
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
@@ -619,19 +623,10 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
   }// </editor-fold>//GEN-END:initComponents
 
   /**
-   * Export the current chart as a PDF document
+   * Open the Model Editor with the selected target
    * @param evt action event
    */
-  private void jButtonPDFActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonPDFActionPerformed
-
-    // set the source with the chart :
-    evt.setSource(this.localJFreeChart);
-
-    ExportPDFAction.getInstance().actionPerformed(evt);
-  }//GEN-LAST:event_jButtonPDFActionPerformed
-
   private void jButtonModelEditorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonModelEditorActionPerformed
-
     final String targetName = getSelectedTargetName();
 
     // show model editor :
@@ -641,8 +636,19 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     }
 }//GEN-LAST:event_jButtonModelEditorActionPerformed
 
+  /**
+   * Export the selected target as an Observing Block (OB)
+   * @param evt action event
+   */
   private void jButtonOBActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonOBActionPerformed
+    this.performOBAction(evt);
+  }//GEN-LAST:event_jButtonOBActionPerformed
 
+  /**
+   * Export the selected target as an Observing Block (OB)
+   * @param evt action event
+   */
+  public void performOBAction(final ActionEvent evt) {
     final ObservationSetting observation = this.om.getObservation();
     final String instrumentName = observation.getInstrumentConfiguration().getName();
 
@@ -650,18 +656,32 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
       // set the source with this instance :
       evt.setSource(this);
 
-      ExportOBVLTIAction.getInstance().actionPerformed(evt);
+      ExportOBVLTIAction.getInstance().process(evt);
 
     } else if (instrumentName.startsWith(AsproConstants.INS_VEGA)) {
 
-      ExportOBVegaAction.getInstance().actionPerformed(evt);
+      ExportOBVegaAction.getInstance().process();
 
     } else {
       JOptionPane.showMessageDialog(null, "The application can not generate an Observing Block for this instrument [" + instrumentName + "] !",
               "Error", JOptionPane.INFORMATION_MESSAGE);
     }
+  }
 
-  }//GEN-LAST:event_jButtonOBActionPerformed
+  /**
+   * Export the current chart as a PDF document
+   * @param evt action event
+   */
+  private void jButtonPDFActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonPDFActionPerformed
+    this.performPDFAction();
+  }//GEN-LAST:event_jButtonPDFActionPerformed
+
+  /**
+   * Export the current chart as a PDF document
+   */
+  public void performPDFAction() {
+    ExportPDFAction.exportPDF(this.localJFreeChart);
+  }
 
   /**
    * This method is useful to set the models and specific features of initialized swing components :
