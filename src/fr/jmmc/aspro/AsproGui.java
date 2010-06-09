@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproGui.java,v 1.17 2010-06-08 14:17:15 bourgesl Exp $"
+ * "@(#) $Id: AsproGui.java,v 1.18 2010-06-09 12:49:03 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.17  2010/06/08 14:17:15  bourgesl
+ * commented the code that tells LAF to use small variant for JComponents
+ *
  * Revision 1.16  2010/06/08 13:41:48  bourgesl
  * use UI defaults to change default component size to small (mac os & nimbus)
  *
@@ -60,6 +63,8 @@
 package fr.jmmc.aspro;
 
 import fr.jmmc.aspro.gui.SettingPanel;
+import fr.jmmc.aspro.gui.action.ExportOBAction;
+import fr.jmmc.aspro.gui.action.ExportPDFAction;
 import fr.jmmc.aspro.gui.action.LoadObservationAction;
 import fr.jmmc.aspro.gui.action.SaveObservationAction;
 import fr.jmmc.aspro.gui.action.ShowPrefAction;
@@ -84,7 +89,7 @@ import javax.swing.ToolTipManager;
  * This class represents the Aspro GUI application
  * @author bourgesl
  */
-public class AsproGui extends App {
+public final class AsproGui extends App {
 
   /** Class Name */
   private static final String className_ = "fr.jmmc.aspro.AsproGui";
@@ -92,13 +97,17 @@ public class AsproGui extends App {
   private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
 
+  /* members */
+  /** Setting Panel */
+  private SettingPanel settingPanel;
+
   /**
    * Public constructor with command line arguments
    * @param args command line arguments
    */
   public AsproGui(final String[] args) {
     // no splash screen during the developments :
-    super(args, false, !AsproConstants.DEBUG_MODE);
+    super(args, false, Preferences.getInstance().IsShowSplashScreen());
   }
 
   /**
@@ -162,10 +171,10 @@ public class AsproGui extends App {
    * Create the main content i.e. the setting panel
    */
   private void createContent() {
-    // adds the panel in scrollPane
-    final JScrollPane settingScrollPanel = new JScrollPane(new SettingPanel());
+    this.settingPanel = new SettingPanel();
 
-    getFramePanel().add(settingScrollPanel, BorderLayout.CENTER);
+    // adds the panel in scrollPane
+    getFramePanel().add(new JScrollPane(this.settingPanel), BorderLayout.CENTER);
   }
 
   /**
@@ -178,6 +187,18 @@ public class AsproGui extends App {
     new SaveObservationAction();
     // show preferences :
     new ShowPrefAction();
+    // export OB :
+    new ExportOBAction();
+    // export PF :
+    new ExportPDFAction();
+  }
+
+  /**
+   * Return the setting panel
+   * @return setting panel
+   */
+  public SettingPanel getSettingPanel() {
+    return this.settingPanel;
   }
 
   /**
@@ -217,9 +238,9 @@ public class AsproGui extends App {
     // Force Locale for Swing Components :
     JComponent.setDefaultLocale(Locale.US);
 
-    // Let the tooltip stay longer (30s) :
+    // Let the tooltip stay longer (60s) :
     ToolTipManager.sharedInstance().setInitialDelay(100);
-    ToolTipManager.sharedInstance().setDismissDelay(30000);
+    ToolTipManager.sharedInstance().setDismissDelay(60000);
 
     /*
     // Change component variant (nimbus or mac os Aqua) :
