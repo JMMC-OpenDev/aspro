@@ -42,6 +42,12 @@
       </prerelease>
     </release>
     <release version="0.4">
+      <prerelease version="0.4b7">
+        <change>Minor UI changes : new File menu actions (Export to OB and PDF) and modified layout on the UV Coverage Panel</change>
+        <change>default minimum elevation changed to 30 degrees</change>
+        <change>Fixed a side effect caused by the BaseLine Limits option that leaves the UV coverage empty</change>
+        <change>Better Look of the table for model parameters</change>
+      </prerelease>
       <prerelease version="0.4b6">
         <change>Export CHARA VEGA Observing Block with all targets (Star List)</change>
       </prerelease>
