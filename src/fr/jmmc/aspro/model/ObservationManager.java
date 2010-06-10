@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationManager.java,v 1.28 2010-05-06 15:37:27 bourgesl Exp $"
+ * "@(#) $Id: ObservationManager.java,v 1.29 2010-06-10 08:54:30 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.28  2010/05/06 15:37:27  bourgesl
+ * added TargetConfiguration to gather HA Min/Max, FT Mode and other future target related configuration
+ *
  * Revision 1.27  2010/04/09 10:33:10  bourgesl
  * convert space character in simbad coords by double dot to have proper HMS / DMS format
  *
@@ -703,9 +706,20 @@ public class ObservationManager extends BaseOIManager {
       // copy the listener references :
       this.listeners.toArray(eventListeners);
 
-      for (ObservationListener listener : eventListeners) {
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("fireEvent : " + type);
+      }
+
+      final long start = System.nanoTime();
+
+      for (final ObservationListener listener : eventListeners) {
         listener.onProcess(type, getObservation());
       }
+
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("fireEvent : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
+      }
+
     }
   }
 }
