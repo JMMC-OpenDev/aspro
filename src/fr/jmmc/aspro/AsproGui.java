@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproGui.java,v 1.18 2010-06-09 12:49:03 bourgesl Exp $"
+ * "@(#) $Id: AsproGui.java,v 1.19 2010-06-10 08:52:53 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.18  2010/06/09 12:49:03  bourgesl
+ * use an hidden preference to show the splashscreen
+ * added Export OB and PDF actions
+ *
  * Revision 1.17  2010/06/08 14:17:15  bourgesl
  * commented the code that tells LAF to use small variant for JComponents
  *
@@ -239,16 +243,7 @@ public final class AsproGui extends App {
     JComponent.setDefaultLocale(Locale.US);
 
     // Let the tooltip stay longer (60s) :
-    ToolTipManager.sharedInstance().setInitialDelay(100);
+    ToolTipManager.sharedInstance().setInitialDelay(250);
     ToolTipManager.sharedInstance().setDismissDelay(60000);
-
-    /*
-    // Change component variant (nimbus or mac os Aqua) :
-    final UIDefaults defaults = UIManager.getDefaults();
-    // nimbus and mac os :
-    defaults.put("JComponent.sizeVariant", "small");
-    // mac os :
-    defaults.put( "TabbedPane.useSmallLayout", Boolean.TRUE );
-     */
   }
 }
