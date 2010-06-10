@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationFileAction.java,v 1.4 2010-06-09 12:54:12 bourgesl Exp $"
+ * "@(#) $Id: ObservationFileAction.java,v 1.5 2010-06-10 13:44:01 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2010/06/09 12:54:12  bourgesl
+ * javadoc
+ *
  * Revision 1.3  2010/04/02 10:06:29  bourgesl
  * add missing xml extension to the file name
  *
@@ -34,8 +37,8 @@ public abstract class ObservationFileAction extends RegisteredAction {
   private static final long serialVersionUID = 1;
   /** Observation settings mime type */
   public static final String OBSERVATION_MIME_TYPE = "application/x-aspro+xml";
-  /** Observation xml extension */
-  public static final String OBS_EXT = "xml";
+  /** Observation extension = aspro */
+  public static final String OBS_EXT = "aspro";
 
   /* members */
   /** last directory used to save a file; by default = user home */
@@ -52,7 +55,7 @@ public abstract class ObservationFileAction extends RegisteredAction {
   public ObservationFileAction(final String classPath, final String fieldName) {
     super(classPath, fieldName);
 
-    FileFilterRepository.getInstance().put(OBSERVATION_MIME_TYPE, "xml", "Aspro Observation Settings (xml)");
+    FileFilterRepository.getInstance().put(OBSERVATION_MIME_TYPE, OBS_EXT, "Aspro Observation Settings (" + OBS_EXT + ")");
   }
 
   /**
