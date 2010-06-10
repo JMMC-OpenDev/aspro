@@ -7,10 +7,16 @@
     <description>
       This application is the new version of the ASPRO tool to prepare your interferometric observations.
     </description>
+    <icon href="Aspro2.png"/>
     <offline-allowed/>
-    <shortcut online="false">
+<!--
+    <association mime-type="application/x-aspro+xml" extensions="aspro">
+      <icon href="Aspro2.png"/>
+      <description>Aspro 2 Observation files</description>
+    </association>
+-->
+    <shortcut>
       <desktop/>
-      <menu submenu="JMMC Apps"/>
     </shortcut>
   </information>
   <security>
