@@ -1,11 +1,16 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetModelForm.java,v 1.19 2010-06-09 15:51:25 bourgesl Exp $"
+ * "@(#) $Id: TargetModelForm.java,v 1.20 2010-06-10 14:20:58 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.19  2010/06/09 15:51:25  bourgesl
+ * added a specific renderer for the JTable of model parameters in order to :
+ * - have a line separator between different models
+ * - avoid repeated model names
+ *
  * Revision 1.18  2010/05/19 12:04:10  mella
  * Use behaviour of common fr.jmmc.jmcs.gui.NumericJTable for parameterTables
  *
@@ -76,6 +81,7 @@ import fr.jmmc.mcs.model.gui.ModelParameterTableModel.EditMode;
 import fr.jmmc.mcs.model.gui.ModelParameterTableModel.Mode;
 import fr.jmmc.mcs.model.targetmodel.Model;
 import fr.jmmc.mcs.model.targetmodel.Parameter;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -1244,7 +1250,7 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
 
       /* members */
       /** custom border used as a line separator */
-      private Border rowBorder = BorderFactory.createMatteBorder(2, 0, 0, 0, getGridColor());
+      private Border rowBorder = null;
 
       /**
        * Overriden method to adjust borders in order to better split parameters belonging to the same model
@@ -1265,6 +1271,14 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
 
         // adjust borders to have thicker line separator :
         if (displaySeparator) {
+
+          if (this.rowBorder == null) {
+            // avoid white color because the background is already white :
+            final Color borderColor = (getGridColor().equals(Color.WHITE)) ? Color.DARK_GRAY : getGridColor();
+            // lazy instanciation :
+            this.rowBorder = BorderFactory.createMatteBorder(1, 0, 0, 0, borderColor);
+          }
+
           comp.setBorder(BorderFactory.createCompoundBorder(this.rowBorder, comp.getBorder()));
         } else {
           // consecutive parameters of the same model :
