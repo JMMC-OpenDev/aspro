@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: InterferometerMapPanel.java,v 1.4 2010-06-09 12:51:09 bourgesl Exp $"
+ * "@(#) $Id: InterferometerMapPanel.java,v 1.5 2010-06-10 08:53:46 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2010/06/09 12:51:09  bourgesl
+ * new interface PDFExportable to define a standard method performPDFAction() that use ExportPDFAction to export the chart to PDF
+ *
  * Revision 1.3  2010/06/08 12:32:11  bourgesl
  * javadoc
  *
@@ -35,15 +38,9 @@ import fr.jmmc.aspro.service.InterferometerMapService;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.util.logging.Level;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.axis.ValueAxis;
-import org.jfree.chart.encoders.EncoderUtil;
-import org.jfree.chart.encoders.ImageFormat;
 import org.jfree.chart.event.ChartProgressEvent;
 import org.jfree.chart.event.ChartProgressListener;
 import org.jfree.chart.labels.ItemLabelAnchor;
@@ -75,6 +72,9 @@ public class InterferometerMapPanel extends javax.swing.JPanel implements ChartP
   private JFreeChart localJFreeChart;
   /** xy plot instance */
   private SquareXYPlot localXYPlot;
+  /** current configuration to track changes */
+  private String configuration = null;
+
   /* swing */
   /** chart panel */
   private SquareChartPanel chartPanel;
@@ -224,65 +224,40 @@ public class InterferometerMapPanel extends javax.swing.JPanel implements ChartP
       logger.fine("plot : " + ObservationManager.toString(observation));
     }
 
-    final long start = System.nanoTime();
-
-    final InterferometerMapData mapData = InterferometerMapService.compute(observation);
-
-    ChartUtils.clearTextSubTitle(localJFreeChart);
-
     // title :
-    final StringBuilder title = new StringBuilder(observation.getInterferometerConfiguration().getName());
-    title.append(" - ").append(observation.getInstrumentConfiguration().getStations());
+    final StringBuilder sb = new StringBuilder(observation.getInterferometerConfiguration().getName());
+    sb.append(" - ").append(observation.getInstrumentConfiguration().getStations());
 
-    ChartUtils.addSubtitle(localJFreeChart, title.toString());
+    final String title = sb.toString();
 
-    // computed data are valid :
-    updateChart(mapData);
+    if (!title.equals(configuration)) {
+      // refresh the plot :
+      this.configuration = title;
 
-    // update theme at end :
-    ChartUtilities.applyCurrentTheme(localJFreeChart);
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("plot : refresh");
+      }
 
-    this.localXYPlot.setBackgroundPaint(Color.WHITE);
+      final long start = System.nanoTime();
 
-    // test to save plot to PNG :
-    if (false) {
-      savePlot();
-    }
+      final InterferometerMapData mapData = InterferometerMapService.compute(observation);
 
-    if (logger.isLoggable(Level.INFO)) {
-      logger.info("plot : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
-    }
-  }
+      ChartUtils.clearTextSubTitle(localJFreeChart);
 
-  /**
-   * Test code to save plot to PNG (can be used in tooltips) :
-   */
-  private void savePlot() {
-    try {
-      final JFreeChart chart = (JFreeChart) this.localJFreeChart.clone();
+      // title :
+      ChartUtils.addSubtitle(localJFreeChart, sb.toString());
 
-      chart.clearSubtitles();
+      // computed data are valid :
+      updateChart(mapData);
 
-      ValueAxis axis = chart.getXYPlot().getDomainAxis();
-      axis.setTickLabelsVisible(false);
-      axis.setTickMarksVisible(false);
+      // update theme at end :
+      ChartUtilities.applyCurrentTheme(localJFreeChart);
 
-      axis = chart.getXYPlot().getRangeAxis();
-      axis.setTickLabelsVisible(false);
-      axis.setTickMarksVisible(false);
+      this.localXYPlot.setBackgroundPaint(Color.WHITE);
 
-      /* Generating temporary file */
-      final File outFile = File.createTempFile("mapPlot", ".png");
-
-      final FileOutputStream out = new FileOutputStream(outFile);
-
-      // Keep a square area in both image and chart :
-      final BufferedImage bufferedImage = chart.createBufferedImage(200, 200,
-              400, 400, null);
-
-      EncoderUtil.writeBufferedImage(bufferedImage, ImageFormat.PNG, out);
-    } catch (Exception e) {
-      logger.log(Level.SEVERE, "failure ", e);
+      if (logger.isLoggable(Level.INFO)) {
+        logger.info("plot : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
+      }
     }
   }
 
