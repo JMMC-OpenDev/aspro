@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBVegaAction.java,v 1.2 2010-06-09 12:53:42 bourgesl Exp $"
+ * "@(#) $Id: ExportOBVegaAction.java,v 1.3 2010-06-10 13:43:42 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2010/06/09 12:53:42  bourgesl
+ * actionPerformed() method renamed to process() because it does not implement Action
+ * javadoc
+ *
  * Revision 1.1  2010/05/26 15:30:54  bourgesl
  * new CHARA Vega Star List generation (OB like)
  *
@@ -61,7 +65,7 @@ public class ExportOBVegaAction {
   private ExportOBVegaAction() {
     super();
 
-    FileFilterRepository.getInstance().put(TXT_MIME_TYPE, TXT_EXT, "Star List (txt)");
+    FileFilterRepository.getInstance().put(TXT_MIME_TYPE, TXT_EXT, "Star List (" + TXT_EXT + ")");
   }
 
   /**

@@ -1,11 +1,16 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportPDFAction.java,v 1.7 2010-06-09 12:57:15 bourgesl Exp $"
+ * "@(#) $Id: ExportPDFAction.java,v 1.8 2010-06-10 13:43:42 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2010/06/09 12:57:15  bourgesl
+ * now implements RegisteredAction (menu File) to export the chart of the current tab settingPanel.getTabSelectedComponent()
+ * use the PDFExportable interface to let the panel call back this action with the chart instance
+ * javadoc
+ *
  * Revision 1.6  2010/05/26 15:29:14  bourgesl
  * light refactoring and javadoc
  *
@@ -91,7 +96,7 @@ public class ExportPDFAction extends RegisteredAction {
   public ExportPDFAction() {
     super(className, actionName);
 
-    FileFilterRepository.getInstance().put(PDF_MIME_TYPE, PDF_EXT, "Portable Document Format (PDF)");
+    FileFilterRepository.getInstance().put(PDF_MIME_TYPE, PDF_EXT, "Portable Document Format (" + PDF_EXT + ")");
   }
 
   /**
