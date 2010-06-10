@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.45 2010-05-26 15:33:06 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.46 2010-06-10 08:55:00 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.45  2010/05/26 15:33:06  bourgesl
+ * fixed constructors
+ *
  * Revision 1.44  2010/05/26 15:29:51  bourgesl
  * added a constructor for CHARA OB to ignore night limits
  *
@@ -431,11 +434,6 @@ public class ObservabilityService {
         // Find the observability intervals for the target list :
         findObservability(targets);
 
-        // fast interrupt :
-        if (this.currentThread.isInterrupted()) {
-          return null;
-        }
-
         // dump star visibilities :
         if (logger.isLoggable(Level.FINE)) {
           logger.fine("Star observability intervals : ");
@@ -445,6 +443,15 @@ public class ObservabilityService {
           }
         }
 
+      }
+
+      // fast interrupt :
+      if (this.currentThread.isInterrupted()) {
+        return null;
+      }
+
+      if (logger.isLoggable(Level.INFO)) {
+        logger.info("compute : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
       }
 
     } catch (IllegalStateException ise) {
@@ -461,10 +468,6 @@ public class ObservabilityService {
       }
       // clear invalid data :
       this.data = null;
-    }
-
-    if (logger.isLoggable(Level.INFO)) {
-      logger.info("compute : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
     }
 
     return this.data;

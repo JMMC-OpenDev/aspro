@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoverageService.java,v 1.17 2010-05-06 15:42:18 bourgesl Exp $"
+ * "@(#) $Id: UVCoverageService.java,v 1.18 2010-06-10 08:54:59 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.17  2010/05/06 15:42:18  bourgesl
+ * use HA Min/Max + FT Mode for the target in the observation settings
+ *
  * Revision 1.16  2010/05/05 14:34:00  bourgesl
  * javadoc / comments
  *
@@ -234,6 +237,10 @@ public class UVCoverageService {
         return null;
       }
 
+      if (logger.isLoggable(Level.INFO)) {
+        logger.info("compute : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
+      }
+
     } catch (IllegalArgumentException iae) {
       // special case : the model can throw such exception to indicate that a parameter has an invalid value :
       throw iae;
@@ -251,10 +258,6 @@ public class UVCoverageService {
       }
       // clear invalid data :
       this.data = null;
-    }
-
-    if (logger.isLoggable(Level.INFO)) {
-      logger.info("compute : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
     }
 
     return this.data;
