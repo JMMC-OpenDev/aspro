@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.41 2010-06-09 12:51:09 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.42 2010-06-10 08:54:06 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.41  2010/06/09 12:51:09  bourgesl
+ * new interface PDFExportable to define a standard method performPDFAction() that use ExportPDFAction to export the chart to PDF
+ *
  * Revision 1.40  2010/06/08 12:39:06  bourgesl
  * minor UI changes : pdf button moved to bottom, changed weight constraint (resizing issues)
  * javadoc
@@ -1326,16 +1329,16 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
                 } else {
 
                   // title :
-                  final StringBuilder title = new StringBuilder(observation.getInterferometerConfiguration().getName());
-                  title.append(" - ").append(observation.getInstrumentConfiguration().getStations());
+                  final StringBuilder sb = new StringBuilder(observation.getInterferometerConfiguration().getName());
+                  sb.append(" - ").append(observation.getInstrumentConfiguration().getStations());
 
                   if (obsData.getBestPops() != null) {
-                    title.append(" + ");
+                    sb.append(" + ");
                     for (Pop pop : obsData.getBestPops().getPopList()) {
-                      title.append(pop.getName()).append(" ");
+                      sb.append(pop.getName()).append(" ");
                     }
                   }
-                  ChartUtils.addSubtitle(localJFreeChart, title.toString());
+                  ChartUtils.addSubtitle(localJFreeChart, sb.toString());
                   ChartUtils.addSubtitle(localJFreeChart, "Source : " + uvData.getName());
 
                   if (observation.getWhen().isNightRestriction()) {

@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityPanel.java,v 1.34 2010-06-09 12:51:09 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityPanel.java,v 1.35 2010-06-10 08:54:06 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.34  2010/06/09 12:51:09  bourgesl
+ * new interface PDFExportable to define a standard method performPDFAction() that use ExportPDFAction to export the chart to PDF
+ *
  * Revision 1.33  2010/06/08 14:48:39  bourgesl
  * moved pdf button against the left side
  *
@@ -480,17 +483,17 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
               localJFreeChart.clearSubtitles();
 
               // title :
-              final StringBuilder title = new StringBuilder(observation.getInterferometerConfiguration().getName());
-              title.append(" - ").append(observation.getInstrumentConfiguration().getStations());
+              final StringBuilder sb = new StringBuilder(observation.getInterferometerConfiguration().getName());
+              sb.append(" - ").append(observation.getInstrumentConfiguration().getStations());
 
               if (obsData.getBestPops() != null) {
-                title.append(" + ");
+                sb.append(" + ");
                 for (Pop pop : obsData.getBestPops().getPopList()) {
-                  title.append(pop.getName()).append(" ");
+                  sb.append(pop.getName()).append(" ");
                 }
               }
 
-              ChartUtils.addSubtitle(localJFreeChart, title.toString());
+              ChartUtils.addSubtitle(localJFreeChart, sb.toString());
 
               if (observation.getWhen().isNightRestriction() || !useLST) {
                 // date :
