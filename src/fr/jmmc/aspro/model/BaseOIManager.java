@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BaseOIManager.java,v 1.8 2010-05-21 15:10:20 bourgesl Exp $"
+ * "@(#) $Id: BaseOIManager.java,v 1.9 2010-06-11 09:10:12 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.8  2010/05/21 15:10:20  bourgesl
+ * use classLoader.getResource() instead of this.getResource()
+ *
  * Revision 1.7  2010/04/02 10:08:17  bourgesl
  * corrected logger name
  *
@@ -36,6 +39,7 @@ package fr.jmmc.aspro.model;
 
 import fr.jmmc.jaxb.JAXBFactory;
 import java.io.File;
+import java.net.URL;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -93,8 +97,14 @@ public class BaseOIManager {
 
     Object result = null;
     try {
+      final URL url = this.getClass().getClassLoader().getResource("fr/jmmc/aspro/model/" + uri);
+
+      if (logger.isLoggable(Level.INFO)) {
+        logger.info("loading configuration from : " + url);
+      }
+
       // use the class loader :
-      result = u.unmarshal(this.getClass().getClassLoader().getResource("fr/jmmc/aspro/model/" + uri));
+      result = u.unmarshal(url);
     } catch (JAXBException je) {
       throw new RuntimeException("Load failure on " + uri, je);
     }

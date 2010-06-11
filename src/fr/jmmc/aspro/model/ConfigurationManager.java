@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ConfigurationManager.java,v 1.21 2010-05-26 09:13:15 bourgesl Exp $"
+ * "@(#) $Id: ConfigurationManager.java,v 1.22 2010-06-11 09:10:12 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.21  2010/05/26 09:13:15  bourgesl
+ * added related channels to the instrument configuration (CHARA)
+ *
  * Revision 1.20  2010/05/19 09:30:06  bourgesl
  * do not sort the interferometer list to keep the order defined in the AsproOIConfigurations.xml file
  *
@@ -91,6 +94,7 @@ import fr.jmmc.aspro.model.oi.Position3D;
 import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.StationLinks;
 import fr.jmmc.aspro.service.GeocentricCoords;
+import fr.jmmc.mcs.gui.FeedbackReport;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -156,6 +160,8 @@ public class ConfigurationManager extends BaseOIManager {
       }
     } catch (RuntimeException re) {
       logger.log(Level.SEVERE, "runtime failure : ", re);
+      // report unacceptable failure :
+      new FeedbackReport(null, true, re);
     }
   }
 
