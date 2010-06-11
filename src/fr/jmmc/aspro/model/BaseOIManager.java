@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BaseOIManager.java,v 1.9 2010-06-11 09:10:12 bourgesl Exp $"
+ * "@(#) $Id: BaseOIManager.java,v 1.10 2010-06-11 09:19:25 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.9  2010/06/11 09:10:12  bourgesl
+ * added log message to help debugging JNLP Offline problems
+ *
  * Revision 1.8  2010/05/21 15:10:20  bourgesl
  * use classLoader.getResource() instead of this.getResource()
  *
@@ -38,6 +41,7 @@
 package fr.jmmc.aspro.model;
 
 import fr.jmmc.jaxb.JAXBFactory;
+import fr.jmmc.mcs.util.Urls;
 import java.io.File;
 import java.net.URL;
 import java.util.Calendar;
@@ -96,17 +100,30 @@ public class BaseOIManager {
     final Unmarshaller u = this.jf.createUnMarshaller();
 
     Object result = null;
+
+    // use the class loader :
+    final URL url = this.getClass().getClassLoader().getResource("fr/jmmc/aspro/model/" + uri);
+
+    if (logger.isLoggable(Level.INFO)) {
+      logger.info("loading configuration from : " + url);
+    }
+
     try {
-      final URL url = this.getClass().getClassLoader().getResource("fr/jmmc/aspro/model/" + uri);
-
-      if (logger.isLoggable(Level.INFO)) {
-        logger.info("loading configuration from : " + url);
-      }
-
-      // use the class loader :
       result = u.unmarshal(url);
     } catch (JAXBException je) {
-      throw new RuntimeException("Load failure on " + uri, je);
+      if (logger.isLoggable(Level.INFO)) {
+        logger.log(Level.INFO, "unmarshalling failure : ", je);
+      }
+    }
+    if (result == null) {
+      if (logger.isLoggable(Level.INFO)) {
+        logger.info("fix jar url : " + Urls.fixJarURL(url));
+      }
+      try {
+        result = u.unmarshal(Urls.fixJarURL(url));
+      } catch (JAXBException je) {
+        throw new RuntimeException("Load failure on " + uri, je);
+      }
     }
     return result;
   }
