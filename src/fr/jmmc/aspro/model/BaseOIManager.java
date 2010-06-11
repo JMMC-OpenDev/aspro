@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BaseOIManager.java,v 1.11 2010-06-11 09:35:05 bourgesl Exp $"
+ * "@(#) $Id: BaseOIManager.java,v 1.12 2010-06-11 09:43:24 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.11  2010/06/11 09:35:05  bourgesl
+ * trying to use getResourceAsStream for jnlp offline mode
+ *
  * Revision 1.10  2010/06/11 09:19:25  bourgesl
  * added log message to help debugging JNLP Offline problems
  *
@@ -44,7 +47,6 @@
 package fr.jmmc.aspro.model;
 
 import fr.jmmc.jaxb.JAXBFactory;
-import fr.jmmc.mcs.util.Urls;
 import java.io.File;
 import java.net.URL;
 import java.util.Calendar;
@@ -100,34 +102,22 @@ public class BaseOIManager {
    * @throws RuntimeException if the load operation failed
    */
   protected Object loadObject(final String uri) {
-    final Unmarshaller u = this.jf.createUnMarshaller();
-
+    if (logger.isLoggable(Level.INFO)) {
+      logger.info("loading file : " + uri);
+    }
     Object result = null;
 
-    // use the class loader :
-    final URL url = this.getClass().getClassLoader().getResource("fr/jmmc/aspro/model/" + uri);
+    final Unmarshaller u = this.jf.createUnMarshaller();
 
-    if (logger.isLoggable(Level.INFO)) {
-      logger.info("loading configuration from : " + url);
-    }
+    // use the class loader resource resolver
 
+    // Note : use getResourceAsStream() to avoid JNLP offline bug with URL (Unknown host exception)
     try {
-      result = u.unmarshal(url);
+      result = u.unmarshal(this.getClass().getClassLoader().getResourceAsStream("fr/jmmc/aspro/model/" + uri));
     } catch (JAXBException je) {
-      if (logger.isLoggable(Level.INFO)) {
-        logger.log(Level.INFO, "unmarshalling failure : ", je);
-      }
+      throw new RuntimeException("Load failure on " + uri, je);
     }
-    if (result == null) {
-      if (logger.isLoggable(Level.INFO)) {
-        logger.info("using stream : " + url);
-      }
-      try {
-        result = u.unmarshal(this.getClass().getClassLoader().getResourceAsStream("fr/jmmc/aspro/model/" + uri));
-      } catch (JAXBException je) {
-        throw new RuntimeException("Load failure on " + uri, je);
-      }
-    }
+
     return result;
   }
 
