@@ -39,6 +39,8 @@
     <release version="0.5">
       <prerelease version="0.5.0">
         <change>First public release of Aspro 2</change>
+        <change>Fixed some JNLP problems in offline mode</change>
+        <change>Added JNLP association with 'aspro' files to be opened at startup</change>
       </prerelease>
     </release>
     <release version="0.4">
