@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetModelForm.java,v 1.20 2010-06-10 14:20:58 bourgesl Exp $"
+ * "@(#) $Id: TargetModelForm.java,v 1.21 2010-06-11 08:40:34 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.20  2010/06/10 14:20:58  bourgesl
+ * model separator is in dark gray if the grid color is white (mac)
+ *
  * Revision 1.19  2010/06/09 15:51:25  bourgesl
  * added a specific renderer for the JTable of model parameters in order to :
  * - have a line separator between different models
@@ -255,8 +258,12 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
     // update the model description :
     this.updateModelDescription((String) this.jComboBoxModelType.getSelectedItem());
 
+    // table selection listener :
+    this.jTableModelParameters.getSelectionModel().addListSelectionListener(this);
+
     // single tree selection :
     this.jTreeModels.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+    // tree selection listener :
     this.jTreeModels.addTreeSelectionListener(this);
 
     // edit mode :
