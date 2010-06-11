@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BaseOIManager.java,v 1.10 2010-06-11 09:19:25 bourgesl Exp $"
+ * "@(#) $Id: BaseOIManager.java,v 1.11 2010-06-11 09:35:05 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.10  2010/06/11 09:19:25  bourgesl
+ * added log message to help debugging JNLP Offline problems
+ *
  * Revision 1.9  2010/06/11 09:10:12  bourgesl
  * added log message to help debugging JNLP Offline problems
  *
@@ -117,10 +120,10 @@ public class BaseOIManager {
     }
     if (result == null) {
       if (logger.isLoggable(Level.INFO)) {
-        logger.info("fix jar url : " + Urls.fixJarURL(url));
+        logger.info("using stream : " + url);
       }
       try {
-        result = u.unmarshal(Urls.fixJarURL(url));
+        result = u.unmarshal(this.getClass().getClassLoader().getResourceAsStream("fr/jmmc/aspro/model/" + uri));
       } catch (JAXBException je) {
         throw new RuntimeException("Load failure on " + uri, je);
       }
