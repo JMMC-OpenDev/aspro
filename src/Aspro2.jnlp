@@ -9,7 +9,7 @@
     </description>
     <icon href="Aspro2.png"/>
     <offline-allowed/>
-    <association mime-type="application/x-aspro+xml" extensions="aspro">
+    <association mime-type="application/x-aspro+xml" extensions="asprox">
       <icon href="Aspro2.png"/>
       <description>Aspro 2 Observation files</description>
     </association>
