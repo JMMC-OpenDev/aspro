@@ -1,0 +1,773 @@
+
+package fr.jmmc.aspro.model.oi;
+
+import java.util.ArrayList;
+import java.util.List;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlType;
+import fr.jmmc.aspro.model.OIBase;
+import fr.jmmc.mcs.model.targetmodel.Model;
+
+
+/**
+ * 
+ *         This type describes a target
+ *       
+ * 
+ * <p>Java class for Target complex type.
+ * 
+ * <p>The following schema fragment specifies the expected content contained within this class.
+ * 
+ * <pre>
+ * &lt;complexType name="Target">
+ *   &lt;complexContent>
+ *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
+ *       &lt;sequence>
+ *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *         &lt;element name="RA" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *         &lt;element name="DEC" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *         &lt;element name="EQUINOX" type="{http://www.w3.org/2001/XMLSchema}float"/>
+ *         &lt;element name="SYSVEL" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
+ *         &lt;element name="VELTYP" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ *         &lt;element name="PMRA" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
+ *         &lt;element name="PMDEC" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
+ *         &lt;element name="PARALLAX" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
+ *         &lt;element name="PARA_ERR" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
+ *         &lt;element name="IDS" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ *         &lt;element name="OBJTYP" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ *         &lt;element name="SPECTYP" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ *         &lt;element name="FLUX_V" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
+ *         &lt;element name="FLUX_I" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
+ *         &lt;element name="FLUX_J" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
+ *         &lt;element name="FLUX_H" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
+ *         &lt;element name="FLUX_K" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
+ *         &lt;element name="FLUX_N" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
+ *         &lt;element ref="{http://www.jmmc.fr/jmcs/models/0.1}model" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="configuration" type="{http://www.jmmc.fr/aspro-oi/0.1}TargetConfiguration" minOccurs="0"/>
+ *       &lt;/sequence>
+ *     &lt;/restriction>
+ *   &lt;/complexContent>
+ * &lt;/complexType>
+ * </pre>
+ * 
+ * 
+ */
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(name = "Target", propOrder = {
+    "name",
+    "ra",
+    "dec",
+    "equinox",
+    "sysvel",
+    "veltyp",
+    "pmra",
+    "pmdec",
+    "parallax",
+    "paraerr",
+    "ids",
+    "objtyp",
+    "spectyp",
+    "fluxv",
+    "fluxi",
+    "fluxj",
+    "fluxh",
+    "fluxk",
+    "fluxn",
+    "models",
+    "configuration"
+})
+public class Target
+    extends OIBase
+{
+
+    @XmlElement(required = true)
+    protected String name;
+    @XmlElement(name = "RA", required = true)
+    protected String ra;
+    @XmlElement(name = "DEC", required = true)
+    protected String dec;
+    @XmlElement(name = "EQUINOX")
+    protected float equinox;
+    @XmlElement(name = "SYSVEL")
+    protected Double sysvel;
+    @XmlElement(name = "VELTYP")
+    protected String veltyp;
+    @XmlElement(name = "PMRA")
+    protected Double pmra;
+    @XmlElement(name = "PMDEC")
+    protected Double pmdec;
+    @XmlElement(name = "PARALLAX")
+    protected Double parallax;
+    @XmlElement(name = "PARA_ERR")
+    protected Double paraerr;
+    @XmlElement(name = "IDS")
+    protected String ids;
+    @XmlElement(name = "OBJTYP")
+    protected String objtyp;
+    @XmlElement(name = "SPECTYP")
+    protected String spectyp;
+    @XmlElement(name = "FLUX_V")
+    protected Double fluxv;
+    @XmlElement(name = "FLUX_I")
+    protected Double fluxi;
+    @XmlElement(name = "FLUX_J")
+    protected Double fluxj;
+    @XmlElement(name = "FLUX_H")
+    protected Double fluxh;
+    @XmlElement(name = "FLUX_K")
+    protected Double fluxk;
+    @XmlElement(name = "FLUX_N")
+    protected Double fluxn;
+    @XmlElement(name = "model", namespace = "http://www.jmmc.fr/jmcs/models/0.1")
+    protected List<Model> models;
+    protected TargetConfiguration configuration;
+
+    /**
+     * Gets the value of the name property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Sets the value of the name property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setName(String value) {
+        this.name = value;
+    }
+
+    /**
+     * Gets the value of the ra property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getRA() {
+        return ra;
+    }
+
+    /**
+     * Sets the value of the ra property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setRA(String value) {
+        this.ra = value;
+    }
+
+    /**
+     * Gets the value of the dec property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getDEC() {
+        return dec;
+    }
+
+    /**
+     * Sets the value of the dec property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setDEC(String value) {
+        this.dec = value;
+    }
+
+    /**
+     * Gets the value of the equinox property.
+     * 
+     */
+    public float getEQUINOX() {
+        return equinox;
+    }
+
+    /**
+     * Sets the value of the equinox property.
+     * 
+     */
+    public void setEQUINOX(float value) {
+        this.equinox = value;
+    }
+
+    /**
+     * Gets the value of the sysvel property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getSYSVEL() {
+        return sysvel;
+    }
+
+    /**
+     * Sets the value of the sysvel property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setSYSVEL(Double value) {
+        this.sysvel = value;
+    }
+
+    /**
+     * Gets the value of the veltyp property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getVELTYP() {
+        return veltyp;
+    }
+
+    /**
+     * Sets the value of the veltyp property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setVELTYP(String value) {
+        this.veltyp = value;
+    }
+
+    /**
+     * Gets the value of the pmra property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getPMRA() {
+        return pmra;
+    }
+
+    /**
+     * Sets the value of the pmra property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setPMRA(Double value) {
+        this.pmra = value;
+    }
+
+    /**
+     * Gets the value of the pmdec property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getPMDEC() {
+        return pmdec;
+    }
+
+    /**
+     * Sets the value of the pmdec property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setPMDEC(Double value) {
+        this.pmdec = value;
+    }
+
+    /**
+     * Gets the value of the parallax property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getPARALLAX() {
+        return parallax;
+    }
+
+    /**
+     * Sets the value of the parallax property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setPARALLAX(Double value) {
+        this.parallax = value;
+    }
+
+    /**
+     * Gets the value of the paraerr property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getPARAERR() {
+        return paraerr;
+    }
+
+    /**
+     * Sets the value of the paraerr property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setPARAERR(Double value) {
+        this.paraerr = value;
+    }
+
+    /**
+     * Gets the value of the ids property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getIDS() {
+        return ids;
+    }
+
+    /**
+     * Sets the value of the ids property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setIDS(String value) {
+        this.ids = value;
+    }
+
+    /**
+     * Gets the value of the objtyp property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getOBJTYP() {
+        return objtyp;
+    }
+
+    /**
+     * Sets the value of the objtyp property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setOBJTYP(String value) {
+        this.objtyp = value;
+    }
+
+    /**
+     * Gets the value of the spectyp property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getSPECTYP() {
+        return spectyp;
+    }
+
+    /**
+     * Sets the value of the spectyp property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setSPECTYP(String value) {
+        this.spectyp = value;
+    }
+
+    /**
+     * Gets the value of the fluxv property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getFLUXV() {
+        return fluxv;
+    }
+
+    /**
+     * Sets the value of the fluxv property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setFLUXV(Double value) {
+        this.fluxv = value;
+    }
+
+    /**
+     * Gets the value of the fluxi property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getFLUXI() {
+        return fluxi;
+    }
+
+    /**
+     * Sets the value of the fluxi property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setFLUXI(Double value) {
+        this.fluxi = value;
+    }
+
+    /**
+     * Gets the value of the fluxj property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getFLUXJ() {
+        return fluxj;
+    }
+
+    /**
+     * Sets the value of the fluxj property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setFLUXJ(Double value) {
+        this.fluxj = value;
+    }
+
+    /**
+     * Gets the value of the fluxh property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getFLUXH() {
+        return fluxh;
+    }
+
+    /**
+     * Sets the value of the fluxh property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setFLUXH(Double value) {
+        this.fluxh = value;
+    }
+
+    /**
+     * Gets the value of the fluxk property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getFLUXK() {
+        return fluxk;
+    }
+
+    /**
+     * Sets the value of the fluxk property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setFLUXK(Double value) {
+        this.fluxk = value;
+    }
+
+    /**
+     * Gets the value of the fluxn property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getFLUXN() {
+        return fluxn;
+    }
+
+    /**
+     * Sets the value of the fluxn property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setFLUXN(Double value) {
+        this.fluxn = value;
+    }
+
+    /**
+     * Gets the value of the models property.
+     * 
+     * <p>
+     * This accessor method returns a reference to the live list,
+     * not a snapshot. Therefore any modification you make to the
+     * returned list will be present inside the JAXB object.
+     * This is why there is not a <CODE>set</CODE> method for the models property.
+     * 
+     * <p>
+     * For example, to add a new item, do as follows:
+     * <pre>
+     *    getModels().add(newItem);
+     * </pre>
+     * 
+     * 
+     * <p>
+     * Objects of the following type(s) are allowed in the list
+     * {@link Model }
+     * 
+     * 
+     */
+    public List<Model> getModels() {
+        if (models == null) {
+            models = new ArrayList<Model>();
+        }
+        return this.models;
+    }
+
+    /**
+     * Gets the value of the configuration property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link TargetConfiguration }
+     *     
+     */
+    public TargetConfiguration getConfiguration() {
+        return configuration;
+    }
+
+    /**
+     * Sets the value of the configuration property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link TargetConfiguration }
+     *     
+     */
+    public void setConfiguration(TargetConfiguration value) {
+        this.configuration = value;
+    }
+    
+//--simple--preserve
+
+  /** computed RA in degrees */
+  @javax.xml.bind.annotation.XmlTransient
+  private double raDeg = Double.NaN;
+
+  /**
+   * Return the right ascension (RA) in degrees
+   * @return right ascension (RA) in degrees
+   */
+  public double getRADeg() {
+    if (Double.isNaN(this.raDeg)) {
+      this.raDeg = fr.jmmc.mcs.astro.ALX.parseHMS(getRA());
+    }
+    return this.raDeg;
+  }
+
+  /**
+   * Define the right ascension (RA) in degrees (read only)
+   * @param raDeg right ascension (RA) in degrees
+   */
+  public void setRADeg(final double raDeg) {
+    this.raDeg = raDeg;
+  }
+
+  /** computed DEC in degrees */
+  @javax.xml.bind.annotation.XmlTransient
+  private double decDeg = Double.NaN;
+
+  /**
+   * Return the declination (DEC) in degrees
+   * @return declination (DEC) in degrees
+   */
+  public double getDECDeg() {
+    if (Double.isNaN(this.decDeg)) {
+      this.decDeg = fr.jmmc.mcs.astro.ALX.parseDEC(getDEC());
+    }
+    return this.decDeg;
+  }
+
+  /**
+   * Define the declination (DEC) in degrees (read only)
+   * @param decDeg declination (DEC) in degrees
+   */
+  public void setDECDeg(final double decDeg) {
+    this.decDeg = decDeg;
+  }
+
+  @Override
+  public String toString() {
+    return "Target [" + ((this.name != null) ? this.name : "undefined") + "]" + " RA = " + getRA() + " DEC = " + getDEC();
+  }
+
+  /**
+   * Return an HTML representation of the target used by tooltips
+   * @return HTML representation
+   */
+  public String toHtml() {
+    final StringBuilder sb = new StringBuilder(128);
+    sb.append("<html>");
+    sb.append("<b>Name</b> : ").append(getName());
+    sb.append("<br><b>Coord</b> : ").append(getRA()).append(" ").append(getDEC());
+    if (getPMRA() != null) {
+      sb.append("<br><b>Proper motion</b> (mas/yr) : ").append(getPMRA()).append(" ").append(getPMDEC());
+    }
+    if (getPARALLAX() != null) {
+      sb.append("<br><b>Parallax</b> (mas) : ").append(getPARALLAX()).append(" [").append(getPARAERR()).append("]");
+    }
+    if (getSYSVEL() != null) {
+      sb.append("<br><b>Radial Velocity</b> (km/s) : ").append(getSYSVEL());
+      if (getVELTYP() != null) {
+        sb.append(" (").append(getVELTYP()).append(")");
+      }
+    }
+    if (getOBJTYP() != null && getOBJTYP().length() > 0) {
+      sb.append("<br><b>Object types</b> : ").append(getOBJTYP());
+    }
+    if (getSPECTYP() != null && getSPECTYP().length() > 0) {
+      sb.append("<br><b>Spectral types</b> : ").append(getSPECTYP());
+    }
+    // Fluxes :
+    if (getFLUXV() != null) {
+      sb.append("<br><b>Flux V</b> : ").append(getFLUXV());
+    }
+    if (getFLUXI() != null) {
+      sb.append("<br><b>Flux I</b> : ").append(getFLUXI());
+    }
+    if (getFLUXJ() != null) {
+      sb.append("<br><b>Flux J</b> : ").append(getFLUXJ());
+    }
+    if (getFLUXH() != null) {
+      sb.append("<br><b>Flux H</b> : ").append(getFLUXH());
+    }
+    if (getFLUXK() != null) {
+      sb.append("<br><b>Flux K</b> : ").append(getFLUXK());
+    }
+    if (getFLUXN() != null) {
+      sb.append("<br><b>Flux N</b> : ").append(getFLUXN());
+    }
+
+    // Ids ?
+
+    sb.append("</html>");
+    return sb.toString();
+  }
+
+  /**
+   * Return the star identifier corresponding to the catalog identifier
+   * @param catalogIdentifier complete catalog identifier (like 'HD' or 'HIP' ...)
+   * @return star identifier (HD 31964) or null
+   */
+  public String getIdentifier(final String catalogIdentifier) {
+    String res = null;
+    if (getIDS() != null) {
+      final String cat = catalogIdentifier + " ";
+      final String[] idArray = getIDS().split(",");
+      for (String id : idArray) {
+        if (id.startsWith(cat)) {
+          res = id;
+          break;
+        }
+      }
+    }
+    return res;
+  }
+
+  /**
+   * Return a deep "copy" of this instance
+   * @return deep "copy" of this instance
+   */
+  @Override
+  public Object clone() {
+    final Target copy = (Target) super.clone();
+
+    // Deep copy of models :
+    final List<Model> newModels = new ArrayList<Model>();
+    for (Model model : getModels()) {
+      newModels.add((Model) model.clone());
+    }
+    copy.models = newModels;
+
+    return copy;
+  }
+//--simple--preserve
+
+}

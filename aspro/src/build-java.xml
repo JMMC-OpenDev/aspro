@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="ASPRO 2" default="about" basedir=".">
+
+  <description>
+  	Aspro ant build file
+  </description>
+
+  <property name="root" location=".."/>
+
+  <!-- JAXB library must be present in the jmcs module nearby -->
+  <property name="jaxb.libs" location="${root}/../jmcs/lib"/>
+
+  <property name="libs" location="${root}/lib"/>
+  <property name="sources" location="${root}/src"/>
+
+
+  <!-- custom macro to enhance XJC -->
+  <macrodef name="xjc">
+    <attribute name="destdir"/>
+    <attribute name="schema"/>
+
+    <sequential>
+      <java jar="${jaxb.libs}/jaxb-xjc.jar">
+        <arg value="-classpath"/>
+        <arg value="${libs}/simple-regenerator-1.0.jar"/>
+
+        <arg value="-no-header"/>
+
+        <arg value="-extension"/>
+        <!-- preserve code extension -->
+        <arg value="-simple-preserve"/>
+
+        <arg value="-d"/>
+        <arg value="@{destdir}"/>
+
+        <arg value="@{schema}"/>
+      </java>
+
+      <delete dir="@{destdir}">
+        <include name="**/*.java.backup"/>
+      </delete>
+      </sequential>
+  </macrodef>
+
+
+  <!-- targets -->
+
+  <!-- target about : -->
+  <target name="about" description="show information for public targets">
+    <echo>available ant targets : </echo>
+    <echo>-------------------------------------------------------------------------------</echo>
+    <echo>  - genXsdCode         : generates the java code from xml schema (xsd)</echo>
+    <echo>-------------------------------------------------------------------------------</echo>
+    <echo> jaxb libraries : ${jaxb.libs}</echo>
+  </target>
+
+
+
+
+  <target name="genXsdCode">
+
+    <echo>generating java code for AsproOIModel.xsd</echo>
+    <mkdir dir="${sources}/fr/jmmc/aspro/model/oi" />
+
+    <xjc destdir="${sources}"
+         schema="${sources}/fr/jmmc/aspro/model/AsproOIModel.xsd" />
+
+    <!-- remove generated classes for jmcs package -->
+    
+    <delete dir="${sources}/fr/jmmc/mcs/" />
+
+<!--
+    <echo>generating java code for AsproDataModel.xsd</echo>
+
+    <mkdir dir="${sources}/fr/jmmc/aspro/model/oifits" />
+    <xjc destdir="${sources}"
+         schema="${sources}/fr/jmmc/aspro/model/AsproDataModel.xsd" />
+-->
+  </target>
+
+
+</project>

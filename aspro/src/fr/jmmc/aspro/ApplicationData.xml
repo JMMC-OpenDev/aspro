@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<ApplicationData link="http://www.jmmc.fr/aspro2">
+  <program name="Aspro2" version="0.5.0"/>
+  <compilation date="21/09/2009" compiler="JDK 1.5.0_16"/>
+  <text>
+    <![CDATA[ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations
+    with the VLTI or other interferometers. This observation preparation tool is developed and maintained by the JMMC.
+    ]]>
+  </text>
+  <dependences>
+    <package name="JSkyCalc" description="Observability constraints based on JSkyCalc by J. R. Thorstensen, Dartmouth College"
+                             link="http://www.dartmouth.edu/~physics/faculty/skycalc/flyer.html"/>
+
+    <package name="JFreeChart" description="JFreeChart is a free 100% Java chart library that makes it easy for developers to display professional quality charts in their applications" link="http://www.jfree.org/jfreechart/"/>
+
+    <package name="iText" description="iText is a library that allows you to generate PDF files on the fly" link="http://itextpdf.com/"/>
+
+    <package name="JAXB" description="Java Architecture for XML Binding (JAXB) allows Java developers to map Java classes to XML representations" link="https://jaxb.dev.java.net/"/>
+
+    <package name="SwingWorker" description="backport of SwingWorker included into Java 1.6" link="https://swingworker.dev.java.net/"/>
+
+  </dependences>
+  <menubar>
+    <menu label="File">
+      <menu label="Load" classpath="fr.jmmc.aspro.gui.action.LoadObservationAction" action="loadObservation" accelerator="L"
+            icon="/fr/jmmc/aspro/gui/icons/fileopen.png" description="load an observation file"/>
+      <menu label="Save" classpath="fr.jmmc.aspro.gui.action.SaveObservationAction" action="saveObservation" accelerator="S"
+            icon="/fr/jmmc/aspro/gui/icons/filesaveas.png" description="save the current observation as an observation file"/>
+      <menu/> <!-- menu separator -->
+      <menu label="Export to an Observing Block" classpath="fr.jmmc.aspro.gui.action.ExportOBAction" action="exportOB" accelerator="O"
+            description="Export your observation to an Observing block (only valid inside the UV Coverage Panel)"/>
+      <menu/> <!-- menu separator -->
+      <menu label="Export plot to PDF" classpath="fr.jmmc.aspro.gui.action.ExportPDFAction" action="exportPDF" accelerator="P"
+            description="Export the current plot to a PDF document"/>
+    </menu>
+  </menubar>
+  <releasenotes>
+    <release version="0.5"> <!-- <pubDate>Thu, 17 Jun 2010 14:00:00 GMT</pubDate> -->
+      <prerelease version="0.5.0">
+        <change>First public release of Aspro 2</change>
+        <change>Fixed some JNLP problems in offline mode</change>
+        <change>Added JNLP association with 'asprox' files to be opened at startup</change>
+      </prerelease>
+    </release>
+    <release version="0.4"> <!-- <pubDate>Tue, 15 Jun 2010 14:26:07 GMT</pubDate> -->
+      <prerelease version="0.4b8">
+        <change>Changed Observation file extension to 'asprox'</change>
+        <change>New logo for Aspro 2</change>
+      </prerelease>
+      <prerelease version="0.4b7">
+        <change>Minor UI changes : new File menu actions (Export to OB and PDF) and modified layout on the UV Coverage Panel</change>
+        <change>default minimum elevation changed to 30 degrees</change>
+        <change>Fixed a side effect caused by the BaseLine Limits option that leaves the UV coverage empty</change>
+        <change>Better Look of the table for model parameters</change>
+        <change>Simplified descriptions for analytic models</change>
+      </prerelease>
+      <prerelease version="0.4b6">
+        <change>Export CHARA VEGA Observing Block with all targets (Star List)</change>
+      </prerelease>
+      <prerelease version="0.4b5">
+        <change>Better Look and Feel for the Preference View</change>
+        <change>Added Model Image options (lut and size) as Preferences</change>
+      </prerelease>
+      <prerelease version="0.4b4"> <!-- 0.3b8 -->
+        <change>Added the limb darkened disk model in the model editor</change>
+        <change>Added gaussian models in the model editor</change>
+        <change>Added ring models in the model editor</change>
+      </prerelease>
+      <prerelease version="0.4b3"> <!-- 0.3b7 -->
+        <change>Add one button to normalize the flux weights in the model editor</change>
+        <change>Add one preference to choose the default style of display for positions (Rho_Theta by default or X_Y) in the model editor</change>
+        <change>Add the preferences window (displayed from the menu)</change>
+      </prerelease>
+      <prerelease version="0.4b2"> <!-- 0.3b6 -->
+        <change>New Interferometer Map Plot to display station positions and the chosen baseline.</change>
+        <change>A star name can be optionaly given to the star resolver in addition to the coordinates to enter manually a new target</change>
+      </prerelease>
+      <prerelease version="0.4b1"> <!-- 0.3b5 -->
+        <change>Several UI changes to manage HA min / max and the fringe tracker mode fields depending on the selected target
+        in the UV Coverage Panel.</change>
+        <change>HA min / max and the fringe tracker mode are related to a specific target and persisted in the observation file.</change>
+        <change>Added date and time constraints on VLTI Observing Block : date is defined if night restrictions are enabled;
+        LST intervals are defined with the target observability (elevation > 30 deg + delay lines + shadowing)
+        restricted by the HA min / max defined in the UV Coverage Panel.</change>
+      </prerelease>
+    </release>
+    <release version="0.3"> <!-- <pubDate>Wed, 19 May 2010 11:25:43 GMT</pubDate> -->
+      <prerelease version="0.3b4">
+        <change>Added VLTI configuration for the period 87 (new baselines) and fixed period 86.</change>
+        <change>Added VLTI configuration for the period 86 (idem period 85).</change>
+        <change>Added VLTI configuration for the future PIONIER instrument (period 86).</change>
+      </prerelease>
+      <prerelease version="0.3b3">
+        <change>Added basic Observing Block for MIDI.</change>
+        <change>Fixed the contiguous date interval problem on observability plot.</change>
+        <change>Minor corrections on AMBER observing blocks (proper motion and RA/DEC format).</change>
+      </prerelease>
+      <prerelease version="0.3b2">
+        <change>Updated Aspro data model to keep simbad information like RA (HMS), DEC (DMS), Radial velocity, Identifiers and Object types.</change>
+        <change>Updated Target tooltip with new information</change>
+        <change>Several fixes to convert sexagesimal RA/DEC in degrees (internal). Known problem : the previously saved files can not be
+        load anymore.</change>
+      </prerelease>
+      <prerelease version="0.3b1">
+        <change>The star resolver now supports RA/DEC coordinates to enter manually a new target
+                (useful when simbad is down or no internet connection)</change>
+        <change>Missing fluxes used in Observing Block set to -99</change>
+        <change>Several minor UI changes for mac OS X platform (10.4 and more)</change>
+        <change>Deployment : Pal library is embedded in its own Jnlp file to avoid signing issues</change>
+      </prerelease>
+    </release>
+    <release version="0.2"> <!-- <pubDate>Mon, 5 Apr 2010 12:00:00 GMT</pubDate> -->
+      <prerelease version="0.2b5"> <!-- 0.1b11 -->
+        <change>Added a transit mark and ticks for the elevation on the observability plot</change>
+        <change>Export VLTI AMBER Observing Block (OB) for a single target (simple)</change>
+        <change>Disable model image widgets when the current target has no defined model</change>
+        <change>Do not use Rho / Theta for the first model in the model editor</change>
+        <change>Replace instead of Append behaviour in the parameter table of the model editor</change>
+      </prerelease>
+      <prerelease version="0.2b4"> <!-- 0.1b10 -->
+        <change>Added circle and elongated disk models</change>
+        <change>Rho / Theta editor instead of X/Y in the model editor</change>
+      </prerelease>
+      <prerelease version="0.2b3"> <!-- 0.1b9 -->
+        <change>First release of the model editor with only punct and disk models</change>
+      </prerelease>
+      <prerelease version="0.2b2"> <!-- 0.1b8 -->
+        <change>Enhanced UV coverage plot with several gui widgets to control the plot (U-V range, amplitude or phase)</change>
+        <change>Better RGB color (LUT) conversion (linear) for visibilities</change>
+        <change>Force LUT Color models to be 256 colors wide with black arround minimum value</change>
+      </prerelease>
+      <prerelease version="0.2b1"> <!-- 0.1b7 -->
+        <change>Imported Target Model from jmcs</change>
+        <change>Corrected several minor style on charts</change>
+        <change>Added target Model uv map on the uv coverage plot with zomming supported</change>
+      </prerelease>
+    </release>
+    <release version="0.1"> <!-- <pubDate>Tue, 16 Feb 2010 12:00:00 GMT</pubDate> -->
+      <prerelease version="0.1b6">
+        <change>Minor bug fixed on UV Coverage plot when the observability displays the baseline limits</change>
+        <change>Fixed PDF text rendering to support greek unicode characters</change>
+      </prerelease>
+      <prerelease version="0.1b5">
+        <change>UV Coverage plot showing observable ranges (sampling, instrument mode)</change>
+        <change>UV Coverage plot showing rise/set tracks</change>
+        <change>Star resolver bug fix for empty proper motion and parallax fields</change>
+        <change>Added PDF generation for plots</change>
+      </prerelease>
+      <prerelease version="0.1b4">
+        <change>Added a best PoPs algorithm for the complete list of targets</change>
+        <change>Fixed JMCS Star resolver for targets without proper motion nor parallax</change>
+        <change>Added PoP user configuration</change>
+        <change>Added CHARA switchyard (beam / station)</change>
+      </prerelease>
+      <prerelease version="0.1b3">
+        <change>Added PoP support</change>
+        <change>Evaluate the best PoP configuration that gives the best observability range for a single target</change>
+      </prerelease>
+      <prerelease version="0.1b2">
+        <change>Added delay line / switchyard / channels in observability plot.</change>
+        <change>Added base line limits</change>
+        <change>Enhanced GUI to set min elevation / detailed plot ...</change>
+      </prerelease>
+      <prerelease version="0.1b1">
+        <change>Complete rewrite of the ASPRO software as a desktop Java application.</change>
+      </prerelease>
+    </release>
+  </releasenotes>
+    <acknowledgment><![CDATA[This research has made use of the Jean-Marie Mariotti Center \texttt{Aspro}
+service \footnote{Available at http://www.jmmc.fr/aspro}.]]></acknowledgment>
+</ApplicationData>
