@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBVLTI.java,v 1.6 2010-06-07 16:03:48 bourgesl Exp $"
+ * "@(#) $Id: ExportOBVLTI.java,v 1.7 2010-06-17 10:02:51 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2010/06/07 16:03:48  bourgesl
+ * minimum elevation changed to 30 degrees
+ *
  * Revision 1.5  2010/05/26 15:29:13  bourgesl
  * light refactoring and javadoc
  *
@@ -74,7 +77,7 @@ public class ExportOBVLTI {
   /** Class Name */
   private static final String className_ = "fr.jmmc.aspro.ob.ExportOBVLTI";
   /** Class logger */
-  protected static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
+  protected static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
   /** double formatter for magnitudes */
   protected final static NumberFormat df3 = new DecimalFormat("0.000");

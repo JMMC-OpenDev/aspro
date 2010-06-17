@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: FileUtils.java,v 1.4 2010-05-26 15:26:02 bourgesl Exp $"
+ * "@(#) $Id: FileUtils.java,v 1.5 2010-06-17 10:02:51 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2010/05/26 15:26:02  bourgesl
+ * line separator is public
+ *
  * Revision 1.3  2010/04/06 08:31:44  bourgesl
  * fixed classloader issue with JNLP
  *
@@ -34,12 +37,12 @@ import java.util.logging.Level;
  * Several File utility methods
  * @author bourgesl
  */
-public class FileUtils {
+public final class FileUtils {
 
   /** Class Name */
   private static final String className_ = "fr.jmmc.aspro.util.FileUtils";
   /** Class logger */
-  private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
   /** platform dependent line separator */
   public static final String LINE_SEPARATOR = System.getProperty("line.separator");
@@ -74,7 +77,7 @@ public class FileUtils {
    * @param fileName file name only no path included
    * @return URL to the file or null
    */
-  public static final URL getResource(final String fileName) {
+  public static URL getResource(final String fileName) {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("getResource : " + fileName);
     }

@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBAction.java,v 1.1 2010-06-09 12:53:00 bourgesl Exp $"
+ * "@(#) $Id: ExportOBAction.java,v 1.2 2010-06-17 10:02:50 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2010/06/09 12:53:00  bourgesl
+ * new action (menu File) that calls the uv coverage panel method performOBAction()
+ *
  */
 package fr.jmmc.aspro.gui.action;
 
@@ -31,7 +34,7 @@ public class ExportOBAction extends RegisteredAction {
   /** Action name. This name is used to register to the ActionRegistrar */
   public final static String actionName = "exportOB";
   /** Class logger */
-  private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(className);
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(className);
 
   /**
    * Public constructor that automatically register the action in RegisteredAction.

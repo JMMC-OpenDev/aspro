@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: GeocentricCoords.java,v 1.5 2010-04-02 14:37:52 bourgesl Exp $"
+ * "@(#) $Id: GeocentricCoords.java,v 1.6 2010-06-17 10:02:50 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2010/04/02 14:37:52  bourgesl
+ * javadoc
+ *
  * Revision 1.4  2009/11/05 12:59:39  bourgesl
  * first simple source observability (only min elevation condition)
  *
@@ -28,15 +31,22 @@ import uk.ac.starlink.pal.Spherical;
  * This class has several methods useful to convert the Geocentric Earth Coordinate frame to Geographic coordinates
  * @author bourgesl
  */
-public class GeocentricCoords {
+public final class GeocentricCoords {
 
   /** Class Name */
   private static final String className_ = "fr.jmmc.aspro.service.GeocentricCoords";
   /** Class logger */
-  private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
   /** AstroLib Positional astronomical Library instance */
-  private static Pal pal = new Pal();
+  private final static Pal pal = new Pal();
+
+  /**
+   * Forbidden constructor
+   */
+  private GeocentricCoords() {
+    // no-op
+  }
 
   /**
    * Return the longitude, latitude in radians and the altitude (m)
@@ -52,6 +62,7 @@ public class GeocentricCoords {
 
   /**
    * Dump the given spherical coordinates in the logs
+   * @param msg starting message
    * @param sph longitude, latitude in radians and the distance (m)
    */
   public static void dump(final String msg, final Spherical sph) {
@@ -65,11 +76,12 @@ public class GeocentricCoords {
    * @param lon longitude in radians
    * @param lat latitude in radians
    * @param d distance (m)
+   * @return string representing the given coordinates
    */
   public static String toString(final double lon, final double lat, final double d) {
-    return pal.Dr2af(lon) + ", " +
-           pal.Dr2af(lat) + ", " +
-           d + " m";
+    return pal.Dr2af(lon) + ", "
+            + pal.Dr2af(lat) + ", "
+            + d + " m";
   }
 
   /**

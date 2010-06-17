@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BasicObservationForm.java,v 1.29 2010-06-07 16:04:15 bourgesl Exp $"
+ * "@(#) $Id: BasicObservationForm.java,v 1.30 2010-06-17 10:02:51 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.29  2010/06/07 16:04:15  bourgesl
+ * change the default behaviour on the date spinner to adjust the day field
+ *
  * Revision 1.28  2010/05/20 12:14:13  bourgesl
  * constraints are reordered : night restriction, date and min elevation
  *
@@ -138,7 +141,7 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
   /** Class Name */
   private static final String className_ = "fr.jmmc.aspro.gui.BasicObservationForm";
   /** Class logger */
-  private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
   /** flag to log a stack trace in method updateObservation() to detect multiple calls */
   private final static boolean DEBUG_UPDATE_EVENT = false;

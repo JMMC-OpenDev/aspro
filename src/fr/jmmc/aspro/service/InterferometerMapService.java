@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: InterferometerMapService.java,v 1.1 2010-05-11 12:08:27 bourgesl Exp $"
+ * "@(#) $Id: InterferometerMapService.java,v 1.2 2010-06-17 10:02:50 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2010/05/11 12:08:27  bourgesl
+ * simple Interferometer Map (stations + baselines) automatically refreshed when the chosen baseline configuration changes
+ *
  */
 package fr.jmmc.aspro.service;
 
@@ -25,12 +28,12 @@ import java.util.logging.Level;
  * This service is stateless to compute the station positions (X,Y) and the chosen baselines
  * @author bourgesl
  */
-public class InterferometerMapService {
+public final class InterferometerMapService {
 
   /** Class Name */
   private static final String className_ = "fr.jmmc.aspro.service.InterferometerMapService";
   /** Class logger */
-  private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
   /** double formatter for baseline length */
   protected final static NumberFormat df2 = new DecimalFormat("0.00");
@@ -181,7 +184,6 @@ public class InterferometerMapService {
       data.setBaselineStationY1(blY1);
       data.setBaselineStationX2(blX2);
       data.setBaselineStationY2(blY2);
-
     }
 
     return data;
@@ -209,7 +211,7 @@ public class InterferometerMapService {
 
   private static final void relocate(final double[] values, final double center) {
     for (int i = 0, len = values.length; i < len; i++) {
-      values[i] = values[i] - center;
+      values[i] -= center;
     }
   }
 

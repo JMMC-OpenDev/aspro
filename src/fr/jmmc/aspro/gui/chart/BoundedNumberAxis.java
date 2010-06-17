@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BoundedNumberAxis.java,v 1.4 2010-05-11 12:02:24 bourgesl Exp $"
+ * "@(#) $Id: BoundedNumberAxis.java,v 1.5 2010-06-17 10:02:50 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2010/05/11 12:02:24  bourgesl
+ * disable autoRange at all
+ *
  * Revision 1.3  2010/02/12 15:53:25  bourgesl
  * comments
  *
@@ -29,14 +32,14 @@ import org.jfree.ui.RectangleInsets;
  *
  * @author bourgesl
  */
-public class BoundedNumberAxis extends NumberAxis {
+public final class BoundedNumberAxis extends NumberAxis {
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
   /** Class Name */
   private static final String className_ = "fr.jmmc.aspro.gui.chart.BoundedNumberAxis";
   /** Class logger */
-  private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
   /** default tick rectangle insets */
   public final static RectangleInsets TICK_LABEL_INSETS = new RectangleInsets(1.0, 1.0, 1.0, 1.0);

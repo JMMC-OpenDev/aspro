@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: HorizonService.java,v 1.2 2009-11-27 16:37:51 bourgesl Exp $"
+ * "@(#) $Id: HorizonService.java,v 1.3 2010-06-17 10:02:50 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2009/11/27 16:37:51  bourgesl
+ * fixed azimuth to south = 0
+ *
  * Revision 1.1  2009/11/23 16:49:17  bourgesl
  * added horizonService to check horizon profiles (VLTI)
  *
@@ -25,15 +28,15 @@ import java.util.Map;
  * This class checks if an azimuth / elevation coordinate is over the telescope horizon
  * @author bourgesl
  */
-public class HorizonService {
+public final class HorizonService {
 
   /** Class Name */
   private static final String className_ = "fr.jmmc.aspro.service.HorizonService";
   /** Class logger */
-  private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
   /** singleton instance */
-  private static HorizonService instance = new HorizonService();
+  private static final HorizonService instance = new HorizonService();
 
   /* members */
   /** cached horizon profiles : low memory impact */
@@ -49,6 +52,7 @@ public class HorizonService {
 
   /**
    * Give the profile corresponding to the given station
+   * @param interferometerName interferometer name used to compute a cache key (interferometer name - station name)
    * @param station station to use
    * @return profile or null if there is no horizon profile for the given station
    */
@@ -117,6 +121,7 @@ public class HorizonService {
    * Simple protected class to use the java shape API to check if a point is inside a polygon
    */
   protected class Profile {
+
     /** station name */
     private String name;
     /** internal shape */
@@ -134,6 +139,5 @@ public class HorizonService {
     public String getName() {
       return name;
     }
-
   }
 }

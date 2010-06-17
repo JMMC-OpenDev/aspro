@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ConfigurationManager.java,v 1.22 2010-06-11 09:10:12 bourgesl Exp $"
+ * "@(#) $Id: ConfigurationManager.java,v 1.23 2010-06-17 10:02:51 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.22  2010/06/11 09:10:12  bourgesl
+ * added log message to help debugging JNLP Offline problems
+ *
  * Revision 1.21  2010/05/26 09:13:15  bourgesl
  * added related channels to the instrument configuration (CHARA)
  *
@@ -112,7 +115,7 @@ public class ConfigurationManager extends BaseOIManager {
   /** Class Name */
   private static final String className_ = "fr.jmmc.aspro.model.ConfigurationManager";
   /** Class logger */
-  private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
   /** Configurations file name */
   private static final String CONF_FILE = "AsproOIConfigurations.xml";

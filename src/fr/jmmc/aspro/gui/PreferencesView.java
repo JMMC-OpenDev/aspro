@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: PreferencesView.java,v 1.5 2010-06-08 12:32:46 bourgesl Exp $"
+ * "@(#) $Id: PreferencesView.java,v 1.6 2010-06-17 10:02:50 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2010/06/08 12:32:46  bourgesl
+ * javadoc
+ *
  * Revision 1.4  2010/05/21 14:27:34  bourgesl
  * added preferences for Model Image Lut & Size
  *
@@ -41,7 +44,7 @@ public class PreferencesView extends javax.swing.JFrame implements Observer {
   /** Class Name */
   private static final String className_ = "fr.jmmc.aspro.gui.PreferencesView";
   /** Class logger */
-  private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
   /** preference singleton */
   private final static Preferences myPreferences = Preferences.getInstance();

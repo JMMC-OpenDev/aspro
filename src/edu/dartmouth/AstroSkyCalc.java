@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AstroSkyCalc.java,v 1.19 2010-05-26 15:28:09 bourgesl Exp $"
+ * "@(#) $Id: AstroSkyCalc.java,v 1.20 2010-06-17 10:02:51 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.19  2010/05/26 15:28:09  bourgesl
+ * added method toString(ra, raDigits, dec, decDigits) to choose the number of digits
+ *
  * Revision 1.18  2010/04/02 14:39:19  bourgesl
  * elevation in degrees instead of rad
  *
@@ -45,7 +48,7 @@ public class AstroSkyCalc {
   /** Class Name */
   private static final String className_ = "edu.dartmouth.AstroSkyCalc";
   /** Class logger */
-  private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
   /** time ratio : lst to jd */
   public static double LST_TO_JD = 24d * Const.SID_RATE;

@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBVega.java,v 1.4 2010-06-07 16:03:48 bourgesl Exp $"
+ * "@(#) $Id: ExportOBVega.java,v 1.5 2010-06-17 10:02:51 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2010/06/07 16:03:48  bourgesl
+ * minimum elevation changed to 30 degrees
+ *
  * Revision 1.3  2010/05/31 09:45:00  bourgesl
  * restored fluxes H and J
  *
@@ -50,7 +53,7 @@ public class ExportOBVega {
   /** Class Name */
   private static final String className_ = "fr.jmmc.aspro.ob.ExportOBVega";
   /** Class logger */
-  protected static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
+  protected static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
   /** double formatter for magnitudes */
   protected final static NumberFormat df2 = new DecimalFormat("0.00");

@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SquareXYPlot.java,v 1.6 2010-02-18 09:52:37 bourgesl Exp $"
+ * "@(#) $Id: SquareXYPlot.java,v 1.7 2010-06-17 10:02:50 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2010/02/18 09:52:37  bourgesl
+ * added rendering hints (anti-aliasing)
+ *
  * Revision 1.5  2010/02/04 17:05:06  bourgesl
  * UV bounds are coming from UVCoverageService
  *
@@ -54,7 +57,7 @@ public class SquareXYPlot extends XYPlot {
   /** Class Name */
   private static final String className_ = "fr.jmmc.aspro.gui.chart.SquareXYPlot";
   /** Class logger */
-  private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
 
   /**

@@ -19,7 +19,7 @@ public final class JAXBFactory {
   /** Class Name */
   private static final String className_ = "fr.jmmc.jaxb.JAXBFactory";
   /** Class logger */
-  private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
 
   /** all factories */
@@ -49,7 +49,7 @@ public final class JAXBFactory {
    *
    * @return JAXBFactory initialized
    */
-  public static final JAXBFactory getInstance(final String jaxbPath) {
+  public static JAXBFactory getInstance(final String jaxbPath) {
     JAXBFactory jf = managedInstances.get(jaxbPath);
 
     if (jf == null) {
@@ -72,7 +72,7 @@ public final class JAXBFactory {
    *
    * @throws RuntimeException if a problem occured
    */
-  protected void initialize() throws IllegalStateException {
+  protected void initialize() throws RuntimeException {
     try {
       this.jc = getContext(jaxbPath);
     } catch (final RuntimeException re) {

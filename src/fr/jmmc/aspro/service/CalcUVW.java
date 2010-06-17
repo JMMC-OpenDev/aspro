@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: CalcUVW.java,v 1.2 2010-01-08 16:51:17 bourgesl Exp $"
+ * "@(#) $Id: CalcUVW.java,v 1.3 2010-06-17 10:02:50 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2010/01/08 16:51:17  bourgesl
+ * initial uv coverage
+ *
  * Revision 1.1  2010/01/05 17:17:50  bourgesl
  * added U,V,W computation
  */
@@ -18,6 +21,13 @@ import fr.jmmc.aspro.model.BaseLine;
  * @author bourgesl
  */
 public final class CalcUVW {
+
+  /**
+   * Forbidden constructor
+   */
+  private CalcUVW() {
+    // no-op
+  }
 
   /**
    * Compute U(H) = sin(H)*X+cos(H)*Y

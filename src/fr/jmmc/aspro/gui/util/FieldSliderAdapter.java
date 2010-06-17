@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: FieldSliderAdapter.java,v 1.4 2010-05-06 15:41:02 bourgesl Exp $"
+ * "@(#) $Id: FieldSliderAdapter.java,v 1.5 2010-06-17 10:02:51 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2010/05/06 15:41:02  bourgesl
+ * the default value sends a listener event
+ *
  * Revision 1.3  2010/05/05 14:29:22  bourgesl
  * javadoc
  *
@@ -33,12 +36,12 @@ import javax.swing.event.ChangeListener;
  * This class manages the interaction between a JFormattedTextField (numeric) and a JSlider
  * @author bourgesl
  */
-public class FieldSliderAdapter implements ChangeListener, PropertyChangeListener {
+public final class FieldSliderAdapter implements ChangeListener, PropertyChangeListener {
 
   /** Class Name */
   private static final String className_ = "fr.jmmc.aspro.gui.util.FieldSliderAdapter";
   /** Class logger */
-  private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
 
   /* members */

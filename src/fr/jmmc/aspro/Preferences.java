@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: Preferences.java,v 1.3 2010-06-09 12:49:39 bourgesl Exp $"
+ * "@(#) $Id: Preferences.java,v 1.4 2010-06-17 10:02:51 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2010/06/09 12:49:39  bourgesl
+ * added an hidden preference (splash.screen.show) to show the splashscreen at startup
+ *
  * Revision 1.2  2010/05/21 14:27:34  bourgesl
  * added preferences for Model Image Lut & Size
  *
@@ -30,7 +33,7 @@ public class Preferences extends fr.jmmc.mcs.util.Preferences {
   /** Class Name */
   private final static String className_ = "fr.jmmc.aspro.Preferences";
   /** Logger */
-  static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
   /* Preferences */
   /** Preference : display splash screen */

@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBVLTIAction.java,v 1.7 2010-06-10 13:43:42 bourgesl Exp $"
+ * "@(#) $Id: ExportOBVLTIAction.java,v 1.8 2010-06-17 10:02:50 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2010/06/10 13:43:42  bourgesl
+ * fixed file description with extension
+ *
  * Revision 1.6  2010/06/09 12:53:42  bourgesl
  * actionPerformed() method renamed to process() because it does not implement Action
  * javadoc
@@ -58,7 +61,7 @@ public class ExportOBVLTIAction {
   /** Class name. This name is used to register to the ActionRegistrar */
   public final static String className = "fr.jmmc.aspro.gui.action.ExportOBVLTIAction";
   /** Class logger */
-  private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(className);
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(className);
   /** OBX mime type */
   public static final String OBX_MIME_TYPE = "application/obx";
   /** OBX extension */

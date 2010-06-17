@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBVegaAction.java,v 1.3 2010-06-10 13:43:42 bourgesl Exp $"
+ * "@(#) $Id: ExportOBVegaAction.java,v 1.4 2010-06-17 10:02:50 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2010/06/10 13:43:42  bourgesl
+ * fixed file description with extension
+ *
  * Revision 1.2  2010/06/09 12:53:42  bourgesl
  * actionPerformed() method renamed to process() because it does not implement Action
  * javadoc
@@ -39,7 +42,7 @@ public class ExportOBVegaAction {
   /** Class name. This name is used to register to the ActionRegistrar */
   public final static String className = "fr.jmmc.aspro.gui.action.ExportOBVegaAction";
   /** Class logger */
-  private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(className);
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(className);
   /** PDF mime type */
   public static final String TXT_MIME_TYPE = "text/plain";
   /** PDF extension */

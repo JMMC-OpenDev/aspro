@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SwingWorkerExecutor.java,v 1.1 2010-02-03 16:06:47 bourgesl Exp $"
+ * "@(#) $Id: SwingWorkerExecutor.java,v 1.2 2010-06-17 10:02:51 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2010/02/03 16:06:47  bourgesl
+ * special swing worker executor to have a single thread (serialized computations) and manages cancellation of previous computation task of the same kind
+ *
  */
 package fr.jmmc.aspro.gui.util;
 
@@ -29,7 +32,7 @@ public final class SwingWorkerExecutor {
   /** Class Name */
   private static final String className_ = "fr.jmmc.aspro.gui.util.SwingWorkerExecutor";
   /** Class logger */
-  private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
   /** singleton instance */
   private static SwingWorkerExecutor instance = null;

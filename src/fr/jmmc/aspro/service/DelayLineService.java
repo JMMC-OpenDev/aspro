@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: DelayLineService.java,v 1.10 2010-05-06 15:41:20 bourgesl Exp $"
+ * "@(#) $Id: DelayLineService.java,v 1.11 2010-06-17 10:02:50 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.10  2010/05/06 15:41:20  bourgesl
+ * use AsproConstants HA Min/Max
+ *
  * Revision 1.9  2010/01/08 16:51:17  bourgesl
  * initial uv coverage
  *
@@ -56,7 +59,7 @@ public class DelayLineService {
   /** Class Name */
   private static final String className_ = "fr.jmmc.aspro.service.DelayLineService";
   /** Class logger */
-  private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
 
   /**

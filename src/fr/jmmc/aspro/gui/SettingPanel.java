@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SettingPanel.java,v 1.19 2010-06-09 12:51:53 bourgesl Exp $"
+ * "@(#) $Id: SettingPanel.java,v 1.20 2010-06-17 10:02:50 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.19  2010/06/09 12:51:53  bourgesl
+ * add getTabSelectedComponent() to get the current active tab component (use to export chart to PDF)
+ *
  * Revision 1.18  2010/06/08 14:49:29  bourgesl
  * fixed the 'baseLine Limits' bug that has a side effect = UV Coverage is unavailable
  * javadoc
@@ -77,7 +80,7 @@ public class SettingPanel extends JPanel implements ObservationListener {
   /** Class Name */
   private static final String className_ = "fr.jmmc.aspro.gui.SettingPanel";
   /** Class logger */
-  private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
 
   /* Tab names */

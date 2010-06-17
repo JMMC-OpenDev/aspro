@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationManager.java,v 1.29 2010-06-10 08:54:30 bourgesl Exp $"
+ * "@(#) $Id: ObservationManager.java,v 1.30 2010-06-17 10:02:51 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.29  2010/06/10 08:54:30  bourgesl
+ * added time monitoring for fireEvent method
+ *
  * Revision 1.28  2010/05/06 15:37:27  bourgesl
  * added TargetConfiguration to gather HA Min/Max, FT Mode and other future target related configuration
  *
@@ -130,7 +133,7 @@ public class ObservationManager extends BaseOIManager {
   /** Class Name */
   private static final String className_ = "fr.jmmc.aspro.model.ObservationManager";
   /** Class logger */
-  private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
   /** singleton pattern */
   private static ObservationManager instance = new ObservationManager();

@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SquareChartPanel.java,v 1.4 2010-02-04 14:45:43 bourgesl Exp $"
+ * "@(#) $Id: SquareChartPanel.java,v 1.5 2010-06-17 10:02:50 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2010/02/04 14:45:43  bourgesl
+ * try / finally srtucture to be sure to call plot.setNotify in any case (exception ...) causing the plot to be frozen (no more refresh)
+ *
  * Revision 1.3  2010/02/03 09:48:53  bourgesl
  * target model uvmap added on the uv coverage with zooming supported
  *
@@ -50,7 +53,7 @@ public class SquareChartPanel extends ChartPanel {
   /** Class Name */
   private static final String className_ = "fr.jmmc.aspro.gui.chart.SquareChartPanel";
   /** Class logger */
-  private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
 
   /* members */

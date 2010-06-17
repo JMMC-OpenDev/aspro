@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoverageService.java,v 1.18 2010-06-10 08:54:59 bourgesl Exp $"
+ * "@(#) $Id: UVCoverageService.java,v 1.19 2010-06-17 10:02:50 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.18  2010/06/10 08:54:59  bourgesl
+ * only log the compute duration if the operation completed normally
+ *
  * Revision 1.17  2010/05/06 15:42:18  bourgesl
  * use HA Min/Max + FT Mode for the target in the observation settings
  *
@@ -86,12 +89,12 @@ import java.util.logging.Level;
  * This service is dedicated to compute the UV tracks for a given target
  * @author bourgesl
  */
-public class UVCoverageService {
+public final class UVCoverageService {
 
   /** Class Name */
   private static final String className_ = "fr.jmmc.aspro.service.UVCoverageService";
   /** Class logger */
-  private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
 
   /* members */
@@ -308,8 +311,8 @@ public class UVCoverageService {
         // wavelength correction :
 
         // Spatial frequency (rad-1) :
-        u[j] = u[j] / this.lambda;
-        v[j] = v[j] / this.lambda;
+        u[j] /= this.lambda;
+        v[j] /= this.lambda;
 
         j++;
       }
@@ -395,11 +398,11 @@ public class UVCoverageService {
             // wavelength correction :
 
             // Spatial frequency (rad-1) :
-            u[j] = u[j] / this.lambdaMin;
-            v[j] = v[j] / this.lambdaMin;
+            u[j] /= this.lambdaMin;
+            v[j] /= this.lambdaMin;
 
-            u2[j] = u2[j] / this.lambdaMax;
-            v2[j] = v2[j] / this.lambdaMax;
+            u2[j] /= this.lambdaMax;
+            v2[j] /= this.lambdaMax;
 
             j++;
           }

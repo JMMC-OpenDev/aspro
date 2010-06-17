@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.46 2010-06-10 08:55:00 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.47 2010-06-17 10:02:50 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.46  2010/06/10 08:55:00  bourgesl
+ * only log the compute duration if the operation completed normally
+ *
  * Revision 1.45  2010/05/26 15:33:06  bourgesl
  * fixed constructors
  *
@@ -204,12 +207,12 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *
  * @author bourgesl
  */
-public class ObservabilityService {
+public final class ObservabilityService {
 
   /** Class Name */
   private static final String className_ = "fr.jmmc.aspro.service.ObservabilityService";
   /** Class logger */
-  private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
 
   /* members */

@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetModelForm.java,v 1.21 2010-06-11 08:40:34 bourgesl Exp $"
+ * "@(#) $Id: TargetModelForm.java,v 1.22 2010-06-17 10:02:51 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.21  2010/06/11 08:40:34  bourgesl
+ * restored table selection listener to have both tree and description in synch with the current selected model in the parameters table
+ *
  * Revision 1.20  2010/06/10 14:20:58  bourgesl
  * model separator is in dark gray if the grid color is white (mac)
  *
@@ -126,7 +129,7 @@ public class TargetModelForm extends javax.swing.JPanel implements ActionListene
   /** Class Name */
   private static final String className_ = "fr.jmmc.aspro.gui.TargetModelForm";
   /** Class logger */
-  private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
 
   /* members */

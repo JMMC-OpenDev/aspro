@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproGui.java,v 1.19 2010-06-10 08:52:53 bourgesl Exp $"
+ * "@(#) $Id: AsproGui.java,v 1.20 2010-06-17 10:02:51 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.19  2010/06/10 08:52:53  bourgesl
+ * modified minimum delay for tooltips to 250ms
+ *
  * Revision 1.18  2010/06/09 12:49:03  bourgesl
  * use an hidden preference to show the splashscreen
  * added Export OB and PDF actions
@@ -98,7 +101,7 @@ public final class AsproGui extends App {
   /** Class Name */
   private static final String className_ = "fr.jmmc.aspro.AsproGui";
   /** Class logger */
-  private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
 
   /* members */

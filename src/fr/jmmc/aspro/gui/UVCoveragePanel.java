@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.42 2010-06-10 08:54:06 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.43 2010-06-17 10:02:51 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.42  2010/06/10 08:54:06  bourgesl
+ * rename variable
+ *
  * Revision 1.41  2010/06/09 12:51:09  bourgesl
  * new interface PDFExportable to define a standard method performPDFAction() that use ExportPDFAction to export the chart to PDF
  *
@@ -223,7 +226,7 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
   /** Class Name */
   private static final String className_ = "fr.jmmc.aspro.gui.UVChartPanel";
   /** Class logger */
-  private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
   /** flag to log a stack trace in method updateObservation() to detect multiple calls */
   private final static boolean DEBUG_UPDATE_EVENT = false;

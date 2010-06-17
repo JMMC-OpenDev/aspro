@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BaseOIManager.java,v 1.12 2010-06-11 09:43:24 bourgesl Exp $"
+ * "@(#) $Id: BaseOIManager.java,v 1.13 2010-06-17 10:02:51 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.12  2010/06/11 09:43:24  bourgesl
+ * definitely use getResourceAsStream to fix bugs with jnlp offline mode
+ *
  * Revision 1.11  2010/06/11 09:35:05  bourgesl
  * trying to use getResourceAsStream for jnlp offline mode
  *
@@ -48,7 +51,6 @@ package fr.jmmc.aspro.model;
 
 import fr.jmmc.jaxb.JAXBFactory;
 import java.io.File;
-import java.net.URL;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -70,7 +72,7 @@ public class BaseOIManager {
   /** Class Name */
   private static final String className_ = "fr.jmmc.aspro.model.BaseOIManager";
   /** Class logger */
-  private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
   /** package name for JAXB generated code */
   private final static String OI_JAXB_PATH = "fr.jmmc.aspro.model.oi";

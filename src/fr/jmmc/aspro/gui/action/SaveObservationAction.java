@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SaveObservationAction.java,v 1.7 2010-06-11 13:48:09 bourgesl Exp $"
+ * "@(#) $Id: SaveObservationAction.java,v 1.8 2010-06-17 10:02:50 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2010/06/11 13:48:09  bourgesl
+ * javadoc
+ *
  * Revision 1.6  2010/06/09 12:54:12  bourgesl
  * javadoc
  *
@@ -48,7 +51,7 @@ public class SaveObservationAction extends ObservationFileAction {
   /** Action name. This name is used to register to the ActionRegistrar */
   public final static String actionName = "saveObservation";
   /** Class logger */
-  private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(className);
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(className);
 
   /**
    * Public constructor that automatically register the action in RegisteredAction.
