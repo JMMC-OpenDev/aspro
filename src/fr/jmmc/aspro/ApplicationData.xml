@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <ApplicationData link="http://www.jmmc.fr/aspro2">
-  <program name="Aspro2" version="0.5.0"/>
+  <program name="Aspro2" version="0.5.1"/>
   <compilation date="21/09/2009" compiler="JDK 1.5.0_16"/>
   <text>
     <![CDATA[ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations
@@ -36,8 +36,11 @@
     </menu>
   </menubar>
   <releasenotes>
-    <release version="0.5"> <!-- <pubDate>Thu, 17 Jun 2010 14:00:00 GMT</pubDate> -->
-      <prerelease version="0.5.0">
+    <release version="0.5">
+      <prerelease version="0.5.1">
+        <change>Added oitools module</change>
+      </prerelease>
+      <prerelease version="0.5.0"> <!-- <pubDate>Thu, 17 Jun 2010 14:00:00 GMT</pubDate> -->
         <change>First public release of Aspro 2</change>
         <change>Fixed some JNLP problems in offline mode</change>
         <change>Added JNLP association with 'asprox' files to be opened at startup</change>
