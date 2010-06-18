@@ -6,12 +6,20 @@
   	Aspro ant build file
   </description>
 
+
+	<!--
+    Get build properties (general).
+	  Should only contain the location of the JMCS module where JAXB libraries can be found.
+	-->
+  <property file="build.properties" />
+
+  <!-- define folder properties -->
   <property name="root" location=".."/>
 
   <!-- JAXB library must be present in the jmcs module nearby -->
-  <property name="jaxb.libs" location="${root}/../jmcs/lib"/>
+  <property name="jaxb.libs" location="${jmcs.path}/lib"/>
 
-  <property name="libs" location="${root}/lib"/>
+  <!-- Aspro src folder -->
   <property name="sources" location="${root}/src"/>
 
 
@@ -23,7 +31,7 @@
     <sequential>
       <java jar="${jaxb.libs}/jaxb-xjc.jar">
         <arg value="-classpath"/>
-        <arg value="${libs}/simple-regenerator-1.0.jar"/>
+        <arg value="${jaxb.libs}/simple-regenerator-1.0.jar"/>
 
         <arg value="-no-header"/>
 
@@ -40,8 +48,10 @@
       <delete dir="@{destdir}">
         <include name="**/*.java.backup"/>
       </delete>
-      </sequential>
+    </sequential>
   </macrodef>
+
+
 
 
   <!-- targets -->
