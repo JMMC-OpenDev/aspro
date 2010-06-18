@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproGui.java,v 1.21 2010-06-18 12:00:40 bourgesl Exp $"
+ * "@(#) $Id: AsproGui.java,v 1.22 2010-06-18 13:31:07 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.21  2010/06/18 12:00:40  bourgesl
+ * added oitools module
+ *
  * Revision 1.20  2010/06/17 10:02:51  bourgesl
  * fixed warning hints - mainly not final static loggers
  *
@@ -83,14 +86,12 @@ import fr.jmmc.aspro.model.ConfigurationManager;
 import fr.jmmc.mcs.gui.App;
 import fr.jmmc.mcs.gui.StatusBar;
 import fr.jmmc.mcs.util.Urls;
-import fr.jmmc.oitools.OIFitsViewer;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Locale;
 import java.util.TimeZone;
-import java.util.logging.Level;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -231,10 +232,6 @@ public final class AsproGui extends App {
    */
   public static void main(final String[] args) {
 
-    // TODO : remove
-    dumpFile("/home/bourgesl/oidata/ASPRO-STAR_1-AMBER-08-OCT-2009T08:17:39.fits");
-
-
     // Set the default locale to en-US locale (for Numerical Fields "." ",")
     Locale.setDefault(Locale.US);
     // Set the default timezone to GMT to handle properly the date in UTC :
@@ -258,30 +255,5 @@ public final class AsproGui extends App {
     // Let the tooltip stay longer (60s) :
     ToolTipManager.sharedInstance().setInitialDelay(250);
     ToolTipManager.sharedInstance().setDismissDelay(60000);
-  }
-
-
-  /**
-   * Test OITools module dependency
-   * @param absFilePath
-   * @return
-   */
-  public static int dumpFile(final String absFilePath) {
-    int error = 0;
-
-    try {
-      logger.info("Reading file : " + absFilePath);
-
-      final long start = System.nanoTime();
-
-      new OIFitsViewer(absFilePath);
-
-      logger.info("dumpFile : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
-
-    } catch (Throwable th) {
-      logger.log(Level.SEVERE, "IO failure occured while reading file : " + absFilePath, th);
-      error = 1;
-    }
-    return error;
   }
 }
