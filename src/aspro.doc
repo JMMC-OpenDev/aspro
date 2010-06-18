@@ -1,19 +1,22 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: aspro.doc,v 1.1 2009-09-08 08:15:21 ccmgr Exp $"
+ * "@(#) $Id: aspro.doc,v 1.2 2010-06-18 13:34:14 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2009/09/08 08:15:21  ccmgr
+ * Fix directory structure and add additional files
+ *
  ******************************************************************************/
 
 /**
-\mainpage aspro : Summary module description sentence
+\mainpage aspro : The new version of Aspro is a Java standalone program that helps you to prepare observations on various optical interferometers.
 
 \bdesc
-Brief module description. There could be one or more sentences in this short
-module description.
+This module contains the Aspro 2 standalone GUI application.
+It requires following modules : jmcs oitools.
 
 \ddesc
 Detailed module description.
