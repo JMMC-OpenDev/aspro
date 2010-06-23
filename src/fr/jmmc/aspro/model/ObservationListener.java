@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationListener.java,v 1.3 2010-01-08 16:51:17 bourgesl Exp $"
+ * "@(#) $Id: ObservationListener.java,v 1.4 2010-06-23 12:53:48 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2010/01/08 16:51:17  bourgesl
+ * initial uv coverage
+ *
  * Revision 1.2  2009/12/04 15:38:27  bourgesl
  * Added Save action in the menu bar
  *
@@ -24,6 +27,9 @@ import fr.jmmc.aspro.model.oi.ObservationSetting;
  */
 public interface ObservationListener {
 
+  /**
+   * This enumeration defines the several kind of observation events
+   */
   enum ObservationEventType {
 
     /** one or more attribute(s) changed */
@@ -31,7 +37,9 @@ public interface ObservationListener {
     /** the observation was loaded */
     LOADED,
     /** the observability was computed */
-    OBSERVABILITY_DONE
+    OBSERVABILITY_DONE,
+    /** the OIFits was computed */
+    OIFITS_DONE
   }
 
   /**

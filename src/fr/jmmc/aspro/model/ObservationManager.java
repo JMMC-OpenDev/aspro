@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationManager.java,v 1.30 2010-06-17 10:02:51 bourgesl Exp $"
+ * "@(#) $Id: ObservationManager.java,v 1.31 2010-06-23 12:53:48 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.30  2010/06/17 10:02:51  bourgesl
+ * fixed warning hints - mainly not final static loggers
+ *
  * Revision 1.29  2010/06/10 08:54:30  bourgesl
  * added time monitoring for fireEvent method
  *
@@ -114,6 +117,7 @@ import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetConfiguration;
 import fr.jmmc.aspro.model.oi.WhenSetting;
 import fr.jmmc.mcs.astro.star.Star;
+import fr.jmmc.oitools.model.OIFitsFile;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
@@ -460,11 +464,11 @@ public class ObservationManager extends BaseOIManager {
         // Object types :
         t.setOBJTYP(star.getPropertyAsString(Star.Property.OTYPELIST));
 
-        // Radial velocity :
+        // Radial velocity (km/s) (optional) :
         t.setSYSVEL(star.getPropertyAsDouble(Star.Property.RV));
         t.setVELTYP(star.getPropertyAsString(Star.Property.RV_DEF));
 
-        // Object types :
+        // Identifiers :
         t.setIDS(star.getPropertyAsString(Star.Property.IDS));
 
         getObservation().getTargets().add(t);
@@ -612,6 +616,22 @@ public class ObservationManager extends BaseOIManager {
   }
 
   /**
+   * Defines the OIFits structure in the observation for later reuse (Visiblity Explorer)
+   * @param oiFitsFile OIFits structure
+   */
+  public void setOIFitsFile(final OIFitsFile oiFitsFile) {
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("setOIFitsFile : " + oiFitsFile);
+    }
+
+    getObservation().setOIFitsFile(oiFitsFile);
+
+    if (oiFitsFile != null) {
+      fireOIFitsDone();
+    }
+  }
+
+  /**
    * Save the current observation in the given file
    * @param file file to save
    * @throws RuntimeException if the save operation failed
@@ -694,6 +714,17 @@ public class ObservationManager extends BaseOIManager {
     }
 
     fireEvent(ObservationEventType.OBSERVABILITY_DONE);
+  }
+
+  /**
+   * This fires an OIFits done event to all registered listeners
+   */
+  public void fireOIFitsDone() {
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("fireOIFitsDone : " + toString(getObservation()));
+    }
+
+    fireEvent(ObservationEventType.OIFITS_DONE);
   }
 
   /**
