@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoverageService.java,v 1.20 2010-06-23 12:56:13 bourgesl Exp $"
+ * "@(#) $Id: UVCoverageService.java,v 1.21 2010-06-23 15:44:06 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.20  2010/06/23 12:56:13  bourgesl
+ * added OIFits structure generation with OI_ARRAY and OI_TARGET tables
+ *
  * Revision 1.19  2010/06/17 10:02:50  bourgesl
  * fixed warning hints - mainly not final static loggers
  *
@@ -137,6 +140,8 @@ public final class UVCoverageService {
   private double lambda;
   /** maximal wavelength */
   private double lambdaMax;
+  /** number of spectral channels (used by OIFits) */
+  private int nSpectralChannels;
   /** maximum U or V coordinate (corrected by the minimal wavelength) */
   private double uvMax;
   /** HA min in decimal hours */
@@ -495,13 +500,14 @@ public final class UVCoverageService {
 
     this.lambdaMin = insMode.getWaveLengthMin() * AsproConstants.MICRO_METER;
     this.lambdaMax = insMode.getWaveLengthMax() * AsproConstants.MICRO_METER;
-
-    this.lambda = (this.lambdaMax + this.lambdaMin) / 2d;
+    this.lambda = insMode.getWaveLength() * AsproConstants.MICRO_METER;
+    this.nSpectralChannels = insMode.getEffectiveNumberOfChannels();
 
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("lambdaMin : " + this.lambdaMin);
       logger.fine("lambda    : " + this.lambda);
       logger.fine("lambdaMax : " + this.lambdaMax);
+      logger.fine("nChannels : " + this.nSpectralChannels);
     }
 
     // HA Min / Max :
@@ -543,14 +549,25 @@ public final class UVCoverageService {
 
     this.oiFitsFile = new OIFitsFile();
 
+    final String arrName = this.observation.getInterferometerConfiguration().getName();
+    final String insName = this.observation.getInstrumentConfiguration().getName();
+
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("arrName : " + arrName);
+      logger.fine("insName : " + insName);
+    }
+
     // OI_ARRAY :
     // station indexes are given according to the beam list ordering starting from 1 :
-    OIFitsCreatorService.createOIArray(this.oiFitsFile, this.observation, this.beams);
+    OIFitsCreatorService.createOIArray(this.oiFitsFile, this.observation, arrName, this.beams);
 
     // OI_TARGET :
     final Target target = ObservationManager.getTarget(this.observation, this.targetName);
     // target index is 1
     OIFitsCreatorService.createOITarget(this.oiFitsFile, target);
+
+    // OI_WAVELENGTH :
+    OIFitsCreatorService.createOIWaveLength(this.oiFitsFile, insName, this.lambdaMin, this.lambdaMax, this.nSpectralChannels);
 
     // TODO
 

@@ -1,15 +1,20 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: OIFitsCreatorService.java,v 1.1 2010-06-23 12:56:13 bourgesl Exp $"
+ * "@(#) $Id: OIFitsCreatorService.java,v 1.2 2010-06-23 15:44:06 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2010/06/23 12:56:13  bourgesl
+ * added OIFits structure generation with OI_ARRAY and OI_TARGET tables
+ *
  */
 package fr.jmmc.aspro.service;
 
+import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.Beam;
+import fr.jmmc.aspro.model.oi.FocalInstrumentMode;
 import fr.jmmc.aspro.model.oi.InterferometerConfiguration;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Position3D;
@@ -21,7 +26,9 @@ import fr.jmmc.oitools.OIFitsConstants;
 import fr.jmmc.oitools.model.OIArray;
 import fr.jmmc.oitools.model.OIFitsFile;
 import fr.jmmc.oitools.model.OITarget;
+import fr.jmmc.oitools.model.OIWavelength;
 import java.util.List;
+import java.util.logging.Level;
 
 /**
  * This stateless class contains the code to create OIFits structure from the current observation
@@ -46,14 +53,16 @@ public class OIFitsCreatorService {
    * Create the OI_ARRAY table for the given observation and beams and add it to the given oiFits structure
    * @param oiFitsFile OIFits structure
    * @param observation observation settings
+   * @param arrayName interferometer name
    * @param beams beam list
    */
-  protected static void createOIArray(final OIFitsFile oiFitsFile, final ObservationSetting observation, final List<Beam> beams) {
+  protected static void createOIArray(final OIFitsFile oiFitsFile, final ObservationSetting observation,
+                                      final String arrayName, final List<Beam> beams) {
 
     final OIArray oiArray = new OIArray(oiFitsFile, beams.size());
 
     // Array Name :
-    oiArray.setArrName(observation.getInterferometerConfiguration().getName());
+    oiArray.setArrName(arrayName);
 
     // Position :
     oiArray.setFrame(OIFitsConstants.KEYWORD_FRAME_GEOCENTRIC);
@@ -140,5 +149,35 @@ public class OIFitsCreatorService {
     oiTarget.getSpecTyp()[0] = target.getSPECTYP();
 
     oiFitsFile.addOiTable(oiTarget);
+  }
+
+  /**
+   * Create the OI_WAVELENGTH table for the given observation and add it to the given oiFits structure
+   * @param oiFitsFile OIFits structure
+   * @param instrumentName instrument name
+   * @param lambdaMin minimal wavelength (m)
+   * @param lambdaMax maximal wavelength (m)
+   * @param nSpectralChannels number of spectral channels
+   */
+  protected static void createOIWaveLength(final OIFitsFile oiFitsFile, final String instrumentName,
+                                           final double lambdaMin, final double lambdaMax, final int nSpectralChannels) {
+
+    final OIWavelength waves = new OIWavelength(oiFitsFile, nSpectralChannels);
+    waves.setInsName(instrumentName);
+
+    final double step = (lambdaMax - lambdaMin) / nSpectralChannels;
+
+    final float[] effWave = waves.getEffWave();
+    final float[] effBand = waves.getEffBand();
+
+    double waveLength = lambdaMin;
+    for (int i = 0; i < nSpectralChannels; i++) {
+      effWave[i] = (float) waveLength;
+      effBand[i] = (float) step;
+
+      waveLength += step;
+    }
+
+    oiFitsFile.addOiTable(waves);
   }
 }
