@@ -1,13 +1,16 @@
 #*******************************************************************************
 # JMMC project
 #
-# "@(#) $Id: Makefile,v 1.8 2010-05-17 15:53:20 ccmgr Exp $"
+# "@(#) $Id: Makefile,v 1.9 2010-06-23 13:08:40 bourgesl Exp $"
 #
 # Makefile of aspro module
 #
 # History
 # -------
 # $Log: not supported by cvs2svn $
+# Revision 1.8  2010/05/17 15:53:20  ccmgr
+# change jnlp file
+#
 # Revision 1.7  2010/04/02 14:38:58  bourgesl
 # added OBX files
 #
@@ -130,6 +133,7 @@ aspro_DIRS     = fr \
 		 edu
 aspro_EXTRAS   = fr/jmmc/aspro/*.xml \
 		 fr/jmmc/aspro/model/*.xml \
+		 fr/jmmc/aspro/gui/*.xsl \
 		 fr/jmmc/aspro/gui/icons/*.png \
 		 fr/jmmc/aspro/gui/icons/*.gif \
 		 fr/jmmc/aspro/ob/*.obx
