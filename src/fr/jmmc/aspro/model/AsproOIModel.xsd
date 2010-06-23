@@ -1197,33 +1197,47 @@
   <xsd:complexType name="FocalInstrumentMode">
     <xsd:annotation>
       <xsd:documentation>
-        This type describes a focal instrument mode (AMBER : "Low_HK" ... "Medium_K_1_2300" ... "High_K_1_2481")
+        This type describes a focal instrument mode (AMBER : "Low_HK" ... "Medium_K_1_2300" ... "High_K_1_2481").
+        It has a wavelength range (waveLengthMin - waveLengthMax), a spectral resolution (resolution)
+        and optionaly a number of channels (numberChannels)
       </xsd:documentation>
     </xsd:annotation>
     <xsd:sequence>
       <xsd:element name="name" type="xsd:string">
         <xsd:annotation>
           <xsd:documentation>
-              The name of this mode
+              The name of this instrument mode
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="resolution" type="xsd:double">
+        <xsd:annotation>
+          <xsd:documentation>
+              The spectral resolution of this instrument mode
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="numberChannels" type="xsd:int" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>
+              The number of spectral channels of this instrument mode (optional)
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
       <xsd:element name="waveLengthMin" type="xsd:double">
         <xsd:annotation>
           <xsd:documentation>
-              The lower wave length
+              The lower wave length of this instrument mode
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
       <xsd:element name="waveLengthMax" type="xsd:double">
         <xsd:annotation>
           <xsd:documentation>
-              The upper wave length
+              The upper wave length of this instrument mode
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
-      <!-- TBD : add generic parameter settings ? -->
-
     </xsd:sequence>
   </xsd:complexType>
 
