@@ -73,7 +73,6 @@ public class Channel
     public void setName(String value) {
         this.name = value;
     }
-
     
 //--simple--preserve
 

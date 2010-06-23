@@ -17,20 +17,10 @@ import fr.jmmc.aspro.model.OIBase;
  * 
  *         Information to add :
  * 
- *         - insNchan
- *         - insRes
- * 
  *         - atmosphere Quality (atmoQual) "Excellent" "Good" "Average" "Bad" "Awful"
- * 
- *         - polychromatic (flag) "Simulate Instrument`s spectral resolution"
  * 
  *         - dit "Detector Integration Time" /Choice 25 50 100
  *         - obsDuration "Total Integration Time (s) per calibrated point"
- * 
- *         - ha1 "Hour Angle Start" /range -12 12 *
- *         - ha2 "Hour Angle End" /range -12 12 *
- * 
- *        Guidage : etoile visee (position), magnitude dans la bande spectrale ?
  * 
  *       
  * 
@@ -216,7 +206,7 @@ public class ObservationSetting
    * @return computed observability data or null
    */
   public fr.jmmc.aspro.model.observability.ObservabilityData getObservabilityData() {
-    return observabilityData;
+    return this.observabilityData;
   }
 
   /**
@@ -225,6 +215,26 @@ public class ObservationSetting
    */
   public void setObservabilityData(final fr.jmmc.aspro.model.observability.ObservabilityData obsData) {
     this.observabilityData = obsData;
+  }
+
+  /** computed OIFits structure (read only) */
+  @javax.xml.bind.annotation.XmlTransient
+  private fr.jmmc.oitools.model.OIFitsFile oiFitsFile = null;
+
+  /**
+   * Return the computed OIFits structure (read only)
+   * @return OIFits structure or null
+   */
+  public fr.jmmc.oitools.model.OIFitsFile getOIFitsFile() {
+    return this.oiFitsFile;
+  }
+
+  /**
+   * Define the computed OIFits structure (read only)
+   * @param oiFitsFile computed OIFits structure
+   */
+  public void setOIFitsFile(final fr.jmmc.oitools.model.OIFitsFile oiFitsFile) {
+    this.oiFitsFile = oiFitsFile;
   }
 
   @Override
