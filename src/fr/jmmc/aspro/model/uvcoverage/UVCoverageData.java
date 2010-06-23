@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoverageData.java,v 1.5 2010-02-04 17:05:05 bourgesl Exp $"
+ * "@(#) $Id: UVCoverageData.java,v 1.6 2010-06-23 12:56:13 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2010/02/04 17:05:05  bourgesl
+ * UV bounds are coming from UVCoverageService
+ *
  * Revision 1.4  2010/02/04 14:54:11  bourgesl
  * UVMapData refactoring (uvRect, min/max values) to keep the color mapping consistent when zooming
  * Compute an sub Image when a zoom occurs while the correct model is computed in the background
@@ -23,6 +26,7 @@
 package fr.jmmc.aspro.model.uvcoverage;
 
 import fr.jmmc.mcs.model.UVMapData;
+import fr.jmmc.oitools.model.OIFitsFile;
 import java.util.List;
 
 /**
@@ -43,6 +47,8 @@ public class UVCoverageData {
   private List<UVRangeBaseLineData> targetUVObservability;
   /** uv map data */
   private UVMapData uvMapData;
+  /** oifits structure */
+  private OIFitsFile oiFitsFile;
 
   /**
    * Constructor
@@ -96,5 +102,13 @@ public class UVCoverageData {
 
   public void setUvMapData(UVMapData uvMapData) {
     this.uvMapData = uvMapData;
+  }
+
+  public OIFitsFile getOiFitsFile() {
+    return oiFitsFile;
+  }
+
+  public void setOiFitsFile(OIFitsFile oiFitsFile) {
+    this.oiFitsFile = oiFitsFile;
   }
 }

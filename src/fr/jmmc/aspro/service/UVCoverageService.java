@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoverageService.java,v 1.19 2010-06-17 10:02:50 bourgesl Exp $"
+ * "@(#) $Id: UVCoverageService.java,v 1.20 2010-06-23 12:56:13 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.19  2010/06/17 10:02:50  bourgesl
+ * fixed warning hints - mainly not final static loggers
+ *
  * Revision 1.18  2010/06/10 08:54:59  bourgesl
  * only log the compute duration if the operation completed normally
  *
@@ -66,6 +69,7 @@ package fr.jmmc.aspro.service;
 
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.BaseLine;
+import fr.jmmc.aspro.model.Beam;
 import fr.jmmc.aspro.model.observability.ObservabilityData;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.Range;
@@ -73,12 +77,14 @@ import fr.jmmc.aspro.model.observability.StarData;
 import fr.jmmc.aspro.model.oi.FocalInstrumentMode;
 import fr.jmmc.aspro.model.uvcoverage.UVCoverageData;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
+import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetConfiguration;
 import fr.jmmc.aspro.model.uvcoverage.UVBaseLineData;
 import fr.jmmc.aspro.model.uvcoverage.UVRangeBaseLineData;
 import fr.jmmc.aspro.util.AngleUtils;
 import fr.jmmc.mcs.model.ModelUVMapService;
 import fr.jmmc.mcs.model.ModelUVMapService.ImageMode;
+import fr.jmmc.oitools.model.OIFitsFile;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.IndexColorModel;
 import java.util.ArrayList;
@@ -100,9 +106,10 @@ public final class UVCoverageService {
   /* members */
 
   /* output */
-  /** observability data */
+  /** uv coverage data */
   private UVCoverageData data = new UVCoverageData();
-
+  /** oifits structure */
+  private OIFitsFile oiFitsFile;
   /* inputs */
   /** observation settings */
   private final ObservationSetting observation;
@@ -140,6 +147,8 @@ public final class UVCoverageService {
   /* reused observability data */
   /** observability data */
   private ObservabilityData obsData = null;
+  /** beam list */
+  private List<Beam> beams = null;
   /** base line list */
   private List<BaseLine> baseLines = null;
   /** star data */
@@ -232,8 +241,18 @@ public final class UVCoverageService {
                     uvRect, null, null,
                     this.imageMode, this.imageSize, this.colorModel));
           }
-        }
-      }
+
+          // fast interrupt :
+          if (this.currentThread.isInterrupted()) {
+            return null;
+          }
+
+          // OIFits structure :
+          createOIFits();
+
+        } // starData is defined
+
+      } // obsData is valid
 
       // fast interrupt :
       if (this.currentThread.isInterrupted()) {
@@ -266,6 +285,9 @@ public final class UVCoverageService {
     return this.data;
   }
 
+  /**
+   * Compute UV tracks using only rise/set intervals
+   */
   private void computeUVSupport() {
 
     // 10 minutes is enough to get pretty ellipse :
@@ -333,6 +355,9 @@ public final class UVCoverageService {
     this.data.setTargetUVRiseSet(targetUVRiseSet);
   }
 
+  /**
+   * Compute UV points (observable) inside HA min/max ranges
+   */
   private void computeObservableUV() {
 
     final List<Range> obsRangesHA = this.starData.getObsRangesHA();
@@ -427,6 +452,12 @@ public final class UVCoverageService {
     }
   }
 
+  /**
+   * Check if the given hour angle is observable
+   * @param ha decimal hour angle
+   * @param obsRangesHA observable ranges
+   * @return true if observable
+   */
   private boolean checkObservability(final double ha, final List<Range> obsRangesHA) {
     for (Range range : obsRangesHA) {
       if (ha >= range.getMin() && ha <= range.getMax()) {
@@ -441,6 +472,8 @@ public final class UVCoverageService {
    * @throws IllegalStateException if the instrument mode is undefined
    */
   private void prepareObservation() throws IllegalStateException {
+    // Get beams :
+    this.beams = this.obsData.getBeams();
     // Get baselines :
     this.baseLines = this.obsData.getBaseLines();
 
@@ -501,5 +534,31 @@ public final class UVCoverageService {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("uvMax : " + this.uvMax);
     }
+  }
+
+  /**
+   * Create the OIFits structure (array, target, wave lengths and visibilities)
+   */
+  private void createOIFits() {
+
+    this.oiFitsFile = new OIFitsFile();
+
+    // OI_ARRAY :
+    // station indexes are given according to the beam list ordering starting from 1 :
+    OIFitsCreatorService.createOIArray(this.oiFitsFile, this.observation, this.beams);
+
+    // OI_TARGET :
+    final Target target = ObservationManager.getTarget(this.observation, this.targetName);
+    // target index is 1
+    OIFitsCreatorService.createOITarget(this.oiFitsFile, target);
+
+    // TODO
+
+    // fast interrupt :
+    if (this.currentThread.isInterrupted()) {
+      return;
+    }
+
+    this.data.setOiFitsFile(this.oiFitsFile);
   }
 }
