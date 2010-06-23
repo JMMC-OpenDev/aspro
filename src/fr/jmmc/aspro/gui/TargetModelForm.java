@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetModelForm.java,v 1.22 2010-06-17 10:02:51 bourgesl Exp $"
+ * "@(#) $Id: TargetModelForm.java,v 1.23 2010-06-23 12:50:38 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.22  2010/06/17 10:02:51  bourgesl
+ * fixed warning hints - mainly not final static loggers
+ *
  * Revision 1.21  2010/06/11 08:40:34  bourgesl
  * restored table selection listener to have both tree and description in synch with the current selected model in the parameters table
  *
@@ -122,7 +125,7 @@ import javax.swing.tree.TreeSelectionModel;
  * This class represents the target model editor ...
  * @author bourgesl
  */
-public class TargetModelForm extends javax.swing.JPanel implements ActionListener, TreeSelectionListener, ListSelectionListener {
+public final class TargetModelForm extends javax.swing.JPanel implements ActionListener, TreeSelectionListener, ListSelectionListener {
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
