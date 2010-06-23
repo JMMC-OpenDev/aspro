@@ -22,6 +22,9 @@
   <!-- Aspro src folder -->
   <property name="sources" location="${root}/src"/>
 
+  <!-- Aspro test folder -->
+  <property name="test" location="${root}/test"/>
+
 
   <!-- custom macro to enhance XJC -->
   <macrodef name="xjc">
@@ -68,7 +71,7 @@
 
 
 
-  <target name="genXsdCode">
+  <target name="genXsdCode" description="generate java classes from XSD schemas">
 
     <echo>generating java code for AsproOIModel.xsd</echo>
     <mkdir dir="${sources}/fr/jmmc/aspro/model/oi" />
@@ -89,5 +92,18 @@
 -->
   </target>
 
+
+
+
+  <target name="oifits2html" description="convert OIFits xml representation to HTML">
+
+		<xslt  in="${test}/oifits/sample.xml"
+          out="${test}/oifits/sample.html"
+          style="${sources}/fr/jmmc/aspro/gui/oiview.xsl"
+          force="true"/>
+
+    <echo>XSLT done : ${test}/oifits/sample.html</echo>
+    
+  </target>
 
 </project>
