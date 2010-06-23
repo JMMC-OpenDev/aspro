@@ -113,20 +113,10 @@
 
         Information to add :
 
-        - insNchan
-        - insRes
-
         - atmosphere Quality (atmoQual) "Excellent" "Good" "Average" "Bad" "Awful"
-
-        - polychromatic (flag) "Simulate Instrument`s spectral resolution"
 
         - dit "Detector Integration Time" /Choice 25 50 100
         - obsDuration "Total Integration Time (s) per calibrated point"
-
-        - ha1 "Hour Angle Start" /range -12 12 *
-        - ha2 "Hour Angle End" /range -12 12 *
-
-       Guidage : etoile visee (position), magnitude dans la bande spectrale ?
 
       </xsd:documentation>
     </xsd:annotation>
