@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: InterferometerMapPanel.java,v 1.6 2010-06-17 10:02:51 bourgesl Exp $"
+ * "@(#) $Id: InterferometerMapPanel.java,v 1.7 2010-06-23 12:52:08 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2010/06/17 10:02:51  bourgesl
+ * fixed warning hints - mainly not final static loggers
+ *
  * Revision 1.5  2010/06/10 08:53:46  bourgesl
  * added a test to determine if the plot must be refresh (configuration changed)
  * removed dead code (save plot to png)
@@ -60,7 +63,7 @@ import org.jfree.ui.TextAnchor;
  * This panel presents the interferometer plot (station, base lines ...)
  * @author bourgesl
  */
-public class InterferometerMapPanel extends javax.swing.JPanel implements ChartProgressListener,
+public final class InterferometerMapPanel extends javax.swing.JPanel implements ChartProgressListener,
         ObservationListener, PDFExportable {
 
   /** default serial UID for Serializable interface */
@@ -90,9 +93,6 @@ public class InterferometerMapPanel extends javax.swing.JPanel implements ChartP
     initComponents();
 
     postInit();
-
-    // register this as an observation listener :
-    ObservationManager.getInstance().register(this);
   }
 
   /**

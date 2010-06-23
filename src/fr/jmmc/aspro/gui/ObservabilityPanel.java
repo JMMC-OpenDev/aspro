@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityPanel.java,v 1.36 2010-06-17 10:02:51 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityPanel.java,v 1.37 2010-06-23 12:52:08 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.36  2010/06/17 10:02:51  bourgesl
+ * fixed warning hints - mainly not final static loggers
+ *
  * Revision 1.35  2010/06/10 08:54:06  bourgesl
  * rename variable
  *
@@ -176,7 +179,7 @@ import org.jfree.ui.TextAnchor;
  * This panel represents the observability plot
  * @author bourgesl
  */
-public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgressListener,
+public final class ObservabilityPanel extends javax.swing.JPanel implements ChartProgressListener,
         ObservationListener, PDFExportable {
 
   /** default serial UID for Serializable interface */
@@ -230,9 +233,6 @@ public class ObservabilityPanel extends javax.swing.JPanel implements ChartProgr
   public ObservabilityPanel() {
     super(new BorderLayout());
     initComponents();
-
-    // register this as an observation listener :
-    ObservationManager.getInstance().register(this);
   }
 
   /**

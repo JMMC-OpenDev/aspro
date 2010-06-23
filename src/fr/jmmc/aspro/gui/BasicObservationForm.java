@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BasicObservationForm.java,v 1.30 2010-06-17 10:02:51 bourgesl Exp $"
+ * "@(#) $Id: BasicObservationForm.java,v 1.31 2010-06-23 12:52:08 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.30  2010/06/17 10:02:51  bourgesl
+ * fixed warning hints - mainly not final static loggers
+ *
  * Revision 1.29  2010/06/07 16:04:15  bourgesl
  * change the default behaviour on the date spinner to adjust the day field
  *
@@ -134,7 +137,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
  * This form allows the user to select main observation settings : date, interferometer, configuration, stations and targets ...
  * @author bourgesl
  */
-public class BasicObservationForm extends javax.swing.JPanel implements ChangeListener, ActionListener, Observer, ObservationListener {
+public final class BasicObservationForm extends javax.swing.JPanel implements ChangeListener, ActionListener, Observer, ObservationListener {
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
@@ -148,7 +151,7 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
 
   /* members */
   /** observation manager */
-  private ObservationManager om = ObservationManager.getInstance();
+  private final ObservationManager om = ObservationManager.getInstance();
   /** flag to enable / disable the automatic update of the observation when any swing component changes */
   private boolean doAutoUpdateObservation = true;
 
@@ -466,9 +469,6 @@ public class BasicObservationForm extends javax.swing.JPanel implements ChangeLi
    * Finally update the observation according to the form state
    */
   private void postInit() {
-
-    // register this as an observation listener :
-    this.om.register(this);
 
     // add observer to the StarResolverWidget :
     this.starSearchField.getStar().addObserver(this);

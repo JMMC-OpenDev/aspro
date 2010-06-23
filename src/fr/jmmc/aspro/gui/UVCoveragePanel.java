@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.43 2010-06-17 10:02:51 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.44 2010-06-23 12:52:08 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.43  2010/06/17 10:02:51  bourgesl
+ * fixed warning hints - mainly not final static loggers
+ *
  * Revision 1.42  2010/06/10 08:54:06  bourgesl
  * rename variable
  *
@@ -218,7 +221,7 @@ import org.jfree.data.xy.XYSeriesCollection;
  * This panel presents the UV coverage plot with its parameters (target, instrument mode ...)
  * @author bourgesl
  */
-public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgressListener, ZoomEventListener,
+public final class UVCoveragePanel extends javax.swing.JPanel implements ChartProgressListener, ZoomEventListener,
         ActionListener, ChangeListener, ObservationListener, Observer, PDFExportable {
 
   /** default serial UID for Serializable interface */
@@ -232,14 +235,14 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
   private final static boolean DEBUG_UPDATE_EVENT = false;
   /** flag to log a stack trace in method plot() to detect multiple calls */
   private final static boolean DEBUG_PLOT_EVENT = false;
-  /** preference singleton */
-  private final static Preferences myPreferences = Preferences.getInstance();
   /** scaling factor to Mega Lambda for U,V points */
   private final static double MEGA_LAMBDA_SCALE = 1e-6;
 
   /* members */
   /** observation manager */
-  private ObservationManager om = ObservationManager.getInstance();
+  private final ObservationManager om = ObservationManager.getInstance();
+  /** preference singleton */
+  private final Preferences myPreferences = Preferences.getInstance();
   /** jFreeChart instance */
   private JFreeChart localJFreeChart;
   /** xy plot instance */
@@ -276,9 +279,6 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
     initComponents();
 
     postInit();
-
-    // register this as an observation listener :
-    om.register(this);
 
     // register this as a preference listener :
     myPreferences.addObserver(this);
@@ -1276,6 +1276,9 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
         public UVCoverageData doInBackground() {
           logger.fine("SwingWorker[UV].doInBackground : IN");
 
+          // first reset the OIFits structure in the current observation :
+          ObservationManager.getInstance().setOIFitsFile(null);
+
           UVCoverageData uvData = new UVCoverageService(observation, targetName, uvMax,
                   doUVSupport, doModelImage, imageMode, imageSize, colorModel).compute();
 
@@ -1321,8 +1324,8 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
               if (uvData != null) {
                 logger.fine("SwingWorker[UV].done : refresh Chart");
 
-                lastZoomEvent = null;
-                currentUVMapData = null;
+                // update the OIFits structure in the current observation :
+                ObservationManager.getInstance().setOIFitsFile(uvData.getOiFitsFile());
 
                 ChartUtils.clearTextSubTitle(localJFreeChart);
 
@@ -1330,6 +1333,9 @@ public class UVCoveragePanel extends javax.swing.JPanel implements ChartProgress
                   // Baseline limits case :
                   reset();
                 } else {
+
+                  lastZoomEvent = null;
+                  currentUVMapData = null;
 
                   // title :
                   final StringBuilder sb = new StringBuilder(observation.getInterferometerConfiguration().getName());
