@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityData.java,v 1.3 2010-01-22 13:16:44 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityData.java,v 1.4 2010-06-23 12:54:17 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2010/01/22 13:16:44  bourgesl
+ * added star observability type to change bar colors easily
+ *
  * Revision 1.2  2010/01/12 16:54:19  bourgesl
  * added PoPs in title + several changes on charts
  *
@@ -19,6 +22,7 @@
 package fr.jmmc.aspro.model.observability;
 
 import fr.jmmc.aspro.model.BaseLine;
+import fr.jmmc.aspro.model.Beam;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -45,6 +49,8 @@ public class ObservabilityData {
   private PopCombination bestPops;
 
   /* other useful data for UV coverage */
+  /** beam list */
+  private List<Beam> beams = null;
   /** base line list */
   private List<BaseLine> baseLines = null;
   /** map of StarData keyed by target name */
@@ -62,7 +68,7 @@ public class ObservabilityData {
     return dateMin;
   }
 
-  public void setDateMin(Date dateMin) {
+  public void setDateMin(final Date dateMin) {
     this.dateMin = dateMin;
   }
 
@@ -70,7 +76,7 @@ public class ObservabilityData {
     return dateMax;
   }
 
-  public void setDateMax(Date dateMax) {
+  public void setDateMax(final Date dateMax) {
     this.dateMax = dateMax;
   }
 
@@ -78,7 +84,7 @@ public class ObservabilityData {
     return sunIntervals;
   }
 
-  public void setSunIntervals(List<SunTimeInterval> sunIntervals) {
+  public void setSunIntervals(final List<SunTimeInterval> sunIntervals) {
     this.sunIntervals = sunIntervals;
   }
 
@@ -90,15 +96,24 @@ public class ObservabilityData {
     return bestPops;
   }
 
-  public void setBestPops(PopCombination bestPops) {
+  public void setBestPops(final PopCombination bestPops) {
     this.bestPops = bestPops;
+  }
+
+  /* other useful data for UV coverage */
+  public List<Beam> getBeams() {
+    return beams;
+  }
+
+  public void setBeams(final List<Beam> beams) {
+    this.beams = beams;
   }
 
   public List<BaseLine> getBaseLines() {
     return baseLines;
   }
 
-  public void setBaseLines(List<BaseLine> baseLines) {
+  public void setBaseLines(final List<BaseLine> baseLines) {
     this.baseLines = baseLines;
   }
 

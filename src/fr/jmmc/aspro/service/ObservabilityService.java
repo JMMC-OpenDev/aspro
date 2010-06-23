@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.47 2010-06-17 10:02:50 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.48 2010-06-23 12:55:14 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.47  2010/06/17 10:02:50  bourgesl
+ * fixed warning hints - mainly not final static loggers
+ *
  * Revision 1.46  2010/06/10 08:55:00  bourgesl
  * only log the compute duration if the operation completed normally
  *
@@ -1400,6 +1403,8 @@ public final class ObservabilityService {
       }
 
     }
+
+    this.data.setBeams(this.beams);
 
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("Beams = " + this.beams);
