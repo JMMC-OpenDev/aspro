@@ -8592,91 +8592,109 @@
       <defaultSamplingTime>60</defaultSamplingTime>
       <mode>
         <name>Low_JHK</name>
+        <resolution>35</resolution>
         <waveLengthMin>1.469</waveLengthMin>
         <waveLengthMax>2.54</waveLengthMax>
       </mode>
       <mode>
         <name>Medium_H_1_1.65</name>
+        <resolution>1500</resolution>
         <waveLengthMin>1.54</waveLengthMin>
         <waveLengthMax>1.82</waveLengthMax>
       </mode>
       <mode>
         <name>Medium_K_1_2.1</name>
+        <resolution>1500</resolution>
         <waveLengthMin>1.926</waveLengthMin>
         <waveLengthMax>2.275</waveLengthMax>
       </mode>
       <mode>
         <name>Medium_K_1_2.3</name>
+        <resolution>1500</resolution>
         <waveLengthMin>2.126</waveLengthMin>
         <waveLengthMax>2.474</waveLengthMax>
       </mode>
       <mode>
         <name>High_K_1_1.979</name>
+        <resolution>12000</resolution>
         <waveLengthMin>1.955</waveLengthMin>
         <waveLengthMax>2.003</waveLengthMax>
       </mode>
       <mode>
         <name>High_K_1_2.018</name>
+        <resolution>12000</resolution>
         <waveLengthMin>1.994</waveLengthMin>
         <waveLengthMax>2.042</waveLengthMax>
       </mode>
       <mode>
         <name>High_K_1_2.056</name>
+        <resolution>12000</resolution>
         <waveLengthMin>2.032</waveLengthMin>
         <waveLengthMax>2.079</waveLengthMax>
       </mode>
       <mode>
         <name>High_K_1_2.095</name>
+        <resolution>12000</resolution>
         <waveLengthMin>2.071</waveLengthMin>
         <waveLengthMax>2.118</waveLengthMax>
       </mode>
       <mode>
         <name>High_K_1_2.133</name>
+        <resolution>12000</resolution>
         <waveLengthMin>2.110</waveLengthMin>
         <waveLengthMax>2.156</waveLengthMax>
       </mode>
       <mode>
         <name>High_K_1_2.172</name>
+        <resolution>12000</resolution>
         <waveLengthMin>2.149</waveLengthMin>
         <waveLengthMax>2.195</waveLengthMax>
       </mode>
       <mode>
         <name>High_K_1_2.211</name>
+        <resolution>12000</resolution>
         <waveLengthMin>2.187</waveLengthMin>
         <waveLengthMax>2.235</waveLengthMax>
       </mode>
       <mode>
         <name>High_K_1_2.249</name>
+        <resolution>12000</resolution>
         <waveLengthMin>2.226</waveLengthMin>
         <waveLengthMax>2.272</waveLengthMax>
       </mode>
       <mode>
         <name>High_K_1_2.288</name>
+        <resolution>12000</resolution>
         <waveLengthMin>2.265</waveLengthMin>
         <waveLengthMax>2.311</waveLengthMax>
       </mode>
       <mode>
         <name>High_K_1_2.326</name>
+        <resolution>12000</resolution>
         <waveLengthMin>2.303</waveLengthMin>
         <waveLengthMax>2.348</waveLengthMax>
       </mode>
       <mode>
         <name>High_K_1_2.365</name>
+        <resolution>12000</resolution>
         <waveLengthMin>2.342</waveLengthMin>
         <waveLengthMax>2.387</waveLengthMax>
       </mode>
       <mode>
         <name>High_K_1_2.403</name>
+        <resolution>12000</resolution>
         <waveLengthMin>2.381</waveLengthMin>
         <waveLengthMax>2.425</waveLengthMax>
       </mode>
       <mode>
         <name>High_K_1_2.442</name>
+        <resolution>12000</resolution>
         <waveLengthMin>2.420</waveLengthMin>
         <waveLengthMax>2.464</waveLengthMax>
       </mode>
       <mode>
         <name>High_K_1_2.481</name>
+        <resolution>12000</resolution>
         <waveLengthMin>2.459</waveLengthMin>
         <waveLengthMax>2.503</waveLengthMax>
       </mode>
@@ -8689,21 +8707,29 @@
       <defaultSamplingTime>60</defaultSamplingTime>
       <mode>
         <name>HIGH_SENS+PRISM</name>
+        <resolution>30</resolution>
+        <numberChannels>10</numberChannels>
         <waveLengthMin>8</waveLengthMin>
         <waveLengthMax>13</waveLengthMax>
       </mode>
       <mode>
         <name>HIGH_SENS+GRISM</name>
+        <resolution>230</resolution>
+        <numberChannels>40</numberChannels>
         <waveLengthMin>8</waveLengthMin>
         <waveLengthMax>13</waveLengthMax>
       </mode>
       <mode>
         <name>SCI_PHOT+PRISM</name>
+        <resolution>30</resolution>
+        <numberChannels>10</numberChannels>
         <waveLengthMin>8</waveLengthMin>
         <waveLengthMax>13</waveLengthMax>
       </mode>
       <mode>
         <name>SCI_PHOT+GRISM</name>
+        <resolution>230</resolution>
+        <numberChannels>40</numberChannels>
         <waveLengthMin>8</waveLengthMin>
         <waveLengthMax>13</waveLengthMax>
       </mode>
@@ -8713,9 +8739,10 @@
       <name>PIONIER</name>
       <description>Prototype configuration for PIONIER instrument</description>
       <numberChannels>4</numberChannels>
-      <defaultSamplingTime>60</defaultSamplingTime>
+      <defaultSamplingTime>20</defaultSamplingTime>
       <mode>
         <name>standard</name>
+        <resolution>40</resolution>
         <waveLengthMin>1.45</waveLengthMin>
         <waveLengthMax>1.8</waveLengthMax>
       </mode>

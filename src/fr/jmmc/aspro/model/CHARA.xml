@@ -393,9 +393,11 @@
       <name>VEGA_2T</name>
       <description></description>
       <numberChannels>2</numberChannels>
-      <defaultSamplingTime>60</defaultSamplingTime>
+      <defaultSamplingTime>40</defaultSamplingTime>
       <mode>
         <name>standard</name>
+        <resolution>40</resolution>
+        <numberChannels>8</numberChannels>
         <waveLengthMin>0.48</waveLengthMin>
         <waveLengthMax>0.82</waveLengthMax>
       </mode>
@@ -405,9 +407,11 @@
       <name>VEGA_3T</name>
       <description></description>
       <numberChannels>3</numberChannels>
-      <defaultSamplingTime>60</defaultSamplingTime>
+      <defaultSamplingTime>40</defaultSamplingTime>
       <mode>
         <name>standard</name>
+        <resolution>40</resolution>
+        <numberChannels>8</numberChannels>
         <waveLengthMin>0.48</waveLengthMin>
         <waveLengthMax>0.82</waveLengthMax>
       </mode>
@@ -417,34 +421,40 @@
       <name>MIRC</name>
       <description></description>
       <numberChannels>4</numberChannels>
-      <defaultSamplingTime>60</defaultSamplingTime>
+      <defaultSamplingTime>40</defaultSamplingTime>
       <mode>
         <name>Low_H</name>
+        <resolution>40</resolution>
         <waveLengthMin>1.5</waveLengthMin>
         <waveLengthMax>1.8</waveLengthMax>
       </mode>
       <mode>
         <name>Low_K</name>
+        <resolution>40</resolution>
         <waveLengthMin>2.0</waveLengthMin>
         <waveLengthMax>2.5</waveLengthMax>
       </mode>
       <mode>
         <name>Medium_H</name>
+        <resolution>150</resolution>
         <waveLengthMin>1.5</waveLengthMin>
         <waveLengthMax>1.8</waveLengthMax>
       </mode>
       <mode>
         <name>Medium_K</name>
+        <resolution>150</resolution>
         <waveLengthMin>2.0</waveLengthMin>
         <waveLengthMax>2.5</waveLengthMax>
       </mode>
       <mode>
         <name>High_H</name>
+        <resolution>400</resolution>
         <waveLengthMin>1.5</waveLengthMin>
         <waveLengthMax>1.8</waveLengthMax>
       </mode>
       <mode>
         <name>High_K</name>
+        <resolution>400</resolution>
         <waveLengthMin>2.0</waveLengthMin>
         <waveLengthMax>2.5</waveLengthMax>
       </mode>
