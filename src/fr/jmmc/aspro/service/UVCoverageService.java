@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoverageService.java,v 1.21 2010-06-23 15:44:06 bourgesl Exp $"
+ * "@(#) $Id: UVCoverageService.java,v 1.22 2010-06-25 15:16:27 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.21  2010/06/23 15:44:06  bourgesl
+ * added computed OI_WAVELENGTH table in OIFits
+ *
  * Revision 1.20  2010/06/23 12:56:13  bourgesl
  * added OIFits structure generation with OI_ARRAY and OI_TARGET tables
  *
@@ -70,6 +73,7 @@
  */
 package fr.jmmc.aspro.service;
 
+import edu.dartmouth.AstroSkyCalc;
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.BaseLine;
 import fr.jmmc.aspro.model.Beam;
@@ -152,6 +156,8 @@ public final class UVCoverageService {
   /* reused observability data */
   /** observability data */
   private ObservabilityData obsData = null;
+  /** sky calc instance */
+  private AstroSkyCalc sc = null;
   /** beam list */
   private List<Beam> beams = null;
   /** base line list */
@@ -228,9 +234,16 @@ public final class UVCoverageService {
 
             computeObservableUV();
 
-            if (logger.isLoggable(Level.FINE)) {
-              logger.fine("UV coordinate maximum = [" + this.uvMax + "]");
-            }
+            // OIFits structure :
+            createOIFits();
+          }
+
+          // fast interrupt :
+          if (this.currentThread.isInterrupted()) {
+            return null;
+          }
+          if (logger.isLoggable(Level.FINE)) {
+            logger.fine("UV coordinate maximum = [" + this.uvMax + "]");
           }
 
           // uv Max = max base line * uv margin / minimum wave length
@@ -251,9 +264,6 @@ public final class UVCoverageService {
           if (this.currentThread.isInterrupted()) {
             return null;
           }
-
-          // OIFits structure :
-          createOIFits();
 
         } // starData is defined
 
@@ -295,35 +305,34 @@ public final class UVCoverageService {
    */
   private void computeUVSupport() {
 
+    final double haElev = this.starData.getHaElev();
+
     // 10 minutes is enough to get pretty ellipse :
     final double step = 10d / 60d;
 
-    final double haElev = this.starData.getHaElev();
+    final int nPoints = (int) Math.round(2d * haElev / step) + 1;
 
     // precessed target declination in rad :
     final double precDEC = Math.toRadians(this.starData.getPrecDEC());
 
     final int sizeBL = this.baseLines.size();
-
     final List<UVBaseLineData> targetUVRiseSet = new ArrayList<UVBaseLineData>(sizeBL);
 
     UVBaseLineData uvData;
     BaseLine baseLine;
+    /* U,V coordinates corrected with central wavelength */
     double[] u;
     double[] v;
-    int j, n;
 
     double haRad;
 
-    for (int i = 0, size = this.baseLines.size(); i < size; i++) {
+    for (int i = 0, j = 0; i < sizeBL; i++) {
       baseLine = this.baseLines.get(i);
 
       uvData = new UVBaseLineData(baseLine.getName());
 
-      n = (int) Math.round(2d * haElev / step) + 1;
-
-      u = new double[n];
-      v = new double[n];
+      u = new double[nPoints];
+      v = new double[nPoints];
 
       j = 0;
 
@@ -378,36 +387,43 @@ public final class UVCoverageService {
 
       final double step = this.haStep;
 
+      final int nPoints = (int) Math.round((ha2 - ha1) / step) + 1;
+
       // precessed target declination in rad :
       final double precDEC = Math.toRadians(this.starData.getPrecDEC());
 
       final int sizeBL = this.baseLines.size();
-
       final List<UVRangeBaseLineData> targetUVObservability = new ArrayList<UVRangeBaseLineData>(sizeBL);
 
       UVRangeBaseLineData uvData;
       BaseLine baseLine;
+      double[] HA;
+      /* pure U,V coordinates (m) */
       double[] u;
       double[] v;
-      double[] u2;
-      double[] v2;
-      int j, n;
+      /* U,V coordinates corrected with minimal wavelength */
+      double[] uWMin;
+      double[] vWMin;
+      /* U,V coordinates corrected with maximal wavelength */
+      double[] uWMax;
+      double[] vWMax;
 
       double haRad;
 
       boolean observable;
 
-      for (int i = 0, size = this.baseLines.size(); i < size; i++) {
+      for (int i = 0, j = 0; i < sizeBL; i++) {
         baseLine = this.baseLines.get(i);
 
-        uvData = new UVRangeBaseLineData(baseLine.getName());
+        uvData = new UVRangeBaseLineData(baseLine);
 
-        n = (int) Math.round((ha2 - ha1) / step) + 1;
-
-        u = new double[n];
-        v = new double[n];
-        u2 = new double[n];
-        v2 = new double[n];
+        HA = new double[nPoints];
+        u = new double[nPoints];
+        v = new double[nPoints];
+        uWMin = new double[nPoints];
+        vWMin = new double[nPoints];
+        uWMax = new double[nPoints];
+        vWMax = new double[nPoints];
 
         j = 0;
 
@@ -417,22 +433,22 @@ public final class UVCoverageService {
           observable = checkObservability(ha, obsRangesHA);
 
           if (observable) {
+            HA[j] = ha;
+
             haRad = AngleUtils.hours2rad(ha);
+
             // Baseline projected vector (m) :
             u[j] = CalcUVW.computeU(baseLine, haRad);
             v[j] = CalcUVW.computeV(precDEC, baseLine, haRad);
 
-            u2[j] = u[j];
-            v2[j] = v[j];
-
             // wavelength correction :
 
             // Spatial frequency (rad-1) :
-            u[j] /= this.lambdaMin;
-            v[j] /= this.lambdaMin;
+            uWMin[j] = u[j] / this.lambdaMin;
+            vWMin[j] = v[j] / this.lambdaMin;
 
-            u2[j] /= this.lambdaMax;
-            v2[j] /= this.lambdaMax;
+            uWMax[j] = u[j] / this.lambdaMax;
+            vWMax[j] = v[j] / this.lambdaMax;
 
             j++;
           }
@@ -441,8 +457,11 @@ public final class UVCoverageService {
         uvData.setNPoints(j);
         uvData.setU(u);
         uvData.setV(v);
-        uvData.setU2(u2);
-        uvData.setV2(v2);
+        uvData.setHA(HA);
+        uvData.setUWMin(uWMin);
+        uvData.setVWMin(vWMin);
+        uvData.setUWMax(uWMax);
+        uvData.setVWMax(vWMax);
 
         targetUVObservability.add(uvData);
 
@@ -477,6 +496,8 @@ public final class UVCoverageService {
    * @throws IllegalStateException if the instrument mode is undefined
    */
   private void prepareObservation() throws IllegalStateException {
+    // Get AstroSkyCalc instance :
+    this.sc = this.obsData.getDateCalc();
     // Get beams :
     this.beams = this.obsData.getBeams();
     // Get baselines :
@@ -546,36 +567,50 @@ public final class UVCoverageService {
    * Create the OIFits structure (array, target, wave lengths and visibilities)
    */
   private void createOIFits() {
+    final List<UVRangeBaseLineData> targetUVObservability = this.data.getTargetUVObservability();
 
-    this.oiFitsFile = new OIFitsFile();
+    if (targetUVObservability != null) {
 
-    final String arrName = this.observation.getInterferometerConfiguration().getName();
-    final String insName = this.observation.getInstrumentConfiguration().getName();
+      this.oiFitsFile = new OIFitsFile();
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("arrName : " + arrName);
-      logger.fine("insName : " + insName);
+      final String dateObs = this.observation.getWhen().getDate().toString();
+
+      final String arrName = this.observation.getInterferometerConfiguration().getName();
+      final String insName = this.observation.getInstrumentConfiguration().getName();
+
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("arrName : " + arrName);
+        logger.fine("insName : " + insName);
+      }
+
+      // OI_ARRAY :
+      // station indexes are given according to the beam list ordering starting from 1 :
+      OIFitsCreatorService.createOIArray(this.oiFitsFile, this.observation, arrName, this.beams);
+
+      // OI_TARGET :
+      final Target target = ObservationManager.getTarget(this.observation, this.targetName);
+      // target index is 1
+      OIFitsCreatorService.createOITarget(this.oiFitsFile, target);
+
+      // OI_WAVELENGTH :
+      final float[] effWave = OIFitsCreatorService.createOIWaveLength(this.oiFitsFile, insName,
+              this.lambdaMin, this.lambdaMax, this.nSpectralChannels);
+
+      // OI_VIS :
+      OIFitsCreatorService.createOIVis(this.oiFitsFile, arrName, insName, dateObs,
+              this.beams, targetUVObservability, effWave,
+              this.starData.getPrecRA(), this.sc);
+
+      // TODO (VIS2, T3)
+
+      // TODO : compute errors + noise models
+
+      // fast interrupt :
+      if (this.currentThread.isInterrupted()) {
+        return;
+      }
+
+      this.data.setOiFitsFile(this.oiFitsFile);
     }
-
-    // OI_ARRAY :
-    // station indexes are given according to the beam list ordering starting from 1 :
-    OIFitsCreatorService.createOIArray(this.oiFitsFile, this.observation, arrName, this.beams);
-
-    // OI_TARGET :
-    final Target target = ObservationManager.getTarget(this.observation, this.targetName);
-    // target index is 1
-    OIFitsCreatorService.createOITarget(this.oiFitsFile, target);
-
-    // OI_WAVELENGTH :
-    OIFitsCreatorService.createOIWaveLength(this.oiFitsFile, insName, this.lambdaMin, this.lambdaMax, this.nSpectralChannels);
-
-    // TODO
-
-    // fast interrupt :
-    if (this.currentThread.isInterrupted()) {
-      return;
-    }
-
-    this.data.setOiFitsFile(this.oiFitsFile);
   }
 }

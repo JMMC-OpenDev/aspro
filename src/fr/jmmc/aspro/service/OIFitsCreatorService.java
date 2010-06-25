@@ -1,34 +1,38 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: OIFitsCreatorService.java,v 1.2 2010-06-23 15:44:06 bourgesl Exp $"
+ * "@(#) $Id: OIFitsCreatorService.java,v 1.3 2010-06-25 15:16:27 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2010/06/23 15:44:06  bourgesl
+ * added computed OI_WAVELENGTH table in OIFits
+ *
  * Revision 1.1  2010/06/23 12:56:13  bourgesl
  * added OIFits structure generation with OI_ARRAY and OI_TARGET tables
  *
  */
 package fr.jmmc.aspro.service;
 
-import fr.jmmc.aspro.AsproConstants;
+import edu.dartmouth.AstroSkyCalc;
 import fr.jmmc.aspro.model.Beam;
-import fr.jmmc.aspro.model.oi.FocalInstrumentMode;
 import fr.jmmc.aspro.model.oi.InterferometerConfiguration;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Position3D;
 import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.Telescope;
+import fr.jmmc.aspro.model.uvcoverage.UVRangeBaseLineData;
 import fr.jmmc.mcs.astro.ALX;
 import fr.jmmc.oitools.OIFitsConstants;
 import fr.jmmc.oitools.model.OIArray;
 import fr.jmmc.oitools.model.OIFitsFile;
 import fr.jmmc.oitools.model.OITarget;
+import fr.jmmc.oitools.model.OIVis;
 import fr.jmmc.oitools.model.OIWavelength;
+import java.util.Calendar;
 import java.util.List;
-import java.util.logging.Level;
 
 /**
  * This stateless class contains the code to create OIFits structure from the current observation
@@ -41,6 +45,8 @@ public class OIFitsCreatorService {
   /** Class logger */
   private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
+  /** target Id */
+  private final static short TARGET_ID = (short) 1;
 
   /**
    * Forbidden constructor
@@ -106,7 +112,7 @@ public class OIFitsCreatorService {
    */
   protected static void createOITarget(final OIFitsFile oiFitsFile, final Target target) {
     final OITarget oiTarget = new OITarget(oiFitsFile, 1);
-    oiTarget.getTargetId()[0] = (short) 1;
+    oiTarget.getTargetId()[0] = TARGET_ID;
     oiTarget.getTarget()[0] = target.getName();
 
     // Coordinates RA/DEC :
@@ -153,14 +159,16 @@ public class OIFitsCreatorService {
 
   /**
    * Create the OI_WAVELENGTH table for the given observation and add it to the given oiFits structure
+   * and return the array of wave lengths (min to max)
    * @param oiFitsFile OIFits structure
    * @param instrumentName instrument name
    * @param lambdaMin minimal wavelength (m)
    * @param lambdaMax maximal wavelength (m)
    * @param nSpectralChannels number of spectral channels
+   * @return array of wave lengths (min to max)
    */
-  protected static void createOIWaveLength(final OIFitsFile oiFitsFile, final String instrumentName,
-                                           final double lambdaMin, final double lambdaMax, final int nSpectralChannels) {
+  protected static float[] createOIWaveLength(final OIFitsFile oiFitsFile, final String instrumentName,
+                                              final double lambdaMin, final double lambdaMax, final int nSpectralChannels) {
 
     final OIWavelength waves = new OIWavelength(oiFitsFile, nSpectralChannels);
     waves.setInsName(instrumentName);
@@ -179,5 +187,102 @@ public class OIFitsCreatorService {
     }
 
     oiFitsFile.addOiTable(waves);
+
+    return effWave;
+  }
+
+  /**
+   * Create the OI_VIS table for the given target and add it to the given oiFits structure
+   * @param oiFitsFile OIFits structure
+   * @param arrayName interferometer name
+   * @param instrumentName instrument name
+   * @param dateObs observation date
+   * @param beams beam list
+   * @param targetUVObservability list of HA/UV coordinates per baseline
+   * @param effWave array of wave lengths (min to max)
+   * @param precRA precessed target right ascension in decimal hours
+   * @param sc sky calc instance
+   */
+  protected static void createOIVis(final OIFitsFile oiFitsFile,
+                                    final String arrayName,
+                                    final String instrumentName,
+                                    final String dateObs,
+                                    final List<Beam> beams,
+                                    final List<UVRangeBaseLineData> targetUVObservability,
+                                    final float[] effWave,
+                                    final double precRA,
+                                    final AstroSkyCalc sc) {
+
+    final int nBl = targetUVObservability.size();
+
+    // Suppose that number of points is consistent :
+    final int nRows = targetUVObservability.get(0).getNPoints();
+
+    final OIVis vis = new OIVis(oiFitsFile, instrumentName, nRows * nBl);
+    vis.setArrName(arrayName);
+    vis.setDateObs(dateObs);
+
+    // Columns :
+    final short[] targetIds = vis.getTargetId();
+    final double[] times = vis.getTime();
+    final double[] mjds = vis.getMjd();
+    // skip int_time (unknown)
+
+    // TODO : vis columns
+
+    final double[] uCoords = vis.getUCoord();
+    final double[] vCoords = vis.getVCoord();
+
+    final short[][] staIndexes = vis.getStaIndex();
+    // skip flag (default to false means values are valid)
+
+    // vars:
+    double ha, jd;
+
+    for (int i = 0, j = 0, k = 0; i < nRows; i++) {
+      targetIds[i] = TARGET_ID;
+
+      j = 0;
+      for (UVRangeBaseLineData uvBL : targetUVObservability) {
+
+        logger.severe("i = " + i + ", j = " + j + ", k = " + k);
+
+        k = i * nBl + j;
+
+        ha = uvBL.getHA()[i];
+        jd = sc.convertHAToJD(ha, precRA);
+
+        // UTC :
+        // todo manage date change : (day + 1)
+        times[k] = calendarToTime(sc.toCalendar(jd, false));
+
+        // TODO : convert jd to mjd :
+        mjds[k] = jd;
+
+        uCoords[k] = uvBL.getU()[i];
+        vCoords[k] = uvBL.getV()[i];
+
+        j++;
+      }
+
+//      staIndexes[i][0] = sta1Id;
+//      staIndexes[i][1] = sta2Id;
+    }
+
+
+    // TODO : compute visiblities
+
+    oiFitsFile.addOiTable(vis);
+  }
+
+  /**
+   * Convert UTC time in seconds
+   * @param cal UTC time
+   * @return UTC time in seconds
+   */
+  private static double calendarToTime(final Calendar cal) {
+    return 3600d * cal.get(Calendar.HOUR_OF_DAY)
+            + 60d * cal.get(Calendar.MINUTE)
+            + cal.get(Calendar.SECOND);
   }
 }
