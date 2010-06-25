@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: Range.java,v 1.9 2010-05-26 15:27:15 bourgesl Exp $"
+ * "@(#) $Id: Range.java,v 1.10 2010-06-25 14:13:06 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.9  2010/05/26 15:27:15  bourgesl
+ * added restrictRange method to return a cropped list of ranges inside [min;max] range
+ *
  * Revision 1.8  2010/04/02 14:39:54  bourgesl
  * added contains method
  *
@@ -87,6 +90,20 @@ public class Range {
   }
 
   /* utility methods */
+  /**
+   * Test if the given value is inside given ranges
+   * @param ranges list of ranges
+   * @param value value to test
+   * @return true if the given value is inside given ranges
+   */
+  public static boolean contains(final List<Range> ranges, final double value) {
+    for (Range range : ranges) {
+      if (range.contains(value)) {
+        return true;
+      }
+    }
+    return false;
+  }
 
   public static Double getMinimum(final List<Range> ranges) {
     if (ranges != null && !ranges.isEmpty()) {
@@ -205,7 +222,7 @@ public class Range {
           // lazy instanciation :
           mRanges = new ArrayList<Range>();
         }
-        mRanges.add(new Range(limit.getPosition(), limits.get(i+1).getPosition()));
+        mRanges.add(new Range(limit.getPosition(), limits.get(i + 1).getPosition()));
       }
     }
 
@@ -213,6 +230,7 @@ public class Range {
   }
 
   private static final class RangeLimit implements Comparable<RangeLimit> {
+
     /** limit position */
     private final double position;
     /** integer value to indicate the start [+1] or end of the initial range */
@@ -234,6 +252,5 @@ public class Range {
     public int compareTo(final RangeLimit limit) {
       return Double.compare(this.position, limit.position);
     }
-    
   }
 }
