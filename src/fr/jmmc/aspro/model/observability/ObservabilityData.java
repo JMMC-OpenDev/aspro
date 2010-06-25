@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityData.java,v 1.4 2010-06-23 12:54:17 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityData.java,v 1.5 2010-06-25 14:13:36 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2010/06/23 12:54:17  bourgesl
+ * added Beam list to use it in OIFits generation
+ *
  * Revision 1.3  2010/01/22 13:16:44  bourgesl
  * added star observability type to change bar colors easily
  *
@@ -21,6 +24,7 @@
  */
 package fr.jmmc.aspro.model.observability;
 
+import edu.dartmouth.AstroSkyCalc;
 import fr.jmmc.aspro.model.BaseLine;
 import fr.jmmc.aspro.model.Beam;
 import java.util.ArrayList;
@@ -49,6 +53,8 @@ public class ObservabilityData {
   private PopCombination bestPops;
 
   /* other useful data for UV coverage */
+  /** astroSkyCalc instance useful to convert HA in LST or UTC */
+  private AstroSkyCalc dateCalc = null;
   /** beam list */
   private List<Beam> beams = null;
   /** base line list */
@@ -101,6 +107,14 @@ public class ObservabilityData {
   }
 
   /* other useful data for UV coverage */
+  public AstroSkyCalc getDateCalc() {
+    return dateCalc;
+  }
+
+  public void setDateCalc(final AstroSkyCalc dateCalc) {
+    this.dateCalc = dateCalc;
+  }
+
   public List<Beam> getBeams() {
     return beams;
   }
