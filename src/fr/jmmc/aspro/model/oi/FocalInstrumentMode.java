@@ -178,7 +178,7 @@ public class FocalInstrumentMode
    * @return number of channels
    */
   public final int computeNumberOfChannels() {
-    return Math.max(1, (int) (getResolution() * (this.waveLengthMax - this.waveLengthMin) / getWaveLength()));
+    return Math.max(1, (int) Math.round(getResolution() * (this.waveLengthMax - this.waveLengthMin) / getWaveLength()));
   }
 //--simple--preserve
 
