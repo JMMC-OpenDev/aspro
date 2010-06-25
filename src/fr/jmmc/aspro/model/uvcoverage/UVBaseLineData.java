@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVBaseLineData.java,v 1.1 2010-01-08 16:50:53 bourgesl Exp $"
+ * "@(#) $Id: UVBaseLineData.java,v 1.2 2010-06-25 14:14:19 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2010/01/08 16:50:53  bourgesl
+ * initial uv coverage
+ *
  */
 package fr.jmmc.aspro.model.uvcoverage;
 
@@ -14,8 +17,9 @@ package fr.jmmc.aspro.model.uvcoverage;
  * @author bourgesl
  */
 public class UVBaseLineData {
+
   /** baseline name */
-  private String name;
+  private final String name;
   /** number of uv points */
   private int nPoints = 0;
   /** u coordinates */
@@ -31,36 +35,31 @@ public class UVBaseLineData {
     this.name = name;
   }
 
-  public String getName() {
+  public final String getName() {
     return name;
   }
 
-  public void setName(String name) {
-    this.name = name;
-  }
-
-  public int getNPoints() {
+  public final int getNPoints() {
     return nPoints;
   }
 
-  public void setNPoints(int nPoints) {
+  public final void setNPoints(final int nPoints) {
     this.nPoints = nPoints;
   }
 
-  public double[] getU() {
+  public final double[] getU() {
     return u;
   }
 
-  public void setU(double[] u) {
+  public final void setU(final double[] u) {
     this.u = u;
   }
 
-  public double[] getV() {
+  public final double[] getV() {
     return v;
   }
 
-  public void setV(double[] v) {
+  public final void setV(final double[] v) {
     this.v = v;
   }
-
 }
