@@ -1,11 +1,16 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AstroSkyCalc.java,v 1.21 2010-06-25 14:12:16 bourgesl Exp $"
+ * "@(#) $Id: AstroSkyCalc.java,v 1.22 2010-06-25 15:14:54 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.21  2010/06/25 14:12:16  bourgesl
+ * code cleanup
+ * methods related to targets moved in AstoSkyCalcObservation
+ * Added methods to convert HA to JD
+ *
  * Revision 1.20  2010/06/17 10:02:51  bourgesl
  * fixed warning hints - mainly not final static loggers
  *
@@ -188,21 +193,22 @@ public final class AstroSkyCalc {
   }
 
   /**
-   * Convert a julian date to a gregorian date (precise up to the second) in UTC
-   * @param jd julian date
-   * @return Date object
-   */
-  public Date toDateUTC(final double jd) {
-    return toDate(jd, false);
-  }
-
-  /**
    * Convert a julian date to a gregorian date (precise up to the second) in LST or UTC
    * @param jd julian date
    * @param useLst flag to select LST (true) or UTC conversion (false)
    * @return Date object
    */
   public Date toDate(final double jd, final boolean useLst) {
+    return toCalendar(jd, useLst).getTime();
+  }
+
+  /**
+   * Convert a julian date to a gregorian calendar (precise up to the second) in LST or UTC
+   * @param jd julian date
+   * @param useLst flag to select LST (true) or UTC conversion (false)
+   * @return Calendar object
+   */
+  public Calendar toCalendar(final double jd, final boolean useLst) {
     final WhenWhere ww = new WhenWhere(jd, this.site);
 
     final InstantInTime t = ww.when;
@@ -222,7 +228,7 @@ public final class AstroSkyCalc {
     // fix milliseconds to 0 to be able to compare date instances :
     cal.set(Calendar.MILLISECOND, 0);
 
-    return cal.getTime();
+    return cal;
   }
 
   /**
