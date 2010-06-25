@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBVega.java,v 1.5 2010-06-17 10:02:51 bourgesl Exp $"
+ * "@(#) $Id: ExportOBVega.java,v 1.6 2010-06-25 14:17:21 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2010/06/17 10:02:51  bourgesl
+ * fixed warning hints - mainly not final static loggers
+ *
  * Revision 1.4  2010/06/07 16:03:48  bourgesl
  * minimum elevation changed to 30 degrees
  *
@@ -22,7 +25,7 @@
  */
 package fr.jmmc.aspro.ob;
 
-import edu.dartmouth.AstroSkyCalc;
+import edu.dartmouth.AstroSkyCalcObservation;
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.ConfigurationManager;
 import fr.jmmc.aspro.model.ObservationManager;
@@ -206,7 +209,7 @@ public class ExportOBVega {
       sb.append(df2.format(UNDEFINED_DIAMETER)).append(SEPARATOR);
 
       // convert RA/DEC :
-      final String[] raDec = AstroSkyCalc.toString(target.getRADeg(), 2, target.getDECDeg(), 1);
+      final String[] raDec = AstroSkyCalcObservation.toString(target.getRADeg(), 2, target.getDECDeg(), 1);
 
       // 11.right ascension (hh:mm:ss.ss)
       sb.append(raDec[0]).append(SEPARATOR);

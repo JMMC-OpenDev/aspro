@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBVLTI.java,v 1.7 2010-06-17 10:02:51 bourgesl Exp $"
+ * "@(#) $Id: ExportOBVLTI.java,v 1.8 2010-06-25 14:17:21 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2010/06/17 10:02:51  bourgesl
+ * fixed warning hints - mainly not final static loggers
+ *
  * Revision 1.6  2010/06/07 16:03:48  bourgesl
  * minimum elevation changed to 30 degrees
  *
@@ -47,7 +50,7 @@
  */
 package fr.jmmc.aspro.ob;
 
-import edu.dartmouth.AstroSkyCalc;
+import edu.dartmouth.AstroSkyCalcObservation;
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.Range;
@@ -193,7 +196,7 @@ public class ExportOBVLTI {
     document = document.replaceFirst(KEY_COMMENTS, target.getSPECTYP());
 
     // convert RA/DEC (mas) up to 3 digits :
-    final String[] raDec = AstroSkyCalc.toString(target.getRADeg(), target.getDECDeg());
+    final String[] raDec = AstroSkyCalcObservation.toString(target.getRADeg(), target.getDECDeg());
 
     document = document.replaceFirst(KEY_RA, raDec[0]);
     document = document.replaceFirst(KEY_DEC, raDec[1]);

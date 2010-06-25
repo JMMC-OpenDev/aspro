@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.48 2010-06-23 12:55:14 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.49 2010-06-25 14:17:21 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.48  2010/06/23 12:55:14  bourgesl
+ * added Beam list to use it in OIFits generation
+ *
  * Revision 1.47  2010/06/17 10:02:50  bourgesl
  * fixed warning hints - mainly not final static loggers
  *
@@ -160,6 +163,7 @@
 package fr.jmmc.aspro.service;
 
 import edu.dartmouth.AstroSkyCalc;
+import edu.dartmouth.AstroSkyCalcObservation;
 import edu.dartmouth.SunAlmanachTime;
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.BaseLine;
@@ -239,7 +243,9 @@ public final class ObservabilityService {
   private final Thread currentThread = Thread.currentThread();
   /** sky calc instance */
   private final AstroSkyCalc sc = new AstroSkyCalc();
-  /** jd corresponding to LST=0 for the observation date */
+  /** observation sky calc instance */
+  private final AstroSkyCalcObservation sco = new AstroSkyCalcObservation();
+  /** jd corresponding to LST=00:00:00 for the observation date */
   private double jdLst0;
   /** jd corresponding to LST=23:59:59 for the observation date */
   private double jdLst24;
@@ -370,26 +376,23 @@ public final class ObservabilityService {
 
       // define site :
       this.sc.defineSite(this.interferometer.getName(), this.interferometer.getPosSph());
+      this.sco.defineSite(this.sc);
 
       // define date :
       final XMLGregorianCalendar cal = this.observation.getWhen().getDate();
-      this.sc.defineDate(cal.getYear(), cal.getMonth(), cal.getDay());
 
-      // fast interrupt :
-      if (this.currentThread.isInterrupted()) {
-        return null;
-      }
+      // find the julian date corresponding to the LST origin LST=00:00:00 for the given date :
+      this.jdLst0 = this.sc.defineDate(cal.getYear(), cal.getMonth(), cal.getDay());
 
-      // Find the julian date corresponding to the LST origin LST=0h for the given date :
-      this.jdLst0 = this.sc.findLst0();
       // warning : in LST, remove 1s to avoid 00:00:00 :
-      this.jdLst24 = this.sc.findLst0(this.jdLst0 + 1d) - 1d / 86400d;
+      this.jdLst24 = this.sc.findJdForLst0(this.jdLst0 + 1d) - 1d / 86400d;
 
       if (logger.isLoggable(Level.FINE)) {
         logger.fine("jd   min = " + this.jdLst0);
         logger.fine("jd   max = " + this.jdLst24);
       }
 
+      this.data.setDateCalc(this.sc);
       this.data.setDateMin(jdToDate(this.jdLst0));
       this.data.setDateMax(jdToDate(this.jdLst24));
 
@@ -407,7 +410,7 @@ public final class ObservabilityService {
       if (this.useNightLimit) {
         //  sun rise/set with twilight : see NightlyAlmanac
 
-        // Use the LST range [0;24h] +- 12h to have valid night ranges to merge with target ranges :
+        // Use the LST range [0;24h] +/- 1 day to have valid night ranges to merge with target ranges :
         final List<SunAlmanachTime> sunEvents = this.sc.findSunRiseSet(this.jdLst0);
 
         processSunAlmanach(sunEvents);
@@ -513,6 +516,11 @@ public final class ObservabilityService {
 
   }
 
+  /**
+   * Find the best Pop combination for the given list of targets
+   * @param targets list of targets
+   * @return best Pop combination or null if none exists
+   */
   private PopCombination findCompatiblePoPs(final List<Target> targets) {
 
     PopCombination bestPopCombination = null;
@@ -671,7 +679,7 @@ public final class ObservabilityService {
   private List<PopObservabilityData> findPoPsForTargetObservability(final Target target) {
 
     // Target coordinates precessed to jd and to get az/alt positions from JSkyCalc :
-    final double[] raDec = this.sc.defineTarget(this.jdLst0, target.getRADeg(), target.getDECDeg());
+    final double[] raDec = this.sco.defineTarget(this.jdLst0, target.getRADeg(), target.getDECDeg());
 
     // precessed target right ascension in decimal hours :
     final double precRA = raDec[0];
@@ -680,7 +688,7 @@ public final class ObservabilityService {
     final double precDEC = raDec[1];
 
     // Find LST range corresponding to the rise / set of the target :
-    final double haElev = this.sc.getHAForElevation(precDEC, this.minElev);
+    final double haElev = this.sco.getHAForElevation(precDEC, this.minElev);
 
     // For all PoP combinations : find the HA interval merged with the HA Rise/set interval
     // list of observability data associated to a pop combination :
@@ -718,6 +726,10 @@ public final class ObservabilityService {
         logger.fine("Target never rise : " + target);
       }
     }
+
+    // reset current target :
+    this.sco.reset();
+
     return popDataList;
   }
 
@@ -734,8 +746,8 @@ public final class ObservabilityService {
     final StarData starData = new StarData(target.getName());
     this.data.addStarData(starData);
 
-    // Target coordinates precessed to jd and to get az/alt positions from JSkyCalc :
-    final double[] raDec = this.sc.defineTarget(this.jdLst0, target.getRADeg(), target.getDECDeg());
+    // get Target coordinates precessed to jd and define target to get later az/alt positions from JSkyCalc :
+    final double[] raDec = this.sco.defineTarget(this.jdLst0, target.getRADeg(), target.getDECDeg());
 
     // precessed target right ascension in decimal hours :
     final double precRA = raDec[0];
@@ -744,10 +756,10 @@ public final class ObservabilityService {
     final double precDEC = raDec[1];
 
     // define transit date (HA = 0) :
-    starObs.setTransitDate(jdToDate(convertHAToJD(0d, precRA)));
+    starObs.setTransitDate(jdToDate(this.sc.convertHAToJD(0d, precRA)));
 
     // Find LST range corresponding to the rise / set of the target :
-    final double haElev = this.sc.getHAForElevation(precDEC, this.minElev);
+    final double haElev = this.sco.getHAForElevation(precDEC, this.minElev);
 
     // update Star Data :
     starData.setPrecRA(precRA);
@@ -924,7 +936,7 @@ public final class ObservabilityService {
 
       // store merge result as date intervals :
       if (finalRanges != null) {
-        // elevation marks :
+        // elevation marks for the current target :
         findElevations(starObs, finalRanges, precRA, precDEC);
 
         // convert JD ranges to date ranges :
@@ -956,6 +968,9 @@ public final class ObservabilityService {
         logger.fine("Target never rise : " + target);
       }
     }
+
+    // reset current target :
+    this.sco.reset();
   }
 
   /**
@@ -1159,7 +1174,7 @@ public final class ObservabilityService {
         return null;
       }
 
-      azEl = this.sc.getTargetPosition(jd);
+      azEl = this.sco.getTargetPosition(jd);
 
       // For every beam (station) :
       // check if there is no horizon obstruction :
@@ -1517,6 +1532,12 @@ public final class ObservabilityService {
     }
   }
 
+  /**
+   * Find the optical length between the given station and the PoP
+   * @param station used station
+   * @param pop used Pop
+   * @return optical length
+   */
   private double getPopOpticalLength(final Station station, final Pop pop) {
     for (PopLink pl : station.getPopLinks()) {
       if (pl.getPop().equals(pop)) {
@@ -1650,10 +1671,10 @@ public final class ObservabilityService {
   /**
    * Convert an HA range to a JD range
    * @param rangeHA given in hour angle (dec hours)
-   * @param lstOffset right ascension (dec hours)
+   * @param precRA precessed target right ascension in decimal hours
    * @return JD range
    */
-  private Range convertHAToJDRange(final Range rangeHA, final double lstOffset) {
+  private Range convertHAToJDRange(final Range rangeHA, final double precRA) {
 
     final double ha1 = rangeHA.getMin();
     final double ha2 = rangeHA.getMax();
@@ -1663,57 +1684,35 @@ public final class ObservabilityService {
       logger.finest("ha2 = " + ha2);
     }
 
-    final double jd1 = convertHAToJD(ha1, lstOffset);
-    final double jd2 = convertHAToJD(ha2, lstOffset);
+    final double jd1 = this.sc.convertHAToJD(ha1, precRA);
+    final double jd2 = this.sc.convertHAToJD(ha2, precRA);
 
     if (logger.isLoggable(Level.FINEST)) {
-      logger.finest("jd1 = " + this.sc.toDate(jd1, true));
-      logger.finest("jd2 = " + this.sc.toDate(jd2, true));
+      logger.finest("jd1 = " + this.sc.toDateLST(jd1));
+      logger.finest("jd2 = " + this.sc.toDateLST(jd2));
     }
 
     return new Range(jd1, jd2);
   }
 
   /**
-   * Convert a decimal hour angle in Julian day
-   * @param ha decimal hour angle
-   * @param lstOffset precessed target right ascension in decimal hours
-   * @return JD value
-   */
-  private double convertHAToJD(final double ha, final double lstOffset) {
-    final double lst = lstOffset + ha;
-
-    // apply the sideral / solar ratio :
-    return this.jdLst0 + AstroSkyCalc.lst2jd(lst);
-  }
-
-  /**
    * Convert a JD range to an HA range but keep only ranges with an HA in [-12;12]
    * @param rangeJD JD range
-   * @param lstOffset precessed target right ascension in decimal hours
-   * @return HA range
+   * @param precRA precessed target right ascension in decimal hours
+   * @return HA range in [-12;12]
    */
-  private Range convertJDToHARange(final Range rangeJD, final double lstOffset) {
+  private Range convertJDToHARange(final Range rangeJD, final double precRA) {
 
     final double jd1 = rangeJD.getMin();
     final double jd2 = rangeJD.getMax();
 
     if (logger.isLoggable(Level.FINEST)) {
-      logger.finest("jd1 = " + this.sc.toDate(jd1, true));
-      logger.finest("jd2 = " + this.sc.toDate(jd2, true));
+      logger.finest("jd1 = " + this.sc.toDateLST(jd1));
+      logger.finest("jd2 = " + this.sc.toDateLST(jd2));
     }
 
-    // apply the sideral / solar ratio :
-    final double lst1 = AstroSkyCalc.jd2lst(jd1 - this.jdLst0);
-    final double lst2 = AstroSkyCalc.jd2lst(jd2 - this.jdLst0);
-
-    if (logger.isLoggable(Level.FINEST)) {
-      logger.finest("lst1 = " + lst1 + " h");
-      logger.finest("lst2 = " + lst2 + " h");
-    }
-
-    double ha1 = lst1 - lstOffset;
-    double ha2 = lst2 - lstOffset;
+    double ha1 = this.sc.convertJDToHA(jd1, precRA);
+    double ha2 = this.sc.convertJDToHA(jd2, precRA);
 
     if (ha1 < AsproConstants.HA_MIN) {
       ha1 = AsproConstants.HA_MIN;
@@ -1748,7 +1747,7 @@ public final class ObservabilityService {
    */
   private void convertRangeToDateInterval(final Range rangeJD, final List<DateTimeInterval> intervals) {
     // one Day in LST is different than one Day in JD :
-    final double day = AstroSkyCalc.lst2jd(24d);
+    final double day = AstroSkyCalc.LST_DAY_IN_JD;
 
     final double jdStart = rangeJD.getMin();
     final double jdEnd = rangeJD.getMax();
@@ -1772,10 +1771,10 @@ public final class ObservabilityService {
           // end occurs after LST 24 :
 
           // interval [jdStart;jdLst24]
-          intervals.add(new DateTimeInterval(jdToDate(jdStart), jdToDate(this.jdLst24)));
+          intervals.add(new DateTimeInterval(jdToDate(jdStart), this.data.getDateMax()));
 
           // add the second interval [jdLst0;jdEnd - day]
-          intervals.add(new DateTimeInterval(jdToDate(this.jdLst0), jdToDate(jdEnd - day)));
+          intervals.add(new DateTimeInterval(this.data.getDateMin(), jdToDate(jdEnd - day)));
         }
       }
 
@@ -1790,10 +1789,10 @@ public final class ObservabilityService {
 
       } else {
         // interval [jdLst0;jdEnd]
-        intervals.add(new DateTimeInterval(jdToDate(this.jdLst0), jdToDate(jdEnd)));
+        intervals.add(new DateTimeInterval(this.data.getDateMin(), jdToDate(jdEnd)));
 
         // add the second interval [jdStart + day;jdLst24]
-        intervals.add(new DateTimeInterval(jdToDate(jdStart + day), jdToDate(this.jdLst24)));
+        intervals.add(new DateTimeInterval(jdToDate(jdStart + day), this.data.getDateMax()));
       }
     }
   }
@@ -1878,6 +1877,13 @@ public final class ObservabilityService {
     return targets;
   }
 
+  /**
+   * Define elevation marks on observability ranges for the current target
+   * @param starObs star observability data
+   * @param obsRangeJD observability ranges in JD
+   * @param precRA precessed RA
+   * @param precDEC precessed DEC
+   */
   private void findElevations(final StarObservabilityData starObs, final List<Range> obsRangeJD, final double precRA, final double precDEC) {
     final List<ElevationDate> elevations = starObs.getElevations();
 
@@ -1887,16 +1893,16 @@ public final class ObservabilityService {
     // internal ticks for elevation :
     for (elev = 20; elev <= 80; elev += 20) {
       if (elev != Math.round(this.minElev)) {
-        haElev = this.sc.getHAForElevation(precDEC, elev);
+        haElev = this.sco.getHAForElevation(precDEC, elev);
 
         if (haElev > 0) {
-          jd = convertHAToJD(-haElev, precRA);
-          if (checkRange(obsRangeJD, jd)) {
+          jd = this.sc.convertHAToJD(-haElev, precRA);
+          if (Range.contains(obsRangeJD, jd)) {
             elevations.add(new ElevationDate(jdToDate(jd), elev));
           }
 
-          jd = convertHAToJD(haElev, precRA);
-          if (checkRange(obsRangeJD, jd)) {
+          jd = this.sc.convertHAToJD(haElev, precRA);
+          if (Range.contains(obsRangeJD, jd)) {
             elevations.add(new ElevationDate(jdToDate(jd), elev));
           }
         }
@@ -1907,12 +1913,12 @@ public final class ObservabilityService {
     AzEl azEl;
     for (Range range : obsRangeJD) {
       jd = range.getMin();
-      azEl = this.sc.getTargetPosition(jd);
+      azEl = this.sco.getTargetPosition(jd);
       elev = (int) Math.round(azEl.getElevation());
       elevations.add(new ElevationDate(jdToDate(jd), elev));
 
       jd = range.getMax();
-      azEl = this.sc.getTargetPosition(jd);
+      azEl = this.sco.getTargetPosition(jd);
       elev = (int) Math.round(azEl.getElevation());
       elevations.add(new ElevationDate(jdToDate(jd), elev));
     }
@@ -1923,15 +1929,6 @@ public final class ObservabilityService {
         logger.fine(elevationDate.toString());
       }
     }
-  }
-
-  private boolean checkRange(final List<Range> ranges, final double value) {
-    for (Range range : ranges) {
-      if (range.contains(value)) {
-        return true;
-      }
-    }
-    return false;
   }
 
   /**
