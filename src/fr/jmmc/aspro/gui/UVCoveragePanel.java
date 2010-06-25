@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.44 2010-06-23 12:52:08 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.45 2010-06-25 14:16:51 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.44  2010/06/23 12:52:08  bourgesl
+ * ObservationManager regsitration for observation events moved in SettingPanel (external)
+ *
  * Revision 1.43  2010/06/17 10:02:51  bourgesl
  * fixed warning hints - mainly not final static loggers
  *
@@ -1683,10 +1686,10 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
       XYSeries xySeriesBL;
 
-      double[] u;
-      double[] v;
-      double[] u2;
-      double[] v2;
+      double[] uWMin;
+      double[] vWMin;
+      double[] uWMax;
+      double[] vWMax;
       double x1, y1, x2, y2;
       int n = 0;
 
@@ -1694,17 +1697,17 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         xySeriesBL = new XYSeries("Observable " + uvBL.getName(), false);
         xySeriesBL.setNotify(false);
 
-        u = uvBL.getU();
-        v = uvBL.getV();
-        u2 = uvBL.getU2();
-        v2 = uvBL.getV2();
+        uWMin = uvBL.getUWMin();
+        vWMin = uvBL.getVWMin();
+        uWMax = uvBL.getUWMax();
+        vWMax = uvBL.getVWMax();
 
         for (int i = 0, size = uvBL.getNPoints(); i < size; i++) {
-          x1 = toUVPlotScale(u[i]);
-          y1 = toUVPlotScale(v[i]);
+          x1 = toUVPlotScale(uWMax[i]);
+          y1 = toUVPlotScale(vWMax[i]);
 
-          x2 = toUVPlotScale(u2[i]);
-          y2 = toUVPlotScale(v2[i]);
+          x2 = toUVPlotScale(uWMin[i]);
+          y2 = toUVPlotScale(vWMin[i]);
 
           // first segment :
           xySeriesBL.add(x1, y1);
