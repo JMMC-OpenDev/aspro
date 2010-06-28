@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoverageService.java,v 1.22 2010-06-25 15:16:27 bourgesl Exp $"
+ * "@(#) $Id: UVCoverageService.java,v 1.23 2010-06-28 14:36:08 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.22  2010/06/25 15:16:27  bourgesl
+ * starting OI_VIS table generation : time / mjd / uv coords
+ * changed UVTable per base line in UV Coverage Service
+ *
  * Revision 1.21  2010/06/23 15:44:06  bourgesl
  * added computed OI_WAVELENGTH table in OIFits
  *
@@ -382,12 +386,41 @@ public final class UVCoverageService {
 
     if (obsRangesHA != null) {
 
-      final double ha1 = this.haMin;
-      final double ha2 = this.haMax;
+      final double haLower = this.haMin;
+      final double haUpper = this.haMax;
 
       final double step = this.haStep;
 
-      final int nPoints = (int) Math.round((ha2 - ha1) / step) + 1;
+      // estimate the number of HA points :
+      final int capacity = (int) Math.round((haUpper - haLower) / step) + 1;
+
+      // First pass : find observable HA values :
+      final double[] haValues = new double[capacity];
+
+      int j = 0;
+      for (double ha = haLower; ha <= haUpper; ha += step) {
+
+        // check HA :
+        if (checkObservability(ha, obsRangesHA)) {
+          haValues[j] = ha;
+          j++;
+        }
+      }
+
+      // correct number of HA points :
+      final int nPoints = j;
+
+      // check if there is at least one observable HA :
+      if (nPoints == 0) {
+        return;
+      }
+
+      final double[] HA = new double[nPoints];
+      System.arraycopy(haValues, 0, HA, 0, nPoints);
+
+      this.data.setHA(HA);
+
+      // Second pass : extract UV values for HA points :
 
       // precessed target declination in rad :
       final double precDEC = Math.toRadians(this.starData.getPrecDEC());
@@ -397,7 +430,7 @@ public final class UVCoverageService {
 
       UVRangeBaseLineData uvData;
       BaseLine baseLine;
-      double[] HA;
+
       /* pure U,V coordinates (m) */
       double[] u;
       double[] v;
@@ -410,14 +443,11 @@ public final class UVCoverageService {
 
       double haRad;
 
-      boolean observable;
-
-      for (int i = 0, j = 0; i < sizeBL; i++) {
+      for (int i = 0; i < sizeBL; i++) {
         baseLine = this.baseLines.get(i);
 
         uvData = new UVRangeBaseLineData(baseLine);
 
-        HA = new double[nPoints];
         u = new double[nPoints];
         v = new double[nPoints];
         uWMin = new double[nPoints];
@@ -425,39 +455,26 @@ public final class UVCoverageService {
         uWMax = new double[nPoints];
         vWMax = new double[nPoints];
 
-        j = 0;
+        for (j = 0; j < nPoints; j++) {
+          haRad = AngleUtils.hours2rad(HA[j]);
 
-        for (double ha = ha1; ha <= ha2; ha += step) {
+          // Baseline projected vector (m) :
+          u[j] = CalcUVW.computeU(baseLine, haRad);
+          v[j] = CalcUVW.computeV(precDEC, baseLine, haRad);
 
-          // check HA :
-          observable = checkObservability(ha, obsRangesHA);
+          // wavelength correction :
 
-          if (observable) {
-            HA[j] = ha;
+          // Spatial frequency (rad-1) :
+          uWMin[j] = u[j] / this.lambdaMin;
+          vWMin[j] = v[j] / this.lambdaMin;
 
-            haRad = AngleUtils.hours2rad(ha);
-
-            // Baseline projected vector (m) :
-            u[j] = CalcUVW.computeU(baseLine, haRad);
-            v[j] = CalcUVW.computeV(precDEC, baseLine, haRad);
-
-            // wavelength correction :
-
-            // Spatial frequency (rad-1) :
-            uWMin[j] = u[j] / this.lambdaMin;
-            vWMin[j] = v[j] / this.lambdaMin;
-
-            uWMax[j] = u[j] / this.lambdaMax;
-            vWMax[j] = v[j] / this.lambdaMax;
-
-            j++;
-          }
+          uWMax[j] = u[j] / this.lambdaMax;
+          vWMax[j] = v[j] / this.lambdaMax;
         }
 
-        uvData.setNPoints(j);
+        uvData.setNPoints(nPoints);
         uvData.setU(u);
         uvData.setV(v);
-        uvData.setHA(HA);
         uvData.setUWMin(uWMin);
         uvData.setVWMin(vWMin);
         uvData.setUWMax(uWMax);
@@ -469,7 +486,6 @@ public final class UVCoverageService {
         if (this.currentThread.isInterrupted()) {
           return;
         }
-
       }
 
       this.data.setTargetUVObservability(targetUVObservability);
@@ -597,8 +613,9 @@ public final class UVCoverageService {
               this.lambdaMin, this.lambdaMax, this.nSpectralChannels);
 
       // OI_VIS :
-      OIFitsCreatorService.createOIVis(this.oiFitsFile, arrName, insName, dateObs,
-              this.beams, targetUVObservability, effWave,
+      OIFitsCreatorService.createOIVis(this.oiFitsFile, arrName, insName,
+              this.data.getHA(), this.beams, this.baseLines,
+              targetUVObservability,
               this.starData.getPrecRA(), this.sc);
 
       // TODO (VIS2, T3)
