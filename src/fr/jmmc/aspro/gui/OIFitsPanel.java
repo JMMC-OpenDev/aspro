@@ -47,7 +47,7 @@ public final class OIFitsPanel extends javax.swing.JPanel implements Observation
     // nothing to do
     // add a HTMLEditorKit to the editor pane
 
-   jOutputPane.setEditorKit(new HTMLEditorKit());
+    jOutputPane.setEditorKit(new HTMLEditorKit());
   }
 
   /**
@@ -88,7 +88,9 @@ public final class OIFitsPanel extends javax.swing.JPanel implements Observation
       // use an XSLT to transform the XML document to an HTML representation :
       document = XmlFactory.transform(document, XSLT_FILE);
 
-      logger.severe("update : " + 1e-6d * (System.nanoTime() - start) + " ms.");
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("update : " + 1e-6d * (System.nanoTime() - start) + " ms.");
+      }
     }
 
     this.jOutputPane.setText(document);
