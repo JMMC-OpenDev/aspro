@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BasicObservationForm.java,v 1.31 2010-06-23 12:52:08 bourgesl Exp $"
+ * "@(#) $Id: BasicObservationForm.java,v 1.32 2010-06-28 12:26:54 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.31  2010/06/23 12:52:08  bourgesl
+ * ObservationManager regsitration for observation events moved in SettingPanel (external)
+ *
  * Revision 1.30  2010/06/17 10:02:51  bourgesl
  * fixed warning hints - mainly not final static loggers
  *
@@ -539,7 +542,6 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     this.jCheckBoxNightLimit.addItemListener(new ItemListener() {
 
       public void itemStateChanged(final ItemEvent e) {
-        jDateSpinner.setEnabled(e.getStateChange() == ItemEvent.SELECTED);
         updateObservation();
       }
     });
