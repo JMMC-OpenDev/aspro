@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AstroSkyCalc.java,v 1.22 2010-06-25 15:14:54 bourgesl Exp $"
+ * "@(#) $Id: AstroSkyCalc.java,v 1.23 2010-06-28 12:26:17 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.22  2010/06/25 15:14:54  bourgesl
+ * added toCalendar method to get calendar instance instead of date
+ *
  * Revision 1.21  2010/06/25 14:12:16  bourgesl
  * code cleanup
  * methods related to targets moved in AstoSkyCalcObservation
@@ -59,6 +62,8 @@ public final class AstroSkyCalc {
   public final static double LST_TO_JD = 24d * Const.SID_RATE;
   /** one Day in LST expressed in JD day */
   public final static double LST_DAY_IN_JD = AstroSkyCalc.lst2jd(24d);
+  /** Modified Juliean day reference */
+  public final static double MJD_REF = 2400000.5d;
   /** 1 second in decimal hour */
   private final static double SEC_IN_DEC_HOUR = 1d / 3600d;
 
@@ -375,5 +380,14 @@ public final class AstroSkyCalc {
    */
   public static double jd2lst(final double jd) {
     return jd * LST_TO_JD;
+  }
+
+  /**
+   * Return the modified julian day from the given julian day
+   * @param jd julian day
+   * @return modified julian day
+   */
+  public static double mjd(final double jd) {
+    return jd - MJD_REF;
   }
 }
