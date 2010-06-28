@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoverageData.java,v 1.6 2010-06-23 12:56:13 bourgesl Exp $"
+ * "@(#) $Id: UVCoverageData.java,v 1.7 2010-06-28 12:27:56 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2010/06/23 12:56:13  bourgesl
+ * added OIFits structure generation with OI_ARRAY and OI_TARGET tables
+ *
  * Revision 1.5  2010/02/04 17:05:05  bourgesl
  * UV bounds are coming from UVCoverageService
  *
@@ -33,7 +36,7 @@ import java.util.List;
  * This class contains the results of the UV coverage service
  * @author bourgesl
  */
-public class UVCoverageData {
+public final class UVCoverageData {
 
   /** name of the target */
   private String name;
@@ -43,6 +46,8 @@ public class UVCoverageData {
   private double lambda;
   /** list of uv points corresponding to the target rise/set */
   private List<UVBaseLineData> targetUVRiseSet;
+  /** decimal hour angle (used by OIFits) */
+  private double[] ha = null;
   /** list of uv point couples corresponding to the target observability */
   private List<UVRangeBaseLineData> targetUVObservability;
   /** uv map data */
@@ -60,7 +65,7 @@ public class UVCoverageData {
     return name;
   }
 
-  public void setName(String name) {
+  public void setName(final String name) {
     this.name = name;
   }
 
@@ -68,7 +73,7 @@ public class UVCoverageData {
     return lambda;
   }
 
-  public void setLambda(double lambda) {
+  public void setLambda(final double lambda) {
     this.lambda = lambda;
   }
 
@@ -76,7 +81,7 @@ public class UVCoverageData {
     return uvMax;
   }
 
-  public void setUvMax(double uvMax) {
+  public void setUvMax(final double uvMax) {
     this.uvMax = uvMax;
   }
 
@@ -84,15 +89,23 @@ public class UVCoverageData {
     return targetUVRiseSet;
   }
 
-  public void setTargetUVRiseSet(List<UVBaseLineData> targetUVRiseSet) {
+  public void setTargetUVRiseSet(final List<UVBaseLineData> targetUVRiseSet) {
     this.targetUVRiseSet = targetUVRiseSet;
+  }
+
+  public double[] getHA() {
+    return ha;
+  }
+
+  public void setHA(final double[] ha) {
+    this.ha = ha;
   }
 
   public List<UVRangeBaseLineData> getTargetUVObservability() {
     return targetUVObservability;
   }
 
-  public void setTargetUVObservability(List<UVRangeBaseLineData> targetUVObservability) {
+  public void setTargetUVObservability(final List<UVRangeBaseLineData> targetUVObservability) {
     this.targetUVObservability = targetUVObservability;
   }
 
@@ -100,7 +113,7 @@ public class UVCoverageData {
     return uvMapData;
   }
 
-  public void setUvMapData(UVMapData uvMapData) {
+  public void setUvMapData(final UVMapData uvMapData) {
     this.uvMapData = uvMapData;
   }
 
@@ -108,7 +121,7 @@ public class UVCoverageData {
     return oiFitsFile;
   }
 
-  public void setOiFitsFile(OIFitsFile oiFitsFile) {
+  public void setOiFitsFile(final OIFitsFile oiFitsFile) {
     this.oiFitsFile = oiFitsFile;
   }
 }

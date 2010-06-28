@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVRangeBaseLineData.java,v 1.2 2010-06-25 14:14:57 bourgesl Exp $"
+ * "@(#) $Id: UVRangeBaseLineData.java,v 1.3 2010-06-28 12:27:56 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2010/06/25 14:14:57  bourgesl
+ * added baseline, HA, UV for WMin / WMax to compute easily the OI_VIS table
+ *
  * Revision 1.1  2010/01/08 16:50:53  bourgesl
  * initial uv coverage
  *
@@ -23,8 +26,6 @@ public final class UVRangeBaseLineData extends UVBaseLineData {
 
   /** base line (used by OIFits) */
   private final BaseLine bl;
-  /** decimal hour angle (used by OIFits) */
-  private double[] ha = null;
   /** u coordinates for the minimal wavelength */
   private double[] uWMin = null;
   /** v coordinates for the minimal wavelength */
@@ -45,14 +46,6 @@ public final class UVRangeBaseLineData extends UVBaseLineData {
 
   public BaseLine getBaseLine() {
     return this.bl;
-  }
-
-  public double[] getHA() {
-    return ha;
-  }
-
-  public void setHA(final double[] ha) {
-    this.ha = ha;
   }
 
   public double[] getUWMin() {
