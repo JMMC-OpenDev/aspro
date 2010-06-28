@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: OIFitsCreatorService.java,v 1.4 2010-06-28 14:37:38 bourgesl Exp $"
+ * "@(#) $Id: OIFitsCreatorService.java,v 1.5 2010-06-28 15:39:35 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2010/06/28 14:37:38  bourgesl
+ * proper OI_VIS creation with : dateObs (from first HA), time (supporting day change), MJD and station indexes
+ *
  * Revision 1.3  2010/06/25 15:16:27  bourgesl
  * starting OI_VIS table generation : time / mjd / uv coords
  * changed UVTable per base line in UV Coverage Service
@@ -30,6 +33,8 @@ import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.Telescope;
 import fr.jmmc.aspro.model.uvcoverage.UVRangeBaseLineData;
 import fr.jmmc.mcs.astro.ALX;
+import fr.jmmc.mcs.model.ModelManager;
+import fr.jmmc.mcs.model.targetmodel.Model;
 import fr.jmmc.oitools.OIFitsConstants;
 import fr.jmmc.oitools.model.OIArray;
 import fr.jmmc.oitools.model.OIFitsFile;
@@ -40,6 +45,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.math.complex.Complex;
 
 /**
  * This stateless class contains the code to create OIFits structure from the current observation
@@ -207,6 +213,7 @@ public class OIFitsCreatorService {
    * @param baseLines base line list
    * @param obsHa observable decimal hour angles
    * @param targetUVObservability list of UV coordinates per baseline
+   * @param models list of models to compute complex visibilities
    * @param precRA precessed target right ascension in decimal hours
    * @param sc sky calc instance
    */
@@ -217,11 +224,15 @@ public class OIFitsCreatorService {
                                     final List<Beam> beams,
                                     final List<BaseLine> baseLines,
                                     final List<UVRangeBaseLineData> targetUVObservability,
+                                    final List<Model> models,
                                     final double precRA,
                                     final AstroSkyCalc sc) {
 
     // Create station - base line mapping :
     final Map<BaseLine, short[]> baseLineIndexes = createBaseLineIndexes(beams, baseLines);
+
+    // Has models ?
+    final boolean hasModels = models != null && !models.isEmpty();
 
     final int nBl = targetUVObservability.size();
 
@@ -243,7 +254,14 @@ public class OIFitsCreatorService {
     final double[] mjds = vis.getMjd();
     // skip int_time (unknown)
 
-    // TODO : vis columns
+    final float[][][] visData = vis.getVisData();
+    // skip visErr (unknown)
+
+    final double[][] visAmp = vis.getVisAmp();
+    // skip visAmpErr (unknown)
+
+    final double[][] visPhi = vis.getVisPhi();
+    // skip visPhiErr (unknown)
 
     final double[] uCoords = vis.getUCoord();
     final double[] vCoords = vis.getVCoord();
@@ -253,9 +271,15 @@ public class OIFitsCreatorService {
 
     // Get WaveLengths from related OI table :
     final float[] effWave = vis.getOiWavelength().getEffWave();
+    final int nWave = effWave.length;
 
     // vars:
     double jd;
+    double u, v;
+
+    final double[] ufreq = new double[nWave];
+    final double[] vfreq = new double[nWave];
+    Complex[] visComplex;
 
     // iterate on HA points :
     for (int i = 0, j = 0, k = 0; i < nRows; i++) {
@@ -279,17 +303,43 @@ public class OIFitsCreatorService {
         // modified julian day :
         mjds[k] = AstroSkyCalc.mjd(jd);
 
-        uCoords[k] = uvBL.getU()[i];
-        vCoords[k] = uvBL.getV()[i];
+        // UV coords (m) :
+        u = uvBL.getU()[i];
+        v = uvBL.getV()[i];
+
+        uCoords[k] = u;
+        vCoords[k] = v;
+
+        // Compute complex visibility for the given models :
+        if (hasModels) {
+
+          // prepare spatial frequencies :
+          for (int l = 0; l < nWave; l++) {
+            ufreq[l] = u / effWave[l];
+            vfreq[l] = v / effWave[l];
+          }
+
+          // compute complex visibilities :
+          visComplex = ModelManager.getInstance().computeModels(ufreq, vfreq, models);
+
+          for (int l = 0; l < nWave; l++) {
+            // complex data :
+            visData[k][l][0] = (float) visComplex[l].getReal();
+            visData[k][l][1] = (float) visComplex[l].getImaginary();
+
+            // amplitude :
+            visAmp[k][l] = visComplex[l].abs();
+
+            // phase [-PI;PI] :
+            visPhi[k][l] = Math.toDegrees(visComplex[l].getArgument());
+          }
+        }
 
         staIndexes[k] = baseLineIndexes.get(uvBL.getBaseLine());
 
         j++;
       }
     }
-
-
-    // TODO : compute visiblities
 
     oiFitsFile.addOiTable(vis);
   }

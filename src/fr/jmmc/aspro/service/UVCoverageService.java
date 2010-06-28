@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoverageService.java,v 1.23 2010-06-28 14:36:08 bourgesl Exp $"
+ * "@(#) $Id: UVCoverageService.java,v 1.24 2010-06-28 15:39:35 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.23  2010/06/28 14:36:08  bourgesl
+ * refactoring of computeObservableUV() with 2 steps : first find observable HA values then find UV coordinates
+ *
  * Revision 1.22  2010/06/25 15:16:27  bourgesl
  * starting OI_VIS table generation : time / mjd / uv coords
  * changed UVTable per base line in UV Coverage Service
@@ -587,6 +590,10 @@ public final class UVCoverageService {
 
     if (targetUVObservability != null) {
 
+      // Start the computations :
+      final long start = System.nanoTime();
+
+
       this.oiFitsFile = new OIFitsFile();
 
       final String dateObs = this.observation.getWhen().getDate().toString();
@@ -615,12 +622,17 @@ public final class UVCoverageService {
       // OI_VIS :
       OIFitsCreatorService.createOIVis(this.oiFitsFile, arrName, insName,
               this.data.getHA(), this.beams, this.baseLines,
-              targetUVObservability,
+              targetUVObservability, target.getModels(),
               this.starData.getPrecRA(), this.sc);
 
       // TODO (VIS2, T3)
 
       // TODO : compute errors + noise models
+
+
+      if (logger.isLoggable(Level.INFO)) {
+        logger.info("createOIFits : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
+      }
 
       // fast interrupt :
       if (this.currentThread.isInterrupted()) {
