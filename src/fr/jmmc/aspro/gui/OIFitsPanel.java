@@ -83,7 +83,7 @@ public final class OIFitsPanel extends javax.swing.JPanel implements Observation
     if (oiFitsFile != null) {
       final long start = System.nanoTime();
 
-      document = oiFitsFile.getXmlDesc(true);
+      document = oiFitsFile.getXmlDesc(true, true);
 
       // use an XSLT to transform the XML document to an HTML representation :
       document = XmlFactory.transform(document, XSLT_FILE);
