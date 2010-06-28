@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: OIFitsCreatorService.java,v 1.3 2010-06-25 15:16:27 bourgesl Exp $"
+ * "@(#) $Id: OIFitsCreatorService.java,v 1.4 2010-06-28 14:37:38 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2010/06/25 15:16:27  bourgesl
+ * starting OI_VIS table generation : time / mjd / uv coords
+ * changed UVTable per base line in UV Coverage Service
+ *
  * Revision 1.2  2010/06/23 15:44:06  bourgesl
  * added computed OI_WAVELENGTH table in OIFits
  *
@@ -16,6 +20,7 @@
 package fr.jmmc.aspro.service;
 
 import edu.dartmouth.AstroSkyCalc;
+import fr.jmmc.aspro.model.BaseLine;
 import fr.jmmc.aspro.model.Beam;
 import fr.jmmc.aspro.model.oi.InterferometerConfiguration;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
@@ -32,7 +37,9 @@ import fr.jmmc.oitools.model.OITarget;
 import fr.jmmc.oitools.model.OIVis;
 import fr.jmmc.oitools.model.OIWavelength;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This stateless class contains the code to create OIFits structure from the current observation
@@ -196,22 +203,25 @@ public class OIFitsCreatorService {
    * @param oiFitsFile OIFits structure
    * @param arrayName interferometer name
    * @param instrumentName instrument name
-   * @param dateObs observation date
    * @param beams beam list
-   * @param targetUVObservability list of HA/UV coordinates per baseline
-   * @param effWave array of wave lengths (min to max)
+   * @param baseLines base line list
+   * @param obsHa observable decimal hour angles
+   * @param targetUVObservability list of UV coordinates per baseline
    * @param precRA precessed target right ascension in decimal hours
    * @param sc sky calc instance
    */
   protected static void createOIVis(final OIFitsFile oiFitsFile,
                                     final String arrayName,
                                     final String instrumentName,
-                                    final String dateObs,
+                                    final double[] obsHa,
                                     final List<Beam> beams,
+                                    final List<BaseLine> baseLines,
                                     final List<UVRangeBaseLineData> targetUVObservability,
-                                    final float[] effWave,
                                     final double precRA,
                                     final AstroSkyCalc sc) {
+
+    // Create station - base line mapping :
+    final Map<BaseLine, short[]> baseLineIndexes = createBaseLineIndexes(beams, baseLines);
 
     final int nBl = targetUVObservability.size();
 
@@ -220,6 +230,11 @@ public class OIFitsCreatorService {
 
     final OIVis vis = new OIVis(oiFitsFile, instrumentName, nRows * nBl);
     vis.setArrName(arrayName);
+
+    // Compute UTC start date from first HA :
+    final Calendar calObs = sc.toCalendar(sc.convertHAToJD(obsHa[0], precRA), false);
+
+    final String dateObs = calendarToString(calObs);
     vis.setDateObs(dateObs);
 
     // Columns :
@@ -234,39 +249,43 @@ public class OIFitsCreatorService {
     final double[] vCoords = vis.getVCoord();
 
     final short[][] staIndexes = vis.getStaIndex();
-    // skip flag (default to false means values are valid)
+    // skip flag (default to false means that values are considered as valid)
+
+    // Get WaveLengths from related OI table :
+    final float[] effWave = vis.getOiWavelength().getEffWave();
 
     // vars:
-    double ha, jd;
+    double jd;
 
+    // iterate on HA points :
     for (int i = 0, j = 0, k = 0; i < nRows; i++) {
-      targetIds[i] = TARGET_ID;
 
       j = 0;
-      for (UVRangeBaseLineData uvBL : targetUVObservability) {
 
-        logger.severe("i = " + i + ", j = " + j + ", k = " + k);
+      // iterate on baselines :
+      for (UVRangeBaseLineData uvBL : targetUVObservability) {
 
         k = i * nBl + j;
 
-        ha = uvBL.getHA()[i];
-        jd = sc.convertHAToJD(ha, precRA);
+        // target id
+        targetIds[k] = TARGET_ID;
+
+        // jd from HA :
+        jd = sc.convertHAToJD(obsHa[i], precRA);
 
         // UTC :
-        // todo manage date change : (day + 1)
-        times[k] = calendarToTime(sc.toCalendar(jd, false));
+        times[k] = calendarToTime(sc.toCalendar(jd, false), calObs);
 
-        // TODO : convert jd to mjd :
-        mjds[k] = jd;
+        // modified julian day :
+        mjds[k] = AstroSkyCalc.mjd(jd);
 
         uCoords[k] = uvBL.getU()[i];
         vCoords[k] = uvBL.getV()[i];
 
+        staIndexes[k] = baseLineIndexes.get(uvBL.getBaseLine());
+
         j++;
       }
-
-//      staIndexes[i][0] = sta1Id;
-//      staIndexes[i][1] = sta2Id;
     }
 
 
@@ -276,13 +295,63 @@ public class OIFitsCreatorService {
   }
 
   /**
+   * Return the station indexes (2) per base line mapping
+   * @param beams beam list
+   * @param baseLines base line list
+   * @return baseline station indexes
+   */
+  private static Map<BaseLine, short[]> createBaseLineIndexes(final List<Beam> beams, final List<BaseLine> baseLines) {
+    // Create Beam - index mapping :
+    final Map<Beam, Short> beamIndexes = new HashMap<Beam, Short>();
+
+    // Note : as Beam.hashCode is not implemented, the map acts as an IdentityMap (pointer equality)
+    int i = 0;
+    for (Beam b : beams) {
+      beamIndexes.put(b, Short.valueOf((short) (i + 1)));
+      i++;
+    }
+
+    // Create BaseLine - indexes mapping :
+    final Map<BaseLine, short[]> baseLineIndexes = new HashMap<BaseLine, short[]>();
+
+    for (BaseLine bl : baseLines) {
+      baseLineIndexes.put(bl, new short[]{
+                beamIndexes.get(bl.getBeam1()).shortValue(),
+                beamIndexes.get(bl.getBeam2()).shortValue()
+              });
+    }
+
+    return baseLineIndexes;
+  }
+
+  /**
    * Convert UTC time in seconds
    * @param cal UTC time
+   * @param calObs UTC start date of observation
    * @return UTC time in seconds
    */
-  private static double calendarToTime(final Calendar cal) {
-    return 3600d * cal.get(Calendar.HOUR_OF_DAY)
+  private static double calendarToTime(final Calendar cal, final Calendar calObs) {
+    final double time = 3600d * cal.get(Calendar.HOUR_OF_DAY)
             + 60d * cal.get(Calendar.MINUTE)
             + cal.get(Calendar.SECOND);
+
+    if (cal.get(Calendar.DAY_OF_MONTH) != calObs.get(Calendar.DAY_OF_MONTH)) {
+      // observation is over 2 UTC days = observation starts before midnight and ends after :
+      return 86400d + time;
+    }
+    return time;
+  }
+
+  /**
+   * Convert UTC date to string
+   * @param cal UTC date
+   * @return string representation
+   */
+  private static String calendarToString(final Calendar cal) {
+    final StringBuilder sb = new StringBuilder();
+    sb.append(cal.get(Calendar.YEAR)).append('-');
+    sb.append(cal.get(Calendar.MONTH) + 1).append('-');
+    sb.append(cal.get(Calendar.DAY_OF_MONTH));
+    return sb.toString();
   }
 }
