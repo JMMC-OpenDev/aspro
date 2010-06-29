@@ -28,6 +28,8 @@
       <menu label="Save" classpath="fr.jmmc.aspro.gui.action.SaveObservationAction" action="saveObservation" accelerator="S"
             icon="/fr/jmmc/aspro/gui/icons/filesaveas.png" description="save the current observation as an observation file"/>
       <menu/> <!-- menu separator -->
+      <menu label="Export to OIFits" classpath="fr.jmmc.aspro.gui.action.ExportOIFitsAction" action="exportOIFits" accelerator="F"
+            description="Export your target observables to an OIFits file (only valid if the target has a model)"/>
       <menu label="Export to an Observing Block" classpath="fr.jmmc.aspro.gui.action.ExportOBAction" action="exportOB" accelerator="O"
             description="Export your observation to an Observing block (only valid inside the UV Coverage Panel)"/>
       <menu/> <!-- menu separator -->
@@ -38,6 +40,9 @@
   <releasenotes>
     <release version="0.5">
       <prerelease version="0.5.1">
+        <change>Added action 'Export to OIFits' in the File menu</change>
+        <change>New OIFits tab panel to show a HTML representation of its content</change>
+        <change>OIFits structure computed on the fly using the selected target and current UV coverage settings</change>
         <change>Added oitools module</change>
       </prerelease>
       <prerelease version="0.5.0"> <!-- <pubDate>Thu, 17 Jun 2010 14:00:00 GMT</pubDate> -->

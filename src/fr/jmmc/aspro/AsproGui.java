@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproGui.java,v 1.22 2010-06-18 13:31:07 bourgesl Exp $"
+ * "@(#) $Id: AsproGui.java,v 1.23 2010-06-29 12:13:21 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.22  2010/06/18 13:31:07  bourgesl
+ * removed oitools integration test code
+ *
  * Revision 1.21  2010/06/18 12:00:40  bourgesl
  * added oitools module
  *
@@ -77,6 +80,7 @@ package fr.jmmc.aspro;
 
 import fr.jmmc.aspro.gui.SettingPanel;
 import fr.jmmc.aspro.gui.action.ExportOBAction;
+import fr.jmmc.aspro.gui.action.ExportOIFitsAction;
 import fr.jmmc.aspro.gui.action.ExportPDFAction;
 import fr.jmmc.aspro.gui.action.LoadObservationAction;
 import fr.jmmc.aspro.gui.action.SaveObservationAction;
@@ -202,8 +206,10 @@ public final class AsproGui extends App {
     new ShowPrefAction();
     // export OB :
     new ExportOBAction();
-    // export PF :
+    // export PDF :
     new ExportPDFAction();
+    // export OIFits :
+    new ExportOIFitsAction();
   }
 
   /**
