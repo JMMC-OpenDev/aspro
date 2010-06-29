@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoverageData.java,v 1.7 2010-06-28 12:27:56 bourgesl Exp $"
+ * "@(#) $Id: UVCoverageData.java,v 1.8 2010-06-29 14:24:45 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2010/06/28 12:27:56  bourgesl
+ * hour angles (HA) moved in UVCoverageData because it is not related to a particular baseline
+ *
  * Revision 1.6  2010/06/23 12:56:13  bourgesl
  * added OIFits structure generation with OI_ARRAY and OI_TARGET tables
  *
@@ -46,7 +49,7 @@ public final class UVCoverageData {
   private double lambda;
   /** list of uv points corresponding to the target rise/set */
   private List<UVBaseLineData> targetUVRiseSet;
-  /** decimal hour angle (used by OIFits) */
+  /** observable decimal hour angles (used by OIFits) */
   private double[] ha = null;
   /** list of uv point couples corresponding to the target observability */
   private List<UVRangeBaseLineData> targetUVObservability;
