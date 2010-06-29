@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationFileAction.java,v 1.6 2010-06-14 13:16:36 bourgesl Exp $"
+ * "@(#) $Id: ObservationFileAction.java,v 1.7 2010-06-29 11:55:54 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2010/06/14 13:16:36  bourgesl
+ * changed aspro file extension to 'asprox'
+ *
  * Revision 1.5  2010/06/10 13:44:01  bourgesl
  * Observation File extension is 'aspro'
  * fixed file description with extension
@@ -41,7 +44,7 @@ public abstract class ObservationFileAction extends RegisteredAction {
   private static final long serialVersionUID = 1;
   /** Observation settings mime type */
   public static final String OBSERVATION_MIME_TYPE = "application/x-aspro+xml";
-  /** Observation extension = aspro */
+  /** Observation extension = asprox */
   public static final String OBS_EXT = "asprox";
 
   /* members */
