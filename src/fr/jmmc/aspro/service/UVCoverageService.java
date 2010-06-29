@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoverageService.java,v 1.24 2010-06-28 15:39:35 bourgesl Exp $"
+ * "@(#) $Id: UVCoverageService.java,v 1.25 2010-06-29 12:14:13 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.24  2010/06/28 15:39:35  bourgesl
+ * added visibility computation in OI_VIS table (VISDATA / VISAMP / VISPHI)
+ *
  * Revision 1.23  2010/06/28 14:36:08  bourgesl
  * refactoring of computeObservableUV() with 2 steps : first find observable HA values then find UV coordinates
  *
@@ -98,6 +101,7 @@ import fr.jmmc.aspro.model.uvcoverage.UVRangeBaseLineData;
 import fr.jmmc.aspro.util.AngleUtils;
 import fr.jmmc.mcs.model.ModelUVMapService;
 import fr.jmmc.mcs.model.ModelUVMapService.ImageMode;
+import fr.jmmc.oitools.model.OIFitsChecker;
 import fr.jmmc.oitools.model.OIFitsFile;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.IndexColorModel;
@@ -593,11 +597,6 @@ public final class UVCoverageService {
       // Start the computations :
       final long start = System.nanoTime();
 
-
-      this.oiFitsFile = new OIFitsFile();
-
-      final String dateObs = this.observation.getWhen().getDate().toString();
-
       final String arrName = this.observation.getInterferometerConfiguration().getName();
       final String insName = this.observation.getInstrumentConfiguration().getName();
 
@@ -606,17 +605,18 @@ public final class UVCoverageService {
         logger.fine("insName : " + insName);
       }
 
+      // create a new OIFits structure :
+      this.oiFitsFile = new OIFitsFile();
+
       // OI_ARRAY :
-      // station indexes are given according to the beam list ordering starting from 1 :
       OIFitsCreatorService.createOIArray(this.oiFitsFile, this.observation, arrName, this.beams);
 
       // OI_TARGET :
       final Target target = ObservationManager.getTarget(this.observation, this.targetName);
-      // target index is 1
       OIFitsCreatorService.createOITarget(this.oiFitsFile, target);
 
       // OI_WAVELENGTH :
-      final float[] effWave = OIFitsCreatorService.createOIWaveLength(this.oiFitsFile, insName,
+      OIFitsCreatorService.createOIWaveLength(this.oiFitsFile, insName,
               this.lambdaMin, this.lambdaMax, this.nSpectralChannels);
 
       // OI_VIS :
@@ -637,6 +637,16 @@ public final class UVCoverageService {
       // fast interrupt :
       if (this.currentThread.isInterrupted()) {
         return;
+      }
+
+      if (false) {
+        final OIFitsChecker checker = new OIFitsChecker();
+        this.oiFitsFile.check(checker);
+
+        // validation results
+        if (logger.isLoggable(Level.INFO)) {
+          logger.info("createOIFits : validation results\n" + checker.getCheckReport());
+        }
       }
 
       this.data.setOiFitsFile(this.oiFitsFile);
