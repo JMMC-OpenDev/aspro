@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: OIFitsCreatorService.java,v 1.5 2010-06-28 15:39:35 bourgesl Exp $"
+ * "@(#) $Id: OIFitsCreatorService.java,v 1.6 2010-06-29 12:13:41 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2010/06/28 15:39:35  bourgesl
+ * added visibility computation in OI_VIS table (VISDATA / VISAMP / VISPHI)
+ *
  * Revision 1.4  2010/06/28 14:37:38  bourgesl
  * proper OI_VIS creation with : dateObs (from first HA), time (supporting day change), MJD and station indexes
  *
@@ -70,6 +73,9 @@ public class OIFitsCreatorService {
 
   /**
    * Create the OI_ARRAY table for the given observation and beams and add it to the given oiFits structure
+   *
+   * Note : station indexes are given according to the beam list ordering starting from 1
+   *
    * @param oiFitsFile OIFits structure
    * @param observation observation settings
    * @param arrayName interferometer name
@@ -120,6 +126,9 @@ public class OIFitsCreatorService {
 
   /**
    * Create the OI_TARGET table for the given target and add it to the given oiFits structure
+   *
+   * Note : target index is 1
+   *
    * @param oiFitsFile OIFits structure
    * @param target target to use
    */
@@ -172,16 +181,14 @@ public class OIFitsCreatorService {
 
   /**
    * Create the OI_WAVELENGTH table for the given observation and add it to the given oiFits structure
-   * and return the array of wave lengths (min to max)
    * @param oiFitsFile OIFits structure
    * @param instrumentName instrument name
    * @param lambdaMin minimal wavelength (m)
    * @param lambdaMax maximal wavelength (m)
    * @param nSpectralChannels number of spectral channels
-   * @return array of wave lengths (min to max)
    */
-  protected static float[] createOIWaveLength(final OIFitsFile oiFitsFile, final String instrumentName,
-                                              final double lambdaMin, final double lambdaMax, final int nSpectralChannels) {
+  protected static void createOIWaveLength(final OIFitsFile oiFitsFile, final String instrumentName,
+                                           final double lambdaMin, final double lambdaMax, final int nSpectralChannels) {
 
     final OIWavelength waves = new OIWavelength(oiFitsFile, nSpectralChannels);
     waves.setInsName(instrumentName);
@@ -200,8 +207,6 @@ public class OIFitsCreatorService {
     }
 
     oiFitsFile.addOiTable(waves);
-
-    return effWave;
   }
 
   /**
@@ -327,10 +332,10 @@ public class OIFitsCreatorService {
             visData[k][l][0] = (float) visComplex[l].getReal();
             visData[k][l][1] = (float) visComplex[l].getImaginary();
 
-            // amplitude :
+            // amplitude (not normalized) :
             visAmp[k][l] = visComplex[l].abs();
 
-            // phase [-PI;PI] :
+            // phase [-PI;PI] in degrees :
             visPhi[k][l] = Math.toDegrees(visComplex[l].getArgument());
           }
         }
