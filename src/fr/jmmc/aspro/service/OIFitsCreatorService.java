@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: OIFitsCreatorService.java,v 1.6 2010-06-29 12:13:41 bourgesl Exp $"
+ * "@(#) $Id: OIFitsCreatorService.java,v 1.7 2010-06-29 14:26:35 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2010/06/29 12:13:41  bourgesl
+ * added some comments
+ *
  * Revision 1.5  2010/06/28 15:39:35  bourgesl
  * added visibility computation in OI_VIS table (VISDATA / VISAMP / VISPHI)
  *
@@ -40,21 +43,24 @@ import fr.jmmc.mcs.model.ModelManager;
 import fr.jmmc.mcs.model.targetmodel.Model;
 import fr.jmmc.oitools.OIFitsConstants;
 import fr.jmmc.oitools.model.OIArray;
+import fr.jmmc.oitools.model.OIFitsChecker;
 import fr.jmmc.oitools.model.OIFitsFile;
 import fr.jmmc.oitools.model.OITarget;
 import fr.jmmc.oitools.model.OIVis;
+import fr.jmmc.oitools.model.OIVis2;
 import fr.jmmc.oitools.model.OIWavelength;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import org.apache.commons.math.complex.Complex;
 
 /**
- * This stateless class contains the code to create OIFits structure from the current observation
+ * This class contains the code to create OIFits structure from the current observation
  * @author bourgesl
  */
-public class OIFitsCreatorService {
+public final class OIFitsCreatorService {
 
   /** Class Name */
   private static final String className_ = "fr.jmmc.aspro.service.OIFitsCreatorService";
@@ -63,36 +69,167 @@ public class OIFitsCreatorService {
           className_);
   /** target Id */
   private final static short TARGET_ID = (short) 1;
+  /** enable the OIFits validation */
+  private final static boolean DO_VALIDATE = true;
+
+  /* members */
+  /* input */
+  /** observation settings */
+  private final ObservationSetting observation;
+  /** selected target */
+  private final Target target;
+
+  /* reused observability data */
+  /** beam list */
+  private final List<Beam> beams;
+  /** base line list */
+  private final List<BaseLine> baseLines;
+  /** precessed target right ascension in decimal hours */
+  private final double precRA;
+  /** sky calc instance */
+  private final AstroSkyCalc sc;
+
+  /* reused uv coverage data */
+  /** minimal wavelength */
+  private final double lambdaMin;
+  /** maximal wavelength */
+  private final double lambdaMax;
+  /** number of spectral channels */
+  private final int nSpectralChannels;
+  /** observable decimal hour angles */
+  private final double[] obsHa;
+  /** list of uv point couples corresponding to the target observability */
+  private final List<UVRangeBaseLineData> targetUVObservability;
+
+  /* output */
+  /** oifits structure */
+  private final OIFitsFile oiFitsFile;
+
+  /* internal */
+  /** interferometer name */
+  private String arrayName = null;
+  /** instrument name */
+  private String instrumentName = null;
+  /** beam mapping */
+  private Map<Beam, Short> beamMapping = null;
 
   /**
-   * Forbidden constructor
+   * Protected constructor
+   * @param observation observation settings
+   * @param target target to process
+   * @param beams beam list
+   * @param baseLines base line list
+   * @param lambdaMin minimal wavelength (m)
+   * @param lambdaMax maximal wavelength (m)
+   * @param nSpectralChannels number of spectral channels
+   * @param obsHa observable decimal hour angles
+   * @param targetUVObservability list of UV coordinates per baseline
+   * @param precRA precessed target right ascension in decimal hours
+   * @param sc sky calc instance
    */
-  private OIFitsCreatorService() {
-    // no-op
+  protected OIFitsCreatorService(final ObservationSetting observation,
+                                 final Target target,
+                                 final List<Beam> beams,
+                                 final List<BaseLine> baseLines,
+                                 final double lambdaMin, final double lambdaMax,
+                                 final int nSpectralChannels,
+                                 final double[] obsHa,
+                                 final List<UVRangeBaseLineData> targetUVObservability,
+                                 final double precRA,
+                                 final AstroSkyCalc sc) {
+    this.observation = observation;
+    this.target = target;
+    this.beams = beams;
+    this.baseLines = baseLines;
+    this.lambdaMin = lambdaMin;
+    this.lambdaMax = lambdaMax;
+    this.nSpectralChannels = nSpectralChannels;
+    this.obsHa = obsHa;
+    this.targetUVObservability = targetUVObservability;
+    this.precRA = precRA;
+    this.sc = sc;
+
+    // create a new OIFits structure :
+    this.oiFitsFile = new OIFitsFile();
   }
 
   /**
-   * Create the OI_ARRAY table for the given observation and beams and add it to the given oiFits structure
+   * Create the OIFits structure with OI_ARRAY, OI_TARGET, OI_WAVELENGTH, OI_VIS tables
+   * @return OIFits structure
+   */
+  protected OIFitsFile createOIFits() {
+
+    // Start the computations :
+    final long start = System.nanoTime();
+
+    this.arrayName = this.observation.getInterferometerConfiguration().getName();
+    this.instrumentName = this.observation.getInstrumentConfiguration().getName();
+
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("arrName : " + this.arrayName);
+      logger.fine("insName : " + this.instrumentName);
+    }
+
+    this.beamMapping = createBeamMapping(this.beams);
+
+    // OI_ARRAY :
+    this.createOIArray();
+
+    // OI_TARGET :
+    this.createOITarget();
+
+    // OI_WAVELENGTH :
+    this.createOIWaveLength();
+
+    // OI_VIS :
+    this.createOIVis();
+
+    // OI_VIS2 :
+    this.createOIVis2();
+
+    // TODO (VIS2, T3)
+
+    // TODO : compute errors + noise models
+
+
+    if (logger.isLoggable(Level.INFO)) {
+      logger.info("createOIFits : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
+    }
+
+    if (DO_VALIDATE) {
+      final OIFitsChecker checker = new OIFitsChecker();
+      this.oiFitsFile.check(checker);
+
+      // validation results
+      if (logger.isLoggable(Level.INFO)) {
+        logger.info("createOIFits : validation results\n" + checker.getCheckReport());
+      }
+    }
+
+    // fast interrupt :
+    if (Thread.currentThread().isInterrupted()) {
+      return null;
+    }
+
+    return this.oiFitsFile;
+  }
+
+  /**
+   * Create the OI_ARRAY table
    *
    * Note : station indexes are given according to the beam list ordering starting from 1
-   *
-   * @param oiFitsFile OIFits structure
-   * @param observation observation settings
-   * @param arrayName interferometer name
-   * @param beams beam list
    */
-  protected static void createOIArray(final OIFitsFile oiFitsFile, final ObservationSetting observation,
-                                      final String arrayName, final List<Beam> beams) {
+  protected void createOIArray() {
 
-    final OIArray oiArray = new OIArray(oiFitsFile, beams.size());
+    final OIArray oiArray = new OIArray(this.oiFitsFile, this.beams.size());
 
     // Array Name :
-    oiArray.setArrName(arrayName);
+    oiArray.setArrName(this.arrayName);
 
     // Position :
     oiArray.setFrame(OIFitsConstants.KEYWORD_FRAME_GEOCENTRIC);
 
-    final InterferometerConfiguration ic = observation.getInterferometerConfiguration().getInterferometerConfiguration();
+    final InterferometerConfiguration ic = this.observation.getInterferometerConfiguration().getInterferometerConfiguration();
     if (ic != null) {
       final Position3D position = ic.getInterferometer().getPosition();
 
@@ -103,7 +240,7 @@ public class OIFitsCreatorService {
     int i = 0;
     Telescope tel;
     Station station;
-    for (Beam b : beams) {
+    for (Beam b : this.beams) {
       station = b.getStation();
 
       tel = station.getTelescope();
@@ -121,45 +258,42 @@ public class OIFitsCreatorService {
       i++;
     }
 
-    oiFitsFile.addOiTable(oiArray);
+    this.oiFitsFile.addOiTable(oiArray);
   }
 
   /**
-   * Create the OI_TARGET table for the given target and add it to the given oiFits structure
+   * Create the OI_TARGET table
    *
    * Note : target index is 1
-   *
-   * @param oiFitsFile OIFits structure
-   * @param target target to use
    */
-  protected static void createOITarget(final OIFitsFile oiFitsFile, final Target target) {
-    final OITarget oiTarget = new OITarget(oiFitsFile, 1);
+  protected void createOITarget() {
+    final OITarget oiTarget = new OITarget(this.oiFitsFile, 1);
     oiTarget.getTargetId()[0] = TARGET_ID;
-    oiTarget.getTarget()[0] = target.getName();
+    oiTarget.getTarget()[0] = this.target.getName();
 
     // Coordinates RA/DEC :
-    oiTarget.getRaEp0()[0] = target.getRADeg();
-    oiTarget.getDecEp0()[0] = target.getDECDeg();
-    oiTarget.getEquinox()[0] = target.getEQUINOX();
+    oiTarget.getRaEp0()[0] = this.target.getRADeg();
+    oiTarget.getDecEp0()[0] = this.target.getDECDeg();
+    oiTarget.getEquinox()[0] = this.target.getEQUINOX();
 
     // Missing RA/DEC errors :
     oiTarget.getRaErr()[0] = 0d;
     oiTarget.getDecErr()[0] = 0d;
 
     // Radial velocity :
-    if (target.getSYSVEL() != null) {
+    if (this.target.getSYSVEL() != null) {
       // convert km/s in m/s :
-      oiTarget.getSysVel()[0] = target.getSYSVEL().doubleValue() * 1e3;
+      oiTarget.getSysVel()[0] = this.target.getSYSVEL().doubleValue() * 1e3;
     }
     oiTarget.getVelTyp()[0] = OIFitsConstants.UNKNOWN_VALUE;
     // Use VELTYP (mostly undefined) :
     oiTarget.getVelDef()[0] = OIFitsConstants.COLUMN_VELDEF_OPTICAL;
 
     // Proper motion :
-    if (target.getPMRA() != null && target.getPMDEC() != null) {
+    if (this.target.getPMRA() != null && this.target.getPMDEC() != null) {
       // convert mas/year in deg/year :
-      oiTarget.getPmRa()[0] = target.getPMRA().doubleValue() * ALX.MILLI_ARCSEC_IN_DEGREES;
-      oiTarget.getPmDec()[0] = target.getPMDEC().doubleValue() * ALX.MILLI_ARCSEC_IN_DEGREES;
+      oiTarget.getPmRa()[0] = this.target.getPMRA().doubleValue() * ALX.MILLI_ARCSEC_IN_DEGREES;
+      oiTarget.getPmDec()[0] = this.target.getPMDEC().doubleValue() * ALX.MILLI_ARCSEC_IN_DEGREES;
     }
 
     // Missing PM RA/DEC errors :
@@ -167,88 +301,64 @@ public class OIFitsCreatorService {
     oiTarget.getPmDecErr()[0] = 0d;
 
     // Parallax :
-    if (target.getPARALLAX() != null && target.getPARAERR() != null) {
+    if (this.target.getPARALLAX() != null && this.target.getPARAERR() != null) {
       // convert mas in deg :
-      oiTarget.getParallax()[0] = (float) (target.getPARALLAX().doubleValue() * ALX.MILLI_ARCSEC_IN_DEGREES);
-      oiTarget.getParaErr()[0] = (float) (target.getPARAERR().doubleValue() * ALX.MILLI_ARCSEC_IN_DEGREES);
+      oiTarget.getParallax()[0] = (float) (this.target.getPARALLAX().doubleValue() * ALX.MILLI_ARCSEC_IN_DEGREES);
+      oiTarget.getParaErr()[0] = (float) (this.target.getPARAERR().doubleValue() * ALX.MILLI_ARCSEC_IN_DEGREES);
     }
 
     // Spectral type :
-    oiTarget.getSpecTyp()[0] = target.getSPECTYP();
+    oiTarget.getSpecTyp()[0] = this.target.getSPECTYP();
 
-    oiFitsFile.addOiTable(oiTarget);
+    this.oiFitsFile.addOiTable(oiTarget);
   }
 
   /**
-   * Create the OI_WAVELENGTH table for the given observation and add it to the given oiFits structure
-   * @param oiFitsFile OIFits structure
-   * @param instrumentName instrument name
-   * @param lambdaMin minimal wavelength (m)
-   * @param lambdaMax maximal wavelength (m)
-   * @param nSpectralChannels number of spectral channels
+   * Create the OI_WAVELENGTH table
    */
-  protected static void createOIWaveLength(final OIFitsFile oiFitsFile, final String instrumentName,
-                                           final double lambdaMin, final double lambdaMax, final int nSpectralChannels) {
+  protected void createOIWaveLength() {
 
-    final OIWavelength waves = new OIWavelength(oiFitsFile, nSpectralChannels);
-    waves.setInsName(instrumentName);
+    final OIWavelength waves = new OIWavelength(this.oiFitsFile, this.nSpectralChannels);
+    waves.setInsName(this.instrumentName);
 
-    final double step = (lambdaMax - lambdaMin) / nSpectralChannels;
+    final double step = (this.lambdaMax - this.lambdaMin) / this.nSpectralChannels;
 
     final float[] effWave = waves.getEffWave();
     final float[] effBand = waves.getEffBand();
 
-    double waveLength = lambdaMin;
-    for (int i = 0; i < nSpectralChannels; i++) {
+    double waveLength = this.lambdaMin;
+    for (int i = 0; i < this.nSpectralChannels; i++) {
       effWave[i] = (float) waveLength;
       effBand[i] = (float) step;
 
       waveLength += step;
     }
 
-    oiFitsFile.addOiTable(waves);
+    this.oiFitsFile.addOiTable(waves);
   }
 
   /**
-   * Create the OI_VIS table for the given target and add it to the given oiFits structure
-   * @param oiFitsFile OIFits structure
-   * @param arrayName interferometer name
-   * @param instrumentName instrument name
-   * @param beams beam list
-   * @param baseLines base line list
-   * @param obsHa observable decimal hour angles
-   * @param targetUVObservability list of UV coordinates per baseline
-   * @param models list of models to compute complex visibilities
-   * @param precRA precessed target right ascension in decimal hours
-   * @param sc sky calc instance
+   * Create the OI_VIS table
    */
-  protected static void createOIVis(final OIFitsFile oiFitsFile,
-                                    final String arrayName,
-                                    final String instrumentName,
-                                    final double[] obsHa,
-                                    final List<Beam> beams,
-                                    final List<BaseLine> baseLines,
-                                    final List<UVRangeBaseLineData> targetUVObservability,
-                                    final List<Model> models,
-                                    final double precRA,
-                                    final AstroSkyCalc sc) {
+  protected void createOIVis() {
 
     // Create station - base line mapping :
-    final Map<BaseLine, short[]> baseLineIndexes = createBaseLineIndexes(beams, baseLines);
+    final Map<BaseLine, short[]> baseLineIndexes = createBaseLineMapping(this.beamMapping, this.baseLines);
 
     // Has models ?
+    final List<Model> models = this.target.getModels();
     final boolean hasModels = models != null && !models.isEmpty();
 
-    final int nBl = targetUVObservability.size();
+    final int nBl = this.targetUVObservability.size();
 
     // Suppose that number of points is consistent :
-    final int nRows = targetUVObservability.get(0).getNPoints();
+    final int nPoints = this.targetUVObservability.get(0).getNPoints();
 
-    final OIVis vis = new OIVis(oiFitsFile, instrumentName, nRows * nBl);
-    vis.setArrName(arrayName);
+    final OIVis vis = new OIVis(this.oiFitsFile, this.instrumentName, nPoints * nBl);
+    vis.setArrName(this.arrayName);
 
     // Compute UTC start date from first HA :
-    final Calendar calObs = sc.toCalendar(sc.convertHAToJD(obsHa[0], precRA), false);
+    final Calendar calObs = this.sc.toCalendar(this.sc.convertHAToJD(this.obsHa[0], this.precRA), false);
 
     final String dateObs = calendarToString(calObs);
     vis.setDateObs(dateObs);
@@ -287,12 +397,12 @@ public class OIFitsCreatorService {
     Complex[] visComplex;
 
     // iterate on HA points :
-    for (int i = 0, j = 0, k = 0; i < nRows; i++) {
+    for (int i = 0, j = 0, k = 0; i < nPoints; i++) {
 
       j = 0;
 
       // iterate on baselines :
-      for (UVRangeBaseLineData uvBL : targetUVObservability) {
+      for (UVRangeBaseLineData uvBL : this.targetUVObservability) {
 
         k = i * nBl + j;
 
@@ -300,10 +410,10 @@ public class OIFitsCreatorService {
         targetIds[k] = TARGET_ID;
 
         // jd from HA :
-        jd = sc.convertHAToJD(obsHa[i], precRA);
+        jd = this.sc.convertHAToJD(this.obsHa[i], this.precRA);
 
         // UTC :
-        times[k] = calendarToTime(sc.toCalendar(jd, false), calObs);
+        times[k] = calendarToTime(this.sc.toCalendar(jd, false), calObs);
 
         // modified julian day :
         mjds[k] = AstroSkyCalc.mjd(jd);
@@ -327,6 +437,11 @@ public class OIFitsCreatorService {
           // compute complex visibilities :
           visComplex = ModelManager.getInstance().computeModels(ufreq, vfreq, models);
 
+          if (visComplex == null) {
+            // fast interrupt :
+            return;
+          }
+
           for (int l = 0; l < nWave; l++) {
             // complex data :
             visData[k][l][0] = (float) visComplex[l].getReal();
@@ -346,33 +461,82 @@ public class OIFitsCreatorService {
       }
     }
 
-    oiFitsFile.addOiTable(vis);
+    this.oiFitsFile.addOiTable(vis);
   }
 
   /**
-   * Return the station indexes (2) per base line mapping
-   * @param beams beam list
-   * @param baseLines base line list
-   * @return baseline station indexes
+   * Create the OI_VIS table
    */
-  private static Map<BaseLine, short[]> createBaseLineIndexes(final List<Beam> beams, final List<BaseLine> baseLines) {
+  protected void createOIVis2() {
+    // Get OI_VIS table :
+    final OIVis vis = this.oiFitsFile.getOiVis()[0];
+    final int nRows = vis.getNbRows();
+    final int nWave = vis.getNWave();
+
+    final OIVis2 vis2 = new OIVis2(this.oiFitsFile, this.instrumentName, nRows);
+    vis2.setArrName(this.arrayName);
+    vis2.setDateObs(vis.getDateObs());
+
+    // Columns :
+    System.arraycopy(vis.getTargetId(), 0, vis2.getTargetId(), 0, nRows);
+    System.arraycopy(vis.getTime(), 0, vis2.getTime(), 0, nRows);
+    System.arraycopy(vis.getMjd(), 0, vis2.getMjd(), 0, nRows);
+    System.arraycopy(vis.getIntTime(), 0, vis2.getIntTime(), 0, nRows);
+
+    final double[][] visAmp = vis.getVisAmp();
+    final double[][] vis2Data = vis2.getVis2Data();
+    // skip vis2Err (unknown)
+
+    for (int k = 0, l = 0; k < nRows; k++) {
+      for (l = 0; l < nWave; l++) {
+        // square visibility (not normalized) :
+        vis2Data[k][l] = visAmp[k][l] * visAmp[k][l];
+      }
+    }
+
+    System.arraycopy(vis.getUCoord(), 0, vis2.getUCoord(), 0, nRows);
+    System.arraycopy(vis.getVCoord(), 0, vis2.getVCoord(), 0, nRows);
+
+    System.arraycopy(vis.getStaIndex(), 0, vis2.getStaIndex(), 0, nRows);
+    // skip flag (default to false means that values are considered as valid)
+
+    this.oiFitsFile.addOiTable(vis2);
+  }
+
+  /**
+   * Return the beam mapping
+   * @param beams beam list
+   * @return beam mapping
+   */
+  private static Map<Beam, Short> createBeamMapping(final List<Beam> beams) {
     // Create Beam - index mapping :
-    final Map<Beam, Short> beamIndexes = new HashMap<Beam, Short>();
+    final Map<Beam, Short> beamMapping = new HashMap<Beam, Short>();
 
     // Note : as Beam.hashCode is not implemented, the map acts as an IdentityMap (pointer equality)
     int i = 0;
     for (Beam b : beams) {
-      beamIndexes.put(b, Short.valueOf((short) (i + 1)));
+      beamMapping.put(b, Short.valueOf((short) (i + 1)));
       i++;
     }
+
+    return beamMapping;
+  }
+
+  /**
+   * Return the station indexes (2) per base line mapping
+   * @param beamMapping beam mapping
+   * @param baseLines base line list
+   * @return baseline station indexes
+   */
+  private static Map<BaseLine, short[]> createBaseLineMapping(final Map<Beam, Short> beamMapping, final List<BaseLine> baseLines) {
 
     // Create BaseLine - indexes mapping :
     final Map<BaseLine, short[]> baseLineIndexes = new HashMap<BaseLine, short[]>();
 
     for (BaseLine bl : baseLines) {
       baseLineIndexes.put(bl, new short[]{
-                beamIndexes.get(bl.getBeam1()).shortValue(),
-                beamIndexes.get(bl.getBeam2()).shortValue()
+                beamMapping.get(bl.getBeam1()).shortValue(),
+                beamMapping.get(bl.getBeam2()).shortValue()
               });
     }
 

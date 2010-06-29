@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoverageService.java,v 1.25 2010-06-29 12:14:13 bourgesl Exp $"
+ * "@(#) $Id: UVCoverageService.java,v 1.26 2010-06-29 14:26:35 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.25  2010/06/29 12:14:13  bourgesl
+ * minor clean up
+ *
  * Revision 1.24  2010/06/28 15:39:35  bourgesl
  * added visibility computation in OI_VIS table (VISDATA / VISAMP / VISPHI)
  *
@@ -101,8 +104,6 @@ import fr.jmmc.aspro.model.uvcoverage.UVRangeBaseLineData;
 import fr.jmmc.aspro.util.AngleUtils;
 import fr.jmmc.mcs.model.ModelUVMapService;
 import fr.jmmc.mcs.model.ModelUVMapService.ImageMode;
-import fr.jmmc.oitools.model.OIFitsChecker;
-import fr.jmmc.oitools.model.OIFitsFile;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.IndexColorModel;
 import java.util.ArrayList;
@@ -126,8 +127,7 @@ public final class UVCoverageService {
   /* output */
   /** uv coverage data */
   private UVCoverageData data = new UVCoverageData();
-  /** oifits structure */
-  private OIFitsFile oiFitsFile;
+
   /* inputs */
   /** observation settings */
   private final ObservationSetting observation;
@@ -594,62 +594,17 @@ public final class UVCoverageService {
 
     if (targetUVObservability != null) {
 
-      // Start the computations :
-      final long start = System.nanoTime();
-
-      final String arrName = this.observation.getInterferometerConfiguration().getName();
-      final String insName = this.observation.getInstrumentConfiguration().getName();
-
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("arrName : " + arrName);
-        logger.fine("insName : " + insName);
-      }
-
-      // create a new OIFits structure :
-      this.oiFitsFile = new OIFitsFile();
-
-      // OI_ARRAY :
-      OIFitsCreatorService.createOIArray(this.oiFitsFile, this.observation, arrName, this.beams);
-
-      // OI_TARGET :
+      // get current target :
       final Target target = ObservationManager.getTarget(this.observation, this.targetName);
-      OIFitsCreatorService.createOITarget(this.oiFitsFile, target);
 
-      // OI_WAVELENGTH :
-      OIFitsCreatorService.createOIWaveLength(this.oiFitsFile, insName,
-              this.lambdaMin, this.lambdaMax, this.nSpectralChannels);
+      // Create the OIFitsCreatorService :
+      final OIFitsCreatorService oiFitsCreator =
+              new OIFitsCreatorService(this.observation, target,
+              this.beams, this.baseLines, this.lambdaMin, this.lambdaMax, this.nSpectralChannels,
+              this.data.getHA(), targetUVObservability, this.starData.getPrecRA(), this.sc);
 
-      // OI_VIS :
-      OIFitsCreatorService.createOIVis(this.oiFitsFile, arrName, insName,
-              this.data.getHA(), this.beams, this.baseLines,
-              targetUVObservability, target.getModels(),
-              this.starData.getPrecRA(), this.sc);
-
-      // TODO (VIS2, T3)
-
-      // TODO : compute errors + noise models
-
-
-      if (logger.isLoggable(Level.INFO)) {
-        logger.info("createOIFits : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
-      }
-
-      // fast interrupt :
-      if (this.currentThread.isInterrupted()) {
-        return;
-      }
-
-      if (false) {
-        final OIFitsChecker checker = new OIFitsChecker();
-        this.oiFitsFile.check(checker);
-
-        // validation results
-        if (logger.isLoggable(Level.INFO)) {
-          logger.info("createOIFits : validation results\n" + checker.getCheckReport());
-        }
-      }
-
-      this.data.setOiFitsFile(this.oiFitsFile);
+      // Create the OIFits structure :
+      this.data.setOiFitsFile(oiFitsCreator.createOIFits());
     }
   }
 }
