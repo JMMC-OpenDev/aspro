@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: InterferometerMapService.java,v 1.3 2010-06-30 14:54:45 bourgesl Exp $"
+ * "@(#) $Id: InterferometerMapService.java,v 1.4 2010-06-30 15:02:25 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2010/06/30 14:54:45  bourgesl
+ * use CombUtils to simplify code (Pops combination and number of baselines)
+ *
  * Revision 1.2  2010/06/17 10:02:50  bourgesl
  * fixed warning hints - mainly not final static loggers
  *
@@ -141,10 +144,10 @@ public final class InterferometerMapService {
         throw new IllegalStateException("the station list is null !");
       }
 
-      final int len = stations.size();
+      final int nStations = stations.size();
 
-      // nombre de baselines :
-      final int blen = CombUtils.comb(len, 2);
+      // baseline count :
+      final int blen = CombUtils.comb(nStations, 2);
 
       final String[] blName = new String[blen];
       final double[] blX1 = new double[blen];
@@ -156,11 +159,11 @@ public final class InterferometerMapService {
       Station s1, s2;
       int i1, i2;
       int n = 0;
-      for (int i = 0; i < len; i++) {
+      for (int i = 0; i < nStations; i++) {
         s1 = stations.get(i);
         i1 = data.getStationIndex(s1.getName());
 
-        for (int j = i + 1; j < len; j++) {
+        for (int j = i + 1; j < nStations; j++) {
           s2 = stations.get(j);
           i2 = data.getStationIndex(s2.getName());
 
