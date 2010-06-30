@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.50 2010-06-30 14:54:45 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.51 2010-06-30 15:02:53 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.50  2010/06/30 14:54:45  bourgesl
+ * use CombUtils to simplify code (Pops combination and number of baselines)
+ *
  * Revision 1.49  2010/06/25 14:17:21  bourgesl
  * refactoring due to changes done in AstroSkyCalc and AstroSkyCalcObservation
  *
@@ -270,9 +273,9 @@ public final class ObservabilityService {
   /** beam list */
   private List<Beam> beams = null;
   /** base line list */
-  private List<BaseLine> baseLines = new ArrayList<BaseLine>();
+  private List<BaseLine> baseLines = null;
   /** W ranges corresponding to the base line list */
-  private List<Range> wRanges = new ArrayList<Range>();
+  private List<Range> wRanges = null;
   /** list of Pop combinations with pop delays per baseline */
   private List<PopCombination> popCombinations = null;
   /** selected target (used by OB) */
@@ -1521,6 +1524,12 @@ public final class ObservabilityService {
   private void prepareBaseLines() {
 
     final int nBeams = this.beams.size();
+
+    // baseline count :
+    final int blen = CombUtils.comb(nBeams, 2);
+
+    this.baseLines = new ArrayList<BaseLine>(blen);
+    this.wRanges = new ArrayList<Range>(blen);
 
     Beam b1, b2;
 
