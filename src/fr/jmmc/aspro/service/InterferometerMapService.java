@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: InterferometerMapService.java,v 1.2 2010-06-17 10:02:50 bourgesl Exp $"
+ * "@(#) $Id: InterferometerMapService.java,v 1.3 2010-06-30 14:54:45 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2010/06/17 10:02:50  bourgesl
+ * fixed warning hints - mainly not final static loggers
+ *
  * Revision 1.1  2010/05/11 12:08:27  bourgesl
  * simple Interferometer Map (stations + baselines) automatically refreshed when the chosen baseline configuration changes
  *
@@ -19,6 +22,7 @@ import fr.jmmc.aspro.model.oi.InterferometerDescription;
 import fr.jmmc.aspro.model.oi.LonLatAlt;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Station;
+import fr.jmmc.aspro.util.CombUtils;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.List;
@@ -140,7 +144,7 @@ public final class InterferometerMapService {
       final int len = stations.size();
 
       // nombre de baselines :
-      final int blen = comb(len, 2);
+      final int blen = CombUtils.comb(len, 2);
 
       final String[] blName = new String[blen];
       final double[] blX1 = new double[blen];
@@ -215,26 +219,4 @@ public final class InterferometerMapService {
     }
   }
 
-  private final static int fact(final int n) {
-    int res = 1;
-    for (int i = 1; i <= n; i++) {
-      res *= i;
-    }
-    return res;
-  }
-
-  private final static int arr(final int n, final int k) {
-    int res = 1;
-
-    // A-n-k = n! / (n - k)!
-    for (int i = n, min = n - k + 1; i >= min; i--) {
-      res *= i;
-    }
-    return res;
-  }
-
-  private final static int comb(final int n, final int k) {
-    //C-n-k = A-n-k/k!
-    return arr(n, k) / fact(k);
-  }
 }

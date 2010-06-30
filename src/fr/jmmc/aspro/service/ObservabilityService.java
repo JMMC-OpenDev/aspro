@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.49 2010-06-25 14:17:21 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.50 2010-06-30 14:54:45 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.49  2010/06/25 14:17:21  bourgesl
+ * refactoring due to changes done in AstroSkyCalc and AstroSkyCalcObservation
+ *
  * Revision 1.48  2010/06/23 12:55:14  bourgesl
  * added Beam list to use it in OIFits generation
  *
@@ -195,6 +198,7 @@ import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.StationLinks;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.service.HorizonService.Profile;
+import fr.jmmc.aspro.util.CombUtils;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -1437,62 +1441,25 @@ public final class ObservabilityService {
     final List<Pop> userPoPs = this.observation.getInstrumentConfiguration().getPopList();
 
     if (userPoPs == null) {
-      // Generate all PoP combinations for 3T or 4T :
+      // Generate all PoP combinations for the given number of beams :
       final List<Pop> pops = this.interferometer.getPops();
 
-      final int n = pops.size();
-      final int p = nBeams;
+      final int nPops = pops.size();
+
+      // Generate all tuples :
+      final List<int[]> tuples = CombUtils.generateTuples(nPops, nBeams);
+
+      this.popCombinations = new ArrayList<PopCombination>(tuples.size());
 
       List<Pop> comb;
-
-      // TODO : find a generic way to get all combinations for any number of beams
-      if (p == 2) {
-        this.popCombinations = new ArrayList<PopCombination>(n * n);
-
-        for (int i = 0; i < n; i++) {
-          for (int j = 0; j < n; j++) {
-            comb = new ArrayList<Pop>(p);
-            comb.add(pops.get(i));
-            comb.add(pops.get(j));
-            this.popCombinations.add(new PopCombination(comb));
-          }
+      for (int[] tuple : tuples) {
+        comb = new ArrayList<Pop>(nBeams);
+        for (int i = 0; i < nBeams; i++) {
+          comb.add(pops.get(tuple[i]));
         }
-
-      } else if (p == 3) {
-        this.popCombinations = new ArrayList<PopCombination>(n * n * n);
-
-        for (int i = 0; i < n; i++) {
-          for (int j = 0; j < n; j++) {
-            for (int k = 0; k < n; k++) {
-              comb = new ArrayList<Pop>(p);
-              comb.add(pops.get(i));
-              comb.add(pops.get(j));
-              comb.add(pops.get(k));
-              this.popCombinations.add(new PopCombination(comb));
-            }
-          }
-        }
-      } else if (p == 4) {
-        this.popCombinations = new ArrayList<PopCombination>(n * n * n * n);
-
-        for (int i = 0; i < n; i++) {
-          for (int j = 0; j < n; j++) {
-            for (int k = 0; k < n; k++) {
-              for (int l = 0; l < n; l++) {
-                comb = new ArrayList<Pop>(p);
-                comb.add(pops.get(i));
-                comb.add(pops.get(j));
-                comb.add(pops.get(k));
-                comb.add(pops.get(l));
-                this.popCombinations.add(new PopCombination(comb));
-              }
-            }
-          }
-        }
-      } else {
-        // case with 2 or 6 telescopes :
-        throw new UnsupportedOperationException("This number of stations is not supported with PoPs !");
+        this.popCombinations.add(new PopCombination(comb));
       }
+
     } else {
       // use the user defined PoPs configuration :
       this.popCombinations = new ArrayList<PopCombination>(1);
