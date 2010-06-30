@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: OIFitsCreatorService.java,v 1.7 2010-06-29 14:26:35 bourgesl Exp $"
+ * "@(#) $Id: OIFitsCreatorService.java,v 1.8 2010-06-30 15:38:52 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2010/06/29 14:26:35  bourgesl
+ * OIFitsCreatorService is a statefull service to ease future changes to add error and noise computation
+ *
  * Revision 1.6  2010/06/29 12:13:41  bourgesl
  * added some comments
  *
@@ -38,6 +41,7 @@ import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.Telescope;
 import fr.jmmc.aspro.model.uvcoverage.UVRangeBaseLineData;
+import fr.jmmc.aspro.util.CombUtils;
 import fr.jmmc.mcs.astro.ALX;
 import fr.jmmc.mcs.model.ModelManager;
 import fr.jmmc.mcs.model.targetmodel.Model;
@@ -45,6 +49,7 @@ import fr.jmmc.oitools.OIFitsConstants;
 import fr.jmmc.oitools.model.OIArray;
 import fr.jmmc.oitools.model.OIFitsChecker;
 import fr.jmmc.oitools.model.OIFitsFile;
+import fr.jmmc.oitools.model.OIT3;
 import fr.jmmc.oitools.model.OITarget;
 import fr.jmmc.oitools.model.OIVis;
 import fr.jmmc.oitools.model.OIVis2;
@@ -187,7 +192,8 @@ public final class OIFitsCreatorService {
     // OI_VIS2 :
     this.createOIVis2();
 
-    // TODO (VIS2, T3)
+    // OI_VIS2 :
+    this.createOIT3();
 
     // TODO : compute errors + noise models
 
@@ -349,10 +355,11 @@ public final class OIFitsCreatorService {
     final List<Model> models = this.target.getModels();
     final boolean hasModels = models != null && !models.isEmpty();
 
-    final int nBl = this.targetUVObservability.size();
+    // number of base lines :
+    final int nBl = this.baseLines.size();
 
-    // Suppose that number of points is consistent :
-    final int nPoints = this.targetUVObservability.get(0).getNPoints();
+    // number of points = number of observable hour angles :
+    final int nPoints = this.obsHa.length;
 
     final OIVis vis = new OIVis(this.oiFitsFile, this.instrumentName, nPoints * nBl);
     vis.setArrName(this.arrayName);
@@ -465,7 +472,7 @@ public final class OIFitsCreatorService {
   }
 
   /**
-   * Create the OI_VIS table
+   * Create the OI_VIS2 table
    */
   protected void createOIVis2() {
     // Get OI_VIS table :
@@ -504,6 +511,56 @@ public final class OIFitsCreatorService {
   }
 
   /**
+   * Create the OI_T3 table
+   */
+  protected void createOIT3() {
+
+    // number of beams :
+    final int nBeams = this.beams.size();
+
+    // number of triplets :
+    final List<int[]> triplets = CombUtils.generateCombinations(nBeams, 3);
+
+    final int nTriplets = triplets.size();
+
+    if (nTriplets == 0) {
+      return;
+    }
+
+    logger.severe("nTriplets = " + nTriplets);
+
+    logger.severe("triplets = " + triplets);
+    for (int[] idx : triplets) {
+      logger.severe(" " + idx[0] + " " + idx[1] + " " + idx[2]);
+    }
+
+
+    // number of base lines :
+    final int nBl = this.baseLines.size();
+
+    logger.severe("baselines = " + nBl);
+
+    // number of points = number of observable hour angles :
+    final int nPoints = this.obsHa.length;
+
+    // Get OI_VIS table :
+    final OIVis vis = this.oiFitsFile.getOiVis()[0];
+    final int nRows = vis.getNbRows();
+    final int nWave = vis.getNWave();
+
+    final OIT3 t3 = new OIT3(this.oiFitsFile, this.instrumentName, nPoints * nTriplets);
+    t3.setArrName(this.arrayName);
+    t3.setDateObs(vis.getDateObs());
+
+    // The following code use some hypothesis on the OI_VIS table as defined in createOIVis()
+
+    // detect triplet baselines :
+
+
+    this.oiFitsFile.addOiTable(t3);
+  }
+
+  /**
    * Return the beam mapping
    * @param beams beam list
    * @return beam mapping
@@ -538,6 +595,11 @@ public final class OIFitsCreatorService {
                 beamMapping.get(bl.getBeam1()).shortValue(),
                 beamMapping.get(bl.getBeam2()).shortValue()
               });
+    }
+
+    logger.severe("BaseLine indexes = ");
+    for (short[] idx : baseLineIndexes.values()) {
+      logger.severe(" " + idx[0] + " " + idx[1]);
     }
 
     return baseLineIndexes;
