@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoverageService.java,v 1.26 2010-06-29 14:26:35 bourgesl Exp $"
+ * "@(#) $Id: UVCoverageService.java,v 1.27 2010-07-05 14:53:03 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.26  2010/06/29 14:26:35  bourgesl
+ * OIFitsCreatorService is a statefull service to ease future changes to add error and noise computation
+ *
  * Revision 1.25  2010/06/29 12:14:13  bourgesl
  * minor clean up
  *
@@ -244,6 +247,11 @@ public final class UVCoverageService {
             }
 
             computeObservableUV();
+
+            // fast interrupt :
+            if (this.currentThread.isInterrupted()) {
+              return null;
+            }
 
             // OIFits structure :
             createOIFits();
