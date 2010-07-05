@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SwingWorkerExecutor.java,v 1.2 2010-06-17 10:02:51 bourgesl Exp $"
+ * "@(#) $Id: SwingWorkerExecutor.java,v 1.3 2010-07-05 14:50:34 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2010/06/17 10:02:51  bourgesl
+ * fixed warning hints - mainly not final static loggers
+ *
  * Revision 1.1  2010/02/03 16:06:47  bourgesl
  * special swing worker executor to have a single thread (serialized computations) and manages cancellation of previous computation task of the same kind
  *
@@ -77,6 +80,7 @@ public final class SwingWorkerExecutor {
    * {@code SwingWorkers} the given {@code SwingWorker} is placed in a waiting
    * queue.
    * NOTE : No synchronization HERE as it must be called from Swing EDT
+   * @param taskFamily task identifier
    * @param worker SwingWorker instance to execute
    */
   public final void execute(final String taskFamily, final SwingWorker<?, ?> worker) {
@@ -85,24 +89,8 @@ public final class SwingWorkerExecutor {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("execute : " + taskFamily + " = " + worker);
     }
-
-    final WeakReference<SwingWorker<?, ?>> oldRef = this.currentWorkerMap.get(taskFamily);
-
     // first, cancel the current running worker for the given task family :
-    if (oldRef != null) {
-      final SwingWorker<?, ?> currentWorker = oldRef.get();
-      if (currentWorker != null) {
-        // reference is valid, so it is still running ...
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("currentWorker to cancel = " + currentWorker);
-        }
-
-        // note : if the worker was previously cancelled, it has no effect.
-        // interrupt the thread to have Thread.isInterrupted() == true :
-        currentWorker.cancel(true);
-      }
-      oldRef.clear();
-    }
+    cancel(taskFamily);
 
     // second, memorize the reference to the new worker before execution :
     final WeakReference<SwingWorker<?, ?>> newRef = new WeakReference<SwingWorker<?, ?>>(worker);
@@ -117,7 +105,33 @@ public final class SwingWorkerExecutor {
   }
 
   /**
+   * Cancel any busy worker for the given task family
+   * NOTE : No synchronization HERE as it must be called from Swing EDT
+   * @param taskFamily task identifier
+   */
+  public final void cancel(final String taskFamily) {
+    final WeakReference<SwingWorker<?, ?>> oldRef = this.currentWorkerMap.get(taskFamily);
+
+    // cancel the current running worker for the given task family :
+    if (oldRef != null) {
+      final SwingWorker<?, ?> currentWorker = oldRef.get();
+      if (currentWorker != null) {
+        // reference is valid, so it is still running ...
+        if (logger.isLoggable(Level.FINE)) {
+          logger.fine("currentWorker to cancel = " + currentWorker);
+        }
+
+        // note : if the worker was previously cancelled, it has no effect.
+        // interrupt the thread to have Thread.isInterrupted() == true :
+        currentWorker.cancel(true);
+      }
+      oldRef.clear();
+    }
+  }
+
+  /**
    * Prepare the executor service with a single thread
+   * @return executor service with a single thread
    */
   private static ExecutorService getWorkersExecutorService() {
     // custom thread factory :
