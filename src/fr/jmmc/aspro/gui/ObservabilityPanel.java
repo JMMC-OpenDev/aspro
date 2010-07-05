@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityPanel.java,v 1.37 2010-06-23 12:52:08 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityPanel.java,v 1.38 2010-07-05 14:51:27 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.37  2010/06/23 12:52:08  bourgesl
+ * ObservationManager regsitration for observation events moved in SettingPanel (external)
+ *
  * Revision 1.36  2010/06/17 10:02:51  bourgesl
  * fixed warning hints - mainly not final static loggers
  *
@@ -535,7 +538,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     // update the status bar :
     StatusBar.show("computing observability ... (please wait, this may take a while)");
 
-    // Cancel other uv map task and execute this new uv map task :
+    // Cancel other observability task and execute this new task :
+    SwingWorkerExecutor.getInstance().cancel("UVCoverage");
     SwingWorkerExecutor.getInstance().execute("Observability", worker);
   }
 
