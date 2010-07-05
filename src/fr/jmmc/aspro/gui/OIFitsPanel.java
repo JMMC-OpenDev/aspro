@@ -14,7 +14,11 @@ import fr.jmmc.aspro.model.ObservationListener;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.util.XmlFactory;
 import fr.jmmc.oitools.model.OIFitsFile;
+import java.io.IOException;
+import java.io.StringReader;
 import java.util.logging.Level;
+import javax.swing.JEditorPane;
+import javax.swing.text.Document;
 import javax.swing.text.html.HTMLEditorKit;
 
 /**
@@ -32,22 +36,16 @@ public final class OIFitsPanel extends javax.swing.JPanel implements Observation
           className_);
   /** XSLT file path */
   private final static String XSLT_FILE = "fr/jmmc/aspro/gui/oiview.xsl";
+  /** empty document */
+  private static Document emptyDocument = null;
+
+  /* member */
+  /** flag to know if the last document was empty to avoid JEditorPane refresh calls */
+  private boolean isEmpty = false;
 
   /** Creates new form OIFitsPanel */
   public OIFitsPanel() {
     initComponents();
-
-    postInit();
-  }
-
-  /**
-   * This method is useful to set the models and specific features of initialized swing components :
-   */
-  private void postInit() {
-    // nothing to do
-    // add a HTMLEditorKit to the editor pane
-
-    jOutputPane.setEditorKit(new HTMLEditorKit());
   }
 
   /**
@@ -64,9 +62,11 @@ public final class OIFitsPanel extends javax.swing.JPanel implements Observation
       case OIFITS_DONE:
         this.updateOIFits(observation.getOIFitsFile());
         break;
-      default:
+      case CHANGED:
         // reset content :
         this.updateOIFits(null);
+        break;
+      default:
     }
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("event [" + type + "] process OUT");
@@ -93,8 +93,28 @@ public final class OIFitsPanel extends javax.swing.JPanel implements Observation
       }
     }
 
-    this.jOutputPane.setText(document);
-    this.jOutputPane.setCaretPosition(0);
+    if (document.length() > 0) {
+
+      final long start = System.nanoTime();
+      try {
+        this.jOutputPane.read(new StringReader(document), null);
+        this.jOutputPane.setCaretPosition(0);
+      } catch (IOException ioe) {
+        logger.log(Level.SEVERE, "IO exception : ", ioe);
+      }
+
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("html : " + 1e-6d * (System.nanoTime() - start) + " ms.");
+      }
+
+      this.isEmpty = false;
+    } else {
+      if (!isEmpty) {
+        // reset content when the observation changed :
+        this.jOutputPane.setDocument(emptyDocument);
+        this.isEmpty = true;
+      }
+    }
   }
 
   /**
@@ -108,14 +128,13 @@ public final class OIFitsPanel extends javax.swing.JPanel implements Observation
   private void initComponents() {
 
     jScrollPane = new javax.swing.JScrollPane();
-    jOutputPane = new javax.swing.JEditorPane();
+    jOutputPane = createEditorPane();
 
     setLayout(new java.awt.BorderLayout());
 
+    jScrollPane.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
+    jScrollPane.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
     jScrollPane.setPreferredSize(new java.awt.Dimension(300, 300));
-
-    jOutputPane.setContentType("text/html");
-    jOutputPane.setEditable(false);
     jScrollPane.setViewportView(jOutputPane);
 
     add(jScrollPane, java.awt.BorderLayout.CENTER);
@@ -124,4 +143,22 @@ public final class OIFitsPanel extends javax.swing.JPanel implements Observation
   private javax.swing.JEditorPane jOutputPane;
   private javax.swing.JScrollPane jScrollPane;
   // End of variables declaration//GEN-END:variables
+
+  /**
+   * Create an html editor pane
+   * @return html editor pane
+   */
+  private static JEditorPane createEditorPane() {
+    final JEditorPane pane = new JEditorPane();
+
+    // add a HTMLEditorKit to the editor pane
+    pane.setEditorKit(new HTMLEditorKit());
+
+    pane.setContentType("text/html");
+    pane.setEditable(false);
+
+    emptyDocument = pane.getEditorKit().createDefaultDocument();
+
+    return pane;
+  }
 }

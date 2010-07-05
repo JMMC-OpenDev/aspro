@@ -18,6 +18,8 @@
   <SubComponents>
     <Container class="javax.swing.JScrollPane" name="jScrollPane">
       <Properties>
+        <Property name="horizontalScrollBarPolicy" type="int" value="32"/>
+        <Property name="verticalScrollBarPolicy" type="int" value="22"/>
         <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
           <Dimension value="[300, 300]"/>
         </Property>
@@ -34,10 +36,9 @@
       <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
       <SubComponents>
         <Component class="javax.swing.JEditorPane" name="jOutputPane">
-          <Properties>
-            <Property name="contentType" type="java.lang.String" value="text/html"/>
-            <Property name="editable" type="boolean" value="false"/>
-          </Properties>
+          <AuxValues>
+            <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="createEditorPane()"/>
+          </AuxValues>
         </Component>
       </SubComponents>
     </Container>
