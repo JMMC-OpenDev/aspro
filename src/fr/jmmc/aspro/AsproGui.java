@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproGui.java,v 1.23 2010-06-29 12:13:21 bourgesl Exp $"
+ * "@(#) $Id: AsproGui.java,v 1.24 2010-07-05 14:50:15 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.23  2010/06/29 12:13:21  bourgesl
+ * added ExportToOIFits action
+ *
  * Revision 1.22  2010/06/18 13:31:07  bourgesl
  * removed oitools integration test code
  *
@@ -89,6 +92,7 @@ import fr.jmmc.aspro.gui.util.ComponentResizeAdapter;
 import fr.jmmc.aspro.model.ConfigurationManager;
 import fr.jmmc.mcs.gui.App;
 import fr.jmmc.mcs.gui.StatusBar;
+import fr.jmmc.mcs.util.ActionRegistrar;
 import fr.jmmc.mcs.util.Urls;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -96,9 +100,11 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Locale;
 import java.util.TimeZone;
+import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.ToolTipManager;
 
@@ -150,6 +156,38 @@ public final class AsproGui extends App {
   @Override
   protected void execute() {
     getFrame().setVisible(true);
+  }
+
+  /**
+   * Hook to handle operations before closing application.
+   *
+   * @return should return true if the application can exit, false otherwise
+   * to cancel exit.
+   */
+  @Override
+  protected boolean finish() {
+    logger.fine("Custom App.finish() handler called.");
+
+    // Ask the user if he wants to save modifications
+    final Object[] options = {"Save", "Cancel", "Don't Save"};
+    final int result = JOptionPane.showOptionDialog(getFrame(),
+            "Do you want to save changes before closing ?\nIf you don't save, your changes will be lost.\n\n",
+            null, JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, null, options,
+            options[0]);
+
+    // If the User clicked the "Save" button, save and quit
+    if (result == 0) {
+      final AbstractAction action = (SaveObservationAction) ActionRegistrar.getInstance().get(SaveObservationAction.className, SaveObservationAction.actionName);
+
+      action.actionPerformed(null);
+    }
+    // If the user clicked the "Cancel" button, don't quit
+    if (result == 1) {
+      return false;
+    }
+
+    // If the user clicked the "Don't Save" button, quit
+    return true;
   }
 
   /**
