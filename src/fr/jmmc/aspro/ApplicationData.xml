@@ -23,14 +23,14 @@
   </dependences>
   <menubar>
     <menu label="File">
-      <menu label="Load" classpath="fr.jmmc.aspro.gui.action.LoadObservationAction" action="loadObservation" accelerator="L"
+      <menu label="Open observation" classpath="fr.jmmc.aspro.gui.action.LoadObservationAction" action="loadObservation" accelerator="O"
             icon="/fr/jmmc/aspro/gui/icons/fileopen.png" description="load an observation file"/>
-      <menu label="Save" classpath="fr.jmmc.aspro.gui.action.SaveObservationAction" action="saveObservation" accelerator="S"
+      <menu label="Save observation" classpath="fr.jmmc.aspro.gui.action.SaveObservationAction" action="saveObservation" accelerator="S"
             icon="/fr/jmmc/aspro/gui/icons/filesaveas.png" description="save the current observation as an observation file"/>
       <menu/> <!-- menu separator -->
       <menu label="Export to OIFits" classpath="fr.jmmc.aspro.gui.action.ExportOIFitsAction" action="exportOIFits" accelerator="F"
             description="Export your target observables to an OIFits file (only valid if the target has a model)"/>
-      <menu label="Export to an Observing Block" classpath="fr.jmmc.aspro.gui.action.ExportOBAction" action="exportOB" accelerator="O"
+      <menu label="Export to an Observing Block" classpath="fr.jmmc.aspro.gui.action.ExportOBAction" action="exportOB" accelerator="B"
             description="Export your observation to an Observing block (only valid inside the UV Coverage Panel)"/>
       <menu/> <!-- menu separator -->
       <menu label="Export plot to PDF" classpath="fr.jmmc.aspro.gui.action.ExportPDFAction" action="exportPDF" accelerator="P"
