@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.45 2010-06-25 14:16:51 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.46 2010-07-05 14:52:26 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.45  2010/06/25 14:16:51  bourgesl
+ * refactoring to use UV for WMin / WMax
+ *
  * Revision 1.44  2010/06/23 12:52:08  bourgesl
  * ObservationManager regsitration for observation events moved in SettingPanel (external)
  *
@@ -1402,7 +1405,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       // update the status bar :
       StatusBar.show("computing uv coverage ... (please wait, this may take a while)");
 
-      // Cancel other uv map task and execute this new uv map task :
+      // Cancel other uv coverage task and execute this new task :
       SwingWorkerExecutor.getInstance().execute("UVCoverage", worker);
 
     } // observability data check
@@ -1513,7 +1516,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         // update the status bar :
         StatusBar.show("computing uv map ... (please wait, this may take a while)");
 
-        // Cancel other uv map task and execute this new uv map task :
+        // Cancel other uv map task and execute this task :
         SwingWorkerExecutor.getInstance().execute("UVMap", worker);
       }
     }
