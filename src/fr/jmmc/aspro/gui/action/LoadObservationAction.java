@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: LoadObservationAction.java,v 1.6 2010-06-17 10:02:50 bourgesl Exp $"
+ * "@(#) $Id: LoadObservationAction.java,v 1.7 2010-07-07 15:11:51 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2010/06/17 10:02:50  bourgesl
+ * fixed warning hints - mainly not final static loggers
+ *
  * Revision 1.5  2010/06/11 13:49:08  bourgesl
  * flagged as open action
  * handle the action event's file coming from ActionRegistar (open action on application startup)
@@ -35,7 +38,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
 /**
- * Save observation settings action
+ * Open observation settings action
  * @author bourgesl
  */
 public class LoadObservationAction extends ObservationFileAction {
