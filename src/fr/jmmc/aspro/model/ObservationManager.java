@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationManager.java,v 1.31 2010-06-23 12:53:48 bourgesl Exp $"
+ * "@(#) $Id: ObservationManager.java,v 1.32 2010-07-07 15:11:09 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.31  2010/06/23 12:53:48  bourgesl
+ * added setOIFitsFile method and fire OIFits done event
+ *
  * Revision 1.30  2010/06/17 10:02:51  bourgesl
  * fixed warning hints - mainly not final static loggers
  *
@@ -142,6 +145,8 @@ public class ObservationManager extends BaseOIManager {
   /** singleton pattern */
   private static ObservationManager instance = new ObservationManager();
   /* members */
+  /** configuration manager */
+  private final ConfigurationManager cm = ConfigurationManager.getInstance();
   /** observation settings */
   private ObservationSetting observation = null;
   /** associated file to the observation settings */
@@ -165,42 +170,102 @@ public class ObservationManager extends BaseOIManager {
     createObservation();
   }
 
+  /**
+   * Create a new observation (empty) with default values
+   */
   private void createObservation() {
     this.observation = new ObservationSetting();
     defineDefaults(this.observation);
   }
 
-  private void defineDefaults(final ObservationSetting obs) {
-    if (obs.getName() == null || obs.getName().length() == 0) {
+  /**
+   * Define default values (empty child objects)
+   * @param newObservation observation to modify
+   */
+  private void defineDefaults(final ObservationSetting newObservation) {
+    if (newObservation.getName() == null || newObservation.getName().length() == 0) {
       this.observation.setName("default");
     }
-    if (obs.getWhen() == null) {
-      obs.setWhen(new WhenSetting());
+    if (newObservation.getWhen() == null) {
+      final WhenSetting when = new WhenSetting();
+      when.setDate(getCalendar(new Date()));
+      when.setNightRestriction(AsproConstants.DEFAULT_USE_NIGHT_LIMITS);
+
+      newObservation.setWhen(when);
     }
-    if (obs.getInstrumentConfiguration() == null) {
-      obs.setInstrumentConfiguration(new FocalInstrumentConfigurationChoice());
+    if (newObservation.getInterferometerConfiguration() == null) {
+      final String defInterferometer = this.cm.getInterferometerNames().get(0);
+      final String defInterferometerConfiguration = this.cm.getInterferometerConfigurationNames(defInterferometer).get(0);
+
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("default Interferometer = " + defInterferometer);
+        logger.fine("default InterferometerConfiguration = " + defInterferometerConfiguration);
+      }
+
+      final InterferometerConfigurationChoice interferometerChoice = new InterferometerConfigurationChoice();
+      interferometerChoice.setName(defInterferometerConfiguration);
+      interferometerChoice.setMinElevation(AsproConstants.DEFAULT_MIN_ELEVATION);
+
+      newObservation.setInterferometerConfiguration(interferometerChoice);
     }
-    if (obs.getInterferometerConfiguration() == null) {
-      obs.setInterferometerConfiguration(new InterferometerConfigurationChoice());
+    if (newObservation.getInstrumentConfiguration() == null) {
+      final String defInstrument = this.cm.getInterferometerInstrumentNames(newObservation.getInterferometerConfiguration().getName()).get(0);
+      final String defInstrumentConfiguration = this.cm.getInstrumentConfigurationNames(newObservation.getInterferometerConfiguration().getName(), defInstrument).get(0);
+
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("default Instrument = " + defInstrument);
+        logger.fine("default InstrumentConfiguration = " + defInstrumentConfiguration);
+      }
+
+      final FocalInstrumentConfigurationChoice instrumentChoice = new FocalInstrumentConfigurationChoice();
+      instrumentChoice.setName(defInstrument);
+      instrumentChoice.setStations(defInstrumentConfiguration);
+
+      newObservation.setInstrumentConfiguration(instrumentChoice);
     }
+
+    // update references :
+    // can throw IllegalStateException if an invalid reference was found :
+    updateObservation(newObservation);
   }
 
+  /**
+   * Register the given observation listener
+   * @param listener observation listener
+   */
   public void register(final ObservationListener listener) {
     this.listeners.add(listener);
   }
 
+  /**
+   * Unregister the given observation listener
+   * @param listener observation listener
+   */
   public void unregister(final ObservationListener listener) {
     this.listeners.remove(listener);
   }
 
+  /**
+   * Return the current observation
+   * @return current observation
+   */
   public ObservationSetting getObservation() {
     return this.observation;
   }
 
+  /**
+   * Return the current observation file
+   * @return the current observation file or null if undefined
+   */
   public File getObservationFile() {
     return this.observationFile;
   }
 
+  /**
+   * Utility method to get a string representation of main observation settings
+   * @param obs observation to use
+   * @return string representation of main observation settings
+   */
   public static String toString(final ObservationSetting obs) {
     final StringBuffer sb = new StringBuffer();
     sb.append("name : ").append(obs.getName());
@@ -226,7 +291,7 @@ public class ObservationManager extends BaseOIManager {
   /**
    * Set the observation date (no time)
    * @param date date to use
-   * @return true if the date changed
+   * @return true if the value changed
    */
   public boolean setWhen(final Date date) {
     final WhenSetting when = getObservation().getWhen();
@@ -246,7 +311,7 @@ public class ObservationManager extends BaseOIManager {
   /**
    * Set the night restriction flag
    * @param useNightLimits flag to enable/disable the night restriction (observability)
-   * @return true if the flag changed
+   * @return true if the value changed
    */
   public boolean setNightRestriction(final boolean useNightLimits) {
     final WhenSetting when = getObservation().getWhen();
@@ -261,6 +326,11 @@ public class ObservationManager extends BaseOIManager {
     return changed;
   }
 
+  /**
+   * Set the minimum elevation (deg)
+   * @param minElev minimum elevation value
+   * @return true if the value changed
+   */
   public boolean setMinElevation(final double minElev) {
     final InterferometerConfigurationChoice interferometerChoice = getObservation().getInterferometerConfiguration();
 
@@ -274,6 +344,12 @@ public class ObservationManager extends BaseOIManager {
     return changed;
   }
 
+  /**
+   * Set the interferometer configuration (interferometer + period)
+   * and refresh the internal InterferometerConfiguration reference
+   * @param name name of the interferometer configuration
+   * @return true if the value changed
+   */
   public boolean setInterferometerConfigurationName(final String name) {
     final InterferometerConfigurationChoice interferometerChoice = getObservation().getInterferometerConfiguration();
 
@@ -283,11 +359,17 @@ public class ObservationManager extends BaseOIManager {
         logger.finest("setInterferometerConfigurationName : " + name);
       }
       interferometerChoice.setName(name);
-      interferometerChoice.setInterferometerConfiguration(ConfigurationManager.getInstance().getInterferometerConfiguration(name));
+      interferometerChoice.setInterferometerConfiguration(this.cm.getInterferometerConfiguration(name));
     }
     return changed;
   }
 
+  /**
+   * Set the instrument configuration (instrument for a given interferometer + period)
+   * and refresh the internal InstrumentConfiguration reference
+   * @param name name of the instrument configuration
+   * @return true if the value changed
+   */
   public boolean setInstrumentConfigurationName(final String name) {
     final FocalInstrumentConfigurationChoice instrumentChoice = getObservation().getInstrumentConfiguration();
 
@@ -297,12 +379,18 @@ public class ObservationManager extends BaseOIManager {
         logger.finest("setInstrumentConfigurationName : " + name);
       }
       instrumentChoice.setName(name);
-      instrumentChoice.setInstrumentConfiguration(ConfigurationManager.getInstance().getInterferometerInstrumentConfiguration(
+      instrumentChoice.setInstrumentConfiguration(this.cm.getInterferometerInstrumentConfiguration(
               getObservation().getInterferometerConfiguration().getName(), name));
     }
     return changed;
   }
 
+  /**
+   * Set the instrument station configuration (baseline for a given instrument)
+   * and refresh the internal StationList reference
+   * @param stations string representation of the station list (AA BB CC ...)
+   * @return true if the value changed
+   */
   public boolean setInstrumentConfigurationStations(final String stations) {
     final FocalInstrumentConfigurationChoice instrumentChoice = getObservation().getInstrumentConfiguration();
 
@@ -312,7 +400,7 @@ public class ObservationManager extends BaseOIManager {
         logger.finest("setInstrumentConfigurationStations : " + stations);
       }
       instrumentChoice.setStations(stations);
-      instrumentChoice.setStationList(ConfigurationManager.getInstance().getInstrumentConfigurationStations(
+      instrumentChoice.setStationList(this.cm.getInstrumentConfigurationStations(
               getObservation().getInterferometerConfiguration().getName(), getObservation().getInstrumentConfiguration().getName(), stations));
     }
     return changed;
@@ -328,7 +416,7 @@ public class ObservationManager extends BaseOIManager {
         logger.finest("setInstrumentConfigurationPoPs : " + pops);
       }
       instrumentChoice.setPops(pops);
-      instrumentChoice.setPopList(ConfigurationManager.getInstance().parseInstrumentPoPs(
+      instrumentChoice.setPopList(this.cm.parseInstrumentPoPs(
               getObservation().getInterferometerConfiguration().getName(), getObservation().getInstrumentConfiguration().getName(), pops));
     }
     return changed;
@@ -344,7 +432,7 @@ public class ObservationManager extends BaseOIManager {
         logger.finest("setInstrumentMode : " + mode);
       }
       instrumentChoice.setInstrumentMode(mode);
-      instrumentChoice.setFocalInstrumentMode(ConfigurationManager.getInstance().getInstrumentMode(
+      instrumentChoice.setFocalInstrumentMode(this.cm.getInstrumentMode(
               getObservation().getInterferometerConfiguration().getName(), getObservation().getInstrumentConfiguration().getName(), mode));
     }
     return changed;
@@ -378,7 +466,7 @@ public class ObservationManager extends BaseOIManager {
     // ugly code to update all resolved references used on post load :
     final InterferometerConfigurationChoice interferometerChoice = obs.getInterferometerConfiguration();
 
-    interferometerChoice.setInterferometerConfiguration(ConfigurationManager.getInstance().getInterferometerConfiguration(interferometerChoice.getName()));
+    interferometerChoice.setInterferometerConfiguration(this.cm.getInterferometerConfiguration(interferometerChoice.getName()));
 
     if (interferometerChoice.getInterferometerConfiguration() == null) {
       throw new IllegalStateException("the interferometer configuration [" + interferometerChoice.getName() + "] is not found !");
@@ -386,14 +474,14 @@ public class ObservationManager extends BaseOIManager {
 
     final FocalInstrumentConfigurationChoice instrumentChoice = obs.getInstrumentConfiguration();
 
-    instrumentChoice.setInstrumentConfiguration(ConfigurationManager.getInstance().getInterferometerInstrumentConfiguration(
+    instrumentChoice.setInstrumentConfiguration(this.cm.getInterferometerInstrumentConfiguration(
             interferometerChoice.getName(), instrumentChoice.getName()));
 
     if (instrumentChoice.getInstrumentConfiguration() == null) {
       throw new IllegalStateException("the instrument configuration [" + instrumentChoice.getName() + "] is not found !");
     }
 
-    instrumentChoice.setStationList(ConfigurationManager.getInstance().getInstrumentConfigurationStations(
+    instrumentChoice.setStationList(this.cm.getInstrumentConfigurationStations(
             interferometerChoice.getName(), instrumentChoice.getName(), instrumentChoice.getStations()));
 
     if (instrumentChoice.getStationList() == null) {
@@ -401,17 +489,16 @@ public class ObservationManager extends BaseOIManager {
     }
 
     // pops can be undefined :
-    instrumentChoice.setPopList(ConfigurationManager.getInstance().parseInstrumentPoPs(
+    instrumentChoice.setPopList(this.cm.parseInstrumentPoPs(
             interferometerChoice.getName(), instrumentChoice.getName(), instrumentChoice.getPops()));
 
     // instrument mode can be undefined :
-    instrumentChoice.setFocalInstrumentMode(ConfigurationManager.getInstance().getInstrumentMode(
+    instrumentChoice.setFocalInstrumentMode(this.cm.getInstrumentMode(
             interferometerChoice.getName(), instrumentChoice.getName(), instrumentChoice.getInstrumentMode()));
 
     if (logger.isLoggable(Level.FINEST)) {
       logger.finest("updateObservation : " + toString(obs));
     }
-
   }
 
   /**
@@ -515,11 +602,16 @@ public class ObservationManager extends BaseOIManager {
   }
 
   public Vector<String> getTargetNames() {
-    final Vector<String> v = new Vector<String>();
-    for (Target t : getObservation().getTargets()) {
-      v.add(t.getName());
+    final List<Target> targets = getObservation().getTargets();
+    final int size = targets.size();
+    if (size > 0) {
+      final Vector<String> v = new Vector<String>(targets.size());
+      for (Target t : targets) {
+        v.add(t.getName());
+      }
+      return v;
     }
-    return v;
+    return EMPTY_VECTOR;
   }
 
   public static void replaceTarget(final ObservationSetting obs, final Target target) {
@@ -666,21 +758,36 @@ public class ObservationManager extends BaseOIManager {
       }
 
       final ObservationSetting newObservation = (ObservationSetting) loaded;
-      defineDefaults(newObservation);
-
-      // update references :
-      // can throw IllegalStateException if an invalid reference was found :
-      updateObservation(newObservation);
-
-      // change the current observation :
-      this.observation = newObservation;
-
-      // fire an observation load event :
-      fireObservationLoaded();
-
-      // fire an observation change event :
-      fireObservationChanged();
+      changeObservation(newObservation);
     }
+  }
+
+  /**
+   * Reset the current observation
+   */
+  public void reset() {
+    logger.info("Reset observation");
+
+    final ObservationSetting newObservation = new ObservationSetting();
+    changeObservation(newObservation);
+  }
+
+  /**
+   * Change the current observation with the given one
+   * and fire load and change events
+   * @param newObservation observation to use
+   */
+  private void changeObservation(final ObservationSetting newObservation) {
+    defineDefaults(newObservation);
+
+    // change the current observation :
+    this.observation = newObservation;
+
+    // fire an observation load event :
+    fireObservationLoaded();
+
+    // fire an observation change event :
+    fireObservationChanged();
   }
 
   /**
