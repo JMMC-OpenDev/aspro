@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: OIFitsCreatorService.java,v 1.9 2010-07-07 09:28:58 bourgesl Exp $"
+ * "@(#) $Id: OIFitsCreatorService.java,v 1.10 2010-07-07 15:06:02 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.9  2010/07/07 09:28:58  bourgesl
+ * disable T3 (dev)
+ * fixed date format (missing 0x)
+ *
  * Revision 1.8  2010/06/30 15:38:52  bourgesl
  * beginning of OI_T3 generation
  *
@@ -78,7 +82,7 @@ public final class OIFitsCreatorService {
   /** target Id */
   private final static short TARGET_ID = (short) 1;
   /** enable the OIFits validation */
-  private final static boolean DO_VALIDATE = true;
+  private final static boolean DO_VALIDATE = false;
 
   /* members */
   /* input */
