@@ -1,15 +1,19 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: XmlFactory.java,v 1.1 2010-06-23 12:49:06 bourgesl Exp $"
+ * "@(#) $Id: XmlFactory.java,v 1.2 2010-07-07 09:29:29 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2010/06/23 12:49:06  bourgesl
+ * XSLT (JAXP) utility class to load (in cache) XSLT files and perform transformations
+ *
  *
  */
 package fr.jmmc.aspro.util;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -284,7 +288,7 @@ public final class XmlFactory {
           logger.fine("XmlFactory.resolvePath : url : " + url);
         }
 
-        source = new StreamSource(url.openStream());
+        source = new StreamSource(new BufferedInputStream(url.openStream()));
       } catch (Exception e) {
         logger.log(Level.SEVERE, "XmlFactory.resolvePath : unable to load XSLT : " + xslFilePath, e);
       }
