@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BaseOIManager.java,v 1.14 2010-07-07 09:27:20 bourgesl Exp $"
+ * "@(#) $Id: BaseOIManager.java,v 1.15 2010-07-07 15:11:42 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.14  2010/07/07 09:27:20  bourgesl
+ * use FileUtils.getResource and buffered url.getOpenStream
+ *
  * Revision 1.13  2010/06/17 10:02:51  bourgesl
  * fixed warning hints - mainly not final static loggers
  *
@@ -60,6 +63,7 @@ import java.net.URL;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.Vector;
 import java.util.logging.Level;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -82,7 +86,10 @@ public class BaseOIManager {
           className_);
   /** package name for JAXB generated code */
   private final static String OI_JAXB_PATH = "fr.jmmc.aspro.model.oi";
-  // members :
+  /** empty vector */
+  protected final static Vector<String> EMPTY_VECTOR = new Vector<String>(0);
+
+  /* members */
   /** internal JAXB Factory */
   private JAXBFactory jf;
   /** datatype factory used to create XMLGregorianCalendar instances */
