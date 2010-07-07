@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.46 2010-07-05 14:52:26 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.47 2010-07-07 15:12:15 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.46  2010/07/05 14:52:26  bourgesl
+ * corrected comments
+ *
  * Revision 1.45  2010/06/25 14:16:51  bourgesl
  * refactoring to use UV for WMin / WMax
  *
@@ -804,7 +807,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     // note : can not be null :
     final String intConfName = observation.getInterferometerConfiguration().getName();
     // test if the interferometer changed :
-    boolean changed = !intConfName.equals(this.interferometerConfigurationName);
+    boolean changed = intConfName != null && !intConfName.equals(this.interferometerConfigurationName);
     if (changed) {
       if (logger.isLoggable(Level.FINE)) {
         logger.fine("interferometer configuration changed : " + intConfName);
@@ -1154,7 +1157,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       this.jComboBoxInstrumentMode.setSelectedItem(observation.getInstrumentConfiguration().getInstrumentMode());
 
       // update the sampling period :
-      this.jFieldSamplingPeriod.setValue(Double.valueOf(observation.getInstrumentConfiguration().getSamplingPeriod()));
+      if (observation.getInstrumentConfiguration().getSamplingPeriod() != null) {
+        this.jFieldSamplingPeriod.setValue(Double.valueOf(observation.getInstrumentConfiguration().getSamplingPeriod()));
+      }
 
       // refresh the fringe tracker modes :
       updateComboFTModes(observation);
