@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BasicObservationForm.java,v 1.32 2010-06-28 12:26:54 bourgesl Exp $"
+ * "@(#) $Id: BasicObservationForm.java,v 1.33 2010-07-07 15:12:41 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.32  2010/06/28 12:26:54  bourgesl
+ * date is always enabled because it is used in OIFits files
+ *
  * Revision 1.31  2010/06/23 12:52:08  bourgesl
  * ObservationManager regsitration for observation events moved in SettingPanel (external)
  *
@@ -153,6 +156,8 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
   private final static boolean DEBUG_UPDATE_EVENT = false;
 
   /* members */
+  /** configuration manager */
+  private final ConfigurationManager cm = ConfigurationManager.getInstance();
   /** observation manager */
   private final ObservationManager om = ObservationManager.getInstance();
   /** flag to enable / disable the automatic update of the observation when any swing component changes */
@@ -506,7 +511,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
       }
     });
 
-    this.jComboBoxInterferometer.setModel(new DefaultComboBoxModel(ConfigurationManager.getInstance().getInterferometerNames()));
+    this.jComboBoxInterferometer.setModel(new DefaultComboBoxModel(this.cm.getInterferometerNames()));
 
     // default values :
     this.jCheckBoxNightLimit.setSelected(AsproConstants.DEFAULT_USE_NIGHT_LIMITS);
@@ -561,7 +566,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
    * Refresh the list of interferometer configurations : depends on the chosen interferometer
    */
   private void updateComboInterferometerConfiguration() {
-    final Vector<String> v = ConfigurationManager.getInstance().getInterferometerConfigurationNames((String) this.jComboBoxInterferometer.getSelectedItem());
+    final Vector<String> v = this.cm.getInterferometerConfigurationNames((String) this.jComboBoxInterferometer.getSelectedItem());
     this.jComboBoxInterferometerConfiguration.setModel(new DefaultComboBoxModel(v));
     final boolean visible = (v.size() > 1);
     this.jLabelPeriod.setVisible(visible);
@@ -572,7 +577,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
    * Refresh the list of instruments : depends on the chosen interferometer configuration
    */
   private void updateComboInstrument() {
-    final Vector<String> v = ConfigurationManager.getInstance().getInterferometerInstrumentNames((String) this.jComboBoxInterferometerConfiguration.getSelectedItem());
+    final Vector<String> v = this.cm.getInterferometerInstrumentNames((String) this.jComboBoxInterferometerConfiguration.getSelectedItem());
     this.jComboBoxInstrument.setModel(new DefaultComboBoxModel(v));
   }
 
@@ -580,7 +585,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
    * Refresh the list of instrument configurations : depends on the chosen instrument (also the interferometer configuration)
    */
   private void updateComboInstrumentConfiguration() {
-    final Vector<String> v = ConfigurationManager.getInstance().getInstrumentConfigurationNames((String) this.jComboBoxInterferometerConfiguration.getSelectedItem(),
+    final Vector<String> v = this.cm.getInstrumentConfigurationNames((String) this.jComboBoxInterferometerConfiguration.getSelectedItem(),
             (String) this.jComboBoxInstrument.getSelectedItem());
     this.jComboBoxInstrumentConfiguration.setModel(new DefaultComboBoxModel(v));
     final boolean visible = (v.size() > 1);
@@ -639,7 +644,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
    * Check if this interferometer has PoPs. If false, disable and reset the PoPs text field
    */
   private void checkPops() {
-    final boolean hasPops = ConfigurationManager.getInstance().hasPoPs((String) this.jComboBoxInterferometer.getSelectedItem());
+    final boolean hasPops = this.cm.hasPoPs((String) this.jComboBoxInterferometer.getSelectedItem());
     this.jLabelPops.setVisible(hasPops);
     this.jTextPoPs.setVisible(hasPops);
     // reset the pops configuration because it can be invalid because of the chosen instrument
@@ -659,7 +664,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
 
       // parse the configuration (instrument = number of channels) + (interferometer = pop indexes [1-5]) :
 
-      listPoPs = ConfigurationManager.getInstance().parseInstrumentPoPs((String) this.jComboBoxInterferometerConfiguration.getSelectedItem(),
+      listPoPs = this.cm.parseInstrumentPoPs((String) this.jComboBoxInterferometerConfiguration.getSelectedItem(),
               (String) this.jComboBoxInstrument.getSelectedItem(), popConfig);
     }
     if (logger.isLoggable(Level.FINE)) {
