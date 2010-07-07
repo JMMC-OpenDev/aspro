@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: OIFitsCreatorService.java,v 1.8 2010-06-30 15:38:52 bourgesl Exp $"
+ * "@(#) $Id: OIFitsCreatorService.java,v 1.9 2010-07-07 09:28:58 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.8  2010/06/30 15:38:52  bourgesl
+ * beginning of OI_T3 generation
+ *
  * Revision 1.7  2010/06/29 14:26:35  bourgesl
  * OIFitsCreatorService is a statefull service to ease future changes to add error and noise computation
  *
@@ -189,14 +192,26 @@ public final class OIFitsCreatorService {
     // OI_VIS :
     this.createOIVis();
 
+    // fast interrupt :
+    if (Thread.currentThread().isInterrupted()) {
+      return null;
+    }
+
     // OI_VIS2 :
     this.createOIVis2();
 
     // OI_VIS2 :
-    this.createOIT3();
+    if (false) {
+      // Work in progress :
+      this.createOIT3();
+    }
+
+    // fast interrupt :
+    if (Thread.currentThread().isInterrupted()) {
+      return null;
+    }
 
     // TODO : compute errors + noise models
-
 
     if (logger.isLoggable(Level.INFO)) {
       logger.info("createOIFits : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
@@ -624,15 +639,26 @@ public final class OIFitsCreatorService {
   }
 
   /**
-   * Convert UTC date to string
+   * Convert UTC date to string 'YYYY-MM-DD'
    * @param cal UTC date
    * @return string representation
    */
   private static String calendarToString(final Calendar cal) {
     final StringBuilder sb = new StringBuilder();
     sb.append(cal.get(Calendar.YEAR)).append('-');
-    sb.append(cal.get(Calendar.MONTH) + 1).append('-');
-    sb.append(cal.get(Calendar.DAY_OF_MONTH));
+
+    final int month = cal.get(Calendar.MONTH) + 1;
+    if (month < 10) {
+      sb.append('0');
+    }
+    sb.append(month).append('-');
+
+    final int day = cal.get(Calendar.DAY_OF_MONTH);
+    if (day < 10) {
+      sb.append('0');
+    }
+    sb.append(day);
+
     return sb.toString();
   }
 }
