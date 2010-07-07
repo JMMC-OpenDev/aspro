@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ConfigurationManager.java,v 1.23 2010-06-17 10:02:51 bourgesl Exp $"
+ * "@(#) $Id: ConfigurationManager.java,v 1.24 2010-07-07 15:11:28 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.23  2010/06/17 10:02:51  bourgesl
+ * fixed warning hints - mainly not final static loggers
+ *
  * Revision 1.22  2010/06/11 09:10:12  bourgesl
  * added log message to help debugging JNLP Offline problems
  *
@@ -100,6 +103,7 @@ import fr.jmmc.aspro.service.GeocentricCoords;
 import fr.jmmc.mcs.gui.FeedbackReport;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
@@ -121,9 +125,10 @@ public class ConfigurationManager extends BaseOIManager {
   private static final String CONF_FILE = "AsproOIConfigurations.xml";
   /** singleton pattern */
   private static ConfigurationManager instance = new ConfigurationManager();
-  // members :
+
+  /* members */
   /** Map : id, interferometer description */
-  private final Map<String, InterferometerDescription> interferometerDescriptions = new HashMap<String, InterferometerDescription>();
+  private final Map<String, InterferometerDescription> interferometerDescriptions = new LinkedHashMap<String, InterferometerDescription>();
   /** Map : id, interferometer configuration */
   private final Map<String, InterferometerConfiguration> interferometerConfigurations = new HashMap<String, InterferometerConfiguration>();
 
@@ -143,24 +148,41 @@ public class ConfigurationManager extends BaseOIManager {
     initialize();
   }
 
+  /**
+   * Initialize the configuration :
+   * - load AsproOIConfigurations.xml to get configuration file paths
+   * - load those files (InterferometerSetting)
+   * - update interferometer description and configuration maps
+   */
   private void initialize() {
     try {
+
+      // Start loading configuration :
+      final long start = System.nanoTime();
+
       final Configurations conf = (Configurations) loadObject(CONF_FILE);
 
       InterferometerSetting is;
       for (String fileName : conf.getFiles()) {
         if (logger.isLoggable(Level.CONFIG)) {
-          logger.config("ConfigurationManager : loading configuration file = " + fileName);
+          logger.config("initialize : loading configuration file = " + fileName);
         }
         is = (InterferometerSetting) loadObject(fileName);
 
         addInterferometerSetting(is);
       }
 
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("ConfigurationManager : descriptions   = " + getInterferometerDescriptions());
-        logger.fine("ConfigurationManager : configurations = " + getInterferometerConfigurations());
+      final long time = (System.nanoTime() - start);
+
+      if (logger.isLoggable(Level.INFO)) {
+        logger.info("initialize : duration = " + 1e-6d * time + " ms.");
       }
+
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("descriptions   = " + getInterferometerDescriptions());
+        logger.fine("configurations = " + getInterferometerConfigurations());
+      }
+
     } catch (RuntimeException re) {
       logger.log(Level.SEVERE, "runtime failure : ", re);
       // report unacceptable failure :
@@ -168,13 +190,18 @@ public class ConfigurationManager extends BaseOIManager {
     }
   }
 
+  /**
+   * Add a new interferometer configuration in the cache
+   * and compute transient information (long/lat and max uv coverage)
+   * @param is interferometer setting
+   */
   private void addInterferometerSetting(final InterferometerSetting is) {
 
     final InterferometerDescription d = is.getDescription();
 
-    // check if the interferoemeter is unique :
+    // check if the interferometer is unique (name) :
     if (interferometerDescriptions.containsKey(d.getName())) {
-      throw new IllegalStateException("This interferometer is already present in the loaded configuration !");
+      throw new IllegalStateException("The interferometer '" + d.getName() + "' is already present in the loaded configuration !");
     }
 
     computeInterferometerLocation(d);
@@ -186,29 +213,35 @@ public class ConfigurationManager extends BaseOIManager {
       interferometerConfigurations.put(getConfigurationName(c), c);
 
       // reverse mapping :
+      // declare interferometer configurations in the interferometer description
       is.getDescription().getConfigurations().add(c);
     }
   }
 
   /**
    * Compute the spherical coordinates for the interferometer
-   * @param d interferometer description
+   * @param id interferometer description
    */
-  private void computeInterferometerLocation(final InterferometerDescription d) {
+  private void computeInterferometerLocation(final InterferometerDescription id) {
 
     // Interferometer center :
-    final Position3D center = d.getPosition();
+    final Position3D center = id.getPosition();
     final Spherical sph = GeocentricCoords.getLonLatAlt(center);
 
-    d.setPosSph(new LonLatAlt(sph.getLong(), sph.getLat(), sph.getRadial()));
+    id.setPosSph(new LonLatAlt(sph.getLong(), sph.getLat(), sph.getRadial()));
 
-    GeocentricCoords.dump(d.getName(), sph);
+    GeocentricCoords.dump(id.getName(), sph);
   }
 
-  private void computeMaxUVCoverage(final InterferometerDescription d) {
+  /**
+   * Compute the max UV coverage using all station couples
+   * Note : some station couples can not be available as instrument baselines
+   * @param id interferometer description
+   */
+  private void computeMaxUVCoverage(final InterferometerDescription id) {
     double maxUV = 0d;
 
-    final List<Station> stations = d.getStations();
+    final List<Station> stations = id.getStations();
     final int size = stations.size();
 
     double x, y, z, dist;
@@ -228,10 +261,10 @@ public class ConfigurationManager extends BaseOIManager {
       }
     }
 
-    d.setMaxBaseLine(maxUV);
+    id.setMaxBaseLine(maxUV);
 
     if (logger.isLoggable(Level.FINE)) {
-      logger.fine("maxUVCoverage [" + d.getName() + "] = " + maxUV + " m");
+      logger.fine("maxUVCoverage [" + id.getName() + "] = " + maxUV + " m");
     }
   }
 
@@ -257,35 +290,58 @@ public class ConfigurationManager extends BaseOIManager {
   }
 
   // Getter / Setter / API :
-  public Map<String, InterferometerDescription> getInterferometerDescriptions() {
+  /**
+   * Return the interferometer description map keyed by name
+   * @return interferometer description map
+   */
+  private Map<String, InterferometerDescription> getInterferometerDescriptions() {
     return interferometerDescriptions;
   }
 
+  /**
+   * Return the interferometer description for the given name
+   * @param name interferometer name
+   * @return interferometer description or null if not found
+   */
   public InterferometerDescription getInterferometerDescription(final String name) {
-    return interferometerDescriptions.get(name);
+    return getInterferometerDescriptions().get(name);
   }
 
+  /**
+   * Return the list of all interferometer names
+   * @return list of all interferometer names
+   */
   public Vector<String> getInterferometerNames() {
-    final Vector<String> v = new Vector<String>();
-
+    final Vector<String> v = new Vector<String>(getInterferometerDescriptions().size());
     for (InterferometerDescription id : getInterferometerDescriptions().values()) {
       v.add(id.getName());
     }
     return v;
   }
 
+  /**
+   * Return the list of interferometer configurations associated to the given interferometer
+   * @param interferometerName name of the interferometer
+   * @return list of interferometer configurations
+   */
   public Vector<String> getInterferometerConfigurationNames(final String interferometerName) {
-    final Vector<String> v = new Vector<String>();
-
     final InterferometerDescription id = getInterferometerDescription(interferometerName);
     if (id != null) {
+      final Vector<String> v = new Vector<String>(id.getConfigurations().size());
       for (InterferometerConfiguration c : id.getConfigurations()) {
         v.add(c.getName());
       }
+      return v;
     }
-    return v;
+    return EMPTY_VECTOR;
   }
 
+  /**
+   * Return the switchyard links for the given station
+   * @param id interferometer description
+   * @param station station
+   * @return switchyard links or null
+   */
   public StationLinks getStationLinks(final InterferometerDescription id, final Station station) {
     if (id.getSwitchyard() != null) {
       for (StationLinks sl : id.getSwitchyard().getStationLinks()) {
@@ -297,50 +353,79 @@ public class ConfigurationManager extends BaseOIManager {
     return null;
   }
 
+  /**
+   * Indicate if the given interferometer has PoPs
+   * @param interferometerName name of the interferometer
+   * @return true if the interferometer description has PoPs
+   */
   public boolean hasPoPs(final String interferometerName) {
-    boolean hasPops = false;
     final InterferometerDescription id = getInterferometerDescription(interferometerName);
     if (id != null) {
-      hasPops = !id.getPops().isEmpty();
+      return !id.getPops().isEmpty();
     }
-    return hasPops;
+    return false;
   }
 
   /* InterferometerConfiguration */
-  public Map<String, InterferometerConfiguration> getInterferometerConfigurations() {
+  /**
+   * Return the interferometer configuration map keyed by name
+   * @return interferometer configuration map
+   */
+  private Map<String, InterferometerConfiguration> getInterferometerConfigurations() {
     return interferometerConfigurations;
   }
 
+  /**
+   * Return the interferometer configuration for the given name
+   * @param name name of the interferometer configuration
+   * @return interferometer configuration or null if not found
+   */
   public InterferometerConfiguration getInterferometerConfiguration(final String name) {
-    return interferometerConfigurations.get(name);
+    return getInterferometerConfigurations().get(name);
   }
 
+  /**
+   * Return the list of all instrument names available for the given configuration
+   * @param configurationName name of the interferometer configuration
+   * @return list of all instrument names
+   */
   public Vector<String> getInterferometerInstrumentNames(final String configurationName) {
-    final Vector<String> v = new Vector<String>();
-
     final InterferometerConfiguration c = getInterferometerConfiguration(configurationName);
     if (c != null) {
+      final Vector<String> v = new Vector<String>(c.getInstruments().size());
       for (FocalInstrumentConfiguration ic : c.getInstruments()) {
         v.add(ic.getFocalInstrument().getName());
       }
+      return v;
     }
-    return v;
+    return EMPTY_VECTOR;
   }
 
+  /**
+   * Return the list of all fringe tracker modes available for the given configuration
+   * @param configurationName name of the interferometer configuration
+   * @return list of all fringe tracker modes
+   */
   public Vector<String> getFringeTrackerModes(final String configurationName) {
-    final Vector<String> v = new Vector<String>();
-
     final InterferometerConfiguration c = getInterferometerConfiguration(configurationName);
     if (c != null) {
       final FringeTracker ft = c.getInterferometer().getFringeTracker();
       if (ft != null) {
+        final Vector<String> v = new Vector<String>(ft.getModes().size() + 1);
         v.add(AsproConstants.NONE);
         v.addAll(ft.getModes());
+        return v;
       }
     }
-    return v;
+    return EMPTY_VECTOR;
   }
 
+  /**
+   * Return the instrument configuration for the given interferometer configuration and instrument name
+   * @param configurationName name of the interferometer configuration
+   * @param instrumentName name of the instrument
+   * @return focal instrument configuration
+   */
   public FocalInstrumentConfiguration getInterferometerInstrumentConfiguration(final String configurationName, final String instrumentName) {
     final InterferometerConfiguration c = getInterferometerConfiguration(configurationName);
     if (c != null) {
@@ -353,30 +438,87 @@ public class ConfigurationManager extends BaseOIManager {
     return null;
   }
 
+  /**
+   * Return the list of all instrument configuration names (station list) for the given interferometer configuration and instrument name
+   * @param configurationName name of the interferometer configuration
+   * @param instrumentName name of the instrument
+   * @return list of all instrument configuration names
+   */
   public Vector<String> getInstrumentConfigurationNames(final String configurationName, final String instrumentName) {
-    final Vector<String> v = new Vector<String>();
-
     final FocalInstrumentConfiguration ic = getInterferometerInstrumentConfiguration(configurationName, instrumentName);
     if (ic != null) {
+      final Vector<String> v = new Vector<String>(ic.getConfigurations().size());
       for (FocalInstrumentConfigurationItem c : ic.getConfigurations()) {
         v.add(c.getShortName());
       }
+      return v;
     }
-    return v;
+    return EMPTY_VECTOR;
   }
 
-  public Vector<String> getInstrumentModes(final String configurationName, final String instrumentName) {
-    final Vector<String> v = new Vector<String>();
-
+  /**
+   * Return the list of stations for the given interferometer configuration, instrument name and instrument configuration
+   * @param configurationName name of the interferometer configuration
+   * @param instrumentName name of the instrument
+   * @param instrumentConfigurationName name of the instrument configuration
+   * @return list of stations
+   */
+  public List<Station> getInstrumentConfigurationStations(final String configurationName, final String instrumentName, final String instrumentConfigurationName) {
     final FocalInstrumentConfiguration ic = getInterferometerInstrumentConfiguration(configurationName, instrumentName);
     if (ic != null) {
+      for (FocalInstrumentConfigurationItem c : ic.getConfigurations()) {
+        if (c.getShortName().equals(instrumentConfigurationName)) {
+          return c.getStations();
+        }
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Return the (optional) list of instrument channels for the given interferometer configuration, instrument name and instrument configuration
+   * @param configurationName name of the interferometer configuration
+   * @param instrumentName name of the instrument
+   * @param instrumentConfigurationName name of the instrument configuration
+   * @return list of instrument channels or null if undefined
+   */
+  public List<Channel> getInstrumentConfigurationChannels(final String configurationName, final String instrumentName, final String instrumentConfigurationName) {
+    final FocalInstrumentConfiguration ic = getInterferometerInstrumentConfiguration(configurationName, instrumentName);
+    if (ic != null) {
+      for (FocalInstrumentConfigurationItem c : ic.getConfigurations()) {
+        if (c.getShortName().equals(instrumentConfigurationName)) {
+          return c.getChannels();
+        }
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Return the list of all instrument modes (spectral configuration) for the given interferometer configuration and instrument name
+   * @param configurationName name of the interferometer configuration
+   * @param instrumentName name of the instrument
+   * @return list of all instrument modes
+   */
+  public Vector<String> getInstrumentModes(final String configurationName, final String instrumentName) {
+    final FocalInstrumentConfiguration ic = getInterferometerInstrumentConfiguration(configurationName, instrumentName);
+    if (ic != null) {
+      final Vector<String> v = new Vector<String>(ic.getFocalInstrument().getModes().size());
       for (FocalInstrumentMode m : ic.getFocalInstrument().getModes()) {
         v.add(m.getName());
       }
+      return v;
     }
-    return v;
+    return EMPTY_VECTOR;
   }
 
+  /**
+   * Return the instrument mode for the given interferometer configuration, instrument name and mode
+   * @param configurationName name of the interferometer configuration
+   * @param instrumentName name of the instrument
+   * @param instrumentMode instrument mode
+   * @return instrument mode or null
+   */
   public FocalInstrumentMode getInstrumentMode(final String configurationName, final String instrumentName, final String instrumentMode) {
     if (instrumentMode != null && instrumentMode.length() > 0) {
       final FocalInstrumentConfiguration ic = getInterferometerInstrumentConfiguration(configurationName, instrumentName);
@@ -391,30 +533,15 @@ public class ConfigurationManager extends BaseOIManager {
     return null;
   }
 
-  public List<Station> getInstrumentConfigurationStations(final String configurationName, final String instrumentName, final String instrumentConfigurationName) {
-    final FocalInstrumentConfiguration ic = getInterferometerInstrumentConfiguration(configurationName, instrumentName);
-    if (ic != null) {
-      for (FocalInstrumentConfigurationItem c : ic.getConfigurations()) {
-        if (c.getShortName().equals(instrumentConfigurationName)) {
-          return c.getStations();
-        }
-      }
-    }
-    return null;
-  }
-
-  public List<Channel> getInstrumentConfigurationChannels(final String configurationName, final String instrumentName, final String instrumentConfigurationName) {
-    final FocalInstrumentConfiguration ic = getInterferometerInstrumentConfiguration(configurationName, instrumentName);
-    if (ic != null) {
-      for (FocalInstrumentConfigurationItem c : ic.getConfigurations()) {
-        if (c.getShortName().equals(instrumentConfigurationName)) {
-          return c.getChannels();
-        }
-      }
-    }
-    return null;
-  }
-
+  /**
+   * Parse and return the list of PoPs for the given interferometer configuration, instrument name and Pops string.
+   * The Pops string must only contain PoP indexes like '12', '111' or '541'.
+   * The length of this string must respect the number of channels of the instrument.
+   * @param configurationName name of the interferometer configuration
+   * @param instrumentName name of the instrument
+   * @param configPoPs Pops string
+   * @return
+   */
   public List<Pop> parseInstrumentPoPs(final String configurationName, final String instrumentName, final String configPoPs) {
     if (configPoPs != null && configPoPs.length() > 0) {
       final FocalInstrumentConfiguration ic = getInterferometerInstrumentConfiguration(configurationName, instrumentName);
@@ -450,5 +577,4 @@ public class ConfigurationManager extends BaseOIManager {
     }
     return null;
   }
-
 }
