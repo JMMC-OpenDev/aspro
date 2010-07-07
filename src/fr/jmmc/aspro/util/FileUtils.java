@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: FileUtils.java,v 1.5 2010-06-17 10:02:51 bourgesl Exp $"
+ * "@(#) $Id: FileUtils.java,v 1.6 2010-07-07 09:29:13 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2010/06/17 10:02:51  bourgesl
+ * fixed warning hints - mainly not final static loggers
+ *
  * Revision 1.4  2010/05/26 15:26:02  bourgesl
  * line separator is public
  *
@@ -74,14 +77,14 @@ public final class FileUtils {
    *
    * Accepts filename like fr/jmmc/aspro/fileName.ext
    *
-   * @param fileName file name only no path included
+   * @param fileName file name like fr/jmmc/aspro/fileName.ext
    * @return URL to the file or null
    */
   public static URL getResource(final String fileName) {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("getResource : " + fileName);
     }
-    // Find properties in the classpath
+    // use the class loader resource resolver
     final URL url = FileUtils.class.getClassLoader().getResource(fileName);
 
     if (url == null) {
@@ -139,6 +142,11 @@ public final class FileUtils {
     return result;
   }
 
+  /**
+   * Write the given string into the given file
+   * @param file file to write
+   * @param content content to write
+   */
   public static void writeFile(final File file, final String content) {
     final Writer w = openFile(file);
     if (w != null) {
