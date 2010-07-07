@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproGui.java,v 1.24 2010-07-05 14:50:15 bourgesl Exp $"
+ * "@(#) $Id: AsproGui.java,v 1.25 2010-07-07 15:16:25 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.24  2010/07/05 14:50:15  bourgesl
+ * added a confirm dialog on exiting the application
+ *
  * Revision 1.23  2010/06/29 12:13:21  bourgesl
  * added ExportToOIFits action
  *
@@ -86,6 +89,7 @@ import fr.jmmc.aspro.gui.action.ExportOBAction;
 import fr.jmmc.aspro.gui.action.ExportOIFitsAction;
 import fr.jmmc.aspro.gui.action.ExportPDFAction;
 import fr.jmmc.aspro.gui.action.LoadObservationAction;
+import fr.jmmc.aspro.gui.action.NewObservationAction;
 import fr.jmmc.aspro.gui.action.SaveObservationAction;
 import fr.jmmc.aspro.gui.action.ShowPrefAction;
 import fr.jmmc.aspro.gui.util.ComponentResizeAdapter;
@@ -236,6 +240,8 @@ public final class AsproGui extends App {
    * Create the main actions present in the menu bar
    */
   private void registerActions() {
+    // new observation :
+    new NewObservationAction();
     // load observation :
     new LoadObservationAction();
     // save observation :

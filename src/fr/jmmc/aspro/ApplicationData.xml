@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <ApplicationData link="http://www.jmmc.fr/aspro2">
-  <program name="Aspro2" version="0.5.1"/>
+  <program name="Aspro2" version="0.5.2"/>
   <compilation date="21/09/2009" compiler="JDK 1.5.0_16"/>
   <text>
     <![CDATA[ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations
@@ -23,6 +23,10 @@
   </dependences>
   <menubar>
     <menu label="File">
+      <!--
+      <menu label="New observation" classpath="fr.jmmc.aspro.gui.action.NewObservationAction" action="newObservation" accelerator="N"
+            icon="/fr/jmmc/aspro/gui/icons/filenew.png"/>
+        -->
       <menu label="Open observation" classpath="fr.jmmc.aspro.gui.action.LoadObservationAction" action="loadObservation" accelerator="O"
             icon="/fr/jmmc/aspro/gui/icons/fileopen.png" description="load an observation file"/>
       <menu label="Save observation" classpath="fr.jmmc.aspro.gui.action.SaveObservationAction" action="saveObservation" accelerator="S"
@@ -39,6 +43,12 @@
   </menubar>
   <releasenotes>
     <release version="0.5">
+      <prerelease version="0.5.2">
+        <change>Fixed OIFits primary header to be used with ASPRO (Gildas)</change>
+        <change>Added new action 'New Observation' to reset the GUI</change>
+        <change>Fixed shortcuts for 'Open Observation' and 'Export to OB' actions in File Menu</change>
+        <change>Added a confirm dialog on exit</change>
+      </prerelease>
       <prerelease version="0.5.1">
         <change>Added action 'Export to OIFits' in the File menu</change>
         <change>New OIFits tab panel to show a HTML representation of its content</change>
