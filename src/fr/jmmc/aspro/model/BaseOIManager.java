@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BaseOIManager.java,v 1.13 2010-06-17 10:02:51 bourgesl Exp $"
+ * "@(#) $Id: BaseOIManager.java,v 1.14 2010-07-07 09:27:20 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.13  2010/06/17 10:02:51  bourgesl
+ * fixed warning hints - mainly not final static loggers
+ *
  * Revision 1.12  2010/06/11 09:43:24  bourgesl
  * definitely use getResourceAsStream to fix bugs with jnlp offline mode
  *
@@ -49,8 +52,11 @@
  ******************************************************************************/
 package fr.jmmc.aspro.model;
 
+import fr.jmmc.aspro.util.FileUtils;
 import fr.jmmc.jaxb.JAXBFactory;
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.net.URL;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -103,7 +109,7 @@ public class BaseOIManager {
    * @return unmarshalled object
    * @throws RuntimeException if the load operation failed
    */
-  protected Object loadObject(final String uri) {
+  protected final Object loadObject(final String uri) {
     if (logger.isLoggable(Level.INFO)) {
       logger.info("loading file : " + uri);
     }
@@ -111,13 +117,18 @@ public class BaseOIManager {
 
     final Unmarshaller u = this.jf.createUnMarshaller();
 
-    // use the class loader resource resolver
-
-    // Note : use getResourceAsStream() to avoid JNLP offline bug with URL (Unknown host exception)
     try {
-      result = u.unmarshal(this.getClass().getClassLoader().getResourceAsStream("fr/jmmc/aspro/model/" + uri));
-    } catch (JAXBException je) {
-      throw new RuntimeException("Load failure on " + uri, je);
+      // use the class loader resource resolver
+      final URL url = FileUtils.getResource("fr/jmmc/aspro/model/" + uri);
+
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("BaseOIManager.loadObject : url : " + url);
+      }
+
+      // Note : use input stream to avoid JNLP offline bug with URL (Unknown host exception)
+      result = u.unmarshal(new BufferedInputStream(url.openStream()));
+    } catch (Exception e) {
+      throw new RuntimeException("Load failure on " + uri, e);
     }
 
     return result;
@@ -129,7 +140,7 @@ public class BaseOIManager {
    * @return unmarshalled object
    * @throws RuntimeException if the load operation failed
    */
-  protected Object loadObject(final File inputFile) {
+  protected final Object loadObject(final File inputFile) {
     final Unmarshaller u = this.jf.createUnMarshaller();
 
     Object result = null;
@@ -147,7 +158,7 @@ public class BaseOIManager {
    * @param object to marshall
    * @throws RuntimeException if the save operation failed
    */
-  protected void saveObject(final File outputFile, final Object object) throws RuntimeException {
+  protected final void saveObject(final File outputFile, final Object object) throws RuntimeException {
     final Marshaller marshaller = this.jf.createMarshaller();
     try {
       marshaller.marshal(object, outputFile);
@@ -156,7 +167,12 @@ public class BaseOIManager {
     }
   }
 
-  protected XMLGregorianCalendar getCalendar(final Date date) {
+  /**
+   * Convert the given date to a XMLGregorianCalendar instance using only date information
+   * @param date date argument
+   * @return XMLGregorianCalendar instance
+   */
+  protected final XMLGregorianCalendar getCalendar(final Date date) {
     final GregorianCalendar calendar = new GregorianCalendar();
     calendar.setTime(date);
 
