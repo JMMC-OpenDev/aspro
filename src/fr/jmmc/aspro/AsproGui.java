@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproGui.java,v 1.25 2010-07-07 15:16:25 bourgesl Exp $"
+ * "@(#) $Id: AsproGui.java,v 1.26 2010-07-08 13:41:13 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.25  2010/07/07 15:16:25  bourgesl
+ * added 'New Observation' action
+ *
  * Revision 1.24  2010/07/05 14:50:15  bourgesl
  * added a confirm dialog on exiting the application
  *
@@ -95,21 +98,23 @@ import fr.jmmc.aspro.gui.action.ShowPrefAction;
 import fr.jmmc.aspro.gui.util.ComponentResizeAdapter;
 import fr.jmmc.aspro.model.ConfigurationManager;
 import fr.jmmc.mcs.gui.App;
+import fr.jmmc.mcs.gui.FeedbackReport;
 import fr.jmmc.mcs.gui.StatusBar;
 import fr.jmmc.mcs.util.ActionRegistrar;
-import fr.jmmc.mcs.util.Urls;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Locale;
 import java.util.TimeZone;
+import java.util.logging.Level;
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
+import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 
 /**
@@ -143,23 +148,56 @@ public final class AsproGui extends App {
    */
   @Override
   protected void init(final String[] args) {
-    logger.fine("init : enter");
+    logger.fine("AsproGui.init() handler : enter");
 
     // Preload configurations :
     ConfigurationManager.getInstance();
 
-    // Initializes the swing components with their actions :
-    prepareFrame(getFrame());
+    try {
+      // Using invokeAndWait to be in sync with the main thread :
+      SwingUtilities.invokeAndWait(new Runnable() {
 
-    logger.fine("init : exit");
+        /**
+         * Initializes the swing components with their actions in EDT
+         */
+        public void run() {
+          prepareFrame(getFrame());
+        }
+      });
+    } catch (Exception e) {
+      logger.log(Level.SEVERE, "failure : ", e);
+      // report unacceptable failure :
+      new FeedbackReport(null, true, e);
+    }
+
+    logger.fine("AsproGui.init() handler : exit");
   }
 
   /** 
-   * Execute application body = make the application frame visible
+   * Execute application body = nothing to do
    */
   @Override
   protected void execute() {
-    getFrame().setVisible(true);
+    logger.fine("AsproGui.execute() handler called.");
+  }
+
+  /**
+   * Application is ready = make the application frame visible
+   */
+  @Override
+  protected void ready() {
+    logger.fine("AsproGui.ready() handler called.");
+
+    SwingUtilities.invokeLater(new Runnable() {
+
+      /**
+       * Show the application frame using EDT
+       */
+      public void run() {
+        logger.fine("AsproGui.ready : handler called.");
+        getFrame().setVisible(true);
+      }
+    });
   }
 
   /**
@@ -170,7 +208,7 @@ public final class AsproGui extends App {
    */
   @Override
   protected boolean finish() {
-    logger.fine("Custom App.finish() handler called.");
+    logger.fine("AsproGui.finish() handler called.");
 
     // Ask the user if he wants to save modifications
     final Object[] options = {"Save", "Cancel", "Don't Save"};
@@ -199,10 +237,12 @@ public final class AsproGui extends App {
    * @param frame
    */
   private void prepareFrame(final JFrame frame) {
+    logger.fine("prepareFrame : enter");
+
     frame.setTitle(App.getSharedApplicationDataModel().getProgramName());
 
     // handle frame icon
-    frame.setIconImage(new ImageIcon(Urls.fixJarURL(getClass().getResource("/fr/jmmc/mcs/gui/favicon.png"))).getImage());
+    frame.setIconImage(new ImageIcon(getClass().getResource("/fr/jmmc/mcs/gui/favicon.png")).getImage());
 
     final Dimension dim = new Dimension(900, 750);
     frame.setMinimumSize(dim);
@@ -224,6 +264,8 @@ public final class AsproGui extends App {
     getFramePanel().add(new StatusBar(), BorderLayout.SOUTH);
 
     StatusBar.show("application started.");
+
+    logger.fine("prepareFrame : exit");
   }
 
   /**
