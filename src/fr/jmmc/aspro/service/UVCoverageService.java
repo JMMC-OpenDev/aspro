@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoverageService.java,v 1.27 2010-07-05 14:53:03 bourgesl Exp $"
+ * "@(#) $Id: UVCoverageService.java,v 1.28 2010-07-08 13:56:33 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.27  2010/07/05 14:53:03  bourgesl
+ * added a cancel check before creating OIFits
+ *
  * Revision 1.26  2010/06/29 14:26:35  bourgesl
  * OIFitsCreatorService is a statefull service to ease future changes to add error and noise computation
  *
@@ -401,8 +404,14 @@ public final class UVCoverageService {
 
     if (obsRangesHA != null) {
 
-      final double haLower = this.haMin;
-      final double haUpper = this.haMax;
+      final double haElev = this.starData.getHaElev();
+
+      final double haLower = (this.haMin < -haElev) ? -haElev : this.haMin;
+      final double haUpper = (this.haMax > haElev) ? haElev : this.haMax;
+
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("HA min/Max = " + haLower + " - " + haUpper);
+      }
 
       final double step = this.haStep;
 
