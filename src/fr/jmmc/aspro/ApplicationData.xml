@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <ApplicationData link="http://www.jmmc.fr/aspro2">
-  <program name="Aspro2" version="0.5.2"/>
+  <program name="Aspro2" version="0.5.3"/>
   <compilation date="21/09/2009" compiler="JDK 1.5.0_16"/>
   <text>
     <![CDATA[ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations
@@ -41,6 +41,9 @@
   </menubar>
   <releasenotes>
     <release version="0.5">
+      <prerelease version="0.5.3">
+        <change>Added OI_T3 computation (bispectrum) in OIFits generation</change>
+      </prerelease>
       <prerelease version="0.5.2">
         <change>Fixed OIFits primary header to be used with ASPRO (Gildas)</change>
         <change>Added new action 'New Observation' to reset the GUI</change>
