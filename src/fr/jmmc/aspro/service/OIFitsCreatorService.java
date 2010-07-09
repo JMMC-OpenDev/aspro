@@ -1,41 +1,3 @@
-/*******************************************************************************
- * JMMC project
- *
- * "@(#) $Id: OIFitsCreatorService.java,v 1.10 2010-07-07 15:06:02 bourgesl Exp $"
- *
- * History
- * -------
- * $Log: not supported by cvs2svn $
- * Revision 1.9  2010/07/07 09:28:58  bourgesl
- * disable T3 (dev)
- * fixed date format (missing 0x)
- *
- * Revision 1.8  2010/06/30 15:38:52  bourgesl
- * beginning of OI_T3 generation
- *
- * Revision 1.7  2010/06/29 14:26:35  bourgesl
- * OIFitsCreatorService is a statefull service to ease future changes to add error and noise computation
- *
- * Revision 1.6  2010/06/29 12:13:41  bourgesl
- * added some comments
- *
- * Revision 1.5  2010/06/28 15:39:35  bourgesl
- * added visibility computation in OI_VIS table (VISDATA / VISAMP / VISPHI)
- *
- * Revision 1.4  2010/06/28 14:37:38  bourgesl
- * proper OI_VIS creation with : dateObs (from first HA), time (supporting day change), MJD and station indexes
- *
- * Revision 1.3  2010/06/25 15:16:27  bourgesl
- * starting OI_VIS table generation : time / mjd / uv coords
- * changed UVTable per base line in UV Coverage Service
- *
- * Revision 1.2  2010/06/23 15:44:06  bourgesl
- * added computed OI_WAVELENGTH table in OIFits
- *
- * Revision 1.1  2010/06/23 12:56:13  bourgesl
- * added OIFits structure generation with OI_ARRAY and OI_TARGET tables
- *
- */
 package fr.jmmc.aspro.service;
 
 import edu.dartmouth.AstroSkyCalc;
@@ -49,6 +11,7 @@ import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.Telescope;
 import fr.jmmc.aspro.model.uvcoverage.UVRangeBaseLineData;
 import fr.jmmc.aspro.util.CombUtils;
+import fr.jmmc.aspro.util.ComplexUtils;
 import fr.jmmc.mcs.astro.ALX;
 import fr.jmmc.mcs.model.ModelManager;
 import fr.jmmc.mcs.model.targetmodel.Model;
@@ -61,8 +24,11 @@ import fr.jmmc.oitools.model.OITarget;
 import fr.jmmc.oitools.model.OIVis;
 import fr.jmmc.oitools.model.OIVis2;
 import fr.jmmc.oitools.model.OIWavelength;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -94,8 +60,12 @@ public final class OIFitsCreatorService {
   /* reused observability data */
   /** beam list */
   private final List<Beam> beams;
+  /** number of beams */
+  private final int nBeams;
   /** base line list */
   private final List<BaseLine> baseLines;
+  /** number of baselines */
+  private final int nBaseLines;
   /** precessed target right ascension in decimal hours */
   private final double precRA;
   /** sky calc instance */
@@ -106,10 +76,12 @@ public final class OIFitsCreatorService {
   private final double lambdaMin;
   /** maximal wavelength */
   private final double lambdaMax;
-  /** number of spectral channels */
-  private final int nSpectralChannels;
+  /** number of wavelengths = number of spectral channels */
+  private int nWaveLengths;
   /** observable decimal hour angles */
   private final double[] obsHa;
+  /** number of points = number of observable hour angles */
+  private final int nHAPoints;
   /** list of uv point couples corresponding to the target observability */
   private final List<UVRangeBaseLineData> targetUVObservability;
 
@@ -122,8 +94,12 @@ public final class OIFitsCreatorService {
   private String arrayName = null;
   /** instrument name */
   private String instrumentName = null;
+  /** wavelengths */
+  private double[] waveLengths;
   /** beam mapping */
   private Map<Beam, Short> beamMapping = null;
+  /** baseline mapping */
+  private Map<BaseLine, short[]> baseLineMapping = null;
 
   /**
    * Protected constructor
@@ -152,11 +128,14 @@ public final class OIFitsCreatorService {
     this.observation = observation;
     this.target = target;
     this.beams = beams;
+    this.nBeams = this.beams.size();
     this.baseLines = baseLines;
+    this.nBaseLines = this.baseLines.size();
     this.lambdaMin = lambdaMin;
     this.lambdaMax = lambdaMax;
-    this.nSpectralChannels = nSpectralChannels;
+    this.nWaveLengths = nSpectralChannels;
     this.obsHa = obsHa;
+    this.nHAPoints = this.obsHa.length;
     this.targetUVObservability = targetUVObservability;
     this.precRA = precRA;
     this.sc = sc;
@@ -182,7 +161,9 @@ public final class OIFitsCreatorService {
       logger.fine("insName : " + this.instrumentName);
     }
 
+    // Create beams and base line mappings :
     this.beamMapping = createBeamMapping(this.beams);
+    this.baseLineMapping = createBaseLineMapping(this.beamMapping, this.baseLines);
 
     // OI_ARRAY :
     this.createOIArray();
@@ -205,7 +186,7 @@ public final class OIFitsCreatorService {
     this.createOIVis2();
 
     // OI_VIS2 :
-    if (false) {
+    if (true) {
       // Work in progress :
       this.createOIT3();
     }
@@ -246,7 +227,8 @@ public final class OIFitsCreatorService {
    */
   protected void createOIArray() {
 
-    final OIArray oiArray = new OIArray(this.oiFitsFile, this.beams.size());
+    // Create OI_ARRAY table :
+    final OIArray oiArray = new OIArray(this.oiFitsFile, this.nBeams);
 
     // Array Name :
     oiArray.setArrName(this.arrayName);
@@ -292,6 +274,8 @@ public final class OIFitsCreatorService {
    * Note : target index is 1
    */
   protected void createOITarget() {
+
+    // Create OI_TARGET table :
     final OITarget oiTarget = new OITarget(this.oiFitsFile, 1);
     oiTarget.getTargetId()[0] = TARGET_ID;
     oiTarget.getTarget()[0] = this.target.getName();
@@ -343,16 +327,21 @@ public final class OIFitsCreatorService {
    */
   protected void createOIWaveLength() {
 
-    final OIWavelength waves = new OIWavelength(this.oiFitsFile, this.nSpectralChannels);
+    // Create OI_WAVELENGTH table :
+    final OIWavelength waves = new OIWavelength(this.oiFitsFile, this.nWaveLengths);
     waves.setInsName(this.instrumentName);
 
-    final double step = (this.lambdaMax - this.lambdaMin) / this.nSpectralChannels;
+    final double step = (this.lambdaMax - this.lambdaMin) / this.nWaveLengths;
+
+    this.waveLengths = new double[this.nWaveLengths];
 
     final float[] effWave = waves.getEffWave();
     final float[] effBand = waves.getEffBand();
 
     double waveLength = this.lambdaMin;
-    for (int i = 0; i < this.nSpectralChannels; i++) {
+    for (int i = 0; i < this.nWaveLengths; i++) {
+      this.waveLengths[i] = waveLength;
+
       effWave[i] = (float) waveLength;
       effBand[i] = (float) step;
 
@@ -367,20 +356,12 @@ public final class OIFitsCreatorService {
    */
   protected void createOIVis() {
 
-    // Create station - base line mapping :
-    final Map<BaseLine, short[]> baseLineIndexes = createBaseLineMapping(this.beamMapping, this.baseLines);
-
     // Has models ?
     final List<Model> models = this.target.getModels();
     final boolean hasModels = models != null && !models.isEmpty();
 
-    // number of base lines :
-    final int nBl = this.baseLines.size();
-
-    // number of points = number of observable hour angles :
-    final int nPoints = this.obsHa.length;
-
-    final OIVis vis = new OIVis(this.oiFitsFile, this.instrumentName, nPoints * nBl);
+    // Create OI_VIS table :
+    final OIVis vis = new OIVis(this.oiFitsFile, this.instrumentName, this.nHAPoints * this.nBaseLines);
     vis.setArrName(this.arrayName);
 
     // Compute UTC start date from first HA :
@@ -410,27 +391,23 @@ public final class OIFitsCreatorService {
     final short[][] staIndexes = vis.getStaIndex();
     // skip flag (default to false means that values are considered as valid)
 
-    // Get WaveLengths from related OI table :
-    final float[] effWave = vis.getOiWavelength().getEffWave();
-    final int nWave = effWave.length;
-
     // vars:
     double jd;
     double u, v;
 
-    final double[] ufreq = new double[nWave];
-    final double[] vfreq = new double[nWave];
+    final double[] ufreq = new double[this.nWaveLengths];
+    final double[] vfreq = new double[this.nWaveLengths];
     Complex[] visComplex;
 
-    // iterate on HA points :
-    for (int i = 0, j = 0, k = 0; i < nPoints; i++) {
+    // Iterate on HA points :
+    for (int i = 0, j = 0, k = 0, l = 0; i < this.nHAPoints; i++) {
 
       j = 0;
 
-      // iterate on baselines :
+      // Iterate on baselines :
       for (UVRangeBaseLineData uvBL : this.targetUVObservability) {
 
-        k = i * nBl + j;
+        k = i * this.nBaseLines + j;
 
         // target id
         targetIds[k] = TARGET_ID;
@@ -455,9 +432,9 @@ public final class OIFitsCreatorService {
         if (hasModels) {
 
           // prepare spatial frequencies :
-          for (int l = 0; l < nWave; l++) {
-            ufreq[l] = u / effWave[l];
-            vfreq[l] = v / effWave[l];
+          for (l = 0; l < this.nWaveLengths; l++) {
+            ufreq[l] = u / this.waveLengths[l];
+            vfreq[l] = v / this.waveLengths[l];
           }
 
           // compute complex visibilities :
@@ -468,7 +445,8 @@ public final class OIFitsCreatorService {
             return;
           }
 
-          for (int l = 0; l < nWave; l++) {
+          // Iterate on wave lengths :
+          for (l = 0; l < this.nWaveLengths; l++) {
             // complex data :
             visData[k][l][0] = (float) visComplex[l].getReal();
             visData[k][l][1] = (float) visComplex[l].getImaginary();
@@ -481,7 +459,8 @@ public final class OIFitsCreatorService {
           }
         }
 
-        staIndexes[k] = baseLineIndexes.get(uvBL.getBaseLine());
+        // station indexes :
+        staIndexes[k] = this.baseLineMapping.get(uvBL.getBaseLine());
 
         j++;
       }
@@ -497,8 +476,8 @@ public final class OIFitsCreatorService {
     // Get OI_VIS table :
     final OIVis vis = this.oiFitsFile.getOiVis()[0];
     final int nRows = vis.getNbRows();
-    final int nWave = vis.getNWave();
 
+    // Create OI_VIS2 table :
     final OIVis2 vis2 = new OIVis2(this.oiFitsFile, this.instrumentName, nRows);
     vis2.setArrName(this.arrayName);
     vis2.setDateObs(vis.getDateObs());
@@ -514,7 +493,8 @@ public final class OIFitsCreatorService {
     // skip vis2Err (unknown)
 
     for (int k = 0, l = 0; k < nRows; k++) {
-      for (l = 0; l < nWave; l++) {
+      // Iterate on wave lengths :
+      for (l = 0; l < this.nWaveLengths; l++) {
         // square visibility (not normalized) :
         vis2Data[k][l] = visAmp[k][l] * visAmp[k][l];
       }
@@ -534,47 +514,183 @@ public final class OIFitsCreatorService {
    */
   protected void createOIT3() {
 
-    // number of beams :
-    final int nBeams = this.beams.size();
+    if (this.nBeams < 3) {
+      return;
+    }
 
     // number of triplets :
-    final List<int[]> triplets = CombUtils.generateCombinations(nBeams, 3);
+    final List<int[]> iTriplets = CombUtils.generateCombinations(this.nBeams, 3);
 
-    final int nTriplets = triplets.size();
-
+    final int nTriplets = iTriplets.size();
     if (nTriplets == 0) {
       return;
     }
 
-    logger.severe("nTriplets = " + nTriplets);
-
-    logger.severe("triplets = " + triplets);
-    for (int[] idx : triplets) {
-      logger.severe(" " + idx[0] + " " + idx[1] + " " + idx[2]);
+    final List<Triplet> triplets = new ArrayList<Triplet>(nTriplets);
+    for (int[] idx : iTriplets) {
+      triplets.add(Triplet.create(idx, this.baseLineMapping));
     }
 
-
-    // number of base lines :
-    final int nBl = this.baseLines.size();
-
-    logger.severe("baselines = " + nBl);
-
-    // number of points = number of observable hour angles :
-    final int nPoints = this.obsHa.length;
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("triplets  = " + triplets);
+    }
 
     // Get OI_VIS table :
     final OIVis vis = this.oiFitsFile.getOiVis()[0];
-    final int nRows = vis.getNbRows();
-    final int nWave = vis.getNWave();
 
-    final OIT3 t3 = new OIT3(this.oiFitsFile, this.instrumentName, nPoints * nTriplets);
+    // Create OI_T3 table :
+    final OIT3 t3 = new OIT3(this.oiFitsFile, this.instrumentName, this.nHAPoints * nTriplets);
     t3.setArrName(this.arrayName);
     t3.setDateObs(vis.getDateObs());
 
+    // OI_VIS Columns :
+    final double[] visTimes = vis.getTime();
+    final double[] visMjds = vis.getMjd();
+    // skip int_time (unknown)
+
+    final float[][][] visData = vis.getVisData();
+    // skip visErr (unknown)
+
+    final double[] visUCoords = vis.getUCoord();
+    final double[] visVCoords = vis.getVCoord();
+
+    final short[][] visStaIndexes = vis.getStaIndex();
+
+    // OI_T3 Columns :
+    final short[] t3TargetIds = t3.getTargetId();
+    final double[] t3Times = t3.getTime();
+    final double[] t3Mjds = t3.getMjd();
+    // skip int_time (unknown)
+
+    final double[][] t3Amp = t3.getT3Amp();
+    // skip t3AmpErr (unknown)
+
+    final double[][] t3Phi = t3.getT3Phi();
+    // skip t3PhiErr (unknown)
+
+    final double[] t3U1Coords = t3.getU1Coord();
+    final double[] t3V1Coords = t3.getV1Coord();
+
+    final double[] t3U2Coords = t3.getU2Coord();
+    final double[] t3V2Coords = t3.getV2Coord();
+
+    final short[][] t3StaIndexes = t3.getStaIndex();
+    // skip flag (default to false means that values are considered as valid)
+
+
     // The following code use some hypothesis on the OI_VIS table as defined in createOIVis()
 
-    // detect triplet baselines :
+    // 1 - the number of rows per HA point corresponds to the number of baselines.
+    // 2 - OI_VIS rows have the same ordering than the list of baselines per HA points.
 
+    float[][] visData12, visData23, visData13;
+    Complex vis12, vis23, vis31, t3Data;
+    double u12, v12, u23, v23;
+
+    int[] relPos;
+    int pos;
+
+    // Iterate on HA points :
+    for (int i = 0, j = 0, k = 0, l = 0, vp = 0; i < this.nHAPoints; i++) {
+
+      // position in OI_VIS HA row group :
+      vp = this.nBaseLines * i;
+
+      j = 0;
+
+      // Iterate on baselines :
+      for (Triplet triplet : triplets) {
+
+        k = nTriplets * i + j;
+
+        // target id
+        t3TargetIds[k] = TARGET_ID;
+
+        // UTC :
+        t3Times[k] = visTimes[vp];
+
+        // modified julian day :
+        t3Mjds[k] = visMjds[vp];
+
+        // Use relative positions to get the 3 complex vectors (AB, BC, AC)
+        relPos = triplet.getRelativePosition();
+
+        // Find baseline AB = 12 :
+        pos = relPos[0];
+
+        if (logger.isLoggable(Level.FINE)) {
+          logger.fine("vis baseline = " + Arrays.toString(visStaIndexes[vp + pos]));
+          logger.fine("T3  baseline = " + Arrays.toString(triplet.getBaselineIndexes()[0]));
+        }
+
+        visData12 = visData[vp + pos];
+        u12 = visUCoords[vp + pos];
+        v12 = visVCoords[vp + pos];
+
+        // Find baseline BC = 23 :
+        pos = relPos[1];
+
+        if (logger.isLoggable(Level.FINE)) {
+          logger.fine("vis baseline = " + Arrays.toString(visStaIndexes[vp + pos]));
+          logger.fine("T3  baseline = " + Arrays.toString(triplet.getBaselineIndexes()[1]));
+        }
+
+        visData23 = visData[vp + pos];
+        u23 = visUCoords[vp + pos];
+        v23 = visVCoords[vp + pos];
+
+        // Find baseline AC = 13 :
+        pos = relPos[2];
+
+        if (logger.isLoggable(Level.FINE)) {
+          logger.fine("vis baseline = " + Arrays.toString(visStaIndexes[vp + pos]));
+          logger.fine("T3  baseline = " + Arrays.toString(triplet.getBaselineIndexes()[2]));
+        }
+
+        if (logger.isLoggable(Level.FINE)) {
+          logger.fine("UV 13    = " + visUCoords[vp + pos] + ", " + visVCoords[vp + pos]);
+          logger.fine("UV 12+23 = " + (u12 + u23) + ", " + (v12 + v23));
+        }
+
+        visData13 = visData[vp + pos];
+
+        // Iterate on wave lengths :
+
+        for (l = 0; l < this.nWaveLengths; l++) {
+
+          // baseline AB = 12 :
+          vis12 = new Complex(visData12[l][0], visData12[l][1]);
+
+          // baseline BC = 23
+          vis23 = new Complex(visData23[l][0], visData23[l][1]);
+
+          // baseline AC = 13 => conjuguate 31 (im = -im)
+          vis31 = new Complex(visData13[l][0], -visData13[l][1]);
+
+          // Compute RE/IM bispectrum with C12*C23*~C13 :
+          t3Data = ComplexUtils.bispectrum(vis12, vis23, vis31);
+
+          // amplitude :
+          t3Amp[k][l] = t3Data.abs();
+
+          // phase [-PI;PI] in degrees :
+          t3Phi[k][l] = Math.toDegrees(t3Data.getArgument());
+        }
+
+        // UV 1 coords (m) :
+        t3U1Coords[k] = u12;
+        t3V1Coords[k] = v12;
+
+        // UV 2 coords (m) :
+        t3U2Coords[k] = u23;
+        t3V2Coords[k] = v23;
+
+        // station indexes :
+        t3StaIndexes[k] = triplet.getTripletIndexes();
+
+        j++;
+      }
+    }
 
     this.oiFitsFile.addOiTable(t3);
   }
@@ -599,15 +715,14 @@ public final class OIFitsCreatorService {
   }
 
   /**
-   * Return the station indexes (2) per base line mapping
+   * Return the station indexes (2) per base line mapping (ordered)
    * @param beamMapping beam mapping
    * @param baseLines base line list
    * @return baseline station indexes
    */
   private static Map<BaseLine, short[]> createBaseLineMapping(final Map<Beam, Short> beamMapping, final List<BaseLine> baseLines) {
-
     // Create BaseLine - indexes mapping :
-    final Map<BaseLine, short[]> baseLineIndexes = new HashMap<BaseLine, short[]>();
+    final Map<BaseLine, short[]> baseLineIndexes = new LinkedHashMap<BaseLine, short[]>();
 
     for (BaseLine bl : baseLines) {
       baseLineIndexes.put(bl, new short[]{
@@ -616,9 +731,11 @@ public final class OIFitsCreatorService {
               });
     }
 
-    logger.severe("BaseLine indexes = ");
-    for (short[] idx : baseLineIndexes.values()) {
-      logger.severe(" " + idx[0] + " " + idx[1]);
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("BaseLine indexes = ");
+      for (short[] idx : baseLineIndexes.values()) {
+        logger.fine(" " + idx[0] + " " + idx[1]);
+      }
     }
 
     return baseLineIndexes;
@@ -664,5 +781,145 @@ public final class OIFitsCreatorService {
     sb.append(day);
 
     return sb.toString();
+  }
+
+  /**
+   * Simple object representing a triplet (3 beams A, B, C) with corresponding baselines and table indexes
+   */
+  private final static class Triplet {
+
+    /** station indexes (1 .. nBeams) */
+    private final short[] tripletIndexes;
+    /** baseline indexes (3 couples) */
+    private final short[][] baselineIndexes;
+    /** relative row positions in OI_VIS table (3) */
+    private final int[] relativePosition;
+
+    /**
+     * Triplet factory method
+     * @param idx 0-based indexes
+     * @param baseLineMapping baseline mapping
+     * @return triplet instance
+     */
+    protected static Triplet create(final int[] idx, final Map<BaseLine, short[]> baseLineMapping) {
+
+      final short[] tIndexes = new short[3];
+      for (int i = 0; i < 3; i++) {
+        tIndexes[i] = (short) (idx[i] + 1);
+      }
+
+      // for tIndexes = [123] i.e. ABC
+      // couples gives { 12 13 23 } i.e. AB AC BC
+
+      // 3 couples :
+      final short[][] bIndexes = new short[3][2];
+
+      for (int i = 0, n = 0; i < 3; i++) {
+        for (int j = i + 1; j < 3; j++) {
+          bIndexes[n][0] = tIndexes[i];
+          bIndexes[n][1] = tIndexes[j];
+          n++;
+        }
+      }
+
+      // Permutations to have { 12 23 13 } i.e. AB BC AC
+      // i.e. exchange 2 and 3
+      final short[] tmp = bIndexes[1];
+      bIndexes[1] = bIndexes[2];
+      bIndexes[2] = tmp;
+
+      // Find relative positions in baseline ordering :
+      final int[] pos = new int[3];
+
+      final short[][] orderedbaseLineIndexes = baseLineMapping.values().toArray(new short[baseLineMapping.size()][2]);
+      final int size = orderedbaseLineIndexes.length;
+
+      short[] find, other;
+      for (int n = 0; n < 3; n++) {
+        find = bIndexes[n];
+        pos[n] = -1;
+        for (int i = 0; i < size; i++) {
+          other = orderedbaseLineIndexes[i];
+
+          if (Arrays.equals(find, other)) {
+            pos[n] = i;
+            break;
+          }
+        }
+        if (pos[n] == -1) {
+          throw new IllegalStateException("impossible to find couple [" + find[0] + find[1] + "]");
+        }
+      }
+
+      return new Triplet(tIndexes, bIndexes, pos);
+    }
+
+    /**
+     * Protected constructor
+     * @param tIndexes station indexes
+     * @param bIndexes baseline indexes
+     * @param pos relative row positions
+     */
+    private Triplet(final short[] tIndexes, final short[][] bIndexes, final int[] pos) {
+      this.tripletIndexes = tIndexes;
+
+      // 3 couples :
+      this.baselineIndexes = bIndexes;
+
+      // 3 positions :
+      this.relativePosition = pos;
+    }
+
+    /**
+     * Return the station indexes
+     * @return station indexes (3)
+     */
+    public short[] getTripletIndexes() {
+      return tripletIndexes;
+    }
+
+    /**
+     * Return the baseline indexes (3 couples)
+     * @return baseline indexes
+     */
+    public short[][] getBaselineIndexes() {
+      return baselineIndexes;
+    }
+
+    /**
+     * Return the relative row positions in OI_VIS table (3)
+     * @return relative row positions
+     */
+    public int[] getRelativePosition() {
+      return relativePosition;
+    }
+
+    /**
+     * Return a string representation for this triplet
+     * @return string representation
+     */
+    @Override
+    public String toString() {
+      final StringBuilder sb = new StringBuilder(32);
+      sb.append("Triplet[");
+
+      for (short s : this.tripletIndexes) {
+        sb.append(s);
+      }
+      sb.append("]{ ");
+
+      for (short[] b : this.baselineIndexes) {
+        sb.append(b[0]).append(b[1]).append(" ");
+      }
+
+      sb.append("} = [ ");
+
+      for (int i : this.relativePosition) {
+        sb.append(i).append(" ");
+      }
+
+      sb.append("]");
+      return sb.toString();
+    }
   }
 }
