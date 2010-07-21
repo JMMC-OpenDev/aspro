@@ -26,6 +26,12 @@
     <telescope>
       <name>T</name>
       <diameter>1.0</diameter>
+      
+      <adaptiveOptics>
+        <band>V</band>
+        <!-- tip tilt -->
+        <numberActuators>2</numberActuators>
+      </adaptiveOptics>
     </telescope>
 
     <station>

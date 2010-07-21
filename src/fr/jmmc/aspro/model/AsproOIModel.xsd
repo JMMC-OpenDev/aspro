@@ -799,13 +799,6 @@
         </xsd:annotation>
       </xsd:element>
 
-      <!-- ActiveOptics ?? -->
-
-
-      <!-- Guidage : spectral band, magnitude limite, champ de vue ... -->
-
-
-      <!-- TBD -->
     </xsd:sequence>
   </xsd:complexType>
 
@@ -823,7 +816,7 @@
       <xsd:element name="band" type="SpectralBand">
         <xsd:annotation>
           <xsd:documentation>
-              Spectral Band
+              Spectral Band used by the Adaptive Optics system
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
@@ -831,6 +824,13 @@
         <xsd:annotation>
           <xsd:documentation>
               Number of actuators
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="magLimit" type="xsd:double" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>
+              The usage limit (mag) (values TBD)
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
@@ -1252,10 +1252,6 @@
     <xsd:annotation>
       <xsd:documentation>
         This type describes a Fringe Tracker system
-
-User
-  define logical oipt%FTUsed /global ! FT in Use
- let oipt%FTMode 0
       </xsd:documentation>
     </xsd:annotation>
     <xsd:sequence>
@@ -1314,8 +1310,6 @@ User
       <xsd:documentation>
         Possible values for the SpectralBand (UBVRIJHKLMNQ)
         http://fr.wikipedia.org/wiki/Syst%C3%A8me_photom%C3%A9trique
-
-        ASPRO : allowedSpectralBand (V, K, I, H, N, J) [1-3]
       </xsd:documentation>
     </xsd:annotation>
     <xsd:restriction base="xsd:string">
@@ -1361,13 +1355,6 @@ User
 
 
 <!-- simple types restrictions -->
-
-  <xsd:simpleType name="string16">
-    <xsd:restriction base="xsd:string">
-      <xsd:minLength value="0"/>
-      <xsd:maxLength value="16"/>
-    </xsd:restriction>
-  </xsd:simpleType>
 
   <xsd:complexType name="Position3D">
     <xsd:annotation>
@@ -1454,6 +1441,5 @@ User
       </xsd:element>
     </xsd:sequence>
   </xsd:complexType>
-
 
 </xsd:schema>

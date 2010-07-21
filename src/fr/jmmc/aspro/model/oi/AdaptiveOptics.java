@@ -24,6 +24,7 @@ import fr.jmmc.aspro.model.OIBase;
  *       &lt;sequence>
  *         &lt;element name="band" type="{http://www.jmmc.fr/aspro-oi/0.1}SpectralBand"/>
  *         &lt;element name="numberActuators" type="{http://www.w3.org/2001/XMLSchema}int"/>
+ *         &lt;element name="magLimit" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -35,7 +36,8 @@ import fr.jmmc.aspro.model.OIBase;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "AdaptiveOptics", propOrder = {
     "band",
-    "numberActuators"
+    "numberActuators",
+    "magLimit"
 })
 public class AdaptiveOptics
     extends OIBase
@@ -44,6 +46,7 @@ public class AdaptiveOptics
     @XmlElement(required = true)
     protected SpectralBand band;
     protected int numberActuators;
+    protected Double magLimit;
 
     /**
      * Gets the value of the band property.
@@ -83,6 +86,30 @@ public class AdaptiveOptics
      */
     public void setNumberActuators(int value) {
         this.numberActuators = value;
+    }
+
+    /**
+     * Gets the value of the magLimit property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getMagLimit() {
+        return magLimit;
+    }
+
+    /**
+     * Sets the value of the magLimit property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setMagLimit(Double value) {
+        this.magLimit = value;
     }
 
 }

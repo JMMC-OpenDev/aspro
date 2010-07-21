@@ -27,11 +27,25 @@
     <telescope>
       <name>UT</name>
       <diameter>8.2</diameter>
+
+      <adaptiveOptics>
+        <band>V</band>
+        <!-- MACAO / VLTI -->
+        <numberActuators>64</numberActuators>
+      </adaptiveOptics>
+
     </telescope>
+    
     <!-- For now we have only one shared instance of AT because all ATs are considered equivalent -->
     <telescope>
       <name>AT</name>
       <diameter>1.8</diameter>
+
+      <adaptiveOptics>
+        <band>V</band>
+        <!-- tip tilt -->
+        <numberActuators>2</numberActuators>
+      </adaptiveOptics>
     </telescope>
 
     <station>

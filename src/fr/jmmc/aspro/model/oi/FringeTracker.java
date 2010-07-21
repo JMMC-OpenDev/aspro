@@ -13,10 +13,6 @@ import fr.jmmc.aspro.model.OIBase;
 /**
  * 
  *         This type describes a Fringe Tracker system
- * 
- * User
- *   define logical oipt%FTUsed /global ! FT in Use
- *  let oipt%FTMode 0
  *       
  * 
  * <p>Java class for FringeTracker complex type.
