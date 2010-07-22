@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: StarObservabilityData.java,v 1.3 2010-04-02 14:40:39 bourgesl Exp $"
+ * "@(#) $Id: StarObservabilityData.java,v 1.4 2010-07-22 12:31:18 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2010/04/02 14:40:39  bourgesl
+ * added elevation data and transit date
+ *
  * Revision 1.2  2010/01/22 13:16:18  bourgesl
  * fixed imports
  *
@@ -27,7 +30,7 @@ import java.util.List;
  *
  * @author bourgesl
  */
-public class StarObservabilityData {
+public final class StarObservabilityData {
   /* type of data */
   /** star observability */
   public final static int TYPE_STAR = 0;
@@ -37,22 +40,24 @@ public class StarObservabilityData {
   public final static int TYPE_HORIZON = 2;
   /** baseline intervals */
   public final static int TYPE_BASE_LINE = 3;
+  /** moon intervals */
+  public final static int TYPE_MOON = 27;
 
   /* members */
 
   /** name of the target (+ base line) */
-  private String name;
+  private final String name;
 
   /** type of data */
   private final int type;
 
-  /* visible date intervals */
+  /** visible date intervals */
   private final List<DateTimeInterval> visible = new ArrayList<DateTimeInterval>();
 
   /** transit date */
   private Date transitDate;
 
-  /* visible date intervals */
+  /** visible date intervals */
   private final List<ElevationDate> elevations = new ArrayList<ElevationDate>();
 
 
@@ -68,10 +73,6 @@ public class StarObservabilityData {
 
   public String getName() {
     return name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
   }
 
   public int getType() {
