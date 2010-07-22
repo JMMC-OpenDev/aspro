@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AstroSkyCalc.java,v 1.23 2010-06-28 12:26:17 bourgesl Exp $"
+ * "@(#) $Id: AstroSkyCalc.java,v 1.24 2010-07-22 12:32:22 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.23  2010/06/28 12:26:17  bourgesl
+ * added mjd(jd) to get modified julian day
+ *
  * Revision 1.22  2010/06/25 15:14:54  bourgesl
  * added toCalendar method to get calendar instance instead of date
  *
@@ -36,7 +39,8 @@
  */
 package edu.dartmouth;
 
-import edu.dartmouth.SunAlmanachTime.SunAlmanachType;
+import edu.dartmouth.AlmanacTime.AlmanacType;
+import fr.jmmc.aspro.model.Range;
 import fr.jmmc.aspro.model.oi.LonLatAlt;
 import fr.jmmc.aspro.util.AngleUtils;
 import java.util.ArrayList;
@@ -44,6 +48,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Level;
 
@@ -256,29 +261,149 @@ public final class AstroSkyCalc {
   }
 
   /**
+   * Return the jd ranges when moon is observable arround LST [0;24]
+   * @param jdLst24 julian date corresponding to LST=24:00:00 for the observation date
+   * @return list of jd ranges when moon is over the horizon
+   */
+  public List<Range> findMoonRiseSet(final double jdLst24) {
+
+    // unique sorted JD time stamps :
+    final TreeSet<AlmanacTime> ts = new TreeSet<AlmanacTime>();
+
+    // LST0  - 1DAY :
+    addMoonAlmanac(ts, this.jdLst0 - 1d);
+    // LST0 :
+    addMoonAlmanac(ts, this.jdLst0);
+    // LST24 :
+    addMoonAlmanac(ts, this.jdLst0 + 1d);
+    // LST24 + 1DAY :
+    addMoonAlmanac(ts, this.jdLst0 + 2d);
+
+    final List<AlmanacTime> sorted = new ArrayList<AlmanacTime>(ts);
+
+    // return events in LST [0;24] :
+    final List<Range> ranges = new ArrayList<Range>(2);
+
+    AlmanacTime stFrom, stTo;
+    double jdFrom, jdTo;
+
+    for (int i = 0, size = sorted.size() - 1; i < size; i++) {
+      stFrom = sorted.get(i);
+
+      if (stFrom.getType() == AlmanacTime.AlmanacType.MoonRise) {
+        stTo = sorted.get(i + 1);
+
+        jdFrom = stFrom.getJd();
+        jdTo = stTo.getJd();
+
+        // Keep intervals that are inside or overlapping the LST [0;24] range :
+        if ((jdFrom >= this.jdLst0 && jdFrom <= jdLst24) || (jdTo >= this.jdLst0 && jdTo <= jdLst24)) {
+
+          if (logger.isLoggable(Level.FINE)) {
+            logger.fine("Range[" + jdFrom + " - " + jdTo + "]");
+          }
+
+          // adjust range limits :
+          if (jdFrom < this.jdLst0) {
+            jdFrom = this.jdLst0;
+          }
+          if (jdTo > jdLst24) {
+            jdTo = jdLst24;
+          }
+
+          ranges.add(new Range(jdFrom, jdTo));
+        }
+      }
+    }
+
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("moon ranges : " + ranges);
+    }
+
+    return ranges;
+  }
+
+  /**
+   * Return the maximum of the moon illumination fraction for the given jd ranges
+   * @param moonRanges jd ranges
+   * @return maximum of the moon illumination fraction
+   */
+  public double getMaxMoonIllum(final List<Range> moonRanges) {
+    double maxIllum = 0d;
+    double jdMin, jdMax, jdMid;
+
+    for (Range range : moonRanges) {
+      jdMin = range.getMin();
+      jdMax = range.getMax();
+      jdMid = (jdMin + jdMax) / 2d;
+
+      maxIllum = Math.max(maxIllum, moonIllum(jdMin));
+      maxIllum = Math.max(maxIllum, moonIllum(jdMid));
+      maxIllum = Math.max(maxIllum, moonIllum(jdMax));
+    }
+    return maxIllum;
+  }
+
+  /**
+   * Return the moon illumination fraction for the given julian date
+   * @param jd julian date
+   * @return moon illumination fraction
+   */
+  private double moonIllum(final double jd) {
+    final WhenWhere wwMoon = new WhenWhere(jd, this.site);
+    wwMoon.ComputeSunMoon();
+
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("moon zenith = " + toDateLST(jd));
+      logger.fine("alt illum = " + wwMoon.altmoon);
+      logger.fine("moon illum = " + wwMoon.moonillum);
+    }
+
+    return wwMoon.moonillum;
+  }
+
+  /**
+   * Add the moon almanach info as as AlmanacTime objects for the given date
+   * @param ts set to store the AlmanacTime objects
+   * @param jd julian date
+   */
+  private void addMoonAlmanac(final Set<AlmanacTime> ts, final double jd) {
+    final WhenWhere ww = new WhenWhere(jd, this.site);
+
+    final NightlyAlmanac na = new NightlyAlmanac(ww);
+
+    ts.add(new AlmanacTime(na.moonrise.when.jd, AlmanacType.MoonRise));
+    ts.add(new AlmanacTime(na.moonset.when.jd, AlmanacType.MoonSet));
+  }
+
+  /**
    * Return the list of Sun events arround LST [0;24] +- 12h
-   * @param jdLst0 julian date corresponding to LST=00:00:00 for the observation date
    * @return list of Sun events
    */
-  public List<SunAlmanachTime> findSunRiseSet(final double jdLst0) {
+  public List<AlmanacTime> findSunRiseSet() {
+
     // unique sorted JD time stamps :
-    final TreeSet<SunAlmanachTime> ts = new TreeSet<SunAlmanachTime>();
+    final TreeSet<AlmanacTime> ts = new TreeSet<AlmanacTime>();
 
-    addAlmanach(ts, jdLst0 - 1d);
-    addAlmanach(ts, jdLst0);
-    addAlmanach(ts, jdLst0 + 1d);
-    addAlmanach(ts, jdLst0 + 2d);
+    // LST0  - 1DAY :
+    addSunAlmanac(ts, this.jdLst0 - 1d);
+    // LST0 :
+    addSunAlmanac(ts, this.jdLst0);
+    // LST24 :
+    addSunAlmanac(ts, this.jdLst0 + 1d);
+    // LST24 + 1DAY :
+    addSunAlmanac(ts, this.jdLst0 + 2d);
 
-    final List<SunAlmanachTime> sorted = new ArrayList<SunAlmanachTime>(ts);
+    final List<AlmanacTime> sorted = new ArrayList<AlmanacTime>(ts);
 
     // return events in LST [0;24] +/- 12h :
-    final double jd0 = jdLst0 - 0.5d;
-    final double jd1 = jdLst0 + 1.5d;
+    final double jd0 = this.jdLst0 - 0.5d;
+    final double jd1 = this.jdLst0 + 1.5d;
 
     // find indexes inside the lst range [jd0;jd1] :
     int i0 = -1;
     int i1 = -1;
-    SunAlmanachTime st;
+    AlmanacTime st;
 
     for (int i = 0, len = sorted.size(); i < len; i++) {
       st = sorted.get(i);
@@ -305,7 +430,7 @@ public final class AstroSkyCalc {
       logger.finest("filtered sun events :");
     }
 
-    final List<SunAlmanachTime> result = new ArrayList<SunAlmanachTime>();
+    final List<AlmanacTime> result = new ArrayList<AlmanacTime>();
 
     for (int i = i0; i <= i1; i++) {
       st = sorted.get(i);
@@ -321,19 +446,19 @@ public final class AstroSkyCalc {
   }
 
   /**
-   * Add the sun almanach info as SunAlmanachTime objects for the given date
-   * @param ts set to store the SunAlmanachTime objects
+   * Add the sun almanach info as AlmanacTime objects for the given date
+   * @param ts set to store the AlmanacTime objects
    * @param jd julian date
    */
-  private void addAlmanach(final TreeSet<SunAlmanachTime> ts, final double jd) {
+  private void addSunAlmanac(final Set<AlmanacTime> ts, final double jd) {
     final WhenWhere ww = new WhenWhere(jd, this.site);
 
     final NightlyAlmanac na = new NightlyAlmanac(ww);
 
-    ts.add(new SunAlmanachTime(na.morningTwilight.when.jd, SunAlmanachType.SunTwlRise));
-    ts.add(new SunAlmanachTime(na.sunrise.when.jd, SunAlmanachType.SunRise));
-    ts.add(new SunAlmanachTime(na.sunset.when.jd, SunAlmanachType.SunSet));
-    ts.add(new SunAlmanachTime(na.eveningTwilight.when.jd, SunAlmanachType.SunTwlSet));
+    ts.add(new AlmanacTime(na.morningTwilight.when.jd, AlmanacType.SunTwlRise));
+    ts.add(new AlmanacTime(na.sunrise.when.jd, AlmanacType.SunRise));
+    ts.add(new AlmanacTime(na.sunset.when.jd, AlmanacType.SunSet));
+    ts.add(new AlmanacTime(na.eveningTwilight.when.jd, AlmanacType.SunTwlSet));
   }
 
   /**
