@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.51 2010-06-30 15:02:53 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.52 2010-07-22 12:32:49 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.51  2010/06/30 15:02:53  bourgesl
+ * use CombUtils to simplify code (number of baselines)
+ *
  * Revision 1.50  2010/06/30 14:54:45  bourgesl
  * use CombUtils to simplify code (Pops combination and number of baselines)
  *
@@ -170,7 +173,7 @@ package fr.jmmc.aspro.service;
 
 import edu.dartmouth.AstroSkyCalc;
 import edu.dartmouth.AstroSkyCalcObservation;
-import edu.dartmouth.SunAlmanachTime;
+import edu.dartmouth.AlmanacTime;
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.BaseLine;
 import fr.jmmc.aspro.model.Beam;
@@ -418,9 +421,26 @@ public final class ObservabilityService {
         //  sun rise/set with twilight : see NightlyAlmanac
 
         // Use the LST range [0;24h] +/- 1 day to have valid night ranges to merge with target ranges :
-        final List<SunAlmanachTime> sunEvents = this.sc.findSunRiseSet(this.jdLst0);
+        final List<AlmanacTime> sunEvents = this.sc.findSunRiseSet();
 
         processSunAlmanach(sunEvents);
+
+        // moon rise/set :
+        final List<Range> moonRanges = this.sc.findMoonRiseSet(this.jdLst24);
+        final double moonIllum = this.sc.getMaxMoonIllum(moonRanges);
+
+        final StarObservabilityData soMoon = new StarObservabilityData("Moon [" + (int) Math.round(100 * moonIllum) + " %]",
+                StarObservabilityData.TYPE_MOON);
+        this.data.getStarVisibilities().add(soMoon);
+
+        for (Range range : moonRanges) {
+          convertRangeToDateInterval(range, soMoon.getVisible());
+        }
+
+        if (logger.isLoggable(Level.FINE)) {
+          logger.fine("moon visible : " + soMoon.getVisible());
+          logger.fine("moon illum   : " + moonIllum);
+        }
       }
 
       // fast interrupt :
@@ -1567,14 +1587,14 @@ public final class ObservabilityService {
    * and all intervals (day/night/twilight) in the LST range [0;24]
    * @param sunEvents jd sun events in the LST range [0;24] +/- 12h
    */
-  private void processSunAlmanach(final List<SunAlmanachTime> sunEvents) {
+  private void processSunAlmanach(final List<AlmanacTime> sunEvents) {
     List<SunTimeInterval> intervals = null;
 
     if (sunEvents != null && !sunEvents.isEmpty()) {
       final int nbInterval = sunEvents.size() - 1;
       intervals = new ArrayList<SunTimeInterval>(nbInterval);
 
-      SunAlmanachTime stFrom, stTo;
+      AlmanacTime stFrom, stTo;
       double jdFrom, jdTo;
       Date from, to;
       SunTimeInterval.SunType type = null;
