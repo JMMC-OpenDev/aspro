@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.47 2010-07-07 15:12:15 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.48 2010-07-22 14:34:23 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.47  2010/07/07 15:12:15  bourgesl
+ * fixed NPE on optional fields (load)
+ *
  * Revision 1.46  2010/07/05 14:52:26  bourgesl
  * corrected comments
  *
@@ -182,6 +185,7 @@ import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Pop;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetConfiguration;
+import fr.jmmc.aspro.model.util.AtmosphereQualityUtils;
 import fr.jmmc.aspro.model.uvcoverage.UVBaseLineData;
 import fr.jmmc.aspro.model.uvcoverage.UVRangeBaseLineData;
 import fr.jmmc.aspro.service.UVCoverageService;
@@ -267,6 +271,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
   private UVMapData currentUVMapData = null;
   /** current interferometer configuration name to track changes */
   private String interferometerConfigurationName = null;
+  /** current instrument name to track changes */
+  private String instrumentName = null;
   /* swing */
   /** chart panel */
   private SquareChartPanel chartPanel;
@@ -589,6 +595,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     gridBagConstraints.gridwidth = 2;
     jPanelLeft.add(jLabelAtmQual, gridBagConstraints);
 
+    jComboBoxAtmQual.setModel(new DefaultComboBoxModel(AtmosphereQualityUtils.getAtmosphereQualityList()));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 7;
@@ -665,20 +672,20 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
    */
   public void performOBAction(final ActionEvent evt) {
     final ObservationSetting observation = this.om.getObservation();
-    final String instrumentName = observation.getInstrumentConfiguration().getName();
+    final String insName = observation.getInstrumentConfiguration().getName();
 
-    if (AsproConstants.INS_AMBER.equals(instrumentName) || AsproConstants.INS_MIDI.equals(instrumentName)) {
+    if (AsproConstants.INS_AMBER.equals(insName) || AsproConstants.INS_MIDI.equals(insName)) {
       // set the source with this instance :
       evt.setSource(this);
 
       ExportOBVLTIAction.getInstance().process(evt);
 
-    } else if (instrumentName.startsWith(AsproConstants.INS_VEGA)) {
+    } else if (insName.startsWith(AsproConstants.INS_VEGA)) {
 
       ExportOBVegaAction.getInstance().process();
 
     } else {
-      JOptionPane.showMessageDialog(null, "The application can not generate an Observing Block for this instrument [" + instrumentName + "] !",
+      JOptionPane.showMessageDialog(null, "The application can not generate an Observing Block for this instrument [" + insName + "] !",
               "Error", JOptionPane.INFORMATION_MESSAGE);
     }
   }
@@ -741,6 +748,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     this.jComboBoxTarget.addActionListener(this);
     this.jComboBoxInstrumentMode.addActionListener(this);
     this.jComboBoxFTMode.addActionListener(this);
+    this.jComboBoxAtmQual.addActionListener(this);
 
     this.uvMaxAdapter = new FieldSliderAdapter(jSliderUVMax, jFieldUVMax, 0d, 0d, 0d);
     this.uvMaxAdapter.addChangeListener(this);
@@ -793,10 +801,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     });
 
     this.jComboBoxImageMode.addActionListener(this);
-
-    // disable Atmosphere quality :
-    this.jLabelAtmQual.setVisible(false);
-    this.jComboBoxAtmQual.setVisible(false);
   }
 
   /**
@@ -804,15 +808,14 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
    * @param observation current observation settings
    */
   private void updateInteferometerData(final ObservationSetting observation) {
-    // note : can not be null :
     final String intConfName = observation.getInterferometerConfiguration().getName();
     // test if the interferometer changed :
-    boolean changed = intConfName != null && !intConfName.equals(this.interferometerConfigurationName);
+    final boolean changed = intConfName != null && !intConfName.equals(this.interferometerConfigurationName);
     if (changed) {
+      this.interferometerConfigurationName = intConfName;
       if (logger.isLoggable(Level.FINE)) {
         logger.fine("interferometer configuration changed : " + intConfName);
       }
-      this.interferometerConfigurationName = intConfName;
 
       final InterferometerConfiguration intConf = observation.getInterferometerConfiguration().getInterferometerConfiguration();
 
@@ -823,23 +826,38 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
   }
 
   /**
-   * Refresh the instrument modes
+   * Refresh the information relative to the instrument : sampling time and modes
    * @param observation current observation settings
    */
-  private void updateComboInstrumentModes(final ObservationSetting observation) {
-    final Object oldValue = this.jComboBoxInstrumentMode.getSelectedItem();
+  private void updateInstrumentData(final ObservationSetting observation) {
+    final String insName = observation.getInstrumentConfiguration().getName();
+    // test if the instrument changed :
+    final boolean changed = insName != null && !insName.equals(this.instrumentName);
+    if (changed) {
+      this.instrumentName = insName;
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("instrument changed : " + insName);
+      }
 
-    final Vector<String> v = ConfigurationManager.getInstance().getInstrumentModes(
-            observation.getInterferometerConfiguration().getName(),
-            observation.getInstrumentConfiguration().getName());
-    this.jComboBoxInstrumentMode.setModel(new DefaultComboBoxModel(v));
+      // update sampling time :
+      final int defaultSamplingTime = ConfigurationManager.getInstance().getInstrumentSamplingTime(
+              observation.getInterferometerConfiguration().getName(),
+              observation.getInstrumentConfiguration().getName());
+      this.jFieldSamplingPeriod.setValue(Double.valueOf(defaultSamplingTime));
 
-    // restore previous selected item :
-    if (oldValue != null) {
-      this.jComboBoxInstrumentMode.setSelectedItem(oldValue);
-    }
-    if (logger.isLoggable(Level.FINEST)) {
-      logger.finest("jComboBoxInstrumentMode updated : " + this.jComboBoxInstrumentMode.getSelectedItem());
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("defaultSamplingTime : " + defaultSamplingTime);
+      }
+
+      // update instrument modes :
+      final Vector<String> v = ConfigurationManager.getInstance().getInstrumentModes(
+              observation.getInterferometerConfiguration().getName(),
+              observation.getInstrumentConfiguration().getName());
+      this.jComboBoxInstrumentMode.setModel(new DefaultComboBoxModel(v));
+
+      if (logger.isLoggable(Level.FINEST)) {
+        logger.finest("jComboBoxInstrumentMode updated : " + this.jComboBoxInstrumentMode.getSelectedItem());
+      }
     }
   }
 
@@ -863,8 +881,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     if (logger.isLoggable(Level.FINEST)) {
       logger.finest("jComboBoxFTMode updated : " + this.jComboBoxFTMode.getSelectedItem());
     }
-    final boolean visible = !modes.isEmpty();
 
+    final boolean visible = !modes.isEmpty();
     this.jComboBoxFTMode.setVisible(visible);
     this.jLabelFTMode.setVisible(visible);
   }
@@ -993,7 +1011,17 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       }
       updateObservation();
       /*
-      // ft mode is useless for now :
+      // TODO : ft mode is useless for now :
+      refreshPlot();
+       */
+    } else if (e.getSource() == this.jComboBoxAtmQual) {
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("atmQuality changed : " + this.jComboBoxAtmQual.getSelectedItem());
+      }
+
+      updateObservation();
+      /*
+      // TODO : atmQuality is useless for now :
       refreshPlot();
        */
     } else if (e.getSource() == this.jComboBoxImageMode) {
@@ -1069,6 +1097,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         // update ft mode :
         changed |= this.om.setTargetFTMode(targetName, (String) this.jComboBoxFTMode.getSelectedItem());
 
+        // update atmQuality :
+        changed |= this.om.setAtmosphereQuality(AtmosphereQualityUtils.getAtmosphereQuality((String) this.jComboBoxAtmQual.getSelectedItem()));
+
       } else {
         // clean up i.e. the panel is then invalid :
 
@@ -1107,11 +1138,11 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     final boolean prevAutoRefresh = this.setAutoRefresh(false);
     try {
 
-      // update the data related to the interferometer :
+      // update data related to the interferometer :
       updateInteferometerData(observation);
 
-      // refresh the instrument modes :
-      updateComboInstrumentModes(observation);
+      // refresh data related to the instrument :
+      updateInstrumentData(observation);
 
       // refresh the fringe tracker modes :
       updateComboFTModes(observation);
@@ -1150,8 +1181,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       this.interferometerConfigurationName = null;
       updateInteferometerData(observation);
 
-      // refresh the instrument modes :
-      updateComboInstrumentModes(observation);
+      // refresh data related to the instrument :
+      this.instrumentName = null;
+      updateInstrumentData(observation);
 
       // update the selected instrument mode :
       this.jComboBoxInstrumentMode.setSelectedItem(observation.getInstrumentConfiguration().getInstrumentMode());
@@ -1163,6 +1195,11 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
       // refresh the fringe tracker modes :
       updateComboFTModes(observation);
+
+      // update atmQuality :
+      if (observation.getWhen().getAtmosphereQuality() != null) {
+        this.jComboBoxAtmQual.setSelectedItem(observation.getWhen().getAtmosphereQuality().value());
+      }
 
       // reset HA limits :
       this.haMinAdapter.setValue(AsproConstants.HA_MIN);
