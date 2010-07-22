@@ -400,6 +400,19 @@
       <description></description>
       <numberChannels>2</numberChannels>
       <defaultSamplingTime>40</defaultSamplingTime>
+
+      <!-- noise parameters -->
+      <transmission>0.05</transmission>
+      <dit>0.01</dit>
+      <ron>10</ron>
+      <detectorSaturation>50000</detectorSaturation>
+      <instrumentVisibility>0.9</instrumentVisibility>
+      <instrumentVisibilityBias>2</instrumentVisibilityBias>
+      <instrumentPhaseBias>2</instrumentPhaseBias>
+      <nbPixInterferometry>128</nbPixInterferometry>
+      <nbPixPhotometry>0</nbPixPhotometry>
+      <fracFluxInInterferometry>1</fracFluxInInterferometry>
+
       <mode>
         <name>standard</name>
         <resolution>40</resolution>
@@ -414,6 +427,19 @@
       <description></description>
       <numberChannels>3</numberChannels>
       <defaultSamplingTime>40</defaultSamplingTime>
+
+      <!-- noise parameters -->
+      <transmission>0.05</transmission>
+      <dit>0.01</dit>
+      <ron>10</ron>
+      <detectorSaturation>50000</detectorSaturation>
+      <instrumentVisibility>0.9</instrumentVisibility>
+      <instrumentVisibilityBias>2</instrumentVisibilityBias>
+      <instrumentPhaseBias>2</instrumentPhaseBias>
+      <nbPixInterferometry>128</nbPixInterferometry>
+      <nbPixPhotometry>0</nbPixPhotometry>
+      <fracFluxInInterferometry>1</fracFluxInInterferometry>
+
       <mode>
         <name>standard</name>
         <resolution>40</resolution>
@@ -428,6 +454,19 @@
       <description></description>
       <numberChannels>4</numberChannels>
       <defaultSamplingTime>40</defaultSamplingTime>
+
+      <!-- noise parameters -->
+      <transmission>0.05</transmission>
+      <dit>0.01</dit>
+      <ron>10</ron>
+      <detectorSaturation>50000</detectorSaturation>
+      <instrumentVisibility>0.9</instrumentVisibility>
+      <instrumentVisibilityBias>2</instrumentVisibilityBias>
+      <instrumentPhaseBias>2</instrumentPhaseBias>
+      <nbPixInterferometry>80</nbPixInterferometry>
+      <nbPixPhotometry>0</nbPixPhotometry>
+      <fracFluxInInterferometry>1</fracFluxInInterferometry>
+
       <mode>
         <name>Low_H</name>
         <resolution>40</resolution>

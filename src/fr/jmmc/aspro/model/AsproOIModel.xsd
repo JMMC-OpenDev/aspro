@@ -561,7 +561,6 @@
         </xsd:annotation>
       </xsd:element>
 
-      <!-- TBD -->
     </xsd:sequence>
   </xsd:complexType>
 
@@ -597,7 +596,6 @@
         </xsd:annotation>
       </xsd:element>
 
-      <!-- TBD -->
     </xsd:sequence>
   </xsd:complexType>
 
@@ -1096,7 +1094,6 @@
         </xsd:annotation>
       </xsd:element>
     </xsd:sequence>
-      <!-- TBD -->
   </xsd:complexType>
 
 
@@ -1139,8 +1136,6 @@
     <xsd:annotation>
       <xsd:documentation>
         This type describes a focal instrument (AMBER, MIDI ...)
-
-        Information to add :
       </xsd:documentation>
     </xsd:annotation>
     <xsd:sequence>
@@ -1173,6 +1168,79 @@
         </xsd:annotation>
       </xsd:element>
 
+      <!-- noise modelling parameters -->
+
+      <xsd:element name="transmission" type="xsd:double">
+        <xsd:annotation>
+          <xsd:documentation>
+              The transmission of interferometer+instrument at observed wavelength (typically 0.01)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="dit" type="xsd:double">
+        <xsd:annotation>
+          <xsd:documentation>
+              The Detector individual integration time in seconds (typically less than 0.1s)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="ron" type="xsd:double">
+        <xsd:annotation>
+          <xsd:documentation>
+              The Detector readout noise (typically 10)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="detectorSaturation" type="xsd:double">
+        <xsd:annotation>
+          <xsd:documentation>
+              The Detector is non-linear above (to avoid saturation/non-linearity) (typically more than 20000)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="instrumentVisibility" type="xsd:double">
+        <xsd:annotation>
+          <xsd:documentation>
+              The instrumental visibility (multiplicative) [0.0 - 1.0] (typically 0.9)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="instrumentVisibilityBias" type="xsd:double">
+        <xsd:annotation>
+          <xsd:documentation>
+              The Typical Visibility Bias (percent of V) (typically 1)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="instrumentPhaseBias" type="xsd:double">
+        <xsd:annotation>
+          <xsd:documentation>
+              The Typical Phase/Phase Closure Bias in degrees (typically 1)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="nbPixInterferometry" type="xsd:int">
+        <xsd:annotation>
+          <xsd:documentation>
+              The number of pixels to code all fringes together (interferometric channel)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="nbPixPhotometry" type="xsd:int">
+        <xsd:annotation>
+          <xsd:documentation>
+              The number of pixels to code each photometric channel
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="fracFluxInInterferometry" type="xsd:double">
+        <xsd:annotation>
+          <xsd:documentation>
+              The fraction of flux going into interferometric channel (typically 0.9)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
       <!-- should we have an explicit list of channels used by this focal instrument ? -->
 
       <xsd:element name="mode" type="FocalInstrumentMode" minOccurs="0" maxOccurs="unbounded">
@@ -1183,7 +1251,6 @@
         </xsd:annotation>
       </xsd:element>
 
-      <!-- TBD -->
     </xsd:sequence>
   </xsd:complexType>
 

@@ -8584,7 +8584,6 @@
 
     <!-- No pop on vlti-->
 
-
     <fringeTracker>
       <name>FINITO</name>
       <band>H</band>
@@ -8595,15 +8594,27 @@
       <instrumentVisibility>0.9</instrumentVisibility>
       <magLimit>12</magLimit>
       <maxIntegration>60</maxIntegration>
-
     </fringeTracker>
 
-    <!-- TBC -->
+
     <focalInstrument>
       <name>AMBER</name>
       <description></description>
       <numberChannels>3</numberChannels>
       <defaultSamplingTime>60</defaultSamplingTime>
+
+      <!-- noise parameters -->
+      <transmission>0.01</transmission>
+      <dit>0.1</dit>
+      <ron>10</ron>
+      <detectorSaturation>24000</detectorSaturation>
+      <instrumentVisibility>0.9</instrumentVisibility>
+      <instrumentVisibilityBias>1</instrumentVisibilityBias>
+      <instrumentPhaseBias>0.1</instrumentPhaseBias>
+      <nbPixInterferometry>32</nbPixInterferometry>
+      <nbPixPhotometry>32</nbPixPhotometry>
+      <fracFluxInInterferometry>0.5</fracFluxInInterferometry>
+
       <mode>
         <name>Low_JHK</name>
         <resolution>35</resolution>
@@ -8719,6 +8730,19 @@
       <description></description>
       <numberChannels>2</numberChannels>
       <defaultSamplingTime>60</defaultSamplingTime>
+
+      <!-- noise parameters -->
+      <transmission>0.02</transmission>
+      <dit>0.1</dit>
+      <ron>10</ron>
+      <detectorSaturation>24000</detectorSaturation>
+      <instrumentVisibility>0.9</instrumentVisibility>
+      <instrumentVisibilityBias>2</instrumentVisibilityBias>
+      <instrumentPhaseBias>2</instrumentPhaseBias>
+      <nbPixInterferometry>32</nbPixInterferometry>
+      <nbPixPhotometry>32</nbPixPhotometry>
+      <fracFluxInInterferometry>0.5</fracFluxInInterferometry>
+
       <mode>
         <name>HIGH_SENS+PRISM</name>
         <resolution>30</resolution>
@@ -8754,6 +8778,19 @@
       <description>Prototype configuration for PIONIER instrument</description>
       <numberChannels>4</numberChannels>
       <defaultSamplingTime>20</defaultSamplingTime>
+
+      <!-- noise parameters -->
+      <transmission>0.1</transmission>
+      <dit>0.01</dit>
+      <ron>10</ron>
+      <detectorSaturation>50000</detectorSaturation>
+      <instrumentVisibility>0.9</instrumentVisibility>
+      <instrumentVisibilityBias>0.1</instrumentVisibilityBias>
+      <instrumentPhaseBias>0.01</instrumentPhaseBias>
+      <nbPixInterferometry>4</nbPixInterferometry>
+      <nbPixPhotometry>4</nbPixPhotometry>
+      <fracFluxInInterferometry>0.8</fracFluxInInterferometry>
+
       <mode>
         <name>standard</name>
         <resolution>40</resolution>
