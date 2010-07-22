@@ -17,8 +17,6 @@ import fr.jmmc.aspro.model.OIBase;
 /**
  * 
  *         This type describes a focal instrument (AMBER, MIDI ...)
- * 
- *         Information to add :
  *       
  * 
  * <p>Java class for FocalInstrument complex type.
@@ -34,6 +32,16 @@ import fr.jmmc.aspro.model.OIBase;
  *         &lt;element name="description" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *         &lt;element name="numberChannels" type="{http://www.w3.org/2001/XMLSchema}int"/>
  *         &lt;element name="defaultSamplingTime" type="{http://www.w3.org/2001/XMLSchema}int"/>
+ *         &lt;element name="transmission" type="{http://www.w3.org/2001/XMLSchema}double"/>
+ *         &lt;element name="dit" type="{http://www.w3.org/2001/XMLSchema}double"/>
+ *         &lt;element name="ron" type="{http://www.w3.org/2001/XMLSchema}double"/>
+ *         &lt;element name="detectorSaturation" type="{http://www.w3.org/2001/XMLSchema}double"/>
+ *         &lt;element name="instrumentVisibility" type="{http://www.w3.org/2001/XMLSchema}double"/>
+ *         &lt;element name="instrumentVisibilityBias" type="{http://www.w3.org/2001/XMLSchema}double"/>
+ *         &lt;element name="instrumentPhaseBias" type="{http://www.w3.org/2001/XMLSchema}double"/>
+ *         &lt;element name="nbPixInterferometry" type="{http://www.w3.org/2001/XMLSchema}int"/>
+ *         &lt;element name="nbPixPhotometry" type="{http://www.w3.org/2001/XMLSchema}int"/>
+ *         &lt;element name="fracFluxInInterferometry" type="{http://www.w3.org/2001/XMLSchema}double"/>
  *         &lt;element name="mode" type="{http://www.jmmc.fr/aspro-oi/0.1}FocalInstrumentMode" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
@@ -49,6 +57,16 @@ import fr.jmmc.aspro.model.OIBase;
     "description",
     "numberChannels",
     "defaultSamplingTime",
+    "transmission",
+    "dit",
+    "ron",
+    "detectorSaturation",
+    "instrumentVisibility",
+    "instrumentVisibilityBias",
+    "instrumentPhaseBias",
+    "nbPixInterferometry",
+    "nbPixPhotometry",
+    "fracFluxInInterferometry",
     "modes"
 })
 public class FocalInstrument
@@ -64,6 +82,16 @@ public class FocalInstrument
     protected String description;
     protected int numberChannels;
     protected int defaultSamplingTime;
+    protected double transmission;
+    protected double dit;
+    protected double ron;
+    protected double detectorSaturation;
+    protected double instrumentVisibility;
+    protected double instrumentVisibilityBias;
+    protected double instrumentPhaseBias;
+    protected int nbPixInterferometry;
+    protected int nbPixPhotometry;
+    protected double fracFluxInInterferometry;
     @XmlElement(name = "mode")
     protected List<FocalInstrumentMode> modes;
 
@@ -145,6 +173,166 @@ public class FocalInstrument
      */
     public void setDefaultSamplingTime(int value) {
         this.defaultSamplingTime = value;
+    }
+
+    /**
+     * Gets the value of the transmission property.
+     * 
+     */
+    public double getTransmission() {
+        return transmission;
+    }
+
+    /**
+     * Sets the value of the transmission property.
+     * 
+     */
+    public void setTransmission(double value) {
+        this.transmission = value;
+    }
+
+    /**
+     * Gets the value of the dit property.
+     * 
+     */
+    public double getDit() {
+        return dit;
+    }
+
+    /**
+     * Sets the value of the dit property.
+     * 
+     */
+    public void setDit(double value) {
+        this.dit = value;
+    }
+
+    /**
+     * Gets the value of the ron property.
+     * 
+     */
+    public double getRon() {
+        return ron;
+    }
+
+    /**
+     * Sets the value of the ron property.
+     * 
+     */
+    public void setRon(double value) {
+        this.ron = value;
+    }
+
+    /**
+     * Gets the value of the detectorSaturation property.
+     * 
+     */
+    public double getDetectorSaturation() {
+        return detectorSaturation;
+    }
+
+    /**
+     * Sets the value of the detectorSaturation property.
+     * 
+     */
+    public void setDetectorSaturation(double value) {
+        this.detectorSaturation = value;
+    }
+
+    /**
+     * Gets the value of the instrumentVisibility property.
+     * 
+     */
+    public double getInstrumentVisibility() {
+        return instrumentVisibility;
+    }
+
+    /**
+     * Sets the value of the instrumentVisibility property.
+     * 
+     */
+    public void setInstrumentVisibility(double value) {
+        this.instrumentVisibility = value;
+    }
+
+    /**
+     * Gets the value of the instrumentVisibilityBias property.
+     * 
+     */
+    public double getInstrumentVisibilityBias() {
+        return instrumentVisibilityBias;
+    }
+
+    /**
+     * Sets the value of the instrumentVisibilityBias property.
+     * 
+     */
+    public void setInstrumentVisibilityBias(double value) {
+        this.instrumentVisibilityBias = value;
+    }
+
+    /**
+     * Gets the value of the instrumentPhaseBias property.
+     * 
+     */
+    public double getInstrumentPhaseBias() {
+        return instrumentPhaseBias;
+    }
+
+    /**
+     * Sets the value of the instrumentPhaseBias property.
+     * 
+     */
+    public void setInstrumentPhaseBias(double value) {
+        this.instrumentPhaseBias = value;
+    }
+
+    /**
+     * Gets the value of the nbPixInterferometry property.
+     * 
+     */
+    public int getNbPixInterferometry() {
+        return nbPixInterferometry;
+    }
+
+    /**
+     * Sets the value of the nbPixInterferometry property.
+     * 
+     */
+    public void setNbPixInterferometry(int value) {
+        this.nbPixInterferometry = value;
+    }
+
+    /**
+     * Gets the value of the nbPixPhotometry property.
+     * 
+     */
+    public int getNbPixPhotometry() {
+        return nbPixPhotometry;
+    }
+
+    /**
+     * Sets the value of the nbPixPhotometry property.
+     * 
+     */
+    public void setNbPixPhotometry(int value) {
+        this.nbPixPhotometry = value;
+    }
+
+    /**
+     * Gets the value of the fracFluxInInterferometry property.
+     * 
+     */
+    public double getFracFluxInInterferometry() {
+        return fracFluxInInterferometry;
+    }
+
+    /**
+     * Sets the value of the fracFluxInInterferometry property.
+     * 
+     */
+    public void setFracFluxInInterferometry(double value) {
+        this.fracFluxInInterferometry = value;
     }
 
     /**
