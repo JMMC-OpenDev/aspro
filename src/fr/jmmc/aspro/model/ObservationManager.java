@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationManager.java,v 1.32 2010-07-07 15:11:09 bourgesl Exp $"
+ * "@(#) $Id: ObservationManager.java,v 1.33 2010-07-22 14:31:55 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.32  2010/07/07 15:11:09  bourgesl
+ * better defaultValues with minimal observation information (interferometer, instrument, stations ...)
+ * new reset method to reset the GUI
+ *
  * Revision 1.31  2010/06/23 12:53:48  bourgesl
  * added setOIFitsFile method and fire OIFits done event
  *
@@ -113,6 +117,7 @@ package fr.jmmc.aspro.model;
 import fr.jmmc.aspro.model.observability.ObservabilityData;
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.ObservationListener.ObservationEventType;
+import fr.jmmc.aspro.model.oi.AtmosphereQuality;
 import fr.jmmc.aspro.model.oi.FocalInstrumentConfigurationChoice;
 import fr.jmmc.aspro.model.oi.InterferometerConfigurationChoice;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
@@ -133,6 +138,9 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 /**
  * This class manages observation files i.e. user defined observation settings
+ *
+ * TODO : javadoc to complete
+ *
  * @author bourgesl
  */
 public class ObservationManager extends BaseOIManager {
@@ -322,6 +330,24 @@ public class ObservationManager extends BaseOIManager {
         logger.finest("setNightRestriction : " + useNightLimits);
       }
       when.setNightRestriction(useNightLimits);
+    }
+    return changed;
+  }
+
+  /**
+   * Set the atmosphere quality
+   * @param atmQuality atmosphere quality to use
+   * @return true if the value changed
+   */
+  public boolean setAtmosphereQuality(final AtmosphereQuality atmQuality) {
+    final WhenSetting when = getObservation().getWhen();
+
+    boolean changed = !atmQuality.equals(when.getAtmosphereQuality());
+    if (changed) {
+      if (logger.isLoggable(Level.FINEST)) {
+        logger.finest("setAtmosphereQuality : " + atmQuality);
+      }
+      when.setAtmosphereQuality(atmQuality);
     }
     return changed;
   }

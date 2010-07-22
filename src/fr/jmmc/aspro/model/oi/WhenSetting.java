@@ -26,6 +26,7 @@ import fr.jmmc.aspro.model.OIBase;
  *       &lt;sequence>
  *         &lt;element name="date" type="{http://www.w3.org/2001/XMLSchema}date"/>
  *         &lt;element name="nightRestriction" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
+ *         &lt;element name="atmosphereQuality" type="{http://www.jmmc.fr/aspro-oi/0.1}AtmosphereQuality" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -37,7 +38,8 @@ import fr.jmmc.aspro.model.OIBase;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "WhenSetting", propOrder = {
     "date",
-    "nightRestriction"
+    "nightRestriction",
+    "atmosphereQuality"
 })
 public class WhenSetting
     extends OIBase
@@ -48,6 +50,7 @@ public class WhenSetting
     protected XMLGregorianCalendar date;
     @XmlElement(defaultValue = "true")
     protected boolean nightRestriction;
+    protected AtmosphereQuality atmosphereQuality;
 
     /**
      * Gets the value of the date property.
@@ -87,6 +90,30 @@ public class WhenSetting
      */
     public void setNightRestriction(boolean value) {
         this.nightRestriction = value;
+    }
+
+    /**
+     * Gets the value of the atmosphereQuality property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link AtmosphereQuality }
+     *     
+     */
+    public AtmosphereQuality getAtmosphereQuality() {
+        return atmosphereQuality;
+    }
+
+    /**
+     * Sets the value of the atmosphereQuality property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link AtmosphereQuality }
+     *     
+     */
+    public void setAtmosphereQuality(AtmosphereQuality value) {
+        this.atmosphereQuality = value;
     }
 
 }

@@ -38,11 +38,11 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link FocalInstrumentMode }
+     * Create an instance of {@link FocalInstrument }
      * 
      */
-    public FocalInstrumentMode createFocalInstrumentMode() {
-        return new FocalInstrumentMode();
+    public FocalInstrument createFocalInstrument() {
+        return new FocalInstrument();
     }
 
     /**
@@ -70,6 +70,14 @@ public class ObjectFactory {
     }
 
     /**
+     * Create an instance of {@link TargetConfiguration }
+     * 
+     */
+    public TargetConfiguration createTargetConfiguration() {
+        return new TargetConfiguration();
+    }
+
+    /**
      * Create an instance of {@link StationLinks }
      * 
      */
@@ -86,14 +94,6 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link ObservationSetting }
-     * 
-     */
-    public ObservationSetting createObservationSetting() {
-        return new ObservationSetting();
-    }
-
-    /**
      * Create an instance of {@link WhenSetting }
      * 
      */
@@ -102,11 +102,11 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link TargetConfiguration }
+     * Create an instance of {@link AdaptiveOptics }
      * 
      */
-    public TargetConfiguration createTargetConfiguration() {
-        return new TargetConfiguration();
+    public AdaptiveOptics createAdaptiveOptics() {
+        return new AdaptiveOptics();
     }
 
     /**
@@ -126,6 +126,22 @@ public class ObjectFactory {
     }
 
     /**
+     * Create an instance of {@link FocalInstrumentConfiguration }
+     * 
+     */
+    public FocalInstrumentConfiguration createFocalInstrumentConfiguration() {
+        return new FocalInstrumentConfiguration();
+    }
+
+    /**
+     * Create an instance of {@link ObservationSetting }
+     * 
+     */
+    public ObservationSetting createObservationSetting() {
+        return new ObservationSetting();
+    }
+
+    /**
      * Create an instance of {@link AzEl }
      * 
      */
@@ -142,27 +158,11 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link FocalInstrumentConfiguration }
+     * Create an instance of {@link LonLatAlt }
      * 
      */
-    public FocalInstrumentConfiguration createFocalInstrumentConfiguration() {
-        return new FocalInstrumentConfiguration();
-    }
-
-    /**
-     * Create an instance of {@link Position3D }
-     * 
-     */
-    public Position3D createPosition3D() {
-        return new Position3D();
-    }
-
-    /**
-     * Create an instance of {@link FocalInstrument }
-     * 
-     */
-    public FocalInstrument createFocalInstrument() {
-        return new FocalInstrument();
+    public LonLatAlt createLonLatAlt() {
+        return new LonLatAlt();
     }
 
     /**
@@ -174,19 +174,19 @@ public class ObjectFactory {
     }
 
     /**
+     * Create an instance of {@link Pop }
+     * 
+     */
+    public Pop createPop() {
+        return new Pop();
+    }
+
+    /**
      * Create an instance of {@link InterferometerConfigurationChoice }
      * 
      */
     public InterferometerConfigurationChoice createInterferometerConfigurationChoice() {
         return new InterferometerConfigurationChoice();
-    }
-
-    /**
-     * Create an instance of {@link LonLatAlt }
-     * 
-     */
-    public LonLatAlt createLonLatAlt() {
-        return new LonLatAlt();
     }
 
     /**
@@ -198,11 +198,11 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link DelayLine }
+     * Create an instance of {@link Position3D }
      * 
      */
-    public DelayLine createDelayLine() {
-        return new DelayLine();
+    public Position3D createPosition3D() {
+        return new Position3D();
     }
 
     /**
@@ -214,11 +214,19 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link Pop }
+     * Create an instance of {@link DelayLine }
      * 
      */
-    public Pop createPop() {
-        return new Pop();
+    public DelayLine createDelayLine() {
+        return new DelayLine();
+    }
+
+    /**
+     * Create an instance of {@link FocalInstrumentMode }
+     * 
+     */
+    public FocalInstrumentMode createFocalInstrumentMode() {
+        return new FocalInstrumentMode();
     }
 
     /**
@@ -243,14 +251,6 @@ public class ObjectFactory {
      */
     public Channel createChannel() {
         return new Channel();
-    }
-
-    /**
-     * Create an instance of {@link AdaptiveOptics }
-     * 
-     */
-    public AdaptiveOptics createAdaptiveOptics() {
-        return new AdaptiveOptics();
     }
 
     /**
