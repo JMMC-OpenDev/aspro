@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproConstants.java,v 1.14 2010-06-09 12:48:05 bourgesl Exp $"
+ * "@(#) $Id: AsproConstants.java,v 1.15 2010-07-22 15:45:43 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.14  2010/06/09 12:48:05  bourgesl
+ * removed DEBUG_MODE constant (useless)
+ *
  * Revision 1.13  2010/06/07 16:03:48  bourgesl
  * minimum elevation changed to 30 degrees
  *
@@ -73,6 +76,8 @@ public interface AsproConstants {
   public static final double OB_MIN_ELEVATION = 30d;
   /** default sampling periodicity = 40 minutes */
   public static final double DEFAULT_SAMPLING_PERIOD = 40d;
+  /** default observation duration per calibrated point = 300 seconds i.e. 5 minutes */
+  public static final double DEFAULT_OBSERVATION_DURATION = 300d;
   /** default value for checkbox Night Limit = true */
   public static final boolean DEFAULT_USE_NIGHT_LIMITS = true;
   /** default image LUT */

@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.48 2010-07-22 14:34:23 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.49 2010-07-22 15:45:43 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.48  2010/07/22 14:34:23  bourgesl
+ * sampling time is updated with the default sampling time of the instrument when the instrument is changed
+ * atmosphere quality is displayed and updated when an observation is loaded
+ *
  * Revision 1.47  2010/07/07 15:12:15  bourgesl
  * fixed NPE on optional fields (load)
  *
@@ -356,6 +360,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     jComboBoxFTMode = new javax.swing.JComboBox();
     jPanelBottom = new javax.swing.JPanel();
     jButtonPDF = new javax.swing.JButton();
+    jFieldObsDuration = new javax.swing.JFormattedTextField();
+    jLabel8 = new javax.swing.JLabel();
 
     setLayout(new java.awt.BorderLayout());
 
@@ -429,10 +435,11 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
     jPanelLeft.add(jComboBoxInstrumentMode, gridBagConstraints);
 
-    jLabel3.setText("Sampling Periodicity");
+    jLabel3.setText("Sampling Periodicity (min)");
+    jLabel3.setToolTipText("One set of calibrated visibilities in the u-v plane is taken at this interval (minutes)"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 14;
+    gridBagConstraints.gridy = 13;
     gridBagConstraints.gridwidth = 2;
     jPanelLeft.add(jLabel3, gridBagConstraints);
 
@@ -441,7 +448,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     jFieldSamplingPeriod.setMinimumSize(new java.awt.Dimension(40, 20));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 15;
+    gridBagConstraints.gridy = 14;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
     jPanelLeft.add(jFieldSamplingPeriod, gridBagConstraints);
@@ -449,7 +456,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     jLabel4.setText("HA min");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 16;
+    gridBagConstraints.gridy = 17;
     jPanelLeft.add(jLabel4, gridBagConstraints);
 
     jSliderHAMin.setMajorTickSpacing(30);
@@ -459,7 +466,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     jSliderHAMin.setPreferredSize(new java.awt.Dimension(80, 30));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 17;
+    gridBagConstraints.gridy = 18;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
     jPanelLeft.add(jSliderHAMin, gridBagConstraints);
@@ -467,7 +474,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     jLabel5.setText("HA max");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 18;
+    gridBagConstraints.gridy = 19;
     jPanelLeft.add(jLabel5, gridBagConstraints);
 
     jSliderHAMax.setMajorTickSpacing(30);
@@ -477,7 +484,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     jSliderHAMax.setPreferredSize(new java.awt.Dimension(80, 30));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 19;
+    gridBagConstraints.gridy = 20;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
     jPanelLeft.add(jSliderHAMax, gridBagConstraints);
@@ -487,7 +494,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     jFieldHAMin.setMinimumSize(new java.awt.Dimension(50, 20));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 17;
+    gridBagConstraints.gridy = 18;
     gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
     jPanelLeft.add(jFieldHAMin, gridBagConstraints);
 
@@ -496,26 +503,26 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     jFieldHAMax.setMinimumSize(new java.awt.Dimension(50, 20));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 19;
+    gridBagConstraints.gridy = 20;
     gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
     jPanelLeft.add(jFieldHAMax, gridBagConstraints);
 
     jTargetHAMin.setText("targetHAMin");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 16;
+    gridBagConstraints.gridy = 17;
     jPanelLeft.add(jTargetHAMin, gridBagConstraints);
 
     jTargetHAMax.setText("targetHAMax");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 18;
+    gridBagConstraints.gridy = 19;
     jPanelLeft.add(jTargetHAMax, gridBagConstraints);
 
     jComboBoxImageMode.setModel(new DefaultComboBoxModel(ModelUVMapService.ImageMode.values()));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 24;
+    gridBagConstraints.gridy = 25;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
     jPanelLeft.add(jComboBoxImageMode, gridBagConstraints);
@@ -524,13 +531,13 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     jCheckBoxModelImage.setText("<html>Underplot a model image</html>");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 23;
+    gridBagConstraints.gridy = 24;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     jPanelLeft.add(jCheckBoxModelImage, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 22;
+    gridBagConstraints.gridy = 23;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.weighty = 0.1;
@@ -541,7 +548,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     jCheckBoxPlotUVSupport.setText("<html>Plot rise/set uv tracks</html>");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 20;
+    gridBagConstraints.gridy = 21;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     jPanelLeft.add(jCheckBoxPlotUVSupport, gridBagConstraints);
@@ -549,11 +556,11 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     jLabel6.setText("Plot what ...");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 24;
+    gridBagConstraints.gridy = 25;
     jPanelLeft.add(jLabel6, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 11;
+    gridBagConstraints.gridy = 10;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.weighty = 0.1;
@@ -567,7 +574,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     jSliderUVMax.setPreferredSize(new java.awt.Dimension(80, 30));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 13;
+    gridBagConstraints.gridy = 12;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
     jPanelLeft.add(jSliderUVMax, gridBagConstraints);
@@ -577,14 +584,14 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     jFieldUVMax.setMinimumSize(new java.awt.Dimension(50, 20));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 13;
+    gridBagConstraints.gridy = 12;
     gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
     jPanelLeft.add(jFieldUVMax, gridBagConstraints);
 
     jLabel7.setText("U-V range to plot");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 12;
+    gridBagConstraints.gridy = 11;
     gridBagConstraints.gridwidth = 2;
     jPanelLeft.add(jLabel7, gridBagConstraints);
 
@@ -633,11 +640,29 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 25;
+    gridBagConstraints.gridy = 26;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.weighty = 0.5;
     jPanelLeft.add(jPanelBottom, gridBagConstraints);
+
+    jFieldObsDuration.setColumns(3);
+    jFieldObsDuration.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter()));
+    jFieldObsDuration.setMinimumSize(new java.awt.Dimension(40, 20));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 16;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
+    jPanelLeft.add(jFieldObsDuration, gridBagConstraints);
+
+    jLabel8.setText("Total Integration time (s)");
+    jLabel8.setToolTipText("Time REALLY spent on-source, in seconds, per calibrated point");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 15;
+    gridBagConstraints.gridwidth = 2;
+    jPanelLeft.add(jLabel8, gridBagConstraints);
 
     jSplitPane.setLeftComponent(jPanelLeft);
 
@@ -758,15 +783,36 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     this.jFieldSamplingPeriod.addPropertyChangeListener("value", new PropertyChangeListener() {
 
       public void propertyChange(final PropertyChangeEvent evt) {
-        final double samplingNew = ((Number) jFieldSamplingPeriod.getValue()).doubleValue();
+        final double newValue = ((Number) jFieldSamplingPeriod.getValue()).doubleValue();
 
-        if (samplingNew < 0d) {
+        if (newValue <= 0d) {
           // invalid value :
           jFieldSamplingPeriod.setValue(AsproConstants.DEFAULT_SAMPLING_PERIOD);
         }
 
         if (logger.isLoggable(Level.FINE)) {
-          logger.fine("samplingPeriod changed : " + samplingNew);
+          logger.fine("samplingPeriod changed : " + newValue);
+        }
+        if (updateObservation()) {
+          refreshPlot();
+        }
+      }
+    });
+
+    // default obs duration and property change listener :
+    this.jFieldObsDuration.setValue(AsproConstants.DEFAULT_OBSERVATION_DURATION);
+    this.jFieldObsDuration.addPropertyChangeListener("value", new PropertyChangeListener() {
+
+      public void propertyChange(final PropertyChangeEvent evt) {
+        final double newValue = ((Number) jFieldObsDuration.getValue()).doubleValue();
+
+        if (newValue <= 0d) {
+          // invalid value :
+          jFieldObsDuration.setValue(AsproConstants.DEFAULT_OBSERVATION_DURATION);
+        }
+
+        if (logger.isLoggable(Level.FINE)) {
+          logger.fine("obsDuration changed : " + newValue);
         }
         if (updateObservation()) {
           refreshPlot();
@@ -839,7 +885,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         logger.fine("instrument changed : " + insName);
       }
 
-      // update sampling time :
+      // reset the sampling time to the default sampling time of the instrument :
       final int defaultSamplingTime = ConfigurationManager.getInstance().getInstrumentSamplingTime(
               observation.getInterferometerConfiguration().getName(),
               observation.getInstrumentConfiguration().getName());
@@ -1009,21 +1055,16 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       if (logger.isLoggable(Level.FINE)) {
         logger.fine("ft mode changed : " + this.jComboBoxFTMode.getSelectedItem());
       }
-      updateObservation();
-      /*
-      // TODO : ft mode is useless for now :
-      refreshPlot();
-       */
+      if (updateObservation()) {
+        refreshPlot();
+      }
     } else if (e.getSource() == this.jComboBoxAtmQual) {
       if (logger.isLoggable(Level.FINE)) {
         logger.fine("atmQuality changed : " + this.jComboBoxAtmQual.getSelectedItem());
       }
-
-      updateObservation();
-      /*
-      // TODO : atmQuality is useless for now :
-      refreshPlot();
-       */
+      if (updateObservation()) {
+        refreshPlot();
+      }
     } else if (e.getSource() == this.jComboBoxImageMode) {
       if (logger.isLoggable(Level.FINE)) {
         logger.fine("image mode changed : " + this.jComboBoxImageMode.getSelectedItem());
@@ -1090,6 +1131,10 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         final Number samplingPeriod = (Number) this.jFieldSamplingPeriod.getValue();
         changed |= this.om.setInstrumentSamplingPeriod(Double.valueOf(samplingPeriod.doubleValue()));
 
+        // Update the acquisition time :
+        final Number obsDuration = (Number) this.jFieldObsDuration.getValue();
+        changed |= this.om.setInstrumentAcquisitionTime(Double.valueOf(obsDuration.doubleValue()));
+
         // Update target HA Min/Max :
         changed |= this.om.setTargetHAMin(targetName, Double.valueOf(this.haMinAdapter.getValue()));
         changed |= this.om.setTargetHAMax(targetName, Double.valueOf(this.haMaxAdapter.getValue()));
@@ -1106,6 +1151,10 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         // reset instrument configuration :
         this.om.setInstrumentMode(null);
         this.om.setInstrumentSamplingPeriod(null);
+        this.om.setInstrumentAcquisitionTime(null);
+
+        // reset atmosphere quality :
+        this.om.setAtmosphereQuality(null);
       }
 
       // TODO : fire event ??
@@ -1191,6 +1240,11 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       // update the sampling period :
       if (observation.getInstrumentConfiguration().getSamplingPeriod() != null) {
         this.jFieldSamplingPeriod.setValue(Double.valueOf(observation.getInstrumentConfiguration().getSamplingPeriod()));
+      }
+
+      // update the acquisition time :
+      if (observation.getInstrumentConfiguration().getAcquisitionTime() != null) {
+        this.jFieldObsDuration.setValue(Double.valueOf(observation.getInstrumentConfiguration().getAcquisitionTime()));
       }
 
       // refresh the fringe tracker modes :
@@ -1793,6 +1847,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
   private javax.swing.JComboBox jComboBoxTarget;
   private javax.swing.JFormattedTextField jFieldHAMax;
   private javax.swing.JFormattedTextField jFieldHAMin;
+  private javax.swing.JFormattedTextField jFieldObsDuration;
   private javax.swing.JFormattedTextField jFieldSamplingPeriod;
   private javax.swing.JFormattedTextField jFieldUVMax;
   private javax.swing.JLabel jLabel1;
@@ -1802,6 +1857,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
   private javax.swing.JLabel jLabel5;
   private javax.swing.JLabel jLabel6;
   private javax.swing.JLabel jLabel7;
+  private javax.swing.JLabel jLabel8;
   private javax.swing.JLabel jLabelAtmQual;
   private javax.swing.JLabel jLabelFTMode;
   private javax.swing.JPanel jPanelBottom;

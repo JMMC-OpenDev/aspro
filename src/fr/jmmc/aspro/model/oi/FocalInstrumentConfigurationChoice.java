@@ -27,6 +27,7 @@ import fr.jmmc.aspro.model.OIBase;
  *         &lt;element name="pops" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="instrumentMode" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="samplingPeriod" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
+ *         &lt;element name="acquisitionTime" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -41,7 +42,8 @@ import fr.jmmc.aspro.model.OIBase;
     "stations",
     "pops",
     "instrumentMode",
-    "samplingPeriod"
+    "samplingPeriod",
+    "acquisitionTime"
 })
 public class FocalInstrumentConfigurationChoice
     extends OIBase
@@ -54,6 +56,7 @@ public class FocalInstrumentConfigurationChoice
     protected String pops;
     protected String instrumentMode;
     protected Double samplingPeriod;
+    protected Double acquisitionTime;
 
     /**
      * Gets the value of the name property.
@@ -173,6 +176,30 @@ public class FocalInstrumentConfigurationChoice
      */
     public void setSamplingPeriod(Double value) {
         this.samplingPeriod = value;
+    }
+
+    /**
+     * Gets the value of the acquisitionTime property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getAcquisitionTime() {
+        return acquisitionTime;
+    }
+
+    /**
+     * Sets the value of the acquisitionTime property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setAcquisitionTime(Double value) {
+        this.acquisitionTime = value;
     }
     
 //--simple--preserve

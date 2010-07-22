@@ -1,11 +1,16 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationManager.java,v 1.33 2010-07-22 14:31:55 bourgesl Exp $"
+ * "@(#) $Id: ObservationManager.java,v 1.34 2010-07-22 15:45:43 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.33  2010/07/22 14:31:55  bourgesl
+ * added atmosphere quality in WhenSetting (optional)
+ * added getSeeing() in AtmosphereQualityUtils
+ * update ObservationManager
+ *
  * Revision 1.32  2010/07/07 15:11:09  bourgesl
  * better defaultValues with minimal observation information (interferometer, instrument, stations ...)
  * new reset method to reset the GUI
@@ -474,6 +479,20 @@ public class ObservationManager extends BaseOIManager {
         logger.finest("setInstrumentSamplingPeriod : " + samplingPeriod);
       }
       instrumentChoice.setSamplingPeriod(samplingPeriod);
+    }
+    return changed;
+  }
+
+  public boolean setInstrumentAcquisitionTime(final Double obsDuration) {
+    final FocalInstrumentConfigurationChoice instrumentChoice = getObservation().getInstrumentConfiguration();
+
+    // period can be null :
+    boolean changed = isChanged(obsDuration, instrumentChoice.getAcquisitionTime());
+    if (changed) {
+      if (logger.isLoggable(Level.FINEST)) {
+        logger.finest("setInstrumentAcquisitionTime : " + obsDuration);
+      }
+      instrumentChoice.setAcquisitionTime(obsDuration);
     }
     return changed;
   }
