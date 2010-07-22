@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ConfigurationManager.java,v 1.24 2010-07-07 15:11:28 bourgesl Exp $"
+ * "@(#) $Id: ConfigurationManager.java,v 1.25 2010-07-22 12:30:12 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.24  2010/07/07 15:11:28  bourgesl
+ * full javadoc
+ *
  * Revision 1.23  2010/06/17 10:02:51  bourgesl
  * fixed warning hints - mainly not final static loggers
  *
@@ -87,6 +90,7 @@ package fr.jmmc.aspro.model;
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.oi.Channel;
 import fr.jmmc.aspro.model.oi.Configurations;
+import fr.jmmc.aspro.model.oi.FocalInstrument;
 import fr.jmmc.aspro.model.oi.FocalInstrumentConfiguration;
 import fr.jmmc.aspro.model.oi.FocalInstrumentConfigurationItem;
 import fr.jmmc.aspro.model.oi.FocalInstrumentMode;
@@ -439,6 +443,20 @@ public class ConfigurationManager extends BaseOIManager {
   }
 
   /**
+   * Return the instrument for the given interferometer configuration and instrument name
+   * @param configurationName name of the interferometer configuration
+   * @param instrumentName name of the instrument
+   * @return focal instrument
+   */
+  public FocalInstrument getInterferometerInstrument(final String configurationName, final String instrumentName) {
+    final FocalInstrumentConfiguration ic = getInterferometerInstrumentConfiguration(configurationName, instrumentName);
+    if (ic != null) {
+      return ic.getFocalInstrument();
+    }
+    return null;
+  }
+
+  /**
    * Return the list of all instrument configuration names (station list) for the given interferometer configuration and instrument name
    * @param configurationName name of the interferometer configuration
    * @param instrumentName name of the instrument
@@ -495,16 +513,30 @@ public class ConfigurationManager extends BaseOIManager {
   }
 
   /**
+   * Return the default sampling time for the given interferometer configuration and instrument name
+   * @param configurationName name of the interferometer configuration
+   * @param instrumentName name of the instrument
+   * @return default sampling time
+   */
+  public int getInstrumentSamplingTime(final String configurationName, final String instrumentName) {
+    final FocalInstrument ins = getInterferometerInstrument(configurationName, instrumentName);
+    if (ins != null) {
+      return ins.getDefaultSamplingTime();
+    }
+    return -1;
+  }
+
+  /**
    * Return the list of all instrument modes (spectral configuration) for the given interferometer configuration and instrument name
    * @param configurationName name of the interferometer configuration
    * @param instrumentName name of the instrument
    * @return list of all instrument modes
    */
   public Vector<String> getInstrumentModes(final String configurationName, final String instrumentName) {
-    final FocalInstrumentConfiguration ic = getInterferometerInstrumentConfiguration(configurationName, instrumentName);
-    if (ic != null) {
-      final Vector<String> v = new Vector<String>(ic.getFocalInstrument().getModes().size());
-      for (FocalInstrumentMode m : ic.getFocalInstrument().getModes()) {
+    final FocalInstrument ins = getInterferometerInstrument(configurationName, instrumentName);
+    if (ins != null) {
+      final Vector<String> v = new Vector<String>(ins.getModes().size());
+      for (FocalInstrumentMode m : ins.getModes()) {
         v.add(m.getName());
       }
       return v;
@@ -521,9 +553,9 @@ public class ConfigurationManager extends BaseOIManager {
    */
   public FocalInstrumentMode getInstrumentMode(final String configurationName, final String instrumentName, final String instrumentMode) {
     if (instrumentMode != null && instrumentMode.length() > 0) {
-      final FocalInstrumentConfiguration ic = getInterferometerInstrumentConfiguration(configurationName, instrumentName);
-      if (ic != null) {
-        for (FocalInstrumentMode m : ic.getFocalInstrument().getModes()) {
+      final FocalInstrument ins = getInterferometerInstrument(configurationName, instrumentName);
+      if (ins != null) {
+        for (FocalInstrumentMode m : ins.getModes()) {
           if (m.getName().equals(instrumentMode)) {
             return m;
           }
@@ -544,10 +576,10 @@ public class ConfigurationManager extends BaseOIManager {
    */
   public List<Pop> parseInstrumentPoPs(final String configurationName, final String instrumentName, final String configPoPs) {
     if (configPoPs != null && configPoPs.length() > 0) {
-      final FocalInstrumentConfiguration ic = getInterferometerInstrumentConfiguration(configurationName, instrumentName);
-      if (ic != null) {
+      final FocalInstrument ins = getInterferometerInstrument(configurationName, instrumentName);
+      if (ins != null) {
         // number of channels :
-        final int numChannels = ic.getFocalInstrument().getNumberChannels();
+        final int numChannels = ins.getNumberChannels();
 
         if (configPoPs.length() == numChannels) {
           // valid length :
