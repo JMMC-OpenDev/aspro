@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: NoiseService.java,v 1.3 2010-07-23 12:29:16 bourgesl Exp $"
+ * "@(#) $Id: NoiseService.java,v 1.4 2010-07-23 15:22:36 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2010/07/23 12:29:16  bourgesl
+ * set object parameters (mag in bands)
+ *
  * Revision 1.2  2010/07/23 10:37:44  bourgesl
  * added parameter initialisation
  *
@@ -15,6 +18,7 @@
  */
 package fr.jmmc.aspro.service;
 
+import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.oi.AdaptiveOptics;
 import fr.jmmc.aspro.model.oi.AtmosphereQuality;
 import fr.jmmc.aspro.model.oi.FocalInstrument;
@@ -29,6 +33,7 @@ import fr.jmmc.aspro.model.oi.TargetConfiguration;
 import fr.jmmc.aspro.model.oi.Telescope;
 import fr.jmmc.aspro.model.util.AtmosphereQualityUtils;
 import java.util.List;
+import java.util.Random;
 
 /**
  * This class performs the noise modelling of visibility data (error and noise) 
@@ -126,7 +131,9 @@ public final class NoiseService {
   /** number of frames per second */
   private double frameRate;
   /** total instrumental visibility (with FT if any) */
-  private double vInst;
+  private double vinst;
+  /** random generator */
+  public final Random random = new Random();
 
   /**
    * Protected constructor
@@ -261,7 +268,7 @@ public final class NoiseService {
 
     final Band band = Band.findBand(this.lambda);
 
-    logger.severe("band                    = " + band);
+    logger.severe("band                       = " + band);
 
     this.insBand = Band.findBand(band);
 
@@ -286,6 +293,178 @@ public final class NoiseService {
    * Initialise other parameters
    */
   private void initParameters() {
+
+    this.vinst = instrumentalVisibility;
+    if (this.fringeTrackerPresent) {
+      this.vinst *= this.fringeTrackerInstrumentalVisibility;
+    }
+
+    final Band band = Band.findBand(this.lambda);
+
+    double dlam;
+    if (this.spectralResolution <= 1d) {
+      dlam = band.getBandWidth();
+    } else {
+      dlam = this.lambda / this.spectralResolution;
+    }
+
+    // strehl ratio of AO :
+    final double sr = Band.strehl(this.adaptiveOpticsMag, this.lambda, this.telDiam, this.seeing, this.nbOfActuators);
+
+    // nb of photons m^-2 m^-1 :
+    final double fzero = Math.pow(10d, band.getLogFluxZero())
+            / (H_PLANCK * C_LIGHT / (this.lambda * AsproConstants.MICRO_METER));
+
+    final double nbTotalPhotPerS = fzero * this.nbTel * Math.PI * Math.pow(this.telDiam / 2d, 2d)
+            * (dlam * AsproConstants.MICRO_METER) * this.transmission * sr
+            * Math.pow(10d, -0.4d * this.objectMag);
+
+    // number of expected photoevents in dit :
+    double nbTotalPhot = nbTotalPhotPerS * this.dit;
+
+    // fraction of total interferometric flux in peak pixel :
+    final double peakflux = this.fracFluxInInterferometry * nbTotalPhot / this.nbPixInterf;
+
+    logger.severe("adaptiveOpticsMag          = " + adaptiveOpticsMag);
+    logger.severe("strehl ratio               = " + sr);
+    logger.severe("dlam                       = " + dlam);
+    logger.severe("nbTotalPhot                = " + nbTotalPhot);
+    logger.severe("peakflux                   = " + peakflux);
+
+    int nbFrameToSaturation;
+    if (this.detectorSaturation < peakflux) {
+      // the dit is too long
+      this.dit *= this.detectorSaturation / peakflux;
+
+      logger.severe("DIT too long. Adjusting it to (possibly impossible) : " + dit + " s");
+
+      nbFrameToSaturation = 1;
+    } else {
+      nbFrameToSaturation = (int) Math.round(this.detectorSaturation / peakflux);
+    }
+
+    if (this.fringeTrackerPresent && (this.fringeTrackerMag <= this.fringeTrackerLimit) && (nbFrameToSaturation > 1)) {
+      // FT is asked, can work, and is useful (need to integrate longer)
+      this.dit = Math.min(this.dit * nbFrameToSaturation, this.totalObsTime);
+      this.dit = Math.min(this.dit, this.fringeTrackerMaxIntTime);
+
+      logger.severe("Observation can take advantage of FT. Adjusting DIT to : " + dit + " s");
+    }
+
+    nbTotalPhot = nbTotalPhotPerS * this.dit;
+
+    logger.severe("nbFrameToSaturation        = " + nbFrameToSaturation);
+    logger.severe("nbTotalPhot                = " + nbTotalPhot);
+
+    this.frameRate = 1d / this.dit;
+
+    // give back the two useful values for the noise estimate :
+
+    // number of photons in interferometric channel :
+    this.nbPhotPerPixelInI = nbTotalPhot * this.fracFluxInInterferometry;
+    // number of photons in photometric channel :
+    this.nbPhotPerPixelInP = nbTotalPhot * (1 - this.fracFluxInInterferometry) / this.nbTel;
+
+    logger.severe("nbPhotPerPixelInI          = " + nbPhotPerPixelInI);
+    logger.severe("nbPhotPerPixelInP          = " + nbPhotPerPixelInP);
+  }
+
+  /**
+   * Compute error and noise on complex visibility
+   * @param visData complex visibility (0 = Re, 1 = Im)
+   * @param visErr complex visibility Error (0 = Re, 1 = Im)
+   */
+  public void computeVnoise(final float[] visData, final float[] visErr) {
+    // TODO :
+
+    /*
+    subroutine do_v_noise(v1,v2,errv)
+    real, intent(inout) :: v1,v2
+    real, intent(out) :: errv
+    real t,r,b;
+    real, external :: rangau
+    include 'gbl_pi.inc'
+    !save instrumentalVisibilityBias
+    b=instrumentalVisibilityBias
+    t=v1**2+v2**2
+    ! use no instrumentalVisibilityBias
+    instrumentalVisibilityBias=0.0
+    call do_v2_noise(t,errv)
+    !reset instrumentalVisibilityBias
+    instrumentalVisibilityBias=b
+    ! if randomizeOutput, t returned is randomized. don't want.
+    t=sqrt(v1**2+v2**2)
+    errv= errv/(2*t)
+    ! convert instrumental phase bias as an error too. Use it as a limit.
+    r=t*(instrumentalPhaseBias*pis/180)
+    errv=max(errv,r)
+    if (randomizeOutput) then
+    v1=v1+rangau(errv/2)
+    v2=v2+rangau(errv/2)
+    endif
+    end subroutine do_v_noise
+     */
+  }
+
+  /**
+   * Compute error on square visibility
+   * @param vis2 square visibility
+   * @return square visiblity error
+   */
+  public double computeV2noise(final double vis2) {
+    return computeV2noise(vis2, false);
+  }
+
+  /**
+   * Compute error on square visibility
+   * @param v square visibility
+   * @param useBias use instrumentalVisibilityBias
+   * @return square visiblity error
+   */
+  private double computeV2noise(final double v, final boolean useBias) {
+
+    // include instrumental visib
+    double visib = v * this.vinst;
+
+    // squared correlated flux
+    double fcorrelsq = Math.pow(this.nbPhotPerPixelInI * visib / this.nbTel, 2d);
+
+    final double sfcorrelsq = 2d * Math.pow(this.nbPhotPerPixelInI, 3d) * Math.pow(visib / this.nbTel, 2d)
+            + 4d * Math.pow(this.nbPhotPerPixelInI * visib / this.nbTel, 2d) + Math.pow(this.nbPhotPerPixelInI, 2d) + this.nbPhotPerPixelInI
+            + Math.pow(this.nbPixInterf, 2d) * Math.pow(this.ron, 4d) + 3d * this.nbPixInterf * Math.pow(this.ron, 4d)
+            + 2d * this.nbPixInterf * this.nbPhotPerPixelInI * Math.pow(this.ron, 2d)
+            + 2d * this.nbPixInterf * Math.pow(this.ron * this.nbPhotPerPixelInI * visib / this.nbTel, 2d);
+
+    // SNR on square correlated flux
+    //final double snrfcsq = fcorrelsq / Math.sqrt(sfcorrelsq);
+
+    // photometric flux
+    final double fphot = this.nbPhotPerPixelInP;
+    // noise on photometric flux
+    final double sfphot = Math.sqrt(this.nbPhotPerPixelInP + this.nbPixPhoto * Math.pow(ron, 2d));
+    // Uncertainty on square visibility
+    // protect zero divide
+    fcorrelsq = Math.max(fcorrelsq, 1e-3d);
+
+    double svisib;
+    if (this.fracFluxInInterferometry >= 1.0) {
+      // no photometry...
+      svisib = Math.pow(visib, 2d) * Math.sqrt(sfcorrelsq / Math.pow(fcorrelsq, 2d));      // per frame
+    } else {
+      svisib = Math.pow(visib, 2d) * Math.sqrt(sfcorrelsq / Math.pow(fcorrelsq, 2d) + 2d * Math.pow(sfphot / fphot, 2d));      // per frame
+    }
+    // repeat OBS measurements to reach totalObsTime minutes
+    svisib /= Math.sqrt(this.totalObsTime * this.frameRate);
+    // correct for instrumental visibility
+    //visib /= this.vinst;
+
+    svisib /= Math.pow(this.vinst, 2d);
+
+    if (useBias) {
+      return Math.max(svisib, this.instrumentalVisibilityBias * 0.01);
+    } else {
+      return svisib;
+    }
   }
 
   /**
@@ -469,5 +648,14 @@ public final class NoiseService {
     public double getStrehlMax() {
       return strehlMax;
     }
+  }
+
+  /**
+   * Return a random value from a Normal (a.k.a. Gaussian) distribution with the given standard deviation
+   * @param sigma standard deviation
+   * @return random value
+   */
+  public final double randomGauss(final double sigma) {
+    return sigma * random.nextGaussian();
   }
 }

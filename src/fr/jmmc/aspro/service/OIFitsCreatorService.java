@@ -50,6 +50,10 @@ public final class OIFitsCreatorService {
   /** enable the OIFits validation */
   private final static boolean DO_VALIDATE = false;
 
+  /** TODO remove : temporary error until correct errors are ready */
+  private final static double ERR_RATE = 1e-2d;
+  private final static double ERR_RATE_DEG = Math.toDegrees(1e-2d* Math.PI);
+
   /* members */
   /* input */
   /** observation settings */
@@ -100,6 +104,10 @@ public final class OIFitsCreatorService {
   private Map<Beam, Short> beamMapping = null;
   /** baseline mapping */
   private Map<BaseLine, short[]> baseLineMapping = null;
+  /** integration time (s) */
+  private double integrationTime = 300d;
+  /** noise service */
+  private final NoiseService noiseService;
 
   /**
    * Protected constructor
@@ -139,6 +147,13 @@ public final class OIFitsCreatorService {
     this.targetUVObservability = targetUVObservability;
     this.precRA = precRA;
     this.sc = sc;
+
+    if (observation.getInstrumentConfiguration().getAcquisitionTime() != null) {
+      this.integrationTime = observation.getInstrumentConfiguration().getAcquisitionTime().doubleValue();
+    }
+
+    // Prepare the noise service :
+    this.noiseService = new NoiseService(this.observation, target);
 
     // create a new OIFits structure :
     this.oiFitsFile = new OIFitsFile();
@@ -185,11 +200,8 @@ public final class OIFitsCreatorService {
     // OI_VIS2 :
     this.createOIVis2();
 
-    // OI_VIS2 :
-    if (true) {
-      // Work in progress :
-      this.createOIT3();
-    }
+    // OI_T3 :
+    this.createOIT3();
 
     // fast interrupt :
     if (Thread.currentThread().isInterrupted()) {
@@ -374,16 +386,16 @@ public final class OIFitsCreatorService {
     final short[] targetIds = vis.getTargetId();
     final double[] times = vis.getTime();
     final double[] mjds = vis.getMjd();
-    // skip int_time (unknown)
+    final double[] intTimes = vis.getIntTime();
 
     final float[][][] visData = vis.getVisData();
-    // skip visErr (unknown)
+    final float[][][] visErr = vis.getVisErr();
 
     final double[][] visAmp = vis.getVisAmp();
-    // skip visAmpErr (unknown)
+    final double[][] visAmpErr = vis.getVisAmpErr();
 
     final double[][] visPhi = vis.getVisPhi();
-    // skip visPhiErr (unknown)
+    final double[][] visPhiErr = vis.getVisPhiErr();
 
     final double[] uCoords = vis.getUCoord();
     final double[] vCoords = vis.getVCoord();
@@ -421,6 +433,9 @@ public final class OIFitsCreatorService {
         // modified julian day :
         mjds[k] = AstroSkyCalc.mjd(jd);
 
+        // integration time (s) :
+        intTimes[k] = this.integrationTime;
+
         // UV coords (m) :
         u = uvBL.getU()[i];
         v = uvBL.getV()[i];
@@ -451,11 +466,20 @@ public final class OIFitsCreatorService {
             visData[k][l][0] = (float) visComplex[l].getReal();
             visData[k][l][1] = (float) visComplex[l].getImaginary();
 
+            visErr[k][l][0] = (float) ERR_RATE;
+            visErr[k][l][1] = (float) ERR_RATE;
+
+            // TODO : use amdlibFakeAmberDiffVis ??? (compute visAmp/VisPhi with errors)
+
             // amplitude (not normalized) :
             visAmp[k][l] = visComplex[l].abs();
 
             // phase [-PI;PI] in degrees :
             visPhi[k][l] = Math.toDegrees(visComplex[l].getArgument());
+
+            // errors :
+            visAmpErr[k][l] = ERR_RATE;
+            visPhiErr[k][l] = ERR_RATE_DEG;
           }
         }
 
@@ -490,13 +514,23 @@ public final class OIFitsCreatorService {
 
     final double[][] visAmp = vis.getVisAmp();
     final double[][] vis2Data = vis2.getVis2Data();
-    // skip vis2Err (unknown)
+    final double[][] vis2Err = vis2.getVis2Err();
 
+    double err;
     for (int k = 0, l = 0; k < nRows; k++) {
       // Iterate on wave lengths :
       for (l = 0; l < this.nWaveLengths; l++) {
         // square visibility (not normalized) :
         vis2Data[k][l] = visAmp[k][l] * visAmp[k][l];
+
+        // errors :
+//      err = ERR_RATE * vis2Data[k][l];
+        err = noiseService.computeV2noise(vis2Data[k][l]);
+        vis2Err[k][l] = err;
+
+        if (err != 0d) {
+          vis2Data[k][l] += noiseService.randomGauss(err/2d);
+        }
       }
     }
 
@@ -546,7 +580,6 @@ public final class OIFitsCreatorService {
     // OI_VIS Columns :
     final double[] visTimes = vis.getTime();
     final double[] visMjds = vis.getMjd();
-    // skip int_time (unknown)
 
     final float[][][] visData = vis.getVisData();
     // skip visErr (unknown)
@@ -560,13 +593,13 @@ public final class OIFitsCreatorService {
     final short[] t3TargetIds = t3.getTargetId();
     final double[] t3Times = t3.getTime();
     final double[] t3Mjds = t3.getMjd();
-    // skip int_time (unknown)
+    final double[] intTimes = t3.getIntTime();
 
     final double[][] t3Amp = t3.getT3Amp();
-    // skip t3AmpErr (unknown)
+    final double[][] t3AmpErr = t3.getT3AmpErr();
 
     final double[][] t3Phi = t3.getT3Phi();
-    // skip t3PhiErr (unknown)
+    final double[][] t3PhiErr = t3.getT3PhiErr();
 
     final double[] t3U1Coords = t3.getU1Coord();
     final double[] t3V1Coords = t3.getV1Coord();
@@ -576,7 +609,6 @@ public final class OIFitsCreatorService {
 
     final short[][] t3StaIndexes = t3.getStaIndex();
     // skip flag (default to false means that values are considered as valid)
-
 
     // The following code use some hypothesis on the OI_VIS table as defined in createOIVis()
 
@@ -611,6 +643,9 @@ public final class OIFitsCreatorService {
 
         // modified julian day :
         t3Mjds[k] = visMjds[vp];
+
+        // integration time (s) :
+        intTimes[k] = this.integrationTime;
 
         // Use relative positions to get the 3 complex vectors (AB, BC, AC)
         relPos = triplet.getRelativePosition();
@@ -675,6 +710,10 @@ public final class OIFitsCreatorService {
 
           // phase [-PI;PI] in degrees :
           t3Phi[k][l] = Math.toDegrees(t3Data.getArgument());
+
+          // errors :
+          t3AmpErr[k][l] = ERR_RATE;
+          t3PhiErr[k][l] = ERR_RATE_DEG;
         }
 
         // UV 1 coords (m) :
