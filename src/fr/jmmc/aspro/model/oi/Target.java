@@ -752,6 +752,32 @@ public class Target
   }
 
   /**
+   * Return the flux in the given band
+   * @param band spectral band
+   * @return flux in the given band or null if undefined
+   */
+  public Double getFlux(final SpectralBand band) {
+    if (band != null) {
+      switch(band) {
+        case V:
+          return getFLUXV();
+        case I:
+          return getFLUXI();
+        case J:
+          return getFLUXJ();
+        case H:
+          return getFLUXH();
+        case K:
+          return getFLUXK();
+        case N:
+          return getFLUXN();
+        default:
+      }
+    }
+    return null;
+  }
+
+  /**
    * Return a deep "copy" of this instance
    * @return deep "copy" of this instance
    */
