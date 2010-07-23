@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: NoiseService.java,v 1.2 2010-07-23 10:37:44 bourgesl Exp $"
+ * "@(#) $Id: NoiseService.java,v 1.3 2010-07-23 12:29:16 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2010/07/23 10:37:44  bourgesl
+ * added parameter initialisation
+ *
  * Revision 1.1  2010/07/22 15:46:05  bourgesl
  * Band mapping done
  *
@@ -86,6 +89,8 @@ public final class NoiseService {
   private int nbPixPhoto = 4;
   /** fraction of flux going into interferometric channel */
   private double fracFluxInInterferometry = 0.9d;
+  /** instrument band */
+  private SpectralBand insBand;
 
   /* instrument mode parameters */
   /** Observation central wavelength (microns) */
@@ -136,6 +141,7 @@ public final class NoiseService {
     prepareTarget(target);
 
     // init other parameters :
+    initParameters();
   }
 
   /**
@@ -253,7 +259,16 @@ public final class NoiseService {
   private void prepareTarget(final Target target) {
     Double flux;
 
-    this.objectMag = 0d;
+    final Band band = Band.findBand(this.lambda);
+
+    logger.severe("band                    = " + band);
+
+    this.insBand = Band.findBand(band);
+
+    logger.severe("insBand                    = " + insBand);
+
+    flux = target.getFlux(this.insBand);
+    this.objectMag = (flux != null) ? flux.doubleValue() : 0d;
     logger.severe("objectMag                  = " + objectMag);
 
     if (fringeTrackerPresent) {
@@ -268,35 +283,127 @@ public final class NoiseService {
   }
 
   /**
+   * Initialise other parameters
+   */
+  private void initParameters() {
+  }
+
+  /**
    * Photometry band related information
    */
   public enum Band {
 
     /** U (ultra violet) */
-    U("u", 0.334d, 0.066d, -1.4d, 0.3d),
+    U("U", 0.334d, 0.066d, -1.4d, 0.3d),
     /** B (Visible) */
-    B("b", 0.461875d, 0.08175d, -1.2d, 0.48d),
+    B("B", 0.461875d, 0.08175d, -1.2d, 0.48d),
     /** V (Visible) */
-    V("v", 0.556d, 0.1105d, -1.44d, 0.5d),
+    V("V", 0.556d, 0.1105d, -1.44d, 0.5d),
     /** R (Visible) */
-    R("r", 0.6625d, 0.10651d, -1.65d, 0.65d),
+    R("R", 0.6625d, 0.10651d, -1.65d, 0.65d),
     /** I (Near Infrared) */
-    I("i", 0.869625d, 0.31176, -1.94d, 0.75d),
+    I("I", 0.869625d, 0.31176, -1.94d, 0.75d),
     /** J (Near Infrared) */
-    J("j", 1.2365d, 0.426d, -2.5d, 0.77d),
+    J("J", 1.2365d, 0.426d, -2.5d, 0.77d),
     /** H (Near Infrared) */
-    H("h", 1.679625d, 0.46425d, -2.94d, 0.84d),
+    H("H", 1.679625d, 0.46425d, -2.94d, 0.84d),
     /** K (Near Infrared) */
-    K("k", 2.365625d, 0.912d, -3.4d, 0.93d),
+    K("K", 2.365625d, 0.912d, -3.4d, 0.93d),
     /** L (Near Infrared) */
-    L("l", 3.45875d, 1.2785, -4.15d, 0.972d),
+    L("L", 3.45875d, 1.2785, -4.15d, 0.972d),
     /** M (Mid Infrared) */
-    M("m", 6.4035d, 4.615d, -4.69d, 0.985d),
+    M("M", 6.4035d, 4.615d, -4.69d, 0.985d),
     /** N (Mid Infrared) */
-    N("n", 11.63d, 5.842d, -5.91d, 0.996d),
+    N("N", 11.63d, 5.842d, -5.91d, 0.996d),
     /** Q (Mid Infrared) */
-    Q("q", 16.575d, 4.05, -7.17d, 0.999d);
-    /** single char band name (lower case) */
+    Q("Q", 16.575d, 4.05, -7.17d, 0.999d);
+
+    /**
+     * Find the band corresponding to the given wavelength
+     * @param waveLength wave length in microns
+     * @return corresponding band
+     * @throws IllegalArgumentException if no band found
+     */
+    public static Band findBand(final double waveLength) throws IllegalArgumentException {
+      for (Band b : values()) {
+        if (Math.abs(waveLength - b.getLambda()) <= b.getBandWidth() / 2d) {
+          return b;
+        }
+      }
+      throw new IllegalArgumentException("no band found for the wave length = " + waveLength);
+    }
+
+    /**
+     * Find the SpectralBand corresponding to the given Band
+     * @param band band to use
+     * @return SpectralBand or null
+     */
+    public static SpectralBand findBand(final Band band) {
+      switch (band) {
+        case V:
+          return SpectralBand.V;
+        case R:
+          return SpectralBand.R;
+        case I:
+          return SpectralBand.I;
+        case J:
+          return SpectralBand.J;
+        case H:
+          return SpectralBand.H;
+        case K:
+          return SpectralBand.K;
+        case N:
+          return SpectralBand.N;
+        default:
+          return null;
+      }
+    }
+
+    /**
+     * Compute the strehl ratio. see le louarn et al (1998, mnras 295, 756), and amb-igr-011 p.5
+     * @param magnitude object magnitude
+     * @param waveLength wave length in microns
+     * @param diameter telescope diameter in meters
+     * @param seeing seeing in arc sec
+     * @param nbOfActuators
+     * @return strehl ratio
+     */
+    public static double strehl(final double magnitude, final double waveLength,
+                                final double diameter, final double seeing, final int nbOfActuators) {
+
+      logger.severe("magnitude     = " + magnitude);
+      logger.severe("waveLength    = " + waveLength);
+      logger.severe("diameter      = " + diameter);
+      logger.severe("seeing        = " + seeing);
+      logger.severe("nbOfActuators = " + nbOfActuators);
+
+      final double lambdaV = 0.55d;
+
+      final Band band = findBand(waveLength);
+
+      final double r0 = 0.251d * lambdaV / seeing * Math.pow(waveLength / lambdaV, 6d / 5d);
+
+      final double doverr0 = diameter / r0;
+
+      logger.severe("r0            = " + r0);
+      logger.severe("doverr0       = " + doverr0);
+
+      final double sigmaphi2_alias = 0.87d * Math.pow(nbOfActuators, -5d / 6d) * Math.pow(doverr0, 5d / 3d);
+
+      // ??? (doverr0 * doverr0)**2 = doverr0**4 ou bien erreur ??
+      final double sigmaphi2_phot = 1.59e-8d * Math.pow(doverr0 * doverr0, 4d) * Math.pow(waveLength / lambdaV, -2d)
+              * Math.pow(nbOfActuators, Math.pow(10d, 0.4d * magnitude));
+      final double sigmaphi2_fixe = -Math.log(band.getStrehlMax());
+      final double sigmaphi2 = sigmaphi2_alias + sigmaphi2_phot + sigmaphi2_fixe;
+      final double strehl = Math.exp(-sigmaphi2) + (1 - Math.exp(-sigmaphi2)) / (1 + doverr0 * doverr0);
+
+      logger.severe("strehl        = " + strehl);
+
+      return strehl;
+    }
+
+    /* members */
+    /** single char band name (upper case) */
     private final String name;
     /** central wave length in microns */
     private final double lambda;

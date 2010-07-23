@@ -761,6 +761,9 @@ public class Target
       switch(band) {
         case V:
           return getFLUXV();
+        case R:
+          // missing flux R : return V
+          return getFLUXV();
         case I:
           return getFLUXI();
         case J:
