@@ -26,7 +26,7 @@
     <!-- For now we have only one shared instance of UT because all UTs are considered equivalent -->
     <telescope>
       <name>UT</name>
-      <diameter>8.2</diameter>
+      <diameter>8.0</diameter>
 
       <adaptiveOptics>
         <band>V</band>
