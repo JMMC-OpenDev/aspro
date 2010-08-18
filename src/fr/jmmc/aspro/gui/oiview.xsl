@@ -28,44 +28,27 @@
 
 
   <xsl:template match="oifits">
-    <h2>
-      File :
-    </h2>
-    <xsl:value-of select="filename"/>
+    <xsl:if test="filename">
+      <h2>
+        File :
+      </h2>
+      <xsl:value-of select="filename"/>
+    </xsl:if>
 
-<!--
-    <h2>
-      Index :
-    </h2>
-    <p>
-      <xsl:apply-templates select="OI_TARGET|arrnames/OI_ARRAY|insnames/OI_WAVELENGTH|OI_VIS|OI_VIS2|OI_T3" mode="index"/>
-    </p>
--->
-    <xsl:apply-templates select="OI_TARGET|arrnames/OI_ARRAY|insnames/OI_WAVELENGTH|OI_VIS|OI_VIS2|OI_T3"/>
+    <xsl:apply-templates />
 
   </xsl:template>
-
-
-
-
-  <xsl:template match="OI_ARRAY|OI_WAVELENGTH|OI_TARGET|OI_VIS|OI_VIS2|OI_T3" mode="index">
-    <a href="#table{position()}"><xsl:value-of select="position()"/><xsl:value-of select="' '"/><xsl:value-of select="name()"/></a>
-    <br/>
-  </xsl:template>
-
 
 
 
 
   <xsl:template match="OI_ARRAY|OI_WAVELENGTH|OI_TARGET|OI_VIS|OI_VIS2|OI_T3">
-    <a name="table{position()}"></a>
+
     <h2>
       <xsl:value-of select="name()"/>
     </h2>
 
     <xsl:apply-templates select="keywords"/>
-
-    <h3>Columns</h3>
 
     <xsl:apply-templates select="table"/>
 
@@ -75,6 +58,7 @@
 
 
   <xsl:template match="keywords">
+
     <h3>Keywords</h3>
     
     <table border="1">
@@ -97,34 +81,20 @@
         </tr>
       </xsl:for-each>
     </table>
+
   </xsl:template>
 
 
 
 
   <xsl:template match="table">
+
+    <h3>Columns</h3>
+
     <table border="1">
       <xsl:copy-of select="tr"/>
     </table>
-  </xsl:template>
-<!--
-  <xsl:template match="tr">
-    <tr>
-      <xsl:apply-templates select="child::*"/>
-    </tr>
+
   </xsl:template>
 
-
-  <xsl:template match="th">
-    <th>
-      <xsl:value-of select="text()"/>
-    </th>
-  </xsl:template>
-
-  <xsl:template match="td">
-    <td>
-      <xsl:value-of select="text()"/>
-    </td>
-  </xsl:template>
--->
 </xsl:stylesheet>
