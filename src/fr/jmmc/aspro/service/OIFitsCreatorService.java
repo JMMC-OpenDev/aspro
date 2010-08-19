@@ -50,9 +50,9 @@ public final class OIFitsCreatorService {
   /** enable the OIFits validation */
   private final static boolean DO_VALIDATE = false;
 
-  /** TODO remove : temporary error until correct errors are ready */
+  /* TODO remove : temporary error until correct errors are ready */
   private final static double ERR_RATE = 1e-2d;
-  private final static double ERR_RATE_DEG = Math.toDegrees(1e-2d* Math.PI);
+  private final static double ERR_RATE_DEG = Math.toDegrees(1e-2d * Math.PI);
 
   /* members */
   /* input */
@@ -411,6 +411,7 @@ public final class OIFitsCreatorService {
     final double[] vfreq = new double[this.nWaveLengths];
     Complex[] visComplex;
 
+    float err;
     // Iterate on HA points :
     for (int i = 0, j = 0, k = 0, l = 0; i < this.nHAPoints; i++) {
 
@@ -466,20 +467,30 @@ public final class OIFitsCreatorService {
             visData[k][l][0] = (float) visComplex[l].getReal();
             visData[k][l][1] = (float) visComplex[l].getImaginary();
 
-            visErr[k][l][0] = (float) ERR_RATE;
-            visErr[k][l][1] = (float) ERR_RATE;
+            // errors :
+            err = this.noiseService.computeVnoise(visData[k][l]);
+
+            // for now, same error on both re and im parts :
+            visErr[k][l][0] = err;
+            visErr[k][l][1] = err;
+
+            visData[k][l][0] += (float) this.noiseService.randomGauss(err / 2d);
+            visData[k][l][1] += (float) this.noiseService.randomGauss(err / 2d);
 
             // TODO : use amdlibFakeAmberDiffVis ??? (compute visAmp/VisPhi with errors)
 
             // amplitude (not normalized) :
-            visAmp[k][l] = visComplex[l].abs();
+//            visAmp[k][l] = visComplex[l].abs();
+            visAmp[k][l] = Math.sqrt(Math.pow(visData[k][l][0], 2d) + Math.pow(visData[k][l][1], 2d));
 
             // phase [-PI;PI] in degrees :
-            visPhi[k][l] = Math.toDegrees(visComplex[l].getArgument());
+            // Math.atan2(getImaginary(), getReal());
+//            visPhi[k][l] = Math.toDegrees(visComplex[l].getArgument());
+            visPhi[k][l] = Math.toDegrees(Math.atan2(visData[k][l][1], visData[k][l][0]));
 
-            // errors :
-            visAmpErr[k][l] = ERR_RATE;
-            visPhiErr[k][l] = ERR_RATE_DEG;
+            // laurent's estimations on errors :
+            visAmpErr[k][l] = Math.sqrt(2) * err;
+            visPhiErr[k][l] = Math.toDegrees(err);
           }
         }
 
@@ -524,13 +535,10 @@ public final class OIFitsCreatorService {
         vis2Data[k][l] = visAmp[k][l] * visAmp[k][l];
 
         // errors :
-//      err = ERR_RATE * vis2Data[k][l];
-        err = noiseService.computeV2noise(vis2Data[k][l]);
-        vis2Err[k][l] = err;
+        err = this.noiseService.computeV2noise(vis2Data[k][l]);
 
-        if (err != 0d) {
-          vis2Data[k][l] += noiseService.randomGauss(err/2d);
-        }
+        vis2Err[k][l] = err;
+        vis2Data[k][l] += this.noiseService.randomGauss(err / 2d);
       }
     }
 

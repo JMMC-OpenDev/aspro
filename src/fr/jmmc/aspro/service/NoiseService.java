@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: NoiseService.java,v 1.4 2010-07-23 15:22:36 bourgesl Exp $"
+ * "@(#) $Id: NoiseService.java,v 1.5 2010-08-19 10:53:23 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2010/07/23 15:22:36  bourgesl
+ * first try to compute noise and errors on VIS2 like Aspro 1
+ *
  * Revision 1.3  2010/07/23 12:29:16  bourgesl
  * set object parameters (mag in bands)
  *
@@ -34,6 +37,7 @@ import fr.jmmc.aspro.model.oi.Telescope;
 import fr.jmmc.aspro.model.util.AtmosphereQualityUtils;
 import java.util.List;
 import java.util.Random;
+import java.util.logging.Level;
 
 /**
  * This class performs the noise modelling of visibility data (error and noise) 
@@ -52,7 +56,7 @@ public final class NoiseService {
           className_);
   /** Planck's constant in standard units (6.6262e-34) */
   public final static double H_PLANCK = 6.62606896e-34d;
-  /** Speed of light (6.6262e-34) */
+  /** Speed of light (2.99792458e8) */
   public final static double C_LIGHT = 2.99792458e8d;
 
   /* members */
@@ -179,11 +183,13 @@ public final class NoiseService {
       this.seeing = AtmosphereQualityUtils.getSeeing(atmQual);
     }
 
-    logger.severe("nbTel                      = " + nbTel);
-    logger.severe("telDiam                    = " + telDiam);
-    logger.severe("aoBand                     = " + aoBand);
-    logger.severe("nbOfActuators              = " + nbOfActuators);
-    logger.severe("seeing                     = " + seeing);
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("nbTel                      = " + nbTel);
+      logger.fine("telDiam                    = " + telDiam);
+      logger.fine("aoBand                     = " + aoBand);
+      logger.fine("nbOfActuators              = " + nbOfActuators);
+      logger.fine("seeing                     = " + seeing);
+    }
   }
 
   /**
@@ -214,19 +220,21 @@ public final class NoiseService {
     this.lambda = insMode.getWaveLength();
     this.spectralResolution = insMode.getResolution();
 
-    logger.severe("totalObsTime               = " + totalObsTime);
-    logger.severe("transmission               = " + transmission);
-    logger.severe("dit                        = " + dit);
-    logger.severe("ron                        = " + ron);
-    logger.severe("detectorSaturation         = " + detectorSaturation);
-    logger.severe("instrumentalVisibility     = " + instrumentalVisibility);
-    logger.severe("instrumentalVisibilityBias = " + instrumentalVisibilityBias);
-    logger.severe("instrumentalPhaseBias      = " + instrumentalPhaseBias);
-    logger.severe("nbPixInterf                = " + nbPixInterf);
-    logger.severe("nbPixPhoto                 = " + nbPixPhoto);
-    logger.severe("fracFluxInInterferometry   = " + fracFluxInInterferometry);
-    logger.severe("lambda                     = " + lambda);
-    logger.severe("spectralResolution         = " + spectralResolution);
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("totalObsTime               = " + totalObsTime);
+      logger.fine("transmission               = " + transmission);
+      logger.fine("dit                        = " + dit);
+      logger.fine("ron                        = " + ron);
+      logger.fine("detectorSaturation         = " + detectorSaturation);
+      logger.fine("instrumentalVisibility     = " + instrumentalVisibility);
+      logger.fine("instrumentalVisibilityBias = " + instrumentalVisibilityBias);
+      logger.fine("instrumentalPhaseBias      = " + instrumentalPhaseBias);
+      logger.fine("nbPixInterf                = " + nbPixInterf);
+      logger.fine("nbPixPhoto                 = " + nbPixPhoto);
+      logger.fine("fracFluxInInterferometry   = " + fracFluxInInterferometry);
+      logger.fine("lambda                     = " + lambda);
+      logger.fine("spectralResolution         = " + spectralResolution);
+    }
   }
 
   /**
@@ -250,12 +258,16 @@ public final class NoiseService {
       }
     }
 
-    logger.severe("fringeTrackerPresent       = " + fringeTrackerPresent);
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("fringeTrackerPresent       = " + fringeTrackerPresent);
+    }
     if (fringeTrackerPresent) {
-      logger.severe("fringeTrackerInstrumentalVisibility = " + fringeTrackerInstrumentalVisibility);
-      logger.severe("fringeTrackerLimit         = " + fringeTrackerLimit);
-      logger.severe("fringeTrackerMaxIntTime    = " + fringeTrackerMaxIntTime);
-      logger.severe("ftBand                     = " + ftBand);
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("fringeTrackerInstrumentalVisibility = " + fringeTrackerInstrumentalVisibility);
+        logger.fine("fringeTrackerLimit         = " + fringeTrackerLimit);
+        logger.fine("fringeTrackerMaxIntTime    = " + fringeTrackerMaxIntTime);
+        logger.fine("ftBand                     = " + ftBand);
+      }
     }
   }
 
@@ -268,25 +280,32 @@ public final class NoiseService {
 
     final Band band = Band.findBand(this.lambda);
 
-    logger.severe("band                       = " + band);
-
     this.insBand = Band.findBand(band);
 
-    logger.severe("insBand                    = " + insBand);
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("band                       = " + band);
+      logger.fine("insBand                    = " + insBand);
+    }
 
     flux = target.getFlux(this.insBand);
     this.objectMag = (flux != null) ? flux.doubleValue() : 0d;
-    logger.severe("objectMag                  = " + objectMag);
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("objectMag                  = " + objectMag);
+    }
 
     if (fringeTrackerPresent) {
       flux = target.getFlux(this.ftBand);
       this.fringeTrackerMag = (flux != null) ? flux.doubleValue() : 0d;
-      logger.severe("fringeTrackerMag           = " + fringeTrackerMag);
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("fringeTrackerMag           = " + fringeTrackerMag);
+      }
     }
 
     flux = target.getFlux(this.aoBand);
     this.adaptiveOpticsMag = (flux != null) ? flux.doubleValue() : 0d;
-    logger.severe("adaptiveOpticsMag          = " + adaptiveOpticsMag);
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("adaptiveOpticsMag          = " + adaptiveOpticsMag);
+    }
   }
 
   /**
@@ -325,18 +344,22 @@ public final class NoiseService {
     // fraction of total interferometric flux in peak pixel :
     final double peakflux = this.fracFluxInInterferometry * nbTotalPhot / this.nbPixInterf;
 
-    logger.severe("adaptiveOpticsMag          = " + adaptiveOpticsMag);
-    logger.severe("strehl ratio               = " + sr);
-    logger.severe("dlam                       = " + dlam);
-    logger.severe("nbTotalPhot                = " + nbTotalPhot);
-    logger.severe("peakflux                   = " + peakflux);
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("adaptiveOpticsMag          = " + adaptiveOpticsMag);
+      logger.fine("strehl ratio               = " + sr);
+      logger.fine("dlam                       = " + dlam);
+      logger.fine("nbTotalPhot                = " + nbTotalPhot);
+      logger.fine("peakflux                   = " + peakflux);
+    }
 
     int nbFrameToSaturation;
     if (this.detectorSaturation < peakflux) {
       // the dit is too long
       this.dit *= this.detectorSaturation / peakflux;
 
-      logger.severe("DIT too long. Adjusting it to (possibly impossible) : " + dit + " s");
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("DIT too long. Adjusting it to (possibly impossible) : " + dit + " s");
+      }
 
       nbFrameToSaturation = 1;
     } else {
@@ -348,13 +371,17 @@ public final class NoiseService {
       this.dit = Math.min(this.dit * nbFrameToSaturation, this.totalObsTime);
       this.dit = Math.min(this.dit, this.fringeTrackerMaxIntTime);
 
-      logger.severe("Observation can take advantage of FT. Adjusting DIT to : " + dit + " s");
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("Observation can take advantage of FT. Adjusting DIT to : " + dit + " s");
+      }
     }
 
     nbTotalPhot = nbTotalPhotPerS * this.dit;
 
-    logger.severe("nbFrameToSaturation        = " + nbFrameToSaturation);
-    logger.severe("nbTotalPhot                = " + nbTotalPhot);
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("nbFrameToSaturation        = " + nbFrameToSaturation);
+      logger.fine("nbTotalPhot                = " + nbTotalPhot);
+    }
 
     this.frameRate = 1d / this.dit;
 
@@ -365,45 +392,35 @@ public final class NoiseService {
     // number of photons in photometric channel :
     this.nbPhotPerPixelInP = nbTotalPhot * (1 - this.fracFluxInInterferometry) / this.nbTel;
 
-    logger.severe("nbPhotPerPixelInI          = " + nbPhotPerPixelInI);
-    logger.severe("nbPhotPerPixelInP          = " + nbPhotPerPixelInP);
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("frameRate                  = " + frameRate);
+      logger.fine("nbPhotPerPixelInI          = " + nbPhotPerPixelInI);
+      logger.fine("nbPhotPerPixelInP          = " + nbPhotPerPixelInP);
+    }
   }
 
   /**
-   * Compute error and noise on complex visibility
+   * Compute error on complex visibility (same error on both real and imaginary part, derived from v2 noise)
    * @param visData complex visibility (0 = Re, 1 = Im)
-   * @param visErr complex visibility Error (0 = Re, 1 = Im)
+   * @return visibility error
    */
-  public void computeVnoise(final float[] visData, final float[] visErr) {
-    // TODO :
+  public float computeVnoise(final float[] visData) {
 
-    /*
-    subroutine do_v_noise(v1,v2,errv)
-    real, intent(inout) :: v1,v2
-    real, intent(out) :: errv
-    real t,r,b;
-    real, external :: rangau
-    include 'gbl_pi.inc'
-    !save instrumentalVisibilityBias
-    b=instrumentalVisibilityBias
-    t=v1**2+v2**2
-    ! use no instrumentalVisibilityBias
-    instrumentalVisibilityBias=0.0
-    call do_v2_noise(t,errv)
-    !reset instrumentalVisibilityBias
-    instrumentalVisibilityBias=b
-    ! if randomizeOutput, t returned is randomized. don't want.
-    t=sqrt(v1**2+v2**2)
-    errv= errv/(2*t)
-    ! convert instrumental phase bias as an error too. Use it as a limit.
-    r=t*(instrumentalPhaseBias*pis/180)
-    errv=max(errv,r)
-    if (randomizeOutput) then
-    v1=v1+rangau(errv/2)
-    v2=v2+rangau(errv/2)
-    endif
-    end subroutine do_v_noise
-     */
+    final double vis2 = visData[0] * visData[0] + visData[1] * visData[1];
+
+    // compute error without using bias :
+    final double errV2 = computeV2noise(vis2, false);
+
+    final double vis = Math.sqrt(vis2);
+
+    double err = errV2 / (2 * vis);
+
+    // convert instrumental phase bias as an error too. Use it as a limit :
+    final double r = vis * Math.toRadians(this.instrumentalPhaseBias);
+
+    err = Math.max(err, r);
+
+    return (float) err;
   }
 
   /**
@@ -412,7 +429,7 @@ public final class NoiseService {
    * @return square visiblity error
    */
   public double computeV2noise(final double vis2) {
-    return computeV2noise(vis2, false);
+    return computeV2noise(vis2, true);
   }
 
   /**
@@ -449,22 +466,30 @@ public final class NoiseService {
     double svisib;
     if (this.fracFluxInInterferometry >= 1.0) {
       // no photometry...
-      svisib = Math.pow(visib, 2d) * Math.sqrt(sfcorrelsq / Math.pow(fcorrelsq, 2d));      // per frame
+      svisib = Math.pow(visib, 2d) * Math.sqrt(sfcorrelsq / Math.pow(fcorrelsq, 2d)); // per frame
     } else {
-      svisib = Math.pow(visib, 2d) * Math.sqrt(sfcorrelsq / Math.pow(fcorrelsq, 2d) + 2d * Math.pow(sfphot / fphot, 2d));      // per frame
+      svisib = Math.pow(visib, 2d) * Math.sqrt(sfcorrelsq / Math.pow(fcorrelsq, 2d) + 2d * Math.pow(sfphot / fphot, 2d)); // per frame
     }
     // repeat OBS measurements to reach totalObsTime minutes
     svisib /= Math.sqrt(this.totalObsTime * this.frameRate);
-    // correct for instrumental visibility
-    //visib /= this.vinst;
 
+    // correct for instrumental visibility :
     svisib /= Math.pow(this.vinst, 2d);
 
     if (useBias) {
-      return Math.max(svisib, this.instrumentalVisibilityBias * 0.01);
+      return Math.max(svisib, this.instrumentalVisibilityBias * 0.01d);
     } else {
       return svisib;
     }
+  }
+
+  /**
+   * Return a random value from a Normal (a.k.a. Gaussian) distribution with the given standard deviation
+   * @param sigma standard deviation
+   * @return random value
+   */
+  public final double randomGauss(final double sigma) {
+    return sigma * random.nextGaussian();
   }
 
   /**
@@ -550,11 +575,13 @@ public final class NoiseService {
     public static double strehl(final double magnitude, final double waveLength,
                                 final double diameter, final double seeing, final int nbOfActuators) {
 
-      logger.severe("magnitude     = " + magnitude);
-      logger.severe("waveLength    = " + waveLength);
-      logger.severe("diameter      = " + diameter);
-      logger.severe("seeing        = " + seeing);
-      logger.severe("nbOfActuators = " + nbOfActuators);
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("magnitude     = " + magnitude);
+        logger.fine("waveLength    = " + waveLength);
+        logger.fine("diameter      = " + diameter);
+        logger.fine("seeing        = " + seeing);
+        logger.fine("nbOfActuators = " + nbOfActuators);
+      }
 
       final double lambdaV = 0.55d;
 
@@ -564,19 +591,23 @@ public final class NoiseService {
 
       final double doverr0 = diameter / r0;
 
-      logger.severe("r0            = " + r0);
-      logger.severe("doverr0       = " + doverr0);
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("r0            = " + r0);
+        logger.fine("doverr0       = " + doverr0);
+      }
 
-      final double sigmaphi2_alias = 0.87d * Math.pow(nbOfActuators, -5d / 6d) * Math.pow(doverr0, 5d / 3d);
+      final double sigmaphi2_alias = 0.87d * Math.pow((double) nbOfActuators, -5d / 6d) * Math.pow(doverr0, 5d / 3d);
 
       // ??? (doverr0 * doverr0)**2 = doverr0**4 ou bien erreur ??
-      final double sigmaphi2_phot = 1.59e-8d * Math.pow(doverr0 * doverr0, 4d) * Math.pow(waveLength / lambdaV, -2d)
-              * Math.pow(nbOfActuators, Math.pow(10d, 0.4d * magnitude));
+      final double sigmaphi2_phot = 1.59e-8d * Math.pow(doverr0, 4d) * Math.pow(waveLength / lambdaV, -2d)
+              * (double) nbOfActuators * Math.pow(10d, 0.4d * magnitude);
       final double sigmaphi2_fixe = -Math.log(band.getStrehlMax());
       final double sigmaphi2 = sigmaphi2_alias + sigmaphi2_phot + sigmaphi2_fixe;
       final double strehl = Math.exp(-sigmaphi2) + (1 - Math.exp(-sigmaphi2)) / (1 + doverr0 * doverr0);
 
-      logger.severe("strehl        = " + strehl);
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("strehl        = " + strehl);
+      }
 
       return strehl;
     }
@@ -648,14 +679,5 @@ public final class NoiseService {
     public double getStrehlMax() {
       return strehlMax;
     }
-  }
-
-  /**
-   * Return a random value from a Normal (a.k.a. Gaussian) distribution with the given standard deviation
-   * @param sigma standard deviation
-   * @return random value
-   */
-  public final double randomGauss(final double sigma) {
-    return sigma * random.nextGaussian();
   }
 }
