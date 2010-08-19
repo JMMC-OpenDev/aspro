@@ -14,6 +14,7 @@ import fr.jmmc.aspro.model.ObservationListener;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.util.XmlFactory;
 import fr.jmmc.oitools.model.OIFitsFile;
+import fr.jmmc.oitools.model.XmlOutputVisitor;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.logging.Level;
@@ -83,7 +84,7 @@ public final class OIFitsPanel extends javax.swing.JPanel implements Observation
     if (oiFitsFile != null) {
       final long start = System.nanoTime();
 
-      document = oiFitsFile.getXmlDesc(true, true);
+      document = XmlOutputVisitor.getXmlDesc(oiFitsFile, true, true);
 
       // use an XSLT to transform the XML document to an HTML representation :
       document = XmlFactory.transform(document, XSLT_FILE);
