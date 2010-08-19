@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: NoiseService.java,v 1.5 2010-08-19 10:53:23 bourgesl Exp $"
+ * "@(#) $Id: NoiseService.java,v 1.6 2010-08-19 15:29:13 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2010/08/19 10:53:23  bourgesl
+ * proper noise computation for VIS2 but first try for VISDATA/VISAMP/VISPHI
+ *
  * Revision 1.4  2010/07/23 15:22:36  bourgesl
  * first try to compute noise and errors on VIS2 like Aspro 1
  *
@@ -401,12 +404,13 @@ public final class NoiseService {
 
   /**
    * Compute error on complex visibility (same error on both real and imaginary part, derived from v2 noise)
-   * @param visData complex visibility (0 = Re, 1 = Im)
+   * @param re real part of the complex visibility
+   * @param im imaginary part of the complex visibility
    * @return visibility error
    */
-  public float computeVnoise(final float[] visData) {
+  public float computeVnoise(final float re, final float im) {
 
-    final double vis2 = visData[0] * visData[0] + visData[1] * visData[1];
+    final double vis2 = Math.pow(re, 2d) + Math.pow(im, 2d);
 
     // compute error without using bias :
     final double errV2 = computeV2noise(vis2, false);

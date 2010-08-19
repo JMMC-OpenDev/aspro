@@ -411,7 +411,7 @@ public final class OIFitsCreatorService {
     final double[] vfreq = new double[this.nWaveLengths];
     Complex[] visComplex;
 
-    float err;
+    float re,im,err;
     // Iterate on HA points :
     for (int i = 0, j = 0, k = 0, l = 0; i < this.nHAPoints; i++) {
 
@@ -464,32 +464,32 @@ public final class OIFitsCreatorService {
           // Iterate on wave lengths :
           for (l = 0; l < this.nWaveLengths; l++) {
             // complex data :
-            visData[k][l][0] = (float) visComplex[l].getReal();
-            visData[k][l][1] = (float) visComplex[l].getImaginary();
+            re = (float) visComplex[l].getReal();
+            im = (float) visComplex[l].getImaginary();
 
             // errors :
-            err = this.noiseService.computeVnoise(visData[k][l]);
+            err = this.noiseService.computeVnoise(re, im);
 
             // for now, same error on both re and im parts :
+            re += (float) this.noiseService.randomGauss(err / 2d);
+            im += (float) this.noiseService.randomGauss(err / 2d);
+
+            visData[k][l][0] = re;
+            visData[k][l][1] = im;
+
             visErr[k][l][0] = err;
             visErr[k][l][1] = err;
-
-            visData[k][l][0] += (float) this.noiseService.randomGauss(err / 2d);
-            visData[k][l][1] += (float) this.noiseService.randomGauss(err / 2d);
 
             // TODO : use amdlibFakeAmberDiffVis ??? (compute visAmp/VisPhi with errors)
 
             // amplitude (not normalized) :
-//            visAmp[k][l] = visComplex[l].abs();
-            visAmp[k][l] = Math.sqrt(Math.pow(visData[k][l][0], 2d) + Math.pow(visData[k][l][1], 2d));
+            visAmp[k][l] = Math.sqrt(Math.pow(re, 2d) + Math.pow(im, 2d));
 
             // phase [-PI;PI] in degrees :
-            // Math.atan2(getImaginary(), getReal());
-//            visPhi[k][l] = Math.toDegrees(visComplex[l].getArgument());
-            visPhi[k][l] = Math.toDegrees(Math.atan2(visData[k][l][1], visData[k][l][0]));
+            visPhi[k][l] = Math.toDegrees(Math.atan2(im, re));
 
-            // laurent's estimations on errors :
-            visAmpErr[k][l] = Math.sqrt(2) * err;
+            // laurent's estimations on errors (incorrect) :
+            visAmpErr[k][l] = err;
             visPhiErr[k][l] = Math.toDegrees(err);
           }
         }
