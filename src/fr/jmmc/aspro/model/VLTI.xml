@@ -8617,7 +8617,7 @@
 
       <mode>
         <name>Low_JHK</name>
-        <resolution>35</resolution>
+        <resolution>70</resolution>
         <waveLengthMin>1.469</waveLengthMin>
         <waveLengthMax>2.54</waveLengthMax>
       </mode>
