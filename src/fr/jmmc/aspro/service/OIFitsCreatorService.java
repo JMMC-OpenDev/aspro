@@ -467,7 +467,8 @@ public final class OIFitsCreatorService {
             re = (float) visComplex[l].getReal();
             im = (float) visComplex[l].getImaginary();
 
-            // errors :
+            // error on visibility amplitude :
+            // Note : phase error is unknown !
             err = this.noiseService.computeVnoise(re, im);
 
             // for now, same error on both re and im parts :
@@ -488,7 +489,7 @@ public final class OIFitsCreatorService {
             // phase [-PI;PI] in degrees :
             visPhi[k][l] = Math.toDegrees(Math.atan2(im, re));
 
-            // laurent's estimations on errors (incorrect) :
+            // approximated estimations on errors (laurent) :
             visAmpErr[k][l] = err;
             visPhiErr[k][l] = Math.toDegrees(err);
           }

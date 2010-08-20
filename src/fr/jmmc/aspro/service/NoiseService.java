@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: NoiseService.java,v 1.6 2010-08-19 15:29:13 bourgesl Exp $"
+ * "@(#) $Id: NoiseService.java,v 1.7 2010-08-20 12:02:20 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2010/08/19 15:29:13  bourgesl
+ * minor changes to clarify code
+ *
  * Revision 1.5  2010/08/19 10:53:23  bourgesl
  * proper noise computation for VIS2 but first try for VISDATA/VISAMP/VISPHI
  *
@@ -403,7 +406,7 @@ public final class NoiseService {
   }
 
   /**
-   * Compute error on complex visibility (same error on both real and imaginary part, derived from v2 noise)
+   * Compute visibility error (derived from v2 noise)
    * @param re real part of the complex visibility
    * @param im imaginary part of the complex visibility
    * @return visibility error
@@ -412,19 +415,26 @@ public final class NoiseService {
 
     final double vis2 = Math.pow(re, 2d) + Math.pow(im, 2d);
 
-    // compute error without using bias :
-    final double errV2 = computeV2noise(vis2, false);
+    // compute error without instrumentalVisibilityBias :
+    final double errVis2 = computeV2noise(vis2, false);
 
-    final double vis = Math.sqrt(vis2);
+    final double visAmp = Math.sqrt(vis2);
 
-    double err = errV2 / (2 * vis);
+    // use derivative :
+    // dVis = dVis2 / ( 2 * vis)
+    double errVisAmp = errVis2 / (2 * visAmp);
 
-    // convert instrumental phase bias as an error too. Use it as a limit :
-    final double r = vis * Math.toRadians(this.instrumentalPhaseBias);
+    // convert instrumental phase bias as an error too. Use it as a limit
+    // inverse the OIfits formula for phase error :
+    // errPhi = (180/PI) * (errOrtho/VIS)
 
-    err = Math.max(err, r);
+    final double errOrtho = visAmp * this.instrumentalPhaseBias * Math.PI / 180d;
 
-    return (float) err;
+    // Why use instrumentalPhaseBias and not instrumentalVisibilityBias ?
+
+    errVisAmp = Math.max(errVisAmp, errOrtho);
+
+    return (float) errVisAmp;
   }
 
   /**
