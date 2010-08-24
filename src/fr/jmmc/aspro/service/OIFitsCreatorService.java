@@ -108,6 +108,8 @@ public final class OIFitsCreatorService {
   private double integrationTime = 300d;
   /** noise service */
   private final NoiseService noiseService;
+  /** internal computed complex visibilities */
+  private Complex[][] visComplex = null;
 
   /**
    * Protected constructor
@@ -189,13 +191,16 @@ public final class OIFitsCreatorService {
     // OI_WAVELENGTH :
     this.createOIWaveLength();
 
-    // OI_VIS :
-    this.createOIVis();
+    // Compute target models :
+    this.computeModelVisibilities();
 
     // fast interrupt :
     if (Thread.currentThread().isInterrupted()) {
       return null;
     }
+
+    // OI_VIS :
+    this.createOIVis();
 
     // OI_VIS2 :
     this.createOIVis2();
@@ -259,7 +264,7 @@ public final class OIFitsCreatorService {
     int i = 0;
     Telescope tel;
     Station station;
-    for (Beam b : this.beams) {
+    for (final Beam b : this.beams) {
       station = b.getStation();
 
       tel = station.getTelescope();
@@ -364,13 +369,66 @@ public final class OIFitsCreatorService {
   }
 
   /**
-   * Create the OI_VIS table
+   * compute complex visibilities from target models and store this data in local reference table
    */
-  protected void createOIVis() {
+  protected void computeModelVisibilities() {
 
     // Has models ?
     final List<Model> models = this.target.getModels();
     final boolean hasModels = models != null && !models.isEmpty();
+
+    // Allocate data array for complex visibilities :
+    final Complex[][] cVis = new Complex[this.nHAPoints * this.nBaseLines][this.nWaveLengths];
+
+    double u, v;
+    final double[] ufreq = new double[this.nWaveLengths];
+    final double[] vfreq = new double[this.nWaveLengths];
+
+    // Iterate on HA points :
+    for (int i = 0, j = 0, k = 0, l = 0; i < this.nHAPoints; i++) {
+
+      j = 0;
+
+      // Iterate on baselines :
+      for (final UVRangeBaseLineData uvBL : this.targetUVObservability) {
+
+        k = this.nBaseLines * i + j;
+
+        // UV coords (m) :
+        u = uvBL.getU()[i];
+        v = uvBL.getV()[i];
+
+        // Compute complex visibility for the given models :
+        if (hasModels) {
+
+          // prepare spatial frequencies :
+          for (l = 0; l < this.nWaveLengths; l++) {
+            ufreq[l] = u / this.waveLengths[l];
+            vfreq[l] = v / this.waveLengths[l];
+          }
+
+          // compute complex visibilities :
+          cVis[k] = ModelManager.getInstance().computeModels(ufreq, vfreq, models);
+
+          if (cVis[k] == null) {
+            // fast interrupt :
+            return;
+          }
+
+        } // target has Models ?
+
+        j++;
+      }
+    }
+
+    // store the data
+    this.visComplex = cVis;
+  }
+
+  /**
+   * Create the OI_VIS table using internal computed visComplex data
+   */
+  protected void createOIVis() {
 
     // Create OI_VIS table :
     final OIVis vis = new OIVis(this.oiFitsFile, this.instrumentName, this.nHAPoints * this.nBaseLines);
@@ -406,21 +464,17 @@ public final class OIFitsCreatorService {
     // vars:
     double jd;
     double u, v;
+    double re,im;
 
-    final double[] ufreq = new double[this.nWaveLengths];
-    final double[] vfreq = new double[this.nWaveLengths];
-    Complex[] visComplex;
-
-    float re,im,err;
     // Iterate on HA points :
     for (int i = 0, j = 0, k = 0, l = 0; i < this.nHAPoints; i++) {
 
       j = 0;
 
       // Iterate on baselines :
-      for (UVRangeBaseLineData uvBL : this.targetUVObservability) {
+      for (final UVRangeBaseLineData uvBL : this.targetUVObservability) {
 
-        k = i * this.nBaseLines + j;
+        k = this.nBaseLines * i + j;
 
         // target id
         targetIds[k] = TARGET_ID;
@@ -444,54 +498,43 @@ public final class OIFitsCreatorService {
         uCoords[k] = u;
         vCoords[k] = v;
 
-        // Compute complex visibility for the given models :
-        if (hasModels) {
-
-          // prepare spatial frequencies :
-          for (l = 0; l < this.nWaveLengths; l++) {
-            ufreq[l] = u / this.waveLengths[l];
-            vfreq[l] = v / this.waveLengths[l];
-          }
-
-          // compute complex visibilities :
-          visComplex = ModelManager.getInstance().computeModels(ufreq, vfreq, models);
-
-          if (visComplex == null) {
-            // fast interrupt :
-            return;
-          }
+        // if complex visibility exists :
+        if (this.visComplex[k] != null) {
 
           // Iterate on wave lengths :
           for (l = 0; l < this.nWaveLengths; l++) {
             // complex data :
-            re = (float) visComplex[l].getReal();
-            im = (float) visComplex[l].getImaginary();
+            re = visComplex[k][l].getReal();
+            im = visComplex[k][l].getImaginary();
 
-            // error on visibility amplitude :
-            // Note : phase error is unknown !
-            err = this.noiseService.computeVnoise(re, im);
+            // VisData contains pure geometric models (i.e. without noise and error)
+            // also VisErr = 0
 
-            // for now, same error on both re and im parts :
-            re += (float) this.noiseService.randomGauss(err / 2d);
-            im += (float) this.noiseService.randomGauss(err / 2d);
+            // TODO : store correlated fluxes i.e. multiply by the number of photons :
+            visData[k][l][0] = (float)re;
+            visData[k][l][1] = (float)im;
 
-            visData[k][l][0] = re;
-            visData[k][l][1] = im;
+            visErr[k][l][0] = 0f;
+            visErr[k][l][1] = 0f;
 
-            visErr[k][l][0] = err;
-            visErr[k][l][1] = err;
+            // TODO : port amdlibFakeAmberDiffVis for AMBER only => VISAMP/PHI
 
-            // TODO : use amdlibFakeAmberDiffVis ??? (compute visAmp/VisPhi with errors)
+            // For other instruments : OI_VIS is unavailable !
 
-            // amplitude (not normalized) :
+            // Following lines will be removed soon : TODO KILL
+
+
+            // amplitude with noise from Vis Re/Im :
             visAmp[k][l] = Math.sqrt(Math.pow(re, 2d) + Math.pow(im, 2d));
 
-            // phase [-PI;PI] in degrees :
+            // TODO : remove
+            visAmpErr[k][l] = ERR_RATE;
+
+            // phase [-PI;PI] in degrees with noise from Vis Re/Im :
             visPhi[k][l] = Math.toDegrees(Math.atan2(im, re));
 
-            // approximated estimations on errors (laurent) :
-            visAmpErr[k][l] = err;
-            visPhiErr[k][l] = Math.toDegrees(err);
+            // TODO : remove
+            visPhiErr[k][l] = ERR_RATE_DEG;
           }
         }
 
@@ -506,7 +549,7 @@ public final class OIFitsCreatorService {
   }
 
   /**
-   * Create the OI_VIS2 table
+   * Create the OI_VIS2 table using internal computed visComplex data
    */
   protected void createOIVis2() {
     // Get OI_VIS table :
@@ -524,22 +567,27 @@ public final class OIFitsCreatorService {
     System.arraycopy(vis.getMjd(), 0, vis2.getMjd(), 0, nRows);
     System.arraycopy(vis.getIntTime(), 0, vis2.getIntTime(), 0, nRows);
 
-    final double[][] visAmp = vis.getVisAmp();
     final double[][] vis2Data = vis2.getVis2Data();
     final double[][] vis2Err = vis2.getVis2Err();
 
-    double err;
+    double re,im;
+    double v2, err;
     for (int k = 0, l = 0; k < nRows; k++) {
+
       // Iterate on wave lengths :
       for (l = 0; l < this.nWaveLengths; l++) {
-        // square visibility (not normalized) :
-        vis2Data[k][l] = visAmp[k][l] * visAmp[k][l];
+        // complex data :
+        re = visComplex[k][l].getReal();
+        im = visComplex[k][l].getImaginary();
 
-        // errors :
-        err = this.noiseService.computeV2noise(vis2Data[k][l]);
+        // pure square visibility :
+        v2 = Math.pow(re, 2d) + Math.pow(im, 2d);
 
+        // square visibility errors :
+        err = this.noiseService.computeVis2Error(v2);
+
+        vis2Data[k][l] = v2 + this.noiseService.randomGauss(err / 2d);
         vis2Err[k][l] = err;
-        vis2Data[k][l] += this.noiseService.randomGauss(err / 2d);
       }
     }
 
