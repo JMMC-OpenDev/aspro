@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: NoiseService.java,v 1.7 2010-08-20 12:02:20 bourgesl Exp $"
+ * "@(#) $Id: NoiseService.java,v 1.8 2010-08-24 16:10:55 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2010/08/20 12:02:20  bourgesl
+ * comments
+ *
  * Revision 1.6  2010/08/19 15:29:13  bourgesl
  * minor changes to clarify code
  *
@@ -134,10 +137,10 @@ public final class NoiseService {
   private double adaptiveOpticsMag = 0d;
 
   /* internal */
-  /** number of photons per pixel in interferometer channel */
-  private double nbPhotPerPixelInI;
-  /** number of photons per pixel in each photometric channel */
-  private double nbPhotPerPixelInP;
+  /** number of photons in interferometer channel */
+  private double nbPhotonInI;
+  /** number of photons in each photometric channel */
+  private double nbPhotonInP;
   /** number of frames per second */
   private double frameRate;
   /** total instrumental visibility (with FT if any) */
@@ -394,85 +397,43 @@ public final class NoiseService {
     // give back the two useful values for the noise estimate :
 
     // number of photons in interferometric channel :
-    this.nbPhotPerPixelInI = nbTotalPhot * this.fracFluxInInterferometry;
+    this.nbPhotonInI = nbTotalPhot * this.fracFluxInInterferometry;
     // number of photons in photometric channel :
-    this.nbPhotPerPixelInP = nbTotalPhot * (1 - this.fracFluxInInterferometry) / this.nbTel;
+    this.nbPhotonInP = nbTotalPhot * (1 - this.fracFluxInInterferometry) / this.nbTel;
 
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("frameRate                  = " + frameRate);
-      logger.fine("nbPhotPerPixelInI          = " + nbPhotPerPixelInI);
-      logger.fine("nbPhotPerPixelInP          = " + nbPhotPerPixelInP);
+      logger.fine("nbPhotPerPixelInI          = " + nbPhotonInI);
+      logger.fine("nbPhotPerPixelInP          = " + nbPhotonInP);
     }
   }
 
   /**
-   * Compute visibility error (derived from v2 noise)
-   * @param re real part of the complex visibility
-   * @param im imaginary part of the complex visibility
-   * @return visibility error
-   */
-  public float computeVnoise(final float re, final float im) {
-
-    final double vis2 = Math.pow(re, 2d) + Math.pow(im, 2d);
-
-    // compute error without instrumentalVisibilityBias :
-    final double errVis2 = computeV2noise(vis2, false);
-
-    final double visAmp = Math.sqrt(vis2);
-
-    // use derivative :
-    // dVis = dVis2 / ( 2 * vis)
-    double errVisAmp = errVis2 / (2 * visAmp);
-
-    // convert instrumental phase bias as an error too. Use it as a limit
-    // inverse the OIfits formula for phase error :
-    // errPhi = (180/PI) * (errOrtho/VIS)
-
-    final double errOrtho = visAmp * this.instrumentalPhaseBias * Math.PI / 180d;
-
-    // Why use instrumentalPhaseBias and not instrumentalVisibilityBias ?
-
-    errVisAmp = Math.max(errVisAmp, errOrtho);
-
-    return (float) errVisAmp;
-  }
-
-  /**
    * Compute error on square visibility
+   *
+   * TODO : Gilles : review the computation 
+   *
    * @param vis2 square visibility
    * @return square visiblity error
    */
-  public double computeV2noise(final double vis2) {
-    return computeV2noise(vis2, true);
-  }
-
-  /**
-   * Compute error on square visibility
-   * @param v square visibility
-   * @param useBias use instrumentalVisibilityBias
-   * @return square visiblity error
-   */
-  private double computeV2noise(final double v, final boolean useBias) {
+  public double computeVis2Error(final double vis2) {
 
     // include instrumental visib
-    double visib = v * this.vinst;
+    double visib = vis2 * this.vinst;
 
     // squared correlated flux
-    double fcorrelsq = Math.pow(this.nbPhotPerPixelInI * visib / this.nbTel, 2d);
+    double fcorrelsq = Math.pow(this.nbPhotonInI * visib / this.nbTel, 2d);
 
-    final double sfcorrelsq = 2d * Math.pow(this.nbPhotPerPixelInI, 3d) * Math.pow(visib / this.nbTel, 2d)
-            + 4d * Math.pow(this.nbPhotPerPixelInI * visib / this.nbTel, 2d) + Math.pow(this.nbPhotPerPixelInI, 2d) + this.nbPhotPerPixelInI
+    final double sfcorrelsq = 2d * Math.pow(this.nbPhotonInI, 3d) * Math.pow(visib / this.nbTel, 2d)
+            + 4d * Math.pow(this.nbPhotonInI * visib / this.nbTel, 2d) + Math.pow(this.nbPhotonInI, 2d) + this.nbPhotonInI
             + Math.pow(this.nbPixInterf, 2d) * Math.pow(this.ron, 4d) + 3d * this.nbPixInterf * Math.pow(this.ron, 4d)
-            + 2d * this.nbPixInterf * this.nbPhotPerPixelInI * Math.pow(this.ron, 2d)
-            + 2d * this.nbPixInterf * Math.pow(this.ron * this.nbPhotPerPixelInI * visib / this.nbTel, 2d);
-
-    // SNR on square correlated flux
-    //final double snrfcsq = fcorrelsq / Math.sqrt(sfcorrelsq);
+            + 2d * this.nbPixInterf * this.nbPhotonInI * Math.pow(this.ron, 2d)
+            + 2d * this.nbPixInterf * Math.pow(this.ron * this.nbPhotonInI * visib / this.nbTel, 2d);
 
     // photometric flux
-    final double fphot = this.nbPhotPerPixelInP;
+    final double fphot = this.nbPhotonInP;
     // noise on photometric flux
-    final double sfphot = Math.sqrt(this.nbPhotPerPixelInP + this.nbPixPhoto * Math.pow(ron, 2d));
+    final double sfphot = Math.sqrt(this.nbPhotonInP + this.nbPixPhoto * Math.pow(this.ron, 2d));
     // Uncertainty on square visibility
     // protect zero divide
     fcorrelsq = Math.max(fcorrelsq, 1e-3d);
@@ -480,9 +441,9 @@ public final class NoiseService {
     double svisib;
     if (this.fracFluxInInterferometry >= 1.0) {
       // no photometry...
-      svisib = Math.pow(visib, 2d) * Math.sqrt(sfcorrelsq / Math.pow(fcorrelsq, 2d)); // per frame
+      svisib = Math.pow(visib, 2d) * Math.sqrt(sfcorrelsq / Math.pow(fcorrelsq, 2d));
     } else {
-      svisib = Math.pow(visib, 2d) * Math.sqrt(sfcorrelsq / Math.pow(fcorrelsq, 2d) + 2d * Math.pow(sfphot / fphot, 2d)); // per frame
+      svisib = Math.pow(visib, 2d) * Math.sqrt(sfcorrelsq / Math.pow(fcorrelsq, 2d) + 2d * Math.pow(sfphot / fphot, 2d));
     }
     // repeat OBS measurements to reach totalObsTime minutes
     svisib /= Math.sqrt(this.totalObsTime * this.frameRate);
@@ -490,11 +451,8 @@ public final class NoiseService {
     // correct for instrumental visibility :
     svisib /= Math.pow(this.vinst, 2d);
 
-    if (useBias) {
-      return Math.max(svisib, this.instrumentalVisibilityBias * 0.01d);
-    } else {
-      return svisib;
-    }
+    // instrumentalVisibilityBias is in percents :
+    return Math.max(svisib, this.instrumentalVisibilityBias * 0.01d);
   }
 
   /**
