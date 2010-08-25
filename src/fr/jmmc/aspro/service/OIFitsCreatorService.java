@@ -191,7 +191,7 @@ public final class OIFitsCreatorService {
     // OI_WAVELENGTH :
     this.createOIWaveLength();
 
-    // Compute target models :
+    // Compute complex visibilities :
     this.computeModelVisibilities();
 
     // fast interrupt :
@@ -213,7 +213,8 @@ public final class OIFitsCreatorService {
       return null;
     }
 
-    // TODO : compute errors + noise models
+    // free computed complex visibilities :
+    this.visComplex = null;
 
     if (logger.isLoggable(Level.INFO)) {
       logger.info("createOIFits : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
@@ -375,31 +376,30 @@ public final class OIFitsCreatorService {
 
     // Has models ?
     final List<Model> models = this.target.getModels();
-    final boolean hasModels = models != null && !models.isEmpty();
 
-    // Allocate data array for complex visibilities :
-    final Complex[][] cVis = new Complex[this.nHAPoints * this.nBaseLines][this.nWaveLengths];
+    if (models != null && !models.isEmpty()) {
+      // Allocate data array for complex visibilities :
+      final Complex[][] cVis = new Complex[this.nHAPoints * this.nBaseLines][this.nWaveLengths];
 
-    double u, v;
-    final double[] ufreq = new double[this.nWaveLengths];
-    final double[] vfreq = new double[this.nWaveLengths];
+      double u, v;
+      final double[] ufreq = new double[this.nWaveLengths];
+      final double[] vfreq = new double[this.nWaveLengths];
 
-    // Iterate on HA points :
-    for (int i = 0, j = 0, k = 0, l = 0; i < this.nHAPoints; i++) {
+      // Iterate on HA points :
+      for (int i = 0, j = 0, k = 0, l = 0; i < this.nHAPoints; i++) {
 
-      j = 0;
+        j = 0;
 
-      // Iterate on baselines :
-      for (final UVRangeBaseLineData uvBL : this.targetUVObservability) {
+        // Iterate on baselines :
+        for (final UVRangeBaseLineData uvBL : this.targetUVObservability) {
 
-        k = this.nBaseLines * i + j;
+          k = this.nBaseLines * i + j;
 
-        // UV coords (m) :
-        u = uvBL.getU()[i];
-        v = uvBL.getV()[i];
+          // UV coords (m) :
+          u = uvBL.getU()[i];
+          v = uvBL.getV()[i];
 
-        // Compute complex visibility for the given models :
-        if (hasModels) {
+          // Compute complex visibility for the given models :
 
           // prepare spatial frequencies :
           for (l = 0; l < this.nWaveLengths; l++) {
@@ -415,14 +415,12 @@ public final class OIFitsCreatorService {
             return;
           }
 
-        } // target has Models ?
-
-        j++;
+          j++;
+        }
       }
-    }
 
-    // store the data
-    this.visComplex = cVis;
+      this.visComplex = cVis;
+    }
   }
 
   /**
@@ -459,12 +457,12 @@ public final class OIFitsCreatorService {
     final double[] vCoords = vis.getVCoord();
 
     final short[][] staIndexes = vis.getStaIndex();
-    // skip flag (default to false means that values are considered as valid)
+    final boolean[][] flags = vis.getFlag();
 
     // vars:
     double jd;
     double u, v;
-    double re,im;
+    double re, im;
 
     // Iterate on HA points :
     for (int i = 0, j = 0, k = 0, l = 0; i < this.nHAPoints; i++) {
@@ -498,21 +496,42 @@ public final class OIFitsCreatorService {
         uCoords[k] = u;
         vCoords[k] = v;
 
-        // if complex visibility exists :
-        if (this.visComplex[k] != null) {
+        // if complex visibility are computed i.e. target has models :
+        if (this.visComplex == null) {
+          // Invalid => NaN value :
+
+          // Iterate on wave lengths :
+          for (l = 0; l < this.nWaveLengths; l++) {
+            visData[k][l][0] = Float.NaN;
+            visData[k][l][1] = Float.NaN;
+
+            visErr[k][l][0] = Float.NaN;
+            visErr[k][l][1] = Float.NaN;
+
+            visAmp[k][l] = Double.NaN;
+            visAmpErr[k][l] = Double.NaN;
+
+            visPhi[k][l] = Double.NaN;
+            visPhiErr[k][l] = Double.NaN;
+
+            // mark this value as invalid :
+            flags[k][l] = true;
+          }
+
+        } else {
 
           // Iterate on wave lengths :
           for (l = 0; l < this.nWaveLengths; l++) {
             // complex data :
-            re = visComplex[k][l].getReal();
-            im = visComplex[k][l].getImaginary();
+            re = this.visComplex[k][l].getReal();
+            im = this.visComplex[k][l].getImaginary();
 
             // VisData contains pure geometric models (i.e. without noise and error)
             // also VisErr = 0
 
             // TODO : store correlated fluxes i.e. multiply by the number of photons :
-            visData[k][l][0] = (float)re;
-            visData[k][l][1] = (float)im;
+            visData[k][l][0] = (float) re;
+            visData[k][l][1] = (float) im;
 
             visErr[k][l][0] = 0f;
             visErr[k][l][1] = 0f;
@@ -521,8 +540,7 @@ public final class OIFitsCreatorService {
 
             // For other instruments : OI_VIS is unavailable !
 
-            // Following lines will be removed soon : TODO KILL
-
+            // Following lines are invalid : TODO KILL
 
             // amplitude with noise from Vis Re/Im :
             visAmp[k][l] = Math.sqrt(Math.pow(re, 2d) + Math.pow(im, 2d));
@@ -570,24 +588,43 @@ public final class OIFitsCreatorService {
     final double[][] vis2Data = vis2.getVis2Data();
     final double[][] vis2Err = vis2.getVis2Err();
 
-    double re,im;
+    final boolean[][] flags = vis2.getFlag();
+
+    // vars:
+    double re, im;
     double v2, err;
+
     for (int k = 0, l = 0; k < nRows; k++) {
 
-      // Iterate on wave lengths :
-      for (l = 0; l < this.nWaveLengths; l++) {
-        // complex data :
-        re = visComplex[k][l].getReal();
-        im = visComplex[k][l].getImaginary();
+      // if complex visibility are computed i.e. target has models :
+      if (this.visComplex == null) {
 
-        // pure square visibility :
-        v2 = Math.pow(re, 2d) + Math.pow(im, 2d);
+        // Iterate on wave lengths :
+        for (l = 0; l < this.nWaveLengths; l++) {
+          vis2Data[k][l] = Double.NaN;
+          vis2Err[k][l] = Double.NaN;
 
-        // square visibility errors :
-        err = this.noiseService.computeVis2Error(v2);
+          // mark this value as invalid :
+          flags[k][l] = true;
+        }
 
-        vis2Data[k][l] = v2 + this.noiseService.randomGauss(err / 2d);
-        vis2Err[k][l] = err;
+      } else {
+
+        // Iterate on wave lengths :
+        for (l = 0; l < this.nWaveLengths; l++) {
+          // complex data :
+          re = this.visComplex[k][l].getReal();
+          im = this.visComplex[k][l].getImaginary();
+
+          // pure square visibility :
+          v2 = Math.pow(re, 2d) + Math.pow(im, 2d);
+
+          // square visibility errors :
+          err = this.noiseService.computeVis2Error(v2);
+
+          vis2Data[k][l] = v2 + this.noiseService.randomGauss(err / 2d);
+          vis2Err[k][l] = err;
+        }
       }
     }
 
@@ -595,7 +632,6 @@ public final class OIFitsCreatorService {
     System.arraycopy(vis.getVCoord(), 0, vis2.getVCoord(), 0, nRows);
 
     System.arraycopy(vis.getStaIndex(), 0, vis2.getStaIndex(), 0, nRows);
-    // skip flag (default to false means that values are considered as valid)
 
     this.oiFitsFile.addOiTable(vis2);
   }
@@ -638,9 +674,6 @@ public final class OIFitsCreatorService {
     final double[] visTimes = vis.getTime();
     final double[] visMjds = vis.getMjd();
 
-    final float[][][] visData = vis.getVisData();
-    // skip visErr (unknown)
-
     final double[] visUCoords = vis.getUCoord();
     final double[] visVCoords = vis.getVCoord();
 
@@ -665,14 +698,19 @@ public final class OIFitsCreatorService {
     final double[] t3V2Coords = t3.getV2Coord();
 
     final short[][] t3StaIndexes = t3.getStaIndex();
-    // skip flag (default to false means that values are considered as valid)
+
+    final boolean[][] flags = t3.getFlag();
 
     // The following code use some hypothesis on the OI_VIS table as defined in createOIVis()
 
     // 1 - the number of rows per HA point corresponds to the number of baselines.
     // 2 - OI_VIS rows have the same ordering than the list of baselines per HA points.
 
-    float[][] visData12, visData23, visData13;
+    // if complex visibility are computed i.e. target has models :
+    final boolean hasModels = this.visComplex != null;
+
+    // vars :
+    Complex[] visData12, visData23, visData13;
     Complex vis12, vis23, vis31, t3Data;
     double u12, v12, u23, v23;
 
@@ -715,7 +753,7 @@ public final class OIFitsCreatorService {
           logger.fine("T3  baseline = " + Arrays.toString(triplet.getBaselineIndexes()[0]));
         }
 
-        visData12 = visData[vp + pos];
+        visData12 = (hasModels) ? this.visComplex[vp + pos] : null;
         u12 = visUCoords[vp + pos];
         v12 = visVCoords[vp + pos];
 
@@ -727,7 +765,7 @@ public final class OIFitsCreatorService {
           logger.fine("T3  baseline = " + Arrays.toString(triplet.getBaselineIndexes()[1]));
         }
 
-        visData23 = visData[vp + pos];
+        visData23 = (hasModels) ? this.visComplex[vp + pos] : null;
         u23 = visUCoords[vp + pos];
         v23 = visVCoords[vp + pos];
 
@@ -744,33 +782,50 @@ public final class OIFitsCreatorService {
           logger.fine("UV 12+23 = " + (u12 + u23) + ", " + (v12 + v23));
         }
 
-        visData13 = visData[vp + pos];
+        visData13 = (hasModels) ? this.visComplex[vp + pos] : null;
 
-        // Iterate on wave lengths :
+        // if complex visibility are computed i.e. target has models :
+        if (!hasModels) {
 
-        for (l = 0; l < this.nWaveLengths; l++) {
+          // Iterate on wave lengths :
+          for (l = 0; l < this.nWaveLengths; l++) {
+            t3Amp[k][l] = Double.NaN;
+            t3AmpErr[k][l] = Double.NaN;
 
-          // baseline AB = 12 :
-          vis12 = new Complex(visData12[l][0], visData12[l][1]);
+            t3Phi[k][l] = Double.NaN;
+            t3PhiErr[k][l] = Double.NaN;
 
-          // baseline BC = 23
-          vis23 = new Complex(visData23[l][0], visData23[l][1]);
+            // mark this value as invalid :
+            flags[k][l] = true;
+          }
 
-          // baseline AC = 13 => conjuguate 31 (im = -im)
-          vis31 = new Complex(visData13[l][0], -visData13[l][1]);
+        } else {
 
-          // Compute RE/IM bispectrum with C12*C23*~C13 :
-          t3Data = ComplexUtils.bispectrum(vis12, vis23, vis31);
+          // Iterate on wave lengths :
+          for (l = 0; l < this.nWaveLengths; l++) {
 
-          // amplitude :
-          t3Amp[k][l] = t3Data.abs();
+            // baseline AB = 12 :
+            vis12 = visData12[l];
 
-          // phase [-PI;PI] in degrees :
-          t3Phi[k][l] = Math.toDegrees(t3Data.getArgument());
+            // baseline BC = 23
+            vis23 = visData23[l];
 
-          // errors :
-          t3AmpErr[k][l] = ERR_RATE;
-          t3PhiErr[k][l] = ERR_RATE_DEG;
+            // baseline AC = 13 => conjuguate 31 (im = -im)
+            vis31 = visData13[l];
+
+            // Compute RE/IM bispectrum with C12*C23*~C13 :
+            t3Data = ComplexUtils.bispectrum(vis12, vis23, vis31);
+
+            // amplitude :
+            t3Amp[k][l] = t3Data.abs();
+
+            // phase [-PI;PI] in degrees :
+            t3Phi[k][l] = Math.toDegrees(t3Data.getArgument());
+
+            // errors :
+            t3AmpErr[k][l] = ERR_RATE;
+            t3PhiErr[k][l] = ERR_RATE_DEG;
+          }
         }
 
         // UV 1 coords (m) :
