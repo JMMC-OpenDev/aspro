@@ -462,7 +462,7 @@ public final class OIFitsCreatorService {
     // vars:
     double jd;
     double u, v;
-    double re, im;
+    double re, im, v2, flux;
 
     // Iterate on HA points :
     for (int i = 0, j = 0, k = 0, l = 0; i < this.nHAPoints; i++) {
@@ -527,12 +527,15 @@ public final class OIFitsCreatorService {
             im = this.visComplex[k][l].getImaginary();
 
             // VisData contains pure geometric models (i.e. without noise and error)
-            // also VisErr = 0
 
-            // TODO : store correlated fluxes i.e. multiply by the number of photons :
-            visData[k][l][0] = (float) re;
-            visData[k][l][1] = (float) im;
+            // store correlated fluxes i.e. multiply by the number of photons :
+            v2 = computeVis2(re, im);
+            flux = this.noiseService.computeCorrelatedFlux(v2);
 
+            visData[k][l][0] = (float) (flux * re);
+            visData[k][l][1] = (float) (flux * im);
+
+            // also VisErr = 0 or SQRT(flux)
             visErr[k][l][0] = 0f;
             visErr[k][l][1] = 0f;
 
@@ -543,7 +546,7 @@ public final class OIFitsCreatorService {
             // Following lines are invalid : TODO KILL
 
             // amplitude with noise from Vis Re/Im :
-            visAmp[k][l] = Math.sqrt(Math.pow(re, 2d) + Math.pow(im, 2d));
+            visAmp[k][l] = Math.sqrt(v2);
 
             // TODO : remove
             visAmpErr[k][l] = ERR_RATE;
@@ -617,13 +620,16 @@ public final class OIFitsCreatorService {
           im = this.visComplex[k][l].getImaginary();
 
           // pure square visibility :
-          v2 = Math.pow(re, 2d) + Math.pow(im, 2d);
+          v2 = computeVis2(re, im);
 
-          // square visibility errors :
-          err = this.noiseService.computeVis2Error(v2);
+          // square visibility error :
+          err = this.noiseService.computeVis2Error(Math.sqrt(v2));
+          vis2Err[k][l] = err;
+
+          // add noise :
+          // Gilles : RANGAU(err/2) ou RANGAU(err) ????
 
           vis2Data[k][l] = v2 + this.noiseService.randomGauss(err / 2d);
-          vis2Err[k][l] = err;
         }
       }
     }
@@ -713,6 +719,7 @@ public final class OIFitsCreatorService {
     Complex[] visData12, visData23, visData13;
     Complex vis12, vis23, vis31, t3Data;
     double u12, v12, u23, v23;
+    double errPhi, errAmp, rand;
 
     int[] relPos;
     int pos;
@@ -811,7 +818,7 @@ public final class OIFitsCreatorService {
             vis23 = visData23[l];
 
             // baseline AC = 13 => conjuguate 31 (im = -im)
-            vis31 = visData13[l];
+            vis31 = visData13[l].conjugate();
 
             // Compute RE/IM bispectrum with C12*C23*~C13 :
             t3Data = ComplexUtils.bispectrum(vis12, vis23, vis31);
@@ -822,9 +829,28 @@ public final class OIFitsCreatorService {
             // phase [-PI;PI] in degrees :
             t3Phi[k][l] = Math.toDegrees(t3Data.getArgument());
 
-            // errors :
-            t3AmpErr[k][l] = ERR_RATE;
-            t3PhiErr[k][l] = ERR_RATE_DEG;
+            // phase closure error (deg) :
+            errPhi = this.noiseService.computeT3PhiError(vis12.abs() , vis23.abs(), vis31.abs());
+            t3PhiErr[k][l] = errPhi;
+
+            // amplitude error t3AmpErr = t3Amp * radians(t3PhiErr) :
+            errAmp = t3Amp[k][l] * Math.toRadians(errPhi);
+            t3AmpErr[k][l] = errAmp;
+
+            // use same random number for the 2 values
+            rand =  this.noiseService.randomGauss(1d);
+
+            // add noise :
+            // Gilles : RANGAU(err/2) ou RANGAU(err) ????
+
+            t3Amp[k][l] += rand * errAmp;
+            t3Phi[k][l] += rand * errPhi;
+
+            /*
+              t3phi=t3phi+t3phierr*noise
+              t3amp=t3amp+t3amperr*noise
+            */
+
           }
         }
 
@@ -844,6 +870,16 @@ public final class OIFitsCreatorService {
     }
 
     this.oiFitsFile.addOiTable(t3);
+  }
+
+  /**
+   * Return the square visibility from complex visibility
+   * @param visRe real part of the complex visibility
+   * @param visIm imaginary part of the complex visibility
+   * @return square visibility
+   */
+  private static double computeVis2(final double visRe, final double visIm) {
+    return Math.pow(visRe, 2d) + Math.pow(visIm, 2d);
   }
 
   /**
