@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: NoiseService.java,v 1.8 2010-08-24 16:10:55 bourgesl Exp $"
+ * "@(#) $Id: NoiseService.java,v 1.9 2010-08-25 15:56:15 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.8  2010/08/24 16:10:55  bourgesl
+ * removed computeVisError and Vis2Error computation to be corrected later (gilles)
+ *
  * Revision 1.7  2010/08/20 12:02:20  bourgesl
  * comments
  *
@@ -403,23 +406,34 @@ public final class NoiseService {
 
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("frameRate                  = " + frameRate);
-      logger.fine("nbPhotPerPixelInI          = " + nbPhotonInI);
-      logger.fine("nbPhotPerPixelInP          = " + nbPhotonInP);
+      logger.fine("nbPhotonInI                = " + nbPhotonInI);
+      logger.fine("nbPhotonInP                = " + nbPhotonInP);
     }
+  }
+
+  /**
+   * Return the correlated flux of the object
+   * @param vis2 square visibility
+   * @return correlated flux
+   */
+  public double computeCorrelatedFlux(final double vis2) {
+
+    // squared correlated flux
+    double fcorrelsq = Math.pow(this.nbPhotonInI / this.nbTel, 2d) * vis2;
+
+    return Math.sqrt(fcorrelsq);
   }
 
   /**
    * Compute error on square visibility
    *
-   * TODO : Gilles : review the computation 
-   *
-   * @param vis2 square visibility
+   * @param vis visibility
    * @return square visiblity error
    */
-  public double computeVis2Error(final double vis2) {
+  public double computeVis2Error(final double vis) {
 
     // include instrumental visib
-    double visib = vis2 * this.vinst;
+    double visib = vis * this.vinst;
 
     // squared correlated flux
     double fcorrelsq = Math.pow(this.nbPhotonInI * visib / this.nbTel, 2d);
@@ -434,29 +448,81 @@ public final class NoiseService {
     final double fphot = this.nbPhotonInP;
     // noise on photometric flux
     final double sfphot = Math.sqrt(this.nbPhotonInP + this.nbPixPhoto * Math.pow(this.ron, 2d));
-    // Uncertainty on square visibility
+
     // protect zero divide
     fcorrelsq = Math.max(fcorrelsq, 1e-3d);
 
-    double svisib;
+    // Uncertainty on square visibility
+    double svis2;
     if (this.fracFluxInInterferometry >= 1.0) {
       // no photometry...
-      svisib = Math.pow(visib, 2d) * Math.sqrt(sfcorrelsq / Math.pow(fcorrelsq, 2d));
+      svis2 = Math.pow(visib, 2d) * Math.sqrt(sfcorrelsq / Math.pow(fcorrelsq, 2d));
     } else {
-      svisib = Math.pow(visib, 2d) * Math.sqrt(sfcorrelsq / Math.pow(fcorrelsq, 2d) + 2d * Math.pow(sfphot / fphot, 2d));
+      svis2 = Math.pow(visib, 2d) * Math.sqrt(sfcorrelsq / Math.pow(fcorrelsq, 2d) + 2d * Math.pow(sfphot / fphot, 2d));
     }
     // repeat OBS measurements to reach totalObsTime minutes
-    svisib /= Math.sqrt(this.totalObsTime * this.frameRate);
+    svis2 /= Math.sqrt(this.totalObsTime * this.frameRate);
 
     // correct for instrumental visibility :
-    svisib /= Math.pow(this.vinst, 2d);
+    svis2 /= Math.pow(this.vinst, 2d);
 
     // instrumentalVisibilityBias is in percents :
-    return Math.max(svisib, this.instrumentalVisibilityBias * 0.01d);
+    return Math.max(svis2, this.instrumentalVisibilityBias * 0.01d);
+  }
+
+  /**
+   * Compute error on closure phase
+   *
+   * @param visAmp12 visibility amplitude of baseline AB = 12
+   * @param visAmp23 visibility amplitude of baseline BC = 23
+   * @param visAmp13 visibility amplitude of baseline AC = 13
+   * @return error on closure phase in degrees
+   */
+  public double computeT3PhiError(final double visAmp12, final double visAmp23, final double visAmp13) {
+
+    // include instrumental visib
+    final double v1 = visAmp12 * this.vinst;
+    final double v2 = visAmp23 * this.vinst;
+    final double v3 = visAmp13 * this.vinst;
+
+    final double v123 = v1 * v2 * v3;
+    final double v12 = v1 * v2;
+    final double v13 = v1 * v2;
+    final double v23 = v1 * v2;
+
+    // photon noise on closure phase
+    final double scpphot = (Math.pow(this.nbTel / this.nbPhotonInI, 3d) * (Math.pow(this.nbTel, 3d) - 2d * v123)
+            + Math.pow(this.nbTel / this.nbPhotonInI, 2d) * (Math.pow(this.nbTel, 2d) * (Math.pow(v1, 2d) + Math.pow(v2, 2d) + Math.pow(v3, 2d))
+            - (Math.pow(v1, 4d) + Math.pow(v2, 4d) + Math.pow(v3, 4d) + 2 * (Math.pow(v12, 2d) + Math.pow(v13, 2d) + Math.pow(v23, 2d))))
+            + (this.nbTel / this.nbPhotonInI) * (this.nbTel * (Math.pow(v12, 2d) + Math.pow(v13, 2d) + Math.pow(v23, 2d))
+            - 2 * v123 * (Math.pow(v1, 2d) + Math.pow(v2, 2d) + Math.pow(v3, 2d)))) / (2 * Math.pow(v123, 2d));
+
+    // detector noise on closure phase
+    final double scpdet = (Math.pow(this.nbTel / this.nbPhotonInI, 6d) * (Math.pow(this.nbPixInterf, 3d) * Math.pow(this.ron, 6d) + 3 * Math.pow(this.nbPixInterf, 2d) * Math.pow(this.ron, 6d))
+            + Math.pow(this.nbTel / this.nbPhotonInI, 4d) * ((Math.pow(v1, 2d) + Math.pow(v2, 2d) + Math.pow(v3, 2d)) * (3 * this.nbPixInterf * Math.pow(this.ron, 4d) + Math.pow(this.nbPixInterf, 2d) * Math.pow(this.ron, 4d)))
+            + Math.pow(this.nbTel / this.nbPhotonInI, 2d) * (this.nbPixInterf * Math.pow(ron, 2d) * (Math.pow(v12, 2d) + Math.pow(v13, 2d) + Math.pow(v23, 2d)))) / (2 * Math.pow(v123, 2d));
+
+    // total noise on closure phase
+    // per frame
+    double sclosph = Math.sqrt(scpphot + scpdet);
+
+    // repeat OBS measurements to reach totalObsTime minutes
+    sclosph /= Math.sqrt(this.totalObsTime * this.frameRate);
+
+    // t3PhiErr and t3AmpErr = t3Amp * radians(t3PhiErr) :
+    return Math.max(Math.toDegrees(sclosph), this.instrumentalPhaseBias);
   }
 
   /**
    * Return a random value from a Normal (a.k.a. Gaussian) distribution with the given standard deviation
+   *
+   * Equivalent to fortran code (kernel/lib/gsys/sysfor.f90)
+   *
+   * function rangau(sigma)
+   * !---------------------------------------------------------------------
+   * !       Normal gaussian distribution with R.M.S. equal to sigma
+   * !---------------------------------------------------------------------
+   *
    * @param sigma standard deviation
    * @return random value
    */
