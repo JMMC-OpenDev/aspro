@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: NoiseService.java,v 1.10 2010-08-26 08:53:24 bourgesl Exp $"
+ * "@(#) $Id: NoiseService.java,v 1.11 2010-08-26 15:27:15 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.10  2010/08/26 08:53:24  bourgesl
+ * minor changes (comments)
+ *
  * Revision 1.9  2010/08/25 15:56:15  bourgesl
  * added computeT3PhiError (ported from noise_lib) and correlated flux
  *
@@ -415,6 +418,25 @@ public final class NoiseService {
   }
 
   /**
+   * Compute error on visibility amplitude derived from computeVis2Error(vis)
+   *
+   * @param vis visibility amplitude
+   * @return visiblity error
+   */
+  public double computeVisError(final double vis) {
+
+    // vis2 error without bias :
+    final double errV2 = computeVis2Error(vis, false);
+
+    // dvis = d(vis2) / (2 * vis) :
+    // dvisRe = dVisIm = d(vis2) / (2 * (visRe + visIm)
+    final double errVis = errV2 / (2d * vis);
+
+    // convert instrumental phase bias as an error too. Use it as a limit.
+    return Math.max(errVis, vis * Math.toRadians(this.instrumentalPhaseBias));
+  }
+
+  /**
    * Return the correlated flux of the object
    * @param vis visibility amplitude
    * @return correlated flux
@@ -433,10 +455,21 @@ public final class NoiseService {
   /**
    * Compute error on square visibility
    *
-   * @param vis visibility
+   * @param vis visibility amplitude
    * @return square visiblity error
    */
   public double computeVis2Error(final double vis) {
+    return computeVis2Error(vis, true);
+  }
+
+  /**
+   * Compute error on square visibility
+   *
+   * @param vis visibility amplitude
+   * @param useBias use instrumentalVisibilityBias
+   * @return square visiblity error
+   */
+  private double computeVis2Error(final double vis, final boolean useBias) {
 
     // include instrumental visib
     final double visib = vis * this.vinst;
@@ -472,8 +505,11 @@ public final class NoiseService {
     // correct for instrumental visibility :
     svis2 /= Math.pow(this.vinst, 2d);
 
-    // instrumentalVisibilityBias is in percents :
-    return Math.max(svis2, this.instrumentalVisibilityBias * 0.01d);
+    if (useBias) {
+      // instrumentalVisibilityBias is in percents :
+      return Math.max(svis2, this.instrumentalVisibilityBias * 0.01d);
+    }
+    return svis2;
   }
 
   /**
