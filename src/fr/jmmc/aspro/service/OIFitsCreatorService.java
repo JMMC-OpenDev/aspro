@@ -50,10 +50,6 @@ public final class OIFitsCreatorService {
   /** enable the OIFits validation */
   private final static boolean DO_VALIDATE = false;
 
-  /* TODO remove : temporary error until correct errors are ready */
-  private final static double ERR_RATE = 1e-2d;
-  private final static double ERR_RATE_DEG = Math.toDegrees(1e-2d * Math.PI);
-
   /* members */
   /* input */
   /** observation settings */
@@ -462,7 +458,7 @@ public final class OIFitsCreatorService {
     // vars:
     double jd;
     double u, v;
-    double re, im, v2, flux;
+    double re, im, amp, flux;
 
     // Iterate on HA points :
     for (int i = 0, j = 0, k = 0, l = 0; i < this.nHAPoints; i++) {
@@ -526,11 +522,11 @@ public final class OIFitsCreatorService {
             re = this.visComplex[k][l].getReal();
             im = this.visComplex[k][l].getImaginary();
 
-            // VisData contains pure geometric models (i.e. without noise and error)
+            // visibility amplitude :
+            amp = this.visComplex[k][l].abs();
 
-            // store correlated fluxes i.e. multiply by the number of photons :
-            v2 = computeVis2(re, im);
-            flux = this.noiseService.computeCorrelatedFlux(v2);
+            // VisData contains pure correlated fluxes (i.e. without noise and error)
+            flux = this.noiseService.computeCorrelatedFlux(amp);
 
             visData[k][l][0] = (float) (flux * re);
             visData[k][l][1] = (float) (flux * im);
@@ -540,22 +536,20 @@ public final class OIFitsCreatorService {
             visErr[k][l][1] = 0f;
 
             // TODO : port amdlibFakeAmberDiffVis for AMBER only => VISAMP/PHI
-
             // For other instruments : OI_VIS is unavailable !
 
             // Following lines are invalid : TODO KILL
 
-            // amplitude with noise from Vis Re/Im :
-            visAmp[k][l] = Math.sqrt(v2);
+            // pure amplitude :
+            visAmp[k][l] = amp;
 
-            // TODO : remove
-            visAmpErr[k][l] = ERR_RATE;
+            // pure phase [-PI;PI] in degrees :
+            visPhi[k][l] = Math.toDegrees(this.visComplex[k][l].getArgument());
 
-            // phase [-PI;PI] in degrees with noise from Vis Re/Im :
-            visPhi[k][l] = Math.toDegrees(Math.atan2(im, re));
-
-            // TODO : remove
-            visPhiErr[k][l] = ERR_RATE_DEG;
+            // Unknown error : may be derived from vis2 error but it is not correct :
+            // it depends on the VIS AMP/PHI computation algorithm) :
+            visAmpErr[k][l] = Double.NaN;
+            visPhiErr[k][l] = Double.NaN;
           }
         }
 
@@ -629,7 +623,7 @@ public final class OIFitsCreatorService {
           // add noise :
           // Gilles : RANGAU(err/2) ou RANGAU(err) ????
 
-          vis2Data[k][l] = v2 + this.noiseService.randomGauss(err / 2d);
+          vis2Data[k][l] = v2 + this.noiseService.randomGauss(err);
         }
       }
     }
@@ -829,28 +823,26 @@ public final class OIFitsCreatorService {
             // phase [-PI;PI] in degrees :
             t3Phi[k][l] = Math.toDegrees(t3Data.getArgument());
 
-            // phase closure error (deg) :
-            errPhi = this.noiseService.computeT3PhiError(vis12.abs() , vis23.abs(), vis31.abs());
-            t3PhiErr[k][l] = errPhi;
+            // phase closure error (rad) :
+            errPhi = this.noiseService.computeT3PhiError(vis12.abs(), vis23.abs(), vis31.abs());
 
-            // amplitude error t3AmpErr = t3Amp * radians(t3PhiErr) :
-            errAmp = t3Amp[k][l] * Math.toRadians(errPhi);
+            // amplitude error t3AmpErr = t3Amp * t3PhiErr :
+            errAmp = t3Amp[k][l] * errPhi;
+
+            // convert errPhi in degrees :
+            errPhi = Math.toDegrees(errPhi);
+
+            t3PhiErr[k][l] = errPhi;
             t3AmpErr[k][l] = errAmp;
 
             // use same random number for the 2 values
-            rand =  this.noiseService.randomGauss(1d);
+            rand = this.noiseService.randomGauss(1d);
 
             // add noise :
             // Gilles : RANGAU(err/2) ou RANGAU(err) ????
 
             t3Amp[k][l] += rand * errAmp;
             t3Phi[k][l] += rand * errPhi;
-
-            /*
-              t3phi=t3phi+t3phierr*noise
-              t3amp=t3amp+t3amperr*noise
-            */
-
           }
         }
 
