@@ -104,8 +104,10 @@ public final class OIFitsCreatorService {
   private double integrationTime = 300d;
   /** noise service */
   private final NoiseService noiseService;
-  /** internal computed complex visibilities */
+  /** internal computed complex visibility [row][waveLength] */
   private Complex[][] visComplex = null;
+  /** internal complex visibility error [row][waveLength] */
+  private Complex[][] visError = null;
 
   /**
    * Protected constructor
@@ -374,12 +376,15 @@ public final class OIFitsCreatorService {
     final List<Model> models = this.target.getModels();
 
     if (models != null && !models.isEmpty()) {
-      // Allocate data array for complex visibilities :
-      final Complex[][] cVis = new Complex[this.nHAPoints * this.nBaseLines][this.nWaveLengths];
+      // Allocate data array for complex visibility and error :
+      final Complex[][] cVis = new Complex[this.nHAPoints * this.nBaseLines][];
+      final Complex[][] cVisError = new Complex[this.nHAPoints * this.nBaseLines][this.nWaveLengths];
 
       double u, v;
       final double[] ufreq = new double[this.nWaveLengths];
       final double[] vfreq = new double[this.nWaveLengths];
+
+      double err;
 
       // Iterate on HA points :
       for (int i = 0, j = 0, k = 0, l = 0; i < this.nHAPoints; i++) {
@@ -404,6 +409,9 @@ public final class OIFitsCreatorService {
           }
 
           // compute complex visibilities :
+
+          // TODO : normalize ??
+
           cVis[k] = ModelManager.getInstance().computeModels(ufreq, vfreq, models);
 
           if (cVis[k] == null) {
@@ -411,11 +419,22 @@ public final class OIFitsCreatorService {
             return;
           }
 
+          // Iterate on wave lengths :
+          for (l = 0; l < this.nWaveLengths; l++) {
+            // visibility amplitude error :
+            err = this.noiseService.computeVisError(cVis[k][l].abs());
+
+            // visRe = visIm = visAmpErr / SQRT(2) :
+            err /= Math.sqrt(2d);
+            cVisError[k][l] = new Complex(err, err);
+          }
+
           j++;
         }
       }
 
       this.visComplex = cVis;
+      this.visError = cVisError;
     }
   }
 
@@ -518,11 +537,11 @@ public final class OIFitsCreatorService {
 
           // Iterate on wave lengths :
           for (l = 0; l < this.nWaveLengths; l++) {
-            // complex data :
+            // pure complex visibility data :
             re = this.visComplex[k][l].getReal();
             im = this.visComplex[k][l].getImaginary();
 
-            // visibility amplitude :
+            // pure visibility amplitude :
             amp = this.visComplex[k][l].abs();
 
             // VisData contains pure correlated fluxes (i.e. without noise and error)
@@ -609,7 +628,7 @@ public final class OIFitsCreatorService {
 
         // Iterate on wave lengths :
         for (l = 0; l < this.nWaveLengths; l++) {
-          // complex data :
+          // pure complex visibility data :
           re = this.visComplex[k][l].getReal();
           im = this.visComplex[k][l].getImaginary();
 
@@ -620,9 +639,7 @@ public final class OIFitsCreatorService {
           err = this.noiseService.computeVis2Error(Math.sqrt(v2));
           vis2Err[k][l] = err;
 
-          // add noise :
-          // Gilles : RANGAU(err/2) ou RANGAU(err) ????
-
+          // add gaussian noise with sigma = err :
           vis2Data[k][l] = v2 + this.noiseService.randomGauss(err);
         }
       }
@@ -754,6 +771,7 @@ public final class OIFitsCreatorService {
           logger.fine("T3  baseline = " + Arrays.toString(triplet.getBaselineIndexes()[0]));
         }
 
+        // pure complex visibility data :
         visData12 = (hasModels) ? this.visComplex[vp + pos] : null;
         u12 = visUCoords[vp + pos];
         v12 = visVCoords[vp + pos];
@@ -766,6 +784,7 @@ public final class OIFitsCreatorService {
           logger.fine("T3  baseline = " + Arrays.toString(triplet.getBaselineIndexes()[1]));
         }
 
+        // pure complex visibility data :
         visData23 = (hasModels) ? this.visComplex[vp + pos] : null;
         u23 = visUCoords[vp + pos];
         v23 = visVCoords[vp + pos];
@@ -783,6 +802,7 @@ public final class OIFitsCreatorService {
           logger.fine("UV 12+23 = " + (u12 + u23) + ", " + (v12 + v23));
         }
 
+        // pure complex visibility data :
         visData13 = (hasModels) ? this.visComplex[vp + pos] : null;
 
         // if complex visibility are computed i.e. target has models :
@@ -835,13 +855,12 @@ public final class OIFitsCreatorService {
             t3PhiErr[k][l] = errPhi;
             t3AmpErr[k][l] = errAmp;
 
-            // use same random number for the 2 values
+            // use same random number for the 2 values (sigma = 1) :
             rand = this.noiseService.randomGauss(1d);
 
-            // add noise :
-            // Gilles : RANGAU(err/2) ou RANGAU(err) ????
-
+            // add gaussian noise with sigma = errAmp :
             t3Amp[k][l] += rand * errAmp;
+            // add gaussian noise with sigma = errPhi :
             t3Phi[k][l] += rand * errPhi;
           }
         }
