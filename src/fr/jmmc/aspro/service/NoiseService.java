@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: NoiseService.java,v 1.9 2010-08-25 15:56:15 bourgesl Exp $"
+ * "@(#) $Id: NoiseService.java,v 1.10 2010-08-26 08:53:24 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.9  2010/08/25 15:56:15  bourgesl
+ * added computeT3PhiError (ported from noise_lib) and correlated flux
+ *
  * Revision 1.8  2010/08/24 16:10:55  bourgesl
  * removed computeVisError and Vis2Error computation to be corrected later (gilles)
  *
@@ -177,7 +180,7 @@ public final class NoiseService {
 
     this.nbTel = stations.size();
 
-    // All telescopes have the same diameter :
+    // All telescopes have the same diameter for a given baseline :
     final Telescope tel = stations.get(0).getTelescope();
 
     this.telDiam = tel.getDiameter();
@@ -357,7 +360,7 @@ public final class NoiseService {
     final double peakflux = this.fracFluxInInterferometry * nbTotalPhot / this.nbPixInterf;
 
     if (logger.isLoggable(Level.FINE)) {
-      logger.fine("adaptiveOpticsMag          = " + adaptiveOpticsMag);
+      logger.fine("adaptiveOpticsMag          = " + this.adaptiveOpticsMag);
       logger.fine("strehl ratio               = " + sr);
       logger.fine("dlam                       = " + dlam);
       logger.fine("nbTotalPhot                = " + nbTotalPhot);
@@ -370,7 +373,7 @@ public final class NoiseService {
       this.dit *= this.detectorSaturation / peakflux;
 
       if (logger.isLoggable(Level.FINE)) {
-        logger.fine("DIT too long. Adjusting it to (possibly impossible) : " + dit + " s");
+        logger.fine("DIT too long. Adjusting it to (possibly impossible) : " + this.dit + " s");
       }
 
       nbFrameToSaturation = 1;
@@ -384,7 +387,7 @@ public final class NoiseService {
       this.dit = Math.min(this.dit, this.fringeTrackerMaxIntTime);
 
       if (logger.isLoggable(Level.FINE)) {
-        logger.fine("Observation can take advantage of FT. Adjusting DIT to : " + dit + " s");
+        logger.fine("Observation can take advantage of FT. Adjusting DIT to : " + this.dit + " s");
       }
     }
 
@@ -413,15 +416,18 @@ public final class NoiseService {
 
   /**
    * Return the correlated flux of the object
-   * @param vis2 square visibility
+   * @param vis visibility amplitude
    * @return correlated flux
    */
-  public double computeCorrelatedFlux(final double vis2) {
+  public double computeCorrelatedFlux(final double vis) {
+
+    // include instrumental visib
+    final double visib = vis * this.vinst;
 
     // squared correlated flux
-    double fcorrelsq = Math.pow(this.nbPhotonInI / this.nbTel, 2d) * vis2;
+    final double fcorrelsq = this.nbPhotonInI * visib / this.nbTel;
 
-    return Math.sqrt(fcorrelsq);
+    return fcorrelsq;
   }
 
   /**
@@ -433,7 +439,7 @@ public final class NoiseService {
   public double computeVis2Error(final double vis) {
 
     // include instrumental visib
-    double visib = vis * this.vinst;
+    final double visib = vis * this.vinst;
 
     // squared correlated flux
     double fcorrelsq = Math.pow(this.nbPhotonInI * visib / this.nbTel, 2d);
@@ -476,7 +482,7 @@ public final class NoiseService {
    * @param visAmp12 visibility amplitude of baseline AB = 12
    * @param visAmp23 visibility amplitude of baseline BC = 23
    * @param visAmp13 visibility amplitude of baseline AC = 13
-   * @return error on closure phase in degrees
+   * @return error on closure phase in radians
    */
   public double computeT3PhiError(final double visAmp12, final double visAmp23, final double visAmp13) {
 
@@ -509,8 +515,8 @@ public final class NoiseService {
     // repeat OBS measurements to reach totalObsTime minutes
     sclosph /= Math.sqrt(this.totalObsTime * this.frameRate);
 
-    // t3PhiErr and t3AmpErr = t3Amp * radians(t3PhiErr) :
-    return Math.max(Math.toDegrees(sclosph), this.instrumentalPhaseBias);
+    // t3PhiErr and t3AmpErr = t3Amp * t3PhiErr :
+    return Math.max(sclosph, Math.toRadians(this.instrumentalPhaseBias));
   }
 
   /**
