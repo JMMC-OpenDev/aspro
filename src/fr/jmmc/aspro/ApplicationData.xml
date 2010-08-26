@@ -42,9 +42,8 @@
   <releasenotes>
     <release version="0.5">
       <prerelease version="0.5.4">
-        <change></change>
-        <change>noise computation for OI_VIS derived from OI_VIS2 errors</change>
-        <change>proper noise computation for OI_VIS2</change>
+        <change>correlated fluxes set in OI_VIS</change>
+        <change>proper noise computation for OI_VIS2 and OI_T3</change>
         <change>Updated AO and instrument configurations to compute noise (VLTI / CHARA)</change>
         <change>Added observation time and atmosphere quality in UV coverage settings</change>
         <change>Sampling time is set to the default sampling time of the instrument when the instrument is changed</change>
