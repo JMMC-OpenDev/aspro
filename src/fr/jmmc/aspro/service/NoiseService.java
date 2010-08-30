@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: NoiseService.java,v 1.11 2010-08-26 15:27:15 bourgesl Exp $"
+ * "@(#) $Id: NoiseService.java,v 1.12 2010-08-30 15:55:59 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.11  2010/08/26 15:27:15  bourgesl
+ * restored computeVisError
+ *
  * Revision 1.10  2010/08/26 08:53:24  bourgesl
  * minor changes (comments)
  *
@@ -429,7 +432,6 @@ public final class NoiseService {
     final double errV2 = computeVis2Error(vis, false);
 
     // dvis = d(vis2) / (2 * vis) :
-    // dvisRe = dVisIm = d(vis2) / (2 * (visRe + visIm)
     final double errVis = errV2 / (2d * vis);
 
     // convert instrumental phase bias as an error too. Use it as a limit.
