@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: OIFitsAMBERService.java,v 1.1 2010-08-26 15:27:38 bourgesl Exp $"
+ * "@(#) $Id: OIFitsAMBERService.java,v 1.2 2010-08-30 15:56:34 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2010/08/26 15:27:38  bourgesl
+ * restored computeVisError for AmberDiffVis
+ * first port of amdlibFakeAmberDiffVis
+ *
  */
 package fr.jmmc.aspro.service;
 
@@ -34,6 +38,8 @@ public final class OIFitsAMBERService {
                                                -25.8090699917488d,
                                                7.84352873962491d,
                                                -1.57308595820081d};
+  /** constant complex (1,0) */
+  private final static Complex COMPLEX_1_0 = new Complex(1d, 0d);
 
   /**
    * Forbidden constructor
@@ -45,7 +51,7 @@ public final class OIFitsAMBERService {
   /**
    * Compute the differential visibility (amplitude / phase) according to AMBER amdlib algorithms
    * @param vis OI_VIS table
-   * @param visComplex computed complex visibility [row][waveLength]
+   * @param visComplex complex visibility [row][waveLength]
    * @param visError complex visibility error [row][waveLength]
    * @param waveLengths wavelengths
    */
@@ -68,35 +74,40 @@ public final class OIFitsAMBERService {
      * wlen[]                      =  waveLengths[]
      */
 
+    // number of rows in OI_VIS table :
     final int nRows = vis.getNbRows();
 
     /* loop on rows */
     int iRow;
 
-    final int nWaveLengths = waveLengths.length;
-
-    /* TODO : refactor later by nWaveLengths */
-    final int nbLVis = nWaveLengths;
+    // number of wavelengths :
+    final int nbLVis = waveLengths.length;
 
     int lVis = 0;
 
     /* We try to follow the paper's notations */
     final Complex[][] cpxVisTable = visComplex;
-    final Complex[][] sigma2_cpxVisTable = visError;
+    final Complex[][] sigma2_cpxVisTable = new Complex[nRows][nbLVis];
 
-    final Complex[][] cNopTable = new Complex[nRows][nWaveLengths];
-    final Complex[][] w1 = new Complex[nRows][nWaveLengths];
-    final Complex[][] sigma2_w1 = new Complex[nRows][nWaveLengths];
-    final Complex[][] cRefTable = new Complex[nRows][nWaveLengths];
-    final Complex[][] sigma2_cRefTable = new Complex[nRows][nWaveLengths];
+    final Complex[][] cNopTable = new Complex[nRows][nbLVis];
+    final Complex[][] w1 = new Complex[nRows][nbLVis];
+    final Complex[][] sigma2_w1 = new Complex[nRows][nbLVis];
+    final Complex[][] cRefTable = new Complex[nRows][nbLVis];
+    final Complex[][] sigma2_cRefTable = new Complex[nRows][nbLVis];
 
     final double[] opd = new double[nRows];
     final double[] cpxVisVectR = new double[nRows];
     final double[] cpxVisVectI = new double[nRows];
 
-    Complex phasor, cpxVis, sigma2_cpxVis;
-    Complex w1Avg = new Complex(0d, 0d);
+    Complex phasor, cpxVis, sigma2_cpxVis, w1Avg;
     double x;
+
+    // Output in OI_VIS table :
+    final double[][] visAmp = vis.getVisAmp();
+    final double[][] visAmpErr = vis.getVisAmpErr();
+
+    final double[][] visPhi = vis.getVisPhi();
+    final double[][] visPhiErr = vis.getVisPhiErr();
 
 
     /* Initialize opd: local copy where all bad pistons are Blank:
@@ -112,17 +123,18 @@ public final class OIFitsAMBERService {
      *
      * Skipped because :
      * cpxVisTable[(][)][]         =  visComplex[][]
-     * sigma2_cpxVisTable[(][)][]  =  visError[][]
-     *
      */
 
-    /*
-     * Initialize wlen
-     *
-     * Skipped because :
-     * wlen[]                      =  waveLengths[]
-     *
-     */
+    // Compute sigma2_cpxVis = visError**2 :
+    for (iRow = 0; iRow < nRows; iRow++) {
+
+      for (lVis = 0; lVis < nbLVis; lVis++) {
+
+        sigma2_cpxVisTable[iRow][lVis] = new Complex(
+                Math.pow(visError[iRow][lVis].getReal(), 2d),
+                Math.pow(visError[iRow][lVis].getImaginary(), 2d));
+      }
+    }
 
     /* First, correct coherent flux from achromatic piston phase (eq 2.2)*/
     /* Here the piston is Zero for the moment */
@@ -168,14 +180,6 @@ public final class OIFitsAMBERService {
       }
     }
 
-
-    final double[][] visAmp = vis.getVisAmp();
-    final double[][] visAmpErr = vis.getVisAmpErr();
-
-    final double[][] visPhi = vis.getVisPhi();
-    final double[][] visPhiErr = vis.getVisPhiErr();
-
-
     /* Now the interspectrum is cNopTable*~cRefTable. Store in w1. */
     for (iRow = 0; iRow < nRows; iRow++) {
 
@@ -216,8 +220,6 @@ public final class OIFitsAMBERService {
         visPhiErr[iRow][lVis] = Math.toDegrees(amdlibAbacusErrPhi(Math.sqrt(sigma2_w1[iRow][lVis].getReal()
                 + sigma2_w1[iRow][lVis].getImaginary())));
 
-
-        /* fprintf(stderr,"%lf, ",visTablePtr[iRow].diffVisPhi[lVis]*180/3.141592);    */
       }
     }
 
@@ -257,13 +259,19 @@ public final class OIFitsAMBERService {
 
   /**
    * Removes a constant phase (achromatic piston) on a complexVisibility vector.
+   * @param cpxVisTable computed complex visibility [row][waveLength] (input)
+   * @param cNopTable corrected complex visibility [row][waveLength] (output)
+   * @param nRows number of rows in OI_VIS
+   * @param nbLVis number of wavelengths
+   * @param waveLengths wave lengths
+   * @param pst piston / opd array
    */
   private static void amdlibCorrect3DVisTableFromAchromaticPiston(
           final Complex[][] cpxVisTable,
           final Complex[][] cNopTable,
           int nRows,
           int nbLVis,
-          final double[] wlen,
+          final double[] waveLengths,
           final double[] pst) {
 
     int iRow;
@@ -289,9 +297,12 @@ public final class OIFitsAMBERService {
          * change the sign of the displacements of, e.g., the Delay
          * lines that are used in templates.
          * x = (2 * M_PI/wlen[lVis]) * -1*pst[iFrame][iBase]; */
-        x = (2d * Math.PI / wlen[lVis]) * pst[iRow];
-
-        phasor = new Complex(Math.cos(x), -Math.sin(x));
+        if (pst[iRow] == 0d) {
+          phasor = COMPLEX_1_0;
+        } else {
+          x = (2d * Math.PI / waveLengths[lVis]) * pst[iRow];
+          phasor = new Complex(Math.cos(x), -Math.sin(x));
+        }
 
         cpxVis = cpxVisTable[iRow][lVis];
 
@@ -314,21 +325,20 @@ public final class OIFitsAMBERService {
       }
       cpxVisAvg = cpxVisAvg.multiply(1d / nbLVis);
 
-      /* Store conjugate complex values in tmpCpxVis as (constant)
-       * vector */
+      /* Store conjugate complex values in tmpCpxVis as (constant) vector */
       for (lVis = 0; lVis < nbLVis; lVis++) {
         tmpCpxVis[iRow][lVis] = cpxVisAvg.conjugate();
       }
-      /*Remove constant by multiplying the two */
+
+      /* Remove constant by multiplying the two */
       for (lVis = 0; lVis < nbLVis; lVis++) {
         phasor = tmpCpxVis[iRow][lVis];
         cpxVis = cNopTable[iRow][lVis];
 
-        /* Store Complex Product of the phasor with the coherent flux
-        in cNopTable*/
+        /* Store Complex Product of the phasor with the coherent flux in cNopTable*/
         cNopTable[iRow][lVis] = cpxVis.multiply(phasor);
       }
-      /*re-Flag cNopTable where cpxVis was Flagged : skipped flags */
+      /* re-Flag cNopTable where cpxVis was Flagged : skipped flags */
     }
   }
 
