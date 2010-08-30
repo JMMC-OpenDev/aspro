@@ -1,6 +1,7 @@
 package fr.jmmc.aspro.service;
 
 import edu.dartmouth.AstroSkyCalc;
+import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.BaseLine;
 import fr.jmmc.aspro.model.Beam;
 import fr.jmmc.aspro.model.oi.InterferometerConfiguration;
@@ -424,8 +425,9 @@ public final class OIFitsCreatorService {
             // visibility amplitude error :
             err = this.noiseService.computeVisError(cVis[k][l].abs());
 
-            // visRe = visIm = visAmpErr / SQRT(2) :
-            err /= Math.sqrt(2d);
+            // Gilles : how to distribute the error on RE/IM parts :
+
+            // visErrRe = visErrIm = visAmpErr for an uniform error distribution :
             cVisError[k][l] = new Complex(err, err);
           }
 
@@ -442,6 +444,9 @@ public final class OIFitsCreatorService {
    * Create the OI_VIS table using internal computed visComplex data
    */
   protected void createOIVis() {
+
+    // test if the instrument is AMBER to use dedicated diffVis algorithm :
+    final boolean isAmber = AsproConstants.INS_AMBER.equals(this.instrumentName);
 
     // Create OI_VIS table :
     final OIVis vis = new OIVis(this.oiFitsFile, this.instrumentName, this.nHAPoints * this.nBaseLines);
@@ -477,7 +482,10 @@ public final class OIFitsCreatorService {
     // vars:
     double jd;
     double u, v;
-    double re, im, amp, flux;
+    double re, im, flux, amp, dRe, dIm;
+
+    // complex visiblity with noise (sigma = visError)
+    final Complex[][] visComplexNoisy = new Complex[vis.getNbRows()][this.nWaveLengths];
 
     // Iterate on HA points :
     for (int i = 0, j = 0, k = 0, l = 0; i < this.nHAPoints; i++) {
@@ -544,31 +552,38 @@ public final class OIFitsCreatorService {
             // pure visibility amplitude :
             amp = this.visComplex[k][l].abs();
 
-            // VisData contains pure correlated fluxes (i.e. without noise and error)
+            // complex visibility error (visErrRe = visErrIm = visAmpErr) :
+            dRe = this.visError[k][l].getReal();
+            dIm = this.visError[k][l].getImaginary();
+
+            // add gaussian noise with sigma = dRe / dIm
+            visComplexNoisy[k][l] = new Complex(re + this.noiseService.randomGauss(dRe),
+                    im + this.noiseService.randomGauss(dIm));
+
+            // pure correlated fluxes :
             flux = this.noiseService.computeCorrelatedFlux(amp);
 
-            visData[k][l][0] = (float) (flux * re);
-            visData[k][l][1] = (float) (flux * im);
+            // store noisy correlated fluxes :
+            visData[k][l][0] = (float) (flux * visComplexNoisy[k][l].getReal());
+            visData[k][l][1] = (float) (flux * visComplexNoisy[k][l].getImaginary());
 
-            // also VisErr = 0 or SQRT(flux)
-            visErr[k][l][0] = 0f;
-            visErr[k][l][1] = 0f;
+            // error on correlated fluxes :
+            visErr[k][l][0] = (float) (flux * dRe);
+            visErr[k][l][1] = (float) (flux * dIm);
 
-            // TODO : port amdlibFakeAmberDiffVis for AMBER only => VISAMP/PHI
-            // For other instruments : OI_VIS is unavailable !
+            if (!isAmber) {
+              // This is not correct as differential visibility / phase depends on the instrument post processing :
 
-            // Following lines are invalid : TODO KILL
+              // noisy amplitude :
+              visAmp[k][l] = visComplexNoisy[k][l].abs();
 
-            // pure amplitude :
-            visAmp[k][l] = amp;
+              // noisy phase in degrees :
+              visPhi[k][l] = Math.toDegrees(visComplexNoisy[k][l].getArgument());
 
-            // pure phase [-PI;PI] in degrees :
-            visPhi[k][l] = Math.toDegrees(this.visComplex[k][l].getArgument());
-
-            // Unknown error : may be derived from vis2 error but it is not correct :
-            // it depends on the VIS AMP/PHI computation algorithm) :
-            visAmpErr[k][l] = Double.NaN;
-            visPhiErr[k][l] = Double.NaN;
+              // derived errors (wrong because it depends on the VIS AMP/PHI computation algorithm) :
+              visAmpErr[k][l] = dRe;
+              visPhiErr[k][l] = Math.toDegrees(dRe / amp);
+            }
           }
         }
 
@@ -577,6 +592,11 @@ public final class OIFitsCreatorService {
 
         j++;
       }
+    }
+
+    /* Compute visAmp / visPhi as amber does */
+    if (isAmber) {
+      OIFitsAMBERService.amdlibFakeAmberDiffVis(vis, visComplexNoisy, this.visError, this.waveLengths);
     }
 
     this.oiFitsFile.addOiTable(vis);
@@ -633,14 +653,15 @@ public final class OIFitsCreatorService {
           im = this.visComplex[k][l].getImaginary();
 
           // pure square visibility :
-          v2 = computeVis2(re, im);
+          v2 = Math.pow(re, 2d) + Math.pow(im, 2d);
+          vis2Data[k][l] = v2;
 
           // square visibility error :
           err = this.noiseService.computeVis2Error(Math.sqrt(v2));
           vis2Err[k][l] = err;
 
           // add gaussian noise with sigma = err :
-          vis2Data[k][l] = v2 + this.noiseService.randomGauss(err);
+          vis2Data[k][l] += this.noiseService.randomGauss(err);
         }
       }
     }
@@ -852,8 +873,8 @@ public final class OIFitsCreatorService {
             // convert errPhi in degrees :
             errPhi = Math.toDegrees(errPhi);
 
-            t3PhiErr[k][l] = errPhi;
             t3AmpErr[k][l] = errAmp;
+            t3PhiErr[k][l] = errPhi;
 
             // use same random number for the 2 values (sigma = 1) :
             rand = this.noiseService.randomGauss(1d);
@@ -881,16 +902,6 @@ public final class OIFitsCreatorService {
     }
 
     this.oiFitsFile.addOiTable(t3);
-  }
-
-  /**
-   * Return the square visibility from complex visibility
-   * @param visRe real part of the complex visibility
-   * @param visIm imaginary part of the complex visibility
-   * @return square visibility
-   */
-  private static double computeVis2(final double visRe, final double visIm) {
-    return Math.pow(visRe, 2d) + Math.pow(visIm, 2d);
   }
 
   /**
