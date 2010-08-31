@@ -387,8 +387,6 @@ public final class OIFitsCreatorService {
       final double[] ufreq = new double[this.nWaveLengths];
       final double[] vfreq = new double[this.nWaveLengths];
 
-      double visAmpErr, visErr;
-
       // Iterate on HA points :
       for (int i = 0, j = 0, k = 0, l = 0; i < this.nHAPoints; i++) {
 
@@ -412,9 +410,6 @@ public final class OIFitsCreatorService {
           }
 
           // compute complex visibilities :
-
-          // TODO : normalize ??
-
           cVis[k] = ModelManager.getInstance().computeModels(ufreq, vfreq, models);
 
           if (cVis[k] == null) {
@@ -443,7 +438,6 @@ public final class OIFitsCreatorService {
   protected void createOIVis() {
 
     // test if the instrument is AMBER to use dedicated diffVis algorithm :
-//    final boolean isAmber = false;
     final boolean isAmber = AsproConstants.INS_AMBER.equals(this.instrumentName);
 
     // Create OI_VIS table :
@@ -601,6 +595,8 @@ public final class OIFitsCreatorService {
     if (isAmber) {
       OIFitsAMBERService.amdlibFakeAmberDiffVis(vis, visComplexNoisy, this.visError, this.waveLengths);
     }
+
+    // TODO : if amber : do use this table.
 
     this.oiFitsFile.addOiTable(vis);
   }

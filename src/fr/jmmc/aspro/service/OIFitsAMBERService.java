@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: OIFitsAMBERService.java,v 1.3 2010-08-31 10:42:33 bourgesl Exp $"
+ * "@(#) $Id: OIFitsAMBERService.java,v 1.4 2010-08-31 15:53:37 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2010/08/31 10:42:33  bourgesl
+ * comments
+ *
  * Revision 1.2  2010/08/30 15:56:34  bourgesl
  * sigma2_vis = visErr^2
  *
@@ -112,14 +115,6 @@ public final class OIFitsAMBERService {
     final double[][] visPhiErr = vis.getVisPhiErr();
 
 
-    /* Initialize opd: local copy where all bad pistons are Blank:
-     * if opd = BLANK, cNopTable[iFrame][iBase] will be BLANK, and the avg
-     * and rms done at the end will avoid these values */
-    for (iRow = 0; iRow < nRows; iRow++) {
-      /* force opd to 0 : was :instantOpdPistonPtr[iRow]; */
-      opd[iRow] = 0d;
-    }
-
     /*
      * Immediately copy input cpxVis to 3D structure, flagging as BLANK when Flag is present
      *
@@ -136,6 +131,18 @@ public final class OIFitsAMBERService {
                 Math.pow(visError[iRow][lVis].getReal(), 2d),
                 Math.pow(visError[iRow][lVis].getImaginary(), 2d));
       }
+    }
+
+    // Aspro 2 : compute fake piston2T now :
+    
+
+
+    /* Initialize opd: local copy where all bad pistons are Blank:
+     * if opd = BLANK, cNopTable[iFrame][iBase] will be BLANK, and the avg
+     * and rms done at the end will avoid these values */
+    for (iRow = 0; iRow < nRows; iRow++) {
+      /* force opd to 0 : was :instantOpdPistonPtr[iRow]; */
+      opd[iRow] = 0d;
     }
 
     /* First, correct coherent flux from achromatic piston phase (eq 2.2)*/
@@ -219,8 +226,7 @@ public final class OIFitsAMBERService {
 
         visPhi[iRow][lVis] = Math.toDegrees(w1Avg.getArgument());
 
-        visPhiErr[iRow][lVis] = Math.toDegrees(amdlibAbacusErrPhi(Math.sqrt(sigma2_w1[iRow][lVis].getReal()
-                + sigma2_w1[iRow][lVis].getImaginary())));
+        visPhiErr[iRow][lVis] = Math.toDegrees(amdlibAbacusErrPhi(Math.sqrt(sigma2_w1[iRow][lVis].getReal() + sigma2_w1[iRow][lVis].getImaginary())));
 
       }
     }
@@ -239,8 +245,10 @@ public final class OIFitsAMBERService {
     }
 
     /* Compute VisAmp */
-    for (lVis = 0; lVis < nbLVis; lVis++) {
-      for (iRow = 0; iRow < nRows; iRow++) {
+    for (iRow = 0; iRow < nRows; iRow++) {
+
+      for (lVis = 0; lVis < nbLVis; lVis++) {
+
         /* The W1 vector */
 
         /* see eq 2.8 */
@@ -250,14 +258,36 @@ public final class OIFitsAMBERService {
         cpxVis = w1[iRow][lVis];
 
         cpxVisVectR[iRow] = phasor.getReal() * cpxVis.getReal() - phasor.getImaginary() * cpxVis.getImaginary();
-        cpxVisVectI[iRow] = phasor.getReal() * cpxVis.getImaginary() + phasor.getImaginary() * cpxVis.getReal();
+/*        cpxVisVectI[iRow] = phasor.getReal() * cpxVis.getImaginary() + phasor.getImaginary() * cpxVis.getReal(); */
 
         visAmp[iRow][lVis] = cpxVisVectR[iRow];
-        visAmpErr[iRow][lVis] = Math.sqrt(sigma2_w1[iRow][lVis].getImaginary()
-                + sigma2_w1[iRow][lVis].getReal());
+        visAmpErr[iRow][lVis] = Math.sqrt(sigma2_w1[iRow][lVis].getImaginary() + sigma2_w1[iRow][lVis].getReal());
       }
     }
   }
+
+
+
+/**
+ * Compute piston, iterative phasor method.
+ *
+ * TODO
+ */
+private static void amdlibFakeComputePiston2T(int                    nbLVis,
+                           final double[] wlen,
+                           final Complex[] cpxVisTable,
+                           final Complex[] s2cpxVisTable,
+                           final double[] pistonOPD,
+                           final double[] sigma,
+                           double                 wlenAvg,
+                           double                 wlenDifAvg,
+                           double                 R
+                           )
+  {
+
+  // TODO : port amdlibPiston.c
+}
+
 
   /**
    * Removes a constant phase (achromatic piston) on a complexVisibility vector.
