@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: OIFitsAMBERService.java,v 1.2 2010-08-30 15:56:34 bourgesl Exp $"
+ * "@(#) $Id: OIFitsAMBERService.java,v 1.3 2010-08-31 10:42:33 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2010/08/30 15:56:34  bourgesl
+ * sigma2_vis = visErr^2
+ *
  * Revision 1.1  2010/08/26 15:27:38  bourgesl
  * restored computeVisError for AmberDiffVis
  * first port of amdlibFakeAmberDiffVis
@@ -70,7 +73,6 @@ public final class OIFitsAMBERService {
      *
      * variable mapping :
      * cpxVisTable[(][)][]         =  visComplex[][]
-     * sigma2_cpxVisTable[(][)][]  =  visError[][]
      * wlen[]                      =  waveLengths[]
      */
 
