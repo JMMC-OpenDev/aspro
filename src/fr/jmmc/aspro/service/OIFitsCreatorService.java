@@ -57,6 +57,8 @@ public final class OIFitsCreatorService {
   private final ObservationSetting observation;
   /** selected target */
   private final Target target;
+  /** flag to add gaussian noise to quantities */
+  private final boolean doNoise = true;
 
   /* reused observability data */
   /** beam list */
@@ -385,7 +387,7 @@ public final class OIFitsCreatorService {
       final double[] ufreq = new double[this.nWaveLengths];
       final double[] vfreq = new double[this.nWaveLengths];
 
-      double err;
+      double visAmpErr, visErr;
 
       // Iterate on HA points :
       for (int i = 0, j = 0, k = 0, l = 0; i < this.nHAPoints; i++) {
@@ -422,13 +424,8 @@ public final class OIFitsCreatorService {
 
           // Iterate on wave lengths :
           for (l = 0; l < this.nWaveLengths; l++) {
-            // visibility amplitude error :
-            err = this.noiseService.computeVisError(cVis[k][l].abs());
-
-            // Gilles : how to distribute the error on RE/IM parts :
-
-            // visErrRe = visErrIm = visAmpErr for an uniform error distribution :
-            cVisError[k][l] = new Complex(err, err);
+            // complex visibility error :
+            cVisError[k][l] = this.noiseService.computeVisComplexError(cVis[k][l].abs());
           }
 
           j++;
@@ -446,6 +443,7 @@ public final class OIFitsCreatorService {
   protected void createOIVis() {
 
     // test if the instrument is AMBER to use dedicated diffVis algorithm :
+//    final boolean isAmber = false;
     final boolean isAmber = AsproConstants.INS_AMBER.equals(this.instrumentName);
 
     // Create OI_VIS table :
@@ -482,7 +480,7 @@ public final class OIFitsCreatorService {
     // vars:
     double jd;
     double u, v;
-    double re, im, flux, amp, dRe, dIm;
+    double visRe, visIm, flux, vAmp, visErrRe, visErrIm;
 
     // complex visiblity with noise (sigma = visError)
     final Complex[][] visComplexNoisy = new Complex[vis.getNbRows()][this.nWaveLengths];
@@ -546,30 +544,35 @@ public final class OIFitsCreatorService {
           // Iterate on wave lengths :
           for (l = 0; l < this.nWaveLengths; l++) {
             // pure complex visibility data :
-            re = this.visComplex[k][l].getReal();
-            im = this.visComplex[k][l].getImaginary();
+            visRe = this.visComplex[k][l].getReal();
+            visIm = this.visComplex[k][l].getImaginary();
 
             // pure visibility amplitude :
-            amp = this.visComplex[k][l].abs();
-
-            // complex visibility error (visErrRe = visErrIm = visAmpErr) :
-            dRe = this.visError[k][l].getReal();
-            dIm = this.visError[k][l].getImaginary();
-
-            // add gaussian noise with sigma = dRe / dIm
-            visComplexNoisy[k][l] = new Complex(re + this.noiseService.randomGauss(dRe),
-                    im + this.noiseService.randomGauss(dIm));
+            vAmp = this.visComplex[k][l].abs();
 
             // pure correlated fluxes :
-            flux = this.noiseService.computeCorrelatedFlux(amp);
+            flux = this.noiseService.computeCorrelatedFlux(vAmp);
 
-            // store noisy correlated fluxes :
-            visData[k][l][0] = (float) (flux * visComplexNoisy[k][l].getReal());
-            visData[k][l][1] = (float) (flux * visComplexNoisy[k][l].getImaginary());
+            // complex visibility error : visErrRe = visErrIm = visAmpErr / SQRT(2) :
+            visErrRe = this.visError[k][l].getReal();
+            visErrIm = this.visError[k][l].getImaginary();
 
             // error on correlated fluxes :
-            visErr[k][l][0] = (float) (flux * dRe);
-            visErr[k][l][1] = (float) (flux * dIm);
+            visErr[k][l][0] = (float) (flux * visErrRe);
+            visErr[k][l][1] = (float) (flux * visErrIm);
+
+            if (this.doNoise) {
+              // add gaussian noise with sigma = visErrRe / visErrIm :
+              visComplexNoisy[k][l] = new Complex(visRe + this.noiseService.randomGauss(visErrRe),
+                      visIm + this.noiseService.randomGauss(visErrIm));
+
+            } else {
+              visComplexNoisy[k][l] = this.visComplex[k][l];
+            }
+
+            // store pure or noisy correlated fluxes :
+            visData[k][l][0] = (float) (flux * visComplexNoisy[k][l].getReal());
+            visData[k][l][1] = (float) (flux * visComplexNoisy[k][l].getImaginary());
 
             if (!isAmber) {
               // This is not correct as differential visibility / phase depends on the instrument post processing :
@@ -580,9 +583,9 @@ public final class OIFitsCreatorService {
               // noisy phase in degrees :
               visPhi[k][l] = Math.toDegrees(visComplexNoisy[k][l].getArgument());
 
-              // derived errors (wrong because it depends on the VIS AMP/PHI computation algorithm) :
-              visAmpErr[k][l] = dRe;
-              visPhiErr[k][l] = Math.toDegrees(dRe / amp);
+              // derived errors :
+              visAmpErr[k][l] = this.visError[k][l].abs();
+              visPhiErr[k][l] = Math.toDegrees(visAmpErr[k][l] / vAmp);
             }
           }
         }
@@ -627,8 +630,8 @@ public final class OIFitsCreatorService {
     final boolean[][] flags = vis2.getFlag();
 
     // vars:
-    double re, im;
-    double v2, err;
+    double visRe, visIm;
+    double v2, v2Err;
 
     for (int k = 0, l = 0; k < nRows; k++) {
 
@@ -649,19 +652,21 @@ public final class OIFitsCreatorService {
         // Iterate on wave lengths :
         for (l = 0; l < this.nWaveLengths; l++) {
           // pure complex visibility data :
-          re = this.visComplex[k][l].getReal();
-          im = this.visComplex[k][l].getImaginary();
+          visRe = this.visComplex[k][l].getReal();
+          visIm = this.visComplex[k][l].getImaginary();
 
           // pure square visibility :
-          v2 = Math.pow(re, 2d) + Math.pow(im, 2d);
+          v2 = Math.pow(visRe, 2d) + Math.pow(visIm, 2d);
           vis2Data[k][l] = v2;
 
           // square visibility error :
-          err = this.noiseService.computeVis2Error(Math.sqrt(v2));
-          vis2Err[k][l] = err;
+          v2Err = this.noiseService.computeVis2Error(Math.sqrt(v2));
+          vis2Err[k][l] = v2Err;
 
-          // add gaussian noise with sigma = err :
-          vis2Data[k][l] += this.noiseService.randomGauss(err);
+          if (this.doNoise) {
+            // add gaussian noise with sigma = err :
+            vis2Data[k][l] += this.noiseService.randomGauss(v2Err);
+          }
         }
       }
     }
@@ -869,20 +874,21 @@ public final class OIFitsCreatorService {
 
             // amplitude error t3AmpErr = t3Amp * t3PhiErr :
             errAmp = t3Amp[k][l] * errPhi;
+            t3AmpErr[k][l] = errAmp;
 
             // convert errPhi in degrees :
             errPhi = Math.toDegrees(errPhi);
-
-            t3AmpErr[k][l] = errAmp;
             t3PhiErr[k][l] = errPhi;
 
-            // use same random number for the 2 values (sigma = 1) :
-            rand = this.noiseService.randomGauss(1d);
+            if (this.doNoise) {
+              // use same random number for the 2 values (sigma = 1) :
+              rand = this.noiseService.randomGauss(1d);
 
-            // add gaussian noise with sigma = errAmp :
-            t3Amp[k][l] += rand * errAmp;
-            // add gaussian noise with sigma = errPhi :
-            t3Phi[k][l] += rand * errPhi;
+              // add gaussian noise with sigma = errAmp :
+              t3Amp[k][l] += rand * errAmp;
+              // add gaussian noise with sigma = errPhi :
+              t3Phi[k][l] += rand * errPhi;
+            }
           }
         }
 
