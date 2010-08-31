@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: NoiseService.java,v 1.12 2010-08-30 15:55:59 bourgesl Exp $"
+ * "@(#) $Id: NoiseService.java,v 1.13 2010-08-31 10:42:07 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.12  2010/08/30 15:55:59  bourgesl
+ * removed comment
+ *
  * Revision 1.11  2010/08/26 15:27:15  bourgesl
  * restored computeVisError
  *
@@ -59,6 +62,7 @@ import fr.jmmc.aspro.model.util.AtmosphereQualityUtils;
 import java.util.List;
 import java.util.Random;
 import java.util.logging.Level;
+import org.apache.commons.math.complex.Complex;
 
 /**
  * This class performs the noise modelling of visibility data (error and noise) 
@@ -79,6 +83,8 @@ public final class NoiseService {
   public final static double H_PLANCK = 6.62606896e-34d;
   /** Speed of light (2.99792458e8) */
   public final static double C_LIGHT = 2.99792458e8d;
+  /** constant 1 / SQRT(2) */
+  private final static double SQRT_2_INV = 1d / Math.sqrt(2d);
 
   /* members */
 
@@ -421,32 +427,54 @@ public final class NoiseService {
   }
 
   /**
-   * Compute error on visibility amplitude derived from computeVis2Error(vis)
+   * Compute error on complex visibility derived from computeVis2Error(visAmp)
    *
-   * @param vis visibility amplitude
+   * @param visAmp visibility amplitude
+   * @return complex visiblity error
+   */
+  public Complex computeVisComplexError(final double visAmp) {
+
+    // visibility amplitude error :
+    final double visAmpErr = computeVisError(visAmp);
+
+    // Distribute the error on RE/IM parts for an uniform error distribution :
+    // see These Martin Vannier (2003) p 76
+
+    // sigma2(visRe) = 1/2 ( sigma2(visRe) + sigma2(visIm) = sigma2(vis) / 2
+
+    // complex visibility error : visErrRe = visErrIm = visAmpErr / SQRT(2) :
+    final double visErr = visAmpErr * SQRT_2_INV;
+
+    return new Complex(visErr, visErr);
+  }
+
+  /**
+   * Compute error on visibility amplitude derived from computeVis2Error(visAmp)
+   *
+   * @param visAmp visibility amplitude
    * @return visiblity error
    */
-  public double computeVisError(final double vis) {
+  private double computeVisError(final double visAmp) {
 
     // vis2 error without bias :
-    final double errV2 = computeVis2Error(vis, false);
+    final double errV2 = computeVis2Error(visAmp, false);
 
     // dvis = d(vis2) / (2 * vis) :
-    final double errVis = errV2 / (2d * vis);
+    final double visAmpErr = errV2 / (2d * visAmp);
 
     // convert instrumental phase bias as an error too. Use it as a limit.
-    return Math.max(errVis, vis * Math.toRadians(this.instrumentalPhaseBias));
+    return Math.max(visAmpErr, visAmp * Math.toRadians(this.instrumentalPhaseBias));
   }
 
   /**
    * Return the correlated flux of the object
-   * @param vis visibility amplitude
+   * @param visAmp visibility amplitude
    * @return correlated flux
    */
-  public double computeCorrelatedFlux(final double vis) {
+  public double computeCorrelatedFlux(final double visAmp) {
 
     // include instrumental visib
-    final double visib = vis * this.vinst;
+    final double visib = visAmp * this.vinst;
 
     // squared correlated flux
     final double fcorrelsq = this.nbPhotonInI * visib / this.nbTel;
@@ -457,24 +485,24 @@ public final class NoiseService {
   /**
    * Compute error on square visibility
    *
-   * @param vis visibility amplitude
+   * @param visAmp visibility amplitude
    * @return square visiblity error
    */
-  public double computeVis2Error(final double vis) {
-    return computeVis2Error(vis, true);
+  public double computeVis2Error(final double visAmp) {
+    return computeVis2Error(visAmp, true);
   }
 
   /**
    * Compute error on square visibility
    *
-   * @param vis visibility amplitude
+   * @param visAmp visibility amplitude
    * @param useBias use instrumentalVisibilityBias
    * @return square visiblity error
    */
-  private double computeVis2Error(final double vis, final boolean useBias) {
+  private double computeVis2Error(final double visAmp, final boolean useBias) {
 
     // include instrumental visib
-    final double visib = vis * this.vinst;
+    final double visib = visAmp * this.vinst;
 
     // squared correlated flux
     double fcorrelsq = Math.pow(this.nbPhotonInI * visib / this.nbTel, 2d);
@@ -519,20 +547,20 @@ public final class NoiseService {
    *
    * @param visAmp12 visibility amplitude of baseline AB = 12
    * @param visAmp23 visibility amplitude of baseline BC = 23
-   * @param visAmp13 visibility amplitude of baseline AC = 13
+   * @param visAmp31 visibility amplitude of baseline CA = 31
    * @return error on closure phase in radians
    */
-  public double computeT3PhiError(final double visAmp12, final double visAmp23, final double visAmp13) {
+  public double computeT3PhiError(final double visAmp12, final double visAmp23, final double visAmp31) {
 
     // include instrumental visib
     final double v1 = visAmp12 * this.vinst;
     final double v2 = visAmp23 * this.vinst;
-    final double v3 = visAmp13 * this.vinst;
+    final double v3 = visAmp31 * this.vinst;
 
     final double v123 = v1 * v2 * v3;
     final double v12 = v1 * v2;
-    final double v13 = v1 * v2;
-    final double v23 = v1 * v2;
+    final double v13 = v1 * v3;
+    final double v23 = v2 * v3;
 
     // photon noise on closure phase
     final double scpphot = (Math.pow(this.nbTel / this.nbPhotonInI, 3d) * (Math.pow(this.nbTel, 3d) - 2d * v123)
