@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: CombTest.java,v 1.1 2010-06-30 14:53:30 bourgesl Exp $"
+ * "@(#) $Id: CombTest.java,v 1.2 2010-09-01 12:55:56 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2010/06/30 14:53:30  bourgesl
+ * new Combinatory utilities to get n-tuples and combinations + test case
+ *
  */
 package test;
 
@@ -22,7 +25,23 @@ public class CombTest {
     test(2);
     test(3);
     test(4);
-    test(6);
+//    test(6);
+
+    List<int[]> res;
+
+    System.out.println("permutations 2 :");
+    res = CombUtils.generatePermutations(2);
+    showResults(res);
+
+    System.out.println("permutations 3 :");
+    res = CombUtils.generatePermutations(3);
+    showResults(res);
+
+    System.out.println("permutations 4 :");
+    res = CombUtils.generatePermutations(4);
+    showResults(res);
+
+    System.out.println("----------------------------------------");
   }
 
   private static final void test(final int nTel) {
