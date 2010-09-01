@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBVLTIAction.java,v 1.10 2010-09-01 13:21:32 bourgesl Exp $"
+ * "@(#) $Id: ExportOBVLTIAction.java,v 1.11 2010-09-01 16:24:42 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.10  2010/09/01 13:21:32  bourgesl
+ * added popup message
+ *
  * Revision 1.9  2010/09/01 12:57:13  bourgesl
  * added runtime exception message to user message dialog
  *
@@ -43,9 +46,11 @@
  */
 package fr.jmmc.aspro.gui.action;
 
+import fr.jmmc.aspro.Preferences;
 import fr.jmmc.aspro.gui.UVCoveragePanel;
 import fr.jmmc.aspro.ob.ExportOBVLTI;
 import fr.jmmc.aspro.util.FileUtils;
+import fr.jmmc.mcs.gui.DismissableMessagePane;
 import fr.jmmc.mcs.gui.StatusBar;
 import fr.jmmc.mcs.util.FileFilterRepository;
 import java.awt.event.ActionEvent;
@@ -159,11 +164,7 @@ public class ExportOBVLTIAction {
         StatusBar.show(file.getName() + " created.");
 
         // PoP up to validate OB file against ESO CfP :
-        // TODO : use a custom dialog with a checkbox (Do not show this message again ...)
-        JOptionPane.showMessageDialog(null,
-                ESO_WARNING,
-                "Information", JOptionPane.INFORMATION_MESSAGE);
-
+        DismissableMessagePane.show(null, ESO_WARNING, Preferences.getInstance(), "ESO_OB_WARNING");
 
       } catch (RuntimeException re) {
         logger.log(Level.SEVERE, "runtime failure : ", re);
