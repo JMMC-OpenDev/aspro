@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBVLTIAction.java,v 1.9 2010-09-01 12:57:13 bourgesl Exp $"
+ * "@(#) $Id: ExportOBVLTIAction.java,v 1.10 2010-09-01 13:21:32 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.9  2010/09/01 12:57:13  bourgesl
+ * added runtime exception message to user message dialog
+ *
  * Revision 1.8  2010/06/17 10:02:50  bourgesl
  * fixed warning hints - mainly not final static loggers
  *
@@ -69,6 +72,9 @@ public class ExportOBVLTIAction {
   public static final String OBX_MIME_TYPE = "application/obx";
   /** OBX extension */
   public static final String OBX_EXT = "obx";
+  /** Eso warning message */
+  public static final String ESO_WARNING = "Please check that your observing block \n conforms to the current ESO Call for Proposal \n (object magnitudes, instrument limits ...)";
+
   /** action singleton */
   private static final ExportOBVLTIAction instance = new ExportOBVLTIAction();
 
@@ -151,6 +157,13 @@ public class ExportOBVLTIAction {
         ExportOBVLTI.process(file, targetName);
 
         StatusBar.show(file.getName() + " created.");
+
+        // PoP up to validate OB file against ESO CfP :
+        // TODO : use a custom dialog with a checkbox (Do not show this message again ...)
+        JOptionPane.showMessageDialog(null,
+                ESO_WARNING,
+                "Information", JOptionPane.INFORMATION_MESSAGE);
+
 
       } catch (RuntimeException re) {
         logger.log(Level.SEVERE, "runtime failure : ", re);
