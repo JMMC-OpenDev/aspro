@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: LoadObservationAction.java,v 1.7 2010-07-07 15:11:51 bourgesl Exp $"
+ * "@(#) $Id: LoadObservationAction.java,v 1.8 2010-09-01 12:57:13 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2010/07/07 15:11:51  bourgesl
+ * fixed comment
+ *
  * Revision 1.6  2010/06/17 10:02:50  bourgesl
  * fixed warning hints - mainly not final static loggers
  *
@@ -105,8 +108,10 @@ public class LoadObservationAction extends ObservationFileAction {
       } catch (RuntimeException re) {
         logger.log(Level.SEVERE, "runtime failure : ", re);
 
+        final String message = "Could not load the file : " + file.getName() + "\n\n" + re.getMessage();
+
         JOptionPane.showMessageDialog(null,
-                "Could not load file " + file.getName(),
+                message,
                 "Error", JOptionPane.ERROR_MESSAGE);
       }
 

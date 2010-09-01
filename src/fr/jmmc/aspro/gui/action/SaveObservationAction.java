@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SaveObservationAction.java,v 1.8 2010-06-17 10:02:50 bourgesl Exp $"
+ * "@(#) $Id: SaveObservationAction.java,v 1.9 2010-09-01 12:57:13 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.8  2010/06/17 10:02:50  bourgesl
+ * fixed warning hints - mainly not final static loggers
+ *
  * Revision 1.7  2010/06/11 13:48:09  bourgesl
  * javadoc
  *
@@ -109,8 +112,10 @@ public class SaveObservationAction extends ObservationFileAction {
       } catch (RuntimeException re) {
         logger.log(Level.SEVERE, "runtime failure : ", re);
 
+        final String message = "Could not save the file : " + file.getName() + "\n\n" + re.getMessage();
+
         JOptionPane.showMessageDialog(null,
-                "Could not save file " + file.getName(),
+                message,
                 "Error", JOptionPane.ERROR_MESSAGE);
       }
 

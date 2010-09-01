@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBVLTIAction.java,v 1.8 2010-06-17 10:02:50 bourgesl Exp $"
+ * "@(#) $Id: ExportOBVLTIAction.java,v 1.9 2010-09-01 12:57:13 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.8  2010/06/17 10:02:50  bourgesl
+ * fixed warning hints - mainly not final static loggers
+ *
  * Revision 1.7  2010/06/10 13:43:42  bourgesl
  * fixed file description with extension
  *
@@ -152,8 +155,10 @@ public class ExportOBVLTIAction {
       } catch (RuntimeException re) {
         logger.log(Level.SEVERE, "runtime failure : ", re);
 
+        final String message = "Could not export to file : " + file.getName() + "\n\n" + re.getMessage();
+
         JOptionPane.showMessageDialog(null,
-                "Could not export to file " + file.getName() + "\n" + re.getMessage(),
+                message,
                 "Error", JOptionPane.ERROR_MESSAGE);
       }
     }
