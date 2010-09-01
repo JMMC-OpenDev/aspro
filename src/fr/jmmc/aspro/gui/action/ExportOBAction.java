@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBAction.java,v 1.2 2010-06-17 10:02:50 bourgesl Exp $"
+ * "@(#) $Id: ExportOBAction.java,v 1.3 2010-09-01 16:24:30 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2010/06/17 10:02:50  bourgesl
+ * fixed warning hints - mainly not final static loggers
+ *
  * Revision 1.1  2010/06/09 12:53:00  bourgesl
  * new action (menu File) that calls the uv coverage panel method performOBAction()
  *
@@ -51,17 +54,13 @@ public class ExportOBAction extends RegisteredAction {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("actionPerformed");
     }
-    try {
-      final AsproGui app = (AsproGui) App.getSharedInstance();
-      final UVCoveragePanel uvCoveragePanel = app.getSettingPanel().getUVCoveragePanel();
 
-      // be sure the uv panel is visible to avoid user wrong inputs :
-      if (uvCoveragePanel != null && uvCoveragePanel.isVisible()) {
-        uvCoveragePanel.performOBAction(evt);
-      }
-    } catch (Exception ex) {
-      // @todo handle this error at user level
-      logger.log(Level.SEVERE, "actionPerformed", ex);
+    final AsproGui app = (AsproGui) App.getSharedInstance();
+    final UVCoveragePanel uvCoveragePanel = app.getSettingPanel().getUVCoveragePanel();
+
+    // be sure the uv panel is visible to avoid user wrong inputs :
+    if (uvCoveragePanel != null && uvCoveragePanel.isVisible()) {
+      uvCoveragePanel.performOBAction(evt);
     }
   }
 }

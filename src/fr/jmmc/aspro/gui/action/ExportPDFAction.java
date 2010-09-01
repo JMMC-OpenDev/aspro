@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportPDFAction.java,v 1.10 2010-09-01 12:57:14 bourgesl Exp $"
+ * "@(#) $Id: ExportPDFAction.java,v 1.11 2010-09-01 16:24:30 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.10  2010/09/01 12:57:14  bourgesl
+ * added runtime exception message to user message dialog
+ *
  * Revision 1.9  2010/06/17 10:02:50  bourgesl
  * fixed warning hints - mainly not final static loggers
  *
@@ -113,18 +116,14 @@ public class ExportPDFAction extends RegisteredAction {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("actionPerformed");
     }
-    try {
-      final AsproGui app = (AsproGui) App.getSharedInstance();
 
-      final Component selectedPanel = app.getSettingPanel().getTabSelectedComponent();
+    final AsproGui app = (AsproGui) App.getSharedInstance();
 
-      // be sure the selected panel implements PDFExportable (not null of course) :
-      if (selectedPanel instanceof PDFExportable) {
-        ((PDFExportable) selectedPanel).performPDFAction();
-      }
-    } catch (Exception ex) {
-      // @todo handle this error at user level
-      logger.log(Level.SEVERE, "actionPerformed", ex);
+    final Component selectedPanel = app.getSettingPanel().getTabSelectedComponent();
+
+    // be sure the selected panel implements PDFExportable (not null of course) :
+    if (selectedPanel instanceof PDFExportable) {
+      ((PDFExportable) selectedPanel).performPDFAction();
     }
   }
 
