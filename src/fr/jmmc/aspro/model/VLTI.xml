@@ -8824,16 +8824,16 @@
       </configuration>
       <!-- A1 G1 K0 I1 -->
       <configuration>
-        <stations>A1 G1 K0</stations>
-      </configuration>
-      <configuration>
-        <stations>A1 G1 I1</stations>
+        <stations>A1 K0 G1</stations>
       </configuration>
       <configuration>
         <stations>A1 K0 I1</stations>
       </configuration>
       <configuration>
-        <stations>G1 K0 I1</stations>
+        <stations>A1 G1 I1</stations>
+      </configuration>
+      <configuration>
+        <stations>K0 G1 I1</stations>
       </configuration>
       <!-- D0 H0 G1 I1 -->
       <configuration>
