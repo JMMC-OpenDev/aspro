@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationManager.java,v 1.34 2010-07-22 15:45:43 bourgesl Exp $"
+ * "@(#) $Id: ObservationManager.java,v 1.35 2010-09-01 12:59:07 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.34  2010/07/22 15:45:43  bourgesl
+ * added acquisition time in UV coverage and observation
+ *
  * Revision 1.33  2010/07/22 14:31:55  bourgesl
  * added atmosphere quality in WhenSetting (optional)
  * added getSeeing() in AtmosphereQualityUtils
@@ -126,9 +129,11 @@ import fr.jmmc.aspro.model.oi.AtmosphereQuality;
 import fr.jmmc.aspro.model.oi.FocalInstrumentConfigurationChoice;
 import fr.jmmc.aspro.model.oi.InterferometerConfigurationChoice;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
+import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetConfiguration;
 import fr.jmmc.aspro.model.oi.WhenSetting;
+import fr.jmmc.aspro.util.CombUtils;
 import fr.jmmc.mcs.astro.star.Star;
 import fr.jmmc.oitools.model.OIFitsFile;
 import java.io.File;
@@ -194,8 +199,9 @@ public class ObservationManager extends BaseOIManager {
   /**
    * Define default values (empty child objects)
    * @param newObservation observation to modify
+   * @throws IllegalStateException if an invalid reference was found (interferometer / instrument / instrument configuration)
    */
-  private void defineDefaults(final ObservationSetting newObservation) {
+  private void defineDefaults(final ObservationSetting newObservation) throws IllegalStateException {
     if (newObservation.getName() == null || newObservation.getName().length() == 0) {
       this.observation.setName("default");
     }
@@ -507,14 +513,19 @@ public class ObservationManager extends BaseOIManager {
     return (value1 == null && value2 != null) || (value1 != null && value2 == null) || (value1 != null && value2 != null && !value1.equals(value2));
   }
 
-  private void updateObservation(final ObservationSetting obs) {
+  /**
+   * Update observation with resolved references  (interferometer / instrument / instrument configuration ...)
+   * @param obs observation to use
+   * @throws IllegalStateException if an invalid reference was found (interferometer / instrument / instrument configuration)
+   */
+  private void updateObservation(final ObservationSetting obs) throws IllegalStateException {
     // ugly code to update all resolved references used on post load :
     final InterferometerConfigurationChoice interferometerChoice = obs.getInterferometerConfiguration();
 
     interferometerChoice.setInterferometerConfiguration(this.cm.getInterferometerConfiguration(interferometerChoice.getName()));
 
     if (interferometerChoice.getInterferometerConfiguration() == null) {
-      throw new IllegalStateException("the interferometer configuration [" + interferometerChoice.getName() + "] is not found !");
+      throw new IllegalStateException("the interferometer configuration [" + interferometerChoice.getName() + "] is invalid !");
     }
 
     final FocalInstrumentConfigurationChoice instrumentChoice = obs.getInstrumentConfiguration();
@@ -523,14 +534,16 @@ public class ObservationManager extends BaseOIManager {
             interferometerChoice.getName(), instrumentChoice.getName()));
 
     if (instrumentChoice.getInstrumentConfiguration() == null) {
-      throw new IllegalStateException("the instrument configuration [" + instrumentChoice.getName() + "] is not found !");
+      throw new IllegalStateException("the instrument [" + instrumentChoice.getName() + "] is invalid !");
     }
 
     instrumentChoice.setStationList(this.cm.getInstrumentConfigurationStations(
             interferometerChoice.getName(), instrumentChoice.getName(), instrumentChoice.getStations()));
 
     if (instrumentChoice.getStationList() == null) {
-      throw new IllegalStateException("the station list is empty !");
+      if (!fixInstrumentConfigurationStations(interferometerChoice.getName(), instrumentChoice)) {
+        throw new IllegalStateException("the instrument configuration [" + instrumentChoice.getStations() + "] is invalid !");
+      }
     }
 
     // pops can be undefined :
@@ -544,6 +557,90 @@ public class ObservationManager extends BaseOIManager {
     if (logger.isLoggable(Level.FINEST)) {
       logger.finest("updateObservation : " + toString(obs));
     }
+  }
+
+  /**
+   * Try to fix an invalid instrument configuration (A0 B0 C0) by testing all possible permutation of the stations.
+   * This problem that can happen if
+   * - ESO CfP changes
+   * - we have errors in our configuration files
+   *
+   * for example : A0 B0 C0 is equivalent to C0 B0 A0
+   *
+   * @param interferometerConfiguration interferometer configuration name
+   * @param instrumentChoice instrument choice
+   * @return true if instrument configuration is fixed
+   */
+  private boolean fixInstrumentConfigurationStations(final String interferometerConfiguration,
+                                                     final FocalInstrumentConfigurationChoice instrumentChoice) {
+    boolean res = false;
+
+    // trim to be sure (xml manually modified) :
+    final String stationNames = instrumentChoice.getStations().trim();
+
+    if (logger.isLoggable(Level.INFO)) {
+      logger.info("the instrument configuration [" + stationNames + "] is incorrect, trying to match a possible configuration ...");
+    }
+
+    // A0 B0 C0 is equivalent to C0 B0 A0
+    final String[] stations = stationNames.split(" ");
+
+    // number of stations in the string :
+    final int nStation = stations.length;
+
+    if (nStation < 2) {
+      // bad value
+      return false;
+    }
+
+    // generate station combinations (indexes) : :
+    final List<int[]> iStations = CombUtils.generatePermutations(nStation);
+
+    String stationIds = null;
+    List<Station> stationList = null;
+
+    final StringBuilder sb = new StringBuilder();
+
+    int[] idx;
+    // skip first permutation as it is equivalent to stationNames :
+    for (int i = 1, j = 0, size = iStations.size(); i < size; i++) {
+      idx = iStations.get(i);
+
+      for (j = 0; j < nStation; j++) {
+        if (j > 0) {
+          sb.append(" ");
+        }
+        sb.append(stations[idx[j]]);
+      }
+
+      stationIds = sb.toString();
+      // recycle :
+      sb.setLength(0);
+
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("trying instrument configuration [" + stationIds + "]");
+      }
+
+      // find station list corresponding to the station ids :
+      stationList = this.cm.getInstrumentConfigurationStations(
+              interferometerConfiguration, instrumentChoice.getName(), stationIds);
+
+      if (stationList != null) {
+        break;
+      }
+    }
+
+    if (stationList != null) {
+      res = true;
+
+      instrumentChoice.setStations(stationIds);
+      instrumentChoice.setStationList(stationList);
+
+      if (logger.isLoggable(Level.INFO)) {
+        logger.info("the correct instrument configuration is [" + stationIds + "]. Save your file to keep this modification");
+      }
+    }
+    return res;
   }
 
   /**
@@ -788,8 +885,9 @@ public class ObservationManager extends BaseOIManager {
    * Load an observation from the given file
    * @param file file to load
    * @throws RuntimeException if the load operation failed
+   * @throws IllegalStateException if an invalid reference was found (interferometer / instrument / instrument configuration)
    */
-  public void load(final File file) throws RuntimeException {
+  public void load(final File file) throws RuntimeException, IllegalStateException {
     if (file != null) {
       this.observationFile = file;
 
@@ -799,7 +897,7 @@ public class ObservationManager extends BaseOIManager {
       final Object loaded = loadObject(this.observationFile);
 
       if (!(loaded instanceof ObservationSetting)) {
-        throw new RuntimeException("The file does not correspond to observation settings : " + file);
+        throw new RuntimeException("The loaded file does not correspond to a valid Aspro2 file : " + file);
       }
 
       final ObservationSetting newObservation = (ObservationSetting) loaded;
@@ -821,8 +919,9 @@ public class ObservationManager extends BaseOIManager {
    * Change the current observation with the given one
    * and fire load and change events
    * @param newObservation observation to use
+   * @throws IllegalStateException if an invalid reference was found (interferometer / instrument / instrument configuration)
    */
-  private void changeObservation(final ObservationSetting newObservation) {
+  private void changeObservation(final ObservationSetting newObservation) throws IllegalStateException {
     defineDefaults(newObservation);
 
     // change the current observation :
