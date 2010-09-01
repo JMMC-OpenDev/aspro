@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <ApplicationData link="http://www.jmmc.fr/aspro2">
-  <program name="Aspro2" version="0.5.4"/>
+  <program name="Aspro2" version="0.5.5"/>
   <compilation date="21/09/2009" compiler="JDK 1.5.0_16"/>
   <text>
     <![CDATA[ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations
@@ -41,9 +41,14 @@
   </menubar>
   <releasenotes>
     <release version="0.5">
+      <prerelease version="0.5.5">
+        <change>Added a pop up to tell the user to check its VLTI OB file against ESO CfP rules</change>
+        <change>Fixed some configuration for AMBER in Period 87 (wrong station ordering) and the
+        loading action to even load such observation files</change>
+      </prerelease>
       <prerelease version="0.5.4">
-        <change>correlated fluxes set in OI_VIS</change>
-        <change>proper noise computation for OI_VIS2 and OI_T3</change>
+        <change>Correlated fluxes set in OI_VIS</change>
+        <change>Proper noise computation for OI_VIS2 and OI_T3</change>
         <change>Updated AO and instrument configurations to compute noise (VLTI / CHARA)</change>
         <change>Added observation time and atmosphere quality in UV coverage settings</change>
         <change>Sampling time is set to the default sampling time of the instrument when the instrument is changed</change>
