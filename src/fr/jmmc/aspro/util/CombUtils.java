@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: CombUtils.java,v 1.1 2010-06-30 14:53:29 bourgesl Exp $"
+ * "@(#) $Id: CombUtils.java,v 1.2 2010-09-01 12:59:25 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2010/06/30 14:53:29  bourgesl
+ * new Combinatory utilities to get n-tuples and combinations + test case
+ *
  */
 package fr.jmmc.aspro.util;
 
@@ -103,6 +106,62 @@ public final class CombUtils {
         recursiveCombinations(n, k, results, current, position + 1, i + 1);
       }
     }
+  }
+
+  /**
+   * Generate all permutations (no repetition, but ordering)
+   * @param n number of elements
+   * @return list of all permutations (integer arrays)
+   */
+  public final static List<int[]> generatePermutations(final int n) {
+
+    final int[] input = new int[n];
+    for (int i = 0; i < n; i++) {
+      input[i] = i;
+    }
+    final int count = fact(n);
+
+    final List<int[]> results = new ArrayList<int[]>(count);
+
+    recursivePermutations(0, n, input, results);
+
+    return results;
+  }
+
+  /**
+   * Recursive algorithm to generate all permutations
+   * @param offset position in the array
+   * @param len input array length
+   * @param input input array
+   * @param output output list
+   */
+  private static void recursivePermutations(final int offset, final int len, final int[] input, final List<int[]> output) {
+    if (len - offset == 1) {
+      // Input now contains a permutation, here I store it in output,
+      // but you can do anything you like with it
+      final int[] o = new int[len];
+      System.arraycopy(input, 0, o, 0, len);
+
+      output.add(o);
+      return;
+    }
+
+    final int a = input[offset];
+    int b;
+
+    for (int i = offset; i < len; i++) {
+      // Swap elements
+      b = input[i];
+      input[i] = a;
+      input[offset] = b;
+
+      recursivePermutations(offset + 1, len, input, output);
+
+      // Restore element
+      input[i] = b;
+    }
+
+    input[offset] = a;
   }
 
   /**
