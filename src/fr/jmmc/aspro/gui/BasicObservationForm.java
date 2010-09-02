@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BasicObservationForm.java,v 1.33 2010-07-07 15:12:41 bourgesl Exp $"
+ * "@(#) $Id: BasicObservationForm.java,v 1.34 2010-09-02 15:46:43 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.33  2010/07/07 15:12:41  bourgesl
+ * use configuration manager member
+ *
  * Revision 1.32  2010/06/28 12:26:54  bourgesl
  * date is always enabled because it is used in OIFits files
  *
@@ -108,6 +111,7 @@ import fr.jmmc.aspro.model.oi.InterferometerConfigurationChoice;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Pop;
 import fr.jmmc.aspro.model.oi.Target;
+import fr.jmmc.aspro.model.oifits.AsproOIFitsFile;
 import fr.jmmc.mcs.astro.star.Star;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -127,6 +131,7 @@ import java.util.Observer;
 import java.util.Vector;
 import java.util.logging.Level;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.ImageIcon;
 import javax.swing.JFormattedTextField;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
@@ -162,6 +167,8 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
   private final ObservationManager om = ObservationManager.getInstance();
   /** flag to enable / disable the automatic update of the observation when any swing component changes */
   private boolean doAutoUpdateObservation = true;
+  /** Warning image icon */
+  private ImageIcon warningIcon = null;
 
   /** Creates new form BasicObservationForm */
   public BasicObservationForm() {
@@ -203,8 +210,11 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     jLabel5 = new javax.swing.JLabel();
     jFieldMinElev = new javax.swing.JFormattedTextField();
     jCheckBoxNightLimit = new javax.swing.JCheckBox();
+    jPanel1 = new javax.swing.JPanel();
+    jLabelStatus = new javax.swing.JLabel();
+    jLabel7 = new javax.swing.JLabel();
 
-    setLayout(new javax.swing.BoxLayout(this, javax.swing.BoxLayout.LINE_AXIS));
+    setLayout(new java.awt.GridBagLayout());
 
     jPanelMain.setBorder(javax.swing.BorderFactory.createTitledBorder("Observation"));
     jPanelMain.setLayout(new java.awt.GridBagLayout());
@@ -318,7 +328,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
     jPanelMain.add(jScrollPane1, gridBagConstraints);
 
-    jButtonRemoveTarget.setFont(new java.awt.Font("Dialog", 1, 14));
+    jButtonRemoveTarget.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
     jButtonRemoveTarget.setIcon(new javax.swing.ImageIcon(getClass().getResource("/fr/jmmc/aspro/gui/icons/delete.png"))); // NOI18N
     jButtonRemoveTarget.setMargin(new java.awt.Insets(0, 0, 0, 0));
     jButtonRemoveTarget.addActionListener(new java.awt.event.ActionListener() {
@@ -356,7 +366,12 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
     jPanelMain.add(starSearchField, gridBagConstraints);
 
-    add(jPanelMain);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridheight = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 0.8;
+    gridBagConstraints.weighty = 1.0;
+    add(jPanelMain, gridBagConstraints);
 
     jPanelOptions.setBorder(javax.swing.BorderFactory.createTitledBorder("Constraints"));
     jPanelOptions.setLayout(new java.awt.GridBagLayout());
@@ -409,7 +424,32 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
     jPanelOptions.add(jCheckBoxNightLimit, gridBagConstraints);
 
-    add(jPanelOptions);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 0.1;
+    add(jPanelOptions, gridBagConstraints);
+
+    jPanel1.setMinimumSize(new java.awt.Dimension(57, 30));
+    jPanel1.setPreferredSize(new java.awt.Dimension(100, 30));
+    jPanel1.setLayout(new java.awt.GridBagLayout());
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    jPanel1.add(jLabelStatus, gridBagConstraints);
+
+    jLabel7.setText("Status : ");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    jPanel1.add(jLabel7, gridBagConstraints);
+
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    add(jPanel1, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
 
   /**
@@ -477,6 +517,10 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
    * Finally update the observation according to the form state
    */
   private void postInit() {
+
+    this.warningIcon = new ImageIcon(getClass().getResource("/fr/jmmc/aspro/gui/icons/dialog-warning.png"));
+
+    this.resetStatus();
 
     // add observer to the StarResolverWidget :
     this.starSearchField.getStar().addObserver(this);
@@ -857,11 +901,48 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("event [" + type + "] process IN");
     }
-    if (type == ObservationEventType.LOADED) {
-      onLoadObservation(observation);
+    switch (type) {
+      case LOADED:
+        onLoadObservation(observation);
+        break;
+      case CHANGED:
+        this.resetStatus();
+        break;
+      case OIFITS_DONE:
+        this.updateStatus(((AsproOIFitsFile) observation.getOIFitsFile()).getWarningMessages());
+        break;
+      default:
     }
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("event [" + type + "] process OUT");
+    }
+  }
+
+  /**
+   * Reset status panel
+   */
+  private void resetStatus() {
+    this.updateStatus(null);
+  }
+
+  /**
+   * Update status panel
+   * @param messages message list or null to reset content
+   */
+  private void updateStatus(final List<String> messages) {
+    if (messages == null) {
+      // reset
+      this.jLabelStatus.setIcon(null);
+      this.jLabelStatus.setText("Ok");
+      this.jLabelStatus.setToolTipText(null);
+    } else {
+      this.jLabelStatus.setIcon(this.warningIcon);
+      this.jLabelStatus.setText("Warning");
+      final StringBuilder sb = new StringBuilder(256);
+      for (String msg : messages) {
+        sb.append(msg).append("\n");
+      }
+      this.jLabelStatus.setToolTipText(sb.toString());
     }
   }
   // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -879,10 +960,13 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
   private javax.swing.JLabel jLabel3;
   private javax.swing.JLabel jLabel4;
   private javax.swing.JLabel jLabel5;
+  private javax.swing.JLabel jLabel7;
   private javax.swing.JLabel jLabelConfiguration;
   private javax.swing.JLabel jLabelPeriod;
   private javax.swing.JLabel jLabelPops;
+  private javax.swing.JLabel jLabelStatus;
   private javax.swing.JList jListTargets;
+  private javax.swing.JPanel jPanel1;
   private javax.swing.JPanel jPanelMain;
   private javax.swing.JPanel jPanelOptions;
   private javax.swing.JScrollPane jScrollPane1;
