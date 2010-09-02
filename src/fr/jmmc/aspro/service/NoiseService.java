@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: NoiseService.java,v 1.13 2010-08-31 10:42:07 bourgesl Exp $"
+ * "@(#) $Id: NoiseService.java,v 1.14 2010-09-02 15:55:55 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.13  2010/08/31 10:42:07  bourgesl
+ * fixed bug on T3noise
+ *
  * Revision 1.12  2010/08/30 15:55:59  bourgesl
  * removed comment
  *
@@ -58,6 +61,7 @@ import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetConfiguration;
 import fr.jmmc.aspro.model.oi.Telescope;
+import fr.jmmc.aspro.model.oifits.WarningContainer;
 import fr.jmmc.aspro.model.util.AtmosphereQualityUtils;
 import java.util.List;
 import java.util.Random;
@@ -85,6 +89,8 @@ public final class NoiseService {
   public final static double C_LIGHT = 2.99792458e8d;
   /** constant 1 / SQRT(2) */
   private final static double SQRT_2_INV = 1d / Math.sqrt(2d);
+  /** invalid complex (NaN, NaN) */
+  private final static Complex INVALID_COMPLEX = new Complex(Double.NaN, Double.NaN);
 
   /* members */
 
@@ -148,13 +154,17 @@ public final class NoiseService {
 
   /* object parameters */
   /** Magnitude in Observing Band (see lambda) (mag) */
-  private double objectMag = 0d;
+  private double objectMag = Double.NaN;
   /** Magnitude in Fringe Tracker's Band of FT ref star (mag) */
-  private double fringeTrackerMag = 0d;
+  private double fringeTrackerMag = Double.NaN;
   /** Magnitude in V Band (for AO performances / for strehl) (mag) */
-  private double adaptiveOpticsMag = 0d;
+  private double adaptiveOpticsMag = Double.NaN;
 
   /* internal */
+  /** container for warning messages */
+  private WarningContainer warningContainer;
+  /** flag to indicate that a parameter is invalid in order the code to return errors as NaN values */
+  private boolean invalidParameters = false;
   /** number of photons in interferometer channel */
   private double nbPhotonInI;
   /** number of photons in each photometric channel */
@@ -170,8 +180,12 @@ public final class NoiseService {
    * Protected constructor
    * @param observation observation settings
    * @param target target to use
+   * @param warningContainer container for warning messages
    */
-  protected NoiseService(final ObservationSetting observation, final Target target) {
+  protected NoiseService(final ObservationSetting observation, final Target target,
+                         final WarningContainer warningContainer) {
+    this.warningContainer = warningContainer;
+
     // extract parameters in observation and configuration :
     prepareInterferometer(observation);
     prepareInstrument(observation);
@@ -288,7 +302,7 @@ public final class NoiseService {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("fringeTrackerPresent       = " + fringeTrackerPresent);
     }
-    if (fringeTrackerPresent) {
+    if (this.fringeTrackerPresent) {
       if (logger.isLoggable(Level.FINE)) {
         logger.fine("fringeTrackerInstrumentalVisibility = " + fringeTrackerInstrumentalVisibility);
         logger.fine("fringeTrackerLimit         = " + fringeTrackerLimit);
@@ -314,24 +328,39 @@ public final class NoiseService {
       logger.fine("insBand                    = " + insBand);
     }
 
+    // If a flux / magnitude is missing => user message
+    // and it is impossible to compute any error
+
     flux = target.getFlux(this.insBand);
-    this.objectMag = (flux != null) ? flux.doubleValue() : 0d;
+    this.objectMag = (flux != null) ? flux.doubleValue() : Double.NaN;
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("objectMag                  = " + objectMag);
     }
 
-    if (fringeTrackerPresent) {
+    if (this.fringeTrackerPresent) {
       flux = target.getFlux(this.ftBand);
-      this.fringeTrackerMag = (flux != null) ? flux.doubleValue() : 0d;
+      this.fringeTrackerMag = (flux != null) ? flux.doubleValue() : Double.NaN;
       if (logger.isLoggable(Level.FINE)) {
         logger.fine("fringeTrackerMag           = " + fringeTrackerMag);
       }
     }
 
     flux = target.getFlux(this.aoBand);
-    this.adaptiveOpticsMag = (flux != null) ? flux.doubleValue() : 0d;
+    this.adaptiveOpticsMag = (flux != null) ? flux.doubleValue() : Double.NaN;
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("adaptiveOpticsMag          = " + adaptiveOpticsMag);
+    }
+
+    if (Double.isNaN(this.objectMag)
+            || (this.fringeTrackerPresent && Double.isNaN(this.fringeTrackerMag))
+            || Double.isNaN(this.adaptiveOpticsMag)) {
+      // missing magnitude
+      this.invalidParameters = true;
+
+      addWarning("Missing photometry on target [" + target.getName() + "] in following bands : "
+              + (Double.isNaN(this.objectMag) ? this.insBand : "")
+              + (this.fringeTrackerPresent && Double.isNaN(this.fringeTrackerMag) ? this.ftBand : "")
+              + (Double.isNaN(this.adaptiveOpticsMag) ? this.aoBand : ""));
     }
   }
 
@@ -339,6 +368,10 @@ public final class NoiseService {
    * Initialise other parameters
    */
   private void initParameters() {
+    // fast return if invalid configuration :
+    if (this.invalidParameters) {
+      return;
+    }
 
     this.vinst = instrumentalVisibility;
     if (this.fringeTrackerPresent) {
@@ -384,9 +417,7 @@ public final class NoiseService {
       // the dit is too long
       this.dit *= this.detectorSaturation / peakflux;
 
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("DIT too long. Adjusting it to (possibly impossible) : " + this.dit + " s");
-      }
+      addWarning("DIT too long. Adjusting it to (possibly impossible) : " + this.dit + " s");
 
       nbFrameToSaturation = 1;
     } else {
@@ -398,9 +429,7 @@ public final class NoiseService {
       this.dit = Math.min(this.dit * nbFrameToSaturation, this.totalObsTime);
       this.dit = Math.min(this.dit, this.fringeTrackerMaxIntTime);
 
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("Observation can take advantage of FT. Adjusting DIT to : " + this.dit + " s");
-      }
+      addWarning("Observation can take advantage of FT. Adjusting DIT to : " + this.dit + " s");
     }
 
     nbTotalPhot = nbTotalPhotPerS * this.dit;
@@ -427,12 +456,37 @@ public final class NoiseService {
   }
 
   /**
-   * Compute error on complex visibility derived from computeVis2Error(visAmp)
+   * Add a warning message in the OIFits file
+   * @param msg message to add
+   */
+  protected void addWarning(final String msg) {
+    if (logger.isLoggable(Level.INFO)) {
+      logger.info(msg);
+    }
+
+    this.warningContainer.addWarningMessage(msg);
+  }
+
+  /**
+   * Return true if all parameters are valid i.e. returned errors are valid
+   * @return true if all parameters are valid
+   */
+  public boolean isValid() {
+    return !this.invalidParameters;
+  }
+
+  /**
+   * Compute error on complex visibility derived from computeVis2Error(visAmp).
+   * It returns NaN if the flux can not be computed
    *
    * @param visAmp visibility amplitude
-   * @return complex visiblity error
+   * @return complex visiblity error or NaN if the error can not be computed
    */
   public Complex computeVisComplexError(final double visAmp) {
+    // fast return NaN if invalid configuration :
+    if (this.invalidParameters) {
+      return INVALID_COMPLEX;
+    }
 
     // visibility amplitude error :
     final double visAmpErr = computeVisError(visAmp);
@@ -467,11 +521,15 @@ public final class NoiseService {
   }
 
   /**
-   * Return the correlated flux of the object
+   * Return the correlated flux of the object. It returns NaN if the flux can not be computed
    * @param visAmp visibility amplitude
-   * @return correlated flux
+   * @return correlated flux or NaN if the flux can not be computed
    */
   public double computeCorrelatedFlux(final double visAmp) {
+    // fast return NaN if invalid configuration :
+    if (this.invalidParameters) {
+      return Double.NaN;
+    }
 
     // include instrumental visib
     final double visib = visAmp * this.vinst;
@@ -483,12 +541,17 @@ public final class NoiseService {
   }
 
   /**
-   * Compute error on square visibility
+   * Compute error on square visibility. It returns NaN if the error can not be computed
    *
    * @param visAmp visibility amplitude
-   * @return square visiblity error
+   * @return square visiblity error or NaN if the error can not be computed
    */
   public double computeVis2Error(final double visAmp) {
+    // fast return NaN if invalid configuration :
+    if (this.invalidParameters) {
+      return Double.NaN;
+    }
+
     return computeVis2Error(visAmp, true);
   }
 
@@ -543,14 +606,18 @@ public final class NoiseService {
   }
 
   /**
-   * Compute error on closure phase
+   * Compute error on closure phase. It returns NaN if the error can not be computed
    *
    * @param visAmp12 visibility amplitude of baseline AB = 12
    * @param visAmp23 visibility amplitude of baseline BC = 23
    * @param visAmp31 visibility amplitude of baseline CA = 31
-   * @return error on closure phase in radians
+   * @return error on closure phase in radians or NaN if the error can not be computed
    */
   public double computeT3PhiError(final double visAmp12, final double visAmp23, final double visAmp31) {
+    // fast return NaN if invalid configuration :
+    if (this.invalidParameters) {
+      return Double.NaN;
+    }
 
     // include instrumental visib
     final double v1 = visAmp12 * this.vinst;
