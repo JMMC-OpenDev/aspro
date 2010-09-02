@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <ApplicationData link="http://www.jmmc.fr/aspro2">
-  <program name="Aspro2" version="0.5.5"/>
+  <program name="Aspro2" version="0.6.0"/>
   <compilation date="21/09/2009" compiler="JDK 1.5.0_16"/>
   <text>
     <![CDATA[ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations
@@ -40,8 +40,15 @@
     </menu>
   </menubar>
   <releasenotes>
+    <release version="0.6">
+      <prerelease version="0.6.0">
+        <change>Offical release of Aspro 2</change>
+      </prerelease>
+    </release>
     <release version="0.5">
       <prerelease version="0.5.5">
+        <change>Added warning messages on GUI to display information relative to error / noise modelling</change>
+        <change>Error and noise computation for OI_VIS (AMBER only) using the differential phase / amplitude algorithm (amdlib)</change>
         <change>Added a pop up to tell the user to check its VLTI OB file against ESO CfP rules</change>
         <change>Fixed some configuration for AMBER in Period 87 (wrong station ordering) and the
         loading action to even load such observation files</change>
