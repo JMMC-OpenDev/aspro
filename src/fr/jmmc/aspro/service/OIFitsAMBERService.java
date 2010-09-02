@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: OIFitsAMBERService.java,v 1.4 2010-08-31 15:53:37 bourgesl Exp $"
+ * "@(#) $Id: OIFitsAMBERService.java,v 1.5 2010-09-02 15:56:14 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2010/08/31 15:53:37  bourgesl
+ * minor changes (comments)
+ *
  * Revision 1.3  2010/08/31 10:42:33  bourgesl
  * comments
  *
@@ -68,8 +71,7 @@ public final class OIFitsAMBERService {
 
     /*
      * Note on amdlib port :
-     * In our case :
-     * nbBases = 1 and nbFrames = vis.getNbRows().
+     * In our case (Aspro 1) : nbBases = 1 and nbFrames = vis.getNbRows().
      * => The double loop (iFrame/iBase) is replaced by a single loop (iRow)
      *
      * This simplify both loops and temporary arrays
@@ -102,7 +104,6 @@ public final class OIFitsAMBERService {
 
     final double[] opd = new double[nRows];
     final double[] cpxVisVectR = new double[nRows];
-    final double[] cpxVisVectI = new double[nRows];
 
     Complex phasor, cpxVis, sigma2_cpxVis, w1Avg;
     double x;
@@ -113,7 +114,6 @@ public final class OIFitsAMBERService {
 
     final double[][] visPhi = vis.getVisPhi();
     final double[][] visPhiErr = vis.getVisPhiErr();
-
 
     /*
      * Immediately copy input cpxVis to 3D structure, flagging as BLANK when Flag is present
@@ -134,7 +134,8 @@ public final class OIFitsAMBERService {
     }
 
     // Aspro 2 : compute fake piston2T now :
-    
+
+    // Port amdlibPiston.c : amdlibComputePiston2T()
 
 
     /* Initialize opd: local copy where all bad pistons are Blank:
@@ -147,7 +148,6 @@ public final class OIFitsAMBERService {
 
     /* First, correct coherent flux from achromatic piston phase (eq 2.2)*/
     /* Here the piston is Zero for the moment */
-
     amdlibCorrect3DVisTableFromAchromaticPiston(cpxVisTable,
             cNopTable,
             nRows,
@@ -257,8 +257,8 @@ public final class OIFitsAMBERService {
         phasor = new Complex(Math.cos(x), -Math.sin(x));
         cpxVis = w1[iRow][lVis];
 
+        /*Here there is no over-frame averaging. Compute 'averaged' values frame by frame */
         cpxVisVectR[iRow] = phasor.getReal() * cpxVis.getReal() - phasor.getImaginary() * cpxVis.getImaginary();
-/*        cpxVisVectI[iRow] = phasor.getReal() * cpxVis.getImaginary() + phasor.getImaginary() * cpxVis.getReal(); */
 
         visAmp[iRow][lVis] = cpxVisVectR[iRow];
         visAmpErr[iRow][lVis] = Math.sqrt(sigma2_w1[iRow][lVis].getImaginary() + sigma2_w1[iRow][lVis].getReal());
@@ -266,28 +266,22 @@ public final class OIFitsAMBERService {
     }
   }
 
-
-
-/**
- * Compute piston, iterative phasor method.
- *
- * TODO
- */
-private static void amdlibFakeComputePiston2T(int                    nbLVis,
-                           final double[] wlen,
-                           final Complex[] cpxVisTable,
-                           final Complex[] s2cpxVisTable,
-                           final double[] pistonOPD,
-                           final double[] sigma,
-                           double                 wlenAvg,
-                           double                 wlenDifAvg,
-                           double                 R
-                           )
-  {
-
-  // TODO : port amdlibPiston.c
-}
-
+  /**
+   * Compute piston, iterative phasor method.
+   *
+   * TODO
+   */
+  private static void amdlibFakeComputePiston2T(int nbLVis,
+                                                final double[] wlen,
+                                                final Complex[] cpxVisTable,
+                                                final Complex[] s2cpxVisTable,
+                                                final double[] pistonOPD,
+                                                final double[] sigma,
+                                                double wlenAvg,
+                                                double wlenDifAvg,
+                                                double R) {
+    // TODO : port amdlibPiston.c
+  }
 
   /**
    * Removes a constant phase (achromatic piston) on a complexVisibility vector.
@@ -426,6 +420,6 @@ private static void amdlibFakeComputePiston2T(int                    nbLVis,
             + abacusCoeff[5] * x2
             + abacusCoeff[6] * x
             + abacusCoeff[7];
-    return Math.pow(10, z);
+    return Math.pow(10d, z);
   }
 }
