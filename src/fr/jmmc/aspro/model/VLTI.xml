@@ -8593,7 +8593,7 @@
 
       <instrumentVisibility>0.9</instrumentVisibility>
       <magLimit>12</magLimit>
-      <maxIntegration>60</maxIntegration>
+      <maxIntegration>10</maxIntegration>
     </fringeTracker>
 
 
