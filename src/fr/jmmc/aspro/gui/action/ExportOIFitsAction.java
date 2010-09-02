@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOIFitsAction.java,v 1.1 2010-06-29 12:13:21 bourgesl Exp $"
+ * "@(#) $Id: ExportOIFitsAction.java,v 1.2 2010-09-02 15:47:19 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2010/06/29 12:13:21  bourgesl
+ * added ExportToOIFits action
+ *
  *
  */
 package fr.jmmc.aspro.gui.action;
@@ -17,6 +20,7 @@ import fr.jmmc.mcs.util.FileFilterRepository;
 import fr.jmmc.mcs.util.RegisteredAction;
 import fr.jmmc.oitools.model.OIFitsFile;
 import fr.jmmc.oitools.model.OIFitsWriter;
+import fr.jmmc.oitools.model.OIVis2;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.util.logging.Level;
@@ -135,11 +139,13 @@ public class ExportOIFitsAction extends RegisteredAction {
 
     sb.append(altName).append('_');
 
-    final String insName = oiFitsFile.getOiVis()[0].getInsName();
+    final OIVis2 vis2 = oiFitsFile.getOiVis2()[0];
+
+    final String insName = vis2.getInsName();
 
     sb.append(insName).append('_');
 
-    final String dateObs = oiFitsFile.getOiVis()[0].getDateObs();
+    final String dateObs = vis2.getDateObs();
 
     sb.append(dateObs);
 
