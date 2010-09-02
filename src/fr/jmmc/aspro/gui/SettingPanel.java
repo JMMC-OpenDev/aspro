@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SettingPanel.java,v 1.21 2010-06-23 12:52:42 bourgesl Exp $"
+ * "@(#) $Id: SettingPanel.java,v 1.22 2010-09-02 15:54:42 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.21  2010/06/23 12:52:42  bourgesl
+ * added the OIFits panel (creation / removal) and proper registration of Observation listeners in ObservationManager
+ *
  * Revision 1.20  2010/06/17 10:02:50  bourgesl
  * fixed warning hints - mainly not final static loggers
  *
@@ -85,6 +88,8 @@ public final class SettingPanel extends JPanel implements ObservationListener {
   /** Class logger */
   private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
+  /** enable / disable OIFits panel */
+  private static final boolean ENABLE_OIFITS = false;
 
   /* Tab names */
   /** name of the tab pane corresponding to the interferometer map */
@@ -249,7 +254,7 @@ public final class SettingPanel extends JPanel implements ObservationListener {
 
           this.uvCoveragePanel = null;
         }
-        if (this.oiFitsPanel != null) {
+        if (ENABLE_OIFITS && this.oiFitsPanel != null) {
           // remove the OIFits panel :
           this.jTabbedPane.remove(this.oiFitsPanel);
 
@@ -259,7 +264,7 @@ public final class SettingPanel extends JPanel implements ObservationListener {
           this.oiFitsPanel = null;
         }
       }
-    } else if (type == ObservationEventType.OIFITS_DONE) {
+    } else if (ENABLE_OIFITS && type == ObservationEventType.OIFITS_DONE) {
       // OIFits panel :
       if (this.oiFitsPanel == null) {
         // create the OIFits panel :
