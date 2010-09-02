@@ -10,6 +10,7 @@ import fr.jmmc.aspro.model.oi.Position3D;
 import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.Telescope;
+import fr.jmmc.aspro.model.oifits.AsproOIFitsFile;
 import fr.jmmc.aspro.model.uvcoverage.UVRangeBaseLineData;
 import fr.jmmc.aspro.util.CombUtils;
 import fr.jmmc.aspro.util.ComplexUtils;
@@ -50,6 +51,8 @@ public final class OIFitsCreatorService {
   private final static short TARGET_ID = (short) 1;
   /** enable the OIFits validation */
   private final static boolean DO_VALIDATE = false;
+  /** flag to add gaussian noise to quantities */
+  private final static boolean DO_NOISE = true;
 
   /* members */
   /* input */
@@ -57,8 +60,6 @@ public final class OIFitsCreatorService {
   private final ObservationSetting observation;
   /** selected target */
   private final Target target;
-  /** flag to add gaussian noise to quantities */
-  private final boolean doNoise = true;
 
   /* reused observability data */
   /** beam list */
@@ -90,9 +91,15 @@ public final class OIFitsCreatorService {
 
   /* output */
   /** oifits structure */
-  private final OIFitsFile oiFitsFile;
+  private final AsproOIFitsFile oiFitsFile;
 
   /* internal */
+  /** target has models */
+  private final boolean hasModels;
+  /** flag = true if returned errors are valid */
+  private final boolean errorValid;
+  /** flag = true if errorValid and DO_NOISE */
+  private final boolean doNoise;
   /** interferometer name */
   private String arrayName = null;
   /** instrument name */
@@ -155,11 +162,21 @@ public final class OIFitsCreatorService {
       this.integrationTime = observation.getInstrumentConfiguration().getAcquisitionTime().doubleValue();
     }
 
-    // Prepare the noise service :
-    this.noiseService = new NoiseService(this.observation, target);
-
     // create a new OIFits structure :
-    this.oiFitsFile = new OIFitsFile();
+    this.oiFitsFile = new AsproOIFitsFile();
+
+    // Prepare the noise service :
+    this.noiseService = new NoiseService(this.observation, target, this.oiFitsFile);
+
+    // Has models ?
+    final List<Model> models = this.target.getModels();
+
+    this.hasModels = (models != null && !models.isEmpty());
+
+    this.errorValid = this.noiseService.isValid();
+
+    // do noise :
+    this.doNoise = (DO_NOISE && this.errorValid);
   }
 
   /**
@@ -203,8 +220,18 @@ public final class OIFitsCreatorService {
     // OI_VIS :
     this.createOIVis();
 
+    // fast interrupt :
+    if (Thread.currentThread().isInterrupted()) {
+      return null;
+    }
+
     // OI_VIS2 :
     this.createOIVis2();
+
+    // fast interrupt :
+    if (Thread.currentThread().isInterrupted()) {
+      return null;
+    }
 
     // OI_T3 :
     this.createOIT3();
@@ -216,6 +243,14 @@ public final class OIFitsCreatorService {
 
     // free computed complex visibilities :
     this.visComplex = null;
+
+    // test if the instrument is AMBER to keep OI_VIS table :
+    if (!AsproConstants.INS_AMBER.equals(this.instrumentName)) {
+      // Remove OI_VIS table if instrument is not AMBER :
+      final OIVis vis = this.oiFitsFile.getOiVis()[0];
+
+      this.oiFitsFile.removeOiTable(vis);
+    }
 
     if (logger.isLoggable(Level.INFO)) {
       logger.info("createOIFits : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
@@ -375,10 +410,9 @@ public final class OIFitsCreatorService {
    */
   protected void computeModelVisibilities() {
 
-    // Has models ?
-    final List<Model> models = this.target.getModels();
+    if (this.hasModels) {
+      final List<Model> models = this.target.getModels();
 
-    if (models != null && !models.isEmpty()) {
       // Allocate data array for complex visibility and error :
       final Complex[][] cVis = new Complex[this.nHAPoints * this.nBaseLines][];
       final Complex[][] cVisError = new Complex[this.nHAPoints * this.nBaseLines][this.nWaveLengths];
@@ -511,8 +545,8 @@ public final class OIFitsCreatorService {
         uCoords[k] = u;
         vCoords[k] = v;
 
-        // if complex visibility are computed i.e. target has models :
-        if (this.visComplex == null) {
+        // if target has models, then complex visibility are computed :
+        if (!this.hasModels) {
           // Invalid => NaN value :
 
           // Iterate on wave lengths :
@@ -559,7 +593,6 @@ public final class OIFitsCreatorService {
               // add gaussian noise with sigma = visErrRe / visErrIm :
               visComplexNoisy[k][l] = new Complex(visRe + this.noiseService.randomGauss(visErrRe),
                       visIm + this.noiseService.randomGauss(visErrIm));
-
             } else {
               visComplexNoisy[k][l] = this.visComplex[k][l];
             }
@@ -568,19 +601,18 @@ public final class OIFitsCreatorService {
             visData[k][l][0] = (float) (flux * visComplexNoisy[k][l].getReal());
             visData[k][l][1] = (float) (flux * visComplexNoisy[k][l].getImaginary());
 
-            if (!isAmber) {
-              // This is not correct as differential visibility / phase depends on the instrument post processing :
+            if (!isAmber || !this.errorValid) {
+              // Waiting for explanations on every instrument processing to compute VisAmp/Phi :
+              // following values are considered as invalid :
+              visAmp[k][l] = Double.NaN;
+              visAmpErr[k][l] = Double.NaN;
 
-              // noisy amplitude :
-              visAmp[k][l] = visComplexNoisy[k][l].abs();
-
-              // noisy phase in degrees :
-              visPhi[k][l] = Math.toDegrees(visComplexNoisy[k][l].getArgument());
-
-              // derived errors :
-              visAmpErr[k][l] = this.visError[k][l].abs();
-              visPhiErr[k][l] = Math.toDegrees(visAmpErr[k][l] / vAmp);
+              visPhi[k][l] = Double.NaN;
+              visPhiErr[k][l] = Double.NaN;
             }
+
+            // mark this value as valid only if error is valid :
+            flags[k][l] = !this.errorValid;
           }
         }
 
@@ -592,11 +624,9 @@ public final class OIFitsCreatorService {
     }
 
     /* Compute visAmp / visPhi as amber does */
-    if (isAmber) {
+    if (isAmber && this.hasModels && this.errorValid) {
       OIFitsAMBERService.amdlibFakeAmberDiffVis(vis, visComplexNoisy, this.visError, this.waveLengths);
     }
-
-    // TODO : if amber : do use this table.
 
     this.oiFitsFile.addOiTable(vis);
   }
@@ -631,8 +661,8 @@ public final class OIFitsCreatorService {
 
     for (int k = 0, l = 0; k < nRows; k++) {
 
-      // if complex visibility are computed i.e. target has models :
-      if (this.visComplex == null) {
+      // if target has models, then complex visibility are computed :
+      if (!this.hasModels) {
 
         // Iterate on wave lengths :
         for (l = 0; l < this.nWaveLengths; l++) {
@@ -663,6 +693,9 @@ public final class OIFitsCreatorService {
             // add gaussian noise with sigma = err :
             vis2Data[k][l] += this.noiseService.randomGauss(v2Err);
           }
+
+          // mark this value as valid only if error is valid :
+          flags[k][l] = !this.errorValid;
         }
       }
     }
@@ -745,9 +778,6 @@ public final class OIFitsCreatorService {
     // 1 - the number of rows per HA point corresponds to the number of baselines.
     // 2 - OI_VIS rows have the same ordering than the list of baselines per HA points.
 
-    // if complex visibility are computed i.e. target has models :
-    final boolean hasModels = this.visComplex != null;
-
     // vars :
     Complex[] visData12, visData23, visData13;
     Complex vis12, vis23, vis31, t3Data;
@@ -794,7 +824,7 @@ public final class OIFitsCreatorService {
         }
 
         // pure complex visibility data :
-        visData12 = (hasModels) ? this.visComplex[vp + pos] : null;
+        visData12 = (this.hasModels) ? this.visComplex[vp + pos] : null;
         u12 = visUCoords[vp + pos];
         v12 = visVCoords[vp + pos];
 
@@ -807,7 +837,7 @@ public final class OIFitsCreatorService {
         }
 
         // pure complex visibility data :
-        visData23 = (hasModels) ? this.visComplex[vp + pos] : null;
+        visData23 = (this.hasModels) ? this.visComplex[vp + pos] : null;
         u23 = visUCoords[vp + pos];
         v23 = visVCoords[vp + pos];
 
@@ -825,10 +855,10 @@ public final class OIFitsCreatorService {
         }
 
         // pure complex visibility data :
-        visData13 = (hasModels) ? this.visComplex[vp + pos] : null;
+        visData13 = (this.hasModels) ? this.visComplex[vp + pos] : null;
 
-        // if complex visibility are computed i.e. target has models :
-        if (!hasModels) {
+        // if target has models, then complex visibility are computed :
+        if (!this.hasModels) {
 
           // Iterate on wave lengths :
           for (l = 0; l < this.nWaveLengths; l++) {
@@ -885,6 +915,9 @@ public final class OIFitsCreatorService {
               // add gaussian noise with sigma = errPhi :
               t3Phi[k][l] += rand * errPhi;
             }
+
+            // mark this value as valid only if error is valid :
+            flags[k][l] = !this.errorValid;
           }
         }
 
