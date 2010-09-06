@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.49 2010-07-22 15:45:43 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.50 2010-09-06 13:39:34 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.49  2010/07/22 15:45:43  bourgesl
+ * added acquisition time in UV coverage and observation
+ *
  * Revision 1.48  2010/07/22 14:34:23  bourgesl
  * sampling time is updated with the default sampling time of the instrument when the instrument is changed
  * atmosphere quality is displayed and updated when an observation is loaded
@@ -327,6 +330,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     java.awt.GridBagConstraints gridBagConstraints;
 
     jSplitPane = new javax.swing.JSplitPane();
+    jScrollPane1 = new javax.swing.JScrollPane();
     jPanelLeft = new javax.swing.JPanel();
     jLabel1 = new javax.swing.JLabel();
     jPanelButtons = new javax.swing.JPanel();
@@ -367,9 +371,13 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
     jSplitPane.setDividerSize(5);
     jSplitPane.setResizeWeight(0.05);
+    jSplitPane.setMinimumSize(new java.awt.Dimension(320, 400));
+    jSplitPane.setPreferredSize(new java.awt.Dimension(320, 400));
 
-    jPanelLeft.setMinimumSize(new java.awt.Dimension(200, 400));
-    jPanelLeft.setPreferredSize(new java.awt.Dimension(200, 400));
+    jScrollPane1.setMinimumSize(new java.awt.Dimension(200, 400));
+    jScrollPane1.setPreferredSize(new java.awt.Dimension(220, 400));
+
+    jPanelLeft.setMinimumSize(new java.awt.Dimension(185, 550));
     jPanelLeft.setLayout(new java.awt.GridBagLayout());
 
     jLabel1.setText("Target");
@@ -664,7 +672,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     gridBagConstraints.gridwidth = 2;
     jPanelLeft.add(jLabel8, gridBagConstraints);
 
-    jSplitPane.setLeftComponent(jPanelLeft);
+    jScrollPane1.setViewportView(jPanelLeft);
+
+    jSplitPane.setLeftComponent(jScrollPane1);
 
     add(jSplitPane, java.awt.BorderLayout.CENTER);
   }// </editor-fold>//GEN-END:initComponents
@@ -1863,6 +1873,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
   private javax.swing.JPanel jPanelBottom;
   private javax.swing.JPanel jPanelButtons;
   private javax.swing.JPanel jPanelLeft;
+  private javax.swing.JScrollPane jScrollPane1;
   private javax.swing.JSeparator jSeparator1;
   private javax.swing.JSeparator jSeparator3;
   private javax.swing.JSlider jSliderHAMax;
