@@ -1,11 +1,16 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproGui.java,v 1.26 2010-07-08 13:41:13 bourgesl Exp $"
+ * "@(#) $Id: AsproGui.java,v 1.27 2010-09-06 13:39:57 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.26  2010/07/08 13:41:13  bourgesl
+ * added logs
+ * encapsulate swing ops in SwingUtilities.invoke...
+ * show GUI only when application is ready
+ *
  * Revision 1.25  2010/07/07 15:16:25  bourgesl
  * added 'New Observation' action
  *
@@ -103,6 +108,7 @@ import fr.jmmc.mcs.gui.StatusBar;
 import fr.jmmc.mcs.util.ActionRegistrar;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.Toolkit;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Locale;
@@ -244,7 +250,18 @@ public final class AsproGui extends App {
     // handle frame icon
     frame.setIconImage(new ImageIcon(getClass().getResource("/fr/jmmc/mcs/gui/favicon.png")).getImage());
 
-    final Dimension dim = new Dimension(900, 750);
+    // get screen size to adjust minimum window size :
+    final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+
+    if (logger.isLoggable(Level.INFO)) {
+      logger.info("screen size = " + screenSize.getWidth() + " x " + screenSize.getHeight());
+    }
+
+    // hack for 1024x768 screens :
+    final int appWidth = 950;
+    final int appHeight = (screenSize.getHeight() <= 768) ? 700 : 800;
+
+    final Dimension dim = new Dimension(appWidth, appHeight);
     frame.setMinimumSize(dim);
     frame.addComponentListener(new ComponentResizeAdapter(dim));
 
