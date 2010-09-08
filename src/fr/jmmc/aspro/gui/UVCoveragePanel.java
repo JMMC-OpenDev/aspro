@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.50 2010-09-06 13:39:34 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.51 2010-09-08 16:00:31 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.50  2010/09/06 13:39:34  bourgesl
+ * small changes on Panels (scrollbar added as needed) in order to solve widget display on small screens
+ *
  * Revision 1.49  2010/07/22 15:45:43  bourgesl
  * added acquisition time in UV coverage and observation
  *
@@ -186,6 +189,7 @@ import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.Range;
 import fr.jmmc.aspro.model.observability.ObservabilityData;
 import fr.jmmc.aspro.model.observability.StarData;
+import fr.jmmc.aspro.model.oi.AtmosphereQuality;
 import fr.jmmc.aspro.model.oi.InterferometerConfiguration;
 import fr.jmmc.aspro.model.uvcoverage.UVCoverageData;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
@@ -242,7 +246,7 @@ import org.jfree.data.xy.XYSeriesCollection;
  * @author bourgesl
  */
 public final class UVCoveragePanel extends javax.swing.JPanel implements ChartProgressListener, ZoomEventListener,
-        ActionListener, ChangeListener, ObservationListener, Observer, PDFExportable {
+        ActionListener, ChangeListener, ObservationListener, Observer, PDFExportable, Disposable {
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
@@ -301,21 +305,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     initComponents();
 
     postInit();
-
-    // register this as a preference listener :
-    myPreferences.addObserver(this);
-  }
-
-  /**
-   * Listen to preferences changes
-   * @param o unused
-   * @param arg unused
-   */
-  public void update(final Observable o, final Object arg) {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("updated Preferences");
-    }
-    this.refreshPlot();
   }
 
   /**
@@ -857,6 +846,44 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     });
 
     this.jComboBoxImageMode.addActionListener(this);
+
+    // register this instance as a Preference Observer :
+    myPreferences.addObserver(this);
+  }
+
+  /**
+   * Free any ressource or reference to this instance :
+   * remove this instance form Preference Observers
+   */
+  public void dispose() {
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("dispose : " + this);
+    }
+
+    // unregister this instance as a Preference Observer :
+    myPreferences.deleteObserver(this);
+  }
+
+  /**
+   * Overriden method to give object identifier
+   * @return string identifier
+   */
+  @Override
+  public String toString() {
+    return "UVCoveragePanel@" + Integer.toHexString(hashCode());
+  }
+
+  /**
+   * Listen to preferences changes
+   * @param o Preferences
+   * @param arg unused
+   */
+  public void update(final Observable o, final Object arg) {
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("Preferences updated on : " + this);
+    }
+
+    this.refreshPlot();
   }
 
   /**
@@ -1164,7 +1191,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         this.om.setInstrumentAcquisitionTime(null);
 
         // reset atmosphere quality :
-        this.om.setAtmosphereQuality(null);
+        this.om.setAtmosphereQuality(AtmosphereQuality.AVERAGE);
       }
 
       // TODO : fire event ??

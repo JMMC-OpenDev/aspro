@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: PreferencesView.java,v 1.6 2010-06-17 10:02:50 bourgesl Exp $"
+ * "@(#) $Id: PreferencesView.java,v 1.7 2010-09-08 16:00:31 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2010/06/17 10:02:50  bourgesl
+ * fixed warning hints - mainly not final static loggers
+ *
  * Revision 1.5  2010/06/08 12:32:46  bourgesl
  * javadoc
  *
@@ -33,11 +36,12 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.logging.Level;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JFrame;
 
 /**
  * Preferences GUI
  */
-public class PreferencesView extends javax.swing.JFrame implements Observer {
+public final class PreferencesView extends JFrame implements Observer {
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
@@ -46,22 +50,17 @@ public class PreferencesView extends javax.swing.JFrame implements Observer {
   /** Class logger */
   private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
+  /* members */
   /** preference singleton */
-  private final static Preferences myPreferences = Preferences.getInstance();
+  private final Preferences myPreferences = Preferences.getInstance();
 
-  /** Creates new form PreferencesView */
+  /** 
+   * Creates a new PreferencesView
+   */
   public PreferencesView() {
     initComponents();
 
     postInit();
-
-    // update GUI
-    myPreferences.addObserver(this);
-    update(null, null);
-
-    // pack and center window
-    pack();
-    setLocationRelativeTo(null);
   }
 
   /**
@@ -72,6 +71,42 @@ public class PreferencesView extends javax.swing.JFrame implements Observer {
     // define custom models :
     this.jComboBoxLUT.setModel(new DefaultComboBoxModel(ColorModels.getColorModelNames()));
     this.jComboBoxImageSize.setModel(new DefaultComboBoxModel(AsproConstants.IMAGE_SIZES));
+
+    // register this instance as a Preference Observer :
+    myPreferences.addObserver(this);
+
+    // update GUI
+    update(null, null);
+
+    // pack and center window
+    pack();
+    setLocationRelativeTo(null);
+  }
+
+  /**
+   * Free any ressource or reference to this instance :
+   * remove this instance form Preference Observers
+   */
+  @Override
+  public void dispose() {
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("dispose : " + this);
+    }
+
+    // unregister this instance as a Preference Observer :
+    myPreferences.deleteObserver(this);
+
+    // dispose Frame :
+    super.dispose();
+  }
+
+  /**
+   * Overriden method to give object identifier
+   * @return string identifier
+   */
+  @Override
+  public String toString() {
+    return "PreferencesView@" + Integer.toHexString(hashCode());
   }
 
   /**
@@ -235,10 +270,14 @@ public class PreferencesView extends javax.swing.JFrame implements Observer {
 
   /**
    * Listen to preferences changes
-   * @param o
-   * @param arg
+   * @param o Preferences
+   * @param arg unused
    */
   public void update(final Observable o, final Object arg) {
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("Preferences updated on : " + this);
+    }
+
     // read prefs to set states of GUI elements
     final boolean preferXyMode = myPreferences.getPreferenceAsBoolean(Preferences.MODELEDITOR_PREFERXY);
     this.jRadioButtonXY.setSelected(preferXyMode);

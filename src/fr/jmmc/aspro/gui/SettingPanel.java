@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SettingPanel.java,v 1.22 2010-09-02 15:54:42 bourgesl Exp $"
+ * "@(#) $Id: SettingPanel.java,v 1.23 2010-09-08 16:00:30 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.22  2010/09/02 15:54:42  bourgesl
+ * disable OIFits panel for production
+ *
  * Revision 1.21  2010/06/23 12:52:42  bourgesl
  * added the OIFits panel (creation / removal) and proper registration of Observation listeners in ObservationManager
  *
@@ -89,7 +92,7 @@ public final class SettingPanel extends JPanel implements ObservationListener {
   private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
   /** enable / disable OIFits panel */
-  private static final boolean ENABLE_OIFITS = false;
+  private static final boolean ENABLE_OIFITS = true;
 
   /* Tab names */
   /** name of the tab pane corresponding to the interferometer map */
@@ -215,11 +218,11 @@ public final class SettingPanel extends JPanel implements ObservationListener {
         // register the observability panel as an observation listener :
         ObservationManager.getInstance().register(this.observabilityPanel);
 
-        // add the observability panel :
-        this.jTabbedPane.addTab(TAB_OBSERVABILITY, this.observabilityPanel);
-
         // the event must be propagated to the new registered listener :
         this.observabilityPanel.onProcess(type, observation);
+
+        // add the observability panel :
+        this.jTabbedPane.addTab(TAB_OBSERVABILITY, this.observabilityPanel);
       }
 
       // UV coverage panel :
@@ -238,11 +241,11 @@ public final class SettingPanel extends JPanel implements ObservationListener {
           // register the uv coverage panel as an observation listener :
           ObservationManager.getInstance().register(this.uvCoveragePanel);
 
-          // add the uv coverage panel :
-          this.jTabbedPane.addTab(TAB_UV_COVERAGE, this.uvCoveragePanel);
-
           // the event must be propagated to the new registered listener :
           this.uvCoveragePanel.onProcess(type, observation);
+
+          // add the uv coverage panel :
+          this.jTabbedPane.addTab(TAB_UV_COVERAGE, this.uvCoveragePanel);
         }
       } else {
         if (uvPanelIndex != -1) {
@@ -252,13 +255,15 @@ public final class SettingPanel extends JPanel implements ObservationListener {
           // unregister the uv panel for the next event :
           ObservationManager.getInstance().unregister(this.uvCoveragePanel);
 
+          // free uv coverage panel references :
+          this.uvCoveragePanel.dispose();
           this.uvCoveragePanel = null;
         }
         if (ENABLE_OIFITS && this.oiFitsPanel != null) {
           // remove the OIFits panel :
           this.jTabbedPane.remove(this.oiFitsPanel);
 
-          // unregister the uv panel for the next event :
+          // unregister the OIFits for the next event :
           ObservationManager.getInstance().unregister(this.oiFitsPanel);
 
           this.oiFitsPanel = null;
@@ -273,11 +278,11 @@ public final class SettingPanel extends JPanel implements ObservationListener {
         // register the OIFits panel as an observation listener :
         ObservationManager.getInstance().register(this.oiFitsPanel);
 
-        // add the OIFits panel :
-        this.jTabbedPane.addTab(TAB_OIFITS, this.oiFitsPanel);
-
         // the event must be propagated to the new registered listener :
         this.oiFitsPanel.onProcess(type, observation);
+
+        // add the OIFits panel :
+        this.jTabbedPane.addTab(TAB_OIFITS, this.oiFitsPanel);
       }
     }
     if (logger.isLoggable(Level.FINE)) {
