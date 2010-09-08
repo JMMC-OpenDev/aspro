@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetModelForm.java,v 1.23 2010-06-23 12:50:38 bourgesl Exp $"
+ * "@(#) $Id: TargetModelForm.java,v 1.24 2010-09-08 15:58:51 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.23  2010/06/23 12:50:38  bourgesl
+ * class made final
+ *
  * Revision 1.22  2010/06/17 10:02:51  bourgesl
  * fixed warning hints - mainly not final static loggers
  *
@@ -237,9 +240,9 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
     initComponents();
 
     // Load Preferences and init default elements
-    final Preferences prefs = Preferences.getInstance();
+    final Preferences myPreferences = Preferences.getInstance();
 
-    final boolean preferXyMode = prefs.getPreferenceAsBoolean(Preferences.MODELEDITOR_PREFERXY);
+    final boolean preferXyMode = myPreferences.getPreferenceAsBoolean(Preferences.MODELEDITOR_PREFERXY);
     if (preferXyMode) {
       getModelParameterTableModel().setEditMode(ModelParameterTableModel.EditMode.X_Y);
     } else {
