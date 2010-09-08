@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: EditableStarResolverWidget.java,v 1.4 2010-05-11 10:17:31 mella Exp $"
+ * "@(#) $Id: EditableStarResolverWidget.java,v 1.5 2010-09-08 15:08:38 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2010/05/11 10:17:31  mella
+ * Add star name as optional field to put one new named star without simbad
+ *
  * Revision 1.3  2010/04/12 14:32:27  bourgesl
  * updated input validation to check HMS and DMS fields to be consistent
  *
@@ -56,6 +59,7 @@ public class EditableStarResolverWidget extends StarResolverWidget {
   /** double formatter for SS.mmm */
   private final static NumberFormat DF_DBL = new DecimalFormat("00.000");
   /* members */
+  /** standard StarResolverWidget action */
   private ActionListener standardAction = null;
 
   /**
@@ -144,24 +148,24 @@ public class EditableStarResolverWidget extends StarResolverWidget {
     final String inputRA = coords.substring(0, pos);
     final String inputDEC;
     // Search if we have one optional star name
-    final int namePos = coords.indexOf(' ',pos+4);
-    if(namePos == -1){
-        inputDEC = coords.substring(pos + 1);
-    }else{
-        inputDEC = coords.substring(pos + 1, namePos);
+    final int namePos = coords.indexOf(' ', pos + 4);
+    if (namePos == -1) {
+      inputDEC = coords.substring(pos + 1);
+    } else {
+      inputDEC = coords.substring(pos + 1, namePos);
     }
 
 
     // Validate the format of the RA value
     if (!inputRA.matches("[+|-]?[0-9]+[:][0-9]+[:][0-9]+.?[0-9]*")) {
-      throw new IllegalArgumentException("wrong RA format: '" +
-              inputRA + "' must be of form +10:00:00.00");
+      throw new IllegalArgumentException("wrong RA format: '"
+              + inputRA + "' must be of form +10:00:00.00");
     }
 
     // Validate the format of the given value
     if (!inputDEC.matches("[+|-]?[0-9]+[:][0-9]+[:][0-9]+.?[0-9]*")) {
-      throw new IllegalArgumentException("wrong DEC format: '" +
-              inputDEC + "' must be of form +30:00:00.00");
+      throw new IllegalArgumentException("wrong DEC format: '"
+              + inputDEC + "' must be of form +30:00:00.00");
     }
 
     // check hour, minute and second values and reformat value :
@@ -176,13 +180,13 @@ public class EditableStarResolverWidget extends StarResolverWidget {
 
 
     // Set name with coordinates or name if given 
-    final String name;    
-    if( namePos==-1 ){
-        // set default name : 'RA DEC' (given coordinates)
-        name = hmsRa + " " + dmsDec;
-    }else{
-        // set given name
-        name=coords.substring(namePos+1);
+    final String name;
+    if (namePos == -1) {
+      // set default name : 'RA DEC' (given coordinates)
+      name = hmsRa + " " + dmsDec;
+    } else {
+      // set given name
+      name = coords.substring(namePos + 1);
     }
 
     /*
@@ -259,22 +263,22 @@ public class EditableStarResolverWidget extends StarResolverWidget {
       hh = Integer.parseInt(tokens[0]);
 
       if (Math.abs(hh) >= 24) {
-        throw new IllegalArgumentException("invalid hour value : '" +
-                raHms + "'");
+        throw new IllegalArgumentException("invalid hour value : '"
+                + raHms + "'");
       }
 
       hm = Integer.parseInt(tokens[1]);
 
       if (hm >= 60) {
-        throw new IllegalArgumentException("invalid minute value: '" +
-                raHms + "'");
+        throw new IllegalArgumentException("invalid minute value: '"
+                + raHms + "'");
       }
 
       hs = Double.parseDouble(tokens[2]);
 
       if (hs >= 60d) {
-        throw new IllegalArgumentException("invalid second value: '" +
-                raHms + "'");
+        throw new IllegalArgumentException("invalid second value: '"
+                + raHms + "'");
       }
       if (_logger.isLoggable(Level.FINE)) {
         _logger.fine("hs = '" + hs + "'");
@@ -286,8 +290,8 @@ public class EditableStarResolverWidget extends StarResolverWidget {
       if (_logger.isLoggable(Level.SEVERE)) {
         _logger.log(Level.SEVERE, "format error", e);
       }
-      throw new IllegalArgumentException("invalid value : '" +
-              raHms + "'");
+      throw new IllegalArgumentException("invalid value : '"
+              + raHms + "'");
     }
 
     // Return a string with missing zero characters :
@@ -328,22 +332,22 @@ public class EditableStarResolverWidget extends StarResolverWidget {
       dd = Integer.parseInt(tokens[0]);
 
       if (Math.abs(dd) >= 90) {
-        throw new IllegalArgumentException("invalid degree value : '" +
-                decDms + "'");
+        throw new IllegalArgumentException("invalid degree value : '"
+                + decDms + "'");
       }
 
       dm = Integer.parseInt(tokens[1]);
 
       if (dm >= 60) {
-        throw new IllegalArgumentException("invalid minute value: '" +
-                decDms + "'");
+        throw new IllegalArgumentException("invalid minute value: '"
+                + decDms + "'");
       }
 
       ds = Double.parseDouble(tokens[2]);
 
       if (ds >= 60d) {
-        throw new IllegalArgumentException("invalid second value: '" +
-                decDms + "'");
+        throw new IllegalArgumentException("invalid second value: '"
+                + decDms + "'");
       }
 
     } catch (IllegalArgumentException iae) {
@@ -352,8 +356,8 @@ public class EditableStarResolverWidget extends StarResolverWidget {
       if (_logger.isLoggable(Level.SEVERE)) {
         _logger.log(Level.SEVERE, "format error", e);
       }
-      throw new IllegalArgumentException("invalid value : '" +
-              decDms + "'");
+      throw new IllegalArgumentException("invalid value : '"
+              + decDms + "'");
     }
 
     // Return a string with missing zero characters :
@@ -371,7 +375,6 @@ public class EditableStarResolverWidget extends StarResolverWidget {
 
     return sb.toString();
   }
-
 
   // --- Test Code -------------------------------------------------------------
   /**
@@ -497,6 +500,11 @@ public class EditableStarResolverWidget extends StarResolverWidget {
 
   }
 
+  /**
+   * Test method
+   * @param searchField editable star resolver field
+   * @param text input string
+   */
   private static void test(final EditableStarResolverWidget searchField, final String text) {
     SwingUtilities.invokeLater(new Runnable() {
 
