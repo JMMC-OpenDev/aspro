@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ConfigurationManager.java,v 1.25 2010-07-22 12:30:12 bourgesl Exp $"
+ * "@(#) $Id: ConfigurationManager.java,v 1.26 2010-09-09 16:06:10 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.25  2010/07/22 12:30:12  bourgesl
+ * added getFocalInstrument and getInstrumentSamplingTime methods
+ *
  * Revision 1.24  2010/07/07 15:11:28  bourgesl
  * full javadoc
  *
@@ -112,7 +115,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 import java.util.logging.Level;
-import uk.ac.starlink.pal.Spherical;
 
 /**
  * This class manages configuration files for the Interferometer configurations
@@ -230,11 +232,11 @@ public class ConfigurationManager extends BaseOIManager {
 
     // Interferometer center :
     final Position3D center = id.getPosition();
-    final Spherical sph = GeocentricCoords.getLonLatAlt(center);
+    final LonLatAlt posSph = GeocentricCoords.getLonLatAlt(center);
 
-    id.setPosSph(new LonLatAlt(sph.getLong(), sph.getLat(), sph.getRadial()));
+    id.setPosSph(posSph);
 
-    GeocentricCoords.dump(id.getName(), sph);
+    GeocentricCoords.dump(id.getName(), posSph);
   }
 
   /**
