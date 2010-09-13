@@ -1,13 +1,16 @@
 #*******************************************************************************
 # JMMC project
 #
-# "@(#) $Id: Makefile,v 1.10 2010-09-13 14:10:35 bourgesl Exp $"
+# "@(#) $Id: Makefile,v 1.11 2010-09-13 14:12:49 bourgesl Exp $"
 #
 # Makefile of aspro module
 #
 # History
 # -------
 # $Log: not supported by cvs2svn $
+# Revision 1.10  2010/09/13 14:10:35  bourgesl
+# added edu.dartmouth license
+#
 # Revision 1.9  2010/06/23 13:08:40  bourgesl
 # added xslt files
 #
@@ -140,7 +143,7 @@ aspro_EXTRAS   = fr/jmmc/aspro/*.xml \
 		 fr/jmmc/aspro/gui/icons/*.png \
 		 fr/jmmc/aspro/gui/icons/*.gif \
 		 fr/jmmc/aspro/ob/*.obx \
-		 edu/darmouth/License.txt
+		 edu/dartmouth/License.txt
 
 #
 # Java programs
