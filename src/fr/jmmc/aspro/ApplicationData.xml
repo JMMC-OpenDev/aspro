@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <ApplicationData link="http://www.jmmc.fr/aspro2">
-  <program name="Aspro2" version="0.6.0"/>
+  <program name="Aspro2" version="0.6.1"/>
   <compilation date="21/09/2009" compiler="JDK 1.5.0_16"/>
   <text>
     <![CDATA[ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations
@@ -11,14 +11,19 @@
   <dependences>
     <package name="JSkyCalc" description="Observability constraints based on JSkyCalc by J. R. Thorstensen, Dartmouth College"
                              link="http://www.dartmouth.edu/~physics/faculty/skycalc/flyer.html"/>
+    <!-- redistribution allowed including this acknowledgment -->
 
     <package name="JFreeChart" description="JFreeChart is a free 100% Java chart library that makes it easy for developers to display professional quality charts in their applications" link="http://www.jfree.org/jfreechart/"/>
+    <!-- LGPL : http://www.gnu.org/licenses/lgpl.html -->
 
     <package name="iText" description="iText is a library that allows you to generate PDF files on the fly" link="http://itextpdf.com/"/>
+    <!-- AGPL : http://itextpdf.com/terms-of-use/agpl.php -->
 
     <package name="JAXB" description="Java Architecture for XML Binding (JAXB) allows Java developers to map Java classes to XML representations" link="https://jaxb.dev.java.net/"/>
+    <!-- CDDL/GPL : https://glassfish.dev.java.net/public/CDDL+GPL.html -->
 
     <package name="SwingWorker" description="backport of SwingWorker included into Java 1.6" link="https://swingworker.dev.java.net/"/>
+    <!-- LGPL : http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html -->
 
   </dependences>
   <menubar>
@@ -41,6 +46,10 @@
   </menubar>
   <releasenotes>
     <release version="0.6">
+      <prerelease version="0.6.1">
+        <change>Remove Astrogrid Pal library</change>
+        <change>Fixed memory leak related to Preference listeners</change>
+      </prerelease>
       <prerelease version="0.6.0">
         <change>Offical release of Aspro 2</change>
       </prerelease>
