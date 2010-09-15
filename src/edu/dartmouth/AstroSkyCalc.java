@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AstroSkyCalc.java,v 1.24 2010-07-22 12:32:22 bourgesl Exp $"
+ * "@(#) $Id: AstroSkyCalc.java,v 1.25 2010-09-15 13:51:47 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.24  2010/07/22 12:32:22  bourgesl
+ * added moon rise/set and moon illumination fraction
+ *
  * Revision 1.23  2010/06/28 12:26:17  bourgesl
  * added mjd(jd) to get modified julian day
  *
@@ -133,7 +136,7 @@ public final class AstroSkyCalc {
     final WhenWhere ww = new WhenWhere(instant, this.site);
 
     if (logger.isLoggable(Level.FINE)) {
-      dumpWhen(ww, "When");
+      AstroSkyCalc.dumpWhen(ww, "When");
     }
 
     // Find the julian date corresponding to the LST origin LST=00:00:00 for the given date :
@@ -187,7 +190,7 @@ public final class AstroSkyCalc {
     }
 
     if (logger.isLoggable(Level.FINE)) {
-      dumpWhen(ww, "LST=00:00:00");
+      AstroSkyCalc.dumpWhen(ww, "LST=00:00:00");
     }
 
     return ww.when.jd;
@@ -246,7 +249,7 @@ public final class AstroSkyCalc {
    * @param ww WhenWhere instance
    * @param label message to log
    */
-  private void dumpWhen(final WhenWhere ww, final String label) {
+  static void dumpWhen(final WhenWhere ww, final String label) {
     if (logger.isLoggable(Level.FINE)) {
       final InstantInTime t = ww.when;
       logger.fine(label + " dump : " + t.jd
@@ -436,7 +439,7 @@ public final class AstroSkyCalc {
       st = sorted.get(i);
 
       if (logger.isLoggable(Level.FINEST)) {
-        dumpWhen(new WhenWhere(st.getJd(), this.site), st.getType().name());
+        AstroSkyCalc.dumpWhen(new WhenWhere(st.getJd(), this.site), st.getType().name());
       }
 
       result.add(st);

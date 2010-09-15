@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AstroSkyCalcObservation.java,v 1.1 2010-06-25 14:12:38 bourgesl Exp $"
+ * "@(#) $Id: AstroSkyCalcObservation.java,v 1.2 2010-09-15 13:51:47 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2010/06/25 14:12:38  bourgesl
+ * methods from AstoSkyCalc related to targets moved in AstoSkyCalcObservation
+ *
  *
  */
 package edu.dartmouth;
@@ -91,10 +94,20 @@ public final class AstroSkyCalcObservation {
     this.observation.w.ChangeWhen(jd);
     this.observation.ComputeSky();
 
-//    if (logger.isLoggable(Level.FINE)) {
-//      dumpWhen(this.observation.w, "Target");
-//      logger.fine("az|alt   : " + this.observation.azimuth + " " + this.observation.altitude);
-//    }
+    // TODO : check angular distance between target and moon :
+    /*
+     * // Check moon distance :
+     * this.observation.ComputeSunMoon();
+     *
+     * observation.moonobj gives the angular distance with moon in degrees
+     *
+     * logger.severe("jd " + jd + " moon distance = " + this.observation.moonobj);
+     *
+     * if (logger.isLoggable(Level.FINE)) {
+     *   AstroSkyCalc.dumpWhen(this.observation.w, "Target");
+     *   logger.fine("az|alt   : " + this.observation.azimuth + " " + this.observation.altitude);
+     * }
+     */
 
     return new AzEl(this.observation.azimuth, this.observation.altitude);
   }
