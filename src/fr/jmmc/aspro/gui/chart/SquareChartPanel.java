@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SquareChartPanel.java,v 1.5 2010-06-17 10:02:50 bourgesl Exp $"
+ * "@(#) $Id: SquareChartPanel.java,v 1.6 2010-09-15 13:53:25 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2010/06/17 10:02:50  bourgesl
+ * fixed warning hints - mainly not final static loggers
+ *
  * Revision 1.4  2010/02/04 14:45:43  bourgesl
  * try / finally srtucture to be sure to call plot.setNotify in any case (exception ...) causing the plot to be frozen (no more refresh)
  *
@@ -46,7 +49,7 @@ import org.jfree.data.Range;
  *
  * @author bourgesl
  */
-public class SquareChartPanel extends ChartPanel {
+public final class SquareChartPanel extends ChartPanel {
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
@@ -89,10 +92,10 @@ public class SquareChartPanel extends ChartPanel {
    * @since 1.0.13
    */
   public SquareChartPanel(JFreeChart chart, int width, int height,
-          int minimumDrawWidth, int minimumDrawHeight, int maximumDrawWidth,
-          int maximumDrawHeight, boolean useBuffer, boolean properties,
-          boolean copy, boolean save, boolean print, boolean zoom,
-          boolean tooltips) {
+                          int minimumDrawWidth, int minimumDrawHeight, int maximumDrawWidth,
+                          int maximumDrawHeight, boolean useBuffer, boolean properties,
+                          boolean copy, boolean save, boolean print, boolean zoom,
+                          boolean tooltips) {
     super(chart, width, height, minimumDrawWidth, minimumDrawHeight, maximumDrawWidth, maximumDrawHeight,
             useBuffer, properties, copy, save, print, zoom, tooltips);
 
@@ -100,11 +103,19 @@ public class SquareChartPanel extends ChartPanel {
     this.addMouseWheelListener(new MouseWheelHandler(this));
   }
 
+  /**
+   * Return the zoom listener
+   * @return zoom listener or null if undefined
+   */
   public ZoomEventListener getZoomEventListener() {
     return zoomListener;
   }
 
-  public void setZoomEventListener(ZoomEventListener listener) {
+  /**
+   * Set the zoom listener
+   * @param listener zoom listener
+   */
+  public void setZoomEventListener(final ZoomEventListener listener) {
     this.zoomListener = listener;
   }
 
@@ -294,19 +305,20 @@ public class SquareChartPanel extends ChartPanel {
       rangeUpperBound = yRange.getUpperBound();
     }
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("Axis ranges :\nX [" + domainLowerBound + ", " + domainUpperBound + "]" + "\nY [" + rangeLowerBound + ", " + rangeUpperBound + "]");
-    }
-
     if (this.zoomListener != null) {
-      this.zoomListener.chartChanged(new ZoomEvent(domainLowerBound, domainUpperBound, rangeLowerBound, rangeUpperBound));
+      final ZoomEvent ze = new ZoomEvent(domainLowerBound, domainUpperBound, rangeLowerBound, rangeUpperBound);
+
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("fireZoomEvent " + ze);
+      }
+      this.zoomListener.chartChanged(ze);
     }
   }
 
   /**
    * HACK to intercept the mouse wheel events to fire the zoom event
    */
-  private class MouseWheelHandler implements MouseWheelListener, Serializable {
+  private final class MouseWheelHandler implements MouseWheelListener, Serializable {
 
     /** default serial UID for Serializable interface */
     private static final long serialVersionUID = 1;
@@ -408,7 +420,7 @@ public class SquareChartPanel extends ChartPanel {
 
         // HACK to get new axis ranges after zoom :
         fireZoomEvent((SquareXYPlot) plot);
-        
+
       } finally {
         plot.setNotify(savedNotify);
       }
