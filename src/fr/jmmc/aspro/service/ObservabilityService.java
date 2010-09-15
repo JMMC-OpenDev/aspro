@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.52 2010-07-22 12:32:49 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.53 2010-09-15 13:55:07 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.52  2010/07/22 12:32:49  bourgesl
+ * added moon information (rise/set and moon illumination fraction) when the night restrictions are enabled
+ *
  * Revision 1.51  2010/06/30 15:02:53  bourgesl
  * use CombUtils to simplify code (number of baselines)
  *
@@ -231,6 +234,8 @@ public final class ObservabilityService {
   /** Class logger */
   private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
+  /** flag to return moon rise/set as star data */
+  private final static boolean MOON_RISE_SET = false;
 
   /* members */
 
@@ -429,16 +434,22 @@ public final class ObservabilityService {
         final List<Range> moonRanges = this.sc.findMoonRiseSet(this.jdLst24);
         final double moonIllum = this.sc.getMaxMoonIllum(moonRanges);
 
-        final StarObservabilityData soMoon = new StarObservabilityData("Moon [" + (int) Math.round(100 * moonIllum) + " %]",
-                StarObservabilityData.TYPE_MOON);
-        this.data.getStarVisibilities().add(soMoon);
+        if (MOON_RISE_SET) {
+          final StarObservabilityData soMoon = new StarObservabilityData("Moon [" + (int) Math.round(100 * moonIllum) + " %]",
+                  StarObservabilityData.TYPE_MOON);
+          this.data.getStarVisibilities().add(soMoon);
 
-        for (Range range : moonRanges) {
-          convertRangeToDateInterval(range, soMoon.getVisible());
+          for (Range range : moonRanges) {
+            convertRangeToDateInterval(range, soMoon.getVisible());
+          }
+          if (logger.isLoggable(Level.FINE)) {
+            logger.fine("moon visible : " + soMoon.getVisible());
+          }
         }
 
+        this.data.setMoonIllumPercent(100d * moonIllum);
+
         if (logger.isLoggable(Level.FINE)) {
-          logger.fine("moon visible : " + soMoon.getVisible());
           logger.fine("moon illum   : " + moonIllum);
         }
       }
