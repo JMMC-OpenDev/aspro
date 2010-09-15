@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SettingPanel.java,v 1.23 2010-09-08 16:00:30 bourgesl Exp $"
+ * "@(#) $Id: SettingPanel.java,v 1.24 2010-09-15 15:08:48 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.23  2010/09/08 16:00:30  bourgesl
+ * unregister Preference Observers when the widget is released (Preference View, UV Coverage Panel)
+ *
  * Revision 1.22  2010/09/02 15:54:42  bourgesl
  * disable OIFits panel for production
  *
@@ -92,7 +95,7 @@ public final class SettingPanel extends JPanel implements ObservationListener {
   private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
   /** enable / disable OIFits panel */
-  private static final boolean ENABLE_OIFITS = true;
+  private static final boolean ENABLE_OIFITS = false;
 
   /* Tab names */
   /** name of the tab pane corresponding to the interferometer map */
