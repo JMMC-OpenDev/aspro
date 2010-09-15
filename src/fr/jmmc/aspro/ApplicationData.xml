@@ -47,6 +47,8 @@
   <releasenotes>
     <release version="0.6">
       <prerelease version="0.6.1">
+        <change>Added 'Aspro 2 / JMMC' label on plots</change>
+        <change>Fixed FT_SENSOR value (FINITO or NONE) in AMBER Observing blocks</change>
         <change>Remove Astrogrid Pal library</change>
         <change>Fixed memory leak related to Preference listeners</change>
       </prerelease>
