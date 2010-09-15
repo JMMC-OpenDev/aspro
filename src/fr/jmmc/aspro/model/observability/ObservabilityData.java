@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityData.java,v 1.5 2010-06-25 14:13:36 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityData.java,v 1.6 2010-09-15 13:56:10 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2010/06/25 14:13:36  bourgesl
+ * added dateCalc (AstroSkyCalc) to be reused by OIFits generation
+ *
  * Revision 1.4  2010/06/23 12:54:17  bourgesl
  * added Beam list to use it in OIFits generation
  *
@@ -37,7 +40,7 @@ import java.util.Map;
  * This class contains the results of the Observability service
  * @author bourgesl
  */
-public class ObservabilityData {
+public final class ObservabilityData {
 
   /* observability plot data */
   /** starting date */
@@ -46,6 +49,8 @@ public class ObservabilityData {
   private Date dateMax = null;
   /** list of sun time intervals */
   private List<SunTimeInterval> sunIntervals = null;
+  /** moon illumination (percent) */
+  private double moonIllumPercent = 0d;
   /** list of star visibility intervals */
   private List<StarObservabilityData> starVisibilities = new ArrayList<StarObservabilityData>();
   /** optional */
@@ -137,5 +142,13 @@ public class ObservabilityData {
 
   public StarData getStarData(final String name) {
     return this.mapStarDatas.get(name);
+  }
+
+  public double getMoonIllumPercent() {
+    return moonIllumPercent;
+  }
+
+  public void setMoonIllumPercent(double moonIllumPercent) {
+    this.moonIllumPercent = moonIllumPercent;
   }
 }
