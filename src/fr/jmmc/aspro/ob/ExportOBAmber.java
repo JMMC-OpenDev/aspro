@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBAmber.java,v 1.11 2010-05-26 15:29:13 bourgesl Exp $"
+ * "@(#) $Id: ExportOBAmber.java,v 1.12 2010-09-15 14:09:33 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.11  2010/05/26 15:29:13  bourgesl
+ * light refactoring and javadoc
+ *
  * Revision 1.10  2010/05/06 15:42:18  bourgesl
  * use HA Min/Max + FT Mode for the target in the observation settings
  *
@@ -42,6 +45,7 @@ package fr.jmmc.aspro.ob;
 
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Target;
+import fr.jmmc.aspro.model.oi.TargetConfiguration;
 import fr.jmmc.aspro.util.FileUtils;
 import java.io.File;
 import java.util.logging.Level;
@@ -93,8 +97,11 @@ public class ExportOBAmber extends ExportOBVLTI {
     // Coude Guided Star = Science (= mag V) :
     document = document.replaceFirst(KEY_COUDE_GS_MAG, df3.format(getMagnitude(target.getFLUXV())));
 
-    // Later : ft sensor
-    document = document.replaceFirst(KEY_FT_SENSOR, "NONE");
+    // Check if a fringe tracker is used :
+    final TargetConfiguration targetConf = target.getConfiguration();
+
+    document = document.replaceFirst(KEY_FT_SENSOR,
+            (targetConf != null && targetConf.getFringeTrackerMode() != null) ? "FINITO" : "NONE");
 
     // spectral configuration = instrument mode :
     document = document.replaceFirst(KEY_SPEC_CONF, observation.getInstrumentConfiguration().getInstrumentMode());
