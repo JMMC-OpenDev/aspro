@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityPanel.java,v 1.38 2010-07-05 14:51:27 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityPanel.java,v 1.39 2010-09-15 13:55:53 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.38  2010/07/05 14:51:27  bourgesl
+ * cancel UV tasks at the same time a new Observation task is executed to make the UI more responsive
+ *
  * Revision 1.37  2010/06/23 12:52:08  bourgesl
  * ObservationManager regsitration for observation events moved in SettingPanel (external)
  *
@@ -123,6 +126,7 @@
  ******************************************************************************/
 package fr.jmmc.aspro.gui;
 
+import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.gui.action.ExportPDFAction;
 import fr.jmmc.aspro.gui.chart.ChartUtils;
 import fr.jmmc.aspro.gui.chart.XYDiamondAnnotation;
@@ -503,7 +507,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
               if (observation.getWhen().isNightRestriction() || !useLST) {
                 // date :
-                ChartUtils.addSubtitle(localJFreeChart, "Day : " + observation.getWhen().getDate().toString());
+                ChartUtils.addSubtitle(localJFreeChart, "Day : " + observation.getWhen().getDate().toString() +
+                        " - Moon = " + (int)Math.round(obsData.getMoonIllumPercent()) + "%");
               }
 
               // computed data are valid :
@@ -657,6 +662,14 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         n++;
       }
     }
+
+    // annotation JMMC (fixed position) :
+    final XYTextAnnotation aJMMC = new XYTextAnnotation(AsproConstants.JMMC_ANNOTATION,
+            localSymbolAxis.getRange().getUpperBound(),
+            max.getTime());
+    aJMMC.setTextAnchor(TextAnchor.BOTTOM_RIGHT);
+    aJMMC.setPaint(Color.BLACK);
+    renderer.addAnnotation(aJMMC, Layer.BACKGROUND);
   }
 
   /**
