@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproConstants.java,v 1.15 2010-07-22 15:45:43 bourgesl Exp $"
+ * "@(#) $Id: AsproConstants.java,v 1.16 2010-09-15 13:52:55 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.15  2010/07/22 15:45:43  bourgesl
+ * added acquisition time in UV coverage and observation
+ *
  * Revision 1.14  2010/06/09 12:48:05  bourgesl
  * removed DEBUG_MODE constant (useless)
  *
@@ -96,4 +99,7 @@ public interface AsproConstants {
   public static final String INS_MIDI = "MIDI";
   /** CHARA VEGA (2T/3T) */
   public static final String INS_VEGA = "VEGA_";
+  
+  /** JMMC legal notice on plots */
+  public static final String JMMC_ANNOTATION = "Made by ASPRO 2/JMMC ";
 }

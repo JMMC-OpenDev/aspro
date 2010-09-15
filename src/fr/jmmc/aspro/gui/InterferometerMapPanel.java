@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: InterferometerMapPanel.java,v 1.7 2010-06-23 12:52:08 bourgesl Exp $"
+ * "@(#) $Id: InterferometerMapPanel.java,v 1.8 2010-09-15 13:52:55 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2010/06/23 12:52:08  bourgesl
+ * ObservationManager regsitration for observation events moved in SettingPanel (external)
+ *
  * Revision 1.6  2010/06/17 10:02:51  bourgesl
  * fixed warning hints - mainly not final static loggers
  *
@@ -35,6 +38,8 @@ import fr.jmmc.aspro.gui.chart.NameLabelGenerator;
 import fr.jmmc.aspro.gui.chart.SquareChartPanel;
 import fr.jmmc.aspro.gui.chart.SquareXYPlot;
 import fr.jmmc.aspro.gui.chart.XYZNameDataSet;
+import fr.jmmc.aspro.gui.chart.ZoomEvent;
+import fr.jmmc.aspro.gui.chart.ZoomEventListener;
 import fr.jmmc.aspro.gui.util.ColorPalette;
 import fr.jmmc.aspro.model.InterferometerMapData;
 import fr.jmmc.aspro.model.ObservationListener;
@@ -48,6 +53,7 @@ import java.awt.Dimension;
 import java.util.logging.Level;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.annotations.XYTextAnnotation;
 import org.jfree.chart.event.ChartProgressEvent;
 import org.jfree.chart.event.ChartProgressListener;
 import org.jfree.chart.labels.ItemLabelAnchor;
@@ -57,14 +63,15 @@ import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
+import org.jfree.ui.Layer;
 import org.jfree.ui.TextAnchor;
 
 /**
  * This panel presents the interferometer plot (station, base lines ...)
  * @author bourgesl
  */
-public final class InterferometerMapPanel extends javax.swing.JPanel implements ChartProgressListener,
-        ObservationListener, PDFExportable {
+public final class InterferometerMapPanel extends javax.swing.JPanel implements ChartProgressListener, ZoomEventListener,
+                                                                                ObservationListener, PDFExportable {
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
@@ -79,6 +86,8 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
   private JFreeChart localJFreeChart;
   /** xy plot instance */
   private SquareXYPlot localXYPlot;
+  /** JMMC annotation */
+  private XYTextAnnotation aJMMC = null;
   /** current configuration to track changes */
   private String configuration = null;
 
@@ -192,6 +201,9 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
     this.chartPanel.setDomainZoomable(AsproConstants.ENABLE_ZOOM);
     this.chartPanel.setRangeZoomable(AsproConstants.ENABLE_ZOOM);
 
+    // define zoom listener :
+    this.chartPanel.setZoomEventListener(this);
+
     this.chartPanel.setMinimumSize(new Dimension(650, 500));
     this.add(this.chartPanel);
   }
@@ -282,7 +294,8 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
     final ColorPalette palette = ColorPalette.getDefaultColorPalette();
 
     // define bounds to the maximum value + 10% (before setDataset) :
-    this.localXYPlot.defineBounds(mapData.getMaxXY() * 1.10d);
+    final double boxSize = mapData.getMaxXY() * 1.10d;
+    this.localXYPlot.defineBounds(boxSize);
 
     // first plot stations :
     final XYZNameDataSet dataset1 = new XYZNameDataSet();
@@ -327,6 +340,32 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
 
     // set the second data set :
     this.localXYPlot.setDataset(1, dataset2);
+
+    // annotation JMMC (moving position) :
+    this.localXYPlot.getRenderer(0).removeAnnotations();
+    if (this.aJMMC == null) {
+      this.aJMMC = new XYTextAnnotation(AsproConstants.JMMC_ANNOTATION, boxSize, -boxSize);
+      this.aJMMC.setTextAnchor(TextAnchor.BOTTOM_RIGHT);
+      this.aJMMC.setPaint(Color.BLACK);
+    } else {
+      this.aJMMC.setX(boxSize);
+      this.aJMMC.setY(-boxSize);
+    }
+    this.localXYPlot.getRenderer(0).addAnnotation(this.aJMMC, Layer.BACKGROUND);
+  }
+
+  /**
+   * Process the zoom event to refresh the model UV map according to the new coordinates
+   * @param ze zoom event
+   */
+  public void chartChanged(final ZoomEvent ze) {
+    if (this.aJMMC != null) {
+      this.localXYPlot.getRenderer(0).removeAnnotations();
+      this.aJMMC.setX(ze.getDomainUpperBound());
+      this.aJMMC.setY(ze.getRangeLowerBound());
+
+      this.localXYPlot.getRenderer(0).addAnnotation(this.aJMMC, Layer.BACKGROUND);
+    }
   }
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JButton jButtonPDF;

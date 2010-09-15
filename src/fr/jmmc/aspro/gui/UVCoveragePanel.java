@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.51 2010-09-08 16:00:31 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.52 2010-09-15 13:56:31 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.51  2010/09/08 16:00:31  bourgesl
+ * unregister Preference Observers when the widget is released (Preference View, UV Coverage Panel)
+ *
  * Revision 1.50  2010/09/06 13:39:34  bourgesl
  * small changes on Panels (scrollbar added as needed) in order to solve widget display on small screens
  *
@@ -234,12 +237,15 @@ import javax.swing.event.ChangeListener;
 import org.jdesktop.swingworker.SwingWorker;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.annotations.XYTextAnnotation;
 import org.jfree.chart.event.ChartProgressEvent;
 import org.jfree.chart.event.ChartProgressListener;
 import org.jfree.chart.renderer.AbstractRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
+import org.jfree.ui.Layer;
+import org.jfree.ui.TextAnchor;
 
 /**
  * This panel presents the UV coverage plot with its parameters (target, instrument mode ...)
@@ -271,6 +277,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
   private JFreeChart localJFreeChart;
   /** xy plot instance */
   private SquareXYPlot localXYPlot;
+  /** JMMC annotation */
+  private XYTextAnnotation aJMMC = null;
   /** uv coordinates scaling factor */
   private double uvPlotScalingFactor = MEGA_LAMBDA_SCALE;
   /* cached data */
@@ -1553,6 +1561,15 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     if (this.currentUVMapData != null && !ze.equals(this.lastZoomEvent)) {
       this.lastZoomEvent = ze;
 
+      if (this.aJMMC != null) {
+        this.localXYPlot.getRenderer(0).removeAnnotations();
+        this.aJMMC.setX(ze.getDomainUpperBound());
+        this.aJMMC.setY(ze.getRangeLowerBound());
+
+        this.localXYPlot.getRenderer(0).addAnnotation(this.aJMMC, Layer.BACKGROUND);
+      }
+
+      // Update model uv map :
       final String targetName = getSelectedTargetName();
 
       final List<Model> models = ObservationManager.getTarget(this.om.getObservation(), targetName).getModels();
@@ -1733,10 +1750,23 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     this.updateUVTracksRiseSet(dataset, uvData);
 
     // define bounds to the uv maximum value (before setDataset) :
-    this.localXYPlot.defineBounds(toUVPlotScale(uvData.getUvMax()));
+    final double boxSize = toUVPlotScale(uvData.getUvMax());
+    this.localXYPlot.defineBounds(boxSize);
 
     // set the main data set :
     this.localXYPlot.setDataset(dataset);
+
+    // annotation JMMC (moving position) :
+    this.localXYPlot.getRenderer(0).removeAnnotations();
+    if (this.aJMMC == null) {
+      this.aJMMC = new XYTextAnnotation(AsproConstants.JMMC_ANNOTATION, boxSize, -boxSize);
+      this.aJMMC.setTextAnchor(TextAnchor.BOTTOM_RIGHT);
+      this.aJMMC.setPaint(Color.BLACK);
+    } else {
+      this.aJMMC.setX(boxSize);
+      this.aJMMC.setY(-boxSize);
+    }
+    this.localXYPlot.getRenderer(0).addAnnotation(this.aJMMC, Layer.BACKGROUND);
   }
 
   /**
