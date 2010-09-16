@@ -13,6 +13,18 @@
                              link="http://www.dartmouth.edu/~physics/faculty/skycalc/flyer.html"/>
     <!-- redistribution allowed including this acknowledgment -->
 
+    <!-- oitools dependency -->
+    <package name="nom.tam.fits"
+             description="The Java FITS library (nom.tam.fits) has been developed which provides efficient I/O for FITS images and binary tables. Made by Dr Thomas A. McGlynn, HEASARC"
+             link="http://heasarc.gsfc.nasa.gov/docs/heasarc/fits/java/v1.0/"/>
+    <!--
+     Copyright: Thomas McGlynn 1997-1999.
+     This code may be used for any purpose, non-commercial
+     or commercial so long as this copyright notice is retained
+     in the source code or included in or referred to in any
+     derived software.
+    -->
+
     <package name="JFreeChart" description="JFreeChart is a free 100% Java chart library that makes it easy for developers to display professional quality charts in their applications" link="http://www.jfree.org/jfreechart/"/>
     <!-- LGPL : http://www.gnu.org/licenses/lgpl.html -->
 
