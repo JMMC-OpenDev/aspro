@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ConfigurationManager.java,v 1.26 2010-09-09 16:06:10 bourgesl Exp $"
+ * "@(#) $Id: ConfigurationManager.java,v 1.27 2010-09-20 12:14:21 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.26  2010/09/09 16:06:10  bourgesl
+ * remove Astrogrid Pal dependency
+ *
  * Revision 1.25  2010/07/22 12:30:12  bourgesl
  * added getFocalInstrument and getInstrumentSamplingTime methods
  *
@@ -120,7 +123,7 @@ import java.util.logging.Level;
  * This class manages configuration files for the Interferometer configurations
  * @author bourgesl
  */
-public class ConfigurationManager extends BaseOIManager {
+public final class ConfigurationManager extends BaseOIManager {
 
   /** Class Name */
   private static final String className_ = "fr.jmmc.aspro.model.ConfigurationManager";
