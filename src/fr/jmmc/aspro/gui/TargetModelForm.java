@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetModelForm.java,v 1.24 2010-09-08 15:58:51 bourgesl Exp $"
+ * "@(#) $Id: TargetModelForm.java,v 1.25 2010-09-20 14:46:02 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.24  2010/09/08 15:58:51  bourgesl
+ * renamed variable
+ *
  * Revision 1.23  2010/06/23 12:50:38  bourgesl
  * class made final
  *
@@ -82,7 +85,6 @@ package fr.jmmc.aspro.gui;
 import fr.jmmc.aspro.Preferences;
 import fr.jmmc.aspro.gui.util.ComponentResizeAdapter;
 import fr.jmmc.aspro.model.ObservationManager;
-import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.mcs.gui.App;
 import fr.jmmc.mcs.gui.NumericJTable;
@@ -164,15 +166,13 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
     boolean result = false;
 
     // Prepare the list of targets :
-    final ObservationSetting observation = ObservationManager.getInstance().getObservation();
-
     List<Target> targets;
     if (targetName != null) {
       // single target editor :
-      targets = Arrays.asList(new Target[]{ObservationManager.getTarget(observation, targetName)});
+      targets = Arrays.asList(new Target[]{ObservationManager.getInstance().getTarget(targetName)});
     } else {
       // full editor :
-      targets = observation.getTargets();
+      targets = ObservationManager.getInstance().getTargets();
     }
 
     final TargetModelForm form = new TargetModelForm();
@@ -223,10 +223,10 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
     if (result) {
       if (targetName != null) {
         // single target editor :
-        ObservationManager.replaceTarget(observation, form.getEditTargets().get(0));
+        ObservationManager.getInstance().replaceTarget(form.getEditTargets().get(0));
       } else {
         // full editor :
-        ObservationManager.setTargets(observation, form.getEditTargets());
+        ObservationManager.getInstance().setTargets(form.getEditTargets());
       }
     }
 

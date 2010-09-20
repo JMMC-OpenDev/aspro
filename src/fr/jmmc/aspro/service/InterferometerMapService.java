@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: InterferometerMapService.java,v 1.4 2010-06-30 15:02:25 bourgesl Exp $"
+ * "@(#) $Id: InterferometerMapService.java,v 1.5 2010-09-20 14:46:02 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2010/06/30 15:02:25  bourgesl
+ * comment changed
+ *
  * Revision 1.3  2010/06/30 14:54:45  bourgesl
  * use CombUtils to simplify code (Pops combination and number of baselines)
  *
@@ -19,6 +22,7 @@
 package fr.jmmc.aspro.service;
 
 import fr.jmmc.aspro.model.InterferometerMapData;
+import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.oi.InterferometerConfiguration;
 import fr.jmmc.aspro.model.oi.InterferometerConfigurationChoice;
 import fr.jmmc.aspro.model.oi.InterferometerDescription;
@@ -60,7 +64,7 @@ public final class InterferometerMapService {
    */
   public static InterferometerMapData compute(final ObservationSetting observation) {
     if (logger.isLoggable(Level.FINE)) {
-      logger.fine("compute : " + observation);
+      logger.fine("compute : " + ObservationManager.toString(observation));
     }
     final InterferometerMapData data = new InterferometerMapData();
 

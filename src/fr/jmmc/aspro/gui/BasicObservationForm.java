@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BasicObservationForm.java,v 1.34 2010-09-02 15:46:43 bourgesl Exp $"
+ * "@(#) $Id: BasicObservationForm.java,v 1.35 2010-09-20 14:46:02 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.34  2010/09/02 15:46:43  bourgesl
+ * added status panel (warnings)
+ *
  * Revision 1.33  2010/07/07 15:12:41  bourgesl
  * use configuration manager member
  *
@@ -773,6 +776,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
 
         boolean changed = false;
 
+        // Transform name to upper case :
         final String name = star.getName().toUpperCase();
 
         if (this.om.addTarget(name, star)) {

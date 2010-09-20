@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBVLTI.java,v 1.8 2010-06-25 14:17:21 bourgesl Exp $"
+ * "@(#) $Id: ExportOBVLTI.java,v 1.9 2010-09-20 14:46:02 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.8  2010/06/25 14:17:21  bourgesl
+ * refactoring due to changes done in AstroSkyCalc and AstroSkyCalcObservation
+ *
  * Revision 1.7  2010/06/17 10:02:51  bourgesl
  * fixed warning hints - mainly not final static loggers
  *
@@ -134,24 +137,26 @@ public class ExportOBVLTI {
    * @param file file to save
    * @param targetName target to process
    */
-  public static void process(final File file, final String targetName) {
+  public final static void process(final File file, final String targetName) {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("process " + targetName + " to " + file);
     }
 
     // get observation and target :
     final ObservationSetting observation = ObservationManager.getInstance().getObservation();
-    final Target target = ObservationManager.getTarget(observation, targetName);
+    final Target target = observation.getTarget(targetName);
 
-    // Dispatch to AMBER or MIDI classes :
-    final String instrumentName = observation.getInstrumentConfiguration().getName();
+    if (target != null) {
+      // Dispatch to AMBER or MIDI classes :
+      final String instrumentName = observation.getInstrumentConfiguration().getName();
 
-    if (AsproConstants.INS_AMBER.equals(instrumentName)) {
-      ExportOBAmber.generate(file, observation, target);
-    } else if (AsproConstants.INS_MIDI.equals(instrumentName)) {
-      ExportOBMidi.generate(file, observation, target);
-    } else {
-      throw new IllegalArgumentException("The application can not generate an Observing Block for this instrument [" + instrumentName + "] !");
+      if (AsproConstants.INS_AMBER.equals(instrumentName)) {
+        ExportOBAmber.generate(file, observation, target);
+      } else if (AsproConstants.INS_MIDI.equals(instrumentName)) {
+        ExportOBMidi.generate(file, observation, target);
+      } else {
+        throw new IllegalArgumentException("The application can not generate an Observing Block for this instrument [" + instrumentName + "] !");
+      }
     }
   }
 
@@ -163,8 +168,8 @@ public class ExportOBVLTI {
    * @param target target to process
    * @return processed template
    */
-  protected static String processCommon(final String template, final String fileName,
-                                        final ObservationSetting observation, final Target target) {
+  protected final static String processCommon(final String template, final String fileName,
+                                              final ObservationSetting observation, final Target target) {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("processCommon " + target.getName());
     }
@@ -219,7 +224,12 @@ public class ExportOBVLTI {
     return document;
   }
 
-  private static String getBaseLine(final ObservationSetting observation) {
+  /**
+   * Return base line in eso p2pp format 'AA-BB-CC'
+   * @param observation observation settings
+   * @return base line
+   */
+  private final static String getBaseLine(final ObservationSetting observation) {
 
     final StringBuilder sb = new StringBuilder();
 
@@ -233,13 +243,14 @@ public class ExportOBVLTI {
 
   /**
    * Process the Date / Time constraints for the given target
-   * @param document OB document
+   * @param doc OB document
    * @param observation observation settings
    * @param target target to process
    * @return processed template
    */
-  private static String processDateTime(String document, final ObservationSetting observation, final Target target) {
+  private final static String processDateTime(String doc, final ObservationSetting observation, final Target target) {
 
+    String document = doc;
     String lstTimeIntervals = "";
     String absTimeList = "";
 
@@ -331,7 +342,7 @@ public class ExportOBVLTI {
    * @param dateIntervals LST intervals
    * @return String value
    */
-  private static String convertLstRanges(final List<DateTimeInterval> dateIntervals) {
+  private final static String convertLstRanges(final List<DateTimeInterval> dateIntervals) {
     final StringBuilder sb = new StringBuilder(32);
 
     final Calendar cal = new GregorianCalendar();
@@ -356,7 +367,7 @@ public class ExportOBVLTI {
    * @param sign +/- 1
    * @return seconds
    */
-  private static int convertDateToSeconds(final Calendar cal, final int sign) {
+  private final static int convertDateToSeconds(final Calendar cal, final int sign) {
 
     final int h = cal.get(Calendar.HOUR_OF_DAY);
     final int m = cal.get(Calendar.MINUTE);
@@ -364,7 +375,12 @@ public class ExportOBVLTI {
     return h * 3600 + (m + sign) * 60;
   }
 
-  protected static double getMagnitude(final Double mag) {
+  /**
+   * Return magnitude value or -99 if the magnitude is null
+   * @param mag magnitude or null
+   * @return magnitude value or -99 if the magnitude is null
+   */
+  protected final static double getMagnitude(final Double mag) {
     if (mag != null) {
       return mag.doubleValue();
     }

@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.52 2010-09-15 13:56:31 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.53 2010-09-20 14:46:02 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.52  2010/09/15 13:56:31  bourgesl
+ * added JMMC copyright on plot
+ *
  * Revision 1.51  2010/09/08 16:00:31  bourgesl
  * unregister Preference Observers when the widget is released (Preference View, UV Coverage Panel)
  *
@@ -252,7 +255,7 @@ import org.jfree.ui.TextAnchor;
  * @author bourgesl
  */
 public final class UVCoveragePanel extends javax.swing.JPanel implements ChartProgressListener, ZoomEventListener,
-        ActionListener, ChangeListener, ObservationListener, Observer, PDFExportable, Disposable {
+                                                                         ActionListener, ChangeListener, ObservationListener, Observer, PDFExportable, Disposable {
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
@@ -1572,102 +1575,106 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       // Update model uv map :
       final String targetName = getSelectedTargetName();
 
-      final List<Model> models = ObservationManager.getTarget(this.om.getObservation(), targetName).getModels();
+      final Target target = this.om.getTarget(targetName);
 
-      if (models.size() > 0) {
+      if (target != null) {
+        final List<Model> models = target.getModels();
 
-        final Rectangle2D.Float uvRect = new Rectangle2D.Float();
-        uvRect.setFrameFromDiagonal(
-                fromUVPlotScale(ze.getDomainLowerBound()), fromUVPlotScale(ze.getRangeLowerBound()),
-                fromUVPlotScale(ze.getDomainUpperBound()), fromUVPlotScale(ze.getRangeUpperBound()));
+        if (models != null && models.size() > 0) {
 
-        // compute an approximated uv map from the reference UV Map :
-        computeSubUVMap(uvRect);
+          final Rectangle2D.Float uvRect = new Rectangle2D.Float();
+          uvRect.setFrameFromDiagonal(
+                  fromUVPlotScale(ze.getDomainLowerBound()), fromUVPlotScale(ze.getRangeLowerBound()),
+                  fromUVPlotScale(ze.getDomainUpperBound()), fromUVPlotScale(ze.getRangeUpperBound()));
 
-        // visibility reference extrema :
-        final Float refMin = Float.valueOf(this.currentUVMapData.getMin());
-        final Float refMax = Float.valueOf(this.currentUVMapData.getMax());
+          // compute an approximated uv map from the reference UV Map :
+          computeSubUVMap(uvRect);
 
-        // model image options :
-        final ImageMode imageMode = (ImageMode) this.jComboBoxImageMode.getSelectedItem();
+          // visibility reference extrema :
+          final Float refMin = Float.valueOf(this.currentUVMapData.getMin());
+          final Float refMax = Float.valueOf(this.currentUVMapData.getMax());
 
-        // Use model image Preferences :
-        final int imageSize = myPreferences.getPreferenceAsInt(Preferences.MODEL_IMAGE_SIZE);
-        final IndexColorModel colorModel = ColorModels.getColorModel(myPreferences.getPreference(Preferences.MODEL_IMAGE_LUT));
+          // model image options :
+          final ImageMode imageMode = (ImageMode) this.jComboBoxImageMode.getSelectedItem();
 
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("computing model uv map ...");
-        }
+          // Use model image Preferences :
+          final int imageSize = myPreferences.getPreferenceAsInt(Preferences.MODEL_IMAGE_SIZE);
+          final IndexColorModel colorModel = ColorModels.getColorModel(myPreferences.getPreference(Preferences.MODEL_IMAGE_LUT));
 
-        /*
-         * Use the SwingWorker backport for Java 5 = swing-worker-1.2.jar (org.jdesktop.swingworker.SwingWorker)
-         */
-        final SwingWorker<UVMapData, Void> worker = new SwingWorker<UVMapData, Void>() {
-
-          /**
-           * Compute the UV Map in background
-           * @return Image
-           */
-          @Override
-          public UVMapData doInBackground() {
-            logger.fine("SwingWorker[UVMap].doInBackground : IN");
-
-            UVMapData uvMapData = ModelUVMapService.computeUVMap(
-                    models, uvRect, refMin, refMax, imageMode, imageSize, colorModel);
-
-            if (isCancelled()) {
-              logger.fine("SwingWorker[UVMap].doInBackground : CANCELLED");
-              // no result if task is cancelled :
-              uvMapData = null;
-            } else {
-              logger.fine("SwingWorker[UVMap].doInBackground : OUT");
-            }
-            return uvMapData;
+          if (logger.isLoggable(Level.FINE)) {
+            logger.fine("computing model uv map ...");
           }
 
-          /**
-           * Refresh the plot using the computed UV Map.
-           * This code is executed by the Swing Event Dispatcher thread (EDT)
+          /*
+           * Use the SwingWorker backport for Java 5 = swing-worker-1.2.jar (org.jdesktop.swingworker.SwingWorker)
            */
-          @Override
-          public void done() {
-            // check if the worker was cancelled :
-            if (!isCancelled()) {
-              logger.fine("SwingWorker[UVMap].done : IN");
-              try {
-                // Get the computation results with all data necessary to draw the plot :
-                final UVMapData uvMapData = get();
+          final SwingWorker<UVMapData, Void> worker = new SwingWorker<UVMapData, Void>() {
 
-                if (uvMapData != null) {
-                  logger.fine("SwingWorker[UVMap].done : refresh Chart");
+            /**
+             * Compute the UV Map in background
+             * @return Image
+             */
+            @Override
+            public UVMapData doInBackground() {
+              logger.fine("SwingWorker[UVMap].doInBackground : IN");
 
-                  // update the background image :
-                  updateUVMap(uvMapData.getUvMap());
-                }
+              UVMapData uvMapData = ModelUVMapService.computeUVMap(
+                      models, uvRect, refMin, refMax, imageMode, imageSize, colorModel);
 
-              } catch (InterruptedException ignore) {
-              } catch (ExecutionException ee) {
-                if (ee.getCause() instanceof IllegalArgumentException) {
-                  JOptionPane.showMessageDialog(null, ee.getCause().getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-                } else {
-                  logger.log(Level.SEVERE, "Error : ", ee);
-                  new FeedbackReport(null, true, (Exception) ee.getCause());
-                }
+              if (isCancelled()) {
+                logger.fine("SwingWorker[UVMap].doInBackground : CANCELLED");
+                // no result if task is cancelled :
+                uvMapData = null;
+              } else {
+                logger.fine("SwingWorker[UVMap].doInBackground : OUT");
               }
-
-              // update the status bar :
-              StatusBar.show("uv map done.");
-
-              logger.fine("SwingWorker[UVMap].done : OUT");
+              return uvMapData;
             }
-          }
-        };
 
-        // update the status bar :
-        StatusBar.show("computing uv map ... (please wait, this may take a while)");
+            /**
+             * Refresh the plot using the computed UV Map.
+             * This code is executed by the Swing Event Dispatcher thread (EDT)
+             */
+            @Override
+            public void done() {
+              // check if the worker was cancelled :
+              if (!isCancelled()) {
+                logger.fine("SwingWorker[UVMap].done : IN");
+                try {
+                  // Get the computation results with all data necessary to draw the plot :
+                  final UVMapData uvMapData = get();
 
-        // Cancel other uv map task and execute this task :
-        SwingWorkerExecutor.getInstance().execute("UVMap", worker);
+                  if (uvMapData != null) {
+                    logger.fine("SwingWorker[UVMap].done : refresh Chart");
+
+                    // update the background image :
+                    updateUVMap(uvMapData.getUvMap());
+                  }
+
+                } catch (InterruptedException ignore) {
+                } catch (ExecutionException ee) {
+                  if (ee.getCause() instanceof IllegalArgumentException) {
+                    JOptionPane.showMessageDialog(null, ee.getCause().getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                  } else {
+                    logger.log(Level.SEVERE, "Error : ", ee);
+                    new FeedbackReport(null, true, (Exception) ee.getCause());
+                  }
+                }
+
+                // update the status bar :
+                StatusBar.show("uv map done.");
+
+                logger.fine("SwingWorker[UVMap].done : OUT");
+              }
+            }
+          };
+
+          // update the status bar :
+          StatusBar.show("computing uv map ... (please wait, this may take a while)");
+
+          // Cancel other uv map task and execute this task :
+          SwingWorkerExecutor.getInstance().execute("UVMap", worker);
+        }
       }
     }
   }

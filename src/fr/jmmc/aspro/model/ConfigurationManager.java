@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ConfigurationManager.java,v 1.27 2010-09-20 12:14:21 bourgesl Exp $"
+ * "@(#) $Id: ConfigurationManager.java,v 1.28 2010-09-20 14:46:02 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.27  2010/09/20 12:14:21  bourgesl
+ * class made final
+ *
  * Revision 1.26  2010/09/09 16:06:10  bourgesl
  * remove Astrogrid Pal dependency
  *
@@ -472,7 +475,7 @@ public final class ConfigurationManager extends BaseOIManager {
     if (ic != null) {
       final Vector<String> v = new Vector<String>(ic.getConfigurations().size());
       for (FocalInstrumentConfigurationItem c : ic.getConfigurations()) {
-        v.add(c.getShortName());
+        v.add(c.getName());
       }
       return v;
     }
@@ -490,7 +493,7 @@ public final class ConfigurationManager extends BaseOIManager {
     final FocalInstrumentConfiguration ic = getInterferometerInstrumentConfiguration(configurationName, instrumentName);
     if (ic != null) {
       for (FocalInstrumentConfigurationItem c : ic.getConfigurations()) {
-        if (c.getShortName().equals(instrumentConfigurationName)) {
+        if (c.getName().equals(instrumentConfigurationName)) {
           return c.getStations();
         }
       }
@@ -509,7 +512,7 @@ public final class ConfigurationManager extends BaseOIManager {
     final FocalInstrumentConfiguration ic = getInterferometerInstrumentConfiguration(configurationName, instrumentName);
     if (ic != null) {
       for (FocalInstrumentConfigurationItem c : ic.getConfigurations()) {
-        if (c.getShortName().equals(instrumentConfigurationName)) {
+        if (c.getName().equals(instrumentConfigurationName)) {
           return c.getChannels();
         }
       }

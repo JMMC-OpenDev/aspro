@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoverageService.java,v 1.28 2010-07-08 13:56:33 bourgesl Exp $"
+ * "@(#) $Id: UVCoverageService.java,v 1.29 2010-09-20 14:46:02 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.28  2010/07/08 13:56:33  bourgesl
+ * changed HA points range : use HA min Elevation range to restrict the user HA Min/Max [-12;12] by default
+ *
  * Revision 1.27  2010/07/05 14:53:03  bourgesl
  * added a cancel check before creating OIFits
  *
@@ -277,7 +280,7 @@ public final class UVCoverageService {
 
             // Compute Target Model for the UV coverage limits :
             this.data.setUvMapData(ModelUVMapService.computeUVMap(
-                    ObservationManager.getTarget(this.observation, this.targetName).getModels(),
+                    this.observation.getTarget(this.targetName).getModels(),
                     uvRect, null, null,
                     this.imageMode, this.imageSize, this.colorModel));
           }
@@ -572,7 +575,7 @@ public final class UVCoverageService {
     }
 
     // HA Min / Max :
-    final TargetConfiguration targetConf = ObservationManager.getTargetConfiguration(this.observation, targetName);
+    final TargetConfiguration targetConf = this.observation.getTargetConfiguration(targetName);
     if (targetConf != null) {
       if (targetConf.getHAMin() != null) {
         this.haMin = targetConf.getHAMin().doubleValue();
@@ -612,7 +615,7 @@ public final class UVCoverageService {
     if (targetUVObservability != null) {
 
       // get current target :
-      final Target target = ObservationManager.getTarget(this.observation, this.targetName);
+      final Target target = this.observation.getTarget(this.targetName);
 
       // Create the OIFitsCreatorService :
       final OIFitsCreatorService oiFitsCreator =
