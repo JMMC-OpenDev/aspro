@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SwingWorkerExecutor.java,v 1.3 2010-07-05 14:50:34 bourgesl Exp $"
+ * "@(#) $Id: SwingWorkerExecutor.java,v 1.4 2010-09-20 12:16:26 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2010/07/05 14:50:34  bourgesl
+ * cancel method made public
+ *
  * Revision 1.2  2010/06/17 10:02:51  bourgesl
  * fixed warning hints - mainly not final static loggers
  *
@@ -19,8 +22,10 @@ import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import org.jdesktop.swingworker.SwingWorker;
@@ -90,7 +95,7 @@ public final class SwingWorkerExecutor {
       logger.fine("execute : " + taskFamily + " = " + worker);
     }
     // first, cancel the current running worker for the given task family :
-    cancel(taskFamily);
+    this.cancel(taskFamily);
 
     // second, memorize the reference to the new worker before execution :
     final WeakReference<SwingWorker<?, ?>> newRef = new WeakReference<SwingWorker<?, ?>>(worker);
@@ -134,29 +139,122 @@ public final class SwingWorkerExecutor {
    * @return executor service with a single thread
    */
   private static ExecutorService getWorkersExecutorService() {
-    // custom thread factory :
-    final ThreadFactory threadFactory = new ThreadFactory() {
+    return new SwingWorkerSingleThreadExecutor();
+  }
 
-      private final AtomicInteger threadNumber = new AtomicInteger(1);
+  /**
+   * Single threaded Swing Worker executor
+   */
+  private static final class SwingWorkerSingleThreadExecutor extends ThreadPoolExecutor {
 
-      public Thread newThread(final Runnable r) {
-        final StringBuilder name = new StringBuilder("SwingWorker-pool-");
-        name.append(System.identityHashCode(this));
-        name.append("-thread-");
-        name.append(threadNumber.getAndIncrement());
+    /**
+     * Create a single threaded Swing Worker executor
+     */
+    public SwingWorkerSingleThreadExecutor() {
+      super(1, 1,
+              0L, TimeUnit.MILLISECONDS,
+              new LinkedBlockingQueue<Runnable>(),
+              new SwingWorkerThreadFactory());
+    }
 
-        final Thread t = new Thread(r, name.toString());
-        if (t.isDaemon()) {
-          t.setDaemon(false);
-        }
-        if (t.getPriority() != Thread.NORM_PRIORITY) {
-          t.setPriority(Thread.NORM_PRIORITY);
-        }
-        return t;
+    /**
+     * Method invoked prior to executing the given Runnable in the
+     * given thread.  This method is invoked by thread <tt>t</tt> that
+     * will execute task <tt>r</tt>, and may be used to re-initialize
+     * ThreadLocals, or to perform logging.
+     *
+     * <p>This implementation does nothing, but may be customized in
+     * subclasses. Note: To properly nest multiple overridings, subclasses
+     * should generally invoke <tt>super.beforeExecute</tt> at the end of
+     * this method.
+     *
+     * @param t the thread that will run task r.
+     * @param r the task that will be executed.
+     */
+    @Override
+    protected void beforeExecute(final Thread t, final Runnable r) {
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("beforeExecute : " + r);
       }
-    };
+    }
 
-    // Single threaded Swing Worker executor :
-    return Executors.newSingleThreadExecutor(threadFactory);
+    /**
+     * Method invoked upon completion of execution of the given Runnable.
+     * This method is invoked by the thread that executed the task. If
+     * non-null, the Throwable is the uncaught <tt>RuntimeException</tt>
+     * or <tt>Error</tt> that caused execution to terminate abruptly.
+     *
+     * <p><b>Note:</b> When actions are enclosed in tasks (such as
+     * {@link FutureTask}) either explicitly or via methods such as
+     * <tt>submit</tt>, these task objects catch and maintain
+     * computational exceptions, and so they do not cause abrupt
+     * termination, and the internal exceptions are <em>not</em>
+     * passed to this method.
+     *
+     * <p>This implementation does nothing, but may be customized in
+     * subclasses. Note: To properly nest multiple overridings, subclasses
+     * should generally invoke <tt>super.afterExecute</tt> at the
+     * beginning of this method.
+     *
+     * @param r the runnable that has completed.
+     * @param t the exception that caused termination, or null if
+     * execution completed normally.
+     */
+    @Override
+    protected void afterExecute(final Runnable r, final Throwable t) {
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("afterExecute : " + r);
+      }
+    }
+
+    /**
+     * Method invoked when the Executor has terminated.  Default
+     * implementation does nothing. Note: To properly nest multiple
+     * overridings, subclasses should generally invoke
+     * <tt>super.terminated</tt> within this method.
+     */
+    @Override
+    protected void terminated() {
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("terminated");
+      }
+    }
+  }
+
+  /**
+   * Custom ThreadFactory implementation
+   */
+  private static final class SwingWorkerThreadFactory implements ThreadFactory {
+
+    /** thread count */
+    private final AtomicInteger threadNumber = new AtomicInteger(1);
+
+    /**
+     * Constructs a new {@code Thread}.
+     *
+     * @param r a runnable to be executed by new thread instance
+     * @return constructed thread, or {@code null} if the request to
+     *         create a thread is rejected
+     */
+    public Thread newThread(final Runnable r) {
+      final StringBuilder name = new StringBuilder("SwingWorker-pool-");
+      name.append(System.identityHashCode(this));
+      name.append("-thread-");
+      name.append(threadNumber.getAndIncrement());
+
+      final Thread t = new Thread(r, name.toString());
+      if (t.isDaemon()) {
+        t.setDaemon(false);
+      }
+      if (t.getPriority() != Thread.NORM_PRIORITY) {
+        t.setPriority(Thread.NORM_PRIORITY);
+      }
+
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("newThread : " + t.getName());
+      }
+
+      return t;
+    }
   }
 }
