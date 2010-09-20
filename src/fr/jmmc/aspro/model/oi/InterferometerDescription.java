@@ -426,7 +426,7 @@ public class InterferometerDescription
    * Return the list of configurations using this interferometer (read only)
    * @return list of configurations using this interferometer
    */
-  public List<InterferometerConfiguration> getConfigurations() {
+  public final List<InterferometerConfiguration> getConfigurations() {
     if (configurations == null) {
       configurations = new ArrayList<InterferometerConfiguration>();
     }
@@ -440,7 +440,7 @@ public class InterferometerDescription
    * Return the maximum distance between 2 stations in meter
    * @return maximum distance between 2 stations in meter
    */
-  public double getMaxBaseLine() {
+  public final double getMaxBaseLine() {
     return maxUVBaseLine;
   }
 
@@ -448,12 +448,12 @@ public class InterferometerDescription
    * Define the maximum distance between 2 stations in meter
    * @param maxBaseLine maximum distance between 2 stations in meter
    */
-  public void setMaxBaseLine(final double maxBaseLine) {
+  public final void setMaxBaseLine(final double maxBaseLine) {
     this.maxUVBaseLine = maxBaseLine;
   }
 
   @Override
-  public String toString() {
+  public final String toString() {
     return "InterferometerDescription [" + ((this.name != null) ? this.name : "undefined") + "]";
   }
 //--simple--preserve

@@ -97,7 +97,7 @@ public class Pop
 //--simple--preserve
 
   @Override
-  public String toString() {
+  public final String toString() {
     return this.name;
   }
 

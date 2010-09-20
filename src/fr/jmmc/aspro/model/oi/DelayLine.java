@@ -95,7 +95,7 @@ public class DelayLine
 //--simple--preserve
 
   @Override
-  public String toString() {
+  public final String toString() {
     return "DelayLine : " + ((this.name != null) ? this.name : "undefined") + " = " + maximumThrow;
   }
 //--simple--preserve

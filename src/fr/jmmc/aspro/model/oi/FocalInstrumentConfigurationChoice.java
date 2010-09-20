@@ -211,7 +211,7 @@ public class FocalInstrumentConfigurationChoice
    * Return the reference to the focal instrument configuration (read only)
    * @return focal instrument configuration or null
    */
-  public FocalInstrumentConfiguration getInstrumentConfiguration() {
+  public final FocalInstrumentConfiguration getInstrumentConfiguration() {
     return instrumentConfiguration;
   }
 
@@ -219,7 +219,7 @@ public class FocalInstrumentConfigurationChoice
    * Define the reference to the focal instrument configuration (read only)
    * @param instrumentConfiguration focal instrument configuration
    */
-  public void setInstrumentConfiguration(final FocalInstrumentConfiguration instrumentConfiguration) {
+  public final void setInstrumentConfiguration(final FocalInstrumentConfiguration instrumentConfiguration) {
     this.instrumentConfiguration = instrumentConfiguration;
   }
 
@@ -231,7 +231,7 @@ public class FocalInstrumentConfigurationChoice
    * Return the reference to the list of Stations (read only)
    * @return list of Stations or null
    */
-  public java.util.List<Station> getStationList() {
+  public final java.util.List<Station> getStationList() {
     return stationList;
   }
 
@@ -239,7 +239,7 @@ public class FocalInstrumentConfigurationChoice
    * Define the reference to the list of Stations (read only)
    * @param stationList list of Stations
    */
-  public void setStationList(final java.util.List<Station> stationList) {
+  public final void setStationList(final java.util.List<Station> stationList) {
     this.stationList = stationList;
   }
 
@@ -251,7 +251,7 @@ public class FocalInstrumentConfigurationChoice
    * Return the reference to the list of PoPs (read only)
    * @return list of PoPs or null
    */
-  public java.util.List<Pop> getPopList() {
+  public final java.util.List<Pop> getPopList() {
     return popList;
   }
 
@@ -259,7 +259,7 @@ public class FocalInstrumentConfigurationChoice
    * Define the reference to the list of PoPs (read only)
    * @param popList list of PoPs
    */
-  public void setPopList(final java.util.List<Pop> popList) {
+  public final void setPopList(final java.util.List<Pop> popList) {
     this.popList = popList;
   }
 
@@ -271,7 +271,7 @@ public class FocalInstrumentConfigurationChoice
    * Return the reference to the instrument mode (read only)
    * @return instrument mode or null
    */
-  public FocalInstrumentMode getFocalInstrumentMode() {
+  public final FocalInstrumentMode getFocalInstrumentMode() {
     return focalInstrumentMode;
   }
 
@@ -279,7 +279,7 @@ public class FocalInstrumentConfigurationChoice
    * Define the reference to the instrument mode (read only)
    * @param focalInstrumentMode instrument mode
    */
-  public void setFocalInstrumentMode(final FocalInstrumentMode focalInstrumentMode) {
+  public final void setFocalInstrumentMode(final FocalInstrumentMode focalInstrumentMode) {
     this.focalInstrumentMode = focalInstrumentMode;
   }
   

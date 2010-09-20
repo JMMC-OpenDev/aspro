@@ -94,7 +94,7 @@ public class InterferometerConfigurationChoice
    * Return the reference to the interferometer configuration (read only)
    * @return interferometer configuration or null
    */
-  public InterferometerConfiguration getInterferometerConfiguration() {
+  public final InterferometerConfiguration getInterferometerConfiguration() {
     return interferometerConfiguration;
   }
 
@@ -102,7 +102,7 @@ public class InterferometerConfigurationChoice
    * Define the reference to the interferometer configuration (read only)
    * @param interferometerConfiguration interferometer configuration
    */
-  public void setInterferometerConfiguration(final InterferometerConfiguration interferometerConfiguration) {
+  public final void setInterferometerConfiguration(final InterferometerConfiguration interferometerConfiguration) {
     this.interferometerConfiguration = interferometerConfiguration;
   }
 

@@ -635,7 +635,7 @@ public class Target
    * Return the right ascension (RA) in degrees
    * @return right ascension (RA) in degrees
    */
-  public double getRADeg() {
+  public final double getRADeg() {
     if (Double.isNaN(this.raDeg)) {
       this.raDeg = fr.jmmc.mcs.astro.ALX.parseHMS(getRA());
     }
@@ -646,7 +646,7 @@ public class Target
    * Define the right ascension (RA) in degrees (read only)
    * @param raDeg right ascension (RA) in degrees
    */
-  public void setRADeg(final double raDeg) {
+  public final void setRADeg(final double raDeg) {
     this.raDeg = raDeg;
   }
 
@@ -658,7 +658,7 @@ public class Target
    * Return the declination (DEC) in degrees
    * @return declination (DEC) in degrees
    */
-  public double getDECDeg() {
+  public final double getDECDeg() {
     if (Double.isNaN(this.decDeg)) {
       this.decDeg = fr.jmmc.mcs.astro.ALX.parseDEC(getDEC());
     }
@@ -669,12 +669,12 @@ public class Target
    * Define the declination (DEC) in degrees (read only)
    * @param decDeg declination (DEC) in degrees
    */
-  public void setDECDeg(final double decDeg) {
+  public final void setDECDeg(final double decDeg) {
     this.decDeg = decDeg;
   }
 
   @Override
-  public String toString() {
+  public final String toString() {
     return "Target [" + ((this.name != null) ? this.name : "undefined") + "]" + " RA = " + getRA() + " DEC = " + getDEC();
   }
 
@@ -682,7 +682,7 @@ public class Target
    * Return an HTML representation of the target used by tooltips
    * @return HTML representation
    */
-  public String toHtml() {
+  public final String toHtml() {
     final StringBuilder sb = new StringBuilder(128);
     sb.append("<html>");
     sb.append("<b>Name</b> : ").append(getName());
@@ -736,7 +736,7 @@ public class Target
    * @param catalogIdentifier complete catalog identifier (like 'HD' or 'HIP' ...)
    * @return star identifier (HD 31964) or null
    */
-  public String getIdentifier(final String catalogIdentifier) {
+  public final String getIdentifier(final String catalogIdentifier) {
     String res = null;
     if (getIDS() != null) {
       final String cat = catalogIdentifier + " ";
@@ -756,7 +756,7 @@ public class Target
    * @param band spectral band
    * @return flux in the given band or null if undefined
    */
-  public Double getFlux(final SpectralBand band) {
+  public final Double getFlux(final SpectralBand band) {
     if (band != null) {
       switch(band) {
         case V:
@@ -785,7 +785,7 @@ public class Target
    * @return deep "copy" of this instance
    */
   @Override
-  public Object clone() {
+  public final Object clone() {
     final Target copy = (Target) super.clone();
 
     // Deep copy of models :

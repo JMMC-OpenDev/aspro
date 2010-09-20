@@ -196,6 +196,37 @@ public class ObservationSetting
     }
     
 //--simple--preserve
+  /**
+   * Return the target of the given name
+   * @param name target name
+   * @return target or null if the target was not found
+   */
+  public final Target getTarget(final String name) {
+    for (Target t : getTargets()) {
+      if (t.getName().equals(name)) {
+        return t;
+      }
+    }
+    return null;
+  }
+  
+  /**
+   * Return the target configuration of the target given by its name 
+   * @param name target name
+   * @return target configuration or null if the target was not found
+   */
+  public final TargetConfiguration getTargetConfiguration(final String name) {
+    final Target target = getTarget(name);
+    if (target != null) {
+      TargetConfiguration targetConf = target.getConfiguration();
+      if (targetConf == null) {
+        targetConf = new TargetConfiguration();
+        target.setConfiguration(targetConf);
+      }
+      return targetConf;
+    }
+    return null;
+  }
 
   /** computed observability data (read only) */
   @javax.xml.bind.annotation.XmlTransient
@@ -205,7 +236,7 @@ public class ObservationSetting
    * Return the computed observability data (read only)
    * @return computed observability data or null
    */
-  public fr.jmmc.aspro.model.observability.ObservabilityData getObservabilityData() {
+  public final fr.jmmc.aspro.model.observability.ObservabilityData getObservabilityData() {
     return this.observabilityData;
   }
 
@@ -213,10 +244,9 @@ public class ObservationSetting
    * Define the computed observability data (read only)
    * @param obsData computed observability data
    */
-  public void setObservabilityData(final fr.jmmc.aspro.model.observability.ObservabilityData obsData) {
+  public final void setObservabilityData(final fr.jmmc.aspro.model.observability.ObservabilityData obsData) {
     this.observabilityData = obsData;
   }
-
   /** computed OIFits structure (read only) */
   @javax.xml.bind.annotation.XmlTransient
   private fr.jmmc.oitools.model.OIFitsFile oiFitsFile = null;
@@ -225,7 +255,7 @@ public class ObservationSetting
    * Return the computed OIFits structure (read only)
    * @return OIFits structure or null
    */
-  public fr.jmmc.oitools.model.OIFitsFile getOIFitsFile() {
+  public final fr.jmmc.oitools.model.OIFitsFile getOIFitsFile() {
     return this.oiFitsFile;
   }
 
@@ -233,15 +263,14 @@ public class ObservationSetting
    * Define the computed OIFits structure (read only)
    * @param oiFitsFile computed OIFits structure
    */
-  public void setOIFitsFile(final fr.jmmc.oitools.model.OIFitsFile oiFitsFile) {
+  public final void setOIFitsFile(final fr.jmmc.oitools.model.OIFitsFile oiFitsFile) {
     this.oiFitsFile = oiFitsFile;
   }
 
   @Override
-  public String toString() {
+  public final String toString() {
     return "Observation : " + ((this.name != null) ? this.name : "undefined");
   }
-  
 //--simple--preserve
 
 }

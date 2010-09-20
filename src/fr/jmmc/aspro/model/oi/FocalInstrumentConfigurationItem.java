@@ -27,7 +27,6 @@ import fr.jmmc.aspro.model.OIBase;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="stations" type="{http://www.w3.org/2001/XMLSchema}IDREFS"/>
  *         &lt;element name="channels" type="{http://www.w3.org/2001/XMLSchema}IDREFS" minOccurs="0"/>
  *       &lt;/sequence>
@@ -40,7 +39,6 @@ import fr.jmmc.aspro.model.OIBase;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "FocalInstrumentConfigurationItem", propOrder = {
-    "name",
     "stations",
     "channels"
 })
@@ -48,7 +46,6 @@ public class FocalInstrumentConfigurationItem
     extends OIBase
 {
 
-    protected String name;
     @XmlList
     @XmlElement(required = true, type = Object.class)
     @XmlIDREF
@@ -59,30 +56,6 @@ public class FocalInstrumentConfigurationItem
     @XmlIDREF
     @XmlSchemaType(name = "IDREFS")
     protected List<Channel> channels;
-
-    /**
-     * Gets the value of the name property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * Sets the value of the name property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setName(String value) {
-        this.name = value;
-    }
 
     /**
      * Gets the value of the stations property.
@@ -143,37 +116,46 @@ public class FocalInstrumentConfigurationItem
     }
     
 //--simple--preserve
+  /** computed name */
+  @javax.xml.bind.annotation.XmlTransient
+  private String name = null;
 
-    @Override
-    public String toString() {
-      if (getName() == null) {
-        generateName();
-      }
-      return "FocalInstrumentConfigurationItem [" + getName() + "]";
+  /**
+   * Return the name of this configuration i.e. 'XX YY ZZ' where station names are XX, YY and ZZ
+   * @return name i.e. 'XX YY ZZ'
+   */
+  public final String getName() {
+    String s = this.name;
+    if (s == null) {
+      s = generateName();
     }
+    return s;
+  }
 
-    public String getShortName() {
-      String s = getName();
+  /**
+   * Generate the name as a string containing station names like 'XX YY ZZ'
+   * @return generated name
+   */
+  private final String generateName() {
+    synchronized (this) {
+      String s = this.name;
       if (s == null) {
-        generateName();
-        s = getName();
+        final StringBuilder sb = new StringBuilder();
+        for (Station station : getStations()) {
+          sb.append(station.getName()).append(" ");
+        }
+        sb.deleteCharAt(sb.length() - 1);
+        s = sb.toString();
+        this.name = s;
       }
       return s;
     }
+  }
 
-    protected void generateName() {
-      synchronized(this) {
-        if (getName() == null) {
-          final StringBuilder sb = new StringBuilder();
-          for (Station s : getStations()) {
-            sb.append(s.getName()).append(" ");
-          }
-          sb.deleteCharAt(sb.length() - 1);
-          setName(sb.toString());
-        }
-      }
-    }
-
+  @Override
+  public final String toString() {
+    return "FocalInstrumentConfigurationItem [" + getName() + "]";
+  }
 //--simple--preserve
 
 }

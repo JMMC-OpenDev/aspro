@@ -164,7 +164,7 @@ public class InterferometerConfiguration
 //--simple--preserve
 
     @Override
-    public String toString() {
+    public final String toString() {
       return "InterferometerConfiguration : " + ((this.name != null) ? this.name : "undefined");
     }
 

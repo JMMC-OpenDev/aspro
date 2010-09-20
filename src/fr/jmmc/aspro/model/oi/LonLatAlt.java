@@ -1,9 +1,11 @@
+
 package fr.jmmc.aspro.model.oi;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
 import fr.jmmc.aspro.model.OIBase;
+
 
 /**
  * 
@@ -32,65 +34,66 @@ import fr.jmmc.aspro.model.OIBase;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "LonLatAlt", propOrder = {
-  "longitude",
-  "latitude",
-  "altitude"
+    "longitude",
+    "latitude",
+    "altitude"
 })
 public class LonLatAlt
-        extends OIBase {
+    extends OIBase
+{
 
-  protected double longitude;
-  protected double latitude;
-  protected double altitude;
+    protected double longitude;
+    protected double latitude;
+    protected double altitude;
 
-  /**
-   * Gets the value of the longitude property.
-   *
-   */
-  public double getLongitude() {
-    return longitude;
-  }
+    /**
+     * Gets the value of the longitude property.
+     * 
+     */
+    public double getLongitude() {
+        return longitude;
+    }
 
-  /**
-   * Sets the value of the longitude property.
-   *
-   */
-  public void setLongitude(double value) {
-    this.longitude = value;
-  }
+    /**
+     * Sets the value of the longitude property.
+     * 
+     */
+    public void setLongitude(double value) {
+        this.longitude = value;
+    }
 
-  /**
-   * Gets the value of the latitude property.
-   *
-   */
-  public double getLatitude() {
-    return latitude;
-  }
+    /**
+     * Gets the value of the latitude property.
+     * 
+     */
+    public double getLatitude() {
+        return latitude;
+    }
 
-  /**
-   * Sets the value of the latitude property.
-   *
-   */
-  public void setLatitude(double value) {
-    this.latitude = value;
-  }
+    /**
+     * Sets the value of the latitude property.
+     * 
+     */
+    public void setLatitude(double value) {
+        this.latitude = value;
+    }
 
-  /**
-   * Gets the value of the altitude property.
-   *
-   */
-  public double getAltitude() {
-    return altitude;
-  }
+    /**
+     * Gets the value of the altitude property.
+     * 
+     */
+    public double getAltitude() {
+        return altitude;
+    }
 
-  /**
-   * Sets the value of the altitude property.
-   *
-   */
-  public void setAltitude(double value) {
-    this.altitude = value;
-  }
-
+    /**
+     * Sets the value of the altitude property.
+     * 
+     */
+    public void setAltitude(double value) {
+        this.altitude = value;
+    }
+    
 //--simple--preserve
   /**
    * Empty constructor for JAXB
@@ -113,8 +116,9 @@ public class LonLatAlt
   }
 
   @Override
-  public String toString() {
+  public final String toString() {
     return "[" + fr.jmmc.aspro.service.GeocentricCoords.toString(getLongitude(), getLatitude(), getAltitude()) + "]";
   }
 //--simple--preserve
+
 }

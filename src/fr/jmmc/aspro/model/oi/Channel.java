@@ -77,7 +77,7 @@ public class Channel
 //--simple--preserve
 
   @Override
-  public boolean equals(final Object obj) {
+  public final boolean equals(final Object obj) {
     if (obj == null) {
       return false;
     }
@@ -92,14 +92,14 @@ public class Channel
   }
 
   @Override
-  public int hashCode() {
+  public final int hashCode() {
     int hash = 7;
     hash = 29 * hash + (this.name != null ? this.name.hashCode() : 0);
     return hash;
   }
 
   @Override
-  public String toString() {
+  public final String toString() {
     return "Channel : " + ((this.name != null) ? this.name : "undefined");
   }
 //--simple--preserve

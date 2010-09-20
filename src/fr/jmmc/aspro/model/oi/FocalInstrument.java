@@ -367,7 +367,7 @@ public class FocalInstrument
 //--simple--preserve
 
     @Override
-    public String toString() {
+    public final String toString() {
       return "FocalInstrument [" + ((this.name != null) ? this.name : "undefined") + "]";
     }
 

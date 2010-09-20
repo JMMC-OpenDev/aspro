@@ -83,6 +83,11 @@ public class AzEl
     super();
   }
 
+  /**
+   * constructor with azimuth and elevation
+   * @param az azimuth in degrees
+   * @param el elevation in degrees
+   */
   public AzEl(final double az, final double el) {
     super();
     this.azimuth = az;
