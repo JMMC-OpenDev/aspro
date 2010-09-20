@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationManager.java,v 1.35 2010-09-01 12:59:07 bourgesl Exp $"
+ * "@(#) $Id: ObservationManager.java,v 1.36 2010-09-20 14:45:36 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.35  2010/09/01 12:59:07  bourgesl
+ * added fixInstrumentConfigurationStations to load files where the station list has a wrong ordering
+ *
  * Revision 1.34  2010/07/22 15:45:43  bourgesl
  * added acquisition time in UV coverage and observation
  *
@@ -149,11 +152,9 @@ import javax.xml.datatype.XMLGregorianCalendar;
 /**
  * This class manages observation files i.e. user defined observation settings
  *
- * TODO : javadoc to complete
- *
  * @author bourgesl
  */
-public class ObservationManager extends BaseOIManager {
+public final class ObservationManager extends BaseOIManager {
 
   /** Class Name */
   private static final String className_ = "fr.jmmc.aspro.model.ObservationManager";
@@ -176,7 +177,7 @@ public class ObservationManager extends BaseOIManager {
    * Return the ObservationManager singleton
    * @return ObservationManager singleton
    */
-  public static ObservationManager getInstance() {
+  public final static ObservationManager getInstance() {
     return instance;
   }
 
@@ -197,57 +198,92 @@ public class ObservationManager extends BaseOIManager {
   }
 
   /**
-   * Define default values (empty child objects)
-   * @param newObservation observation to modify
-   * @throws IllegalStateException if an invalid reference was found (interferometer / instrument / instrument configuration)
+   * Return the current observation
+   * @return current observation
    */
-  private void defineDefaults(final ObservationSetting newObservation) throws IllegalStateException {
-    if (newObservation.getName() == null || newObservation.getName().length() == 0) {
-      this.observation.setName("default");
-    }
-    if (newObservation.getWhen() == null) {
-      final WhenSetting when = new WhenSetting();
-      when.setDate(getCalendar(new Date()));
-      when.setNightRestriction(AsproConstants.DEFAULT_USE_NIGHT_LIMITS);
-
-      newObservation.setWhen(when);
-    }
-    if (newObservation.getInterferometerConfiguration() == null) {
-      final String defInterferometer = this.cm.getInterferometerNames().get(0);
-      final String defInterferometerConfiguration = this.cm.getInterferometerConfigurationNames(defInterferometer).get(0);
-
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("default Interferometer = " + defInterferometer);
-        logger.fine("default InterferometerConfiguration = " + defInterferometerConfiguration);
-      }
-
-      final InterferometerConfigurationChoice interferometerChoice = new InterferometerConfigurationChoice();
-      interferometerChoice.setName(defInterferometerConfiguration);
-      interferometerChoice.setMinElevation(AsproConstants.DEFAULT_MIN_ELEVATION);
-
-      newObservation.setInterferometerConfiguration(interferometerChoice);
-    }
-    if (newObservation.getInstrumentConfiguration() == null) {
-      final String defInstrument = this.cm.getInterferometerInstrumentNames(newObservation.getInterferometerConfiguration().getName()).get(0);
-      final String defInstrumentConfiguration = this.cm.getInstrumentConfigurationNames(newObservation.getInterferometerConfiguration().getName(), defInstrument).get(0);
-
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("default Instrument = " + defInstrument);
-        logger.fine("default InstrumentConfiguration = " + defInstrumentConfiguration);
-      }
-
-      final FocalInstrumentConfigurationChoice instrumentChoice = new FocalInstrumentConfigurationChoice();
-      instrumentChoice.setName(defInstrument);
-      instrumentChoice.setStations(defInstrumentConfiguration);
-
-      newObservation.setInstrumentConfiguration(instrumentChoice);
-    }
-
-    // update references :
-    // can throw IllegalStateException if an invalid reference was found :
-    updateObservation(newObservation);
+  public ObservationSetting getObservation() {
+    return this.observation;
   }
 
+  /**
+   * Return the current observation file
+   * @return the current observation file or null if undefined
+   */
+  public File getObservationFile() {
+    return this.observationFile;
+  }
+
+  // --- MAIN FUNCTIONS --------------------------------------------------------
+  /**
+   * Reset the current observation
+   */
+  public void reset() {
+    logger.info("Reset observation");
+
+    final ObservationSetting newObservation = new ObservationSetting();
+    changeObservation(newObservation);
+  }
+
+  /**
+   * Load an observation from the given file
+   * @param file file to load
+   * @throws RuntimeException if the load operation failed
+   * @throws IllegalStateException if an invalid reference was found (interferometer / instrument / instrument configuration)
+   */
+  public void load(final File file) throws RuntimeException, IllegalStateException {
+    if (file != null) {
+      this.observationFile = file;
+
+      if (logger.isLoggable(Level.INFO)) {
+        logger.info("Load observation from : " + this.observationFile);
+      }
+      final Object loaded = loadObject(this.observationFile);
+
+      if (!(loaded instanceof ObservationSetting)) {
+        throw new RuntimeException("The loaded file does not correspond to a valid Aspro2 file : " + file);
+      }
+
+      final ObservationSetting newObservation = (ObservationSetting) loaded;
+      changeObservation(newObservation);
+    }
+  }
+
+  /**
+   * Change the current observation with the given one
+   * and fire load and change events
+   * @param newObservation observation to use
+   * @throws IllegalStateException if an invalid reference was found (interferometer / instrument / instrument configuration)
+   */
+  private void changeObservation(final ObservationSetting newObservation) throws IllegalStateException {
+    defineDefaults(newObservation);
+
+    // change the current observation :
+    this.observation = newObservation;
+
+    // fire an observation load event :
+    fireObservationLoaded();
+
+    // fire an observation change event :
+    fireObservationChanged();
+  }
+
+  /**
+   * Save the current observation in the given file
+   * @param file file to save
+   * @throws RuntimeException if the save operation failed
+   */
+  public void save(final File file) throws RuntimeException {
+    if (file != null) {
+      this.observationFile = file;
+
+      if (logger.isLoggable(Level.INFO)) {
+        logger.info("Save observation to : " + this.observationFile);
+      }
+      saveObject(this.observationFile, getObservation());
+    }
+  }
+
+  // --- EVENTS ----------------------------------------------------------------
   /**
    * Register the given observation listener
    * @param listener observation listener
@@ -265,48 +301,86 @@ public class ObservationManager extends BaseOIManager {
   }
 
   /**
-   * Return the current observation
-   * @return current observation
+   * This fires an observation load event to all registered listeners.
+   * Fired by changeObservation() when an observation is loaded or reset
    */
-  public ObservationSetting getObservation() {
-    return this.observation;
+  private void fireObservationLoaded() {
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("fireObservationLoaded : " + toString(getObservation()));
+    }
+
+    fireEvent(ObservationEventType.LOADED);
   }
 
   /**
-   * Return the current observation file
-   * @return the current observation file or null if undefined
+   * This fires an observation change event to all registered listeners.
+   * Fired by BasicObservationForm when any main parameter is changed
+   * Fired by changeObservation() when an observation is loaded or reset
    */
-  public File getObservationFile() {
-    return this.observationFile;
+  public void fireObservationChanged() {
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("fireObservationChanged : " + toString(getObservation()));
+    }
+
+    fireEvent(ObservationEventType.CHANGED);
   }
 
   /**
-   * Utility method to get a string representation of main observation settings
-   * @param obs observation to use
-   * @return string representation of main observation settings
+   * This fires an observability done event to all registered listeners.
+   * Fired by setObservabilityData() <- ObservabilityPanel.plot().done() (EDT) when the observability is computed
    */
-  public static String toString(final ObservationSetting obs) {
-    final StringBuffer sb = new StringBuffer();
-    sb.append("name : ").append(obs.getName());
-    sb.append(" when : ").append(obs.getWhen().getDate());
-    sb.append(" interferometer : ").append(obs.getInterferometerConfiguration().getName());
-    // instrument :
-    sb.append(" instrument : ").append(obs.getInstrumentConfiguration().getName());
-    sb.append(" stations : ").append(obs.getInstrumentConfiguration().getStations());
-    if (obs.getInstrumentConfiguration().getPops() != null) {
-      sb.append(" pops : ").append(obs.getInstrumentConfiguration().getPops());
-    }
-    if (obs.getInstrumentConfiguration().getInstrumentMode() != null) {
-      sb.append(" mode : ").append(obs.getInstrumentConfiguration().getInstrumentMode());
-    }
-    if (!obs.getTargets().isEmpty()) {
-      sb.append(" targets : \n").append(obs.getTargets());
+  private void fireObservabilityDone() {
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("fireObservabilityDone : " + toString(getObservation()));
     }
 
-    return sb.toString();
+    fireEvent(ObservationEventType.OBSERVABILITY_DONE);
   }
 
-  // API :
+  // Missing fireUVCoverageDone 
+  /**
+   * This fires an OIFits done event to all registered listeners.
+   * Fired by setOIFitsFile() <- UVCoveragePanel.plot().done() (EDT) when the oiFits is computed
+   */
+  private void fireOIFitsDone() {
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("fireOIFitsDone : " + toString(getObservation()));
+    }
+
+    fireEvent(ObservationEventType.OIFITS_DONE);
+  }
+
+  /**
+   * Send an event to the registered listeners.
+   * Note : any new listener registered during the processing of this event, will not be called
+   * @param type event type
+   */
+  private void fireEvent(final ObservationEventType type) {
+    if (!this.listeners.isEmpty()) {
+      // Call listeners with a copy of the listener list to avoid concurrent modification :
+      final ObservationListener[] eventListeners = new ObservationListener[this.listeners.size()];
+
+      // copy the listener references :
+      this.listeners.toArray(eventListeners);
+
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("fireEvent : " + type);
+      }
+
+      final long start = System.nanoTime();
+
+      for (final ObservationListener listener : eventListeners) {
+        listener.onProcess(type, getObservation());
+      }
+
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("fireEvent : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
+      }
+
+    }
+  }
+
+  // --- WHEN ------------------------------------------------------------------
   /**
    * Set the observation date (no time)
    * @param date date to use
@@ -363,6 +437,7 @@ public class ObservationManager extends BaseOIManager {
     return changed;
   }
 
+  // --- INTERFEROMETER --------------------------------------------------------
   /**
    * Set the minimum elevation (deg)
    * @param minElev minimum elevation value
@@ -401,6 +476,7 @@ public class ObservationManager extends BaseOIManager {
     return changed;
   }
 
+  // --- INSTRUMENT ------------------------------------------------------------
   /**
    * Set the instrument configuration (instrument for a given interferometer + period)
    * and refresh the internal InstrumentConfiguration reference
@@ -443,6 +519,12 @@ public class ObservationManager extends BaseOIManager {
     return changed;
   }
 
+  /**
+   * Set the user PoPs associated to the station configuration (baseline for a given instrument)
+   * and refresh the internal PopList reference
+   * @param pops string representation of the pop list like '12', '111' or '541'
+   * @return true if the value changed
+   */
   public boolean setInstrumentConfigurationPoPs(final String pops) {
     final FocalInstrumentConfigurationChoice instrumentChoice = getObservation().getInstrumentConfiguration();
 
@@ -459,6 +541,12 @@ public class ObservationManager extends BaseOIManager {
     return changed;
   }
 
+  /**
+   * Set the instrument mode for the current interferometer and instrument
+   * and refresh the internal FocalInstrumentMode reference
+   * @param mode string representation of the instrument mode
+   * @return true if the value changed
+   */
   public boolean setInstrumentMode(final String mode) {
     final FocalInstrumentConfigurationChoice instrumentChoice = getObservation().getInstrumentConfiguration();
 
@@ -475,6 +563,11 @@ public class ObservationManager extends BaseOIManager {
     return changed;
   }
 
+  /**
+   * Set the sampling period for the current instrument
+   * @param samplingPeriod sampling period (m) or null if undefined
+   * @return true if the value changed
+   */
   public boolean setInstrumentSamplingPeriod(final Double samplingPeriod) {
     final FocalInstrumentConfigurationChoice instrumentChoice = getObservation().getInstrumentConfiguration();
 
@@ -489,10 +582,15 @@ public class ObservationManager extends BaseOIManager {
     return changed;
   }
 
+  /**
+   * Set the acquisition time for the current instrument
+   * @param obsDuration acquisition time (s) or null if undefined
+   * @return true if the value changed
+   */
   public boolean setInstrumentAcquisitionTime(final Double obsDuration) {
     final FocalInstrumentConfigurationChoice instrumentChoice = getObservation().getInstrumentConfiguration();
 
-    // period can be null :
+    // obsDuration can be null :
     boolean changed = isChanged(obsDuration, instrumentChoice.getAcquisitionTime());
     if (changed) {
       if (logger.isLoggable(Level.FINEST)) {
@@ -503,14 +601,311 @@ public class ObservationManager extends BaseOIManager {
     return changed;
   }
 
+  // --- TARGETS ---------------------------------------------------------------
   /**
-   * Check if the objects are different supporting null values
-   * @param value1 string 1
-   * @param value2 string 2
-   * @return true only if objects are different
+   * Return the target of the given name
+   * @param name target name
+   * @return target or null if the target is not found
    */
-  private boolean isChanged(final Object value1, final Object value2) {
-    return (value1 == null && value2 != null) || (value1 != null && value2 == null) || (value1 != null && value2 != null && !value1.equals(value2));
+  public Target getTarget(final String name) {
+    return getObservation().getTarget(name);
+  }
+
+  /**
+   * Return the list of all targets
+   * @return list of all targets
+   */
+  public List<Target> getTargets() {
+    return getObservation().getTargets();
+  }
+
+  /**
+   * Return the list of all target names
+   * @return list of all target names
+   */
+  public Vector<String> getTargetNames() {
+    final List<Target> targets = getTargets();
+    final int size = targets.size();
+    if (size > 0) {
+      final Vector<String> v = new Vector<String>(targets.size());
+      for (Target t : targets) {
+        v.add(t.getName());
+      }
+      return v;
+    }
+    return EMPTY_VECTOR;
+  }
+
+  /**
+   * Add a target given its unique name.
+   * Note : it does not check anything on coordinates (cross matching)
+   * @param name target name
+   * @param star object
+   * @return true if the target list changed
+   */
+  public boolean addTarget(final String name, final Star star) {
+    boolean changed = false;
+    if (name != null && name.length() > 0) {
+      changed = (getTarget(name) == null);
+      if (changed) {
+        if (logger.isLoggable(Level.FINEST)) {
+          logger.finest("addTarget : " + name);
+        }
+
+        final Target t = new Target();
+        t.setName(name);
+
+        /*
+        Strings = {DEC=+43 49 23.910, RA=05 01 58.1341, OTYPELIST=**,Al*,SB*,*,Em*,V*,IR,UV, SPECTRALTYPES=A8Iab:}
+        Doubles = {PROPERMOTION_RA=0.18, PARALLAX=1.6, DEC_d=43.8233083, FLUX_J=1.88, PROPERMOTION_DEC=-2.31, FLUX_K=1.533, PARALLAX_err=1.16, FLUX_V=3.039, FLUX_H=1.702, RA_d=75.4922254}
+         */
+
+        // coordinates (deg) :
+        t.setRA(star.getPropertyAsString(Star.Property.RA).replace(' ', ':'));
+        t.setDEC(star.getPropertyAsString(Star.Property.DEC).replace(' ', ':'));
+        t.setEQUINOX(AsproConstants.EPOCH_J2000);
+
+        // Proper motion (mas/yr) (optional) :
+        t.setPMRA(star.getPropertyAsDouble(Star.Property.PROPERMOTION_RA));
+        t.setPMDEC(star.getPropertyAsDouble(Star.Property.PROPERMOTION_DEC));
+
+        // Parallax (mas) (optional) :
+        t.setPARALLAX(star.getPropertyAsDouble(Star.Property.PARALLAX));
+        t.setPARAERR(star.getPropertyAsDouble(Star.Property.PARALLAX_err));
+
+        // Magnitudes (optional) :
+        t.setFLUXV(star.getPropertyAsDouble(Star.Property.FLUX_V));
+        t.setFLUXI(star.getPropertyAsDouble(Star.Property.FLUX_I));
+        t.setFLUXJ(star.getPropertyAsDouble(Star.Property.FLUX_J));
+        t.setFLUXH(star.getPropertyAsDouble(Star.Property.FLUX_H));
+        t.setFLUXK(star.getPropertyAsDouble(Star.Property.FLUX_K));
+        t.setFLUXN(star.getPropertyAsDouble(Star.Property.FLUX_N));
+
+        // Spectral types :
+        t.setSPECTYP(star.getPropertyAsString(Star.Property.SPECTRALTYPES));
+
+        // Object types :
+        t.setOBJTYP(star.getPropertyAsString(Star.Property.OTYPELIST));
+
+        // Radial velocity (km/s) (optional) :
+        t.setSYSVEL(star.getPropertyAsDouble(Star.Property.RV));
+        t.setVELTYP(star.getPropertyAsString(Star.Property.RV_DEF));
+
+        // Identifiers :
+        t.setIDS(star.getPropertyAsString(Star.Property.IDS));
+
+        getTargets().add(t);
+      }
+    }
+    return changed;
+  }
+
+  /**
+   * Remove a target given its unique name
+   * @param name target name
+   * @return true if the target list changed
+   */
+  public boolean removeTarget(final String name) {
+    boolean changed = false;
+    if (name != null && name.length() > 0) {
+      Target t;
+      for (Iterator<Target> it = getTargets().iterator(); it.hasNext();) {
+        t = it.next();
+        if (t.getName().equals(name)) {
+          if (logger.isLoggable(Level.FINEST)) {
+            logger.finest("removeTarget : " + name);
+          }
+          changed = true;
+          it.remove();
+          break;
+        }
+      }
+    }
+    return changed;
+  }
+
+  /**
+   * Replace an existing target by the given target instance (same name)
+   * @param newTarget target to store
+   */
+  public void replaceTarget(final Target newTarget) {
+    Target target;
+    for (ListIterator<Target> it = getTargets().listIterator(); it.hasNext();) {
+      target = it.next();
+      if (target.getName().equals(newTarget.getName())) {
+        it.set(newTarget);
+      }
+    }
+  }
+
+  /**
+   * Replace the complete list of targets by the given list of targets
+   * @param newTargets targets to store
+   */
+  public void setTargets(final List<Target> newTargets) {
+    final List<Target> targets = getTargets();
+    targets.clear();
+    targets.addAll(newTargets);
+  }
+
+  // --- TARGET CONFIGURATION --------------------------------------------------
+  /**
+   * Return the target configuration for the given target (FT mode, HA min/max)
+   * @param name target name
+   * @return target configuration or null if the target is not found
+   */
+  public TargetConfiguration getTargetConfiguration(final String name) {
+    return getObservation().getTargetConfiguration(name);
+  }
+
+  /**
+   * Set the HA lower value for the given target name
+   * @param name name of the target
+   * @param haMin HA lower value or null to clear it
+   * @return true if the value changed
+   */
+  public boolean setTargetHAMin(final String name, final Double haMin) {
+    final TargetConfiguration targetConf = getTargetConfiguration(name);
+
+    // haMin can be null :
+    boolean changed = isChanged(haMin, targetConf.getHAMin());
+    if (changed) {
+      if (logger.isLoggable(Level.FINEST)) {
+        logger.finest("setTargetHAMin : " + haMin);
+      }
+      targetConf.setHAMin(haMin);
+    }
+    return changed;
+  }
+
+  /**
+   * Set the HA upper value for the given target name
+   * @param name name of the target
+   * @param haMax HA upper value or null to clear it
+   * @return true if the value changed
+   */
+  public boolean setTargetHAMax(final String name, final Double haMax) {
+    final TargetConfiguration targetConf = getTargetConfiguration(name);
+
+    // haMax can be null :
+    boolean changed = isChanged(haMax, targetConf.getHAMax());
+    if (changed) {
+      if (logger.isLoggable(Level.FINEST)) {
+        logger.finest("setTargetHAMax : " + haMax);
+      }
+      targetConf.setHAMax(haMax);
+    }
+    return changed;
+  }
+
+  /**
+   * Set the Fringe tracker mode for the given target name
+   * @param name name of the target
+   * @param ftMode Fringe tracker mode or 'None'
+   * @return true if the value changed
+   */
+  public boolean setTargetFTMode(final String name, final String ftMode) {
+    final TargetConfiguration targetConf = getTargetConfiguration(name);
+
+    // special case : None
+    final String mode = (AsproConstants.NONE.equals(ftMode)) ? null : ftMode;
+
+    // ftMode can be null :
+    boolean changed = isChanged(mode, targetConf.getFringeTrackerMode());
+    if (changed) {
+      if (logger.isLoggable(Level.FINEST)) {
+        logger.finest("setTargetFTMode : " + mode);
+      }
+      targetConf.setFringeTrackerMode(mode);
+    }
+    return changed;
+  }
+
+  // --- COMPUTATION RESULTS ---------------------------------------------------
+  /**
+   * Defines the computed observability data in the observation for later reuse (UV Coverage).
+   * Used by ObservabilityPanel.plot()
+   * @param obsData observability data
+   */
+  public void setObservabilityData(final ObservabilityData obsData) {
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("setObservabilityData : " + obsData);
+    }
+
+    getObservation().setObservabilityData(obsData);
+
+    if (obsData != null) {
+      fireObservabilityDone();
+    }
+  }
+
+  /**
+   * Defines the OIFits structure in the observation for later reuse (Visiblity Explorer)
+   * @param oiFitsFile OIFits structure
+   */
+  public void setOIFitsFile(final OIFitsFile oiFitsFile) {
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("setOIFitsFile : " + oiFitsFile);
+    }
+
+    getObservation().setOIFitsFile(oiFitsFile);
+
+    if (oiFitsFile != null) {
+      fireOIFitsDone();
+    }
+  }
+
+  // --- INTERNAL METHODS ------------------------------------------------------
+  /**
+   * Define default values (empty child objects)
+   * @param newObservation observation to modify
+   * @throws IllegalStateException if an invalid reference was found (interferometer / instrument / instrument configuration)
+   */
+  private void defineDefaults(final ObservationSetting newObservation) throws IllegalStateException {
+    if (newObservation.getName() == null || newObservation.getName().length() == 0) {
+      this.observation.setName("default");
+    }
+    if (newObservation.getWhen() == null) {
+      final WhenSetting when = new WhenSetting();
+      when.setDate(getCalendar(new Date()));
+      when.setNightRestriction(AsproConstants.DEFAULT_USE_NIGHT_LIMITS);
+
+      newObservation.setWhen(when);
+    }
+    if (newObservation.getInterferometerConfiguration() == null) {
+      final String defInterferometer = this.cm.getInterferometerNames().get(0);
+      final String defInterferometerConfiguration = this.cm.getInterferometerConfigurationNames(defInterferometer).get(0);
+
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("default Interferometer = " + defInterferometer);
+        logger.fine("default InterferometerConfiguration = " + defInterferometerConfiguration);
+      }
+
+      final InterferometerConfigurationChoice interferometerChoice = new InterferometerConfigurationChoice();
+      interferometerChoice.setName(defInterferometerConfiguration);
+      interferometerChoice.setMinElevation(AsproConstants.DEFAULT_MIN_ELEVATION);
+
+      newObservation.setInterferometerConfiguration(interferometerChoice);
+    }
+    if (newObservation.getInstrumentConfiguration() == null) {
+      final String defInstrument = this.cm.getInterferometerInstrumentNames(newObservation.getInterferometerConfiguration().getName()).get(0);
+      final String defInstrumentConfiguration = this.cm.getInstrumentConfigurationNames(newObservation.getInterferometerConfiguration().getName(), defInstrument).get(0);
+
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("default Instrument = " + defInstrument);
+        logger.fine("default InstrumentConfiguration = " + defInstrumentConfiguration);
+      }
+
+      final FocalInstrumentConfigurationChoice instrumentChoice = new FocalInstrumentConfigurationChoice();
+      instrumentChoice.setName(defInstrument);
+      instrumentChoice.setStations(defInstrumentConfiguration);
+
+      newObservation.setInstrumentConfiguration(instrumentChoice);
+    }
+
+    // update references :
+    // can throw IllegalStateException if an invalid reference was found :
+    updateObservation(newObservation);
   }
 
   /**
@@ -644,367 +1039,38 @@ public class ObservationManager extends BaseOIManager {
   }
 
   /**
-   * Add a target given its unique name
-   * @param name target name
-   * @param star object
-   * @return true if the target list changed
+   * Utility method to get a string representation of main observation settings
+   * @param obs observation to use
+   * @return string representation of main observation settings
    */
-  public boolean addTarget(final String name, final Star star) {
-    boolean changed = false;
-    if (name != null && name.length() > 0) {
-      changed = (getTarget(name) == null);
-      if (changed) {
-        if (logger.isLoggable(Level.FINEST)) {
-          logger.finest("addTarget : " + name);
-        }
-
-        final Target t = new Target();
-        t.setName(name);
-
-        /*
-        Strings = {DEC=+43 49 23.910, RA=05 01 58.1341, OTYPELIST=**,Al*,SB*,*,Em*,V*,IR,UV, SPECTRALTYPES=A8Iab:}
-        Doubles = {PROPERMOTION_RA=0.18, PARALLAX=1.6, DEC_d=43.8233083, FLUX_J=1.88, PROPERMOTION_DEC=-2.31, FLUX_K=1.533, PARALLAX_err=1.16, FLUX_V=3.039, FLUX_H=1.702, RA_d=75.4922254}
-         */
-
-        // coordinates (deg) :
-        t.setRA(star.getPropertyAsString(Star.Property.RA).replace(' ', ':'));
-        t.setDEC(star.getPropertyAsString(Star.Property.DEC).replace(' ', ':'));
-        t.setEQUINOX(AsproConstants.EPOCH_J2000);
-
-        // Proper motion (mas/yr) (optional) :
-        t.setPMRA(star.getPropertyAsDouble(Star.Property.PROPERMOTION_RA));
-        t.setPMDEC(star.getPropertyAsDouble(Star.Property.PROPERMOTION_DEC));
-
-        // Parallax (mas) (optional) :
-        t.setPARALLAX(star.getPropertyAsDouble(Star.Property.PARALLAX));
-        t.setPARAERR(star.getPropertyAsDouble(Star.Property.PARALLAX_err));
-
-        // Magnitudes (optional) :
-        t.setFLUXV(star.getPropertyAsDouble(Star.Property.FLUX_V));
-        t.setFLUXI(star.getPropertyAsDouble(Star.Property.FLUX_I));
-        t.setFLUXJ(star.getPropertyAsDouble(Star.Property.FLUX_J));
-        t.setFLUXH(star.getPropertyAsDouble(Star.Property.FLUX_H));
-        t.setFLUXK(star.getPropertyAsDouble(Star.Property.FLUX_K));
-        t.setFLUXN(star.getPropertyAsDouble(Star.Property.FLUX_N));
-
-        // Spectral types :
-        t.setSPECTYP(star.getPropertyAsString(Star.Property.SPECTRALTYPES));
-
-        // Object types :
-        t.setOBJTYP(star.getPropertyAsString(Star.Property.OTYPELIST));
-
-        // Radial velocity (km/s) (optional) :
-        t.setSYSVEL(star.getPropertyAsDouble(Star.Property.RV));
-        t.setVELTYP(star.getPropertyAsString(Star.Property.RV_DEF));
-
-        // Identifiers :
-        t.setIDS(star.getPropertyAsString(Star.Property.IDS));
-
-        getObservation().getTargets().add(t);
-      }
+  public static String toString(final ObservationSetting obs) {
+    final StringBuffer sb = new StringBuffer();
+    sb.append("name : ").append(obs.getName());
+    sb.append(" date : ").append(obs.getWhen().getDate());
+    sb.append(" interferometer : ").append(obs.getInterferometerConfiguration().getName());
+    // instrument :
+    sb.append(" instrument : ").append(obs.getInstrumentConfiguration().getName());
+    sb.append(" stations : ").append(obs.getInstrumentConfiguration().getStations());
+    if (obs.getInstrumentConfiguration().getPops() != null) {
+      sb.append(" pops : ").append(obs.getInstrumentConfiguration().getPops());
     }
-    return changed;
+    if (obs.getInstrumentConfiguration().getInstrumentMode() != null) {
+      sb.append(" mode : ").append(obs.getInstrumentConfiguration().getInstrumentMode());
+    }
+    if (!obs.getTargets().isEmpty()) {
+      sb.append(" targets : \n").append(obs.getTargets());
+    }
+
+    return sb.toString();
   }
 
   /**
-   * Remove a target given its unique name
-   * @param name target name
-   * @return true if the target list changed
+   * Check if the objects are different supporting null values
+   * @param value1 string 1
+   * @param value2 string 2
+   * @return true only if objects are different
    */
-  public boolean removeTarget(final String name) {
-    boolean changed = false;
-    if (name != null && name.length() > 0) {
-      Target t;
-      for (Iterator<Target> it = getObservation().getTargets().iterator(); it.hasNext();) {
-        t = it.next();
-        if (t.getName().equals(name)) {
-          if (logger.isLoggable(Level.FINEST)) {
-            logger.finest("removeTarget : " + name);
-          }
-          changed = true;
-          it.remove();
-          break;
-        }
-      }
-    }
-    return changed;
-  }
-
-  public static Target getTarget(final ObservationSetting obs, final String name) {
-    for (Target t : obs.getTargets()) {
-      if (t.getName().equals(name)) {
-        return t;
-      }
-    }
-    return null;
-  }
-
-  public Target getTarget(final String name) {
-    return getTarget(getObservation(), name);
-  }
-
-  public Vector<String> getTargetNames() {
-    final List<Target> targets = getObservation().getTargets();
-    final int size = targets.size();
-    if (size > 0) {
-      final Vector<String> v = new Vector<String>(targets.size());
-      for (Target t : targets) {
-        v.add(t.getName());
-      }
-      return v;
-    }
-    return EMPTY_VECTOR;
-  }
-
-  public static void replaceTarget(final ObservationSetting obs, final Target target) {
-    Target t;
-    for (ListIterator<Target> it = obs.getTargets().listIterator(); it.hasNext();) {
-      t = it.next();
-      if (t.getName().equals(target.getName())) {
-        it.set(target);
-      }
-    }
-  }
-
-  public static void setTargets(final ObservationSetting obs, final List<Target> targets) {
-    obs.getTargets().clear();
-    obs.getTargets().addAll(targets);
-  }
-
-  public TargetConfiguration getTargetConfiguration(final String name) {
-    return getTargetConfiguration(getObservation(), name);
-  }
-
-  public static TargetConfiguration getTargetConfiguration(final ObservationSetting obs, final String name) {
-    final Target target = getTarget(obs, name);
-    if (target != null) {
-      TargetConfiguration targetConf = target.getConfiguration();
-      if (targetConf == null) {
-        targetConf = new TargetConfiguration();
-        target.setConfiguration(targetConf);
-      }
-      return targetConf;
-    }
-    return null;
-  }
-
-  public boolean setTargetHAMin(final String name, final Double haMin) {
-    final TargetConfiguration targetConf = getTargetConfiguration(name);
-
-    // haMin can be null :
-    boolean changed = isChanged(haMin, targetConf.getHAMin());
-    if (changed) {
-      if (logger.isLoggable(Level.FINEST)) {
-        logger.finest("setTargetHAMin : " + haMin);
-      }
-      targetConf.setHAMin(haMin);
-    }
-    return changed;
-  }
-
-  public boolean setTargetHAMax(final String name, final Double haMax) {
-    final TargetConfiguration targetConf = getTargetConfiguration(name);
-
-    // haMax can be null :
-    boolean changed = isChanged(haMax, targetConf.getHAMax());
-    if (changed) {
-      if (logger.isLoggable(Level.FINEST)) {
-        logger.finest("setTargetHAMax : " + haMax);
-      }
-      targetConf.setHAMax(haMax);
-    }
-    return changed;
-  }
-
-  public boolean setTargetFTMode(final String name, final String ftMode) {
-    final TargetConfiguration targetConf = getTargetConfiguration(name);
-
-    // special case : None
-    final String mode = (AsproConstants.NONE.equals(ftMode)) ? null : ftMode;
-
-    // ftMode can be null :
-    boolean changed = isChanged(mode, targetConf.getFringeTrackerMode());
-    if (changed) {
-      if (logger.isLoggable(Level.FINEST)) {
-        logger.finest("setTargetFTMode : " + mode);
-      }
-      targetConf.setFringeTrackerMode(mode);
-    }
-    return changed;
-  }
-
-  /**
-   * Defines the computed observability data in the observation for later reuse (UV Coverage)
-   * @param obsData observability data
-   */
-  public void setObservabilityData(final ObservabilityData obsData) {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("setObservabilityData : " + obsData);
-    }
-
-    getObservation().setObservabilityData(obsData);
-
-    if (obsData != null) {
-      fireObservabilityDone();
-    }
-  }
-
-  /**
-   * Defines the OIFits structure in the observation for later reuse (Visiblity Explorer)
-   * @param oiFitsFile OIFits structure
-   */
-  public void setOIFitsFile(final OIFitsFile oiFitsFile) {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("setOIFitsFile : " + oiFitsFile);
-    }
-
-    getObservation().setOIFitsFile(oiFitsFile);
-
-    if (oiFitsFile != null) {
-      fireOIFitsDone();
-    }
-  }
-
-  /**
-   * Save the current observation in the given file
-   * @param file file to save
-   * @throws RuntimeException if the save operation failed
-   */
-  public void save(final File file) throws RuntimeException {
-    if (file != null) {
-      this.observationFile = file;
-
-      if (logger.isLoggable(Level.INFO)) {
-        logger.info("Save observation to : " + this.observationFile);
-      }
-      saveObject(this.observationFile, getObservation());
-    }
-  }
-
-  /**
-   * Load an observation from the given file
-   * @param file file to load
-   * @throws RuntimeException if the load operation failed
-   * @throws IllegalStateException if an invalid reference was found (interferometer / instrument / instrument configuration)
-   */
-  public void load(final File file) throws RuntimeException, IllegalStateException {
-    if (file != null) {
-      this.observationFile = file;
-
-      if (logger.isLoggable(Level.INFO)) {
-        logger.info("Load observation from : " + this.observationFile);
-      }
-      final Object loaded = loadObject(this.observationFile);
-
-      if (!(loaded instanceof ObservationSetting)) {
-        throw new RuntimeException("The loaded file does not correspond to a valid Aspro2 file : " + file);
-      }
-
-      final ObservationSetting newObservation = (ObservationSetting) loaded;
-      changeObservation(newObservation);
-    }
-  }
-
-  /**
-   * Reset the current observation
-   */
-  public void reset() {
-    logger.info("Reset observation");
-
-    final ObservationSetting newObservation = new ObservationSetting();
-    changeObservation(newObservation);
-  }
-
-  /**
-   * Change the current observation with the given one
-   * and fire load and change events
-   * @param newObservation observation to use
-   * @throws IllegalStateException if an invalid reference was found (interferometer / instrument / instrument configuration)
-   */
-  private void changeObservation(final ObservationSetting newObservation) throws IllegalStateException {
-    defineDefaults(newObservation);
-
-    // change the current observation :
-    this.observation = newObservation;
-
-    // fire an observation load event :
-    fireObservationLoaded();
-
-    // fire an observation change event :
-    fireObservationChanged();
-  }
-
-  /**
-   * This fires an observation load event to all registered listeners
-   */
-  public void fireObservationLoaded() {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("fireObservationLoaded : " + toString(getObservation()));
-    }
-
-    fireEvent(ObservationEventType.LOADED);
-  }
-
-  /**
-   * This fires an observation change event to all registered listeners
-   */
-  public void fireObservationChanged() {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("fireObservationChanged : " + toString(getObservation()));
-    }
-
-    fireEvent(ObservationEventType.CHANGED);
-  }
-
-  /**
-   * This fires an observability done event to all registered listeners
-   */
-  public void fireObservabilityDone() {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("fireObservabilityDone : " + toString(getObservation()));
-    }
-
-    fireEvent(ObservationEventType.OBSERVABILITY_DONE);
-  }
-
-  /**
-   * This fires an OIFits done event to all registered listeners
-   */
-  public void fireOIFitsDone() {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("fireOIFitsDone : " + toString(getObservation()));
-    }
-
-    fireEvent(ObservationEventType.OIFITS_DONE);
-  }
-
-  /**
-   * Send an event to the registered listeners.
-   * Note : any new listener registered during the processing of this event, will not be called
-   * @param type event type
-   */
-  private void fireEvent(final ObservationEventType type) {
-    if (!this.listeners.isEmpty()) {
-      // Call listeners with a copy of the listener list to avoid concurrent modification :
-      final ObservationListener[] eventListeners = new ObservationListener[this.listeners.size()];
-
-      // copy the listener references :
-      this.listeners.toArray(eventListeners);
-
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("fireEvent : " + type);
-      }
-
-      final long start = System.nanoTime();
-
-      for (final ObservationListener listener : eventListeners) {
-        listener.onProcess(type, getObservation());
-      }
-
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("fireEvent : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
-      }
-
-    }
+  private boolean isChanged(final Object value1, final Object value2) {
+    return (value1 == null && value2 != null) || (value1 != null && value2 == null) || (value1 != null && value2 != null && !value1.equals(value2));
   }
 }
