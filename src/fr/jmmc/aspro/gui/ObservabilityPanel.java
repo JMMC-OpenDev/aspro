@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityPanel.java,v 1.39 2010-09-15 13:55:53 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityPanel.java,v 1.40 2010-09-23 19:46:35 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.39  2010/09/15 13:55:53  bourgesl
+ * added JMMC copyright on plot
+ * added moon illumination in title because moon rise/set is hidden
+ *
  * Revision 1.38  2010/07/05 14:51:27  bourgesl
  * cancel UV tasks at the same time a new Observation task is executed to make the UI more responsive
  *
@@ -528,8 +532,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
           } catch (InterruptedException ignore) {
           } catch (ExecutionException ee) {
-            logger.log(Level.SEVERE, "Error : ", ee);
-            new FeedbackReport(null, true, (Exception) ee.getCause());
+            // Show feedback report (modal and do not exit on close) :
+            new FeedbackReport(true, ee.getCause());
           }
 
           // update the status bar :

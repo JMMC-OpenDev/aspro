@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.53 2010-09-20 14:46:02 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.54 2010-09-23 19:46:35 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.53  2010/09/20 14:46:02  bourgesl
+ * minor refactoring changes
+ *
  * Revision 1.52  2010/09/15 13:56:31  bourgesl
  * added JMMC copyright on plot
  *
@@ -1533,8 +1536,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
               if (ee.getCause() instanceof IllegalArgumentException) {
                 JOptionPane.showMessageDialog(null, ee.getCause().getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
               } else {
-                logger.log(Level.SEVERE, "Error : ", ee);
-                new FeedbackReport(null, true, (Exception) ee.getCause());
+                // Show feedback report (modal and do not exit on close) :
+                new FeedbackReport(true, ee.getCause());
               }
             }
 
@@ -1656,8 +1659,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
                   if (ee.getCause() instanceof IllegalArgumentException) {
                     JOptionPane.showMessageDialog(null, ee.getCause().getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                   } else {
-                    logger.log(Level.SEVERE, "Error : ", ee);
-                    new FeedbackReport(null, true, (Exception) ee.getCause());
+                    // Show feedback report (modal and do not exit on close) :
+                    new FeedbackReport(true, ee.getCause());
                   }
                 }
 

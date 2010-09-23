@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ConfigurationManager.java,v 1.28 2010-09-20 14:46:02 bourgesl Exp $"
+ * "@(#) $Id: ConfigurationManager.java,v 1.29 2010-09-23 19:46:35 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.28  2010/09/20 14:46:02  bourgesl
+ * minor refactoring changes
+ *
  * Revision 1.27  2010/09/20 12:14:21  bourgesl
  * class made final
  *
@@ -196,9 +199,8 @@ public final class ConfigurationManager extends BaseOIManager {
       }
 
     } catch (RuntimeException re) {
-      logger.log(Level.SEVERE, "runtime failure : ", re);
-      // report unacceptable failure :
-      new FeedbackReport(null, true, re);
+      // Show feedback report (modal and do exit on close) :
+      new FeedbackReport(true, re, true);
     }
   }
 
