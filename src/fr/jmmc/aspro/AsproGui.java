@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproGui.java,v 1.27 2010-09-06 13:39:57 bourgesl Exp $"
+ * "@(#) $Id: AsproGui.java,v 1.28 2010-09-23 19:47:32 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.27  2010/09/06 13:39:57  bourgesl
+ * adjust the minimum size of the main window according to the screen size
+ *
  * Revision 1.26  2010/07/08 13:41:13  bourgesl
  * added logs
  * encapsulate swing ops in SwingUtilities.invoke...
@@ -106,6 +109,7 @@ import fr.jmmc.mcs.gui.App;
 import fr.jmmc.mcs.gui.FeedbackReport;
 import fr.jmmc.mcs.gui.StatusBar;
 import fr.jmmc.mcs.util.ActionRegistrar;
+import fr.jmmc.mcs.util.MCSExceptionHandler;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Toolkit;
@@ -160,6 +164,7 @@ public final class AsproGui extends App {
     ConfigurationManager.getInstance();
 
     try {
+
       // Using invokeAndWait to be in sync with the main thread :
       SwingUtilities.invokeAndWait(new Runnable() {
 
@@ -170,10 +175,10 @@ public final class AsproGui extends App {
           prepareFrame(getFrame());
         }
       });
+
     } catch (Exception e) {
-      logger.log(Level.SEVERE, "failure : ", e);
-      // report unacceptable failure :
-      new FeedbackReport(null, true, e);
+      // Show feedback report (modal and do exit on close) :
+      new FeedbackReport(true, e, true);
     }
 
     logger.fine("AsproGui.init() handler : exit");
@@ -340,6 +345,8 @@ public final class AsproGui extends App {
    * @param args command line arguments
    */
   public static void main(final String[] args) {
+    // Install exception handlers :
+    MCSExceptionHandler.installSwingHandler();
 
     // Set the default locale to en-US locale (for Numerical Fields "." ",")
     Locale.setDefault(Locale.US);
