@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: XmlFactory.java,v 1.2 2010-07-07 09:29:29 bourgesl Exp $"
+ * "@(#) $Id: XmlFactory.java,v 1.3 2010-09-24 15:48:24 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2010/07/07 09:29:29  bourgesl
+ * use buffered url.openStream
+ *
  * Revision 1.1  2010/06/23 12:49:06  bourgesl
  * XSLT (JAXP) utility class to load (in cache) XSLT files and perform transformations
  *
@@ -14,7 +17,7 @@
 package fr.jmmc.aspro.util;
 
 import java.io.BufferedInputStream;
-import java.io.File;
+import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -36,6 +39,7 @@ import javax.xml.transform.stream.StreamSource;
 
 /**
  * Utility class for XSL transformations
+ *
  * @author bourgesl
  */
 public final class XmlFactory {
@@ -44,18 +48,15 @@ public final class XmlFactory {
   /** Class Name */
   private static final String className_ = "fr.jmmc.aspro.util.XmlFactory";
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
-          className_);
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(className_);
   /** encoding used for XML and XSL documents */
   public static final String ENCODING = "UTF-8";
   /** default buffer size for XSLT result document */
   public static final int DEFAULT_BUFFER_SIZE = 4096;
-  /** use the class loader (true) or the file system (false) to resolve XSL file paths */
-  private static final boolean USE_CLASSLOADER = true;
   /** inner XSLT factory */
   private static TransformerFactory transformerFactory = null;
   /** cache for Xsl templates */
-  private static Map<String, Templates> cachedTemplates = new HashMap<String, Templates>(32);
+  private static final Map<String, Templates> cachedTemplates = new HashMap<String, Templates>(32);
 
   /**
    * Forbidden constructor
@@ -68,34 +69,21 @@ public final class XmlFactory {
    * Returns a TransformerFactory (JAXP)
    *
    * @return TransformerFactory (JAXP)
+   *
+   * @throws IllegalStateException if TransformerFactory initialization failed
    */
-  protected static final TransformerFactory getTransformerFactory() {
+  protected static final TransformerFactory getTransformerFactory()
+          throws IllegalStateException {
+
     if (transformerFactory == null) {
       try {
         transformerFactory = TransformerFactory.newInstance();
-      } catch (final TransformerFactoryConfigurationError tfce) {
-        logger.log(Level.SEVERE, "XmlFactory.getTransformerFactory : failure on TransformerFactory initialisation : ", tfce);
+      } catch (TransformerFactoryConfigurationError tfce) {
+        throw new IllegalStateException("XmlFactory.getTransformerFactory : failure on TransformerFactory initialisation : ", tfce);
       }
     }
 
     return transformerFactory;
-  }
-
-  /**
-   * Returns a transformer for the given xslt source
-   *
-   * @param source stream source for xslt script
-   *
-   * @return transformer for the given xslt source
-   */
-  protected static final Transformer newTransformer(final StreamSource source) {
-    try {
-      return getOutTransformer(getTransformerFactory().newTransformer(source));
-    } catch (final TransformerConfigurationException tce) {
-      logger.log(Level.SEVERE, "XmlFactory.newTransformer : failure on creating new Transformer for source : " + source, tce);
-    }
-
-    return null;
   }
 
   /**
@@ -104,15 +92,17 @@ public final class XmlFactory {
    * @param source stream source for xslt script
    *
    * @return new xslt template
+   *
+   * @throws IllegalStateException if TransformerFactory initialization failed or template creation failed
    */
-  protected static final Templates newTemplate(final StreamSource source) {
+  protected static final Templates newTemplate(final StreamSource source)
+          throws IllegalStateException {
+
     try {
       return getTransformerFactory().newTemplates(source);
-    } catch (final TransformerConfigurationException tce) {
-      logger.log(Level.SEVERE, "XmlFactory.newTransformer : failure on creating new template : " + source, tce);
+    } catch (TransformerConfigurationException tce) {
+      throw new IllegalStateException("XmlFactory.newTransformer : failure on creating new template : " + source, tce);
     }
-
-    return null;
   }
 
   /**
@@ -121,15 +111,36 @@ public final class XmlFactory {
    * @param tmp xslt template (precompiled xslt script)
    *
    * @return transformer for the given xslt template
+   *
+   * @throws IllegalStateException if transformer creation failed
    */
-  protected static final Transformer newTransformer(final Templates tmp) {
+  protected static final Transformer newTransformer(final Templates tmp)
+          throws IllegalStateException {
+
     try {
       return getOutTransformer(tmp.newTransformer());
-    } catch (final TransformerConfigurationException tce) {
-      logger.log(Level.SEVERE, "XmlFactory.newTransformer : failure on creating new Transformer for template : " + tmp, tce);
+    } catch (TransformerConfigurationException tce) {
+      throw new IllegalStateException("XmlFactory.newTransformer : failure on creating new Transformer for template : " + tmp, tce);
     }
+  }
 
-    return null;
+  /**
+   * Returns a transformer for the given xslt source
+   *
+   * @param source stream source for xslt script
+   *
+   * @return transformer for the given xslt source
+   *
+   * @throws IllegalStateException if TransformerFactory initialization failed or transformer creation failed
+   */
+  protected static final Transformer newTransformer(final StreamSource source)
+          throws IllegalStateException {
+
+    try {
+      return getOutTransformer(getTransformerFactory().newTransformer(source));
+    } catch (TransformerConfigurationException tce) {
+      throw new IllegalStateException("XmlFactory.newTransformer : failure on creating new Transformer for source : " + source, tce);
+    }
   }
 
   /**
@@ -147,28 +158,38 @@ public final class XmlFactory {
   }
 
   /**
-   * Process xslt on xml document
+   * Process xslt on xml document (using xslt cache)
    *
    * @param xmlSource XML content to transform
    * @param xslFilePath XSL file to use (XSLT)
    *
-   * @return result document
+   * @return result document as string
+   *
+   * @throws IllegalStateException if TransformerFactory initialization failed or template creation failed or transformer creation failed
+   * @throws RuntimeException if transformation failure or the xsl file path is empty or IO failure
    */
-  public static String transform(final String xmlSource, final String xslFilePath) {
+  public static String transform(final String xmlSource, final String xslFilePath)
+          throws IllegalStateException, RuntimeException {
+
     return transform(xmlSource, xslFilePath, true);
   }
 
   /**
-   * Process xslt on xml document XSL code can use parameter 'lastModified'
+   * Process xslt on xml document
    *
    * @param xmlSource XML content to transform
    * @param xslFilePath XSL file to use (XSLT)
    * @param doCacheXsl true indicates that XSLT can be keep in permanent cache for reuse (avoid a lot of wasted time
    *        (compiling xslt) for many transformations)
    *
-   * @return result document
+   * @return result document as string
+   *
+   * @throws IllegalStateException if TransformerFactory initialization failed or template creation failed or transformer creation failed
+   * @throws RuntimeException if transformation failure or the xsl file path is empty or IO failure
    */
-  public static String transform(final String xmlSource, final String xslFilePath, final boolean doCacheXsl) {
+  public static String transform(final String xmlSource, final String xslFilePath, final boolean doCacheXsl)
+          throws IllegalStateException, RuntimeException {
+
     final StringWriter out = new StringWriter(DEFAULT_BUFFER_SIZE);
 
     transform(xmlSource, xslFilePath, doCacheXsl, out);
@@ -177,39 +198,39 @@ public final class XmlFactory {
   }
 
   /**
-   * Process xslt on xml document XSL code can use parameter 'lastModified'
+   * Process xslt on xml document
    *
    * @param xmlSource XML content to transform
    * @param xslFilePath XSL file to use (XSLT)
    * @param doCacheXsl true indicates that XSLT can be keep in permanent cache for reuse (avoid a lot of wasted time
    *        (compiling xslt) for many transformations)
    * @param out buffer (should be cleared before method invocation)
+   *
+   * @throws IllegalStateException if TransformerFactory initialization failed or template creation failed or transformer creation failed
+   * @throws RuntimeException if transformation failure or the xsl file path is empty or I/O exception occurs while reading XSLT
    */
   private static void transform(final String xmlSource, final String xslFilePath,
-                                final boolean doCacheXsl, final Writer out) {
+                                final boolean doCacheXsl, final Writer out)
+          throws IllegalStateException, RuntimeException {
+
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("XmlFactory.transform : enter : xslFilePath : " + xslFilePath);
     }
 
     if ((xmlSource != null) && (xslFilePath != null)) {
-      Transformer tf = null;
+      final Transformer tf;
 
       if (doCacheXsl) {
         tf = loadXsl(xslFilePath);
       } else {
-        final StreamSource source = resolvePath(xslFilePath);
-        if (source != null) {
-          tf = newTransformer(source);
-        }
+        tf = newTransformer(resolveXSLTPath(xslFilePath));
       }
 
-      if (tf != null) {
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("XmlFactory.transform : XML Source : " + xmlSource);
-        }
-
-        asString(tf, new StreamSource(new StringReader(xmlSource)), out);
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("XmlFactory.transform : XML Source : " + xmlSource);
       }
+
+      asString(tf, new StreamSource(new StringReader(xmlSource)), out);
     }
 
     if (logger.isLoggable(Level.FINE)) {
@@ -218,46 +239,40 @@ public final class XmlFactory {
   }
 
   /**
-   * Loads xsl template with cache
+   * Load an xslt using template cache
    *
    * @param xslFilePath XSL file to use (XSLT)
    *
-   * @return transformer or null if file does not exist or xslt not valid
+   * @return transformer or null if file does not exist
+   *
+   * @throws IllegalStateException if TransformerFactory initialization failed or template creation failed or transformer creation failed
+   * @throws RuntimeException if the xsl file path is empty or I/O exception occurs while reading XSLT
    */
-  private static final Transformer loadXsl(final String xslFilePath) {
-    if ((xslFilePath == null) || (xslFilePath.length() == 0)) {
-      logger.log(Level.SEVERE, "XmlFactory.loadXsl : unable to load template : empty file name !");
+  private static final Transformer loadXsl(final String xslFilePath)
+          throws IllegalStateException, RuntimeException {
 
-      return null;
+    if ((xslFilePath == null) || (xslFilePath.length() == 0)) {
+      throw new RuntimeException("XmlFactory.resolvePath : unable to load XSLT : empty file path !");
     }
 
     Transformer tf = null;
     Templates tmp = cachedTemplates.get(xslFilePath);
 
     if (tmp == null) {
+      tmp = newTemplate(resolveXSLTPath(xslFilePath));
 
-      try {
-        final StreamSource source = resolvePath(xslFilePath);
-        if (source != null) {
-          tmp = newTemplate(source);
-          cachedTemplates.put(xslFilePath, tmp);
+      cachedTemplates.put(xslFilePath, tmp);
 
-          if (logger.isLoggable(Level.FINE)) {
-            logger.fine("XmlFactory.loadXsl : template : " + Integer.toHexString(tmp.hashCode()));
-          }
-        }
-      } catch (final Exception e) {
-        logger.log(Level.SEVERE, "XmlFactory.loadXsl : unable to create template for XSL : " + xslFilePath, e);
-      }
-    }
-
-    if (tmp != null) {
       if (logger.isLoggable(Level.FINE)) {
-        logger.fine("XmlFactory.loadXsl : template in cache : " + Integer.toHexString(tmp.hashCode()));
+        logger.fine("XmlFactory.loadXsl : template : " + Integer.toHexString(tmp.hashCode()));
       }
-
-      tf = newTransformer(tmp);
     }
+
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("XmlFactory.loadXsl : template in cache : " + Integer.toHexString(tmp.hashCode()));
+    }
+
+    tf = newTransformer(tmp);
 
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("XmlFactory.loadXsl : xslt : " + tf);
@@ -267,47 +282,33 @@ public final class XmlFactory {
   }
 
   /**
-   * Resolve the XSL file path (using class loader)
+   * Resolve the XSL file path using the class loader
    *
    * @param xslFilePath XSL file to use (XSLT)
    *
-   * @return StreamSource instance or null
+   * @return StreamSource instance
+   *
+   * @throws IllegalStateException if the file is not found
+   * @throws RuntimeException if the xsl file path is empty or I/O exception occurs while reading XSLT
    */
-  private static StreamSource resolvePath(final String xslFilePath) {
-    StreamSource source = null;
+  private static StreamSource resolveXSLTPath(final String xslFilePath)
+          throws IllegalStateException, RuntimeException {
+
     if ((xslFilePath == null) || (xslFilePath.length() == 0)) {
-      logger.log(Level.SEVERE, "XmlFactory.resolvePath : unable to load XSLT : empty path !");
-
-      return null;
-    }
-    if (USE_CLASSLOADER) {
-      try {
-        final URL url = FileUtils.getResource(xslFilePath);
-
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("XmlFactory.resolvePath : url : " + url);
-        }
-
-        source = new StreamSource(new BufferedInputStream(url.openStream()));
-      } catch (Exception e) {
-        logger.log(Level.SEVERE, "XmlFactory.resolvePath : unable to load XSLT : " + xslFilePath, e);
-      }
-    } else {
-      final File file = new File(xslFilePath);
-
-      if (!file.exists()) {
-        logger.log(Level.SEVERE, "XmlFactory.resolvePath : unable to load XSLT : no file found for : " + xslFilePath);
-
-        return null;
-      }
-
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("XmlFactory.resolvePath : file : " + file);
-      }
-      source = new StreamSource(file);
+      throw new RuntimeException("XmlFactory.resolveXSLTPath : unable to load XSLT : empty file path !");
     }
 
-    return source;
+    final URL url = FileUtils.getResource(xslFilePath);
+
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("XmlFactory.resolveXSLTPath : url : " + url);
+    }
+
+    try {
+      return new StreamSource(new BufferedInputStream(url.openStream()));
+    } catch (IOException ioe) {
+      throw new RuntimeException("XmlFactory.resolveXSLTPath : unable to load the XSLT file : " + xslFilePath, ioe);
+    }
   }
 
   /**
@@ -317,12 +318,13 @@ public final class XmlFactory {
    * @param source xml document
    * @param out buffer (should be cleared before method invocation)
    *
-   * @throws RuntimeException if TransformerException
+   * @throws RuntimeException if transformation failure
    */
-  private static void asString(final Transformer transformer, final Source source, final Writer out) {
+  private static void asString(final Transformer transformer, final Source source, final Writer out)
+          throws RuntimeException {
     try {
       transformer.transform(source, new StreamResult(out));
-    } catch (final TransformerException te) {
+    } catch (TransformerException te) {
       throw new RuntimeException("XmlFactory.asString : transformer failure :", te);
     }
   }
