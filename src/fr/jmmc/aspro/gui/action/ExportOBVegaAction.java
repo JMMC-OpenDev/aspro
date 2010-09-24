@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBVegaAction.java,v 1.5 2010-09-01 12:57:14 bourgesl Exp $"
+ * "@(#) $Id: ExportOBVegaAction.java,v 1.6 2010-09-24 15:54:25 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2010/09/01 12:57:14  bourgesl
+ * added runtime exception message to user message dialog
+ *
  * Revision 1.4  2010/06/17 10:02:50  bourgesl
  * fixed warning hints - mainly not final static loggers
  *
@@ -25,6 +28,7 @@ package fr.jmmc.aspro.gui.action;
 
 import fr.jmmc.aspro.ob.ExportOBVega;
 import fr.jmmc.aspro.util.FileUtils;
+import fr.jmmc.mcs.gui.MessagePane;
 import fr.jmmc.mcs.gui.StatusBar;
 import fr.jmmc.mcs.util.FileFilterRepository;
 import java.io.File;
@@ -120,13 +124,8 @@ public class ExportOBVegaAction {
         StatusBar.show(file.getName() + " created.");
 
       } catch (RuntimeException re) {
-        logger.log(Level.SEVERE, "runtime failure : ", re);
-
-        final String message = "Could not export to file : " + file.getName() + "\n\n" + re.getMessage();
-
-        JOptionPane.showMessageDialog(null,
-                message,
-                "Error", JOptionPane.ERROR_MESSAGE);
+        MessagePane.showErrorMessage(
+                "Could not export to file : " + file.getName(), re);
       }
     }
   }

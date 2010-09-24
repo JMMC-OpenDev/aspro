@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportPDFAction.java,v 1.11 2010-09-01 16:24:30 bourgesl Exp $"
+ * "@(#) $Id: ExportPDFAction.java,v 1.12 2010-09-24 15:54:25 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.11  2010/09/01 16:24:30  bourgesl
+ * removed exception
+ *
  * Revision 1.10  2010/09/01 12:57:14  bourgesl
  * added runtime exception message to user message dialog
  *
@@ -46,6 +49,7 @@ import fr.jmmc.aspro.gui.PDFExportable;
 import fr.jmmc.aspro.gui.chart.PDFUtils;
 import fr.jmmc.aspro.util.FileUtils;
 import fr.jmmc.mcs.gui.App;
+import fr.jmmc.mcs.gui.MessagePane;
 import fr.jmmc.mcs.gui.StatusBar;
 import fr.jmmc.mcs.util.ActionRegistrar;
 import fr.jmmc.mcs.util.FileFilterRepository;
@@ -53,6 +57,7 @@ import fr.jmmc.mcs.util.RegisteredAction;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.io.File;
+import java.io.IOException;
 import java.util.logging.Level;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
@@ -64,7 +69,7 @@ import org.jfree.chart.JFreeChart;
  *
  * @author bourgesl
  */
-public class ExportPDFAction extends RegisteredAction {
+public final class ExportPDFAction extends RegisteredAction {
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
@@ -170,14 +175,13 @@ public class ExportPDFAction extends RegisteredAction {
 
         StatusBar.show(file.getName() + " created.");
 
+      } catch (IOException ioe) {
+        MessagePane.showErrorMessage(
+                "Could not write to file : " + file.getName(), ioe);
+
       } catch (RuntimeException re) {
-        logger.log(Level.SEVERE, "runtime failure : ", re);
-
-        final String message = "Could not export to file : " + file.getName() + "\n\n" + re.getMessage();
-
-        JOptionPane.showMessageDialog(null,
-                message,
-                "Error", JOptionPane.ERROR_MESSAGE);
+        MessagePane.showErrorMessage(
+                "Could not export to file : " + file.getName(), re);
       }
     }
   }

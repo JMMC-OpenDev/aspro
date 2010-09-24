@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOIFitsAction.java,v 1.2 2010-09-02 15:47:19 bourgesl Exp $"
+ * "@(#) $Id: ExportOIFitsAction.java,v 1.3 2010-09-24 15:54:25 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2010/09/02 15:47:19  bourgesl
+ * use OI_VIS2 (always present)
+ *
  * Revision 1.1  2010/06/29 12:13:21  bourgesl
  * added ExportToOIFits action
  *
@@ -15,6 +18,7 @@ package fr.jmmc.aspro.gui.action;
 
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.util.FileUtils;
+import fr.jmmc.mcs.gui.MessagePane;
 import fr.jmmc.mcs.gui.StatusBar;
 import fr.jmmc.mcs.util.FileFilterRepository;
 import fr.jmmc.mcs.util.RegisteredAction;
@@ -116,11 +120,8 @@ public class ExportOIFitsAction extends RegisteredAction {
           StatusBar.show(file.getName() + " created.");
 
         } catch (Exception e) {
-          logger.log(Level.SEVERE, "failure : ", e);
-
-          JOptionPane.showMessageDialog(null,
-                  "Could not export to file " + file.getName() + "\n" + e.getMessage(),
-                  "Error", JOptionPane.ERROR_MESSAGE);
+          MessagePane.showErrorMessage(
+                "Could not export to file : " + file.getName(), e);
         }
       }
     }

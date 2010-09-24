@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: LoadObservationAction.java,v 1.8 2010-09-01 12:57:13 bourgesl Exp $"
+ * "@(#) $Id: LoadObservationAction.java,v 1.9 2010-09-24 15:54:25 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.8  2010/09/01 12:57:13  bourgesl
+ * added runtime exception message to user message dialog
+ *
  * Revision 1.7  2010/07/07 15:11:51  bourgesl
  * fixed comment
  *
@@ -32,13 +35,13 @@
 package fr.jmmc.aspro.gui.action;
 
 import fr.jmmc.aspro.model.ObservationManager;
+import fr.jmmc.mcs.gui.MessagePane;
 import fr.jmmc.mcs.gui.StatusBar;
 import fr.jmmc.mcs.util.ActionRegistrar;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.util.logging.Level;
 import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
 
 /**
  * Open observation settings action
@@ -103,18 +106,13 @@ public class LoadObservationAction extends ObservationFileAction {
 
       try {
         om.load(file);
+
         StatusBar.show("file loaded : " + file.getName());
 
       } catch (RuntimeException re) {
-        logger.log(Level.SEVERE, "runtime failure : ", re);
-
-        final String message = "Could not load the file : " + file.getName() + "\n\n" + re.getMessage();
-
-        JOptionPane.showMessageDialog(null,
-                message,
-                "Error", JOptionPane.ERROR_MESSAGE);
+        MessagePane.showErrorMessage(
+                "Could not load the file : " + file.getName(), re);
       }
-
     }
   }
 }

@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: NewObservationAction.java,v 1.2 2010-09-01 12:57:13 bourgesl Exp $"
+ * "@(#) $Id: NewObservationAction.java,v 1.3 2010-09-24 15:54:25 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2010/09/01 12:57:13  bourgesl
+ * added runtime exception message to user message dialog
+ *
  * Revision 1.1  2010/07/07 15:16:25  bourgesl
  * added 'New Observation' action
  *
@@ -13,13 +16,10 @@
 package fr.jmmc.aspro.gui.action;
 
 import fr.jmmc.aspro.model.ObservationManager;
+import fr.jmmc.mcs.gui.MessagePane;
 import fr.jmmc.mcs.gui.StatusBar;
-import fr.jmmc.mcs.util.ActionRegistrar;
 import java.awt.event.ActionEvent;
-import java.io.File;
 import java.util.logging.Level;
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
 
 /**
  * New observation settings action
@@ -59,13 +59,8 @@ public class NewObservationAction extends ObservationFileAction {
       StatusBar.show("new observation created.");
 
     } catch (RuntimeException re) {
-      logger.log(Level.SEVERE, "runtime failure : ", re);
-
-      final String message = "Could not create new observation \n\n" + re.getMessage();
-
-      JOptionPane.showMessageDialog(null,
-              message,
-              "Error", JOptionPane.ERROR_MESSAGE);
+        MessagePane.showErrorMessage(
+                "Could not create new observation", re);
     }
   }
 }

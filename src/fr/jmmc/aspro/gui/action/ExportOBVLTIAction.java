@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBVLTIAction.java,v 1.11 2010-09-01 16:24:42 bourgesl Exp $"
+ * "@(#) $Id: ExportOBVLTIAction.java,v 1.12 2010-09-24 15:54:25 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.11  2010/09/01 16:24:42  bourgesl
+ * use JMCS DissmissableMessageDialog
+ *
  * Revision 1.10  2010/09/01 13:21:32  bourgesl
  * added popup message
  *
@@ -51,6 +54,7 @@ import fr.jmmc.aspro.gui.UVCoveragePanel;
 import fr.jmmc.aspro.ob.ExportOBVLTI;
 import fr.jmmc.aspro.util.FileUtils;
 import fr.jmmc.mcs.gui.DismissableMessagePane;
+import fr.jmmc.mcs.gui.MessagePane;
 import fr.jmmc.mcs.gui.StatusBar;
 import fr.jmmc.mcs.util.FileFilterRepository;
 import java.awt.event.ActionEvent;
@@ -166,14 +170,12 @@ public class ExportOBVLTIAction {
         // PoP up to validate OB file against ESO CfP :
         DismissableMessagePane.show(null, ESO_WARNING, Preferences.getInstance(), "ESO_OB_WARNING");
 
+      } catch (IllegalStateException iae) {
+        // template file not found
+        throw iae;
       } catch (RuntimeException re) {
-        logger.log(Level.SEVERE, "runtime failure : ", re);
-
-        final String message = "Could not export to file : " + file.getName() + "\n\n" + re.getMessage();
-
-        JOptionPane.showMessageDialog(null,
-                message,
-                "Error", JOptionPane.ERROR_MESSAGE);
+        MessagePane.showErrorMessage(
+                "Could not export to file : " + file.getName(), re);
       }
     }
   }
