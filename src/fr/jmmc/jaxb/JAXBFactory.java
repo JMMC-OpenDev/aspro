@@ -48,8 +48,10 @@ public final class JAXBFactory {
    * @param jaxbPath jaxb context path
    *
    * @return JAXBFactory initialized
+   *
+   * @throws XmlBindException if a JAXBException was caught
    */
-  public static JAXBFactory getInstance(final String jaxbPath) {
+  public static JAXBFactory getInstance(final String jaxbPath) throws XmlBindException {
     JAXBFactory jf = managedInstances.get(jaxbPath);
 
     if (jf == null) {
@@ -70,14 +72,14 @@ public final class JAXBFactory {
   /**
    * Initializes the JAXB Context
    *
-   * @throws RuntimeException if a problem occured
+   * @throws XmlBindException if a JAXBException was caught
    */
-  protected void initialize() throws RuntimeException {
+  protected void initialize() throws XmlBindException {
     try {
       this.jc = getContext(jaxbPath);
-    } catch (final RuntimeException re) {
-      logger.log(Level.SEVERE, "JAXBFactory.initialize : JAXB failure : ", re);
-      throw re;
+    } catch (XmlBindException xbe) {
+      logger.log(Level.SEVERE, "JAXBFactory.initialize : JAXB failure : ", xbe);
+      throw xbe;
     }
   }
 
@@ -96,7 +98,7 @@ public final class JAXBFactory {
       // ivoa schema package
       c = JAXBContext.newInstance(path);
 
-    } catch (final JAXBException je) {
+    } catch (JAXBException je) {
       throw new XmlBindException("JAXBFactory.getContext : Unable to create JAXBContext : " + path, je);
     }
 
@@ -125,7 +127,7 @@ public final class JAXBFactory {
       // create an Unmarshaller
       u = getJAXBContext().createUnmarshaller();
 
-    } catch (final JAXBException je) {
+    } catch (JAXBException je) {
       throw new XmlBindException("JAXBFactory.createUnMarshaller : JAXB Failure", je);
     }
 
@@ -146,7 +148,7 @@ public final class JAXBFactory {
       m = getJAXBContext().createMarshaller();
 
       m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-    } catch (final JAXBException je) {
+    } catch (JAXBException je) {
       throw new XmlBindException("JAXBFactory.createMarshaller : JAXB Failure", je);
     }
 

@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: FileUtils.java,v 1.6 2010-07-07 09:29:13 bourgesl Exp $"
+ * "@(#) $Id: FileUtils.java,v 1.7 2010-09-24 15:51:09 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2010/07/07 09:29:13  bourgesl
+ * javadoc
+ *
  * Revision 1.5  2010/06/17 10:02:51  bourgesl
  * fixed warning hints - mainly not final static loggers
  *
@@ -38,6 +41,9 @@ import java.util.logging.Level;
 
 /**
  * Several File utility methods
+ *
+ * TODO : check/correct IO exception handling
+ *
  * @author bourgesl
  */
 public final class FileUtils {
@@ -79,8 +85,10 @@ public final class FileUtils {
    *
    * @param fileName file name like fr/jmmc/aspro/fileName.ext
    * @return URL to the file or null
+   *
+   * @throws IllegalStateException if the file is not found
    */
-  public static URL getResource(final String fileName) {
+  public static URL getResource(final String fileName) throws IllegalStateException {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("getResource : " + fileName);
     }
@@ -88,18 +96,21 @@ public final class FileUtils {
     final URL url = FileUtils.class.getClassLoader().getResource(fileName);
 
     if (url == null) {
-      throw new RuntimeException("Unable to find the file in classpath : " + fileName);
+      throw new IllegalStateException("Unable to find the file in the classpath : " + fileName);
     }
-
+    
     return url;
   }
 
   /**
    * Read the text file into a string
+   * 
    * @param fileName file to load
    * @return text file content
+   *
+   * @throws IllegalStateException if the file is not found
    */
-  public static String readFile(final String fileName) {
+  public static String readFile(final String fileName) throws IllegalStateException {
 
     String result = null;
 
@@ -127,15 +138,15 @@ public final class FileUtils {
 
       result = sb.toString();
 
-    } catch (Exception ex) {
-      logger.log(Level.SEVERE, "read failure.", ex);
+    } catch (IOException ioe) {
+      logger.log(Level.SEVERE, "read failure.", ioe);
 
     } finally {
       if (inputStream != null) {
         try {
           inputStream.close();
-        } catch (IOException ex) {
-          logger.log(Level.SEVERE, "close failure.", ex);
+        } catch (IOException ioe) {
+          logger.log(Level.FINE, "close failure.", ioe);
         }
       }
     }
@@ -152,7 +163,7 @@ public final class FileUtils {
     if (w != null) {
       try {
         w.write(content);
-      } catch (final IOException ioe) {
+      } catch (IOException ioe) {
         logger.log(Level.SEVERE, "IO failure.", ioe);
       } finally {
         closeFile(w);
@@ -170,7 +181,7 @@ public final class FileUtils {
   public static Writer openFile(final File file) {
     try {
       return new BufferedWriter(new FileWriter(file));
-    } catch (final IOException ioe) {
+    } catch (IOException ioe) {
       logger.log(Level.SEVERE, "IO failure.", ioe);
     }
 
@@ -187,8 +198,8 @@ public final class FileUtils {
     if (w != null) {
       try {
         w.close();
-      } catch (final IOException ioe) {
-        logger.log(Level.SEVERE, "IO close failure.", ioe);
+      } catch (IOException ioe) {
+        logger.log(Level.FINE, "IO close failure.", ioe);
       }
     }
 
