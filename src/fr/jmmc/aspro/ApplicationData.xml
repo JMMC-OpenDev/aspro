@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <ApplicationData link="http://www.jmmc.fr/aspro2">
-  <program name="Aspro2" version="0.6.2 beta"/>
+  <program name="Aspro2" version="0.6.2"/>
   <compilation date="20/09/2010" compiler="JDK 1.5.0_16"/>
   <text>
     <![CDATA[ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations
@@ -58,7 +58,7 @@
   </menubar>
   <releasenotes>
     <release version="0.6">
-      <prerelease version="0.6.2 beta">
+      <prerelease version="0.6.2">
         <change>Added CHARA instruments : CLASSIC (2T) and CLIMB (3T)</change>
         <change>Better exception handling and user messages</change>
         <change>Unexpected exceptions are now propagated to the feedback report</change>
