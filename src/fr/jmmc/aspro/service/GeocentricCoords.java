@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: GeocentricCoords.java,v 1.7 2010-09-09 16:01:19 bourgesl Exp $"
+ * "@(#) $Id: GeocentricCoords.java,v 1.8 2010-09-24 15:51:32 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2010/09/09 16:01:19  bourgesl
+ * convert cartesian ECEF coordinates to spherical coordinates to remove Astrogrid Pal dependency
+ *
  * Revision 1.6  2010/06/17 10:02:50  bourgesl
  * fixed warning hints - mainly not final static loggers
  *
@@ -109,7 +112,7 @@ public final class GeocentricCoords {
    * @return string representing the given coordinates
    */
   public static String toString(final double lon, final double lat, final double d) {
-    return ALX.toDms(Math.toDegrees(lon)) + ", " + ALX.toDms(Math.toDegrees(lat)) + ", " + d + " m";
+    return ALX.toDMS(Math.toDegrees(lon)) + ", " + ALX.toDMS(Math.toDegrees(lat)) + ", " + d + " m";
   }
 
   /**
@@ -143,8 +146,8 @@ public final class GeocentricCoords {
     -24.570106, -70.406044
     -24° 34' 12.38", -70° 24' 21.76
      */
-    System.out.println("-24.570106 [-24° 34' 12.38\"] : " + ALX.toDms(-24.570106d));
-    System.out.println("-70.406044 [-70° 24' 21.76\"] : " + ALX.toDms(-70.406044d));
+    System.out.println("-24.570106 [-24° 34' 12.38\"] : " + ALX.toDMS(-24.570106d));
+    System.out.println("-70.406044 [-70° 24' 21.76\"] : " + ALX.toDMS(-70.406044d));
 
   }
 }
