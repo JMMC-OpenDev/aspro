@@ -312,14 +312,14 @@ public class AsproGenConfig {
     final double DF = 0.5842d; // Distance between two beams before switchyard for telescopes on the same arms
     final double DT = 1.2446d; // Distance between beams before switchyard for telescopes on differents arms
 
-    addCHARASwitchyardStation(sb, "S1", new double[]{0d, DV, 2 * DV, 3 * DV});
-    addCHARASwitchyardStation(sb, "S2", new double[]{DF, DF + DV, DF + 2 * DV, DF + 3 * DV});
+    addCHARASwitchyardStation(sb, "S1", new double[]{0d, DV, 2 * DV, 3 * DV, 4 * DV, 5 * DV});
+    addCHARASwitchyardStation(sb, "S2", new double[]{DF, DF + DV, DF + 2 * DV, DF + 3 * DV, DF + 4 * DV, DF + 5 * DV});
 
-    addCHARASwitchyardStation(sb, "W1", new double[]{DT + DF, DT + DF + DV, DT + DF + 2 * DV, DT + DF + 3 * DV});
-    addCHARASwitchyardStation(sb, "W2", new double[]{DT + 2 * DF, DT + 2 * DF + DV, DT + 2 * DF + 2 * DV, DT + 2 * DF + 3 * DV});
+    addCHARASwitchyardStation(sb, "W1", new double[]{DT + DF, DT + DF + DV, DT + DF + 2 * DV, DT + DF + 3 * DV, DT + DF + 4 * DV, DT + DF + 5 * DV});
+    addCHARASwitchyardStation(sb, "W2", new double[]{DT + 2 * DF, DT + 2 * DF + DV, DT + 2 * DF + 2 * DV, DT + 2 * DF + 3 * DV, DT + 2 * DF + 4 * DV, DT + 2 * DF + 5 * DV});
 
-    addCHARASwitchyardStation(sb, "E1", new double[]{2 * DT + 3 * DF, 2 * DT + 3 * DF + DV, 2 * DT + 3 * DF + 2 * DV, 2 * DT + 3 * DF + 3 * DV});
-    addCHARASwitchyardStation(sb, "E2", new double[]{2 * DT + 2 * DF, 2 * DT + 2 * DF + DV, 2 * DT + 2 * DF + 2 * DV, 2 * DT + 2 * DF + 3 * DV});
+    addCHARASwitchyardStation(sb, "E1", new double[]{2 * DT + 3 * DF, 2 * DT + 3 * DF + DV, 2 * DT + 3 * DF + 2 * DV, 2 * DT + 3 * DF + 3 * DV, 2 * DT + 3 * DF + 4 * DV, 2 * DT + 3 * DF + 5 * DV});
+    addCHARASwitchyardStation(sb, "E2", new double[]{2 * DT + 2 * DF, 2 * DT + 2 * DF + DV, 2 * DT + 2 * DF + 2 * DV, 2 * DT + 2 * DF + 3 * DV, 2 * DT + 2 * DF + 4 * DV, 2 * DT + 2 * DF + 5 * DV});
 
     sb.append("</switchyard>\n");
 
@@ -338,7 +338,7 @@ public class AsproGenConfig {
       value = values[i];
 
       sb.append("<channelLink>\n");
-      sb.append("<channel>Channel").append(i + 1).append("</channel>\n");
+      sb.append("<channel>V").append(i + 1).append("</channel>\n");
       sb.append("<opticalLength>").append(nf.format(value)).append("</opticalLength>\n");
       sb.append("</channelLink>\n");
     }
@@ -374,5 +374,6 @@ public class AsproGenConfig {
       convertCHARASwitchyard();
     }
 
+      convertCHARASwitchyard();
   }
 }
