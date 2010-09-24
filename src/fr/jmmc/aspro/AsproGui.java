@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproGui.java,v 1.29 2010-09-24 15:55:15 bourgesl Exp $"
+ * "@(#) $Id: AsproGui.java,v 1.30 2010-09-24 16:27:40 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.29  2010/09/24 15:55:15  bourgesl
+ * configuration loading is done before starting Swing App
+ *
  * Revision 1.28  2010/09/23 19:47:32  bourgesl
  * Use new Swing exception handler
  * comments when calling FeedBackReport
@@ -152,6 +155,9 @@ public final class AsproGui extends App {
    * @param args command line arguments
    */
   public static void main(final String[] args) {
+    // Force security checks
+    System.setSecurityManager(null);
+
     // Install exception handlers :
     MCSExceptionHandler.installSwingHandler();
 
