@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ShowPrefAction.java,v 1.3 2010-06-09 12:54:12 bourgesl Exp $"
+ * "@(#) $Id: ShowPrefAction.java,v 1.4 2010-09-24 15:50:08 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2010/06/09 12:54:12  bourgesl
+ * javadoc
+ *
  */
 package fr.jmmc.aspro.gui.action;
 
@@ -46,11 +49,7 @@ public class ShowPrefAction extends RegisteredAction {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("actionPerformed");
     }
-    try {
-      new PreferencesView().setVisible(true);
-    } catch (Exception ex) {
-      // @todo handle this error at user level
-      logger.log(Level.SEVERE, "actionPerformed", ex);
-    }
+
+    new PreferencesView().setVisible(true);
   }
 }

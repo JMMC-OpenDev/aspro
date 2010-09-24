@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BaseOIManager.java,v 1.15 2010-07-07 15:11:42 bourgesl Exp $"
+ * "@(#) $Id: BaseOIManager.java,v 1.16 2010-09-24 15:52:35 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.15  2010/07/07 15:11:42  bourgesl
+ * empty vector added
+ *
  * Revision 1.14  2010/07/07 09:27:20  bourgesl
  * use FileUtils.getResource and buffered url.getOpenStream
  *
@@ -57,8 +60,10 @@ package fr.jmmc.aspro.model;
 
 import fr.jmmc.aspro.util.FileUtils;
 import fr.jmmc.jaxb.JAXBFactory;
+import fr.jmmc.jaxb.XmlBindException;
 import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.Calendar;
 import java.util.Date;
@@ -66,8 +71,6 @@ import java.util.GregorianCalendar;
 import java.util.Vector;
 import java.util.logging.Level;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.DatatypeFactory;
@@ -91,38 +94,44 @@ public class BaseOIManager {
 
   /* members */
   /** internal JAXB Factory */
-  private JAXBFactory jf;
+  private final JAXBFactory jf;
   /** datatype factory used to create XMLGregorianCalendar instances */
-  private DatatypeFactory df;
+  private final DatatypeFactory df;
 
   /**
    * Protected constructor
+   *
+   * @throws XmlBindException if a JAXBException was caught
    */
-  protected BaseOIManager() {
+  protected BaseOIManager() throws XmlBindException {
+
     this.jf = JAXBFactory.getInstance(OI_JAXB_PATH);
+
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("BaseOIManager : " + this.jf);
     }
     try {
       this.df = DatatypeFactory.newInstance();
     } catch (DatatypeConfigurationException dce) {
-      logger.log(Level.SEVERE, "Unable to resolve DatatypeFactory : ", dce);
+      throw new XmlBindException("Unable to resolve DatatypeFactory : ", dce);
     }
   }
 
   /**
    * Protected load method
-   * @param uri relative URI of the document to load
+   * @param uri relative URI of the document to load (class loader)
    * @return unmarshalled object
+   *
+   * @throws IllegalStateException if the file is not found
    * @throws RuntimeException if the load operation failed
    */
-  protected final Object loadObject(final String uri) {
+  protected final Object loadObject(final String uri)
+          throws IllegalStateException, RuntimeException {
+
     if (logger.isLoggable(Level.INFO)) {
       logger.info("loading file : " + uri);
     }
     Object result = null;
-
-    final Unmarshaller u = this.jf.createUnMarshaller();
 
     try {
       // use the class loader resource resolver
@@ -133,9 +142,12 @@ public class BaseOIManager {
       }
 
       // Note : use input stream to avoid JNLP offline bug with URL (Unknown host exception)
-      result = u.unmarshal(new BufferedInputStream(url.openStream()));
-    } catch (Exception e) {
-      throw new RuntimeException("Load failure on " + uri, e);
+      result = this.jf.createUnMarshaller().unmarshal(new BufferedInputStream(url.openStream()));
+
+    } catch (IOException ioe) {
+      throw new RuntimeException("Load failure on " + uri, ioe);
+    } catch (JAXBException je) {
+      throw new RuntimeException("Load failure on " + uri, je);
     }
 
     return result;
@@ -145,14 +157,15 @@ public class BaseOIManager {
    * Protected load method
    * @param inputFile File to load
    * @return unmarshalled object
+   *
    * @throws RuntimeException if the load operation failed
    */
-  protected final Object loadObject(final File inputFile) {
-    final Unmarshaller u = this.jf.createUnMarshaller();
+  protected final Object loadObject(final File inputFile)
+          throws RuntimeException {
 
     Object result = null;
     try {
-      result = u.unmarshal(inputFile);
+      result = this.jf.createUnMarshaller().unmarshal(inputFile);
     } catch (JAXBException je) {
       throw new RuntimeException("Load failure on " + inputFile, je);
     }
@@ -163,12 +176,13 @@ public class BaseOIManager {
    * Protected save method
    * @param outputFile File to save
    * @param object to marshall
+   *
    * @throws RuntimeException if the save operation failed
    */
-  protected final void saveObject(final File outputFile, final Object object) throws RuntimeException {
-    final Marshaller marshaller = this.jf.createMarshaller();
+  protected final void saveObject(final File outputFile, final Object object)
+          throws RuntimeException {
     try {
-      marshaller.marshal(object, outputFile);
+      this.jf.createMarshaller().marshal(object, outputFile);
     } catch (JAXBException je) {
       throw new RuntimeException("Save failure on " + outputFile, je);
     }

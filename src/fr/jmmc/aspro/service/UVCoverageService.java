@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoverageService.java,v 1.29 2010-09-20 14:46:02 bourgesl Exp $"
+ * "@(#) $Id: UVCoverageService.java,v 1.30 2010-09-24 15:49:34 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.29  2010/09/20 14:46:02  bourgesl
+ * minor refactoring changes
+ *
  * Revision 1.28  2010/07/08 13:56:33  bourgesl
  * changed HA points range : use HA min Elevation range to restrict the user HA Min/Max [-12;12] by default
  *
@@ -100,7 +103,6 @@ import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.BaseLine;
 import fr.jmmc.aspro.model.Beam;
 import fr.jmmc.aspro.model.observability.ObservabilityData;
-import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.Range;
 import fr.jmmc.aspro.model.observability.StarData;
 import fr.jmmc.aspro.model.oi.FocalInstrumentMode;
@@ -224,102 +226,82 @@ public final class UVCoverageService {
     // Start the computations :
     final long start = System.nanoTime();
 
-    try {
-      // check if observability data are available :
-      this.obsData = this.observation.getObservabilityData();
+    // check if observability data are available :
+    this.obsData = this.observation.getObservabilityData();
 
-      if (this.obsData == null) {
-        // invalid data because the observability data are not available :
-        this.data = null;
-      } else {
-        // Get instrument and observability data :
-        prepareObservation();
+    if (this.obsData == null) {
+      // invalid data because the observability data are not available :
+      this.data = null;
+    } else {
+      // Get instrument and observability data :
+      prepareObservation();
 
-        if (this.starData != null) {
-          // Note : for Baseline limits, the starData is null
-          // (target observability is not available) :
+      if (this.starData != null) {
+        // Note : for Baseline limits, the starData is null
+        // (target observability is not available) :
 
-          // target name :
-          this.data.setName(this.targetName);
+        // target name :
+        this.data.setName(this.targetName);
 
-          // wave length :
-          this.data.setLambda(this.lambda);
+        // wave length :
+        this.data.setLambda(this.lambda);
 
-          // Is the target visible :
-          if (this.starData.getHaElev() > 0d) {
+        // Is the target visible :
+        if (this.starData.getHaElev() > 0d) {
 
-            if (this.doUVSupport) {
-              computeUVSupport();
-            }
-
-            computeObservableUV();
-
-            // fast interrupt :
-            if (this.currentThread.isInterrupted()) {
-              return null;
-            }
-
-            // OIFits structure :
-            createOIFits();
+          if (this.doUVSupport) {
+            computeUVSupport();
           }
 
-          // fast interrupt :
-          if (this.currentThread.isInterrupted()) {
-            return null;
-          }
-          if (logger.isLoggable(Level.FINE)) {
-            logger.fine("UV coordinate maximum = [" + this.uvMax + "]");
-          }
-
-          // uv Max = max base line * uv margin / minimum wave length
-          this.data.setUvMax(this.uvMax);
-
-          if (this.doModelImage) {
-            final Rectangle2D.Float uvRect = new Rectangle2D.Float();
-            uvRect.setFrameFromDiagonal(-uvMax, -uvMax, uvMax, uvMax);
-
-            // Compute Target Model for the UV coverage limits :
-            this.data.setUvMapData(ModelUVMapService.computeUVMap(
-                    this.observation.getTarget(this.targetName).getModels(),
-                    uvRect, null, null,
-                    this.imageMode, this.imageSize, this.colorModel));
-          }
+          computeObservableUV();
 
           // fast interrupt :
           if (this.currentThread.isInterrupted()) {
             return null;
           }
 
-        } // starData is defined
+          // OIFits structure :
+          createOIFits();
+        }
 
-      } // obsData is valid
+        // fast interrupt :
+        if (this.currentThread.isInterrupted()) {
+          return null;
+        }
+        if (logger.isLoggable(Level.FINE)) {
+          logger.fine("UV coordinate maximum = [" + this.uvMax + "]");
+        }
 
-      // fast interrupt :
-      if (this.currentThread.isInterrupted()) {
-        return null;
-      }
+        // uv Max = max base line * uv margin / minimum wave length
+        this.data.setUvMax(this.uvMax);
 
-      if (logger.isLoggable(Level.INFO)) {
-        logger.info("compute : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
-      }
+        if (this.doModelImage) {
+          final Rectangle2D.Float uvRect = new Rectangle2D.Float();
+          uvRect.setFrameFromDiagonal(-uvMax, -uvMax, uvMax, uvMax);
 
-    } catch (IllegalArgumentException iae) {
-      // special case : the model can throw such exception to indicate that a parameter has an invalid value :
-      throw iae;
-    } catch (IllegalStateException ise) {
-      if (logger.isLoggable(Level.WARNING)) {
-        logger.log(Level.WARNING, "invalid observation :", ise);
-        logger.log(Level.WARNING, "observation : " + ObservationManager.toString(this.observation));
-      }
-      // clear invalid data :
-      this.data = null;
-    } catch (RuntimeException re) {
-      if (logger.isLoggable(Level.SEVERE)) {
-        logger.log(Level.SEVERE, "compute failure :", re);
-        logger.log(Level.SEVERE, "observation : " + ObservationManager.toString(this.observation));
-      }
-      // clear invalid data :
-      this.data = null;
+          // Compute Target Model for the UV coverage limits :
+          this.data.setUvMapData(ModelUVMapService.computeUVMap(
+                  this.observation.getTarget(this.targetName).getModels(),
+                  uvRect, null, null,
+                  this.imageMode, this.imageSize, this.colorModel));
+        }
+
+        // fast interrupt :
+        if (this.currentThread.isInterrupted()) {
+          return null;
+        }
+
+      } // starData is defined
+
+    } // obsData is valid
+
+    // fast interrupt :
+    if (this.currentThread.isInterrupted()) {
+      return null;
+    }
+
+    if (logger.isLoggable(Level.INFO)) {
+      logger.info("compute : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
     }
 
     return this.data;
@@ -619,7 +601,7 @@ public final class UVCoverageService {
 
       // Create the OIFitsCreatorService :
       final OIFitsCreatorService oiFitsCreator =
-              new OIFitsCreatorService(this.observation, target,
+                                 new OIFitsCreatorService(this.observation, target,
               this.beams, this.baseLines, this.lambdaMin, this.lambdaMax, this.nSpectralChannels,
               this.data.getHA(), targetUVObservability, this.starData.getPrecRA(), this.sc);
 
