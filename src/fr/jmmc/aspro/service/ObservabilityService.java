@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.53 2010-09-15 13:55:07 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.54 2010-09-24 15:51:20 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.53  2010/09/15 13:55:07  bourgesl
+ * disabled moon rise/set as a star data
+ *
  * Revision 1.52  2010/07/22 12:32:49  bourgesl
  * added moon information (rise/set and moon illumination fraction) when the night restrictions are enabled
  *
@@ -183,7 +186,6 @@ import fr.jmmc.aspro.model.Beam;
 import fr.jmmc.aspro.model.ConfigurationManager;
 import fr.jmmc.aspro.model.observability.DateTimeInterval;
 import fr.jmmc.aspro.model.observability.ObservabilityData;
-import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.observability.PopCombination;
 import fr.jmmc.aspro.model.observability.GroupedPopObservabilityData;
 import fr.jmmc.aspro.model.observability.PopObservabilityData;
@@ -370,151 +372,134 @@ public final class ObservabilityService {
     // Start the computations :
     final long start = System.nanoTime();
 
-    try {
-      // Get interferometer / instrument :
-      prepareObservation();
+    // Get interferometer / instrument :
+    prepareObservation();
 
-      // Define target list :
-      final List<Target> targets;
-      if (this.doBaseLineLimits) {
-        targets = generateTargetsForBaseLineLimits();
+    // Define target list :
+    final List<Target> targets;
+    if (this.doBaseLineLimits) {
+      targets = generateTargetsForBaseLineLimits();
+    } else {
+      if (this.selectedTarget == null) {
+        // copy the list to avoid concurrent modification during iteration :
+        targets = new ArrayList<Target>(this.observation.getTargets());
       } else {
-        if (this.selectedTarget == null) {
-          // copy the list to avoid concurrent modification during iteration :
-          targets = new ArrayList<Target>(this.observation.getTargets());
-        } else {
-          // use the given target (OB) :
-          targets = new ArrayList<Target>(1);
-          targets.add(selectedTarget);
+        // use the given target (OB) :
+        targets = new ArrayList<Target>(1);
+        targets.add(selectedTarget);
+      }
+    }
+
+    // define site :
+    this.sc.defineSite(this.interferometer.getName(), this.interferometer.getPosSph());
+    this.sco.defineSite(this.sc);
+
+    // define date :
+    final XMLGregorianCalendar cal = this.observation.getWhen().getDate();
+
+    // find the julian date corresponding to the LST origin LST=00:00:00 for the given date :
+    this.jdLst0 = this.sc.defineDate(cal.getYear(), cal.getMonth(), cal.getDay());
+
+    // warning : in LST, remove 1s to avoid 00:00:00 :
+    this.jdLst24 = this.sc.findJdForLst0(this.jdLst0 + 1d) - 1d / 86400d;
+
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("jd   min = " + this.jdLst0);
+      logger.fine("jd   max = " + this.jdLst24);
+    }
+
+    this.data.setDateCalc(this.sc);
+    this.data.setDateMin(jdToDate(this.jdLst0));
+    this.data.setDateMax(jdToDate(this.jdLst24));
+
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("date min = " + this.data.getDateMin());
+      logger.fine("date max = " + this.data.getDateMax());
+    }
+
+    // fast interrupt :
+    if (this.currentThread.isInterrupted()) {
+      return null;
+    }
+
+    // 1 - Find the day / twlight / night zones :
+    if (this.useNightLimit) {
+      //  sun rise/set with twilight : see NightlyAlmanac
+
+      // Use the LST range [0;24h] +/- 1 day to have valid night ranges to merge with target ranges :
+      final List<AlmanacTime> sunEvents = this.sc.findSunRiseSet();
+
+      processSunAlmanach(sunEvents);
+
+      // moon rise/set :
+      final List<Range> moonRanges = this.sc.findMoonRiseSet(this.jdLst24);
+      final double moonIllum = this.sc.getMaxMoonIllum(moonRanges);
+
+      if (MOON_RISE_SET) {
+        final StarObservabilityData soMoon = new StarObservabilityData("Moon [" + (int) Math.round(100 * moonIllum) + " %]",
+                StarObservabilityData.TYPE_MOON);
+        this.data.getStarVisibilities().add(soMoon);
+
+        for (Range range : moonRanges) {
+          convertRangeToDateInterval(range, soMoon.getVisible());
+        }
+        if (logger.isLoggable(Level.FINE)) {
+          logger.fine("moon visible : " + soMoon.getVisible());
         }
       }
 
-      // define site :
-      this.sc.defineSite(this.interferometer.getName(), this.interferometer.getPosSph());
-      this.sco.defineSite(this.sc);
-
-      // define date :
-      final XMLGregorianCalendar cal = this.observation.getWhen().getDate();
-
-      // find the julian date corresponding to the LST origin LST=00:00:00 for the given date :
-      this.jdLst0 = this.sc.defineDate(cal.getYear(), cal.getMonth(), cal.getDay());
-
-      // warning : in LST, remove 1s to avoid 00:00:00 :
-      this.jdLst24 = this.sc.findJdForLst0(this.jdLst0 + 1d) - 1d / 86400d;
+      this.data.setMoonIllumPercent(100d * moonIllum);
 
       if (logger.isLoggable(Level.FINE)) {
-        logger.fine("jd   min = " + this.jdLst0);
-        logger.fine("jd   max = " + this.jdLst24);
+        logger.fine("moon illum   : " + moonIllum);
       }
+    }
 
-      this.data.setDateCalc(this.sc);
-      this.data.setDateMin(jdToDate(this.jdLst0));
-      this.data.setDateMax(jdToDate(this.jdLst24));
+    // fast interrupt :
+    if (this.currentThread.isInterrupted()) {
+      return null;
+    }
 
+    // 2 - Observability per target :
+
+    if (targets == null || targets.isEmpty()) {
       if (logger.isLoggable(Level.FINE)) {
-        logger.fine("date min = " + this.data.getDateMin());
-        logger.fine("date max = " + this.data.getDateMax());
+        logger.fine("No target defined.");
+      }
+    } else {
+
+      // Prepare the beams (station / channel / delay line) :
+      prepareBeams();
+
+      // Prepare the base line (XYZ vector, wRange) :
+      prepareBaseLines();
+
+      // Prepare the pops :
+      if (this.hasPops) {
+        preparePopCombinations();
       }
 
-      // fast interrupt :
-      if (this.currentThread.isInterrupted()) {
-        return null;
-      }
+      // Find the observability intervals for the target list :
+      findObservability(targets);
 
-      // 1 - Find the day / twlight / night zones :
-      if (this.useNightLimit) {
-        //  sun rise/set with twilight : see NightlyAlmanac
+      // dump star visibilities :
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("Star observability intervals : ");
 
-        // Use the LST range [0;24h] +/- 1 day to have valid night ranges to merge with target ranges :
-        final List<AlmanacTime> sunEvents = this.sc.findSunRiseSet();
-
-        processSunAlmanach(sunEvents);
-
-        // moon rise/set :
-        final List<Range> moonRanges = this.sc.findMoonRiseSet(this.jdLst24);
-        final double moonIllum = this.sc.getMaxMoonIllum(moonRanges);
-
-        if (MOON_RISE_SET) {
-          final StarObservabilityData soMoon = new StarObservabilityData("Moon [" + (int) Math.round(100 * moonIllum) + " %]",
-                  StarObservabilityData.TYPE_MOON);
-          this.data.getStarVisibilities().add(soMoon);
-
-          for (Range range : moonRanges) {
-            convertRangeToDateInterval(range, soMoon.getVisible());
-          }
-          if (logger.isLoggable(Level.FINE)) {
-            logger.fine("moon visible : " + soMoon.getVisible());
-          }
-        }
-
-        this.data.setMoonIllumPercent(100d * moonIllum);
-
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("moon illum   : " + moonIllum);
+        for (StarObservabilityData so : this.data.getStarVisibilities()) {
+          logger.fine(so.toString());
         }
       }
 
-      // fast interrupt :
-      if (this.currentThread.isInterrupted()) {
-        return null;
-      }
+    }
 
-      // 2 - Observability per target :
+    // fast interrupt :
+    if (this.currentThread.isInterrupted()) {
+      return null;
+    }
 
-      if (targets == null || targets.isEmpty()) {
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("No target defined.");
-        }
-      } else {
-
-        // Prepare the beams (station / channel / delay line) :
-        prepareBeams();
-
-        // Prepare the base line (XYZ vector, wRange) :
-        prepareBaseLines();
-
-        // Prepare the pops :
-        if (this.hasPops) {
-          preparePopCombinations();
-        }
-
-        // Find the observability intervals for the target list :
-        findObservability(targets);
-
-        // dump star visibilities :
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("Star observability intervals : ");
-
-          for (StarObservabilityData so : this.data.getStarVisibilities()) {
-            logger.fine(so.toString());
-          }
-        }
-
-      }
-
-      // fast interrupt :
-      if (this.currentThread.isInterrupted()) {
-        return null;
-      }
-
-      if (logger.isLoggable(Level.INFO)) {
-        logger.info("compute : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
-      }
-
-    } catch (IllegalStateException ise) {
-      if (logger.isLoggable(Level.WARNING)) {
-        logger.log(Level.WARNING, "invalid observation :", ise);
-        logger.log(Level.WARNING, "observation : " + ObservationManager.toString(this.observation));
-      }
-      // clear invalid data :
-      this.data = null;
-    } catch (RuntimeException re) {
-      if (logger.isLoggable(Level.SEVERE)) {
-        logger.log(Level.SEVERE, "compute failure :", re);
-        logger.log(Level.SEVERE, "observation : " + ObservationManager.toString(this.observation));
-      }
-      // clear invalid data :
-      this.data = null;
+    if (logger.isLoggable(Level.INFO)) {
+      logger.info("compute : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
     }
 
     return this.data;
@@ -1260,9 +1245,8 @@ public final class ObservabilityService {
 
   /**
    * Use the observation to define the interferometer and instrument configurations and check if the interferometer has PoPs
-   * @throws IllegalStateException if the interferometer configuration or instrument configuration is undefined
    */
-  private void prepareObservation() throws IllegalStateException {
+  private void prepareObservation() {
     // If min elevation was defined in constructor, skip observation's value :
     if (Double.isNaN(this.minElev)) {
       this.minElev = this.observation.getInterferometerConfiguration().getMinElevation();
@@ -1297,7 +1281,7 @@ public final class ObservabilityService {
    * Computes the fixed offset for the beam from the station fixed offset and the interferometer switchyard
    * @throws IllegalStateException if the station list is undefined
    */
-  private void prepareBeams() {
+  private void prepareBeams() throws IllegalStateException {
     // Get chosen stations :
     final List<Station> stations = this.observation.getInstrumentConfiguration().getStationList();
     if (stations == null) {
@@ -1538,8 +1522,10 @@ public final class ObservabilityService {
    * @param station used station
    * @param pop used Pop
    * @return optical length
+   *
+   * @throws IllegalStateException if bad configuration (missing pop value in switchyard)
    */
-  private double getPopOpticalLength(final Station station, final Pop pop) {
+  private double getPopOpticalLength(final Station station, final Pop pop) throws IllegalStateException {
     for (PopLink pl : station.getPopLinks()) {
       if (pl.getPop().equals(pop)) {
         return pl.getOpticalLength();
