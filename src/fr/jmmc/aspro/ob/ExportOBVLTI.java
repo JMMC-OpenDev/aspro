@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBVLTI.java,v 1.9 2010-09-20 14:46:02 bourgesl Exp $"
+ * "@(#) $Id: ExportOBVLTI.java,v 1.10 2010-09-24 15:52:03 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.9  2010/09/20 14:46:02  bourgesl
+ * minor refactoring changes
+ *
  * Revision 1.8  2010/06/25 14:17:21  bourgesl
  * refactoring due to changes done in AstroSkyCalc and AstroSkyCalcObservation
  *
@@ -136,8 +139,10 @@ public class ExportOBVLTI {
    * According to the instrument defined in the observation, it uses ExportOBAmber or ExportOBMidi.
    * @param file file to save
    * @param targetName target to process
+   *
+   * @throws IllegalStateException if the template file is not found
    */
-  public final static void process(final File file, final String targetName) {
+  public final static void process(final File file, final String targetName) throws IllegalStateException {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("process " + targetName + " to " + file);
     }

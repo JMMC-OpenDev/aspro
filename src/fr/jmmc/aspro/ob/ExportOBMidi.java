@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBMidi.java,v 1.4 2010-05-26 15:29:13 bourgesl Exp $"
+ * "@(#) $Id: ExportOBMidi.java,v 1.5 2010-09-24 15:52:03 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2010/05/26 15:29:13  bourgesl
+ * light refactoring and javadoc
+ *
  * Revision 1.3  2010/05/06 15:42:18  bourgesl
  * use HA Min/Max + FT Mode for the target in the observation settings
  *
@@ -72,8 +75,12 @@ public class ExportOBMidi extends ExportOBVLTI {
    * @param file file to save
    * @param observation observation settings
    * @param target target to process
+   *
+   * @throws IllegalStateException if the template file is not found
    */
-  public static void generate(final File file, final ObservationSetting observation, final Target target) {
+  public static void generate(final File file, final ObservationSetting observation, final Target target)
+                        throws IllegalStateException {
+    
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("generate file : " + file);
     }

@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBAmber.java,v 1.12 2010-09-15 14:09:33 bourgesl Exp $"
+ * "@(#) $Id: ExportOBAmber.java,v 1.13 2010-09-24 15:52:03 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.12  2010/09/15 14:09:33  bourgesl
+ * set FT_SENSOR according to user choice (Finito)
+ *
  * Revision 1.11  2010/05/26 15:29:13  bourgesl
  * light refactoring and javadoc
  *
@@ -78,8 +81,12 @@ public class ExportOBAmber extends ExportOBVLTI {
    * @param file file to save
    * @param observation observation settings
    * @param target target to process
+   *
+   * @throws IllegalStateException if the template file is not found
    */
-  public static void generate(final File file, final ObservationSetting observation, final Target target) {
+  public static void generate(final File file, final ObservationSetting observation, final Target target)
+                        throws IllegalStateException {
+
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("generate file : " + file);
     }
