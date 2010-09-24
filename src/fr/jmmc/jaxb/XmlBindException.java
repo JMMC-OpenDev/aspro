@@ -18,19 +18,19 @@ public final class XmlBindException extends RuntimeException {
   /** 
    * Constructs a new XmlBindException with the specified cause
    *
-   * @param je JAXBException 
+   * @param e JAXB Exception
    */
-  public XmlBindException(final JAXBException je) {
-    super(je);
+  public XmlBindException(final Exception e) {
+    super(e);
   }
 
   /** 
    * Constructs a new XmlBindException with the specified message and cause
    *
    * @param message the detail message
-   * @param je JAXBException 
+   * @param e JAXB Exception
    */
-  public XmlBindException(final String message, final JAXBException je) {
-    super(message, je);
+  public XmlBindException(final String message, final Exception e) {
+    super(message, e);
   }
 }
