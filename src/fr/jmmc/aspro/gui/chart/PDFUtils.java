@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: PDFUtils.java,v 1.4 2010-06-17 10:02:50 bourgesl Exp $"
+ * "@(#) $Id: PDFUtils.java,v 1.5 2010-09-24 15:53:44 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2010/06/17 10:02:50  bourgesl
+ * fixed warning hints - mainly not final static loggers
+ *
  * Revision 1.3  2010/01/19 11:01:08  bourgesl
  * force text rendering as shapes to avoid unicode issues
  *
@@ -43,7 +46,7 @@ import org.jfree.chart.JFreeChart;
  * This class is dedicated to export charts as PDF documents
  * @author bourgesl
  */
-public class PDFUtils {
+public final class PDFUtils {
 
   /** Class Name */
   private static final String className_ = "fr.jmmc.aspro.gui.chart.PDFUtils";
@@ -68,8 +71,14 @@ public class PDFUtils {
    * Save the given chart as a PDF document in the given file
    * @param file PDF file to create
    * @param chart chart to export
+   *
+   * @throws IOException if the file exists but is a directory
+   *                   rather than a regular file, does not exist but cannot
+   *                   be created, or cannot be opened for any other reason
+   * @throws RuntimeException if a PDF document exception occured
    */
-  public static void saveChartAsPDF(final File file, final JFreeChart chart) {
+  public static void saveChartAsPDF(final File file, final JFreeChart chart)
+          throws IOException, RuntimeException {
 
     BufferedOutputStream localBufferedOutputStream = null;
     try {
@@ -77,21 +86,27 @@ public class PDFUtils {
 
       writeChartAsPDF(localBufferedOutputStream, chart, new DefaultFontMapper());
 
-    } catch (IOException ioe) {
-      logger.log(Level.SEVERE, "IO exception : ", ioe);
     } finally {
       if (localBufferedOutputStream != null) {
         try {
           localBufferedOutputStream.close();
         } catch (IOException ioe) {
-          logger.log(Level.SEVERE, "IO exception : ", ioe);
+          logger.log(Level.FINE, "IO exception : ", ioe);
         }
       }
     }
   }
 
-  public static void writeChartAsPDF(final OutputStream outputStream, final JFreeChart chart, final FontMapper fontMapper)
-          throws IOException {
+  /**
+   * Create a PDF document with the given chart and save it in the given stream
+   * @param outputStream output stream
+   * @param chart chart instance
+   * @param fontMapper font mapper
+   * 
+   * @throws RuntimeException if a PDF document exception occured
+   */
+  private static void writeChartAsPDF(final OutputStream outputStream, final JFreeChart chart, final FontMapper fontMapper)
+          throws RuntimeException {
 
     Graphics2D g2 = null;
 
@@ -140,8 +155,9 @@ public class PDFUtils {
       chart.draw(g2, drawArea);
 
       pdfContentByte.addTemplate(pdfTemplate, margin, margin);
+
     } catch (DocumentException de) {
-      logger.log(Level.SEVERE, "document exception : ", de);
+      throw new RuntimeException("PDF document exception : ", de);
     } finally {
       if (g2 != null) {
         g2.dispose();
