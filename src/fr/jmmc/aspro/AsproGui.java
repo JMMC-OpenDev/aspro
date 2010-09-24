@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproGui.java,v 1.28 2010-09-23 19:47:32 bourgesl Exp $"
+ * "@(#) $Id: AsproGui.java,v 1.29 2010-09-24 15:55:15 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.28  2010/09/23 19:47:32  bourgesl
+ * Use new Swing exception handler
+ * comments when calling FeedBackReport
+ *
  * Revision 1.27  2010/09/06 13:39:57  bourgesl
  * adjust the minimum size of the main window according to the screen size
  *
@@ -144,6 +148,60 @@ public final class AsproGui extends App {
   private SettingPanel settingPanel;
 
   /**
+   * Main entry point : define the locale to US / GMT and then start the application
+   * @param args command line arguments
+   */
+  public static void main(final String[] args) {
+    // Install exception handlers :
+    MCSExceptionHandler.installSwingHandler();
+
+    // Set the default locale to en-US locale (for Numerical Fields "." ",")
+    Locale.setDefault(Locale.US);
+    // Set the default timezone to GMT to handle properly the date in UTC :
+    TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
+
+    // Change Swing defaults :
+    changeSwingDefaults();
+
+    final long start = System.nanoTime();
+    try {
+      preStart();
+
+      // Start application with the command line arguments
+      new AsproGui(args);
+    } finally {
+      final long time = (System.nanoTime() - start);
+
+      if (logger.isLoggable(Level.INFO)) {
+        logger.info("startup : duration = " + 1e-6d * time + " ms.");
+      }
+    }
+  }
+
+  /**
+   * Start components like singleton before the GUI
+   */
+  private static void preStart() {
+
+    // Preload configurations :
+    ConfigurationManager.getInstance();
+
+  }
+
+  /**
+   * Change several default values for Swing rendering.
+   */
+  private static void changeSwingDefaults() {
+
+    // Force Locale for Swing Components :
+    JComponent.setDefaultLocale(Locale.US);
+
+    // Let the tooltip stay longer (60s) :
+    ToolTipManager.sharedInstance().setInitialDelay(250);
+    ToolTipManager.sharedInstance().setDismissDelay(60000);
+  }
+
+  /**
    * Public constructor with command line arguments
    * @param args command line arguments
    */
@@ -159,9 +217,6 @@ public final class AsproGui extends App {
   @Override
   protected void init(final String[] args) {
     logger.fine("AsproGui.init() handler : enter");
-
-    // Preload configurations :
-    ConfigurationManager.getInstance();
 
     try {
 
@@ -338,38 +393,5 @@ public final class AsproGui extends App {
       // callback on exit :
       App.quitAction().actionPerformed(null);
     }
-  }
-
-  /**
-   * Main entry point : define the locale to US / GMT and then start the application
-   * @param args command line arguments
-   */
-  public static void main(final String[] args) {
-    // Install exception handlers :
-    MCSExceptionHandler.installSwingHandler();
-
-    // Set the default locale to en-US locale (for Numerical Fields "." ",")
-    Locale.setDefault(Locale.US);
-    // Set the default timezone to GMT to handle properly the date in UTC :
-    TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
-
-    // Change Swing defaults :
-    changeSwingDefaults();
-
-    // Start application with the command line arguments
-    new AsproGui(args);
-  }
-
-  /**
-   * Change several default values for Swing rendering.
-   */
-  private static void changeSwingDefaults() {
-
-    // Force Locale for Swing Components :
-    JComponent.setDefaultLocale(Locale.US);
-
-    // Let the tooltip stay longer (60s) :
-    ToolTipManager.sharedInstance().setInitialDelay(250);
-    ToolTipManager.sharedInstance().setDismissDelay(60000);
   }
 }
