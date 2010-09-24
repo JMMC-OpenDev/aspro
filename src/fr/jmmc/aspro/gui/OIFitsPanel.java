@@ -13,12 +13,14 @@ package fr.jmmc.aspro.gui;
 import fr.jmmc.aspro.model.ObservationListener;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.util.XmlFactory;
+import fr.jmmc.mcs.gui.App;
 import fr.jmmc.oitools.model.OIFitsFile;
 import fr.jmmc.oitools.model.XmlOutputVisitor;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.logging.Level;
 import javax.swing.JEditorPane;
+import javax.swing.JOptionPane;
 import javax.swing.text.Document;
 import javax.swing.text.html.HTMLEditorKit;
 

@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetModelForm.java,v 1.25 2010-09-20 14:46:02 bourgesl Exp $"
+ * "@(#) $Id: TargetModelForm.java,v 1.26 2010-09-24 15:55:22 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.25  2010/09/20 14:46:02  bourgesl
+ * minor refactoring changes
+ *
  * Revision 1.24  2010/09/08 15:58:51  bourgesl
  * renamed variable
  *
@@ -87,6 +90,7 @@ import fr.jmmc.aspro.gui.util.ComponentResizeAdapter;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.mcs.gui.App;
+import fr.jmmc.mcs.gui.MessagePane;
 import fr.jmmc.mcs.gui.NumericJTable;
 import fr.jmmc.mcs.model.ModelDefinition;
 import fr.jmmc.mcs.model.ModelManager;
@@ -888,7 +892,8 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         ModelManager.getInstance().validateModels(target.getModels());
       } catch (IllegalArgumentException iae) {
         // single message at once :
-        JOptionPane.showMessageDialog(null, iae.getMessage(), "Error on target " + target.getName(), JOptionPane.ERROR_MESSAGE);
+        MessagePane.showErrorMessage(
+                iae.getMessage(), "Error on target " + target.getName());
 
         // stop and continue editing the form :
         return;

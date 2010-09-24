@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: EditableStarResolverWidget.java,v 1.5 2010-09-08 15:08:38 bourgesl Exp $"
+ * "@(#) $Id: EditableStarResolverWidget.java,v 1.6 2010-09-24 15:53:07 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2010/09/08 15:08:38  bourgesl
+ * javadoc
+ *
  * Revision 1.4  2010/05/11 10:17:31  mella
  * Add star name as optional field to put one new named star without simbad
  *
@@ -25,6 +28,7 @@ package fr.jmmc.aspro.gui.star;
 import fr.jmmc.mcs.astro.ALX;
 import fr.jmmc.mcs.astro.star.Star;
 import fr.jmmc.mcs.astro.star.StarResolverWidget;
+import fr.jmmc.mcs.gui.MessagePane;
 import fr.jmmc.mcs.gui.StatusBar;
 import java.awt.Container;
 import java.awt.event.ActionEvent;
@@ -38,7 +42,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
@@ -112,9 +115,8 @@ public class EditableStarResolverWidget extends StarResolverWidget {
               parseCoordinates(textValue);
             } catch (IllegalArgumentException iae) {
 
-              JOptionPane.showMessageDialog(null,
-                      "Invalid format for star coordinates :\n" + iae.getMessage(), "Error",
-                      JOptionPane.ERROR_MESSAGE);
+              MessagePane.showErrorMessage(
+                      "Invalid format for star coordinates :\n" + iae.getMessage());
 
               StatusBar.show("Parsing star coordinates failed.");
 

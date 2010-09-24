@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.54 2010-09-23 19:46:35 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.55 2010-09-24 15:49:48 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.54  2010/09/23 19:46:35  bourgesl
+ * comments when calling FeedBackReport
+ *
  * Revision 1.53  2010/09/20 14:46:02  bourgesl
  * minor refactoring changes
  *
@@ -210,6 +213,7 @@ import fr.jmmc.aspro.model.uvcoverage.UVBaseLineData;
 import fr.jmmc.aspro.model.uvcoverage.UVRangeBaseLineData;
 import fr.jmmc.aspro.service.UVCoverageService;
 import fr.jmmc.mcs.gui.FeedbackReport;
+import fr.jmmc.mcs.gui.MessagePane;
 import fr.jmmc.mcs.gui.StatusBar;
 import fr.jmmc.mcs.image.ColorModels;
 import fr.jmmc.mcs.model.ModelUVMapService;
@@ -1534,7 +1538,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
             } catch (ExecutionException ee) {
               reset();
               if (ee.getCause() instanceof IllegalArgumentException) {
-                JOptionPane.showMessageDialog(null, ee.getCause().getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                MessagePane.showErrorMessage(ee.getCause().getMessage());
               } else {
                 // Show feedback report (modal and do not exit on close) :
                 new FeedbackReport(true, ee.getCause());
@@ -1657,7 +1661,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
                 } catch (InterruptedException ignore) {
                 } catch (ExecutionException ee) {
                   if (ee.getCause() instanceof IllegalArgumentException) {
-                    JOptionPane.showMessageDialog(null, ee.getCause().getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                    MessagePane.showErrorMessage(ee.getCause().getMessage());
                   } else {
                     // Show feedback report (modal and do not exit on close) :
                     new FeedbackReport(true, ee.getCause());
