@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproGui.java,v 1.33 2010-09-25 13:55:33 bourgesl Exp $"
+ * "@(#) $Id: AsproGui.java,v 1.34 2010-09-25 13:58:43 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.33  2010/09/25 13:55:33  bourgesl
+ * test again With JNLP
+ *
  * Revision 1.32  2010/09/25 13:43:40  bourgesl
  * better exception handling
  * test for JNLP
@@ -269,11 +272,6 @@ public final class AsproGui extends App {
        * Show the application frame using EDT
        */
       public void run() {
-
-    if (true)
-      throw new RuntimeException("TEST");
-
-
         logger.fine("AsproGui.ready : handler called.");
         getFrame().setVisible(true);
       }
