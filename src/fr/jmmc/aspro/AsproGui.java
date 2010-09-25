@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproGui.java,v 1.32 2010-09-25 13:43:40 bourgesl Exp $"
+ * "@(#) $Id: AsproGui.java,v 1.33 2010-09-25 13:55:33 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.32  2010/09/25 13:43:40  bourgesl
+ * better exception handling
+ * test for JNLP
+ *
  * Revision 1.31  2010/09/25 12:18:23  bourgesl
  * TEST exception handling with JNLP
  *
@@ -161,9 +165,6 @@ public final class AsproGui extends App {
    * @param args command line arguments
    */
   public static void main(final String[] args) {
-    // Force security checks
-    System.setSecurityManager(null);
-
     // Install exception handlers :
     MCSExceptionHandler.installSwingHandler();
 
@@ -177,8 +178,6 @@ public final class AsproGui extends App {
 
     final long start = System.nanoTime();
     try {
-      preStart();
-
       // Start application with the command line arguments
       new AsproGui(args);
     } finally {
@@ -188,19 +187,6 @@ public final class AsproGui extends App {
         logger.info("startup : duration = " + 1e-6d * time + " ms.");
       }
     }
-  }
-
-  /**
-   * Start components like singleton before the GUI
-   */
-  private static void preStart() {
-
-    // Preload configurations :
-    ConfigurationManager.getInstance();
-
-    if (true)
-      throw new RuntimeException("TEST");
-
   }
 
   /**
@@ -234,6 +220,9 @@ public final class AsproGui extends App {
   @Override
   protected void init(final String[] args) throws RuntimeException {
     logger.fine("AsproGui.init() handler : enter");
+
+    // Preload configurations :
+    ConfigurationManager.getInstance();
 
     try {
 
@@ -280,6 +269,11 @@ public final class AsproGui extends App {
        * Show the application frame using EDT
        */
       public void run() {
+
+    if (true)
+      throw new RuntimeException("TEST");
+
+
         logger.fine("AsproGui.ready : handler called.");
         getFrame().setVisible(true);
       }
