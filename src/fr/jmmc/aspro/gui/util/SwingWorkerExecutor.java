@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SwingWorkerExecutor.java,v 1.4 2010-09-20 12:16:26 bourgesl Exp $"
+ * "@(#) $Id: SwingWorkerExecutor.java,v 1.5 2010-09-25 13:42:22 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2010/09/20 12:16:26  bourgesl
+ * created inner class + logs
+ *
  * Revision 1.3  2010/07/05 14:50:34  bourgesl
  * cancel method made public
  *
@@ -18,6 +21,7 @@
  */
 package fr.jmmc.aspro.gui.util;
 
+import fr.jmmc.mcs.util.MCSExceptionHandler;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
@@ -242,19 +246,22 @@ public final class SwingWorkerExecutor {
       name.append("-thread-");
       name.append(threadNumber.getAndIncrement());
 
-      final Thread t = new Thread(r, name.toString());
-      if (t.isDaemon()) {
-        t.setDaemon(false);
+      final Thread thread = new Thread(r, name.toString());
+      if (thread.isDaemon()) {
+        thread.setDaemon(false);
       }
-      if (t.getPriority() != Thread.NORM_PRIORITY) {
-        t.setPriority(Thread.NORM_PRIORITY);
+      if (thread.getPriority() != Thread.NORM_PRIORITY) {
+        thread.setPriority(Thread.NORM_PRIORITY);
       }
+
+      // define UncaughtExceptionHandler :
+      MCSExceptionHandler.installThreadHandler(thread);
 
       if (logger.isLoggable(Level.FINE)) {
-        logger.fine("newThread : " + t.getName());
+        logger.fine("newThread : " + thread.getName());
       }
 
-      return t;
+      return thread;
     }
   }
 }
