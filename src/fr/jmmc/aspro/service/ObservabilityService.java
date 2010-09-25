@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.54 2010-09-24 15:51:20 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.55 2010-09-25 13:58:57 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.54  2010/09/24 15:51:20  bourgesl
+ * removed catch RuntimeExceptionS to get it at higher level (
+ *
  * Revision 1.53  2010/09/15 13:55:07  bourgesl
  * disabled moon rise/set as a star data
  *
@@ -368,6 +371,11 @@ public final class ObservabilityService {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("compute : " + this.observation);
     }
+
+    if (true)
+      throw new RuntimeException("TEST");
+
+
 
     // Start the computations :
     final long start = System.nanoTime();
