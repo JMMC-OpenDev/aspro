@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ConfigurationManager.java,v 1.29 2010-09-23 19:46:35 bourgesl Exp $"
+ * "@(#) $Id: ConfigurationManager.java,v 1.30 2010-09-25 13:41:59 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.29  2010/09/23 19:46:35  bourgesl
+ * comments when calling FeedBackReport
+ *
  * Revision 1.28  2010/09/20 14:46:02  bourgesl
  * minor refactoring changes
  *
@@ -116,7 +119,6 @@ import fr.jmmc.aspro.model.oi.Position3D;
 import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.StationLinks;
 import fr.jmmc.aspro.service.GeocentricCoords;
-import fr.jmmc.mcs.gui.FeedbackReport;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -139,7 +141,7 @@ public final class ConfigurationManager extends BaseOIManager {
   /** Configurations file name */
   private static final String CONF_FILE = "AsproOIConfigurations.xml";
   /** singleton pattern */
-  private static ConfigurationManager instance = new ConfigurationManager();
+  private static volatile ConfigurationManager instance = null;
 
   /* members */
   /** Map : id, interferometer description */
@@ -150,8 +152,18 @@ public final class ConfigurationManager extends BaseOIManager {
   /**
    * Return the ConfigurationManager singleton
    * @return ConfigurationManager singleton
+   *
+   * @throws RuntimeException if the load operation failed
    */
-  public static ConfigurationManager getInstance() {
+  public static synchronized final ConfigurationManager getInstance() throws RuntimeException {
+    if (instance == null) {
+      final ConfigurationManager cm = new ConfigurationManager();
+
+      // can throw RuntimeException :
+      cm.initialize();
+
+      instance = cm;
+    }
     return instance;
   }
 
@@ -160,7 +172,6 @@ public final class ConfigurationManager extends BaseOIManager {
    */
   private ConfigurationManager() {
     super();
-    initialize();
   }
 
   /**
@@ -168,39 +179,33 @@ public final class ConfigurationManager extends BaseOIManager {
    * - load AsproOIConfigurations.xml to get configuration file paths
    * - load those files (InterferometerSetting)
    * - update interferometer description and configuration maps
+   * 
+   * @throws RuntimeException if the load operation failed
    */
-  private void initialize() {
-    try {
+  private void initialize() throws RuntimeException {
+    final long start = System.nanoTime();
 
-      // Start loading configuration :
-      final long start = System.nanoTime();
+    final Configurations conf = (Configurations) loadObject(CONF_FILE);
 
-      final Configurations conf = (Configurations) loadObject(CONF_FILE);
-
-      InterferometerSetting is;
-      for (String fileName : conf.getFiles()) {
-        if (logger.isLoggable(Level.CONFIG)) {
-          logger.config("initialize : loading configuration file = " + fileName);
-        }
-        is = (InterferometerSetting) loadObject(fileName);
-
-        addInterferometerSetting(is);
+    InterferometerSetting is;
+    for (String fileName : conf.getFiles()) {
+      if (logger.isLoggable(Level.CONFIG)) {
+        logger.config("initialize : loading configuration file = " + fileName);
       }
+      is = (InterferometerSetting) loadObject(fileName);
 
-      final long time = (System.nanoTime() - start);
+      addInterferometerSetting(is);
+    }
 
-      if (logger.isLoggable(Level.INFO)) {
-        logger.info("initialize : duration = " + 1e-6d * time + " ms.");
-      }
+    final long time = (System.nanoTime() - start);
 
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("descriptions   = " + getInterferometerDescriptions());
-        logger.fine("configurations = " + getInterferometerConfigurations());
-      }
+    if (logger.isLoggable(Level.INFO)) {
+      logger.info("initialize : duration = " + 1e-6d * time + " ms.");
+    }
 
-    } catch (RuntimeException re) {
-      // Show feedback report (modal and do exit on close) :
-      new FeedbackReport(true, re, true);
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("descriptions   = " + getInterferometerDescriptions());
+      logger.fine("configurations = " + getInterferometerConfigurations());
     }
   }
 
