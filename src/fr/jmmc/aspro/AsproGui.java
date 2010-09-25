@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproGui.java,v 1.31 2010-09-25 12:18:23 bourgesl Exp $"
+ * "@(#) $Id: AsproGui.java,v 1.32 2010-09-25 13:43:40 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.31  2010/09/25 12:18:23  bourgesl
+ * TEST exception handling with JNLP
+ *
  * Revision 1.30  2010/09/24 16:27:40  bourgesl
  * disable security checks
  *
@@ -116,7 +119,6 @@ import fr.jmmc.aspro.gui.action.ShowPrefAction;
 import fr.jmmc.aspro.gui.util.ComponentResizeAdapter;
 import fr.jmmc.aspro.model.ConfigurationManager;
 import fr.jmmc.mcs.gui.App;
-import fr.jmmc.mcs.gui.FeedbackReport;
 import fr.jmmc.mcs.gui.StatusBar;
 import fr.jmmc.mcs.util.ActionRegistrar;
 import fr.jmmc.mcs.util.MCSExceptionHandler;
@@ -125,6 +127,7 @@ import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Locale;
 import java.util.TimeZone;
 import java.util.logging.Level;
@@ -195,6 +198,9 @@ public final class AsproGui extends App {
     // Preload configurations :
     ConfigurationManager.getInstance();
 
+    if (true)
+      throw new RuntimeException("TEST");
+
   }
 
   /**
@@ -222,9 +228,11 @@ public final class AsproGui extends App {
   /**
    * Initialize application objects
    * @param args ignored arguments
+   *
+   * @throws RuntimeException if the AsproGui initialisation failed
    */
   @Override
-  protected void init(final String[] args) {
+  protected void init(final String[] args) throws RuntimeException {
     logger.fine("AsproGui.init() handler : enter");
 
     try {
@@ -240,9 +248,12 @@ public final class AsproGui extends App {
         }
       });
 
-    } catch (Exception e) {
-      // Show feedback report (modal and do exit on close) :
-      new FeedbackReport(true, e, true);
+    } catch (InterruptedException ie) {
+      // propagate the exception :
+      throw new RuntimeException("AsproGui.init : interrupted", ie);
+    } catch (InvocationTargetException ite) {
+      // propagate the internal exception :
+      throw new RuntimeException("AsproGui.init : exception", ite.getCause());
     }
 
     logger.fine("AsproGui.init() handler : exit");
@@ -271,10 +282,6 @@ public final class AsproGui extends App {
       public void run() {
         logger.fine("AsproGui.ready : handler called.");
         getFrame().setVisible(true);
-
-        if (true) {
-          throw new RuntimeException("TEST");
-        }
       }
     });
   }
