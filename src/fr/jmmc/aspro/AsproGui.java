@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproGui.java,v 1.30 2010-09-24 16:27:40 bourgesl Exp $"
+ * "@(#) $Id: AsproGui.java,v 1.31 2010-09-25 12:18:23 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.30  2010/09/24 16:27:40  bourgesl
+ * disable security checks
+ *
  * Revision 1.29  2010/09/24 15:55:15  bourgesl
  * configuration loading is done before starting Swing App
  *
@@ -268,6 +271,10 @@ public final class AsproGui extends App {
       public void run() {
         logger.fine("AsproGui.ready : handler called.");
         getFrame().setVisible(true);
+
+        if (true) {
+          throw new RuntimeException("TEST");
+        }
       }
     });
   }
