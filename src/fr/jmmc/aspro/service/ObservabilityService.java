@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.55 2010-09-25 13:58:57 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.56 2010-09-25 14:03:35 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.55  2010/09/25 13:58:57  bourgesl
+ * test failure in service (JNLP)
+ *
  * Revision 1.54  2010/09/24 15:51:20  bourgesl
  * removed catch RuntimeExceptionS to get it at higher level (
  *
@@ -371,11 +374,6 @@ public final class ObservabilityService {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("compute : " + this.observation);
     }
-
-    if (true)
-      throw new RuntimeException("TEST");
-
-
 
     // Start the computations :
     final long start = System.nanoTime();
