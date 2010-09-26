@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: PDFUtils.java,v 1.5 2010-09-24 15:53:44 bourgesl Exp $"
+ * "@(#) $Id: PDFUtils.java,v 1.6 2010-09-26 11:59:11 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2010/09/24 15:53:44  bourgesl
+ * IOexception is thrown to have better exception handling
+ *
  * Revision 1.4  2010/06/17 10:02:50  bourgesl
  * fixed warning hints - mainly not final static loggers
  *
@@ -75,10 +78,10 @@ public final class PDFUtils {
    * @throws IOException if the file exists but is a directory
    *                   rather than a regular file, does not exist but cannot
    *                   be created, or cannot be opened for any other reason
-   * @throws RuntimeException if a PDF document exception occured
+   * @throws IllegalStateException if a PDF document exception occured
    */
   public static void saveChartAsPDF(final File file, final JFreeChart chart)
-          throws IOException, RuntimeException {
+          throws IOException, IllegalStateException {
 
     BufferedOutputStream localBufferedOutputStream = null;
     try {
@@ -103,10 +106,10 @@ public final class PDFUtils {
    * @param chart chart instance
    * @param fontMapper font mapper
    * 
-   * @throws RuntimeException if a PDF document exception occured
+   * @throws IllegalStateException if a PDF document exception occured
    */
   private static void writeChartAsPDF(final OutputStream outputStream, final JFreeChart chart, final FontMapper fontMapper)
-          throws RuntimeException {
+          throws IllegalStateException {
 
     Graphics2D g2 = null;
 
@@ -157,7 +160,7 @@ public final class PDFUtils {
       pdfContentByte.addTemplate(pdfTemplate, margin, margin);
 
     } catch (DocumentException de) {
-      throw new RuntimeException("PDF document exception : ", de);
+      throw new IllegalStateException("PDF document exception : ", de);
     } finally {
       if (g2 != null) {
         g2.dispose();

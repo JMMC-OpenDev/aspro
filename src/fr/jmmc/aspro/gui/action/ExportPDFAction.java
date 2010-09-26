@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportPDFAction.java,v 1.12 2010-09-24 15:54:25 bourgesl Exp $"
+ * "@(#) $Id: ExportPDFAction.java,v 1.13 2010-09-26 11:59:11 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.12  2010/09/24 15:54:25  bourgesl
+ * better exception handling + use MessagePane
+ *
  * Revision 1.11  2010/09/01 16:24:30  bourgesl
  * removed exception
  *
@@ -178,10 +181,6 @@ public final class ExportPDFAction extends RegisteredAction {
       } catch (IOException ioe) {
         MessagePane.showErrorMessage(
                 "Could not write to file : " + file.getName(), ioe);
-
-      } catch (RuntimeException re) {
-        MessagePane.showErrorMessage(
-                "Could not export to file : " + file.getName(), re);
       }
     }
   }
