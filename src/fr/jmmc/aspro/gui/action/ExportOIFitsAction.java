@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOIFitsAction.java,v 1.3 2010-09-24 15:54:25 bourgesl Exp $"
+ * "@(#) $Id: ExportOIFitsAction.java,v 1.4 2010-09-26 11:59:39 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2010/09/24 15:54:25  bourgesl
+ * better exception handling + use MessagePane
+ *
  * Revision 1.2  2010/09/02 15:47:19  bourgesl
  * use OI_VIS2 (always present)
  *
@@ -27,10 +30,12 @@ import fr.jmmc.oitools.model.OIFitsWriter;
 import fr.jmmc.oitools.model.OIVis2;
 import java.awt.event.ActionEvent;
 import java.io.File;
+import java.io.IOException;
 import java.util.logging.Level;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileFilter;
+import nom.tam.fits.FitsException;
 
 /**
  * This registered action represents a File Menu entry to export an OIFits file
@@ -119,9 +124,12 @@ public class ExportOIFitsAction extends RegisteredAction {
 
           StatusBar.show(file.getName() + " created.");
 
-        } catch (Exception e) {
+        } catch (FitsException fe) {
           MessagePane.showErrorMessage(
-                "Could not export to file : " + file.getName(), e);
+                "Could not export to file : " + file.getName(), fe);
+        } catch (IOException ioe) {
+          MessagePane.showErrorMessage(
+                "Could not export to file : " + file.getName(), ioe);
         }
       }
     }
