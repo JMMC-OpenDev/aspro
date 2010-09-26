@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.55 2010-09-24 15:49:48 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.56 2010-09-26 12:00:07 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.55  2010/09/24 15:49:48  bourgesl
+ * use MessagePane
+ *
  * Revision 1.54  2010/09/23 19:46:35  bourgesl
  * comments when calling FeedBackReport
  *
@@ -1717,14 +1720,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         logger.fine("sub uvMap [" + x + ", " + y + " - " + w + ", " + h + "]");
       }
 
-      Image subUVMap = null;
-      try {
-        // crop a small sub image waiting for the correct model to be computed :
-        subUVMap = this.currentUVMapData.getUvMap().getSubimage(x, y, w, h);
-
-      } catch (RuntimeException re) {
-        logger.log(Level.SEVERE, "subImage failure : ", re);
-      }
+      // crop a small sub image waiting for the correct model to be computed :
+      final Image subUVMap = this.currentUVMapData.getUvMap().getSubimage(x, y, w, h);
 
       // update the background image :
       updateUVMap(subUVMap);
