@@ -1,11 +1,16 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationManager.java,v 1.36 2010-09-20 14:45:36 bourgesl Exp $"
+ * "@(#) $Id: ObservationManager.java,v 1.37 2010-09-26 12:47:40 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.36  2010/09/20 14:45:36  bourgesl
+ * better method ordering
+ * removed static methods getTarget(observation ...) and getTargetConfiguration(observation ...)
+ * javadoc updated
+ *
  * Revision 1.35  2010/09/01 12:59:07  bourgesl
  * added fixInstrumentConfigurationStations to load files where the station list has a wrong ordering
  *
@@ -216,8 +221,10 @@ public final class ObservationManager extends BaseOIManager {
   // --- MAIN FUNCTIONS --------------------------------------------------------
   /**
    * Reset the current observation
+   *
+   * @throws IllegalStateException if an invalid reference was found (interferometer / instrument / instrument configuration)
    */
-  public void reset() {
+  public void reset() throws IllegalStateException {
     logger.info("Reset observation");
 
     final ObservationSetting newObservation = new ObservationSetting();
@@ -229,6 +236,7 @@ public final class ObservationManager extends BaseOIManager {
    * @param file file to load
    * @throws RuntimeException if the load operation failed
    * @throws IllegalStateException if an invalid reference was found (interferometer / instrument / instrument configuration)
+   * or if the file is not an Observation
    */
   public void load(final File file) throws RuntimeException, IllegalStateException {
     if (file != null) {
@@ -240,7 +248,7 @@ public final class ObservationManager extends BaseOIManager {
       final Object loaded = loadObject(this.observationFile);
 
       if (!(loaded instanceof ObservationSetting)) {
-        throw new RuntimeException("The loaded file does not correspond to a valid Aspro2 file : " + file);
+        throw new IllegalStateException("The loaded file does not correspond to a valid Aspro2 file : " + file);
       }
 
       final ObservationSetting newObservation = (ObservationSetting) loaded;

@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BaseOIManager.java,v 1.16 2010-09-24 15:52:35 bourgesl Exp $"
+ * "@(#) $Id: BaseOIManager.java,v 1.17 2010-09-26 12:47:40 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.16  2010/09/24 15:52:35  bourgesl
+ * removed catch RuntimeExceptionS to get it at higher level (better exception handling)
+ *
  * Revision 1.15  2010/07/07 15:11:42  bourgesl
  * empty vector added
  *
@@ -122,11 +125,11 @@ public class BaseOIManager {
    * @param uri relative URI of the document to load (class loader)
    * @return unmarshalled object
    *
-   * @throws IllegalStateException if the file is not found
-   * @throws RuntimeException if the load operation failed
+   * @throws IllegalStateException if the file is not found or IO failure
+   * @throws IllegalArgumentException if the load operation failed
    */
   protected final Object loadObject(final String uri)
-          throws IllegalStateException, RuntimeException {
+          throws IllegalStateException, IllegalArgumentException {
 
     if (logger.isLoggable(Level.INFO)) {
       logger.info("loading file : " + uri);
@@ -145,9 +148,9 @@ public class BaseOIManager {
       result = this.jf.createUnMarshaller().unmarshal(new BufferedInputStream(url.openStream()));
 
     } catch (IOException ioe) {
-      throw new RuntimeException("Load failure on " + uri, ioe);
+      throw new IllegalStateException("Load failure on " + uri, ioe);
     } catch (JAXBException je) {
-      throw new RuntimeException("Load failure on " + uri, je);
+      throw new IllegalArgumentException("Load failure on " + uri, je);
     }
 
     return result;

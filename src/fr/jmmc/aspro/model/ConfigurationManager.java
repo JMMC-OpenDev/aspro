@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ConfigurationManager.java,v 1.30 2010-09-25 13:41:59 bourgesl Exp $"
+ * "@(#) $Id: ConfigurationManager.java,v 1.31 2010-09-26 12:47:40 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.30  2010/09/25 13:41:59  bourgesl
+ * better singleton initialisation
+ * simplified exception handling
+ *
  * Revision 1.29  2010/09/23 19:46:35  bourgesl
  * comments when calling FeedBackReport
  *
@@ -153,9 +157,12 @@ public final class ConfigurationManager extends BaseOIManager {
    * Return the ConfigurationManager singleton
    * @return ConfigurationManager singleton
    *
-   * @throws RuntimeException if the load operation failed
+   * @throws IllegalStateException if the configuration files are not found or IO failure
+   * @throws IllegalArgumentException if the load configuration failed
    */
-  public static synchronized final ConfigurationManager getInstance() throws RuntimeException {
+  public static synchronized final ConfigurationManager getInstance()
+          throws IllegalStateException, IllegalArgumentException {
+    
     if (instance == null) {
       final ConfigurationManager cm = new ConfigurationManager();
 
@@ -180,9 +187,12 @@ public final class ConfigurationManager extends BaseOIManager {
    * - load those files (InterferometerSetting)
    * - update interferometer description and configuration maps
    * 
-   * @throws RuntimeException if the load operation failed
+   * @throws IllegalStateException if the configuration files are not found or IO failure
+   * @throws IllegalArgumentException if the load configuration failed
    */
-  private void initialize() throws RuntimeException {
+  private void initialize()
+          throws IllegalStateException, IllegalArgumentException {
+    
     final long start = System.nanoTime();
 
     final Configurations conf = (Configurations) loadObject(CONF_FILE);
