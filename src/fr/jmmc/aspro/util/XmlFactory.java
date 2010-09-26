@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: XmlFactory.java,v 1.3 2010-09-24 15:48:24 bourgesl Exp $"
+ * "@(#) $Id: XmlFactory.java,v 1.4 2010-09-26 11:57:36 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2010/09/24 15:48:24  bourgesl
+ * proper exception handling (unexpected and runtime failures)
+ *
  * Revision 1.2  2010/07/07 09:29:29  bourgesl
  * use buffered url.openStream
  *
@@ -166,10 +169,10 @@ public final class XmlFactory {
    * @return result document as string
    *
    * @throws IllegalStateException if TransformerFactory initialization failed or template creation failed or transformer creation failed
-   * @throws RuntimeException if transformation failure or the xsl file path is empty or IO failure
+   * @throws IllegalArgumentException if transformation failure or the xsl file path is empty or IO failure
    */
   public static String transform(final String xmlSource, final String xslFilePath)
-          throws IllegalStateException, RuntimeException {
+          throws IllegalStateException, IllegalArgumentException {
 
     return transform(xmlSource, xslFilePath, true);
   }
@@ -185,10 +188,10 @@ public final class XmlFactory {
    * @return result document as string
    *
    * @throws IllegalStateException if TransformerFactory initialization failed or template creation failed or transformer creation failed
-   * @throws RuntimeException if transformation failure or the xsl file path is empty or IO failure
+   * @throws IllegalArgumentException if transformation failure or the xsl file path is empty or IO failure
    */
   public static String transform(final String xmlSource, final String xslFilePath, final boolean doCacheXsl)
-          throws IllegalStateException, RuntimeException {
+          throws IllegalStateException, IllegalArgumentException {
 
     final StringWriter out = new StringWriter(DEFAULT_BUFFER_SIZE);
 
@@ -207,11 +210,11 @@ public final class XmlFactory {
    * @param out buffer (should be cleared before method invocation)
    *
    * @throws IllegalStateException if TransformerFactory initialization failed or template creation failed or transformer creation failed
-   * @throws RuntimeException if transformation failure or the xsl file path is empty or I/O exception occurs while reading XSLT
+   * @throws IllegalArgumentException if transformation failure or the xsl file path is empty or I/O exception occurs while reading XSLT
    */
   private static void transform(final String xmlSource, final String xslFilePath,
                                 final boolean doCacheXsl, final Writer out)
-          throws IllegalStateException, RuntimeException {
+          throws IllegalStateException, IllegalArgumentException {
 
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("XmlFactory.transform : enter : xslFilePath : " + xslFilePath);
@@ -246,13 +249,13 @@ public final class XmlFactory {
    * @return transformer or null if file does not exist
    *
    * @throws IllegalStateException if TransformerFactory initialization failed or template creation failed or transformer creation failed
-   * @throws RuntimeException if the xsl file path is empty or I/O exception occurs while reading XSLT
+   * @throws IllegalArgumentException if the xsl file path is empty or I/O exception occurs while reading XSLT
    */
   private static final Transformer loadXsl(final String xslFilePath)
-          throws IllegalStateException, RuntimeException {
+          throws IllegalStateException, IllegalArgumentException {
 
     if ((xslFilePath == null) || (xslFilePath.length() == 0)) {
-      throw new RuntimeException("XmlFactory.resolvePath : unable to load XSLT : empty file path !");
+      throw new IllegalArgumentException("XmlFactory.resolvePath : unable to load XSLT : empty file path !");
     }
 
     Transformer tf = null;
@@ -289,13 +292,13 @@ public final class XmlFactory {
    * @return StreamSource instance
    *
    * @throws IllegalStateException if the file is not found
-   * @throws RuntimeException if the xsl file path is empty or I/O exception occurs while reading XSLT
+   * @throws IllegalArgumentException if the xsl file path is empty or I/O exception occurs while reading XSLT
    */
   private static StreamSource resolveXSLTPath(final String xslFilePath)
-          throws IllegalStateException, RuntimeException {
+          throws IllegalStateException, IllegalArgumentException {
 
     if ((xslFilePath == null) || (xslFilePath.length() == 0)) {
-      throw new RuntimeException("XmlFactory.resolveXSLTPath : unable to load XSLT : empty file path !");
+      throw new IllegalArgumentException("XmlFactory.resolveXSLTPath : unable to load XSLT : empty file path !");
     }
 
     final URL url = FileUtils.getResource(xslFilePath);
@@ -307,7 +310,7 @@ public final class XmlFactory {
     try {
       return new StreamSource(new BufferedInputStream(url.openStream()));
     } catch (IOException ioe) {
-      throw new RuntimeException("XmlFactory.resolveXSLTPath : unable to load the XSLT file : " + xslFilePath, ioe);
+      throw new IllegalArgumentException("XmlFactory.resolveXSLTPath : unable to load the XSLT file : " + xslFilePath, ioe);
     }
   }
 
@@ -318,14 +321,14 @@ public final class XmlFactory {
    * @param source xml document
    * @param out buffer (should be cleared before method invocation)
    *
-   * @throws RuntimeException if transformation failure
+   * @throws IllegalArgumentException if transformation failure
    */
   private static void asString(final Transformer transformer, final Source source, final Writer out)
-          throws RuntimeException {
+          throws IllegalArgumentException {
     try {
       transformer.transform(source, new StreamResult(out));
     } catch (TransformerException te) {
-      throw new RuntimeException("XmlFactory.asString : transformer failure :", te);
+      throw new IllegalArgumentException("XmlFactory.asString : transformer failure :", te);
     }
   }
 }
