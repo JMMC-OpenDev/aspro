@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproGui.java,v 1.34 2010-09-25 13:58:43 bourgesl Exp $"
+ * "@(#) $Id: AsproGui.java,v 1.35 2010-09-26 12:47:16 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.34  2010/09/25 13:58:43  bourgesl
+ * remove tests
+ *
  * Revision 1.33  2010/09/25 13:55:33  bourgesl
  * test again With JNLP
  *
@@ -252,19 +255,11 @@ public final class AsproGui extends App {
   }
 
   /** 
-   * Execute application body = nothing to do
+   * Execute application body = make the application frame visible
    */
   @Override
   protected void execute() {
     logger.fine("AsproGui.execute() handler called.");
-  }
-
-  /**
-   * Application is ready = make the application frame visible
-   */
-  @Override
-  protected void ready() {
-    logger.fine("AsproGui.ready() handler called.");
 
     SwingUtilities.invokeLater(new Runnable() {
 
