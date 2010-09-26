@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: EditableStarResolverWidget.java,v 1.6 2010-09-24 15:53:07 bourgesl Exp $"
+ * "@(#) $Id: EditableStarResolverWidget.java,v 1.7 2010-09-26 12:11:45 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2010/09/24 15:53:07  bourgesl
+ * use MessagePane
+ *
  * Revision 1.5  2010/09/08 15:08:38  bourgesl
  * javadoc
  *
@@ -133,6 +136,7 @@ public class EditableStarResolverWidget extends StarResolverWidget {
   /**
    * Parse the text value as RA/DEC coordinates, update the star model and notify the observers
    * @param input text value with optional star name field(trimmed)
+   * 
    * @throws IllegalArgumentException if the RA/DEC format was wrong
    */
   protected void parseCoordinates(final String input) throws IllegalArgumentException {
@@ -249,9 +253,10 @@ public class EditableStarResolverWidget extends StarResolverWidget {
    *
    * @param raHms input HMS value
    * @return formatted string
+   * 
    * @throws IllegalArgumentException if any value is invalid
    */
-  protected String parseHMS(final String raHms) {
+  protected String parseHMS(final String raHms) throws IllegalArgumentException {
 
     int hh;
     int hm;
@@ -286,14 +291,14 @@ public class EditableStarResolverWidget extends StarResolverWidget {
         _logger.fine("hs = '" + hs + "'");
       }
 
-    } catch (IllegalArgumentException iae) {
-      throw iae;
-    } catch (Exception e) {
+    } catch (NumberFormatException nfe) {
       if (_logger.isLoggable(Level.SEVERE)) {
-        _logger.log(Level.SEVERE, "format error", e);
+        _logger.log(Level.SEVERE, "format error", nfe);
       }
       throw new IllegalArgumentException("invalid value : '"
               + raHms + "'");
+    } catch (IllegalArgumentException iae) {
+      throw iae;
     }
 
     // Return a string with missing zero characters :
@@ -320,7 +325,7 @@ public class EditableStarResolverWidget extends StarResolverWidget {
    * @return formatted string
    * @throws IllegalArgumentException if any value is invalid
    */
-  protected String parseDMS(final String decDms) {
+  protected String parseDMS(final String decDms) throws IllegalArgumentException {
 
     int dd;
     int dm;
@@ -352,14 +357,14 @@ public class EditableStarResolverWidget extends StarResolverWidget {
                 + decDms + "'");
       }
 
-    } catch (IllegalArgumentException iae) {
-      throw iae;
-    } catch (Exception e) {
+    } catch (NumberFormatException nfe) {
       if (_logger.isLoggable(Level.SEVERE)) {
-        _logger.log(Level.SEVERE, "format error", e);
+        _logger.log(Level.SEVERE, "format error", nfe);
       }
       throw new IllegalArgumentException("invalid value : '"
               + decDms + "'");
+    } catch (IllegalArgumentException iae) {
+      throw iae;
     }
 
     // Return a string with missing zero characters :
