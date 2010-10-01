@@ -59,7 +59,7 @@
   <releasenotes>
     <release version="0.6">
       <prerelease version="0.6.3">
-        <change type="BUGFIX" id="1285777818">Fixed bug concerning random dates : the LST axis is corrupted (Requires 'lower' < 'upper')</change>
+        <change type="BUGFIX" id="1285777818">Fixed bug concerning random dates : the LST axis is corrupted (Requires 'lower' &lt; 'upper')</change>
         <change type="BUGFIX">Fixed bug in HA min/max restrictions : invalid values can cause a NegativeArrayException</change>
         <change>Formatted DIT value in warning messages coming from noise modeling (FT or saturation)</change>
         <change>Added warning messages on GUI to indicate unobservable target and invalid HA min/max settings</change>
