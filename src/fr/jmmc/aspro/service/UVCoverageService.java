@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoverageService.java,v 1.30 2010-09-24 15:49:34 bourgesl Exp $"
+ * "@(#) $Id: UVCoverageService.java,v 1.31 2010-10-01 15:45:45 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.30  2010/09/24 15:49:34  bourgesl
+ * removed catch RuntimeExceptionS to get it at higher level (better exception handling)
+ *
  * Revision 1.29  2010/09/20 14:46:02  bourgesl
  * minor refactoring changes
  *
@@ -247,7 +250,9 @@ public final class UVCoverageService {
         this.data.setLambda(this.lambda);
 
         // Is the target visible :
-        if (this.starData.getHaElev() > 0d) {
+        if (this.starData.getHaElev() <= 0d) {
+          addWarning("The target [" + this.targetName + "] is not observable (never rise)");
+        } else {
 
           if (this.doUVSupport) {
             computeUVSupport();
@@ -262,6 +267,7 @@ public final class UVCoverageService {
 
           // OIFits structure :
           createOIFits();
+
         }
 
         // fast interrupt :
@@ -314,8 +320,8 @@ public final class UVCoverageService {
 
     final double haElev = this.starData.getHaElev();
 
-    // 10 minutes is enough to get pretty ellipse :
-    final double step = 10d / 60d;
+    // 5 minutes is correct to get pretty ellipse :
+    final double step = 5d / 60d;
 
     final int nPoints = (int) Math.round(2d * haElev / step) + 1;
 
@@ -370,10 +376,25 @@ public final class UVCoverageService {
       if (this.currentThread.isInterrupted()) {
         return;
       }
-
     }
 
     this.data.setTargetUVRiseSet(targetUVRiseSet);
+  }
+
+  /**
+   * Check the given hour angle inside the [-haElev; haElev]
+   * @param ha ha to check
+   * @param haElev rise/set ha
+   * @return ha or -haElev or haElev
+   */
+  private final static double checkHA(final double ha, final double haElev) {
+    if (ha < -haElev) {
+      return -haElev;
+    }
+    if (ha > haElev) {
+      return haElev;
+    }
+    return ha;
   }
 
   /**
@@ -387,12 +408,14 @@ public final class UVCoverageService {
       logger.fine("obsRangesHA = " + obsRangesHA);
     }
 
-    if (obsRangesHA != null) {
+    if (obsRangesHA == null) {
+      addWarning("The target [" + this.targetName + "] is not observable");
+    } else {
 
       final double haElev = this.starData.getHaElev();
 
-      final double haLower = (this.haMin < -haElev) ? -haElev : this.haMin;
-      final double haUpper = (this.haMax > haElev) ? haElev : this.haMax;
+      final double haLower = checkHA(this.haMin, haElev);
+      final double haUpper = checkHA(this.haMax, haElev);
 
       if (logger.isLoggable(Level.FINE)) {
         logger.fine("HA min/Max = " + haLower + " - " + haUpper);
@@ -421,6 +444,7 @@ public final class UVCoverageService {
 
       // check if there is at least one observable HA :
       if (nPoints == 0) {
+        addWarning("Check your HA min/max settings. There is no observable HA");
         return;
       }
 
@@ -537,7 +561,7 @@ public final class UVCoverageService {
 
     final FocalInstrumentMode insMode = this.observation.getInstrumentConfiguration().getFocalInstrumentMode();
     if (insMode == null) {
-      throw new IllegalStateException("prepareObservation : the instrumentMode is null !");
+      throw new IllegalStateException("the instrumentMode is empty !");
     }
 
     if (logger.isLoggable(Level.FINE)) {
@@ -594,19 +618,33 @@ public final class UVCoverageService {
   private void createOIFits() {
     final List<UVRangeBaseLineData> targetUVObservability = this.data.getTargetUVObservability();
 
-    if (targetUVObservability != null) {
+    if (targetUVObservability == null) {
+      addWarning("OIFits data not available");
+    } else {
 
       // get current target :
       final Target target = this.observation.getTarget(this.targetName);
 
       // Create the OIFitsCreatorService :
-      final OIFitsCreatorService oiFitsCreator =
-                                 new OIFitsCreatorService(this.observation, target,
+      final OIFitsCreatorService oiFitsCreator = new OIFitsCreatorService(this.observation, target,
               this.beams, this.baseLines, this.lambdaMin, this.lambdaMax, this.nSpectralChannels,
-              this.data.getHA(), targetUVObservability, this.starData.getPrecRA(), this.sc);
+              this.data.getHA(), targetUVObservability, this.starData.getPrecRA(), this.sc,
+              this.data.getWarningContainer());
 
       // Create the OIFits structure :
       this.data.setOiFitsFile(oiFitsCreator.createOIFits());
     }
+  }
+
+  /**
+   * Add a warning message in the OIFits file
+   * @param msg message to add
+   */
+  protected final void addWarning(final String msg) {
+    if (logger.isLoggable(Level.INFO)) {
+      logger.info(msg);
+    }
+
+    this.data.getWarningContainer().addWarningMessage(msg);
   }
 }
