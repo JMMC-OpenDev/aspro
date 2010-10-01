@@ -1,23 +1,25 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproOIFitsFile.java,v 1.1 2010-09-02 15:46:32 bourgesl Exp $"
+ * "@(#) $Id: WarningContainer.java,v 1.1 2010-10-01 13:21:35 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2010/09/02 15:46:32  bourgesl
+ * simple warning message container extension of OIFiteFile
+ *
  */
-package fr.jmmc.aspro.model.oifits;
+package fr.jmmc.aspro.model;
 
-import fr.jmmc.oitools.model.OIFitsFile;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This class extends OIFitsFile (oitools) in order to add warning messages produced while computation
+ * This class is a container for warning messages produced while computation
  * @author bourgesl
  */
-public final class AsproOIFitsFile extends OIFitsFile implements WarningContainer {
+public final class WarningContainer {
 
   /** warning messages */
   private List<String> warningMessages = null;
@@ -25,7 +27,7 @@ public final class AsproOIFitsFile extends OIFitsFile implements WarningContaine
   /**
    * Public constructor
    */
-  public AsproOIFitsFile() {
+  public WarningContainer() {
     super();
   }
 
