@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityPanel.java,v 1.40 2010-09-23 19:46:35 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityPanel.java,v 1.41 2010-10-01 15:28:46 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.40  2010/09/23 19:46:35  bourgesl
+ * comments when calling FeedBackReport
+ *
  * Revision 1.39  2010/09/15 13:55:53  bourgesl
  * added JMMC copyright on plot
  * added moon illumination in title because moon rise/set is hidden
@@ -174,6 +177,7 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.annotations.XYTextAnnotation;
 import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.axis.SymbolAxis;
+import org.jfree.chart.axis.TickUnitSource;
 import org.jfree.chart.event.ChartProgressEvent;
 import org.jfree.chart.event.ChartProgressListener;
 import org.jfree.chart.plot.IntervalMarker;
@@ -191,7 +195,7 @@ import org.jfree.ui.TextAnchor;
  * @author bourgesl
  */
 public final class ObservabilityPanel extends javax.swing.JPanel implements ChartProgressListener,
-        ObservationListener, PDFExportable {
+                                                                            ObservationListener, PDFExportable {
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
@@ -209,9 +213,11 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
   /* time references */
   /** LST time reference */
-  private static final String TIME_LST = "LST";
+  private static final String TIME_LST = "L.S.T.";
   /** UTC time reference */
-  private static final String TIME_UTC = "UTC";
+  private static final String TIME_UTC = "U.T.C.";
+  /** HA time reference */
+  private static final String TIME_HA = "H.A.";
 
   /* default plot options */
   /** default value for the checkbox BaseLine Limits */
@@ -224,6 +230,11 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
   private JFreeChart localJFreeChart;
   /** xy plot instance */
   private XYPlot localXYPlot;
+  /** hour angle tick units */
+  private final TickUnitSource haTickUnits = ChartUtils.createHourAngleTickUnits();
+  /** hour:minute units */
+  private final TickUnitSource hhmmTickUnits = ChartUtils.createTimeTickUnits();
+
   /* swing */
   /** chart panel */
   private ChartPanel chartPanel;
@@ -310,9 +321,11 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
       public void itemStateChanged(final ItemEvent e) {
         final boolean doBaseLineLimits = e.getStateChange() == ItemEvent.SELECTED;
         if (doBaseLineLimits) {
+          jComboTimeRef.setSelectedItem(TIME_LST);
           jCheckBoxDetailedOutput.setSelected(false);
         }
 
+        jComboTimeRef.setEnabled(!doBaseLineLimits);
         jCheckBoxDetailedOutput.setEnabled(!doBaseLineLimits);
         refreshPlot();
       }
@@ -509,16 +522,26 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
               ChartUtils.addSubtitle(localJFreeChart, sb.toString());
 
-              if (observation.getWhen().isNightRestriction() || !useLST) {
+              if (!doBaseLineLimits && (observation.getWhen().isNightRestriction() || !useLST)) {
                 // date :
-                ChartUtils.addSubtitle(localJFreeChart, "Day : " + observation.getWhen().getDate().toString() +
-                        " - Moon = " + (int)Math.round(obsData.getMoonIllumPercent()) + "%");
+                ChartUtils.addSubtitle(localJFreeChart, "Day : " + observation.getWhen().getDate().toString()
+                        + " - Moon = " + (int) Math.round(obsData.getMoonIllumPercent()) + "%");
               }
 
               // computed data are valid :
-              updateChart(obsData.getStarVisibilities(), obsData.getDateMin(), obsData.getDateMax());
+              updateChart(obsData.getStarVisibilities(), obsData.getDateMin(), obsData.getDateMax(), doBaseLineLimits);
 
-              updateDateAxis((useLST) ? "LST" : "UTC", obsData.getDateMin(), obsData.getDateMax());
+              final String dateAxisLabel;
+              if (doBaseLineLimits) {
+                dateAxisLabel = TIME_HA;
+              } else {
+                if (useLST) {
+                  dateAxisLabel = TIME_LST;
+                } else {
+                  dateAxisLabel = TIME_UTC;
+                }
+              }
+              updateDateAxis(dateAxisLabel, obsData.getDateMin(), obsData.getDateMax(), doBaseLineLimits);
 
               updateSunMarkers(obsData.getSunIntervals());
 
@@ -557,8 +580,11 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
    * @param starVis star observability data
    * @param min lower date of the plot
    * @param max upper date of the plot
+   * @param doBaseLineLimits flag to plot baseline limits
    */
-  private void updateChart(final List<StarObservabilityData> starVis, final Date min, final Date max) {
+  private void updateChart(final List<StarObservabilityData> starVis, final Date min, final Date max,
+                           final boolean doBaseLineLimits) {
+
     final ColorPalette palette = ColorPalette.getDefaultColorPalette();
 
     // renderer :
@@ -627,7 +653,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     // remove Annotations :
     renderer.removeAnnotations();
 
-    if (!this.jCheckBoxBaseLineLimits.isSelected()) {
+    if (!doBaseLineLimits) {
       // add the Annotations :
       // 24h date formatter like in france :
       final DateFormat df = DateFormat.getTimeInstance(DateFormat.SHORT, Locale.FRANCE);
@@ -669,8 +695,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
     // annotation JMMC (fixed position) :
     final XYTextAnnotation aJMMC = new XYTextAnnotation(AsproConstants.JMMC_ANNOTATION,
-            localSymbolAxis.getRange().getUpperBound(),
-            max.getTime());
+            localSymbolAxis.getRange().getUpperBound(), max.getTime());
     aJMMC.setTextAnchor(TextAnchor.BOTTOM_RIGHT);
     aJMMC.setPaint(Color.BLACK);
     renderer.addAnnotation(aJMMC, Layer.BACKGROUND);
@@ -681,12 +706,25 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
    * @param label axis label with units
    * @param from starting date
    * @param to ending date
+   * @param doBaseLineLimits flag to plot baseline limits
    */
-  private void updateDateAxis(final String label, final Date from, final Date to) {
+  private void updateDateAxis(final String label, final Date from, final Date to,
+                              final boolean doBaseLineLimits) {
+
     // change the Range axis (horizontal) :
     final DateAxis dateAxis = new DateAxis(label);
     dateAxis.setAutoRange(false);
+
+    // note : the last tick is missing as date max = 23:59:59 (removed 1s)
     dateAxis.setRange(from.getTime(), to.getTime());
+
+    if (doBaseLineLimits) {
+      dateAxis.setStandardTickUnits(this.haTickUnits);
+    } else {
+      dateAxis.setStandardTickUnits(this.hhmmTickUnits);
+    }
+    dateAxis.setTickLabelInsets(ChartUtils.TICK_LABEL_INSETS);
+
     this.localXYPlot.setRangeAxis(dateAxis);
   }
 
