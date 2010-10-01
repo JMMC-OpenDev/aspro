@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.56 2010-09-25 14:03:35 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.57 2010-10-01 15:41:04 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.56  2010/09/25 14:03:35  bourgesl
+ * removed JNLP failure test
+ *
  * Revision 1.55  2010/09/25 13:58:57  bourgesl
  * test failure in service (JNLP)
  *
@@ -415,8 +418,12 @@ public final class ObservabilityService {
     }
 
     this.data.setDateCalc(this.sc);
-    this.data.setDateMin(jdToDate(this.jdLst0));
-    this.data.setDateMax(jdToDate(this.jdLst24));
+
+    final Date dateMin = jdToDate(this.jdLst0);
+    final Date dateMax = jdToDate(this.jdLst24);
+
+    this.data.setDateMin(dateMin);
+    this.data.setDateMax(dateMax);
 
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("date min = " + this.data.getDateMin());
