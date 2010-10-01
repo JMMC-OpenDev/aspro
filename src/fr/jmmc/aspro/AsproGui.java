@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproGui.java,v 1.35 2010-09-26 12:47:16 bourgesl Exp $"
+ * "@(#) $Id: AsproGui.java,v 1.36 2010-10-01 13:25:41 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.35  2010/09/26 12:47:16  bourgesl
+ * moved ready code to execute
+ *
  * Revision 1.34  2010/09/25 13:58:43  bourgesl
  * remove tests
  *
@@ -171,16 +174,16 @@ public final class AsproGui extends App {
    * @param args command line arguments
    */
   public static void main(final String[] args) {
-    // Install exception handlers :
-    MCSExceptionHandler.installSwingHandler();
-
     // Set the default locale to en-US locale (for Numerical Fields "." ",")
     Locale.setDefault(Locale.US);
     // Set the default timezone to GMT to handle properly the date in UTC :
     TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
 
-    // Change Swing defaults :
+    // Change Swing defaults before using Swing classes :
     changeSwingDefaults();
+
+    // Install exception handlers for Swing (use EDT) :
+    MCSExceptionHandler.installSwingHandler();
 
     final long start = System.nanoTime();
     try {
@@ -204,7 +207,7 @@ public final class AsproGui extends App {
     JComponent.setDefaultLocale(Locale.US);
 
     // Let the tooltip stay longer (60s) :
-    ToolTipManager.sharedInstance().setInitialDelay(250);
+    ToolTipManager.sharedInstance().setInitialDelay(100);
     ToolTipManager.sharedInstance().setDismissDelay(60000);
   }
 
@@ -324,9 +327,9 @@ public final class AsproGui extends App {
       logger.info("screen size = " + screenSize.getWidth() + " x " + screenSize.getHeight());
     }
 
-    // hack for 1024x768 screens :
+    // hack for screens smaller than 1152x864 screens :
     final int appWidth = 950;
-    final int appHeight = (screenSize.getHeight() <= 768) ? 700 : 800;
+    final int appHeight = (screenSize.getHeight() >= 864) ? 800 : 700;
 
     final Dimension dim = new Dimension(appWidth, appHeight);
     frame.setMinimumSize(dim);
