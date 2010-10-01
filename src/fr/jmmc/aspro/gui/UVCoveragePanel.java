@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.56 2010-09-26 12:00:07 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.57 2010-10-01 15:30:52 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.56  2010/09/26 12:00:07  bourgesl
+ * do not catch runtime exceptions
+ *
  * Revision 1.55  2010/09/24 15:49:48  bourgesl
  * use MessagePane
  *
@@ -244,7 +247,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JFormattedTextField;
-import javax.swing.JOptionPane;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import org.jdesktop.swingworker.SwingWorker;
@@ -730,8 +732,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       ExportOBVegaAction.getInstance().process();
 
     } else {
-      JOptionPane.showMessageDialog(null, "The application can not generate an Observing Block for this instrument [" + insName + "] !",
-              "Error", JOptionPane.INFORMATION_MESSAGE);
+      MessagePane.showMessage("The application can not generate an Observing Block for this instrument [" + insName + "] !");
     }
   }
 
@@ -1436,7 +1437,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         public UVCoverageData doInBackground() {
           logger.fine("SwingWorker[UV].doInBackground : IN");
 
-          // first reset the OIFits structure in the current observation :
+          // first reset the warning container in the current observation :
+          ObservationManager.getInstance().setWarningContainer(null);
+          // then reset the OIFits structure in the current observation :
           ObservationManager.getInstance().setOIFitsFile(null);
 
           UVCoverageData uvData = new UVCoverageService(observation, targetName, uvMax,
@@ -1483,6 +1486,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
               if (uvData != null) {
                 logger.fine("SwingWorker[UV].done : refresh Chart");
+
+                // update the warning container in the current observation :
+                ObservationManager.getInstance().setWarningContainer(uvData.getWarningContainer());
 
                 // update the OIFits structure in the current observation :
                 ObservationManager.getInstance().setOIFitsFile(uvData.getOiFitsFile());
