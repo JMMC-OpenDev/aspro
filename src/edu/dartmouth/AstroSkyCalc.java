@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AstroSkyCalc.java,v 1.25 2010-09-15 13:51:47 bourgesl Exp $"
+ * "@(#) $Id: AstroSkyCalc.java,v 1.26 2010-10-01 15:25:56 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.25  2010/09/15 13:51:47  bourgesl
+ * comments explaining how to get moon angular distance
+ *
  * Revision 1.24  2010/07/22 12:32:22  bourgesl
  * added moon rise/set and moon illumination fraction
  *
@@ -74,6 +77,10 @@ public final class AstroSkyCalc {
   public final static double MJD_REF = 2400000.5d;
   /** 1 second in decimal hour */
   private final static double SEC_IN_DEC_HOUR = 1d / 3600d;
+  /** millisecond in decimal hour */
+  private final static double MSEC_IN_DEC_HOUR = SEC_IN_DEC_HOUR / 1000d;
+  /** minimal precision value in decimal hour */
+  private final static double PREC_IN_DEC_HOUR = MSEC_IN_DEC_HOUR / 10d;
 
   /* members */
   /** site location */
@@ -168,25 +175,38 @@ public final class AstroSkyCalc {
 
     final WhenWhere ww = new WhenWhere(jd, this.site);
 
+    double error;
+    double sign;
+
     // decimal hours :
-    double error = ww.sidereal;
-    int n = 0;
+    double lst;
 
-    while (error > SEC_IN_DEC_HOUR && n < 9) {
+    for (int n = 0;; n++) {
+      lst = ww.sidereal;
 
-      if (error > 12d) {
-        error = 24d - error;
+      if (lst > 12d) {
+        error = 24d - lst;
+        sign = 1d;
       } else {
-        error *= -1d;
+        error = lst;
+        sign = -1d;
       }
 
-      ww.ChangeWhen(ww.when.jd + (error / 24d));
+      // test if error is less than 1ms, then exit loop :
+      // absolute lst value must be positive i.e. inside [0;1s] :
+      if (error < MSEC_IN_DEC_HOUR && lst < SEC_IN_DEC_HOUR || n > 10) {
+        break;
+      }
 
-//    dumpWhen(this.when, "When");
+      // avoid too small step (double precision limit) :
+      if (error < PREC_IN_DEC_HOUR) {
+        error = PREC_IN_DEC_HOUR;
+      }
 
-      // next pass :
-      error = ww.sidereal;
-      n++;
+      // adjust jd :
+      ww.ChangeWhen(ww.when.jd + sign * error / 24d);
+
+//      dumpWhen(ww, "When");
     }
 
     if (logger.isLoggable(Level.FINE)) {
@@ -212,7 +232,8 @@ public final class AstroSkyCalc {
    * @return Date object
    */
   public Date toDate(final double jd, final boolean useLst) {
-    return toCalendar(jd, useLst).getTime();
+    final Calendar cal = toCalendar(jd, useLst);
+    return cal.getTime();
   }
 
   /**
@@ -224,16 +245,16 @@ public final class AstroSkyCalc {
   public Calendar toCalendar(final double jd, final boolean useLst) {
     final WhenWhere ww = new WhenWhere(jd, this.site);
 
-    final InstantInTime t = ww.when;
-
     // The default TimeZone is already set to GMT :
     final Calendar cal = new GregorianCalendar();
     if (useLst) {
+      final RA sidereal = ww.siderealobj;
       // ignore the date info as the LST has only time :
-      cal.set(Calendar.HOUR_OF_DAY, ww.siderealobj.sex.hour);
-      cal.set(Calendar.MINUTE, ww.siderealobj.sex.minute);
-      cal.set(Calendar.SECOND, (int) Math.round(ww.siderealobj.sex.second));
+      cal.set(Calendar.HOUR_OF_DAY, sidereal.sex.hour);
+      cal.set(Calendar.MINUTE, sidereal.sex.minute);
+      cal.set(Calendar.SECOND, (int) Math.round(sidereal.sex.second));
     } else {
+      final InstantInTime t = ww.when;
       /* note : month is in range [0;11] in java Calendar */
       cal.set(t.UTDate.year, t.UTDate.month - 1, t.UTDate.day,
               t.UTDate.timeofday.hour, t.UTDate.timeofday.minute, (int) Math.round(t.UTDate.timeofday.second));
