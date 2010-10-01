@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ChartUtils.java,v 1.9 2010-05-11 12:01:54 bourgesl Exp $"
+ * "@(#) $Id: ChartUtils.java,v 1.10 2010-10-01 15:35:42 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.9  2010/05/11 12:01:54  bourgesl
+ * added createLegend argument to createSquareXYLineChart(...)
+ *
  * Revision 1.8  2010/04/02 10:04:18  bourgesl
  * added diamond shape
  *
@@ -30,16 +33,20 @@
  */
 package fr.jmmc.aspro.gui.chart;
 
+import fr.jmmc.aspro.util.TimeFormat;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Polygon;
 import java.awt.Shape;
+import java.text.DateFormat;
 import java.text.DecimalFormat;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.StandardChartTheme;
+import org.jfree.chart.axis.DateTickUnit;
+import org.jfree.chart.axis.DateTickUnitType;
 import org.jfree.chart.axis.NumberTickUnit;
 import org.jfree.chart.axis.TickUnitSource;
 import org.jfree.chart.axis.TickUnits;
@@ -66,10 +73,8 @@ public class ChartUtils {
 
   /** The default font for titles. */
   private static final Font DEFAULT_TITLE_FONT = new Font("SansSerif", Font.BOLD, 14);
-  /** scientific tick units singleton */
-  private static TickUnits SCIENTIFIC_TICK_UNITS = null;
   /** default tick label rectangle insets */
-  public final static RectangleInsets TICK_LABEL_INSETS = new RectangleInsets(1.0, 1.0, 1.0, 1.0);
+  public final static RectangleInsets TICK_LABEL_INSETS = new RectangleInsets(2.0, 2.0, 2.0, 2.0);
   /** default axis offset */
   public final static RectangleInsets ZERO_AXIS_OFFSET = new RectangleInsets(0.0, 0.0, 0.0, 0.0);
   /** diamond shape */
@@ -107,8 +112,8 @@ public class ChartUtils {
 
     // diamond shape :
     final int delta = 4;
-    final int[] xpoints = new int[] {0, delta, 0, -delta};
-    final int[] ypoints = new int[] {-delta, 0, delta, 0};
+    final int[] xpoints = new int[]{0, delta, 0, -delta};
+    final int[] ypoints = new int[]{-delta, 0, delta, 0};
 
     DIAMOND_SHAPE = new Polygon(xpoints, ypoints, 4);
   }
@@ -122,7 +127,6 @@ public class ChartUtils {
     final JFreeChart localJFreeChart = ChartFactory.createXYBarChart("", null, false, null, null, PlotOrientation.HORIZONTAL, false, false, false);
 
     final XYPlot localXYPlot = (XYPlot) localJFreeChart.getPlot();
-    localXYPlot.setNoDataMessage("NO DATA");
 
     localXYPlot.getDomainAxis().setVisible(false);
     localXYPlot.getRangeAxis().setVisible(false);
@@ -148,7 +152,6 @@ public class ChartUtils {
     final JFreeChart localJFreeChart = createSquareXYLineChart(null, xLabel, yLabel, null, PlotOrientation.VERTICAL, legend, false, false);
 
     final SquareXYPlot localXYPlot = (SquareXYPlot) localJFreeChart.getPlot();
-    localXYPlot.setNoDataMessage("NO DATA");
 
     // show crosshair :
     /*
@@ -200,13 +203,13 @@ public class ChartUtils {
    * @return The chart.
    */
   public static JFreeChart createSquareXYLineChart(String title,
-          String xAxisLabel,
-          String yAxisLabel,
-          XYDataset dataset,
-          PlotOrientation orientation,
-          boolean legend,
-          boolean tooltips,
-          boolean urls) {
+                                                   String xAxisLabel,
+                                                   String yAxisLabel,
+                                                   XYDataset dataset,
+                                                   PlotOrientation orientation,
+                                                   boolean legend,
+                                                   boolean tooltips,
+                                                   boolean urls) {
 
     if (orientation == null) {
       throw new IllegalArgumentException("Null 'orientation' argument.");
@@ -281,36 +284,91 @@ public class ChartUtils {
    * @see #createStandardTickUnits()
    */
   public static TickUnitSource createScientificTickUnits() {
-    if (SCIENTIFIC_TICK_UNITS == null) {
-      final TickUnits units = new TickUnits();
-      final DecimalFormat df0 = new DecimalFormat("0");
-      final DecimalFormat df1 = new DecimalFormat("0.0E0");
+    final TickUnits units = new TickUnits();
+    final DecimalFormat df0 = new DecimalFormat("0");
+    final DecimalFormat df1 = new DecimalFormat("0.0E0");
 
-      units.add(new NumberTickUnit(1, df0));
-      units.add(new NumberTickUnit(5, df0));
-      units.add(new NumberTickUnit(10, df0));
-      units.add(new NumberTickUnit(50, df0));
-      units.add(new NumberTickUnit(100, df0));
-      units.add(new NumberTickUnit(500, df0));
+    // note : number lower than 1 are not supported !
 
-      units.add(new NumberTickUnit(1000, df1));
-      units.add(new NumberTickUnit(5000, df1));
-      units.add(new NumberTickUnit(10000, df1));
-      units.add(new NumberTickUnit(50000, df1));
-      units.add(new NumberTickUnit(100000, df1));
-      units.add(new NumberTickUnit(500000, df1));
-      units.add(new NumberTickUnit(1000000, df1));
-      units.add(new NumberTickUnit(5000000, df1));
-      units.add(new NumberTickUnit(10000000, df1));
-      units.add(new NumberTickUnit(50000000, df1));
-      units.add(new NumberTickUnit(100000000, df1));
-      units.add(new NumberTickUnit(500000000, df1));
-      units.add(new NumberTickUnit(1000000000, df1));
-      units.add(new NumberTickUnit(5000000000.0, df1));
-      units.add(new NumberTickUnit(10000000000.0, df1));
+    units.add(new NumberTickUnit(1, df0));
+    units.add(new NumberTickUnit(5, df0));
+    units.add(new NumberTickUnit(10, df0));
+    units.add(new NumberTickUnit(50, df0));
+    units.add(new NumberTickUnit(100, df0));
+    units.add(new NumberTickUnit(500, df0));
 
-      SCIENTIFIC_TICK_UNITS = units;
-    }
-    return SCIENTIFIC_TICK_UNITS;
+    units.add(new NumberTickUnit(1000, df1));
+    units.add(new NumberTickUnit(5000, df1));
+    units.add(new NumberTickUnit(10000, df1));
+    units.add(new NumberTickUnit(50000, df1));
+    units.add(new NumberTickUnit(100000, df1));
+    units.add(new NumberTickUnit(500000, df1));
+    units.add(new NumberTickUnit(1000000, df1));
+    units.add(new NumberTickUnit(5000000, df1));
+    units.add(new NumberTickUnit(10000000, df1));
+    units.add(new NumberTickUnit(50000000, df1));
+    units.add(new NumberTickUnit(100000000, df1));
+    units.add(new NumberTickUnit(500000000, df1));
+    units.add(new NumberTickUnit(1000000000, df1));
+    units.add(new NumberTickUnit(5000000000.0, df1));
+    units.add(new NumberTickUnit(10000000000.0, df1));
+
+    return units;
+  }
+
+  /**
+   * Returns a collection of tick units for time values (hours and minutes).
+   *
+   * @return A collection of tick units for time values.
+   *
+   * @see #setStandardTickUnits(TickUnitSource)
+   * @see #createStandardDateTickUnits()
+   */
+  public static TickUnitSource createTimeTickUnits() {
+
+    final TickUnits units = new TickUnits();
+
+    // H:MM format :
+    final DateFormat tf = new TimeFormat(false, true);
+
+    // hours
+    units.add(new DateTickUnit(DateTickUnitType.HOUR, 1,
+            DateTickUnitType.MINUTE, 5, tf));
+    units.add(new DateTickUnit(DateTickUnitType.HOUR, 2,
+            DateTickUnitType.MINUTE, 10, tf));
+    units.add(new DateTickUnit(DateTickUnitType.HOUR, 3,
+            DateTickUnitType.MINUTE, 30, tf));
+    units.add(new DateTickUnit(DateTickUnitType.HOUR, 6,
+            DateTickUnitType.HOUR, 1, tf));
+
+    return units;
+  }
+
+  /**
+   * Returns a collection of tick units for time values (hours and minutes).
+   *
+   * @return A collection of tick units for time values.
+   *
+   * @see #setStandardTickUnits(TickUnitSource)
+   * @see #createStandardDateTickUnits()
+   */
+  public static TickUnitSource createHourAngleTickUnits() {
+
+    final TickUnits units = new TickUnits();
+
+    // HA format :
+    final DateFormat haf = new TimeFormat(true, false);
+
+    // hours
+    units.add(new DateTickUnit(DateTickUnitType.HOUR, 1,
+            DateTickUnitType.MINUTE, 5, haf));
+    units.add(new DateTickUnit(DateTickUnitType.HOUR, 2,
+            DateTickUnitType.MINUTE, 10, haf));
+    units.add(new DateTickUnit(DateTickUnitType.HOUR, 3,
+            DateTickUnitType.MINUTE, 30, haf));
+    units.add(new DateTickUnit(DateTickUnitType.HOUR, 6,
+            DateTickUnitType.HOUR, 1, haf));
+
+    return units;
   }
 }
