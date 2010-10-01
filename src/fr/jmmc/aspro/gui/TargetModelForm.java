@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetModelForm.java,v 1.26 2010-09-24 15:55:22 bourgesl Exp $"
+ * "@(#) $Id: TargetModelForm.java,v 1.27 2010-10-01 15:30:01 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.26  2010/09/24 15:55:22  bourgesl
+ * use MessagePane
+ *
  * Revision 1.25  2010/09/20 14:46:02  bourgesl
  * minor refactoring changes
  *
@@ -92,13 +95,11 @@ import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.mcs.gui.App;
 import fr.jmmc.mcs.gui.MessagePane;
 import fr.jmmc.mcs.gui.NumericJTable;
-import fr.jmmc.mcs.model.ModelDefinition;
 import fr.jmmc.mcs.model.ModelManager;
 import fr.jmmc.mcs.model.gui.ModelParameterTableModel;
 import fr.jmmc.mcs.model.gui.ModelParameterTableModel.EditMode;
 import fr.jmmc.mcs.model.gui.ModelParameterTableModel.Mode;
 import fr.jmmc.mcs.model.targetmodel.Model;
-import fr.jmmc.mcs.model.targetmodel.Parameter;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -968,8 +969,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         this.selectPath(new TreePath(newNode.getPath()));
 
       } else if (parentNode.getUserObject() instanceof Model) {
-        // TODO : later
-        JOptionPane.showMessageDialog(this, "Not implemented !");
+        throw new UnsupportedOperationException("Not implemented !");
       }
     } else {
       if (logger.isLoggable(Level.SEVERE)) {
@@ -1026,8 +1026,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         this.selectPath(new TreePath(parentNode.getPath()));
 
       } else if (parentNode.getUserObject() instanceof Model) {
-        // TODO : later
-        JOptionPane.showMessageDialog(this, "Not implemented !");
+        throw new UnsupportedOperationException("Not implemented !");
       }
     } else {
       if (logger.isLoggable(Level.SEVERE)) {
@@ -1064,8 +1063,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         target = (Target) parentNode.getUserObject();
 
       } else if (parentNode.getUserObject() instanceof Model) {
-        // TODO : later
-        JOptionPane.showMessageDialog(this, "Not implemented !");
+        throw new UnsupportedOperationException("Not implemented !");
       }
     } else {
       if (logger.isLoggable(Level.SEVERE)) {
@@ -1112,21 +1110,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
       return;
     }
 
-    // following code could be delegated to
-    // ModelManager.getInstance().normalizeModelFlux(target);
-    double totalFlux = 0;
-    List<Model> modelList = this.currentTarget.getModels();
-
-    for (Model model : modelList) {
-      Parameter p = model.getParameter(ModelDefinition.PARAM_FLUX_WEIGHT);
-      // p should never be null
-      totalFlux += p.getValue();
-    }
-    for (Model model : modelList) {
-      Parameter p = model.getParameter(ModelDefinition.PARAM_FLUX_WEIGHT);
-      // p should never be null
-      p.setValue(p.getValue() / totalFlux);
-    }
+    ModelManager.getInstance().normalizeFluxes(this.currentTarget.getModels());
 
     // refresh whole values
     getModelParameterTableModel().fireTableDataChanged();
