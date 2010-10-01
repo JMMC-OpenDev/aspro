@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: NoiseService.java,v 1.14 2010-09-02 15:55:55 bourgesl Exp $"
+ * "@(#) $Id: NoiseService.java,v 1.15 2010-10-01 15:39:58 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.14  2010/09/02 15:55:55  bourgesl
+ * handle missing object magnitudes : always return NaN for errors
+ * report warning messages for DIT and missing magnitudes
+ *
  * Revision 1.13  2010/08/31 10:42:07  bourgesl
  * fixed bug on T3noise
  *
@@ -61,8 +65,9 @@ import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetConfiguration;
 import fr.jmmc.aspro.model.oi.Telescope;
-import fr.jmmc.aspro.model.oifits.WarningContainer;
+import fr.jmmc.aspro.model.WarningContainer;
 import fr.jmmc.aspro.model.util.AtmosphereQualityUtils;
+import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Random;
 import java.util.logging.Level;
@@ -417,7 +422,7 @@ public final class NoiseService {
       // the dit is too long
       this.dit *= this.detectorSaturation / peakflux;
 
-      addWarning("DIT too long. Adjusting it to (possibly impossible) : " + this.dit + " s");
+      addWarning("DIT too long (saturation). Adjusting it to (possibly impossible) : " + formatDIT(this.dit));
 
       nbFrameToSaturation = 1;
     } else {
@@ -429,7 +434,7 @@ public final class NoiseService {
       this.dit = Math.min(this.dit * nbFrameToSaturation, this.totalObsTime);
       this.dit = Math.min(this.dit, this.fringeTrackerMaxIntTime);
 
-      addWarning("Observation can take advantage of FT. Adjusting DIT to : " + this.dit + " s");
+      addWarning("Observation can take advantage of FT. Adjusting DIT to : " + formatDIT(this.dit));
     }
 
     nbTotalPhot = nbTotalPhotPerS * this.dit;
@@ -456,10 +461,29 @@ public final class NoiseService {
   }
 
   /**
+   * Format DIT value for warning messages
+   * @param dit detector integration time (s)
+   * @return DIT value
+   */
+  private String formatDIT(final double dit) {
+    final String unit;
+    final double val;
+    if (dit >= 1d) {
+      val = dit;
+      unit = " s";
+    } else {
+      val = dit * 1000d;
+      unit = " ms";
+    }
+    final DecimalFormat df = new DecimalFormat("##0.##");
+    return df.format(val) + unit;
+  }
+
+  /**
    * Add a warning message in the OIFits file
    * @param msg message to add
    */
-  protected void addWarning(final String msg) {
+  protected final void addWarning(final String msg) {
     if (logger.isLoggable(Level.INFO)) {
       logger.info(msg);
     }
