@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoverageData.java,v 1.8 2010-06-29 14:24:45 bourgesl Exp $"
+ * "@(#) $Id: UVCoverageData.java,v 1.9 2010-10-01 15:38:29 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.8  2010/06/29 14:24:45  bourgesl
+ * javadoc comment
+ *
  * Revision 1.7  2010/06/28 12:27:56  bourgesl
  * hour angles (HA) moved in UVCoverageData because it is not related to a particular baseline
  *
@@ -31,6 +34,7 @@
  */
 package fr.jmmc.aspro.model.uvcoverage;
 
+import fr.jmmc.aspro.model.WarningContainer;
 import fr.jmmc.mcs.model.UVMapData;
 import fr.jmmc.oitools.model.OIFitsFile;
 import java.util.List;
@@ -55,6 +59,8 @@ public final class UVCoverageData {
   private List<UVRangeBaseLineData> targetUVObservability;
   /** uv map data */
   private UVMapData uvMapData;
+  /** warning container */
+  private final WarningContainer warningContainer = new WarningContainer();
   /** oifits structure */
   private OIFitsFile oiFitsFile;
 
@@ -118,6 +124,10 @@ public final class UVCoverageData {
 
   public void setUvMapData(final UVMapData uvMapData) {
     this.uvMapData = uvMapData;
+  }
+
+  public WarningContainer getWarningContainer() {
+    return warningContainer;
   }
 
   public OIFitsFile getOiFitsFile() {
