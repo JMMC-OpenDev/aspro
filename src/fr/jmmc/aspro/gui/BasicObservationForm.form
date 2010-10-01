@@ -148,6 +148,7 @@
         <Component class="javax.swing.JFormattedTextField" name="jTextPoPs">
           <Properties>
             <Property name="columns" type="int" value="4"/>
+            <Property name="toolTipText" type="java.lang.String" value="&lt;html&gt;&#xa;define a specific PoPs combination (PoP 1 to 5) by giving the list of PoP numbers&lt;br/&gt;&#xa;in the same order than stations of the selected base line. For example:&lt;ul&gt;&#xa;&lt;li&gt;VEGA_2T with baseline S1-S2&lt;br/&gt;&apos;34&apos; means PoP3 on S1 and PoP4 on S2&lt;/li&gt;&#xa;&lt;li&gt;MIRC (4T) with baseline S1-S2-E1-W2&lt;br/&gt;&apos;1255&apos; means PoP1 on S1, PoP2 on S2 and Pop5 on E1 and W2&lt;/li&gt;&#xa;&lt;/ul&gt;&#xa;&lt;b&gt;If you left this field blank, ASPRO 2 will compute the &apos;best PoP&apos; combination&lt;br/&gt;&#xa;maximizing the observability of your complete list of targets&lt;/b&gt;&#xa;&lt;/html&gt;"/>
             <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
               <Dimension value="[40, 20]"/>
             </Property>
@@ -197,6 +198,7 @@
                   <StringArray count="0"/>
                 </Property>
                 <Property name="selectionMode" type="int" value="0"/>
+                <Property name="toolTipText" type="java.lang.String" value="Target list : use the SimBad field to enter your targets&#xa;"/>
                 <Property name="visibleRowCount" type="int" value="3"/>
               </Properties>
               <AuxValues>
@@ -241,7 +243,7 @@
         </Component>
         <Component class="fr.jmmc.aspro.gui.star.EditableStarResolverWidget" name="starSearchField">
           <Properties>
-            <Property name="toolTipText" type="java.lang.String" value="&lt;html&gt;&#xa;Target identifier (SimBad resolution)&lt;br/&gt;&#xa;or RA / DEC coordinates with optional star name (&apos;HMS DMS [star name]&apos;)&#xa;&lt;/html&gt;"/>
+            <Property name="toolTipText" type="java.lang.String" value="&lt;html&gt;&#xa;Enter targets here :&lt;br/&gt;&#xa;Target identifier (SimBad resolution)&lt;br/&gt;&#xa;or RA / DEC coordinates with optional star name (&apos;HMS DMS [star name]&apos;)&#xa;&lt;/html&gt;"/>
             <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
               <Dimension value="[100, 23]"/>
             </Property>
@@ -356,9 +358,12 @@
       <Layout class="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout"/>
       <SubComponents>
         <Component class="javax.swing.JLabel" name="jLabelStatus">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Ok"/>
+          </Properties>
           <Constraints>
             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
-              <GridBagConstraints gridX="1" gridY="0" gridWidth="1" gridHeight="1" fill="1" ipadX="0" ipadY="0" insetsTop="0" insetsLeft="0" insetsBottom="0" insetsRight="0" anchor="10" weightX="0.0" weightY="0.0"/>
+              <GridBagConstraints gridX="1" gridY="0" gridWidth="1" gridHeight="1" fill="1" ipadX="0" ipadY="0" insetsTop="0" insetsLeft="0" insetsBottom="0" insetsRight="0" anchor="10" weightX="1.0" weightY="1.0"/>
             </Constraint>
           </Constraints>
         </Component>
@@ -368,7 +373,7 @@
           </Properties>
           <Constraints>
             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
-              <GridBagConstraints gridX="0" gridY="0" gridWidth="1" gridHeight="1" fill="1" ipadX="0" ipadY="0" insetsTop="0" insetsLeft="0" insetsBottom="0" insetsRight="0" anchor="10" weightX="0.0" weightY="0.0"/>
+              <GridBagConstraints gridX="0" gridY="0" gridWidth="1" gridHeight="1" fill="1" ipadX="0" ipadY="0" insetsTop="4" insetsLeft="4" insetsBottom="4" insetsRight="4" anchor="10" weightX="0.0" weightY="0.0"/>
             </Constraint>
           </Constraints>
         </Component>

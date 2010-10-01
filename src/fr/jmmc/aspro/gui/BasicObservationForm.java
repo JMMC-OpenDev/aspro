@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BasicObservationForm.java,v 1.35 2010-09-20 14:46:02 bourgesl Exp $"
+ * "@(#) $Id: BasicObservationForm.java,v 1.36 2010-10-01 13:24:02 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.35  2010/09/20 14:46:02  bourgesl
+ * minor refactoring changes
+ *
  * Revision 1.34  2010/09/02 15:46:43  bourgesl
  * added status panel (warnings)
  *
@@ -114,8 +117,8 @@ import fr.jmmc.aspro.model.oi.InterferometerConfigurationChoice;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Pop;
 import fr.jmmc.aspro.model.oi.Target;
-import fr.jmmc.aspro.model.oifits.AsproOIFitsFile;
 import fr.jmmc.mcs.astro.star.Star;
+import fr.jmmc.mcs.gui.MessagePane;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
@@ -137,7 +140,6 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JFormattedTextField;
 import javax.swing.JList;
-import javax.swing.JOptionPane;
 import javax.swing.JSpinner;
 import javax.swing.JSpinner.DateEditor;
 import javax.swing.SwingUtilities;
@@ -300,6 +302,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     jPanelMain.add(jLabelPops, gridBagConstraints);
 
     jTextPoPs.setColumns(4);
+    jTextPoPs.setToolTipText("<html>\ndefine a specific PoPs combination (PoP 1 to 5) by giving the list of PoP numbers<br/>\nin the same order than stations of the selected base line. For example:<ul>\n<li>VEGA_2T with baseline S1-S2<br/>'34' means PoP3 on S1 and PoP4 on S2</li>\n<li>MIRC (4T) with baseline S1-S2-E1-W2<br/>'1255' means PoP1 on S1, PoP2 on S2 and Pop5 on E1 and W2</li>\n</ul>\n<b>If you left this field blank, ASPRO 2 will compute the 'best PoP' combination<br/>\nmaximizing the observability of your complete list of targets</b>\n</html>");
     jTextPoPs.setMinimumSize(new java.awt.Dimension(40, 20));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 6;
@@ -319,6 +322,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     jScrollPane1.setPreferredSize(new java.awt.Dimension(100, 50));
 
     jListTargets.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+    jListTargets.setToolTipText("Target list : use the SimBad field to enter your targets\n");
     jListTargets.setVisibleRowCount(3);
     jScrollPane1.setViewportView(jListTargets);
 
@@ -331,7 +335,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
     jPanelMain.add(jScrollPane1, gridBagConstraints);
 
-    jButtonRemoveTarget.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+    jButtonRemoveTarget.setFont(new java.awt.Font("Dialog", 1, 14));
     jButtonRemoveTarget.setIcon(new javax.swing.ImageIcon(getClass().getResource("/fr/jmmc/aspro/gui/icons/delete.png"))); // NOI18N
     jButtonRemoveTarget.setMargin(new java.awt.Insets(0, 0, 0, 0));
     jButtonRemoveTarget.addActionListener(new java.awt.event.ActionListener() {
@@ -358,7 +362,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
     jPanelMain.add(jButtonModelEditor, gridBagConstraints);
 
-    starSearchField.setToolTipText("<html>\nTarget identifier (SimBad resolution)<br/>\nor RA / DEC coordinates with optional star name ('HMS DMS [star name]')\n</html>");
+    starSearchField.setToolTipText("<html>\nEnter targets here :<br/>\nTarget identifier (SimBad resolution)<br/>\nor RA / DEC coordinates with optional star name ('HMS DMS [star name]')\n</html>");
     starSearchField.setMinimumSize(new java.awt.Dimension(100, 23));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 3;
@@ -435,10 +439,14 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     jPanel1.setMinimumSize(new java.awt.Dimension(57, 30));
     jPanel1.setPreferredSize(new java.awt.Dimension(100, 30));
     jPanel1.setLayout(new java.awt.GridBagLayout());
+
+    jLabelStatus.setText("Ok");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
     jPanel1.add(jLabelStatus, gridBagConstraints);
 
     jLabel7.setText("Status : ");
@@ -446,6 +454,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
     jPanel1.add(jLabel7, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
@@ -463,8 +472,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     final String targetName = (String) this.jListTargets.getSelectedValue();
 
     if (targetName != null) {
-      final int answer = JOptionPane.showConfirmDialog(this.jButtonRemoveTarget, "Do you want to remove the target [" + targetName + "] ?");
-      if (answer == JOptionPane.YES_OPTION) {
+      if (MessagePane.showConfirmMessage(this.jButtonRemoveTarget, "Do you want to remove the target [" + targetName + "] ?")) {
         if (this.om.removeTarget(targetName)) {
           // update target list :
           updateListTargets();
@@ -912,8 +920,8 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
       case CHANGED:
         this.resetStatus();
         break;
-      case OIFITS_DONE:
-        this.updateStatus(((AsproOIFitsFile) observation.getOIFitsFile()).getWarningMessages());
+      case WARNINGS_READY:
+        this.updateStatus(observation.getWarningContainer().getWarningMessages());
         break;
       default:
     }
@@ -934,7 +942,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
    * @param messages message list or null to reset content
    */
   private void updateStatus(final List<String> messages) {
-    if (messages == null) {
+    if (messages == null || messages.isEmpty()) {
       // reset
       this.jLabelStatus.setIcon(null);
       this.jLabelStatus.setText("Ok");
@@ -996,16 +1004,18 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         }
         // Get item index :
         final int index = locationToIndex(evt.getPoint());
-        // Get target name :
-        final String targetName = (String) getModel().getElementAt(index);
-        if (targetName != null) {
-          final Target target = ObservationManager.getInstance().getTarget(targetName);
-          if (target != null) {
-            // Return the tool tip text :
-            return target.toHtml();
+        if (index != -1) {
+          // Get target name :
+          final String targetName = (String) getModel().getElementAt(index);
+          if (targetName != null) {
+            final Target target = ObservationManager.getInstance().getTarget(targetName);
+            if (target != null) {
+              // Return the tool tip text :
+              return target.toHtml();
+            }
           }
         }
-        return null;
+        return getToolTipText();
       }
     };
   }
