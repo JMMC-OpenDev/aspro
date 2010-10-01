@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: NewObservationAction.java,v 1.4 2010-09-26 12:43:58 bourgesl Exp $"
+ * "@(#) $Id: NewObservationAction.java,v 1.5 2010-10-01 15:33:52 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2010/09/26 12:43:58  bourgesl
+ * removed try catch runtime exception
+ *
  * Revision 1.3  2010/09/24 15:54:25  bourgesl
  * better exception handling + use MessagePane
  *
@@ -19,10 +22,13 @@
 package fr.jmmc.aspro.gui.action;
 
 import fr.jmmc.aspro.model.ObservationManager;
-import fr.jmmc.mcs.gui.MessagePane;
+import fr.jmmc.mcs.gui.App;
 import fr.jmmc.mcs.gui.StatusBar;
+import fr.jmmc.mcs.util.ActionRegistrar;
 import java.awt.event.ActionEvent;
 import java.util.logging.Level;
+import javax.swing.AbstractAction;
+import javax.swing.JOptionPane;
 
 /**
  * New observation settings action
@@ -54,6 +60,26 @@ public class NewObservationAction extends ObservationFileAction {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("actionPerformed");
     }
+
+    // Ask the user if he wants to save modifications
+    final Object[] options = {"Save", "Cancel", "Don't Save"};
+    final int result = JOptionPane.showOptionDialog(App.getFrame(),
+            "Do you want to save changes before creating a new observation ?\nIf you don't save, your changes will be lost.\n\n",
+            null, JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, null, options,
+            options[0]);
+
+    // If the User clicked the "Save" button, save and go on
+    if (result == 0) {
+      final AbstractAction action = (SaveObservationAction) ActionRegistrar.getInstance().get(SaveObservationAction.className, SaveObservationAction.actionName);
+
+      action.actionPerformed(null);
+    }
+    // If the user clicked the "Cancel" button, don't quit
+    if (result == 1) {
+      return;
+    }
+
+    // If the user clicked the "Don't Save" button, go on
     final ObservationManager om = ObservationManager.getInstance();
 
     om.reset();
