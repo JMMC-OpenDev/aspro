@@ -1,11 +1,16 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BasicObservationForm.java,v 1.36 2010-10-01 13:24:02 bourgesl Exp $"
+ * "@(#) $Id: BasicObservationForm.java,v 1.37 2010-10-01 16:02:13 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.36  2010/10/01 13:24:02  bourgesl
+ * added tooltips on target list and PoPs field
+ * Warnings are always refreshed
+ * use MessagePane
+ *
  * Revision 1.35  2010/09/20 14:46:02  bourgesl
  * minor refactoring changes
  *
@@ -111,6 +116,7 @@ import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.ConfigurationManager;
 import fr.jmmc.aspro.model.ObservationListener;
 import fr.jmmc.aspro.model.ObservationManager;
+import fr.jmmc.aspro.model.WarningContainer;
 import fr.jmmc.aspro.model.oi.FocalInstrumentConfigurationChoice;
 import fr.jmmc.aspro.model.oi.InterferometerConfiguration;
 import fr.jmmc.aspro.model.oi.InterferometerConfigurationChoice;
@@ -921,7 +927,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         this.resetStatus();
         break;
       case WARNINGS_READY:
-        this.updateStatus(observation.getWarningContainer().getWarningMessages());
+        this.updateStatus(observation.getWarningContainer());
         break;
       default:
     }
@@ -939,10 +945,10 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
 
   /**
    * Update status panel
-   * @param messages message list or null to reset content
+   * @param warningContainer warning container or null to reset content
    */
-  private void updateStatus(final List<String> messages) {
-    if (messages == null || messages.isEmpty()) {
+  private void updateStatus(final WarningContainer warningContainer) {
+    if (warningContainer == null || !warningContainer.hasWarningMessages()) {
       // reset
       this.jLabelStatus.setIcon(null);
       this.jLabelStatus.setText("Ok");
@@ -951,7 +957,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
       this.jLabelStatus.setIcon(this.warningIcon);
       this.jLabelStatus.setText("Warning");
       final StringBuilder sb = new StringBuilder(256);
-      for (String msg : messages) {
+      for (String msg : warningContainer.getWarningMessages()) {
         sb.append(msg).append("\n");
       }
       this.jLabelStatus.setToolTipText(sb.toString());
