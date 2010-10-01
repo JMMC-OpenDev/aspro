@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BoundedNumberAxis.java,v 1.5 2010-06-17 10:02:50 bourgesl Exp $"
+ * "@(#) $Id: BoundedNumberAxis.java,v 1.6 2010-10-01 15:34:28 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2010/06/17 10:02:50  bourgesl
+ * fixed warning hints - mainly not final static loggers
+ *
  * Revision 1.4  2010/05/11 12:02:24  bourgesl
  * disable autoRange at all
  *
@@ -22,8 +25,8 @@
 package fr.jmmc.aspro.gui.chart;
 
 import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.event.AxisChangeEvent;
 import org.jfree.data.Range;
-import org.jfree.ui.RectangleInsets;
 
 /**
  * This customized number axis used bounds to limits its expansion (zoom out).
@@ -41,8 +44,6 @@ public final class BoundedNumberAxis extends NumberAxis {
   /** Class logger */
   private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
-  /** default tick rectangle insets */
-  public final static RectangleInsets TICK_LABEL_INSETS = new RectangleInsets(1.0, 1.0, 1.0, 1.0);
 
   /* members */
   /** axis bounds */
@@ -58,7 +59,7 @@ public final class BoundedNumberAxis extends NumberAxis {
   public BoundedNumberAxis(String label) {
     super(label);
     setAutoRange(false, false);
-    setTickLabelInsets(TICK_LABEL_INSETS);
+    setTickLabelInsets(ChartUtils.TICK_LABEL_INSETS);
   }
 
   /**
