@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportPDFAction.java,v 1.13 2010-09-26 11:59:11 bourgesl Exp $"
+ * "@(#) $Id: ExportPDFAction.java,v 1.14 2010-10-01 15:33:39 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.13  2010/09/26 11:59:11  bourgesl
+ * replaced RuntimeException by IllegalStateException to avoid catching runtime exceptions
+ *
  * Revision 1.12  2010/09/24 15:54:25  bourgesl
  * better exception handling + use MessagePane
  *
@@ -63,7 +66,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
 import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileFilter;
 import org.jfree.chart.JFreeChart;
 
@@ -160,8 +162,7 @@ public final class ExportPDFAction extends RegisteredAction {
       file = checkFileExtension(fileChooser.getSelectedFile());
 
       if (file.exists()) {
-        final int answer = JOptionPane.showConfirmDialog(null, "File \'" + file.getName() + "\' already exists\nDo you want to overwrite this file ?");
-        if (answer != JOptionPane.YES_OPTION) {
+        if (!MessagePane.showConfirmFileOverwrite(file.getName())) {
           file = null;
         }
       }

@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SaveObservationAction.java,v 1.10 2010-09-24 15:54:25 bourgesl Exp $"
+ * "@(#) $Id: SaveObservationAction.java,v 1.11 2010-10-01 15:34:06 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.10  2010/09/24 15:54:25  bourgesl
+ * better exception handling + use MessagePane
+ *
  * Revision 1.9  2010/09/01 12:57:13  bourgesl
  * added runtime exception message to user message dialog
  *
@@ -43,7 +46,6 @@ import java.awt.event.ActionEvent;
 import java.io.File;
 import java.util.logging.Level;
 import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
 
 /**
  * Save observation settings action
@@ -95,8 +97,7 @@ public class SaveObservationAction extends ObservationFileAction {
       file = checkFileExtension(fileChooser.getSelectedFile());
 
       if (file.exists()) {
-        final int answer = JOptionPane.showConfirmDialog(null, "File \'" + file.getName() + "\' already exists\nDo you want to overwrite this file ?");
-        if (answer != JOptionPane.YES_OPTION) {
+        if (!MessagePane.showConfirmFileOverwrite(file.getName())) {
           file = null;
         }
       }

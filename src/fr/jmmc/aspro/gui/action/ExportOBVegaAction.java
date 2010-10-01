@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBVegaAction.java,v 1.6 2010-09-24 15:54:25 bourgesl Exp $"
+ * "@(#) $Id: ExportOBVegaAction.java,v 1.7 2010-10-01 15:32:28 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2010/09/24 15:54:25  bourgesl
+ * better exception handling + use MessagePane
+ *
  * Revision 1.5  2010/09/01 12:57:14  bourgesl
  * added runtime exception message to user message dialog
  *
@@ -34,7 +37,6 @@ import fr.jmmc.mcs.util.FileFilterRepository;
 import java.io.File;
 import java.util.logging.Level;
 import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileFilter;
 
 /**
@@ -105,8 +107,7 @@ public class ExportOBVegaAction {
       file = checkFileExtension(fileChooser.getSelectedFile());
 
       if (file.exists()) {
-        final int answer = JOptionPane.showConfirmDialog(null, "File \'" + file.getName() + "\' already exists\nDo you want to overwrite this file ?");
-        if (answer != JOptionPane.YES_OPTION) {
+        if (!MessagePane.showConfirmFileOverwrite(file.getName())) {
           file = null;
         }
       }
