@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: StarData.java,v 1.2 2010-01-22 13:16:19 bourgesl Exp $"
+ * "@(#) $Id: StarData.java,v 1.3 2010-10-01 15:36:58 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2010/01/22 13:16:19  bourgesl
+ * fixed imports
+ *
  * Revision 1.1  2010/01/08 16:48:30  bourgesl
  * package refactoring
  *
@@ -68,6 +71,12 @@ public class StarData {
     this.haElev = haElev;
   }
 
+  /*
+   * TODO : check usages and provide proper user messages (not observable in actions ...)
+   * ExportOBVega.java
+   * ExportOBVLTI.java
+   * UVCoverageService.java
+   */
   public List<Range> getObsRangesHA() {
     return obsRangesHA;
   }
