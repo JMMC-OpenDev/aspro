@@ -789,14 +789,25 @@ public class Target
     final Target copy = (Target) super.clone();
 
     // Deep copy of models :
-    final List<Model> newModels = new ArrayList<Model>();
-    for (Model model : getModels()) {
-      newModels.add((Model) model.clone());
-    }
-    copy.models = newModels;
+    copy.models = Target.cloneModels(getModels());
 
     return copy;
   }
+
+  /**
+   * Return a deep "copy" of the list of models
+   * @param models list of models to clone
+   * @return cloned model list
+   */
+  public static final List<Model> cloneModels(final List<Model> models) {
+    // Deep copy of models :
+    final List<Model> newModels = new ArrayList<Model>(models.size());
+    for (Model model : models) {
+      newModels.add((Model) model.clone());
+    }
+    return newModels;
+  }
+
 //--simple--preserve
 
 }
