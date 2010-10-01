@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <ApplicationData link="http://www.jmmc.fr/aspro2">
-  <program name="Aspro2" version="0.6.2"/>
-  <compilation date="20/09/2010" compiler="JDK 1.5.0_16"/>
+  <program name="Aspro2" version="0.6.3 beta"/>
+  <compilation date="29/09/2010" compiler="JDK 1.5.0_16"/>
   <text>
     <![CDATA[ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations
     with the VLTI or other interferometers. This observation preparation tool is developed and maintained by the JMMC.
@@ -48,9 +48,9 @@
             icon="/fr/jmmc/aspro/gui/icons/filesaveas.png" description="save the current observation as an observation file"/>
       <menu/> <!-- menu separator -->
       <menu label="Export to OIFits" classpath="fr.jmmc.aspro.gui.action.ExportOIFitsAction" action="exportOIFits" accelerator="F"
-            description="Export your target observables to an OIFits file (only valid if the target has a model)"/>
+            description="Export your target observables to an OIFits file"/>
       <menu label="Export to an Observing Block" classpath="fr.jmmc.aspro.gui.action.ExportOBAction" action="exportOB" accelerator="B"
-            description="Export your observation to an Observing block (only valid inside the UV Coverage Panel)"/>
+            description="Export your observation to an Observing block"/>
       <menu/> <!-- menu separator -->
       <menu label="Export plot to PDF" classpath="fr.jmmc.aspro.gui.action.ExportPDFAction" action="exportPDF" accelerator="P"
             description="Export the current plot to a PDF document"/>
@@ -58,7 +58,23 @@
   </menubar>
   <releasenotes>
     <release version="0.6">
+      <prerelease version="0.6.3">
+        <change type="BUGFIX" id="1285777818">Fixed bug concerning random dates : the LST axis is corrupted (Requires 'lower' < 'upper')</change>
+        <change type="BUGFIX">Fixed bug in HA min/max restrictions : invalid values can cause a NegativeArrayException</change>
+        <change>Formatted DIT value in warning messages coming from noise modeling (FT or saturation)</change>
+        <change>Added warning messages on GUI to indicate unobservable target and invalid HA min/max settings</change>
+        <change>Added tooltips on target list and PoPs field</change>
+        <change>Fixed window size problem for the 1280 x 800 resolution</change>
+        <change>Added a confirm dialog for the 'New Observation' action</change>
+      </prerelease>
       <prerelease version="0.6.2">
+        <change type="BUGFIX" id="1285082082">Added the following message
+                when the user use the 'Export to OIFits' action and the oifits is null :
+                'There is currently no OIFits data (no target or your target is not observable)'</change>
+        <change type="BUGFIX" id="1285167992">Corrected focus problem with the action 'Export to an Observing block'
+                and added an user message if there is no target to export</change>
+        <change>Use an hour angle axis when the observability displays the baseline limits</change>
+        <change>Normalize model flux weights to compute visibilities</change>
         <change>Added CHARA instruments : CLASSIC (2T) and CLIMB (3T)</change>
         <change>Better exception handling and user messages</change>
         <change>Unexpected exceptions are now propagated to the feedback report</change>
