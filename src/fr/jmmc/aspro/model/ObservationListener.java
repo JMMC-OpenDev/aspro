@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationListener.java,v 1.4 2010-06-23 12:53:48 bourgesl Exp $"
+ * "@(#) $Id: ObservationListener.java,v 1.5 2010-10-01 15:36:29 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2010/06/23 12:53:48  bourgesl
+ * added setOIFitsFile method and fire OIFits done event
+ *
  * Revision 1.3  2010/01/08 16:51:17  bourgesl
  * initial uv coverage
  *
@@ -38,8 +41,12 @@ public interface ObservationListener {
     LOADED,
     /** the observability was computed */
     OBSERVABILITY_DONE,
+    /** the warnings are ready */
+    WARNINGS_READY,
     /** the OIFits was computed */
     OIFITS_DONE
+
+    /* TODO Missing UVCoverageDone event */
   }
 
   /**

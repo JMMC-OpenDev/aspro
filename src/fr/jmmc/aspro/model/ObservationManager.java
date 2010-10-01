@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationManager.java,v 1.37 2010-09-26 12:47:40 bourgesl Exp $"
+ * "@(#) $Id: ObservationManager.java,v 1.38 2010-10-01 15:36:29 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.37  2010/09/26 12:47:40  bourgesl
+ * better exception handling
+ *
  * Revision 1.36  2010/09/20 14:45:36  bourgesl
  * better method ordering
  * removed static methods getTarget(observation ...) and getTargetConfiguration(observation ...)
@@ -345,7 +348,20 @@ public final class ObservationManager extends BaseOIManager {
     fireEvent(ObservationEventType.OBSERVABILITY_DONE);
   }
 
-  // Missing fireUVCoverageDone 
+  // TODO : Missing fireUVCoverageDone
+
+  /**
+   * This fires a warning ready event to all registered listeners.
+   * Fired by setWarningContainer() <- UVCoveragePanel.plot().done() (EDT) when the oiFits is computed
+   */
+  private void fireWarningsReady() {
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("fireOIFitsDone : " + toString(getObservation()));
+    }
+
+    fireEvent(ObservationEventType.WARNINGS_READY);
+  }
+
   /**
    * This fires an OIFits done event to all registered listeners.
    * Fired by setOIFitsFile() <- UVCoveragePanel.plot().done() (EDT) when the oiFits is computed
@@ -844,6 +860,22 @@ public final class ObservationManager extends BaseOIManager {
 
     if (obsData != null) {
       fireObservabilityDone();
+    }
+  }
+
+  /**
+   * Defines the warning container in the observation for later reuse
+   * @param warningContainer OIFits structure
+   */
+  public void setWarningContainer(final WarningContainer warningContainer) {
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("setWarningContainer : " + warningContainer);
+    }
+
+    getObservation().setWarningContainer(warningContainer);
+
+    if (warningContainer != null) {
+      fireWarningsReady();
     }
   }
 
