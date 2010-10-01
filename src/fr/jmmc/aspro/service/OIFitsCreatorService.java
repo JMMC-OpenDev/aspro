@@ -4,13 +4,13 @@ import edu.dartmouth.AstroSkyCalc;
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.BaseLine;
 import fr.jmmc.aspro.model.Beam;
+import fr.jmmc.aspro.model.WarningContainer;
 import fr.jmmc.aspro.model.oi.InterferometerConfiguration;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Position3D;
 import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.Telescope;
-import fr.jmmc.aspro.model.oifits.AsproOIFitsFile;
 import fr.jmmc.aspro.model.uvcoverage.UVRangeBaseLineData;
 import fr.jmmc.aspro.util.CombUtils;
 import fr.jmmc.aspro.util.ComplexUtils;
@@ -91,7 +91,7 @@ public final class OIFitsCreatorService {
 
   /* output */
   /** oifits structure */
-  private final AsproOIFitsFile oiFitsFile;
+  private final OIFitsFile oiFitsFile;
 
   /* internal */
   /** target has models */
@@ -132,6 +132,7 @@ public final class OIFitsCreatorService {
    * @param targetUVObservability list of UV coordinates per baseline
    * @param precRA precessed target right ascension in decimal hours
    * @param sc sky calc instance
+   * @param warningContainer container for warning messages
    */
   protected OIFitsCreatorService(final ObservationSetting observation,
                                  final Target target,
@@ -142,7 +143,8 @@ public final class OIFitsCreatorService {
                                  final double[] obsHa,
                                  final List<UVRangeBaseLineData> targetUVObservability,
                                  final double precRA,
-                                 final AstroSkyCalc sc) {
+                                 final AstroSkyCalc sc,
+                                 final WarningContainer warningContainer) {
     this.observation = observation;
     this.target = target;
     this.beams = beams;
@@ -163,10 +165,10 @@ public final class OIFitsCreatorService {
     }
 
     // create a new OIFits structure :
-    this.oiFitsFile = new AsproOIFitsFile();
+    this.oiFitsFile = new OIFitsFile();
 
     // Prepare the noise service :
-    this.noiseService = new NoiseService(this.observation, target, this.oiFitsFile);
+    this.noiseService = new NoiseService(this.observation, target, warningContainer);
 
     // Has models ?
     final List<Model> models = this.target.getModels();
@@ -413,6 +415,10 @@ public final class OIFitsCreatorService {
     if (this.hasModels) {
       final List<Model> models = this.target.getModels();
 
+      // Clone models and normalize fluxes :
+      final List<Model> normModels = Target.cloneModels(models);
+      ModelManager.normalizeFluxes(normModels);
+
       // Allocate data array for complex visibility and error :
       final Complex[][] cVis = new Complex[this.nHAPoints * this.nBaseLines][];
       final Complex[][] cVisError = new Complex[this.nHAPoints * this.nBaseLines][this.nWaveLengths];
@@ -444,7 +450,7 @@ public final class OIFitsCreatorService {
           }
 
           // compute complex visibilities :
-          cVis[k] = ModelManager.getInstance().computeModels(ufreq, vfreq, models);
+          cVis[k] = ModelManager.getInstance().computeModels(ufreq, vfreq, normModels);
 
           if (cVis[k] == null) {
             // fast interrupt :
