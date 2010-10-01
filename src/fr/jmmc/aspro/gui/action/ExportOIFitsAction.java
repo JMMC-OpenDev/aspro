@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOIFitsAction.java,v 1.4 2010-09-26 11:59:39 bourgesl Exp $"
+ * "@(#) $Id: ExportOIFitsAction.java,v 1.5 2010-10-01 15:33:11 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2010/09/26 11:59:39  bourgesl
+ * catch correct exceptions
+ *
  * Revision 1.3  2010/09/24 15:54:25  bourgesl
  * better exception handling + use MessagePane
  *
@@ -33,7 +36,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
 import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileFilter;
 import nom.tam.fits.FitsException;
 
@@ -106,8 +108,7 @@ public class ExportOIFitsAction extends RegisteredAction {
         file = checkFileExtension(fileChooser.getSelectedFile());
 
         if (file.exists()) {
-          final int answer = JOptionPane.showConfirmDialog(null, "File \'" + file.getName() + "\' already exists\nDo you want to overwrite this file ?");
-          if (answer != JOptionPane.YES_OPTION) {
+          if (!MessagePane.showConfirmFileOverwrite(file.getName())) {
             file = null;
           }
         }
@@ -132,6 +133,8 @@ public class ExportOIFitsAction extends RegisteredAction {
                 "Could not export to file : " + file.getName(), ioe);
         }
       }
+    } else {
+      MessagePane.showMessage("There is currently no OIFits data (your target is not observable)");
     }
   }
 
