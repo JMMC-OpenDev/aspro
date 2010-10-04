@@ -118,7 +118,7 @@ public final class JAXBFactory {
    * Creates a JAXB Unmarshaller
    *
    * @return JAXB Unmarshaller
-   * @throws XmlBindException if a JAXBException was caught
+   * @throws XmlBindException if a JAXBException was caught while creating an unmarshaller
    */
   public Unmarshaller createUnMarshaller() throws XmlBindException {
     Unmarshaller u = null;
@@ -138,7 +138,7 @@ public final class JAXBFactory {
    * Creates a JAXB Marshaller
    *
    * @return JAXB Marshaller
-   * @throws XmlBindException if a JAXBException was caught
+   * @throws XmlBindException if a JAXBException was caught while creating an marshaller
    */
   public Marshaller createMarshaller() throws XmlBindException {
     Marshaller m = null;
