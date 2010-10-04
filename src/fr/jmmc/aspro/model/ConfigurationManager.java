@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ConfigurationManager.java,v 1.31 2010-09-26 12:47:40 bourgesl Exp $"
+ * "@(#) $Id: ConfigurationManager.java,v 1.32 2010-10-04 14:30:47 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.31  2010/09/26 12:47:40  bourgesl
+ * better exception handling
+ *
  * Revision 1.30  2010/09/25 13:41:59  bourgesl
  * better singleton initialisation
  * simplified exception handling
@@ -162,7 +165,7 @@ public final class ConfigurationManager extends BaseOIManager {
    */
   public static synchronized final ConfigurationManager getInstance()
           throws IllegalStateException, IllegalArgumentException {
-    
+
     if (instance == null) {
       final ConfigurationManager cm = new ConfigurationManager();
 
@@ -192,7 +195,7 @@ public final class ConfigurationManager extends BaseOIManager {
    */
   private void initialize()
           throws IllegalStateException, IllegalArgumentException {
-    
+
     final long start = System.nanoTime();
 
     final Configurations conf = (Configurations) loadObject(CONF_FILE);
@@ -234,7 +237,7 @@ public final class ConfigurationManager extends BaseOIManager {
     }
 
     computeInterferometerLocation(d);
-    computeMaxUVCoverage(d);
+    computeLimitsUVCoverage(d);
 
     interferometerDescriptions.put(d.getName(), d);
 
@@ -263,12 +266,13 @@ public final class ConfigurationManager extends BaseOIManager {
   }
 
   /**
-   * Compute the max UV coverage using all station couples
+   * Compute the min and max UV coverage using all station couples
    * Note : some station couples can not be available as instrument baselines
    * @param id interferometer description
    */
-  private void computeMaxUVCoverage(final InterferometerDescription id) {
+  private void computeLimitsUVCoverage(final InterferometerDescription id) {
     double maxUV = 0d;
+    double minUV = Double.MAX_VALUE;
 
     final List<Station> stations = id.getStations();
     final int size = stations.size();
@@ -286,14 +290,16 @@ public final class ConfigurationManager extends BaseOIManager {
 
         dist = Math.sqrt(x * x + y * y + z * z);
 
+        minUV = Math.min(minUV, dist);
         maxUV = Math.max(maxUV, dist);
       }
     }
 
+    id.setMinBaseLine(minUV);
     id.setMaxBaseLine(maxUV);
 
     if (logger.isLoggable(Level.FINE)) {
-      logger.fine("maxUVCoverage [" + id.getName() + "] = " + maxUV + " m");
+      logger.fine("computeLimitsUVCoverage [" + id.getName() + "] = {" + minUV + " - " + maxUV + " m");
     }
   }
 

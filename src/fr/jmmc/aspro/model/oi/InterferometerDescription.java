@@ -432,6 +432,25 @@ public class InterferometerDescription
     }
     return configurations;
   }
+ /** minimum distance between 2 stations in meter */
+  @javax.xml.bind.annotation.XmlTransient
+  private double minUVBaseLine = 0d;
+
+  /**
+   * Return the minimum distance between 2 stations in meter
+   * @return minimum distance between 2 stations in meter
+   */
+  public final double getMinBaseLine() {
+    return minUVBaseLine;
+  }
+
+  /**
+   * Define the minimum distance between 2 stations in meter
+   * @param minBaseLine minimum distance between 2 stations in meter
+   */
+  public final void setMinBaseLine(final double minBaseLine) {
+    this.minUVBaseLine = minBaseLine;
+  }
   /** maximum distance between 2 stations in meter */
   @javax.xml.bind.annotation.XmlTransient
   private double maxUVBaseLine = 0d;
