@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproGui.java,v 1.36 2010-10-01 13:25:41 bourgesl Exp $"
+ * "@(#) $Id: AsproGui.java,v 1.37 2010-10-04 14:59:13 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.36  2010/10/01 13:25:41  bourgesl
+ * set Swing properties before using MCSExceptionHandler (swingHandler)
+ * fix for screens 1280x800
+ *
  * Revision 1.35  2010/09/26 12:47:16  bourgesl
  * moved ready code to execute
  *
@@ -248,10 +252,10 @@ public final class AsproGui extends App {
 
     } catch (InterruptedException ie) {
       // propagate the exception :
-      throw new RuntimeException("AsproGui.init : interrupted", ie);
+      throw new IllegalStateException("AsproGui.init : interrupted", ie);
     } catch (InvocationTargetException ite) {
       // propagate the internal exception :
-      throw new RuntimeException("AsproGui.init : exception", ite.getCause());
+      throw new IllegalStateException("AsproGui.init : exception", ite.getCause());
     }
 
     logger.fine("AsproGui.init() handler : exit");
