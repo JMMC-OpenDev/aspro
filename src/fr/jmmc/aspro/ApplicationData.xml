@@ -55,6 +55,9 @@
       <menu label="Export plot to PDF" classpath="fr.jmmc.aspro.gui.action.ExportPDFAction" action="exportPDF" accelerator="P"
             description="Export the current plot to a PDF document"/>
     </menu>
+    <menu label="Interop">
+      <menu label="Perform model fitting" classpath="fr.jmmc.aspro.gui.action.BroadcastToModelFittingAction" action="BroadcastToModelFittingAction"/>
+    </menu>
   </menubar>
   <releasenotes>
     <release version="0.6">
