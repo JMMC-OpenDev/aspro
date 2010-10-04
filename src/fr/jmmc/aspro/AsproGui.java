@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproGui.java,v 1.37 2010-10-04 14:59:13 bourgesl Exp $"
+ * "@(#) $Id: AsproGui.java,v 1.38 2010-10-04 16:11:12 mella Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.37  2010/10/04 14:59:13  bourgesl
+ * replaced runtime exception by illegal state exception during initialization
+ *
  * Revision 1.36  2010/10/01 13:25:41  bourgesl
  * set Swing properties before using MCSExceptionHandler (swingHandler)
  * fix for screens 1280x800
@@ -126,6 +129,7 @@
 package fr.jmmc.aspro;
 
 import fr.jmmc.aspro.gui.SettingPanel;
+import fr.jmmc.aspro.gui.action.BroadcastToModelFittingAction;
 import fr.jmmc.aspro.gui.action.ExportOBAction;
 import fr.jmmc.aspro.gui.action.ExportOIFitsAction;
 import fr.jmmc.aspro.gui.action.ExportPDFAction;
@@ -387,6 +391,8 @@ public final class AsproGui extends App {
     new ExportPDFAction();
     // export OIFits :
     new ExportOIFitsAction();
+    // use interop with modelfitting :
+    new BroadcastToModelFittingAction();
   }
 
   /**
