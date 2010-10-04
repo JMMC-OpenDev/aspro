@@ -1,7 +1,5 @@
 package fr.jmmc.jaxb;
 
-import javax.xml.bind.JAXBException;
-
 /**
  * This class is a RuntimeException wrapping a JAXB Exception or a validation failure 
  * 
