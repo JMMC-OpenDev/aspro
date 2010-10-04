@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.57 2010-10-01 15:30:52 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.58 2010-10-04 14:31:46 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.57  2010/10/01 15:30:52  bourgesl
+ * define warning container filled in UVCoverageService (including noise service messages)
+ * use MessagePane
+ *
  * Revision 1.56  2010/09/26 12:00:07  bourgesl
  * do not catch runtime exceptions
  *
@@ -924,9 +928,10 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
       final InterferometerConfiguration intConf = observation.getInterferometerConfiguration().getInterferometerConfiguration();
 
-      // update the UV Max :
+      // update the UV range :
+      final double minBaseLine = intConf.getInterferometer().getMinBaseLine();
       final double maxBaseLine = intConf.getInterferometer().getMaxBaseLine();
-      this.uvMaxAdapter.reset(0, maxBaseLine, maxBaseLine);
+      this.uvMaxAdapter.reset(minBaseLine, maxBaseLine, maxBaseLine);
     }
   }
 
