@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TimeFormat.java,v 1.1 2010-10-01 15:29:15 bourgesl Exp $"
+ * "@(#) $Id: TimeFormat.java,v 1.2 2010-10-04 05:14:40 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2010/10/01 15:29:15  bourgesl
+ * custom Date format to format time (HH:MM) and HA
+ *
  */
 package fr.jmmc.aspro.util;
 
@@ -70,10 +73,10 @@ public final class TimeFormat extends DateFormat {
 
     if (useHA) {
       h -= 12;
-    }
-
-    if (h < 10) {
-      toAppendTo.append('0');
+    } else {
+      if (h < 10) {
+        toAppendTo.append('0');
+      }
     }
     toAppendTo.append(h);
 
