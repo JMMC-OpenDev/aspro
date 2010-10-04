@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBMidi.java,v 1.5 2010-09-24 15:52:03 bourgesl Exp $"
+ * "@(#) $Id: ExportOBMidi.java,v 1.6 2010-10-04 16:25:25 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2010/09/24 15:52:03  bourgesl
+ * exception propagation if template is not found
+ *
  * Revision 1.4  2010/05/26 15:29:13  bourgesl
  * light refactoring and javadoc
  *
@@ -47,6 +50,7 @@ import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.util.FileUtils;
 import java.io.File;
+import java.io.IOException;
 import java.util.logging.Level;
 
 /**
@@ -76,10 +80,11 @@ public class ExportOBMidi extends ExportOBVLTI {
    * @param observation observation settings
    * @param target target to process
    *
-   * @throws IllegalStateException if the template file is not found
+   * @throws IllegalStateException if the template file is not found or can not be read
+   * @throws IOException if an I/O exception occured while writing the observing block
    */
   public static void generate(final File file, final ObservationSetting observation, final Target target)
-                        throws IllegalStateException {
+                        throws IllegalStateException, IOException {
     
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("generate file : " + file);

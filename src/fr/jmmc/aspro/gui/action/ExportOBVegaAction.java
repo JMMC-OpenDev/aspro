@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBVegaAction.java,v 1.7 2010-10-01 15:32:28 bourgesl Exp $"
+ * "@(#) $Id: ExportOBVegaAction.java,v 1.8 2010-10-04 16:25:25 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2010/10/01 15:32:28  bourgesl
+ * use MessagePane.showConfirmFileOverwrite
+ *
  * Revision 1.6  2010/09/24 15:54:25  bourgesl
  * better exception handling + use MessagePane
  *
@@ -35,6 +38,7 @@ import fr.jmmc.mcs.gui.MessagePane;
 import fr.jmmc.mcs.gui.StatusBar;
 import fr.jmmc.mcs.util.FileFilterRepository;
 import java.io.File;
+import java.io.IOException;
 import java.util.logging.Level;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileFilter;
@@ -124,9 +128,9 @@ public class ExportOBVegaAction {
 
         StatusBar.show(file.getName() + " created.");
 
-      } catch (RuntimeException re) {
+      } catch (IOException ioe) {
         MessagePane.showErrorMessage(
-                "Could not export to file : " + file.getName(), re);
+                "Could not export to file : " + file.getName(), ioe);
       }
     }
   }

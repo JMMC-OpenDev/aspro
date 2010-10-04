@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBVLTIAction.java,v 1.13 2010-10-01 15:32:28 bourgesl Exp $"
+ * "@(#) $Id: ExportOBVLTIAction.java,v 1.14 2010-10-04 16:25:25 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.13  2010/10/01 15:32:28  bourgesl
+ * use MessagePane.showConfirmFileOverwrite
+ *
  * Revision 1.12  2010/09/24 15:54:25  bourgesl
  * better exception handling + use MessagePane
  *
@@ -62,6 +65,7 @@ import fr.jmmc.mcs.gui.StatusBar;
 import fr.jmmc.mcs.util.FileFilterRepository;
 import java.awt.event.ActionEvent;
 import java.io.File;
+import java.io.IOException;
 import java.util.logging.Level;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileFilter;
@@ -171,12 +175,9 @@ public class ExportOBVLTIAction {
         // PoP up to validate OB file against ESO CfP :
         DismissableMessagePane.show(null, ESO_WARNING, Preferences.getInstance(), "ESO_OB_WARNING");
 
-      } catch (IllegalStateException iae) {
-        // template file not found
-        throw iae;
-      } catch (RuntimeException re) {
+      } catch (IOException ioe) {
         MessagePane.showErrorMessage(
-                "Could not export to file : " + file.getName(), re);
+                "Could not export to file : " + file.getName(), ioe);
       }
     }
   }

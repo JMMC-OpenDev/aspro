@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBVega.java,v 1.6 2010-06-25 14:17:21 bourgesl Exp $"
+ * "@(#) $Id: ExportOBVega.java,v 1.7 2010-10-04 16:25:25 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2010/06/25 14:17:21  bourgesl
+ * refactoring due to changes done in AstroSkyCalc and AstroSkyCalcObservation
+ *
  * Revision 1.5  2010/06/17 10:02:51  bourgesl
  * fixed warning hints - mainly not final static loggers
  *
@@ -41,6 +44,7 @@ import fr.jmmc.aspro.model.oi.TargetConfiguration;
 import fr.jmmc.aspro.service.ObservabilityService;
 import fr.jmmc.aspro.util.FileUtils;
 import java.io.File;
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.List;
@@ -104,8 +108,9 @@ public class ExportOBVega {
   /**
    * Generate the Star List for the current observation.
    * @param file file to save
+   * @throws IOException if an I/O exception occured while writing the observing block
    */
-  public static void process(final File file) {
+  public static void process(final File file) throws IOException {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("generate file : " + file);
     }

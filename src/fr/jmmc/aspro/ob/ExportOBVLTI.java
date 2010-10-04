@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBVLTI.java,v 1.10 2010-09-24 15:52:03 bourgesl Exp $"
+ * "@(#) $Id: ExportOBVLTI.java,v 1.11 2010-10-04 16:25:25 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.10  2010/09/24 15:52:03  bourgesl
+ * exception propagation if template is not found
+ *
  * Revision 1.9  2010/09/20 14:46:02  bourgesl
  * minor refactoring changes
  *
@@ -69,6 +72,7 @@ import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetConfiguration;
 import fr.jmmc.aspro.service.ObservabilityService;
 import java.io.File;
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Calendar;
@@ -141,8 +145,10 @@ public class ExportOBVLTI {
    * @param targetName target to process
    *
    * @throws IllegalStateException if the template file is not found
+   * @throws IllegalArgumentException if the instrument is not supported (only AMBER/MIDI/VEGA)
+   * @throws IOException if an I/O exception occured while writing the observing block
    */
-  public final static void process(final File file, final String targetName) throws IllegalStateException {
+  public final static void process(final File file, final String targetName) throws IllegalStateException, IllegalArgumentException, IOException {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("process " + targetName + " to " + file);
     }
@@ -164,7 +170,7 @@ public class ExportOBVLTI {
       }
     }
   }
-
+  
   /**
    * Process the common part of the given template for the given target
    * @param template OB template

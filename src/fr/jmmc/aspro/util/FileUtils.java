@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: FileUtils.java,v 1.7 2010-09-24 15:51:09 bourgesl Exp $"
+ * "@(#) $Id: FileUtils.java,v 1.8 2010-10-04 16:25:25 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2010/09/24 15:51:09  bourgesl
+ * better exception handling
+ *
  * Revision 1.6  2010/07/07 09:29:13  bourgesl
  * javadoc
  *
@@ -41,8 +44,6 @@ import java.util.logging.Level;
 
 /**
  * Several File utility methods
- *
- * TODO : check/correct IO exception handling
  *
  * @author bourgesl
  */
@@ -83,34 +84,34 @@ public final class FileUtils {
    *
    * Accepts filename like fr/jmmc/aspro/fileName.ext
    *
-   * @param fileName file name like fr/jmmc/aspro/fileName.ext
+   * @param classpathLocation file name like fr/jmmc/aspro/fileName.ext
    * @return URL to the file or null
    *
    * @throws IllegalStateException if the file is not found
    */
-  public static URL getResource(final String fileName) throws IllegalStateException {
+  public static URL getResource(final String classpathLocation) throws IllegalStateException {
     if (logger.isLoggable(Level.FINE)) {
-      logger.fine("getResource : " + fileName);
+      logger.fine("getResource : " + classpathLocation);
     }
     // use the class loader resource resolver
-    final URL url = FileUtils.class.getClassLoader().getResource(fileName);
+    final URL url = FileUtils.class.getClassLoader().getResource(classpathLocation);
 
     if (url == null) {
-      throw new IllegalStateException("Unable to find the file in the classpath : " + fileName);
+      throw new IllegalStateException("Unable to find the file in the classpath : " + classpathLocation);
     }
-    
+
     return url;
   }
 
   /**
-   * Read the text file into a string
+   * Read a text file from the current classloader into a string
    * 
-   * @param fileName file to load
+   * @param classpathLocation file name like fr/jmmc/aspro/fileName.ext
    * @return text file content
    *
-   * @throws IllegalStateException if the file is not found
+   * @throws IllegalStateException if the file is not found or an I/O exception occured
    */
-  public static String readFile(final String fileName) throws IllegalStateException {
+  public static String readFile(final String classpathLocation) throws IllegalStateException {
 
     String result = null;
 
@@ -120,7 +121,7 @@ public final class FileUtils {
     InputStream inputStream = null;
 
     try {
-      final URL url = getResource(fileName);
+      final URL url = getResource(classpathLocation);
       inputStream = url.openStream();
 
       final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
@@ -132,15 +133,14 @@ public final class FileUtils {
         if (sb.length() > 0) {
           sb.append(LINE_SEPARATOR);
         }
-
         sb.append(currentLine);
       }
 
       result = sb.toString();
 
     } catch (IOException ioe) {
-      logger.log(Level.SEVERE, "read failure.", ioe);
-
+      // Unexpected exception :
+      throw new IllegalStateException("unable to read file : " + classpathLocation, ioe);
     } finally {
       if (inputStream != null) {
         try {
@@ -157,18 +157,15 @@ public final class FileUtils {
    * Write the given string into the given file
    * @param file file to write
    * @param content content to write
+   *
+   * @throws IOException if an I/O exception occured
    */
-  public static void writeFile(final File file, final String content) {
+  public static void writeFile(final File file, final String content) throws IOException {
     final Writer w = openFile(file);
-    if (w != null) {
-      try {
-        w.write(content);
-      } catch (IOException ioe) {
-        logger.log(Level.SEVERE, "IO failure.", ioe);
-      } finally {
-        closeFile(w);
-      }
-
+    try {
+      w.write(content);
+    } finally {
+      closeFile(w);
     }
   }
 
@@ -176,25 +173,20 @@ public final class FileUtils {
    * Returns a Writer for the given file
    *
    * @param file file to write
-   * @return Writer (buffered) or null
+   * @return Writer (buffered)
+   *
+   * @throws IOException if an I/O exception occured
    */
-  public static Writer openFile(final File file) {
-    try {
-      return new BufferedWriter(new FileWriter(file));
-    } catch (IOException ioe) {
-      logger.log(Level.SEVERE, "IO failure.", ioe);
-    }
-
-    return null;
+  public static Writer openFile(final File file) throws IOException {
+    return new BufferedWriter(new FileWriter(file));
   }
 
   /**
    * Close the given writer
    *
    * @param w writer to close
-   * @return null
    */
-  public static Writer closeFile(final Writer w) {
+  public static void closeFile(final Writer w) {
     if (w != null) {
       try {
         w.close();
@@ -202,7 +194,5 @@ public final class FileUtils {
         logger.log(Level.FINE, "IO close failure.", ioe);
       }
     }
-
-    return null;
   }
 }
