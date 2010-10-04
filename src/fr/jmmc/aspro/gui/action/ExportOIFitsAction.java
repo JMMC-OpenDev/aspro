@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOIFitsAction.java,v 1.5 2010-10-01 15:33:11 bourgesl Exp $"
+ * "@(#) $Id: ExportOIFitsAction.java,v 1.6 2010-10-04 14:32:13 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2010/10/01 15:33:11  bourgesl
+ * added message 'There is currently no OIFits data (your target is not observable)'
+ * use MessagePane.showConfirmFileOverwrite
+ *
  * Revision 1.4  2010/09/26 11:59:39  bourgesl
  * catch correct exceptions
  *
@@ -143,7 +147,7 @@ public class ExportOIFitsAction extends RegisteredAction {
    * @param oiFitsFile  OIFits structure
    * @return default name [ASPRO_<target-name>_<instrument>_date]
    */
-  private String getName(final OIFitsFile oiFitsFile) {
+  protected static String getName(final OIFitsFile oiFitsFile) {
     final StringBuilder sb = new StringBuilder(32).append("Aspro2_");
 
     final String targetName = oiFitsFile.getOiTarget().getTarget()[0];
