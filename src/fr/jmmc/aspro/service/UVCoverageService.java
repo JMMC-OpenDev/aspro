@@ -1,11 +1,16 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoverageService.java,v 1.31 2010-10-01 15:45:45 bourgesl Exp $"
+ * "@(#) $Id: UVCoverageService.java,v 1.32 2010-10-04 14:57:09 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.31  2010/10/01 15:45:45  bourgesl
+ * Added warning messages on GUI to indicate unobservable target and invalid HA min/max settings and OIFits data not available
+ * Fixed bug in HA min/max restrictions : invalid values can cause a NegativeArrayException
+ * forward the warning container to the OIFits Creator Service
+ *
  * Revision 1.30  2010/09/24 15:49:34  bourgesl
  * removed catch RuntimeExceptionS to get it at higher level (better exception handling)
  *
@@ -135,6 +140,8 @@ public final class UVCoverageService {
   /** Class logger */
   private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
+  /** safety limit for the number of sampled HA points = 500 */
+  public static final int MAX_HA_POINTS = 500;
 
   /* members */
 
@@ -267,7 +274,6 @@ public final class UVCoverageService {
 
           // OIFits structure :
           createOIFits();
-
         }
 
         // fast interrupt :
@@ -427,7 +433,9 @@ public final class UVCoverageService {
       final int capacity = (int) Math.round((haUpper - haLower) / step) + 1;
 
       // First pass : find observable HA values :
-      final double[] haValues = new double[capacity];
+
+      // use safety limit to avoid out of memory errors :
+      final double[] haValues = new double[(capacity > MAX_HA_POINTS) ? MAX_HA_POINTS : capacity];
 
       int j = 0;
       for (double ha = haLower; ha <= haUpper; ha += step) {
@@ -436,6 +444,12 @@ public final class UVCoverageService {
         if (checkObservability(ha, obsRangesHA)) {
           haValues[j] = ha;
           j++;
+
+          // check safety limit :
+          if (j >= MAX_HA_POINTS) {
+            addWarning("Too many HA points (" + capacity + "), check your sampling periodicity. Only " + MAX_HA_POINTS + " samples computed");
+            break;
+          }
         }
       }
 
