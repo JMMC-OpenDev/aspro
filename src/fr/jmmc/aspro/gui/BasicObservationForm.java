@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BasicObservationForm.java,v 1.37 2010-10-01 16:02:13 bourgesl Exp $"
+ * "@(#) $Id: BasicObservationForm.java,v 1.38 2010-10-04 05:14:16 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.37  2010/10/01 16:02:13  bourgesl
+ * use warning container directly to check if is null (reset occured in observation)
+ *
  * Revision 1.36  2010/10/01 13:24:02  bourgesl
  * added tooltips on target list and PoPs field
  * Warnings are always refreshed
@@ -956,10 +959,13 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     } else {
       this.jLabelStatus.setIcon(this.warningIcon);
       this.jLabelStatus.setText("Warning");
+
       final StringBuilder sb = new StringBuilder(256);
+      sb.append("<html>");
       for (String msg : warningContainer.getWarningMessages()) {
-        sb.append(msg).append("\n");
+        sb.append(msg).append("<br>");
       }
+      sb.append("</html>");
       this.jLabelStatus.setToolTipText(sb.toString());
     }
   }
