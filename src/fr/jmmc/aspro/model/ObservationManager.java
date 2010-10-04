@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationManager.java,v 1.38 2010-10-01 15:36:29 bourgesl Exp $"
+ * "@(#) $Id: ObservationManager.java,v 1.39 2010-10-04 16:25:39 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.38  2010/10/01 15:36:29  bourgesl
+ * new event WARNING_READY
+ * added setWarningContainer and fireWarningReady methods
+ *
  * Revision 1.37  2010/09/26 12:47:40  bourgesl
  * better exception handling
  *
@@ -148,6 +152,7 @@ import fr.jmmc.aspro.util.CombUtils;
 import fr.jmmc.mcs.astro.star.Star;
 import fr.jmmc.oitools.model.OIFitsFile;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -237,11 +242,12 @@ public final class ObservationManager extends BaseOIManager {
   /**
    * Load an observation from the given file
    * @param file file to load
-   * @throws RuntimeException if the load operation failed
-   * @throws IllegalStateException if an invalid reference was found (interferometer / instrument / instrument configuration)
-   * or if the file is not an Observation
+   * 
+   * @throws IOException if an I/O exception occured
+   * @throws IllegalStateException if an invalid reference was found (interferometer / instrument / instrument configuration) or an unexpected exception occured
+   * @throws IllegalArgumentException if the file is not an Observation
    */
-  public void load(final File file) throws RuntimeException, IllegalStateException {
+  public void load(final File file) throws IOException, IllegalStateException, IllegalArgumentException {
     if (file != null) {
       this.observationFile = file;
 
@@ -251,7 +257,7 @@ public final class ObservationManager extends BaseOIManager {
       final Object loaded = loadObject(this.observationFile);
 
       if (!(loaded instanceof ObservationSetting)) {
-        throw new IllegalStateException("The loaded file does not correspond to a valid Aspro2 file : " + file);
+        throw new IllegalArgumentException("The loaded file does not correspond to a valid Aspro2 file : " + file);
       }
 
       final ObservationSetting newObservation = (ObservationSetting) loaded;
@@ -263,6 +269,7 @@ public final class ObservationManager extends BaseOIManager {
    * Change the current observation with the given one
    * and fire load and change events
    * @param newObservation observation to use
+   * 
    * @throws IllegalStateException if an invalid reference was found (interferometer / instrument / instrument configuration)
    */
   private void changeObservation(final ObservationSetting newObservation) throws IllegalStateException {
@@ -281,9 +288,11 @@ public final class ObservationManager extends BaseOIManager {
   /**
    * Save the current observation in the given file
    * @param file file to save
-   * @throws RuntimeException if the save operation failed
+   *
+   * @throws IOException if an I/O exception occured
+   * @throws IllegalStateException if an unexpected exception occured
    */
-  public void save(final File file) throws RuntimeException {
+  public void save(final File file) throws IOException, IllegalStateException {
     if (file != null) {
       this.observationFile = file;
 

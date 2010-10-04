@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SaveObservationAction.java,v 1.11 2010-10-01 15:34:06 bourgesl Exp $"
+ * "@(#) $Id: SaveObservationAction.java,v 1.12 2010-10-04 16:25:39 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.11  2010/10/01 15:34:06  bourgesl
+ * use MessagePane.showConfirmFileOverwrite
+ *
  * Revision 1.10  2010/09/24 15:54:25  bourgesl
  * better exception handling + use MessagePane
  *
@@ -44,6 +47,7 @@ import fr.jmmc.mcs.gui.MessagePane;
 import fr.jmmc.mcs.gui.StatusBar;
 import java.awt.event.ActionEvent;
 import java.io.File;
+import java.io.IOException;
 import java.util.logging.Level;
 import javax.swing.JFileChooser;
 
@@ -114,9 +118,9 @@ public class SaveObservationAction extends ObservationFileAction {
 
         StatusBar.show("file saved : " + file.getName());
 
-      } catch (RuntimeException re) {
+      } catch (IOException ioe) {
         MessagePane.showErrorMessage(
-                "Could not save the file : " + file.getName(), re);
+                "Could not save the file : " + file.getName(), ioe);
       }
     }
   }

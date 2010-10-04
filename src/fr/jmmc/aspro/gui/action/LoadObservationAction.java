@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: LoadObservationAction.java,v 1.9 2010-09-24 15:54:25 bourgesl Exp $"
+ * "@(#) $Id: LoadObservationAction.java,v 1.10 2010-10-04 16:25:39 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.9  2010/09/24 15:54:25  bourgesl
+ * better exception handling + use MessagePane
+ *
  * Revision 1.8  2010/09/01 12:57:13  bourgesl
  * added runtime exception message to user message dialog
  *
@@ -40,6 +43,7 @@ import fr.jmmc.mcs.gui.StatusBar;
 import fr.jmmc.mcs.util.ActionRegistrar;
 import java.awt.event.ActionEvent;
 import java.io.File;
+import java.io.IOException;
 import java.util.logging.Level;
 import javax.swing.JFileChooser;
 
@@ -109,9 +113,12 @@ public class LoadObservationAction extends ObservationFileAction {
 
         StatusBar.show("file loaded : " + file.getName());
 
-      } catch (RuntimeException re) {
+      } catch (IllegalArgumentException iae) {
         MessagePane.showErrorMessage(
-                "Could not load the file : " + file.getName(), re);
+                "Invalid file : " + file.getName(), iae);
+      } catch (IOException ioe) {
+        MessagePane.showErrorMessage(
+                "Could not load the file : " + file.getName(), ioe);
       }
     }
   }

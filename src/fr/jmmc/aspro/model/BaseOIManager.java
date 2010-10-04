@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BaseOIManager.java,v 1.17 2010-09-26 12:47:40 bourgesl Exp $"
+ * "@(#) $Id: BaseOIManager.java,v 1.18 2010-10-04 16:25:39 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.17  2010/09/26 12:47:40  bourgesl
+ * better exception handling
+ *
  * Revision 1.16  2010/09/24 15:52:35  bourgesl
  * removed catch RuntimeExceptionS to get it at higher level (better exception handling)
  *
@@ -74,6 +77,7 @@ import java.util.GregorianCalendar;
 import java.util.Vector;
 import java.util.logging.Level;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.UnmarshalException;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.DatatypeFactory;
@@ -121,15 +125,16 @@ public class BaseOIManager {
   }
 
   /**
-   * Protected load method
+   * Protected load method used by ConfigurationManager.initialize to load the aspro configuration files
    * @param uri relative URI of the document to load (class loader)
    * @return unmarshalled object
    *
-   * @throws IllegalStateException if the file is not found or IO failure
+   * @throws IllegalStateException if the file is not found or an I/O exception occured
    * @throws IllegalArgumentException if the load operation failed
+   * @throws XmlBindException if a JAXBException was caught while creating an unmarshaller
    */
   protected final Object loadObject(final String uri)
-          throws IllegalStateException, IllegalArgumentException {
+          throws IllegalStateException, IllegalArgumentException, XmlBindException {
 
     if (logger.isLoggable(Level.INFO)) {
       logger.info("loading file : " + uri);
@@ -161,16 +166,18 @@ public class BaseOIManager {
    * @param inputFile File to load
    * @return unmarshalled object
    *
-   * @throws RuntimeException if the load operation failed
+   * @throws IOException if an I/O exception occured
+   * @throws IllegalStateException if an unexpected exception occured
+   * @throws XmlBindException if a JAXBException was caught while creating an unmarshaller
    */
   protected final Object loadObject(final File inputFile)
-          throws RuntimeException {
+          throws IOException, IllegalStateException, XmlBindException {
 
     Object result = null;
     try {
       result = this.jf.createUnMarshaller().unmarshal(inputFile);
     } catch (JAXBException je) {
-      throw new RuntimeException("Load failure on " + inputFile, je);
+      handleException("Load failure on " + inputFile, je);
     }
     return result;
   }
@@ -180,15 +187,38 @@ public class BaseOIManager {
    * @param outputFile File to save
    * @param object to marshall
    *
-   * @throws RuntimeException if the save operation failed
+   * @throws IOException if an I/O exception occured
+   * @throws IllegalStateException if an unexpected exception occured
+   * @throws XmlBindException if a JAXBException was caught while creating an marshaller
    */
   protected final void saveObject(final File outputFile, final Object object)
-          throws RuntimeException {
+          throws IOException, IllegalStateException {
     try {
       this.jf.createMarshaller().marshal(object, outputFile);
     } catch (JAXBException je) {
-      throw new RuntimeException("Save failure on " + outputFile, je);
+      handleException("Save failure on " + outputFile, je);
     }
+  }
+
+  /**
+   * Handle JAXB Exception to extract IO Exception or unexpected exceptions
+   * @param message message
+   * @param je jaxb exception
+   * 
+   * @throws IllegalStateException if an unexpected exception occured
+   * @throws IOException if an I/O exception occured
+   */
+  protected final static void handleException(final String message, final JAXBException je) throws IllegalStateException, IOException {
+    final Throwable cause = je.getCause();
+    if (cause != null) {
+      if (cause instanceof IOException) {
+        throw (IOException) cause;
+      }
+    }
+    if (je instanceof UnmarshalException) {
+      throw new IllegalArgumentException("The loaded file does not correspond to a valid file", cause);
+    }
+    throw new IllegalStateException(message, je);
   }
 
   /**
