@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BroadcastToModelFittingAction.java,v 1.1 2010-10-04 12:31:48 mella Exp $"
+ * "@(#) $Id: BroadcastToModelFittingAction.java,v 1.2 2010-10-04 15:57:32 mella Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2010/10/04 12:31:48  mella
+ * Renamed
+ *
  * Revision 1.1  2010/10/04 12:29:30  mella
  * Add first (non-working) revision
  *
@@ -16,6 +19,7 @@ package fr.jmmc.aspro.gui.action;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.jaxb.JAXBFactory;
+import fr.jmmc.mcs.gui.MessagePane;
 import fr.jmmc.mcs.gui.StatusBar;
 import fr.jmmc.mcs.model.targetmodel.Model;
 import fr.jmmc.mcs.util.RegisteredAction;
@@ -25,15 +29,12 @@ import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.StringWriter;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
-import javax.swing.JOptionPane;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import org.astrogrid.samp.Message;
 import org.astrogrid.samp.Metadata;
-import org.astrogrid.samp.SampMap;
 import org.astrogrid.samp.client.AbstractMessageHandler;
 import org.astrogrid.samp.client.ClientProfile;
 import org.astrogrid.samp.client.DefaultClientProfile;
@@ -50,12 +51,11 @@ public class BroadcastToModelFittingAction extends RegisteredAction {
     /** default serial UID for Serializable interface */
     private static final long serialVersionUID = 1;
     /** Class name. This name is used to register to the ActionRegistrar */
-    private final static String className = "fr.jmmc.aspro.gui.action.BroadcastToFitModelAction";
+    private final static String className = "fr.jmmc.aspro.gui.action.BroadcastToModelFittingAction";
     /** Action name. This name is used to register to the ActionRegistrar */
-    public final static String actionName = "broadcastToFitModelAction";
+    public final static String actionName = "broadcastToModelFittingAction";
     /** Class logger */
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(className);
-
     private static HubConnector conn = null;
 
     /* members */
@@ -90,7 +90,7 @@ public class BroadcastToModelFittingAction extends RegisteredAction {
         final OIFitsFile oiFitsFile = ObservationManager.getInstance().getObservation().getOIFitsFile();
 
         if (oiFitsFile == null) {
-            StatusBar.show("Can't get oifits to forward to one modelfitting application.");
+            MessagePane.showMessage("There is currently no OIFits data (your target is not observable)");
             return;
         }
 
@@ -101,10 +101,7 @@ public class BroadcastToModelFittingAction extends RegisteredAction {
             OIFitsWriter.writeOIFits(file.getAbsolutePath(), oiFitsFile);
             StatusBar.show(file.getName() + " created.");
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "failure : ", e);
-            JOptionPane.showMessageDialog(null,
-                    "Could not export to file " + file.getName() + "\n" + e.getMessage(),
-                    "Error", JOptionPane.ERROR_MESSAGE);
+            MessagePane.showErrorMessage("Could not export to file " + file.getName() + "\n" + e.getMessage());
             return;
         }
 
@@ -112,16 +109,16 @@ public class BroadcastToModelFittingAction extends RegisteredAction {
         String targetName = oiFitsFile.getOiTarget().getTarget()[0];
         Target t = ObservationManager.getInstance().getObservation().getTarget(targetName);
         Model targetModel = new Model();
-        targetModel.setNameAndType("Container");        
+        targetModel.setNameAndType("Container");
         for (Model model : t.getModels()) {
             targetModel.getModels().add(model);
         }
-        String xmlModel="";
+        String xmlModel = "";
         try {
             StringWriter sw = new StringWriter();
             final Marshaller marshaller = this.jf.createMarshaller();
             marshaller.marshal(targetModel, sw);
-            xmlModel=sw.toString();
+            xmlModel = sw.toString();
         } catch (JAXBException je) {
             //throw new RuntimeException("Save failure on " + outputFile, je);
             je.printStackTrace();
@@ -157,12 +154,12 @@ public class BroadcastToModelFittingAction extends RegisteredAction {
         }
 
         // Broadcast a message
-        try {        
+        try {
             HashMap params = new HashMap();
             params.put("model", xmlModel);
             params.put("filename", file.getAbsolutePath());
             conn.getConnection().notifyAll(new Message("LITpro.runfit", params));
-        } catch (Exception ex) {            
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
 
