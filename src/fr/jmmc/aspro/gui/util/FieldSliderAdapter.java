@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: FieldSliderAdapter.java,v 1.5 2010-06-17 10:02:51 bourgesl Exp $"
+ * "@(#) $Id: FieldSliderAdapter.java,v 1.6 2010-10-04 14:31:01 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2010/06/17 10:02:51  bourgesl
+ * fixed warning hints - mainly not final static loggers
+ *
  * Revision 1.4  2010/05/06 15:41:02  bourgesl
  * the default value sends a listener event
  *
@@ -101,11 +104,11 @@ public final class FieldSliderAdapter implements ChangeListener, PropertyChangeL
 
     this.minLimit = min;
     this.minValue = min;
-    
+
     this.maxValue = max;
 
     this.defValue = def;
-    
+
     this.sliderRatio = (max - min) / (this.slider.getModel().getMaximum() - this.slider.getModel().getMinimum());
 
     this.field.setValue(Double.valueOf(this.defValue));
@@ -259,10 +262,18 @@ public final class FieldSliderAdapter implements ChangeListener, PropertyChangeL
     this.field.setValue(value);
   }
 
+  /**
+   * Return the maximum value <= maximum Limit
+   * @return maximum value <= maximum Limit
+   */
   public double getMaxValue() {
     return maxValue;
   }
 
+  /**
+   * Set the maximum value <= maximum Limit
+   * @param maxValue maximum value <= maximum Limit
+   */
   public void setMaxValue(double maxValue) {
     if (logger.isLoggable(Level.FINEST)) {
       logger.finest("maxValue changed : " + maxValue);
@@ -270,10 +281,18 @@ public final class FieldSliderAdapter implements ChangeListener, PropertyChangeL
     this.maxValue = maxValue;
   }
 
+  /**
+   * Return the minimum value >= minimum Limit
+   * @return minimum value >= minimum Limit
+   */
   public double getMinValue() {
     return minValue;
   }
 
+  /**
+   * Set the minimum value >= minimum Limit
+   * @param minValue minimum value >= minimum Limit
+   */
   public void setMinValue(double minValue) {
     if (logger.isLoggable(Level.FINEST)) {
       logger.finest("minValue changed : " + minValue);
@@ -281,10 +300,18 @@ public final class FieldSliderAdapter implements ChangeListener, PropertyChangeL
     this.minValue = minValue;
   }
 
+  /**
+   * Return the default value
+   * @return default value
+   */
   public double getDefValue() {
     return defValue;
   }
 
+  /**
+   * Set the default value
+   * @param defValue default value
+   */
   public void setDefValue(double defValue) {
     this.defValue = defValue;
   }
