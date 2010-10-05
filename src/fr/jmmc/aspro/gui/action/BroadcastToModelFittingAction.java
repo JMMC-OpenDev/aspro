@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BroadcastToModelFittingAction.java,v 1.2 2010-10-04 15:57:32 mella Exp $"
+ * "@(#) $Id: BroadcastToModelFittingAction.java,v 1.3 2010-10-05 07:56:57 mella Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2010/10/04 15:57:32  mella
+ * Fix constant values
+ * Display errors using MessagePane
+ *
  * Revision 1.1  2010/10/04 12:31:48  mella
  * Renamed
  *
@@ -21,8 +25,9 @@ import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.jaxb.JAXBFactory;
 import fr.jmmc.mcs.gui.MessagePane;
 import fr.jmmc.mcs.gui.StatusBar;
+import fr.jmmc.mcs.interop.SampCapability;
+import fr.jmmc.mcs.interop.SampCapabilityAction;
 import fr.jmmc.mcs.model.targetmodel.Model;
-import fr.jmmc.mcs.util.RegisteredAction;
 import fr.jmmc.oitools.model.OIFitsFile;
 import fr.jmmc.oitools.model.OIFitsWriter;
 import java.awt.event.ActionEvent;
@@ -46,7 +51,7 @@ import org.astrogrid.samp.client.HubConnector;
  * send model and generated oifits to one modelfitting application.
  * @author mella
  */
-public class BroadcastToModelFittingAction extends RegisteredAction {
+public class BroadcastToModelFittingAction extends SampCapabilityAction {
 
     /** default serial UID for Serializable interface */
     private static final long serialVersionUID = 1;
@@ -68,11 +73,10 @@ public class BroadcastToModelFittingAction extends RegisteredAction {
      * Public constructor that automatically register the action in RegisteredAction.
      */
     public BroadcastToModelFittingAction() {
-        super(className, actionName);
+        super(className, actionName, SampCapability.LITPRO_START_SETTING);
         this.jf = JAXBFactory.getInstance(OI_JAXB_PATH);
 
     }
-
     /**
      * Handle the action event
      * @param evt action event
