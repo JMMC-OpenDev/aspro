@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.58 2010-10-04 14:31:46 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.59 2010-10-05 15:06:22 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.58  2010/10/04 14:31:46  bourgesl
+ * use the minimum baseline as a minimum for the UV Max coverage in order to avoid zero value (bug)
+ *
  * Revision 1.57  2010/10/01 15:30:52  bourgesl
  * define warning container filled in UVCoverageService (including noise service messages)
  * use MessagePane
@@ -193,6 +196,7 @@
 package fr.jmmc.aspro.gui;
 
 import fr.jmmc.aspro.AsproConstants;
+import fr.jmmc.aspro.AsproGui;
 import fr.jmmc.aspro.Preferences;
 import fr.jmmc.aspro.gui.action.ExportOBVLTIAction;
 import fr.jmmc.aspro.gui.action.ExportOBVegaAction;
@@ -1104,6 +1108,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       if (logger.isLoggable(Level.FINE)) {
         logger.fine("target changed : " + getSelectedTargetName());
       }
+      synchronizeSelectedTarget();
       updateTargetConfiguration();
       updateTargetHA();
       changeStateForModelImageWidgets();
@@ -2090,5 +2095,18 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
    */
   public String getSelectedTargetName() {
     return (String) this.jComboBoxTarget.getSelectedItem();
+  }
+
+  /**
+   * Update the selected target in the observation form (on top)
+   */
+  private void synchronizeSelectedTarget() {
+    final String targetName = getSelectedTargetName();
+
+    logger.severe("target = " + targetName);
+
+    final BasicObservationForm form = AsproGui.getInstance().getSettingPanel().getObservationForm();
+
+    form.updateSelectedTarget(targetName);
   }
 }

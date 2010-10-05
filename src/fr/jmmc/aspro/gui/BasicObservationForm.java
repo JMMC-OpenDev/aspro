@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BasicObservationForm.java,v 1.38 2010-10-04 05:14:16 bourgesl Exp $"
+ * "@(#) $Id: BasicObservationForm.java,v 1.39 2010-10-05 15:06:22 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.38  2010/10/04 05:14:16  bourgesl
+ * use an html tolltip for warning messages
+ *
  * Revision 1.37  2010/10/01 16:02:13  bourgesl
  * use warning container directly to check if is null (reset occured in observation)
  *
@@ -661,12 +664,27 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
    * Refresh the target list
    */
   private void updateListTargets() {
+    final Object oldValue = this.jListTargets.getSelectedValue();
+
     final Vector<String> v = this.om.getTargetNames();
     this.jListTargets.setModel(new DefaultComboBoxModel(v));
+
+    // restore previous selected item :
+    if (oldValue != null) {
+      updateSelectedTarget(oldValue);
+    }
 
     // disable buttons if the target list is empty :
     this.jButtonRemoveTarget.setEnabled(!v.isEmpty());
     this.jButtonModelEditor.setEnabled(!v.isEmpty());
+  }
+
+  /**
+   * Define the selected target in the target list
+   * @param targetName
+   */
+  public void updateSelectedTarget(final Object targetName) {
+      this.jListTargets.setSelectedValue(targetName, true);
   }
 
   /**
