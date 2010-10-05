@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ConfigurationManager.java,v 1.32 2010-10-04 14:30:47 bourgesl Exp $"
+ * "@(#) $Id: ConfigurationManager.java,v 1.33 2010-10-05 18:23:24 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.32  2010/10/04 14:30:47  bourgesl
+ * added compute the minimum baseline
+ *
  * Revision 1.31  2010/09/26 12:47:40  bourgesl
  * better exception handling
  *
@@ -229,17 +232,17 @@ public final class ConfigurationManager extends BaseOIManager {
    */
   private void addInterferometerSetting(final InterferometerSetting is) {
 
-    final InterferometerDescription d = is.getDescription();
+    final InterferometerDescription id = is.getDescription();
 
     // check if the interferometer is unique (name) :
-    if (interferometerDescriptions.containsKey(d.getName())) {
-      throw new IllegalStateException("The interferometer '" + d.getName() + "' is already present in the loaded configuration !");
+    if (interferometerDescriptions.containsKey(id.getName())) {
+      throw new IllegalStateException("The interferometer '" + id.getName() + "' is already present in the loaded configuration !");
     }
 
-    computeInterferometerLocation(d);
-    computeLimitsUVCoverage(d);
+    computeInterferometerLocation(id);
+    computeLimitsUVCoverage(id);
 
-    interferometerDescriptions.put(d.getName(), d);
+    interferometerDescriptions.put(id.getName(), id);
 
     for (InterferometerConfiguration c : is.getConfigurations()) {
       interferometerConfigurations.put(getConfigurationName(c), c);
@@ -271,10 +274,21 @@ public final class ConfigurationManager extends BaseOIManager {
    * @param id interferometer description
    */
   private void computeLimitsUVCoverage(final InterferometerDescription id) {
+    final double[] range = computeLimitsUVCoverage(id.getStations());
+    id.setMinBaseLine(range[0]);
+    id.setMaxBaseLine(range[1]);
+  }
+
+  /**
+   * Compute the min and max UV coverage using all possible baselines
+   * Note : some station couples can not be available as instrument baselines
+   * @param stations list of stations
+   * @return min - max
+   */
+  public static double[] computeLimitsUVCoverage(final List<Station> stations) {
     double maxUV = 0d;
     double minUV = Double.MAX_VALUE;
 
-    final List<Station> stations = id.getStations();
     final int size = stations.size();
 
     double x, y, z, dist;
@@ -295,12 +309,10 @@ public final class ConfigurationManager extends BaseOIManager {
       }
     }
 
-    id.setMinBaseLine(minUV);
-    id.setMaxBaseLine(maxUV);
-
     if (logger.isLoggable(Level.FINE)) {
-      logger.fine("computeLimitsUVCoverage [" + id.getName() + "] = {" + minUV + " - " + maxUV + " m");
+      logger.fine("computeLimitsUVCoverage = {" + minUV + " - " + maxUV + " m");
     }
+    return new double[] {minUV, maxUV};
   }
 
   /**
