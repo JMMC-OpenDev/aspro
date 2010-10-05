@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <ApplicationData link="http://www.jmmc.fr/aspro2">
-  <program name="Aspro2" version="0.6.3"/>
+  <program name="Aspro2" version="0.6.4 beta"/>
   <compilation date="29/09/2010" compiler="JDK 1.5.0_16"/>
   <text>
     <![CDATA[ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations
@@ -57,10 +57,16 @@
     </menu>
     <menu label="Interop">
       <menu label="Perform model fitting" classpath="fr.jmmc.aspro.gui.action.BroadcastToModelFittingAction" action="broadcastToModelFittingAction"/>
+      <menu label="Search calibrators" classpath="fr.jmmc.aspro.gui.action.SampSearchCalQuery" action="searchCalStartQuery"
+       description="use SearchCal to search calibrators for the current selected target (SAMP)"/>
     </menu>
   </menubar>
   <releasenotes>
     <release version="0.6">
+      <prerelease version="0.6.4 beta">
+        <change type="FEATURE">SearchCal integration through SAMP protocol</change>
+        <change type="FEATURE">Forward model and generated oifits to LITpro through SAMP VO protocol for model fitting</change>
+      </prerelease>
       <prerelease version="0.6.3">
         <change type="BUGFIX">Limit the memory footprint when the sampling periodicity is very small (less than 1 minute).
         First 500 HA samples are computed and the following warning is displayed : 

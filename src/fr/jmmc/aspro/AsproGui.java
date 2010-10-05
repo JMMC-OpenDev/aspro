@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproGui.java,v 1.39 2010-10-05 14:59:48 bourgesl Exp $"
+ * "@(#) $Id: AsproGui.java,v 1.40 2010-10-05 18:24:08 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.39  2010/10/05 14:59:48  bourgesl
+ * added AsproGui:getInstance()
+ *
  * Revision 1.38  2010/10/04 16:11:12  mella
  * Instantiate Broadcast to modelfitting action
  *
@@ -138,6 +141,7 @@ import fr.jmmc.aspro.gui.action.ExportOIFitsAction;
 import fr.jmmc.aspro.gui.action.ExportPDFAction;
 import fr.jmmc.aspro.gui.action.LoadObservationAction;
 import fr.jmmc.aspro.gui.action.NewObservationAction;
+import fr.jmmc.aspro.gui.action.SampSearchCalQuery;
 import fr.jmmc.aspro.gui.action.SaveObservationAction;
 import fr.jmmc.aspro.gui.action.ShowPrefAction;
 import fr.jmmc.aspro.gui.util.ComponentResizeAdapter;
@@ -404,6 +408,8 @@ public final class AsproGui extends App {
     new ExportOIFitsAction();
     // use interop with modelfitting :
     new BroadcastToModelFittingAction();
+    // searchCal query (SAMP) :
+    new SampSearchCalQuery();
   }
 
   /**

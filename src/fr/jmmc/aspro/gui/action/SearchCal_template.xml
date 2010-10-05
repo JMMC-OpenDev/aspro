@@ -2,18 +2,18 @@
     <COOSYS ID="J2000" equinox="J2000." epoch="J2000." system="eq_FK5"/>
     <RESOURCE name="SearchCal v3.3.5c">
         <TABLE>
-            <PARAM datatype="string" name="objectName" value="ETA_TAU"/>
-            <PARAM datatype="double" name="mag" value="0.0"/>
+            <PARAM datatype="string" name="objectName" value="_TARGET-NAME_"/>
+            <PARAM datatype="double" name="mag" value="_MAG_"/>
             <PARAM unit="arcmin" datatype="integer" name="diffRa" value="18.0"/>
             <PARAM unit="arcmin" datatype="integer" name="diffDec" value="6.0"/>
             <PARAM unit="arcmin" datatype="integer" name="radius" value="10.0"/>
-            <PARAM datatype="string" name="band" value="K"/>
+            <PARAM datatype="string" name="band" value="_INSBAND_"/>
             <PARAM datatype="double" name="minMagRange" value="4.0"/>
             <PARAM datatype="double" name="maxMagRange" value="8.0"/>
-            <PARAM unit="HH:MM:SS.TT" datatype="string" name="ra" value="03:47:29.076"/>
-            <PARAM unit="DD:MM:SS.TT" datatype="string" name="dec" value="24:06:18.494"/>
-            <PARAM unit="m" datatype="double" name="baseMax" value="102.45"/>
-            <PARAM unit="um" datatype="double" name="wlen" value="1.0"/>
+            <PARAM unit="HH:MM:SS.TT" datatype="string" name="ra" value="_RA_"/>
+            <PARAM unit="DD:MM:SS.TT" datatype="string" name="dec" value="_DEC_"/>
+            <PARAM unit="m" datatype="double" name="baseMax" value="_BASEMAX_"/>
+            <PARAM unit="um" datatype="double" name="wlen" value="_WAVELENGTH_"/>
             <PARAM datatype="string" name="file"/>
             <PARAM unit="mas" datatype="double" name="diamVK"/>
             <PARAM datatype="boolean" name="bright" value="false"/>
