@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <ApplicationData link="http://www.jmmc.fr/aspro2">
-  <program name="Aspro2" version="0.6.3 beta"/>
+  <program name="Aspro2" version="0.6.3"/>
   <compilation date="29/09/2010" compiler="JDK 1.5.0_16"/>
   <text>
     <![CDATA[ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations
@@ -62,6 +62,11 @@
   <releasenotes>
     <release version="0.6">
       <prerelease version="0.6.3">
+        <change type="BUGFIX">Limit the memory footprint when the sampling periodicity is very small (less than 1 minute).
+        First 500 HA samples are computed and the following warning is displayed : 
+        Too many HA points (...), check your sampling periodicity. Only 500 samples computed</change>
+        <change type="BUGFIX">Fixed bug when the UV Max value is set to 0.
+        This slider has now a minimum value set to the smallest baseline length of the selected interferometer</change>
         <change type="BUGFIX" id="1285777818">Fixed bug concerning random dates : the LST axis is corrupted (Requires 'lower' &lt; 'upper')</change>
         <change type="BUGFIX">Fixed bug in HA min/max restrictions : invalid values can cause a NegativeArrayException</change>
         <change>Formatted DIT value in warning messages coming from noise modeling (FT or saturation)</change>
