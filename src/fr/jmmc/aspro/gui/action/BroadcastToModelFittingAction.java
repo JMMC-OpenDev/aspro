@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BroadcastToModelFittingAction.java,v 1.5 2010-10-05 13:01:46 mella Exp $"
+ * "@(#) $Id: BroadcastToModelFittingAction.java,v 1.6 2010-10-05 14:59:02 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2010/10/05 13:01:46  mella
+ * major cleanup to implement action that forward model and oifits to modelfitting application
+ *
  * Revision 1.4  2010/10/05 07:57:49  mella
  * Add composeMessage
  *
@@ -39,10 +42,9 @@ import fr.jmmc.oitools.model.OIFitsWriter;
 import java.io.File;
 import java.io.StringWriter;
 import java.util.HashMap;
-import java.util.logging.Level;
+import java.util.Map;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
-import org.astrogrid.samp.client.HubConnector;
 
 /**
  * This registered action represents a File Menu entry to
@@ -76,10 +78,8 @@ public class BroadcastToModelFittingAction extends SampCapabilityAction {
     }
 
     @Override
-    public HashMap composeMessage() {
+    public Map<?,?> composeMessage() {
         logger.fine("composeMessage");
-
-        HashMap params = new HashMap();
 
         // Get the oifits object
         // save it on disk
@@ -125,9 +125,12 @@ public class BroadcastToModelFittingAction extends SampCapabilityAction {
         }
 
         // Store parameters for reply message
+        final Map<String, String> params = new HashMap<String, String>();
         params.put("model", xmlModel);
         params.put("filename", file.getAbsolutePath());
+        
         StatusBar.show("New settings sent by remote application ready for modification.");
+        
         return params;
     }
 }
