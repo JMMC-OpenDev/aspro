@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BroadcastToModelFittingAction.java,v 1.3 2010-10-05 07:56:57 mella Exp $"
+ * "@(#) $Id: BroadcastToModelFittingAction.java,v 1.4 2010-10-05 07:57:49 mella Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2010/10/05 07:56:57  mella
+ * Use SampCapability.LITPRO_START_SETTING in constructor instead of JmmcCapability
+ *
  * Revision 1.2  2010/10/04 15:57:32  mella
  * Fix constant values
  * Display errors using MessagePane
@@ -167,5 +170,10 @@ public class BroadcastToModelFittingAction extends SampCapabilityAction {
             ex.printStackTrace();
         }
 
+    }
+
+    @Override
+    public HashMap composeMessage() {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 }
