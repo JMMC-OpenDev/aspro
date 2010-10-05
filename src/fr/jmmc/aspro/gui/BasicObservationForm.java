@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BasicObservationForm.java,v 1.39 2010-10-05 15:06:22 bourgesl Exp $"
+ * "@(#) $Id: BasicObservationForm.java,v 1.40 2010-10-05 18:22:52 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.39  2010/10/05 15:06:22  bourgesl
+ * sycnhronize target selection from UV coverage panel to observation form
+ *
  * Revision 1.38  2010/10/04 05:14:16  bourgesl
  * use an html tolltip for warning messages
  *
@@ -683,8 +686,16 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
    * Define the selected target in the target list
    * @param targetName
    */
-  public void updateSelectedTarget(final Object targetName) {
+  protected void updateSelectedTarget(final Object targetName) {
       this.jListTargets.setSelectedValue(targetName, true);
+  }
+
+  /**
+   * Return the currently selected target name
+   * @return target name
+   */
+  public String getSelectedTargetName() {
+    return (String) this.jListTargets.getSelectedValue();
   }
 
   /**
