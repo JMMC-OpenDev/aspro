@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBAction.java,v 1.4 2010-10-01 15:31:34 bourgesl Exp $"
+ * "@(#) $Id: ExportOBAction.java,v 1.5 2010-10-05 15:06:00 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2010/10/01 15:31:34  bourgesl
+ * added message 'Please enter first a target to export it as an Observing block'
+ *
  * Revision 1.3  2010/09/01 16:24:30  bourgesl
  * removed exception
  *
@@ -59,8 +62,7 @@ public class ExportOBAction extends RegisteredAction {
       logger.fine("actionPerformed");
     }
 
-    final AsproGui app = (AsproGui) App.getSharedInstance();
-    final UVCoveragePanel uvCoveragePanel = app.getSettingPanel().getUVCoveragePanel();
+    final UVCoveragePanel uvCoveragePanel = AsproGui.getInstance().getSettingPanel().getUVCoveragePanel();
 
     // be sure the uv panel is visible to avoid user wrong inputs :
     if (uvCoveragePanel != null) {

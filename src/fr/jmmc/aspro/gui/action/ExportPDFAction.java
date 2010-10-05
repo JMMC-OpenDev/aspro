@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportPDFAction.java,v 1.14 2010-10-01 15:33:39 bourgesl Exp $"
+ * "@(#) $Id: ExportPDFAction.java,v 1.15 2010-10-05 15:06:00 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.14  2010/10/01 15:33:39  bourgesl
+ * use MessagePane.showConfirmFileOverwrite
+ *
  * Revision 1.13  2010/09/26 11:59:11  bourgesl
  * replaced RuntimeException by IllegalStateException to avoid catching runtime exceptions
  *
@@ -54,7 +57,6 @@ import fr.jmmc.aspro.AsproGui;
 import fr.jmmc.aspro.gui.PDFExportable;
 import fr.jmmc.aspro.gui.chart.PDFUtils;
 import fr.jmmc.aspro.util.FileUtils;
-import fr.jmmc.mcs.gui.App;
 import fr.jmmc.mcs.gui.MessagePane;
 import fr.jmmc.mcs.gui.StatusBar;
 import fr.jmmc.mcs.util.ActionRegistrar;
@@ -127,9 +129,7 @@ public final class ExportPDFAction extends RegisteredAction {
       logger.fine("actionPerformed");
     }
 
-    final AsproGui app = (AsproGui) App.getSharedInstance();
-
-    final Component selectedPanel = app.getSettingPanel().getTabSelectedComponent();
+    final Component selectedPanel = AsproGui.getInstance().getSettingPanel().getTabSelectedComponent();
 
     // be sure the selected panel implements PDFExportable (not null of course) :
     if (selectedPanel instanceof PDFExportable) {
