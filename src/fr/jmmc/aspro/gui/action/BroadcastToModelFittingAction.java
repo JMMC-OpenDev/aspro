@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BroadcastToModelFittingAction.java,v 1.4 2010-10-05 07:57:49 mella Exp $"
+ * "@(#) $Id: BroadcastToModelFittingAction.java,v 1.5 2010-10-05 13:01:46 mella Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2010/10/05 07:57:49  mella
+ * Add composeMessage
+ *
  * Revision 1.3  2010/10/05 07:56:57  mella
  * Use SampCapability.LITPRO_START_SETTING in constructor instead of JmmcCapability
  *
@@ -33,20 +36,12 @@ import fr.jmmc.mcs.interop.SampCapabilityAction;
 import fr.jmmc.mcs.model.targetmodel.Model;
 import fr.jmmc.oitools.model.OIFitsFile;
 import fr.jmmc.oitools.model.OIFitsWriter;
-import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.StringWriter;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.logging.Level;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
-import org.astrogrid.samp.Message;
-import org.astrogrid.samp.Metadata;
-import org.astrogrid.samp.client.AbstractMessageHandler;
-import org.astrogrid.samp.client.ClientProfile;
-import org.astrogrid.samp.client.DefaultClientProfile;
-import org.astrogrid.samp.client.HubConnection;
 import org.astrogrid.samp.client.HubConnector;
 
 /**
@@ -64,7 +59,6 @@ public class BroadcastToModelFittingAction extends SampCapabilityAction {
     public final static String actionName = "broadcastToModelFittingAction";
     /** Class logger */
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(className);
-    private static HubConnector conn = null;
 
     /* members */
     /** package name for JAXB generated code */
@@ -80,14 +74,12 @@ public class BroadcastToModelFittingAction extends SampCapabilityAction {
         this.jf = JAXBFactory.getInstance(OI_JAXB_PATH);
 
     }
-    /**
-     * Handle the action event
-     * @param evt action event
-     */
-    public void actionPerformed(final ActionEvent evt) {
-        if (logger.isLoggable(Level.FINE)) {
-            logger.fine("actionPerformed");
-        }
+
+    @Override
+    public HashMap composeMessage() {
+        logger.fine("composeMessage");
+
+        HashMap params = new HashMap();
 
         // Get the oifits object
         // save it on disk
@@ -98,7 +90,7 @@ public class BroadcastToModelFittingAction extends SampCapabilityAction {
 
         if (oiFitsFile == null) {
             MessagePane.showMessage("There is currently no OIFits data (your target is not observable)");
-            return;
+            return null;
         }
 
         File file = new File(ExportOIFitsAction.getName(oiFitsFile));
@@ -108,8 +100,8 @@ public class BroadcastToModelFittingAction extends SampCapabilityAction {
             OIFitsWriter.writeOIFits(file.getAbsolutePath(), oiFitsFile);
             StatusBar.show(file.getName() + " created.");
         } catch (Exception e) {
-            MessagePane.showErrorMessage("Could not export to file " + file.getName() + "\n" + e.getMessage());
-            return;
+            MessagePane.showErrorMessage("Could not export to file " + file.getName() + "\n", e);
+            return null;
         }
 
         // Get Model assuming that target name is the first one (and only one).. of oifits.
@@ -126,54 +118,16 @@ public class BroadcastToModelFittingAction extends SampCapabilityAction {
             final Marshaller marshaller = this.jf.createMarshaller();
             marshaller.marshal(targetModel, sw);
             xmlModel = sw.toString();
+            StatusBar.show("Model received from remote application.");
         } catch (JAXBException je) {
-            //throw new RuntimeException("Save failure on " + outputFile, je);
-            je.printStackTrace();
-            return;
+            MessagePane.showErrorMessage("Could not build model desc for samp message", je);
+            return null;
         }
 
-        // connect to samp if not already done
-        if (conn == null) {
-            // Construct a connector
-            ClientProfile profile = DefaultClientProfile.getProfile();
-            conn = new HubConnector(profile);
-
-            // Configure it with metadata about this application
-            Metadata meta = new Metadata();
-            meta.setName("ASPRO2GMGMGM");
-            meta.setDescriptionText("Application that does stuff");
-            conn.declareMetadata(meta);
-
-            // Prepare to receive messages with specific MType(s)
-            conn.addMessageHandler(new AbstractMessageHandler("stuff.do") {
-
-                public Map processCall(HubConnection c, String senderId, Message msg) {
-                    System.out.println("TBD for " + msg);
-                    return null;
-                }
-            });
-
-            // This step required even if no custom message handlers added.
-            conn.declareSubscriptions(conn.computeSubscriptions());
-
-            // Keep a look out for hubs if initial one shuts down
-            conn.setAutoconnect(10);
-        }
-
-        // Broadcast a message
-        try {
-            HashMap params = new HashMap();
-            params.put("model", xmlModel);
-            params.put("filename", file.getAbsolutePath());
-            conn.getConnection().notifyAll(new Message("LITpro.runfit", params));
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-
-    }
-
-    @Override
-    public HashMap composeMessage() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        // Store parameters for reply message
+        params.put("model", xmlModel);
+        params.put("filename", file.getAbsolutePath());
+        StatusBar.show("New settings sent by remote application ready for modification.");
+        return params;
     }
 }
