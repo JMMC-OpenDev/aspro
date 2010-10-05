@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproGui.java,v 1.38 2010-10-04 16:11:12 mella Exp $"
+ * "@(#) $Id: AsproGui.java,v 1.39 2010-10-05 14:59:48 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.38  2010/10/04 16:11:12  mella
+ * Instantiate Broadcast to modelfitting action
+ *
  * Revision 1.37  2010/10/04 14:59:13  bourgesl
  * replaced runtime exception by illegal state exception during initialization
  *
@@ -217,6 +220,14 @@ public final class AsproGui extends App {
     // Let the tooltip stay longer (60s) :
     ToolTipManager.sharedInstance().setInitialDelay(100);
     ToolTipManager.sharedInstance().setDismissDelay(60000);
+  }
+
+  /**
+   * Return the Aspro Gui singleton
+   * @return Aspro Gui singleton
+   */
+  public static AsproGui getInstance() {
+     return (AsproGui) App.getSharedInstance();
   }
 
   /**
