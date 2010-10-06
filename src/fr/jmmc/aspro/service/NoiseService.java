@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: NoiseService.java,v 1.15 2010-10-01 15:39:58 bourgesl Exp $"
+ * "@(#) $Id: NoiseService.java,v 1.16 2010-10-06 16:05:41 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.15  2010/10/01 15:39:58  bourgesl
+ * formatted DIT value in warnings
+ *
  * Revision 1.14  2010/09/02 15:55:55  bourgesl
  * handle missing object magnitudes : always return NaN for errors
  * report warning messages for DIT and missing magnitudes
@@ -748,7 +751,8 @@ public final class NoiseService {
         case V:
           return SpectralBand.V;
         case R:
-          return SpectralBand.R;
+          // band R not supported return V
+          return SpectralBand.V;
         case I:
           return SpectralBand.I;
         case J:
