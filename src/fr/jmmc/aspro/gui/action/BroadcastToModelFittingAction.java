@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BroadcastToModelFittingAction.java,v 1.6 2010-10-05 14:59:02 bourgesl Exp $"
+ * "@(#) $Id: BroadcastToModelFittingAction.java,v 1.7 2010-10-06 16:05:53 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2010/10/05 14:59:02  bourgesl
+ * fixed composeMessage signature
+ *
  * Revision 1.5  2010/10/05 13:01:46  mella
  * major cleanup to implement action that forward model and oifits to modelfitting application
  *
@@ -49,6 +52,9 @@ import javax.xml.bind.Marshaller;
 /**
  * This registered action represents a File Menu entry to
  * send model and generated oifits to one modelfitting application.
+ *
+ * TODO : rename that class
+ *
  * @author mella
  */
 public class BroadcastToModelFittingAction extends SampCapabilityAction {
