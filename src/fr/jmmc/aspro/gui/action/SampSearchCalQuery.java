@@ -1,16 +1,18 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SampSearchCalQuery.java,v 1.1 2010-10-05 18:24:07 bourgesl Exp $"
+ * "@(#) $Id: SampSearchCalQuery.java,v 1.2 2010-10-06 16:06:33 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2010/10/05 18:24:07  bourgesl
+ * first running searchCal start query integration through SAMP (but cause bugs in SearchCal)
+ *
  */
 package fr.jmmc.aspro.gui.action;
 
 import edu.dartmouth.AstroSkyCalcObservation;
-import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.AsproGui;
 import fr.jmmc.aspro.gui.BasicObservationForm;
 import fr.jmmc.aspro.model.ConfigurationManager;
@@ -33,6 +35,9 @@ import java.util.logging.Level;
 
 /**
  * This action asks SearchCal to search calibrators for the current selected target
+ *
+ * TODO : rename that class
+ *
  * @author bourgesl
  */
 public final class SampSearchCalQuery extends SampCapabilityAction {
@@ -45,32 +50,38 @@ public final class SampSearchCalQuery extends SampCapabilityAction {
   public final static String actionName = "searchCalStartQuery";
   /** Class logger */
   private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(className);
-
   /** template name */
   private final static String TEMPLATE_FILE = "fr/jmmc/aspro/gui/action/SearchCal_template.xml";
 
   /* keywords */
   /** keyword - objectName */
   public final static String KEY_TARGET_NAME = "_TARGET-NAME_";
-
   /** keyword - mag */
   public final static String KEY_MAG = "_MAG_";
-
+  /** keyword - minMagRange */
+  public final static String KEY_MAG_MIN = "_MAG_MIN_";
+  /** keyword - maxMagRange */
+  public final static String KEY_MAG_MAX = "_MAG_MAX_";
   /** keyword - band */
   public final static String KEY_INS_BAND = "_INSBAND_";
-
   /** keyword - ra */
   public final static String KEY_RA = "_RA_";
   /** keyword - dec */
   public final static String KEY_DEC = "_DEC_";
-
   /** keyword - baseMax */
   public final static String KEY_BASE_MAX = "_BASEMAX_";
   /** keyword - wlen */
   public final static String KEY_WAVELENGTH = "_WAVELENGTH_";
+  /** keyword - bright */
+  public final static String KEY_BRIGHT = "_BRIGHT_MODE_";
+  /** maximal magnitude for bright scenario */
+  private final static double BRIGHT_MAG_MAX = 5.5d;
+  /** default minimal magnitude if magnitude is undefined */
+  private final static double DEF_MAG_MIN = 2d;
+  /** default maximal magnitude if magnitude is undefined */
+  private final static double DEF_MAG_MAX = 4d;
 
   /* members */
-  
   /**
    * Public constructor that automatically register the action in RegisteredAction.
    */
@@ -78,6 +89,10 @@ public final class SampSearchCalQuery extends SampCapabilityAction {
     super(className, actionName, SampCapability.SEARCHCAL_START_QUERY);
   }
 
+  /**
+   * Create the Samp message parameters with the SearchCal votable
+   * @return Samp message parameters as a map
+   */
   public Map<?, ?> composeMessage() {
 
     final BasicObservationForm form = AsproGui.getInstance().getSettingPanel().getObservationForm();
@@ -86,7 +101,7 @@ public final class SampSearchCalQuery extends SampCapabilityAction {
     final String targetName = form.getSelectedTargetName();
 
     if (targetName == null) {
-      MessagePane.showMessage("Please select a target before calling SearchCal");
+      MessagePane.showMessage("Please select a target before calling SearchCal in the target list");
       return null;
     }
 
@@ -99,7 +114,9 @@ public final class SampSearchCalQuery extends SampCapabilityAction {
     final Map<String, String> parameters = new HashMap<String, String>();
     parameters.put("query", votable);
 
-    logger.severe("votable = \n" + votable);
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("votable = \n" + votable);
+    }
 
     return parameters;
   }
@@ -147,9 +164,29 @@ public final class SampSearchCalQuery extends SampCapabilityAction {
 
     final Double flux = target.getFlux(insBand);
 
-    final double objectMag = (flux != null) ? flux.doubleValue() : Double.NaN;
+    final double objectMag;
+    final double minMag;
+    final double maxMag;
+    final boolean bright;
+
+    if (flux == null) {
+      objectMag = Double.NaN;
+      minMag = DEF_MAG_MIN;
+      maxMag = DEF_MAG_MAX;
+      bright = true;
+    } else {
+      objectMag = flux.doubleValue();
+      minMag = objectMag - 2d;
+      maxMag = objectMag + 2d;
+
+      bright = (objectMag <= BRIGHT_MAG_MAX);
+    }
+
     if (logger.isLoggable(Level.FINE)) {
-      logger.fine("objectMag                  = " + objectMag);
+      logger.fine("objectMag = " + objectMag);
+      logger.fine("minMag    = " + minMag);
+      logger.fine("maxMag    = " + maxMag);
+      logger.fine("bright    = " + bright);
     }
 
     // max base line :
@@ -164,9 +201,12 @@ public final class SampSearchCalQuery extends SampCapabilityAction {
 
     votable = votable.replaceFirst(KEY_TARGET_NAME, targetName);
 
-    // magnitude in instrument band : TODO
+    // magnitude in instrument band :
     votable = votable.replaceFirst(KEY_MAG, Double.toString(objectMag));
     votable = votable.replaceFirst(KEY_INS_BAND, insBand.value());
+
+    votable = votable.replaceFirst(KEY_MAG_MIN, Double.toString(minMag));
+    votable = votable.replaceFirst(KEY_MAG_MAX, Double.toString(maxMag));
 
     // convert RA/DEC (mas) up to 3 digits :
     final String[] raDec = AstroSkyCalcObservation.toString(target.getRADeg(), target.getDECDeg());
@@ -176,6 +216,8 @@ public final class SampSearchCalQuery extends SampCapabilityAction {
 
     votable = votable.replaceFirst(KEY_BASE_MAX, Double.toString(maxBaseline));
     votable = votable.replaceFirst(KEY_WAVELENGTH, Double.toString(lambda));
+
+    votable = votable.replaceFirst(KEY_BRIGHT, Boolean.toString(bright));
 
     return votable;
   }
