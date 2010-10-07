@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: XmlFactory.java,v 1.4 2010-09-26 11:57:36 bourgesl Exp $"
+ * "@(#) $Id: XmlFactory.java,v 1.5 2010-10-07 15:00:55 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2010/09/26 11:57:36  bourgesl
+ * replaced RuntimeException by IllegalArgumentException to avoid catching all runtime exceptions
+ *
  * Revision 1.3  2010/09/24 15:48:24  bourgesl
  * proper exception handling (unexpected and runtime failures)
  *
@@ -55,7 +58,7 @@ public final class XmlFactory {
   /** encoding used for XML and XSL documents */
   public static final String ENCODING = "UTF-8";
   /** default buffer size for XSLT result document */
-  public static final int DEFAULT_BUFFER_SIZE = 4096;
+  public static final int DEFAULT_BUFFER_SIZE = 16384;
   /** inner XSLT factory */
   private static TransformerFactory transformerFactory = null;
   /** cache for Xsl templates */
