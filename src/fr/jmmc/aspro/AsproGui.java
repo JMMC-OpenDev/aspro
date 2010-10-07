@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproGui.java,v 1.40 2010-10-05 18:24:08 bourgesl Exp $"
+ * "@(#) $Id: AsproGui.java,v 1.41 2010-10-07 15:03:25 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.40  2010/10/05 18:24:08  bourgesl
+ * first running searchCal start query integration through SAMP (but cause bugs in SearchCal)
+ *
  * Revision 1.39  2010/10/05 14:59:48  bourgesl
  * added AsproGui:getInstance()
  *
@@ -146,6 +149,7 @@ import fr.jmmc.aspro.gui.action.SaveObservationAction;
 import fr.jmmc.aspro.gui.action.ShowPrefAction;
 import fr.jmmc.aspro.gui.util.ComponentResizeAdapter;
 import fr.jmmc.aspro.model.ConfigurationManager;
+import fr.jmmc.aspro.model.searchCal.SearchCalSampMessageHandler;
 import fr.jmmc.mcs.gui.App;
 import fr.jmmc.mcs.gui.StatusBar;
 import fr.jmmc.mcs.util.ActionRegistrar;
@@ -370,6 +374,9 @@ public final class AsproGui extends App {
     // initialize the actions :
     registerActions();
 
+    // initialize SAMP message handlers :
+    declareInteroperability();
+
     // Handle status bar
     getFramePanel().add(new StatusBar(), BorderLayout.SOUTH);
 
@@ -411,6 +418,14 @@ public final class AsproGui extends App {
     // searchCal query (SAMP) :
     new SampSearchCalQuery();
   }
+
+  /**
+   * Create SAMP Message handlers
+   */
+    private void declareInteroperability() {
+      // Add handler to load searchCal votable and get calibrators
+      new SearchCalSampMessageHandler();
+    }
 
   /**
    * Return the setting panel
