@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationManager.java,v 1.39 2010-10-04 16:25:39 bourgesl Exp $"
+ * "@(#) $Id: ObservationManager.java,v 1.40 2010-10-07 15:02:05 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.39  2010/10/04 16:25:39  bourgesl
+ * proper JAXB / IO exception handling
+ *
  * Revision 1.38  2010/10/01 15:36:29  bourgesl
  * new event WARNING_READY
  * added setWarningContainer and fireWarningReady methods
@@ -153,6 +156,7 @@ import fr.jmmc.mcs.astro.star.Star;
 import fr.jmmc.oitools.model.OIFitsFile;
 import java.io.File;
 import java.io.IOException;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -160,6 +164,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Vector;
 import java.util.logging.Level;
+import javax.swing.SwingUtilities;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 /**
@@ -263,6 +268,30 @@ public final class ObservationManager extends BaseOIManager {
       final ObservationSetting newObservation = (ObservationSetting) loaded;
       changeObservation(newObservation);
     }
+  }
+
+  /**
+   * Load an observation from the given reader
+   * @param reader any reader
+   * @return loaded observation
+   *
+   * @throws IOException if an I/O exception occured
+   * @throws IllegalArgumentException if the file is not an Observation
+   */
+  public ObservationSetting load(final Reader reader) throws IOException, IllegalArgumentException {
+    if (reader != null) {
+      if (logger.isLoggable(Level.INFO)) {
+        logger.info("Load observation from : " + reader);
+      }
+      final Object loaded = loadObject(reader);
+
+      if (!(loaded instanceof ObservationSetting)) {
+        throw new IllegalArgumentException("The loaded file does not correspond to a valid Aspro2 file");
+      }
+
+      return (ObservationSetting) loaded;
+    }
+    return null;
   }
 
   /**
@@ -389,6 +418,12 @@ public final class ObservationManager extends BaseOIManager {
    * @param type event type
    */
   private void fireEvent(final ObservationEventType type) {
+
+    // TODO : remove when code is clean !
+    if (!SwingUtilities.isEventDispatchThread()) {
+      logger.log(Level.SEVERE, "invalid thread : use EDT", new Throwable());
+    }
+
     if (!this.listeners.isEmpty()) {
       // Call listeners with a copy of the listener list to avoid concurrent modification :
       final ObservationListener[] eventListeners = new ObservationListener[this.listeners.size()];
