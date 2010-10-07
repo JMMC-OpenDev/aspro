@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: FileUtils.java,v 1.8 2010-10-04 16:25:25 bourgesl Exp $"
+ * "@(#) $Id: FileUtils.java,v 1.9 2010-10-07 15:01:14 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.8  2010/10/04 16:25:25  bourgesl
+ * proper IO exception handling
+ *
  * Revision 1.7  2010/09/24 15:51:09  bourgesl
  * better exception handling
  *
@@ -33,6 +36,7 @@ package fr.jmmc.aspro.util;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -112,19 +116,48 @@ public final class FileUtils {
    * @throws IllegalStateException if the file is not found or an I/O exception occured
    */
   public static String readFile(final String classpathLocation) throws IllegalStateException {
+    final URL url = getResource(classpathLocation);
+
+    try {
+      return readFile(url.openStream(), 2048);
+    } catch (IOException ioe) {
+      // Unexpected exception :
+      throw new IllegalStateException("unable to read file : " + classpathLocation, ioe);
+    }
+  }
+
+  /**
+   * Read a text file from the given file
+   *
+   * @param file local file
+   * @return text file content
+   *
+   * @throws IOException if an I/O exception occured
+   */
+  public static String readFile(final File file) throws IOException {
+    final int length = (int)file.length();
+
+    // TODO : check maximum length :
+    return readFile(new FileInputStream(file), length);
+  }
+
+  /**
+   * Read a text file from the given input stream into a string
+   *
+   * @param inputStream stream to load
+   * @param bufferCapacity initial buffer capacity (chars)
+   * @return text file content
+   *
+   * @throws IOException if an I/O exception occured
+   */
+  private static String readFile(final InputStream inputStream, final int bufferCapacity) throws IOException {
 
     String result = null;
 
-    // buffer used for both script and result :
-    final StringBuilder sb = new StringBuilder(512);
-
-    InputStream inputStream = null;
-
     try {
-      final URL url = getResource(classpathLocation);
-      inputStream = url.openStream();
-
       final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+
+      final StringBuilder sb = new StringBuilder(bufferCapacity);
 
       // Read incoming data line by line
       String currentLine = null;
@@ -138,9 +171,6 @@ public final class FileUtils {
 
       result = sb.toString();
 
-    } catch (IOException ioe) {
-      // Unexpected exception :
-      throw new IllegalStateException("unable to read file : " + classpathLocation, ioe);
     } finally {
       if (inputStream != null) {
         try {
