@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetModelForm.java,v 1.27 2010-10-01 15:30:01 bourgesl Exp $"
+ * "@(#) $Id: TargetModelForm.java,v 1.28 2010-10-07 15:02:36 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.27  2010/10/01 15:30:01  bourgesl
+ * use ModelManager.normalizeFluxes(models)
+ *
  * Revision 1.26  2010/09/24 15:55:22  bourgesl
  * use MessagePane
  *
@@ -115,7 +118,6 @@ import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.JTree;
 import javax.swing.ListSelectionModel;
