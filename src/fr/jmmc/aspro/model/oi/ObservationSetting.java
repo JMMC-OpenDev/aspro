@@ -209,7 +209,23 @@ public class ObservationSetting
     }
     return null;
   }
-  
+
+  /**
+   * Return the position of the target having the given name
+   * @param name target name
+   * @return position of -1 if not found
+   */
+  public final int getTargetPosition(final String name) {
+    int i = 0;
+    for (Target t : getTargets()) {
+      if (t.getName().equals(name)) {
+        return i;
+      }
+      i++;
+    }
+    return -1;
+  }
+
   /**
    * Return the target configuration of the target given by its name 
    * @param name target name
