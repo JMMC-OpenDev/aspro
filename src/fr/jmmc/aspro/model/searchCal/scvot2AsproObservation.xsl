@@ -3,18 +3,21 @@
 ********************************************************************************
  JMMC project
 
- "@(#) $Id: scvot2AsproObservation.xsl,v 1.2 2010-10-07 13:30:39 mella Exp $"
+ "@(#) $Id: scvot2AsproObservation.xsl,v 1.3 2010-10-07 15:06:26 bourgesl Exp $"
 
  History
  ~~~~~~~
  $Log: not supported by cvs2svn $
+ Revision 1.2  2010/10/07 13:30:39  mella
+ Add one comment that explain why we do only consider calibrators with UDD_X diameters
+
  Revision 1.1  2010/10/07 11:55:10  bourgesl
  xslt to transform searchCal votable to Aspro 2 observation (targets)
 
 ********************************************************************************
  NAME
  scvot2AsproObservation.xsl - SearchCal Votable into Aspro2 observation setting
- 
+
  DESCRIPTION
  This stylesheet transform one SearchCal Votable into one aspro observation
  setting with one target per calibrator that get one diameter.
@@ -144,6 +147,8 @@
         </xsl:variable>
         <xsl:variable name="EQUINOX" select="translate(/VOT11:VOTABLE/VOT11:COOSYS/@equinox, 'J', '')"/>
 
+        <xsl:variable name="TARGET" select="/VOT11:VOTABLE/VOT11:RESOURCE/VOT11:TABLE/VOT11:PARAM[@name = 'objectName']/@value"/>
+
 <!-- starting output document -->
 <ns2:observationSetting
       xmlns:ns2="http://www.jmmc.fr/aspro-oi/0.1"
@@ -151,9 +156,13 @@
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:schemaLocation="http://www.jmmc.fr/aspro-oi/0.1 AsproOIModel.xsd http://www.jmmc.fr/jmcs/models/0.1 targetModel.xsd">
 
+<xsl:comment>Science Object Name</xsl:comment>
+
+    <name><xsl:value-of select="$TARGET"/></name>
+
+<!--
 <xsl:comment>fake observation</xsl:comment>
 
-    <name>default</name>
     <when>
         <date>2010-10-01</date>
         <nightRestriction>true</nightRestriction>
@@ -169,8 +178,9 @@
         <instrumentMode>Low_JHK</instrumentMode>
         <samplingPeriod>40.0</samplingPeriod>
     </instrumentConfiguration>
+-->
 
-<xsl:comment>xsl output</xsl:comment>
+<xsl:comment>Calibrators</xsl:comment>
 
             <!-- Build one target element per calibrator ( at least with one UDD diameter ) -->
             <!-- Some calibrator can be omitted but this hsould be fixed on the server side -->
@@ -233,13 +243,13 @@
                     <xsl:if test="$PARA_ERR/text()">
                       <PARA_ERR><xsl:value-of select="$PARA_ERR"/></PARA_ERR>
                     </xsl:if>
-                    
+
                     <!-- missing in scvot <IDS> -->
                     <!-- missing in scvot <OBJTYP> -->
                     <xsl:if test="$SPECTYP/text()">
                       <SPECTYP><xsl:value-of select="$SPECTYP"/></SPECTYP>
                     </xsl:if>
-                    
+
                     <xsl:if test="$FLUX_V/text()">
                       <FLUX_V><xsl:value-of select="$FLUX_V"/></FLUX_V>
                     </xsl:if>
