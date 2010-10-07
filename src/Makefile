@@ -1,13 +1,16 @@
 #*******************************************************************************
 # JMMC project
 #
-# "@(#) $Id: Makefile,v 1.13 2010-10-06 08:49:58 bourgesl Exp $"
+# "@(#) $Id: Makefile,v 1.14 2010-10-07 15:03:36 bourgesl Exp $"
 #
 # Makefile of aspro module
 #
 # History
 # -------
 # $Log: not supported by cvs2svn $
+# Revision 1.13  2010/10/06 08:49:58  bourgesl
+# try again
+#
 # Revision 1.12  2010/10/06 08:46:19  bourgesl
 # add searchCal_template.xml in jar
 #
@@ -151,6 +154,7 @@ aspro_EXTRAS   = edu/dartmouth/License.txt \
                  fr/jmmc/aspro/gui/icons/*.gif \
                  fr/jmmc/aspro/gui/icons/*.png \
                  fr/jmmc/aspro/model/*.xml \
+                 fr/jmmc/aspro/model/searchCal/*.xsl \
                  fr/jmmc/aspro/ob/*.obx
 
 #
