@@ -3,11 +3,14 @@
 ********************************************************************************
  JMMC project
 
- "@(#) $Id: scvot2AsproObservation.xsl,v 1.1 2010-10-07 11:55:10 bourgesl Exp $"
+ "@(#) $Id: scvot2AsproObservation.xsl,v 1.2 2010-10-07 13:30:39 mella Exp $"
 
  History
  ~~~~~~~
  $Log: not supported by cvs2svn $
+ Revision 1.1  2010/10/07 11:55:10  bourgesl
+ xslt to transform searchCal votable to Aspro 2 observation (targets)
+
 ********************************************************************************
  NAME
  scvot2AsproObservation.xsl - SearchCal Votable into Aspro2 observation setting
@@ -169,7 +172,8 @@
 
 <xsl:comment>xsl output</xsl:comment>
 
-            <!-- Build one target element per calibrator (at least with one diameter)-->
+            <!-- Build one target element per calibrator ( at least with one UDD diameter ) -->
+            <!-- Some calibrator can be omitted but this hsould be fixed on the server side -->
             <xsl:for-each select=".//VOT11:TR[VOT11:TD[position()=$diam_index]/text()]">
                 <xsl:variable name="name">
                     <xsl:choose>
