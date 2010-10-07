@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BasicObservationForm.java,v 1.40 2010-10-05 18:22:52 bourgesl Exp $"
+ * "@(#) $Id: BasicObservationForm.java,v 1.41 2010-10-07 15:02:58 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.40  2010/10/05 18:22:52  bourgesl
+ * added getSelectedTargetName() to replace soon the same method in UVCoveragePanel
+ *
  * Revision 1.39  2010/10/05 15:06:22  bourgesl
  * sycnhronize target selection from UV coverage panel to observation form
  *
@@ -661,6 +664,13 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     final boolean visible = (v.size() > 1);
     this.jLabelConfiguration.setVisible(visible);
     this.jComboBoxInstrumentConfiguration.setVisible(visible);
+  }
+
+  /**
+   * Force to refresh the target list from the observation
+   */
+  public void forceUpdateListTargets() {
+    this.updateListTargets();
   }
 
   /**
