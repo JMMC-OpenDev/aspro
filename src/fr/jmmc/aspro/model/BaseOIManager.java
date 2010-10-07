@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BaseOIManager.java,v 1.18 2010-10-04 16:25:39 bourgesl Exp $"
+ * "@(#) $Id: BaseOIManager.java,v 1.19 2010-10-07 15:02:26 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.18  2010/10/04 16:25:39  bourgesl
+ * proper JAXB / IO exception handling
+ *
  * Revision 1.17  2010/09/26 12:47:40  bourgesl
  * better exception handling
  *
@@ -70,6 +73,7 @@ import fr.jmmc.jaxb.XmlBindException;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.Reader;
 import java.net.URL;
 import java.util.Calendar;
 import java.util.Date;
@@ -178,6 +182,27 @@ public class BaseOIManager {
       result = this.jf.createUnMarshaller().unmarshal(inputFile);
     } catch (JAXBException je) {
       handleException("Load failure on " + inputFile, je);
+    }
+    return result;
+  }
+
+  /**
+   * Protected load method
+   * @param reader any reader
+   * @return unmarshalled object
+   *
+   * @throws IOException if an I/O exception occured
+   * @throws IllegalStateException if an unexpected exception occured
+   * @throws XmlBindException if a JAXBException was caught while creating an unmarshaller
+   */
+  protected final Object loadObject(final Reader reader)
+          throws IOException, IllegalStateException, XmlBindException {
+
+    Object result = null;
+    try {
+      result = this.jf.createUnMarshaller().unmarshal(reader);
+    } catch (JAXBException je) {
+      handleException("Load failure on " + reader, je);
     }
     return result;
   }
