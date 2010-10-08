@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityPanel.java,v 1.42 2010-10-08 09:41:58 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityPanel.java,v 1.43 2010-10-08 12:32:02 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.42  2010/10/08 09:41:58  bourgesl
+ * fixed LST range [0;24] to see all ticks
+ * hide annotations (date and elevation) if it is too close from date limits (2 minutes)
+ *
  * Revision 1.41  2010/10/01 15:28:46  bourgesl
  * Use an hour angle axis when the observability displays the baseline limits
  *
@@ -213,7 +217,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
   public static final Color TWILIGHT_COLOR = new Color(192, 192, 192);
   /** background color corresponding to the NIGHT zone */
   public static final Color NIGHT_COLOR = new Color(128, 128, 128);
-  /** annotation rotation angle = 90° */
+  /** annotation rotation angle = 90 degrees */
   private static final double HALF_PI = Math.PI / 2d;
 
   /** milliseconds threshold to consider the date too close to date axis limits = 2 minutes */
@@ -279,7 +283,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     this.chartPanel = new ChartPanel(this.localJFreeChart,
             600, 400, /* prefered size */
             300, 200, /* minimum size before scaling */
-            1900, 1200, /* maximum size before scaling */
+            2000, 2000, /* maximum size before scaling */
             true, /* use buffer */
             false, /* properties */
             true, /* copy */
@@ -611,6 +615,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     String name;
     TaskSeries taskSeries;
     Task task;
+    int colorIndex;
 
     for (StarObservabilityData so : starVis) {
       name = so.getName();
@@ -631,21 +636,55 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
       localTaskSeriesCollection.add(taskSeries);
 
       // color :
-      renderer.setSeriesPaint(n, palette.getColor(so.getType()), false);
+      colorIndex = so.getType();
+
+      if (colorIndex == StarObservabilityData.TYPE_STAR && name.endsWith(AsproConstants.CAL_SUFFIX)) {
+        colorIndex = StarObservabilityData.TYPE_CALIBRATOR;
+      }
+      renderer.setSeriesPaint(n, palette.getColor(colorIndex), false);
 
       n++;
     }
 
-    // set the main data set :
-    final XYTaskDataset dataset = new XYTaskDataset(localTaskSeriesCollection);
+    // Fix the plot size and bar width :
+
+    // TODO : adjust range to have correct bar size if there is a lot of targets :
+    // Add a scrollbar arround the plot only ?
+
+    final double barWidth;
+    final double rangeMin, rangeMax;
+
+    if (targetNames.length > 0) {
+      rangeMin = -0.5d;
+      rangeMax = targetNames.length - 0.5d;
+    } else {
+      rangeMin = 0d;
+      rangeMax = 1d;
+    }
 
     // adjust bar width :
     if (targetNames.length > 1) {
-      dataset.setSeriesWidth(0.5d);
+      barWidth = 0.5d;
     } else {
-      dataset.setSeriesWidth(0.25d);
+      barWidth = 0.25d;
     }
 
+    // TODO : later
+    /*
+    final int height = 50 * targetNames.length + 100;
+    
+    logger.severe("height = " + height);
+
+    final Dimension dim = new Dimension((int)this.chartPanel.getPreferredSize().getWidth(), height);
+
+    this.chartPanel.setMinimumSize(dim);
+    this.chartPanel.setPreferredSize(dim);
+    this.chartPanel.revalidate();
+     */
+
+    // set the main data set :
+    final XYTaskDataset dataset = new XYTaskDataset(localTaskSeriesCollection);
+    dataset.setSeriesWidth(barWidth);
     this.localXYPlot.setDataset(dataset);
 
     // change the Domain axis (vertical) :
@@ -653,13 +692,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     localSymbolAxis.setInverted(true);
     localSymbolAxis.setGridBandsVisible(false);
     localSymbolAxis.setAutoRange(false);
-
-    // TODO : adjust range to have correct bar size if there is a lot of targets :
-    // Add a scrollbar arround the plot only ?
-
-    if (targetNames.length > 0) {
-      localSymbolAxis.setRange(-0.5d, targetNames.length - 0.5d);
-    }
+    localSymbolAxis.setRange(rangeMin, rangeMax);
     this.localXYPlot.setDomainAxis(localSymbolAxis);
 
     // remove Annotations :
@@ -679,7 +712,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
           for (ElevationDate ed : so.getElevations()) {
             if (checkDateAxisLimits(ed.getDate(), min, max)) {
-              renderer.addAnnotation(new XYTickAnnotation(Integer.toString(ed.getElevation()) + "°", n, ed.getDate().getTime(), HALF_PI));
+              renderer.addAnnotation(new XYTickAnnotation(Integer.toString(ed.getElevation()), n, ed.getDate().getTime(), HALF_PI));
             }
           }
         }
@@ -816,3 +849,4 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     }
   }
 }
+
