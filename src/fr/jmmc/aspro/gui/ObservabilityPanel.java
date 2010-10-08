@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityPanel.java,v 1.41 2010-10-01 15:28:46 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityPanel.java,v 1.42 2010-10-08 09:41:58 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.41  2010/10/01 15:28:46  bourgesl
+ * Use an hour angle axis when the observability displays the baseline limits
+ *
  * Revision 1.40  2010/09/23 19:46:35  bourgesl
  * comments when calling FeedBackReport
  *
@@ -210,6 +213,11 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
   public static final Color TWILIGHT_COLOR = new Color(192, 192, 192);
   /** background color corresponding to the NIGHT zone */
   public static final Color NIGHT_COLOR = new Color(128, 128, 128);
+  /** annotation rotation angle = 90° */
+  private static final double HALF_PI = Math.PI / 2d;
+
+  /** milliseconds threshold to consider the date too close to date axis limits = 2 minutes */
+  private static final long DATE_LIMIT_THRESHOLD = 2 * 60 * 1000;
 
   /* time references */
   /** LST time reference */
@@ -645,6 +653,10 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     localSymbolAxis.setInverted(true);
     localSymbolAxis.setGridBandsVisible(false);
     localSymbolAxis.setAutoRange(false);
+
+    // TODO : adjust range to have correct bar size if there is a lot of targets :
+    // Add a scrollbar arround the plot only ?
+
     if (targetNames.length > 0) {
       localSymbolAxis.setRange(-0.5d, targetNames.length - 0.5d);
     }
@@ -666,25 +678,26 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
           renderer.addAnnotation(new XYDiamondAnnotation(n, so.getTransitDate().getTime(), 10, 10));
 
           for (ElevationDate ed : so.getElevations()) {
-            renderer.addAnnotation(new XYTickAnnotation(Integer.toString(ed.getElevation()) + "°", n, ed.getDate().getTime(), Math.PI / 2d));
+            if (checkDateAxisLimits(ed.getDate(), min, max)) {
+              renderer.addAnnotation(new XYTickAnnotation(Integer.toString(ed.getElevation()) + "°", n, ed.getDate().getTime(), HALF_PI));
+            }
           }
         }
 
         for (DateTimeInterval interval : so.getVisible()) {
-
-          if (!interval.getStartDate().equals(min)) {
+          if (checkDateAxisLimits(interval.getStartDate(), min, max)) {
             final XYTextAnnotation aStart = new XYTextAnnotation(df.format(interval.getStartDate()), n, interval.getStartDate().getTime());
             aStart.setTextAnchor(TextAnchor.BASELINE_CENTER);
             aStart.setPaint(Color.BLACK);
-            aStart.setRotationAngle(Math.PI / 2);
+            aStart.setRotationAngle(HALF_PI);
             renderer.addAnnotation(aStart);
           }
 
-          if (!interval.getEndDate().equals(max)) {
+          if (checkDateAxisLimits(interval.getEndDate(), min, max)) {
             final XYTextAnnotation aEnd = new XYTextAnnotation(df.format(interval.getEndDate()), n, interval.getEndDate().getTime());
             aEnd.setTextAnchor(TextAnchor.BASELINE_CENTER);
             aEnd.setPaint(Color.BLACK);
-            aEnd.setRotationAngle(Math.PI / 2);
+            aEnd.setRotationAngle(HALF_PI);
             renderer.addAnnotation(aEnd);
           }
         }
@@ -694,11 +707,29 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     }
 
     // annotation JMMC (fixed position) :
-    final XYTextAnnotation aJMMC = new XYTextAnnotation(AsproConstants.JMMC_ANNOTATION,
-            localSymbolAxis.getRange().getUpperBound(), max.getTime());
+    final XYTextAnnotation aJMMC = new XYTextAnnotation(AsproConstants.JMMC_ANNOTATION, localSymbolAxis.getRange().getUpperBound(), max.getTime());
     aJMMC.setTextAnchor(TextAnchor.BOTTOM_RIGHT);
     aJMMC.setPaint(Color.BLACK);
     renderer.addAnnotation(aJMMC, Layer.BACKGROUND);
+  }
+
+  /**
+   * Check if the given date is too close to date axis limits
+   * @param date date to check
+   * @param min min date of date axis
+   * @param max max date of date axis
+   * @return true if the given date is NOT close to date axis limits
+   */
+  private final boolean checkDateAxisLimits(final Date date, final Date min, final Date max) {
+    // if date is too close to date min:
+    if (date.getTime() - min.getTime() < DATE_LIMIT_THRESHOLD) {
+      return false;
+    }
+    // if date is too close to date min:
+    if (max.getTime() - date.getTime() < DATE_LIMIT_THRESHOLD) {
+      return false;
+    }
+    return true;
   }
 
   /**
@@ -715,8 +746,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     final DateAxis dateAxis = new DateAxis(label);
     dateAxis.setAutoRange(false);
 
-    // note : the last tick is missing as date max = 23:59:59 (removed 1s)
-    dateAxis.setRange(from.getTime(), to.getTime());
+    // add a margin of 1 ms :
+    dateAxis.setRange(from.getTime() - 1l, to.getTime() + 1l);
 
     if (doBaseLineLimits) {
       dateAxis.setStandardTickUnits(this.haTickUnits);
