@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BasicObservationForm.java,v 1.41 2010-10-07 15:02:58 bourgesl Exp $"
+ * "@(#) $Id: BasicObservationForm.java,v 1.42 2010-10-08 09:39:03 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.41  2010/10/07 15:02:58  bourgesl
+ * added forceUpdateListTargets() hack
+ *
  * Revision 1.40  2010/10/05 18:22:52  bourgesl
  * added getSelectedTargetName() to replace soon the same method in UVCoveragePanel
  *
@@ -697,7 +700,11 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
    * @param targetName
    */
   protected void updateSelectedTarget(final Object targetName) {
-      this.jListTargets.setSelectedValue(targetName, true);
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("selected target = " + targetName);
+    }
+
+    this.jListTargets.setSelectedValue(targetName, true);
   }
 
   /**

@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.59 2010-10-05 15:06:22 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.60 2010-10-08 09:39:03 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.59  2010/10/05 15:06:22  bourgesl
+ * sycnhronize target selection from UV coverage panel to observation form
+ *
  * Revision 1.58  2010/10/04 14:31:46  bourgesl
  * use the minimum baseline as a minimum for the UV Max coverage in order to avoid zero value (bug)
  *
@@ -2101,12 +2104,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
    * Update the selected target in the observation form (on top)
    */
   private void synchronizeSelectedTarget() {
-    final String targetName = getSelectedTargetName();
-
-    logger.severe("target = " + targetName);
-
     final BasicObservationForm form = AsproGui.getInstance().getSettingPanel().getObservationForm();
 
-    form.updateSelectedTarget(targetName);
+    form.updateSelectedTarget(getSelectedTargetName());
   }
 }
