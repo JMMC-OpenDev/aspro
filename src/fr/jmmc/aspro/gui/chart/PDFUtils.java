@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: PDFUtils.java,v 1.6 2010-09-26 11:59:11 bourgesl Exp $"
+ * "@(#) $Id: PDFUtils.java,v 1.7 2010-10-08 12:30:30 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2010/09/26 11:59:11  bourgesl
+ * replaced RuntimeException by IllegalStateException to avoid catching runtime exceptions
+ *
  * Revision 1.5  2010/09/24 15:53:44  bourgesl
  * IOexception is thrown to have better exception handling
  *
@@ -113,6 +116,8 @@ public final class PDFUtils {
 
     Graphics2D g2 = null;
 
+    // TODO : adjust document size (A4, A3, A2) and orientation according to the chart content ...
+
     final Document document = new Document(PageSize.A4.rotate());
 
     final Rectangle pdfRectangle = document.getPageSize();
@@ -129,7 +134,9 @@ public final class PDFUtils {
      */
 
     // margin = 1 cm :
-    final float margin = 72f / 2.54f;
+    final float marginCM = 1f;
+    // in points :
+    final float margin = marginCM * 72f / 2.54f;
 
     final float innerWidth = width - 2 * margin;
     final float innerHeight = height - 2 * margin;
