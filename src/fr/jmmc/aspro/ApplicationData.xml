@@ -64,8 +64,9 @@
   <releasenotes>
     <release version="0.6">
       <prerelease version="0.6.4 beta">
-        <change type="FEATURE">SearchCal integration through SAMP protocol</change>
-        <change type="FEATURE">Forward model and generated oifits to LITpro through SAMP VO protocol for model fitting</change>
+        <change>SearchCal integration through SAMP VO protocol : send the selected target to let SearchCal find calibrators
+        and process SearchCal response to extract calibrators</change>
+        <change>LITpro integration through SAMP VO protocol : send models and generated oifits for the selected target</change>
       </prerelease>
       <prerelease version="0.6.3">
         <change type="BUGFIX">Limit the memory footprint when the sampling periodicity is very small (less than 1 minute).
