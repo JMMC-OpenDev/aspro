@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ChartUtils.java,v 1.10 2010-10-01 15:35:42 bourgesl Exp $"
+ * "@(#) $Id: ChartUtils.java,v 1.11 2010-10-08 12:30:53 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.10  2010/10/01 15:35:42  bourgesl
+ * removed 'NO DATA' message on plots
+ * new Time and HA tick units factory methods
+ *
  * Revision 1.9  2010/05/11 12:01:54  bourgesl
  * added createLegend argument to createSquareXYLineChart(...)
  *
@@ -128,6 +132,11 @@ public class ChartUtils {
 
     final XYPlot localXYPlot = (XYPlot) localJFreeChart.getPlot();
 
+    localXYPlot.setDomainCrosshairVisible(false);
+    // show crosshair on date axis :
+    localXYPlot.setRangeCrosshairLockedOnData(false);
+    localXYPlot.setRangeCrosshairVisible(false);
+
     localXYPlot.getDomainAxis().setVisible(false);
     localXYPlot.getRangeAxis().setVisible(false);
 
@@ -152,12 +161,6 @@ public class ChartUtils {
     final JFreeChart localJFreeChart = createSquareXYLineChart(null, xLabel, yLabel, null, PlotOrientation.VERTICAL, legend, false, false);
 
     final SquareXYPlot localXYPlot = (SquareXYPlot) localJFreeChart.getPlot();
-
-    // show crosshair :
-    /*
-    localXYPlot.setDomainCrosshairVisible(true);
-    localXYPlot.setRangeCrosshairVisible(true);
-     */
 
     // reset bounds to [-1;1]
     localXYPlot.defineBounds(1);
