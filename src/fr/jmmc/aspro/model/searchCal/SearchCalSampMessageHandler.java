@@ -1,14 +1,18 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SearchCalSampMessageHandler.java,v 1.1 2010-10-07 15:04:23 bourgesl Exp $"
+ * "@(#) $Id: SearchCalSampMessageHandler.java,v 1.2 2010-10-08 12:29:17 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2010/10/07 15:04:23  bourgesl
+ * first SearchCal votable Samp handler : extract calibrators and merge them to the target list
+ *
  */
 package fr.jmmc.aspro.model.searchCal;
 
+import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.AsproGui;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
@@ -45,6 +49,8 @@ public final class SearchCalSampMessageHandler extends SampMessageHandler {
           className_);
   /** XSLT file path */
   private final static String XSLT_FILE = "fr/jmmc/aspro/model/searchCal/scvot2AsproObservation.xsl";
+  /** maximum calibrators accepted at once */
+  private final static int MAX_CALIBRATORS = 10;
 
   /**
    * Public constructor
@@ -145,7 +151,19 @@ public final class SearchCalSampMessageHandler extends SampMessageHandler {
           int pos = om.getObservation().getTargetPosition(targetName);
 
           if (pos == -1) {
-            MessagePane.showErrorMessage("Target '" + targetName + "' not found in SearchCal votable !");
+            MessagePane.showErrorMessage("Target '" + targetName + "' not found in targets (wrong SearchCal target) !");
+            return;
+          }
+
+          // check the number of calibrators :
+          if (calibrators.isEmpty()) {
+            MessagePane.showErrorMessage("No calibrator found in SearchCal response !");
+            return;
+          }
+
+          if (calibrators.size() > MAX_CALIBRATORS) {
+            MessagePane.showErrorMessage("Too many calibrators (" + calibrators.size() + ") found in SearchCal response !");
+            return;
           }
 
           // copy list of observation targets :
@@ -204,7 +222,7 @@ public final class SearchCalSampMessageHandler extends SampMessageHandler {
     String name;
     for (Target cal : calibrators) {
       // add (cal) suffix in calibrator name :
-      name = cal.getName() + " (cal)";
+      name = cal.getName() + AsproConstants.CAL_SUFFIX;
 
       if (!exist(editTargets, name)) {
         cal.setName(name);
