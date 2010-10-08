@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproConstants.java,v 1.16 2010-09-15 13:52:55 bourgesl Exp $"
+ * "@(#) $Id: AsproConstants.java,v 1.17 2010-10-08 12:31:09 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.16  2010/09/15 13:52:55  bourgesl
+ * added JMMC copyright on plot
+ *
  * Revision 1.15  2010/07/22 15:45:43  bourgesl
  * added acquisition time in UV coverage and observation
  *
@@ -102,4 +105,7 @@ public interface AsproConstants {
   
   /** JMMC legal notice on plots */
   public static final String JMMC_ANNOTATION = "Made by ASPRO 2/JMMC ";
+
+  /** suffix for calibrator names */
+  public static final String CAL_SUFFIX = " (cal)";
 }
