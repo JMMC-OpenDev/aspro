@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.57 2010-10-01 15:41:04 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.58 2010-10-08 09:40:26 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.57  2010/10/01 15:41:04  bourgesl
+ * easier to debug code with only 1 operation per line
+ *
  * Revision 1.56  2010/09/25 14:03:35  bourgesl
  * removed JNLP failure test
  *
@@ -273,7 +276,7 @@ public final class ObservabilityService {
   private final AstroSkyCalcObservation sco = new AstroSkyCalcObservation();
   /** jd corresponding to LST=00:00:00 for the observation date */
   private double jdLst0;
-  /** jd corresponding to LST=23:59:59 for the observation date */
+  /** jd corresponding to LST=24:00:00 for the observation date */
   private double jdLst24;
   /** flag to enable the observability restriction due to the night */
   private boolean useNightLimit;
@@ -409,8 +412,7 @@ public final class ObservabilityService {
     // find the julian date corresponding to the LST origin LST=00:00:00 for the given date :
     this.jdLst0 = this.sc.defineDate(cal.getYear(), cal.getMonth(), cal.getDay());
 
-    // warning : in LST, remove 1s to avoid 00:00:00 :
-    this.jdLst24 = this.sc.findJdForLst0(this.jdLst0 + 1d) - 1d / 86400d;
+    this.jdLst24 = this.sc.findJdForLst0(this.jdLst0 + 1d);
 
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("jd   min = " + this.jdLst0);
@@ -420,7 +422,11 @@ public final class ObservabilityService {
     this.data.setDateCalc(this.sc);
 
     final Date dateMin = jdToDate(this.jdLst0);
-    final Date dateMax = jdToDate(this.jdLst24);
+
+    final Date dateEnd = jdToDate(this.jdLst24);
+
+    // in LST, dateEnd = dateMin, so add one day :
+    final Date dateMax = (this.useLST) ? new Date(dateEnd.getTime() + 86400000l) : dateEnd;
 
     this.data.setDateMin(dateMin);
     this.data.setDateMax(dateMax);
@@ -792,7 +798,7 @@ public final class ObservabilityService {
     final double precDEC = raDec[1];
 
     // define transit date (HA = 0) :
-    starObs.setTransitDate(jdToDate(this.sc.convertHAToJD(0d, precRA)));
+    starObs.setTransitDate(convertJDToDate(this.sc.convertHAToJD(0d, precRA)));
 
     // Find LST range corresponding to the rise / set of the target :
     final double haElev = this.sco.getHAForElevation(precDEC, this.minElev);
@@ -1646,16 +1652,8 @@ public final class ObservabilityService {
             logger.fine("Range[" + jdFrom + " - " + jdTo + "] : " + type);
           }
 
-          // adjust range limits :
-          if (jdFrom < this.jdLst0) {
-            jdFrom = this.jdLst0;
-          }
-          if (jdTo > this.jdLst24) {
-            jdTo = this.jdLst24;
-          }
-
-          from = jdToDate(jdFrom);
-          to = jdToDate(jdTo);
+          from = jdToDateInDateRange(jdFrom);
+          to = jdToDateInDateRange(jdTo);
 
           if (logger.isLoggable(Level.FINE)) {
             logger.fine("SunInterval[" + from + " - " + to + "] : " + type);
@@ -1763,7 +1761,7 @@ public final class ObservabilityService {
       if (jdEnd <= this.jdLst24) {
 
         // single interval [jdStart;jdEnd]
-        intervals.add(new DateTimeInterval(jdToDate(jdStart), jdToDate(jdEnd)));
+        intervals.add(new DateTimeInterval(jdToDateInDateRange(jdStart), jdToDateInDateRange(jdEnd)));
 
       } else {
 
@@ -1771,16 +1769,16 @@ public final class ObservabilityService {
           // two points over LST 24 :
 
           // single interval [jdStart - day;jdEnd - day]
-          intervals.add(new DateTimeInterval(jdToDate(jdStart - day), jdToDate(jdEnd - day)));
+          intervals.add(new DateTimeInterval(jdToDateInDateRange(jdStart - day), jdToDateInDateRange(jdEnd - day)));
 
         } else {
           // end occurs after LST 24 :
 
           // interval [jdStart;jdLst24]
-          intervals.add(new DateTimeInterval(jdToDate(jdStart), this.data.getDateMax()));
+          intervals.add(new DateTimeInterval(jdToDateInDateRange(jdStart), this.data.getDateMax()));
 
           // add the second interval [jdLst0;jdEnd - day]
-          intervals.add(new DateTimeInterval(this.data.getDateMin(), jdToDate(jdEnd - day)));
+          intervals.add(new DateTimeInterval(this.data.getDateMin(), jdToDateInDateRange(jdEnd - day)));
         }
       }
 
@@ -1791,14 +1789,14 @@ public final class ObservabilityService {
         // two points before LST 0h :
 
         // single interval [jdStart + day;jdEnd + day]
-        intervals.add(new DateTimeInterval(jdToDate(jdStart + day), jdToDate(jdEnd + day)));
+        intervals.add(new DateTimeInterval(jdToDateInDateRange(jdStart + day), jdToDateInDateRange(jdEnd + day)));
 
       } else {
         // interval [jdLst0;jdEnd]
-        intervals.add(new DateTimeInterval(this.data.getDateMin(), jdToDate(jdEnd)));
+        intervals.add(new DateTimeInterval(this.data.getDateMin(), jdToDateInDateRange(jdEnd)));
 
         // add the second interval [jdStart + day;jdLst24]
-        intervals.add(new DateTimeInterval(jdToDate(jdStart + day), this.data.getDateMax()));
+        intervals.add(new DateTimeInterval(jdToDateInDateRange(jdStart + day), this.data.getDateMax()));
       }
     }
   }
@@ -1840,6 +1838,60 @@ public final class ObservabilityService {
           end--;
         }
       }
+    }
+  }
+
+  /**
+   * Convert a JD date to a date within LST range [0;24]
+   * Note : due to HA limit [+/-12h], the converted JD / Date ranges
+   * can have a discontinuity on the date axis !
+   *
+   * @param jd range to convert
+   * @return date
+   */
+  private final Date convertJDToDate(final double jd) {
+    // one Day in LST is different than one Day in JD :
+    final double day = AstroSkyCalc.LST_DAY_IN_JD;
+
+    if (jd >= this.jdLst0) {
+
+      if (jd <= this.jdLst24) {
+
+        // date in [jdLst0;jdLst24]
+        return jdToDateInDateRange(jd);
+
+      } else {
+        // over LST 24 :
+
+        // return [jd - day]
+        return jdToDateInDateRange(jd - day);
+      }
+
+    } else {
+      // start occurs before LST 0h :
+
+      // return [jd + day]
+      return jdToDateInDateRange(jd + day);
+    }
+  }
+
+  /**
+   * Convert a JD value to a Date Object (LST or UTC)
+   * within range [jdLst0;jdLst24]]<=>[DateMin;DateMax]
+   * @see #useLST
+   * @see #jdToDate(double) 
+   * @param jd julian day
+   * @return Date Object (LST or UTC)
+   */
+  private final Date jdToDateInDateRange(final double jd) {
+    // adjust range limits :
+    if (jd <= this.jdLst0) {
+      return this.data.getDateMin();
+    } else {
+      if (jd >= this.jdLst24) {
+        return this.data.getDateMax();
+      }
+      return jdToDate(jd);
     }
   }
 
@@ -1896,37 +1948,49 @@ public final class ObservabilityService {
     int elev;
     double jd;
     double haElev;
+
+    final int minElevation = (int)Math.round(this.minElev);
+    
     // internal ticks for elevation :
     for (elev = 20; elev <= 80; elev += 20) {
-      if (elev != Math.round(this.minElev)) {
+      if (elev > minElevation) {
         haElev = this.sco.getHAForElevation(precDEC, elev);
 
         if (haElev > 0) {
           jd = this.sc.convertHAToJD(-haElev, precRA);
           if (Range.contains(obsRangeJD, jd)) {
-            elevations.add(new ElevationDate(jdToDate(jd), elev));
+            elevations.add(new ElevationDate(convertJDToDate(jd), elev));
           }
 
           jd = this.sc.convertHAToJD(haElev, precRA);
           if (Range.contains(obsRangeJD, jd)) {
-            elevations.add(new ElevationDate(jdToDate(jd), elev));
+            elevations.add(new ElevationDate(convertJDToDate(jd), elev));
           }
         }
       }
     }
 
-    // ticks for observability intervals (limits) :
     AzEl azEl;
+
+    // tick for transit :
+    jd = this.sc.convertHAToJD(0d, precRA);
+    if (Range.contains(obsRangeJD, jd)) {
+      azEl = this.sco.getTargetPosition(jd);
+      elev = (int) Math.round(azEl.getElevation());
+      elevations.add(new ElevationDate(convertJDToDate(jd), elev));
+    }
+
+    // ticks for observability intervals (limits) :
     for (Range range : obsRangeJD) {
       jd = range.getMin();
       azEl = this.sco.getTargetPosition(jd);
       elev = (int) Math.round(azEl.getElevation());
-      elevations.add(new ElevationDate(jdToDate(jd), elev));
+      elevations.add(new ElevationDate(convertJDToDate(jd), elev));
 
       jd = range.getMax();
       azEl = this.sco.getTargetPosition(jd);
       elev = (int) Math.round(azEl.getElevation());
-      elevations.add(new ElevationDate(jdToDate(jd), elev));
+      elevations.add(new ElevationDate(convertJDToDate(jd), elev));
     }
 
     if (logger.isLoggable(Level.FINE)) {
@@ -1964,7 +2028,7 @@ public final class ObservabilityService {
       // merge contiguous date ranges :
       mergeDateIntervals(dateIntervals);
 
-      // Replace the 23:59:59 date by 00:00:00 to merge contiguous intervals in LST :
+      // Replace the 24:00:00 date by 00:00:00 to merge contiguous intervals in LST :
       final Calendar cal = new GregorianCalendar();
       cal.set(Calendar.HOUR_OF_DAY, 0);
       cal.set(Calendar.MINUTE, 0);
@@ -1974,9 +2038,9 @@ public final class ObservabilityService {
 
       final Date lst0 = cal.getTime();
 
-      cal.set(Calendar.HOUR_OF_DAY, 23);
-      cal.set(Calendar.MINUTE, 59);
-      cal.set(Calendar.SECOND, 59);
+      cal.set(Calendar.HOUR_OF_DAY, 24);
+      cal.set(Calendar.MINUTE, 0);
+      cal.set(Calendar.SECOND, 0);
 
       final Date lst24 = cal.getTime();
 
