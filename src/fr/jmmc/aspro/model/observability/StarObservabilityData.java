@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: StarObservabilityData.java,v 1.4 2010-07-22 12:31:18 bourgesl Exp $"
+ * "@(#) $Id: StarObservabilityData.java,v 1.5 2010-10-08 12:29:44 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2010/07/22 12:31:18  bourgesl
+ * new moon type
+ *
  * Revision 1.3  2010/04/02 14:40:39  bourgesl
  * added elevation data and transit date
  *
@@ -34,12 +37,14 @@ public final class StarObservabilityData {
   /* type of data */
   /** star observability */
   public final static int TYPE_STAR = 0;
+  /** calibrator observability */
+  public final static int TYPE_CALIBRATOR = 1;
   /** rise/set intervals */
-  public final static int TYPE_RISE_SET = 1;
+  public final static int TYPE_RISE_SET = 2;
   /** horizon intervals */
-  public final static int TYPE_HORIZON = 2;
+  public final static int TYPE_HORIZON = 3;
   /** baseline intervals */
-  public final static int TYPE_BASE_LINE = 3;
+  public final static int TYPE_BASE_LINE = 4;
   /** moon intervals */
   public final static int TYPE_MOON = 27;
 
