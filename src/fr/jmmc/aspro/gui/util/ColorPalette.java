@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ColorPalette.java,v 1.1 2010-01-22 13:17:35 bourgesl Exp $"
+ * "@(#) $Id: ColorPalette.java,v 1.2 2010-10-08 12:30:02 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2010/01/22 13:17:35  bourgesl
+ * simple default color palette
+ *
  */
 package fr.jmmc.aspro.gui.util;
 
@@ -20,42 +23,30 @@ public class ColorPalette {
 
   /** default colors */
   private final static Color[] DEFAULT_COLORS = {
-    /* RED */
-    new Color(0xFF, 0x55, 0x55),
-    /* BLUE */
-    new Color(0x55, 0x55, 0xFF),
-    /* GREEN */
-    new Color(0x55, 0xFF, 0x55),
-    /* YELLOW */
-    new Color(0xFF, 0xFF, 0x55),
-    /* MAGENTA */
-    new Color(0xFF, 0x55, 0xFF),
-    /* CYAN */
-    new Color(0x55, 0xFF, 0xFF),
-    ChartColor.DARK_RED,
-    ChartColor.DARK_BLUE,
-    ChartColor.DARK_GREEN,
-    ChartColor.DARK_YELLOW,
-    ChartColor.DARK_MAGENTA,
-    ChartColor.DARK_CYAN,
     ChartColor.LIGHT_RED,
     ChartColor.LIGHT_BLUE,
     ChartColor.LIGHT_GREEN,
     ChartColor.LIGHT_YELLOW,
     ChartColor.LIGHT_MAGENTA,
     ChartColor.LIGHT_CYAN,
-    ChartColor.VERY_DARK_RED,
-    ChartColor.VERY_DARK_BLUE,
-    ChartColor.VERY_DARK_GREEN,
-    ChartColor.VERY_DARK_YELLOW,
-    ChartColor.VERY_DARK_MAGENTA,
-    ChartColor.VERY_DARK_CYAN,
     ChartColor.VERY_LIGHT_RED,
     ChartColor.VERY_LIGHT_BLUE,
     ChartColor.VERY_LIGHT_GREEN,
     ChartColor.VERY_LIGHT_YELLOW,
     ChartColor.VERY_LIGHT_MAGENTA,
-    ChartColor.VERY_LIGHT_CYAN
+    ChartColor.VERY_LIGHT_CYAN,
+    ChartColor.DARK_RED,
+    ChartColor.DARK_BLUE,
+    ChartColor.DARK_GREEN,
+    ChartColor.DARK_YELLOW,
+    ChartColor.DARK_MAGENTA,
+    ChartColor.DARK_CYAN,
+    ChartColor.VERY_DARK_RED,
+    ChartColor.VERY_DARK_BLUE,
+    ChartColor.VERY_DARK_GREEN,
+    ChartColor.VERY_DARK_YELLOW,
+    ChartColor.VERY_DARK_MAGENTA,
+    ChartColor.VERY_DARK_CYAN
   };
   /** default color palette */
   private static ColorPalette DEFAULT_COLOR_PALETTE = new ColorPalette(DEFAULT_COLORS);
