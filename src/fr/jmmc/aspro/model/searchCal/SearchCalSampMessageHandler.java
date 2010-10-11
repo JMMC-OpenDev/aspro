@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SearchCalSampMessageHandler.java,v 1.2 2010-10-08 12:29:17 bourgesl Exp $"
+ * "@(#) $Id: SearchCalSampMessageHandler.java,v 1.3 2010-10-11 14:15:37 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2010/10/08 12:29:17  bourgesl
+ * added error messages if nb(calibrators) = 0 or > 10
+ *
  * Revision 1.1  2010/10/07 15:04:23  bourgesl
  * first SearchCal votable Samp handler : extract calibrators and merge them to the target list
  *
@@ -29,11 +32,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 import javax.swing.SwingUtilities;
 import org.astrogrid.samp.Message;
-import org.astrogrid.samp.client.HubConnection;
 import org.astrogrid.samp.client.SampException;
 
 /**
@@ -60,21 +61,19 @@ public final class SearchCalSampMessageHandler extends SampMessageHandler {
   }
 
   /**
-   * Process the Samp message
-   * @param connection hub connection
-   * @param senderId sender identifier
-   * @param msg Samp message
-   * @return null
+   * Implements message processing
    *
-   * @throws SampException if the votable url is incorrect or the votable can not be read
+   * @param senderId public ID of sender client
+   * @param message message with MType this handler is subscribed to
+   * @throws SampException if any error occured while message processing
    */
-  public Map<?, ?> processCall(final HubConnection connection, final String senderId, final Message msg) throws SampException {
+  protected void processMessage(final String senderId, final Message message) throws SampException {
     if (logger.isLoggable(Level.FINE)) {
-      logger.fine("\tReceived '" + this.handledMType() + "' message from '" + senderId + "' : '" + msg + "'.");
+      logger.fine("\tReceived '" + this.handledMType() + "' message from '" + senderId + "' : '" + message + "'.");
     }
 
     // get url of votable (locally stored) :
-    final String voTableURL = (String) msg.getParam("url");
+    final String voTableURL = (String) message.getParam("url");
 
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("VOTable URL = " + voTableURL);
@@ -203,7 +202,6 @@ public final class SearchCalSampMessageHandler extends SampMessageHandler {
 
       throw new SampException("Can not read the votable : " + voTableURL, ioe);
     }
-    return null;
   }
 
   /**
