@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: EditableStarResolverWidget.java,v 1.7 2010-09-26 12:11:45 bourgesl Exp $"
+ * "@(#) $Id: EditableStarResolverWidget.java,v 1.8 2010-10-13 20:57:05 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2010/09/26 12:11:45  bourgesl
+ * avoid catch any exception but corect number format exception
+ *
  * Revision 1.6  2010/09/24 15:53:07  bourgesl
  * use MessagePane
  *
@@ -201,6 +204,8 @@ public class EditableStarResolverWidget extends StarResolverWidget {
 
     // Then update the internal star model :
     final Star starModel = getStar();
+
+    // No synchronisation needeed as it is already done by EDT :
     starModel.clear();
 
     // Name :
