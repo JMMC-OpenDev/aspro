@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ConfigurationManager.java,v 1.34 2010-10-14 14:19:26 bourgesl Exp $"
+ * "@(#) $Id: ConfigurationManager.java,v 1.35 2010-10-14 14:46:23 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.34  2010/10/14 14:19:26  bourgesl
+ * generated fake station horizons or fix them to respect the max elevation limit
+ *
  * Revision 1.33  2010/10/05 18:23:24  bourgesl
  * computeUVLimits made public for a given list of stations
  *
@@ -248,6 +251,7 @@ public final class ConfigurationManager extends BaseOIManager {
 
     computeInterferometerLocation(id);
     computeLimitsUVCoverage(id);
+
     adjustStationHorizons(id.getStations());
 
     interferometerDescriptions.put(id.getName(), id);
@@ -324,17 +328,18 @@ public final class ConfigurationManager extends BaseOIManager {
   }
 
   /**
-   * Adjust the station horizons to respect the maximum elevation limit (85°)
+   * Adjust the station horizons to respect the maximum elevation limit (85 deg for CHARA)
    * @param stations station to update
    */
   private void adjustStationHorizons(final List<Station> stations) {
-    // TODO : use a default value per interferometer (also for min elevation) :
-    final double maxElev = AsproConstants.DEFAULT_MAX_ELEVATION;
-
+    double maxElev;
     for (Station station : stations) {
       if (logger.isLoggable(Level.FINE)) {
         logger.fine("station : " + station);
       }
+
+      // maximum elevation in degrees per telescope :
+      maxElev = station.getTelescope().getMaxElevation();
 
       if (station.getHorizon() != null && !station.getHorizon().getPoints().isEmpty()) {
         // horizon is defined : check elevation
