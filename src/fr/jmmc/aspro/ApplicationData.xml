@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <ApplicationData link="http://www.jmmc.fr/aspro2">
-  <program name="Aspro2" version="0.6.4 beta"/>
+  <program name="Aspro2" version="0.7.1 beta"/>
   <compilation date="29/09/2010" compiler="JDK 1.5.0_16"/>
   <text>
     <![CDATA[ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations
@@ -62,12 +62,17 @@
     </menu>
   </menubar>
   <releasenotes>
-    <release version="0.6">
-      <prerelease version="0.6.4 beta">
+    <release version="0.7">
+      <prerelease version="0.7.1 beta">
+        <change>Fixed bug related to sampling periodicity : use the instrument default sampling time when an invalid value is detected</change>
+      </prerelease>
+      <prerelease version="0.7.0">
         <change>SearchCal integration through SAMP VO protocol : send the selected target to let SearchCal find calibrators
         and process SearchCal response to extract calibrators</change>
         <change>LITpro integration through SAMP VO protocol : send models and generated oifits for the selected target</change>
       </prerelease>
+    </release>
+    <release version="0.6">
       <prerelease version="0.6.3">
         <change type="BUGFIX">Limit the memory footprint when the sampling periodicity is very small (less than 1 minute).
         First 500 HA samples are computed and the following warning is displayed : 

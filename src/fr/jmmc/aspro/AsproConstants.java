@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproConstants.java,v 1.17 2010-10-08 12:31:09 bourgesl Exp $"
+ * "@(#) $Id: AsproConstants.java,v 1.18 2010-10-14 10:58:03 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.17  2010/10/08 12:31:09  bourgesl
+ * added suffix for calibrators
+ *
  * Revision 1.16  2010/09/15 13:52:55  bourgesl
  * added JMMC copyright on plot
  *
@@ -80,8 +83,6 @@ public interface AsproConstants {
   public static final double DEFAULT_MIN_ELEVATION = 30d;
   /** minimum elevation for OB generation = 30 degrees */
   public static final double OB_MIN_ELEVATION = 30d;
-  /** default sampling periodicity = 40 minutes */
-  public static final double DEFAULT_SAMPLING_PERIOD = 40d;
   /** default observation duration per calibrated point = 300 seconds i.e. 5 minutes */
   public static final double DEFAULT_OBSERVATION_DURATION = 300d;
   /** default value for checkbox Night Limit = true */

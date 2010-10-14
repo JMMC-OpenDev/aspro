@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.60 2010-10-08 09:39:03 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.61 2010-10-14 10:58:03 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.60  2010/10/08 09:39:03  bourgesl
+ * removed log when the selected target changes
+ *
  * Revision 1.59  2010/10/05 15:06:22  bourgesl
  * sycnhronize target selection from UV coverage panel to observation form
  *
@@ -810,8 +813,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     this.uvMaxAdapter = new FieldSliderAdapter(jSliderUVMax, jFieldUVMax, 0d, 0d, 0d);
     this.uvMaxAdapter.addChangeListener(this);
 
-    // default sampling Period and property change listener :
-    this.jFieldSamplingPeriod.setValue(AsproConstants.DEFAULT_SAMPLING_PERIOD);
+    // define property change listener :
     this.jFieldSamplingPeriod.addPropertyChangeListener("value", new PropertyChangeListener() {
 
       public void propertyChange(final PropertyChangeEvent evt) {
@@ -819,7 +821,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
         if (newValue <= 0d) {
           // invalid value :
-          jFieldSamplingPeriod.setValue(AsproConstants.DEFAULT_SAMPLING_PERIOD);
+          resetSamplingPeriod(om.getObservation());
         }
 
         if (logger.isLoggable(Level.FINE)) {
@@ -956,15 +958,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         logger.fine("instrument changed : " + insName);
       }
 
-      // reset the sampling time to the default sampling time of the instrument :
-      final int defaultSamplingTime = ConfigurationManager.getInstance().getInstrumentSamplingTime(
-              observation.getInterferometerConfiguration().getName(),
-              observation.getInstrumentConfiguration().getName());
-      this.jFieldSamplingPeriod.setValue(Double.valueOf(defaultSamplingTime));
-
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("defaultSamplingTime : " + defaultSamplingTime);
-      }
+      resetSamplingPeriod(observation);
 
       // update instrument modes :
       final Vector<String> v = ConfigurationManager.getInstance().getInstrumentModes(
@@ -976,6 +970,33 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         logger.finest("jComboBoxInstrumentMode updated : " + this.jComboBoxInstrumentMode.getSelectedItem());
       }
     }
+  }
+
+  /**
+   * Reset the sampling period to the default sampling time of the selected instrument
+   * @param observation observation to use
+   */
+  private void resetSamplingPeriod(final ObservationSetting observation) {
+      // reset the sampling time to the default sampling time of the instrument :
+      final int defaultSamplingTime = getInstrumentDefaultSamplingTime(observation);
+
+      this.jFieldSamplingPeriod.setValue(Double.valueOf(defaultSamplingTime));
+
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("defaultSamplingTime : " + defaultSamplingTime);
+      }
+  }
+
+  /**
+   * Return the default sampling time of the selected instrument
+   * @param observation observation to use
+   * @return default sampling time
+   */
+  private int getInstrumentDefaultSamplingTime(final ObservationSetting observation) {
+      // get the default sampling time of the instrument :
+      return ConfigurationManager.getInstance().getInstrumentSamplingTime(
+              observation.getInterferometerConfiguration().getName(),
+              observation.getInstrumentConfiguration().getName());
   }
 
   /**
@@ -1451,9 +1472,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
           logger.fine("SwingWorker[UV].doInBackground : IN");
 
           // first reset the warning container in the current observation :
-          ObservationManager.getInstance().setWarningContainer(null);
+          om.setWarningContainer(null);
           // then reset the OIFits structure in the current observation :
-          ObservationManager.getInstance().setOIFitsFile(null);
+          om.setOIFitsFile(null);
 
           UVCoverageData uvData = new UVCoverageService(observation, targetName, uvMax,
                   doUVSupport, doModelImage, imageMode, imageSize, colorModel).compute();
@@ -1501,10 +1522,10 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
                 logger.fine("SwingWorker[UV].done : refresh Chart");
 
                 // update the warning container in the current observation :
-                ObservationManager.getInstance().setWarningContainer(uvData.getWarningContainer());
+                om.setWarningContainer(uvData.getWarningContainer());
 
                 // update the OIFits structure in the current observation :
-                ObservationManager.getInstance().setOIFitsFile(uvData.getOiFitsFile());
+                om.setOIFitsFile(uvData.getOiFitsFile());
 
                 ChartUtils.clearTextSubTitle(localJFreeChart);
 
