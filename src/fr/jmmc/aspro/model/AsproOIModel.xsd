@@ -798,6 +798,13 @@
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
+      <xsd:element name="maxElevation" type="xsd:double">
+        <xsd:annotation>
+          <xsd:documentation>
+              Telescope maximum elevation in degrees (85 deg for CHARA)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
       <xsd:element name="adaptiveOptics" type="AdaptiveOptics" minOccurs="0">
         <xsd:annotation>
           <xsd:documentation>
