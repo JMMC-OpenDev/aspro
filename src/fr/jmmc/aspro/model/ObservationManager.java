@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationManager.java,v 1.40 2010-10-07 15:02:05 bourgesl Exp $"
+ * "@(#) $Id: ObservationManager.java,v 1.41 2010-10-14 13:22:02 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.40  2010/10/07 15:02:05  bourgesl
+ * added load(reader) and fireEvent checks that the current thread is EDT
+ *
  * Revision 1.39  2010/10/04 16:25:39  bourgesl
  * proper JAXB / IO exception handling
  *
@@ -157,12 +160,12 @@ import fr.jmmc.oitools.model.OIFitsFile;
 import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Vector;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
 import javax.swing.SwingUtilities;
 import javax.xml.datatype.XMLGregorianCalendar;
@@ -189,7 +192,7 @@ public final class ObservationManager extends BaseOIManager {
   /** associated file to the observation settings */
   private File observationFile = null;
   /** observation listeners */
-  private List<ObservationListener> listeners = new ArrayList<ObservationListener>();
+  private final CopyOnWriteArrayList<ObservationListener> listeners = new CopyOnWriteArrayList<ObservationListener>();
 
   /**
    * Return the ObservationManager singleton
@@ -338,7 +341,7 @@ public final class ObservationManager extends BaseOIManager {
    * @param listener observation listener
    */
   public void register(final ObservationListener listener) {
-    this.listeners.add(listener);
+    this.listeners.addIfAbsent(listener);
   }
 
   /**
@@ -387,7 +390,6 @@ public final class ObservationManager extends BaseOIManager {
   }
 
   // TODO : Missing fireUVCoverageDone
-
   /**
    * This fires a warning ready event to all registered listeners.
    * Fired by setWarningContainer() <- UVCoveragePanel.plot().done() (EDT) when the oiFits is computed
@@ -424,27 +426,18 @@ public final class ObservationManager extends BaseOIManager {
       logger.log(Level.SEVERE, "invalid thread : use EDT", new Throwable());
     }
 
-    if (!this.listeners.isEmpty()) {
-      // Call listeners with a copy of the listener list to avoid concurrent modification :
-      final ObservationListener[] eventListeners = new ObservationListener[this.listeners.size()];
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("fireEvent : " + type);
+    }
 
-      // copy the listener references :
-      this.listeners.toArray(eventListeners);
+    final long start = System.nanoTime();
 
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("fireEvent : " + type);
-      }
+    for (final ObservationListener listener : this.listeners) {
+      listener.onProcess(type, getObservation());
+    }
 
-      final long start = System.nanoTime();
-
-      for (final ObservationListener listener : eventListeners) {
-        listener.onProcess(type, getObservation());
-      }
-
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("fireEvent : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
-      }
-
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("fireEvent : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
     }
   }
 
