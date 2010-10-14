@@ -64,6 +64,7 @@
   <releasenotes>
     <release version="0.7">
       <prerelease version="0.7.1 beta">
+        <change>Fixed concurrency bugs related to the SimBad star resolver : the search field is disabled while processing a request to avoid concurrent requests</change>
         <change>Fixed bug related to sampling periodicity : use the instrument default sampling time when an invalid value is detected</change>
       </prerelease>
       <prerelease version="0.7.0">
