@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SampSearchCalQuery.java,v 1.2 2010-10-06 16:06:33 bourgesl Exp $"
+ * "@(#) $Id: SampSearchCalQuery.java,v 1.3 2010-10-14 13:12:53 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2010/10/06 16:06:33  bourgesl
+ * finalization : define bright, min/Max MagRange correctly
+ *
  * Revision 1.1  2010/10/05 18:24:07  bourgesl
  * first running searchCal start query integration through SAMP (but cause bugs in SearchCal)
  *
@@ -22,9 +25,9 @@ import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.SpectralBand;
 import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.Target;
-import fr.jmmc.aspro.service.NoiseService;
-import fr.jmmc.aspro.service.NoiseService.Band;
+import fr.jmmc.aspro.model.util.SpectralBandUtils;
 import fr.jmmc.aspro.util.FileUtils;
+import fr.jmmc.mcs.astro.Band;
 import fr.jmmc.mcs.gui.MessagePane;
 import fr.jmmc.mcs.interop.SampCapability;
 import fr.jmmc.mcs.interop.SampCapabilityAction;
@@ -151,8 +154,8 @@ public final class SampSearchCalQuery extends SampCapabilityAction {
       logger.fine("lambda = " + lambda);
     }
 
-    final NoiseService.Band band = NoiseService.Band.findBand(lambda);
-    final SpectralBand insBand = Band.findBand(band);
+    final Band band = Band.findBand(lambda);
+    final SpectralBand insBand = SpectralBandUtils.findBand(band);
 
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("band    = " + band);
