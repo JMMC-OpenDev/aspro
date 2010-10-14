@@ -241,7 +241,7 @@
             </Constraint>
           </Constraints>
         </Component>
-        <Component class="fr.jmmc.aspro.gui.star.EditableStarResolverWidget" name="starSearchField">
+        <Component class="fr.jmmc.mcs.astro.star.EditableStarResolverWidget" name="starSearchField">
           <Properties>
             <Property name="toolTipText" type="java.lang.String" value="&lt;html&gt;&#xa;Enter targets here :&lt;br/&gt;&#xa;Target identifier (SimBad resolution)&lt;br/&gt;&#xa;or RA / DEC coordinates with optional star name (&apos;HMS DMS [star name]&apos;)&#xa;&lt;/html&gt;"/>
             <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">

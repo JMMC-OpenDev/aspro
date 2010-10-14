@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BasicObservationForm.java,v 1.42 2010-10-08 09:39:03 bourgesl Exp $"
+ * "@(#) $Id: BasicObservationForm.java,v 1.43 2010-10-14 12:55:46 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.42  2010/10/08 09:39:03  bourgesl
+ * removed log when the selected target changes
+ *
  * Revision 1.41  2010/10/07 15:02:58  bourgesl
  * added forceUpdateListTargets() hack
  *
@@ -229,7 +232,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     jListTargets = createTargetList();
     jButtonRemoveTarget = new javax.swing.JButton();
     jButtonModelEditor = new javax.swing.JButton();
-    starSearchField = new fr.jmmc.aspro.gui.star.EditableStarResolverWidget();
+    starSearchField = new fr.jmmc.mcs.astro.star.EditableStarResolverWidget();
     jPanelOptions = new javax.swing.JPanel();
     jLabel1 = new javax.swing.JLabel();
     jDateSpinner = new javax.swing.JSpinner();
@@ -1041,7 +1044,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
   private javax.swing.JPanel jPanelOptions;
   private javax.swing.JScrollPane jScrollPane1;
   private javax.swing.JFormattedTextField jTextPoPs;
-  private fr.jmmc.aspro.gui.star.EditableStarResolverWidget starSearchField;
+  private fr.jmmc.mcs.astro.star.EditableStarResolverWidget starSearchField;
   // End of variables declaration//GEN-END:variables
 
   /**
