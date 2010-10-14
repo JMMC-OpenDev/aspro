@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: HorizonService.java,v 1.3 2010-06-17 10:02:50 bourgesl Exp $"
+ * "@(#) $Id: HorizonService.java,v 1.4 2010-10-14 14:18:20 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2010/06/17 10:02:50  bourgesl
+ * fixed warning hints - mainly not final static loggers
+ *
  * Revision 1.2  2009/11/27 16:37:51  bourgesl
  * fixed azimuth to south = 0
  *
@@ -40,12 +43,19 @@ public final class HorizonService {
 
   /* members */
   /** cached horizon profiles : low memory impact */
-  private Map<String, Profile> cachedProfiles = new HashMap<String, Profile>();
+  private final Map<String, Profile> cachedProfiles = new HashMap<String, Profile>();
 
+  /**
+   * Return the singleton
+   * @return singleton
+   */
   public static HorizonService getInstance() {
     return instance;
   }
 
+  /**
+   * Private constructor
+   */
   private HorizonService() {
     /* no-op */
   }
@@ -57,6 +67,7 @@ public final class HorizonService {
    * @return profile or null if there is no horizon profile for the given station
    */
   public Profile getProfile(final String interferometerName, final Station station) {
+    // profile key = '<interferometer> - <station>' :
     final String key = interferometerName + " - " + station.getName();
     Profile profile = cachedProfiles.get(key);
 
@@ -88,9 +99,8 @@ public final class HorizonService {
 
         final Polygon polygon = new Polygon(xpoints, ypoints, npoints);
 
-        profile = new Profile(station.getName(), polygon);
+        profile = new Profile(key, polygon);
 
-        // Maybe the name of the station is not enough to guarantee the unicity for a long list of interferometers :
         cachedProfiles.put(key, profile);
       }
     }
@@ -120,22 +130,37 @@ public final class HorizonService {
   /**
    * Simple protected class to use the java shape API to check if a point is inside a polygon
    */
-  protected class Profile {
+  protected final class Profile {
 
-    /** station name */
-    private String name;
+    /** profile name */
+    private final String name;
     /** internal shape */
-    private Shape shape;
+    private final Shape shape;
 
-    protected Profile(final String stationName, final Shape shape) {
-      this.name = stationName;
+    /**
+     * Protected constructor
+     * @param name profile name
+     * @param shape shape (horizon)
+     */
+    protected Profile(final String name, final Shape shape) {
+      this.name = name;
       this.shape = shape;
     }
 
+    /**
+     * Check if the given azimuth and elevation is inside the observable shape
+     * @param az azimuth (degrees)
+     * @param elev elevation (degrees)
+     * @return true if the given coordinates are inside the observable shape
+     */
     public boolean check(final double az, final double elev) {
       return this.shape.contains(az, elev);
     }
 
+    /**
+     * Return the profile name
+     * @return profile name
+     */
     public String getName() {
       return name;
     }
