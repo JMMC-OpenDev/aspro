@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ConfigurationManager.java,v 1.33 2010-10-05 18:23:24 bourgesl Exp $"
+ * "@(#) $Id: ConfigurationManager.java,v 1.34 2010-10-14 14:19:26 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.33  2010/10/05 18:23:24  bourgesl
+ * computeUVLimits made public for a given list of stations
+ *
  * Revision 1.32  2010/10/04 14:30:47  bourgesl
  * added compute the minimum baseline
  *
@@ -113,6 +116,7 @@
 package fr.jmmc.aspro.model;
 
 import fr.jmmc.aspro.AsproConstants;
+import fr.jmmc.aspro.model.oi.AzEl;
 import fr.jmmc.aspro.model.oi.Channel;
 import fr.jmmc.aspro.model.oi.Configurations;
 import fr.jmmc.aspro.model.oi.FocalInstrument;
@@ -120,6 +124,7 @@ import fr.jmmc.aspro.model.oi.FocalInstrumentConfiguration;
 import fr.jmmc.aspro.model.oi.FocalInstrumentConfigurationItem;
 import fr.jmmc.aspro.model.oi.FocalInstrumentMode;
 import fr.jmmc.aspro.model.oi.FringeTracker;
+import fr.jmmc.aspro.model.oi.HorizonProfile;
 import fr.jmmc.aspro.model.oi.InterferometerConfiguration;
 import fr.jmmc.aspro.model.oi.InterferometerDescription;
 import fr.jmmc.aspro.model.oi.InterferometerSetting;
@@ -158,6 +163,8 @@ public final class ConfigurationManager extends BaseOIManager {
   private final Map<String, InterferometerDescription> interferometerDescriptions = new LinkedHashMap<String, InterferometerDescription>();
   /** Map : id, interferometer configuration */
   private final Map<String, InterferometerConfiguration> interferometerConfigurations = new HashMap<String, InterferometerConfiguration>();
+  /** default horizon profile */
+  private HorizonProfile defaultHorizon = null;
 
   /**
    * Return the ConfigurationManager singleton
@@ -241,6 +248,7 @@ public final class ConfigurationManager extends BaseOIManager {
 
     computeInterferometerLocation(id);
     computeLimitsUVCoverage(id);
+    adjustStationHorizons(id.getStations());
 
     interferometerDescriptions.put(id.getName(), id);
 
@@ -312,7 +320,54 @@ public final class ConfigurationManager extends BaseOIManager {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("computeLimitsUVCoverage = {" + minUV + " - " + maxUV + " m");
     }
-    return new double[] {minUV, maxUV};
+    return new double[]{minUV, maxUV};
+  }
+
+  /**
+   * Adjust the station horizons to respect the maximum elevation limit (85°)
+   * @param stations station to update
+   */
+  private void adjustStationHorizons(final List<Station> stations) {
+    // TODO : use a default value per interferometer (also for min elevation) :
+    final double maxElev = AsproConstants.DEFAULT_MAX_ELEVATION;
+
+    for (Station station : stations) {
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("station : " + station);
+      }
+
+      if (station.getHorizon() != null && !station.getHorizon().getPoints().isEmpty()) {
+        // horizon is defined : check elevation
+        for (AzEl point : station.getHorizon().getPoints()) {
+          if (point.getElevation() > maxElev) {
+            if (logger.isLoggable(Level.FINE)) {
+              logger.fine("station : " + station + " : fix point : " + point);
+            }
+            point.setElevation(maxElev);
+          }
+        }
+
+      } else {
+        // missing horizon :
+        if (defaultHorizon == null) {
+          final HorizonProfile horizon = new HorizonProfile();
+          final List<AzEl> points = horizon.getPoints();
+
+          points.add(new AzEl(360d, 0d));
+          points.add(new AzEl(0d, 0d));
+          points.add(new AzEl(0d, maxElev));
+          points.add(new AzEl(360d, maxElev));
+
+          defaultHorizon = horizon;
+        }
+
+        if (logger.isLoggable(Level.FINE)) {
+          logger.fine("station : " + station + " use default horizon");
+        }
+        // define fake horizon :
+        station.setHorizon(defaultHorizon);
+      }
+    }
   }
 
   /**
