@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: EditableStarResolverWidget.java,v 1.8 2010-10-13 20:57:05 bourgesl Exp $"
+ * "@(#) $Id: EditableStarResolverWidget.java,v 1.9 2010-10-14 12:22:31 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.8  2010/10/13 20:57:05  bourgesl
+ * added comment
+ *
  * Revision 1.7  2010/09/26 12:11:45  bourgesl
  * avoid catch any exception but corect number format exception
  *
@@ -54,7 +57,7 @@ import javax.swing.SwingUtilities;
 /**
  * This extended StarResolverWidget allows the user to enter an RA/DEC couple as a Star without any CDS resolution (manually defined star)
  */
-public class EditableStarResolverWidget extends StarResolverWidget {
+public final class EditableStarResolverWidget extends StarResolverWidget {
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
