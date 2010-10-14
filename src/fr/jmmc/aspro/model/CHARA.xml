@@ -26,6 +26,7 @@
     <telescope>
       <name>T</name>
       <diameter>1.0</diameter>
+      <maxElevation>85.0</maxElevation>
       
       <adaptiveOptics>
         <band>V</band>

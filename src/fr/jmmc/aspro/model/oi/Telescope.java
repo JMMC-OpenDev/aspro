@@ -28,6 +28,7 @@ import fr.jmmc.aspro.model.OIBase;
  *       &lt;sequence>
  *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}ID"/>
  *         &lt;element name="diameter" type="{http://www.w3.org/2001/XMLSchema}double"/>
+ *         &lt;element name="maxElevation" type="{http://www.w3.org/2001/XMLSchema}double"/>
  *         &lt;element name="adaptiveOptics" type="{http://www.jmmc.fr/aspro-oi/0.1}AdaptiveOptics" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
@@ -41,6 +42,7 @@ import fr.jmmc.aspro.model.OIBase;
 @XmlType(name = "Telescope", propOrder = {
     "name",
     "diameter",
+    "maxElevation",
     "adaptiveOptics"
 })
 public class Telescope
@@ -53,6 +55,7 @@ public class Telescope
     @XmlSchemaType(name = "ID")
     protected String name;
     protected double diameter;
+    protected double maxElevation;
     protected AdaptiveOptics adaptiveOptics;
 
     /**
@@ -93,6 +96,22 @@ public class Telescope
      */
     public void setDiameter(double value) {
         this.diameter = value;
+    }
+
+    /**
+     * Gets the value of the maxElevation property.
+     * 
+     */
+    public double getMaxElevation() {
+        return maxElevation;
+    }
+
+    /**
+     * Sets the value of the maxElevation property.
+     * 
+     */
+    public void setMaxElevation(double value) {
+        this.maxElevation = value;
     }
 
     /**
