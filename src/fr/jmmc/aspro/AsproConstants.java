@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproConstants.java,v 1.18 2010-10-14 10:58:03 bourgesl Exp $"
+ * "@(#) $Id: AsproConstants.java,v 1.19 2010-10-14 14:18:37 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.18  2010/10/14 10:58:03  bourgesl
+ * Fixed bug related to sampling periodicity : use the instrument default sampling time when an invalid value is detected
+ *
  * Revision 1.17  2010/10/08 12:31:09  bourgesl
  * added suffix for calibrators
  *
@@ -81,6 +84,8 @@ public interface AsproConstants {
   /* UI Defaults */
   /** default minimum elevation = 30 degrees */
   public static final double DEFAULT_MIN_ELEVATION = 30d;
+  /** default maximum elevation = 85 degrees */
+  public static final double DEFAULT_MAX_ELEVATION = 85d;
   /** minimum elevation for OB generation = 30 degrees */
   public static final double OB_MIN_ELEVATION = 30d;
   /** default observation duration per calibrated point = 300 seconds i.e. 5 minutes */
