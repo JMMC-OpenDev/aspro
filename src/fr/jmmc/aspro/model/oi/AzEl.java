@@ -93,6 +93,15 @@ public class AzEl
     this.azimuth = az;
     this.elevation = el;
   }
+
+  /**
+   * Return a string representation
+   * @return (az, el)
+   */
+  @Override
+  public String toString() {
+    return "(" + this.azimuth + ", " + this.elevation + ")";
+  }
 //--simple--preserve
 
 }
