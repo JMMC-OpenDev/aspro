@@ -35,75 +35,36 @@
  *
  *
  */
-
 package fr.jmmc.aspro.gui.chart;
 
-import
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.Paint;
+import java.awt.Polygon;
+import java.awt.Stroke;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Rectangle2D;
+import java.io.Serializable;
 
-java.awt.BasicStroke;
-import
-
-java.awt.Color;
-import
-
-java.awt.Graphics2D;
-import
-
-java.awt.Paint;
-import
-
-java.awt.Polygon;
-import
-
-java.awt.Stroke;
-import
-
-java.awt.geom.AffineTransform;
-import
-
-java.awt.geom.Rectangle2D;
-import
-
-java.io.Serializable;
-
-import
-
-org.jfree.chart.annotations.AbstractXYAnnotation;
-import
-
-org.jfree.chart.axis.ValueAxis;
-import
-
-org.jfree.chart.plot.Plot;
-import
-
-org.jfree.chart.plot.PlotOrientation;
-import
-
-org.jfree.chart.plot.PlotRenderingInfo;
-import
-
-org.jfree.chart.plot.XYPlot;
-import
-
-org.jfree.ui.RectangleEdge;
-import
-
-  org
-
-      .jfree.util.PublicCloneable;
+import org.jfree.chart.annotations.AbstractXYAnnotation;
+import org.jfree.chart.axis.ValueAxis;
+import org.jfree.chart.plot.Plot;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.plot.PlotRenderingInfo;
+import org.jfree.chart.plot.XYPlot;
+import org.jfree.ui.RectangleEdge;
+import org.jfree.util.PublicCloneable;
 
 public class XYDiamondAnnotation extends AbstractXYAnnotation implements
-Cloneable, PublicCloneable, Serializable {
+        Cloneable, PublicCloneable, Serializable {
 
-/**
-* Una Annotazione a forma di rombo può essere aggiunta su un {@link org.jfree.chart.plot.XYPlot}.
-*/
-private static final long serialVersionUID = -2184152269531019722L;
-
+  /**
+   * Una Annotazione a forma di rombo può essere aggiunta su un {@link org.jfree.chart.plot.XYPlot}.
+   */
+  private static final long serialVersionUID = -2184152269531019722L;
   /** outline color */
   public static final Paint DEFAULT_OUTLINE_PAINT = Color.BLACK;
-
   /** Colore di default. */
   public static final Paint DEFAULT_PAINT = Color.YELLOW;
   /** Larghezza del tratto di default. */
@@ -251,9 +212,9 @@ private static final long serialVersionUID = -2184152269531019722L;
     float j2DY = (float) rangeAxis.valueToJava2D(this.y, dataArea, rangeEdge);
 
     if (orientation == PlotOrientation.HORIZONTAL) {
-        float tempAnchor = j2DX;
-        j2DX = j2DY;
-        j2DY = tempAnchor;
+      float tempAnchor = j2DX;
+      j2DX = j2DY;
+      j2DY = tempAnchor;
     }
 
     Rectangle2D displayArea = new Rectangle2D.Double(j2DX - this.displayWidth / 2.0, j2DY - this.displayHeight / 2.0, this.displayWidth,
