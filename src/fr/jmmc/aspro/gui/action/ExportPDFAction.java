@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportPDFAction.java,v 1.15 2010-10-05 15:06:00 bourgesl Exp $"
+ * "@(#) $Id: ExportPDFAction.java,v 1.16 2010-10-15 16:59:43 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.15  2010/10/05 15:06:00  bourgesl
+ * use AsproGui:getInstance()
+ *
  * Revision 1.14  2010/10/01 15:33:39  bourgesl
  * use MessagePane.showConfirmFileOverwrite
  *
@@ -100,11 +103,14 @@ public final class ExportPDFAction extends RegisteredAction {
   }
 
   /**
-   * Export the given chart as a PDF document
-   * @param chart chart to export
+   * Export the given exportable chart as a PDF document
+   *
+   * TODO : add rendering options (output format, orientation ?)
+   *
+   * @param exportable component
    */
-  public static void exportPDF(final JFreeChart chart) {
-    getInstance().process(chart);
+  public static void exportPDF(final PDFExportable exportable) {
+    getInstance().process(exportable);
   }
 
   /* members */
@@ -139,9 +145,9 @@ public final class ExportPDFAction extends RegisteredAction {
 
   /**
    * Export the given chart as a PDF document
-   * @param chart chart to export
+   * @param exportable exportable component
    */
-  public void process(final JFreeChart chart) {
+  public void process(final PDFExportable exportable) {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("process");
     }
@@ -174,14 +180,19 @@ public final class ExportPDFAction extends RegisteredAction {
     if (file != null) {
       this.setLastDir(file.getParent());
 
+      // prepare Chart :
+      final JFreeChart chart = exportable.prepareChart();
       try {
-        PDFUtils.saveChartAsPDF(file, chart);
+        PDFUtils.saveChartAsPDF(file, chart, exportable.getPDFOptions());
 
         StatusBar.show(file.getName() + " created.");
 
       } catch (IOException ioe) {
         MessagePane.showErrorMessage(
                 "Could not write to file : " + file.getName(), ioe);
+      } finally {
+        // restore Chart state if modified :
+        exportable.postPDFExport();
       }
     }
   }

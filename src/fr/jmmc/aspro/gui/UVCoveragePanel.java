@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.61 2010-10-14 10:58:03 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.62 2010-10-15 16:59:43 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.61  2010/10/14 10:58:03  bourgesl
+ * Fixed bug related to sampling periodicity : use the instrument default sampling time when an invalid value is detected
+ *
  * Revision 1.60  2010/10/08 09:39:03  bourgesl
  * removed log when the selected target changes
  *
@@ -208,6 +211,7 @@ import fr.jmmc.aspro.gui.action.ExportOBVLTIAction;
 import fr.jmmc.aspro.gui.action.ExportOBVegaAction;
 import fr.jmmc.aspro.gui.action.ExportPDFAction;
 import fr.jmmc.aspro.gui.chart.ChartUtils;
+import fr.jmmc.aspro.gui.chart.PDFOptions;
 import fr.jmmc.aspro.gui.chart.SquareChartPanel;
 import fr.jmmc.aspro.gui.chart.SquareXYPlot;
 import fr.jmmc.aspro.gui.chart.ZoomEvent;
@@ -758,11 +762,35 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     this.performPDFAction();
   }//GEN-LAST:event_jButtonPDFActionPerformed
 
+
   /**
-   * Export the current chart as a PDF document
+   * Export the chart component as a PDF document
    */
   public void performPDFAction() {
-    ExportPDFAction.exportPDF(this.localJFreeChart);
+    ExportPDFAction.exportPDF(this);
+  }
+
+  /**
+   * Return the PDF options
+   * @return PDF options
+   */
+  public PDFOptions getPDFOptions() {
+    return PDFOptions.DEFAULT_PDF_OPTIONS;
+  }
+
+  /**
+   * Return the chart to export as a PDF document
+   * @return chart
+   */
+  public JFreeChart prepareChart() {
+    return this.localJFreeChart;
+  }
+
+  /**
+   * Callback indicating the chart was processed by the PDF engine
+   */
+  public void postPDFExport() {
+    // no-op
   }
 
   /**

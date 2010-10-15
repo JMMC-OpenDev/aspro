@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: InterferometerMapPanel.java,v 1.8 2010-09-15 13:52:55 bourgesl Exp $"
+ * "@(#) $Id: InterferometerMapPanel.java,v 1.9 2010-10-15 16:59:43 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.8  2010/09/15 13:52:55  bourgesl
+ * added JMMC copyright on plot
+ *
  * Revision 1.7  2010/06/23 12:52:08  bourgesl
  * ObservationManager regsitration for observation events moved in SettingPanel (external)
  *
@@ -35,6 +38,7 @@ import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.gui.action.ExportPDFAction;
 import fr.jmmc.aspro.gui.chart.ChartUtils;
 import fr.jmmc.aspro.gui.chart.NameLabelGenerator;
+import fr.jmmc.aspro.gui.chart.PDFOptions;
 import fr.jmmc.aspro.gui.chart.SquareChartPanel;
 import fr.jmmc.aspro.gui.chart.SquareXYPlot;
 import fr.jmmc.aspro.gui.chart.XYZNameDataSet;
@@ -142,10 +146,33 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
 }//GEN-LAST:event_jButtonPDFActionPerformed
 
   /**
-   * Export the current chart as a PDF document
+   * Export the chart component as a PDF document
    */
   public void performPDFAction() {
-    ExportPDFAction.exportPDF(this.localJFreeChart);
+    ExportPDFAction.exportPDF(this);
+  }
+
+  /**
+   * Return the PDF options
+   * @return PDF options
+   */
+  public PDFOptions getPDFOptions() {
+    return PDFOptions.DEFAULT_PDF_OPTIONS;
+  }
+  
+  /**
+   * Return the chart to export as a PDF document
+   * @return chart
+   */
+  public JFreeChart prepareChart() {
+    return this.localJFreeChart;
+  }
+
+  /**
+   * Callback indicating the chart was processed by the PDF engine
+   */
+  public void postPDFExport() {
+    // no-op
   }
 
   /**

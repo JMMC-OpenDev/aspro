@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: PDFUtils.java,v 1.7 2010-10-08 12:30:30 bourgesl Exp $"
+ * "@(#) $Id: PDFUtils.java,v 1.8 2010-10-15 16:59:43 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2010/10/08 12:30:30  bourgesl
+ * added to do : adjust page size according to chart content
+ *
  * Revision 1.6  2010/09/26 11:59:11  bourgesl
  * replaced RuntimeException by IllegalStateException to avoid catching runtime exceptions
  *
@@ -29,13 +32,12 @@ package fr.jmmc.aspro.gui.chart;
 
 import com.lowagie.text.Document;
 import com.lowagie.text.DocumentException;
-import com.lowagie.text.PageSize;
 import com.lowagie.text.Rectangle;
 import com.lowagie.text.pdf.DefaultFontMapper;
-import com.lowagie.text.pdf.FontMapper;
 import com.lowagie.text.pdf.PdfContentByte;
 import com.lowagie.text.pdf.PdfTemplate;
 import com.lowagie.text.pdf.PdfWriter;
+import fr.jmmc.aspro.gui.chart.PDFOptions.Orientation;
 
 import fr.jmmc.mcs.gui.App;
 import java.awt.Graphics2D;
@@ -77,20 +79,21 @@ public final class PDFUtils {
    * Save the given chart as a PDF document in the given file
    * @param file PDF file to create
    * @param chart chart to export
+   * @param options PDF options
    *
    * @throws IOException if the file exists but is a directory
    *                   rather than a regular file, does not exist but cannot
    *                   be created, or cannot be opened for any other reason
    * @throws IllegalStateException if a PDF document exception occured
    */
-  public static void saveChartAsPDF(final File file, final JFreeChart chart)
+  public static void saveChartAsPDF(final File file, final JFreeChart chart, final PDFOptions options)
           throws IOException, IllegalStateException {
 
     BufferedOutputStream localBufferedOutputStream = null;
     try {
       localBufferedOutputStream = new BufferedOutputStream(new FileOutputStream(file));
 
-      writeChartAsPDF(localBufferedOutputStream, chart, new DefaultFontMapper());
+      writeChartAsPDF(localBufferedOutputStream, chart, options);
 
     } finally {
       if (localBufferedOutputStream != null) {
@@ -107,18 +110,37 @@ public final class PDFUtils {
    * Create a PDF document with the given chart and save it in the given stream
    * @param outputStream output stream
    * @param chart chart instance
-   * @param fontMapper font mapper
+   * @param options PDF options
    * 
    * @throws IllegalStateException if a PDF document exception occured
    */
-  private static void writeChartAsPDF(final OutputStream outputStream, final JFreeChart chart, final FontMapper fontMapper)
+  private static void writeChartAsPDF(final OutputStream outputStream, final JFreeChart chart,
+                                      final PDFOptions options)
           throws IllegalStateException {
 
     Graphics2D g2 = null;
 
-    // TODO : adjust document size (A4, A3, A2) and orientation according to the chart content ...
+    // adjust document size (A4, A3, A2) and orientation according to the options :
+    final Rectangle documentPage;
+    switch (options.getPageSize()) {
+      case A2:
+        documentPage = com.lowagie.text.PageSize.A2;
+        break;
+      case A3:
+        documentPage = com.lowagie.text.PageSize.A3;
+        break;
+      default:
+      case A4:
+        documentPage = com.lowagie.text.PageSize.A4;
+        break;
+    }
 
-    final Document document = new Document(PageSize.A4.rotate());
+    final Document document;
+    if (Orientation.Landscape == options.getOrientation()) {
+      document = new Document(documentPage.rotate());
+    } else {
+      document = new Document(documentPage);
+    }
 
     final Rectangle pdfRectangle = document.getPageSize();
 
@@ -157,7 +179,7 @@ public final class PDFUtils {
         g2 = pdfTemplate.createGraphicsShapes(innerWidth, innerHeight);
       } else {
         // text rendered as text + font but unicode characters are not rendered
-        g2 = pdfTemplate.createGraphics(innerWidth, innerHeight, fontMapper);
+        g2 = pdfTemplate.createGraphics(innerWidth, innerHeight, new DefaultFontMapper());
       }
 
       final Rectangle2D.Float drawArea = new Rectangle2D.Float(0F, 0F, innerWidth, innerHeight);
