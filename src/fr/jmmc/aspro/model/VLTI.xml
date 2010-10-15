@@ -27,7 +27,7 @@
     <telescope>
       <name>UT</name>
       <diameter>8.0</diameter>
-      <maxElevation>90.0</maxElevation>
+      <maxElevation>89.0</maxElevation>
 
       <adaptiveOptics>
         <band>V</band>
@@ -41,7 +41,7 @@
     <telescope>
       <name>AT</name>
       <diameter>1.8</diameter>
-      <maxElevation>90.0</maxElevation>
+      <maxElevation>89.0</maxElevation>
 
       <adaptiveOptics>
         <band>V</band>
