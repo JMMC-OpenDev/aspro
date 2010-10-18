@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ChartUtils.java,v 1.11 2010-10-08 12:30:53 bourgesl Exp $"
+ * "@(#) $Id: ChartUtils.java,v 1.12 2010-10-18 14:27:43 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.11  2010/10/08 12:30:53  bourgesl
+ * added tests with cross hairs
+ *
  * Revision 1.10  2010/10/01 15:35:42  bourgesl
  * removed 'NO DATA' message on plots
  * new Time and HA tick units factory methods
@@ -49,6 +52,7 @@ import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.StandardChartTheme;
+import org.jfree.chart.annotations.XYTextAnnotation;
 import org.jfree.chart.axis.DateTickUnit;
 import org.jfree.chart.axis.DateTickUnitType;
 import org.jfree.chart.axis.NumberTickUnit;
@@ -68,6 +72,7 @@ import org.jfree.chart.urls.StandardXYURLGenerator;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.ui.RectangleEdge;
 import org.jfree.ui.RectangleInsets;
+import org.jfree.ui.TextAnchor;
 
 /**
  * Several static methods related to the JFreeChart library
@@ -77,6 +82,8 @@ public class ChartUtils {
 
   /** The default font for titles. */
   private static final Font DEFAULT_TITLE_FONT = new Font("SansSerif", Font.BOLD, 14);
+  /** The default font for annotation texts */
+  private static final Font DEFAULT_ANNOTATION_FONT = new Font("SansSerif", Font.PLAIN, 9);
   /** default tick label rectangle insets */
   public final static RectangleInsets TICK_LABEL_INSETS = new RectangleInsets(2.0, 2.0, 2.0, 2.0);
   /** default axis offset */
@@ -373,5 +380,22 @@ public class ChartUtils {
             DateTickUnitType.HOUR, 1, haf));
 
     return units;
+  }
+
+    /**
+     * Creates a new annotation to be displayed at the given coordinates.  The
+     * coordinates are specified in data space (they will be converted to
+     * Java2D space for display).
+     *
+     * @param text  the text (<code>null</code> not permitted).
+     * @param x  the x-coordinate (in data space).
+     * @param y  the y-coordinate (in data space).
+     * @return new annotation
+     */
+  public static XYTextAnnotation createXYTextAnnotation(final String text, final double x, final double y) {
+    final XYTextAnnotation a = new XYTextAnnotation(text, x, y);
+    a.setFont(DEFAULT_ANNOTATION_FONT);
+
+    return a;
   }
 }
