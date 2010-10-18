@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityPanel.java,v 1.44 2010-10-15 17:03:21 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityPanel.java,v 1.45 2010-10-18 14:28:56 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.44  2010/10/15 17:03:21  bourgesl
+ * major changes to add sliding behaviour (scrollbar) to view only a subset of targets if there are too many.
+ * PDF options according to the number of targets
+ *
  * Revision 1.43  2010/10/08 12:32:02  bourgesl
  * fixed calibrator color (blue)
  * added tests to adjust chart size
@@ -174,11 +178,15 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import javax.swing.DefaultBoundedRangeModel;
@@ -206,7 +214,6 @@ import org.jfree.data.gantt.Task;
 import org.jfree.data.gantt.TaskSeries;
 import org.jfree.data.gantt.TaskSeriesCollection;
 import org.jfree.ui.Layer;
-import org.jfree.ui.TextAnchor;
 
 /**
  * This panel represents the observability plot
@@ -230,13 +237,12 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
   public static final Color NIGHT_COLOR = new Color(128, 128, 128);
   /** annotation rotation angle = 90 degrees */
   private static final double HALF_PI = Math.PI / 2d;
-
   /** milliseconds threshold to consider the date too close to date axis limits = 3 minutes */
   private static final long DATE_LIMIT_THRESHOLD = 3 * 60 * 1000;
-  /** max items displayed before scrolling */
-  private final static int MAX_VIEW_ITEMS = 50;
   /** max items printed before using A3 format */
   private final static int MAX_PRINTABLE_ITEMS = 15;
+  /** max items displayed before scrolling */
+  private final static int MAX_VIEW_ITEMS = MAX_PRINTABLE_ITEMS;
 
   /* time references */
   /** LST time reference */
@@ -257,11 +263,10 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
   private JFreeChart localJFreeChart;
   /** xy plot instance */
   private XYPlot localXYPlot;
-
+  /** sliding adapter to display a subset of targets */
   private SlidingXYPlotAdapter slidingXYPlotAdapter = null;
-
+  /** optional scrollbar to navigate through targets */
   private JScrollBar scroller = null;
-
   /** hour angle tick units */
   private final TickUnitSource haTickUnits = ChartUtils.createHourAngleTickUnits();
   /** hour:minute units */
@@ -318,30 +323,46 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
             false /* tooltips */);
 
     // zoom options :
+    // targets :
     this.chartPanel.setDomainZoomable(false);
+    // date axis :
     this.chartPanel.setRangeZoomable(false);
     this.chartPanel.setMouseWheelEnabled(false);
 
     this.add(this.chartPanel, BorderLayout.CENTER);
 
-    scroller = new JScrollBar(JScrollBar.VERTICAL, 0, 0, 0, 1);
+    this.scroller = new JScrollBar(JScrollBar.VERTICAL, 0, 1, 0, 1);
 
-    scroller.getModel().addChangeListener(new ChangeListener() {
+    this.scroller.getModel().addChangeListener(new ChangeListener() {
 
       public void stateChanged(final ChangeEvent paramChangeEvent) {
-        final DefaultBoundedRangeModel model = (DefaultBoundedRangeModel)paramChangeEvent.getSource();
+        final DefaultBoundedRangeModel model = (DefaultBoundedRangeModel) paramChangeEvent.getSource();
         slidingXYPlotAdapter.setPosition(model.getValue());
       }
-
     });
 
-    this.add(scroller, BorderLayout.EAST);
-/*
-    JPanel localJPanel = new JPanel(new BorderLayout());
-    localJPanel.add(this.scroller);
-    localJPanel.setBorder(BorderFactory.createEmptyBorder(66, 2, 2, 2));
-    add(localJPanel, "East");
-*/
+    // add the mouse wheel listener to the complete observability panel :
+    this.addMouseWheelListener(new MouseWheelListener() {
+
+      public void mouseWheelMoved(final MouseWheelEvent e) {
+        if (scroller.isVisible()) {
+          if (logger.isLoggable(Level.FINER)) {
+            logger.finer("mouseWheelMoved : " + e);
+          }
+          final DefaultBoundedRangeModel model = (DefaultBoundedRangeModel) scroller.getModel();
+
+          final int clicks = e.getWheelRotation();
+          if (clicks < 0) {
+            model.setValue(model.getValue() + clicks);
+          } else if (clicks > 0) {
+            model.setValue(model.getValue() + clicks);
+          }
+        }
+      }
+    });
+
+
+    this.add(this.scroller, BorderLayout.EAST);
 
     final JPanel panelBottom = new JPanel(new BorderLayout());
 
@@ -445,7 +466,6 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     // Memorize subset mode before rendering PDF :
     this.useSubsetBeforePDF = this.slidingXYPlotAdapter.isUseSubset();
     if (this.useSubsetBeforePDF) {
-      logger.severe("DISABLE SUBSET");
       // Adapt the chart to print all targets
       this.slidingXYPlotAdapter.setUseSubset(false);
     }
@@ -458,7 +478,6 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
    */
   public void postPDFExport() {
     if (this.useSubsetBeforePDF) {
-      logger.severe("ENABLE SUBSET");
       // Restore the chart as displayed
       this.slidingXYPlotAdapter.setUseSubset(true);
     }
@@ -689,7 +708,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
     final int size = starVis.size();
 
-    final List<String> targetNames  = new ArrayList<String>(size);
+    final List<String> targetNames = new ArrayList<String>(size);
     final List<Color> targetColors = new ArrayList<Color>(size);
 
     final TaskSeriesCollection localTaskSeriesCollection = new TaskSeriesCollection();
@@ -728,59 +747,43 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
       targetColors.add(palette.getColor(colorIndex));
     }
 
-    // TODO : later : enable / disable scrollbars
-    // inspect panel size to know how much items to display
-    /*
-    final int height = 50 * targetNames.length + 100;
-    
-    logger.severe("height = " + height);
-
-    final Dimension dim = new Dimension((int)this.chartPanel.getPreferredSize().getWidth(), height);
-
-    this.chartPanel.setMinimumSize(dim);
-    this.chartPanel.setPreferredSize(dim);
-    this.chartPanel.revalidate();
-     */
-
-    final List<XYAnnotation> annotations;
+    final Map<Integer, List<XYAnnotation>> annotations;
     if (doBaseLineLimits) {
       annotations = null;
     } else {
-      annotations = new ArrayList<XYAnnotation>();
+      annotations = new HashMap<Integer, List<XYAnnotation>>(4);
 
       // add the Annotations :
       // 24h date formatter like in france :
       final DateFormat df = DateFormat.getTimeInstance(DateFormat.SHORT, Locale.FRANCE);
 
+      Integer pos;
       int n = 0;
       for (StarObservabilityData so : starVis) {
+        pos = Integer.valueOf(n);
 
         // transit annotation :
         if (so.getType() == StarObservabilityData.TYPE_STAR) {
-          annotations.add(new XYDiamondAnnotation(n, so.getTransitDate().getTime(), 10, 10));
+          addAnnotation(annotations, pos, new XYDiamondAnnotation(n, so.getTransitDate().getTime(), 10, 10));
 
           for (ElevationDate ed : so.getElevations()) {
             if (checkDateAxisLimits(ed.getDate(), min, max)) {
-              annotations.add(new XYTickAnnotation(Integer.toString(ed.getElevation()), n, ed.getDate().getTime(), HALF_PI));
+              addAnnotation(annotations, pos, new XYTickAnnotation(Integer.toString(ed.getElevation()), n, ed.getDate().getTime(), HALF_PI));
             }
           }
         }
 
         for (DateTimeInterval interval : so.getVisible()) {
           if (checkDateAxisLimits(interval.getStartDate(), min, max)) {
-            final XYTextAnnotation aStart = new XYTextAnnotation(df.format(interval.getStartDate()), n, interval.getStartDate().getTime());
-            aStart.setTextAnchor(TextAnchor.BASELINE_CENTER);
-            aStart.setPaint(Color.BLACK);
+            final XYTextAnnotation aStart = ChartUtils.createXYTextAnnotation(df.format(interval.getStartDate()), n, interval.getStartDate().getTime());
             aStart.setRotationAngle(HALF_PI);
-            annotations.add(aStart);
+            addAnnotation(annotations, pos, aStart);
           }
 
           if (checkDateAxisLimits(interval.getEndDate(), min, max)) {
-            final XYTextAnnotation aEnd = new XYTextAnnotation(df.format(interval.getEndDate()), n, interval.getEndDate().getTime());
-            aEnd.setTextAnchor(TextAnchor.BASELINE_CENTER);
-            aEnd.setPaint(Color.BLACK);
+            final XYTextAnnotation aEnd = ChartUtils.createXYTextAnnotation(df.format(interval.getEndDate()), n, interval.getEndDate().getTime());
             aEnd.setRotationAngle(HALF_PI);
-            annotations.add(aEnd);
+            addAnnotation(annotations, pos, aEnd);
           }
         }
 
@@ -789,17 +792,36 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     }
 
     this.scroller.getModel().setMinimum(0);
-    this.scroller.getModel().setMaximum(size);
 
-    if (size < MAX_VIEW_ITEMS) {
+    if (size <= MAX_VIEW_ITEMS) {
+      this.scroller.getModel().setMaximum(0);
       this.scroller.getModel().setValue(0);
-      this.scroller.setEnabled(false);
+      this.scroller.setVisible(false);
     } else {
-      this.scroller.setEnabled(true);
+      this.scroller.getModel().setMaximum(size - MAX_VIEW_ITEMS);
+      this.scroller.setVisible(true);
     }
 
+    // update plot data :
     this.slidingXYPlotAdapter.setData(localTaskSeriesCollection, targetNames, targetColors, annotations);
+
+    // force a plot refresh :
     this.slidingXYPlotAdapter.setUseSubset(!doBaseLineLimits);
+  }
+
+  /**
+   * Add the given annotation to the map of annotations keyed by position
+   * @param annotations map of annotations keyed by position
+   * @param pos position
+   * @param annotation annotation to add
+   */
+  private void addAnnotation(final Map<Integer, List<XYAnnotation>> annotations, final Integer pos, final XYAnnotation annotation) {
+    List<XYAnnotation> list = annotations.get(pos);
+    if (list == null) {
+      list = new ArrayList<XYAnnotation>();
+      annotations.put(pos, list);
+    }
+    list.add(annotation);
   }
 
   /**
@@ -905,4 +927,3 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     }
   }
 }
-
