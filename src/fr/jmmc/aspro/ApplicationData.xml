@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <ApplicationData link="http://www.jmmc.fr/aspro2">
-  <program name="Aspro2" version="0.7.1 beta"/>
-  <compilation date="29/09/2010" compiler="JDK 1.5.0_16"/>
+  <program name="Aspro2" version="0.7.2 beta"/>
+  <compilation date="19/10/2010" compiler="JDK 1.5.0_16"/>
   <text>
     <![CDATA[ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations
     with the VLTI or other interferometers. This observation preparation tool is developed and maintained by the JMMC.
@@ -63,7 +63,15 @@
   </menubar>
   <releasenotes>
     <release version="0.7">
+      <prerelease version="0.7.2 beta">
+        <change>Totally rewritten CHARA configuration thanks to official configuration file (telescopes.chara)</change>
+        <change>Added VEGA_4T (preliminary support) and change ordering for instruments (2T, 3T, 4T)</change>
+        <change>Automatic PDF orientation (observability) according to the number of targets</change>
+        <change>Added an optional scrollbar and better handling for a lot of targets on the observability plot</change>
+        <change>Smaller font size for time annotations on the observability plot</change>
+      </prerelease>
       <prerelease version="0.7.1 beta">
+        <change>Added the zenithal restriction (VLTI) in the observability computation (elevation limit of 89 degrees)</change>
         <change>Added the zenithal restriction (CHARA) in the observability computation (elevation limit of 85 degrees)</change>
         <change>Fixed concurrency bugs related to the SimBad star resolver : the search field is disabled while processing a request to avoid concurrent requests</change>
         <change>Fixed bug related to sampling periodicity : use the instrument default sampling time when an invalid value is detected</change>
@@ -74,7 +82,7 @@
         <change>LITpro integration through SAMP VO protocol : send models and generated oifits for the selected target</change>
       </prerelease>
     </release>
-    <release version="0.6">
+    <release version="0.6"> <!-- <pubDate>Thu, 5 Oct 2010 15:25:24 GMT</pubDate> -->
       <prerelease version="0.6.3">
         <change type="BUGFIX">Limit the memory footprint when the sampling periodicity is very small (less than 1 minute).
         First 500 HA samples are computed and the following warning is displayed : 
