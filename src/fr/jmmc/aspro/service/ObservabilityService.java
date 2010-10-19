@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.58 2010-10-08 09:40:26 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.59 2010-10-19 15:00:32 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.58  2010/10/08 09:40:26  bourgesl
+ * fixed LST range [0;24] and no more [0;23:59:59]
+ * fixed elevation dates inside LST range [0;24] and added transit elevation
+ *
  * Revision 1.57  2010/10/01 15:41:04  bourgesl
  * easier to debug code with only 1 operation per line
  *
@@ -1417,6 +1421,8 @@ public final class ObservabilityService {
       // Associate a delay line to the beam :
       // Simple association between DL / Channel = DL_n linked to Channel_n
 
+      // TODO : CHARA : use the delay line associated to the station : DL_E1 for E1 (shorter than others)
+
       Channel ch;
       int chPos;
       for (Beam b : this.beams) {
@@ -1913,15 +1919,17 @@ public final class ObservabilityService {
 
     final double obsLat = Math.toDegrees(this.interferometer.getPosSph().getLatitude());
 
-    int decMin = 5 * (int) Math.round((obsLat - 90d + this.minElev) / 5d);
+    final int decStep = 2;
+
+    int decMin = decStep * (int) Math.round((obsLat - 90d + this.minElev) / decStep);
     decMin = Math.max(decMin, -90);
 
-    int decMax = 5 * (int) Math.round((obsLat + 90 - this.minElev) / 5d);
+    int decMax = decStep * (int) Math.round((obsLat + 90 - this.minElev) / decStep);
     decMax = Math.min(decMax, 90);
 
     final List<Target> targets = new ArrayList<Target>();
     Target t;
-    for (int i = decMax; i > decMin; i -= 5) {
+    for (int i = decMax; i >= decMin; i -= decStep) {
       t = new Target();
       // delta = n (deg)
       t.setName("\u0394 = " + Integer.toString(i));
