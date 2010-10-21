@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ChartUtils.java,v 1.12 2010-10-18 14:27:43 bourgesl Exp $"
+ * "@(#) $Id: ChartUtils.java,v 1.13 2010-10-21 16:50:11 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.12  2010/10/18 14:27:43  bourgesl
+ * reduce text annotation size
+ *
  * Revision 1.11  2010/10/08 12:30:53  bourgesl
  * added tests with cross hairs
  *
@@ -44,10 +47,12 @@ import fr.jmmc.aspro.util.TimeFormat;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.Polygon;
-import java.awt.Shape;
+import java.awt.FontMetrics;
+import java.awt.Graphics2D;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
+import java.util.HashMap;
+import java.util.Map;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
@@ -70,26 +75,30 @@ import org.jfree.chart.title.TextTitle;
 import org.jfree.chart.title.Title;
 import org.jfree.chart.urls.StandardXYURLGenerator;
 import org.jfree.data.xy.XYDataset;
+import org.jfree.text.TextUtilities;
 import org.jfree.ui.RectangleEdge;
 import org.jfree.ui.RectangleInsets;
-import org.jfree.ui.TextAnchor;
 
 /**
  * Several static methods related to the JFreeChart library
  * @author bourgesl
  */
-public class ChartUtils {
+public final class ChartUtils {
 
+  /** cache for annotation fonts to autofit size */
+  private final static Map<Integer, Font> cachedFonts = new HashMap<Integer, Font>();
   /** The default font for titles. */
-  private static final Font DEFAULT_TITLE_FONT = new Font("SansSerif", Font.BOLD, 14);
+  public static final Font DEFAULT_TITLE_FONT = new Font("SansSerif", Font.BOLD, 14);
   /** The default font for annotation texts */
-  private static final Font DEFAULT_ANNOTATION_FONT = new Font("SansSerif", Font.PLAIN, 9);
+  public static final Font DEFAULT_TEXT_ANNOTATION_FONT = getAnnotationFont(9);
+  /** The default small font for annotation texts */
+  public static final Font SMALL_TEXT_ANNOTATION_FONT = getAnnotationFont(8);
   /** default tick label rectangle insets */
   public final static RectangleInsets TICK_LABEL_INSETS = new RectangleInsets(2.0, 2.0, 2.0, 2.0);
   /** default axis offset */
   public final static RectangleInsets ZERO_AXIS_OFFSET = new RectangleInsets(0.0, 0.0, 0.0, 0.0);
-  /** diamond shape */
-  public final static Shape DIAMOND_SHAPE;
+  /** custom chart theme */
+  public final static StandardChartTheme CHART_THEME;
 
   /**
    * Forbidden constructor
@@ -102,31 +111,81 @@ public class ChartUtils {
 
     // Change the default chart theme before creating any chart :
     if (ChartFactory.getChartTheme() instanceof StandardChartTheme) {
-      final StandardChartTheme theme = (StandardChartTheme) ChartFactory.getChartTheme();
+      CHART_THEME = (StandardChartTheme) ChartFactory.getChartTheme();
 
       // Disable Bar shadows :
-      theme.setShadowVisible(false);
+      CHART_THEME.setShadowVisible(false);
 
       // Disable Bar gradient :
-      theme.setXYBarPainter(new StandardXYBarPainter());
+      CHART_THEME.setXYBarPainter(new StandardXYBarPainter());
 
       // Axis offset = gap between the axis line and the data area :
-      theme.setAxisOffset(ZERO_AXIS_OFFSET);
+      CHART_THEME.setAxisOffset(ZERO_AXIS_OFFSET);
 
       // plot outline :
-      theme.setPlotOutlinePaint(Color.BLACK);
+      CHART_THEME.setPlotOutlinePaint(Color.BLACK);
 
       // axis colors :
-      theme.setAxisLabelPaint(Color.BLACK);
-      theme.setTickLabelPaint(Color.BLACK);
+      CHART_THEME.setAxisLabelPaint(Color.BLACK);
+      CHART_THEME.setTickLabelPaint(Color.BLACK);
+
+      // text annotations :
+      CHART_THEME.setItemLabelPaint(Color.BLACK);
+      CHART_THEME.setSmallFont(DEFAULT_TEXT_ANNOTATION_FONT);
+    } else {
+      throw new IllegalStateException("unsupported chart theme : " + ChartFactory.getChartTheme());
     }
+  }
 
-    // diamond shape :
-    final int delta = 4;
-    final int[] xpoints = new int[]{0, delta, 0, -delta};
-    final int[] ypoints = new int[]{-delta, 0, delta, 0};
+  /**
+   * Return the annotation font for the given size (cached)
+   * @param size font size
+   * @return annotation font
+   */
+  protected static Font getAnnotationFont(final int size) {
+    final Integer key = Integer.valueOf(size);
+    Font f = cachedFonts.get(key);
+    if (f == null) {
+      f = new Font("SansSerif", Font.PLAIN, size);
+      cachedFonts.put(key, f);
+    }
+    return f;
+  }
 
-    DIAMOND_SHAPE = new Polygon(xpoints, ypoints, 4);
+  /**
+   * Return the biggest font whose size best fits the given text for the given width
+   * @param text text to use
+   * @param maxWidth maximum pixel width to fit
+   * @param g2 graphics object
+   * @param minFontSize minimum size for the font
+   * @param maxFontSize maximum size for the font
+   * @return font
+   */
+  protected static Font autoFitText(final String text, final double maxWidth,
+                                    final Graphics2D g2, final int minFontSize, final int maxFontSize) {
+
+    Font f;
+    FontMetrics fm;
+
+    int size = maxFontSize;
+    double width = 0;
+
+    do {
+      f = ChartUtils.getAnnotationFont(size);
+
+//      System.out.println("font      = " + f);
+      fm = g2.getFontMetrics(f);
+
+      // get pixel width of the given text with the current font :
+      width = TextUtilities.getTextBounds(text, g2, fm).getWidth();
+
+//      System.out.println("width     = " + width);
+
+      size--;
+
+    } while (width > maxWidth && size > minFontSize);
+
+    return f;
   }
 
   /**
@@ -382,19 +441,62 @@ public class ChartUtils {
     return units;
   }
 
-    /**
-     * Creates a new annotation to be displayed at the given coordinates.  The
-     * coordinates are specified in data space (they will be converted to
-     * Java2D space for display).
-     *
-     * @param text  the text (<code>null</code> not permitted).
-     * @param x  the x-coordinate (in data space).
-     * @param y  the y-coordinate (in data space).
-     * @return new annotation
-     */
+  /**
+   * Creates a new text annotation to be displayed at the given coordinates.  The
+   * coordinates are specified in data space.
+   *
+   * HACK : use default text annotation font
+   *
+   * @param text  the text (<code>null</code> not permitted).
+   * @param x  the x-coordinate (in data space).
+   * @param y  the y-coordinate (in data space).
+   * @return new annotation
+   */
   public static XYTextAnnotation createXYTextAnnotation(final String text, final double x, final double y) {
     final XYTextAnnotation a = new XYTextAnnotation(text, x, y);
-    a.setFont(DEFAULT_ANNOTATION_FONT);
+    a.setFont(DEFAULT_TEXT_ANNOTATION_FONT);
+    // default color is BLACK
+
+    return a;
+  }
+
+  /**
+   * Creates a new text annotation to be displayed at the given coordinates.  The
+   * coordinates are specified in data space.
+   *
+   * HACK : use default text annotation font
+   *
+   * @param text  the text (<code>null</code> not permitted).
+   * @param x  the x-coordinate (in data space).
+   * @param y  the y-coordinate (in data space).
+   * @return new annotation
+   */
+  public static FitXYTextAnnotation createFitXYTextAnnotation(final String text, final double x, final double y) {
+    final FitXYTextAnnotation a = new FitXYTextAnnotation(text, x, y);
+    a.setFont(DEFAULT_TEXT_ANNOTATION_FONT);
+    // default color is BLACK
+
+    return a;
+  }
+
+  /**
+   * Creates a new text annotation to be displayed at the given coordinates.  The
+   * coordinates are specified in data space.
+   *
+   * HACK : use small text annotation font
+   *
+   * @param text  the text (<code>null</code> not permitted).
+   * @param x  the x-coordinate (in data space).
+   * @param y  the y-coordinate (in data space).
+   * @param angle  the angle of the arrow's line (in radians).
+   * @return new annotation
+   */
+  public static XYTickAnnotation createXYTickAnnotation(final String text, final double x, final double y,
+                                                        final double angle) {
+
+    final XYTickAnnotation a = new XYTickAnnotation(text, x, y, angle);
+    a.setFont(SMALL_TEXT_ANNOTATION_FONT);
+    // default color is BLACK
 
     return a;
   }
