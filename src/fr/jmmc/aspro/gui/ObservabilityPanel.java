@@ -1,11 +1,16 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityPanel.java,v 1.45 2010-10-18 14:28:56 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityPanel.java,v 1.46 2010-10-21 16:52:46 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.45  2010/10/18 14:28:56  bourgesl
+ * max view items set to 15.
+ * optional scrollbar - added mousewheel listener
+ * disabled logs
+ *
  * Revision 1.44  2010/10/15 17:03:21  bourgesl
  * major changes to add sliding behaviour (scrollbar) to view only a subset of targets if there are too many.
  * PDF options according to the number of targets
@@ -156,7 +161,6 @@ import fr.jmmc.aspro.gui.chart.PDFOptions.Orientation;
 import fr.jmmc.aspro.gui.chart.PDFOptions.PageSize;
 import fr.jmmc.aspro.gui.chart.SlidingXYPlotAdapter;
 import fr.jmmc.aspro.gui.chart.XYDiamondAnnotation;
-import fr.jmmc.aspro.gui.chart.XYTickAnnotation;
 import fr.jmmc.aspro.gui.util.ColorPalette;
 import fr.jmmc.aspro.gui.util.SwingWorkerExecutor;
 import fr.jmmc.aspro.model.observability.DateTimeInterval;
@@ -171,6 +175,7 @@ import fr.jmmc.aspro.model.oi.Pop;
 import fr.jmmc.aspro.service.ObservabilityService;
 import fr.jmmc.mcs.gui.FeedbackReport;
 import fr.jmmc.mcs.gui.StatusBar;
+import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FlowLayout;
@@ -234,13 +239,13 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
   /** background color corresponding to the TWILIGHT zone */
   public static final Color TWILIGHT_COLOR = new Color(192, 192, 192);
   /** background color corresponding to the NIGHT zone */
-  public static final Color NIGHT_COLOR = new Color(128, 128, 128);
+  public static final Color NIGHT_COLOR = new Color(150, 150, 150);
   /** annotation rotation angle = 90 degrees */
   private static final double HALF_PI = Math.PI / 2d;
   /** milliseconds threshold to consider the date too close to date axis limits = 3 minutes */
   private static final long DATE_LIMIT_THRESHOLD = 3 * 60 * 1000;
   /** max items printed before using A3 format */
-  private final static int MAX_PRINTABLE_ITEMS = 15;
+  private final static int MAX_PRINTABLE_ITEMS = 10;
   /** max items displayed before scrolling */
   private final static int MAX_VIEW_ITEMS = MAX_PRINTABLE_ITEMS;
 
@@ -764,24 +769,24 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
         // transit annotation :
         if (so.getType() == StarObservabilityData.TYPE_STAR) {
-          addAnnotation(annotations, pos, new XYDiamondAnnotation(n, so.getTransitDate().getTime(), 10, 10));
+          addAnnotation(annotations, pos, new XYDiamondAnnotation(n, so.getTransitDate().getTime(), 8, 8));
 
           for (ElevationDate ed : so.getElevations()) {
             if (checkDateAxisLimits(ed.getDate(), min, max)) {
-              addAnnotation(annotations, pos, new XYTickAnnotation(Integer.toString(ed.getElevation()), n, ed.getDate().getTime(), HALF_PI));
+              addAnnotation(annotations, pos, ChartUtils.createXYTickAnnotation(Integer.toString(ed.getElevation()), n, ed.getDate().getTime(), HALF_PI));
             }
           }
         }
 
         for (DateTimeInterval interval : so.getVisible()) {
           if (checkDateAxisLimits(interval.getStartDate(), min, max)) {
-            final XYTextAnnotation aStart = ChartUtils.createXYTextAnnotation(df.format(interval.getStartDate()), n, interval.getStartDate().getTime());
+            final XYTextAnnotation aStart = ChartUtils.createFitXYTextAnnotation(df.format(interval.getStartDate()), n, interval.getStartDate().getTime());
             aStart.setRotationAngle(HALF_PI);
             addAnnotation(annotations, pos, aStart);
           }
 
           if (checkDateAxisLimits(interval.getEndDate(), min, max)) {
-            final XYTextAnnotation aEnd = ChartUtils.createXYTextAnnotation(df.format(interval.getEndDate()), n, interval.getEndDate().getTime());
+            final XYTextAnnotation aEnd = ChartUtils.createFitXYTextAnnotation(df.format(interval.getEndDate()), n, interval.getEndDate().getTime());
             aEnd.setRotationAngle(HALF_PI);
             addAnnotation(annotations, pos, aEnd);
           }
@@ -895,11 +900,9 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
             col = TWILIGHT_COLOR;
             break;
         }
-        localIntervalMarker = new IntervalMarker(interval.getStartDate().getTime(),
-                interval.getEndDate().getTime(), col);
-
         // force Alpha to 1.0 to avoid PDF rendering problems (alpha layer ordering) :
-        localIntervalMarker.setAlpha(1.0f);
+        localIntervalMarker = new IntervalMarker(interval.getStartDate().getTime(),
+                interval.getEndDate().getTime(), col, new BasicStroke(0.5f), null, null, 1f);
 
         this.localXYPlot.addRangeMarker(localIntervalMarker, Layer.BACKGROUND);
       }
