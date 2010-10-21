@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.62 2010-10-15 16:59:43 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.63 2010-10-21 16:51:01 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.62  2010/10/15 16:59:43  bourgesl
+ * new PDF options (page size and orientation)
+ * PDFExportable refactoring to include prepareChart, postPDF and getPDFOptions methods
+ *
  * Revision 1.61  2010/10/14 10:58:03  bourgesl
  * Fixed bug related to sampling periodicity : use the instrument default sampling time when an invalid value is detected
  *
@@ -762,7 +766,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     this.performPDFAction();
   }//GEN-LAST:event_jButtonPDFActionPerformed
 
-
   /**
    * Export the chart component as a PDF document
    */
@@ -1005,14 +1008,14 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
    * @param observation observation to use
    */
   private void resetSamplingPeriod(final ObservationSetting observation) {
-      // reset the sampling time to the default sampling time of the instrument :
-      final int defaultSamplingTime = getInstrumentDefaultSamplingTime(observation);
+    // reset the sampling time to the default sampling time of the instrument :
+    final int defaultSamplingTime = getInstrumentDefaultSamplingTime(observation);
 
-      this.jFieldSamplingPeriod.setValue(Double.valueOf(defaultSamplingTime));
+    this.jFieldSamplingPeriod.setValue(Double.valueOf(defaultSamplingTime));
 
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("defaultSamplingTime : " + defaultSamplingTime);
-      }
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("defaultSamplingTime : " + defaultSamplingTime);
+    }
   }
 
   /**
@@ -1021,10 +1024,10 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
    * @return default sampling time
    */
   private int getInstrumentDefaultSamplingTime(final ObservationSetting observation) {
-      // get the default sampling time of the instrument :
-      return ConfigurationManager.getInstance().getInstrumentSamplingTime(
-              observation.getInterferometerConfiguration().getName(),
-              observation.getInstrumentConfiguration().getName());
+    // get the default sampling time of the instrument :
+    return ConfigurationManager.getInstance().getInstrumentSamplingTime(
+            observation.getInterferometerConfiguration().getName(),
+            observation.getInstrumentConfiguration().getName());
   }
 
   /**
@@ -1639,7 +1642,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
    */
   public void chartChanged(final ZoomEvent ze) {
     // check if the zoom changed :
-    if (this.currentUVMapData != null && !ze.equals(this.lastZoomEvent)) {
+    if (!ze.equals(this.lastZoomEvent)) {
       this.lastZoomEvent = ze;
 
       if (this.aJMMC != null) {
@@ -1650,108 +1653,110 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         this.localXYPlot.getRenderer(0).addAnnotation(this.aJMMC, Layer.BACKGROUND);
       }
 
-      // Update model uv map :
-      final String targetName = getSelectedTargetName();
+      if (this.currentUVMapData != null) {
+        // Update model uv map :
+        final String targetName = getSelectedTargetName();
 
-      final Target target = this.om.getTarget(targetName);
+        final Target target = this.om.getTarget(targetName);
 
-      if (target != null) {
-        final List<Model> models = target.getModels();
+        if (target != null) {
+          final List<Model> models = target.getModels();
 
-        if (models != null && models.size() > 0) {
+          if (models != null && models.size() > 0) {
 
-          final Rectangle2D.Float uvRect = new Rectangle2D.Float();
-          uvRect.setFrameFromDiagonal(
-                  fromUVPlotScale(ze.getDomainLowerBound()), fromUVPlotScale(ze.getRangeLowerBound()),
-                  fromUVPlotScale(ze.getDomainUpperBound()), fromUVPlotScale(ze.getRangeUpperBound()));
+            final Rectangle2D.Float uvRect = new Rectangle2D.Float();
+            uvRect.setFrameFromDiagonal(
+                    fromUVPlotScale(ze.getDomainLowerBound()), fromUVPlotScale(ze.getRangeLowerBound()),
+                    fromUVPlotScale(ze.getDomainUpperBound()), fromUVPlotScale(ze.getRangeUpperBound()));
 
-          // compute an approximated uv map from the reference UV Map :
-          computeSubUVMap(uvRect);
+            // compute an approximated uv map from the reference UV Map :
+            computeSubUVMap(uvRect);
 
-          // visibility reference extrema :
-          final Float refMin = Float.valueOf(this.currentUVMapData.getMin());
-          final Float refMax = Float.valueOf(this.currentUVMapData.getMax());
+            // visibility reference extrema :
+            final Float refMin = Float.valueOf(this.currentUVMapData.getMin());
+            final Float refMax = Float.valueOf(this.currentUVMapData.getMax());
 
-          // model image options :
-          final ImageMode imageMode = (ImageMode) this.jComboBoxImageMode.getSelectedItem();
+            // model image options :
+            final ImageMode imageMode = (ImageMode) this.jComboBoxImageMode.getSelectedItem();
 
-          // Use model image Preferences :
-          final int imageSize = myPreferences.getPreferenceAsInt(Preferences.MODEL_IMAGE_SIZE);
-          final IndexColorModel colorModel = ColorModels.getColorModel(myPreferences.getPreference(Preferences.MODEL_IMAGE_LUT));
+            // Use model image Preferences :
+            final int imageSize = myPreferences.getPreferenceAsInt(Preferences.MODEL_IMAGE_SIZE);
+            final IndexColorModel colorModel = ColorModels.getColorModel(myPreferences.getPreference(Preferences.MODEL_IMAGE_LUT));
 
-          if (logger.isLoggable(Level.FINE)) {
-            logger.fine("computing model uv map ...");
-          }
-
-          /*
-           * Use the SwingWorker backport for Java 5 = swing-worker-1.2.jar (org.jdesktop.swingworker.SwingWorker)
-           */
-          final SwingWorker<UVMapData, Void> worker = new SwingWorker<UVMapData, Void>() {
-
-            /**
-             * Compute the UV Map in background
-             * @return Image
-             */
-            @Override
-            public UVMapData doInBackground() {
-              logger.fine("SwingWorker[UVMap].doInBackground : IN");
-
-              UVMapData uvMapData = ModelUVMapService.computeUVMap(
-                      models, uvRect, refMin, refMax, imageMode, imageSize, colorModel);
-
-              if (isCancelled()) {
-                logger.fine("SwingWorker[UVMap].doInBackground : CANCELLED");
-                // no result if task is cancelled :
-                uvMapData = null;
-              } else {
-                logger.fine("SwingWorker[UVMap].doInBackground : OUT");
-              }
-              return uvMapData;
+            if (logger.isLoggable(Level.FINE)) {
+              logger.fine("computing model uv map ...");
             }
 
-            /**
-             * Refresh the plot using the computed UV Map.
-             * This code is executed by the Swing Event Dispatcher thread (EDT)
+            /*
+             * Use the SwingWorker backport for Java 5 = swing-worker-1.2.jar (org.jdesktop.swingworker.SwingWorker)
              */
-            @Override
-            public void done() {
-              // check if the worker was cancelled :
-              if (!isCancelled()) {
-                logger.fine("SwingWorker[UVMap].done : IN");
-                try {
-                  // Get the computation results with all data necessary to draw the plot :
-                  final UVMapData uvMapData = get();
+            final SwingWorker<UVMapData, Void> worker = new SwingWorker<UVMapData, Void>() {
 
-                  if (uvMapData != null) {
-                    logger.fine("SwingWorker[UVMap].done : refresh Chart");
+              /**
+               * Compute the UV Map in background
+               * @return Image
+               */
+              @Override
+              public UVMapData doInBackground() {
+                logger.fine("SwingWorker[UVMap].doInBackground : IN");
 
-                    // update the background image :
-                    updateUVMap(uvMapData.getUvMap());
-                  }
+                UVMapData uvMapData = ModelUVMapService.computeUVMap(
+                        models, uvRect, refMin, refMax, imageMode, imageSize, colorModel);
 
-                } catch (InterruptedException ignore) {
-                } catch (ExecutionException ee) {
-                  if (ee.getCause() instanceof IllegalArgumentException) {
-                    MessagePane.showErrorMessage(ee.getCause().getMessage());
-                  } else {
-                    // Show feedback report (modal and do not exit on close) :
-                    new FeedbackReport(true, ee.getCause());
-                  }
+                if (isCancelled()) {
+                  logger.fine("SwingWorker[UVMap].doInBackground : CANCELLED");
+                  // no result if task is cancelled :
+                  uvMapData = null;
+                } else {
+                  logger.fine("SwingWorker[UVMap].doInBackground : OUT");
                 }
-
-                // update the status bar :
-                StatusBar.show("uv map done.");
-
-                logger.fine("SwingWorker[UVMap].done : OUT");
+                return uvMapData;
               }
-            }
-          };
 
-          // update the status bar :
-          StatusBar.show("computing uv map ... (please wait, this may take a while)");
+              /**
+               * Refresh the plot using the computed UV Map.
+               * This code is executed by the Swing Event Dispatcher thread (EDT)
+               */
+              @Override
+              public void done() {
+                // check if the worker was cancelled :
+                if (!isCancelled()) {
+                  logger.fine("SwingWorker[UVMap].done : IN");
+                  try {
+                    // Get the computation results with all data necessary to draw the plot :
+                    final UVMapData uvMapData = get();
 
-          // Cancel other uv map task and execute this task :
-          SwingWorkerExecutor.getInstance().execute("UVMap", worker);
+                    if (uvMapData != null) {
+                      logger.fine("SwingWorker[UVMap].done : refresh Chart");
+
+                      // update the background image :
+                      updateUVMap(uvMapData.getUvMap());
+                    }
+
+                  } catch (InterruptedException ignore) {
+                  } catch (ExecutionException ee) {
+                    if (ee.getCause() instanceof IllegalArgumentException) {
+                      MessagePane.showErrorMessage(ee.getCause().getMessage());
+                    } else {
+                      // Show feedback report (modal and do not exit on close) :
+                      new FeedbackReport(true, ee.getCause());
+                    }
+                  }
+
+                  // update the status bar :
+                  StatusBar.show("uv map done.");
+
+                  logger.fine("SwingWorker[UVMap].done : OUT");
+                }
+              }
+            };
+
+            // update the status bar :
+            StatusBar.show("computing uv map ... (please wait, this may take a while)");
+
+            // Cancel other uv map task and execute this task :
+            SwingWorkerExecutor.getInstance().execute("UVMap", worker);
+          }
         }
       }
     }
@@ -1838,9 +1843,10 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     // annotation JMMC (moving position) :
     this.localXYPlot.getRenderer(0).removeAnnotations();
     if (this.aJMMC == null) {
-      this.aJMMC = new XYTextAnnotation(AsproConstants.JMMC_ANNOTATION, boxSize, -boxSize);
+      this.aJMMC = ChartUtils.createXYTextAnnotation(AsproConstants.JMMC_ANNOTATION, boxSize, -boxSize);
+      this.aJMMC.setFont(ChartUtils.SMALL_TEXT_ANNOTATION_FONT);
       this.aJMMC.setTextAnchor(TextAnchor.BOTTOM_RIGHT);
-      this.aJMMC.setPaint(Color.BLACK);
+      this.aJMMC.setPaint(Color.DARK_GRAY);
     } else {
       this.aJMMC.setX(boxSize);
       this.aJMMC.setY(-boxSize);

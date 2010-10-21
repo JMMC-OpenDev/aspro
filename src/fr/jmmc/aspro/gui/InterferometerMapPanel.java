@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: InterferometerMapPanel.java,v 1.9 2010-10-15 16:59:43 bourgesl Exp $"
+ * "@(#) $Id: InterferometerMapPanel.java,v 1.10 2010-10-21 16:51:01 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.9  2010/10/15 16:59:43  bourgesl
+ * new PDF options (page size and orientation)
+ * PDFExportable refactoring to include prepareChart, postPDF and getPDFOptions methods
+ *
  * Revision 1.8  2010/09/15 13:52:55  bourgesl
  * added JMMC copyright on plot
  *
@@ -188,7 +192,7 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
     // Use Bubble Renderer for the first dataset :
     this.localXYPlot.setRenderer(0, new XYBubbleRenderer());
 
-    // Use Bubble Renderer for the second dataset :
+    // Use Line Renderer for the second dataset :
     this.localXYPlot.setRenderer(1, lineRenderer);
 
     // Hide grid lines :
@@ -371,9 +375,10 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
     // annotation JMMC (moving position) :
     this.localXYPlot.getRenderer(0).removeAnnotations();
     if (this.aJMMC == null) {
-      this.aJMMC = new XYTextAnnotation(AsproConstants.JMMC_ANNOTATION, boxSize, -boxSize);
+      this.aJMMC = ChartUtils.createXYTextAnnotation(AsproConstants.JMMC_ANNOTATION, boxSize, -boxSize);
+      this.aJMMC.setFont(ChartUtils.SMALL_TEXT_ANNOTATION_FONT);
       this.aJMMC.setTextAnchor(TextAnchor.BOTTOM_RIGHT);
-      this.aJMMC.setPaint(Color.BLACK);
+      this.aJMMC.setPaint(Color.DARK_GRAY);
     } else {
       this.aJMMC.setX(boxSize);
       this.aJMMC.setY(-boxSize);
