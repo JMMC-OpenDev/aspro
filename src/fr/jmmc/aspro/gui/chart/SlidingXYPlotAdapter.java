@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SlidingXYPlotAdapter.java,v 1.2 2010-10-18 14:27:07 bourgesl Exp $"
+ * "@(#) $Id: SlidingXYPlotAdapter.java,v 1.3 2010-10-21 16:49:12 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2010/10/18 14:27:07  bourgesl
+ * javadoc
+ * disabled logs
+ *
  * Revision 1.1  2010/10/15 17:03:20  bourgesl
  * major changes to add sliding behaviour (scrollbar) to view only a subset of targets if there are too many.
  * PDF options according to the number of targets
@@ -46,6 +50,8 @@ public final class SlidingXYPlotAdapter {
   private final JFreeChart localJFreeChart;
   /** xy plot instance */
   private XYPlot localXYPlot;
+  /** JMMC annotation */
+  private XYTextAnnotation aJMMC = null;
   /** plot renderer to define annotations */
   private final XYBarRenderer renderer;
   /** max items in the chart view if the useSubset mode is enabled */
@@ -201,15 +207,17 @@ public final class SlidingXYPlotAdapter {
     final double rangeMin, rangeMax;
 
     if (newSize > 0) {
-      rangeMin = -0.5d;
-      rangeMax = newSize - 0.5d;
+      rangeMin = -(2d / 3d);
+      rangeMax = newSize - (1d / 3d);
     } else {
       rangeMin = 0d;
       rangeMax = 1d;
     }
 
     // adjust bar width :
-    if (newSize > 1) {
+    if (newSize > 6) {
+      barWidth = 0.75d;
+    } else if (newSize > 1) {
       barWidth = 0.5d;
     } else {
       barWidth = 0.25d;
@@ -271,6 +279,14 @@ public final class SlidingXYPlotAdapter {
               a.setX(n);
               this.renderer.addAnnotation(a);
 
+              if (a instanceof XYTickAnnotation) {
+                // set tick location over bar edges :
+                ((XYTickAnnotation) a).setMaxRadius(barWidth / 2d);
+              } else if (a instanceof FitXYTextAnnotation) {
+                // set text maximum width = bar width :
+                ((FitXYTextAnnotation) a).setMaxRadius(barWidth);
+              }
+
             } else if (annotation instanceof XYDiamondAnnotation) {
               final XYDiamondAnnotation a = (XYDiamondAnnotation) annotation;
               a.setX(n);
@@ -282,12 +298,17 @@ public final class SlidingXYPlotAdapter {
     }
 
     // annotation JMMC (fixed position) :
-    final XYTextAnnotation aJMMC = new XYTextAnnotation(AsproConstants.JMMC_ANNOTATION,
-            localSymbolAxis.getRange().getUpperBound(),
-            this.localXYPlot.getRangeAxis().getRange().getUpperBound());
-
-    aJMMC.setTextAnchor(TextAnchor.BOTTOM_RIGHT);
-    aJMMC.setPaint(Color.BLACK);
+    if (this.aJMMC == null) {
+      this.aJMMC = ChartUtils.createXYTextAnnotation(AsproConstants.JMMC_ANNOTATION,
+              localSymbolAxis.getRange().getUpperBound(),
+              this.localXYPlot.getRangeAxis().getRange().getUpperBound());
+      this.aJMMC.setFont(ChartUtils.SMALL_TEXT_ANNOTATION_FONT);
+      this.aJMMC.setTextAnchor(TextAnchor.BOTTOM_RIGHT);
+      this.aJMMC.setPaint(Color.DARK_GRAY);
+    } else {
+      this.aJMMC.setX(localSymbolAxis.getRange().getUpperBound());
+      this.aJMMC.setY(this.localXYPlot.getRangeAxis().getRange().getUpperBound());
+    }
     this.renderer.addAnnotation(aJMMC, Layer.BACKGROUND);
 
     // tick color :
