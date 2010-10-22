@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOIFitsAction.java,v 1.6 2010-10-04 14:32:13 bourgesl Exp $"
+ * "@(#) $Id: ExportOIFitsAction.java,v 1.7 2010-10-22 13:45:45 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2010/10/04 14:32:13  bourgesl
+ * getName(fits) is now protected and static (used by BroadcastToMFGui)
+ *
  * Revision 1.5  2010/10/01 15:33:11  bourgesl
  * added message 'There is currently no OIFits data (your target is not observable)'
  * use MessagePane.showConfirmFileOverwrite
@@ -35,13 +38,13 @@ import fr.jmmc.mcs.util.RegisteredAction;
 import fr.jmmc.oitools.model.OIFitsFile;
 import fr.jmmc.oitools.model.OIFitsWriter;
 import fr.jmmc.oitools.model.OIVis2;
+import fr.nom.tam.fits.FitsException;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileFilter;
-import nom.tam.fits.FitsException;
 
 /**
  * This registered action represents a File Menu entry to export an OIFits file
@@ -131,10 +134,10 @@ public class ExportOIFitsAction extends RegisteredAction {
 
         } catch (FitsException fe) {
           MessagePane.showErrorMessage(
-                "Could not export to file : " + file.getName(), fe);
+                  "Could not export to file : " + file.getName(), fe);
         } catch (IOException ioe) {
           MessagePane.showErrorMessage(
-                "Could not export to file : " + file.getName(), ioe);
+                  "Could not export to file : " + file.getName(), ioe);
         }
       }
     } else {
