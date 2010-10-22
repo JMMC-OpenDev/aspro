@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: Preferences.java,v 1.4 2010-06-17 10:02:51 bourgesl Exp $"
+ * "@(#) $Id: Preferences.java,v 1.5 2010-10-22 13:31:37 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2010/06/17 10:02:51  bourgesl
+ * fixed warning hints - mainly not final static loggers
+ *
  * Revision 1.3  2010/06/09 12:49:39  bourgesl
  * added an hidden preference (splash.screen.show) to show the splashscreen at startup
  *
@@ -20,13 +23,14 @@
 package fr.jmmc.aspro;
 
 import fr.jmmc.mcs.util.PreferencesException;
+import java.util.Arrays;
 
 /**
  * Handles preferences for Aspro.
  *
  * Note : There is a special preference 'splash.screen.show' used to disable the splash screen (dev mode) if its value is 'false'.
  */
-public class Preferences extends fr.jmmc.mcs.util.Preferences {
+public final class Preferences extends fr.jmmc.mcs.util.Preferences {
 
   /** Singleton instance */
   private static Preferences _singleton = null;
@@ -46,6 +50,8 @@ public class Preferences extends fr.jmmc.mcs.util.Preferences {
   public final static String MODEL_IMAGE_LUT = "model.image.lut";
   /** Preference : Image size to use for the object model image in the UV Coverage plot */
   public final static String MODEL_IMAGE_SIZE = "model.image.size";
+  /** Preference : time reference (LST/UTC) */
+  public final static String TIME_REFERENCE = "time.reference";
 
   /**
    * Private constructor that must be empty.
@@ -83,6 +89,9 @@ public class Preferences extends fr.jmmc.mcs.util.Preferences {
     // UV Coverage - image size and LUT :
     setDefaultPreference(MODEL_IMAGE_LUT, AsproConstants.DEFAULT_IMAGE_LUT);
     setDefaultPreference(MODEL_IMAGE_SIZE, AsproConstants.DEFAULT_IMAGE_SIZE);
+
+    // Time reference :
+    setDefaultPreference(TIME_REFERENCE, AsproConstants.TIME_LST);
   }
 
   /**
@@ -117,5 +126,19 @@ public class Preferences extends fr.jmmc.mcs.util.Preferences {
       return false;
     }
     return true;
+  }
+
+  /**
+   * Return the time reference : use preferences or LST if it is undefined
+   * @return time reference
+   */
+  public String getTimeReference() {
+
+    final String value = getPreference(TIME_REFERENCE);
+
+    if (value == null || Arrays.binarySearch(AsproConstants.TIME_CHOICES, value) < 0) {
+      return AsproConstants.TIME_LST;
+    }
+    return value;
   }
 }

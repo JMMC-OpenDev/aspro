@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityPanel.java,v 1.46 2010-10-21 16:52:46 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityPanel.java,v 1.47 2010-10-22 13:31:37 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.46  2010/10/21 16:52:46  bourgesl
+ * night area is lighter to have better grayscale prints
+ * minor changes related to annotations
+ *
  * Revision 1.45  2010/10/18 14:28:56  bourgesl
  * max view items set to 15.
  * optional scrollbar - added mousewheel listener
@@ -154,6 +158,7 @@
 package fr.jmmc.aspro.gui;
 
 import fr.jmmc.aspro.AsproConstants;
+import fr.jmmc.aspro.Preferences;
 import fr.jmmc.aspro.gui.action.ExportPDFAction;
 import fr.jmmc.aspro.gui.chart.ChartUtils;
 import fr.jmmc.aspro.gui.chart.PDFOptions;
@@ -192,6 +197,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import javax.swing.DefaultBoundedRangeModel;
@@ -225,7 +232,7 @@ import org.jfree.ui.Layer;
  * @author bourgesl
  */
 public final class ObservabilityPanel extends javax.swing.JPanel implements ChartProgressListener,
-                                                                            ObservationListener, PDFExportable {
+                                                                            ObservationListener, Observer, PDFExportable, Disposable {
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
@@ -249,14 +256,6 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
   /** max items displayed before scrolling */
   private final static int MAX_VIEW_ITEMS = MAX_PRINTABLE_ITEMS;
 
-  /* time references */
-  /** LST time reference */
-  private static final String TIME_LST = "L.S.T.";
-  /** UTC time reference */
-  private static final String TIME_UTC = "U.T.C.";
-  /** HA time reference */
-  private static final String TIME_HA = "H.A.";
-
   /* default plot options */
   /** default value for the checkbox BaseLine Limits */
   private static final boolean DEFAULT_DO_BASELINE_LIMITS = false;
@@ -264,6 +263,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
   private static final boolean DEFAULT_DO_DETAILED_OUTPUT = false;
 
   /* members */
+  /** preference singleton */
+  private final Preferences myPreferences = Preferences.getInstance();
   /** jFreeChart instance */
   private JFreeChart localJFreeChart;
   /** xy plot instance */
@@ -387,7 +388,9 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
     panelOptions.add(new JLabel("Time :"));
 
-    this.jComboTimeRef = new JComboBox(new String[]{TIME_LST, TIME_UTC});
+    this.jComboTimeRef = new JComboBox(AsproConstants.TIME_CHOICES);
+    this.jComboTimeRef.setSelectedItem(this.myPreferences.getTimeReference());
+
     this.jComboTimeRef.addActionListener(new ActionListener() {
 
       public void actionPerformed(final ActionEvent e) {
@@ -403,8 +406,12 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
       public void itemStateChanged(final ItemEvent e) {
         final boolean doBaseLineLimits = e.getStateChange() == ItemEvent.SELECTED;
         if (doBaseLineLimits) {
-          jComboTimeRef.setSelectedItem(TIME_LST);
+          // force LST to compute correctly base line limits :
+          jComboTimeRef.setSelectedItem(AsproConstants.TIME_LST);
           jCheckBoxDetailedOutput.setSelected(false);
+        } else {
+          // restore user preference :
+          jComboTimeRef.setSelectedItem(myPreferences.getTimeReference());
         }
 
         jComboTimeRef.setEnabled(!doBaseLineLimits);
@@ -429,6 +436,36 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     panelBottom.add(panelOptions, BorderLayout.CENTER);
 
     this.add(panelBottom, BorderLayout.PAGE_END);
+
+    // register this instance as a Preference Observer :
+    this.myPreferences.addObserver(this);
+  }
+
+  /**
+   * Free any ressource or reference to this instance :
+   * remove this instance form Preference Observers
+   */
+  public void dispose() {
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("dispose : " + this);
+    }
+
+    // unregister this instance as a Preference Observer :
+    this.myPreferences.deleteObserver(this);
+  }
+
+  /**
+   * Listen to preferences changes
+   * @param o Preferences
+   * @param arg unused
+   */
+  public void update(final Observable o, final Object arg) {
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("Preferences updated on : " + this);
+    }
+    logger.severe("Preferences updated on : " + this);
+
+    this.jComboTimeRef.setSelectedItem(this.myPreferences.getTimeReference());
   }
 
   /**
@@ -512,7 +549,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
       // first disable the automatic refresh from field changes :
       this.doAutoRefresh = false;
 
-      this.jComboTimeRef.setSelectedItem(TIME_LST);
+      // restore user preference :
+      this.jComboTimeRef.setSelectedItem(this.myPreferences.getTimeReference());
 
       this.jCheckBoxBaseLineLimits.setSelected(DEFAULT_DO_BASELINE_LIMITS);
       this.jCheckBoxDetailedOutput.setSelected(DEFAULT_DO_DETAILED_OUTPUT);
@@ -573,7 +611,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     /* get plot options from swing components */
 
     /** indicates if the timestamps are expressed in LST or in UTC */
-    final boolean useLST = TIME_LST.equals(this.jComboTimeRef.getSelectedItem());
+    final boolean useLST = AsproConstants.TIME_LST.equals(this.jComboTimeRef.getSelectedItem());
 
     /** flag to find baseline limits */
     final boolean doBaseLineLimits = this.jCheckBoxBaseLineLimits.isSelected();
@@ -654,12 +692,12 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
               final String dateAxisLabel;
               if (doBaseLineLimits) {
-                dateAxisLabel = TIME_HA;
+                dateAxisLabel = AsproConstants.TIME_HA;
               } else {
                 if (useLST) {
-                  dateAxisLabel = TIME_LST;
+                  dateAxisLabel = AsproConstants.TIME_LST;
                 } else {
-                  dateAxisLabel = TIME_UTC;
+                  dateAxisLabel = AsproConstants.TIME_UTC;
                 }
               }
               updateDateAxis(dateAxisLabel, obsData.getDateMin(), obsData.getDateMax(), doBaseLineLimits);

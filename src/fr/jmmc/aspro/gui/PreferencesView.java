@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: PreferencesView.java,v 1.7 2010-09-08 16:00:31 bourgesl Exp $"
+ * "@(#) $Id: PreferencesView.java,v 1.8 2010-10-22 13:31:37 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2010/09/08 16:00:31  bourgesl
+ * unregister Preference Observers when the widget is released (Preference View, UV Coverage Panel)
+ *
  * Revision 1.6  2010/06/17 10:02:50  bourgesl
  * fixed warning hints - mainly not final static loggers
  *
@@ -73,7 +76,7 @@ public final class PreferencesView extends JFrame implements Observer {
     this.jComboBoxImageSize.setModel(new DefaultComboBoxModel(AsproConstants.IMAGE_SIZES));
 
     // register this instance as a Preference Observer :
-    myPreferences.addObserver(this);
+    this.myPreferences.addObserver(this);
 
     // update GUI
     update(null, null);
@@ -94,7 +97,7 @@ public final class PreferencesView extends JFrame implements Observer {
     }
 
     // unregister this instance as a Preference Observer :
-    myPreferences.deleteObserver(this);
+    this.myPreferences.deleteObserver(this);
 
     // dispose Frame :
     super.dispose();
@@ -120,63 +123,92 @@ public final class PreferencesView extends JFrame implements Observer {
   private void initComponents() {
     java.awt.GridBagConstraints gridBagConstraints;
 
-    buttonGroup1 = new javax.swing.ButtonGroup();
-    jPanel3 = new javax.swing.JPanel();
-    jLabel1 = new javax.swing.JLabel();
+    buttonGroupPositionStyle = new javax.swing.ButtonGroup();
+    buttonGroupTimeRef = new javax.swing.ButtonGroup();
+    jPanel1 = new javax.swing.JPanel();
+    jLabelTimeRef = new javax.swing.JLabel();
+    jRadioButtonTimeLST = new javax.swing.JRadioButton();
+    jRadioButtonTimeUTC = new javax.swing.JRadioButton();
+    jPanelModelEditor = new javax.swing.JPanel();
+    jLabelPositionStyle = new javax.swing.JLabel();
     jRadioButtonXY = new javax.swing.JRadioButton();
     jRadioButtonRhoTheta = new javax.swing.JRadioButton();
-    jPanel1 = new javax.swing.JPanel();
-    jLabel8 = new javax.swing.JLabel();
+    jPanelModelImage = new javax.swing.JPanel();
+    jLabelLutTable = new javax.swing.JLabel();
     jComboBoxLUT = new javax.swing.JComboBox();
-    jLabel9 = new javax.swing.JLabel();
+    jLabelImageSize = new javax.swing.JLabel();
     jComboBoxImageSize = new javax.swing.JComboBox();
-    jPanel2 = new javax.swing.JPanel();
+    jPanelButtons = new javax.swing.JPanel();
     jButtonDefault = new javax.swing.JButton();
     jButtonSave = new javax.swing.JButton();
 
     setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
     setTitle("Preferences");
-    getContentPane().setLayout(new java.awt.BorderLayout(5, 5));
+    getContentPane().setLayout(new javax.swing.BoxLayout(getContentPane(), javax.swing.BoxLayout.PAGE_AXIS));
 
-    jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder("Model Editor"));
-    jPanel3.setLayout(new java.awt.GridBagLayout());
+    jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Observability"));
 
-    jLabel1.setText("<html>Default style to <br/>edit model positions : </htmL>");
+    jLabelTimeRef.setText("Time reference");
+    jPanel1.add(jLabelTimeRef);
+
+    buttonGroupTimeRef.add(jRadioButtonTimeLST);
+    jRadioButtonTimeLST.setSelected(true);
+    jRadioButtonTimeLST.setText(AsproConstants.TIME_LST);
+    jRadioButtonTimeLST.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jRadioButtonTimeRefActionPerformed(evt);
+      }
+    });
+    jPanel1.add(jRadioButtonTimeLST);
+
+    buttonGroupTimeRef.add(jRadioButtonTimeUTC);
+    jRadioButtonTimeUTC.setText(AsproConstants.TIME_UTC);
+    jRadioButtonTimeUTC.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jRadioButtonTimeRefActionPerformed(evt);
+      }
+    });
+    jPanel1.add(jRadioButtonTimeUTC);
+
+    getContentPane().add(jPanel1);
+
+    jPanelModelEditor.setBorder(javax.swing.BorderFactory.createTitledBorder("Model Editor"));
+    jPanelModelEditor.setLayout(new java.awt.GridBagLayout());
+
+    jLabelPositionStyle.setText("<html>Default style to <br/>edit model positions</htmL>");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
-    gridBagConstraints.gridheight = 2;
-    jPanel3.add(jLabel1, gridBagConstraints);
+    jPanelModelEditor.add(jLabelPositionStyle, gridBagConstraints);
 
-    buttonGroup1.add(jRadioButtonXY);
-    jRadioButtonXY.setSelected(true);
+    buttonGroupPositionStyle.add(jRadioButtonXY);
     jRadioButtonXY.setText("x / y (mas)");
     jRadioButtonXY.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(java.awt.event.ActionEvent evt) {
-        jRadioButtonXYActionPerformed(evt);
+        jRadioButtonPositionStyleActionPerformed(evt);
       }
     });
-    jPanel3.add(jRadioButtonXY, new java.awt.GridBagConstraints());
+    jPanelModelEditor.add(jRadioButtonXY, new java.awt.GridBagConstraints());
 
-    buttonGroup1.add(jRadioButtonRhoTheta);
+    buttonGroupPositionStyle.add(jRadioButtonRhoTheta);
     jRadioButtonRhoTheta.setText("rho (mas) / theta");
     jRadioButtonRhoTheta.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(java.awt.event.ActionEvent evt) {
-        jRadioButtonXYActionPerformed(evt);
+        jRadioButtonPositionStyleActionPerformed(evt);
       }
     });
-    jPanel3.add(jRadioButtonRhoTheta, new java.awt.GridBagConstraints());
+    jPanelModelEditor.add(jRadioButtonRhoTheta, new java.awt.GridBagConstraints());
 
-    getContentPane().add(jPanel3, java.awt.BorderLayout.PAGE_START);
+    getContentPane().add(jPanelModelEditor);
 
-    jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Model Image"));
-    jPanel1.setLayout(new java.awt.GridBagLayout());
+    jPanelModelImage.setBorder(javax.swing.BorderFactory.createTitledBorder("Model Image"));
+    jPanelModelImage.setLayout(new java.awt.GridBagLayout());
 
-    jLabel8.setText("LUT table");
+    jLabelLutTable.setText("LUT table");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 2;
-    jPanel1.add(jLabel8, gridBagConstraints);
+    jPanelModelImage.add(jLabelLutTable, gridBagConstraints);
 
     jComboBoxLUT.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -187,13 +219,13 @@ public final class PreferencesView extends JFrame implements Observer {
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 2;
     gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
-    jPanel1.add(jComboBoxLUT, gridBagConstraints);
+    jPanelModelImage.add(jComboBoxLUT, gridBagConstraints);
 
-    jLabel9.setText("Image size");
+    jLabelImageSize.setText("Image size");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 3;
-    jPanel1.add(jLabel9, gridBagConstraints);
+    jPanelModelImage.add(jLabelImageSize, gridBagConstraints);
 
     jComboBoxImageSize.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -204,9 +236,9 @@ public final class PreferencesView extends JFrame implements Observer {
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 3;
     gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
-    jPanel1.add(jComboBoxImageSize, gridBagConstraints);
+    jPanelModelImage.add(jComboBoxImageSize, gridBagConstraints);
 
-    getContentPane().add(jPanel1, java.awt.BorderLayout.CENTER);
+    getContentPane().add(jPanelModelImage);
 
     jButtonDefault.setText("Restore Default Settings");
     jButtonDefault.addActionListener(new java.awt.event.ActionListener() {
@@ -214,7 +246,7 @@ public final class PreferencesView extends JFrame implements Observer {
         jButtonDefaultActionPerformed(evt);
       }
     });
-    jPanel2.add(jButtonDefault);
+    jPanelButtons.add(jButtonDefault);
 
     jButtonSave.setText("Save Modifications");
     jButtonSave.addActionListener(new java.awt.event.ActionListener() {
@@ -222,23 +254,23 @@ public final class PreferencesView extends JFrame implements Observer {
         jButtonSaveActionPerformed(evt);
       }
     });
-    jPanel2.add(jButtonSave);
+    jPanelButtons.add(jButtonSave);
 
-    getContentPane().add(jPanel2, java.awt.BorderLayout.SOUTH);
+    getContentPane().add(jPanelButtons);
   }// </editor-fold>//GEN-END:initComponents
 
-    private void jRadioButtonXYActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonXYActionPerformed
+    private void jRadioButtonPositionStyleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonPositionStyleActionPerformed
       try {
         // will fire triggerObserversNotification so update() will be called
-        myPreferences.setPreference(Preferences.MODELEDITOR_PREFERXY, jRadioButtonXY.isSelected());
+        this.myPreferences.setPreference(Preferences.MODELEDITOR_PREFERXY, this.jRadioButtonXY.isSelected());
       } catch (PreferencesException pe) {
         logger.log(Level.SEVERE, null, pe);
       }
-    }//GEN-LAST:event_jRadioButtonXYActionPerformed
+    }//GEN-LAST:event_jRadioButtonPositionStyleActionPerformed
 
     private void jButtonSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSaveActionPerformed
       try {
-        myPreferences.saveToFile();
+        this.myPreferences.saveToFile();
       } catch (PreferencesException pe) {
         // this try catch should not be solved here
         // one feedback report could be thrown on error into Preference code
@@ -247,13 +279,13 @@ public final class PreferencesView extends JFrame implements Observer {
     }//GEN-LAST:event_jButtonSaveActionPerformed
 
     private void jButtonDefaultActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDefaultActionPerformed
-      myPreferences.resetToDefaultPreferences();
+      this.myPreferences.resetToDefaultPreferences();
     }//GEN-LAST:event_jButtonDefaultActionPerformed
 
     private void jComboBoxImageSizeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxImageSizeActionPerformed
       try {
         // will fire triggerObserversNotification so update() will be called
-        myPreferences.setPreference(Preferences.MODEL_IMAGE_SIZE, this.jComboBoxImageSize.getSelectedItem());
+        this.myPreferences.setPreference(Preferences.MODEL_IMAGE_SIZE, this.jComboBoxImageSize.getSelectedItem());
       } catch (PreferencesException pe) {
         logger.log(Level.SEVERE, null, pe);
       }
@@ -262,11 +294,27 @@ public final class PreferencesView extends JFrame implements Observer {
     private void jComboBoxLUTActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxLUTActionPerformed
       try {
         // will fire triggerObserversNotification so update() will be called
-        myPreferences.setPreference(Preferences.MODEL_IMAGE_LUT, this.jComboBoxLUT.getSelectedItem());
+        this.myPreferences.setPreference(Preferences.MODEL_IMAGE_LUT, this.jComboBoxLUT.getSelectedItem());
       } catch (PreferencesException pe) {
         logger.log(Level.SEVERE, null, pe);
       }
     }//GEN-LAST:event_jComboBoxLUTActionPerformed
+
+    private void jRadioButtonTimeRefActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonTimeRefActionPerformed
+      try {
+        final String value;
+        if (this.jRadioButtonTimeUTC.isSelected()) {
+          value = AsproConstants.TIME_UTC;
+        } else {
+          value = AsproConstants.TIME_LST;
+        }
+
+        // will fire triggerObserversNotification so update() will be called
+        this.myPreferences.setPreference(Preferences.TIME_REFERENCE, value);
+      } catch (PreferencesException pe) {
+        logger.log(Level.SEVERE, null, pe);
+      }
+    }//GEN-LAST:event_jRadioButtonTimeRefActionPerformed
 
   /**
    * Listen to preferences changes
@@ -279,27 +327,36 @@ public final class PreferencesView extends JFrame implements Observer {
     }
 
     // read prefs to set states of GUI elements
-    final boolean preferXyMode = myPreferences.getPreferenceAsBoolean(Preferences.MODELEDITOR_PREFERXY);
+    final boolean preferXyMode = this.myPreferences.getPreferenceAsBoolean(Preferences.MODELEDITOR_PREFERXY);
     this.jRadioButtonXY.setSelected(preferXyMode);
     this.jRadioButtonRhoTheta.setSelected(!preferXyMode);
 
-    this.jComboBoxLUT.setSelectedItem(myPreferences.getPreference(Preferences.MODEL_IMAGE_LUT));
+    this.jComboBoxLUT.setSelectedItem(this.myPreferences.getPreference(Preferences.MODEL_IMAGE_LUT));
 
-    this.jComboBoxImageSize.setSelectedItem(myPreferences.getPreferenceAsInt(Preferences.MODEL_IMAGE_SIZE));
+    this.jComboBoxImageSize.setSelectedItem(this.myPreferences.getPreferenceAsInt(Preferences.MODEL_IMAGE_SIZE));
+
+    final boolean preferTimeLst = AsproConstants.TIME_LST.equals(this.myPreferences.getTimeReference());
+    this.jRadioButtonTimeLST.setSelected(preferTimeLst);
+    this.jRadioButtonTimeUTC.setSelected(!preferTimeLst);
   }
   // Variables declaration - do not modify//GEN-BEGIN:variables
-  private javax.swing.ButtonGroup buttonGroup1;
+  private javax.swing.ButtonGroup buttonGroupPositionStyle;
+  private javax.swing.ButtonGroup buttonGroupTimeRef;
   private javax.swing.JButton jButtonDefault;
   private javax.swing.JButton jButtonSave;
   private javax.swing.JComboBox jComboBoxImageSize;
   private javax.swing.JComboBox jComboBoxLUT;
-  private javax.swing.JLabel jLabel1;
-  private javax.swing.JLabel jLabel8;
-  private javax.swing.JLabel jLabel9;
+  private javax.swing.JLabel jLabelImageSize;
+  private javax.swing.JLabel jLabelLutTable;
+  private javax.swing.JLabel jLabelPositionStyle;
+  private javax.swing.JLabel jLabelTimeRef;
   private javax.swing.JPanel jPanel1;
-  private javax.swing.JPanel jPanel2;
-  private javax.swing.JPanel jPanel3;
+  private javax.swing.JPanel jPanelButtons;
+  private javax.swing.JPanel jPanelModelEditor;
+  private javax.swing.JPanel jPanelModelImage;
   private javax.swing.JRadioButton jRadioButtonRhoTheta;
+  private javax.swing.JRadioButton jRadioButtonTimeLST;
+  private javax.swing.JRadioButton jRadioButtonTimeUTC;
   private javax.swing.JRadioButton jRadioButtonXY;
   // End of variables declaration//GEN-END:variables
 }

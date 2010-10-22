@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproConstants.java,v 1.19 2010-10-14 14:18:37 bourgesl Exp $"
+ * "@(#) $Id: AsproConstants.java,v 1.20 2010-10-22 13:31:37 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.19  2010/10/14 14:18:37  bourgesl
+ * added max elevation set to 85 degrees
+ *
  * Revision 1.18  2010/10/14 10:58:03  bourgesl
  * Fixed bug related to sampling periodicity : use the instrument default sampling time when an invalid value is detected
  *
@@ -63,7 +66,6 @@ package fr.jmmc.aspro;
  */
 public interface AsproConstants {
 
-  /* DEV */
   /** chart : enables the zoom in / out */
   public final static boolean ENABLE_ZOOM = true;
 
@@ -101,6 +103,16 @@ public interface AsproConstants {
   /** no value for combo boxes */
   public static final String NONE = "None";
 
+  /* time references */
+  /** LST time reference */
+  public static final String TIME_LST = "L.S.T.";
+  /** UTC time reference */
+  public static final String TIME_UTC = "U.T.C.";
+  /** HA time reference */
+  public static final String TIME_HA = "H.A.";
+  /** list of choosable time references */
+  public static final String[] TIME_CHOICES = new String[]{TIME_LST, TIME_UTC};
+
   /* instrument names for specific features */
   /** VLTI AMBER */
   public static final String INS_AMBER = "AMBER";
@@ -108,10 +120,8 @@ public interface AsproConstants {
   public static final String INS_MIDI = "MIDI";
   /** CHARA VEGA (2T/3T) */
   public static final String INS_VEGA = "VEGA_";
-  
   /** JMMC legal notice on plots */
   public static final String JMMC_ANNOTATION = "Made by ASPRO 2/JMMC ";
-
   /** suffix for calibrator names */
   public static final String CAL_SUFFIX = " (cal)";
 }
