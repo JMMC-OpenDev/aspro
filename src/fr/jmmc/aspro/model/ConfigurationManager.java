@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ConfigurationManager.java,v 1.35 2010-10-14 14:46:23 bourgesl Exp $"
+ * "@(#) $Id: ConfigurationManager.java,v 1.36 2010-10-22 11:12:46 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.35  2010/10/14 14:46:23  bourgesl
+ * generated fake station horizons or fix them to respect the max elevation limit per telescope
+ *
  * Revision 1.34  2010/10/14 14:19:26  bourgesl
  * generated fake station horizons or fix them to respect the max elevation limit
  *
@@ -299,7 +302,7 @@ public final class ConfigurationManager extends BaseOIManager {
    */
   public static double[] computeLimitsUVCoverage(final List<Station> stations) {
     double maxUV = 0d;
-    double minUV = Double.MAX_VALUE;
+    double minUV = Double.POSITIVE_INFINITY;
 
     final int size = stations.size();
 
