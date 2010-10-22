@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: Range.java,v 1.10 2010-06-25 14:13:06 bourgesl Exp $"
+ * "@(#) $Id: Range.java,v 1.11 2010-10-22 11:33:58 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.10  2010/06/25 14:13:06  bourgesl
+ * added method contains(List of ranges, value)
+ *
  * Revision 1.9  2010/05/26 15:27:15  bourgesl
  * added restrictRange method to return a cropped list of ranges inside [min;max] range
  *
@@ -46,52 +49,91 @@ import java.util.List;
  * A simple range of double values
  * @author bourgesl
  */
-public class Range {
+public final class Range {
 
+  /** minimum value */
   private double min = 0d;
+  /** maximum value */
   private double max = 0d;
 
+  /**
+   * Constructor
+   */
   public Range() {
     /* no-op */
   }
 
+  /**
+   * Constructor with given minimum and maximum value
+   * @param min minimum value
+   * @param max maximum value
+   */
   public Range(final double min, final double max) {
     this.min = min;
     this.max = max;
   }
 
+  /**
+   * Return the minimum value
+   * @return minimum value
+   */
   public double getMin() {
     return min;
   }
 
-  public void setMin(double min) {
+  /**
+   * Set the minimum value
+   * @param min minimum value
+   */
+  public void setMin(final double min) {
     this.min = min;
   }
 
+  /**
+   * Return the maximum value
+   * @return maximum value
+   */
   public double getMax() {
     return max;
   }
 
-  public void setMax(double max) {
+  /**
+   * Set the maximum value
+   * @param max maximum value
+   */
+  public void setMax(final double max) {
     this.max = max;
   }
 
+  /**
+   * Return the length (max - min)
+   * @return length
+   */
   public double getLength() {
     return this.max - this.min;
   }
 
+  /**
+   * Return true if this range contains the given value (including bounds)
+   * @param value value to check
+   * @return true if this range contains the given value
+   */
   public boolean contains(final double value) {
     return value >= this.min && value <= this.max;
   }
 
+  /**
+   * Return a string representation of this range
+   * @return string representation of this range
+   */
   @Override
   public String toString() {
     return "[" + this.min + ", " + this.max + "]";
   }
 
-  /* utility methods */
+  /* --- Utility methods ---------------------------------------------------- */
   /**
-   * Test if the given value is inside given ranges
+   * Test if the given value is inside the given list of ranges
    * @param ranges list of ranges
    * @param value value to test
    * @return true if the given value is inside given ranges
@@ -105,9 +147,14 @@ public class Range {
     return false;
   }
 
+  /**
+   * Find the minimum value of the given list of ranges
+   * @param ranges list of ranges
+   * @return minimum value of the given list of ranges
+   */
   public static Double getMinimum(final List<Range> ranges) {
     if (ranges != null && !ranges.isEmpty()) {
-      double min = Double.MAX_VALUE;
+      double min = Double.POSITIVE_INFINITY;
       for (Range range : ranges) {
         if (min > range.getMin()) {
           min = range.getMin();
@@ -118,9 +165,14 @@ public class Range {
     return null;
   }
 
+  /**
+   * Find the maximum value of the given list of ranges
+   * @param ranges list of ranges
+   * @return maximum value of the given list of ranges
+   */
   public static Double getMaximum(final List<Range> ranges) {
     if (ranges != null && !ranges.isEmpty()) {
-      double max = Double.MIN_VALUE;
+      double max = Double.NEGATIVE_INFINITY;
       for (Range range : ranges) {
         if (max < range.getMax()) {
           max = range.getMax();
@@ -229,22 +281,38 @@ public class Range {
     return mRanges;
   }
 
+  /**
+   * Utility class used by intersection and merge algorithms
+   */
   private static final class RangeLimit implements Comparable<RangeLimit> {
 
-    /** limit position */
+    /** position of the limit */
     private final double position;
-    /** integer value to indicate the start [+1] or end of the initial range */
+    /** integer value to indicate the start [+1] or end of the initial range [-1] */
     private final int flag;
 
+    /**
+     * Constructor with given position and flag
+     * @param position position of the limit
+     * @param flag flag indicating a starting or ending range
+     */
     protected RangeLimit(final double position, final int flag) {
       this.position = position;
       this.flag = flag;
     }
 
+    /**
+     * Return the flag indicating a starting or ending range
+     * @return flag indicating a starting or ending range
+     */
     public int getFlag() {
       return flag;
     }
 
+    /**
+     * Return the position of the limit
+     * @return position of the limit
+     */
     public double getPosition() {
       return position;
     }
