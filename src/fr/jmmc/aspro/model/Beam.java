@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: Beam.java,v 1.1 2009-11-20 16:55:47 bourgesl Exp $"
+ * "@(#) $Id: Beam.java,v 1.2 2010-10-22 11:13:16 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2009/11/20 16:55:47  bourgesl
+ * Added Beam / Delay Line definition
+ * ObservabilityService is stateless to simplify coding
+ *
  *
  ******************************************************************************/
 package fr.jmmc.aspro.model;
@@ -18,7 +22,7 @@ import fr.jmmc.aspro.model.oi.Station;
  * This class defines the beam definition coming from the station through a delay line and arriving to a channel in the interferometer
  * @author bourgesl
  */
-public class Beam {
+public final class Beam {
 
   /** station */
   private final Station station;
@@ -26,7 +30,7 @@ public class Beam {
   private Channel channel;
   /** channel */
   private DelayLine delayLine;
-  /** fixed optical length from the interferometer switchyard */
+  /** fixed optical length (m) from the interferometer switchyard */
   private double opticalLength = 0d;
 
   /**
@@ -37,34 +41,66 @@ public class Beam {
     this.station = station;
   }
 
+  /**
+   * Return the station
+   * @return station
+   */
   public Station getStation() {
     return station;
   }
 
+  /**
+   * Return the channel
+   * @return channel
+   */
   public Channel getChannel() {
     return channel;
   }
 
-  public void setChannel(Channel channel) {
+  /**
+   * Set the channel
+   * @param channel channel to use
+   */
+  public void setChannel(final Channel channel) {
     this.channel = channel;
   }
 
+  /**
+   * Return the delay line
+   * @return delay line
+   */
   public DelayLine getDelayLine() {
     return delayLine;
   }
 
-  public void setDelayLine(DelayLine delayLine) {
+  /**
+   * Set the delay line
+   * @param delayLine delay line
+   */
+  public void setDelayLine(final DelayLine delayLine) {
     this.delayLine = delayLine;
   }
 
+  /**
+   * Return the fixed optical length (m)
+   * @return fixed optical length
+   */
   public double getOpticalLength() {
     return opticalLength;
   }
 
-  public void addOpticalLength(double opticalLength) {
+  /**
+   * Add the given value to the fixed optical length (m)
+   * @param opticalLength length (m) to add
+   */
+  public void addOpticalLength(final double opticalLength) {
     this.opticalLength += opticalLength;
   }
 
+  /**
+   * Return a string representation of the Beam object
+   * @return string representation of the Beam object
+   */
   @Override
   public String toString() {
     return "Beam : " + this.station + " - " + this.channel + " - " + this.delayLine + " = " + this.opticalLength + " m";
