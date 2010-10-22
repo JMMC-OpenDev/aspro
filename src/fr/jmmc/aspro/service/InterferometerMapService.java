@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: InterferometerMapService.java,v 1.5 2010-09-20 14:46:02 bourgesl Exp $"
+ * "@(#) $Id: InterferometerMapService.java,v 1.6 2010-10-22 11:12:02 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2010/09/20 14:46:02  bourgesl
+ * minor refactoring changes
+ *
  * Revision 1.4  2010/06/30 15:02:25  bourgesl
  * comment changed
  *
@@ -200,8 +203,13 @@ public final class InterferometerMapService {
     return data;
   }
 
+  /**
+   * Find the minimum value of the given array
+   * @param values array to use
+   * @return minimum value
+   */
   private static final double getMin(final double[] values) {
-    double min = Double.MAX_VALUE;
+    double min = Double.POSITIVE_INFINITY;
     for (double v : values) {
       if (min > v) {
         min = v;
@@ -210,8 +218,13 @@ public final class InterferometerMapService {
     return min;
   }
 
+  /**
+   * Find the maximum value of the given array
+   * @param values array to use
+   * @return maximum value
+   */
   private static final double getMax(final double[] values) {
-    double max = Double.MIN_VALUE;
+    double max = Double.NEGATIVE_INFINITY;
     for (double v : values) {
       if (max < v) {
         max = v;
@@ -220,10 +233,14 @@ public final class InterferometerMapService {
     return max;
   }
 
+  /**
+   * Relocate the given values with the given mean value
+   * @param values values to relocate
+   * @param center center or mean value
+   */
   private static final void relocate(final double[] values, final double center) {
     for (int i = 0, len = values.length; i < len; i++) {
       values[i] -= center;
     }
   }
-
 }

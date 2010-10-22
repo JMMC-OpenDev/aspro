@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: GroupedPopObservabilityData.java,v 1.1 2010-01-08 16:48:29 bourgesl Exp $"
+ * "@(#) $Id: GroupedPopObservabilityData.java,v 1.2 2010-10-22 11:12:02 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2010/01/08 16:48:29  bourgesl
+ * package refactoring
+ *
  * Revision 1.1  2009/12/18 11:52:02  bourgesl
  * added Pops Finder Compatible Mode for a list of targets
  *
@@ -43,7 +46,7 @@ public class GroupedPopObservabilityData implements Comparable<GroupedPopObserva
     double len;
 
     double acc = 0d;
-    double min = Double.MAX_VALUE;
+    double min = Double.POSITIVE_INFINITY;
     for (PopObservabilityData popData : this.popDataList) {
       len = popData.getMaxLength();
 
