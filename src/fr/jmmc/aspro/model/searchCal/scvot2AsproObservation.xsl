@@ -3,11 +3,14 @@
 ********************************************************************************
  JMMC project
 
- "@(#) $Id: scvot2AsproObservation.xsl,v 1.3 2010-10-07 15:06:26 bourgesl Exp $"
+ "@(#) $Id: scvot2AsproObservation.xsl,v 1.4 2010-10-22 11:10:20 bourgesl Exp $"
 
  History
  ~~~~~~~
  $Log: not supported by cvs2svn $
+ Revision 1.3  2010/10/07 15:06:26  bourgesl
+ added searchCal object name (target name in aspro) in observation name
+
  Revision 1.2  2010/10/07 13:30:39  mella
  Add one comment that explain why we do only consider calibrators with UDD_X diameters
 
@@ -145,6 +148,12 @@
                 <xsl:with-param name="colName"><xsl:value-of select="concat('UD_', /VOT11:VOTABLE/VOT11:RESOURCE/VOT11:TABLE/VOT11:PARAM[@name='band']/@value)"/></xsl:with-param>
             </xsl:call-template>
         </xsl:variable>
+        <xsl:variable name="deletedFlag_index">
+            <xsl:call-template name="getColumnIndex">
+                <xsl:with-param name="colName">deletedFlag</xsl:with-param>
+            </xsl:call-template>
+        </xsl:variable>
+
         <xsl:variable name="EQUINOX" select="translate(/VOT11:VOTABLE/VOT11:COOSYS/@equinox, 'J', '')"/>
 
         <xsl:variable name="TARGET" select="/VOT11:VOTABLE/VOT11:RESOURCE/VOT11:TABLE/VOT11:PARAM[@name = 'objectName']/@value"/>
@@ -183,116 +192,125 @@
 <xsl:comment>Calibrators</xsl:comment>
 
             <!-- Build one target element per calibrator ( at least with one UDD diameter ) -->
-            <!-- Some calibrator can be omitted but this hsould be fixed on the server side -->
+            <!-- Some calibrator can be omitted but this should be fixed on the server side -->
             <xsl:for-each select=".//VOT11:TR[VOT11:TD[position()=$diam_index]/text()]">
-                <xsl:variable name="name">
-                    <xsl:choose>
-                        <xsl:when test="./VOT11:TD[position()=$HIP_index]">
-                            <xsl:value-of select="concat('HIP ',./VOT11:TD[position()=$HIP_index])"/>
-                        </xsl:when>
-                        <xsl:when test="./VOT11:TD[position()=$HD_index]">
-                            <xsl:value-of select="concat('HD ',./VOT11:TD[position()=$HD_index])"/>
-                        </xsl:when>
-                        <xsl:when test="./VOT11:TD[position()=$name2MASS_index]">
-                            <xsl:value-of select="./VOT11:TD[position()=$name2MASS_index]"/>
-                        </xsl:when>
-                        <xsl:when test="./VOT11:TD[position()=$DM_index]">
-                            <xsl:value-of select="concat('DM ',./VOT11:TD[position()=$DM_index])"/>
-                        </xsl:when>
-                    </xsl:choose>
-                </xsl:variable>
-                <xsl:variable name="RA" select="translate(./VOT11:TD[position()=$RA_index], ' ', ':')"/>
-                <xsl:variable name="PMRA" select="./VOT11:TD[position()=$PMRA_index]"/>
-                <xsl:variable name="DEC" select="translate(./VOT11:TD[position()=$DEC_index], ' ', ':')"/>
-                <xsl:variable name="PMDEC" select="./VOT11:TD[position()=$PMDEC_index]"/>
-                <xsl:variable name="diam" select="./VOT11:TD[position()=$diam_index]"/>
-                <xsl:variable name="FLUX_H" select="./VOT11:TD[position()=$H_index]"/>
-                <xsl:variable name="FLUX_I" select="./VOT11:TD[position()=$I_index]"/>
-                <xsl:variable name="FLUX_J" select="./VOT11:TD[position()=$J_index]"/>
-                <xsl:variable name="FLUX_K" select="./VOT11:TD[position()=$K_index]"/>
-                <xsl:variable name="FLUX_N" select="./VOT11:TD[position()=$N_index]"/>
-                <xsl:variable name="FLUX_V" select="./VOT11:TD[position()=$V_index]"/>
-                <xsl:variable name="SPECTYP" select="./VOT11:TD[position()=$SpType_index]"/>
-                <xsl:variable name="SYSVEL" select="./VOT11:TD[position()=$RadVel_index]"/>
-                <xsl:variable name="PARALLAX" select="./VOT11:TD[position()=$Parallax_index]"/>
-                <xsl:variable name="PARA_ERR" select="./VOT11:TD[position()=$ParallaxErr_index]"/>
 
-                <target>
-                    <!-- identifier -->
-                    <name><xsl:value-of select="$name"/></name>
+                <xsl:variable name="deletedFlag" select="./VOT11:TD[position()=$deletedFlag_index]"/>
 
-                    <RA><xsl:value-of select="$RA"/></RA>
-                    <DEC><xsl:value-of select="$DEC"/></DEC>
-                    <EQUINOX><xsl:value-of select="$EQUINOX"/></EQUINOX>
+<!--                <xsl:comment>deletedFlag = <xsl:value-of select="$deletedFlag"/></xsl:comment> -->
 
-                    <xsl:if test="$SYSVEL/text()">
-                      <SYSVEL><xsl:value-of select="$SYSVEL"/></SYSVEL>
-                    </xsl:if>
-                    <!-- missing in scvot <VELTYP> -->
+                <xsl:if test="$deletedFlag = 'false'">
 
-                    <xsl:if test="$PMRA/text()">
-                      <PMRA><xsl:value-of select="$PMRA"/></PMRA>
-                    </xsl:if>
-                    <xsl:if test="$PMDEC/text()">
-                      <PMDEC><xsl:value-of select="$PMDEC"/></PMDEC>
-                    </xsl:if>
+                  <xsl:variable name="name">
+                      <xsl:choose>
+                          <xsl:when test="./VOT11:TD[position()=$HD_index]">
+                              <xsl:value-of select="concat('HD ',./VOT11:TD[position()=$HD_index])"/>
+                          </xsl:when>
+                          <xsl:when test="./VOT11:TD[position()=$HIP_index]">
+                              <xsl:value-of select="concat('HIP ',./VOT11:TD[position()=$HIP_index])"/>
+                          </xsl:when>
+                          <xsl:when test="./VOT11:TD[position()=$name2MASS_index]">
+                              <xsl:value-of select="./VOT11:TD[position()=$name2MASS_index]"/>
+                          </xsl:when>
+                          <xsl:when test="./VOT11:TD[position()=$DM_index]">
+                              <xsl:value-of select="concat('DM ',./VOT11:TD[position()=$DM_index])"/>
+                          </xsl:when>
+                      </xsl:choose>
+                  </xsl:variable>
+                  <xsl:variable name="RA" select="translate(./VOT11:TD[position()=$RA_index], ' ', ':')"/>
+                  <xsl:variable name="PMRA" select="./VOT11:TD[position()=$PMRA_index]"/>
+                  <xsl:variable name="DEC" select="translate(./VOT11:TD[position()=$DEC_index], ' ', ':')"/>
+                  <xsl:variable name="PMDEC" select="./VOT11:TD[position()=$PMDEC_index]"/>
+                  <xsl:variable name="diam" select="./VOT11:TD[position()=$diam_index]"/>
+                  <xsl:variable name="FLUX_H" select="./VOT11:TD[position()=$H_index]"/>
+                  <xsl:variable name="FLUX_I" select="./VOT11:TD[position()=$I_index]"/>
+                  <xsl:variable name="FLUX_J" select="./VOT11:TD[position()=$J_index]"/>
+                  <xsl:variable name="FLUX_K" select="./VOT11:TD[position()=$K_index]"/>
+                  <xsl:variable name="FLUX_N" select="./VOT11:TD[position()=$N_index]"/>
+                  <xsl:variable name="FLUX_V" select="./VOT11:TD[position()=$V_index]"/>
+                  <xsl:variable name="SPECTYP" select="./VOT11:TD[position()=$SpType_index]"/>
+                  <xsl:variable name="SYSVEL" select="./VOT11:TD[position()=$RadVel_index]"/>
+                  <xsl:variable name="PARALLAX" select="./VOT11:TD[position()=$Parallax_index]"/>
+                  <xsl:variable name="PARA_ERR" select="./VOT11:TD[position()=$ParallaxErr_index]"/>
 
-                    <xsl:if test="$PARALLAX/text()">
-                      <PARALLAX><xsl:value-of select="$PARALLAX"/></PARALLAX>
-                    </xsl:if>
-                    <xsl:if test="$PARA_ERR/text()">
-                      <PARA_ERR><xsl:value-of select="$PARA_ERR"/></PARA_ERR>
-                    </xsl:if>
+                  <target>
+                      <!-- identifier -->
+                      <name><xsl:value-of select="$name"/></name>
 
-                    <!-- missing in scvot <IDS> -->
-                    <!-- missing in scvot <OBJTYP> -->
-                    <xsl:if test="$SPECTYP/text()">
-                      <SPECTYP><xsl:value-of select="$SPECTYP"/></SPECTYP>
-                    </xsl:if>
+                      <RA><xsl:value-of select="$RA"/></RA>
+                      <DEC><xsl:value-of select="$DEC"/></DEC>
+                      <EQUINOX><xsl:value-of select="$EQUINOX"/></EQUINOX>
 
-                    <xsl:if test="$FLUX_V/text()">
-                      <FLUX_V><xsl:value-of select="$FLUX_V"/></FLUX_V>
-                    </xsl:if>
-                    <xsl:if test="$FLUX_I/text()">
-                      <FLUX_I><xsl:value-of select="$FLUX_I"/></FLUX_I>
-                    </xsl:if>
-                    <xsl:if test="$FLUX_J/text()">
-                      <FLUX_J><xsl:value-of select="$FLUX_J"/></FLUX_J>
-                    </xsl:if>
-                    <xsl:if test="$FLUX_H/text()">
-                      <FLUX_H><xsl:value-of select="$FLUX_H"/></FLUX_H>
-                    </xsl:if>
-                    <xsl:if test="$FLUX_K/text()">
-                      <FLUX_K><xsl:value-of select="$FLUX_K"/></FLUX_K>
-                    </xsl:if>
-                    <xsl:if test="$FLUX_N/text()">
-                      <FLUX_N><xsl:value-of select="$FLUX_N"/></FLUX_N>
-                    </xsl:if>
+                      <xsl:if test="$SYSVEL/text()">
+                        <SYSVEL><xsl:value-of select="$SYSVEL"/></SYSVEL>
+                      </xsl:if>
+                      <!-- missing in scvot <VELTYP> -->
 
-                    <ns3:model type="disk" name="disk1">
-                        <ns3:parameter type="flux_weight" name="flux_weight1">
-                            <value>1.0</value>
-                            <minValue>0.0</minValue>
-                            <hasFixedValue>false</hasFixedValue>
-                        </ns3:parameter>
-                        <ns3:parameter type="x" name="x1">
-                            <units>mas</units>
-                            <value>0.0</value>
-                            <hasFixedValue>true</hasFixedValue>
-                        </ns3:parameter>
-                        <ns3:parameter type="y" name="y1">
-                            <units>mas</units>
-                            <value>0.0</value>
-                            <hasFixedValue>true</hasFixedValue>
-                        </ns3:parameter>
-                        <ns3:parameter type="diameter" name="diameter1">
-                            <units>mas</units>
-                            <value><xsl:value-of select="$diam"/></value>
-                            <minValue>0.0</minValue>
-                            <hasFixedValue>false</hasFixedValue>
-                        </ns3:parameter>
-                    </ns3:model>
-                </target>
+                      <xsl:if test="$PMRA/text()">
+                        <PMRA><xsl:value-of select="$PMRA"/></PMRA>
+                      </xsl:if>
+                      <xsl:if test="$PMDEC/text()">
+                        <PMDEC><xsl:value-of select="$PMDEC"/></PMDEC>
+                      </xsl:if>
+
+                      <xsl:if test="$PARALLAX/text()">
+                        <PARALLAX><xsl:value-of select="$PARALLAX"/></PARALLAX>
+                      </xsl:if>
+                      <xsl:if test="$PARA_ERR/text()">
+                        <PARA_ERR><xsl:value-of select="$PARA_ERR"/></PARA_ERR>
+                      </xsl:if>
+
+                      <!-- missing in scvot <IDS> -->
+                      <!-- missing in scvot <OBJTYP> -->
+                      <xsl:if test="$SPECTYP/text()">
+                        <SPECTYP><xsl:value-of select="$SPECTYP"/></SPECTYP>
+                      </xsl:if>
+
+                      <xsl:if test="$FLUX_V/text()">
+                        <FLUX_V><xsl:value-of select="$FLUX_V"/></FLUX_V>
+                      </xsl:if>
+                      <xsl:if test="$FLUX_I/text()">
+                        <FLUX_I><xsl:value-of select="$FLUX_I"/></FLUX_I>
+                      </xsl:if>
+                      <xsl:if test="$FLUX_J/text()">
+                        <FLUX_J><xsl:value-of select="$FLUX_J"/></FLUX_J>
+                      </xsl:if>
+                      <xsl:if test="$FLUX_H/text()">
+                        <FLUX_H><xsl:value-of select="$FLUX_H"/></FLUX_H>
+                      </xsl:if>
+                      <xsl:if test="$FLUX_K/text()">
+                        <FLUX_K><xsl:value-of select="$FLUX_K"/></FLUX_K>
+                      </xsl:if>
+                      <xsl:if test="$FLUX_N/text()">
+                        <FLUX_N><xsl:value-of select="$FLUX_N"/></FLUX_N>
+                      </xsl:if>
+
+                      <ns3:model type="disk" name="disk1">
+                          <ns3:parameter type="flux_weight" name="flux_weight1">
+                              <value>1.0</value>
+                              <minValue>0.0</minValue>
+                              <hasFixedValue>false</hasFixedValue>
+                          </ns3:parameter>
+                          <ns3:parameter type="x" name="x1">
+                              <units>mas</units>
+                              <value>0.0</value>
+                              <hasFixedValue>true</hasFixedValue>
+                          </ns3:parameter>
+                          <ns3:parameter type="y" name="y1">
+                              <units>mas</units>
+                              <value>0.0</value>
+                              <hasFixedValue>true</hasFixedValue>
+                          </ns3:parameter>
+                          <ns3:parameter type="diameter" name="diameter1">
+                              <units>mas</units>
+                              <value><xsl:value-of select="$diam"/></value>
+                              <minValue>0.0</minValue>
+                              <hasFixedValue>false</hasFixedValue>
+                          </ns3:parameter>
+                      </ns3:model>
+                  </target>
+
+                </xsl:if>
             </xsl:for-each>
 
 </ns2:observationSetting>
