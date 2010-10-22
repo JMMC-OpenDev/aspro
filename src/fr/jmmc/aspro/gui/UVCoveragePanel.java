@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.63 2010-10-21 16:51:01 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.64 2010-10-22 13:31:10 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.63  2010/10/21 16:51:01  bourgesl
+ * JMMC trademark made less important
+ *
  * Revision 1.62  2010/10/15 16:59:43  bourgesl
  * new PDF options (page size and orientation)
  * PDFExportable refactoring to include prepareChart, postPDF and getPDFOptions methods
@@ -914,7 +917,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     this.jComboBoxImageMode.addActionListener(this);
 
     // register this instance as a Preference Observer :
-    myPreferences.addObserver(this);
+    this.myPreferences.addObserver(this);
   }
 
   /**
@@ -927,7 +930,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     }
 
     // unregister this instance as a Preference Observer :
-    myPreferences.deleteObserver(this);
+    this.myPreferences.deleteObserver(this);
   }
 
   /**
@@ -1482,8 +1485,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     final ImageMode imageMode = (ImageMode) this.jComboBoxImageMode.getSelectedItem();
 
     // Use model image Preferences :
-    final int imageSize = myPreferences.getPreferenceAsInt(Preferences.MODEL_IMAGE_SIZE);
-    final IndexColorModel colorModel = ColorModels.getColorModel(myPreferences.getPreference(Preferences.MODEL_IMAGE_LUT));
+    final int imageSize = this.myPreferences.getPreferenceAsInt(Preferences.MODEL_IMAGE_SIZE);
+    final IndexColorModel colorModel = ColorModels.getColorModel(this.myPreferences.getPreference(Preferences.MODEL_IMAGE_LUT));
 
     // check if observability data are available :
     final ObservabilityData obsData = observation.getObservabilityData();
@@ -1680,8 +1683,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
             final ImageMode imageMode = (ImageMode) this.jComboBoxImageMode.getSelectedItem();
 
             // Use model image Preferences :
-            final int imageSize = myPreferences.getPreferenceAsInt(Preferences.MODEL_IMAGE_SIZE);
-            final IndexColorModel colorModel = ColorModels.getColorModel(myPreferences.getPreference(Preferences.MODEL_IMAGE_LUT));
+            final int imageSize = this.myPreferences.getPreferenceAsInt(Preferences.MODEL_IMAGE_SIZE);
+            final IndexColorModel colorModel = ColorModels.getColorModel(this.myPreferences.getPreference(Preferences.MODEL_IMAGE_LUT));
 
             if (logger.isLoggable(Level.FINE)) {
               logger.fine("computing model uv map ...");
