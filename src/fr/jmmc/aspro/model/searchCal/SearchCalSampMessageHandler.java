@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SearchCalSampMessageHandler.java,v 1.3 2010-10-11 14:15:37 bourgesl Exp $"
+ * "@(#) $Id: SearchCalSampMessageHandler.java,v 1.4 2010-10-22 11:10:44 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2010/10/11 14:15:37  bourgesl
+ * SampMessageHandler refactoring
+ *
  * Revision 1.2  2010/10/08 12:29:17  bourgesl
  * added error messages if nb(calibrators) = 0 or > 10
  *
@@ -22,6 +25,7 @@ import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.util.FileUtils;
 import fr.jmmc.aspro.util.XmlFactory;
+import fr.jmmc.mcs.gui.App;
 import fr.jmmc.mcs.gui.MessagePane;
 import fr.jmmc.mcs.interop.SampCapability;
 import fr.jmmc.mcs.interop.SampMessageHandler;
@@ -193,7 +197,7 @@ public final class SearchCalSampMessageHandler extends SampMessageHandler {
           om.fireObservationChanged();
 
           // change focus :
-          AsproGui.getFrame().toFront();
+          App.getFrame().toFront();
         }
       });
 
