@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <ApplicationData link="http://www.jmmc.fr/aspro2">
-  <program name="Aspro2" version="0.7.2 beta"/>
+  <program name="Aspro2" version="0.7.3 beta"/>
   <compilation date="19/10/2010" compiler="JDK 1.5.0_16"/>
   <text>
     <![CDATA[ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations
@@ -63,6 +63,15 @@
   </menubar>
   <releasenotes>
     <release version="0.7">
+      <prerelease version="0.7.3 beta">
+        <change>SearchCal integration : use deletedFlag to filter calibrators to mimic SearchCal delete action and
+          display HD identifier instead of HIP identifier to mimic SearchCal view</change>
+        <change>Added new preference for Time reference (LST or UTC)</change>
+        <change type="BUGFIX" id="1287726162">Fixed bug when computing HA max (0 instead of a negative value)</change>
+        <change>Updated Observability plot : better position and automatic font size for hour annotations</change>
+        <change>Modified JMMC trademark (less important)</change>
+        <change>Updated night area color : lighter to have better grayscale prints</change>
+      </prerelease>
       <prerelease version="0.7.2 beta">
         <change>Totally rewritten CHARA configuration thanks to official configuration file (telescopes.chara)</change>
         <change>Added VEGA_4T (preliminary support) and change ordering for instruments (2T, 3T, 4T)</change>
@@ -76,7 +85,7 @@
         <change>Fixed concurrency bugs related to the SimBad star resolver : the search field is disabled while processing a request to avoid concurrent requests</change>
         <change>Fixed bug related to sampling periodicity : use the instrument default sampling time when an invalid value is detected</change>
       </prerelease>
-      <prerelease version="0.7.0">
+      <prerelease version="0.7.0 beta">
         <change>SearchCal integration through SAMP VO protocol : send the selected target to let SearchCal find calibrators
         and process SearchCal response to extract calibrators</change>
         <change>LITpro integration through SAMP VO protocol : send models and generated oifits for the selected target</change>
