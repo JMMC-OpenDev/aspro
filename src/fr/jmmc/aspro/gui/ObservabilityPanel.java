@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityPanel.java,v 1.47 2010-10-22 13:31:37 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityPanel.java,v 1.48 2010-11-16 15:31:50 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.47  2010/10/22 13:31:37  bourgesl
+ * added preference for Time LST/UTC
+ *
  * Revision 1.46  2010/10/21 16:52:46  bourgesl
  * night area is lighter to have better grayscale prints
  * minor changes related to annotations
@@ -358,9 +361,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
           final DefaultBoundedRangeModel model = (DefaultBoundedRangeModel) scroller.getModel();
 
           final int clicks = e.getWheelRotation();
-          if (clicks < 0) {
-            model.setValue(model.getValue() + clicks);
-          } else if (clicks > 0) {
+          if (clicks != 0) {
             model.setValue(model.getValue() + clicks);
           }
         }
@@ -836,7 +837,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
     this.scroller.getModel().setMinimum(0);
 
-    if (size <= MAX_VIEW_ITEMS) {
+    if (doBaseLineLimits || size <= MAX_VIEW_ITEMS) {
       this.scroller.getModel().setMaximum(0);
       this.scroller.getModel().setValue(0);
       this.scroller.setVisible(false);
