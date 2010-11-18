@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BasicObservationForm.java,v 1.43 2010-10-14 12:55:46 bourgesl Exp $"
+ * "@(#) $Id: BasicObservationForm.java,v 1.44 2010-11-18 15:08:10 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.43  2010/10/14 12:55:46  bourgesl
+ * editable star resolver moved in JMCS
+ *
  * Revision 1.42  2010/10/08 09:39:03  bourgesl
  * removed log when the selected target changes
  *
@@ -509,10 +512,8 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
 
   private void jButtonModelEditorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonModelEditorActionPerformed
 
-    final String targetName = (String) this.jListTargets.getSelectedValue();
-
-    // show model editor :
-    if (TargetModelForm.showModelEditor(targetName)) {
+    // show model editor for all targets :
+    if (TargetModelForm.showModelEditor(null)) {
       // fire an observation change event :
       this.om.fireObservationChanged();
     }
