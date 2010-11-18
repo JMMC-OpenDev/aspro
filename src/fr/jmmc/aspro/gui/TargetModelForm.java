@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetModelForm.java,v 1.28 2010-10-07 15:02:36 bourgesl Exp $"
+ * "@(#) $Id: TargetModelForm.java,v 1.29 2010-11-18 17:19:09 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.28  2010/10/07 15:02:36  bourgesl
+ * unused import
+ *
  * Revision 1.27  2010/10/01 15:30:01  bourgesl
  * use ModelManager.normalizeFluxes(models)
  *
@@ -92,10 +95,7 @@
 package fr.jmmc.aspro.gui;
 
 import fr.jmmc.aspro.Preferences;
-import fr.jmmc.aspro.gui.util.ComponentResizeAdapter;
-import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.oi.Target;
-import fr.jmmc.mcs.gui.App;
 import fr.jmmc.mcs.gui.MessagePane;
 import fr.jmmc.mcs.gui.NumericJTable;
 import fr.jmmc.mcs.model.ModelManager;
@@ -105,18 +105,13 @@ import fr.jmmc.mcs.model.gui.ModelParameterTableModel.Mode;
 import fr.jmmc.mcs.model.targetmodel.Model;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComponent;
-import javax.swing.JDialog;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.JTree;
@@ -148,97 +143,12 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
           className_);
 
   /* members */
-  /** editor result = true if the user validates the inputs */
-  private boolean result = false;
   /** list of edited targets (clone) */
-  private List<Target> editTargets = new ArrayList<Target>();
+  private List<Target> editTargets;
   /** current edited target to detect target changes to update the table model */
   private Target currentTarget = null;
   /** current model type to detect type changes to update the model description */
   private String currentModelType = null;
-  /* Swing */
-  /** dialog window */
-  private JDialog dialog;
-
-  /**
-   * Display the model editor using the given target name as the initial selected target
-   * @param targetName optional target name to display only the models of this target
-   * @return true if the model editor changed anything
-   */
-  public static boolean showModelEditor(final String targetName) {
-
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("showing Model Editor : " + targetName);
-    }
-    boolean result = false;
-
-    // Prepare the list of targets :
-    List<Target> targets;
-    if (targetName != null) {
-      // single target editor :
-      targets = Arrays.asList(new Target[]{ObservationManager.getInstance().getTarget(targetName)});
-    } else {
-      // full editor :
-      targets = ObservationManager.getInstance().getTargets();
-    }
-
-    final TargetModelForm form = new TargetModelForm();
-
-    // generate the target/model tree :
-    form.generateTree(targets);
-
-    JDialog dialog = null;
-
-    try {
-      // 1. Create the dialog
-      dialog = new JDialog(App.getFrame(), "Model Editor", true);
-
-      final Dimension dim = new Dimension(600, 600);
-      dialog.setMinimumSize(dim);
-      dialog.addComponentListener(new ComponentResizeAdapter(dim));
-
-      // 2. Optional: What happens when the dialog closes ?
-      dialog.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-
-      // 3. Create components and put them in the dialog
-      dialog.add(form);
-
-      // Associate the dialog to the form :
-      form.setDialog(dialog);
-
-      // 4. Size the dialog.
-      dialog.pack();
-
-      // Center it :
-      dialog.setLocationRelativeTo(dialog.getOwner());
-
-      // 5. Show it.
-      dialog.setVisible(true);
-
-      // get editor result :
-      result = form.isResult();
-
-    } finally {
-      if (dialog != null) {
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("dispose Model Editor ...");
-        }
-        dialog.dispose();
-      }
-    }
-
-    if (result) {
-      if (targetName != null) {
-        // single target editor :
-        ObservationManager.getInstance().replaceTarget(form.getEditTargets().get(0));
-      } else {
-        // full editor :
-        ObservationManager.getInstance().setTargets(form.getEditTargets());
-      }
-    }
-
-    return result;
-  }
 
   /**
    * Creates new form TargetModelForm
@@ -321,16 +231,12 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
    */
   protected void generateTree(final List<Target> targets) {
 
+    this.editTargets = targets;
+
     final DefaultMutableTreeNode rootNode = getRootNode();
 
-    Target target;
     DefaultMutableTreeNode targetNode;
-    for (Target t : targets) {
-      // clone target and models to allow undo/cancel actions :
-      target = (Target) t.clone();
-
-      // add the cloned target to the edited targets :
-      this.editTargets.add(target);
+    for (Target target : targets) {
 
       targetNode = new DefaultMutableTreeNode(target);
 
@@ -621,10 +527,9 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
     java.awt.GridBagConstraints gridBagConstraints;
 
     buttonGroupEditMode = new javax.swing.ButtonGroup();
-    jPanelTargets = new javax.swing.JPanel();
     jScrollPaneTreeModels = new javax.swing.JScrollPane();
     jTreeModels = createJTree();
-    jPanel4 = new javax.swing.JPanel();
+    jPanelModelActions = new javax.swing.JPanel();
     jComboBoxModelType = new javax.swing.JComboBox();
     jButtonAdd = new javax.swing.JButton();
     jButtonRemove = new javax.swing.JButton();
@@ -642,16 +547,8 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
     jRadioButtonRhoTheta = new javax.swing.JRadioButton();
     jLabelOffsetEditMode = new javax.swing.JLabel();
     jButtonNormalizeFluxes = new javax.swing.JButton();
-    jPanelButtons = new javax.swing.JPanel();
-    jButtonOK = new javax.swing.JButton();
-    jButtonCancel = new javax.swing.JButton();
 
     setLayout(new java.awt.GridBagLayout());
-
-    jPanelTargets.setBorder(javax.swing.BorderFactory.createTitledBorder("Targets"));
-    jPanelTargets.setMinimumSize(new java.awt.Dimension(300, 100));
-    jPanelTargets.setPreferredSize(new java.awt.Dimension(300, 100));
-    jPanelTargets.setLayout(new java.awt.GridBagLayout());
 
     jScrollPaneTreeModels.setMinimumSize(new java.awt.Dimension(100, 100));
     jScrollPaneTreeModels.setPreferredSize(new java.awt.Dimension(100, 100));
@@ -665,14 +562,14 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.weightx = 0.3;
-    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.weighty = 0.2;
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-    jPanelTargets.add(jScrollPaneTreeModels, gridBagConstraints);
+    add(jScrollPaneTreeModels, gridBagConstraints);
 
-    jPanel4.setBorder(javax.swing.BorderFactory.createTitledBorder("Model actions"));
-    jPanel4.setMinimumSize(new java.awt.Dimension(200, 80));
-    jPanel4.setPreferredSize(new java.awt.Dimension(200, 80));
-    jPanel4.setLayout(new java.awt.GridBagLayout());
+    jPanelModelActions.setBorder(javax.swing.BorderFactory.createTitledBorder("Model actions"));
+    jPanelModelActions.setMinimumSize(new java.awt.Dimension(200, 80));
+    jPanelModelActions.setPreferredSize(new java.awt.Dimension(200, 80));
+    jPanelModelActions.setLayout(new java.awt.GridBagLayout());
 
     jComboBoxModelType.setMinimumSize(new java.awt.Dimension(100, 24));
     jComboBoxModelType.setPreferredSize(new java.awt.Dimension(100, 24));
@@ -682,7 +579,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-    jPanel4.add(jComboBoxModelType, gridBagConstraints);
+    jPanelModelActions.add(jComboBoxModelType, gridBagConstraints);
 
     jButtonAdd.setText("Add");
     jButtonAdd.addActionListener(new java.awt.event.ActionListener() {
@@ -695,7 +592,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-    jPanel4.add(jButtonAdd, gridBagConstraints);
+    jPanelModelActions.add(jButtonAdd, gridBagConstraints);
 
     jButtonRemove.setText("Remove");
     jButtonRemove.setEnabled(false);
@@ -709,7 +606,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-    jPanel4.add(jButtonRemove, gridBagConstraints);
+    jPanelModelActions.add(jButtonRemove, gridBagConstraints);
 
     jButtonUpdate.setText("Update");
     jButtonUpdate.setEnabled(false);
@@ -723,7 +620,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
     gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-    jPanel4.add(jButtonUpdate, gridBagConstraints);
+    jPanelModelActions.add(jButtonUpdate, gridBagConstraints);
 
     jLabel3.setText("model type");
     gridBagConstraints = new java.awt.GridBagConstraints();
@@ -731,7 +628,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
     gridBagConstraints.gridy = 1;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-    jPanel4.add(jLabel3, gridBagConstraints);
+    jPanelModelActions.add(jLabel3, gridBagConstraints);
 
     jLabel5.setText("Name");
     gridBagConstraints = new java.awt.GridBagConstraints();
@@ -739,7 +636,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
     gridBagConstraints.gridy = 0;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-    jPanel4.add(jLabel5, gridBagConstraints);
+    jPanelModelActions.add(jLabel5, gridBagConstraints);
 
     jTextFieldName.setColumns(15);
     jTextFieldName.setEditable(false);
@@ -749,23 +646,15 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-    jPanel4.add(jTextFieldName, gridBagConstraints);
+    jPanelModelActions.add(jTextFieldName, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.weightx = 0.7;
-    gridBagConstraints.weighty = 1.0;
-    jPanelTargets.add(jPanel4, gridBagConstraints);
-
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 0.2;
-    add(jPanelTargets, gridBagConstraints);
+    add(jPanelModelActions, gridBagConstraints);
 
     jPanelDescription.setBorder(javax.swing.BorderFactory.createTitledBorder("Model description"));
     jPanelDescription.setMaximumSize(new java.awt.Dimension(2147483647, 250));
@@ -789,6 +678,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
+    gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.weighty = 0.2;
     add(jPanelDescription, gridBagConstraints);
@@ -838,6 +728,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
+    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
     jPanelParameters.add(jLabelOffsetEditMode, gridBagConstraints);
 
     jButtonNormalizeFluxes.setText("Normalize fluxes");
@@ -849,67 +740,39 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 3;
     gridBagConstraints.gridy = 1;
+    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
     jPanelParameters.add(jButtonNormalizeFluxes, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 2;
-    gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
+    gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.weighty = 0.5;
+    gridBagConstraints.weighty = 0.6;
     add(jPanelParameters, gridBagConstraints);
-
-    jButtonOK.setText("OK");
-    jButtonOK.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        jButtonOKActionPerformed(evt);
-      }
-    });
-    jPanelButtons.add(jButtonOK);
-
-    jButtonCancel.setText("Cancel");
-    jButtonCancel.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        jButtonCancelActionPerformed(evt);
-      }
-    });
-    jPanelButtons.add(jButtonCancel);
-
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 3;
-    gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    add(jPanelButtons, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
 
   /**
-   * Process the OK action
-   * @param evt action event
+   * Validate the form
+   * @return true only if the data are valid
    */
-  private void jButtonOKActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonOKActionPerformed
+  protected boolean validateForm() {
     // Validate the models :
     for (Target target : this.editTargets) {
       try {
         ModelManager.getInstance().validateModels(target.getModels());
       } catch (IllegalArgumentException iae) {
-        // single message at once :
+        // display an error message for the first error found :
         MessagePane.showErrorMessage(
                 iae.getMessage(), "Error on target " + target.getName());
 
         // stop and continue editing the form :
-        return;
+        return false;
       }
     }
-
-    // update the validation flag :
-    this.result = true;
-
-    if (this.dialog != null) {
-      this.dialog.setVisible(false);
-    }
-  }//GEN-LAST:event_jButtonOKActionPerformed
+    return true;
+  }
 
   /**
    * Process the Update action
@@ -950,8 +813,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         }
 
         // Remove and add model at the right place :
-        int idx;
-        idx = target.getModels().indexOf(model);
+        int idx = target.getModels().indexOf(model);
         target.getModels().remove(idx);
         target.getModels().add(idx, newModel);
 
@@ -1006,8 +868,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         }
 
         // Remove model from target :
-        int idx;
-        idx = target.getModels().indexOf(model);
+        int idx = target.getModels().indexOf(model);
         target.getModels().remove(idx);
 
         if (idx == 0) {
@@ -1101,18 +962,12 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
     }
   }//GEN-LAST:event_jButtonAddActionPerformed
 
-  private void jButtonCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCancelActionPerformed
-    if (this.dialog != null) {
-      this.dialog.setVisible(false);
-    }
-  }//GEN-LAST:event_jButtonCancelActionPerformed
-
   private void jButtonNormalizeFluxesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonNormalizeFluxesActionPerformed
     if (this.currentTarget == null) {
       return;
     }
 
-    ModelManager.getInstance().normalizeFluxes(this.currentTarget.getModels());
+    ModelManager.normalizeFluxes(this.currentTarget.getModels());
 
     // refresh whole values
     getModelParameterTableModel().fireTableDataChanged();
@@ -1120,9 +975,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.ButtonGroup buttonGroupEditMode;
   private javax.swing.JButton jButtonAdd;
-  private javax.swing.JButton jButtonCancel;
   private javax.swing.JButton jButtonNormalizeFluxes;
-  private javax.swing.JButton jButtonOK;
   private javax.swing.JButton jButtonRemove;
   private javax.swing.JButton jButtonUpdate;
   private javax.swing.JComboBox jComboBoxModelType;
@@ -1130,11 +983,9 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
   private javax.swing.JLabel jLabel5;
   private javax.swing.JLabel jLabelModelDescrption;
   private javax.swing.JLabel jLabelOffsetEditMode;
-  private javax.swing.JPanel jPanel4;
-  private javax.swing.JPanel jPanelButtons;
   private javax.swing.JPanel jPanelDescription;
+  private javax.swing.JPanel jPanelModelActions;
   private javax.swing.JPanel jPanelParameters;
-  private javax.swing.JPanel jPanelTargets;
   private javax.swing.JRadioButton jRadioButtonRhoTheta;
   private javax.swing.JRadioButton jRadioButtonXY;
   private javax.swing.JScrollPane jScrollPaneModelDescription;
@@ -1144,30 +995,6 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
   private javax.swing.JTextField jTextFieldName;
   private javax.swing.JTree jTreeModels;
   // End of variables declaration//GEN-END:variables
-
-  /**
-   * Return the editor result
-   * @return true if the user validated (ok button)
-   */
-  public boolean isResult() {
-    return result;
-  }
-
-  /**
-   * Return the list of target whom models are edited
-   * @return list of target
-   */
-  public List<Target> getEditTargets() {
-    return editTargets;
-  }
-
-  /**
-   * Define the JDialog for this form
-   * @param dialog JDialog instance
-   */
-  protected void setDialog(final JDialog dialog) {
-    this.dialog = dialog;
-  }
 
   /**
    * Create a custom JTree which convertValueToText() method is overriden
