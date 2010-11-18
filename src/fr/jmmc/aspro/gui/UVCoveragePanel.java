@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.64 2010-10-22 13:31:10 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.65 2010-11-18 17:18:23 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.64  2010/10/22 13:31:10  bourgesl
+ * code convention
+ *
  * Revision 1.63  2010/10/21 16:51:01  bourgesl
  * JMMC trademark made less important
  *
@@ -724,7 +727,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     final String targetName = getSelectedTargetName();
 
     // show model editor :
-    if (TargetModelForm.showModelEditor(targetName)) {
+    if (TargetEditorDialog.showEditor(targetName)) {
       changeStateForModelImageWidgets();
       refreshPlot();
     }
