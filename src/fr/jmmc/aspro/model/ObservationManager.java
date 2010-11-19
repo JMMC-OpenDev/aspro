@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationManager.java,v 1.41 2010-10-14 13:22:02 bourgesl Exp $"
+ * "@(#) $Id: ObservationManager.java,v 1.42 2010-11-19 16:55:59 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.41  2010/10/14 13:22:02  bourgesl
+ * use CopyOnWriteArrayList for observation listeners
+ *
  * Revision 1.40  2010/10/07 15:02:05  bourgesl
  * added load(reader) and fireEvent checks that the current thread is EDT
  *
@@ -783,20 +786,6 @@ public final class ObservationManager extends BaseOIManager {
       }
     }
     return changed;
-  }
-
-  /**
-   * Replace an existing target by the given target instance (same name)
-   * @param newTarget target to store
-   */
-  public void replaceTarget(final Target newTarget) {
-    Target target;
-    for (ListIterator<Target> it = getTargets().listIterator(); it.hasNext();) {
-      target = it.next();
-      if (target.getName().equals(newTarget.getName())) {
-        it.set(newTarget);
-      }
-    }
   }
 
   /**
