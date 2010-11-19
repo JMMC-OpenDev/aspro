@@ -808,6 +808,21 @@ public class Target
     return newModels;
   }
 
+  /**
+   * Return the target of the given name in the given list of targets
+   * @param name target name
+   * @param targets list of targets
+   * @return target or null if the target was not found
+   */
+  public static final Target getTarget(final String name, final List<Target> targets) {
+    for (Target t : targets) {
+      if (t.getName().equals(name)) {
+        return t;
+      }
+    }
+    return null;
+  }
+
 //--simple--preserve
 
 }

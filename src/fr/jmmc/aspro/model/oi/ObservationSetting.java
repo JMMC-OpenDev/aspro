@@ -202,12 +202,7 @@ public class ObservationSetting
    * @return target or null if the target was not found
    */
   public final Target getTarget(final String name) {
-    for (Target t : getTargets()) {
-      if (t.getName().equals(name)) {
-        return t;
-      }
-    }
-    return null;
+    return Target.getTarget(name, getTargets());
   }
 
   /**
