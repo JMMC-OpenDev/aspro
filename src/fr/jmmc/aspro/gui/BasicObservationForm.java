@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BasicObservationForm.java,v 1.45 2010-11-18 17:18:23 bourgesl Exp $"
+ * "@(#) $Id: BasicObservationForm.java,v 1.46 2010-11-19 16:55:42 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.45  2010/11/18 17:18:23  bourgesl
+ * use new TargetEditorDialog
+ *
  * Revision 1.44  2010/11/18 15:08:10  bourgesl
  * open the model editor for all targets (instead of the selected one)
  *
@@ -392,7 +395,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
     jPanelMain.add(jButtonModelEditor, gridBagConstraints);
 
-    starSearchField.setToolTipText("<html>\nEnter targets here :<br/>\nTarget identifier (SimBad resolution)<br/>\nor RA / DEC coordinates with optional star name ('HMS DMS [star name]')\n</html>");
+    starSearchField.setToolTipText("<html>\nEnter targets here :<br/>\nTarget identifier (SimBad resolution)<br/>\nor RA / DEC coordinates (J2000) with optional star name ('HMS DMS [star name]')\n</html>");
     starSearchField.setMinimumSize(new java.awt.Dimension(100, 23));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 3;
