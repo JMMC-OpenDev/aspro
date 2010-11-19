@@ -1,11 +1,16 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetModelForm.java,v 1.29 2010-11-18 17:19:09 bourgesl Exp $"
+ * "@(#) $Id: TargetModelForm.java,v 1.30 2010-11-19 16:57:04 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.29  2010/11/18 17:19:09  bourgesl
+ * moved dialog related code to TargetEditorDialog
+ * remove OK / Cancel buttons
+ * minor UI changes
+ *
  * Revision 1.28  2010/10/07 15:02:36  bourgesl
  * unused import
  *
@@ -130,6 +135,9 @@ import javax.swing.tree.TreeSelectionModel;
 
 /**
  * This class represents the target model editor ...
+ *
+ * TODO : extract intermediate class for Tree methods
+ *
  * @author bourgesl
  */
 public final class TargetModelForm extends javax.swing.JPanel implements ActionListener, TreeSelectionListener, ListSelectionListener {
@@ -248,9 +256,6 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
     }
     // fire node structure changed :
     getTreeModelsModel().nodeStructureChanged(rootNode);
-
-    // select first target :
-    selectFirstTarget(rootNode);
   }
 
   /**
@@ -311,6 +316,38 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         generateModelNodes(modelNode, child);
       }
     }
+  }
+
+  /**
+   * Select the target node for the given target name
+   * @param targetName target name indicating which node to select
+   */
+  protected void selectTarget(final String targetName) {
+
+    if (targetName != null) {
+      final Target target = Target.getTarget(targetName, this.editTargets);
+
+      if (target != null) {
+        final DefaultMutableTreeNode targetNode = this.findTreeNode(target);
+
+        if (targetNode != null) {
+          // Select the target node :
+          this.selectPath(new TreePath(targetNode.getPath()));
+
+          // expand target node if there is at least one model :
+          if (!targetNode.isLeaf()) {
+            final DefaultMutableTreeNode child = (DefaultMutableTreeNode) targetNode.getFirstChild();
+
+            this.jTreeModels.scrollPathToVisible(new TreePath(child.getPath()));
+          }
+
+          return;
+        }
+      }
+    }
+
+    // select first target :
+    selectFirstTarget(getRootNode());
   }
 
   /**

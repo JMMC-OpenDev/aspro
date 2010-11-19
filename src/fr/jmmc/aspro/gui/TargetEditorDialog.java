@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetEditorDialog.java,v 1.1 2010-11-18 17:19:35 bourgesl Exp $"
+ * "@(#) $Id: TargetEditorDialog.java,v 1.2 2010-11-19 16:57:04 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2010/11/18 17:19:35  bourgesl
+ * new target and model editor using tabs (modal dialog)
+ *
  */
 package fr.jmmc.aspro.gui;
 
@@ -16,7 +19,6 @@ import fr.jmmc.mcs.gui.App;
 import java.awt.Dimension;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import javax.swing.JDialog;
@@ -57,19 +59,12 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
     boolean result = false;
 
     // Prepare the list of targets :
-    List<Target> targets;
-    if (targetName != null) {
-      // single target editor :
-      targets = Arrays.asList(new Target[]{ObservationManager.getInstance().getTarget(targetName)});
-    } else {
-      // full editor :
-      targets = ObservationManager.getInstance().getTargets();
-    }
+    final List<Target> targets = ObservationManager.getInstance().getTargets();
 
     final TargetEditorDialog form = new TargetEditorDialog(targets);
 
-    // initialise the editor :
-    form.initialize();
+    // initialise the full editor and select the target :
+    form.initialize(targetName);
 
     JDialog dialog = null;
 
@@ -115,13 +110,8 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
       if (logger.isLoggable(Level.FINE)) {
         logger.fine("update the targets ...");
       }
-      if (targetName != null) {
-        // single target editor :
-        ObservationManager.getInstance().replaceTarget(form.getEditTargets().get(0));
-      } else {
-        // full editor :
-        ObservationManager.getInstance().setTargets(form.getEditTargets());
-      }
+      // full editor :
+      ObservationManager.getInstance().setTargets(form.getEditTargets());
     }
 
     return result;
@@ -161,13 +151,16 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
 
   /**
    * Initialise the editor with targets (single or all)
+   * @param targetName target name to select
    */
-  protected void initialize() {
+  protected void initialize(final String targetName) {
 
     // TODO
     this.targetModelForm.generateTree(getEditTargets());
+    this.targetModelForm.selectTarget(targetName);
 
     this.targetForm.generateTree(getEditTargets());
+    this.targetForm.selectTarget(targetName);
   }
 
   /** This method is called from within the constructor to
@@ -289,8 +282,8 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
       public void run() {
 
         try {
-          ObservationManager.getInstance().load(new File("/home/bourgesl/VLTI_ref_E0G0H0.asprox"));
-          logger.info("result = " + showEditor(null));
+          ObservationManager.getInstance().load(new File("/home/bourgesl/VLTI_FUN2.asprox"));
+          logger.info("result = " + showEditor("HIP32768"));
           System.exit(0);
         } catch (Exception e) {
           logger.log(Level.SEVERE, "runtime exception", e);

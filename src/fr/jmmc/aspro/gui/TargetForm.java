@@ -1,18 +1,19 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetForm.java,v 1.1 2010-11-18 17:20:33 bourgesl Exp $"
+ * "@(#) $Id: TargetForm.java,v 1.2 2010-11-19 16:57:04 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2010/11/18 17:20:33  bourgesl
+ * initial GUI for target editor
+ *
  */
 package fr.jmmc.aspro.gui;
 
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.mcs.gui.MessagePane;
-import fr.jmmc.mcs.model.targetmodel.Model;
-import java.awt.event.ActionEvent;
 import java.util.List;
 import java.util.logging.Level;
 import javax.swing.JTree;
@@ -20,12 +21,14 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
 /**
  * This class represents the target information editor ...
+ *
+ * TODO : extract intermediate class for Tree methods
+ *
  * @author bourgesl
  */
 public final class TargetForm extends javax.swing.JPanel implements TreeSelectionListener {
@@ -41,7 +44,7 @@ public final class TargetForm extends javax.swing.JPanel implements TreeSelectio
   /* members */
   /** list of edited targets (clone) */
   private List<Target> editTargets;
-  /** current edited target to detect target changes to update the table model */
+  /** current edited target */
   private Target currentTarget = null;
 
   /**
@@ -105,17 +108,16 @@ public final class TargetForm extends javax.swing.JPanel implements TreeSelectio
 
       targetNode = new DefaultMutableTreeNode(target);
 
+      // TODO : add calibrators as children of the target Node
+/*
       for (Model model : target.getModels()) {
-        this.generateModelNodes(targetNode, model);
+      this.generateModelNodes(targetNode, model);
       }
-
+       */
       rootNode.add(targetNode);
     }
     // fire node structure changed :
     getTreeModelsModel().nodeStructureChanged(rootNode);
-
-    // select first target :
-    selectFirstTarget(rootNode);
   }
 
   /**
@@ -157,25 +159,35 @@ public final class TargetForm extends javax.swing.JPanel implements TreeSelectio
   }
 
   /**
-   * Generate the model nodes recursively
-   *
-   * @param parentNode parent node to append nodes
-   * @param model model to process
+   * Select the target node for the given target name
+   * @param targetName target name indicating which node to select
    */
-  private void generateModelNodes(final DefaultMutableTreeNode parentNode, final Model model) {
+  protected void selectTarget(final String targetName) {
 
-    // May need clone target and model to allow undo/cancel actions :
+    if (targetName != null) {
+      final Target target = Target.getTarget(targetName, this.editTargets);
 
-    final DefaultMutableTreeNode modelNode = new DefaultMutableTreeNode(model);
+      if (target != null) {
+        final DefaultMutableTreeNode targetNode = this.findTreeNode(target);
 
-    parentNode.add(modelNode);
+        if (targetNode != null) {
+          // Select the target node :
+          this.selectPath(new TreePath(targetNode.getPath()));
 
-    final List<Model> children = model.getModels();
-    if (!children.isEmpty()) {
-      for (Model child : children) {
-        generateModelNodes(modelNode, child);
+          // expand target node if there is at least one model :
+          if (!targetNode.isLeaf()) {
+            final DefaultMutableTreeNode child = (DefaultMutableTreeNode) targetNode.getFirstChild();
+
+            this.jTreeModels.scrollPathToVisible(new TreePath(child.getPath()));
+          }
+
+          return;
+        }
       }
     }
+
+    // select first target :
+    selectFirstTarget(getRootNode());
   }
 
   /**
@@ -239,12 +251,6 @@ public final class TargetForm extends javax.swing.JPanel implements TreeSelectio
       if (userObject instanceof Target) {
         // Target :
         this.processTargetSelection((Target) userObject);
-      } else if (userObject instanceof Model) {
-        final TreeNode[] path = node.getPath();
-        // target is after the root node in the tree path :
-        final Target target = (Target) ((DefaultMutableTreeNode) path[1]).getUserObject();
-        // Model :
-        this.processModelSelection(target, (Model) userObject);
       }
     }
   }
@@ -255,35 +261,26 @@ public final class TargetForm extends javax.swing.JPanel implements TreeSelectio
    */
   private void processTargetSelection(final Target target) {
 
-    // reset text field name :
-    this.jTextFieldName.setText(null);
+    // name :
+    this.jTextFieldName.setText(target.getName());
+    // RA / DEC :
+    this.jTextFieldRA.setText(target.getRA());
+    this.jTextFieldDEC.setText(target.getDEC());
 
-  }
+    // Fluxes :
+    Double flux = target.getFLUXV();
+    this.jTextFieldFluxV.setText((flux != null) ? Double.toString(flux) : "99");
+    flux = target.getFLUXI();
+    this.jTextFieldFluxI.setText((flux != null) ? Double.toString(flux) : "99");
+    flux = target.getFLUXJ();
+    this.jTextFieldFluxJ.setText((flux != null) ? Double.toString(flux) : "99");
+    flux = target.getFLUXH();
+    this.jTextFieldFluxH.setText((flux != null) ? Double.toString(flux) : "99");
+    flux = target.getFLUXK();
+    this.jTextFieldFluxK.setText((flux != null) ? Double.toString(flux) : "99");
+    flux = target.getFLUXN();
+    this.jTextFieldFluxN.setText((flux != null) ? Double.toString(flux) : "99");
 
-  /**
-   * Update the UI when a model is selected in the target/model tree
-   * @param target selected target
-   * @param model selected model
-   */
-  private void processModelSelection(final Target target, final Model model) {
-
-    // update text field name :
-    this.jTextFieldName.setText(model.getName());
-
-  }
-
-  /**
-   * Process any comboBox or radio change event
-   * @param e action event
-   */
-  public void actionPerformed(final ActionEvent e) {
-  }
-
-  /**
-   * Update the model description given the model type
-   * @param type model type to use
-   */
-  private void updateModelDescription(final String type) {
   }
 
   /**
@@ -297,17 +294,39 @@ public final class TargetForm extends javax.swing.JPanel implements TreeSelectio
   private void initComponents() {
     java.awt.GridBagConstraints gridBagConstraints;
 
-    buttonGroupEditMode = new javax.swing.ButtonGroup();
     jPanelTargets = new javax.swing.JPanel();
     jScrollPaneTreeModels = new javax.swing.JScrollPane();
     jTreeModels = createJTree();
     jPanelModelActions = new javax.swing.JPanel();
-    jLabel5 = new javax.swing.JLabel();
-    jTextFieldName = new javax.swing.JTextField();
+    jButtonUp = new javax.swing.JButton();
+    jButtonDown = new javax.swing.JButton();
+    jToggleButtonMarkCal = new javax.swing.JToggleButton();
+    jToggleButtonAssociateCal = new javax.swing.JToggleButton();
+    jSeparatorButtons = new javax.swing.JSeparator();
     jPanelTarget = new javax.swing.JPanel();
+    jLabel1 = new javax.swing.JLabel();
+    jTextFieldName = new javax.swing.JTextField();
+    jLabel2 = new javax.swing.JLabel();
+    jSeparator2 = new javax.swing.JSeparator();
+    jTextFieldRA = new javax.swing.JTextField();
+    jLabel3 = new javax.swing.JLabel();
+    jTextFieldDEC = new javax.swing.JTextField();
+    jSeparator3 = new javax.swing.JSeparator();
+    jLabel4 = new javax.swing.JLabel();
+    jTextFieldFluxV = new javax.swing.JTextField();
+    jLabel5 = new javax.swing.JLabel();
+    jTextFieldFluxI = new javax.swing.JTextField();
+    jLabel6 = new javax.swing.JLabel();
+    jTextFieldFluxJ = new javax.swing.JTextField();
+    jLabel7 = new javax.swing.JLabel();
+    jTextFieldFluxH = new javax.swing.JTextField();
+    jLabel8 = new javax.swing.JLabel();
+    jTextFieldFluxK = new javax.swing.JTextField();
+    jLabel9 = new javax.swing.JLabel();
+    jTextFieldFluxN = new javax.swing.JTextField();
     jPanelDescription = new javax.swing.JPanel();
-    jScrollPaneTargetDescription = new javax.swing.JScrollPane();
-    jLabelTargetDescrption = new javax.swing.JLabel();
+    jScrollPaneTargetInfos = new javax.swing.JScrollPane();
+    jTextAreaTargetInfos = new javax.swing.JTextArea();
 
     setLayout(new java.awt.GridBagLayout());
 
@@ -333,27 +352,51 @@ public final class TargetForm extends javax.swing.JPanel implements TreeSelectio
     jPanelTargets.add(jScrollPaneTreeModels, gridBagConstraints);
 
     jPanelModelActions.setBorder(javax.swing.BorderFactory.createTitledBorder("Target actions"));
+    jPanelModelActions.setEnabled(false);
     jPanelModelActions.setMinimumSize(new java.awt.Dimension(200, 80));
     jPanelModelActions.setPreferredSize(new java.awt.Dimension(200, 80));
     jPanelModelActions.setLayout(new java.awt.GridBagLayout());
 
-    jLabel5.setText("Name");
+    jButtonUp.setText("Up");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-    jPanelModelActions.add(jLabel5, gridBagConstraints);
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
+    jPanelModelActions.add(jButtonUp, gridBagConstraints);
 
-    jTextFieldName.setColumns(15);
-    jTextFieldName.setEditable(false);
-    jTextFieldName.setMinimumSize(new java.awt.Dimension(100, 19));
+    jButtonDown.setText("Down");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
+    jPanelModelActions.add(jButtonDown, gridBagConstraints);
+
+    jToggleButtonMarkCal.setText("Mark as calibrator");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
+    jPanelModelActions.add(jToggleButtonMarkCal, gridBagConstraints);
+
+    jToggleButtonAssociateCal.setText("Associate ...");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
+    jPanelModelActions.add(jToggleButtonAssociateCal, gridBagConstraints);
+
+    jSeparatorButtons.setOrientation(javax.swing.SwingConstants.VERTICAL);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 0;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-    jPanelModelActions.add(jTextFieldName, gridBagConstraints);
+    gridBagConstraints.gridheight = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
+    gridBagConstraints.insets = new java.awt.Insets(0, 20, 0, 20);
+    jPanelModelActions.add(jSeparatorButtons, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
@@ -364,6 +407,159 @@ public final class TargetForm extends javax.swing.JPanel implements TreeSelectio
 
     jPanelTarget.setBorder(javax.swing.BorderFactory.createTitledBorder("Target"));
     jPanelTarget.setLayout(new java.awt.GridBagLayout());
+
+    jLabel1.setText("Name");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    jPanelTarget.add(jLabel1, gridBagConstraints);
+
+    jTextFieldName.setColumns(10);
+    jTextFieldName.setEditable(false);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    jPanelTarget.add(jTextFieldName, gridBagConstraints);
+
+    jLabel2.setText("RA [HMS]");
+    jLabel2.setToolTipText("RA coordinate (J2000) (HMS)");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    jPanelTarget.add(jLabel2, gridBagConstraints);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.weighty = 0.1;
+    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    jPanelTarget.add(jSeparator2, gridBagConstraints);
+
+    jTextFieldRA.setColumns(10);
+    jTextFieldRA.setEditable(false);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    jPanelTarget.add(jTextFieldRA, gridBagConstraints);
+
+    jLabel3.setText("DEC [DMS]");
+    jLabel3.setToolTipText("DEC coordinate (J2000) (DMS)");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    jPanelTarget.add(jLabel3, gridBagConstraints);
+
+    jTextFieldDEC.setColumns(10);
+    jTextFieldDEC.setEditable(false);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    jPanelTarget.add(jTextFieldDEC, gridBagConstraints);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.weighty = 0.1;
+    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    jPanelTarget.add(jSeparator3, gridBagConstraints);
+
+    jLabel4.setText("Magnitude V");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 5;
+    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    jPanelTarget.add(jLabel4, gridBagConstraints);
+
+    jTextFieldFluxV.setColumns(10);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 5;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    jPanelTarget.add(jTextFieldFluxV, gridBagConstraints);
+
+    jLabel5.setText("Magnitude I");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 6;
+    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    jPanelTarget.add(jLabel5, gridBagConstraints);
+
+    jTextFieldFluxI.setColumns(10);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 6;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    jPanelTarget.add(jTextFieldFluxI, gridBagConstraints);
+
+    jLabel6.setText("Magnitude J");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 7;
+    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    jPanelTarget.add(jLabel6, gridBagConstraints);
+
+    jTextFieldFluxJ.setColumns(10);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 7;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    jPanelTarget.add(jTextFieldFluxJ, gridBagConstraints);
+
+    jLabel7.setText("Magnitude H");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 8;
+    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    jPanelTarget.add(jLabel7, gridBagConstraints);
+
+    jTextFieldFluxH.setColumns(10);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 8;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    jPanelTarget.add(jTextFieldFluxH, gridBagConstraints);
+
+    jLabel8.setText("Magnitude K");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 9;
+    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    jPanelTarget.add(jLabel8, gridBagConstraints);
+
+    jTextFieldFluxK.setColumns(10);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 9;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    jPanelTarget.add(jTextFieldFluxK, gridBagConstraints);
+
+    jLabel9.setText("Magnitude N");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 10;
+    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    jPanelTarget.add(jLabel9, gridBagConstraints);
+
+    jTextFieldFluxN.setColumns(10);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 10;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    jPanelTarget.add(jTextFieldFluxN, gridBagConstraints);
+
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 1;
@@ -378,18 +574,15 @@ public final class TargetForm extends javax.swing.JPanel implements TreeSelectio
     jPanelDescription.setPreferredSize(new java.awt.Dimension(100, 150));
     jPanelDescription.setLayout(new java.awt.GridBagLayout());
 
-    jLabelTargetDescrption.setBackground(new java.awt.Color(255, 255, 255));
-    jLabelTargetDescrption.setFont(new java.awt.Font("Dialog", 0, 12)); // NOI18N
-    jLabelTargetDescrption.setOpaque(true);
-    jScrollPaneTargetDescription.setViewportView(jLabelTargetDescrption);
+    jTextAreaTargetInfos.setColumns(20);
+    jTextAreaTargetInfos.setRows(5);
+    jScrollPaneTargetInfos.setViewportView(jTextAreaTargetInfos);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
-    jPanelDescription.add(jScrollPaneTargetDescription, gridBagConstraints);
+    jPanelDescription.add(jScrollPaneTargetInfos, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
@@ -428,16 +621,38 @@ public final class TargetForm extends javax.swing.JPanel implements TreeSelectio
     return true;
   }
   // Variables declaration - do not modify//GEN-BEGIN:variables
-  private javax.swing.ButtonGroup buttonGroupEditMode;
+  private javax.swing.JButton jButtonDown;
+  private javax.swing.JButton jButtonUp;
+  private javax.swing.JLabel jLabel1;
+  private javax.swing.JLabel jLabel2;
+  private javax.swing.JLabel jLabel3;
+  private javax.swing.JLabel jLabel4;
   private javax.swing.JLabel jLabel5;
-  private javax.swing.JLabel jLabelTargetDescrption;
+  private javax.swing.JLabel jLabel6;
+  private javax.swing.JLabel jLabel7;
+  private javax.swing.JLabel jLabel8;
+  private javax.swing.JLabel jLabel9;
   private javax.swing.JPanel jPanelDescription;
   private javax.swing.JPanel jPanelModelActions;
   private javax.swing.JPanel jPanelTarget;
   private javax.swing.JPanel jPanelTargets;
-  private javax.swing.JScrollPane jScrollPaneTargetDescription;
+  private javax.swing.JScrollPane jScrollPaneTargetInfos;
   private javax.swing.JScrollPane jScrollPaneTreeModels;
+  private javax.swing.JSeparator jSeparator2;
+  private javax.swing.JSeparator jSeparator3;
+  private javax.swing.JSeparator jSeparatorButtons;
+  private javax.swing.JTextArea jTextAreaTargetInfos;
+  private javax.swing.JTextField jTextFieldDEC;
+  private javax.swing.JTextField jTextFieldFluxH;
+  private javax.swing.JTextField jTextFieldFluxI;
+  private javax.swing.JTextField jTextFieldFluxJ;
+  private javax.swing.JTextField jTextFieldFluxK;
+  private javax.swing.JTextField jTextFieldFluxN;
+  private javax.swing.JTextField jTextFieldFluxV;
   private javax.swing.JTextField jTextFieldName;
+  private javax.swing.JTextField jTextFieldRA;
+  private javax.swing.JToggleButton jToggleButtonAssociateCal;
+  private javax.swing.JToggleButton jToggleButtonMarkCal;
   private javax.swing.JTree jTreeModels;
   // End of variables declaration//GEN-END:variables
 
@@ -488,9 +703,6 @@ public final class TargetForm extends javax.swing.JPanel implements TreeSelectio
               } else if (userObject instanceof Target) {
                 // Target :
                 sValue = ((Target) userObject).getName();
-              } else if (userObject instanceof Model) {
-                // Model :
-                sValue = ((Model) userObject).getName();
               } else {
                 if (logger.isLoggable(Level.SEVERE)) {
                   logger.severe("unsupported class type = " + userObject.getClass());
