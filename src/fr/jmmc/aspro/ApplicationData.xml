@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <ApplicationData link="http://www.jmmc.fr/aspro2">
-  <program name="Aspro2" version="0.7.3 beta"/>
+  <program name="Aspro2" version="0.7.4 beta"/>
   <compilation date="19/10/2010" compiler="JDK 1.5.0_16"/>
   <text>
     <![CDATA[ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations
@@ -63,6 +63,10 @@
   </menubar>
   <releasenotes>
     <release version="0.7">
+      <prerelease version="0.7.4 beta">
+        <change>Added Target editor to let the user edit target fields (magnitudes ...) and 
+        provide user information per target</change>
+      </prerelease>
       <prerelease version="0.7.3 beta">
         <change>SearchCal integration : use deletedFlag to filter calibrators to mimic SearchCal delete action and
           display HD identifier instead of HIP identifier to mimic SearchCal view</change>
