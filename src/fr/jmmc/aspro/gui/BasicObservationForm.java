@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BasicObservationForm.java,v 1.46 2010-11-19 16:55:42 bourgesl Exp $"
+ * "@(#) $Id: BasicObservationForm.java,v 1.47 2010-11-23 16:56:10 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.46  2010/11/19 16:55:42  bourgesl
+ * added J2000 in tooltip
+ *
  * Revision 1.45  2010/11/18 17:18:23  bourgesl
  * use new TargetEditorDialog
  *
@@ -529,7 +532,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
    * Return the Pops custom formatter : number format that accepts null values
    * @return number formatter
    */
-  private NumberFormatter getPopsFormatter() {
+  private static NumberFormatter getPopsFormatter() {
     final NumberFormatter nf = new NumberFormatter(new DecimalFormat("####")) {
 
       /** default serial UID for Serializable interface */
