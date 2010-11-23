@@ -26,6 +26,7 @@ import fr.jmmc.mcs.model.targetmodel.Model;
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
  *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *         &lt;element name="userInformation" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="RA" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *         &lt;element name="DEC" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *         &lt;element name="EQUINOX" type="{http://www.w3.org/2001/XMLSchema}float"/>
@@ -57,6 +58,7 @@ import fr.jmmc.mcs.model.targetmodel.Model;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "Target", propOrder = {
     "name",
+    "userInformation",
     "ra",
     "dec",
     "equinox",
@@ -84,6 +86,7 @@ public class Target
 
     @XmlElement(required = true)
     protected String name;
+    protected String userInformation;
     @XmlElement(name = "RA", required = true)
     protected String ra;
     @XmlElement(name = "DEC", required = true)
@@ -146,6 +149,30 @@ public class Target
      */
     public void setName(String value) {
         this.name = value;
+    }
+
+    /**
+     * Gets the value of the userInformation property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getUserInformation() {
+        return userInformation;
+    }
+
+    /**
+     * Sets the value of the userInformation property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setUserInformation(String value) {
+        this.userInformation = value;
     }
 
     /**

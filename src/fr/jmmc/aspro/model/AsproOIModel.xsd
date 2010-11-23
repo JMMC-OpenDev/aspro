@@ -316,6 +316,14 @@
         </xsd:annotation>
       </xsd:element>
 
+      <xsd:element name="userInformation" type="xsd:string" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>
+            User information related to this target
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
 <!-- position -->
       <xsd:element name="RA" type="xsd:string">
         <xsd:annotation>
