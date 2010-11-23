@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetEditorDialog.java,v 1.2 2010-11-19 16:57:04 bourgesl Exp $"
+ * "@(#) $Id: TargetEditorDialog.java,v 1.3 2010-11-23 16:56:29 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2010/11/19 16:57:04  bourgesl
+ * always open full editor with selected target
+ * added target name, RA/DEC, magnitudes
+ *
  * Revision 1.1  2010/11/18 17:19:35  bourgesl
  * new target and model editor using tabs (modal dialog)
  *
@@ -20,6 +24,8 @@ import java.awt.Dimension;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
 import java.util.logging.Level;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -276,6 +282,8 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
    * @param args unused
    */
   public static void main(String[] args) {
+    // Set the default locale to en-US locale (for Numerical Fields "." ",")
+    Locale.setDefault(Locale.US);
 
     SwingUtilities.invokeLater(new Runnable() {
 
