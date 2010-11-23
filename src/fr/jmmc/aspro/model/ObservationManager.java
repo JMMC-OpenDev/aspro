@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationManager.java,v 1.42 2010-11-19 16:55:59 bourgesl Exp $"
+ * "@(#) $Id: ObservationManager.java,v 1.43 2010-11-23 16:55:43 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.42  2010/11/19 16:55:59  bourgesl
+ * remove replaceTarget
+ *
  * Revision 1.41  2010/10/14 13:22:02  bourgesl
  * use CopyOnWriteArrayList for observation listeners
  *
@@ -166,7 +169,6 @@ import java.io.Reader;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Vector;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
