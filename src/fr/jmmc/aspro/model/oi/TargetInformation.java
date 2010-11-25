@@ -1,3 +1,4 @@
+
 package fr.jmmc.aspro.model.oi;
 
 import java.util.ArrayList;
@@ -7,6 +8,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 import fr.jmmc.aspro.model.OIBase;
+
 
 /**
  * 
@@ -35,95 +37,96 @@ import fr.jmmc.aspro.model.OIBase;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "TargetInformation", propOrder = {
-  "name",
-  "description",
-  "calibrators"
+    "name",
+    "description",
+    "calibrators"
 })
 public class TargetInformation
-        extends OIBase {
+    extends OIBase
+{
 
-  @XmlElement(required = true)
-  protected String name;
-  protected String description;
-  protected List<String> calibrators;
+    @XmlElement(required = true)
+    protected String name;
+    protected String description;
+    protected List<String> calibrators;
 
-  /**
-   * Gets the value of the name property.
-   *
-   * @return
-   *     possible object is
-   *     {@link String }
-   *
-   */
-  public String getName() {
-    return name;
-  }
-
-  /**
-   * Sets the value of the name property.
-   *
-   * @param value
-   *     allowed object is
-   *     {@link String }
-   *
-   */
-  public void setName(String value) {
-    this.name = value;
-  }
-
-  /**
-   * Gets the value of the description property.
-   *
-   * @return
-   *     possible object is
-   *     {@link String }
-   *
-   */
-  public String getDescription() {
-    return description;
-  }
-
-  /**
-   * Sets the value of the description property.
-   *
-   * @param value
-   *     allowed object is
-   *     {@link String }
-   *
-   */
-  public void setDescription(String value) {
-    this.description = value;
-  }
-
-  /**
-   * Gets the value of the calibrators property.
-   *
-   * <p>
-   * This accessor method returns a reference to the live list,
-   * not a snapshot. Therefore any modification you make to the
-   * returned list will be present inside the JAXB object.
-   * This is why there is not a <CODE>set</CODE> method for the calibrators property.
-   *
-   * <p>
-   * For example, to add a new item, do as follows:
-   * <pre>
-   *    getCalibrators().add(newItem);
-   * </pre>
-   *
-   *
-   * <p>
-   * Objects of the following type(s) are allowed in the list
-   * {@link String }
-   *
-   *
-   */
-  public List<String> getCalibrators() {
-    if (calibrators == null) {
-      calibrators = new ArrayList<String>();
+    /**
+     * Gets the value of the name property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getName() {
+        return name;
     }
-    return this.calibrators;
-  }
 
+    /**
+     * Sets the value of the name property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setName(String value) {
+        this.name = value;
+    }
+
+    /**
+     * Gets the value of the description property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getDescription() {
+        return description;
+    }
+
+    /**
+     * Sets the value of the description property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setDescription(String value) {
+        this.description = value;
+    }
+
+    /**
+     * Gets the value of the calibrators property.
+     * 
+     * <p>
+     * This accessor method returns a reference to the live list,
+     * not a snapshot. Therefore any modification you make to the
+     * returned list will be present inside the JAXB object.
+     * This is why there is not a <CODE>set</CODE> method for the calibrators property.
+     * 
+     * <p>
+     * For example, to add a new item, do as follows:
+     * <pre>
+     *    getCalibrators().add(newItem);
+     * </pre>
+     * 
+     * 
+     * <p>
+     * Objects of the following type(s) are allowed in the list
+     * {@link String }
+     * 
+     * 
+     */
+    public List<String> getCalibrators() {
+        if (calibrators == null) {
+            calibrators = new ArrayList<String>();
+        }
+        return this.calibrators;
+    }
+    
 //--simple--preserve
 
   @Override
@@ -150,4 +153,5 @@ public class TargetInformation
     return copy;
   }
 //--simple--preserve
+
 }

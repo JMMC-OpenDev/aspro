@@ -1,3 +1,4 @@
+
 package fr.jmmc.aspro.model.oi;
 
 import java.util.ArrayList;
@@ -8,6 +9,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import fr.jmmc.aspro.model.OIBase;
+
 
 /**
  * 
@@ -47,178 +49,179 @@ import fr.jmmc.aspro.model.OIBase;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "Observation", propOrder = {
-  "name",
-  "when",
-  "interferometerConfiguration",
-  "instrumentConfiguration",
-  "targets",
-  "targetUserInfos"
+    "name",
+    "when",
+    "interferometerConfiguration",
+    "instrumentConfiguration",
+    "targets",
+    "targetUserInfos"
 })
 @XmlRootElement(name = "observationSetting")
 public class ObservationSetting
-        extends OIBase {
+    extends OIBase
+{
 
-  @XmlElement(required = true)
-  protected String name;
-  @XmlElement(required = true)
-  protected WhenSetting when;
-  @XmlElement(required = true)
-  protected InterferometerConfigurationChoice interferometerConfiguration;
-  @XmlElement(required = true)
-  protected FocalInstrumentConfigurationChoice instrumentConfiguration;
-  @XmlElement(name = "target", required = true)
-  protected List<Target> targets;
-  protected TargetUserInformations targetUserInfos;
+    @XmlElement(required = true)
+    protected String name;
+    @XmlElement(required = true)
+    protected WhenSetting when;
+    @XmlElement(required = true)
+    protected InterferometerConfigurationChoice interferometerConfiguration;
+    @XmlElement(required = true)
+    protected FocalInstrumentConfigurationChoice instrumentConfiguration;
+    @XmlElement(name = "target", required = true)
+    protected List<Target> targets;
+    protected TargetUserInformations targetUserInfos;
 
-  /**
-   * Gets the value of the name property.
-   *
-   * @return
-   *     possible object is
-   *     {@link String }
-   *
-   */
-  public String getName() {
-    return name;
-  }
-
-  /**
-   * Sets the value of the name property.
-   *
-   * @param value
-   *     allowed object is
-   *     {@link String }
-   *
-   */
-  public void setName(String value) {
-    this.name = value;
-  }
-
-  /**
-   * Gets the value of the when property.
-   *
-   * @return
-   *     possible object is
-   *     {@link WhenSetting }
-   *
-   */
-  public WhenSetting getWhen() {
-    return when;
-  }
-
-  /**
-   * Sets the value of the when property.
-   *
-   * @param value
-   *     allowed object is
-   *     {@link WhenSetting }
-   *
-   */
-  public void setWhen(WhenSetting value) {
-    this.when = value;
-  }
-
-  /**
-   * Gets the value of the interferometerConfiguration property.
-   *
-   * @return
-   *     possible object is
-   *     {@link InterferometerConfigurationChoice }
-   *
-   */
-  public InterferometerConfigurationChoice getInterferometerConfiguration() {
-    return interferometerConfiguration;
-  }
-
-  /**
-   * Sets the value of the interferometerConfiguration property.
-   *
-   * @param value
-   *     allowed object is
-   *     {@link InterferometerConfigurationChoice }
-   *
-   */
-  public void setInterferometerConfiguration(InterferometerConfigurationChoice value) {
-    this.interferometerConfiguration = value;
-  }
-
-  /**
-   * Gets the value of the instrumentConfiguration property.
-   *
-   * @return
-   *     possible object is
-   *     {@link FocalInstrumentConfigurationChoice }
-   *
-   */
-  public FocalInstrumentConfigurationChoice getInstrumentConfiguration() {
-    return instrumentConfiguration;
-  }
-
-  /**
-   * Sets the value of the instrumentConfiguration property.
-   *
-   * @param value
-   *     allowed object is
-   *     {@link FocalInstrumentConfigurationChoice }
-   *
-   */
-  public void setInstrumentConfiguration(FocalInstrumentConfigurationChoice value) {
-    this.instrumentConfiguration = value;
-  }
-
-  /**
-   * Gets the value of the targets property.
-   *
-   * <p>
-   * This accessor method returns a reference to the live list,
-   * not a snapshot. Therefore any modification you make to the
-   * returned list will be present inside the JAXB object.
-   * This is why there is not a <CODE>set</CODE> method for the targets property.
-   *
-   * <p>
-   * For example, to add a new item, do as follows:
-   * <pre>
-   *    getTargets().add(newItem);
-   * </pre>
-   *
-   *
-   * <p>
-   * Objects of the following type(s) are allowed in the list
-   * {@link Target }
-   *
-   *
-   */
-  public List<Target> getTargets() {
-    if (targets == null) {
-      targets = new ArrayList<Target>();
+    /**
+     * Gets the value of the name property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getName() {
+        return name;
     }
-    return this.targets;
-  }
 
-  /**
-   * Gets the value of the targetUserInfos property.
-   *
-   * @return
-   *     possible object is
-   *     {@link TargetUserInformations }
-   *
-   */
-  public TargetUserInformations getTargetUserInfos() {
-    return targetUserInfos;
-  }
+    /**
+     * Sets the value of the name property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setName(String value) {
+        this.name = value;
+    }
 
-  /**
-   * Sets the value of the targetUserInfos property.
-   *
-   * @param value
-   *     allowed object is
-   *     {@link TargetUserInformations }
-   *
-   */
-  public void setTargetUserInfos(TargetUserInformations value) {
-    this.targetUserInfos = value;
-  }
+    /**
+     * Gets the value of the when property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link WhenSetting }
+     *     
+     */
+    public WhenSetting getWhen() {
+        return when;
+    }
 
+    /**
+     * Sets the value of the when property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link WhenSetting }
+     *     
+     */
+    public void setWhen(WhenSetting value) {
+        this.when = value;
+    }
+
+    /**
+     * Gets the value of the interferometerConfiguration property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link InterferometerConfigurationChoice }
+     *     
+     */
+    public InterferometerConfigurationChoice getInterferometerConfiguration() {
+        return interferometerConfiguration;
+    }
+
+    /**
+     * Sets the value of the interferometerConfiguration property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link InterferometerConfigurationChoice }
+     *     
+     */
+    public void setInterferometerConfiguration(InterferometerConfigurationChoice value) {
+        this.interferometerConfiguration = value;
+    }
+
+    /**
+     * Gets the value of the instrumentConfiguration property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link FocalInstrumentConfigurationChoice }
+     *     
+     */
+    public FocalInstrumentConfigurationChoice getInstrumentConfiguration() {
+        return instrumentConfiguration;
+    }
+
+    /**
+     * Sets the value of the instrumentConfiguration property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link FocalInstrumentConfigurationChoice }
+     *     
+     */
+    public void setInstrumentConfiguration(FocalInstrumentConfigurationChoice value) {
+        this.instrumentConfiguration = value;
+    }
+
+    /**
+     * Gets the value of the targets property.
+     * 
+     * <p>
+     * This accessor method returns a reference to the live list,
+     * not a snapshot. Therefore any modification you make to the
+     * returned list will be present inside the JAXB object.
+     * This is why there is not a <CODE>set</CODE> method for the targets property.
+     * 
+     * <p>
+     * For example, to add a new item, do as follows:
+     * <pre>
+     *    getTargets().add(newItem);
+     * </pre>
+     * 
+     * 
+     * <p>
+     * Objects of the following type(s) are allowed in the list
+     * {@link Target }
+     * 
+     * 
+     */
+    public List<Target> getTargets() {
+        if (targets == null) {
+            targets = new ArrayList<Target>();
+        }
+        return this.targets;
+    }
+
+    /**
+     * Gets the value of the targetUserInfos property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link TargetUserInformations }
+     *     
+     */
+    public TargetUserInformations getTargetUserInfos() {
+        return targetUserInfos;
+    }
+
+    /**
+     * Sets the value of the targetUserInfos property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link TargetUserInformations }
+     *     
+     */
+    public void setTargetUserInfos(TargetUserInformations value) {
+        this.targetUserInfos = value;
+    }
+    
 //--simple--preserve
   /**
    * Return the target of the given name
@@ -339,4 +342,5 @@ public class ObservationSetting
     return "Observation : " + ((this.name != null) ? this.name : "undefined");
   }
 //--simple--preserve
+
 }

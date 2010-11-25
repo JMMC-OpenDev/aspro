@@ -1,3 +1,4 @@
+
 package fr.jmmc.aspro.model.oi;
 
 import java.util.ArrayList;
@@ -7,6 +8,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 import fr.jmmc.aspro.model.OIBase;
+
 
 /**
  * 
@@ -34,74 +36,75 @@ import fr.jmmc.aspro.model.OIBase;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "TargetUserInformations", propOrder = {
-  "calibrators",
-  "targetInfos"
+    "calibrators",
+    "targetInfos"
 })
 public class TargetUserInformations
-        extends OIBase {
+    extends OIBase
+{
 
-  protected List<String> calibrators;
-  @XmlElement(name = "targetInfo")
-  protected List<TargetInformation> targetInfos;
+    protected List<String> calibrators;
+    @XmlElement(name = "targetInfo")
+    protected List<TargetInformation> targetInfos;
 
-  /**
-   * Gets the value of the calibrators property.
-   *
-   * <p>
-   * This accessor method returns a reference to the live list,
-   * not a snapshot. Therefore any modification you make to the
-   * returned list will be present inside the JAXB object.
-   * This is why there is not a <CODE>set</CODE> method for the calibrators property.
-   *
-   * <p>
-   * For example, to add a new item, do as follows:
-   * <pre>
-   *    getCalibrators().add(newItem);
-   * </pre>
-   *
-   *
-   * <p>
-   * Objects of the following type(s) are allowed in the list
-   * {@link String }
-   *
-   *
-   */
-  public List<String> getCalibrators() {
-    if (calibrators == null) {
-      calibrators = new ArrayList<String>();
+    /**
+     * Gets the value of the calibrators property.
+     * 
+     * <p>
+     * This accessor method returns a reference to the live list,
+     * not a snapshot. Therefore any modification you make to the
+     * returned list will be present inside the JAXB object.
+     * This is why there is not a <CODE>set</CODE> method for the calibrators property.
+     * 
+     * <p>
+     * For example, to add a new item, do as follows:
+     * <pre>
+     *    getCalibrators().add(newItem);
+     * </pre>
+     * 
+     * 
+     * <p>
+     * Objects of the following type(s) are allowed in the list
+     * {@link String }
+     * 
+     * 
+     */
+    public List<String> getCalibrators() {
+        if (calibrators == null) {
+            calibrators = new ArrayList<String>();
+        }
+        return this.calibrators;
     }
-    return this.calibrators;
-  }
 
-  /**
-   * Gets the value of the targetInfos property.
-   *
-   * <p>
-   * This accessor method returns a reference to the live list,
-   * not a snapshot. Therefore any modification you make to the
-   * returned list will be present inside the JAXB object.
-   * This is why there is not a <CODE>set</CODE> method for the targetInfos property.
-   *
-   * <p>
-   * For example, to add a new item, do as follows:
-   * <pre>
-   *    getTargetInfos().add(newItem);
-   * </pre>
-   *
-   *
-   * <p>
-   * Objects of the following type(s) are allowed in the list
-   * {@link TargetInformation }
-   *
-   *
-   */
-  public List<TargetInformation> getTargetInfos() {
-    if (targetInfos == null) {
-      targetInfos = new ArrayList<TargetInformation>();
+    /**
+     * Gets the value of the targetInfos property.
+     * 
+     * <p>
+     * This accessor method returns a reference to the live list,
+     * not a snapshot. Therefore any modification you make to the
+     * returned list will be present inside the JAXB object.
+     * This is why there is not a <CODE>set</CODE> method for the targetInfos property.
+     * 
+     * <p>
+     * For example, to add a new item, do as follows:
+     * <pre>
+     *    getTargetInfos().add(newItem);
+     * </pre>
+     * 
+     * 
+     * <p>
+     * Objects of the following type(s) are allowed in the list
+     * {@link TargetInformation }
+     * 
+     * 
+     */
+    public List<TargetInformation> getTargetInfos() {
+        if (targetInfos == null) {
+            targetInfos = new ArrayList<TargetInformation>();
+        }
+        return this.targetInfos;
     }
-    return this.targetInfos;
-  }
-
+    
 //--simple--preserve
   @Override
   public final String toString() {
@@ -157,4 +160,5 @@ public class TargetUserInformations
     return copy;
   }
 //--simple--preserve
+
 }
