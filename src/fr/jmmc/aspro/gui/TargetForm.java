@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetForm.java,v 1.4 2010-11-25 08:00:35 bourgesl Exp $"
+ * "@(#) $Id: TargetForm.java,v 1.5 2010-11-25 17:55:26 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2010/11/25 08:00:35  bourgesl
+ * added open simbad action
+ * updated data model
+ *
  * Revision 1.3  2010/11/23 16:57:35  bourgesl
  * complete editor with optional fields (magnitudes ...) and user information
  * custom number formatter to allow null values in text fields
@@ -357,7 +361,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
       this.jTextAreaIds.setCaretPosition(0);
 
       // user description :
-      this.jTextAreaTargetInfos.setText(this.editTargetUserInfos.getTargetUserInformation(target.getName()).getDescription());
+      this.jTextAreaTargetInfos.setText(this.editTargetUserInfos.getTargetUserInformation(target).getDescription());
 
     } finally {
       // restore the automatic update target :
@@ -459,7 +463,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
         logger.fine("user infos : " + text);
       }
 
-      this.editTargetUserInfos.getTargetUserInformation(this.currentTarget.getName()).setDescription((text.length() > 0) ? text : null);
+      this.editTargetUserInfos.getTargetUserInformation(this.currentTarget).setDescription((text.length() > 0) ? text : null);
     }
   }
 

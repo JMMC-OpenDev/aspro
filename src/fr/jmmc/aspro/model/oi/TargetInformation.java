@@ -3,9 +3,13 @@ package fr.jmmc.aspro.model.oi;
 
 import java.util.ArrayList;
 import java.util.List;
+import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementRef;
+import javax.xml.bind.annotation.XmlIDREF;
+import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 import fr.jmmc.aspro.model.OIBase;
 
@@ -24,9 +28,9 @@ import fr.jmmc.aspro.model.OIBase;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *         &lt;element name="target" type="{http://www.w3.org/2001/XMLSchema}IDREF"/>
  *         &lt;element name="description" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="calibrators" type="{http://www.w3.org/2001/XMLSchema}string" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="calibrators" type="{http://www.w3.org/2001/XMLSchema}IDREFS" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -37,7 +41,7 @@ import fr.jmmc.aspro.model.OIBase;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "TargetInformation", propOrder = {
-    "name",
+    "target",
     "description",
     "calibrators"
 })
@@ -45,33 +49,36 @@ public class TargetInformation
     extends OIBase
 {
 
-    @XmlElement(required = true)
-    protected String name;
+    @XmlElement(required = true, type = Object.class)
+    @XmlIDREF
+    @XmlSchemaType(name = "IDREF")
+    protected Target target;
     protected String description;
-    protected List<String> calibrators;
+    @XmlElementRef(name = "calibrators", type = JAXBElement.class)
+    protected List<Target> calibrators;
 
     /**
-     * Gets the value of the name property.
+     * Gets the value of the target property.
      * 
      * @return
      *     possible object is
-     *     {@link String }
+     *     {@link Object }
      *     
      */
-    public String getName() {
-        return name;
+    public Target getTarget() {
+        return target;
     }
 
     /**
-     * Sets the value of the name property.
+     * Sets the value of the target property.
      * 
      * @param value
      *     allowed object is
-     *     {@link String }
+     *     {@link Object }
      *     
      */
-    public void setName(String value) {
-        this.name = value;
+    public void setTarget(Target value) {
+        this.target = value;
     }
 
     /**
@@ -116,13 +123,13 @@ public class TargetInformation
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link String }
+     * {@link JAXBElement }{@code <}{@link List }{@code <}{@link Object }{@code >}{@code >}
      * 
      * 
      */
-    public List<String> getCalibrators() {
+    public List<Target> getCalibrators() {
         if (calibrators == null) {
-            calibrators = new ArrayList<String>();
+            calibrators = new ArrayList<Target>();
         }
         return this.calibrators;
     }
@@ -131,7 +138,7 @@ public class TargetInformation
 
   @Override
   public final String toString() {
-    return "TargetInformation [" + ((this.name != null) ? this.name : "undefined") + "]" + " : " + getCalibrators();
+    return "TargetInformation [" + ((this.getTarget() != null) ? this.getTarget() : "undefined") + "]" + " : " + getCalibrators();
   }
 
   /**
@@ -142,10 +149,12 @@ public class TargetInformation
   public final Object clone() {
     final TargetInformation copy = (TargetInformation) super.clone();
 
+    // note : targets are not cloned again as only there (immutable) identifier is needed
+
     // Deep copy of calibrators :
-    final List<String> oldCalibrators = copy.getCalibrators();
-    final List<String> newCalibrators = new ArrayList<String>(oldCalibrators.size());
-    for (String cal : oldCalibrators) {
+    final List<Target> oldCalibrators = copy.getCalibrators();
+    final List<Target> newCalibrators = new ArrayList<Target>(oldCalibrators.size());
+    for (Target cal : oldCalibrators) {
       newCalibrators.add(cal);
     }
     copy.calibrators = newCalibrators;

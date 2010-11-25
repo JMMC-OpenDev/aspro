@@ -3,9 +3,11 @@ package fr.jmmc.aspro.model.oi;
 
 import java.util.ArrayList;
 import java.util.List;
+import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementRef;
 import javax.xml.bind.annotation.XmlType;
 import fr.jmmc.aspro.model.OIBase;
 
@@ -24,7 +26,7 @@ import fr.jmmc.aspro.model.OIBase;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="calibrators" type="{http://www.w3.org/2001/XMLSchema}string" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="calibrators" type="{http://www.w3.org/2001/XMLSchema}IDREFS" maxOccurs="unbounded" minOccurs="0"/>
  *         &lt;element name="targetInfo" type="{http://www.jmmc.fr/aspro-oi/0.1}TargetInformation" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
@@ -43,7 +45,8 @@ public class TargetUserInformations
     extends OIBase
 {
 
-    protected List<String> calibrators;
+    @XmlElementRef(name = "calibrators", type = JAXBElement.class)
+    protected List<Target> calibrators;
     @XmlElement(name = "targetInfo")
     protected List<TargetInformation> targetInfos;
 
@@ -65,13 +68,13 @@ public class TargetUserInformations
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link String }
+     * {@link JAXBElement }{@code <}{@link List }{@code <}{@link Object }{@code >}{@code >}
      * 
      * 
      */
-    public List<String> getCalibrators() {
+    public List<Target> getCalibrators() {
         if (calibrators == null) {
-            calibrators = new ArrayList<String>();
+            calibrators = new ArrayList<Target>();
         }
         return this.calibrators;
     }
@@ -112,19 +115,20 @@ public class TargetUserInformations
   }
 
   /**
-   * Return the target user information corresponding to the target of the given name or create a new instance if the target is missing
-   * @param name target name
+   * Return the target user information corresponding to the target
+   * or create a new instance if the target is missing
+   * @param target target
    * @return target user information
    */
-  public final TargetInformation getTargetUserInformation(final String name) {
+  public final TargetInformation getTargetUserInformation(final Target target) {
     for (TargetInformation targetInfo : getTargetInfos()) {
-      if (targetInfo.getName().equals(name)) {
+      if (targetInfo.getTarget().equals(target)) {
         return targetInfo;
       }
     }
     // create a new instance if the target is not found :
     final TargetInformation targetInfo = new TargetInformation();
-    targetInfo.setName(name);
+    targetInfo.setTarget(target);
     getTargetInfos().add(targetInfo);
     return targetInfo;
   }
@@ -141,10 +145,12 @@ public class TargetUserInformations
   public final Object clone() {
     final TargetUserInformations copy = (TargetUserInformations) super.clone();
 
+    // note : targets are not cloned again as only there (immutable) identifier is needed
+
     // Deep copy of calibrators :
-    final List<String> oldCalibrators = copy.getCalibrators();
-    final List<String> newCalibrators = new ArrayList<String>(oldCalibrators.size());
-    for (String cal : oldCalibrators) {
+    final List<Target> oldCalibrators = copy.getCalibrators();
+    final List<Target> newCalibrators = new ArrayList<Target>(oldCalibrators.size());
+    for (Target cal : oldCalibrators) {
       newCalibrators.add(cal);
     }
     copy.calibrators = newCalibrators;

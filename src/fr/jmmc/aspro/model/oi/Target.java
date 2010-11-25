@@ -6,7 +6,11 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlID;
+import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import fr.jmmc.aspro.model.OIBase;
 import fr.jmmc.mcs.model.targetmodel.Model;
 
@@ -25,8 +29,8 @@ import fr.jmmc.mcs.model.targetmodel.Model;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
+ *         &lt;element name="id" type="{http://www.w3.org/2001/XMLSchema}ID"/>
  *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="userInformation" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="RA" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *         &lt;element name="DEC" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *         &lt;element name="EQUINOX" type="{http://www.w3.org/2001/XMLSchema}float"/>
@@ -57,8 +61,8 @@ import fr.jmmc.mcs.model.targetmodel.Model;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "Target", propOrder = {
+    "id",
     "name",
-    "userInformation",
     "ra",
     "dec",
     "equinox",
@@ -85,8 +89,12 @@ public class Target
 {
 
     @XmlElement(required = true)
+    @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
+    @XmlID
+    @XmlSchemaType(name = "ID")
+    protected String id;
+    @XmlElement(required = true)
     protected String name;
-    protected String userInformation;
     @XmlElement(name = "RA", required = true)
     protected String ra;
     @XmlElement(name = "DEC", required = true)
@@ -128,6 +136,30 @@ public class Target
     protected TargetConfiguration configuration;
 
     /**
+     * Gets the value of the id property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getId() {
+        return id;
+    }
+
+    /**
+     * Sets the value of the id property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setId(String value) {
+        this.id = value;
+    }
+
+    /**
      * Gets the value of the name property.
      * 
      * @return
@@ -149,30 +181,6 @@ public class Target
      */
     public void setName(String value) {
         this.name = value;
-    }
-
-    /**
-     * Gets the value of the userInformation property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getUserInformation() {
-        return userInformation;
-    }
-
-    /**
-     * Sets the value of the userInformation property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setUserInformation(String value) {
-        this.userInformation = value;
     }
 
     /**
@@ -653,7 +661,6 @@ public class Target
     }
     
 //--simple--preserve
-
   /** computed RA in degrees */
   @javax.xml.bind.annotation.XmlTransient
   private double raDeg = Double.NaN;
@@ -676,7 +683,6 @@ public class Target
   public final void setRADeg(final double raDeg) {
     this.raDeg = raDeg;
   }
-
   /** computed DEC in degrees */
   @javax.xml.bind.annotation.XmlTransient
   private double decDeg = Double.NaN;
@@ -700,9 +706,52 @@ public class Target
     this.decDeg = decDeg;
   }
 
+  /**
+   * This method returns the target identifier.
+   * If it is missing, it generates a new identifier from the name field.
+   * @return target identifier
+   */
+  public final String getIdentifier() {
+    if (getId() == null) {
+      setId(fr.jmmc.aspro.model.util.XmlIdUtils.convert(getName()));
+    }
+    return getId();
+  }
+
+  /**
+   * This equals method uses the identifier equality
+   * @param obj other object (target)
+   * @return true if the identifiers are equals
+   */
+  @Override
+  public final boolean equals(final Object obj) {
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    final Target other = (Target) obj;
+    if ((this.getIdentifier() == null) ? (other.getIdentifier() != null) : !this.getIdentifier().equals(other.getIdentifier())) {
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * This hashcode implementation uses only the id field
+   * @return hashcode 
+   */
+  @Override
+  public final int hashCode() {
+    int hash = 3;
+    hash = 71 * hash + (this.getIdentifier() != null ? this.getIdentifier().hashCode() : 0);
+    return hash;
+  }
+
   @Override
   public final String toString() {
-    return "Target [" + ((this.name != null) ? this.name : "undefined") + "]" + " RA = " + getRA() + " DEC = " + getDEC();
+    return "Target [" + ((this.getName() != null) ? this.getName() : "undefined") + "]" + " RA = " + getRA() + " DEC = " + getDEC();
   }
 
   /**
@@ -768,9 +817,9 @@ public class Target
     if (getIDS() != null) {
       final String cat = catalogIdentifier + " ";
       final String[] idArray = getIDS().split(",");
-      for (String id : idArray) {
-        if (id.startsWith(cat)) {
-          res = id;
+      for (String catEntry : idArray) {
+        if (catEntry.startsWith(cat)) {
+          res = catEntry;
           break;
         }
       }
@@ -785,7 +834,7 @@ public class Target
    */
   public final Double getFlux(final SpectralBand band) {
     if (band != null) {
-      switch(band) {
+      switch (band) {
         case V:
           return getFLUXV();
         case R:
@@ -849,7 +898,6 @@ public class Target
     }
     return null;
   }
-
 //--simple--preserve
 
 }
