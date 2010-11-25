@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetEditorDialog.java,v 1.3 2010-11-23 16:56:29 bourgesl Exp $"
+ * "@(#) $Id: TargetEditorDialog.java,v 1.4 2010-11-25 07:59:59 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2010/11/23 16:56:29  bourgesl
+ * fixed main (locale)
+ *
  * Revision 1.2  2010/11/19 16:57:04  bourgesl
  * always open full editor with selected target
  * added target name, RA/DEC, magnitudes
@@ -19,17 +22,20 @@ package fr.jmmc.aspro.gui;
 import fr.jmmc.aspro.gui.util.ComponentResizeAdapter;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.oi.Target;
+import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.mcs.gui.App;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.TimeZone;
 import java.util.logging.Level;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 /**
  * This dialog contains tabs to edit both target properties and models
@@ -49,6 +55,8 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
   private boolean result = false;
   /** list of edited targets (clone) */
   private final List<Target> editTargets;
+  /** list of edited target user informations (clone) */
+  private final TargetUserInformations editTargetUserInfos;
   /* Swing */
   /** dialog window */
   private JDialog dialog;
@@ -64,10 +72,12 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
     }
     boolean result = false;
 
+    final ObservationManager om = ObservationManager.getInstance();
     // Prepare the list of targets :
-    final List<Target> targets = ObservationManager.getInstance().getTargets();
+    final List<Target> targets = om.getTargets();
+    final TargetUserInformations targetUserInfos = om.getTargetUserInfos();
 
-    final TargetEditorDialog form = new TargetEditorDialog(targets);
+    final TargetEditorDialog form = new TargetEditorDialog(targets, targetUserInfos);
 
     // initialise the full editor and select the target :
     form.initialize(targetName);
@@ -116,8 +126,9 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
       if (logger.isLoggable(Level.FINE)) {
         logger.fine("update the targets ...");
       }
-      // full editor :
-      ObservationManager.getInstance().setTargets(form.getEditTargets());
+      // update the data model in the observation :
+      om.setTargets(form.getEditTargets());
+      om.setTargetUserInfos(form.getEditTargetUserInfos());
     }
 
     return result;
@@ -127,16 +138,18 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
    * Creates new form TargetEditorDialog
    */
   public TargetEditorDialog() {
-    this(null);
+    this(null, null);
   }
 
   /**
-   * Creates new form TargetEditorDialog with the given list of targets (single or all)
+   * Creates new form TargetEditorDialog with the given list of targets and user information
    * @param targets list of targets to edit
+   * @param targetUserInfos target user informations
    */
-  protected TargetEditorDialog(final List<Target> targets) {
+  protected TargetEditorDialog(final List<Target> targets, final TargetUserInformations targetUserInfos) {
     super();
 
+    // Prepare data model (clone to support cancel) :
     final int size = (targets != null) ? targets.size() : 0;
 
     this.editTargets = new ArrayList<Target>(size);
@@ -152,7 +165,37 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
       }
     }
 
+    this.editTargetUserInfos = (targetUserInfos != null) ? targetUserInfos : new TargetUserInformations();
+
+    // initialize swing components :
     initComponents();
+
+    // Register a change listener for the tabbed panel :
+    this.jTabbedPane.addChangeListener(new ChangeListener() {
+
+      /**
+       * This method is called whenever the selected tab changes
+       * @param evt change event
+       */
+      public final void stateChanged(final ChangeEvent ce) {
+
+        final Component selected = jTabbedPane.getSelectedComponent();
+
+        logger.severe("selected : " + selected.getClass().getSimpleName());
+
+        if (selected == targetModelForm) {
+          // TODO : refresh the tree according to the new target / calibrator list
+
+          // select the target :
+          targetModelForm.selectTarget(targetForm.getCurrentTarget().getName());
+        } else if (selected == targetForm) {
+          // select the target :
+          targetForm.selectTarget(targetModelForm.getCurrentTarget().getName());
+        } else {
+          logger.severe("unsupported tab event = " + ce);
+        }
+      }
+    });
   }
 
   /**
@@ -161,12 +204,9 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
    */
   protected void initialize(final String targetName) {
 
-    // TODO
-    this.targetModelForm.generateTree(getEditTargets());
-    this.targetModelForm.selectTarget(targetName);
+    this.targetModelForm.initialize(getEditTargets(), targetName);
 
-    this.targetForm.generateTree(getEditTargets());
-    this.targetForm.selectTarget(targetName);
+    this.targetForm.initialize(getEditTargets(), getEditTargetUserInfos(), targetName);
   }
 
   /** This method is called from within the constructor to
@@ -261,11 +301,19 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
   }
 
   /**
-   * Return the list of target whom models are edited
+   * Return the list of target that is edited by this editor
    * @return list of target
    */
   protected List<Target> getEditTargets() {
     return editTargets;
+  }
+
+  /**
+   * Return the target user informations that is edited by this editor
+   * @return target user informations
+   */
+  protected TargetUserInformations getEditTargetUserInfos() {
+    return editTargetUserInfos;
   }
 
   /**
