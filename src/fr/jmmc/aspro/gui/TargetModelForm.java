@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetModelForm.java,v 1.30 2010-11-19 16:57:04 bourgesl Exp $"
+ * "@(#) $Id: TargetModelForm.java,v 1.31 2010-11-25 08:00:54 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.30  2010/11/19 16:57:04  bourgesl
+ * always open full editor with selected target
+ * added target name, RA/DEC, magnitudes
+ *
  * Revision 1.29  2010/11/18 17:19:09  bourgesl
  * moved dialog related code to TargetEditorDialog
  * remove OK / Cancel buttons
@@ -208,6 +212,18 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
     this.jTableModelParameters.getTableHeader().setReorderingAllowed(false);
   }
 
+  /**
+   * Initialize the internal model (tree) from the given list of targets
+   * @param targets list of targets to edit
+   * @param targetName target name to select
+   */
+  protected void initialize(final List<Target> targets, final String targetName) {
+    this.editTargets = targets;
+
+    this.generateTree(targets);
+    this.selectTarget(targetName);
+  }
+
   /* Tree related methods */
   /**
    * Return the tree model
@@ -237,7 +253,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
    * Generate the tree from the given list of targets (single or all)
    * @param targets list of targets to edit
    */
-  protected void generateTree(final List<Target> targets) {
+  private void generateTree(final List<Target> targets) {
 
     this.editTargets = targets;
 
@@ -809,6 +825,14 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
       }
     }
     return true;
+  }
+
+  /**
+   * Return the current edited target
+   * @return current edited target
+   */
+  protected final Target getCurrentTarget() {
+    return currentTarget;
   }
 
   /**
