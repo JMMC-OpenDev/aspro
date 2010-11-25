@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetForm.java,v 1.3 2010-11-23 16:57:35 bourgesl Exp $"
+ * "@(#) $Id: TargetForm.java,v 1.4 2010-11-25 08:00:35 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2010/11/23 16:57:35  bourgesl
+ * complete editor with optional fields (magnitudes ...) and user information
+ * custom number formatter to allow null values in text fields
+ *
  * Revision 1.2  2010/11/19 16:57:04  bourgesl
  * always open full editor with selected target
  * added target name, RA/DEC, magnitudes
@@ -17,8 +21,12 @@
 package fr.jmmc.aspro.gui;
 
 import fr.jmmc.aspro.model.oi.Target;
+import fr.jmmc.aspro.model.oi.TargetUserInformations;
+import fr.jmmc.mcs.gui.BrowserLauncher;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.List;
@@ -49,12 +57,16 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
   /** Class logger */
   private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
+  /** SimBad URL (query by identifier) */
+  private static final String SIMBAD_QUERY_ID = "http://simbad.u-strasbg.fr/simbad/sim-id?Ident=";
   /** custom number field formatter */
   private static NumberFormatter numberFieldFormatter = null;
 
   /* members */
   /** list of edited targets (clone) */
   private List<Target> editTargets;
+  /** list of edited target user informations (clone) */
+  private TargetUserInformations editTargetUserInfos;
   /** current edited target */
   private Target currentTarget = null;
   /** flag to enable / disable the automatic update of the target when any swing component changes */
@@ -102,6 +114,19 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
 
   }
 
+  /**
+   * Initialize the internal model (tree) from the given list of targets
+   * @param targets list of targets to edit
+   * @param targetUserInfos target user informations
+   * @param targetName target name to select
+   */
+  protected void initialize(final List<Target> targets, final TargetUserInformations targetUserInfos, final String targetName) {
+    this.editTargets = targets;
+    this.editTargetUserInfos = targetUserInfos;
+
+    this.generateTree(targets);
+    this.selectTarget(targetName);
+  }
   /* Tree related methods */
   /**
    * Return the tree model
@@ -131,9 +156,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
    * Generate the tree from the given list of targets (single or all)
    * @param targets list of targets to edit
    */
-  protected void generateTree(final List<Target> targets) {
-
-    this.editTargets = targets;
+  private void generateTree(final List<Target> targets) {
 
     final DefaultMutableTreeNode rootNode = getRootNode();
 
@@ -333,8 +356,8 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
       this.jTextAreaIds.setText(target.getIDS());
       this.jTextAreaIds.setCaretPosition(0);
 
-      // user information :
-      this.jTextAreaTargetInfos.setText(target.getUserInformation());
+      // user description :
+      this.jTextAreaTargetInfos.setText(this.editTargetUserInfos.getTargetUserInformation(target.getName()).getDescription());
 
     } finally {
       // restore the automatic update target :
@@ -436,7 +459,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
         logger.fine("user infos : " + text);
       }
 
-      this.currentTarget.setUserInformation((text.length() > 0) ? text : null);
+      this.editTargetUserInfos.getTargetUserInformation(this.currentTarget.getName()).setDescription((text.length() > 0) ? text : null);
     }
   }
 
@@ -499,10 +522,10 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     jFieldParallax = new JFormattedTextField(getNumberFieldFormatter());
     jLabelParaErr = new javax.swing.JLabel();
     jFieldParaErr = new JFormattedTextField(getNumberFieldFormatter());
-    jLabelSimBad = new javax.swing.JLabel();
     jLabelIds = new javax.swing.JLabel();
     jScrollPaneIds = new javax.swing.JScrollPane();
     jTextAreaIds = new javax.swing.JTextArea();
+    jButtonSimbad = new javax.swing.JButton();
     jPanelDescription = new javax.swing.JPanel();
     jScrollPaneTargetInfos = new javax.swing.JScrollPane();
     jTextAreaTargetInfos = new javax.swing.JTextArea();
@@ -915,12 +938,6 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
     jPanelTarget.add(jFieldParaErr, gridBagConstraints);
 
-    jLabelSimBad.setText("open SimBad ...");
-    jLabelSimBad.setEnabled(false);
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridwidth = 2;
-    jPanelTarget.add(jLabelSimBad, gridBagConstraints);
-
     jLabelIds.setText("Identifiers");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -946,6 +963,17 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
     jPanelTarget.add(jScrollPaneIds, gridBagConstraints);
 
+    jButtonSimbad.setText("open Simbad");
+    jButtonSimbad.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jButtonSimbadActionPerformed(evt);
+      }
+    });
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    jPanelTarget.add(jButtonSimbad, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 1;
@@ -961,7 +989,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
 
     jTextAreaTargetInfos.setBackground(new java.awt.Color(255, 255, 153));
     jTextAreaTargetInfos.setColumns(20);
-    jTextAreaTargetInfos.setFont(new java.awt.Font("Monospaced", 0, 10)); // NOI18N
+    jTextAreaTargetInfos.setFont(new java.awt.Font("Monospaced", 0, 10));
     jTextAreaTargetInfos.setRows(2);
     jTextAreaTargetInfos.addFocusListener(new java.awt.event.FocusAdapter() {
       public void focusLost(java.awt.event.FocusEvent evt) {
@@ -996,6 +1024,22 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     // TODO add your handling code here:
     targetInfosChanged(this.jTextAreaTargetInfos.getText());
   }//GEN-LAST:event_jTextAreaTargetInfosFocusLost
+
+  private void jButtonSimbadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSimbadActionPerformed
+
+    try {
+      final String url = SIMBAD_QUERY_ID + URLEncoder.encode(this.currentTarget.getName(), "UTF-8");
+
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("Simbad url = " + url);
+      }
+
+      BrowserLauncher.openURL(url);
+    } catch (UnsupportedEncodingException uee) {
+      logger.log(Level.SEVERE, "unsupported encoding : ", uee);
+    }
+
+  }//GEN-LAST:event_jButtonSimbadActionPerformed
 
   /**
    * Validate the form
@@ -1044,6 +1088,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
   }
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JButton jButtonDown;
+  private javax.swing.JButton jButtonSimbad;
   private javax.swing.JButton jButtonUp;
   private javax.swing.JTextField jFieldDEC;
   private javax.swing.JFormattedTextField jFieldMagH;
@@ -1077,7 +1122,6 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
   private javax.swing.JLabel jLabelParallax;
   private javax.swing.JLabel jLabelRA;
   private javax.swing.JLabel jLabelRMDEC;
-  private javax.swing.JLabel jLabelSimBad;
   private javax.swing.JLabel jLabelSpecTypes;
   private javax.swing.JLabel jLabelSysVel;
   private javax.swing.JPanel jPanelDescription;
