@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BasicObservationForm.java,v 1.47 2010-11-23 16:56:10 bourgesl Exp $"
+ * "@(#) $Id: BasicObservationForm.java,v 1.48 2010-11-25 07:58:17 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.47  2010/11/23 16:56:10  bourgesl
+ * custom pops formatter made static
+ *
  * Revision 1.46  2010/11/19 16:55:42  bourgesl
  * added J2000 in tooltip
  *
@@ -520,9 +523,10 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
   }//GEN-LAST:event_jButtonRemoveTargetActionPerformed
 
   private void jButtonModelEditorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonModelEditorActionPerformed
+    final String targetName = getSelectedTargetName();
 
-    // show model editor for all targets :
-    if (TargetEditorDialog.showEditor(null)) {
+    // show model editor :
+    if (TargetEditorDialog.showEditor(targetName)) {
       // fire an observation change event :
       this.om.fireObservationChanged();
     }
