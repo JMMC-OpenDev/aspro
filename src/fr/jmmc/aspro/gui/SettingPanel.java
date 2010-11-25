@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SettingPanel.java,v 1.24 2010-09-15 15:08:48 bourgesl Exp $"
+ * "@(#) $Id: SettingPanel.java,v 1.25 2010-11-25 07:58:32 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.24  2010/09/15 15:08:48  bourgesl
+ * disable again OIFits (dev only)
+ *
  * Revision 1.23  2010/09/08 16:00:30  bourgesl
  * unregister Preference Observers when the widget is released (Preference View, UV Coverage Panel)
  *
@@ -191,7 +194,7 @@ public final class SettingPanel extends JPanel implements ObservationListener {
     ObservationManager.getInstance().register(this.observationForm);
 
     // add the observation form :
-    this.jSplitPane.setLeftComponent(observationForm);
+    this.jSplitPane.setLeftComponent(this.observationForm);
   }
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JPanel jPlotPanel;
