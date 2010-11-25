@@ -161,6 +161,14 @@
         </xsd:annotation>
       </xsd:element>
 
+      <xsd:element name="targetUserInfos" type="TargetUserInformations" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>
+              User information related to targets (calibrator flag, calibrators associated to every target, user description)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
     </xsd:sequence>
 
   </xsd:complexType>
@@ -528,6 +536,69 @@
         <xsd:annotation>
           <xsd:documentation>
               The fringe tracker mode (among possible FringeTracker modes)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+
+
+
+
+  <!-- TargetUserInformations -->
+  <xsd:complexType name="TargetUserInformations">
+    <xsd:annotation>
+      <xsd:documentation>
+        This type describes the user information related to all targets.
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="calibrators" type="xsd:string" minOccurs="0" maxOccurs="unbounded">
+        <xsd:annotation>
+          <xsd:documentation>
+              The list of target names considered as calibrators
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="targetInfo" type="TargetInformation" minOccurs="0" maxOccurs="unbounded">
+        <xsd:annotation>
+          <xsd:documentation>
+              This contains additional information related to a specific target (list of calibrators, user description ...)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+
+
+
+
+  <!-- TargetInformation -->
+  <xsd:complexType name="TargetInformation">
+    <xsd:annotation>
+      <xsd:documentation>
+        This type describes the list of calibrators associated to a target
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="name" type="xsd:string">
+        <xsd:annotation>
+          <xsd:documentation>
+            The target name which this additional information is related to
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="description" type="xsd:string" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>
+            User information related to this target
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="calibrators" type="xsd:string" minOccurs="0" maxOccurs="unbounded">
+        <xsd:annotation>
+          <xsd:documentation>
+              The list of target names considered as calibrators for this target
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>

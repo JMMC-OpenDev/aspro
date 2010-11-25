@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationManager.java,v 1.43 2010-11-23 16:55:43 bourgesl Exp $"
+ * "@(#) $Id: ObservationManager.java,v 1.44 2010-11-25 07:59:23 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.43  2010/11/23 16:55:43  bourgesl
+ * removed import
+ *
  * Revision 1.42  2010/11/19 16:55:59  bourgesl
  * remove replaceTarget
  *
@@ -159,6 +162,7 @@ import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetConfiguration;
+import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.aspro.model.oi.WhenSetting;
 import fr.jmmc.aspro.util.CombUtils;
 import fr.jmmc.mcs.astro.star.Star;
@@ -873,6 +877,23 @@ public final class ObservationManager extends BaseOIManager {
     return changed;
   }
 
+  // --- TARGET USER INFORMATION -----------------------------------------------
+  /**
+   * Return the target user informations (create a new one if needed)
+   * @return target user informations
+   */
+  public TargetUserInformations getTargetUserInfos() {
+    return getObservation().getOrCreateTargetUserInfos();
+  }
+
+  /**
+   * Replace the complete target user informations
+   * @param newTargetUserInfos target user informations to store
+   */
+  public void setTargetUserInfos(final TargetUserInformations newTargetUserInfos) {
+    getObservation().setTargetUserInfos(newTargetUserInfos);
+  }
+
   // --- COMPUTATION RESULTS ---------------------------------------------------
   /**
    * Defines the computed observability data in the observation for later reuse (UV Coverage).
@@ -1062,7 +1083,7 @@ public final class ObservationManager extends BaseOIManager {
     String stationIds = null;
     List<Station> stationList = null;
 
-    final StringBuilder sb = new StringBuilder();
+    final StringBuilder sb = new StringBuilder(16);
 
     int[] idx;
     // skip first permutation as it is equivalent to stationNames :
@@ -1112,7 +1133,7 @@ public final class ObservationManager extends BaseOIManager {
    * @return string representation of main observation settings
    */
   public static String toString(final ObservationSetting obs) {
-    final StringBuffer sb = new StringBuffer();
+    final StringBuffer sb = new StringBuffer(255);
     sb.append("name : ").append(obs.getName());
     sb.append(" date : ").append(obs.getWhen().getDate());
     sb.append(" interferometer : ").append(obs.getInterferometerConfiguration().getName());
