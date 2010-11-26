@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetForm.java,v 1.5 2010-11-25 17:55:26 bourgesl Exp $"
+ * "@(#) $Id: TargetForm.java,v 1.6 2010-11-26 15:57:17 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2010/11/25 17:55:26  bourgesl
+ * updated aspro data model to use xsd:id / xsd:idref for target references
+ *
  * Revision 1.4  2010/11/25 08:00:35  bourgesl
  * added open simbad action
  * updated data model
@@ -494,7 +497,6 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     jFieldRA = new javax.swing.JTextField();
     jLabelDEC = new javax.swing.JLabel();
     jFieldDEC = new javax.swing.JTextField();
-    jSeparator2 = new javax.swing.JSeparator();
     jLabelSysVel = new javax.swing.JLabel();
     jFieldSysVel = new JFormattedTextField(getNumberFieldFormatter());
     jSeparator3 = new javax.swing.JSeparator();
@@ -621,14 +623,16 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     jLabelName.setText("Name");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    gridBagConstraints.insets = new java.awt.Insets(0, 4, 4, 4);
     jPanelTarget.add(jLabelName, gridBagConstraints);
 
     jFieldName.setColumns(10);
     jFieldName.setEditable(false);
     gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    gridBagConstraints.insets = new java.awt.Insets(0, 4, 4, 4);
     jPanelTarget.add(jFieldName, gridBagConstraints);
 
     jLabelRA.setText("RA [HMS]");
@@ -638,7 +642,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     gridBagConstraints.gridy = 1;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
     gridBagConstraints.weightx = 0.1;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
     jPanelTarget.add(jLabelRA, gridBagConstraints);
 
     jFieldRA.setColumns(10);
@@ -646,9 +650,10 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 1;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 0.2;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
     jPanelTarget.add(jFieldRA, gridBagConstraints);
 
     jLabelDEC.setText("DEC [DMS]");
@@ -657,7 +662,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
     jPanelTarget.add(jLabelDEC, gridBagConstraints);
 
     jFieldDEC.setColumns(10);
@@ -665,289 +670,276 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 3;
     gridBagConstraints.gridy = 1;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 0.2;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
     jPanelTarget.add(jFieldDEC, gridBagConstraints);
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 4;
-    gridBagConstraints.gridwidth = 4;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.weighty = 0.05;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-    jPanelTarget.add(jSeparator2, gridBagConstraints);
 
     jLabelSysVel.setText("Radial Velocity");
     jLabelSysVel.setToolTipText("radial velocity in km/s");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridy = 9;
     gridBagConstraints.gridwidth = 3;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
     jPanelTarget.add(jLabelSysVel, gridBagConstraints);
 
     jFieldSysVel.setColumns(6);
     jFieldSysVel.setName("SYSVEL"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 3;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridy = 9;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
     jPanelTarget.add(jFieldSysVel, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridy = 3;
     gridBagConstraints.gridwidth = 4;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.weighty = 0.05;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
     jPanelTarget.add(jSeparator3, gridBagConstraints);
 
     jLabelPMRA.setText("PMRA");
     jLabelPMRA.setToolTipText("proper motion in RA (mas/yr)");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 5;
+    gridBagConstraints.gridy = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
     jPanelTarget.add(jLabelPMRA, gridBagConstraints);
 
     jFieldPMRA.setColumns(6);
     jFieldPMRA.setName("PMRA"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 5;
+    gridBagConstraints.gridy = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
     jPanelTarget.add(jFieldPMRA, gridBagConstraints);
 
     jLabelRMDEC.setText("PMDEC");
     jLabelRMDEC.setToolTipText("proper motion in DEC (mas/yr)");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
-    gridBagConstraints.gridy = 5;
+    gridBagConstraints.gridy = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
     jPanelTarget.add(jLabelRMDEC, gridBagConstraints);
 
     jFieldPMDEC.setColumns(6);
     jFieldPMDEC.setName("PMDEC"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 3;
-    gridBagConstraints.gridy = 5;
+    gridBagConstraints.gridy = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
     jPanelTarget.add(jFieldPMDEC, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 7;
+    gridBagConstraints.gridy = 8;
     gridBagConstraints.gridwidth = 4;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.weighty = 0.05;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
     jPanelTarget.add(jSeparator4, gridBagConstraints);
 
     jLabelMag.setText("Magnitudes :");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 8;
-    gridBagConstraints.gridwidth = 4;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
+    gridBagConstraints.gridy = 4;
     jPanelTarget.add(jLabelMag, gridBagConstraints);
 
     jLabelMagV.setText("V");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 9;
+    gridBagConstraints.gridy = 5;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
     jPanelTarget.add(jLabelMagV, gridBagConstraints);
 
     jFieldMagV.setColumns(6);
     jFieldMagV.setName("FLUXV"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 9;
+    gridBagConstraints.gridy = 5;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
     jPanelTarget.add(jFieldMagV, gridBagConstraints);
 
     jLabelMagI.setText("I");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
-    gridBagConstraints.gridy = 9;
+    gridBagConstraints.gridy = 5;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
     jPanelTarget.add(jLabelMagI, gridBagConstraints);
 
     jFieldMagI.setColumns(6);
     jFieldMagI.setName("FLUXI"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 3;
-    gridBagConstraints.gridy = 9;
+    gridBagConstraints.gridy = 5;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
     jPanelTarget.add(jFieldMagI, gridBagConstraints);
 
     jLabelMagJ.setText("J");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 10;
+    gridBagConstraints.gridy = 6;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
     jPanelTarget.add(jLabelMagJ, gridBagConstraints);
 
     jFieldMagJ.setColumns(6);
     jFieldMagJ.setName("FLUXJ"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 10;
+    gridBagConstraints.gridy = 6;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
     jPanelTarget.add(jFieldMagJ, gridBagConstraints);
 
     jLabelMagH.setText("H");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
-    gridBagConstraints.gridy = 10;
+    gridBagConstraints.gridy = 6;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
     jPanelTarget.add(jLabelMagH, gridBagConstraints);
 
     jFieldMagH.setColumns(6);
     jFieldMagH.setName("FLUXH"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 3;
-    gridBagConstraints.gridy = 10;
+    gridBagConstraints.gridy = 6;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
     jPanelTarget.add(jFieldMagH, gridBagConstraints);
 
     jLabelMagK.setText("K");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 11;
+    gridBagConstraints.gridy = 7;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
     jPanelTarget.add(jLabelMagK, gridBagConstraints);
 
     jFieldMagK.setColumns(6);
     jFieldMagK.setName("FLUXK"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 11;
+    gridBagConstraints.gridy = 7;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
     jPanelTarget.add(jFieldMagK, gridBagConstraints);
 
     jLabelMagN.setText("N");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
-    gridBagConstraints.gridy = 11;
+    gridBagConstraints.gridy = 7;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
     jPanelTarget.add(jLabelMagN, gridBagConstraints);
 
     jFieldMagN.setColumns(6);
     jFieldMagN.setName("FLUXN"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 3;
-    gridBagConstraints.gridy = 11;
+    gridBagConstraints.gridy = 7;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
     jPanelTarget.add(jFieldMagN, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 12;
+    gridBagConstraints.gridy = 11;
     gridBagConstraints.gridwidth = 4;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.weighty = 0.05;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
     jPanelTarget.add(jSeparator5, gridBagConstraints);
 
     jLabelObjTypes.setText("Object types");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 14;
+    gridBagConstraints.gridy = 13;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
     jPanelTarget.add(jLabelObjTypes, gridBagConstraints);
 
     jLabelSpecTypes.setText("Spectral type");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 13;
+    gridBagConstraints.gridy = 12;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
     jPanelTarget.add(jLabelSpecTypes, gridBagConstraints);
 
     jFieldSpecType.setColumns(10);
     jFieldSpecType.setEditable(false);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 13;
+    gridBagConstraints.gridy = 12;
     gridBagConstraints.gridwidth = 3;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
     jPanelTarget.add(jFieldSpecType, gridBagConstraints);
 
     jFieldObjTypes.setColumns(10);
     jFieldObjTypes.setEditable(false);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 14;
+    gridBagConstraints.gridy = 13;
     gridBagConstraints.gridwidth = 3;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
     jPanelTarget.add(jFieldObjTypes, gridBagConstraints);
 
     jLabelParallax.setText("Parallax");
     jLabelParallax.setToolTipText("parallax in mas");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 6;
+    gridBagConstraints.gridy = 10;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
     jPanelTarget.add(jLabelParallax, gridBagConstraints);
 
     jFieldParallax.setColumns(6);
     jFieldParallax.setName("PARALLAX"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 6;
+    gridBagConstraints.gridy = 10;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
     jPanelTarget.add(jFieldParallax, gridBagConstraints);
 
     jLabelParaErr.setText("Error");
     jLabelParaErr.setToolTipText("Error in parallax (mas/yr)");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
-    gridBagConstraints.gridy = 6;
+    gridBagConstraints.gridy = 10;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
     jPanelTarget.add(jLabelParaErr, gridBagConstraints);
 
     jFieldParaErr.setColumns(6);
     jFieldParaErr.setName("PARA_ERR"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 3;
-    gridBagConstraints.gridy = 6;
+    gridBagConstraints.gridy = 10;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
     jPanelTarget.add(jFieldParaErr, gridBagConstraints);
 
     jLabelIds.setText("Identifiers");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 15;
+    gridBagConstraints.gridy = 14;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
     jPanelTarget.add(jLabelIds, gridBagConstraints);
 
     jTextAreaIds.setColumns(10);
@@ -960,11 +952,12 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 15;
+    gridBagConstraints.gridy = 14;
     gridBagConstraints.gridwidth = 3;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weighty = 0.1;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
     jPanelTarget.add(jScrollPaneIds, gridBagConstraints);
 
     jButtonSimbad.setText("open Simbad");
@@ -974,10 +967,12 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
       }
     });
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.gridx = 3;
+    gridBagConstraints.gridy = 0;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    gridBagConstraints.insets = new java.awt.Insets(0, 4, 4, 4);
     jPanelTarget.add(jButtonSimbad, gridBagConstraints);
+
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 1;
@@ -1135,7 +1130,6 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
   private javax.swing.JScrollPane jScrollPaneIds;
   private javax.swing.JScrollPane jScrollPaneTargetInfos;
   private javax.swing.JScrollPane jScrollPaneTreeTargets;
-  private javax.swing.JSeparator jSeparator2;
   private javax.swing.JSeparator jSeparator3;
   private javax.swing.JSeparator jSeparator4;
   private javax.swing.JSeparator jSeparator5;
