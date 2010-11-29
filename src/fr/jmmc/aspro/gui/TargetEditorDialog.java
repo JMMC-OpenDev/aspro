@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetEditorDialog.java,v 1.4 2010-11-25 07:59:59 bourgesl Exp $"
+ * "@(#) $Id: TargetEditorDialog.java,v 1.5 2010-11-29 13:51:43 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2010/11/25 07:59:59  bourgesl
+ * synchronize the selected target between tabs
+ *
  * Revision 1.3  2010/11/23 16:56:29  bourgesl
  * fixed main (locale)
  *
@@ -88,7 +91,7 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
       // 1. Create the dialog
       dialog = new JDialog(App.getFrame(), "Target Editor", true);
 
-      final Dimension dim = new Dimension(600, 600);
+      final Dimension dim = new Dimension(600, 700);
       dialog.setMinimumSize(dim);
       dialog.addComponentListener(new ComponentResizeAdapter(dim));
 
