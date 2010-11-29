@@ -862,10 +862,20 @@ public class Target
    */
   @Override
   public final Object clone() {
+    // Force identifier generation :
+    this.getIdentifier();
+
     final Target copy = (Target) super.clone();
 
     // Deep copy of models :
-    copy.models = Target.cloneModels(getModels());
+    if (copy.models != null) {
+      copy.models = Target.cloneModels(copy.models);
+    }
+
+    // Deep copy of target configuration :
+    if (copy.configuration != null) {
+      copy.configuration = (TargetConfiguration)copy.configuration.clone();
+    }
 
     return copy;
   }
@@ -876,7 +886,6 @@ public class Target
    * @return cloned model list
    */
   public static final List<Model> cloneModels(final List<Model> models) {
-    // Deep copy of models :
     final List<Model> newModels = new ArrayList<Model>(models.size());
     for (Model model : models) {
       newModels.add((Model) model.clone());

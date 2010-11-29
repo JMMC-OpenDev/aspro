@@ -278,6 +278,7 @@ public class ObservationSetting
     }
     return null;
   }
+
   /** computed observability data (read only) */
   @javax.xml.bind.annotation.XmlTransient
   private fr.jmmc.aspro.model.observability.ObservabilityData observabilityData = null;
@@ -297,7 +298,9 @@ public class ObservationSetting
   public final void setObservabilityData(final fr.jmmc.aspro.model.observability.ObservabilityData obsData) {
     this.observabilityData = obsData;
   }
+
   // TODO : store UVCoverageData also
+
   /** warning container (read only) */
   @javax.xml.bind.annotation.XmlTransient
   private fr.jmmc.aspro.model.WarningContainer warningContainer = null;
@@ -317,6 +320,7 @@ public class ObservationSetting
   public final void setWarningContainer(final fr.jmmc.aspro.model.WarningContainer warningContainer) {
     this.warningContainer = warningContainer;
   }
+
   /** computed OIFits structure (read only) */
   @javax.xml.bind.annotation.XmlTransient
   private fr.jmmc.oitools.model.OIFitsFile oiFitsFile = null;
@@ -341,6 +345,43 @@ public class ObservationSetting
   public final String toString() {
     return "Observation : " + ((this.name != null) ? this.name : "undefined");
   }
+
+
+  /**
+   * Return a deep "copy" of this instance
+   * @return deep "copy" of this instance
+   */
+  @Override
+  public final Object clone() {
+    final ObservationSetting copy = (ObservationSetting) super.clone();
+
+    // clear computed fields :
+    copy.observabilityData = null;
+    copy.oiFitsFile = null;
+    copy.warningContainer = null;
+
+    // Deep copy child objects :
+    if (copy.when != null) {
+      copy.when = (WhenSetting)copy.when.clone();
+    }
+    if (copy.interferometerConfiguration != null) {
+      copy.interferometerConfiguration = (InterferometerConfigurationChoice)copy.interferometerConfiguration.clone();
+    }
+    if (copy.instrumentConfiguration != null) {
+      copy.instrumentConfiguration = (FocalInstrumentConfigurationChoice)copy.instrumentConfiguration.clone();
+    }
+
+    // Deep copy of targets :
+    if (copy.targets != null) {
+      copy.targets = cloneList(copy.targets);
+    }
+
+//    protected TargetUserInformations targetUserInfos;
+
+
+    return copy;
+  }
+
 //--simple--preserve
 
 }
