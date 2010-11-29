@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetModelForm.java,v 1.31 2010-11-25 08:00:54 bourgesl Exp $"
+ * "@(#) $Id: TargetModelForm.java,v 1.32 2010-11-29 15:27:30 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.31  2010/11/25 08:00:54  bourgesl
+ * added getEditTarget
+ *
  * Revision 1.30  2010/11/19 16:57:04  bourgesl
  * always open full editor with selected target
  * added target name, RA/DEC, magnitudes
@@ -691,13 +694,13 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
     jPanelModelActions.add(jLabel5, gridBagConstraints);
 
-    jTextFieldName.setColumns(15);
+    jTextFieldName.setColumns(10);
     jTextFieldName.setEditable(false);
-    jTextFieldName.setMinimumSize(new java.awt.Dimension(100, 19));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.weightx = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
     jPanelModelActions.add(jTextFieldName, gridBagConstraints);
 

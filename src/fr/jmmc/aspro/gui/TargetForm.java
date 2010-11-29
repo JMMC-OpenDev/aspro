@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetForm.java,v 1.9 2010-11-29 15:07:28 bourgesl Exp $"
+ * "@(#) $Id: TargetForm.java,v 1.10 2010-11-29 15:27:30 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.9  2010/11/29 15:07:28  bourgesl
+ * smaller insets (mac)
+ *
  * Revision 1.8  2010/11/29 14:56:29  bourgesl
  * fixed UI problems with special LAF (GTK ...)
  *
@@ -491,7 +494,6 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
   private void initComponents() {
     java.awt.GridBagConstraints gridBagConstraints;
 
-    jPanelTargets = new javax.swing.JPanel();
     jScrollPaneTreeTargets = new javax.swing.JScrollPane();
     jTreeModels = createJTree();
     jPanelTargetActions = new javax.swing.JPanel();
@@ -548,10 +550,6 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
 
     setLayout(new java.awt.GridBagLayout());
 
-    jPanelTargets.setMinimumSize(new java.awt.Dimension(300, 100));
-    jPanelTargets.setPreferredSize(new java.awt.Dimension(300, 100));
-    jPanelTargets.setLayout(new java.awt.GridBagLayout());
-
     jScrollPaneTreeTargets.setMinimumSize(new java.awt.Dimension(80, 100));
     jScrollPaneTreeTargets.setPreferredSize(new java.awt.Dimension(130, 100));
 
@@ -567,7 +565,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     gridBagConstraints.weightx = 0.2;
     gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-    jPanelTargets.add(jScrollPaneTreeTargets, gridBagConstraints);
+    add(jScrollPaneTreeTargets, gridBagConstraints);
 
     jPanelTargetActions.setBorder(javax.swing.BorderFactory.createTitledBorder("Target actions"));
     jPanelTargetActions.setEnabled(false);
@@ -581,6 +579,8 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.weightx = 0.2;
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
     jPanelTargetActions.add(jButtonUp, gridBagConstraints);
 
@@ -590,6 +590,8 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.weightx = 0.2;
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
     jPanelTargetActions.add(jButtonDown, gridBagConstraints);
 
@@ -599,6 +601,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.weightx = 0.2;
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
     jPanelTargetActions.add(jToggleButtonMarkCal, gridBagConstraints);
 
@@ -608,6 +611,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.weightx = 0.2;
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
     jPanelTargetActions.add(jToggleButtonAssociateCal, gridBagConstraints);
 
@@ -625,7 +629,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.weighty = 0.1;
-    jPanelTargets.add(jPanelTargetActions, gridBagConstraints);
+    add(jPanelTargetActions, gridBagConstraints);
 
     jPanelTarget.setBorder(javax.swing.BorderFactory.createTitledBorder("Target"));
     jPanelTarget.setLayout(new java.awt.GridBagLayout());
@@ -990,7 +994,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.weightx = 0.8;
     gridBagConstraints.weighty = 0.7;
-    jPanelTargets.add(jPanelTarget, gridBagConstraints);
+    add(jPanelTarget, gridBagConstraints);
 
     jPanelDescription.setBorder(javax.swing.BorderFactory.createTitledBorder("Target information"));
     jPanelDescription.setMinimumSize(new java.awt.Dimension(10, 50));
@@ -1019,15 +1023,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.weighty = 0.2;
-    jPanelTargets.add(jPanelDescription, gridBagConstraints);
-
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.weighty = 0.3;
-    add(jPanelTargets, gridBagConstraints);
+    add(jPanelDescription, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
 
   private void jTextAreaTargetInfosFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jTextAreaTargetInfosFocusLost
@@ -1137,7 +1133,6 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
   private javax.swing.JPanel jPanelDescription;
   private javax.swing.JPanel jPanelTarget;
   private javax.swing.JPanel jPanelTargetActions;
-  private javax.swing.JPanel jPanelTargets;
   private javax.swing.JScrollPane jScrollPaneIds;
   private javax.swing.JScrollPane jScrollPaneTargetInfos;
   private javax.swing.JScrollPane jScrollPaneTreeTargets;
