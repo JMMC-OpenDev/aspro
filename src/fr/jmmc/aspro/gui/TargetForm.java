@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetForm.java,v 1.6 2010-11-26 15:57:17 bourgesl Exp $"
+ * "@(#) $Id: TargetForm.java,v 1.7 2010-11-29 13:52:11 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2010/11/26 15:57:17  bourgesl
+ * magnitudes moved upper
+ * minor UI changes
+ *
  * Revision 1.5  2010/11/25 17:55:26  bourgesl
  * updated aspro data model to use xsd:id / xsd:idref for target references
  *
@@ -699,7 +703,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     gridBagConstraints.gridy = 3;
     gridBagConstraints.gridwidth = 4;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.weighty = 0.05;
+    gridBagConstraints.weighty = 0.1;
     jPanelTarget.add(jSeparator3, gridBagConstraints);
 
     jLabelPMRA.setText("PMRA");
@@ -742,13 +746,14 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     gridBagConstraints.gridy = 8;
     gridBagConstraints.gridwidth = 4;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.weighty = 0.05;
+    gridBagConstraints.weighty = 0.1;
     jPanelTarget.add(jSeparator4, gridBagConstraints);
 
     jLabelMag.setText("Magnitudes :");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 4;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.SOUTH;
     jPanelTarget.add(jLabelMag, gridBagConstraints);
 
     jLabelMagV.setText("V");
@@ -857,7 +862,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     gridBagConstraints.gridy = 11;
     gridBagConstraints.gridwidth = 4;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.weighty = 0.05;
+    gridBagConstraints.weighty = 0.1;
     jPanelTarget.add(jSeparator5, gridBagConstraints);
 
     jLabelObjTypes.setText("Object types");
@@ -882,7 +887,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 12;
     gridBagConstraints.gridwidth = 3;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
     jPanelTarget.add(jFieldSpecType, gridBagConstraints);
@@ -893,7 +898,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 13;
     gridBagConstraints.gridwidth = 3;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
     jPanelTarget.add(jFieldObjTypes, gridBagConstraints);
@@ -942,10 +947,10 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
     jPanelTarget.add(jLabelIds, gridBagConstraints);
 
-    jTextAreaIds.setColumns(10);
+    jTextAreaIds.setColumns(20);
     jTextAreaIds.setEditable(false);
     jTextAreaIds.setLineWrap(true);
-    jTextAreaIds.setRows(2);
+    jTextAreaIds.setRows(1);
     jTextAreaIds.setTabSize(2);
     jTextAreaIds.setWrapStyleWord(true);
     jScrollPaneIds.setViewportView(jTextAreaIds);
@@ -956,7 +961,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     gridBagConstraints.gridwidth = 3;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.weighty = 0.1;
+    gridBagConstraints.weighty = 0.3;
     gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
     jPanelTarget.add(jScrollPaneIds, gridBagConstraints);
 
@@ -978,7 +983,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.weightx = 0.8;
-    gridBagConstraints.weighty = 0.8;
+    gridBagConstraints.weighty = 0.7;
     jPanelTargets.add(jPanelTarget, gridBagConstraints);
 
     jPanelDescription.setBorder(javax.swing.BorderFactory.createTitledBorder("Target information"));
@@ -989,7 +994,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     jTextAreaTargetInfos.setBackground(new java.awt.Color(255, 255, 153));
     jTextAreaTargetInfos.setColumns(20);
     jTextAreaTargetInfos.setFont(new java.awt.Font("Monospaced", 0, 10));
-    jTextAreaTargetInfos.setRows(2);
+    jTextAreaTargetInfos.setRows(1);
     jTextAreaTargetInfos.addFocusListener(new java.awt.event.FocusAdapter() {
       public void focusLost(java.awt.event.FocusEvent evt) {
         jTextAreaTargetInfosFocusLost(evt);
@@ -1001,13 +1006,14 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
     jPanelDescription.add(jScrollPaneTargetInfos, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.weighty = 0.1;
+    gridBagConstraints.weighty = 0.2;
     jPanelTargets.add(jPanelDescription, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
