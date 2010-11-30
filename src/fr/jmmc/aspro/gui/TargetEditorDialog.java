@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetEditorDialog.java,v 1.6 2010-11-30 17:03:34 bourgesl Exp $"
+ * "@(#) $Id: TargetEditorDialog.java,v 1.7 2010-11-30 17:20:25 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2010/11/30 17:03:34  bourgesl
+ * use new cloned ObservationSetting to define model (targets + target user informations)
+ *
  * Revision 1.5  2010/11/29 13:51:43  bourgesl
  * larger height for dialog window
  *
@@ -86,7 +89,7 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
 
     // Prepare the data model (editable targets and user infos) :
     final List<Target> targets = cloned.getTargets();
-    final TargetUserInformations targetUserInfos = cloned.getTargetUserInfos();
+    final TargetUserInformations targetUserInfos = cloned.getOrCreateTargetUserInfos();
 
     final TargetEditorDialog form = new TargetEditorDialog(targets, targetUserInfos);
 
