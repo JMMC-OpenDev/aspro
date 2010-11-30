@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationManager.java,v 1.44 2010-11-25 07:59:23 bourgesl Exp $"
+ * "@(#) $Id: ObservationManager.java,v 1.45 2010-11-30 15:52:25 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.44  2010/11/25 07:59:23  bourgesl
+ * updated data model to add target user informations (description, calibrator flag, calibrator list per target ...)
+ * support cloneable
+ *
  * Revision 1.43  2010/11/23 16:55:43  bourgesl
  * removed import
  *
@@ -278,6 +282,11 @@ public final class ObservationManager extends BaseOIManager {
       }
 
       final ObservationSetting newObservation = (ObservationSetting) loaded;
+
+      // post load processing :
+      ObservationFileProcessor.onLoad(newObservation);
+
+      // ready to use :
       changeObservation(newObservation);
     }
   }
@@ -300,6 +309,8 @@ public final class ObservationManager extends BaseOIManager {
       if (!(loaded instanceof ObservationSetting)) {
         throw new IllegalArgumentException("The loaded file does not correspond to a valid Aspro2 file");
       }
+
+      // TODO : use ObservationFileProcessor ??
 
       return (ObservationSetting) loaded;
     }
@@ -340,7 +351,13 @@ public final class ObservationManager extends BaseOIManager {
       if (logger.isLoggable(Level.INFO)) {
         logger.info("Save observation to : " + this.observationFile);
       }
-      saveObject(this.observationFile, getObservation());
+
+      final ObservationSetting saveObservation = getObservation();
+
+      // pre save processing :
+      ObservationFileProcessor.onSave(saveObservation);
+
+      saveObject(this.observationFile, saveObservation);
     }
   }
 
