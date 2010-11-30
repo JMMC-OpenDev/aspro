@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetForm.java,v 1.10 2010-11-29 15:27:30 bourgesl Exp $"
+ * "@(#) $Id: TargetForm.java,v 1.11 2010-11-30 17:04:18 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.10  2010/11/29 15:27:30  bourgesl
+ * small GUI changes for platform compatibility
+ *
  * Revision 1.9  2010/11/29 15:07:28  bourgesl
  * smaller insets (mac)
  *
@@ -53,6 +56,7 @@ import java.util.List;
 import java.util.logging.Level;
 import javax.swing.JFormattedTextField;
 import javax.swing.JTree;
+import javax.swing.SwingUtilities;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.text.NumberFormatter;
@@ -148,6 +152,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     this.selectTarget(targetName);
   }
   /* Tree related methods */
+
   /**
    * Return the tree model
    * @return tree model
@@ -306,26 +311,33 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
 
     /* React to the node selection. */
 
-    // Check if it is the root node :
-    final DefaultMutableTreeNode rootNode = getRootNode();
-    if (node == rootNode) {
-      selectFirstTarget(rootNode);
-      return;
-    }
+    // Use invokeLater to avoid event ordering problems with focusLost on JTextArea
+    // or JTable editors :
+    SwingUtilities.invokeLater(new Runnable() {
 
-    /* retrieve the node that was selected */
-    final Object userObject = node.getUserObject();
+      public void run() {
+        // Check if it is the root node :
+        final DefaultMutableTreeNode rootNode = getRootNode();
+        if (node == rootNode) {
+          selectFirstTarget(rootNode);
+          return;
+        }
 
-    if (userObject != null) {
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("tree selection : " + userObject);
+        /* retrieve the node that was selected */
+        final Object userObject = node.getUserObject();
+
+        if (userObject != null) {
+          if (logger.isLoggable(Level.FINE)) {
+            logger.fine("tree selection : " + userObject);
+          }
+
+          if (userObject instanceof Target) {
+            // Target :
+            processTargetSelection((Target) userObject);
+          }
+        }
       }
-
-      if (userObject instanceof Target) {
-        // Target :
-        this.processTargetSelection((Target) userObject);
-      }
-    }
+    });
   }
 
   /**
@@ -1027,7 +1039,15 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
   }// </editor-fold>//GEN-END:initComponents
 
   private void jTextAreaTargetInfosFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jTextAreaTargetInfosFocusLost
-    // TODO add your handling code here:
+    super.processFocusEvent(evt);
+
+    // ignore temporary focus event
+    if (evt.isTemporary()) {
+      return;
+    }
+
+    logger.severe("focusLost : " + this.currentTarget.getIdentifier() + " = " + this.jTextAreaTargetInfos.getText());
+
     targetInfosChanged(this.jTextAreaTargetInfos.getText());
   }//GEN-LAST:event_jTextAreaTargetInfosFocusLost
 

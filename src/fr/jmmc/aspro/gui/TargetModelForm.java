@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetModelForm.java,v 1.32 2010-11-29 15:27:30 bourgesl Exp $"
+ * "@(#) $Id: TargetModelForm.java,v 1.33 2010-11-30 17:04:18 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.32  2010/11/29 15:27:30  bourgesl
+ * small GUI changes for platform compatibility
+ *
  * Revision 1.31  2010/11/25 08:00:54  bourgesl
  * added getEditTarget
  *
@@ -128,6 +131,7 @@ import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.JTree;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -412,32 +416,40 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
 
     /* React to the node selection. */
 
-    // Check if it is the root node :
-    final DefaultMutableTreeNode rootNode = getRootNode();
-    if (node == rootNode) {
-      selectFirstTarget(rootNode);
-      return;
-    }
+    // Use invokeLater to avoid event ordering problems with focusLost on JTextArea
+    // or JTable editors :
+    SwingUtilities.invokeLater(new Runnable() {
 
-    /* retrieve the node that was selected */
-    final Object userObject = node.getUserObject();
+      public void run() {
 
-    if (userObject != null) {
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("tree selection : " + userObject);
+        // Check if it is the root node :
+        final DefaultMutableTreeNode rootNode = getRootNode();
+        if (node == rootNode) {
+          selectFirstTarget(rootNode);
+          return;
+        }
+
+        /* retrieve the node that was selected */
+        final Object userObject = node.getUserObject();
+
+        if (userObject != null) {
+          if (logger.isLoggable(Level.FINE)) {
+            logger.fine("tree selection : " + userObject);
+          }
+
+          if (userObject instanceof Target) {
+            // Target :
+            processTargetSelection((Target) userObject);
+          } else if (userObject instanceof Model) {
+            final TreeNode[] path = node.getPath();
+            // target is after the root node in the tree path :
+            final Target target = (Target) ((DefaultMutableTreeNode) path[1]).getUserObject();
+            // Model :
+            processModelSelection(target, (Model) userObject);
+          }
+        }
       }
-
-      if (userObject instanceof Target) {
-        // Target :
-        this.processTargetSelection((Target) userObject);
-      } else if (userObject instanceof Model) {
-        final TreeNode[] path = node.getPath();
-        // target is after the root node in the tree path :
-        final Target target = (Target) ((DefaultMutableTreeNode) path[1]).getUserObject();
-        // Model :
-        this.processModelSelection(target, (Model) userObject);
-      }
-    }
+    });
   }
 
   /**
