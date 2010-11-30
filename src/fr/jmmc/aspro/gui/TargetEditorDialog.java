@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetEditorDialog.java,v 1.5 2010-11-29 13:51:43 bourgesl Exp $"
+ * "@(#) $Id: TargetEditorDialog.java,v 1.6 2010-11-30 17:03:34 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2010/11/29 13:51:43  bourgesl
+ * larger height for dialog window
+ *
  * Revision 1.4  2010/11/25 07:59:59  bourgesl
  * synchronize the selected target between tabs
  *
@@ -24,6 +27,7 @@ package fr.jmmc.aspro.gui;
 
 import fr.jmmc.aspro.gui.util.ComponentResizeAdapter;
 import fr.jmmc.aspro.model.ObservationManager;
+import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.mcs.gui.App;
@@ -76,9 +80,13 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
     boolean result = false;
 
     final ObservationManager om = ObservationManager.getInstance();
-    // Prepare the list of targets :
-    final List<Target> targets = om.getTargets();
-    final TargetUserInformations targetUserInfos = om.getTargetUserInfos();
+
+    // use deep copy of the current observation to allow OK/cancel actions :
+    final ObservationSetting cloned = (ObservationSetting) om.getObservation().clone();
+
+    // Prepare the data model (editable targets and user infos) :
+    final List<Target> targets = cloned.getTargets();
+    final TargetUserInformations targetUserInfos = cloned.getTargetUserInfos();
 
     final TargetEditorDialog form = new TargetEditorDialog(targets, targetUserInfos);
 
@@ -138,10 +146,10 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
   }
 
   /** 
-   * Creates new form TargetEditorDialog
+   * Creates new form TargetEditorDialog (used to test swing interface in NetBeans)
    */
   public TargetEditorDialog() {
-    this(null, null);
+    this(new ArrayList<Target>(0), new TargetUserInformations());
   }
 
   /**
@@ -152,23 +160,9 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
   protected TargetEditorDialog(final List<Target> targets, final TargetUserInformations targetUserInfos) {
     super();
 
-    // Prepare data model (clone to support cancel) :
-    final int size = (targets != null) ? targets.size() : 0;
-
-    this.editTargets = new ArrayList<Target>(size);
-
-    if (targets != null) {
-      Target target;
-      for (Target t : targets) {
-        // clone target and models to allow undo/cancel actions :
-        target = (Target) t.clone();
-
-        // add the cloned target to the edited targets :
-        this.editTargets.add(target);
-      }
-    }
-
-    this.editTargetUserInfos = (targetUserInfos != null) ? targetUserInfos : new TargetUserInformations();
+    // Define shared data model with tabbed forms :
+    this.editTargets = targets;
+    this.editTargetUserInfos = targetUserInfos;
 
     // initialize swing components :
     initComponents();
@@ -184,8 +178,6 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
 
         final Component selected = jTabbedPane.getSelectedComponent();
 
-        logger.severe("selected : " + selected.getClass().getSimpleName());
-
         if (selected == targetModelForm) {
           // TODO : refresh the tree according to the new target / calibrator list
 
@@ -194,8 +186,6 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
         } else if (selected == targetForm) {
           // select the target :
           targetForm.selectTarget(targetModelForm.getCurrentTarget().getName());
-        } else {
-          logger.severe("unsupported tab event = " + ce);
         }
       }
     });
@@ -206,6 +196,8 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
    * @param targetName target name to select
    */
   protected void initialize(final String targetName) {
+
+    // Propagate the model (edited targets and user infos) to forms :
 
     this.targetModelForm.initialize(getEditTargets(), targetName);
 
