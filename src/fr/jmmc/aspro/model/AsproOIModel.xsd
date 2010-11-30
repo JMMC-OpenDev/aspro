@@ -121,6 +121,14 @@
       </xsd:documentation>
     </xsd:annotation>
     <xsd:sequence>
+      <xsd:element name="schemaVersion" type="xsd:float">
+        <xsd:annotation>
+          <xsd:documentation>
+              Schema version for this observation
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
       <xsd:element name="name" type="xsd:string">
         <xsd:annotation>
           <xsd:documentation>
@@ -316,13 +324,6 @@
       </xsd:documentation>
     </xsd:annotation>
     <xsd:sequence>
-      <xsd:element name="id" type="xsd:ID">
-        <xsd:annotation>
-          <xsd:documentation>
-              Identifier for this target (derived from the target name)
-          </xsd:documentation>
-        </xsd:annotation>
-      </xsd:element>
       <xsd:element name="name" type="xsd:string">
         <xsd:annotation>
           <xsd:documentation>
@@ -499,6 +500,15 @@
       </xsd:element>
 
     </xsd:sequence>
+
+    <xsd:attribute name="id" type="xsd:ID" use="required">
+      <xsd:annotation>
+        <xsd:documentation>
+            Identifier for this target (derived from the target name)
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+
   </xsd:complexType>
 
 
@@ -552,7 +562,7 @@
       </xsd:documentation>
     </xsd:annotation>
     <xsd:sequence>
-      <xsd:element name="calibrators" type="xsd:IDREFS" minOccurs="0" maxOccurs="unbounded">
+      <xsd:element name="calibrators" type="xsd:IDREFS" minOccurs="0">
         <xsd:annotation>
           <xsd:documentation>
               The list of targets considered as calibrators
@@ -585,7 +595,7 @@
       </xsd:documentation>
     </xsd:annotation>
     <xsd:sequence>
-      <xsd:element name="target" type="xsd:IDREF">
+      <xsd:element name="targetRef" type="xsd:IDREF">
         <xsd:annotation>
           <xsd:documentation>
             The target identifier corresponding to the target which this additional information is related to
@@ -604,7 +614,8 @@
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
-      <xsd:element name="calibrators" type="xsd:IDREFS" minOccurs="0" maxOccurs="unbounded">
+
+      <xsd:element name="calibrators" type="xsd:IDREFS" minOccurs="0">
         <xsd:annotation>
           <xsd:documentation>
               The list of targets considered as calibrators for this target

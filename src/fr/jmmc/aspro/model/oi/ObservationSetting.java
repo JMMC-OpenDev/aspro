@@ -33,6 +33,7 @@ import fr.jmmc.aspro.model.OIBase;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
+ *         &lt;element name="schemaVersion" type="{http://www.w3.org/2001/XMLSchema}float"/>
  *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *         &lt;element name="when" type="{http://www.jmmc.fr/aspro-oi/0.1}WhenSetting"/>
  *         &lt;element name="interferometerConfiguration" type="{http://www.jmmc.fr/aspro-oi/0.1}InterferometerConfigurationChoice"/>
@@ -49,6 +50,7 @@ import fr.jmmc.aspro.model.OIBase;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "Observation", propOrder = {
+    "schemaVersion",
     "name",
     "when",
     "interferometerConfiguration",
@@ -61,6 +63,7 @@ public class ObservationSetting
     extends OIBase
 {
 
+    protected float schemaVersion;
     @XmlElement(required = true)
     protected String name;
     @XmlElement(required = true)
@@ -72,6 +75,22 @@ public class ObservationSetting
     @XmlElement(name = "target", required = true)
     protected List<Target> targets;
     protected TargetUserInformations targetUserInfos;
+
+    /**
+     * Gets the value of the schemaVersion property.
+     * 
+     */
+    public float getSchemaVersion() {
+        return schemaVersion;
+    }
+
+    /**
+     * Sets the value of the schemaVersion property.
+     * 
+     */
+    public void setSchemaVersion(float value) {
+        this.schemaVersion = value;
+    }
 
     /**
      * Gets the value of the name property.
@@ -278,7 +297,6 @@ public class ObservationSetting
     }
     return null;
   }
-
   /** computed observability data (read only) */
   @javax.xml.bind.annotation.XmlTransient
   private fr.jmmc.aspro.model.observability.ObservabilityData observabilityData = null;
@@ -298,9 +316,7 @@ public class ObservationSetting
   public final void setObservabilityData(final fr.jmmc.aspro.model.observability.ObservabilityData obsData) {
     this.observabilityData = obsData;
   }
-
   // TODO : store UVCoverageData also
-
   /** warning container (read only) */
   @javax.xml.bind.annotation.XmlTransient
   private fr.jmmc.aspro.model.WarningContainer warningContainer = null;
@@ -320,7 +336,6 @@ public class ObservationSetting
   public final void setWarningContainer(final fr.jmmc.aspro.model.WarningContainer warningContainer) {
     this.warningContainer = warningContainer;
   }
-
   /** computed OIFits structure (read only) */
   @javax.xml.bind.annotation.XmlTransient
   private fr.jmmc.oitools.model.OIFitsFile oiFitsFile = null;
@@ -346,7 +361,6 @@ public class ObservationSetting
     return "Observation : " + ((this.name != null) ? this.name : "undefined");
   }
 
-
   /**
    * Return a deep "copy" of this instance
    * @return deep "copy" of this instance
@@ -362,26 +376,58 @@ public class ObservationSetting
 
     // Deep copy child objects :
     if (copy.when != null) {
-      copy.when = (WhenSetting)copy.when.clone();
+      copy.when = (WhenSetting) copy.when.clone();
     }
     if (copy.interferometerConfiguration != null) {
-      copy.interferometerConfiguration = (InterferometerConfigurationChoice)copy.interferometerConfiguration.clone();
+      copy.interferometerConfiguration = (InterferometerConfigurationChoice) copy.interferometerConfiguration.clone();
     }
     if (copy.instrumentConfiguration != null) {
-      copy.instrumentConfiguration = (FocalInstrumentConfigurationChoice)copy.instrumentConfiguration.clone();
+      copy.instrumentConfiguration = (FocalInstrumentConfigurationChoice) copy.instrumentConfiguration.clone();
     }
 
     // Deep copy of targets :
     if (copy.targets != null) {
-      copy.targets = cloneList(copy.targets);
+      copy.targets = OIBase.deepCopyList(copy.targets);
     }
 
-//    protected TargetUserInformations targetUserInfos;
+    // Deep copy of target user infos :
+    if (copy.targetUserInfos != null) {
+      // deep copy objects but not targets (already done previously, only used for id / idref) :
+      copy.targetUserInfos = (TargetUserInformations) copy.targetUserInfos.clone();
 
+      // replace old target instances by cloned target instances :
+      copy.targetUserInfos.updateTargetReferences(copy.createTargetIndex());
+    }
 
     return copy;
   }
 
+  /**
+   * Check this object for bad reference(s) and removes them if needed.
+   * For now it checks target ID/IDREF consistency (targetUserInformations...)
+   */
+  public void checkReferences() {
+    // check target user infos :
+    if (this.targetUserInfos != null) {
+      if (logger.isLoggable(java.util.logging.Level.FINE)) {
+        logger.fine("checkReferences = " + this.targetUserInfos);
+      }
+      this.targetUserInfos.updateTargetReferences(this.createTargetIndex());
+    }
+  }
+
+  /**
+   * Return the Map<ID, Target> index
+   * @return Map<ID, Target> index
+   */
+  private java.util.Map<String, Target> createTargetIndex() {
+    // create the Map<ID, Target> index :
+    final java.util.Map<String, Target> mapIDTargets = new java.util.HashMap<String, Target>();
+    for (Target target : this.targets) {
+      mapIDTargets.put(target.getIdentifier(), target);
+    }
+    return mapIDTargets;
+  }
 //--simple--preserve
 
 }

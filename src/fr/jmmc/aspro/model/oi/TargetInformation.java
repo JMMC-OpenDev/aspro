@@ -3,12 +3,11 @@ package fr.jmmc.aspro.model.oi;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementRef;
 import javax.xml.bind.annotation.XmlIDREF;
+import javax.xml.bind.annotation.XmlList;
 import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 import fr.jmmc.aspro.model.OIBase;
@@ -28,9 +27,9 @@ import fr.jmmc.aspro.model.OIBase;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="target" type="{http://www.w3.org/2001/XMLSchema}IDREF"/>
+ *         &lt;element name="targetRef" type="{http://www.w3.org/2001/XMLSchema}IDREF"/>
  *         &lt;element name="description" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="calibrators" type="{http://www.w3.org/2001/XMLSchema}IDREFS" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="calibrators" type="{http://www.w3.org/2001/XMLSchema}IDREFS" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -41,7 +40,7 @@ import fr.jmmc.aspro.model.OIBase;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "TargetInformation", propOrder = {
-    "target",
+    "targetRef",
     "description",
     "calibrators"
 })
@@ -52,33 +51,36 @@ public class TargetInformation
     @XmlElement(required = true, type = Object.class)
     @XmlIDREF
     @XmlSchemaType(name = "IDREF")
-    protected Target target;
+    protected Target targetRef;
     protected String description;
-    @XmlElementRef(name = "calibrators", type = JAXBElement.class)
+    @XmlList
+    @XmlElement(type = Object.class)
+    @XmlIDREF
+    @XmlSchemaType(name = "IDREFS")
     protected List<Target> calibrators;
 
     /**
-     * Gets the value of the target property.
+     * Gets the value of the targetRef property.
      * 
      * @return
      *     possible object is
      *     {@link Object }
      *     
      */
-    public Target getTarget() {
-        return target;
+    public Target getTargetRef() {
+        return targetRef;
     }
 
     /**
-     * Sets the value of the target property.
+     * Sets the value of the targetRef property.
      * 
      * @param value
      *     allowed object is
      *     {@link Object }
      *     
      */
-    public void setTarget(Target value) {
-        this.target = value;
+    public void setTargetRef(Target value) {
+        this.targetRef = value;
     }
 
     /**
@@ -123,7 +125,7 @@ public class TargetInformation
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link JAXBElement }{@code <}{@link List }{@code <}{@link Object }{@code >}{@code >}
+     * {@link Object }
      * 
      * 
      */
@@ -135,10 +137,9 @@ public class TargetInformation
     }
     
 //--simple--preserve
-
   @Override
   public final String toString() {
-    return "TargetInformation [" + ((this.getTarget() != null) ? this.getTarget() : "undefined") + "]" + " : " + getCalibrators();
+    return "TargetInformation [" + ((this.getTargetRef() != null) ? this.getTargetRef() : "undefined") + "]" + " : " + getCalibrators();
   }
 
   /**
@@ -149,17 +150,43 @@ public class TargetInformation
   public final Object clone() {
     final TargetInformation copy = (TargetInformation) super.clone();
 
-    // note : targets are not cloned again as only there (immutable) identifier is needed
+    // note : targets are not cloned as only there (immutable) identifier is useful
+    // see  : updateTargetReferences(Map<ID, Target>) to replace target instances to have a clean object graph
+    // i.e. (no leaking references)
 
-    // Deep copy of calibrators :
-    final List<Target> oldCalibrators = copy.getCalibrators();
-    final List<Target> newCalibrators = new ArrayList<Target>(oldCalibrators.size());
-    for (Target cal : oldCalibrators) {
-      newCalibrators.add(cal);
+    // Simple copy of calibrators (Target instances) :
+    if (copy.calibrators != null) {
+      copy.calibrators = OIBase.copyList(copy.calibrators);
     }
-    copy.calibrators = newCalibrators;
 
     return copy;
+  }
+
+  /**
+   * Check bad references and update target references in this instance using the given Map<ID, Target> index
+   * @param mapIDTargets Map<ID, Target> index
+   */
+  protected final void updateTargetReferences(final java.util.Map<String, Target> mapIDTargets) {
+    // note : targetRef is already updated in TargetUserInformations
+
+    if (this.calibrators != null) {
+      Target target, newTarget;
+
+      for (final java.util.ListIterator<Target> it = this.calibrators.listIterator(); it.hasNext();) {
+        target = it.next();
+
+        newTarget = mapIDTargets.get(target.getIdentifier());
+        if (newTarget != null) {
+          if (newTarget != target) {
+            it.set(newTarget);
+          }
+        } else {
+          logger.info("Removing missing target reference '" + target.getIdentifier() + "'.");
+          it.remove();
+        }
+      }
+    }
+
   }
 //--simple--preserve
 

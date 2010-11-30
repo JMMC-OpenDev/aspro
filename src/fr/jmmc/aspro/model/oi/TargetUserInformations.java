@@ -3,11 +3,12 @@ package fr.jmmc.aspro.model.oi;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementRef;
+import javax.xml.bind.annotation.XmlIDREF;
+import javax.xml.bind.annotation.XmlList;
+import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 import fr.jmmc.aspro.model.OIBase;
 
@@ -26,7 +27,7 @@ import fr.jmmc.aspro.model.OIBase;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="calibrators" type="{http://www.w3.org/2001/XMLSchema}IDREFS" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="calibrators" type="{http://www.w3.org/2001/XMLSchema}IDREFS" minOccurs="0"/>
  *         &lt;element name="targetInfo" type="{http://www.jmmc.fr/aspro-oi/0.1}TargetInformation" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
@@ -45,7 +46,10 @@ public class TargetUserInformations
     extends OIBase
 {
 
-    @XmlElementRef(name = "calibrators", type = JAXBElement.class)
+    @XmlList
+    @XmlElement(type = Object.class)
+    @XmlIDREF
+    @XmlSchemaType(name = "IDREFS")
     protected List<Target> calibrators;
     @XmlElement(name = "targetInfo")
     protected List<TargetInformation> targetInfos;
@@ -68,7 +72,7 @@ public class TargetUserInformations
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link JAXBElement }{@code <}{@link List }{@code <}{@link Object }{@code >}{@code >}
+     * {@link Object }
      * 
      * 
      */
@@ -122,21 +126,20 @@ public class TargetUserInformations
    */
   public final TargetInformation getTargetUserInformation(final Target target) {
     for (TargetInformation targetInfo : getTargetInfos()) {
-      if (targetInfo.getTarget().equals(target)) {
+      if (targetInfo.getTargetRef().equals(target)) {
         return targetInfo;
       }
     }
     // create a new instance if the target is not found :
     final TargetInformation targetInfo = new TargetInformation();
-    targetInfo.setTarget(target);
+    targetInfo.setTargetRef(target);
     getTargetInfos().add(targetInfo);
     return targetInfo;
   }
 
   /*
-   TODO : prune TargetInformation orphans
+  TODO : prune TargetInformation orphans
    */
-
   /**
    * Return a deep "copy" of this instance
    * @return deep "copy" of this instance
@@ -145,25 +148,74 @@ public class TargetUserInformations
   public final Object clone() {
     final TargetUserInformations copy = (TargetUserInformations) super.clone();
 
-    // note : targets are not cloned again as only there (immutable) identifier is needed
+    // note : targets are not cloned as only there (immutable) identifier is useful
+    // see  : updateTargetReferences(Map<ID, Target>) to replace target instances to have a clean object graph
+    // i.e. (no leaking references)
 
-    // Deep copy of calibrators :
-    final List<Target> oldCalibrators = copy.getCalibrators();
-    final List<Target> newCalibrators = new ArrayList<Target>(oldCalibrators.size());
-    for (Target cal : oldCalibrators) {
-      newCalibrators.add(cal);
+    // Simple copy of calibrators (Target instances) :
+    if (copy.calibrators != null) {
+      copy.calibrators = OIBase.copyList(copy.calibrators);
     }
-    copy.calibrators = newCalibrators;
 
     // Deep copy of target informations :
-    final List<TargetInformation> oldTargetInfos = copy.getTargetInfos();
-    final List<TargetInformation> newTargetInfos = new ArrayList<TargetInformation>(oldTargetInfos.size());
-    for (TargetInformation info : oldTargetInfos) {
-      newTargetInfos.add((TargetInformation) info.clone());
+    if (copy.targetInfos != null) {
+      copy.targetInfos = OIBase.deepCopyList(copy.targetInfos);
     }
-    copy.targetInfos = newTargetInfos;
 
     return copy;
+  }
+
+  /**
+   * Check bad references and update target references in this instance using the given Map<ID, Target> index
+   * @param mapIDTargets Map<ID, Target> index
+   */
+  protected final void updateTargetReferences(final java.util.Map<String, Target> mapIDTargets) {
+
+    if (this.calibrators != null) {
+      Target target, newTarget;
+
+      for (final java.util.ListIterator<Target> it = this.calibrators.listIterator(); it.hasNext();) {
+        target = it.next();
+
+        newTarget = mapIDTargets.get(target.getIdentifier());
+        if (newTarget != null) {
+          if (newTarget != target) {
+            it.set(newTarget);
+          }
+        } else {
+          logger.info("Removing missing target reference '" + target.getIdentifier() + "'.");
+          it.remove();
+        }
+      }
+    }
+
+    if (this.targetInfos != null) {
+      TargetInformation targetInfo;
+      Target target, newTarget;
+
+      for (final java.util.ListIterator<TargetInformation> it = this.targetInfos.listIterator(); it.hasNext();) {
+        targetInfo = it.next();
+
+        target = targetInfo.getTargetRef();
+
+        if (target == null) {
+          logger.info("Removing invalid target reference.");
+          it.remove();
+        } else {
+          newTarget = mapIDTargets.get(target.getIdentifier());
+          if (newTarget != null) {
+            if (newTarget != target) {
+              targetInfo.setTargetRef(newTarget);
+            }
+
+            targetInfo.updateTargetReferences(mapIDTargets);
+          } else {
+            logger.info("Removing missing target reference '" + target.getIdentifier() + "'.");
+            it.remove();
+          }
+        }
+      }
+    }
   }
 //--simple--preserve
 

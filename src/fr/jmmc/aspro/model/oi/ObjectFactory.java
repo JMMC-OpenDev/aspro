@@ -1,12 +1,7 @@
 
 package fr.jmmc.aspro.model.oi;
 
-import java.util.List;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.annotation.XmlElementDecl;
-import javax.xml.bind.annotation.XmlIDREF;
 import javax.xml.bind.annotation.XmlRegistry;
-import javax.xml.namespace.QName;
 
 
 /**
@@ -26,7 +21,6 @@ import javax.xml.namespace.QName;
 @XmlRegistry
 public class ObjectFactory {
 
-    private final static QName _TargetInformationCalibrators_QNAME = new QName("", "calibrators");
 
     /**
      * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: fr.jmmc.aspro.model.oi
@@ -164,6 +158,14 @@ public class ObjectFactory {
     }
 
     /**
+     * Create an instance of {@link ObservationSetting }
+     * 
+     */
+    public ObservationSetting createObservationSetting() {
+        return new ObservationSetting();
+    }
+
+    /**
      * Create an instance of {@link ChannelLink }
      * 
      */
@@ -273,34 +275,6 @@ public class ObjectFactory {
      */
     public FocalInstrumentConfigurationChoice createFocalInstrumentConfigurationChoice() {
         return new FocalInstrumentConfigurationChoice();
-    }
-
-    /**
-     * Create an instance of {@link ObservationSetting }
-     * 
-     */
-    public ObservationSetting createObservationSetting() {
-        return new ObservationSetting();
-    }
-
-    /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link List }{@code <}{@link Object }{@code >}{@code >}}
-     * 
-     */
-    @XmlElementDecl(namespace = "", name = "calibrators", scope = TargetInformation.class)
-    @XmlIDREF
-    public JAXBElement<List<Object>> createTargetInformationCalibrators(List<Object> value) {
-        return new JAXBElement<List<Object>>(_TargetInformationCalibrators_QNAME, ((Class) List.class), TargetInformation.class, ((List<Object> ) value));
-    }
-
-    /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link List }{@code <}{@link Object }{@code >}{@code >}}
-     * 
-     */
-    @XmlElementDecl(namespace = "", name = "calibrators", scope = TargetUserInformations.class)
-    @XmlIDREF
-    public JAXBElement<List<Object>> createTargetUserInformationsCalibrators(List<Object> value) {
-        return new JAXBElement<List<Object>>(_TargetInformationCalibrators_QNAME, ((Class) List.class), TargetUserInformations.class, ((List<Object> ) value));
     }
 
 }
