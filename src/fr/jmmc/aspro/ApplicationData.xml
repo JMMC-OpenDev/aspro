@@ -80,6 +80,8 @@
         and synchronize the selected target between 'Model' and 'Target' tabs</change>
         <change>Added new Target editor to let the user edit target fields (magnitudes ...) and
         provide user information per target</change>
+        <change type="BUGFIX">Fixed major bug on target model editor when the user changes the selected target
+        while editing a parameter value</change>
       </prerelease>
       <prerelease version="0.7.3 beta">
         <change>SearchCal integration : use deletedFlag to filter calibrators to mimic SearchCal delete action and
