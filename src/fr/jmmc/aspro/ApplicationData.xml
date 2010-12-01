@@ -1,13 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <ApplicationData link="http://www.jmmc.fr/aspro2">
+
   <program name="Aspro2" version="0.7.4 beta"/>
-  <compilation date="19/10/2010" compiler="JDK 1.5.0_16"/>
+
+  <compilation date="01/12/2010" compiler="JDK 1.5.0_16"/>
+
   <text>
     <![CDATA[ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations
-    with the VLTI or other interferometers. This observation preparation tool is developed and maintained by the JMMC.
+    with the VLTI or other interferometers.
+    This observation preparation tool is developed and maintained by the JMMC.
     ]]>
   </text>
+
   <dependences>
     <package name="JSkyCalc" description="Observability constraints based on JSkyCalc by J. R. Thorstensen, Dartmouth College"
                              link="http://www.dartmouth.edu/~physics/faculty/skycalc/flyer.html"/>
@@ -38,6 +43,7 @@
     <!-- LGPL : http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html -->
 
   </dependences>
+
   <menubar>
     <menu label="File">
       <menu label="New observation" classpath="fr.jmmc.aspro.gui.action.NewObservationAction" action="newObservation" accelerator="N"
@@ -55,16 +61,24 @@
       <menu label="Export plot to PDF" classpath="fr.jmmc.aspro.gui.action.ExportPDFAction" action="exportPDF" accelerator="P"
             description="Export the current plot to a PDF document"/>
     </menu>
+
     <menu label="Interop">
       <menu label="Perform model fitting" classpath="fr.jmmc.aspro.gui.action.BroadcastToModelFittingAction" action="broadcastToModelFittingAction"/>
       <menu label="Search calibrators" classpath="fr.jmmc.aspro.gui.action.SampSearchCalQuery" action="searchCalStartQuery"
        description="use SearchCal to search calibrators for the current selected target (SAMP)"/>
     </menu>
   </menubar>
+
   <releasenotes>
     <release version="0.7">
       <prerelease version="0.7.4 beta">
-        <change>Added Target editor to let the user edit target fields (magnitudes ...) and 
+        <change>Added a version attribute in the Observation file to handle model conversions</change>
+        <change>Updated the Observation data model : targets have an ID attribute (derived from target name)
+        used to associate user informations : description, calibrator flag and calibrator list per target.</change>
+        <change>Added action to open the SimBad web page for the current target in the Target editor</change>
+        <change>Fixed the selected target when opening the target editor
+        and synchronize the selected target between 'Model' and 'Target' tabs</change>
+        <change>Added new Target editor to let the user edit target fields (magnitudes ...) and
         provide user information per target</change>
       </prerelease>
       <prerelease version="0.7.3 beta">
@@ -95,6 +109,7 @@
         <change>LITpro integration through SAMP VO protocol : send models and generated oifits for the selected target</change>
       </prerelease>
     </release>
+
     <release version="0.6"> <!-- <pubDate>Thu, 5 Oct 2010 15:25:24 GMT</pubDate> -->
       <prerelease version="0.6.3">
         <change type="BUGFIX">Limit the memory footprint when the sampling periodicity is very small (less than 1 minute).
@@ -132,6 +147,7 @@
         <change>Offical release of Aspro 2</change>
       </prerelease>
     </release>
+
     <release version="0.5">
       <prerelease version="0.5.5">
         <change>Added warning messages on GUI to display information relative to error / noise modelling</change>
@@ -169,6 +185,7 @@
         <change>Added JNLP association with 'asprox' files to be opened at startup</change>
       </prerelease>
     </release>
+
     <release version="0.4"> <!-- <pubDate>Tue, 15 Jun 2010 14:26:07 GMT</pubDate> -->
       <prerelease version="0.4b8">
         <change>Changed Observation file extension to 'asprox'</change>
@@ -211,6 +228,7 @@
         restricted by the HA min / max defined in the UV Coverage Panel.</change>
       </prerelease>
     </release>
+
     <release version="0.3"> <!-- <pubDate>Wed, 19 May 2010 11:25:43 GMT</pubDate> -->
       <prerelease version="0.3b4">
         <change>Added VLTI configuration for the period 87 (new baselines) and fixed period 86.</change>
@@ -236,6 +254,7 @@
         <change>Deployment : Pal library is embedded in its own Jnlp file to avoid signing issues</change>
       </prerelease>
     </release>
+
     <release version="0.2"> <!-- <pubDate>Mon, 5 Apr 2010 12:00:00 GMT</pubDate> -->
       <prerelease version="0.2b5"> <!-- 0.1b11 -->
         <change>Added a transit mark and ticks for the elevation on the observability plot</change>
@@ -262,6 +281,7 @@
         <change>Added target Model uv map on the uv coverage plot with zomming supported</change>
       </prerelease>
     </release>
+
     <release version="0.1"> <!-- <pubDate>Tue, 16 Feb 2010 12:00:00 GMT</pubDate> -->
       <prerelease version="0.1b6">
         <change>Minor bug fixed on UV Coverage plot when the observability displays the baseline limits</change>
@@ -293,6 +313,8 @@
       </prerelease>
     </release>
   </releasenotes>
-    <acknowledgment><![CDATA[This research has made use of the Jean-Marie Mariotti Center \texttt{Aspro}
+
+  <acknowledgment><![CDATA[This research has made use of the Jean-Marie Mariotti Center \texttt{Aspro}
 service \footnote{Available at http://www.jmmc.fr/aspro}.]]></acknowledgment>
+
 </ApplicationData>
