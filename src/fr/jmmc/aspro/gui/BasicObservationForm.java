@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BasicObservationForm.java,v 1.48 2010-11-25 07:58:17 bourgesl Exp $"
+ * "@(#) $Id: BasicObservationForm.java,v 1.49 2010-12-01 16:35:42 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.48  2010/11/25 07:58:17  bourgesl
+ * select the correct target when opening the target editor
+ *
  * Revision 1.47  2010/11/23 16:56:10  bourgesl
  * custom pops formatter made static
  *
@@ -388,7 +391,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
     jPanelMain.add(jButtonRemoveTarget, gridBagConstraints);
 
-    jButtonModelEditor.setText("Model editor");
+    jButtonModelEditor.setText("Target editor");
     jButtonModelEditor.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(java.awt.event.ActionEvent evt) {
         jButtonModelEditorActionPerformed(evt);

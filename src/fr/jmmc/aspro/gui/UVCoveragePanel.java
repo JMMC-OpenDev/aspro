@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.65 2010-11-18 17:18:23 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.66 2010-12-01 16:35:42 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.65  2010/11/18 17:18:23  bourgesl
+ * use new TargetEditorDialog
+ *
  * Revision 1.64  2010/10/22 13:31:10  bourgesl
  * code convention
  *
@@ -431,7 +434,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
     jPanelButtons.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 2, 2));
 
-    jButtonModelEditor.setText("Model Editor");
+    jButtonModelEditor.setText("Target Editor");
     jButtonModelEditor.setMargin(new java.awt.Insets(0, 0, 0, 0));
     jButtonModelEditor.setMinimumSize(new java.awt.Dimension(50, 25));
     jButtonModelEditor.addActionListener(new java.awt.event.ActionListener() {

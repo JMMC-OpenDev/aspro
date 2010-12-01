@@ -85,7 +85,7 @@
                   <SubComponents>
                     <Component class="javax.swing.JButton" name="jButtonModelEditor">
                       <Properties>
-                        <Property name="text" type="java.lang.String" value="Model Editor"/>
+                        <Property name="text" type="java.lang.String" value="Target Editor"/>
                         <Property name="margin" type="java.awt.Insets" editor="org.netbeans.beaninfo.editors.InsetsEditor">
                           <Insets value="[0, 0, 0, 0]"/>
                         </Property>

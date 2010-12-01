@@ -230,7 +230,7 @@
         </Component>
         <Component class="javax.swing.JButton" name="jButtonModelEditor">
           <Properties>
-            <Property name="text" type="java.lang.String" value="Model editor"/>
+            <Property name="text" type="java.lang.String" value="Target editor"/>
           </Properties>
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButtonModelEditorActionPerformed"/>
