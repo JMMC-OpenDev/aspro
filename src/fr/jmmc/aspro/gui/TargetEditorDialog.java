@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetEditorDialog.java,v 1.7 2010-11-30 17:20:25 bourgesl Exp $"
+ * "@(#) $Id: TargetEditorDialog.java,v 1.8 2010-12-03 16:11:52 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2010/11/30 17:20:25  bourgesl
+ * fixed NPE when targetUserInformations is undefined
+ *
  * Revision 1.6  2010/11/30 17:03:34  bourgesl
  * use new cloned ObservationSetting to define model (targets + target user informations)
  *
@@ -185,10 +188,10 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
           // TODO : refresh the tree according to the new target / calibrator list
 
           // select the target :
-          targetModelForm.selectTarget(targetForm.getCurrentTarget().getName());
+          targetModelForm.selectTarget(targetForm.getCurrentTarget());
         } else if (selected == targetForm) {
           // select the target :
-          targetForm.selectTarget(targetModelForm.getCurrentTarget().getName());
+          targetForm.selectTarget(targetModelForm.getCurrentTarget());
         }
       }
     });
@@ -202,9 +205,9 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
 
     // Propagate the model (edited targets and user infos) to forms :
 
-    this.targetModelForm.initialize(getEditTargets(), targetName);
+    this.targetModelForm.initialize(targetName);
 
-    this.targetForm.initialize(getEditTargets(), getEditTargetUserInfos(), targetName);
+    this.targetForm.initialize(targetName);
   }
 
   /** This method is called from within the constructor to
@@ -218,8 +221,8 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
     java.awt.GridBagConstraints gridBagConstraints;
 
     jTabbedPane = new javax.swing.JTabbedPane();
-    targetModelForm = new fr.jmmc.aspro.gui.TargetModelForm();
-    targetForm = new fr.jmmc.aspro.gui.TargetForm();
+    targetModelForm = new fr.jmmc.aspro.gui.TargetModelForm(this.editTargets, this.editTargetUserInfos);
+    targetForm = new fr.jmmc.aspro.gui.TargetForm(this.editTargets, this.editTargetUserInfos);
     jPanelButtons = new javax.swing.JPanel();
     jButtonOK = new javax.swing.JButton();
     jButtonCancel = new javax.swing.JButton();

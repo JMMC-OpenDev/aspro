@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetModelForm.java,v 1.34 2010-12-03 09:33:19 bourgesl Exp $"
+ * "@(#) $Id: TargetModelForm.java,v 1.35 2010-12-03 16:11:52 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.34  2010/12/03 09:33:19  bourgesl
+ * changed font for model tree
+ *
  * Revision 1.33  2010/11/30 17:04:18  bourgesl
  * fixed focus/editor problems when the tree selection changes (use invokeLater)
  *
@@ -113,7 +116,9 @@
 package fr.jmmc.aspro.gui;
 
 import fr.jmmc.aspro.Preferences;
+import fr.jmmc.aspro.gui.util.ModelJTree;
 import fr.jmmc.aspro.model.oi.Target;
+import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.mcs.gui.MessagePane;
 import fr.jmmc.mcs.gui.NumericJTable;
 import fr.jmmc.mcs.model.ModelManager;
@@ -132,7 +137,6 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JTable;
-import javax.swing.JTree;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
@@ -142,15 +146,11 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
-import javax.swing.tree.TreeSelectionModel;
 
 /**
  * This class represents the target model editor ...
- *
- * TODO : extract intermediate class for Tree methods
  *
  * @author bourgesl
  */
@@ -166,16 +166,32 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
 
   /* members */
   /** list of edited targets (clone) */
-  private List<Target> editTargets;
+  private final List<Target> editTargets;
+  /** edited target user informations (clone) */
+  private final TargetUserInformations editTargetUserInfos;
   /** current edited target to detect target changes to update the table model */
   private Target currentTarget = null;
   /** current model type to detect type changes to update the model description */
   private String currentModelType = null;
 
   /**
-   * Creates new form TargetModelForm
+   * Creates new form TargetModelForm (used by NetBeans editor only)
    */
   public TargetModelForm() {
+    this(null, null);
+  }
+
+  /**
+   * Creates new form TargetModelForm
+   * @param targets list of targets to edit
+   * @param targetUserInfos target user informations
+   */
+  public TargetModelForm(final List<Target> targets, final TargetUserInformations targetUserInfos) {
+    super();
+
+    this.editTargets = targets;
+    this.editTargetUserInfos = targetUserInfos;
+
     initComponents();
 
     // Load Preferences and init default elements
@@ -209,8 +225,6 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
     // table selection listener :
     this.jTableModelParameters.getSelectionModel().addListSelectionListener(this);
 
-    // single tree selection :
-    this.jTreeModels.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
     // tree selection listener :
     this.jTreeModels.addTreeSelectionListener(this);
 
@@ -224,39 +238,20 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
 
   /**
    * Initialize the internal model (tree) from the given list of targets
-   * @param targets list of targets to edit
    * @param targetName target name to select
    */
-  protected void initialize(final List<Target> targets, final String targetName) {
-    this.editTargets = targets;
-
-    this.generateTree(targets);
-    this.selectTarget(targetName);
+  protected void initialize(final String targetName) {
+    this.generateTree(this.editTargets);
+    this.selectTarget(Target.getTarget(targetName, this.editTargets));
   }
 
   /* Tree related methods */
   /**
-   * Return the tree model
-   * @return tree model
+   * Return the custom ModelJTree
+   * @return ModelJTree
    */
-  private DefaultTreeModel getTreeModelsModel() {
-    return ((DefaultTreeModel) this.jTreeModels.getModel());
-  }
-
-  /**
-   * Return the root node (Models)
-   * @return root node
-   */
-  private DefaultMutableTreeNode getRootNode() {
-    return (DefaultMutableTreeNode) getTreeModelsModel().getRoot();
-  }
-
-  /**
-   * Return the node corresponding to the last selected path in the tree
-   * @return node or null
-   */
-  private DefaultMutableTreeNode getLastSelectedNode() {
-    return (DefaultMutableTreeNode) this.jTreeModels.getLastSelectedPathComponent();
+  private final ModelJTree getTreeModels() {
+    return (ModelJTree) this.jTreeModels;
   }
 
   /**
@@ -265,61 +260,20 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
    */
   private void generateTree(final List<Target> targets) {
 
-    this.editTargets = targets;
-
-    final DefaultMutableTreeNode rootNode = getRootNode();
+    final DefaultMutableTreeNode rootNode = this.getTreeModels().getRootNode();
 
     DefaultMutableTreeNode targetNode;
     for (Target target : targets) {
 
-      targetNode = new DefaultMutableTreeNode(target);
+      targetNode = this.getTreeModels().addNode(rootNode, target);
 
       for (Model model : target.getModels()) {
         this.generateModelNodes(targetNode, model);
       }
-
-      rootNode.add(targetNode);
     }
+
     // fire node structure changed :
-    getTreeModelsModel().nodeStructureChanged(rootNode);
-  }
-
-  /**
-   * Find the first tree node having the given user object
-   * @param userObject user object to locate in the tree
-   * @return tree node or null
-   */
-  private DefaultMutableTreeNode findTreeNode(final Object userObject) {
-    return findTreeNode(getRootNode(), userObject);
-  }
-
-  /**
-   * Find the first tree node having the given user object recursively
-   *
-   * @param node current node to traverse
-   * @param userObject user object to locate in the tree
-   * @return tree node or null
-   */
-  private static DefaultMutableTreeNode findTreeNode(final DefaultMutableTreeNode node, final Object userObject) {
-    if (node.getUserObject() == userObject) {
-      return node;
-    }
-
-    final int size = node.getChildCount();
-    if (size > 0) {
-      DefaultMutableTreeNode result = null;
-
-      DefaultMutableTreeNode childNode;
-      for (int i = 0; i < size; i++) {
-        childNode = (DefaultMutableTreeNode) node.getChildAt(i);
-
-        result = findTreeNode(childNode, userObject);
-        if (result != null) {
-          return result;
-        }
-      }
-    }
-    return null;
+    this.getTreeModels().fireNodeChanged(rootNode);
   }
 
   /**
@@ -330,11 +284,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
    */
   private void generateModelNodes(final DefaultMutableTreeNode parentNode, final Model model) {
 
-    // May need clone target and model to allow undo/cancel actions :
-
-    final DefaultMutableTreeNode modelNode = new DefaultMutableTreeNode(model);
-
-    parentNode.add(modelNode);
+    final DefaultMutableTreeNode modelNode = this.getTreeModels().addNode(parentNode, model);
 
     final List<Model> children = model.getModels();
     if (!children.isEmpty()) {
@@ -345,64 +295,11 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
   }
 
   /**
-   * Select the target node for the given target name
-   * @param targetName target name indicating which node to select
+   * Select the target node for the given target
+   * @param target to select
    */
-  protected void selectTarget(final String targetName) {
-
-    if (targetName != null) {
-      final Target target = Target.getTarget(targetName, this.editTargets);
-
-      if (target != null) {
-        final DefaultMutableTreeNode targetNode = this.findTreeNode(target);
-
-        if (targetNode != null) {
-          // Select the target node :
-          this.selectPath(new TreePath(targetNode.getPath()));
-
-          // expand target node if there is at least one model :
-          if (!targetNode.isLeaf()) {
-            final DefaultMutableTreeNode child = (DefaultMutableTreeNode) targetNode.getFirstChild();
-
-            this.jTreeModels.scrollPathToVisible(new TreePath(child.getPath()));
-          }
-
-          return;
-        }
-      }
-    }
-
-    // select first target :
-    selectFirstTarget(getRootNode());
-  }
-
-  /**
-   * Select the first target
-   * @param rootNode root node
-   */
-  private void selectFirstTarget(final DefaultMutableTreeNode rootNode) {
-    // first child = first target :
-    final DefaultMutableTreeNode firstChild = (DefaultMutableTreeNode) rootNode.getFirstChild();
-
-    this.selectPath(new TreePath(firstChild.getPath()));
-
-    // expand target node if there is at least one model :
-    if (!firstChild.isLeaf()) {
-      final DefaultMutableTreeNode secondChild = (DefaultMutableTreeNode) firstChild.getFirstChild();
-
-      this.jTreeModels.scrollPathToVisible(new TreePath(secondChild.getPath()));
-    }
-  }
-
-  /**
-   * Change the selected path in the tree (target / models)
-   * This will send a selection event changed that will refresh the UI (buttons + parameters table)
-   *
-   * @param path tree path
-   */
-  private void selectPath(final TreePath path) {
-    this.jTreeModels.setSelectionPath(path);
-    this.jTreeModels.scrollPathToVisible(path);
+  protected void selectTarget(final Target target) {
+    this.getTreeModels().selectTarget(target);
   }
 
   /**
@@ -410,7 +307,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
    * @param e tree selection event
    */
   public void valueChanged(final TreeSelectionEvent e) {
-    final DefaultMutableTreeNode node = getLastSelectedNode();
+    final DefaultMutableTreeNode node = this.getTreeModels().getLastSelectedNode();
 
     /* if nothing is selected */
     if (node == null) {
@@ -426,9 +323,9 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
       public void run() {
 
         // Check if it is the root node :
-        final DefaultMutableTreeNode rootNode = getRootNode();
+        final DefaultMutableTreeNode rootNode = getTreeModels().getRootNode();
         if (node == rootNode) {
-          selectFirstTarget(rootNode);
+          getTreeModels().selectFirstChildNode(rootNode);
           return;
         }
 
@@ -577,11 +474,11 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
     if (minIndex != -1) {
       final Model model = getModelParameterTableModel().getModelAt(minIndex);
 
-      final DefaultMutableTreeNode modelNode = this.findTreeNode(model);
+      final DefaultMutableTreeNode modelNode = this.getTreeModels().findTreeNode(model);
 
       if (modelNode != null) {
         // Select the model node :
-        this.selectPath(new TreePath(modelNode.getPath()));
+        this.getTreeModels().selectPath(new TreePath(modelNode.getPath()));
       }
     }
   }
@@ -599,7 +496,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
 
     buttonGroupEditMode = new javax.swing.ButtonGroup();
     jScrollPaneTreeModels = new javax.swing.JScrollPane();
-    jTreeModels = createJTree();
+    jTreeModels = new ModelJTree(this.editTargetUserInfos);
     jPanelModelActions = new javax.swing.JPanel();
     jComboBoxModelType = new javax.swing.JComboBox();
     jButtonAdd = new javax.swing.JButton();
@@ -859,7 +756,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
    * @param evt action event
    */
   private void jButtonUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonUpdateActionPerformed
-    final DefaultMutableTreeNode currentNode = getLastSelectedNode();
+    final DefaultMutableTreeNode currentNode = this.getTreeModels().getLastSelectedNode();
 
     if (currentNode == null) {
       return;
@@ -897,6 +794,9 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         target.getModels().remove(idx);
         target.getModels().add(idx, newModel);
 
+        // force to refresh table model :
+        this.currentTarget = null;
+
         // Replace node :
         final DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(newModel);
         idx = parentNode.getIndex(currentNode);
@@ -904,13 +804,10 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         parentNode.insert(newNode, idx);
 
         // fire node structure changed :
-        getTreeModelsModel().nodeStructureChanged(parentNode);
-
-        // force to refresh table model :
-        this.currentTarget = null;
+        this.getTreeModels().fireNodeChanged(parentNode);
 
         // Select the new node = model :
-        this.selectPath(new TreePath(newNode.getPath()));
+        this.getTreeModels().selectPath(new TreePath(newNode.getPath()));
 
       } else if (parentNode.getUserObject() instanceof Model) {
         throw new UnsupportedOperationException("Not implemented !");
@@ -927,7 +824,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
    * @param evt action event
    */
   private void jButtonRemoveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonRemoveActionPerformed
-    final DefaultMutableTreeNode currentNode = getLastSelectedNode();
+    final DefaultMutableTreeNode currentNode = this.getTreeModels().getLastSelectedNode();
 
     if (currentNode == null) {
       return;
@@ -956,17 +853,11 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
           ModelManager.relocateModels(target.getModels());
         }
 
-        // Remove node :
-        parentNode.remove(currentNode);
-
-        // fire node structure changed :
-        getTreeModelsModel().nodeStructureChanged(parentNode);
-
         // force to refresh table model :
         this.currentTarget = null;
 
-        // Select the parent node = target :
-        this.selectPath(new TreePath(parentNode.getPath()));
+        // Remove node and refresh tree :
+        this.getTreeModels().removeNodeAndRefresh(parentNode, currentNode);
 
       } else if (parentNode.getUserObject() instanceof Model) {
         throw new UnsupportedOperationException("Not implemented !");
@@ -983,7 +874,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
    * @param evt action event
    */
   private void jButtonAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAddActionPerformed
-    final DefaultMutableTreeNode currentNode = getLastSelectedNode();
+    final DefaultMutableTreeNode currentNode = this.getTreeModels().getLastSelectedNode();
 
     if (currentNode == null) {
       return;
@@ -1027,18 +918,11 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
       // Add model to target :
       target.getModels().add(newModel);
 
-      // Add node :
-      final DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(newModel);
-      targetNode.add(newNode);
-
-      // fire node structure changed :
-      getTreeModelsModel().nodeStructureChanged(targetNode);
-
       // force to refresh table model :
       this.currentTarget = null;
 
-      // Select the new node = model :
-      this.selectPath(new TreePath(newNode.getPath()));
+      // Add node and refresh tree :
+      this.getTreeModels().addNodeAndRefresh(targetNode, newModel);
     }
   }//GEN-LAST:event_jButtonAddActionPerformed
 
@@ -1075,82 +959,6 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
   private javax.swing.JTextField jTextFieldName;
   private javax.swing.JTree jTreeModels;
   // End of variables declaration//GEN-END:variables
-
-  /**
-   * Create a custom JTree which convertValueToText() method is overriden
-   * @return JTree
-   */
-  private static JTree createJTree() {
-    return new JTree() {
-
-      /** default serial UID for Serializable interface */
-      private static final long serialVersionUID = 1;
-
-      /**
-       * Called by the renderers to convert the specified value to
-       * text. This implementation returns <code>value.toString</code>, ignoring
-       * all other arguments. To control the conversion, subclass this
-       * method and use any of the arguments you need.
-       *
-       * @param value the <code>Object</code> to convert to text
-       * @param selected true if the node is selected
-       * @param expanded true if the node is expanded
-       * @param leaf  true if the node is a leaf node
-       * @param row  an integer specifying the node's display row, where 0 is
-       *             the first row in the display
-       * @param hasFocus true if the node has the focus
-       * @return the <code>String</code> representation of the node's value
-       */
-      @Override
-      public String convertValueToText(
-              final Object value,
-              final boolean selected,
-              final boolean expanded, final boolean leaf, final int row,
-              final boolean hasFocus) {
-        if (value != null) {
-          String sValue = null;
-
-          if (value instanceof DefaultMutableTreeNode) {
-            final DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
-
-            final Object userObject = node.getUserObject();
-
-            if (userObject != null) {
-
-              if (userObject instanceof String) {
-                // String type = root node :
-                sValue = userObject.toString();
-              } else if (userObject instanceof Target) {
-                // Target :
-                sValue = ((Target) userObject).getName();
-              } else if (userObject instanceof Model) {
-                // Model :
-                sValue = ((Model) userObject).getName();
-              } else {
-                if (logger.isLoggable(Level.SEVERE)) {
-                  logger.severe("unsupported class type = " + userObject.getClass());
-                }
-
-              }
-            }
-
-          } else {
-            if (logger.isLoggable(Level.SEVERE)) {
-              logger.severe("unsupported class type = " + value.getClass());
-            }
-
-            sValue = value.toString();
-          }
-
-          if (sValue != null) {
-            return sValue;
-          }
-
-        }
-        return "";
-      }
-    };
-  }
 
   /**
    * Create a custom JTable with specific behaviour (custom numeric editors and renderers)

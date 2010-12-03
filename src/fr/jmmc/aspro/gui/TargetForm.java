@@ -1,11 +1,16 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetForm.java,v 1.13 2010-12-03 09:34:01 bourgesl Exp $"
+ * "@(#) $Id: TargetForm.java,v 1.14 2010-12-03 16:11:52 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.13  2010/12/03 09:34:01  bourgesl
+ * first try using drag and drop between calibrator list and target tree
+ * added calibrator list coupled with Calibrator button
+ * changed font for target tree
+ *
  * Revision 1.12  2010/12/01 16:18:57  bourgesl
  * updated GUI to use an action toolbar and have a calibrator list
  *
@@ -50,6 +55,7 @@
 package fr.jmmc.aspro.gui;
 
 import fr.jmmc.aspro.gui.util.GenericListModel;
+import fr.jmmc.aspro.gui.util.TargetJTree;
 import fr.jmmc.aspro.gui.util.TargetTransferHandler;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetInformation;
@@ -70,7 +76,6 @@ import java.util.logging.Level;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JFormattedTextField;
 import javax.swing.JList;
-import javax.swing.JTree;
 import javax.swing.ListCellRenderer;
 import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
@@ -80,14 +85,9 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.text.NumberFormatter;
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreePath;
-import javax.swing.tree.TreeSelectionModel;
 
 /**
  * This class represents the target information editor ...
- *
- * TODO : extract intermediate class for Tree methods
  *
  * @author bourgesl
  */
@@ -107,9 +107,9 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
 
   /* members */
   /** list of edited targets (clone) */
-  private List<Target> editTargets;
+  private final List<Target> editTargets;
   /** edited target user informations (clone) */
-  private TargetUserInformations editTargetUserInfos;
+  private final TargetUserInformations editTargetUserInfos;
   /** cached mapping between target and Target Information */
   private final Map<String, TargetInformation> mapIDTargetInformations = new HashMap<String, TargetInformation>();
   /** current edited target */
@@ -121,9 +121,23 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
   private GenericListModel<Target> calibratorsModel;
 
   /**
-   * Creates new form TargetForm
+   * Creates new form TargetForm (used by NetBeans editor only)
    */
   public TargetForm() {
+    this(null, null);
+  }
+
+  /**
+   * Creates new form TargetForm
+   * @param targets list of targets to edit
+   * @param targetUserInfos target user informations
+   */
+  public TargetForm(final List<Target> targets, final TargetUserInformations targetUserInfos) {
+    super();
+
+    this.editTargets = targets;
+    this.editTargetUserInfos = targetUserInfos;
+
     initComponents();
 
     postInit();
@@ -134,8 +148,6 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
    */
   private void postInit() {
 
-    // single tree selection :
-    this.jTreeTargets.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
     // tree selection listener :
     this.jTreeTargets.addTreeSelectionListener(this);
 
@@ -179,54 +191,29 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
 
   /**
    * Initialize the internal model (tree) from the given list of targets
-   * @param targets list of targets to edit
-   * @param targetUserInfos target user informations
    * @param targetName target name to select
    */
-  protected void initialize(final List<Target> targets, final TargetUserInformations targetUserInfos, final String targetName) {
-    this.editTargets = targets;
-    this.editTargetUserInfos = targetUserInfos;
+  protected void initialize(final String targetName) {
 
-    this.calibratorsModel = new GenericListModel<Target>(targetUserInfos.getCalibrators());
+    this.calibratorsModel = new GenericListModel<Target>(this.editTargetUserInfos.getCalibrators());
     this.jListCalibrators.setModel(this.calibratorsModel);
 
-    this.generateTree(targets);
-    this.selectTarget(targetName);
-
+    this.generateTree(this.editTargets);
+    this.selectTarget(Target.getTarget(targetName, this.editTargets));
 
     // Add custom DnD support :
-    final TransferHandler th = new TargetTransferHandler(this.editTargetUserInfos);
-
-    logger.severe("transfer Handler = " + this.jListCalibrators.getTransferHandler());
-
-    this.jListCalibrators.setTransferHandler(th);
-    this.jTreeTargets.setTransferHandler(th);
-
+    final TransferHandler targetTransferHandler = new TargetTransferHandler();
+    this.jListCalibrators.setTransferHandler(targetTransferHandler);
+    this.jTreeTargets.setTransferHandler(targetTransferHandler);
   }
+
   /* Tree related methods */
-
   /**
-   * Return the tree model
-   * @return tree model
+   * Return the custom TargetJTree
+   * @return TargetJTree
    */
-  private DefaultTreeModel getTreeTargetsModel() {
-    return ((DefaultTreeModel) this.jTreeTargets.getModel());
-  }
-
-  /**
-   * Return the root node (Models)
-   * @return root node
-   */
-  private DefaultMutableTreeNode getRootNode() {
-    return (DefaultMutableTreeNode) getTreeTargetsModel().getRoot();
-  }
-
-  /**
-   * Return the node corresponding to the last selected path in the tree
-   * @return node or null
-   */
-  private DefaultMutableTreeNode getLastSelectedNode() {
-    return (DefaultMutableTreeNode) this.jTreeTargets.getLastSelectedPathComponent();
+  private final TargetJTree getTreeTargets() {
+    return (TargetJTree) this.jTreeTargets;
   }
 
   /**
@@ -235,118 +222,26 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
    */
   private void generateTree(final List<Target> targets) {
 
-    final DefaultMutableTreeNode rootNode = getRootNode();
+    final DefaultMutableTreeNode rootNode = this.getTreeTargets().getRootNode();
 
     DefaultMutableTreeNode targetNode;
     for (Target target : targets) {
 
-      targetNode = new DefaultMutableTreeNode(target);
+      targetNode = this.getTreeTargets().addNode(rootNode, target);
 
       // TODO : add calibrators as children of the target Node
-
-      rootNode.add(targetNode);
     }
+
     // fire node structure changed :
-    getTreeTargetsModel().nodeStructureChanged(rootNode);
+    this.getTreeTargets().fireNodeChanged(rootNode);
   }
 
   /**
-   * Find the first tree node having the given user object
-   * @param userObject user object to locate in the tree
-   * @return tree node or null
+   * Select the target node for the given target
+   * @param target to select
    */
-  private DefaultMutableTreeNode findTreeNode(final Object userObject) {
-    return findTreeNode(getRootNode(), userObject);
-  }
-
-  /**
-   * Find the first tree node having the given user object recursively
-   *
-   * @param node current node to traverse
-   * @param userObject user object to locate in the tree
-   * @return tree node or null
-   */
-  private static DefaultMutableTreeNode findTreeNode(final DefaultMutableTreeNode node, final Object userObject) {
-    if (node.getUserObject() == userObject) {
-      return node;
-    }
-
-    final int size = node.getChildCount();
-    if (size > 0) {
-      DefaultMutableTreeNode result = null;
-
-      DefaultMutableTreeNode childNode;
-      for (int i = 0; i < size; i++) {
-        childNode = (DefaultMutableTreeNode) node.getChildAt(i);
-
-        result = findTreeNode(childNode, userObject);
-        if (result != null) {
-          return result;
-        }
-      }
-    }
-    return null;
-  }
-
-  /**
-   * Select the target node for the given target name
-   * @param targetName target name indicating which node to select
-   */
-  protected void selectTarget(final String targetName) {
-
-    if (targetName != null) {
-      final Target target = Target.getTarget(targetName, this.editTargets);
-
-      if (target != null) {
-        final DefaultMutableTreeNode targetNode = this.findTreeNode(target);
-
-        if (targetNode != null) {
-          // Select the target node :
-          this.selectPath(new TreePath(targetNode.getPath()));
-
-          // expand target node if there is at least one child :
-          if (!targetNode.isLeaf()) {
-            final DefaultMutableTreeNode child = (DefaultMutableTreeNode) targetNode.getFirstChild();
-
-            this.jTreeTargets.scrollPathToVisible(new TreePath(child.getPath()));
-          }
-
-          return;
-        }
-      }
-    }
-
-    // select first target :
-    selectFirstTarget(getRootNode());
-  }
-
-  /**
-   * Select the first target
-   * @param rootNode root node
-   */
-  private void selectFirstTarget(final DefaultMutableTreeNode rootNode) {
-    // first child = first target :
-    final DefaultMutableTreeNode firstChild = (DefaultMutableTreeNode) rootNode.getFirstChild();
-
-    this.selectPath(new TreePath(firstChild.getPath()));
-
-    // expand target node if there is at least one child :
-    if (!firstChild.isLeaf()) {
-      final DefaultMutableTreeNode secondChild = (DefaultMutableTreeNode) firstChild.getFirstChild();
-
-      this.jTreeTargets.scrollPathToVisible(new TreePath(secondChild.getPath()));
-    }
-  }
-
-  /**
-   * Change the selected path in the target tree
-   * This will send a selection event changed that will refresh the UI (buttons + parameters table)
-   *
-   * @param path tree path
-   */
-  private void selectPath(final TreePath path) {
-    this.jTreeTargets.setSelectionPath(path);
-    this.jTreeTargets.scrollPathToVisible(path);
+  protected void selectTarget(final Target target) {
+    this.getTreeTargets().selectTarget(target);
   }
 
   /**
@@ -354,7 +249,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
    * @param e tree selection event
    */
   public void valueChanged(final TreeSelectionEvent e) {
-    final DefaultMutableTreeNode node = getLastSelectedNode();
+    final DefaultMutableTreeNode node = this.getTreeTargets().getLastSelectedNode();
 
     /* if nothing is selected */
     if (node == null) {
@@ -369,9 +264,9 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
 
       public void run() {
         // Check if it is the root node :
-        final DefaultMutableTreeNode rootNode = getRootNode();
+        final DefaultMutableTreeNode rootNode = getTreeTargets().getRootNode();
         if (node == rootNode) {
-          selectFirstTarget(rootNode);
+          getTreeTargets().selectFirstChildNode(rootNode);
           return;
         }
 
@@ -452,11 +347,15 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     }
   }
 
-
-  private boolean isCalibrator(final Target target) {
-    return this.editTargetUserInfos.getCalibrators().contains(target);
+  /**
+   * Return true if the given target is a calibrator
+   * i.e. the calibrator list contains the given target
+   * @param target target to use
+   * @return true if the given target is a calibrator
+   */
+  public final boolean isCalibrator(final Target target) {
+    return this.editTargetUserInfos.isCalibrator(target);
   }
-
 
   /**
    * Process the change event for any number field.
@@ -551,7 +450,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
       if (logger.isLoggable(Level.FINE)) {
         logger.fine("user infos : " + text);
       }
-        
+
       getTargetUserInformation(this.currentTarget).setDescription((text.length() > 0) ? text : null);
     }
   }
@@ -569,7 +468,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
 
     buttonGroupCalibrators = new javax.swing.ButtonGroup();
     jScrollPaneTreeTargets = new javax.swing.JScrollPane();
-    jTreeTargets = createJTree();
+    jTreeTargets = new TargetJTree(this.editTargetUserInfos);
     jToolBarActions = new javax.swing.JToolBar();
     jButtonUp = new javax.swing.JButton();
     jButtonDown = new javax.swing.JButton();
@@ -1078,6 +977,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     jPanelCalibrators.setBorder(javax.swing.BorderFactory.createTitledBorder("Calibrators"));
     jPanelCalibrators.setLayout(new java.awt.BorderLayout());
 
+    jListCalibrators.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
     jListCalibrators.setToolTipText("this list contains targets considered as calibrators");
     jListCalibrators.setCellRenderer(createTargetListCellRenderer());
     jListCalibrators.setDragEnabled(true);
@@ -1114,11 +1014,14 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     final boolean isCalibrator = this.jToggleButtonCalibrator.isSelected();
 
     if (logger.isLoggable(Level.FINE)) {
-        logger.fine("isCalibrator = " + isCalibrator + " for " + this.currentTarget.getName());
+      logger.fine("isCalibrator = " + isCalibrator + " for " + this.currentTarget.getName());
     }
 
     if (isCalibrator) {
-      this.calibratorsModel.add(this.currentTarget);
+      // TODO : Should be done directly by our data model classes (editTargetUserInfos)
+      if (!this.calibratorsModel.contains(this.currentTarget)) {
+        this.calibratorsModel.add(this.currentTarget);
+      }
     } else {
 
       // First remove this calibrator from target's calibrator lists :
@@ -1134,12 +1037,13 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
       }
     }
 
-    // Refresh selected node :
-    final DefaultMutableTreeNode targetNode = this.findTreeNode(this.currentTarget);
+    // Refresh selected node to show/hide (cal) suffix :
+    final DefaultMutableTreeNode targetNode = this.getTreeTargets().findTreeNode(this.currentTarget);
 
     if (targetNode != null) {
+
       // fire node structure changed :
-      getTreeTargetsModel().nodeStructureChanged(targetNode);
+      this.getTreeTargets().fireNodeChanged(targetNode);
     }
   }//GEN-LAST:event_jToggleButtonCalibratorActionPerformed
 
@@ -1250,84 +1154,6 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
   // End of variables declaration//GEN-END:variables
 
   /**
-   * Create a custom JTree which convertValueToText() method is overriden
-   * @return JTree
-   */
-  private JTree createJTree() {
-    return new JTree() {
-
-      /** default serial UID for Serializable interface */
-      private static final long serialVersionUID = 1;
-
-      /**
-       * Called by the renderers to convert the specified value to
-       * text. This implementation returns <code>value.toString</code>, ignoring
-       * all other arguments. To control the conversion, subclass this
-       * method and use any of the arguments you need.
-       *
-       * @param value the <code>Object</code> to convert to text
-       * @param selected true if the node is selected
-       * @param expanded true if the node is expanded
-       * @param leaf  true if the node is a leaf node
-       * @param row  an integer specifying the node's display row, where 0 is
-       *             the first row in the display
-       * @param hasFocus true if the node has the focus
-       * @return the <code>String</code> representation of the node's value
-       */
-      @Override
-      public String convertValueToText(
-              final Object value,
-              final boolean selected,
-              final boolean expanded, final boolean leaf, final int row,
-              final boolean hasFocus) {
-        if (value != null) {
-          String sValue = null;
-
-          if (value instanceof DefaultMutableTreeNode) {
-            final DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
-
-            final Object userObject = node.getUserObject();
-
-            if (userObject != null) {
-
-              if (userObject instanceof String) {
-                // String type = root node :
-                sValue = userObject.toString();
-              } else if (userObject instanceof Target) {
-                final Target target = (Target) userObject;
-                // Target :
-                sValue = target.getName();
-
-                if (isCalibrator(target)) {
-                  sValue += " (cal)";
-                }
-
-              } else {
-                if (logger.isLoggable(Level.SEVERE)) {
-                  logger.severe("unsupported class type = " + userObject.getClass());
-                }
-              }
-            }
-
-          } else {
-            if (logger.isLoggable(Level.SEVERE)) {
-              logger.severe("unsupported class type = " + value.getClass());
-            }
-
-            sValue = value.toString();
-          }
-
-          if (sValue != null) {
-            return sValue;
-          }
-
-        }
-        return "";
-      }
-    };
-  }
-
-  /**
    * Create a custom list renderer to display target name instead of target.toString()
    * @return custom list renderer
    */
@@ -1422,7 +1248,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
    * @return target information
    */
   private final TargetInformation getTargetUserInformation(final Target target) {
-    
+
     TargetInformation targetInfo = this.mapIDTargetInformations.get(target.getIdentifier());
 
     if (targetInfo == null) {

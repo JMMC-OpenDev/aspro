@@ -50,7 +50,7 @@
             </Property>
           </Properties>
           <AuxValues>
-            <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="createJTree()"/>
+            <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new ModelJTree(this.editTargetUserInfos)"/>
           </AuxValues>
         </Component>
       </SubComponents>
