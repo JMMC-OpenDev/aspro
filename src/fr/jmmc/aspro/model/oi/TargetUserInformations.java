@@ -1,4 +1,3 @@
-
 package fr.jmmc.aspro.model.oi;
 
 import java.util.ArrayList;
@@ -11,7 +10,6 @@ import javax.xml.bind.annotation.XmlList;
 import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 import fr.jmmc.aspro.model.OIBase;
-
 
 /**
  * 
@@ -39,83 +37,92 @@ import fr.jmmc.aspro.model.OIBase;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "TargetUserInformations", propOrder = {
-    "calibrators",
-    "targetInfos"
+  "calibrators",
+  "targetInfos"
 })
 public class TargetUserInformations
-    extends OIBase
-{
+        extends OIBase {
 
-    @XmlList
-    @XmlElement(type = Object.class)
-    @XmlIDREF
-    @XmlSchemaType(name = "IDREFS")
-    protected List<Target> calibrators;
-    @XmlElement(name = "targetInfo")
-    protected List<TargetInformation> targetInfos;
+  @XmlList
+  @XmlElement(type = Object.class)
+  @XmlIDREF
+  @XmlSchemaType(name = "IDREFS")
+  protected List<Target> calibrators;
+  @XmlElement(name = "targetInfo")
+  protected List<TargetInformation> targetInfos;
 
-    /**
-     * Gets the value of the calibrators property.
-     * 
-     * <p>
-     * This accessor method returns a reference to the live list,
-     * not a snapshot. Therefore any modification you make to the
-     * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the calibrators property.
-     * 
-     * <p>
-     * For example, to add a new item, do as follows:
-     * <pre>
-     *    getCalibrators().add(newItem);
-     * </pre>
-     * 
-     * 
-     * <p>
-     * Objects of the following type(s) are allowed in the list
-     * {@link Object }
-     * 
-     * 
-     */
-    public List<Target> getCalibrators() {
-        if (calibrators == null) {
-            calibrators = new ArrayList<Target>();
-        }
-        return this.calibrators;
+  /**
+   * Gets the value of the calibrators property.
+   *
+   * <p>
+   * This accessor method returns a reference to the live list,
+   * not a snapshot. Therefore any modification you make to the
+   * returned list will be present inside the JAXB object.
+   * This is why there is not a <CODE>set</CODE> method for the calibrators property.
+   *
+   * <p>
+   * For example, to add a new item, do as follows:
+   * <pre>
+   *    getCalibrators().add(newItem);
+   * </pre>
+   *
+   *
+   * <p>
+   * Objects of the following type(s) are allowed in the list
+   * {@link Object }
+   *
+   *
+   */
+  public List<Target> getCalibrators() {
+    if (calibrators == null) {
+      calibrators = new ArrayList<Target>();
     }
+    return this.calibrators;
+  }
 
-    /**
-     * Gets the value of the targetInfos property.
-     * 
-     * <p>
-     * This accessor method returns a reference to the live list,
-     * not a snapshot. Therefore any modification you make to the
-     * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the targetInfos property.
-     * 
-     * <p>
-     * For example, to add a new item, do as follows:
-     * <pre>
-     *    getTargetInfos().add(newItem);
-     * </pre>
-     * 
-     * 
-     * <p>
-     * Objects of the following type(s) are allowed in the list
-     * {@link TargetInformation }
-     * 
-     * 
-     */
-    public List<TargetInformation> getTargetInfos() {
-        if (targetInfos == null) {
-            targetInfos = new ArrayList<TargetInformation>();
-        }
-        return this.targetInfos;
+  /**
+   * Gets the value of the targetInfos property.
+   *
+   * <p>
+   * This accessor method returns a reference to the live list,
+   * not a snapshot. Therefore any modification you make to the
+   * returned list will be present inside the JAXB object.
+   * This is why there is not a <CODE>set</CODE> method for the targetInfos property.
+   *
+   * <p>
+   * For example, to add a new item, do as follows:
+   * <pre>
+   *    getTargetInfos().add(newItem);
+   * </pre>
+   *
+   *
+   * <p>
+   * Objects of the following type(s) are allowed in the list
+   * {@link TargetInformation }
+   *
+   *
+   */
+  public List<TargetInformation> getTargetInfos() {
+    if (targetInfos == null) {
+      targetInfos = new ArrayList<TargetInformation>();
     }
-    
+    return this.targetInfos;
+  }
+
 //--simple--preserve
   @Override
   public final String toString() {
     return "TargetUserInformations : \ncalibrators : " + getCalibrators() + "\ntargets : " + getTargetInfos();
+  }
+
+  /**
+   * Return true if the given target is a calibrator 
+   * i.e. the calibrator list contains the given target 
+   * @param target target to use
+   * @return true if the given target is a calibrator 
+   */
+  public final boolean isCalibrator(final Target target) {
+    return this.getCalibrators().contains(target);
   }
 
   /**
@@ -218,5 +225,4 @@ public class TargetUserInformations
     }
   }
 //--simple--preserve
-
 }
