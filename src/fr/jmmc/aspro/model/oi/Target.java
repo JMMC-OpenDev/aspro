@@ -896,9 +896,11 @@ public class Target
    * @return target or null if the target was not found
    */
   public static final Target getTarget(final String name, final List<Target> targets) {
-    for (Target t : targets) {
-      if (t.getName().equals(name)) {
-        return t;
+    if (name != null) {
+      for (Target t : targets) {
+        if (t.getName().equals(name)) {
+          return t;
+        }
       }
     }
     return null;
