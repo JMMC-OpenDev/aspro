@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetModelForm.java,v 1.33 2010-11-30 17:04:18 bourgesl Exp $"
+ * "@(#) $Id: TargetModelForm.java,v 1.34 2010-12-03 09:33:19 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.33  2010/11/30 17:04:18  bourgesl
+ * fixed focus/editor problems when the tree selection changes (use invokeLater)
+ *
  * Revision 1.32  2010/11/29 15:27:30  bourgesl
  * small GUI changes for platform compatibility
  *
@@ -621,6 +624,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
     jScrollPaneTreeModels.setMinimumSize(new java.awt.Dimension(100, 100));
     jScrollPaneTreeModels.setPreferredSize(new java.awt.Dimension(100, 100));
 
+    jTreeModels.setFont(new java.awt.Font("Dialog", 1, 12)); // NOI18N
     javax.swing.tree.DefaultMutableTreeNode treeNode1 = new javax.swing.tree.DefaultMutableTreeNode("Models");
     jTreeModels.setModel(new javax.swing.tree.DefaultTreeModel(treeNode1));
     jScrollPaneTreeModels.setViewportView(jTreeModels);
