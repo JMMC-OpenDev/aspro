@@ -1,11 +1,16 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: GenericTransferable.java,v 1.1 2010-12-03 09:34:01 bourgesl Exp $"
+ * "@(#) $Id: GenericTransferable.java,v 1.2 2010-12-03 16:28:48 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2010/12/03 09:34:01  bourgesl
+ * first try using drag and drop between calibrator list and target tree
+ * added calibrator list coupled with Calibrator button
+ * changed font for target tree
+ *
  */
 package fr.jmmc.aspro.gui.util;
 
@@ -13,6 +18,7 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
+import javax.swing.tree.TreeNode;
 
 /**
  * A transferable implementation for the specific Target data transfer of some Swing
@@ -64,6 +70,7 @@ public final class GenericTransferable implements Transferable {
    * of the object returned is defined by the representation class of the flavor.
    *
    * @param flavor the requested flavor for the data
+   * @return an object
    * @see DataFlavor#getRepresentationClass
    * @exception IOException                if the data is no longer available
    *              in the requested flavor.
@@ -72,5 +79,10 @@ public final class GenericTransferable implements Transferable {
    */
   public Object getTransferData(final DataFlavor flavor) throws UnsupportedFlavorException, IOException {
     return this.data;
+  }
+
+  @Override
+  public String toString() {
+    return "GenericTransferable { " + this.data + "}";
   }
 }
