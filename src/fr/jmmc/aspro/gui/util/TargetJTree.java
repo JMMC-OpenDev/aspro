@@ -1,18 +1,19 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetJTree.java,v 1.1 2010-12-03 16:10:57 bourgesl Exp $"
+ * "@(#) $Id: TargetJTree.java,v 1.2 2010-12-06 17:01:58 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2010/12/03 16:10:57  bourgesl
+ * JTree utility classes to handle targets / models
+ *
  */
 package fr.jmmc.aspro.gui.util;
 
 import fr.jmmc.aspro.model.oi.Target;
-import fr.jmmc.aspro.model.oi.TargetInformation;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
-import java.util.List;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 
@@ -113,25 +114,43 @@ public class TargetJTree extends GenericJTree {
    * @param target target to use
    * @return true if the given target is a calibrator
    */
-  public final boolean isCalibrator(final Target target) {
+  private final boolean isCalibrator(final Target target) {
     return this.editTargetUserInfos.isCalibrator(target);
   }
 
-  public final boolean addCalibrator(final Target calibrator, final DefaultMutableTreeNode destNode, final Target target) {
+  /**
+   * Add the given calibrator target to the given science target
+   * @param calibrator calibrator target
+   * @param targetNode science target node to update
+   * @param target science target to use
+   * @return true if the calibrator was added
+   */
+  public final boolean addCalibrator(final Target calibrator, final DefaultMutableTreeNode targetNode, final Target target) {
 
-    if (!isCalibrator(target)) {
-      final TargetInformation targetInfo = this.editTargetUserInfos.getTargetUserInformation(target);
+    if (this.editTargetUserInfos.addCalibratorToTarget(target, calibrator)) {
+      // Add node :
+      this.addNodeAndRefresh(targetNode, calibrator);
 
-      final List<Target> calibratorsModel = targetInfo.getCalibrators();
+      return true;
+    }
+    return false;
+  }
 
-      if (!calibratorsModel.contains(calibrator)) {
-        calibratorsModel.add(calibrator);
+  /**
+   * Remove the given calibrator target from the given science target
+   * @param calibratorNode calibrator node to remove
+   * @param calibrator calibrator target
+   * @param targetNode science target node to update
+   * @param target science target to use
+   * @return true if the calibrator was removed
+   */
+  public final boolean removeCalibrator(final DefaultMutableTreeNode calibratorNode, final Target calibrator, final DefaultMutableTreeNode targetNode, final Target target) {
 
-        // Add node :
-        this.addNodeAndRefresh(destNode, calibrator);
+    if (this.editTargetUserInfos.removeCalibratorFromTarget(target, calibrator)) {
+      // remove node :
+      this.removeNodeAndRefresh(targetNode, calibratorNode);
 
-        return true;
-      }
+      return true;
     }
     return false;
   }
