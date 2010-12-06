@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: GenericJTree.java,v 1.1 2010-12-03 16:10:57 bourgesl Exp $"
+ * "@(#) $Id: GenericJTree.java,v 1.2 2010-12-06 17:01:14 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2010/12/03 16:10:57  bourgesl
+ * JTree utility classes to handle targets / models
+ *
  */
 package fr.jmmc.aspro.gui.util;
 
@@ -138,7 +141,7 @@ public class GenericJTree extends JTree {
    * @param userObject user object to locate in the tree
    * @return tree node or null
    */
-  private static DefaultMutableTreeNode findTreeNode(final DefaultMutableTreeNode node, final Object userObject) {
+  public static DefaultMutableTreeNode findTreeNode(final DefaultMutableTreeNode node, final Object userObject) {
     if (node.getUserObject() == userObject) {
       return node;
     }
