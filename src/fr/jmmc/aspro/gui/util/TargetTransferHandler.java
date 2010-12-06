@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetTransferHandler.java,v 1.2 2010-12-03 16:28:48 bourgesl Exp $"
+ * "@(#) $Id: TargetTransferHandler.java,v 1.3 2010-12-06 17:02:32 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2010/12/03 16:28:48  bourgesl
+ * first try to use drag and drop with List and Tree
+ *
  * Revision 1.1  2010/12/03 09:34:01  bourgesl
  * first try using drag and drop between calibrator list and target tree
  * added calibrator list coupled with Calibrator button
@@ -15,15 +18,17 @@
 package fr.jmmc.aspro.gui.util;
 
 import fr.jmmc.aspro.model.oi.Target;
+import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
-import java.util.Arrays;
+import java.awt.datatransfer.UnsupportedFlavorException;
+import java.io.IOException;
+import java.util.List;
 import java.util.logging.Level;
 import javax.swing.JComponent;
 import javax.swing.JList;
 import javax.swing.TransferHandler;
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.TreePath;
 
 /**
  * This custom transfer handler manages the Drag and Drop of Target objects (calibrators) between JList and JTree instances.
@@ -42,82 +47,102 @@ public final class TargetTransferHandler extends TransferHandler {
   private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
 
+  /* members */
+  /** list of edited targets (clone) */
+  private final List<Target> editTargets;
+  /** edited target user informations (clone) */
+  private final TargetUserInformations editTargetUserInfos;
+
   /**
    * Public constructor
+   * @param targets list of targets
+   * @param targetUserInfos target user informations
    */
-  public TargetTransferHandler() {
+  public TargetTransferHandler(final List<Target> targets, final TargetUserInformations targetUserInfos) {
     super();
+
+    this.editTargets = targets;
+    this.editTargetUserInfos = targetUserInfos;
   }
 
   /**
    * Create a Transferable to use as the source for a data transfer.
    *
-   * @param comp  The component holding the data to be transfered.  This
+   * @param sourceComponent  The component holding the data to be transfered.  This
    *  argument is provided to enable sharing of TransferHandlers by
    *  multiple components.
    * @return  The representation of the data to be transfered.
    *
    */
   @Override
-  protected Transferable createTransferable(final JComponent comp) {
-    if (comp instanceof JList) {
-      final JList list = (JList) comp;
+  protected Transferable createTransferable(final JComponent sourceComponent) {
+    if (sourceComponent instanceof JList) {
+      final JList list = (JList) sourceComponent;
       final Object userObject = list.getSelectedValue();
 
-      if (userObject == null) {
-        return null;
-      }
-
-      logger.severe("JList drag selection : " + userObject);
-
-      if (userObject instanceof Target) {
-        // Target so not null :
-        final Target srcTarget = (Target) userObject;
-
-        // note : we suppose that the target is a calibrator :
-
-        // only drag calibrators (not science targets) :
-        return new GenericTransferable(new Object[]{srcTarget, null});
-
-      } else {
-        logger.severe("unsupported object type : " + comp);
-      }
-
-    } else if (comp instanceof TargetJTree) {
-      final TargetJTree tree = (TargetJTree) comp;
-
-      final DefaultMutableTreeNode sourceNode = tree.getLastSelectedNode();
-
-      /* if nothing is selected */
-      if (sourceNode == null) {
-        return null;
-      }
-
-      /* retrieve the node that was selected */
-      final Object userObject = sourceNode.getUserObject();
-
       if (userObject != null) {
-
-        logger.severe("JTree drag selection : " + userObject);
-
         if (userObject instanceof Target) {
           // Target so not null :
-          final Target srcTarget = (Target) userObject;
+          final Target sourceTarget = (Target) userObject;
 
-          // Check if the target is a calibrator
+          // Check if the target is a calibrator ?
+          if (isCalibrator(sourceTarget)) {
 
-          if (tree.isCalibrator((Target) userObject)) {
+            if (logger.isLoggable(Level.FINE)) {
+              logger.fine("JList DRAG selection : " + sourceTarget);
+            }
+
             // only drag calibrators (not science targets) :
-            return new GenericTransferable(new Object[]{srcTarget, new TreePath(sourceNode.getPath())});
+            return new TargetTransferable(sourceTarget.getIdentifier());
           }
-
         } else {
-          logger.severe("unsupported object type : " + comp);
+          logger.severe("unsupported object type : " + userObject);
+        }
+      }
+
+    } else if (sourceComponent instanceof TargetJTree) {
+      final TargetJTree tree = (TargetJTree) sourceComponent;
+      final DefaultMutableTreeNode sourceNode = tree.getLastSelectedNode();
+
+      if (sourceNode != null) {
+        /* retrieve the node that was selected */
+        final Object userObject = sourceNode.getUserObject();
+
+        if (userObject != null) {
+          if (userObject instanceof Target) {
+            // Target so not null :
+            final Target sourceTarget = (Target) userObject;
+
+            // Check if the target is a calibrator ?
+            if (isCalibrator(sourceTarget)) {
+
+              if (logger.isLoggable(Level.FINE)) {
+                logger.fine("JTree DRAG selection : " + sourceTarget);
+              }
+
+              Target parentTarget = null;
+
+              // Check the parent node to get the science target :
+              final DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) sourceNode.getParent();
+
+              if (parentNode != null) {
+                final Object parentUserObject = parentNode.getUserObject();
+                if (parentUserObject instanceof Target) {
+                  parentTarget = (Target) parentUserObject;
+                }
+              }
+
+              // only drag calibrators (not science targets) :
+              return new TargetTransferable(sourceTarget.getIdentifier(), (parentTarget != null) ? parentTarget.getIdentifier() : null);
+            }
+          } else {
+            logger.severe("unsupported object type : " + userObject);
+          }
         }
       }
 
     } else {
-      logger.severe("unsupported component : " + comp);
+      logger.severe("unsupported component : " + sourceComponent);
     }
 
     return null;
@@ -132,39 +157,43 @@ public final class TargetTransferHandler extends TransferHandler {
    * should not be advertised in that case. Returning {@code NONE}
    * disables transfers from the component.
    *
-   * @param c  the component holding the data to be transferred;
+   * @param sourceComponent  the component holding the data to be transferred;
    *           provided to enable sharing of <code>TransferHandler</code>s
    * @return {@code COPY} if the transfer property can be found,
    *          otherwise returns <code>NONE</code>
    */
   @Override
-  public int getSourceActions(final JComponent c) {
-    return COPY_OR_MOVE;
+  public int getSourceActions(final JComponent sourceComponent) {
+    if (sourceComponent instanceof JList) {
+      return COPY;
+    } else if (sourceComponent instanceof TargetJTree) {
+      return COPY_OR_MOVE;
+    }
+    return NONE;
   }
 
   /**
    * Indicates whether a component will accept an import of the given
    * set of data flavors prior to actually attempting to import it.
    *
-   * @param comp  the component to receive the transfer;
+   * @param destinationComponent  the component to receive the transfer;
    *              provided to enable sharing of <code>TransferHandler</code>s
    * @param transferFlavors  the data formats available
    * @return  true if the data can be inserted into the component, false otherwise
    * @see #canImport(TransferHandler.TransferSupport)
    */
   @Override
-  public boolean canImport(final JComponent comp,
+  public boolean canImport(final JComponent destinationComponent,
                            final DataFlavor[] transferFlavors) {
 
-    if (comp instanceof TargetJTree) {
-
-      // TODO : tester si le noeud courant est bien une target ...
-
-      // Pas evident a faire (Java 5)
-
-      return true;
+    if (destinationComponent instanceof TargetJTree) {
+      // Check if the transferFlavors are supported :
+      if (TargetTransferable.TargetIdentifiersDataFlavor.equals(transferFlavors[0])) {
+        // Java 5 does not have an API to handle easily the drop location.
+        // It is not possible to have a different behaviour depending on the target type (calibrator or science)
+        return true;
+      }
     }
-    // List does not accept drop ...
     return false;
   }
 
@@ -173,60 +202,58 @@ public final class TargetTransferHandler extends TransferHandler {
    * DND drop operation.  The <code>Transferable</code> represents
    * the data to be imported into the component.
    *
-   * @param comp  the component to receive the transfer;
+   * @param destinationComponent  the component to receive the transfer;
    *              provided to enable sharing of <code>TransferHandler</code>s
    * @param data     the data to import
    * @return  true if the data was inserted into the component, false otherwise
    * @see #importData(TransferHandler.TransferSupport)
    */
   @Override
-  public boolean importData(final JComponent comp, final Transferable data) {
+  public boolean importData(final JComponent destinationComponent, final Transferable data) {
 
-    if (data != null && comp instanceof TargetJTree) {
-      Target srcTarget = null;
-      try {
-        final Object[] objects = (Object[]) data.getTransferData(DataFlavor.stringFlavor);
+    /* In case of copy/paste action, we must check that the destination component supports the data flavor */
+    if (data != null
+            && destinationComponent instanceof TargetJTree
+            && canImport(destinationComponent, data.getTransferDataFlavors())) {
 
-        logger.severe("transfered objects : " + Arrays.toString(objects));
+      final TargetJTree tree = (TargetJTree) destinationComponent;
+      final DefaultMutableTreeNode destinationNode = tree.getLastSelectedNode();
 
-        srcTarget = (Target)objects[0];
-
-      } catch (Exception e) {
-        logger.log(Level.SEVERE, "failure", e);
-      }
-
-      if (srcTarget != null) {
-        logger.severe("target (calibrator) : " + srcTarget);
-
-        final TargetJTree tree = (TargetJTree) comp;
-
-        final DefaultMutableTreeNode destNode = tree.getLastSelectedNode();
-
-        /* if nothing is selected */
-        if (destNode == null) {
-          return false;
-        }
-
+      if (destinationNode != null) {
         /* retrieve the node that was selected */
-        final Object userObject = destNode.getUserObject();
+        final Object userObject = destinationNode.getUserObject();
 
         if (userObject != null) {
-
-          logger.severe("JTree DROP selection : " + userObject);
-
           if (userObject instanceof Target) {
+            final Target destinationTarget = (Target) userObject;
 
-            final Target destTarget = (Target) userObject;
+            // Check if the target is NOT a calibrator i.e. a science target ?
+            if (!isCalibrator(destinationTarget)) {
+              if (logger.isLoggable(Level.FINE)) {
+                logger.fine("JTree DROP selection : " + destinationTarget);
+              }
 
-            return tree.addCalibrator(srcTarget, destNode, destTarget);
+              // Extract data :
+              final TargetTransferable transfer = extractData(data);
+              if (transfer != null) {
+                final Target srcTarget = getTargetById(transfer.getTargetId());
+                if (srcTarget != null) {
+                  if (logger.isLoggable(Level.FINE)) {
+                    logger.fine("target (calibrator) : " + srcTarget);
+                  }
 
+                  return tree.addCalibrator(srcTarget, destinationNode, destinationTarget);
+                }
+              }
+            }
           } else {
-            logger.severe("unsupported object type : " + comp);
+            // can occur on root node ('Targets' string)
+            if (logger.isLoggable(Level.FINE)) {
+              logger.fine("unsupported object type : " + userObject);
+            }
           }
         }
       }
-
-      return false;
     }
     return false;
   }
@@ -235,20 +262,89 @@ public final class TargetTransferHandler extends TransferHandler {
    * Invoked after data has been exported.  This method should remove
    * the data that was transferred if the action was <code>MOVE</code>.
    *
-   * @param source the component that was the source of the data
+   * @param sourceComponent the component that was the source of the data
    * @param data   The data that was transferred or possibly null
    *               if the action is <code>NONE</code>.
    * @param action the actual action that was performed
    */
   @Override
-  protected void exportDone(final JComponent source, final Transferable data, final int action) {
-    if (data != null && action == MOVE) {
-      if (source instanceof TargetJTree) {
-        logger.severe("exportDone : " + data + " action = " + ((action == MOVE) ? "move" : "copy"));
+  protected void exportDone(final JComponent sourceComponent, final Transferable data, final int action) {
 
-        // TODO : remove the previous node :
+    if (data != null
+            && action == MOVE
+            && sourceComponent instanceof TargetJTree) {
 
+      // Extract data :
+      final TargetTransferable transfer = extractData(data);
+      if (transfer != null) {
+        if (logger.isLoggable(Level.FINE)) {
+          logger.fine("exportDone : Transfered object : " + transfer);
+        }
+
+        final Target srcTarget = getTargetById(transfer.getTargetId());
+        if (srcTarget != null) {
+          if (logger.isLoggable(Level.FINE)) {
+            logger.fine("target (calibrator) : " + srcTarget);
+          }
+
+          final Target parentTarget = getTargetById(transfer.getParentTargetId());
+          if (parentTarget != null) {
+            if (logger.isLoggable(Level.FINE)) {
+              logger.fine("target (science) : " + parentTarget);
+            }
+
+            final TargetJTree tree = (TargetJTree) sourceComponent;
+
+            final DefaultMutableTreeNode parentNode = tree.findTreeNode(parentTarget);
+            if (parentNode != null) {
+              final DefaultMutableTreeNode srcNode = TargetJTree.findTreeNode(parentNode, srcTarget);
+              if (srcNode != null) {
+                // remove the moved node :
+                tree.removeCalibrator(srcNode, srcTarget, parentNode, parentTarget);
+              }
+            }
+          }
+        }
       }
     }
+  }
+
+  /**
+   * Extract TargetTransferable from data
+   * @param data   The data that was transferred or possibly null
+   *               if the action is <code>NONE</code>.
+   * @return TargetTransferable or null
+   */
+  private final TargetTransferable extractData(final Transferable data) {
+    TargetTransferable transfer = null;
+    try {
+      transfer = (TargetTransferable) data.getTransferData(TargetTransferable.TargetIdentifiersDataFlavor);
+    } catch (UnsupportedFlavorException ufe) {
+      logger.log(Level.SEVERE, "unsupported format", ufe);
+    } catch (IOException ioe) {
+      logger.log(Level.SEVERE, "I/O failure", ioe);
+    }
+    return transfer;
+  }
+
+// --- Utility methods -------------------------------------------------------
+  /**
+   * Return true if the given target is a calibrator
+   * i.e. the calibrator list contains the given target
+   * @param target target to use
+   * @return true if the given target is a calibrator
+   */
+  private final boolean isCalibrator(final Target target) {
+    return this.editTargetUserInfos.isCalibrator(target);
+  }
+
+  /**
+   * Return the target of the given identifier in the given list of targets
+   * @param id target identifier
+   * @return target or null if the target was not found
+   */
+  private final Target getTargetById(final String id) {
+    return Target.getTargetById(id, this.editTargets);
+
   }
 }
