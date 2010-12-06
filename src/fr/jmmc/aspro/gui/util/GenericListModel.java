@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: GenericListModel.java,v 1.1 2010-12-03 09:32:47 bourgesl Exp $"
+ * "@(#) $Id: GenericListModel.java,v 1.2 2010-12-06 17:01:28 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2010/12/03 09:32:47  bourgesl
+ * ListModel implementation using a List<Type>
+ *
  */
 package fr.jmmc.aspro.gui.util;
 
@@ -239,5 +242,19 @@ public final class GenericListModel<K> extends AbstractListModel {
       model.remove(i);
     }
     fireIntervalRemoved(this, fromIndex, toIndex);
+  }
+
+  // --- specific methods ------------------------------------------------------
+  /**
+   * Append the element if not present.
+   *
+   * @param element element to be added to this list, if absent
+   * @return <tt>true</tt> if the element was added
+   */
+  public boolean addIfAbsent(final K element) {
+    if (!this.model.contains(element)) {
+      return this.model.add(element);
+    }
+    return false;
   }
 }
