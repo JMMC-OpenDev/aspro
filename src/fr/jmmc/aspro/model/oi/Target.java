@@ -905,6 +905,23 @@ public class Target
     }
     return null;
   }
+
+  /**
+   * Return the target of the given identifier in the given list of targets
+   * @param id target identifier
+   * @param targets list of targets
+   * @return target or null if the target was not found
+   */
+  public static final Target getTargetById(final String id, final List<Target> targets) {
+    if (id != null) {
+      for (Target t : targets) {
+        if (t.getIdentifier().equals(id)) {
+          return t;
+        }
+      }
+    }
+    return null;
+  }
 //--simple--preserve
 
 }
