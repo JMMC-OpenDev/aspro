@@ -2,7 +2,7 @@
 
 <ApplicationData link="http://www.jmmc.fr/aspro2">
 
-  <program name="Aspro2" version="0.7.4 beta"/>
+  <program name="Aspro2" version="0.7.5 beta"/>
 
   <compilation date="01/12/2010" compiler="JDK 1.5.0_16"/>
 
@@ -71,6 +71,11 @@
 
   <releasenotes>
     <release version="0.7">
+      <prerelease version="0.7.5 beta">
+        <change>Added CHARA PAVO instrument : PAVO_2T and PAVO_3T (3T)</change>
+        <change>Updated target editor to flag a target as a calibrator</change>
+        <change>Basic drag and drop support to associate calibrators to (science) targets</change>
+      </prerelease>
       <prerelease version="0.7.4 beta">
         <change>Added a version attribute in the Observation file to handle model conversions</change>
         <change>Updated the Observation data model : targets have an ID attribute (derived from target name)
