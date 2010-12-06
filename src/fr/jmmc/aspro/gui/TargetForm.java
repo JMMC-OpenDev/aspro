@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetForm.java,v 1.14 2010-12-03 16:11:52 bourgesl Exp $"
+ * "@(#) $Id: TargetForm.java,v 1.15 2010-12-06 17:00:55 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.14  2010/12/03 16:11:52  bourgesl
+ * refactoring to use new JTree classes
+ *
  * Revision 1.13  2010/12/03 09:34:01  bourgesl
  * first try using drag and drop between calibrator list and target tree
  * added calibrator list coupled with Calibrator button
@@ -77,21 +80,25 @@ import javax.swing.DefaultListCellRenderer;
 import javax.swing.JFormattedTextField;
 import javax.swing.JList;
 import javax.swing.ListCellRenderer;
+import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.text.NumberFormatter;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreePath;
 
 /**
  * This class represents the target information editor ...
  *
  * @author bourgesl
  */
-public final class TargetForm extends javax.swing.JPanel implements PropertyChangeListener, TreeSelectionListener {
+public final class TargetForm extends javax.swing.JPanel implements PropertyChangeListener, TreeSelectionListener, ListSelectionListener {
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
@@ -151,6 +158,9 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     // tree selection listener :
     this.jTreeTargets.addTreeSelectionListener(this);
 
+    // list selection listener :
+    this.jListCalibrators.getSelectionModel().addListSelectionListener(this);
+
     // add property change listener to editable fields :
 
     // radial velocity :
@@ -202,7 +212,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     this.selectTarget(Target.getTarget(targetName, this.editTargets));
 
     // Add custom DnD support :
-    final TransferHandler targetTransferHandler = new TargetTransferHandler();
+    final TransferHandler targetTransferHandler = new TargetTransferHandler(this.editTargets, this.editTargetUserInfos);
     this.jListCalibrators.setTransferHandler(targetTransferHandler);
     this.jTreeTargets.setTransferHandler(targetTransferHandler);
   }
@@ -224,12 +234,17 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
 
     final DefaultMutableTreeNode rootNode = this.getTreeTargets().getRootNode();
 
+    TargetInformation targetInfo;
     DefaultMutableTreeNode targetNode;
     for (Target target : targets) {
 
       targetNode = this.getTreeTargets().addNode(rootNode, target);
 
-      // TODO : add calibrators as children of the target Node
+      // add calibrators as children of the target Node :
+      targetInfo = getTargetUserInformation(target);
+      for (Target calibrator : targetInfo.getCalibrators()) {
+        this.getTreeTargets().addNode(targetNode, calibrator);
+      }
     }
 
     // fire node structure changed :
@@ -286,6 +301,35 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
       }
     });
   }
+
+  /**
+   * Called whenever the value of the selection changes.
+   * @param e the event that characterizes the change.
+   */
+  public void valueChanged(final ListSelectionEvent e) {
+    final ListSelectionModel lsm = (ListSelectionModel) e.getSource();
+
+    if (e.getValueIsAdjusting() || lsm.isSelectionEmpty()) {
+      return;
+    }
+
+    // Single selection mode :
+    final int minIndex = lsm.getMinSelectionIndex();
+
+    if (minIndex != -1) {
+      final Target target = this.calibratorsModel.get(minIndex);
+
+      final DefaultMutableTreeNode targetNode = this.getTreeTargets().findTreeNode(target);
+
+      if (targetNode != null) {
+        // Select the target node :
+        this.getTreeTargets().selectPath(new TreePath(targetNode.getPath()));
+      } else {
+        this.processTargetSelection(target);
+      }
+    }
+  }
+
 
   /**
    * Update the UI when a target is selected in the target tree
@@ -466,17 +510,14 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
   private void initComponents() {
     java.awt.GridBagConstraints gridBagConstraints;
 
-    buttonGroupCalibrators = new javax.swing.ButtonGroup();
     jScrollPaneTreeTargets = new javax.swing.JScrollPane();
     jTreeTargets = new TargetJTree(this.editTargetUserInfos);
     jToolBarActions = new javax.swing.JToolBar();
     jButtonUp = new javax.swing.JButton();
     jButtonDown = new javax.swing.JButton();
     jSeparator1 = new javax.swing.JToolBar.Separator();
-    jToggleButtonEdit = new javax.swing.JToggleButton();
-    jToggleButtonAssociate = new javax.swing.JToggleButton();
-    jSeparator2 = new javax.swing.JToolBar.Separator();
     jToggleButtonCalibrator = new javax.swing.JToggleButton();
+    jButtonRemoveCalibrator = new javax.swing.JButton();
     jPanelTarget = new javax.swing.JPanel();
     jLabelName = new javax.swing.JLabel();
     jFieldName = new javax.swing.JTextField();
@@ -531,7 +572,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     jScrollPaneTreeTargets.setMinimumSize(new java.awt.Dimension(80, 100));
     jScrollPaneTreeTargets.setPreferredSize(new java.awt.Dimension(130, 100));
 
-    jTreeTargets.setFont(new java.awt.Font("Dialog", 1, 12)); // NOI18N
+    jTreeTargets.setFont(new java.awt.Font("Dialog", 1, 12));
     javax.swing.tree.DefaultMutableTreeNode treeNode1 = new javax.swing.tree.DefaultMutableTreeNode("Targets");
     jTreeTargets.setModel(new javax.swing.tree.DefaultTreeModel(treeNode1));
     jTreeTargets.setDragEnabled(true);
@@ -559,24 +600,24 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     jToolBarActions.add(jButtonDown);
     jToolBarActions.add(jSeparator1);
 
-    buttonGroupCalibrators.add(jToggleButtonEdit);
-    jToggleButtonEdit.setSelected(true);
-    jToggleButtonEdit.setText("Edit Target");
-    jToolBarActions.add(jToggleButtonEdit);
-
-    buttonGroupCalibrators.add(jToggleButtonAssociate);
-    jToggleButtonAssociate.setText("Associate");
-    jToggleButtonAssociate.setEnabled(false);
-    jToolBarActions.add(jToggleButtonAssociate);
-    jToolBarActions.add(jSeparator2);
-
-    jToggleButtonCalibrator.setText("Calibrator Flag");
+    jToggleButtonCalibrator.setText("Flag Target as Calibrator");
     jToggleButtonCalibrator.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(java.awt.event.ActionEvent evt) {
         jToggleButtonCalibratorActionPerformed(evt);
       }
     });
     jToolBarActions.add(jToggleButtonCalibrator);
+
+    jButtonRemoveCalibrator.setText("Remove Calibrator");
+    jButtonRemoveCalibrator.setFocusable(false);
+    jButtonRemoveCalibrator.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+    jButtonRemoveCalibrator.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+    jButtonRemoveCalibrator.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jButtonRemoveCalibratorActionPerformed(evt);
+      }
+    });
+    jToolBarActions.add(jButtonRemoveCalibrator);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
@@ -1018,10 +1059,27 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     }
 
     if (isCalibrator) {
+      boolean confirm = true;
+
+      // check that the target has no calibrator yet :
+      if (this.editTargetUserInfos.hasCalibrators(this.currentTarget)) {
+
+        if (MessagePane.showConfirmMessage(this.jToggleButtonCalibrator,
+                "Do you really want to use this target as a calibrator [" + this.currentTarget.getName() + "] ?")) {
+          confirm = true;
+          // TODO : use the JTree to remove calibrators from the current target and update the model ...
+
+        } else {
+          this.jToggleButtonCalibrator.setSelected(false);
+          confirm = false;
+        }
+      }
+
       // TODO : Should be done directly by our data model classes (editTargetUserInfos)
-      if (!this.calibratorsModel.contains(this.currentTarget)) {
+      if (confirm && !this.calibratorsModel.contains(this.currentTarget)) {
         this.calibratorsModel.add(this.currentTarget);
       }
+
     } else {
 
       // First remove this calibrator from target's calibrator lists :
@@ -1029,7 +1087,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
       if (MessagePane.showConfirmMessage(this.jToggleButtonCalibrator,
               "Do you really want to remove associations with this calibrator [" + this.currentTarget.getName() + "] ?")) {
 
-        // TODO : use the JTree to remove the calibrator and update the model ...
+        // TODO : use the JTree to remove the occurences of the calibrator and update the model ...
 
         this.calibratorsModel.remove(this.currentTarget);
       } else {
@@ -1046,6 +1104,33 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
       this.getTreeTargets().fireNodeChanged(targetNode);
     }
   }//GEN-LAST:event_jToggleButtonCalibratorActionPerformed
+
+  private void jButtonRemoveCalibratorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonRemoveCalibratorActionPerformed
+
+    // remove the current calibrator from its science target :
+    if (isCalibrator(this.currentTarget)) {
+
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("remove calibrator " + this.currentTarget.getName());
+      }
+
+      final DefaultMutableTreeNode currentNode = this.getTreeTargets().getLastSelectedNode();
+
+      if (currentNode == null) {
+        return;
+      }
+
+      // Parent can be a target or null :
+      final DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) currentNode.getParent();
+
+      if (parentNode.getUserObject() instanceof Target) {
+        final Target parentTarget = (Target) parentNode.getUserObject();
+
+        // Remove calibrator from target :
+        this.getTreeTargets().removeCalibrator(currentNode, this.currentTarget, parentNode, parentTarget);
+      }
+    }
+  }//GEN-LAST:event_jButtonRemoveCalibratorActionPerformed
 
   /**
    * Validate the form
@@ -1093,8 +1178,8 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     return previous;
   }
   // Variables declaration - do not modify//GEN-BEGIN:variables
-  private javax.swing.ButtonGroup buttonGroupCalibrators;
   private javax.swing.JButton jButtonDown;
+  private javax.swing.JButton jButtonRemoveCalibrator;
   private javax.swing.JButton jButtonSimbad;
   private javax.swing.JButton jButtonUp;
   private javax.swing.JTextField jFieldDEC;
@@ -1140,15 +1225,12 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
   private javax.swing.JScrollPane jScrollPaneTargetInfos;
   private javax.swing.JScrollPane jScrollPaneTreeTargets;
   private javax.swing.JToolBar.Separator jSeparator1;
-  private javax.swing.JToolBar.Separator jSeparator2;
   private javax.swing.JSeparator jSeparator3;
   private javax.swing.JSeparator jSeparator4;
   private javax.swing.JSeparator jSeparator5;
   private javax.swing.JTextArea jTextAreaIds;
   private javax.swing.JTextArea jTextAreaTargetInfos;
-  private javax.swing.JToggleButton jToggleButtonAssociate;
   private javax.swing.JToggleButton jToggleButtonCalibrator;
-  private javax.swing.JToggleButton jToggleButtonEdit;
   private javax.swing.JToolBar jToolBarActions;
   private javax.swing.JTree jTreeTargets;
   // End of variables declaration//GEN-END:variables
@@ -1252,7 +1334,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     TargetInformation targetInfo = this.mapIDTargetInformations.get(target.getIdentifier());
 
     if (targetInfo == null) {
-      targetInfo = this.editTargetUserInfos.getTargetUserInformation(target);
+      targetInfo = this.editTargetUserInfos.getOrCreateTargetInformation(target);
       this.mapIDTargetInformations.put(target.getIdentifier(), targetInfo);
     }
 
