@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: OIBase.java,v 1.7 2010-12-03 16:28:30 bourgesl Exp $"
+ * "@(#) $Id: OIBase.java,v 1.8 2010-12-06 17:03:33 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2010/12/03 16:28:30  bourgesl
+ * Serializable support
+ *
  * Revision 1.6  2010/11/30 15:53:27  bourgesl
  * added shared logger
  * added deepCopyList and copyList methods to simplify clone implementations
@@ -27,7 +30,6 @@
  ******************************************************************************/
 package fr.jmmc.aspro.model;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,7 +37,7 @@ import java.util.List;
  * This is a base class for all generated classes in model.oi (Optical Interferometry Data Model)
  * @author bourgesl
  */
-public class OIBase implements Cloneable, Serializable {
+public class OIBase implements Cloneable {
   /** Class logger */
   protected static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           "fr.jmmc.aspro.model.OIBase");
