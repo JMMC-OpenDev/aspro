@@ -122,7 +122,19 @@ public class TargetUserInformations
    * @return true if the given target is a calibrator 
    */
   public final boolean isCalibrator(final Target target) {
-    return this.getCalibrators().contains(target);
+    return getCalibrators().contains(target);
+  }
+
+  /**
+   * Append the given target to the calibrator list if not present.
+   * @param target calibrator to be added to the calibrator list, if absent
+   * @return <tt>true</tt> if the calibrator was added
+   */
+  public boolean addCalibratorIfAbsent(final Target target) {
+    if (!isCalibrator(target)) {
+      return getCalibrators().add(target);
+    }
+    return false;
   }
 
   /**
@@ -131,22 +143,77 @@ public class TargetUserInformations
    * @param target target
    * @return target user information
    */
-  public final TargetInformation getTargetUserInformation(final Target target) {
+  public final TargetInformation getOrCreateTargetInformation(final Target target) {
+    TargetInformation targetInfo = getTargetInformation(target);
+    if (targetInfo == null) {
+      // create a new instance if the target is not found :
+      targetInfo = new TargetInformation();
+      targetInfo.setTargetRef(target);
+      getTargetInfos().add(targetInfo);
+    }
+    return targetInfo;
+  }
+
+  /**
+   * Return the existing target information corresponding to the target
+   * @param target target
+   * @return target user information
+   * @see #getOrCreateTargetInformation(Target)
+   */
+  public final TargetInformation getTargetInformation(final Target target) {
     for (TargetInformation targetInfo : getTargetInfos()) {
       if (targetInfo.getTargetRef().equals(target)) {
         return targetInfo;
       }
     }
-    // create a new instance if the target is not found :
-    final TargetInformation targetInfo = new TargetInformation();
-    targetInfo.setTargetRef(target);
-    getTargetInfos().add(targetInfo);
-    return targetInfo;
+    return null;
   }
 
-  /*
-  TODO : prune TargetInformation orphans
+  /**
+   * Return true if the given target has calibrators
+   * @param target target to use
+   * @return true if the given target has calibrators
    */
+  public final boolean hasCalibrators(final Target target) {
+    final TargetInformation targetInfo = getTargetInformation(target);
+    if (targetInfo != null) {
+      return targetInfo.hasCalibrators();
+    }
+    return false;
+  }
+
+  /**
+   * Add the given calibrator target to the given science target
+   * @param target science target to use
+   * @param calibrator calibrator target
+   * @return true if the calibrator was added
+   */
+  public final boolean addCalibratorToTarget(final Target target, final Target calibrator) {
+    // check that the target is a science target :
+    if (!isCalibrator(target) && isCalibrator(calibrator)) {
+      final TargetInformation targetInfo = getOrCreateTargetInformation(target);
+
+      return targetInfo.addCalibrator(calibrator);
+    }
+    return false;
+  }
+
+  /**
+   * Remove the given calibrator target to the given science target
+   * @param target science target to use
+   * @param calibrator calibrator target
+   * @return true if the calibrator was removed
+   */
+  public final boolean removeCalibratorFromTarget(final Target target, final Target calibrator) {
+    // check that the target is a science target :
+    if (!isCalibrator(target) && isCalibrator(calibrator)) {
+      final TargetInformation targetInfo = getOrCreateTargetInformation(target);
+
+      return targetInfo.removeCalibrator(calibrator);
+    }
+    return false;
+  }
+
   /**
    * Return a deep "copy" of this instance
    * @return deep "copy" of this instance

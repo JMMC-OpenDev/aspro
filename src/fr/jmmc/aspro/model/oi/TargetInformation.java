@@ -143,6 +143,51 @@ public class TargetInformation
   }
 
   /**
+   * Return true if the calibrator list is not empty
+   * @return true if the calibrator list is not empty
+   */
+  public final boolean hasCalibrators() {
+    if (this.calibrators != null) {
+      return !this.calibrators.isEmpty();
+    }
+    return false;
+  }
+
+  /**
+   * Return true if the given target is a calibrator
+   * i.e. the calibrator list contains the given target
+   * @param target target to use
+   * @return true if the given target is a calibrator
+   */
+  public final boolean isCalibrator(final Target target) {
+    return getCalibrators().contains(target);
+  }
+
+  /**
+   * Append the given target to the calibrator list if not present.
+   * @param target calibrator to be added to the calibrator list, if absent
+   * @return <tt>true</tt> if the calibrator was added
+   */
+  public boolean addCalibrator(final Target target) {
+    if (!isCalibrator(target)) {
+      return getCalibrators().add(target);
+    }
+    return false;
+  }
+
+  /**
+   * Remove the given target to the calibrator list if present.
+   * @param target calibrator to be removed from the calibrator list, if present
+   * @return <tt>true</tt> if the calibrator was removed
+   */
+  public boolean removeCalibrator(final Target target) {
+    if (isCalibrator(target)) {
+      return getCalibrators().remove(target);
+    }
+    return false;
+  }
+
+  /**
    * Return a deep "copy" of this instance
    * @return deep "copy" of this instance
    */
