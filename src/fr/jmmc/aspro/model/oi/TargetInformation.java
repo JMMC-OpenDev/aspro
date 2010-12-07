@@ -231,7 +231,21 @@ public class TargetInformation
         }
       }
     }
+  }
 
+  /**
+   * Return true if this target information is empty :
+   * description is empty and calibrator list is empty
+   * @return true if this target information is empty
+   */
+  protected final boolean isEmpty() {
+    if (this.description != null && this.description.length() != 0) {
+      return false;
+    }
+    if (this.calibrators != null && !this.calibrators.isEmpty()) {
+      return false;
+    }
+    return true;
   }
 //--simple--preserve
 
