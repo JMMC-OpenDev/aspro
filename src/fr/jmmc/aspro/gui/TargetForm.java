@@ -1,11 +1,16 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetForm.java,v 1.15 2010-12-06 17:00:55 bourgesl Exp $"
+ * "@(#) $Id: TargetForm.java,v 1.16 2010-12-07 17:39:48 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.15  2010/12/06 17:00:55  bourgesl
+ * added list selection listener for calibrators
+ * support remove calibrator for a science target
+ * generate tree with calibrators
+ *
  * Revision 1.14  2010/12/03 16:11:52  bourgesl
  * refactoring to use new JTree classes
  *
@@ -238,12 +243,15 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     DefaultMutableTreeNode targetNode;
     for (Target target : targets) {
 
-      targetNode = this.getTreeTargets().addNode(rootNode, target);
+      // TODO : only display science targets :
+      if (!isCalibrator(target)) {
+        targetNode = this.getTreeTargets().addNode(rootNode, target);
 
-      // add calibrators as children of the target Node :
-      targetInfo = getTargetUserInformation(target);
-      for (Target calibrator : targetInfo.getCalibrators()) {
-        this.getTreeTargets().addNode(targetNode, calibrator);
+        // add calibrators as children of the target Node :
+        targetInfo = getTargetUserInformation(target);
+        for (Target calibrator : targetInfo.getCalibrators()) {
+          this.getTreeTargets().addNode(targetNode, calibrator);
+        }
       }
     }
 
@@ -264,42 +272,50 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
    * @param e tree selection event
    */
   public void valueChanged(final TreeSelectionEvent e) {
-    final DefaultMutableTreeNode node = this.getTreeTargets().getLastSelectedNode();
+    final DefaultMutableTreeNode currentNode = this.getTreeTargets().getLastSelectedNode();
 
-    /* if nothing is selected */
-    if (node == null) {
-      return;
-    }
+    if (currentNode != null) {
+      // Use invokeLater to avoid event ordering problems with focusLost on JTextArea
+      // or JTable editors :
+      SwingUtilities.invokeLater(new Runnable() {
 
-    /* React to the node selection. */
-
-    // Use invokeLater to avoid event ordering problems with focusLost on JTextArea
-    // or JTable editors :
-    SwingUtilities.invokeLater(new Runnable() {
-
-      public void run() {
-        // Check if it is the root node :
-        final DefaultMutableTreeNode rootNode = getTreeTargets().getRootNode();
-        if (node == rootNode) {
-          getTreeTargets().selectFirstChildNode(rootNode);
-          return;
-        }
-
-        /* retrieve the node that was selected */
-        final Object userObject = node.getUserObject();
-
-        if (userObject != null) {
-          if (logger.isLoggable(Level.FINE)) {
-            logger.fine("tree selection : " + userObject);
+        public void run() {
+          // Check if it is the root node :
+          final DefaultMutableTreeNode rootNode = getTreeTargets().getRootNode();
+          if (currentNode == rootNode) {
+            getTreeTargets().selectFirstChildNode(rootNode);
+            return;
           }
+
+          /* retrieve the node that was selected */
+          final Object userObject = currentNode.getUserObject();
 
           if (userObject instanceof Target) {
-            // Target :
-            processTargetSelection((Target) userObject);
+            final Target target = (Target) userObject;
+
+            if (logger.isLoggable(Level.FINE)) {
+              logger.fine("tree selection : " + target);
+            }
+
+            final boolean isCalibrator = isCalibrator(target);
+
+            // select the calibrator in the calibrator list :
+            if (isCalibrator) {
+              if (jListCalibrators.getSelectedValue() != target) {
+                jListCalibrators.setSelectedValue(target, true);
+              }
+            } else {
+              jListCalibrators.clearSelection();
+            }
+
+            processTargetSelection(target);
+
+            // enable/disable the 'remove calibrator' action :
+            jButtonRemoveCalibrator.setEnabled(isCalibrator);
           }
         }
-      }
-    });
+      });
+    }
   }
 
   /**
@@ -313,23 +329,45 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
       return;
     }
 
-    // Single selection mode :
-    final int minIndex = lsm.getMinSelectionIndex();
+    // Use invokeLater to avoid event ordering problems with focusLost on JTextArea
+    // or JTable editors :
+    SwingUtilities.invokeLater(new Runnable() {
 
-    if (minIndex != -1) {
-      final Target target = this.calibratorsModel.get(minIndex);
+      public void run() {
 
-      final DefaultMutableTreeNode targetNode = this.getTreeTargets().findTreeNode(target);
+        // Single selection mode :
+        final int minIndex = lsm.getMinSelectionIndex();
 
-      if (targetNode != null) {
-        // Select the target node :
-        this.getTreeTargets().selectPath(new TreePath(targetNode.getPath()));
-      } else {
-        this.processTargetSelection(target);
+        if (minIndex != -1) {
+          final Target target = calibratorsModel.get(minIndex);
+
+          // Check if the selected tree node :
+          final DefaultMutableTreeNode currentNode = getTreeTargets().getLastSelectedNode();
+
+          if (currentNode != null && currentNode.getUserObject() != target) {
+
+            // select the first target node having this calibrator :
+            final DefaultMutableTreeNode targetNode = getTreeTargets().findTreeNode(target);
+
+            if (targetNode != null) {
+              // Select the target node that will send later a TreeSelectionEvent :
+              getTreeTargets().selectPath(new TreePath(targetNode.getPath()));
+            } else {
+              // No tree node found for the calibrator :
+
+              // disable the 'remove calibrator' action :
+              jButtonRemoveCalibrator.setEnabled(false);
+
+              // clear tree selection :
+              getTreeTargets().clearSelection();
+
+              processTargetSelection(target);
+            }
+          }
+        }
       }
-    }
+    });
   }
-
 
   /**
    * Update the UI when a target is selected in the target tree
@@ -389,16 +427,6 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
       // restore the automatic update target :
       this.setAutoUpdateTarget(prevAutoUpdateTarget);
     }
-  }
-
-  /**
-   * Return true if the given target is a calibrator
-   * i.e. the calibrator list contains the given target
-   * @param target target to use
-   * @return true if the given target is a calibrator
-   */
-  public final boolean isCalibrator(final Target target) {
-    return this.editTargetUserInfos.isCalibrator(target);
   }
 
   /**
@@ -1066,6 +1094,8 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
 
         if (MessagePane.showConfirmMessage(this.jToggleButtonCalibrator,
                 "Do you really want to use this target as a calibrator [" + this.currentTarget.getName() + "] ?")) {
+
+
           confirm = true;
           // TODO : use the JTree to remove calibrators from the current target and update the model ...
 
@@ -1075,9 +1105,10 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
         }
       }
 
-      // TODO : Should be done directly by our data model classes (editTargetUserInfos)
+      // note : should be done directly by our data model classes (editTargetUserInfos) :
       if (confirm && !this.calibratorsModel.contains(this.currentTarget)) {
         this.calibratorsModel.add(this.currentTarget);
+        this.jListCalibrators.setSelectedValue(this.currentTarget, true);
       }
 
     } else {
@@ -1095,7 +1126,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
       }
     }
 
-    // Refresh selected node to show/hide (cal) suffix :
+    // Refresh selected node to show/hide CAL_suffix :
     final DefaultMutableTreeNode targetNode = this.getTreeTargets().findTreeNode(this.currentTarget);
 
     if (targetNode != null) {
@@ -1107,27 +1138,38 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
 
   private void jButtonRemoveCalibratorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonRemoveCalibratorActionPerformed
 
-    // remove the current calibrator from its science target :
-    if (isCalibrator(this.currentTarget)) {
+    final DefaultMutableTreeNode currentNode = this.getTreeTargets().getLastSelectedNode();
 
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("remove calibrator " + this.currentTarget.getName());
-      }
+    if (currentNode != null) {
 
-      final DefaultMutableTreeNode currentNode = this.getTreeTargets().getLastSelectedNode();
+      /* retrieve the node that was selected */
+      final Object userObject = currentNode.getUserObject();
 
-      if (currentNode == null) {
-        return;
-      }
+      if (userObject instanceof Target) {
+        final Target target = (Target) userObject;
 
-      // Parent can be a target or null :
-      final DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) currentNode.getParent();
+        if (logger.isLoggable(Level.FINE)) {
+          logger.fine("tree selection : " + target);
+        }
 
-      if (parentNode.getUserObject() instanceof Target) {
-        final Target parentTarget = (Target) parentNode.getUserObject();
+        // remove the current calibrator from its science target :
+        if (isCalibrator(target)) {
 
-        // Remove calibrator from target :
-        this.getTreeTargets().removeCalibrator(currentNode, this.currentTarget, parentNode, parentTarget);
+          if (logger.isLoggable(Level.FINE)) {
+            logger.fine("remove calibrator " + target.getName());
+          }
+
+          // Parent can be a target or null :
+          final DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) currentNode.getParent();
+
+          if (parentNode.getUserObject() instanceof Target) {
+            final Target parentTarget = (Target) parentNode.getUserObject();
+
+            // Remove calibrator from target :
+            this.getTreeTargets().removeCalibrator(currentNode, target,
+                    parentNode, parentTarget, true);
+          }
+        }
       }
     }
   }//GEN-LAST:event_jButtonRemoveCalibratorActionPerformed
@@ -1322,6 +1364,16 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
    */
   private static boolean isChanged(final Object value1, final Object value2) {
     return (value1 == null && value2 != null) || (value1 != null && value2 == null) || (value1 != null && value2 != null && !value1.equals(value2));
+  }
+
+  /**
+   * Return true if the given target is a calibrator
+   * i.e. the calibrator list contains the given target
+   * @param target target to use
+   * @return true if the given target is a calibrator
+   */
+  public final boolean isCalibrator(final Target target) {
+    return this.editTargetUserInfos.isCalibrator(target);
   }
 
   /**
