@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: GenericJTree.java,v 1.2 2010-12-06 17:01:14 bourgesl Exp $"
+ * "@(#) $Id: GenericJTree.java,v 1.3 2010-12-07 17:34:46 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2010/12/06 17:01:14  bourgesl
+ * findNode(parent, node) made public
+ *
  * Revision 1.1  2010/12/03 16:10:57  bourgesl
  * JTree utility classes to handle targets / models
  *
@@ -91,13 +94,26 @@ public class GenericJTree extends JTree {
    * @param currentNode node to remove
    */
   public void removeNodeAndRefresh(final DefaultMutableTreeNode parentNode, final DefaultMutableTreeNode currentNode) {
+    this.removeNodeAndRefresh(parentNode, currentNode, true);
+  }
+
+  /**
+   * Remove the given current node from the parent node
+   * and Fire node structure changed on the parent node
+   * @param parentNode parent node
+   * @param currentNode node to remove
+   * @param doSelectParent flag to indicate to select the parent node once the node removed
+   */
+  public void removeNodeAndRefresh(final DefaultMutableTreeNode parentNode, final DefaultMutableTreeNode currentNode, final boolean doSelectParent) {
     parentNode.remove(currentNode);
 
     // fire node structure changed :
     this.fireNodeChanged(parentNode);
 
-    // Select the parent node = target :
-    this.selectPath(new TreePath(parentNode.getPath()));
+    if (doSelectParent) {
+      // Select the parent node = target :
+      this.selectPath(new TreePath(parentNode.getPath()));
+    }
   }
 
   /**
