@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetJTree.java,v 1.2 2010-12-06 17:01:58 bourgesl Exp $"
+ * "@(#) $Id: TargetJTree.java,v 1.3 2010-12-07 17:37:54 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2010/12/06 17:01:58  bourgesl
+ * added addCalibrator and removeCalibrator that use data model and refresh tree
+ *
  * Revision 1.1  2010/12/03 16:10:57  bourgesl
  * JTree utility classes to handle targets / models
  *
@@ -93,29 +96,10 @@ public class TargetJTree extends GenericJTree {
    */
   @Override
   protected String convertUserObjectToString(final Object userObject) {
-
     if (userObject instanceof Target) {
-      final Target target = (Target) userObject;
-
-      String sValue = target.getName();
-
-      if (isCalibrator(target)) {
-        sValue += " (cal)";
-      }
-      return sValue;
-
+      return this.editTargetUserInfos.getTargetDisplayName((Target) userObject);
     }
     return super.convertUserObjectToString(userObject);
-  }
-
-  /**
-   * Return true if the given target is a calibrator
-   * i.e. the calibrator list contains the given target
-   * @param target target to use
-   * @return true if the given target is a calibrator
-   */
-  private final boolean isCalibrator(final Target target) {
-    return this.editTargetUserInfos.isCalibrator(target);
   }
 
   /**
@@ -142,13 +126,15 @@ public class TargetJTree extends GenericJTree {
    * @param calibrator calibrator target
    * @param targetNode science target node to update
    * @param target science target to use
+   * @param doSelectParent flag to indicate to select the parent node once the node removed
    * @return true if the calibrator was removed
    */
-  public final boolean removeCalibrator(final DefaultMutableTreeNode calibratorNode, final Target calibrator, final DefaultMutableTreeNode targetNode, final Target target) {
+  public final boolean removeCalibrator(final DefaultMutableTreeNode calibratorNode, final Target calibrator, final DefaultMutableTreeNode targetNode, final Target target,
+                                        final boolean doSelectParent) {
 
     if (this.editTargetUserInfos.removeCalibratorFromTarget(target, calibrator)) {
       // remove node :
-      this.removeNodeAndRefresh(targetNode, calibratorNode);
+      this.removeNodeAndRefresh(targetNode, calibratorNode, doSelectParent);
 
       return true;
     }
