@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetTransferHandler.java,v 1.3 2010-12-06 17:02:32 bourgesl Exp $"
+ * "@(#) $Id: TargetTransferHandler.java,v 1.4 2010-12-07 17:37:31 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2010/12/06 17:02:32  bourgesl
+ * support copy and move operations using TargetTransferable objects
+ * code clean up
+ *
  * Revision 1.2  2010/12/03 16:28:48  bourgesl
  * first try to use drag and drop with List and Tree
  *
@@ -300,7 +304,7 @@ public final class TargetTransferHandler extends TransferHandler {
               final DefaultMutableTreeNode srcNode = TargetJTree.findTreeNode(parentNode, srcTarget);
               if (srcNode != null) {
                 // remove the moved node :
-                tree.removeCalibrator(srcNode, srcTarget, parentNode, parentTarget);
+                tree.removeCalibrator(srcNode, srcTarget, parentNode, parentTarget, false);
               }
             }
           }
@@ -345,6 +349,5 @@ public final class TargetTransferHandler extends TransferHandler {
    */
   private final Target getTargetById(final String id) {
     return Target.getTargetById(id, this.editTargets);
-
   }
 }
