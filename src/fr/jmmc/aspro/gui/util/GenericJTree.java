@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: GenericJTree.java,v 1.3 2010-12-07 17:34:46 bourgesl Exp $"
+ * "@(#) $Id: GenericJTree.java,v 1.4 2010-12-08 17:04:06 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2010/12/07 17:34:46  bourgesl
+ * optionaly update selection when removing a node
+ *
  * Revision 1.2  2010/12/06 17:01:14  bourgesl
  * findNode(parent, node) made public
  *
@@ -131,6 +134,15 @@ public class GenericJTree extends JTree {
    */
   public final DefaultMutableTreeNode getRootNode() {
     return (DefaultMutableTreeNode) getTreeModel().getRoot();
+  }
+
+  /**
+   * Return the parent node of the given node
+   * @param node node to use
+   * @return parent node
+   */
+  public final DefaultMutableTreeNode getParentNode(final DefaultMutableTreeNode node) {
+    return (DefaultMutableTreeNode) node.getParent();
   }
 
   /**
