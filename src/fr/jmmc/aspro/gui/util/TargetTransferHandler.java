@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetTransferHandler.java,v 1.4 2010-12-07 17:37:31 bourgesl Exp $"
+ * "@(#) $Id: TargetTransferHandler.java,v 1.5 2010-12-08 17:03:55 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2010/12/07 17:37:31  bourgesl
+ * do not update tree selection when removing a node (move action)
+ *
  * Revision 1.3  2010/12/06 17:02:32  bourgesl
  * support copy and move operations using TargetTransferable objects
  * code clean up
@@ -127,7 +130,7 @@ public final class TargetTransferHandler extends TransferHandler {
               Target parentTarget = null;
 
               // Check the parent node to get the science target :
-              final DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) sourceNode.getParent();
+              final DefaultMutableTreeNode parentNode = tree.getParentNode(sourceNode);
 
               if (parentNode != null) {
                 final Object parentUserObject = parentNode.getUserObject();
