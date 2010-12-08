@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetForm.java,v 1.16 2010-12-07 17:39:48 bourgesl Exp $"
+ * "@(#) $Id: TargetForm.java,v 1.17 2010-12-08 17:05:27 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.16  2010/12/07 17:39:48  bourgesl
+ * synchronized selection between calibrator list and target tree
+ * the 'Remove calibrator' button is enabled only on calibrator selections
+ *
  * Revision 1.15  2010/12/06 17:00:55  bourgesl
  * added list selection listener for calibrators
  * support remove calibrator for a science target
@@ -62,6 +66,7 @@
  */
 package fr.jmmc.aspro.gui;
 
+import fr.jmmc.aspro.gui.util.GenericJTree;
 import fr.jmmc.aspro.gui.util.GenericListModel;
 import fr.jmmc.aspro.gui.util.TargetJTree;
 import fr.jmmc.aspro.gui.util.TargetTransferHandler;
@@ -239,11 +244,13 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
 
     final DefaultMutableTreeNode rootNode = this.getTreeTargets().getRootNode();
 
+    rootNode.removeAllChildren();
+
     TargetInformation targetInfo;
     DefaultMutableTreeNode targetNode;
     for (Target target : targets) {
 
-      // TODO : only display science targets :
+      // display only science targets :
       if (!isCalibrator(target)) {
         targetNode = this.getTreeTargets().addNode(rootNode, target);
 
@@ -264,7 +271,11 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
    * @param target to select
    */
   protected void selectTarget(final Target target) {
-    this.getTreeTargets().selectTarget(target);
+    if (isCalibrator(target)) {
+      this.jListCalibrators.setSelectedValue(target, true);
+    } else {
+      this.getTreeTargets().selectTarget(target);
+    }
   }
 
   /**
@@ -341,28 +352,36 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
         if (minIndex != -1) {
           final Target target = calibratorsModel.get(minIndex);
 
+          boolean found = false;
+
           // Check if the selected tree node :
           final DefaultMutableTreeNode currentNode = getTreeTargets().getLastSelectedNode();
 
-          if (currentNode != null && currentNode.getUserObject() != target) {
-
-            // select the first target node having this calibrator :
-            final DefaultMutableTreeNode targetNode = getTreeTargets().findTreeNode(target);
-
-            if (targetNode != null) {
-              // Select the target node that will send later a TreeSelectionEvent :
-              getTreeTargets().selectPath(new TreePath(targetNode.getPath()));
+          if (currentNode != null) {
+            if (currentNode.getUserObject() == target) {
+              found = true;
             } else {
-              // No tree node found for the calibrator :
+              // select the first target node having this calibrator :
+              final DefaultMutableTreeNode targetNode = getTreeTargets().findTreeNode(target);
 
-              // disable the 'remove calibrator' action :
-              jButtonRemoveCalibrator.setEnabled(false);
-
-              // clear tree selection :
-              getTreeTargets().clearSelection();
-
-              processTargetSelection(target);
+              if (targetNode != null) {
+                found = true;
+                // Select the target node that will send later a TreeSelectionEvent :
+                getTreeTargets().selectPath(new TreePath(targetNode.getPath()));
+              }
             }
+          }
+
+          if (!found) {
+            // No tree node found for the calibrator :
+
+            // disable the 'remove calibrator' action :
+            jButtonRemoveCalibrator.setEnabled(false);
+
+            // clear tree selection :
+            getTreeTargets().clearSelection();
+
+            processTargetSelection(target);
           }
         }
       }
@@ -1087,54 +1106,101 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     }
 
     if (isCalibrator) {
-      boolean confirm = true;
 
       // check that the target has no calibrator yet :
       if (this.editTargetUserInfos.hasCalibrators(this.currentTarget)) {
 
-        if (MessagePane.showConfirmMessage(this.jToggleButtonCalibrator,
-                "Do you really want to use this target as a calibrator [" + this.currentTarget.getName() + "] ?")) {
+        MessagePane.showErrorMessage(
+                "There are already calibrators associated to this target [" + this.currentTarget.getName() + "] !");
 
-
-          confirm = true;
-          // TODO : use the JTree to remove calibrators from the current target and update the model ...
-
-        } else {
-          this.jToggleButtonCalibrator.setSelected(false);
-          confirm = false;
-        }
+        this.jToggleButtonCalibrator.setSelected(false);
+        return;
       }
 
       // note : should be done directly by our data model classes (editTargetUserInfos) :
-      if (confirm && !this.calibratorsModel.contains(this.currentTarget)) {
+      if (!this.calibratorsModel.contains(this.currentTarget)) {
         this.calibratorsModel.add(this.currentTarget);
+
+        // Remove the calibrator node in the target tree :
+        final DefaultMutableTreeNode targetNode = this.getTreeTargets().findTreeNode(this.currentTarget);
+
+        if (targetNode != null) {
+          this.getTreeTargets().removeNodeAndRefresh(this.getTreeTargets().getParentNode(targetNode), targetNode, false);
+        }
+
+        // select the calibrator :
         this.jListCalibrators.setSelectedValue(this.currentTarget, true);
       }
 
     } else {
 
-      // First remove this calibrator from target's calibrator lists :
+      // determine if the calibrator is really used in a target :
+      final DefaultMutableTreeNode calibratorNode = getTreeTargets().findTreeNode(this.currentTarget);
 
-      if (MessagePane.showConfirmMessage(this.jToggleButtonCalibrator,
+      if (calibratorNode == null || MessagePane.showConfirmMessage(this.jToggleButtonCalibrator,
               "Do you really want to remove associations with this calibrator [" + this.currentTarget.getName() + "] ?")) {
 
-        // TODO : use the JTree to remove the occurences of the calibrator and update the model ...
+        // remove the occurences of the calibrator and update the tree ...
+        removeCalibrator(this.currentTarget);
 
         this.calibratorsModel.remove(this.currentTarget);
+
+        // Restore the calibrator node in the target tree :
+        final DefaultMutableTreeNode rootNode = this.getTreeTargets().getRootNode();
+
+        int nScienceTargets = 0;
+
+        for (Target target : this.editTargets) {
+          if (!isCalibrator(target)) {
+            if (target == this.currentTarget) {
+              // create node :
+              final DefaultMutableTreeNode targetNode = new DefaultMutableTreeNode(target);
+
+              rootNode.insert(targetNode, nScienceTargets);
+
+              // fire node structure changed :
+              this.getTreeTargets().fireNodeChanged(rootNode);
+
+              this.getTreeTargets().selectPath(new TreePath(targetNode.getPath()));
+              
+              break;
+            }
+            nScienceTargets++;
+          }
+        }
+
       } else {
         this.jToggleButtonCalibrator.setSelected(true);
       }
     }
-
-    // Refresh selected node to show/hide CAL_suffix :
-    final DefaultMutableTreeNode targetNode = this.getTreeTargets().findTreeNode(this.currentTarget);
-
-    if (targetNode != null) {
-
-      // fire node structure changed :
-      this.getTreeTargets().fireNodeChanged(targetNode);
-    }
   }//GEN-LAST:event_jToggleButtonCalibratorActionPerformed
+
+  /**
+   * Remove all occurences of the calibrator from the tree
+   * @param calibrator calibrator target
+   */
+  private void removeCalibrator(final Target calibrator) {
+
+    final DefaultMutableTreeNode rootNode = this.getTreeTargets().getRootNode();
+
+    final int size = rootNode.getChildCount();
+    if (size > 0) {
+      DefaultMutableTreeNode targetNode, calibratorNode;
+
+      for (int i = 0; i < size; i++) {
+        targetNode = (DefaultMutableTreeNode) rootNode.getChildAt(i);
+
+        // Find the first occurence of the calibrator in the target calibrators :
+        calibratorNode = GenericJTree.findTreeNode(targetNode, calibrator);
+
+        if (calibratorNode != null) {
+          // Remove calibrator from target :
+          this.getTreeTargets().removeCalibrator(calibratorNode, calibrator,
+                  targetNode, (Target) targetNode.getUserObject(), true);
+        }
+      }
+    }
+  }
 
   private void jButtonRemoveCalibratorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonRemoveCalibratorActionPerformed
 
@@ -1160,9 +1226,9 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
           }
 
           // Parent can be a target or null :
-          final DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) currentNode.getParent();
+          final DefaultMutableTreeNode parentNode = this.getTreeTargets().getParentNode(currentNode);
 
-          if (parentNode.getUserObject() instanceof Target) {
+          if (parentNode != null && parentNode.getUserObject() instanceof Target) {
             final Target parentTarget = (Target) parentNode.getUserObject();
 
             // Remove calibrator from target :
