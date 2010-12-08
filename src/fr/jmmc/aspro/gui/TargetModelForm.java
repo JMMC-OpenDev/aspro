@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetModelForm.java,v 1.36 2010-12-07 17:38:29 bourgesl Exp $"
+ * "@(#) $Id: TargetModelForm.java,v 1.37 2010-12-08 17:04:33 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.36  2010/12/07 17:38:29  bourgesl
+ * minor changes to simplify code
+ *
  * Revision 1.35  2010/12/03 16:11:52  bourgesl
  * refactoring to use new JTree classes
  *
@@ -264,6 +267,8 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
   private void generateTree(final List<Target> targets) {
 
     final DefaultMutableTreeNode rootNode = this.getTreeModels().getRootNode();
+    
+    rootNode.removeAllChildren();
 
     DefaultMutableTreeNode targetNode;
     for (Target target : targets) {
@@ -766,7 +771,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         }
 
         // Parent can be a target or a model :
-        final DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) currentNode.getParent();
+        final DefaultMutableTreeNode parentNode = this.getTreeModels().getParentNode(currentNode);
 
         if (parentNode.getUserObject() instanceof Target) {
           final Target target = (Target) parentNode.getUserObject();
@@ -827,7 +832,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
 
         // Parent can be a target or a model :
 
-        final DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) currentNode.getParent();
+        final DefaultMutableTreeNode parentNode = this.getTreeModels().getParentNode(currentNode);
 
         if (parentNode.getUserObject() instanceof Target) {
           final Target target = (Target) parentNode.getUserObject();
@@ -879,7 +884,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         target = (Target) currentNode.getUserObject();
 
       } else if (currentNode.getUserObject() instanceof Model) {
-        final DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) currentNode.getParent();
+        final DefaultMutableTreeNode parentNode = this.getTreeModels().getParentNode(currentNode);
 
         // Parent can be a target or a model :
 
