@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetEditorDialog.java,v 1.8 2010-12-03 16:11:52 bourgesl Exp $"
+ * "@(#) $Id: TargetEditorDialog.java,v 1.9 2010-12-08 17:04:53 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.8  2010/12/03 16:11:52  bourgesl
+ * refactoring to use new JTree classes
+ *
  * Revision 1.7  2010/11/30 17:20:25  bourgesl
  * fixed NPE when targetUserInformations is undefined
  *
@@ -185,10 +188,11 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
         final Component selected = jTabbedPane.getSelectedComponent();
 
         if (selected == targetModelForm) {
-          // TODO : refresh the tree according to the new target / calibrator list
+          // refresh the tree according to the new target / calibrator list
+          // and select the target :
+          targetModelForm.initialize(targetForm.getCurrentTarget().getName());
 
-          // select the target :
-          targetModelForm.selectTarget(targetForm.getCurrentTarget());
+//          targetModelForm.selectTarget(targetForm.getCurrentTarget());
         } else if (selected == targetForm) {
           // select the target :
           targetForm.selectTarget(targetModelForm.getCurrentTarget());
