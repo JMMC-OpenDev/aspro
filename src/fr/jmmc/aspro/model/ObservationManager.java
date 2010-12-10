@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationManager.java,v 1.45 2010-11-30 15:52:25 bourgesl Exp $"
+ * "@(#) $Id: ObservationManager.java,v 1.46 2010-12-10 17:15:40 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.45  2010/11/30 15:52:25  bourgesl
+ * added ObservationFileProcessor onLoad and onSave callbacks to check schema version and handle model conversion if needed
+ *
  * Revision 1.44  2010/11/25 07:59:23  bourgesl
  * updated data model to add target user informations (description, calibrator flag, calibrator list per target ...)
  * support cloneable
@@ -166,6 +169,7 @@ import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetConfiguration;
+import fr.jmmc.aspro.model.oi.TargetInformation;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.aspro.model.oi.WhenSetting;
 import fr.jmmc.aspro.util.CombUtils;
@@ -174,9 +178,12 @@ import fr.jmmc.oitools.model.OIFitsFile;
 import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
@@ -707,6 +714,53 @@ public final class ObservationManager extends BaseOIManager {
   }
 
   /**
+   * TODO : targets + calibrators + orphan calibrators
+   * @return
+   */
+  public List<Target> getDisplayTargets() {
+
+    final List<Target> displayTargets = new ArrayList<Target>();
+
+    final List<Target> targets = getTargets();
+    final TargetUserInformations targetUserInfos = getObservation().getTargetUserInfos();
+
+    final Map<Target, Target> usedCalibrators = new IdentityHashMap<Target, Target>();
+
+    TargetInformation targetInfo;
+
+    for (Target target : targets) {
+
+      if (targetUserInfos == null) {
+        displayTargets.add(target);
+      } else if (!targetUserInfos.isCalibrator(target)) {
+        // display only science targets :
+        displayTargets.add(target);
+
+        // add calibrators after the science target :
+        targetInfo = targetUserInfos.getTargetInformation(target);
+        if (targetInfo != null) {
+          for (Target calibrator : targetInfo.getCalibrators()) {
+            displayTargets.add(calibrator);
+
+            usedCalibrators.put(calibrator, calibrator);
+          }
+        }
+      }
+    }
+
+    if (targetUserInfos != null) {
+      // add orphan calibrator :
+      for (Target calibrator : targetUserInfos.getCalibrators()) {
+        if (!usedCalibrators.containsKey(calibrator)) {
+          displayTargets.add(calibrator);
+        }
+      }
+    }
+
+    return displayTargets;
+  }
+
+  /**
    * Return the list of all target names
    * @return list of all target names
    */
@@ -908,7 +962,21 @@ public final class ObservationManager extends BaseOIManager {
    * @param newTargetUserInfos target user informations to store
    */
   public void setTargetUserInfos(final TargetUserInformations newTargetUserInfos) {
-    getObservation().setTargetUserInfos(newTargetUserInfos);
+    final TargetUserInformations targetUserInfos = getObservation().getTargetUserInfos();
+
+    // TODO : check
+    if (targetUserInfos == null) {
+      getObservation().setTargetUserInfos(newTargetUserInfos);
+    } else {
+      // update the current target user informations :
+      final List<Target> calibrators = targetUserInfos.getCalibrators();
+      calibrators.clear();
+      calibrators.addAll(newTargetUserInfos.getCalibrators());
+
+      final List<TargetInformation> targetInfos = targetUserInfos.getTargetInfos();
+      targetInfos.clear();
+      targetInfos.addAll(newTargetUserInfos.getTargetInfos());
+    }
   }
 
   // --- COMPUTATION RESULTS ---------------------------------------------------
