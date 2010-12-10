@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetForm.java,v 1.17 2010-12-08 17:05:27 bourgesl Exp $"
+ * "@(#) $Id: TargetForm.java,v 1.18 2010-12-10 17:13:40 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.17  2010/12/08 17:05:27  bourgesl
+ * first complete implementation
+ *
  * Revision 1.16  2010/12/07 17:39:48  bourgesl
  * synchronized selection between calibrator list and target tree
  * the 'Remove calibrator' button is enabled only on calibrator selections
@@ -69,7 +72,10 @@ package fr.jmmc.aspro.gui;
 import fr.jmmc.aspro.gui.util.GenericJTree;
 import fr.jmmc.aspro.gui.util.GenericListModel;
 import fr.jmmc.aspro.gui.util.TargetJTree;
+import fr.jmmc.aspro.gui.util.TargetListRenderer;
+import fr.jmmc.aspro.gui.util.TargetRenderer;
 import fr.jmmc.aspro.gui.util.TargetTransferHandler;
+import fr.jmmc.aspro.gui.util.TargetTreeCellRenderer;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetInformation;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
@@ -165,11 +171,15 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
    */
   private void postInit() {
 
+    final TargetRenderer renderer = new TargetRenderer(this.editTargetUserInfos);
+
     // tree selection listener :
     this.jTreeTargets.addTreeSelectionListener(this);
+    this.jTreeTargets.setCellRenderer(new TargetTreeCellRenderer(renderer));
 
     // list selection listener :
     this.jListCalibrators.getSelectionModel().addListSelectionListener(this);
+    this.jListCalibrators.setCellRenderer(new TargetListRenderer(renderer));
 
     // add property change listener to editable fields :
 
@@ -619,7 +629,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     jScrollPaneTreeTargets.setMinimumSize(new java.awt.Dimension(80, 100));
     jScrollPaneTreeTargets.setPreferredSize(new java.awt.Dimension(130, 100));
 
-    jTreeTargets.setFont(new java.awt.Font("Dialog", 1, 12));
+    jTreeTargets.setFont(new java.awt.Font("Dialog", 1, 12)); // NOI18N
     javax.swing.tree.DefaultMutableTreeNode treeNode1 = new javax.swing.tree.DefaultMutableTreeNode("Targets");
     jTreeTargets.setModel(new javax.swing.tree.DefaultTreeModel(treeNode1));
     jTreeTargets.setDragEnabled(true);
@@ -630,7 +640,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     gridBagConstraints.gridy = 0;
     gridBagConstraints.gridheight = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.weightx = 0.2;
+    gridBagConstraints.weightx = 0.3;
     gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
     add(jScrollPaneTreeTargets, gridBagConstraints);
@@ -1032,7 +1042,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.weightx = 0.8;
+    gridBagConstraints.weightx = 0.7;
     gridBagConstraints.weighty = 0.7;
     gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
     add(jPanelTarget, gridBagConstraints);
@@ -1044,7 +1054,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
 
     jTextAreaTargetInfos.setBackground(new java.awt.Color(255, 255, 153));
     jTextAreaTargetInfos.setColumns(20);
-    jTextAreaTargetInfos.setFont(new java.awt.Font("Monospaced", 0, 10));
+    jTextAreaTargetInfos.setFont(new java.awt.Font("Monospaced", 0, 10)); // NOI18N
     jTextAreaTargetInfos.setRows(1);
     jScrollPaneTargetInfos.setViewportView(jTextAreaTargetInfos);
 
@@ -1069,7 +1079,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     jListCalibrators.setToolTipText("this list contains targets considered as calibrators");
     jListCalibrators.setCellRenderer(createTargetListCellRenderer());
     jListCalibrators.setDragEnabled(true);
-    jListCalibrators.setFixedCellWidth(80);
+    jListCalibrators.setFixedCellWidth(100);
     jListCalibrators.setVisibleRowCount(3);
     jScrollPaneCalibrators.setViewportView(jListCalibrators);
 

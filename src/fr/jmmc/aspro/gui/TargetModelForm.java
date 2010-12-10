@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetModelForm.java,v 1.37 2010-12-08 17:04:33 bourgesl Exp $"
+ * "@(#) $Id: TargetModelForm.java,v 1.38 2010-12-10 17:13:50 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.37  2010/12/08 17:04:33  bourgesl
+ * generateTree can be used multiple times
+ * use getParentNode
+ *
  * Revision 1.36  2010/12/07 17:38:29  bourgesl
  * minor changes to simplify code
  *
@@ -123,6 +127,8 @@ package fr.jmmc.aspro.gui;
 
 import fr.jmmc.aspro.Preferences;
 import fr.jmmc.aspro.gui.util.ModelJTree;
+import fr.jmmc.aspro.gui.util.TargetRenderer;
+import fr.jmmc.aspro.gui.util.TargetTreeCellRenderer;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.mcs.gui.MessagePane;
@@ -233,6 +239,9 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
 
     // tree selection listener :
     this.jTreeModels.addTreeSelectionListener(this);
+
+    final TargetRenderer renderer = new TargetRenderer(this.editTargetUserInfos);
+    this.jTreeModels.setCellRenderer(new TargetTreeCellRenderer(renderer));
 
     // edit mode :
     this.jRadioButtonXY.addActionListener(this);
