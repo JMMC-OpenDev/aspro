@@ -208,11 +208,19 @@ public class TargetInformation
   }
 
   /**
-   * Check bad references and update target references in this instance using the given Map<ID, Target> index
-   * @param mapIDTargets Map<ID, Target> index
+   * Check bad references and update target references 
+   * and check if referenced calibrators are present in the given mapIDCalibrators
+   * @param mapIDCalibrators Map<ID, Target> index
    */
-  protected final void updateTargetReferences(final java.util.Map<String, Target> mapIDTargets) {
+  protected final void updateTargetReferences(final java.util.Map<String, Target> mapIDCalibrators) {
     // note : targetRef is already updated in TargetUserInformations
+
+    if (this.description != null) {
+      this.description = this.description.trim();
+      if (this.description.length() == 0) {
+        this.description = null;
+      }
+    }
 
     if (this.calibrators != null) {
       Target target, newTarget;
@@ -220,7 +228,7 @@ public class TargetInformation
       for (final java.util.ListIterator<Target> it = this.calibrators.listIterator(); it.hasNext();) {
         target = it.next();
 
-        newTarget = mapIDTargets.get(target.getIdentifier());
+        newTarget = mapIDCalibrators.get(target.getIdentifier());
         if (newTarget != null) {
           if (newTarget != target) {
             it.set(newTarget);
@@ -229,6 +237,9 @@ public class TargetInformation
           logger.info("Removing missing target reference '" + target.getIdentifier() + "'.");
           it.remove();
         }
+      }
+      if (this.calibrators.isEmpty()) {
+        this.calibrators = null;
       }
     }
   }

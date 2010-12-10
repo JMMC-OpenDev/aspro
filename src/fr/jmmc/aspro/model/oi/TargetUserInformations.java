@@ -263,6 +263,9 @@ public class TargetUserInformations
    */
   protected final void updateTargetReferences(final java.util.Map<String, Target> mapIDTargets) {
 
+    // create the Map<ID, Target> index for calibrators :
+    final java.util.Map<String, Target> mapIDCalibrators = new java.util.HashMap<String, Target>();
+
     if (this.calibrators != null) {
       Target target, newTarget;
 
@@ -274,10 +277,16 @@ public class TargetUserInformations
           if (newTarget != target) {
             it.set(newTarget);
           }
+
+          mapIDCalibrators.put(newTarget.getIdentifier(), newTarget);
+
         } else {
           logger.info("Removing missing target reference '" + target.getIdentifier() + "'.");
           it.remove();
         }
+      }
+      if (this.calibrators.isEmpty()) {
+        this.calibrators = null;
       }
     }
 
@@ -300,7 +309,7 @@ public class TargetUserInformations
               targetInfo.setTargetRef(newTarget);
             }
 
-            targetInfo.updateTargetReferences(mapIDTargets);
+            targetInfo.updateTargetReferences(mapIDCalibrators);
 
             // remove if empty :
             if (targetInfo.isEmpty()) {
@@ -316,7 +325,26 @@ public class TargetUserInformations
           }
         }
       }
+      if (this.targetInfos.isEmpty()) {
+        this.targetInfos = null;
+      }
     }
+  }
+
+
+  /**
+   * Return true if this target user informations are empty :
+   * target info list is empty and calibrator list is empty
+   * @return true if this target user informations are empty
+   */
+  protected final boolean isEmpty() {
+    if (this.calibrators != null && !this.calibrators.isEmpty()) {
+      return false;
+    }
+    if (this.targetInfos != null && !this.targetInfos.isEmpty()) {
+      return false;
+    }
+    return true;
   }
 //--simple--preserve
 
