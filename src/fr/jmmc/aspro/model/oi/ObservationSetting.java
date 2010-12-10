@@ -413,6 +413,14 @@ public class ObservationSetting
         logger.fine("checkReferences = " + this.targetUserInfos);
       }
       this.targetUserInfos.updateTargetReferences(this.createTargetIndex());
+
+      // remove if empty :
+      if (this.targetUserInfos.isEmpty()) {
+        if (logger.isLoggable(java.util.logging.Level.FINE)) {
+          logger.fine("Removing empty target user informations.");
+        }
+        this.targetUserInfos = null;
+      }
     }
   }
 
