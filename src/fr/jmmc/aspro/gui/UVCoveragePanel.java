@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.66 2010-12-01 16:35:42 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.67 2010-12-10 17:14:03 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.66  2010/12/01 16:35:42  bourgesl
+ * 'Model editor' renamed to 'Target editor'
+ *
  * Revision 1.65  2010/11/18 17:18:23  bourgesl
  * use new TargetEditorDialog
  *
@@ -731,6 +734,11 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
     // show model editor :
     if (TargetEditorDialog.showEditor(targetName)) {
+
+      // TODO : better event handling :
+      AsproGui.getInstance().getSettingPanel().getObservationForm().forceUpdateListTargets();
+
+      // TODO : refresh target list and plot ...
       changeStateForModelImageWidgets();
       refreshPlot();
     }
