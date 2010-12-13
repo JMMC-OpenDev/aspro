@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOIFitsAction.java,v 1.7 2010-10-22 13:45:45 bourgesl Exp $"
+ * "@(#) $Id: ExportOIFitsAction.java,v 1.8 2010-12-13 16:39:39 mella Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2010/10/22 13:45:45  bourgesl
+ * fixed repackaging of nom.tam.fits library (oitools)
+ *
  * Revision 1.6  2010/10/04 14:32:13  bourgesl
  * getName(fits) is now protected and static (used by BroadcastToMFGui)
  *
@@ -34,6 +37,7 @@ import fr.jmmc.aspro.util.FileUtils;
 import fr.jmmc.mcs.gui.MessagePane;
 import fr.jmmc.mcs.gui.StatusBar;
 import fr.jmmc.mcs.util.FileFilterRepository;
+import fr.jmmc.mcs.util.MimeType;
 import fr.jmmc.mcs.util.RegisteredAction;
 import fr.jmmc.oitools.model.OIFitsFile;
 import fr.jmmc.oitools.model.OIFitsWriter;
@@ -61,11 +65,7 @@ public class ExportOIFitsAction extends RegisteredAction {
   public final static String actionName = "exportOIFits";
   /** Class logger */
   private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(className);
-  /** OIFits settings mime type */
-  public static final String OIFITS_MIME_TYPE = "application/oifits";
-  /** OIFits extension = oifits */
-  public static final String OIFITS_EXT = "oifits";
-
+ 
   /* members */
   /** last directory used to save a file; by default = user home */
   private String lastDir = System.getProperty("user.home");
@@ -74,9 +74,7 @@ public class ExportOIFitsAction extends RegisteredAction {
    * Public constructor that automatically register the action in RegisteredAction.
    */
   public ExportOIFitsAction() {
-    super(className, actionName);
-
-    FileFilterRepository.getInstance().put(OIFITS_MIME_TYPE, OIFITS_EXT, "Optical Interferometry FITS (" + OIFITS_EXT + ")");
+    super(className, actionName);  
   }
 
   /**
@@ -168,7 +166,7 @@ public class ExportOIFitsAction extends RegisteredAction {
 
     sb.append(dateObs);
 
-    sb.append('.').append(OIFITS_EXT);
+    sb.append('.').append(MimeType.OIFITS.getExtension());
 
     return sb.toString();
   }
@@ -178,7 +176,7 @@ public class ExportOIFitsAction extends RegisteredAction {
    * @return file filter
    */
   protected FileFilter getFileFilter() {
-    return FileFilterRepository.getInstance().get(OIFITS_MIME_TYPE);
+    return MimeType.OIFITS.getFileFilter();
   }
 
   /**
@@ -188,9 +186,9 @@ public class ExportOIFitsAction extends RegisteredAction {
    */
   protected File checkFileExtension(final File file) {
     final String ext = FileUtils.getExtension(file);
-
-    if (!OIFITS_EXT.equals(ext)) {
-      return new File(file.getParentFile(), file.getName() + "." + OIFITS_EXT);
+    final String oifitsExt = MimeType.OIFITS.getExtension();
+    if (!oifitsExt.equals(ext)) {
+      return new File(file.getParentFile(), file.getName() + "." + oifitsExt);
     }
     return file;
   }
