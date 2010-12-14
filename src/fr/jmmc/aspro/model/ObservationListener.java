@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationListener.java,v 1.5 2010-10-01 15:36:29 bourgesl Exp $"
+ * "@(#) $Id: ObservationListener.java,v 1.6 2010-12-14 09:25:50 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2010/10/01 15:36:29  bourgesl
+ * new event WARNING_READY
+ * added setWarningContainer and fireWarningReady methods
+ *
  * Revision 1.4  2010/06/23 12:53:48  bourgesl
  * added setOIFitsFile method and fire OIFits done event
  *
@@ -35,10 +39,12 @@ public interface ObservationListener {
    */
   enum ObservationEventType {
 
-    /** one or more attribute(s) changed */
-    CHANGED,
     /** the observation was loaded */
     LOADED,
+    /** one or more attribute(s) changed */
+    CHANGED,
+    /** target list (target, models and calibrators) changed */
+    TARGET_CHANGED,
     /** the observability was computed */
     OBSERVABILITY_DONE,
     /** the warnings are ready */
