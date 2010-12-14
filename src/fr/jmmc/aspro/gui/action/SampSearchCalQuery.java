@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SampSearchCalQuery.java,v 1.3 2010-10-14 13:12:53 bourgesl Exp $"
+ * "@(#) $Id: SampSearchCalQuery.java,v 1.4 2010-12-14 09:25:41 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2010/10/14 13:12:53  bourgesl
+ * Spectral band definition moved in JMCS
+ *
  * Revision 1.2  2010/10/06 16:06:33  bourgesl
  * finalization : define bright, min/Max MagRange correctly
  *
@@ -38,8 +41,6 @@ import java.util.logging.Level;
 
 /**
  * This action asks SearchCal to search calibrators for the current selected target
- *
- * TODO : rename that class
  *
  * @author bourgesl
  */
@@ -100,19 +101,23 @@ public final class SampSearchCalQuery extends SampCapabilityAction {
 
     final BasicObservationForm form = AsproGui.getInstance().getSettingPanel().getObservationForm();
 
-    // extract UV Coverage Panel information :
-    final String targetName = form.getSelectedTargetName();
+    // extract the selected target in the main form :
+    final Target target = form.getSelectedTarget();
 
-    if (targetName == null) {
-      MessagePane.showMessage("Please select a target before calling SearchCal in the target list");
+    if (target == null) {
+      MessagePane.showMessage("Please select a target before calling SearchCal !");
+      return null;
+    }
+    if (ObservationManager.getInstance().isCalibrator(target)) {
+      MessagePane.showMessage("Please select a science target (not a calibrator target) !");
       return null;
     }
 
     if (logger.isLoggable(Level.FINE)) {
-      logger.fine("composeMessage for target : " + targetName);
+      logger.fine("composeMessage for target : " + target);
     }
 
-    final String votable = processTarget(targetName);
+    final String votable = processTarget(target);
 
     final Map<String, String> parameters = new HashMap<String, String>();
     parameters.put("query", votable);
@@ -126,17 +131,16 @@ public final class SampSearchCalQuery extends SampCapabilityAction {
 
   /**
    * Load and fill the searchCal votable
-   * @param targetName target to use
+   * @param target target to use
    * @return SearchCal votable as string
    */
-  private String processTarget(final String targetName) {
+  private String processTarget(final Target target) {
 
     // get OB template :
     String votable = FileUtils.readFile(TEMPLATE_FILE);
 
     // get observation and target :
     final ObservationSetting observation = ObservationManager.getInstance().getObservation();
-    final Target target = observation.getTarget(targetName);
 
     final FocalInstrumentMode insMode = observation.getInstrumentConfiguration().getFocalInstrumentMode();
     if (insMode == null) {
@@ -202,7 +206,7 @@ public final class SampSearchCalQuery extends SampCapabilityAction {
 
     // --- Target information ---
 
-    votable = votable.replaceFirst(KEY_TARGET_NAME, targetName);
+    votable = votable.replaceFirst(KEY_TARGET_NAME, target.getName());
 
     // magnitude in instrument band :
     votable = votable.replaceFirst(KEY_MAG, Double.toString(objectMag));
