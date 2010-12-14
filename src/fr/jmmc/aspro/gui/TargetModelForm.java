@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetModelForm.java,v 1.38 2010-12-10 17:13:50 bourgesl Exp $"
+ * "@(#) $Id: TargetModelForm.java,v 1.39 2010-12-14 09:24:31 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.38  2010/12/10 17:13:50  bourgesl
+ * use custom renderers
+ *
  * Revision 1.37  2010/12/08 17:04:33  bourgesl
  * generateTree can be used multiple times
  * use getParentNode
@@ -239,9 +242,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
 
     // tree selection listener :
     this.jTreeModels.addTreeSelectionListener(this);
-
-    final TargetRenderer renderer = new TargetRenderer(this.editTargetUserInfos);
-    this.jTreeModels.setCellRenderer(new TargetTreeCellRenderer(renderer));
+    this.jTreeModels.setCellRenderer(new TargetTreeCellRenderer(new TargetRenderer(this.editTargetUserInfos)));
 
     // edit mode :
     this.jRadioButtonXY.addActionListener(this);
@@ -327,8 +328,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
     final DefaultMutableTreeNode currentNode = this.getTreeModels().getLastSelectedNode();
 
     if (currentNode != null) {
-      // Use invokeLater to avoid event ordering problems with focusLost on JTextArea
-      // or JTable editors :
+      // Use invokeLater to selection change issues with editors :
       SwingUtilities.invokeLater(new Runnable() {
 
         public void run() {

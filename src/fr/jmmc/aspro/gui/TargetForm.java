@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetForm.java,v 1.18 2010-12-10 17:13:40 bourgesl Exp $"
+ * "@(#) $Id: TargetForm.java,v 1.19 2010-12-14 09:24:31 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.18  2010/12/10 17:13:40  bourgesl
+ * use custom renderers
+ *
  * Revision 1.17  2010/12/08 17:05:27  bourgesl
  * first complete implementation
  *
@@ -296,8 +299,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     final DefaultMutableTreeNode currentNode = this.getTreeTargets().getLastSelectedNode();
 
     if (currentNode != null) {
-      // Use invokeLater to avoid event ordering problems with focusLost on JTextArea
-      // or JTable editors :
+      // Use invokeLater to selection change issues with editors :
       SwingUtilities.invokeLater(new Runnable() {
 
         public void run() {
@@ -350,8 +352,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
       return;
     }
 
-    // Use invokeLater to avoid event ordering problems with focusLost on JTextArea
-    // or JTable editors :
+    // Use invokeLater to selection change issues with editors :
     SwingUtilities.invokeLater(new Runnable() {
 
       public void run() {
@@ -1172,7 +1173,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
               this.getTreeTargets().fireNodeChanged(rootNode);
 
               this.getTreeTargets().selectPath(new TreePath(targetNode.getPath()));
-              
+
               break;
             }
             nScienceTargets++;
