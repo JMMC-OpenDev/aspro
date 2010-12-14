@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationManager.java,v 1.46 2010-12-10 17:15:40 bourgesl Exp $"
+ * "@(#) $Id: ObservationManager.java,v 1.47 2010-12-14 09:27:26 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.46  2010/12/10 17:15:40  bourgesl
+ * added getDisplayTargets and modified how to update target user informations (copy)
+ *
  * Revision 1.45  2010/11/30 15:52:25  bourgesl
  * added ObservationFileProcessor onLoad and onSave callbacks to check schema version and handle model conversion if needed
  *
@@ -179,6 +182,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
@@ -338,10 +342,10 @@ public final class ObservationManager extends BaseOIManager {
     this.observation = newObservation;
 
     // fire an observation load event :
-    fireObservationLoaded();
+    this.fireObservationLoaded();
 
     // fire an observation change event :
-    fireObservationChanged();
+    this.fireObservationChanged();
   }
 
   /**
@@ -401,6 +405,7 @@ public final class ObservationManager extends BaseOIManager {
    * This fires an observation change event to all registered listeners.
    * Fired by BasicObservationForm when any main parameter is changed
    * Fired by changeObservation() when an observation is loaded or reset
+   * Fired by updateTargets(List<Target>, TargetUserInformations) when targets are modified
    */
   public void fireObservationChanged() {
     if (logger.isLoggable(Level.FINE)) {
@@ -408,6 +413,18 @@ public final class ObservationManager extends BaseOIManager {
     }
 
     fireEvent(ObservationEventType.CHANGED);
+  }
+
+  /**
+   * This fires an observation target change event to all registered listeners.
+   * Fired by updateTargets(List<Target>, TargetUserInformations) when targets are modified
+   */
+  private void fireObservationTargetsChanged() {
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("fireObservationTargetsChanged : " + toString(getObservation()));
+    }
+
+    fireEvent(ObservationEventType.TARGET_CHANGED);
   }
 
   /**
@@ -714,16 +731,43 @@ public final class ObservationManager extends BaseOIManager {
   }
 
   /**
-   * TODO : targets + calibrators + orphan calibrators
+   * Return the target user informations (create a new one if needed)
+   * @return target user informations
+   */
+  public TargetUserInformations getTargetUserInfos() {
+    return getObservation().getOrCreateTargetUserInfos();
+  }
+
+ /**
+   * Return true if the given target is a calibrator
+   * i.e. the calibrator list contains the given target
+   * @param target target to use
+   * @return true if the given target is a calibrator
+   */
+  public final boolean isCalibrator(final Target target) {
+    return getTargetUserInfos().isCalibrator(target);
+  }
+
+  /**
+   * Return a displayable list of targets containing
+   * - science targets followed by their calibrators
+   * - calibrator orphans
    * @return
    */
   public List<Target> getDisplayTargets() {
 
-    final List<Target> displayTargets = new ArrayList<Target>();
+    final List<Target> targets = getObservation().getTargets();
 
-    final List<Target> targets = getTargets();
+    if (targets.isEmpty()) {
+      return Collections.emptyList();
+    }
+
+    // get the existing target user informations (can be null) :
     final TargetUserInformations targetUserInfos = getObservation().getTargetUserInfos();
 
+    final List<Target> displayTargets = new ArrayList<Target>();
+
+    // map of used calibrators :
     final Map<Target, Target> usedCalibrators = new IdentityHashMap<Target, Target>();
 
     TargetInformation targetInfo;
@@ -731,15 +775,17 @@ public final class ObservationManager extends BaseOIManager {
     for (Target target : targets) {
 
       if (targetUserInfos == null) {
+        // no calibrator defined, all targets are science targets :
         displayTargets.add(target);
       } else if (!targetUserInfos.isCalibrator(target)) {
-        // display only science targets :
+        // science targets :
         displayTargets.add(target);
 
-        // add calibrators after the science target :
+        // add calibrators related to the science target :
         targetInfo = targetUserInfos.getTargetInformation(target);
         if (targetInfo != null) {
           for (Target calibrator : targetInfo.getCalibrators()) {
+            // calibrator targets :
             displayTargets.add(calibrator);
 
             usedCalibrators.put(calibrator, calibrator);
@@ -749,7 +795,7 @@ public final class ObservationManager extends BaseOIManager {
     }
 
     if (targetUserInfos != null) {
-      // add orphan calibrator :
+      // add calibrator orphans i.e. not associated to a target :
       for (Target calibrator : targetUserInfos.getCalibrators()) {
         if (!usedCalibrators.containsKey(calibrator)) {
           displayTargets.add(calibrator);
@@ -762,6 +808,9 @@ public final class ObservationManager extends BaseOIManager {
 
   /**
    * Return the list of all target names
+   *
+   * TODO : kill
+   *
    * @return list of all target names
    */
   public Vector<String> getTargetNames() {
@@ -778,16 +827,15 @@ public final class ObservationManager extends BaseOIManager {
   }
 
   /**
-   * Add a target given its unique name.
+   * Add a target given its unique name and
+   * fires a target change and an observation change event 
    * Note : it does not check anything on coordinates (cross matching)
    * @param name target name
-   * @param star object
-   * @return true if the target list changed
+   * @param star object to create the target object
    */
-  public boolean addTarget(final String name, final Star star) {
-    boolean changed = false;
+  public void addTarget(final String name, final Star star) {
     if (name != null && name.length() > 0) {
-      changed = (getTarget(name) == null);
+      final boolean changed = (getTarget(name) == null);
       if (changed) {
         if (logger.isLoggable(Level.FINEST)) {
           logger.finest("addTarget : " + name);
@@ -836,43 +884,94 @@ public final class ObservationManager extends BaseOIManager {
         t.setIDS(star.getPropertyAsString(Star.Property.IDS));
 
         getTargets().add(t);
+
+        // fire change events :
+        this.fireTargetChangedEvents();
       }
     }
-    return changed;
   }
 
   /**
-   * Remove a target given its unique name
-   * @param name target name
-   * @return true if the target list changed
+   * Remove the given science target from the target list and
+   * fires a target change and an observation change event 
+   * @param target science target to remove
    */
-  public boolean removeTarget(final String name) {
-    boolean changed = false;
-    if (name != null && name.length() > 0) {
+  public void removeTarget(final Target target) {
+    if (target != null) {
+      boolean changed = false;
+      
+      // remove calibrators related to the science target :
+      final TargetInformation targetInfo = getTargetUserInfos().getTargetInformation(target);
+      if (targetInfo != null) {
+        targetInfo.getCalibrators().clear();
+      }
+
       Target t;
-      for (Iterator<Target> it = getTargets().iterator(); it.hasNext();) {
+      for (final Iterator<Target> it = getTargets().iterator(); it.hasNext();) {
         t = it.next();
-        if (t.getName().equals(name)) {
+        if (target.equals(t)) {
           if (logger.isLoggable(Level.FINEST)) {
-            logger.finest("removeTarget : " + name);
+            logger.finest("removeTarget : " + t);
           }
           changed = true;
           it.remove();
           break;
         }
       }
+      if (changed) {
+        // fire change events :
+        this.fireTargetChangedEvents();
+      }
     }
-    return changed;
   }
 
   /**
-   * Replace the complete list of targets by the given list of targets
-   * @param newTargets targets to store
+   * Remove the given calibrator target from the target list
+   * and fires a target change and an observation change event 
+   * @param calibrator calibrator target to remove
    */
-  public void setTargets(final List<Target> newTargets) {
+  public void removeCalibrator(final Target calibrator) {
+    if (calibrator != null) {
+
+      final TargetUserInformations targetUserInfos = getTargetUserInfos();
+
+      for (Target target : getTargets()) {
+        targetUserInfos.removeCalibratorFromTarget(target, calibrator);
+      }
+      targetUserInfos.removeCalibrator(calibrator);
+
+      // remove calibrator from target list that fires change events :
+      removeTarget(calibrator);
+    }
+  }
+
+  /**
+   * Update the list of targets using the given list of targets and target user informations
+   * (different instances) and fires a target change and an observation change event 
+   * @param newTargets new target list
+   * @param newTargetUserInfos new target user informations
+   */
+  public void updateTargets(final List<Target> newTargets, final TargetUserInformations newTargetUserInfos) {
+
     final List<Target> targets = getTargets();
     targets.clear();
     targets.addAll(newTargets);
+
+    getObservation().setTargetUserInfos(newTargetUserInfos);
+
+    // fire change events :
+    this.fireTargetChangedEvents();
+  }
+
+  /**
+   * This fires a target change and an observation change event to all registered listeners.
+   */
+  private void fireTargetChangedEvents() {
+    // fire an observation targets change event :
+    this.fireObservationTargetsChanged();
+
+    // fire an observation change event :
+    this.fireObservationChanged();
   }
 
   // --- TARGET CONFIGURATION --------------------------------------------------
@@ -948,37 +1047,6 @@ public final class ObservationManager extends BaseOIManager {
     return changed;
   }
 
-  // --- TARGET USER INFORMATION -----------------------------------------------
-  /**
-   * Return the target user informations (create a new one if needed)
-   * @return target user informations
-   */
-  public TargetUserInformations getTargetUserInfos() {
-    return getObservation().getOrCreateTargetUserInfos();
-  }
-
-  /**
-   * Replace the complete target user informations
-   * @param newTargetUserInfos target user informations to store
-   */
-  public void setTargetUserInfos(final TargetUserInformations newTargetUserInfos) {
-    final TargetUserInformations targetUserInfos = getObservation().getTargetUserInfos();
-
-    // TODO : check
-    if (targetUserInfos == null) {
-      getObservation().setTargetUserInfos(newTargetUserInfos);
-    } else {
-      // update the current target user informations :
-      final List<Target> calibrators = targetUserInfos.getCalibrators();
-      calibrators.clear();
-      calibrators.addAll(newTargetUserInfos.getCalibrators());
-
-      final List<TargetInformation> targetInfos = targetUserInfos.getTargetInfos();
-      targetInfos.clear();
-      targetInfos.addAll(newTargetUserInfos.getTargetInfos());
-    }
-  }
-
   // --- COMPUTATION RESULTS ---------------------------------------------------
   /**
    * Defines the computed observability data in the observation for later reuse (UV Coverage).
@@ -993,7 +1061,7 @@ public final class ObservationManager extends BaseOIManager {
     getObservation().setObservabilityData(obsData);
 
     if (obsData != null) {
-      fireObservabilityDone();
+      this.fireObservabilityDone();
     }
   }
 
@@ -1009,7 +1077,7 @@ public final class ObservationManager extends BaseOIManager {
     getObservation().setWarningContainer(warningContainer);
 
     if (warningContainer != null) {
-      fireWarningsReady();
+      this.fireWarningsReady();
     }
   }
 
@@ -1025,7 +1093,7 @@ public final class ObservationManager extends BaseOIManager {
     getObservation().setOIFitsFile(oiFitsFile);
 
     if (oiFitsFile != null) {
-      fireOIFitsDone();
+      this.fireOIFitsDone();
     }
   }
 
