@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BroadcastToModelFittingAction.java,v 1.7 2010-10-06 16:05:53 bourgesl Exp $"
+ * "@(#) $Id: BroadcastToModelFittingAction.java,v 1.8 2010-12-14 09:25:13 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2010/10/06 16:05:53  bourgesl
+ * added comments
+ *
  * Revision 1.6  2010/10/05 14:59:02  bourgesl
  * fixed composeMessage signature
  *
@@ -112,10 +115,10 @@ public class BroadcastToModelFittingAction extends SampCapabilityAction {
 
         // Get Model assuming that target name is the first one (and only one).. of oifits.
         String targetName = oiFitsFile.getOiTarget().getTarget()[0];
-        Target t = ObservationManager.getInstance().getObservation().getTarget(targetName);
+        Target target = ObservationManager.getInstance().getTarget(targetName);
         Model targetModel = new Model();
         targetModel.setNameAndType("Container");
-        for (Model model : t.getModels()) {
+        for (Model model : target.getModels()) {
             targetModel.getModels().add(model);
         }
         String xmlModel = "";
