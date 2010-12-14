@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BasicObservationForm.java,v 1.50 2010-12-10 17:14:37 bourgesl Exp $"
+ * "@(#) $Id: BasicObservationForm.java,v 1.51 2010-12-14 09:23:33 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.50  2010/12/10 17:14:37  bourgesl
+ * refactoring to use a display target list instead of target names
+ *
  * Revision 1.49  2010/12/01 16:35:42  bourgesl
  * 'Model editor' renamed to 'Target editor'
  *
@@ -152,7 +155,6 @@
 package fr.jmmc.aspro.gui;
 
 import fr.jmmc.aspro.AsproConstants;
-import fr.jmmc.aspro.AsproGui;
 import fr.jmmc.aspro.gui.util.GenericListModel;
 import fr.jmmc.aspro.gui.util.TargetListRenderer;
 import fr.jmmc.aspro.gui.util.TargetRenderer;
@@ -166,6 +168,7 @@ import fr.jmmc.aspro.model.oi.InterferometerConfigurationChoice;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Pop;
 import fr.jmmc.aspro.model.oi.Target;
+import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.mcs.astro.star.Star;
 import fr.jmmc.mcs.gui.MessagePane;
 import java.awt.event.ActionEvent;
@@ -522,34 +525,31 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
    */
   private void jButtonRemoveTargetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonRemoveTargetActionPerformed
 
-    // TODO : refactor
-    final Target selectedTarget = (Target) this.jListTargets.getSelectedValue();
-    final String targetName = selectedTarget.getName();
+    final Target selectedTarget = getSelectedTarget();
 
-    if (targetName != null) {
-      if (MessagePane.showConfirmMessage(this.jButtonRemoveTarget, "Do you want to remove the target [" + targetName + "] ?")) {
-        if (this.om.removeTarget(targetName)) {
-          // update target list :
-          updateListTargets();
+    if (selectedTarget != null) {
 
-          this.om.fireObservationChanged();
+      if (this.om.isCalibrator(selectedTarget)) {
+        if (MessagePane.showConfirmMessage(this.jButtonRemoveTarget,
+                "Do you want to remove definitely the calibrator target [" + selectedTarget.getName() + "] and all associations ?")) {
+
+          // update the data model and fire change events :
+          this.om.removeCalibrator(selectedTarget);
         }
+      } else if (MessagePane.showConfirmMessage(this.jButtonRemoveTarget,
+              "Do you want to remove the science target [" + selectedTarget.getName() + "] ?")) {
+
+        // update the data model and fire change events :
+        this.om.removeTarget(selectedTarget);
       }
     }
   }//GEN-LAST:event_jButtonRemoveTargetActionPerformed
 
   private void jButtonTargetEditorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonTargetEditorActionPerformed
-    final String targetName = getSelectedTargetName();
+    final Target target = getSelectedTarget();
 
     // show model editor :
-    if (TargetEditorDialog.showEditor(targetName)) {
-
-      // TODO : better event handling :
-      AsproGui.getInstance().getSettingPanel().getObservationForm().forceUpdateListTargets();
-
-      // fire an observation change event :
-      this.om.fireObservationChanged();
-    }
+    TargetEditorDialog.showEditor((target != null) ? target.getName() : null);
   }//GEN-LAST:event_jButtonTargetEditorActionPerformed
 
   /**
@@ -665,14 +665,14 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     });
 
     // update combo boxes :
-    updateComboInterferometerConfiguration();
-    updateComboInstrument();
-    updateComboInstrumentConfiguration();
-    updateListTargets();
-    checkPops();
+    this.updateComboInterferometerConfiguration();
+    this.updateComboInstrument();
+    this.updateComboInstrumentConfiguration();
+    this.updateListTargets();
+    this.checkPops();
 
     // initial observation synchronization :
-    updateObservation();
+    this.updateObservation();
   }
 
   /**
@@ -707,27 +707,19 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
   }
 
   /**
-   * Force to refresh the target list from the observation
-   */
-  public void forceUpdateListTargets() {
-    this.updateListTargets();
-  }
-
-  /**
-   * Refresh the target list : handle the onChangeEvent to detect target changes !
-   * TODO : refactor the target changed (event ??)
+   * Refresh the target list
    */
   private void updateListTargets() {
     final Target selectedTarget = (Target) this.jListTargets.getSelectedValue();
 
     final List<Target> displayTargets = this.om.getDisplayTargets();
+    final TargetUserInformations targetUserInfos = this.om.getTargetUserInfos();
 
     logger.severe("updateListTargets = " + displayTargets);
 
+    // read only model :
     this.jListTargets.setModel(new GenericListModel<Target>(displayTargets));
-
-    final TargetRenderer renderer = new TargetRenderer(this.om.getTargetUserInfos());
-    this.jListTargets.setCellRenderer(new TargetListRenderer(renderer));
+    this.jListTargets.setCellRenderer(new TargetListRenderer(new TargetRenderer(targetUserInfos)));
 
     // restore previous selected item :
     if (selectedTarget != null) {
@@ -741,29 +733,22 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
 
   /**
    * Define the selected target in the target list
-   *
-   * TODO : refactor signature
-   * @param targetName
+   * @param targetName target name
    */
   protected void updateSelectedTarget(final String targetName) {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("selected target = " + targetName);
     }
 
-    final Target target = this.om.getTarget(targetName);
-    this.jListTargets.setSelectedValue(target, true);
+    this.jListTargets.setSelectedValue(this.om.getTarget(targetName), true);
   }
 
   /**
-   * Return the currently selected target name
-   * @return target name
+   * Return the currently selected target
+   * @return target
    */
-  public String getSelectedTargetName() {
-    final Target target = (Target) this.jListTargets.getSelectedValue();
-    if (target == null) {
-      return null;
-    }
-    return target.getName();
+  public Target getSelectedTarget() {
+    return (Target)this.jListTargets.getSelectedValue();
   }
 
   /**
@@ -871,7 +856,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
   }
 
   /**
-   * Observer implementation used for the StarResolver.
+   * Observer implementation used for the StarResolver (called by EDT)
    * Create a new Target object with the retrieved data from SimBAD and
    * fire an observation change event
    * @param o Observable instance
@@ -888,30 +873,11 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
           logger.fine("Star resolved : \n" + star);
         }
 
-        boolean changed = false;
-
-        // Transform name to upper case :
+        // Transform star name to upper case :
         final String name = star.getName().toUpperCase();
 
-        if (this.om.addTarget(name, star)) {
-          changed = true;
-        }
-
-        if (changed) {
-          // This method was called by the StarResolverThread (not EDT) :
-          SwingUtilities.invokeLater(new Runnable() {
-
-            public void run() {
-              // update the target list :
-              updateListTargets();
-
-              if (DEBUG_UPDATE_EVENT) {
-                logger.log(Level.SEVERE, "UPDATE", new Throwable());
-              }
-              om.fireObservationChanged();
-            }
-          });
-        }
+        // update the data model and fire change events :
+        this.om.addTarget(name, star);
       }
     }
   }
@@ -986,7 +952,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
       this.jTextPoPs.setText(instrumentChoice.getPops());
 
       // update the target list :
-      updateListTargets();
+      this.updateListTargets();
 
       // constraints :
 
@@ -1025,6 +991,9 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         break;
       case CHANGED:
         this.resetStatus();
+        break;
+      case TARGET_CHANGED:
+        this.updateListTargets();
         break;
       case WARNINGS_READY:
         this.updateStatus(observation.getWarningContainer());
