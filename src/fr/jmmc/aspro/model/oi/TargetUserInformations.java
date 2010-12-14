@@ -148,9 +148,21 @@ public class TargetUserInformations
    * @param target calibrator to be added to the calibrator list, if absent
    * @return <tt>true</tt> if the calibrator was added
    */
-  public boolean addCalibratorIfAbsent(final Target target) {
+  public boolean addCalibrator(final Target target) {
     if (!isCalibrator(target)) {
       return getCalibrators().add(target);
+    }
+    return false;
+  }
+
+  /**
+   * Remove the given target from the calibrator list if present.
+   * @param target calibrator to be removed from the calibrator list, if present
+   * @return <tt>true</tt> if the calibrator was removed
+   */
+  public boolean removeCalibrator(final Target target) {
+    if (isCalibrator(target)) {
+      return getCalibrators().remove(target);
     }
     return false;
   }
