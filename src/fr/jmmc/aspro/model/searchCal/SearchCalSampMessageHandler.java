@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SearchCalSampMessageHandler.java,v 1.4 2010-10-22 11:10:44 bourgesl Exp $"
+ * "@(#) $Id: SearchCalSampMessageHandler.java,v 1.5 2010-12-14 09:28:27 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2010/10/22 11:10:44  bourgesl
+ * use App frame
+ *
  * Revision 1.3  2010/10/11 14:15:37  bourgesl
  * SampMessageHandler refactoring
  *
@@ -18,11 +21,10 @@
  */
 package fr.jmmc.aspro.model.searchCal;
 
-import fr.jmmc.aspro.AsproConstants;
-import fr.jmmc.aspro.AsproGui;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Target;
+import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.aspro.util.FileUtils;
 import fr.jmmc.aspro.util.XmlFactory;
 import fr.jmmc.mcs.gui.App;
@@ -34,7 +36,6 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import javax.swing.SwingUtilities;
@@ -142,18 +143,14 @@ public final class SearchCalSampMessageHandler extends SampMessageHandler {
         }
       }
 
-      // fire an observation change event (EDT) :
+      // Use invokeLater to avoid concurrency and ensure that 
+      // data model is modified and fire events using Swing EDT :
       SwingUtilities.invokeLater(new Runnable() {
 
-        /**
-         * Synchronized by EDT
-         */
         public void run() {
 
-          // science target position :
-          int pos = om.getObservation().getTargetPosition(targetName);
-
-          if (pos == -1) {
+          // check that science target is present :
+          if (om.getTarget(targetName) == null) {
             MessagePane.showErrorMessage("Target '" + targetName + "' not found in targets (wrong SearchCal target) !");
             return;
           }
@@ -169,8 +166,12 @@ public final class SearchCalSampMessageHandler extends SampMessageHandler {
             return;
           }
 
-          // copy list of observation targets :
-          final List<Target> editTargets = new ArrayList<Target>(om.getTargets());
+          // use deep copy of the current observation to manipulate target and calibrator list properly :
+          final ObservationSetting cloned = (ObservationSetting) om.getObservation().clone();
+
+          // Prepare the data model (editable targets and user infos) :
+          final List<Target> editTargets = cloned.getTargets();
+          final TargetUserInformations editTargetUserInfos = cloned.getOrCreateTargetUserInfos();
 
           if (logger.isLoggable(Level.FINE)) {
             logger.fine("initial targets :");
@@ -179,7 +180,7 @@ public final class SearchCalSampMessageHandler extends SampMessageHandler {
             }
           }
 
-          mergeTargets(pos, editTargets, calibrators);
+          mergeTargets(editTargets, editTargetUserInfos, targetName, calibrators);
 
           if (logger.isLoggable(Level.FINE)) {
             logger.fine("updated targets :");
@@ -189,12 +190,7 @@ public final class SearchCalSampMessageHandler extends SampMessageHandler {
           }
 
           // update the complete list of targets :
-          om.setTargets(editTargets);
-
-          // TODO : better event handling :
-          AsproGui.getInstance().getSettingPanel().getObservationForm().forceUpdateListTargets();
-
-          om.fireObservationChanged();
+          om.updateTargets(editTargets, editTargetUserInfos);
 
           // change focus :
           App.getFrame().toFront();
@@ -210,43 +206,66 @@ public final class SearchCalSampMessageHandler extends SampMessageHandler {
 
   /**
    * Merge targets and calibrators
-   * @param targetPos position of the science target for calibrators
-   * @param editTargets current edited list of targets
-   * @param calibrators list of calibrators
+   * @param editTargets edited list of targets
+   * @param editTargetUserInfos edited target user informations
+   * @param targetName science target name
+   * @param calibrators list of calibrators for the science target
    */
-  private static void mergeTargets(final int targetPos, final List<Target> editTargets, final List<Target> calibrators) {
+  private static void mergeTargets(final List<Target> editTargets, final TargetUserInformations editTargetUserInfos,
+                                   final String targetName, final List<Target> calibrators) {
 
-    int pos = targetPos;
+    final Target scienceTarget = Target.getTarget(targetName, editTargets);
 
-    // add calibrators in the target list after the science target :
-    pos++;
+    if (scienceTarget != null) {
+      String calName;
+      Target oldCal;
 
-    String name;
-    for (Target cal : calibrators) {
-      // add (cal) suffix in calibrator name :
-      name = cal.getName() + AsproConstants.CAL_SUFFIX;
+      for (Target newCal : calibrators) {
+        // Transform star name to upper case :
+        calName = newCal.getName().toUpperCase();
 
-      if (!exist(editTargets, name)) {
-        cal.setName(name);
+        oldCal = Target.getTarget(calName, editTargets);
 
-        editTargets.add(pos, cal);
-        pos++;
+        if (oldCal == null) {
+          // update name :
+          newCal.setName(calName);
+
+          // append the missing target :
+          editTargets.add(newCal);
+
+          editTargetUserInfos.addCalibrator(newCal);
+
+          editTargetUserInfos.addCalibratorToTarget(scienceTarget, newCal);
+
+        } else {
+          boolean accept = false;
+          // already exist :
+          if (editTargetUserInfos.isCalibrator(oldCal)) {
+            // already calibrator
+            accept = true;
+
+          } else {
+            // check if has calibrators
+            if (editTargetUserInfos.hasCalibrators(oldCal)) {
+              logger.warning("skipped calibrator : " + oldCal);
+            } else {
+              // Science target without calibrators :
+
+              // check models ...
+              accept = true;
+            }
+          }
+          if (accept) {
+            // remove old cal ? no, keep it : user modified it maybe.
+
+            // merge old cal and new cal (datas ...)
+
+            editTargetUserInfos.addCalibrator(oldCal);
+
+            editTargetUserInfos.addCalibratorToTarget(scienceTarget, oldCal);
+          }
+        }
       }
     }
-  }
-
-  /**
-   * Return true if the target is already present in the given list of targets
-   * @param editTargets list of targets
-   * @param name target name
-   * @return true if the target is already present
-   */
-  private static boolean exist(final List<Target> editTargets, final String name) {
-    for (Target t : editTargets) {
-      if (t.getName().equals(name)) {
-        return true;
-      }
-    }
-    return false;
   }
 }
