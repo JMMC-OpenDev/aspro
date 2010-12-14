@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetEditorDialog.java,v 1.9 2010-12-08 17:04:53 bourgesl Exp $"
+ * "@(#) $Id: TargetEditorDialog.java,v 1.10 2010-12-14 09:24:12 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.9  2010/12/08 17:04:53  bourgesl
+ * refresh the complete model tree when the tab changes
+ *
  * Revision 1.8  2010/12/03 16:11:52  bourgesl
  * refactoring to use new JTree classes
  *
@@ -146,9 +149,9 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
       if (logger.isLoggable(Level.FINE)) {
         logger.fine("update the targets ...");
       }
-      // update the data model in the observation :
-      om.setTargets(form.getEditTargets());
-      om.setTargetUserInfos(form.getEditTargetUserInfos());
+      // update the data model in the observation 
+      // and fire target and observation change events :
+      om.updateTargets(form.getEditTargets(), form.getEditTargetUserInfos());
     }
 
     return result;
@@ -191,8 +194,6 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
           // refresh the tree according to the new target / calibrator list
           // and select the target :
           targetModelForm.initialize(targetForm.getCurrentTarget().getName());
-
-//          targetModelForm.selectTarget(targetForm.getCurrentTarget());
         } else if (selected == targetForm) {
           // select the target :
           targetForm.selectTarget(targetModelForm.getCurrentTarget());
@@ -202,12 +203,12 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
   }
 
   /**
-   * Initialise the editor with targets (single or all)
+   * Initialize the editor forms and the selected target
    * @param targetName target name to select
    */
   protected void initialize(final String targetName) {
 
-    // Propagate the model (edited targets and user infos) to forms :
+    // Generate trees and select the target :
 
     this.targetModelForm.initialize(targetName);
 
