@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetTreeCellRenderer.java,v 1.1 2010-12-10 17:09:48 bourgesl Exp $"
+ * "@(#) $Id: TargetTreeCellRenderer.java,v 1.2 2010-12-15 13:33:07 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2010/12/10 17:09:48  bourgesl
+ * custom renderers (list/tree) to display target name with corresponding icon
+ *
  */
 package fr.jmmc.aspro.gui.util;
 
@@ -47,13 +50,13 @@ public final class TargetTreeCellRenderer extends DefaultTreeCellRenderer {
    */
   @Override
   public Component getTreeCellRendererComponent(
-          JTree tree,
-          Object value,
-          boolean sel,
-          boolean expanded,
-          boolean leaf,
-          int row,
-          boolean hasFocus) {
+          final JTree tree,
+          final Object value,
+          final boolean sel,
+          final boolean expanded,
+          final boolean leaf,
+          final int row,
+          final boolean hasFocus) {
 
     super.getTreeCellRendererComponent(
             tree, value, sel,

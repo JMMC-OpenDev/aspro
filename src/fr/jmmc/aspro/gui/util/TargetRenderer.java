@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetRenderer.java,v 1.1 2010-12-10 17:09:48 bourgesl Exp $"
+ * "@(#) $Id: TargetRenderer.java,v 1.2 2010-12-15 13:33:07 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2010/12/10 17:09:48  bourgesl
+ * custom renderers (list/tree) to display target name with corresponding icon
+ *
  */
 package fr.jmmc.aspro.gui.util;
 
@@ -37,6 +40,16 @@ public final class TargetRenderer {
     this.calibratorIcon = new ImageIcon(getClass().getResource("/fr/jmmc/aspro/gui/icons/calibrator.png"));
     this.targetIcon = new ImageIcon(getClass().getResource("/fr/jmmc/aspro/gui/icons/target.png"));
     this.targetUserInfos = targetUserInfos;
+  }
+
+  /**
+   * Convert the target to string :
+   * Return the display name of the given target using the format 'name' ( ' (cal)')
+   * @param target target to use
+   * @return display name
+   */
+  public final String convertTargetToString(final Target target) {
+    return this.targetUserInfos.getTargetDisplayName(target);
   }
 
   /**

@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetListRenderer.java,v 1.1 2010-12-10 17:09:47 bourgesl Exp $"
+ * "@(#) $Id: TargetListRenderer.java,v 1.2 2010-12-15 13:33:06 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2010/12/10 17:09:47  bourgesl
+ * custom renderers (list/tree) to display target name with corresponding icon
+ *
  */
 package fr.jmmc.aspro.gui.util;
 
@@ -58,18 +61,19 @@ public final class TargetListRenderer extends DefaultListCellRenderer {
    */
   @Override
   public Component getListCellRendererComponent(
-          JList list,
-          Object value,
-          int index,
-          boolean isSelected,
-          boolean cellHasFocus) {
+          final JList list,
+          final Object value,
+          final int index,
+          final boolean isSelected,
+          final boolean cellHasFocus) {
 
     final String val;
     if (value == null) {
       val = null;
+    } else if (value instanceof Target) {
+      val = delegate.convertTargetToString((Target) value);
     } else {
-      final Target target = (Target) value;
-      val = target.getName();
+      val = value.toString();
     }
 
     super.getListCellRendererComponent(
