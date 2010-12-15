@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BroadcastToModelFittingAction.java,v 1.8 2010-12-14 09:25:13 bourgesl Exp $"
+ * "@(#) $Id: BroadcastToModelFittingAction.java,v 1.9 2010-12-15 13:36:13 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.8  2010/12/14 09:25:13  bourgesl
+ * variable renamed
+ *
  * Revision 1.7  2010/10/06 16:05:53  bourgesl
  * added comments
  *
@@ -56,8 +59,6 @@ import javax.xml.bind.Marshaller;
  * This registered action represents a File Menu entry to
  * send model and generated oifits to one modelfitting application.
  *
- * TODO : rename that class
- *
  * @author mella
  */
 public class BroadcastToModelFittingAction extends SampCapabilityAction {
@@ -102,7 +103,7 @@ public class BroadcastToModelFittingAction extends SampCapabilityAction {
             return null;
         }
 
-        File file = new File(ExportOIFitsAction.getName(oiFitsFile));
+        File file = new File(ExportOIFitsAction.getDefaultFileName(oiFitsFile));
         file.deleteOnExit();
 
         try {
