@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: FileUtils.java,v 1.9 2010-10-07 15:01:14 bourgesl Exp $"
+ * "@(#) $Id: FileUtils.java,v 1.10 2010-12-15 13:30:38 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.9  2010/10/07 15:01:14  bourgesl
+ * added readFile(file)
+ *
  * Revision 1.8  2010/10/04 16:25:25  bourgesl
  * proper IO exception handling
  *
@@ -135,10 +138,7 @@ public final class FileUtils {
    * @throws IOException if an I/O exception occured
    */
   public static String readFile(final File file) throws IOException {
-    final int length = (int)file.length();
-
-    // TODO : check maximum length :
-    return readFile(new FileInputStream(file), length);
+    return readFile(new FileInputStream(file), (int)file.length());
   }
 
   /**

@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: OIFitsAMBERService.java,v 1.5 2010-09-02 15:56:14 bourgesl Exp $"
+ * "@(#) $Id: OIFitsAMBERService.java,v 1.6 2010-12-15 13:30:53 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2010/09/02 15:56:14  bourgesl
+ * comments
+ *
  * Revision 1.4  2010/08/31 15:53:37  bourgesl
  * minor changes (comments)
  *
@@ -268,8 +271,6 @@ public final class OIFitsAMBERService {
 
   /**
    * Compute piston, iterative phasor method.
-   *
-   * TODO
    */
   private static void amdlibFakeComputePiston2T(int nbLVis,
                                                 final double[] wlen,
