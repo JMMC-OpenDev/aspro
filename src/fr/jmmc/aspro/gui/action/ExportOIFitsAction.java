@@ -1,16 +1,19 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOIFitsAction.java,v 1.8 2010-12-13 16:39:39 mella Exp $"
+ * "@(#) $Id: ExportOIFitsAction.java,v 1.9 2010-12-15 13:34:22 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.8  2010/12/13 16:39:39  mella
+ * use new enum MimeType.OIFITS
+ *
  * Revision 1.7  2010/10/22 13:45:45  bourgesl
  * fixed repackaging of nom.tam.fits library (oitools)
  *
  * Revision 1.6  2010/10/04 14:32:13  bourgesl
- * getName(fits) is now protected and static (used by BroadcastToMFGui)
+ * getDefaultFileName(fits) is now protected and static (used by BroadcastToMFGui)
  *
  * Revision 1.5  2010/10/01 15:33:11  bourgesl
  * added message 'There is currently no OIFits data (your target is not observable)'
@@ -36,9 +39,9 @@ import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.util.FileUtils;
 import fr.jmmc.mcs.gui.MessagePane;
 import fr.jmmc.mcs.gui.StatusBar;
-import fr.jmmc.mcs.util.FileFilterRepository;
 import fr.jmmc.mcs.util.MimeType;
 import fr.jmmc.mcs.util.RegisteredAction;
+import fr.jmmc.oitools.model.OIArray;
 import fr.jmmc.oitools.model.OIFitsFile;
 import fr.jmmc.oitools.model.OIFitsWriter;
 import fr.jmmc.oitools.model.OIVis2;
@@ -103,7 +106,7 @@ public class ExportOIFitsAction extends RegisteredAction {
           fileChooser.setCurrentDirectory(new File(this.getLastDir()));
         }
 
-        fileChooser.setSelectedFile(new File(fileChooser.getCurrentDirectory(), getName(oiFitsFile)));
+        fileChooser.setSelectedFile(new File(fileChooser.getCurrentDirectory(), getDefaultFileName(oiFitsFile)));
       }
 
       fileChooser.setDialogTitle("Export the current target as an OIFits file");
@@ -145,10 +148,11 @@ public class ExportOIFitsAction extends RegisteredAction {
 
   /**
    * Generate a default name for the given OIFits structure
-   * @param oiFitsFile  OIFits structure
-   * @return default name [ASPRO_<target-name>_<instrument>_date]
+   * @param oiFitsFile OIFits structure
+   * @return default name [Aspro2_<TARGET>_<INSTRUMENT>_<CONFIGURATION>_<DATE>]
    */
-  protected static String getName(final OIFitsFile oiFitsFile) {
+  protected static String getDefaultFileName(final OIFitsFile oiFitsFile) {
+
     final StringBuilder sb = new StringBuilder(32).append("Aspro2_");
 
     final String targetName = oiFitsFile.getOiTarget().getTarget()[0];
@@ -158,9 +162,17 @@ public class ExportOIFitsAction extends RegisteredAction {
 
     final OIVis2 vis2 = oiFitsFile.getOiVis2()[0];
 
+    final String arrayName = vis2.getArrName();
     final String insName = vis2.getInsName();
 
     sb.append(insName).append('_');
+
+    final OIArray array = oiFitsFile.getOiArray(arrayName);
+    for (String station : array.getStaName()) {
+      sb.append(station).append('-');
+    }
+    sb.deleteCharAt(sb.length() - 1);
+    sb.append('_');
 
     final String dateObs = vis2.getDateObs();
 
