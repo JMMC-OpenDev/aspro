@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: PDFExportable.java,v 1.3 2010-12-07 17:34:21 bourgesl Exp $"
+ * "@(#) $Id: PDFExportable.java,v 1.4 2010-12-15 13:36:27 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2010/12/07 17:34:21  bourgesl
+ * removed to do
+ *
  * Revision 1.2  2010/10/15 16:59:43  bourgesl
  * new PDF options (page size and orientation)
  * PDFExportable refactoring to include prepareChart, postPDF and getPDFOptions methods
@@ -24,11 +27,19 @@ import org.jfree.chart.JFreeChart;
  * @author bourgesl
  */
 public interface PDFExportable {
+  /** PDF extension */
+  public static final String PDF_EXT = "pdf";
 
   /**
    * Export the chart component as a PDF document.
    */
   public void performPDFAction();
+
+  /**
+   * Return the PDF default file name
+   * @return PDF default file name
+   */
+  public String getPDFDefaultFileName();
 
   /**
    * Return the PDF options
