@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBVLTI.java,v 1.11 2010-10-04 16:25:25 bourgesl Exp $"
+ * "@(#) $Id: ExportOBVLTI.java,v 1.12 2010-12-15 13:32:00 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.11  2010/10/04 16:25:25  bourgesl
+ * proper IO exception handling
+ *
  * Revision 1.10  2010/09/24 15:52:03  bourgesl
  * exception propagation if template is not found
  *
@@ -158,13 +161,15 @@ public class ExportOBVLTI {
     final Target target = observation.getTarget(targetName);
 
     if (target != null) {
-      // Dispatch to AMBER or MIDI classes :
+      // Dispatch to AMBER / MIDI / PIONIER classes :
       final String instrumentName = observation.getInstrumentConfiguration().getName();
 
       if (AsproConstants.INS_AMBER.equals(instrumentName)) {
         ExportOBAmber.generate(file, observation, target);
       } else if (AsproConstants.INS_MIDI.equals(instrumentName)) {
         ExportOBMidi.generate(file, observation, target);
+      } else if (AsproConstants.INS_PIONIER.equals(instrumentName)) {
+        ExportOBPionier.generate(file, observation, target);
       } else {
         throw new IllegalArgumentException("The application can not generate an Observing Block for this instrument [" + instrumentName + "] !");
       }
@@ -240,7 +245,7 @@ public class ExportOBVLTI {
    * @param observation observation settings
    * @return base line
    */
-  private final static String getBaseLine(final ObservationSetting observation) {
+  public final static String getBaseLine(final ObservationSetting observation) {
 
     final StringBuilder sb = new StringBuilder();
 
