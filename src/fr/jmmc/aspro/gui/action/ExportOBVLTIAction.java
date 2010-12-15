@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBVLTIAction.java,v 1.14 2010-10-04 16:25:25 bourgesl Exp $"
+ * "@(#) $Id: ExportOBVLTIAction.java,v 1.15 2010-12-15 13:35:24 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.14  2010/10/04 16:25:25  bourgesl
+ * proper IO exception handling
+ *
  * Revision 1.13  2010/10/01 15:32:28  bourgesl
  * use MessagePane.showConfirmFileOverwrite
  *
@@ -57,6 +60,7 @@ package fr.jmmc.aspro.gui.action;
 
 import fr.jmmc.aspro.Preferences;
 import fr.jmmc.aspro.gui.UVCoveragePanel;
+import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.ob.ExportOBVLTI;
 import fr.jmmc.aspro.util.FileUtils;
 import fr.jmmc.mcs.gui.DismissableMessagePane;
@@ -89,7 +93,6 @@ public class ExportOBVLTIAction {
   public static final String OBX_EXT = "obx";
   /** Eso warning message */
   public static final String ESO_WARNING = "Please check that your observing block \n conforms to the current ESO Call for Proposal \n (object magnitudes, instrument limits ...)";
-
   /** action singleton */
   private static final ExportOBVLTIAction instance = new ExportOBVLTIAction();
 
@@ -144,9 +147,8 @@ public class ExportOBVLTIAction {
     }
 
     // default P2PP file name :
-    // replace invalid characters :
-    final String altName = targetName.replaceAll("[^a-zA-Z_0-9]", "_");
-    fileChooser.setSelectedFile(new File(fileChooser.getCurrentDirectory(), "SCI_" + altName + "." + OBX_EXT));
+    final String fileName = ObservationManager.getInstance().getObservation().generateFileName(targetName, "SCI", OBX_EXT);
+    fileChooser.setSelectedFile(new File(fileChooser.getCurrentDirectory(), fileName));
 
     fileChooser.setDialogTitle("Export the target [" + targetName + "] as an Observing Block");
 
@@ -187,7 +189,7 @@ public class ExportOBVLTIAction {
    * @return file filter
    */
   protected FileFilter getFileFilter() {
-    return FileFilterRepository.getInstance().get(OBX_MIME_TYPE);
+    return FileFilterRepository.get(OBX_MIME_TYPE);
   }
 
   /**
