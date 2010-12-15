@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: InterferometerMapPanel.java,v 1.10 2010-10-21 16:51:01 bourgesl Exp $"
+ * "@(#) $Id: InterferometerMapPanel.java,v 1.11 2010-12-15 13:36:43 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.10  2010/10/21 16:51:01  bourgesl
+ * JMMC trademark made less important
+ *
  * Revision 1.9  2010/10/15 16:59:43  bourgesl
  * new PDF options (page size and orientation)
  * PDFExportable refactoring to include prepareChart, postPDF and getPDFOptions methods
@@ -156,6 +159,26 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
     ExportPDFAction.exportPDF(this);
   }
 
+  /**
+   * Return the PDF default file name (without extension)
+   * @return PDF default file name
+   */
+  public String getPDFDefaultFileName() {
+    final StringBuilder sb = new StringBuilder(16);
+    sb.append("MAP_");
+
+    final ObservationSetting observation = ObservationManager.getInstance().getObservation();
+
+    final String intConfName = observation.getInterferometerConfiguration().getName();
+    final String altIntConfName = intConfName.replaceAll("[^a-zA-Z_0-9]", "_");
+    sb.append(altIntConfName).append('_');
+
+    final String baseLine = observation.getInstrumentConfiguration().getStations().replaceAll(" ", "-");
+    sb.append(baseLine).append('.').append(PDF_EXT);
+
+    return sb.toString();
+  }
+  
   /**
    * Return the PDF options
    * @return PDF options
