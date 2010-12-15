@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportPDFAction.java,v 1.16 2010-10-15 16:59:43 bourgesl Exp $"
+ * "@(#) $Id: ExportPDFAction.java,v 1.17 2010-12-15 13:35:45 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.16  2010/10/15 16:59:43  bourgesl
+ * new PDF options (page size and orientation)
+ * PDFExportable refactoring to include prepareChart, postPDF and getPDFOptions methods
+ *
  * Revision 1.15  2010/10/05 15:06:00  bourgesl
  * use AsproGui:getInstance()
  *
@@ -91,8 +95,6 @@ public final class ExportPDFAction extends RegisteredAction {
   private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(className);
   /** PDF mime type */
   public static final String PDF_MIME_TYPE = "application/pdf";
-  /** PDF extension */
-  public static final String PDF_EXT = "pdf";
 
   /**
    * Return the singleton ExportPDFAction instance
@@ -104,8 +106,6 @@ public final class ExportPDFAction extends RegisteredAction {
 
   /**
    * Export the given exportable chart as a PDF document
-   *
-   * TODO : add rendering options (output format, orientation ?)
    *
    * @param exportable component
    */
@@ -123,7 +123,7 @@ public final class ExportPDFAction extends RegisteredAction {
   public ExportPDFAction() {
     super(className, actionName);
 
-    FileFilterRepository.getInstance().put(PDF_MIME_TYPE, PDF_EXT, "Portable Document Format (" + PDF_EXT + ")");
+    FileFilterRepository.getInstance().put(PDF_MIME_TYPE, PDFExportable.PDF_EXT, "Portable Document Format (" + PDFExportable.PDF_EXT + ")");
   }
 
   /**
@@ -160,6 +160,10 @@ public final class ExportPDFAction extends RegisteredAction {
     if (this.getLastDir() != null) {
       fileChooser.setCurrentDirectory(new File(this.getLastDir()));
     }
+
+    // default PDF file name :
+    final String fileName = exportable.getPDFDefaultFileName();
+    fileChooser.setSelectedFile(new File(fileChooser.getCurrentDirectory(), fileName));
 
     fileChooser.setDialogTitle("Export the plot to PDF");
 
@@ -202,7 +206,7 @@ public final class ExportPDFAction extends RegisteredAction {
    * @return file filter
    */
   protected FileFilter getFileFilter() {
-    return FileFilterRepository.getInstance().get(PDF_MIME_TYPE);
+    return FileFilterRepository.get(PDF_MIME_TYPE);
   }
 
   /**
@@ -213,8 +217,8 @@ public final class ExportPDFAction extends RegisteredAction {
   protected File checkFileExtension(final File file) {
     final String ext = FileUtils.getExtension(file);
 
-    if (!PDF_EXT.equals(ext)) {
-      return new File(file.getParentFile(), file.getName() + "." + PDF_EXT);
+    if (!PDFExportable.PDF_EXT.equals(ext)) {
+      return new File(file.getParentFile(), file.getName() + "." + PDFExportable.PDF_EXT);
     }
     return file;
   }
