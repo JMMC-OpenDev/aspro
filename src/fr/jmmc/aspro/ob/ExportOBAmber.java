@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBAmber.java,v 1.14 2010-10-04 16:25:25 bourgesl Exp $"
+ * "@(#) $Id: ExportOBAmber.java,v 1.15 2010-12-15 13:31:38 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.14  2010/10/04 16:25:25  bourgesl
+ * proper IO exception handling
+ *
  * Revision 1.13  2010/09/24 15:52:03  bourgesl
  * exception propagation if template is not found
  *
@@ -61,7 +64,7 @@ import java.util.logging.Level;
  * This class generates an observing block for the VLTI AMBER instrument
  * @author bourgesl
  */
-public class ExportOBAmber extends ExportOBVLTI {
+public final class ExportOBAmber extends ExportOBVLTI {
 
   /** template name */
   private final static String TEMPLATE_FILE = "fr/jmmc/aspro/ob/AMBER_template.obx";
