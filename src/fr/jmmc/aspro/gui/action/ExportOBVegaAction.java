@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBVegaAction.java,v 1.8 2010-10-04 16:25:25 bourgesl Exp $"
+ * "@(#) $Id: ExportOBVegaAction.java,v 1.9 2010-12-15 13:34:35 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.8  2010/10/04 16:25:25  bourgesl
+ * proper IO exception handling
+ *
  * Revision 1.7  2010/10/01 15:32:28  bourgesl
  * use MessagePane.showConfirmFileOverwrite
  *
@@ -140,7 +143,7 @@ public class ExportOBVegaAction {
    * @return file filter
    */
   protected FileFilter getFileFilter() {
-    return FileFilterRepository.getInstance().get(TXT_MIME_TYPE);
+    return FileFilterRepository.get(TXT_MIME_TYPE);
   }
 
   /**

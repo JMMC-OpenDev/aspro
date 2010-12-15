@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationFileAction.java,v 1.7 2010-06-29 11:55:54 bourgesl Exp $"
+ * "@(#) $Id: ObservationFileAction.java,v 1.8 2010-12-15 13:33:35 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2010/06/29 11:55:54  bourgesl
+ * comment updated
+ *
  * Revision 1.6  2010/06/14 13:16:36  bourgesl
  * changed aspro file extension to 'asprox'
  *
@@ -70,7 +73,7 @@ public abstract class ObservationFileAction extends RegisteredAction {
    * @return file filter
    */
   protected FileFilter getFileFilter() {
-    return FileFilterRepository.getInstance().get(OBSERVATION_MIME_TYPE);
+    return FileFilterRepository.get(OBSERVATION_MIME_TYPE);
   }
 
   /**
