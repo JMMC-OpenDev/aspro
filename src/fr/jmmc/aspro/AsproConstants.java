@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproConstants.java,v 1.20 2010-10-22 13:31:37 bourgesl Exp $"
+ * "@(#) $Id: AsproConstants.java,v 1.21 2010-12-15 13:37:03 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.20  2010/10/22 13:31:37  bourgesl
+ * added preference for Time LST/UTC
+ *
  * Revision 1.19  2010/10/14 14:18:37  bourgesl
  * added max elevation set to 85 degrees
  *
@@ -118,6 +121,8 @@ public interface AsproConstants {
   public static final String INS_AMBER = "AMBER";
   /** VLTI MIDI */
   public static final String INS_MIDI = "MIDI";
+  /** VLTI PIONIER */
+  public static final String INS_PIONIER = "PIONIER";
   /** CHARA VEGA (2T/3T) */
   public static final String INS_VEGA = "VEGA_";
   /** JMMC legal notice on plots */
