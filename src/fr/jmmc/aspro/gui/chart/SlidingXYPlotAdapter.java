@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SlidingXYPlotAdapter.java,v 1.3 2010-10-21 16:49:12 bourgesl Exp $"
+ * "@(#) $Id: SlidingXYPlotAdapter.java,v 1.4 2010-12-15 13:33:18 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2010/10/21 16:49:12  bourgesl
+ * better annotation position and font size
+ * modified bar width for many targets
+ *
  * Revision 1.2  2010/10/18 14:27:07  bourgesl
  * javadoc
  * disabled logs
@@ -201,7 +205,6 @@ public final class SlidingXYPlotAdapter {
     // Fix the plot size and bar width :
 
     // TODO : adjust range to have correct bar size if there is a lot of targets :
-    // Add a scrollbar arround the plot only ?
 
     final double barWidth;
     final double rangeMin, rangeMax;
