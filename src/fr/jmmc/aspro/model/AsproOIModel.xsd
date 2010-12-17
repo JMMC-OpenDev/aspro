@@ -331,6 +331,13 @@
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
+      <xsd:element name="origin" type="xsd:string" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>
+            Target origin (SearchCal ...)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
 
 <!-- position -->
       <xsd:element name="RA" type="xsd:string">
