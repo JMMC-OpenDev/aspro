@@ -243,6 +243,14 @@ public class ObservationSetting
     
 //--simple--preserve
   /**
+   * Return true if the target list is not empty
+   * @return true if the target list is not empty
+   */
+  public final boolean hasTargets() {
+    return !getTargets().isEmpty();
+  }
+
+  /**
    * Return the target of the given name
    * @param name target name
    * @return target or null if the target was not found
@@ -419,6 +427,150 @@ public class ObservationSetting
       mapIDTargets.put(target.getIdentifier(), target);
     }
     return mapIDTargets;
+  }
+  /** computed displayable list of targets (read only) */
+  @javax.xml.bind.annotation.XmlTransient
+  private List<Target> cachedDisplayTargets = null;
+  /** computed parent target list associated to the displayable list of targets (read only) */
+  @javax.xml.bind.annotation.XmlTransient
+  private List<Target> cachedParentForDisplayTargets = null;
+
+  /**
+   * Clear any cached value related to targets
+   */
+  public void clearCacheTargets() {
+    this.cachedDisplayTargets = null;
+    this.cachedParentForDisplayTargets = null;
+  }
+
+  /**
+   * Return the displayable list of targets containing
+   * - science targets followed by their calibrators
+   * - calibrator orphans
+   * @return displayable list of targets
+   */
+  public List<Target> getDisplayTargets() {
+    if (this.cachedDisplayTargets != null) {
+      return this.cachedDisplayTargets;
+    }
+
+    computeDisplayTargets();
+
+    return this.cachedDisplayTargets;
+  }
+
+  /**
+   * Return the parent target list associated to the displayable list of targets
+   * @return parent target list associated to the displayable list of targets
+   */
+  public List<Target> getParentForDisplayTargets() {
+    if (this.cachedParentForDisplayTargets != null) {
+      return this.cachedParentForDisplayTargets;
+    }
+
+    // TODO CALS : use this to help synchronizing selections (list <=> combo ...)
+
+    computeDisplayTargets();
+
+    return this.cachedParentForDisplayTargets;
+  }
+
+  /**
+   * Compute the displayable list of targets containing
+   * - science targets followed by their calibrators
+   * - calibrator orphans
+   * And the parent target associated to display target list
+   */
+  private void computeDisplayTargets() {
+
+    final List<Target> innerTargets = getTargets();
+
+    final List<Target> displayTargets;
+    final List<Target> parentTargets;
+    if (innerTargets.isEmpty()) {
+      displayTargets = java.util.Collections.emptyList();
+      parentTargets = java.util.Collections.emptyList();
+    } else {
+      displayTargets = new ArrayList<Target>();
+      parentTargets = new ArrayList<Target>();
+
+      // map of used calibrators :
+      final java.util.Map<Target, Target> usedCalibrators = new java.util.IdentityHashMap<Target, Target>();
+
+      // get the existing target user informations (can be null) :
+      final TargetUserInformations localTargetUserInfos = getTargetUserInfos();
+
+      for (Target target : innerTargets) {
+
+        if (localTargetUserInfos == null) {
+          // no calibrator defined, all targets are science targets :
+          displayTargets.add(target);
+          parentTargets.add(null);
+        } else if (!localTargetUserInfos.isCalibrator(target)) {
+          // science targets :
+          displayTargets.add(target);
+          parentTargets.add(null);
+
+          // add calibrators related to the science target :
+          for (Target calibrator : localTargetUserInfos.getCalibrators(target)) {
+            // calibrator targets :
+            displayTargets.add(calibrator);
+            parentTargets.add(target);
+
+            usedCalibrators.put(calibrator, calibrator);
+          }
+        }
+      }
+
+      if (localTargetUserInfos != null) {
+        // add calibrator orphans i.e. not associated to a target :
+        for (Target calibrator : localTargetUserInfos.getCalibrators()) {
+          if (!usedCalibrators.containsKey(calibrator)) {
+            displayTargets.add(calibrator);
+            parentTargets.add(null);
+          }
+        }
+      }
+    }
+
+    // cache the computed lists :
+    this.cachedDisplayTargets = displayTargets;
+    this.cachedParentForDisplayTargets = parentTargets;
+  }
+
+  /**
+   * Generate a standard file name for the selected target using the format :
+   * [<prefix>_<TARGET>_<INSTRUMENT>_<CONFIGURATION>_<DATE>.<extension>]
+   *
+   * @param targetName target name
+   * @param prefix prefix for the file name
+   * @param extension file extension
+   * @return standard file name
+   */
+  public String generateFileName(final String targetName, final String prefix, final String extension) {
+    final StringBuilder sb = new StringBuilder(32);
+    if (prefix != null) {
+      sb.append(prefix).append('_');
+    }
+
+    // replace invalid characters :
+    final String altTargetName = targetName.replaceAll("[^a-zA-Z_0-9]", "_");
+
+    sb.append(altTargetName).append('_');
+
+    final String instrumentName = this.getInstrumentConfiguration().getName();
+
+    sb.append(instrumentName).append('_');
+
+    final String baseLine = this.getInstrumentConfiguration().getStations().replaceAll(" ", "-");
+
+    sb.append(baseLine).append('_');
+
+    final String date = this.getWhen().getDate().toString();
+
+    sb.append(date).append('.').append(extension);
+
+    return sb.toString();
   }
 //--simple--preserve
 
