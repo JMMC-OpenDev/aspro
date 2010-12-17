@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: GenericListModel.java,v 1.2 2010-12-06 17:01:28 bourgesl Exp $"
+ * "@(#) $Id: GenericListModel.java,v 1.3 2010-12-17 15:15:58 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2010/12/06 17:01:28  bourgesl
+ * added addIfAbsent
+ *
  * Revision 1.1  2010/12/03 09:32:47  bourgesl
  * ListModel implementation using a List<Type>
  *
@@ -14,6 +17,7 @@ package fr.jmmc.aspro.gui.util;
 
 import java.util.List;
 import javax.swing.AbstractListModel;
+import javax.swing.ComboBoxModel;
 
 /**
  * This custom implementation uses an existing List
@@ -22,7 +26,7 @@ import javax.swing.AbstractListModel;
  *
  * @author bourgesl
  */
-public final class GenericListModel<K> extends AbstractListModel {
+public final class GenericListModel<K> extends AbstractListModel implements ComboBoxModel {
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
@@ -30,16 +34,30 @@ public final class GenericListModel<K> extends AbstractListModel {
   /* members */
   /** internal model implementing the List interface */
   private final List<K> model;
+  /** flag to enable combo box model implementation (selected item) */
+  private final boolean comboBoxModel;
+  /** ComboBoxModel selected item */
+  private Object selectedObject = null;
 
   /**
    * Constructor using an existing list for the internal model
    * @param model list to use (must be not null)
    */
   public GenericListModel(final List<K> model) {
+    this(model, false);
+  }
+
+  /**
+   * Constructor using an existing list for the internal model
+   * @param model list to use (must be not null)
+   * @param isComboBoxModel flag to indicate that this implements ComboBoxModel (selected item)
+   */
+  public GenericListModel(final List<K> model, final boolean isComboBoxModel) {
     if (model == null) {
       throw new IllegalArgumentException("the given list can not be null !");
     }
     this.model = model;
+    this.comboBoxModel = isComboBoxModel;
   }
 
   /**
@@ -256,5 +274,26 @@ public final class GenericListModel<K> extends AbstractListModel {
       return this.model.add(element);
     }
     return false;
+  }
+
+  // implements javax.swing.ComboBoxModel
+  /**
+   * Set the value of the selected item. The selected item may be null.
+   * <p>
+   * @param anObject The combo box value or null for no selection.
+   */
+  public void setSelectedItem(final Object anObject) {
+    if (this.comboBoxModel) {
+      if ((this.selectedObject != null && !this.selectedObject.equals(anObject))
+              || this.selectedObject == null && anObject != null) {
+        this.selectedObject = anObject;
+        fireContentsChanged(this, -1, -1);
+      }
+    }
+  }
+
+  // implements javax.swing.ComboBoxModel
+  public Object getSelectedItem() {
+    return this.selectedObject;
   }
 }
