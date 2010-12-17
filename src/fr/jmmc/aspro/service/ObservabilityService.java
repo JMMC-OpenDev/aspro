@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.59 2010-10-19 15:00:32 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.60 2010-12-17 15:08:10 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.59  2010/10/19 15:00:32  bourgesl
+ * changed step to 2 degrees to compute base line limits
+ *
  * Revision 1.58  2010/10/08 09:40:26  bourgesl
  * fixed LST range [0;24] and no more [0;23:59:59]
  * fixed elevation dates inside LST range [0;24] and added transit elevation
@@ -227,6 +230,7 @@ import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.service.HorizonService.Profile;
 import fr.jmmc.aspro.util.CombUtils;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -401,8 +405,7 @@ public final class ObservabilityService {
         targets = new ArrayList<Target>(this.observation.getTargets());
       } else {
         // use the given target (OB) :
-        targets = new ArrayList<Target>(1);
-        targets.add(selectedTarget);
+        targets = Arrays.asList(selectedTarget);
       }
     }
 
@@ -458,19 +461,6 @@ public final class ObservabilityService {
       final List<Range> moonRanges = this.sc.findMoonRiseSet(this.jdLst24);
       final double moonIllum = this.sc.getMaxMoonIllum(moonRanges);
 
-      if (MOON_RISE_SET) {
-        final StarObservabilityData soMoon = new StarObservabilityData("Moon [" + (int) Math.round(100 * moonIllum) + " %]",
-                StarObservabilityData.TYPE_MOON);
-        this.data.getStarVisibilities().add(soMoon);
-
-        for (Range range : moonRanges) {
-          convertRangeToDateInterval(range, soMoon.getVisible());
-        }
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("moon visible : " + soMoon.getVisible());
-        }
-      }
-
       this.data.setMoonIllumPercent(100d * moonIllum);
 
       if (logger.isLoggable(Level.FINE)) {
@@ -509,11 +499,12 @@ public final class ObservabilityService {
       if (logger.isLoggable(Level.FINE)) {
         logger.fine("Star observability intervals : ");
 
-        for (StarObservabilityData so : this.data.getStarVisibilities()) {
-          logger.fine(so.toString());
+        for (List<StarObservabilityData> soList : this.data.getMapStarVisibilities().values()) {
+          for (StarObservabilityData so : soList) {
+            logger.fine(so.toString());
+          }
         }
       }
-
     }
 
     // fast interrupt :
@@ -785,9 +776,15 @@ public final class ObservabilityService {
    */
   private void findTargetObservability(final Target target) {
 
-    final StarObservabilityData starObs = new StarObservabilityData(target.getName(), StarObservabilityData.TYPE_STAR);
+    final String targetName = target.getName();
+
+    final int listSize = (this.doDetails) ? (3 + this.baseLines.size()) : 1;
+    final List<StarObservabilityData> starVisList = new ArrayList<StarObservabilityData>(listSize);
+    this.data.addStarVisibilities(targetName, starVisList);
+
+    final StarObservabilityData starObs = new StarObservabilityData(targetName, StarObservabilityData.TYPE_STAR);
     // add the result to have also unobservable targets :
-    this.data.getStarVisibilities().add(starObs);
+    starVisList.add(starObs);
 
     final StarData starData = new StarData(target.getName());
     this.data.addStarData(starData);
@@ -884,19 +881,17 @@ public final class ObservabilityService {
       final List<Range> obsRanges = new ArrayList<Range>();
 
       if (this.doDetails) {
-        // Get the current target name :
-        final String prefix = starObs.getName() + " ";
 
         // Add Rise/Set :
-        final StarObservabilityData soRiseSet = new StarObservabilityData(target.getName() + " Rise/Set", StarObservabilityData.TYPE_RISE_SET);
-        this.data.getStarVisibilities().add(soRiseSet);
+        final StarObservabilityData soRiseSet = new StarObservabilityData(targetName, "Rise/Set", StarObservabilityData.TYPE_RISE_SET);
+        starVisList.add(soRiseSet);
 
         convertRangeToDateInterval(rangeJDRiseSet, soRiseSet.getVisible());
 
         if (rangesJDHz != null) {
           // Add Horizon :
-          final StarObservabilityData soHz = new StarObservabilityData(target.getName() + " Horizon", StarObservabilityData.TYPE_HORIZON);
-          this.data.getStarVisibilities().add(soHz);
+          final StarObservabilityData soHz = new StarObservabilityData(targetName, "Horizon", StarObservabilityData.TYPE_HORIZON);
+          starVisList.add(soHz);
 
           for (Range range : rangesJDHz) {
             convertRangeToDateInterval(range, soHz.getVisible());
@@ -922,8 +917,8 @@ public final class ObservabilityService {
               logger.fine("JD ranges  : " + obsRanges);
             }
 
-            soBl = new StarObservabilityData(prefix + baseLine.getName(), StarObservabilityData.TYPE_BASE_LINE + i);
-            this.data.getStarVisibilities().add(soBl);
+            soBl = new StarObservabilityData(targetName, baseLine.getName(), StarObservabilityData.TYPE_BASE_LINE + i);
+            starVisList.add(soBl);
 
             // convert JD ranges to date ranges :
             for (Range range : obsRanges) {
@@ -1036,7 +1031,7 @@ public final class ObservabilityService {
     // First Pass :
     // For all PoP combinations : find the HA interval merged with the HA Rise/set interval
     // list of observability data associated to a pop combination :
-    final List<PopObservabilityData> popDataList = getPopObservabilityData(starObs.getName(), dec, rangesTarget);
+    final List<PopObservabilityData> popDataList = getPopObservabilityData(starObs.getTargetName(), dec, rangesTarget);
 
     // Current pop observability :
     PopObservabilityData popData;
@@ -1957,8 +1952,8 @@ public final class ObservabilityService {
     double jd;
     double haElev;
 
-    final int minElevation = (int)Math.round(this.minElev);
-    
+    final int minElevation = (int) Math.round(this.minElev);
+
     // internal ticks for elevation :
     for (elev = 20; elev <= 80; elev += 20) {
       if (elev > minElevation) {
