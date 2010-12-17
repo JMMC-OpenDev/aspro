@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationFileProcessor.java,v 1.1 2010-11-30 15:52:13 bourgesl Exp $"
+ * "@(#) $Id: ObservationFileProcessor.java,v 1.2 2010-12-17 15:15:25 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2010/11/30 15:52:13  bourgesl
+ * added ObservationFileProcessor onLoad and onSave callbacks to check schema version and handle model conversion if needed
+ *
  */
 package fr.jmmc.aspro.model;
 
@@ -63,7 +66,7 @@ public final class ObservationFileProcessor {
     }
     // convert ?
 
-    // check other things :
+    // check and update target references :
     observation.checkReferences();
   }
 
@@ -78,7 +81,7 @@ public final class ObservationFileProcessor {
 
     observation.setSchemaVersion(CURRENT_REVISION.getVersion());
 
-    // check other things :
+    // check and update target references :
     observation.checkReferences();
   }
 
