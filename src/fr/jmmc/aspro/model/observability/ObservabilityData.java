@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityData.java,v 1.6 2010-09-15 13:56:10 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityData.java,v 1.7 2010-12-17 15:14:11 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2010/09/15 13:56:10  bourgesl
+ * added moon illumination (percent)
+ *
  * Revision 1.5  2010/06/25 14:13:36  bourgesl
  * added dateCalc (AstroSkyCalc) to be reused by OIFits generation
  *
@@ -30,9 +33,10 @@ package fr.jmmc.aspro.model.observability;
 import edu.dartmouth.AstroSkyCalc;
 import fr.jmmc.aspro.model.BaseLine;
 import fr.jmmc.aspro.model.Beam;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -51,8 +55,10 @@ public final class ObservabilityData {
   private List<SunTimeInterval> sunIntervals = null;
   /** moon illumination (percent) */
   private double moonIllumPercent = 0d;
-  /** list of star visibility intervals */
-  private List<StarObservabilityData> starVisibilities = new ArrayList<StarObservabilityData>();
+
+  /** map of StarObservabilityData list keyed by target name */
+  private Map<String, List<StarObservabilityData>> mapStarVisibilities = new LinkedHashMap<String, List<StarObservabilityData>>();
+
   /** optional */
   /** best PoPs combination */
   private PopCombination bestPops;
@@ -99,8 +105,16 @@ public final class ObservabilityData {
     this.sunIntervals = sunIntervals;
   }
 
-  public List<StarObservabilityData> getStarVisibilities() {
-    return starVisibilities;
+  public void addStarVisibilities(final String name, final StarObservabilityData starVis) {
+    this.mapStarVisibilities.put(name, Arrays.asList(starVis));
+  }
+
+  public void addStarVisibilities(final String name, final List<StarObservabilityData> starVis) {
+    this.mapStarVisibilities.put(name, starVis);
+  }
+
+  public Map<String, List<StarObservabilityData>> getMapStarVisibilities() {
+    return this.mapStarVisibilities;
   }
 
   public PopCombination getBestPops() {
