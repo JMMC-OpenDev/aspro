@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: GroupedPopObservabilityData.java,v 1.2 2010-10-22 11:12:02 bourgesl Exp $"
+ * "@(#) $Id: GroupedPopObservabilityData.java,v 1.3 2010-12-17 15:14:20 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2010/10/22 11:12:02  bourgesl
+ * javadoc
+ * fixed minimum and maximum methods (Double extrema)
+ *
  * Revision 1.1  2010/01/08 16:48:29  bourgesl
  * package refactoring
  *
@@ -90,11 +94,11 @@ public class GroupedPopObservabilityData implements Comparable<GroupedPopObserva
   public String toString() {
     final StringBuffer sb = new StringBuffer(64).append(getIdentifier()).append(" [");
     for (PopObservabilityData popData : this.popDataList) {
-      sb.append("\t").append(popData.getTargetName()).append(" : ").append(popData.getMaxLength());
+      sb.append('\t').append(popData.getTargetName()).append(" : ").append(popData.getMaxLength());
     }
-    sb.append("]");
+    sb.append(']');
     if (this.estimation != -1d) {
-      sb.append("\t").append(this.estimation);
+      sb.append('\t').append(this.estimation);
     }
     return sb.toString();
   }

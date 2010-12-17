@@ -142,7 +142,7 @@ public class FocalInstrumentConfigurationItem
       if (s == null) {
         final StringBuilder sb = new StringBuilder();
         for (Station station : getStations()) {
-          sb.append(station.getName()).append(" ");
+          sb.append(station.getName()).append(' ');
         }
         sb.deleteCharAt(sb.length() - 1);
         s = sb.toString();

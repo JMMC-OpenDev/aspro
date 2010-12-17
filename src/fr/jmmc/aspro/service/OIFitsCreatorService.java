@@ -1159,16 +1159,16 @@ public final class OIFitsCreatorService {
       sb.append("]{ ");
 
       for (short[] b : this.baselineIndexes) {
-        sb.append(b[0]).append(b[1]).append(" ");
+        sb.append(b[0]).append(b[1]).append(' ');
       }
 
       sb.append("} = [ ");
 
       for (int i : this.relativePosition) {
-        sb.append(i).append(" ");
+        sb.append(i).append(' ');
       }
 
-      sb.append("]");
+      sb.append(']');
       return sb.toString();
     }
   }

@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBVLTI.java,v 1.12 2010-12-15 13:32:00 bourgesl Exp $"
+ * "@(#) $Id: ExportOBVLTI.java,v 1.13 2010-12-17 15:08:24 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.12  2010/12/15 13:32:00  bourgesl
+ * added Export PIONIER OB
+ *
  * Revision 1.11  2010/10/04 16:25:25  bourgesl
  * proper IO exception handling
  *
@@ -250,7 +253,7 @@ public class ExportOBVLTI {
     final StringBuilder sb = new StringBuilder();
 
     for (Station s : observation.getInstrumentConfiguration().getStationList()) {
-      sb.append(s.getName()).append("-");
+      sb.append(s.getName()).append('-');
     }
     sb.deleteCharAt(sb.length() - 1);
 
