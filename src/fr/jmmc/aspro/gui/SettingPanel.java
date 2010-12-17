@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SettingPanel.java,v 1.25 2010-11-25 07:58:32 bourgesl Exp $"
+ * "@(#) $Id: SettingPanel.java,v 1.26 2010-12-17 15:17:53 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.25  2010/11/25 07:58:32  bourgesl
+ * typo
+ *
  * Revision 1.24  2010/09/15 15:08:48  bourgesl
  * disable again OIFits (dev only)
  *
@@ -232,14 +235,12 @@ public final class SettingPanel extends JPanel implements ObservationListener {
       }
 
       // UV coverage panel :
-      final boolean hasTarget = !observation.getTargets().isEmpty();
-
       int uvPanelIndex = -1;
       if (this.uvCoveragePanel != null) {
         uvPanelIndex = this.jTabbedPane.indexOfComponent(this.uvCoveragePanel);
       }
 
-      if (hasTarget) {
+      if (observation.hasTargets()) {
         if (uvPanelIndex == -1) {
           // create the uv coverage panel :
           this.uvCoveragePanel = new UVCoveragePanel();
