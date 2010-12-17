@@ -1,11 +1,16 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BasicObservationForm.java,v 1.51 2010-12-14 09:23:33 bourgesl Exp $"
+ * "@(#) $Id: BasicObservationForm.java,v 1.52 2010-12-17 15:20:26 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.51  2010/12/14 09:23:33  bourgesl
+ * refactoring to use target list instead of target names
+ * remove calibrator (all occurences) and science target
+ * use target changed event to refresh target list
+ *
  * Revision 1.50  2010/12/10 17:14:37  bourgesl
  * refactoring to use a display target list instead of target names
  *
@@ -258,7 +263,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     jLabelTargets = new javax.swing.JLabel();
     jScrollPaneTargets = new javax.swing.JScrollPane();
     jListTargets = createTargetList();
-    jButtonRemoveTarget = new javax.swing.JButton();
+    jButtonDeleteTarget = new javax.swing.JButton();
     jButtonTargetEditor = new javax.swing.JButton();
     starSearchField = new fr.jmmc.mcs.astro.star.EditableStarResolverWidget();
     jPanelOptions = new javax.swing.JPanel();
@@ -389,19 +394,20 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
     jPanelMain.add(jScrollPaneTargets, gridBagConstraints);
 
-    jButtonRemoveTarget.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
-    jButtonRemoveTarget.setIcon(new javax.swing.ImageIcon(getClass().getResource("/fr/jmmc/aspro/gui/icons/delete.png"))); // NOI18N
-    jButtonRemoveTarget.setMargin(new java.awt.Insets(0, 0, 0, 0));
-    jButtonRemoveTarget.addActionListener(new java.awt.event.ActionListener() {
+    jButtonDeleteTarget.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+    jButtonDeleteTarget.setIcon(new javax.swing.ImageIcon(getClass().getResource("/fr/jmmc/aspro/gui/icons/delete.png"))); // NOI18N
+    jButtonDeleteTarget.setToolTipText("delete the selected target");
+    jButtonDeleteTarget.setMargin(new java.awt.Insets(0, 0, 0, 0));
+    jButtonDeleteTarget.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(java.awt.event.ActionEvent evt) {
-        jButtonRemoveTargetActionPerformed(evt);
+        jButtonDeleteTargetActionPerformed(evt);
       }
     });
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 2;
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-    jPanelMain.add(jButtonRemoveTarget, gridBagConstraints);
+    jPanelMain.add(jButtonDeleteTarget, gridBagConstraints);
 
     jButtonTargetEditor.setText("Target editor");
     jButtonTargetEditor.addActionListener(new java.awt.event.ActionListener() {
@@ -523,27 +529,29 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
    * Process the remove target action
    * @param evt action event
    */
-  private void jButtonRemoveTargetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonRemoveTargetActionPerformed
+  private void jButtonDeleteTargetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDeleteTargetActionPerformed
+
+    // TODO : multi selection support to delete multiple targets at the same time :
 
     final Target selectedTarget = getSelectedTarget();
 
     if (selectedTarget != null) {
 
       if (this.om.isCalibrator(selectedTarget)) {
-        if (MessagePane.showConfirmMessage(this.jButtonRemoveTarget,
-                "Do you want to remove definitely the calibrator target [" + selectedTarget.getName() + "] and all associations ?")) {
+        if (MessagePane.showConfirmMessage(this.jButtonDeleteTarget,
+                "Do you want to delete the calibrator target [" + selectedTarget.getName() + "] and all associations ?")) {
 
           // update the data model and fire change events :
           this.om.removeCalibrator(selectedTarget);
         }
-      } else if (MessagePane.showConfirmMessage(this.jButtonRemoveTarget,
-              "Do you want to remove the science target [" + selectedTarget.getName() + "] ?")) {
+      } else if (MessagePane.showConfirmMessage(this.jButtonDeleteTarget,
+              "Do you want to delete the science target [" + selectedTarget.getName() + "] ?")) {
 
         // update the data model and fire change events :
         this.om.removeTarget(selectedTarget);
       }
     }
-  }//GEN-LAST:event_jButtonRemoveTargetActionPerformed
+  }//GEN-LAST:event_jButtonDeleteTargetActionPerformed
 
   private void jButtonTargetEditorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonTargetEditorActionPerformed
     final Target target = getSelectedTarget();
@@ -710,37 +718,42 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
    * Refresh the target list
    */
   private void updateListTargets() {
-    final Target selectedTarget = (Target) this.jListTargets.getSelectedValue();
+    final Target selectedTarget = getSelectedTarget();
 
     final List<Target> displayTargets = this.om.getDisplayTargets();
     final TargetUserInformations targetUserInfos = this.om.getTargetUserInfos();
 
-    logger.severe("updateListTargets = " + displayTargets);
-
-    // read only model :
+    // note : read only :
     this.jListTargets.setModel(new GenericListModel<Target>(displayTargets));
     this.jListTargets.setCellRenderer(new TargetListRenderer(new TargetRenderer(targetUserInfos)));
 
     // restore previous selected item :
     if (selectedTarget != null) {
-      updateSelectedTarget(selectedTarget.getName());
+      updateSelectedTarget(selectedTarget);
     }
 
     // disable buttons if the target list is empty :
-    this.jButtonRemoveTarget.setEnabled(!displayTargets.isEmpty());
+    this.jButtonDeleteTarget.setEnabled(!displayTargets.isEmpty());
     this.jButtonTargetEditor.setEnabled(!displayTargets.isEmpty());
+
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("jListTargets updated : " + getSelectedTarget());
+    }
   }
 
   /**
    * Define the selected target in the target list
-   * @param targetName target name
+   *
+   * @param target target to select
    */
-  protected void updateSelectedTarget(final String targetName) {
+  protected void updateSelectedTarget(final Target target) {
     if (logger.isLoggable(Level.FINE)) {
-      logger.fine("selected target = " + targetName);
+      logger.fine("selected target = " + target);
     }
 
-    this.jListTargets.setSelectedValue(this.om.getTarget(targetName), true);
+    if (target != null && !target.equals(getSelectedTarget())) {
+      this.jListTargets.setSelectedValue(target, true);
+    }
   }
 
   /**
@@ -748,7 +761,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
    * @return target
    */
   public Target getSelectedTarget() {
-    return (Target)this.jListTargets.getSelectedValue();
+    return (Target) this.jListTargets.getSelectedValue();
   }
 
   /**
@@ -873,11 +886,8 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
           logger.fine("Star resolved : \n" + star);
         }
 
-        // Transform star name to upper case :
-        final String name = star.getName().toUpperCase();
-
         // update the data model and fire change events :
-        this.om.addTarget(name, star);
+        this.om.addTarget(Target.formatName(star.getName()), star);
       }
     }
   }
@@ -1036,7 +1046,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     }
   }
   // Variables declaration - do not modify//GEN-BEGIN:variables
-  private javax.swing.JButton jButtonRemoveTarget;
+  private javax.swing.JButton jButtonDeleteTarget;
   private javax.swing.JButton jButtonTargetEditor;
   private javax.swing.JCheckBox jCheckBoxNightLimit;
   private javax.swing.JComboBox jComboBoxInstrument;
