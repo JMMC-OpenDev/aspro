@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: StarObservabilityData.java,v 1.5 2010-10-08 12:29:44 bourgesl Exp $"
+ * "@(#) $Id: StarObservabilityData.java,v 1.6 2010-12-17 15:13:37 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2010/10/08 12:29:44  bourgesl
+ * add calibrator type (blue)
+ *
  * Revision 1.4  2010/07/22 12:31:18  bourgesl
  * new moon type
  *
@@ -35,6 +38,7 @@ import java.util.List;
  */
 public final class StarObservabilityData {
   /* type of data */
+
   /** star observability */
   public final static int TYPE_STAR = 0;
   /** calibrator observability */
@@ -49,35 +53,46 @@ public final class StarObservabilityData {
   public final static int TYPE_MOON = 27;
 
   /* members */
-
-  /** name of the target (+ base line) */
-  private final String name;
-
+  /** name of the target */
+  private final String targetName;
+  /** additional information on data (moon, rise/set, horizon, base line ...) */
+  private final String info;
   /** type of data */
   private final int type;
-
   /** visible date intervals */
   private final List<DateTimeInterval> visible = new ArrayList<DateTimeInterval>();
-
   /** transit date */
   private Date transitDate;
-
   /** visible date intervals */
   private final List<ElevationDate> elevations = new ArrayList<ElevationDate>();
 
+  /**
+   * Constructor
+   * @param targetName target name
+   * @param type type of observability
+   */
+  public StarObservabilityData(final String targetName, final int type) {
+    this(targetName, null, type);
+  }
 
   /**
    * Constructor
-   * @param name target name
+   * @param targetName target name
+   * @param info additional information on data (moon, rise/set, horizon, base line ...)
    * @param type type of observability
    */
-  public StarObservabilityData(final String name, final int type) {
-    this.name = name;
+  public StarObservabilityData(final String targetName, final String info, final int type) {
+    this.targetName = targetName;
+    this.info = info;
     this.type = type;
   }
 
-  public String getName() {
-    return name;
+  public String getTargetName() {
+    return targetName;
+  }
+
+  public String getInfo() {
+    return info;
   }
 
   public int getType() {
@@ -102,6 +117,6 @@ public final class StarObservabilityData {
 
   @Override
   public String toString() {
-    return name + " : " + getVisible();
+    return getTargetName() + " " + ((this.info != null) ? this.info : "") + " : " + getVisible();
   }
 }
