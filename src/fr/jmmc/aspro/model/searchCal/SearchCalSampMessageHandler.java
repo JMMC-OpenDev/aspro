@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SearchCalSampMessageHandler.java,v 1.5 2010-12-14 09:28:27 bourgesl Exp $"
+ * "@(#) $Id: SearchCalSampMessageHandler.java,v 1.6 2010-12-17 15:09:39 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2010/12/14 09:28:27  bourgesl
+ * major update on mergeTargets to flag calibrators and update targets and target user informations
+ *
  * Revision 1.4  2010/10/22 11:10:44  bourgesl
  * use App frame
  *
@@ -107,9 +110,7 @@ public final class SearchCalSampMessageHandler extends SampMessageHandler {
         logger.fine("votable :\n" + votable);
       }
 
-      // TODO : check SearchCal in votable
-
-      // TODO LATER : accept any votable having a meta.ID ...
+      // LATER : accept any votable having a meta.ID to import target and not only searchCal calibrators ...
 
       // use an XSLT to transform the SearchCal votable document to an Aspro 2 Observation :
       final long start = System.nanoTime();
@@ -180,7 +181,7 @@ public final class SearchCalSampMessageHandler extends SampMessageHandler {
             }
           }
 
-          mergeTargets(editTargets, editTargetUserInfos, targetName, calibrators);
+          final String report = mergeTargets(editTargets, editTargetUserInfos, targetName, calibrators);
 
           if (logger.isLoggable(Level.FINE)) {
             logger.fine("updated targets :");
@@ -189,8 +190,16 @@ public final class SearchCalSampMessageHandler extends SampMessageHandler {
             }
           }
 
-          // update the complete list of targets :
+          // update the complete list of targets and force to update references :
+          // needed to replace old target references by the new calibrator targets :
           om.updateTargets(editTargets, editTargetUserInfos);
+
+          if (logger.isLoggable(Level.INFO)) {
+            logger.info(report);
+          }
+
+          // display report message :
+          MessagePane.showMessage(report);
 
           // change focus :
           App.getFrame().toFront();
@@ -210,9 +219,13 @@ public final class SearchCalSampMessageHandler extends SampMessageHandler {
    * @param editTargetUserInfos edited target user informations
    * @param targetName science target name
    * @param calibrators list of calibrators for the science target
+   * @return merge operation report
    */
-  private static void mergeTargets(final List<Target> editTargets, final TargetUserInformations editTargetUserInfos,
-                                   final String targetName, final List<Target> calibrators) {
+  private static String mergeTargets(final List<Target> editTargets, final TargetUserInformations editTargetUserInfos,
+                                     final String targetName, final List<Target> calibrators) {
+    // report buffer :
+    final StringBuilder sb = new StringBuilder(512);
+    sb.append("Import SearchCal calibrators to target [").append(targetName).append("]\n\n");
 
     final Target scienceTarget = Target.getTarget(targetName, editTargets);
 
@@ -221,51 +234,70 @@ public final class SearchCalSampMessageHandler extends SampMessageHandler {
       Target oldCal;
 
       for (Target newCal : calibrators) {
-        // Transform star name to upper case :
-        calName = newCal.getName().toUpperCase();
+        calName = Target.formatName(newCal.getName());
+
+        // update target name :
+        newCal.setName(calName);
+        newCal.setOrigin("SearchCal");
 
         oldCal = Target.getTarget(calName, editTargets);
 
         if (oldCal == null) {
-          // update name :
-          newCal.setName(calName);
 
           // append the missing target :
           editTargets.add(newCal);
 
+          // define it as a calibrator :
           editTargetUserInfos.addCalibrator(newCal);
 
+          // associate it to the science target :
           editTargetUserInfos.addCalibratorToTarget(scienceTarget, newCal);
 
+          // report message :
+          sb.append(calName).append(" added as a calibrator\n");
+
         } else {
-          boolean accept = false;
-          // already exist :
-          if (editTargetUserInfos.isCalibrator(oldCal)) {
-            // already calibrator
-            accept = true;
+          // target already exist : always replace old target by the SearchCal calibrator (gilles)
+          // even if the old target was modified by the user ...
 
-          } else {
-            // check if has calibrators
-            if (editTargetUserInfos.hasCalibrators(oldCal)) {
-              logger.warning("skipped calibrator : " + oldCal);
-            } else {
-              // Science target without calibrators :
+          // check if the existing target had calibrators :
+          if (editTargetUserInfos.hasCalibrators(oldCal)) {
+            final List<Target> oldCalibrators = editTargetUserInfos.getCalibrators(oldCal);
 
-              // check models ...
-              accept = true;
+            // report message :
+            sb.append("WARNING : ").append(calName).append(" had calibrators that were removed : ");
+            for (Target cal : oldCalibrators) {
+              sb.append(cal.getName()).append(' ');
             }
+            sb.append('\n');
+
+            // remove calibrators related to the calibrator target :
+            oldCalibrators.clear();
           }
-          if (accept) {
-            // remove old cal ? no, keep it : user modified it maybe.
 
-            // merge old cal and new cal (datas ...)
+          // note : oldCal and newCal are equals() so following operations are possible :
 
-            editTargetUserInfos.addCalibrator(oldCal);
+          if (!editTargetUserInfos.isCalibrator(oldCal)) {
+            // define it as a calibrator :
+            editTargetUserInfos.addCalibrator(newCal);
 
-            editTargetUserInfos.addCalibratorToTarget(scienceTarget, oldCal);
+            // report message :
+            sb.append(calName).append(" updated and flagged as a calibrator\n");
+          } else {
+            // report message :
+            sb.append(calName).append(" updated\n");
           }
+
+          // associate it to the science target :
+          editTargetUserInfos.addCalibratorToTarget(scienceTarget, newCal);
+
+          // replace the old target by the new calibrator :
+          // note : the position of the target is not the same :
+          editTargets.remove(oldCal);
+          editTargets.add(newCal);
         }
       }
     }
+    return sb.toString();
   }
 }
