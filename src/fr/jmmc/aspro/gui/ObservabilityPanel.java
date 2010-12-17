@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityPanel.java,v 1.48 2010-11-16 15:31:50 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityPanel.java,v 1.49 2010-12-17 15:19:35 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.48  2010/11/16 15:31:50  bourgesl
+ * hide scrollbar for baseline limits
+ *
  * Revision 1.47  2010/10/22 13:31:37  bourgesl
  * added preference for Time LST/UTC
  *
@@ -180,6 +183,8 @@ import fr.jmmc.aspro.model.observability.StarObservabilityData;
 import fr.jmmc.aspro.model.observability.SunTimeInterval;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Pop;
+import fr.jmmc.aspro.model.oi.Target;
+import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.aspro.service.ObservabilityService;
 import fr.jmmc.mcs.gui.FeedbackReport;
 import fr.jmmc.mcs.gui.StatusBar;
@@ -195,6 +200,7 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -464,7 +470,6 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("Preferences updated on : " + this);
     }
-    logger.severe("Preferences updated on : " + this);
 
     this.jComboTimeRef.setSelectedItem(this.myPreferences.getTimeReference());
   }
@@ -482,6 +487,49 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
    */
   public void performPDFAction() {
     ExportPDFAction.exportPDF(this);
+  }
+
+  /**
+   * Return the PDF default file name (without extension)
+   * @return PDF default file name
+   */
+  public String getPDFDefaultFileName() {
+    final StringBuilder sb = new StringBuilder(32);
+    sb.append("OBS_");
+
+    final ObservationSetting observation = ObservationManager.getInstance().getObservation();
+
+    final String baseLine = observation.getInstrumentConfiguration().getStations().replaceAll(" ", "-");
+
+    final boolean doBaseLineLimits = this.jCheckBoxBaseLineLimits.isSelected();
+    final boolean doDetailedOutput = this.jCheckBoxDetailedOutput.isSelected();
+
+    if (doBaseLineLimits) {
+      sb.append("LIMITS_");
+
+      final String intConfName = observation.getInterferometerConfiguration().getName();
+      final String altIntConfName = intConfName.replaceAll("[^a-zA-Z_0-9]", "_");
+      sb.append(altIntConfName).append('_');
+
+      sb.append(baseLine);
+
+    } else {
+      if (doDetailedOutput) {
+        sb.append("DETAILS_");
+      }
+
+      final String instrumentName = observation.getInstrumentConfiguration().getName();
+      sb.append(instrumentName).append('_');
+
+      sb.append(baseLine).append('_');
+
+      final String date = observation.getWhen().getDate().toString();
+      sb.append(date);
+    }
+
+    sb.append('.').append(PDF_EXT);
+
+    return sb.toString();
   }
 
   /**
@@ -679,7 +727,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
               if (obsData.getBestPops() != null) {
                 sb.append(" + ");
                 for (Pop pop : obsData.getBestPops().getPopList()) {
-                  sb.append(pop.getName()).append(" ");
+                  sb.append(pop.getName()).append(' ');
                 }
               }
 
@@ -704,7 +752,11 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
               updateDateAxis(dateAxisLabel, obsData.getDateMin(), obsData.getDateMax(), doBaseLineLimits);
 
               // computed data are valid :
-              updateChart(obsData.getStarVisibilities(), obsData.getDateMin(), obsData.getDateMax(), doBaseLineLimits);
+              updateChart(observation.getDisplayTargets(),
+                      observation.getOrCreateTargetUserInfos(),
+                      obsData.getMapStarVisibilities(),
+                      obsData.getDateMin(), obsData.getDateMax(),
+                      doBaseLineLimits);
 
               updateSunMarkers(obsData.getSunIntervals());
 
@@ -740,102 +792,142 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
   /**
    * Update the datasets and the symbol axis given the star observability data
-   * @param starVis star observability data
+   * @param displayTargets list of display targets
+   * @param targetUserInfos target user informations
+   * @param starVisMap map of StarObservabilityData list keyed by target name
    * @param min lower date of the plot
    * @param max upper date of the plot
    * @param doBaseLineLimits flag to plot baseline limits
    */
-  private void updateChart(final List<StarObservabilityData> starVis, final Date min, final Date max,
+  @SuppressWarnings("unchecked")
+  private void updateChart(final List<Target> displayTargets,
+                           final TargetUserInformations targetUserInfos,
+                           final Map<String, List<StarObservabilityData>> starVisMap,
+                           final Date min, final Date max,
                            final boolean doBaseLineLimits) {
 
     final ColorPalette palette = ColorPalette.getDefaultColorPalette();
 
-    final int size = starVis.size();
+    // 24h date formatter like in france :
+    final DateFormat df = DateFormat.getTimeInstance(DateFormat.SHORT, Locale.FRANCE);
 
-    final List<String> targetNames = new ArrayList<String>(size);
-    final List<Color> targetColors = new ArrayList<Color>(size);
-
+    final List<String> targetNames = new ArrayList<String>();
+    final List<Color> targetColors = new ArrayList<Color>();
     final TaskSeriesCollection localTaskSeriesCollection = new TaskSeriesCollection();
 
     String name;
     TaskSeries taskSeries;
     Task task;
     int colorIndex;
-
-    for (StarObservabilityData so : starVis) {
-      name = so.getName();
-
-      targetNames.add(name);
-
-      // use the target name as the name of the serie :
-      taskSeries = new TaskSeries(name);
-      taskSeries.setNotify(false);
-
-      int j = 1;
-      for (DateTimeInterval interval : so.getVisible()) {
-        task = new Task("T" + j, interval.getStartDate(), interval.getEndDate());
-        taskSeries.add(task);
-        j++;
-      }
-
-      taskSeries.setNotify(true);
-      localTaskSeriesCollection.add(taskSeries);
-
-      // color :
-      colorIndex = so.getType();
-
-      if (colorIndex == StarObservabilityData.TYPE_STAR && name.endsWith(AsproConstants.CAL_SUFFIX)) {
-        colorIndex = StarObservabilityData.TYPE_CALIBRATOR;
-      }
-
-      targetColors.add(palette.getColor(colorIndex));
-    }
+    Integer pos;
+    int n = 0;
 
     final Map<Integer, List<XYAnnotation>> annotations;
+
+    final Collection<?> collection;
     if (doBaseLineLimits) {
+      // Use StarObservabilityData directly to get generated targets :
+      collection = starVisMap.values();
       annotations = null;
     } else {
+      // Use display target to get correct ordering and calibrator associations :
+      collection = displayTargets;
       annotations = new HashMap<Integer, List<XYAnnotation>>(4);
+    }
 
-      // add the Annotations :
-      // 24h date formatter like in france :
-      final DateFormat df = DateFormat.getTimeInstance(DateFormat.SHORT, Locale.FRANCE);
+    Target target;
+    List<StarObservabilityData> soList;
 
-      Integer pos;
-      int n = 0;
-      for (StarObservabilityData so : starVis) {
-        pos = Integer.valueOf(n);
+    for (Object o : collection) {
+      if (doBaseLineLimits) {
+        target = null;
+        soList = (List<StarObservabilityData>) o;
+      } else {
+        target = (Target) o;
+        // get StarObservabilityData results :
+        soList = starVisMap.get(target.getName());
+      }
 
-        // transit annotation :
-        if (so.getType() == StarObservabilityData.TYPE_STAR) {
-          addAnnotation(annotations, pos, new XYDiamondAnnotation(n, so.getTransitDate().getTime(), 8, 8));
+      // to be sure (concurrency problem ?) :
+      if (soList != null) {
+        for (StarObservabilityData so : soList) {
+          if (doBaseLineLimits) {
+            name = so.getTargetName();
+          } else {
+            // display name :
+            name = targetUserInfos.getTargetDisplayName(target);
 
-          for (ElevationDate ed : so.getElevations()) {
-            if (checkDateAxisLimits(ed.getDate(), min, max)) {
-              addAnnotation(annotations, pos, ChartUtils.createXYTickAnnotation(Integer.toString(ed.getElevation()), n, ed.getDate().getTime(), HALF_PI));
+            if (so.getInfo() != null) {
+              name = name + " " + so.getInfo();
             }
           }
-        }
 
-        for (DateTimeInterval interval : so.getVisible()) {
-          if (checkDateAxisLimits(interval.getStartDate(), min, max)) {
-            final XYTextAnnotation aStart = ChartUtils.createFitXYTextAnnotation(df.format(interval.getStartDate()), n, interval.getStartDate().getTime());
-            aStart.setRotationAngle(HALF_PI);
-            addAnnotation(annotations, pos, aStart);
+          targetNames.add(name);
+
+          // use the target name as the name of the serie :
+          taskSeries = new TaskSeries(name);
+          taskSeries.setNotify(false);
+
+          int j = 1;
+          for (DateTimeInterval interval : so.getVisible()) {
+            task = new Task("T" + j, interval.getStartDate(), interval.getEndDate());
+            taskSeries.add(task);
+            j++;
           }
 
-          if (checkDateAxisLimits(interval.getEndDate(), min, max)) {
-            final XYTextAnnotation aEnd = ChartUtils.createFitXYTextAnnotation(df.format(interval.getEndDate()), n, interval.getEndDate().getTime());
-            aEnd.setRotationAngle(HALF_PI);
-            addAnnotation(annotations, pos, aEnd);
-          }
-        }
+          taskSeries.setNotify(true);
+          localTaskSeriesCollection.add(taskSeries);
 
-        n++;
+          // color :
+          colorIndex = so.getType();
+
+          if (colorIndex == StarObservabilityData.TYPE_STAR
+                  && target != null && targetUserInfos.isCalibrator(target)) {
+            // use different color for calibrators :
+            colorIndex = StarObservabilityData.TYPE_CALIBRATOR;
+          }
+
+          targetColors.add(palette.getColor(colorIndex));
+
+          if (!doBaseLineLimits) {
+            // add the Annotations :
+            // 24h date formatter like in france :
+
+            pos = Integer.valueOf(n);
+
+            // transit annotation :
+            if (so.getType() == StarObservabilityData.TYPE_STAR) {
+              addAnnotation(annotations, pos, new XYDiamondAnnotation(n, so.getTransitDate().getTime(), 8, 8));
+
+              for (ElevationDate ed : so.getElevations()) {
+                if (checkDateAxisLimits(ed.getDate(), min, max)) {
+                  addAnnotation(annotations, pos, ChartUtils.createXYTickAnnotation(Integer.toString(ed.getElevation()), n, ed.getDate().getTime(), HALF_PI));
+                }
+              }
+            }
+
+            for (DateTimeInterval interval : so.getVisible()) {
+              if (checkDateAxisLimits(interval.getStartDate(), min, max)) {
+                final XYTextAnnotation aStart = ChartUtils.createFitXYTextAnnotation(df.format(interval.getStartDate()), n, interval.getStartDate().getTime());
+                aStart.setRotationAngle(HALF_PI);
+                addAnnotation(annotations, pos, aStart);
+              }
+
+              if (checkDateAxisLimits(interval.getEndDate(), min, max)) {
+                final XYTextAnnotation aEnd = ChartUtils.createFitXYTextAnnotation(df.format(interval.getEndDate()), n, interval.getEndDate().getTime());
+                aEnd.setRotationAngle(HALF_PI);
+                addAnnotation(annotations, pos, aEnd);
+              }
+            }
+          }
+          n++;
+        }
       }
     }
 
     this.scroller.getModel().setMinimum(0);
+
+    final int size = localTaskSeriesCollection.getRowCount();
 
     if (doBaseLineLimits || size <= MAX_VIEW_ITEMS) {
       this.scroller.getModel().setMaximum(0);
