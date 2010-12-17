@@ -213,6 +213,17 @@ public class TargetUserInformations
   }
 
   /**
+   * Return the calibrator list for the given target
+   * @param target target to use
+   * @return calibrator list
+   */
+  public final List<Target> getCalibrators(final Target target) {
+    final TargetInformation targetInfo = getOrCreateTargetInformation(target);
+
+    return targetInfo.getCalibrators();
+  }
+
+  /**
    * Add the given calibrator target to the given science target
    * @param target science target to use
    * @param calibrator calibrator target
