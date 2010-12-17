@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetForm.java,v 1.19 2010-12-14 09:24:31 bourgesl Exp $"
+ * "@(#) $Id: TargetForm.java,v 1.20 2010-12-17 15:17:30 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.19  2010/12/14 09:24:31  bourgesl
+ * updated comment
+ *
  * Revision 1.18  2010/12/10 17:13:40  bourgesl
  * use custom renderers
  *
@@ -1256,7 +1259,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
    * @return true only if the data are valid
    */
   protected boolean validateForm() {
-    // TODO : is there something to validate ?
+    // nothing to validate
     return true;
   }
 

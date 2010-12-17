@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetEditorDialog.java,v 1.10 2010-12-14 09:24:12 bourgesl Exp $"
+ * "@(#) $Id: TargetEditorDialog.java,v 1.11 2010-12-17 15:17:41 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.10  2010/12/14 09:24:12  bourgesl
+ * use ObservationManager.updateTargets to update data model and fire target and observation change events
+ *
  * Revision 1.9  2010/12/08 17:04:53  bourgesl
  * refresh the complete model tree when the tab changes
  *
@@ -149,7 +152,8 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
       if (logger.isLoggable(Level.FINE)) {
         logger.fine("update the targets ...");
       }
-      // update the data model in the observation 
+      
+      // update the complete list of targets and force to update references :
       // and fire target and observation change events :
       om.updateTargets(form.getEditTargets(), form.getEditTargetUserInfos());
     }
