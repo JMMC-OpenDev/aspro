@@ -31,6 +31,7 @@ import fr.jmmc.mcs.model.targetmodel.Model;
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
  *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *         &lt;element name="origin" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="RA" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *         &lt;element name="DEC" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *         &lt;element name="EQUINOX" type="{http://www.w3.org/2001/XMLSchema}float"/>
@@ -63,6 +64,7 @@ import fr.jmmc.mcs.model.targetmodel.Model;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "Target", propOrder = {
     "name",
+    "origin",
     "ra",
     "dec",
     "equinox",
@@ -90,6 +92,7 @@ public class Target
 
     @XmlElement(required = true)
     protected String name;
+    protected String origin;
     @XmlElement(name = "RA", required = true)
     protected String ra;
     @XmlElement(name = "DEC", required = true)
@@ -157,6 +160,30 @@ public class Target
      */
     public void setName(String value) {
         this.name = value;
+    }
+
+    /**
+     * Gets the value of the origin property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getOrigin() {
+        return origin;
+    }
+
+    /**
+     * Sets the value of the origin property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setOrigin(String value) {
+        this.origin = value;
     }
 
     /**
@@ -765,17 +792,17 @@ public class Target
     final StringBuilder sb = new StringBuilder(128);
     sb.append("<html>");
     sb.append("<b>Name</b> : ").append(getName());
-    sb.append("<br><b>Coord</b> : ").append(getRA()).append(" ").append(getDEC());
+    sb.append("<br><b>Coord</b> : ").append(getRA()).append(' ').append(getDEC());
     if (getPMRA() != null) {
-      sb.append("<br><b>Proper motion</b> (mas/yr) : ").append(getPMRA()).append(" ").append(getPMDEC());
+      sb.append("<br><b>Proper motion</b> (mas/yr) : ").append(getPMRA()).append(' ').append(getPMDEC());
     }
     if (getPARALLAX() != null) {
-      sb.append("<br><b>Parallax</b> (mas) : ").append(getPARALLAX()).append(" [").append(getPARAERR()).append("]");
+      sb.append("<br><b>Parallax</b> (mas) : ").append(getPARALLAX()).append(" [").append(getPARAERR()).append(']');
     }
     if (getSYSVEL() != null) {
       sb.append("<br><b>Radial Velocity</b> (km/s) : ").append(getSYSVEL());
       if (getVELTYP() != null) {
-        sb.append(" (").append(getVELTYP()).append(")");
+        sb.append(" (").append(getVELTYP()).append(')');
       }
     }
     if (getOBJTYP() != null && getOBJTYP().length() > 0) {
@@ -921,6 +948,16 @@ public class Target
       }
     }
     return null;
+  }
+
+  /**
+   * Format the given star name to become a valid target name (identifier)
+   * @param name any star name (not null)
+   * @return target name
+   */
+  public static final String formatName(final String name) {
+    // trim and upper case :
+    return name.trim().toUpperCase();
   }
 //--simple--preserve
 
