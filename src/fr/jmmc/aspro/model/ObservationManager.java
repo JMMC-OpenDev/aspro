@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationManager.java,v 1.47 2010-12-14 09:27:26 bourgesl Exp $"
+ * "@(#) $Id: ObservationManager.java,v 1.48 2010-12-17 15:15:13 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.47  2010/12/14 09:27:26  bourgesl
+ * major refactoring to fire target change events on add/remove target/calibrator operations
+ *
  * Revision 1.46  2010/12/10 17:15:40  bourgesl
  * added getDisplayTargets and modified how to update target user informations (copy)
  *
@@ -172,7 +175,6 @@ import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetConfiguration;
-import fr.jmmc.aspro.model.oi.TargetInformation;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.aspro.model.oi.WhenSetting;
 import fr.jmmc.aspro.util.CombUtils;
@@ -181,13 +183,8 @@ import fr.jmmc.oitools.model.OIFitsFile;
 import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
-import java.util.IdentityHashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
@@ -318,12 +315,15 @@ public final class ObservationManager extends BaseOIManager {
       final Object loaded = loadObject(reader);
 
       if (!(loaded instanceof ObservationSetting)) {
-        throw new IllegalArgumentException("The loaded file does not correspond to a valid Aspro2 file");
+        throw new IllegalArgumentException("The loaded document does not correspond to a valid Aspro2 file");
       }
 
-      // TODO : use ObservationFileProcessor ??
+      final ObservationSetting newObservation = (ObservationSetting) loaded;
 
-      return (ObservationSetting) loaded;
+      // post load processing :
+      ObservationFileProcessor.onLoad(newObservation);
+
+      return newObservation;
     }
     return null;
   }
@@ -471,7 +471,7 @@ public final class ObservationManager extends BaseOIManager {
    */
   private void fireEvent(final ObservationEventType type) {
 
-    // TODO : remove when code is clean !
+    // ensure events are fired by EDT :
     if (!SwingUtilities.isEventDispatchThread()) {
       logger.log(Level.SEVERE, "invalid thread : use EDT", new Throwable());
     }
@@ -738,7 +738,7 @@ public final class ObservationManager extends BaseOIManager {
     return getObservation().getOrCreateTargetUserInfos();
   }
 
- /**
+  /**
    * Return true if the given target is a calibrator
    * i.e. the calibrator list contains the given target
    * @param target target to use
@@ -755,75 +755,7 @@ public final class ObservationManager extends BaseOIManager {
    * @return
    */
   public List<Target> getDisplayTargets() {
-
-    final List<Target> targets = getObservation().getTargets();
-
-    if (targets.isEmpty()) {
-      return Collections.emptyList();
-    }
-
-    // get the existing target user informations (can be null) :
-    final TargetUserInformations targetUserInfos = getObservation().getTargetUserInfos();
-
-    final List<Target> displayTargets = new ArrayList<Target>();
-
-    // map of used calibrators :
-    final Map<Target, Target> usedCalibrators = new IdentityHashMap<Target, Target>();
-
-    TargetInformation targetInfo;
-
-    for (Target target : targets) {
-
-      if (targetUserInfos == null) {
-        // no calibrator defined, all targets are science targets :
-        displayTargets.add(target);
-      } else if (!targetUserInfos.isCalibrator(target)) {
-        // science targets :
-        displayTargets.add(target);
-
-        // add calibrators related to the science target :
-        targetInfo = targetUserInfos.getTargetInformation(target);
-        if (targetInfo != null) {
-          for (Target calibrator : targetInfo.getCalibrators()) {
-            // calibrator targets :
-            displayTargets.add(calibrator);
-
-            usedCalibrators.put(calibrator, calibrator);
-          }
-        }
-      }
-    }
-
-    if (targetUserInfos != null) {
-      // add calibrator orphans i.e. not associated to a target :
-      for (Target calibrator : targetUserInfos.getCalibrators()) {
-        if (!usedCalibrators.containsKey(calibrator)) {
-          displayTargets.add(calibrator);
-        }
-      }
-    }
-
-    return displayTargets;
-  }
-
-  /**
-   * Return the list of all target names
-   *
-   * TODO : kill
-   *
-   * @return list of all target names
-   */
-  public Vector<String> getTargetNames() {
-    final List<Target> targets = getTargets();
-    final int size = targets.size();
-    if (size > 0) {
-      final Vector<String> v = new Vector<String>(targets.size());
-      for (Target t : targets) {
-        v.add(t.getName());
-      }
-      return v;
-    }
-    return EMPTY_VECTOR;
+    return getObservation().getDisplayTargets();
   }
 
   /**
@@ -898,27 +830,15 @@ public final class ObservationManager extends BaseOIManager {
    */
   public void removeTarget(final Target target) {
     if (target != null) {
-      boolean changed = false;
-      
-      // remove calibrators related to the science target :
-      final TargetInformation targetInfo = getTargetUserInfos().getTargetInformation(target);
-      if (targetInfo != null) {
-        targetInfo.getCalibrators().clear();
-      }
 
-      Target t;
-      for (final Iterator<Target> it = getTargets().iterator(); it.hasNext();) {
-        t = it.next();
-        if (target.equals(t)) {
-          if (logger.isLoggable(Level.FINEST)) {
-            logger.finest("removeTarget : " + t);
-          }
-          changed = true;
-          it.remove();
-          break;
+      // remove calibrators related to the science target :
+      getTargetUserInfos().getCalibrators(target).clear();
+
+      if (getTargets().remove(target)) {
+        if (logger.isLoggable(Level.FINEST)) {
+          logger.finest("removeTarget : " + target);
         }
-      }
-      if (changed) {
+
         // fire change events :
         this.fireTargetChangedEvents();
       }
@@ -959,6 +879,9 @@ public final class ObservationManager extends BaseOIManager {
 
     getObservation().setTargetUserInfos(newTargetUserInfos);
 
+    // check and update target references :
+    getObservation().checkReferences();
+
     // fire change events :
     this.fireTargetChangedEvents();
   }
@@ -967,6 +890,10 @@ public final class ObservationManager extends BaseOIManager {
    * This fires a target change and an observation change event to all registered listeners.
    */
   private void fireTargetChangedEvents() {
+
+    // force clear display target cache :
+    getObservation().clearCacheTargets();
+
     // fire an observation targets change event :
     this.fireObservationTargetsChanged();
 
@@ -1245,7 +1172,7 @@ public final class ObservationManager extends BaseOIManager {
 
       for (j = 0; j < nStation; j++) {
         if (j > 0) {
-          sb.append(" ");
+          sb.append(' ');
         }
         sb.append(stations[idx[j]]);
       }
@@ -1299,7 +1226,7 @@ public final class ObservationManager extends BaseOIManager {
     if (obs.getInstrumentConfiguration().getInstrumentMode() != null) {
       sb.append(" mode : ").append(obs.getInstrumentConfiguration().getInstrumentMode());
     }
-    if (!obs.getTargets().isEmpty()) {
+    if (obs.hasTargets()) {
       sb.append(" targets : \n").append(obs.getTargets());
     }
 
