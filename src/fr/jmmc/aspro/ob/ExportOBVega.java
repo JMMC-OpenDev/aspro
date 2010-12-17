@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBVega.java,v 1.7 2010-10-04 16:25:25 bourgesl Exp $"
+ * "@(#) $Id: ExportOBVega.java,v 1.8 2010-12-17 15:08:33 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2010/10/04 16:25:25  bourgesl
+ * proper IO exception handling
+ *
  * Revision 1.6  2010/06/25 14:17:21  bourgesl
  * refactoring due to changes done in AstroSkyCalc and AstroSkyCalcObservation
  *
@@ -130,6 +133,8 @@ public class ExportOBVega {
 
     // Generate the file content :
     final StringBuilder sb = new StringBuilder(512);
+
+    // TODO CALS : we should use the display targets to have both science targets with their calibrators
 
     // fill the buffer per target :
     for (Target target : observation.getTargets()) {
