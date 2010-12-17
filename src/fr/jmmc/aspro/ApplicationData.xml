@@ -2,9 +2,9 @@
 
 <ApplicationData link="http://www.jmmc.fr/aspro2">
 
-  <program name="Aspro2" version="0.7.5 beta"/>
+  <program name="Aspro2" version="0.7.6 beta"/>
 
-  <compilation date="01/12/2010" compiler="JDK 1.5.0_16"/>
+  <compilation date="17/12/2010" compiler="JDK 1.5.0_16"/>
 
   <text>
     <![CDATA[ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations
@@ -71,15 +71,21 @@
 
   <releasenotes>
     <release version="0.7">
-      <prerelease version="0.7.5 beta">
+      <prerelease version="0.7.6 beta">
+        <change>Added Observing Blocks for PIONIER instrument</change>
         <change>Added CHARA PAVO instrument : PAVO_2T and PAVO_3T (3T)</change>
+        <change>Updated default file names for exports (PDF, OB, OIFits) to be more meaningful</change>
+      </prerelease>
+      <prerelease version="0.7.5 beta">
+        <change>Updated Observability plot to display science targets with their calibrators</change>
+        <change>Updated target lists to display science targets with their calibrators</change>
+        <change>Advanced drag and drop support to associate calibrators to (science) targets in the target editor</change>
         <change>Updated target editor to flag a target as a calibrator</change>
-        <change>Basic drag and drop support to associate calibrators to (science) targets</change>
       </prerelease>
       <prerelease version="0.7.4 beta">
         <change>Added a version attribute in the Observation file to handle model conversions</change>
         <change>Updated the Observation data model : targets have an ID attribute (derived from target name)
-        used to associate user informations : description, calibrator flag and calibrator list per target.</change>
+        used to associate user informations : description, calibrator flag and calibrator list per target</change>
         <change>Added action to open the SimBad web page for the current target in the Target editor</change>
         <change>Fixed the selected target when opening the target editor
         and synchronize the selected target between 'Model' and 'Target' tabs</change>
@@ -223,35 +229,35 @@
         <change>Add the preferences window (displayed from the menu)</change>
       </prerelease>
       <prerelease version="0.4b2"> <!-- 0.3b6 -->
-        <change>New Interferometer Map Plot to display station positions and the chosen baseline.</change>
+        <change>New Interferometer Map Plot to display station positions and the chosen baseline</change>
         <change>A star name can be optionaly given to the star resolver in addition to the coordinates to enter manually a new target</change>
       </prerelease>
       <prerelease version="0.4b1"> <!-- 0.3b5 -->
         <change>Several UI changes to manage HA min / max and the fringe tracker mode fields depending on the selected target
-        in the UV Coverage Panel.</change>
-        <change>HA min / max and the fringe tracker mode are related to a specific target and persisted in the observation file.</change>
+        in the UV Coverage Panel</change>
+        <change>HA min / max and the fringe tracker mode are related to a specific target and persisted in the observation file</change>
         <change>Added date and time constraints on VLTI Observing Block : date is defined if night restrictions are enabled;
         LST intervals are defined with the target observability (elevation > 30 deg + delay lines + shadowing)
-        restricted by the HA min / max defined in the UV Coverage Panel.</change>
+        restricted by the HA min / max defined in the UV Coverage Panel</change>
       </prerelease>
     </release>
 
     <release version="0.3"> <!-- <pubDate>Wed, 19 May 2010 11:25:43 GMT</pubDate> -->
       <prerelease version="0.3b4">
-        <change>Added VLTI configuration for the period 87 (new baselines) and fixed period 86.</change>
-        <change>Added VLTI configuration for the period 86 (idem period 85).</change>
-        <change>Added VLTI configuration for the future PIONIER instrument (period 86).</change>
+        <change>Added VLTI configuration for the period 87 (new baselines) and fixed period 86</change>
+        <change>Added VLTI configuration for the period 86 (idem period 85)</change>
+        <change>Added VLTI configuration for the future PIONIER instrument (period 86)</change>
       </prerelease>
       <prerelease version="0.3b3">
-        <change>Added basic Observing Block for MIDI.</change>
-        <change>Fixed the contiguous date interval problem on observability plot.</change>
-        <change>Minor corrections on AMBER observing blocks (proper motion and RA/DEC format).</change>
+        <change>Added basic Observing Block for MIDI</change>
+        <change>Fixed the contiguous date interval problem on observability plot</change>
+        <change>Minor corrections on AMBER observing blocks (proper motion and RA/DEC format)</change>
       </prerelease>
       <prerelease version="0.3b2">
-        <change>Updated Aspro data model to keep simbad information like RA (HMS), DEC (DMS), Radial velocity, Identifiers and Object types.</change>
+        <change>Updated Aspro data model to keep simbad information like RA (HMS), DEC (DMS), Radial velocity, Identifiers and Object types</change>
         <change>Updated Target tooltip with new information</change>
         <change>Several fixes to convert sexagesimal RA/DEC in degrees (internal). Known problem : the previously saved files can not be
-        load anymore.</change>
+        load anymore</change>
       </prerelease>
       <prerelease version="0.3b1">
         <change>The star resolver now supports RA/DEC coordinates to enter manually a new target
@@ -311,12 +317,12 @@
         <change>Evaluate the best PoP configuration that gives the best observability range for a single target</change>
       </prerelease>
       <prerelease version="0.1b2">
-        <change>Added delay line / switchyard / channels in observability plot.</change>
+        <change>Added delay line / switchyard / channels in observability plot</change>
         <change>Added base line limits</change>
         <change>Enhanced GUI to set min elevation / detailed plot ...</change>
       </prerelease>
       <prerelease version="0.1b1">
-        <change>Complete rewrite of the ASPRO software as a desktop Java application.</change>
+        <change>Complete rewrite of the ASPRO software as a desktop Java application</change>
       </prerelease>
     </release>
   </releasenotes>
