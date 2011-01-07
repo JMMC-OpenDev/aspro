@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetForm.java,v 1.20 2010-12-17 15:17:30 bourgesl Exp $"
+ * "@(#) $Id: TargetForm.java,v 1.21 2011-01-07 13:20:12 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.20  2010/12/17 15:17:30  bourgesl
+ * comment
+ *
  * Revision 1.19  2010/12/14 09:24:31  bourgesl
  * updated comment
  *
@@ -283,7 +286,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
   }
 
   /**
-   * Select the target node for the given target
+   * Select the target int the target tree or in the calibrator list for the given target
    * @param target to select
    */
   protected void selectTarget(final Target target) {
