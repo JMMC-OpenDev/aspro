@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.69 2010-12-17 15:17:21 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.70 2011-01-07 13:20:59 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.69  2010/12/17 15:17:21  bourgesl
+ * major change : target combo box use display targets instead of target names
+ *
  * Revision 1.68  2010/12/14 09:25:01  bourgesl
  * target change event refactored
  *
@@ -803,8 +806,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
    * @return PDF default file name
    */
   public String getPDFDefaultFileName() {
-    final ObservationSetting observation = ObservationManager.getInstance().getObservation();
-    return observation.generateFileName(getSelectedTargetName(), "UV", PDF_EXT);
+    return ObservationManager.getInstance().getObservation().generateFileName(getSelectedTargetName(), "UV", PDF_EXT);
   }
 
   /**
@@ -2199,7 +2201,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
    * Return the currently selected target name
    * @return target name
    */
-  public String getSelectedTargetName() {
+  private String getSelectedTargetName() {
     final Target target = getSelectedTarget();
     if (target != null) {
       return getSelectedTarget().getName();
