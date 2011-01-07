@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBVLTIAction.java,v 1.16 2011-01-07 13:23:16 bourgesl Exp $"
+ * "@(#) $Id: ExportOBVLTIAction.java,v 1.17 2011-01-07 16:51:08 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.16  2011/01/07 13:23:16  bourgesl
+ * added instrument and AO magnitudes in OB file name
+ *
  * Revision 1.15  2010/12/15 13:35:24  bourgesl
  * use observation default file name
  *
@@ -64,17 +67,12 @@ package fr.jmmc.aspro.gui.action;
 import fr.jmmc.aspro.Preferences;
 import fr.jmmc.aspro.gui.UVCoveragePanel;
 import fr.jmmc.aspro.model.ObservationManager;
-import fr.jmmc.aspro.model.oi.AdaptiveOptics;
-import fr.jmmc.aspro.model.oi.FocalInstrumentMode;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
-import fr.jmmc.aspro.model.oi.SpectralBand;
-import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.Target;
-import fr.jmmc.aspro.model.oi.Telescope;
-import fr.jmmc.aspro.model.util.SpectralBandUtils;
+import fr.jmmc.aspro.model.oi.TargetInformation;
+import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.aspro.ob.ExportOBVLTI;
 import fr.jmmc.aspro.util.FileUtils;
-import fr.jmmc.mcs.astro.Band;
 import fr.jmmc.mcs.gui.DismissableMessagePane;
 import fr.jmmc.mcs.gui.MessagePane;
 import fr.jmmc.mcs.gui.StatusBar;
@@ -82,8 +80,6 @@ import fr.jmmc.mcs.util.FileFilterRepository;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.List;
 import java.util.logging.Level;
 import javax.swing.JFileChooser;
@@ -106,14 +102,8 @@ public class ExportOBVLTIAction {
   public static final String OBX_MIME_TYPE = "application/obx";
   /** OBX extension */
   public static final String OBX_EXT = "obx";
-  /** P2PP file prefix for science targets */
-  public static final String OB_SCIENCE = "SCI";
-  /** P2PP file prefix for calibrator targets */
-  public static final String OB_CALIBRATOR = "CAL";
   /** Eso warning message */
-  public static final String ESO_WARNING = "Please check that your observing block \n conforms to the current ESO Call for Proposal \n (object magnitudes, instrument limits ...)";
-  /** double formatter for magnitudes */
-  protected final static NumberFormat df2 = new DecimalFormat("0.##");
+  public static final String ESO_WARNING = "Please check that your observing blocks \n conform to the current ESO Call for Proposal \n (object magnitudes, instrument limits ...)";
   /** action singleton */
   private static final ExportOBVLTIAction instance = new ExportOBVLTIAction();
 
@@ -170,7 +160,7 @@ public class ExportOBVLTIAction {
     }
 
     // default OB file name :
-    fileChooser.setSelectedFile(new File(fileChooser.getCurrentDirectory(), generateOBFileName(target)));
+    fileChooser.setSelectedFile(new File(fileChooser.getCurrentDirectory(), ExportOBVLTI.generateOBFileName(target)));
 
     fileChooser.setDialogTitle("Export the target [" + target.getName() + "] as an Observing Block");
 
@@ -192,12 +182,38 @@ public class ExportOBVLTIAction {
       this.setLastDir(file.getParent());
 
       try {
-        ExportOBVLTI.process(file, target);
+
+        // get observation :
+        final ObservationSetting observation = ObservationManager.getInstance().getObservation();
+
+        ExportOBVLTI.process(file, observation, target);
+
+        // Generate all calibrator OBs for a science target :
+        final TargetUserInformations targetUserInfos = observation.getTargetUserInfos();
+
+        if (targetUserInfos != null && !targetUserInfos.isCalibrator(target)) {
+          final TargetInformation targetInfo = targetUserInfos.getTargetInformation(target);
+          if (targetInfo != null) {
+            final List<Target> calibrators = targetInfo.getCalibrators();
+
+            if (!calibrators.isEmpty()) {
+              File calFile = null;
+
+              for (Target calibrator : calibrators) {
+                calFile = new File(getLastDir(), ExportOBVLTI.generateOBFileName(calibrator));
+
+                ExportOBVLTI.process(calFile, observation, calibrator);
+              }
+            }
+          }
+        }
 
         StatusBar.show(file.getName() + " created.");
 
         // PoP up to validate OB file against ESO CfP :
         DismissableMessagePane.show(null, ESO_WARNING, Preferences.getInstance(), "ESO_OB_WARNING");
+
+        // TODO : CALS : indicate all created file names !
 
       } catch (IOException ioe) {
         MessagePane.showErrorMessage(
@@ -242,73 +258,5 @@ public class ExportOBVLTIAction {
    */
   protected void setLastDir(String lastDir) {
     this.lastDir = lastDir;
-  }
-
-  /**
-   * Generate the Observing block file name using the given target
-   * @param target target to use
-   * @return Observing block file name
-   */
-  private String generateOBFileName(final Target target) {
-
-    final ObservationManager om = ObservationManager.getInstance();
-    final ObservationSetting observation = om.getObservation();
-
-    // get instrument band :
-    final FocalInstrumentMode insMode = observation.getInstrumentConfiguration().getFocalInstrumentMode();
-    if (insMode == null) {
-      throw new IllegalStateException("the instrumentMode is empty !");
-    }
-
-    final double lambda = insMode.getWaveLength();
-
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("lambda = " + lambda);
-    }
-
-    final Band band = Band.findBand(lambda);
-    final SpectralBand insBand = SpectralBandUtils.findBand(band);
-
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("insBand = " + insBand);
-    }
-
-    // get AO band :
-    final List<Station> stations = observation.getInstrumentConfiguration().getStationList();
-
-    // All telescopes in a configuration have the same AO system :
-    final Telescope tel = stations.get(0).getTelescope();
-
-    // AO :
-    final AdaptiveOptics ao = tel.getAdaptiveOptics();
-
-    final SpectralBand aoBand = (ao != null) ? ao.getBand() : null;
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("aoBand = " + aoBand);
-    }
-
-    // extract instrument and AO fluxes :
-    final Double insMag = target.getFlux(insBand);
-    final Double aoMag = target.getFlux(aoBand);
-
-    // Decorate the target name :
-    final StringBuilder sb = new StringBuilder(32);
-    sb.append(target.getName());
-
-    sb.append('_').append(insBand.name());
-    sb.append(df2.format(ExportOBVLTI.getMagnitude(insMag)));
-
-    sb.append('_').append(aoBand.name());
-    sb.append(df2.format(ExportOBVLTI.getMagnitude(aoMag)));
-
-    final String targetNameWithMagnitudes = sb.toString();
-
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("targetNameWithMagnitudes = " + targetNameWithMagnitudes);
-    }
-
-    final String prefix = om.isCalibrator(target) ? OB_CALIBRATOR : OB_SCIENCE;
-
-    return observation.generateFileName(targetNameWithMagnitudes, prefix, OBX_EXT);
   }
 }

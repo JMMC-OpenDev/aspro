@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBVLTI.java,v 1.14 2011-01-07 13:22:49 bourgesl Exp $"
+ * "@(#) $Id: ExportOBVLTI.java,v 1.15 2011-01-07 16:51:08 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.14  2011/01/07 13:22:49  bourgesl
+ * use UNDEFINED_MAGNITUDE and target directly
+ *
  * Revision 1.13  2010/12/17 15:08:24  bourgesl
  * append char instead of string
  *
@@ -70,16 +73,25 @@ package fr.jmmc.aspro.ob;
 
 import edu.dartmouth.AstroSkyCalcObservation;
 import fr.jmmc.aspro.AsproConstants;
+import fr.jmmc.aspro.gui.action.ExportOBVLTIAction;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.Range;
 import fr.jmmc.aspro.model.observability.DateTimeInterval;
 import fr.jmmc.aspro.model.observability.ObservabilityData;
 import fr.jmmc.aspro.model.observability.StarData;
+import fr.jmmc.aspro.model.oi.AdaptiveOptics;
+import fr.jmmc.aspro.model.oi.FocalInstrumentMode;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
+import fr.jmmc.aspro.model.oi.SpectralBand;
 import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetConfiguration;
+import fr.jmmc.aspro.model.oi.TargetInformation;
+import fr.jmmc.aspro.model.oi.TargetUserInformations;
+import fr.jmmc.aspro.model.oi.Telescope;
+import fr.jmmc.aspro.model.util.SpectralBandUtils;
 import fr.jmmc.aspro.service.ObservabilityService;
+import fr.jmmc.mcs.astro.Band;
 import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
@@ -101,6 +113,12 @@ public class ExportOBVLTI {
   /** Class logger */
   protected static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
+  /** P2PP file prefix for science targets */
+  public static final String OB_SCIENCE = "SCI";
+  /** P2PP file prefix for calibrator targets */
+  public static final String OB_CALIBRATOR = "CAL";
+  /** double formatter for magnitudes */
+  protected final static NumberFormat df2 = new DecimalFormat("0.##");
   /** double formatter for magnitudes */
   protected final static NumberFormat df3 = new DecimalFormat("0.000");
   /** double formatter for PM */
@@ -109,6 +127,10 @@ public class ExportOBVLTI {
   public final static String VAL_ABS_TIME_LIST = "{<DATE>T00:00:00 <DATE>T00:00:00 1}";
   /** date keyword for absolute_times_list template value */
   public final static String VAL_ABS_TIME_LIST_DATE = "<DATE>";
+  /** category value for SCIENCE OB */
+  public final static String VAL_CATEGORY_SCIENCE = "SCIENCE";
+  /** category value for CALIBRATOR OB */
+  public final static String VAL_CATEGORY_CALIBRATOR = "CALIB";
 
   /* keywords */
   /** keyword - name */
@@ -131,6 +153,10 @@ public class ExportOBVLTI {
   public final static String KEY_TARGET_NAME = "<TARGET-NAME>";
   /** keyword - Baseline */
   public final static String KEY_BASE_LINE = "<BASE-LINE>";
+  /** keyword - category (SCIENCE or CALIB) */
+  public final static String KEY_CATEGORY = "<CATEGORY>";
+  /** keyword - calibrator OB (InstrumentComments) */
+  public final static String KEY_CALIBRATOR_OB = "<CALIBRATOR-OB>";
 
   /* keywords common to AMBER and MIDI */
   /** keyword - xxx.HMAG */
@@ -149,20 +175,19 @@ public class ExportOBVLTI {
    * Generate the OB file for the given target.
    * According to the instrument defined in the observation, it uses ExportOBAmber, ExportOBMidi or ExportOBPionier.
    * @param file file to save
+   * @param observation observation to use
    * @param target target to process
    *
    * @throws IllegalStateException if the template file is not found
    * @throws IllegalArgumentException if the instrument is not supported (only AMBER/MIDI/VEGA)
    * @throws IOException if an I/O exception occured while writing the observing block
    */
-  public final static void process(final File file, final Target target) throws IllegalStateException, IllegalArgumentException, IOException {
+  public final static void process(final File file, final ObservationSetting observation, final Target target) throws IllegalStateException, IllegalArgumentException, IOException {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("process " + target.getName() + " to " + file);
     }
 
-    if (target != null) {
-      final ObservationSetting observation = ObservationManager.getInstance().getObservation();
-
+    if (observation != null && target != null) {
       // Dispatch to AMBER / MIDI / PIONIER classes :
       final String instrumentName = observation.getInstrumentConfiguration().getName();
 
@@ -208,6 +233,36 @@ public class ExportOBVLTI {
     }
 
     document = document.replaceFirst(KEY_NAME, name);
+
+    // --- Calibrator OB ---
+    final TargetUserInformations targetUserInfos = observation.getTargetUserInfos();
+
+    String calibratorOBFileName = "";
+    if (targetUserInfos != null && !targetUserInfos.isCalibrator(target)) {
+      // use first calibrator in calibrator list :
+      final TargetInformation targetInfo = targetUserInfos.getTargetInformation(target);
+      if (targetInfo != null) {
+        final List<Target> calibrators = targetInfo.getCalibrators();
+        if (!calibrators.isEmpty()) {
+          final Target firstCalibrator = calibrators.get(0);
+          calibratorOBFileName = generateOBFileName(firstCalibrator);
+
+          // remove obx extension :
+          pos = calibratorOBFileName.lastIndexOf('.');
+          if (pos != -1) {
+            calibratorOBFileName = calibratorOBFileName.substring(0, pos);
+          }
+        }
+      }
+    }
+
+    // Define the calibrator OB using the first calibrator :
+    document = document.replaceFirst(KEY_CALIBRATOR_OB, calibratorOBFileName);
+
+    // --- OB category ---
+    document = document.replaceFirst(KEY_CATEGORY,
+            (targetUserInfos != null && targetUserInfos.isCalibrator(target)) ? VAL_CATEGORY_CALIBRATOR : VAL_CATEGORY_SCIENCE);
+
 
     // --- Date / Time constraints ---
 
@@ -403,5 +458,73 @@ public class ExportOBVLTI {
       return mag.doubleValue();
     }
     return AsproConstants.UNDEFINED_MAGNITUDE;
+  }
+
+  /**
+   * Generate the Observing block file name using the given target
+   * @param target target to use
+   * @return Observing block file name
+   */
+  public static String generateOBFileName(final Target target) {
+
+    final ObservationManager om = ObservationManager.getInstance();
+    final ObservationSetting observation = om.getObservation();
+
+    // get instrument band :
+    final FocalInstrumentMode insMode = observation.getInstrumentConfiguration().getFocalInstrumentMode();
+    if (insMode == null) {
+      throw new IllegalStateException("the instrumentMode is empty !");
+    }
+
+    final double lambda = insMode.getWaveLength();
+
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("lambda = " + lambda);
+    }
+
+    final Band band = Band.findBand(lambda);
+    final SpectralBand insBand = SpectralBandUtils.findBand(band);
+
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("insBand = " + insBand);
+    }
+
+    // get AO band :
+    final List<Station> stations = observation.getInstrumentConfiguration().getStationList();
+
+    // All telescopes in a configuration have the same AO system :
+    final Telescope tel = stations.get(0).getTelescope();
+
+    // AO :
+    final AdaptiveOptics ao = tel.getAdaptiveOptics();
+
+    final SpectralBand aoBand = (ao != null) ? ao.getBand() : null;
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("aoBand = " + aoBand);
+    }
+
+    // extract instrument and AO fluxes :
+    final Double insMag = target.getFlux(insBand);
+    final Double aoMag = target.getFlux(aoBand);
+
+    // Decorate the target name :
+    final StringBuilder sb = new StringBuilder(32);
+    sb.append(target.getName());
+
+    sb.append('_').append(insBand.name());
+    sb.append(df2.format(ExportOBVLTI.getMagnitude(insMag)));
+
+    sb.append('_').append(aoBand.name());
+    sb.append(df2.format(ExportOBVLTI.getMagnitude(aoMag)));
+
+    final String targetNameWithMagnitudes = sb.toString();
+
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("targetNameWithMagnitudes = " + targetNameWithMagnitudes);
+    }
+
+    final String prefix = om.isCalibrator(target) ? OB_CALIBRATOR : OB_SCIENCE;
+
+    return observation.generateFileName(targetNameWithMagnitudes, prefix, ExportOBVLTIAction.OBX_EXT);
   }
 }
