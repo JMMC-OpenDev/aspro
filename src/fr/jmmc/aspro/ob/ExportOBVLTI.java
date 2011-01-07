@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBVLTI.java,v 1.13 2010-12-17 15:08:24 bourgesl Exp $"
+ * "@(#) $Id: ExportOBVLTI.java,v 1.14 2011-01-07 13:22:49 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.13  2010/12/17 15:08:24  bourgesl
+ * append char instead of string
+ *
  * Revision 1.12  2010/12/15 13:32:00  bourgesl
  * added Export PIONIER OB
  *
@@ -102,8 +105,6 @@ public class ExportOBVLTI {
   protected final static NumberFormat df3 = new DecimalFormat("0.000");
   /** double formatter for PM */
   protected final static NumberFormat df6 = new DecimalFormat("0.000000");
-  /** default value for undefined magnitude = -99 */
-  public final static double UNDEFINED_MAGNITUDE = -99d;
   /** absolute_times_list template value */
   public final static String VAL_ABS_TIME_LIST = "{<DATE>T00:00:00 <DATE>T00:00:00 1}";
   /** date keyword for absolute_times_list template value */
@@ -146,24 +147,22 @@ public class ExportOBVLTI {
 
   /**
    * Generate the OB file for the given target.
-   * According to the instrument defined in the observation, it uses ExportOBAmber or ExportOBMidi.
+   * According to the instrument defined in the observation, it uses ExportOBAmber, ExportOBMidi or ExportOBPionier.
    * @param file file to save
-   * @param targetName target to process
+   * @param target target to process
    *
    * @throws IllegalStateException if the template file is not found
    * @throws IllegalArgumentException if the instrument is not supported (only AMBER/MIDI/VEGA)
    * @throws IOException if an I/O exception occured while writing the observing block
    */
-  public final static void process(final File file, final String targetName) throws IllegalStateException, IllegalArgumentException, IOException {
+  public final static void process(final File file, final Target target) throws IllegalStateException, IllegalArgumentException, IOException {
     if (logger.isLoggable(Level.FINE)) {
-      logger.fine("process " + targetName + " to " + file);
+      logger.fine("process " + target.getName() + " to " + file);
     }
 
-    // get observation and target :
-    final ObservationSetting observation = ObservationManager.getInstance().getObservation();
-    final Target target = observation.getTarget(targetName);
-
     if (target != null) {
+      final ObservationSetting observation = ObservationManager.getInstance().getObservation();
+
       // Dispatch to AMBER / MIDI / PIONIER classes :
       final String instrumentName = observation.getInstrumentConfiguration().getName();
 
@@ -178,7 +177,7 @@ public class ExportOBVLTI {
       }
     }
   }
-  
+
   /**
    * Process the common part of the given template for the given target
    * @param template OB template
@@ -399,10 +398,10 @@ public class ExportOBVLTI {
    * @param mag magnitude or null
    * @return magnitude value or -99 if the magnitude is null
    */
-  protected final static double getMagnitude(final Double mag) {
+  public final static double getMagnitude(final Double mag) {
     if (mag != null) {
       return mag.doubleValue();
     }
-    return UNDEFINED_MAGNITUDE;
+    return AsproConstants.UNDEFINED_MAGNITUDE;
   }
 }
