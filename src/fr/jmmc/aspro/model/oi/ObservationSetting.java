@@ -554,7 +554,7 @@ public class ObservationSetting
     }
 
     // replace invalid characters :
-    final String altTargetName = targetName.replaceAll("[^a-zA-Z_0-9]", "_");
+    final String altTargetName = targetName.replaceAll("[^a-zA-Z_\\+\\-0-9]", "_");
 
     sb.append(altTargetName).append('_');
 
