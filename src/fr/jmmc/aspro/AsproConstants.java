@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproConstants.java,v 1.21 2010-12-15 13:37:03 bourgesl Exp $"
+ * "@(#) $Id: AsproConstants.java,v 1.22 2011-01-07 13:20:23 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.21  2010/12/15 13:37:03  bourgesl
+ * added PIONIER instrument
+ *
  * Revision 1.20  2010/10/22 13:31:37  bourgesl
  * added preference for Time LST/UTC
  *
@@ -129,4 +132,8 @@ public interface AsproConstants {
   public static final String JMMC_ANNOTATION = "Made by ASPRO 2/JMMC ";
   /** suffix for calibrator names */
   public static final String CAL_SUFFIX = " (cal)";
+
+  /** default value for undefined magnitude = -99 */
+  public final static double UNDEFINED_MAGNITUDE = -99d;
+
 }
