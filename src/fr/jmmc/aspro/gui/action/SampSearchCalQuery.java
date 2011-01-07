@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SampSearchCalQuery.java,v 1.4 2010-12-14 09:25:41 bourgesl Exp $"
+ * "@(#) $Id: SampSearchCalQuery.java,v 1.5 2011-01-07 13:21:24 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2010/12/14 09:25:41  bourgesl
+ * use target directly instead of target name
+ *
  * Revision 1.3  2010/10/14 13:12:53  bourgesl
  * Spectral band definition moved in JMCS
  *
@@ -142,14 +145,15 @@ public final class SampSearchCalQuery extends SampCapabilityAction {
     // get observation and target :
     final ObservationSetting observation = ObservationManager.getInstance().getObservation();
 
-    final FocalInstrumentMode insMode = observation.getInstrumentConfiguration().getFocalInstrumentMode();
-    if (insMode == null) {
-      throw new IllegalStateException("the instrumentMode is empty !");
-    }
     // Get chosen stations :
     final List<Station> stations = observation.getInstrumentConfiguration().getStationList();
     if (stations == null) {
       throw new IllegalStateException("prepareBeams : the station list is null !");
+    }
+
+    final FocalInstrumentMode insMode = observation.getInstrumentConfiguration().getFocalInstrumentMode();
+    if (insMode == null) {
+      throw new IllegalStateException("the instrumentMode is empty !");
     }
 
     final double lambda = insMode.getWaveLength();
