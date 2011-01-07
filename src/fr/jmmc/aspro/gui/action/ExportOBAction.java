@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBAction.java,v 1.5 2010-10-05 15:06:00 bourgesl Exp $"
+ * "@(#) $Id: ExportOBAction.java,v 1.6 2011-01-07 13:21:08 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2010/10/05 15:06:00  bourgesl
+ * use AsproGui:getInstance()
+ *
  * Revision 1.4  2010/10/01 15:31:34  bourgesl
  * added message 'Please enter first a target to export it as an Observing block'
  *
@@ -23,7 +26,6 @@ package fr.jmmc.aspro.gui.action;
 
 import fr.jmmc.aspro.AsproGui;
 import fr.jmmc.aspro.gui.UVCoveragePanel;
-import fr.jmmc.mcs.gui.App;
 import fr.jmmc.mcs.gui.MessagePane;
 import fr.jmmc.mcs.util.RegisteredAction;
 import java.awt.event.ActionEvent;
