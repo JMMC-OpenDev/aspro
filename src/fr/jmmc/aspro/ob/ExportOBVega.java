@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBVega.java,v 1.8 2010-12-17 15:08:33 bourgesl Exp $"
+ * "@(#) $Id: ExportOBVega.java,v 1.9 2011-01-07 13:22:31 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.8  2010/12/17 15:08:33  bourgesl
+ * added comment
+ *
  * Revision 1.7  2010/10/04 16:25:25  bourgesl
  * proper IO exception handling
  *
@@ -67,8 +70,6 @@ public class ExportOBVega {
           className_);
   /** double formatter for magnitudes */
   protected final static NumberFormat df2 = new DecimalFormat("0.00");
-  /** default value for undefined magnitude = 99 */
-  public final static double UNDEFINED_MAGNITUDE = 99d;
   /** default value for undefined angular diameter = 99 */
   public final static double UNDEFINED_DIAMETER = 99d;
   /** HD catalog identifier (SimBad) */
@@ -371,14 +372,14 @@ public class ExportOBVega {
   }
 
   /**
-   * Return the given magnitude or the undefined magnitude value
-   * @param mag magnitude
-   * @return given magnitude or the undefined magnitude value
+   * Return magnitude value or -99 if the magnitude is null
+   * @param mag magnitude or null
+   * @return magnitude value or -99 if the magnitude is null
    */
-  protected static double getMagnitude(final Double mag) {
+  protected final static double getMagnitude(final Double mag) {
     if (mag != null) {
       return mag.doubleValue();
     }
-    return UNDEFINED_MAGNITUDE;
+    return AsproConstants.UNDEFINED_MAGNITUDE;
   }
 }
