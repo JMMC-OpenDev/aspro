@@ -39,7 +39,7 @@
  TEL.COU.DELTA        "0."
  TEL.COU.GSSOURCE     "SCIENCE"
  TEL.COU.MAG          "<COUDE-GS-MAG>"
- DPR.CATG             "SCIENCE"
+ DPR.CATG             "<CATEGORY>"
  ISS.IAS.HMAG         "<HMAG>"
  
  TEMPLATE.NAME "PIONIER_obs_scan"
