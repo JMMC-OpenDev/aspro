@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetForm.java,v 1.21 2011-01-07 13:20:12 bourgesl Exp $"
+ * "@(#) $Id: TargetForm.java,v 1.22 2011-01-10 12:45:54 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.21  2011/01/07 13:20:12  bourgesl
+ * comment
+ *
  * Revision 1.20  2010/12/17 15:17:30  bourgesl
  * comment
  *
@@ -237,7 +240,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     this.calibratorsModel = new GenericListModel<Target>(this.editTargetUserInfos.getCalibrators());
     this.jListCalibrators.setModel(this.calibratorsModel);
 
-    this.generateTree(this.editTargets);
+    this.generateTree();
     this.selectTarget(Target.getTarget(targetName, this.editTargets));
 
     // Add custom DnD support :
@@ -256,10 +259,9 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
   }
 
   /**
-   * Generate the tree from the given list of targets (single or all)
-   * @param targets list of targets to edit
+   * Generate the tree from the current edited list of targets
    */
-  private void generateTree(final List<Target> targets) {
+  private void generateTree() {
 
     final DefaultMutableTreeNode rootNode = this.getTreeTargets().getRootNode();
 
@@ -267,7 +269,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
 
     TargetInformation targetInfo;
     DefaultMutableTreeNode targetNode;
-    for (Target target : targets) {
+    for (Target target : this.editTargets) {
 
       // display only science targets :
       if (!isCalibrator(target)) {
