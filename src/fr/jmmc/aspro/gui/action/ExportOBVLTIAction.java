@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBVLTIAction.java,v 1.17 2011-01-07 16:51:08 bourgesl Exp $"
+ * "@(#) $Id: ExportOBVLTIAction.java,v 1.18 2011-01-10 13:29:59 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.17  2011/01/07 16:51:08  bourgesl
+ * fill correctly category and calibrator-ob keywords
+ * for a science OB, generates all related calibrator OBs
+ *
  * Revision 1.16  2011/01/07 13:23:16  bourgesl
  * added instrument and AO magnitudes in OB file name
  *
@@ -146,8 +150,6 @@ public class ExportOBVLTIAction {
     final UVCoveragePanel uvCoveragePanel = (UVCoveragePanel) event.getSource();
 
     // extract UV Coverage Panel information :
-
-    // TODO CALS : get both science target and calibrator target :
     final Target target = uvCoveragePanel.getSelectedTarget();
 
     File file = null;
@@ -213,7 +215,7 @@ public class ExportOBVLTIAction {
         // PoP up to validate OB file against ESO CfP :
         DismissableMessagePane.show(null, ESO_WARNING, Preferences.getInstance(), "ESO_OB_WARNING");
 
-        // TODO : CALS : indicate all created file names !
+        // TODO : indicate all created file names !
 
       } catch (IOException ioe) {
         MessagePane.showErrorMessage(
