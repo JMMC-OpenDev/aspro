@@ -2,7 +2,7 @@
 
 <ApplicationData link="http://www.jmmc.fr/aspro2">
 
-  <program name="Aspro2" version="0.7.6 beta"/>
+  <program name="Aspro2" version="0.7.7 beta"/>
 
   <compilation date="17/12/2010" compiler="JDK 1.5.0_16"/>
 
@@ -71,6 +71,10 @@
 
   <releasenotes>
     <release version="0.7">
+      <prerelease version="0.7.7 beta">
+        <change>Updated Export to Observing Blocks to support calibrators : the selected science target is exported
+        to a science OB and its calibrators to calibrator OBs.</change>
+      </prerelease>
       <prerelease version="0.7.6 beta">
         <change>Added Observing Blocks for PIONIER instrument</change>
         <change>Added CHARA PAVO instrument : PAVO_2T and PAVO_3T (3T)</change>
