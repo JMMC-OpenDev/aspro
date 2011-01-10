@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetEditorDialog.java,v 1.11 2010-12-17 15:17:41 bourgesl Exp $"
+ * "@(#) $Id: TargetEditorDialog.java,v 1.12 2011-01-10 12:45:37 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.11  2010/12/17 15:17:41  bourgesl
+ * comment
+ *
  * Revision 1.10  2010/12/14 09:24:12  bourgesl
  * use ObservationManager.updateTargets to update data model and fire target and observation change events
  *
@@ -72,6 +75,9 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
   /** Class logger */
   private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
+  /** flag indicating that the target editor dialog is active */
+  private static boolean targetEditorActive = false;
+
   /* members */
   /** editor result = true if the user validates the inputs */
   private boolean result = false;
@@ -84,6 +90,14 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
   private JDialog dialog;
 
   /**
+   * Return the flag indicating that the target editor dialog is active
+   * @return flag indicating that the target editor dialog is active
+   */
+  public static boolean isTargetEditorActive() {
+    return targetEditorActive;
+  }
+
+  /**
    * Display the model editor using the given target name as the initial selected target
    * @param targetName optional target name to display only the models of this target
    * @return true if the model editor changed anything
@@ -94,23 +108,26 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
     }
     boolean result = false;
 
-    final ObservationManager om = ObservationManager.getInstance();
-
-    // use deep copy of the current observation to allow OK/cancel actions :
-    final ObservationSetting cloned = (ObservationSetting) om.getObservation().clone();
-
-    // Prepare the data model (editable targets and user infos) :
-    final List<Target> targets = cloned.getTargets();
-    final TargetUserInformations targetUserInfos = cloned.getOrCreateTargetUserInfos();
-
-    final TargetEditorDialog form = new TargetEditorDialog(targets, targetUserInfos);
-
-    // initialise the full editor and select the target :
-    form.initialize(targetName);
-
     JDialog dialog = null;
 
     try {
+      // update flag to indicate that the editor is enabled :
+      targetEditorActive = true;
+
+      final ObservationManager om = ObservationManager.getInstance();
+
+      // use deep copy of the current observation to allow OK/cancel actions :
+      final ObservationSetting cloned = (ObservationSetting) om.getObservation().clone();
+
+      // Prepare the data model (editable targets and user infos) :
+      final List<Target> targets = cloned.getTargets();
+      final TargetUserInformations targetUserInfos = cloned.getOrCreateTargetUserInfos();
+
+      final TargetEditorDialog form = new TargetEditorDialog(targets, targetUserInfos);
+
+      // initialise the editor and select the target :
+      form.initialize(targetName);
+
       // 1. Create the dialog
       dialog = new JDialog(App.getFrame(), "Target Editor", true);
 
@@ -139,23 +156,26 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
       // get editor result :
       result = form.isResult();
 
+      if (result) {
+        if (logger.isLoggable(Level.FINE)) {
+          logger.fine("update the targets ...");
+        }
+
+        // update the complete list of targets and force to update references :
+        // and fire target and observation change events :
+        om.updateTargets(form.getEditTargets(), form.getEditTargetUserInfos());
+      }
+
     } finally {
+      // update flag to indicate that the editor is disabled :
+      targetEditorActive = false;
+
       if (dialog != null) {
         if (logger.isLoggable(Level.FINE)) {
           logger.fine("dispose Model Editor ...");
         }
         dialog.dispose();
       }
-    }
-
-    if (result) {
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("update the targets ...");
-      }
-      
-      // update the complete list of targets and force to update references :
-      // and fire target and observation change events :
-      om.updateTargets(form.getEditTargets(), form.getEditTargetUserInfos());
     }
 
     return result;
