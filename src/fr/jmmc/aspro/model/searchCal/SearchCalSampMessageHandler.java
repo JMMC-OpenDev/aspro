@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SearchCalSampMessageHandler.java,v 1.6 2010-12-17 15:09:39 bourgesl Exp $"
+ * "@(#) $Id: SearchCalSampMessageHandler.java,v 1.7 2011-01-10 12:47:16 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2010/12/17 15:09:39  bourgesl
+ * added SearchCal origin to imported target
+ * refactor to use calibrator flag and associations : updated merge targets
+ *
  * Revision 1.5  2010/12/14 09:28:27  bourgesl
  * major update on mergeTargets to flag calibrators and update targets and target user informations
  *
@@ -24,6 +28,7 @@
  */
 package fr.jmmc.aspro.model.searchCal;
 
+import fr.jmmc.aspro.gui.TargetEditorDialog;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Target;
@@ -149,6 +154,11 @@ public final class SearchCalSampMessageHandler extends SampMessageHandler {
       SwingUtilities.invokeLater(new Runnable() {
 
         public void run() {
+
+          if (TargetEditorDialog.isTargetEditorActive()) {
+            MessagePane.showErrorMessage("Please close the target editor first !");
+            return;
+          }
 
           // check that science target is present :
           if (om.getTarget(targetName) == null) {
