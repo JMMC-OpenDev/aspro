@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetModelForm.java,v 1.39 2010-12-14 09:24:31 bourgesl Exp $"
+ * "@(#) $Id: TargetModelForm.java,v 1.40 2011-01-10 12:46:28 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.39  2010/12/14 09:24:31  bourgesl
+ * updated comment
+ *
  * Revision 1.38  2010/12/10 17:13:50  bourgesl
  * use custom renderers
  *
@@ -257,7 +260,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
    * @param targetName target name to select
    */
   protected void initialize(final String targetName) {
-    this.generateTree(this.editTargets);
+    this.generateTree();
     this.selectTarget(Target.getTarget(targetName, this.editTargets));
   }
 
@@ -271,17 +274,29 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
   }
 
   /**
-   * Generate the tree from the given list of targets (single or all)
-   * @param targets list of targets to edit
+   * Generate the tree from the current edited list of targets
    */
-  private void generateTree(final List<Target> targets) {
+  private void generateTree() {
 
     final DefaultMutableTreeNode rootNode = this.getTreeModels().getRootNode();
-    
+
     rootNode.removeAllChildren();
 
     DefaultMutableTreeNode targetNode;
-    for (Target target : targets) {
+    for (Target target : this.editTargets) {
+
+      // add first science targets :
+      if (!this.editTargetUserInfos.isCalibrator(target)) {
+        targetNode = this.getTreeModels().addNode(rootNode, target);
+
+        for (Model model : target.getModels()) {
+          this.generateModelNodes(targetNode, model);
+        }
+      }
+    }
+
+    //  add calibrators :
+    for (Target target : this.editTargetUserInfos.getCalibrators()) {
 
       targetNode = this.getTreeModels().addNode(rootNode, target);
 
