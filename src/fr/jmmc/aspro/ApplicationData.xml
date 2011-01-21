@@ -2,9 +2,9 @@
 
 <ApplicationData link="http://www.jmmc.fr/aspro2">
 
-  <program name="Aspro2" version="0.7.7 beta"/>
+  <program name="Aspro2" version="0.7.8 beta"/>
 
-  <compilation date="17/12/2010" compiler="JDK 1.5.0_16"/>
+  <compilation date="21/01/2011" compiler="JDK 1.5.0_16"/>
 
   <text>
     <![CDATA[ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations
@@ -71,6 +71,9 @@
 
   <releasenotes>
     <release version="0.7">
+      <prerelease version="0.7.8 beta">
+        <change>Internal changes related to computations running in background (concurrency)</change>
+      </prerelease>
       <prerelease version="0.7.7 beta">
         <change>Updated Export to Observing Blocks to support calibrators : the selected science target is exported
         to a science OB and its calibrators to calibrator OBs.</change>
