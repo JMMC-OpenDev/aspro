@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityPanel.java,v 1.49 2010-12-17 15:19:35 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityPanel.java,v 1.50 2011-01-21 16:26:56 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.49  2010/12/17 15:19:35  bourgesl
+ * updateChart updated to use the ordering of display targets and use calibrator flag to define target colors
+ *
  * Revision 1.48  2010/11/16 15:31:50  bourgesl
  * hide scrollbar for baseline limits
  *
@@ -172,8 +175,11 @@ import fr.jmmc.aspro.gui.chart.PDFOptions.Orientation;
 import fr.jmmc.aspro.gui.chart.PDFOptions.PageSize;
 import fr.jmmc.aspro.gui.chart.SlidingXYPlotAdapter;
 import fr.jmmc.aspro.gui.chart.XYDiamondAnnotation;
+import fr.jmmc.aspro.gui.task.AsproTaskRegistry;
 import fr.jmmc.aspro.gui.util.ColorPalette;
-import fr.jmmc.aspro.gui.util.SwingWorkerExecutor;
+import fr.jmmc.aspro.gui.task.TaskSwingWorker;
+import fr.jmmc.aspro.gui.task.TaskSwingWorkerExecutor;
+import fr.jmmc.aspro.model.ObservationEventType;
 import fr.jmmc.aspro.model.observability.DateTimeInterval;
 import fr.jmmc.aspro.model.observability.ObservabilityData;
 import fr.jmmc.aspro.model.ObservationListener;
@@ -186,7 +192,6 @@ import fr.jmmc.aspro.model.oi.Pop;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.aspro.service.ObservabilityService;
-import fr.jmmc.mcs.gui.FeedbackReport;
 import fr.jmmc.mcs.gui.StatusBar;
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
@@ -208,7 +213,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
-import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import javax.swing.DefaultBoundedRangeModel;
 import javax.swing.JButton;
@@ -219,7 +223,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollBar;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import org.jdesktop.swingworker.SwingWorker;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
@@ -275,9 +278,9 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
   /** preference singleton */
   private final Preferences myPreferences = Preferences.getInstance();
   /** jFreeChart instance */
-  private JFreeChart localJFreeChart;
+  private JFreeChart chart;
   /** xy plot instance */
-  private XYPlot localXYPlot;
+  private XYPlot xyPlot;
   /** sliding adapter to display a subset of targets */
   private SlidingXYPlotAdapter slidingXYPlotAdapter = null;
   /** optional scrollbar to navigate through targets */
@@ -316,16 +319,16 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
    */
   private void initComponents() {
 
-    this.localJFreeChart = ChartUtils.createXYBarChart();
-    this.localXYPlot = (XYPlot) this.localJFreeChart.getPlot();
+    this.chart = ChartUtils.createXYBarChart();
+    this.xyPlot = (XYPlot) this.chart.getPlot();
 
     // define sliding adapter :
-    this.slidingXYPlotAdapter = new SlidingXYPlotAdapter(this.localJFreeChart, this.localXYPlot, MAX_VIEW_ITEMS);
+    this.slidingXYPlotAdapter = new SlidingXYPlotAdapter(this.chart, this.xyPlot, MAX_VIEW_ITEMS);
 
     // add listener :
-    this.localJFreeChart.addProgressListener(this);
+    this.chart.addProgressListener(this);
 
-    this.chartPanel = new ChartPanel(this.localJFreeChart,
+    this.chartPanel = new ChartPanel(this.chart,
             600, 400, /* prefered size */
             300, 200, /* minimum size before scaling */
             2000, 2000, /* maximum size before scaling */
@@ -561,7 +564,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
       this.slidingXYPlotAdapter.setUseSubset(false);
     }
 
-    return this.localJFreeChart;
+    return this.chart;
   }
 
   /**
@@ -657,137 +660,166 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
       logger.fine("plot : " + ObservationManager.toString(observation));
     }
 
+    // first Reset the observability data in the current observation using Swing EDT :
+    ObservationManager.getInstance().setObservabilityData(null);
+
     /* get plot options from swing components */
 
-    /** indicates if the timestamps are expressed in LST or in UTC */
+    // indicates if the timestamps are expressed in LST or in UTC :
     final boolean useLST = AsproConstants.TIME_LST.equals(this.jComboTimeRef.getSelectedItem());
 
-    /** flag to find baseline limits */
+    // flag to find baseline limits :
     final boolean doBaseLineLimits = this.jCheckBoxBaseLineLimits.isSelected();
 
-    /** flag to produce detailed output with all BL / horizon / rise intervals per target */
+    // flag to produce detailed output with all BL / horizon / rise intervals per target :
     final boolean doDetailedOutput = this.jCheckBoxDetailedOutput.isSelected();
-
-    /*
-     * Use the SwingWorker backport for Java 5 = swing-worker-1.2.jar (org.jdesktop.swingworker.SwingWorker)
-     */
-    final SwingWorker<ObservabilityData, Void> worker = new SwingWorker<ObservabilityData, Void>() {
-
-      /**
-       * Compute the observability data in background
-       * @return observability data
-       */
-      @Override
-      public ObservabilityData doInBackground() {
-        logger.fine("SwingWorker[Observability].doInBackground : IN");
-
-        ObservabilityData obsData = null;
-
-        // first reset the observability data in the current observation :
-        ObservationManager.getInstance().setObservabilityData(null);
-
-        // compute the observability data with the UI parameters :
-        obsData = new ObservabilityService(observation, useLST, doDetailedOutput, doBaseLineLimits).compute();
-
-        if (isCancelled()) {
-          logger.fine("SwingWorker[Observability].doInBackground : CANCELLED");
-          // no result if task is cancelled :
-          obsData = null;
-        } else {
-          logger.fine("SwingWorker[Observability].doInBackground : OUT");
-        }
-        return obsData;
-      }
-
-      /**
-       * Refresh the plot using the computed observability data.
-       * This code is executed by the Swing Event Dispatcher thread (EDT)
-       */
-      @Override
-      public void done() {
-        // check if the worker was cancelled :
-        if (!isCancelled()) {
-          logger.fine("SwingWorker[Observability].done : IN");
-          try {
-            // Get the computation results with all data necessary to draw the plot :
-            final ObservabilityData obsData = get();
-
-            if (obsData != null) {
-              logger.fine("SwingWorker[Observability].done : refresh Chart");
-
-              // update the observability data in the current observation :
-              ObservationManager.getInstance().setObservabilityData(obsData);
-
-              localJFreeChart.clearSubtitles();
-
-              // title :
-              final StringBuilder sb = new StringBuilder(observation.getInterferometerConfiguration().getName());
-              sb.append(" - ").append(observation.getInstrumentConfiguration().getStations());
-
-              if (obsData.getBestPops() != null) {
-                sb.append(" + ");
-                for (Pop pop : obsData.getBestPops().getPopList()) {
-                  sb.append(pop.getName()).append(' ');
-                }
-              }
-
-              ChartUtils.addSubtitle(localJFreeChart, sb.toString());
-
-              if (!doBaseLineLimits && (observation.getWhen().isNightRestriction() || !useLST)) {
-                // date :
-                ChartUtils.addSubtitle(localJFreeChart, "Day : " + observation.getWhen().getDate().toString()
-                        + " - Moon = " + (int) Math.round(obsData.getMoonIllumPercent()) + "%");
-              }
-
-              final String dateAxisLabel;
-              if (doBaseLineLimits) {
-                dateAxisLabel = AsproConstants.TIME_HA;
-              } else {
-                if (useLST) {
-                  dateAxisLabel = AsproConstants.TIME_LST;
-                } else {
-                  dateAxisLabel = AsproConstants.TIME_UTC;
-                }
-              }
-              updateDateAxis(dateAxisLabel, obsData.getDateMin(), obsData.getDateMax(), doBaseLineLimits);
-
-              // computed data are valid :
-              updateChart(observation.getDisplayTargets(),
-                      observation.getOrCreateTargetUserInfos(),
-                      obsData.getMapStarVisibilities(),
-                      obsData.getDateMin(), obsData.getDateMax(),
-                      doBaseLineLimits);
-
-              updateSunMarkers(obsData.getSunIntervals());
-
-              // tick color :
-              localXYPlot.getRangeAxis().setTickMarkPaint(Color.BLACK);
-              localXYPlot.getDomainAxis().setTickMarkPaint(Color.BLACK);
-
-              // update theme at end :
-              ChartUtilities.applyCurrentTheme(localJFreeChart);
-            }
-
-          } catch (InterruptedException ignore) {
-          } catch (ExecutionException ee) {
-            // Show feedback report (modal and do not exit on close) :
-            new FeedbackReport(true, ee.getCause());
-          }
-
-          // update the status bar :
-          StatusBar.show("observability done.");
-
-          logger.fine("SwingWorker[Observability].done : OUT");
-        }
-      }
-    };
 
     // update the status bar :
     StatusBar.show("computing observability ... (please wait, this may take a while)");
 
+    // Create Swing worker :
+    final ObservabilitySwingWorker taskWorker = new ObservabilitySwingWorker(this, observation, useLST, doDetailedOutput, doBaseLineLimits);
+
     // Cancel other observability task and execute this new task :
-    SwingWorkerExecutor.getInstance().cancel("UVCoverage");
-    SwingWorkerExecutor.getInstance().execute("Observability", worker);
+    TaskSwingWorkerExecutor.executeTask(taskWorker);
+  }
+
+  /**
+   * TaskSwingWorker child class to compute observability data and refresh the observability plot
+   */
+  private final static class ObservabilitySwingWorker extends TaskSwingWorker<ObservabilityData> {
+
+    /* members */
+    /** observability panel used for refreshUI callback */
+    private final ObservabilityPanel obsPanel;
+    /** observation settings */
+    private final ObservationSetting observation;
+    /** indicates if the timestamps are expressed in LST or in UTC */
+    private final boolean useLST;
+    /** flag to find baseline limits */
+    private final boolean doBaseLineLimits;
+    /** flag to produce detailed output with all BL / horizon / rise intervals per target */
+    private final boolean doDetailedOutput;
+
+    /**
+     * Hidden constructor
+     *
+     * @param obsPanel observability panel
+     * @param observation observation settings
+     * @param useLST indicates if the timestamps are expressed in LST or in UTC
+     * @param doDetailedOutput flag to produce detailed output with all BL / horizon / rise intervals per target
+     * @param doBaseLineLimits flag to find base line limits
+     */
+    private ObservabilitySwingWorker(final ObservabilityPanel obsPanel, final ObservationSetting observation,
+                                     final boolean useLST, final boolean doDetailedOutput, final boolean doBaseLineLimits) {
+      super(AsproTaskRegistry.TASK_OBSERVABILITY, observation.getVersion());
+      this.obsPanel = obsPanel;
+      this.observation = observation;
+      this.useLST = useLST;
+      this.doDetailedOutput = doDetailedOutput;
+      this.doBaseLineLimits = doBaseLineLimits;
+    }
+
+    /**
+     * Compute the observability data in background
+     * This code is executed by a Worker thread (Not Swing EDT)
+     * @return observability data
+     */
+    @Override
+    public ObservabilityData computeInBackground() {
+      // compute the observability data :
+      return new ObservabilityService(this.observation, this.useLST, this.doDetailedOutput, this.doBaseLineLimits).compute();
+    }
+
+    /**
+     * Refresh the plot using the computed observability data.
+     * This code is executed by the Swing Event Dispatcher thread (EDT)
+     * @param obsData computed observability data
+     */
+    @Override
+    public void refreshUI(final ObservabilityData obsData) {
+//      if (this.observation.getVersion() == this.getVersion()) {
+        // delegates to the observability panel :
+        this.obsPanel.updatePlot(this.observation, this.useLST, this.doBaseLineLimits, obsData);
+/*
+      } else {
+        if (logger.isLoggable(logLevel)) {
+          logger.log(logLevel, logPrefix + ".refreshUI : VERSION MISMATCH = " + this.observation.getVersion() + " <> " + this.getVersion());
+        }
+        logger.severe(logPrefix + ".refreshUI : VERSION MISMATCH = " + this.observation.getVersion() + " <> " + this.getVersion());
+      }
+ */
+    }
+  }
+
+  /**
+   * Refresh the plot using ObservabilitySwingWorker arguments and the computed observability data.
+   * This code is executed by the Swing Event Dispatcher thread (EDT)
+   *
+   * @param observation observation settings
+   * @param useLST indicates if the timestamps are expressed in LST or in UTC
+   * @param doBaseLineLimits flag to find base line limits
+   * @param obsData computed observability data
+   */
+  private void updatePlot(final ObservationSetting observation,
+                          final boolean useLST, final boolean doBaseLineLimits,
+                          final ObservabilityData obsData) {
+
+    // update the observability data in the current observation using Swing EDT :
+    // Will fire event ObservabilityDone :
+    ObservationManager.getInstance().setObservabilityData(obsData);
+
+    chart.clearSubtitles();
+
+    // title :
+    final StringBuilder sb = new StringBuilder(observation.getInterferometerConfiguration().getName());
+    sb.append(" - ").append(observation.getInstrumentConfiguration().getStations());
+
+    if (obsData.getBestPops() != null) {
+      sb.append(" + ");
+      for (Pop pop : obsData.getBestPops().getPopList()) {
+        sb.append(pop.getName()).append(' ');
+      }
+    }
+
+    ChartUtils.addSubtitle(chart, sb.toString());
+
+    if (!doBaseLineLimits && (observation.getWhen().isNightRestriction() || !useLST)) {
+      // date :
+      ChartUtils.addSubtitle(chart, "Day : " + observation.getWhen().getDate().toString()
+              + " - Moon = " + (int) Math.round(obsData.getMoonIllumPercent()) + "%");
+    }
+
+    final String dateAxisLabel;
+    if (doBaseLineLimits) {
+      dateAxisLabel = AsproConstants.TIME_HA;
+    } else {
+      if (useLST) {
+        dateAxisLabel = AsproConstants.TIME_LST;
+      } else {
+        dateAxisLabel = AsproConstants.TIME_UTC;
+      }
+    }
+    updateDateAxis(dateAxisLabel, obsData.getDateMin(), obsData.getDateMax(), doBaseLineLimits);
+
+    // computed data are valid :
+    updateChart(observation.getDisplayTargets(),
+            observation.getOrCreateTargetUserInfos(),
+            obsData.getMapStarVisibilities(),
+            obsData.getDateMin(), obsData.getDateMax(),
+            doBaseLineLimits);
+
+    updateSunMarkers(obsData.getSunIntervals());
+
+    // tick color :
+    xyPlot.getRangeAxis().setTickMarkPaint(Color.BLACK);
+    xyPlot.getDomainAxis().setTickMarkPaint(Color.BLACK);
+
+    // update theme at end :
+    ChartUtilities.applyCurrentTheme(chart);
+
+    // update the status bar :
+    StatusBar.show("observability done.");
   }
 
   /**
@@ -1003,7 +1035,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     }
     dateAxis.setTickLabelInsets(ChartUtils.TICK_LABEL_INSETS);
 
-    this.localXYPlot.setRangeAxis(dateAxis);
+    this.xyPlot.setRangeAxis(dateAxis);
   }
 
   /**
@@ -1012,7 +1044,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
    */
   private void updateSunMarkers(final List<SunTimeInterval> intervals) {
     // remove Markers :
-    this.localXYPlot.clearRangeMarkers();
+    this.xyPlot.clearRangeMarkers();
 
     // add the Markers :
     if (intervals != null) {
@@ -1035,7 +1067,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         localIntervalMarker = new IntervalMarker(interval.getStartDate().getTime(),
                 interval.getEndDate().getTime(), col, new BasicStroke(0.5f), null, null, 1f);
 
-        this.localXYPlot.addRangeMarker(localIntervalMarker, Layer.BACKGROUND);
+        this.xyPlot.addRangeMarker(localIntervalMarker, Layer.BACKGROUND);
       }
     }
   }
