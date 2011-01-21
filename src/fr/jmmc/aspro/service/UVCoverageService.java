@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoverageService.java,v 1.32 2010-10-04 14:57:09 bourgesl Exp $"
+ * "@(#) $Id: UVCoverageService.java,v 1.33 2011-01-21 16:18:21 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.32  2010/10/04 14:57:09  bourgesl
+ * added a safety limit for HA points (500) and an associated warning
+ *
  * Revision 1.31  2010/10/01 15:45:45  bourgesl
  * Added warning messages on GUI to indicate unobservable target and invalid HA min/max settings and OIFits data not available
  * Fixed bug in HA min/max restrictions : invalid values can cause a NegativeArrayException
@@ -154,6 +157,8 @@ public final class UVCoverageService {
   private final ObservationSetting observation;
   /** target to use */
   private final String targetName;
+  /** maximum U or V coordinate (corrected by the minimal wavelength) */
+  private double uvMax;
   /** flag to compute the UV support */
   private final boolean doUVSupport;
   /** flag to compute the model image */
@@ -178,8 +183,6 @@ public final class UVCoverageService {
   private double lambdaMax;
   /** number of spectral channels (used by OIFits) */
   private int nSpectralChannels;
-  /** maximum U or V coordinate (corrected by the minimal wavelength) */
-  private double uvMax;
   /** HA min in decimal hours */
   private double haMin = AsproConstants.HA_MIN;
   /** HA max in decimal hours */
@@ -635,6 +638,8 @@ public final class UVCoverageService {
     if (targetUVObservability == null) {
       addWarning("OIFits data not available");
     } else {
+
+      // thread safety : observation can change ... extract observation info in prepare ??
 
       // get current target :
       final Target target = this.observation.getTarget(this.targetName);
