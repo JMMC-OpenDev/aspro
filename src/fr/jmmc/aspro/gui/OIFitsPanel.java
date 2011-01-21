@@ -10,6 +10,7 @@
  */
 package fr.jmmc.aspro.gui;
 
+import fr.jmmc.aspro.model.ObservationEventType;
 import fr.jmmc.aspro.model.ObservationListener;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.util.XmlFactory;

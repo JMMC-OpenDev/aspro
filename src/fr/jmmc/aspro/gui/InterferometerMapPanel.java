@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: InterferometerMapPanel.java,v 1.11 2010-12-15 13:36:43 bourgesl Exp $"
+ * "@(#) $Id: InterferometerMapPanel.java,v 1.12 2011-01-21 16:23:44 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.11  2010/12/15 13:36:43  bourgesl
+ * new getPDFDefaultFileName implementation
+ *
  * Revision 1.10  2010/10/21 16:51:01  bourgesl
  * JMMC trademark made less important
  *
@@ -53,8 +56,8 @@ import fr.jmmc.aspro.gui.chart.ZoomEvent;
 import fr.jmmc.aspro.gui.chart.ZoomEventListener;
 import fr.jmmc.aspro.gui.util.ColorPalette;
 import fr.jmmc.aspro.model.InterferometerMapData;
+import fr.jmmc.aspro.model.ObservationEventType;
 import fr.jmmc.aspro.model.ObservationListener;
-import fr.jmmc.aspro.model.ObservationListener.ObservationEventType;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.service.InterferometerMapService;

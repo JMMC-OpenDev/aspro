@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SettingPanel.java,v 1.26 2010-12-17 15:17:53 bourgesl Exp $"
+ * "@(#) $Id: SettingPanel.java,v 1.27 2011-01-21 16:23:23 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.26  2010/12/17 15:17:53  bourgesl
+ * use hasTarget
+ *
  * Revision 1.25  2010/11/25 07:58:32  bourgesl
  * typo
  *
@@ -78,6 +81,7 @@
  ******************************************************************************/
 package fr.jmmc.aspro.gui;
 
+import fr.jmmc.aspro.model.ObservationEventType;
 import fr.jmmc.aspro.model.ObservationListener;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.oi.ObservationSetting;

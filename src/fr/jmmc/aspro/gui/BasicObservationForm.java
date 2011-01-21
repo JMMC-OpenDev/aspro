@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BasicObservationForm.java,v 1.52 2010-12-17 15:20:26 bourgesl Exp $"
+ * "@(#) $Id: BasicObservationForm.java,v 1.53 2011-01-21 16:23:53 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.52  2010/12/17 15:20:26  bourgesl
+ * major change : target list use display targets instead of target names
+ *
  * Revision 1.51  2010/12/14 09:23:33  bourgesl
  * refactoring to use target list instead of target names
  * remove calibrator (all occurences) and science target
@@ -164,6 +167,7 @@ import fr.jmmc.aspro.gui.util.GenericListModel;
 import fr.jmmc.aspro.gui.util.TargetListRenderer;
 import fr.jmmc.aspro.gui.util.TargetRenderer;
 import fr.jmmc.aspro.model.ConfigurationManager;
+import fr.jmmc.aspro.model.ObservationEventType;
 import fr.jmmc.aspro.model.ObservationListener;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.WarningContainer;
