@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproGui.java,v 1.41 2010-10-07 15:03:25 bourgesl Exp $"
+ * "@(#) $Id: AsproGui.java,v 1.42 2011-01-21 16:28:35 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.41  2010/10/07 15:03:25  bourgesl
+ * added searchCal samp message handler (votable)
+ *
  * Revision 1.40  2010/10/05 18:24:08  bourgesl
  * first running searchCal start query integration through SAMP (but cause bugs in SearchCal)
  *
@@ -147,7 +150,9 @@ import fr.jmmc.aspro.gui.action.NewObservationAction;
 import fr.jmmc.aspro.gui.action.SampSearchCalQuery;
 import fr.jmmc.aspro.gui.action.SaveObservationAction;
 import fr.jmmc.aspro.gui.action.ShowPrefAction;
+import fr.jmmc.aspro.gui.task.AsproTaskRegistry;
 import fr.jmmc.aspro.gui.util.ComponentResizeAdapter;
+import fr.jmmc.aspro.gui.task.TaskSwingWorkerExecutor;
 import fr.jmmc.aspro.model.ConfigurationManager;
 import fr.jmmc.aspro.model.searchCal.SearchCalSampMessageHandler;
 import fr.jmmc.mcs.gui.App;
@@ -235,7 +240,7 @@ public final class AsproGui extends App {
    * @return Aspro Gui singleton
    */
   public static AsproGui getInstance() {
-     return (AsproGui) App.getSharedInstance();
+    return (AsproGui) App.getSharedInstance();
   }
 
   /**
@@ -248,6 +253,29 @@ public final class AsproGui extends App {
   }
 
   /**
+   * Initialize services before the GUI
+   *
+   * @throws IllegalStateException if the configuration files are not found or IO failure
+   * @throws IllegalArgumentException if the load configuration failed
+   */
+  private void initServices() throws IllegalStateException, IllegalArgumentException {
+
+    // Preload configurations :
+    ConfigurationManager.getInstance();
+
+    // Initialize tasks and the task executor :
+    TaskSwingWorkerExecutor.create(AsproTaskRegistry.getInstance());
+  }
+
+  /**
+   * Stop services before application quits.
+   */
+  private void stopServices() {
+    // stop the task executor :
+    TaskSwingWorkerExecutor.stop();
+  }
+
+  /**
    * Initialize application objects
    * @param args ignored arguments
    *
@@ -257,8 +285,7 @@ public final class AsproGui extends App {
   protected void init(final String[] args) throws RuntimeException {
     logger.fine("AsproGui.init() handler : enter");
 
-    // Preload configurations :
-    ConfigurationManager.getInstance();
+    this.initServices();
 
     try {
 
@@ -330,6 +357,8 @@ public final class AsproGui extends App {
     if (result == 1) {
       return false;
     }
+
+    this.stopServices();
 
     // If the user clicked the "Don't Save" button, quit
     return true;
@@ -422,10 +451,10 @@ public final class AsproGui extends App {
   /**
    * Create SAMP Message handlers
    */
-    private void declareInteroperability() {
-      // Add handler to load searchCal votable and get calibrators
-      new SearchCalSampMessageHandler();
-    }
+  private void declareInteroperability() {
+    // Add handler to load searchCal votable and get calibrators
+    new SearchCalSampMessageHandler();
+  }
 
   /**
    * Return the setting panel
