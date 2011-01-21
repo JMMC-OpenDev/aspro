@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationManager.java,v 1.48 2010-12-17 15:15:13 bourgesl Exp $"
+ * "@(#) $Id: ObservationManager.java,v 1.49 2011-01-21 16:22:38 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.48  2010/12/17 15:15:13  bourgesl
+ * API simplifications
+ *
  * Revision 1.47  2010/12/14 09:27:26  bourgesl
  * major refactoring to fire target change events on add/remove target/calibrator operations
  *
@@ -167,7 +170,6 @@ package fr.jmmc.aspro.model;
 
 import fr.jmmc.aspro.model.observability.ObservabilityData;
 import fr.jmmc.aspro.AsproConstants;
-import fr.jmmc.aspro.model.ObservationListener.ObservationEventType;
 import fr.jmmc.aspro.model.oi.AtmosphereQuality;
 import fr.jmmc.aspro.model.oi.FocalInstrumentConfigurationChoice;
 import fr.jmmc.aspro.model.oi.InterferometerConfigurationChoice;
@@ -185,8 +187,8 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.Date;
 import java.util.List;
-import java.util.Vector;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import javax.swing.SwingUtilities;
 import javax.xml.datatype.XMLGregorianCalendar;
@@ -206,6 +208,8 @@ public final class ObservationManager extends BaseOIManager {
   /** singleton pattern */
   private static ObservationManager instance = new ObservationManager();
   /* members */
+  /** version counter */
+  private final AtomicInteger versionNumber = new AtomicInteger(1);
   /** configuration manager */
   private final ConfigurationManager cm = ConfigurationManager.getInstance();
   /** observation settings */
@@ -344,8 +348,8 @@ public final class ObservationManager extends BaseOIManager {
     // fire an observation load event :
     this.fireObservationLoaded();
 
-    // fire an observation change event :
-    this.fireObservationChanged();
+    // fire change events :
+    this.fireTargetChangedEvents();
   }
 
   /**
@@ -398,6 +402,9 @@ public final class ObservationManager extends BaseOIManager {
       logger.fine("fireObservationLoaded : " + toString(getObservation()));
     }
 
+    // Reset version :
+    this.versionNumber.set(1);
+
     fireEvent(ObservationEventType.LOADED);
   }
 
@@ -408,8 +415,12 @@ public final class ObservationManager extends BaseOIManager {
    * Fired by updateTargets(List<Target>, TargetUserInformations) when targets are modified
    */
   public void fireObservationChanged() {
+    // Update version :
+    getObservation().setVersion(this.versionNumber.getAndIncrement());
+
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("fireObservationChanged : " + toString(getObservation()));
+      logger.fine("observation version = " + getObservation().getVersion());
     }
 
     fireEvent(ObservationEventType.CHANGED);
@@ -470,8 +481,7 @@ public final class ObservationManager extends BaseOIManager {
    * @param type event type
    */
   private void fireEvent(final ObservationEventType type) {
-
-    // ensure events are fired by EDT :
+    // ensure events are fired by Swing EDT :
     if (!SwingUtilities.isEventDispatchThread()) {
       logger.log(Level.SEVERE, "invalid thread : use EDT", new Throwable());
     }
