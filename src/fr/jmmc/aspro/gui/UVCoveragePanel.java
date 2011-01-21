@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.70 2011-01-07 13:20:59 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.71 2011-01-21 16:28:03 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.70  2011/01/07 13:20:59  bourgesl
+ * getSelectedTargetName made private
+ *
  * Revision 1.69  2010/12/17 15:17:21  bourgesl
  * major change : target combo box use display targets instead of target names
  *
@@ -241,13 +244,16 @@ import fr.jmmc.aspro.gui.chart.SquareChartPanel;
 import fr.jmmc.aspro.gui.chart.SquareXYPlot;
 import fr.jmmc.aspro.gui.chart.ZoomEvent;
 import fr.jmmc.aspro.gui.chart.ZoomEventListener;
+import fr.jmmc.aspro.gui.task.AsproTaskRegistry;
 import fr.jmmc.aspro.gui.util.ColorPalette;
 import fr.jmmc.aspro.gui.util.FieldSliderAdapter;
 import fr.jmmc.aspro.gui.util.GenericListModel;
-import fr.jmmc.aspro.gui.util.SwingWorkerExecutor;
+import fr.jmmc.aspro.gui.task.TaskSwingWorkerExecutor;
 import fr.jmmc.aspro.gui.util.TargetListRenderer;
 import fr.jmmc.aspro.gui.util.TargetRenderer;
+import fr.jmmc.aspro.gui.task.TaskSwingWorker;
 import fr.jmmc.aspro.model.ConfigurationManager;
+import fr.jmmc.aspro.model.ObservationEventType;
 import fr.jmmc.aspro.model.ObservationListener;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.Range;
@@ -265,7 +271,6 @@ import fr.jmmc.aspro.model.util.AtmosphereQualityUtils;
 import fr.jmmc.aspro.model.uvcoverage.UVBaseLineData;
 import fr.jmmc.aspro.model.uvcoverage.UVRangeBaseLineData;
 import fr.jmmc.aspro.service.UVCoverageService;
-import fr.jmmc.mcs.gui.FeedbackReport;
 import fr.jmmc.mcs.gui.MessagePane;
 import fr.jmmc.mcs.gui.StatusBar;
 import fr.jmmc.mcs.image.ColorModels;
@@ -296,7 +301,6 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JFormattedTextField;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import org.jdesktop.swingworker.SwingWorker;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.annotations.XYTextAnnotation;
@@ -989,7 +993,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
   }
 
   /**
-   * Update the information relative to the interferometer (configuration) : UV max length
+   * Update the information relative to the interferometer (configuration) : UV max length and fringe tracker modes
    * @param observation current observation settings
    */
   private void updateInteferometerData(final ObservationSetting observation) {
@@ -1015,7 +1019,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
   }
 
   /**
-   * Refresh the information relative to the instrument : sampling time and modes
+   * Refresh the information relative to the instrument : sampling time and instrument modes
    * @param observation current observation settings
    */
   private void updateInstrumentData(final ObservationSetting observation) {
@@ -1437,6 +1441,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
       // finally refresh the targets, that fires the target changed event
       // refresh the fields HA Min/Max, FT Mode and computed HA Min / Max :
+      this.displayTargetList = null;
       this.updateComboTarget(observation);
 
       // reset to defaults :
@@ -1521,6 +1526,11 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       logger.log(Level.SEVERE, "PLOT", new Throwable());
     }
 
+    // first reset the warning container in the current observation using Swing EDT :
+    om.setWarningContainer(null);
+    // then reset the OIFits structure in the current observation using Swing EDT :
+    om.setOIFitsFile(null);
+
     /* get plot options from swing components */
 
     final String targetName = getSelectedTargetName();
@@ -1541,151 +1551,213 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     final ObservabilityData obsData = observation.getObservabilityData();
 
     if (obsData != null) {
-      /*
-       * Use the SwingWorker backport for Java 5 = swing-worker-1.2.jar (org.jdesktop.swingworker.SwingWorker)
-       */
-      final SwingWorker<UVCoverageData, Void> worker = new SwingWorker<UVCoverageData, Void>() {
-
-        /**
-         * Compute the UV Coverage data in background
-         * @return UV Coverage data
-         */
-        @Override
-        public UVCoverageData doInBackground() {
-          logger.fine("SwingWorker[UV].doInBackground : IN");
-
-          // first reset the warning container in the current observation :
-          om.setWarningContainer(null);
-          // then reset the OIFits structure in the current observation :
-          om.setOIFitsFile(null);
-
-          UVCoverageData uvData = new UVCoverageService(observation, targetName, uvMax,
-                  doUVSupport, doModelImage, imageMode, imageSize, colorModel).compute();
-
-          if (isCancelled()) {
-            logger.fine("SwingWorker[UV].doInBackground : CANCELLED");
-            // no result if task is cancelled :
-            uvData = null;
-          } else {
-            logger.fine("SwingWorker[UV].doInBackground : OUT");
-          }
-          return uvData;
-        }
-
-        /**
-         * Reset the plot in case of baseline limits or model exception
-         */
-        public void reset() {
-          lastZoomEvent = null;
-          currentUVMapData = null;
-
-          // reset bounds to [-1;1] (before setDataset) :
-          localXYPlot.defineBounds(1d);
-          // reset dataset for baseline limits :
-          localXYPlot.setDataset(null);
-
-          // update the background image :
-          updateUVMap(null);
-        }
-
-        /**
-         * Refresh the plot using the computed UV Coverage data.
-         * This code is executed by the Swing Event Dispatcher thread (EDT)
-         */
-        @Override
-        public void done() {
-          // check if the worker was cancelled :
-          if (!isCancelled()) {
-            logger.fine("SwingWorker[UV].done : IN");
-            try {
-              // Get the computation results with all data necessary to draw the plot :
-              final UVCoverageData uvData = get();
-
-              if (uvData != null) {
-                logger.fine("SwingWorker[UV].done : refresh Chart");
-
-                // update the warning container in the current observation :
-                om.setWarningContainer(uvData.getWarningContainer());
-
-                // update the OIFits structure in the current observation :
-                om.setOIFitsFile(uvData.getOiFitsFile());
-
-                ChartUtils.clearTextSubTitle(localJFreeChart);
-
-                if (uvData.getName() == null) {
-                  // Baseline limits case :
-                  reset();
-                } else {
-
-                  lastZoomEvent = null;
-                  currentUVMapData = null;
-
-                  // title :
-                  final StringBuilder sb = new StringBuilder(observation.getInterferometerConfiguration().getName());
-                  sb.append(" - ").append(observation.getInstrumentConfiguration().getStations());
-
-                  if (obsData.getBestPops() != null) {
-                    sb.append(" + ");
-                    for (Pop pop : obsData.getBestPops().getPopList()) {
-                      sb.append(pop.getName()).append(' ');
-                    }
-                  }
-                  ChartUtils.addSubtitle(localJFreeChart, sb.toString());
-                  ChartUtils.addSubtitle(localJFreeChart, "Source : " + uvData.getName());
-
-                  if (observation.getWhen().isNightRestriction()) {
-                    // date :
-                    ChartUtils.addSubtitle(localJFreeChart, "Day : " + observation.getWhen().getDate().toString());
-                  }
-
-                  // change the scaling factor : (???)
-                  // lambda ??
-                  setUvPlotScalingFactor(MEGA_LAMBDA_SCALE);
-
-                  // computed data are valid :
-                  updateChart(uvData);
-
-                  // update the uv map data :
-                  currentUVMapData = uvData.getUvMapData();
-
-                  // update the background image :
-                  if (currentUVMapData == null) {
-                    updateUVMap(null);
-                  } else {
-                    updateUVMap(currentUVMapData.getUvMap());
-                  }
-                }
-
-                // update theme at end :
-                ChartUtilities.applyCurrentTheme(localJFreeChart);
-              }
-
-            } catch (InterruptedException ignore) {
-            } catch (ExecutionException ee) {
-              reset();
-              if (ee.getCause() instanceof IllegalArgumentException) {
-                MessagePane.showErrorMessage(ee.getCause().getMessage());
-              } else {
-                // Show feedback report (modal and do not exit on close) :
-                new FeedbackReport(true, ee.getCause());
-              }
-            }
-
-            // update the status bar :
-            StatusBar.show("uv coverage done.");
-
-            logger.fine("SwingWorker[UV].done : OUT");
-          }
-        }
-      };
+      // TODO : check consistency differently (use clone or result cache) ...
 
       // update the status bar :
       StatusBar.show("computing uv coverage ... (please wait, this may take a while)");
 
+      // Create Swing worker :
+      final UVCoverageSwingWorker taskWorker = new UVCoverageSwingWorker(this, observation, targetName,
+              uvMax, doUVSupport, doModelImage, imageMode, imageSize, colorModel,
+              obsData);
+
       // Cancel other uv coverage task and execute this new task :
-      SwingWorkerExecutor.getInstance().execute("UVCoverage", worker);
+      TaskSwingWorkerExecutor.executeTask(taskWorker);
 
     } // observability data check
+  }
+
+  /**
+   * TaskSwingWorker child class to compute uv coverage data and refresh the uv coverage plot
+   */
+  private final static class UVCoverageSwingWorker extends TaskSwingWorker<UVCoverageData> {
+
+    /* members */
+    /** uv panel used for refreshUI callback */
+    private final UVCoveragePanel uvPanel;
+    /** observation settings */
+    private final ObservationSetting observation;
+    /** target to use */
+    private final String targetName;
+    /** maximum U or V coordinate (corrected by the minimal wavelength) */
+    private final double uvMax;
+    /** flag to compute the UV support */
+    private final boolean doUVSupport;
+    /** flag to compute the model image */
+    private final boolean doModelImage;
+    /** image mode (amplitude or phase) */
+    private final ImageMode imageMode;
+    /** image size */
+    private final int imageSize;
+    /** image color model */
+    private final IndexColorModel colorModel;
+    /** computed observability data */
+    private final ObservabilityData obsData;
+
+    /**
+     * Hidden constructor
+     *
+     * @param uvPanel observability panel
+     * @param observation observation settings
+     * @param targetName target name
+     * @param uvMax U-V max in meter
+     * @param doUVSupport flag to compute the UV support
+     * @param doModelImage flag to compute the model image
+     * @param imageMode image mode (amplitude or phase)
+     * @param imageSize number of pixels for both width and height of the generated image
+     * @param colorModel color model to use
+     * @param obsData computed observability data
+     */
+    private UVCoverageSwingWorker(final UVCoveragePanel uvPanel, final ObservationSetting observation, final String targetName,
+                                  final double uvMax, final boolean doUVSupport,
+                                  final boolean doModelImage, final ImageMode imageMode, final int imageSize, final IndexColorModel colorModel,
+                                  final ObservabilityData obsData) {
+      super(AsproTaskRegistry.TASK_UV_COVERAGE, observation.getVersion());
+      this.uvPanel = uvPanel;
+      this.observation = observation;
+      this.targetName = targetName;
+      this.uvMax = uvMax;
+      this.doUVSupport = doUVSupport;
+      this.doModelImage = doModelImage;
+      this.imageMode = imageMode;
+      this.imageSize = imageSize;
+      this.colorModel = colorModel;
+      this.obsData = obsData;
+    }
+
+    /**
+     * Compute the UV Coverage data in background
+     * This code is executed by a Worker thread (Not Swing EDT)
+     * @return UV Coverage data
+     */
+    @Override
+    public UVCoverageData computeInBackground() {
+      // compute the uv coverage data :
+      return new UVCoverageService(this.observation, this.targetName, this.uvMax,
+              this.doUVSupport, this.doModelImage, this.imageMode, this.imageSize, this.colorModel).compute();
+    }
+
+    /**
+     * Refresh the plot using the computed UV Coverage data.
+     * This code is executed by the Swing Event Dispatcher thread (EDT)
+     * @param uvData computed UV Coverage data
+     */
+    @Override
+    public void refreshUI(final UVCoverageData uvData) {
+//      if (this.observation.getVersion() == this.getVersion()) {
+        // delegates to uv coverage panel :
+        this.uvPanel.updatePlot(this.observation, this.obsData, uvData);
+/*
+      } else {
+        if (logger.isLoggable(logLevel)) {
+          logger.log(logLevel, logPrefix + ".refreshUI : VERSION MISMATCH = " + this.observation.getVersion() + " <> " + this.getVersion());
+        }
+      }
+ */
+    }
+
+    /**
+     * Handle the execution exception that occured in the compute operation {@see #computeInBackground()}.
+     * This implementation resets the plot and opens a message dialog or the feedback report depending on the cause.
+     *
+     * @param ee execution exception
+     */
+    @Override
+    public void handleException(final ExecutionException ee) {
+      this.uvPanel.resetPlot();
+      if (ee.getCause() instanceof IllegalArgumentException) {
+        MessagePane.showErrorMessage(ee.getCause().getMessage());
+      } else {
+        super.handleException(ee);
+      }
+    }
+  }
+
+  /**
+   * Reset the plot in case of baseline limits or model exception
+   */
+  private void resetPlot() {
+    this.lastZoomEvent = null;
+    this.currentUVMapData = null;
+
+    // reset bounds to [-1;1] (before setDataset) :
+    this.localXYPlot.defineBounds(1d);
+    // reset dataset for baseline limits :
+    this.localXYPlot.setDataset(null);
+
+    // update the background image :
+    this.updateUVMap(null);
+  }
+
+  /**
+   * Refresh the plot using the computed UV Coverage data.
+   * This code is executed by the Swing Event Dispatcher thread (EDT)
+   *
+   * @param observation observation settings
+   * @param obsData computed observability data
+   * @param uvData computed UV Coverage data
+   */
+  private void updatePlot(final ObservationSetting observation,
+                          final ObservabilityData obsData,
+                          final UVCoverageData uvData) {
+
+    // update the warning container in the current observation :
+    om.setWarningContainer(uvData.getWarningContainer());
+
+    // update the OIFits structure in the current observation :
+    om.setOIFitsFile(uvData.getOiFitsFile());
+
+    ChartUtils.clearTextSubTitle(localJFreeChart);
+
+    if (uvData.getName() == null) {
+      // Baseline limits case :
+      resetPlot();
+    } else {
+
+      lastZoomEvent = null;
+      currentUVMapData = null;
+
+      // title :
+      final StringBuilder sb = new StringBuilder(observation.getInterferometerConfiguration().getName());
+      sb.append(" - ").append(observation.getInstrumentConfiguration().getStations());
+
+      if (obsData.getBestPops() != null) {
+        sb.append(" + ");
+        for (Pop pop : obsData.getBestPops().getPopList()) {
+          sb.append(pop.getName()).append(' ');
+        }
+      }
+      ChartUtils.addSubtitle(localJFreeChart, sb.toString());
+      ChartUtils.addSubtitle(localJFreeChart, "Source : " + uvData.getName());
+
+      if (observation.getWhen().isNightRestriction()) {
+        // date :
+        ChartUtils.addSubtitle(localJFreeChart, "Day : " + observation.getWhen().getDate().toString());
+      }
+
+      // change the scaling factor : (???)
+      // lambda ??
+      setUvPlotScalingFactor(MEGA_LAMBDA_SCALE);
+
+      // computed data are valid :
+      updateChart(uvData);
+
+      // update the uv map data :
+      currentUVMapData = uvData.getUvMapData();
+
+      // update the background image :
+      if (currentUVMapData == null) {
+        updateUVMap(null);
+      } else {
+        updateUVMap(currentUVMapData.getUvMap());
+      }
+    }
+
+    // update theme at end :
+    ChartUtilities.applyCurrentTheme(localJFreeChart);
+
+    // update the status bar :
+    StatusBar.show("uv coverage done.");
   }
 
   /**
@@ -1707,7 +1779,15 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
       if (this.currentUVMapData != null) {
         // Update model uv map :
-        final Target target = getSelectedTarget();
+
+        // get target name instead of getSelectedTarget() :
+        final String targetName = getSelectedTargetName();
+
+        // get observation for version checking :
+        final ObservationSetting observation = this.om.getObservation();
+
+        // get target from observation for consistency :
+        final Target target = observation.getTarget(targetName);
 
         if (target != null) {
           final List<Model> models = target.getModels();
@@ -1737,77 +1817,112 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
               logger.fine("computing model uv map ...");
             }
 
-            /*
-             * Use the SwingWorker backport for Java 5 = swing-worker-1.2.jar (org.jdesktop.swingworker.SwingWorker)
-             */
-            final SwingWorker<UVMapData, Void> worker = new SwingWorker<UVMapData, Void>() {
-
-              /**
-               * Compute the UV Map in background
-               * @return Image
-               */
-              @Override
-              public UVMapData doInBackground() {
-                logger.fine("SwingWorker[UVMap].doInBackground : IN");
-
-                UVMapData uvMapData = ModelUVMapService.computeUVMap(
-                        models, uvRect, refMin, refMax, imageMode, imageSize, colorModel);
-
-                if (isCancelled()) {
-                  logger.fine("SwingWorker[UVMap].doInBackground : CANCELLED");
-                  // no result if task is cancelled :
-                  uvMapData = null;
-                } else {
-                  logger.fine("SwingWorker[UVMap].doInBackground : OUT");
-                }
-                return uvMapData;
-              }
-
-              /**
-               * Refresh the plot using the computed UV Map.
-               * This code is executed by the Swing Event Dispatcher thread (EDT)
-               */
-              @Override
-              public void done() {
-                // check if the worker was cancelled :
-                if (!isCancelled()) {
-                  logger.fine("SwingWorker[UVMap].done : IN");
-                  try {
-                    // Get the computation results with all data necessary to draw the plot :
-                    final UVMapData uvMapData = get();
-
-                    if (uvMapData != null) {
-                      logger.fine("SwingWorker[UVMap].done : refresh Chart");
-
-                      // update the background image :
-                      updateUVMap(uvMapData.getUvMap());
-                    }
-
-                  } catch (InterruptedException ignore) {
-                  } catch (ExecutionException ee) {
-                    if (ee.getCause() instanceof IllegalArgumentException) {
-                      MessagePane.showErrorMessage(ee.getCause().getMessage());
-                    } else {
-                      // Show feedback report (modal and do not exit on close) :
-                      new FeedbackReport(true, ee.getCause());
-                    }
-                  }
-
-                  // update the status bar :
-                  StatusBar.show("uv map done.");
-
-                  logger.fine("SwingWorker[UVMap].done : OUT");
-                }
-              }
-            };
-
             // update the status bar :
             StatusBar.show("computing uv map ... (please wait, this may take a while)");
 
-            // Cancel other uv map task and execute this task :
-            SwingWorkerExecutor.getInstance().execute("UVMap", worker);
+            // Create Swing worker :
+            final UVMapSwingWorker taskWorker = new UVMapSwingWorker(this, observation.getVersion(), models, uvRect,
+                    refMin, refMax, imageMode, imageSize, colorModel);
+
+
+            // Cancel other uv coverage task and execute this new task :
+            TaskSwingWorkerExecutor.executeTask(taskWorker);
           }
         }
+      }
+    }
+  }
+
+  /**
+   * TaskSwingWorker child class to compute UV Map data and refresh the uv coverage plot
+   */
+  private final static class UVMapSwingWorker extends TaskSwingWorker<UVMapData> {
+
+    /* members */
+    /** uv panel used for refreshUI callback */
+    private final UVCoveragePanel uvPanel;
+    /** list of models to use */
+    private final List<Model> models;
+    /** UV frequency area in rad-1 */
+    private final Rectangle2D.Float uvRect;
+    /** minimum reference float value used only for sub images */
+    private final Float refMin;
+    /** maximum reference float value used only for sub images */
+    private final Float refMax;
+    /** image mode (amplitude or phase) */
+    private final ImageMode imageMode;
+    /** image size */
+    private final int imageSize;
+    /** image color model */
+    private final IndexColorModel colorModel;
+
+    /**
+     * Hidden constructor
+     *
+     * @param uvPanel observability panel
+     * @param version observation version related to the target models
+     * @param models list of models to use
+     * @param uvRect UV frequency area in rad-1
+     * @param refMin minimum reference float value used only for sub images
+     * @param refMax maximum reference float value used only for sub images
+     * @param imageMode image mode (amplitude or phase)
+     * @param imageSize number of pixels for both width and height of the generated image
+     * @param colorModel color model to use
+     */
+    private UVMapSwingWorker(final UVCoveragePanel uvPanel, final int version, final List<Model> models,
+                             final Rectangle2D.Float uvRect,
+                             final Float refMin, final Float refMax,
+                             final ImageMode imageMode, final int imageSize, final IndexColorModel colorModel) {
+      super(AsproTaskRegistry.TASK_UV_MAP, version);
+      this.uvPanel = uvPanel;
+      this.models = models;
+      this.uvRect = uvRect;
+      this.refMin = refMin;
+      this.refMax = refMax;
+      this.imageMode = imageMode;
+      this.imageSize = imageSize;
+      this.colorModel = colorModel;
+    }
+
+    /**
+     * Compute the UV Map data in background
+     * This code is executed by a Worker thread (Not Swing EDT)
+     * @return UV Map data
+     */
+    @Override
+    public UVMapData computeInBackground() {
+      // compute the uv map data :
+      return ModelUVMapService.computeUVMap(
+              this.models, this.uvRect, this.refMin, this.refMax, this.imageMode, this.imageSize, this.colorModel);
+    }
+
+    /**
+     * Refresh the plot using the computed UV Map data.
+     * This code is executed by the Swing Event Dispatcher thread (EDT)
+     * @param uvMapData computed UV Map data
+     */
+    @Override
+    public void refreshUI(final UVMapData uvMapData) {
+      // delegates to uv coverage panel :
+      this.uvPanel.updateUVMap(uvMapData.getUvMap());
+
+      // update the status bar :
+      StatusBar.show("uv map done.");
+    }
+
+    /**
+     * Handle the execution exception that occured in the compute operation {@see #computeInBackground()}.
+     * This implementation resets the plot and opens a message dialog or the feedback report depending on the cause.
+     *
+     * @param ee execution exception
+     */
+    @Override
+    public void handleException(final ExecutionException ee) {
+      this.uvPanel.updateUVMap(null);
+      if (ee.getCause() instanceof IllegalArgumentException) {
+        MessagePane.showErrorMessage(ee.getCause().getMessage());
+      } else {
+        super.handleException(ee);
       }
     }
   }
