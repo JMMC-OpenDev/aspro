@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationListener.java,v 1.6 2010-12-14 09:25:50 bourgesl Exp $"
+ * "@(#) $Id: ObservationListener.java,v 1.7 2011-01-21 16:17:24 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2010/12/14 09:25:50  bourgesl
+ * added target change event
+ *
  * Revision 1.5  2010/10/01 15:36:29  bourgesl
  * new event WARNING_READY
  * added setWarningContainer and fireWarningReady methods
@@ -34,31 +37,11 @@ import fr.jmmc.aspro.model.oi.ObservationSetting;
  */
 public interface ObservationListener {
 
-  /**
-   * This enumeration defines the several kind of observation events
-   */
-  enum ObservationEventType {
-
-    /** the observation was loaded */
-    LOADED,
-    /** one or more attribute(s) changed */
-    CHANGED,
-    /** target list (target, models and calibrators) changed */
-    TARGET_CHANGED,
-    /** the observability was computed */
-    OBSERVABILITY_DONE,
-    /** the warnings are ready */
-    WARNINGS_READY,
-    /** the OIFits was computed */
-    OIFITS_DONE
-
-    /* TODO Missing UVCoverageDone event */
-  }
-
-  /**
-   * Handle the given event on the given observation
-   * @param type event type
-   * @param observation observation
-   */
-  public void onProcess(ObservationEventType type, ObservationSetting observation);
+    /**
+     * Handle the given event on the given observation
+     * @param type event type
+     * @param observation observation
+     */
+    public void onProcess(ObservationEventType type,
+                          ObservationSetting observation);
 }
