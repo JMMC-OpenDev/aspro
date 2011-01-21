@@ -289,6 +289,27 @@ public class ObservationSetting
     }
     return null;
   }
+
+  /** version (read only) */
+  @javax.xml.bind.annotation.XmlTransient
+  private int version = -1;
+
+  /**
+   * Return the current version (read only)
+   * @return current version
+   */
+  public final int getVersion() {
+    return this.version;
+  }
+
+  /**
+   * Define the current version (read only)
+   * @param value version
+   */
+  public final void setVersion(final int value) {
+    this.version = value;
+  }
+
   /** computed observability data (read only) */
   @javax.xml.bind.annotation.XmlTransient
   private fr.jmmc.aspro.model.observability.ObservabilityData observabilityData = null;
