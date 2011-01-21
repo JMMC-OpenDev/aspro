@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.60 2010-12-17 15:08:10 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.61 2011-01-21 16:18:35 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.60  2010/12/17 15:08:10  bourgesl
+ * StarObservabilityData constructor changed
+ * Map<target name, StarObservabilityData> instead of StarObservabilityData list
+ *
  * Revision 1.59  2010/10/19 15:00:32  bourgesl
  * changed step to 2 degrees to compute base line limits
  *
@@ -256,8 +260,6 @@ public final class ObservabilityService {
   /** Class logger */
   private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
-  /** flag to return moon rise/set as star data */
-  private final static boolean MOON_RISE_SET = false;
 
   /* members */
 
