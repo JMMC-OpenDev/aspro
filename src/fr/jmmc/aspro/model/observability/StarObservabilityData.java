@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: StarObservabilityData.java,v 1.6 2010-12-17 15:13:37 bourgesl Exp $"
+ * "@(#) $Id: StarObservabilityData.java,v 1.7 2011-01-25 13:48:55 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2010/12/17 15:13:37  bourgesl
+ * name attribute split into targetName and info
+ *
  * Revision 1.5  2010/10/08 12:29:44  bourgesl
  * add calibrator type (blue)
  *
@@ -63,7 +66,7 @@ public final class StarObservabilityData {
   private final List<DateTimeInterval> visible = new ArrayList<DateTimeInterval>();
   /** transit date */
   private Date transitDate;
-  /** visible date intervals */
+  /** elevation sampled data */
   private final List<ElevationDate> elevations = new ArrayList<ElevationDate>();
 
   /**
@@ -87,30 +90,58 @@ public final class StarObservabilityData {
     this.type = type;
   }
 
+  /**
+   * Return the name of the target
+   * @return name of the target
+   */
   public String getTargetName() {
     return targetName;
   }
 
+  /**
+   * Return the additional information on data (moon, rise/set, horizon, base line ...)
+   * @return additional information on data (moon, rise/set, horizon, base line ...)
+   */
   public String getInfo() {
     return info;
   }
 
+  /**
+   * Return the type of data
+   * @return type of data
+   */
   public int getType() {
     return type;
   }
 
+  /**
+   * Return the visible date intervals
+   * @return visible date intervals
+   */
   public List<DateTimeInterval> getVisible() {
     return visible;
   }
 
+  /**
+   * Return the transit date
+   * @return transit date
+   */
   public Date getTransitDate() {
     return transitDate;
   }
 
-  public void setTransitDate(Date transitDate) {
+  /**
+   * Define the transit date
+   * @param transitDate transit date
+   */
+  public void setTransitDate(final Date transitDate) {
     this.transitDate = transitDate;
   }
 
+  /**
+   * Return the elevation sampled data
+   * @return elevation sampled data
+   */
   public List<ElevationDate> getElevations() {
     return elevations;
   }

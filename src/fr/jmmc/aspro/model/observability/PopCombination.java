@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: PopCombination.java,v 1.1 2010-01-08 16:48:30 bourgesl Exp $"
+ * "@(#) $Id: PopCombination.java,v 1.2 2011-01-25 13:48:56 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2010/01/08 16:48:30  bourgesl
+ * package refactoring
+ *
  * Revision 1.1  2009/12/18 11:52:02  bourgesl
  * added Pops Finder Compatible Mode for a list of targets
  *
@@ -20,9 +23,9 @@ import java.util.List;
  * used by the observability service
  * @author bourgesl
  */
-public class PopCombination {
+public final class PopCombination {
 
-  /** identifier for this combination */
+  /** identifier of this combination */
   private final String identifier;
   /** list of Pops with the same order than the station list */
   private final List<Pop> popList;
@@ -43,22 +46,42 @@ public class PopCombination {
     this.identifier = sb.toString();
   }
 
+  /**
+   * Return the identifier of this combination (1123, 1355)
+   * @return identifier of this combination
+   */
   public String getIdentifier() {
     return identifier;
   }
 
+  /**
+   * Return the list of Pops
+   * @return list of Pops
+   */
   public List<Pop> getPopList() {
     return popList;
   }
 
+  /**
+   * Return the list of pop delays
+   * @return list of pop delays
+   */
   public List<Double> getPopOffsets() {
     return popOffsets;
   }
 
+  /**
+   * Define the list of pop delays
+   * @param popOffsets list of pop delays
+   */
   public void setPopOffsets(List<Double> popOffsets) {
     this.popOffsets = popOffsets;
   }
 
+  /**
+   * Return the identifier of this combination (1123, 1355)
+   * @return identifier of this combination (1123, 1355)
+   */
   @Override
   public String toString() {
     return this.identifier;

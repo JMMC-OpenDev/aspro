@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: GroupedPopObservabilityData.java,v 1.3 2010-12-17 15:14:20 bourgesl Exp $"
+ * "@(#) $Id: GroupedPopObservabilityData.java,v 1.4 2011-01-25 13:48:56 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2010/12/17 15:14:20  bourgesl
+ * append char instead of string
+ *
  * Revision 1.2  2010/10/22 11:12:02  bourgesl
  * javadoc
  * fixed minimum and maximum methods (Double extrema)
@@ -26,22 +29,27 @@ import java.util.List;
  * to estimate the best PoPs combination for the complete list of targets
  * @author bourgesl
  */
-public class GroupedPopObservabilityData implements Comparable<GroupedPopObservabilityData> {
+public final class GroupedPopObservabilityData implements Comparable<GroupedPopObservabilityData> {
 
   /** pop combination */
   private final PopCombination popCombination;
-  /** Pop data for the same PoPs combination but several targets */
+  /** Pop data grouped by Pop combination per target */
   private List<PopObservabilityData> popDataList;
   /** observability estimation */
   private double estimation = -1d;
 
+  /**
+   * Public constructor
+   * @param popCombination pop combination
+   * @param popDataList Pop data grouped by Pop combination per target
+   */
   public GroupedPopObservabilityData(final PopCombination popCombination, final List<PopObservabilityData> popDataList) {
     this.popCombination = popCombination;
     this.popDataList = popDataList;
   }
 
   /**
-   * Estimator 
+   * Estimator : computes the observability estimation = somme(maxLength) * minimum(maxLength).
    */
   public void estimateData() {
     // try a simple estimator (not using any union or intersection check) :
@@ -74,18 +82,34 @@ public class GroupedPopObservabilityData implements Comparable<GroupedPopObserva
     return Double.compare(this.estimation, other.getEstimation());
   }
 
+  /**
+   * Return the pop combination
+   * @return pop combination
+   */
   public PopCombination getPopCombination() {
     return this.popCombination;
   }
 
+  /**
+   * Return the identifier of the pop combination
+   * @return identifier of the pop combination
+   */
   public String getIdentifier() {
     return this.popCombination.getIdentifier();
   }
 
+  /**
+   * Return the observability estimation
+   * @return observability estimation
+   */
   public double getEstimation() {
     return this.estimation;
   }
 
+  /**
+   * Return the Pop data grouped by Pop combination per target
+   * @return Pop data grouped by Pop combination per target
+   */
   public List<PopObservabilityData> getPopDataList() {
     return this.popDataList;
   }

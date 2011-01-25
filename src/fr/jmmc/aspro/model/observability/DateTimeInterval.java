@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: DateTimeInterval.java,v 1.2 2010-04-13 15:26:21 bourgesl Exp $"
+ * "@(#) $Id: DateTimeInterval.java,v 1.3 2011-01-25 13:48:56 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2010/04/13 15:26:21  bourgesl
+ * add Comparable support
+ *
  * Revision 1.1  2010/01/08 16:48:30  bourgesl
  * package refactoring
  *
@@ -23,11 +26,16 @@ import java.util.Date;
  */
 public class DateTimeInterval implements Comparable<DateTimeInterval> {
 
-  /** starting date */
+  /** starting date/time */
   private final Date startDate;
-  /** ending date */
+  /** ending date/time */
   private final Date endDate;
 
+  /**
+   * Public constructor
+   * @param startDate starting date/time
+   * @param endDate ending date/time
+   */
   public DateTimeInterval(final Date startDate, final Date endDate) {
     this.startDate = startDate;
     this.endDate = endDate;
@@ -38,20 +46,32 @@ public class DateTimeInterval implements Comparable<DateTimeInterval> {
    * @param other date interval
    * @return Double.compare(startDate1, startDate2)
    */
-  public int compareTo(final DateTimeInterval other) {
+  public final int compareTo(final DateTimeInterval other) {
     return this.startDate.compareTo(other.getStartDate());
   }
 
+  /**
+   * Return the starting date/time
+   * @return starting date/time
+   */
   public final Date getStartDate() {
     return startDate;
   }
 
+  /**
+   * Return the ending date/time
+   * @return ending date/time
+   */
   public final Date getEndDate() {
     return endDate;
   }
 
+  /**
+   * Return a string representation "[startDate - endDate]"
+   * @return "[startDate - endDate]"
+   */
   @Override
-  public String toString() {
+  public final String toString() {
     return "[" + this.startDate + " - " + this.endDate + "]";
   }
 }

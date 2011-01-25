@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: PopObservabilityData.java,v 1.2 2010-01-22 13:16:18 bourgesl Exp $"
+ * "@(#) $Id: PopObservabilityData.java,v 1.3 2011-01-25 13:48:56 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2010/01/22 13:16:18  bourgesl
+ * fixed imports
+ *
  * Revision 1.1  2010/01/08 16:48:30  bourgesl
  * package refactoring
  *
@@ -22,7 +25,7 @@ import java.util.List;
  * This class contains intermediate results for the observability of a target using a particular Pop combination
  * @author bourgesl
  */
-public class PopObservabilityData implements Comparable<PopObservabilityData> {
+public final class PopObservabilityData implements Comparable<PopObservabilityData> {
 
   /** target name */
   private final String targetName;
@@ -35,12 +38,23 @@ public class PopObservabilityData implements Comparable<PopObservabilityData> {
   /** maximum length of an HA range after merging HA ranges per BL with Rise/Set range */
   private double maxLength;
 
+  /**
+   * Public constructor
+   * @param targetName target name
+   * @param popCombination pop combination
+   * @param rangesBL list of HA ranges per BL
+   */
   public PopObservabilityData(final String targetName, final PopCombination popCombination, final List<List<Range>> rangesBL) {
     this.targetName = targetName;
     this.popCombination = popCombination;
     this.rangesBL = rangesBL;
   }
 
+  /**
+   * Compute the total observability length
+   * @param nValid number of ranges to consider a point is valid
+   * @param flatRanges ranges to merge
+   */
   public void computeMaxLength(final int nValid, final List<Range> flatRanges) {
     // flatten ranges :
     for (List<Range> ranges : this.rangesBL) {
@@ -80,22 +94,42 @@ public class PopObservabilityData implements Comparable<PopObservabilityData> {
     return Double.compare(this.maxLength, other.getMaxLength());
   }
 
+  /**
+   * Return the target name
+   * @return target name
+   */
   public String getTargetName() {
     return targetName;
   }
 
+  /**
+   * Return the maximum length of an HA range after merging HA ranges per BL with Rise/Set range
+   * @return maximum length of an HA range after merging HA ranges per BL with Rise/Set range
+   */
   public double getMaxLength() {
     return maxLength;
   }
 
+  /**
+   * Return the pop combination
+   * @return pop combination
+   */
   public PopCombination getPopCombination() {
     return popCombination;
   }
 
+  /**
+   * Return the list of HA ranges per BL
+   * @return list of HA ranges per BL
+   */
   public List<List<Range>> getRangesBL() {
     return rangesBL;
   }
 
+  /**
+   * Return the list of HA ranges merged with the target Rise / Set
+   * @return list of HA ranges merged with the target Rise / Set
+   */
   public List<Range> getMergeRanges() {
     return mergeRanges;
   }

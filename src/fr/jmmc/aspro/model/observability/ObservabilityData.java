@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityData.java,v 1.7 2010-12-17 15:14:11 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityData.java,v 1.8 2011-01-25 13:48:56 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2010/12/17 15:14:11  bourgesl
+ * list of StarObservabilityData replaced by map of StarObservabilityData list keyed by target name
+ *
  * Revision 1.6  2010/09/15 13:56:10  bourgesl
  * added moon illumination (percent)
  *
@@ -53,116 +56,199 @@ public final class ObservabilityData {
   private Date dateMax = null;
   /** list of sun time intervals */
   private List<SunTimeInterval> sunIntervals = null;
-  /** moon illumination (percent) */
+  /** moon illumination fraction (percent) */
   private double moonIllumPercent = 0d;
-
   /** map of StarObservabilityData list keyed by target name */
-  private Map<String, List<StarObservabilityData>> mapStarVisibilities = new LinkedHashMap<String, List<StarObservabilityData>>();
-
-  /** optional */
-  /** best PoPs combination */
+  private final Map<String, List<StarObservabilityData>> mapStarVisibilities = new LinkedHashMap<String, List<StarObservabilityData>>();
+  /** optional best PoPs combination */
   private PopCombination bestPops;
 
   /* other useful data for UV coverage */
-  /** astroSkyCalc instance useful to convert HA in LST or UTC */
+  /** AstroSkyCalc instance useful to convert HA in LST or UTC */
   private AstroSkyCalc dateCalc = null;
   /** beam list */
   private List<Beam> beams = null;
   /** base line list */
   private List<BaseLine> baseLines = null;
   /** map of StarData keyed by target name */
-  private Map<String, StarData> mapStarDatas = new HashMap<String, StarData>();
+  private final Map<String, StarData> mapStarDatas = new HashMap<String, StarData>();
 
   /**
-   * Constuctor
+   * Public Constuctor
    */
   public ObservabilityData() {
     super();
   }
 
-  /* Getter - Setter */
+  /**
+   * Return the starting date
+   * @return starting date
+   */
   public Date getDateMin() {
     return dateMin;
   }
 
+  /**
+   * Define the starting date
+   * @param dateMin starting date
+   */
   public void setDateMin(final Date dateMin) {
     this.dateMin = dateMin;
   }
 
+  /**
+   * Return the ending date
+   * @return ending date
+   */
   public Date getDateMax() {
     return dateMax;
   }
 
+  /**
+   * Define the ending date
+   * @param dateMax ending date
+   */
   public void setDateMax(final Date dateMax) {
     this.dateMax = dateMax;
   }
 
+  /**
+   * Return the list of sun time intervals
+   * @return list of sun time intervals
+   */
   public List<SunTimeInterval> getSunIntervals() {
     return sunIntervals;
   }
 
+  /**
+   * Define the list of sun time intervals
+   * @param sunIntervals list of sun time intervals
+   */
   public void setSunIntervals(final List<SunTimeInterval> sunIntervals) {
     this.sunIntervals = sunIntervals;
   }
 
+  /**
+   * Return the moon illumination fraction (percent)
+   * @return moon illumination fraction (percent)
+   */
+  public double getMoonIllumPercent() {
+    return moonIllumPercent;
+  }
+
+  /**
+   * Define the moon illumination fraction (percent)
+   * @param moonIllumPercent moon illumination fraction (percent)
+   */
+  public void setMoonIllumPercent(final double moonIllumPercent) {
+    this.moonIllumPercent = moonIllumPercent;
+  }
+
+  /**
+   * Add the StarObservabilityData for the given target name
+   * @param name target name
+   * @param starVis StarObservabilityData to add
+   */
   public void addStarVisibilities(final String name, final StarObservabilityData starVis) {
     this.mapStarVisibilities.put(name, Arrays.asList(starVis));
   }
 
+  /**
+   * Add the StarObservabilityData list for the given target name
+   * @param name target name
+   * @param starVis StarObservabilityData list to add
+   */
   public void addStarVisibilities(final String name, final List<StarObservabilityData> starVis) {
     this.mapStarVisibilities.put(name, starVis);
   }
 
+  /**
+   * Return the map of StarObservabilityData list keyed by target name
+   * @return map of StarObservabilityData list keyed by target name
+   */
   public Map<String, List<StarObservabilityData>> getMapStarVisibilities() {
     return this.mapStarVisibilities;
   }
 
+  /**
+   * Return the optional best PoPs combination
+   * @return optional best PoPs combination
+   */
   public PopCombination getBestPops() {
     return bestPops;
   }
 
+  /**
+   * Define the optional best PoPs combination
+   * @param bestPops optional best PoPs combination
+   */
   public void setBestPops(final PopCombination bestPops) {
     this.bestPops = bestPops;
   }
 
   /* other useful data for UV coverage */
+  /**
+   * Return the AstroSkyCalc instance useful to convert HA in LST or UTC
+   * @return AstroSkyCalc instance useful to convert HA in LST or UTC
+   */
   public AstroSkyCalc getDateCalc() {
     return dateCalc;
   }
 
+  /**
+   * Define the AstroSkyCalc instance
+   * @param dateCalc AstroSkyCalc instance
+   */
   public void setDateCalc(final AstroSkyCalc dateCalc) {
     this.dateCalc = dateCalc;
   }
 
+  /**
+   * Return the beam list
+   * @return beam list
+   */
   public List<Beam> getBeams() {
     return beams;
   }
 
+  /**
+   * Define the beam list
+   * @param beams beam list
+   */
   public void setBeams(final List<Beam> beams) {
     this.beams = beams;
   }
 
+  /**
+   * Return the base line list
+   * @return base line list
+   */
   public List<BaseLine> getBaseLines() {
     return baseLines;
   }
 
+  /**
+   * Define the base line list
+   * @param baseLines base line list
+   */
   public void setBaseLines(final List<BaseLine> baseLines) {
     this.baseLines = baseLines;
   }
 
+  /**
+   * Add the given StarData
+   * @param starData StarData to add
+   */
   public void addStarData(final StarData starData) {
     this.mapStarDatas.put(starData.getName(), starData);
   }
 
+  /**
+   * Return the StarData for the given target name
+   * @param name target name
+   * @return StarData or null if not found
+   */
   public StarData getStarData(final String name) {
     return this.mapStarDatas.get(name);
-  }
-
-  public double getMoonIllumPercent() {
-    return moonIllumPercent;
-  }
-
-  public void setMoonIllumPercent(double moonIllumPercent) {
-    this.moonIllumPercent = moonIllumPercent;
   }
 }

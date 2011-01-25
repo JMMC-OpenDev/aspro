@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ConfigurationManager.java,v 1.37 2011-01-25 12:29:37 bourgesl Exp $"
+ * "@(#) $Id: ConfigurationManager.java,v 1.38 2011-01-25 13:48:56 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.37  2011/01/25 12:29:37  bourgesl
+ * fixed javadoc errors
+ *
  * Revision 1.36  2010/10/22 11:12:46  bourgesl
  * fixed minimum computation (Double extrema)
  *
@@ -402,7 +405,6 @@ public final class ConfigurationManager extends BaseOIManager {
     return name;
   }
 
-  // Getter / Setter / API :
   /**
    * Return the interferometer description map keyed by name
    * @return interferometer description map
