@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TaskSwingWorkerExecutor.java,v 1.1 2011-01-21 16:33:19 bourgesl Exp $"
+ * "@(#) $Id: TaskSwingWorkerExecutor.java,v 1.2 2011-01-25 10:40:42 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2011/01/21 16:33:19  bourgesl
+ * refactored SwingWorkerExecutor to use TaskSwingWorker and simplify and clean up the cancellation of child tasks before executing a new worker
+ *
  * Revision 1.5  2010/09/25 13:42:22  bourgesl
  * use installThreadHandler(thread) for worker threads
  *
@@ -42,11 +45,9 @@ import java.util.logging.Level;
  */
 public final class TaskSwingWorkerExecutor {
 
-  /** Class Name */
-  private static final String className_ = "fr.jmmc.aspro.gui.util.SwingWorkerExecutor";
   /** Class logger */
   private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
-          className_);
+          TaskSwingWorkerExecutor.class.getName());
   /** log Level to use (Level.INFO to help debugging) */
   private final static Level logLevel = Level.FINE;
   /** singleton instance */

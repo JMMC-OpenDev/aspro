@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TaskSwingWorker.java,v 1.1 2011-01-21 16:31:41 bourgesl Exp $"
+ * "@(#) $Id: TaskSwingWorker.java,v 1.2 2011-01-25 10:40:42 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2011/01/21 16:31:41  bourgesl
+ * Extended SwingWorker to facilitate debugging and support version and Task for cancellation and consistency checks
+ *
  */
 package fr.jmmc.aspro.gui.task;
 
@@ -26,11 +29,9 @@ import java.util.logging.Level;
  */
 public abstract class TaskSwingWorker<T> extends org.jdesktop.swingworker.SwingWorker<T, Void> {
 
-  /** Class Name */
-  private static final String className_ = "fr.jmmc.aspro.gui.util.SwingWorker";
   /** Class logger */
   protected static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
-          className_);
+          TaskSwingWorker.class.getName());
   /** log Level to use (Level.INFO to help debugging) */
   protected final static Level logLevel = Level.FINE;
 
