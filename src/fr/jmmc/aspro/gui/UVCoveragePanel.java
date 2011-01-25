@@ -1,11 +1,17 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.71 2011-01-21 16:28:03 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.72 2011-01-25 10:41:19 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.71  2011/01/21 16:28:03  bourgesl
+ * import ObservationEventType
+ * use AsproTaskRegistry instead of task family
+ * extracted TaskSwingWorker classes to see clearly what are inputs/outputs
+ * reset computed results using Swing EDT (plot) and not in background
+ *
  * Revision 1.70  2011/01/07 13:20:59  bourgesl
  * getSelectedTargetName made private
  *
@@ -1645,7 +1651,15 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     @Override
     public void refreshUI(final UVCoverageData uvData) {
 //      if (this.observation.getVersion() == this.getVersion()) {
-        // delegates to uv coverage panel :
+
+        // update the warning container in the current observation :
+        ObservationManager.getInstance().setWarningContainer(uvData.getWarningContainer());
+
+        // update the OIFits structure in the current observation :
+        ObservationManager.getInstance().setOIFitsFile(uvData.getOiFitsFile());
+
+        // Note : computed observability data is used in updatePlot() to define the chart title (best PoPs) ...
+        // Refresh the GUI using consistent objects (observation, obsData and uvData) that were used in computeInBackground() :
         this.uvPanel.updatePlot(this.observation, this.obsData, uvData);
 /*
       } else {
@@ -1694,18 +1708,12 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
    * This code is executed by the Swing Event Dispatcher thread (EDT)
    *
    * @param observation observation settings
-   * @param obsData computed observability data
+   * @param obsData computed observability data used to get Best PoPs
    * @param uvData computed UV Coverage data
    */
   private void updatePlot(final ObservationSetting observation,
                           final ObservabilityData obsData,
                           final UVCoverageData uvData) {
-
-    // update the warning container in the current observation :
-    om.setWarningContainer(uvData.getWarningContainer());
-
-    // update the OIFits structure in the current observation :
-    om.setOIFitsFile(uvData.getOiFitsFile());
 
     ChartUtils.clearTextSubTitle(localJFreeChart);
 

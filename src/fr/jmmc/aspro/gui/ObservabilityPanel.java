@@ -1,11 +1,17 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityPanel.java,v 1.50 2011-01-21 16:26:56 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityPanel.java,v 1.51 2011-01-25 10:41:19 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.50  2011/01/21 16:26:56  bourgesl
+ * import ObservationEventType
+ * use AsproTaskRegistry instead of task family
+ * extracted TaskSwingWorker class to see clearly what are inputs/outputs
+ * reset computed results using Swing EDT (plot) and not in background
+ *
  * Revision 1.49  2010/12/17 15:19:35  bourgesl
  * updateChart updated to use the ordering of display targets and use calibrator flag to define target colors
  *
@@ -727,6 +733,11 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
      */
     @Override
     public ObservabilityData computeInBackground() {
+
+      // for each (observations) in ObservationCollection {
+      // new ObservabilityService(observation) => obsData
+      // add obsData in ObservationCollection results ...
+
       // compute the observability data :
       return new ObservabilityService(this.observation, this.useLST, this.doDetailedOutput, this.doBaseLineLimits).compute();
     }
@@ -739,7 +750,13 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     @Override
     public void refreshUI(final ObservabilityData obsData) {
 //      if (this.observation.getVersion() == this.getVersion()) {
-        // delegates to the observability panel :
+
+        // update the observability data in the current observation using Swing EDT :
+        // Will fire event ObservabilityDone :
+        ObservationManager.getInstance().setObservabilityData(obsData);
+
+        // Note : useLST and doBaseLineLimits parameters are used in updatePlot() to define the chart title ...
+        // Refresh the GUI using the same parameter values that were used in computeInBackground() / ObservabilityService for consistency :
         this.obsPanel.updatePlot(this.observation, this.useLST, this.doBaseLineLimits, obsData);
 /*
       } else {
@@ -764,10 +781,6 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
   private void updatePlot(final ObservationSetting observation,
                           final boolean useLST, final boolean doBaseLineLimits,
                           final ObservabilityData obsData) {
-
-    // update the observability data in the current observation using Swing EDT :
-    // Will fire event ObservabilityDone :
-    ObservationManager.getInstance().setObservabilityData(obsData);
 
     chart.clearSubtitles();
 
