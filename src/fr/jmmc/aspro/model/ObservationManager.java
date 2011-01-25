@@ -1,11 +1,16 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationManager.java,v 1.49 2011-01-21 16:22:38 bourgesl Exp $"
+ * "@(#) $Id: ObservationManager.java,v 1.50 2011-01-25 12:29:37 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.49  2011/01/21 16:22:38  bourgesl
+ * fixed bug when loading files (target list are not refreshed) : use targetChangedEvent in changeObservation instead of changedEvent to indicate swing panels to refresh their target list
+ * reset version to 1 in changeObservation
+ * increment version in fireObservationChanged
+ *
  * Revision 1.48  2010/12/17 15:15:13  bourgesl
  * API simplifications
  *
@@ -762,7 +767,7 @@ public final class ObservationManager extends BaseOIManager {
    * Return a displayable list of targets containing
    * - science targets followed by their calibrators
    * - calibrator orphans
-   * @return
+   * @return displayable list of targets
    */
   public List<Target> getDisplayTargets() {
     return getObservation().getDisplayTargets();

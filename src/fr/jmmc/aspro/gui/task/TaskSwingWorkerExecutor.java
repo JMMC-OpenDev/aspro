@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TaskSwingWorkerExecutor.java,v 1.2 2011-01-25 10:40:42 bourgesl Exp $"
+ * "@(#) $Id: TaskSwingWorkerExecutor.java,v 1.3 2011-01-25 12:29:37 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2011/01/25 10:40:42  bourgesl
+ * fixed class name
+ *
  * Revision 1.1  2011/01/21 16:33:19  bourgesl
  * refactored SwingWorkerExecutor to use TaskSwingWorker and simplify and clean up the cancellation of child tasks before executing a new worker
  *
@@ -94,7 +97,7 @@ public final class TaskSwingWorkerExecutor {
   /**
    * Schedules the given {@code TaskSwingWorker} for execution on a <i>worker</i>
    * thread.
-   * @see #execute(fr.jmmc.aspro.gui.util.TaskSwingWorker)
+   * @see #execute(TaskSwingWorker)
    * @param worker TaskSwingWorker instance to execute
    */
   public final static void executeTask(final TaskSwingWorker<?> worker) {

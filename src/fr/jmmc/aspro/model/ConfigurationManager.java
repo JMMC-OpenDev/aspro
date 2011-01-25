@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ConfigurationManager.java,v 1.36 2010-10-22 11:12:46 bourgesl Exp $"
+ * "@(#) $Id: ConfigurationManager.java,v 1.37 2011-01-25 12:29:37 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.36  2010/10/22 11:12:46  bourgesl
+ * fixed minimum computation (Double extrema)
+ *
  * Revision 1.35  2010/10/14 14:46:23  bourgesl
  * generated fake station horizons or fix them to respect the max elevation limit per telescope
  *
@@ -678,7 +681,7 @@ public final class ConfigurationManager extends BaseOIManager {
    * @param configurationName name of the interferometer configuration
    * @param instrumentName name of the instrument
    * @param configPoPs Pops string
-   * @return
+   * @return list of PoPs
    */
   public List<Pop> parseInstrumentPoPs(final String configurationName, final String instrumentName, final String configPoPs) {
     if (configPoPs != null && configPoPs.length() > 0) {

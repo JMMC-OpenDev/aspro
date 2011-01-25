@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.72 2011-01-25 10:41:19 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.73 2011-01-25 12:29:37 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.72  2011/01/25 10:41:19  bourgesl
+ * added comments
+ * moved OM.setComputedResult in refreshUI
+ *
  * Revision 1.71  2011/01/21 16:28:03  bourgesl
  * import ObservationEventType
  * use AsproTaskRegistry instead of task family
@@ -1671,7 +1675,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     }
 
     /**
-     * Handle the execution exception that occured in the compute operation {@see #computeInBackground()}.
+     * Handle the execution exception that occured in the compute operation @see #computeInBackground()
      * This implementation resets the plot and opens a message dialog or the feedback report depending on the cause.
      *
      * @param ee execution exception
@@ -1919,7 +1923,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     }
 
     /**
-     * Handle the execution exception that occured in the compute operation {@see #computeInBackground()}.
+     * Handle the execution exception that occured in the compute operation @see #computeInBackground()
      * This implementation resets the plot and opens a message dialog or the feedback report depending on the cause.
      *
      * @param ee execution exception

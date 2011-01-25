@@ -197,7 +197,7 @@ public class XYDiamondAnnotation extends AbstractXYAnnotation implements
   }
 
   /**
-   * @see org.jfree.chart.annotations.XYAnnotation#draw(java.awt.Graphics2D, org.jfree.chart.plot.XYPlot, java.awt.geom.Rectangle2D, org.jfree.chart.axis.CategoryAxis, org.jfree.chart.axis.ValueAxis,RenderIndex,org.jfree.chart.plot.PlotRenderingInfo)
+   * @see org.jfree.chart.annotations.XYAnnotation#draw(java.awt.Graphics2D, org.jfree.chart.plot.XYPlot, java.awt.geom.Rectangle2D, org.jfree.chart.axis.ValueAxis, org.jfree.chart.axis.ValueAxis, int, org.jfree.chart.plot.PlotRenderingInfo)
    */
   @Override
   public void draw(Graphics2D g2, XYPlot plot, Rectangle2D dataArea,

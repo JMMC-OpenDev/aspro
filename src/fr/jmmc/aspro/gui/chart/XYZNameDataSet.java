@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: XYZNameDataSet.java,v 1.1 2010-05-11 12:06:40 bourgesl Exp $"
+ * "@(#) $Id: XYZNameDataSet.java,v 1.2 2011-01-25 12:29:36 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2010/05/11 12:06:40  bourgesl
+ * Overriden XYZDataSet to include a name property used by NameLabelGenerator
+ *
  */
 package fr.jmmc.aspro.gui.chart;
 
@@ -61,7 +64,7 @@ public class XYZNameDataSet extends DefaultXYZDataset {
 
   /**
    * Adds a series or if a series with the same key already exists replaces
-   * the data for that series, then sends a {@link DatasetChangeEvent} to
+   * the data for that series, then sends a {@link org.jfree.data.general.DatasetChangeEvent} to
    * all registered listeners.
    *
    * @param seriesKey  the series key (<code>null</code> not permitted).

@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.61 2011-01-21 16:18:35 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.62 2011-01-25 12:29:37 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.61  2011/01/21 16:18:35  bourgesl
+ * removed unused flag
+ *
  * Revision 1.60  2010/12/17 15:08:10  bourgesl
  * StarObservabilityData constructor changed
  * Map<target name, StarObservabilityData> instead of StarObservabilityData list
@@ -2012,7 +2015,7 @@ public final class ObservabilityService {
    * Note : date intervals that are over (00:00 or 24:00) are merged. 
    * For example : 22:00->24:00 and 00:00->01:00 returns 22:00->01:00
    *
-   * @see fr.jmmc.aspro.ob.ExportOBVLTI#processDateTime(document, observation, target, haMin, haMax)
+   * @see fr.jmmc.aspro.ob.ExportOBVLTI#processDateTime(String, ObservationSetting, Target)
    * 
    * @param ranges HA ranges
    * @param precRA precessed target right ascension in decimal hours

@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ChartUtils.java,v 1.13 2010-10-21 16:50:11 bourgesl Exp $"
+ * "@(#) $Id: ChartUtils.java,v 1.14 2011-01-25 12:29:36 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.13  2010/10/21 16:50:11  bourgesl
+ * added autoFitFont and several factory methods related to annotations to set default font
+ *
  * Revision 1.12  2010/10/18 14:27:43  bourgesl
  * reduce text annotation size
  *
@@ -349,8 +352,8 @@ public final class ChartUtils {
    *
    * @return A collection of tick units for integer values.
    *
-   * @see #setStandardTickUnits(TickUnitSource)
-   * @see #createStandardTickUnits()
+   * @see org.jfree.chart.axis.ValueAxis#setStandardTickUnits(TickUnitSource)
+   * @see org.jfree.chart.axis.NumberAxis#createStandardTickUnits()
    */
   public static TickUnitSource createScientificTickUnits() {
     final TickUnits units = new TickUnits();
@@ -390,8 +393,8 @@ public final class ChartUtils {
    *
    * @return A collection of tick units for time values.
    *
-   * @see #setStandardTickUnits(TickUnitSource)
-   * @see #createStandardDateTickUnits()
+   * @see org.jfree.chart.axis.ValueAxis#setStandardTickUnits(TickUnitSource)
+   * @see org.jfree.chart.axis.DateAxis#createStandardDateTickUnits()
    */
   public static TickUnitSource createTimeTickUnits() {
 
@@ -418,8 +421,8 @@ public final class ChartUtils {
    *
    * @return A collection of tick units for time values.
    *
-   * @see #setStandardTickUnits(TickUnitSource)
-   * @see #createStandardDateTickUnits()
+   * @see org.jfree.chart.axis.ValueAxis#setStandardTickUnits(TickUnitSource)
+   * @see org.jfree.chart.axis.DateAxis#createStandardDateTickUnits()
    */
   public static TickUnitSource createHourAngleTickUnits() {
 

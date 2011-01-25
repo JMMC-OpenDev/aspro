@@ -246,7 +246,7 @@ public final class XYTickAnnotation extends XYTextAnnotation
    *
    * @return The arrow stroke (never <code>null</code>).
    *
-   * @see #setArrowStroke(Stroke)
+   * @see #setLineStroke(Stroke)
    */
   public Stroke getLineStroke() {
     return this.lineStroke;
@@ -257,7 +257,7 @@ public final class XYTickAnnotation extends XYTextAnnotation
    *
    * @param stroke  the stroke (<code>null</code> not permitted).
    *
-   * @see #getArrowStroke()
+   * @see #getLineStroke()
    */
   public void setLineStroke(Stroke stroke) {
     if (stroke == null) {
@@ -271,7 +271,7 @@ public final class XYTickAnnotation extends XYTextAnnotation
    *
    * @return The arrow paint (never <code>null</code>).
    *
-   * @see #setArrowPaint(Paint)
+   * @see #setLinePaint(Paint)
    */
   public Paint getLinePaint() {
     return this.linePaint;
@@ -282,7 +282,7 @@ public final class XYTickAnnotation extends XYTextAnnotation
    *
    * @param paint  the arrow paint (<code>null</code> not permitted).
    *
-   * @see #getArrowPaint()
+   * @see #getLinePaint()
    */
   public void setLinePaint(Paint paint) {
     if (paint == null) {

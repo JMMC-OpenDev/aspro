@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TaskSwingWorker.java,v 1.2 2011-01-25 10:40:42 bourgesl Exp $"
+ * "@(#) $Id: TaskSwingWorker.java,v 1.3 2011-01-25 12:29:37 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2011/01/25 10:40:42  bourgesl
+ * fixed class name
+ *
  * Revision 1.1  2011/01/21 16:31:41  bourgesl
  * Extended SwingWorker to facilitate debugging and support version and Task for cancellation and consistency checks
  *
@@ -159,7 +162,7 @@ public abstract class TaskSwingWorker<T> extends org.jdesktop.swingworker.SwingW
   public abstract void refreshUI(final T data);
 
   /**
-   * Handle the execution exception that occured in the compute operation {@see #computeInBackground()}.
+   * Handle the execution exception that occured in the compute operation : @see #computeInBackground()
    * This default implementation opens the feedback report (modal and do not exit on close).
    *
    * @param ee execution exception
