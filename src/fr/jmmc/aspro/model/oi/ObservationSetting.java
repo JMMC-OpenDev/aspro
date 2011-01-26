@@ -290,29 +290,53 @@ public class ObservationSetting
     return null;
   }
 
-  /** version (read only) */
+  /** observation version (read only) */
   @javax.xml.bind.annotation.XmlTransient
-  private int version = -1;
+  private final java.util.concurrent.atomic.AtomicInteger version = new java.util.concurrent.atomic.AtomicInteger(0);
 
   /**
-   * Return the current version (read only)
-   * @return current version
+   * Return the observation version
+   * @return observation version
    */
   public final int getVersion() {
-    return this.version;
+    return this.version.get();
   }
 
   /**
-   * Define the current version (read only)
-   * @param value version
+   * Increment the observation version
    */
-  public final void setVersion(final int value) {
-    this.version = value;
+  public final void incVersion() {
+    this.version.incrementAndGet();
+  }
+
+  /** target list version version (read only) */
+  @javax.xml.bind.annotation.XmlTransient
+  private final java.util.concurrent.atomic.AtomicInteger targetVersion = new java.util.concurrent.atomic.AtomicInteger(0);
+
+  /**
+   * Return the target list version
+   * @return target list version
+   */
+  public final int getTargetVersion() {
+    return this.targetVersion.get();
+  }
+
+  /**
+   * Increment the target list version
+   */
+  public final void incTargetVersion() {
+    this.targetVersion.incrementAndGet();
   }
 
   /** computed observability data (read only) */
+
+  /*
+   * Note on shared fields :
+   * volatile indicates that the field is used both by Swing EDT and the Worker Thread
+   */
+
   @javax.xml.bind.annotation.XmlTransient
-  private fr.jmmc.aspro.model.observability.ObservabilityData observabilityData = null;
+  private volatile fr.jmmc.aspro.model.observability.ObservabilityData observabilityData = null;
 
   /**
    * Return the computed observability data (read only)
@@ -375,12 +399,16 @@ public class ObservationSetting
   }
 
   /**
-   * Return a deep "copy" of this instance
+   * Return a deep "copy" of this instance excluding target / models / target user informations
+   * and clear computed fields
+   *
    * @return deep "copy" of this instance
    */
   @Override
   public final Object clone() {
     final ObservationSetting copy = (ObservationSetting) super.clone();
+
+    // version is not cloned : to be able to read current version
 
     // clear computed fields :
     copy.observabilityData = null;
@@ -397,6 +425,21 @@ public class ObservationSetting
     if (copy.instrumentConfiguration != null) {
       copy.instrumentConfiguration = (FocalInstrumentConfigurationChoice) copy.instrumentConfiguration.clone();
     }
+
+    // Just copy list of targets :
+    if (copy.targets != null) {
+      copy.targets = OIBase.copyList(copy.targets);
+    }
+
+    return copy;
+  }
+
+  /**
+   * Return a deep "copy" of this instance including target / models / target user informations
+   * @return deep "copy" of this instance
+   */
+  public final ObservationSetting deepClone() {
+    final ObservationSetting copy = (ObservationSetting) clone();
 
     // Deep copy of targets :
     if (copy.targets != null) {
