@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SearchCalSampMessageHandler.java,v 1.7 2011-01-10 12:47:16 bourgesl Exp $"
+ * "@(#) $Id: SearchCalSampMessageHandler.java,v 1.8 2011-01-26 17:21:11 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2011/01/10 12:47:16  bourgesl
+ * use TargetEditorDialog.targetEditorActive flag to disable Samp action when the target editor is active to disable concurrent edition
+ *
  * Revision 1.6  2010/12/17 15:09:39  bourgesl
  * added SearchCal origin to imported target
  * refactor to use calibrator flag and associations : updated merge targets
@@ -178,7 +181,7 @@ public final class SearchCalSampMessageHandler extends SampMessageHandler {
           }
 
           // use deep copy of the current observation to manipulate target and calibrator list properly :
-          final ObservationSetting cloned = (ObservationSetting) om.getObservation().clone();
+          final ObservationSetting cloned = om.getObservation().deepClone();
 
           // Prepare the data model (editable targets and user infos) :
           final List<Target> editTargets = cloned.getTargets();
