@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.62 2011-01-25 12:29:37 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.63 2011-01-26 17:19:33 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.62  2011/01/25 12:29:37  bourgesl
+ * fixed javadoc errors
+ *
  * Revision 1.61  2011/01/21 16:18:35  bourgesl
  * removed unused flag
  *
@@ -268,17 +271,17 @@ public final class ObservabilityService {
 
   /* output */
   /** observability data */
-  private ObservabilityData data = new ObservabilityData();
+  private final ObservabilityData data;
 
   /* inputs */
-  /** observation settings */
+  /** observation settings used (read-only). Note : Swing actions can modify this object during the computation (dirty read) */
   private final ObservationSetting observation;
   /** indicates if the timestamps are expressed in LST or in UTC */
   private final boolean useLST;
   /** flag to find baseline limits */
   private final boolean doBaseLineLimits;
   /** flag to produce detailed output with all BL / horizon / rise intervals per target */
-  private final boolean doDetails;
+  private final boolean doDetailedOutput;
 
   /* internal */
   /** Get the current thread to check if the computation is interrupted */
@@ -324,16 +327,19 @@ public final class ObservabilityService {
    *
    * @param observation observation settings
    * @param useLST indicates if the timestamps are expressed in LST or in UTC
-   * @param doDetails flag to produce detailed output with all BL / horizon / rise intervals per target
+   * @param doDetailedOutput flag to produce detailed output with all BL / horizon / rise intervals per target
    * @param doBaseLineLimits flag to find base line limits
    */
   public ObservabilityService(final ObservationSetting observation,
-                              final boolean useLST, final boolean doDetails, final boolean doBaseLineLimits) {
+                              final boolean useLST, final boolean doDetailedOutput, final boolean doBaseLineLimits) {
     // Inputs :
     this.observation = observation;
     this.useLST = useLST;
-    this.doDetails = doDetails;
+    this.doDetailedOutput = doDetailedOutput;
     this.doBaseLineLimits = doBaseLineLimits;
+
+    // create the observability data :
+    this.data = new ObservabilityData(useLST, doDetailedOutput, doBaseLineLimits);
   }
 
   /**
@@ -783,7 +789,7 @@ public final class ObservabilityService {
 
     final String targetName = target.getName();
 
-    final int listSize = (this.doDetails) ? (3 + this.baseLines.size()) : 1;
+    final int listSize = (this.doDetailedOutput) ? (3 + this.baseLines.size()) : 1;
     final List<StarObservabilityData> starVisList = new ArrayList<StarObservabilityData>(listSize);
     this.data.addStarVisibilities(targetName, starVisList);
 
@@ -885,7 +891,7 @@ public final class ObservabilityService {
       // observable ranges (jd) :
       final List<Range> obsRanges = new ArrayList<Range>();
 
-      if (this.doDetails) {
+      if (this.doDetailedOutput) {
 
         // Add Rise/Set :
         final StarObservabilityData soRiseSet = new StarObservabilityData(targetName, "Rise/Set", StarObservabilityData.TYPE_RISE_SET);

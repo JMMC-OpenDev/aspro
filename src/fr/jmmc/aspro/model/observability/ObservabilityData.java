@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityData.java,v 1.8 2011-01-25 13:48:56 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityData.java,v 1.9 2011-01-26 17:20:53 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.8  2011/01/25 13:48:56  bourgesl
+ * javadoc
+ *
  * Revision 1.7  2010/12/17 15:14:11  bourgesl
  * list of StarObservabilityData replaced by map of StarObservabilityData list keyed by target name
  *
@@ -49,6 +52,14 @@ import java.util.Map;
  */
 public final class ObservabilityData {
 
+  /* input parameters */
+  /** flag indicating if the timestamps are expressed in LST or in UTC */
+  private final boolean useLST;
+  /** flag to find baseline limits */
+  private final boolean doBaseLineLimits;
+  /** flag to produce detailed output with all BL / horizon / rise intervals per target */
+  private final boolean doDetailedOutput;
+
   /* observability plot data */
   /** starting date */
   private Date dateMin = null;
@@ -75,11 +86,42 @@ public final class ObservabilityData {
 
   /**
    * Public Constuctor
+   * @param useLST indicates if the timestamps are expressed in LST or in UTC
+   * @param doDetailedOutput flag to produce detailed output with all BL / horizon / rise intervals per target
+   * @param doBaseLineLimits flag to find base line limits
    */
-  public ObservabilityData() {
-    super();
+  public ObservabilityData(final boolean useLST, final boolean doDetailedOutput, final boolean doBaseLineLimits) {
+    this.useLST = useLST;
+    this.doDetailedOutput = doDetailedOutput;
+    this.doBaseLineLimits = doBaseLineLimits;
   }
 
+  /* inputs */
+  /**
+   * Return the flag indicating if the timestamps are expressed in LST or in UTC
+   * @return flag indicating if the timestamps are expressed in LST or in UTC
+   */
+  public boolean isUseLST() {
+    return useLST;
+  }
+
+  /**
+   * Return the flag to find baseline limits
+   * @return flag to find baseline limits
+   */
+  public boolean isDoBaseLineLimits() {
+    return doBaseLineLimits;
+  }
+
+  /**
+   * Return the flag to produce detailed output with all BL / horizon / rise intervals per target
+   * @return flag to produce detailed output with all BL / horizon / rise intervals per target
+   */
+  public boolean isDoDetailedOutput() {
+    return doDetailedOutput;
+  }
+
+  /* outputs */
   /**
    * Return the starting date
    * @return starting date
