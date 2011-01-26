@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoverageService.java,v 1.33 2011-01-21 16:18:21 bourgesl Exp $"
+ * "@(#) $Id: UVCoverageService.java,v 1.34 2011-01-26 17:19:56 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.33  2011/01/21 16:18:21  bourgesl
+ * uvMax marked as an input parameter
+ *
  * Revision 1.32  2010/10/04 14:57:09  bourgesl
  * added a safety limit for HA points (500) and an associated warning
  *
@@ -153,7 +156,7 @@ public final class UVCoverageService {
   private UVCoverageData data = new UVCoverageData();
 
   /* inputs */
-  /** observation settings */
+  /** observation settings used (read-only). Note : Swing actions can modify this object during the computation (dirty read) */
   private final ObservationSetting observation;
   /** target to use */
   private final String targetName;

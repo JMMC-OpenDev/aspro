@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: NoiseService.java,v 1.17 2010-10-14 13:12:52 bourgesl Exp $"
+ * "@(#) $Id: NoiseService.java,v 1.18 2011-01-26 17:19:56 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.17  2010/10/14 13:12:52  bourgesl
+ * Spectral band definition moved in JMCS
+ *
  * Revision 1.16  2010/10/06 16:05:41  bourgesl
  * use band V instead of R till we do not support band R
  *
@@ -191,7 +194,7 @@ public final class NoiseService {
 
   /**
    * Protected constructor
-   * @param observation observation settings
+   * @param observation observation settings used (read-only). Note : Swing actions can modify this object during the computation (dirty read)
    * @param target target to use
    * @param warningContainer container for warning messages
    */
