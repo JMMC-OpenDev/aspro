@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityPanel.java,v 1.51 2011-01-25 10:41:19 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityPanel.java,v 1.52 2011-01-26 17:23:41 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.51  2011/01/25 10:41:19  bourgesl
+ * added comments
+ * moved OM.setComputedResult in refreshUI
+ *
  * Revision 1.50  2011/01/21 16:26:56  bourgesl
  * import ObservationEventType
  * use AsproTaskRegistry instead of task family
@@ -684,7 +688,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     StatusBar.show("computing observability ... (please wait, this may take a while)");
 
     // Create Swing worker :
-    final ObservabilitySwingWorker taskWorker = new ObservabilitySwingWorker(this, observation, useLST, doDetailedOutput, doBaseLineLimits);
+    final ObservabilitySwingWorker taskWorker = new ObservabilitySwingWorker(this,
+            observation, useLST, doDetailedOutput, doBaseLineLimits);
 
     // Cancel other observability task and execute this new task :
     TaskSwingWorkerExecutor.executeTask(taskWorker);
@@ -718,8 +723,12 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
      */
     private ObservabilitySwingWorker(final ObservabilityPanel obsPanel, final ObservationSetting observation,
                                      final boolean useLST, final boolean doDetailedOutput, final boolean doBaseLineLimits) {
+      // get current observation version :
       super(AsproTaskRegistry.TASK_OBSERVABILITY, observation.getVersion());
       this.obsPanel = obsPanel;
+
+      // TODO : clone observation to ensure consistency (Swing can modify observation while the worker thread is running) :
+//      this.observation = (ObservationSetting)observation.clone();
       this.observation = observation;
       this.useLST = useLST;
       this.doDetailedOutput = doDetailedOutput;
@@ -751,13 +760,11 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     public void refreshUI(final ObservabilityData obsData) {
 //      if (this.observation.getVersion() == this.getVersion()) {
 
-        // update the observability data in the current observation using Swing EDT :
-        // Will fire event ObservabilityDone :
-        ObservationManager.getInstance().setObservabilityData(obsData);
+// TODO : skip baseline limits case :
 
-        // Note : useLST and doBaseLineLimits parameters are used in updatePlot() to define the chart title ...
-        // Refresh the GUI using the same parameter values that were used in computeInBackground() / ObservabilityService for consistency :
-        this.obsPanel.updatePlot(this.observation, this.useLST, this.doBaseLineLimits, obsData);
+        // update the observability data in the current observation using Swing EDT :
+        // Will fire event ObservabilityDone and call UVCoveragePanel to refresh the UV Coverage plot :
+        ObservationManager.getInstance().setObservabilityData(obsData);
 /*
       } else {
         if (logger.isLoggable(logLevel)) {
@@ -765,7 +772,9 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         }
         logger.severe(logPrefix + ".refreshUI : VERSION MISMATCH = " + this.observation.getVersion() + " <> " + this.getVersion());
       }
- */
+*/
+      // Refresh the GUI using the same parameter values that were used in computeInBackground() / ObservabilityService for consistency :
+      this.obsPanel.updatePlot(this.observation, obsData);
     }
   }
 
@@ -774,13 +783,12 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
    * This code is executed by the Swing Event Dispatcher thread (EDT)
    *
    * @param observation observation settings
-   * @param useLST indicates if the timestamps are expressed in LST or in UTC
-   * @param doBaseLineLimits flag to find base line limits
    * @param obsData computed observability data
    */
-  private void updatePlot(final ObservationSetting observation,
-                          final boolean useLST, final boolean doBaseLineLimits,
-                          final ObservabilityData obsData) {
+  private void updatePlot(final ObservationSetting observation, final ObservabilityData obsData) {
+
+    final boolean useLST = obsData.isUseLST();
+    final boolean doBaseLineLimits = obsData.isDoBaseLineLimits();
 
     chart.clearSubtitles();
 

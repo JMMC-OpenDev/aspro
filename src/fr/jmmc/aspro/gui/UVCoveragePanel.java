@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.73 2011-01-25 12:29:37 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.74 2011-01-26 17:23:41 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.73  2011/01/25 12:29:37  bourgesl
+ * fixed javadoc errors
+ *
  * Revision 1.72  2011/01/25 10:41:19  bourgesl
  * added comments
  * moved OM.setComputedResult in refreshUI
@@ -1470,6 +1473,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       // restore the automatic update observation :
       this.setAutoUpdateObservation(prevAutoUpdateObservation);
     }
+
+    // Event chain : Load -> Changed :
+    // Do not call updateObservation() as it will done soon by onChangeObservation()
   }
 
   /**
@@ -1566,6 +1572,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       // update the status bar :
       StatusBar.show("computing uv coverage ... (please wait, this may take a while)");
 
+// TODO : use obsData.isDoBaseLineLimits() flag to reset the plot directly instead of calling worker ...
+
       // Create Swing worker :
       final UVCoverageSwingWorker taskWorker = new UVCoverageSwingWorker(this, observation, targetName,
               uvMax, doUVSupport, doModelImage, imageMode, imageSize, colorModel,
@@ -1622,6 +1630,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
                                   final double uvMax, final boolean doUVSupport,
                                   final boolean doModelImage, final ImageMode imageMode, final int imageSize, final IndexColorModel colorModel,
                                   final ObservabilityData obsData) {
+      // get current observation version :
       super(AsproTaskRegistry.TASK_UV_COVERAGE, observation.getVersion());
       this.uvPanel = uvPanel;
       this.observation = observation;
@@ -1656,22 +1665,22 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     public void refreshUI(final UVCoverageData uvData) {
 //      if (this.observation.getVersion() == this.getVersion()) {
 
-        // update the warning container in the current observation :
-        ObservationManager.getInstance().setWarningContainer(uvData.getWarningContainer());
+      // update the warning container in the current observation :
+      ObservationManager.getInstance().setWarningContainer(uvData.getWarningContainer());
 
-        // update the OIFits structure in the current observation :
-        ObservationManager.getInstance().setOIFitsFile(uvData.getOiFitsFile());
+      // update the OIFits structure in the current observation :
+      ObservationManager.getInstance().setOIFitsFile(uvData.getOiFitsFile());
 
-        // Note : computed observability data is used in updatePlot() to define the chart title (best PoPs) ...
-        // Refresh the GUI using consistent objects (observation, obsData and uvData) that were used in computeInBackground() :
-        this.uvPanel.updatePlot(this.observation, this.obsData, uvData);
-/*
+      // Note : computed observability data is used in updatePlot() to define the chart title (best PoPs) ...
+      // Refresh the GUI using consistent objects (observation, obsData and uvData) that were used in computeInBackground() :
+      this.uvPanel.updatePlot(this.observation, this.obsData, uvData);
+      /*
       } else {
-        if (logger.isLoggable(logLevel)) {
-          logger.log(logLevel, logPrefix + ".refreshUI : VERSION MISMATCH = " + this.observation.getVersion() + " <> " + this.getVersion());
-        }
+      if (logger.isLoggable(logLevel)) {
+      logger.log(logLevel, logPrefix + ".refreshUI : VERSION MISMATCH = " + this.observation.getVersion() + " <> " + this.getVersion());
       }
- */
+      }
+       */
     }
 
     /**
