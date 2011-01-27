@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: InterferometerMapPanel.java,v 1.12 2011-01-21 16:23:44 bourgesl Exp $"
+ * "@(#) $Id: InterferometerMapPanel.java,v 1.13 2011-01-27 17:04:22 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.12  2011/01/21 16:23:44  bourgesl
+ * import ObservationEventType
+ *
  * Revision 1.11  2010/12/15 13:36:43  bourgesl
  * new getPDFDefaultFileName implementation
  *
@@ -56,8 +59,8 @@ import fr.jmmc.aspro.gui.chart.ZoomEvent;
 import fr.jmmc.aspro.gui.chart.ZoomEventListener;
 import fr.jmmc.aspro.gui.util.ColorPalette;
 import fr.jmmc.aspro.model.InterferometerMapData;
-import fr.jmmc.aspro.model.ObservationEventType;
-import fr.jmmc.aspro.model.ObservationListener;
+import fr.jmmc.aspro.model.event.ObservationEventType;
+import fr.jmmc.aspro.model.event.ObservationListener;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.service.InterferometerMapService;
@@ -97,9 +100,9 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
 
   /* members */
   /** jFreeChart instance */
-  private JFreeChart localJFreeChart;
+  private JFreeChart chart;
   /** xy plot instance */
-  private SquareXYPlot localXYPlot;
+  private SquareXYPlot xyPlot;
   /** JMMC annotation */
   private XYTextAnnotation aJMMC = null;
   /** current configuration to track changes */
@@ -181,7 +184,7 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
 
     return sb.toString();
   }
-  
+
   /**
    * Return the PDF options
    * @return PDF options
@@ -189,13 +192,13 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
   public PDFOptions getPDFOptions() {
     return PDFOptions.DEFAULT_PDF_OPTIONS;
   }
-  
+
   /**
    * Return the chart to export as a PDF document
    * @return chart
    */
   public JFreeChart prepareChart() {
-    return this.localJFreeChart;
+    return this.chart;
   }
 
   /**
@@ -210,26 +213,26 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
    */
   private void postInit() {
 
-    this.localJFreeChart = ChartUtils.createSquareXYLineChart(null, null, true);
-    this.localXYPlot = (SquareXYPlot) localJFreeChart.getPlot();
+    this.chart = ChartUtils.createSquareXYLineChart(null, null, true);
+    this.xyPlot = (SquareXYPlot) this.chart.getPlot();
 
-    final XYItemRenderer lineRenderer = this.localXYPlot.getRenderer();
+    final XYItemRenderer lineRenderer = this.xyPlot.getRenderer();
 
     // Use Bubble Renderer for the first dataset :
-    this.localXYPlot.setRenderer(0, new XYBubbleRenderer());
+    this.xyPlot.setRenderer(0, new XYBubbleRenderer());
 
     // Use Line Renderer for the second dataset :
-    this.localXYPlot.setRenderer(1, lineRenderer);
+    this.xyPlot.setRenderer(1, lineRenderer);
 
     // Hide grid lines :
-    this.localXYPlot.setDomainGridlinesVisible(false);
-    this.localXYPlot.setRangeGridlinesVisible(false);
+    this.xyPlot.setDomainGridlinesVisible(false);
+    this.xyPlot.setRangeGridlinesVisible(false);
 
     // hide axes at [0,0] :
-    localXYPlot.setDomainZeroBaselineVisible(false);
-    localXYPlot.setRangeZeroBaselineVisible(false);
+    this.xyPlot.setDomainZeroBaselineVisible(false);
+    this.xyPlot.setRangeZeroBaselineVisible(false);
 
-    final XYItemRenderer localXYItemRenderer = localXYPlot.getRenderer();
+    final XYItemRenderer localXYItemRenderer = this.xyPlot.getRenderer();
 
     // station labels :
     localXYItemRenderer.setBaseItemLabelGenerator(new NameLabelGenerator());
@@ -237,12 +240,12 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
     localXYItemRenderer.setBaseItemLabelsVisible(true);
 
     // Adjust outline :
-    this.localXYPlot.setOutlineStroke(new BasicStroke(1.f));
+    this.xyPlot.setOutlineStroke(new BasicStroke(1.f));
 
     // add listener :
-    this.localJFreeChart.addProgressListener(this);
+    this.chart.addProgressListener(this);
 
-    this.chartPanel = new SquareChartPanel(this.localJFreeChart,
+    this.chartPanel = new SquareChartPanel(this.chart,
             400, 400, /* prefered size */
             200, 200, /* minimum size before scaling */
             1600, 1600, /* maximum size before scaling */
@@ -303,7 +306,7 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
 
     final String title = sb.toString();
 
-    if (!title.equals(configuration)) {
+    if (!title.equals(this.configuration)) {
       // refresh the plot :
       this.configuration = title;
 
@@ -315,18 +318,18 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
 
       final InterferometerMapData mapData = InterferometerMapService.compute(observation);
 
-      ChartUtils.clearTextSubTitle(localJFreeChart);
+      ChartUtils.clearTextSubTitle(this.chart);
 
       // title :
-      ChartUtils.addSubtitle(localJFreeChart, sb.toString());
+      ChartUtils.addSubtitle(this.chart, sb.toString());
 
       // computed data are valid :
       updateChart(mapData);
 
       // update theme at end :
-      ChartUtilities.applyCurrentTheme(localJFreeChart);
+      ChartUtilities.applyCurrentTheme(this.chart);
 
-      this.localXYPlot.setBackgroundPaint(Color.WHITE);
+      this.xyPlot.setBackgroundPaint(Color.WHITE);
 
       if (logger.isLoggable(Level.INFO)) {
         logger.info("plot : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
@@ -341,7 +344,7 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
   private void updateChart(final InterferometerMapData mapData) {
 
     // renderer for base lines :
-    final XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) this.localXYPlot.getRenderer(1);
+    final XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) this.xyPlot.getRenderer(1);
 
     // reset colors :
     renderer.clearSeriesPaints(false);
@@ -352,7 +355,7 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
 
     // define bounds to the maximum value + 10% (before setDataset) :
     final double boxSize = mapData.getMaxXY() * 1.10d;
-    this.localXYPlot.defineBounds(boxSize);
+    this.xyPlot.defineBounds(boxSize);
 
     // first plot stations :
     final XYZNameDataSet dataset1 = new XYZNameDataSet();
@@ -360,7 +363,7 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
     dataset1.addSeries("Stations", new double[][]{mapData.getStationX(), mapData.getStationY(), mapData.getDiameter()}, mapData.getStationName());
 
     // set the first data set :
-    this.localXYPlot.setDataset(dataset1);
+    this.xyPlot.setDataset(dataset1);
 
     // baselines :
     final XYSeriesCollection dataset2 = new XYSeriesCollection();
@@ -396,10 +399,10 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
     }
 
     // set the second data set :
-    this.localXYPlot.setDataset(1, dataset2);
+    this.xyPlot.setDataset(1, dataset2);
 
     // annotation JMMC (moving position) :
-    this.localXYPlot.getRenderer(0).removeAnnotations();
+    this.xyPlot.getRenderer(0).removeAnnotations();
     if (this.aJMMC == null) {
       this.aJMMC = ChartUtils.createXYTextAnnotation(AsproConstants.JMMC_ANNOTATION, boxSize, -boxSize);
       this.aJMMC.setFont(ChartUtils.SMALL_TEXT_ANNOTATION_FONT);
@@ -409,7 +412,7 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
       this.aJMMC.setX(boxSize);
       this.aJMMC.setY(-boxSize);
     }
-    this.localXYPlot.getRenderer(0).addAnnotation(this.aJMMC, Layer.BACKGROUND);
+    this.xyPlot.getRenderer(0).addAnnotation(this.aJMMC, Layer.BACKGROUND);
   }
 
   /**
@@ -418,11 +421,11 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
    */
   public void chartChanged(final ZoomEvent ze) {
     if (this.aJMMC != null) {
-      this.localXYPlot.getRenderer(0).removeAnnotations();
+      this.xyPlot.getRenderer(0).removeAnnotations();
       this.aJMMC.setX(ze.getDomainUpperBound());
       this.aJMMC.setY(ze.getRangeLowerBound());
 
-      this.localXYPlot.getRenderer(0).addAnnotation(this.aJMMC, Layer.BACKGROUND);
+      this.xyPlot.getRenderer(0).addAnnotation(this.aJMMC, Layer.BACKGROUND);
     }
   }
   // Variables declaration - do not modify//GEN-BEGIN:variables
