@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationManager.java,v 1.51 2011-01-26 17:22:04 bourgesl Exp $"
+ * "@(#) $Id: ObservationManager.java,v 1.52 2011-01-27 17:11:10 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.51  2011/01/26 17:22:04  bourgesl
+ * added many comments (usages / listeners for events)
+ * refactored version changes
+ *
  * Revision 1.50  2011/01/25 12:29:37  bourgesl
  * fixed javadoc errors
  *
@@ -176,6 +180,8 @@
  ******************************************************************************/
 package fr.jmmc.aspro.model;
 
+import fr.jmmc.aspro.model.event.ObservationListener;
+import fr.jmmc.aspro.model.event.ObservationEventType;
 import fr.jmmc.aspro.model.observability.ObservabilityData;
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.oi.AtmosphereQuality;
@@ -402,7 +408,7 @@ public final class ObservationManager extends BaseOIManager {
    * This fires an observation load event to all registered listeners.
    * Fired by changeObservation() when an observation is loaded or reset
    *
-   * Listeners : SettingPanel / BasicObservationForm / ObservabilityPanel / UVCoveragePanel
+   * Listeners : BasicObservationForm / SettingPanel / ObservabilityPanel / UVCoveragePanel
    */
   private void fireObservationLoaded() {
     if (logger.isLoggable(Level.FINE)) {
@@ -416,7 +422,7 @@ public final class ObservationManager extends BaseOIManager {
    * This fires an observation target change event to all registered listeners.
    * Fired by fireTargetChangedEvents() when an observation is loaded or reset or the target list was modified
    *
-   * Listeners : BasicObservationForm
+   * Listeners : BasicObservationForm / SettingPanel / UVCoveragePanel
    */
   private void fireObservationTargetsChanged() {
     // Update observation version :
@@ -435,7 +441,7 @@ public final class ObservationManager extends BaseOIManager {
    * Fired by BasicObservationForm.updateObservation() when any main parameter is changed
    * Fired by fireTargetChangedEvents() when an observation is loaded or reset or the target list was modified
    *
-   * Listeners : SettingPanel / BasicObservationForm / InterferometerMapPanel / ObservabilityPanel / UVCoveragePanel / OIFitsPanel
+   * Listeners : BasicObservationForm / InterferometerMapPanel / ObservabilityPanel / UVCoveragePanel / OIFitsPanel
    */
   public void fireObservationChanged() {
     // Update observation version :
