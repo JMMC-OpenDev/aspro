@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoverageService.java,v 1.34 2011-01-26 17:19:56 bourgesl Exp $"
+ * "@(#) $Id: UVCoverageService.java,v 1.35 2011-01-27 17:11:47 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.34  2011/01/26 17:19:56  bourgesl
+ * comment on concurrency
+ *
  * Revision 1.33  2011/01/21 16:18:21  bourgesl
  * uvMax marked as an input parameter
  *
@@ -158,6 +161,8 @@ public final class UVCoverageService {
   /* inputs */
   /** observation settings used (read-only). Note : Swing actions can modify this object during the computation (dirty read) */
   private final ObservationSetting observation;
+  /** computed Observability Data (read-only) */
+  private final ObservabilityData obsData;
   /** target to use */
   private final String targetName;
   /** maximum U or V coordinate (corrected by the minimal wavelength) */
@@ -192,8 +197,6 @@ public final class UVCoverageService {
   private double haMax = AsproConstants.HA_MAX;
 
   /* reused observability data */
-  /** observability data */
-  private ObservabilityData obsData = null;
   /** sky calc instance */
   private AstroSkyCalc sc = null;
   /** beam list */
@@ -208,6 +211,7 @@ public final class UVCoverageService {
    * Note : This service is statefull so it can not be reused by several calls.
    *
    * @param observation observation settings
+   * @param obsData computed observability data
    * @param targetName target name
    * @param uvMax U-V max in meter
    * @param doUVSupport flag to compute the UV support
@@ -216,10 +220,11 @@ public final class UVCoverageService {
    * @param imageSize number of pixels for both width and height of the generated image
    * @param colorModel color model to use
    */
-  public UVCoverageService(final ObservationSetting observation, final String targetName,
+  public UVCoverageService(final ObservationSetting observation, final ObservabilityData obsData, final String targetName,
                            final double uvMax, final boolean doUVSupport,
                            final boolean doModelImage, final ImageMode imageMode, final int imageSize, final IndexColorModel colorModel) {
     this.observation = observation;
+    this.obsData = obsData;
     this.targetName = targetName;
     this.uvMax = uvMax;
     this.doUVSupport = doUVSupport;
@@ -242,76 +247,67 @@ public final class UVCoverageService {
     // Start the computations :
     final long start = System.nanoTime();
 
-    // check if observability data are available :
-    this.obsData = this.observation.getObservabilityData();
+    // Get instrument and observability data :
+    prepareObservation();
 
-    if (this.obsData == null) {
-      // invalid data because the observability data are not available :
-      this.data = null;
-    } else {
-      // Get instrument and observability data :
-      prepareObservation();
+    if (this.starData != null) {
+      // Note : for Baseline limits, the starData is null
+      // (target observability is not available) :
 
-      if (this.starData != null) {
-        // Note : for Baseline limits, the starData is null
-        // (target observability is not available) :
+      // target name :
+      this.data.setName(this.targetName);
 
-        // target name :
-        this.data.setName(this.targetName);
+      // wave length :
+      this.data.setLambda(this.lambda);
 
-        // wave length :
-        this.data.setLambda(this.lambda);
+      // Is the target visible :
+      if (this.starData.getHaElev() <= 0d) {
+        addWarning("The target [" + this.targetName + "] is not observable (never rise)");
+      } else {
 
-        // Is the target visible :
-        if (this.starData.getHaElev() <= 0d) {
-          addWarning("The target [" + this.targetName + "] is not observable (never rise)");
-        } else {
-
-          if (this.doUVSupport) {
-            computeUVSupport();
-          }
-
-          computeObservableUV();
-
-          // fast interrupt :
-          if (this.currentThread.isInterrupted()) {
-            return null;
-          }
-
-          // OIFits structure :
-          createOIFits();
+        if (this.doUVSupport) {
+          computeUVSupport();
         }
 
-        // fast interrupt :
-        if (this.currentThread.isInterrupted()) {
-          return null;
-        }
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("UV coordinate maximum = [" + this.uvMax + "]");
-        }
-
-        // uv Max = max base line * uv margin / minimum wave length
-        this.data.setUvMax(this.uvMax);
-
-        if (this.doModelImage) {
-          final Rectangle2D.Float uvRect = new Rectangle2D.Float();
-          uvRect.setFrameFromDiagonal(-uvMax, -uvMax, uvMax, uvMax);
-
-          // Compute Target Model for the UV coverage limits :
-          this.data.setUvMapData(ModelUVMapService.computeUVMap(
-                  this.observation.getTarget(this.targetName).getModels(),
-                  uvRect, null, null,
-                  this.imageMode, this.imageSize, this.colorModel));
-        }
+        computeObservableUV();
 
         // fast interrupt :
         if (this.currentThread.isInterrupted()) {
           return null;
         }
 
-      } // starData is defined
+        // OIFits structure :
+        createOIFits();
+      }
 
-    } // obsData is valid
+      // fast interrupt :
+      if (this.currentThread.isInterrupted()) {
+        return null;
+      }
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("UV coordinate maximum = [" + this.uvMax + "]");
+      }
+
+      // uv Max = max base line * uv margin / minimum wave length
+      this.data.setUvMax(this.uvMax);
+
+      if (this.doModelImage) {
+        final Rectangle2D.Float uvRect = new Rectangle2D.Float();
+        uvRect.setFrameFromDiagonal(-uvMax, -uvMax, uvMax, uvMax);
+
+        // Compute Target Model for the UV coverage limits :
+        this.data.setUvMapData(ModelUVMapService.computeUVMap(
+                this.observation.getTarget(this.targetName).getModels(),
+                uvRect, null, null,
+                this.imageMode, this.imageSize, this.colorModel));
+      }
+
+      // fast interrupt :
+      if (this.currentThread.isInterrupted()) {
+        return null;
+      }
+
+    } // starData is defined
 
     // fast interrupt :
     if (this.currentThread.isInterrupted()) {
