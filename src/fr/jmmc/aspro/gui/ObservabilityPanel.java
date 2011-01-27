@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityPanel.java,v 1.52 2011-01-26 17:23:41 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityPanel.java,v 1.53 2011-01-27 17:06:17 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.52  2011/01/26 17:23:41  bourgesl
+ * comments + use Observability data (parameters)
+ *
  * Revision 1.51  2011/01/25 10:41:19  bourgesl
  * added comments
  * moved OM.setComputedResult in refreshUI
@@ -189,10 +192,10 @@ import fr.jmmc.aspro.gui.task.AsproTaskRegistry;
 import fr.jmmc.aspro.gui.util.ColorPalette;
 import fr.jmmc.aspro.gui.task.TaskSwingWorker;
 import fr.jmmc.aspro.gui.task.TaskSwingWorkerExecutor;
-import fr.jmmc.aspro.model.ObservationEventType;
+import fr.jmmc.aspro.model.event.ObservationEventType;
 import fr.jmmc.aspro.model.observability.DateTimeInterval;
 import fr.jmmc.aspro.model.observability.ObservabilityData;
-import fr.jmmc.aspro.model.ObservationListener;
+import fr.jmmc.aspro.model.event.ObservationListener;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.observability.ElevationDate;
 import fr.jmmc.aspro.model.observability.StarObservabilityData;
@@ -634,11 +637,11 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     }
 
     switch (type) {
-      case CHANGED:
-        this.plot(observation);
-        break;
       case LOADED:
         this.onLoadObservation(observation);
+        break;
+      case CHANGED:
+        this.plot(observation);
         break;
       default:
     }
@@ -673,6 +676,16 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     // first Reset the observability data in the current observation using Swing EDT :
     ObservationManager.getInstance().setObservabilityData(null);
 
+    // also reset other results (UV Coverage Panel) :
+
+      // TODO : do not share results !
+
+      // first reset the warning container in the current observation using Swing EDT :
+    ObservationManager.getInstance().setWarningContainer(null);
+      // then reset the OIFits structure in the current observation using Swing EDT :
+    ObservationManager.getInstance().setOIFitsFile(null);
+
+
     /* get plot options from swing components */
 
     // indicates if the timestamps are expressed in LST or in UTC :
@@ -687,9 +700,15 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     // update the status bar :
     StatusBar.show("computing observability ... (please wait, this may take a while)");
 
+    // TODO : clone observation to ensure consistency (Swing can modify observation while the worker thread is running) :
+
+    // TODO MULTI-CONF : use multi observations instead of main observation ?
+
+    final ObservationSetting taskObservation = (ObservationSetting) observation.clone();
+
     // Create Swing worker :
     final ObservabilitySwingWorker taskWorker = new ObservabilitySwingWorker(this,
-            observation, useLST, doDetailedOutput, doBaseLineLimits);
+            taskObservation, useLST, doDetailedOutput, doBaseLineLimits);
 
     // Cancel other observability task and execute this new task :
     TaskSwingWorkerExecutor.executeTask(taskWorker);
@@ -726,9 +745,6 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
       // get current observation version :
       super(AsproTaskRegistry.TASK_OBSERVABILITY, observation.getVersion());
       this.obsPanel = obsPanel;
-
-      // TODO : clone observation to ensure consistency (Swing can modify observation while the worker thread is running) :
-//      this.observation = (ObservationSetting)observation.clone();
       this.observation = observation;
       this.useLST = useLST;
       this.doDetailedOutput = doDetailedOutput;
@@ -760,19 +776,21 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     public void refreshUI(final ObservabilityData obsData) {
 //      if (this.observation.getVersion() == this.getVersion()) {
 
-// TODO : skip baseline limits case :
-
+      // skip baseline limits case :
+      if (!obsData.isDoBaseLineLimits()) {
         // update the observability data in the current observation using Swing EDT :
         // Will fire event ObservabilityDone and call UVCoveragePanel to refresh the UV Coverage plot :
         ObservationManager.getInstance().setObservabilityData(obsData);
-/*
-      } else {
-        if (logger.isLoggable(logLevel)) {
-          logger.log(logLevel, logPrefix + ".refreshUI : VERSION MISMATCH = " + this.observation.getVersion() + " <> " + this.getVersion());
-        }
-        logger.severe(logPrefix + ".refreshUI : VERSION MISMATCH = " + this.observation.getVersion() + " <> " + this.getVersion());
       }
-*/
+
+      /*
+      } else {
+      if (logger.isLoggable(logLevel)) {
+      logger.log(logLevel, logPrefix + ".refreshUI : VERSION MISMATCH = " + this.observation.getVersion() + " <> " + this.getVersion());
+      }
+      logger.severe(logPrefix + ".refreshUI : VERSION MISMATCH = " + this.observation.getVersion() + " <> " + this.getVersion());
+      }
+       */
       // Refresh the GUI using the same parameter values that were used in computeInBackground() / ObservabilityService for consistency :
       this.obsPanel.updatePlot(this.observation, obsData);
     }
@@ -790,7 +808,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     final boolean useLST = obsData.isUseLST();
     final boolean doBaseLineLimits = obsData.isDoBaseLineLimits();
 
-    chart.clearSubtitles();
+    this.chart.clearSubtitles();
 
     // title :
     final StringBuilder sb = new StringBuilder(observation.getInterferometerConfiguration().getName());
@@ -803,11 +821,11 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
       }
     }
 
-    ChartUtils.addSubtitle(chart, sb.toString());
+    ChartUtils.addSubtitle(this.chart, sb.toString());
 
     if (!doBaseLineLimits && (observation.getWhen().isNightRestriction() || !useLST)) {
       // date :
-      ChartUtils.addSubtitle(chart, "Day : " + observation.getWhen().getDate().toString()
+      ChartUtils.addSubtitle(this.chart, "Day : " + observation.getWhen().getDate().toString()
               + " - Moon = " + (int) Math.round(obsData.getMoonIllumPercent()) + "%");
     }
 
@@ -833,11 +851,11 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     updateSunMarkers(obsData.getSunIntervals());
 
     // tick color :
-    xyPlot.getRangeAxis().setTickMarkPaint(Color.BLACK);
-    xyPlot.getDomainAxis().setTickMarkPaint(Color.BLACK);
+    this.xyPlot.getRangeAxis().setTickMarkPaint(Color.BLACK);
+    this.xyPlot.getDomainAxis().setTickMarkPaint(Color.BLACK);
 
     // update theme at end :
-    ChartUtilities.applyCurrentTheme(chart);
+    ChartUtilities.applyCurrentTheme(this.chart);
 
     // update the status bar :
     StatusBar.show("observability done.");
