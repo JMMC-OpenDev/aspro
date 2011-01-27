@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: GenericListModel.java,v 1.3 2010-12-17 15:15:58 bourgesl Exp $"
+ * "@(#) $Id: GenericListModel.java,v 1.4 2011-01-27 17:10:47 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2010/12/17 15:15:58  bourgesl
+ * implements ComboBoxModel also
+ *
  * Revision 1.2  2010/12/06 17:01:28  bourgesl
  * added addIfAbsent
  *
@@ -58,6 +61,8 @@ public final class GenericListModel<K> extends AbstractListModel implements Comb
     }
     this.model = model;
     this.comboBoxModel = isComboBoxModel;
+
+    // No default selection for combo box model
   }
 
   /**
