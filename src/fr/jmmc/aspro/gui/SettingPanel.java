@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SettingPanel.java,v 1.27 2011-01-21 16:23:23 bourgesl Exp $"
+ * "@(#) $Id: SettingPanel.java,v 1.28 2011-01-27 17:07:29 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.27  2011/01/21 16:23:23  bourgesl
+ * import ObservationEventType
+ *
  * Revision 1.26  2010/12/17 15:17:53  bourgesl
  * use hasTarget
  *
@@ -81,8 +84,8 @@
  ******************************************************************************/
 package fr.jmmc.aspro.gui;
 
-import fr.jmmc.aspro.model.ObservationEventType;
-import fr.jmmc.aspro.model.ObservationListener;
+import fr.jmmc.aspro.model.event.ObservationEventType;
+import fr.jmmc.aspro.model.event.ObservationListener;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import java.awt.Component;
@@ -180,21 +183,18 @@ public final class SettingPanel extends JPanel implements ObservationListener {
       }
     });
 
-    // register this setting panel as an observation listener (first listener) :
-    ObservationManager.getInstance().register(this);
-
     // Add panels :
 
     // create the map panel :
     final InterferometerMapPanel mapPanel = new InterferometerMapPanel();
 
-    // register the map panel as an observation listener before the observation form :
+    // register the map panel as an observation listener before the observation form (listener 1) :
     ObservationManager.getInstance().register(mapPanel);
 
     // add the map panel :
     this.jTabbedPane.addTab(TAB_INTERFEROMETER_MAP, mapPanel);
 
-    // create the observation form that will send a changed event on the current observation :
+    // create the observation form that will send a changed event on the current observation (listener 2) :
     this.observationForm = new BasicObservationForm();
 
     // register the observation form as an observation listener :
@@ -202,6 +202,9 @@ public final class SettingPanel extends JPanel implements ObservationListener {
 
     // add the observation form :
     this.jSplitPane.setLeftComponent(this.observationForm);
+
+    // register this setting panel as an observation listener (listener 3) :
+    ObservationManager.getInstance().register(this);
   }
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JPanel jPlotPanel;
@@ -220,7 +223,7 @@ public final class SettingPanel extends JPanel implements ObservationListener {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("event [" + type + "] process IN");
     }
-    if (type == ObservationEventType.CHANGED
+    if (type == ObservationEventType.TARGET_CHANGED
             || type == ObservationEventType.LOADED) {
 
       // Observability panel :
