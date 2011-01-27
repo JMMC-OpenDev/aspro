@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.74 2011-01-26 17:23:41 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.75 2011-01-27 17:10:34 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.74  2011/01/26 17:23:41  bourgesl
+ * comments + use Observability data (parameters)
+ *
  * Revision 1.73  2011/01/25 12:29:37  bourgesl
  * fixed javadoc errors
  *
@@ -266,13 +269,12 @@ import fr.jmmc.aspro.gui.util.TargetListRenderer;
 import fr.jmmc.aspro.gui.util.TargetRenderer;
 import fr.jmmc.aspro.gui.task.TaskSwingWorker;
 import fr.jmmc.aspro.model.ConfigurationManager;
-import fr.jmmc.aspro.model.ObservationEventType;
-import fr.jmmc.aspro.model.ObservationListener;
+import fr.jmmc.aspro.model.event.ObservationEventType;
+import fr.jmmc.aspro.model.event.ObservationListener;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.Range;
 import fr.jmmc.aspro.model.observability.ObservabilityData;
 import fr.jmmc.aspro.model.observability.StarData;
-import fr.jmmc.aspro.model.oi.AtmosphereQuality;
 import fr.jmmc.aspro.model.oi.InterferometerConfiguration;
 import fr.jmmc.aspro.model.uvcoverage.UVCoverageData;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
@@ -353,15 +355,15 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
   /** preference singleton */
   private final Preferences myPreferences = Preferences.getInstance();
   /** jFreeChart instance */
-  private JFreeChart localJFreeChart;
+  private JFreeChart chart;
   /** xy plot instance */
-  private SquareXYPlot localXYPlot;
+  private SquareXYPlot xyPlot;
   /** JMMC annotation */
   private XYTextAnnotation aJMMC = null;
   /** uv coordinates scaling factor */
   private double uvPlotScalingFactor = MEGA_LAMBDA_SCALE;
   /* cached data */
-  /** last computed Observability Data to get star data */
+  /** last computed Observability Data */
   private ObservabilityData currentObsData = null;
   /** last zoom event to check if the zoom area changed */
   private ZoomEvent lastZoomEvent = null;
@@ -371,8 +373,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
   private String interferometerConfigurationName = null;
   /** current instrument name to track changes */
   private String instrumentName = null;
-  /** current displayed targets to track changes */
-  private Object displayTargetList = null;
 
   /* swing */
   /** chart panel */
@@ -839,7 +839,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
    * @return chart
    */
   public JFreeChart prepareChart() {
-    return this.localJFreeChart;
+    return this.chart;
   }
 
   /**
@@ -854,18 +854,18 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
    */
   private void postInit() {
 
-    this.localJFreeChart = ChartUtils.createSquareXYLineChart("U (M\u03BB)", "V (M\u03BB)", true);
-    this.localXYPlot = (SquareXYPlot) localJFreeChart.getPlot();
+    this.chart = ChartUtils.createSquareXYLineChart("U (M\u03BB)", "V (M\u03BB)", true);
+    this.xyPlot = (SquareXYPlot) this.chart.getPlot();
 
     // Adjust background settings :
-    this.localXYPlot.setBackgroundImageAlpha(1.0f);
+    this.xyPlot.setBackgroundImageAlpha(1.0f);
     // Adjust outline :
-    this.localXYPlot.setOutlineStroke(new BasicStroke(1.f));
+    this.xyPlot.setOutlineStroke(new BasicStroke(1.f));
 
     // add listener :
-    this.localJFreeChart.addProgressListener(this);
+    this.chart.addProgressListener(this);
 
-    this.chartPanel = new SquareChartPanel(this.localJFreeChart,
+    this.chartPanel = new SquareChartPanel(this.chart,
             400, 400, /* prefered size */
             200, 200, /* minimum size before scaling */
             1600, 1600, /* maximum size before scaling */
@@ -1113,41 +1113,37 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
   }
 
   /**
-   * Refresh the target list
+   * Refresh the target combo box
    * @param observation current observation settings
    */
   private void updateComboTarget(final ObservationSetting observation) {
     final List<Target> displayTargets = observation.getDisplayTargets();
-    // test if the display target changed using a simple reference comparison
-    // as getDisplayTargets() use a cache :
-    if (displayTargets != this.displayTargetList) {
-      this.displayTargetList = displayTargets;
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("target list changed : " + displayTargets);
-      }
 
-      // avoid update comboboxes each time the observation is changed ...
-      // could use the TARGET_CHANGED event but it requires to review the form initialization ...
-      // and event processing (take care of their ordering)
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("target list changed : " + displayTargets);
+    }
 
-      final TargetUserInformations targetUserInfos = observation.getOrCreateTargetUserInfos();
+    final TargetUserInformations targetUserInfos = observation.getOrCreateTargetUserInfos();
 
-      final Target selectedTarget = getSelectedTarget();
+    final Target selectedTarget = getSelectedTarget();
 
-      // note : read only :
-      this.jComboBoxTarget.setModel(new GenericListModel<Target>(displayTargets, true));
-      this.jComboBoxTarget.setRenderer(new TargetListRenderer(new TargetRenderer(targetUserInfos)));
+    // note : read only :
+    this.jComboBoxTarget.setModel(new GenericListModel<Target>(displayTargets, true));
+    this.jComboBoxTarget.setRenderer(new TargetListRenderer(new TargetRenderer(targetUserInfos)));
 
-      // restore previous selected item :
-      if (selectedTarget == null) {
-        // force to trigger a selection change event :
-        this.jComboBoxTarget.setSelectedItem(!displayTargets.isEmpty() ? displayTargets.get(0) : null);
-      } else {
-        this.jComboBoxTarget.setSelectedItem(selectedTarget);
-      }
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("jComboBoxTarget updated : " + getSelectedTargetName());
-      }
+    // restore previous selected item :
+    if (selectedTarget != null) {
+      this.jComboBoxTarget.setSelectedItem(selectedTarget);
+    }
+
+    // select first target if no target is selected :
+    if (getSelectedTarget() == null) {
+      // force to trigger a selection change event :
+      this.jComboBoxTarget.setSelectedItem(!displayTargets.isEmpty() ? displayTargets.get(0) : null);
+    }
+
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("jComboBoxTarget updated : " + getSelectedTargetName());
     }
   }
 
@@ -1190,6 +1186,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
    * Update the HA min / max according to the selected target and computed observability data (star data)
    */
   private void updateTargetHA() {
+    boolean reset = true;
     if (this.currentObsData != null) {
       final String targetName = getSelectedTargetName();
 
@@ -1205,11 +1202,12 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
           logger.fine("target HA min : " + min);
           logger.fine("target HA max : " + min);
         }
-      } else {
-        // baseline limits case :
-        this.jTargetHAMin.setText(null);
-        this.jTargetHAMax.setText(null);
+        reset = false;
       }
+    }
+    if (reset) {
+      this.jTargetHAMin.setText(null);
+      this.jTargetHAMax.setText(null);
     }
   }
 
@@ -1321,18 +1319,18 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         logger.fine("updateObservation : " + targetName);
       }
 
+      // Change the instrument mode :
+      changed |= this.om.setInstrumentMode((String) this.jComboBoxInstrumentMode.getSelectedItem());
+
+      // Update the sampling period :
+      final Number samplingPeriod = (Number) this.jFieldSamplingPeriod.getValue();
+      changed |= this.om.setInstrumentSamplingPeriod(Double.valueOf(samplingPeriod.doubleValue()));
+
+      // Update the acquisition time :
+      final Number obsDuration = (Number) this.jFieldObsDuration.getValue();
+      changed |= this.om.setInstrumentAcquisitionTime(Double.valueOf(obsDuration.doubleValue()));
+
       if (targetName != null) {
-
-        // Change the instrument mode :
-        changed |= this.om.setInstrumentMode((String) this.jComboBoxInstrumentMode.getSelectedItem());
-
-        // Update the sampling period :
-        final Number samplingPeriod = (Number) this.jFieldSamplingPeriod.getValue();
-        changed |= this.om.setInstrumentSamplingPeriod(Double.valueOf(samplingPeriod.doubleValue()));
-
-        // Update the acquisition time :
-        final Number obsDuration = (Number) this.jFieldObsDuration.getValue();
-        changed |= this.om.setInstrumentAcquisitionTime(Double.valueOf(obsDuration.doubleValue()));
 
         // Update target HA Min/Max :
         changed |= this.om.setTargetHAMin(targetName, Double.valueOf(this.haMinAdapter.getValue()));
@@ -1341,70 +1339,19 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         // update ft mode :
         changed |= this.om.setTargetFTMode(targetName, (String) this.jComboBoxFTMode.getSelectedItem());
 
-        // update atmQuality :
-        changed |= this.om.setAtmosphereQuality(AtmosphereQualityUtils.getAtmosphereQuality((String) this.jComboBoxAtmQual.getSelectedItem()));
-
-      } else {
-        // clean up i.e. the panel is then invalid :
-
-        // reset instrument configuration :
-        this.om.setInstrumentMode(null);
-        this.om.setInstrumentSamplingPeriod(null);
-        this.om.setInstrumentAcquisitionTime(null);
-
-        // reset atmosphere quality :
-        this.om.setAtmosphereQuality(AtmosphereQuality.AVERAGE);
       }
 
+      // update atmQuality :
+      changed |= this.om.setAtmosphereQuality(AtmosphereQualityUtils.getAtmosphereQuality((String) this.jComboBoxAtmQual.getSelectedItem()));
+
       // TODO : fire event ??
-      // NOTE : the onChange event is already handled : risk of cyclic loop !
+      // NOTE : the onChange event is already handled : risk of cyclic loop : use another event ???
 
       if (logger.isLoggable(Level.FINE)) {
         logger.fine("updateObservation : " + changed);
       }
     }
     return changed;
-  }
-
-  /**
-   * Update the UI widgets from the given changed observation
-   * @param observation observation
-   */
-  private void onChangeObservation(final ObservationSetting observation) {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("observation :\n" + ObservationManager.toString(observation));
-    }
-
-    // When the observation changes, it means that the observability will be computed in background,
-    // and soon an ObservabilityDone event will be sent.
-
-    // Only refresh the UI widgets and NOT the plot :
-
-    // disable the automatic update observation :
-    final boolean prevAutoUpdateObservation = this.setAutoUpdateObservation(false);
-    // disable the automatic refresh :
-    final boolean prevAutoRefresh = this.setAutoRefresh(false);
-    try {
-
-      // update data related to the interferometer :
-      this.updateInteferometerData(observation);
-
-      // refresh data related to the instrument :
-      this.updateInstrumentData(observation);
-
-      // finally refresh the targets, that fires the target changed event
-      // refresh the fields HA Min/Max, FT Mode and computed HA Min / Max :
-      this.updateComboTarget(observation);
-
-    } finally {
-      // restore the automatic refresh :
-      this.setAutoRefresh(prevAutoRefresh);
-      // restore the automatic update observation :
-      this.setAutoUpdateObservation(prevAutoUpdateObservation);
-    }
-
-    // finally, update the observation :
-    updateObservation();
   }
 
   /**
@@ -1452,11 +1399,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       this.haMinAdapter.setValue(AsproConstants.HA_MIN);
       this.haMaxAdapter.setValue(AsproConstants.HA_MAX);
 
-      // finally refresh the targets, that fires the target changed event
-      // refresh the fields HA Min/Max, FT Mode and computed HA Min / Max :
-      this.displayTargetList = null;
-      this.updateComboTarget(observation);
-
       // reset to defaults :
       this.jCheckBoxPlotUVSupport.setSelected(true);
       this.jCheckBoxModelImage.setSelected(true);
@@ -1479,6 +1421,72 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
   }
 
   /**
+   * Update the target comboBox from the given changed observation
+   * @param observation observation
+   */
+  private void onTargetChangeObservation(final ObservationSetting observation) {
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("observation :\n" + ObservationManager.toString(observation));
+    }
+
+    // Only refresh the target comboBox and NOT the plot :
+
+    // disable the automatic update observation :
+    final boolean prevAutoUpdateObservation = this.setAutoUpdateObservation(false);
+    // disable the automatic refresh :
+    final boolean prevAutoRefresh = this.setAutoRefresh(false);
+    try {
+
+      // refresh the targets, that fires the target changed event
+      // refresh the fields HA Min/Max, FT Mode and computed HA Min / Max :
+      this.updateComboTarget(observation);
+
+    } finally {
+      // restore the automatic refresh :
+      this.setAutoRefresh(prevAutoRefresh);
+      // restore the automatic update observation :
+      this.setAutoUpdateObservation(prevAutoUpdateObservation);
+    }
+  }
+
+  /**
+   * Update the UI widgets from the given changed observation
+   * @param observation observation
+   */
+  private void onChangeObservation(final ObservationSetting observation) {
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("observation :\n" + ObservationManager.toString(observation));
+    }
+
+    // When the observation changes, it means that the observability will be computed in background,
+    // and soon an ObservabilityDone event will be sent.
+
+    // Only refresh the UI widgets and NOT the plot :
+
+    // disable the automatic update observation :
+    final boolean prevAutoUpdateObservation = this.setAutoUpdateObservation(false);
+    // disable the automatic refresh :
+    final boolean prevAutoRefresh = this.setAutoRefresh(false);
+    try {
+
+      // update data related to the interferometer :
+      this.updateInteferometerData(observation);
+
+      // refresh data related to the instrument :
+      this.updateInstrumentData(observation);
+
+    } finally {
+      // restore the automatic refresh :
+      this.setAutoRefresh(prevAutoRefresh);
+      // restore the automatic update observation :
+      this.setAutoUpdateObservation(prevAutoUpdateObservation);
+    }
+
+    // finally, update the observation :
+    updateObservation();
+  }
+
+  /**
    * Handle the given event on the given observation =
    * 1/ If the observation changed, refresh the UI widgets (targets ...)
    * 2/ If the observability is computed, then refresh the plot
@@ -1492,6 +1500,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     switch (type) {
       case LOADED:
         this.onLoadObservation(observation);
+        break;
+      case TARGET_CHANGED:
+        this.onTargetChangeObservation(observation);
         break;
       case CHANGED:
         this.onChangeObservation(observation);
@@ -1508,8 +1519,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
   }
 
   /**
-   * Update the computed Observability Data used to have star data (HA min / max)
-   * @param obsData
+   * Update the computed Observability Data
+   * and update star data (HA min / max)
+   * @param obsData computed Observability Data
    */
   private void updateObservabilityData(final ObservabilityData obsData) {
     this.currentObsData = obsData;
@@ -1542,42 +1554,43 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       logger.log(Level.SEVERE, "PLOT", new Throwable());
     }
 
-    // first reset the warning container in the current observation using Swing EDT :
-    om.setWarningContainer(null);
-    // then reset the OIFits structure in the current observation using Swing EDT :
-    om.setOIFitsFile(null);
-
-    /* get plot options from swing components */
-
-    final String targetName = getSelectedTargetName();
-
-    final double uvMax = this.uvMaxAdapter.getValue();
-
-    final boolean doUVSupport = this.jCheckBoxPlotUVSupport.isSelected();
-    final boolean doModelImage = this.jCheckBoxModelImage.isSelected();
-
-    // model image options :
-    final ImageMode imageMode = (ImageMode) this.jComboBoxImageMode.getSelectedItem();
-
-    // Use model image Preferences :
-    final int imageSize = this.myPreferences.getPreferenceAsInt(Preferences.MODEL_IMAGE_SIZE);
-    final IndexColorModel colorModel = ColorModels.getColorModel(this.myPreferences.getPreference(Preferences.MODEL_IMAGE_LUT));
-
     // check if observability data are available :
-    final ObservabilityData obsData = observation.getObservabilityData();
+    if (this.currentObsData != null) {
 
-    if (obsData != null) {
-      // TODO : check consistency differently (use clone or result cache) ...
+      // TODO : do not share results !
+
+      // first reset the warning container in the current observation using Swing EDT :
+      om.setWarningContainer(null);
+      // then reset the OIFits structure in the current observation using Swing EDT :
+      om.setOIFitsFile(null);
+
+      /* get plot options from swing components */
+
+      final String targetName = getSelectedTargetName();
+
+      final double uvMax = this.uvMaxAdapter.getValue();
+
+      final boolean doUVSupport = this.jCheckBoxPlotUVSupport.isSelected();
+      final boolean doModelImage = this.jCheckBoxModelImage.isSelected();
+
+      // model image options :
+      final ImageMode imageMode = (ImageMode) this.jComboBoxImageMode.getSelectedItem();
+
+      // Use model image Preferences :
+      final int imageSize = this.myPreferences.getPreferenceAsInt(Preferences.MODEL_IMAGE_SIZE);
+      final IndexColorModel colorModel = ColorModels.getColorModel(this.myPreferences.getPreference(Preferences.MODEL_IMAGE_LUT));
 
       // update the status bar :
       StatusBar.show("computing uv coverage ... (please wait, this may take a while)");
 
-// TODO : use obsData.isDoBaseLineLimits() flag to reset the plot directly instead of calling worker ...
+
+      // TODO : use currentUVMapData to check if the new image is the same !!
+
+      // TODO : check consistency differently (use clone or result cache) ...
 
       // Create Swing worker :
-      final UVCoverageSwingWorker taskWorker = new UVCoverageSwingWorker(this, observation, targetName,
-              uvMax, doUVSupport, doModelImage, imageMode, imageSize, colorModel,
-              obsData);
+      final UVCoverageSwingWorker taskWorker = new UVCoverageSwingWorker(this, observation, this.currentObsData, targetName,
+              uvMax, doUVSupport, doModelImage, imageMode, imageSize, colorModel);
 
       // Cancel other uv coverage task and execute this new task :
       TaskSwingWorkerExecutor.executeTask(taskWorker);
@@ -1595,6 +1608,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     private final UVCoveragePanel uvPanel;
     /** observation settings */
     private final ObservationSetting observation;
+    /** computed observability data */
+    private final ObservabilityData obsData;
     /** target to use */
     private final String targetName;
     /** maximum U or V coordinate (corrected by the minimal wavelength) */
@@ -1609,14 +1624,13 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     private final int imageSize;
     /** image color model */
     private final IndexColorModel colorModel;
-    /** computed observability data */
-    private final ObservabilityData obsData;
 
     /**
      * Hidden constructor
      *
      * @param uvPanel observability panel
      * @param observation observation settings
+     * @param obsData computed observability data
      * @param targetName target name
      * @param uvMax U-V max in meter
      * @param doUVSupport flag to compute the UV support
@@ -1624,16 +1638,16 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
      * @param imageMode image mode (amplitude or phase)
      * @param imageSize number of pixels for both width and height of the generated image
      * @param colorModel color model to use
-     * @param obsData computed observability data
      */
-    private UVCoverageSwingWorker(final UVCoveragePanel uvPanel, final ObservationSetting observation, final String targetName,
+    private UVCoverageSwingWorker(final UVCoveragePanel uvPanel, final ObservationSetting observation,
+                                  final ObservabilityData obsData, final String targetName,
                                   final double uvMax, final boolean doUVSupport,
-                                  final boolean doModelImage, final ImageMode imageMode, final int imageSize, final IndexColorModel colorModel,
-                                  final ObservabilityData obsData) {
+                                  final boolean doModelImage, final ImageMode imageMode, final int imageSize, final IndexColorModel colorModel) {
       // get current observation version :
       super(AsproTaskRegistry.TASK_UV_COVERAGE, observation.getVersion());
       this.uvPanel = uvPanel;
       this.observation = observation;
+      this.obsData = obsData;
       this.targetName = targetName;
       this.uvMax = uvMax;
       this.doUVSupport = doUVSupport;
@@ -1641,7 +1655,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       this.imageMode = imageMode;
       this.imageSize = imageSize;
       this.colorModel = colorModel;
-      this.obsData = obsData;
     }
 
     /**
@@ -1652,7 +1665,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     @Override
     public UVCoverageData computeInBackground() {
       // compute the uv coverage data :
-      return new UVCoverageService(this.observation, this.targetName, this.uvMax,
+      return new UVCoverageService(this.observation, this.obsData, this.targetName, this.uvMax,
               this.doUVSupport, this.doModelImage, this.imageMode, this.imageSize, this.colorModel).compute();
     }
 
@@ -1701,19 +1714,27 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
   }
 
   /**
-   * Reset the plot in case of baseline limits or model exception
+   * Reset the plot in case of model exception
    */
   private void resetPlot() {
+    ChartUtils.clearTextSubTitle(this.chart);
+
     this.lastZoomEvent = null;
     this.currentUVMapData = null;
 
     // reset bounds to [-1;1] (before setDataset) :
-    this.localXYPlot.defineBounds(1d);
+    this.xyPlot.defineBounds(1d);
     // reset dataset for baseline limits :
-    this.localXYPlot.setDataset(null);
+    this.xyPlot.setDataset(null);
 
     // update the background image :
     this.updateUVMap(null);
+
+    // update theme at end :
+    ChartUtilities.applyCurrentTheme(this.chart);
+
+    // update the status bar :
+    StatusBar.show("uv coverage done.");
   }
 
   /**
@@ -1728,15 +1749,15 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
                           final ObservabilityData obsData,
                           final UVCoverageData uvData) {
 
-    ChartUtils.clearTextSubTitle(localJFreeChart);
-
     if (uvData.getName() == null) {
       // Baseline limits case :
       resetPlot();
-    } else {
 
-      lastZoomEvent = null;
-      currentUVMapData = null;
+    } else {
+      ChartUtils.clearTextSubTitle(this.chart);
+
+      this.lastZoomEvent = null;
+      this.currentUVMapData = null;
 
       // title :
       final StringBuilder sb = new StringBuilder(observation.getInterferometerConfiguration().getName());
@@ -1748,12 +1769,12 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
           sb.append(pop.getName()).append(' ');
         }
       }
-      ChartUtils.addSubtitle(localJFreeChart, sb.toString());
-      ChartUtils.addSubtitle(localJFreeChart, "Source : " + uvData.getName());
+      ChartUtils.addSubtitle(this.chart, sb.toString());
+      ChartUtils.addSubtitle(this.chart, "Source : " + uvData.getName());
 
       if (observation.getWhen().isNightRestriction()) {
         // date :
-        ChartUtils.addSubtitle(localJFreeChart, "Day : " + observation.getWhen().getDate().toString());
+        ChartUtils.addSubtitle(this.chart, "Day : " + observation.getWhen().getDate().toString());
       }
 
       // change the scaling factor : (???)
@@ -1764,21 +1785,21 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       updateChart(uvData);
 
       // update the uv map data :
-      currentUVMapData = uvData.getUvMapData();
+      this.currentUVMapData = uvData.getUvMapData();
 
       // update the background image :
-      if (currentUVMapData == null) {
+      if (this.currentUVMapData == null) {
         updateUVMap(null);
       } else {
-        updateUVMap(currentUVMapData.getUvMap());
+        updateUVMap(this.currentUVMapData.getUvMap());
       }
+
+      // update theme at end :
+      ChartUtilities.applyCurrentTheme(this.chart);
+
+      // update the status bar :
+      StatusBar.show("uv coverage done.");
     }
-
-    // update theme at end :
-    ChartUtilities.applyCurrentTheme(localJFreeChart);
-
-    // update the status bar :
-    StatusBar.show("uv coverage done.");
   }
 
   /**
@@ -1791,11 +1812,11 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       this.lastZoomEvent = ze;
 
       if (this.aJMMC != null) {
-        this.localXYPlot.getRenderer(0).removeAnnotations();
+        this.xyPlot.getRenderer(0).removeAnnotations();
         this.aJMMC.setX(ze.getDomainUpperBound());
         this.aJMMC.setY(ze.getRangeLowerBound());
 
-        this.localXYPlot.getRenderer(0).addAnnotation(this.aJMMC, Layer.BACKGROUND);
+        this.xyPlot.getRenderer(0).addAnnotation(this.aJMMC, Layer.BACKGROUND);
       }
 
       if (this.currentUVMapData != null) {
@@ -1993,11 +2014,11 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
    */
   private void updateUVMap(final Image uvMap) {
     if (uvMap != null) {
-      this.localXYPlot.setBackgroundPaint(null);
-      this.localXYPlot.setBackgroundImage(uvMap);
+      this.xyPlot.setBackgroundPaint(null);
+      this.xyPlot.setBackgroundImage(uvMap);
     } else {
-      this.localXYPlot.setBackgroundPaint(Color.lightGray);
-      this.localXYPlot.setBackgroundImage(null);
+      this.xyPlot.setBackgroundPaint(Color.lightGray);
+      this.xyPlot.setBackgroundImage(null);
     }
   }
 
@@ -2007,7 +2028,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
    */
   private void updateChart(final UVCoverageData uvData) {
     // renderer :
-    final AbstractRenderer renderer = (AbstractRenderer) this.localXYPlot.getRenderer();
+    final AbstractRenderer renderer = (AbstractRenderer) this.xyPlot.getRenderer();
 
     // reset colors :
     renderer.clearSeriesPaints(false);
@@ -2021,13 +2042,13 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
     // define bounds to the uv maximum value (before setDataset) :
     final double boxSize = toUVPlotScale(uvData.getUvMax());
-    this.localXYPlot.defineBounds(boxSize);
+    this.xyPlot.defineBounds(boxSize);
 
     // set the main data set :
-    this.localXYPlot.setDataset(dataset);
+    this.xyPlot.setDataset(dataset);
 
     // annotation JMMC (moving position) :
-    this.localXYPlot.getRenderer(0).removeAnnotations();
+    this.xyPlot.getRenderer(0).removeAnnotations();
     if (this.aJMMC == null) {
       this.aJMMC = ChartUtils.createXYTextAnnotation(AsproConstants.JMMC_ANNOTATION, boxSize, -boxSize);
       this.aJMMC.setFont(ChartUtils.SMALL_TEXT_ANNOTATION_FONT);
@@ -2037,7 +2058,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       this.aJMMC.setX(boxSize);
       this.aJMMC.setY(-boxSize);
     }
-    this.localXYPlot.getRenderer(0).addAnnotation(this.aJMMC, Layer.BACKGROUND);
+    this.xyPlot.getRenderer(0).addAnnotation(this.aJMMC, Layer.BACKGROUND);
   }
 
   /**
@@ -2049,7 +2070,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     final ColorPalette palette = ColorPalette.getDefaultColorPalette();
 
     // renderer :
-    final XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) this.localXYPlot.getRenderer();
+    final XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) this.xyPlot.getRenderer();
 
     // process uv rise/set :
     final List<UVBaseLineData> targetUVRiseSet = uvData.getTargetUVRiseSet();
@@ -2113,7 +2134,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     final ColorPalette palette = ColorPalette.getDefaultColorPalette();
 
     // renderer :
-    final XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) this.localXYPlot.getRenderer();
+    final XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) this.xyPlot.getRenderer();
 
     // process observable uv ranges :
     final List<UVRangeBaseLineData> targetUVObservability = uvData.getTargetUVObservability();
@@ -2355,6 +2376,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
   /**
    * Update the selected target in the observation form (on top)
+   *
+   * TODO : use a better solution to synchronize the selection (event ?)
    */
   private void synchronizeSelectedTarget() {
     final BasicObservationForm form = AsproGui.getInstance().getSettingPanel().getObservationForm();
