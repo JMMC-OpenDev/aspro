@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BasicObservationForm.java,v 1.53 2011-01-21 16:23:53 bourgesl Exp $"
+ * "@(#) $Id: BasicObservationForm.java,v 1.54 2011-01-27 17:04:00 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.53  2011/01/21 16:23:53  bourgesl
+ * import ObservationEventType
+ *
  * Revision 1.52  2010/12/17 15:20:26  bourgesl
  * major change : target list use display targets instead of target names
  *
@@ -167,8 +170,8 @@ import fr.jmmc.aspro.gui.util.GenericListModel;
 import fr.jmmc.aspro.gui.util.TargetListRenderer;
 import fr.jmmc.aspro.gui.util.TargetRenderer;
 import fr.jmmc.aspro.model.ConfigurationManager;
-import fr.jmmc.aspro.model.ObservationEventType;
-import fr.jmmc.aspro.model.ObservationListener;
+import fr.jmmc.aspro.model.event.ObservationEventType;
+import fr.jmmc.aspro.model.event.ObservationListener;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.WarningContainer;
 import fr.jmmc.aspro.model.oi.FocalInstrumentConfigurationChoice;
@@ -1003,11 +1006,11 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
       case LOADED:
         onLoadObservation(observation);
         break;
-      case CHANGED:
-        this.resetStatus();
-        break;
       case TARGET_CHANGED:
         this.updateListTargets();
+        break;
+      case CHANGED:
+        this.resetStatus();
         break;
       case WARNINGS_READY:
         this.updateStatus(observation.getWarningContainer());

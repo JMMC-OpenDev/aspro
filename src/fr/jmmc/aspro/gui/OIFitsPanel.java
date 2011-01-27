@@ -10,8 +10,8 @@
  */
 package fr.jmmc.aspro.gui;
 
-import fr.jmmc.aspro.model.ObservationEventType;
-import fr.jmmc.aspro.model.ObservationListener;
+import fr.jmmc.aspro.model.event.ObservationEventType;
+import fr.jmmc.aspro.model.event.ObservationListener;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.util.XmlFactory;
 import fr.jmmc.oitools.model.OIFitsFile;
@@ -61,12 +61,12 @@ public final class OIFitsPanel extends javax.swing.JPanel implements Observation
       logger.fine("event [" + type + "] process IN");
     }
     switch (type) {
-      case OIFITS_DONE:
-        this.updateOIFits(observation.getOIFitsFile());
-        break;
       case CHANGED:
         // reset content :
         this.updateOIFits(null);
+        break;
+      case OIFITS_DONE:
+        this.updateOIFits(observation.getOIFitsFile());
         break;
       default:
     }
