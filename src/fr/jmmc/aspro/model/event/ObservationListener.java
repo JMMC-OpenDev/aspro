@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationListener.java,v 1.7 2011-01-21 16:17:24 bourgesl Exp $"
+ * "@(#) $Id: ObservationListener.java,v 1.1 2011-01-27 17:03:38 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2011/01/21 16:17:24  bourgesl
+ * extracted ObservationEventType enum
+ *
  * Revision 1.6  2010/12/14 09:25:50  bourgesl
  * added target change event
  *
@@ -27,7 +30,7 @@
  *
  *
  ******************************************************************************/
-package fr.jmmc.aspro.model;
+package fr.jmmc.aspro.model.event;
 
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 

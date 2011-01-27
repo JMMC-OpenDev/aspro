@@ -1,4 +1,4 @@
-package fr.jmmc.aspro.model;
+package fr.jmmc.aspro.model.event;
 
 /**
    * This enumeration defines all types of observation events
