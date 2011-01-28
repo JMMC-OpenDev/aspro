@@ -216,9 +216,6 @@
               <Image iconType="3" name="/fr/jmmc/aspro/gui/icons/delete.png"/>
             </Property>
             <Property name="toolTipText" type="java.lang.String" value="delete the selected target"/>
-            <Property name="margin" type="java.awt.Insets" editor="org.netbeans.beaninfo.editors.InsetsEditor">
-              <Insets value="[0, 0, 0, 0]"/>
-            </Property>
           </Properties>
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButtonDeleteTargetActionPerformed"/>
@@ -278,9 +275,6 @@
             <Property name="text" type="java.lang.String" value="Night restriction"/>
             <Property name="horizontalTextPosition" type="int" value="10"/>
             <Property name="iconTextGap" type="int" value="20"/>
-            <Property name="margin" type="java.awt.Insets" editor="org.netbeans.beaninfo.editors.InsetsEditor">
-              <Insets value="[0, 0, 0, 0]"/>
-            </Property>
           </Properties>
           <Constraints>
             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">

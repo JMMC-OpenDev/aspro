@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationListener.java,v 1.1 2011-01-27 17:03:38 bourgesl Exp $"
+ * "@(#) $Id: ObservationListener.java,v 1.2 2011-01-28 16:32:35 mella Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2011/01/27 17:03:38  bourgesl
+ * new package event
+ *
  * Revision 1.7  2011/01/21 16:17:24  bourgesl
  * extracted ObservationEventType enum
  *
@@ -32,7 +35,6 @@
  ******************************************************************************/
 package fr.jmmc.aspro.model.event;
 
-import fr.jmmc.aspro.model.oi.ObservationSetting;
 
 /**
  * This interface define the methods to be implemented by observation listener
@@ -41,10 +43,8 @@ import fr.jmmc.aspro.model.oi.ObservationSetting;
 public interface ObservationListener {
 
     /**
-     * Handle the given event on the given observation
-     * @param type event type
-     * @param observation observation
+     * Handle the given observation event
+     * @param event
      */
-    public void onProcess(ObservationEventType type,
-                          ObservationSetting observation);
+    public void onProcess(ObservationEvent event);
 }

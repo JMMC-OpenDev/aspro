@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationManager.java,v 1.52 2011-01-27 17:11:10 bourgesl Exp $"
+ * "@(#) $Id: ObservationManager.java,v 1.53 2011-01-28 16:32:36 mella Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.52  2011/01/27 17:11:10  bourgesl
+ * updated listeners in javadoc
+ *
  * Revision 1.51  2011/01/26 17:22:04  bourgesl
  * added many comments (usages / listeners for events)
  * refactored version changes
@@ -16,7 +19,7 @@
  * Revision 1.49  2011/01/21 16:22:38  bourgesl
  * fixed bug when loading files (target list are not refreshed) : use targetChangedEvent in changeObservation instead of changedEvent to indicate swing panels to refresh their target list
  * reset version to 1 in changeObservation
- * increment version in fireObservationChanged
+ * increment version in fireObservationRefresh
  *
  * Revision 1.48  2010/12/17 15:15:13  bourgesl
  * API simplifications
@@ -184,6 +187,8 @@ import fr.jmmc.aspro.model.event.ObservationListener;
 import fr.jmmc.aspro.model.event.ObservationEventType;
 import fr.jmmc.aspro.model.observability.ObservabilityData;
 import fr.jmmc.aspro.AsproConstants;
+import fr.jmmc.aspro.model.event.ObservationEvent;
+import fr.jmmc.aspro.model.event.UpdateObservationEvent;
 import fr.jmmc.aspro.model.oi.AtmosphereQuality;
 import fr.jmmc.aspro.model.oi.FocalInstrumentConfigurationChoice;
 import fr.jmmc.aspro.model.oi.InterferometerConfigurationChoice;
@@ -415,7 +420,7 @@ public final class ObservationManager extends BaseOIManager {
       logger.fine("fireObservationLoaded : " + toString(getObservation()));
     }
 
-    fireEvent(ObservationEventType.LOADED);
+    fireEvent(new ObservationEvent(ObservationEventType.LOADED, getObservation()));
   }
 
   /**
@@ -433,26 +438,90 @@ public final class ObservationManager extends BaseOIManager {
       logger.fine("target version = " + getObservation().getTargetVersion());
     }
 
-    fireEvent(ObservationEventType.TARGET_CHANGED);
+    fireEvent(new ObservationEvent(ObservationEventType.TARGET_CHANGED, getObservation()));
   }
 
   /**
    * This fires an observation change event to all registered listeners.
-   * Fired by BasicObservationForm.updateObservation() when any main parameter is changed
-   * Fired by fireTargetChangedEvents() when an observation is loaded or reset or the target list was modified
+   * TODO javadoc...
+   */
+  public void fireObservationUpdate() {
+    fireObservationUpdate(false);
+  }
+
+  /**
+   * This fires an observation change event to all registered listeners.
+   * TODO javadoc...
+   */
+  private void fireObservationUpdate(final boolean forceRefresh) {
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("fireObservationUpdate : " + toString(getObservation()));
+    }
+
+    final UpdateObservationEvent event = new UpdateObservationEvent(ObservationEventType.DO_UPDATE, getObservation());
+
+    fireEvent(event);
+
+    if (forceRefresh) {
+      event.setChanged(UpdateObservationEvent.ChangeType.MAIN);
+    }
+
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("fireObservationUpdate : changed = " + event.getChanged());
+    }
+
+    // Handle event result :
+    if (event.getChanged() != UpdateObservationEvent.ChangeType.NONE) {
+
+      // Update observation version :
+      getObservation().incVersion();
+
+      // TODO : MULTI CONF : gerer synchro / clone ....
+
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("observation version = " + getObservation().getVersion());
+      }
+
+      switch (event.getChanged()) {
+        case MAIN:
+          fireObservationRefresh();
+          break;
+        case UV:
+          fireObservationRefreshUV();
+          break;
+        default:
+          break;
+      }
+
+    }
+  }
+
+  /**
+   * This fires an observation refresh event to all registered listeners.
+   * TODO
    *
    * Listeners : BasicObservationForm / InterferometerMapPanel / ObservabilityPanel / UVCoveragePanel / OIFitsPanel
    */
-  public void fireObservationChanged() {
-    // Update observation version :
-    getObservation().incVersion();
-
+  private void fireObservationRefresh() {
     if (logger.isLoggable(Level.FINE)) {
-      logger.fine("fireObservationChanged : " + toString(getObservation()));
-      logger.fine("observation version = " + getObservation().getVersion());
+      logger.fine("fireObservationRefresh : " + toString(getObservation()));
     }
 
-    fireEvent(ObservationEventType.CHANGED);
+    fireEvent(new ObservationEvent(ObservationEventType.REFRESH, getObservation()));
+  }
+
+  /**
+   * This fires an observation refresh UV event to all registered listeners.
+   * TODO
+   *
+   * Listeners : UVCoveragePanel
+   */
+  private void fireObservationRefreshUV() {
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("fireObservationRefreshUV : " + toString(getObservation()));
+    }
+
+    fireEvent(new ObservationEvent(ObservationEventType.REFRESH_UV, getObservation()));
   }
 
   /**
@@ -466,7 +535,7 @@ public final class ObservationManager extends BaseOIManager {
       logger.fine("fireObservabilityDone : " + toString(getObservation()));
     }
 
-    fireEvent(ObservationEventType.OBSERVABILITY_DONE);
+    fireEvent(new ObservationEvent(ObservationEventType.OBSERVABILITY_DONE, getObservation()));
   }
 
   /**
@@ -480,7 +549,7 @@ public final class ObservationManager extends BaseOIManager {
       logger.fine("fireOIFitsDone : " + toString(getObservation()));
     }
 
-    fireEvent(ObservationEventType.WARNINGS_READY);
+    fireEvent(new ObservationEvent(ObservationEventType.WARNINGS_READY, getObservation()));
   }
 
   /**
@@ -494,28 +563,28 @@ public final class ObservationManager extends BaseOIManager {
       logger.fine("fireOIFitsDone : " + toString(getObservation()));
     }
 
-    fireEvent(ObservationEventType.OIFITS_DONE);
+    fireEvent(new ObservationEvent(ObservationEventType.OIFITS_DONE, getObservation()));
   }
 
   /**
    * Send an event to the registered listeners.
    * Note : any new listener registered during the processing of this event, will not be called
-   * @param type event type
+   * @param event event
    */
-  private void fireEvent(final ObservationEventType type) {
+  private void fireEvent(final ObservationEvent event) {
     // ensure events are fired by Swing EDT :
     if (!SwingUtilities.isEventDispatchThread()) {
       logger.log(Level.SEVERE, "invalid thread : use EDT", new Throwable());
     }
 
     if (logger.isLoggable(Level.FINE)) {
-      logger.fine("fireEvent : " + type);
+      logger.fine("fireEvent : " + event);
     }
 
     final long start = System.nanoTime();
 
     for (final ObservationListener listener : this.listeners) {
-      listener.onProcess(type, getObservation());
+      listener.onProcess(event);
     }
 
     if (logger.isLoggable(Level.FINE)) {
@@ -951,8 +1020,8 @@ public final class ObservationManager extends BaseOIManager {
     // fire an observation targets change event :
     this.fireObservationTargetsChanged();
 
-    // fire an observation change event :
-    this.fireObservationChanged();
+    // fire an observation update event and force refresh :
+    this.fireObservationUpdate(true);
   }
 
   // --- TARGET CONFIGURATION --------------------------------------------------
@@ -1201,7 +1270,7 @@ public final class ObservationManager extends BaseOIManager {
    * @return true if instrument configuration is fixed
    */
   private boolean fixInstrumentConfigurationStations(final String interferometerConfiguration,
-                                                     final FocalInstrumentConfigurationChoice instrumentChoice) {
+          final FocalInstrumentConfigurationChoice instrumentChoice) {
     boolean res = false;
 
     // trim to be sure (xml manually modified) :

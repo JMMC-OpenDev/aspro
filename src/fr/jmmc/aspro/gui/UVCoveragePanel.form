@@ -76,9 +76,6 @@
                     <Component class="javax.swing.JButton" name="jButtonModelEditor">
                       <Properties>
                         <Property name="text" type="java.lang.String" value="Target Editor"/>
-                        <Property name="margin" type="java.awt.Insets" editor="org.netbeans.beaninfo.editors.InsetsEditor">
-                          <Insets value="[0, 0, 0, 0]"/>
-                        </Property>
                         <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
                           <Dimension value="[50, 25]"/>
                         </Property>
@@ -91,9 +88,6 @@
                       <Properties>
                         <Property name="text" type="java.lang.String" value="OB"/>
                         <Property name="toolTipText" type="java.lang.String" value="Only CHARA VEGA or VLTI AMBER/MIDI instruments are supported"/>
-                        <Property name="margin" type="java.awt.Insets" editor="org.netbeans.beaninfo.editors.InsetsEditor">
-                          <Insets value="[0, 0, 0, 0]"/>
-                        </Property>
                       </Properties>
                       <Events>
                         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButtonOBActionPerformed"/>
@@ -468,9 +462,6 @@
                           <Image iconType="3" name="/fr/jmmc/aspro/gui/icons/icon_pdf.gif"/>
                         </Property>
                         <Property name="alignmentY" type="float" value="1.0"/>
-                        <Property name="margin" type="java.awt.Insets" editor="org.netbeans.beaninfo.editors.InsetsEditor">
-                          <Insets value="[0, 0, 0, 0]"/>
-                        </Property>
                       </Properties>
                       <Events>
                         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButtonPDFActionPerformed"/>

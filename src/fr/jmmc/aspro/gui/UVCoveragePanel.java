@@ -1,11 +1,16 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.75 2011-01-27 17:10:34 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.76 2011-01-28 16:32:35 mella Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.75  2011/01/27 17:10:34  bourgesl
+ * use target changed event to update the target combo box
+ * use current observability data to compute UV Coverage (service)
+ * renamed chart vars
+ *
  * Revision 1.74  2011/01/26 17:23:41  bourgesl
  * comments + use Observability data (parameters)
  *
@@ -269,10 +274,11 @@ import fr.jmmc.aspro.gui.util.TargetListRenderer;
 import fr.jmmc.aspro.gui.util.TargetRenderer;
 import fr.jmmc.aspro.gui.task.TaskSwingWorker;
 import fr.jmmc.aspro.model.ConfigurationManager;
-import fr.jmmc.aspro.model.event.ObservationEventType;
 import fr.jmmc.aspro.model.event.ObservationListener;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.Range;
+import fr.jmmc.aspro.model.event.ObservationEvent;
+import fr.jmmc.aspro.model.event.UpdateObservationEvent;
 import fr.jmmc.aspro.model.observability.ObservabilityData;
 import fr.jmmc.aspro.model.observability.StarData;
 import fr.jmmc.aspro.model.oi.InterferometerConfiguration;
@@ -333,7 +339,7 @@ import org.jfree.ui.TextAnchor;
  * @author bourgesl
  */
 public final class UVCoveragePanel extends javax.swing.JPanel implements ChartProgressListener, ZoomEventListener,
-                                                                         ActionListener, ChangeListener, ObservationListener, Observer, PDFExportable, Disposable {
+        ActionListener, ChangeListener, ObservationListener, Observer, PDFExportable, Disposable {
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
@@ -911,9 +917,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         if (logger.isLoggable(Level.FINE)) {
           logger.fine("samplingPeriod changed : " + newValue);
         }
-        if (updateObservation()) {
-          refreshPlot();
-        }
+        fireObservationUpdateEvent();
       }
     });
 
@@ -932,9 +936,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         if (logger.isLoggable(Level.FINE)) {
           logger.fine("obsDuration changed : " + newValue);
         }
-        if (updateObservation()) {
-          refreshPlot();
-        }
+        fireObservationUpdateEvent();
       }
     });
 
@@ -1241,27 +1243,25 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       updateTargetHA();
       changeStateForModelImageWidgets();
       refreshPlot();
+
     } else if (e.getSource() == this.jComboBoxInstrumentMode) {
       if (logger.isLoggable(Level.FINE)) {
         logger.fine("instrument mode changed : " + this.jComboBoxInstrumentMode.getSelectedItem());
       }
-      if (updateObservation()) {
-        refreshPlot();
-      }
+      fireObservationUpdateEvent();
+
     } else if (e.getSource() == this.jComboBoxFTMode) {
       if (logger.isLoggable(Level.FINE)) {
         logger.fine("ft mode changed : " + this.jComboBoxFTMode.getSelectedItem());
       }
-      if (updateObservation()) {
-        refreshPlot();
-      }
+      fireObservationUpdateEvent();
+
     } else if (e.getSource() == this.jComboBoxAtmQual) {
       if (logger.isLoggable(Level.FINE)) {
         logger.fine("atmQuality changed : " + this.jComboBoxAtmQual.getSelectedItem());
       }
-      if (updateObservation()) {
-        refreshPlot();
-      }
+      fireObservationUpdateEvent();
+
     } else if (e.getSource() == this.jComboBoxImageMode) {
       if (logger.isLoggable(Level.FINE)) {
         logger.fine("image mode changed : " + this.jComboBoxImageMode.getSelectedItem());
@@ -1282,17 +1282,17 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         logger.fine("haMin changed : " + source.getValue());
       }
       this.haMaxAdapter.setMinValue(source.getValue());
-      if (updateObservation()) {
-        refreshPlot();
-      }
+
+      fireObservationUpdateEvent();
+
     } else if (source == this.haMaxAdapter) {
       if (logger.isLoggable(Level.FINE)) {
         logger.fine("haMax changed : " + source.getValue());
       }
       this.haMinAdapter.setMaxValue(source.getValue());
-      if (updateObservation()) {
-        refreshPlot();
-      }
+
+      fireObservationUpdateEvent();
+
     } else if (source == this.uvMaxAdapter) {
       if (logger.isLoggable(Level.FINE)) {
         logger.fine("U-V Max changed : " + source.getValue());
@@ -1302,56 +1302,13 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
   }
 
   /**
-   * Update the observation with the form fields if the automatic update flag is enabled.
-   * @return true if the observation changed
+   * TODO
    */
-  private boolean updateObservation() {
-    boolean changed = false;
+  private void fireObservationUpdateEvent() {
     // check if the automatic update flag is enabled :
     if (this.doAutoUpdateObservation) {
-      if (DEBUG_UPDATE_EVENT) {
-        logger.log(Level.SEVERE, "UPDATE", new Throwable());
-      }
-
-      final String targetName = getSelectedTargetName();
-
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("updateObservation : " + targetName);
-      }
-
-      // Change the instrument mode :
-      changed |= this.om.setInstrumentMode((String) this.jComboBoxInstrumentMode.getSelectedItem());
-
-      // Update the sampling period :
-      final Number samplingPeriod = (Number) this.jFieldSamplingPeriod.getValue();
-      changed |= this.om.setInstrumentSamplingPeriod(Double.valueOf(samplingPeriod.doubleValue()));
-
-      // Update the acquisition time :
-      final Number obsDuration = (Number) this.jFieldObsDuration.getValue();
-      changed |= this.om.setInstrumentAcquisitionTime(Double.valueOf(obsDuration.doubleValue()));
-
-      if (targetName != null) {
-
-        // Update target HA Min/Max :
-        changed |= this.om.setTargetHAMin(targetName, Double.valueOf(this.haMinAdapter.getValue()));
-        changed |= this.om.setTargetHAMax(targetName, Double.valueOf(this.haMaxAdapter.getValue()));
-
-        // update ft mode :
-        changed |= this.om.setTargetFTMode(targetName, (String) this.jComboBoxFTMode.getSelectedItem());
-
-      }
-
-      // update atmQuality :
-      changed |= this.om.setAtmosphereQuality(AtmosphereQualityUtils.getAtmosphereQuality((String) this.jComboBoxAtmQual.getSelectedItem()));
-
-      // TODO : fire event ??
-      // NOTE : the onChange event is already handled : risk of cyclic loop : use another event ???
-
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("updateObservation : " + changed);
-      }
+      ObservationManager.getInstance().fireObservationUpdate();
     }
-    return changed;
   }
 
   /**
@@ -1450,12 +1407,14 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
   }
 
   /**
-   * Update the UI widgets from the given changed observation
-   * @param observation observation
+   * Update the observation with the form fields if the automatic update flag is enabled
+   *
+   * Invoked by ObservationManager ... TODO
+   * @param event event
    */
-  private void onChangeObservation(final ObservationSetting observation) {
+  private void onUpdateObservation(final UpdateObservationEvent event) {
     if (logger.isLoggable(Level.FINE)) {
-      logger.fine("observation :\n" + ObservationManager.toString(observation));
+      logger.fine("observation :\n" + ObservationManager.toString(event.getObservation()));
     }
 
     // When the observation changes, it means that the observability will be computed in background,
@@ -1470,10 +1429,10 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     try {
 
       // update data related to the interferometer :
-      this.updateInteferometerData(observation);
+      this.updateInteferometerData(event.getObservation());
 
       // refresh data related to the instrument :
-      this.updateInstrumentData(observation);
+      this.updateInstrumentData(event.getObservation());
 
     } finally {
       // restore the automatic refresh :
@@ -1482,39 +1441,86 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       this.setAutoUpdateObservation(prevAutoUpdateObservation);
     }
 
-    // finally, update the observation :
-    updateObservation();
+    // Update Observation : 
+
+    // check if the automatic update flag is enabled :
+    if (this.doAutoUpdateObservation) {
+      if (DEBUG_UPDATE_EVENT) {
+        logger.log(Level.SEVERE, "UPDATE", new Throwable());
+      }
+      boolean changed = false;
+
+      final String targetName = getSelectedTargetName();
+
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("onUpdateObservation : " + targetName);
+      }
+
+      // Change the instrument mode :
+      changed |= this.om.setInstrumentMode((String) this.jComboBoxInstrumentMode.getSelectedItem());
+
+      // Update the sampling period :
+      final Number samplingPeriod = (Number) this.jFieldSamplingPeriod.getValue();
+      changed |= this.om.setInstrumentSamplingPeriod(Double.valueOf(samplingPeriod.doubleValue()));
+
+      // Update the acquisition time :
+      final Number obsDuration = (Number) this.jFieldObsDuration.getValue();
+      changed |= this.om.setInstrumentAcquisitionTime(Double.valueOf(obsDuration.doubleValue()));
+
+      if (targetName != null) {
+
+        // Update target HA Min/Max :
+        changed |= this.om.setTargetHAMin(targetName, Double.valueOf(this.haMinAdapter.getValue()));
+        changed |= this.om.setTargetHAMax(targetName, Double.valueOf(this.haMaxAdapter.getValue()));
+
+        // update ft mode :
+        changed |= this.om.setTargetFTMode(targetName, (String) this.jComboBoxFTMode.getSelectedItem());
+
+      }
+
+      // update atmQuality :
+      changed |= this.om.setAtmosphereQuality(AtmosphereQualityUtils.getAtmosphereQuality((String) this.jComboBoxAtmQual.getSelectedItem()));
+
+      if (changed) {
+        // update change flag to make the om fire an observation refresh event later
+        event.setChanged(UpdateObservationEvent.ChangeType.UV);
+      }
+    }
   }
 
   /**
    * Handle the given event on the given observation =
    * 1/ If the observation changed, refresh the UI widgets (targets ...)
    * 2/ If the observability is computed, then refresh the plot
-   * @param type event type
-   * @param observation observation
+   * @param event event
    */
-  public void onProcess(final ObservationEventType type, final ObservationSetting observation) {
+  public void onProcess(final ObservationEvent event) {
     if (logger.isLoggable(Level.FINE)) {
-      logger.fine("event [" + type + "] process IN");
+      logger.fine("event [" + event.getType() + "] process IN");
     }
-    switch (type) {
+    switch (event.getType()) {
       case LOADED:
-        this.onLoadObservation(observation);
+        this.onLoadObservation(event.getObservation());
         break;
       case TARGET_CHANGED:
-        this.onTargetChangeObservation(observation);
+        this.onTargetChangeObservation(event.getObservation());
         break;
-      case CHANGED:
-        this.onChangeObservation(observation);
+      case DO_UPDATE:
+        this.onUpdateObservation((UpdateObservationEvent) event);
+        break;
+      case REFRESH_UV:
+        // refreshPlot();
+        // TODO test 
+        this.plot(event.getObservation());
         break;
       case OBSERVABILITY_DONE:
-        this.updateObservabilityData(observation.getObservabilityData());
-        this.plot(observation);
+        this.updateObservabilityData(event.getObservation().getObservabilityData());
+        this.plot(event.getObservation());
         break;
       default:
     }
     if (logger.isLoggable(Level.FINE)) {
-      logger.fine("event [" + type + "] process OUT");
+      logger.fine("event [" + event.getType() + "] process OUT");
     }
   }
 
@@ -1640,9 +1646,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
      * @param colorModel color model to use
      */
     private UVCoverageSwingWorker(final UVCoveragePanel uvPanel, final ObservationSetting observation,
-                                  final ObservabilityData obsData, final String targetName,
-                                  final double uvMax, final boolean doUVSupport,
-                                  final boolean doModelImage, final ImageMode imageMode, final int imageSize, final IndexColorModel colorModel) {
+            final ObservabilityData obsData, final String targetName,
+            final double uvMax, final boolean doUVSupport,
+            final boolean doModelImage, final ImageMode imageMode, final int imageSize, final IndexColorModel colorModel) {
       // get current observation version :
       super(AsproTaskRegistry.TASK_UV_COVERAGE, observation.getVersion());
       this.uvPanel = uvPanel;
@@ -1746,8 +1752,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
    * @param uvData computed UV Coverage data
    */
   private void updatePlot(final ObservationSetting observation,
-                          final ObservabilityData obsData,
-                          final UVCoverageData uvData) {
+          final ObservabilityData obsData,
+          final UVCoverageData uvData) {
 
     if (uvData.getName() == null) {
       // Baseline limits case :
@@ -1912,9 +1918,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
      * @param colorModel color model to use
      */
     private UVMapSwingWorker(final UVCoveragePanel uvPanel, final int version, final List<Model> models,
-                             final Rectangle2D.Float uvRect,
-                             final Float refMin, final Float refMax,
-                             final ImageMode imageMode, final int imageSize, final IndexColorModel colorModel) {
+            final Rectangle2D.Float uvRect,
+            final Float refMin, final Float refMax,
+            final ImageMode imageMode, final int imageSize, final IndexColorModel colorModel) {
       super(AsproTaskRegistry.TASK_UV_MAP, version);
       this.uvPanel = uvPanel;
       this.models = models;

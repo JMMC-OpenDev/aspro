@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SettingPanel.java,v 1.28 2011-01-27 17:07:29 bourgesl Exp $"
+ * "@(#) $Id: SettingPanel.java,v 1.29 2011-01-28 16:32:35 mella Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.28  2011/01/27 17:07:29  bourgesl
+ * use target changed event to create UVCoveragePanel
+ * SettingPanel is now the third listener in order to synchronize correctly target lists
+ *
  * Revision 1.27  2011/01/21 16:23:23  bourgesl
  * import ObservationEventType
  *
@@ -87,6 +91,7 @@ package fr.jmmc.aspro.gui;
 import fr.jmmc.aspro.model.event.ObservationEventType;
 import fr.jmmc.aspro.model.event.ObservationListener;
 import fr.jmmc.aspro.model.ObservationManager;
+import fr.jmmc.aspro.model.event.ObservationEvent;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import java.awt.Component;
 import java.util.logging.Level;
@@ -216,13 +221,16 @@ public final class SettingPanel extends JPanel implements ObservationListener {
    * Handle the given event on the given observation = 
    * add the missing plot panels
    * 
-   * @param type event type
-   * @param observation observation
+   * @param event event
    */
-  public void onProcess(final ObservationEventType type, final ObservationSetting observation) {
+  public void onProcess(final ObservationEvent event) {
     if (logger.isLoggable(Level.FINE)) {
-      logger.fine("event [" + type + "] process IN");
+      logger.fine("event [" + event.getType() + "] process IN");
     }
+
+    final ObservationEventType type = event.getType();
+    final ObservationSetting observation= event.getObservation();
+
     if (type == ObservationEventType.TARGET_CHANGED
             || type == ObservationEventType.LOADED) {
 
@@ -235,7 +243,7 @@ public final class SettingPanel extends JPanel implements ObservationListener {
         ObservationManager.getInstance().register(this.observabilityPanel);
 
         // the event must be propagated to the new registered listener :
-        this.observabilityPanel.onProcess(type, observation);
+        this.observabilityPanel.onProcess(event);
 
         // add the observability panel :
         this.jTabbedPane.addTab(TAB_OBSERVABILITY, this.observabilityPanel);
@@ -256,7 +264,7 @@ public final class SettingPanel extends JPanel implements ObservationListener {
           ObservationManager.getInstance().register(this.uvCoveragePanel);
 
           // the event must be propagated to the new registered listener :
-          this.uvCoveragePanel.onProcess(type, observation);
+          this.uvCoveragePanel.onProcess(event);
 
           // add the uv coverage panel :
           this.jTabbedPane.addTab(TAB_UV_COVERAGE, this.uvCoveragePanel);
@@ -293,7 +301,7 @@ public final class SettingPanel extends JPanel implements ObservationListener {
         ObservationManager.getInstance().register(this.oiFitsPanel);
 
         // the event must be propagated to the new registered listener :
-        this.oiFitsPanel.onProcess(type, observation);
+        this.oiFitsPanel.onProcess(event);
 
         // add the OIFits panel :
         this.jTabbedPane.addTab(TAB_OIFITS, this.oiFitsPanel);

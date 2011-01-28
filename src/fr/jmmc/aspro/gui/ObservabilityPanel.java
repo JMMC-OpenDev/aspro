@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityPanel.java,v 1.53 2011-01-27 17:06:17 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityPanel.java,v 1.54 2011-01-28 16:32:35 mella Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.53  2011/01/27 17:06:17  bourgesl
+ * clear all computed results (warning, oifits)
+ * do not propagate observability_done event for baseline limits case
+ *
  * Revision 1.52  2011/01/26 17:23:41  bourgesl
  * comments + use Observability data (parameters)
  *
@@ -192,11 +196,11 @@ import fr.jmmc.aspro.gui.task.AsproTaskRegistry;
 import fr.jmmc.aspro.gui.util.ColorPalette;
 import fr.jmmc.aspro.gui.task.TaskSwingWorker;
 import fr.jmmc.aspro.gui.task.TaskSwingWorkerExecutor;
-import fr.jmmc.aspro.model.event.ObservationEventType;
 import fr.jmmc.aspro.model.observability.DateTimeInterval;
 import fr.jmmc.aspro.model.observability.ObservabilityData;
 import fr.jmmc.aspro.model.event.ObservationListener;
 import fr.jmmc.aspro.model.ObservationManager;
+import fr.jmmc.aspro.model.event.ObservationEvent;
 import fr.jmmc.aspro.model.observability.ElevationDate;
 import fr.jmmc.aspro.model.observability.StarObservabilityData;
 import fr.jmmc.aspro.model.observability.SunTimeInterval;
@@ -257,7 +261,7 @@ import org.jfree.ui.Layer;
  * @author bourgesl
  */
 public final class ObservabilityPanel extends javax.swing.JPanel implements ChartProgressListener,
-                                                                            ObservationListener, Observer, PDFExportable, Disposable {
+        ObservationListener, Observer, PDFExportable, Disposable {
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
@@ -628,25 +632,24 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
   /**
    * Handle the given event on the given observation =
    * compute observability data and refresh the plot
-   * @param type event type
-   * @param observation observation
+   * @param event event
    */
-  public void onProcess(final ObservationEventType type, final ObservationSetting observation) {
+  public void onProcess(final ObservationEvent event) {
     if (logger.isLoggable(Level.FINE)) {
-      logger.fine("event [" + type + "] process IN");
+      logger.fine("event [" + event.getType() + "] process IN");
     }
 
-    switch (type) {
+    switch (event.getType()) {
       case LOADED:
-        this.onLoadObservation(observation);
+        this.onLoadObservation(event.getObservation());
         break;
-      case CHANGED:
-        this.plot(observation);
+      case REFRESH:
+        this.plot(event.getObservation());
         break;
       default:
     }
     if (logger.isLoggable(Level.FINE)) {
-      logger.fine("event [" + type + "] process OUT");
+      logger.fine("event [" + event.getType() + "] process OUT");
     }
   }
 
@@ -678,11 +681,11 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
     // also reset other results (UV Coverage Panel) :
 
-      // TODO : do not share results !
+    // TODO : do not share results !
 
-      // first reset the warning container in the current observation using Swing EDT :
+    // first reset the warning container in the current observation using Swing EDT :
     ObservationManager.getInstance().setWarningContainer(null);
-      // then reset the OIFits structure in the current observation using Swing EDT :
+    // then reset the OIFits structure in the current observation using Swing EDT :
     ObservationManager.getInstance().setOIFitsFile(null);
 
 
@@ -741,7 +744,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
      * @param doBaseLineLimits flag to find base line limits
      */
     private ObservabilitySwingWorker(final ObservabilityPanel obsPanel, final ObservationSetting observation,
-                                     final boolean useLST, final boolean doDetailedOutput, final boolean doBaseLineLimits) {
+            final boolean useLST, final boolean doDetailedOutput, final boolean doBaseLineLimits) {
       // get current observation version :
       super(AsproTaskRegistry.TASK_OBSERVABILITY, observation.getVersion());
       this.obsPanel = obsPanel;
@@ -776,21 +779,20 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     public void refreshUI(final ObservabilityData obsData) {
 //      if (this.observation.getVersion() == this.getVersion()) {
 
-      // skip baseline limits case :
-      if (!obsData.isDoBaseLineLimits()) {
-        // update the observability data in the current observation using Swing EDT :
-        // Will fire event ObservabilityDone and call UVCoveragePanel to refresh the UV Coverage plot :
-        ObservationManager.getInstance().setObservabilityData(obsData);
-      }
-
-      /*
+        // skip baseline limits case :
+        if (!obsData.isDoBaseLineLimits()) {
+          // update the observability data in the current observation using Swing EDT :
+          // Will fire event ObservabilityDone and call UVCoveragePanel to refresh the UV Coverage plot :
+          ObservationManager.getInstance().setObservabilityData(obsData);
+        }
+/*
       } else {
-      if (logger.isLoggable(logLevel)) {
-      logger.log(logLevel, logPrefix + ".refreshUI : VERSION MISMATCH = " + this.observation.getVersion() + " <> " + this.getVersion());
+        if (logger.isLoggable(logLevel)) {
+          logger.log(logLevel, logPrefix + ".refreshUI : VERSION MISMATCH = " + this.observation.getVersion() + " <> " + this.getVersion());
+        }
+        logger.severe(logPrefix + ".refreshUI : VERSION MISMATCH = " + this.observation.getVersion() + " <> " + this.getVersion());
       }
-      logger.severe(logPrefix + ".refreshUI : VERSION MISMATCH = " + this.observation.getVersion() + " <> " + this.getVersion());
-      }
-       */
+*/
       // Refresh the GUI using the same parameter values that were used in computeInBackground() / ObservabilityService for consistency :
       this.obsPanel.updatePlot(this.observation, obsData);
     }
@@ -872,10 +874,10 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
    */
   @SuppressWarnings("unchecked")
   private void updateChart(final List<Target> displayTargets,
-                           final TargetUserInformations targetUserInfos,
-                           final Map<String, List<StarObservabilityData>> starVisMap,
-                           final Date min, final Date max,
-                           final boolean doBaseLineLimits) {
+          final TargetUserInformations targetUserInfos,
+          final Map<String, List<StarObservabilityData>> starVisMap,
+          final Date min, final Date max,
+          final boolean doBaseLineLimits) {
 
     final ColorPalette palette = ColorPalette.getDefaultColorPalette();
 
@@ -1058,7 +1060,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
    * @param doBaseLineLimits flag to plot baseline limits
    */
   private void updateDateAxis(final String label, final Date from, final Date to,
-                              final boolean doBaseLineLimits) {
+          final boolean doBaseLineLimits) {
 
     // change the Range axis (horizontal) :
     final DateAxis dateAxis = new DateAxis(label);

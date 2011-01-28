@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: InterferometerMapPanel.java,v 1.13 2011-01-27 17:04:22 bourgesl Exp $"
+ * "@(#) $Id: InterferometerMapPanel.java,v 1.14 2011-01-28 16:32:36 mella Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.13  2011/01/27 17:04:22  bourgesl
+ * renamed chart vars
+ *
  * Revision 1.12  2011/01/21 16:23:44  bourgesl
  * import ObservationEventType
  *
@@ -59,9 +62,9 @@ import fr.jmmc.aspro.gui.chart.ZoomEvent;
 import fr.jmmc.aspro.gui.chart.ZoomEventListener;
 import fr.jmmc.aspro.gui.util.ColorPalette;
 import fr.jmmc.aspro.model.InterferometerMapData;
-import fr.jmmc.aspro.model.event.ObservationEventType;
 import fr.jmmc.aspro.model.event.ObservationListener;
 import fr.jmmc.aspro.model.ObservationManager;
+import fr.jmmc.aspro.model.event.ObservationEvent;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.service.InterferometerMapService;
 import java.awt.BasicStroke;
@@ -88,7 +91,7 @@ import org.jfree.ui.TextAnchor;
  * @author bourgesl
  */
 public final class InterferometerMapPanel extends javax.swing.JPanel implements ChartProgressListener, ZoomEventListener,
-                                                                                ObservationListener, PDFExportable {
+        ObservationListener, PDFExportable {
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
@@ -272,21 +275,20 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
    * Handle the changed event to plot the interferometer map synchronously.
    * As this instance is the first observation listener, the plot is first done
    * before other plots / computations are done.
-   * @param type event type
-   * @param observation observation
+   * @param event event
    */
-  public void onProcess(final ObservationEventType type, final ObservationSetting observation) {
+  public void onProcess(final ObservationEvent event) {
     if (logger.isLoggable(Level.FINE)) {
-      logger.fine("event [" + type + "] process IN");
+      logger.fine("event [" + event.getType() + "] process IN");
     }
-    switch (type) {
-      case CHANGED:
-        this.plot(observation);
+    switch (event.getType()) {
+      case REFRESH:
+        this.plot(event.getObservation());
         break;
       default:
     }
     if (logger.isLoggable(Level.FINE)) {
-      logger.fine("event [" + type + "] process OUT");
+      logger.fine("event [" + event.getType() + "] process OUT");
     }
   }
 

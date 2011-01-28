@@ -10,9 +10,8 @@
  */
 package fr.jmmc.aspro.gui;
 
-import fr.jmmc.aspro.model.event.ObservationEventType;
+import fr.jmmc.aspro.model.event.ObservationEvent;
 import fr.jmmc.aspro.model.event.ObservationListener;
-import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.util.XmlFactory;
 import fr.jmmc.oitools.model.OIFitsFile;
 import fr.jmmc.oitools.model.XmlOutputVisitor;
@@ -53,25 +52,24 @@ public final class OIFitsPanel extends javax.swing.JPanel implements Observation
   /**
    * Handle the given event on the given observation =
    * If the oifits is computed, refresh the UI widgets
-   * @param type event type
-   * @param observation observation
+   * @param event event
    */
-  public void onProcess(final ObservationEventType type, final ObservationSetting observation) {
+  public void onProcess(final ObservationEvent event) {
     if (logger.isLoggable(Level.FINE)) {
-      logger.fine("event [" + type + "] process IN");
+      logger.fine("event [" + event.getType() + "] process IN");
     }
-    switch (type) {
-      case CHANGED:
+    switch (event.getType()) {
+      case REFRESH:
         // reset content :
         this.updateOIFits(null);
         break;
       case OIFITS_DONE:
-        this.updateOIFits(observation.getOIFitsFile());
+        this.updateOIFits(event.getObservation().getOIFitsFile());
         break;
       default:
     }
     if (logger.isLoggable(Level.FINE)) {
-      logger.fine("event [" + type + "] process OUT");
+      logger.fine("event [" + event.getType() + "] process OUT");
     }
   }
 

@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BasicObservationForm.java,v 1.54 2011-01-27 17:04:00 bourgesl Exp $"
+ * "@(#) $Id: BasicObservationForm.java,v 1.55 2011-01-28 16:32:36 mella Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.54  2011/01/27 17:04:00  bourgesl
+ * reordered events
+ *
  * Revision 1.53  2011/01/21 16:23:53  bourgesl
  * import ObservationEventType
  *
@@ -170,10 +173,11 @@ import fr.jmmc.aspro.gui.util.GenericListModel;
 import fr.jmmc.aspro.gui.util.TargetListRenderer;
 import fr.jmmc.aspro.gui.util.TargetRenderer;
 import fr.jmmc.aspro.model.ConfigurationManager;
-import fr.jmmc.aspro.model.event.ObservationEventType;
 import fr.jmmc.aspro.model.event.ObservationListener;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.WarningContainer;
+import fr.jmmc.aspro.model.event.ObservationEvent;
+import fr.jmmc.aspro.model.event.UpdateObservationEvent;
 import fr.jmmc.aspro.model.oi.FocalInstrumentConfigurationChoice;
 import fr.jmmc.aspro.model.oi.InterferometerConfiguration;
 import fr.jmmc.aspro.model.oi.InterferometerConfigurationChoice;
@@ -668,14 +672,14 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
           // invalid value :
           jFieldMinElev.setValue(AsproConstants.DEFAULT_MIN_ELEVATION);
         }
-        updateObservation();
+        fireObservationUpdateEvent();
       }
     });
 
     this.jCheckBoxNightLimit.addItemListener(new ItemListener() {
 
       public void itemStateChanged(final ItemEvent e) {
-        updateObservation();
+        fireObservationUpdateEvent();
       }
     });
 
@@ -687,7 +691,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     this.checkPops();
 
     // initial observation synchronization :
-    this.updateObservation();
+    fireObservationUpdateEvent();
   }
 
   /**
@@ -803,7 +807,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         logger.fine("Instrument Configuration changed : " + this.jComboBoxInstrumentConfiguration.getSelectedItem());
       }
     }
-    updateObservation();
+    fireObservationUpdateEvent();
   }
 
   /**
@@ -842,7 +846,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
       resetPops();
     }
     // then update the observation :
-    updateObservation();
+    fireObservationUpdateEvent();
   }
 
   /**
@@ -871,7 +875,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
       if (logger.isLoggable(Level.FINE)) {
         logger.fine("Date changed : " + this.jDateSpinner.getModel().getValue());
       }
-      updateObservation();
+      fireObservationUpdateEvent();
     }
   }
 
@@ -900,33 +904,12 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
   }
 
   /**
-   * Update the observation with the form fields if the automatic update flag is enabled.
-   * If the observation changed, then fire an observation change event
+   * TODO
    */
-  private void updateObservation() {
+  private void fireObservationUpdateEvent() {
     // check if the automatic update flag is enabled :
     if (this.doAutoUpdateObservation) {
-      if (DEBUG_UPDATE_EVENT) {
-        logger.log(Level.SEVERE, "UPDATE", new Throwable());
-      }
-
-      boolean changed = false;
-
-      // observation :
-      changed |= this.om.setInterferometerConfigurationName((String) this.jComboBoxInterferometerConfiguration.getSelectedItem());
-      changed |= this.om.setInstrumentConfigurationName((String) this.jComboBoxInstrument.getSelectedItem());
-      changed |= this.om.setInstrumentConfigurationStations((String) this.jComboBoxInstrumentConfiguration.getSelectedItem());
-      changed |= this.om.setInstrumentConfigurationPoPs(this.jTextPoPs.getText());
-
-      // constraints :
-      changed |= this.om.setWhen((Date) this.jDateSpinner.getModel().getValue());
-      changed |= this.om.setMinElevation(((Number) this.jFieldMinElev.getValue()).doubleValue());
-      changed |= this.om.setNightRestriction(this.jCheckBoxNightLimit.isSelected());
-
-      if (changed) {
-        // fire an observation change event :
-        this.om.fireObservationChanged();
-      }
+      ObservationManager.getInstance().fireObservationUpdate();
     }
   }
 
@@ -992,33 +975,68 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
   }
 
   /**
+   * Update the observation with the form fields if the automatic update flag is enabled
+   *
+   * Invoked by ObservationManager ... TODO
+   * @param event event
+   */
+  private void onUpdateObservation(final UpdateObservationEvent event) {
+    // check if the automatic update flag is enabled :
+    if (this.doAutoUpdateObservation) {
+      if (DEBUG_UPDATE_EVENT) {
+        logger.log(Level.SEVERE, "UPDATE", new Throwable());
+      }
+
+      boolean changed = false;
+
+      // observation :
+      changed |= this.om.setInterferometerConfigurationName((String) this.jComboBoxInterferometerConfiguration.getSelectedItem());
+      changed |= this.om.setInstrumentConfigurationName((String) this.jComboBoxInstrument.getSelectedItem());
+      changed |= this.om.setInstrumentConfigurationStations((String) this.jComboBoxInstrumentConfiguration.getSelectedItem());
+      changed |= this.om.setInstrumentConfigurationPoPs(this.jTextPoPs.getText());
+
+      // constraints :
+      changed |= this.om.setWhen((Date) this.jDateSpinner.getModel().getValue());
+      changed |= this.om.setMinElevation(((Number) this.jFieldMinElev.getValue()).doubleValue());
+      changed |= this.om.setNightRestriction(this.jCheckBoxNightLimit.isSelected());
+
+      if (changed) {
+        // update change flag to make the om fire an observation refresh event later
+        event.setChanged(UpdateObservationEvent.ChangeType.MAIN);
+      }
+    }
+  }
+
+  /**
    * Handle the given event on the given observation.
    * Refresh the UI component according to the loaded observation settings
    *
-   * @param type event type
-   * @param observation observation
+   * @param event event
    */
-  public void onProcess(final ObservationEventType type, final ObservationSetting observation) {
+  public void onProcess(final ObservationEvent event) {
     if (logger.isLoggable(Level.FINE)) {
-      logger.fine("event [" + type + "] process IN");
+      logger.fine("event [" + event.getType() + "] process IN");
     }
-    switch (type) {
+    switch (event.getType()) {
       case LOADED:
-        onLoadObservation(observation);
+        this.onLoadObservation(event.getObservation());
         break;
       case TARGET_CHANGED:
         this.updateListTargets();
         break;
-      case CHANGED:
+      case DO_UPDATE:
+        this.onUpdateObservation((UpdateObservationEvent) event);
+        break;
+      case REFRESH:
         this.resetStatus();
         break;
       case WARNINGS_READY:
-        this.updateStatus(observation.getWarningContainer());
+        this.updateStatus(event.getObservation().getWarningContainer());
         break;
       default:
     }
     if (logger.isLoggable(Level.FINE)) {
-      logger.fine("event [" + type + "] process OUT");
+      logger.fine("event [" + event.getType() + "] process OUT");
     }
   }
 

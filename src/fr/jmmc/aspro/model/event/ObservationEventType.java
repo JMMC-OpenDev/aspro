@@ -9,8 +9,12 @@ public enum ObservationEventType {
     LOADED,
     /** target list (target, models and calibrators) changed */
     TARGET_CHANGED,
-    /** one or more attribute(s) changed */
-    CHANGED,
+    /** ask listeners to save swing states into the observation */
+    DO_UPDATE,
+    /** one or more general attribute(s) changed */
+    REFRESH,
+    /** one or more attribute(s) used for UV related changed */
+    REFRESH_UV,
     /** the observability was computed */
     OBSERVABILITY_DONE,
     /** the warnings are ready */
