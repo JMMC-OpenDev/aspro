@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproGui.java,v 1.42 2011-01-21 16:28:35 bourgesl Exp $"
+ * "@(#) $Id: AsproGui.java,v 1.43 2011-01-31 13:31:33 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.42  2011/01/21 16:28:35  bourgesl
+ * added start/stop Services for TaskSwingWorkerExecutor
+ *
  * Revision 1.41  2010/10/07 15:03:25  bourgesl
  * added searchCal samp message handler (votable)
  *
@@ -154,6 +157,7 @@ import fr.jmmc.aspro.gui.task.AsproTaskRegistry;
 import fr.jmmc.aspro.gui.util.ComponentResizeAdapter;
 import fr.jmmc.aspro.gui.task.TaskSwingWorkerExecutor;
 import fr.jmmc.aspro.model.ConfigurationManager;
+import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.searchCal.SearchCalSampMessageHandler;
 import fr.jmmc.mcs.gui.App;
 import fr.jmmc.mcs.gui.StatusBar;
@@ -297,6 +301,12 @@ public final class AsproGui extends App {
          */
         public void run() {
           prepareFrame(getFrame());
+
+          // Should open a file ?
+          if (!hasFileArgument()) {
+            // No, create a new observation and update the GUI :
+            ObservationManager.getInstance().reset();
+          }
         }
       });
 
