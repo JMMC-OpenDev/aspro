@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * JMMC project
+ *
+ * "@(#) $Id: ObservationEventType.java,v 1.3 2011-01-31 15:24:34 bourgesl Exp $"
+ *
+ * History
+ * -------
+ * $Log: not supported by cvs2svn $
+ *
+ ******************************************************************************/
 package fr.jmmc.aspro.model.event;
 
 /**
