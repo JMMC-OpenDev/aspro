@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproGui.java,v 1.43 2011-01-31 13:31:33 bourgesl Exp $"
+ * "@(#) $Id: AsproGui.java,v 1.44 2011-01-31 15:08:34 mella Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.43  2011/01/31 13:31:33  bourgesl
+ * When no file is opened, use ObservationManager.reset() to create a new observation and update the GUI
+ *
  * Revision 1.42  2011/01/21 16:28:35  bourgesl
  * added start/stop Services for TaskSwingWorkerExecutor
  *
@@ -252,8 +255,7 @@ public final class AsproGui extends App {
    * @param args command line arguments
    */
   public AsproGui(final String[] args) {
-    // no splash screen during the developments :
-    super(args, false, Preferences.getInstance().IsShowSplashScreen());
+    super(args, false);
   }
 
   /**
