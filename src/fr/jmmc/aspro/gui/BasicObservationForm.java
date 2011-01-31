@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BasicObservationForm.java,v 1.55 2011-01-28 16:32:36 mella Exp $"
+ * "@(#) $Id: BasicObservationForm.java,v 1.56 2011-01-31 13:28:37 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.55  2011/01/28 16:32:36  mella
+ * Add new observationEvents (CHANGED replaced by DO_UPDATE, REFRESH and REFRESH_UV)
+ * Modify the observationListener interface
+ *
  * Revision 1.54  2011/01/27 17:04:00  bourgesl
  * reordered events
  *
@@ -585,7 +589,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
        * Hack to allow empty string
        */
       @Override
-      public Object stringToValue(String text) throws ParseException {
+      public Object stringToValue(final String text) throws ParseException {
         if (text == null || text.length() == 0) {
           return null;
         }
@@ -608,8 +612,6 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
 
     this.warningIcon = new ImageIcon(getClass().getResource("/fr/jmmc/aspro/gui/icons/dialog-warning.png"));
 
-    this.resetStatus();
-
     // add observer to the StarResolverWidget :
     this.starSearchField.getStar().addObserver(this);
 
@@ -621,9 +623,9 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     de.getTextField().addFocusListener(new FocusAdapter() {
 
       @Override
-      public void focusGained(FocusEvent e) {
-        if (e.getSource() instanceof JTextComponent) {
-          final JTextComponent textComponent = ((JTextComponent) e.getSource());
+      public void focusGained(final FocusEvent fe) {
+        if (fe.getSource() instanceof JTextComponent) {
+          final JTextComponent textComponent = ((JTextComponent) fe.getSource());
 
           SwingUtilities.invokeLater(new Runnable() {
 
@@ -638,16 +640,10 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
       }
 
       @Override
-      public void focusLost(FocusEvent e) {
+      public void focusLost(final FocusEvent fe) {
         // nothing to do
       }
     });
-
-    this.jComboBoxInterferometer.setModel(new DefaultComboBoxModel(this.cm.getInterferometerNames()));
-
-    // default values :
-    this.jCheckBoxNightLimit.setSelected(AsproConstants.DEFAULT_USE_NIGHT_LIMITS);
-    this.jFieldMinElev.setValue(AsproConstants.DEFAULT_MIN_ELEVATION);
 
     // define change listeners :
     this.jDateSpinner.addChangeListener(this);
@@ -683,15 +679,11 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
       }
     });
 
-    // update combo boxes :
-    this.updateComboInterferometerConfiguration();
-    this.updateComboInstrument();
-    this.updateComboInstrumentConfiguration();
-    this.updateListTargets();
-    this.checkPops();
+    // define interferometer names (constant) :
+    this.jComboBoxInterferometer.setModel(new DefaultComboBoxModel(this.cm.getInterferometerNames()));
 
-    // initial observation synchronization :
-    fireObservationUpdateEvent();
+    // reset status :
+    this.resetStatus();
   }
 
   /**
@@ -904,7 +896,8 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
   }
 
   /**
-   * TODO
+   * Fire an Observation Change event when a Swing component changed
+   * ONLY if the automatic update flag is enabled
    */
   private void fireObservationUpdateEvent() {
     // check if the automatic update flag is enabled :
@@ -975,10 +968,13 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
   }
 
   /**
-   * Update the observation with the form fields if the automatic update flag is enabled
+   * Update the current observation (via the ObservationManager) with state of UI widgets
+   * ONLY if the automatic update flag is enabled.
+   * 
+   * If the observation changes, it updates the event's changed flag (MAIN | UV | NONE)
+   * to fire an observation refresh event.
    *
-   * Invoked by ObservationManager ... TODO
-   * @param event event
+   * @param event update event
    */
   private void onUpdateObservation(final UpdateObservationEvent event) {
     // check if the automatic update flag is enabled :
@@ -1001,7 +997,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
       changed |= this.om.setNightRestriction(this.jCheckBoxNightLimit.isSelected());
 
       if (changed) {
-        // update change flag to make the om fire an observation refresh event later
+        // update change flag to make the ObservationManager fire an observation refresh event later
         event.setChanged(UpdateObservationEvent.ChangeType.MAIN);
       }
     }
