@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationListener.java,v 1.2 2011-01-28 16:32:35 mella Exp $"
+ * "@(#) $Id: ObservationListener.java,v 1.3 2011-01-31 15:24:48 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2011/01/28 16:32:35  mella
+ * Add new observationEvents (CHANGED replaced by DO_UPDATE, REFRESH and REFRESH_UV)
+ * Modify the observationListener interface
+ *
  * Revision 1.1  2011/01/27 17:03:38  bourgesl
  * new package event
  *
@@ -35,16 +39,15 @@
  ******************************************************************************/
 package fr.jmmc.aspro.model.event;
 
-
 /**
  * This interface define the methods to be implemented by observation listener
  * @author bourgesl
  */
 public interface ObservationListener {
 
-    /**
-     * Handle the given observation event
-     * @param event
-     */
-    public void onProcess(ObservationEvent event);
+  /**
+   * Handle the given observation event
+   * @param event observation event
+   */
+  public void onProcess(ObservationEvent event);
 }
