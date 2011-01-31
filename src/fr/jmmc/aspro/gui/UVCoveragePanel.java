@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.76 2011-01-28 16:32:35 mella Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.77 2011-01-31 13:27:16 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.76  2011/01/28 16:32:35  mella
+ * Add new observationEvents (CHANGED replaced by DO_UPDATE, REFRESH and REFRESH_UV)
+ * Modify the observationListener interface
+ *
  * Revision 1.75  2011/01/27 17:10:34  bourgesl
  * use target changed event to update the target combo box
  * use current observability data to compute UV Coverage (service)
@@ -1302,7 +1306,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
   }
 
   /**
-   * TODO
+   * Fire an Observation Change event when a Swing component changed
+   * ONLY if the automatic update flag is enabled
    */
   private void fireObservationUpdateEvent() {
     // check if the automatic update flag is enabled :
@@ -1406,21 +1411,22 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     }
   }
 
+
   /**
-   * Update the observation with the form fields if the automatic update flag is enabled
+   * Update the current observation (via the ObservationManager) with state of UI widgets
+   * ONLY if the automatic update flag is enabled.
    *
-   * Invoked by ObservationManager ... TODO
-   * @param event event
+   * If the observation changes, it updates the event's changed flag (MAIN | UV | NONE)
+   * to fire an observation refresh event.
+   *
+   * @param event update event
    */
   private void onUpdateObservation(final UpdateObservationEvent event) {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("observation :\n" + ObservationManager.toString(event.getObservation()));
     }
 
-    // When the observation changes, it means that the observability will be computed in background,
-    // and soon an ObservabilityDone event will be sent.
-
-    // Only refresh the UI widgets and NOT the plot :
+    // Refresh the UI widgets related to Observation Main changes :
 
     // disable the automatic update observation :
     final boolean prevAutoUpdateObservation = this.setAutoUpdateObservation(false);
@@ -1448,13 +1454,13 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       if (DEBUG_UPDATE_EVENT) {
         logger.log(Level.SEVERE, "UPDATE", new Throwable());
       }
-      boolean changed = false;
-
       final String targetName = getSelectedTargetName();
 
       if (logger.isLoggable(Level.FINE)) {
         logger.fine("onUpdateObservation : " + targetName);
       }
+
+      boolean changed = false;
 
       // Change the instrument mode :
       changed |= this.om.setInstrumentMode((String) this.jComboBoxInstrumentMode.getSelectedItem());
@@ -1482,7 +1488,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       changed |= this.om.setAtmosphereQuality(AtmosphereQualityUtils.getAtmosphereQuality((String) this.jComboBoxAtmQual.getSelectedItem()));
 
       if (changed) {
-        // update change flag to make the om fire an observation refresh event later
+        // update change flag to make the ObservationManager fire an observation refresh event later
         event.setChanged(UpdateObservationEvent.ChangeType.UV);
       }
     }
@@ -1509,8 +1515,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         this.onUpdateObservation((UpdateObservationEvent) event);
         break;
       case REFRESH_UV:
-        // refreshPlot();
-        // TODO test 
         this.plot(event.getObservation());
         break;
       case OBSERVABILITY_DONE:
