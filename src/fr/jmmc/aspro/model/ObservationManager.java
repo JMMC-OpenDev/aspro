@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationManager.java,v 1.53 2011-01-28 16:32:36 mella Exp $"
+ * "@(#) $Id: ObservationManager.java,v 1.54 2011-01-31 13:30:38 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.53  2011/01/28 16:32:36  mella
+ * Add new observationEvents (CHANGED replaced by DO_UPDATE, REFRESH and REFRESH_UV)
+ * Modify the observationListener interface
+ *
  * Revision 1.52  2011/01/27 17:11:10  bourgesl
  * updated listeners in javadoc
  *
@@ -223,17 +227,19 @@ public final class ObservationManager extends BaseOIManager {
   /** Class logger */
   private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
+  /** flag to log a stack trace in method fireEvent() to debug events */
+  private final static boolean DEBUG_FIRE_EVENT = false;
   /** singleton pattern */
-  private static ObservationManager instance = new ObservationManager();
+  private static final ObservationManager instance = new ObservationManager();
   /* members */
   /** configuration manager */
   private final ConfigurationManager cm = ConfigurationManager.getInstance();
+  /** observation listeners */
+  private final CopyOnWriteArrayList<ObservationListener> listeners = new CopyOnWriteArrayList<ObservationListener>();
   /** observation settings */
   private ObservationSetting observation = null;
   /** associated file to the observation settings */
   private File observationFile = null;
-  /** observation listeners */
-  private final CopyOnWriteArrayList<ObservationListener> listeners = new CopyOnWriteArrayList<ObservationListener>();
 
   /**
    * Return the ObservationManager singleton
@@ -248,15 +254,6 @@ public final class ObservationManager extends BaseOIManager {
    */
   private ObservationManager() {
     super();
-    createObservation();
-  }
-
-  /**
-   * Create a new observation (empty) with default values
-   */
-  private void createObservation() {
-    this.observation = new ObservationSetting();
-    defineDefaults(this.observation);
   }
 
   /**
@@ -268,11 +265,27 @@ public final class ObservationManager extends BaseOIManager {
   }
 
   /**
+   * Private : define the current observation
+   * @param obs new observation to use
+   */
+  private void setObservation(final ObservationSetting obs) {
+    this.observation = obs;
+  }
+
+  /**
    * Return the current observation file
    * @return the current observation file or null if undefined
    */
   public File getObservationFile() {
     return this.observationFile;
+  }
+
+  /**
+   * Private : define the current observation file
+   * @param file new observation file to use
+   */
+  private void setObservationFile(final File file) {
+    this.observationFile = file;
   }
 
   // --- MAIN FUNCTIONS --------------------------------------------------------
@@ -285,6 +298,9 @@ public final class ObservationManager extends BaseOIManager {
     logger.info("Reset observation");
 
     final ObservationSetting newObservation = new ObservationSetting();
+
+    setObservationFile(null);
+
     changeObservation(newObservation);
   }
 
@@ -298,16 +314,16 @@ public final class ObservationManager extends BaseOIManager {
    */
   public void load(final File file) throws IOException, IllegalStateException, IllegalArgumentException {
     if (file != null) {
-      this.observationFile = file;
-
       if (logger.isLoggable(Level.INFO)) {
-        logger.info("Load observation from : " + this.observationFile);
+        logger.info("Load observation from : " + file);
       }
-      final Object loaded = loadObject(this.observationFile);
+      final Object loaded = loadObject(file);
 
       if (!(loaded instanceof ObservationSetting)) {
         throw new IllegalArgumentException("The loaded file does not correspond to a valid Aspro2 file : " + file);
       }
+
+      setObservationFile(file);
 
       final ObservationSetting newObservation = (ObservationSetting) loaded;
 
@@ -321,6 +337,8 @@ public final class ObservationManager extends BaseOIManager {
 
   /**
    * Load an observation from the given reader
+   * Used by SearchCalSampMessageHandler
+   * 
    * @param reader any reader
    * @return loaded observation
    *
@@ -359,7 +377,7 @@ public final class ObservationManager extends BaseOIManager {
     defineDefaults(newObservation);
 
     // change the current observation :
-    this.observation = newObservation;
+    setObservation(newObservation);
 
     // fire an observation load event :
     this.fireObservationLoaded();
@@ -377,10 +395,8 @@ public final class ObservationManager extends BaseOIManager {
    */
   public void save(final File file) throws IOException, IllegalStateException {
     if (file != null) {
-      this.observationFile = file;
-
       if (logger.isLoggable(Level.INFO)) {
-        logger.info("Save observation to : " + this.observationFile);
+        logger.info("Save observation to : " + file);
       }
 
       final ObservationSetting saveObservation = getObservation();
@@ -388,7 +404,9 @@ public final class ObservationManager extends BaseOIManager {
       // pre save processing :
       ObservationFileProcessor.onSave(saveObservation);
 
-      saveObject(this.observationFile, saveObservation);
+      saveObject(file, saveObservation);
+
+      setObservationFile(file);
     }
   }
 
@@ -498,7 +516,7 @@ public final class ObservationManager extends BaseOIManager {
 
   /**
    * This fires an observation refresh event to all registered listeners.
-   * TODO
+   * TODO javadoc...
    *
    * Listeners : BasicObservationForm / InterferometerMapPanel / ObservabilityPanel / UVCoveragePanel / OIFitsPanel
    */
@@ -512,7 +530,7 @@ public final class ObservationManager extends BaseOIManager {
 
   /**
    * This fires an observation refresh UV event to all registered listeners.
-   * TODO
+   * TODO javadoc...
    *
    * Listeners : UVCoveragePanel
    */
@@ -575,6 +593,9 @@ public final class ObservationManager extends BaseOIManager {
     // ensure events are fired by Swing EDT :
     if (!SwingUtilities.isEventDispatchThread()) {
       logger.log(Level.SEVERE, "invalid thread : use EDT", new Throwable());
+    }
+    if (DEBUG_FIRE_EVENT) {
+      logger.log(Level.SEVERE, "FIRE " + event, new Throwable());
     }
 
     if (logger.isLoggable(Level.FINE)) {
@@ -1166,7 +1187,7 @@ public final class ObservationManager extends BaseOIManager {
    */
   private void defineDefaults(final ObservationSetting newObservation) throws IllegalStateException {
     if (newObservation.getName() == null || newObservation.getName().length() == 0) {
-      this.observation.setName("default");
+      newObservation.setName("default");
     }
     if (newObservation.getWhen() == null) {
       final WhenSetting when = new WhenSetting();
@@ -1270,7 +1291,7 @@ public final class ObservationManager extends BaseOIManager {
    * @return true if instrument configuration is fixed
    */
   private boolean fixInstrumentConfigurationStations(final String interferometerConfiguration,
-          final FocalInstrumentConfigurationChoice instrumentChoice) {
+                                                     final FocalInstrumentConfigurationChoice instrumentChoice) {
     boolean res = false;
 
     // trim to be sure (xml manually modified) :
