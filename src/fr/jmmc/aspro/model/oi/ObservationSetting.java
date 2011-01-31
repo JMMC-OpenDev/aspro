@@ -353,26 +353,9 @@ public class ObservationSetting
   public final void setObservabilityData(final fr.jmmc.aspro.model.observability.ObservabilityData obsData) {
     this.observabilityData = obsData;
   }
+
   // TODO : store UVCoverageData also
-  /** warning container (read only) */
-  @javax.xml.bind.annotation.XmlTransient
-  private fr.jmmc.aspro.model.WarningContainer warningContainer = null;
 
-  /**
-   * Return the warning container (read only)
-   * @return warning container or null
-   */
-  public final fr.jmmc.aspro.model.WarningContainer getWarningContainer() {
-    return this.warningContainer;
-  }
-
-  /**
-   * Define the warning container (read only)
-   * @param warningContainer warning container
-   */
-  public final void setWarningContainer(final fr.jmmc.aspro.model.WarningContainer warningContainer) {
-    this.warningContainer = warningContainer;
-  }
   /** computed OIFits structure (read only) */
   @javax.xml.bind.annotation.XmlTransient
   private fr.jmmc.oitools.model.OIFitsFile oiFitsFile = null;
@@ -413,7 +396,6 @@ public class ObservationSetting
     // clear computed fields :
     copy.observabilityData = null;
     copy.oiFitsFile = null;
-    copy.warningContainer = null;
 
     // Deep copy child objects :
     if (copy.when != null) {
