@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.77 2011-01-31 13:27:16 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.78 2011-01-31 15:29:08 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.77  2011/01/31 13:27:16  bourgesl
+ * updated java doc
+ *
  * Revision 1.76  2011/01/28 16:32:35  mella
  * Add new observationEvents (CHANGED replaced by DO_UPDATE, REFRESH and REFRESH_UV)
  * Modify the observationListener interface
@@ -343,7 +346,7 @@ import org.jfree.ui.TextAnchor;
  * @author bourgesl
  */
 public final class UVCoveragePanel extends javax.swing.JPanel implements ChartProgressListener, ZoomEventListener,
-        ActionListener, ChangeListener, ObservationListener, Observer, PDFExportable, Disposable {
+                                                                         ActionListener, ChangeListener, ObservationListener, Observer, PDFExportable, Disposable {
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
@@ -1411,7 +1414,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     }
   }
 
-
   /**
    * Update the current observation (via the ObservationManager) with state of UI widgets
    * ONLY if the automatic update flag is enabled.
@@ -1569,10 +1571,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
       // TODO : do not share results !
 
-      // first reset the warning container in the current observation using Swing EDT :
-      om.setWarningContainer(null);
-      // then reset the OIFits structure in the current observation using Swing EDT :
+      // reset the OIFits structure in the current observation using Swing EDT :
       om.setOIFitsFile(null);
+
 
       /* get plot options from swing components */
 
@@ -1650,9 +1651,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
      * @param colorModel color model to use
      */
     private UVCoverageSwingWorker(final UVCoveragePanel uvPanel, final ObservationSetting observation,
-            final ObservabilityData obsData, final String targetName,
-            final double uvMax, final boolean doUVSupport,
-            final boolean doModelImage, final ImageMode imageMode, final int imageSize, final IndexColorModel colorModel) {
+                                  final ObservabilityData obsData, final String targetName,
+                                  final double uvMax, final boolean doUVSupport,
+                                  final boolean doModelImage, final ImageMode imageMode, final int imageSize, final IndexColorModel colorModel) {
       // get current observation version :
       super(AsproTaskRegistry.TASK_UV_COVERAGE, observation.getVersion());
       this.uvPanel = uvPanel;
@@ -1688,8 +1689,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     public void refreshUI(final UVCoverageData uvData) {
 //      if (this.observation.getVersion() == this.getVersion()) {
 
-      // update the warning container in the current observation :
-      ObservationManager.getInstance().setWarningContainer(uvData.getWarningContainer());
+      // Fire a warnings ready event :
+      ObservationManager.getInstance().fireWarningsReady(uvData.getWarningContainer());
 
       // update the OIFits structure in the current observation :
       ObservationManager.getInstance().setOIFitsFile(uvData.getOiFitsFile());
@@ -1756,8 +1757,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
    * @param uvData computed UV Coverage data
    */
   private void updatePlot(final ObservationSetting observation,
-          final ObservabilityData obsData,
-          final UVCoverageData uvData) {
+                          final ObservabilityData obsData,
+                          final UVCoverageData uvData) {
 
     if (uvData.getName() == null) {
       // Baseline limits case :
@@ -1922,9 +1923,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
      * @param colorModel color model to use
      */
     private UVMapSwingWorker(final UVCoveragePanel uvPanel, final int version, final List<Model> models,
-            final Rectangle2D.Float uvRect,
-            final Float refMin, final Float refMax,
-            final ImageMode imageMode, final int imageSize, final IndexColorModel colorModel) {
+                             final Rectangle2D.Float uvRect,
+                             final Float refMin, final Float refMax,
+                             final ImageMode imageMode, final int imageSize, final IndexColorModel colorModel) {
       super(AsproTaskRegistry.TASK_UV_MAP, version);
       this.uvPanel = uvPanel;
       this.models = models;

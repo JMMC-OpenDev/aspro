@@ -1,11 +1,16 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationManager.java,v 1.54 2011-01-31 13:30:38 bourgesl Exp $"
+ * "@(#) $Id: ObservationManager.java,v 1.55 2011-01-31 15:29:13 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.54  2011/01/31 13:30:38  bourgesl
+ * add and use setObservation and setObservationFile to clarify code
+ * at initialisation, it does not create an observation anymore : use load or reset to have an observation and send observation events to observation listeners
+ * updated java doc
+ *
  * Revision 1.53  2011/01/28 16:32:36  mella
  * Add new observationEvents (CHANGED replaced by DO_UPDATE, REFRESH and REFRESH_UV)
  * Modify the observationListener interface
@@ -193,6 +198,7 @@ import fr.jmmc.aspro.model.observability.ObservabilityData;
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.event.ObservationEvent;
 import fr.jmmc.aspro.model.event.UpdateObservationEvent;
+import fr.jmmc.aspro.model.event.WarningContainerEvent;
 import fr.jmmc.aspro.model.oi.AtmosphereQuality;
 import fr.jmmc.aspro.model.oi.FocalInstrumentConfigurationChoice;
 import fr.jmmc.aspro.model.oi.InterferometerConfigurationChoice;
@@ -460,32 +466,43 @@ public final class ObservationManager extends BaseOIManager {
   }
 
   /**
-   * This fires an observation change event to all registered listeners.
-   * TODO javadoc...
+   * This fires an observation update event to all registered listeners.
+   * Fired by [BasicObservationForm|UVCoveragePanel].fireObservationUpdateEvent()
+   * when a Swing component changed
+   *
+   * Listeners : BasicObservationForm / UVCoveragePanel
    */
   public void fireObservationUpdate() {
     fireObservationUpdate(false);
   }
 
   /**
-   * This fires an observation change event to all registered listeners.
-   * TODO javadoc...
+   * This fires an observation update event to all registered listeners.
+   * Fired by [BasicObservationForm|UVCoveragePanel].fireObservationUpdateEvent()
+   * when a Swing component changed
+   *
+   * Listeners : BasicObservationForm / UVCoveragePanel
+   *
+   * @param forceRefresh flag to force an observation refresh event (MAIN)
    */
   private void fireObservationUpdate(final boolean forceRefresh) {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("fireObservationUpdate : " + toString(getObservation()));
     }
 
-    final UpdateObservationEvent event = new UpdateObservationEvent(ObservationEventType.DO_UPDATE, getObservation());
+    final UpdateObservationEvent event = new UpdateObservationEvent(getObservation());
 
     fireEvent(event);
 
     if (forceRefresh) {
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("fireObservationUpdate : FORCE REFRESH - changed = " + event.getChanged());
+      }
       event.setChanged(UpdateObservationEvent.ChangeType.MAIN);
-    }
-
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("fireObservationUpdate : changed = " + event.getChanged());
+    } else {
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("fireObservationUpdate : changed = " + event.getChanged());
+      }
     }
 
     // Handle event result :
@@ -510,15 +527,15 @@ public final class ObservationManager extends BaseOIManager {
         default:
           break;
       }
-
     }
   }
 
   /**
-   * This fires an observation refresh event to all registered listeners.
-   * TODO javadoc...
+   * This fires an observation refresh event (MAIN) to all registered listeners.
+   * Fired by fireObservationUpdate() <= [BasicObservationForm|UVCoveragePanel].fireObservationUpdateEvent()
+   * when the observation changed (or force refresh)
    *
-   * Listeners : BasicObservationForm / InterferometerMapPanel / ObservabilityPanel / UVCoveragePanel / OIFitsPanel
+   * Listeners : BasicObservationForm / InterferometerMapPanel / ObservabilityPanel / OIFitsPanel
    */
   private void fireObservationRefresh() {
     if (logger.isLoggable(Level.FINE)) {
@@ -529,10 +546,11 @@ public final class ObservationManager extends BaseOIManager {
   }
 
   /**
-   * This fires an observation refresh UV event to all registered listeners.
-   * TODO javadoc...
+   * This fires an observation refresh event (UV) to all registered listeners.
+   * Fired by fireObservationUpdate() <= [BasicObservationForm|UVCoveragePanel].fireObservationUpdateEvent()
+   * when the observation changed only UV related information
    *
-   * Listeners : UVCoveragePanel
+   * Listeners : BasicObservationForm / UVCoveragePanel
    */
   private void fireObservationRefreshUV() {
     if (logger.isLoggable(Level.FINE)) {
@@ -544,7 +562,7 @@ public final class ObservationManager extends BaseOIManager {
 
   /**
    * This fires an observability done event to all registered listeners.
-   * Fired by setObservabilityData() <- ObservabilityPanel.ObservabilitySwingWorker.refreshUI() (EDT) when the observability is computed
+   * Fired by setObservabilityData() <= ObservabilityPanel.ObservabilitySwingWorker.refreshUI() (EDT) when the observability is computed
    *
    * Listeners : UVCoveragePanel
    */
@@ -557,22 +575,24 @@ public final class ObservationManager extends BaseOIManager {
   }
 
   /**
-   * This fires a warning ready event to all registered listeners.
-   * Fired by setWarningContainer() <- UVCoveragePanel.UVCoverageSwingWorker.refreshUI() (EDT) when the warnings are defined
+   * This fires a warnings ready event to all registered listeners.
+   * Fired by UVCoveragePanel.UVCoverageSwingWorker.refreshUI() (EDT) when warnings are defined
    *
    * Listeners : BasicObservationForm
+   *
+   * @param warningContainer warning container
    */
-  private void fireWarningsReady() {
+  public void fireWarningsReady(final WarningContainer warningContainer) {
     if (logger.isLoggable(Level.FINE)) {
-      logger.fine("fireOIFitsDone : " + toString(getObservation()));
+      logger.fine("fireWarningsReady : " + toString(getObservation()));
     }
 
-    fireEvent(new ObservationEvent(ObservationEventType.WARNINGS_READY, getObservation()));
+    fireEvent(new WarningContainerEvent(warningContainer));
   }
 
   /**
    * This fires an OIFits done event to all registered listeners.
-   * Fired by setOIFitsFile() <- UVCoveragePanel.UVCoverageSwingWorker.refreshUI() (EDT) when the OIFits is computed
+   * Fired by setOIFitsFile() <= UVCoveragePanel.UVCoverageSwingWorker.refreshUI() (EDT) when the OIFits is computed
    *
    * Listeners : SettingPanel / OIFitsPanel
    */
@@ -1140,24 +1160,6 @@ public final class ObservationManager extends BaseOIManager {
 
     if (obsData != null) {
       this.fireObservabilityDone();
-    }
-  }
-
-  /**
-   * Defines the warning container in the observation for later reuse
-   * Used by UVCoveragePanel.UVCoverageSwingWorker.refreshUI()
-   *
-   * @param warningContainer OIFits structure
-   */
-  public void setWarningContainer(final WarningContainer warningContainer) {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("setWarningContainer : " + warningContainer);
-    }
-
-    getObservation().setWarningContainer(warningContainer);
-
-    if (warningContainer != null) {
-      this.fireWarningsReady();
     }
   }
 

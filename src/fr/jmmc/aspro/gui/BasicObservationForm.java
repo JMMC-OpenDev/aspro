@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BasicObservationForm.java,v 1.56 2011-01-31 13:28:37 bourgesl Exp $"
+ * "@(#) $Id: BasicObservationForm.java,v 1.57 2011-01-31 15:29:00 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.56  2011/01/31 13:28:37  bourgesl
+ * removed initialisation code in postInit() in favor of observation events
+ * updated java doc
+ *
  * Revision 1.55  2011/01/28 16:32:36  mella
  * Add new observationEvents (CHANGED replaced by DO_UPDATE, REFRESH and REFRESH_UV)
  * Modify the observationListener interface
@@ -182,6 +186,7 @@ import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.WarningContainer;
 import fr.jmmc.aspro.model.event.ObservationEvent;
 import fr.jmmc.aspro.model.event.UpdateObservationEvent;
+import fr.jmmc.aspro.model.event.WarningContainerEvent;
 import fr.jmmc.aspro.model.oi.FocalInstrumentConfigurationChoice;
 import fr.jmmc.aspro.model.oi.InterferometerConfiguration;
 import fr.jmmc.aspro.model.oi.InterferometerConfigurationChoice;
@@ -1026,8 +1031,11 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
       case REFRESH:
         this.resetStatus();
         break;
+      case REFRESH_UV:
+        this.resetStatus();
+        break;
       case WARNINGS_READY:
-        this.updateStatus(event.getObservation().getWarningContainer());
+        this.updateStatus(((WarningContainerEvent) event).getWarningContainer());
         break;
       default:
     }
@@ -1050,9 +1058,11 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
   private void updateStatus(final WarningContainer warningContainer) {
     if (warningContainer == null || !warningContainer.hasWarningMessages()) {
       // reset
-      this.jLabelStatus.setIcon(null);
-      this.jLabelStatus.setText("Ok");
-      this.jLabelStatus.setToolTipText(null);
+      if (this.jLabelStatus.getIcon() != null) {
+        this.jLabelStatus.setIcon(null);
+        this.jLabelStatus.setText("Ok");
+        this.jLabelStatus.setToolTipText(null);
+      }
     } else {
       this.jLabelStatus.setIcon(this.warningIcon);
       this.jLabelStatus.setText("Warning");

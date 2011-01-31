@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityPanel.java,v 1.54 2011-01-28 16:32:35 mella Exp $"
+ * "@(#) $Id: ObservabilityPanel.java,v 1.55 2011-01-31 15:29:10 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.54  2011/01/28 16:32:35  mella
+ * Add new observationEvents (CHANGED replaced by DO_UPDATE, REFRESH and REFRESH_UV)
+ * Modify the observationListener interface
+ *
  * Revision 1.53  2011/01/27 17:06:17  bourgesl
  * clear all computed results (warning, oifits)
  * do not propagate observability_done event for baseline limits case
@@ -683,9 +687,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
     // TODO : do not share results !
 
-    // first reset the warning container in the current observation using Swing EDT :
-    ObservationManager.getInstance().setWarningContainer(null);
-    // then reset the OIFits structure in the current observation using Swing EDT :
+    // reset the OIFits structure in the current observation using Swing EDT :
     ObservationManager.getInstance().setOIFitsFile(null);
 
 
