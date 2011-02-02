@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetEditorDialog.java,v 1.13 2011-01-26 17:21:11 bourgesl Exp $"
+ * "@(#) $Id: TargetEditorDialog.java,v 1.14 2011-02-02 17:43:21 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.13  2011/01/26 17:21:11  bourgesl
+ * use deepClone (target/models ...)
+ *
  * Revision 1.12  2011/01/10 12:45:37  bourgesl
  * added targetEditorActive flag to disable SearchCal Samp action
  *
@@ -119,8 +122,8 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
 
       final ObservationManager om = ObservationManager.getInstance();
 
-      // use deep copy of the current observation to allow OK/cancel actions :
-      final ObservationSetting cloned = om.getObservation().deepClone();
+      // use deep copy of the current main observation to allow OK/cancel actions :
+      final ObservationSetting cloned = om.getMainObservation().deepClone();
 
       // Prepare the data model (editable targets and user infos) :
       final List<Target> targets = cloned.getTargets();
