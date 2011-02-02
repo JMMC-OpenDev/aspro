@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: InterferometerMapPanel.java,v 1.14 2011-01-28 16:32:36 mella Exp $"
+ * "@(#) $Id: InterferometerMapPanel.java,v 1.15 2011-02-02 17:39:01 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.14  2011/01/28 16:32:36  mella
+ * Add new observationEvents (CHANGED replaced by DO_UPDATE, REFRESH and REFRESH_UV)
+ * Modify the observationListener interface
+ *
  * Revision 1.13  2011/01/27 17:04:22  bourgesl
  * renamed chart vars
  *
@@ -91,7 +95,7 @@ import org.jfree.ui.TextAnchor;
  * @author bourgesl
  */
 public final class InterferometerMapPanel extends javax.swing.JPanel implements ChartProgressListener, ZoomEventListener,
-        ObservationListener, PDFExportable {
+                                                                                ObservationListener, PDFExportable {
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
@@ -173,10 +177,13 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
    * @return PDF default file name
    */
   public String getPDFDefaultFileName() {
+    // TODO MULTI-CONF : adjust file name if multi configurations ...
+
+    // now : use the main observation :
+    final ObservationSetting observation = ObservationManager.getInstance().getMainObservation();
+
     final StringBuilder sb = new StringBuilder(16);
     sb.append("MAP_");
-
-    final ObservationSetting observation = ObservationManager.getInstance().getObservation();
 
     final String intConfName = observation.getInterferometerConfiguration().getName();
     final String altIntConfName = intConfName.replaceAll("[^a-zA-Z_0-9]", "_");
