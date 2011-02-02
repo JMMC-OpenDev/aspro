@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationManager.java,v 1.55 2011-01-31 15:29:13 bourgesl Exp $"
+ * "@(#) $Id: ObservationManager.java,v 1.56 2011-02-02 17:42:50 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.55  2011/01/31 15:29:13  bourgesl
+ * use WarningContainerEvent instead of shared warning in observation
+ * modified fireWarningsReady(warningContainer) to use WarningContainerEvent
+ *
  * Revision 1.54  2011/01/31 13:30:38  bourgesl
  * add and use setObservation and setObservationFile to clarify code
  * at initialisation, it does not create an observation anymore : use load or reset to have an observation and send observation events to observation listeners
@@ -196,6 +200,7 @@ import fr.jmmc.aspro.model.event.ObservationListener;
 import fr.jmmc.aspro.model.event.ObservationEventType;
 import fr.jmmc.aspro.model.observability.ObservabilityData;
 import fr.jmmc.aspro.AsproConstants;
+import fr.jmmc.aspro.model.event.ObservabilityEvent;
 import fr.jmmc.aspro.model.event.ObservationEvent;
 import fr.jmmc.aspro.model.event.UpdateObservationEvent;
 import fr.jmmc.aspro.model.event.WarningContainerEvent;
@@ -242,10 +247,12 @@ public final class ObservationManager extends BaseOIManager {
   private final ConfigurationManager cm = ConfigurationManager.getInstance();
   /** observation listeners */
   private final CopyOnWriteArrayList<ObservationListener> listeners = new CopyOnWriteArrayList<ObservationListener>();
-  /** observation settings */
-  private ObservationSetting observation = null;
+  /** main observation settings */
+  private ObservationSetting mainObservation = null;
   /** associated file to the observation settings */
   private File observationFile = null;
+  /** derived observation settings for computations */
+  private ObservationSetting observation = null;
 
   /**
    * Return the ObservationManager singleton
@@ -263,16 +270,51 @@ public final class ObservationManager extends BaseOIManager {
   }
 
   /**
-   * Return the current observation
-   * @return current observation
+   * Return the main observation
+   * @return main observation
+   */
+  public ObservationSetting getMainObservation() {
+    return this.mainObservation;
+  }
+
+  /**
+   * Private : define the main observation
+   * @param obs new main observation to set
+   */
+  private void setMainObservation(final ObservationSetting obs) {
+    this.mainObservation = obs;
+  }
+
+  /**
+   * TODO : update observation used for computations from main observation
+   */
+  private void synchronizeObservations() {
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("synchronizeObservations : " + toString(getMainObservation()));
+    }
+
+    // clone observation to ensure consistency (Swing can modify observation while the worker thread is running) :
+    final ObservationSetting obs = (ObservationSetting) getMainObservation().clone();
+
+    // TODO MULTI-CONF : use multi observations instead of main observation ?
+
+    setObservation(obs);
+  }
+
+  /**
+   * Return the observation used for computations
+   * 
+   * TODO MULTI-CONF : analyze usages to see bad usages (main or compute)
+   *
+   * @return observation used for computations
    */
   public ObservationSetting getObservation() {
     return this.observation;
   }
 
   /**
-   * Private : define the current observation
-   * @param obs new observation to use
+   * Private : define the observation used for computations
+   * @param obs new observation to use for computations
    */
   private void setObservation(final ObservationSetting obs) {
     this.observation = obs;
@@ -383,7 +425,7 @@ public final class ObservationManager extends BaseOIManager {
     defineDefaults(newObservation);
 
     // change the current observation :
-    setObservation(newObservation);
+    setMainObservation(newObservation);
 
     // fire an observation load event :
     this.fireObservationLoaded();
@@ -405,7 +447,7 @@ public final class ObservationManager extends BaseOIManager {
         logger.info("Save observation to : " + file);
       }
 
-      final ObservationSetting saveObservation = getObservation();
+      final ObservationSetting saveObservation = getMainObservation();
 
       // pre save processing :
       ObservationFileProcessor.onSave(saveObservation);
@@ -441,10 +483,10 @@ public final class ObservationManager extends BaseOIManager {
    */
   private void fireObservationLoaded() {
     if (logger.isLoggable(Level.FINE)) {
-      logger.fine("fireObservationLoaded : " + toString(getObservation()));
+      logger.fine("fireObservationLoaded : " + toString(getMainObservation()));
     }
 
-    fireEvent(new ObservationEvent(ObservationEventType.LOADED, getObservation()));
+    fireEvent(new ObservationEvent(ObservationEventType.LOADED, getMainObservation()));
   }
 
   /**
@@ -454,15 +496,15 @@ public final class ObservationManager extends BaseOIManager {
    * Listeners : BasicObservationForm / SettingPanel / UVCoveragePanel
    */
   private void fireObservationTargetsChanged() {
-    // Update observation version :
-    getObservation().incTargetVersion();
+    // Increment target version of the main observation :
+    getMainObservation().getVersion().incTargetVersion();
 
     if (logger.isLoggable(Level.FINE)) {
-      logger.fine("fireObservationTargetsChanged : " + toString(getObservation()));
-      logger.fine("target version = " + getObservation().getTargetVersion());
+      logger.fine("fireObservationTargetsChanged : " + toString(getMainObservation()));
+      logger.fine("observation version = " + getMainObservation().getVersion());
     }
 
-    fireEvent(new ObservationEvent(ObservationEventType.TARGET_CHANGED, getObservation()));
+    fireEvent(new ObservationEvent(ObservationEventType.TARGET_CHANGED, getMainObservation()));
   }
 
   /**
@@ -477,7 +519,8 @@ public final class ObservationManager extends BaseOIManager {
   }
 
   /**
-   * This fires an observation update event to all registered listeners.
+   * This fires an observation update event to all registered listeners
+   * and then fires an observation refresh event (MAIN or UV) if anything changed.
    * Fired by [BasicObservationForm|UVCoveragePanel].fireObservationUpdateEvent()
    * when a Swing component changed
    *
@@ -487,10 +530,10 @@ public final class ObservationManager extends BaseOIManager {
    */
   private void fireObservationUpdate(final boolean forceRefresh) {
     if (logger.isLoggable(Level.FINE)) {
-      logger.fine("fireObservationUpdate : " + toString(getObservation()));
+      logger.fine("fireObservationUpdate : " + toString(getMainObservation()));
     }
 
-    final UpdateObservationEvent event = new UpdateObservationEvent(getObservation());
+    final UpdateObservationEvent event = new UpdateObservationEvent(getMainObservation());
 
     fireEvent(event);
 
@@ -508,15 +551,30 @@ public final class ObservationManager extends BaseOIManager {
     // Handle event result :
     if (event.getChanged() != UpdateObservationEvent.ChangeType.NONE) {
 
-      // Update observation version :
-      getObservation().incVersion();
+      final ObservationVersion version = getMainObservation().getVersion();
 
-      // TODO : MULTI CONF : gerer synchro / clone ....
-
+      // Update versions first :
+      switch (event.getChanged()) {
+        case MAIN:
+          // Increment observation main and UV versions :
+          version.incMainVersion();
+          version.incUVVersion();
+          break;
+        case UV:
+          version.incUVVersion();
+          break;
+        default:
+          break;
+      }
       if (logger.isLoggable(Level.FINE)) {
-        logger.fine("observation version = " + getObservation().getVersion());
+        logger.fine("observation version = " + version);
       }
 
+      // then synchronize observations : main and used for computations :
+      // note: version object is copied too :
+      synchronizeObservations();
+
+      // finally fire refresh event :
       switch (event.getChanged()) {
         case MAIN:
           fireObservationRefresh();
@@ -538,6 +596,7 @@ public final class ObservationManager extends BaseOIManager {
    * Listeners : BasicObservationForm / InterferometerMapPanel / ObservabilityPanel / OIFitsPanel
    */
   private void fireObservationRefresh() {
+    // use observation for computations :
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("fireObservationRefresh : " + toString(getObservation()));
     }
@@ -553,6 +612,7 @@ public final class ObservationManager extends BaseOIManager {
    * Listeners : BasicObservationForm / UVCoveragePanel
    */
   private void fireObservationRefreshUV() {
+    // use observation for computations :
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("fireObservationRefreshUV : " + toString(getObservation()));
     }
@@ -565,13 +625,16 @@ public final class ObservationManager extends BaseOIManager {
    * Fired by setObservabilityData() <= ObservabilityPanel.ObservabilitySwingWorker.refreshUI() (EDT) when the observability is computed
    *
    * Listeners : UVCoveragePanel
+   * @param observation observation used to compute observability data (consistency)
+   * @param obsData observability data
    */
-  private void fireObservabilityDone() {
+  public void fireObservabilityDone(final ObservationSetting observation, final ObservabilityData obsData) {
+    // use given observation (corresponding to an observation for computations) :
     if (logger.isLoggable(Level.FINE)) {
-      logger.fine("fireObservabilityDone : " + toString(getObservation()));
+      logger.fine("fireObservabilityDone : " + toString(observation));
     }
 
-    fireEvent(new ObservationEvent(ObservationEventType.OBSERVABILITY_DONE, getObservation()));
+    fireEvent(new ObservabilityEvent(observation, obsData));
   }
 
   /**
@@ -583,11 +646,12 @@ public final class ObservationManager extends BaseOIManager {
    * @param warningContainer warning container
    */
   public void fireWarningsReady(final WarningContainer warningContainer) {
+    // use observation for computations :
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("fireWarningsReady : " + toString(getObservation()));
     }
 
-    fireEvent(new WarningContainerEvent(warningContainer));
+    fireEvent(new WarningContainerEvent(getObservation(), warningContainer));
   }
 
   /**
@@ -597,6 +661,7 @@ public final class ObservationManager extends BaseOIManager {
    * Listeners : SettingPanel / OIFitsPanel
    */
   private void fireOIFitsDone() {
+    // use observation for computations :
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("fireOIFitsDone : " + toString(getObservation()));
     }
@@ -615,7 +680,7 @@ public final class ObservationManager extends BaseOIManager {
       logger.log(Level.SEVERE, "invalid thread : use EDT", new Throwable());
     }
     if (DEBUG_FIRE_EVENT) {
-      logger.log(Level.SEVERE, "FIRE " + event, new Throwable());
+      logger.log(Level.SEVERE, "FIRE " + event + " on " + event.getObservation().getVersion(), new Throwable());
     }
 
     if (logger.isLoggable(Level.FINE)) {
@@ -642,7 +707,7 @@ public final class ObservationManager extends BaseOIManager {
    * @return true if the value changed
    */
   public boolean setWhen(final Date date) {
-    final WhenSetting when = getObservation().getWhen();
+    final WhenSetting when = getMainObservation().getWhen();
 
     final XMLGregorianCalendar newValue = getCalendar(date);
 
@@ -664,7 +729,7 @@ public final class ObservationManager extends BaseOIManager {
    * @return true if the value changed
    */
   public boolean setNightRestriction(final boolean useNightLimits) {
-    final WhenSetting when = getObservation().getWhen();
+    final WhenSetting when = getMainObservation().getWhen();
 
     final boolean changed = when.isNightRestriction() != useNightLimits;
     if (changed) {
@@ -684,7 +749,7 @@ public final class ObservationManager extends BaseOIManager {
    * @return true if the value changed
    */
   public boolean setAtmosphereQuality(final AtmosphereQuality atmQuality) {
-    final WhenSetting when = getObservation().getWhen();
+    final WhenSetting when = getMainObservation().getWhen();
 
     final boolean changed = !atmQuality.equals(when.getAtmosphereQuality());
     if (changed) {
@@ -705,7 +770,7 @@ public final class ObservationManager extends BaseOIManager {
    * @return true if the value changed
    */
   public boolean setMinElevation(final double minElev) {
-    final InterferometerConfigurationChoice interferometerChoice = getObservation().getInterferometerConfiguration();
+    final InterferometerConfigurationChoice interferometerChoice = getMainObservation().getInterferometerConfiguration();
 
     final boolean changed = interferometerChoice.getMinElevation() != minElev;
     if (changed) {
@@ -726,7 +791,7 @@ public final class ObservationManager extends BaseOIManager {
    * @return true if the value changed
    */
   public boolean setInterferometerConfigurationName(final String name) {
-    final InterferometerConfigurationChoice interferometerChoice = getObservation().getInterferometerConfiguration();
+    final InterferometerConfigurationChoice interferometerChoice = getMainObservation().getInterferometerConfiguration();
 
     final boolean changed = !name.equals(interferometerChoice.getName());
     if (changed) {
@@ -749,7 +814,7 @@ public final class ObservationManager extends BaseOIManager {
    * @return true if the value changed
    */
   public boolean setInstrumentConfigurationName(final String name) {
-    final FocalInstrumentConfigurationChoice instrumentChoice = getObservation().getInstrumentConfiguration();
+    final FocalInstrumentConfigurationChoice instrumentChoice = getMainObservation().getInstrumentConfiguration();
 
     final boolean changed = !name.equals(instrumentChoice.getName());
     if (changed) {
@@ -758,7 +823,7 @@ public final class ObservationManager extends BaseOIManager {
       }
       instrumentChoice.setName(name);
       instrumentChoice.setInstrumentConfiguration(this.cm.getInterferometerInstrumentConfiguration(
-              getObservation().getInterferometerConfiguration().getName(), name));
+              getMainObservation().getInterferometerConfiguration().getName(), name));
     }
     return changed;
   }
@@ -772,7 +837,7 @@ public final class ObservationManager extends BaseOIManager {
    * @return true if the value changed
    */
   public boolean setInstrumentConfigurationStations(final String stations) {
-    final FocalInstrumentConfigurationChoice instrumentChoice = getObservation().getInstrumentConfiguration();
+    final FocalInstrumentConfigurationChoice instrumentChoice = getMainObservation().getInstrumentConfiguration();
 
     final boolean changed = !stations.equals(instrumentChoice.getStations());
     if (changed) {
@@ -781,7 +846,8 @@ public final class ObservationManager extends BaseOIManager {
       }
       instrumentChoice.setStations(stations);
       instrumentChoice.setStationList(this.cm.getInstrumentConfigurationStations(
-              getObservation().getInterferometerConfiguration().getName(), getObservation().getInstrumentConfiguration().getName(), stations));
+              getMainObservation().getInterferometerConfiguration().getName(),
+              getMainObservation().getInstrumentConfiguration().getName(), stations));
     }
     return changed;
   }
@@ -795,7 +861,7 @@ public final class ObservationManager extends BaseOIManager {
    * @return true if the value changed
    */
   public boolean setInstrumentConfigurationPoPs(final String pops) {
-    final FocalInstrumentConfigurationChoice instrumentChoice = getObservation().getInstrumentConfiguration();
+    final FocalInstrumentConfigurationChoice instrumentChoice = getMainObservation().getInstrumentConfiguration();
 
     // pops can be null :
     final boolean changed = isChanged(pops, instrumentChoice.getPops());
@@ -805,7 +871,8 @@ public final class ObservationManager extends BaseOIManager {
       }
       instrumentChoice.setPops(pops);
       instrumentChoice.setPopList(this.cm.parseInstrumentPoPs(
-              getObservation().getInterferometerConfiguration().getName(), getObservation().getInstrumentConfiguration().getName(), pops));
+              getMainObservation().getInterferometerConfiguration().getName(),
+              getMainObservation().getInstrumentConfiguration().getName(), pops));
     }
     return changed;
   }
@@ -819,7 +886,7 @@ public final class ObservationManager extends BaseOIManager {
    * @return true if the value changed
    */
   public boolean setInstrumentMode(final String mode) {
-    final FocalInstrumentConfigurationChoice instrumentChoice = getObservation().getInstrumentConfiguration();
+    final FocalInstrumentConfigurationChoice instrumentChoice = getMainObservation().getInstrumentConfiguration();
 
     // mode can be null :
     final boolean changed = isChanged(mode, instrumentChoice.getInstrumentMode());
@@ -829,7 +896,8 @@ public final class ObservationManager extends BaseOIManager {
       }
       instrumentChoice.setInstrumentMode(mode);
       instrumentChoice.setFocalInstrumentMode(this.cm.getInstrumentMode(
-              getObservation().getInterferometerConfiguration().getName(), getObservation().getInstrumentConfiguration().getName(), mode));
+              getMainObservation().getInterferometerConfiguration().getName(),
+              getMainObservation().getInstrumentConfiguration().getName(), mode));
     }
     return changed;
   }
@@ -842,7 +910,7 @@ public final class ObservationManager extends BaseOIManager {
    * @return true if the value changed
    */
   public boolean setInstrumentSamplingPeriod(final Double samplingPeriod) {
-    final FocalInstrumentConfigurationChoice instrumentChoice = getObservation().getInstrumentConfiguration();
+    final FocalInstrumentConfigurationChoice instrumentChoice = getMainObservation().getInstrumentConfiguration();
 
     // period can be null :
     final boolean changed = isChanged(samplingPeriod, instrumentChoice.getSamplingPeriod());
@@ -863,7 +931,7 @@ public final class ObservationManager extends BaseOIManager {
    * @return true if the value changed
    */
   public boolean setInstrumentAcquisitionTime(final Double obsDuration) {
-    final FocalInstrumentConfigurationChoice instrumentChoice = getObservation().getInstrumentConfiguration();
+    final FocalInstrumentConfigurationChoice instrumentChoice = getMainObservation().getInstrumentConfiguration();
 
     // obsDuration can be null :
     final boolean changed = isChanged(obsDuration, instrumentChoice.getAcquisitionTime());
@@ -883,7 +951,7 @@ public final class ObservationManager extends BaseOIManager {
    * @return target or null if the target is not found
    */
   public Target getTarget(final String name) {
-    return getObservation().getTarget(name);
+    return getMainObservation().getTarget(name);
   }
 
   /**
@@ -891,7 +959,7 @@ public final class ObservationManager extends BaseOIManager {
    * @return list of all targets
    */
   public List<Target> getTargets() {
-    return getObservation().getTargets();
+    return getMainObservation().getTargets();
   }
 
   /**
@@ -899,7 +967,7 @@ public final class ObservationManager extends BaseOIManager {
    * @return target user informations
    */
   public TargetUserInformations getTargetUserInfos() {
-    return getObservation().getOrCreateTargetUserInfos();
+    return getMainObservation().getOrCreateTargetUserInfos();
   }
 
   /**
@@ -919,7 +987,7 @@ public final class ObservationManager extends BaseOIManager {
    * @return displayable list of targets
    */
   public List<Target> getDisplayTargets() {
-    return getObservation().getDisplayTargets();
+    return getMainObservation().getDisplayTargets();
   }
 
   /**
@@ -1041,10 +1109,10 @@ public final class ObservationManager extends BaseOIManager {
     targets.clear();
     targets.addAll(newTargets);
 
-    getObservation().setTargetUserInfos(newTargetUserInfos);
+    getMainObservation().setTargetUserInfos(newTargetUserInfos);
 
     // check and update target references :
-    getObservation().checkReferences();
+    getMainObservation().checkReferences();
 
     // fire change events :
     this.fireTargetChangedEvents();
@@ -1056,7 +1124,7 @@ public final class ObservationManager extends BaseOIManager {
   private void fireTargetChangedEvents() {
 
     // force clear display target cache :
-    getObservation().clearCacheTargets();
+    getMainObservation().clearCacheTargets();
 
     // fire an observation targets change event :
     this.fireObservationTargetsChanged();
@@ -1072,7 +1140,7 @@ public final class ObservationManager extends BaseOIManager {
    * @return target configuration or null if the target is not found
    */
   public TargetConfiguration getTargetConfiguration(final String name) {
-    return getObservation().getTargetConfiguration(name);
+    return getMainObservation().getTargetConfiguration(name);
   }
 
   /**
@@ -1146,24 +1214,6 @@ public final class ObservationManager extends BaseOIManager {
 
   // --- COMPUTATION RESULTS ---------------------------------------------------
   /**
-   * Defines the computed observability data in the observation for later reuse (UV Coverage).
-   * Used by ObservabilityPanel.ObservabilitySwingWorker.refreshUI()
-   * 
-   * @param obsData observability data
-   */
-  public void setObservabilityData(final ObservabilityData obsData) {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("setObservabilityData : " + obsData);
-    }
-
-    getObservation().setObservabilityData(obsData);
-
-    if (obsData != null) {
-      this.fireObservabilityDone();
-    }
-  }
-
-  /**
    * Defines the OIFits structure in the observation for later reuse (Visiblity Explorer)
    * Used by UVCoveragePanel.UVCoverageSwingWorker.refreshUI()
    * 
@@ -1174,6 +1224,7 @@ public final class ObservationManager extends BaseOIManager {
       logger.fine("setOIFitsFile : " + oiFitsFile);
     }
 
+    // TODO : remove
     getObservation().setOIFitsFile(oiFitsFile);
 
     if (oiFitsFile != null) {
