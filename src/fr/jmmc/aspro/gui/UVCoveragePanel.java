@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.78 2011-01-31 15:29:08 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.79 2011-02-02 17:44:12 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.78  2011/01/31 15:29:08  bourgesl
+ * use WarningContainerEvent instead of shared warning in observation
+ * modified fireWarningsReady(warningContainer) to use WarningContainerEvent
+ *
  * Revision 1.77  2011/01/31 13:27:16  bourgesl
  * updated java doc
  *
@@ -273,6 +277,7 @@ import fr.jmmc.aspro.gui.chart.SquareXYPlot;
 import fr.jmmc.aspro.gui.chart.ZoomEvent;
 import fr.jmmc.aspro.gui.chart.ZoomEventListener;
 import fr.jmmc.aspro.gui.task.AsproTaskRegistry;
+import fr.jmmc.aspro.gui.task.ObservationTaskSwingWorker;
 import fr.jmmc.aspro.gui.util.ColorPalette;
 import fr.jmmc.aspro.gui.util.FieldSliderAdapter;
 import fr.jmmc.aspro.gui.util.GenericListModel;
@@ -284,6 +289,7 @@ import fr.jmmc.aspro.model.ConfigurationManager;
 import fr.jmmc.aspro.model.event.ObservationListener;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.Range;
+import fr.jmmc.aspro.model.event.ObservabilityEvent;
 import fr.jmmc.aspro.model.event.ObservationEvent;
 import fr.jmmc.aspro.model.event.UpdateObservationEvent;
 import fr.jmmc.aspro.model.observability.ObservabilityData;
@@ -359,6 +365,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
   private final static boolean DEBUG_UPDATE_EVENT = false;
   /** flag to log a stack trace in method plot() to detect multiple calls */
   private final static boolean DEBUG_PLOT_EVENT = false;
+  /** flag to log version checking */
+  private final static boolean DEBUG_VERSIONS = false;
   /** scaling factor to Mega Lambda for U,V points */
   private final static double MEGA_LAMBDA_SCALE = 1e-6;
 
@@ -375,6 +383,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
   private XYTextAnnotation aJMMC = null;
   /** uv coordinates scaling factor */
   private double uvPlotScalingFactor = MEGA_LAMBDA_SCALE;
+
   /* cached data */
   /** last computed Observability Data */
   private ObservabilityData currentObsData = null;
@@ -836,7 +845,12 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
    * @return PDF default file name
    */
   public String getPDFDefaultFileName() {
-    return ObservationManager.getInstance().getObservation().generateFileName(getSelectedTargetName(), "UV", PDF_EXT);
+    // TODO MULTI-CONF : adjust file name if multi configurations ...
+
+    // now : use the main observation :
+    final ObservationSetting observation = ObservationManager.getInstance().getMainObservation();
+
+    return observation.generateFileName(getSelectedTargetName(), "UV", PDF_EXT);
   }
 
   /**
@@ -918,7 +932,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
         if (newValue <= 0d) {
           // invalid value :
-          resetSamplingPeriod(om.getObservation());
+          resetSamplingPeriod(om.getMainObservation());
         }
 
         if (logger.isLoggable(Level.FINE)) {
@@ -1517,10 +1531,10 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         this.onUpdateObservation((UpdateObservationEvent) event);
         break;
       case REFRESH_UV:
-        this.plot(event.getObservation());
+        this.refreshPlot(event.getObservation());
         break;
       case OBSERVABILITY_DONE:
-        this.updateObservabilityData(event.getObservation().getObservabilityData());
+        this.updateObservabilityData(((ObservabilityEvent) event).getObservabilityData());
         this.plot(event.getObservation());
         break;
       default:
@@ -1541,7 +1555,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
   }
 
   /**
-   * Refresh the plot when an UI widget changes.
+   * Refresh the plot when an UI widget changes that is not related to the observation.
    * Check the doAutoRefresh flag to avoid unwanted refresh (resetOptions)
    */
   protected void refreshPlot() {
@@ -1549,14 +1563,49 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       if (logger.isLoggable(Level.FINE)) {
         logger.fine("refreshPlot");
       }
-      this.plot(this.om.getObservation());
+      // use the latest observation for computations :
+      this.refreshPlot(this.om.getObservation());
+    }
+  }
+
+  /**
+   * Refresh the plot using the given observation.
+   * Check if observation and observability data are consistent.
+   * Used by refreshPlot() (UV widget change not related to observation)
+   *  and by onProcess(REFRESH_UV) (UV widget change related to observation)
+   * 
+   * @param observation observation to use
+   */
+  protected void refreshPlot(final ObservationSetting observation) {
+    if (this.currentObsData != null) {
+
+      // avoid to mix inconsistent observation and observability data :
+      // Next plot (observability done event) will take into account UI widget changes.
+
+      if (this.currentObsData.getVersion().isSameMainVersion(observation.getVersion())) {
+        if (logger.isLoggable(Level.FINE)) {
+          logger.fine("refreshPlot : main version equals : " + this.currentObsData.getVersion() + " :: " + observation.getVersion());
+        }
+        if (DEBUG_VERSIONS) {
+          logger.severe("refreshPlot : main version equals : " + this.currentObsData.getVersion() + " :: " + observation.getVersion());
+        }
+
+        this.plot(observation);
+      } else {
+        if (logger.isLoggable(Level.FINE)) {
+          logger.fine("refreshPlot : main version mismatch : " + this.currentObsData.getVersion() + " :: " + observation.getVersion());
+        }
+        if (DEBUG_VERSIONS) {
+          logger.severe("refreshPlot : main version mismatch : " + this.currentObsData.getVersion() + " :: " + observation.getVersion());
+        }
+      }
     }
   }
 
   /**
    * Plot the UV Coverage using a SwingWorker to do the computation in the background.
    * This code is executed by the Swing Event Dispatcher thread (EDT)
-   * @param observation observation data to use
+   * @param observation observation to use
    */
   protected void plot(final ObservationSetting observation) {
     if (logger.isLoggable(Level.FINE)) {
@@ -1592,12 +1641,10 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       final IndexColorModel colorModel = ColorModels.getColorModel(this.myPreferences.getPreference(Preferences.MODEL_IMAGE_LUT));
 
       // update the status bar :
-      StatusBar.show("computing uv coverage ... (please wait, this may take a while)");
+      StatusBar.show("computing uv coverage ...");
 
 
       // TODO : use currentUVMapData to check if the new image is the same !!
-
-      // TODO : check consistency differently (use clone or result cache) ...
 
       // Create Swing worker :
       final UVCoverageSwingWorker taskWorker = new UVCoverageSwingWorker(this, observation, this.currentObsData, targetName,
@@ -1612,13 +1659,11 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
   /**
    * TaskSwingWorker child class to compute uv coverage data and refresh the uv coverage plot
    */
-  private final static class UVCoverageSwingWorker extends TaskSwingWorker<UVCoverageData> {
+  private final static class UVCoverageSwingWorker extends ObservationTaskSwingWorker<UVCoverageData> {
 
     /* members */
     /** uv panel used for refreshUI callback */
     private final UVCoveragePanel uvPanel;
-    /** observation settings */
-    private final ObservationSetting observation;
     /** computed observability data */
     private final ObservabilityData obsData;
     /** target to use */
@@ -1655,9 +1700,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
                                   final double uvMax, final boolean doUVSupport,
                                   final boolean doModelImage, final ImageMode imageMode, final int imageSize, final IndexColorModel colorModel) {
       // get current observation version :
-      super(AsproTaskRegistry.TASK_UV_COVERAGE, observation.getVersion());
+      super(AsproTaskRegistry.TASK_UV_COVERAGE, observation);
       this.uvPanel = uvPanel;
-      this.observation = observation;
       this.obsData = obsData;
       this.targetName = targetName;
       this.uvMax = uvMax;
@@ -1676,7 +1720,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     @Override
     public UVCoverageData computeInBackground() {
       // compute the uv coverage data :
-      return new UVCoverageService(this.observation, this.obsData, this.targetName, this.uvMax,
+      return new UVCoverageService(this.getObservation(), this.obsData, this.targetName, this.uvMax,
               this.doUVSupport, this.doModelImage, this.imageMode, this.imageSize, this.colorModel).compute();
     }
 
@@ -1687,7 +1731,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
      */
     @Override
     public void refreshUI(final UVCoverageData uvData) {
-//      if (this.observation.getVersion() == this.getVersion()) {
+
+      // Note : the main observation can have changed while computation
+      // i.e. the this.observation.getVersion() != this.getVersion()
 
       // Fire a warnings ready event :
       ObservationManager.getInstance().fireWarningsReady(uvData.getWarningContainer());
@@ -1697,14 +1743,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
       // Note : computed observability data is used in updatePlot() to define the chart title (best PoPs) ...
       // Refresh the GUI using consistent objects (observation, obsData and uvData) that were used in computeInBackground() :
-      this.uvPanel.updatePlot(this.observation, this.obsData, uvData);
-      /*
-      } else {
-      if (logger.isLoggable(logLevel)) {
-      logger.log(logLevel, logPrefix + ".refreshUI : VERSION MISMATCH = " + this.observation.getVersion() + " <> " + this.getVersion());
-      }
-      }
-       */
+      this.uvPanel.updatePlot(this.getObservation(), this.obsData, uvData);
     }
 
     /**
@@ -1728,6 +1767,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
    * Reset the plot in case of model exception
    */
   private void resetPlot() {
+
     ChartUtils.clearTextSubTitle(this.chart);
 
     this.lastZoomEvent = null;
@@ -1765,6 +1805,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       resetPlot();
 
     } else {
+
       ChartUtils.clearTextSubTitle(this.chart);
 
       this.lastZoomEvent = null;
@@ -1837,6 +1878,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         final String targetName = getSelectedTargetName();
 
         // get observation for version checking :
+        // TODO : use last cached observation :
         final ObservationSetting observation = this.om.getObservation();
 
         // get target from observation for consistency :
@@ -1871,10 +1913,10 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
             }
 
             // update the status bar :
-            StatusBar.show("computing uv map ... (please wait, this may take a while)");
+            StatusBar.show("computing uv map ...");
 
             // Create Swing worker :
-            final UVMapSwingWorker taskWorker = new UVMapSwingWorker(this, observation.getVersion(), models, uvRect,
+            final UVMapSwingWorker taskWorker = new UVMapSwingWorker(this, observation.getVersion().getTargetVersion(), models, uvRect,
                     refMin, refMax, imageMode, imageSize, colorModel);
 
 
@@ -1926,7 +1968,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
                              final Rectangle2D.Float uvRect,
                              final Float refMin, final Float refMax,
                              final ImageMode imageMode, final int imageSize, final IndexColorModel colorModel) {
-      super(AsproTaskRegistry.TASK_UV_MAP, version);
+      super(AsproTaskRegistry.TASK_UV_MAP, "{targetVersion=" + version + "}");
       this.uvPanel = uvPanel;
       this.models = models;
       this.uvRect = uvRect;
