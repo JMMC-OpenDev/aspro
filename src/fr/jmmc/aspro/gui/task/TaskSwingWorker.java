@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TaskSwingWorker.java,v 1.3 2011-01-25 12:29:37 bourgesl Exp $"
+ * "@(#) $Id: TaskSwingWorker.java,v 1.4 2011-02-02 17:43:09 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2011/01/25 12:29:37  bourgesl
+ * fixed javadoc errors
+ *
  * Revision 1.2  2011/01/25 10:40:42  bourgesl
  * fixed class name
  *
@@ -17,7 +20,6 @@ package fr.jmmc.aspro.gui.task;
 
 import fr.jmmc.mcs.gui.FeedbackReport;
 import java.util.concurrent.ExecutionException;
-import java.util.logging.Level;
 
 /**
  * This class extends SwingWorker backport for Java 5 to :
@@ -28,33 +30,30 @@ import java.util.logging.Level;
  *
  * @author bourgesl
  *
- * @param <T> the result type returned by this {@code TaskSwingWorker's}
+ * @param <T> the result type returned by this {@code TaskSwingWorker}
  */
 public abstract class TaskSwingWorker<T> extends org.jdesktop.swingworker.SwingWorker<T, Void> {
 
   /** Class logger */
   protected static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           TaskSwingWorker.class.getName());
-  /** log Level to use (Level.INFO to help debugging) */
-  protected final static Level logLevel = Level.FINE;
+  /** flag to log debugging information */
+  protected final static boolean DEBUG_FLAG = false;
 
   /* members */
   /** related task */
   private final Task task;
-  /** version */
-  private final int version;
-  /** log prefix using the format 'SwingWorker[" + task.name + "]' used by debugging statements */
+  /** log prefix using the format 'SwingWorker[" + task.name + "]" + logSuffix + "@hashcode' used by debugging statements */
   protected final String logPrefix;
 
   /**
    * Create a new TaskSwingWorker instance
    * @param task related task
-   * @param version version to use
+   * @param logSuffix complementary suffix for log prefix
    */
-  public TaskSwingWorker(final Task task, final int version) {
+  public TaskSwingWorker(final Task task, final String logSuffix) {
     this.task = task;
-    this.version = version;
-    this.logPrefix = "SwingWorker[" + task.getName() + "]";
+    this.logPrefix = (DEBUG_FLAG) ? ("SwingWorker[" + task.getName() + "]" + logSuffix + "@" + Integer.toHexString(hashCode())) : "SwingWorker";
   }
 
   /**
@@ -65,17 +64,9 @@ public abstract class TaskSwingWorker<T> extends org.jdesktop.swingworker.SwingW
     return task;
   }
 
-  /**
-   * Return the version
-   * @return version
-   */
-  public final int getVersion() {
-    return this.version;
-  }
-
   @Override
   public final String toString() {
-    return this.logPrefix + "{version=" + this.version + "}@" + Integer.toHexString(hashCode());
+    return this.logPrefix;
   }
 
   /**
@@ -84,8 +75,8 @@ public abstract class TaskSwingWorker<T> extends org.jdesktop.swingworker.SwingW
    */
   @Override
   public final T doInBackground() {
-    if (logger.isLoggable(logLevel)) {
-      logger.log(logLevel, logPrefix + ".doInBackground : START");
+    if (DEBUG_FLAG) {
+      logger.info(logPrefix + ".doInBackground : START");
     }
 
     T data = null;
@@ -94,14 +85,14 @@ public abstract class TaskSwingWorker<T> extends org.jdesktop.swingworker.SwingW
     data = this.computeInBackground();
 
     if (isCancelled()) {
-      if (logger.isLoggable(logLevel)) {
-        logger.log(logLevel, logPrefix + ".doInBackground : CANCELLED");
+      if (DEBUG_FLAG) {
+        logger.info(logPrefix + ".doInBackground : CANCELLED");
       }
       // no result if task was cancelled :
       data = null;
     } else {
-      if (logger.isLoggable(logLevel)) {
-        logger.log(logLevel, logPrefix + ".doInBackground : DONE");
+      if (DEBUG_FLAG) {
+        logger.info(logPrefix + ".doInBackground : DONE");
       }
     }
     return data;
@@ -115,8 +106,8 @@ public abstract class TaskSwingWorker<T> extends org.jdesktop.swingworker.SwingW
   public final void done() {
     // check if the worker was cancelled :
     if (isCancelled()) {
-      if (logger.isLoggable(logLevel)) {
-        logger.log(logLevel, logPrefix + ".done : CANCELLED");
+      if (DEBUG_FLAG) {
+        logger.info(logPrefix + ".done : CANCELLED");
       }
     } else {
       try {
@@ -124,19 +115,19 @@ public abstract class TaskSwingWorker<T> extends org.jdesktop.swingworker.SwingW
         final T data = get();
 
         if (data == null) {
-          if (logger.isLoggable(logLevel)) {
-            logger.log(logLevel, logPrefix + ".done : NO DATA");
+          if (DEBUG_FLAG) {
+            logger.info(logPrefix + ".done : NO DATA");
           }
         } else {
-          if (logger.isLoggable(logLevel)) {
-            logger.log(logLevel, logPrefix + ".done : UI START");
+          if (DEBUG_FLAG) {
+            logger.info(logPrefix + ".done : UI START");
           }
 
           // refresh UI with data :
           this.refreshUI(data);
 
-          if (logger.isLoggable(logLevel)) {
-            logger.log(logLevel, logPrefix + ".done : UI DONE");
+          if (DEBUG_FLAG) {
+            logger.info(logPrefix + ".done : UI DONE");
           }
         }
 

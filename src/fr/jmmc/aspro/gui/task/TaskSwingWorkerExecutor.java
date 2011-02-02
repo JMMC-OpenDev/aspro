@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TaskSwingWorkerExecutor.java,v 1.3 2011-01-25 12:29:37 bourgesl Exp $"
+ * "@(#) $Id: TaskSwingWorkerExecutor.java,v 1.4 2011-02-02 17:43:09 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2011/01/25 12:29:37  bourgesl
+ * fixed javadoc errors
+ *
  * Revision 1.2  2011/01/25 10:40:42  bourgesl
  * fixed class name
  *
@@ -51,8 +54,8 @@ public final class TaskSwingWorkerExecutor {
   /** Class logger */
   private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           TaskSwingWorkerExecutor.class.getName());
-  /** log Level to use (Level.INFO to help debugging) */
-  private final static Level logLevel = Level.FINE;
+  /** flag to log debugging information */
+  protected final static boolean DEBUG_FLAG = false;
   /** singleton instance */
   private static TaskSwingWorkerExecutor instance;
 
@@ -64,8 +67,8 @@ public final class TaskSwingWorkerExecutor {
     if (instance == null) {
       instance = new TaskSwingWorkerExecutor(registry);
 
-      if (logger.isLoggable(logLevel)) {
-        logger.log(logLevel, "created SwingWorkerExecutor : " + instance);
+      if (DEBUG_FLAG) {
+        logger.info("created SwingWorkerExecutor : " + instance);
       }
     }
   }
@@ -76,8 +79,8 @@ public final class TaskSwingWorkerExecutor {
   public static void stop() {
     if (instance != null) {
       instance.shutdown();
-      if (logger.isLoggable(logLevel)) {
-        logger.log(logLevel, "stopped SwingWorkerExecutor : " + instance);
+      if (DEBUG_FLAG) {
+        logger.info("stopped SwingWorkerExecutor : " + instance);
       }
     }
     instance = null;
@@ -147,16 +150,16 @@ public final class TaskSwingWorkerExecutor {
     // note : there is no synchronisation here because this method must be called from Swing EDT
     final Task task = worker.getTask();
 
-    if (logger.isLoggable(logLevel)) {
-      logger.log(logLevel, "execute task : " + task + " with worker = " + worker);
+    if (DEBUG_FLAG) {
+      logger.info("execute task : " + task + " with worker = " + worker);
     }
 
     // cancel the running worker for the task and child tasks
     // and memorize the reference to the new worker before execution :
     this.cancelRelatedTasks(task, worker);
 
-    if (logger.isLoggable(logLevel)) {
-      logger.log(logLevel, "execute worker = " + worker);
+    if (DEBUG_FLAG) {
+      logger.info("execute worker = " + worker);
     }
 
     // finally, execute the new worker with the custom executor service :
@@ -170,8 +173,8 @@ public final class TaskSwingWorkerExecutor {
    * @param newWorker new worker for the given task
    */
   private final void cancelRelatedTasks(final Task task, final TaskSwingWorker<?> newWorker) {
-    if (logger.isLoggable(logLevel)) {
-      logger.log(logLevel, "cancel related tasks for = " + task);
+    if (DEBUG_FLAG) {
+      logger.info("cancel related tasks for = " + task);
     }
     // cancel any busy worker related to the given task :
     cancel(task, newWorker);
@@ -195,8 +198,8 @@ public final class TaskSwingWorkerExecutor {
     // cancel the current running worker for the given task :
     if (currentWorker != null) {
       // worker is still running ...
-      if (logger.isLoggable(logLevel)) {
-        logger.log(logLevel, "cancel worker = " + currentWorker);
+      if (DEBUG_FLAG) {
+        logger.info("cancel worker = " + currentWorker);
       }
 
       // note : if the worker was previously cancelled, it has no effect.
@@ -213,12 +216,12 @@ public final class TaskSwingWorkerExecutor {
   private final void clearWorker(final TaskSwingWorker<?> worker) {
     // get current worker and clear reference :
     if (this.currentTaskWorkers.compareAndSet(worker.getTask().getId(), worker, null)) {
-      if (logger.isLoggable(logLevel)) {
-        logger.log(logLevel, "cleared worker = " + worker);
+      if (DEBUG_FLAG) {
+        logger.info("cleared worker = " + worker);
       }
     } else {
-      if (logger.isLoggable(logLevel)) {
-        logger.log(logLevel, "NOT cleared worker = " + worker + " - value is = " + this.currentTaskWorkers.get(worker.getTask().getId()));
+      if (DEBUG_FLAG) {
+        logger.info("NOT cleared worker = " + worker + " - value is = " + this.currentTaskWorkers.get(worker.getTask().getId()));
       }
     }
   }
@@ -263,8 +266,8 @@ public final class TaskSwingWorkerExecutor {
      */
     @Override
     protected void beforeExecute(final Thread t, final Runnable r) {
-      if (logger.isLoggable(logLevel)) {
-        logger.log(logLevel, "beforeExecute : " + r);
+      if (DEBUG_FLAG) {
+        logger.info("beforeExecute : " + r);
       }
     }
 
@@ -292,11 +295,11 @@ public final class TaskSwingWorkerExecutor {
      */
     @Override
     protected void afterExecute(final Runnable r, final Throwable t) {
-      if (logger.isLoggable(logLevel)) {
+      if (DEBUG_FLAG) {
         if (t != null) {
-          logger.log(logLevel, "afterExecute : " + r, t);
+          logger.log(Level.INFO, "afterExecute : " + r, t);
         } else {
-          logger.log(logLevel, "afterExecute : " + r);
+          logger.info("afterExecute : " + r);
         }
       }
       if (r instanceof TaskSwingWorker<?>) {
@@ -338,8 +341,8 @@ public final class TaskSwingWorkerExecutor {
       // define UncaughtExceptionHandler :
       MCSExceptionHandler.installThreadHandler(thread);
 
-      if (logger.isLoggable(logLevel)) {
-        logger.log(logLevel, "new thread : " + thread.getName());
+      if (DEBUG_FLAG) {
+        logger.info("new thread : " + thread.getName());
       }
 
       return thread;
