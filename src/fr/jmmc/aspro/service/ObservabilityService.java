@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.63 2011-01-26 17:19:33 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.64 2011-02-02 17:38:31 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.63  2011/01/26 17:19:33  bourgesl
+ * added input parameters in Observability data for consistency
+ *
  * Revision 1.62  2011/01/25 12:29:37  bourgesl
  * fixed javadoc errors
  *
@@ -266,6 +269,8 @@ public final class ObservabilityService {
   /** Class logger */
   private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
+  /** flag to slow down the service to detect concurrency problems */
+  private final static boolean DEBUG_SLOW_SERVICE = false;
 
   /* members */
 
@@ -521,6 +526,14 @@ public final class ObservabilityService {
     // fast interrupt :
     if (this.currentThread.isInterrupted()) {
       return null;
+    }
+
+    if (DEBUG_SLOW_SERVICE) {
+      try {
+        Thread.sleep(2000l);
+      } catch (InterruptedException ie) {
+        logger.log(Level.SEVERE, "DEBUG_SLOW_SERVICE", ie);
+      }
     }
 
     if (logger.isLoggable(Level.INFO)) {

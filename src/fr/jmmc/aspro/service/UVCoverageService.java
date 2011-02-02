@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoverageService.java,v 1.35 2011-01-27 17:11:47 bourgesl Exp $"
+ * "@(#) $Id: UVCoverageService.java,v 1.36 2011-02-02 17:38:31 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.35  2011/01/27 17:11:47  bourgesl
+ * use given observability data instead of using shared observation results
+ *
  * Revision 1.34  2011/01/26 17:19:56  bourgesl
  * comment on concurrency
  *
@@ -137,6 +140,7 @@ import java.awt.image.IndexColorModel;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * This service is dedicated to compute the UV tracks for a given target
@@ -149,6 +153,8 @@ public final class UVCoverageService {
   /** Class logger */
   private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
+  /** flag to slow down the service to detect concurrency problems */
+  private final static boolean DEBUG_SLOW_SERVICE = false;
   /** safety limit for the number of sampled HA points = 500 */
   public static final int MAX_HA_POINTS = 500;
 
@@ -312,6 +318,14 @@ public final class UVCoverageService {
     // fast interrupt :
     if (this.currentThread.isInterrupted()) {
       return null;
+    }
+
+    if (DEBUG_SLOW_SERVICE) {
+      try {
+        Thread.sleep(2000l);
+      } catch (InterruptedException ie) {
+        logger.log(Level.SEVERE, "DEBUG_SLOW_SERVICE", ie);
+      }
     }
 
     if (logger.isLoggable(Level.INFO)) {
