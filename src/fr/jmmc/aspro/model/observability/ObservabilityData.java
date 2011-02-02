@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityData.java,v 1.9 2011-01-26 17:20:53 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityData.java,v 1.10 2011-02-02 17:40:16 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.9  2011/01/26 17:20:53  bourgesl
+ * added input parameters in Observability data for consistency
+ *
  * Revision 1.8  2011/01/25 13:48:56  bourgesl
  * javadoc
  *
@@ -39,6 +42,7 @@ package fr.jmmc.aspro.model.observability;
 import edu.dartmouth.AstroSkyCalc;
 import fr.jmmc.aspro.model.BaseLine;
 import fr.jmmc.aspro.model.Beam;
+import fr.jmmc.aspro.model.ObservationVersion;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -51,6 +55,9 @@ import java.util.Map;
  * @author bourgesl
  */
 public final class ObservabilityData {
+
+  /** observation version */
+  private ObservationVersion version;
 
   /* input parameters */
   /** flag indicating if the timestamps are expressed in LST or in UTC */
@@ -94,6 +101,23 @@ public final class ObservabilityData {
     this.useLST = useLST;
     this.doDetailedOutput = doDetailedOutput;
     this.doBaseLineLimits = doBaseLineLimits;
+  }
+
+  /* version */
+  /**
+   * Return the observation version
+   * @return observation version
+   */
+  public ObservationVersion getVersion() {
+    return version;
+  }
+
+  /**
+   * Define the observation version
+   * @param version observation version
+   */
+  public void setVersion(final ObservationVersion version) {
+    this.version = version;
   }
 
   /* inputs */

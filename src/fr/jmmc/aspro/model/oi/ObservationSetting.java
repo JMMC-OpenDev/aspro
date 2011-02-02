@@ -292,69 +292,15 @@ public class ObservationSetting
 
   /** observation version (read only) */
   @javax.xml.bind.annotation.XmlTransient
-  private final java.util.concurrent.atomic.AtomicInteger version = new java.util.concurrent.atomic.AtomicInteger(0);
+  private fr.jmmc.aspro.model.ObservationVersion version = new fr.jmmc.aspro.model.ObservationVersion();
 
   /**
    * Return the observation version
    * @return observation version
    */
-  public final int getVersion() {
-    return this.version.get();
+  public final fr.jmmc.aspro.model.ObservationVersion getVersion() {
+    return this.version;
   }
-
-  /**
-   * Increment the observation version
-   */
-  public final void incVersion() {
-    this.version.incrementAndGet();
-  }
-
-  /** target list version version (read only) */
-  @javax.xml.bind.annotation.XmlTransient
-  private final java.util.concurrent.atomic.AtomicInteger targetVersion = new java.util.concurrent.atomic.AtomicInteger(0);
-
-  /**
-   * Return the target list version
-   * @return target list version
-   */
-  public final int getTargetVersion() {
-    return this.targetVersion.get();
-  }
-
-  /**
-   * Increment the target list version
-   */
-  public final void incTargetVersion() {
-    this.targetVersion.incrementAndGet();
-  }
-
-  /** computed observability data (read only) */
-
-  /*
-   * Note on shared fields :
-   * volatile indicates that the field is used both by Swing EDT and the Worker Thread
-   */
-
-  @javax.xml.bind.annotation.XmlTransient
-  private volatile fr.jmmc.aspro.model.observability.ObservabilityData observabilityData = null;
-
-  /**
-   * Return the computed observability data (read only)
-   * @return computed observability data or null
-   */
-  public final fr.jmmc.aspro.model.observability.ObservabilityData getObservabilityData() {
-    return this.observabilityData;
-  }
-
-  /**
-   * Define the computed observability data (read only)
-   * @param obsData computed observability data
-   */
-  public final void setObservabilityData(final fr.jmmc.aspro.model.observability.ObservabilityData obsData) {
-    this.observabilityData = obsData;
-  }
-
-  // TODO : store UVCoverageData also
 
   /** computed OIFits structure (read only) */
   @javax.xml.bind.annotation.XmlTransient
@@ -382,7 +328,7 @@ public class ObservationSetting
   }
 
   /**
-   * Return a deep "copy" of this instance excluding target / models / target user informations
+   * Return a partial deep "copy" of this instance excluding target / models / target user informations
    * and clear computed fields
    *
    * @return deep "copy" of this instance
@@ -391,10 +337,10 @@ public class ObservationSetting
   public final Object clone() {
     final ObservationSetting copy = (ObservationSetting) super.clone();
 
-    // version is not cloned : to be able to read current version
+    // copy version :
+    copy.version = new fr.jmmc.aspro.model.ObservationVersion(copy.version);
 
     // clear computed fields :
-    copy.observabilityData = null;
     copy.oiFitsFile = null;
 
     // Deep copy child objects :
@@ -408,10 +354,12 @@ public class ObservationSetting
       copy.instrumentConfiguration = (FocalInstrumentConfigurationChoice) copy.instrumentConfiguration.clone();
     }
 
-    // Just copy list of targets :
+    // Just copy list of targets (do not clone targets as it is only used by target editor) :
     if (copy.targets != null) {
       copy.targets = OIBase.copyList(copy.targets);
     }
+
+    // Do not copy target user infos (only used by target editor)
 
     return copy;
   }
@@ -477,16 +425,12 @@ public class ObservationSetting
   /** computed displayable list of targets (read only) */
   @javax.xml.bind.annotation.XmlTransient
   private List<Target> cachedDisplayTargets = null;
-  /** computed parent target list associated to the displayable list of targets (read only) */
-  @javax.xml.bind.annotation.XmlTransient
-  private List<Target> cachedParentForDisplayTargets = null;
 
   /**
    * Clear any cached value related to targets
    */
   public void clearCacheTargets() {
     this.cachedDisplayTargets = null;
-    this.cachedParentForDisplayTargets = null;
   }
 
   /**
@@ -506,22 +450,6 @@ public class ObservationSetting
   }
 
   /**
-   * Return the parent target list associated to the displayable list of targets
-   * @return parent target list associated to the displayable list of targets
-   */
-  public List<Target> getParentForDisplayTargets() {
-    if (this.cachedParentForDisplayTargets != null) {
-      return this.cachedParentForDisplayTargets;
-    }
-
-    // TODO CALS : use this to help synchronizing selections (list <=> combo ...)
-
-    computeDisplayTargets();
-
-    return this.cachedParentForDisplayTargets;
-  }
-
-  /**
    * Compute the displayable list of targets containing
    * - science targets followed by their calibrators
    * - calibrator orphans
@@ -532,13 +460,11 @@ public class ObservationSetting
     final List<Target> innerTargets = getTargets();
 
     final List<Target> displayTargets;
-    final List<Target> parentTargets;
+
     if (innerTargets.isEmpty()) {
       displayTargets = java.util.Collections.emptyList();
-      parentTargets = java.util.Collections.emptyList();
     } else {
       displayTargets = new ArrayList<Target>();
-      parentTargets = new ArrayList<Target>();
 
       // map of used calibrators :
       final java.util.Map<Target, Target> usedCalibrators = new java.util.IdentityHashMap<Target, Target>();
@@ -551,17 +477,14 @@ public class ObservationSetting
         if (localTargetUserInfos == null) {
           // no calibrator defined, all targets are science targets :
           displayTargets.add(target);
-          parentTargets.add(null);
         } else if (!localTargetUserInfos.isCalibrator(target)) {
           // science targets :
           displayTargets.add(target);
-          parentTargets.add(null);
 
           // add calibrators related to the science target :
           for (Target calibrator : localTargetUserInfos.getCalibrators(target)) {
             // calibrator targets :
             displayTargets.add(calibrator);
-            parentTargets.add(target);
 
             usedCalibrators.put(calibrator, calibrator);
           }
@@ -573,7 +496,6 @@ public class ObservationSetting
         for (Target calibrator : localTargetUserInfos.getCalibrators()) {
           if (!usedCalibrators.containsKey(calibrator)) {
             displayTargets.add(calibrator);
-            parentTargets.add(null);
           }
         }
       }
@@ -581,7 +503,6 @@ public class ObservationSetting
 
     // cache the computed lists :
     this.cachedDisplayTargets = displayTargets;
-    this.cachedParentForDisplayTargets = parentTargets;
   }
 
   /**
