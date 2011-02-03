@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.64 2011-02-02 17:38:31 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.65 2011-02-03 17:26:52 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.64  2011/02/02 17:38:31  bourgesl
+ * added DEBUG_SLOW_SERVICE flag to sleep 2s for debugging purposes
+ *
  * Revision 1.63  2011/01/26 17:19:33  bourgesl
  * added input parameters in Observability data for consistency
  *
@@ -343,8 +346,8 @@ public final class ObservabilityService {
     this.doDetailedOutput = doDetailedOutput;
     this.doBaseLineLimits = doBaseLineLimits;
 
-    // create the observability data :
-    this.data = new ObservabilityData(useLST, doDetailedOutput, doBaseLineLimits);
+    // create the observability data corresponding to the observation version :
+    this.data = new ObservabilityData(observation.getVersion(), useLST, doDetailedOutput, doBaseLineLimits);
   }
 
   /**
