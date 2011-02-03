@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: NewObservationAction.java,v 1.5 2010-10-01 15:33:52 bourgesl Exp $"
+ * "@(#) $Id: NewObservationAction.java,v 1.6 2011-02-03 17:29:55 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2010/10/01 15:33:52  bourgesl
+ * Added a confirm dialog for the 'New Observation' action
+ *
  * Revision 1.4  2010/09/26 12:43:58  bourgesl
  * removed try catch runtime exception
  *
@@ -25,6 +28,7 @@ import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.mcs.gui.App;
 import fr.jmmc.mcs.gui.StatusBar;
 import fr.jmmc.mcs.util.ActionRegistrar;
+import fr.jmmc.mcs.util.RegisteredAction;
 import java.awt.event.ActionEvent;
 import java.util.logging.Level;
 import javax.swing.AbstractAction;
@@ -34,7 +38,7 @@ import javax.swing.JOptionPane;
  * New observation settings action
  * @author bourgesl
  */
-public class NewObservationAction extends ObservationFileAction {
+public class NewObservationAction extends RegisteredAction {
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
@@ -80,9 +84,7 @@ public class NewObservationAction extends ObservationFileAction {
     }
 
     // If the user clicked the "Don't Save" button, go on
-    final ObservationManager om = ObservationManager.getInstance();
-
-    om.reset();
+    ObservationManager.getInstance().reset();
 
     StatusBar.show("new observation created.");
   }
