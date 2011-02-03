@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TaskSwingWorker.java,v 1.4 2011-02-02 17:43:09 bourgesl Exp $"
+ * "@(#) $Id: TaskSwingWorker.java,v 1.5 2011-02-03 17:29:09 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2011/02/02 17:43:09  bourgesl
+ * minor changes (logs)
+ *
  * Revision 1.3  2011/01/25 12:29:37  bourgesl
  * fixed javadoc errors
  *
@@ -54,6 +57,19 @@ public abstract class TaskSwingWorker<T> extends org.jdesktop.swingworker.SwingW
   public TaskSwingWorker(final Task task, final String logSuffix) {
     this.task = task;
     this.logPrefix = (DEBUG_FLAG) ? ("SwingWorker[" + task.getName() + "]" + logSuffix + "@" + Integer.toHexString(hashCode())) : "SwingWorker";
+  }
+
+  /**
+   * Schedules this {@code TaskSwingWorker} for execution on a <i>worker</i>
+   * thread.
+   * @see TaskSwingWorkerExecutor#executeTask(TaskSwingWorker)
+   */
+  public final void executeTask() {
+    // increment running worker :
+    TaskSwingWorkerExecutor.incRunningWorkerCounter();
+
+    // Cancel other observability task and execute this new task :
+    TaskSwingWorkerExecutor.executeTask(this);
   }
 
   /**
@@ -136,6 +152,9 @@ public abstract class TaskSwingWorker<T> extends org.jdesktop.swingworker.SwingW
         handleException(ee);
       }
     }
+
+    // decrement running worker :
+    TaskSwingWorkerExecutor.decRunningWorkerCounter();
   }
 
   /**

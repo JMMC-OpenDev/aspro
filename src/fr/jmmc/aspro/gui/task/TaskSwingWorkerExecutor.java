@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TaskSwingWorkerExecutor.java,v 1.4 2011-02-02 17:43:09 bourgesl Exp $"
+ * "@(#) $Id: TaskSwingWorkerExecutor.java,v 1.5 2011-02-03 17:29:09 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2011/02/02 17:43:09  bourgesl
+ * minor changes (logs)
+ *
  * Revision 1.3  2011/01/25 12:29:37  bourgesl
  * fixed javadoc errors
  *
@@ -58,6 +61,8 @@ public final class TaskSwingWorkerExecutor {
   protected final static boolean DEBUG_FLAG = false;
   /** singleton instance */
   private static TaskSwingWorkerExecutor instance;
+  /** running worker counter */
+  private final static AtomicInteger runningWorkerCounter = new AtomicInteger(0);
 
   /**
    * Create the TaskSwingWorkerExecutor singleton
@@ -87,6 +92,14 @@ public final class TaskSwingWorkerExecutor {
   }
 
   /**
+   * Return true if there is at least one worker running
+   * @return true if there is at least one worker running
+   */
+  public final static boolean isTaskRunning() {
+    return runningWorkerCounter.get() > 0;
+  }
+
+  /**
    * This code returns the singleton instance.
    * @return TaskSwingWorkerExecutor
    */
@@ -103,18 +116,36 @@ public final class TaskSwingWorkerExecutor {
    * @see #execute(TaskSwingWorker)
    * @param worker TaskSwingWorker instance to execute
    */
-  public final static void executeTask(final TaskSwingWorker<?> worker) {
+  final static void executeTask(final TaskSwingWorker<?> worker) {
     getInstance().execute(worker);
   }
 
+  /**
+   * Increment the counter of running worker
+   */
+  final static void incRunningWorkerCounter() {
+    final int count = runningWorkerCounter.incrementAndGet();
+
+    if (DEBUG_FLAG) {
+      logger.info("runningWorkerCounter : " + count);
+    }
+  }
+
+  /**
+   * Decrement the counter of running worker
+   */
+  final static void decRunningWorkerCounter() {
+    final int count = runningWorkerCounter.decrementAndGet();
+
+    if (DEBUG_FLAG) {
+      logger.info("runningWorkerCounter : " + count);
+    }
+  }
+
   /* members */
-  /**
-   * Single threaded thread pool
-   */
+  /** Single threaded thread pool */
   private final ExecutorService executorService;
-  /**
-   * Current (or old) worker atomic reference for all tasks
-   */
+  /** Current (or old) worker atomic reference for all tasks */
   private final AtomicReferenceArray<TaskSwingWorker<?>> currentTaskWorkers;
 
   /**
