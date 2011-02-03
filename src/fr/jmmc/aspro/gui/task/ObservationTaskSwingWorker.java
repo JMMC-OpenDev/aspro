@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationTaskSwingWorker.java,v 1.1 2011-02-02 17:41:52 bourgesl Exp $"
+ * "@(#) $Id: ObservationTaskSwingWorker.java,v 1.2 2011-02-03 17:29:24 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2011/02/02 17:41:52  bourgesl
+ * add observation and its version in task logs
+ *
  */
 package fr.jmmc.aspro.gui.task;
 
@@ -44,13 +47,5 @@ public abstract class ObservationTaskSwingWorker<T> extends TaskSwingWorker<T> {
    */
   public final ObservationSetting getObservation() {
     return this.observation;
-  }
-
-  /**
-   * Return the observation version
-   * @return observation version
-   */
-  public final ObservationVersion getVersion() {
-    return this.observation.getVersion();
   }
 }
