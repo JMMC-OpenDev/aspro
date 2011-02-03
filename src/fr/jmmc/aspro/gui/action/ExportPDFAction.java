@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportPDFAction.java,v 1.17 2010-12-15 13:35:45 bourgesl Exp $"
+ * "@(#) $Id: ExportPDFAction.java,v 1.18 2011-02-03 17:31:16 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.17  2010/12/15 13:35:45  bourgesl
+ * define a default file name depending on the PDFExportable interface
+ *
  * Revision 1.16  2010/10/15 16:59:43  bourgesl
  * new PDF options (page size and orientation)
  * PDFExportable refactoring to include prepareChart, postPDF and getPDFOptions methods
@@ -68,9 +71,7 @@ import fr.jmmc.mcs.gui.MessagePane;
 import fr.jmmc.mcs.gui.StatusBar;
 import fr.jmmc.mcs.util.ActionRegistrar;
 import fr.jmmc.mcs.util.FileFilterRepository;
-import fr.jmmc.mcs.util.RegisteredAction;
 import java.awt.Component;
-import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
@@ -83,16 +84,16 @@ import org.jfree.chart.JFreeChart;
  *
  * @author bourgesl
  */
-public final class ExportPDFAction extends RegisteredAction {
+public final class ExportPDFAction extends WaitingTaskAction {
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
   /** Class name. This name is used to register to the ActionRegistrar */
   private final static String className = "fr.jmmc.aspro.gui.action.ExportPDFAction";
-  /** Action name. This name is used to register to the ActionRegistrar */
-  public final static String actionName = "exportPDF";
   /** Class logger */
   private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(className);
+  /** Action name. This name is used to register to the ActionRegistrar */
+  public final static String actionName = "exportPDF";
   /** PDF mime type */
   public static final String PDF_MIME_TYPE = "application/pdf";
 
@@ -128,9 +129,8 @@ public final class ExportPDFAction extends RegisteredAction {
 
   /**
    * Handle the action event
-   * @param evt action event
    */
-  public void actionPerformed(final ActionEvent evt) {
+  public final void actionPerformed() {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("actionPerformed");
     }

@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOIFitsAction.java,v 1.9 2010-12-15 13:34:22 bourgesl Exp $"
+ * "@(#) $Id: ExportOIFitsAction.java,v 1.10 2011-02-03 17:31:16 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.9  2010/12/15 13:34:22  bourgesl
+ * added baseline in default file name
+ *
  * Revision 1.8  2010/12/13 16:39:39  mella
  * use new enum MimeType.OIFITS
  *
@@ -40,13 +43,11 @@ import fr.jmmc.aspro.util.FileUtils;
 import fr.jmmc.mcs.gui.MessagePane;
 import fr.jmmc.mcs.gui.StatusBar;
 import fr.jmmc.mcs.util.MimeType;
-import fr.jmmc.mcs.util.RegisteredAction;
 import fr.jmmc.oitools.model.OIArray;
 import fr.jmmc.oitools.model.OIFitsFile;
 import fr.jmmc.oitools.model.OIFitsWriter;
 import fr.jmmc.oitools.model.OIVis2;
 import fr.nom.tam.fits.FitsException;
-import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
@@ -58,7 +59,7 @@ import javax.swing.filechooser.FileFilter;
  * containing the visibilities of the selected target.
  * @author bourgesl
  */
-public class ExportOIFitsAction extends RegisteredAction {
+public class ExportOIFitsAction extends WaitingTaskAction {
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
@@ -68,7 +69,6 @@ public class ExportOIFitsAction extends RegisteredAction {
   public final static String actionName = "exportOIFits";
   /** Class logger */
   private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(className);
- 
   /* members */
   /** last directory used to save a file; by default = user home */
   private String lastDir = System.getProperty("user.home");
@@ -77,14 +77,13 @@ public class ExportOIFitsAction extends RegisteredAction {
    * Public constructor that automatically register the action in RegisteredAction.
    */
   public ExportOIFitsAction() {
-    super(className, actionName);  
+    super(className, actionName);
   }
 
   /**
    * Handle the action event
-   * @param evt action event
    */
-  public void actionPerformed(final ActionEvent evt) {
+  public void actionPerformed() {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("actionPerformed");
     }
