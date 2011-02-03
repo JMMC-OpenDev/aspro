@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SampSearchCalQuery.java,v 1.5 2011-01-07 13:21:24 bourgesl Exp $"
+ * "@(#) $Id: SampSearchCalQuery.java,v 1.6 2011-02-03 17:29:44 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2011/01/07 13:21:24  bourgesl
+ * moved code
+ *
  * Revision 1.4  2010/12/14 09:25:41  bourgesl
  * use target directly instead of target name
  *
@@ -143,6 +146,8 @@ public final class SampSearchCalQuery extends SampCapabilityAction {
     String votable = FileUtils.readFile(TEMPLATE_FILE);
 
     // get observation and target :
+
+    // TODO MULTI-CONF : gerer les observations multiples :
     final ObservationSetting observation = ObservationManager.getInstance().getObservation();
 
     // Get chosen stations :
