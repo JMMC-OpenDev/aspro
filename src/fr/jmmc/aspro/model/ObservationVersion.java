@@ -1,16 +1,19 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationVersion.java,v 1.1 2011-02-02 17:41:22 bourgesl Exp $"
+ * "@(#) $Id: ObservationVersion.java,v 1.2 2011-02-03 17:28:19 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2011/02/02 17:41:22  bourgesl
+ * observation versions (target list, main, uv)
+ *
  */
 package fr.jmmc.aspro.model;
 
 /**
- * This class handles observation versioning (target listn main, uv).
+ * This class handles observation versioning (target list, main, uv).
  *
  * Note: no synchronization needed as this class is always used by Swing EDT (single threaded)
  *
@@ -55,8 +58,9 @@ public final class ObservationVersion {
 
   /**
    * Increment the target list version
+   * Only used by ObservationManager.fireObservationTargetsChanged()
    */
-  public final void incTargetVersion() {
+  final void incTargetVersion() {
     this.targetVersion++;
   }
 
@@ -70,8 +74,9 @@ public final class ObservationVersion {
 
   /**
    * Increment the observation main version
+   * Only used by ObservationManager.fireObservationUpdate()
    */
-  public final void incMainVersion() {
+  final void incMainVersion() {
     this.mainVersion++;
   }
 
@@ -84,9 +89,10 @@ public final class ObservationVersion {
   }
 
   /**
-   * Increment the observation UV version
+   * Increment the observation UV version.
+   * Only used by ObservationManager.fireObservationUpdate()
    */
-  public final void incUVVersion() {
+  final void incUVVersion() {
     this.uvVersion++;
   }
 
