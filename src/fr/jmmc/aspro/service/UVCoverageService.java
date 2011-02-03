@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoverageService.java,v 1.36 2011-02-02 17:38:31 bourgesl Exp $"
+ * "@(#) $Id: UVCoverageService.java,v 1.37 2011-02-03 17:26:32 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.36  2011/02/02 17:38:31  bourgesl
+ * added DEBUG_SLOW_SERVICE flag to sleep 2s for debugging purposes
+ *
  * Revision 1.35  2011/01/27 17:11:47  bourgesl
  * use given observability data instead of using shared observation results
  *
@@ -140,7 +143,6 @@ import java.awt.image.IndexColorModel;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * This service is dedicated to compute the UV tracks for a given target
@@ -162,7 +164,7 @@ public final class UVCoverageService {
 
   /* output */
   /** uv coverage data */
-  private UVCoverageData data = new UVCoverageData();
+  private final UVCoverageData data;
 
   /* inputs */
   /** observation settings used (read-only). Note : Swing actions can modify this object during the computation (dirty read) */
@@ -238,6 +240,9 @@ public final class UVCoverageService {
     this.imageMode = imageMode;
     this.imageSize = imageSize;
     this.colorModel = colorModel;
+
+    // create the uv coverage data corresponding to the observation version :
+    this.data = new UVCoverageData(observation.getVersion());
   }
 
   /**
@@ -261,7 +266,7 @@ public final class UVCoverageService {
       // (target observability is not available) :
 
       // target name :
-      this.data.setName(this.targetName);
+      this.data.setTargetName(this.targetName);
 
       // wave length :
       this.data.setLambda(this.lambda);
@@ -673,10 +678,6 @@ public final class UVCoverageService {
    * @param msg message to add
    */
   protected final void addWarning(final String msg) {
-    if (logger.isLoggable(Level.INFO)) {
-      logger.info(msg);
-    }
-
     this.data.getWarningContainer().addWarningMessage(msg);
   }
 }
