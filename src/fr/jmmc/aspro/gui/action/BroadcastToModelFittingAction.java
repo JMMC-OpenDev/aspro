@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BroadcastToModelFittingAction.java,v 1.9 2010-12-15 13:36:13 bourgesl Exp $"
+ * "@(#) $Id: BroadcastToModelFittingAction.java,v 1.10 2011-02-03 17:30:05 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.9  2010/12/15 13:36:13  bourgesl
+ * refactoring
+ *
  * Revision 1.8  2010/12/14 09:25:13  bourgesl
  * variable renamed
  *
@@ -58,6 +61,8 @@ import javax.xml.bind.Marshaller;
 /**
  * This registered action represents a File Menu entry to
  * send model and generated oifits to one modelfitting application.
+ *
+ * TODO : test if any task is running like fr.jmmc.aspro.gui.action.WaitingTaskAction
  *
  * @author mella
  */
