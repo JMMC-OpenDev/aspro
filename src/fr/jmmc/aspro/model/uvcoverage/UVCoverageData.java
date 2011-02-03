@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoverageData.java,v 1.9 2010-10-01 15:38:29 bourgesl Exp $"
+ * "@(#) $Id: UVCoverageData.java,v 1.10 2011-02-03 17:27:38 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.9  2010/10/01 15:38:29  bourgesl
+ * added warning container
+ *
  * Revision 1.8  2010/06/29 14:24:45  bourgesl
  * javadoc comment
  *
@@ -34,6 +37,7 @@
  */
 package fr.jmmc.aspro.model.uvcoverage;
 
+import fr.jmmc.aspro.model.ObservationVersion;
 import fr.jmmc.aspro.model.WarningContainer;
 import fr.jmmc.mcs.model.UVMapData;
 import fr.jmmc.oitools.model.OIFitsFile;
@@ -45,8 +49,10 @@ import java.util.List;
  */
 public final class UVCoverageData {
 
+  /** observation version */
+  private final ObservationVersion version;
   /** name of the target */
-  private String name;
+  private String targetName;
   /** maximum U or V coordinate (scale) */
   private double uvMax;
   /** wave length */
@@ -57,7 +63,7 @@ public final class UVCoverageData {
   private double[] ha = null;
   /** list of uv point couples corresponding to the target observability */
   private List<UVRangeBaseLineData> targetUVObservability;
-  /** uv map data */
+  /** uv map data : TODO remove */
   private UVMapData uvMapData;
   /** warning container */
   private final WarningContainer warningContainer = new WarningContainer();
@@ -65,17 +71,28 @@ public final class UVCoverageData {
   private OIFitsFile oiFitsFile;
 
   /**
-   * Constructor
+   * Public Constructor
+   * @param version observation version
    */
-  public UVCoverageData() {
+  public UVCoverageData(final ObservationVersion version) {
+    this.version = version;
   }
 
-  public String getName() {
-    return name;
+  /* version */
+  /**
+   * Return the observation version
+   * @return observation version
+   */
+  public ObservationVersion getVersion() {
+    return version;
   }
 
-  public void setName(final String name) {
-    this.name = name;
+  public String getTargetName() {
+    return targetName;
+  }
+
+  public void setTargetName(final String name) {
+    this.targetName = name;
   }
 
   public double getLambda() {

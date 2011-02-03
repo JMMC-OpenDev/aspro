@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityData.java,v 1.10 2011-02-02 17:40:16 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityData.java,v 1.11 2011-02-03 17:27:38 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.10  2011/02/02 17:40:16  bourgesl
+ * added version
+ *
  * Revision 1.9  2011/01/26 17:20:53  bourgesl
  * added input parameters in Observability data for consistency
  *
@@ -57,7 +60,7 @@ import java.util.Map;
 public final class ObservabilityData {
 
   /** observation version */
-  private ObservationVersion version;
+  private final ObservationVersion version;
 
   /* input parameters */
   /** flag indicating if the timestamps are expressed in LST or in UTC */
@@ -92,12 +95,14 @@ public final class ObservabilityData {
   private final Map<String, StarData> mapStarDatas = new HashMap<String, StarData>();
 
   /**
-   * Public Constuctor
+   * Public Constructor
+   * @param version observation version
    * @param useLST indicates if the timestamps are expressed in LST or in UTC
    * @param doDetailedOutput flag to produce detailed output with all BL / horizon / rise intervals per target
    * @param doBaseLineLimits flag to find base line limits
    */
-  public ObservabilityData(final boolean useLST, final boolean doDetailedOutput, final boolean doBaseLineLimits) {
+  public ObservabilityData(final ObservationVersion version, final boolean useLST, final boolean doDetailedOutput, final boolean doBaseLineLimits) {
+    this.version = version;
     this.useLST = useLST;
     this.doDetailedOutput = doDetailedOutput;
     this.doBaseLineLimits = doBaseLineLimits;
@@ -110,14 +115,6 @@ public final class ObservabilityData {
    */
   public ObservationVersion getVersion() {
     return version;
-  }
-
-  /**
-   * Define the observation version
-   * @param version observation version
-   */
-  public void setVersion(final ObservationVersion version) {
-    this.version = version;
   }
 
   /* inputs */
