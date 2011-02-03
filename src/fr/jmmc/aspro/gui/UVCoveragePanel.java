@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.79 2011-02-02 17:44:12 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.80 2011-02-03 17:25:42 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.79  2011/02/02 17:44:12  bourgesl
+ * added observation version checkings
+ * comments / to do
+ *
  * Revision 1.78  2011/01/31 15:29:08  bourgesl
  * use WarningContainerEvent instead of shared warning in observation
  * modified fireWarningsReady(warningContainer) to use WarningContainerEvent
@@ -281,7 +285,6 @@ import fr.jmmc.aspro.gui.task.ObservationTaskSwingWorker;
 import fr.jmmc.aspro.gui.util.ColorPalette;
 import fr.jmmc.aspro.gui.util.FieldSliderAdapter;
 import fr.jmmc.aspro.gui.util.GenericListModel;
-import fr.jmmc.aspro.gui.task.TaskSwingWorkerExecutor;
 import fr.jmmc.aspro.gui.util.TargetListRenderer;
 import fr.jmmc.aspro.gui.util.TargetRenderer;
 import fr.jmmc.aspro.gui.task.TaskSwingWorker;
@@ -804,7 +807,11 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
    * @param evt action event
    */
   public void performOBAction(final ActionEvent evt) {
-    final ObservationSetting observation = this.om.getObservation();
+
+    // TODO : MULTI-CONF : what to do (export an OB per CONF ?)
+
+    // Use main observation to check instrument :
+    final ObservationSetting observation = this.om.getMainObservation();
     final String insName = observation.getInstrumentConfiguration().getName();
 
     if (AsproConstants.INS_AMBER.equals(insName)
@@ -1646,12 +1653,10 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
       // TODO : use currentUVMapData to check if the new image is the same !!
 
-      // Create Swing worker :
-      final UVCoverageSwingWorker taskWorker = new UVCoverageSwingWorker(this, observation, this.currentObsData, targetName,
-              uvMax, doUVSupport, doModelImage, imageMode, imageSize, colorModel);
-
-      // Cancel other uv coverage task and execute this new task :
-      TaskSwingWorkerExecutor.executeTask(taskWorker);
+      // Create uv coverage task worker :
+      // Cancel other tasks and execute this new task :
+      new UVCoverageSwingWorker(this, observation, this.currentObsData, targetName,
+              uvMax, doUVSupport, doModelImage, imageMode, imageSize, colorModel).executeTask();
 
     } // observability data check
   }
@@ -1800,7 +1805,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
                           final ObservabilityData obsData,
                           final UVCoverageData uvData) {
 
-    if (uvData.getName() == null) {
+    if (uvData.getTargetName() == null) {
       // Baseline limits case :
       resetPlot();
 
@@ -1822,7 +1827,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         }
       }
       ChartUtils.addSubtitle(this.chart, sb.toString());
-      ChartUtils.addSubtitle(this.chart, "Source : " + uvData.getName());
+      ChartUtils.addSubtitle(this.chart, "Source : " + uvData.getTargetName());
 
       if (observation.getWhen().isNightRestriction()) {
         // date :
@@ -1915,13 +1920,12 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
             // update the status bar :
             StatusBar.show("computing uv map ...");
 
-            // Create Swing worker :
-            final UVMapSwingWorker taskWorker = new UVMapSwingWorker(this, observation.getVersion().getTargetVersion(), models, uvRect,
-                    refMin, refMax, imageMode, imageSize, colorModel);
+            // Create uv map task worker :
+            // Cancel other tasks and execute this new task :
 
-
-            // Cancel other uv coverage task and execute this new task :
-            TaskSwingWorkerExecutor.executeTask(taskWorker);
+            // TODO : version clean up :
+            new UVMapSwingWorker(this, observation.getVersion().getTargetVersion(), models, uvRect,
+                    refMin, refMax, imageMode, imageSize, colorModel).executeTask();
           }
         }
       }

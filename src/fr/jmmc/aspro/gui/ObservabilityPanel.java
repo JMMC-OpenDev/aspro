@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityPanel.java,v 1.56 2011-02-02 17:44:12 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityPanel.java,v 1.57 2011-02-03 17:25:42 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.56  2011/02/02 17:44:12  bourgesl
+ * added observation version checkings
+ * comments / to do
+ *
  * Revision 1.55  2011/01/31 15:29:10  bourgesl
  * use WarningContainerEvent instead of shared warning in observation
  * modified fireWarningsReady(warningContainer) to use WarningContainerEvent
@@ -203,7 +207,6 @@ import fr.jmmc.aspro.gui.chart.XYDiamondAnnotation;
 import fr.jmmc.aspro.gui.task.AsproTaskRegistry;
 import fr.jmmc.aspro.gui.task.ObservationTaskSwingWorker;
 import fr.jmmc.aspro.gui.util.ColorPalette;
-import fr.jmmc.aspro.gui.task.TaskSwingWorkerExecutor;
 import fr.jmmc.aspro.model.observability.DateTimeInterval;
 import fr.jmmc.aspro.model.observability.ObservabilityData;
 import fr.jmmc.aspro.model.event.ObservationListener;
@@ -710,12 +713,11 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     // update the status bar :
     StatusBar.show("computing observability ...");
 
-    // Create Swing worker :
-    final ObservabilitySwingWorker taskWorker = new ObservabilitySwingWorker(this,
-            observation, useLST, doDetailedOutput, doBaseLineLimits);
-
-    // Cancel other observability task and execute this new task :
-    TaskSwingWorkerExecutor.executeTask(taskWorker);
+    // Create Observability task worker
+    // Cancel other tasks and execute this new task :
+    new ObservabilitySwingWorker(this,
+            observation, useLST, doDetailedOutput, doBaseLineLimits)
+            .executeTask();
   }
 
   /**
@@ -776,8 +778,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     @Override
     public void refreshUI(final ObservabilityData obsData) {
 
-      // define the observation version in computed observability data :
-      obsData.setVersion(getVersion());
+      final ObservationSetting taskObservation = this.getObservation();
 
       // TODO : if do baseline limits => compute also observation observability ...
 
@@ -786,35 +787,35 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         // Fire the event ObservabilityDone and call UVCoveragePanel to refresh the UV Coverage plot :
 
         // Note : the main observation can have changed while computation :
-        final ObservationSetting currentObservation = ObservationManager.getInstance().getObservation();
+        final ObservationSetting lastObservation = ObservationManager.getInstance().getObservation();
 
-        if (getVersion().isSameMainVersion(currentObservation.getVersion())) {
+        if (taskObservation.getVersion().isSameMainVersion(lastObservation.getVersion())) {
           if (logger.isLoggable(Level.FINE)) {
-            logger.fine("refreshUI : main version equals : " + this.getVersion() + " :: " + currentObservation.getVersion());
+            logger.fine("refreshUI : main version equals : " + taskObservation.getVersion() + " :: " + lastObservation.getVersion());
           }
           if (DEBUG_VERSIONS) {
-            logger.severe("refreshUI : main version equals : " + this.getVersion() + " :: " + currentObservation.getVersion());
+            logger.severe("refreshUI : main version equals : " + taskObservation.getVersion() + " :: " + lastObservation.getVersion());
           }
 
           // use latest observation to see possible UV widget changes :
           // note observability data is also valid for any UV version :
-          ObservationManager.getInstance().fireObservabilityDone(currentObservation, obsData);
+          ObservationManager.getInstance().fireObservabilityDone(lastObservation, obsData);
         } else {
           if (logger.isLoggable(Level.FINE)) {
-            logger.fine("refreshUI : main version mismatch : " + this.getVersion() + " :: " + currentObservation.getVersion());
+            logger.fine("refreshUI : main version mismatch : " + taskObservation.getVersion() + " :: " + lastObservation.getVersion());
           }
           if (DEBUG_VERSIONS) {
-            logger.severe("refreshUI : main version mismatch : " + this.getVersion() + " :: " + currentObservation.getVersion());
+            logger.severe("refreshUI : main version mismatch : " + taskObservation.getVersion() + " :: " + lastObservation.getVersion());
           }
 
           // use consistent observation and observability data :
           // next iteration will see changes ...
-          ObservationManager.getInstance().fireObservabilityDone(this.getObservation(), obsData);
+          ObservationManager.getInstance().fireObservabilityDone(taskObservation, obsData);
         }
       }
 
       // Refresh the GUI using the same parameter values that were used in computeInBackground() / ObservabilityService for consistency :
-      this.obsPanel.updatePlot(this.getObservation(), obsData);
+      this.obsPanel.updatePlot(taskObservation, obsData);
     }
   }
 
