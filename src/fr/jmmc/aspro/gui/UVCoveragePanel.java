@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.80 2011-02-03 17:25:42 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.81 2011-02-04 17:18:30 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.80  2011/02/03 17:25:42  bourgesl
+ * minor clean up
+ *
  * Revision 1.79  2011/02/02 17:44:12  bourgesl
  * added observation version checkings
  * comments / to do
@@ -287,7 +290,6 @@ import fr.jmmc.aspro.gui.util.FieldSliderAdapter;
 import fr.jmmc.aspro.gui.util.GenericListModel;
 import fr.jmmc.aspro.gui.util.TargetListRenderer;
 import fr.jmmc.aspro.gui.util.TargetRenderer;
-import fr.jmmc.aspro.gui.task.TaskSwingWorker;
 import fr.jmmc.aspro.model.ConfigurationManager;
 import fr.jmmc.aspro.model.event.ObservationListener;
 import fr.jmmc.aspro.model.ObservationManager;
@@ -388,17 +390,19 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
   private double uvPlotScalingFactor = MEGA_LAMBDA_SCALE;
 
   /* cached data */
-  /** last computed Observability Data */
-  private ObservabilityData currentObsData = null;
-  /** last zoom event to check if the zoom area changed */
-  private ZoomEvent lastZoomEvent = null;
-  /** last computed UV Map Data to have a reference UV Map */
-  private UVMapData currentUVMapData = null;
   /** current interferometer configuration name to track changes */
   private String interferometerConfigurationName = null;
   /** current instrument name to track changes */
   private String instrumentName = null;
+  /* cached computed data */
+  /** last computed Observability Data */
+  private ObservabilityData currentObsData = null;
 
+  /* plot data */
+  /** last zoom event to check if the zoom area changed */
+  private ZoomEvent lastZoomEvent = null;
+  /** chart data */
+  private ChartData chartData = null;
   /* swing */
   /** chart panel */
   private SquareChartPanel chartPanel;
@@ -854,10 +858,15 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
   public String getPDFDefaultFileName() {
     // TODO MULTI-CONF : adjust file name if multi configurations ...
 
-    // now : use the main observation :
-    final ObservationSetting observation = ObservationManager.getInstance().getMainObservation();
+    if (this.getChartData() != null) {
 
-    return observation.generateFileName(getSelectedTargetName(), "UV", PDF_EXT);
+      // observation used by the plot :
+      final ObservationSetting observation = this.getChartData().getObservation();
+      final UVCoverageData uvData = this.getChartData().getUVData();
+
+      return observation.generateFileName(uvData.getTargetName(), "UV", PDF_EXT);
+    }
+    return null;
   }
 
   /**
@@ -1393,7 +1402,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       // reset cached data :
       this.currentObsData = null;
       this.lastZoomEvent = null;
-      this.currentUVMapData = null;
+      this.chartData = null;
 
     } finally {
       // restore the automatic refresh :
@@ -1557,6 +1566,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
    * @param obsData computed Observability Data
    */
   private void updateObservabilityData(final ObservabilityData obsData) {
+    // TODO MULTI-CONF : handle multiple observability data and fix update Target HA acoordingly :
     this.currentObsData = obsData;
     updateTargetHA();
   }
@@ -1622,6 +1632,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       logger.log(Level.SEVERE, "PLOT", new Throwable());
     }
 
+    // Note : version checks are already done in refreshPlot(observation) :
+
     // check if observability data are available :
     if (this.currentObsData != null) {
 
@@ -1671,10 +1683,10 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     private final UVCoveragePanel uvPanel;
     /** computed observability data */
     private final ObservabilityData obsData;
-    /** target to use */
+    /** target name */
     private final String targetName;
     /** maximum U or V coordinate (corrected by the minimal wavelength) */
-    private final double uvMax;
+    private double uvMax;
     /** flag to compute the UV support */
     private final boolean doUVSupport;
     /** flag to compute the model image */
@@ -1725,8 +1737,22 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     @Override
     public UVCoverageData computeInBackground() {
       // compute the uv coverage data :
-      return new UVCoverageService(this.getObservation(), this.obsData, this.targetName, this.uvMax,
-              this.doUVSupport, this.doModelImage, this.imageMode, this.imageSize, this.colorModel).compute();
+      final UVCoverageData uvData = new UVCoverageService(this.getObservation(), this.obsData, this.targetName, this.uvMax,
+              this.doUVSupport).compute();
+
+      if (this.doModelImage) {
+        this.uvMax = uvData.getUvMax();
+        // compute the uv map data :
+        final Rectangle2D.Double uvRect = new Rectangle2D.Double();
+        uvRect.setFrameFromDiagonal(-this.uvMax, -this.uvMax, this.uvMax, this.uvMax);
+
+        // Compute Target Model for the UV coverage limits ONCE :
+        uvData.setUvMapData(ModelUVMapService.computeUVMap(
+                this.getObservation().getTarget(this.targetName).getModels(),
+                uvRect, null, null, this.imageMode, this.imageSize, this.colorModel));
+      }
+
+      return uvData;
     }
 
     /**
@@ -1746,9 +1772,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       // update the OIFits structure in the current observation :
       ObservationManager.getInstance().setOIFitsFile(uvData.getOiFitsFile());
 
-      // Note : computed observability data is used in updatePlot() to define the chart title (best PoPs) ...
-      // Refresh the GUI using consistent objects (observation, obsData and uvData) that were used in computeInBackground() :
-      this.uvPanel.updatePlot(this.getObservation(), this.obsData, uvData);
+      // Refresh the GUI using coherent data :
+      this.uvPanel.updatePlot(new ChartData(this.getObservation(), this.obsData, uvData));
     }
 
     /**
@@ -1776,7 +1801,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     ChartUtils.clearTextSubTitle(this.chart);
 
     this.lastZoomEvent = null;
-    this.currentUVMapData = null;
+    this.chartData = null;
 
     // reset bounds to [-1;1] (before setDataset) :
     this.xyPlot.defineBounds(1d);
@@ -1794,27 +1819,46 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
   }
 
   /**
-   * Refresh the plot using the computed UV Coverage data.
+   * Return the chart data
+   * @return chart data
+   */
+  private ChartData getChartData() {
+    return this.chartData;
+  }
+
+  /**
+   * Define the chart data
+   * @param chartData chart data
+   */
+  private void setChartData(final ChartData chartData) {
+    this.chartData = chartData;
+  }
+
+  /**
+   * Refresh the plot using chart data.
    * This code is executed by the Swing Event Dispatcher thread (EDT)
    *
-   * @param observation observation settings
-   * @param obsData computed observability data used to get Best PoPs
-   * @param uvData computed UV Coverage data
+   * @param chartData chart data
    */
-  private void updatePlot(final ObservationSetting observation,
-                          final ObservabilityData obsData,
-                          final UVCoverageData uvData) {
+  private void updatePlot(final ChartData chartData) {
+    // memorize chart data (used by export PDF and zoom handling) :
+    setChartData(chartData);
+
+    final UVCoverageData uvData = chartData.getUVData();
 
     if (uvData.getTargetName() == null) {
       // Baseline limits case :
       resetPlot();
 
     } else {
+      // reset zoom cache :
+      this.lastZoomEvent = null;
+
+      final ObservationSetting observation = chartData.getObservation();
+      final ObservabilityData obsData = chartData.getObsData();
+      final UVMapData uvMapData = chartData.getUVMapData();
 
       ChartUtils.clearTextSubTitle(this.chart);
-
-      this.lastZoomEvent = null;
-      this.currentUVMapData = null;
 
       // title :
       final StringBuilder sb = new StringBuilder(observation.getInterferometerConfiguration().getName());
@@ -1834,21 +1878,17 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         ChartUtils.addSubtitle(this.chart, "Day : " + observation.getWhen().getDate().toString());
       }
 
-      // change the scaling factor : (???)
-      // lambda ??
+      // change the scaling factor ?
       setUvPlotScalingFactor(MEGA_LAMBDA_SCALE);
 
       // computed data are valid :
       updateChart(uvData);
 
-      // update the uv map data :
-      this.currentUVMapData = uvData.getUvMapData();
-
       // update the background image :
-      if (this.currentUVMapData == null) {
+      if (uvMapData == null) {
         updateUVMap(null);
       } else {
-        updateUVMap(this.currentUVMapData.getUvMap());
+        updateUVMap(uvMapData.getUvMap());
       }
 
       // update theme at end :
@@ -1876,15 +1916,16 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         this.xyPlot.getRenderer(0).addAnnotation(this.aJMMC, Layer.BACKGROUND);
       }
 
-      if (this.currentUVMapData != null) {
+      if (this.getChartData() != null
+              && this.getChartData().getUVMapData() != null) {
         // Update model uv map :
 
-        // get target name instead of getSelectedTarget() :
-        final String targetName = getSelectedTargetName();
+        final ObservationSetting observation = this.getChartData().getObservation();
+        final UVCoverageData uvData = this.getChartData().getUVData();
+        final UVMapData uvMapData = this.getChartData().getUVMapData();
 
-        // get observation for version checking :
-        // TODO : use last cached observation :
-        final ObservationSetting observation = this.om.getObservation();
+        // get target name :
+        final String targetName = uvData.getTargetName();
 
         // get target from observation for consistency :
         final Target target = observation.getTarget(targetName);
@@ -1894,28 +1935,22 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
           if (models != null && models.size() > 0) {
 
-            final Rectangle2D.Float uvRect = new Rectangle2D.Float();
+            final Rectangle2D.Double uvRect = new Rectangle2D.Double();
             uvRect.setFrameFromDiagonal(
                     fromUVPlotScale(ze.getDomainLowerBound()), fromUVPlotScale(ze.getRangeLowerBound()),
                     fromUVPlotScale(ze.getDomainUpperBound()), fromUVPlotScale(ze.getRangeUpperBound()));
 
             // compute an approximated uv map from the reference UV Map :
-            computeSubUVMap(uvRect);
+            computeSubUVMap(uvMapData, uvRect);
 
             // visibility reference extrema :
-            final Float refMin = Float.valueOf(this.currentUVMapData.getMin());
-            final Float refMax = Float.valueOf(this.currentUVMapData.getMax());
+            final Float refMin = uvMapData.getMin();
+            final Float refMax = uvMapData.getMax();
 
             // model image options :
-            final ImageMode imageMode = (ImageMode) this.jComboBoxImageMode.getSelectedItem();
-
-            // Use model image Preferences :
-            final int imageSize = this.myPreferences.getPreferenceAsInt(Preferences.MODEL_IMAGE_SIZE);
-            final IndexColorModel colorModel = ColorModels.getColorModel(this.myPreferences.getPreference(Preferences.MODEL_IMAGE_LUT));
-
-            if (logger.isLoggable(Level.FINE)) {
-              logger.fine("computing model uv map ...");
-            }
+            final ImageMode imageMode = uvMapData.getImageMode();
+            final int imageSize = uvMapData.getImageSize();
+            final IndexColorModel colorModel = uvMapData.getColorModel();
 
             // update the status bar :
             StatusBar.show("computing uv map ...");
@@ -1924,7 +1959,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
             // Cancel other tasks and execute this new task :
 
             // TODO : version clean up :
-            new UVMapSwingWorker(this, observation.getVersion().getTargetVersion(), models, uvRect,
+            new UVMapSwingWorker(this, observation, models, uvRect,
                     refMin, refMax, imageMode, imageSize, colorModel).executeTask();
           }
         }
@@ -1935,7 +1970,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
   /**
    * TaskSwingWorker child class to compute UV Map data and refresh the uv coverage plot
    */
-  private final static class UVMapSwingWorker extends TaskSwingWorker<UVMapData> {
+  private final static class UVMapSwingWorker extends ObservationTaskSwingWorker<UVMapData> {
 
     /* members */
     /** uv panel used for refreshUI callback */
@@ -1943,10 +1978,10 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     /** list of models to use */
     private final List<Model> models;
     /** UV frequency area in rad-1 */
-    private final Rectangle2D.Float uvRect;
-    /** minimum reference float value used only for sub images */
+    private final Rectangle2D.Double uvRect;
+    /** minimum reference double value used only for sub images */
     private final Float refMin;
-    /** maximum reference float value used only for sub images */
+    /** maximum reference double value used only for sub images */
     private final Float refMax;
     /** image mode (amplitude or phase) */
     private final ImageMode imageMode;
@@ -1959,20 +1994,20 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
      * Hidden constructor
      *
      * @param uvPanel observability panel
-     * @param version observation version related to the target models
+     * @param observation observation settings
      * @param models list of models to use
      * @param uvRect UV frequency area in rad-1
-     * @param refMin minimum reference float value used only for sub images
-     * @param refMax maximum reference float value used only for sub images
+     * @param refMin minimum reference double value used only for sub images
+     * @param refMax maximum reference double value used only for sub images
      * @param imageMode image mode (amplitude or phase)
      * @param imageSize number of pixels for both width and height of the generated image
      * @param colorModel color model to use
      */
-    private UVMapSwingWorker(final UVCoveragePanel uvPanel, final int version, final List<Model> models,
-                             final Rectangle2D.Float uvRect,
+    private UVMapSwingWorker(final UVCoveragePanel uvPanel, final ObservationSetting observation, final List<Model> models,
+                             final Rectangle2D.Double uvRect,
                              final Float refMin, final Float refMax,
                              final ImageMode imageMode, final int imageSize, final IndexColorModel colorModel) {
-      super(AsproTaskRegistry.TASK_UV_MAP, "{targetVersion=" + version + "}");
+      super(AsproTaskRegistry.TASK_UV_MAP, observation);
       this.uvPanel = uvPanel;
       this.models = models;
       this.uvRect = uvRect;
@@ -2028,41 +2063,41 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
   /**
    * Compute a sub image for the UV Map given the new uv area
+   * @param uvMapData UV Map data
    * @param uvRect uv area
    */
-  private void computeSubUVMap(final Rectangle2D.Float uvRect) {
-    if (this.currentUVMapData != null) {
-      final int imageSize = this.currentUVMapData.getImageSize();
-      // uv area reference :
-      final Rectangle2D.Float uvRectRef = this.currentUVMapData.getUvRect();
+  private void computeSubUVMap(final UVMapData uvMapData, final Rectangle2D.Double uvRect) {
+    final int imageSize = uvMapData.getImageSize();
 
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("uv map rect     = " + uvRect);
-        logger.fine("uv map rect REF = " + uvRectRef);
-      }
+    // uv area reference :
+    final Rectangle2D.Double uvRectRef = uvMapData.getUvRect();
 
-      // note : floor/ceil to be sure to have at least 1x1 pixel image
-      final int x = (int) Math.floor(imageSize * (uvRect.getX() - uvRectRef.getX()) / uvRectRef.getWidth());
-      int y = (int) Math.floor(imageSize * (uvRect.getY() - uvRectRef.getY()) / uvRectRef.getHeight());
-      final int w = (int) Math.ceil(imageSize * uvRect.getWidth() / uvRectRef.getWidth());
-      final int h = (int) Math.ceil(imageSize * uvRect.getHeight() / uvRectRef.getHeight());
-
-      // Note : the image is produced from an array where 0,0 corresponds to the upper left corner
-      // whereas it corresponds in UV to the lower U and Upper V coordinates => inverse the V axis
-
-      // Inverse V axis issue :
-      y = imageSize - y - h;
-
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("sub uvMap [" + x + ", " + y + " - " + w + ", " + h + "]");
-      }
-
-      // crop a small sub image waiting for the correct model to be computed :
-      final Image subUVMap = this.currentUVMapData.getUvMap().getSubimage(x, y, w, h);
-
-      // update the background image :
-      updateUVMap(subUVMap);
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("uv map rect     = " + uvRect);
+      logger.fine("uv map rect REF = " + uvRectRef);
     }
+
+    // note : floor/ceil to be sure to have at least 1x1 pixel image
+    final int x = (int) Math.floor(imageSize * (uvRect.getX() - uvRectRef.getX()) / uvRectRef.getWidth());
+    int y = (int) Math.floor(imageSize * (uvRect.getY() - uvRectRef.getY()) / uvRectRef.getHeight());
+    final int w = (int) Math.ceil(imageSize * uvRect.getWidth() / uvRectRef.getWidth());
+    final int h = (int) Math.ceil(imageSize * uvRect.getHeight() / uvRectRef.getHeight());
+
+    // Note : the image is produced from an array where 0,0 corresponds to the upper left corner
+    // whereas it corresponds in UV to the lower U and Upper V coordinates => inverse the V axis
+
+    // Inverse V axis issue :
+    y = imageSize - y - h;
+
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("sub uvMap [" + x + ", " + y + " - " + w + ", " + h + "]");
+    }
+
+    // crop a small sub image waiting for the correct model to be computed :
+    final Image subUVMap = uvMapData.getUvMap().getSubimage(x, y, w, h);
+
+    // update the background image :
+    updateUVMap(subUVMap);
   }
 
   /**
@@ -2389,7 +2424,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
    * Define the uv scaling factor
    * @param uvPlotScalingFactor new value
    */
-  private void setUvPlotScalingFactor(double uvPlotScalingFactor) {
+  private void setUvPlotScalingFactor(final double uvPlotScalingFactor) {
     this.uvPlotScalingFactor = uvPlotScalingFactor;
   }
 
@@ -2440,5 +2475,64 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     final BasicObservationForm form = AsproGui.getInstance().getSettingPanel().getObservationForm();
 
     form.updateSelectedTarget(getSelectedTarget());
+  }
+
+  /**
+   * UV Coverage Chart Data used by the plot
+   *
+   * TODO MULTI-CONF : add displayed configuration / modes (overlay, single ...)
+   */
+  private final static class ChartData {
+
+    /** observation */
+    private final ObservationSetting observation;
+    /** observability data */
+    private final ObservabilityData obsData;
+    /** UV Coverage data */
+    private final UVCoverageData uvData;
+
+    /**
+     * Constructor
+     * @param observation observation settings
+     * @param obsData computed observability data
+     * @param uvData computed UV Coverage data
+     */
+    protected ChartData(final ObservationSetting observation, final ObservabilityData obsData, final UVCoverageData uvData) {
+      this.observation = observation;
+      this.obsData = obsData;
+      this.uvData = uvData;
+    }
+
+    /**
+     * Return the observation
+     * @return observation
+     */
+    public ObservationSetting getObservation() {
+      return this.observation;
+    }
+
+    /**
+     * Return the observability data
+     * @return observability data
+     */
+    public ObservabilityData getObsData() {
+      return this.obsData;
+    }
+
+    /**
+     * Return the UV Coverage data
+     * @return UV Coverage data
+     */
+    public UVCoverageData getUVData() {
+      return this.uvData;
+    }
+
+    /**
+     * Return the UV Map data
+     * @return UV Map data
+     */
+    public UVMapData getUVMapData() {
+      return this.uvData.getUvMapData();
+    }
   }
 }
