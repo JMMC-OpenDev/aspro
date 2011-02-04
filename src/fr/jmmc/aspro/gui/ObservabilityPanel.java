@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityPanel.java,v 1.57 2011-02-03 17:25:42 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityPanel.java,v 1.58 2011-02-04 17:17:01 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.57  2011/02/03 17:25:42  bourgesl
+ * minor clean up
+ *
  * Revision 1.56  2011/02/02 17:44:12  bourgesl
  * added observation version checkings
  * comments / to do
@@ -293,6 +296,10 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
   private static final double HALF_PI = Math.PI / 2d;
   /** milliseconds threshold to consider the date too close to date axis limits = 3 minutes */
   private static final long DATE_LIMIT_THRESHOLD = 3 * 60 * 1000;
+  /** hour angle tick units */
+  private final static TickUnitSource HA_TICK_UNITS = ChartUtils.createHourAngleTickUnits();
+  /** hour:minute units */
+  private final static TickUnitSource HH_MM_TICK_UNITS = ChartUtils.createTimeTickUnits();
   /** max items printed before using A3 format */
   private final static int MAX_PRINTABLE_ITEMS = 10;
   /** max items displayed before scrolling */
@@ -315,10 +322,10 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
   private SlidingXYPlotAdapter slidingXYPlotAdapter = null;
   /** optional scrollbar to navigate through targets */
   private JScrollBar scroller = null;
-  /** hour angle tick units */
-  private final TickUnitSource haTickUnits = ChartUtils.createHourAngleTickUnits();
-  /** hour:minute units */
-  private final TickUnitSource hhmmTickUnits = ChartUtils.createTimeTickUnits();
+
+  /* plot data */
+  /** chart data */
+  private ChartData chartData = null;
 
   /* swing */
   /** chart panel */
@@ -527,45 +534,50 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
    * @return PDF default file name
    */
   public String getPDFDefaultFileName() {
-    // TODO MULTI-CONF : adjust file name if multi configurations ...
+    if (this.getChartData() != null) {
+      // TODO MULTI-CONF : adjust file name if multi configurations ...
 
-    // now : use the main observation :
-    final ObservationSetting observation = ObservationManager.getInstance().getMainObservation();
+      // observation used by the plot :
+      final ObservationSetting observation = this.getChartData().getObservation();
 
-    final StringBuilder sb = new StringBuilder(32);
-    sb.append("OBS_");
+      // flags used by the plot :
+      final ObservabilityData obsData = this.getChartData().getObsData();
+      final boolean doBaseLineLimits = obsData.isDoBaseLineLimits();
+      final boolean doDetailedOutput = obsData.isDoDetailedOutput();
 
-    final String baseLine = observation.getInstrumentConfiguration().getStations().replaceAll(" ", "-");
+      final StringBuilder sb = new StringBuilder(32);
+      sb.append("OBS_");
 
-    final boolean doBaseLineLimits = this.jCheckBoxBaseLineLimits.isSelected();
-    final boolean doDetailedOutput = this.jCheckBoxDetailedOutput.isSelected();
+      final String baseLine = observation.getInstrumentConfiguration().getStations().replaceAll(" ", "-");
 
-    if (doBaseLineLimits) {
-      sb.append("LIMITS_");
+      if (doBaseLineLimits) {
+        sb.append("LIMITS_");
 
-      final String intConfName = observation.getInterferometerConfiguration().getName();
-      final String altIntConfName = intConfName.replaceAll("[^a-zA-Z_0-9]", "_");
-      sb.append(altIntConfName).append('_');
+        final String intConfName = observation.getInterferometerConfiguration().getName();
+        final String altIntConfName = intConfName.replaceAll("[^a-zA-Z_0-9]", "_");
+        sb.append(altIntConfName).append('_');
 
-      sb.append(baseLine);
+        sb.append(baseLine);
 
-    } else {
-      if (doDetailedOutput) {
-        sb.append("DETAILS_");
+      } else {
+        if (doDetailedOutput) {
+          sb.append("DETAILS_");
+        }
+
+        final String instrumentName = observation.getInstrumentConfiguration().getName();
+        sb.append(instrumentName).append('_');
+
+        sb.append(baseLine).append('_');
+
+        final String date = observation.getWhen().getDate().toString();
+        sb.append(date);
       }
 
-      final String instrumentName = observation.getInstrumentConfiguration().getName();
-      sb.append(instrumentName).append('_');
+      sb.append('.').append(PDF_EXT);
 
-      sb.append(baseLine).append('_');
-
-      final String date = observation.getWhen().getDate().toString();
-      sb.append(date);
+      return sb.toString();
     }
-
-    sb.append('.').append(PDF_EXT);
-
-    return sb.toString();
+    return null;
   }
 
   /**
@@ -573,14 +585,13 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
    * @return PDF options
    */
   public PDFOptions getPDFOptions() {
+    if (this.getChartData() != null) {
+      // baseline limits flag used by the plot :
+      final boolean doBaseLineLimits = this.getChartData().getObsData().isDoBaseLineLimits();
 
-    final int size = this.slidingXYPlotAdapter.getSize();
-
-    /** flag to find baseline limits */
-    final boolean doBaseLineLimits = this.jCheckBoxBaseLineLimits.isSelected();
-
-    if (!doBaseLineLimits && size > MAX_PRINTABLE_ITEMS) {
-      return new PDFOptions(PageSize.A3, Orientation.Portait);
+      if (!doBaseLineLimits && this.slidingXYPlotAdapter.getSize() > MAX_PRINTABLE_ITEMS) {
+        return new PDFOptions(PageSize.A3, Orientation.Portait);
+      }
     }
     return PDFOptions.DEFAULT_PDF_OPTIONS;
   }
@@ -696,6 +707,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     // TODO : do not share results !
 
     // reset the OIFits structure in the current observation using Swing EDT :
+    // TODO : kill
     ObservationManager.getInstance().setOIFitsFile(null);
 
 
@@ -716,8 +728,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     // Create Observability task worker
     // Cancel other tasks and execute this new task :
     new ObservabilitySwingWorker(this,
-            observation, useLST, doDetailedOutput, doBaseLineLimits)
-            .executeTask();
+            observation, useLST, doDetailedOutput, doBaseLineLimits).executeTask();
   }
 
   /**
@@ -786,8 +797,10 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
       if (!obsData.isDoBaseLineLimits()) {
         // Fire the event ObservabilityDone and call UVCoveragePanel to refresh the UV Coverage plot :
 
-        // Note : the main observation can have changed while computation :
-        final ObservationSetting lastObservation = ObservationManager.getInstance().getObservation();
+        final ObservationManager om = ObservationManager.getInstance();
+
+        // use the latest observation for computations to check versions :
+        final ObservationSetting lastObservation = om.getObservation();
 
         if (taskObservation.getVersion().isSameMainVersion(lastObservation.getVersion())) {
           if (logger.isLoggable(Level.FINE)) {
@@ -799,7 +812,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
           // use latest observation to see possible UV widget changes :
           // note observability data is also valid for any UV version :
-          ObservationManager.getInstance().fireObservabilityDone(lastObservation, obsData);
+          om.fireObservabilityDone(lastObservation, obsData);
         } else {
           if (logger.isLoggable(Level.FINE)) {
             logger.fine("refreshUI : main version mismatch : " + taskObservation.getVersion() + " :: " + lastObservation.getVersion());
@@ -810,23 +823,43 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
           // use consistent observation and observability data :
           // next iteration will see changes ...
-          ObservationManager.getInstance().fireObservabilityDone(taskObservation, obsData);
+          om.fireObservabilityDone(taskObservation, obsData);
         }
       }
 
-      // Refresh the GUI using the same parameter values that were used in computeInBackground() / ObservabilityService for consistency :
-      this.obsPanel.updatePlot(taskObservation, obsData);
+      // Refresh the GUI using coherent data :
+      this.obsPanel.updatePlot(new ChartData(taskObservation, obsData));
     }
   }
 
   /**
-   * Refresh the plot using ObservabilitySwingWorker arguments and the computed observability data.
+   * Return the chart data
+   * @return chart data
+   */
+  private ChartData getChartData() {
+    return this.chartData;
+  }
+
+  /**
+   * Define the chart data
+   * @param chartData chart data
+   */
+  private void setChartData(final ChartData chartData) {
+    this.chartData = chartData;
+  }
+
+  /**
+   * Refresh the plot using chart data.
    * This code is executed by the Swing Event Dispatcher thread (EDT)
    *
-   * @param observation observation settings
-   * @param obsData computed observability data
+   * @param chartData chart data
    */
-  private void updatePlot(final ObservationSetting observation, final ObservabilityData obsData) {
+  private void updatePlot(final ChartData chartData) {
+    // memorize chart data (used by export PDF) :
+    setChartData(chartData);
+
+    final ObservationSetting observation = chartData.getObservation();
+    final ObservabilityData obsData = chartData.getObsData();
 
     final boolean useLST = obsData.isUseLST();
     final boolean doBaseLineLimits = obsData.isDoBaseLineLimits();
@@ -1091,9 +1124,9 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     dateAxis.setRange(from.getTime() - 1l, to.getTime() + 1l);
 
     if (doBaseLineLimits) {
-      dateAxis.setStandardTickUnits(this.haTickUnits);
+      dateAxis.setStandardTickUnits(HA_TICK_UNITS);
     } else {
-      dateAxis.setStandardTickUnits(this.hhmmTickUnits);
+      dateAxis.setStandardTickUnits(HH_MM_TICK_UNITS);
     }
     dateAxis.setTickLabelInsets(ChartUtils.TICK_LABEL_INSETS);
 
@@ -1152,6 +1185,45 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
           break;
         default:
       }
+    }
+  }
+
+  /**
+   * Observability Chart Data used by the plot
+   *
+   * TODO MULTI-CONF : add displayed configuration / modes (overlay, single ...)
+   */
+  private final static class ChartData {
+
+    /** observation */
+    private final ObservationSetting observation;
+    /** observability data */
+    private final ObservabilityData obsData;
+
+    /**
+     * Constructor
+     * @param observation observation
+     * @param obsData observability data
+     */
+    protected ChartData(final ObservationSetting observation, final ObservabilityData obsData) {
+      this.observation = observation;
+      this.obsData = obsData;
+    }
+
+    /**
+     * Return the observation
+     * @return observation
+     */
+    public ObservationSetting getObservation() {
+      return this.observation;
+    }
+
+    /**
+     * Return the observability data
+     * @return observability data
+     */
+    public ObservabilityData getObsData() {
+      return this.obsData;
     }
   }
 }

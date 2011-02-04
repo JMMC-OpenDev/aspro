@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: InterferometerMapPanel.java,v 1.15 2011-02-02 17:39:01 bourgesl Exp $"
+ * "@(#) $Id: InterferometerMapPanel.java,v 1.16 2011-02-04 17:16:21 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.15  2011/02/02 17:39:01  bourgesl
+ * added to do
+ *
  * Revision 1.14  2011/01/28 16:32:36  mella
  * Add new observationEvents (CHANGED replaced by DO_UPDATE, REFRESH and REFRESH_UV)
  * Modify the observationListener interface
@@ -115,6 +118,10 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
   /** current configuration to track changes */
   private String configuration = null;
 
+  /* plot data */
+  /** chart data */
+  private ChartData chartData = null;
+
   /* swing */
   /** chart panel */
   private SquareChartPanel chartPanel;
@@ -177,22 +184,24 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
    * @return PDF default file name
    */
   public String getPDFDefaultFileName() {
-    // TODO MULTI-CONF : adjust file name if multi configurations ...
+    if (this.getChartData() != null) {
+      // TODO MULTI-CONF : adjust file name if multi configurations ...
 
-    // now : use the main observation :
-    final ObservationSetting observation = ObservationManager.getInstance().getMainObservation();
+      final ObservationSetting observation = this.getChartData().getObservation();
 
-    final StringBuilder sb = new StringBuilder(16);
-    sb.append("MAP_");
+      final StringBuilder sb = new StringBuilder(16);
+      sb.append("MAP_");
 
-    final String intConfName = observation.getInterferometerConfiguration().getName();
-    final String altIntConfName = intConfName.replaceAll("[^a-zA-Z_0-9]", "_");
-    sb.append(altIntConfName).append('_');
+      final String intConfName = observation.getInterferometerConfiguration().getName();
+      final String altIntConfName = intConfName.replaceAll("[^a-zA-Z_0-9]", "_");
+      sb.append(altIntConfName).append('_');
 
-    final String baseLine = observation.getInstrumentConfiguration().getStations().replaceAll(" ", "-");
-    sb.append(baseLine).append('.').append(PDF_EXT);
+      final String baseLine = observation.getInstrumentConfiguration().getStations().replaceAll(" ", "-");
+      sb.append(baseLine).append('.').append(PDF_EXT);
 
-    return sb.toString();
+      return sb.toString();
+    }
+    return null;
   }
 
   /**
@@ -309,15 +318,12 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
       logger.fine("plot : " + ObservationManager.toString(observation));
     }
 
-    // title :
-    final StringBuilder sb = new StringBuilder(observation.getInterferometerConfiguration().getName());
-    sb.append(" - ").append(observation.getInstrumentConfiguration().getStations());
+    final String config = observation.getInterferometerConfiguration().getName()
+            + '-' + observation.getInstrumentConfiguration().getStations();
 
-    final String title = sb.toString();
-
-    if (!title.equals(this.configuration)) {
+    if (!config.equals(this.configuration)) {
       // refresh the plot :
-      this.configuration = title;
+      this.configuration = config;
 
       if (logger.isLoggable(Level.FINE)) {
         logger.fine("plot : refresh");
@@ -325,25 +331,61 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
 
       final long start = System.nanoTime();
 
+      // TODO MULTI-CONF : separate the service in two parts : interferometer setup and baseline data :
       final InterferometerMapData mapData = InterferometerMapService.compute(observation);
 
-      ChartUtils.clearTextSubTitle(this.chart);
-
-      // title :
-      ChartUtils.addSubtitle(this.chart, sb.toString());
-
-      // computed data are valid :
-      updateChart(mapData);
-
-      // update theme at end :
-      ChartUtilities.applyCurrentTheme(this.chart);
-
-      this.xyPlot.setBackgroundPaint(Color.WHITE);
+      this.updatePlot(new ChartData(observation, mapData));
 
       if (logger.isLoggable(Level.INFO)) {
         logger.info("plot : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
       }
     }
+  }
+
+  /**
+   * Return the chart data
+   * @return chart data
+   */
+  private ChartData getChartData() {
+    return this.chartData;
+  }
+
+  /**
+   * Define the chart data
+   * @param chartData chart data
+   */
+  private void setChartData(final ChartData chartData) {
+    this.chartData = chartData;
+  }
+
+  /**
+   * Refresh the plot using chart data.
+   * This code is executed by the Swing Event Dispatcher thread (EDT)
+   *
+   * @param chartData chart data
+   */
+  private void updatePlot(final ChartData chartData) {
+    // memorize chart data (used by export PDF) :
+    setChartData(chartData);
+
+    final ObservationSetting observation = chartData.getObservation();
+    final InterferometerMapData mapData = chartData.getMapData();
+
+    ChartUtils.clearTextSubTitle(this.chart);
+
+    // title :
+    final StringBuilder sb = new StringBuilder(observation.getInterferometerConfiguration().getName());
+    sb.append(" - ").append(observation.getInstrumentConfiguration().getStations());
+
+    ChartUtils.addSubtitle(this.chart, sb.toString());
+
+    // computed data are valid :
+    updateChart(mapData);
+
+    // update theme at end :
+    ChartUtilities.applyCurrentTheme(this.chart);
+
+    this.xyPlot.setBackgroundPaint(Color.WHITE);
   }
 
   /**
@@ -460,6 +502,43 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
           break;
         default:
       }
+    }
+  }
+
+  /**
+   * Interferometer Map Chart Data used by the plot
+   */
+  private final static class ChartData {
+
+    /** observation */
+    private final ObservationSetting observation;
+    /** interferometer map data */
+    private final InterferometerMapData mapData;
+
+    /**
+     * Constructor
+     * @param observation observation used by the plo
+     * @param mapData interferometer map data
+     */
+    protected ChartData(final ObservationSetting observation, final InterferometerMapData mapData) {
+      this.observation = observation;
+      this.mapData = mapData;
+    }
+
+    /**
+     * Return the observation
+     * @return observation
+     */
+    public ObservationSetting getObservation() {
+      return this.observation;
+    }
+
+    /**
+     * Return the interferometer map data
+     * @return interferometer map data
+     */
+    public InterferometerMapData getMapData() {
+      return this.mapData;
     }
   }
 }
