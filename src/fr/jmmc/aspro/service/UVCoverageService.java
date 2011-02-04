@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoverageService.java,v 1.37 2011-02-03 17:26:32 bourgesl Exp $"
+ * "@(#) $Id: UVCoverageService.java,v 1.38 2011-02-04 17:20:45 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.37  2011/02/03 17:26:32  bourgesl
+ * added  observation version to UVCoverageData
+ * removed logs related to warnings
+ *
  * Revision 1.36  2011/02/02 17:38:31  bourgesl
  * added DEBUG_SLOW_SERVICE flag to sleep 2s for debugging purposes
  *
@@ -136,10 +140,7 @@ import fr.jmmc.aspro.model.oi.TargetConfiguration;
 import fr.jmmc.aspro.model.uvcoverage.UVBaseLineData;
 import fr.jmmc.aspro.model.uvcoverage.UVRangeBaseLineData;
 import fr.jmmc.aspro.util.AngleUtils;
-import fr.jmmc.mcs.model.ModelUVMapService;
-import fr.jmmc.mcs.model.ModelUVMapService.ImageMode;
-import java.awt.geom.Rectangle2D;
-import java.awt.image.IndexColorModel;
+import fr.jmmc.aspro.util.TestUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -167,7 +168,7 @@ public final class UVCoverageService {
   private final UVCoverageData data;
 
   /* inputs */
-  /** observation settings used (read-only). Note : Swing actions can modify this object during the computation (dirty read) */
+  /** observation settings used  (read-only copy of the modifiable observation) */
   private final ObservationSetting observation;
   /** computed Observability Data (read-only) */
   private final ObservabilityData obsData;
@@ -177,14 +178,6 @@ public final class UVCoverageService {
   private double uvMax;
   /** flag to compute the UV support */
   private final boolean doUVSupport;
-  /** flag to compute the model image */
-  private final boolean doModelImage;
-  /** image mode (amplitude or phase) */
-  private ImageMode imageMode;
-  /** image size */
-  private int imageSize;
-  /** image color model */
-  private IndexColorModel colorModel;
 
   /* internal */
   /** Get the current thread to check if the computation is interrupted */
@@ -223,23 +216,14 @@ public final class UVCoverageService {
    * @param targetName target name
    * @param uvMax U-V max in meter
    * @param doUVSupport flag to compute the UV support
-   * @param doModelImage flag to compute the model image
-   * @param imageMode image mode (amplitude or phase)
-   * @param imageSize number of pixels for both width and height of the generated image
-   * @param colorModel color model to use
    */
   public UVCoverageService(final ObservationSetting observation, final ObservabilityData obsData, final String targetName,
-                           final double uvMax, final boolean doUVSupport,
-                           final boolean doModelImage, final ImageMode imageMode, final int imageSize, final IndexColorModel colorModel) {
+                           final double uvMax, final boolean doUVSupport) {
     this.observation = observation;
     this.obsData = obsData;
     this.targetName = targetName;
     this.uvMax = uvMax;
     this.doUVSupport = doUVSupport;
-    this.doModelImage = doModelImage;
-    this.imageMode = imageMode;
-    this.imageSize = imageSize;
-    this.colorModel = colorModel;
 
     // create the uv coverage data corresponding to the observation version :
     this.data = new UVCoverageData(observation.getVersion());
@@ -299,19 +283,8 @@ public final class UVCoverageService {
         logger.fine("UV coordinate maximum = [" + this.uvMax + "]");
       }
 
-      // uv Max = max base line * uv margin / minimum wave length
+      // uv Max = max base line / minimum wave length
       this.data.setUvMax(this.uvMax);
-
-      if (this.doModelImage) {
-        final Rectangle2D.Float uvRect = new Rectangle2D.Float();
-        uvRect.setFrameFromDiagonal(-uvMax, -uvMax, uvMax, uvMax);
-
-        // Compute Target Model for the UV coverage limits :
-        this.data.setUvMapData(ModelUVMapService.computeUVMap(
-                this.observation.getTarget(this.targetName).getModels(),
-                uvRect, null, null,
-                this.imageMode, this.imageSize, this.colorModel));
-      }
 
       // fast interrupt :
       if (this.currentThread.isInterrupted()) {
@@ -326,10 +299,10 @@ public final class UVCoverageService {
     }
 
     if (DEBUG_SLOW_SERVICE) {
-      try {
-        Thread.sleep(2000l);
-      } catch (InterruptedException ie) {
-        logger.log(Level.SEVERE, "DEBUG_SLOW_SERVICE", ie);
+      TestUtils.busyWait(2000l);
+
+      if (this.currentThread.isInterrupted()) {
+        return null;
       }
     }
 
@@ -347,8 +320,8 @@ public final class UVCoverageService {
 
     final double haElev = this.starData.getHaElev();
 
-    // 5 minutes is correct to get pretty ellipse :
-    final double step = 5d / 60d;
+    // 1 minute is fine to get pretty ellipse :
+    final double step = 1d / 60d;
 
     final int nPoints = (int) Math.round(2d * haElev / step) + 1;
 
