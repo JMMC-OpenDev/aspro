@@ -34,9 +34,6 @@
     
     <!-- PDF -->
     <jar href="jar/iText-2.1.5.jar" />
-
-    <!-- backport of Swing worker -->
-    <jar href="jar/swing-worker-1.2.jar" />
   </resources>
   <application-desc main-class="fr.jmmc.aspro.AsproGui"/>
 </jnlp>
