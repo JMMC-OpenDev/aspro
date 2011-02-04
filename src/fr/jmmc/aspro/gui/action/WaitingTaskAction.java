@@ -1,16 +1,21 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: WaitingTaskAction.java,v 1.1 2011-02-03 17:30:55 bourgesl Exp $"
+ * "@(#) $Id: WaitingTaskAction.java,v 1.2 2011-02-04 10:04:35 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2011/02/03 17:30:55  bourgesl
+ * new abstract action that detect if any task is running and waits for task completion before running action (use Timer)
+ *
  */
 package fr.jmmc.aspro.gui.action;
 
 import fr.jmmc.aspro.gui.task.TaskSwingWorkerExecutor;
+import fr.jmmc.mcs.gui.App;
 import fr.jmmc.mcs.util.RegisteredAction;
+import java.awt.Cursor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.logging.Level;
@@ -33,6 +38,19 @@ public abstract class WaitingTaskAction extends RegisteredAction {
   private final static int POLLING_DELAY = 100;
   /** shared flag to know if there is already a  pending action */
   private static boolean pending = false;
+
+  /**
+   * Define the shared pending flag and the main frame cursor (default|wait)
+   * @param value new value to set
+   */
+  private static void setPending(final boolean value) {
+    pending = value;
+
+    App.getFrame().setCursor(
+            (value)
+            ? Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR)
+            : Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+  }
 
   /**
    * Constructor, that automatically register the action in RegisteredAction.
@@ -68,7 +86,7 @@ public abstract class WaitingTaskAction extends RegisteredAction {
     // check if there are running tasks :
     if (TaskSwingWorkerExecutor.isTaskRunning()) {
       // indicate to other actions that this action is pending for execution :
-      pending = true;
+      setPending(true);
 
       // delay the delegate action until there is no running task :
       new DelayedActionPerformer(this).start();
@@ -125,7 +143,7 @@ public abstract class WaitingTaskAction extends RegisteredAction {
 
       if (!taskRunning) {
         // indicate to other actions that this action is no more pending :
-        pending = false;
+        setPending(false);
 
         // stop this timer :
         this.timer.stop();
