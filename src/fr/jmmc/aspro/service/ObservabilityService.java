@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.65 2011-02-03 17:26:52 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.66 2011-02-04 17:19:39 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.65  2011/02/03 17:26:52  bourgesl
+ * added  observation version to ObservabilityData
+ *
  * Revision 1.64  2011/02/02 17:38:31  bourgesl
  * added DEBUG_SLOW_SERVICE flag to sleep 2s for debugging purposes
  *
@@ -245,6 +248,7 @@ import fr.jmmc.aspro.model.oi.StationLinks;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.service.HorizonService.Profile;
 import fr.jmmc.aspro.util.CombUtils;
+import fr.jmmc.aspro.util.TestUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -282,7 +286,7 @@ public final class ObservabilityService {
   private final ObservabilityData data;
 
   /* inputs */
-  /** observation settings used (read-only). Note : Swing actions can modify this object during the computation (dirty read) */
+  /** observation settings used  (read-only copy of the modifiable observation) */
   private final ObservationSetting observation;
   /** indicates if the timestamps are expressed in LST or in UTC */
   private final boolean useLST;
@@ -532,10 +536,10 @@ public final class ObservabilityService {
     }
 
     if (DEBUG_SLOW_SERVICE) {
-      try {
-        Thread.sleep(2000l);
-      } catch (InterruptedException ie) {
-        logger.log(Level.SEVERE, "DEBUG_SLOW_SERVICE", ie);
+      TestUtils.busyWait(2000l);
+      
+      if (this.currentThread.isInterrupted()) {
+        return null;
       }
     }
 
