@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: NoiseService.java,v 1.19 2011-02-03 17:27:03 bourgesl Exp $"
+ * "@(#) $Id: NoiseService.java,v 1.20 2011-02-04 17:19:45 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.19  2011/02/03 17:27:03  bourgesl
+ * removed logs related to warnings
+ *
  * Revision 1.18  2011/01/26 17:19:56  bourgesl
  * comment on concurrency
  *
@@ -197,7 +200,7 @@ public final class NoiseService {
 
   /**
    * Protected constructor
-   * @param observation observation settings used (read-only). Note : Swing actions can modify this object during the computation (dirty read)
+   * @param observation observation settings used (read-only copy of the modifiable observation)
    * @param target target to use
    * @param warningContainer container for warning messages
    */

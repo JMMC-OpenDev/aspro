@@ -56,7 +56,7 @@ public final class OIFitsCreatorService {
 
   /* members */
   /* input */
-  /** observation settings used (read-only). Note : Swing actions can modify this object during the computation (dirty read) */
+  /** observation settings used  (read-only copy of the modifiable observation) */
   private final ObservationSetting observation;
   /** selected target */
   private final Target target;
