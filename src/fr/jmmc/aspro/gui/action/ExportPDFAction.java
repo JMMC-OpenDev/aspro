@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportPDFAction.java,v 1.18 2011-02-03 17:31:16 bourgesl Exp $"
+ * "@(#) $Id: ExportPDFAction.java,v 1.19 2011-02-04 17:18:46 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.18  2011/02/03 17:31:16  bourgesl
+ * use WaitingTaskAction to export valid data
+ *
  * Revision 1.17  2010/12/15 13:35:45  bourgesl
  * define a default file name depending on the PDFExportable interface
  *
@@ -163,7 +166,9 @@ public final class ExportPDFAction extends WaitingTaskAction {
 
     // default PDF file name :
     final String fileName = exportable.getPDFDefaultFileName();
-    fileChooser.setSelectedFile(new File(fileChooser.getCurrentDirectory(), fileName));
+    if (fileName != null) {
+      fileChooser.setSelectedFile(new File(fileChooser.getCurrentDirectory(), fileName));
+    }
 
     fileChooser.setDialogTitle("Export the plot to PDF");
 
