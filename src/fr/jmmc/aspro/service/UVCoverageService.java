@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoverageService.java,v 1.38 2011-02-04 17:20:45 bourgesl Exp $"
+ * "@(#) $Id: UVCoverageService.java,v 1.39 2011-02-07 15:23:10 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.38  2011/02/04 17:20:45  bourgesl
+ * removed model image computation (ModelUVMapService)
+ * use busyWait (test)
+ *
  * Revision 1.37  2011/02/03 17:26:32  bourgesl
  * added  observation version to UVCoverageData
  * removed logs related to warnings
@@ -635,14 +639,16 @@ public final class UVCoverageService {
       // get current target :
       final Target target = this.observation.getTarget(this.targetName);
 
-      // Create the OIFitsCreatorService :
-      final OIFitsCreatorService oiFitsCreator = new OIFitsCreatorService(this.observation, target,
-              this.beams, this.baseLines, this.lambdaMin, this.lambdaMax, this.nSpectralChannels,
-              this.data.getHA(), targetUVObservability, this.starData.getPrecRA(), this.sc,
-              this.data.getWarningContainer());
+      if (target != null) {
+        // Create the OIFitsCreatorService :
+        final OIFitsCreatorService oiFitsCreator = new OIFitsCreatorService(this.observation, target,
+                this.beams, this.baseLines, this.lambdaMin, this.lambdaMax, this.nSpectralChannels,
+                this.data.getHA(), targetUVObservability, this.starData.getPrecRA(), this.sc,
+                this.data.getWarningContainer());
 
-      // Create the OIFits structure :
-      this.data.setOiFitsFile(oiFitsCreator.createOIFits());
+        // Create the OIFits structure :
+        this.data.setOiFitsFile(oiFitsCreator.createOIFits());
+      }
     }
   }
 
