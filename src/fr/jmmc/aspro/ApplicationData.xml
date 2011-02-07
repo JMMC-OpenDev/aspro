@@ -72,7 +72,9 @@
   <releasenotes>
     <release version="0.7">
       <prerelease version="0.7.8 beta">
-        <change>Internal changes related to computations running in background (concurrency)</change>
+        <change>Optimisation : the model image is not computed if it is useless</change>
+        <change>Actions Export to OIFits / PDF waits for computations to be done</change>
+        <change>Internal changes related to computations running in background (concurrency and consistency)</change>
       </prerelease>
       <prerelease version="0.7.7 beta">
         <change>Updated Export to Observing Blocks to support calibrators : the selected science target is exported
