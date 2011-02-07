@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoverageData.java,v 1.10 2011-02-03 17:27:38 bourgesl Exp $"
+ * "@(#) $Id: UVCoverageData.java,v 1.11 2011-02-07 15:23:29 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.10  2011/02/03 17:27:38  bourgesl
+ * added observation version in constructor
+ *
  * Revision 1.9  2010/10/01 15:38:29  bourgesl
  * added warning container
  *
@@ -63,8 +66,8 @@ public final class UVCoverageData {
   private double[] ha = null;
   /** list of uv point couples corresponding to the target observability */
   private List<UVRangeBaseLineData> targetUVObservability;
-  /** uv map data : TODO remove */
-  private UVMapData uvMapData;
+  /** uv map data */
+  private UVMapData uvMapData = null;
   /** warning container */
   private final WarningContainer warningContainer = new WarningContainer();
   /** oifits structure */
