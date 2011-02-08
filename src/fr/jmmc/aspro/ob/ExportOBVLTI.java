@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBVLTI.java,v 1.15 2011-01-07 16:51:08 bourgesl Exp $"
+ * "@(#) $Id: ExportOBVLTI.java,v 1.16 2011-02-08 15:34:16 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.15  2011/01/07 16:51:08  bourgesl
+ * fill correctly category and calibrator-ob keywords
+ * for a science OB, generates all related calibrator OBs
+ *
  * Revision 1.14  2011/01/07 13:22:49  bourgesl
  * use UNDEFINED_MAGNITUDE and target directly
  *
@@ -476,55 +480,13 @@ public class ExportOBVLTI {
       throw new IllegalStateException("the instrumentMode is empty !");
     }
 
-    final double lambda = insMode.getWaveLength();
+    final TargetConfiguration targetConf = target.getConfiguration();
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("lambda = " + lambda);
-    }
+    final boolean useFT = (targetConf != null && targetConf.getFringeTrackerMode() != null);
 
-    final Band band = Band.findBand(lambda);
-    final SpectralBand insBand = SpectralBandUtils.findBand(band);
-
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("insBand = " + insBand);
-    }
-
-    // get AO band :
-    final List<Station> stations = observation.getInstrumentConfiguration().getStationList();
-
-    // All telescopes in a configuration have the same AO system :
-    final Telescope tel = stations.get(0).getTelescope();
-
-    // AO :
-    final AdaptiveOptics ao = tel.getAdaptiveOptics();
-
-    final SpectralBand aoBand = (ao != null) ? ao.getBand() : null;
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("aoBand = " + aoBand);
-    }
-
-    // extract instrument and AO fluxes :
-    final Double insMag = target.getFlux(insBand);
-    final Double aoMag = target.getFlux(aoBand);
-
-    // Decorate the target name :
-    final StringBuilder sb = new StringBuilder(32);
-    sb.append(target.getName());
-
-    sb.append('_').append(insBand.name());
-    sb.append(df2.format(ExportOBVLTI.getMagnitude(insMag)));
-
-    sb.append('_').append(aoBand.name());
-    sb.append(df2.format(ExportOBVLTI.getMagnitude(aoMag)));
-
-    final String targetNameWithMagnitudes = sb.toString();
-
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("targetNameWithMagnitudes = " + targetNameWithMagnitudes);
-    }
-
+    final String suffix = insMode.getName() + '_' + (useFT ? "FT" : "noFT");
     final String prefix = om.isCalibrator(target) ? OB_CALIBRATOR : OB_SCIENCE;
 
-    return observation.generateFileName(targetNameWithMagnitudes, prefix, ExportOBVLTIAction.OBX_EXT);
+    return observation.generateFileName(target.getName(), prefix, suffix, ExportOBVLTIAction.OBX_EXT);
   }
 }

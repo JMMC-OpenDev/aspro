@@ -1,4 +1,3 @@
-
 package fr.jmmc.aspro.model.oi;
 
 import java.util.ArrayList;
@@ -9,7 +8,6 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import fr.jmmc.aspro.model.OIBase;
-
 
 /**
  * 
@@ -50,197 +48,196 @@ import fr.jmmc.aspro.model.OIBase;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "Observation", propOrder = {
-    "schemaVersion",
-    "name",
-    "when",
-    "interferometerConfiguration",
-    "instrumentConfiguration",
-    "targets",
-    "targetUserInfos"
+  "schemaVersion",
+  "name",
+  "when",
+  "interferometerConfiguration",
+  "instrumentConfiguration",
+  "targets",
+  "targetUserInfos"
 })
 @XmlRootElement(name = "observationSetting")
 public class ObservationSetting
-    extends OIBase
-{
+        extends OIBase {
 
-    protected float schemaVersion;
-    @XmlElement(required = true)
-    protected String name;
-    @XmlElement(required = true)
-    protected WhenSetting when;
-    @XmlElement(required = true)
-    protected InterferometerConfigurationChoice interferometerConfiguration;
-    @XmlElement(required = true)
-    protected FocalInstrumentConfigurationChoice instrumentConfiguration;
-    @XmlElement(name = "target", required = true)
-    protected List<Target> targets;
-    protected TargetUserInformations targetUserInfos;
+  protected float schemaVersion;
+  @XmlElement(required = true)
+  protected String name;
+  @XmlElement(required = true)
+  protected WhenSetting when;
+  @XmlElement(required = true)
+  protected InterferometerConfigurationChoice interferometerConfiguration;
+  @XmlElement(required = true)
+  protected FocalInstrumentConfigurationChoice instrumentConfiguration;
+  @XmlElement(name = "target", required = true)
+  protected List<Target> targets;
+  protected TargetUserInformations targetUserInfos;
 
-    /**
-     * Gets the value of the schemaVersion property.
-     * 
-     */
-    public float getSchemaVersion() {
-        return schemaVersion;
+  /**
+   * Gets the value of the schemaVersion property.
+   *
+   */
+  public float getSchemaVersion() {
+    return schemaVersion;
+  }
+
+  /**
+   * Sets the value of the schemaVersion property.
+   *
+   */
+  public void setSchemaVersion(float value) {
+    this.schemaVersion = value;
+  }
+
+  /**
+   * Gets the value of the name property.
+   *
+   * @return
+   *     possible object is
+   *     {@link String }
+   *
+   */
+  public String getName() {
+    return name;
+  }
+
+  /**
+   * Sets the value of the name property.
+   *
+   * @param value
+   *     allowed object is
+   *     {@link String }
+   *
+   */
+  public void setName(String value) {
+    this.name = value;
+  }
+
+  /**
+   * Gets the value of the when property.
+   *
+   * @return
+   *     possible object is
+   *     {@link WhenSetting }
+   *
+   */
+  public WhenSetting getWhen() {
+    return when;
+  }
+
+  /**
+   * Sets the value of the when property.
+   *
+   * @param value
+   *     allowed object is
+   *     {@link WhenSetting }
+   *
+   */
+  public void setWhen(WhenSetting value) {
+    this.when = value;
+  }
+
+  /**
+   * Gets the value of the interferometerConfiguration property.
+   *
+   * @return
+   *     possible object is
+   *     {@link InterferometerConfigurationChoice }
+   *
+   */
+  public InterferometerConfigurationChoice getInterferometerConfiguration() {
+    return interferometerConfiguration;
+  }
+
+  /**
+   * Sets the value of the interferometerConfiguration property.
+   *
+   * @param value
+   *     allowed object is
+   *     {@link InterferometerConfigurationChoice }
+   *
+   */
+  public void setInterferometerConfiguration(InterferometerConfigurationChoice value) {
+    this.interferometerConfiguration = value;
+  }
+
+  /**
+   * Gets the value of the instrumentConfiguration property.
+   *
+   * @return
+   *     possible object is
+   *     {@link FocalInstrumentConfigurationChoice }
+   *
+   */
+  public FocalInstrumentConfigurationChoice getInstrumentConfiguration() {
+    return instrumentConfiguration;
+  }
+
+  /**
+   * Sets the value of the instrumentConfiguration property.
+   *
+   * @param value
+   *     allowed object is
+   *     {@link FocalInstrumentConfigurationChoice }
+   *
+   */
+  public void setInstrumentConfiguration(FocalInstrumentConfigurationChoice value) {
+    this.instrumentConfiguration = value;
+  }
+
+  /**
+   * Gets the value of the targets property.
+   *
+   * <p>
+   * This accessor method returns a reference to the live list,
+   * not a snapshot. Therefore any modification you make to the
+   * returned list will be present inside the JAXB object.
+   * This is why there is not a <CODE>set</CODE> method for the targets property.
+   *
+   * <p>
+   * For example, to add a new item, do as follows:
+   * <pre>
+   *    getTargets().add(newItem);
+   * </pre>
+   *
+   *
+   * <p>
+   * Objects of the following type(s) are allowed in the list
+   * {@link Target }
+   *
+   *
+   */
+  public List<Target> getTargets() {
+    if (targets == null) {
+      targets = new ArrayList<Target>();
     }
+    return this.targets;
+  }
 
-    /**
-     * Sets the value of the schemaVersion property.
-     * 
-     */
-    public void setSchemaVersion(float value) {
-        this.schemaVersion = value;
-    }
+  /**
+   * Gets the value of the targetUserInfos property.
+   *
+   * @return
+   *     possible object is
+   *     {@link TargetUserInformations }
+   *
+   */
+  public TargetUserInformations getTargetUserInfos() {
+    return targetUserInfos;
+  }
 
-    /**
-     * Gets the value of the name property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getName() {
-        return name;
-    }
+  /**
+   * Sets the value of the targetUserInfos property.
+   *
+   * @param value
+   *     allowed object is
+   *     {@link TargetUserInformations }
+   *
+   */
+  public void setTargetUserInfos(TargetUserInformations value) {
+    this.targetUserInfos = value;
+  }
 
-    /**
-     * Sets the value of the name property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setName(String value) {
-        this.name = value;
-    }
-
-    /**
-     * Gets the value of the when property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link WhenSetting }
-     *     
-     */
-    public WhenSetting getWhen() {
-        return when;
-    }
-
-    /**
-     * Sets the value of the when property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link WhenSetting }
-     *     
-     */
-    public void setWhen(WhenSetting value) {
-        this.when = value;
-    }
-
-    /**
-     * Gets the value of the interferometerConfiguration property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link InterferometerConfigurationChoice }
-     *     
-     */
-    public InterferometerConfigurationChoice getInterferometerConfiguration() {
-        return interferometerConfiguration;
-    }
-
-    /**
-     * Sets the value of the interferometerConfiguration property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link InterferometerConfigurationChoice }
-     *     
-     */
-    public void setInterferometerConfiguration(InterferometerConfigurationChoice value) {
-        this.interferometerConfiguration = value;
-    }
-
-    /**
-     * Gets the value of the instrumentConfiguration property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link FocalInstrumentConfigurationChoice }
-     *     
-     */
-    public FocalInstrumentConfigurationChoice getInstrumentConfiguration() {
-        return instrumentConfiguration;
-    }
-
-    /**
-     * Sets the value of the instrumentConfiguration property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link FocalInstrumentConfigurationChoice }
-     *     
-     */
-    public void setInstrumentConfiguration(FocalInstrumentConfigurationChoice value) {
-        this.instrumentConfiguration = value;
-    }
-
-    /**
-     * Gets the value of the targets property.
-     * 
-     * <p>
-     * This accessor method returns a reference to the live list,
-     * not a snapshot. Therefore any modification you make to the
-     * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the targets property.
-     * 
-     * <p>
-     * For example, to add a new item, do as follows:
-     * <pre>
-     *    getTargets().add(newItem);
-     * </pre>
-     * 
-     * 
-     * <p>
-     * Objects of the following type(s) are allowed in the list
-     * {@link Target }
-     * 
-     * 
-     */
-    public List<Target> getTargets() {
-        if (targets == null) {
-            targets = new ArrayList<Target>();
-        }
-        return this.targets;
-    }
-
-    /**
-     * Gets the value of the targetUserInfos property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link TargetUserInformations }
-     *     
-     */
-    public TargetUserInformations getTargetUserInfos() {
-        return targetUserInfos;
-    }
-
-    /**
-     * Sets the value of the targetUserInfos property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link TargetUserInformations }
-     *     
-     */
-    public void setTargetUserInfos(TargetUserInformations value) {
-        this.targetUserInfos = value;
-    }
-    
 //--simple--preserve
   /**
    * Return true if the target list is not empty
@@ -289,7 +286,6 @@ public class ObservationSetting
     }
     return null;
   }
-
   /** observation version (read only) */
   @javax.xml.bind.annotation.XmlTransient
   private fr.jmmc.aspro.model.ObservationVersion version = new fr.jmmc.aspro.model.ObservationVersion();
@@ -301,7 +297,6 @@ public class ObservationSetting
   public final fr.jmmc.aspro.model.ObservationVersion getVersion() {
     return this.version;
   }
-
   /** computed OIFits structure (read only) */
   @javax.xml.bind.annotation.XmlTransient
   private fr.jmmc.oitools.model.OIFitsFile oiFitsFile = null;
@@ -507,14 +502,15 @@ public class ObservationSetting
 
   /**
    * Generate a standard file name for the selected target using the format :
-   * [<prefix>_<TARGET>_<INSTRUMENT>_<CONFIGURATION>_<DATE>.<extension>]
+   * [<prefix>_<TARGET>_<INSTRUMENT>_<CONFIGURATION>_<suffix>_<DATE>.<extension>]
    *
    * @param targetName target name
-   * @param prefix prefix for the file name
+   * @param prefix prefix (optional) for the file name
+   * @param suffix suffix (optional) before the date
    * @param extension file extension
    * @return standard file name
    */
-  public String generateFileName(final String targetName, final String prefix, final String extension) {
+  public String generateFileName(final String targetName, final String prefix, final String suffix, final String extension) {
     final StringBuilder sb = new StringBuilder(32);
     if (prefix != null) {
       sb.append(prefix).append('_');
@@ -533,6 +529,10 @@ public class ObservationSetting
 
     sb.append(baseLine).append('_');
 
+    if (suffix != null) {
+      sb.append(suffix).append('_');
+    }
+
     final String date = this.getWhen().getDate().toString();
 
     sb.append(date).append('.').append(extension);
@@ -540,5 +540,4 @@ public class ObservationSetting
     return sb.toString();
   }
 //--simple--preserve
-
 }

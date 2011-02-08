@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.82 2011-02-07 16:07:36 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.83 2011-02-08 15:34:16 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.82  2011/02/07 16:07:36  bourgesl
+ * performance : use current chart data to avoid computing UV Map (model image) if it is still valid !
+ *
  * Revision 1.81  2011/02/04 17:18:30  bourgesl
  * new ChartData inner class to have chart state used by PDF export AND to handle zoom event (consistent with uv map image displayed)
  * use ModelUVMapService directly in UVCoverageWorker
@@ -868,7 +871,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       final ObservationSetting observation = this.getChartData().getObservation();
       final UVCoverageData uvData = this.getChartData().getUVData();
 
-      return observation.generateFileName(uvData.getTargetName(), "UV", PDF_EXT);
+      return observation.generateFileName(uvData.getTargetName(), "UV", null, PDF_EXT);
     }
     return null;
   }
