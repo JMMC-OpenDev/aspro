@@ -42,6 +42,8 @@
     <package name="SwingWorker" description="backport of SwingWorker included into Java 1.6" link="https://swingworker.dev.java.net/"/>
     <!-- LGPL : http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html -->
 
+<!-- todo add JSAMP 1.2 -->
+
   </dependences>
 
   <menubar>
@@ -72,6 +74,7 @@
   <releasenotes>
     <release version="0.7">
       <prerelease version="0.7.8 beta">
+        <change>JSAMP library updated to release 1.2</change>
         <change>Optimisation : the model image is not computed if it is useless</change>
         <change>Actions Export to OIFits / PDF waits for computations to be done</change>
         <change>Internal changes related to computations running in background (concurrency and consistency)</change>
