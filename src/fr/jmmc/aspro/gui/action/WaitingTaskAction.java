@@ -1,19 +1,22 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: WaitingTaskAction.java,v 1.2 2011-02-04 10:04:35 bourgesl Exp $"
+ * "@(#) $Id: WaitingTaskAction.java,v 1.3 2011-02-14 17:13:07 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2011/02/04 10:04:35  bourgesl
+ * change the cursor (wait) when an action is pending
+ *
  * Revision 1.1  2011/02/03 17:30:55  bourgesl
  * new abstract action that detect if any task is running and waits for task completion before running action (use Timer)
  *
  */
 package fr.jmmc.aspro.gui.action;
 
-import fr.jmmc.aspro.gui.task.TaskSwingWorkerExecutor;
 import fr.jmmc.mcs.gui.App;
+import fr.jmmc.mcs.gui.task.TaskSwingWorkerExecutor;
 import fr.jmmc.mcs.util.RegisteredAction;
 import java.awt.Cursor;
 import java.awt.event.ActionEvent;

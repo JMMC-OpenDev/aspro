@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproGui.java,v 1.44 2011-01-31 15:08:34 mella Exp $"
+ * "@(#) $Id: AsproGui.java,v 1.45 2011-02-14 17:13:07 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.44  2011/01/31 15:08:34  mella
+ * do no check splashscreen preference because this is done in all apps now
+ *
  * Revision 1.43  2011/01/31 13:31:33  bourgesl
  * When no file is opened, use ObservationManager.reset() to create a new observation and update the GUI
  *
@@ -158,12 +161,12 @@ import fr.jmmc.aspro.gui.action.SaveObservationAction;
 import fr.jmmc.aspro.gui.action.ShowPrefAction;
 import fr.jmmc.aspro.gui.task.AsproTaskRegistry;
 import fr.jmmc.aspro.gui.util.ComponentResizeAdapter;
-import fr.jmmc.aspro.gui.task.TaskSwingWorkerExecutor;
 import fr.jmmc.aspro.model.ConfigurationManager;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.searchCal.SearchCalSampMessageHandler;
 import fr.jmmc.mcs.gui.App;
 import fr.jmmc.mcs.gui.StatusBar;
+import fr.jmmc.mcs.gui.task.TaskSwingWorkerExecutor;
 import fr.jmmc.mcs.util.ActionRegistrar;
 import fr.jmmc.mcs.util.MCSExceptionHandler;
 import java.awt.BorderLayout;
@@ -270,7 +273,8 @@ public final class AsproGui extends App {
     ConfigurationManager.getInstance();
 
     // Initialize tasks and the task executor :
-    TaskSwingWorkerExecutor.create(AsproTaskRegistry.getInstance());
+    AsproTaskRegistry.getInstance();
+    TaskSwingWorkerExecutor.start();
   }
 
   /**

@@ -1,53 +1,65 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproTaskRegistry.java,v 1.1 2011-01-21 16:30:38 bourgesl Exp $"
+ * "@(#) $Id: AsproTaskRegistry.java,v 1.2 2011-02-14 17:13:07 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2011/01/21 16:30:38  bourgesl
+ * create Aspro Tasks and describe their dependencies
+ *
  */
 package fr.jmmc.aspro.gui.task;
 
+import fr.jmmc.mcs.gui.task.Task;
+import fr.jmmc.mcs.gui.task.TaskRegistry;
+
 /**
- * This class describes the Aspro tasks associated to SwingWorker and their ordering
+ * This class describes the Aspro tasks associated with SwingWorker(s) and their execution order
  * @author bourgesl
  */
-public final class AsproTaskRegistry implements TaskRegistry {
+public final class AsproTaskRegistry extends TaskRegistry {
 
-  /* Aspro tasks */
+  /** task registry singleton */
+  private final static AsproTaskRegistry instance;
+
+  /* ASPRO tasks */
   /** Observability task */
   public final static Task TASK_OBSERVABILITY;
   /** UV Coverage task */
   public final static Task TASK_UV_COVERAGE;
   /** UV Map task */
   public final static Task TASK_UV_MAP;
-  /** Fits task (future) */
-//  public final static Task TASK_OIFITS;
-  /** task count */
-  public final static int TASK_COUNT;
-  /** task registry singleton */
-  private final static AsproTaskRegistry instance;
 
+  /** Fits task (future) */
+  /*
+  public final static Task TASK_OIFITS;
+   */
   /**
-   * Static initializer to define tasks (id, name) and child tasks
+   * Static initializer to define tasks and their child tasks
    */
   static {
-    int n = 0;
+    // create the task registry singleton :
+    instance = new AsproTaskRegistry();
 
     // create tasks :
-    TASK_OBSERVABILITY = new Task(n++, "Observability");
-    TASK_UV_COVERAGE = new Task(n++, "UVCoverage");
-    TASK_UV_MAP = new Task(n++, "UVMap");
+    TASK_OBSERVABILITY = new Task("Observability");
+    TASK_UV_COVERAGE = new Task("UVCoverage");
+    TASK_UV_MAP = new Task("UVMap");
 //    TASK_OIFITS = new Task(n++, "OIFits");
 
+    // register tasks :
+    instance.addTask(TASK_OBSERVABILITY);
+    instance.addTask(TASK_UV_COVERAGE);
+    instance.addTask(TASK_UV_MAP);
+
+    // task chain :
     final Task[] tasks = new Task[]{
       TASK_OBSERVABILITY, TASK_UV_COVERAGE, TASK_UV_MAP /* , TASK_OIFITS */};
 
-    TASK_COUNT = tasks.length;
-
     // iterate over tasks :
-    for (int i = 0; i < n; i++) {
+    for (int i = 0, n = tasks.length; i < n; i++) {
 
       final int childCount = n - i - 1;
 
@@ -57,10 +69,8 @@ public final class AsproTaskRegistry implements TaskRegistry {
         childTasks[j] = tasks[i + j + 1];
       }
 
-      tasks[i].setChildTasks(childTasks);
+      instance.setChildTasks(tasks[i], childTasks);
     }
-
-    instance = new AsproTaskRegistry();
   }
 
   /**
@@ -72,17 +82,9 @@ public final class AsproTaskRegistry implements TaskRegistry {
   }
 
   /**
-   * Private constructor
+   * Protected constructor
    */
   private AsproTaskRegistry() {
-    // no-op
-  }
-
-  /**
-   * Return the number of tasks
-   * @return number of tasks
-   */
-  public int getTaskCount() {
-    return TASK_COUNT;
+    super();
   }
 }

@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationTaskSwingWorker.java,v 1.3 2011-02-04 17:18:59 bourgesl Exp $"
+ * "@(#) $Id: ObservationTaskSwingWorker.java,v 1.4 2011-02-14 17:13:07 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2011/02/04 17:18:59  bourgesl
+ * minor
+ *
  * Revision 1.2  2011/02/03 17:29:24  bourgesl
  * removed getVersion
  *
@@ -15,8 +18,9 @@
  */
 package fr.jmmc.aspro.gui.task;
 
-import fr.jmmc.aspro.model.ObservationVersion;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
+import fr.jmmc.mcs.gui.task.Task;
+import fr.jmmc.mcs.gui.task.TaskSwingWorker;
 
 /**
  * This class extends TaskSwingWorker to :
