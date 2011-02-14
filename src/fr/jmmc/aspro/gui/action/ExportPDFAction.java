@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportPDFAction.java,v 1.19 2011-02-04 17:18:46 bourgesl Exp $"
+ * "@(#) $Id: ExportPDFAction.java,v 1.20 2011-02-14 15:33:10 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.19  2011/02/04 17:18:46  bourgesl
+ * avoid empty file name
+ *
  * Revision 1.18  2011/02/03 17:31:16  bourgesl
  * use WaitingTaskAction to export valid data
  *
@@ -69,11 +72,11 @@ package fr.jmmc.aspro.gui.action;
 import fr.jmmc.aspro.AsproGui;
 import fr.jmmc.aspro.gui.PDFExportable;
 import fr.jmmc.aspro.gui.chart.PDFUtils;
-import fr.jmmc.aspro.util.FileUtils;
 import fr.jmmc.mcs.gui.MessagePane;
 import fr.jmmc.mcs.gui.StatusBar;
 import fr.jmmc.mcs.util.ActionRegistrar;
 import fr.jmmc.mcs.util.FileFilterRepository;
+import fr.jmmc.mcs.util.FileUtils;
 import java.awt.Component;
 import java.io.File;
 import java.io.IOException;

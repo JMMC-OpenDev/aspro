@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBVLTIAction.java,v 1.18 2011-01-10 13:29:59 bourgesl Exp $"
+ * "@(#) $Id: ExportOBVLTIAction.java,v 1.19 2011-02-14 15:33:10 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.18  2011/01/10 13:29:59  bourgesl
+ * removed comment
+ *
  * Revision 1.17  2011/01/07 16:51:08  bourgesl
  * fill correctly category and calibrator-ob keywords
  * for a science OB, generates all related calibrator OBs
@@ -76,11 +79,11 @@ import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetInformation;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.aspro.ob.ExportOBVLTI;
-import fr.jmmc.aspro.util.FileUtils;
 import fr.jmmc.mcs.gui.DismissableMessagePane;
 import fr.jmmc.mcs.gui.MessagePane;
 import fr.jmmc.mcs.gui.StatusBar;
 import fr.jmmc.mcs.util.FileFilterRepository;
+import fr.jmmc.mcs.util.FileUtils;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;

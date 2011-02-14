@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBMidi.java,v 1.7 2010-12-15 13:31:38 bourgesl Exp $"
+ * "@(#) $Id: ExportOBMidi.java,v 1.8 2011-02-14 15:33:10 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2010/12/15 13:31:38  bourgesl
+ * class made final
+ *
  * Revision 1.6  2010/10/04 16:25:25  bourgesl
  * proper IO exception handling
  *
@@ -51,7 +54,7 @@ package fr.jmmc.aspro.ob;
 
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Target;
-import fr.jmmc.aspro.util.FileUtils;
+import fr.jmmc.mcs.util.FileUtils;
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;

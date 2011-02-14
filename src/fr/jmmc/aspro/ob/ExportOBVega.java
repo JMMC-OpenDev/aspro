@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBVega.java,v 1.9 2011-01-07 13:22:31 bourgesl Exp $"
+ * "@(#) $Id: ExportOBVega.java,v 1.10 2011-02-14 15:33:10 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.9  2011/01/07 13:22:31  bourgesl
+ * use UNDEFINED_MAGNITUDE
+ *
  * Revision 1.8  2010/12/17 15:08:33  bourgesl
  * added comment
  *
@@ -48,7 +51,7 @@ import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetConfiguration;
 import fr.jmmc.aspro.service.ObservabilityService;
-import fr.jmmc.aspro.util.FileUtils;
+import fr.jmmc.mcs.util.FileUtils;
 import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;

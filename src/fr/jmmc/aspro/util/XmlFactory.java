@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: XmlFactory.java,v 1.5 2010-10-07 15:00:55 bourgesl Exp $"
+ * "@(#) $Id: XmlFactory.java,v 1.6 2011-02-14 15:33:11 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2010/10/07 15:00:55  bourgesl
+ * higher buffer size
+ *
  * Revision 1.4  2010/09/26 11:57:36  bourgesl
  * replaced RuntimeException by IllegalArgumentException to avoid catching all runtime exceptions
  *
@@ -21,6 +24,8 @@
  *
  */
 package fr.jmmc.aspro.util;
+
+import fr.jmmc.mcs.util.FileUtils;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;

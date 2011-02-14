@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SearchCalSampMessageHandler.java,v 1.9 2011-02-04 17:19:22 bourgesl Exp $"
+ * "@(#) $Id: SearchCalSampMessageHandler.java,v 1.10 2011-02-14 15:33:10 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.9  2011/02/04 17:19:22  bourgesl
+ * use main observation to get targets for edition
+ *
  * Revision 1.8  2011/01/26 17:21:11  bourgesl
  * use deepClone (target/models ...)
  *
@@ -39,12 +42,12 @@ import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
-import fr.jmmc.aspro.util.FileUtils;
 import fr.jmmc.aspro.util.XmlFactory;
 import fr.jmmc.mcs.gui.App;
 import fr.jmmc.mcs.gui.MessagePane;
 import fr.jmmc.mcs.interop.SampCapability;
 import fr.jmmc.mcs.interop.SampMessageHandler;
+import fr.jmmc.mcs.util.FileUtils;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;

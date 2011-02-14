@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SampSearchCalQuery.java,v 1.6 2011-02-03 17:29:44 bourgesl Exp $"
+ * "@(#) $Id: SampSearchCalQuery.java,v 1.7 2011-02-14 15:33:10 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2011/02/03 17:29:44  bourgesl
+ * comment
+ *
  * Revision 1.5  2011/01/07 13:21:24  bourgesl
  * moved code
  *
@@ -35,11 +38,11 @@ import fr.jmmc.aspro.model.oi.SpectralBand;
 import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.util.SpectralBandUtils;
-import fr.jmmc.aspro.util.FileUtils;
 import fr.jmmc.mcs.astro.Band;
 import fr.jmmc.mcs.gui.MessagePane;
 import fr.jmmc.mcs.interop.SampCapability;
 import fr.jmmc.mcs.interop.SampCapabilityAction;
+import fr.jmmc.mcs.util.FileUtils;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

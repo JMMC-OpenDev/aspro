@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOIFitsAction.java,v 1.10 2011-02-03 17:31:16 bourgesl Exp $"
+ * "@(#) $Id: ExportOIFitsAction.java,v 1.11 2011-02-14 15:33:10 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.10  2011/02/03 17:31:16  bourgesl
+ * use WaitingTaskAction to export valid data
+ *
  * Revision 1.9  2010/12/15 13:34:22  bourgesl
  * added baseline in default file name
  *
@@ -39,9 +42,9 @@
 package fr.jmmc.aspro.gui.action;
 
 import fr.jmmc.aspro.model.ObservationManager;
-import fr.jmmc.aspro.util.FileUtils;
 import fr.jmmc.mcs.gui.MessagePane;
 import fr.jmmc.mcs.gui.StatusBar;
+import fr.jmmc.mcs.util.FileUtils;
 import fr.jmmc.mcs.util.MimeType;
 import fr.jmmc.oitools.model.OIArray;
 import fr.jmmc.oitools.model.OIFitsFile;

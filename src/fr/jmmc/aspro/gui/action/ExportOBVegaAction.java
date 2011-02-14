@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBVegaAction.java,v 1.9 2010-12-15 13:34:35 bourgesl Exp $"
+ * "@(#) $Id: ExportOBVegaAction.java,v 1.10 2011-02-14 15:33:10 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.9  2010/12/15 13:34:35  bourgesl
+ * removed warning
+ *
  * Revision 1.8  2010/10/04 16:25:25  bourgesl
  * proper IO exception handling
  *
@@ -36,10 +39,10 @@
 package fr.jmmc.aspro.gui.action;
 
 import fr.jmmc.aspro.ob.ExportOBVega;
-import fr.jmmc.aspro.util.FileUtils;
 import fr.jmmc.mcs.gui.MessagePane;
 import fr.jmmc.mcs.gui.StatusBar;
 import fr.jmmc.mcs.util.FileFilterRepository;
+import fr.jmmc.mcs.util.FileUtils;
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;

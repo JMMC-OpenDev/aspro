@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BaseOIManager.java,v 1.19 2010-10-07 15:02:26 bourgesl Exp $"
+ * "@(#) $Id: BaseOIManager.java,v 1.20 2011-02-14 15:33:10 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.19  2010/10/07 15:02:26  bourgesl
+ * added load(reader)
+ *
  * Revision 1.18  2010/10/04 16:25:39  bourgesl
  * proper JAXB / IO exception handling
  *
@@ -67,9 +70,9 @@
  ******************************************************************************/
 package fr.jmmc.aspro.model;
 
-import fr.jmmc.aspro.util.FileUtils;
 import fr.jmmc.jaxb.JAXBFactory;
 import fr.jmmc.jaxb.XmlBindException;
+import fr.jmmc.mcs.util.FileUtils;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;

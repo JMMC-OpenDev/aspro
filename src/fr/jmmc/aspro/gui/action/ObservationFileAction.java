@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationFileAction.java,v 1.8 2010-12-15 13:33:35 bourgesl Exp $"
+ * "@(#) $Id: ObservationFileAction.java,v 1.9 2011-02-14 15:33:10 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.8  2010/12/15 13:33:35  bourgesl
+ * removed warning
+ *
  * Revision 1.7  2010/06/29 11:55:54  bourgesl
  * comment updated
  *
@@ -31,8 +34,8 @@
  */
 package fr.jmmc.aspro.gui.action;
 
-import fr.jmmc.aspro.util.FileUtils;
 import fr.jmmc.mcs.util.FileFilterRepository;
+import fr.jmmc.mcs.util.FileUtils;
 import fr.jmmc.mcs.util.RegisteredAction;
 import java.io.File;
 import javax.swing.filechooser.FileFilter;

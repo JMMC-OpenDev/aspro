@@ -1,18 +1,21 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBPionier.java,v 1.1 2010-12-15 13:32:00 bourgesl Exp $"
+ * "@(#) $Id: ExportOBPionier.java,v 1.2 2011-02-14 15:33:10 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2010/12/15 13:32:00  bourgesl
+ * added Export PIONIER OB
+ *
  *
  */
 package fr.jmmc.aspro.ob;
 
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Target;
-import fr.jmmc.aspro.util.FileUtils;
+import fr.jmmc.mcs.util.FileUtils;
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
