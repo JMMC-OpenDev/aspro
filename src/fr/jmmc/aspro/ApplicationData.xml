@@ -30,6 +30,12 @@
      derived software.
     -->
 
+    <!-- jmcs dependency -->
+    <package name="JSAMP"
+             description="JSAMP is a Java toolkit for use with the Simple Applications Messaging Protocol. Made by Mark Taylor, working in the Astrophysics Group at Bristol University."
+             link="http://software.astrogrid.org/doc/p/jsamp/1.2/"/>
+
+
     <package name="JFreeChart" description="JFreeChart is a free 100% Java chart library that makes it easy for developers to display professional quality charts in their applications" link="http://www.jfree.org/jfreechart/"/>
     <!-- LGPL : http://www.gnu.org/licenses/lgpl.html -->
 
