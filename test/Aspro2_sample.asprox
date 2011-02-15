@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <ns2:observationSetting xmlns:ns2="http://www.jmmc.fr/aspro-oi/0.1" xmlns:ns3="http://www.jmmc.fr/jmcs/models/0.1">
+    <schemaVersion>2010.12</schemaVersion>
     <name>default</name>
     <when>
         <date>2010-10-01</date>
         <nightRestriction>true</nightRestriction>
+        <atmosphereQuality>Average</atmosphereQuality>
     </when>
     <interferometerConfiguration>
         <name>VLTI Period 87</name>
@@ -15,8 +17,9 @@
         <pops></pops>
         <instrumentMode>Low_JHK</instrumentMode>
         <samplingPeriod>40.0</samplingPeriod>
+        <acquisitionTime>300.0</acquisitionTime>
     </instrumentConfiguration>
-    <target>
+    <target id="HIP1234">
         <name>HIP1234</name>
         <RA>00:15:21.5494</RA>
         <DEC>+28:35:13.809</DEC>
