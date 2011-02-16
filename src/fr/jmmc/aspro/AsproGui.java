@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproGui.java,v 1.45 2011-02-14 17:13:07 bourgesl Exp $"
+ * "@(#) $Id: AsproGui.java,v 1.46 2011-02-16 14:53:15 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.45  2011/02/14 17:13:07  bourgesl
+ * Use JMCS Task / TaskSwingWorker ...
+ *
  * Revision 1.44  2011/01/31 15:08:34  mella
  * do no check splashscreen preference because this is done in all apps now
  *
@@ -159,6 +162,7 @@ import fr.jmmc.aspro.gui.action.NewObservationAction;
 import fr.jmmc.aspro.gui.action.SampSearchCalQuery;
 import fr.jmmc.aspro.gui.action.SaveObservationAction;
 import fr.jmmc.aspro.gui.action.ShowPrefAction;
+import fr.jmmc.aspro.gui.action.TargetEditorAction;
 import fr.jmmc.aspro.gui.task.AsproTaskRegistry;
 import fr.jmmc.aspro.gui.util.ComponentResizeAdapter;
 import fr.jmmc.aspro.model.ConfigurationManager;
@@ -444,6 +448,7 @@ public final class AsproGui extends App {
    * Create the main actions present in the menu bar
    */
   private void registerActions() {
+    // File menu :
     // new observation :
     new NewObservationAction();
     // load observation :
@@ -458,6 +463,12 @@ public final class AsproGui extends App {
     new ExportPDFAction();
     // export OIFits :
     new ExportOIFitsAction();
+
+    // Edit menu :
+    // target editor :
+    new TargetEditorAction();
+
+    // Interop menu :
     // use interop with modelfitting :
     new BroadcastToModelFittingAction();
     // searchCal query (SAMP) :

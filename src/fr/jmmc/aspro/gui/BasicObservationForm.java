@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BasicObservationForm.java,v 1.57 2011-01-31 15:29:00 bourgesl Exp $"
+ * "@(#) $Id: BasicObservationForm.java,v 1.58 2011-02-16 14:53:15 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.57  2011/01/31 15:29:00  bourgesl
+ * use WarningContainerEvent instead of shared warning in observation
+ * modified fireWarningsReady(warningContainer) to use WarningContainerEvent
+ *
  * Revision 1.56  2011/01/31 13:28:37  bourgesl
  * removed initialisation code in postInit() in favor of observation events
  * updated java doc
@@ -574,11 +578,18 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
   }//GEN-LAST:event_jButtonDeleteTargetActionPerformed
 
   private void jButtonTargetEditorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonTargetEditorActionPerformed
+    showTargetEditor();
+  }//GEN-LAST:event_jButtonTargetEditorActionPerformed
+
+  /**
+   * Open the target editor using the selected target
+   */
+  public void showTargetEditor() {
     final Target target = getSelectedTarget();
 
     // show model editor :
     TargetEditorDialog.showEditor((target != null) ? target.getName() : null);
-  }//GEN-LAST:event_jButtonTargetEditorActionPerformed
+  }
 
   /**
    * Return the Pops custom formatter : number format that accepts null values
