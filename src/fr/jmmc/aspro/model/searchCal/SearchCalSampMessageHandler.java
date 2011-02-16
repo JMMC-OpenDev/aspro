@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SearchCalSampMessageHandler.java,v 1.10 2011-02-14 15:33:10 bourgesl Exp $"
+ * "@(#) $Id: SearchCalSampMessageHandler.java,v 1.11 2011-02-16 14:52:43 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.10  2011/02/14 15:33:10  bourgesl
+ * use JMCS FileUtils
+ *
  * Revision 1.9  2011/02/04 17:19:22  bourgesl
  * use main observation to get targets for edition
  *
@@ -185,6 +188,8 @@ public final class SearchCalSampMessageHandler extends SampMessageHandler {
             MessagePane.showErrorMessage("Too many calibrators (" + calibrators.size() + ") found in SearchCal response !");
             return;
           }
+
+          // TODO : check if current Aspro instrument band corresponds to SearchCal band !
 
           // use deep copy of the current observation to manipulate target and calibrator list properly :
           final ObservationSetting cloned = om.getMainObservation().deepClone();
