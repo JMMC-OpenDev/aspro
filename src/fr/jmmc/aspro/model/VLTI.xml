@@ -8779,7 +8779,7 @@
       <name>PIONIER</name>
       <description>Prototype configuration for PIONIER instrument</description>
       <numberChannels>4</numberChannels>
-      <defaultSamplingTime>20</defaultSamplingTime>
+      <defaultSamplingTime>30</defaultSamplingTime>
 
       <!-- noise parameters -->
       <transmission>0.1</transmission>
@@ -8796,6 +8796,7 @@
       <mode>
         <name>standard</name>
         <resolution>40</resolution>
+        <numberChannels>7</numberChannels>
         <waveLengthMin>1.45</waveLengthMin>
         <waveLengthMax>1.8</waveLengthMax>
       </mode>
@@ -9083,6 +9084,22 @@
       </configuration>
       <configuration>
         <stations>G0 I1</stations>
+      </configuration>
+    </instrument>
+
+    <instrument>
+      <focalInstrument>PIONIER</focalInstrument>
+      <configuration>
+        <stations>UT1 UT2 UT3 UT4</stations>
+      </configuration>
+      <configuration>
+        <stations>A0 K0 G1 I1</stations>
+      </configuration>
+      <configuration>
+        <stations>D0 H0 G1 I1</stations>
+      </configuration>
+      <configuration>
+        <stations>E0 G0 H0 I1</stations>
       </configuration>
     </instrument>
 
