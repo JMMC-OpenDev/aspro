@@ -234,7 +234,9 @@ public class TargetInformation
             it.set(newTarget);
           }
         } else {
-          logger.info("Removing missing target reference '" + target.getIdentifier() + "'.");
+          if (logger.isLoggable(java.util.logging.Level.FINE)) {
+            logger.fine("Removing missing target reference '" + target.getIdentifier() + "'.");
+          }
           it.remove();
         }
       }
