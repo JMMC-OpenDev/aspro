@@ -81,6 +81,7 @@
   <releasenotes>
     <release version="0.7">
       <prerelease version="0.7.8 beta">
+        <change>Fixed VLTI configuration for the PIONIER instrument (period 86 and 87)</change>
         <change>JSAMP library updated to release 1.2 that fix shutdown notification problems when the user closes any JMMC application.</change>
         <change>Optimisation : the model image is not computed if it is useless</change>
         <change>Actions Export to OIFits / PDF waits for computations to be done</change>
