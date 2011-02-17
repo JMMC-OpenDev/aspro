@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ConfigurationManager.java,v 1.38 2011-01-25 13:48:56 bourgesl Exp $"
+ * "@(#) $Id: ConfigurationManager.java,v 1.39 2011-02-17 16:01:28 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.38  2011/01/25 13:48:56  bourgesl
+ * javadoc
+ *
  * Revision 1.37  2011/01/25 12:29:37  bourgesl
  * fixed javadoc errors
  *
@@ -710,10 +713,14 @@ public final class ConfigurationManager extends BaseOIManager {
               for (Pop pop : listPoPs) {
                 if (pop.getIndex() == idx) {
                   config.add(pop);
+                  break;
                 }
               }
             }
-            return config;
+            // check if all given numbers are valid (16 is invalid !) :
+            if (config.size() == numChannels) {
+              return config;
+            }
           }
         }
       }
