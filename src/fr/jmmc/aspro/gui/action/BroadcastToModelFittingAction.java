@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BroadcastToModelFittingAction.java,v 1.11 2011-02-17 11:02:21 mella Exp $"
+ * "@(#) $Id: BroadcastToModelFittingAction.java,v 1.12 2011-02-17 17:13:44 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.11  2011/02/17 11:02:21  mella
+ * Throw illegalStateException instead of simple error messages
+ *
  * Revision 1.10  2011/02/03 17:30:05  bourgesl
  * added to do
  *
@@ -123,7 +126,6 @@ public class BroadcastToModelFittingAction extends SampCapabilityAction {
 
     try {
       OIFitsWriter.writeOIFits(file.getAbsolutePath(), oiFitsFile);
-      StatusBar.show(file.getName() + " created.");
     } catch (FitsException fe) {
       throw new IllegalStateException("Could not export to temporary file : " + file.getAbsolutePath(), fe);
     } catch (IOException ioe) {
@@ -144,7 +146,6 @@ public class BroadcastToModelFittingAction extends SampCapabilityAction {
       final Marshaller marshaller = this.jf.createMarshaller();
       marshaller.marshal(targetModel, sw);
       xmlModel = sw.toString();
-      StatusBar.show("Model received from remote application.");
     } catch (JAXBException je) {
       throw new IllegalStateException("Could not build model desc for samp message", je);
     }
@@ -154,7 +155,7 @@ public class BroadcastToModelFittingAction extends SampCapabilityAction {
     params.put("model", xmlModel);
     params.put("filename", file.getAbsolutePath());
 
-    StatusBar.show("New settings sent by remote application ready for modification.");
+    StatusBar.show("New LITpro settings sent ready for modification.");
 
     return params;
   }
