@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BroadcastToModelFittingAction.java,v 1.10 2011-02-03 17:30:05 bourgesl Exp $"
+ * "@(#) $Id: BroadcastToModelFittingAction.java,v 1.11 2011-02-17 11:02:21 mella Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.10  2011/02/03 17:30:05  bourgesl
+ * added to do
+ *
  * Revision 1.9  2010/12/15 13:36:13  bourgesl
  * refactoring
  *
@@ -49,9 +52,12 @@ import fr.jmmc.mcs.gui.StatusBar;
 import fr.jmmc.mcs.interop.SampCapability;
 import fr.jmmc.mcs.interop.SampCapabilityAction;
 import fr.jmmc.mcs.model.targetmodel.Model;
+import fr.jmmc.mcs.util.FileUtils;
 import fr.jmmc.oitools.model.OIFitsFile;
 import fr.jmmc.oitools.model.OIFitsWriter;
+import fr.nom.tam.fits.FitsException;
 import java.io.File;
+import java.io.IOException;
 import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
@@ -68,84 +74,88 @@ import javax.xml.bind.Marshaller;
  */
 public class BroadcastToModelFittingAction extends SampCapabilityAction {
 
-    /** default serial UID for Serializable interface */
-    private static final long serialVersionUID = 1;
-    /** Class name. This name is used to register to the ActionRegistrar */
-    private final static String className = "fr.jmmc.aspro.gui.action.BroadcastToModelFittingAction";
-    /** Action name. This name is used to register to the ActionRegistrar */
-    public final static String actionName = "broadcastToModelFittingAction";
-    /** Class logger */
-    private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(className);
+  /** default serial UID for Serializable interface */
+  private static final long serialVersionUID = 1;
+  /** Class name. This name is used to register to the ActionRegistrar */
+  private final static String className = BroadcastToModelFittingAction.class.getName();
+  /** Action name. This name is used to register to the ActionRegistrar */
+  public final static String actionName = "broadcastToModelFittingAction";
+  /** Class logger */
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(className);
 
-    /* members */
-    /** package name for JAXB generated code */
-    private final static String OI_JAXB_PATH = "fr.jmmc.aspro.model.oi";
-    /** internal JAXB Factory */
-    private JAXBFactory jf;
+  /* members */
+  /** package name for JAXB generated code */
+  private final static String OI_JAXB_PATH = "fr.jmmc.aspro.model.oi";
+  /** internal JAXB Factory */
+  private JAXBFactory jf;
 
-    /**
-     * Public constructor that automatically register the action in RegisteredAction.
-     */
-    public BroadcastToModelFittingAction() {
-        super(className, actionName, SampCapability.LITPRO_START_SETTING);
-        this.jf = JAXBFactory.getInstance(OI_JAXB_PATH);
+  /**
+   * Public constructor that automatically register the action in RegisteredAction.
+   */
+  public BroadcastToModelFittingAction() {
+    super(className, actionName, SampCapability.LITPRO_START_SETTING);
+    this.jf = JAXBFactory.getInstance(OI_JAXB_PATH);
 
+  }
+
+  /**
+   *
+   * @throws IllegalStateException if the oifits file can not be written to a temporary file
+   * @return
+   */
+  @Override
+  public Map<?, ?> composeMessage() throws IllegalStateException {
+    logger.fine("composeMessage");
+
+    // Get the oifits object
+    // save it on disk
+    // get Target model from the targetId given by oifits.oiTargets
+    // serialize and build one samp message
+
+    final OIFitsFile oiFitsFile = ObservationManager.getInstance().getObservation().getOIFitsFile();
+
+    if (oiFitsFile == null) {
+      MessagePane.showMessage("There is currently no OIFits data (your target is not observable)");
+      return null;
     }
 
-    @Override
-    public Map<?,?> composeMessage() {
-        logger.fine("composeMessage");
+    File file = FileUtils.getTempFile(ExportOIFitsAction.getDefaultFileName(oiFitsFile));
 
-        // Get the oifits object
-        // save it on disk
-        // get Target model from the targetId given by oifits.oiTargets
-        // serialize and build one samp message
-
-        final OIFitsFile oiFitsFile = ObservationManager.getInstance().getObservation().getOIFitsFile();
-
-        if (oiFitsFile == null) {
-            MessagePane.showMessage("There is currently no OIFits data (your target is not observable)");
-            return null;
-        }
-
-        File file = new File(ExportOIFitsAction.getDefaultFileName(oiFitsFile));
-        file.deleteOnExit();
-
-        try {
-            OIFitsWriter.writeOIFits(file.getAbsolutePath(), oiFitsFile);
-            StatusBar.show(file.getName() + " created.");
-        } catch (Exception e) {
-            MessagePane.showErrorMessage("Could not export to file " + file.getName() + "\n", e);
-            return null;
-        }
-
-        // Get Model assuming that target name is the first one (and only one).. of oifits.
-        String targetName = oiFitsFile.getOiTarget().getTarget()[0];
-        Target target = ObservationManager.getInstance().getTarget(targetName);
-        Model targetModel = new Model();
-        targetModel.setNameAndType("Container");
-        for (Model model : target.getModels()) {
-            targetModel.getModels().add(model);
-        }
-        String xmlModel = "";
-        try {
-            StringWriter sw = new StringWriter();
-            final Marshaller marshaller = this.jf.createMarshaller();
-            marshaller.marshal(targetModel, sw);
-            xmlModel = sw.toString();
-            StatusBar.show("Model received from remote application.");
-        } catch (JAXBException je) {
-            MessagePane.showErrorMessage("Could not build model desc for samp message", je);
-            return null;
-        }
-
-        // Store parameters for reply message
-        final Map<String, String> params = new HashMap<String, String>();
-        params.put("model", xmlModel);
-        params.put("filename", file.getAbsolutePath());
-        
-        StatusBar.show("New settings sent by remote application ready for modification.");
-        
-        return params;
+    try {
+      OIFitsWriter.writeOIFits(file.getAbsolutePath(), oiFitsFile);
+      StatusBar.show(file.getName() + " created.");
+    } catch (FitsException fe) {
+      throw new IllegalStateException("Could not export to temporary file : " + file.getAbsolutePath(), fe);
+    } catch (IOException ioe) {
+      throw new IllegalStateException("Could not export to temporary file : " + file.getAbsolutePath(), ioe);
     }
+
+    // Get Model assuming that target name is the first one (and only one).. of oifits.
+    String targetName = oiFitsFile.getOiTarget().getTarget()[0];
+    Target target = ObservationManager.getInstance().getTarget(targetName);
+    Model targetModel = new Model();
+    targetModel.setNameAndType("Container");
+    for (Model model : target.getModels()) {
+      targetModel.getModels().add(model);
+    }
+    String xmlModel = "";
+    try {
+      StringWriter sw = new StringWriter();
+      final Marshaller marshaller = this.jf.createMarshaller();
+      marshaller.marshal(targetModel, sw);
+      xmlModel = sw.toString();
+      StatusBar.show("Model received from remote application.");
+    } catch (JAXBException je) {
+      throw new IllegalStateException("Could not build model desc for samp message", je);
+    }
+
+    // Store parameters for reply message
+    final Map<String, String> params = new HashMap<String, String>();
+    params.put("model", xmlModel);
+    params.put("filename", file.getAbsolutePath());
+
+    StatusBar.show("New settings sent by remote application ready for modification.");
+
+    return params;
+  }
 }
