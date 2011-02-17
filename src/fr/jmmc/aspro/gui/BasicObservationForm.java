@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BasicObservationForm.java,v 1.58 2011-02-16 14:53:15 bourgesl Exp $"
+ * "@(#) $Id: BasicObservationForm.java,v 1.59 2011-02-17 16:47:29 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.58  2011/02/16 14:53:15  bourgesl
+ * added target editor action in Edit menu
+ *
  * Revision 1.57  2011/01/31 15:29:00  bourgesl
  * use WarningContainerEvent instead of shared warning in observation
  * modified fireWarningsReady(warningContainer) to use WarningContainerEvent
@@ -384,7 +387,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     jPanelMain.add(jLabelPops, gridBagConstraints);
 
     jTextPoPs.setColumns(4);
-    jTextPoPs.setToolTipText("<html>\ndefine a specific PoPs combination (PoP 1 to 5) by giving the list of PoP numbers<br/>\nin the same order than stations of the selected base line. For example:<ul>\n<li>VEGA_2T with baseline S1-S2<br/>'34' means PoP3 on S1 and PoP4 on S2</li>\n<li>MIRC (4T) with baseline S1-S2-E1-W2<br/>'1255' means PoP1 on S1, PoP2 on S2 and Pop5 on E1 and W2</li>\n</ul>\n<b>If you left this field blank, ASPRO 2 will compute the 'best PoP' combination<br/>\nmaximizing the observability of your complete list of targets</b>\n</html>");
+    jTextPoPs.setToolTipText("<html>\ndefine a specific PoPs combination (PoP 1 to 5) by giving the list of PoP numbers<br/>\nin the same order than stations of the selected base line. For example:<ul>\n<li>VEGA_2T with baseline S1-S2<br/>'34' means PoP3 on S1 and PoP4 on S2</li>\n<li>MIRC (4T) with baseline S1-S2-E1-W2<br/>'1255' means PoP1 on S1, PoP2 on S2 and Pop5 on E1 and W2</li>\n</ul>\n<b>If you leave this field blank, ASPRO 2 will compute the 'best PoP' combination<br/>\nmaximizing the observability of your complete list of targets</b>\n</html>");
     jTextPoPs.setMinimumSize(new java.awt.Dimension(40, 20));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 6;
@@ -418,10 +421,9 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
     jPanelMain.add(jScrollPaneTargets, gridBagConstraints);
 
-    jButtonDeleteTarget.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+    jButtonDeleteTarget.setFont(new java.awt.Font("Dialog", 1, 14));
     jButtonDeleteTarget.setIcon(new javax.swing.ImageIcon(getClass().getResource("/fr/jmmc/aspro/gui/icons/delete.png"))); // NOI18N
     jButtonDeleteTarget.setToolTipText("delete the selected target");
-    jButtonDeleteTarget.setMargin(new java.awt.Insets(0, 0, 0, 0));
     jButtonDeleteTarget.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(java.awt.event.ActionEvent evt) {
         jButtonDeleteTargetActionPerformed(evt);
@@ -470,7 +472,6 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     jCheckBoxNightLimit.setText("Night restriction");
     jCheckBoxNightLimit.setHorizontalTextPosition(javax.swing.SwingConstants.LEADING);
     jCheckBoxNightLimit.setIconTextGap(20);
-    jCheckBoxNightLimit.setMargin(new java.awt.Insets(0, 0, 0, 0));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
