@@ -3,7 +3,7 @@
     <schemaVersion>2010.12</schemaVersion>
     <name>default</name>
     <when>
-        <date>2010-10-01</date>
+        <date>2011-10-15</date>
         <nightRestriction>true</nightRestriction>
         <atmosphereQuality>Average</atmosphereQuality>
     </when>
@@ -13,7 +13,7 @@
     </interferometerConfiguration>
     <instrumentConfiguration>
         <name>AMBER</name>
-        <stations>D0 G1 I1</stations>
+        <stations>A1 G1 I1</stations>
         <pops></pops>
         <instrumentMode>Low_JHK</instrumentMode>
         <samplingPeriod>40.0</samplingPeriod>
@@ -95,5 +95,40 @@ complex and with dimensions dimsof(UFREQ,VFREQ).
             <HAMin>-12.0</HAMin>
             <HAMax>12.0</HAMax>
         </configuration>
+    </target>
+    <target id="ETA_TAU">
+        <name>ETA TAU</name>
+        <RA>03:47:29.0765</RA>
+        <DEC>+24:06:18.494</DEC>
+        <EQUINOX>2000.0</EQUINOX>
+        <SYSVEL>10.1</SYSVEL>
+        <PMRA>19.35</PMRA>
+        <PMDEC>-43.11</PMDEC>
+        <PARALLAX>8.87</PARALLAX>
+        <PARA_ERR>0.99</PARA_ERR>
+        <IDS>Cl* Melotte 22 HII 1432,WDS J03475+2406A,[KSP2003] J034729.04+240619.4,1E 0344.5+2357,ALS 15094,2MASS J03472908+2406184,PLX 821,Cl* Melotte 22 K 60,Cl* Melotte 22 VM 32,Cl* Melotte 22 MSH 194,Cl* Melotte 22 MSK 141,Cl* Melotte 22 TRU 414,Cl* Melotte 22 WCZ 236,[JE82] 124,* eta Tau,* 25 Tau,AG+23 323,BD+23 541,BDS 1875 A,CCDM J03474+2407A,CEL 344,EM* MWC 74,FK5 139,GC 4541,GCRV 2135,GEN# +5.20221432,GSC 01800-02202,HD 23630,HGAM 274,HIC 17702,HIP 17702,HR 1165,IDS 03415+2348 A,IRAS 03445+2357,IRC +20063,JP11 4669,JP11 4680,N30 776,NAME ALCYONE,PMC 90-93 100,PPM 92898,ROT 3785,SAO 76199,SKY# 5771,SRS 30139,TYC 1800-2202-1,UBV 3639,VDB 23,XZ 4911,[B10] 869,[KSP2003] G166.6680-23.4550,[SCG94] O 165,[SCG94] X 180,uvby98 520221432,Cl Melotte 22 1432</IDS>
+        <OBJTYP>**,IR,X,*,*iC,*iN,Em*,Be*,UV</OBJTYP>
+        <SPECTYP>B7III</SPECTYP>
+        <FLUX_V>2.873</FLUX_V>
+        <FLUX_J>2.735</FLUX_J>
+        <FLUX_H>2.735</FLUX_H>
+        <FLUX_K>2.636</FLUX_K>
+    </target>
+    <target id="HD_1234">
+        <name>HD 1234</name>
+        <RA>00:16:27.6605</RA>
+        <DEC>-36:47:46.641</DEC>
+        <EQUINOX>2000.0</EQUINOX>
+        <PMRA>-14.75</PMRA>
+        <PMDEC>-17.22</PMDEC>
+        <PARALLAX>5.56</PARALLAX>
+        <PARA_ERR>1.31</PARA_ERR>
+        <IDS>2MASS J00162766-3647467,CD-37 56,CPC 18 68,CPD-37 14,GSC 06996-00075,HD 1234,HIC 1311,HIP 1311,PPM 275860,SAO 192435,SRS 3031,TYC 6996-75-1,uvby98 100001234</IDS>
+        <OBJTYP>*,IR</OBJTYP>
+        <SPECTYP>F3V</SPECTYP>
+        <FLUX_V>9.19</FLUX_V>
+        <FLUX_J>8.318</FLUX_J>
+        <FLUX_H>8.131</FLUX_H>
+        <FLUX_K>8.112</FLUX_K>
     </target>
 </ns2:observationSetting>
