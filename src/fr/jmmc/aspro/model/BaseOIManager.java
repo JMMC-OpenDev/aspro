@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BaseOIManager.java,v 1.20 2011-02-14 15:33:10 bourgesl Exp $"
+ * "@(#) $Id: BaseOIManager.java,v 1.21 2011-02-18 15:31:39 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.20  2011/02/14 15:33:10  bourgesl
+ * use JMCS FileUtils
+ *
  * Revision 1.19  2010/10/07 15:02:26  bourgesl
  * added load(reader)
  *
@@ -77,6 +80,7 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
+import java.io.Writer;
 import java.net.URL;
 import java.util.Calendar;
 import java.util.Date;
@@ -225,6 +229,22 @@ public class BaseOIManager {
       this.jf.createMarshaller().marshal(object, outputFile);
     } catch (JAXBException je) {
       handleException("Save failure on " + outputFile, je);
+    }
+  }
+
+  /**
+   * Public save method
+   * @param writer writer to use
+   * @param object to marshall
+   *
+   * @throws IllegalStateException if an unexpected exception occured
+   */
+  public final void saveObject(final Writer writer, final Object object)
+          throws IllegalStateException {
+    try {
+      this.jf.createMarshaller().marshal(object, writer);
+    } catch (JAXBException je) {
+      throw new IllegalStateException("Serialization failure", je);
     }
   }
 

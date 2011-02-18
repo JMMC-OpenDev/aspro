@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BroadcastToModelFittingAction.java,v 1.12 2011-02-17 17:13:44 bourgesl Exp $"
+ * "@(#) $Id: BroadcastToModelFittingAction.java,v 1.13 2011-02-18 15:31:39 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.12  2011/02/17 17:13:44  bourgesl
+ * removed status changes
+ *
  * Revision 1.11  2011/02/17 11:02:21  mella
  * Throw illegalStateException instead of simple error messages
  *
@@ -98,7 +101,6 @@ public class BroadcastToModelFittingAction extends SampCapabilityAction {
   public BroadcastToModelFittingAction() {
     super(className, actionName, SampCapability.LITPRO_START_SETTING);
     this.jf = JAXBFactory.getInstance(OI_JAXB_PATH);
-
   }
 
   /**
@@ -122,7 +124,7 @@ public class BroadcastToModelFittingAction extends SampCapabilityAction {
       return null;
     }
 
-    File file = FileUtils.getTempFile(ExportOIFitsAction.getDefaultFileName(oiFitsFile));
+    final File file = FileUtils.getTempFile(ExportOIFitsAction.getDefaultFileName(oiFitsFile));
 
     try {
       OIFitsWriter.writeOIFits(file.getAbsolutePath(), oiFitsFile);
@@ -133,29 +135,28 @@ public class BroadcastToModelFittingAction extends SampCapabilityAction {
     }
 
     // Get Model assuming that target name is the first one (and only one).. of oifits.
-    String targetName = oiFitsFile.getOiTarget().getTarget()[0];
-    Target target = ObservationManager.getInstance().getTarget(targetName);
-    Model targetModel = new Model();
+    final String targetName = oiFitsFile.getOiTarget().getTarget()[0];
+
+    final Target target = ObservationManager.getInstance().getTarget(targetName);
+
+    final Model targetModel = new Model();
     targetModel.setNameAndType("Container");
     for (Model model : target.getModels()) {
       targetModel.getModels().add(model);
     }
-    String xmlModel = "";
-    try {
-      StringWriter sw = new StringWriter();
-      final Marshaller marshaller = this.jf.createMarshaller();
-      marshaller.marshal(targetModel, sw);
-      xmlModel = sw.toString();
-    } catch (JAXBException je) {
-      throw new IllegalStateException("Could not build model desc for samp message", je);
-    }
+
+    // Create a 4K buffer for models :
+    final StringWriter sw = new StringWriter(4096);
+
+    // serialize models to xml :
+    ObservationManager.getInstance().saveObject(sw, targetModel);
+
+    final String xmlModel = sw.toString();
 
     // Store parameters for reply message
     final Map<String, String> params = new HashMap<String, String>();
     params.put("model", xmlModel);
     params.put("filename", file.getAbsolutePath());
-
-    StatusBar.show("New LITpro settings sent ready for modification.");
 
     return params;
   }
