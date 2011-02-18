@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetJTree.java,v 1.3 2010-12-07 17:37:54 bourgesl Exp $"
+ * "@(#) $Id: TargetJTree.java,v 1.4 2011-02-18 16:33:54 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2010/12/07 17:37:54  bourgesl
+ * use getTargetDisplayName
+ * use do not update tree selection when removing a node (move action)
+ *
  * Revision 1.2  2010/12/06 17:01:58  bourgesl
  * added addCalibrator and removeCalibrator that use data model and refresh tree
  *
@@ -76,12 +80,15 @@ public class TargetJTree extends GenericJTree {
    * @param rootNode root node
    */
   public final void selectFirstChildNode(final DefaultMutableTreeNode rootNode) {
-    // first child = first target :
-    final DefaultMutableTreeNode firstChild = (DefaultMutableTreeNode) rootNode.getFirstChild();
+    if (rootNode.isLeaf()) {
+      return;
+    }
 
+    // first child = target :
+    final DefaultMutableTreeNode firstChild = (DefaultMutableTreeNode) rootNode.getFirstChild();
     this.selectPath(new TreePath(firstChild.getPath()));
 
-    // expand target node if there is at least one model :
+    // expand target node if there is at least one child node :
     if (!firstChild.isLeaf()) {
       final DefaultMutableTreeNode secondChild = (DefaultMutableTreeNode) firstChild.getFirstChild();
 
