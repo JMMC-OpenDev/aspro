@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: InterferometerMapPanel.java,v 1.16 2011-02-04 17:16:21 bourgesl Exp $"
+ * "@(#) $Id: InterferometerMapPanel.java,v 1.17 2011-02-22 18:11:29 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.16  2011/02/04 17:16:21  bourgesl
+ * new ChartData inner class to have chart state used by PDF export
+ *
  * Revision 1.15  2011/02/02 17:39:01  bourgesl
  * added to do
  *
@@ -145,32 +148,8 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
   // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
   private void initComponents() {
 
-    jPanel1 = new javax.swing.JPanel();
-    jButtonPDF = new javax.swing.JButton();
-
     setLayout(new java.awt.BorderLayout());
-
-    jPanel1.setLayout(new java.awt.BorderLayout());
-
-    jButtonPDF.setIcon(new javax.swing.ImageIcon(getClass().getResource("/fr/jmmc/aspro/gui/icons/icon_pdf.gif"))); // NOI18N
-    jButtonPDF.setMargin(new java.awt.Insets(0, 0, 0, 0));
-    jButtonPDF.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        jButtonPDFActionPerformed(evt);
-      }
-    });
-    jPanel1.add(jButtonPDF, java.awt.BorderLayout.SOUTH);
-
-    add(jPanel1, java.awt.BorderLayout.LINE_START);
   }// </editor-fold>//GEN-END:initComponents
-
-  /**
-   * Export the current chart as a PDF document
-   * @param evt action event
-   */
-  private void jButtonPDFActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonPDFActionPerformed
-    this.performPDFAction();
-}//GEN-LAST:event_jButtonPDFActionPerformed
 
   /**
    * Export the chart component as a PDF document
@@ -263,18 +242,7 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
 
     // add listener :
     this.chart.addProgressListener(this);
-
-    this.chartPanel = new SquareChartPanel(this.chart,
-            400, 400, /* prefered size */
-            200, 200, /* minimum size before scaling */
-            1600, 1600, /* maximum size before scaling */
-            true, /* use buffer */
-            false, /* properties */
-            true, /* copy */
-            true, /* save */
-            true, /* print */
-            false, /* zoom */
-            false /* tooltips */);
+    this.chartPanel = ChartUtils.createSquareChartPanel(this.chart);
 
     // zoom options :
     this.chartPanel.setDomainZoomable(AsproConstants.ENABLE_ZOOM);
@@ -480,8 +448,6 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
     }
   }
   // Variables declaration - do not modify//GEN-BEGIN:variables
-  private javax.swing.JButton jButtonPDF;
-  private javax.swing.JPanel jPanel1;
   // End of variables declaration//GEN-END:variables
   /** drawing started time value */
   private long lastTime = 0l;

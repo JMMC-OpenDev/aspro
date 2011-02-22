@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBVLTIAction.java,v 1.19 2011-02-14 15:33:10 bourgesl Exp $"
+ * "@(#) $Id: ExportOBVLTIAction.java,v 1.20 2011-02-22 18:11:29 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.19  2011/02/14 15:33:10  bourgesl
+ * use JMCS FileUtils
+ *
  * Revision 1.18  2011/01/10 13:29:59  bourgesl
  * removed comment
  *
@@ -153,6 +156,7 @@ public class ExportOBVLTIAction {
     final UVCoveragePanel uvCoveragePanel = (UVCoveragePanel) event.getSource();
 
     // extract UV Coverage Panel information :
+    // TODO : use main panel to get selection (or OM ?)
     final Target target = uvCoveragePanel.getSelectedTarget();
 
     File file = null;

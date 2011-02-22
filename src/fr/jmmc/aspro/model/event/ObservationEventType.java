@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationEventType.java,v 1.3 2011-01-31 15:24:34 bourgesl Exp $"
+ * "@(#) $Id: ObservationEventType.java,v 1.4 2011-02-22 18:11:30 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2011/01/31 15:24:34  bourgesl
+ * added file header
+ *
  *
  ******************************************************************************/
 package fr.jmmc.aspro.model.event;
@@ -19,7 +22,9 @@ public enum ObservationEventType {
     LOADED,
     /** target list (target, models and calibrators) changed */
     TARGET_CHANGED,
-    /** ask listeners to save swing states into the observation */
+    /** target selection changed */
+    TARGET_SELECTION_CHANGED,
+    /** ask listeners to save thier swing state into the main observation */
     DO_UPDATE,
     /** one or more general attribute(s) changed */
     REFRESH,

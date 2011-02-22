@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.83 2011-02-08 15:34:16 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.84 2011-02-22 18:11:30 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.83  2011/02/08 15:34:16  bourgesl
+ * changed proposed OB file names to include instrument mode and FT/noFT
+ *
  * Revision 1.82  2011/02/07 16:07:36  bourgesl
  * performance : use current chart data to avoid computing UV Map (model image) if it is still valid !
  *
@@ -279,7 +282,6 @@
 package fr.jmmc.aspro.gui;
 
 import fr.jmmc.aspro.AsproConstants;
-import fr.jmmc.aspro.AsproGui;
 import fr.jmmc.aspro.Preferences;
 import fr.jmmc.aspro.gui.action.ExportOBVLTIAction;
 import fr.jmmc.aspro.gui.action.ExportOBVegaAction;
@@ -294,15 +296,13 @@ import fr.jmmc.aspro.gui.task.AsproTaskRegistry;
 import fr.jmmc.aspro.gui.task.ObservationTaskSwingWorker;
 import fr.jmmc.aspro.gui.util.ColorPalette;
 import fr.jmmc.aspro.gui.util.FieldSliderAdapter;
-import fr.jmmc.aspro.gui.util.GenericListModel;
-import fr.jmmc.aspro.gui.util.TargetListRenderer;
-import fr.jmmc.aspro.gui.util.TargetRenderer;
 import fr.jmmc.aspro.model.ConfigurationManager;
 import fr.jmmc.aspro.model.event.ObservationListener;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.Range;
 import fr.jmmc.aspro.model.event.ObservabilityEvent;
 import fr.jmmc.aspro.model.event.ObservationEvent;
+import fr.jmmc.aspro.model.event.TargetSelectionEvent;
 import fr.jmmc.aspro.model.event.UpdateObservationEvent;
 import fr.jmmc.aspro.model.observability.ObservabilityData;
 import fr.jmmc.aspro.model.observability.StarData;
@@ -312,7 +312,6 @@ import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Pop;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetConfiguration;
-import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.aspro.model.util.AtmosphereQualityUtils;
 import fr.jmmc.aspro.model.uvcoverage.UVBaseLineData;
 import fr.jmmc.aspro.model.uvcoverage.UVRangeBaseLineData;
@@ -401,6 +400,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
   private String interferometerConfigurationName = null;
   /** current instrument name to track changes */
   private String instrumentName = null;
+  /** current selected target */
+  private Target currentTarget = null;
   /* cached computed data */
   /** last computed Observability Data */
   private ObservabilityData currentObsData = null;
@@ -447,11 +448,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     jSplitPane = new javax.swing.JSplitPane();
     jScrollPaneForm = new javax.swing.JScrollPane();
     jPanelLeft = new javax.swing.JPanel();
-    jPanelButtons = new javax.swing.JPanel();
-    jButtonModelEditor = new javax.swing.JButton();
-    jButtonOB = new javax.swing.JButton();
-    jLabelTarget = new javax.swing.JLabel();
-    jComboBoxTarget = new javax.swing.JComboBox();
     jLabelInstrumentMode = new javax.swing.JLabel();
     jComboBoxInstrumentMode = new javax.swing.JComboBox();
     jLabelAtmQual = new javax.swing.JLabel();
@@ -479,13 +475,13 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     jCheckBoxModelImage = new javax.swing.JCheckBox();
     jLabelImageMode = new javax.swing.JLabel();
     jComboBoxImageMode = new javax.swing.JComboBox();
-    jPanelBottom = new javax.swing.JPanel();
-    jButtonPDF = new javax.swing.JButton();
+    jPanelSpacer = new javax.swing.JPanel();
 
     setLayout(new java.awt.BorderLayout());
 
     jSplitPane.setDividerSize(5);
     jSplitPane.setResizeWeight(0.05);
+    jSplitPane.setContinuousLayout(true);
     jSplitPane.setMinimumSize(new java.awt.Dimension(320, 400));
     jSplitPane.setPreferredSize(new java.awt.Dimension(320, 400));
 
@@ -495,59 +491,12 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     jPanelLeft.setMinimumSize(new java.awt.Dimension(185, 550));
     jPanelLeft.setLayout(new java.awt.GridBagLayout());
 
-    jPanelButtons.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 2, 2));
-
-    jButtonModelEditor.setText("Target Editor");
-    jButtonModelEditor.setMargin(new java.awt.Insets(0, 0, 0, 0));
-    jButtonModelEditor.setMinimumSize(new java.awt.Dimension(50, 25));
-    jButtonModelEditor.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        jButtonModelEditorActionPerformed(evt);
-      }
-    });
-    jPanelButtons.add(jButtonModelEditor);
-
-    jButtonOB.setText("OB");
-    jButtonOB.setToolTipText("Only CHARA VEGA or VLTI AMBER/MIDI instruments are supported");
-    jButtonOB.setMargin(new java.awt.Insets(0, 0, 0, 0));
-    jButtonOB.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        jButtonOBActionPerformed(evt);
-      }
-    });
-    jPanelButtons.add(jButtonOB);
-
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.weighty = 0.3;
-    gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 0);
-    jPanelLeft.add(jPanelButtons, gridBagConstraints);
-
-    jLabelTarget.setText("Target");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.ipadx = 2;
-    gridBagConstraints.ipady = 2;
-    jPanelLeft.add(jLabelTarget, gridBagConstraints);
-
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 2;
-    gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
-    jPanelLeft.add(jComboBoxTarget, gridBagConstraints);
-
     jLabelInstrumentMode.setText("Instrument mode");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 4;
     gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.insets = new java.awt.Insets(6, 0, 0, 0);
     jPanelLeft.add(jLabelInstrumentMode, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
@@ -766,26 +715,13 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
     jPanelLeft.add(jComboBoxImageMode, gridBagConstraints);
-
-    jPanelBottom.setLayout(new javax.swing.BoxLayout(jPanelBottom, javax.swing.BoxLayout.LINE_AXIS));
-
-    jButtonPDF.setIcon(new javax.swing.ImageIcon(getClass().getResource("/fr/jmmc/aspro/gui/icons/icon_pdf.gif"))); // NOI18N
-    jButtonPDF.setAlignmentY(1.0F);
-    jButtonPDF.setMargin(new java.awt.Insets(0, 0, 0, 0));
-    jButtonPDF.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        jButtonPDFActionPerformed(evt);
-      }
-    });
-    jPanelBottom.add(jButtonPDF);
-
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 26;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.weighty = 0.5;
-    jPanelLeft.add(jPanelBottom, gridBagConstraints);
+    gridBagConstraints.weighty = 0.1;
+    jPanelLeft.add(jPanelSpacer, gridBagConstraints);
 
     jScrollPaneForm.setViewportView(jPanelLeft);
 
@@ -793,25 +729,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
     add(jSplitPane, java.awt.BorderLayout.CENTER);
   }// </editor-fold>//GEN-END:initComponents
-
-  /**
-   * Open the Model Editor with the selected target
-   * @param evt action event
-   */
-  private void jButtonModelEditorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonModelEditorActionPerformed
-    final String targetName = getSelectedTargetName();
-
-    // show model editor :
-    TargetEditorDialog.showEditor(targetName);
-}//GEN-LAST:event_jButtonModelEditorActionPerformed
-
-  /**
-   * Export the selected target as an Observing Block (OB)
-   * @param evt action event
-   */
-  private void jButtonOBActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonOBActionPerformed
-    this.performOBAction(evt);
-  }//GEN-LAST:event_jButtonOBActionPerformed
 
   /**
    * Export the selected target as an Observing Block (OB)
@@ -847,10 +764,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
    * Export the current chart as a PDF document
    * @param evt action event
    */
-  private void jButtonPDFActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonPDFActionPerformed
-    this.performPDFAction();
-  }//GEN-LAST:event_jButtonPDFActionPerformed
-
   /**
    * Export the chart component as a PDF document
    */
@@ -914,18 +827,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
     // add listener :
     this.chart.addProgressListener(this);
-
-    this.chartPanel = new SquareChartPanel(this.chart,
-            400, 400, /* prefered size */
-            200, 200, /* minimum size before scaling */
-            1600, 1600, /* maximum size before scaling */
-            true, /* use buffer */
-            false, /* properties */
-            true, /* copy */
-            true, /* save */
-            true, /* print */
-            false, /* zoom */
-            false /* tooltips */);
+    this.chartPanel = ChartUtils.createSquareChartPanel(this.chart);
 
     // zoom options :
     this.chartPanel.setDomainZoomable(AsproConstants.ENABLE_ZOOM);
@@ -939,7 +841,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     this.jSplitPane.setRightComponent(this.chartPanel);
 
     // define change listeners :
-    this.jComboBoxTarget.addActionListener(this);
     this.jComboBoxInstrumentMode.addActionListener(this);
     this.jComboBoxFTMode.addActionListener(this);
     this.jComboBoxAtmQual.addActionListener(this);
@@ -1159,41 +1060,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
   }
 
   /**
-   * Refresh the target combo box
-   * @param observation current observation settings
-   */
-  private void updateComboTarget(final ObservationSetting observation) {
-    final List<Target> displayTargets = observation.getDisplayTargets();
-
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("target list changed : " + displayTargets);
-    }
-
-    final TargetUserInformations targetUserInfos = observation.getOrCreateTargetUserInfos();
-
-    final Target selectedTarget = getSelectedTarget();
-
-    // note : read only :
-    this.jComboBoxTarget.setModel(new GenericListModel<Target>(displayTargets, true));
-    this.jComboBoxTarget.setRenderer(new TargetListRenderer(new TargetRenderer(targetUserInfos)));
-
-    // restore previous selected item :
-    if (selectedTarget != null) {
-      this.jComboBoxTarget.setSelectedItem(selectedTarget);
-    }
-
-    // select first target if no target is selected :
-    if (getSelectedTarget() == null) {
-      // force to trigger a selection change event :
-      this.jComboBoxTarget.setSelectedItem(!displayTargets.isEmpty() ? displayTargets.get(0) : null);
-    }
-
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("jComboBoxTarget updated : " + getSelectedTargetName());
-    }
-  }
-
-  /**
    * Update UI according to the target configuration
    */
   private void updateTargetConfiguration() {
@@ -1278,17 +1144,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
    * @param e action event
    */
   public void actionPerformed(final ActionEvent e) {
-    if (e.getSource() == this.jComboBoxTarget) {
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("target changed : " + getSelectedTargetName());
-      }
-      synchronizeSelectedTarget();
-      updateTargetConfiguration();
-      updateTargetHA();
-      changeStateForModelImageWidgets();
-      refreshPlot();
-
-    } else if (e.getSource() == this.jComboBoxInstrumentMode) {
+    if (e.getSource() == this.jComboBoxInstrumentMode) {
       if (logger.isLoggable(Level.FINE)) {
         logger.fine("instrument mode changed : " + this.jComboBoxInstrumentMode.getSelectedItem());
       }
@@ -1407,6 +1263,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       this.jComboBoxImageMode.setSelectedItem(ImageMode.AMP);
 
       // reset cached data :
+      this.currentTarget = null;
       this.currentObsData = null;
       this.lastZoomEvent = null;
       this.chartData = null;
@@ -1423,15 +1280,14 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
   }
 
   /**
-   * Update the target comboBox from the given changed observation
+   * Update the selected target for the given observation
    * @param observation observation
+   * @param target selected target
    */
-  private void onTargetChangeObservation(final ObservationSetting observation) {
+  private void onTargetSelectionChange(final ObservationSetting observation, final Target target) {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("observation :\n" + ObservationManager.toString(observation));
     }
-
-    // Only refresh the target comboBox and NOT the plot :
 
     // disable the automatic update observation :
     final boolean prevAutoUpdateObservation = this.setAutoUpdateObservation(false);
@@ -1439,9 +1295,12 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     final boolean prevAutoRefresh = this.setAutoRefresh(false);
     try {
 
-      // refresh the targets, that fires the target changed event
-      // refresh the fields HA Min/Max, FT Mode and computed HA Min / Max :
-      this.updateComboTarget(observation);
+      // update the current selected target :
+      this.setSelectedTarget(target);
+
+      updateTargetConfiguration();
+      updateTargetHA();
+      changeStateForModelImageWidgets();
 
     } finally {
       // restore the automatic refresh :
@@ -1449,6 +1308,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       // restore the automatic update observation :
       this.setAutoUpdateObservation(prevAutoUpdateObservation);
     }
+    refreshPlot();
   }
 
   /**
@@ -1547,8 +1407,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       case LOADED:
         this.onLoadObservation(event.getObservation());
         break;
-      case TARGET_CHANGED:
-        this.onTargetChangeObservation(event.getObservation());
+      case TARGET_SELECTION_CHANGED:
+        this.onTargetSelectionChange(event.getObservation(), ((TargetSelectionEvent) event).getTarget());
         break;
       case DO_UPDATE:
         this.onUpdateObservation((UpdateObservationEvent) event);
@@ -2009,7 +1869,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
             // Create uv map task worker :
             // Cancel other tasks and execute this new task :
 
-            // TODO : version clean up :
             new UVMapSwingWorker(this, observation, models, uvRect,
                     refMin, refMax, imageMode, imageSize, colorModel).executeTask();
           }
@@ -2337,16 +2196,12 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     }
   }
   // Variables declaration - do not modify//GEN-BEGIN:variables
-  private javax.swing.JButton jButtonModelEditor;
-  private javax.swing.JButton jButtonOB;
-  private javax.swing.JButton jButtonPDF;
   private javax.swing.JCheckBox jCheckBoxModelImage;
   private javax.swing.JCheckBox jCheckBoxPlotUVSupport;
   private javax.swing.JComboBox jComboBoxAtmQual;
   private javax.swing.JComboBox jComboBoxFTMode;
   private javax.swing.JComboBox jComboBoxImageMode;
   private javax.swing.JComboBox jComboBoxInstrumentMode;
-  private javax.swing.JComboBox jComboBoxTarget;
   private javax.swing.JFormattedTextField jFieldHAMax;
   private javax.swing.JFormattedTextField jFieldHAMin;
   private javax.swing.JFormattedTextField jFieldObsDuration;
@@ -2360,11 +2215,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
   private javax.swing.JLabel jLabelInstrumentMode;
   private javax.swing.JLabel jLabelObsDuration;
   private javax.swing.JLabel jLabelSamplingPeriod;
-  private javax.swing.JLabel jLabelTarget;
   private javax.swing.JLabel jLabelUVMax;
-  private javax.swing.JPanel jPanelBottom;
-  private javax.swing.JPanel jPanelButtons;
   private javax.swing.JPanel jPanelLeft;
+  private javax.swing.JPanel jPanelSpacer;
   private javax.swing.JScrollPane jScrollPaneForm;
   private javax.swing.JSeparator jSeparator1;
   private javax.swing.JSeparator jSeparator3;
@@ -2511,21 +2364,21 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
   /**
    * Return the currently selected target
+   *
+   * TODO : check usages : OBVLTIAction
+   *
    * @return target
    */
   public Target getSelectedTarget() {
-    return (Target) this.jComboBoxTarget.getSelectedItem();
+    return this.currentTarget;
   }
 
   /**
-   * Update the selected target in the observation form (on top)
-   *
-   * TODO : use a better solution to synchronize the selection (event ?)
+   * Define the currently selected target
+   * @param target target to use
    */
-  private void synchronizeSelectedTarget() {
-    final BasicObservationForm form = AsproGui.getInstance().getSettingPanel().getObservationForm();
-
-    form.updateSelectedTarget(getSelectedTarget());
+  private void setSelectedTarget(final Target target) {
+    this.currentTarget = target;
   }
 
   /**

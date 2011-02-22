@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BasicObservationForm.java,v 1.59 2011-02-17 16:47:29 bourgesl Exp $"
+ * "@(#) $Id: BasicObservationForm.java,v 1.60 2011-02-22 18:11:29 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.59  2011/02/17 16:47:29  bourgesl
+ * updated tooltip
+ *
  * Revision 1.58  2011/02/16 14:53:15  bourgesl
  * added target editor action in Edit menu
  *
@@ -214,6 +217,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.DecimalFormat;
 import java.text.ParseException;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Observable;
@@ -221,14 +225,15 @@ import java.util.Observer;
 import java.util.Vector;
 import java.util.logging.Level;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.DefaultListSelectionModel;
 import javax.swing.ImageIcon;
 import javax.swing.JFormattedTextField;
 import javax.swing.JList;
-import javax.swing.JSpinner;
 import javax.swing.JSpinner.DateEditor;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.ListSelectionEvent;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.NumberFormatter;
 import javax.xml.datatype.XMLGregorianCalendar;
@@ -258,6 +263,14 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
   private boolean doAutoUpdateObservation = true;
   /** Warning image icon */
   private ImageIcon warningIcon = null;
+  /** current selected target to avoid empty list selection */
+  private Target currentTarget = null;
+  /** flag to enable / disable the automatic selection check of the target list */
+  private boolean doAutoCheckTargets = true;
+  /** current selected instrument configuration to avoid empty list selection */
+  private String currentInstrumentConfiguration = null;
+  /** flag to enable / disable the automatic selection check of the instrument configuration */
+  private boolean doAutoCheckConfigurations = true;
 
   /** Creates new form BasicObservationForm */
   public BasicObservationForm() {
@@ -276,7 +289,16 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
   private void initComponents() {
     java.awt.GridBagConstraints gridBagConstraints;
 
+    jPanelTargets = new javax.swing.JPanel();
+    jPanelTargetsLeft = new javax.swing.JPanel();
+    starSearchField = new fr.jmmc.mcs.astro.star.EditableStarResolverWidget();
+    jScrollPaneTargets = new javax.swing.JScrollPane();
+    jListTargets = createTargetList();
+    jButtonDeleteTarget = new javax.swing.JButton();
+    jButtonTargetEditor = new javax.swing.JButton();
+    jPanelTargetsRight = new javax.swing.JPanel();
     jPanelMain = new javax.swing.JPanel();
+    jPanelObsLeft = new javax.swing.JPanel();
     jLabelInterferometer = new javax.swing.JLabel();
     jComboBoxInterferometer = new javax.swing.JComboBox();
     jLabelPeriod = new javax.swing.JLabel();
@@ -284,15 +306,11 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     jLabelInstrument = new javax.swing.JLabel();
     jComboBoxInstrument = new javax.swing.JComboBox();
     jLabelConfiguration = new javax.swing.JLabel();
-    jComboBoxInstrumentConfiguration = new javax.swing.JComboBox();
+    jScrollPaneInstrumentConfigurations = new javax.swing.JScrollPane();
+    jListInstrumentConfigurations = new javax.swing.JList();
     jLabelPops = new javax.swing.JLabel();
     jTextPoPs = new JFormattedTextField(getPopsFormatter());
-    jLabelTargets = new javax.swing.JLabel();
-    jScrollPaneTargets = new javax.swing.JScrollPane();
-    jListTargets = createTargetList();
-    jButtonDeleteTarget = new javax.swing.JButton();
-    jButtonTargetEditor = new javax.swing.JButton();
-    starSearchField = new fr.jmmc.mcs.astro.star.EditableStarResolverWidget();
+    jPanelObsRight = new javax.swing.JPanel();
     jPanelOptions = new javax.swing.JPanel();
     jCheckBoxNightLimit = new javax.swing.JCheckBox();
     jLabelDate = new javax.swing.JLabel();
@@ -305,125 +323,69 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
 
     setLayout(new java.awt.GridBagLayout());
 
-    jPanelMain.setBorder(javax.swing.BorderFactory.createTitledBorder("Observation"));
-    jPanelMain.setLayout(new java.awt.GridBagLayout());
+    jPanelTargets.setBorder(javax.swing.BorderFactory.createTitledBorder("Targets"));
+    jPanelTargets.setLayout(new java.awt.GridBagLayout());
 
-    jLabelInterferometer.setLabelFor(jComboBoxInterferometer);
-    jLabelInterferometer.setText("Interferometer");
+    jPanelTargetsLeft.setMinimumSize(new java.awt.Dimension(12, 12));
+    jPanelTargetsLeft.setPreferredSize(new java.awt.Dimension(12, 12));
+
+    javax.swing.GroupLayout jPanelTargetsLeftLayout = new javax.swing.GroupLayout(jPanelTargetsLeft);
+    jPanelTargetsLeft.setLayout(jPanelTargetsLeftLayout);
+    jPanelTargetsLeftLayout.setHorizontalGroup(
+      jPanelTargetsLeftLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+      .addGap(0, 19, Short.MAX_VALUE)
+    );
+    jPanelTargetsLeftLayout.setVerticalGroup(
+      jPanelTargetsLeftLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+      .addGap(0, 104, Short.MAX_VALUE)
+    );
+
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-    jPanelMain.add(jLabelInterferometer, gridBagConstraints);
+    gridBagConstraints.gridheight = 3;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 0.1;
+    jPanelTargets.add(jPanelTargetsLeft, gridBagConstraints);
 
+    starSearchField.setText("");
+    starSearchField.setToolTipText("<html>\nEnter targets here :<br/>\nTarget identifier (SimBad resolution)<br/>\nor RA / DEC coordinates (J2000) with optional star name ('HMS DMS [star name]')\n</html>");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 0;
+    gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-    gridBagConstraints.weightx = 0.1;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-    jPanelMain.add(jComboBoxInterferometer, gridBagConstraints);
+    gridBagConstraints.insets = new java.awt.Insets(0, 0, 4, 0);
+    jPanelTargets.add(starSearchField, gridBagConstraints);
 
-    jLabelPeriod.setLabelFor(jComboBoxInstrumentConfiguration);
-    jLabelPeriod.setText("Period");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 3;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-    jPanelMain.add(jLabelPeriod, gridBagConstraints);
-
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 4;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-    jPanelMain.add(jComboBoxInterferometerConfiguration, gridBagConstraints);
-
-    jLabelInstrument.setLabelFor(jComboBoxInstrument);
-    jLabelInstrument.setText("Instrument");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-    jPanelMain.add(jLabelInstrument, gridBagConstraints);
-
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-    gridBagConstraints.weightx = 0.1;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-    jPanelMain.add(jComboBoxInstrument, gridBagConstraints);
-
-    jLabelConfiguration.setLabelFor(jComboBoxInstrumentConfiguration);
-    jLabelConfiguration.setText("Configuration");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 3;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-    jPanelMain.add(jLabelConfiguration, gridBagConstraints);
-
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 4;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.weightx = 0.1;
-    gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
-    jPanelMain.add(jComboBoxInstrumentConfiguration, gridBagConstraints);
-
-    jLabelPops.setLabelFor(jTextPoPs);
-    jLabelPops.setText("PoPs");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 5;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-    jPanelMain.add(jLabelPops, gridBagConstraints);
-
-    jTextPoPs.setColumns(4);
-    jTextPoPs.setToolTipText("<html>\ndefine a specific PoPs combination (PoP 1 to 5) by giving the list of PoP numbers<br/>\nin the same order than stations of the selected base line. For example:<ul>\n<li>VEGA_2T with baseline S1-S2<br/>'34' means PoP3 on S1 and PoP4 on S2</li>\n<li>MIRC (4T) with baseline S1-S2-E1-W2<br/>'1255' means PoP1 on S1, PoP2 on S2 and Pop5 on E1 and W2</li>\n</ul>\n<b>If you leave this field blank, ASPRO 2 will compute the 'best PoP' combination<br/>\nmaximizing the observability of your complete list of targets</b>\n</html>");
-    jTextPoPs.setMinimumSize(new java.awt.Dimension(40, 20));
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 6;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
-    jPanelMain.add(jTextPoPs, gridBagConstraints);
-
-    jLabelTargets.setLabelFor(jListTargets);
-    jLabelTargets.setText("Targets");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 2;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-    jPanelMain.add(jLabelTargets, gridBagConstraints);
-
-    jScrollPaneTargets.setPreferredSize(new java.awt.Dimension(100, 50));
-
+    jListTargets.setModel(new javax.swing.AbstractListModel() {
+      String[] strings = { "Samples:", "HD 1234", "HIP 1234" };
+      public int getSize() { return strings.length; }
+      public Object getElementAt(int i) { return strings[i]; }
+    });
     jListTargets.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
     jListTargets.setToolTipText("Target list : use the SimBad field to enter your targets\n");
-    jListTargets.setVisibleRowCount(3);
+    jListTargets.setVisibleRowCount(2);
+    jListTargets.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
+      public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
+        jListTargetsValueChanged(evt);
+      }
+    });
     jScrollPaneTargets.setViewportView(jListTargets);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.gridheight = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.weightx = 0.1;
+    gridBagConstraints.weightx = 0.8;
     gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-    jPanelMain.add(jScrollPaneTargets, gridBagConstraints);
+    gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 6);
+    jPanelTargets.add(jScrollPaneTargets, gridBagConstraints);
 
-    jButtonDeleteTarget.setFont(new java.awt.Font("Dialog", 1, 14));
     jButtonDeleteTarget.setIcon(new javax.swing.ImageIcon(getClass().getResource("/fr/jmmc/aspro/gui/icons/delete.png"))); // NOI18N
     jButtonDeleteTarget.setToolTipText("delete the selected target");
+    jButtonDeleteTarget.setMargin(new java.awt.Insets(0, 0, 0, 0));
     jButtonDeleteTarget.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(java.awt.event.ActionEvent evt) {
         jButtonDeleteTargetActionPerformed(evt);
@@ -432,38 +394,178 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 2;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-    jPanelMain.add(jButtonDeleteTarget, gridBagConstraints);
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.SOUTHWEST;
+    gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 0);
+    jPanelTargets.add(jButtonDeleteTarget, gridBagConstraints);
 
     jButtonTargetEditor.setText("Target editor");
+    jButtonTargetEditor.setMargin(new java.awt.Insets(0, 0, 0, 0));
     jButtonTargetEditor.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(java.awt.event.ActionEvent evt) {
         jButtonTargetEditorActionPerformed(evt);
       }
     });
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 5;
-    gridBagConstraints.gridy = 2;
-    gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-    jPanelMain.add(jButtonTargetEditor, gridBagConstraints);
+    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridy = 1;
+    jPanelTargets.add(jButtonTargetEditor, gridBagConstraints);
 
-    starSearchField.setToolTipText("<html>\nEnter targets here :<br/>\nTarget identifier (SimBad resolution)<br/>\nor RA / DEC coordinates (J2000) with optional star name ('HMS DMS [star name]')\n</html>");
-    starSearchField.setMinimumSize(new java.awt.Dimension(100, 23));
+    jPanelTargetsRight.setMinimumSize(new java.awt.Dimension(12, 12));
+    jPanelTargetsRight.setPreferredSize(new java.awt.Dimension(12, 12));
+
+    javax.swing.GroupLayout jPanelTargetsRightLayout = new javax.swing.GroupLayout(jPanelTargetsRight);
+    jPanelTargetsRight.setLayout(jPanelTargetsRightLayout);
+    jPanelTargetsRightLayout.setHorizontalGroup(
+      jPanelTargetsRightLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+      .addGap(0, 19, Short.MAX_VALUE)
+    );
+    jPanelTargetsRightLayout.setVerticalGroup(
+      jPanelTargetsRightLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+      .addGap(0, 104, Short.MAX_VALUE)
+    );
+
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 3;
-    gridBagConstraints.gridy = 2;
-    gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.gridheight = 3;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.weightx = 0.1;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-    jPanelMain.add(starSearchField, gridBagConstraints);
+    jPanelTargets.add(jPanelTargetsRight, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridheight = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.weightx = 0.8;
+    gridBagConstraints.weightx = 0.4;
     gridBagConstraints.weighty = 1.0;
+    add(jPanelTargets, gridBagConstraints);
+
+    jPanelMain.setBorder(javax.swing.BorderFactory.createTitledBorder("Observation"));
+    jPanelMain.setLayout(new java.awt.GridBagLayout());
+
+    jPanelObsLeft.setMinimumSize(new java.awt.Dimension(12, 12));
+    jPanelObsLeft.setPreferredSize(new java.awt.Dimension(12, 12));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.gridheight = 4;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 0.1;
+    jPanelMain.add(jPanelObsLeft, gridBagConstraints);
+
+    jLabelInterferometer.setLabelFor(jComboBoxInterferometer);
+    jLabelInterferometer.setText("Interferometer");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+    gridBagConstraints.insets = new java.awt.Insets(0, 0, 4, 6);
+    jPanelMain.add(jLabelInterferometer, gridBagConstraints);
+
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.weightx = 0.4;
+    gridBagConstraints.insets = new java.awt.Insets(0, 0, 4, 0);
+    jPanelMain.add(jComboBoxInterferometer, gridBagConstraints);
+
+    jLabelPeriod.setText("Period");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+    gridBagConstraints.insets = new java.awt.Insets(0, 0, 4, 6);
+    jPanelMain.add(jLabelPeriod, gridBagConstraints);
+
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.insets = new java.awt.Insets(0, 0, 4, 0);
+    jPanelMain.add(jComboBoxInterferometerConfiguration, gridBagConstraints);
+
+    jLabelInstrument.setLabelFor(jComboBoxInstrument);
+    jLabelInstrument.setText("Instrument");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+    gridBagConstraints.insets = new java.awt.Insets(0, 0, 4, 6);
+    jPanelMain.add(jLabelInstrument, gridBagConstraints);
+
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.insets = new java.awt.Insets(0, 0, 4, 0);
+    jPanelMain.add(jComboBoxInstrument, gridBagConstraints);
+
+    jLabelConfiguration.setText("Configuration(s)");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 3;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.SOUTH;
+    gridBagConstraints.insets = new java.awt.Insets(0, 12, 4, 0);
+    jPanelMain.add(jLabelConfiguration, gridBagConstraints);
+
+    jListInstrumentConfigurations.setModel(new javax.swing.AbstractListModel() {
+      String[] strings = { "Samples:", "UT1 UT2 UT3 UT4", "E1 E2 W1 W2" };
+      public int getSize() { return strings.length; }
+      public Object getElementAt(int i) { return strings[i]; }
+    });
+    jListInstrumentConfigurations.setVisibleRowCount(2);
+    jListInstrumentConfigurations.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
+      public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
+        jListInstrumentConfigurationsValueChanged(evt);
+      }
+    });
+    jScrollPaneInstrumentConfigurations.setViewportView(jListInstrumentConfigurations);
+
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 3;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.gridheight = 3;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.ipadx = 5;
+    gridBagConstraints.weightx = 0.4;
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(0, 12, 2, 0);
+    jPanelMain.add(jScrollPaneInstrumentConfigurations, gridBagConstraints);
+
+    jLabelPops.setLabelFor(jTextPoPs);
+    jLabelPops.setText("PoPs");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHEAST;
+    gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 6);
+    jPanelMain.add(jLabelPops, gridBagConstraints);
+
+    jTextPoPs.setColumns(4);
+    jTextPoPs.setToolTipText("<html>\ndefine a specific PoPs combination (PoP 1 to 5) by giving the list of PoP numbers<br/>\nin the same order than stations of the selected base line. For example:<ul>\n<li>VEGA_2T with baseline S1-S2<br/>'34' means PoP3 on S1 and PoP4 on S2</li>\n<li>MIRC (4T) with baseline S1-S2-E1-W2<br/>'1255' means PoP1 on S1, PoP2 on S2 and Pop5 on E1 and W2</li>\n</ul>\n<b>If you leave this field blank, ASPRO 2 will compute the 'best PoP' combination<br/>\nmaximizing the observability of your complete list of targets</b>\n</html>");
+    jTextPoPs.setMinimumSize(new java.awt.Dimension(40, 20));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    jPanelMain.add(jTextPoPs, gridBagConstraints);
+
+    jPanelObsRight.setMinimumSize(new java.awt.Dimension(12, 12));
+    jPanelObsRight.setPreferredSize(new java.awt.Dimension(12, 12));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 4;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.gridheight = 4;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 0.1;
+    jPanelMain.add(jPanelObsRight, gridBagConstraints);
+
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.gridheight = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 0.5;
     add(jPanelMain, gridBagConstraints);
 
     jPanelOptions.setBorder(javax.swing.BorderFactory.createTitledBorder("Constraints"));
@@ -476,8 +578,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    gridBagConstraints.insets = new java.awt.Insets(0, 0, 4, 0);
     jPanelOptions.add(jCheckBoxNightLimit, gridBagConstraints);
 
     jLabelDate.setLabelFor(jDateSpinner);
@@ -486,16 +587,17 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    gridBagConstraints.insets = new java.awt.Insets(0, 0, 4, 6);
     jPanelOptions.add(jLabelDate, gridBagConstraints);
 
     jDateSpinner.setModel(new javax.swing.SpinnerDateModel());
+    jDateSpinner.setEditor(new javax.swing.JSpinner.DateEditor(jDateSpinner, "yyyy/MM/dd"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.ipadx = 2;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    gridBagConstraints.insets = new java.awt.Insets(0, 0, 4, 0);
     jPanelOptions.add(jDateSpinner, gridBagConstraints);
 
     jLabelMinElev.setLabelFor(jFieldMinElev);
@@ -505,7 +607,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 6);
     jPanelOptions.add(jLabelMinElev, gridBagConstraints);
 
     jFieldMinElev.setColumns(2);
@@ -514,10 +616,12 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 0);
     jPanelOptions.add(jFieldMinElev, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.weightx = 0.1;
     add(jPanelOptions, gridBagConstraints);
@@ -531,22 +635,23 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
+    gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 10);
     jPanelStatus.add(jLabelState, gridBagConstraints);
 
     jLabelStatus.setText("Ok");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 0;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
     jPanelStatus.add(jLabelStatus, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weighty = 1.0;
     add(jPanelStatus, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
 
@@ -581,6 +686,14 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
   private void jButtonTargetEditorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonTargetEditorActionPerformed
     showTargetEditor();
   }//GEN-LAST:event_jButtonTargetEditorActionPerformed
+
+  private void jListInstrumentConfigurationsValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_jListInstrumentConfigurationsValueChanged
+    this.processInstrumentConfigurationValueChanged(evt);
+  }//GEN-LAST:event_jListInstrumentConfigurationsValueChanged
+
+  private void jListTargetsValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_jListTargetsValueChanged
+    this.processTargetValueChanged(evt);
+  }//GEN-LAST:event_jListTargetsValueChanged
 
   /**
    * Open the target editor using the selected target
@@ -633,8 +746,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     this.starSearchField.getStar().addObserver(this);
 
     // update component models :
-    final DateEditor de = new JSpinner.DateEditor(jDateSpinner, "yyyy/MM/dd");
-    this.jDateSpinner.setEditor(de);
+    final DateEditor de = (DateEditor) this.jDateSpinner.getEditor();
 
     // custom focus listener to let the user change the day field by default :
     de.getTextField().addFocusListener(new FocusAdapter() {
@@ -667,7 +779,6 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     this.jComboBoxInterferometer.addActionListener(this);
     this.jComboBoxInterferometerConfiguration.addActionListener(this);
     this.jComboBoxInstrument.addActionListener(this);
-    this.jComboBoxInstrumentConfiguration.addActionListener(this);
 
     this.jTextPoPs.addPropertyChangeListener("value", new PropertyChangeListener() {
 
@@ -718,8 +829,15 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
    * Refresh the list of instruments : depends on the chosen interferometer configuration
    */
   private void updateComboInstrument() {
+    final Object oldValue = this.jComboBoxInstrument.getSelectedItem();
+
     final Vector<String> v = this.cm.getInterferometerInstrumentNames((String) this.jComboBoxInterferometerConfiguration.getSelectedItem());
     this.jComboBoxInstrument.setModel(new DefaultComboBoxModel(v));
+
+    // restore previous selected item :
+    if (oldValue != null) {
+      this.jComboBoxInstrument.setSelectedItem(oldValue);
+    }
   }
 
   /**
@@ -728,10 +846,32 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
   private void updateComboInstrumentConfiguration() {
     final Vector<String> v = this.cm.getInstrumentConfigurationNames((String) this.jComboBoxInterferometerConfiguration.getSelectedItem(),
             (String) this.jComboBoxInstrument.getSelectedItem());
-    this.jComboBoxInstrumentConfiguration.setModel(new DefaultComboBoxModel(v));
-    final boolean visible = (v.size() > 1);
-    this.jLabelConfiguration.setVisible(visible);
-    this.jComboBoxInstrumentConfiguration.setVisible(visible);
+
+    final Object[] oldValues = this.jListInstrumentConfigurations.getSelectedValues();
+
+    // disable the automatic selection check of the instrument configuration :
+    final boolean prevAutoCheckConfigurations = this.setAutoCheckConfigurations(false);
+    try {
+      this.jListInstrumentConfigurations.setModel(new GenericListModel<String>(v));
+
+      // restore previous selected item(s) :
+      this.selectInstrumentConfigurations(oldValues);
+
+    } finally {
+      // restore the automatic selection check of the instrument configuration :
+      this.setAutoCheckConfigurations(prevAutoCheckConfigurations);
+    }
+    // ensure one configuration is selected :
+    this.checkInstrumentConfigurationSelection();
+  }
+
+  /**
+   * Return the list model of the instrument configuration list
+   * @return list model
+   */
+  @SuppressWarnings("unchecked")
+  private GenericListModel<String> getInstrumentConfigurationModel() {
+    return (GenericListModel<String>) this.jListInstrumentConfigurations.getModel();
   }
 
   /**
@@ -743,36 +883,30 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     final List<Target> displayTargets = this.om.getDisplayTargets();
     final TargetUserInformations targetUserInfos = this.om.getTargetUserInfos();
 
-    // note : read only :
-    this.jListTargets.setModel(new GenericListModel<Target>(displayTargets));
-    this.jListTargets.setCellRenderer(new TargetListRenderer(new TargetRenderer(targetUserInfos)));
+    // disable the automatic selection check of the target list :
+    final boolean prevAutoCheckTargets = this.setAutoCheckTargets(false);
+    try {
+      this.jListTargets.setModel(new GenericListModel<Target>(displayTargets));
+      this.jListTargets.setCellRenderer(new TargetListRenderer(new TargetRenderer(targetUserInfos)));
 
-    // restore previous selected item :
-    if (selectedTarget != null) {
-      updateSelectedTarget(selectedTarget);
+      // restore previous selected item :
+      if (selectedTarget != null) {
+        this.jListTargets.setSelectedValue(selectedTarget, true);
+      }
+
+      // disable buttons if the target list is empty :
+      this.jButtonDeleteTarget.setEnabled(!displayTargets.isEmpty());
+      this.jButtonTargetEditor.setEnabled(!displayTargets.isEmpty());
+
+    } finally {
+      // restore the automatic selection check of the target list :
+      this.setAutoCheckTargets(prevAutoCheckTargets);
     }
-
-    // disable buttons if the target list is empty :
-    this.jButtonDeleteTarget.setEnabled(!displayTargets.isEmpty());
-    this.jButtonTargetEditor.setEnabled(!displayTargets.isEmpty());
+    // ensure one target is selected :
+    this.checkTargetSelection();
 
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("jListTargets updated : " + getSelectedTarget());
-    }
-  }
-
-  /**
-   * Define the selected target in the target list
-   *
-   * @param target target to select
-   */
-  protected void updateSelectedTarget(final Target target) {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("selected target = " + target);
-    }
-
-    if (target != null && !target.equals(getSelectedTarget())) {
-      this.jListTargets.setSelectedValue(target, true);
     }
   }
 
@@ -781,7 +915,51 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
    * @return target
    */
   public Target getSelectedTarget() {
+    // TODO : handle multiple selections
     return (Target) this.jListTargets.getSelectedValue();
+  }
+
+  /**
+   * Called whenever the target selection changes.
+   * @param e the event that characterizes the change.
+   */
+  private void processTargetValueChanged(final ListSelectionEvent e) {
+    // skip events when the user selection is adjusting :
+    if (e.getValueIsAdjusting()) {
+      return;
+    }
+
+    // ensure at least one item is selected :
+    if (this.jListTargets.getSelectionModel().isSelectionEmpty()) {
+      this.checkTargetSelection();
+      return;
+    }
+
+    // check if selection changes :
+    if (this.currentTarget == null || !this.currentTarget.equals(getSelectedTarget())) {
+      // memorize the selected item :
+      this.currentTarget = getSelectedTarget();
+
+      // handle single selection :
+
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("Selected Target changed : " + getSelectedTarget());
+      }
+
+      // update observation :
+      fireTargetSelectionChangeEvent();
+    }
+  }
+
+  /**
+   * Check if the selected target is empty, then restore the last selected target
+   * or select the first target
+   */
+  private void checkTargetSelection() {
+    // check if the automatic configuration check flag is enabled :
+    if (this.doAutoCheckTargets) {
+      checkListSelection(this.jListTargets, this.currentTarget);
+    }
   }
 
   /**
@@ -790,33 +968,107 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
    * @param e action event
    */
   public void actionPerformed(final ActionEvent e) {
-    if (e.getSource() == this.jComboBoxInterferometer) {
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("Interferometer changed : " + this.jComboBoxInterferometer.getSelectedItem());
+    // disable the automatic update observation :
+    final boolean prevAutoUpdateObservation = this.setAutoUpdateObservation(false);
+    try {
+      if (e.getSource() == this.jComboBoxInterferometer) {
+        if (logger.isLoggable(Level.FINE)) {
+          logger.fine("Interferometer changed : " + this.jComboBoxInterferometer.getSelectedItem());
+        }
+        updateComboInterferometerConfiguration();
+        updateComboInstrument();
+        updateComboInstrumentConfiguration();
+        checkPops();
+      } else if (e.getSource() == this.jComboBoxInterferometerConfiguration) {
+        if (logger.isLoggable(Level.FINE)) {
+          logger.fine("Interferometer Configuration changed : " + this.jComboBoxInterferometerConfiguration.getSelectedItem());
+        }
+        updateComboInstrument();
+        updateComboInstrumentConfiguration();
+      } else if (e.getSource() == this.jComboBoxInstrument) {
+        if (logger.isLoggable(Level.FINE)) {
+          logger.fine("Instrument changed : " + this.jComboBoxInstrument.getSelectedItem());
+        }
+        updateComboInstrumentConfiguration();
+        checkPops();
       }
-      updateComboInterferometerConfiguration();
-      updateComboInstrument();
-      updateComboInstrumentConfiguration();
-      checkPops();
-    } else if (e.getSource() == this.jComboBoxInterferometerConfiguration) {
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("Interferometer Configuration changed : " + this.jComboBoxInterferometerConfiguration.getSelectedItem());
-      }
-      updateComboInstrument();
-      updateComboInstrumentConfiguration();
-    } else if (e.getSource() == this.jComboBoxInstrument) {
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("Instrument changed : " + this.jComboBoxInstrument.getSelectedItem());
-      }
-      updateComboInstrumentConfiguration();
-      checkPops();
 
-    } else if (e.getSource() == this.jComboBoxInstrumentConfiguration) {
+    } finally {
+      // restore the automatic update observation :
+      this.setAutoUpdateObservation(prevAutoUpdateObservation);
+    }
+    // group multiple calls into a single observation update event :
+    fireObservationUpdateEvent();
+  }
+
+  /**
+   * Called whenever the instrument configuration selection changes.
+   * @param e the event that characterizes the change.
+   */
+  private void processInstrumentConfigurationValueChanged(final ListSelectionEvent e) {
+    // skip events when the user selection is adjusting :
+    if (e.getValueIsAdjusting()) {
+      return;
+    }
+
+    // ensure at least one item is selected :
+    if (this.jListInstrumentConfigurations.getSelectionModel().isSelectionEmpty()) {
+      this.checkInstrumentConfigurationSelection();
+      return;
+    }
+
+    // memorize the first selected item :
+    this.currentInstrumentConfiguration = (String) this.jListInstrumentConfigurations.getSelectedValue();
+
+    // handle multiple selection :
+
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("Instrument Configuration changed : " + Arrays.toString(this.jListInstrumentConfigurations.getSelectedValues()));
+    }
+
+    // update observation :
+    fireObservationUpdateEvent();
+  }
+
+  /**
+   * Check if the selected instrument configuration is empty, then restore the last selected configuration
+   * or select the first configuration
+   */
+  private void checkInstrumentConfigurationSelection() {
+    // check if the automatic configuration check flag is enabled :
+    if (this.doAutoCheckConfigurations) {
+      checkListSelection(this.jListInstrumentConfigurations, this.currentInstrumentConfiguration);
+    }
+  }
+
+  /**
+   * Select all given values in the instrument configuration list
+   * @param values configurations to select
+   */
+  private void selectInstrumentConfigurations(final Object[] values) {
+    if (values != null && values.length > 0) {
       if (logger.isLoggable(Level.FINE)) {
-        logger.fine("Instrument Configuration changed : " + this.jComboBoxInstrumentConfiguration.getSelectedItem());
+        logger.fine("selectInstrumentConfigurations : " + Arrays.toString(values));
+      }
+
+      final GenericListModel<String> lm = getInstrumentConfigurationModel();
+      final DefaultListSelectionModel lsm = (DefaultListSelectionModel) this.jListInstrumentConfigurations.getSelectionModel();
+
+      int index = -1;
+      for (Object selection : values) {
+        index = lm.indexOf((String) selection);
+        if (index != -1) {
+          lsm.addSelectionInterval(index, index);
+        }
+      }
+      if (index != -1) {
+        // scroll to last selected value :
+        this.jListInstrumentConfigurations.ensureIndexIsVisible(index);
+      }
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("selectInstrumentConfigurations : selectedValues : " + Arrays.toString(this.jListInstrumentConfigurations.getSelectedValues()));
       }
     }
-    fireObservationUpdateEvent();
   }
 
   /**
@@ -919,8 +1171,24 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
   private void fireObservationUpdateEvent() {
     // check if the automatic update flag is enabled :
     if (this.doAutoUpdateObservation) {
+    if (logger.isLoggable(Level.FINE)) {
+        logger.fine("fireObservationUpdateEvent");
+    }
       ObservationManager.getInstance().fireObservationUpdate();
     }
+  }
+
+  /**
+   * Fire a Target Selection Change event when the target selection changes.
+   */
+  private void fireTargetSelectionChangeEvent() {
+
+    final Target selected = getSelectedTarget();
+
+    if (logger.isLoggable(Level.FINE)) {
+        logger.fine("fireTargetSelectionChangeEvent : target = " + selected);
+    }
+    ObservationManager.getInstance().fireTargetSelectionChanged(selected);
   }
 
   /**
@@ -934,7 +1202,13 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     }
     // disable the automatic update observation :
     final boolean prevAutoUpdateObservation = this.setAutoUpdateObservation(false);
+    // disable the automatic selection check of the instrument configuration :
+    final boolean prevAutoCheckConfigurations = this.setAutoCheckConfigurations(false);
     try {
+      // reset cached values :
+      this.currentTarget = null;
+      this.currentInstrumentConfiguration = null;
+
       // observation :
 
       // update the interferometer and interferometer configuration :
@@ -954,15 +1228,13 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
       // update the selected instrument :
       this.jComboBoxInstrument.setSelectedItem(instrumentChoice.getName());
 
-      // update the selected instrument configuration (stations) :
-      this.jComboBoxInstrumentConfiguration.setSelectedItem(instrumentChoice.getStations());
+      // update the selected instrument configurations :
+      // TODO MULTI-CONF : check
+      this.selectInstrumentConfigurations(new Object[]{instrumentChoice.getStations()});
 
       // update the selected pops (pops) :
       // note : setText() does not fire a property change event :
       this.jTextPoPs.setText(instrumentChoice.getPops());
-
-      // update the target list :
-      this.updateListTargets();
 
       // constraints :
 
@@ -979,9 +1251,13 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
       this.jCheckBoxNightLimit.setSelected(observation.getWhen().isNightRestriction());
 
     } finally {
+      // restore the automatic selection check of the instrument configuration :
+      this.setAutoCheckConfigurations(prevAutoCheckConfigurations);
       // restore the automatic update observation :
       this.setAutoUpdateObservation(prevAutoUpdateObservation);
     }
+    // ensure one configuration is selected :
+    this.checkInstrumentConfigurationSelection();
   }
 
   /**
@@ -1005,7 +1281,10 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
       // observation :
       changed |= this.om.setInterferometerConfigurationName((String) this.jComboBoxInterferometerConfiguration.getSelectedItem());
       changed |= this.om.setInstrumentConfigurationName((String) this.jComboBoxInstrument.getSelectedItem());
-      changed |= this.om.setInstrumentConfigurationStations((String) this.jComboBoxInstrumentConfiguration.getSelectedItem());
+
+      // TODO MULTI-CONF :
+      changed |= this.om.setInstrumentConfigurationStations((String) this.jListInstrumentConfigurations.getSelectedValue());
+
       changed |= this.om.setInstrumentConfigurationPoPs(this.jTextPoPs.getText());
 
       // constraints :
@@ -1093,7 +1372,6 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
   private javax.swing.JButton jButtonTargetEditor;
   private javax.swing.JCheckBox jCheckBoxNightLimit;
   private javax.swing.JComboBox jComboBoxInstrument;
-  private javax.swing.JComboBox jComboBoxInstrumentConfiguration;
   private javax.swing.JComboBox jComboBoxInterferometer;
   private javax.swing.JComboBox jComboBoxInterferometerConfiguration;
   private javax.swing.JSpinner jDateSpinner;
@@ -1107,11 +1385,17 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
   private javax.swing.JLabel jLabelPops;
   private javax.swing.JLabel jLabelState;
   private javax.swing.JLabel jLabelStatus;
-  private javax.swing.JLabel jLabelTargets;
+  private javax.swing.JList jListInstrumentConfigurations;
   private javax.swing.JList jListTargets;
   private javax.swing.JPanel jPanelMain;
+  private javax.swing.JPanel jPanelObsLeft;
+  private javax.swing.JPanel jPanelObsRight;
   private javax.swing.JPanel jPanelOptions;
   private javax.swing.JPanel jPanelStatus;
+  private javax.swing.JPanel jPanelTargets;
+  private javax.swing.JPanel jPanelTargetsLeft;
+  private javax.swing.JPanel jPanelTargetsRight;
+  private javax.swing.JScrollPane jScrollPaneInstrumentConfigurations;
   private javax.swing.JScrollPane jScrollPaneTargets;
   private javax.swing.JFormattedTextField jTextPoPs;
   private fr.jmmc.mcs.astro.star.EditableStarResolverWidget starSearchField;
@@ -1122,7 +1406,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
    * @return JList
    */
   private static JList createTargetList() {
-    return new JList() {
+    final JList list = new JList() {
 
       /** default serial UID for Serializable interface */
       private static final long serialVersionUID = 1;
@@ -1146,6 +1430,47 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         return getToolTipText();
       }
     };
+
+    final Target defTarget = new Target();
+    defTarget.setName("HIP 1234");
+
+    // Useful to define the empty list width and height :
+    list.setPrototypeCellValue(defTarget);
+
+    return list;
+  }
+
+  /**
+   * Check if the given list selection is empty, then restore the last selected item
+   * or select the first item (if exist)
+   * @param list JList to use
+   * @param lastValue last selected value for the given list
+   * @param <K> type of every list item
+   */
+  @SuppressWarnings("unchecked")
+  private static <K> void checkListSelection(final JList list, final K lastValue) {
+    // ensure at least one item is selected :
+    if (list.getSelectionModel().isSelectionEmpty()) {
+      // previously an item was selected - select it back (if possible) :
+      K selection = lastValue;
+
+      final GenericListModel<K> model = (GenericListModel<K>) list.getModel();
+
+      if (selection == null || !model.contains(selection)) {
+        // Select first item (if exist) :
+        selection = (model.isEmpty()) ? null : model.get(0);
+      }
+      if (selection != null) {
+        if (logger.isLoggable(Level.FINE)) {
+          logger.fine("list selection empty - select : " + selection);
+        }
+        list.setSelectedValue(selection, true);
+      } else {
+        if (logger.isLoggable(Level.FINE)) {
+          logger.fine("list selection empty - nothing to select !");
+        }
+      }
+    }
   }
 
   /**
@@ -1172,6 +1497,64 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
 
     // then change its state :
     this.doAutoUpdateObservation = value;
+
+    // return previous state :
+    return previous;
+  }
+
+  /**
+   * Enable / Disable the automatic automatic selection check of the instrument configuration.
+   * Return its previous value.
+   *
+   * Typical use is as following :
+   * // disable the automatic selection check of the instrument configuration :
+   * final boolean prevAutoCheckConfigurations = this.setAutoCheckConfigurations(false);
+   * try {
+   *   // operations ...
+   *
+   * } finally {
+   *   // restore the automatic selection check of the instrument configuration :
+   *   this.setAutoCheckConfigurations(prevAutoCheckConfiguration);
+   * }
+   *
+   * @param value new value
+   * @return previous value
+   */
+  private boolean setAutoCheckConfigurations(final boolean value) {
+    // first backup the state of the automatic selection check :
+    final boolean previous = this.doAutoCheckConfigurations;
+
+    // then change its state :
+    this.doAutoCheckConfigurations = value;
+
+    // return previous state :
+    return previous;
+  }
+
+  /**
+   * Enable / Disable the automatic automatic selection check of the target list.
+   * Return its previous value.
+   *
+   * Typical use is as following :
+   * // disable the automatic selection check of the target list :
+   * final boolean prevAutoCheckTargets = this.setAutoCheckTargets(false);
+   * try {
+   *   // operations ...
+   *
+   * } finally {
+   *   // restore the automatic selection check of the target list :
+   *   this.setAutoCheckTargets(prevAutoCheckTargets);
+   * }
+   *
+   * @param value new value
+   * @return previous value
+   */
+  private boolean setAutoCheckTargets(final boolean value) {
+    // first backup the state of the automatic selection check :
+    final boolean previous = this.doAutoCheckTargets;
+
+    // then change its state :
+    this.doAutoCheckTargets = value;
 
     // return previous state :
     return previous;

@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityPanel.java,v 1.58 2011-02-04 17:17:01 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityPanel.java,v 1.59 2011-02-22 18:11:30 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.58  2011/02/04 17:17:01  bourgesl
+ * new ChartData inner class to have chart state used by PDF export
+ *
  * Revision 1.57  2011/02/03 17:25:42  bourgesl
  * minor clean up
  *
@@ -246,7 +249,6 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.logging.Level;
 import javax.swing.DefaultBoundedRangeModel;
-import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -336,8 +338,6 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
   private JCheckBox jCheckBoxBaseLineLimits;
   /** checkbox Detailed output */
   private JCheckBox jCheckBoxDetailedOutput;
-  /** pdf export button */
-  private JButton jButtonPDF;
   /** flag to enable / disable the automatic refresh of the plot when any swing component changes */
   private boolean doAutoRefresh = true;
   /** flag to indicate the subset mode before exporting to pdf */
@@ -364,18 +364,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
     // add listener :
     this.chart.addProgressListener(this);
-
-    this.chartPanel = new ChartPanel(this.chart,
-            600, 400, /* prefered size */
-            300, 200, /* minimum size before scaling */
-            2000, 2000, /* maximum size before scaling */
-            true, /* use buffer */
-            false, /* properties */
-            true, /* copy */
-            true, /* save */
-            true, /* print */
-            false, /* zoom */
-            false /* tooltips */);
+    this.chartPanel = ChartUtils.createChartPanel(this.chart);
 
     // zoom options :
     // targets :
@@ -416,20 +405,6 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
 
     this.add(this.scroller, BorderLayout.EAST);
-
-    final JPanel panelBottom = new JPanel(new BorderLayout());
-
-    // same generated code in UVCoveragePanel :
-    this.jButtonPDF = new javax.swing.JButton();
-    this.jButtonPDF.setIcon(new javax.swing.ImageIcon(getClass().getResource("/fr/jmmc/aspro/gui/icons/icon_pdf.gif"))); // NOI18N
-    this.jButtonPDF.setMargin(new java.awt.Insets(0, 0, 0, 0));
-    this.jButtonPDF.addActionListener(new java.awt.event.ActionListener() {
-
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        jButtonPDFActionPerformed(evt);
-      }
-    });
-    panelBottom.add(this.jButtonPDF, BorderLayout.WEST);
 
     final JPanel panelOptions = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 1));
 
@@ -480,9 +455,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
     panelOptions.add(this.jCheckBoxDetailedOutput);
 
-    panelBottom.add(panelOptions, BorderLayout.CENTER);
-
-    this.add(panelBottom, BorderLayout.PAGE_END);
+    this.add(panelOptions, BorderLayout.PAGE_END);
 
     // register this instance as a Preference Observer :
     this.myPreferences.addObserver(this);
@@ -512,14 +485,6 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     }
 
     this.jComboTimeRef.setSelectedItem(this.myPreferences.getTimeReference());
-  }
-
-  /**
-   * Export the current chart as a PDF document
-   * @param evt action event
-   */
-  private void jButtonPDFActionPerformed(java.awt.event.ActionEvent evt) {
-    this.performPDFAction();
   }
 
   /**
@@ -1053,6 +1018,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     }
 
     this.scroller.getModel().setMinimum(0);
+    this.scroller.getModel().setExtent(0);
 
     final int size = localTaskSeriesCollection.getRowCount();
 

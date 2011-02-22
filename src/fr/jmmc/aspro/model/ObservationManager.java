@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationManager.java,v 1.56 2011-02-02 17:42:50 bourgesl Exp $"
+ * "@(#) $Id: ObservationManager.java,v 1.57 2011-02-22 18:11:30 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.56  2011/02/02 17:42:50  bourgesl
+ * added a lot of comments
+ * separate main and observation for computations (synchronise)
+ *
  * Revision 1.55  2011/01/31 15:29:13  bourgesl
  * use WarningContainerEvent instead of shared warning in observation
  * modified fireWarningsReady(warningContainer) to use WarningContainerEvent
@@ -202,6 +206,7 @@ import fr.jmmc.aspro.model.observability.ObservabilityData;
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.event.ObservabilityEvent;
 import fr.jmmc.aspro.model.event.ObservationEvent;
+import fr.jmmc.aspro.model.event.TargetSelectionEvent;
 import fr.jmmc.aspro.model.event.UpdateObservationEvent;
 import fr.jmmc.aspro.model.event.WarningContainerEvent;
 import fr.jmmc.aspro.model.oi.AtmosphereQuality;
@@ -479,7 +484,7 @@ public final class ObservationManager extends BaseOIManager {
    * This fires an observation load event to all registered listeners.
    * Fired by changeObservation() when an observation is loaded or reset
    *
-   * Listeners : BasicObservationForm / SettingPanel / ObservabilityPanel / UVCoveragePanel
+   * Listeners : SettingPanel / BasicObservationForm / ObservabilityPanel / UVCoveragePanel
    */
   private void fireObservationLoaded() {
     if (logger.isLoggable(Level.FINE)) {
@@ -493,7 +498,7 @@ public final class ObservationManager extends BaseOIManager {
    * This fires an observation target change event to all registered listeners.
    * Fired by fireTargetChangedEvents() when an observation is loaded or reset or the target list was modified
    *
-   * Listeners : BasicObservationForm / SettingPanel / UVCoveragePanel
+   * Listeners : SettingPanel / BasicObservationForm
    */
   private void fireObservationTargetsChanged() {
     // Increment target version of the main observation :
@@ -505,6 +510,23 @@ public final class ObservationManager extends BaseOIManager {
     }
 
     fireEvent(new ObservationEvent(ObservationEventType.TARGET_CHANGED, getMainObservation()));
+  }
+
+  /**
+   * This fires a target selection changed event to all registered listeners.
+   * Fired by [BasicObservationForm].fireTargetSelectionChangeEvent()
+   * when the selected target changed
+   *
+   * Listeners : UVCoveragePanel
+   *
+   * @param target selected target
+   */
+  public void fireTargetSelectionChanged(final Target target) {
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("fireTargetSelectionChange : " + toString(getMainObservation()));
+    }
+
+    fireEvent(new TargetSelectionEvent(getMainObservation(), target));
   }
 
   /**

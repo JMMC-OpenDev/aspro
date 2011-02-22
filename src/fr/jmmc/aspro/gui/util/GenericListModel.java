@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: GenericListModel.java,v 1.4 2011-01-27 17:10:47 bourgesl Exp $"
+ * "@(#) $Id: GenericListModel.java,v 1.5 2011-02-22 18:11:30 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2011/01/27 17:10:47  bourgesl
+ * added comment
+ *
  * Revision 1.3  2010/12/17 15:15:58  bourgesl
  * implements ComboBoxModel also
  *
@@ -146,6 +149,21 @@ public final class GenericListModel<K> extends AbstractListModel implements Comb
    */
   public boolean contains(final K element) {
     return model.contains(element);
+  }
+
+  /**
+   * Returns the index of the first occurrence of the specified element
+   * in this list, or -1 if this list does not contain the element.
+   * More formally, returns the lowest index <tt>i</tt> such that
+   * <tt>(o==null&nbsp;?&nbsp;get(i)==null&nbsp;:&nbsp;o.equals(get(i)))</tt>,
+   * or -1 if there is no such index.
+   *
+   * @param element element to search for
+   * @return the index of the first occurrence of the specified element in
+   *         this list, or -1 if this list does not contain the element
+   */
+  public int indexOf(final K element) {
+    return model.indexOf(element);
   }
 
   /**

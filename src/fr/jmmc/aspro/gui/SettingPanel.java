@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SettingPanel.java,v 1.29 2011-01-28 16:32:35 mella Exp $"
+ * "@(#) $Id: SettingPanel.java,v 1.30 2011-02-22 18:11:29 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.29  2011/01/28 16:32:35  mella
+ * Add new observationEvents (CHANGED replaced by DO_UPDATE, REFRESH and REFRESH_UV)
+ * Modify the observationListener interface
+ *
  * Revision 1.28  2011/01/27 17:07:29  bourgesl
  * use target changed event to create UVCoveragePanel
  * SettingPanel is now the third listener in order to synchronize correctly target lists
@@ -153,17 +157,14 @@ public final class SettingPanel extends JPanel implements ObservationListener {
   private void initComponents() {
 
     jSplitPane = new javax.swing.JSplitPane();
-    jPlotPanel = new javax.swing.JPanel();
     jTabbedPane = new javax.swing.JTabbedPane();
 
     setLayout(new java.awt.BorderLayout());
 
     jSplitPane.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
-
-    jPlotPanel.setLayout(new java.awt.BorderLayout());
-    jPlotPanel.add(jTabbedPane, java.awt.BorderLayout.CENTER);
-
-    jSplitPane.setRightComponent(jPlotPanel);
+    jSplitPane.setResizeWeight(0.05);
+    jSplitPane.setContinuousLayout(true);
+    jSplitPane.setRightComponent(jTabbedPane);
 
     add(jSplitPane, java.awt.BorderLayout.CENTER);
   }// </editor-fold>//GEN-END:initComponents
@@ -188,18 +189,21 @@ public final class SettingPanel extends JPanel implements ObservationListener {
       }
     });
 
+    // register this setting panel as an observation listener (listener 1) :
+    ObservationManager.getInstance().register(this);
+
     // Add panels :
 
     // create the map panel :
     final InterferometerMapPanel mapPanel = new InterferometerMapPanel();
 
-    // register the map panel as an observation listener before the observation form (listener 1) :
+    // register the map panel as an observation listener before the observation form (listener 2) :
     ObservationManager.getInstance().register(mapPanel);
 
     // add the map panel :
     this.jTabbedPane.addTab(TAB_INTERFEROMETER_MAP, mapPanel);
 
-    // create the observation form that will send a changed event on the current observation (listener 2) :
+    // create the observation form that will send a changed event on the current observation (listener 3) :
     this.observationForm = new BasicObservationForm();
 
     // register the observation form as an observation listener :
@@ -207,12 +211,8 @@ public final class SettingPanel extends JPanel implements ObservationListener {
 
     // add the observation form :
     this.jSplitPane.setLeftComponent(this.observationForm);
-
-    // register this setting panel as an observation listener (listener 3) :
-    ObservationManager.getInstance().register(this);
   }
   // Variables declaration - do not modify//GEN-BEGIN:variables
-  private javax.swing.JPanel jPlotPanel;
   private javax.swing.JSplitPane jSplitPane;
   private javax.swing.JTabbedPane jTabbedPane;
   // End of variables declaration//GEN-END:variables
@@ -229,7 +229,7 @@ public final class SettingPanel extends JPanel implements ObservationListener {
     }
 
     final ObservationEventType type = event.getType();
-    final ObservationSetting observation= event.getObservation();
+    final ObservationSetting observation = event.getObservation();
 
     if (type == ObservationEventType.TARGET_CHANGED
             || type == ObservationEventType.LOADED) {

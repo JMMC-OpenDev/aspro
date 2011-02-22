@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetModelForm.java,v 1.40 2011-01-10 12:46:28 bourgesl Exp $"
+ * "@(#) $Id: TargetModelForm.java,v 1.41 2011-02-22 18:11:30 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.40  2011/01/10 12:46:28  bourgesl
+ * updated Tree (science targets first, then calibrators)
+ *
  * Revision 1.39  2010/12/14 09:24:31  bourgesl
  * updated comment
  *
@@ -546,7 +549,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
     jScrollPaneTreeModels.setMinimumSize(new java.awt.Dimension(100, 100));
     jScrollPaneTreeModels.setPreferredSize(new java.awt.Dimension(100, 100));
 
-    jTreeModels.setFont(new java.awt.Font("Dialog", 1, 12)); // NOI18N
+    jTreeModels.setFont(new java.awt.Font("Dialog", 1, 12));
     javax.swing.tree.DefaultMutableTreeNode treeNode1 = new javax.swing.tree.DefaultMutableTreeNode("Models");
     jTreeModels.setModel(new javax.swing.tree.DefaultTreeModel(treeNode1));
     jScrollPaneTreeModels.setViewportView(jTreeModels);
@@ -637,7 +640,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 0;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
     jPanelModelActions.add(jTextFieldName, gridBagConstraints);
