@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ChartUtils.java,v 1.14 2011-01-25 12:29:36 bourgesl Exp $"
+ * "@(#) $Id: ChartUtils.java,v 1.15 2011-02-22 18:10:16 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.14  2011/01/25 12:29:36  bourgesl
+ * fixed javadoc errors
+ *
  * Revision 1.13  2010/10/21 16:50:11  bourgesl
  * added autoFitFont and several factory methods related to annotations to set default font
  *
@@ -57,6 +60,7 @@ import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
 import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.StandardChartTheme;
@@ -102,6 +106,18 @@ public final class ChartUtils {
   public final static RectangleInsets ZERO_AXIS_OFFSET = new RectangleInsets(0.0, 0.0, 0.0, 0.0);
   /** custom chart theme */
   public final static StandardChartTheme CHART_THEME;
+  /** The default panel width. */
+  public static final int DEFAULT_WIDTH = 600;
+  /** The default panel height. */
+  public static final int DEFAULT_HEIGHT = 400;
+  /** The default limit below which chart scaling kicks in. */
+  public static final int DEFAULT_MINIMUM_DRAW_WIDTH = 300;
+  /** The default limit below which chart scaling kicks in. */
+  public static final int DEFAULT_MINIMUM_DRAW_HEIGHT = 200;
+  /** The default limit above which chart scaling kicks in. */
+  public static final int DEFAULT_MAXIMUM_DRAW_WIDTH = 2560;
+  /** The default limit above which chart scaling kicks in. */
+  public static final int DEFAULT_MAXIMUM_DRAW_HEIGHT = 2048;
 
   /**
    * Forbidden constructor
@@ -138,6 +154,44 @@ public final class ChartUtils {
     } else {
       throw new IllegalStateException("unsupported chart theme : " + ChartFactory.getChartTheme());
     }
+  }
+
+  /**
+   * Return new chart panel using special draw widths to avoid scaling effects
+   * @param chart chart to use
+   * @return chart panel
+   */
+  public static ChartPanel createChartPanel(final JFreeChart chart) {
+    return new ChartPanel(chart,
+            DEFAULT_WIDTH, DEFAULT_HEIGHT, /* prefered size */
+            DEFAULT_MINIMUM_DRAW_WIDTH, DEFAULT_MINIMUM_DRAW_HEIGHT, /* minimum size before scaling */
+            DEFAULT_MAXIMUM_DRAW_WIDTH, DEFAULT_MAXIMUM_DRAW_HEIGHT, /* maximum size before scaling */
+            true, /* use buffer */
+            false, /* properties */
+            true, /* copy */
+            true, /* save */
+            true, /* print */
+            false, /* zoom */
+            false /* tooltips */);
+  }
+
+  /**
+   * Return new square chart panel using special draw widths to avoid scaling effects
+   * @param chart chart to use
+   * @return chart panel
+   */
+  public static SquareChartPanel createSquareChartPanel(final JFreeChart chart) {
+    return new SquareChartPanel(chart,
+            DEFAULT_HEIGHT, DEFAULT_HEIGHT, /* prefered size */
+            DEFAULT_MINIMUM_DRAW_HEIGHT, DEFAULT_MINIMUM_DRAW_HEIGHT, /* minimum size before scaling */
+            DEFAULT_MAXIMUM_DRAW_HEIGHT, DEFAULT_MAXIMUM_DRAW_HEIGHT, /* maximum size before scaling */
+            true, /* use buffer */
+            false, /* properties */
+            true, /* copy */
+            true, /* save */
+            true, /* print */
+            false, /* zoom */
+            false /* tooltips */);
   }
 
   /**
