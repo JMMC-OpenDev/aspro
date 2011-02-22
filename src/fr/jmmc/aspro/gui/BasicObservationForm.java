@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BasicObservationForm.java,v 1.60 2011-02-22 18:11:29 bourgesl Exp $"
+ * "@(#) $Id: BasicObservationForm.java,v 1.61 2011-02-22 18:19:38 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.60  2011/02/22 18:11:29  bourgesl
+ * Major UI changes : configuration multi-selection, unique target selection in main form
+ *
  * Revision 1.59  2011/02/17 16:47:29  bourgesl
  * updated tooltip
  *
@@ -328,18 +331,6 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
 
     jPanelTargetsLeft.setMinimumSize(new java.awt.Dimension(12, 12));
     jPanelTargetsLeft.setPreferredSize(new java.awt.Dimension(12, 12));
-
-    javax.swing.GroupLayout jPanelTargetsLeftLayout = new javax.swing.GroupLayout(jPanelTargetsLeft);
-    jPanelTargetsLeft.setLayout(jPanelTargetsLeftLayout);
-    jPanelTargetsLeftLayout.setHorizontalGroup(
-      jPanelTargetsLeftLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGap(0, 19, Short.MAX_VALUE)
-    );
-    jPanelTargetsLeftLayout.setVerticalGroup(
-      jPanelTargetsLeftLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGap(0, 104, Short.MAX_VALUE)
-    );
-
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
@@ -412,18 +403,6 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
 
     jPanelTargetsRight.setMinimumSize(new java.awt.Dimension(12, 12));
     jPanelTargetsRight.setPreferredSize(new java.awt.Dimension(12, 12));
-
-    javax.swing.GroupLayout jPanelTargetsRightLayout = new javax.swing.GroupLayout(jPanelTargetsRight);
-    jPanelTargetsRight.setLayout(jPanelTargetsRightLayout);
-    jPanelTargetsRightLayout.setHorizontalGroup(
-      jPanelTargetsRightLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGap(0, 19, Short.MAX_VALUE)
-    );
-    jPanelTargetsRightLayout.setVerticalGroup(
-      jPanelTargetsRightLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGap(0, 104, Short.MAX_VALUE)
-    );
-
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 3;
     gridBagConstraints.gridy = 0;
