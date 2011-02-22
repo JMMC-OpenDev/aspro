@@ -2,9 +2,9 @@
 
 <ApplicationData link="http://www.jmmc.fr/aspro2">
 
-  <program name="Aspro2" version="0.7.8 beta"/>
+  <program name="Aspro2" version="0.7.9 beta"/>
 
-  <compilation date="15/02/2011" compiler="JDK 1.5.0_16"/>
+  <compilation date="22/02/2011" compiler="JDK 1.5.0_16"/>
 
   <text>
     <![CDATA[ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations
@@ -84,6 +84,11 @@
 
   <releasenotes>
     <release version="0.7">
+      <prerelease version="0.7.9 beta">
+        <change>Important changes in the user interface (main panel) to allow multi selection of instrument configurations
+        and use the main target list to select the current target used in UV Coverage Panel</change>
+        <change>Added VLTI configuration for Period 88</change>
+      </prerelease>
       <prerelease version="0.7.8 beta">
         <change>Fixed VLTI configuration for the PIONIER instrument (period 86 and 87)</change>
         <change>JSAMP library updated to release 1.2 that fix shutdown notification problems when the user closes any JMMC application.</change>
