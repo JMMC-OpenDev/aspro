@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetEditorDialog.java,v 1.14 2011-02-02 17:43:21 bourgesl Exp $"
+ * "@(#) $Id: TargetEditorDialog.java,v 1.15 2011-02-23 08:58:08 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.14  2011/02/02 17:43:21  bourgesl
+ * use main observation
+ *
  * Revision 1.13  2011/01/26 17:21:11  bourgesl
  * use deepClone (target/models ...)
  *
@@ -259,8 +262,8 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
     targetModelForm = new fr.jmmc.aspro.gui.TargetModelForm(this.editTargets, this.editTargetUserInfos);
     targetForm = new fr.jmmc.aspro.gui.TargetForm(this.editTargets, this.editTargetUserInfos);
     jPanelButtons = new javax.swing.JPanel();
-    jButtonOK = new javax.swing.JButton();
     jButtonCancel = new javax.swing.JButton();
+    jButtonOK = new javax.swing.JButton();
 
     setLayout(new java.awt.GridBagLayout());
 
@@ -273,13 +276,7 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
     gridBagConstraints.weighty = 1.0;
     add(jTabbedPane, gridBagConstraints);
 
-    jButtonOK.setText("OK");
-    jButtonOK.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        jButtonOKActionPerformed(evt);
-      }
-    });
-    jPanelButtons.add(jButtonOK);
+    jPanelButtons.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 12, 6));
 
     jButtonCancel.setText("Cancel");
     jButtonCancel.addActionListener(new java.awt.event.ActionListener() {
@@ -288,6 +285,14 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
       }
     });
     jPanelButtons.add(jButtonCancel);
+
+    jButtonOK.setText("OK");
+    jButtonOK.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jButtonOKActionPerformed(evt);
+      }
+    });
+    jPanelButtons.add(jButtonOK);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
