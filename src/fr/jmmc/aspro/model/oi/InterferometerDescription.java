@@ -17,11 +17,6 @@ import fr.jmmc.aspro.model.OIBase;
 /**
  * 
  *         This type describes the interferometer site
- * 
- *         Information to add :
- * 
- *         obsMinElev 20
- * 
  *       
  * 
  * <p>Java class for InterferometerDescription complex type.
