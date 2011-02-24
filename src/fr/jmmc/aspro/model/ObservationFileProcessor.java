@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationFileProcessor.java,v 1.2 2010-12-17 15:15:25 bourgesl Exp $"
+ * "@(#) $Id: ObservationFileProcessor.java,v 1.3 2011-02-24 17:13:18 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2010/12/17 15:15:25  bourgesl
+ * comments
+ *
  * Revision 1.1  2010/11/30 15:52:13  bourgesl
  * added ObservationFileProcessor onLoad and onSave callbacks to check schema version and handle model conversion if needed
  *
@@ -13,6 +16,7 @@
 package fr.jmmc.aspro.model;
 
 import fr.jmmc.aspro.model.oi.ObservationSetting;
+import fr.jmmc.aspro.model.oi.ObservationVariant;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.util.AsproModelVersion;
 import java.util.logging.Level;
@@ -29,7 +33,7 @@ public final class ObservationFileProcessor {
   private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
   /** Current revision of the Aspro DM */
-  public final static AsproModelVersion CURRENT_REVISION = AsproModelVersion.Dec2010Revision;
+  public final static AsproModelVersion CURRENT_REVISION = AsproModelVersion.Feb2011Revision;
 
   /**
    * Forbidden constructor
@@ -91,11 +95,12 @@ public final class ObservationFileProcessor {
    * @param revision observation revision
    */
   private static void convertModel(final ObservationSetting observation, final AsproModelVersion revision) {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("convertModel = " + revision);
+    if (logger.isLoggable(Level.INFO)) {
+      logger.info("convert observation model from " + revision + " to " + CURRENT_REVISION);
     }
 
-    if (revision == AsproModelVersion.InitialRevision) {
+    if (revision.getVersion() < AsproModelVersion.Dec2010Revision.getVersion()) {
+      // update model to Dec2010Revision :
       // force to generate target identifiers :
       String id;
       for (Target target : observation.getTargets()) {
@@ -104,6 +109,25 @@ public final class ObservationFileProcessor {
           logger.fine("generate target ID '" + target.getName() + "' = '" + id + "'");
         }
       }
+    }
+
+    if (revision.getVersion() < AsproModelVersion.Feb2011Revision.getVersion()) {
+      // update model to Feb2011Revision :
+
+      if (observation.getVariants().isEmpty()) {
+        // create a new variant having the same configuration (stations only) :
+        final ObservationVariant obsVariant = new ObservationVariant();
+
+        // Note : stations can not be null :
+        obsVariant.setStations(observation.getInstrumentConfiguration().getStations());
+
+        // create a new collection :
+        observation.getVariants().add(obsVariant);
+      }
+    }
+
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("convertModel done : " + revision);
     }
   }
 }

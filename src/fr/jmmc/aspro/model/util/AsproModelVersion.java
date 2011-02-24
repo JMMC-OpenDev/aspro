@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproModelVersion.java,v 1.1 2010-11-30 15:55:57 bourgesl Exp $"
+ * "@(#) $Id: AsproModelVersion.java,v 1.2 2011-02-24 17:13:18 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2010/11/30 15:55:57  bourgesl
+ * new model revision history as an enumeration
+ *
  */
 package fr.jmmc.aspro.model.util;
 
@@ -18,7 +21,9 @@ public enum AsproModelVersion {
   /** initial revision */
   InitialRevision(2010.9f),
   /** december 2010 revision : target IDs and user informations (calibrators) */
-  Dec2010Revision(2010.12f);
+  Dec2010Revision(2010.12f),
+  /** february 2011 revision : added observation variants and observation collection */
+  Feb2011Revision(2011.02f);
 
   /* members */
   /** version as a float value */
