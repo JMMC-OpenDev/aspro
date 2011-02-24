@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BasicObservationForm.java,v 1.61 2011-02-22 18:19:38 bourgesl Exp $"
+ * "@(#) $Id: BasicObservationForm.java,v 1.62 2011-02-24 17:10:56 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.61  2011/02/22 18:19:38  bourgesl
+ * fixed panel layouts
+ *
  * Revision 1.60  2011/02/22 18:11:29  bourgesl
  * Major UI changes : configuration multi-selection, unique target selection in main form
  *
@@ -204,6 +207,7 @@ import fr.jmmc.aspro.model.oi.FocalInstrumentConfigurationChoice;
 import fr.jmmc.aspro.model.oi.InterferometerConfiguration;
 import fr.jmmc.aspro.model.oi.InterferometerConfigurationChoice;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
+import fr.jmmc.aspro.model.oi.ObservationVariant;
 import fr.jmmc.aspro.model.oi.Pop;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
@@ -256,12 +260,12 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
           className_);
   /** flag to log a stack trace in method updateObservation() to detect multiple calls */
   private final static boolean DEBUG_UPDATE_EVENT = false;
+  /** configuration manager */
+  private final static ConfigurationManager cm = ConfigurationManager.getInstance();
+  /** observation manager */
+  private final static ObservationManager om = ObservationManager.getInstance();
 
   /* members */
-  /** configuration manager */
-  private final ConfigurationManager cm = ConfigurationManager.getInstance();
-  /** observation manager */
-  private final ObservationManager om = ObservationManager.getInstance();
   /** flag to enable / disable the automatic update of the observation when any swing component changes */
   private boolean doAutoUpdateObservation = true;
   /** Warning image icon */
@@ -308,12 +312,15 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     jComboBoxInterferometerConfiguration = new javax.swing.JComboBox();
     jLabelInstrument = new javax.swing.JLabel();
     jComboBoxInstrument = new javax.swing.JComboBox();
-    jLabelConfiguration = new javax.swing.JLabel();
-    jScrollPaneInstrumentConfigurations = new javax.swing.JScrollPane();
-    jListInstrumentConfigurations = new javax.swing.JList();
     jLabelPops = new javax.swing.JLabel();
     jTextPoPs = new JFormattedTextField(getPopsFormatter());
     jPanelObsRight = new javax.swing.JPanel();
+    jPanelObsBottom = new javax.swing.JPanel();
+    jPanelConfigurations = new javax.swing.JPanel();
+    jScrollPaneInstrumentConfigurations = new javax.swing.JScrollPane();
+    jListInstrumentConfigurations = new javax.swing.JList();
+    jPanelConfLeft = new javax.swing.JPanel();
+    jPanelConfRight = new javax.swing.JPanel();
     jPanelOptions = new javax.swing.JPanel();
     jCheckBoxNightLimit = new javax.swing.JCheckBox();
     jLabelDate = new javax.swing.JLabel();
@@ -340,12 +347,13 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     jPanelTargets.add(jPanelTargetsLeft, gridBagConstraints);
 
     starSearchField.setText("");
-    starSearchField.setToolTipText("<html>\nEnter targets here :<br/>\nTarget identifier (SimBad resolution)<br/>\nor RA / DEC coordinates (J2000) with optional star name ('HMS DMS [star name]')\n</html>");
+    starSearchField.setToolTipText("<html>\nEnter targets here :<br/>\nTarget identifier (CDS Simbad service)<br/>\nor RA / DEC coordinates (J2000) with optional star name ('HMS DMS [star name]')\n</html>");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.weightx = 0.8;
     gridBagConstraints.insets = new java.awt.Insets(0, 0, 4, 0);
     jPanelTargets.add(starSearchField, gridBagConstraints);
 
@@ -355,7 +363,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
       public Object getElementAt(int i) { return strings[i]; }
     });
     jListTargets.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-    jListTargets.setToolTipText("Target list : use the SimBad field to enter your targets\n");
+    jListTargets.setToolTipText("Target list : use the Simbad field to enter your targets\n");
     jListTargets.setVisibleRowCount(2);
     jListTargets.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
       public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
@@ -414,11 +422,11 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridheight = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.weightx = 0.4;
+    gridBagConstraints.weightx = 0.3;
     gridBagConstraints.weighty = 1.0;
     add(jPanelTargets, gridBagConstraints);
 
-    jPanelMain.setBorder(javax.swing.BorderFactory.createTitledBorder("Observation"));
+    jPanelMain.setBorder(javax.swing.BorderFactory.createTitledBorder("Main settings"));
     jPanelMain.setLayout(new java.awt.GridBagLayout());
 
     jPanelObsLeft.setMinimumSize(new java.awt.Dimension(12, 12));
@@ -444,7 +452,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.weightx = 0.4;
+    gridBagConstraints.weightx = 0.8;
     gridBagConstraints.insets = new java.awt.Insets(0, 0, 4, 0);
     jPanelMain.add(jComboBoxInterferometer, gridBagConstraints);
 
@@ -479,38 +487,6 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     gridBagConstraints.insets = new java.awt.Insets(0, 0, 4, 0);
     jPanelMain.add(jComboBoxInstrument, gridBagConstraints);
 
-    jLabelConfiguration.setText("Configuration(s)");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 3;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.SOUTH;
-    gridBagConstraints.insets = new java.awt.Insets(0, 12, 4, 0);
-    jPanelMain.add(jLabelConfiguration, gridBagConstraints);
-
-    jListInstrumentConfigurations.setModel(new javax.swing.AbstractListModel() {
-      String[] strings = { "Samples:", "UT1 UT2 UT3 UT4", "E1 E2 W1 W2" };
-      public int getSize() { return strings.length; }
-      public Object getElementAt(int i) { return strings[i]; }
-    });
-    jListInstrumentConfigurations.setVisibleRowCount(2);
-    jListInstrumentConfigurations.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
-      public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
-        jListInstrumentConfigurationsValueChanged(evt);
-      }
-    });
-    jScrollPaneInstrumentConfigurations.setViewportView(jListInstrumentConfigurations);
-
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 3;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.gridheight = 3;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.ipadx = 5;
-    gridBagConstraints.weightx = 0.4;
-    gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(0, 12, 2, 0);
-    jPanelMain.add(jScrollPaneInstrumentConfigurations, gridBagConstraints);
-
     jLabelPops.setLabelFor(jTextPoPs);
     jLabelPops.setText("PoPs");
     gridBagConstraints = new java.awt.GridBagConstraints();
@@ -532,20 +508,77 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     jPanelObsRight.setMinimumSize(new java.awt.Dimension(12, 12));
     jPanelObsRight.setPreferredSize(new java.awt.Dimension(12, 12));
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 4;
+    gridBagConstraints.gridx = 3;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.gridheight = 4;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.weightx = 0.1;
     jPanelMain.add(jPanelObsRight, gridBagConstraints);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridwidth = 4;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weighty = 1.0;
+    jPanelMain.add(jPanelObsBottom, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.gridheight = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.weightx = 0.5;
+    gridBagConstraints.weightx = 0.3;
     add(jPanelMain, gridBagConstraints);
+
+    jPanelConfigurations.setBorder(javax.swing.BorderFactory.createTitledBorder("Configuration(s)"));
+    jPanelConfigurations.setLayout(new java.awt.GridBagLayout());
+
+    jListInstrumentConfigurations.setModel(new javax.swing.AbstractListModel() {
+      String[] strings = { "Samples:", "UT1 UT2 UT3 UT4", "E1 E2 W1 W2" };
+      public int getSize() { return strings.length; }
+      public Object getElementAt(int i) { return strings[i]; }
+    });
+    jListInstrumentConfigurations.setVisibleRowCount(2);
+    jListInstrumentConfigurations.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
+      public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
+        jListInstrumentConfigurationsValueChanged(evt);
+      }
+    });
+    jScrollPaneInstrumentConfigurations.setViewportView(jListInstrumentConfigurations);
+
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 0.8;
+    gridBagConstraints.weighty = 1.0;
+    jPanelConfigurations.add(jScrollPaneInstrumentConfigurations, gridBagConstraints);
+
+    jPanelConfLeft.setMinimumSize(new java.awt.Dimension(12, 12));
+    jPanelConfLeft.setPreferredSize(new java.awt.Dimension(12, 12));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 0.1;
+    jPanelConfigurations.add(jPanelConfLeft, gridBagConstraints);
+
+    jPanelConfRight.setMinimumSize(new java.awt.Dimension(12, 12));
+    jPanelConfRight.setPreferredSize(new java.awt.Dimension(12, 12));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 0.1;
+    jPanelConfigurations.add(jPanelConfRight, gridBagConstraints);
+
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.gridheight = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 0.3;
+    add(jPanelConfigurations, gridBagConstraints);
 
     jPanelOptions.setBorder(javax.swing.BorderFactory.createTitledBorder("Constraints"));
     jPanelOptions.setLayout(new java.awt.GridBagLayout());
@@ -599,7 +632,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     jPanelOptions.add(jFieldMinElev, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridx = 3;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.weightx = 0.1;
@@ -627,7 +660,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     jPanelStatus.add(jLabelStatus, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridx = 3;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.weighty = 1.0;
@@ -640,24 +673,24 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
    */
   private void jButtonDeleteTargetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDeleteTargetActionPerformed
 
-    // TODO : multi selection support to delete multiple targets at the same time :
+    // TODO : multi selection of targets to delete multiple targets at the same time :
 
     final Target selectedTarget = getSelectedTarget();
 
     if (selectedTarget != null) {
 
-      if (this.om.isCalibrator(selectedTarget)) {
+      if (om.isCalibrator(selectedTarget)) {
         if (MessagePane.showConfirmMessage(this.jButtonDeleteTarget,
                 "Do you want to delete the calibrator target [" + selectedTarget.getName() + "] and all associations ?")) {
 
           // update the data model and fire change events :
-          this.om.removeCalibrator(selectedTarget);
+          om.removeCalibrator(selectedTarget);
         }
       } else if (MessagePane.showConfirmMessage(this.jButtonDeleteTarget,
               "Do you want to delete the science target [" + selectedTarget.getName() + "] ?")) {
 
         // update the data model and fire change events :
-        this.om.removeTarget(selectedTarget);
+        om.removeTarget(selectedTarget);
       }
     }
   }//GEN-LAST:event_jButtonDeleteTargetActionPerformed
@@ -787,7 +820,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     });
 
     // define interferometer names (constant) :
-    this.jComboBoxInterferometer.setModel(new DefaultComboBoxModel(this.cm.getInterferometerNames()));
+    this.jComboBoxInterferometer.setModel(new DefaultComboBoxModel(cm.getInterferometerNames()));
 
     // reset status :
     this.resetStatus();
@@ -797,7 +830,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
    * Refresh the list of interferometer configurations : depends on the chosen interferometer
    */
   private void updateComboInterferometerConfiguration() {
-    final Vector<String> v = this.cm.getInterferometerConfigurationNames((String) this.jComboBoxInterferometer.getSelectedItem());
+    final Vector<String> v = cm.getInterferometerConfigurationNames((String) this.jComboBoxInterferometer.getSelectedItem());
     this.jComboBoxInterferometerConfiguration.setModel(new DefaultComboBoxModel(v));
     final boolean visible = (v.size() > 1);
     this.jLabelPeriod.setVisible(visible);
@@ -810,7 +843,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
   private void updateComboInstrument() {
     final Object oldValue = this.jComboBoxInstrument.getSelectedItem();
 
-    final Vector<String> v = this.cm.getInterferometerInstrumentNames((String) this.jComboBoxInterferometerConfiguration.getSelectedItem());
+    final Vector<String> v = cm.getInterferometerInstrumentNames((String) this.jComboBoxInterferometerConfiguration.getSelectedItem());
     this.jComboBoxInstrument.setModel(new DefaultComboBoxModel(v));
 
     // restore previous selected item :
@@ -823,10 +856,10 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
    * Refresh the list of instrument configurations : depends on the chosen instrument (also the interferometer configuration)
    */
   private void updateComboInstrumentConfiguration() {
-    final Vector<String> v = this.cm.getInstrumentConfigurationNames((String) this.jComboBoxInterferometerConfiguration.getSelectedItem(),
+    final Vector<String> v = cm.getInstrumentConfigurationNames((String) this.jComboBoxInterferometerConfiguration.getSelectedItem(),
             (String) this.jComboBoxInstrument.getSelectedItem());
 
-    final Object[] oldValues = this.jListInstrumentConfigurations.getSelectedValues();
+    final Object[] oldValues = getInstrumentConfigurations();
 
     // disable the automatic selection check of the instrument configuration :
     final boolean prevAutoCheckConfigurations = this.setAutoCheckConfigurations(false);
@@ -859,8 +892,8 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
   private void updateListTargets() {
     final Target selectedTarget = getSelectedTarget();
 
-    final List<Target> displayTargets = this.om.getDisplayTargets();
-    final TargetUserInformations targetUserInfos = this.om.getTargetUserInfos();
+    final List<Target> displayTargets = om.getDisplayTargets();
+    final TargetUserInformations targetUserInfos = om.getTargetUserInfos();
 
     // disable the automatic selection check of the target list :
     final boolean prevAutoCheckTargets = this.setAutoCheckTargets(false);
@@ -894,7 +927,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
    * @return target
    */
   public Target getSelectedTarget() {
-    // TODO : handle multiple selections
+    // TODO : multi selection of targets to delete multiple targets at the same time :
     return (Target) this.jListTargets.getSelectedValue();
   }
 
@@ -1002,11 +1035,19 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     // handle multiple selection :
 
     if (logger.isLoggable(Level.FINE)) {
-      logger.fine("Instrument Configuration changed : " + Arrays.toString(this.jListInstrumentConfigurations.getSelectedValues()));
+      logger.fine("Instrument Configuration changed : " + Arrays.toString(getInstrumentConfigurations()));
     }
 
     // update observation :
     fireObservationUpdateEvent();
+  }
+
+  /**
+   * Return the selected instrument configurations
+   * @return selected instrument configurations
+   */
+  private Object[] getInstrumentConfigurations() {
+    return this.jListInstrumentConfigurations.getSelectedValues();
   }
 
   /**
@@ -1045,7 +1086,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         this.jListInstrumentConfigurations.ensureIndexIsVisible(index);
       }
       if (logger.isLoggable(Level.FINE)) {
-        logger.fine("selectInstrumentConfigurations : selectedValues : " + Arrays.toString(this.jListInstrumentConfigurations.getSelectedValues()));
+        logger.fine("selectInstrumentConfigurations : selectedValues : " + Arrays.toString(getInstrumentConfigurations()));
       }
     }
   }
@@ -1054,7 +1095,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
    * Check if this interferometer has PoPs. If false, disable and reset the PoPs text field
    */
   private void checkPops() {
-    final boolean hasPops = this.cm.hasPoPs((String) this.jComboBoxInterferometer.getSelectedItem());
+    final boolean hasPops = cm.hasPoPs((String) this.jComboBoxInterferometer.getSelectedItem());
     this.jLabelPops.setVisible(hasPops);
     this.jTextPoPs.setVisible(hasPops);
     // reset the pops configuration because it can be invalid because of the chosen instrument
@@ -1074,7 +1115,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
 
       // parse the configuration (instrument = number of channels) + (interferometer = pop indexes [1-5]) :
 
-      listPoPs = this.cm.parseInstrumentPoPs((String) this.jComboBoxInterferometerConfiguration.getSelectedItem(),
+      listPoPs = cm.parseInstrumentPoPs((String) this.jComboBoxInterferometerConfiguration.getSelectedItem(),
               (String) this.jComboBoxInstrument.getSelectedItem(), popConfig);
     }
     if (logger.isLoggable(Level.FINE)) {
@@ -1121,7 +1162,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
 
   /**
    * Observer implementation used for the StarResolver (called by EDT)
-   * Create a new Target object with the retrieved data from SimBAD and
+   * Create a new Target object with the retrieved data from Simbad and
    * fire an observation change event
    * @param o Observable instance
    * @param arg unused argument
@@ -1138,7 +1179,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         }
 
         // update the data model and fire change events :
-        this.om.addTarget(Target.formatName(star.getName()), star);
+        om.addTarget(Target.formatName(star.getName()), star);
       }
     }
   }
@@ -1208,8 +1249,14 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
       this.jComboBoxInstrument.setSelectedItem(instrumentChoice.getName());
 
       // update the selected instrument configurations :
-      // TODO MULTI-CONF : check
-      this.selectInstrumentConfigurations(new Object[]{instrumentChoice.getStations()});
+      final List<ObservationVariant> obsVariants = observation.getVariants();
+      final int len = obsVariants.size();
+      final Object[] stationConfs = new Object[len];
+      for (int i = 0; i < len; i++) {
+        stationConfs[i] = obsVariants.get(i).getStations();
+      }
+
+      this.selectInstrumentConfigurations(stationConfs);
 
       // update the selected pops (pops) :
       // note : setText() does not fire a property change event :
@@ -1258,18 +1305,18 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
       boolean changed = false;
 
       // observation :
-      changed |= this.om.setInterferometerConfigurationName((String) this.jComboBoxInterferometerConfiguration.getSelectedItem());
-      changed |= this.om.setInstrumentConfigurationName((String) this.jComboBoxInstrument.getSelectedItem());
+      changed |= om.setInterferometerConfigurationName((String) this.jComboBoxInterferometerConfiguration.getSelectedItem());
+      changed |= om.setInstrumentConfigurationName((String) this.jComboBoxInstrument.getSelectedItem());
 
       // TODO MULTI-CONF :
-      changed |= this.om.setInstrumentConfigurationStations((String) this.jListInstrumentConfigurations.getSelectedValue());
+      changed |= om.setInstrumentConfigurationStations(getInstrumentConfigurations());
 
-      changed |= this.om.setInstrumentConfigurationPoPs(this.jTextPoPs.getText());
+      changed |= om.setInstrumentConfigurationPoPs(this.jTextPoPs.getText());
 
       // constraints :
-      changed |= this.om.setWhen((Date) this.jDateSpinner.getModel().getValue());
-      changed |= this.om.setMinElevation(((Number) this.jFieldMinElev.getValue()).doubleValue());
-      changed |= this.om.setNightRestriction(this.jCheckBoxNightLimit.isSelected());
+      changed |= om.setWhen((Date) this.jDateSpinner.getModel().getValue());
+      changed |= om.setMinElevation(((Number) this.jFieldMinElev.getValue()).doubleValue());
+      changed |= om.setNightRestriction(this.jCheckBoxNightLimit.isSelected());
 
       if (changed) {
         // update change flag to make the ObservationManager fire an observation refresh event later
@@ -1355,7 +1402,6 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
   private javax.swing.JComboBox jComboBoxInterferometerConfiguration;
   private javax.swing.JSpinner jDateSpinner;
   private javax.swing.JFormattedTextField jFieldMinElev;
-  private javax.swing.JLabel jLabelConfiguration;
   private javax.swing.JLabel jLabelDate;
   private javax.swing.JLabel jLabelInstrument;
   private javax.swing.JLabel jLabelInterferometer;
@@ -1366,7 +1412,11 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
   private javax.swing.JLabel jLabelStatus;
   private javax.swing.JList jListInstrumentConfigurations;
   private javax.swing.JList jListTargets;
+  private javax.swing.JPanel jPanelConfLeft;
+  private javax.swing.JPanel jPanelConfRight;
+  private javax.swing.JPanel jPanelConfigurations;
   private javax.swing.JPanel jPanelMain;
+  private javax.swing.JPanel jPanelObsBottom;
   private javax.swing.JPanel jPanelObsLeft;
   private javax.swing.JPanel jPanelObsRight;
   private javax.swing.JPanel jPanelOptions;
