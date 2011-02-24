@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetForm.java,v 1.22 2011-01-10 12:45:54 bourgesl Exp $"
+ * "@(#) $Id: TargetForm.java,v 1.23 2011-02-24 17:11:32 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.22  2011/01/10 12:45:54  bourgesl
+ * generateTree signature updated
+ *
  * Revision 1.21  2011/01/07 13:20:12  bourgesl
  * comment
  *
@@ -135,7 +138,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
   /** Class logger */
   private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
-  /** SimBad URL (query by identifier) */
+  /** Simbad URL (query by identifier) */
   private static final String SIMBAD_QUERY_ID = "http://simbad.u-strasbg.fr/simbad/sim-id?Ident=";
   /** custom number field formatter */
   private static NumberFormatter numberFieldFormatter = null;
