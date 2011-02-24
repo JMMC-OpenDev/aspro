@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBVega.java,v 1.10 2011-02-14 15:33:10 bourgesl Exp $"
+ * "@(#) $Id: ExportOBVega.java,v 1.11 2011-02-24 17:13:06 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.10  2011/02/14 15:33:10  bourgesl
+ * use JMCS FileUtils
+ *
  * Revision 1.9  2011/01/07 13:22:31  bourgesl
  * use UNDEFINED_MAGNITUDE
  *
@@ -75,7 +78,7 @@ public class ExportOBVega {
   protected final static NumberFormat df2 = new DecimalFormat("0.00");
   /** default value for undefined angular diameter = 99 */
   public final static double UNDEFINED_DIAMETER = 99d;
-  /** HD catalog identifier (SimBad) */
+  /** HD catalog identifier (Simbad) */
   public final static String HD_CATALOG = "HD";
 
   /* CHARA Vega StarList File constants */
@@ -122,8 +125,8 @@ public class ExportOBVega {
       logger.fine("generate file : " + file);
     }
 
-    // get observation :
-    final ObservationSetting observation = ObservationManager.getInstance().getObservation();
+    // use main observation :
+    final ObservationSetting observation = ObservationManager.getInstance().getMainObservation();
 
     // Compute Observability data with min elevation = 30 deg and without night restrictions :
     final ObservabilityService os = new ObservabilityService(observation, AsproConstants.OB_MIN_ELEVATION);

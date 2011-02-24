@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBVLTI.java,v 1.16 2011-02-08 15:34:16 bourgesl Exp $"
+ * "@(#) $Id: ExportOBVLTI.java,v 1.17 2011-02-24 17:13:06 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.16  2011/02/08 15:34:16  bourgesl
+ * changed proposed OB file names to include instrument mode and FT/noFT
+ *
  * Revision 1.15  2011/01/07 16:51:08  bourgesl
  * fill correctly category and calibrator-ob keywords
  * for a science OB, generates all related calibrator OBs
@@ -83,19 +86,14 @@ import fr.jmmc.aspro.model.Range;
 import fr.jmmc.aspro.model.observability.DateTimeInterval;
 import fr.jmmc.aspro.model.observability.ObservabilityData;
 import fr.jmmc.aspro.model.observability.StarData;
-import fr.jmmc.aspro.model.oi.AdaptiveOptics;
 import fr.jmmc.aspro.model.oi.FocalInstrumentMode;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
-import fr.jmmc.aspro.model.oi.SpectralBand;
 import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetConfiguration;
 import fr.jmmc.aspro.model.oi.TargetInformation;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
-import fr.jmmc.aspro.model.oi.Telescope;
-import fr.jmmc.aspro.model.util.SpectralBandUtils;
 import fr.jmmc.aspro.service.ObservabilityService;
-import fr.jmmc.mcs.astro.Band;
 import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
@@ -472,7 +470,9 @@ public class ExportOBVLTI {
   public static String generateOBFileName(final Target target) {
 
     final ObservationManager om = ObservationManager.getInstance();
-    final ObservationSetting observation = om.getObservation();
+
+    // use main observation :
+    final ObservationSetting observation = om.getMainObservation();
 
     // get instrument band :
     final FocalInstrumentMode insMode = observation.getInstrumentConfiguration().getFocalInstrumentMode();

@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBVLTIAction.java,v 1.20 2011-02-22 18:11:29 bourgesl Exp $"
+ * "@(#) $Id: ExportOBVLTIAction.java,v 1.21 2011-02-24 17:11:49 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.20  2011/02/22 18:11:29  bourgesl
+ * Major UI changes : configuration multi-selection, unique target selection in main form
+ *
  * Revision 1.19  2011/02/14 15:33:10  bourgesl
  * use JMCS FileUtils
  *
@@ -192,8 +195,8 @@ public class ExportOBVLTIAction {
 
       try {
 
-        // get observation :
-        final ObservationSetting observation = ObservationManager.getInstance().getObservation();
+        // use main observation :
+        final ObservationSetting observation = ObservationManager.getInstance().getMainObservation();
 
         ExportOBVLTI.process(file, observation, target);
 
