@@ -45,10 +45,18 @@
     </xsd:annotation>
   </xsd:element>
 
-  <xsd:element name="observationSetting" type="Observation">
+  <xsd:element name="observationSetting" type="ObservationSetting">
     <xsd:annotation>
       <xsd:documentation>
         this element contains a complete Observation description
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+
+  <xsd:element name="observationCollection" type="ObservationCollection">
+    <xsd:annotation>
+      <xsd:documentation>
+        this element contains a collection of observation descriptions
       </xsd:documentation>
     </xsd:annotation>
   </xsd:element>
@@ -105,19 +113,59 @@
 
 
 
-<!-- Observation -->
-  <xsd:complexType name="Observation">
+<!-- ObservationCollection -->
+  <xsd:complexType name="ObservationCollection">
     <xsd:annotation>
       <xsd:documentation>
-        This type describes the observation settings (when, where, what)
+        This type describes a observation collection
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="schemaVersion" type="xsd:float">
+        <xsd:annotation>
+          <xsd:documentation>
+              Schema version for this observation collection
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
 
-        Information to add :
+      <xsd:element name="name" type="xsd:string">
+        <xsd:annotation>
+          <xsd:documentation>
+              Identifier for this observation collection
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
 
-        - atmosphere Quality (atmoQual) "Excellent" "Good" "Average" "Bad" "Awful"
+      <xsd:element name="description" type="xsd:string" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>
+            User information related to this observation collection
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
 
-        - dit "Detector Integration Time" /Choice 25 50 100
-        - obsDuration "Total Integration Time (s) per calibrated point"
+      <xsd:element name="observation" type="ObservationSetting" minOccurs="1" maxOccurs="unbounded">
+        <xsd:annotation>
+          <xsd:documentation>
+              One or more Observation description(s)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
 
+      <!-- TODO : add shared targets / target user information in the future -->
+
+    </xsd:sequence>
+  </xsd:complexType>
+
+
+
+
+<!-- ObservationSetting -->
+  <xsd:complexType name="ObservationSetting">
+    <xsd:annotation>
+      <xsd:documentation>
+        This type describes the observation settings (when, where, what, how)
       </xsd:documentation>
     </xsd:annotation>
     <xsd:sequence>
@@ -133,6 +181,14 @@
         <xsd:annotation>
           <xsd:documentation>
               Identifier for this observation
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
+      <xsd:element name="description" type="xsd:string" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>
+            User information related to this observation
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
@@ -169,6 +225,8 @@
         </xsd:annotation>
       </xsd:element>
 
+      <!-- TODO : add searchCal information (UD diameters) in Target or TargetUserInformations type -->
+
       <xsd:element name="targetUserInfos" type="TargetUserInformations" minOccurs="0">
         <xsd:annotation>
           <xsd:documentation>
@@ -177,8 +235,39 @@
         </xsd:annotation>
       </xsd:element>
 
-    </xsd:sequence>
+      <xsd:element name="variant" type="ObservationVariant" minOccurs="0" maxOccurs="unbounded">
+        <xsd:annotation>
+          <xsd:documentation>
+              Optional observation variant(s)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
 
+    </xsd:sequence>
+  </xsd:complexType>
+
+
+
+
+<!-- ObservationVariant -->
+  <xsd:complexType name="ObservationVariant">
+    <xsd:annotation>
+      <xsd:documentation>
+        This type describes the overriden observation settings to form an observation variant i.e. multi configuration support :
+        - list of stations (U1 U2 U4)
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+
+      <xsd:element name="stations" type="xsd:string">
+        <xsd:annotation>
+          <xsd:documentation>
+              The list of stations (U1 U2 U4)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      
+    </xsd:sequence>
   </xsd:complexType>
 
 
@@ -775,11 +864,6 @@
     <xsd:annotation>
       <xsd:documentation>
         This type describes the interferometer site
-
-        Information to add :
-
-        obsMinElev 20
-
       </xsd:documentation>
     </xsd:annotation>
     <xsd:sequence>
