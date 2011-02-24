@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SettingPanel.java,v 1.30 2011-02-22 18:11:29 bourgesl Exp $"
+ * "@(#) $Id: SettingPanel.java,v 1.31 2011-02-24 17:14:11 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.30  2011/02/22 18:11:29  bourgesl
+ * Major UI changes : configuration multi-selection, unique target selection in main form
+ *
  * Revision 1.29  2011/01/28 16:32:35  mella
  * Add new observationEvents (CHANGED replaced by DO_UPDATE, REFRESH and REFRESH_UV)
  * Modify the observationListener interface
@@ -229,10 +232,11 @@ public final class SettingPanel extends JPanel implements ObservationListener {
     }
 
     final ObservationEventType type = event.getType();
-    final ObservationSetting observation = event.getObservation();
 
     if (type == ObservationEventType.TARGET_CHANGED
             || type == ObservationEventType.LOADED) {
+
+      final ObservationSetting observation = event.getObservation();
 
       // Observability panel :
       if (this.observabilityPanel == null) {

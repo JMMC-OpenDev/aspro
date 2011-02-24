@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: InterferometerMapData.java,v 1.1 2010-05-11 12:08:27 bourgesl Exp $"
+ * "@(#) $Id: InterferometerMapData.java,v 1.2 2011-02-24 17:14:12 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2010/05/11 12:08:27  bourgesl
+ * simple Interferometer Map (stations + baselines) automatically refreshed when the chosen baseline configuration changes
+ *
  */
 package fr.jmmc.aspro.model;
 
@@ -23,6 +26,7 @@ public final class InterferometerMapData {
   private double[] stationX;
   private double[] stationY;
   // base lines :
+  private String stationNames;
   /* baseline name = "'S1'-'S2' length m" */
   private String[] baselineName;
   private double[] baselineStationX1;
@@ -41,7 +45,7 @@ public final class InterferometerMapData {
     return maxXY;
   }
 
-  public void setMaxXY(double maxXY) {
+  public void setMaxXY(final double maxXY) {
     this.maxXY = maxXY;
   }
 
@@ -49,7 +53,7 @@ public final class InterferometerMapData {
     return stationName;
   }
 
-  public void setStationName(String[] name) {
+  public void setStationName(final String[] name) {
     this.stationName = name;
   }
 
@@ -66,7 +70,7 @@ public final class InterferometerMapData {
     return diameter;
   }
 
-  public void setDiameter(double[] diameter) {
+  public void setDiameter(final double[] diameter) {
     this.diameter = diameter;
   }
 
@@ -74,7 +78,7 @@ public final class InterferometerMapData {
     return stationX;
   }
 
-  public void setStationX(double[] x) {
+  public void setStationX(final double[] x) {
     this.stationX = x;
   }
 
@@ -82,15 +86,23 @@ public final class InterferometerMapData {
     return stationY;
   }
 
-  public void setStationY(double[] y) {
+  public void setStationY(final double[] y) {
     this.stationY = y;
+  }
+
+  public String getStationNames() {
+    return stationNames;
+  }
+
+  public void setStationNames(final String stationNames) {
+    this.stationNames = stationNames;
   }
 
   public String[] getBaselineName() {
     return baselineName;
   }
 
-  public void setBaselineName(String[] name) {
+  public void setBaselineName(final String[] name) {
     this.baselineName = name;
   }
 
@@ -98,7 +110,7 @@ public final class InterferometerMapData {
     return baselineStationX1;
   }
 
-  public void setBaselineStationX1(double[] x) {
+  public void setBaselineStationX1(final double[] x) {
     this.baselineStationX1 = x;
   }
 
@@ -106,7 +118,7 @@ public final class InterferometerMapData {
     return baselineStationX2;
   }
 
-  public void setBaselineStationX2(double[] x) {
+  public void setBaselineStationX2(final double[] x) {
     this.baselineStationX2 = x;
   }
 
@@ -114,7 +126,7 @@ public final class InterferometerMapData {
     return baselineStationY1;
   }
 
-  public void setBaselineStationY1(double[] y) {
+  public void setBaselineStationY1(final double[] y) {
     this.baselineStationY1 = y;
   }
 
@@ -122,7 +134,7 @@ public final class InterferometerMapData {
     return baselineStationY2;
   }
 
-  public void setBaselineStationY2(double[] y) {
+  public void setBaselineStationY2(final double[] y) {
     this.baselineStationY2 = y;
   }
 }

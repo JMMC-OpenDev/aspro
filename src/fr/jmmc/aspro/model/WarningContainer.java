@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: WarningContainer.java,v 1.1 2010-10-01 13:21:35 bourgesl Exp $"
+ * "@(#) $Id: WarningContainer.java,v 1.2 2011-02-24 17:14:13 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2010/10/01 13:21:35  bourgesl
+ * Warnings are not deidcated to OIFits noise service but also used by UVCoverageService to give warnings when the target is not observable
+ *
  * Revision 1.1  2010/09/02 15:46:32  bourgesl
  * simple warning message container extension of OIFiteFile
  *
@@ -29,6 +32,23 @@ public final class WarningContainer {
    */
   public WarningContainer() {
     super();
+  }
+
+  /**
+   * Add the given warning container to this warning container only if the new message does not already exist in this container
+   * @param container messages to add
+   */
+  public void addWarningMessages(final WarningContainer container) {
+    if (container.hasWarningMessages()) {
+      if (this.warningMessages == null) {
+        this.warningMessages = new ArrayList<String>(4);
+      }
+      for (String msg : container.getWarningMessages()) {
+        if (!this.warningMessages.contains(msg)) {
+          this.warningMessages.add(msg);
+        }
+      }
+    }
   }
 
   /**

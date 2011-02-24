@@ -1,17 +1,21 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityEvent.java,v 1.1 2011-02-02 17:41:03 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityEvent.java,v 1.2 2011-02-24 17:14:12 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2011/02/02 17:41:03  bourgesl
+ * new event to transfer Observability Data
+ *
  *
  ******************************************************************************/
 package fr.jmmc.aspro.model.event;
 
 import fr.jmmc.aspro.model.observability.ObservabilityData;
-import fr.jmmc.aspro.model.oi.ObservationSetting;
+import fr.jmmc.aspro.model.oi.ObservationCollection;
+import java.util.List;
 
 /**
  * This event extends the ObservationEvent to have the observability data
@@ -19,23 +23,23 @@ import fr.jmmc.aspro.model.oi.ObservationSetting;
 public final class ObservabilityEvent extends ObservationEvent {
 
   /** observability data */
-  private final ObservabilityData obsData;
+  private final List<ObservabilityData> obsDataList;
 
   /**
    * Public constructor
-   * @param observation observation related to this event
-   * @param obsData observability data
+   * @param obsCollection observation collection used by computations
+   * @param obsDataList observability data
    */
-  public ObservabilityEvent(final ObservationSetting observation, final ObservabilityData obsData) {
-    super(ObservationEventType.OBSERVABILITY_DONE, observation);
-    this.obsData = obsData;
+  public ObservabilityEvent(final ObservationCollection obsCollection, final List<ObservabilityData> obsDataList) {
+    super(ObservationEventType.OBSERVABILITY_DONE, obsCollection);
+    this.obsDataList = obsDataList;
   }
 
   /**
    * Return the observability data
    * @return observability data
    */
-  public ObservabilityData getObservabilityData() {
-    return obsData;
+  public List<ObservabilityData> getObservabilityData() {
+    return obsDataList;
   }
 }

@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetSelectionEvent.java,v 1.1 2011-02-22 18:11:30 bourgesl Exp $"
+ * "@(#) $Id: TargetSelectionEvent.java,v 1.2 2011-02-24 17:14:12 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2011/02/22 18:11:30  bourgesl
+ * Major UI changes : configuration multi-selection, unique target selection in main form
+ *
  * Revision 1.2  2011/02/02 17:40:36  bourgesl
  * added observation for debugging purposes
  *
@@ -15,7 +18,6 @@
  */
 package fr.jmmc.aspro.model.event;
 
-import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Target;
 
 /**
@@ -28,11 +30,10 @@ public final class TargetSelectionEvent extends ObservationEvent {
 
   /**
    * Public constructor
-   * @param observation observation related to this event
    * @param target selected target
    */
-  public TargetSelectionEvent(final ObservationSetting observation, final Target target) {
-    super(ObservationEventType.TARGET_SELECTION_CHANGED, observation);
+  public TargetSelectionEvent(final Target target) {
+    super(ObservationEventType.TARGET_SELECTION_CHANGED);
     this.target = target;
   }
 

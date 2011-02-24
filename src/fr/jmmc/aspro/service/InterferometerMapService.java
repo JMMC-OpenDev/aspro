@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: InterferometerMapService.java,v 1.6 2010-10-22 11:12:02 bourgesl Exp $"
+ * "@(#) $Id: InterferometerMapService.java,v 1.7 2011-02-24 17:14:11 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2010/10/22 11:12:02  bourgesl
+ * javadoc
+ * fixed minimum and maximum methods (Double extrema)
+ *
  * Revision 1.5  2010/09/20 14:46:02  bourgesl
  * minor refactoring changes
  *
@@ -146,6 +150,8 @@ public final class InterferometerMapService {
       data.setStationY(mapY);
 
       // Get chosen stations :
+      data.setStationNames(observation.getInstrumentConfiguration().getStations());
+
       final List<Station> stations = observation.getInstrumentConfiguration().getStationList();
       if (stations == null) {
         throw new IllegalStateException("the station list is null !");
