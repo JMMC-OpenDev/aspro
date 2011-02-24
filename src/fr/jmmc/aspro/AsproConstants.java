@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproConstants.java,v 1.22 2011-01-07 13:20:23 bourgesl Exp $"
+ * "@(#) $Id: AsproConstants.java,v 1.23 2011-02-24 17:10:22 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.22  2011/01/07 13:20:23  bourgesl
+ * added UNDEFINED_MAGNITUDE
+ *
  * Revision 1.21  2010/12/15 13:37:03  bourgesl
  * added PIONIER instrument
  *
@@ -135,5 +138,8 @@ public interface AsproConstants {
 
   /** default value for undefined magnitude = -99 */
   public final static double UNDEFINED_MAGNITUDE = -99d;
+
+  /** label to display when multiple configurations are in use (file names, chart titles ...) */
+  public static final String MULTI_CONF = "MULTI CONFIGURATION";
 
 }
