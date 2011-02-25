@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproConstants.java,v 1.23 2011-02-24 17:10:22 bourgesl Exp $"
+ * "@(#) $Id: AsproConstants.java,v 1.24 2011-02-25 16:51:18 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.23  2011/02/24 17:10:22  bourgesl
+ * added multi conf label
+ *
  * Revision 1.22  2011/01/07 13:20:23  bourgesl
  * added UNDEFINED_MAGNITUDE
  *
@@ -141,5 +144,8 @@ public interface AsproConstants {
 
   /** label to display when multiple configurations are in use (file names, chart titles ...) */
   public static final String MULTI_CONF = "MULTI CONFIGURATION";
+
+  /** regular expression used to match characters different than alpha/numeric/+/- */
+  public static final String REGEXP_INVALID_TEXT_CHARS = "[^a-zA-Z_\\+\\-0-9]";
 
 }

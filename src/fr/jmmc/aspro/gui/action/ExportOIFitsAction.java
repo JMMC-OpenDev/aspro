@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOIFitsAction.java,v 1.11 2011-02-14 15:33:10 bourgesl Exp $"
+ * "@(#) $Id: ExportOIFitsAction.java,v 1.12 2011-02-25 16:51:18 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.11  2011/02/14 15:33:10  bourgesl
+ * use JMCS FileUtils
+ *
  * Revision 1.10  2011/02/03 17:31:16  bourgesl
  * use WaitingTaskAction to export valid data
  *
@@ -41,6 +44,7 @@
  */
 package fr.jmmc.aspro.gui.action;
 
+import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.mcs.gui.MessagePane;
 import fr.jmmc.mcs.gui.StatusBar;
@@ -158,7 +162,7 @@ public class ExportOIFitsAction extends WaitingTaskAction {
     final StringBuilder sb = new StringBuilder(32).append("Aspro2_");
 
     final String targetName = oiFitsFile.getOiTarget().getTarget()[0];
-    final String altName = targetName.replaceAll("[^a-zA-Z_0-9]", "_");
+    final String altName = targetName.replaceAll(AsproConstants.REGEXP_INVALID_TEXT_CHARS, "_");
 
     sb.append(altName).append('_');
 

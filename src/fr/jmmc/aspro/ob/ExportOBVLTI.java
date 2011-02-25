@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBVLTI.java,v 1.17 2011-02-24 17:13:06 bourgesl Exp $"
+ * "@(#) $Id: ExportOBVLTI.java,v 1.18 2011-02-25 16:51:18 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.17  2011/02/24 17:13:06  bourgesl
+ * comments
+ *
  * Revision 1.16  2011/02/08 15:34:16  bourgesl
  * changed proposed OB file names to include instrument mode and FT/noFT
  *
@@ -288,7 +291,7 @@ public class ExportOBVLTI {
             df6.format((target.getPMDEC() != null) ? target.getPMDEC().doubleValue() / 1000d : 0d));
 
     // replace invalid characters (i.e. not alpha numeric) :
-    final String altName = target.getName().replaceAll("[^a-zA-Z_0-9]", "_");
+    final String altName = target.getName().replaceAll(AsproConstants.REGEXP_INVALID_TEXT_CHARS, "_");
     document = document.replaceFirst(KEY_TARGET_NAME, altName);
 
     // Later : atmosphere / seeing

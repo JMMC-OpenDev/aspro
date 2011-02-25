@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBVega.java,v 1.11 2011-02-24 17:13:06 bourgesl Exp $"
+ * "@(#) $Id: ExportOBVega.java,v 1.12 2011-02-25 16:51:18 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.11  2011/02/24 17:13:06  bourgesl
+ * comments
+ *
  * Revision 1.10  2011/02/14 15:33:10  bourgesl
  * use JMCS FileUtils
  *
@@ -207,7 +210,7 @@ public class ExportOBVega {
       //   2.TARGET or REFERENCE
       sb.append(STAR_TARGET).append(SEPARATOR);
       // 3.Name of observation (string) = target name (only alpha and digit characters) + Base Line
-      final String altName = target.getName().replaceAll("[^a-zA-Z_0-9]", "");
+      final String altName = target.getName().replaceAll(AsproConstants.REGEXP_INVALID_TEXT_CHARS, "");
       sb.append(altName).append(baseLine).append(SEPARATOR);
       // 4.HD number (string)
       sb.append(hdId.replace(" ", "")).append(SEPARATOR);
