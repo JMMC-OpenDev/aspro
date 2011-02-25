@@ -2,9 +2,9 @@
 
 <ApplicationData link="http://www.jmmc.fr/aspro2">
 
-  <program name="Aspro2" version="0.7.9 beta"/>
+  <program name="Aspro2" version="0.8.0 beta"/>
 
-  <compilation date="22/02/2011" compiler="JDK 1.5.0_16"/>
+  <compilation date="25/02/2011" compiler="JDK 1.5.0_16"/>
 
   <text>
     <![CDATA[ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations
@@ -14,42 +14,152 @@
   </text>
 
   <dependences>
-    <package name="JSkyCalc" description="Observability constraints based on JSkyCalc by J. R. Thorstensen, Dartmouth College"
-                             link="http://www.dartmouth.edu/~physics/faculty/skycalc/flyer.html"/>
-    <!-- redistribution allowed including this acknowledgment -->
+
+    <!-- Science / VO libraries -->
+
+    <package name="JSkyCalc"
+        description="Observability constraints based on JSkyCalc by J. R. Thorstensen, Dartmouth College"
+        link="http://www.dartmouth.edu/~physics/faculty/skycalc/flyer.html"
+        license="redistribution allowed including this acknowledgment 'Observability constraints based on JSkyCalc by J. R. Thorstensen, Dartmouth College'" />
 
     <!-- oitools dependency -->
     <package name="nom.tam.fits"
-             description="The Java FITS library (nom.tam.fits) has been developed which provides efficient I/O for FITS images and binary tables. Made by Dr Thomas A. McGlynn, HEASARC"
-             link="http://heasarc.gsfc.nasa.gov/docs/heasarc/fits/java/v1.0/"/>
+        description="The Java FITS library (nom.tam.fits) has been developed which provides efficient I/O for FITS images and binary tables. Made by Dr Thomas A. McGlynn, HEASARC"
+        link="http://heasarc.gsfc.nasa.gov/docs/heasarc/fits/java/v1.0/"
+        license="Copyright: Thomas McGlynn 1997-1999." />
     <!--
-     Copyright: Thomas McGlynn 1997-1999.
-     This code may be used for any purpose, non-commercial
-     or commercial so long as this copyright notice is retained
-     in the source code or included in or referred to in any
-     derived software.
+      Copyright: Thomas McGlynn 1997-1999.
+      This code may be used for any purpose, non-commercial
+      or commercial so long as this copyright notice is retained
+      in the source code or included in or referred to in any
+      derived software.
     -->
 
-    <!-- jmcs dependency -->
+    <!-- jmcs dependencies -->
+
+    <!-- VO interoperability -->
     <package name="JSAMP"
-             description="JSAMP is a Java toolkit for use with the Simple Applications Messaging Protocol. Made by Mark Taylor, working in the Astrophysics Group at Bristol University."
-             link="http://software.astrogrid.org/doc/jsamp/"/>
-    <!-- JSAMP is open source software; it is available under (at least) the Academic Free Licence and the BSD Licence.  -->
+        description="JSAMP is a Java toolkit for use with the Simple Applications Messaging Protocol. Made by Mark Taylor, working in the Astrophysics Group at Bristol University."
+        link="http://software.astrogrid.org/doc/jsamp/"
+        jars="jsamp-1.2.jar"
+        license="(at least) the Academic Free Licence and the BSD License."/>
+
+    <!-- Model computations -->
+    <package name="commons-math"
+        description="Commons Math is a library of lightweight, self-contained mathematics and statistics components addressing the most common problems not available in the Java programming language or Commons Lang."
+        link="http://commons.apache.org/math/"
+        jars="commons-math-2.0.jar"
+        license="APACHE_V2"/>
+
+    <!-- Model computations (bessel functions) -->
+    <package name="CERN colt"
+        description="provides a set of Open Source Libraries for High Performance Scientific and Technical Computing in Java"
+        link="http://acs.lbl.gov/software/colt/"
+        jars="colt.jar"
+        license="Copyright (c) 1999 CERN - European Organization for Nuclear Research"/>
+        <!--
+          Copyright (c) 1999 CERN - European Organization for Nuclear Research.
+          Permission to use, copy, modify, distribute and sell this software and its documentation for any purpose is
+          hereby granted without fee, provided that the above copyright notice appear in all copies and that both that
+          copyright notice and this permission notice appear in supporting documentation. CERN makes no representations
+          about the suitability of this software for any purpose. It is provided "as is" without expressed or implied warranty.
+        -->
 
 
-    <package name="JFreeChart" description="JFreeChart is a free 100% Java chart library that makes it easy for developers to display professional quality charts in their applications" link="http://www.jfree.org/jfreechart/"/>
-    <!-- LGPL : http://www.gnu.org/licenses/lgpl.html -->
+     <!-- Swing -->
+    <package name="JFreeChart"
+        description="JFreeChart is a free 100% Java chart library that makes it easy for developers to display professional quality charts in their applications"
+        link="http://www.jfree.org/jfreechart/"
+        jars="jfreechart-1.0.13.jar jcommon-1.0.16.jar"
+        license="LGPL"
+    />
 
-    <package name="iText" description="iText is a library that allows you to generate PDF files on the fly" link="http://itextpdf.com/"/>
-    <!-- AGPL : http://itextpdf.com/terms-of-use/agpl.php -->
+    <package name="iText"
+        description="iText is a library that allows you to generate PDF files on the fly"
+        link="http://itextpdf.com/"
+        jars="iText-2.1.5.jar"
+        license="AGPL (http://itextpdf.com/terms-of-use/agpl.php)"
+        />
 
-    <package name="JAXB" description="Java Architecture for XML Binding (JAXB) allows Java developers to map Java classes to XML representations" link="https://jaxb.dev.java.net/"/>
-    <!-- CDDL/GPL : https://glassfish.dev.java.net/public/CDDL+GPL.html -->
+    <!-- jmcs dependencies -->
 
-    <package name="SwingWorker" description="backport of SwingWorker included into Java 1.6" link="https://swingworker.dev.java.net/"/>
-    <!-- LGPL : http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html -->
+    <!-- Launch one desktop browser -->
+    <package name="BrowserLauncher2"
+        description="Permit to use the default web browser"
+        link="http://browserlaunch2.sourceforge.net/"
+        jars="BrowserLauncher2-1_3.jar"/>
 
-<!-- todo add JSAMP 1.2 -->
+    <!-- Swing Task management -->
+    <package name="SwingWorker" description="backport of SwingWorker included into Java 1.6"
+        link="https://swingworker.dev.java.net/"
+        jars="swing-worker-1.2.jar"
+        license="LGPL"/>
+
+    <!-- Mac OS X Desktop integration -->
+    <package name="AppleJavaExtensions"
+        description="Adapt menus for Mac OS X"
+        link="http://developer.apple.com/samplecode/AppleJavaExtensions/index.html"
+        jars="AppleJavaExtensions.jar"/>
+
+
+    <!-- Tools -->
+
+    <!-- jmcs dependencies -->
+
+    <!-- Xml binding (target models and aspro2) -->
+    <package name="JAXB"
+        description="Java Architecture for XML Binding (JAXB) allows Java developers to map Java classes to XML representations"
+        link="https://jaxb.dev.java.net/"
+        jars="activation.jar jaxb-api.jar jaxb-impl.jar jsr173_1.0_api.jar"
+        license="CDDL/GPL" />
+
+    <!--  Xml binding (ApplicationData and LITpro) -->
+    <package name="castor"
+        description="Create Java classes from XSD schema"
+        link="http://www.castor.org/"
+        jars="castor.jar"/>
+    <!-- castor dependency -->
+    <package name="xercesImpl"
+        description="XML validation"
+        link="http://xerces.apache.org/"
+        jars="xercesImpl.jar xmlParserAPIs.jar"/>
+
+    <!-- HTTP client (feedback report and LITpro) (see fr.jmmc.mcs.util.Http wrapper) -->
+    <package name="commons-httpclient"
+        description="HTTP Client (used to send HTTP POST requests)"
+        link="http://hc.apache.org/httpclient-3.x/"
+        jars="commons-httpclient-3.1.jar "/>
+
+    <!-- HttpClient dependency -->
+    <package name="commons-codec"
+        description="Commons Codec provides implementations of common encoders and decoders such as Base64, Hex, Phonetic and URLs. "
+        link="http://commons.apache.org/codec/"
+        jars="commons-codec-1.3.jar"/>
+
+    <!-- Logging common interface (HttpClient, Axis dependencies at least) -->
+    <package name="commons-logging"
+        description="Ultra-thin bridge between different logging implementations"
+        link="http://commons.apache.org/logging/"
+        jars="commons-logging-1.1.1.jar"/>
+
+    <!-- Graphical logging utility (-loggui option) -->
+    <package name="loggui"
+        description="Adjust logging facilities"
+        link="http://www.informatrix.ch/loggui/index.html"
+        jars="loggui.jar"/>
+
+    <!-- Parse command line arguments -->
+    <package name="java-getopt"
+        description="Interpret command line arguments"
+        link="http://www.urbanophile.com/arenn/hacking/download.html"
+        jars="java-getopt-1.0.13.jar"/>
+
+    <!-- Only used to detect the platform -->
+    <package name="commons-lang"
+        description="Provide much needed additions to the standard JDK's java.lang package "
+        link="http://commons.apache.org/lang/"
+        jars="commons-lang-2.4.jar"
+        license="APACHE_V2"/>
 
   </dependences>
 
@@ -83,12 +193,17 @@
   </menubar>
 
   <releasenotes>
-    <release version="0.7">
-      <prerelease version="0.7.9 beta">
+    <release version="0.8">
+      <prerelease version="0.8.0 beta">
+        <change>Updated Interferometer Map Plot to display baselines for all selected  instrument configurations</change>
+        <change>Major refactoring to compute observability and UV Coverage for all selected  instrument configurations</change>
         <change>Important changes in the user interface (main panel) to allow multi selection of instrument configurations
-        and use the main target list to select the current target used in UV Coverage Panel</change>
+        and use the main target list to select the current target used in UV Coverage Panel
+        </change>
         <change>Added VLTI configuration for Period 88</change>
       </prerelease>
+    </release>
+    <release version="0.7">
       <prerelease version="0.7.8 beta">
         <change>Fixed VLTI configuration for the PIONIER instrument (period 86 and 87)</change>
         <change>JSAMP library updated to release 1.2 that fix shutdown notification problems when the user closes any JMMC application.</change>
@@ -98,7 +213,8 @@
       </prerelease>
       <prerelease version="0.7.7 beta">
         <change>Updated Export to Observing Blocks to support calibrators : the selected science target is exported
-        to a science OB and its calibrators to calibrator OBs.</change>
+        to a science OB and its calibrators to calibrator OBs.
+        </change>
       </prerelease>
       <prerelease version="0.7.6 beta">
         <change>Added Observing Blocks for PIONIER instrument</change>
@@ -114,18 +230,23 @@
       <prerelease version="0.7.4 beta">
         <change>Added a version attribute in the Observation file to handle model conversions</change>
         <change>Updated the Observation data model : targets have an ID attribute (derived from target name)
-        used to associate user informations : description, calibrator flag and calibrator list per target</change>
+        used to associate user informations : description, calibrator flag and calibrator list per target
+        </change>
         <change>Added action to open the SimBad web page for the current target in the Target editor</change>
         <change>Fixed the selected target when opening the target editor
-        and synchronize the selected target between 'Model' and 'Target' tabs</change>
+        and synchronize the selected target between 'Model' and 'Target' tabs
+        </change>
         <change>Added new Target editor to let the user edit target fields (magnitudes ...) and
-        provide user information per target</change>
+        provide user information per target
+        </change>
         <change type="BUGFIX">Fixed major bug on target model editor when the user changes the selected target
-        while editing a parameter value</change>
+        while editing a parameter value
+        </change>
       </prerelease>
       <prerelease version="0.7.3 beta">
         <change>SearchCal integration : use deletedFlag to filter calibrators to mimic SearchCal delete action and
-          display HD identifier instead of HIP identifier to mimic SearchCal view</change>
+          display HD identifier instead of HIP identifier to mimic SearchCal view
+        </change>
         <change>Added new preference for Time reference (LST or UTC)</change>
         <change type="BUGFIX" id="1287726162">Fixed bug when computing HA max (0 instead of a negative value)</change>
         <change>Updated Observability plot : better position and automatic font size for hour annotations</change>
@@ -147,7 +268,8 @@
       </prerelease>
       <prerelease version="0.7.0 beta">
         <change>SearchCal integration through SAMP VO protocol : send the selected target to let SearchCal find calibrators
-        and process SearchCal response to extract calibrators</change>
+        and process SearchCal response to extract calibrators
+        </change>
         <change>LITpro integration through SAMP VO protocol : send models and generated oifits for the selected target</change>
       </prerelease>
     </release>
@@ -156,9 +278,11 @@
       <prerelease version="0.6.3">
         <change type="BUGFIX">Limit the memory footprint when the sampling periodicity is very small (less than 1 minute).
         First 500 HA samples are computed and the following warning is displayed : 
-        Too many HA points (...), check your sampling periodicity. Only 500 samples computed</change>
+        Too many HA points (...), check your sampling periodicity. Only 500 samples computed
+        </change>
         <change type="BUGFIX">Fixed bug when the UV Max value is set to 0.
-        This slider has now a minimum value set to the smallest baseline length of the selected interferometer</change>
+        This slider has now a minimum value set to the smallest baseline length of the selected interferometer
+        </change>
         <change type="BUGFIX" id="1285777818">Fixed bug concerning random dates : the LST axis is corrupted (Requires 'lower' &lt; 'upper')</change>
         <change type="BUGFIX">Fixed bug in HA min/max restrictions : invalid values can cause a NegativeArrayException</change>
         <change>Formatted DIT value in warning messages coming from noise modeling (FT or saturation)</change>
@@ -170,9 +294,11 @@
       <prerelease version="0.6.2">
         <change type="BUGFIX" id="1285082082">Added the following message
                 when the user use the 'Export to OIFits' action and the oifits is null :
-                'There is currently no OIFits data (no target or your target is not observable)'</change>
+                'There is currently no OIFits data (no target or your target is not observable)'
+        </change>
         <change type="BUGFIX" id="1285167992">Corrected focus problem with the action 'Export to an Observing block'
-                and added an user message if there is no target to export</change>
+                and added an user message if there is no target to export
+        </change>
         <change>Use an hour angle axis when the observability displays the baseline limits</change>
         <change>Normalize model flux weights to compute visibilities</change>
         <change>Added CHARA instruments : CLASSIC (2T) and CLIMB (3T)</change>
@@ -196,7 +322,8 @@
         <change>Error and noise computation for OI_VIS (AMBER only) using the differential phase / amplitude algorithm (amdlib)</change>
         <change>Added a pop up to tell the user to check its VLTI OB file against ESO CfP rules</change>
         <change>Fixed some configuration for AMBER in Period 87 (wrong station ordering) and the
-        loading action to even load such observation files</change>
+        loading action to even load such observation files
+        </change>
       </prerelease>
       <prerelease version="0.5.4">
         <change>Correlated fluxes set in OI_VIS</change>
@@ -263,11 +390,13 @@
       </prerelease>
       <prerelease version="0.4b1"> <!-- 0.3b5 -->
         <change>Several UI changes to manage HA min / max and the fringe tracker mode fields depending on the selected target
-        in the UV Coverage Panel</change>
+        in the UV Coverage Panel
+        </change>
         <change>HA min / max and the fringe tracker mode are related to a specific target and persisted in the observation file</change>
         <change>Added date and time constraints on VLTI Observing Block : date is defined if night restrictions are enabled;
         LST intervals are defined with the target observability (elevation > 30 deg + delay lines + shadowing)
-        restricted by the HA min / max defined in the UV Coverage Panel</change>
+        restricted by the HA min / max defined in the UV Coverage Panel
+        </change>
       </prerelease>
     </release>
 
@@ -286,11 +415,13 @@
         <change>Updated Aspro data model to keep simbad information like RA (HMS), DEC (DMS), Radial velocity, Identifiers and Object types</change>
         <change>Updated Target tooltip with new information</change>
         <change>Several fixes to convert sexagesimal RA/DEC in degrees (internal). Known problem : the previously saved files can not be
-        load anymore</change>
+        load anymore
+        </change>
       </prerelease>
       <prerelease version="0.3b1">
         <change>The star resolver now supports RA/DEC coordinates to enter manually a new target
-                (useful when simbad is down or no internet connection)</change>
+                (useful when simbad is down or no internet connection)
+        </change>
         <change>Missing fluxes used in Observing Block set to -99</change>
         <change>Several minor UI changes for mac OS X platform (10.4 and more)</change>
         <change>Deployment : Pal library is embedded in its own Jnlp file to avoid signing issues</change>
@@ -357,6 +488,7 @@
   </releasenotes>
 
   <acknowledgment><![CDATA[This research has made use of the Jean-Marie Mariotti Center \texttt{Aspro}
-service \footnote{Available at http://www.jmmc.fr/aspro}.]]></acknowledgment>
+service \footnote{Available at http://www.jmmc.fr/aspro}.]]>
+  </acknowledgment>
 
 </ApplicationData>
