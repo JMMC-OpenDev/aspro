@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: InterferometerMapData.java,v 1.2 2011-02-24 17:14:12 bourgesl Exp $"
+ * "@(#) $Id: InterferometerMapData.java,v 1.3 2011-02-25 16:51:55 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2011/02/24 17:14:12  bourgesl
+ * Major refactoring to support / handle observation collection (multi-conf)
+ *
  * Revision 1.1  2010/05/11 12:08:27  bourgesl
  * simple Interferometer Map (stations + baselines) automatically refreshed when the chosen baseline configuration changes
  *
@@ -25,8 +28,9 @@ public final class InterferometerMapData {
   private double[] diameter;
   private double[] stationX;
   private double[] stationY;
-  // base lines :
+  /** configuration */
   private String stationNames;
+  // base lines :
   /* baseline name = "'S1'-'S2' length m" */
   private String[] baselineName;
   private double[] baselineStationX1;
