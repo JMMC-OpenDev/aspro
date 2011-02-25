@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ChartUtils.java,v 1.15 2011-02-22 18:10:16 bourgesl Exp $"
+ * "@(#) $Id: ChartUtils.java,v 1.16 2011-02-25 16:50:58 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.15  2011/02/22 18:10:16  bourgesl
+ * added createChartPanel / createSquareChartPanel to avoid redundancy and visual bugs with big screens
+ *
  * Revision 1.14  2011/01/25 12:29:36  bourgesl
  * fixed javadoc errors
  *
@@ -251,6 +254,7 @@ public final class ChartUtils {
    */
   public static JFreeChart createXYBarChart() {
     // no title :
+    // TODO MULTI-CONF : TEST LEGEND on Observability plot :
     final JFreeChart localJFreeChart = ChartFactory.createXYBarChart("", null, false, null, null, PlotOrientation.HORIZONTAL, false, false, false);
 
     final XYPlot localXYPlot = (XYPlot) localJFreeChart.getPlot();
