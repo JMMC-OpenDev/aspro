@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: InterferometerMapPanel.java,v 1.18 2011-02-24 17:14:11 bourgesl Exp $"
+ * "@(#) $Id: InterferometerMapPanel.java,v 1.19 2011-02-25 16:49:54 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.18  2011/02/24 17:14:11  bourgesl
+ * Major refactoring to support / handle observation collection (multi-conf)
+ *
  * Revision 1.17  2011/02/22 18:11:29  bourgesl
  * Major UI changes : configuration multi-selection, unique target selection in main form
  *
@@ -172,20 +175,11 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
     if (this.getChartData() != null) {
 
       final ObservationCollection obsCollection = this.getChartData().getObservationCollection();
-      final ObservationSetting observation = obsCollection.getFirstObservation();
 
-      final StringBuilder sb = new StringBuilder(16);
+      final StringBuilder sb = new StringBuilder(32);
       sb.append("MAP_");
-
-      final String intConfName = observation.getInterferometerConfiguration().getName();
-      final String altIntConfName = intConfName.replaceAll("[^a-zA-Z_0-9]", "_");
-      sb.append(altIntConfName).append('_');
-
-      final String baseLine = (obsCollection.isSingle())
-              ? observation.getInstrumentConfiguration().getStations()
-              : AsproConstants.MULTI_CONF;
-
-      sb.append(baseLine.replaceAll(" ", "-")).append('.').append(PDF_EXT);
+      sb.append(obsCollection.getInterferometerConfiguration(true)).append('_');
+      sb.append(obsCollection.getDisplayConfigurations("_", true)).append('.').append(PDF_EXT);
 
       return sb.toString();
     }
@@ -298,14 +292,8 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
     // create a unique key (interferometer configuration|stations...)
     // to check if the map must be refreshed
     final StringBuilder sb = new StringBuilder(64);
-
-    for (ObservationSetting observation : obsCollection.getObservations()) {
-      if (sb.length() == 0) {
-        sb.append(observation.getInterferometerConfiguration().getName()).append('|');
-      }
-      sb.append(observation.getInstrumentConfiguration().getStations()).append('|');
-    }
-
+    sb.append(obsCollection.getInterferometerConfiguration()).append('|');
+    obsCollection.getAllConfigurations(sb, "|");
     final String config = sb.toString();
 
     if (!config.equals(this.configuration)) {
@@ -319,8 +307,6 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
       final long start = System.nanoTime();
 
       final List<InterferometerMapData> mapDataList = new ArrayList<InterferometerMapData>(obsCollection.size());
-
-      // TODO MULTI-CONF LATER : separate the service in two parts : interferometer setup and baseline data :
 
       for (ObservationSetting observation : obsCollection.getObservations()) {
         mapDataList.add(InterferometerMapService.compute(observation));
@@ -360,23 +346,19 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
     // memorize chart data (used by export PDF) :
     setChartData(chartData);
 
-    final ObservationCollection obsCollection = this.getChartData().getObservationCollection();
-    final ObservationSetting observation = obsCollection.getFirstObservation();
-    final List<InterferometerMapData> mapDataList = chartData.getMapDataList();
-
-    ChartUtils.clearTextSubTitle(this.chart);
+    final ObservationCollection obsCollection = chartData.getObservationCollection();
 
     // title :
-    final StringBuilder sb = new StringBuilder();
-    sb.append(observation.getInterferometerConfiguration().getName());
-    sb.append(" - ").append((obsCollection.isSingle())
-            ? observation.getInstrumentConfiguration().getStations()
-            : AsproConstants.MULTI_CONF);
+    ChartUtils.clearTextSubTitle(this.chart);
+
+    final StringBuilder sb = new StringBuilder(32);
+    sb.append(obsCollection.getInterferometerConfiguration(false)).append(" - ");
+    sb.append(obsCollection.getDisplayConfigurations(" / "));
 
     ChartUtils.addSubtitle(this.chart, sb.toString());
 
     // computed data are valid :
-    updateChart(mapDataList);
+    updateChart(chartData.getMapDataList());
 
     // update theme at end :
     ChartUtilities.applyCurrentTheme(this.chart);
@@ -389,8 +371,6 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
    * @param mapDataList interferometer map data
    */
   private void updateChart(final List<InterferometerMapData> mapDataList) {
-
-    final boolean multiConf = mapDataList.size() > 1;
 
     // First map Data is always defined :
     final InterferometerMapData mapData1 = mapDataList.get(0);
@@ -421,12 +401,15 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
 
     final ColorPalette palette = ColorPalette.getDefaultColorPalette();
 
-    final XYSeriesCollection blDataSet = new XYSeriesCollection();
+    final XYSeriesCollection dataset = new XYSeriesCollection();
+
+    XYSeries xySeriesBL = null;
 
     String[] blName;
     double[] blX1, blY1, blX2, blY2;
-    XYSeries xySeriesBL;
     int n = 0;
+
+    final boolean single = mapDataList.size() == 1;
 
     // Iterate over map data (multi conf) :
     for (InterferometerMapData mapData : mapDataList) {
@@ -436,47 +419,46 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
       blX2 = mapData.getBaselineStationX2();
       blY2 = mapData.getBaselineStationY2();
 
-      if (multiConf) {
+      if (!single) {
         // 1 color per configuration (i.e. per XYSeries) :
         xySeriesBL = new XYSeries(mapData.getStationNames(), false);
         xySeriesBL.setNotify(false);
+      }
 
-        for (int i = 0, len = blName.length; i < len; i++) {
-          // first station :
-          xySeriesBL.add(blX1[i], blY1[i]);
+      for (int i = 0, len = blName.length; i < len; i++) {
 
-          // second station :
-          xySeriesBL.add(blX2[i], blY2[i]);
-
-          // add an invalid point to break the line between the 2 segments :
-          xySeriesBL.add(Double.NaN, Double.NaN);
-        }
-
-        blDataSet.addSeries(xySeriesBL);
-        renderer.setSeriesPaint(n, palette.getColor(n), false);
-        n++;
-
-      } else {
-        // 1 color per base line (i.e. per XYSeries) :
-        for (int i = 0, len = blName.length; i < len; i++) {
+        if (single) {
+          // 1 color per base line (i.e. per XYSeries) :
           xySeriesBL = new XYSeries(blName[i], false);
           xySeriesBL.setNotify(false);
+        }
 
-          // first station :
-          xySeriesBL.add(blX1[i], blY1[i]);
+        // first station :
+        xySeriesBL.add(blX1[i], blY1[i]);
 
-          // second station :
-          xySeriesBL.add(blX2[i], blY2[i]);
+        // second station :
+        xySeriesBL.add(blX2[i], blY2[i]);
 
-          blDataSet.addSeries(xySeriesBL);
+        // add an invalid point to break the line between the 2 segments :
+        xySeriesBL.add(Double.NaN, Double.NaN);
+
+        if (single) {
+          dataset.addSeries(xySeriesBL);
+          n = dataset.getSeriesCount() - 1;
           renderer.setSeriesPaint(n, palette.getColor(n), false);
-          n++;
         }
       }
+
+      if (!single) {
+        dataset.addSeries(xySeriesBL);
+        n = dataset.getSeriesCount() - 1;
+        renderer.setSeriesPaint(n, palette.getColor(n), false);
+      }
+
     }
 
     // set the second data set :
-    this.xyPlot.setDataset(1, blDataSet);
+    this.xyPlot.setDataset(1, dataset);
 
     // annotation JMMC (moving position) :
     this.xyPlot.getRenderer(0).removeAnnotations();

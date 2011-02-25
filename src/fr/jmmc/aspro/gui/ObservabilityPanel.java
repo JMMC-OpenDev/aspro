@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityPanel.java,v 1.60 2011-02-24 17:14:12 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityPanel.java,v 1.61 2011-02-25 16:50:16 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.60  2011/02/24 17:14:12  bourgesl
+ * Major refactoring to support / handle observation collection (multi-conf)
+ *
  * Revision 1.59  2011/02/22 18:11:30  bourgesl
  * Major UI changes : configuration multi-selection, unique target selection in main form
  *
@@ -516,33 +519,21 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
       final StringBuilder sb = new StringBuilder(32);
       sb.append("OBS_");
 
-      final String baseLine = (obsCollection.isSingle())
-              ? observation.getInstrumentConfiguration().getStations()
-              : AsproConstants.MULTI_CONF;
+      final String baseLine = obsCollection.getDisplayConfigurations("_", true);
 
       if (doBaseLineLimits) {
         sb.append("LIMITS_");
-
-        final String intConfName = observation.getInterferometerConfiguration().getName();
-        final String altIntConfName = intConfName.replaceAll("[^a-zA-Z_0-9]", "_");
-        sb.append(altIntConfName).append('_');
-
-        sb.append(baseLine.replaceAll(" ", "-"));
+        sb.append(obsCollection.getInterferometerConfiguration(true)).append('_');
+        sb.append(baseLine);
 
       } else {
         if (doDetailedOutput) {
           sb.append("DETAILS_");
         }
-
-        final String instrumentName = observation.getInstrumentConfiguration().getName();
-        sb.append(instrumentName).append('_');
-
-        sb.append(baseLine.replaceAll(" ", "-")).append('_');
-
-        final String date = observation.getWhen().getDate().toString();
-        sb.append(date);
+        sb.append(observation.getInstrumentConfiguration().getName()).append('_');
+        sb.append(baseLine).append('_');
+        sb.append(observation.getWhen().getDate().toString());
       }
-
       sb.append('.').append(PDF_EXT);
 
       return sb.toString();
@@ -742,6 +733,9 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     @Override
     public List<ObservabilityData> computeInBackground() {
 
+      // Start the computations :
+      final long start = System.nanoTime();
+
       final List<ObservabilityData> obsDataList = new ArrayList<ObservabilityData>(getObservationCollection().size());
 
       for (ObservationSetting observation : getObservationCollection().getObservations()) {
@@ -753,6 +747,10 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         if (Thread.currentThread().isInterrupted()) {
           return null;
         }
+      }
+
+      if (logger.isLoggable(Level.INFO)) {
+        logger.info("compute : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
       }
 
       return obsDataList;
@@ -846,27 +844,33 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     final boolean useLST = obsData.isUseLST();
     final boolean doBaseLineLimits = obsData.isDoBaseLineLimits();
 
-    this.chart.clearSubtitles();
-
     // title :
-    final StringBuilder sb = new StringBuilder(observation.getInterferometerConfiguration().getName());
-    sb.append(" - ").append(
-            (obsCollection.isSingle())
-            ? observation.getInstrumentConfiguration().getStations()
-            : AsproConstants.MULTI_CONF);
+    ChartUtils.clearTextSubTitle(this.chart);
+
+    final StringBuilder sb = new StringBuilder(32);
+    sb.append(obsCollection.getInterferometerConfiguration(false)).append(" - ");
+
+    // TODO MULTI-CONF : fix when plot is correct :
+//    sb.append(obsCollection.getDisplayConfigurations(" / "));
+    sb.append(obsCollection.getFirstObservation().getInstrumentConfiguration().getStations());
+
+    if (!obsCollection.isSingle()) {
+      sb.append(" (TODO MULTI-CONF : ONLY FIRST CONFIGURATION DISPLAYED)");
+    }
 
     // TODO MULTI-CONF : how to display best PoPs ???
+    // USE LEGEND : 'CONF + PoPs'
+//    if (obsCollection.isSingle() && obsData.getBestPops() != null) {
     if (obsData.getBestPops() != null) {
       sb.append(" + ");
       for (Pop pop : obsData.getBestPops().getPopList()) {
         sb.append(pop.getName()).append(' ');
       }
     }
-
     ChartUtils.addSubtitle(this.chart, sb.toString());
 
     if (!doBaseLineLimits && (observation.getWhen().isNightRestriction() || !useLST)) {
-      // date :
+      // date and moon FLI :
       ChartUtils.addSubtitle(this.chart, "Day : " + observation.getWhen().getDate().toString()
               + " - Moon = " + (int) Math.round(obsData.getMoonIllumPercent()) + "%");
     }
