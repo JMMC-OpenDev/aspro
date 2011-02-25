@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationManager.java,v 1.58 2011-02-24 17:14:13 bourgesl Exp $"
+ * "@(#) $Id: ObservationManager.java,v 1.59 2011-02-25 16:52:11 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.58  2011/02/24 17:14:13  bourgesl
+ * Major refactoring to support / handle observation collection (multi-conf)
+ *
  * Revision 1.57  2011/02/22 18:11:30  bourgesl
  * Major UI changes : configuration multi-selection, unique target selection in main form
  *
@@ -718,7 +721,7 @@ public final class ObservationManager extends BaseOIManager {
   public void fireWarningsReady(final WarningContainer warningContainer) {
     // use observation for computations :
     if (logger.isLoggable(Level.FINE)) {
-      logger.fine("fireWarningsReady : " + toString(getObservation()));
+      logger.fine("fireWarningsReady : " + warningContainer);
     }
 
     fireEvent(new WarningContainerEvent(warningContainer));

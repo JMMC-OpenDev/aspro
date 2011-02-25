@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationTaskSwingWorker.java,v 1.5 2011-02-24 17:14:13 bourgesl Exp $"
+ * "@(#) $Id: ObservationTaskSwingWorker.java,v 1.6 2011-02-25 16:52:11 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2011/02/24 17:14:13  bourgesl
+ * Major refactoring to support / handle observation collection (multi-conf)
+ *
  * Revision 1.4  2011/02/14 17:13:07  bourgesl
  * Use JMCS Task / TaskSwingWorker ...
  *
@@ -60,14 +63,5 @@ public abstract class ObservationTaskSwingWorker<T> extends TaskSwingWorker<T> {
    */
   protected final ObservationCollection getObservationCollection() {
     return this.obsCollection;
-  }
-
-  /**
-   * Return the associated observation
-   * TODO : KILL
-   * @return associated observation
-   */
-  protected final ObservationSetting getObservation() {
-    return this.obsCollection.getFirstObservation();
   }
 }
