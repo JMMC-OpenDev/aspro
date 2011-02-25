@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.85 2011-02-24 17:14:12 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.86 2011-02-25 16:50:48 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.85  2011/02/24 17:14:12  bourgesl
+ * Major refactoring to support / handle observation collection (multi-conf)
+ *
  * Revision 1.84  2011/02/22 18:11:30  bourgesl
  * Major UI changes : configuration multi-selection, unique target selection in main form
  *
@@ -1647,6 +1650,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     @Override
     public List<UVCoverageData> computeInBackground() {
 
+      // Start the computations :
+      final long start = System.nanoTime();
+
       final List<ObservationSetting> observations = getObservationCollection().getObservations();
       final List<UVCoverageData> uvDataList = new ArrayList<UVCoverageData>(observations.size());
 
@@ -1666,6 +1672,10 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         }
       }
 
+      if (logger.isLoggable(Level.INFO)) {
+        logger.info("compute : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
+      }
+
       if (this.doModelImage) {
         // use first uvData to store UVMapData :
         final UVCoverageData uvData = uvDataList.get(0);
@@ -1678,7 +1688,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         uvRect.setFrameFromDiagonal(-this.uvMax, -this.uvMax, this.uvMax, this.uvMax);
 
         // get target from observation for consistency :
-        final Target target = this.getObservation().getTarget(this.targetName);
+        final Target target = getObservationCollection().getFirstObservation().getTarget(this.targetName);
 
         if (target != null) {
           final List<Model> models = target.getModels();
@@ -1686,7 +1696,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
           if (models != null && models.size() > 0) {
 
             // get observation target version :
-            final int targetVersion = this.getObservation().getVersion().getTargetVersion();
+            final int targetVersion = getObservationCollection().getVersion().getTargetVersion();
 
             // Check if the previously computed UV Map Data is still valid :
             if (this.currentUVMapData != null
@@ -1851,24 +1861,21 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
       final UVMapData uvMapData = chartData.getUVMapData();
 
+      // title :
       ChartUtils.clearTextSubTitle(this.chart);
 
-      // title :
-      final StringBuilder sb = new StringBuilder(observation.getInterferometerConfiguration().getName());
-
-      sb.append(" - ").append(
-              (obsCollection.isSingle())
-              ? observation.getInstrumentConfiguration().getStations()
-              : AsproConstants.MULTI_CONF);
+      final StringBuilder sb = new StringBuilder(32);
+      sb.append(obsCollection.getInterferometerConfiguration(false)).append(" - ");
+      sb.append(obsCollection.getDisplayConfigurations(" / "));
 
       // TODO MULTI-CONF : how to display best PoPs ???
-      if (obsData.getBestPops() != null) {
+      // USE LEGEND : 'CONF + PoPs'
+      if (obsCollection.isSingle() && obsData.getBestPops() != null) {
         sb.append(" + ");
         for (Pop pop : obsData.getBestPops().getPopList()) {
           sb.append(pop.getName()).append(' ');
         }
       }
-
       ChartUtils.addSubtitle(this.chart, sb.toString());
       ChartUtils.addSubtitle(this.chart, "Source : " + uvData.getTargetName());
 
@@ -1881,7 +1888,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       setUvPlotScalingFactor(MEGA_LAMBDA_SCALE);
 
       // computed data are valid :
-      updateChart(uvData);
+      updateChart(uvDataList);
 
       // update the background image :
       if (uvMapData == null) {
@@ -2112,9 +2119,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
   /**
    * Update the datasets
-   * @param uvData uv coverage data
+   * @param uvDataList uv coverage data
    */
-  private void updateChart(final UVCoverageData uvData) {
+  private void updateChart(final List<UVCoverageData> uvDataList) {
     // renderer :
     final AbstractRenderer renderer = (AbstractRenderer) this.xyPlot.getRenderer();
 
@@ -2125,11 +2132,11 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
     final XYSeriesCollection dataset = new XYSeriesCollection();
 
-    this.updateUVTracks(dataset, uvData);
-    this.updateUVTracksRiseSet(dataset, uvData);
+    this.updateUVTracks(dataset, uvDataList);
+    this.updateUVTracksRiseSet(dataset, uvDataList);
 
     // define bounds to the uv maximum value (before setDataset) :
-    final double boxSize = toUVPlotScale(uvData.getUvMax());
+    final double boxSize = toUVPlotScale(uvDataList.get(0).getUvMax());
     this.xyPlot.defineBounds(boxSize);
 
     // set the main data set :
@@ -2150,135 +2157,152 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
   }
 
   /**
-   * Update the dataset with UV rise/set tracks
+   * Update the dataset with UV observable tracks
    * @param dataset dataset to use
-   * @param uvData uv coverage data
+   * @param uvDataList uv coverage data
    */
-  private void updateUVTracksRiseSet(final XYSeriesCollection dataset, final UVCoverageData uvData) {
+  private void updateUVTracks(final XYSeriesCollection dataset, final List<UVCoverageData> uvDataList) {
     final ColorPalette palette = ColorPalette.getDefaultColorPalette();
 
     // renderer :
     final XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) this.xyPlot.getRenderer();
 
-    // process uv rise/set :
-    final List<UVBaseLineData> targetUVRiseSet = uvData.getTargetUVRiseSet();
+    final boolean single = uvDataList.size() == 1;
 
-    if (targetUVRiseSet != null) {
-      // target is visible :
+    // Iterate over map data (multi conf) :
+    for (UVCoverageData uvData : uvDataList) {
 
-      XYSeries xySeriesBL;
+      // process observable uv ranges :
+      final List<UVRangeBaseLineData> targetUVObservability = uvData.getTargetUVObservability();
 
-      double[] u;
-      double[] v;
-      double x, y;
-      int n = 0;
-      // serie offset :
-      final int offset = dataset.getSeriesCount();
+      if (targetUVObservability != null) {
+        // target is observable :
 
+        XYSeries xySeriesBL = null;
 
-      for (UVBaseLineData uvBL : targetUVRiseSet) {
-        xySeriesBL = new XYSeries("Rise/Set " + uvBL.getName(), false);
-        xySeriesBL.setNotify(false);
+        double[] uWMin;
+        double[] vWMin;
+        double[] uWMax;
+        double[] vWMax;
+        double x1, y1, x2, y2;
+        int n = 0;
 
-        u = uvBL.getU();
-        v = uvBL.getV();
+        if (!single) {
+          // 1 color per configuration (i.e. per XYSeries) :
+          xySeriesBL = new XYSeries(uvData.getStationNames(), false);
+          xySeriesBL.setNotify(false);
+        }
 
-        // first ellipse line :
-        for (int i = 0, size = uvBL.getNPoints(); i < size; i++) {
-          x = toUVPlotScale(u[i]);
-          y = toUVPlotScale(v[i]);
+        for (UVRangeBaseLineData uvBL : targetUVObservability) {
 
-          xySeriesBL.add(x, y);
-        } // points
+          if (single) {
+            // 1 color per base line (i.e. per XYSeries) :
+            xySeriesBL = new XYSeries(uvBL.getName(), false);
+            xySeriesBL.setNotify(false);
+          }
 
-        // add an invalid point to break the line between the 2 segments :
-        xySeriesBL.add(Double.NaN, Double.NaN);
+          uWMin = uvBL.getUWMin();
+          vWMin = uvBL.getVWMin();
+          uWMax = uvBL.getUWMax();
+          vWMax = uvBL.getVWMax();
 
-        // second symetric ellipse line :
-        for (int i = 0, size = uvBL.getNPoints(); i < size; i++) {
-          x = toUVPlotScale(-u[i]);
-          y = toUVPlotScale(-v[i]);
+          for (int i = 0, size = uvBL.getNPoints(); i < size; i++) {
+            x1 = toUVPlotScale(uWMax[i]);
+            y1 = toUVPlotScale(vWMax[i]);
 
-          xySeriesBL.add(x, y);
-        } // points
+            x2 = toUVPlotScale(uWMin[i]);
+            y2 = toUVPlotScale(vWMin[i]);
 
-        xySeriesBL.setNotify(true);
-        dataset.addSeries(xySeriesBL);
+            // first segment :
+            xySeriesBL.add(x1, y1);
+            xySeriesBL.add(x2, y2);
 
-        // color :
-        renderer.setSeriesPaint(n + offset, palette.getColor(n), false);
+            // add an invalid point to break the line between the 2 segments :
+            xySeriesBL.add(Double.NaN, Double.NaN);
 
-        n++;
-      } // BL
+            // second symetric segment :
+            xySeriesBL.add(-x1, -y1);
+            xySeriesBL.add(-x2, -y2);
+
+            // add an invalid point to break the line between the 2 segments :
+            xySeriesBL.add(Double.NaN, Double.NaN);
+
+          } // points
+
+          if (single) {
+            dataset.addSeries(xySeriesBL);
+            n = dataset.getSeriesCount() - 1;
+            renderer.setSeriesPaint(n, palette.getColor(n), false);
+          }
+
+        } // BL
+
+        if (!single) {
+          dataset.addSeries(xySeriesBL);
+          n = dataset.getSeriesCount() - 1;
+          renderer.setSeriesPaint(n, palette.getColor(n), false);
+        }
+      }
     }
   }
 
   /**
-   * Update the dataset with UV observable tracks
+   * Update the dataset with UV rise/set tracks
    * @param dataset dataset to use
-   * @param uvData uv coverage data
+   * @param uvDataList uv coverage data
    */
-  private void updateUVTracks(final XYSeriesCollection dataset, final UVCoverageData uvData) {
-    final ColorPalette palette = ColorPalette.getDefaultColorPalette();
+  private void updateUVTracksRiseSet(final XYSeriesCollection dataset, final List<UVCoverageData> uvDataList) {
 
-    // renderer :
-    final XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) this.xyPlot.getRenderer();
+    final boolean single = uvDataList.size() == 1;
 
-    // process observable uv ranges :
-    final List<UVRangeBaseLineData> targetUVObservability = uvData.getTargetUVObservability();
+    // Iterate over map data (multi conf) :
+    for (UVCoverageData uvData : uvDataList) {
 
-    if (targetUVObservability != null) {
-      // target is observable :
+      // process uv rise/set :
+      final List<UVBaseLineData> targetUVRiseSet = uvData.getTargetUVRiseSet();
 
-      XYSeries xySeriesBL;
+      if (targetUVRiseSet != null) {
+        // target is visible :
 
-      double[] uWMin;
-      double[] vWMin;
-      double[] uWMax;
-      double[] vWMax;
-      double x1, y1, x2, y2;
-      int n = 0;
+        XYSeries xySeriesBL;
 
-      for (UVRangeBaseLineData uvBL : targetUVObservability) {
-        xySeriesBL = new XYSeries("Observable " + uvBL.getName(), false);
-        xySeriesBL.setNotify(false);
+        double[] u;
+        double[] v;
+        double x, y;
 
-        uWMin = uvBL.getUWMin();
-        vWMin = uvBL.getVWMin();
-        uWMax = uvBL.getUWMax();
-        vWMax = uvBL.getVWMax();
+        for (UVBaseLineData uvBL : targetUVRiseSet) {
+          if (single) {
+            xySeriesBL = dataset.getSeries(uvBL.getName());
+          } else {
+            xySeriesBL = dataset.getSeries(uvData.getStationNames());
+          }
 
-        for (int i = 0, size = uvBL.getNPoints(); i < size; i++) {
-          x1 = toUVPlotScale(uWMax[i]);
-          y1 = toUVPlotScale(vWMax[i]);
+          u = uvBL.getU();
+          v = uvBL.getV();
 
-          x2 = toUVPlotScale(uWMin[i]);
-          y2 = toUVPlotScale(vWMin[i]);
+          // first ellipse line :
+          for (int i = 0, size = uvBL.getNPoints(); i < size; i++) {
+            x = toUVPlotScale(u[i]);
+            y = toUVPlotScale(v[i]);
 
-          // first segment :
-          xySeriesBL.add(x1, y1);
-          xySeriesBL.add(x2, y2);
+            xySeriesBL.add(x, y);
+          } // points
 
           // add an invalid point to break the line between the 2 segments :
           xySeriesBL.add(Double.NaN, Double.NaN);
 
-          // second symetric segment :
-          xySeriesBL.add(-x1, -y1);
-          xySeriesBL.add(-x2, -y2);
+          // second symetric ellipse line :
+          for (int i = 0, size = uvBL.getNPoints(); i < size; i++) {
+            x = toUVPlotScale(-u[i]);
+            y = toUVPlotScale(-v[i]);
+
+            xySeriesBL.add(x, y);
+          } // points
 
           // add an invalid point to break the line between the 2 segments :
           xySeriesBL.add(Double.NaN, Double.NaN);
-
-        } // points
-
-        xySeriesBL.setNotify(true);
-        dataset.addSeries(xySeriesBL);
-
-        // color :
-        renderer.setSeriesPaint(n, palette.getColor(n), false);
-
-        n++;
-      } // BL
+        } // BL
+      }
     }
   }
   // Variables declaration - do not modify//GEN-BEGIN:variables
