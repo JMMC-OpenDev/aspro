@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BasicObservationForm.java,v 1.62 2011-02-24 17:10:56 bourgesl Exp $"
+ * "@(#) $Id: BasicObservationForm.java,v 1.63 2011-02-25 16:49:16 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.62  2011/02/24 17:10:56  bourgesl
+ * added support for observation variants + fix Simbad typo
+ *
  * Revision 1.61  2011/02/22 18:19:38  bourgesl
  * fixed panel layouts
  *
@@ -1191,9 +1194,9 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
   private void fireObservationUpdateEvent() {
     // check if the automatic update flag is enabled :
     if (this.doAutoUpdateObservation) {
-    if (logger.isLoggable(Level.FINE)) {
+      if (logger.isLoggable(Level.FINE)) {
         logger.fine("fireObservationUpdateEvent");
-    }
+      }
       ObservationManager.getInstance().fireObservationUpdate();
     }
   }
@@ -1206,7 +1209,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     final Target selected = getSelectedTarget();
 
     if (logger.isLoggable(Level.FINE)) {
-        logger.fine("fireTargetSelectionChangeEvent : target = " + selected);
+      logger.fine("fireTargetSelectionChangeEvent : target = " + selected);
     }
     ObservationManager.getInstance().fireTargetSelectionChanged(selected);
   }
@@ -1308,7 +1311,6 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
       changed |= om.setInterferometerConfigurationName((String) this.jComboBoxInterferometerConfiguration.getSelectedItem());
       changed |= om.setInstrumentConfigurationName((String) this.jComboBoxInstrument.getSelectedItem());
 
-      // TODO MULTI-CONF :
       changed |= om.setInstrumentConfigurationStations(getInstrumentConfigurations());
 
       changed |= om.setInstrumentConfigurationPoPs(this.jTextPoPs.getText());
