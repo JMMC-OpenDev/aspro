@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationEvent.java,v 1.3 2011-02-24 17:14:12 bourgesl Exp $"
+ * "@(#) $Id: ObservationEvent.java,v 1.4 2011-02-25 16:51:37 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2011/02/24 17:14:12  bourgesl
+ * Major refactoring to support / handle observation collection (multi-conf)
+ *
  * Revision 1.2  2011/01/31 15:25:09  bourgesl
  * javadoc
  * added file header
@@ -58,8 +61,7 @@ public class ObservationEvent {
    */
   public ObservationEvent(final ObservationEventType type, final ObservationCollection obsCollection) {
     this.type = type;
-    // TODO MULTI-CONF : SET TO NULL when code is stable : useful during refactoring ...
-    this.observation = obsCollection.getFirstObservation();
+    this.observation = null;
     this.obsCollection = obsCollection;
   }
 
