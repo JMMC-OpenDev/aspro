@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoverageData.java,v 1.11 2011-02-07 15:23:29 bourgesl Exp $"
+ * "@(#) $Id: UVCoverageData.java,v 1.12 2011-02-25 16:51:29 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.11  2011/02/07 15:23:29  bourgesl
+ * comment
+ *
  * Revision 1.10  2011/02/03 17:27:38  bourgesl
  * added observation version in constructor
  *
@@ -60,6 +63,8 @@ public final class UVCoverageData {
   private double uvMax;
   /** wave length */
   private double lambda;
+  /** configuration */
+  private String stationNames;
   /** list of uv points corresponding to the target rise/set */
   private List<UVBaseLineData> targetUVRiseSet;
   /** observable decimal hour angles (used by OIFits) */
@@ -112,6 +117,14 @@ public final class UVCoverageData {
 
   public void setUvMax(final double uvMax) {
     this.uvMax = uvMax;
+  }
+
+  public String getStationNames() {
+    return stationNames;
+  }
+
+  public void setStationNames(final String stationNames) {
+    this.stationNames = stationNames;
   }
 
   public List<UVBaseLineData> getTargetUVRiseSet() {

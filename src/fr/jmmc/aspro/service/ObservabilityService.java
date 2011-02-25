@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.66 2011-02-04 17:19:39 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.67 2011-02-25 16:48:08 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.66  2011/02/04 17:19:39  bourgesl
+ * use busyWait (test)
+ *
  * Revision 1.65  2011/02/03 17:26:52  bourgesl
  * added  observation version to ObservabilityData
  *
@@ -537,7 +540,7 @@ public final class ObservabilityService {
 
     if (DEBUG_SLOW_SERVICE) {
       TestUtils.busyWait(2000l);
-      
+
       if (this.currentThread.isInterrupted()) {
         return null;
       }
@@ -1340,6 +1343,8 @@ public final class ObservabilityService {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("stations = " + stations);
     }
+
+    this.data.setStationNames(this.observation.getInstrumentConfiguration().getStations());
 
     final int nBeams = stations.size();
 

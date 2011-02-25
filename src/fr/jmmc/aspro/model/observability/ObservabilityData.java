@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityData.java,v 1.11 2011-02-03 17:27:38 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityData.java,v 1.12 2011-02-25 16:51:29 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.11  2011/02/03 17:27:38  bourgesl
+ * added observation version in constructor
+ *
  * Revision 1.10  2011/02/02 17:40:16  bourgesl
  * added version
  *
@@ -87,6 +90,8 @@ public final class ObservabilityData {
   /* other useful data for UV coverage */
   /** AstroSkyCalc instance useful to convert HA in LST or UTC */
   private AstroSkyCalc dateCalc = null;
+  /** configuration */
+  private String stationNames;
   /** beam list */
   private List<Beam> beams = null;
   /** base line list */
@@ -264,6 +269,14 @@ public final class ObservabilityData {
    */
   public void setDateCalc(final AstroSkyCalc dateCalc) {
     this.dateCalc = dateCalc;
+  }
+
+  public String getStationNames() {
+    return stationNames;
+  }
+
+  public void setStationNames(final String stationNames) {
+    this.stationNames = stationNames;
   }
 
   /**

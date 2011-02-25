@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoverageService.java,v 1.39 2011-02-07 15:23:10 bourgesl Exp $"
+ * "@(#) $Id: UVCoverageService.java,v 1.40 2011-02-25 16:48:08 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.39  2011/02/07 15:23:10  bourgesl
+ * null check
+ *
  * Revision 1.38  2011/02/04 17:20:45  bourgesl
  * removed model image computation (ModelUVMapService)
  * use busyWait (test)
@@ -559,6 +562,8 @@ public final class UVCoverageService {
   private void prepareObservation() throws IllegalStateException {
     // Get AstroSkyCalc instance :
     this.sc = this.obsData.getDateCalc();
+    // Get station names :
+    this.data.setStationNames(this.obsData.getStationNames());
     // Get beams :
     this.beams = this.obsData.getBeams();
     // Get baselines :
