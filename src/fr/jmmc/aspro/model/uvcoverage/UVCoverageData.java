@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoverageData.java,v 1.12 2011-02-25 16:51:29 bourgesl Exp $"
+ * "@(#) $Id: UVCoverageData.java,v 1.13 2011-02-28 17:10:36 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.12  2011/02/25 16:51:29  bourgesl
+ * added station names = configuration
+ *
  * Revision 1.11  2011/02/07 15:23:29  bourgesl
  * comment
  *
@@ -43,9 +46,9 @@
  */
 package fr.jmmc.aspro.model.uvcoverage;
 
+import fr.jmmc.aspro.model.BaseLine;
 import fr.jmmc.aspro.model.ObservationVersion;
 import fr.jmmc.aspro.model.WarningContainer;
-import fr.jmmc.mcs.model.UVMapData;
 import fr.jmmc.oitools.model.OIFitsFile;
 import java.util.List;
 
@@ -65,14 +68,14 @@ public final class UVCoverageData {
   private double lambda;
   /** configuration */
   private String stationNames;
+  /** base line list */
+  private List<BaseLine> baseLines = null;
   /** list of uv points corresponding to the target rise/set */
   private List<UVBaseLineData> targetUVRiseSet;
   /** observable decimal hour angles (used by OIFits) */
   private double[] ha = null;
   /** list of uv point couples corresponding to the target observability */
   private List<UVRangeBaseLineData> targetUVObservability;
-  /** uv map data */
-  private UVMapData uvMapData = null;
   /** warning container */
   private final WarningContainer warningContainer = new WarningContainer();
   /** oifits structure */
@@ -127,6 +130,22 @@ public final class UVCoverageData {
     this.stationNames = stationNames;
   }
 
+  /**
+   * Return the base line list
+   * @return base line list
+   */
+  public List<BaseLine> getBaseLines() {
+    return baseLines;
+  }
+
+  /**
+   * Define the base line list
+   * @param baseLines base line list
+   */
+  public void setBaseLines(final List<BaseLine> baseLines) {
+    this.baseLines = baseLines;
+  }
+
   public List<UVBaseLineData> getTargetUVRiseSet() {
     return targetUVRiseSet;
   }
@@ -149,14 +168,6 @@ public final class UVCoverageData {
 
   public void setTargetUVObservability(final List<UVRangeBaseLineData> targetUVObservability) {
     this.targetUVObservability = targetUVObservability;
-  }
-
-  public UVMapData getUvMapData() {
-    return uvMapData;
-  }
-
-  public void setUvMapData(final UVMapData uvMapData) {
-    this.uvMapData = uvMapData;
   }
 
   public WarningContainer getWarningContainer() {
