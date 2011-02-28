@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SampSearchCalQuery.java,v 1.8 2011-02-24 17:11:49 bourgesl Exp $"
+ * "@(#) $Id: SampSearchCalQuery.java,v 1.9 2011-02-28 17:13:14 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.8  2011/02/24 17:11:49  bourgesl
+ * comments
+ *
  * Revision 1.7  2011/02/14 15:33:10  bourgesl
  * use JMCS FileUtils
  *
@@ -32,7 +35,6 @@ package fr.jmmc.aspro.gui.action;
 
 import edu.dartmouth.AstroSkyCalcObservation;
 import fr.jmmc.aspro.AsproGui;
-import fr.jmmc.aspro.gui.BasicObservationForm;
 import fr.jmmc.aspro.model.ConfigurationManager;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.oi.FocalInstrumentMode;
@@ -111,10 +113,8 @@ public final class SampSearchCalQuery extends SampCapabilityAction {
    */
   public Map<?, ?> composeMessage() {
 
-    final BasicObservationForm form = AsproGui.getInstance().getSettingPanel().getObservationForm();
-
     // extract the selected target in the main form :
-    final Target target = form.getSelectedTarget();
+    final Target target = AsproGui.getInstance().getSettingPanel().getObservationForm().getSelectedTarget();
 
     if (target == null) {
       MessagePane.showMessage("Please select a target before calling SearchCal !");

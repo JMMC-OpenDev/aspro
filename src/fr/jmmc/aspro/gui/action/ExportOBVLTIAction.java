@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBVLTIAction.java,v 1.21 2011-02-24 17:11:49 bourgesl Exp $"
+ * "@(#) $Id: ExportOBVLTIAction.java,v 1.22 2011-02-28 17:13:14 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.21  2011/02/24 17:11:49  bourgesl
+ * comments
+ *
  * Revision 1.20  2011/02/22 18:11:29  bourgesl
  * Major UI changes : configuration multi-selection, unique target selection in main form
  *
@@ -158,8 +161,7 @@ public class ExportOBVLTIAction {
 
     final UVCoveragePanel uvCoveragePanel = (UVCoveragePanel) event.getSource();
 
-    // extract UV Coverage Panel information :
-    // TODO : use main panel to get selection (or OM ?)
+    // extract the selected target in the UV Coverage Panel :
     final Target target = uvCoveragePanel.getSelectedTarget();
 
     File file = null;

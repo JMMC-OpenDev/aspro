@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBAction.java,v 1.6 2011-01-07 13:21:08 bourgesl Exp $"
+ * "@(#) $Id: ExportOBAction.java,v 1.7 2011-02-28 17:13:14 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2011/01/07 13:21:08  bourgesl
+ * removed import
+ *
  * Revision 1.5  2010/10/05 15:06:00  bourgesl
  * use AsproGui:getInstance()
  *
@@ -66,7 +69,7 @@ public class ExportOBAction extends RegisteredAction {
 
     final UVCoveragePanel uvCoveragePanel = AsproGui.getInstance().getSettingPanel().getUVCoveragePanel();
 
-    // be sure the uv panel is visible to avoid user wrong inputs :
+    // note : there is at least one target :
     if (uvCoveragePanel != null) {
       uvCoveragePanel.performOBAction(evt);
     } else {
