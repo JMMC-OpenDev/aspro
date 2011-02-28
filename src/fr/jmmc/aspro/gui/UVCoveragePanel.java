@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.86 2011-02-25 16:50:48 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.87 2011-02-28 17:13:48 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.86  2011/02/25 16:50:48  bourgesl
+ * simplify title / file name via observation collection API
+ * multi conf support on plot
+ *
  * Revision 1.85  2011/02/24 17:14:12  bourgesl
  * Major refactoring to support / handle observation collection (multi-conf)
  *
@@ -302,7 +306,9 @@ import fr.jmmc.aspro.gui.task.AsproTaskRegistry;
 import fr.jmmc.aspro.gui.task.ObservationTaskSwingWorker;
 import fr.jmmc.aspro.gui.util.ColorPalette;
 import fr.jmmc.aspro.gui.util.FieldSliderAdapter;
+import fr.jmmc.aspro.model.BaseLine;
 import fr.jmmc.aspro.model.ConfigurationManager;
+import fr.jmmc.aspro.model.ObservationCollectionUVData;
 import fr.jmmc.aspro.model.event.ObservationListener;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.Range;
@@ -317,7 +323,6 @@ import fr.jmmc.aspro.model.oi.InterferometerConfiguration;
 import fr.jmmc.aspro.model.oi.ObservationCollection;
 import fr.jmmc.aspro.model.uvcoverage.UVCoverageData;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
-import fr.jmmc.aspro.model.oi.Pop;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetConfiguration;
 import fr.jmmc.aspro.model.util.AtmosphereQualityUtils;
@@ -420,7 +425,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
   /** last zoom event to check if the zoom area changed */
   private ZoomEvent lastZoomEvent = null;
   /** chart data */
-  private ChartData chartData = null;
+  private ObservationCollectionUVData chartData = null;
   /* swing */
   /** chart panel */
   private SquareChartPanel chartPanel;
@@ -746,10 +751,14 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
    */
   public void performOBAction(final ActionEvent evt) {
 
-    // TODO : MULTI-CONF : what to do (export an OB per CONF ?)
-
     // Use main observation to check instrument :
     final ObservationSetting observation = om.getMainObservation();
+
+    if (observation.getVariants().size() > 1) {
+      MessagePane.showMessage("The application can not generate an Observing Block when multiple configurations are selected !");
+      return;
+    }
+
     final String insName = observation.getInstrumentConfiguration().getName();
 
     if (AsproConstants.INS_AMBER.equals(insName)
@@ -787,14 +796,17 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
    */
   public String getPDFDefaultFileName() {
     if (this.getChartData() != null) {
+      final ObservationSetting observation = this.getChartData().getFirstObservation();
 
-      // TODO MULTI-CONF : adjust file name if multi configurations ...
+      final StringBuilder sb = new StringBuilder(32);
+      sb.append("UV_");
+      sb.append(this.getChartData().getTargetName().replaceAll(fr.jmmc.aspro.AsproConstants.REGEXP_INVALID_TEXT_CHARS, "_")).append('_');
+      sb.append(observation.getInstrumentConfiguration().getName()).append('_');
+      sb.append(this.getChartData().getDisplayConfigurations("_", true)).append('_');
+      sb.append(observation.getWhen().getDate().toString());
+      sb.append('.').append(PDF_EXT);
 
-      // observation used by the plot :
-      final ObservationSetting observation = this.getChartData().getObservationCollection().getFirstObservation();
-      final UVCoverageData uvData = this.getChartData().getUVDataList().get(0);
-
-      return observation.generateFileName(uvData.getTargetName(), "UV", null, PDF_EXT);
+      return sb.toString();
     }
     return null;
   }
@@ -1109,13 +1121,12 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
    */
   private void updateTargetHA() {
     boolean reset = true;
-    if (this.getObservabilityData() != null) {
+
+    // HA min / max are only relevant for a single observation :
+    if (this.getObservabilityData() != null
+            && this.getObservabilityData().size() == 1) {
+
       final String targetName = getSelectedTargetName();
-
-      // TODO MULTI-CONF :fix update Target HA acoordingly :
-
-      // use first for now :
-
       final StarData starData = this.getFirstObservabilityData().getStarData(targetName);
       if (starData != null) {
         final Double min = Range.getMinimum(starData.getObsRangesHA());
@@ -1321,10 +1332,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       // restore the automatic update observation :
       this.setAutoUpdateObservation(prevAutoUpdateObservation);
     }
-    // TODO MULTI-CONF : BAD HACK = incorrect : use the bad observation, not observation collection :
-    if (this.getObservabilityData() != null) {
-      refreshPlot();
-    }
+    refreshPlot();
   }
 
   /**
@@ -1474,7 +1482,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
    * @return first observability Data
    */
   private ObservabilityData getFirstObservabilityData() {
-    return this.currentObsData.get(0);
+    return this.getObservabilityData().get(0);
   }
 
   /**
@@ -1500,7 +1508,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
    * @param obsCollection observation collection to use
    */
   protected void refreshPlot(final ObservationCollection obsCollection) {
-    if (this.getObservabilityData() != null) {
+    if (obsCollection != null && this.getObservabilityData() != null) {
+      // versions are the same for all observability data :
       final ObservabilityData obsData = this.getFirstObservabilityData();
 
       // avoid to mix inconsistent observation and observability data :
@@ -1584,7 +1593,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
   /**
    * TaskSwingWorker child class to compute uv coverage data and refresh the uv coverage plot
    */
-  private final static class UVCoverageSwingWorker extends ObservationTaskSwingWorker<List<UVCoverageData>> {
+  private final static class UVCoverageSwingWorker extends ObservationTaskSwingWorker<ObservationCollectionUVData> {
 
     /* members */
     /** uv panel used for refreshUI callback */
@@ -1648,7 +1657,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
      * @return UV Coverage data
      */
     @Override
-    public List<UVCoverageData> computeInBackground() {
+    public ObservationCollectionUVData computeInBackground() {
 
       // Start the computations :
       final long start = System.nanoTime();
@@ -1672,23 +1681,19 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         }
       }
 
-      if (logger.isLoggable(Level.INFO)) {
-        logger.info("compute : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
-      }
+      final ObservationCollectionUVData uvDataCollection = new ObservationCollectionUVData(getObservationCollection(), this.obsDataList, uvDataList);
 
       if (this.doModelImage) {
-        // use first uvData to store UVMapData :
-        final UVCoverageData uvData = uvDataList.get(0);
         // compute the uv map data :
 
         // update uvMax according to UVCoverage Service (wavelength correction) :
-        this.uvMax = uvData.getUvMax();
+        this.uvMax = uvDataCollection.getFirstUVData().getUvMax();
 
         final Rectangle2D.Double uvRect = new Rectangle2D.Double();
         uvRect.setFrameFromDiagonal(-this.uvMax, -this.uvMax, this.uvMax, this.uvMax);
 
-        // get target from observation for consistency :
-        final Target target = getObservationCollection().getFirstObservation().getTarget(this.targetName);
+        // get target from the first observation for consistency :
+        final Target target = uvDataCollection.getFirstObservation().getTarget(this.targetName);
 
         if (target != null) {
           final List<Model> models = target.getModels();
@@ -1696,7 +1701,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
           if (models != null && models.size() > 0) {
 
             // get observation target version :
-            final int targetVersion = getObservationCollection().getVersion().getTargetVersion();
+            final int targetVersion = uvDataCollection.getVersion().getTargetVersion();
 
             // Check if the previously computed UV Map Data is still valid :
             if (this.currentUVMapData != null
@@ -1707,7 +1712,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
               }
 
               // reuse computed UV Map Data :
-              uvData.setUvMapData(this.currentUVMapData);
+              uvDataCollection.setUvMapData(this.currentUVMapData);
             } else {
 
               if (logger.isLoggable(Level.FINE)) {
@@ -1718,43 +1723,30 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
               final UVMapData uvMapData = ModelUVMapService.computeUVMap(models,
                       uvRect, null, null, this.imageMode, this.imageSize, this.colorModel);
 
-              // define target name and version :
-              uvMapData.setTargetName(this.targetName);
-              uvMapData.setTargetVersion(targetVersion);
+              if (uvMapData != null) {
+                // define target name and version :
+                uvMapData.setTargetName(this.targetName);
+                uvMapData.setTargetVersion(targetVersion);
 
-              uvData.setUvMapData(uvMapData);
+                uvDataCollection.setUvMapData(uvMapData);
+              }
             }
           }
         }
       }
 
-      // TODO MULTI-CONF : should manage merge results (warning, fits ...) in background ...
+      // fast interrupt :
+      if (Thread.currentThread().isInterrupted()) {
+        return null;
+      }
 
-      return uvDataList;
-    }
+      // merge results (warning, fits ...) :
+      if (uvDataCollection.isSingle()) {
+        final UVCoverageData uvData1 = uvDataCollection.getFirstUVData();
 
-    /**
-     * Refresh the plot using the computed UV Coverage data.
-     * This code is executed by the Swing Event Dispatcher thread (EDT)
-     * @param uvDataList computed UV Coverage data
-     */
-    @Override
-    public void refreshUI(final List<UVCoverageData> uvDataList) {
+        uvDataCollection.setWarningContainer(uvData1.getWarningContainer());
+        uvDataCollection.setOiFitsFile(uvData1.getOiFitsFile());
 
-      // Note : the main observation can have changed while computation
-      // i.e. the this.observation.getVersion() != this.getVersion()
-
-      // TODO : MULTI-CONF : what to do (warnings, fits) !!
-
-      if (getObservationCollection().isSingle()) {
-        // use first uvData :
-        final UVCoverageData uvData = uvDataList.get(0);
-
-        // Fire a warnings ready event :
-        ObservationManager.getInstance().fireWarningsReady(uvData.getWarningContainer());
-
-        // update the OIFits structure in the current observation :
-        ObservationManager.getInstance().setOIFitsFile(uvData.getOiFitsFile());
       } else {
 
         // merged warning container :
@@ -1764,14 +1756,38 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
           mergedWarningContainer.addWarningMessages(uvData.getWarningContainer());
         }
 
-        // Fire a warnings ready event :
-        ObservationManager.getInstance().fireWarningsReady(mergedWarningContainer);
+        uvDataCollection.setWarningContainer(mergedWarningContainer);
 
-        // NO merged OIFITS still !
+        // No merged OIFITS still :
+        uvDataCollection.setOiFitsFile(null);
       }
 
+      if (logger.isLoggable(Level.INFO)) {
+        logger.info("compute : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
+      }
+
+      return uvDataCollection;
+    }
+
+    /**
+     * Refresh the plot using the computed UV Coverage data.
+     * This code is executed by the Swing Event Dispatcher thread (EDT)
+     * @param uvDataCollection computed UV Coverage data
+     */
+    @Override
+    public void refreshUI(final ObservationCollectionUVData uvDataCollection) {
+
+      // Note : the main observation can have changed while computation
+      // i.e. the this.observation.getVersion() != this.getVersion()
+
+      // Fire a warnings ready event :
+      ObservationManager.getInstance().fireWarningsReady(uvDataCollection.getWarningContainer());
+
+      // update the OIFits structure in the current observation :
+      ObservationManager.getInstance().setOIFitsFile(uvDataCollection.getOiFitsFile());
+
       // Refresh the GUI using coherent data :
-      this.uvPanel.updatePlot(new ChartData(this.getObservationCollection(), this.obsDataList, uvDataList));
+      this.uvPanel.updatePlot(uvDataCollection);
     }
 
     /**
@@ -1820,7 +1836,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
    * Return the chart data
    * @return chart data
    */
-  private ChartData getChartData() {
+  private ObservationCollectionUVData getChartData() {
     return this.chartData;
   }
 
@@ -1828,7 +1844,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
    * Define the chart data
    * @param chartData chart data
    */
-  private void setChartData(final ChartData chartData) {
+  private void setChartData(final ObservationCollectionUVData chartData) {
     this.chartData = chartData;
   }
 
@@ -1838,14 +1854,11 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
    *
    * @param chartData chart data
    */
-  private void updatePlot(final ChartData chartData) {
+  private void updatePlot(final ObservationCollectionUVData chartData) {
     // memorize chart data (used by export PDF and zoom handling) :
     setChartData(chartData);
 
-    final List<UVCoverageData> uvDataList = chartData.getUVDataList();
-    final UVCoverageData uvData = uvDataList.get(0);
-
-    if (uvData.getTargetName() == null) {
+    if (chartData.getTargetName() == null) {
       // Baseline limits case :
       resetPlot();
 
@@ -1853,31 +1866,22 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       // reset zoom cache :
       this.lastZoomEvent = null;
 
-      final ObservationCollection obsCollection = this.getChartData().getObservationCollection();
-      final ObservationSetting observation = obsCollection.getFirstObservation();
-
-      final List<ObservabilityData> obsDataList = chartData.getObsDataList();
-      final ObservabilityData obsData = obsDataList.get(0);
-
+      final ObservationSetting observation = chartData.getFirstObservation();
+      final ObservabilityData obsData = chartData.getFirstObsData();
       final UVMapData uvMapData = chartData.getUVMapData();
 
       // title :
       ChartUtils.clearTextSubTitle(this.chart);
 
       final StringBuilder sb = new StringBuilder(32);
-      sb.append(obsCollection.getInterferometerConfiguration(false)).append(" - ");
-      sb.append(obsCollection.getDisplayConfigurations(" / "));
-
-      // TODO MULTI-CONF : how to display best PoPs ???
-      // USE LEGEND : 'CONF + PoPs'
-      if (obsCollection.isSingle() && obsData.getBestPops() != null) {
-        sb.append(" + ");
-        for (Pop pop : obsData.getBestPops().getPopList()) {
-          sb.append(pop.getName()).append(' ');
-        }
+      sb.append(chartData.getInterferometerConfiguration(false)).append(" - ");
+      sb.append(observation.getInstrumentConfiguration().getName()).append(" - ");
+      sb.append(chartData.getDisplayConfigurations(" / "));
+      if ((chartData.isSingle() || obsData.isUserPops()) && obsData.getBestPops() != null) {
+        obsData.getBestPops().toString(sb);
       }
       ChartUtils.addSubtitle(this.chart, sb.toString());
-      ChartUtils.addSubtitle(this.chart, "Source : " + uvData.getTargetName());
+      ChartUtils.addSubtitle(this.chart, "Source : " + chartData.getTargetName());
 
       if (observation.getWhen().isNightRestriction()) {
         // date :
@@ -1888,7 +1892,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       setUvPlotScalingFactor(MEGA_LAMBDA_SCALE);
 
       // computed data are valid :
-      updateChart(uvDataList);
+      updateChart(chartData);
 
       // update the background image :
       if (uvMapData == null) {
@@ -1925,15 +1929,10 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       if (this.getChartData() != null && this.getChartData().getUVMapData() != null) {
         // Update model uv map :
 
-        final ObservationSetting observation = this.getChartData().getObservationCollection().getFirstObservation();
-        final UVCoverageData uvData = this.getChartData().getUVDataList().get(0);
         final UVMapData uvMapData = this.getChartData().getUVMapData();
 
-        // get target name :
-        final String targetName = uvData.getTargetName();
-
         // get target from observation for consistency :
-        final Target target = observation.getTarget(targetName);
+        final Target target = this.getChartData().getFirstObservation().getTarget(this.getChartData().getTargetName());
 
         if (target != null) {
           final List<Model> models = target.getModels();
@@ -2119,9 +2118,10 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
   /**
    * Update the datasets
-   * @param uvDataList uv coverage data
+   * @param chartData chart data
    */
-  private void updateChart(final List<UVCoverageData> uvDataList) {
+  private void updateChart(final ObservationCollectionUVData chartData) {
+
     // renderer :
     final AbstractRenderer renderer = (AbstractRenderer) this.xyPlot.getRenderer();
 
@@ -2130,13 +2130,13 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     // side effect with chart theme :
     renderer.setAutoPopulateSeriesPaint(false);
 
-    final XYSeriesCollection dataset = new XYSeriesCollection();
-
-    this.updateUVTracks(dataset, uvDataList);
-    this.updateUVTracksRiseSet(dataset, uvDataList);
+    // Create dataset with UV coverage data :
+    final XYSeriesCollection dataset = prepareDataset(chartData);
+    this.updateUVTracks(dataset, chartData);
+    this.updateUVTracksRiseSet(dataset, chartData);
 
     // define bounds to the uv maximum value (before setDataset) :
-    final double boxSize = toUVPlotScale(uvDataList.get(0).getUvMax());
+    final double boxSize = toUVPlotScale(chartData.getFirstUVData().getUvMax());
     this.xyPlot.defineBounds(boxSize);
 
     // set the main data set :
@@ -2157,48 +2157,94 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
   }
 
   /**
-   * Update the dataset with UV observable tracks
-   * @param dataset dataset to use
-   * @param uvDataList uv coverage data
+   * Prepare the dataset i.e. create all XYSeries once for all
+   * @param chartData chart data
+   * @return dataset
    */
-  private void updateUVTracks(final XYSeriesCollection dataset, final List<UVCoverageData> uvDataList) {
+  private XYSeriesCollection prepareDataset(final ObservationCollectionUVData chartData) {
     final ColorPalette palette = ColorPalette.getDefaultColorPalette();
 
     // renderer :
     final XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) this.xyPlot.getRenderer();
 
-    final boolean single = uvDataList.size() == 1;
+    final XYSeriesCollection dataset = new XYSeriesCollection();
 
-    // Iterate over map data (multi conf) :
-    for (UVCoverageData uvData : uvDataList) {
+    XYSeries xySeries = null;
+    int n;
+
+    final boolean single = chartData.isSingle();
+
+    // Iterate over UV Coverage data (multi conf) :
+    for (int c = 0, len = chartData.size(); c < len; c++) {
+      final UVCoverageData uvData = chartData.getUVDataList().get(c);
+
+      if (!single) {
+        // 1 color per configuration (i.e. per XYSeries) :
+        xySeries = new XYSeries(chartData.getConfigurationNames().get(c), false);
+        xySeries.setNotify(false);
+
+        dataset.addSeries(xySeries);
+
+        n = dataset.getSeriesCount() - 1;
+        renderer.setSeriesPaint(n, palette.getColor(n), false);
+
+      } else {
+        for (BaseLine bl : uvData.getBaseLines()) {
+
+          // 1 color per base line (i.e. per XYSeries) :
+          xySeries = new XYSeries(bl.getName(), false);
+          xySeries.setNotify(false);
+
+          dataset.addSeries(xySeries);
+
+          n = dataset.getSeriesCount() - 1;
+          renderer.setSeriesPaint(n, palette.getColor(n), false);
+        }
+      } // BL
+    }
+
+    return dataset;
+  }
+
+  /**
+   * Update the dataset with UV observable tracks
+   * @param dataset dataset to use
+   * @param chartData chart data
+   */
+  private void updateUVTracks(final XYSeriesCollection dataset, final ObservationCollectionUVData chartData) {
+
+    List<UVRangeBaseLineData> targetUVObservability;
+
+    XYSeries xySeries = null;
+
+    double[] uWMin;
+    double[] vWMin;
+    double[] uWMax;
+    double[] vWMax;
+    double x1, y1, x2, y2;
+
+    final boolean single = chartData.isSingle();
+
+    // Iterate over UV Coverage data (multi conf) :
+    for (int c = 0, len = chartData.size(); c < len; c++) {
+      final UVCoverageData uvData = chartData.getUVDataList().get(c);
 
       // process observable uv ranges :
-      final List<UVRangeBaseLineData> targetUVObservability = uvData.getTargetUVObservability();
+      targetUVObservability = uvData.getTargetUVObservability();
 
       if (targetUVObservability != null) {
         // target is observable :
 
-        XYSeries xySeriesBL = null;
-
-        double[] uWMin;
-        double[] vWMin;
-        double[] uWMax;
-        double[] vWMax;
-        double x1, y1, x2, y2;
-        int n = 0;
-
         if (!single) {
           // 1 color per configuration (i.e. per XYSeries) :
-          xySeriesBL = new XYSeries(uvData.getStationNames(), false);
-          xySeriesBL.setNotify(false);
+          xySeries = dataset.getSeries(chartData.getConfigurationNames().get(c));
         }
 
         for (UVRangeBaseLineData uvBL : targetUVObservability) {
 
           if (single) {
             // 1 color per base line (i.e. per XYSeries) :
-            xySeriesBL = new XYSeries(uvBL.getName(), false);
-            xySeriesBL.setNotify(false);
+            xySeries = dataset.getSeries(uvBL.getName());
           }
 
           uWMin = uvBL.getUWMin();
@@ -2214,34 +2260,21 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
             y2 = toUVPlotScale(vWMin[i]);
 
             // first segment :
-            xySeriesBL.add(x1, y1);
-            xySeriesBL.add(x2, y2);
+            xySeries.add(x1, y1);
+            xySeries.add(x2, y2);
 
             // add an invalid point to break the line between the 2 segments :
-            xySeriesBL.add(Double.NaN, Double.NaN);
+            xySeries.add(Double.NaN, Double.NaN);
 
             // second symetric segment :
-            xySeriesBL.add(-x1, -y1);
-            xySeriesBL.add(-x2, -y2);
+            xySeries.add(-x1, -y1);
+            xySeries.add(-x2, -y2);
 
             // add an invalid point to break the line between the 2 segments :
-            xySeriesBL.add(Double.NaN, Double.NaN);
+            xySeries.add(Double.NaN, Double.NaN);
 
           } // points
-
-          if (single) {
-            dataset.addSeries(xySeriesBL);
-            n = dataset.getSeriesCount() - 1;
-            renderer.setSeriesPaint(n, palette.getColor(n), false);
-          }
-
         } // BL
-
-        if (!single) {
-          dataset.addSeries(xySeriesBL);
-          n = dataset.getSeriesCount() - 1;
-          renderer.setSeriesPaint(n, palette.getColor(n), false);
-        }
       }
     }
   }
@@ -2249,32 +2282,40 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
   /**
    * Update the dataset with UV rise/set tracks
    * @param dataset dataset to use
-   * @param uvDataList uv coverage data
+   * @param chartData chart data
    */
-  private void updateUVTracksRiseSet(final XYSeriesCollection dataset, final List<UVCoverageData> uvDataList) {
+  private void updateUVTracksRiseSet(final XYSeriesCollection dataset, final ObservationCollectionUVData chartData) {
 
-    final boolean single = uvDataList.size() == 1;
+    List<UVBaseLineData> targetUVRiseSet;
 
-    // Iterate over map data (multi conf) :
-    for (UVCoverageData uvData : uvDataList) {
+    XYSeries xySeries = null;
+
+    double[] u;
+    double[] v;
+    double x, y;
+
+    final boolean single = chartData.isSingle();
+
+    // Iterate over UV Coverage data (multi conf) :
+    for (int c = 0, len = chartData.size(); c < len; c++) {
+      final UVCoverageData uvData = chartData.getUVDataList().get(c);
 
       // process uv rise/set :
-      final List<UVBaseLineData> targetUVRiseSet = uvData.getTargetUVRiseSet();
+      targetUVRiseSet = uvData.getTargetUVRiseSet();
 
       if (targetUVRiseSet != null) {
         // target is visible :
 
-        XYSeries xySeriesBL;
-
-        double[] u;
-        double[] v;
-        double x, y;
+        if (!single) {
+          // 1 color per configuration (i.e. per XYSeries) :
+          xySeries = dataset.getSeries(chartData.getConfigurationNames().get(c));
+        }
 
         for (UVBaseLineData uvBL : targetUVRiseSet) {
+
           if (single) {
-            xySeriesBL = dataset.getSeries(uvBL.getName());
-          } else {
-            xySeriesBL = dataset.getSeries(uvData.getStationNames());
+            // 1 color per base line (i.e. per XYSeries) :
+            xySeries = dataset.getSeries(uvBL.getName());
           }
 
           u = uvBL.getU();
@@ -2285,22 +2326,22 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
             x = toUVPlotScale(u[i]);
             y = toUVPlotScale(v[i]);
 
-            xySeriesBL.add(x, y);
+            xySeries.add(x, y);
           } // points
 
           // add an invalid point to break the line between the 2 segments :
-          xySeriesBL.add(Double.NaN, Double.NaN);
+          xySeries.add(Double.NaN, Double.NaN);
 
           // second symetric ellipse line :
           for (int i = 0, size = uvBL.getNPoints(); i < size; i++) {
             x = toUVPlotScale(-u[i]);
             y = toUVPlotScale(-v[i]);
 
-            xySeriesBL.add(x, y);
+            xySeries.add(x, y);
           } // points
 
           // add an invalid point to break the line between the 2 segments :
-          xySeriesBL.add(Double.NaN, Double.NaN);
+          xySeries.add(Double.NaN, Double.NaN);
         } // BL
       }
     }
@@ -2474,9 +2515,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
   /**
    * Return the currently selected target
-   *
-   * TODO : check usages : OBVLTIAction
-   *
    * @return target
    */
   public Target getSelectedTarget() {
@@ -2489,62 +2527,5 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
    */
   private void setSelectedTarget(final Target target) {
     this.currentTarget = target;
-  }
-
-  /**
-   * UV Coverage Chart Data used by the plot
-   */
-  private final static class ChartData {
-
-    /** observation collection */
-    private final ObservationCollection obsCollection;
-    /** observability data */
-    private final List<ObservabilityData> obsDataList;
-    /** UV Coverage data */
-    private final List<UVCoverageData> uvDataList;
-
-    /**
-     * Constructor
-     * @param obsCollection observation collection
-     * @param obsDataList observability data
-     * @param uvDataList UV Coverage data
-     */
-    protected ChartData(final ObservationCollection obsCollection, final List<ObservabilityData> obsDataList, final List<UVCoverageData> uvDataList) {
-      this.obsCollection = obsCollection;
-      this.obsDataList = obsDataList;
-      this.uvDataList = uvDataList;
-    }
-
-    /**
-     * Return the observation collection
-     * @return observation collection
-     */
-    public ObservationCollection getObservationCollection() {
-      return this.obsCollection;
-    }
-
-    /**
-     * Return the observability data
-     * @return observability data
-     */
-    public List<ObservabilityData> getObsDataList() {
-      return this.obsDataList;
-    }
-
-    /**
-     * Return the UV Coverage data
-     * @return UV Coverage data
-     */
-    public List<UVCoverageData> getUVDataList() {
-      return this.uvDataList;
-    }
-
-    /**
-     * Return the UV Map data
-     * @return UV Map data
-     */
-    public UVMapData getUVMapData() {
-      return this.uvDataList.get(0).getUvMapData();
-    }
   }
 }
