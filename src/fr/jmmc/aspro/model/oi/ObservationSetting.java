@@ -577,8 +577,6 @@ public class ObservationSetting
       sb.append(prefix).append('_');
     }
 
-    // TODO MULTI-CONF : incorrect use ObsCollection instead !
-
     // replace invalid characters :
     final String altTargetName = targetName.replaceAll(fr.jmmc.aspro.AsproConstants.REGEXP_INVALID_TEXT_CHARS, "_");
 
