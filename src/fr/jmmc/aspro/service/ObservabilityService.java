@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.67 2011-02-25 16:48:08 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.68 2011-02-28 17:10:18 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.67  2011/02/25 16:48:08  bourgesl
+ * added station names = configuration
+ *
  * Revision 1.66  2011/02/04 17:19:39  bourgesl
  * use busyWait (test)
  *
@@ -1534,10 +1537,16 @@ public final class ObservabilityService {
         this.popCombinations.add(new PopCombination(comb));
       }
 
+      this.data.setUserPops(false);
+
     } else {
       // use the user defined PoPs configuration :
+      final PopCombination user = new PopCombination(userPoPs);
       this.popCombinations = new ArrayList<PopCombination>(1);
-      this.popCombinations.add(new PopCombination(userPoPs));
+      this.popCombinations.add(user);
+
+      this.data.setUserPops(true);
+      this.data.setBestPops(user);
     }
 
     Beam b1, b2;
