@@ -1,3 +1,4 @@
+
 package fr.jmmc.aspro.model.oi;
 
 import java.util.ArrayList;
@@ -8,6 +9,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import fr.jmmc.aspro.model.OIBase;
+
 
 /**
  * 
@@ -37,121 +39,143 @@ import fr.jmmc.aspro.model.OIBase;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "ObservationCollection", propOrder = {
-  "schemaVersion",
-  "name",
-  "description",
-  "observations"
+    "schemaVersion",
+    "name",
+    "description",
+    "observations"
 })
 @XmlRootElement(name = "observationCollection")
 public class ObservationCollection
-        extends OIBase {
+    extends OIBase
+{
 
-  protected float schemaVersion;
-  @XmlElement(required = true)
-  protected String name;
-  protected String description;
-  @XmlElement(name = "observation", required = true)
-  protected List<ObservationSetting> observations;
+    protected float schemaVersion;
+    @XmlElement(required = true)
+    protected String name;
+    protected String description;
+    @XmlElement(name = "observation", required = true)
+    protected List<ObservationSetting> observations;
 
-  /**
-   * Gets the value of the schemaVersion property.
-   *
-   */
-  public float getSchemaVersion() {
-    return schemaVersion;
-  }
-
-  /**
-   * Sets the value of the schemaVersion property.
-   *
-   */
-  public void setSchemaVersion(float value) {
-    this.schemaVersion = value;
-  }
-
-  /**
-   * Gets the value of the name property.
-   *
-   * @return
-   *     possible object is
-   *     {@link String }
-   *
-   */
-  public String getName() {
-    return name;
-  }
-
-  /**
-   * Sets the value of the name property.
-   *
-   * @param value
-   *     allowed object is
-   *     {@link String }
-   *
-   */
-  public void setName(String value) {
-    this.name = value;
-  }
-
-  /**
-   * Gets the value of the description property.
-   *
-   * @return
-   *     possible object is
-   *     {@link String }
-   *
-   */
-  public String getDescription() {
-    return description;
-  }
-
-  /**
-   * Sets the value of the description property.
-   *
-   * @param value
-   *     allowed object is
-   *     {@link String }
-   *
-   */
-  public void setDescription(String value) {
-    this.description = value;
-  }
-
-  /**
-   * Gets the value of the observations property.
-   *
-   * <p>
-   * This accessor method returns a reference to the live list,
-   * not a snapshot. Therefore any modification you make to the
-   * returned list will be present inside the JAXB object.
-   * This is why there is not a <CODE>set</CODE> method for the observations property.
-   *
-   * <p>
-   * For example, to add a new item, do as follows:
-   * <pre>
-   *    getObservations().add(newItem);
-   * </pre>
-   *
-   *
-   * <p>
-   * Objects of the following type(s) are allowed in the list
-   * {@link ObservationSetting }
-   *
-   *
-   */
-  public List<ObservationSetting> getObservations() {
-    if (observations == null) {
-      observations = new ArrayList<ObservationSetting>();
+    /**
+     * Gets the value of the schemaVersion property.
+     * 
+     */
+    public float getSchemaVersion() {
+        return schemaVersion;
     }
-    return this.observations;
+
+    /**
+     * Sets the value of the schemaVersion property.
+     * 
+     */
+    public void setSchemaVersion(float value) {
+        this.schemaVersion = value;
+    }
+
+    /**
+     * Gets the value of the name property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Sets the value of the name property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setName(String value) {
+        this.name = value;
+    }
+
+    /**
+     * Gets the value of the description property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getDescription() {
+        return description;
+    }
+
+    /**
+     * Sets the value of the description property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setDescription(String value) {
+        this.description = value;
+    }
+
+    /**
+     * Gets the value of the observations property.
+     * 
+     * <p>
+     * This accessor method returns a reference to the live list,
+     * not a snapshot. Therefore any modification you make to the
+     * returned list will be present inside the JAXB object.
+     * This is why there is not a <CODE>set</CODE> method for the observations property.
+     * 
+     * <p>
+     * For example, to add a new item, do as follows:
+     * <pre>
+     *    getObservations().add(newItem);
+     * </pre>
+     * 
+     * 
+     * <p>
+     * Objects of the following type(s) are allowed in the list
+     * {@link ObservationSetting }
+     * 
+     * 
+     */
+    public List<ObservationSetting> getObservations() {
+        if (observations == null) {
+            observations = new ArrayList<ObservationSetting>();
+        }
+        return this.observations;
+    }
+    
+//--simple--preserve
+  /**
+   * Public Constructor required by JAXB API
+   */
+  public ObservationCollection() {
+    super();
   }
 
-//--simple--preserve
+  /**
+   * Public constructor which copies information from the given observation collection (by reference)
+   * @param obsCollection observation collection to copy
+   */
+  public ObservationCollection(final ObservationCollection obsCollection) {
+    // copy observation collection :
+    this.schemaVersion = obsCollection.getSchemaVersion();
+    this.name = obsCollection.getName();
+    this.description = obsCollection.getDescription();
+    this.observations = obsCollection.getObservations();
+    // transient :
+    this.version = obsCollection.getVersion();
+  }
+
   /**
    * Return the size of this observation collection
    * @return number of observations
    */
-  public int size() {
+  public final int size() {
     return getObservations().size();
   }
 
@@ -159,7 +183,7 @@ public class ObservationCollection
    * Return true if there is only 1 observation in this observation collection
    * @return true if there is only 1 observation
    */
-  public boolean isSingle() {
+  public final boolean isSingle() {
     return size() == 1;
   }
 
@@ -167,7 +191,7 @@ public class ObservationCollection
    * Return the first observation
    * @return first observation
    */
-  public ObservationSetting getFirstObservation() {
+  public final ObservationSetting getFirstObservation() {
     return getObservations().get(0);
   }
   /** observation version (read only) */
@@ -261,4 +285,5 @@ public class ObservationCollection
     sb.delete(sb.length() - separator.length(), sb.length());
   }
 //--simple--preserve
+
 }
