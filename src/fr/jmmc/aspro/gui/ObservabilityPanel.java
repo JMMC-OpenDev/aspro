@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityPanel.java,v 1.61 2011-02-25 16:50:16 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityPanel.java,v 1.62 2011-02-28 17:14:01 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.61  2011/02/25 16:50:16  bourgesl
+ * simplify title / file name via observation collection API
+ *
  * Revision 1.60  2011/02/24 17:14:12  bourgesl
  * Major refactoring to support / handle observation collection (multi-conf)
  *
@@ -219,6 +222,7 @@ import fr.jmmc.aspro.gui.chart.XYDiamondAnnotation;
 import fr.jmmc.aspro.gui.task.AsproTaskRegistry;
 import fr.jmmc.aspro.gui.task.ObservationTaskSwingWorker;
 import fr.jmmc.aspro.gui.util.ColorPalette;
+import fr.jmmc.aspro.model.ObservationCollectionObsData;
 import fr.jmmc.aspro.model.observability.DateTimeInterval;
 import fr.jmmc.aspro.model.observability.ObservabilityData;
 import fr.jmmc.aspro.model.event.ObservationListener;
@@ -229,7 +233,6 @@ import fr.jmmc.aspro.model.observability.StarObservabilityData;
 import fr.jmmc.aspro.model.observability.SunTimeInterval;
 import fr.jmmc.aspro.model.oi.ObservationCollection;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
-import fr.jmmc.aspro.model.oi.Pop;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.aspro.service.ObservabilityService;
@@ -334,7 +337,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
   /* plot data */
   /** chart data */
-  private ChartData chartData = null;
+  private ObservationCollectionObsData chartData = null;
 
   /* swing */
   /** chart panel */
@@ -508,22 +511,21 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
   public String getPDFDefaultFileName() {
     if (this.getChartData() != null) {
 
-      final ObservationCollection obsCollection = this.getChartData().getObservationCollection();
-      final ObservationSetting observation = obsCollection.getFirstObservation();
+      final ObservationSetting observation = this.getChartData().getFirstObservation();
 
       // flags used by the plot :
-      final ObservabilityData obsData = this.getChartData().getObsDataList().get(0);
+      final ObservabilityData obsData = this.getChartData().getFirstObsData();
       final boolean doBaseLineLimits = obsData.isDoBaseLineLimits();
       final boolean doDetailedOutput = obsData.isDoDetailedOutput();
 
       final StringBuilder sb = new StringBuilder(32);
       sb.append("OBS_");
 
-      final String baseLine = obsCollection.getDisplayConfigurations("_", true);
+      final String baseLine = this.getChartData().getDisplayConfigurations("_", true);
 
       if (doBaseLineLimits) {
         sb.append("LIMITS_");
-        sb.append(obsCollection.getInterferometerConfiguration(true)).append('_');
+        sb.append(this.getChartData().getInterferometerConfiguration(true)).append('_');
         sb.append(baseLine);
 
       } else {
@@ -805,7 +807,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
       }
 
       // Refresh the GUI using coherent data :
-      this.obsPanel.updatePlot(new ChartData(taskObsCollection, obsDataList));
+      this.obsPanel.updatePlot(new ObservationCollectionObsData(taskObsCollection, obsDataList));
     }
   }
 
@@ -813,7 +815,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
    * Return the chart data
    * @return chart data
    */
-  private ChartData getChartData() {
+  private ObservationCollectionObsData getChartData() {
     return this.chartData;
   }
 
@@ -821,7 +823,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
    * Define the chart data
    * @param chartData chart data
    */
-  private void setChartData(final ChartData chartData) {
+  private void setChartData(final ObservationCollectionObsData chartData) {
     this.chartData = chartData;
   }
 
@@ -831,16 +833,13 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
    *
    * @param chartData chart data
    */
-  private void updatePlot(final ChartData chartData) {
+  private void updatePlot(final ObservationCollectionObsData chartData) {
     // memorize chart data (used by export PDF) :
     setChartData(chartData);
 
-    final ObservationCollection obsCollection = this.getChartData().getObservationCollection();
-    final ObservationSetting observation = obsCollection.getFirstObservation();
-
-    final List<ObservabilityData> obsDataList = chartData.getObsDataList();
-    final ObservabilityData obsData = obsDataList.get(0);
-
+    final ObservationSetting observation = chartData.getFirstObservation();
+    final ObservabilityData obsData = chartData.getFirstObsData();
+    
     final boolean useLST = obsData.isUseLST();
     final boolean doBaseLineLimits = obsData.isDoBaseLineLimits();
 
@@ -848,24 +847,17 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     ChartUtils.clearTextSubTitle(this.chart);
 
     final StringBuilder sb = new StringBuilder(32);
-    sb.append(obsCollection.getInterferometerConfiguration(false)).append(" - ");
+    sb.append(chartData.getInterferometerConfiguration(false)).append(" - ");
+    sb.append(observation.getInstrumentConfiguration().getName()).append(" - ");
+    sb.append(chartData.getDisplayConfigurations(" / "));
 
     // TODO MULTI-CONF : fix when plot is correct :
-//    sb.append(obsCollection.getDisplayConfigurations(" / "));
-    sb.append(obsCollection.getFirstObservation().getInstrumentConfiguration().getStations());
-
-    if (!obsCollection.isSingle()) {
+    if (!chartData.isSingle()) {
       sb.append(" (TODO MULTI-CONF : ONLY FIRST CONFIGURATION DISPLAYED)");
     }
 
-    // TODO MULTI-CONF : how to display best PoPs ???
-    // USE LEGEND : 'CONF + PoPs'
-//    if (obsCollection.isSingle() && obsData.getBestPops() != null) {
-    if (obsData.getBestPops() != null) {
-      sb.append(" + ");
-      for (Pop pop : obsData.getBestPops().getPopList()) {
-        sb.append(pop.getName()).append(' ');
-      }
+    if ((chartData.isSingle() || obsData.isUserPops()) && obsData.getBestPops() != null) {
+      obsData.getBestPops().toString(sb);
     }
     ChartUtils.addSubtitle(this.chart, sb.toString());
 
@@ -896,6 +888,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
             obsData.getDateMin(), obsData.getDateMax(),
             doBaseLineLimits);
 
+    // only valid for single observation :
     updateSunMarkers(obsData.getSunIntervals());
 
     // tick color :
@@ -1178,43 +1171,6 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
           break;
         default:
       }
-    }
-  }
-
-  /**
-   * Observability Chart Data used by the plot
-   */
-  private final static class ChartData {
-
-    /** observation collection */
-    private final ObservationCollection obsCollection;
-    /** observability data */
-    private final List<ObservabilityData> obsDataList;
-
-    /**
-     * Constructor
-     * @param obsCollection observation collection
-     * @param obsDataList observability data
-     */
-    protected ChartData(final ObservationCollection obsCollection, final List<ObservabilityData> obsDataList) {
-      this.obsCollection = obsCollection;
-      this.obsDataList = obsDataList;
-    }
-
-    /**
-     * Return the observation collection
-     * @return observation collection
-     */
-    public ObservationCollection getObservationCollection() {
-      return this.obsCollection;
-    }
-
-    /**
-     * Return the observability data
-     * @return observability data
-     */
-    public List<ObservabilityData> getObsDataList() {
-      return this.obsDataList;
     }
   }
 }

@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: InterferometerMapPanel.java,v 1.19 2011-02-25 16:49:54 bourgesl Exp $"
+ * "@(#) $Id: InterferometerMapPanel.java,v 1.20 2011-02-28 17:14:01 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.19  2011/02/25 16:49:54  bourgesl
+ * simplify title / file name via observation collection API
+ *
  * Revision 1.18  2011/02/24 17:14:11  bourgesl
  * Major refactoring to support / handle observation collection (multi-conf)
  *
@@ -78,6 +81,7 @@ import fr.jmmc.aspro.gui.chart.ZoomEvent;
 import fr.jmmc.aspro.gui.chart.ZoomEventListener;
 import fr.jmmc.aspro.gui.util.ColorPalette;
 import fr.jmmc.aspro.model.InterferometerMapData;
+import fr.jmmc.aspro.model.ObservationCollectionMapData;
 import fr.jmmc.aspro.model.event.ObservationListener;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.event.ObservationEvent;
@@ -131,8 +135,8 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
   private String configuration = null;
 
   /* plot data */
-  /** chart data */
-  private ChartData chartData = null;
+  /** observation collection associated with interferometer map data */
+  private ObservationCollectionMapData chartData = null;
 
   /* swing */
   /** chart panel */
@@ -173,13 +177,10 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
    */
   public String getPDFDefaultFileName() {
     if (this.getChartData() != null) {
-
-      final ObservationCollection obsCollection = this.getChartData().getObservationCollection();
-
       final StringBuilder sb = new StringBuilder(32);
       sb.append("MAP_");
-      sb.append(obsCollection.getInterferometerConfiguration(true)).append('_');
-      sb.append(obsCollection.getDisplayConfigurations("_", true)).append('.').append(PDF_EXT);
+      sb.append(this.getChartData().getInterferometerConfiguration(true)).append('_');
+      sb.append(this.getChartData().getDisplayConfigurations("_", true)).append('.').append(PDF_EXT);
 
       return sb.toString();
     }
@@ -312,7 +313,7 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
         mapDataList.add(InterferometerMapService.compute(observation));
       }
 
-      this.updatePlot(new ChartData(obsCollection, mapDataList));
+      this.updatePlot(new ObservationCollectionMapData(obsCollection, mapDataList));
 
       if (logger.isLoggable(Level.INFO)) {
         logger.info("plot : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
@@ -324,7 +325,7 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
    * Return the chart data
    * @return chart data
    */
-  private ChartData getChartData() {
+  private ObservationCollectionMapData getChartData() {
     return this.chartData;
   }
 
@@ -332,7 +333,7 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
    * Define the chart data
    * @param chartData chart data
    */
-  private void setChartData(final ChartData chartData) {
+  private void setChartData(final ObservationCollectionMapData chartData) {
     this.chartData = chartData;
   }
 
@@ -342,23 +343,21 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
    *
    * @param chartData chart data
    */
-  private void updatePlot(final ChartData chartData) {
+  private void updatePlot(final ObservationCollectionMapData chartData) {
     // memorize chart data (used by export PDF) :
     setChartData(chartData);
-
-    final ObservationCollection obsCollection = chartData.getObservationCollection();
 
     // title :
     ChartUtils.clearTextSubTitle(this.chart);
 
     final StringBuilder sb = new StringBuilder(32);
-    sb.append(obsCollection.getInterferometerConfiguration(false)).append(" - ");
-    sb.append(obsCollection.getDisplayConfigurations(" / "));
+    sb.append(chartData.getInterferometerConfiguration(false)).append(" - ");
+    sb.append(chartData.getDisplayConfigurations(" / "));
 
     ChartUtils.addSubtitle(this.chart, sb.toString());
 
     // computed data are valid :
-    updateChart(chartData.getMapDataList());
+    updateChart(chartData);
 
     // update theme at end :
     ChartUtilities.applyCurrentTheme(this.chart);
@@ -368,12 +367,12 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
 
   /**
    * Update the datasets
-   * @param mapDataList interferometer map data
+   * @param chartData chart data
    */
-  private void updateChart(final List<InterferometerMapData> mapDataList) {
+  private void updateChart(final ObservationCollectionMapData chartData) {
 
     // First map Data is always defined :
-    final InterferometerMapData mapData1 = mapDataList.get(0);
+    final InterferometerMapData mapData1 = chartData.getFirstMapData();
 
     // 1 - Stations :
 
@@ -403,16 +402,16 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
 
     final XYSeriesCollection dataset = new XYSeriesCollection();
 
-    XYSeries xySeriesBL = null;
+    XYSeries xySeries = null;
 
     String[] blName;
     double[] blX1, blY1, blX2, blY2;
     int n = 0;
 
-    final boolean single = mapDataList.size() == 1;
+    final boolean single = chartData.isSingle();
 
     // Iterate over map data (multi conf) :
-    for (InterferometerMapData mapData : mapDataList) {
+    for (InterferometerMapData mapData : chartData.getMapDataList()) {
       blName = mapData.getBaselineName();
       blX1 = mapData.getBaselineStationX1();
       blY1 = mapData.getBaselineStationY1();
@@ -421,40 +420,36 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
 
       if (!single) {
         // 1 color per configuration (i.e. per XYSeries) :
-        xySeriesBL = new XYSeries(mapData.getStationNames(), false);
-        xySeriesBL.setNotify(false);
+        xySeries = new XYSeries(mapData.getStationNames(), false);
+        xySeries.setNotify(false);
+
+        dataset.addSeries(xySeries);
+        n = dataset.getSeriesCount() - 1;
+        renderer.setSeriesPaint(n, palette.getColor(n), false);
       }
 
       for (int i = 0, len = blName.length; i < len; i++) {
 
         if (single) {
           // 1 color per base line (i.e. per XYSeries) :
-          xySeriesBL = new XYSeries(blName[i], false);
-          xySeriesBL.setNotify(false);
-        }
+          xySeries = new XYSeries(blName[i], false);
+          xySeries.setNotify(false);
 
-        // first station :
-        xySeriesBL.add(blX1[i], blY1[i]);
-
-        // second station :
-        xySeriesBL.add(blX2[i], blY2[i]);
-
-        // add an invalid point to break the line between the 2 segments :
-        xySeriesBL.add(Double.NaN, Double.NaN);
-
-        if (single) {
-          dataset.addSeries(xySeriesBL);
+          dataset.addSeries(xySeries);
           n = dataset.getSeriesCount() - 1;
           renderer.setSeriesPaint(n, palette.getColor(n), false);
         }
-      }
 
-      if (!single) {
-        dataset.addSeries(xySeriesBL);
-        n = dataset.getSeriesCount() - 1;
-        renderer.setSeriesPaint(n, palette.getColor(n), false);
-      }
+        // first station :
+        xySeries.add(blX1[i], blY1[i]);
 
+        // second station :
+        xySeries.add(blX2[i], blY2[i]);
+
+        // add an invalid point to break the line between the 2 segments :
+        xySeries.add(Double.NaN, Double.NaN);
+
+      } // BL
     }
 
     // set the second data set :
@@ -508,43 +503,6 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
           break;
         default:
       }
-    }
-  }
-
-  /**
-   * Interferometer Map Chart Data used by the plot
-   */
-  private final static class ChartData {
-
-    /** observation collection */
-    private final ObservationCollection obsCollection;
-    /** interferometer map data */
-    private final List<InterferometerMapData> mapDataList;
-
-    /**
-     * Constructor
-     * @param obsCollection observation collection
-     * @param mapDataList interferometer map data
-     */
-    protected ChartData(final ObservationCollection obsCollection, final List<InterferometerMapData> mapDataList) {
-      this.obsCollection = obsCollection;
-      this.mapDataList = mapDataList;
-    }
-
-    /**
-     * Return the observation collection
-     * @return observation collection
-     */
-    public ObservationCollection getObservationCollection() {
-      return this.obsCollection;
-    }
-
-    /**
-     * Return the interferometer map data
-     * @return interferometer map data
-     */
-    public List<InterferometerMapData> getMapDataList() {
-      return this.mapDataList;
     }
   }
 }
