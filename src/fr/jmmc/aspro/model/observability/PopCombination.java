@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: PopCombination.java,v 1.2 2011-01-25 13:48:56 bourgesl Exp $"
+ * "@(#) $Id: PopCombination.java,v 1.3 2011-02-28 17:11:38 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2011/01/25 13:48:56  bourgesl
+ * javadoc
+ *
  * Revision 1.1  2010/01/08 16:48:30  bourgesl
  * package refactoring
  *
@@ -85,5 +88,16 @@ public final class PopCombination {
   @Override
   public String toString() {
     return this.identifier;
+  }
+
+  /**
+   * Append this pop combination to the given buffer using the format '+ PopN PopN ...'
+   * @param sb buffer to append to
+   */
+  public void toString(final StringBuilder sb) {
+    sb.append(" + ");
+    for (Pop pop : getPopList()) {
+      sb.append(pop.getName()).append(' ');
+    }
   }
 }
