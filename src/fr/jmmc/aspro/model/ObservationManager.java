@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationManager.java,v 1.59 2011-02-25 16:52:11 bourgesl Exp $"
+ * "@(#) $Id: ObservationManager.java,v 1.60 2011-02-28 17:12:12 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.59  2011/02/25 16:52:11  bourgesl
+ * removed unused code
+ *
  * Revision 1.58  2011/02/24 17:14:13  bourgesl
  * Major refactoring to support / handle observation collection (multi-conf)
  *
@@ -672,7 +675,6 @@ public final class ObservationManager extends BaseOIManager {
       logger.fine("fireObservationRefresh : " + toString(getObservationCollection()));
     }
 
-    // TODO : remove observation
     fireEvent(new ObservationEvent(ObservationEventType.REFRESH, getObservationCollection()));
   }
 
@@ -689,7 +691,6 @@ public final class ObservationManager extends BaseOIManager {
       logger.fine("fireObservationRefreshUV : " + toString(getObservationCollection()));
     }
 
-    // TODO : remove observation
     fireEvent(new ObservationEvent(ObservationEventType.REFRESH_UV, getObservationCollection()));
   }
 

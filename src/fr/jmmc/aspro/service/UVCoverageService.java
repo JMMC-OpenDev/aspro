@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoverageService.java,v 1.40 2011-02-25 16:48:08 bourgesl Exp $"
+ * "@(#) $Id: UVCoverageService.java,v 1.41 2011-02-28 17:12:12 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.40  2011/02/25 16:48:08  bourgesl
+ * added station names = configuration
+ *
  * Revision 1.39  2011/02/07 15:23:10  bourgesl
  * null check
  *
@@ -562,12 +565,14 @@ public final class UVCoverageService {
   private void prepareObservation() throws IllegalStateException {
     // Get AstroSkyCalc instance :
     this.sc = this.obsData.getDateCalc();
-    // Get station names :
+    // Copy station names :
     this.data.setStationNames(this.obsData.getStationNames());
     // Get beams :
     this.beams = this.obsData.getBeams();
     // Get baselines :
     this.baseLines = this.obsData.getBaseLines();
+    // Copy baseLines :
+    this.data.setBaseLines(this.obsData.getBaseLines());
 
     // Get starData for the selected target name :
     this.starData = this.obsData.getStarData(this.targetName);
