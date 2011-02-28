@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityData.java,v 1.12 2011-02-25 16:51:29 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityData.java,v 1.13 2011-02-28 17:12:01 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.12  2011/02/25 16:51:29  bourgesl
+ * added station names = configuration
+ *
  * Revision 1.11  2011/02/03 17:27:38  bourgesl
  * added observation version in constructor
  *
@@ -84,6 +87,8 @@ public final class ObservabilityData {
   private double moonIllumPercent = 0d;
   /** map of StarObservabilityData list keyed by target name */
   private final Map<String, List<StarObservabilityData>> mapStarVisibilities = new LinkedHashMap<String, List<StarObservabilityData>>();
+  /** flag indicating to use user PoPs */
+  private boolean userPops;
   /** optional best PoPs combination */
   private PopCombination bestPops;
 
@@ -236,6 +241,22 @@ public final class ObservabilityData {
    */
   public Map<String, List<StarObservabilityData>> getMapStarVisibilities() {
     return this.mapStarVisibilities;
+  }
+
+  /**
+   * Return the flag indicating to use user PoPs
+   * @return flag indicating to use user PoPs
+   */
+  public boolean isUserPops() {
+    return userPops;
+  }
+
+  /**
+   * Define the flag indicating to use user PoPs
+   * @param userPops flag indicating to use user PoPs
+   */
+  public void setUserPops(final boolean userPops) {
+    this.userPops = userPops;
   }
 
   /**
