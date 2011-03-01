@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SlidingXYPlotAdapter.java,v 1.4 2010-12-15 13:33:18 bourgesl Exp $"
+ * "@(#) $Id: SlidingXYPlotAdapter.java,v 1.5 2011-03-01 17:14:00 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2010/12/15 13:33:18  bourgesl
+ * removed comment
+ *
  * Revision 1.3  2010/10/21 16:49:12  bourgesl
  * better annotation position and font size
  * modified bar width for many targets
@@ -23,6 +26,7 @@ package fr.jmmc.aspro.gui.chart;
 
 import fr.jmmc.aspro.AsproConstants;
 import java.awt.Color;
+import java.awt.Paint;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -51,9 +55,9 @@ public final class SlidingXYPlotAdapter {
           className_);
   /* members */
   /** jFreeChart instance */
-  private final JFreeChart localJFreeChart;
+  private final JFreeChart chart;
   /** xy plot instance */
-  private XYPlot localXYPlot;
+  private final XYPlot xyPlot;
   /** JMMC annotation */
   private XYTextAnnotation aJMMC = null;
   /** plot renderer to define annotations */
@@ -71,7 +75,7 @@ public final class SlidingXYPlotAdapter {
   /** data symbols (targets) */
   private List<String> symbols = null;
   /** data colors (targets) */
-  private List<Color> colors = null;
+  private List<Paint> colors = null;
   /** annotations */
   private Map<Integer, List<XYAnnotation>> annotations = null;
   /** last used start position for the subset */
@@ -86,8 +90,8 @@ public final class SlidingXYPlotAdapter {
    * @param maxElements max items in the chart view
    */
   public SlidingXYPlotAdapter(final JFreeChart chart, final XYPlot plot, final int maxElements) {
-    this.localJFreeChart = chart;
-    this.localXYPlot = plot;
+    this.chart = chart;
+    this.xyPlot = plot;
     this.renderer = (XYBarRenderer) plot.getRenderer();
     this.maxViewItems = maxElements;
   }
@@ -99,7 +103,7 @@ public final class SlidingXYPlotAdapter {
    * @param colors data colors
    * @param annotations map of annotations keyed by position
    */
-  public void setData(final TaskSeriesCollection collection, final List<String> symbols, final List<Color> colors,
+  public void setData(final TaskSeriesCollection collection, final List<String> symbols, final List<Paint> colors,
                       final Map<Integer, List<XYAnnotation>> annotations) {
     this.size = symbols.size();
     this.collection = collection;
@@ -231,33 +235,33 @@ public final class SlidingXYPlotAdapter {
     // side effect with chart theme :
     this.renderer.setAutoPopulateSeriesPaint(false);
 
-    final TaskSeriesCollection localTaskSeriesCollection = new TaskSeriesCollection();
+    final TaskSeriesCollection subTaskSeriesCollection = new TaskSeriesCollection();
 
-    final String[] localSymbols = new String[newSize];
+    final String[] subSymbols = new String[newSize];
 
     for (int i = start, n = 0; i < end; i++, n++) {
-      localSymbols[n] = this.symbols.get(i);
+      subSymbols[n] = this.symbols.get(i);
 
-      localTaskSeriesCollection.add(this.collection.getSeries(i));
+      subTaskSeriesCollection.add(this.collection.getSeries(i));
 
       // color :
       this.renderer.setSeriesPaint(n, this.colors.get(i), false);
     }
 
-    final XYTaskDataset dataset = new XYTaskDataset(localTaskSeriesCollection);
+    final XYTaskDataset dataset = new XYTaskDataset(subTaskSeriesCollection);
 
     dataset.setSeriesWidth(barWidth);
 
     // update dataset :
-    this.localXYPlot.setDataset(dataset);
+    this.xyPlot.setDataset(dataset);
 
     // change the Domain axis (vertical) :
-    final SymbolAxis localSymbolAxis = new SymbolAxis(null, localSymbols);
-    localSymbolAxis.setInverted(true);
-    localSymbolAxis.setGridBandsVisible(false);
-    localSymbolAxis.setAutoRange(false);
-    localSymbolAxis.setRange(rangeMin, rangeMax);
-    this.localXYPlot.setDomainAxis(localSymbolAxis);
+    final SymbolAxis symbolAxis = new SymbolAxis(null, subSymbols);
+    symbolAxis.setInverted(true);
+    symbolAxis.setGridBandsVisible(false);
+    symbolAxis.setAutoRange(false);
+    symbolAxis.setRange(rangeMin, rangeMax);
+    this.xyPlot.setDomainAxis(symbolAxis);
 
     // remove Annotations :
     this.renderer.removeAnnotations();
@@ -303,22 +307,22 @@ public final class SlidingXYPlotAdapter {
     // annotation JMMC (fixed position) :
     if (this.aJMMC == null) {
       this.aJMMC = ChartUtils.createXYTextAnnotation(AsproConstants.JMMC_ANNOTATION,
-              localSymbolAxis.getRange().getUpperBound(),
-              this.localXYPlot.getRangeAxis().getRange().getUpperBound());
+              symbolAxis.getRange().getUpperBound(),
+              this.xyPlot.getRangeAxis().getRange().getUpperBound());
       this.aJMMC.setFont(ChartUtils.SMALL_TEXT_ANNOTATION_FONT);
       this.aJMMC.setTextAnchor(TextAnchor.BOTTOM_RIGHT);
       this.aJMMC.setPaint(Color.DARK_GRAY);
     } else {
-      this.aJMMC.setX(localSymbolAxis.getRange().getUpperBound());
-      this.aJMMC.setY(this.localXYPlot.getRangeAxis().getRange().getUpperBound());
+      this.aJMMC.setX(symbolAxis.getRange().getUpperBound());
+      this.aJMMC.setY(this.xyPlot.getRangeAxis().getRange().getUpperBound());
     }
     this.renderer.addAnnotation(aJMMC, Layer.BACKGROUND);
 
     // tick color :
-    this.localXYPlot.getRangeAxis().setTickMarkPaint(Color.BLACK);
-    this.localXYPlot.getDomainAxis().setTickMarkPaint(Color.BLACK);
+    this.xyPlot.getRangeAxis().setTickMarkPaint(Color.BLACK);
+    this.xyPlot.getDomainAxis().setTickMarkPaint(Color.BLACK);
 
     // update theme at end :
-    ChartUtilities.applyCurrentTheme(this.localJFreeChart);
+    ChartUtilities.applyCurrentTheme(this.chart);
   }
 }
