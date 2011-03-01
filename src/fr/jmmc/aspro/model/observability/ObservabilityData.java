@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityData.java,v 1.13 2011-02-28 17:12:01 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityData.java,v 1.14 2011-03-01 17:16:22 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.13  2011/02/28 17:12:01  bourgesl
+ * added user Pops flag to know if the best PoPs is in fact the user PoPs
+ *
  * Revision 1.12  2011/02/25 16:51:29  bourgesl
  * added station names = configuration
  *
@@ -52,10 +55,9 @@ import edu.dartmouth.AstroSkyCalc;
 import fr.jmmc.aspro.model.BaseLine;
 import fr.jmmc.aspro.model.Beam;
 import fr.jmmc.aspro.model.ObservationVersion;
-import java.util.Arrays;
+import fr.jmmc.aspro.model.oi.Target;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -85,8 +87,10 @@ public final class ObservabilityData {
   private List<SunTimeInterval> sunIntervals = null;
   /** moon illumination fraction (percent) */
   private double moonIllumPercent = 0d;
+  /** target list (useful for baseline limits) */
+  private List<Target> targets;
   /** map of StarObservabilityData list keyed by target name */
-  private final Map<String, List<StarObservabilityData>> mapStarVisibilities = new LinkedHashMap<String, List<StarObservabilityData>>();
+  private final Map<String, List<StarObservabilityData>> mapStarVisibilities = new HashMap<String, List<StarObservabilityData>>();
   /** flag indicating to use user PoPs */
   private boolean userPops;
   /** optional best PoPs combination */
@@ -218,12 +222,19 @@ public final class ObservabilityData {
   }
 
   /**
-   * Add the StarObservabilityData for the given target name
-   * @param name target name
-   * @param starVis StarObservabilityData to add
+   * Return the target list (useful for baseline limits)
+   * @return target list (useful for baseline limits)
    */
-  public void addStarVisibilities(final String name, final StarObservabilityData starVis) {
-    this.mapStarVisibilities.put(name, Arrays.asList(starVis));
+  public List<Target> getTargets() {
+    return targets;
+  }
+
+  /**
+   * Define the target list (useful for baseline limits)
+   * @param targets target list (useful for baseline limits)
+   */
+  public void setTargets(final List<Target> targets) {
+    this.targets = targets;
   }
 
   /**
@@ -292,10 +303,18 @@ public final class ObservabilityData {
     this.dateCalc = dateCalc;
   }
 
+  /**
+   * Return the configuration
+   * @return configuration
+   */
   public String getStationNames() {
     return stationNames;
   }
 
+  /**
+   * Define the configuration
+   * @param stationNames configuration
+   */
   public void setStationNames(final String stationNames) {
     this.stationNames = stationNames;
   }
