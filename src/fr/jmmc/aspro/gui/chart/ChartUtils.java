@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ChartUtils.java,v 1.16 2011-02-25 16:50:58 bourgesl Exp $"
+ * "@(#) $Id: ChartUtils.java,v 1.17 2011-03-01 17:13:11 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.16  2011/02/25 16:50:58  bourgesl
+ * comment on legends
+ *
  * Revision 1.15  2011/02/22 18:10:16  bourgesl
  * added createChartPanel / createSquareChartPanel to avoid redundancy and visual bugs with big screens
  *
@@ -58,6 +61,9 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
+import java.awt.Paint;
+import java.awt.Shape;
+import java.awt.Stroke;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.util.HashMap;
@@ -66,6 +72,7 @@ import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.LegendItem;
 import org.jfree.chart.StandardChartTheme;
 import org.jfree.chart.annotations.XYTextAnnotation;
 import org.jfree.chart.axis.DateTickUnit;
@@ -95,6 +102,9 @@ import org.jfree.ui.RectangleInsets;
  */
 public final class ChartUtils {
 
+  /** Class logger */
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
+          ChartUtils.class.getName());
   /** cache for annotation fonts to autofit size */
   private final static Map<Integer, Font> cachedFonts = new HashMap<Integer, Font>();
   /** The default font for titles. */
@@ -254,27 +264,26 @@ public final class ChartUtils {
    */
   public static JFreeChart createXYBarChart() {
     // no title :
-    // TODO MULTI-CONF : TEST LEGEND on Observability plot :
-    final JFreeChart localJFreeChart = ChartFactory.createXYBarChart("", null, false, null, null, PlotOrientation.HORIZONTAL, false, false, false);
+    final JFreeChart chart = ChartFactory.createXYBarChart("", null, false, null, null, PlotOrientation.HORIZONTAL, true, false, false);
 
-    final XYPlot localXYPlot = (XYPlot) localJFreeChart.getPlot();
+    final XYPlot xyPlot = (XYPlot) chart.getPlot();
 
-    localXYPlot.setDomainCrosshairVisible(false);
+    xyPlot.setDomainCrosshairVisible(false);
     // show crosshair on date axis :
-    localXYPlot.setRangeCrosshairLockedOnData(false);
-    localXYPlot.setRangeCrosshairVisible(false);
+    xyPlot.setRangeCrosshairLockedOnData(false);
+    xyPlot.setRangeCrosshairVisible(false);
 
-    localXYPlot.getDomainAxis().setVisible(false);
-    localXYPlot.getRangeAxis().setVisible(false);
+    xyPlot.getDomainAxis().setVisible(false);
+    xyPlot.getRangeAxis().setVisible(false);
 
     // Adjust outline :
-    localXYPlot.setOutlineStroke(new BasicStroke(1.f));
+    xyPlot.setOutlineStroke(new BasicStroke(1.f));
 
-    final XYBarRenderer localXYBarRenderer = (XYBarRenderer) localXYPlot.getRenderer();
-    localXYBarRenderer.setUseYInterval(true);
-    localXYBarRenderer.setDrawBarOutline(true);
+    final XYBarRenderer xyBarRenderer = (XYBarRenderer) xyPlot.getRenderer();
+    xyBarRenderer.setUseYInterval(true);
+    xyBarRenderer.setDrawBarOutline(true);
 
-    return localJFreeChart;
+    return chart;
   }
 
   /**
@@ -285,35 +294,35 @@ public final class ChartUtils {
    * @return jFreeChart instance
    */
   public static JFreeChart createSquareXYLineChart(final String xLabel, final String yLabel, final boolean legend) {
-    final JFreeChart localJFreeChart = createSquareXYLineChart(null, xLabel, yLabel, null, PlotOrientation.VERTICAL, legend, false, false);
+    final JFreeChart chart = createSquareXYLineChart(null, xLabel, yLabel, null, PlotOrientation.VERTICAL, legend, false, false);
 
-    final SquareXYPlot localXYPlot = (SquareXYPlot) localJFreeChart.getPlot();
+    final SquareXYPlot xyPlot = (SquareXYPlot) chart.getPlot();
 
     // reset bounds to [-1;1]
-    localXYPlot.defineBounds(1);
+    xyPlot.defineBounds(1);
 
     // display axes at [0,0] :
-    localXYPlot.setDomainZeroBaselineVisible(true);
-    localXYPlot.setRangeZeroBaselineVisible(true);
+    xyPlot.setDomainZeroBaselineVisible(true);
+    xyPlot.setRangeZeroBaselineVisible(true);
 
     // use custom units :
-    localXYPlot.getRangeAxis().setStandardTickUnits(ChartUtils.createScientificTickUnits());
-    localXYPlot.getDomainAxis().setStandardTickUnits(ChartUtils.createScientificTickUnits());
+    xyPlot.getRangeAxis().setStandardTickUnits(ChartUtils.createScientificTickUnits());
+    xyPlot.getDomainAxis().setStandardTickUnits(ChartUtils.createScientificTickUnits());
 
     // tick color :
-    localXYPlot.getRangeAxis().setTickMarkPaint(Color.BLACK);
-    localXYPlot.getDomainAxis().setTickMarkPaint(Color.BLACK);
+    xyPlot.getRangeAxis().setTickMarkPaint(Color.BLACK);
+    xyPlot.getDomainAxis().setTickMarkPaint(Color.BLACK);
 
-    final XYLineAndShapeRenderer localLineAndShapeRenderer = (XYLineAndShapeRenderer) localXYPlot.getRenderer();
+    final XYLineAndShapeRenderer lineAndShapeRenderer = (XYLineAndShapeRenderer) xyPlot.getRenderer();
 
     // force to use the base stroke :
-    localLineAndShapeRenderer.setAutoPopulateSeriesStroke(false);
-    localLineAndShapeRenderer.setBaseStroke(new BasicStroke(1.25F));
+    lineAndShapeRenderer.setAutoPopulateSeriesStroke(false);
+    lineAndShapeRenderer.setBaseStroke(new BasicStroke(1.25F));
 
     // update theme at end :
-    ChartUtilities.applyCurrentTheme(localJFreeChart);
+    ChartUtilities.applyCurrentTheme(chart);
 
-    return localJFreeChart;
+    return chart;
   }
 
   /**
@@ -378,31 +387,69 @@ public final class ChartUtils {
 
   /**
    * Add a sub title to the given chart
-   * @param localJFreeChart chart
+   * @param chart chart to use
    * @param text sub title content
    */
-  public static void addSubtitle(final JFreeChart localJFreeChart, final String text) {
-    localJFreeChart.addSubtitle(new TextTitle(text, DEFAULT_TITLE_FONT));
+  public static void addSubtitle(final JFreeChart chart, final String text) {
+    chart.addSubtitle(new TextTitle(text, DEFAULT_TITLE_FONT));
   }
 
   /**
    * Clear the sub titles except the legend
-   * @param localJFreeChart chart to process
+   * @param chart chart to process
    */
-  public static void clearTextSubTitle(final JFreeChart localJFreeChart) {
+  public static void clearTextSubTitle(final JFreeChart chart) {
     Title legend = null;
     Title title;
-    for (int i = 0; i < localJFreeChart.getSubtitleCount(); i++) {
-      title = localJFreeChart.getSubtitle(i);
+    for (int i = 0; i < chart.getSubtitleCount(); i++) {
+      title = chart.getSubtitle(i);
       if (title instanceof LegendTitle) {
         legend = title;
         break;
       }
     }
-    localJFreeChart.clearSubtitles();
+    chart.clearSubtitles();
     if (legend != null) {
-      localJFreeChart.addSubtitle(legend);
+      chart.addSubtitle(legend);
     }
+  }
+
+  /**
+   * Returns a default legend item for the specified series.
+   * note : code inspired from XYBarRenderer.createLegendItem()
+   *
+   * @param xyBarRenderer XY bar renderer to get visual default attributes (font, colors ...)
+   * @param label the legend label
+   * @param paint the legend shape paint
+   *
+   * @return A legend item for the series.
+   */
+  public static LegendItem createLegendItem(final XYBarRenderer xyBarRenderer, final String label, final Paint paint) {
+
+    // use first serie to get visual attributes :
+    final int series = 0;
+
+    final Shape shape = xyBarRenderer.getLegendBar();
+
+    final Paint outlinePaint = xyBarRenderer.lookupSeriesOutlinePaint(series);
+    final Stroke outlineStroke = xyBarRenderer.lookupSeriesOutlineStroke(series);
+
+    final LegendItem item;
+    if (xyBarRenderer.isDrawBarOutline()) {
+      item = new LegendItem(label, null, null, null, shape, paint, outlineStroke, outlinePaint);
+    } else {
+      item = new LegendItem(label, null, null, null, shape, paint);
+    }
+    item.setLabelFont(xyBarRenderer.lookupLegendTextFont(series));
+    final Paint labelPaint = xyBarRenderer.lookupLegendTextPaint(series);
+    if (labelPaint != null) {
+      item.setLabelPaint(labelPaint);
+    }
+    if (xyBarRenderer.getGradientPaintTransformer() != null) {
+      item.setFillPaintTransformer(xyBarRenderer.getGradientPaintTransformer());
+    }
+
+    return item;
   }
 
   /**
