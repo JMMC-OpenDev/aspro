@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.87 2011-02-28 17:13:48 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.88 2011-03-01 17:11:38 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.87  2011/02/28 17:13:48  bourgesl
+ * fixed dataset (always defined) that use CONF + PoPs in the legend
+ *
  * Revision 1.86  2011/02/25 16:50:48  bourgesl
  * simplify title / file name via observation collection API
  * multi conf support on plot
@@ -303,7 +306,7 @@ import fr.jmmc.aspro.gui.chart.SquareXYPlot;
 import fr.jmmc.aspro.gui.chart.ZoomEvent;
 import fr.jmmc.aspro.gui.chart.ZoomEventListener;
 import fr.jmmc.aspro.gui.task.AsproTaskRegistry;
-import fr.jmmc.aspro.gui.task.ObservationTaskSwingWorker;
+import fr.jmmc.aspro.gui.task.ObservationCollectionTaskSwingWorker;
 import fr.jmmc.aspro.gui.util.ColorPalette;
 import fr.jmmc.aspro.gui.util.FieldSliderAdapter;
 import fr.jmmc.aspro.model.BaseLine;
@@ -754,8 +757,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     // Use main observation to check instrument :
     final ObservationSetting observation = om.getMainObservation();
 
-    if (observation.getVariants().size() > 1) {
-      MessagePane.showMessage("The application can not generate an Observing Block when multiple configurations are selected !");
+    if (!observation.isSingle()) {
+      MessagePane.showMessage("Aspro 2 can not generate an Observing Block when multiple configurations are selected !");
       return;
     }
 
@@ -775,7 +778,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       ExportOBVegaAction.getInstance().process();
 
     } else {
-      MessagePane.showMessage("The application can not generate an Observing Block for this instrument [" + insName + "] !");
+      MessagePane.showMessage("Aspro 2 can not generate an Observing Block for this instrument [" + insName + "] !");
     }
   }
 
@@ -802,8 +805,11 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       sb.append("UV_");
       sb.append(this.getChartData().getTargetName().replaceAll(fr.jmmc.aspro.AsproConstants.REGEXP_INVALID_TEXT_CHARS, "_")).append('_');
       sb.append(observation.getInstrumentConfiguration().getName()).append('_');
-      sb.append(this.getChartData().getDisplayConfigurations("_", true)).append('_');
-      sb.append(observation.getWhen().getDate().toString());
+      sb.append(this.getChartData().getDisplayConfigurations("_", true));
+      if (observation.getWhen().isNightRestriction()) {
+        sb.append('_');
+        sb.append(observation.getWhen().getDate().toString());
+      }
       sb.append('.').append(PDF_EXT);
 
       return sb.toString();
@@ -1553,12 +1559,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     // check if observability data are available :
     if (this.getObservabilityData() != null) {
 
-      // TODO : do not share results !
-
-      // reset the OIFits structure in the current observation using Swing EDT :
-      om.setOIFitsFile(null);
-
-
       /* get plot options from swing components */
 
       final String targetName = getSelectedTargetName();
@@ -1593,7 +1593,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
   /**
    * TaskSwingWorker child class to compute uv coverage data and refresh the uv coverage plot
    */
-  private final static class UVCoverageSwingWorker extends ObservationTaskSwingWorker<ObservationCollectionUVData> {
+  private final static class UVCoverageSwingWorker extends ObservationCollectionTaskSwingWorker<ObservationCollectionUVData> {
 
     /* members */
     /** uv panel used for refreshUI callback */

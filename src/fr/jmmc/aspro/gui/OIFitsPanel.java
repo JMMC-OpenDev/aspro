@@ -10,6 +10,7 @@
  */
 package fr.jmmc.aspro.gui;
 
+import fr.jmmc.aspro.model.event.OIFitsEvent;
 import fr.jmmc.aspro.model.event.ObservationEvent;
 import fr.jmmc.aspro.model.event.ObservationListener;
 import fr.jmmc.aspro.util.XmlFactory;
@@ -64,7 +65,7 @@ public final class OIFitsPanel extends javax.swing.JPanel implements Observation
         this.updateOIFits(null);
         break;
       case OIFITS_DONE:
-        this.updateOIFits(event.getObservation().getOIFitsFile());
+        this.updateOIFits(((OIFitsEvent) event).getOIFitsFile());
         break;
       default:
     }

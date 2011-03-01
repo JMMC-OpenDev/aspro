@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SettingPanel.java,v 1.31 2011-02-24 17:14:11 bourgesl Exp $"
+ * "@(#) $Id: SettingPanel.java,v 1.32 2011-03-01 17:11:15 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.31  2011/02/24 17:14:11  bourgesl
+ * Major refactoring to support / handle observation collection (multi-conf)
+ *
  * Revision 1.30  2011/02/22 18:11:29  bourgesl
  * Major UI changes : configuration multi-selection, unique target selection in main form
  *
@@ -235,6 +238,11 @@ public final class SettingPanel extends JPanel implements ObservationListener {
 
     if (type == ObservationEventType.TARGET_CHANGED
             || type == ObservationEventType.LOADED) {
+
+      if (type == ObservationEventType.LOADED) {
+        // show interferometer map when a file is loaded or the observation is reset :
+        this.jTabbedPane.setSelectedIndex(0);
+      }
 
       final ObservationSetting observation = event.getObservation();
 
