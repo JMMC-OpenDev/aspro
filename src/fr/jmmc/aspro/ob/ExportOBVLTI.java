@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBVLTI.java,v 1.18 2011-02-25 16:51:18 bourgesl Exp $"
+ * "@(#) $Id: ExportOBVLTI.java,v 1.19 2011-03-01 17:16:54 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.18  2011/02/25 16:51:18  bourgesl
+ * use AsproConstants for regexp
+ *
  * Revision 1.17  2011/02/24 17:13:06  bourgesl
  * comments
  *
@@ -203,7 +206,7 @@ public class ExportOBVLTI {
       } else if (AsproConstants.INS_PIONIER.equals(instrumentName)) {
         ExportOBPionier.generate(file, observation, target);
       } else {
-        throw new IllegalArgumentException("The application can not generate an Observing Block for this instrument [" + instrumentName + "] !");
+        throw new IllegalArgumentException("Aspro 2 can not generate an Observing Block for this instrument [" + instrumentName + "] !");
       }
     }
   }

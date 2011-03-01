@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: InterferometerMapService.java,v 1.7 2011-02-24 17:14:11 bourgesl Exp $"
+ * "@(#) $Id: InterferometerMapService.java,v 1.8 2011-03-01 17:17:01 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2011/02/24 17:14:11  bourgesl
+ * Major refactoring to support / handle observation collection (multi-conf)
+ *
  * Revision 1.6  2010/10/22 11:12:02  bourgesl
  * javadoc
  * fixed minimum and maximum methods (Double extrema)
@@ -153,8 +156,8 @@ public final class InterferometerMapService {
       data.setStationNames(observation.getInstrumentConfiguration().getStations());
 
       final List<Station> stations = observation.getInstrumentConfiguration().getStationList();
-      if (stations == null) {
-        throw new IllegalStateException("the station list is null !");
+      if (stations == null || stations.isEmpty()) {
+        throw new IllegalStateException("compute : the station list is empty !");
       }
 
       final int nStations = stations.size();
