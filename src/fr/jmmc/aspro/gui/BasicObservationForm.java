@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BasicObservationForm.java,v 1.63 2011-02-25 16:49:16 bourgesl Exp $"
+ * "@(#) $Id: BasicObservationForm.java,v 1.64 2011-03-01 17:08:50 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.63  2011/02/25 16:49:16  bourgesl
+ * removed comments
+ *
  * Revision 1.62  2011/02/24 17:10:56  bourgesl
  * added support for observation variants + fix Simbad typo
  *
@@ -240,6 +243,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JFormattedTextField;
 import javax.swing.JList;
 import javax.swing.JSpinner.DateEditor;
+import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -1026,8 +1030,10 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
       return;
     }
 
+    final ListSelectionModel lsm = this.jListInstrumentConfigurations.getSelectionModel();
+
     // ensure at least one item is selected :
-    if (this.jListInstrumentConfigurations.getSelectionModel().isSelectionEmpty()) {
+    if (lsm.isSelectionEmpty()) {
       this.checkInstrumentConfigurationSelection();
       return;
     }
@@ -1035,13 +1041,26 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     // memorize the first selected item :
     this.currentInstrumentConfiguration = (String) this.jListInstrumentConfigurations.getSelectedValue();
 
-    // handle multiple selection :
-
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("Instrument Configuration changed : " + Arrays.toString(getInstrumentConfigurations()));
     }
 
-    // update observation :
+    final boolean isSingle = lsm.getMinSelectionIndex() == lsm.getMaxSelectionIndex();
+
+    // disable the automatic update observation :
+    final boolean prevAutoUpdateObservation = this.setAutoUpdateObservation(false);
+    try {
+      // if multiple configurations, disable night restrictions :
+      if (!isSingle) {
+        this.jCheckBoxNightLimit.setSelected(false);
+      }
+      this.jCheckBoxNightLimit.setEnabled(isSingle);
+    } finally {
+      // restore the automatic update observation :
+      this.setAutoUpdateObservation(prevAutoUpdateObservation);
+    }
+
+    // group multiple calls into a single observation update event :
     fireObservationUpdateEvent();
   }
 
@@ -1197,6 +1216,10 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
       if (logger.isLoggable(Level.FINE)) {
         logger.fine("fireObservationUpdateEvent");
       }
+      if (DEBUG_UPDATE_EVENT) {
+        logger.log(Level.SEVERE, "FIRE_UPDATE", new Throwable());
+      }
+
       ObservationManager.getInstance().fireObservationUpdate();
     }
   }
@@ -1227,9 +1250,14 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     final boolean prevAutoUpdateObservation = this.setAutoUpdateObservation(false);
     // disable the automatic selection check of the instrument configuration :
     final boolean prevAutoCheckConfigurations = this.setAutoCheckConfigurations(false);
+    // disable the automatic selection check of the target list :
+    final boolean prevAutoCheckTargets = this.setAutoCheckTargets(false);
     try {
       // reset cached values :
       this.currentTarget = null;
+      // clear selected target :
+      this.jListTargets.clearSelection();
+
       this.currentInstrumentConfiguration = null;
 
       // observation :
@@ -1251,6 +1279,10 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
       // update the selected instrument :
       this.jComboBoxInstrument.setSelectedItem(instrumentChoice.getName());
 
+      // update the night restriction BEFORE selected instrument configurations :
+      this.jCheckBoxNightLimit.setSelected(observation.getWhen().isNightRestriction());
+      this.jCheckBoxNightLimit.setEnabled(true);
+
       // update the selected instrument configurations :
       final List<ObservationVariant> obsVariants = observation.getVariants();
       final int len = obsVariants.size();
@@ -1259,6 +1291,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         stationConfs[i] = obsVariants.get(i).getStations();
       }
 
+      this.jListInstrumentConfigurations.clearSelection();
       this.selectInstrumentConfigurations(stationConfs);
 
       // update the selected pops (pops) :
@@ -1276,10 +1309,9 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
       // update the min elevation :
       this.jFieldMinElev.setValue(interferometerChoice.getMinElevation());
 
-      // update the night restriction :
-      this.jCheckBoxNightLimit.setSelected(observation.getWhen().isNightRestriction());
-
     } finally {
+      // restore the automatic selection check of the target list :
+      this.setAutoCheckTargets(prevAutoCheckTargets);
       // restore the automatic selection check of the instrument configuration :
       this.setAutoCheckConfigurations(prevAutoCheckConfigurations);
       // restore the automatic update observation :
