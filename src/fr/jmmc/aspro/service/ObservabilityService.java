@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.68 2011-02-28 17:10:18 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.69 2011-03-01 17:17:50 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.68  2011/02/28 17:10:18  bourgesl
+ * define Pops in all case (user or best PoPs)
+ *
  * Revision 1.67  2011/02/25 16:48:08  bourgesl
  * added station names = configuration
  *
@@ -430,13 +433,15 @@ public final class ObservabilityService {
       targets = generateTargetsForBaseLineLimits();
     } else {
       if (this.selectedTarget == null) {
-        // copy the list to avoid concurrent modification during iteration :
-        targets = new ArrayList<Target>(this.observation.getTargets());
+        targets = this.observation.getTargets();
       } else {
         // use the given target (OB) :
         targets = Arrays.asList(selectedTarget);
       }
     }
+
+    // define the targets anyway :
+    this.data.setTargets(targets);
 
     // define site :
     this.sc.defineSite(this.interferometer.getName(), this.interferometer.getPosSph());
@@ -1339,8 +1344,8 @@ public final class ObservabilityService {
   private void prepareBeams() throws IllegalStateException {
     // Get chosen stations :
     final List<Station> stations = this.observation.getInstrumentConfiguration().getStationList();
-    if (stations == null) {
-      throw new IllegalStateException("prepareBeams : the station list is null !");
+    if (stations == null || stations.isEmpty()) {
+      throw new IllegalStateException("prepareBeams : the station list is empty !");
     }
 
     if (logger.isLoggable(Level.FINE)) {
