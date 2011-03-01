@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SampSearchCalQuery.java,v 1.9 2011-02-28 17:13:14 bourgesl Exp $"
+ * "@(#) $Id: SampSearchCalQuery.java,v 1.10 2011-03-01 17:12:51 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.9  2011/02/28 17:13:14  bourgesl
+ * comments
+ *
  * Revision 1.8  2011/02/24 17:11:49  bourgesl
  * comments
  *
@@ -38,6 +41,7 @@ import fr.jmmc.aspro.AsproGui;
 import fr.jmmc.aspro.model.ConfigurationManager;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.oi.FocalInstrumentMode;
+import fr.jmmc.aspro.model.oi.ObservationCollection;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.SpectralBand;
 import fr.jmmc.aspro.model.oi.Station;
@@ -48,6 +52,7 @@ import fr.jmmc.mcs.gui.MessagePane;
 import fr.jmmc.mcs.interop.SampCapability;
 import fr.jmmc.mcs.interop.SampCapabilityAction;
 import fr.jmmc.mcs.util.FileUtils;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -147,23 +152,35 @@ public final class SampSearchCalQuery extends SampCapabilityAction {
    * @return SearchCal votable as string
    */
   private String processTarget(final Target target) {
-
     // get OB template :
     String votable = FileUtils.readFile(TEMPLATE_FILE);
 
-    // get observation and target :
-
-    // TODO MULTI-CONF : quoi faire ?
-    // use main observation :
-    final ObservationSetting observation = ObservationManager.getInstance().getMainObservation();
+    // use observation collection :
+    final ObservationCollection obsCollection = ObservationManager.getInstance().getObservationCollection();
 
     // Get chosen stations :
-    final List<Station> stations = observation.getInstrumentConfiguration().getStationList();
-    if (stations == null) {
-      throw new IllegalStateException("prepareBeams : the station list is null !");
+    final List<Station> stations;
+
+    if (obsCollection.isSingle()) {
+      stations = obsCollection.getFirstObservation().getInstrumentConfiguration().getStationList();
+    } else {
+      // merge station lists to have the largest baseline ...
+      stations = new ArrayList<Station>();
+
+      for (ObservationSetting observation : obsCollection.getObservations()) {
+        for (Station station : observation.getInstrumentConfiguration().getStationList()) {
+          if (!stations.contains(station)) {
+            stations.add(station);
+          }
+        }
+      }
     }
 
-    final FocalInstrumentMode insMode = observation.getInstrumentConfiguration().getFocalInstrumentMode();
+    if (stations == null || stations.isEmpty()) {
+      throw new IllegalStateException("processTarget : the station list is empty !");
+    }
+
+    final FocalInstrumentMode insMode = obsCollection.getFirstObservation().getInstrumentConfiguration().getFocalInstrumentMode();
     if (insMode == null) {
       throw new IllegalStateException("the instrumentMode is empty !");
     }
@@ -217,6 +234,7 @@ public final class SampSearchCalQuery extends SampCapabilityAction {
     final double maxBaseline = range[1];
 
     if (logger.isLoggable(Level.FINE)) {
+      logger.fine("stations    = " + stations);
       logger.fine("maxBaseline = " + maxBaseline);
     }
 
