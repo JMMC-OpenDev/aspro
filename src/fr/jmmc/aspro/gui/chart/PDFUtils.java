@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: PDFUtils.java,v 1.8 2010-10-15 16:59:43 bourgesl Exp $"
+ * "@(#) $Id: PDFUtils.java,v 1.9 2011-03-01 17:13:37 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.8  2010/10/15 16:59:43  bourgesl
+ * new PDF options (page size and orientation)
+ * PDFExportable refactoring to include prepareChart, postPDF and getPDFOptions methods
+ *
  * Revision 1.7  2010/10/08 12:30:30  bourgesl
  * added to do : adjust page size according to chart content
  *
@@ -89,19 +93,24 @@ public final class PDFUtils {
   public static void saveChartAsPDF(final File file, final JFreeChart chart, final PDFOptions options)
           throws IOException, IllegalStateException {
 
-    BufferedOutputStream localBufferedOutputStream = null;
-    try {
-      localBufferedOutputStream = new BufferedOutputStream(new FileOutputStream(file));
+    final long start = System.nanoTime();
 
-      writeChartAsPDF(localBufferedOutputStream, chart, options);
+    BufferedOutputStream bo = null;
+    try {
+      bo = new BufferedOutputStream(new FileOutputStream(file));
+
+      writeChartAsPDF(bo, chart, options);
 
     } finally {
-      if (localBufferedOutputStream != null) {
+      if (bo != null) {
         try {
-          localBufferedOutputStream.close();
+          bo.close();
         } catch (IOException ioe) {
           logger.log(Level.FINE, "IO exception : ", ioe);
         }
+      }
+      if (logger.isLoggable(Level.INFO)) {
+        logger.info("saveChartAsPDF : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
       }
     }
   }
@@ -164,13 +173,13 @@ public final class PDFUtils {
     final float innerHeight = height - 2 * margin;
 
     try {
-      final PdfWriter localPdfWriter = PdfWriter.getInstance(document, outputStream);
+      final PdfWriter writer = PdfWriter.getInstance(document, outputStream);
 
       document.open();
 
       definePDFProperties(document);
 
-      final PdfContentByte pdfContentByte = localPdfWriter.getDirectContent();
+      final PdfContentByte pdfContentByte = writer.getDirectContent();
 
       final PdfTemplate pdfTemplate = pdfContentByte.createTemplate(width, height);
 
