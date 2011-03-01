@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationCollectionObsData.java,v 1.1 2011-02-28 17:12:51 bourgesl Exp $"
+ * "@(#) $Id: ObservationCollectionObsData.java,v 1.2 2011-03-01 17:14:09 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2011/02/28 17:12:51  bourgesl
+ * new result containers to have an easier API to manipulate lists
+ *
  */
 package fr.jmmc.aspro.model;
 
@@ -49,7 +52,7 @@ public class ObservationCollectionObsData extends ObservationCollection {
   private final void prepareConfigurationNames() {
     final StringBuilder sb = new StringBuilder();
 
-    // Iterate over UV Coverage data (multi conf) :
+    // Iterate over Observability data (multi conf) :
     for (ObservabilityData obsData : getObsDataList()) {
       sb.append(obsData.getStationNames());
       if (!obsData.isUserPops() && obsData.getBestPops() != null) {
