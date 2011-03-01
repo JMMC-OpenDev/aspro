@@ -295,6 +295,22 @@ public class ObservationSetting
     
 //--simple--preserve
   /**
+   * Return the number of variants
+   * @return number of variants
+   */
+  public final int getVariantSize() {
+    return getVariants().size();
+  }
+
+  /**
+   * Return true if this observation has only one variant
+   * @return true if this observation has only one variant
+   */
+  public final boolean isSingle() {
+    return getVariantSize() == 1;
+  }
+
+  /**
    * Return true if the target list is not empty
    * @return true if the target list is not empty
    */
@@ -341,7 +357,6 @@ public class ObservationSetting
     }
     return null;
   }
-
   /** observation version (read only) */
   @javax.xml.bind.annotation.XmlTransient
   private fr.jmmc.aspro.model.ObservationVersion version = new fr.jmmc.aspro.model.ObservationVersion();
@@ -352,26 +367,6 @@ public class ObservationSetting
    */
   public final fr.jmmc.aspro.model.ObservationVersion getVersion() {
     return this.version;
-  }
-
-  /** computed OIFits structure (read only) */
-  @javax.xml.bind.annotation.XmlTransient
-  private fr.jmmc.oitools.model.OIFitsFile oiFitsFile = null;
-
-  /**
-   * Return the computed OIFits structure (read only)
-   * @return OIFits structure or null
-   */
-  public final fr.jmmc.oitools.model.OIFitsFile getOIFitsFile() {
-    return this.oiFitsFile;
-  }
-
-  /**
-   * Define the computed OIFits structure (read only)
-   * @param oiFitsFile computed OIFits structure
-   */
-  public final void setOIFitsFile(final fr.jmmc.oitools.model.OIFitsFile oiFitsFile) {
-    this.oiFitsFile = oiFitsFile;
   }
 
   @Override
@@ -391,9 +386,6 @@ public class ObservationSetting
 
     // copy version :
     copy.version = new fr.jmmc.aspro.model.ObservationVersion(copy.version);
-
-    // clear computed fields :
-    copy.oiFitsFile = null;
 
     // clear observation variants :
     copy.variants = null;
@@ -477,7 +469,6 @@ public class ObservationSetting
     }
     return mapIDTargets;
   }
-  
   /** computed displayable list of targets (read only) */
   @javax.xml.bind.annotation.XmlTransient
   private List<Target> cachedDisplayTargets = null;
