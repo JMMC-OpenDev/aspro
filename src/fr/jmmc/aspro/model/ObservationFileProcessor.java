@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationFileProcessor.java,v 1.3 2011-02-24 17:13:18 bourgesl Exp $"
+ * "@(#) $Id: ObservationFileProcessor.java,v 1.4 2011-03-01 17:14:33 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2011/02/24 17:13:18  bourgesl
+ * added model migration
+ *
  * Revision 1.2  2010/12/17 15:15:25  bourgesl
  * comments
  *
@@ -114,7 +117,8 @@ public final class ObservationFileProcessor {
     if (revision.getVersion() < AsproModelVersion.Feb2011Revision.getVersion()) {
       // update model to Feb2011Revision :
 
-      if (observation.getVariants().isEmpty()) {
+      // note : scvot2AsproObservation.xsl generates only a partial observation :
+      if (observation.getInstrumentConfiguration() != null && observation.getVariants().isEmpty()) {
         // create a new variant having the same configuration (stations only) :
         final ObservationVariant obsVariant = new ObservationVariant();
 
