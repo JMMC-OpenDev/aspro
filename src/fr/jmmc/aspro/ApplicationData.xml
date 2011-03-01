@@ -186,20 +186,19 @@
     </menu>
 
     <menu label="Interop">
-      <menu label="Perform model fitting" classpath="fr.jmmc.aspro.gui.action.BroadcastToModelFittingAction" action="broadcastToModelFittingAction"/>
       <menu label="Search calibrators" classpath="fr.jmmc.aspro.gui.action.SampSearchCalQuery" action="searchCalStartQuery"
-       description="use SearchCal to search calibrators for the current selected target (SAMP)"/>
+            description="use SearchCal to search calibrators for the current selected target (SAMP)"/>
+      <menu label="Perform model fitting" classpath="fr.jmmc.aspro.gui.action.BroadcastToModelFittingAction" action="broadcastToModelFittingAction"/>
     </menu>
   </menubar>
 
   <releasenotes>
     <release version="0.8">
       <prerelease version="0.8.0 beta">
-        <change>Updated Interferometer Map Plot to display baselines for all selected  instrument configurations</change>
-        <change>Major refactoring to compute observability and UV Coverage for all selected  instrument configurations</change>
+        <change>Updated plots (Interferometer Map, Observability and UV Coverage) to display data for all selected instrument configurations</change>
+        <change>Major refactoring to compute observability and UV Coverage for all selected instrument configurations</change>
         <change>Important changes in the user interface (main panel) to allow multi selection of instrument configurations
-        and use the main target list to select the current target used in UV Coverage Panel
-        </change>
+        and use the main target list to select the current target used in the UV Coverage Panel</change>
         <change>Added VLTI configuration for Period 88</change>
       </prerelease>
     </release>
@@ -213,8 +212,7 @@
       </prerelease>
       <prerelease version="0.7.7 beta">
         <change>Updated Export to Observing Blocks to support calibrators : the selected science target is exported
-        to a science OB and its calibrators to calibrator OBs.
-        </change>
+        to a science OB and its calibrators to calibrator OBs.</change>
       </prerelease>
       <prerelease version="0.7.6 beta">
         <change>Added Observing Blocks for PIONIER instrument</change>
@@ -230,18 +228,11 @@
       <prerelease version="0.7.4 beta">
         <change>Added a version attribute in the Observation file to handle model conversions</change>
         <change>Updated the Observation data model : targets have an ID attribute (derived from target name)
-        used to associate user informations : description, calibrator flag and calibrator list per target
-        </change>
+        used to associate user informations : description, calibrator flag and calibrator list per target</change>
         <change>Added action to open the SimBad web page for the current target in the Target editor</change>
-        <change>Fixed the selected target when opening the target editor
-        and synchronize the selected target between 'Model' and 'Target' tabs
-        </change>
-        <change>Added new Target editor to let the user edit target fields (magnitudes ...) and
-        provide user information per target
-        </change>
-        <change type="BUGFIX">Fixed major bug on target model editor when the user changes the selected target
-        while editing a parameter value
-        </change>
+        <change>Fixed the selected target when opening the target editor and synchronize the selected target between 'Model' and 'Target' tabs</change>
+        <change>Added new Target editor to let the user edit target fields (magnitudes ...) and provide user information per target</change>
+        <change type="BUGFIX">Fixed major bug on target model editor when the user changes the selected target while editing a parameter value</change>
       </prerelease>
       <prerelease version="0.7.3 beta">
         <change>SearchCal integration : use deletedFlag to filter calibrators to mimic SearchCal delete action and
@@ -292,13 +283,10 @@
         <change>Added a confirm dialog for the 'New Observation' action</change>
       </prerelease>
       <prerelease version="0.6.2">
-        <change type="BUGFIX" id="1285082082">Added the following message
-                when the user use the 'Export to OIFits' action and the oifits is null :
-                'There is currently no OIFits data (no target or your target is not observable)'
-        </change>
+        <change type="BUGFIX" id="1285082082">Added the following message when the user use the 'Export to OIFits' action and the oifits is null :
+        'There is currently no OIFits data (no target or your target is not observable)'</change>
         <change type="BUGFIX" id="1285167992">Corrected focus problem with the action 'Export to an Observing block'
-                and added an user message if there is no target to export
-        </change>
+                and added an user message if there is no target to export</change>
         <change>Use an hour angle axis when the observability displays the baseline limits</change>
         <change>Normalize model flux weights to compute visibilities</change>
         <change>Added CHARA instruments : CLASSIC (2T) and CLIMB (3T)</change>
@@ -322,8 +310,7 @@
         <change>Error and noise computation for OI_VIS (AMBER only) using the differential phase / amplitude algorithm (amdlib)</change>
         <change>Added a pop up to tell the user to check its VLTI OB file against ESO CfP rules</change>
         <change>Fixed some configuration for AMBER in Period 87 (wrong station ordering) and the
-        loading action to even load such observation files
-        </change>
+        loading action to even load such observation files</change>
       </prerelease>
       <prerelease version="0.5.4">
         <change>Correlated fluxes set in OI_VIS</change>
@@ -389,14 +376,11 @@
         <change>A star name can be optionaly given to the star resolver in addition to the coordinates to enter manually a new target</change>
       </prerelease>
       <prerelease version="0.4b1"> <!-- 0.3b5 -->
-        <change>Several UI changes to manage HA min / max and the fringe tracker mode fields depending on the selected target
-        in the UV Coverage Panel
-        </change>
+        <change>Several UI changes to manage HA min / max and the fringe tracker mode fields depending on the selected target in the UV Coverage Panel</change>
         <change>HA min / max and the fringe tracker mode are related to a specific target and persisted in the observation file</change>
         <change>Added date and time constraints on VLTI Observing Block : date is defined if night restrictions are enabled;
-        LST intervals are defined with the target observability (elevation > 30 deg + delay lines + shadowing)
-        restricted by the HA min / max defined in the UV Coverage Panel
-        </change>
+        LST intervals are defined with the target observability (elevation > 30 deg + delay lines + shadowing) restricted by the HA min / max defined
+        in the UV Coverage Panel</change>
       </prerelease>
     </release>
 
@@ -414,14 +398,10 @@
       <prerelease version="0.3b2">
         <change>Updated Aspro data model to keep simbad information like RA (HMS), DEC (DMS), Radial velocity, Identifiers and Object types</change>
         <change>Updated Target tooltip with new information</change>
-        <change>Several fixes to convert sexagesimal RA/DEC in degrees (internal). Known problem : the previously saved files can not be
-        load anymore
-        </change>
+        <change>Several fixes to convert sexagesimal RA/DEC in degrees (internal). Known problem : the previously saved files can not be load anymore</change>
       </prerelease>
       <prerelease version="0.3b1">
-        <change>The star resolver now supports RA/DEC coordinates to enter manually a new target
-                (useful when simbad is down or no internet connection)
-        </change>
+        <change>The star resolver now supports RA/DEC coordinates to enter manually a new target (useful when simbad is down or no internet connection)</change>
         <change>Missing fluxes used in Observing Block set to -99</change>
         <change>Several minor UI changes for mac OS X platform (10.4 and more)</change>
         <change>Deployment : Pal library is embedded in its own Jnlp file to avoid signing issues</change>
