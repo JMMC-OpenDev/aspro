@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationTaskSwingWorker.java,v 1.6 2011-02-25 16:52:11 bourgesl Exp $"
+ * "@(#) $Id: ObservationCollectionTaskSwingWorker.java,v 1.1 2011-03-01 17:07:44 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2011/02/25 16:52:11  bourgesl
+ * removed unused code
+ *
  * Revision 1.5  2011/02/24 17:14:13  bourgesl
  * Major refactoring to support / handle observation collection (multi-conf)
  *
@@ -31,28 +34,25 @@ import fr.jmmc.mcs.gui.task.TaskSwingWorker;
 
 /**
  * This class extends TaskSwingWorker to :
- * - define observation associated to this worker
- * - define the observation version
+ * - define the observation collection associated to this worker
  * - simplify debugging / logging by adding observation version to task logs
  *
  * @author bourgesl
  *
- * TODO MULTI-CONF : refactor the class name to ObservationCollectionTaskSwingWorker
- *
  * @param <T> the result type returned by this {@code TaskSwingWorker}
  */
-public abstract class ObservationTaskSwingWorker<T> extends TaskSwingWorker<T> {
+public abstract class ObservationCollectionTaskSwingWorker<T> extends TaskSwingWorker<T> {
 
   /* members */
   /** observation collection */
   private final ObservationCollection obsCollection;
 
   /**
-   * Create a new ObservationTaskSwingWorker instance
+   * Create a new ObservationCollectionTaskSwingWorker instance
    * @param task related task
    * @param obsCollection observation collection used by computations associated with this worker
    */
-  public ObservationTaskSwingWorker(final Task task, final ObservationCollection obsCollection) {
+  public ObservationCollectionTaskSwingWorker(final Task task, final ObservationCollection obsCollection) {
     super(task, (DEBUG_FLAG) ? obsCollection.getVersion().toString() : "");
     this.obsCollection = obsCollection;
   }
