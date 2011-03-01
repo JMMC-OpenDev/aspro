@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: InterferometerMapPanel.java,v 1.20 2011-02-28 17:14:01 bourgesl Exp $"
+ * "@(#) $Id: InterferometerMapPanel.java,v 1.21 2011-03-01 17:09:09 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.20  2011/02/28 17:14:01  bourgesl
+ * use new result containers
+ *
  * Revision 1.19  2011/02/25 16:49:54  bourgesl
  * simplify title / file name via observation collection API
  *
@@ -234,12 +237,12 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
     this.xyPlot.setDomainZeroBaselineVisible(false);
     this.xyPlot.setRangeZeroBaselineVisible(false);
 
-    final XYItemRenderer localXYItemRenderer = this.xyPlot.getRenderer();
+    final XYItemRenderer renderer = this.xyPlot.getRenderer();
 
     // station labels :
-    localXYItemRenderer.setBaseItemLabelGenerator(new NameLabelGenerator());
-    localXYItemRenderer.setBasePositiveItemLabelPosition(new ItemLabelPosition(ItemLabelAnchor.CENTER, TextAnchor.BOTTOM_RIGHT));
-    localXYItemRenderer.setBaseItemLabelsVisible(true);
+    renderer.setBaseItemLabelGenerator(new NameLabelGenerator());
+    renderer.setBasePositiveItemLabelPosition(new ItemLabelPosition(ItemLabelAnchor.CENTER, TextAnchor.BOTTOM_RIGHT));
+    renderer.setBaseItemLabelsVisible(true);
 
     // Adjust outline :
     this.xyPlot.setOutlineStroke(new BasicStroke(1.f));
