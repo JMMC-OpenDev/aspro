@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: StarObservabilityData.java,v 1.7 2011-01-25 13:48:55 bourgesl Exp $"
+ * "@(#) $Id: StarObservabilityData.java,v 1.8 2011-03-01 17:16:39 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2011/01/25 13:48:55  bourgesl
+ * javadoc
+ *
  * Revision 1.6  2010/12/17 15:13:37  bourgesl
  * name attribute split into targetName and info
  *
@@ -52,13 +55,11 @@ public final class StarObservabilityData {
   public final static int TYPE_HORIZON = 3;
   /** baseline intervals */
   public final static int TYPE_BASE_LINE = 4;
-  /** moon intervals */
-  public final static int TYPE_MOON = 27;
 
   /* members */
   /** name of the target */
   private final String targetName;
-  /** additional information on data (moon, rise/set, horizon, base line ...) */
+  /** additional information on data (rise/set, horizon, base line ...) */
   private final String info;
   /** type of data */
   private final int type;
@@ -99,11 +100,27 @@ public final class StarObservabilityData {
   }
 
   /**
-   * Return the additional information on data (moon, rise/set, horizon, base line ...)
-   * @return additional information on data (moon, rise/set, horizon, base line ...)
+   * Return the additional information on data (rise/set, horizon, base line ...)
+   * @return additional information on data (rise/set, horizon, base line ...)
    */
   public String getInfo() {
     return info;
+  }
+
+  /**
+   * Return the legend label (Science or Calibrator target else return additional information on data)
+   * @param idx type to use
+   * @return string representing this type
+   */
+  public String getLegendLabel(final int idx) {
+    switch (idx) {
+      case TYPE_STAR:
+        return "Science";
+      case TYPE_CALIBRATOR:
+        return "Calibrator";
+      default:
+    }
+    return this.getInfo();
   }
 
   /**
