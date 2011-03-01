@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationManager.java,v 1.60 2011-02-28 17:12:12 bourgesl Exp $"
+ * "@(#) $Id: ObservationManager.java,v 1.61 2011-03-01 17:15:43 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.60  2011/02/28 17:12:12  bourgesl
+ * removed comments
+ *
  * Revision 1.59  2011/02/25 16:52:11  bourgesl
  * removed unused code
  *
@@ -213,6 +216,7 @@ import fr.jmmc.aspro.model.event.ObservationListener;
 import fr.jmmc.aspro.model.event.ObservationEventType;
 import fr.jmmc.aspro.model.observability.ObservabilityData;
 import fr.jmmc.aspro.AsproConstants;
+import fr.jmmc.aspro.model.event.OIFitsEvent;
 import fr.jmmc.aspro.model.event.ObservabilityEvent;
 import fr.jmmc.aspro.model.event.ObservationEvent;
 import fr.jmmc.aspro.model.event.TargetSelectionEvent;
@@ -269,6 +273,8 @@ public final class ObservationManager extends BaseOIManager {
   private File observationFile = null;
   /** derived observation collection used by computations */
   private ObservationCollection obsCollection = null;
+  /** computed OIFits structure */
+  private OIFitsFile oiFitsFile = null;
 
   /**
    * Return the ObservationManager singleton
@@ -342,20 +348,6 @@ public final class ObservationManager extends BaseOIManager {
     }
 
     setObservationCollection(newObsCollection);
-  }
-
-  /**
-   * Return the observation used for computations
-   *
-   * TODO MULTI-CONF : KILL
-   *
-   * @return observation used for computations
-   */
-  public ObservationSetting getObservation() {
-    if (getObservationCollection().size() > 0) {
-      return getObservationCollection().getObservations().get(0);
-    }
-    throw new IllegalStateException("ObservationCollection is empty (should never happen) !");
   }
 
   /**
@@ -645,6 +637,9 @@ public final class ObservationManager extends BaseOIManager {
         logger.fine("observation version = " + version);
       }
 
+      // reset the OIFits structure :
+      setOIFitsFile(null);
+
       // then synchronize the main observation with the observation collection used by computations :
       synchronizeObservations();
 
@@ -720,7 +715,6 @@ public final class ObservationManager extends BaseOIManager {
    * @param warningContainer warning container
    */
   public void fireWarningsReady(final WarningContainer warningContainer) {
-    // use observation for computations :
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("fireWarningsReady : " + warningContainer);
     }
@@ -733,14 +727,16 @@ public final class ObservationManager extends BaseOIManager {
    * Fired by setOIFitsFile() <= UVCoveragePanel.UVCoverageSwingWorker.refreshUI() (EDT) when the OIFits is computed
    *
    * Listeners : SettingPanel / OIFitsPanel
+   *
+   * @param oiFitsFile OIFits structure
    */
-  private void fireOIFitsDone() {
+  public void fireOIFitsDone(final OIFitsFile oiFitsFile) {
     // use observation for computations :
     if (logger.isLoggable(Level.FINE)) {
-      logger.fine("fireOIFitsDone : " + toString(getObservation()));
+      logger.fine("fireOIFitsDone : " + oiFitsFile);
     }
 
-    fireEvent(new ObservationEvent(ObservationEventType.OIFITS_DONE, getObservation()));
+    fireEvent(new OIFitsEvent(oiFitsFile));
   }
 
   /**
@@ -1317,7 +1313,7 @@ public final class ObservationManager extends BaseOIManager {
 
   // --- COMPUTATION RESULTS ---------------------------------------------------
   /**
-   * Defines the OIFits structure in the observation for later reuse (Visiblity Explorer)
+   * Defines the OIFits structure (SHARED) for later reuse (Visiblity Explorer)
    * Used by UVCoveragePanel.UVCoverageSwingWorker.refreshUI()
    * 
    * @param oiFitsFile OIFits structure
@@ -1329,12 +1325,19 @@ public final class ObservationManager extends BaseOIManager {
 
     // TODO: use a new class OIFitsData (version / File / Target) ...
 
-    // TODO : remove
-    getObservation().setOIFitsFile(oiFitsFile);
+    this.oiFitsFile = oiFitsFile;
 
     if (oiFitsFile != null) {
-      this.fireOIFitsDone();
+      this.fireOIFitsDone(oiFitsFile);
     }
+  }
+
+  /**
+   * Return the computed OIFits structure (read only)
+   * @return OIFits structure or null
+   */
+  public final OIFitsFile getOIFitsFile() {
+    return this.oiFitsFile;
   }
 
   // --- OBSERVATION VARIANTS --------------------------------------------------
