@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BroadcastToModelFittingAction.java,v 1.13 2011-02-18 15:31:39 bourgesl Exp $"
+ * "@(#) $Id: BroadcastToModelFittingAction.java,v 1.14 2011-03-01 17:12:06 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.13  2011/02/18 15:31:39  bourgesl
+ * minor refactoring on target model serialization
+ *
  * Revision 1.12  2011/02/17 17:13:44  bourgesl
  * removed status changes
  *
@@ -54,7 +57,6 @@ import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.jaxb.JAXBFactory;
 import fr.jmmc.mcs.gui.MessagePane;
-import fr.jmmc.mcs.gui.StatusBar;
 import fr.jmmc.mcs.interop.SampCapability;
 import fr.jmmc.mcs.interop.SampCapabilityAction;
 import fr.jmmc.mcs.model.targetmodel.Model;
@@ -67,8 +69,6 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
 
 /**
  * This registered action represents a File Menu entry to
@@ -112,12 +112,18 @@ public class BroadcastToModelFittingAction extends SampCapabilityAction {
   public Map<?, ?> composeMessage() throws IllegalStateException {
     logger.fine("composeMessage");
 
+    // Use main observation to check variants :
+    if (!ObservationManager.getInstance().getMainObservation().isSingle()) {
+      MessagePane.showMessage("Aspro 2 can not generate an OIFits file when multiple configurations are selected !");
+      return null;
+    }
+
     // Get the oifits object
     // save it on disk
     // get Target model from the targetId given by oifits.oiTargets
     // serialize and build one samp message
 
-    final OIFitsFile oiFitsFile = ObservationManager.getInstance().getObservation().getOIFitsFile();
+    final OIFitsFile oiFitsFile = ObservationManager.getInstance().getOIFitsFile();
 
     if (oiFitsFile == null) {
       MessagePane.showMessage("There is currently no OIFits data (your target is not observable)");

@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOIFitsAction.java,v 1.12 2011-02-25 16:51:18 bourgesl Exp $"
+ * "@(#) $Id: ExportOIFitsAction.java,v 1.13 2011-03-01 17:12:06 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.12  2011/02/25 16:51:18  bourgesl
+ * use AsproConstants for regexp
+ *
  * Revision 1.11  2011/02/14 15:33:10  bourgesl
  * use JMCS FileUtils
  *
@@ -94,7 +97,14 @@ public class ExportOIFitsAction extends WaitingTaskAction {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("actionPerformed");
     }
-    final OIFitsFile oiFitsFile = ObservationManager.getInstance().getObservation().getOIFitsFile();
+
+    // Use main observation to check variants :
+    if (!ObservationManager.getInstance().getMainObservation().isSingle()) {
+      MessagePane.showMessage("Aspro 2 can not generate an OIFits file when multiple configurations are selected !");
+      return;
+    }
+
+    final OIFitsFile oiFitsFile = ObservationManager.getInstance().getOIFitsFile();
 
     if (oiFitsFile != null) {
 
