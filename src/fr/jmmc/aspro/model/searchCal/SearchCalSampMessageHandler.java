@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SearchCalSampMessageHandler.java,v 1.11 2011-02-16 14:52:43 bourgesl Exp $"
+ * "@(#) $Id: SearchCalSampMessageHandler.java,v 1.12 2011-03-02 17:36:03 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.11  2011/02/16 14:52:43  bourgesl
+ * added comments
+ *
  * Revision 1.10  2011/02/14 15:33:10  bourgesl
  * use JMCS FileUtils
  *
@@ -141,6 +144,9 @@ public final class SearchCalSampMessageHandler extends SampMessageHandler {
       if (logger.isLoggable(Level.FINE)) {
         logger.fine("document :\n" + document);
       }
+
+      // TODO CALS : HERE
+      //logger.severe("document :\n" + document);
 
       final ObservationManager om = ObservationManager.getInstance();
 
