@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproGui.java,v 1.46 2011-02-16 14:53:15 bourgesl Exp $"
+ * "@(#) $Id: AsproGui.java,v 1.47 2011-03-02 11:00:24 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.46  2011/02/16 14:53:15  bourgesl
+ * added target editor action in Edit menu
+ *
  * Revision 1.45  2011/02/14 17:13:07  bourgesl
  * Use JMCS Task / TaskSwingWorker ...
  *
@@ -266,30 +269,6 @@ public final class AsproGui extends App {
   }
 
   /**
-   * Initialize services before the GUI
-   *
-   * @throws IllegalStateException if the configuration files are not found or IO failure
-   * @throws IllegalArgumentException if the load configuration failed
-   */
-  private void initServices() throws IllegalStateException, IllegalArgumentException {
-
-    // Preload configurations :
-    ConfigurationManager.getInstance();
-
-    // Initialize tasks and the task executor :
-    AsproTaskRegistry.getInstance();
-    TaskSwingWorkerExecutor.start();
-  }
-
-  /**
-   * Stop services before application quits.
-   */
-  private void stopServices() {
-    // stop the task executor :
-    TaskSwingWorkerExecutor.stop();
-  }
-
-  /**
    * Initialize application objects
    * @param args ignored arguments
    *
@@ -331,7 +310,23 @@ public final class AsproGui extends App {
     logger.fine("AsproGui.init() handler : exit");
   }
 
-  /** 
+  /**
+   * Initialize services before the GUI
+   *
+   * @throws IllegalStateException if the configuration files are not found or IO failure
+   * @throws IllegalArgumentException if the load configuration failed
+   */
+  private void initServices() throws IllegalStateException, IllegalArgumentException {
+
+    // Preload configurations :
+    ConfigurationManager.getInstance();
+
+    // Initialize tasks and the task executor :
+    AsproTaskRegistry.getInstance();
+    TaskSwingWorkerExecutor.start();
+  }
+
+  /**
    * Execute application body = make the application frame visible
    */
   @Override
@@ -378,10 +373,20 @@ public final class AsproGui extends App {
       return false;
     }
 
-    this.stopServices();
-
     // If the user clicked the "Don't Save" button, quit
     return true;
+  }
+
+  /**
+   * Hook to handle operations when exiting application.
+   * @see App#exit(int)
+   */
+  @Override
+  protected void onFinish() {
+    // stop the task executor :
+    TaskSwingWorkerExecutor.stop();
+
+    super.onFinish();
   }
 
   /**
