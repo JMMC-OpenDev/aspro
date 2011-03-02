@@ -52,6 +52,7 @@ import fr.jmmc.mcs.model.targetmodel.Model;
  *         &lt;element name="FLUX_N" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
  *         &lt;element ref="{http://www.jmmc.fr/jmcs/models/0.1}model" maxOccurs="unbounded" minOccurs="0"/>
  *         &lt;element name="configuration" type="{http://www.jmmc.fr/aspro-oi/0.1}TargetConfiguration" minOccurs="0"/>
+ *         &lt;element name="calibratorInfos" type="{http://www.jmmc.fr/aspro-oi/0.1}CalibratorInformations" minOccurs="0"/>
  *       &lt;/sequence>
  *       &lt;attribute name="id" use="required" type="{http://www.w3.org/2001/XMLSchema}ID" />
  *     &lt;/restriction>
@@ -84,7 +85,8 @@ import fr.jmmc.mcs.model.targetmodel.Model;
     "fluxk",
     "fluxn",
     "models",
-    "configuration"
+    "configuration",
+    "calibratorInfos"
 })
 public class Target
     extends OIBase
@@ -132,6 +134,7 @@ public class Target
     @XmlElement(name = "model", namespace = "http://www.jmmc.fr/jmcs/models/0.1")
     protected List<Model> models;
     protected TargetConfiguration configuration;
+    protected CalibratorInformations calibratorInfos;
     @XmlAttribute(required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlID
@@ -661,6 +664,30 @@ public class Target
      */
     public void setConfiguration(TargetConfiguration value) {
         this.configuration = value;
+    }
+
+    /**
+     * Gets the value of the calibratorInfos property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link CalibratorInformations }
+     *     
+     */
+    public CalibratorInformations getCalibratorInfos() {
+        return calibratorInfos;
+    }
+
+    /**
+     * Sets the value of the calibratorInfos property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link CalibratorInformations }
+     *     
+     */
+    public void setCalibratorInfos(CalibratorInformations value) {
+        this.calibratorInfos = value;
     }
 
     /**

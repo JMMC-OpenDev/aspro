@@ -595,6 +595,15 @@
         </xsd:annotation>
       </xsd:element>
 
+      <!-- calibrator information -->
+      <xsd:element name="calibratorInfos" type="CalibratorInformations" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>
+              Optional calibrator information (diameters)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
     </xsd:sequence>
 
     <xsd:attribute name="id" type="xsd:ID" use="required">
@@ -644,6 +653,102 @@
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+
+
+
+
+  <!-- CalibratorInformations -->
+  <xsd:complexType name="CalibratorInformations">
+    <xsd:annotation>
+      <xsd:documentation>
+        This type describes the optional calibrator information (uniform disk diameters).
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+
+      <!-- Uniform disk diameters in bands U, B, V, R, I, J, H, K, L, N -->
+      <xsd:element name="UD_U" type="xsd:double" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>
+            U-band Uniform-Disk Diameter
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="UD_B" type="xsd:double" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>
+            B-band Uniform-Disk Diameter
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="UD_V" type="xsd:double" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>
+            V-band Uniform-Disk Diameter
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="UD_R" type="xsd:double" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>
+            R-band Uniform-Disk Diameter
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="UD_I" type="xsd:double" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>
+            I-band Uniform-Disk Diameter
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="UD_J" type="xsd:double" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>
+            J-band Uniform-Disk Diameter
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="UD_H" type="xsd:double" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>
+            H-band Uniform-Disk Diameter
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="UD_K" type="xsd:double" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>
+            K-band Uniform-Disk Diameter
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="UD_L" type="xsd:double" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>
+            L-band Uniform-Disk Diameter
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="UD_N" type="xsd:double" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>
+            N-band Uniform-Disk Diameter
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      
+      <!-- Limb-Darkened Diameter -->
+      <xsd:element name="LD" type="xsd:double" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>
+            Limb-Darkened Diameter
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      
     </xsd:sequence>
   </xsd:complexType>
 
