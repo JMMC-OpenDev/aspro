@@ -96,20 +96,55 @@ public class BaseValue
     }
     
 //--simple--preserve
-
-    /**
-     * Return the value (implemented by child classes)
-     * @return value
-     */
-    public Object getValue() {
-      return null;
-    }
-
-  @Override
-  public final String toString() {
-    return "[name=" + getName() + ", value=" + getValue() + ((getUnit() != null) ? ", unit="+getUnit() : "") + "]";
+  /**
+   * Return the value (implemented by child classes)
+   * @return value
+   */
+  public Object getValue() {
+    return null;
   }
 
+  /**
+   * Return the string value or null if this is not a StringValue instance
+   * @return string value or null
+   */
+  public final String getString() {
+    if (this instanceof StringValue) {
+      return ((StringValue) this).getValue();
+    }
+    return null;
+  }
+
+  /**
+   * Return the number value or null if this is not a NumberValue instance
+   * @return number value or null
+   */
+  public final Double getNumber() {
+    if (this instanceof NumberValue) {
+      return ((NumberValue) this).getValue();
+    }
+    return null;
+  }
+
+  /**
+   * Return the boolean value or null if this is not a BooleanValue instance
+   * @return string value or null
+   */
+  public final Boolean getBoolean() {
+    if (this instanceof BooleanValue) {
+      return ((BooleanValue) this).isValue();
+    }
+    return null;
+  }
+
+  /**
+   * Return a string representation containing (name, value and optional unit)
+   * @return string representation
+   */
+  @Override
+  public final String toString() {
+    return "[name=" + getName() + ", value=" + getValue() + ((getUnit() != null) ? ", unit=" + getUnit() : "") + "]";
+  }
 //--simple--preserve
 
 }

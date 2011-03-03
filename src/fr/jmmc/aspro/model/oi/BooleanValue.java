@@ -60,7 +60,7 @@ public class BooleanValue
     public void setValue(Boolean value) {
         this.value = value;
     }
-
+    
 //--simple--preserve
 
     /**
