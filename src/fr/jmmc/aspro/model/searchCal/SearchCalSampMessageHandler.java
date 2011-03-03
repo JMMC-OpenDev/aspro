@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SearchCalSampMessageHandler.java,v 1.12 2011-03-02 17:36:03 bourgesl Exp $"
+ * "@(#) $Id: SearchCalSampMessageHandler.java,v 1.13 2011-03-03 17:40:49 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.12  2011/03/02 17:36:03  bourgesl
+ * do not skip calibrator without UD diameters / return all diameters as Target/calibratorInfos
+ *
  * Revision 1.11  2011/02/16 14:52:43  bourgesl
  * added comments
  *
@@ -45,20 +48,30 @@ package fr.jmmc.aspro.model.searchCal;
 
 import fr.jmmc.aspro.gui.TargetEditorDialog;
 import fr.jmmc.aspro.model.ObservationManager;
+import fr.jmmc.aspro.model.oi.BaseValue;
+import fr.jmmc.aspro.model.oi.CalibratorInformations;
+import fr.jmmc.aspro.model.oi.FocalInstrumentMode;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
+import fr.jmmc.aspro.model.oi.SpectralBand;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
+import fr.jmmc.aspro.model.util.SpectralBandUtils;
 import fr.jmmc.aspro.util.XmlFactory;
+import fr.jmmc.mcs.astro.Band;
 import fr.jmmc.mcs.gui.App;
 import fr.jmmc.mcs.gui.MessagePane;
 import fr.jmmc.mcs.interop.SampCapability;
 import fr.jmmc.mcs.interop.SampMessageHandler;
+import fr.jmmc.mcs.model.ModelDefinition;
+import fr.jmmc.mcs.model.targetmodel.Model;
+import fr.jmmc.mcs.model.targetmodel.Parameter;
 import fr.jmmc.mcs.util.FileUtils;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import javax.swing.SwingUtilities;
@@ -145,9 +158,6 @@ public final class SearchCalSampMessageHandler extends SampMessageHandler {
         logger.fine("document :\n" + document);
       }
 
-      // TODO CALS : HERE
-      //logger.severe("document :\n" + document);
-
       final ObservationManager om = ObservationManager.getInstance();
 
       final ObservationSetting searchCalObservation = om.load(new StringReader(document));
@@ -164,6 +174,22 @@ public final class SearchCalSampMessageHandler extends SampMessageHandler {
         logger.fine("calibrators :");
         for (Target cal : calibrators) {
           logger.fine(cal.toString());
+        }
+      }
+
+      // filter science target if distance = 0.0 :
+      // should we do this filter in XSLT (not easy as the distance is a number) !
+      for (Iterator<Target> it = calibrators.iterator(); it.hasNext();) {
+        final Target cal = it.next();
+
+        final BaseValue dist = cal.getCalibratorInfos().getField(CalibratorInformations.FIELD_DISTANCE);
+
+        // Use 0 or 1e-6 deg ?
+        if (dist != null && dist.getNumber().doubleValue() == 0d) {
+          if (logger.isLoggable(Level.INFO)) {
+            logger.info("calibrator distance is 0 - skip science target : " + cal + " - IDS = " + cal.getIDS());
+          }
+          it.remove();
         }
       }
 
@@ -195,14 +221,67 @@ public final class SearchCalSampMessageHandler extends SampMessageHandler {
             return;
           }
 
-          // TODO : check if current Aspro instrument band corresponds to SearchCal band !
-
           // use deep copy of the current observation to manipulate target and calibrator list properly :
-          final ObservationSetting cloned = om.getMainObservation().deepClone();
+          final ObservationSetting obsCloned = om.getMainObservation().deepClone();
+
+          // Find instrument band :
+          final FocalInstrumentMode insMode = obsCloned.getInstrumentConfiguration().getFocalInstrumentMode();
+          if (insMode == null) {
+            throw new IllegalStateException("the instrumentMode is empty !");
+          }
+
+          final double lambda = insMode.getWaveLength();
+          if (logger.isLoggable(Level.FINE)) {
+            logger.fine("lambda = " + lambda);
+          }
+
+          final Band band = Band.findBand(lambda);
+          final SpectralBand insBand = SpectralBandUtils.findBand(band);
+
+          if (logger.isLoggable(Level.FINE)) {
+            logger.fine("band    = " + band);
+            logger.fine("insBand = " + insBand);
+          }
+
+          // TODO CALS : find correct diameter among UD_ ...
+          // or using alternate diameters (in order of priority) : UD, LD, UDDK, DIA12
+
+          // TODO : MOVE THAT CODE ELSEWHERE ...
+
+          for (Target cal : calibrators) {
+            logger.severe(cal.toString());
+
+            // set disk diameter according to instrument band :
+            if (!cal.getModels().isEmpty()) {
+              final Model diskModel = cal.getModels().get(0);
+
+              if (ModelDefinition.MODEL_DISK.equals(diskModel.getType())) {
+
+                // if UD_<band> diameter is missing, use other values ...
+                final Double ud = cal.getCalibratorInfos().getUDDiameter(insBand);
+
+                logger.severe("diameter UD_" + insBand + " = " + ud);
+
+                if (ud != null) {
+
+                  final Parameter diameterParameter = diskModel.getParameter(ModelDefinition.PARAM_DIAMETER);
+
+                  if (diameterParameter != null) {
+                    diameterParameter.setValue(ud.doubleValue());
+                  }
+
+                  logger.severe("parameters : " + diskModel.getParameters());
+                } else {
+                  // use alternate :
+                  logger.severe("NOT IMPLEMENTED : TODO CALS");
+                }
+              }
+            }
+          }
 
           // Prepare the data model (editable targets and user infos) :
-          final List<Target> editTargets = cloned.getTargets();
-          final TargetUserInformations editTargetUserInfos = cloned.getOrCreateTargetUserInfos();
+          final List<Target> editTargets = obsCloned.getTargets();
+          final TargetUserInformations editTargetUserInfos = obsCloned.getOrCreateTargetUserInfos();
 
           if (logger.isLoggable(Level.FINE)) {
             logger.fine("initial targets :");
