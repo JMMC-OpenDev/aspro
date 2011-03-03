@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BaseOIManager.java,v 1.21 2011-02-18 15:31:39 bourgesl Exp $"
+ * "@(#) $Id: BaseOIManager.java,v 1.22 2011-03-03 15:51:30 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.21  2011/02/18 15:31:39  bourgesl
+ * minor refactoring on target model serialization
+ *
  * Revision 1.20  2011/02/14 15:33:10  bourgesl
  * use JMCS FileUtils
  *
@@ -186,7 +189,15 @@ public class BaseOIManager {
 
     Object result = null;
     try {
+
+      final long start = System.nanoTime();
+
       result = this.jf.createUnMarshaller().unmarshal(inputFile);
+
+      if (logger.isLoggable(Level.INFO)) {
+        logger.info("unmarshall : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
+      }
+
     } catch (JAXBException je) {
       handleException("Load failure on " + inputFile, je);
     }
@@ -207,7 +218,15 @@ public class BaseOIManager {
 
     Object result = null;
     try {
+
+      final long start = System.nanoTime();
+
       result = this.jf.createUnMarshaller().unmarshal(reader);
+
+      if (logger.isLoggable(Level.INFO)) {
+        logger.info("unmarshall : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
+      }
+
     } catch (JAXBException je) {
       handleException("Load failure on " + reader, je);
     }
@@ -226,7 +245,15 @@ public class BaseOIManager {
   protected final void saveObject(final File outputFile, final Object object)
           throws IOException, IllegalStateException {
     try {
+
+      final long start = System.nanoTime();
+
       this.jf.createMarshaller().marshal(object, outputFile);
+
+      if (logger.isLoggable(Level.INFO)) {
+        logger.info("marshall : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
+      }
+
     } catch (JAXBException je) {
       handleException("Save failure on " + outputFile, je);
     }

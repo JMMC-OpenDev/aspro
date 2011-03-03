@@ -266,7 +266,7 @@
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
-      
+
     </xsd:sequence>
   </xsd:complexType>
 
@@ -331,7 +331,7 @@
       <xsd:element name="minElevation" type="xsd:double">
         <xsd:annotation>
           <xsd:documentation>
-            minimum elevation for the telescopes (deg). 
+            minimum elevation for the telescopes (deg).
             Must be in the range [0;90]
           </xsd:documentation>
         </xsd:annotation>
@@ -627,7 +627,7 @@
       </xsd:documentation>
     </xsd:annotation>
     <xsd:sequence>
-      
+
       <!-- HA Min / Max -->
       <xsd:element name="HAMin" type="xsd:double" minOccurs="0">
         <xsd:annotation>
@@ -668,88 +668,89 @@
     </xsd:annotation>
     <xsd:sequence>
 
-      <!-- Uniform disk diameters in bands U, B, V, R, I, J, H, K, L, N -->
-      <xsd:element name="UD_U" type="xsd:double" minOccurs="0">
+      <!-- SearchCal parameters -->
+      <xsd:element name="parameter" type="BaseValue" minOccurs="0" maxOccurs="unbounded">
         <xsd:annotation>
           <xsd:documentation>
-            U-band Uniform-Disk Diameter
+            SearchCal VOTable Parameter
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
-      <xsd:element name="UD_B" type="xsd:double" minOccurs="0">
+
+      <!-- SearchCal fields -->
+      <xsd:element name="field" type="BaseValue" minOccurs="0" maxOccurs="unbounded">
         <xsd:annotation>
           <xsd:documentation>
-            B-band Uniform-Disk Diameter
+            SearchCal VOTable Field
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
-      <xsd:element name="UD_V" type="xsd:double" minOccurs="0">
-        <xsd:annotation>
-          <xsd:documentation>
-            V-band Uniform-Disk Diameter
-          </xsd:documentation>
-        </xsd:annotation>
-      </xsd:element>
-      <xsd:element name="UD_R" type="xsd:double" minOccurs="0">
-        <xsd:annotation>
-          <xsd:documentation>
-            R-band Uniform-Disk Diameter
-          </xsd:documentation>
-        </xsd:annotation>
-      </xsd:element>
-      <xsd:element name="UD_I" type="xsd:double" minOccurs="0">
-        <xsd:annotation>
-          <xsd:documentation>
-            I-band Uniform-Disk Diameter
-          </xsd:documentation>
-        </xsd:annotation>
-      </xsd:element>
-      <xsd:element name="UD_J" type="xsd:double" minOccurs="0">
-        <xsd:annotation>
-          <xsd:documentation>
-            J-band Uniform-Disk Diameter
-          </xsd:documentation>
-        </xsd:annotation>
-      </xsd:element>
-      <xsd:element name="UD_H" type="xsd:double" minOccurs="0">
-        <xsd:annotation>
-          <xsd:documentation>
-            H-band Uniform-Disk Diameter
-          </xsd:documentation>
-        </xsd:annotation>
-      </xsd:element>
-      <xsd:element name="UD_K" type="xsd:double" minOccurs="0">
-        <xsd:annotation>
-          <xsd:documentation>
-            K-band Uniform-Disk Diameter
-          </xsd:documentation>
-        </xsd:annotation>
-      </xsd:element>
-      <xsd:element name="UD_L" type="xsd:double" minOccurs="0">
-        <xsd:annotation>
-          <xsd:documentation>
-            L-band Uniform-Disk Diameter
-          </xsd:documentation>
-        </xsd:annotation>
-      </xsd:element>
-      <xsd:element name="UD_N" type="xsd:double" minOccurs="0">
-        <xsd:annotation>
-          <xsd:documentation>
-            N-band Uniform-Disk Diameter
-          </xsd:documentation>
-        </xsd:annotation>
-      </xsd:element>
-      
-      <!-- Limb-Darkened Diameter -->
-      <xsd:element name="LD" type="xsd:double" minOccurs="0">
-        <xsd:annotation>
-          <xsd:documentation>
-            Limb-Darkened Diameter
-          </xsd:documentation>
-        </xsd:annotation>
-      </xsd:element>
-      
+
     </xsd:sequence>
+  </xsd:complexType>
+
+
+
+
+  <!--
+    Base value type.
+  -->
+  <xsd:complexType name="BaseValue">
+    <xsd:annotation>
+      <xsd:documentation>
+        A generic value type
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:attribute name="name" type="xsd:string" use="required"/>
+    <xsd:attribute name="unit" type="xsd:string" />
+  </xsd:complexType>
+
+  <!--
+    Boolean value type.
+  -->
+  <xsd:complexType name="BooleanValue">
+    <xsd:annotation>
+      <xsd:documentation>
+        A boolean value
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexContent>
+      <xsd:extension base="BaseValue">
+        <xsd:attribute name="value" type="xsd:boolean" />
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+
+  <!--
+    Number value type.
+  -->
+  <xsd:complexType name="NumberValue">
+    <xsd:annotation>
+      <xsd:documentation>
+        A number value
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexContent>
+      <xsd:extension base="BaseValue">
+        <xsd:attribute name="value" type="xsd:double" />
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+
+  <!--
+    String value type.
+  -->
+  <xsd:complexType name="StringValue">
+    <xsd:annotation>
+      <xsd:documentation>
+        A string value
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexContent>
+      <xsd:extension base="BaseValue">
+        <xsd:attribute name="value" type="xsd:string" />
+      </xsd:extension>
+    </xsd:complexContent>
   </xsd:complexType>
 
 
@@ -946,7 +947,7 @@
       <xsd:element name="channels" type="xsd:IDREFS" minOccurs="0">
         <xsd:annotation>
           <xsd:documentation>
-              The list of channels for this configuration (V1 V2) used by CHARA/Vega 
+              The list of channels for this configuration (V1 V2) used by CHARA/Vega
           </xsd:documentation>
           <xsd:appinfo>
             <jaxb:property>

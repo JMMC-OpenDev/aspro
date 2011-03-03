@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationManager.java,v 1.61 2011-03-01 17:15:43 bourgesl Exp $"
+ * "@(#) $Id: ObservationManager.java,v 1.62 2011-03-03 15:51:30 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.61  2011/03/01 17:15:43  bourgesl
+ * store the computed OIFits structure to simplify usage (no more in observation) + fireOIFitsDone
+ *
  * Revision 1.60  2011/02/28 17:12:12  bourgesl
  * removed comments
  *
@@ -412,6 +415,7 @@ public final class ObservationManager extends BaseOIManager {
       if (logger.isLoggable(Level.INFO)) {
         logger.info("Load observation from : " + file);
       }
+
       final Object loaded = loadObject(file);
 
       if (!(loaded instanceof ObservationSetting)) {
@@ -445,6 +449,7 @@ public final class ObservationManager extends BaseOIManager {
       if (logger.isLoggable(Level.INFO)) {
         logger.info("Load observation from : " + reader);
       }
+      
       final Object loaded = loadObject(reader);
 
       if (!(loaded instanceof ObservationSetting)) {
