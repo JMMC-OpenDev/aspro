@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BasicObservationForm.java,v 1.64 2011-03-01 17:08:50 bourgesl Exp $"
+ * "@(#) $Id: BasicObservationForm.java,v 1.65 2011-03-03 17:37:24 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.64  2011/03/01 17:08:50  bourgesl
+ * if multiple configurations, disable night restrictions
+ *
  * Revision 1.63  2011/02/25 16:49:16  bourgesl
  * removed comments
  *
@@ -955,7 +958,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     }
 
     // check if selection changes :
-    if (this.currentTarget == null || !this.currentTarget.equals(getSelectedTarget())) {
+    if (this.currentTarget == null || this.currentTarget != getSelectedTarget()) {
       // memorize the selected item :
       this.currentTarget = getSelectedTarget();
 
