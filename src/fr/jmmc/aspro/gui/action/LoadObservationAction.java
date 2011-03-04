@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: LoadObservationAction.java,v 1.10 2010-10-04 16:25:39 bourgesl Exp $"
+ * "@(#) $Id: LoadObservationAction.java,v 1.11 2011-03-04 16:57:48 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.10  2010/10/04 16:25:39  bourgesl
+ * proper JAXB / IO exception handling
+ *
  * Revision 1.9  2010/09/24 15:54:25  bourgesl
  * better exception handling + use MessagePane
  *
@@ -109,6 +112,7 @@ public class LoadObservationAction extends ObservationFileAction {
       this.setLastDir(file.getParent());
 
       try {
+        // TODO : check if file exists. If not, add the file extension if missing and retry ...
         om.load(file);
 
         StatusBar.show("file loaded : " + file.getName());
