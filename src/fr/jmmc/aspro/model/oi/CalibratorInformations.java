@@ -260,20 +260,30 @@ public class CalibratorInformations
    */
   /** field distance (degrees) (number) */
   public final static String FIELD_DISTANCE = "dist";
-  /** field UD_V (max) (number) */
+  /** field UD_V (mas) (number) */
   public final static String FIELD_UD_V = "UD_V";
-  /** field UD_R (max) (number) */
+  /** field UD_R (mas) (number) */
   public final static String FIELD_UD_R = "UD_R";
-  /** field UD_I (max) (number) */
+  /** field UD_I (mas) (number) */
   public final static String FIELD_UD_I = "UD_I";
-  /** field UD_J (max) (number) */
+  /** field UD_J (mas) (number) */
   public final static String FIELD_UD_J = "UD_J";
-  /** field UD_H (max) (number) */
+  /** field UD_H (mas) (number) */
   public final static String FIELD_UD_H = "UD_H";
-  /** field UD_K (max) (number) */
+  /** field UD_K (mas) (number) */
   public final static String FIELD_UD_K = "UD_K";
-  /** field UD_N (max) (number) */
+  /** field UD_N (mas) (number) */
   public final static String FIELD_UD_N = "UD_N";
+
+  /* alternate diameters */
+  /** field UD (mas) (number) = Uniform-Disc Diameter */
+  public final static String FIELD_UD = "UD";
+  /** field LD (mas) (number) = Limb-Darkened Diameter */
+  public final static String FIELD_LD = "LD";
+  /** field UDDK (mas) (number) = Uniform-Disc Diameter in K-band */
+  public final static String FIELD_UDDK = "UDDK";
+  /** field Dia12 (mas) (number) = Angular Diameter at 12 microns */
+  public final static String FIELD_DIA12 = "Dia12";
 
   /* Utility methods */
   /**
@@ -311,7 +321,7 @@ public class CalibratorInformations
   /**
    * Return the diameter in the given band
    * @param band spectral band
-   * @return flux in the given band or null if undefined
+   * @return diameter in the given band or null if undefined
    */
   public final Double getUDDiameter(final SpectralBand band) {
     if (band != null) {
@@ -336,6 +346,24 @@ public class CalibratorInformations
     return null;
   }
 
+  /**
+   * Return the available diameter UD, LD, UDDK, DIA12 (in order of priority)
+   * @return diameter UD, LD, UDDK, DIA12 or null if unavailable
+   */
+  public final BaseValue getAlternateDiameter() {
+    BaseValue diameter = getField(FIELD_UD);
+    if (diameter == null) {
+      diameter = getField(FIELD_LD);
+    }
+    if (diameter == null) {
+      diameter = getField(FIELD_UDDK);
+    }
+    if (diameter == null) {
+      diameter = getField(FIELD_DIA12);
+    }
+    
+    return diameter;
+  }
   /**
    * Return the value corresponding to the given name
    * @param list list to traverse
