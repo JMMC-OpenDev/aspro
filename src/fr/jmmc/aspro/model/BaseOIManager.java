@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BaseOIManager.java,v 1.22 2011-03-03 15:51:30 bourgesl Exp $"
+ * "@(#) $Id: BaseOIManager.java,v 1.23 2011-03-04 16:59:59 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.22  2011/03/03 15:51:30  bourgesl
+ * added calibrator informations (searchCal main parameters and all values)
+ *
  * Revision 1.21  2011/02/18 15:31:39  bourgesl
  * minor refactoring on target model serialization
  *
@@ -76,6 +79,7 @@
  ******************************************************************************/
 package fr.jmmc.aspro.model;
 
+import fr.jmmc.jaxb.AsproCustomPrefixMapper;
 import fr.jmmc.jaxb.JAXBFactory;
 import fr.jmmc.jaxb.XmlBindException;
 import fr.jmmc.mcs.util.FileUtils;
@@ -91,6 +95,8 @@ import java.util.GregorianCalendar;
 import java.util.Vector;
 import java.util.logging.Level;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.PropertyException;
 import javax.xml.bind.UnmarshalException;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeConstants;
@@ -248,7 +254,7 @@ public class BaseOIManager {
 
       final long start = System.nanoTime();
 
-      this.jf.createMarshaller().marshal(object, outputFile);
+      this.createMarshaller().marshal(object, outputFile);
 
       if (logger.isLoggable(Level.INFO)) {
         logger.info("marshall : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
@@ -269,10 +275,41 @@ public class BaseOIManager {
   public final void saveObject(final Writer writer, final Object object)
           throws IllegalStateException {
     try {
-      this.jf.createMarshaller().marshal(object, writer);
+      this.createMarshaller().marshal(object, writer);
     } catch (JAXBException je) {
       throw new IllegalStateException("Serialization failure", je);
     }
+  }
+
+  /**
+   * Creates a JAXB Marshaller customized for Aspro 2 (name spaces)
+   *
+   * @return JAXB Marshaller
+   * @throws XmlBindException if a JAXBException was caught while creating an marshaller
+   */
+  private final Marshaller createMarshaller() throws XmlBindException {
+    final Marshaller m = this.jf.createMarshaller();
+
+    /*
+    to specify the URI->prefix mapping, you'll need to provide an
+    implementation of NamespacePrefixMapper, which determines the
+    prefixes used for marshalling.
+    
+    you specify this as a property of Marshaller to
+    tell the marshaller to consult your mapper
+    to assign a prefix for a namespace.
+     */
+    try {
+      m.setProperty("com.sun.xml.bind.namespacePrefixMapper", AsproCustomPrefixMapper.getInstance());
+    } catch (PropertyException pe) {
+      // if the JAXB provider doesn't recognize the prefix mapper,
+      // it will throw this exception. Since being unable to specify
+      // a human friendly prefix is not really a fatal problem,
+      // you can just continue marshalling without failing
+
+      logger.log(Level.WARNING, "jaxb property failure", pe);
+    }
+    return m;
   }
 
   /**
