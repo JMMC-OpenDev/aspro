@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.88 2011-03-01 17:11:38 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.89 2011-03-04 16:57:36 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.88  2011/03/01 17:11:38  bourgesl
+ * minor changes
+ *
  * Revision 1.87  2011/02/28 17:13:48  bourgesl
  * fixed dataset (always defined) that use CONF + PoPs in the legend
  *
@@ -2508,7 +2511,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
   private String getSelectedTargetName() {
     final Target target = getSelectedTarget();
     if (target != null) {
-      return getSelectedTarget().getName();
+      return target.getName();
     }
     return null;
   }
