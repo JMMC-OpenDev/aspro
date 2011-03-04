@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SearchCalSampMessageHandler.java,v 1.13 2011-03-03 17:40:49 bourgesl Exp $"
+ * "@(#) $Id: SearchCalSampMessageHandler.java,v 1.14 2011-03-04 16:59:07 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.13  2011/03/03 17:40:49  bourgesl
+ * filter the science targets that may be present in SearchCal response
+ * define the disk model diameter using the selected instrument band and UD_ fields
+ *
  * Revision 1.12  2011/03/02 17:36:03  bourgesl
  * do not skip calibrator without UD diameters / return all diameters as Target/calibratorInfos
  *
@@ -57,6 +61,7 @@ import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.aspro.model.util.SpectralBandUtils;
 import fr.jmmc.aspro.util.XmlFactory;
+import fr.jmmc.mcs.astro.ALX;
 import fr.jmmc.mcs.astro.Band;
 import fr.jmmc.mcs.gui.App;
 import fr.jmmc.mcs.gui.MessagePane;
@@ -177,19 +182,29 @@ public final class SearchCalSampMessageHandler extends SampMessageHandler {
         }
       }
 
-      // filter science target if distance = 0.0 :
-      // should we do this filter in XSLT (not easy as the distance is a number) !
+      // Mimic SearchCal science object detection distance preference :
+      /*
+      setDefaultPreference("query.scienceObjectDetectionDistance",
+      "" + (1 * ALX.ARCSEC_IN_DEGREES));
+       */
+      final double scienceObjectDetectionDistance = (1d * ALX.ARCSEC_IN_DEGREES);
+
+      // filter science target if distance is less than science object detection distance preference (1 arcsec) :
       for (Iterator<Target> it = calibrators.iterator(); it.hasNext();) {
         final Target cal = it.next();
 
         final BaseValue dist = cal.getCalibratorInfos().getField(CalibratorInformations.FIELD_DISTANCE);
 
-        // Use 0 or 1e-6 deg ?
-        if (dist != null && dist.getNumber().doubleValue() == 0d) {
-          if (logger.isLoggable(Level.INFO)) {
-            logger.info("calibrator distance is 0 - skip science target : " + cal + " - IDS = " + cal.getIDS());
+        if (dist != null) {
+          final double rowDistance = dist.getNumber().doubleValue();
+
+          // If the distance is close enough to be detected as a science object
+          if (rowDistance < scienceObjectDetectionDistance) {
+            if (logger.isLoggable(Level.INFO)) {
+              logger.info("calibrator distance is [" + rowDistance + "] - skip this calibrator considered as science object : " + cal + " - IDS = " + cal.getIDS());
+            }
+            it.remove();
           }
-          it.remove();
         }
       }
 
@@ -224,6 +239,12 @@ public final class SearchCalSampMessageHandler extends SampMessageHandler {
           // use deep copy of the current observation to manipulate target and calibrator list properly :
           final ObservationSetting obsCloned = om.getMainObservation().deepClone();
 
+
+          // find correct diameter among UD_ for the Aspro instrument band ...
+          // or using alternate diameters (in order of priority) : UD, LD, UDDK, DIA12
+
+          // TODO : MOVE THAT CODE ELSEWHERE ... (reuse it when the instrument band changes)
+
           // Find instrument band :
           final FocalInstrumentMode insMode = obsCloned.getInstrumentConfiguration().getFocalInstrumentMode();
           if (insMode == null) {
@@ -243,37 +264,44 @@ public final class SearchCalSampMessageHandler extends SampMessageHandler {
             logger.fine("insBand = " + insBand);
           }
 
-          // TODO CALS : find correct diameter among UD_ ...
-          // or using alternate diameters (in order of priority) : UD, LD, UDDK, DIA12
-
-          // TODO : MOVE THAT CODE ELSEWHERE ...
-
           for (Target cal : calibrators) {
-            logger.severe(cal.toString());
 
             // set disk diameter according to instrument band :
             if (!cal.getModels().isEmpty()) {
               final Model diskModel = cal.getModels().get(0);
 
               if (ModelDefinition.MODEL_DISK.equals(diskModel.getType())) {
+                final Parameter diameterParameter = diskModel.getParameter(ModelDefinition.PARAM_DIAMETER);
 
-                // if UD_<band> diameter is missing, use other values ...
-                final Double ud = cal.getCalibratorInfos().getUDDiameter(insBand);
+                if (diameterParameter != null) {
 
-                logger.severe("diameter UD_" + insBand + " = " + ud);
+                  // if UD_<band> diameter is missing, use other values ...
+                  final Double udBand = cal.getCalibratorInfos().getUDDiameter(insBand);
 
-                if (ud != null) {
+                  if (udBand != null) {
+                    if (logger.isLoggable(Level.INFO)) {
+                      logger.info("define uniform disk diameter for calibrator ["
+                              + cal.getName() + "] using diameter UD_" + insBand + " = " + udBand);
+                    }
+                    diameterParameter.setValue(udBand.doubleValue());
 
-                  final Parameter diameterParameter = diskModel.getParameter(ModelDefinition.PARAM_DIAMETER);
+                  } else {
+                    // use alternate diameter UD, LD, UDDK, DIA12 (in order of priority) :
+                    final BaseValue diam = cal.getCalibratorInfos().getAlternateDiameter();
 
-                  if (diameterParameter != null) {
-                    diameterParameter.setValue(ud.doubleValue());
+                    if (diam != null) {
+                      if (logger.isLoggable(Level.INFO)) {
+                        logger.info("define uniform disk diameter for calibrator ["
+                                + cal.getName() + "] using diameter " + diam.getName() + " = " + diam.getValue());
+                      }
+
+                      diameterParameter.setValue(diam.getNumber().doubleValue());
+                    } else {
+                      if (logger.isLoggable(Level.INFO)) {
+                        logger.info("no diameter available for calibrator [" + cal.getName() + "], use 0.0");
+                      }
+                    }
                   }
-
-                  logger.severe("parameters : " + diskModel.getParameters());
-                } else {
-                  // use alternate :
-                  logger.severe("NOT IMPLEMENTED : TODO CALS");
                 }
               }
             }
