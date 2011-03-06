@@ -135,7 +135,7 @@ public class Target
     protected List<Model> models;
     protected TargetConfiguration configuration;
     protected CalibratorInformations calibratorInfos;
-    @XmlAttribute(required = true)
+    @XmlAttribute(name = "id", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlID
     @XmlSchemaType(name = "ID")

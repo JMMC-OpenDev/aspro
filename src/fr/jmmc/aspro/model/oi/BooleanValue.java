@@ -34,7 +34,7 @@ public class BooleanValue
     extends BaseValue
 {
 
-    @XmlAttribute
+    @XmlAttribute(name = "value")
     protected Boolean value;
 
     /**

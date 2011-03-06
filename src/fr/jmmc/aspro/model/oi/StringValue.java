@@ -34,7 +34,7 @@ public class StringValue
     extends BaseValue
 {
 
-    @XmlAttribute
+    @XmlAttribute(name = "value")
     protected String value;
 
     /**

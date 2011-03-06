@@ -34,7 +34,7 @@ public class NumberValue
     extends BaseValue
 {
 
-    @XmlAttribute
+    @XmlAttribute(name = "value")
     protected Double value;
 
     /**

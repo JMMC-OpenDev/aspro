@@ -42,9 +42,9 @@ public class BaseValue
     extends OIBase
 {
 
-    @XmlAttribute(required = true)
+    @XmlAttribute(name = "name", required = true)
     protected String name;
-    @XmlAttribute
+    @XmlAttribute(name = "unit")
     protected String unit;
 
     /**
