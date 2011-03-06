@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproCustomPrefixMapper.java,v 1.1 2011-03-04 16:57:21 bourgesl Exp $"
+ * "@(#) $Id: AsproCustomPrefixMapper.java,v 1.2 2011-03-06 14:07:51 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2011/03/04 16:57:21  bourgesl
+ * new prefix mapper for Aspro (xsi)
+ *
  */
 package fr.jmmc.jaxb;
 
@@ -14,6 +17,13 @@ import com.sun.xml.bind.marshaller.NamespacePrefixMapper;
 /**
  * This class customizes the xml schema prefixes
  * @see NamespacePrefixMapper
+ *
+ * The main problem consists in extending the correct JAXB implementation :
+ * - JAXB 2.x
+ * import com.sun.xml.bind.marshaller.NamespacePrefixMapper;
+ *
+ * - JDK 6
+ * import com.sun.xml.internal.bind.marshaller.NamespacePrefixMapper;
  * 
  * @author bourgesl
  */
@@ -99,7 +109,7 @@ public final class AsproCustomPrefixMapper extends NamespacePrefixMapper {
    * (so that we don't unexpectedly change the meaning of QNames
    * bound to {@link String}), partly to simplify the marshaller.
    * <li>
-   * If the prefix returned is "" yet the current {@link JAXBContext}
+   * If the prefix returned is "" yet the current JAXBContext
    * includes classes that use the empty namespace URI. This allows
    * the JAXB RI to reserve the "" prefix for the empty namespace URI,
    * which is the only possible prefix for the URI.
