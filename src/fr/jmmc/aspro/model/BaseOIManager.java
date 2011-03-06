@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BaseOIManager.java,v 1.23 2011-03-04 16:59:59 bourgesl Exp $"
+ * "@(#) $Id: BaseOIManager.java,v 1.24 2011-03-06 14:07:39 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.23  2011/03/04 16:59:59  bourgesl
+ * added namespacePrefixMapper to avoid xml:xsi overhead and define properly prefixes for aspro and target model
+ *
  * Revision 1.22  2011/03/03 15:51:30  bourgesl
  * added calibrator informations (searchCal main parameters and all values)
  *
@@ -114,6 +117,8 @@ public class BaseOIManager {
   /** Class logger */
   private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
+  /** JAXB property to define a custom namspace prefix mapper */
+  public static final String JAXB_NAMESPACE_PREFIX_MAPPER = "com.sun.xml.bind.namespacePrefixMapper";
   /** package name for JAXB generated code */
   private final static String OI_JAXB_PATH = "fr.jmmc.aspro.model.oi";
   /** empty vector */
@@ -300,14 +305,17 @@ public class BaseOIManager {
     to assign a prefix for a namespace.
      */
     try {
-      m.setProperty("com.sun.xml.bind.namespacePrefixMapper", AsproCustomPrefixMapper.getInstance());
+      m.setProperty(JAXB_NAMESPACE_PREFIX_MAPPER, AsproCustomPrefixMapper.getInstance());
     } catch (PropertyException pe) {
       // if the JAXB provider doesn't recognize the prefix mapper,
       // it will throw this exception. Since being unable to specify
       // a human friendly prefix is not really a fatal problem,
       // you can just continue marshalling without failing
 
-      logger.log(Level.WARNING, "jaxb property failure", pe);
+      if (logger.isLoggable(Level.WARNING)) {
+        logger.warning("marshaller class = " + m.getClass().getName());
+        logger.log(Level.WARNING, "JAXB Marshaller.setProperty failure", pe);
+      }
     }
     return m;
   }
