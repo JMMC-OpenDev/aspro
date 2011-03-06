@@ -21,10 +21,12 @@ public final class JAXBFactory {
   /** Class logger */
   private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
-
+  /** JAXB 2 Context Factory (System property) */
+  public static final String JAXB_CONTEXT_FACTORY = "javax.xml.bind.JAXBContext";
+  /** JAXB implementation 2.1.12 provided in JMCS libraries */
+  public static final String JAXB_CONTEXT_FACTORY_IMPLEMENTATION = "com.sun.xml.bind.v2.ContextFactory";
   /** all factories */
   private static ConcurrentHashMap<String, JAXBFactory> managedInstances = new ConcurrentHashMap<String, JAXBFactory>(4);
-
   //~ Members ----------------------------------------------------------------------------------------------------------
   /** jaxb context path : used to find a factory */
   private final String jaxbPath;
@@ -93,6 +95,13 @@ public final class JAXBFactory {
   private JAXBContext getContext(final String path) throws XmlBindException {
     JAXBContext c = null;
 
+    // Define the system property to define which JAXB implementation to use :
+    System.setProperty(JAXB_CONTEXT_FACTORY, JAXB_CONTEXT_FACTORY_IMPLEMENTATION);
+
+    if (logger.isLoggable(Level.INFO)) {
+      logger.info("JAXB implementation = " + System.getProperty(JAXB_CONTEXT_FACTORY));
+    }
+
     try {
       // create a JAXBContext capable of handling classes generated into
       // ivoa schema package
@@ -156,3 +165,4 @@ public final class JAXBFactory {
   }
 }
 //~ End of file --------------------------------------------------------------------------------------------------------
+
