@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BroadcastToModelFittingAction.java,v 1.14 2011-03-01 17:12:06 bourgesl Exp $"
+ * "@(#) $Id: BroadcastToModelFittingAction.java,v 1.15 2011-03-08 17:25:26 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.14  2011/03/01 17:12:06  bourgesl
+ * added message if multiple configuration
+ * use OM.getOIFitsFile instead of observation
+ *
  * Revision 1.13  2011/02/18 15:31:39  bourgesl
  * minor refactoring on target model serialization
  *
@@ -57,6 +61,7 @@ import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.jaxb.JAXBFactory;
 import fr.jmmc.mcs.gui.MessagePane;
+import fr.jmmc.mcs.gui.task.TaskSwingWorkerExecutor;
 import fr.jmmc.mcs.interop.SampCapability;
 import fr.jmmc.mcs.interop.SampCapabilityAction;
 import fr.jmmc.mcs.model.targetmodel.Model;
@@ -73,8 +78,6 @@ import java.util.Map;
 /**
  * This registered action represents a File Menu entry to
  * send model and generated oifits to one modelfitting application.
- *
- * TODO : test if any task is running like fr.jmmc.aspro.gui.action.WaitingTaskAction
  *
  * @author mella
  */
@@ -104,9 +107,9 @@ public class BroadcastToModelFittingAction extends SampCapabilityAction {
   }
 
   /**
-   *
+   * Should return the message you want to send
    * @throws IllegalStateException if the oifits file can not be written to a temporary file
-   * @return
+   * @return Samp message parameters as a map
    */
   @Override
   public Map<?, ?> composeMessage() throws IllegalStateException {
@@ -115,6 +118,12 @@ public class BroadcastToModelFittingAction extends SampCapabilityAction {
     // Use main observation to check variants :
     if (!ObservationManager.getInstance().getMainObservation().isSingle()) {
       MessagePane.showMessage("Aspro 2 can not generate an OIFits file when multiple configurations are selected !");
+      return null;
+    }
+
+    // check if there is any running task :
+    if (TaskSwingWorkerExecutor.isTaskRunning()) {
+      MessagePane.showMessage("Computations are in progress; please retry later.");
       return null;
     }
 
