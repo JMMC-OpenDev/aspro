@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBVegaAction.java,v 1.10 2011-02-14 15:33:10 bourgesl Exp $"
+ * "@(#) $Id: ExportOBVegaAction.java,v 1.11 2011-03-08 13:49:39 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.10  2011/02/14 15:33:10  bourgesl
+ * use JMCS FileUtils
+ *
  * Revision 1.9  2010/12/15 13:34:35  bourgesl
  * removed warning
  *
@@ -136,7 +139,7 @@ public class ExportOBVegaAction {
 
       } catch (IOException ioe) {
         MessagePane.showErrorMessage(
-                "Could not export to file : " + file.getName(), ioe);
+                "Could not export to file : " + file.getAbsolutePath(), ioe);
       }
     }
   }

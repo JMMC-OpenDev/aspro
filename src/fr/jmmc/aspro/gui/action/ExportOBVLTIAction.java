@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOBVLTIAction.java,v 1.22 2011-02-28 17:13:14 bourgesl Exp $"
+ * "@(#) $Id: ExportOBVLTIAction.java,v 1.23 2011-03-08 13:49:39 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.22  2011/02/28 17:13:14  bourgesl
+ * comments
+ *
  * Revision 1.21  2011/02/24 17:11:49  bourgesl
  * comments
  *
@@ -195,12 +198,19 @@ public class ExportOBVLTIAction {
     if (file != null) {
       this.setLastDir(file.getParent());
 
+      final File mainFile = file;
       try {
 
         // use main observation :
         final ObservationSetting observation = ObservationManager.getInstance().getMainObservation();
 
-        ExportOBVLTI.process(file, observation, target);
+        // report buffer :
+        final StringBuilder sb = new StringBuilder(128);
+        sb.append("Export Observing Blocks for target [").append(target.getName());
+        sb.append("] in folder :\n").append(getLastDir()).append("\n\n");
+
+        ExportOBVLTI.process(mainFile, observation, target);
+        sb.append(mainFile.getName()).append("\n");
 
         // Generate all calibrator OBs for a science target :
         final TargetUserInformations targetUserInfos = observation.getTargetUserInfos();
@@ -211,27 +221,27 @@ public class ExportOBVLTIAction {
             final List<Target> calibrators = targetInfo.getCalibrators();
 
             if (!calibrators.isEmpty()) {
-              File calFile = null;
-
               for (Target calibrator : calibrators) {
-                calFile = new File(getLastDir(), ExportOBVLTI.generateOBFileName(calibrator));
+                file = new File(getLastDir(), ExportOBVLTI.generateOBFileName(calibrator));
 
-                ExportOBVLTI.process(calFile, observation, calibrator);
+                ExportOBVLTI.process(file, observation, calibrator);
+                sb.append(file.getName()).append("\n");
               }
             }
           }
         }
 
-        StatusBar.show(file.getName() + " created.");
+        StatusBar.show(mainFile.getName() + " created.");
+
+        // display report message :
+        MessagePane.showMessage(sb.toString());
 
         // PoP up to validate OB file against ESO CfP :
-        DismissableMessagePane.show(null, ESO_WARNING, Preferences.getInstance(), "ESO_OB_WARNING");
-
-        // TODO : indicate all created file names !
+        DismissableMessagePane.show(ESO_WARNING, Preferences.getInstance(), "ESO_OB_WARNING");
 
       } catch (IOException ioe) {
         MessagePane.showErrorMessage(
-                "Could not export to file : " + file.getName(), ioe);
+                "Could not export to file : " + file.getAbsolutePath(), ioe);
       }
     }
   }

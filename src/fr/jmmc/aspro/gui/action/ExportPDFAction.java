@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportPDFAction.java,v 1.20 2011-02-14 15:33:10 bourgesl Exp $"
+ * "@(#) $Id: ExportPDFAction.java,v 1.21 2011-03-08 13:49:39 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.20  2011/02/14 15:33:10  bourgesl
+ * use JMCS FileUtils
+ *
  * Revision 1.19  2011/02/04 17:18:46  bourgesl
  * avoid empty file name
  *
@@ -201,7 +204,7 @@ public final class ExportPDFAction extends WaitingTaskAction {
 
       } catch (IOException ioe) {
         MessagePane.showErrorMessage(
-                "Could not write to file : " + file.getName(), ioe);
+                "Could not write to file : " + file.getAbsolutePath(), ioe);
       } finally {
         // restore Chart state if modified :
         exportable.postPDFExport();

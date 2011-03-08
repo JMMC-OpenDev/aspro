@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportOIFitsAction.java,v 1.13 2011-03-01 17:12:06 bourgesl Exp $"
+ * "@(#) $Id: ExportOIFitsAction.java,v 1.14 2011-03-08 13:49:39 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.13  2011/03/01 17:12:06  bourgesl
+ * added message if multiple configuration
+ * use OM.getOIFitsFile instead of observation
+ *
  * Revision 1.12  2011/02/25 16:51:18  bourgesl
  * use AsproConstants for regexp
  *
@@ -151,10 +155,10 @@ public class ExportOIFitsAction extends WaitingTaskAction {
 
         } catch (FitsException fe) {
           MessagePane.showErrorMessage(
-                  "Could not export to file : " + file.getName(), fe);
+                  "Could not export to file : " + file.getAbsolutePath(), fe);
         } catch (IOException ioe) {
           MessagePane.showErrorMessage(
-                  "Could not export to file : " + file.getName(), ioe);
+                  "Could not export to file : " + file.getAbsolutePath(), ioe);
         }
       }
     } else {

@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SaveObservationAction.java,v 1.12 2010-10-04 16:25:39 bourgesl Exp $"
+ * "@(#) $Id: SaveObservationAction.java,v 1.13 2011-03-08 13:49:39 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.12  2010/10/04 16:25:39  bourgesl
+ * proper JAXB / IO exception handling
+ *
  * Revision 1.11  2010/10/01 15:34:06  bourgesl
  * use MessagePane.showConfirmFileOverwrite
  *
@@ -120,7 +123,7 @@ public class SaveObservationAction extends ObservationFileAction {
 
       } catch (IOException ioe) {
         MessagePane.showErrorMessage(
-                "Could not save the file : " + file.getName(), ioe);
+                "Could not save the file : " + file.getAbsolutePath(), ioe);
       }
     }
   }
