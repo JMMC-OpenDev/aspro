@@ -117,8 +117,10 @@ public class CalibratorInformations
   }
 
   /* parameter constants */
-  /** parameter SearchCal_version (string) */
-  public final static String PARAMETER_SCL_VERSION = "SearchCal_version";
+  /** parameter SearchCalGuiVersion (string) */
+  public final static String PARAMETER_SCL_GUI_VERSION = "SearchCalGuiVersion";
+  /** parameter SearchCalServerVersion (string) */
+  public final static String PARAMETER_SCL_SERVER_VERSION = "SearchCalServerVersion";
   /** parameter band (string) */
   public final static String PARAMETER_SCL_BAND = "band";
   /** parameter baseline Max (m) (number) */
