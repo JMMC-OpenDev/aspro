@@ -9,7 +9,7 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
 /**
- * JAXBFactory is an utility class to configure JAXB Connection & properties
+ * JAXBFactory is an utility class to configure JAXB context & properties
  *
  * @author Laurent Bourges
  */
@@ -21,7 +21,10 @@ public final class JAXBFactory {
   /** Class logger */
   private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
-  /** JAXB 2 Context Factory (System property) */
+  /**
+   * JAXB 2 Context Factory (System property) "javax.xml.bind.JAXBContext" instead of "javax.xml.bind.context.factory"
+   * bug reported : http://java.net/jira/browse/JAXB-816
+   */
   public static final String JAXB_CONTEXT_FACTORY = "javax.xml.bind.JAXBContext";
   /** JAXB implementation 2.1.12 provided in JMCS libraries */
   public static final String JAXB_CONTEXT_FACTORY_IMPLEMENTATION = "com.sun.xml.bind.v2.ContextFactory";
