@@ -3,11 +3,14 @@
 ********************************************************************************
  JMMC project
 
- "@(#) $Id: scvot2AsproObservation.xsl,v 1.6 2011-03-03 15:51:29 bourgesl Exp $"
+ "@(#) $Id: scvot2AsproObservation.xsl,v 1.7 2011-03-08 13:51:03 bourgesl Exp $"
 
  History
  ~~~~~~~
  $Log: not supported by cvs2svn $
+ Revision 1.6  2011/03/03 15:51:29  bourgesl
+ added calibrator informations (searchCal main parameters and all values)
+
  Revision 1.4  2010/10/22 11:10:20  bourgesl
  use deletedFlag to filter calibrators to mimic SearchCal delete action
  use HD identifier instead of HIP identifier to mimic SearchCal view
@@ -399,7 +402,7 @@
 
             <calibratorInfos>
 
-              <parameter xsi:type="a:StringValue" name="SearchCal_version" value="{/VOT11:VOTABLE/VOT11:RESOURCE/@name}"/>
+              <parameter xsi:type="a:StringValue" name="SearchCalServerVersion" value="{/VOT11:VOTABLE/VOT11:RESOURCE/@name}"/>
 
               <!-- Build one parameter element per VOTable PARAM present in COPY_PARAMS -->
               <xsl:for-each select="/VOT11:VOTABLE/VOT11:RESOURCE/VOT11:TABLE/VOT11:PARAM[contains($COPY_PARAMS, @name) and @value]">
