@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: LoadObservationAction.java,v 1.11 2011-03-04 16:57:48 bourgesl Exp $"
+ * "@(#) $Id: LoadObservationAction.java,v 1.12 2011-03-08 13:50:18 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.11  2011/03/04 16:57:48  bourgesl
+ * added comment
+ *
  * Revision 1.10  2010/10/04 16:25:39  bourgesl
  * proper JAXB / IO exception handling
  *
@@ -44,6 +47,7 @@ import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.mcs.gui.MessagePane;
 import fr.jmmc.mcs.gui.StatusBar;
 import fr.jmmc.mcs.util.ActionRegistrar;
+import fr.jmmc.mcs.util.FileUtils;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
@@ -111,18 +115,34 @@ public class LoadObservationAction extends ObservationFileAction {
     if (file != null) {
       this.setLastDir(file.getParent());
 
-      try {
-        // TODO : check if file exists. If not, add the file extension if missing and retry ...
-        om.load(file);
+      boolean exist = file.exists();
 
-        StatusBar.show("file loaded : " + file.getName());
+      // check if file exists :
+      if (!exist) {
+        if (FileUtils.getExtension(file) == null) {
+          // try using the same file name with extension :
+          file = checkFileExtension(file);
+          // check again if that file exists :
+          exist = file.exists();
+        }
+      }
 
-      } catch (IllegalArgumentException iae) {
+      if (exist) {
+        try {
+          om.load(file);
+
+          StatusBar.show("file loaded : " + file.getName());
+
+        } catch (IllegalArgumentException iae) {
+          MessagePane.showErrorMessage(
+                  "Invalid observation file : " + file.getAbsolutePath(), iae);
+        } catch (IOException ioe) {
+          MessagePane.showErrorMessage(
+                  "Could not load the file : " + file.getAbsolutePath(), ioe);
+        }
+      } else {
         MessagePane.showErrorMessage(
-                "Invalid file : " + file.getName(), iae);
-      } catch (IOException ioe) {
-        MessagePane.showErrorMessage(
-                "Could not load the file : " + file.getName(), ioe);
+                "Could not load the file : " + file.getAbsolutePath());
       }
     }
   }
