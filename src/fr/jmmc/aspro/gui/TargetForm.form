@@ -681,7 +681,6 @@
                     </Column>
                   </TableColumnModel>
                 </Property>
-                <Property name="fillsViewportHeight" type="boolean" value="true"/>
                 <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
                   <Dimension value="[50, 50]"/>
                 </Property>

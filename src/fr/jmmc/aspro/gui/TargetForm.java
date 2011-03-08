@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetForm.java,v 1.24 2011-03-08 17:27:50 bourgesl Exp $"
+ * "@(#) $Id: TargetForm.java,v 1.25 2011-03-08 17:39:03 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.24  2011/03/08 17:27:50  bourgesl
+ * display SearchCal calibrator information if available using one JTable
+ *
  * Revision 1.23  2011/02/24 17:11:32  bourgesl
  * fix Simbad typo
  *
@@ -1110,7 +1113,6 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     jTableCalibratorInfos.setModel(new CalibratorInfoTableModel());
     jTableCalibratorInfos.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_ALL_COLUMNS);
     jTableCalibratorInfos.setCellSelectionEnabled(true);
-    jTableCalibratorInfos.setFillsViewportHeight(true);
     jTableCalibratorInfos.setMinimumSize(new java.awt.Dimension(50, 50));
     jTableCalibratorInfos.getTableHeader().setReorderingAllowed(false);
     jScrollPaneCalibratorInfos.setViewportView(jTableCalibratorInfos);
