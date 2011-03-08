@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: WaitingTaskAction.java,v 1.3 2011-02-14 17:13:07 bourgesl Exp $"
+ * "@(#) $Id: WaitingTaskAction.java,v 1.4 2011-03-08 17:25:36 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2011/02/14 17:13:07  bourgesl
+ * Use JMCS Task / TaskSwingWorker ...
+ *
  * Revision 1.2  2011/02/04 10:04:35  bourgesl
  * change the cursor (wait) when an action is pending
  *
@@ -86,7 +89,7 @@ public abstract class WaitingTaskAction extends RegisteredAction {
       return;
     }
 
-    // check if there are running tasks :
+    // check if there is any running task :
     if (TaskSwingWorkerExecutor.isTaskRunning()) {
       // indicate to other actions that this action is pending for execution :
       setPending(true);
@@ -134,7 +137,7 @@ public abstract class WaitingTaskAction extends RegisteredAction {
     }
 
     /**
-     * Handle the timer calls
+     * Handle the timer calls until there is no running task
      * @param ae action event
      */
     public void actionPerformed(final ActionEvent ae) {
