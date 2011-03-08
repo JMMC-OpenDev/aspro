@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetForm.java,v 1.23 2011-02-24 17:11:32 bourgesl Exp $"
+ * "@(#) $Id: TargetForm.java,v 1.24 2011-03-08 17:27:50 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.23  2011/02/24 17:11:32  bourgesl
+ * fix Simbad typo
+ *
  * Revision 1.22  2011/01/10 12:45:54  bourgesl
  * generateTree signature updated
  *
@@ -84,6 +87,7 @@
  */
 package fr.jmmc.aspro.gui;
 
+import fr.jmmc.aspro.gui.util.CalibratorInfoTableModel;
 import fr.jmmc.aspro.gui.util.GenericJTree;
 import fr.jmmc.aspro.gui.util.GenericListModel;
 import fr.jmmc.aspro.gui.util.TargetJTree;
@@ -462,7 +466,16 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
       this.jTextAreaTargetInfos.setText(getTargetUserInformation(target).getDescription());
 
       // update calibrator flag :
-      this.jToggleButtonCalibrator.setSelected(isCalibrator(target));
+      final boolean calibrator = isCalibrator(target);
+      this.jToggleButtonCalibrator.setSelected(calibrator);
+
+      final boolean useTableCalibratorInfos = calibrator && target.getCalibratorInfos() != null;
+      if (useTableCalibratorInfos) {
+        getCalibratorInfoTableModel().setData(target.getCalibratorInfos());
+      }
+      // only display calibrator informations if available :
+      this.jLabelCalibratorInfos.setVisible(useTableCalibratorInfos);
+      this.jScrollPaneCalibratorInfos.setVisible(useTableCalibratorInfos);
 
     } finally {
       // restore the automatic update target :
@@ -579,8 +592,12 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
   private void initComponents() {
     java.awt.GridBagConstraints gridBagConstraints;
 
+    jPanelLeft = new javax.swing.JPanel();
     jScrollPaneTreeTargets = new javax.swing.JScrollPane();
     jTreeTargets = new TargetJTree(this.editTargetUserInfos);
+    jPanelCalibrators = new javax.swing.JPanel();
+    jScrollPaneCalibrators = new javax.swing.JScrollPane();
+    jListCalibrators = new javax.swing.JList();
     jToolBarActions = new javax.swing.JToolBar();
     jButtonUp = new javax.swing.JButton();
     jButtonDown = new javax.swing.JButton();
@@ -629,19 +646,21 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     jScrollPaneIds = new javax.swing.JScrollPane();
     jTextAreaIds = new javax.swing.JTextArea();
     jButtonSimbad = new javax.swing.JButton();
+    jLabelCalibratorInfos = new javax.swing.JLabel();
+    jScrollPaneCalibratorInfos = new javax.swing.JScrollPane();
+    jTableCalibratorInfos = new javax.swing.JTable();
     jPanelDescription = new javax.swing.JPanel();
     jScrollPaneTargetInfos = new javax.swing.JScrollPane();
     jTextAreaTargetInfos = new javax.swing.JTextArea();
-    jPanelCalibrators = new javax.swing.JPanel();
-    jScrollPaneCalibrators = new javax.swing.JScrollPane();
-    jListCalibrators = new javax.swing.JList();
 
     setLayout(new java.awt.GridBagLayout());
+
+    jPanelLeft.setLayout(new java.awt.GridBagLayout());
 
     jScrollPaneTreeTargets.setMinimumSize(new java.awt.Dimension(80, 100));
     jScrollPaneTreeTargets.setPreferredSize(new java.awt.Dimension(130, 100));
 
-    jTreeTargets.setFont(new java.awt.Font("Dialog", 1, 12)); // NOI18N
+    jTreeTargets.setFont(new java.awt.Font("Dialog", 1, 12));
     javax.swing.tree.DefaultMutableTreeNode treeNode1 = new javax.swing.tree.DefaultMutableTreeNode("Targets");
     jTreeTargets.setModel(new javax.swing.tree.DefaultTreeModel(treeNode1));
     jTreeTargets.setDragEnabled(true);
@@ -652,10 +671,38 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     gridBagConstraints.gridy = 0;
     gridBagConstraints.gridheight = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.weightx = 0.3;
-    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 0.7;
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-    add(jScrollPaneTreeTargets, gridBagConstraints);
+    jPanelLeft.add(jScrollPaneTreeTargets, gridBagConstraints);
+
+    jPanelCalibrators.setBorder(javax.swing.BorderFactory.createTitledBorder("Calibrators"));
+    jPanelCalibrators.setLayout(new java.awt.BorderLayout());
+
+    jListCalibrators.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+    jListCalibrators.setToolTipText("this list contains targets considered as calibrators");
+    jListCalibrators.setCellRenderer(createTargetListCellRenderer());
+    jListCalibrators.setDragEnabled(true);
+    jListCalibrators.setFixedCellWidth(100);
+    jListCalibrators.setVisibleRowCount(3);
+    jScrollPaneCalibrators.setViewportView(jListCalibrators);
+
+    jPanelCalibrators.add(jScrollPaneCalibrators, java.awt.BorderLayout.CENTER);
+
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weighty = 0.3;
+    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    jPanelLeft.add(jPanelCalibrators, gridBagConstraints);
+
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridheight = 3;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weightx = 0.4;
+    gridBagConstraints.weighty = 1.0;
+    add(jPanelLeft, gridBagConstraints);
 
     jToolBarActions.setFloatable(false);
     jToolBarActions.setRollover(true);
@@ -772,7 +819,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     gridBagConstraints.gridy = 3;
     gridBagConstraints.gridwidth = 4;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.weighty = 0.1;
+    gridBagConstraints.weighty = 0.05;
     jPanelTarget.add(jSeparator3, gridBagConstraints);
 
     jLabelPMRA.setText("PMRA");
@@ -817,7 +864,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     gridBagConstraints.gridy = 8;
     gridBagConstraints.gridwidth = 4;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.weighty = 0.1;
+    gridBagConstraints.weighty = 0.05;
     jPanelTarget.add(jSeparator4, gridBagConstraints);
 
     jLabelMag.setText("Magnitudes :");
@@ -933,7 +980,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     gridBagConstraints.gridy = 11;
     gridBagConstraints.gridwidth = 4;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.weighty = 0.1;
+    gridBagConstraints.weighty = 0.05;
     jPanelTarget.add(jSeparator5, gridBagConstraints);
 
     jLabelObjTypes.setText("Object types");
@@ -1033,7 +1080,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     gridBagConstraints.gridwidth = 3;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.weighty = 0.3;
+    gridBagConstraints.weighty = 0.1;
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
     jPanelTarget.add(jScrollPaneIds, gridBagConstraints);
 
@@ -1050,12 +1097,39 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
     jPanelTarget.add(jButtonSimbad, gridBagConstraints);
 
+    jLabelCalibratorInfos.setText("<html>Calibrator<br/>Information</html>");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 15;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    jPanelTarget.add(jLabelCalibratorInfos, gridBagConstraints);
+
+    jScrollPaneCalibratorInfos.setPreferredSize(new java.awt.Dimension(50, 50));
+
+    jTableCalibratorInfos.setModel(new CalibratorInfoTableModel());
+    jTableCalibratorInfos.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_ALL_COLUMNS);
+    jTableCalibratorInfos.setCellSelectionEnabled(true);
+    jTableCalibratorInfos.setFillsViewportHeight(true);
+    jTableCalibratorInfos.setMinimumSize(new java.awt.Dimension(50, 50));
+    jTableCalibratorInfos.getTableHeader().setReorderingAllowed(false);
+    jScrollPaneCalibratorInfos.setViewportView(jTableCalibratorInfos);
+
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 15;
+    gridBagConstraints.gridwidth = 3;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.weighty = 0.2;
+    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    jPanelTarget.add(jScrollPaneCalibratorInfos, gridBagConstraints);
+
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.weightx = 0.7;
-    gridBagConstraints.weighty = 0.7;
+    gridBagConstraints.weightx = 0.6;
+    gridBagConstraints.weighty = 0.8;
     gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
     add(jPanelTarget, gridBagConstraints);
 
@@ -1066,7 +1140,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
 
     jTextAreaTargetInfos.setBackground(new java.awt.Color(255, 255, 153));
     jTextAreaTargetInfos.setColumns(20);
-    jTextAreaTargetInfos.setFont(new java.awt.Font("Monospaced", 0, 10)); // NOI18N
+    jTextAreaTargetInfos.setFont(new java.awt.Font("Monospaced", 0, 10));
     jTextAreaTargetInfos.setRows(1);
     jScrollPaneTargetInfos.setViewportView(jTextAreaTargetInfos);
 
@@ -1083,26 +1157,6 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     gridBagConstraints.weighty = 0.2;
     gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
     add(jPanelDescription, gridBagConstraints);
-
-    jPanelCalibrators.setBorder(javax.swing.BorderFactory.createTitledBorder("Calibrators"));
-    jPanelCalibrators.setLayout(new java.awt.BorderLayout());
-
-    jListCalibrators.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-    jListCalibrators.setToolTipText("this list contains targets considered as calibrators");
-    jListCalibrators.setCellRenderer(createTargetListCellRenderer());
-    jListCalibrators.setDragEnabled(true);
-    jListCalibrators.setFixedCellWidth(100);
-    jListCalibrators.setVisibleRowCount(3);
-    jScrollPaneCalibrators.setViewportView(jListCalibrators);
-
-    jPanelCalibrators.add(jScrollPaneCalibrators, java.awt.BorderLayout.CENTER);
-
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 2;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-    add(jPanelCalibrators, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
 
   private void jButtonSimbadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSimbadActionPerformed
@@ -1307,6 +1361,16 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     // return previous state :
     return previous;
   }
+
+
+  /**
+   * Return the custom table model
+   * @return CalibratorInfoTableModel
+   */
+  private CalibratorInfoTableModel getCalibratorInfoTableModel() {
+    return (CalibratorInfoTableModel) this.jTableCalibratorInfos.getModel();
+  }
+
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JButton jButtonDown;
   private javax.swing.JButton jButtonRemoveCalibrator;
@@ -1328,6 +1392,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
   private javax.swing.JTextField jFieldRA;
   private javax.swing.JTextField jFieldSpecType;
   private javax.swing.JFormattedTextField jFieldSysVel;
+  private javax.swing.JLabel jLabelCalibratorInfos;
   private javax.swing.JLabel jLabelDEC;
   private javax.swing.JLabel jLabelIds;
   private javax.swing.JLabel jLabelMag;
@@ -1349,7 +1414,9 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
   private javax.swing.JList jListCalibrators;
   private javax.swing.JPanel jPanelCalibrators;
   private javax.swing.JPanel jPanelDescription;
+  private javax.swing.JPanel jPanelLeft;
   private javax.swing.JPanel jPanelTarget;
+  private javax.swing.JScrollPane jScrollPaneCalibratorInfos;
   private javax.swing.JScrollPane jScrollPaneCalibrators;
   private javax.swing.JScrollPane jScrollPaneIds;
   private javax.swing.JScrollPane jScrollPaneTargetInfos;
@@ -1358,6 +1425,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
   private javax.swing.JSeparator jSeparator3;
   private javax.swing.JSeparator jSeparator4;
   private javax.swing.JSeparator jSeparator5;
+  private javax.swing.JTable jTableCalibratorInfos;
   private javax.swing.JTextArea jTextAreaIds;
   private javax.swing.JTextArea jTextAreaTargetInfos;
   private javax.swing.JToggleButton jToggleButtonCalibrator;
