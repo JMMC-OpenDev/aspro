@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationManager.java,v 1.62 2011-03-03 15:51:30 bourgesl Exp $"
+ * "@(#) $Id: ObservationManager.java,v 1.63 2011-03-08 17:26:15 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.62  2011/03/03 15:51:30  bourgesl
+ * added calibrator informations (searchCal main parameters and all values)
+ *
  * Revision 1.61  2011/03/01 17:15:43  bourgesl
  * store the computed OIFits structure to simplify usage (no more in observation) + fireOIFitsDone
  *
@@ -226,18 +229,26 @@ import fr.jmmc.aspro.model.event.TargetSelectionEvent;
 import fr.jmmc.aspro.model.event.UpdateObservationEvent;
 import fr.jmmc.aspro.model.event.WarningContainerEvent;
 import fr.jmmc.aspro.model.oi.AtmosphereQuality;
+import fr.jmmc.aspro.model.oi.BaseValue;
 import fr.jmmc.aspro.model.oi.FocalInstrumentConfigurationChoice;
+import fr.jmmc.aspro.model.oi.FocalInstrumentMode;
 import fr.jmmc.aspro.model.oi.InterferometerConfigurationChoice;
 import fr.jmmc.aspro.model.oi.ObservationCollection;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.ObservationVariant;
+import fr.jmmc.aspro.model.oi.SpectralBand;
 import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetConfiguration;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.aspro.model.oi.WhenSetting;
+import fr.jmmc.aspro.model.util.SpectralBandUtils;
 import fr.jmmc.aspro.util.CombUtils;
+import fr.jmmc.mcs.astro.Band;
 import fr.jmmc.mcs.astro.star.Star;
+import fr.jmmc.mcs.model.ModelDefinition;
+import fr.jmmc.mcs.model.targetmodel.Model;
+import fr.jmmc.mcs.model.targetmodel.Parameter;
 import fr.jmmc.oitools.model.OIFitsFile;
 import java.io.File;
 import java.io.IOException;
@@ -449,7 +460,7 @@ public final class ObservationManager extends BaseOIManager {
       if (logger.isLoggable(Level.INFO)) {
         logger.info("Load observation from : " + reader);
       }
-      
+
       final Object loaded = loadObject(reader);
 
       if (!(loaded instanceof ObservationSetting)) {
@@ -1199,6 +1210,91 @@ public final class ObservationManager extends BaseOIManager {
       // remove calibrator from target list that fires change events :
       removeTarget(calibrator);
     }
+  }
+
+  /**
+   * Update diameter parameter of uniform disk models for the given list of calibrator targets
+   * using their CalibratorInformations (SearchCal) :
+   *
+   * find correct diameter among UD_ for the observation instrument band
+   * or using alternate diameters (in order of priority) : UD, LD, UDDK, DIA12
+   *
+   * @param calibrators list of calibrator targets
+   * @return true if any diameter value changed
+   */
+  public boolean defineCalibratorDiameter(final List<Target> calibrators) {
+    boolean changed = false;
+
+    // Find instrument band from main observation :
+    final FocalInstrumentMode insMode = getMainObservation().getInstrumentConfiguration().getFocalInstrumentMode();
+    if (insMode == null) {
+      throw new IllegalStateException("the instrumentMode is empty !");
+    }
+
+    final double lambda = insMode.getWaveLength();
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("lambda = " + lambda);
+    }
+
+    final Band band = Band.findBand(lambda);
+    final SpectralBand insBand = SpectralBandUtils.findBand(band);
+
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("band    = " + band);
+      logger.fine("insBand = " + insBand);
+    }
+
+    for (Target cal : calibrators) {
+
+      // set disk diameter according to instrument band :
+      if (!cal.getModels().isEmpty()) {
+        final Model diskModel = cal.getModels().get(0);
+
+        if (ModelDefinition.MODEL_DISK.equals(diskModel.getType())) {
+          final Parameter diameterParameter = diskModel.getParameter(ModelDefinition.PARAM_DIAMETER);
+
+          if (diameterParameter != null) {
+            // if UD_<band> diameter is missing, use other values ...
+            final Double udBand = cal.getCalibratorInfos().getUDDiameter(insBand);
+
+            if (udBand != null) {
+              if (logger.isLoggable(Level.INFO)) {
+                logger.info("Define uniform disk diameter for calibrator ["
+                        + cal.getName() + "] using diameter UD_" + insBand + " = " + udBand);
+              }
+              diameterParameter.setValue(udBand.doubleValue());
+              changed = true;
+
+            } else {
+              // use alternate diameter UD, LD, UDDK, DIA12 (in order of priority) :
+              final BaseValue diam = cal.getCalibratorInfos().getAlternateDiameter();
+
+              if (diam != null) {
+                if (logger.isLoggable(Level.INFO)) {
+                  logger.info("Define uniform disk diameter for calibrator ["
+                          + cal.getName() + "] using diameter " + diam.getName() + " = " + diam.getValue());
+                }
+
+                diameterParameter.setValue(diam.getNumber().doubleValue());
+                changed = true;
+
+              } else {
+                if (logger.isLoggable(Level.INFO)) {
+                  logger.info("No diameter available for calibrator [" + cal.getName() + "], set to 0.0");
+                }
+
+                diameterParameter.setValue(0d);
+                changed = true;
+              }
+            }
+          }
+        }
+      }
+    }
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("diameter(s) changed = " + changed);
+    }
+    return changed;
   }
 
   /**
