@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SearchCalSampMessageHandler.java,v 1.14 2011-03-04 16:59:07 bourgesl Exp $"
+ * "@(#) $Id: SearchCalSampMessageHandler.java,v 1.15 2011-03-08 17:27:14 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.14  2011/03/04 16:59:07  bourgesl
+ * define diameter using alternate diameters if computed UD_ are missing
+ *
  * Revision 1.13  2011/03/03 17:40:49  bourgesl
  * filter the science targets that may be present in SearchCal response
  * define the disk model diameter using the selected instrument band and UD_ fields
@@ -54,22 +57,17 @@ import fr.jmmc.aspro.gui.TargetEditorDialog;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.oi.BaseValue;
 import fr.jmmc.aspro.model.oi.CalibratorInformations;
-import fr.jmmc.aspro.model.oi.FocalInstrumentMode;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
-import fr.jmmc.aspro.model.oi.SpectralBand;
+import fr.jmmc.aspro.model.oi.StringValue;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
-import fr.jmmc.aspro.model.util.SpectralBandUtils;
 import fr.jmmc.aspro.util.XmlFactory;
 import fr.jmmc.mcs.astro.ALX;
-import fr.jmmc.mcs.astro.Band;
 import fr.jmmc.mcs.gui.App;
 import fr.jmmc.mcs.gui.MessagePane;
 import fr.jmmc.mcs.interop.SampCapability;
+import fr.jmmc.mcs.interop.SampManager;
 import fr.jmmc.mcs.interop.SampMessageHandler;
-import fr.jmmc.mcs.model.ModelDefinition;
-import fr.jmmc.mcs.model.targetmodel.Model;
-import fr.jmmc.mcs.model.targetmodel.Parameter;
 import fr.jmmc.mcs.util.FileUtils;
 import java.io.File;
 import java.io.IOException;
@@ -81,6 +79,7 @@ import java.util.List;
 import java.util.logging.Level;
 import javax.swing.SwingUtilities;
 import org.astrogrid.samp.Message;
+import org.astrogrid.samp.Metadata;
 import org.astrogrid.samp.client.SampException;
 
 /**
@@ -118,6 +117,20 @@ public final class SearchCalSampMessageHandler extends SampMessageHandler {
       logger.fine("\tReceived '" + this.handledMType() + "' message from '" + senderId + "' : '" + message + "'.");
     }
 
+    // LATER : accept any votable having a meta.ID to import target and not only searchCal calibrators ...
+
+    final Metadata senderMetadata = SampManager.getMetaData(senderId);
+    final String searchCalVersion = senderMetadata.getString("searchcal.version");
+
+    if (searchCalVersion == null) {
+      MessagePane.showErrorMessage("Aspro 2 currently accepts only VOTable(s) from SearchCal; application '" + senderMetadata.getName() + "' is not supported.");
+      return;
+    }
+
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("SearchCal version = " + searchCalVersion);
+    }
+
     // get url of votable (locally stored) :
     final String voTableURL = (String) message.getParam("url");
 
@@ -140,6 +153,7 @@ public final class SearchCalSampMessageHandler extends SampMessageHandler {
 
     try {
 
+      // note : uri can be http://anything :
       final File voTableFile = new File(uri);
 
       final String votable = FileUtils.readFile(voTableFile);
@@ -148,15 +162,13 @@ public final class SearchCalSampMessageHandler extends SampMessageHandler {
         logger.fine("votable :\n" + votable);
       }
 
-      // LATER : accept any votable having a meta.ID to import target and not only searchCal calibrators ...
-
       // use an XSLT to transform the SearchCal votable document to an Aspro 2 Observation :
       final long start = System.nanoTime();
 
       final String document = XmlFactory.transform(votable, XSLT_FILE);
 
       if (logger.isLoggable(Level.INFO)) {
-        logger.info("xslt : " + 1e-6d * (System.nanoTime() - start) + " ms.");
+        logger.info("VOTable transformation (XSLT) : " + 1e-6d * (System.nanoTime() - start) + " ms.");
       }
 
       if (logger.isLoggable(Level.FINE)) {
@@ -208,6 +220,15 @@ public final class SearchCalSampMessageHandler extends SampMessageHandler {
         }
       }
 
+      // Add the SearchCalVersion parameter to calibrators :
+      final StringValue paramSearchCalVersion = new StringValue();
+      paramSearchCalVersion.setName(CalibratorInformations.PARAMETER_SCL_GUI_VERSION);
+      paramSearchCalVersion.setValue(searchCalVersion);
+
+      for (Target cal : calibrators) {
+        cal.getCalibratorInfos().getParameters().add(paramSearchCalVersion);
+      }
+
       // Use invokeLater to avoid concurrency and ensure that 
       // data model is modified and fire events using Swing EDT :
       SwingUtilities.invokeLater(new Runnable() {
@@ -236,76 +257,12 @@ public final class SearchCalSampMessageHandler extends SampMessageHandler {
             return;
           }
 
-          // use deep copy of the current observation to manipulate target and calibrator list properly :
-          final ObservationSetting obsCloned = om.getMainObservation().deepClone();
-
-
           // find correct diameter among UD_ for the Aspro instrument band ...
           // or using alternate diameters (in order of priority) : UD, LD, UDDK, DIA12
+          om.defineCalibratorDiameter(calibrators);
 
-          // TODO : MOVE THAT CODE ELSEWHERE ... (reuse it when the instrument band changes)
-
-          // Find instrument band :
-          final FocalInstrumentMode insMode = obsCloned.getInstrumentConfiguration().getFocalInstrumentMode();
-          if (insMode == null) {
-            throw new IllegalStateException("the instrumentMode is empty !");
-          }
-
-          final double lambda = insMode.getWaveLength();
-          if (logger.isLoggable(Level.FINE)) {
-            logger.fine("lambda = " + lambda);
-          }
-
-          final Band band = Band.findBand(lambda);
-          final SpectralBand insBand = SpectralBandUtils.findBand(band);
-
-          if (logger.isLoggable(Level.FINE)) {
-            logger.fine("band    = " + band);
-            logger.fine("insBand = " + insBand);
-          }
-
-          for (Target cal : calibrators) {
-
-            // set disk diameter according to instrument band :
-            if (!cal.getModels().isEmpty()) {
-              final Model diskModel = cal.getModels().get(0);
-
-              if (ModelDefinition.MODEL_DISK.equals(diskModel.getType())) {
-                final Parameter diameterParameter = diskModel.getParameter(ModelDefinition.PARAM_DIAMETER);
-
-                if (diameterParameter != null) {
-
-                  // if UD_<band> diameter is missing, use other values ...
-                  final Double udBand = cal.getCalibratorInfos().getUDDiameter(insBand);
-
-                  if (udBand != null) {
-                    if (logger.isLoggable(Level.INFO)) {
-                      logger.info("define uniform disk diameter for calibrator ["
-                              + cal.getName() + "] using diameter UD_" + insBand + " = " + udBand);
-                    }
-                    diameterParameter.setValue(udBand.doubleValue());
-
-                  } else {
-                    // use alternate diameter UD, LD, UDDK, DIA12 (in order of priority) :
-                    final BaseValue diam = cal.getCalibratorInfos().getAlternateDiameter();
-
-                    if (diam != null) {
-                      if (logger.isLoggable(Level.INFO)) {
-                        logger.info("define uniform disk diameter for calibrator ["
-                                + cal.getName() + "] using diameter " + diam.getName() + " = " + diam.getValue());
-                      }
-
-                      diameterParameter.setValue(diam.getNumber().doubleValue());
-                    } else {
-                      if (logger.isLoggable(Level.INFO)) {
-                        logger.info("no diameter available for calibrator [" + cal.getName() + "], use 0.0");
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
+          // use deep copy of the current observation to manipulate target and calibrator list properly :
+          final ObservationSetting obsCloned = om.getMainObservation().deepClone();
 
           // Prepare the data model (editable targets and user infos) :
           final List<Target> editTargets = obsCloned.getTargets();
