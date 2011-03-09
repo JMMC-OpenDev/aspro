@@ -123,17 +123,13 @@
 
       <Layout class="org.netbeans.modules.form.compat2.layouts.DesignBoxLayout"/>
       <SubComponents>
-        <Component class="javax.swing.JButton" name="jButtonUp">
+        <Component class="javax.swing.JButton" name="jButtonSortRA">
           <Properties>
-            <Property name="text" type="java.lang.String" value="Up"/>
-            <Property name="enabled" type="boolean" value="false"/>
+            <Property name="text" type="java.lang.String" value="Sort by R.A."/>
           </Properties>
-        </Component>
-        <Component class="javax.swing.JButton" name="jButtonDown">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="Down"/>
-            <Property name="enabled" type="boolean" value="false"/>
-          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButtonSortRAActionPerformed"/>
+          </Events>
         </Component>
         <Component class="javax.swing.JToolBar$Separator" name="jSeparator1">
         </Component>

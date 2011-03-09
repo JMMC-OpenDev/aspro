@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetForm.java,v 1.25 2011-03-08 17:39:03 bourgesl Exp $"
+ * "@(#) $Id: TargetForm.java,v 1.26 2011-03-09 14:57:15 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.25  2011/03/08 17:39:03  bourgesl
+ * fill viewport height is not available in JDK 5
+ *
  * Revision 1.24  2011/03/08 17:27:50  bourgesl
  * display SearchCal calibrator information if available using one JTable
  *
@@ -101,6 +104,7 @@ import fr.jmmc.aspro.gui.util.TargetTreeCellRenderer;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetInformation;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
+import fr.jmmc.aspro.model.util.TargetRAComparator;
 import fr.jmmc.mcs.gui.BrowserLauncher;
 import fr.jmmc.mcs.gui.MessagePane;
 import java.awt.Component;
@@ -110,6 +114,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.text.DecimalFormat;
 import java.text.ParseException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -602,8 +607,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     jScrollPaneCalibrators = new javax.swing.JScrollPane();
     jListCalibrators = new javax.swing.JList();
     jToolBarActions = new javax.swing.JToolBar();
-    jButtonUp = new javax.swing.JButton();
-    jButtonDown = new javax.swing.JButton();
+    jButtonSortRA = new javax.swing.JButton();
     jSeparator1 = new javax.swing.JToolBar.Separator();
     jToggleButtonCalibrator = new javax.swing.JToggleButton();
     jButtonRemoveCalibrator = new javax.swing.JButton();
@@ -710,13 +714,13 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     jToolBarActions.setFloatable(false);
     jToolBarActions.setRollover(true);
 
-    jButtonUp.setText("Up");
-    jButtonUp.setEnabled(false);
-    jToolBarActions.add(jButtonUp);
-
-    jButtonDown.setText("Down");
-    jButtonDown.setEnabled(false);
-    jToolBarActions.add(jButtonDown);
+    jButtonSortRA.setText("Sort by R.A.");
+    jButtonSortRA.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jButtonSortRAActionPerformed(evt);
+      }
+    });
+    jToolBarActions.add(jButtonSortRA);
     jToolBarActions.add(jSeparator1);
 
     jToggleButtonCalibrator.setText("Flag Target as Calibrator");
@@ -1318,6 +1322,45 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     }
   }//GEN-LAST:event_jButtonRemoveCalibratorActionPerformed
 
+  private void jButtonSortRAActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSortRAActionPerformed
+    // sort edited targets :
+    sortTargets(this.editTargets);
+
+    // sort calibrator list :
+    sortTargets(this.editTargetUserInfos.getCalibrators());
+
+    TargetInformation targetInfo;
+    for (Target target : this.editTargets) {
+
+      // sort also every calibrator list of science targets :
+      if (!isCalibrator(target)) {
+        targetInfo = getTargetUserInformation(target);
+
+        if (!targetInfo.getCalibrators().isEmpty()) {
+          sortTargets(targetInfo.getCalibrators());
+        }
+      }
+    }
+
+    // Refresh the complete form :
+    this.initialize(getCurrentTarget().getName());
+  }//GEN-LAST:event_jButtonSortRAActionPerformed
+
+  /**
+   * Sort the given target list by right ascension (R.A.)
+   * @param targets target list to sort (modified)
+   */
+  private static void sortTargets(final List<Target> targets) {
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("targets to sort : " + targets);
+    }
+    Collections.sort(targets, TargetRAComparator.getInstance());
+
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("targets sorted   : " + targets);
+    }
+  }
+
   /**
    * Validate the form
    * @return true only if the data are valid
@@ -1364,7 +1407,6 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     return previous;
   }
 
-
   /**
    * Return the custom table model
    * @return CalibratorInfoTableModel
@@ -1372,12 +1414,10 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
   private CalibratorInfoTableModel getCalibratorInfoTableModel() {
     return (CalibratorInfoTableModel) this.jTableCalibratorInfos.getModel();
   }
-
   // Variables declaration - do not modify//GEN-BEGIN:variables
-  private javax.swing.JButton jButtonDown;
   private javax.swing.JButton jButtonRemoveCalibrator;
   private javax.swing.JButton jButtonSimbad;
-  private javax.swing.JButton jButtonUp;
+  private javax.swing.JButton jButtonSortRA;
   private javax.swing.JTextField jFieldDEC;
   private javax.swing.JFormattedTextField jFieldMagH;
   private javax.swing.JFormattedTextField jFieldMagI;
