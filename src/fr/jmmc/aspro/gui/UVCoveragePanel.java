@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.89 2011-03-04 16:57:36 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.90 2011-03-09 14:18:29 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.89  2011/03/04 16:57:36  bourgesl
+ * minor
+ *
  * Revision 1.88  2011/03/01 17:11:38  bourgesl
  * minor changes
  *
@@ -1754,6 +1757,11 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
         // merged warning container :
         final WarningContainer mergedWarningContainer = new WarningContainer();
+
+        if (uvDataCollection.getFirstObservation().getWhen().isNightRestriction()) {
+          mergedWarningContainer.addWarningMessage("Multiple configurations cannot be done in one night (night restrictions are only valid for "
+                  + uvDataCollection.getFirstObservation().getWhen().getDate().toString() + ")");
+        }
 
         for (UVCoverageData uvData : uvDataList) {
           mergedWarningContainer.addWarningMessages(uvData.getWarningContainer());

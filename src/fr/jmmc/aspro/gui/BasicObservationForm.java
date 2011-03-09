@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BasicObservationForm.java,v 1.65 2011-03-03 17:37:24 bourgesl Exp $"
+ * "@(#) $Id: BasicObservationForm.java,v 1.66 2011-03-09 14:18:29 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.65  2011/03/03 17:37:24  bourgesl
+ * when target selection changes, check the target instance to detect target modifications and propagate a targetSelectionChangeEvent
+ *
  * Revision 1.64  2011/03/01 17:08:50  bourgesl
  * if multiple configurations, disable night restrictions
  *
@@ -1048,21 +1051,6 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
       logger.fine("Instrument Configuration changed : " + Arrays.toString(getInstrumentConfigurations()));
     }
 
-    final boolean isSingle = lsm.getMinSelectionIndex() == lsm.getMaxSelectionIndex();
-
-    // disable the automatic update observation :
-    final boolean prevAutoUpdateObservation = this.setAutoUpdateObservation(false);
-    try {
-      // if multiple configurations, disable night restrictions :
-      if (!isSingle) {
-        this.jCheckBoxNightLimit.setSelected(false);
-      }
-      this.jCheckBoxNightLimit.setEnabled(isSingle);
-    } finally {
-      // restore the automatic update observation :
-      this.setAutoUpdateObservation(prevAutoUpdateObservation);
-    }
-
     // group multiple calls into a single observation update event :
     fireObservationUpdateEvent();
   }
@@ -1282,10 +1270,6 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
       // update the selected instrument :
       this.jComboBoxInstrument.setSelectedItem(instrumentChoice.getName());
 
-      // update the night restriction BEFORE selected instrument configurations :
-      this.jCheckBoxNightLimit.setSelected(observation.getWhen().isNightRestriction());
-      this.jCheckBoxNightLimit.setEnabled(true);
-
       // update the selected instrument configurations :
       final List<ObservationVariant> obsVariants = observation.getVariants();
       final int len = obsVariants.size();
@@ -1302,6 +1286,8 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
       this.jTextPoPs.setText(instrumentChoice.getPops());
 
       // constraints :
+      // update the night restriction :
+      this.jCheckBoxNightLimit.setSelected(observation.getWhen().isNightRestriction());
 
       // update the date spinner :
       final XMLGregorianCalendar date = observation.getWhen().getDate();
