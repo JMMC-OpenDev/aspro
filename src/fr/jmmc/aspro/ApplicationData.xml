@@ -194,6 +194,7 @@
 
   <releasenotes>
     <release version="0.8">
+      <!-- <pubDate>Thu, 10 Mar 2011 11:16:37 GMT</pubDate> -->
       <prerelease version="0.8.0">
         <change>Added Button 'Sort by R.A.' in the target editor to sort both science and calibrator targets by their right ascension</change>
         <change>Added calibrator information (SearchCal) in the observation file and display important ones in the target editor (diameters)</change>
@@ -204,6 +205,7 @@
         <change>Added VLTI configuration for Period 88</change>
       </prerelease>
     </release>
+
     <release version="0.7">
       <!-- <pubDate>Tue, 15 Feb 2011 11:41:46 GMT</pubDate> -->
       <prerelease version="0.7.8 beta">
@@ -269,7 +271,7 @@
     </release>
 
     <release version="0.6">
-      <!-- <pubDate>Thu, 5 Oct 2010 15:25:24 GMT</pubDate> -->
+      <!-- <pubDate>Tue, 05 Oct 2010 10:08:04 GMT</pubDate> -->
       <prerelease version="0.6.3">
         <change type="BUGFIX">Limit the memory footprint when the sampling periodicity is very small (less than 1 minute).
         First 500 HA samples are computed and the following warning is displayed : 
@@ -309,7 +311,7 @@
     </release>
 
     <release version="0.5">
-      <!-- <pubDate>Thu, 17 Jun 2010 14:00:00 GMT</pubDate> -->
+      <!-- <pubDate>Mon, 06 Sep 2010 18:00:58 GMT</pubDate> -->
       <prerelease version="0.5.5">
         <change>Added warning messages on GUI to display information relative to error / noise modelling</change>
         <change>Error and noise computation for OI_VIS (AMBER only) using the differential phase / amplitude algorithm (amdlib)</change>
