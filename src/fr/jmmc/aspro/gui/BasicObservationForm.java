@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BasicObservationForm.java,v 1.66 2011-03-09 14:18:29 bourgesl Exp $"
+ * "@(#) $Id: BasicObservationForm.java,v 1.67 2011-03-11 15:03:27 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.66  2011/03/09 14:18:29  bourgesl
+ * bug fix #67 : allow night restrictions in multi-conf mode and add the warning message "multiple config cannot be done in one night"
+ *
  * Revision 1.65  2011/03/03 17:37:24  bourgesl
  * when target selection changes, check the target instance to detect target modifications and propagate a targetSelectionChangeEvent
  *
@@ -359,8 +362,8 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     gridBagConstraints.weightx = 0.1;
     jPanelTargets.add(jPanelTargetsLeft, gridBagConstraints);
 
-    starSearchField.setText("");
     starSearchField.setToolTipText("<html>\nEnter targets here :<br/>\nTarget identifier (CDS Simbad service)<br/>\nor RA / DEC coordinates (J2000) with optional star name ('HMS DMS [star name]')\n</html>");
+    starSearchField.setName("starSearchField"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 0;
@@ -377,6 +380,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     });
     jListTargets.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
     jListTargets.setToolTipText("Target list : use the Simbad field to enter your targets\n");
+    jListTargets.setName("jListTargets"); // NOI18N
     jListTargets.setVisibleRowCount(2);
     jListTargets.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
       public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
@@ -412,6 +416,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
 
     jButtonTargetEditor.setText("Target editor");
     jButtonTargetEditor.setMargin(new java.awt.Insets(0, 0, 0, 0));
+    jButtonTargetEditor.setName("jButtonTargetEditor"); // NOI18N
     jButtonTargetEditor.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(java.awt.event.ActionEvent evt) {
         jButtonTargetEditorActionPerformed(evt);
@@ -512,6 +517,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     jTextPoPs.setColumns(4);
     jTextPoPs.setToolTipText("<html>\ndefine a specific PoPs combination (PoP 1 to 5) by giving the list of PoP numbers<br/>\nin the same order than stations of the selected base line. For example:<ul>\n<li>VEGA_2T with baseline S1-S2<br/>'34' means PoP3 on S1 and PoP4 on S2</li>\n<li>MIRC (4T) with baseline S1-S2-E1-W2<br/>'1255' means PoP1 on S1, PoP2 on S2 and Pop5 on E1 and W2</li>\n</ul>\n<b>If you leave this field blank, ASPRO 2 will compute the 'best PoP' combination<br/>\nmaximizing the observability of your complete list of targets</b>\n</html>");
     jTextPoPs.setMinimumSize(new java.awt.Dimension(40, 20));
+    jTextPoPs.setName("jTextPoPs"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 3;
@@ -551,6 +557,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
       public int getSize() { return strings.length; }
       public Object getElementAt(int i) { return strings[i]; }
     });
+    jListInstrumentConfigurations.setName("jListInstrumentConfigurations"); // NOI18N
     jListInstrumentConfigurations.setVisibleRowCount(2);
     jListInstrumentConfigurations.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
       public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
@@ -599,6 +606,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     jCheckBoxNightLimit.setText("Night restriction");
     jCheckBoxNightLimit.setHorizontalTextPosition(javax.swing.SwingConstants.LEADING);
     jCheckBoxNightLimit.setIconTextGap(20);
+    jCheckBoxNightLimit.setName("jCheckBoxNightLimit"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
@@ -1092,11 +1100,14 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         index = lm.indexOf((String) selection);
         if (index != -1) {
           lsm.addSelectionInterval(index, index);
+          this.jListInstrumentConfigurations.ensureIndexIsVisible(index);
         }
       }
       if (index != -1) {
         // scroll to last selected value :
+        this.jListInstrumentConfigurations.ensureIndexIsVisible(index - 1);
         this.jListInstrumentConfigurations.ensureIndexIsVisible(index);
+        this.jListInstrumentConfigurations.ensureIndexIsVisible(index + 1);
       }
       if (logger.isLoggable(Level.FINE)) {
         logger.fine("selectInstrumentConfigurations : selectedValues : " + Arrays.toString(getInstrumentConfigurations()));
