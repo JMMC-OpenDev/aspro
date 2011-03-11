@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproGui.java,v 1.47 2011-03-02 11:00:24 bourgesl Exp $"
+ * "@(#) $Id: AsproGui.java,v 1.48 2011-03-11 12:56:07 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.47  2011/03/02 11:00:24  bourgesl
+ * override onFinish properly to free ressouce when exiting the application
+ *
  * Revision 1.46  2011/02/16 14:53:15  bourgesl
  * added target editor action in Edit menu
  *
@@ -382,7 +385,7 @@ public final class AsproGui extends App {
    * @see App#exit(int)
    */
   @Override
-  protected void onFinish() {
+  public void onFinish() {
     // stop the task executor :
     TaskSwingWorkerExecutor.stop();
 
