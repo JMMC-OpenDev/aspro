@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SettingPanel.java,v 1.32 2011-03-01 17:11:15 bourgesl Exp $"
+ * "@(#) $Id: SettingPanel.java,v 1.33 2011-03-11 12:55:54 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.32  2011/03/01 17:11:15  bourgesl
+ * minor changes
+ *
  * Revision 1.31  2011/02/24 17:14:11  bourgesl
  * Major refactoring to support / handle observation collection (multi-conf)
  *
@@ -127,13 +130,13 @@ public final class SettingPanel extends JPanel implements ObservationListener {
 
   /* Tab names */
   /** name of the tab pane corresponding to the interferometer map */
-  private static final String TAB_INTERFEROMETER_MAP = "Map";
+  public static final String TAB_INTERFEROMETER_MAP = "Map";
   /** name of the tab pane corresponding to the observability panel */
-  private static final String TAB_OBSERVABILITY = "Observability";
+  public static final String TAB_OBSERVABILITY = "Observability";
   /** name of the tab pane corresponding to the uv coverage panel */
-  private static final String TAB_UV_COVERAGE = "UV coverage";
+  public static final String TAB_UV_COVERAGE = "UV coverage";
   /** name of the tab pane corresponding to the OIFits panel */
-  private static final String TAB_OIFITS = "OIFits";
+  public static final String TAB_OIFITS = "OIFits";
 
   /* members */
   /** basic observation form */
