@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproGui.java,v 1.48 2011-03-11 12:56:07 bourgesl Exp $"
+ * "@(#) $Id: AsproGui.java,v 1.49 2011-03-11 15:02:56 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.48  2011/03/11 12:56:07  bourgesl
+ * onFinish made public
+ *
  * Revision 1.47  2011/03/02 11:00:24  bourgesl
  * override onFinish properly to free ressouce when exiting the application
  *
@@ -343,6 +346,7 @@ public final class AsproGui extends App {
        */
       public void run() {
         logger.fine("AsproGui.ready : handler called.");
+
         getFrame().setVisible(true);
       }
     });
@@ -447,6 +451,7 @@ public final class AsproGui extends App {
    */
   private void createContent() {
     this.settingPanel = new SettingPanel();
+    this.settingPanel.setName("settingPanel");
 
     // adds the panel in scrollPane
     getFramePanel().add(new JScrollPane(this.settingPanel), BorderLayout.CENTER);

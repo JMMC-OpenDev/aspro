@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SettingPanel.java,v 1.33 2011-03-11 12:55:54 bourgesl Exp $"
+ * "@(#) $Id: SettingPanel.java,v 1.34 2011-03-11 15:03:34 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.33  2011/03/11 12:55:54  bourgesl
+ * tab names made public
+ *
  * Revision 1.32  2011/03/01 17:11:15  bourgesl
  * minor changes
  *
@@ -205,6 +208,7 @@ public final class SettingPanel extends JPanel implements ObservationListener {
 
     // create the map panel :
     final InterferometerMapPanel mapPanel = new InterferometerMapPanel();
+    mapPanel.setName("mapPanel");
 
     // register the map panel as an observation listener before the observation form (listener 2) :
     ObservationManager.getInstance().register(mapPanel);
@@ -214,6 +218,7 @@ public final class SettingPanel extends JPanel implements ObservationListener {
 
     // create the observation form that will send a changed event on the current observation (listener 3) :
     this.observationForm = new BasicObservationForm();
+    observationForm.setName("observationForm");
 
     // register the observation form as an observation listener :
     ObservationManager.getInstance().register(this.observationForm);
@@ -253,6 +258,7 @@ public final class SettingPanel extends JPanel implements ObservationListener {
       if (this.observabilityPanel == null) {
         // create the observability panel :
         this.observabilityPanel = new ObservabilityPanel();
+        this.observabilityPanel.setName("observabilityPanel");
 
         // register the observability panel as an observation listener :
         ObservationManager.getInstance().register(this.observabilityPanel);
@@ -274,6 +280,7 @@ public final class SettingPanel extends JPanel implements ObservationListener {
         if (uvPanelIndex == -1) {
           // create the uv coverage panel :
           this.uvCoveragePanel = new UVCoveragePanel();
+          this.uvCoveragePanel.setName("uvCoveragePanel");
 
           // register the uv coverage panel as an observation listener :
           ObservationManager.getInstance().register(this.uvCoveragePanel);
@@ -311,6 +318,7 @@ public final class SettingPanel extends JPanel implements ObservationListener {
       if (this.oiFitsPanel == null) {
         // create the OIFits panel :
         this.oiFitsPanel = new OIFitsPanel();
+        this.oiFitsPanel.setName("oiFitsPanel");
 
         // register the OIFits panel as an observation listener :
         ObservationManager.getInstance().register(this.oiFitsPanel);
