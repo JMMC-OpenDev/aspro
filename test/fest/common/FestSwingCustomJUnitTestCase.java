@@ -1,23 +1,28 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: FestSwingCustomJUnitTestCase.java,v 1.1 2011-03-11 12:55:35 bourgesl Exp $"
+ * "@(#) $Id: FestSwingCustomJUnitTestCase.java,v 1.2 2011-03-11 15:04:08 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2011/03/11 12:55:35  bourgesl
+ * added fest-swing test cases for Aspro 2
+ *
  */
 package fest.common;
 
 import static org.fest.swing.timing.Pause.*;
 import org.fest.swing.timing.Timeout;
 import java.awt.Component;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
 import org.fest.swing.core.Robot;
 import org.fest.swing.edt.FailOnThreadViolationRepaintManager;
 import org.fest.swing.fixture.ComponentFixture;
+import org.fest.swing.image.ImageException;
 import org.fest.swing.image.ScreenshotTaker;
 import org.fest.swing.junit.v4_5.runner.GUITestRunner;
 import org.fest.swing.security.NoExitSecurityManagerInstaller;
@@ -232,6 +237,52 @@ public class FestSwingCustomJUnitTestCase extends FestSwingCustomTestCaseTemplat
     } catch (Exception e) {
       if (logger.isLoggable(Level.WARNING)) {
         logger.log(Level.WARNING, "Unable to take screenshot : " + filePath, e);
+      }
+    }
+  }
+
+  /**
+   * Takes a screenshot of the given <code>{@link java.awt.Component}</code>.
+   * @param fixture the given fixture to extract its component.
+   * @return a screenshot of the given component.
+   * @throws SecurityException if <code>readDisplayPixels</code> permission is not granted.
+   */
+  protected BufferedImage takeScreenshotOf(final ComponentFixture<?> fixture) {
+    return takeScreenshotOf(fixture.component());
+  }
+
+  /**
+   * Takes a screenshot of the given <code>{@link java.awt.Component}</code>.
+   * @param c the given component.
+   * @return a screenshot of the given component.
+   * @throws SecurityException if <code>readDisplayPixels</code> permission is not granted.
+   */
+  protected BufferedImage takeScreenshotOf(final Component c) {
+    pauseMedium();
+
+    return screenshotTaker.takeScreenshotOf(c);
+  }
+
+  /**
+   * Save the given image as a PNG file.
+   * @param image the image to save.
+   * @param fileName the file name (including the png extension)
+   * @throws ImageException if the given file path is <code>null</code> or empty.
+   * or if the given file path does not end with ".png".
+   * or if the given file path belongs to a non-empty directory.
+   * or if an I/O error prevents the image from being saved as a file.
+   */
+  protected void saveImage(final BufferedImage image, final String fileName) throws ImageException {
+    final String filePath = screenshotFolder + fileName;
+    try {
+      screenshotTaker.saveImage(image, filePath);
+
+      if (logger.isLoggable(Level.INFO)) {
+        logger.info("Screenshot saved as " + filePath);
+      }
+    } catch (Exception e) {
+      if (logger.isLoggable(Level.WARNING)) {
+        logger.log(Level.WARNING, "Unable to save screenshot : " + filePath, e);
       }
     }
   }

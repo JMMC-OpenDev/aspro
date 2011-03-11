@@ -1,14 +1,19 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproDocJUnitTest.java,v 1.1 2011-03-11 12:55:35 bourgesl Exp $"
+ * "@(#) $Id: AsproDocJUnitTest.java,v 1.2 2011-03-11 15:04:07 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2011/03/11 12:55:35  bourgesl
+ * added fest-swing test cases for Aspro 2
+ *
  */
 package fest;
 
+import com.mortennobel.imagescaling.AdvancedResizeOp;
+import com.mortennobel.imagescaling.ResampleOp;
 import static org.fest.swing.core.matcher.DialogMatcher.*;
 import static org.fest.swing.core.matcher.JButtonMatcher.*;
 import fest.common.JmcsApplicationSetup;
@@ -16,10 +21,9 @@ import fest.common.JmcsApplicationSetup;
 import fest.common.JmcsFestSwingJUnitTestCase;
 import fr.jmmc.aspro.AsproGui;
 import fr.jmmc.aspro.gui.SettingPanel;
-import fr.jmmc.mcs.astro.star.StarResolverWidget;
-import javax.swing.text.JTextComponent;
+import java.awt.image.BufferedImage;
+import javax.swing.JComponent;
 import org.fest.swing.annotation.GUITest;
-import org.fest.swing.core.GenericTypeMatcher;
 import org.fest.swing.fixture.DialogFixture;
 import org.fest.swing.fixture.JTabbedPaneFixture;
 import org.junit.Test;
@@ -46,16 +50,39 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
   public void shouldStart() {
     window.tabbedPane().requireVisible();
 
-    window.textBox(new GenericTypeMatcher<JTextComponent>(JTextComponent.class) {
+    window.textBox("starSearchField").enterText("SimBad");
 
-      @Override
-      protected boolean isMatching(JTextComponent c) {
-        return c instanceof StarResolverWidget;
-      }
-    }).enterText("SimBad Star resolver");
+    AsproTestUtils.checkRunningTasks();
 
     // Capture initial state :
     saveScreenshot(window, "Aspro2.png");
+  }
+
+  /**
+   * Capture the main panel
+   */
+  @Test
+  @GUITest
+  public void captureMain() {
+
+    int height = 32 + 10;
+
+    JComponent com;
+    com = window.panel("observationForm").component();
+    logger.severe("observationForm height = " + com.getHeight());
+
+    height += com.getHeight();
+
+    com = window.menuItemWithPath("File").component();
+    logger.severe("menu bar height = " + com.getHeight());
+
+    height += com.getHeight();
+
+    final BufferedImage image = takeScreenshotOf(window);
+
+    final BufferedImage croppedImage = image.getSubimage(0, 0, image.getWidth(), height);
+
+    saveImage(croppedImage, "Aspro2-main.png");
   }
 
   /**
@@ -73,27 +100,28 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
 
     // Capture UV Coverage :
     plotTabs.selectTab(SettingPanel.TAB_UV_COVERAGE);
-    saveScreenshot(window, "Aspro2-uv.png");
 
-    /*
-    window.panel(new GenericTypeMatcher<JPanel>(JPanel.class) {
+    final BufferedImage image = takeScreenshotOf(window);
 
-    @Override
-    protected boolean isMatching(JPanel panel) {
-    return panel instanceof UVCoveragePanel;
-    }
-    }).requireNotVisible();
-     */
+    saveImage(image, "Aspro2-uv.png");
+    saveImage(image, "Aspro2-screen.png");
 
-    /*
-    window.panel(new GenericTypeMatcher<JPanel>(JPanel.class) {
+    logger.severe("image size = " + image.getWidth() + "x" + image.getHeight());
 
-    @Override
-    protected boolean isMatching(JPanel panel) {
-    return panel instanceof BasicObservationForm;
-    }
-    }).requireNotVisible();
-     */
+    // miniature for aspro web page : 350px width :
+    final int width = 350;
+    final int height = Math.round(1f * width * image.getHeight() / image.getWidth());
+
+    logger.severe("miniature size = " + width + "x" + height);
+
+    BufferedImage rescaledImage = null;
+    ResampleOp resampleOp = null;
+
+    // use Lanczos3 resampler and soft unsharp mask :
+    resampleOp = new ResampleOp(width, height);
+    resampleOp.setUnsharpenMask(AdvancedResizeOp.UnsharpenMask.Soft);
+    rescaledImage = resampleOp.filter(image, null);
+    saveImage(rescaledImage, "Aspro2-screen-small.png");
   }
 
   /**
@@ -103,7 +131,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
   @GUITest
   public void shouldOpenTargetEditor() {
 
-    window.button(withText("Target editor")).click();
+    window.button("jButtonTargetEditor").click();
 
     final DialogFixture dialog = window.dialog(withTitle("Target Editor"));
 
@@ -123,6 +151,5 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
     window.close();
 
     window.optionPane().buttonWithText("Don't Save").click();
-//    window.optionPane().buttonWithText("Cancel").click();
   }
 }
