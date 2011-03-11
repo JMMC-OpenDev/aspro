@@ -8,7 +8,7 @@
         <atmosphereQuality>Average</atmosphereQuality>
     </when>
     <interferometerConfiguration>
-        <name>VLTI Period 87</name>
+        <name>VLTI Period 88</name>
         <minElevation>20.0</minElevation>
     </interferometerConfiguration>
     <instrumentConfiguration>
