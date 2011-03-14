@@ -1,16 +1,20 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: FestSwingCustomTestCaseTemplate.java,v 1.1 2011-03-11 12:55:35 bourgesl Exp $"
+ * "@(#) $Id: FestSwingCustomTestCaseTemplate.java,v 1.2 2011-03-14 14:46:56 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2011/03/11 12:55:35  bourgesl
+ * added fest-swing test cases for Aspro 2
+ *
  */
 package fest.common;
 
 import org.fest.swing.core.BasicRobot;
 import org.fest.swing.core.Robot;
+import org.fest.swing.core.Settings;
 
 /**
  * This custom FestSwingTestCaseTemplate modifies the robot behaviour :
@@ -44,6 +48,11 @@ import org.fest.swing.core.Robot;
  */
 public abstract class FestSwingCustomTestCaseTemplate {
 
+  /** millisecond count in between generated events */
+  private static int DELAY_BETWEEN_EVENTS = 50;
+  /** milliseconds before checking for idle */
+  private static int EVENT_POSTING_DELAY = 5 * DELAY_BETWEEN_EVENTS / 3;
+
   /* members */
   /** robot instance */
   private Robot robot = null;
@@ -56,10 +65,28 @@ public abstract class FestSwingCustomTestCaseTemplate {
   }
 
   /**
+   * Define the robot delays (@see #DELAY_BETWEEN_EVENTS and #EVENT_POSTING_DELAY)
+   * @param delay in milliseconds
+   */
+  protected static void defineRobotDelayBetweenEvents(final int delay) {
+    int effectiveDelay = delay;
+    if (effectiveDelay < 50) {
+      effectiveDelay = 50;
+    }
+    DELAY_BETWEEN_EVENTS = effectiveDelay;
+    EVENT_POSTING_DELAY = 5 * DELAY_BETWEEN_EVENTS / 3;
+  }
+
+  /**
    * Creates this test's <code>{@link Robot}</code> using the current AWT hierarchy.
    */
   protected final void setUpRobot() {
     robot = BasicRobot.robotWithCurrentAwtHierarchy();
+
+    // changes default delays :
+    final Settings settings = robot.settings();
+    settings.delayBetweenEvents(DELAY_BETWEEN_EVENTS);
+    settings.eventPostingDelay(EVENT_POSTING_DELAY);
   }
 
   /**
