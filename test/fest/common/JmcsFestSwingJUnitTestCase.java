@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: JmcsFestSwingJUnitTestCase.java,v 1.1 2011-03-11 12:55:35 bourgesl Exp $"
+ * "@(#) $Id: JmcsFestSwingJUnitTestCase.java,v 1.2 2011-03-14 14:47:18 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2011/03/11 12:55:35  bourgesl
+ * added fest-swing test cases for Aspro 2
+ *
  */
 package fest.common;
 
@@ -13,6 +16,7 @@ import static org.fest.swing.launcher.ApplicationLauncher.*;
 import fr.jmmc.mcs.gui.App;
 import java.util.Arrays;
 import java.util.logging.Level;
+import org.fest.swing.core.EmergencyAbortListener;
 import org.fest.swing.fixture.FrameFixture;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -26,6 +30,8 @@ public class JmcsFestSwingJUnitTestCase extends FestSwingCustomJUnitTestCase {
   /* members */
   /** application window fixture */
   protected FrameFixture window;
+  /** emergency abort listener associated to 'Ctrl + Shift + A' key combination */
+  private EmergencyAbortListener listener;
 
   /**
    * Public constructor required by JUnit
@@ -104,12 +110,15 @@ public class JmcsFestSwingJUnitTestCase extends FestSwingCustomJUnitTestCase {
    */
   @Override
   protected void onSetUp() {
+    listener = EmergencyAbortListener.registerInToolkit();
+
     // IMPORTANT: note the call to 'robot()'
     // we must use the Robot from FestSwingCustomTestCaseTemplate
-    this.window = new FrameFixture(robot(), App.getFrame());
+    window = new FrameFixture(robot(), App.getFrame());
 
     // shows the frame to test
-    this.window.show();
+    window.show();
+    window.moveToFront();
   }
 
   /**
@@ -117,8 +126,8 @@ public class JmcsFestSwingJUnitTestCase extends FestSwingCustomJUnitTestCase {
    */
   @Override
   protected void onTearDown() {
-    this.window.cleanUp();
-  }
+    listener.unregister();
 
-  /* Utility methods */
+    window.cleanUp();
+  }
 }
