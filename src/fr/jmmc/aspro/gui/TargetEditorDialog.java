@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetEditorDialog.java,v 1.15 2011-02-23 08:58:08 bourgesl Exp $"
+ * "@(#) $Id: TargetEditorDialog.java,v 1.16 2011-03-14 14:45:16 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.15  2011/02/23 08:58:08  bourgesl
+ * flip OK / Cancel buttons
+ *
  * Revision 1.14  2011/02/02 17:43:21  bourgesl
  * use main observation
  *
@@ -159,7 +162,7 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
       // Center it :
       dialog.setLocationRelativeTo(dialog.getOwner());
 
-      // 5. Show it.
+      // 5. Show it and waits until dialog is not visible or disposed :
       dialog.setVisible(true);
 
       // get editor result :
