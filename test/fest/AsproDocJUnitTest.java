@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproDocJUnitTest.java,v 1.4 2011-03-14 14:47:50 bourgesl Exp $"
+ * "@(#) $Id: AsproDocJUnitTest.java,v 1.5 2011-03-14 17:43:10 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2011/03/14 14:47:50  bourgesl
+ * added many tests
+ *
  * Revision 1.3  2011/03/11 16:02:05  bourgesl
  * updated scenario
  *
@@ -59,13 +62,13 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
 
     // define robot delays :
     // fast delay :
-    defineRobotDelayBetweenEvents(VERY_SHORT_DELAY);
+    defineRobotDelayBetweenEvents(SHORT_DELAY);
     // normal delay
     //defineRobotDelayBetweenEvents(SHORT_DELAY);
 
     // define delay before taking screenshot :
     // fast delay :
-    defineScreenshotDelay(VERY_SHORT_DELAY);
+    defineScreenshotDelay(SHORT_DELAY);
     // normal delay
     //defineScreenshotDelay(SHORT_DELAY);
 
@@ -80,7 +83,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
   public void shouldStart() {
     window.tabbedPane().requireVisible();
 
-    window.textBox("starSearchField").enterText("Simbad");
+    window.textBox("starSearchField").setText("Simbad");
 
     // waits for computation to finish :
     AsproTestUtils.checkRunningTasks();
@@ -250,6 +253,8 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
 
     enableTooltips(true);
 
+    window.list("jListTargets").selectItem("HD 1234");
+
     window.menuItemWithPath("Interop", "Perform model fitting").click();
     window.menuItemWithPath("Interop", "Perform model fitting", "LITpro").focus();
 
@@ -328,11 +333,17 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
     dialog.requireVisible();
     dialog.moveToFront();
 
-    final JTextComponentFixture emailField = dialog.textBox(JTextComponentMatcher.withText("bourges.laurent@obs.ujf-grenoble.fr"));
+    final String myEmail = "bourges.laurent@obs.ujf-grenoble.fr";
 
-    emailField.deleteText().enterText("type your email address here");
+    final JTextComponentFixture emailField = dialog.textBox(JTextComponentMatcher.withText(myEmail));
+
+    // hide my email address :
+    emailField.setText("type your email address here");
 
     saveScreenshot(dialog, "Aspro2-FeebackReport.png");
+
+    // restore my preferences :
+    emailField.setText(myEmail);
 
     // close dialog :
     dialog.close();
