@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: FestSwingCustomJUnitTestCase.java,v 1.2 2011-03-11 15:04:08 bourgesl Exp $"
+ * "@(#) $Id: FestSwingCustomJUnitTestCase.java,v 1.3 2011-03-14 14:46:20 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2011/03/11 15:04:08  bourgesl
+ * added image operations (resize, crop ...)
+ *
  * Revision 1.1  2011/03/11 12:55:35  bourgesl
  * added fest-swing test cases for Aspro 2
  *
@@ -13,14 +16,16 @@
 package fest.common;
 
 import static org.fest.swing.timing.Pause.*;
-import org.fest.swing.timing.Timeout;
 import java.awt.Component;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
+import javax.swing.ToolTipManager;
 import org.fest.swing.core.Robot;
 import org.fest.swing.edt.FailOnThreadViolationRepaintManager;
+import org.fest.swing.edt.GuiActionRunner;
+import org.fest.swing.edt.GuiTask;
 import org.fest.swing.fixture.ComponentFixture;
 import org.fest.swing.image.ImageException;
 import org.fest.swing.image.ScreenshotTaker;
@@ -61,14 +66,18 @@ public class FestSwingCustomJUnitTestCase extends FestSwingCustomTestCaseTemplat
   /** Class logger */
   protected static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           FestSwingCustomJUnitTestCase.class.getName());
-  /** 1s timeout */
-  protected static final Timeout DEF_TIMEOUT = Timeout.timeout(1000l);
-  /** short delay (0.1s) */
-  protected static final long SHORT_DELAY = 100l;
-  /** medium delay (0.5s) */
-  protected static final long MEDIUM_DELAY = 500l;
-  /** long delay (5s) */
-  protected static final long LONG_DELAY = 5000l;
+  /** null delay (0 ms) */
+  protected static final int NULL_DELAY = 0;
+  /** very short delay (50 ms) */
+  protected static final int VERY_SHORT_DELAY = 50;
+  /** short delay (100 ms) */
+  protected static final int SHORT_DELAY = 100;
+  /** medium delay (500 ms) */
+  protected static final int MEDIUM_DELAY = 500;
+  /** long delay (5 s) */
+  protected static final int LONG_DELAY = 5000;
+  /** pause before screen shot */
+  private static long SCREENSHOT_DELAY = SHORT_DELAY;
   /** screenshot taker */
   private static ScreenshotTaker screenshotTaker;
   /** screenshot folder */
@@ -132,7 +141,8 @@ public class FestSwingCustomJUnitTestCase extends FestSwingCustomTestCaseTemplat
     if (logger.isLoggable(Level.INFO)) {
       logger.info("tearDownOnce : tests done");
     }
-    pause(MEDIUM_DELAY);
+    // waits for application to exit properly
+    pauseMedium();
   }
 
   /**
@@ -175,8 +185,20 @@ public class FestSwingCustomJUnitTestCase extends FestSwingCustomTestCaseTemplat
   protected void onTearDown() {
   }
 
-
   /* Utility methods */
+  /**
+   * Enable / disable tooltips
+   * @param flag value to set
+   */
+  protected static void enableTooltips(final boolean flag) {
+    GuiActionRunner.execute(new GuiTask() {
+
+      public void executeInEDT() {
+        ToolTipManager.sharedInstance().setEnabled(flag);
+      }
+    });
+  }
+
   /**
    * Sleeps for @see #SHORT_DELAY
    */
@@ -196,6 +218,23 @@ public class FestSwingCustomJUnitTestCase extends FestSwingCustomTestCaseTemplat
    */
   protected static void pauseLong() {
     pause(LONG_DELAY);
+  }
+
+  /**
+   * Define the screenshot delay (@see #SCREENSHOT_DELAY)
+   * @param delay milliseconds
+   */
+  protected static void defineScreenshotDelay(final long delay) {
+    SCREENSHOT_DELAY = delay;
+  }
+
+  /**
+   * Sleeps for @see #SCREENSHOT_DELAY
+   */
+  protected static void pauseBeforeScreenshot() {
+    if (SCREENSHOT_DELAY > 0l) {
+      pause(SCREENSHOT_DELAY);
+    }
   }
 
   /**
@@ -220,19 +259,21 @@ public class FestSwingCustomJUnitTestCase extends FestSwingCustomTestCaseTemplat
    * @param c the given component.
    * @param fileName the file name (including the png extension)
    */
-  protected static void saveScreenshot(final Component c, final String fileName) {
+  private static void saveScreenshot(final Component c, final String fileName) {
     final String filePath = screenshotFolder + fileName;
     try {
-      pauseMedium();
+      pauseBeforeScreenshot();
 
-      if (c == null) {
-        screenshotTaker.saveDesktopAsPng(filePath);
-      } else {
-        screenshotTaker.saveComponentAsPng(c, filePath);
-      }
+      if (screenshotTaker != null) {
+        if (c == null) {
+          screenshotTaker.saveDesktopAsPng(filePath);
+        } else {
+          screenshotTaker.saveComponentAsPng(c, filePath);
+        }
 
-      if (logger.isLoggable(Level.INFO)) {
-        logger.info("Screenshot saved as " + filePath);
+        if (logger.isLoggable(Level.INFO)) {
+          logger.info("Screenshot saved as " + filePath);
+        }
       }
     } catch (Exception e) {
       if (logger.isLoggable(Level.WARNING)) {
@@ -257,8 +298,8 @@ public class FestSwingCustomJUnitTestCase extends FestSwingCustomTestCaseTemplat
    * @return a screenshot of the given component.
    * @throws SecurityException if <code>readDisplayPixels</code> permission is not granted.
    */
-  protected BufferedImage takeScreenshotOf(final Component c) {
-    pauseMedium();
+  private BufferedImage takeScreenshotOf(final Component c) {
+    pauseBeforeScreenshot();
 
     return screenshotTaker.takeScreenshotOf(c);
   }
