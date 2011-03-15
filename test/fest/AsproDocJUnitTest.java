@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproDocJUnitTest.java,v 1.5 2011-03-14 17:43:10 bourgesl Exp $"
+ * "@(#) $Id: AsproDocJUnitTest.java,v 1.6 2011-03-15 15:46:37 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2011/03/14 17:43:10  bourgesl
+ * use setText instead of enterText
+ *
  * Revision 1.4  2011/03/14 14:47:50  bourgesl
  * added many tests
  *
@@ -21,6 +24,8 @@
  */
 package fest;
 
+import static java.awt.event.KeyEvent.*;
+import static org.fest.swing.core.KeyPressInfo.*;
 import static org.fest.swing.core.matcher.DialogMatcher.*;
 
 import com.mortennobel.imagescaling.AdvancedResizeOp;
@@ -29,22 +34,29 @@ import com.mortennobel.imagescaling.ResampleOp;
 import fest.common.JmcsApplicationSetup;
 
 import fest.common.JmcsFestSwingJUnitTestCase;
-import fr.jmmc.aspro.AsproGui;
-import fr.jmmc.aspro.gui.SettingPanel;
+
 import java.awt.Frame;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.logging.Level;
 import javax.swing.JComponent;
+import javax.swing.JFormattedTextField;
 import javax.swing.JList;
+
 import org.fest.swing.annotation.GUITest;
 import org.fest.swing.core.GenericTypeMatcher;
 import org.fest.swing.core.matcher.FrameMatcher;
 import org.fest.swing.core.matcher.JButtonMatcher;
 import org.fest.swing.core.matcher.JTextComponentMatcher;
+import org.fest.swing.edt.GuiActionRunner;
+import org.fest.swing.edt.GuiTask;
 import org.fest.swing.fixture.DialogFixture;
 import org.fest.swing.fixture.FrameFixture;
-import org.fest.swing.fixture.JTabbedPaneFixture;
+import org.fest.swing.fixture.JOptionPaneFixture;
+import org.fest.swing.fixture.JPanelFixture;
 import org.fest.swing.fixture.JTextComponentFixture;
+import org.fest.swing.util.Platform;
+
 import org.junit.Test;
 
 /**
@@ -54,11 +66,20 @@ import org.junit.Test;
  */
 public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
 
+  /** name of the tab pane corresponding to the interferometer map */
+  private static final String TAB_INTERFEROMETER_MAP = "Map";
+  /** name of the tab pane corresponding to the observability panel */
+  private static final String TAB_OBSERVABILITY = "Observability";
+  /** name of the tab pane corresponding to the uv coverage panel */
+  private static final String TAB_UV_COVERAGE = "UV coverage";
+
   /**
    * Define the application
    */
   static {
-    JmcsApplicationSetup.define(AsproGui.class, "-open", "/home/bourgesl/dev/aspro/test/Aspro2_sample.asprox");
+    JmcsApplicationSetup.define(
+            fr.jmmc.aspro.AsproGui.class,
+            "-open", "/home/bourgesl/dev/aspro/test/Aspro2_sample.asprox");
 
     // define robot delays :
     // fast delay :
@@ -81,15 +102,13 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
   @Test
   @GUITest
   public void shouldStart() {
-    window.tabbedPane().requireVisible();
-
     window.textBox("starSearchField").setText("Simbad");
 
     // waits for computation to finish :
     AsproTestUtils.checkRunningTasks();
 
     // Capture initial state :
-    saveScreenshot(window, "Aspro2-map.png");
+    showPlotTab(TAB_INTERFEROMETER_MAP, "Aspro2-map.png");
   }
 
   /**
@@ -102,22 +121,54 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
   }
 
   /**
-   * Test plot tabs
+   * Test observability plot
    */
   @Test
   @GUITest
-  public void shouldNavigateTabs() {
+  public void shouldShowObservability() {
 
-    final JTabbedPaneFixture plotTabs = window.tabbedPane();
+    // Capture observability plot :
+    showPlotTab(TAB_OBSERVABILITY, "Aspro2-obs.png");
 
-    // Capture UV Coverage :
-    plotTabs.selectTab(SettingPanel.TAB_OBSERVABILITY);
-    saveScreenshot(window, "Aspro2-obs.png");
+    final JPanelFixture panel = window.panel("observabilityPanel");
 
-    // Capture UV Coverage :
-    plotTabs.selectTab(SettingPanel.TAB_UV_COVERAGE);
+    // enable baseline limits :
+    panel.checkBox("jCheckBoxBaseLineLimits").check();
 
-    final BufferedImage image = takeScreenshotOf(window);
+    // waits for computation to finish :
+    AsproTestUtils.checkRunningTasks();
+
+    // Capture observability plot of  baseline limits :
+    saveScreenshot(window.tabbedPane(), "Aspro2-obs-bl.png");
+
+    // disable baseline limits :
+    panel.checkBox("jCheckBoxBaseLineLimits").uncheck();
+
+    // enable detailed plot :
+    panel.checkBox("jCheckBoxDetailedOutput").check();
+
+    // waits for computation to finish :
+    AsproTestUtils.checkRunningTasks();
+
+    // Capture observability plot of detailed plot :
+    saveScreenshot(window.tabbedPane(), "Aspro2-obs-det.png");
+
+    // disable detailed plot :
+    panel.checkBox("jCheckBoxDetailedOutput").uncheck();
+
+    // waits for computation to finish :
+    AsproTestUtils.checkRunningTasks();
+  }
+
+  /**
+   * Test UV coverage plot
+   */
+  @Test
+  @GUITest
+  public void shouldShowUVCoverage() {
+
+    // Capture UV Coverage plot :
+    final BufferedImage image = showPlotTab(TAB_UV_COVERAGE);
 
     saveImage(image, "Aspro2-uv.png");
     saveImage(image, "Aspro2-screen.png");
@@ -135,7 +186,12 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
     resampleOp = new ResampleOp(width, height);
     resampleOp.setUnsharpenMask(AdvancedResizeOp.UnsharpenMask.Soft);
     rescaledImage = resampleOp.filter(image, null);
+
     saveImage(rescaledImage, "Aspro2-screen-small.png");
+
+    // Export OIFits / OB :
+    exportOIFits();
+    exportOB();
   }
 
   /**
@@ -232,14 +288,17 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
     // hack to solve focus trouble in menu items :
     window.menuItemWithPath("Interop").focus();
 
-    enableTooltips(true);
+    try {
+      enableTooltips(true);
 
-    window.menuItemWithPath("Interop", "Search calibrators").click();
-    window.menuItemWithPath("Interop", "Search calibrators", "SearchCal").focus();
+      window.menuItemWithPath("Interop", "Search calibrators").click();
+      window.menuItemWithPath("Interop", "Search calibrators", "SearchCal").focus();
 
-    captureMainForm("Aspro2-calibrators-StartSearchQuery.png");
+      captureMainForm("Aspro2-calibrators-StartSearchQuery.png");
 
-    enableTooltips(false);
+    } finally {
+      enableTooltips(false);
+    }
   }
 
   /**
@@ -248,19 +307,82 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
   @Test
   @GUITest
   public void shouldCallLITpro() {
-    // hack to solve focus trouble in menu items :
-    window.menuItemWithPath("Interop").focus();
-
-    enableTooltips(true);
 
     window.list("jListTargets").selectItem("HD 1234");
 
-    window.menuItemWithPath("Interop", "Perform model fitting").click();
-    window.menuItemWithPath("Interop", "Perform model fitting", "LITpro").focus();
+    // waits for computation to finish :
+    AsproTestUtils.checkRunningTasks();
 
-    captureMainForm("Aspro2-LITpro-send.png");
+    // Export UV Coverage plot as PDF :
+    selectTab(TAB_UV_COVERAGE);
 
-    enableTooltips(false);
+    // Export OIFits / OB :
+    exportOIFits();
+    exportOB();
+
+    // hack to solve focus trouble in menu items :
+    window.menuItemWithPath("Interop").focus();
+
+    try {
+      enableTooltips(true);
+
+      window.menuItemWithPath("Interop", "Perform model fitting").click();
+      window.menuItemWithPath("Interop", "Perform model fitting", "LITpro").focus();
+
+      captureMainForm("Aspro2-LITpro-send.png");
+
+    } finally {
+      enableTooltips(false);
+    }
+  }
+
+  /**
+   * Test Chara PoPs
+   */
+  @Test
+  @GUITest
+  public void shouldShowCharaPoPs() {
+
+    // show observability plot :
+    window.tabbedPane().selectTab(TAB_OBSERVABILITY);
+
+    window.list("jListTargets").selectItem("HIP1234");
+
+    final JPanelFixture form = window.panel("observationForm");
+
+    // select CHARA interferometer :
+    form.comboBox("jComboBoxInterferometer").selectItem("CHARA");
+
+    final int left = 5 + window.panel("jPanelTargets").component().getWidth();
+
+    final int width = 5 + window.panel("jPanelMain").component().getWidth()
+            + window.panel("jPanelConfigurations").component().getWidth();
+
+    final int height = getMainFormHeight(window) + 68;
+
+    // waits for computation to finish :
+    AsproTestUtils.checkRunningTasks();
+
+    saveCroppedScreenshotOf("popsAuto.png", left, 0, width, height);
+
+    // set PoPs to '25' :
+    final JFormattedTextField jTextPoPs = (JFormattedTextField) form.textBox("jTextPoPs").component();
+
+    GuiActionRunner.execute(new GuiTask() {
+
+      protected void executeInEDT() {
+        // Integer field :
+        jTextPoPs.setValue(Integer.valueOf(25));
+      }
+    });
+
+    // waits for computation to finish :
+    AsproTestUtils.checkRunningTasks();
+
+    // show observability plot (force plot refresh) :
+    window.tabbedPane().selectTab(TAB_OBSERVABILITY);
+
+    saveCroppedScreenshotOf("popsUser.png", left, 0, width, height);
   }
 
   /**
@@ -279,21 +401,18 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
 
     window.list("jListTargets").selectItem("HD 3546 (cal)");
 
-    // capture tabs :
-    final JTabbedPaneFixture plotTabs = window.tabbedPane();
-
-    // Capture UV Coverage :
-    plotTabs.selectTab(SettingPanel.TAB_OBSERVABILITY);
-
     // waits for computation to finish :
     AsproTestUtils.checkRunningTasks();
 
-    saveScreenshot(window, "Aspro2-calibrators-obs.png");
+    // Capture observability plot :
+    showPlotTab(TAB_OBSERVABILITY, "Aspro2-calibrators-obs.png");
 
-    // Capture UV Coverage :
-    plotTabs.selectTab(SettingPanel.TAB_UV_COVERAGE);
+    // Capture UV Coverage plot :
+    showPlotTab(TAB_UV_COVERAGE, "Aspro2-calibrators-uv.png");
 
-    saveScreenshot(window, "Aspro2-calibrators-uv.png");
+    // Export OIFits / OB :
+    exportOIFits();
+    exportOB();
 
     // target editor with calibrators :
     window.button("jButtonTargetEditor").click();
@@ -364,6 +483,109 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
   --- Utility methods  ---------------------------------------------------------
    */
   /**
+   * Export Observing block file using default file name
+   */
+  private void exportOB() {
+    // export OB file :
+    window.pressAndReleaseKey(keyCode(VK_B).modifiers(Platform.controlOrCommandMask()));
+
+    // use image folder to store OB file and validate :
+    window.fileChooser().setCurrentDirectory(getScreenshotFolder()).approve();
+
+    // overwrite any existing file :
+    confirmDialogFileOverwrite();
+    // close report message (ob files) :
+    closeMessage();
+    // close check ESO magnitudes :
+    closeMessage();
+  }
+
+  /**
+   * Export OIFits file using default file name
+   */
+  private void exportOIFits() {
+    // export OIFits :
+    window.pressAndReleaseKey(keyCode(VK_F).modifiers(Platform.controlOrCommandMask()));
+
+    // use image folder to store OIFits and validate :
+    window.fileChooser().setCurrentDirectory(getScreenshotFolder()).approve();
+
+    // overwrite any existing file :
+    confirmDialogFileOverwrite();
+  }
+
+  /**
+   * Export the current plot to PDF
+   */
+  private void exportPDF() {
+    // export PDF :
+    window.pressAndReleaseKey(keyCode(VK_P).modifiers(Platform.controlOrCommandMask()));
+
+    // use image folder to store PDF and validate :
+    window.fileChooser().setCurrentDirectory(getScreenshotFolder()).approve();
+
+    // overwrite any existing file :
+    confirmDialogFileOverwrite();
+  }
+
+  /**
+   * Show the plot tab of the given name and return the window screenshot
+   * @param tabName tab name
+   * @return screenshot image
+   */
+  private BufferedImage showPlotTab(final String tabName) {
+    // select tab :
+    selectTab(tabName);
+
+    return takeScreenshotOf(window);
+  }
+
+  /**
+   * Show the plot tab of the given name and capture the window screenshot
+   * @param tabName tab name
+   * @param fileName file name of the window screenshot
+   */
+  private void showPlotTab(final String tabName, final String fileName) {
+    // select tab :
+    selectTab(tabName);
+
+    // Capture window screenshot :
+    saveScreenshot(window, fileName);
+  }
+
+  /**
+   * Show the plot tab of the given name and export PDF using default file name
+   * @param tabName tab name
+   */
+  private void selectTab(final String tabName) {
+    window.tabbedPane().selectTab(tabName);
+
+    // export PDF :
+    exportPDF();
+  }
+
+  /**
+   * Close File overwrite confirm dialog clicking on "Replace" button
+   */
+  private void confirmDialogFileOverwrite() {
+    try {
+      // if file already exists, a confirm message appears :
+      final JOptionPaneFixture optionPane = window.optionPane();
+
+      if (optionPane != null) {
+        // confirm file overwrite :
+        optionPane.buttonWithText("Replace").click();
+      }
+
+    } catch (RuntimeException re) {
+      // happens when the confirm message does not occur :
+      if (logger.isLoggable(Level.FINE)) {
+        logger.log(Level.FINE, "lookup failure : ", re);
+      }
+    }
+  }
+
+  /**
    * Close Save confirm dialog clicking on "Don't Save" button
    */
   private void confirmDialogDontSave() {
@@ -372,14 +594,51 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
   }
 
   /**
+   * Close any option pane
+   */
+  private void closeMessage() {
+    try {
+      // if a message appears :
+      final JOptionPaneFixture optionPane = window.optionPane();
+
+      if (optionPane != null) {
+        // click OK :
+        optionPane.okButton().click();
+      }
+
+    } catch (RuntimeException re) {
+      // happens when the confirm message does not occur :
+      if (logger.isLoggable(Level.FINE)) {
+        logger.log(Level.FINE, "lookup failure : ", re);
+      }
+    }
+  }
+
+  /**
    * Capture a screenshot of the main form using the given file name
    * @param fileName the file name (including the png extension)
    */
   private void captureMainForm(final String fileName) {
+    saveCroppedScreenshotOf(fileName, 0, 0, -1, getMainFormHeight(window));
+  }
 
+  /**
+   * Capture a screenshot of the application window, crop it and save it using the given file name
+   * @param fileName the file name (including the png extension)
+   * @param x the X coordinate of the upper-left corner of the
+   *          specified rectangular region
+   * @param y the Y coordinate of the upper-left corner of the
+   *          specified rectangular region
+   * @param w the width of the specified rectangular region (<=0 indicates to use the width of screenshot image)
+   * @param h the height of the specified rectangular region (<=0 indicates to use the height of screenshot image)
+   */
+  private void saveCroppedScreenshotOf(final String fileName, final int x, final int y, final int w, final int h) {
     final BufferedImage image = takeScreenshotOf(window);
 
-    final BufferedImage croppedImage = image.getSubimage(0, 0, image.getWidth(), getMainFormHeight(window));
+    final int width = (w <= 0) ? image.getWidth() : w;
+    final int height = (h <= 0) ? image.getHeight() : h;
+
+    final BufferedImage croppedImage = image.getSubimage(x, y, width, height);
 
     saveImage(croppedImage, fileName);
   }
