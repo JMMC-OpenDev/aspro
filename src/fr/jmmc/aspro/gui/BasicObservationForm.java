@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BasicObservationForm.java,v 1.67 2011-03-11 15:03:27 bourgesl Exp $"
+ * "@(#) $Id: BasicObservationForm.java,v 1.68 2011-03-15 15:32:52 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.67  2011/03/11 15:03:27  bourgesl
+ * define panel name
+ * fixed visibility of selected configuration(s)
+ *
  * Revision 1.66  2011/03/09 14:18:29  bourgesl
  * bug fix #67 : allow night restrictions in multi-conf mode and add the warning message "multiple config cannot be done in one night"
  *
@@ -350,6 +354,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     setLayout(new java.awt.GridBagLayout());
 
     jPanelTargets.setBorder(javax.swing.BorderFactory.createTitledBorder("Targets"));
+    jPanelTargets.setName("jPanelTargets"); // NOI18N
     jPanelTargets.setLayout(new java.awt.GridBagLayout());
 
     jPanelTargetsLeft.setMinimumSize(new java.awt.Dimension(12, 12));
@@ -402,6 +407,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     jButtonDeleteTarget.setIcon(new javax.swing.ImageIcon(getClass().getResource("/fr/jmmc/aspro/gui/icons/delete.png"))); // NOI18N
     jButtonDeleteTarget.setToolTipText("delete the selected target");
     jButtonDeleteTarget.setMargin(new java.awt.Insets(0, 0, 0, 0));
+    jButtonDeleteTarget.setName("jButtonDeleteTarget"); // NOI18N
     jButtonDeleteTarget.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(java.awt.event.ActionEvent evt) {
         jButtonDeleteTargetActionPerformed(evt);
@@ -445,6 +451,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     add(jPanelTargets, gridBagConstraints);
 
     jPanelMain.setBorder(javax.swing.BorderFactory.createTitledBorder("Main settings"));
+    jPanelMain.setName("jPanelMain"); // NOI18N
     jPanelMain.setLayout(new java.awt.GridBagLayout());
 
     jPanelObsLeft.setMinimumSize(new java.awt.Dimension(12, 12));
@@ -466,6 +473,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     gridBagConstraints.insets = new java.awt.Insets(0, 0, 4, 6);
     jPanelMain.add(jLabelInterferometer, gridBagConstraints);
 
+    jComboBoxInterferometer.setName("jComboBoxInterferometer"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 0;
@@ -482,6 +490,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     gridBagConstraints.insets = new java.awt.Insets(0, 0, 4, 6);
     jPanelMain.add(jLabelPeriod, gridBagConstraints);
 
+    jComboBoxInterferometerConfiguration.setName("jComboBoxInterferometerConfiguration"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 1;
@@ -498,6 +507,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     gridBagConstraints.insets = new java.awt.Insets(0, 0, 4, 6);
     jPanelMain.add(jLabelInstrument, gridBagConstraints);
 
+    jComboBoxInstrument.setName("jComboBoxInstrument"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 2;
@@ -550,6 +560,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     add(jPanelMain, gridBagConstraints);
 
     jPanelConfigurations.setBorder(javax.swing.BorderFactory.createTitledBorder("Configuration(s)"));
+    jPanelConfigurations.setName("jPanelConfigurations"); // NOI18N
     jPanelConfigurations.setLayout(new java.awt.GridBagLayout());
 
     jListInstrumentConfigurations.setModel(new javax.swing.AbstractListModel() {
@@ -601,6 +612,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     add(jPanelConfigurations, gridBagConstraints);
 
     jPanelOptions.setBorder(javax.swing.BorderFactory.createTitledBorder("Constraints"));
+    jPanelOptions.setName("jPanelOptions"); // NOI18N
     jPanelOptions.setLayout(new java.awt.GridBagLayout());
 
     jCheckBoxNightLimit.setText("Night restriction");
@@ -625,6 +637,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
 
     jDateSpinner.setModel(new javax.swing.SpinnerDateModel());
     jDateSpinner.setEditor(new javax.swing.JSpinner.DateEditor(jDateSpinner, "yyyy/MM/dd"));
+    jDateSpinner.setName("jDateSpinner"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 1;
@@ -645,6 +658,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
 
     jFieldMinElev.setColumns(2);
     jFieldMinElev.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0"))));
+    jFieldMinElev.setName("jFieldMinElev"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 2;
@@ -660,6 +674,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     add(jPanelOptions, gridBagConstraints);
 
     jPanelStatus.setMinimumSize(new java.awt.Dimension(57, 30));
+    jPanelStatus.setName("jPanelStatus"); // NOI18N
     jPanelStatus.setPreferredSize(new java.awt.Dimension(100, 30));
     jPanelStatus.setLayout(new java.awt.GridBagLayout());
 
@@ -672,6 +687,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     jPanelStatus.add(jLabelState, gridBagConstraints);
 
     jLabelStatus.setText("Ok");
+    jLabelStatus.setName("jLabelStatus"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 0;
