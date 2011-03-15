@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: FestSwingCustomJUnitTestCase.java,v 1.3 2011-03-14 14:46:20 bourgesl Exp $"
+ * "@(#) $Id: FestSwingCustomJUnitTestCase.java,v 1.4 2011-03-15 15:44:16 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2011/03/14 14:46:20  bourgesl
+ * added enableTooltips(boolean) and defineScreenshotDelay(millis)
+ *
  * Revision 1.2  2011/03/11 15:04:08  bourgesl
  * added image operations (resize, crop ...)
  *
@@ -80,7 +83,9 @@ public class FestSwingCustomJUnitTestCase extends FestSwingCustomTestCaseTemplat
   private static long SCREENSHOT_DELAY = SHORT_DELAY;
   /** screenshot taker */
   private static ScreenshotTaker screenshotTaker;
-  /** screenshot folder */
+  /** screenshot folder as a file */
+  private static File screenshotFolderFile;
+  /** screenshot folder as a string*/
   private static String screenshotFolder;
 
   /**
@@ -104,32 +109,32 @@ public class FestSwingCustomJUnitTestCase extends FestSwingCustomTestCaseTemplat
 
     screenshotTaker = new ScreenshotTaker();
 
-    File imageFolder = null;
+    screenshotFolderFile = null;
     try {
       final String currentFolderPath = Files.currentFolder().getCanonicalPath();
 
-      imageFolder = new File(currentFolderPath + File.separator + "fest-screenshots");
+      screenshotFolderFile = new File(currentFolderPath + File.separator + "fest-screenshots");
 
-      if (imageFolder.exists()) {
+      if (screenshotFolderFile.exists()) {
         if (logger.isLoggable(Level.INFO)) {
-          logger.info("setUpOnce : delete any existing file in directory = " + imageFolder);
+          logger.info("setUpOnce : delete any existing file in directory = " + screenshotFolderFile);
         }
 
-        for (File f : imageFolder.listFiles()) {
+        for (File f : screenshotFolderFile.listFiles()) {
           Files.delete(f);
         }
       } else {
-        imageFolder.mkdir();
+        screenshotFolderFile.mkdir();
       }
 
-      screenshotFolder = imageFolder.getCanonicalPath() + File.separator;
+      screenshotFolder = screenshotFolderFile.getCanonicalPath() + File.separator;
 
       if (logger.isLoggable(Level.INFO)) {
         logger.info("setUpOnce : screenshot folder = " + screenshotFolder);
       }
 
     } catch (IOException ioe) {
-      throw new RuntimeException("unable to create screenshot folder : " + imageFolder, ioe);
+      throw new RuntimeException("unable to create screenshot folder : " + screenshotFolderFile, ioe);
     }
   }
 
@@ -235,6 +240,14 @@ public class FestSwingCustomJUnitTestCase extends FestSwingCustomTestCaseTemplat
     if (SCREENSHOT_DELAY > 0l) {
       pause(SCREENSHOT_DELAY);
     }
+  }
+
+  /**
+   * Return the screenshot Folder as a file
+   * @return file
+   */
+  protected static File getScreenshotFolder() {
+    return screenshotFolderFile;
   }
 
   /**
