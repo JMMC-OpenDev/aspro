@@ -1,11 +1,16 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproDocJUnitTest.java,v 1.6 2011-03-15 15:46:37 bourgesl Exp $"
+ * "@(#) $Id: AsproDocJUnitTest.java,v 1.7 2011-03-15 16:12:19 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2011/03/15 15:46:37  bourgesl
+ * new tests : PDF / OIFits / OB
+ * observability (detailed / baseline limits)
+ * Pops
+ *
  * Revision 1.5  2011/03/14 17:43:10  bourgesl
  * use setText instead of enterText
  *
@@ -94,6 +99,9 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
     //defineScreenshotDelay(SHORT_DELAY);
 
     enableTooltips(false);
+
+    // customize PDF action to avoid use StatusBar :
+    fr.jmmc.aspro.gui.action.ExportPDFAction.setAvoidUseStatusBar(true);
   }
 
   /**
@@ -211,11 +219,13 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
     dialog.tabbedPane().selectTab("Models");
 
     dialog.tree().selectPath("Models/HIP1234/elong_disk1");
+
     saveScreenshot(dialog, "Aspro2-Model.png");
 
     dialog.tabbedPane().selectTab("Targets");
 
     dialog.tree().selectPath("Targets/HD 1234");
+
     saveScreenshot(dialog, "Aspro2-Target.png");
 
     // close dialog :
@@ -423,11 +433,14 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
     dialog.moveToFront();
 
     dialog.tabbedPane().selectTab("Models");
+
     dialog.tree().selectPath("Models/HD 3546 (cal)/disk1");
 
     saveScreenshot(dialog, "Aspro2-calibrators-Model.png");
 
     dialog.tabbedPane().selectTab("Targets");
+
+    dialog.tree().selectPath("Targets/HIP1234/HD 3546 (cal)");
 
     saveScreenshot(dialog, "Aspro2-calibrators-Target.png");
 
@@ -535,9 +548,14 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
    */
   private BufferedImage showPlotTab(final String tabName) {
     // select tab :
-    selectTab(tabName);
+    window.tabbedPane().selectTab(tabName);
 
-    return takeScreenshotOf(window);
+    final BufferedImage image = takeScreenshotOf(window);
+
+    // export PDF :
+    exportPDF();
+
+    return image;
   }
 
   /**
@@ -547,10 +565,13 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
    */
   private void showPlotTab(final String tabName, final String fileName) {
     // select tab :
-    selectTab(tabName);
+    window.tabbedPane().selectTab(tabName);
 
     // Capture window screenshot :
     saveScreenshot(window, fileName);
+
+    // export PDF :
+    exportPDF();
   }
 
   /**

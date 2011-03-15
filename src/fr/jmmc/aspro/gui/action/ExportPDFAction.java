@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ExportPDFAction.java,v 1.21 2011-03-08 13:49:39 bourgesl Exp $"
+ * "@(#) $Id: ExportPDFAction.java,v 1.22 2011-03-15 16:12:19 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.21  2011/03/08 13:49:39  bourgesl
+ * added file path in error messages
+ *
  * Revision 1.20  2011/02/14 15:33:10  bourgesl
  * use JMCS FileUtils
  *
@@ -105,6 +108,8 @@ public final class ExportPDFAction extends WaitingTaskAction {
   public final static String actionName = "exportPDF";
   /** PDF mime type */
   public static final String PDF_MIME_TYPE = "application/pdf";
+  /** flag to avoid use StatusBar (JUnit) */
+  private static boolean avoidUseStatusBar = false;
 
   /**
    * Return the singleton ExportPDFAction instance
@@ -123,6 +128,13 @@ public final class ExportPDFAction extends WaitingTaskAction {
     getInstance().process(exportable);
   }
 
+  /**
+   * Define the flag to avoid use StatusBar (JUnit)
+   * @param flag true to avoid use StatusBar
+   */
+  public final static void setAvoidUseStatusBar(final boolean flag) {
+    avoidUseStatusBar = flag;
+  }
   /* members */
   /** last directory used to save a file; by default = user home */
   private String lastDir = System.getProperty("user.home");
@@ -200,7 +212,9 @@ public final class ExportPDFAction extends WaitingTaskAction {
       try {
         PDFUtils.saveChartAsPDF(file, chart, exportable.getPDFOptions());
 
-        StatusBar.show(file.getName() + " created.");
+        if (!avoidUseStatusBar) {
+          StatusBar.show(file.getName() + " created.");
+        }
 
       } catch (IOException ioe) {
         MessagePane.showErrorMessage(
