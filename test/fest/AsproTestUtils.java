@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproTestUtils.java,v 1.1 2011-03-11 16:02:05 bourgesl Exp $"
+ * "@(#) $Id: AsproTestUtils.java,v 1.2 2011-03-15 15:45:27 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2011/03/11 16:02:05  bourgesl
+ * updated scenario
+ *
  */
 package fest;
 
@@ -14,6 +17,8 @@ import org.fest.swing.timing.Timeout;
 
 import fr.jmmc.mcs.gui.task.TaskSwingWorkerExecutor;
 import java.util.logging.Level;
+import org.fest.swing.edt.GuiActionRunner;
+import org.fest.swing.edt.GuiQuery;
 import org.fest.swing.timing.Condition;
 
 /**
@@ -25,8 +30,8 @@ public final class AsproTestUtils {
   /** Class logger */
   protected static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           AsproTestUtils.class.getName());
-  /** 10s timeout */
-  protected static final Timeout LONG_TIMEOUT = Timeout.timeout(10000l);
+  /** 5s timeout */
+  protected static final Timeout LONG_TIMEOUT = Timeout.timeout(5000l);
 
   /**
    * Forbidden constructor
@@ -50,12 +55,19 @@ public final class AsproTestUtils {
        * @return <code>true</code> if the condition has been satisfied, otherwise <code>false</code>.
        */
       public boolean test() {
-        final boolean done = !TaskSwingWorkerExecutor.isTaskRunning();
 
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("checkRunningTasks : test = " + done);
-        }
-        return done;
+        return GuiActionRunner.execute(new GuiQuery<Boolean>() {
+
+          protected Boolean executeInEDT() {
+            final boolean done = !TaskSwingWorkerExecutor.isTaskRunning();
+
+            if (logger.isLoggable(Level.FINE)) {
+              logger.fine("checkRunningTasks : test = " + done);
+            }
+            return done;
+          }
+        });
+
       }
     }, LONG_TIMEOUT);
 
