@@ -1,11 +1,16 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityPanel.java,v 1.63 2011-03-01 17:10:34 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityPanel.java,v 1.64 2011-03-15 15:42:11 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.63  2011/03/01 17:10:34  bourgesl
+ * added legend on plot
+ * updated plot to display observability of all configurations
+ * if multiple configurations, disable baseline limits and detailed output
+ *
  * Revision 1.62  2011/02/28 17:14:01  bourgesl
  * use new result containers
  *
@@ -426,8 +431,9 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     panelOptions.add(new JLabel("Time :"));
 
     this.jComboTimeRef = new JComboBox(AsproConstants.TIME_CHOICES);
-    this.jComboTimeRef.setSelectedItem(this.myPreferences.getTimeReference());
+    this.jComboTimeRef.setName("jComboTimeRef");
 
+    this.jComboTimeRef.setSelectedItem(this.myPreferences.getTimeReference());
     this.jComboTimeRef.addActionListener(new ActionListener() {
 
       public void actionPerformed(final ActionEvent e) {
@@ -437,6 +443,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     panelOptions.add(this.jComboTimeRef);
 
     this.jCheckBoxBaseLineLimits = new JCheckBox("BaseLine limits");
+    this.jCheckBoxBaseLineLimits.setName("jCheckBoxBaseLineLimits");
+
     this.jCheckBoxBaseLineLimits.setSelected(DEFAULT_DO_BASELINE_LIMITS);
     this.jCheckBoxBaseLineLimits.addItemListener(new ItemListener() {
 
@@ -469,6 +477,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     panelOptions.add(this.jCheckBoxBaseLineLimits);
 
     this.jCheckBoxDetailedOutput = new JCheckBox("Details");
+    this.jCheckBoxDetailedOutput.setName("jCheckBoxDetailedOutput");
+
     this.jCheckBoxDetailedOutput.setSelected(DEFAULT_DO_DETAILED_OUTPUT);
     this.jCheckBoxDetailedOutput.addItemListener(new ItemListener() {
 
