@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproDocJUnitTest.java,v 1.7 2011-03-15 16:12:19 bourgesl Exp $"
+ * "@(#) $Id: AsproDocJUnitTest.java,v 1.8 2011-03-15 16:36:00 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2011/03/15 16:12:19  bourgesl
+ * disable statusBar updates when running fest swing tests
+ *
  * Revision 1.6  2011/03/15 15:46:37  bourgesl
  * new tests : PDF / OIFits / OB
  * observability (detailed / baseline limits)
@@ -87,17 +90,12 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
             "-open", "/home/bourgesl/dev/aspro/test/Aspro2_sample.asprox");
 
     // define robot delays :
-    // fast delay :
     defineRobotDelayBetweenEvents(SHORT_DELAY);
-    // normal delay
-    //defineRobotDelayBetweenEvents(SHORT_DELAY);
 
     // define delay before taking screenshot :
-    // fast delay :
     defineScreenshotDelay(SHORT_DELAY);
-    // normal delay
-    //defineScreenshotDelay(SHORT_DELAY);
 
+    // disable tooltips :
     enableTooltips(false);
 
     // customize PDF action to avoid use StatusBar :
