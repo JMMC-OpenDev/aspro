@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SearchCalSampMessageHandler.java,v 1.15 2011-03-08 17:27:14 bourgesl Exp $"
+ * "@(#) $Id: SearchCalSampMessageHandler.java,v 1.16 2011-03-16 16:14:28 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.15  2011/03/08 17:27:14  bourgesl
+ * added a parameter with SearchCal Gui version and use OM.defineCalibratorDiameter(calibrators)
+ *
  * Revision 1.14  2011/03/04 16:59:07  bourgesl
  * define diameter using alternate diameters if computed UD_ are missing
  *
@@ -201,7 +204,7 @@ public final class SearchCalSampMessageHandler extends SampMessageHandler {
        */
       final double scienceObjectDetectionDistance = (1d * ALX.ARCSEC_IN_DEGREES);
 
-      // filter science target if distance is less than science object detection distance preference (1 arcsec) :
+      // @note SCIENCE_DISTANCE_CHECK : filter science target if distance is less than science object detection distance preference (1 arcsec) :
       for (Iterator<Target> it = calibrators.iterator(); it.hasNext();) {
         final Target cal = it.next();
 
