@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproDocJUnitTest.java,v 1.8 2011-03-15 16:36:00 bourgesl Exp $"
+ * "@(#) $Id: AsproDocJUnitTest.java,v 1.9 2011-03-17 15:42:40 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.8  2011/03/15 16:36:00  bourgesl
+ * comments
+ *
  * Revision 1.7  2011/03/15 16:12:19  bourgesl
  * disable statusBar updates when running fest swing tests
  *
@@ -447,6 +450,33 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
   }
 
   /**
+   * Test Open file "/home/bourgesl/dev/aspro/test/Aspro2_sample_multi.asprox"
+   */
+  @Test
+  @GUITest
+  public void shouldOpenSampleMultiConf() {
+
+    // hack to solve focus trouble in menu items :
+    window.menuItemWithPath("File").focus();
+    window.menuItemWithPath("File", "Open observation").click();
+
+    window.fileChooser().selectFile(new File("/home/bourgesl/dev/aspro/test/Aspro2_sample_multi.asprox"));
+    window.fileChooser().approve();
+
+    // waits for computation to finish :
+    AsproTestUtils.checkRunningTasks();
+
+    // Capture map plot :
+    showPlotTab(TAB_INTERFEROMETER_MAP, "Aspro2-multiConf-map.png");
+
+    // Capture observability plot :
+    showPlotTab(TAB_OBSERVABILITY, "Aspro2-multiConf-obs.png");
+
+    // Capture UV Coverage plot :
+    showPlotTab(TAB_UV_COVERAGE, "Aspro2-multiConf-uv.png");
+  }
+
+  /**
    * Test Feedback report
    */
   @Test
@@ -480,11 +510,13 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
   }
 
   /**
-   * Test the application exit sequence
+   * Test the application exit sequence : ALWAYS THE LAST TEST
    */
   @Test
   @GUITest
   public void shouldExit() {
+    logger.severe("shouldExit test");
+
     window.close();
 
     confirmDialogDontSave();
