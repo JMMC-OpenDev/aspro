@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: FestSwingCustomTestCaseTemplate.java,v 1.2 2011-03-14 14:46:56 bourgesl Exp $"
+ * "@(#) $Id: FestSwingCustomTestCaseTemplate.java,v 1.3 2011-03-17 15:41:49 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2011/03/14 14:46:56  bourgesl
+ * added defineRobotDelayBetweenEvents(millis) to speed up or slow down the robot animation
+ *
  * Revision 1.1  2011/03/11 12:55:35  bourgesl
  * added fest-swing test cases for Aspro 2
  *
@@ -93,7 +96,8 @@ public abstract class FestSwingCustomTestCaseTemplate {
    * Cleans up resources used by this test's <code>{@link Robot}</code>.
    */
   protected final void cleanUp() {
-    robot.cleanUp();
+    // DO NOT dispose any open windows :
+    robot.cleanUpWithoutDisposingWindows();
   }
 
   /**
