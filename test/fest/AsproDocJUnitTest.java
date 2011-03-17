@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproDocJUnitTest.java,v 1.9 2011-03-17 15:42:40 bourgesl Exp $"
+ * "@(#) $Id: AsproDocJUnitTest.java,v 1.10 2011-03-17 15:58:32 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.9  2011/03/17 15:42:40  bourgesl
+ * added shouldOpenSampleMultiConf test
+ *
  * Revision 1.8  2011/03/15 16:36:00  bourgesl
  * comments
  *
@@ -88,6 +91,9 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
    * Define the application
    */
   static {
+    // disable dev LAF menu :
+    System.setProperty("jmcs.laf.menu", "false");
+
     JmcsApplicationSetup.define(
             fr.jmmc.aspro.AsproGui.class,
             "-open", "/home/bourgesl/dev/aspro/test/Aspro2_sample.asprox");
