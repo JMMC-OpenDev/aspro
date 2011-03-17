@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: JmcsFestSwingJUnitTestCase.java,v 1.2 2011-03-14 14:47:18 bourgesl Exp $"
+ * "@(#) $Id: JmcsFestSwingJUnitTestCase.java,v 1.3 2011-03-17 15:42:22 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2011/03/14 14:47:18  bourgesl
+ * added emergency abort listener associated to 'Ctrl + Shift + A' key combination
+ *
  * Revision 1.1  2011/03/11 12:55:35  bourgesl
  * added fest-swing test cases for Aspro 2
  *
@@ -128,6 +131,6 @@ public class JmcsFestSwingJUnitTestCase extends FestSwingCustomJUnitTestCase {
   protected void onTearDown() {
     listener.unregister();
 
-    window.cleanUp();
+    // robot is already cleaned up in FestSwingCustomTestCaseTemplate
   }
 }
