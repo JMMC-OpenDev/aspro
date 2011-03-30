@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproDocJUnitTest.java,v 1.10 2011-03-17 15:58:32 bourgesl Exp $"
+ * "@(#) $Id: AsproDocJUnitTest.java,v 1.11 2011-03-30 09:00:56 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.10  2011/03/17 15:58:32  bourgesl
+ * disable dev LAF menu
+ *
  * Revision 1.9  2011/03/17 15:42:40  bourgesl
  * added shouldOpenSampleMultiConf test
  *
@@ -52,7 +55,6 @@ import fest.common.JmcsFestSwingJUnitTestCase;
 import java.awt.Frame;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.util.logging.Level;
 import javax.swing.JComponent;
 import javax.swing.JFormattedTextField;
 import javax.swing.JList;
@@ -66,7 +68,6 @@ import org.fest.swing.edt.GuiActionRunner;
 import org.fest.swing.edt.GuiTask;
 import org.fest.swing.fixture.DialogFixture;
 import org.fest.swing.fixture.FrameFixture;
-import org.fest.swing.fixture.JOptionPaneFixture;
 import org.fest.swing.fixture.JPanelFixture;
 import org.fest.swing.fixture.JTextComponentFixture;
 import org.fest.swing.util.Platform;
@@ -499,7 +500,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
     dialog.requireVisible();
     dialog.moveToFront();
 
-    final String myEmail = "bourges.laurent@obs.ujf-grenoble.fr";
+    final String myEmail = "laurent.bourges@obs.ujf-grenoble.fr";
 
     final JTextComponentFixture emailField = dialog.textBox(JTextComponentMatcher.withText(myEmail));
 
@@ -622,82 +623,11 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
   }
 
   /**
-   * Close File overwrite confirm dialog clicking on "Replace" button
-   */
-  private void confirmDialogFileOverwrite() {
-    try {
-      // if file already exists, a confirm message appears :
-      final JOptionPaneFixture optionPane = window.optionPane();
-
-      if (optionPane != null) {
-        // confirm file overwrite :
-        optionPane.buttonWithText("Replace").click();
-      }
-
-    } catch (RuntimeException re) {
-      // happens when the confirm message does not occur :
-      if (logger.isLoggable(Level.FINE)) {
-        logger.log(Level.FINE, "lookup failure : ", re);
-      }
-    }
-  }
-
-  /**
-   * Close Save confirm dialog clicking on "Don't Save" button
-   */
-  private void confirmDialogDontSave() {
-    // close confirm dialog :
-    window.optionPane().buttonWithText("Don't Save").click();
-  }
-
-  /**
-   * Close any option pane
-   */
-  private void closeMessage() {
-    try {
-      // if a message appears :
-      final JOptionPaneFixture optionPane = window.optionPane();
-
-      if (optionPane != null) {
-        // click OK :
-        optionPane.okButton().click();
-      }
-
-    } catch (RuntimeException re) {
-      // happens when the confirm message does not occur :
-      if (logger.isLoggable(Level.FINE)) {
-        logger.log(Level.FINE, "lookup failure : ", re);
-      }
-    }
-  }
-
-  /**
    * Capture a screenshot of the main form using the given file name
    * @param fileName the file name (including the png extension)
    */
   private void captureMainForm(final String fileName) {
     saveCroppedScreenshotOf(fileName, 0, 0, -1, getMainFormHeight(window));
-  }
-
-  /**
-   * Capture a screenshot of the application window, crop it and save it using the given file name
-   * @param fileName the file name (including the png extension)
-   * @param x the X coordinate of the upper-left corner of the
-   *          specified rectangular region
-   * @param y the Y coordinate of the upper-left corner of the
-   *          specified rectangular region
-   * @param w the width of the specified rectangular region (<=0 indicates to use the width of screenshot image)
-   * @param h the height of the specified rectangular region (<=0 indicates to use the height of screenshot image)
-   */
-  private void saveCroppedScreenshotOf(final String fileName, final int x, final int y, final int w, final int h) {
-    final BufferedImage image = takeScreenshotOf(window);
-
-    final int width = (w <= 0) ? image.getWidth() : w;
-    final int height = (h <= 0) ? image.getHeight() : h;
-
-    final BufferedImage croppedImage = image.getSubimage(x, y, width, height);
-
-    saveImage(croppedImage, fileName);
   }
 
   /**
