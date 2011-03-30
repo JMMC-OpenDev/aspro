@@ -8,8 +8,9 @@
         VLTI interferometer.
 -->
 
-<ns0:interferometerSetting  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
-   xmlns:ns0='http://www.jmmc.fr/aspro-oi/0.1'
+<a:interferometerSetting
+   xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+   xmlns:a='http://www.jmmc.fr/aspro-oi/0.1'
    xsi:schemaLocation='http://www.jmmc.fr/aspro-oi/0.1 AsproOIModel.xsd'>
 
   <description>
@@ -8777,7 +8778,7 @@
 
     <focalInstrument>
       <name>PIONIER</name>
-      <description>Prototype configuration for PIONIER instrument</description>
+      <description>PIONIER instrument</description>
       <numberChannels>4</numberChannels>
       <defaultSamplingTime>30</defaultSamplingTime>
 
@@ -9480,4 +9481,4 @@
 
   </configuration>
 
-</ns0:interferometerSetting>
+</a:interferometerSetting>
