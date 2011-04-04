@@ -1,4 +1,8 @@
 
+import fr.jmmc.aspro.AsproConstants;
+import fr.jmmc.aspro.model.oi.LonLatAlt;
+import fr.jmmc.aspro.model.oi.Position3D;
+import fr.jmmc.aspro.service.GeocentricCoords;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -572,10 +576,11 @@ public final class AsproGenConfig {
    * @param args unused
    */
   public static void main(final String[] args) {
+    final String asproPath = "/home/bourgesl/dev/aspro-NEW/etc/";
+
     if (false) {
 
       // VLTI :
-      final String asproPath = "/home/bourgesl/dev/aspro-NEW/etc/";
       convertSwitchYard(asproPath + "VLT.switchyard");
 
       final String[] vltStations = {
@@ -589,12 +594,186 @@ public final class AsproGenConfig {
         convertHorizon(station, asproPath + station + ".horizon", sb);
       }
       logger.severe("convertHorizons : \n" + sb.toString());
+    }
 
+    if (false) {
       // CHARA :
       convertCHARAConfig("/home/bourgesl/dev/aspro/test/telescopes.chara");
     }
 
-    // CHARA :
-    convertCHARAConfig("/home/bourgesl/dev/aspro/test/telescopes.chara");
+    if (true) {
+      VLTIPosition();
+      MROIposition();
+
+      convertStationFile(asproPath + "MROI.stations");
+    }
   }
+
+  private static void VLTIPosition() {
+
+    final double lonDeg = -(70d + 24d / 60d + 16.92d / 3600d);
+    logger.severe("VLTI longitude (deg) : " + lonDeg);
+
+    final double latDeg = -(24d + 37d / 60d + 38.46d / 3600d);
+    logger.severe("VLTI latitude (deg) : " + latDeg);
+
+    final double alt = 2681d;
+    computeInterferometerPosition(lonDeg, latDeg, alt);
+
+    // 1942803.281897419, -5457847.407163382, -2648734.592484602
+/*
+      <posX>1942042.8584924</posX>
+      <posY>-5455305.996911</posY>
+      <posZ>-2654521.4011759</posZ>
+*/
+    final Position3D position = new Position3D();
+    position.setPosX(1942042.8584924d);
+    position.setPosY(-5455305.996911d);
+    position.setPosZ(-2654521.4011759d);
+
+    final LonLatAlt coords = GeocentricCoords.getLonLatAlt(position);
+
+    logger.severe("VLTI position : " + coords.toString());
+// 1942042.8584924035, -5455305.996911049, -2654521.401175926
+  }
+
+  private static void MROIposition() {
+
+    final double lonDeg = -(107d + 11d / 60d + 05.12d / 3600d);
+    logger.severe("MROI longitude (deg) : " + lonDeg);
+
+    final double latDeg = 33d + 58d / 60d + 47.6d / 3600d;
+    logger.severe("MROI latitude (deg) : " + latDeg);
+
+    final double alt = 3200d;
+    computeInterferometerPosition(lonDeg, latDeg, alt);
+  }
+
+  /**
+   *
+   * @param lon longitude in degrees
+   * @param lat latitude in degrees
+   * @param alt altitude in meters
+   */
+  private static void computeInterferometerPosition(final double lon, final double lat, final double alt) {
+
+    final double theta = Math.toRadians(90d - lat);
+    final double phi = Math.toRadians(lon);
+
+    final double r = AsproConstants.EARTH_RADIUS + alt;
+
+    final double x = r * Math.sin(theta) * Math.cos(phi);
+    final double y = r * Math.sin(theta) * Math.sin(phi);
+    final double z = r * Math.cos(theta);
+
+    logger.severe("position (x,y,z) : " + x + ", " + y + ", " + z);
+
+  }
+
+  /**
+   * Convert the ASPRO 1 station file :
+   *  W0  0			 0		 0		   0
+   *  W1 -1.058755762353468	-7.2772199998144 1.570859050973913  7.52
+   *  W2 -2.1386491936416	-14.937289999797 3.173079724470378  15.42
+   *  W3 -3.163870843607306	-22.209509999956 4.694184747335298  22.92
+   *
+   * 165.8497 167.1097 -1000000 -1000000 173.8097 175.0697 -1000000 -1000000 U1
+   * @param absFileName absolute file path to ASPRO 1 VLTI switchyard file
+   */
+  private static void convertStationFile(final String absFileName) {
+
+    logger.severe("convertStationFile : " + absFileName);
+
+    final StringBuilder sb = new StringBuilder(16384);
+
+    // number of columns filled with double values :
+    final int maxCols = 5;
+    // column separator :
+    final String delimiter = " ";
+
+    // load data from file :
+    BufferedReader reader = null;
+    try {
+      final File data = new File(absFileName);
+
+      reader = new BufferedReader(new FileReader(data));
+
+      int i = 0;
+      String line;
+      StringTokenizer tok;
+      // outputs :
+      String station = null;
+      double[] values = new double[maxCols];
+
+      while ((line = reader.readLine()) != null) {
+        line = line.replaceAll("\\s+", delimiter);
+        tok = new StringTokenizer(line, delimiter);
+
+        i = 0;
+        station = null;
+        while (tok.hasMoreTokens()) {
+          if (i == 0) {
+            // station name :
+            station = tok.nextToken();
+          } else if (i < maxCols) {
+            values[i] = Double.parseDouble(tok.nextToken());
+          } else {
+            break;
+          }
+          i++;
+        }
+
+        if (station != null) {
+          /*
+          System.out.println("station : " + station);
+          System.out.println("values : " + Arrays.toString(values));
+          */
+          /*
+          <station>
+            <name>S1</name>
+            <telescope>T</telescope>
+            <relativePosition>
+              <posX>0.0</posX>
+              <posY>0.0</posY>
+              <posZ>0.0</posZ>
+            </relativePosition>
+            <delayLineFixedOffset>0.0</delayLineFixedOffset>
+           ...
+          </station>
+           */
+
+          // output :
+          sb.append("<station>\n");
+          sb.append("<name>").append(station).append("</name>\n");
+          sb.append("<telescope>T</telescope>\n");
+
+          sb.append("<relativePosition>\n");
+          sb.append("<posX>").append(values[1]).append("</posX>\n");
+          sb.append("<posY>").append(values[2]).append("</posY>\n");
+          sb.append("<posZ>").append(values[3]).append("</posZ>\n");
+          sb.append("</relativePosition>\n");
+
+          sb.append("<delayLineFixedOffset>").append(values[4]).append("</delayLineFixedOffset>\n");
+
+          sb.append("</station>\n");
+        }
+      }
+
+    } catch (FileNotFoundException fnfe) {
+      logger.log(Level.SEVERE, null, fnfe);
+    } catch (IOException ioe) {
+      logger.log(Level.SEVERE, null, ioe);
+    } finally {
+      if (reader != null) {
+        try {
+          reader.close();
+        } catch (IOException ex) {
+          logger.log(Level.SEVERE, null, ex);
+        }
+      }
+    }
+
+    logger.severe("convertStationFile : output :\n" + sb.toString());
+  }
+
 }
