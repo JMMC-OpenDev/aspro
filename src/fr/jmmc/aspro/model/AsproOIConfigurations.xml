@@ -8,11 +8,15 @@
         This file lists all interferometer configuration files.
 -->
 
-<ns0:configurations  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
-   xmlns:ns0='http://www.jmmc.fr/aspro-oi/0.1'
+<a:configurations
+   xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+   xmlns:a='http://www.jmmc.fr/aspro-oi/0.1'
    xsi:schemaLocation='http://www.jmmc.fr/aspro-oi/0.1 AsproOIModel.xsd'>
 
   <file>VLTI.xml</file>
   <file>CHARA.xml</file>
-
-</ns0:configurations>
+<!--
+  <file>MROI.xml</file>
+  -->
+  
+</a:configurations>
