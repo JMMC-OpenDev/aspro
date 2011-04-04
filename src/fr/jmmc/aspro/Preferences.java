@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: Preferences.java,v 1.5 2010-10-22 13:31:37 bourgesl Exp $"
+ * "@(#) $Id: Preferences.java,v 1.6 2011-04-04 13:58:56 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2010/10/22 13:31:37  bourgesl
+ * added preference for Time LST/UTC
+ *
  * Revision 1.4  2010/06/17 10:02:51  bourgesl
  * fixed warning hints - mainly not final static loggers
  *
@@ -77,6 +80,11 @@ public final class Preferences extends fr.jmmc.mcs.util.Preferences {
     return _singleton;
   }
 
+  /**
+   * Define the default properties used to reset default preferences.
+   *
+   * @throws PreferencesException if any preference value has a unsupported class type
+   */
   protected void setDefaultPreferences() throws PreferencesException {
     logger.fine("Preferences.setDefaultPreferences()");
 
@@ -95,7 +103,7 @@ public final class Preferences extends fr.jmmc.mcs.util.Preferences {
   }
 
   /**
-   * Return preference filename.
+   * Return the preference filename.
    *
    * @return preference filename.
    */
