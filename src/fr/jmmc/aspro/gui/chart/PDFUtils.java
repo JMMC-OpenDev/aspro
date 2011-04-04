@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: PDFUtils.java,v 1.9 2011-03-01 17:13:37 bourgesl Exp $"
+ * "@(#) $Id: PDFUtils.java,v 1.10 2011-04-04 13:58:50 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.9  2011/03/01 17:13:37  bourgesl
+ * added time monitoring when saving PDF
+ *
  * Revision 1.8  2010/10/15 16:59:43  bourgesl
  * new PDF options (page size and orientation)
  * PDFExportable refactoring to include prepareChart, postPDF and getPDFOptions methods
@@ -44,6 +47,7 @@ import com.lowagie.text.pdf.PdfWriter;
 import fr.jmmc.aspro.gui.chart.PDFOptions.Orientation;
 
 import fr.jmmc.mcs.gui.App;
+import fr.jmmc.mcs.util.FileUtils;
 import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
 import java.io.BufferedOutputStream;
@@ -102,13 +106,8 @@ public final class PDFUtils {
       writeChartAsPDF(bo, chart, options);
 
     } finally {
-      if (bo != null) {
-        try {
-          bo.close();
-        } catch (IOException ioe) {
-          logger.log(Level.FINE, "IO exception : ", ioe);
-        }
-      }
+      FileUtils.closeStream(bo);
+
       if (logger.isLoggable(Level.INFO)) {
         logger.info("saveChartAsPDF : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
       }
@@ -124,8 +123,7 @@ public final class PDFUtils {
    * @throws IllegalStateException if a PDF document exception occured
    */
   private static void writeChartAsPDF(final OutputStream outputStream, final JFreeChart chart,
-                                      final PDFOptions options)
-          throws IllegalStateException {
+                                      final PDFOptions options) throws IllegalStateException {
 
     Graphics2D g2 = null;
 
