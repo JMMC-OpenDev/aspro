@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetEditorDialog.java,v 1.16 2011-03-14 14:45:16 bourgesl Exp $"
+ * "@(#) $Id: TargetEditorDialog.java,v 1.17 2011-04-04 16:14:21 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.16  2011/03/14 14:45:16  bourgesl
+ * added comment
+ *
  * Revision 1.15  2011/02/23 08:58:08  bourgesl
  * flip OK / Cancel buttons
  *
@@ -385,7 +388,7 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
           ObservationManager.getInstance().load(new File("/home/bourgesl/VLTI_FUN2.asprox"));
           logger.info("result = " + showEditor("HIP32768"));
           System.exit(0);
-        } catch (Exception e) {
+        } catch (Exception e) { // main (test)
           logger.log(Level.SEVERE, "runtime exception", e);
         }
       }
