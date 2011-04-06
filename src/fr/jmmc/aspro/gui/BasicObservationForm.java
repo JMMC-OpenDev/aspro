@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BasicObservationForm.java,v 1.68 2011-03-15 15:32:52 bourgesl Exp $"
+ * "@(#) $Id: BasicObservationForm.java,v 1.69 2011-04-06 15:34:36 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.68  2011/03/15 15:32:52  bourgesl
+ * added names for panels and fields
+ *
  * Revision 1.67  2011/03/11 15:03:27  bourgesl
  * define panel name
  * fixed visibility of selected configuration(s)
@@ -1204,8 +1207,8 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
    * Observer implementation used for the StarResolver (called by EDT)
    * Create a new Target object with the retrieved data from Simbad and
    * fire an observation change event
-   * @param o Observable instance
-   * @param arg unused argument
+   * @param o Observable instance i.e. Star instance
+   * @param arg Star.Notification instance
    */
   public void update(final Observable o, final Object arg) {
     if (o instanceof Star) {
