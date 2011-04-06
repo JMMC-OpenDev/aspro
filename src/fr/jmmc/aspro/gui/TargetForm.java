@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: TargetForm.java,v 1.26 2011-03-09 14:57:15 bourgesl Exp $"
+ * "@(#) $Id: TargetForm.java,v 1.27 2011-04-06 15:35:15 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.26  2011/03/09 14:57:15  bourgesl
+ * bug workaround #18 : added Button 'Sort by R.A.' to sort science targets and their calibrators by RA and refresh completely the form
+ *
  * Revision 1.25  2011/03/08 17:39:03  bourgesl
  * fill viewport height is not available in JDK 5
  *
@@ -107,11 +110,10 @@ import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.aspro.model.util.TargetRAComparator;
 import fr.jmmc.mcs.gui.BrowserLauncher;
 import fr.jmmc.mcs.gui.MessagePane;
+import fr.jmmc.mcs.util.Urls;
 import java.awt.Component;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.Collections;
@@ -1166,17 +1168,13 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
   }// </editor-fold>//GEN-END:initComponents
 
   private void jButtonSimbadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSimbadActionPerformed
-    try {
-      final String url = SIMBAD_QUERY_ID + URLEncoder.encode(this.currentTarget.getName(), "UTF-8");
+    final String url = SIMBAD_QUERY_ID + Urls.encode(this.currentTarget.getName());
 
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("Simbad url = " + url);
-      }
-
-      BrowserLauncher.openURL(url);
-    } catch (UnsupportedEncodingException uee) {
-      logger.log(Level.SEVERE, "unsupported encoding : ", uee);
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("Simbad url = " + url);
     }
+
+    BrowserLauncher.openURL(url);
   }//GEN-LAST:event_jButtonSimbadActionPerformed
 
   private void jToggleButtonCalibratorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButtonCalibratorActionPerformed
