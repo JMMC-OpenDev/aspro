@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproGui.java,v 1.50 2011-04-07 13:55:08 mella Exp $"
+ * "@(#) $Id: AsproGui.java,v 1.51 2011-04-07 14:10:25 mella Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.50  2011/04/07 13:55:08  mella
+ * Use replace some init code by SwingSettings.defineDefaults()
+ *
  * Revision 1.49  2011/03/11 15:02:56  bourgesl
  * define panel name
  *
@@ -221,15 +224,12 @@ public final class AsproGui extends App {
   private SettingPanel settingPanel;
 
   /**
-   * Main entry point : define the locale to US / GMT and then start the application
+   * Main entry point : use swing setup and then start the application
    * @param args command line arguments
    */
   public static void main(final String[] args) {
     // init swing application for science
-    SwingSettings.defineDefaults();
-
-    // Install exception handlers for Swing (use EDT) :
-    MCSExceptionHandler.installSwingHandler();
+    SwingSettings.setup();
 
     final long start = System.nanoTime();
     try {
