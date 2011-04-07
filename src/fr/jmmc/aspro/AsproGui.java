@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproGui.java,v 1.49 2011-03-11 15:02:56 bourgesl Exp $"
+ * "@(#) $Id: AsproGui.java,v 1.50 2011-04-07 13:55:08 mella Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.49  2011/03/11 15:02:56  bourgesl
+ * define panel name
+ *
  * Revision 1.48  2011/03/11 12:56:07  bourgesl
  * onFinish made public
  *
@@ -179,6 +182,7 @@ import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.searchCal.SearchCalSampMessageHandler;
 import fr.jmmc.mcs.gui.App;
 import fr.jmmc.mcs.gui.StatusBar;
+import fr.jmmc.mcs.gui.SwingSettings;
 import fr.jmmc.mcs.gui.task.TaskSwingWorkerExecutor;
 import fr.jmmc.mcs.util.ActionRegistrar;
 import fr.jmmc.mcs.util.MCSExceptionHandler;
@@ -221,13 +225,8 @@ public final class AsproGui extends App {
    * @param args command line arguments
    */
   public static void main(final String[] args) {
-    // Set the default locale to en-US locale (for Numerical Fields "." ",")
-    Locale.setDefault(Locale.US);
-    // Set the default timezone to GMT to handle properly the date in UTC :
-    TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
-
-    // Change Swing defaults before using Swing classes :
-    changeSwingDefaults();
+    // init swing application for science
+    SwingSettings.defineDefaults();
 
     // Install exception handlers for Swing (use EDT) :
     MCSExceptionHandler.installSwingHandler();
@@ -243,19 +242,6 @@ public final class AsproGui extends App {
         logger.info("startup : duration = " + 1e-6d * time + " ms.");
       }
     }
-  }
-
-  /**
-   * Change several default values for Swing rendering.
-   */
-  private static void changeSwingDefaults() {
-
-    // Force Locale for Swing Components :
-    JComponent.setDefaultLocale(Locale.US);
-
-    // Let the tooltip stay longer (60s) :
-    ToolTipManager.sharedInstance().setInitialDelay(100);
-    ToolTipManager.sharedInstance().setDismissDelay(60000);
   }
 
   /**
