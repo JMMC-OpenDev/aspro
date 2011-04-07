@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AsproGui.java,v 1.51 2011-04-07 14:10:25 mella Exp $"
+ * "@(#) $Id: AsproGui.java,v 1.52 2011-04-07 14:57:31 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.51  2011/04/07 14:10:25  mella
+ * ExceptionHandler removed because it is now defined in SwingSettings.setup()
+ *
  * Revision 1.50  2011/04/07 13:55:08  mella
  * Use replace some init code by SwingSettings.defineDefaults()
  *
@@ -188,24 +191,19 @@ import fr.jmmc.mcs.gui.StatusBar;
 import fr.jmmc.mcs.gui.SwingSettings;
 import fr.jmmc.mcs.gui.task.TaskSwingWorkerExecutor;
 import fr.jmmc.mcs.util.ActionRegistrar;
-import fr.jmmc.mcs.util.MCSExceptionHandler;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Locale;
-import java.util.TimeZone;
 import java.util.logging.Level;
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
-import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
-import javax.swing.ToolTipManager;
 
 /**
  * This class represents the Aspro GUI application
