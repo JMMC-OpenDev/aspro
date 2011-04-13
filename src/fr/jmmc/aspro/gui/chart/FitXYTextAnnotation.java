@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: FitXYTextAnnotation.java,v 1.2 2011-04-08 15:11:41 bourgesl Exp $"
+ * "@(#) $Id: FitXYTextAnnotation.java,v 1.3 2011-04-13 14:38:50 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2011/04/08 15:11:41  bourgesl
+ * margin set to 1px
+ *
  * Revision 1.1  2010/10/21 16:47:43  bourgesl
  * Custom XYTextAnnotation that adjust its font size to respect sizing constraints i.e. text width is fit to maxRadius
  *
@@ -33,16 +36,8 @@ public final class FitXYTextAnnotation extends XYTextAnnotation
 
   /** For serialization. */
   private static final long serialVersionUID = 1L;
-  /** maximum font size */
-  private final static int MAX_SIZE_FONT = 11;
-  /** minimum font size */
-  private final static int MIN_SIZE_FONT = 5;
   /** margin in pixels */
   private final static int MARGIN = 1;
-
-  /* members */
-  /** HACK : maximum width defined in data units to scale the text */
-  private double maxRadius;
 
   /**
    * Creates a new annotation to be displayed at the given coordinates.  The
@@ -58,25 +53,9 @@ public final class FitXYTextAnnotation extends XYTextAnnotation
   }
 
   /**
-   * Return the maximum radius defined in data units to scale the text
-   * @return maximum radius defined in data units
-   */
-  public double getMaxRadius() {
-    return maxRadius;
-  }
-
-  /**
-   * Set the maximum radius defined in data units to scale the text
-   * @param maxRadius maximum radius defined in data units
-   */
-  public void setMaxRadius(final double maxRadius) {
-    this.maxRadius = maxRadius;
-  }
-
-  /**
    * Draws the annotation.
    *
-   * @param g2  the graphics device.
+   * @param g2d  the graphics device.
    * @param plot  the plot.
    * @param dataArea  the data area.
    * @param domainAxis  the domain axis.
@@ -86,21 +65,35 @@ public final class FitXYTextAnnotation extends XYTextAnnotation
    *              entity information.
    */
   @Override
-  public void draw(final Graphics2D g2, final XYPlot plot, final Rectangle2D dataArea,
+  public void draw(final Graphics2D g2d, final XYPlot plot, final Rectangle2D dataArea,
                    final ValueAxis domainAxis, final ValueAxis rangeAxis,
                    final int rendererIndex, final PlotRenderingInfo info) {
 
-    final RectangleEdge domainEdge = Plot.resolveDomainAxisLocation(
-            plot.getDomainAxisLocation(), plot.getOrientation());
+    // Use Observability Plot Context to determine once for all the appropriate font size
+    // that best fits the bar width; if too large, do not render the annotation
 
-    // HACK (max radius) is related to bar width i.e. domain axis :
-    final double j2MAX = domainAxis.lengthToJava2D(getMaxRadius(), dataArea, domainEdge) - 2d * MARGIN;
+    final ObservabilityPlotContext renderContext = ObservabilityPlotContext.getInstance();
 
-    final Font bestFont = ChartUtils.autoFitText(getText(), j2MAX, g2, MIN_SIZE_FONT, MAX_SIZE_FONT);
+    final Font bestFont;
 
-    // change font :
+    if (renderContext.autoFitTimeWidthDone()) {
+      bestFont = renderContext.autoFitTimeWidthFont();
+    } else {
+      // first time, perform fit:
+      final RectangleEdge domainEdge = Plot.resolveDomainAxisLocation(plot.getDomainAxisLocation(), plot.getOrientation());
+
+      // convert max text width in data units (equals to bar width) i.e. domain axis :
+      final double j2Max = domainAxis.lengthToJava2D(renderContext.getMaxTextWidth(), dataArea, domainEdge) - 2d * MARGIN;
+
+      bestFont = renderContext.autoFitTimeWidthFont(g2d, j2Max);
+    }
+
+    // Dont render if the text do not fit in block size:
+    if (bestFont == null) {
+      return;
+    }
     setFont(bestFont);
 
-    super.draw(g2, plot, dataArea, domainAxis, rangeAxis, rendererIndex, info);
+    super.draw(g2d, plot, dataArea, domainAxis, rangeAxis, rendererIndex, info);
   }
 }

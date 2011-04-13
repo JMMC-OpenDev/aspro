@@ -37,13 +37,13 @@
  */
 package fr.jmmc.aspro.gui.chart;
 
-import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Paint;
 import java.awt.Polygon;
 import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.GeneralPath;
 import java.awt.geom.Rectangle2D;
 import java.io.Serializable;
 
@@ -56,7 +56,11 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.ui.RectangleEdge;
 import org.jfree.util.PublicCloneable;
 
-public class XYDiamondAnnotation extends AbstractXYAnnotation implements
+/**
+ * Custom annotation to plot a diamond mark that supports also auto scaling 
+ * @author bourgesl
+ */
+public final class XYDiamondAnnotation extends AbstractXYAnnotation implements
         Cloneable, PublicCloneable, Serializable {
 
   /**
@@ -67,49 +71,41 @@ public class XYDiamondAnnotation extends AbstractXYAnnotation implements
   public static final Paint DEFAULT_OUTLINE_PAINT = Color.BLACK;
   /** Colore di default. */
   public static final Paint DEFAULT_PAINT = Color.YELLOW;
-  /** Larghezza del tratto di default. */
-  public static final Stroke DEFAULT_STROKE = new BasicStroke(1.0f);
-  /** Fattore di Scala di default. */
-  public static final double DEFAULT_SCALE = 1.0;
-
+  /** margin in pixels */
+  private final static int MARGIN = 1;
   /* members */
-  /** Fattore di Scala. */
-  private double drawScaleFactor;
-  /** Coordinata x. */
+  /** Coordinata x (in data space). */
   private double x;
-  /** Coordinata y. */
+  /** Coordinata y (in data space). */
   private double y;
-  /** Larghezza. */
-  private double displayWidth;
-  /** Altezza. */
-  private double displayHeight;
+  /** standard size (maximum size) in pixels */
+  private double displaySize;
   /** Larghezza del Tratto . */
   private transient Stroke diamondStroke;
   /** The diamond paint. */
   private transient Paint diamondPaint;
 
-  public XYDiamondAnnotation(double x, double y, double width, double height) {
+  /**
+   * Public constructor
+   * @param x  the x-coordinate (in data space).
+   * @param y  the y-coordinate (in data space).
+   */
+  public XYDiamondAnnotation(final double x, final double y) {
+    this(x, y, 10d);
+  }
+
+  /**
+   * Public constructor
+   * @param x  the x-coordinate (in data space).
+   * @param y  the y-coordinate (in data space).
+   * @param size standard size (in java2D)
+   */
+  public XYDiamondAnnotation(final double x, final double y, final double size) {
     this.x = x;
     this.y = y;
-    this.displayWidth = width;
-    this.displayHeight = height;
-    this.drawScaleFactor = DEFAULT_SCALE;
+    this.displaySize = size;
     this.diamondPaint = DEFAULT_PAINT;
-    this.diamondStroke = DEFAULT_STROKE;
-  }
-
-  /**
-   * @return Ritorna il Fattore di Scala.
-   */
-  public double getDrawScaleFactor() {
-    return drawScaleFactor;
-  }
-
-  /**
-   * @param drawScaleFactor Fattore di Scala da settare internamente alla classe.
-   */
-  public void setDrawScaleFactor(double drawScaleFactor) {
-    this.drawScaleFactor = drawScaleFactor;
+    this.diamondStroke = ChartUtils.DEFAULT_STROKE;
   }
 
   /**
@@ -122,7 +118,7 @@ public class XYDiamondAnnotation extends AbstractXYAnnotation implements
   /**
    * @param x x da settare internamente alla classe.
    */
-  public void setX(double x) {
+  public void setX(final double x) {
     this.x = x;
   }
 
@@ -136,36 +132,22 @@ public class XYDiamondAnnotation extends AbstractXYAnnotation implements
   /**
    * @param y y da settare internamente alla classe.
    */
-  public void setY(double y) {
+  public void setY(final double y) {
     this.y = y;
   }
 
   /**
    * @return Ritorna la larghezza del diamante.
    */
-  public double getDisplayWidth() {
-    return displayWidth;
+  public double getDisplaySize() {
+    return displaySize;
   }
 
   /**
-   * @param displayWidth Setta la larghezza del diamante.
+   * @param displaySize Setta la larghezza del diamante.
    */
-  public void setDisplayWidth(double displayWidth) {
-    this.displayWidth = displayWidth;
-  }
-
-  /**
-   * @return Ritorna l'altezza del diamante.
-   */
-  public double getDisplayHeight() {
-    return displayHeight;
-  }
-
-  /**
-   * @param displayHeight Setta l'altezza del diamante.
-   */
-  public void setDisplayHeight(double displayHeight) {
-    this.displayHeight = displayHeight;
+  public void setDisplaySize(final double displaySize) {
+    this.displaySize = displaySize;
   }
 
   /**
@@ -178,7 +160,7 @@ public class XYDiamondAnnotation extends AbstractXYAnnotation implements
   /**
    * @param diamondStroke Setta la larghezza del tratto di disegno.
    */
-  public void setStroke(Stroke diamondStroke) {
+  public void setStroke(final Stroke diamondStroke) {
     this.diamondStroke = diamondStroke;
   }
 
@@ -192,7 +174,7 @@ public class XYDiamondAnnotation extends AbstractXYAnnotation implements
   /**
    * @param diamondPaint Setta il colore del diamante.
    */
-  public void setPaint(Paint diamondPaint) {
+  public void setPaint(final Paint diamondPaint) {
     this.diamondPaint = diamondPaint;
   }
 
@@ -200,57 +182,86 @@ public class XYDiamondAnnotation extends AbstractXYAnnotation implements
    * @see org.jfree.chart.annotations.XYAnnotation#draw(java.awt.Graphics2D, org.jfree.chart.plot.XYPlot, java.awt.geom.Rectangle2D, org.jfree.chart.axis.ValueAxis, org.jfree.chart.axis.ValueAxis, int, org.jfree.chart.plot.PlotRenderingInfo)
    */
   @Override
-  public void draw(Graphics2D g2, XYPlot plot, Rectangle2D dataArea,
-                   ValueAxis domainAxis, ValueAxis rangeAxis, int rendererIndex,
-                   PlotRenderingInfo info) {
-    PlotOrientation orientation = plot.getOrientation();
-    RectangleEdge domainEdge = Plot.resolveDomainAxisLocation(
-            plot.getDomainAxisLocation(), orientation);
-    RectangleEdge rangeEdge = Plot.resolveRangeAxisLocation(
-            plot.getRangeAxisLocation(), orientation);
-    float j2DX = (float) domainAxis.valueToJava2D(this.x, dataArea, domainEdge);
-    float j2DY = (float) rangeAxis.valueToJava2D(this.y, dataArea, rangeEdge);
+  public void draw(final Graphics2D g2, final XYPlot plot, final Rectangle2D dataArea,
+                   final ValueAxis domainAxis, final ValueAxis rangeAxis,
+                   final int rendererIndex, final PlotRenderingInfo info) {
+
+    final PlotOrientation orientation = plot.getOrientation();
+
+    final RectangleEdge domainEdge = Plot.resolveDomainAxisLocation(plot.getDomainAxisLocation(), orientation);
+    final RectangleEdge rangeEdge = Plot.resolveRangeAxisLocation(plot.getRangeAxisLocation(), orientation);
+
+    double j2DX = domainAxis.valueToJava2D(this.x, dataArea, domainEdge);
+    double j2DY = rangeAxis.valueToJava2D(this.y, dataArea, rangeEdge);
 
     if (orientation == PlotOrientation.HORIZONTAL) {
-      float tempAnchor = j2DX;
+      final double tempAnchor = j2DX;
       j2DX = j2DY;
       j2DY = tempAnchor;
     }
 
-    Rectangle2D displayArea = new Rectangle2D.Double(j2DX - this.displayWidth / 2.0, j2DY - this.displayHeight / 2.0, this.displayWidth,
-            this.displayHeight);
-    AffineTransform savedTransform = g2.getTransform();
-    Rectangle2D drawArea = new Rectangle2D.Double(0.0, 0.0, this.displayWidth * this.drawScaleFactor, this.displayHeight * this.drawScaleFactor);
+    // Use Observability Plot Context to determine once for all the appropriate display size
+    // that best fits the bar width; if too large, do not render the annotation
 
-    g2.scale(1 / this.drawScaleFactor, 1 / this.drawScaleFactor);
-    g2.translate((j2DX - this.displayWidth / 2.0) * this.drawScaleFactor,
-            (j2DY - this.displayHeight / 2.0) * this.drawScaleFactor);
-    drawDiamond(g2, drawArea);
-    g2.setTransform(savedTransform);
-    String toolTip = getToolTipText();
-    String url = getURL();
-    if (toolTip != null || url != null) {
-      addEntity(info, displayArea, rendererIndex, toolTip, url);
+    final ObservabilityPlotContext renderContext = ObservabilityPlotContext.getInstance();
+
+    final double drawScaleFactor;
+
+    if (renderContext.autoFitDiamondSizeDone()) {
+      drawScaleFactor = renderContext.autoFitDiamondScale();
+    } else {
+      // first time, perform scaling:
+
+      // convert max width width in data units (relative to bar width) i.e. domain axis :
+      final double j2Max = (int) Math.round(domainAxis.lengthToJava2D(renderContext.getMaxDiamondWidth(), dataArea, domainEdge)) - 2d * MARGIN;
+
+      drawScaleFactor = renderContext.autoFitDiamondSize(j2Max, this.displaySize);
     }
 
+    // Dont render if the size do not fit in block size:
+    if (drawScaleFactor == 0d) {
+      return;
+    }
+
+    final double size = this.displaySize * drawScaleFactor;
+
+    final AffineTransform savedTransform = g2.getTransform();
+
+    final Rectangle2D drawArea = new Rectangle2D.Double(0d, 0d, size, size);
+
+    g2.translate(j2DX - size / 2d, j2DY - size / 2d);
+
+    drawDiamond(g2, drawArea);
+
+    g2.setTransform(savedTransform);
+
+    final String toolTip = getToolTipText();
+    final String url = getURL();
+    if (toolTip != null || url != null) {
+      final Rectangle2D displayArea = new Rectangle2D.Double(j2DX - size / 2d, j2DY - size / 2d, size, size);
+
+      addEntity(info, displayArea, rendererIndex, toolTip, url);
+    }
   }
 
   /**
    * @param g2 Dispositivo di disegno
    * @param drawArea Area in cui disegnare il diamante.
    */
-  private void drawDiamond(Graphics2D g2, Rectangle2D drawArea) {
-    Polygon diamond = new Polygon();
-    int offset = (int) drawArea.getWidth() / 2;
-    int coordX = (int) drawArea.getCenterX();
-    int coordY = (int) drawArea.getCenterY();
-//disegnamo il rombo partendo da un punto
-    diamond.addPoint(coordX, coordY - offset);
-    diamond.addPoint(coordX - offset, coordY);
-    diamond.addPoint(coordX, coordY + offset);
-    diamond.addPoint(coordX + offset, coordY);
-//ritorniamo al punto di partenza per chiudere il poligono
-    diamond.addPoint(coordX, coordY - offset);
+  private void drawDiamond(final Graphics2D g2, final Rectangle2D drawArea) {
+    // use float (java 1.5 support):
+    final float offset = (float) (drawArea.getWidth() / 2d);
+    final float coordX = (float) drawArea.getCenterX();
+    final float coordY = (float) drawArea.getCenterY();
+
+    final GeneralPath diamond = new GeneralPath(GeneralPath.WIND_NON_ZERO, 6);
+    diamond.moveTo(coordX, coordY - offset);
+    diamond.lineTo(coordX - offset, coordY);
+    diamond.lineTo(coordX - offset, coordY);
+    diamond.lineTo(coordX, coordY + offset);
+    diamond.lineTo(coordX + offset, coordY);
+    diamond.lineTo(coordX, coordY - offset);
+
     g2.setPaint(getPaint());
     g2.setStroke(getStroke());
     g2.fill(diamond);
@@ -267,7 +278,7 @@ public class XYDiamondAnnotation extends AbstractXYAnnotation implements
    *
    * @return <code>true</code> or <code>false</code>.
    */
-  public boolean equals(Object object) {
+  public boolean equals(final Object object) {
 
     if (object == null) {
       return false;

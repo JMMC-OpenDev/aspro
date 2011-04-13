@@ -51,8 +51,8 @@
  */
 package fr.jmmc.aspro.gui.chart;
 
-import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Paint;
 import java.awt.Shape;
@@ -69,6 +69,7 @@ import org.jfree.chart.plot.PlotRenderingInfo;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.text.TextUtilities;
 import org.jfree.ui.RectangleEdge;
+import org.jfree.ui.TextAnchor;
 import org.jfree.util.PublicCloneable;
 
 /**
@@ -89,32 +90,16 @@ public final class XYTickAnnotation extends XYTextAnnotation
 
   /** For serialization. */
   private static final long serialVersionUID = -4031161445009858551L;
-  /** The default tip radius (in Java2D units). */
-  public static final double DEFAULT_TIP_RADIUS = 10d;
-  /** The default base radius (in Java2D units). */
-  public static final double DEFAULT_BASE_RADIUS = 14d;
-  /** The default label offset (in Java2D units). */
-  public static final double DEFAULT_LABEL_OFFSET = 4d;
+  /** The default label margin (in Java2D units). */
+  public static final double DEFAULT_LABEL_MARGIN = -1d;
+
+  /* members */
   /** The angle of the arrow's line (in radians). */
   private double angle;
-  /**
-   * The radius from the (x, y) point to the tip of the arrow (in Java2D
-   * units).
-   */
-  private double tipRadius;
-  /**
-   * The radius from the (x, y) point to the start of the arrow line (in
-   * Java2D units).
-   */
-  private double baseRadius;
   /** The line stroke. */
   private transient Stroke lineStroke;
   /** The line paint. */
   private transient Paint linePaint;
-  /** The radius from the base point to the anchor point for the label. */
-  private double labelOffset;
-  /** HACK : maximum radius defined in data units to scale the tick */
-  private double maxRadius;
 
   /**
    * Creates a new label and arrow annotation.
@@ -124,16 +109,18 @@ public final class XYTickAnnotation extends XYTextAnnotation
    * @param y  the y-coordinate (measured against the chart's range axis).
    * @param angle  the angle of the arrow's line (in radians).
    */
-  public XYTickAnnotation(String label, double x, double y, double angle) {
-
+  public XYTickAnnotation(final String label, final double x, final double y, final double angle) {
     super(label, x, y);
-    this.angle = angle;
-    this.tipRadius = DEFAULT_TIP_RADIUS;
-    this.baseRadius = DEFAULT_BASE_RADIUS;
-    this.labelOffset = DEFAULT_LABEL_OFFSET;
-    this.lineStroke = new BasicStroke(1.0f);
 
+    this.angle = angle;
+
+    this.lineStroke = ChartUtils.DEFAULT_STROKE;
     this.linePaint = Color.BLACK;
+
+    setTextAnchor(TextAnchor.TOP_CENTER);
+    setRotationAnchor(TextAnchor.TOP_CENTER);
+
+    setOutlineVisible(false);
   }
 
   /**
@@ -154,91 +141,8 @@ public final class XYTickAnnotation extends XYTextAnnotation
    *
    * @see #getAngle()
    */
-  public void setAngle(double angle) {
+  public void setAngle(final double angle) {
     this.angle = angle;
-  }
-
-  /**
-   * Returns the tip radius.
-   *
-   * @return The tip radius (in Java2D units).
-   *
-   * @see #setTipRadius(double)
-   */
-  public double getTipRadius() {
-    return this.tipRadius;
-  }
-
-  /**
-   * Sets the tip radius.
-   *
-   * @param radius  the radius (in Java2D units).
-   *
-   * @see #getTipRadius()
-   */
-  public void setTipRadius(double radius) {
-    this.tipRadius = radius;
-  }
-
-  /**
-   * Returns the base radius.
-   *
-   * @return The base radius (in Java2D units).
-   *
-   * @see #setBaseRadius(double)
-   */
-  public double getBaseRadius() {
-    return this.baseRadius;
-  }
-
-  /**
-   * Sets the base radius.
-   *
-   * @param radius  the radius (in Java2D units).
-   *
-   * @see #getBaseRadius()
-   */
-  public void setBaseRadius(double radius) {
-    this.baseRadius = radius;
-  }
-
-  /**
-   * Return the maximum radius defined in data units to scale the tick
-   * @return maximum radius defined in data units
-   */
-  public double getMaxRadius() {
-    return maxRadius;
-  }
-
-  /**
-   * Set the maximum radius defined in data units to scale the tick
-   * @param maxRadius maximum radius defined in data units
-   */
-  public void setMaxRadius(double maxRadius) {
-    this.maxRadius = maxRadius;
-  }
-
-  /**
-   * Returns the label offset.
-   *
-   * @return The label offset (in Java2D units).
-   *
-   * @see #setLabelOffset(double)
-   */
-  public double getLabelOffset() {
-    return this.labelOffset;
-  }
-
-  /**
-   * Sets the label offset (from the arrow base, continuing in a straight
-   * line, in Java2D units).
-   *
-   * @param offset  the offset (in Java2D units).
-   *
-   * @see #getLabelOffset()
-   */
-  public void setLabelOffset(double offset) {
-    this.labelOffset = offset;
   }
 
   /**
@@ -259,7 +163,7 @@ public final class XYTickAnnotation extends XYTextAnnotation
    *
    * @see #getLineStroke()
    */
-  public void setLineStroke(Stroke stroke) {
+  public void setLineStroke(final Stroke stroke) {
     if (stroke == null) {
       throw new IllegalArgumentException("Null 'stroke' not permitted.");
     }
@@ -284,7 +188,7 @@ public final class XYTickAnnotation extends XYTextAnnotation
    *
    * @see #getLinePaint()
    */
-  public void setLinePaint(Paint paint) {
+  public void setLinePaint(final Paint paint) {
     if (paint == null) {
       throw new IllegalArgumentException("Null 'paint' argument.");
     }
@@ -294,7 +198,7 @@ public final class XYTickAnnotation extends XYTextAnnotation
   /**
    * Draws the annotation.
    *
-   * @param g2  the graphics device.
+   * @param g2d  the graphics device.
    * @param plot  the plot.
    * @param dataArea  the data area.
    * @param domainAxis  the domain axis.
@@ -303,46 +207,58 @@ public final class XYTickAnnotation extends XYTextAnnotation
    * @param info  the plot rendering info.
    */
   @Override
-  public void draw(final Graphics2D g2, final XYPlot plot, final Rectangle2D dataArea,
+  public void draw(final Graphics2D g2d, final XYPlot plot, final Rectangle2D dataArea,
                    final ValueAxis domainAxis, final ValueAxis rangeAxis,
                    final int rendererIndex, final PlotRenderingInfo info) {
 
     final PlotOrientation orientation = plot.getOrientation();
 
-    final RectangleEdge domainEdge = Plot.resolveDomainAxisLocation(
-            plot.getDomainAxisLocation(), orientation);
-    final RectangleEdge rangeEdge = Plot.resolveRangeAxisLocation(
-            plot.getRangeAxisLocation(), orientation);
+    final RectangleEdge domainEdge = Plot.resolveDomainAxisLocation(plot.getDomainAxisLocation(), orientation);
+    final RectangleEdge rangeEdge = Plot.resolveRangeAxisLocation(plot.getRangeAxisLocation(), orientation);
 
     double j2DX = domainAxis.valueToJava2D(getX(), dataArea, domainEdge);
     double j2DY = rangeAxis.valueToJava2D(getY(), dataArea, rangeEdge);
 
-    // HACK (max radius) is related to bar width i.e. domain axis :
-    final double j2MAX = domainAxis.lengthToJava2D(getMaxRadius(), dataArea, domainEdge);
+    // Use Observability Plot Context to determine once for all the appropriate font size
+    // that best fits the bar width; if too large, do not render the annotation
 
-    final double tickLength = this.baseRadius - this.tipRadius;
-    final double maxHeight = this.baseRadius - tickLength / 2d;
+    final ObservabilityPlotContext renderContext = ObservabilityPlotContext.getInstance();
 
-//    System.out.println("maxHeight = " + maxHeight);
-//    System.out.println("j2MAX     = " + j2MAX);
+    // convert the tip radius in data units (equals to bar width / 2) i.e. domain axis :
+    final double j2Radius = domainAxis.lengthToJava2D(renderContext.getTipRadius(), dataArea, domainEdge);
 
-    final double scalingFactor = j2MAX / maxHeight;
+    Font bestFont = null;
+    double halfTickLength;
 
-//    System.out.println("scale     = " + scalingFactor);
+    if (renderContext.autoFitTipDone()) {
+      halfTickLength = renderContext.autoFitTickLength();
+      bestFont = renderContext.autoFitTipFont();
+    } else {
+      // first time, perform fit:
 
-    double tipRadiusScaled = scalingFactor * this.tipRadius;
-    double baseRadiusScaled = scalingFactor * this.baseRadius;
+      // convert the max tip height in data units (equals to margin) i.e. domain axis :
+      final double j2MaxHeight = domainAxis.lengthToJava2D(renderContext.getMaxTipHeight(), dataArea, domainEdge);
 
-    final double tickLengthScaled = baseRadiusScaled - tipRadiusScaled;
+      halfTickLength = renderContext.autoFitTickLength(Math.min(j2Radius, j2MaxHeight));
 
-    if (tickLengthScaled > tickLength) {
-      tipRadiusScaled = j2MAX - tickLength / 2d;
-      baseRadiusScaled = j2MAX + tickLength / 2d;
+      final double j2MaxTextHeight = j2MaxHeight - (halfTickLength + 2d * DEFAULT_LABEL_MARGIN);
+
+      bestFont = renderContext.autoFitTipFont(g2d, j2MaxTextHeight);
     }
 
-//    System.out.println("tipRadiusScaled  = " + tipRadiusScaled);
-//    System.out.println("baseRadiusScaled = " + baseRadiusScaled);
-//    System.out.println("tickLengthScaled = " + tickLengthScaled);
+    // Dont render if the tick is too small:
+    if (halfTickLength == 0d) {
+      return;
+    }
+
+    // Dont render if the text do not fit in block size:
+    if (bestFont == null) {
+      return;
+    }
+    setFont(bestFont);
+
+    final double baseRadiusScaled = j2Radius - halfTickLength;
+    final double tipRadiusScaled = j2Radius + halfTickLength;
 
     if (orientation == PlotOrientation.HORIZONTAL) {
       final double temp = j2DX;
@@ -350,39 +266,40 @@ public final class XYTickAnnotation extends XYTextAnnotation
       j2DY = temp;
     }
 
-    final double startX = j2DX + Math.cos(this.angle) * baseRadiusScaled;
-    final double startY = j2DY + Math.sin(this.angle) * baseRadiusScaled;
+    final double cosAngle = Math.cos(this.angle);
+    final double sinAngle = Math.sin(this.angle);
 
-    final double endX = j2DX + Math.cos(this.angle) * tipRadiusScaled;
-    final double endY = j2DY + Math.sin(this.angle) * tipRadiusScaled;
+    final double startX = j2DX + cosAngle * baseRadiusScaled;
+    final double startY = j2DY + sinAngle * baseRadiusScaled;
 
-    g2.setStroke(this.lineStroke);
-    g2.setPaint(this.linePaint);
-    final Line2D line = new Line2D.Double(startX, startY, endX, endY);
-    g2.draw(line);
+    final double endX = j2DX + cosAngle * tipRadiusScaled;
+    final double endY = j2DY + sinAngle * tipRadiusScaled;
+
+    g2d.setStroke(this.lineStroke);
+    g2d.setPaint(this.linePaint);
+    g2d.draw(new Line2D.Double(startX, startY, endX, endY));
 
     // draw the label
-    final double labelX = j2DX + Math.cos(this.angle) * (baseRadiusScaled
-            + this.labelOffset);
-    final double labelY = j2DY + Math.sin(this.angle) * (baseRadiusScaled
-            + this.labelOffset);
-    g2.setFont(getFont());
+    final float labelX = (float) (j2DX + cosAngle * (tipRadiusScaled + DEFAULT_LABEL_MARGIN));
+    final float labelY = (float) (j2DY + sinAngle * (tipRadiusScaled + DEFAULT_LABEL_MARGIN));
+    g2d.setFont(getFont());
 
-    final Shape hotspot = TextUtilities.calculateRotatedStringBounds(
-            getText(), g2, (float) labelX, (float) labelY, getTextAnchor(),
-            getRotationAngle(), getRotationAnchor());
+    final Shape hotspot = TextUtilities.calculateRotatedStringBounds(getText(), g2d, labelX, labelY,
+            getTextAnchor(), getRotationAngle(), getRotationAnchor());
+
     if (getBackgroundPaint() != null) {
-      g2.setPaint(getBackgroundPaint());
-      g2.fill(hotspot);
+      g2d.setPaint(getBackgroundPaint());
+      g2d.fill(hotspot);
     }
-    g2.setPaint(getPaint());
-    TextUtilities.drawRotatedString(getText(), g2, (float) labelX,
-            (float) labelY, getTextAnchor(), getRotationAngle(),
-            getRotationAnchor());
+
+    g2d.setPaint(getPaint());
+    TextUtilities.drawRotatedString(getText(), g2d, labelX, labelY,
+            getTextAnchor(), getRotationAngle(), getRotationAnchor());
+
     if (isOutlineVisible()) {
-      g2.setStroke(getOutlineStroke());
-      g2.setPaint(getOutlinePaint());
-      g2.draw(hotspot);
+      g2d.setStroke(getOutlineStroke());
+      g2d.setPaint(getOutlinePaint());
+      g2d.draw(hotspot);
     }
 
     final String toolTip = getToolTipText();

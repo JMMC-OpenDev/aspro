@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SlidingXYPlotAdapter.java,v 1.5 2011-03-01 17:14:00 bourgesl Exp $"
+ * "@(#) $Id: SlidingXYPlotAdapter.java,v 1.6 2011-04-13 14:38:50 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2011/03/01 17:14:00  bourgesl
+ * renamed variables
+ *
  * Revision 1.4  2010/12/15 13:33:18  bourgesl
  * removed comment
  *
@@ -63,7 +66,7 @@ public final class SlidingXYPlotAdapter {
   /** plot renderer to define annotations */
   private final XYBarRenderer renderer;
   /** max items in the chart view if the useSubset mode is enabled */
-  private final int maxViewItems;
+  private int maxViewItems;
   /** flag to enable/disable the subset mode */
   private boolean useSubset = false;
   /** current position of the subset */
@@ -113,11 +116,19 @@ public final class SlidingXYPlotAdapter {
   }
 
   /**
-   * Return the max items in the chart view if the useSubset mode is enabled
+   * Return the max items in the chart view when the useSubset mode is enabled
    * @return max items in the chart view
    */
   public int getMaxViewItems() {
     return maxViewItems;
+  }
+
+  /**
+   * Define the max items in the chart view when the useSubset mode is enabled
+   * @param maxViewItems max items in the chart view
+   */
+  public void setMaxViewItems(final int maxViewItems) {
+    this.maxViewItems = maxViewItems;
   }
 
   /**
@@ -157,10 +168,14 @@ public final class SlidingXYPlotAdapter {
   }
 
   /**
-   * Define the flag to enable/disable the subset mode and (force) refresh the plot
+   * Define the flag to enable/disable the subset mode and force an update of the plot
    * @param useSubset new value
    */
   public void setUseSubset(final boolean useSubset) {
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("useSubset = " + useSubset);
+    }
+
     this.useSubset = useSubset;
     if (useSubset) {
       updatePlot(this.maxViewItems, true);
@@ -205,10 +220,6 @@ public final class SlidingXYPlotAdapter {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("updatePlotDataset : pos = " + this.position + " :: (" + start + " to " + end + ")");
     }
-
-    // Fix the plot size and bar width :
-
-    // TODO : adjust range to have correct bar size if there is a lot of targets :
 
     final double barWidth;
     final double rangeMin, rangeMax;
@@ -269,6 +280,23 @@ public final class SlidingXYPlotAdapter {
     // annotations :
     if (this.annotations != null) {
 
+      final ObservabilityPlotContext renderContext = ObservabilityPlotContext.getInstance();
+
+      // set text maximum width = bar width :
+      renderContext.setMaxTextWidth(barWidth);
+
+      // set diamond maximum size = 85% bar width :
+      renderContext.setMaxDiamondWidth(barWidth * 0.85d);
+
+      // set tip radius = 50% bar width (tick location over bar edges) :
+      renderContext.setTipRadius(barWidth * 0.5d);
+
+      // set max tip height = margin between bars (half tick + text) :
+      renderContext.setMaxTipHeight(1d - barWidth);
+
+
+      // Redefine the x-position of annotations (corresponding to visible targets) :
+
       List<XYAnnotation> list;
       Integer pos;
       for (int i = start, n = 0; i < end; i++, n++) {
@@ -286,14 +314,6 @@ public final class SlidingXYPlotAdapter {
               a.setX(n);
               this.renderer.addAnnotation(a);
 
-              if (a instanceof XYTickAnnotation) {
-                // set tick location over bar edges :
-                ((XYTickAnnotation) a).setMaxRadius(barWidth / 2d);
-              } else if (a instanceof FitXYTextAnnotation) {
-                // set text maximum width = bar width :
-                ((FitXYTextAnnotation) a).setMaxRadius(barWidth);
-              }
-
             } else if (annotation instanceof XYDiamondAnnotation) {
               final XYDiamondAnnotation a = (XYDiamondAnnotation) annotation;
               a.setX(n);
@@ -309,7 +329,6 @@ public final class SlidingXYPlotAdapter {
       this.aJMMC = ChartUtils.createXYTextAnnotation(AsproConstants.JMMC_ANNOTATION,
               symbolAxis.getRange().getUpperBound(),
               this.xyPlot.getRangeAxis().getRange().getUpperBound());
-      this.aJMMC.setFont(ChartUtils.SMALL_TEXT_ANNOTATION_FONT);
       this.aJMMC.setTextAnchor(TextAnchor.BOTTOM_RIGHT);
       this.aJMMC.setPaint(Color.DARK_GRAY);
     } else {
