@@ -2,7 +2,7 @@
 
 <ApplicationData link="http://www.jmmc.fr/aspro2">
 
-  <program name="Aspro2" version="0.8.0"/>
+  <program name="Aspro2" version="0.8.1"/>
 
   <compilation date="09/03/2011" compiler="JDK 1.5.0_16"/>
 
