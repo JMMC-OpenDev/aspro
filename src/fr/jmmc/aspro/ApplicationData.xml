@@ -195,6 +195,12 @@
 
   <releasenotes>
     <release version="0.8">
+      <prerelease version="0.8.1">
+        <change>Added 'Scroll view' checkbox button to see all targets (or only some of them) on the observability plot</change>
+        <change>Enable mouse zooming for targets only on the observability plot</change>
+        <change>Always show the scrollbar (with margins) on the observability plot</change>
+        <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/109">Adapt the number of visible targets on the observability plot when the application window is resized</change>
+      </prerelease>
       <!-- <pubDate>Thu, 10 Mar 2011 11:16:37 GMT</pubDate> -->
       <prerelease version="0.8.0">
         <change>Added Button 'Sort by R.A.' in the target editor to sort both science and calibrator targets by their right ascension</change>
