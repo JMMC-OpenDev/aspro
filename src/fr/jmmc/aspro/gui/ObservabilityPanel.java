@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityPanel.java,v 1.64 2011-03-15 15:42:11 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityPanel.java,v 1.65 2011-04-13 14:37:32 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.64  2011/03/15 15:42:11  bourgesl
+ * added names for fields
+ *
  * Revision 1.63  2011/03/01 17:10:34  bourgesl
  * added legend on plot
  * updated plot to display observability of all configurations
@@ -221,10 +224,12 @@ package fr.jmmc.aspro.gui;
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.Preferences;
 import fr.jmmc.aspro.gui.action.ExportPDFAction;
+import fr.jmmc.aspro.gui.chart.BoundedDateAxis;
 import fr.jmmc.aspro.gui.chart.ChartUtils;
 import fr.jmmc.aspro.gui.chart.PDFOptions;
 import fr.jmmc.aspro.gui.chart.PDFOptions.Orientation;
 import fr.jmmc.aspro.gui.chart.PDFOptions.PageSize;
+import fr.jmmc.aspro.gui.chart.ObservabilityPlotContext;
 import fr.jmmc.aspro.gui.chart.SlidingXYPlotAdapter;
 import fr.jmmc.aspro.gui.chart.XYDiamondAnnotation;
 import fr.jmmc.aspro.gui.task.AsproTaskRegistry;
@@ -245,13 +250,16 @@ import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.aspro.service.ObservabilityService;
 import fr.jmmc.mcs.gui.StatusBar;
-import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Insets;
 import java.awt.Paint;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseWheelEvent;
@@ -267,29 +275,35 @@ import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.logging.Level;
+import javax.swing.BorderFactory;
+import javax.swing.BoundedRangeModel;
 import javax.swing.DefaultBoundedRangeModel;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollBar;
+import javax.swing.JSeparator;
+import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import org.jfree.chart.ChartPanel;
+import org.jfree.chart.ChartRenderingInfo;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.LegendItemCollection;
 import org.jfree.chart.annotations.XYAnnotation;
 import org.jfree.chart.annotations.XYTextAnnotation;
-import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.axis.TickUnitSource;
 import org.jfree.chart.event.ChartProgressEvent;
 import org.jfree.chart.event.ChartProgressListener;
 import org.jfree.chart.plot.IntervalMarker;
+import org.jfree.chart.plot.PlotRenderingInfo;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYBarRenderer;
 import org.jfree.data.gantt.Task;
 import org.jfree.data.gantt.TaskSeries;
 import org.jfree.data.gantt.TaskSeriesCollection;
+import org.jfree.data.time.DateRange;
 import org.jfree.ui.Layer;
 
 /**
@@ -323,9 +337,13 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
   /** hour:minute units */
   private final static TickUnitSource HH_MM_TICK_UNITS = ChartUtils.createTimeTickUnits();
   /** max items printed before using A3 format */
-  private final static int MAX_PRINTABLE_ITEMS = 10;
+  private final static int MAX_PRINTABLE_ITEMS_A4 = 10;
+  /** max items printed before using A2 format */
+  private final static int MAX_PRINTABLE_ITEMS_A3 = MAX_PRINTABLE_ITEMS_A4 * 5;
   /** max items displayed before scrolling */
-  private final static int MAX_VIEW_ITEMS = MAX_PRINTABLE_ITEMS;
+  private final static int MAX_VIEW_ITEMS = MAX_PRINTABLE_ITEMS_A4;
+  /** default item size to determine the max view items dynamically */
+  private final static int ITEM_SIZE = 40;
 
   /* default plot options */
   /** default value for the checkbox BaseLine Limits */
@@ -342,8 +360,10 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
   private XYPlot xyPlot;
   /** sliding adapter to display a subset of targets */
   private SlidingXYPlotAdapter slidingXYPlotAdapter = null;
-  /** optional scrollbar to navigate through targets */
-  private JScrollBar scroller = null;
+  /** plot rendering context */
+  private final ObservabilityPlotContext renderContext = ObservabilityPlotContext.getInstance();
+  /** height (in pixels) corresponding to non data area (title / axis / legend) */
+  private int plotNonDataHeight = 100;
 
   /* plot data */
   /** chart data */
@@ -352,6 +372,12 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
   /* swing */
   /** chart panel */
   private ChartPanel chartPanel;
+  /** panel dedicated to the scrollbar to define margins */
+  private JPanel scrollerPanel = null;
+  /** optional scrollbar to navigate through targets */
+  private JScrollBar scroller = null;
+  /** checkbox Scroll View */
+  private JCheckBox jCheckBoxScrollView;
   /** time reference combo box */
   private JComboBox jComboTimeRef;
   /** checkbox BaseLine Limits */
@@ -386,21 +412,26 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     this.chart.addProgressListener(this);
     this.chartPanel = ChartUtils.createChartPanel(this.chart);
 
+    // intercept component resize events:
+    this.chartPanel.addComponentListener(new PanelResizeAdapter());
+
     // zoom options :
-    // targets :
-    this.chartPanel.setDomainZoomable(false);
+    // allow zooming on targets only:
+    this.chartPanel.setDomainZoomable(true);
     // date axis :
     this.chartPanel.setRangeZoomable(false);
+    // disable mouse wheel as it is already used when scrolling view:
     this.chartPanel.setMouseWheelEnabled(false);
 
     this.add(this.chartPanel, BorderLayout.CENTER);
 
-    this.scroller = new JScrollBar(JScrollBar.VERTICAL, 0, 1, 0, 1);
+    this.scroller = new JScrollBar(JScrollBar.VERTICAL, 0, 0, 0, 0);
 
     this.scroller.getModel().addChangeListener(new ChangeListener() {
 
       public void stateChanged(final ChangeEvent paramChangeEvent) {
         final DefaultBoundedRangeModel model = (DefaultBoundedRangeModel) paramChangeEvent.getSource();
+        // update position and repaint the plot:
         slidingXYPlotAdapter.setPosition(model.getValue());
       }
     });
@@ -409,7 +440,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     this.addMouseWheelListener(new MouseWheelListener() {
 
       public void mouseWheelMoved(final MouseWheelEvent e) {
-        if (scroller.isVisible()) {
+        if (scroller.isEnabled()) {
           if (logger.isLoggable(Level.FINER)) {
             logger.finer("mouseWheelMoved : " + e);
           }
@@ -417,14 +448,20 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
           final int clicks = e.getWheelRotation();
           if (clicks != 0) {
+            // update value in min (0) / max (size - max viewed items) range:
             model.setValue(model.getValue() + clicks);
           }
         }
       }
     });
 
+    // Use a panel to define custom margin arround the scroll bar:
+    this.scrollerPanel = new JPanel(new BorderLayout());
+    this.scrollerPanel.add(this.scroller);
+    this.scrollerPanel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
+    this.scrollerPanel.setBackground(Color.WHITE);
 
-    this.add(this.scroller, BorderLayout.EAST);
+    this.add(this.scrollerPanel, BorderLayout.EAST);
 
     final JPanel panelOptions = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 1));
 
@@ -488,6 +525,22 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     });
 
     panelOptions.add(this.jCheckBoxDetailedOutput);
+
+    this.jCheckBoxScrollView = new JCheckBox("Scroll view");
+    this.jCheckBoxScrollView.setName("jCheckBoxScrollView");
+
+    // TODO: use an user preference:
+    this.jCheckBoxScrollView.setSelected(true);
+    this.jCheckBoxScrollView.addItemListener(new ItemListener() {
+
+      public void itemStateChanged(final ItemEvent e) {
+        // update scrollbar state and repaint the plot:
+        updateSliderProperties(false);
+      }
+    });
+
+    panelOptions.add(new JSeparator(SwingConstants.VERTICAL));
+    panelOptions.add(this.jCheckBoxScrollView);
 
     this.add(panelOptions, BorderLayout.PAGE_END);
 
@@ -577,10 +630,21 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
   public PDFOptions getPDFOptions() {
     if (this.getChartData() != null) {
       // baseline limits flag used by the plot :
-      final boolean doBaseLineLimits = this.getChartData().getObsDataList().get(0).isDoBaseLineLimits();
+      final boolean doBaseLineLimits = this.getChartData().getFirstObsData().isDoBaseLineLimits();
 
-      if (!doBaseLineLimits && this.slidingXYPlotAdapter.getSize() > MAX_PRINTABLE_ITEMS) {
-        return new PDFOptions(PageSize.A3, Orientation.Portait);
+      if (!doBaseLineLimits) {
+        final int size = this.slidingXYPlotAdapter.getSize();
+
+        if (logger.isLoggable(Level.FINE)) {
+          logger.fine("row count = " + size);
+        }
+
+        if (size > MAX_PRINTABLE_ITEMS_A3) {
+          return new PDFOptions(PageSize.A2, Orientation.Portait);
+        }
+        if (size > MAX_PRINTABLE_ITEMS_A4) {
+          return new PDFOptions(PageSize.A3, Orientation.Portait);
+        }
       }
     }
     return PDFOptions.DEFAULT_PDF_OPTIONS;
@@ -597,6 +661,10 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
       // Adapt the chart to print all targets
       this.slidingXYPlotAdapter.setUseSubset(false);
     }
+    // Render text even if do not fit in block size:
+    this.renderContext.setHideAnnotationTooSmall(false);
+    // Use smaller fonts (print):
+    this.renderContext.setMinSizeFont(true);
 
     return this.chart;
   }
@@ -609,6 +677,10 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
       // Restore the chart as displayed
       this.slidingXYPlotAdapter.setUseSubset(true);
     }
+    // Reset hideTextDontFit:
+    this.renderContext.setHideAnnotationTooSmall(ObservabilityPlotContext.DEFAULT_HIDE_TEXT_DONT_FIT);
+    // Use larger fonts (display):
+    this.renderContext.setMinSizeFont(false);
   }
 
   /**
@@ -1056,7 +1128,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
               // transit annotation :
               if (so.getType() == StarObservabilityData.TYPE_STAR) {
-                addAnnotation(annotations, pos, new XYDiamondAnnotation(n, so.getTransitDate().getTime(), 8, 8));
+                addAnnotation(annotations, pos, new XYDiamondAnnotation(n, so.getTransitDate().getTime()));
 
                 for (ElevationDate ed : so.getElevations()) {
                   if (checkDateAxisLimits(ed.getDate(), min, max)) {
@@ -1085,25 +1157,11 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
       }
     }
 
-    this.scroller.getModel().setMinimum(0);
-    this.scroller.getModel().setExtent(0);
-
-    final int size = taskSeriesCollection.getRowCount();
-
-    if (doBaseLineLimits || size <= MAX_VIEW_ITEMS) {
-      this.scroller.getModel().setMaximum(0);
-      this.scroller.getModel().setValue(0);
-      this.scroller.setVisible(false);
-    } else {
-      this.scroller.getModel().setMaximum(size - MAX_VIEW_ITEMS);
-      this.scroller.setVisible(true);
-    }
-
     // update plot data :
     this.slidingXYPlotAdapter.setData(taskSeriesCollection, targetNames, targetColors, annotations);
 
-    // force a plot refresh :
-    this.slidingXYPlotAdapter.setUseSubset(!doBaseLineLimits);
+    // force a plot refresh:
+    this.updateSliderProperties(true);
 
     // define fixed Legend :
     final LegendItemCollection legendCollection = new LegendItemCollection();
@@ -1113,6 +1171,37 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
       }
     }
     this.xyPlot.setFixedLegendItems(legendCollection);
+  }
+
+  /**
+   * Update the scrollbar model and define the SlidingXYPlotAdapter.useSubset flag to force a plot refresh
+   * @param forceRefresh to repaint the plot anyway
+   */
+  private void updateSliderProperties(final boolean forceRefresh) {
+    // baseline limits flag used by the plot :
+    final boolean doBaseLineLimits = this.getChartData().getFirstObsData().isDoBaseLineLimits();
+
+    final int size = this.slidingXYPlotAdapter.getSize();
+
+    final BoundedRangeModel rangeModel = this.scroller.getModel();
+
+    final boolean useSubset;
+    if (doBaseLineLimits || !this.jCheckBoxScrollView.isSelected() || size <= this.slidingXYPlotAdapter.getMaxViewItems()) {
+      // disable scrollbar:
+      rangeModel.setRangeProperties(0, 0, 0, 0, false);
+      this.scroller.setEnabled(false);
+      useSubset = false;
+    } else {
+      // refresh scrollbar maximum value:
+      rangeModel.setRangeProperties(rangeModel.getValue(), 0, 0, size - this.slidingXYPlotAdapter.getMaxViewItems(), false);
+      this.scroller.setEnabled(true);
+      useSubset = true;
+    }
+
+    // repaint the plot:
+    if (forceRefresh || useSubset != this.slidingXYPlotAdapter.isUseSubset()) {
+      this.slidingXYPlotAdapter.setUseSubset(useSubset);
+    }
   }
 
   /**
@@ -1160,8 +1249,10 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                               final boolean doBaseLineLimits) {
 
     // change the Range axis (horizontal) :
-    final DateAxis dateAxis = new DateAxis(label);
+    final BoundedDateAxis dateAxis = new BoundedDateAxis(label);
     dateAxis.setAutoRange(false);
+
+    dateAxis.setBounds(new DateRange(from.getTime() - 1l, to.getTime() + 1l));
 
     // add a margin of 1 ms :
     dateAxis.setRange(from.getTime() - 1l, to.getTime() + 1l);
@@ -1203,7 +1294,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         }
         // force Alpha to 1.0 to avoid PDF rendering problems (alpha layer ordering) :
         this.xyPlot.addRangeMarker(new IntervalMarker(interval.getStartDate().getTime(),
-                interval.getEndDate().getTime(), col, new BasicStroke(0.5f), null, null, 1f), Layer.BACKGROUND);
+                interval.getEndDate().getTime(), col, ChartUtils.THIN_STROKE, null, null, 1f), Layer.BACKGROUND);
       }
     }
   }
@@ -1226,6 +1317,37 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
           break;
         default:
       }
+    }
+
+    switch (event.getType()) {
+      case ChartProgressEvent.DRAWING_STARTED:
+        // reset context state:
+        this.renderContext.reset();
+        break;
+      case ChartProgressEvent.DRAWING_FINISHED:
+        // free context state:
+        this.renderContext.reset();
+        // get chart rendering area:
+        final ChartRenderingInfo info = this.chartPanel.getChartRenderingInfo();
+        final PlotRenderingInfo pinfo = info.getPlotInfo();
+
+        if (logger.isLoggable(Level.FINE)) {
+          logger.fine("chartArea = " + info.getChartArea());
+          logger.fine("dataArea  = " + pinfo.getDataArea());
+        }
+
+        final int top = (int) Math.floor(pinfo.getDataArea().getY());
+        final int bottom = (int) Math.floor(info.getChartArea().getHeight() - pinfo.getDataArea().getMaxY());
+
+        final Insets current = this.scrollerPanel.getBorder().getBorderInsets(null);
+        if (current.top != top || current.bottom != bottom) {
+          // adjust scrollbar margins :
+          this.scrollerPanel.setBorder(BorderFactory.createEmptyBorder(top, 0, bottom, 0));
+        }
+
+        this.plotNonDataHeight = top + bottom;
+        break;
+      default:
     }
   }
 
@@ -1256,5 +1378,51 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
     // return previous state :
     return previous;
+  }
+
+  /**
+   * Handle resize event to determine the maximum viewable items
+   * @param width width of the chart panel
+   * @param height height of the chart panel
+   */
+  private void handleResize(final int width, final int height) {
+    // use non data height (title + axis + legend):
+    final int maxViewItems = (height - this.plotNonDataHeight) / ITEM_SIZE;
+
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("size = " + width + " x " + height + " => maxViewItems = " + maxViewItems);
+    }
+
+    if (maxViewItems != this.slidingXYPlotAdapter.getMaxViewItems()) {
+      // repaint the plot:
+      this.slidingXYPlotAdapter.setMaxViewItems(maxViewItems);
+
+      // update scrollbar state and repaint the plot:
+      this.updateSliderProperties(true);
+    }
+  }
+
+  /**
+   * Custom Component adapter that handle componentResized events
+   */
+  private final class PanelResizeAdapter extends ComponentAdapter {
+
+    /**
+     * Protected Constructor
+     */
+    PanelResizeAdapter() {
+      super();
+    }
+
+    /**
+     * Invoked when the component's size changes.
+     * This overriden method checks that the new size is greater than the minimal dimension
+     * @param e event to process
+     */
+    @Override
+    public void componentResized(final ComponentEvent e) {
+      final Dimension d = e.getComponent().getSize();
+      handleResize(d.width, d.height);
+    }
   }
 }
