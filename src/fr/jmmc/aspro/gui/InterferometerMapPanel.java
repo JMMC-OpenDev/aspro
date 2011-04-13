@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: InterferometerMapPanel.java,v 1.21 2011-03-01 17:09:09 bourgesl Exp $"
+ * "@(#) $Id: InterferometerMapPanel.java,v 1.22 2011-04-13 14:35:25 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.21  2011/03/01 17:09:09  bourgesl
+ * renamed variable
+ *
  * Revision 1.20  2011/02/28 17:14:01  bourgesl
  * use new result containers
  *
@@ -91,7 +94,6 @@ import fr.jmmc.aspro.model.event.ObservationEvent;
 import fr.jmmc.aspro.model.oi.ObservationCollection;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.service.InterferometerMapService;
-import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.util.ArrayList;
@@ -243,9 +245,6 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
     renderer.setBaseItemLabelGenerator(new NameLabelGenerator());
     renderer.setBasePositiveItemLabelPosition(new ItemLabelPosition(ItemLabelAnchor.CENTER, TextAnchor.BOTTOM_RIGHT));
     renderer.setBaseItemLabelsVisible(true);
-
-    // Adjust outline :
-    this.xyPlot.setOutlineStroke(new BasicStroke(1.f));
 
     // add listener :
     this.chart.addProgressListener(this);
@@ -462,7 +461,6 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
     this.xyPlot.getRenderer(0).removeAnnotations();
     if (this.aJMMC == null) {
       this.aJMMC = ChartUtils.createXYTextAnnotation(AsproConstants.JMMC_ANNOTATION, boxSize, -boxSize);
-      this.aJMMC.setFont(ChartUtils.SMALL_TEXT_ANNOTATION_FONT);
       this.aJMMC.setTextAnchor(TextAnchor.BOTTOM_RIGHT);
       this.aJMMC.setPaint(Color.DARK_GRAY);
     } else {

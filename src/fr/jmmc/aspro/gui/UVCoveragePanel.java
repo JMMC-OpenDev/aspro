@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: UVCoveragePanel.java,v 1.90 2011-03-09 14:18:29 bourgesl Exp $"
+ * "@(#) $Id: UVCoveragePanel.java,v 1.91 2011-04-13 14:35:26 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.90  2011/03/09 14:18:29  bourgesl
+ * bug fix #67 : allow night restrictions in multi-conf mode and add the warning message "multiple config cannot be done in one night"
+ *
  * Revision 1.89  2011/03/04 16:57:36  bourgesl
  * minor
  *
@@ -346,7 +349,6 @@ import fr.jmmc.mcs.model.ModelUVMapService;
 import fr.jmmc.mcs.model.ModelUVMapService.ImageMode;
 import fr.jmmc.mcs.model.UVMapData;
 import fr.jmmc.mcs.model.targetmodel.Model;
-import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Image;
@@ -856,8 +858,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
     // Adjust background settings :
     this.xyPlot.setBackgroundImageAlpha(1.0f);
-    // Adjust outline :
-    this.xyPlot.setOutlineStroke(new BasicStroke(1.f));
 
     // add listener :
     this.chart.addProgressListener(this);
@@ -2157,7 +2157,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     this.xyPlot.getRenderer(0).removeAnnotations();
     if (this.aJMMC == null) {
       this.aJMMC = ChartUtils.createXYTextAnnotation(AsproConstants.JMMC_ANNOTATION, boxSize, -boxSize);
-      this.aJMMC.setFont(ChartUtils.SMALL_TEXT_ANNOTATION_FONT);
       this.aJMMC.setTextAnchor(TextAnchor.BOTTOM_RIGHT);
       this.aJMMC.setPaint(Color.DARK_GRAY);
     } else {
