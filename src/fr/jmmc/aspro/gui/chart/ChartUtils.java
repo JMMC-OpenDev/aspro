@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ChartUtils.java,v 1.17 2011-03-01 17:13:11 bourgesl Exp $"
+ * "@(#) $Id: ChartUtils.java,v 1.18 2011-04-13 14:34:55 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.17  2011/03/01 17:13:11  bourgesl
+ * added createLegendItem
+ *
  * Revision 1.16  2011/02/25 16:50:58  bourgesl
  * comment on legends
  *
@@ -109,10 +112,16 @@ public final class ChartUtils {
   private final static Map<Integer, Font> cachedFonts = new HashMap<Integer, Font>();
   /** The default font for titles. */
   public static final Font DEFAULT_TITLE_FONT = new Font("SansSerif", Font.BOLD, 14);
-  /** The default font for annotation texts */
-  public static final Font DEFAULT_TEXT_ANNOTATION_FONT = getAnnotationFont(9);
+  /** The default font for small texts */
+  public static final Font DEFAULT_TEXT_SMALL_FONT = getAnnotationFont(9);
   /** The default small font for annotation texts */
   public static final Font SMALL_TEXT_ANNOTATION_FONT = getAnnotationFont(8);
+  /** default draw stroke */
+  public static final Stroke DEFAULT_STROKE = new BasicStroke(1.0f);
+  /** thin draw stroke */
+  public static final Stroke THIN_STROKE = new BasicStroke(0.5f);
+  /** larger draw stroke */
+  public static final Stroke LARGE_STROKE = new BasicStroke(1.25f);
   /** default tick label rectangle insets */
   public final static RectangleInsets TICK_LABEL_INSETS = new RectangleInsets(2.0, 2.0, 2.0, 2.0);
   /** default axis offset */
@@ -163,7 +172,7 @@ public final class ChartUtils {
 
       // text annotations :
       CHART_THEME.setItemLabelPaint(Color.BLACK);
-      CHART_THEME.setSmallFont(DEFAULT_TEXT_ANNOTATION_FONT);
+      CHART_THEME.setSmallFont(DEFAULT_TEXT_SMALL_FONT);
     } else {
       throw new IllegalStateException("unsupported chart theme : " + ChartFactory.getChartTheme());
     }
@@ -175,7 +184,7 @@ public final class ChartUtils {
    * @return chart panel
    */
   public static ChartPanel createChartPanel(final JFreeChart chart) {
-    return new ChartPanel(chart,
+    final ChartPanel panel = new ChartPanel(chart,
             DEFAULT_WIDTH, DEFAULT_HEIGHT, /* prefered size */
             DEFAULT_MINIMUM_DRAW_WIDTH, DEFAULT_MINIMUM_DRAW_HEIGHT, /* minimum size before scaling */
             DEFAULT_MAXIMUM_DRAW_WIDTH, DEFAULT_MAXIMUM_DRAW_HEIGHT, /* maximum size before scaling */
@@ -186,6 +195,9 @@ public final class ChartUtils {
             true, /* print */
             false, /* zoom */
             false /* tooltips */);
+
+    panel.getChartRenderingInfo().setEntityCollection(null);
+    return panel;
   }
 
   /**
@@ -194,7 +206,7 @@ public final class ChartUtils {
    * @return chart panel
    */
   public static SquareChartPanel createSquareChartPanel(final JFreeChart chart) {
-    return new SquareChartPanel(chart,
+    final SquareChartPanel panel = new SquareChartPanel(chart,
             DEFAULT_HEIGHT, DEFAULT_HEIGHT, /* prefered size */
             DEFAULT_MINIMUM_DRAW_HEIGHT, DEFAULT_MINIMUM_DRAW_HEIGHT, /* minimum size before scaling */
             DEFAULT_MAXIMUM_DRAW_HEIGHT, DEFAULT_MAXIMUM_DRAW_HEIGHT, /* maximum size before scaling */
@@ -205,6 +217,9 @@ public final class ChartUtils {
             true, /* print */
             false, /* zoom */
             false /* tooltips */);
+
+    panel.getChartRenderingInfo().setEntityCollection(null);
+    return panel;
   }
 
   /**
@@ -212,7 +227,7 @@ public final class ChartUtils {
    * @param size font size
    * @return annotation font
    */
-  protected static Font getAnnotationFont(final int size) {
+  protected static final Font getAnnotationFont(final int size) {
     final Integer key = Integer.valueOf(size);
     Font f = cachedFonts.get(key);
     if (f == null) {
@@ -224,36 +239,86 @@ public final class ChartUtils {
 
   /**
    * Return the biggest font whose size best fits the given text for the given width
+   * @param g2d graphics object
    * @param text text to use
    * @param maxWidth maximum pixel width to fit
-   * @param g2 graphics object
    * @param minFontSize minimum size for the font
    * @param maxFontSize maximum size for the font
+   * @param allowDontFit flag indicating to use the minimum font size if the text dont fit; null otherwise
    * @return font
    */
-  protected static Font autoFitText(final String text, final double maxWidth,
-                                    final Graphics2D g2, final int minFontSize, final int maxFontSize) {
+  protected static Font autoFitTextWidth(final Graphics2D g2d,
+                                         final String text, final double maxWidth,
+                                         final int minFontSize, final int maxFontSize,
+                                         final boolean allowDontFit) {
 
     Font f;
     FontMetrics fm;
 
     int size = maxFontSize;
-    double width = 0;
+    double width;
 
     do {
       f = ChartUtils.getAnnotationFont(size);
 
-//      System.out.println("font      = " + f);
-      fm = g2.getFontMetrics(f);
+//      logger.severe("font      = " + f);
+      fm = g2d.getFontMetrics(f);
 
       // get pixel width of the given text with the current font :
-      width = TextUtilities.getTextBounds(text, g2, fm).getWidth();
+      width = TextUtilities.getTextBounds(text, g2d, fm).getWidth();
 
-//      System.out.println("width     = " + width);
+//      logger.severe("width     = " + width);
 
       size--;
 
-    } while (width > maxWidth && size > minFontSize);
+    } while (width > maxWidth && size >= minFontSize);
+
+    if (!allowDontFit && width > maxWidth) {
+      f = null;
+    }
+
+    return f;
+  }
+
+  /**
+   * Return the biggest font whose size best fits the given text for the given height
+   * @param g2d graphics object
+   * @param text text to use
+   * @param maxHeight maximum pixel height to fit
+   * @param minFontSize minimum size for the font
+   * @param maxFontSize maximum size for the font
+   * @param allowDontFit flag indicating to use the minimum font size if the text dont fit; null otherwise
+   * @return font
+   */
+  protected static Font autoFitTextHeight(final Graphics2D g2d,
+                                          final String text, final double maxHeight,
+                                          final int minFontSize, final int maxFontSize,
+                                          final boolean allowDontFit) {
+
+    Font f;
+    FontMetrics fm;
+
+    int size = maxFontSize;
+    double height;
+
+    do {
+      f = ChartUtils.getAnnotationFont(size);
+
+//      logger.severe("font      = " + f);
+      fm = g2d.getFontMetrics(f);
+
+      // get pixel height of the given text with the current font :
+      height = TextUtilities.getTextBounds(text, g2d, fm).getHeight();
+
+//      logger.severe("height     = " + height);
+
+      size--;
+
+    } while (height > maxHeight && size >= minFontSize);
+
+    if (!allowDontFit && height > maxHeight) {
+      f = null;
+    }
 
     return f;
   }
@@ -268,6 +333,9 @@ public final class ChartUtils {
 
     final XYPlot xyPlot = (XYPlot) chart.getPlot();
 
+    // enlarge right margin to have last displayed hour (00:00)
+    xyPlot.setInsets(new RectangleInsets(2d, 10d, 2d, 20d));
+
     xyPlot.setDomainCrosshairVisible(false);
     // show crosshair on date axis :
     xyPlot.setRangeCrosshairLockedOnData(false);
@@ -277,7 +345,7 @@ public final class ChartUtils {
     xyPlot.getRangeAxis().setVisible(false);
 
     // Adjust outline :
-    xyPlot.setOutlineStroke(new BasicStroke(1.f));
+    xyPlot.setOutlineStroke(DEFAULT_STROKE);
 
     final XYBarRenderer xyBarRenderer = (XYBarRenderer) xyPlot.getRenderer();
     xyBarRenderer.setUseYInterval(true);
@@ -313,11 +381,14 @@ public final class ChartUtils {
     xyPlot.getRangeAxis().setTickMarkPaint(Color.BLACK);
     xyPlot.getDomainAxis().setTickMarkPaint(Color.BLACK);
 
+    // Adjust outline :
+    xyPlot.setOutlineStroke(DEFAULT_STROKE);
+
     final XYLineAndShapeRenderer lineAndShapeRenderer = (XYLineAndShapeRenderer) xyPlot.getRenderer();
 
     // force to use the base stroke :
     lineAndShapeRenderer.setAutoPopulateSeriesStroke(false);
-    lineAndShapeRenderer.setBaseStroke(new BasicStroke(1.25F));
+    lineAndShapeRenderer.setBaseStroke(LARGE_STROKE);
 
     // update theme at end :
     ChartUtilities.applyCurrentTheme(chart);
@@ -553,7 +624,7 @@ public final class ChartUtils {
    * Creates a new text annotation to be displayed at the given coordinates.  The
    * coordinates are specified in data space.
    *
-   * HACK : use default text annotation font
+   * HACK : use small text annotation font
    *
    * @param text  the text (<code>null</code> not permitted).
    * @param x  the x-coordinate (in data space).
@@ -562,17 +633,13 @@ public final class ChartUtils {
    */
   public static XYTextAnnotation createXYTextAnnotation(final String text, final double x, final double y) {
     final XYTextAnnotation a = new XYTextAnnotation(text, x, y);
-    a.setFont(DEFAULT_TEXT_ANNOTATION_FONT);
-    // default color is BLACK
-
+    a.setFont(SMALL_TEXT_ANNOTATION_FONT);
     return a;
   }
 
   /**
-   * Creates a new text annotation to be displayed at the given coordinates.  The
-   * coordinates are specified in data space.
-   *
-   * HACK : use default text annotation font
+   * Creates a new text annotation to be displayed at the given coordinates.  
+   * The coordinates are specified in data space.
    *
    * @param text  the text (<code>null</code> not permitted).
    * @param x  the x-coordinate (in data space).
@@ -581,9 +648,7 @@ public final class ChartUtils {
    */
   public static FitXYTextAnnotation createFitXYTextAnnotation(final String text, final double x, final double y) {
     final FitXYTextAnnotation a = new FitXYTextAnnotation(text, x, y);
-    a.setFont(DEFAULT_TEXT_ANNOTATION_FONT);
-    // default color is BLACK
-
+    // font is determined automatically (auto-fit)
     return a;
   }
 
