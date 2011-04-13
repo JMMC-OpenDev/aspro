@@ -1,53 +1,31 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BoundedNumberAxis.java,v 1.7 2011-04-13 14:33:45 bourgesl Exp $"
+ * "@(#) $Id: BoundedDateAxis.java,v 1.1 2011-04-13 14:33:45 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
- * Revision 1.6  2010/10/01 15:34:28  bourgesl
- * moved constant
- *
- * Revision 1.5  2010/06/17 10:02:50  bourgesl
- * fixed warning hints - mainly not final static loggers
- *
- * Revision 1.4  2010/05/11 12:02:24  bourgesl
- * disable autoRange at all
- *
- * Revision 1.3  2010/02/12 15:53:25  bourgesl
- * comments
- *
- * Revision 1.2  2010/01/13 16:12:08  bourgesl
- * comments
- *
- * Revision 1.1  2010/01/12 16:53:20  bourgesl
- * customized JFreeChart classes to get a square XY Plot supporting zooming in/out with mouse and mouse wheel
- *
  */
 package fr.jmmc.aspro.gui.chart;
 
-import org.jfree.chart.axis.NumberAxis;
-import org.jfree.chart.event.AxisChangeEvent;
+import org.jfree.chart.axis.DateAxis;
 import org.jfree.data.Range;
 
 /**
- * This customized number axis used bounds to limits its expansion (zoom out).
+ * This customized date axis used bounds to limits its expansion (zoom out).
  *
  * Note : this class must support the inherited cloneable interface.
  *
  * @author bourgesl
  */
-public final class BoundedNumberAxis extends NumberAxis {
+public class BoundedDateAxis extends DateAxis {
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
-  /** Class Name */
-  private static final String className_ = "fr.jmmc.aspro.gui.chart.BoundedNumberAxis";
   /** Class logger */
   private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
-          className_);
-
+          BoundedDateAxis.class.getName());
   /* members */
   /** axis bounds */
   private Range bounds = null;
@@ -55,11 +33,9 @@ public final class BoundedNumberAxis extends NumberAxis {
   /**
    * Constructs a number axis, using default values where necessary.
    *
-   * Changes the default tick label insets
-   *
    * @param label  the axis label (<code>null</code> permitted).
    */
-  public BoundedNumberAxis(String label) {
+  public BoundedDateAxis(final String label) {
     super(label);
     setAutoRange(false, false);
     setTickLabelInsets(ChartUtils.TICK_LABEL_INSETS);
@@ -75,7 +51,7 @@ public final class BoundedNumberAxis extends NumberAxis {
    */
   @Override
   public Object clone() throws CloneNotSupportedException {
-    BoundedNumberAxis clone = (BoundedNumberAxis) super.clone();
+    BoundedDateAxis clone = (BoundedDateAxis) super.clone();
     return clone;
   }
 
@@ -110,7 +86,7 @@ public final class BoundedNumberAxis extends NumberAxis {
    */
   @Override
   public void setRange(Range range, final boolean turnOffAutoRange,
-          final boolean notify) {
+                       final boolean notify) {
 
     // check if range is within bounds :
 
