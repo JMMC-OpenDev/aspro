@@ -1,11 +1,17 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityPanel.java,v 1.65 2011-04-13 14:37:32 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityPanel.java,v 1.66 2011-04-14 14:28:13 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.65  2011/04/13 14:37:32  bourgesl
+ * enable zooming on targets only
+ * always show the scrollbar with margins
+ * added button 'Scroll view' to see all targets
+ * listen for resize events to adjust max view items
+ *
  * Revision 1.64  2011/03/15 15:42:11  bourgesl
  * added names for fields
  *
@@ -969,7 +975,9 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     if (!doBaseLineLimits && (observation.getWhen().isNightRestriction() || !useLST)) {
       // date and moon FLI :
       ChartUtils.addSubtitle(this.chart, "Day : " + observation.getWhen().getDate().toString()
-              + " - Moon = " + (int) Math.round(obsData.getMoonIllumPercent()) + "%");
+              + (observation.getWhen().isNightRestriction()
+              ? " - Moon = " + (int) Math.round(obsData.getMoonIllumPercent()) + "%"
+              : ""));
     }
 
     final String dateAxisLabel;
@@ -1250,11 +1258,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
     // change the Range axis (horizontal) :
     final BoundedDateAxis dateAxis = new BoundedDateAxis(label);
-    dateAxis.setAutoRange(false);
-
-    dateAxis.setBounds(new DateRange(from.getTime() - 1l, to.getTime() + 1l));
-
     // add a margin of 1 ms :
+    dateAxis.setBounds(new DateRange(from.getTime() - 1l, to.getTime() + 1l));
     dateAxis.setRange(from.getTime() - 1l, to.getTime() + 1l);
 
     if (doBaseLineLimits) {
