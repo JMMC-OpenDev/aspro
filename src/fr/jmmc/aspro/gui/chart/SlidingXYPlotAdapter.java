@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SlidingXYPlotAdapter.java,v 1.6 2011-04-13 14:38:50 bourgesl Exp $"
+ * "@(#) $Id: SlidingXYPlotAdapter.java,v 1.7 2011-04-14 14:36:22 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2011/04/13 14:38:50  bourgesl
+ * refactored annotations to use the plot context (only perform text / block fitting once)
+ * support autofit size (height / width) for fonts / marks / ticks
+ *
  * Revision 1.5  2011/03/01 17:14:00  bourgesl
  * renamed variables
  *
@@ -37,9 +41,9 @@ import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.annotations.XYAnnotation;
 import org.jfree.chart.annotations.XYTextAnnotation;
-import org.jfree.chart.axis.SymbolAxis;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYBarRenderer;
+import org.jfree.data.Range;
 import org.jfree.data.gantt.TaskSeriesCollection;
 import org.jfree.data.gantt.XYTaskDataset;
 import org.jfree.ui.Layer;
@@ -267,10 +271,10 @@ public final class SlidingXYPlotAdapter {
     this.xyPlot.setDataset(dataset);
 
     // change the Domain axis (vertical) :
-    final SymbolAxis symbolAxis = new SymbolAxis(null, subSymbols);
+    final BoundedSymbolAxis symbolAxis = new BoundedSymbolAxis(null, subSymbols);
     symbolAxis.setInverted(true);
     symbolAxis.setGridBandsVisible(false);
-    symbolAxis.setAutoRange(false);
+    symbolAxis.setBounds(new Range(rangeMin, rangeMax));
     symbolAxis.setRange(rangeMin, rangeMax);
     this.xyPlot.setDomainAxis(symbolAxis);
 
