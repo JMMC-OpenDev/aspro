@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SquareChartPanel.java,v 1.6 2010-09-15 13:53:25 bourgesl Exp $"
+ * "@(#) $Id: SquareChartPanel.java,v 1.7 2011-04-14 14:36:46 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2010/09/15 13:53:25  bourgesl
+ * comments / javadoc
+ *
  * Revision 1.5  2010/06/17 10:02:50  bourgesl
  * fixed warning hints - mainly not final static loggers
  *
@@ -91,11 +94,11 @@ public final class SquareChartPanel extends ChartPanel {
    *
    * @since 1.0.13
    */
-  public SquareChartPanel(JFreeChart chart, int width, int height,
-                          int minimumDrawWidth, int minimumDrawHeight, int maximumDrawWidth,
-                          int maximumDrawHeight, boolean useBuffer, boolean properties,
-                          boolean copy, boolean save, boolean print, boolean zoom,
-                          boolean tooltips) {
+  public SquareChartPanel(final JFreeChart chart, final int width, final int height,
+                          final int minimumDrawWidth, final int minimumDrawHeight, final int maximumDrawWidth,
+                          final int maximumDrawHeight, final boolean useBuffer, final boolean properties,
+                          final boolean copy, boolean save, final boolean print, final boolean zoom,
+                          final boolean tooltips) {
     super(chart, width, height, minimumDrawWidth, minimumDrawHeight, maximumDrawWidth, maximumDrawHeight,
             useBuffer, properties, copy, save, print, zoom, tooltips);
 
@@ -126,8 +129,8 @@ public final class SquareChartPanel extends ChartPanel {
    * @param y  the y value (in screen coordinates).
    */
   @Override
-  public void zoomInBoth(double x, double y) {
-    Plot plot = getChart().getPlot();
+  public void zoomInBoth(final double x, final double y) {
+    final Plot plot = getChart().getPlot();
     if (plot == null) {
       return;
     }
@@ -156,8 +159,8 @@ public final class SquareChartPanel extends ChartPanel {
    * @param y  the y value (in screen coordinates).
    */
   @Override
-  public void zoomOutBoth(double x, double y) {
-    Plot plot = getChart().getPlot();
+  public void zoomOutBoth(final double x, final double y) {
+    final Plot plot = getChart().getPlot();
     if (plot == null) {
       return;
     }
@@ -192,12 +195,10 @@ public final class SquareChartPanel extends ChartPanel {
     if ((selection.getHeight() > 0) && (selection.getWidth() > 0)) {
       // get the origin of the zoom selection in the Java2D space used for
       // drawing the chart (that is, before any scaling to fit the panel)
-      final Point2D selectOrigin = translateScreenToJava2D(new Point(
-              (int) Math.ceil(selection.getX()),
-              (int) Math.ceil(selection.getY())));
+      final Point2D selectOrigin = translateScreenToJava2D(new Point((int) Math.ceil(selection.getX()), (int) Math.ceil(selection.getY())));
+
       final PlotRenderingInfo plotInfo = getChartRenderingInfo().getPlotInfo();
-      final Rectangle2D scaledDataArea = getScreenDataArea(
-              (int) selection.getCenterX(), (int) selection.getCenterY());
+      final Rectangle2D scaledDataArea = getScreenDataArea((int) selection.getCenterX(), (int) selection.getCenterY());
 
       // percents :
       double hLower = (selection.getMinX() - scaledDataArea.getMinX()) / scaledDataArea.getWidth();
@@ -327,7 +328,7 @@ public final class SquareChartPanel extends ChartPanel {
 
     /* members */
     /** The chart panel. */
-    private ChartPanel chartPanel;
+    private final ChartPanel chartPanel;
     /** The zoom factor. */
     protected double zoomFactor;
 
@@ -336,7 +337,7 @@ public final class SquareChartPanel extends ChartPanel {
      *
      * @param chartPanel  the chart panel (<code>null</code> not permitted).
      */
-    public MouseWheelHandler(ChartPanel chartPanel) {
+    public MouseWheelHandler(final ChartPanel chartPanel) {
       this.chartPanel = chartPanel;
       this.zoomFactor = DEFAULT_ZOOM_FACTOR;
     }
@@ -359,24 +360,24 @@ public final class SquareChartPanel extends ChartPanel {
      *
      * @see #getZoomFactor()
      */
-    public void setZoomFactor(double zoomFactor) {
+    public void setZoomFactor(final double zoomFactor) {
       this.zoomFactor = zoomFactor;
     }
 
     /**
      * Handles a mouse wheel event from the underlying chart panel.
      *
-     * @param e  the event.
+     * @param mwe  the event.
      */
-    public void mouseWheelMoved(MouseWheelEvent e) {
-      JFreeChart chart = this.chartPanel.getChart();
+    public void mouseWheelMoved(final MouseWheelEvent mwe) {
+      final JFreeChart chart = this.chartPanel.getChart();
       if (chart == null) {
         return;
       }
-      Plot plot = chart.getPlot();
+      final Plot plot = chart.getPlot();
       if (plot instanceof Zoomable) {
-        Zoomable zoomable = (Zoomable) plot;
-        handleZoomable(zoomable, e);
+        final Zoomable zoomable = (Zoomable) plot;
+        handleZoomable(zoomable, mwe);
       }
     }
 
@@ -384,17 +385,18 @@ public final class SquareChartPanel extends ChartPanel {
      * Handle the case where a plot implements the {@link Zoomable} interface.
      *
      * @param zoomable  the zoomable plot.
-     * @param e  the mouse wheel event.
+     * @param mwe  the mouse wheel event.
      */
-    private void handleZoomable(Zoomable zoomable, MouseWheelEvent e) {
-      Plot plot = (Plot) zoomable;
-      ChartRenderingInfo info = this.chartPanel.getChartRenderingInfo();
-      PlotRenderingInfo pinfo = info.getPlotInfo();
-      Point2D p = this.chartPanel.translateScreenToJava2D(e.getPoint());
+    private void handleZoomable(final Zoomable zoomable, final MouseWheelEvent mwe) {
+      final Plot plot = (Plot) zoomable;
+      final ChartRenderingInfo info = this.chartPanel.getChartRenderingInfo();
+      final PlotRenderingInfo pinfo = info.getPlotInfo();
+
+      final Point2D p = this.chartPanel.translateScreenToJava2D(mwe.getPoint());
       if (!pinfo.getDataArea().contains(p)) {
         return;
       }
-      int clicks = e.getWheelRotation();
+      final int clicks = mwe.getWheelRotation();
       int direction = 0;
       if (clicks < 0) {
         direction = -1;
@@ -409,13 +411,13 @@ public final class SquareChartPanel extends ChartPanel {
       try {
         plot.setNotify(false);
 
-        final double increment = 1.0 + this.zoomFactor;
+        final double increment = 1d + this.zoomFactor;
         if (direction > 0) {
           zoomable.zoomDomainAxes(increment, pinfo, p, true);
           zoomable.zoomRangeAxes(increment, pinfo, p, true);
         } else if (direction < 0) {
-          zoomable.zoomDomainAxes(1.0 / increment, pinfo, p, true);
-          zoomable.zoomRangeAxes(1.0 / increment, pinfo, p, true);
+          zoomable.zoomDomainAxes(1d / increment, pinfo, p, true);
+          zoomable.zoomRangeAxes(1d / increment, pinfo, p, true);
         }
 
         // HACK to get new axis ranges after zoom :

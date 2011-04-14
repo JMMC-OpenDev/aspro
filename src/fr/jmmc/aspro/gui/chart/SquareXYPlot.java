@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SquareXYPlot.java,v 1.7 2010-06-17 10:02:50 bourgesl Exp $"
+ * "@(#) $Id: SquareXYPlot.java,v 1.8 2011-04-14 14:36:46 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2010/06/17 10:02:50  bourgesl
+ * fixed warning hints - mainly not final static loggers
+ *
  * Revision 1.6  2010/02/18 09:52:37  bourgesl
  * added rendering hints (anti-aliasing)
  *
@@ -50,7 +53,7 @@ import org.jfree.ui.RectangleInsets;
  *
  * @author bourgesl
  */
-public class SquareXYPlot extends XYPlot {
+public final class SquareXYPlot extends XYPlot {
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
@@ -71,17 +74,17 @@ public class SquareXYPlot extends XYPlot {
    * @param rangeAxis  the range axis (<code>null</code> permitted).
    * @param renderer  the renderer (<code>null</code> permitted).
    */
-  public SquareXYPlot(XYDataset dataset,
-          ValueAxis domainAxis,
-          ValueAxis rangeAxis,
-          XYItemRenderer renderer) {
+  public SquareXYPlot(final XYDataset dataset,
+                      final ValueAxis domainAxis,
+                      final ValueAxis rangeAxis,
+                      final XYItemRenderer renderer) {
     super(dataset, domainAxis, rangeAxis, renderer);
   }
 
   /**
    * Draws the plot within the specified area on a graphics device.
    *
-   * @param g2  the graphics device.
+   * @param g2d  the graphics device.
    * @param area  the plot area (in Java2D space).
    * @param anchor  an anchor point in Java2D space (<code>null</code>
    *                permitted).
@@ -91,8 +94,8 @@ public class SquareXYPlot extends XYPlot {
    *              permitted).
    */
   @Override
-  public void draw(Graphics2D g2, Rectangle2D area, Point2D anchor,
-          PlotState parentState, PlotRenderingInfo info) {
+  public void draw(final Graphics2D g2d, final Rectangle2D area, final Point2D anchor,
+                   final PlotState parentState, final PlotRenderingInfo info) {
 
     double hSpace = 0d;
     double vSpace = 0d;
@@ -104,7 +107,7 @@ public class SquareXYPlot extends XYPlot {
     vSpace += insets.getTop() + insets.getBottom();
 
     // compute Axis Space :
-    final AxisSpace space = calculateAxisSpace(g2, area);
+    final AxisSpace space = calculateAxisSpace(g2d, area);
 
     hSpace += space.getLeft() + space.getRight();
     vSpace += space.getTop() + space.getBottom();
@@ -128,11 +131,12 @@ public class SquareXYPlot extends XYPlot {
     adjustedArea.setRect(Math.round(area.getX() + marginWidth), Math.round(area.getY() + marginHeight), Math.round(adjustedWidth), Math.round(adjustedHeight));
 
     // Force rendering hints :
-    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-    g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-    g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+    g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+    // Use bilinear for performance instead of bicubic (available but slower):
+    g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+    g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
 
-    super.draw(g2, adjustedArea, anchor, parentState, info);
+    super.draw(g2d, adjustedArea, anchor, parentState, info);
   }
 
   /**
@@ -182,7 +186,6 @@ public class SquareXYPlot extends XYPlot {
       if (bounds != null) {
         // do not disable auto range :
         domainAxis.setRange(bounds, false, false);
-
         rangeAxis.setRange(bounds, false, false);
       }
     }
