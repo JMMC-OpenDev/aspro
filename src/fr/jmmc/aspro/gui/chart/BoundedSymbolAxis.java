@@ -1,48 +1,47 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BoundedDateAxis.java,v 1.2 2011-04-14 14:36:03 bourgesl Exp $"
+ * "@(#) $Id: BoundedSymbolAxis.java,v 1.1 2011-04-14 14:36:03 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
- * Revision 1.1  2011/04/13 14:33:45  bourgesl
- * added bounded date axis
- *
  */
 package fr.jmmc.aspro.gui.chart;
 
-import java.util.logging.Level;
-import org.jfree.chart.axis.DateAxis;
+import org.jfree.chart.axis.SymbolAxis;
 import org.jfree.chart.event.AxisChangeEvent;
 import org.jfree.data.Range;
 
 /**
- * This customized date axis uses bounds to limits its expansion (zoom out).
+ * This customized symbol axis uses bounds to limits its expansion (zoom out).
  *
  * Note : this class must support the inherited cloneable interface.
  *
  * @author bourgesl
  */
-public final class BoundedDateAxis extends DateAxis {
+public final class BoundedSymbolAxis extends SymbolAxis {
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
-  /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
-          BoundedDateAxis.class.getName());
 
   /* members */
   /** axis bounds */
   private Range bounds = null;
 
   /**
-   * Constructs a number axis, using default values where necessary.
+   * Constructs a symbol axis, using default attribute values where
+   * necessary.
+   *
+   * Changes the default tick label insets
+   *
    *
    * @param label  the axis label (<code>null</code> permitted).
+   * @param sv  the list of symbols to display instead of the numeric
+   *            values.
    */
-  public BoundedDateAxis(final String label) {
-    super(label);
+  public BoundedSymbolAxis(final String label, final String[] sv) {
+    super(label, sv);
     setAutoRange(false, false);
     setTickLabelInsets(ChartUtils.TICK_LABEL_INSETS);
   }
@@ -57,7 +56,7 @@ public final class BoundedDateAxis extends DateAxis {
    */
   @Override
   public Object clone() throws CloneNotSupportedException {
-    return (BoundedDateAxis) super.clone();
+    return (BoundedSymbolAxis) super.clone();
   }
 
   /**
@@ -94,14 +93,14 @@ public final class BoundedDateAxis extends DateAxis {
 
       // This is called by JFreeChart to reset the zoom:
       /*
-      at fr.jmmc.aspro.gui.chart.BoundedDateAxis.setAutoRange(BoundedDateAxis.java:93)
+      at fr.jmmc.aspro.gui.chart.BoundedSymbolAxis.setAutoRange(BoundedSymbolAxis.java:96)
       at org.jfree.chart.axis.ValueAxis.setAutoRange(ValueAxis.java:975)
       at org.jfree.chart.axis.ValueAxis.resizeRange(ValueAxis.java:1563)
       at org.jfree.chart.axis.ValueAxis.resizeRange(ValueAxis.java:1539)
-      at org.jfree.chart.plot.XYPlot.zoomRangeAxes(XYPlot.java:5158)
-      at org.jfree.chart.plot.XYPlot.zoomRangeAxes(XYPlot.java:5123)
-      at org.jfree.chart.ChartPanel.restoreAutoRangeBounds(ChartPanel.java:2430)
-      at org.jfree.chart.ChartPanel.restoreAutoBounds(ChartPanel.java:2391)
+      at org.jfree.chart.plot.XYPlot.zoomDomainAxes(XYPlot.java:5081)
+      at org.jfree.chart.plot.XYPlot.zoomDomainAxes(XYPlot.java:5047)
+      at org.jfree.chart.ChartPanel.restoreAutoDomainBounds(ChartPanel.java:2410)
+      at org.jfree.chart.ChartPanel.restoreAutoBounds(ChartPanel.java:2390)
       at org.jfree.chart.ChartPanel.mouseReleased(ChartPanel.java:2044)
        */
 

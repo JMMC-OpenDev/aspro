@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BoundedNumberAxis.java,v 1.7 2011-04-13 14:33:45 bourgesl Exp $"
+ * "@(#) $Id: BoundedNumberAxis.java,v 1.8 2011-04-14 14:36:03 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2011/04/13 14:33:45  bourgesl
+ * added bounded date axis
+ *
  * Revision 1.6  2010/10/01 15:34:28  bourgesl
  * moved constant
  *
@@ -27,12 +30,13 @@
  */
 package fr.jmmc.aspro.gui.chart;
 
+import java.util.logging.Level;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.event.AxisChangeEvent;
 import org.jfree.data.Range;
 
 /**
- * This customized number axis used bounds to limits its expansion (zoom out).
+ * This customized number axis uses bounds to limits its expansion (zoom out).
  *
  * Note : this class must support the inherited cloneable interface.
  *
@@ -42,12 +46,9 @@ public final class BoundedNumberAxis extends NumberAxis {
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
-  /** Class Name */
-  private static final String className_ = "fr.jmmc.aspro.gui.chart.BoundedNumberAxis";
   /** Class logger */
   private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
-          className_);
-
+          BoundedNumberAxis.class.getName());
   /* members */
   /** axis bounds */
   private Range bounds = null;
@@ -59,7 +60,7 @@ public final class BoundedNumberAxis extends NumberAxis {
    *
    * @param label  the axis label (<code>null</code> permitted).
    */
-  public BoundedNumberAxis(String label) {
+  public BoundedNumberAxis(final String label) {
     super(label);
     setAutoRange(false, false);
     setTickLabelInsets(ChartUtils.TICK_LABEL_INSETS);
@@ -75,8 +76,7 @@ public final class BoundedNumberAxis extends NumberAxis {
    */
   @Override
   public Object clone() throws CloneNotSupportedException {
-    BoundedNumberAxis clone = (BoundedNumberAxis) super.clone();
-    return clone;
+    return (BoundedNumberAxis) super.clone();
   }
 
   /**
@@ -96,6 +96,27 @@ public final class BoundedNumberAxis extends NumberAxis {
   }
 
   /**
+   * Sets the auto range attribute.  If the <code>notify</code> flag is set,
+   * an {@link AxisChangeEvent} is sent to registered listeners.
+   *
+   * HACK : log an error message because autoRange must not be used with bounded axis
+   *
+   * @param auto  the flag.
+   * @param notify  notify listeners?
+   *
+   * @see #isAutoRange()
+   */
+  @Override
+  protected void setAutoRange(final boolean auto, final boolean notify) {
+    if (auto) {
+      logger.log(Level.SEVERE, "AutoRange must not be used: ", new Throwable());
+      return;
+    }
+
+    super.setAutoRange(auto, notify);
+  }
+
+  /**
    * HACK : check the defined bounds to avoid excessive zoom out
    *
    * Sets the range for the axis, if requested, sends an
@@ -109,8 +130,10 @@ public final class BoundedNumberAxis extends NumberAxis {
    *                notified.
    */
   @Override
-  public void setRange(Range range, final boolean turnOffAutoRange,
-          final boolean notify) {
+  public void setRange(final Range range, final boolean turnOffAutoRange,
+                       final boolean notify) {
+
+    Range newRange = range;
 
     // check if range is within bounds :
 
@@ -126,7 +149,7 @@ public final class BoundedNumberAxis extends NumberAxis {
         // range is outside bounds :
 
         if (min < lower && max > upper) {
-          range = bounds;
+          newRange = bounds;
         } else {
           // try to relocate the range inside bounds
           // to keep its length so aspect ratio constant :
@@ -146,14 +169,14 @@ public final class BoundedNumberAxis extends NumberAxis {
 
           if (min < lower || max > upper) {
             // again, range is outside bounds :
-            range = bounds;
+            newRange = bounds;
           } else {
-            range = new Range(min, max);
+            newRange = new Range(min, max);
           }
         }
       }
     }
 
-    super.setRange(range, turnOffAutoRange, notify);
+    super.setRange(newRange, turnOffAutoRange, notify);
   }
 }
