@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservationManager.java,v 1.63 2011-03-08 17:26:15 bourgesl Exp $"
+ * "@(#) $Id: ObservationManager.java,v 1.64 2011-04-22 15:39:24 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.63  2011/03/08 17:26:15  bourgesl
+ * added defineCalibratorDiameter(list<Target>) to update UD diameters according to searchCal information
+ *
  * Revision 1.62  2011/03/03 15:51:30  bourgesl
  * added calibrator informations (searchCal main parameters and all values)
  *
@@ -222,6 +225,7 @@ import fr.jmmc.aspro.model.event.ObservationListener;
 import fr.jmmc.aspro.model.event.ObservationEventType;
 import fr.jmmc.aspro.model.observability.ObservabilityData;
 import fr.jmmc.aspro.AsproConstants;
+import fr.jmmc.aspro.Preferences;
 import fr.jmmc.aspro.model.event.OIFitsEvent;
 import fr.jmmc.aspro.model.event.ObservabilityEvent;
 import fr.jmmc.aspro.model.event.ObservationEvent;
@@ -1491,7 +1495,7 @@ public final class ObservationManager extends BaseOIManager {
 
       final InterferometerConfigurationChoice interferometerChoice = new InterferometerConfigurationChoice();
       interferometerChoice.setName(defInterferometerConfiguration);
-      interferometerChoice.setMinElevation(AsproConstants.DEFAULT_MIN_ELEVATION);
+      interferometerChoice.setMinElevation(Preferences.getInstance().getMinElevation());
 
       observation.setInterferometerConfiguration(interferometerChoice);
     }
