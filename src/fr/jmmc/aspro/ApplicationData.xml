@@ -2,9 +2,9 @@
 
 <ApplicationData link="http://www.jmmc.fr/aspro2">
 
-  <program name="Aspro2" version="0.8.1"/>
+  <program name="Aspro2" version="0.8.2"/>
 
-  <compilation date="09/03/2011" compiler="JDK 1.5.0_16"/>
+  <compilation date="22/04/2011" compiler="JDK 1.5.0_16"/>
 
   <text>
     <![CDATA[ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations
@@ -195,6 +195,10 @@
 
   <releasenotes>
     <release version="0.8">
+      <prerelease version="0.8.2">
+        <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/27">Added 'Center plot arround night' preference to have the complete night centered on the observability plot</change>
+        <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/26">Added civil and nautical twilight zones</change>
+      </prerelease>
       <prerelease version="0.8.1">
         <change>Added 'Scroll view' checkbox button to see all targets (or only some of them) on the observability plot</change>
         <change>Enable mouse zooming for targets only on the observability plot</change>
