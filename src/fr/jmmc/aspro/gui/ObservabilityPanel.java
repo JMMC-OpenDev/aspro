@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityPanel.java,v 1.66 2011-04-14 14:28:13 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityPanel.java,v 1.67 2011-04-22 15:40:10 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.66  2011/04/14 14:28:13  bourgesl
+ * do not show moon FLI if night restrictions are disabled
+ *
  * Revision 1.65  2011/04/13 14:37:32  bourgesl
  * enable zooming on targets only
  * always show the scrollbar with margins
@@ -331,7 +334,11 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
   /** background color corresponding to the DAY zone */
   public static final Color DAY_COLOR = new Color(224, 224, 224);
   /** background color corresponding to the TWILIGHT zone */
-  public static final Color TWILIGHT_COLOR = new Color(192, 192, 192);
+  public static final Color CIVIL_TWILIGHT_COLOR = new Color(206, 206, 206);
+  /** background color corresponding to the TWILIGHT zone */
+  public static final Color NAUTIC_TWILIGHT_COLOR = new Color(188, 188, 188);
+  /** background color corresponding to the TWILIGHT zone */
+  public static final Color ASTRO_TWILIGHT_COLOR = new Color(170, 170, 170);
   /** background color corresponding to the NIGHT zone */
   public static final Color NIGHT_COLOR = new Color(150, 150, 150);
   /** annotation rotation angle = 90 degrees */
@@ -792,14 +799,17 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
     /* get plot options from swing components */
 
-    // indicates if the timestamps are expressed in LST or in UTC :
+    // indicates if the timestamps are expressed in LST or in UTC:
     final boolean useLST = AsproConstants.TIME_LST.equals(this.jComboTimeRef.getSelectedItem());
 
-    // flag to find baseline limits :
+    // flag to find baseline limits:
     final boolean doBaseLineLimits = this.jCheckBoxBaseLineLimits.isSelected();
 
-    // flag to produce detailed output with all BL / horizon / rise intervals per target :
+    // flag to produce detailed output with all BL / horizon / rise intervals per target:
     final boolean doDetailedOutput = this.jCheckBoxDetailedOutput.isSelected();
+
+    // flag to center JD range arround midnight:
+    final boolean doCenterMidnight = myPreferences.isCenterNight();
 
     // update the status bar :
     StatusBar.show("computing observability ...");
@@ -807,7 +817,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     // Create Observability task worker
     // Cancel other tasks and execute this new task :
     new ObservabilitySwingWorker(this,
-            obsCollection, useLST, doDetailedOutput, doBaseLineLimits).executeTask();
+            obsCollection, useLST, doDetailedOutput, doBaseLineLimits, doCenterMidnight).executeTask();
   }
 
   /**
@@ -824,6 +834,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     private final boolean doBaseLineLimits;
     /** flag to produce detailed output with all BL / horizon / rise intervals per target */
     private final boolean doDetailedOutput;
+    /** flag to center the plot arround midnight */
+    private final boolean doCenterMidnight;
 
     /**
      * Hidden constructor
@@ -833,15 +845,18 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
      * @param useLST indicates if the timestamps are expressed in LST or in UTC
      * @param doDetailedOutput flag to produce detailed output with all BL / horizon / rise intervals per target
      * @param doBaseLineLimits flag to find base line limits
+     * @param doCenterMidnight flag to center JD range arround midnight
      */
     private ObservabilitySwingWorker(final ObservabilityPanel obsPanel, final ObservationCollection obsCollection,
-                                     final boolean useLST, final boolean doDetailedOutput, final boolean doBaseLineLimits) {
+                                     final boolean useLST, final boolean doDetailedOutput, final boolean doBaseLineLimits,
+                                     final boolean doCenterMidnight) {
       // get current observation version :
       super(AsproTaskRegistry.TASK_OBSERVABILITY, obsCollection);
       this.obsPanel = obsPanel;
       this.useLST = useLST;
       this.doDetailedOutput = doDetailedOutput;
       this.doBaseLineLimits = doBaseLineLimits;
+      this.doCenterMidnight = doCenterMidnight;
     }
 
     /**
@@ -860,7 +875,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
       for (ObservationSetting observation : getObservationCollection().getObservations()) {
         // compute the observability data :
         obsDataList.add(
-                new ObservabilityService(observation, this.useLST, this.doDetailedOutput, this.doBaseLineLimits).compute());
+                new ObservabilityService(observation, this.useLST, this.doDetailedOutput, this.doBaseLineLimits, this.doCenterMidnight).compute());
 
         // fast interrupt :
         if (Thread.currentThread().isInterrupted()) {
@@ -1187,7 +1202,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
    */
   private void updateSliderProperties(final boolean forceRefresh) {
     // baseline limits flag used by the plot :
-    final boolean doBaseLineLimits = this.getChartData().getFirstObsData().isDoBaseLineLimits();
+    final boolean doBaseLineLimits =
+                  (this.getChartData() != null) ? this.getChartData().getFirstObsData().isDoBaseLineLimits() : false;
 
     final int size = this.slidingXYPlotAdapter.getSize();
 
@@ -1292,9 +1308,17 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
           case Night:
             col = NIGHT_COLOR;
             break;
+          case CivilTwilight:
+            col = CIVIL_TWILIGHT_COLOR;
+            break;
+          case NauticalTwilight:
+            col = NAUTIC_TWILIGHT_COLOR;
+            break;
+          case AstronomicalTwilight:
+            col = ASTRO_TWILIGHT_COLOR;
+            break;
           default:
-          case Twilight:
-            col = TWILIGHT_COLOR;
+            col = Color.RED;
             break;
         }
         // force Alpha to 1.0 to avoid PDF rendering problems (alpha layer ordering) :
