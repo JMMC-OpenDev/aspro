@@ -40,7 +40,6 @@ package fr.jmmc.aspro.gui.chart;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Paint;
-import java.awt.Polygon;
 import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
@@ -289,11 +288,7 @@ public final class XYDiamondAnnotation extends AbstractXYAnnotation implements
     if (object instanceof XYDiamondAnnotation) {
       XYDiamondAnnotation diamond = (XYDiamondAnnotation) object;
       if (super.equals(object)) {
-        boolean b0 = this.x == diamond.getX();
-        boolean b1 = this.y == diamond.getY();
-        boolean b2 = this.getToolTipText().equals(diamond.getToolTipText());
-        boolean b3 = this.getURL().equals(diamond.getURL());
-        return b0 && b1 && b2 && b3;
+        return (this.x == diamond.getX()) && (this.y == diamond.getY());
       }
     }
     return false;
