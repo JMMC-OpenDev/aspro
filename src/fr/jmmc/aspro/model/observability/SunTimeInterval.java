@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: SunTimeInterval.java,v 1.3 2011-01-25 13:48:55 bourgesl Exp $"
+ * "@(#) $Id: SunTimeInterval.java,v 1.4 2011-04-22 15:40:19 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2011/01/25 13:48:55  bourgesl
+ * javadoc
+ *
  * Revision 1.2  2010/04/13 15:26:21  bourgesl
  * add Comparable support
  *
@@ -21,13 +24,13 @@ package fr.jmmc.aspro.model.observability;
 import java.util.Date;
 
 /**
- * This class contains a simple date/time interval corresponding to DAY / NIGHT / TWILIGHT.
+ * This class contains a simple date/time interval corresponding to DAY / NIGHT / TWILIGHTS (ASTRO / NAUTIC / CIVIL).
  * @author bourgesl
  */
 public final class SunTimeInterval extends DateTimeInterval {
 
   /**
-   * Type of SunTimeInterval (DAY / NIGHT / TWILIGHT)
+   * Type of SunTimeInterval (DAY / NIGHT / TWILIGHTS (ASTRO / NAUTIC / CIVIL))
    */
   public enum SunType {
 
@@ -35,10 +38,14 @@ public final class SunTimeInterval extends DateTimeInterval {
     Day,
     /** NIGHT */
     Night,
-    /** TWILIGHT */
-    Twilight;
+    /** ASTRONOMICAL TWILIGHT */
+    AstronomicalTwilight,
+    /** NAUTICAL TWILIGHT */
+    NauticalTwilight,
+    /** CIVIL TWILIGHT */
+    CivilTwilight
   }
-  /** type of the interval : DAY / NIGHT / TWILIGHT */
+  /** type of the interval : DAY / NIGHT / TWILIGHTS (ASTRO / NAUTIC / CIVIL) */
   private final SunType type;
 
   /**
