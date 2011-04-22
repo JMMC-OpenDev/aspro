@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AstroSkyCalc.java,v 1.26 2010-10-01 15:25:56 bourgesl Exp $"
+ * "@(#) $Id: AstroSkyCalc.java,v 1.27 2011-04-22 15:37:33 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.26  2010/10/01 15:25:56  bourgesl
+ * fixed bug in findLst0 [Requires 'lower' < 'upper'] :
+ * precision is better (<1ms) and LST must be < 1s
+ *
  * Revision 1.25  2010/09/15 13:51:47  bourgesl
  * comments explaining how to get moon angular distance
  *
@@ -45,7 +49,7 @@
  */
 package edu.dartmouth;
 
-import edu.dartmouth.AlmanacTime.AlmanacType;
+import edu.dartmouth.AstroAlmanacTime.AlmanacType;
 import fr.jmmc.aspro.model.Range;
 import fr.jmmc.aspro.model.oi.LonLatAlt;
 import fr.jmmc.aspro.util.AngleUtils;
@@ -53,9 +57,9 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.logging.Level;
 
 /**
@@ -65,14 +69,12 @@ import java.util.logging.Level;
  */
 public final class AstroSkyCalc {
 
-  /** Class Name */
-  private static final String className_ = "edu.dartmouth.AstroSkyCalc";
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(className_);
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(AstroSkyCalc.class.getName());
   /** time ratio : lst to jd */
   public final static double LST_TO_JD = 24d * Const.SID_RATE;
   /** one Day in LST expressed in JD day */
-  public final static double LST_DAY_IN_JD = AstroSkyCalc.lst2jd(24d);
+  public final static double LST_DAY_IN_JD = 1d / Const.SID_RATE;
   /** Modified Juliean day reference */
   public final static double MJD_REF = 2400000.5d;
   /** 1 second in decimal hour */
@@ -85,8 +87,14 @@ public final class AstroSkyCalc {
   /* members */
   /** site location */
   Site site;
+  /** jd corresponding to LT=12:00:00 for the observation date */
+  private double jdLt12;
+  /** jd corresponding to LT=24:00:00 for the observation date */
+  private double jdMidnight;
   /** jd corresponding to LST=00:00:00 for the observation date */
   private double jdLst0;
+  /** date correspondign to LST=00:00:00 */
+  private Calendar dateLst0;
 
   /**
    * Public Constructor
@@ -122,34 +130,74 @@ public final class AstroSkyCalc {
   }
 
   /**
-   * Define the observation date with a gregorian date (lenient) in UTC at 00:00
+   * Define the observation date with a gregorian date (lenient)
    * and return the jd time value corresponding to LST=00:00:00 for the current date
    * @param year year
    * @param month month from [1-12]
    * @param day day in [1-31]
-   * @return jd corresponding to LST=00:00:00 for the current date
+   * @return jd corresponding to LST=00:00:00 for the current date night
    */
   public double defineDate(final int year, final int month, final int day) {
     // yyyy mm dd hh:mm
-    final String dateTime = year + " " + month + " " + day + " 00:00";
+    final String dateTime = year + " " + month + " " + day + " 12:00";
 
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("dateTime : " + dateTime);
     }
 
-    // Define date as an UTC time :
-    final InstantInTime instant = new InstantInTime(dateTime, this.site.stdz, this.site.use_dst, true);
-
-    final WhenWhere ww = new WhenWhere(instant, this.site);
+    // Define date as 12:00 (local time) :
+    final WhenWhere ww = new WhenWhere(new InstantInTime(dateTime, this.site.stdz, this.site.use_dst, false),
+            this.site);
 
     if (logger.isLoggable(Level.FINE)) {
-      AstroSkyCalc.dumpWhen(ww, "When");
+      AstroSkyCalc.dumpWhen(ww, "LocalTime at 12:00");
     }
 
-    // Find the julian date corresponding to the LST origin LST=00:00:00 for the given date :
-    this.jdLst0 = findJdForLst0(ww.when.jd);
+    // Define the julian date corresponding to LT=12:00:00 for the given date :
+    this.jdLt12 = ww.when.jd;
+
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("jdUt12 = " + this.jdLt12);
+    }
+
+    // midnight (local time) for the given date to locate LST origin arround:
+    this.jdMidnight = this.jdLt12 + 0.5d;
+
+    // Find the julian date corresponding to the LST origin LST=00:00:00 arround the given date :
+    final InstantInTime lst0 = findLst0(jdMidnight);
+
+    this.jdLst0 = lst0.jd;
+
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("jdLst0 = " + this.jdLst0);
+    }
+
+    // define the date at LST origin to have it when converting LST time in java dates (date + time):
+    this.dateLst0 = new GregorianCalendar(lst0.UTDate.year, lst0.UTDate.month - 1, lst0.UTDate.day);
+
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("dateLst0 = " + this.dateLst0.getTime());
+    }
 
     return this.jdLst0;
+  }
+
+  /**
+   * Return the jd time value corresponding to LT=12:00:00 for the current date
+   *
+   * @return jd corresponding to LT=12:00:00 for the current date
+   */
+  public double getJdLt12() {
+    return this.jdLt12;
+  }
+
+  /**
+   * Return the jd time value corresponding to LT=24:00:00 for the observation date
+   *
+   * @return jd corresponding to LT=24:00:00 for the observation date
+   */
+  public double getJdMidnight() {
+    return this.jdMidnight;
   }
 
   /**
@@ -172,8 +220,21 @@ public final class AstroSkyCalc {
    * @return jd corresponding to LST=00:00:00 for the given jd date
    */
   public double findJdForLst0(final double jd) {
+    return findLst0(jd).jd;
+  }
 
-    final WhenWhere ww = new WhenWhere(jd, this.site);
+  /**
+   * Find when LST=00:00:00 arround the given jd date
+   *
+   * Note : accurate +/-12 h within the given date
+   *
+   * @param jd julian date
+   *
+   * @return instant corresponding to LST=00:00:00 for the given jd date
+   */
+  private InstantInTime findLst0(final double jd) {
+
+    final WhenWhere ww = new WhenWhere(jd, this.site, false);
 
     double error;
     double sign;
@@ -213,7 +274,7 @@ public final class AstroSkyCalc {
       AstroSkyCalc.dumpWhen(ww, "LST=00:00:00");
     }
 
-    return ww.when.jd;
+    return ww.when;
   }
 
   /**
@@ -243,26 +304,52 @@ public final class AstroSkyCalc {
    * @return Calendar object
    */
   public Calendar toCalendar(final double jd, final boolean useLst) {
-    final WhenWhere ww = new WhenWhere(jd, this.site);
+    final WhenWhere ww = new WhenWhere(jd, this.site, false);
+
+    /* notes :
+     * - month is in range [0;11] in java Calendar
+     * - milliseconds are set to 0 to be able to compare date instances
+     */
 
     // The default TimeZone is already set to GMT :
-    final Calendar cal = new GregorianCalendar();
+    final Calendar calendar;
     if (useLst) {
       final RA sidereal = ww.siderealobj;
-      // ignore the date info as the LST has only time :
-      cal.set(Calendar.HOUR_OF_DAY, sidereal.sex.hour);
-      cal.set(Calendar.MINUTE, sidereal.sex.minute);
-      cal.set(Calendar.SECOND, (int) Math.round(sidereal.sex.second));
-    } else {
-      final InstantInTime t = ww.when;
-      /* note : month is in range [0;11] in java Calendar */
-      cal.set(t.UTDate.year, t.UTDate.month - 1, t.UTDate.day,
-              t.UTDate.timeofday.hour, t.UTDate.timeofday.minute, (int) Math.round(t.UTDate.timeofday.second));
-    }
-    // fix milliseconds to 0 to be able to compare date instances :
-    cal.set(Calendar.MILLISECOND, 0);
 
-    return cal;
+      // use the observation date as the LST has only time :
+      calendar = new GregorianCalendar(this.dateLst0.get(Calendar.YEAR), this.dateLst0.get(Calendar.MONTH), this.dateLst0.get(Calendar.DAY_OF_MONTH),
+              sidereal.sex.hour, sidereal.sex.minute, (int) Math.round(sidereal.sex.second));
+
+      double days = (jd - this.jdLst0) * Const.SID_RATE;
+//      logger.severe("days=" + days);
+      int ndays = 0;
+      if (days > 0d) {
+        // Add 1ms (precision):
+        days += MSEC_IN_DEC_HOUR;
+        if (days > 1d) {
+          ndays = (int) Math.floor(days);
+        }
+      } else if (days < 0d) {
+        ndays = -1;
+        // Add 1ms (precision):
+        days += MSEC_IN_DEC_HOUR;
+        if (days < -1d) {
+          ndays += (int) Math.ceil(days);
+        }
+      }
+      if (ndays != 0) {
+//        logger.severe("ndays=" + ndays);
+        calendar.add(Calendar.DAY_OF_YEAR, ndays);
+      }
+
+    } else {
+      final GenericCalDat utDate = ww.when.UTDate;
+
+      calendar = new GregorianCalendar(utDate.year, utDate.month - 1, utDate.day,
+              utDate.timeofday.hour, utDate.timeofday.minute, (int) Math.round(utDate.timeofday.second));
+    }
+
+    return calendar;
   }
 
   /**
@@ -271,9 +358,19 @@ public final class AstroSkyCalc {
    * @param label message to log
    */
   static void dumpWhen(final WhenWhere ww, final String label) {
-    if (logger.isLoggable(Level.FINE)) {
+    dumpWhen(Level.FINE, ww, label);
+  }
+
+  /**
+   * Log the time info (UTC + sideral time)
+   * @param logLevel log level (FINE...)
+   * @param ww WhenWhere instance
+   * @param label message to log
+   */
+  static void dumpWhen(final Level logLevel, final WhenWhere ww, final String label) {
+    if (logger.isLoggable(logLevel)) {
       final InstantInTime t = ww.when;
-      logger.fine(label + " dump : " + t.jd
+      logger.log(logLevel, label + " dump : " + t.jd
               + "\nUT : " + t.UTDate.day
               + "/" + t.UTDate.month
               + "/" + t.UTDate.year
@@ -285,54 +382,144 @@ public final class AstroSkyCalc {
   }
 
   /**
-   * Return the jd ranges when moon is observable arround LST [0;24]
-   * @param jdLst24 julian date corresponding to LST=24:00:00 for the observation date
+   * Return the almanac for the proper night (arround midnight).
+   * Moreover, sun times are duplicated and translated to -1Day, +1Day and +2Day
+   * to be able to have night limits among LST[-12;+36]
+   * @return almanac
+   */
+  public AstroAlmanac getAlmanac() {
+    // Get the almanac for the proper night (arround midnight):
+    final AstroAlmanac almanacNight = new AstroAlmanac();
+
+    // MIDNIGHT :
+    addAlmanacTimes(this.jdMidnight, almanacNight);
+
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("almanacNight: " + almanacNight);
+    }
+
+    // Notes :
+    // 1. Lst0 is arround midnight (+/- 12h):
+    // 2. targets RA are in range [0;24]
+    // 3. HA are in range [-12;12]
+    // LST frame is in range [-12;36]
+    // For midnight : in range [-24;48]
+
+    // Translates sun times (-1,1,2 days) only:
+    final AstroAlmanac almanac = new AstroAlmanac();
+
+    // copy midnight & moon times:
+    almanac.getMidnights().addAll(almanacNight.getMidnights());
+
+    Set<AstroAlmanacTime> refTimes;
+
+    // Hack on moon to have still fake moon ranges (rise / set):
+    // findMoonRiseSet returns ranges if (rise / set) couples are present!
+
+    // note: will be helpful as moon distance check is implemented to avoid calculations when moon is set !
+
+    // MOON:
+    refTimes = almanacNight.getMoonTimes();
+    final Set<AstroAlmanacTime> moonTimes = almanac.getMoonTimes();
+    // MIDNIGHT - 1DAY :
+    AstroAlmanac.translate(-LST_DAY_IN_JD, refTimes, moonTimes);
+    // MIDNIGHT :
+    moonTimes.addAll(refTimes);
+    // MIDNIGHT + 1DAY :
+    AstroAlmanac.translate(+LST_DAY_IN_JD, refTimes, moonTimes);
+
+    // SUN:
+    refTimes = almanacNight.getSunTimes();
+    final Set<AstroAlmanacTime> sunTimes = almanac.getSunTimes();
+
+    // MIDNIGHT - 1DAY :
+    AstroAlmanac.translate(-LST_DAY_IN_JD, refTimes, sunTimes);
+    // MIDNIGHT :
+    sunTimes.addAll(refTimes);
+    // MIDNIGHT + 1DAY :
+    AstroAlmanac.translate(+LST_DAY_IN_JD, refTimes, sunTimes);
+    // MIDNIGHT + 2DAY :
+    AstroAlmanac.translate(2d * LST_DAY_IN_JD, refTimes, sunTimes);
+
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("almanac: " + almanac);
+    }
+
+    return almanac;
+  }
+
+  /**
+   * Find the next midnight following jdUt12 in the given almanac instance
+   * @param almanac almanac instance
+   * @return julian date corresponding to midnight for the observation date
+   */
+  public double findMidnight(final AstroAlmanac almanac) {
+    double jdMid = 0d;
+
+    AstroAlmanacTime midnight;
+    for (final Iterator<AstroAlmanacTime> it = almanac.getMidnights().iterator(); it.hasNext();) {
+      midnight = it.next();
+
+      if (logger.isLoggable(Level.FINEST)) {
+        AstroSkyCalc.dumpWhen(new WhenWhere(midnight.getJd(), this.site, false), midnight.getType().name());
+      }
+
+      if (midnight.getJd() >= this.jdLt12) {
+        jdMid = midnight.getJd();
+        break;
+      }
+    }
+
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("jdMidnight : " + jdMid);
+    }
+//    logger.severe("jdMidnight : " + jdMid);
+//    logger.severe("jdLt24     : " + this.jdMidnight);
+
+//    logger.severe("diff       : " + Math.abs(jdMid - this.jdMidnight));
+
+    return jdMid;
+  }
+
+  /**
+   * Return the jd ranges when moon is observable in range [jdLower; jdUpper]
+   * @param almanac almanac instance
+   * @param jdLower lower jd
+   * @param jdUpper upper jd
    * @return list of jd ranges when moon is over the horizon
    */
-  public List<Range> findMoonRiseSet(final double jdLst24) {
+  public List<Range> findMoonRiseSet(final AstroAlmanac almanac, final double jdLower, final double jdUpper) {
 
-    // unique sorted JD time stamps :
-    final TreeSet<AlmanacTime> ts = new TreeSet<AlmanacTime>();
+    // TODO : refactor that code to translates times into intervals inside a given valid range [jdLower; jdUpper]
 
-    // LST0  - 1DAY :
-    addMoonAlmanac(ts, this.jdLst0 - 1d);
-    // LST0 :
-    addMoonAlmanac(ts, this.jdLst0);
-    // LST24 :
-    addMoonAlmanac(ts, this.jdLst0 + 1d);
-    // LST24 + 1DAY :
-    addMoonAlmanac(ts, this.jdLst0 + 2d);
-
-    final List<AlmanacTime> sorted = new ArrayList<AlmanacTime>(ts);
-
-    // return events in LST [0;24] :
+    final List<AstroAlmanacTime> sorted = new ArrayList<AstroAlmanacTime>(almanac.getMoonTimes());
     final List<Range> ranges = new ArrayList<Range>(2);
 
-    AlmanacTime stFrom, stTo;
+    AstroAlmanacTime moonFrom, moonTo;
     double jdFrom, jdTo;
 
     for (int i = 0, size = sorted.size() - 1; i < size; i++) {
-      stFrom = sorted.get(i);
+      moonFrom = sorted.get(i);
 
-      if (stFrom.getType() == AlmanacTime.AlmanacType.MoonRise) {
-        stTo = sorted.get(i + 1);
+      if (moonFrom.getType() == AstroAlmanacTime.AlmanacType.MoonRise) {
+        moonTo = sorted.get(i + 1);
 
-        jdFrom = stFrom.getJd();
-        jdTo = stTo.getJd();
+        jdFrom = moonFrom.getJd();
+        jdTo = moonTo.getJd();
 
-        // Keep intervals that are inside or overlapping the LST [0;24] range :
-        if ((jdFrom >= this.jdLst0 && jdFrom <= jdLst24) || (jdTo >= this.jdLst0 && jdTo <= jdLst24)) {
+        // Keep intervals that are inside or overlapping the range [jdLower; jdUpper] range :
+        if ((jdFrom >= jdLower && jdFrom <= jdUpper) || (jdTo >= jdLower && jdTo <= jdUpper)) {
 
           if (logger.isLoggable(Level.FINE)) {
             logger.fine("Range[" + jdFrom + " - " + jdTo + "]");
           }
 
           // adjust range limits :
-          if (jdFrom < this.jdLst0) {
-            jdFrom = this.jdLst0;
+          if (jdFrom < jdLower) {
+            jdFrom = jdLower;
           }
-          if (jdTo > jdLst24) {
-            jdTo = jdLst24;
+          if (jdTo > jdUpper) {
+            jdTo = jdUpper;
           }
 
           ranges.add(new Range(jdFrom, jdTo));
@@ -387,63 +574,41 @@ public final class AstroSkyCalc {
   }
 
   /**
-   * Add the moon almanach info as as AlmanacTime objects for the given date
-   * @param ts set to store the AlmanacTime objects
-   * @param jd julian date
-   */
-  private void addMoonAlmanac(final Set<AlmanacTime> ts, final double jd) {
-    final WhenWhere ww = new WhenWhere(jd, this.site);
-
-    final NightlyAlmanac na = new NightlyAlmanac(ww);
-
-    ts.add(new AlmanacTime(na.moonrise.when.jd, AlmanacType.MoonRise));
-    ts.add(new AlmanacTime(na.moonset.when.jd, AlmanacType.MoonSet));
-  }
-
-  /**
-   * Return the list of Sun events arround LST [0;24] +- 12h
+   * Return the list of Sun events in range [jdLower; jdUpper] +/- 12h
+   * @param almanac almanac instance
+   * @param jdLower lower jd
+   * @param jdUpper upper jd
    * @return list of Sun events
    */
-  public List<AlmanacTime> findSunRiseSet() {
+  public List<AstroAlmanacTime> findSunRiseSet(final AstroAlmanac almanac, final double jdLower, final double jdUpper) {
 
-    // unique sorted JD time stamps :
-    final TreeSet<AlmanacTime> ts = new TreeSet<AlmanacTime>();
+    // TODO : refactor that code to translates times into intervals inside a given valid range [jdLower; jdUpper]
 
-    // LST0  - 1DAY :
-    addSunAlmanac(ts, this.jdLst0 - 1d);
-    // LST0 :
-    addSunAlmanac(ts, this.jdLst0);
-    // LST24 :
-    addSunAlmanac(ts, this.jdLst0 + 1d);
-    // LST24 + 1DAY :
-    addSunAlmanac(ts, this.jdLst0 + 2d);
+    final double jd0 = jdLower - 0.5d * LST_DAY_IN_JD;
+    final double jd1 = jdUpper + 0.5d * LST_DAY_IN_JD;
 
-    final List<AlmanacTime> sorted = new ArrayList<AlmanacTime>(ts);
-
-    // return events in LST [0;24] +/- 12h :
-    final double jd0 = this.jdLst0 - 0.5d;
-    final double jd1 = this.jdLst0 + 1.5d;
+    final List<AstroAlmanacTime> sorted = new ArrayList<AstroAlmanacTime>(almanac.getSunTimes());
 
     // find indexes inside the lst range [jd0;jd1] :
     int i0 = -1;
     int i1 = -1;
-    AlmanacTime st;
+    AstroAlmanacTime sunTime;
 
     for (int i = 0, len = sorted.size(); i < len; i++) {
-      st = sorted.get(i);
+      sunTime = sorted.get(i);
 
 //      if (logger.isLoggable(Level.FINE)) {
 //        dumpWhen(new WhenWhere(st.getJd(), this.site), st.getType().name());
 //      }
 
-      if (st.getJd() >= jd0) {
+      if (sunTime.getJd() >= jd0) {
         if (i0 == -1) {
           // include previous event :
           i0 = i - 1;
         }
       }
 
-      if (st.getJd() > jd1) {
+      if (sunTime.getJd() > jd1) {
         // include next event :
         i1 = i;
         break;
@@ -454,35 +619,51 @@ public final class AstroSkyCalc {
       logger.finest("filtered sun events :");
     }
 
-    final List<AlmanacTime> result = new ArrayList<AlmanacTime>();
+    final List<AstroAlmanacTime> result = new ArrayList<AstroAlmanacTime>();
 
     for (int i = i0; i <= i1; i++) {
-      st = sorted.get(i);
+      sunTime = sorted.get(i);
 
       if (logger.isLoggable(Level.FINEST)) {
-        AstroSkyCalc.dumpWhen(new WhenWhere(st.getJd(), this.site), st.getType().name());
+        AstroSkyCalc.dumpWhen(new WhenWhere(sunTime.getJd(), this.site), sunTime.getType().name());
       }
 
-      result.add(st);
+      result.add(sunTime);
     }
 
     return result;
   }
 
   /**
-   * Add the sun almanach info as AlmanacTime objects for the given date
-   * @param ts set to store the AlmanacTime objects
+   * Add the sun and moon information as AstroAlmanacTime objects for the given date
    * @param jd julian date
+   * @param almanac almanac instance set to store the AstroAlmanacTime objects
    */
-  private void addSunAlmanac(final Set<AlmanacTime> ts, final double jd) {
+  private void addAlmanacTimes(final double jd, final AstroAlmanac almanac) {
     final WhenWhere ww = new WhenWhere(jd, this.site);
 
     final NightlyAlmanac na = new NightlyAlmanac(ww);
 
-    ts.add(new AlmanacTime(na.morningTwilight.when.jd, AlmanacType.SunTwlRise));
-    ts.add(new AlmanacTime(na.sunrise.when.jd, AlmanacType.SunRise));
-    ts.add(new AlmanacTime(na.sunset.when.jd, AlmanacType.SunSet));
-    ts.add(new AlmanacTime(na.eveningTwilight.when.jd, AlmanacType.SunTwlSet));
+    // add midnight:
+    almanac.getMidnights().add(new AstroAlmanacTime(na.midnight.when.jd, AlmanacType.Midnight));
+
+    // add sun times:
+    final Set<AstroAlmanacTime> sunTimes = almanac.getSunTimes();
+
+    sunTimes.add(new AstroAlmanacTime(na.morningTwilight18.when.jd, AlmanacType.SunTwl18Rise));
+    sunTimes.add(new AstroAlmanacTime(na.morningTwilight12.when.jd, AlmanacType.SunTwl12Rise));
+    sunTimes.add(new AstroAlmanacTime(na.morningTwilight06.when.jd, AlmanacType.SunTwl06Rise));
+    sunTimes.add(new AstroAlmanacTime(na.sunrise.when.jd, AlmanacType.SunRise));
+    sunTimes.add(new AstroAlmanacTime(na.sunset.when.jd, AlmanacType.SunSet));
+    sunTimes.add(new AstroAlmanacTime(na.eveningTwilight06.when.jd, AlmanacType.SunTwl06Set));
+    sunTimes.add(new AstroAlmanacTime(na.eveningTwilight12.when.jd, AlmanacType.SunTwl12Set));
+    sunTimes.add(new AstroAlmanacTime(na.eveningTwilight18.when.jd, AlmanacType.SunTwl18Set));
+
+    // add moon times:
+    final Set<AstroAlmanacTime> moonTimes = almanac.getMoonTimes();
+
+    moonTimes.add(new AstroAlmanacTime(na.moonrise.when.jd, AlmanacType.MoonRise));
+    moonTimes.add(new AstroAlmanacTime(na.moonset.when.jd, AlmanacType.MoonSet));
   }
 
   /**
