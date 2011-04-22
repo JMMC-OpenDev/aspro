@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AstroSkyCalcObservation.java,v 1.2 2010-09-15 13:51:47 bourgesl Exp $"
+ * "@(#) $Id: AstroSkyCalcObservation.java,v 1.3 2011-04-22 15:37:49 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2010/09/15 13:51:47  bourgesl
+ * comments explaining how to get moon angular distance
+ *
  * Revision 1.1  2010/06/25 14:12:38  bourgesl
  * methods from AstoSkyCalc related to targets moved in AstoSkyCalcObservation
  *
@@ -73,7 +76,7 @@ public final class AstroSkyCalcObservation {
     final Celest target = new Celest(AngleUtils.deg2hours(ra), dec, AsproConstants.EPOCH_J2000);
 
     if (logger.isLoggable(Level.FINE)) {
-      logger.fine("Target [RA/DEC/EPOCH] :" + target.Alpha.RoundedRAString(3, ":") + " " + target.Delta.RoundedDecString(3, ":"));
+      logger.fine("Target [RA/DEC/EPOCH] :" + target.alpha.RoundedRAString(3, ":") + " " + target.delta.RoundedDecString(3, ":"));
     }
 
     // define jd :
@@ -81,7 +84,7 @@ public final class AstroSkyCalcObservation {
 
     this.observation = new Observation(ww, target);
 
-    return new double[]{this.observation.current.Alpha.value, this.observation.current.Delta.value};
+    return new double[]{this.observation.current.alpha.value, this.observation.current.delta.value};
   }
 
   /**
@@ -116,7 +119,7 @@ public final class AstroSkyCalcObservation {
    * Log the minimum and maximum elevation for the current target / site
    */
   private void getTargetMinMaxAlt() {
-    final double[] minmax = Spherical.min_max_alt(this.site.lat.value, this.observation.current.Delta.value);
+    final double[] minmax = Spherical.min_max_alt(this.site.lat.value, this.observation.current.delta.value);
 
     // degrees :
     if (logger.isLoggable(Level.FINE)) {
@@ -179,8 +182,8 @@ public final class AstroSkyCalcObservation {
     final Celest target = new Celest(AngleUtils.deg2hours(ra), dec, AsproConstants.EPOCH_J2000);
 
     return new String[]{
-              target.Alpha.RoundedRAString(raDigits, ":"),
-              target.Delta.RoundedDecString(decDigits, ":")
+              target.alpha.RoundedRAString(raDigits, ":"),
+              target.delta.RoundedDecString(decDigits, ":")
             };
   }
 }
