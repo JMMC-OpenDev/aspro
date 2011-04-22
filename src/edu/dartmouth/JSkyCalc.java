@@ -66,4633 +66,15 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableColumn;
 import javax.swing.text.html.HTMLEditorKit;
 
-
 /* JSkyCalc.java -- copyright 2007, John Thorstensen, Dartmouth College. */
 /** TERMS OF USE -- Anyone is free to use this software for any purpose, and to
 modify it for their own purposes, provided that credit is given to the author
 in a prominent place.  For the present program that means that the green
 title and author banner appearing on the main window must not be removed,
 and may not be altered without premission of the author. */
-class Const {
-  /* some constants */
 
-  public static final double J2000 = 2451545.; // the julian epoch 2000
-  public static final double DEG_IN_RADIAN = 57.2957795130823;
-  public static final double HRS_IN_RADIAN = 3.81971863420549;
-  public static final double ARCSEC_IN_RADIAN = 206264.806247096;
-  public static final double PI_OVER_2 = 1.5707963267949;
-  public static final double PI = 3.14159265358979;
-  public static final double TWOPI = 6.28318530717959;
-  public static final double EARTHRAD_IN_AU = 23454.7910556298; // earth radii in 1 AU 
-  public static final double EARTHRAD_IN_KM = 6378.1366; // equatorial
-  public static final double KMS_AUDAY = 1731.45683633; // 1731 km/sec = 1 AU/d
-  public static final double SPEED_OF_LIGHT = 299792.458; // exact, km/s. 
-  public static final double SS_MASS = 1.00134198; // solar system mass, M_sun 
-  public static final double ASTRO_UNIT = 1.4959787066e11; // 1 AU in meters 
-  public static final double LIGHTSEC_IN_AU = 499.0047863852; // 1 AU in SI meters 
-  public static final double OMEGA_EARTH = 7.292116e-5; // inertial ang vel of earth
-  public static final double SID_RATE = 1.0027379093;  // sidereal/solar ratio
-}
-
-class sexagesimal implements Cloneable {
-
-  int sign;
-  int hour, minute;
-  double second;
-  double value;
-
-  // Overloaded constructor takes either a string or a double argument.
-  // little public classes wrap the ones that do all the work.
-  public sexagesimal(String s) {
-    parseSexString(s);
-  }
-
-  public sexagesimal(double v) {
-    tosex(v);
-    value = v;
-  }
-
-  @Override
-  public sexagesimal clone() {
-    try {
-      sexagesimal copy = (sexagesimal) super.clone();
-      copy.sign = sign;
-      copy.hour = hour;
-      copy.minute = minute;
-      copy.second = second;
-      copy.value = value;
-      return copy;
-    } catch (CloneNotSupportedException e) {
-      throw new Error("This should never happen!");
-    }
-  }
-
-  void tosex(double h) {  // decimal hour converter ...
-    double m;
-    // System.out.printf("h = %f\n",h);
-    if (h >= 0.) {
-      sign = 1;
-    } else {
-      sign = -1;
-    }
-    h = h * sign;
-    hour = (int) h;
-    m = 60. * (h - (double) hour);
-    minute = (int) m;
-    second = 60. * (m - (double) minute);
-    // System.out.printf("sgn h m s %d  %d %d %f\n",sign,hour,minute,second);
-  }
-
-  void parseSexString(String s) {
-    // converts a string, either colon or space separated, into a
-    // sexagesimal. "minus-zero" problem is handled.
-    double doubleMinute;
-    String[] fields;
-    if (s.contains(":")) {
-      fields = s.split(":");      // colon-delimited
-    } else {
-      fields = s.split("\\s+");  // whitespace
-    }
-    if (fields.length == 1) {  // a string, but just a single number
-      value = Double.parseDouble(fields[0]);
-      tosex(value);
-    } else {   // it's a triplet (or possibly doublet)
-      // for (String ss : fields) {
-      // System.out.printf("%s ... ",ss);  // colon-delimited
-      // }
-      if (fields[0].contains("-")) {
-        sign = -1;
-      } else {
-        sign = 1;
-      }
-      fields[0] = fields[0].replace("+", "");  // parseInt chokes on explicit "+"
-      hour = Integer.parseInt(fields[0]);
-      if (hour < 0) {
-        hour = hour * -1;   // positive definite
-      }
-      try {
-        minute = Integer.parseInt(fields[1]);
-      } catch (NumberFormatException e) { // decimal minute input
-        doubleMinute = Double.parseDouble(fields[1]);
-        minute = (int) doubleMinute;
-        second = 60. * (double) (doubleMinute - (double) minute);
-      }
-      if (fields.length > 2) {  // seconds are there ...
-        second = Double.parseDouble(fields[2]);
-      }
-    }
-    // System.out.printf("%d  %d %d %f\n",sign,hour,minute,second);
-    value = (double) hour + (double) minute / 60. + (double) second / 3600.;
-    value = value * sign;
-    // System.out.printf("value: %f\n",value);
-  }
-
-  public sexagesimal roundsex(int ndigits) {
-    // returns a sexagesimal rounded off to ndigits
-    // so that seconds and minutes are never 60.  Higher overflows
-    // (e.g. 24 00 00 for a time of day) will be handled elsewhere.
-
-    String teststr = "";
-    String testformat = "";
-    int hourback, minuteback;
-    double secondback;
-    int secondswidth;
-    int tenthMinutes;
-    double decimalMinute, decimalMinuteback;
-
-    if (ndigits >= 0) {  // including seconds ...
-      if (ndigits == 0) {
-        testformat =
-                String.format(Locale.ENGLISH, "%%d %%d %%02.0f");
-      }
-      if (ndigits > 0) {
-        secondswidth = 3 + ndigits;
-        testformat = String.format(Locale.ENGLISH, "%%d %%d %%0%1d.%1df",
-                secondswidth, ndigits);
-        // System.out.println(testformat);
-      }
-
-      // System.out.printf("In roundsex, testformat = %s\n",testformat);
-      teststr = String.format(Locale.ENGLISH, testformat, hour, minute, second);
-      Scanner readback = new Scanner(teststr).useDelimiter("\\s");
-      readback.useLocale(Locale.ENGLISH);
-      // read back the result ...
-      // System.out.printf("In roundsex, teststr = %s\n",teststr);
-      hourback = readback.nextInt();
-      if (hourback < 0.) {
-        hourback *= -1.;
-      }
-      minuteback = readback.nextInt();
-      secondback = readback.nextDouble();
-      // System.out.printf("read back: %d %d %f\n",hourback,minuteback,secondback);
-      if (secondback > 59.999999999) {  // klugy, but should be very safe
-        secondback = 0.;
-        minuteback++;
-        if (minuteback == 60) {
-          minuteback = 0;
-          hourback++; // overflows to 24, etc need to be handled
-          // at the next level
-        }
-        teststr = String.format(Locale.ENGLISH, testformat, hourback, minuteback, secondback);
-      }
-    } else {  // -1 -> tenths of a minute, -2 -> whole minutes
-      decimalMinute = minute + second / 60.;
-      if (ndigits == -1) {
-        teststr = String.format(Locale.ENGLISH, "%d %4.1f", hour, decimalMinute);
-      }
-      if (ndigits <= -2) {
-        teststr = String.format(Locale.ENGLISH, "%d %02.0f", hour, decimalMinute);
-      }
-      Scanner readback = new Scanner(teststr);
-      readback.useLocale(Locale.ENGLISH);
-      hourback = readback.nextInt();
-      decimalMinuteback = readback.nextDouble();
-      if (decimalMinuteback > 59.99) {  // limited precision - this will be safe
-        decimalMinuteback = 0.00001;
-        hourback++;
-      }
-      minuteback = (int) decimalMinuteback;
-      if (ndigits == -1) {
-        tenthMinutes = (int) ((10. * (decimalMinuteback - minuteback) + 0.0001));
-        teststr = String.format(Locale.ENGLISH, "%d %02d.%1d", hourback, minuteback, tenthMinutes);
-      } else {
-        teststr = String.format(Locale.ENGLISH, "%d %02d", hourback, minuteback);
-      }
-    }
-    sexagesimal roundedsex = new sexagesimal(teststr);
-    roundedsex.sign = sign;
-    return roundedsex;
-  }
-}
-
-/* The Java calendar API is pretty nasty, and the DST rules in 
-particular are buried very deeply.  The application I have in 
-mind requires me to have explicit control over these rules in the
-past and the future.  Given that I've already
-written my own date handlers in other languages, I'm thinking
-it may be be easier and more robust for me to just go ahead and 
-reproduce that functionality from scratch.  */
-class GenericCalDat implements Cloneable
-/** GenericCalDat - handles conversions back and forth to JD, and 
-formatting and rounding of dates.  Rounding of times is handled in the
-sexagesimal class, and then continued rounding of dates is handled 
-here.  GenericCalDat is blind to whether the date represented is 
-UT or local - that's handled by InstantInTime. */
-{
-
-  int year, month, day;
-  sexagesimal timeofday;
-  String[] months = {"", "January", "February", "March", "April",
-    "May", "June", "July", "August", "September", "October", "November",
-    "December"};
-  String monthtest = "janfebmaraprmayjunjulaugsepoctnovdec";
-  String[] dayname = {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
-
-  // Polymorphism! Overload constructor class to
-  // accept either a string or a double.
-  public GenericCalDat(String s) {
-    // "yyyy mm dd hh mm ss" ... or JD as character string.
-    CalFromString(s);
-  }
-  // overload the constructor method to take a JD number.
-
-  public GenericCalDat(double jdin) {
-    CalFromJD(jdin);
-  }
-
-  @Override
-  public GenericCalDat clone() {
-    try {
-      GenericCalDat copy = (GenericCalDat) super.clone();
-      copy.year = year;
-      copy.month = month;
-      copy.day = day;
-      copy.timeofday = (sexagesimal) timeofday.clone();
-      return copy;
-    } catch (CloneNotSupportedException e) {
-      throw new Error("This should never happen!");
-    }
-  }
-
-  void CalFromJD(double jd) {
-    /* sets the calendar date using the current values of jd -- can
-    be either a local or UT date */
-
-    /* Adapted from J. Meeus,  Astronomical Formulae for Calculators,
-    published by Willman-Bell Inc.
-    Avoids a copyrighted routine from Numerical Recipes.
-    Tested and works properly from the beginning of the
-    calendar era (1583) to beyond 3000 AD. */
-
-    double tmp;
-    long alpha;
-    long Z, A, B, C, D, E;
-    double F, x;
-    int dow;
-    double jdin;
-    int rounded_ok = 0;
-
-    jdin = jd;
-
-
-    while (rounded_ok == 0) {
-      tmp = jdin + 0.5;
-      Z = (long) tmp;
-      x = Z / 7. + 0.01;
-      dow = (int) (7. * Math.floor(x));
-
-      F = tmp - Z;
-      if (Z < 2299161) {
-        A = Z;
-      } else {
-        alpha = (long) ((Z - 1867216.25) / 36524.25);
-        A = Z + 1 + alpha - (long) (alpha / 4);
-      }
-
-      B = A + 1524;
-      C = (long) ((B - 122.1) / 365.25);
-      D = (long) (365.25 * C);
-      E = (long) ((B - D) / 30.6001);
-
-      day = (int) (B - D - (long) (30.6001 * E));
-      if (E < 13.5) {
-        month = (int) (E - 1);
-      } else {
-        month = (int) (E - 13);
-      }
-      if (month > 2.5) {
-        year = (int) (C - 4716);
-      } else {
-        year = (int) (C - 4715);
-      }
-      timeofday = new sexagesimal(24. * F);
-
-      if (timeofday.hour == 24) {
-        jdin = jdin + 1.0e-7; // near to the resolution of the double
-      } else {
-        rounded_ok = 1;
-      }
-    }
-  }
-
-  void CalFromString(String s) {
-    // "yyyy mm dd hh mm ss" ... or just a string "JD".
-    // "yyyy mm dd" or "yyyy mm dd hh mm" work ok too.
-    // "2006 Jul 14" works, as does "2006 July 14 18:00"
-    String[] fields = s.split("\\s+");   // whitespace
-
-    if (fields.length == 1) { // presumably only a JD ...
-      double jdin = Double.parseDouble(fields[0]);
-      CalFromJD(jdin);
-      return;
-    }
-
-    year = Integer.parseInt(fields[0]);
-    try {
-      month = Integer.parseInt(fields[1]);
-    } catch (NumberFormatException e) {
-      // System.out.println("Catching exception .. ");
-      String ss = fields[1].toLowerCase();
-      ss = ss.substring(0, 3);
-      int ind = monthtest.indexOf(ss);
-      if (ind > -1) {
-        month = ((ind / 3) + 1);
-        // System.out.printf("ss %s ind %d month %d\n",ss,ind,month);
-      } else {
-        // System.out.println("Undecipherable month, set to 1000.\n");
-        month = 1000;
-      }
-    }
-    day = Integer.parseInt(fields[2]);
-    if (fields.length == 4) { // colon-sep time included
-      timeofday = new sexagesimal(fields[3]);
-    }
-    if (fields.length == 5) {
-      timeofday = new sexagesimal(String.format(Locale.ENGLISH, "%s:%s", fields[3], fields[4]));
-    }
-    if (fields.length > 5) {
-      timeofday =
-              new sexagesimal(String.format(Locale.ENGLISH, "%s:%s:%s", fields[3], fields[4], fields[5]));
-    }
-  }
-
-  double Cal2JD() {
-
-    int y, m;
-    long A, B;
-    double jdout;
-
-    // System.out.printf("%d %d %d  %d %d %f\n",
-    // year,month,day,timeofday.hour,timeofday.minute,timeofday.second);
-
-    if (month <= 2) {
-      y = year - 1;
-      m = month + 12;
-    } else {
-      y = year;
-      m = month;
-    }
-
-    A = (long) ((double) (y + 0.00000001) / 100.);
-    B = 2 - A + (long) ((double) (A + 0.000000001) / 4.);
-
-    jdout = (long) (365.25 * (double) y) + (long) (30.6001 * (m + 1)) + day +
-            1720994.5;
-    //System.out.println(jd);
-    jdout += (double) timeofday.hour / 24. + (double) timeofday.minute / 1440. +
-            timeofday.second / 86400.;
-    //System.out.println(jd);
-
-    if (year > 1583) {
-      return (jdout + (double) B);
-    } else {
-      return jdout;
-    }
-  }
-
-  int DayOfWeek() {
-    /** Adapted straight from skycalc, returns 0=Mon throuh 6=Sun **/
-    double jd;
-    long i;
-    double x;
-    int d;
-
-    jd = Cal2JD() + 0.5;
-    i = (long) jd;
-    x = i / 7. + 0.01;
-    d = (int) (7. * (x - (long) x));
-    return d;
-  }
-
-  void quickprint() {
-    System.out.printf("%d %02d %02d  %02d %02d %f",
-            year, month, day, timeofday.hour, timeofday.minute, timeofday.second);
-    System.out.printf(" -> %s\n", dayname[DayOfWeek()]);
-  }
-
-  String RoundedCalString(int style, int digits) {
-    /** Returns a descriptive string; rather than writing a flexible
-    format I'll code a number of options.  Much sturm und drang here
-    because of the need to round the day along with everything else.
-    These styles follow cooclasses.py; I'll write more as needed. :
-
-    style 0 -> 2006 8 12  10 11 12
-    style 1 -> 2005 Aug 12  10 11
-    style 2 -> Fri Aug 12  10:11
-    style 3 -> 2005 Aug 12
-    style 4 -> Fri Aug 12
-    style 5 -> 2005 6 12
-    style 6 -> 2006 Aug 12 Tue
-    style 7 -> Fri 2006 Aug 12  10:11
-
-    style 10 -> (time only) 10 11 12.0
-    style 11 -> (time only) 10:11:12.0
-    style 12 -> (time only) 10:11
-
-    These are included here to force correct rounding when printing
-    only the time.
-
-     */
-    String result;
-    String outputFormat;
-    int timeDigits;
-    double jdtemp;
-    int printYear, printMonth, printDay;
-    int printHour, printMinute;
-    double printSecond;
-    int printDOW;
-
-
-    if (style == 0) {
-      digits = 0;
-    }
-    if (style == 1 | style == 2 | style == 12) {
-      digits = -2;
-    }
-
-    sexagesimal Rounded = timeofday.roundsex(digits);
-    // round the date upward ...
-    if (Rounded.hour == 24) {
-      // System.out.println("Oops, gotta round day upward.\n");
-      jdtemp = Cal2JD() + 0.4; // this will always round upward
-      // and never screw the day of week
-      GenericCalDat tempcal = new GenericCalDat(jdtemp);
-      printYear = tempcal.year;
-      printMonth = tempcal.month;
-      printDay = tempcal.day;
-      printHour = 0;
-      printMinute = 0;
-      printSecond = 0.;
-      printDOW = tempcal.DayOfWeek();
-    } else {
-      printYear = year;
-      printMonth = month;
-      printDay = day;
-      printHour = Rounded.hour;
-      printMinute = Rounded.minute;
-      printSecond = Rounded.second;
-      printDOW = DayOfWeek();
-    }
-    String monthAbr = months[printMonth].substring(0, 3);
-    switch (style) {
-      case 0:
-        // System.out.println("*** 0 ***");
-        result = String.format(Locale.ENGLISH, "%4d %02d %02d  %02d %02d %02.0f",
-                printYear, printMonth, printDay, printHour, printMinute,
-                printSecond);
-        break;
-      case 1:
-        // System.out.println("*** 1 ***");
-        result = String.format(Locale.ENGLISH, "%4d %s %02d  %02d %02d",
-                printYear, monthAbr, printDay, printHour, printMinute);
-        break;
-      case 2:
-        // System.out.println("*** 2 ***");
-        result = String.format(Locale.ENGLISH, "%s %s %02d  %02d:%02d",
-                dayname[printDOW], monthAbr, printDay, printHour, printMinute);
-        break;
-      case 3:
-        // System.out.println("*** 3 ***");
-        result = String.format(Locale.ENGLISH, "%4d %s %02d", printYear, monthAbr,
-                printDay);
-        break;
-      case 4:
-        // System.out.println("*** 4 ***");
-        result = String.format(Locale.ENGLISH, "%s %s %02d", dayname[printDOW],
-                monthAbr, printDay);
-        break;
-      case 5:
-        // System.out.println("*** 5 ***");
-        result = String.format(Locale.ENGLISH, "%4d %02d %02d", printYear, printMonth,
-                printDay);
-        break;
-      case 6:
-        // System.out.println("*** 6 ***");
-        result = String.format(Locale.ENGLISH, "%4d %s %02d  %s", printYear, monthAbr,
-                printDay, dayname[printDOW]);
-        break;
-      case 7:
-        // System.out.println("*** 2 ***");
-        result = String.format(Locale.ENGLISH, "%s  %4d %s %02d  %02d:%02d",
-                dayname[printDOW], printYear, monthAbr, printDay, printHour, printMinute);
-        break;
-
-      case 11:
-        // System.out.println("*** 11 ***");
-        result = String.format(Locale.ENGLISH, "%02d %02d %04.1f", printHour, printMinute,
-                printSecond);
-        break;
-      case 12:
-        result = String.format(Locale.ENGLISH, "%02d:%02d", printHour, printMinute);
-        break;
-      default:
-        // System.out.println("*** Default ***");
-        result = String.format(Locale.ENGLISH, "%02d %02d %02.0f",
-                printYear, monthAbr, printDay, printHour, printMinute,
-                printSecond);
-    }
-    return result;
-  }
-}
-
-class InstantInTime implements Cloneable
-/** The instance variable jd is the true jd (always), and there are 
-two GenericCalDat instances, UTDate and localDate.  Instance 
-variables stdz and useDST are the std zone offset (hours west) and an 
-integer encoding which daylight savings convention is used.  
-FindDSTBounds figures out whether DST is actually in effect.
- **/
-{
-
-  double jd;   /* the real JD, always. */
-
-  GenericCalDat UTDate;
-  GenericCalDat localDate;
-  double localjd;   /* used transiently ... */
-
-  double stdz;   // hours west
-  int useDST;
-  boolean dstInEffect = false;
-  double[] DSTBounds = {0., 0};
-  static double TheEpoch = 2440587.50000;  // Jan 1, 1970 0h UT
-
-  public InstantInTime(double stdzin, int use_dst) {
-    // default constructor sets to system time ...
-    stdz = stdzin;
-    useDST = use_dst;
-    SetInstant(stdzin, use_dst);
-  }
-
-  public InstantInTime(String s, double stdzin,
-          int use_dst, boolean is_ut) {
-    /* allowed formats are "yyyy mo dd hh mm ss" and "mo" can
-    be a three-letter abbreviation. */
-    stdz = stdzin;
-    useDST = use_dst;
-    SetInstant(s, stdzin, use_dst, is_ut);
-  }
-
-  public InstantInTime(double jdin, double stdzin,
-          int use_dst, boolean is_ut) {
-    /* allowed formats are "yyyy mo dd hh mm ss" and "mo" can
-    be a three-letter abbreviation. */
-    stdz = stdzin;
-    useDST = use_dst;
-    SetInstant(jdin, stdzin, use_dst, is_ut);
-  }
-
-  void SetInstant(double stdzin, int use_dst) {
-    // when no time specified, sets to system time.
-    long milliseconds;
-    double jdnow;
-
-    stdz = stdzin;
-    useDST = use_dst;
-    milliseconds = System.currentTimeMillis();
-    jdnow = TheEpoch + milliseconds / 86400000.;
-    SetInstant(jdnow, stdzin, use_dst, true);
-  }
-
-  @Override
-  public InstantInTime clone() {
-    try {
-      InstantInTime copy = (InstantInTime) super.clone();
-      copy.jd = jd;
-      copy.UTDate = (GenericCalDat) UTDate.clone();
-      copy.localDate = (GenericCalDat) localDate.clone();
-      copy.localjd = localjd;
-      copy.stdz = stdz;
-      copy.useDST = useDST;
-      copy.dstInEffect = dstInEffect;
-      copy.DSTBounds = DSTBounds;
-      return copy;
-    } catch (CloneNotSupportedException e) {
-      throw new Error("This should never happen!");
-    }
-  }
-
-  void SetInstant(String s, double stdzin, int use_dst, boolean is_ut) {
-
-    useDST = use_dst;
-
-    if (is_ut) {
-      UTDate = new GenericCalDat(s);
-      jd = UTDate.Cal2JD();
-      // System.out.printf("Setting to UT, s = %s,jd = %f\n",s,jd);
-      // The DST calculation is not sensitive to year if dstInEffect is
-      // computed using the same year as used in findDSTBounds.
-      if (use_dst == 0) {
-        dstInEffect = false;
-      } else {  // determine if DST is in effect ...
-        DSTBounds = findDSTBounds(UTDate.year, stdzin, use_dst);
-        if (use_dst > 0) {  // northern hemisphere logic
-          if (jd > DSTBounds[0] & jd < DSTBounds[1]) {
-            dstInEffect = true;
-          } else {
-            dstInEffect = false;
-          }
-        }
-        if (use_dst < 0) {  // southern hemisphere logic
-          if (jd < DSTBounds[0] | jd > DSTBounds[1]) {
-            dstInEffect = true;
-          } else {
-            dstInEffect = false;
-          }
-        }
-        // System.out.printf("use_dst %d jd %f Bounds[0,1] = %f %f\n",
-        //   use_dst,jd,DSTBounds[0],DSTBounds[1]);
-        // if (dstInEffect) System.out.printf("DST is in effect.\n");
-        // else System.out.printf("DST is NOT in effect.\n");
-      }
-
-      if (dstInEffect) {
-        localjd = jd - (stdzin - 1.) / 24.;
-        //  System.out.printf("setting localjd using DST\n");
-      } else {
-        localjd = jd - (stdzin / 24.);
-        //  System.out.printf("Setting localjd using std time\n");
-      }
-      localDate = new GenericCalDat(localjd);
-
-    } else {  // input string is local date and time.
-      localDate = new GenericCalDat(s);  // by definition ..
-      localjd = localDate.Cal2JD();
-      // System.out.printf("using localjd = %f\n",localjd);
-      if (use_dst == 0) {
-        dstInEffect = false;
-      } else { // dst is used if applicable ... use local-time limits of
-        // applicability {DSTBounds [2] and [3] instead of [0] and [1])
-        DSTBounds = findDSTBounds(localDate.year, stdzin, use_dst);
-        if (use_dst > 0) {  // northern hemisphere logic
-          if (localjd > DSTBounds[2] & localjd < DSTBounds[3]) {
-            dstInEffect = true;
-          } else {
-            dstInEffect = false;
-          }
-        }
-        if (use_dst < 0) {  // southern hemisphere logic
-          if (localjd < DSTBounds[2] | localjd > DSTBounds[3]) {
-            dstInEffect = true;
-          } else {
-            dstInEffect = false;
-          }
-        }
-      }
-
-      if (dstInEffect) {
-        jd = localjd + (stdzin - 1.) / 24.;
-      } else {
-        jd = localjd + stdzin / 24.;
-      }
-      // System.out.printf("Setting jd to %f\n",jd);
-      UTDate = new GenericCalDat(jd);
-    }
-  }
-
-  void AdvanceTime(String s, double stdzin, int use_dst_in) {
-    String[] fields;
-    String lastfield;
-    double inputdelta, delta;
-    int nf;
-
-    stdz = stdzin;
-    useDST = use_dst_in;
-
-    fields = s.split("\\s+");  // whitespace
-
-    nf = fields.length;
-    inputdelta = Double.parseDouble(fields[0]);
-    if (nf > 1) {
-      lastfield = fields[nf - 1].toLowerCase();
-    } else {
-      lastfield = "h";   // defaults to hours
-    }
-    // use first character to tell us what the unit is
-//      System.out.printf("last field %s  lastfield.substring(0,1) :%s:\n",
-    //          lastfield,lastfield.substring(0,1));
-    if (lastfield.startsWith("h")) {
-      delta = inputdelta / 24.;
-    } else if (lastfield.startsWith("m")) {
-      delta = inputdelta / 1440.;
-    } else if (lastfield.startsWith("s")) {
-      delta = inputdelta / 86400.;
-    } else if (lastfield.startsWith("d")) {
-      delta = inputdelta;
-    } else if (lastfield.startsWith("t")) {
-      delta = inputdelta / 1.0027379093;
-    } // 1 sidereal day
-    else if (lastfield.startsWith("l")) {
-      delta = 29.5307 * inputdelta;
-    } // 1 lunation
-    else if (lastfield.startsWith("y")) {
-      delta = 365. * inputdelta;
-    } else {
-      delta = inputdelta / 24.;
-    }
-
-    SetInstant(jd + delta, stdz, useDST, true);
-    // jd is always UT, so use_dst is true
-
-  }
-
-  void AdvanceTime(String s, double stdzin, int use_dst_in, boolean forward) {
-    String[] fields;
-    String lastfield;
-    double inputdelta, delta;
-    int nf;
-
-    stdz = stdzin;
-    useDST = use_dst_in;
-
-    fields = s.split("\\s+");  // whitespace
-
-    nf = fields.length;
-    inputdelta = Double.parseDouble(fields[0]);
-    if (nf > 1) {
-      lastfield = fields[nf - 1].toLowerCase();
-    } else {
-      lastfield = "h";   // defaults to hours
-    }
-    // use first character to tell us what the unit is
-//      System.out.printf("last field %s  lastfield.substring(0,1) :%s:\n",
-    //          lastfield,lastfield.substring(0,1));
-    if (lastfield.startsWith("h")) {
-      delta = inputdelta / 24.;
-    } else if (lastfield.startsWith("m")) {
-      delta = inputdelta / 1440.;
-    } else if (lastfield.startsWith("s")) {
-      delta = inputdelta / 86400.;
-    } else if (lastfield.startsWith("d")) {
-      delta = inputdelta;
-    } else if (lastfield.startsWith("t")) {
-      delta = inputdelta / 1.0027379093;
-    } // 1 sidereal day
-    else if (lastfield.startsWith("l")) {
-      delta = 29.5307 * inputdelta;
-    } // 1 lunation
-    else if (lastfield.startsWith("y")) {
-      delta = 365. * inputdelta;
-    } else {
-      delta = inputdelta / 24.;
-    }
-    /*      System.out.println("AdvanceTime, delta = " + String.format(Locale.ENGLISH, "%f",delta) +
-    "forward = " + forward); */
-
-    if (forward) {
-      SetInstant(jd + delta, stdz, useDST, true);
-    } // jd is always UT, so use_dst is true
-    else {
-      SetInstant(jd - delta, stdz, useDST, true);
-      // System.out.printf("AdvanceTime: JD, delta %f %f  stdz %f useDST %d\n",
-      //          jd,delta,stdz,useDST);
-      }
-  }
-
-  void SetInstant(double jdin, double stdzin, int use_dst, boolean is_ut) {
-    // Silly to repeat all that code just to change datatype ...
-    // but it'll work correctly at least.
-
-    useDST = use_dst;
-
-    if (is_ut) {
-      jd = jdin;  // by definition, it's the JD
-      UTDate = new GenericCalDat(jd);
-      // The DST calculation is not sensitive to year if dstInEffect is
-      // computed using the same year as used in findDSTBounds.
-      if (use_dst == 0) {
-        dstInEffect = false;
-      } else {  // determine if DST is in effect ...
-        DSTBounds = findDSTBounds(UTDate.year, stdzin, use_dst);
-        if (use_dst > 0) {  // northern hemisphere logic
-          if (jd > DSTBounds[0] & jd < DSTBounds[1]) {
-            dstInEffect = true;
-          } else {
-            dstInEffect = false;
-          }
-        }
-        if (use_dst < 0) {  // southern hemisphere logic
-          if (jd < DSTBounds[0] | jd > DSTBounds[1]) {
-            dstInEffect = true;
-          } else {
-            dstInEffect = false;
-          }
-        }
-        // System.out.printf("use_dst %d jd %f Bounds[0,1] = %f %f\n",
-        //   use_dst,jd,DSTBounds[0],DSTBounds[1]);
-        // if (dstInEffect) System.out.printf("DST is in effect.\n");
-        // else System.out.printf("DST is NOT in effect.\n");
-      }
-
-      if (dstInEffect) {
-        localjd = jd - (stdzin - 1.) / 24.;
-      } else {
-        localjd = jd - (stdzin / 24.);
-      }
-      localDate = new GenericCalDat(localjd);
-    } else {  // input string is local date and time.
-      localDate = new GenericCalDat(jdin);  // by definition ..
-      localjd = localDate.Cal2JD();
-      if (use_dst == 0) {
-        dstInEffect = false;
-      } else { // dst is used if applicable ... use local-time limits of
-        // applicability (DSTBounds [2] and [3] instead of [0] and [1])
-        DSTBounds = findDSTBounds(localDate.year, stdzin, use_dst);
-        if (use_dst > 0) {  // northern hemisphere logic
-          if (localjd > DSTBounds[2] & localjd < DSTBounds[3]) {
-            dstInEffect = true;
-          } else {
-            dstInEffect = false;
-          }
-        }
-        if (use_dst < 0) {  // southern hemisphere logic
-          if (localjd < DSTBounds[2] | localjd > DSTBounds[3]) {
-            dstInEffect = true;
-          } else {
-            dstInEffect = false;
-          }
-        }
-      }
-
-      if (dstInEffect) {
-        jd = localjd + (stdzin - 1.) / 24.;
-      } else {
-        jd = localjd + stdzin / 24.;
-      }
-      UTDate = new GenericCalDat(jd);
-    }
-  }
-
-  double[] findDSTBounds(int year, double stdz, int use_dst) {
-    /** returns jdb and jde, first and last dates for dst in year.
-    [0] and [1] are true JD, [2] and [3] are reckoned wrt local time.
-    This proved to be useful later.
-    The parameter use_dst allows for a number
-    of conventions, namely:
-    0 = don't use it at all (standard time all the time)
-    1 = use USA convention (1st Sun in April to
-    last Sun in Oct 1986 - 2006; last Sun in April before;
-    2nd sunday in March to first in Nov from 2007 on.)
-    2 = use Spanish convention (for Canary Islands)
-    -1 = use Chilean convention (CTIO).
-    -2 = Australian convention (for AAT).
-    Negative numbers denote sites in the southern hemisphere,
-    where jdb and jde are beginning and end of STANDARD time for
-    the year.
-    It's assumed that the time changes at 2AM local time; so
-    when clock is set ahead, time jumps suddenly from 2 to 3,
-    and when time is set back, the hour from 1 to 2 AM local
-    time is repeated.  This could be changed in code if need be.
-    Straight translation of skycalc c routine.
-     **/
-    int nSundays = 0;
-    int nSaturdays = 0;  // for Chile, keep descriptive name
-    int trialday = 1;
-    int trialdow = 0;
-    String trialstring;
-    double[] JDBoundary = {0., 0., 0., 0.};
-    double jdtmp;
-
-    GenericCalDat trial = new GenericCalDat("2000 1 1 1 1 1");
-    if (use_dst == 0) {  // if DST is not used this shouldn't matter.
-      return JDBoundary;  // this is a common case, get outta here fast.
-    } else if (use_dst == 1) {
-      // USA conventions from mid-60s (?) onward.
-      // No attempt to account for energy-crisis measures (Nixon admin.)
-      if (year < 1986) {  // last sunday in April
-        trialday = 30;
-        while (trialdow != 6) {
-          trialstring = String.format(Locale.ENGLISH, "%d 4 %d 2 0 0", year, trialday);
-          trial.CalFromString(trialstring);
-          trialdow = trial.DayOfWeek();
-          trialday--;
-        }
-      } else if (year <= 2006) {  // first Sunday in April
-        trialday = 1;
-        trialdow = 0;
-        while (trialdow != 6) {
-          trialstring = String.format(Locale.ENGLISH, "%d 4 %d 2 0 0", year, trialday);
-          trial.CalFromString(trialstring);
-          trialdow = trial.DayOfWeek();
-          trialday++;
-        }
-      } else {  // 2007 and after, it's 2nd Sunday in March ....
-        nSundays = 0;
-        trialday = 1;
-        trialdow = 0;
-        while (nSundays < 2) {
-          trialstring = String.format(Locale.ENGLISH, "%d 3 %d 2 0 0", year, trialday);
-          trial.CalFromString(trialstring);
-          trialdow = trial.DayOfWeek();
-          if (trialdow == 6) {
-            nSundays++;
-          }
-          trialday++;
-        }
-      }
-      jdtmp = trial.Cal2JD();
-      JDBoundary[0] = jdtmp + stdz / 24.;  // true JD of change.
-      JDBoundary[2] = jdtmp;  // local-time version
-
-
-      trialdow = 0;  // for next round
-
-      if (year < 2007) {  // last Sunday in October
-        trialday = 31;
-        while (trialdow != 6) {
-          trialstring = String.format(Locale.ENGLISH, "%d 10 %d 2 0 0", year, trialday);
-          trial.CalFromString(trialstring);
-          trialdow = trial.DayOfWeek();
-          trialday--;
-        }
-      } else {   // first Sunday in November, didn't change in 1986.
-        trialday = 1;
-        trialdow = 0;
-        while (trialdow != 6) {
-          trialstring = String.format(Locale.ENGLISH, "%d 11 %d 2 0 0", year, trialday);
-          trial.CalFromString(trialstring);
-          trialdow = trial.DayOfWeek();
-          trialday++;
-        }
-      }
-      jdtmp = trial.Cal2JD();
-      JDBoundary[1] = jdtmp + (stdz - 1.) / 24.; // true JD
-      JDBoundary[3] = jdtmp;  // local-time version
-    } else if (use_dst == 2) { // EU convention
-      trialday = 31; // start last Sunday in March at 1 AM
-      while (trialdow != 6) {
-        trialstring = String.format(Locale.ENGLISH, "%d 3 %d 1 0 0", year, trialday);
-        trial.CalFromString(trialstring);
-        trialdow = trial.DayOfWeek();
-        trialday--;
-      }
-      jdtmp = trial.Cal2JD();
-      JDBoundary[0] = jdtmp + stdz / 24.;
-      JDBoundary[2] = jdtmp;
-
-      trialday = 30; // end last Sunday in October at 1 AM
-      trialdow = 0;
-      while (trialdow != 6) {
-        trialstring = String.format(Locale.ENGLISH, "%d 10 %d 1 0 0", year, trialday);
-        trial.CalFromString(trialstring);
-        trialdow = trial.DayOfWeek();
-        trialday--;
-      }
-      jdtmp = trial.Cal2JD();
-      JDBoundary[1] = jdtmp + (stdz - 1.) / 24.;
-      JDBoundary[3] = jdtmp;
-    } else if (use_dst == -1) { // Chile - negative -> southern
-      // In the south, [0] and [2] -> March-ish -> END of DST
-      //               [1] and [3] -> Octoberish -> BEGIN DST
-
-      trialday = 1;  // starts at 24h on 2nd Sat. of Oct.
-      nSaturdays = 0;
-      while (nSaturdays != 2) {
-        trialstring = String.format(Locale.ENGLISH, "%d 10 %d 23 0 0", year, trialday);
-        // use 11 pm for day calculation to avoid any ambiguity
-        trial.CalFromString(trialstring);
-        trialdow = trial.DayOfWeek();
-        if (trialdow == 5) {
-          nSaturdays++;
-        }
-        trialday++;
-      }
-      jdtmp = trial.Cal2JD();
-      JDBoundary[1] = jdtmp + (stdz + 1.) / 24.;
-      JDBoundary[3] = jdtmp;
-      // add the hour back here (DST start)
-
-      nSaturdays = 0;
-      trialday = 1;
-      while (nSaturdays != 2) { // end on the 2nd Sat in March
-        trialstring = String.format(Locale.ENGLISH, "%d 3 %d 23 0 0", year, trialday);
-        // use 11 pm for day calculation to avoid any ambiguity
-        trial.CalFromString(trialstring);
-        trialdow = trial.DayOfWeek();
-        if (trialdow == 5) {
-          nSaturdays++;
-        }
-        trialday++;
-      }
-      jdtmp = trial.Cal2JD();
-      JDBoundary[0] = jdtmp + stdz / 24.;
-      JDBoundary[2] = jdtmp;
-      // no need to add the hour back, DST is ending now.
-    } else if (use_dst == -2) {  // Australia (NSW)
-      trialday = 31;
-      trialdow = 0;
-      while (trialdow != 6) { // DST begins at 2 AM, Last sun in Oct
-        trialstring = String.format(Locale.ENGLISH, "%d 10 %d 2 0 0", year, trialday);
-        trial.CalFromString(trialstring);
-        trialdow = trial.DayOfWeek();
-        trialday--;
-      }
-      jdtmp = trial.Cal2JD();
-      JDBoundary[1] = jdtmp + stdz / 24.;
-      JDBoundary[3] = jdtmp;
-
-      trialday = 31;
-      trialdow = 0;
-      while (trialdow != 6) { // DST ends at 3 AM, Last sun in March
-        trialstring = String.format(Locale.ENGLISH, "%d 3 %d 3 0 0", year, trialday);
-        trial.CalFromString(trialstring);
-        trialdow = trial.DayOfWeek();
-        trialday--;
-      }
-      jdtmp = trial.Cal2JD();
-      JDBoundary[0] = jdtmp + (stdz + 1.) / 24.;
-      JDBoundary[2] = jdtmp;
-    }
-    return JDBoundary;
-  }
-
-  double JulianEpoch() {
-    return 2000. + (jd - Const.J2000) / 365.25;   // as simple as that ...
-  }
-}
-
-/* Now come the classes that handle celestial coordinates ...  */
-class RA implements Cloneable {
-
-  /** Right Ascension.  */
-  double value;    // decimal hours
-  sexagesimal sex;
-
-  double adjra(double inval) {
-    // System.out.printf("input inval %f ... ",inval);
-    inval = inval % 24.;
-    while (inval < 0.) {
-      inval += 24.;
-    }
-    while (inval > 24.) {
-      inval -= 24.;
-    }
-    // System.out.printf("returning inval = %f\n",inval);
-    return inval;
-  }
-
-  // overloaded constructors are simply wrappers
-  public RA(double inval) {
-    value = adjra(inval);
-    sex = new sexagesimal(value);
-  }
-
-  public RA(String s) {
-    sex = new sexagesimal(s);
-    value = adjra(sex.value);
-    sex.tosex(value);
-  }
-
-  public void setRA(double inval) {
-    value = adjra(inval);
-//      System.out.printf("Setting start %d %d %5.2f  %f  -> ",
-//        sex.hour,sex.minute,sex.second,value);
-    sex.tosex(value);
-//      System.out.printf("%d %d %5.2f ... \n",sex.hour,sex.minute,sex.second);
-  }
-
-  public void setRA(String s) {
-    sex.parseSexString(s);
-    value = adjra(sex.value);
-    sex.tosex(value);
-  }
-
-  @Override
-  public RA clone() {
-    try {
-      RA copy = (RA) super.clone();
-      copy.value = value;
-      copy.sex = (sexagesimal) sex.clone();
-      return copy;
-    } catch (CloneNotSupportedException e) {
-      throw new Error("This should never happen!");
-    }
-  }
-
-  public double radians() {
-    return (value / Const.HRS_IN_RADIAN);
-  }
-
-  public double degrees() {
-    return (value * 15.);
-  }
-
-  public String RoundedRAString(int ndigits, String divider) {
-
-    /** Returns a rounded sexagesimal RA, with the cut imposed at 24 h */
-    sexagesimal rounded;
-    int secfieldwidth;
-    double decimalMinute;
-    String raformat = "";
-    String outstr = "";
-
-    rounded = sex.roundsex(ndigits);
-    if (rounded.hour == 24) {
-      rounded.hour = 0;
-      rounded.minute = 0;
-      rounded.second = 0.;
-    }
-    if (ndigits >= 0) {
-      if (ndigits == 0) {
-        raformat =
-                String.format(Locale.ENGLISH, "%%02d%s%%02d%s%%02.0f", divider, divider);
-      } else {
-        secfieldwidth = ndigits + 3;
-        raformat =
-                String.format(Locale.ENGLISH, "%%02d%s%%02d%s%%0%1d.%1df", divider, divider,
-                secfieldwidth, ndigits);
-      }
-      outstr = String.format(Locale.ENGLISH, raformat, rounded.hour, rounded.minute, rounded.second);
-    } else if (ndigits == -1) {
-      decimalMinute = rounded.minute + rounded.second / 60.;
-      outstr = String.format(Locale.ENGLISH, "%02d%s%04.1f", rounded.hour, divider, decimalMinute);
-    } else if (ndigits == -2) {
-      outstr = String.format(Locale.ENGLISH, "%02d%s%02d", rounded.hour, divider, rounded.minute);
-    }
-    return outstr;
-  }
-}
-
-class HA implements Cloneable {
-
-  /** Hour angle, nearly the same as RA, but force -12 to +12.  */
-  double value;    // decimal hours
-  sexagesimal sex;
-
-  double adjha(double inval) {
-    inval = inval % 24.;
-    while (inval < -12.) {
-      inval += 24.;
-    }
-    while (inval > 12.) {
-      inval -= 24.;
-    }
-    return inval;
-  }
-
-  // overloaded constructors are simply wrappers
-  public HA(double inval) {
-    setHA(inval);
-  }
-
-  public HA(String s) {
-    setHA(s);
-  }
-
-  public void setHA(double inval) {
-    value = adjha(inval);
-    sex = new sexagesimal(value);
-  }
-
-  public void setHA(String s) {
-    sex = new sexagesimal(s);
-    value = adjha(sex.value);
-    sex.tosex(value);
-  }
-
-  @Override
-  public HA clone() {
-    try {
-      HA copy = (HA) super.clone();
-      copy.value = value;
-      copy.sex = (sexagesimal) sex.clone();
-      return copy;
-    } catch (CloneNotSupportedException e) {
-      throw new Error("This should never happen!");
-    }
-  }
-
-  public double radians() {
-    return (value / Const.HRS_IN_RADIAN);
-  }
-
-  public double degrees() {
-    return (value * 15.);
-  }
-
-  public String RoundedHAString(int ndigits, String divider) {
-    /** sexagesimal dec string, with the cut at +- 12 hr */
-    sexagesimal rounded;
-    int secfieldwidth;
-    double decimalMinute;
-    String haformat = "";
-    String outstr = "";
-    String signout = "+";
-
-    rounded = sex.roundsex(ndigits);
-    if (rounded.hour == 12 & rounded.sign == -1) {
-      rounded.hour = 12;
-      rounded.minute = 0;
-      rounded.second = 0.;
-      rounded.sign = 1;
-    }
-    // System.out.printf("rounded.sign = %d\n",rounded.sign);
-    if (rounded.sign > 0) {
-      signout = "+";
-    } else {
-      signout = "-";
-    }
-    if (ndigits >= 0) {
-      if (ndigits == 0) {
-        haformat =
-                String.format(Locale.ENGLISH, "%s%%d%s%%02d%s%%02.0f", signout, divider, divider);
-      } else {
-        secfieldwidth = ndigits + 3;
-        haformat =
-                String.format(Locale.ENGLISH, "%s%%d%s%%02d%s%%0%1d.%1df", signout, divider, divider,
-                secfieldwidth, ndigits);
-      }
-      outstr = String.format(Locale.ENGLISH, haformat, rounded.hour, rounded.minute, rounded.second);
-    } else if (ndigits == -1) {
-      decimalMinute = rounded.minute + rounded.second / 60.;
-      outstr = String.format(Locale.ENGLISH, "%s%d%s%04.1f", signout, rounded.hour, divider, decimalMinute);
-    } else if (ndigits == -2) {
-      outstr = String.format(Locale.ENGLISH, "%s%d%s%02d", signout, rounded.hour, divider, rounded.minute);
-    }
-
-    return outstr;
-  }
-}
-
-class dec implements Cloneable {
-
-  /** declination.  */
-  double value;    // decimal degrees
-  sexagesimal sex;
-
-  // overloaded constructors are simply wrappers
-  public dec(double inval) {
-    setDec(inval);
-  }
-
-  public dec(String s) {
-    setDec(s);
-  }
-  // no good way to adjust out-of-range decs (it
-  // doesn't wrap) so this is simpler than HA and RA
-
-  public void setDec(double inval) {
-    value = inval;
-    sex = new sexagesimal(value);
-  }
-
-  public void setDec(String s) {
-    sex = new sexagesimal(s);
-    value = sex.value;
-  }
-
-  @Override
-  public dec clone() {
-    try {
-      dec copy = (dec) super.clone();
-      copy.value = value;
-      copy.sex = (sexagesimal) sex.clone();
-      return copy;
-    } catch (CloneNotSupportedException e) {
-      throw new Error("This should never happen!");
-    }
-  }
-
-  public double radians() {
-    return (value / Const.DEG_IN_RADIAN);
-  }
-
-  public double degrees() {
-    return (value);   // duuhh - but may be good to have
-  }
-
-  public String RoundedDecString(int ndigits, String divider) {
-    // no need to wrap, so again simpler than HA and RA
-    sexagesimal rounded;
-    int secfieldwidth;
-    double decimalMinute;
-    String decformat = "";
-    String outstr = "";
-    String signout = "+";
-
-    rounded = sex.roundsex(ndigits);
-
-    if (rounded.sign > 0) {
-      signout = "+";
-    } else {
-      signout = "-";
-    }
-    if (ndigits >= 0) {
-      if (ndigits == 0) {
-        decformat =
-                String.format(Locale.ENGLISH, "%s%%02d%s%%02d%s%%02.0f", signout, divider, divider);
-      } else {
-        secfieldwidth = ndigits + 3;
-        decformat =
-                String.format(Locale.ENGLISH, "%s%%02d%s%%02d%s%%0%1d.%1df", signout, divider, divider,
-                secfieldwidth, ndigits);
-      }
-      outstr = String.format(Locale.ENGLISH, decformat, rounded.hour, rounded.minute, rounded.second);
-    } else if (ndigits == -1) {
-      decimalMinute = rounded.minute + rounded.second / 60.;
-      outstr = String.format(Locale.ENGLISH, "%s%02d%s%04.1f", signout, rounded.hour, divider, decimalMinute);
-    } else if (ndigits == -2) {
-      outstr = String.format(Locale.ENGLISH, "%s%02d%s%02d", signout, rounded.hour, divider, rounded.minute);
-    }
-    return outstr;
-  }
-}
-
-class Celest implements Cloneable {
-
-  // A celestial coordinate, which knows its equinox.
-  RA Alpha;
-  dec Delta;
-  double Equinox;
-  double distance;  // not always used but sometimes useful
-  double galat, galong;  //  galactic coords, in degrees.
-
-  // To do:  Add an elaborate input parsing mechanism and overload
-  // constructors like crazy.
-  public Celest(RA a, dec d, double e) {
-    Alpha = a;
-    Delta = d;
-    Equinox = e;
-    distance = 0.;
-  }
-
-  public Celest(double r, double d, double e) {  // ra, dec, and equinox
-    // decimal hours, degr.
-    Alpha = new RA(r);
-    Delta = new dec(d);
-    Equinox = e;
-    distance = 0.;
-  }
-
-  public Celest(double r, double d, double e, double dist) {
-    // ra, dec, and equinox decimal hours, degr; dist in
-    // undefined units.
-    Alpha = new RA(r);
-    Delta = new dec(d);
-    Equinox = e;
-    distance = dist;
-  }
-
-  public Celest(String[] s) {  // ra, dec, and equinox as separate strings
-    Alpha = new RA(s[0]);
-    Delta = new dec(s[1]);
-    Equinox = Double.parseDouble(s[2]);
-    distance = 0.;
-  }
-
-  public Celest(String ras, String decs, String eqs) {
-    // ra, dec, and equinox as separate strings not in an array
-    Alpha = new RA(ras);
-    Delta = new dec(decs);
-    Equinox = Double.parseDouble(eqs);
-    distance = 0.;
-  }
-
-  public Celest(String s) {  // colon-separated ra, dec, equinox (3 string)
-    String[] fields;
-
-    fields = s.split("\\s+");  // whitespace
-    Alpha = new RA(fields[0]);
-    Delta = new dec(fields[1]);
-    Equinox = Double.parseDouble(fields[2]);
-    distance = 0.;
-  }
-
-  @Override
-  public boolean equals(Object arg) {
-    // override (I hope) the Object equals method to use in at least one test later.
-    if ((arg != null) && (arg instanceof Celest)) {
-      Celest c = (Celest) arg;
-      if (c.Alpha.value == Alpha.value && c.Delta.value == Delta.value &&
-              c.Equinox == Equinox) {
-        return true;
-      } else {
-        return false;
-      }
-    } else {
-      return false;
-    }
-  }
-
-  void UpdateFromStrings(String rastr, String decstr, String eqstr) {
-    // updates a previously instantiated celest from three strings.
-    Alpha.setRA(rastr);
-    Delta.setDec(decstr);
-    Equinox = Double.parseDouble(eqstr);
-  }
-
-  @Override
-  public Celest clone() {
-    try {
-      Celest copy = (Celest) super.clone();
-      copy.Alpha = (RA) Alpha.clone();
-      copy.Delta = (dec) Delta.clone();
-      copy.Equinox = Equinox;
-      copy.distance = distance;
-      copy.galat = galat;
-      copy.galong = galong;
-      return copy;
-    } catch (CloneNotSupportedException e) {
-      throw new Error("This should never happen!");
-    }
-  }
-
-  String checkstring() {
-    String outstr = "";
-    outstr = outstr + Alpha.RoundedRAString(2, ":") + "  ";
-    outstr = outstr + Delta.RoundedDecString(1, ":") + "  ";
-    outstr = outstr + String.format(Locale.ENGLISH, "%6.1f", Equinox);
-    return outstr;
-  }
-
-  String shortstring() {
-    String outstr = "";
-    outstr = outstr + Alpha.RoundedRAString(1, ":") + "  ";
-    outstr = outstr + Delta.RoundedDecString(0, ":") + "  ";
-    //outstr = outstr + String.format(Locale.ENGLISH, "%6.1f",Equinox);
-    return outstr;
-  }
-
-  static double[] XYZcel(double x, double y, double z) {
-    /** Given x, y, and z, returns {ra, dec, distance}.  */
-    double mod;
-    double xy;
-    double raout, decout;
-    double[] radecReturn = {0., 0., 0.};
-
-    mod = Math.sqrt(x * x + y * y + z * z);
-    if (mod > 0.) {
-      x = x / mod;
-      y = y / mod;
-      z = z / mod;
-    } else {
-      System.out.println("Zero modulus in XYZcel.");
-      radecReturn[0] = 0.;
-      radecReturn[1] = 0.;
-      radecReturn[2] = 0.;
-      return radecReturn;
-    }
-
-    // System.out.printf("XYZcel: %f %f %f ->\n",x,y,z);
-    xy = Math.sqrt(x * x + y * y);
-    if (xy < 1.0e-11) {  // on the pole
-      raout = 0.;      // ra is degenerate
-      decout = Const.PI_OVER_2;
-      if (z < 0.) {
-        decout *= -1.;
-      }
-    } else {
-      raout = Math.atan2(y, x) * Const.HRS_IN_RADIAN;
-      decout = Math.asin(z) * Const.DEG_IN_RADIAN;
-    }
-    // System.out.printf("%f %f\n",raout,decout);
-    radecReturn[0] = raout;
-    radecReturn[1] = decout;
-    radecReturn[2] = mod;  // it will sometimees be useful to have the dist.
-
-    return radecReturn;
-  }
-
-  double[] cel_unitXYZ() {
-    /** Given instance variables, returns UNIT VECTOR {x,y,z}. */
-    double[] retvals = {0., 0., 0.};
-    double cosdec;
-
-    cosdec = Math.cos(Delta.radians());
-    retvals[0] = Math.cos(Alpha.radians()) * cosdec;
-    retvals[1] = Math.sin(Alpha.radians()) * cosdec;
-    retvals[2] = Math.sin(Delta.radians());
-
-    return retvals;
-  }
-
-  double[] precess(double NewEquinox) {
-    /** generates a unit vector XYZ in equinox NewEquinox from the current
-    Alpha, Delta, and Equinox.  I believe these are IUA 1976 precession
-    constants, which are not fully up-to-date but which are close
-    enough for most puropses. */
-    double ti, tf, zeta, z, theta;
-    double cosz, coszeta, costheta, sinz, sinzeta, sintheta;
-    double[][] p = new double[3][3];
-    double[] orig = new double[3];
-    double[] fin = new double[3];
-
-    int i, j;
-
-
-    //System.out.printf("equinoxes %f %f\n",Equinox,NewEquinox);
-    ti = (Equinox - 2000d) / 100d;
-    tf = (NewEquinox - 2000d - 100d * ti) / 100d;
-
-    zeta = (2306.2181d + 1.39656d * ti + 0.000139d * ti * ti) * tf +
-            (0.30188d - 0.000344d * ti) * tf * tf + 0.017998d * tf * tf * tf;
-    z = zeta + (0.79280d + 0.000410d * ti) * tf * tf + 0.000205d * tf * tf * tf;
-    theta = (2004.3109d - 0.8533d * ti - 0.000217d * ti * ti) * tf - (0.42665d + 0.000217d * ti) * tf * tf - 0.041833d * tf * tf * tf;
-
-    cosz = Math.cos(z / Const.ARCSEC_IN_RADIAN);
-    coszeta = Math.cos(zeta / Const.ARCSEC_IN_RADIAN);
-    costheta = Math.cos(theta / Const.ARCSEC_IN_RADIAN);
-    sinz = Math.sin(z / Const.ARCSEC_IN_RADIAN);
-    sinzeta = Math.sin(zeta / Const.ARCSEC_IN_RADIAN);
-    sintheta = Math.sin(theta / Const.ARCSEC_IN_RADIAN);
-
-    p[0][0] = coszeta * cosz * costheta - sinzeta * sinz;
-    p[0][1] = -1d * sinzeta * cosz * costheta - coszeta * sinz;
-    p[0][2] = -1d * cosz * sintheta;
-
-    p[1][0] = coszeta * sinz * costheta + sinzeta * cosz;
-    p[1][1] = -1d * sinzeta * sinz * costheta + coszeta * cosz;
-    p[1][2] = -1d * sinz * sintheta;
-
-    p[2][0] = coszeta * sintheta;
-    p[2][1] = -1d * sinzeta * sintheta;
-    p[2][2] = costheta;
-
-    final double alpha = Alpha.radians();
-    final double delta = Delta.radians();
-
-    orig[0] = Math.cos(delta) * Math.cos(alpha);
-    orig[1] = Math.cos(delta) * Math.sin(alpha);
-    orig[2] = Math.sin(delta);
-
-    for (i = 0; i < 3; i++) {  // matrix multiplication
-      fin[i] = 0.;
-      //System.out.printf("orig[%d] = %f\n",i,orig[i]);
-      for (j = 0; j < 3; j++) {
-        //System.out.printf("%d%d: %f  ",i,j,p[i][j]);
-        fin[i] += p[i][j] * orig[j];
-      }
-      //System.out.printf("\nfin[%d] = %f\n\n",i,fin[i]);
-      }
-    return XYZcel(fin[0], fin[1], fin[2]);
-
-  }
-
-  public void selfprecess(double newEquinox) {
-    /** precesses a Celest in place. */
-    double[] radecOut;
-    radecOut = precess(newEquinox);
-    Alpha.setRA(radecOut[0]);
-    Delta.setDec(radecOut[1]);
-    Equinox = newEquinox;
-
-  }
-
-  public Celest precessed(double newEquinox) {
-    /** returns a new Celest precessed from this one. */
-    double[] radecOut;
-    radecOut = precess(newEquinox);
-    // System.out.printf("radecOut %f %f\n",radecOut[0],radecOut[1]);
-    Celest outputCel = new Celest(radecOut[0], radecOut[1], newEquinox);
-    return outputCel;
-  }
-
-  void galactic() {
-    /** computes instance variables galong and galat.  Algorithm is
-    rigorous. */
-    Celest cel1950 = precessed(1950);
-    double[] xyz;
-    double[] xyzgal = {0., 0., 0.};
-    double[] temp;
-
-    double p11 = -0.066988739415,
-            p12 = -0.872755765853,
-            p13 = -0.483538914631,
-            p21 = 0.492728466047,
-            p22 = -0.450346958025,
-            p23 = 0.744584633299,
-            p31 = -0.867600811168,
-            p32 = -0.188374601707,
-            p33 = 0.460199784759;
-
-    xyz = cel1950.cel_unitXYZ();
-
-    xyzgal[0] = xyz[0] * p11 + xyz[1] * p12 + xyz[2] * p13;
-    xyzgal[1] = xyz[0] * p21 + xyz[1] * p22 + xyz[2] * p23;
-    xyzgal[2] = xyz[0] * p31 + xyz[1] * p32 + xyz[2] * p33;
-    temp = XYZcel(xyzgal[0], xyzgal[1], xyzgal[2]);
-    galong = temp[0] * 15.;
-    while (galong < 0.) {
-      galong += 360.;
-    }
-    galat = temp[1];
-  }
-}
-
-class latitude extends dec implements Cloneable {
-
-  /** latitude, basically the same structure as a dec.  */
-  // overloaded constructors are simply wrappers
-  public latitude(double inval) {
-    super(inval);
-  }
-
-  public latitude(String s) {
-    super(s);
-  }
-
-  @Override
-  public latitude clone() {
-    //try {
-    latitude copy = (latitude) super.clone();
-    return copy;
-    //} catch (CloneNotSupportedException e) {
-    //  throw new Error ("This should never happen!");
-    //}
-  }
-}
-
-class longitude implements Cloneable {
-
-  /** longitude, +- 12 hours.  Includes some special hooks for
-  interpreting inmput strings .*/
-  double value;   // internally, hours west.
-  sexagesimal sex;
-
-  double adjlongit(double inval) {
-    inval = inval % 24.;
-    while (inval < -12.) {
-      inval += 24.;
-    }
-    while (inval > 12.) {
-      inval -= 24.;
-    }
-    return inval;
-  }
-
-  longitude(double x) {
-    setFromDouble(x);
-  }
-
-  longitude(String s) {
-    setFromString(s);
-  }
-
-  public longitude clone() {
-    try {
-      longitude copy = (longitude) super.clone();
-      copy.value = value;
-      copy.sex = (sexagesimal) sex.clone();
-      return copy;
-    } catch (CloneNotSupportedException e) {
-      throw new Error("This should never happen!");
-    }
-  }
-
-  void setFromDouble(double x) {
-    value = adjlongit(x);  // force value to +- 12 h on input.
-    sex = new sexagesimal(value);
-  }
-
-  void setFromString(String s) {
-    String[] fields;
-    String unitfield;
-    String directionfield;
-    boolean indegrees = false, positiveEast = false;
-
-    int nf, i;
-
-// THIS NEEDS WORK to avoid colliding with rules used in the 
-// interpretation of sexagesimals.  Need to test for letters in last
-// couple of pieces of the string, then feed the sexagesimal converter
-// with only the remaining pieces.
-
-    // check for a label at the end ...
-    fields = s.split("\\s+");  // whitespace
-    nf = fields.length;
-    unitfield = fields[nf - 2].toLowerCase();
-    // System.out.printf("last field %s\n",lastfield);
-    i = unitfield.indexOf("h");
-    if (i > -1) {
-      indegrees = false;
-      // System.out.println("h found ... ");
-      }
-    i = unitfield.indexOf("d");
-    if (i > -1) {
-      indegrees = true;
-      // System.out.println("d found ... ");
-      }
-    directionfield = fields[nf - 1].toLowerCase();
-    i = directionfield.indexOf("e");
-    if (i > -1) {
-      positiveEast = true;
-      // System.out.println("e found ... ");
-      }
-    i = directionfield.indexOf("w");
-    if (i > -1) {
-      positiveEast = false;
-      // System.out.println("w found ... ");
-      }
-    sex = new sexagesimal(s);
-    value = sex.value;
-    if (indegrees) {
-      value = value / 15.;
-    }
-    if (positiveEast) {
-      value *= -1.;
-    }
-    // System.out.printf("Value = %f\n",value);
-    value = adjlongit(value);
-    sex.tosex(value);
-  }
-
-  double radiansWest() {
-    return (value / Const.HRS_IN_RADIAN);
-  }
-
-  double hoursWest() {
-    return value;
-  }
-
-  double degreesEast() {
-    return value * -15.;
-  }
-
-  public String RoundedLongitString(int ndigits, String divider,
-          boolean inDegrees) {
-
-    sexagesimal outvalsex, rounded;
-    double outval;
-    int secfieldwidth;
-    double decimalMinute;
-    String raformat = "";
-    String outstr = "";
-
-    if (inDegrees) {
-      outval = value * 15.;
-    } else {
-      outval = value;
-    }
-
-    outvalsex = new sexagesimal(outval);
-    rounded = outvalsex.roundsex(ndigits);
-
-    // System.out.printf("rounded value is %f\n",rounded.value);
-
-    if (rounded.hour == 24) {
-      rounded.hour = 0;
-      rounded.minute = 0;
-      rounded.second = 0.;
-    }
-    if (ndigits >= 0) {
-      if (ndigits == 0) {
-        raformat =
-                String.format(Locale.ENGLISH, "%%02d%s%%02d%s%%02.0f", divider, divider);
-      } else {
-        secfieldwidth = ndigits + 3;
-        raformat =
-                String.format(Locale.ENGLISH, "%%02d%s%%02d%s%%0%1d.%1df", divider, divider,
-                secfieldwidth, ndigits);
-      }
-      outstr = String.format(Locale.ENGLISH, raformat, rounded.hour, rounded.minute, rounded.second);
-    } else if (ndigits == -1) {
-      decimalMinute = rounded.minute + rounded.second / 60.;
-      outstr = String.format(Locale.ENGLISH, "%02d%s%04.1f", rounded.hour, divider, decimalMinute);
-    } else if (ndigits == -2) {
-      outstr = String.format(Locale.ENGLISH, "%02d%s%02d", rounded.hour, divider, rounded.minute);
-    }
-
-    if (inDegrees) {
-      outstr = outstr + " D";
-    } else {
-      outstr = outstr + " H";
-    }
-    if (rounded.sign == 1) {
-      outstr = outstr + " W";
-    } else {
-      outstr = outstr + " E";
-    }
-
-    return outstr;
-  }
-}
-
-class Site implements Cloneable {
-
-  // Complicated class holding much data about sites, which at this point
-  // are all `canned'.
-  String name;          // name of site
-  latitude lat;         // geographic latitude
-  longitude longit;     // longitude
-  double stdz;          // time zone offset from UT, decimal hrs
-  int use_dst;          // code for DST use, 0 = none, 1 = US, etc.
-  String timezone_name; // name of timezone e.g. "Mountain"
-  String zone_abbrev;   // one-letter abbreviation of timezone
-  double elevsea;       // elevation above sea level, meters
-  double elevhoriz;     // elevation above the typical local horizon, m.
-
-//   Site(HashMap<String, Site> sitelist, String sitename) {
-//      Reload(sitelist, sitename);
-//   }
-//   void Reload(Site [] sitelist, string sitename) {
-//        Site tempsite = sitelist.get(sitename);
-//        name = tempsite.name;
-//        longit = new longitude(tempsite.longit.value);
-//        lat = new latitude(tempsite.lat.value);
-//        stdz = tempsize.stdz;
-//        use_dst = tempsite.use_dst;
-//        timezone_name = tempsite.timezone_name;
-//        zone_abbrev = tempsite.zone_abbrev;
-//        elevsea = tempsite.elevsea;
-//        elevhoriz = tempsite.elev_horiz;
-//   }
-  void Reload(Site s) {
-    name = s.name;
-    longit = (longitude) s.longit.clone();
-    lat = (latitude) s.lat.clone();
-    stdz = s.stdz;
-    use_dst = s.use_dst;
-    timezone_name = s.timezone_name;
-    zone_abbrev = s.zone_abbrev;
-    elevsea = s.elevsea;
-    elevhoriz = s.elevhoriz;
-  }
-
-  /**
-   * Laurent Bourges [PATCH] :
-   * Special constructor with numerical arguments and using GMT time zone (no DST)
-   * @param name site name
-   * @param lon longitude given in decimal hours
-   * @param lat latitude given in degrees
-   * @param alt altitude given in meters
-   */
-  Site(final String name, final double lon, final double lat, final double alt) {
-    this.name = name;
-    this.longit = new longitude(lon);
-    this.lat = new latitude(lat);
-    /** approximate the time zone offset : used by nightly almanach */
-    this.stdz = Math.floor(lon);
-    // no daylight saving time :
-    this.use_dst = 0;
-    this.timezone_name = "";
-    this.zone_abbrev = "";
-    this.elevsea = alt;
-    this.elevhoriz = alt;
-  }
-  
-  Site(String[] sitepars) {
-    // for(int j = 0; j < 9; j++) System.out.printf("%d %s\n",j,sitepars[j]);
-    name = sitepars[0];
-    // System.out.printf("%s %s",sitepars[0],sitepars[1]);
-    // System.out.printf("-> %f\n",Double.parseDouble(sitepars[1].trim()));
-    longit = new longitude(Double.parseDouble(sitepars[1].trim()));
-    lat = new latitude(Double.parseDouble(sitepars[2].trim()));
-    stdz = Double.parseDouble(sitepars[3].trim());
-    use_dst = Integer.parseInt(sitepars[4].trim());
-    timezone_name = sitepars[5];
-    zone_abbrev = sitepars[6];
-    elevsea = Double.parseDouble(sitepars[7].trim());
-    elevhoriz = Double.parseDouble(sitepars[8].trim());
-  }
-
-  void dumpsite() {  // for diagnostics
-    System.out.printf("%s\n", name);
-    System.out.printf("longitude %s\n", longit.RoundedLongitString(1, ":", true));
-    System.out.printf("latitude  %s\n", lat.RoundedDecString(0, ":"));
-    System.out.printf("Zone offset from UT %6.3f hours\n", stdz);
-  }
-
-  @Override
-  public boolean equals(Object arg) {
-    if ((arg != null) && (arg instanceof Site)) {
-      Site ss = (Site) arg;
-      if (!(ss.name.equals(name))) {
-        return false;
-      }
-      if (ss.lat.value != lat.value) {
-        return false;
-      }
-      if (ss.longit.value != longit.value) {
-        return false;
-      }
-      if (ss.stdz != stdz) {
-        return false;
-      }
-      // close enough ...
-    }
-    return true;
-  }
-
-  public Site clone() {
-    try {
-      Site copy = (Site) super.clone();
-      copy.name = name;
-      copy.lat = (latitude) lat.clone();
-      copy.longit = (longitude) longit.clone();
-      copy.stdz = stdz;
-      copy.use_dst = use_dst;
-      copy.timezone_name = timezone_name;
-      copy.zone_abbrev = zone_abbrev;
-      copy.elevsea = elevsea;
-      copy.elevhoriz = elevhoriz;
-      return copy;
-    } catch (CloneNotSupportedException e) {
-      throw new Error("This should never happen!");
-    }
-  }
-}
-
-class Spherical {
-
-  /** container for several static spherical trig methods. */
-  static double subtend(Celest a, Celest b) {
-    /** angle in radians between two positions. */
-    double[] aCart = {0., 0., 0.};
-    double[] bCart = {0., 0., 0.};
-    Celest bprime;
-    double dotproduct, theta;
-    double dr, dd;
-
-    if (Math.abs(a.Equinox - b.Equinox) > 0.001) {
-      bprime = b.precessed(a.Equinox);
-    } else {
-      bprime = (Celest) b.clone();
-    }
-
-    aCart = a.cel_unitXYZ();
-    bCart = bprime.cel_unitXYZ();
-
-    dotproduct = aCart[0] * bCart[0] + aCart[1] * bCart[1] +
-            aCart[2] * bCart[2];
-
-    theta = Math.acos(dotproduct);
-
-    // if the angle is tiny, use a flat sky approximation away from
-    // the poles to get a more accurate answer.
-    if (theta < 1.0e-5) {
-      if (Math.abs(a.Delta.radians()) < (Const.PI_OVER_2 - 0.001) &&
-              Math.abs(bprime.Delta.radians()) < (Const.PI_OVER_2 - 0.001)) {
-        dr = (bprime.Alpha.radians() - a.Alpha.radians()) *
-                Math.cos((a.Delta.radians() + bprime.Delta.radians()) / 2.);
-        dd = bprime.Delta.radians() - a.Delta.radians();
-        theta = Math.sqrt(dr * dr + dd * dd);
-
-      }
-    }
-    return theta;
-  }
-
-  static double[] CuspPA(Celest s, Celest m) {
-    /** Given the positions of the sun and the moon, returns the position angle
-    of the line connecting the moon's two cusps.  Ported from python. */
-    double codecsun = (90. - s.Delta.value) / Const.DEG_IN_RADIAN;
-    double codecmoon = (90. - m.Delta.value) / Const.DEG_IN_RADIAN;
-    double dra = s.Alpha.value - m.Alpha.value;
-    while (dra < -12.) {
-      dra += 24.;
-    }
-    while (dra >= 12.) {
-      dra -= 24.;
-    }
-    dra = dra / Const.HRS_IN_RADIAN;
-
-    // Spherical law of cosines gives moon-sun separation
-    double moonsun = Math.acos(Math.cos(codecsun) * Math.cos(codecmoon) +
-            Math.sin(codecsun) * Math.sin(codecmoon) * Math.cos(dra));
-    // spherical law of sines + law of cosines needed to get
-    // sine and cosine of pa separately; this gets quadrant etc.!
-    double pasin = Math.sin(dra) * Math.sin(codecsun) / Math.sin(moonsun);
-    double pacos = (Math.cos(codecsun) -
-            Math.cos(codecmoon) * Math.cos(moonsun)) /
-            (Math.sin(codecmoon) * Math.sin(moonsun));
-    double pa = Math.atan2(pasin, pacos);
-
-//   print "pa of arc from moon to sun is %5.2f deg." % (pa * _skysub.DEG_IN_RADIAN)
-
-    double cusppa = pa - Const.PI / 2.;   // line of cusps ...
-//     System.out.printf("cusppa = %f\n",cusppa);
-    double[] retvals = {cusppa, moonsun};
-    return retvals;
-  }
-
-  static double[] min_max_alt(double lat, double dec) {
-    /** returns the minimum and maximum altitudes (degrees) of an object at
-    declination dec as viewed from lat.  */
-    /* translated straight from skycalc. */
-    double x, latrad, decrad;
-    double[] retvals = {0., 0.};
-
-    latrad = lat / Const.DEG_IN_RADIAN;
-    decrad = dec / Const.DEG_IN_RADIAN;
-    x = Math.cos(decrad) * Math.cos(latrad) + Math.sin(decrad) * Math.sin(latrad);
-    if (Math.abs(x) <= 1.) {
-      retvals[1] = Math.asin(x) * Const.DEG_IN_RADIAN;
-    } else {
-      System.out.printf("min_max_alt ... asin(>1)\n");
-    }
-
-    x = Math.sin(decrad) * Math.sin(latrad) - Math.cos(decrad) * Math.cos(latrad);
-    if (Math.abs(x) <= 1.) {
-      retvals[0] = Math.asin(x) * Const.DEG_IN_RADIAN;
-    } else {
-      System.out.printf("min_max_alt ... asin(>1)\n");
-    }
-
-    return retvals;
-  }
-
-  static double ha_alt(double dec, double lat, double alt) {
-    /** Finds the hour angle at which an object at declination dec is at altitude
-    alt, as viewed from latitude lat;  returns 1000 if always higher,
-    -1000 if always lower. */
-    double x, coalt, codec, colat;
-    double[] minmax;
-
-    minmax = min_max_alt(lat, dec);
-    if (alt < minmax[0]) {
-      return (1000.);   // always higher than asked
-    }
-    if (alt > minmax[1]) {
-      return (-1000.);  // always lower than asked
-    }
-    // System.out.printf("dec %f lat %f alt %f ... \n",dec,lat,alt);
-    codec = Const.PI_OVER_2 - dec / Const.DEG_IN_RADIAN;
-    colat = Const.PI_OVER_2 - lat / Const.DEG_IN_RADIAN;
-    coalt = Const.PI_OVER_2 - alt / Const.DEG_IN_RADIAN;
-    x = (Math.cos(coalt) - Math.cos(codec) * Math.cos(colat)) /
-            (Math.sin(codec) * Math.sin(colat));
-    if (Math.abs(x) <= 1.) {
-      return (Math.acos(x) * Const.HRS_IN_RADIAN);
-    } else {
-      System.out.printf("Bad inverse trig in ha_alt ... acos(%f)\n", x);
-      return (1000.);
-    }
-  }
-
-  static double true_airmass(double alt) {
-    /* returns the true airmass for a given altitude (degrees).  Ported from C. */
-    /* The expression used is based on a tabulation of the mean KPNO
-    atmosphere given by C. M. Snell & A. M. Heiser, 1968,
-    PASP, 80, 336.  They tabulated the airmass at 5 degr
-    intervals from z = 60 to 85 degrees; I fit the data with
-    a fourth order poly for (secz - airmass) as a function of
-    (secz - 1) using the IRAF curfit routine, then adjusted the
-    zeroth order term to force (secz - airmass) to zero at
-    z = 0.  The poly fit is very close to the tabulated points
-    (largest difference is 3.2e-4) and appears smooth.
-    This 85-degree point is at secz = 11.47, so for secz > 12
-    I just return secz - 1.5 ... about the largest offset
-    properly determined. */
-    double secz, seczmin1;
-    int i, ord = 3;
-    double[] coef = {2.879465e-3, 3.033104e-3, 1.351167e-3, -4.716679e-5};
-    double result = 0.;
-
-    if (alt <= 0.) {
-      return (-1.);   /* out of range. */
-    }
-    secz = 1. / Math.sin(alt / Const.DEG_IN_RADIAN);
-    seczmin1 = secz - 1.;
-    if (secz > 12.) {
-      return (secz - 1.5);   // approx at extreme airmass
-    }
-    for (i = ord; i >= 0; i--) {
-      result = (result + coef[i]) * seczmin1;
-    }
-    result = secz - result;
-    return result;
-  }
-
-  static Celest Gal2Cel(double galacticlongit, double galacticlatit) {
-    /** computes instance variables galong and galat.  Algorithm is
-    rigorous. */
-    double[] xyz = {0., 0., 0.};
-    double[] xyzgal = {0., 0., 0.};
-    double[] temp;
-
-    double p11 = -0.066988739415,
-            p12 = -0.872755765853,
-            p13 = -0.483538914631,
-            p21 = 0.492728466047,
-            p22 = -0.450346958025,
-            p23 = 0.744584633299,
-            p31 = -0.867600811168,
-            p32 = -0.188374601707,
-            p33 = 0.460199784759;
-
-    double galongitrad = galacticlongit / Const.DEG_IN_RADIAN;
-    double galatitrad = galacticlatit / Const.DEG_IN_RADIAN;
-
-    xyzgal[0] = Math.cos(galongitrad) * Math.cos(galatitrad);
-    xyzgal[1] = Math.sin(galongitrad) * Math.cos(galatitrad);
-    xyzgal[2] = Math.sin(galatitrad);
-    // System.out.printf("Galactic xyz %f %f %f\n",xyzgal[0],xyzgal[1],xyzgal[2]);
-
-    // for rotation matrices, inverse is the transpose, so ...
-    xyz[0] = xyzgal[0] * p11 + xyzgal[1] * p21 + xyzgal[2] * p31;
-    xyz[1] = xyzgal[0] * p12 + xyzgal[1] * p22 + xyzgal[2] * p32;
-    xyz[2] = xyzgal[0] * p13 + xyzgal[1] * p23 + xyzgal[2] * p33;
-    // System.out.printf("Equatorial xyz %f %f %f\n",xyz[0],xyz[1],xyz[2]);
-
-    double[] retvals = Celest.XYZcel(xyz[0], xyz[1], xyz[2]);
-    Celest cel = new Celest(retvals[0], retvals[1], 1950.);  // galactic are defined for 1950
-
-    return cel;   // and precess elsehwere to whatever.
-
-  }
-}
-
-class Topo {  // topocentric correction stuff 
-
-  static final double FLATTEN = 0.003352813;  // flattening, 1/298.257
-  static final double EQUAT_RAD = 6378137.;   // equatorial radius, meters
-
-  static double[] Geocent(double longitin, double latitin, double height) {
-    // XYZ coordinates given geographic.  Declared static because it will often
-    // be used with lst in place of longitude.
-    // input is decimal hours, decimal degrees, and meters.
-    // See 1992 Astr Almanac, p. K11.
-
-    double denom, C_geo, S_geo;
-    double geolat, coslat, sinlat, geolong, sinlong, coslong;
-    double[] retval = {0., 0., 0.};
-
-
-    //System.out.printf("lat long %f %f\n",latitin,longitin);
-    geolat = latitin / Const.DEG_IN_RADIAN;
-    geolong = longitin / Const.HRS_IN_RADIAN;
-    //System.out.printf("radians %f %f \n",geolat,geolong);
-    coslat = Math.cos(geolat);
-    sinlat = Math.sin(geolat);
-    coslong = Math.cos(geolong);
-    sinlong = Math.sin(geolong);
-
-    denom = (1. - FLATTEN) * sinlat;
-    denom = coslat * coslat + denom * denom;
-    C_geo = 1. / Math.sqrt(denom);
-    S_geo = (1. - FLATTEN) * (1. - FLATTEN) * C_geo;
-    C_geo = C_geo + height / EQUAT_RAD;
-    S_geo = S_geo + height / EQUAT_RAD;
-    retval[0] = C_geo * coslat * coslong;
-    retval[1] = C_geo * coslat * sinlong;
-    retval[2] = S_geo * sinlat;
-
-    return retval;
-  }
-
-  static Celest topocorr(Celest geopos, InstantInTime when, Site where, double sidereal) {
-    // The geopos to which this is being applied needs to have its
-    // distance set.
-
-    double x, y, z, x_geo, y_geo, z_geo, topodist;
-    double[] retvals;
-
-    x = Math.cos(geopos.Alpha.radians()) *
-            Math.cos(geopos.Delta.radians()) * geopos.distance;
-    y = Math.sin(geopos.Alpha.radians()) *
-            Math.cos(geopos.Delta.radians()) * geopos.distance;
-    z = Math.sin(geopos.Delta.radians()) * geopos.distance;
-
-    retvals = Geocent(sidereal, where.lat.value,
-            where.elevsea);
-    x_geo = retvals[0] / Const.EARTHRAD_IN_AU;
-    y_geo = retvals[1] / Const.EARTHRAD_IN_AU;
-    z_geo = retvals[2] / Const.EARTHRAD_IN_AU;
-
-    x = x - x_geo;
-    y = y - y_geo;
-    z = z - z_geo;
-
-    topodist = Math.sqrt(x * x + y * y + z * z);
-
-    x /= topodist;
-    y /= topodist;
-    z /= topodist;
-
-    return new Celest(Math.atan2(y, x) * Const.HRS_IN_RADIAN,
-            Math.asin(z) * Const.DEG_IN_RADIAN,
-            when.JulianEpoch(), topodist);
-  }
-}
-
-class Ecliptic {
-  /* Holds some static methods for rotating from ecliptic to equatorial and back ... */
-
-  static double[] eclrot(double jd, double x, double y, double z) {
-    /** rotates x,y,z coordinates to equatorial x,y,z; all are
-    in equinox of date. Returns [0] = x, [1] = y, [2] = z */
-    double incl;
-    double T;
-    double[] retval = {0., 0., 0.};
-
-    T = (jd - Const.J2000) / 36525;
-    incl = (23.439291 + T * (-0.0130042 - 0.00000016 * T)) / Const.DEG_IN_RADIAN;
-    /* 1992 Astron Almanac, p. B18, dropping the
-    cubic term, which is 2 milli-arcsec! */
-    // System.out.printf("T incl %f %f\n",T,incl);
-    retval[1] = Math.cos(incl) * y - Math.sin(incl) * z;
-    retval[2] = Math.sin(incl) * y + Math.cos(incl) * z;
-    retval[0] = x;
-    return (retval);
-  }
-
-  static double[] Cel2Ecl(Observation o) {
-    /** rotates celestial coords to equatorial at
-    equinox of jd. Returns [0] = x, [1] = y, [2] = z */
-    double incl;
-    double T;
-    double julep;
-    double[] retval = {0., 0.};   // ecliptic longitude and latitude
-    double[] equat = {0., 0., 0.}; // equatorial unit vector
-    double[] eclipt = {0., 0., 0.}; // ecliptic unit vector
-
-    T = (o.w.when.jd - Const.J2000) / 36525;
-    incl = (23.439291 + T * (-0.0130042 - 0.00000016 * T)) / Const.DEG_IN_RADIAN;
-    /* 1992 Astron Almanac, p. B18, dropping the
-    cubic term, which is 2 milli-arcsec! */
-    // System.out.printf("T incl %f %f\n",T,incl);
-
-    equat = o.current.cel_unitXYZ();
-
-    eclipt[1] = Math.cos(incl) * equat[1] + Math.sin(incl) * equat[2];
-    eclipt[2] = -1. * Math.sin(incl) * equat[1] + Math.cos(incl) * equat[2];
-    eclipt[0] = equat[0];
-
-    retval[0] = Math.atan2(eclipt[1], eclipt[0]) * Const.DEG_IN_RADIAN;
-    while (retval[0] < 0.) {
-      retval[0] += 360.;
-    }
-    while (retval[0] >= 360.) {
-      retval[0] -= 360.;
-    }
-    retval[1] = Math.asin(eclipt[2]) * Const.DEG_IN_RADIAN;
-
-    return (retval);
-  }
-}
-
-class deltaT {
-  /* holds only a static method that returns a rough ephemeris time 
-  correction */
-
-  static double etcorr(double jd) {
-
-    /* Given a julian date in 1900-2100, returns the correction
-    delta t which is:
-    TDT - UT (after 1983 and before 1998)
-    ET - UT (before 1983)
-    an extrapolated guess  (after 2001).
-
-    For dates in the past (<= 2001 and after 1900) the value is linearly
-    interpolated on 5-year intervals; for dates after the present,
-    an extrapolation is used, because the true value of delta t
-    cannot be predicted precisely.  Note that TDT is essentially the
-    modern version of ephemeris time with a slightly cleaner
-    definition.
-
-    Where the algorithm shifts there will be a small (< 0.1 sec)
-    discontinuity.  Also, the 5-year linear interpolation scheme can
-    lead to errors as large as 0.5 seconds in some cases, though
-    usually rather smaller.   One seldom has actual UT to work with anyway,
-    since the commonly-used UTC is tied to TAI within an integer number
-    of seconds.  */
-
-    double jd1900 = 2415019.5;
-    double[] dates = {1900., 1905., 1910., 1915., 1920., 1925., 1930.,
-      1935., 1940., 1945., 1950., 1955., 1960., 1965., 1970., 1975., 1980.,
-      1985., 1990., 1995., 2000., 2004.};
-    // 2004 is the last one tabulated in the 2006 almanac
-    double[] delts = {-2.72, 3.86, 10.46, 17.20, 21.16, 23.62,
-      24.02, 23.93, 24.33, 26.77, 29.15, 31.07, 33.15, 35.73, 40.18,
-      45.48, 50.54, 54.34, 56.86, 60.78, 63.83, 64.57};
-    double year, delt = 0.;
-    int i;
-
-    year = 1900. + (jd - jd1900) / 365.25;
-
-    if (year < 2004. && year >= 1900.) {
-      i = (int) ((year - 1900) / 5);
-      delt = delts[i] +
-              ((delts[i + 1] - delts[i]) / (dates[i + 1] - dates[i])) * (year - dates[i]);
-    } else if (year >= 2004. && year < 2100.) {
-      delt = 31.69 + (2.164e-3) * (jd - 2436935.4);  /* rough extrapolation */
-    } /* the 31.69 is adjusted to give 64.09 sec at the start of 2001. */ else if (year < 1900) {
-      // printf("etcorr ... no ephemeris time data for < 1900.\n");
-      delt = 0.;
-    } else if (year >= 2100.) {
-      // printf("etcorr .. very long extrapolation in delta T - inaccurate.\n");
-      delt = 180.; /* who knows? */
-    }
-
-    return (delt);
-  }
-}
-
-class SkyIllum {
-
-  /** container for the ztwilight and krisciunas/schaefer routines */
-  static double ztwilight(double alt) {
-
-    /* evaluates a polynomial expansion for the approximate brightening
-    in magnitudes of the zenith in twilight compared to its
-    value at full night, as function of altitude of the sun (in degrees).
-    To get this expression I looked in Meinel, A.,
-    & Meinel, M., "Sunsets, Twilight, & Evening Skies", Cambridge U.
-    Press, 1983; there's a graph on p. 38 showing the decline of
-    zenith twilight.  I read points off this graph and fit them with a
-    polynomial; I don't even know what band there data are for! */
-    /* Comparison with Ashburn, E. V. 1952, JGR, v.57, p.85 shows that this
-    is a good fit to his B-band measurements.  */
-
-    double y, val;
-
-    if (alt > 0.) {
-      return 99.;  // guard
-    }
-    if (alt < -18.) {
-      return 0.;
-    }
-
-    y = (-1. * alt - 9.0) / 9.0;  /* my polynomial's argument...*/
-    val = ((2.0635175 * y + 1.246602) * y - 9.4084495) * y + 6.132725;
-    return (val);
-  }
-
-  static double lunskybright(double alpha, double rho, double kzen,
-          double altmoon, double alt, double moondist) {
-
-    /* Evaluates predicted LUNAR part of sky brightness, in
-    V magnitudes per square arcsecond, following K. Krisciunas
-    and B. E. Schaeffer (1991) PASP 103, 1033.
-
-    alpha = separation of sun and moon as seen from earth,
-    converted internally to its supplement,
-    rho = separation of moon and object,
-    kzen = zenith extinction coefficient,
-    altmoon = altitude of moon above horizon,
-    alt = altitude of object above horizon
-    moondist = distance to moon, in earth radii
-
-    all are in decimal degrees. */
-
-    double istar, Xzm, Xo, Z, Zmoon, Bmoon, fofrho, rho_rad, test;
-
-    rho_rad = rho / Const.DEG_IN_RADIAN;
-    alpha = (180. - alpha);
-    Zmoon = (90. - altmoon) / Const.DEG_IN_RADIAN;
-    Z = (90. - alt) / Const.DEG_IN_RADIAN;
-    moondist = Const.EARTHRAD_IN_AU * moondist / (60.27);
-    /* distance arrives in AU, want it normalized to mean distance,
-    60.27 earth radii. */
-
-    istar = -0.4 * (3.84 + 0.026 * Math.abs(alpha) + 4.0e-9 * Math.pow(alpha, 4.)); /*eqn 20*/
-    istar = Math.pow(10., istar) / (moondist * moondist);
-    if (Math.abs(alpha) < 7.) /* crude accounting for opposition effect */ {
-      istar = istar * (1.35 - 0.05 * Math.abs(istar));
-    }
-    /* 35 per cent brighter at full, effect tapering linearly to
-    zero at 7 degrees away from full. mentioned peripherally in
-    Krisciunas and Scheafer, p. 1035. */
-    fofrho = 229087. * (1.06 + Math.cos(rho_rad) * Math.cos(rho_rad));
-    if (Math.abs(rho) > 10.) {
-      fofrho = fofrho + Math.pow(10., (6.15 - rho / 40.));            /* eqn 21 */
-    } else if (Math.abs(rho) > 0.25) {
-      fofrho = fofrho + 6.2e7 / (rho * rho);   /* eqn 19 */
-    } else {
-      fofrho = fofrho + 9.9e8;  /*for 1/4 degree -- radius of moon! */
-    }
-    Xzm = Math.sqrt(1.0 - 0.96 * Math.sin(Zmoon) * Math.sin(Zmoon));
-    if (Xzm != 0.) {
-      Xzm = 1. / Xzm;
-    } else {
-      Xzm = 10000.;
-    }
-    Xo = Math.sqrt(1.0 - 0.96 * Math.sin(Z) * Math.sin(Z));
-    if (Xo != 0.) {
-      Xo = 1. / Xo;
-    } else {
-      Xo = 10000.;
-    }
-    Bmoon = fofrho * istar * Math.pow(10., (-0.4 * kzen * Xzm)) * (1. - Math.pow(10., (-0.4 * kzen * Xo)));   /* nanoLamberts */
-    if (Bmoon > 0.001) {
-      return (22.50 - 1.08574 * Math.log(Bmoon / 34.08)); /* V mag per sq arcs-eqn 1 */
-    } else {
-      return (99.);
-    }
-  }
-}
-
-class Sun implements Cloneable {
-
-  Celest geopos;
-  Celest topopos;
-  double[] xyz = {0., 0., 0.};     /* for use in barycentric correction */
-
-  double[] xyzvel = {0., 0., 0.};  /* ditto. */
-
-
-  Sun(WhenWhere w) {
-    update(w.when, w.where, w.sidereal);
-  }
-
-  Sun(InstantInTime inst) {  // no site, so no topo
-    double retvals[];
-    retvals = computesun(inst.jd);
-    xyz[0] = retvals[3];
-    xyz[1] = retvals[4];
-    xyz[2] = retvals[5];
-    geopos = new Celest(retvals[0], retvals[1], inst.JulianEpoch());
-    geopos.distance = retvals[2];
-    topopos = new Celest(0., 0., inst.JulianEpoch());  // not set
-    topopos.distance = 0.;
-  }
-
-  Sun(double jdin) {        // no site, so no topo possible
-    double retvals[];
-    double eq;
-
-    retvals = computesun(jdin);
-    xyz[0] = retvals[3];
-    xyz[1] = retvals[4];
-    xyz[2] = retvals[5];
-    eq = 2000. + (jdin - Const.J2000) / 365.25;
-    geopos = new Celest(retvals[0], retvals[1], eq);
-    geopos.distance = retvals[2];
-    topopos = new Celest(0., 0., eq); // not set, no geogr. info
-    topopos.distance = 0.;
-  }
-
-  @Override
-  public Sun clone() {
-    try {
-      Sun copy = (Sun) super.clone();
-      copy.geopos = (Celest) geopos.clone();
-      copy.topopos = (Celest) topopos.clone();
-      copy.xyz = xyz;
-      copy.xyzvel = xyzvel;
-      return copy;
-    } catch (CloneNotSupportedException e) {
-      throw new Error("This should never happen!");
-    }
-  }
-
-  void update(InstantInTime when, Site where, double sidereal) {
-    // need to avoid handing in a whenwhere or get circularity ...
-    double[] retvals;
-
-    // System.out.printf("updating sun jd %f ... ",w.when.jd);
-    retvals = computesun(when.jd);
-    xyz = new double[3];
-    xyz[0] = retvals[3];
-    xyz[1] = retvals[4];
-    xyz[2] = retvals[5];
-
-    //System.out.printf("Sun constructor - jd %f xyz = %f %f %f\n",
-    //     w.when.jd,xyz[0],xyz[1],xyz[2]);
-
-    // ignoring topocentric part of helio time correction.
-
-    geopos = new Celest(retvals[0], retvals[1], when.JulianEpoch());
-    geopos.distance = retvals[2];
-    topopos = Topo.topocorr(geopos, when, where, sidereal);
-    // System.out.printf("topo radec %s %s\n",topopos.Alpha.RoundedRAString(2,":"),
-    //        topopos.Delta.RoundedDecString(1,":"));
-  }
-
-
-  /* Implements Jean Meeus' solar ephemeris, from Astronomical
-  Formulae for Calculators, pp. 79 ff.  Position is wrt *mean* equinox of
-  date. */
-  static double[] computesun(double jd) {
-    double xecl, yecl, zecl;
-    double[] equatorial = {0., 0., 0.};
-    double e, L, T, Tsq, Tcb;
-    double M, Cent, nu, sunlong;
-    double Lrad, Mrad, nurad, R;
-    double A, B, C, D, E, H;
-    double[] retvals = {0., 0., 0., 0., 0., 0.};
-    // will be geora, geodec, geodist, x, y, z (geo)
-
-    // correct jd to ephemeris time once we have that done ...
-
-    jd = jd + deltaT.etcorr(jd) / 86400.;
-    T = (jd - 2415020.) / 36525.;  // Julian centuries since 1900
-    Tsq = T * T;
-    Tcb = T * Tsq;
-
-    L = 279.69668 + 36000.76892 * T + 0.0003025 * Tsq;
-    M = 358.47583 + 35999.04975 * T - 0.000150 * Tsq - 0.0000033 * Tcb;
-    e = 0.01675104 - 0.0000418 * T - 0.000000126 * Tsq;
-
-    A = (153.23 + 22518.7541 * T) / Const.DEG_IN_RADIAN;  /* A, B due to Venus */
-    B = (216.57 + 45037.5082 * T) / Const.DEG_IN_RADIAN;
-    C = (312.69 + 32964.3577 * T) / Const.DEG_IN_RADIAN;  /* C due to Jupiter */
-    /* D -- rough correction from earth-moon
-    barycenter to center of earth. */
-    D = (350.74 + 445267.1142 * T - 0.00144 * Tsq) / Const.DEG_IN_RADIAN;
-    E = (231.19 + 20.20 * T) / Const.DEG_IN_RADIAN;
-    /* "inequality of long period .. */
-    H = (353.40 + 65928.7155 * T) / Const.DEG_IN_RADIAN;  /* Jupiter. */
-
-    L = L + 0.00134 * Math.cos(A) + 0.00154 * Math.cos(B) + 0.00200 * Math.cos(C) + 0.00179 * Math.sin(D) + 0.00178 * Math.sin(E);
-
-    Lrad = L / Const.DEG_IN_RADIAN;
-    Mrad = M / Const.DEG_IN_RADIAN;
-
-    Cent = (1.919460 - 0.004789 * T - 0.000014 * Tsq) * Math.sin(Mrad) + (0.020094 - 0.000100 * T) * Math.sin(2.0 * Mrad) + 0.000293 * Math.sin(3.0 * Mrad);
-    sunlong = L + Cent;
-
-
-    nu = M + Cent;
-    nurad = nu / Const.DEG_IN_RADIAN;
-
-    R = (1.0000002 * (1 - e * e)) / (1. + e * Math.cos(nurad));
-    R = R + 0.00000543 * Math.sin(A) + 0.00001575 * Math.sin(B) + 0.00001627 * Math.sin(C) + 0.00003076 * Math.cos(D) + 0.00000927 * Math.sin(H);
-    /*      printf("solar longitude: %10.5f  Radius vector %10.7f\n",sunlong,R);
-    printf("eccentricity %10.7f  eqn of center %10.5f\n",e,Cent);   */
-
-    sunlong = sunlong / Const.DEG_IN_RADIAN;
-
-    retvals[2] = R; // distance
-    xecl = Math.cos(sunlong);  /* geocentric */
-    yecl = Math.sin(sunlong);
-    zecl = 0.;
-    equatorial = Ecliptic.eclrot(jd, xecl, yecl, zecl);
-
-    retvals[0] = Math.atan2(equatorial[1], equatorial[0]) * Const.HRS_IN_RADIAN;
-    while (retvals[0] < 0.) {
-      retvals[0] = retvals[0] + 24.;
-    }
-    retvals[1] = Math.asin(equatorial[2]) * Const.DEG_IN_RADIAN;
-
-    retvals[3] = equatorial[0] * R;  // xyz
-    retvals[4] = equatorial[1] * R;
-    retvals[5] = equatorial[2] * R;
-//       System.out.printf("computesun XYZ %f %f %f  %f\n",
-//          retvals[3],retvals[4],retvals[5],jd);
-
-    return (retvals);
-  }
-
-  void sunvel(double jd) {
-    /* numerically differentiates sun xyz to get velocity. */
-    double dt = 0.05; // days ... gives about 8 digits ...
-    int i;
-
-    double[] pos1 = computesun(jd - dt / 2.);
-    double[] pos2 = computesun(jd + dt / 2.);
-    for (i = 0; i < 3; i++) {
-      xyzvel[i] = (pos2[i + 3] - pos1[i + 3]) / dt;  // AU/d, eq. of date.
-    }
-  }
-}
-
-class Moon implements Cloneable {
-
-  Celest geopos;
-  Celest topopos;
-
-  Moon(double jd) {
-    double[] retvals;
-    double eq;
-    retvals = computemoon(jd);
-    eq = 2000. + (jd - Const.J2000) / 365.25;
-    geopos = new Celest(retvals[0], retvals[1], eq, retvals[2]);
-    topopos = new Celest(0., 0., eq);  // not set, no geogr info
-  }
-
-  Moon(WhenWhere w) {
-//      double [] retvals;
-//      retvals = computemoon(w.when.jd);
-//      geopos = new Celest(retvals[0],retvals[1],w.when.JulianEpoch(),retvals[2]);
-//      topopos = Topo.topocorr(geopos, w);
-    update(w.when, w.where, w.sidereal);
-  }
-
-  void update(InstantInTime when, Site where, double sidereal) {
-    double[] retvals;
-
-    retvals = computemoon(when.jd);
-    geopos = new Celest(retvals[0], retvals[1], when.JulianEpoch(), retvals[2]);
-    topopos = Topo.topocorr(geopos, when, where, sidereal);
-  }
-
-  @Override
-  public Moon clone() {
-    try {
-      Moon copy = (Moon) super.clone();
-      copy.geopos = (Celest) geopos.clone();
-      copy.topopos = (Celest) topopos.clone();
-      return copy;
-    } catch (CloneNotSupportedException e) {
-      throw new Error("This should never happen!");
-    }
-  }
-
-  static double[] computemoon(double jd) {
-    /* Rather accurate lunar
-    ephemeris, from Jean Meeus' *Astronomical Formulae For Calculators*,
-    pub. Willman-Bell.  Includes all the terms given there. */
-    double Lpr, M, Mpr, D, F, Om, T, Tsq, Tcb;
-    double e, lambda, B, beta, om1, om2, dist;
-    double sinx, x, y, z, l, m, n, pie;
-    double[] retvals = {0., 0., 0., 0., 0., 0.};  //ra,dec,distance,x,y,z.
-    double[] equatorial = {0., 0., 0.};
-
-    jd = jd + deltaT.etcorr(jd) / 86400.;
-    /* approximate correction to ephemeris time */
-    T = (jd - 2415020.) / 36525.;   /* this based around 1900 ... */
-    Tsq = T * T;
-    Tcb = Tsq * T;
-
-    Lpr = 270.434164 + 481267.8831 * T - 0.001133 * Tsq + 0.0000019 * Tcb;
-    M = 358.475833 + 35999.0498 * T - 0.000150 * Tsq - 0.0000033 * Tcb;
-    Mpr = 296.104608 + 477198.8491 * T + 0.009192 * Tsq + 0.0000144 * Tcb;
-    D = 350.737486 + 445267.1142 * T - 0.001436 * Tsq + 0.0000019 * Tcb;
-    F = 11.250889 + 483202.0251 * T - 0.003211 * Tsq - 0.0000003 * Tcb;
-    Om = 259.183275 - 1934.1420 * T + 0.002078 * Tsq + 0.0000022 * Tcb;
-
-    Lpr = Lpr % 360.;
-    M = M % 360.;
-    Mpr = Mpr % 360.;
-    D = D % 360.;
-    F = F % 360.;
-    Om = Om % 360.;
-
-    sinx = Math.sin((51.2 + 20.2 * T) / Const.DEG_IN_RADIAN);
-    Lpr = Lpr + 0.000233 * sinx;
-    M = M - 0.001778 * sinx;
-    Mpr = Mpr + 0.000817 * sinx;
-    D = D + 0.002011 * sinx;
-
-    sinx = 0.003964 * Math.sin((346.560 + 132.870 * T - 0.0091731 * Tsq) / Const.DEG_IN_RADIAN);
-
-    Lpr = Lpr + sinx;
-    Mpr = Mpr + sinx;
-    D = D + sinx;
-    F = F + sinx;
-
-
-    sinx = Math.sin(Om / Const.DEG_IN_RADIAN);
-    Lpr = Lpr + 0.001964 * sinx;
-    Mpr = Mpr + 0.002541 * sinx;
-    D = D + 0.001964 * sinx;
-    F = F - 0.024691 * sinx;
-    F = F - 0.004328 * Math.sin((Om + 275.05 - 2.30 * T) / Const.DEG_IN_RADIAN);
-
-    e = 1 - 0.002495 * T - 0.00000752 * Tsq;
-
-    M = M / Const.DEG_IN_RADIAN;   /* these will all be arguments ... */
-    Mpr = Mpr / Const.DEG_IN_RADIAN;
-    D = D / Const.DEG_IN_RADIAN;
-    F = F / Const.DEG_IN_RADIAN;
-
-    lambda = Lpr + 6.288750 * Math.sin(Mpr) + 1.274018 * Math.sin(2 * D - Mpr) + 0.658309 * Math.sin(2 * D) + 0.213616 * Math.sin(2 * Mpr) - e * 0.185596 * Math.sin(M) - 0.114336 * Math.sin(2 * F) + 0.058793 * Math.sin(2 * D - 2 * Mpr) + e * 0.057212 * Math.sin(2 * D - M - Mpr) + 0.053320 * Math.sin(2 * D + Mpr) + e * 0.045874 * Math.sin(2 * D - M) + e * 0.041024 * Math.sin(Mpr - M) - 0.034718 * Math.sin(D) - e * 0.030465 * Math.sin(M + Mpr) + 0.015326 * Math.sin(2 * D - 2 * F) - 0.012528 * Math.sin(2 * F + Mpr) - 0.010980 * Math.sin(2 * F - Mpr) + 0.010674 * Math.sin(4 * D - Mpr) + 0.010034 * Math.sin(3 * Mpr) + 0.008548 * Math.sin(4 * D - 2 * Mpr) - e * 0.007910 * Math.sin(M - Mpr + 2 * D) - e * 0.006783 * Math.sin(2 * D + M) + 0.005162 * Math.sin(Mpr - D);
-
-    /* And furthermore.....*/
-
-    lambda = lambda + e * 0.005000 * Math.sin(M + D) + e * 0.004049 * Math.sin(Mpr - M + 2 * D) + 0.003996 * Math.sin(2 * Mpr + 2 * D) + 0.003862 * Math.sin(4 * D) + 0.003665 * Math.sin(2 * D - 3 * Mpr) + e * 0.002695 * Math.sin(2 * Mpr - M) + 0.002602 * Math.sin(Mpr - 2 * F - 2 * D) + e * 0.002396 * Math.sin(2 * D - M - 2 * Mpr) - 0.002349 * Math.sin(Mpr + D) + e * e * 0.002249 * Math.sin(2 * D - 2 * M) - e * 0.002125 * Math.sin(2 * Mpr + M) - e * e * 0.002079 * Math.sin(2 * M) + e * e * 0.002059 * Math.sin(2 * D - Mpr - 2 * M) - 0.001773 * Math.sin(Mpr + 2 * D - 2 * F) - 0.001595 * Math.sin(2 * F + 2 * D) + e * 0.001220 * Math.sin(4 * D - M - Mpr) - 0.001110 * Math.sin(2 * Mpr + 2 * F) + 0.000892 * Math.sin(Mpr - 3 * D) - e * 0.000811 * Math.sin(M + Mpr + 2 * D) + e * 0.000761 * Math.sin(4 * D - M - 2 * Mpr) + e * e * 0.000717 * Math.sin(Mpr - 2 * M) + e * e * 0.000704 * Math.sin(Mpr - 2 * M - 2 * D) + e * 0.000693 * Math.sin(M - 2 * Mpr + 2 * D) + e * 0.000598 * Math.sin(2 * D - M - 2 * F) + 0.000550 * Math.sin(Mpr + 4 * D) + 0.000538 * Math.sin(4 * Mpr) + e * 0.000521 * Math.sin(4 * D - M) + 0.000486 * Math.sin(2 * Mpr - D);
-
-    /*              *eclongit = lambda;  */
-
-    B = 5.128189 * Math.sin(F) + 0.280606 * Math.sin(Mpr + F) + 0.277693 * Math.sin(Mpr - F) + 0.173238 * Math.sin(2 * D - F) + 0.055413 * Math.sin(2 * D + F - Mpr) + 0.046272 * Math.sin(2 * D - F - Mpr) + 0.032573 * Math.sin(2 * D + F) + 0.017198 * Math.sin(2 * Mpr + F) + 0.009267 * Math.sin(2 * D + Mpr - F) + 0.008823 * Math.sin(2 * Mpr - F) + e * 0.008247 * Math.sin(2 * D - M - F) + 0.004323 * Math.sin(2 * D - F - 2 * Mpr) + 0.004200 * Math.sin(2 * D + F + Mpr) + e * 0.003372 * Math.sin(F - M - 2 * D) + 0.002472 * Math.sin(2 * D + F - M - Mpr) + e * 0.002222 * Math.sin(2 * D + F - M) + e * 0.002072 * Math.sin(2 * D - F - M - Mpr) + e * 0.001877 * Math.sin(F - M + Mpr) + 0.001828 * Math.sin(4 * D - F - Mpr) - e * 0.001803 * Math.sin(F + M) - 0.001750 * Math.sin(3 * F) + e * 0.001570 * Math.sin(Mpr - M - F) - 0.001487 * Math.sin(F + D) - e * 0.001481 * Math.sin(F + M + Mpr) + e * 0.001417 * Math.sin(F - M - Mpr) + e * 0.001350 * Math.sin(F - M) + 0.001330 * Math.sin(F - D) + 0.001106 * Math.sin(F + 3 * Mpr) + 0.001020 * Math.sin(4 * D - F) + 0.000833 * Math.sin(F + 4 * D - Mpr);
-    /* not only that, but */
-    B = B + 0.000781 * Math.sin(Mpr - 3 * F) + 0.000670 * Math.sin(F + 4 * D - 2 * Mpr) + 0.000606 * Math.sin(2 * D - 3 * F) + 0.000597 * Math.sin(2 * D + 2 * Mpr - F) + e * 0.000492 * Math.sin(2 * D + Mpr - M - F) + 0.000450 * Math.sin(2 * Mpr - F - 2 * D) + 0.000439 * Math.sin(3 * Mpr - F) + 0.000423 * Math.sin(F + 2 * D + 2 * Mpr) + 0.000422 * Math.sin(2 * D - F - 3 * Mpr) - e * 0.000367 * Math.sin(M + F + 2 * D - Mpr) - e * 0.000353 * Math.sin(M + F + 2 * D) + 0.000331 * Math.sin(F + 4 * D) + e * 0.000317 * Math.sin(2 * D + F - M + Mpr) + e * e * 0.000306 * Math.sin(2 * D - 2 * M - F) - 0.000283 * Math.sin(Mpr + 3 * F);
-
-
-    om1 = 0.0004664 * Math.cos(Om / Const.DEG_IN_RADIAN);
-    om2 = 0.0000754 * Math.cos((Om + 275.05 - 2.30 * T) / Const.DEG_IN_RADIAN);
-
-    beta = B * (1. - om1 - om2);
-    /*      *eclatit = beta; */
-
-    pie = 0.950724 + 0.051818 * Math.cos(Mpr) + 0.009531 * Math.cos(2 * D - Mpr) + 0.007843 * Math.cos(2 * D) + 0.002824 * Math.cos(2 * Mpr) + 0.000857 * Math.cos(2 * D + Mpr) + e * 0.000533 * Math.cos(2 * D - M) + e * 0.000401 * Math.cos(2 * D - M - Mpr) + e * 0.000320 * Math.cos(Mpr - M) - 0.000271 * Math.cos(D) - e * 0.000264 * Math.cos(M + Mpr) - 0.000198 * Math.cos(2 * F - Mpr) + 0.000173 * Math.cos(3 * Mpr) + 0.000167 * Math.cos(4 * D - Mpr) - e * 0.000111 * Math.cos(M) + 0.000103 * Math.cos(4 * D - 2 * Mpr) - 0.000084 * Math.cos(2 * Mpr - 2 * D) - e * 0.000083 * Math.cos(2 * D + M) + 0.000079 * Math.cos(2 * D + 2 * Mpr) + 0.000072 * Math.cos(4 * D) + e * 0.000064 * Math.cos(2 * D - M + Mpr) - e * 0.000063 * Math.cos(2 * D + M - Mpr) + e * 0.000041 * Math.cos(M + D) + e * 0.000035 * Math.cos(2 * Mpr - M) - 0.000033 * Math.cos(3 * Mpr - 2 * D) - 0.000030 * Math.cos(Mpr + D) - 0.000029 * Math.cos(2 * F - 2 * D) - e * 0.000029 * Math.cos(2 * Mpr + M) + e * e * 0.000026 * Math.cos(2 * D - 2 * M) - 0.000023 * Math.cos(2 * F - 2 * D + Mpr) + e * 0.000019 * Math.cos(4 * D - M - Mpr);
-
-    // System.out.printf("beta lambda %f %f",beta,lambda);
-    beta = beta / Const.DEG_IN_RADIAN;
-    lambda = lambda / Const.DEG_IN_RADIAN;
-    dist = 1. / Math.sin((pie) / Const.DEG_IN_RADIAN);
-//      System.out.printf("dist %f\n",dist);
-
-    retvals[2] = dist / Const.EARTHRAD_IN_AU;
-
-    l = Math.cos(lambda) * Math.cos(beta);
-    m = Math.sin(lambda) * Math.cos(beta);
-    n = Math.sin(beta);
-
-    equatorial = Ecliptic.eclrot(jd, l, m, n);
-    retvals[3] = equatorial[0] * dist;
-    retvals[4] = equatorial[1] * dist;
-    retvals[5] = equatorial[2] * dist;
-
-    retvals[0] = Math.atan2(equatorial[1], equatorial[0]) * Const.HRS_IN_RADIAN;
-    retvals[1] = Math.asin(equatorial[2]) * Const.DEG_IN_RADIAN;
-
-    return retvals;
-
-  }
-
-  public static double flmoon(int n, int nph) {
-    /* Gives JD (+- 2 min) of phase nph during a given lunation n.
-    Implements formulae in Meeus' Astronomical Formulae for Calculators,
-    2nd Edn, publ. by Willman-Bell. */
-    /* nph = 0 for new, 1 first qtr, 2 full, 3 last quarter. */
-
-    double jd, cor;
-    double M, Mpr, F;
-    double T;
-    double lun;
-
-    lun = (double) n + (double) nph / 4.;
-    T = lun / 1236.85;
-    jd = 2415020.75933 + 29.53058868 * lun + 0.0001178 * T * T - 0.000000155 * T * T * T + 0.00033 * Math.sin((166.56 + 132.87 * T - 0.009173 * T * T) / Const.DEG_IN_RADIAN);
-    M = 359.2242 + 29.10535608 * lun - 0.0000333 * T * T - 0.00000347 * T * T * T;
-    M = M / Const.DEG_IN_RADIAN;
-    Mpr = 306.0253 + 385.81691806 * lun + 0.0107306 * T * T + 0.00001236 * T * T * T;
-    Mpr = Mpr / Const.DEG_IN_RADIAN;
-    F = 21.2964 + 390.67050646 * lun - 0.0016528 * T * T - 0.00000239 * T * T * T;
-    F = F / Const.DEG_IN_RADIAN;
-    if ((nph == 0) || (nph == 2)) {/* new or full */
-      cor = (0.1734 - 0.000393 * T) * Math.sin(M) + 0.0021 * Math.sin(2 * M) - 0.4068 * Math.sin(Mpr) + 0.0161 * Math.sin(2 * Mpr) - 0.0004 * Math.sin(3 * Mpr) + 0.0104 * Math.sin(2 * F) - 0.0051 * Math.sin(M + Mpr) - 0.0074 * Math.sin(M - Mpr) + 0.0004 * Math.sin(2 * F + M) - 0.0004 * Math.sin(2 * F - M) - 0.0006 * Math.sin(2 * F + Mpr) + 0.0010 * Math.sin(2 * F - Mpr) + 0.0005 * Math.sin(M + 2 * Mpr);
-      jd = jd + cor;
-    } else {
-      cor = (0.1721 - 0.0004 * T) * Math.sin(M) + 0.0021 * Math.sin(2 * M) - 0.6280 * Math.sin(Mpr) + 0.0089 * Math.sin(2 * Mpr) - 0.0004 * Math.sin(3 * Mpr) + 0.0079 * Math.sin(2 * F) - 0.0119 * Math.sin(M + Mpr) - 0.0047 * Math.sin(M - Mpr) + 0.0003 * Math.sin(2 * F + M) - 0.0004 * Math.sin(2 * F - M) - 0.0006 * Math.sin(2 * F + Mpr) + 0.0021 * Math.sin(2 * F - Mpr) + 0.0003 * Math.sin(M + 2 * Mpr) + 0.0004 * Math.sin(M - 2 * Mpr) - 0.0003 * Math.sin(2 * M + Mpr);
-      if (nph == 1) {
-        cor = cor + 0.0028 -
-                0.0004 * Math.cos(M) + 0.0003 * Math.cos(Mpr);
-      }
-      if (nph == 3) {
-        cor = cor - 0.0028 +
-                0.0004 * Math.cos(M) - 0.0003 * Math.cos(Mpr);
-      }
-      jd = jd + cor;
-
-    }
-    return jd;
-  }
-
-  public static int lunation(double jd) {
-    int n; // approximate lunation ...
-    int nlast;
-    double newjd, lastnewjd;
-    int kount = 0;
-    double x;
-
-    nlast = (int) ((jd - 2415020.5) / 29.5307) - 1;
-
-    lastnewjd = flmoon(nlast, 0);
-    nlast++;
-    newjd = flmoon(nlast, 0);
-    // increment lunations until you're sure the last and next new
-    // moons bracket your input value.
-    while ((newjd < jd) && (kount < 40)) {
-      lastnewjd = newjd;
-      nlast++;
-      kount++;
-      newjd = flmoon(nlast, 0);
-    }
-    if (kount > 35) {
-      System.out.printf("didn't find lunation!\n");
-    }
-    return (nlast - 1);
-  }
-
-  public static String MoonPhaseDescr(double jd) {
-
-    int n;
-    int nlast, noctiles;
-    double newjd, lastnewjd;
-    double fqjd, fljd, lqjd;
-    int kount = 0;
-    double x;
-
-    nlast = lunation(jd);
-    lastnewjd = flmoon(nlast, 0);
-    x = jd - lastnewjd;
-    noctiles = (int) (x / 3.69134);  // 1/8 month, truncated.
-    if (noctiles == 0) {
-      return String.format(Locale.ENGLISH, "%3.1f days since new moon.", x);
-    } else if (noctiles <= 2) {  // nearest first quarter ...
-      fqjd = flmoon(nlast, 1);
-      x = jd - fqjd;
-      if (x < 0.) {
-        return String.format(Locale.ENGLISH, "%3.1f days before first quarter.", (-1. * x));
-      } else {
-        return String.format(Locale.ENGLISH, "%3.1f days after first quarter.", x);
-      }
-    } else if (noctiles <= 4) {  // nearest full ...
-      fljd = flmoon(nlast, 2);
-      x = jd - fljd;
-      if (x < 0.) {
-        return String.format(Locale.ENGLISH, "%3.1f days before full moon.", (-1. * x));
-      } else {
-        return String.format(Locale.ENGLISH, "%3.1f days after full moon.", x);
-      }
-    } else if (noctiles <= 6) {  // nearest last quarter ...
-      lqjd = flmoon(nlast, 3);
-      x = jd - lqjd;
-      if (x < 0.) {
-        return String.format(Locale.ENGLISH, "%3.1f days before last quarter.", (-1. * x));
-      } else {
-        return String.format(Locale.ENGLISH, "%3.1f days after last quarter.", x);
-      }
-    } else {
-      newjd = flmoon(nlast + 1, 0);
-      x = jd - newjd;
-      return String.format(Locale.ENGLISH, "%3.1f days before new moon.", (-1. * x));
-    }
-  }
-}
-
-class WhenWhere implements Cloneable {
-
-  InstantInTime when;
-  Site where;
-  double sidereal;
-  RA siderealobj;   // for output
-  double[] barycenter = {0., 0., 0., 0., 0., 0.};
-  // Barycentric coords in epoch of date; 0-2 are XYZ, 3-5 are velocity.
-  Sun sun;
-  HA hasun;
-  double altsun, azsun;
-  double twilight;
-  Moon moon;    // mostly for use in rise-set calculations.
-  HA hamoon;
-  double altmoon, azmoon;
-  double sunmoon;
-  double moonillum;
-  double cusppa;
-
-  void dump() {
-    System.out.printf("jd %f  Local %d %d %d  %d %d  UT %d %d %d  %d %d\n",
-            when.jd, when.localDate.year, when.localDate.month, when.localDate.day,
-            when.localDate.timeofday.hour, when.localDate.timeofday.minute,
-            when.UTDate.year, when.UTDate.month, when.UTDate.day, when.UTDate.timeofday.hour,
-            when.UTDate.timeofday.minute);
-    System.out.printf("lst %f\n", sidereal);
-  }
-
-  WhenWhere(InstantInTime t, Site loc) {
-    when = t;
-    where = loc;
-    sidereal = lstcalc(when.jd, where.longit.value);
-    siderealobj = new RA(sidereal);
-    MakeLocalSun();
-    MakeLocalMoon();   // these always need instantiation to avoid trouble later.
-
-  }
-
-  WhenWhere(double jdin, Site loc) {
-    when = new InstantInTime(jdin, loc.stdz, loc.use_dst, true);
-    where = loc;
-    sidereal = lstcalc(when.jd, where.longit.value);
-    siderealobj = new RA(sidereal);
-    MakeLocalSun();
-    MakeLocalMoon();   // these always need instantiation to avoid trouble later.
-  }
-
-  void ChangeWhen(double jdin) {
-    when.SetInstant(jdin, where.stdz, where.use_dst, true);
-    sidereal = lstcalc(when.jd, where.longit.value);
-    siderealobj.setRA(sidereal);
-  }
-
-  void ChangeWhen(String s, boolean is_ut) {
-    when.SetInstant(s, where.stdz, where.use_dst, is_ut);
-    sidereal = lstcalc(when.jd, where.longit.value);
-    siderealobj.setRA(sidereal);
-  }
-
-  void SetToNow() {
-    when.SetInstant(where.stdz, where.use_dst);
-    sidereal = lstcalc(when.jd, where.longit.value);
-    siderealobj.setRA(sidereal);
-  }
-
-  void ChangeSite(HashMap<String, Site> hash, String s) {
-    // changing site involves synching sidereal and local time
-    // so test to see if these are needed.
-    Site ss = hash.get(s);
-    if (where.equals(ss) == false) {  // there's an equals method for this now ...
-      // System.out.printf("Changing site ... .\n");
-      where = ss;
-      // System.out.printf("Site changed, stdz = %f\n",where.stdz);
-      sidereal = lstcalc(when.jd, where.longit.value);
-      when.SetInstant(when.jd, where.stdz, where.use_dst, true);
-      siderealobj.setRA(sidereal);
-    }
-    // otherwise do nothing.
-    // else System.out.printf("Not changing site ... \n");
-  }
-
-  void AdvanceWhen(String s) {
-    when.AdvanceTime(s, where.stdz, where.use_dst);
-    sidereal = lstcalc(when.jd, where.longit.value);
-    siderealobj.setRA(sidereal);
-  }
-
-  void AdvanceWhen(String s, boolean forward) {
-    when.AdvanceTime(s, where.stdz, where.use_dst, forward);
-    sidereal = lstcalc(when.jd, where.longit.value);
-    siderealobj.setRA(sidereal);
-  }
-
-  Celest zenith2000() {
-    Celest c = new Celest(sidereal, where.lat.value, when.JulianEpoch());
-    c.selfprecess(2000.);
-    return c;
-  }
-
-  @Override
-  public WhenWhere clone() {  // override clone method to make it public
-    try {
-      WhenWhere copy = (WhenWhere) super.clone();   // this needs to be try/catch to make it work
-      copy.when = (InstantInTime) when.clone();
-      copy.where = (Site) where.clone();
-      copy.sidereal = sidereal;
-      copy.siderealobj = (RA) siderealobj.clone();
-      copy.barycenter = (double[]) barycenter;
-      copy.sun = (Sun) sun.clone();
-      copy.hasun = (HA) hasun.clone();
-      copy.altsun = altsun;
-      copy.azsun = azsun;
-      copy.twilight = twilight;
-      copy.moon = (Moon) moon.clone();
-      copy.hamoon = (HA) hamoon.clone();
-      copy.altmoon = altmoon;
-      copy.azmoon = azmoon;
-      copy.sunmoon = sunmoon;
-      copy.moonillum = moonillum;
-      copy.cusppa = cusppa;
-      return copy;
-    } catch (CloneNotSupportedException e) {
-      throw new Error("This should never happen!\n");
-    }
-  }
-
-  static double lstcalc(double jdin, double longitin) {
-    double tt, ut, jdmid, jdfrac, sid_g;
-    long jdintt, sid_int;
-
-    jdintt = (long) jdin;
-    jdfrac = jdin - jdintt;
-    if (jdfrac < 0.5d) {
-      jdmid = jdintt - 0.5d;
-      ut = jdfrac + 0.5d;
-    } else {
-      jdmid = jdintt + 0.5d;
-      ut = jdfrac - 0.5d;
-    }
-    tt = (jdmid - Const.J2000) / 36525d;
-    sid_g = (24110.54841d + 8640184.812866d * tt + 0.093104d * tt * tt - 6.2e-6d * tt * tt * tt) / 86400d;
-    sid_int = (long) sid_g;
-    sid_g = sid_g - (double) sid_int;
-    sid_g = sid_g + 1.0027379093d * ut - longitin / 24d;
-    sid_int = (long) sid_g;
-    sid_g = (sid_g - (double) sid_int) * 24d;
-    if (sid_g < 0d) {
-      sid_g = sid_g + 24d;
-    }
-    return sid_g;
-  }
-
-  // Pass in a previously-computed planets and sun for this ...
-  // Planets and sun are assumed up-to-date.
-  void baryxyzvel(Planets p, Sun s) {
-
-    int i;
-    double[] geopos;
-
-    // need sunvel now so get it ...
-
-    //      System.out.printf("into baryxyzvel, jd = %f\n",when.jd);
-    s.sunvel(when.jd);  // compute sun velocity  ...
-
-//       System.out.printf("Helio Vxyz sun: %f %f %f  %f\n",
-    //         s.xyzvel[0] * Const.KMS_AUDAY,
-    //        s.xyzvel[1] * Const.KMS_AUDAY,
-    //       s.xyzvel[2] * Const.KMS_AUDAY, when.jd);
-
-    p.ComputeBaryCor(); // compute offset of barycenter from heliocenter
-
-//       System.out.printf("sun xyz  %f %f %f\n",s.xyz[0],s.xyz[1],s.xyz[2]);
-//       System.out.printf(" baryc   %f %f %f\n",p.barycor[0],p.barycor[1],p.barycor[2]);
-    for (i = 0; i < 3; i++) {
-      barycenter[i] = (-1. * s.xyz[i] - p.barycor[i]) *
-              Const.LIGHTSEC_IN_AU;
-      barycenter[i + 3] = (-1. * s.xyzvel[i] - p.barycor[i + 3]) *
-              Const.KMS_AUDAY;
-//          System.out.printf("pre-topo: %d   %f   %f \n",i,
-//              barycenter[i] / Const.LIGHTSEC_IN_AU,
-//                                                barycenter[i+3]);
-    }
-
-    // add in the topocentric velocity ... note use of sidereal for longit
-
-    geopos = Topo.Geocent(sidereal, where.lat.value, where.elevsea);
-
-//       System.out.printf("Geopos: %f %f %f\n",geopos[0],geopos[1],geopos[2]);
-//       System.out.printf("topo corrn vx vy %f %f\n",
-//          Const.OMEGA_EARTH * geopos[1] * Const.EARTHRAD_IN_KM,
-//          Const.OMEGA_EARTH * geopos[0] * Const.EARTHRAD_IN_KM);
-
-    // rotation vel is vector omega crossed into posn vector
-
-    barycenter[3] -= Const.OMEGA_EARTH * geopos[1] * Const.EARTHRAD_IN_KM;
-    barycenter[4] += Const.OMEGA_EARTH * geopos[0] * Const.EARTHRAD_IN_KM;
-
-  }
-
-  void MakeLocalSun() {
-    //System.out.printf("Making a new sun, jd = %f\n",when.jd);
-    sun = new Sun(this);
-    //System.out.printf("Made sun, sidereal = %f\n",sidereal);
-    hasun = new HA(sidereal - sun.topopos.Alpha.value);
-    double[] altazpar = Observation.altit(sun.topopos.Delta.value, hasun.value,
-            where.lat.value);
-    altsun = altazpar[0];
-    azsun = altazpar[1];
-    twilight = SkyIllum.ztwilight(altsun);
-    //System.out.printf("Made a new sun: %s alt %f\n",sun.topopos.checkstring(),altazpar[0]);
-  }
-
-  void UpdateLocalSun() {
-    sun.update(when, where, sidereal);
-    hasun = new HA(sidereal - sun.topopos.Alpha.value);
-    double[] altazpar = Observation.altit(sun.topopos.Delta.value, hasun.value,
-            where.lat.value);
-    altsun = altazpar[0];
-    azsun = altazpar[1];
-    twilight = SkyIllum.ztwilight(altsun);
-//       System.out.printf("Updated sun: %s %f\n",sun.topopos.checkstring(),altazpar[0]);
-  }
-
-  void MakeLocalMoon() {
-    moon = new Moon(this);
-    hamoon = new HA(sidereal - moon.topopos.Alpha.value);
-    double[] altazpar = Observation.altit(moon.topopos.Delta.value, hamoon.value,
-            where.lat.value);
-    altmoon = altazpar[0];
-    azmoon = altazpar[1];
-//      sunmoon = Spherical.subtend(sun.topopos,moon.topopos);
-//      moonillum = 0.5 * (1. - Math.cos(sunmoon));
-//      sunmoon *= Const.DEG_IN_RADIAN;
-//      System.out.printf("Made a new moon: %s HA %s alt %f\n",moon.topopos.checkstring(),
-//          hamoon.RoundedHAString(0,":"),altazpar[0]);
-  }
-
-  void UpdateLocalMoon() {
-    moon.update(when, where, sidereal);
-    hamoon = new HA(sidereal - moon.topopos.Alpha.value);
-    double[] altazpar = Observation.altit(moon.topopos.Delta.value, hamoon.value,
-            where.lat.value);
-    altmoon = altazpar[0];
-    azmoon = altazpar[1];
-    // call this after updating the sun ...
-//      sunmoon = Spherical.subtend(sun.topopos,moon.topopos);
-//      moonillum = 0.5 * (1. - Math.cos(sunmoon));
-//      sunmoon *= Const.DEG_IN_RADIAN;
-
-//      System.out.printf("Updated the moon: %s HA %s alt %f\n",moon.topopos.checkstring(),
-//          hamoon.RoundedHAString(0,":"),altazpar[0]);
-  }
-
-  void ComputeSunMoon() {
-    double retvals[];
-
-    UpdateLocalSun();
-    UpdateLocalMoon();
-    retvals = Spherical.CuspPA(sun.topopos, moon.topopos);
-    sunmoon = retvals[1];
-    moonillum = 0.5 * (1. - Math.cos(sunmoon));
-    sunmoon *= Const.DEG_IN_RADIAN;
-    cusppa = retvals[0];  // radians ...
-  }
-}
-
-class Observation implements Cloneable {
-
-  WhenWhere w;
-  Celest c;
-  Celest current;
-  HA ha;
-  double altitude, azimuth, parallactic;
-  double airmass;
-  double barytcor, baryvcor;   // time and velocity corrections to barycenter
-  double baryjd;
-  // I'd been hauling around a separate sun and moon, but these are now
-  // expunged ... they're in the WhenWhere.  But moonlight, moonobj, and sunobj
-  // depend on the object coordinates so they are here:
-  double moonlight;
-  double moonobj, sunobj;    // angular sepn of moon from obj and sun from obj
-
-  Observation(WhenWhere wIn, Celest celIn) {
-    w = (WhenWhere) wIn.clone();
-    c = (Celest) celIn.clone();
-    ha = new HA(0.);
-    ComputeSky();
-  }
-
-  void ComputeSky() {   // bare-bones updater
-    // assumes WhenWhere w has been updated.
-    current = c.precessed(w.when.JulianEpoch());
-    ha.setHA(w.sidereal - current.Alpha.value);
-    double[] altazpar = altit(current.Delta.value, ha.value,
-            w.where.lat.value);
-    altitude = altazpar[0];
-    azimuth = altazpar[1];
-    parallactic = altazpar[2];
-    airmass = Spherical.true_airmass(altitude);
-  }
-
-  // Split off the sun, moon, barycenter etc. to save time -- they're
-  // not always needed in every instance.
-  @Override
-  public Observation clone() {  // override clone method to make it public
-    try {
-      Observation copy = (Observation) super.clone();   // this needs to be try/catch to make it work
-      copy.w = (WhenWhere) w.clone();
-      copy.c = (Celest) c.clone();
-      copy.current = (Celest) current.clone();
-      copy.ha = (HA) ha.clone();
-      copy.altitude = altitude;
-      copy.azimuth = azimuth;
-      copy.parallactic = parallactic;
-      copy.barytcor = barytcor;
-      copy.baryvcor = baryvcor;
-      copy.baryjd = baryjd;
-      copy.moonlight = moonlight;
-      copy.moonobj = moonobj;
-      copy.sunobj = sunobj;
-      return copy;
-    } catch (CloneNotSupportedException e) {
-      throw new Error("This should never happen!\n");
-    }
-  }
-
-  void ComputeSunMoon() {
-
-
-    current = c.precessed(w.when.JulianEpoch());
-    //System.out.printf("ComputeSunMoon %s (%f)\n",
-    //       current.Alpha.RoundedRAString(2," "),current.Equinox);
-    w.ComputeSunMoon();   // the non-object related parts are all done here
-
-    sunobj = Const.DEG_IN_RADIAN * Spherical.subtend(w.sun.topopos, current);
-    moonobj = Const.DEG_IN_RADIAN * Spherical.subtend(w.moon.topopos, current);
-
-    moonlight = SkyIllum.lunskybright(w.sunmoon, moonobj, 0.172, w.altmoon,
-            altitude, w.moon.topopos.distance);
-
-  }
-
-  static double[] altit(double dec, double hrangle, double lat) {
-    // returns altitiude (degr), azimuth (degrees), parallactic angle (degr)
-    double x, y, z;
-    double sinp, cosp;   // sine and cosine of parallactic angle
-    double cosdec, sindec, cosha, sinha, coslat, sinlat;
-    double retvals[] = {0., 0., 0.};
-    double az, parang;
-
-    dec = dec / Const.DEG_IN_RADIAN;
-    hrangle = hrangle / Const.HRS_IN_RADIAN;
-    lat = lat / Const.DEG_IN_RADIAN;
-    cosdec = Math.cos(dec);
-    sindec = Math.sin(dec);
-    cosha = Math.cos(hrangle);
-    sinha = Math.sin(hrangle);
-    coslat = Math.cos(lat);
-    sinlat = Math.sin(lat);
-    x = Const.DEG_IN_RADIAN * Math.asin(cosdec * cosha * coslat + sindec * sinlat);
-    // x is the altitude.
-    y = sindec * coslat - cosdec * cosha * sinlat; /* due N comp. */
-    z = -1. * cosdec * sinha; /* due east comp. */
-    az = Math.atan2(z, y);
-
-    if (cosdec != 0.) { // protect from divide by zero
-      sinp = -1. * Math.sin(az) * coslat / cosdec;
-      /* spherical law of sines ... cosdec = sine of codec,
-      coslat = sine of colatitude */
-      cosp = -1. * Math.cos(az) * cosha - Math.sin(az) * sinha * sinlat;
-      /* spherical law of cosines ... also transformed to local
-      available variables. */
-      parang = Math.atan2(sinp, cosp) * Const.DEG_IN_RADIAN;
-      /* library function gets the quadrant. */
-    } else { // you're on the pole ...
-      if (lat >= 0.) {
-        parang = 180.;
-      } else {
-        parang = 0.;
-      }
-    }
-
-    az *= Const.DEG_IN_RADIAN;
-    while (az < 0.) {
-      az += 360.;
-    }
-    while (az >= 360.) {
-      az -= 360.;
-    }
-
-    retvals[0] = x;
-    retvals[1] = az;
-    retvals[2] = parang;
-
-    return retvals;
-  }
-//   
-//   void computesun() {
-//      sun = new Sun(w);
-//   }
-//
-//   void computemoon() {
-//      moon = new Moon(w);
-//   }
-//
-
-  void computebary(Planets p) {
-
-    w.baryxyzvel(p, w.sun);  /* find the position and velocity of the
-    observing site wrt the solar system barycent */
-    double[] unitvec = current.cel_unitXYZ();
-//      System.out.printf("Current: %s\n",current.checkstring());
-    barytcor = 0.;
-    baryvcor = 0.;
-//      System.out.printf("Bary xyz %f %f %f \n",w.barycenter[0],
-//             w.barycenter[1],w.barycenter[2]);
-    for (int i = 0; i < 3; i++) {
-      barytcor += unitvec[i] * w.barycenter[i];
-      baryvcor += unitvec[i] * w.barycenter[i + 3];
-    }
-//      System.out.printf("Bary %f sec %f km/s ...\n",
-//          barytcor, baryvcor);
-    baryjd = w.when.jd + barytcor / 86400.;
-  }
-}
-
-class Planets {
-
-  /** This includes everything for the planets. */
-  /* The planetary ephemeris used is based on Meeus' Astronomical
-  Forumulae for Calculators.  This gives fairly good (< 1 arcmin)
-  positions for the inner planets but somewhat worse for the outer
-  planets.  These should NOT be used in applications where precise
-  positions are needed.  This is intended as a very lightweight
-  application for purposes such as  (a) telling you which planet is
-  which in the sky; (b) plotting the planet recognizably among the
-  constellations; (c) warning you if your target is fairly close to
-  a bright planet; (d) generating a reasonably accurate value for the
-  offset of the solar system barycenter from the center of the sun. */
-  double jd_el;
-
-  /* Arrays of planetary elements */
-  static String[] names = {"Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn",
-    "Uranus", "Neptune", "Pluto"}; // what the heck, let's keep Pluto
-  double[] incl = {0., 0., 0., 0., 0., 0., 0., 0., 0.};  // inclination
-  double[] Omega = {0., 0., 0., 0., 0., 0., 0., 0., 0.}; // longit of asc node
-  double[] omega = {0., 0., 0., 0., 0., 0., 0., 0., 0.}; // longit of perihelion
-  double[] a = {0., 0., 0., 0., 0., 0., 0., 0., 0.};     // semimajor axis
-  double[] daily = {0., 0., 0., 0., 0., 0., 0., 0., 0.}; // mean daily motion, degr.
-  double[] ecc = {0., 0., 0., 0., 0., 0., 0., 0., 0.};   // eccentricity
-  double[] L_0 = {0., 0., 0., 0., 0., 0., 0., 0., 0.};   // starting longitude (?)
-  static double[] mass = {1.660137e-7, 2.447840e-6, 3.040433e-6,
-    3.227149e-7, 9.547907e-4, 2.858776e-4, 4.355401e-5, 5.177591e-5,
-    7.69e-9};  // IAU 1976 masses of planets in terms of solar mass
-  // used to weight barycenter calculation only.
-// Need to include instance variables of x,y,z and xdot,ydot,zdot
-  double[][] xyz;
-  double[][] xyzvel;
-  double[] barycor;  // 0,1,2 = xyz in AU; 3,4,5 = xyzvel in km/s.
-  double[] mags = {0., 0., 0., 0., 0., 0., 0., 0., 0.};   // apparent mags
-  static final double[] V0 = {-0.42, -4.40, -3.86, -1.52, -9.40, -9.22, -7.19,
-    -6.87, -1.0};
-
-  /*  From Astronomical Almanac, 2003, p. E88.  V mag of planet when
-  full face on at unit distance from both sun and earth.  Saturn
-  has been goosed up a bit b/c Almanac quantity didn't have rings
-  in it ...   */
-  Observation[] PlanetObs;
-
-  Planets(WhenWhere wIn) {
-    comp_el(wIn.when.jd);
-    PlanetObs = pposns(wIn);
-  }
-
-  void Update(WhenWhere wIn) {
-    comp_el(wIn.when.jd);
-    PlanetObs = pposns(wIn);
-  }
-
-  void comp_el(double jd_in) {
-    /* Compute and load mean elements for the planets. */
-    double T, Tsq, Tcb, d;
-    double ups, P, Q, S, V, W, G, H, zeta, psi;  // Meeus p. 110 ff.
-    double sinQ, sinZeta, cosQ, cosZeta, sinV, cosV, sin2Zeta, cos2Zeta;
-    double sin2Q, cos2Q, sinH, sin2H, cosH, cos2H;
-
-    jd_el = jd_in;
-    d = jd_el - 2415020.;    // 1900
-    T = d / 36525.;
-    Tsq = T * T;
-    Tcb = Tsq * T;
-
-    // Mercury, Venus, and Mars from Explanatory Suppl. p. 113
-
-    // Mercury = 0
-    incl[0] = 7.002880 + 1.8608e-3 * T - 1.83e-5 * Tsq;
-    Omega[0] = 47.14594 + 1.185208 * T + 1.74e-4 * Tsq;
-    omega[0] = 75.899697 + 1.55549 * T + 2.95e-4 * Tsq;
-    a[0] = 0.3870986;
-    daily[0] = 4.0923388;
-    ecc[0] = 0.20561421 + 0.00002046 * T;
-    L_0[0] = 178.179078 + 4.0923770233 * d +
-            0.0000226 * Math.pow((3.6525 * T), 2.);
-
-    // Venus = 1
-    incl[1] = 3.39363 + 1.00583e-03 * T - 9.722e-7 * Tsq;
-    Omega[1] = 75.7796472 + 0.89985 * T + 4.1e-4 * Tsq;
-    omega[1] = 130.16383 + 1.4080 * T + 9.764e-4 * Tsq;
-    a[1] = 0.723325;
-    daily[1] = 1.60213049;
-    ecc[1] = 0.00682069 - 0.00004774 * T;
-    L_0[1] = 342.767053 + 1.6021687039 * 36525 * T +
-            0.000023212 * Math.pow((3.6525 * T), 2.);
-
-    // Earth = 2  ... elements from old Nautical Almanac
-    ecc[2] = 0.01675104 - 0.00004180 * T + 0.000000126 * Tsq;
-    incl[2] = 0.0;
-    Omega[2] = 0.0;
-    omega[2] = 101.22083 + 0.0000470684 * d + 0.000453 * Tsq + 0.000003 * Tcb;
-    a[2] = 1.0000007;
-    ;
-    daily[2] = 0.985599;
-    L_0[2] = 358.47583 + 0.9856002670 * d - 0.000150 * Tsq - 0.000003 * Tcb +
-            omega[2];
-
-    // Mars = 3
-    incl[3] = 1.85033 - 6.75e-04 * T - 1.833e-5 * Tsq;
-    Omega[3] = 48.786442 + .770992 * T + 1.39e-6 * Tsq;
-    omega[3] = 334.218203 + 1.840758 * T + 1.299e-4 * Tsq;
-    a[3] = 1.5236915;
-    daily[3] = 0.5240329502 + 1.285e-9 * T;
-    ecc[3] = 0.09331290 - 0.000092064 * T - 0.000000077 * Tsq;
-    L_0[3] = 293.747628 + 0.5240711638 * d +
-            0.000023287 * Math.pow((3.6525 * T), 2.);
-
-    // Outer planets from Jean Meeus, Astronomical Formulae for
-    // Calculators, 3rd Edn, Willman-Bell; p. 100
-    // Mutual interactions get pretty big; I'm including some of the
-    // larger perturbation terms from Meeus' book.
-
-    // Jupiter = 4
-
-    incl[4] = 1.308736 - 0.0056961 * T + 0.0000039 * Tsq;
-    Omega[4] = 99.443414 + 1.0105300 * T + 0.0003522 * Tsq - 0.00000851 * Tcb;
-    omega[4] = 12.720972 + 1.6099617 * T + 1.05627e-3 * Tsq - 3.43e-6 * Tcb;
-    a[4] = 5.202561;
-    daily[4] = 0.08312941782;
-    ecc[4] = .04833475 + 1.64180e-4 * T - 4.676e-7 * Tsq -
-            1.7e-9 * Tcb;
-    L_0[4] = 238.049257 + 3036.301986 * T + 0.0003347 * Tsq -
-            1.65e-6 * Tcb;
-
-    ups = 0.2 * T + 0.1;
-    P = (237.47555 + 3034.9061 * T) / Const.DEG_IN_RADIAN;
-    Q = (265.91650 + 1222.1139 * T) / Const.DEG_IN_RADIAN;
-    S = (243.51721 + 428.4677 * T) / Const.DEG_IN_RADIAN;
-    V = 5 * Q - 2 * P;
-    W = 2 * P - 6 * Q + 3 * S;
-    zeta = Q - P;
-    psi = S - Q;
-    sinQ = Math.sin(Q);  // compute some of the more popular ones ...
-    cosQ = Math.cos(Q);
-    sin2Q = Math.sin(2. * Q);
-    cos2Q = Math.cos(2. * Q);
-    sinV = Math.sin(V);
-    cosV = Math.cos(V);
-    sinZeta = Math.sin(zeta);
-    cosZeta = Math.cos(zeta);
-    sin2Zeta = Math.sin(2 * zeta);
-    cos2Zeta = Math.cos(2 * zeta);
-
-    L_0[4] = L_0[4] + (0.331364 - 0.010281 * ups - 0.004692 * ups * ups) * sinV + (0.003228 - 0.064436 * ups + 0.002075 * ups * ups) * cosV - (0.003083 + 0.000275 * ups - 0.000489 * ups * ups) * Math.sin(2 * V) + 0.002472 * Math.sin(W) + 0.013619 * sinZeta + 0.018472 * sin2Zeta + 0.006717 * Math.sin(3 * zeta) + (0.007275 - 0.001253 * ups) * sinZeta * sinQ + 0.006417 * sin2Zeta * sinQ - (0.033839 + 0.001253 * ups) * cosZeta * sinQ - (0.035681 + 0.001208 * ups) * sinZeta * sinQ;
-    /* only part of the terms, the ones first on the list and
-    selected larger-amplitude terms from farther down. */
-
-    ecc[4] = ecc[4] + 1e-7 * ((3606 + 130 * ups - 43 * ups * ups) * sinV + (1289 - 580 * ups) * cosV - 6764 * sinZeta * sinQ - 1110 * sin2Zeta * sinQ + (1284 + 116 * ups) * cosZeta * sinQ + (1460 + 130 * ups) * sinZeta * cosQ + 6074 * cosZeta * cosQ);
-
-    omega[4] = omega[4] + (0.007192 - 0.003147 * ups) * sinV + (0.000197 * ups * ups - 0.00675 * ups - 0.020428) * cosV + 0.034036 * cosZeta * sinQ + 0.037761 * sinZeta * cosQ;
-
-    a[4] = a[4] + 1.0e-6 * (205 * cosZeta - 263 * cosV + 693 * cos2Zeta + 312 * Math.sin(3 * zeta) + 147 * Math.cos(4 * zeta) + 299 * sinZeta * sinQ + 181 * cos2Zeta * sinQ + 181 * cos2Zeta * sinQ + 204 * sin2Zeta * cosQ + 111 * Math.sin(3 * zeta) * cosQ - 337 * cosZeta * cosQ - 111 * cos2Zeta * cosQ);
-
-    // Saturn = 5
-    incl[5] = 2.492519 - 0.00034550 * T - 7.28e-7 * Tsq;
-    Omega[5] = 112.790414 + 0.8731951 * T - 0.00015218 * Tsq - 5.31e-6 * Tcb;
-    omega[5] = 91.098214 + 1.9584158 * T + 8.2636e-4 * Tsq;
-    a[5] = 9.554747;
-    daily[5] = 0.0334978749897;
-    ecc[5] = 0.05589232 - 3.4550e-4 * T - 7.28e-7 * Tsq;
-    L_0[5] = 266.564377 + 1223.509884 * T + 0.0003245 * Tsq - 5.8e-6 * Tcb + (0.018150 * ups - 0.814181 + 0.016714 * ups * ups) * sinV + (0.160906 * ups - 0.010497 - 0.004100 * ups * ups) * cosV + 0.007581 * Math.sin(2 * V) - 0.007986 * Math.sin(W) - 0.148811 * sinZeta - 0.040786 * sin2Zeta - 0.015208 * Math.sin(3 * zeta) - 0.006339 * Math.sin(4 * zeta) - 0.006244 * sinQ + (0.008931 + 0.002728 * ups) * sinZeta * sinQ - 0.016500 * sin2Zeta * sinQ - 0.005775 * Math.sin(3 * zeta) * sinQ + (0.081344 + 0.003206 * ups) * cosZeta * sinQ + 0.015019 * cos2Zeta * sinQ + (0.085581 + 0.002494 * ups) * sinZeta * cosQ + (0.025328 - 0.003117 * ups) * cosZeta * cosQ + 0.014394 * cos2Zeta * cosQ;   /* truncated here -- no
-    terms larger than 0.01 degrees, but errors may
-    accumulate beyond this.... */
-    ecc[5] = ecc[5] + 1.0e-7 * ((2458. * ups - 7927.) * sinV + (13381. + 1226. * ups) * cosV + 12415. * sinQ + 26599. * cosZeta * sinQ - 4687. * cos2Zeta * sinQ - 12696. * sinZeta * cosQ - 4200. * sin2Zeta * cosQ + (2211. - 286 * ups) * sinZeta * sin2Q - 2208. * sin2Zeta * sin2Q - 2780. * cosZeta * sin2Q + 2022. * cos2Zeta * sin2Q - 2842. * sinZeta * cos2Q - 1594. * cosZeta * cos2Q + 2162. * cos2Zeta * cos2Q);  /* terms with amplitudes
-    > 2000e-7;  some secular variation ignored. */
-    omega[5] = omega[5] + (0.077108 + 0.007186 * ups - 0.001533 * ups * ups) * sinV + (0.045803 - 0.014766 * ups - 0.000536 * ups * ups) * cosV - 0.075825 * sinZeta * sinQ - 0.024839 * sin2Zeta * sinQ - 0.072582 * cosQ - 0.150383 * cosZeta * cosQ +
-            0.026897 * cos2Zeta * cosQ;  /* all terms with amplitudes
-    greater than 0.02 degrees -- lots of others! */
-    a[5] = a[5] + 1.0e-6 * (2933. * cosV + 33629. * cosZeta - 3081. * cos2Zeta - 1423. * Math.cos(3 * zeta) + 1098. * sinQ - 2812. * sinZeta * sinQ + 2138. * cosZeta * sinQ + 2206. * sinZeta * cosQ - 1590. * sin2Zeta * cosQ + 2885. * cosZeta * cosQ + 2172. * cos2Zeta * cosQ);  /* terms with amplitudes greater
-    than 1000 x 1e-6 */
-
-    // Uranus = 6
-    incl[6] = 0.772464 + 0.0006253 * T + 0.0000395 * Tsq;
-    Omega[6] = 73.477111 + 0.4986678 * T + 0.0013117 * Tsq;
-    omega[6] = 171.548692 + 1.4844328 * T + 2.37e-4 * Tsq - 6.1e-7 * Tcb;
-    a[6] = 19.21814;
-    daily[6] = 1.1769022484e-2;
-    ecc[6] = 0.0463444 - 2.658e-5 * T;
-    L_0[6] = 244.197470 + 429.863546 * T + 0.000316 * Tsq - 6e-7 * Tcb;
-    /* stick in a little bit of perturbation -- this one really gets
-    yanked around.... after Meeus p. 116*/
-    G = (83.76922 + 218.4901 * T) / Const.DEG_IN_RADIAN;
-    H = 2 * G - S;
-
-    sinH = Math.sin(H);
-    sin2H = Math.sin(2. * H);
-    cosH = Math.cos(H);
-    cos2H = Math.cos(2. * H);
-
-    L_0[6] = L_0[6] + (0.864319 - 0.001583 * ups) * sinH + (0.082222 - 0.006833 * ups) * cosH + 0.036017 * sin2H;
-    omega[6] = omega[6] + 0.120303 * sinH + (0.019472 - 0.000947 * ups) * cosH + 0.006197 * sin2H;
-    ecc[6] = ecc[6] + 1.0e-7 * (20981. * cosH - 3349. * sinH + 1311. * cos2H);
-    a[6] = a[6] - 0.003825 * cosH;
-
-    /* other corrections to "true longitude" are ignored. */
-
-    // Neptune = 7
-    incl[7] = 1.779242 - 9.5436e-3 * T - 9.1e-6 * Tsq;
-    Omega[7] = 130.681389 + 1.0989350 * T + 2.4987e-4 * Tsq - 4.718e-6 * Tcb;
-    omega[7] = 46.727364 + 1.4245744 * T + 3.9082e-3 * Tsq - 6.05e-7 * Tcb;
-    a[7] = 30.10957;
-    daily[7] = 6.020148227e-3;
-    ecc[7] = 0.00899704 + 6.33e-6 * T;
-    L_0[7] = 84.457994 + 219.885914 * T + 0.0003205 * Tsq - 6e-7 * Tcb;
-    L_0[7] = L_0[7] - (0.589833 - 0.001089 * ups) * sinH - (0.056094 - 0.004658 * ups) * cosH - 0.024286 * sin2H;
-    omega[7] = omega[7] + 0.024039 * sinH - 0.025303 * cosH;
-    ecc[7] = ecc[7] + 1.0e-7 * (4389. * sinH + 1129. * sin2H + 4262. * cosH + 1089. * cos2H);
-    a[7] = a[7] + 8.189e-3 * cosH;
-
-    // Pluto = 8; very approx elements, osculating for Sep 15 1992.
-    d = jd_el - 2448880.5;  /* 1992 Sep 15 */
-    T = d / 36525.;
-    incl[8] = 17.1426;
-    Omega[8] = 110.180;
-    omega[8] = 223.782;
-    a[8] = 39.7465;
-    daily[8] = 0.00393329;
-    ecc[8] = 0.253834;
-    L_0[8] = 228.1027 + 0.00393329 * d;
-
-  }
-
-  double[] planetxyz(int p, double jd) {
-    /** produces ecliptic X,Y,Z coords for planet number 'p' at date jd. */
-    double M, omnotil, nu, r;
-    double e, LL, Om, om, nuu, ii;
-    double[] retvals = {0., 0., 0.};
-
-    // 1992 Astronomical Almanac p. E4 has these formulae.
-
-    ii = incl[p] / Const.DEG_IN_RADIAN;
-    e = ecc[p];
-
-    LL = (daily[p] * (jd - jd_el) + L_0[p]) / Const.DEG_IN_RADIAN;
-    Om = Omega[p] / Const.DEG_IN_RADIAN;
-    om = omega[p] / Const.DEG_IN_RADIAN;
-
-    M = LL - om;
-    omnotil = om - Om;
-    // approximate formula for Kepler equation solution ...
-    nu = M + (2. * e - 0.25 * Math.pow(e, 3.)) * Math.sin(M) +
-            1.25 * e * e * Math.sin(2 * M) +
-            1.08333333 * Math.pow(e, 3.) * Math.sin(3 * M);
-    r = a[p] * (1. - e * e) / (1 + e * Math.cos(nu));
-
-    retvals[0] = r *
-            (Math.cos(nu + omnotil) * Math.cos(Om) - Math.sin(nu + omnotil) *
-            Math.cos(ii) * Math.sin(Om));
-    retvals[1] = r *
-            (Math.cos(nu + omnotil) * Math.sin(Om) + Math.sin(nu + omnotil) *
-            Math.cos(ii) * Math.cos(Om));
-    retvals[2] = r * Math.sin(nu + omnotil) * Math.sin(ii);
-
-    return retvals;
-
-  }
-
-  double[] planetvel(int p, double jd) {
-
-    /* numerically evaluates planet velocity by brute-force
-    numerical differentiation. Very unsophisticated algorithm. */
-
-    double dt; /* timestep */
-    double x1, y1, z1, x2, y2, z2, r1, d1, r2, d2, ep1;
-    double[] pos1 = {0., 0., 0.};
-    double[] pos2 = {0., 0., 0.};
-    double[] retval = {0., 0., 0.};
-    int i;
-
-    dt = 0.1 / daily[p]; /* time for mean motion of 0.1 degree */
-    pos1 = planetxyz(p, (jd - dt));
-    pos2 = planetxyz(p, (jd + dt));
-    for (i = 0; i < 3; i++) {
-      retval[i] = 0.5 * (pos2[i] - pos1[i]) / dt;
-    }
-    return retval;
-    /* answer should be in ecliptic coordinates, in AU per day.*/
-  }
-
-  double modulus(double[] a) {
-    int i;
-    double result = 0.;
-
-    for (i = 0; i < a.length; i++) {
-      result += a[i] * a[i];
-    }
-    return Math.sqrt(result);
-
-  }
-
-  double dotprod(double[] a, double[] b) {
-    int i;
-    double result = 0.;
-    for (i = 0; i < a.length; i++) {
-      result += a[i] * b[i];
-    }
-    return result;
-  }
-
-  void computemags() {
-    /* assumes xyz[][] has been updated.  All the calculations are relative,
-    so it doesn't matter what the system is. */
-    int i, j;
-    double sun2planet, earth2planet, phasefac;
-    double[] dxyz = {0., 0., 0.};
-
-    for (i = 0; i < 9; i++) {
-      if (i != 2) {  // skip earth
-        sun2planet = modulus(xyz[i]);
-        for (j = 0; j < 3; j++) {
-          dxyz[j] = xyz[i][j] - xyz[2][j];
-        }
-        earth2planet = modulus(dxyz);
-        phasefac = 0.5 * (dotprod(xyz[i], dxyz) / (sun2planet * earth2planet) + 1.);
-        // this should be the illuminated fraction.
-
-        mags[i] = V0[i] +
-                2.5 * Math.log10(phasefac) + 5. * Math.log10(sun2planet * earth2planet);
-      } else {
-        mags[i] = -99.;   // earth
-      }
-    }
-
-    // for(i = 0; i < 9; i++) System.out.printf("%s  %f\n",names[i],mags[i]);
-  }
-
-  Celest earthview(double[] earthxyz, double[] planxyz, double jd) {
-    double[] dxyz = {0., 0., 0.};
-    double[] retvals = {0., 0., 0.};
-    double eq;
-    int i;
-
-    eq = 2000. + (jd - Const.J2000) / 365.25;
-    for (i = 0; i < 3; i++) {
-      dxyz[i] = planxyz[i] - earthxyz[i];
-    }
-    retvals = Celest.XYZcel(dxyz[0], dxyz[1], dxyz[2]);
-    Celest ViewFromEarth = new Celest(retvals[0], retvals[1], eq, retvals[2]);
-    return ViewFromEarth;
-  }
-
-  public Observation[] pposns(WhenWhere w) {
-    /* returns Observations for all the planets. */
-
-    int i;
-    double[] earthxyz = {0., 0., 0.};
-    double[] eclipt = {0., 0., 0.};
-    double[] equat = {0., 0., 0.};
-    double[] ecliptvel = {0., 0., 0.};
-    double[] equatvel = {0., 0., 0.};
-    Celest planetcel;
-
-    Observation[] planetpos = new Observation[9];
-
-    xyz = new double[9][3];
-    xyzvel = new double[9][3];
-
-    // compute_el(w.when.jd);   refresh the planetary elements
-
-    eclipt = planetxyz(2, w.when.jd);   // earth  ... do separately
-    earthxyz = Ecliptic.eclrot(w.when.jd, eclipt[0], eclipt[1], eclipt[2]);
-    xyz[2][0] = earthxyz[0];
-    xyz[2][1] = earthxyz[1];
-    xyz[2][2] = earthxyz[2];
-    ecliptvel = planetvel(2, w.when.jd);
-    equatvel = Ecliptic.eclrot(w.when.jd, ecliptvel[0], ecliptvel[1],
-            ecliptvel[2]);
-    xyzvel[2][0] = equatvel[0];
-    xyzvel[2][1] = equatvel[1];
-    xyzvel[2][2] = equatvel[2];
-
-    for (i = 0; i < 9; i++) {
-      if (i != 2) {  // skip earth
-        eclipt = planetxyz(i, w.when.jd);
-        equat = Ecliptic.eclrot(w.when.jd, eclipt[0], eclipt[1], eclipt[2]);
-        // save xyz position of planet for barycentric correction.
-        xyz[i][0] = equat[0];
-        xyz[i][1] = equat[1];
-        xyz[i][2] = equat[2];
-        // and the velocities, too
-        ecliptvel = planetvel(i, w.when.jd);
-        equatvel = Ecliptic.eclrot(w.when.jd, ecliptvel[0], ecliptvel[1],
-                ecliptvel[2]);
-        xyzvel[i][0] = equatvel[0];
-        xyzvel[i][1] = equatvel[1];
-        xyzvel[i][2] = equatvel[2];
-        planetcel = earthview(earthxyz, equat, w.when.jd);
-        planetpos[i] = new Observation(w, planetcel);
-        //  System.out.printf("i %d %s\n",i,planetpos[i].ha.RoundedHAString(0,":"));
-      } else {         // earth
-        planetpos[i] = new Observation(w, new Celest(0., 0., 2000., 0.));
-      }
-    }
-    return planetpos;
-  }
-
-  void printxyz() {  // for diagn.
-    int i, j;
-    for (i = 0; i < 9; i++) {
-      System.out.printf("%d ", i);
-      for (j = 0; j < 3; j++) {
-        System.out.printf("%f ", xyz[i][j]);
-      }
-      System.out.printf("  ");
-      for (j = 0; j < 3; j++) {
-        System.out.printf("%f ", xyzvel[i][j]);
-      }
-      System.out.printf("\n");
-    }
-  }
-
-  void ComputeBaryCor() {
-    // Using PREVIOUSLY COMPUTED xyz and xyzvel, computes the offset to the
-    // barycenter.
-    int i, j;
-
-    barycor = new double[6];
-    barycor[0] = 0.;
-    barycor[1] = 0.;
-    barycor[2] = 0.;
-    barycor[3] = 0.;
-    barycor[4] = 0.;
-    barycor[5] = 0.;
-
-    for (i = 0; i < 9; i++) {
-      for (j = 0; j < 3; j++) {
-        barycor[j] = barycor[j] + xyz[i][j] * mass[i];
-        barycor[j + 3] = barycor[j + 3] + xyzvel[i][j] * mass[i];
-      }
-    }
-    for (j = 0; j < 3; j++) {
-      barycor[j] = barycor[j] / Const.SS_MASS;
-      barycor[j + 3] = barycor[j + 3] / Const.SS_MASS;
-    }
-  }
-}
-
-class Constel {
-
-  /** Just a static routine to deliver a constellation. */
-  /* This is adapted from an implementation of an algorithm from
-  \bibitem[Roman(1987)]{1987PASP...99..695R} Roman, N.~G.\ 1987,
-  \pasp, 99, 695.  I adpated the skycalc routine, which was in turn
-  written by Francois Ochsenbein of the CDS, Strasbourg.  There are
-  big arrays that define the corners of the constellations (in 1875
-  coords).
-   */
-  static String getconstel(Celest c) {
-    double ra1875, dec1875;
-    int i;
-    double[] ra1 = {0, 0.0000, 120.0000, 315.0000, 270.0000, 0.0000, 137.5000, 0.0000,
-      160.0000, 262.5000, 302.5000, 0.0000, 172.5000, 248.0000, 302.5000, 119.5000,
-      137.5000, 195.0000, 46.5000, 306.2500, 170.0000, 0.0000, 210.0000, 353.7500,
-      180.0000, 202.5000, 347.5000, 91.5000, 300.0000, 308.0500, 105.0000, 119.5000,
-      296.5000, 300.0000, 343.0000, 0.0000, 291.2500, 25.5000, 36.5000, 46.5000,
-      334.7500, 75.0000, 210.5000, 216.2500, 47.5000, 332.0000, 309.0000, 0.0000,
-      91.5000, 181.2500, 228.7500, 329.5000, 50.0000, 343.0000, 236.2500, 30.6250,
-      255.0000, 0.0000, 20.5000, 97.5000, 350.0000, 202.5000, 0.0000, 353.7500,
-      272.6250, 273.5000, 286.2500, 25.0000, 126.2500, 2.5000, 180.0000, 102.0000,
-      328.6250, 328.1250, 287.5000, 137.5000, 152.5000, 231.5000, 236.2500, 138.750,
-      0.0000, 37.7500, 290.3750, 67.5000, 326.0000, 328.1250, 98.0000, 110.5000,
-      0.0000, 330.0000, 342.2500, 343.0000, 38.5000, 161.7500, 180.0000, 116.2500,
-      138.7500, 10.7500, 227.7500, 352.5000, 185.0000, 356.2500, 209.3750, 36.2500,
-      40.7500, 67.5000, 272.6250, 165.0000, 295.0000, 71.2500, 148.2500, 198.7500,
-      0.0000, 21.1250, 88.2500, 118.2500, 313.7500, 288.8750, 28.7500, 242.5000,
-      226.2500, 227.7500, 275.5000, 161.2500, 283.0000, 25.0000, 10.7500, 157.5000,
-      318.7500, 85.5000, 1.0000, 238.7500, 88.2500, 297.5000, 283.0000, 2.1250,
-      303.7500, 117.1250, 308.5000, 288.7500, 49.2500, 283.0000, 85.5000, 93.2500,
-      285.0000, 74.5000, 238.7500, 297.5000, 69.2500, 80.0000, 192.5000, 258.7500,
-      178.0000, 112.5000, 251.2500, 0.0000, 84.0000, 105.0000, 316.7500, 94.6250,
-      273.7500, 313.1250, 315.7500, 172.7500, 93.6250, 104.0000, 117.1250, 357.5000,
-      25.0000, 302.1250, 202.5000, 341.2500, 118.8750, 138.7500, 273.7500, 279.9333,
-      312.5000, 105.0000, 273.7500, 241.2500, 273.7500, 322.0000, 0.0000, 278.7500,
-      304.5000, 312.5000, 320.0000, 330.0000, 325.0000, 105.2500, 53.7500, 69.2500,
-      108.0000, 220.0000, 267.5000, 39.7500, 49.2500, 226.2500, 70.0000, 87.5000,
-      267.5000, 273.7500, 278.7500, 341.2500, 161.2500, 172.7500, 0.0000, 357.5000,
-      213.7500, 238.7500, 300.0000, 320.0000, 257.5000, 87.5000, 73.7500, 76.2500,
-      121.2500, 143.7500, 177.5000, 263.7500, 283.0000, 72.5000, 308.0000, 257.5000,
-      273.7500, 125.5000, 244.0000, 128.7500, 161.2500, 244.0000, 235.0000, 188.750,
-      192.5000, 136.2500, 25.0000, 39.7500, 162.5000, 177.5000, 213.7500, 244.0000,
-      0.0000, 320.0000, 328.0000, 357.5000, 146.2500, 70.5000, 72.5000, 300.0000,
-      153.7500, 188.7500, 223.7500, 235.0000, 68.7500, 251.2500, 264.0000, 158.7500,
-      91.7500, 183.7500, 162.5000, 52.5000, 125.5000, 64.0000, 267.5000, 320.0000,
-      345.0000, 45.0000, 140.5000, 0.0000, 25.0000, 58.0000, 350.0000, 212.5000,
-      235.0000, 240.0000, 72.5000, 75.0000, 120.0000, 51.2500, 246.3125, 267.5000,
-      287.5000, 305.0000, 45.0000, 67.5000, 230.0000, 0.0000, 40.0000, 61.2500,
-      64.0000, 320.0000, 90.0000, 120.0000, 36.2500, 57.5000, 0.0000, 90.0000,
-      122.5000, 52.5000, 57.5000, 0.0000, 32.5000, 67.5000, 225.7500, 126.7500,
-      92.5000, 177.5000, 212.5000, 225.7500, 60.0000, 132.5000, 165.0000, 262.5000,
-      270.0000, 330.0000, 48.0000, 75.0000, 97.5000, 0.0000, 20.0000, 350.0000,
-      65.0000, 230.0000, 305.0000, 82.5000, 227.5000, 246.3125, 223.7500, 248.7500,
-      90.0000, 102.5000, 168.7500, 177.5000, 192.5000, 202.5000, 251.2500, 32.5000,
-      48.0000, 221.2500, 252.5000, 262.5000, 330.0000, 68.7500, 205.0000, 221.2500,
-      0.0000, 52.5000, 98.7500, 135.5000, 168.7500, 270.0000, 320.0000, 350.0000,
-      11.2500, 0.0000, 115.0000, 205.0000, 52.5000, 0.0000};
-
-    double[] ra2 = {360, 360.0000, 217.5000, 345.0000, 315.0000, 120.0000, 160.0000, 75.0000,
-      217.5000, 270.0000, 315.0000, 52.6250, 203.7500, 262.5000, 310.0000, 137.500,
-      170.0000, 248.0000, 51.2500, 310.0000, 180.0000, 5.0000, 235.0000, 360.000,
-      202.5000, 216.2500, 353.7500, 105.0000, 306.2500, 309.0000, 119.5000, 126.250,
-      300.0000, 308.0500, 347.5000, 36.5000, 296.5000, 28.6250, 46.5000, 47.500,
-      343.0000, 91.5000, 216.2500, 291.2500, 50.0000, 334.7500, 329.5000, 25.500,
-      97.5000, 202.5000, 236.2500, 332.0000, 75.0000, 350.0000, 255.0000, 37.750,
-      273.5000, 20.5000, 25.0000, 102.0000, 360.0000, 210.5000, 16.7500, 360.000,
-      273.5000, 286.2500, 287.5000, 30.6250, 137.5000, 13.0000, 181.2500, 110.500,
-      329.5000, 328.6250, 291.0000, 152.5000, 161.7500, 236.2500, 245.0000, 143.750,
-      37.7500, 38.5000, 291.0000, 70.3750, 328.1250, 330.0000, 110.5000, 116.250,
-      30.0000, 342.2500, 343.0000, 352.5000, 40.7500, 165.0000, 185.0000, 138.750,
-      148.2500, 21.1250, 231.5000, 356.2500, 198.7500, 360.0000, 210.5000, 40.750,
-      67.5000, 71.2500, 290.3750, 180.0000, 313.7500, 88.2500, 157.5000, 209.375,
-      1.0000, 25.0000, 98.0000, 120.0000, 326.0000, 295.0000, 36.2500, 245.000,
-      227.7500, 242.5000, 283.0000, 165.0000, 288.8750, 28.7500, 12.7500, 161.250,
-      321.2500, 88.2500, 2.1250, 240.5000, 93.2500, 303.7500, 288.7500, 12.750,
-      308.5000, 118.2500, 318.7500, 297.5000, 50.5000, 285.0000, 86.5000, 94.625,
-      297.5000, 80.0000, 241.2500, 303.7500, 74.5000, 84.0000, 202.5000, 273.750,
-      192.5000, 117.1250, 258.7500, 2.1250, 86.5000, 112.5000, 320.0000, 104.000,
-      283.0000, 315.7500, 316.7500, 178.0000, 94.6250, 105.0000, 118.8750, 360.000,
-      49.2500, 304.5000, 226.2500, 357.5000, 138.7500, 161.2500, 279.9333, 283.000,
-      313.1250, 105.2500, 276.3750, 251.2500, 276.3750, 325.0000, 30.0000, 283.000,
-      312.5000, 320.0000, 322.0000, 341.2500, 330.0000, 108.0000, 69.2500, 70.000,
-      121.2500, 226.2500, 273.7500, 49.2500, 53.7500, 244.0000, 76.2500, 93.625,
-      269.5000, 278.7500, 283.0000, 357.5000, 172.7500, 177.5000, 5.0000, 360.000,
-      220.0000, 244.0000, 308.0000, 328.0000, 269.5000, 121.2500, 76.2500, 87.500,
-      125.5000, 161.2500, 192.5000, 265.0000, 300.0000, 73.7500, 320.0000, 273.750,
-      283.0000, 128.7500, 245.6250, 136.2500, 162.5000, 245.6250, 238.7500, 192.500,
-      213.7500, 146.2500, 39.7500, 56.2500, 177.5000, 188.7500, 223.7500, 251.250,
-      25.0000, 328.0000, 357.5000, 360.0000, 153.7500, 72.5000, 91.7500, 320.000,
-      158.7500, 223.7500, 235.0000, 240.0000, 70.5000, 264.0000, 267.5000, 162.500,
-      110.5000, 188.7500, 183.7500, 56.2500, 140.5000, 68.7500, 287.5000, 345.000,
-      350.0000, 52.5000, 165.0000, 25.0000, 45.0000, 64.0000, 360.0000, 223.750,
-      240.0000, 246.3125, 75.0000, 98.7500, 125.5000, 58.0000, 267.5000, 287.500,
-      305.0000, 320.0000, 51.2500, 72.5000, 235.0000, 35.0000, 45.0000, 64.000,
-      67.5000, 330.0000, 120.0000, 122.5000, 40.0000, 61.2500, 27.5000, 92.500,
-      126.7500, 57.5000, 60.0000, 23.7500, 36.2500, 75.0000, 230.0000, 132.500,
-      97.5000, 192.5000, 225.7500, 230.0000, 65.0000, 165.0000, 168.7500, 270.000,
-      305.0000, 350.0000, 52.5000, 82.5000, 102.5000, 20.0000, 32.5000, 360.000,
-      68.7500, 246.3125, 320.0000, 90.0000, 230.0000, 248.7500, 227.5000, 251.250,
-      102.5000, 135.5000, 177.5000, 192.5000, 218.0000, 205.0000, 252.5000, 48.000,
-      68.7500, 223.7500, 262.5000, 270.0000, 350.0000, 98.7500, 221.2500, 255.000,
-      20.0000, 68.7500, 135.5000, 168.7500, 205.0000, 320.0000, 350.0000, 360.000,
-      20.0000, 52.5000, 205.0000, 270.0000, 115.0000, 360.0000};
-
-    double[] decs = {90, 88.0000, 86.5000, 86.1667, 86.0000, 85.0000, 82.0000, 80.0000,
-      80.0000, 80.0000, 80.0000, 77.0000, 77.0000, 75.0000, 75.0000, 73.500,
-      73.5000, 70.0000, 68.0000, 67.0000, 66.5000, 66.0000, 66.0000, 66.000,
-      64.0000, 63.0000, 63.0000, 62.0000, 61.5000, 60.9167, 60.0000, 60.000,
-      59.5000, 59.5000, 59.0833, 58.5000, 58.0000, 57.5000, 57.0000, 57.000,
-      56.2500, 56.0000, 55.5000, 55.5000, 55.0000, 55.0000, 54.8333, 54.000,
-      54.0000, 53.0000, 53.0000, 52.7500, 52.5000, 52.5000, 51.5000, 50.500,
-      50.5000, 50.0000, 50.0000, 50.0000, 50.0000, 48.5000, 48.0000, 48.000,
-      47.5000, 47.5000, 47.5000, 47.0000, 47.0000, 46.0000, 45.0000, 44.500,
-      44.0000, 43.7500, 43.5000, 42.0000, 40.0000, 40.0000, 40.0000, 39.750,
-      36.7500, 36.7500, 36.5000, 36.0000, 36.0000, 36.0000, 35.5000, 35.500,
-      35.0000, 35.0000, 34.5000, 34.5000, 34.0000, 34.0000, 34.0000, 33.500,
-      33.5000, 33.0000, 33.0000, 32.0833, 32.0000, 31.3333, 30.7500, 30.666,
-      30.6667, 30.0000, 30.0000, 29.0000, 29.0000, 28.5000, 28.5000, 28.500,
-      28.0000, 28.0000, 28.0000, 28.0000, 28.0000, 27.5000, 27.2500, 27.000,
-      26.0000, 26.0000, 26.0000, 25.5000, 25.5000, 25.0000, 23.7500, 23.500,
-      23.5000, 22.8333, 22.0000, 22.0000, 21.5000, 21.2500, 21.0833, 21.000,
-      20.5000, 20.0000, 19.5000, 19.1667, 19.0000, 18.5000, 18.0000, 17.500,
-      16.1667, 16.0000, 16.0000, 15.7500, 15.5000, 15.5000, 15.0000, 14.333,
-      14.0000, 13.5000, 12.8333, 12.5000, 12.5000, 12.5000, 12.5000, 12.000,
-      12.0000, 11.8333, 11.8333, 11.0000, 10.0000, 10.0000, 10.0000, 10.000,
-      9.9167, 8.5000, 8.0000, 7.5000, 7.0000, 7.0000, 6.2500, 6.250,
-      6.0000, 5.5000, 4.5000, 4.0000, 3.0000, 2.7500, 2.0000, 2.000,
-      2.0000, 2.0000, 2.0000, 2.0000, 1.7500, 1.5000, 0.0000, 0.000,
-      0.0000, 0.0000, 0.0000, -1.7500, -1.7500, -3.2500, -4.0000, -4.000,
-      -4.0000, -4.0000, -4.0000, -4.0000, -6.0000, -6.0000, -7.0000, -7.000,
-      -8.0000, -8.0000, -9.0000, -9.0000, -10.0000, -11.0000, -11.0000, -11.000,
-      -11.0000, -11.0000, -11.0000, -11.6667, -12.0333, -14.5000, -15.0000, -16.000,
-      -16.0000, -17.0000, -18.2500, -19.0000, -19.0000, -19.2500, -20.0000, -22.000,
-      -22.0000, -24.0000, -24.3833, -24.3833, -24.5000, -24.5000, -24.5000, -24.583,
-      -25.5000, -25.5000, -25.5000, -25.5000, -26.5000, -27.2500, -27.2500, -28.000,
-      -29.1667, -29.5000, -29.5000, -29.5000, -30.0000, -30.0000, -30.0000, -31.166,
-      -33.0000, -33.0000, -35.0000, -36.0000, -36.7500, -37.0000, -37.0000, -37.000,
-      -37.0000, -39.5833, -39.7500, -40.0000, -40.0000, -40.0000, -40.0000, -42.000,
-      -42.0000, -42.0000, -43.0000, -43.0000, -43.0000, -44.0000, -45.5000, -45.500,
-      -45.5000, -45.5000, -46.0000, -46.5000, -48.0000, -48.1667, -49.0000, -49.000,
-      -49.0000, -50.0000, -50.7500, -50.7500, -51.0000, -51.0000, -51.5000, -52.500,
-      -53.0000, -53.1667, -53.1667, -53.5000, -54.0000, -54.0000, -54.0000, -54.500,
-      -55.0000, -55.0000, -55.0000, -55.0000, -56.5000, -56.5000, -56.5000, -57.000,
-      -57.0000, -57.0000, -57.5000, -57.5000, -58.0000, -58.5000, -58.5000, -58.500,
-      -59.0000, -60.0000, -60.0000, -61.0000, -61.0000, -61.0000, -63.5833, -63.583,
-      -64.0000, -64.0000, -64.0000, -64.0000, -64.0000, -65.0000, -65.0000, -67.500,
-      -67.5000, -67.5000, -67.5000, -67.5000, -67.5000, -70.0000, -70.0000, -70.000,
-      -75.0000, -75.0000, -75.0000, -75.0000, -75.0000, -75.0000, -75.0000, -75.000,
-      -76.0000, -82.5000, -82.5000, -82.5000, -85.0000, -90.0000};
-
-    String[] abbrevs = {" ", "UMi", "UMi", "UMi", "UMi", "Cep", "Cam", "Cep",
-      "Cam", "UMi", "Dra", "Cep", "Cam", "UMi", "Cep", "Cam",
-      "Dra", "UMi", "Cas", "Dra", "Dra", "Cep", "UMi", "Cep",
-      "Dra", "Dra", "Cep", "Cam", "Dra", "Cep", "Cam", "UMa",
-      "Dra", "Cep", "Cep", "Cas", "Dra", "Cas", "Cas", "Cam",
-      "Cep", "Cam", "UMa", "Dra", "Cam", "Cep", "Cep", "Cas",
-      "Lyn", "UMa", "Dra", "Cep", "Cam", "Cas", "Dra", "Per",
-      "Dra", "Cas", "Per", "Lyn", "Cas", "UMa", "Cas", "Cas",
-      "Her", "Dra", "Cyg", "Per", "UMa", "Cas", "UMa", "Lyn",
-      "Cyg", "Cyg", "Cyg", "UMa", "UMa", "Boo", "Her", "Lyn",
-      "And", "Per", "Lyr", "Per", "Cyg", "Lac", "Aur", "Lyn",
-      "And", "Lac", "Lac", "And", "Per", "UMa", "CVn", "Lyn",
-      "LMi", "And", "Boo", "And", "CVn", "And", "CVn", "Tri",
-      "Per", "Aur", "Lyr", "UMa", "Cyg", "Aur", "LMi", "CVn",
-      "And", "Tri", "Aur", "Gem", "Cyg", "Cyg", "Tri", "CrB",
-      "Boo", "CrB", "Lyr", "LMi", "Lyr", "Tri", "Psc", "LMi",
-      "Vul", "Tau", "And", "Ser", "Gem", "Vul", "Vul", "And",
-      "Vul", "Gem", "Vul", "Vul", "Ari", "Sge", "Ori", "Gem",
-      "Sge", "Tau", "Her", "Sge", "Tau", "Tau", "Com", "Her",
-      "Com", "Gem", "Her", "Peg", "Tau", "Gem", "Peg", "Gem",
-      "Her", "Del", "Peg", "Leo", "Ori", "Gem", "Cnc", "Peg",
-      "Ari", "Del", "Boo", "Peg", "Cnc", "Leo", "Oph", "Aql",
-      "Del", "CMi", "Ser", "Her", "Oph", "Peg", "Psc", "Ser",
-      "Del", "Equ", "Peg", "Peg", "Peg", "CMi", "Tau", "Ori",
-      "CMi", "Vir", "Oph", "Cet", "Tau", "Ser", "Ori", "Ori",
-      "Ser", "Ser", "Aql", "Psc", "Leo", "Vir", "Psc", "Psc",
-      "Vir", "Oph", "Aql", "Aqr", "Oph", "Mon", "Eri", "Ori",
-      "Hya", "Sex", "Vir", "Oph", "Aql", "Eri", "Aqr", "Ser",
-      "Sct", "Hya", "Oph", "Hya", "Crt", "Sco", "Lib", "Crv",
-      "Vir", "Hya", "Cet", "Eri", "Crt", "Crv", "Lib", "Oph",
-      "Cet", "Cap", "Aqr", "Cet", "Hya", "Eri", "Lep", "Cap",
-      "Hya", "Hya", "Lib", "Sco", "Eri", "Oph", "Sgr", "Hya",
-      "CMa", "Hya", "Hya", "For", "Pyx", "Eri", "Sgr", "PsA",
-      "Scl", "For", "Ant", "Scl", "For", "Eri", "Scl", "Cen",
-      "Lup", "Sco", "Cae", "Col", "Pup", "Eri", "Sco", "CrA",
-      "Sgr", "Mic", "Eri", "Cae", "Lup", "Phe", "Eri", "Hor",
-      "Cae", "Gru", "Pup", "Vel", "Eri", "Hor", "Phe", "Car",
-      "Vel", "Hor", "Dor", "Phe", "Eri", "Pic", "Lup", "Vel",
-      "Car", "Cen", "Lup", "Nor", "Dor", "Vel", "Cen", "Ara",
-      "Tel", "Gru", "Hor", "Pic", "Car", "Phe", "Eri", "Phe",
-      "Dor", "Nor", "Ind", "Pic", "Cir", "Ara", "Cir", "Ara",
-      "Pic", "Car", "Cen", "Cru", "Cen", "Cir", "Ara", "Hor",
-      "Ret", "Cir", "Ara", "Pav", "Tuc", "Dor", "Cir", "TrA",
-      "Tuc", "Hyi", "Vol", "Car", "Mus", "Pav", "Ind", "Tuc",
-      "Tuc", "Hyi", "Cha", "Aps", "Men", "Oct"};
-
-    Celest c1875 = c.precessed(1875.);
-    ra1875 = c1875.Alpha.degrees();
-    dec1875 = c1875.Delta.degrees();
-    i = 0;
-    while (i < ra1.length) {
-      if ((ra1875 >= ra1[i]) && (ra1875 < ra2[i]) && (dec1875 >= decs[i])) {
-        break;
-      }
-      i++;
-    }
-    if (i < ra1.length) {
-      return (abbrevs[i]);
-    } else {
-      return "???";
-    }
-  }
-}
-
-class NightlyAlmanac {
-
-  /** For finding timing of various phenomena, esp sun and moon rise and set. */
-  WhenWhere midnight;
-  WhenWhere sunrise;
-  WhenWhere sunset;
-  WhenWhere moonrise;
-  WhenWhere moonset;
-  WhenWhere eveningTwilight;
-  WhenWhere morningTwilight;
-  WhenWhere nightcenter;
-
-  static double jd_sun_alt(double alt, WhenWhere wIn) {
-    /**  finds the jd at which the sun is at altitude alt, given initial guess handed
-    in with a whenwhere.  */
-    double jdguess, lastjd;
-    double deriv, err, del = 0.002;
-    double alt2, alt3;
-    int i = 0;
-
-    WhenWhere w = (WhenWhere) wIn.clone();
-
-    /* Set up calculation, then walk in with Newton-Raphson scheme (guess and
-    check using numerical derivatives). */
-
-    jdguess = w.when.jd;
-//      System.out.printf("Before makelocalsun, w.when.jd %f\n",w.when.jd);
-    w.MakeLocalSun();
-    alt2 = w.altsun;
-//      System.out.printf("after alt2: w.when.jd %f alt2 %f\n",
-    //                  w.when.jd,alt2);
-    jdguess = jdguess + del;
-    w.ChangeWhen(jdguess);
-    w.UpdateLocalSun();
-    alt3 = w.altsun;
-    err = alt3 - alt;
-    deriv = (alt3 - alt2) / del;
-//      System.out.printf("alt2 alt3 %f %f  err %f deriv %f\n",
-    //             alt2,alt3,err,deriv);
-    while ((Math.abs(err) > 0.02) && (i < 10)) {
-      lastjd = jdguess;
-      alt2 = alt3;       // save last guess
-      jdguess = jdguess - err / deriv;
-      w.ChangeWhen(jdguess);
-      w.UpdateLocalSun();
-      alt3 = w.altsun;
-//          System.out.printf("alt3 %f jdguess %f\n",alt3,jdguess);
-      err = alt3 - alt;
-      i++;
-      deriv = (alt3 - alt2) / (jdguess - lastjd);
-
-      if (i == 9) {
-        System.out.printf("jd_sun_alt not converging.\n");
-      }
-
-    }
-    if (i >= 9) {
-      jdguess = -1000.;
-    }
-//      System.out.printf("Leaving sun w/ wIn %f w %f\n",wIn.when.jd,w.when.jd);
-    return jdguess;
-  }
-
-  static double jd_moon_alt(double alt, WhenWhere wIn) {
-    /**  finds the jd at which the moon is at altitude alt, given initial guess handed
-    in with a whenwhere.  */
-    double jdguess, lastjd;
-    double deriv, err, del = 0.002;
-    double alt2, alt3;
-    int i = 0;
-
-    /* Set up calculation, then walk in with Newton-Raphson scheme (guess and
-    check using numerical derivatives). */
-
-    WhenWhere w = (WhenWhere) wIn.clone();
-
-    // System.out.printf("Into jd_moon_alt, target = %f\n",alt);
-    jdguess = w.when.jd;
-    w.MakeLocalMoon();
-    alt2 = w.altmoon;
-    // System.out.printf("after alt2: w.when.jd %f alt2 %f\n",
-    //              w.when.jd,alt2);
-    jdguess = jdguess + del;
-    w.ChangeWhen(jdguess);
-    w.UpdateLocalMoon();
-    alt3 = w.altmoon;
-    err = alt3 - alt;
-    deriv = (alt3 - alt2) / del;
-    // System.out.printf("alt2 alt3 %f %f  err %f deriv %f\n",
-    //        alt2,alt3,err,deriv);
-    while ((Math.abs(err) > 0.02) && (i < 10)) {
-      lastjd = jdguess;
-      alt2 = alt3;       // save last guess
-      jdguess = jdguess - err / deriv;
-      w.ChangeWhen(jdguess);
-      w.UpdateLocalMoon();
-      alt3 = w.altmoon;
-      // System.out.printf("alt3 %f jdguess %f ",alt3,jdguess,deriv);
-      err = alt3 - alt;
-      i++;
-      deriv = (alt3 - alt2) / (jdguess - lastjd);
-      // System.out.printf(" err %f deriv %f\n",err,deriv);
-
-      if (i == 9) {
-        System.out.printf("jd_moon_alt not converging.\n");
-      }
-
-    }
-    if (i >= 9) {
-      jdguess = -1000.;
-    }
-    // System.out.printf("Exiting with jdguess = %f\n\n",jdguess);
-    return jdguess;
-  }
-
-  NightlyAlmanac(WhenWhere wIn) {
-    /** Computes rise, set, and twilight for the night nearest in time to wIn.when */
-    WhenWhere w = (WhenWhere) wIn.clone();
-
-    midnight = new WhenWhere(w.when.clone(), w.where.clone());   // instantiate these ...
-    // midnight.MakeLocalSun();
-    // midnight.MakeLocalMoon();
-
-    // AAACK!  Have to clone EVERY WHEN, or they are all the SAME WHEN forever.
-
-    sunrise = new WhenWhere(w.when.clone(), w.where.clone());
-    sunset = new WhenWhere(w.when.clone(), w.where.clone());
-    moonrise = new WhenWhere(w.when.clone(), w.where.clone());
-    moonset = new WhenWhere(w.when.clone(), w.where.clone());
-    eveningTwilight = new WhenWhere(w.when.clone(), w.where.clone());
-    morningTwilight = new WhenWhere(w.when.clone(), w.where.clone());
-    nightcenter = new WhenWhere(w.when.clone(), w.where.clone());
-
-    Update(w);
-  }
-
-  void Update(WhenWhere wIn) {
-    /** Computes rise, set, and twilight for the night nearest in time to wIn.when */
-    double horiz;    // depression of the horizon in degrees
-    double rise_set_alt;
-    double dtrise, dtset;
-    double jdtemp, jdnoon;
-    double twilight_alt = -18.;  // the standard choice for solar altitude at twilight
-
-    // be sure the site infor is up to date
-
-    WhenWhere w = (WhenWhere) wIn.clone();
-    w.when = (InstantInTime) wIn.when.clone();
-    w.where = (Site) wIn.where.clone();
-    midnight.where = (Site) w.where.clone();
-    midnight.when = (InstantInTime) w.when.clone();
-    sunrise.where = (Site) w.where.clone();
-    sunset.where = (Site) w.where.clone();
-    moonrise.where = (Site) w.where.clone();
-    moonset.where = (Site) w.where.clone();
-    eveningTwilight.where = (Site) w.where.clone();
-    morningTwilight.where = (Site) w.where.clone();
-    nightcenter.where = (Site) w.where.clone();
-
-    // approx means you can't use a negative elevation for the obs to
-    // compensate for higher terrain.
-
-    horiz = Const.DEG_IN_RADIAN *
-            Math.sqrt(2. * w.where.elevhoriz / (1000. * Const.EARTHRAD_IN_KM));
-    rise_set_alt = -(0.83 + horiz);
-    // upper limb of sun and moon rise and set when center of disk is about 50 arcmin
-    // below horizon, mostly because of refraction.  Sun and moon are almost the same
-    // angular size, and variation in refraction is much larger than ang. size variations.
-
-
-    // Establish and set the nearest midnight -- previous if before local noon,
-    // next midnight if after local noon.
-
-    midnight.when = (InstantInTime) w.when.clone();
-//      System.out.printf("Entering almanac with local  %s\n",midnight.when.localDate.RoundedCalString(0,0));
-    if (midnight.when.localDate.timeofday.hour >= 12) {
-      midnight.when.localDate.timeofday.hour = 23;
-      midnight.when.localDate.timeofday.minute = 59;
-      midnight.when.localDate.timeofday.second = 59.9;
-    } else {
-      midnight.when.localDate.timeofday.hour = 0;
-      midnight.when.localDate.timeofday.minute = 0;
-      midnight.when.localDate.timeofday.second = 0.0;
-    }
-    jdtemp = midnight.when.localDate.Cal2JD();
-    // System.out.printf("jdtemp (local) = %f\n",jdtemp);
-    midnight.when.SetInstant(jdtemp, w.where.stdz, w.where.use_dst, false);
-    // System.out.printf("translates to midnight.jd %f\n",midnight.when.jd);
-    double jdmid = midnight.when.jd;   // the real JD
-    midnight.ChangeWhen(jdmid);        // to synch sidereal etc.
-//      System.out.printf("Midnight set to %s\n", midnight.when.UTDate.RoundedCalString(0,1));
-//      System.out.printf("lst at midnight = %f\n",midnight.sidereal);
-
-    midnight.UpdateLocalSun();
-    midnight.UpdateLocalMoon();
-
-    // See if the sun rises or sets ...
-    double hasunrise = Spherical.ha_alt(midnight.sun.topopos.Delta.value,
-            midnight.where.lat.value, rise_set_alt);
-//      System.out.printf("hourangle sunrise: %f\n",hasunrise);
-
-    if (hasunrise < 11.8 && hasunrise > 0.2) {
-      // if sun grazes horizon, small changes in dec may affect whether it actually
-      // rises or sets.  Since dec is computed at midnight, put a little pad on to
-      // avoid non-convergent calculations.
-      // sunrise = new WhenWhere(jdmid + hasunrise/24.,w.where);
-
-      dtrise = midnight.sun.topopos.Alpha.value - hasunrise -
-              midnight.sidereal;
-
-      while (dtrise >= 12.) {
-        dtrise -= 24.;
-      }
-      while (dtrise < -12.) {
-        dtrise += 24.;
-      }
-
-      dtset = midnight.sun.topopos.Alpha.value + hasunrise -
-              midnight.sidereal;
-      while (dtset >= 12) {
-        dtset -= 24.;
-      }
-      while (dtset < -12.) {
-        dtset += 24.;
-      }
-
-//         System.out.printf("going to jd_sun_alt with est sunrise = %f\n",jdmid + dtrise/24.);
-      sunrise.ChangeWhen(jdmid + dtrise / 24.);
-      sunrise.UpdateLocalSun();
-//         System.out.printf("sunrise.when.jd %f, sunrise.altsun %f\n",sunrise.when.jd,
-//             sunrise.altsun);
-      jdtemp = jd_sun_alt(rise_set_alt, sunrise);
-//         System.out.printf("out, sunrise = %f\n",jdtemp);
-      sunrise.ChangeWhen(jdtemp);
-
-//         System.out.printf("going to jd_sun_alt with est sunset = %f\n",jdmid + dtset/24.);
-      sunset.ChangeWhen(jdmid + dtset / 24.);
-      sunset.UpdateLocalSun();
-      jdtemp = jd_sun_alt(rise_set_alt, sunset);
-//         System.out.printf("out, sunset = %f\n",jdtemp);
-      sunset.ChangeWhen(jdtemp);
-//         System.out.printf("In NightlyAlmanac.Update, sunset set to:\n");
-//         sunset.dump();
-      nightcenter.ChangeWhen((sunset.when.jd + sunrise.when.jd) / 2.);
-    } else if (hasunrise < 0.2) {  // may not rise ... set sunrise to noontime to flag.
-      if (midnight.when.localDate.timeofday.hour == 23) {
-        jdnoon = jdmid - 0.5;
-      } else {
-        jdnoon = jdmid + 0.5;
-      }
-      sunrise.ChangeWhen(jdnoon);
-      sunset.ChangeWhen(jdnoon);
-      nightcenter.ChangeWhen(jdnoon);
-    } else if (hasunrise >= 11.8) { // may not set ... set sunset to midnight to flag.
-      sunrise.ChangeWhen(jdmid);
-      sunset.ChangeWhen(jdmid);
-      nightcenter.ChangeWhen(jdmid);
-    }
-
-    // Now let's do the same thing for twilight ...
-    double hatwilight = Spherical.ha_alt(midnight.sun.topopos.Delta.value,
-            midnight.where.lat.value, twilight_alt);
-    // System.out.printf("hourangle sunrise: %f\n",hasunrise);
-    if (hatwilight < 11.8 && hatwilight > 0.2) {
-
-      dtrise = midnight.sun.topopos.Alpha.value - hatwilight -
-              midnight.sidereal;
-
-      while (dtrise >= 12.) {
-        dtrise -= 24.;
-      }
-      while (dtrise < -12.) {
-        dtrise += 24.;
-      }
-
-      dtset = midnight.sun.topopos.Alpha.value + hatwilight -
-              midnight.sidereal;
-      while (dtset >= 12) {
-        dtset -= 24.;
-      }
-      while (dtset < -12.) {
-        dtset += 24.;
-      }
-
-      eveningTwilight.ChangeWhen(jdmid + dtset / 24.);
-      eveningTwilight.UpdateLocalSun();
-      jdtemp = jd_sun_alt(twilight_alt, eveningTwilight);
-      eveningTwilight.ChangeWhen(jdtemp);
-
-      morningTwilight.ChangeWhen(jdmid + dtrise / 24.);
-      morningTwilight.UpdateLocalSun();
-      jdtemp = jd_sun_alt(twilight_alt, morningTwilight);
-      morningTwilight.ChangeWhen(jdtemp);
-
-    } else if (hatwilight < 0.2) {  // twilight may not begin ... set to noon to flag.
-      if (midnight.when.localDate.timeofday.hour == 23) // this case will be rare.
-      {
-        jdnoon = jdmid - 0.5;
-      } else {
-        jdnoon = jdmid + 0.5;
-      }
-      morningTwilight.ChangeWhen(jdnoon);
-      eveningTwilight.ChangeWhen(jdnoon);
-
-    } else if (hatwilight >= 11.8) { // twilight may not end (midsummer at high lat).
-      morningTwilight.ChangeWhen(jdmid);
-      eveningTwilight.ChangeWhen(jdmid);
-      // flag -- set twilight to exactly midn.
-      }
-
-    // now we tackle the moon ... which is a bit harder.
-
-    double hamoonrise = Spherical.ha_alt(midnight.moon.topopos.Delta.value,
-            midnight.where.lat.value, rise_set_alt);
-
-    if (hamoonrise < 11. && hamoonrise > 1.) {
-      // The moon moves faster than the sun, so set more conservative limits for
-      // proceeding with the calculation.
-
-      dtrise = midnight.moon.topopos.Alpha.value - hamoonrise -
-              midnight.sidereal;
-
-      while (dtrise >= 12.) {
-        dtrise -= 24.;
-      }
-      while (dtrise < -12.) {
-        dtrise += 24.;
-      }
-
-      dtset = midnight.moon.topopos.Alpha.value + hamoonrise -
-              midnight.sidereal;
-      while (dtset >= 12) {
-        dtset -= 24.;
-      }
-      while (dtset < -12.) {
-        dtset += 24.;
-      }
-      /*
-      System.out.printf("ra moon midn    %s\n",midnight.moon.topopos.Alpha.RoundedRAString(0,":"));
-      System.out.printf("lst at midnight %f\n",midnight.sidereal);
-      System.out.printf("rise-set HA %f\n",hamoonrise);
-      System.out.printf("dtrise %f dtset %f\n",dtrise,dtset);
-       */
-
-      moonrise.ChangeWhen(jdmid + dtrise / 24.);
-      moonrise.UpdateLocalMoon();
-      jdtemp = jd_moon_alt(rise_set_alt, moonrise);
-      moonrise.ChangeWhen(jdtemp);
-
-      moonset.ChangeWhen(jdmid + dtset / 24.);
-      moonset.UpdateLocalMoon();
-      jdtemp = jd_moon_alt(rise_set_alt, moonset);
-      moonset.ChangeWhen(jdtemp);
-    }
-  }
-}
-
-class Seasonal {
-
-  double[] jdnew;
-  double[] jdfull;   // new and full moon dates bracketing the present
-  double ha_at_center;       // hour angle at night center
-  public Object[][] tabledata;
-  static Observation lastcomputedobs;
-  boolean wasupdated = false;
-
-  Seasonal(Observation obs) {  // just sets up arrays
-    int i;
-    jdnew = new double[8];
-    jdfull = new double[8];
-    tabledata = new Object[16][11];
-    lastcomputedobs = (Observation) obs.clone();
-    this.Update(obs);  // for constructor, go ahead and do it ...
-  }
-
-  void Update(Observation obs) {
-    int lun, i;
-    double[] xy;
-    double min_alt, max_alt;
-    String[] hoursup = {" ", " ", " "};
-
-    // check to see if anything has changed significantly, otherwise skip it.
-    if (Math.abs(lastcomputedobs.w.when.jd - obs.w.when.jd) > 5. ||
-            !obs.c.equals(lastcomputedobs.c) || !obs.w.where.equals(lastcomputedobs.w.where)) {
-
-      Observation oseason = (Observation) obs.clone();
-      NightlyAlmanac ng = new NightlyAlmanac(oseason.w);
-
-      xy = Spherical.min_max_alt(oseason.w.where.lat.value, oseason.current.Delta.value);
-      min_alt = xy[0];
-      max_alt = xy[1];
-
-      // run computations for new and full moon in a roughly +- 3-month interval
-
-      int lunstart = Moon.lunation(oseason.w.when.jd) - 3;
-      for (i = 0; i < 8; i++) {
-
-        lun = lunstart + i;
-
-        jdnew[i] = Moon.flmoon(lun, 0);
-        oseason.w.ChangeWhen(jdnew[i]);
-
-        ng.Update(oseason.w);
-        tabledata[2 * i][0] = " New ";
-        // tabulated date is EVENING DATE of the night closest to the instant of phase ...
-        tabledata[2 * i][1] = (Object) ng.sunset.when.localDate.RoundedCalString(3, 0);
-        // System.out.printf("New : %s  ",oseason.w.when.localDate.RoundedCalString(1,0));
-
-        // System.out.printf(" sunrise: %s\n",ng.sunrise.when.localDate.RoundedCalString(1,0));
-
-        oseason.w.ChangeWhen(ng.eveningTwilight.when.jd);
-        oseason.ComputeSky();
-        tabledata[2 * i][2] = oseason.ha.RoundedHAString(-2, ":");
-        tabledata[2 * i][3] = airmassstring(oseason.altitude, oseason.airmass);
-
-        oseason.w.ChangeWhen(ng.nightcenter.when.jd);
-        oseason.ComputeSky();
-        tabledata[2 * i][4] = oseason.ha.RoundedHAString(-2, ":");
-        tabledata[2 * i][5] = airmassstring(oseason.altitude, oseason.airmass);
-        ha_at_center = oseason.ha.value;  // store for later
-
-        oseason.w.ChangeWhen(ng.morningTwilight.when.jd);
-        oseason.ComputeSky();
-        tabledata[2 * i][6] = oseason.ha.RoundedHAString(-2, ":");
-        tabledata[2 * i][7] = airmassstring(oseason.altitude, oseason.airmass);
-
-        hoursup = NightHoursAboveAirmass(oseason, ng, min_alt, max_alt);
-        tabledata[2 * i][8] = hoursup[0];
-        tabledata[2 * i][9] = hoursup[1];
-        tabledata[2 * i][10] = hoursup[2];
-
-        jdfull[i] = Moon.flmoon(lun, 2);
-        oseason.w.ChangeWhen(jdfull[i]);
-
-        ng.Update(oseason.w);
-        tabledata[2 * i + 1][0] = " Full";
-        tabledata[2 * i + 1][1] = ng.sunset.when.localDate.RoundedCalString(3, 0);
-        // System.out.printf("Full: %s  ",oseason.w.when.localDate.RoundedCalString(1,0));
-
-        ng.Update(oseason.w);
-        // System.out.printf(" sunrise: %s\n",ng.sunrise.when.localDate.RoundedCalString(1,0));
-
-        oseason.w.ChangeWhen(ng.eveningTwilight.when.jd);
-        oseason.ComputeSky();
-        tabledata[2 * i + 1][2] = oseason.ha.RoundedHAString(-2, ":");
-        tabledata[2 * i + 1][3] = airmassstring(oseason.altitude, oseason.airmass);
-
-        oseason.w.ChangeWhen(ng.nightcenter.when.jd);
-        oseason.ComputeSky();
-        tabledata[2 * i + 1][4] = oseason.ha.RoundedHAString(-2, ":");
-        tabledata[2 * i + 1][5] = airmassstring(oseason.altitude, oseason.airmass);
-        ha_at_center = oseason.ha.value;  // store for later
-
-        oseason.w.ChangeWhen(ng.morningTwilight.when.jd);
-        oseason.ComputeSky();
-        tabledata[2 * i + 1][6] = oseason.ha.RoundedHAString(-2, ":");
-        tabledata[2 * i + 1][7] = airmassstring(oseason.altitude, oseason.airmass);
-
-        hoursup = NightHoursAboveAirmass(oseason, ng, min_alt, max_alt);
-        tabledata[2 * i + 1][8] = hoursup[0];
-        tabledata[2 * i + 1][9] = hoursup[1];
-        tabledata[2 * i + 1][10] = hoursup[2];
-
-      }
-      wasupdated = true;
-      lastcomputedobs = obs.clone();  // copy computed obs for use in skip condition
-      // dump();
-      } else {
-      wasupdated = false;
-      // System.out.printf("no seasonal update.\n");  // diagn. used to check skip condition.
-      }
-  }
-
-  String airmassstring(double altitude, double airmass) {
-    // this happens so many times that it's worth writing a method.
-    if (altitude < 0.) {
-      return "(down)";
-    } else if (airmass > 10.) {
-      return "> 10.";
-    } else {
-      return String.format(Locale.ENGLISH, "%5.2f", airmass);
-    }
-  }
-
-  double hrs_up(double jdup, double jddown, double jdeve, double jdmorn) {
-    /* an object comes up past a given point at jdup, and goes down at jddown,
-    with twilight jdeve and jdmorn.  Computes how long object is up *and* it's
-    dark.  Transcribed without significant modification from _skysub.c  ... */
-
-    double jdup2, jddown0;
-
-    if (jdup < jdeve) {
-      if (jddown >= jdmorn) /* up all night */ {
-        return ((jdmorn - jdeve) * 24.);
-      } else if (jddown >= jdeve) {
-        /* careful here ... circumpolar objects can come back *up*
-        a second time before morning.  jdup and jddown are
-        the ones immediately preceding and following the upper
-        culmination nearest the center of the night, so "jdup"
-        can be on the previous night rather than the one we want. */
-        jdup2 = jdup + 1.0 / Const.SID_RATE;
-        if (jdup2 > jdmorn) /* the usual case ... doesn't rise again */ {
-          return ((jddown - jdeve) * 24.);
-        } else {
-          return (((jddown - jdeve) + (jdmorn - jdup2)) * 24.);
-        }
-      } else {
-        return (0.);
-      }
-    } else if (jddown > jdmorn) {
-      if (jdup >= jdmorn) {
-        return (0.);
-      } else {
-        /* again, a circumpolar object can be up at evening twilight
-        and come 'round again in the morning ... */
-        jddown0 = jddown - 1.0 / Const.SID_RATE;
-        if (jddown0 < jdeve) {
-          return ((jdmorn - jdup) * 24.);
-        } else {
-          return (((jddown0 - jdeve) + (jdmorn - jdup)) * 24.);
-        }
-      }
-    } else {
-      return ((jddown - jdup) * 24.);  /* up & down the same night ...
-         might happen a second time in pathological cases, but this will
-         be extremely rare except at very high latitudes.  */
-    }
-  }
-
-  void dump() {
-    int i, j;
-    for (i = 0; i < 16; i++) {
-      for (j = 0; j < 11; j++) {
-        System.out.printf("%8s ", tabledata[i][j]);
-      }
-      System.out.printf("\n");
-    }
-  }
-
-  String[] NightHoursAboveAirmass(Observation obs, NightlyAlmanac ng, double min_alt, double max_alt) {
-    double[] critical_alt = {19.2786, 29.8796, 41.7592};
-    // altitudes above horizon at which true airmass = 1.5, 2, and 3 respectively.
-    String[] retvals = {" ", " ", " "};   // night hours above critical altitude
-    double jdtrans;   // jd of transit closest to midnight
-    double[] dt = {0., 0., 0.};
-    double[] jdup = {0., 0., 0.};
-    double[] jddown = {0., 0., 0.};
-    int i;
-
-    WhenWhere diagn = obs.w.clone();
-
-    // jd of transit nearest midnight
-
-    jdtrans = ng.nightcenter.when.jd - ha_at_center / (24. * Const.SID_RATE);
-
-//      diagn.ChangeWhen(jdtrans);
-//      System.out.printf("diagnostic: transit at local time %s\n",
-//             diagn.when.localDate.RoundedCalString(0,0));
-
-    for (i = 0; i < 3; i++) {
-      if ((min_alt < critical_alt[i]) && (max_alt > critical_alt[i])) { // passes this altitude
-        dt[i] = Spherical.ha_alt(obs.current.Delta.value, obs.w.where.lat.value, critical_alt[i]) /
-                (Const.SID_RATE * 24.);
-        jdup[i] = jdtrans - dt[i];
-        jddown[i] = jdtrans + dt[i];
-      } else {
-        jdup[i] = 0.;
-        jddown[i] = 0.;
-        if (min_alt < critical_alt[i]) {
-          dt[i] = 0.;
-        } else {
-          dt[i] = 12.;
-        }
-      }
-
-      // let's just hope twilight occurs for now ...
-
-      if (jdup[i] != 0.) // passes the relevant airmass
-      {
-        retvals[i] = String.format(Locale.ENGLISH, "%4.1f", hrs_up(jdup[i], jddown[i], ng.eveningTwilight.when.jd,
-                ng.morningTwilight.when.jd));
-      } // always remains above the relevant altitude
-      else if (min_alt > critical_alt[i]) {
-        retvals[i] = String.format(Locale.ENGLISH, "%4.1f",
-                24. * (ng.morningTwilight.when.jd - ng.eveningTwilight.when.jd));
-      } // never rises above the relevant altitude
-      else {
-        retvals[i] = String.format(Locale.ENGLISH, "0.0");
-      }
-
-    }
-
-    return retvals;
-
-  }
-}
-
-class filewriter {
-  // a little class to make it easy to open and close an outfile.
-
-  File outfile;
-  PrintWriter pw = null;
-  FileWriter fw = null;
-
-  filewriter(String fname) {
-    outfile = new File(fname);
-    fw = null;
-    try {
-      fw = new FileWriter(outfile, true);
-    } catch (IOException e) {
-      System.out.printf("File writer didn't open for %s.\n", fname);
-    }
-    pw = new PrintWriter(fw);
-
-  }
-
-  void closer() {
-    try {
-      fw.close();
-    } catch (IOException e) {
-      System.out.printf("File writer didn't close.\n");
-    }
-  }
-}
-
-class FileGrabber extends JFrame {
-// similar utility class for opening an infile, pops a file chooser.
-
-  File infile;
-  BufferedReader br = null;
-  FileReader fr = null;
-
-  FileGrabber() {
-    JFileChooser chooser = new JFileChooser();
-    int result = chooser.showOpenDialog(this);
-    if (result != JFileChooser.CANCEL_OPTION) {
-      try {
-        infile = chooser.getSelectedFile();
-        br = null;
-        fr = new FileReader(infile);
-      } catch (Exception e) {
-        System.out.println("File opening error of some kind.");
-      }
-      if (fr != null) {
-        br = new BufferedReader(fr);
-      }
-    }
-  }
-
-  void closer() {
-    try {
-      fr.close();
-    } catch (IOException e) {
-      System.out.println("File reader didn't close.");
-    }
-  }
-}
-
-class AstrObj {
-  // simple class for storing info from coord files ...
-
-  String name;
-  Celest c;
-
-  // String comment;   // may be added later ...
-  // double pmx, pmy;
-  AstrObj(String instuff) {
-    String[] fields;
-    instuff = instuff.replace(":", " ");
-    fields = instuff.split("\\s+");  // whitespace separated.
-    name = fields[0];
-    try {
-      String raf = fields[1] + " " + fields[2] + " " + fields[3];
-      String decf = fields[4] + " " + fields[5] + " " + fields[6];
-      //  System.out.printf("raf %s decf %s\n",raf,decf);
-      c = new Celest(raf, decf, fields[7]);
-    } catch (Exception e) {
-      System.out.printf("Unconvertable input in AstrObj ... %s\n", instuff);
-    }
-  }
-
-  AstrObj(String sIn, Celest cIn) {
-    name = sIn;
-    c = cIn;
-  }
-}
-
-class BrightStar {
-  // A class for storing info from bright star list.  These are to be read in from
-  // brightest.dat, which is a file of the 518 stars with m < 4.
-
-  String name;
-  Celest c;
-  double m;   // apparent magnitude.
-  Color col;  // color used for plotting the star, based on spectral type.
-
-  BrightStar(String instuff) {
-    // constructor reads from a file with lines like:
-    // 3.158278  44.85722  3.80 " 27Kap Per"
-    // try {
-    String[] fields;
-    String[] fields2;
-    try {
-      fields = instuff.split("\"");   // split out the quoted name
-      name = fields[1];
-      fields[0] = fields[0].trim();
-      fields2 = fields[0].split("\\s+");  // and the rest
-      c = new Celest(Double.parseDouble(fields2[0]), Double.parseDouble(fields2[1]), 2000.);
-      m = Double.parseDouble(fields2[2]);
-      col = new Color(Integer.parseInt(fields2[3]), Integer.parseInt(fields2[4]),
-              Integer.parseInt(fields2[5]));
-    } catch (Exception e) {
-      System.out.printf("Unreadable line in bright star file input: %s\n", instuff);
-    }
-  }
-  // time to rationalize the precession in the display map ... which means we need:
-}
-
-//class JSkyCalcWindow extends JPanel implements MouseListener  {
-public class JSkyCalc {
+/* JSkyCalc is not used by ASPRO 2 */
+public final class JSkyCalc {
 
   public static void main(String[] args) {
     //   Locale locale = Locale.getDefault();  ... fixes the problems with German locale,
@@ -4716,10 +98,11 @@ public class JSkyCalc {
   }
 }
 
+/** This ENORMOUS class includes the entire user interface -- subwindows are
+implemented as subclasses. */
 class JSkyCalcWindow extends JComponent {
 
-  /** This ENORMOUS class includes the entire user interface -- subwindows are
-  implemented as subclasses. */
+
   /*
   final UIManager.LookAndFeelInfo [] landfs  = UIManager.getInstalledLookAndFeels();
   final String className;
@@ -4773,7 +156,7 @@ class JSkyCalcWindow extends JComponent {
   static HashMap<Double, AstrObj> byra = new HashMap<Double, AstrObj>();
   static Double rakey;
   static String[] RASelectors;  // real names, sorted by ra
-  static String[] NameSelectors;  // real names, sorted by dec.
+  static String[] NameSelectors;  // real names, sorted by DEC.
   static HashMap<String, AstrObj> presenterKey = new HashMap<String, AstrObj>();
   static HashMap<String, Site> siteDict = new HashMap<String, Site>();
   AstrObjSelector AirmSelWin;
@@ -5052,9 +435,9 @@ class JSkyCalcWindow extends JComponent {
     textpanel.add(equinoxfield, constraints);
 
     // Need to fill in values or synchOutput chokes later ...
-    RAfield.setText(o.c.Alpha.RoundedRAString(2, ":"));
-    decfield.setText(o.c.Delta.RoundedDecString(1, ":"));
-    equinoxfield.setText(String.format(Locale.ENGLISH, "%7.2f", o.c.Equinox));
+    RAfield.setText(o.c.alpha.RoundedRAString(2, ":"));
+    decfield.setText(o.c.delta.RoundedDecString(1, ":"));
+    equinoxfield.setText(String.format(Locale.ENGLISH, "%7.2f", o.c.equinox));
 
     iy++;
     constraints.gridx = 0;
@@ -5390,7 +773,7 @@ class JSkyCalcWindow extends JComponent {
     SkyWin.add(SkyDisp);
     SkyWin.setVisible(true);
 
-    /* A panel for alternate coords (e.g. current RA and dec, galactic etc.) */
+    /* A panel for alternate coords (e.g. current RA and DEC, galactic etc.) */
 
     AltWin = new AltCoordWin();
     altcoowinvisible = false;
@@ -5723,11 +1106,11 @@ class JSkyCalcWindow extends JComponent {
         try {
           String sel = objnamefield.getText();
           RAfield.setText(
-                  presenterKey.get(sel).c.Alpha.RoundedRAString(3, " "));
+                  presenterKey.get(sel).c.alpha.RoundedRAString(3, " "));
           decfield.setText(
-                  presenterKey.get(sel).c.Delta.RoundedDecString(2, " "));
+                  presenterKey.get(sel).c.delta.RoundedDecString(2, " "));
           equinoxfield.setText(String.format(Locale.ENGLISH, "%7.2f",
-                  presenterKey.get(sel).c.Equinox));
+                  presenterKey.get(sel).c.equinox));
           synchOutput();
         } catch (Exception exc) {
           objnamefield.setText("Not Found.");
@@ -5875,15 +1258,15 @@ class JSkyCalcWindow extends JComponent {
             equinoxfield.getText());
 
     // special hook for equinox of date ...
-    if (o.c.Equinox < 0.) {
-      o.c.Equinox = o.w.when.JulianEpoch();
+    if (o.c.equinox < 0.) {
+      o.c.equinox = o.w.when.JulianEpoch();
     }
 
     // and repeat them back ...
 
-    RAfield.setText(o.c.Alpha.RoundedRAString(2, " "));
-    decfield.setText(o.c.Delta.RoundedDecString(1, " "));
-    equinoxfield.setText(String.format(Locale.ENGLISH, "%7.2f", o.c.Equinox));
+    RAfield.setText(o.c.alpha.RoundedRAString(2, " "));
+    decfield.setText(o.c.delta.RoundedDecString(1, " "));
+    equinoxfield.setText(String.format(Locale.ENGLISH, "%7.2f", o.c.equinox));
 
     o.ComputeSky();
     o.ComputeSunMoon();
@@ -5925,18 +1308,18 @@ class JSkyCalcWindow extends JComponent {
     altazfield.setText(String.format(Locale.ENGLISH, "%5.1f  az = %6.1f", o.altitude, o.azimuth));
 
     parallactic = o.parallactic;
-    while (parallactic < -180.) {
-      parallactic += 360.;
+    while (parallactic < -180d) {
+      parallactic += 360d;
     }
-    while (parallactic >= 180.) {
-      parallactic -= 360.;
+    while (parallactic >= 180d) {
+      parallactic -= 360d;
     }
-    altparallactic = parallactic + 180.;
-    while (altparallactic < -180.) {
-      altparallactic += 360.;
+    altparallactic = parallactic + 180d;
+    while (altparallactic < -180d) {
+      altparallactic += 360d;
     }
-    while (altparallactic >= 180.) {
-      altparallactic -= 360.;
+    while (altparallactic >= 180d) {
+      altparallactic -= 360d;
     }
 
     parallacticfield.setText(String.format(Locale.ENGLISH, "%5.1f  [%5.1f] degr.", parallactic,
@@ -6054,7 +1437,7 @@ class JSkyCalcWindow extends JComponent {
   }
 
   Color MoonWarningColor(double altmoon,
-          double altitude, double altsun, double moonobj, double moonlight) {
+                         double altitude, double altsun, double moonobj, double moonlight) {
     if (altmoon < 0. | altitude < 0.) {
       return outputcolor;
     }
@@ -6144,7 +1527,7 @@ class JSkyCalcWindow extends JComponent {
 
     AutoUpdate(String s) {
       this.mystr = s;   // constructor does basically nothing ...
-      }
+    }
 
     public void run() {
       while (autoupdaterunning) {
@@ -6165,7 +1548,7 @@ class JSkyCalcWindow extends JComponent {
 
     AutoStep(String s) {
       this.mystr = s;   // constructor does basically nothing ...
-      }
+    }
 
     public void run() {
       while (autosteprunning) {
@@ -6316,8 +1699,8 @@ class JSkyCalcWindow extends JComponent {
       for (i = 0; i < 9; i++) {
         if (i != 2) {  // skip earth
           PlanetDispData[j][0] = p.names[i];
-          PlanetDispData[j][1] = p.PlanetObs[i].c.Alpha.RoundedRAString(-1, ":");
-          PlanetDispData[j][2] = p.PlanetObs[i].c.Delta.RoundedDecString(-2, ":");
+          PlanetDispData[j][1] = p.PlanetObs[i].c.alpha.RoundedRAString(-1, ":");
+          PlanetDispData[j][2] = p.PlanetObs[i].c.delta.RoundedDecString(-2, ":");
           PlanetDispData[j][3] = p.PlanetObs[i].ha.RoundedHAString(-2, ":");
           if (p.PlanetObs[i].altitude < 0.) {
             PlanetDispData[j][4] = "(Down.)";
@@ -6371,8 +1754,8 @@ class JSkyCalcWindow extends JComponent {
       for (i = 0; i < 9; i++) {
         if (i != 2) {  // skip earth
           ptable.setValueAt(p.names[i], j, 0);
-          ptable.setValueAt(p.PlanetObs[i].c.Alpha.RoundedRAString(-1, ":"), j, 1);
-          ptable.setValueAt(p.PlanetObs[i].c.Delta.RoundedDecString(-2, ":"), j, 2);
+          ptable.setValueAt(p.PlanetObs[i].c.alpha.RoundedRAString(-1, ":"), j, 1);
+          ptable.setValueAt(p.PlanetObs[i].c.delta.RoundedDecString(-2, ":"), j, 2);
           ptable.setValueAt(p.PlanetObs[i].ha.RoundedHAString(-2, ":"), j, 3);
           if (p.PlanetObs[i].altitude < 0.) {
             ptable.setValueAt("(Down.)", j, 4);
@@ -6410,7 +1793,7 @@ class JSkyCalcWindow extends JComponent {
       int j = 0;
 
       headings = new String[]{"Moon", "Evening Date", "HA.eve", "airm.eve", "HA.ctr", "airm.ctr",
-                "HA.morn", "airm.morn", "hrs<3", "hrs<2", "hrs<1.5"};
+                              "HA.morn", "airm.morn", "hrs<3", "hrs<2", "hrs<1.5"};
       JPanel container = new JPanel();
       season.Update(o);
 
@@ -6418,8 +1801,8 @@ class JSkyCalcWindow extends JComponent {
 //          for(i = 0; i < 9; i++) {
 //            if(i != 2) {  // skip earth
 //                PlanetDispData[j][0] = p.names[i];
-//                PlanetDispData[j][1] = p.PlanetObs[i].c.Alpha.RoundedRAString(-1,":");
-//                PlanetDispData[j][2] = p.PlanetObs[i].c.Delta.RoundedDecString(-2,":");
+//                PlanetDispData[j][1] = p.PlanetObs[i].c.alpha.RoundedRAString(-1,":");
+//                PlanetDispData[j][2] = p.PlanetObs[i].c.delta.RoundedDecString(-2,":");
 //                PlanetDispData[j][3] = p.PlanetObs[i].ha.RoundedHAString(-2,":");
 //                if(p.PlanetObs[i].altitude < 0.) PlanetDispData[j][4] = "(Down.)";
 //                else if(p.PlanetObs[i].airmass > 10.) PlanetDispData[j][4] = "> 10.";
@@ -6594,7 +1977,7 @@ class JSkyCalcWindow extends JComponent {
 
       jdtemp = Nightly.sunset.when.jd;
       jdint = (int) jdtemp;
-      starthr = (int) (24. * (jdtemp - jdint));
+      starthr = (int) (24d * (jdtemp - jdint));
 
       jdtemp = Nightly.sunrise.when.jd + 1. / 24.;  // round up
       endhr = (int) (24. * (jdtemp - jdint));
@@ -6688,7 +2071,7 @@ class JSkyCalcWindow extends JComponent {
     JTextField[] phenfield;
     JLabel[] phenlabel;
     String[] labeltext = {"Sunset", "Twilight Ends", "LST Eve. Twi.", "Night Center", "Twilight Begins",
-      "LST Morn. Twi.", "Sunrise", "Moonrise", "Moonset"};
+                          "LST Morn. Twi.", "Sunrise", "Moonrise", "Moonset"};
 
     NightlyWindow() {
       int i;
@@ -6730,11 +2113,11 @@ class JSkyCalcWindow extends JComponent {
     void UpdateDisplay() {  // assumes Nightly has been updated separately.
 
       phenfield[0].setText(Nightly.sunset.when.localDate.RoundedCalString(2, 0));
-      phenfield[1].setText(Nightly.eveningTwilight.when.localDate.RoundedCalString(2, 0));
-      phenfield[2].setText(Nightly.eveningTwilight.siderealobj.RoundedRAString(-2, " "));
+      phenfield[1].setText(Nightly.eveningTwilight18.when.localDate.RoundedCalString(2, 0));
+      phenfield[2].setText(Nightly.eveningTwilight18.siderealobj.RoundedRAString(-2, " "));
       phenfield[3].setText(Nightly.nightcenter.when.localDate.RoundedCalString(2, 0));
-      phenfield[4].setText(Nightly.morningTwilight.when.localDate.RoundedCalString(2, 0));
-      phenfield[5].setText(Nightly.morningTwilight.siderealobj.RoundedRAString(-2, " "));
+      phenfield[4].setText(Nightly.morningTwilight18.when.localDate.RoundedCalString(2, 0));
+      phenfield[5].setText(Nightly.morningTwilight18.siderealobj.RoundedRAString(-2, " "));
       phenfield[6].setText(Nightly.sunrise.when.localDate.RoundedCalString(2, 0));
 
       if (Nightly.moonrise.when.jd < Nightly.moonset.when.jd) {
@@ -6874,11 +2257,11 @@ class JSkyCalcWindow extends JComponent {
               presenterKey.get(Selectors[i]).c.checkstring()
               ); */
               RAfield.setText(
-                      presenterKey.get(sel).c.Alpha.RoundedRAString(3, " "));
+                      presenterKey.get(sel).c.alpha.RoundedRAString(3, " "));
               decfield.setText(
-                      presenterKey.get(sel).c.Delta.RoundedDecString(2, " "));
+                      presenterKey.get(sel).c.delta.RoundedDecString(2, " "));
               equinoxfield.setText(String.format(Locale.ENGLISH, "%7.2f",
-                      presenterKey.get(sel).c.Equinox));
+                      presenterKey.get(sel).c.equinox));
               synchOutput();
             } catch (ArrayIndexOutOfBoundsException e) {
             }
@@ -6906,7 +2289,7 @@ class JSkyCalcWindow extends JComponent {
         obj = new AstrObj(st);
         if (obj.name != null & obj.c != null) {
           byname.put(obj.name.toLowerCase(), obj);
-          rakey = (Double) obj.c.Alpha.value;
+          rakey = (Double) obj.c.alpha.value;
           // ensure unique RA keys by inserting small tie-breaker offset
           while (byra.keySet().contains(rakey)) {
             rakey = rakey + 0.00001;
@@ -6979,7 +2362,7 @@ class JSkyCalcWindow extends JComponent {
       byname.remove(key);
     }
 
-    Celest nullc = new Celest(0., 0., 2000.);
+    Celest nullc = new Celest(0., 0., 2000d);
     AstrObj nullobj = new AstrObj("null", nullc);
     byra.put(0., nullobj);
     byname.put("null", nullobj);
@@ -7001,10 +2384,10 @@ class JSkyCalcWindow extends JComponent {
     int i, minindex = 0;
 
     if (presenterKey.size() > 0) {
-      decin = incel.Delta.value;
+      decin = incel.delta.value;
       for (i = 0; i < RASelectors.length; i++) {
         objcel = presenterKey.get(RASelectors[i]).c;
-        if (Math.abs(decin - objcel.Delta.value) < decband) {  // guard expensive subtend
+        if (Math.abs(decin - objcel.delta.value) < decband) {  // guard expensive subtend
           sep = Spherical.subtend(incel, objcel);
           if (sep < minsep) {
             minsep = sep;
@@ -7016,9 +2399,9 @@ class JSkyCalcWindow extends JComponent {
       if (minsep < tolerance) {
         objcel = presenterKey.get(RASelectors[minindex]).c;
         objnamefield.setText(RASelectors[minindex]);
-        RAfield.setText(objcel.Alpha.RoundedRAString(2, " "));
-        decfield.setText(objcel.Delta.RoundedDecString(1, " "));
-        equinoxfield.setText(String.format(Locale.ENGLISH, "%7.2f", objcel.Equinox));
+        RAfield.setText(objcel.alpha.RoundedRAString(2, " "));
+        decfield.setText(objcel.delta.RoundedDecString(1, " "));
+        equinoxfield.setText(String.format(Locale.ENGLISH, "%7.2f", objcel.equinox));
       }
     }
   }
@@ -7304,8 +2687,8 @@ class JSkyCalcWindow extends JComponent {
           // get equinox from main window
           double eq = Double.parseDouble(equinoxfield.getText());
           ctmp.selfprecess(eq);
-          RAfield.setText(ctmp.Alpha.RoundedRAString(2, " "));
-          decfield.setText(ctmp.Delta.RoundedDecString(1, " "));
+          RAfield.setText(ctmp.alpha.RoundedRAString(2, " "));
+          decfield.setText(ctmp.delta.RoundedDecString(1, " "));
           setToDate();
         }
       });
@@ -7320,8 +2703,8 @@ class JSkyCalcWindow extends JComponent {
           // get equinox from main window
           double eq = Double.parseDouble(equinoxfield.getText());
           ctmp.selfprecess(eq);
-          RAfield.setText(ctmp.Alpha.RoundedRAString(2, " "));
-          decfield.setText(ctmp.Delta.RoundedDecString(1, " "));
+          RAfield.setText(ctmp.alpha.RoundedRAString(2, " "));
+          decfield.setText(ctmp.delta.RoundedDecString(1, " "));
           setToDate();
         }
       });
@@ -7359,9 +2742,9 @@ class JSkyCalcWindow extends JComponent {
     void Refresh() {
       // to be called at the end of a synchOutput so site etc are all done.
 
-      currentrafield.setText(o.current.Alpha.RoundedRAString(2, " "));
-      currentdecfield.setText(o.current.Delta.RoundedDecString(1, " "));
-      currenteqfield.setText(String.format(Locale.ENGLISH, "%7.2f", o.current.Equinox));
+      currentrafield.setText(o.current.alpha.RoundedRAString(2, " "));
+      currentdecfield.setText(o.current.delta.RoundedDecString(1, " "));
+      currenteqfield.setText(String.format(Locale.ENGLISH, "%7.2f", o.current.equinox));
       o.c.galactic();
       galactlongitfield.setText(String.format(Locale.ENGLISH, "%6.2f", o.c.galong));
       galactlatitfield.setText(String.format(Locale.ENGLISH, "%6.2f", o.c.galat));
@@ -7467,7 +2850,7 @@ class JSkyCalcWindow extends JComponent {
 
   class SkyDisplay extends JComponent
           implements MouseMotionListener,
-          KeyListener, MouseListener {
+                     KeyListener, MouseListener {
 
     int xpixint, ypixint;       // number of pixels in x and y directions, int
     double xpix, ypix, aspect;  // number of pixels in x and y directions, double
@@ -7557,8 +2940,8 @@ class JSkyCalcWindow extends JComponent {
       } else if (mousevent.getButton() == MouseEvent.BUTTON2) {  // middle sets to coords
 //               System.out.printf("%d %d\n",mousevent.getX(),mousevent.getY());
         Celest markedC = pixtocelest(mousevent.getX(), mousevent.getY());
-        RAfield.setText(markedC.Alpha.RoundedRAString(0, " "));
-        decfield.setText(markedC.Delta.RoundedDecString(0, " "));
+        RAfield.setText(markedC.alpha.RoundedRAString(0, " "));
+        decfield.setText(markedC.delta.RoundedDecString(0, " "));
         synchOutput();
       }
     }
@@ -7602,8 +2985,8 @@ class JSkyCalcWindow extends JComponent {
       } else if (k.getKeyChar() == 'c') {
         //   System.out.printf("%d %d\n",mousevent.getX(),mousevent.getY());
         Celest markedC = pixtocelest(mousevent.getX(), mousevent.getY());
-        RAfield.setText(markedC.Alpha.RoundedRAString(0, " "));
-        decfield.setText(markedC.Delta.RoundedDecString(0, " "));
+        RAfield.setText(markedC.alpha.RoundedRAString(0, " "));
+        decfield.setText(markedC.delta.RoundedDecString(0, " "));
         synchOutput();
       } else if (k.getKeyChar() == 's') {
         //   System.out.printf("%d %d\n",mousevent.getX(),mousevent.getY());
@@ -7637,10 +3020,10 @@ class JSkyCalcWindow extends JComponent {
       Celest objcel;
       double sep, minsep = 1000000000000.;
       int i, minindex = 0;
-      decin = incel.Delta.value;
+      decin = incel.delta.value;
 
       for (i = 0; i < bs.length; i++) {
-        if (Math.abs(decin - bs[i].c.Delta.value) < decband) {  // guard expensive subtend
+        if (Math.abs(decin - bs[i].c.delta.value) < decband) {  // guard expensive subtend
           sep = Spherical.subtend(incel, bs[i].c);
           if (sep < minsep) {
             minsep = sep;
@@ -7651,9 +3034,9 @@ class JSkyCalcWindow extends JComponent {
 
       if (minsep < tolerance) {
         objnamefield.setText(bs[minindex].name);
-        RAfield.setText(bs[minindex].c.Alpha.RoundedRAString(2, " "));
-        decfield.setText(bs[minindex].c.Delta.RoundedDecString(1, " "));
-        equinoxfield.setText(String.format(Locale.ENGLISH, "%7.2f", bs[minindex].c.Equinox));
+        RAfield.setText(bs[minindex].c.alpha.RoundedRAString(2, " "));
+        decfield.setText(bs[minindex].c.delta.RoundedDecString(1, " "));
+        equinoxfield.setText(String.format(Locale.ENGLISH, "%7.2f", bs[minindex].c.equinox));
       }
     }
 
@@ -7678,9 +3061,9 @@ class JSkyCalcWindow extends JComponent {
       for (i = 0; i < 7; i++) {
         HAgrid[i] = new GeneralPath();
         ha = (double) (2 * i - 6);
-        decstart = 90.;
-        decmiddle = 85.;
-        decend = 80.;
+        decstart = 90d;
+        decmiddle = 85d;
+        decend = 80d;
         xystart = SkyProject(ha, decstart, coslat, sinlat);
         xystartpix = xytopix(xystart[0], xystart[1]);
 
@@ -7929,10 +3312,10 @@ class JSkyCalcWindow extends JComponent {
       double[] hadecdist = Celest.XYZcel(xt, yc, zc);  // x remains the same
       // hadecdist[0] is the hour angle ...
       RA Alph = new RA(hadecdist[0] - 6. + o.w.sidereal);
-      dec Delt = new dec(hadecdist[1]);
-      Celest cel = new Celest(Alph, Delt, 2000.); // coord eq is sloppy ...
-//           System.out.printf("%s %s\n",cel.Alpha.RoundedRAString(0,":"),
-      //                 cel.Delta.RoundedDecString(-1,":"));
+      DEC Delt = new DEC(hadecdist[1]);
+      Celest cel = new Celest(Alph, Delt, 2000d); // coord eq is sloppy ...
+//           System.out.printf("%s %s\n",cel.alpha.RoundedRAString(0,":"),
+      //                 cel.delta.RoundedDecString(-1,":"));
       return (cel);
     }
 
@@ -7999,8 +3382,8 @@ class JSkyCalcWindow extends JComponent {
       lst = o.w.sidereal;
       double coslat = Math.cos(o.w.where.lat.radians());
       double sinlat = Math.sin(o.w.where.lat.radians());
-      xy = SkyProject(lst - o.current.Alpha.value,
-              o.current.Delta.value, coslat, sinlat);
+      xy = SkyProject(lst - o.current.alpha.value,
+              o.current.delta.value, coslat, sinlat);
       g2.setPaint(objboxcolor);
       drawbox(xy[0], xy[1], 0.05, "solid", 1.3f);
     }
@@ -8012,8 +3395,8 @@ class JSkyCalcWindow extends JComponent {
       lst = o.w.sidereal;
       double coslat = Math.cos(o.w.where.lat.radians());
       double sinlat = Math.sin(o.w.where.lat.radians());
-      xy = SkyProject(lst - o.w.sun.topopos.Alpha.value,
-              o.w.sun.topopos.Delta.value, coslat, sinlat);
+      xy = SkyProject(lst - o.w.sun.topopos.alpha.value,
+              o.w.sun.topopos.delta.value, coslat, sinlat);
       putDot(xy[0], xy[1], 0.009, brightyellow);
       g2.setPaint(brightyellow);
       drawcircle(xy[0], xy[1], 0.02, "solid", 1.5f);
@@ -8098,11 +3481,11 @@ class JSkyCalcWindow extends JComponent {
       int i, j, ist;
 
       // compute the precession matrix ONCE.
-      ti = (bs[0].c.Equinox - 2000.) / 100.;
-      tf = (equinox - 2000. - 100. * ti) / 100.;
+      ti = (bs[0].c.equinox - 2000d) / 100.;
+      tf = (equinox - 2000d - 100. * ti) / 100.;
 
-      zeta = (2306.2181 + 1.39656 * ti + 0.000139 * ti * ti) * tf +
-              (0.30188 - 0.000344 * ti) * tf * tf + 0.017998 * tf * tf * tf;
+      zeta = (2306.2181 + 1.39656 * ti + 0.000139 * ti * ti) * tf
+              + (0.30188 - 0.000344 * ti) * tf * tf + 0.017998 * tf * tf * tf;
       z = zeta + (0.79280 + 0.000410 * ti) * tf * tf + 0.000205 * tf * tf * tf;
       theta = (2004.3109 - 0.8533 * ti - 0.000217 * ti * ti) * tf - (0.42665 + 0.000217 * ti) * tf * tf - 0.041833 * tf * tf * tf;
 
@@ -8126,10 +3509,10 @@ class JSkyCalcWindow extends JComponent {
       p[2][2] = costheta;
 
       for (ist = 0; ist < bs.length; ist++) {
-        cosdelt = Math.cos(bs[ist].c.Delta.radians());
-        orig[0] = cosdelt * Math.cos(bs[ist].c.Alpha.radians());
-        orig[1] = cosdelt * Math.sin(bs[ist].c.Alpha.radians());
-        orig[2] = Math.sin(bs[ist].c.Delta.radians());
+        cosdelt = Math.cos(bs[ist].c.delta.radians());
+        orig[0] = cosdelt * Math.cos(bs[ist].c.alpha.radians());
+        orig[1] = cosdelt * Math.sin(bs[ist].c.alpha.radians());
+        orig[2] = Math.sin(bs[ist].c.delta.radians());
         for (i = 0; i < 3; i++) {  // matrix multiplication
           fin[i] = 0.;
           //System.out.printf("orig[%d] = %f\n",i,orig[i]);
@@ -8140,9 +3523,9 @@ class JSkyCalcWindow extends JComponent {
           //System.out.printf("\nfin[%d] = %f\n\n",i,fin[i]);
         }
         radecdist = Celest.XYZcel(fin[0], fin[1], fin[2]);
-        bs[ist].c.Alpha.setRA(radecdist[0]);
-        bs[ist].c.Delta.setDec(radecdist[1]);
-        bs[ist].c.Equinox = equinox;
+        bs[ist].c.alpha.setRA(radecdist[0]);
+        bs[ist].c.delta.setDec(radecdist[1]);
+        bs[ist].c.equinox = equinox;
       }
     }
 
@@ -8162,7 +3545,7 @@ class JSkyCalcWindow extends JComponent {
       y = cosdec * Math.cos(ha);
       z = Math.sin(dec);
 
-      double ypr = sinlat * y - coslat * z;   // rotating backward, by CO-latitude, so sin
+      double ypr = sinlat * y - coslat * z;   // rotating backward, by CO-Latitude, so sin
       double zpr = coslat * y + sinlat * z;   // and cos switch around.
 
       double zdist = Math.acos(zpr);
@@ -8192,7 +3575,7 @@ class JSkyCalcWindow extends JComponent {
 
       // precess the list if the epoch mismatch is > 1 yr
       equinoxnow = o.w.when.JulianEpoch();
-      if (Math.abs(equinoxnow - bs[0].c.Equinox) > 1.) {
+      if (Math.abs(equinoxnow - bs[0].c.equinox) > 1.) {
         // System.out.printf("%s -> ",bs[0].c.checkstring());
         PrecessBrightStars(equinoxnow);
         // System.out.printf("%s \n",bs[0].c.checkstring());
@@ -8201,7 +3584,7 @@ class JSkyCalcWindow extends JComponent {
       double coslat = Math.cos(o.w.where.lat.radians());
       double sinlat = Math.sin(o.w.where.lat.radians());
       for (i = 0; i < bs.length; i++) {
-        xy = SkyProject(lst - bs[i].c.Alpha.value, bs[i].c.Delta.value, coslat, sinlat);
+        xy = SkyProject(lst - bs[i].c.alpha.value, bs[i].c.delta.value, coslat, sinlat);
         //System.out.printf("PB %f %f\n",xy[0],xy[1]);
         putDot(xy[0], xy[1], magconst1 + magslope * (magzpt - bs[i].m), bs[i].col);
       }
@@ -8238,7 +3621,7 @@ class JSkyCalcWindow extends JComponent {
 
       double pa = o.w.cusppa + (Const.PI) / 2.;   // cusppa already in rad.
       double[][] turnmoon = {{Math.cos(pa), Math.sin(pa)},
-        {-1. * Math.sin(pa), Math.cos(pa)}};
+                             {-1. * Math.sin(pa), Math.cos(pa)}};
       for (j = 0; j < nseg; j++) {
         for (i = 0; i < 2; i++) {
           limbxypr[i][j] = 0.;
@@ -8250,19 +3633,19 @@ class JSkyCalcWindow extends JComponent {
         }
       }
 
-      double zover2 = (90. - o.w.altmoon) / (Const.DEG_IN_RADIAN * 2.);
+      double zover2 = (90d - o.w.altmoon) / (Const.DEG_IN_RADIAN * 2.);
       double coszover2 = Math.cos(zover2);
       double moonsize = 3. * coszover2;
 
-      double rafac = 15. * Math.cos(o.w.moon.topopos.Delta.radians());
+      double rafac = 15. * Math.cos(o.w.moon.topopos.delta.radians());
 
       double[] ralimb = new double[nseg];
       double[] declimb = new double[nseg];
       double[] raterm = new double[nseg];
       double[] decterm = new double[nseg];
 
-      double racent = o.w.moon.topopos.Alpha.value;  // saving verbosity
-      double deccent = o.w.moon.topopos.Delta.value;
+      double racent = o.w.moon.topopos.alpha.value;  // saving verbosity
+      double deccent = o.w.moon.topopos.delta.value;
 
       // double moonsize = 3.;
 
@@ -8270,8 +3653,8 @@ class JSkyCalcWindow extends JComponent {
         ralimb[i] = o.w.sidereal - // Hereafter actually HA, not RA
                 (racent + limbxypr[0][i] * moonsize / rafac);
         declimb[i] = deccent + limbxypr[1][i] * moonsize;
-        raterm[i] = o.w.sidereal -
-                (racent + termxypr[0][i] * moonsize / rafac);
+        raterm[i] = o.w.sidereal
+                - (racent + termxypr[0][i] * moonsize / rafac);
         decterm[i] = deccent + termxypr[1][i] * moonsize;
       }
 
@@ -8346,8 +3729,8 @@ class JSkyCalcWindow extends JComponent {
 
       for (i = 0; i < 9; i++) {
         if (i != 2) {
-          xy = SkyProject(lst - p.PlanetObs[i].c.Alpha.value,
-                  p.PlanetObs[i].c.Delta.value, coslat, sinlat);
+          xy = SkyProject(lst - p.PlanetObs[i].c.alpha.value,
+                  p.PlanetObs[i].c.delta.value, coslat, sinlat);
           if (p.mags[i] < 4.7) {
             putDot(xy[0], xy[1], magconst1 + magslope * (4.5 - p.mags[i]), Color.YELLOW);
           } else {
@@ -8378,8 +3761,8 @@ class JSkyCalcWindow extends JComponent {
         obj = presenterKey.get(RASelectors[i]);
         if (!obj.name.equals("null")) {
           cel = obj.c.precessed(currenteq);
-          xy = SkyProject(lst - cel.Alpha.value,
-                  cel.Delta.value, coslat, sinlat);
+          xy = SkyProject(lst - cel.alpha.value,
+                  cel.delta.value, coslat, sinlat);
           puttext(xy[0], xy[1], obj.name, smallfont, smallfontmetrics);
         }
       }
@@ -8513,10 +3896,10 @@ class JSkyCalcWindow extends JComponent {
       timespan = (jdend - jdstart) * 24.;
       // System.out.printf("timespan = %f hrs\n",timespan);
       xhi = xlo + timespan;
-      endfade = xlo + (Nightly.eveningTwilight.when.jd - jdstart) * 24.;
+      endfade = xlo + (Nightly.eveningTwilight18.when.jd - jdstart) * 24.;
       //System.out.printf("xlo %f dt %f Endfade = %f\n",xlo,
-      //      (Nightly.eveningTwilight.when.jd - jdstart) * 24.,endfade);
-      startfade = xlo + (Nightly.morningTwilight.when.jd - jdstart) * 24.;
+      //      (Nightly.eveningTwilight18.when.jd - jdstart) * 24.,endfade);
+      startfade = xlo + (Nightly.morningTwilight18.when.jd - jdstart) * 24.;
 
       double span = xhi - xlo;
       double fracx = xvphi - xvplo;
@@ -8828,7 +4211,7 @@ class JSkyCalcWindow extends JComponent {
 
       Observation oairm = new Observation((WhenWhere) wIn.clone(),
               (Celest) cIn.clone());
-      // System.out.printf("%s\n",oairm.c.Alpha.RoundedRAString(2,":"));
+      // System.out.printf("%s\n",oairm.c.alpha.RoundedRAString(2,":"));
       double jd = jdstart;
       double dt = 0.005;
       double[] xy1 = {0., 0.};
@@ -8968,7 +4351,7 @@ class JSkyCalcWindow extends JComponent {
         pa += Const.PI;  // flip in S.
       }
       double[][] turnmoon = {{Math.cos(pa), Math.sin(pa)},
-        {-1. * Math.sin(pa), Math.cos(pa)}};
+                             {-1. * Math.sin(pa), Math.cos(pa)}};
       for (j = 0; j < nseg; j++) {
         for (i = 0; i < 2; i++) {
           limbxypr[i][j] = 0.;
@@ -8980,7 +4363,7 @@ class JSkyCalcWindow extends JComponent {
         }
       }
 
-      double ycent = ylo + (omoon.w.altmoon / 90.) * (yhi - ylo);  // scale ...
+      double ycent = ylo + (omoon.w.altmoon / 90d) * (yhi - ylo);  // scale ...
       double xcent = xlo + (omoon.w.when.jd - jdstart) * 24.;
       double[] xypix = xytopix(xcent, ycent);
 //          System.out.printf("jd %f xcent ycent %f %f altmoon %f \n",
@@ -9021,4 +4404,125 @@ class JSkyCalcWindow extends JComponent {
       g2.setPaint(Color.WHITE);
     }
   }
+}
+
+class filewriter {
+  // a little class to make it easy to open and close an outfile.
+
+  File outfile;
+  PrintWriter pw = null;
+  FileWriter fw = null;
+
+  filewriter(String fname) {
+    outfile = new File(fname);
+    fw = null;
+    try {
+      fw = new FileWriter(outfile, true);
+    } catch (IOException e) {
+      System.out.printf("File writer didn't open for %s.\n", fname);
+    }
+    pw = new PrintWriter(fw);
+
+  }
+
+  void closer() {
+    try {
+      fw.close();
+    } catch (IOException e) {
+      System.out.printf("File writer didn't close.\n");
+    }
+  }
+}
+
+class FileGrabber extends JFrame {
+// similar utility class for opening an infile, pops a file chooser.
+
+  File infile;
+  BufferedReader br = null;
+  FileReader fr = null;
+
+  FileGrabber() {
+    JFileChooser chooser = new JFileChooser();
+    int result = chooser.showOpenDialog(this);
+    if (result != JFileChooser.CANCEL_OPTION) {
+      try {
+        infile = chooser.getSelectedFile();
+        br = null;
+        fr = new FileReader(infile);
+      } catch (Exception e) {
+        System.out.println("File opening error of some kind.");
+      }
+      if (fr != null) {
+        br = new BufferedReader(fr);
+      }
+    }
+  }
+
+  void closer() {
+    try {
+      fr.close();
+    } catch (IOException e) {
+      System.out.println("File reader didn't close.");
+    }
+  }
+}
+
+class AstrObj {
+  // simple class for storing info from coord files ...
+
+  String name;
+  Celest c;
+
+  // String comment;   // may be added later ...
+  // double pmx, pmy;
+  AstrObj(String instuff) {
+    String[] fields;
+    instuff = instuff.replace(":", " ");
+    fields = instuff.split("\\s+");  // whitespace separated.
+    name = fields[0];
+    try {
+      String raf = fields[1] + " " + fields[2] + " " + fields[3];
+      String decf = fields[4] + " " + fields[5] + " " + fields[6];
+      //  System.out.printf("raf %s decf %s\n",raf,decf);
+      c = new Celest(raf, decf, fields[7]);
+    } catch (Exception e) {
+      System.out.printf("Unconvertable input in AstrObj ... %s\n", instuff);
+    }
+  }
+
+  AstrObj(String sIn, Celest cIn) {
+    name = sIn;
+    c = cIn;
+  }
+}
+
+class BrightStar {
+  // A class for storing info from bright star list.  These are to be read in from
+  // brightest.dat, which is a file of the 518 stars with m < 4.
+
+  String name;
+  Celest c;
+  double m;   // apparent magnitude.
+  Color col;  // color used for plotting the star, based on spectral type.
+
+  BrightStar(String instuff) {
+    // constructor reads from a file with lines like:
+    // 3.158278  44.85722  3.80 " 27Kap Per"
+    // try {
+    String[] fields;
+    String[] fields2;
+    try {
+      fields = instuff.split("\"");   // split out the quoted name
+      name = fields[1];
+      fields[0] = fields[0].trim();
+      fields2 = fields[0].split("\\s+");  // and the rest
+      c = new Celest(Double.parseDouble(fields2[0]), Double.parseDouble(fields2[1]), 2000d);
+      m = Double.parseDouble(fields2[2]);
+      col = new Color(Integer.parseInt(fields2[3]), Integer.parseInt(fields2[4]),
+              Integer.parseInt(fields2[5]));
+    } catch (Exception e) {
+      System.out.printf("Unreadable line in bright star file input: %s\n", instuff);
+    }
+  }
+  // time to rationalize the precession in the display map ... which means we need:
 }
