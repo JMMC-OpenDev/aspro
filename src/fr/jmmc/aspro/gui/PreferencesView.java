@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: PreferencesView.java,v 1.8 2010-10-22 13:31:37 bourgesl Exp $"
+ * "@(#) $Id: PreferencesView.java,v 1.9 2011-04-22 15:38:41 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.8  2010/10/22 13:31:37  bourgesl
+ * added preference for Time LST/UTC
+ *
  * Revision 1.7  2010/09/08 16:00:31  bourgesl
  * unregister Preference Observers when the widget is released (Preference View, UV Coverage Panel)
  *
@@ -125,10 +128,14 @@ public final class PreferencesView extends JFrame implements Observer {
 
     buttonGroupPositionStyle = new javax.swing.ButtonGroup();
     buttonGroupTimeRef = new javax.swing.ButtonGroup();
+    buttonGroupTimeAxis = new javax.swing.ButtonGroup();
     jPanel1 = new javax.swing.JPanel();
     jLabelTimeRef = new javax.swing.JLabel();
     jRadioButtonTimeLST = new javax.swing.JRadioButton();
     jRadioButtonTimeUTC = new javax.swing.JRadioButton();
+    jLabelCenterNight = new javax.swing.JLabel();
+    jRadioButtonCenterNightYes = new javax.swing.JRadioButton();
+    jRadioButtonCenterNightNo = new javax.swing.JRadioButton();
     jPanelModelEditor = new javax.swing.JPanel();
     jLabelPositionStyle = new javax.swing.JLabel();
     jRadioButtonXY = new javax.swing.JRadioButton();
@@ -147,9 +154,13 @@ public final class PreferencesView extends JFrame implements Observer {
     getContentPane().setLayout(new javax.swing.BoxLayout(getContentPane(), javax.swing.BoxLayout.PAGE_AXIS));
 
     jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Observability"));
+    jPanel1.setLayout(new java.awt.GridBagLayout());
 
     jLabelTimeRef.setText("Time reference");
-    jPanel1.add(jLabelTimeRef);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    jPanel1.add(jLabelTimeRef, gridBagConstraints);
 
     buttonGroupTimeRef.add(jRadioButtonTimeLST);
     jRadioButtonTimeLST.setSelected(true);
@@ -159,7 +170,9 @@ public final class PreferencesView extends JFrame implements Observer {
         jRadioButtonTimeRefActionPerformed(evt);
       }
     });
-    jPanel1.add(jRadioButtonTimeLST);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    jPanel1.add(jRadioButtonTimeLST, gridBagConstraints);
 
     buttonGroupTimeRef.add(jRadioButtonTimeUTC);
     jRadioButtonTimeUTC.setText(AsproConstants.TIME_UTC);
@@ -168,7 +181,44 @@ public final class PreferencesView extends JFrame implements Observer {
         jRadioButtonTimeRefActionPerformed(evt);
       }
     });
-    jPanel1.add(jRadioButtonTimeUTC);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    jPanel1.add(jRadioButtonTimeUTC, gridBagConstraints);
+
+    jLabelCenterNight.setText("Center plot arround night");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    jPanel1.add(jLabelCenterNight, gridBagConstraints);
+
+    buttonGroupTimeAxis.add(jRadioButtonCenterNightYes);
+    jRadioButtonCenterNightYes.setSelected(true);
+    jRadioButtonCenterNightYes.setText("yes");
+    jRadioButtonCenterNightYes.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jRadioButtonCenterNightActionPerformed(evt);
+      }
+    });
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+    jPanel1.add(jRadioButtonCenterNightYes, gridBagConstraints);
+
+    buttonGroupTimeAxis.add(jRadioButtonCenterNightNo);
+    jRadioButtonCenterNightNo.setText("no");
+    jRadioButtonCenterNightNo.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jRadioButtonCenterNightActionPerformed(evt);
+      }
+    });
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    jPanel1.add(jRadioButtonCenterNightNo, gridBagConstraints);
 
     getContentPane().add(jPanel1);
 
@@ -207,7 +257,9 @@ public final class PreferencesView extends JFrame implements Observer {
     jLabelLutTable.setText("LUT table");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
     jPanelModelImage.add(jLabelLutTable, gridBagConstraints);
 
     jComboBoxLUT.addActionListener(new java.awt.event.ActionListener() {
@@ -217,14 +269,16 @@ public final class PreferencesView extends JFrame implements Observer {
     });
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridy = 0;
     gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
     jPanelModelImage.add(jComboBoxLUT, gridBagConstraints);
 
     jLabelImageSize.setText("Image size");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
     jPanelModelImage.add(jLabelImageSize, gridBagConstraints);
 
     jComboBoxImageSize.addActionListener(new java.awt.event.ActionListener() {
@@ -234,7 +288,7 @@ public final class PreferencesView extends JFrame implements Observer {
     });
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridy = 1;
     gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
     jPanelModelImage.add(jComboBoxImageSize, gridBagConstraints);
 
@@ -316,6 +370,22 @@ public final class PreferencesView extends JFrame implements Observer {
       }
     }//GEN-LAST:event_jRadioButtonTimeRefActionPerformed
 
+    private void jRadioButtonCenterNightActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonCenterNightActionPerformed
+      try {
+        final String value;
+        if (this.jRadioButtonCenterNightYes.isSelected()) {
+          value = "true";
+        } else {
+          value = "false";
+        }
+
+        // will fire triggerObserversNotification so update() will be called
+        this.myPreferences.setPreference(Preferences.CENTER_NIGHT, value);
+      } catch (PreferencesException pe) {
+        logger.log(Level.SEVERE, null, pe);
+      }
+    }//GEN-LAST:event_jRadioButtonCenterNightActionPerformed
+
   /**
    * Listen to preferences changes
    * @param o Preferences
@@ -338,14 +408,21 @@ public final class PreferencesView extends JFrame implements Observer {
     final boolean preferTimeLst = AsproConstants.TIME_LST.equals(this.myPreferences.getTimeReference());
     this.jRadioButtonTimeLST.setSelected(preferTimeLst);
     this.jRadioButtonTimeUTC.setSelected(!preferTimeLst);
+
+    final boolean preferCenterNight = this.myPreferences.isCenterNight();
+    this.jRadioButtonCenterNightYes.setSelected(preferCenterNight);
+    this.jRadioButtonCenterNightNo.setSelected(!preferCenterNight);
+
   }
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.ButtonGroup buttonGroupPositionStyle;
+  private javax.swing.ButtonGroup buttonGroupTimeAxis;
   private javax.swing.ButtonGroup buttonGroupTimeRef;
   private javax.swing.JButton jButtonDefault;
   private javax.swing.JButton jButtonSave;
   private javax.swing.JComboBox jComboBoxImageSize;
   private javax.swing.JComboBox jComboBoxLUT;
+  private javax.swing.JLabel jLabelCenterNight;
   private javax.swing.JLabel jLabelImageSize;
   private javax.swing.JLabel jLabelLutTable;
   private javax.swing.JLabel jLabelPositionStyle;
@@ -354,6 +431,8 @@ public final class PreferencesView extends JFrame implements Observer {
   private javax.swing.JPanel jPanelButtons;
   private javax.swing.JPanel jPanelModelEditor;
   private javax.swing.JPanel jPanelModelImage;
+  private javax.swing.JRadioButton jRadioButtonCenterNightNo;
+  private javax.swing.JRadioButton jRadioButtonCenterNightYes;
   private javax.swing.JRadioButton jRadioButtonRhoTheta;
   private javax.swing.JRadioButton jRadioButtonTimeLST;
   private javax.swing.JRadioButton jRadioButtonTimeUTC;

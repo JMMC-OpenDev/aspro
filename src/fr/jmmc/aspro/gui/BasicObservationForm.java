@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: BasicObservationForm.java,v 1.69 2011-04-06 15:34:36 bourgesl Exp $"
+ * "@(#) $Id: BasicObservationForm.java,v 1.70 2011-04-22 15:38:41 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.69  2011/04/06 15:34:36  bourgesl
+ * javadoc
+ *
  * Revision 1.68  2011/03/15 15:32:52  bourgesl
  * added names for panels and fields
  *
@@ -214,7 +217,7 @@
  ******************************************************************************/
 package fr.jmmc.aspro.gui;
 
-import fr.jmmc.aspro.AsproConstants;
+import fr.jmmc.aspro.Preferences;
 import fr.jmmc.aspro.gui.util.GenericListModel;
 import fr.jmmc.aspro.gui.util.TargetListRenderer;
 import fr.jmmc.aspro.gui.util.TargetRenderer;
@@ -846,7 +849,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
 
         if (minElevNew < 0d || minElevNew >= 90d) {
           // invalid value :
-          jFieldMinElev.setValue(AsproConstants.DEFAULT_MIN_ELEVATION);
+          jFieldMinElev.setValue(Preferences.getInstance().getMinElevation());
         }
         fireObservationUpdateEvent();
       }
