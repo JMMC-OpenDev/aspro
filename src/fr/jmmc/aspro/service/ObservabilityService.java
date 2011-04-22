@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.69 2011-03-01 17:17:50 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.70 2011-04-22 15:41:41 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.69  2011/03/01 17:17:50  bourgesl
+ * define target list an
+ *
  * Revision 1.68  2011/02/28 17:10:18  bourgesl
  * define Pops in all case (user or best PoPs)
  *
@@ -224,9 +227,10 @@
  ******************************************************************************/
 package fr.jmmc.aspro.service;
 
+import edu.dartmouth.AstroAlmanac;
 import edu.dartmouth.AstroSkyCalc;
 import edu.dartmouth.AstroSkyCalcObservation;
-import edu.dartmouth.AlmanacTime;
+import edu.dartmouth.AstroAlmanacTime;
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.BaseLine;
 import fr.jmmc.aspro.model.Beam;
@@ -280,11 +284,9 @@ import javax.xml.datatype.XMLGregorianCalendar;
  */
 public final class ObservabilityService {
 
-  /** Class Name */
-  private static final String className_ = "fr.jmmc.aspro.service.ObservabilityService";
   /** Class logger */
   private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
-          className_);
+          ObservabilityService.class.getName());
   /** flag to slow down the service to detect concurrency problems */
   private final static boolean DEBUG_SLOW_SERVICE = false;
 
@@ -303,6 +305,8 @@ public final class ObservabilityService {
   private final boolean doBaseLineLimits;
   /** flag to produce detailed output with all BL / horizon / rise intervals per target */
   private final boolean doDetailedOutput;
+  /** flag to center the plot arround midnight */
+  private final boolean doCenterMidnight;
 
   /* internal */
   /** Get the current thread to check if the computation is interrupted */
@@ -311,10 +315,10 @@ public final class ObservabilityService {
   private final AstroSkyCalc sc = new AstroSkyCalc();
   /** observation sky calc instance */
   private final AstroSkyCalcObservation sco = new AstroSkyCalcObservation();
-  /** jd corresponding to LST=00:00:00 for the observation date */
-  private double jdLst0;
-  /** jd corresponding to LST=24:00:00 for the observation date */
-  private double jdLst24;
+  /** lower jd arround the observation date */
+  private double jdLower;
+  /** upper jd arround the observation date */
+  private double jdUpper;
   /** flag to enable the observability restriction due to the night */
   private boolean useNightLimit;
   /** Night ranges defined in julian day */
@@ -350,21 +354,24 @@ public final class ObservabilityService {
    * @param useLST indicates if the timestamps are expressed in LST or in UTC
    * @param doDetailedOutput flag to produce detailed output with all BL / horizon / rise intervals per target
    * @param doBaseLineLimits flag to find base line limits
+   * @param doCenterMidnight flag to center JD range arround midnight
    */
   public ObservabilityService(final ObservationSetting observation,
-                              final boolean useLST, final boolean doDetailedOutput, final boolean doBaseLineLimits) {
+                              final boolean useLST, final boolean doDetailedOutput, final boolean doBaseLineLimits,
+                              final boolean doCenterMidnight) {
     // Inputs :
     this.observation = observation;
     this.useLST = useLST;
     this.doDetailedOutput = doDetailedOutput;
     this.doBaseLineLimits = doBaseLineLimits;
+    this.doCenterMidnight = doCenterMidnight;
 
     // create the observability data corresponding to the observation version :
     this.data = new ObservabilityData(observation.getVersion(), useLST, doDetailedOutput, doBaseLineLimits);
   }
 
   /**
-   * Specific Constructor to prepare CHARA Observing blocks for all targets (LST) ignoring night restrictions
+   * Specific Constructor to prepare CHARA Observing blocks for all targets (LST) ignoring night restrictions (OB VEGA only)
    * Note : This service is statefull so it can not be reused by several calls.
    *
    * @param observation observation settings
@@ -375,7 +382,7 @@ public final class ObservabilityService {
   }
 
   /**
-   * Specific Constructor to prepare VLTI Observing blocks for a single target (LST)
+   * Specific Constructor to prepare VLTI Observing blocks for a single target (LST) (OB VLTI only)
    * Note : This service is statefull so it can not be reused by several calls.
    *
    * @param observation observation settings
@@ -399,7 +406,7 @@ public final class ObservabilityService {
   private ObservabilityService(final ObservationSetting observation,
                                final Target target, final double minElev, final boolean ignoreNightLimits) {
     // use LST :
-    this(observation, true, false, false);
+    this(observation, true, false, false, false);
 
     // select target :
     this.selectedTarget = target;
@@ -418,6 +425,7 @@ public final class ObservabilityService {
    */
   public ObservabilityData compute() {
     if (logger.isLoggable(Level.FINE)) {
+      logger.fine("\n\n--------------------------------------------------------------------------------\n\n");
       logger.fine("compute : " + this.observation);
     }
 
@@ -447,60 +455,9 @@ public final class ObservabilityService {
     this.sc.defineSite(this.interferometer.getName(), this.interferometer.getPosSph());
     this.sco.defineSite(this.sc);
 
-    // define date :
-    final XMLGregorianCalendar cal = this.observation.getWhen().getDate();
-
-    // find the julian date corresponding to the LST origin LST=00:00:00 for the given date :
-    this.jdLst0 = this.sc.defineDate(cal.getYear(), cal.getMonth(), cal.getDay());
-
-    this.jdLst24 = this.sc.findJdForLst0(this.jdLst0 + 1d);
-
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("jd   min = " + this.jdLst0);
-      logger.fine("jd   max = " + this.jdLst24);
-    }
-
-    this.data.setDateCalc(this.sc);
-
-    final Date dateMin = jdToDate(this.jdLst0);
-
-    final Date dateEnd = jdToDate(this.jdLst24);
-
-    // in LST, dateEnd = dateMin, so add one day :
-    final Date dateMax = (this.useLST) ? new Date(dateEnd.getTime() + 86400000l) : dateEnd;
-
-    this.data.setDateMin(dateMin);
-    this.data.setDateMax(dateMax);
-
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("date min = " + this.data.getDateMin());
-      logger.fine("date max = " + this.data.getDateMax());
-    }
-
-    // fast interrupt :
-    if (this.currentThread.isInterrupted()) {
-      return null;
-    }
-
-    // 1 - Find the day / twlight / night zones :
-    if (this.useNightLimit) {
-      //  sun rise/set with twilight : see NightlyAlmanac
-
-      // Use the LST range [0;24h] +/- 1 day to have valid night ranges to merge with target ranges :
-      final List<AlmanacTime> sunEvents = this.sc.findSunRiseSet();
-
-      processSunAlmanach(sunEvents);
-
-      // moon rise/set :
-      final List<Range> moonRanges = this.sc.findMoonRiseSet(this.jdLst24);
-      final double moonIllum = this.sc.getMaxMoonIllum(moonRanges);
-
-      this.data.setMoonIllumPercent(100d * moonIllum);
-
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("moon illum   : " + moonIllum);
-      }
-    }
+    // define observation date :
+    // find the appropriate night (LST range):
+    this.defineObservationRange();
 
     // fast interrupt :
     if (this.currentThread.isInterrupted()) {
@@ -559,6 +516,88 @@ public final class ObservabilityService {
     }
 
     return this.data;
+  }
+
+  /**
+   * Define the observation date and determine the jd bounds (lst0 - lst24 or arround midnight)
+   */
+  private void defineObservationRange() {
+
+    this.data.setDateCalc(this.sc);
+
+    // define date :
+    final XMLGregorianCalendar cal = this.observation.getWhen().getDate();
+
+    // find the julian date corresponding to the LST origin LST=00:00:00 for the given date :
+    this.jdLower = this.sc.defineDate(cal.getYear(), cal.getMonth(), cal.getDay());
+
+    // find the julian date corresponding to LST=00:00:00 next day:
+    this.jdUpper = this.sc.findJdForLst0(this.jdLower + AstroSkyCalc.LST_DAY_IN_JD);
+
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("jdLower = " + this.jdLower);
+      logger.fine("jdUpper = " + this.jdUpper);
+    }
+
+    this.data.setDateMin(jdToDate(this.jdLower));
+    this.data.setDateMax(jdToDate(this.jdUpper));
+
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("date min = " + this.data.getDateMin());
+      logger.fine("date max = " + this.data.getDateMax());
+    }
+
+    // fast interrupt :
+    if (this.currentThread.isInterrupted()) {
+      return;
+    }
+
+    // 1 - Find the day / twlight / night zones :
+    if (this.useNightLimit) {
+      //  sun rise/set with twilight : see NightlyAlmanac
+      final AstroAlmanac almanac = this.sc.getAlmanac();
+
+      if (this.doCenterMidnight) {
+        final double jdMidnight = this.sc.findMidnight(almanac);
+
+        if (logger.isLoggable(Level.FINE)) {
+          logger.fine("jdMidnight = " + jdMidnight);
+        }
+
+        // adjust the jd bounds :
+        this.jdLower = jdMidnight - AstroSkyCalc.lst2jd(12d);
+        this.jdUpper = jdMidnight + AstroSkyCalc.lst2jd(12d);
+
+        if (logger.isLoggable(Level.FINE)) {
+          logger.fine("jdLower = " + this.jdLower);
+          logger.fine("jdUpper = " + this.jdUpper);
+        }
+
+        this.data.setDateMin(jdToDate(this.jdLower));
+        this.data.setDateMax(jdToDate(this.jdUpper));
+
+        if (logger.isLoggable(Level.FINE)) {
+          logger.fine("date min = " + this.data.getDateMin());
+          logger.fine("date max = " + this.data.getDateMax());
+        }
+      }
+
+      // Use the LST range [0;24h] +/- 1 day to have valid night ranges to merge with target ranges :
+      final List<AstroAlmanacTime> sunEvents = this.sc.findSunRiseSet(almanac, this.jdLower, this.jdUpper);
+
+      processSunAlmanach(sunEvents);
+
+      // moon rise/set :
+      final List<Range> moonRanges = this.sc.findMoonRiseSet(almanac, this.jdLower, this.jdUpper);
+
+      final double moonIllum = this.sc.getMaxMoonIllum(moonRanges);
+
+      this.data.setMoonIllumPercent(100d * moonIllum);
+
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("moon illum   : " + moonIllum);
+      }
+    }
   }
 
   /**
@@ -758,7 +797,7 @@ public final class ObservabilityService {
   private List<PopObservabilityData> findPoPsForTargetObservability(final Target target) {
 
     // Target coordinates precessed to jd and to get az/alt positions from JSkyCalc :
-    final double[] raDec = this.sco.defineTarget(this.jdLst0, target.getRADeg(), target.getDECDeg());
+    final double[] raDec = this.sco.defineTarget(this.jdLower, target.getRADeg(), target.getDECDeg());
 
     // precessed target right ascension in decimal hours :
     final double precRA = raDec[0];
@@ -820,6 +859,10 @@ public final class ObservabilityService {
 
     final String targetName = target.getName();
 
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("targetName = " + targetName);
+    }
+
     final int listSize = (this.doDetailedOutput) ? (3 + this.baseLines.size()) : 1;
     final List<StarObservabilityData> starVisList = new ArrayList<StarObservabilityData>(listSize);
     this.data.addStarVisibilities(targetName, starVisList);
@@ -832,7 +875,7 @@ public final class ObservabilityService {
     this.data.addStarData(starData);
 
     // get Target coordinates precessed to jd and define target to get later az/alt positions from JSkyCalc :
-    final double[] raDec = this.sco.defineTarget(this.jdLst0, target.getRADeg(), target.getDECDeg());
+    final double[] raDec = this.sco.defineTarget(this.jdLower, target.getRADeg(), target.getDECDeg());
 
     // precessed target right ascension in decimal hours :
     final double precRA = raDec[0];
@@ -1654,14 +1697,14 @@ public final class ObservabilityService {
    * and all intervals (day/night/twilight) in the LST range [0;24]
    * @param sunEvents jd sun events in the LST range [0;24] +/- 12h
    */
-  private void processSunAlmanach(final List<AlmanacTime> sunEvents) {
+  private void processSunAlmanach(final List<AstroAlmanacTime> sunEvents) {
     List<SunTimeInterval> intervals = null;
 
     if (sunEvents != null && !sunEvents.isEmpty()) {
       final int nbInterval = sunEvents.size() - 1;
       intervals = new ArrayList<SunTimeInterval>(nbInterval);
 
-      AlmanacTime stFrom, stTo;
+      AstroAlmanacTime stFrom, stTo;
       double jdFrom, jdTo;
       Date from, to;
       SunTimeInterval.SunType type = null;
@@ -1674,16 +1717,28 @@ public final class ObservabilityService {
         jdTo = stTo.getJd();
 
         switch (stFrom.getType()) {
+          case SunTwl18Rise:
+            type = SunTimeInterval.SunType.AstronomicalTwilight;
+            break;
+          case SunTwl12Rise:
+            type = SunTimeInterval.SunType.NauticalTwilight;
+            break;
+          case SunTwl06Rise:
+            type = SunTimeInterval.SunType.CivilTwilight;
+            break;
           case SunRise:
             type = SunTimeInterval.SunType.Day;
             break;
           case SunSet:
-            type = SunTimeInterval.SunType.Twilight;
+            type = SunTimeInterval.SunType.CivilTwilight;
             break;
-          case SunTwlRise:
-            type = SunTimeInterval.SunType.Twilight;
+          case SunTwl06Set:
+            type = SunTimeInterval.SunType.NauticalTwilight;
             break;
-          case SunTwlSet:
+          case SunTwl12Set:
+            type = SunTimeInterval.SunType.AstronomicalTwilight;
+            break;
+          case SunTwl18Set:
             type = SunTimeInterval.SunType.Night;
             break;
           default:
@@ -1696,8 +1751,8 @@ public final class ObservabilityService {
           this.nightLimits.add(new Range(jdFrom, jdTo));
         }
 
-        // Keep intervals that are inside or overlapping the LST [0;24] range :
-        if ((jdFrom >= this.jdLst0 && jdFrom <= this.jdLst24) || (jdTo >= this.jdLst0 && jdTo <= this.jdLst24)) {
+        // Keep intervals that are inside or overlapping the range [jdLower; jdUpper] range :
+        if ((jdFrom >= this.jdLower && jdFrom <= this.jdUpper) || (jdTo >= this.jdLower && jdTo <= this.jdUpper)) {
 
           if (logger.isLoggable(Level.FINE)) {
             logger.fine("Range[" + jdFrom + " - " + jdTo + "] : " + type);
@@ -1717,7 +1772,6 @@ public final class ObservabilityService {
       if (logger.isLoggable(Level.FINE)) {
         logger.fine("nightLimits : " + this.nightLimits);
       }
-
     }
 
     this.data.setSunIntervals(intervals);
@@ -1801,26 +1855,24 @@ public final class ObservabilityService {
    * @param intervals interval list where new date intervals will be added
    */
   private void convertRangeToDateInterval(final Range rangeJD, final List<DateTimeInterval> intervals) {
-    // one Day in LST is different than one Day in JD :
-    final double day = AstroSkyCalc.LST_DAY_IN_JD;
-
     final double jdStart = rangeJD.getMin();
     final double jdEnd = rangeJD.getMax();
 
-    if (jdStart >= this.jdLst0) {
+    if (jdStart >= this.jdLower) {
 
-      if (jdEnd <= this.jdLst24) {
+      if (jdEnd <= this.jdUpper) {
 
         // single interval [jdStart;jdEnd]
         intervals.add(new DateTimeInterval(jdToDateInDateRange(jdStart), jdToDateInDateRange(jdEnd)));
 
       } else {
 
-        if (jdStart > this.jdLst24) {
+        if (jdStart > this.jdUpper) {
           // two points over LST 24 :
 
           // single interval [jdStart - day;jdEnd - day]
-          intervals.add(new DateTimeInterval(jdToDateInDateRange(jdStart - day), jdToDateInDateRange(jdEnd - day)));
+          intervals.add(new DateTimeInterval(jdToDateInDateRange(jdStart - AstroSkyCalc.LST_DAY_IN_JD),
+                  jdToDateInDateRange(jdEnd - AstroSkyCalc.LST_DAY_IN_JD)));
 
         } else {
           // end occurs after LST 24 :
@@ -1829,25 +1881,26 @@ public final class ObservabilityService {
           intervals.add(new DateTimeInterval(jdToDateInDateRange(jdStart), this.data.getDateMax()));
 
           // add the second interval [jdLst0;jdEnd - day]
-          intervals.add(new DateTimeInterval(this.data.getDateMin(), jdToDateInDateRange(jdEnd - day)));
+          intervals.add(new DateTimeInterval(this.data.getDateMin(), jdToDateInDateRange(jdEnd - AstroSkyCalc.LST_DAY_IN_JD)));
         }
       }
 
     } else {
       // start occurs before LST 0h :
 
-      if (jdEnd < this.jdLst0) {
+      if (jdEnd < this.jdLower) {
         // two points before LST 0h :
 
         // single interval [jdStart + day;jdEnd + day]
-        intervals.add(new DateTimeInterval(jdToDateInDateRange(jdStart + day), jdToDateInDateRange(jdEnd + day)));
+        intervals.add(new DateTimeInterval(jdToDateInDateRange(jdStart + AstroSkyCalc.LST_DAY_IN_JD),
+                jdToDateInDateRange(jdEnd + AstroSkyCalc.LST_DAY_IN_JD)));
 
       } else {
         // interval [jdLst0;jdEnd]
         intervals.add(new DateTimeInterval(this.data.getDateMin(), jdToDateInDateRange(jdEnd)));
 
         // add the second interval [jdStart + day;jdLst24]
-        intervals.add(new DateTimeInterval(jdToDateInDateRange(jdStart + day), this.data.getDateMax()));
+        intervals.add(new DateTimeInterval(jdToDateInDateRange(jdStart + AstroSkyCalc.LST_DAY_IN_JD), this.data.getDateMax()));
       }
     }
   }
@@ -1901,12 +1954,9 @@ public final class ObservabilityService {
    * @return date
    */
   private final Date convertJDToDate(final double jd) {
-    // one Day in LST is different than one Day in JD :
-    final double day = AstroSkyCalc.LST_DAY_IN_JD;
+    if (jd >= this.jdLower) {
 
-    if (jd >= this.jdLst0) {
-
-      if (jd <= this.jdLst24) {
+      if (jd <= this.jdUpper) {
 
         // date in [jdLst0;jdLst24]
         return jdToDateInDateRange(jd);
@@ -1915,14 +1965,14 @@ public final class ObservabilityService {
         // over LST 24 :
 
         // return [jd - day]
-        return jdToDateInDateRange(jd - day);
+        return jdToDateInDateRange(jd - AstroSkyCalc.LST_DAY_IN_JD);
       }
 
     } else {
       // start occurs before LST 0h :
 
       // return [jd + day]
-      return jdToDateInDateRange(jd + day);
+      return jdToDateInDateRange(jd + AstroSkyCalc.LST_DAY_IN_JD);
     }
   }
 
@@ -1936,10 +1986,10 @@ public final class ObservabilityService {
    */
   private final Date jdToDateInDateRange(final double jd) {
     // adjust range limits :
-    if (jd <= this.jdLst0) {
+    if (jd <= this.jdLower) {
       return this.data.getDateMin();
     } else {
-      if (jd >= this.jdLst24) {
+      if (jd >= this.jdUpper) {
         return this.data.getDateMax();
       }
       return jdToDate(jd);
@@ -2056,6 +2106,8 @@ public final class ObservabilityService {
 
   /**
    * Convert the given list of HA ranges to date intervals in LST (used by Export OB only)
+   *
+   * TODO : check that code when LST / night center is done!
    *
    * Note : date intervals that are over (00:00 or 24:00) are merged. 
    * For example : 22:00->24:00 and 00:00->01:00 returns 22:00->01:00
