@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AstroAlmanac.java,v 1.1 2011-04-22 15:34:24 bourgesl Exp $"
+ * "@(#) $Id: AstroAlmanac.java,v 1.2 2011-04-26 15:53:38 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2011/04/22 15:34:24  bourgesl
+ * new JMMC classes to manage almanac data
+ *
  */
 package edu.dartmouth;
 
@@ -19,8 +22,6 @@ import java.util.TreeSet;
  */
 public final class AstroAlmanac {
 
-  /** Midnight unique sorted JD time stamps */
-  private final Set<AstroAlmanacTime> midnights = new TreeSet<AstroAlmanacTime>();
   /** Sun unique sorted JD time stamps */
   private final Set<AstroAlmanacTime> sunTimes = new TreeSet<AstroAlmanacTime>();
   /** Moon unique sorted JD time stamps */
@@ -31,14 +32,6 @@ public final class AstroAlmanac {
    */
   protected AstroAlmanac() {
     super();
-  }
-
-  /**
-   * Return the Midnight unique sorted JD time stamps
-   * @return Midnight unique sorted JD time stamps
-   */
-  public Set<AstroAlmanacTime> getMidnights() {
-    return midnights;
   }
 
   /**
@@ -63,8 +56,7 @@ public final class AstroAlmanac {
    */
   @Override
   public String toString() {
-    return "midnights:\n" + getMidnights()
-            + "\nsun times:\n" + getSunTimes()
+    return "sun times:\n" + getSunTimes()
             + "\nmoon times:\n" + getMoonTimes();
   }
 

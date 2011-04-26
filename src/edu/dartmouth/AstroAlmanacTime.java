@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AstroAlmanacTime.java,v 1.1 2011-04-22 15:34:24 bourgesl Exp $"
+ * "@(#) $Id: AstroAlmanacTime.java,v 1.2 2011-04-26 15:53:38 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2011/04/22 15:34:24  bourgesl
+ * new JMMC classes to manage almanac data
+ *
  * Revision 1.1  2010/07/22 12:31:51  bourgesl
  * refactoring to be used also for Moon events
  *
@@ -43,9 +46,7 @@ public final class AstroAlmanacTime implements Comparable<AstroAlmanacTime> {
     /** Moon Rise */
     MoonRise,
     /** Moon Set */
-    MoonSet,
-    /** Night center */
-    Midnight
+    MoonSet
   }
   /** julian date */
   private final double jd;
