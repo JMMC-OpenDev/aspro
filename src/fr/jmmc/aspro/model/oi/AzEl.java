@@ -95,6 +95,16 @@ public class AzEl
   }
 
   /**
+   * Define azimuth and elevation
+   * @param az azimuth in degrees
+   * @param el elevation in degrees
+   */
+  public void setAzEl(final double az, final double el) {
+    this.azimuth = az;
+    this.elevation = el;
+  }
+
+  /**
    * Return a string representation
    * @return (az, el)
    */
