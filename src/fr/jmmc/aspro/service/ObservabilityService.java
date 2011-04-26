@@ -1,11 +1,14 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.71 2011-04-26 13:03:03 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.72 2011-04-26 15:57:16 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.71  2011/04/26 13:03:03  bourgesl
+ * optimized checkHorizonProfile() : do not compute precessed coordinates every time
+ *
  * Revision 1.70  2011/04/22 15:41:41  bourgesl
  * new method defineObservationRange to define observation date, find midnight and process almanac times
  * define new twilight zones
@@ -558,19 +561,19 @@ public final class ObservabilityService {
 
     // 1 - Find the day / twlight / night zones :
     if (this.useNightLimit) {
-      //  sun rise/set with twilight : see NightlyAlmanac
-      final AstroAlmanac almanac = this.sc.getAlmanac();
+      // initialize night limits anyway:
+      this.nightLimits = new ArrayList<Range>(3);
 
       if (this.doCenterMidnight) {
-        final double jdMidnight = this.sc.findMidnight(almanac);
+        final double jdMidnight = this.sc.getJdMidnight();
 
         if (logger.isLoggable(Level.FINE)) {
           logger.fine("jdMidnight = " + jdMidnight);
         }
 
         // adjust the jd bounds :
-        this.jdLower = jdMidnight - AstroSkyCalc.lst2jd(12d);
-        this.jdUpper = jdMidnight + AstroSkyCalc.lst2jd(12d);
+        this.jdLower = jdMidnight - AstroSkyCalc.HALF_LST_DAY_IN_JD;
+        this.jdUpper = jdMidnight + AstroSkyCalc.HALF_LST_DAY_IN_JD;
 
         if (logger.isLoggable(Level.FINE)) {
           logger.fine("jdLower = " + this.jdLower);
@@ -586,13 +589,25 @@ public final class ObservabilityService {
         }
       }
 
-      // Use the LST range [0;24h] +/- 1 day to have valid night ranges to merge with target ranges :
+      //  sun rise/set with twilight : see NightlyAlmanac
+      final AstroAlmanac almanac = this.sc.getAlmanac();
+
+      // Use the LST range [0;24h] +/- 12h to have valid night ranges to merge with target ranges :
       final List<AstroAlmanacTime> sunEvents = this.sc.findSunRiseSet(almanac, this.jdLower, this.jdUpper);
+
+      // TODO : use two filters:
+      // 1-Display (sun intervals) : in jdLower / jdUpper
+
+      // 2-Night limits in [LST0 -12; LST0 + 36]
 
       processSunAlmanach(sunEvents);
 
       // moon rise/set :
       final List<Range> moonRanges = this.sc.findMoonRiseSet(almanac, this.jdLower, this.jdUpper);
+
+      // Moon filters:
+      // 1-use ranges in  [LST0 -12; LST0 + 36]:
+      // 2- moon Illum in jdLower / jdUpper !
 
       final double moonIllum = this.sc.getMaxMoonIllum(moonRanges);
 
@@ -946,17 +961,17 @@ public final class ObservabilityService {
         return;
       }
 
-      // convert HA range to JD range :
+      // convert HA range to JD range in range [LST0 - 12; LST0 + 12]
       final Range rangeJDRiseSet = convertHAToJDRange(rangeHARiseSet, precRA);
 
       // For now : only VLTI has horizon profiles :
-      List<Range> rangesJDHz = null;
+      List<Range> rangesJDHorizon = null;
       if (this.hasHorizon) {
         // check horizon profiles inside rise/set range :
-        rangesJDHz = checkHorizonProfile(rangeJDRiseSet);
+        rangesJDHorizon = checkHorizonProfile(rangeJDRiseSet);
 
         if (logger.isLoggable(Level.FINE)) {
-          logger.fine("rangesJDHz : " + rangesJDHz);
+          logger.fine("rangesJDHz : " + rangesJDHorizon);
         }
 
         // fast interrupt :
@@ -976,12 +991,12 @@ public final class ObservabilityService {
 
         convertRangeToDateInterval(rangeJDRiseSet, soRiseSet.getVisible());
 
-        if (rangesJDHz != null) {
+        if (rangesJDHorizon != null) {
           // Add Horizon :
           final StarObservabilityData soHz = new StarObservabilityData(targetName, "Horizon", StarObservabilityData.TYPE_HORIZON);
           starVisList.add(soHz);
 
-          for (Range range : rangesJDHz) {
+          for (Range range : rangesJDHorizon) {
             convertRangeToDateInterval(range, soHz.getVisible());
           }
         }
@@ -1038,8 +1053,8 @@ public final class ObservabilityService {
         }
       }
 
-      if (rangesJDHz != null) {
-        obsRanges.addAll(rangesJDHz);
+      if (rangesJDHorizon != null) {
+        obsRanges.addAll(rangesJDHorizon);
       } else {
         // Check Shadowing for every stations ?
 
@@ -1700,7 +1715,7 @@ public final class ObservabilityService {
 
     if (sunEvents != null && !sunEvents.isEmpty()) {
       final int nbInterval = sunEvents.size() - 1;
-      intervals = new ArrayList<SunTimeInterval>(nbInterval);
+      intervals = new ArrayList<SunTimeInterval>();
 
       AstroAlmanacTime stFrom, stTo;
       double jdFrom, jdTo;
@@ -1743,9 +1758,6 @@ public final class ObservabilityService {
         }
 
         if (type == SunTimeInterval.SunType.Night) {
-          if (this.nightLimits == null) {
-            this.nightLimits = new ArrayList<Range>(2);
-          }
           this.nightLimits.add(new Range(jdFrom, jdTo));
         }
 
@@ -1776,7 +1788,9 @@ public final class ObservabilityService {
   }
 
   /**
-   * Convert an HA range to a JD range
+   * Convert an HA range to a JD range.
+   * Returned JD values are in range [LST0 - 12; LST0 + 12]
+   *
    * @param rangeHA given in hour angle (dec hours)
    * @param precRA precessed target right ascension in decimal hours
    * @return JD range
