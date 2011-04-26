@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: ObservabilityService.java,v 1.70 2011-04-22 15:41:41 bourgesl Exp $"
+ * "@(#) $Id: ObservabilityService.java,v 1.71 2011-04-26 13:03:03 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.70  2011/04/22 15:41:41  bourgesl
+ * new method defineObservationRange to define observation date, find midnight and process almanac times
+ * define new twilight zones
+ *
  * Revision 1.69  2011/03/01 17:17:50  bourgesl
  * define target list an
  *
@@ -796,8 +800,8 @@ public final class ObservabilityService {
    */
   private List<PopObservabilityData> findPoPsForTargetObservability(final Target target) {
 
-    // Target coordinates precessed to jd and to get az/alt positions from JSkyCalc :
-    final double[] raDec = this.sco.defineTarget(this.jdLower, target.getRADeg(), target.getDECDeg());
+    // get Target coordinates precessed to jd :
+    final double[] raDec = this.sco.defineTarget(jdCenter(), target.getRADeg(), target.getDECDeg());
 
     // precessed target right ascension in decimal hours :
     final double precRA = raDec[0];
@@ -847,7 +851,6 @@ public final class ObservabilityService {
 
     // reset current target :
     this.sco.reset();
-
     return popDataList;
   }
 
@@ -875,7 +878,7 @@ public final class ObservabilityService {
     this.data.addStarData(starData);
 
     // get Target coordinates precessed to jd and define target to get later az/alt positions from JSkyCalc :
-    final double[] raDec = this.sco.defineTarget(this.jdLower, target.getRADeg(), target.getDECDeg());
+    final double[] raDec = this.sco.defineTarget(jdCenter(), target.getRADeg(), target.getDECDeg());
 
     // precessed target right ascension in decimal hours :
     final double precRA = raDec[0];
@@ -1270,7 +1273,7 @@ public final class ObservabilityService {
    */
   private List<Range> checkHorizonProfile(final Range jdRiseSet) {
     // output :
-    final List<Range> ranges = new ArrayList<Range>();
+    final List<Range> ranges = new ArrayList<Range>(3);
 
     // Prepare profiles :
     final HorizonService hs = HorizonService.getInstance();
@@ -1287,7 +1290,7 @@ public final class ObservabilityService {
     final double jdMin = jdRiseSet.getMin();
     final double jdMax = jdRiseSet.getMax();
 
-    AzEl azEl;
+    final AzEl azEl = new AzEl();
     boolean visible = false;
     boolean last = false;
 
@@ -1295,18 +1298,13 @@ public final class ObservabilityService {
 
     for (double jd = jdMin; jd < jdMax; jd += jdStep) {
 
-      // fast interrupt :
-      if (this.currentThread.isInterrupted()) {
-        return null;
-      }
-
-      azEl = this.sco.getTargetPosition(jd);
+      this.sco.getTargetPosition(jd, azEl);
 
       // For every beam (station) :
       // check if there is no horizon obstruction :
       visible = true;
 
-      for (Profile p : profiles) {
+      for (final Profile p : profiles) {
         if (!hs.checkProfile(p, azEl.getAzimuth(), azEl.getElevation())) {
           /*
           if (logger.isLoggable(Level.FINE)) {
@@ -2073,12 +2071,12 @@ public final class ObservabilityService {
       }
     }
 
-    AzEl azEl;
+    final AzEl azEl = new AzEl();
 
     // tick for transit :
     jd = this.sc.convertHAToJD(0d, precRA);
     if (Range.contains(obsRangeJD, jd)) {
-      azEl = this.sco.getTargetPosition(jd);
+      this.sco.getTargetPosition(jd, azEl);
       elev = (int) Math.round(azEl.getElevation());
       elevations.add(new ElevationDate(convertJDToDate(jd), elev));
     }
@@ -2086,12 +2084,12 @@ public final class ObservabilityService {
     // ticks for observability intervals (limits) :
     for (Range range : obsRangeJD) {
       jd = range.getMin();
-      azEl = this.sco.getTargetPosition(jd);
+      this.sco.getTargetPosition(jd, azEl);
       elev = (int) Math.round(azEl.getElevation());
       elevations.add(new ElevationDate(convertJDToDate(jd), elev));
 
       jd = range.getMax();
-      azEl = this.sco.getTargetPosition(jd);
+      this.sco.getTargetPosition(jd, azEl);
       elev = (int) Math.round(azEl.getElevation());
       elevations.add(new ElevationDate(convertJDToDate(jd), elev));
     }
@@ -2178,5 +2176,13 @@ public final class ObservabilityService {
       return dateIntervals;
     }
     return null;
+  }
+
+  /**
+   * Return the jd at the middle of the range [jdLower; jdUpper]
+   * @return jd at the middle of the range
+   */
+  private double jdCenter() {
+    return (this.jdLower + this.jdUpper) / 2d;
   }
 }
