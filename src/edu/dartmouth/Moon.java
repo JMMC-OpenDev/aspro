@@ -14,23 +14,23 @@ public final class Moon implements Cloneable {
   Celest topopos;
 
   Moon(final double jd) {
-    final double[] retvals = computemoon(jd);
-    final double eq = 2000d + (jd - Const.J2000) / 365.25d;
+    final double[] retvals = computeMoon(jd);
+    final double eq = InstantInTime.julianEpoch(jd);
     geopos = new Celest(retvals[0], retvals[1], eq, retvals[2]);
     topopos = new Celest(0d, 0d, eq);  // not set, no geogr info
   }
 
   Moon(final WhenWhere w) {
 //      double [] retvals;
-//      retvals = computemoon(w.when.jd);
-//      geopos = new Celest(retvals[0],retvals[1],w.when.JulianEpoch(),retvals[2]);
+//      retvals = computeMoon(w.when.jd);
+//      geopos = new Celest(retvals[0],retvals[1],w.when.julianEpoch(),retvals[2]);
 //      topopos = Topo.topocorr(geopos, w);
     update(w.when, w.where, w.sidereal);
   }
 
   void update(final InstantInTime when, final Site where, final double sidereal) {
-    final double[] retvals = computemoon(when.jd);
-    geopos = new Celest(retvals[0], retvals[1], when.JulianEpoch(), retvals[2]);
+    final double[] retvals = computeMoon(when.jd);
+    geopos = new Celest(retvals[0], retvals[1], when.julianEpoch(), retvals[2]);
     topopos = Topo.topocorr(geopos, when, where, sidereal);
   }
 
@@ -49,7 +49,7 @@ public final class Moon implements Cloneable {
   /** Rather accurate lunar
   ephemeris, from Jean Meeus' *Astronomical Formulae For Calculators*,
   pub. Willman-Bell.  Includes all the terms given there. */
-  static double[] computemoon(final double jdIn) {
+  static double[] computeMoon(final double jdIn) {
 
     final double jd = jdIn + DeltaT.etcorr(jdIn) / 86400d;
     /* approximate correction to ephemeris time */

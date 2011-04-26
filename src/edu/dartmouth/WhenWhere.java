@@ -16,10 +16,12 @@ public final class WhenWhere implements Cloneable {
   RA siderealobj;   // for output
   double[] barycenter = {0d, 0d, 0d, 0d, 0d, 0d};
   // Barycentric coords in epoch of date; 0-2 are XYZ, 3-5 are velocity.
+  final double[] altazparSun = new double[3];
   Sun sun;
   HA hasun;
   double altsun, azsun;
   double twilight;
+  final double[] altazparMoon = new double[3];
   Moon moon;    // mostly for use in rise-set calculations.
   HA hamoon;
   double altmoon, azmoon;
@@ -39,10 +41,10 @@ public final class WhenWhere implements Cloneable {
   WhenWhere(final InstantInTime t, final Site loc) {
     when = t;
     where = loc;
-    sidereal = lstcalc(when.jd, where.longit.value);
+    sidereal = lstCalc(when.jd, where.longit.value);
     siderealobj = new RA(sidereal);
-    MakeLocalSun();
-    MakeLocalMoon();   // these always need instantiation to avoid trouble later.
+    makeLocalSun();
+    makeLocalMoon();   // these always need instantiation to avoid trouble later.
   }
 
   WhenWhere(final double jdin, final Site loc) {
@@ -51,40 +53,40 @@ public final class WhenWhere implements Cloneable {
 
   /**
    * LAURENT : custom constructor to avoid making sun / moon anyway
-   * @param jdin
+   * @param jdIn
    * @param loc
    * @param makeLocalSunMoon
    */
-  WhenWhere(final double jdin, final Site loc, final boolean makeLocalSunMoon) {
-    when = new InstantInTime(jdin, loc.stdz, loc.use_dst, true);
+  WhenWhere(final double jdIn, final Site loc, final boolean makeLocalSunMoon) {
+    when = new InstantInTime(jdIn, loc.stdz, loc.use_dst, true);
     where = loc;
-    sidereal = lstcalc(when.jd, where.longit.value);
+    sidereal = lstCalc(when.jd, where.longit.value);
     siderealobj = new RA(sidereal);
     if (makeLocalSunMoon) {
-      MakeLocalSun();
-      MakeLocalMoon();   // these always need instantiation to avoid trouble later.
+      makeLocalSun();
+      makeLocalMoon();   // these always need instantiation to avoid trouble later.
     }
   }
 
-  void ChangeWhen(final double jdin) {
-    when.SetInstant(jdin, where.stdz, where.use_dst, true);
-    sidereal = lstcalc(when.jd, where.longit.value);
+  void changeWhen(final double jdin) {
+    when.setInstant(jdin, where.stdz, where.use_dst, true);
+    sidereal = lstCalc(when.jd, where.longit.value);
     siderealobj.setRA(sidereal);
   }
 
-  void ChangeWhen(final String s, final boolean is_ut) {
-    when.SetInstant(s, where.stdz, where.use_dst, is_ut);
-    sidereal = lstcalc(when.jd, where.longit.value);
+  void changeWhen(final String s, final boolean is_ut) {
+    when.setInstant(s, where.stdz, where.use_dst, is_ut);
+    sidereal = lstCalc(when.jd, where.longit.value);
     siderealobj.setRA(sidereal);
   }
 
-  void SetToNow() {
-    when.SetInstant(where.stdz, where.use_dst);
-    sidereal = lstcalc(when.jd, where.longit.value);
+  void setToNow() {
+    when.setInstant(where.stdz, where.use_dst);
+    sidereal = lstCalc(when.jd, where.longit.value);
     siderealobj.setRA(sidereal);
   }
 
-  void ChangeSite(final HashMap<String, Site> hash, final String s) {
+  void changeSite(final HashMap<String, Site> hash, final String s) {
     // changing site involves synching sidereal and local time
     // so test to see if these are needed.
     final Site ss = hash.get(s);
@@ -92,28 +94,28 @@ public final class WhenWhere implements Cloneable {
       // System.out.printf("Changing site ... .\n");
       where = ss;
       // System.out.printf("Site changed, stdz = %f\n",where.stdz);
-      sidereal = lstcalc(when.jd, where.longit.value);
-      when.SetInstant(when.jd, where.stdz, where.use_dst, true);
+      sidereal = lstCalc(when.jd, where.longit.value);
+      when.setInstant(when.jd, where.stdz, where.use_dst, true);
       siderealobj.setRA(sidereal);
     }
     // otherwise do nothing.
     // else System.out.printf("Not changing site ... \n");
   }
 
-  void AdvanceWhen(final String s) {
-    when.AdvanceTime(s, where.stdz, where.use_dst);
-    sidereal = lstcalc(when.jd, where.longit.value);
+  void advanceWhen(final String s) {
+    when.advanceTime(s, where.stdz, where.use_dst);
+    sidereal = lstCalc(when.jd, where.longit.value);
     siderealobj.setRA(sidereal);
   }
 
-  void AdvanceWhen(final String s, final boolean forward) {
-    when.AdvanceTime(s, where.stdz, where.use_dst, forward);
-    sidereal = lstcalc(when.jd, where.longit.value);
+  void advanceWhen(final String s, final boolean forward) {
+    when.advanceTime(s, where.stdz, where.use_dst, forward);
+    sidereal = lstCalc(when.jd, where.longit.value);
     siderealobj.setRA(sidereal);
   }
 
   Celest zenith2000() {
-    final Celest c = new Celest(sidereal, where.lat.value, when.JulianEpoch());
+    final Celest c = new Celest(sidereal, where.lat.value, when.julianEpoch());
     c.selfprecess(2000d);
     return c;
   }
@@ -135,7 +137,7 @@ public final class WhenWhere implements Cloneable {
     }
   }
 
-  static double lstcalc(final double jdin, final double longitin) {
+  static double lstCalc(final double jdin, final double longitin) {
     final long jdintt = (long) jdin;
     final double jdfrac = jdin - jdintt;
 
@@ -208,60 +210,54 @@ public final class WhenWhere implements Cloneable {
 
   }
 
-  void MakeLocalSun() {
+  void makeLocalSun() {
     //System.out.printf("Making a new sun, jd = %f\n",when.jd);
     sun = new Sun(this);
     //System.out.printf("Made sun, sidereal = %f\n",sidereal);
     hasun = new HA(sidereal - sun.topopos.alpha.value);
-    final double[] altazpar = Observation.altit(sun.topopos.delta.value, hasun.value, where.lat.value);
-    altsun = altazpar[0];
-    azsun = altazpar[1];
+    Observation.altit(sun.topopos.delta.value, hasun.value, where.lat.value, altazparSun);
+    altsun = altazparSun[0];
+    azsun = altazparSun[1];
     twilight = SkyIllum.ztwilight(altsun);
     //System.out.printf("Made a new sun: %s alt %f\n",sun.topopos.checkstring(),altazpar[0]);
   }
 
-  void UpdateLocalSun() {
+  void updateLocalSun() {
     sun.update(when, where, sidereal);
     hasun = new HA(sidereal - sun.topopos.alpha.value);
-    final double[] altazpar = Observation.altit(sun.topopos.delta.value, hasun.value, where.lat.value);
-    altsun = altazpar[0];
-    azsun = altazpar[1];
+    Observation.altit(sun.topopos.delta.value, hasun.value, where.lat.value, altazparSun);
+    altsun = altazparSun[0];
+    azsun = altazparSun[1];
     twilight = SkyIllum.ztwilight(altsun);
 //       System.out.printf("Updated sun: %s %f\n",sun.topopos.checkstring(),altazpar[0]);
   }
 
-  void MakeLocalMoon() {
+  void makeLocalMoon() {
     moon = new Moon(this);
     hamoon = new HA(sidereal - moon.topopos.alpha.value);
-    final double[] altazpar = Observation.altit(moon.topopos.delta.value, hamoon.value, where.lat.value);
-    altmoon = altazpar[0];
-    azmoon = altazpar[1];
-//      sunmoon = Spherical.subtend(sun.topopos,moon.topopos);
-//      moonillum = 0.5 * (1. - Math.cos(sunmoon));
-//      sunmoon *= Const.DEG_IN_RADIAN;
+    Observation.altit(moon.topopos.delta.value, hamoon.value, where.lat.value, altazparMoon);
+    altmoon = altazparMoon[0];
+    azmoon = altazparMoon[1];
+
 //      System.out.printf("Made a new moon: %s HA %s alt %f\n",moon.topopos.checkstring(),
-//          hamoon.RoundedHAString(0,":"),altazpar[0]);
+//          hamoon.roundedHAString(0,":"),altazpar[0]);
   }
 
-  void UpdateLocalMoon() {
+  void updateLocalMoon() {
     moon.update(when, where, sidereal);
     hamoon = new HA(sidereal - moon.topopos.alpha.value);
-    final double[] altazpar = Observation.altit(moon.topopos.delta.value, hamoon.value, where.lat.value);
-    altmoon = altazpar[0];
-    azmoon = altazpar[1];
-    // call this after updating the sun ...
-//      sunmoon = Spherical.subtend(sun.topopos,moon.topopos);
-//      moonillum = 0.5 * (1. - Math.cos(sunmoon));
-//      sunmoon *= Const.DEG_IN_RADIAN;
+    Observation.altit(moon.topopos.delta.value, hamoon.value, where.lat.value, altazparMoon);
+    altmoon = altazparMoon[0];
+    azmoon = altazparMoon[1];
 
 //      System.out.printf("Updated the moon: %s HA %s alt %f\n",moon.topopos.checkstring(),
-//          hamoon.RoundedHAString(0,":"),altazpar[0]);
+//          hamoon.roundedHAString(0,":"),altazpar[0]);
   }
 
-  void ComputeSunMoon() {
-    UpdateLocalSun();
-    UpdateLocalMoon();
-    final double[] retvals = Spherical.CuspPA(sun.topopos, moon.topopos);
+  void computeSunMoon() {
+    updateLocalSun();
+    updateLocalMoon();
+    final double[] retvals = Spherical.cuspPA(sun.topopos, moon.topopos);
     sunmoon = retvals[1];
     moonillum = 0.5d * (1d - Math.cos(sunmoon));
     sunmoon *= Const.DEG_IN_RADIAN;

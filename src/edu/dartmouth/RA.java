@@ -74,7 +74,7 @@ public final class RA implements Cloneable {
     return (value * 15d);
   }
 
-  public String RoundedRAString(final int ndigits, final String divider) {
+  public String roundedRAString(final int ndigits, final String divider) {
 
     /** Returns a rounded Sexagesimal RA, with the cut imposed at 24 h */
     Sexagesimal rounded;

@@ -228,12 +228,12 @@ class JSkyCalcWindow extends JComponent {
     i = new InstantInTime(s.stdz, s.use_dst);
     w = new WhenWhere(i, s);
     o = new Observation(w, w.zenith2000());
-    o.ComputeSky();
-    o.w.MakeLocalSun();
-    o.w.MakeLocalMoon();
-    o.ComputeSunMoon();
+    o.computeSky();
+    o.w.makeLocalSun();
+    o.w.makeLocalMoon();
+    o.computeSunMoon();
     p = new Planets(w);
-    o.computebary(p);
+    o.computeBary(p);
 
     int iy = 0;
 
@@ -435,8 +435,8 @@ class JSkyCalcWindow extends JComponent {
     textpanel.add(equinoxfield, constraints);
 
     // Need to fill in values or synchOutput chokes later ...
-    RAfield.setText(o.c.alpha.RoundedRAString(2, ":"));
-    decfield.setText(o.c.delta.RoundedDecString(1, ":"));
+    RAfield.setText(o.c.alpha.roundedRAString(2, ":"));
+    decfield.setText(o.c.delta.roundedDecString(1, ":"));
     equinoxfield.setText(String.format(Locale.ENGLISH, "%7.2f", o.c.equinox));
 
     iy++;
@@ -1106,9 +1106,9 @@ class JSkyCalcWindow extends JComponent {
         try {
           String sel = objnamefield.getText();
           RAfield.setText(
-                  presenterKey.get(sel).c.alpha.RoundedRAString(3, " "));
+                  presenterKey.get(sel).c.alpha.roundedRAString(3, " "));
           decfield.setText(
-                  presenterKey.get(sel).c.delta.RoundedDecString(2, " "));
+                  presenterKey.get(sel).c.delta.roundedDecString(2, " "));
           equinoxfield.setText(String.format(Locale.ENGLISH, "%7.2f",
                   presenterKey.get(sel).c.equinox));
           synchOutput();
@@ -1259,23 +1259,23 @@ class JSkyCalcWindow extends JComponent {
 
     // special hook for equinox of date ...
     if (o.c.equinox < 0.) {
-      o.c.equinox = o.w.when.JulianEpoch();
+      o.c.equinox = o.w.when.julianEpoch();
     }
 
     // and repeat them back ...
 
-    RAfield.setText(o.c.alpha.RoundedRAString(2, " "));
-    decfield.setText(o.c.delta.RoundedDecString(1, " "));
+    RAfield.setText(o.c.alpha.roundedRAString(2, " "));
+    decfield.setText(o.c.delta.roundedDecString(1, " "));
     equinoxfield.setText(String.format(Locale.ENGLISH, "%7.2f", o.c.equinox));
 
-    o.ComputeSky();
-    o.ComputeSunMoon();
+    o.computeSky();
+    o.computeSunMoon();
 
     p.Update(o.w);
     if (planetframevisible) {
       PlWin.DisplayUpdate();
     }
-    o.computebary(p);
+    o.computeBary(p);
     checkPlanets();
 
 //      if(hourlyframevisible) {   // an expensive operation 
@@ -1293,7 +1293,7 @@ class JSkyCalcWindow extends JComponent {
       SeasonWin.DisplayUpdate();
     }
 
-    HAfield.setText(o.ha.RoundedHAString(0, " "));
+    HAfield.setText(o.ha.roundedHAString(0, " "));
     HAfield.setBackground(HAWarningColor(o.ha.value));
 
     if (o.altitude < 0.) {
@@ -1360,15 +1360,15 @@ class JSkyCalcWindow extends JComponent {
       is_ut = false;      // easy binary choice
     }
     if (is_ut) {
-      datefield.setText(o.w.when.UTDate.RoundedCalString(6, 0));
-      timefield.setText(o.w.when.UTDate.RoundedCalString(11, 1));
+      datefield.setText(o.w.when.UTDate.roundedCalString(6, 0));
+      timefield.setText(o.w.when.UTDate.roundedCalString(11, 1));
     } else {
-      datefield.setText(o.w.when.localDate.RoundedCalString(6, 0));
-      timefield.setText(o.w.when.localDate.RoundedCalString(11, 1));
+      datefield.setText(o.w.when.localDate.roundedCalString(6, 0));
+      timefield.setText(o.w.when.localDate.roundedCalString(11, 1));
     }
     JDfield.setText(String.format(Locale.ENGLISH, "%15.6f", o.w.when.jd));
     // w.siderealobj.setRA(w.sidereal);  // update
-    siderealfield.setText(o.w.siderealobj.RoundedRAString(0, " "));
+    siderealfield.setText(o.w.siderealobj.roundedRAString(0, " "));
     sunradecfield.setText(o.w.sun.topopos.shortstring());
     moonradecfield.setText(o.w.moon.topopos.shortstring());
     sunaltazfield.setText(String.format(Locale.ENGLISH, "%5.1f   az = %6.1f", o.w.altsun, o.w.azsun));
@@ -1423,12 +1423,12 @@ class JSkyCalcWindow extends JComponent {
         o.w.where.elevhoriz = 0.;
       }
     } else {
-      o.w.ChangeSite(siteDict, SiteString);
+      o.w.changeSite(siteDict, SiteString);
     }
     // and spit them all back out ...
     obsnamefield.setText(o.w.where.name);
-    longitudefield.setText(o.w.where.longit.RoundedLongitString(1, " ", false));
-    latitudefield.setText(o.w.where.lat.RoundedDecString(0, " "));
+    longitudefield.setText(o.w.where.longit.roundedLongitString(1, " ", false));
+    latitudefield.setText(o.w.where.lat.roundedDecString(0, " "));
     stdzfield.setText(String.format(Locale.ENGLISH, "%5.2f", o.w.where.stdz));
     use_dstfield.setText(String.format(Locale.ENGLISH, "%d", o.w.where.use_dst));
     zonenamefield.setText(o.w.where.timezone_name);
@@ -1516,8 +1516,8 @@ class JSkyCalcWindow extends JComponent {
     // Get site and UT options
     synchSite();
 
-    o.w.SetToNow();
-    o.w.ComputeSunMoon();
+    o.w.setToNow();
+    o.w.computeSunMoon();
     synchOutput();
   }
 
@@ -1568,7 +1568,7 @@ class JSkyCalcWindow extends JComponent {
 // 
 //      // Get site and UT options
 //      String SiteString = SiteButtons.getSelection().getActionCommand();
-//      w.ChangeSite(SiteString);
+//      w.changeSite(SiteString);
 // 
 //      System.out.printf("swapping ... ");
 //   
@@ -1603,8 +1603,8 @@ class JSkyCalcWindow extends JComponent {
     synchSite();
 
     String advanceString = timestepfield.getText();
-    o.w.AdvanceWhen(advanceString);
-    o.w.ComputeSunMoon();
+    o.w.advanceWhen(advanceString);
+    o.w.computeSunMoon();
 
     synchOutput();
 
@@ -1615,8 +1615,8 @@ class JSkyCalcWindow extends JComponent {
     synchSite();
 
     String advanceString = timestepfield.getText();
-    o.w.AdvanceWhen(advanceString, forward);
-    o.w.ComputeSunMoon();
+    o.w.advanceWhen(advanceString, forward);
+    o.w.computeSunMoon();
 
     synchOutput();
   }
@@ -1628,7 +1628,7 @@ class JSkyCalcWindow extends JComponent {
 
     // Get site and UT options
     //String SiteString = SiteButtons.getSelection().getActionCommand();
-    //o.w.ChangeSite(SiteString);
+    //o.w.changeSite(SiteString);
     synchSite();
 
     String UTstring = UTbuttons.getSelection().getActionCommand();
@@ -1646,9 +1646,9 @@ class JSkyCalcWindow extends JComponent {
 
     // System.out.printf("%s %s %s\n",dateTimeString,UTstring,is_ut);
     // set the actual time ...
-    o.w.ChangeWhen(dateTimeString, is_ut);
+    o.w.changeWhen(dateTimeString, is_ut);
     // and update the display with the new values.
-    o.w.ComputeSunMoon();
+    o.w.computeSunMoon();
     synchOutput();
   }
 
@@ -1659,7 +1659,7 @@ class JSkyCalcWindow extends JComponent {
 
     // Get site and UT options, and set them ...
     //String SiteString = SiteButtons.getSelection().getActionCommand();
-    //o.w.ChangeSite(SiteString);
+    //o.w.changeSite(SiteString);
     synchSite();
 
     String UTstring = UTbuttons.getSelection().getActionCommand();
@@ -1673,8 +1673,8 @@ class JSkyCalcWindow extends JComponent {
 
     // System.out.printf("jd = %f\n",jd);
     // change the time using current options
-    o.w.ChangeWhen(jd);
-    o.w.ComputeSunMoon();
+    o.w.changeWhen(jd);
+    o.w.computeSunMoon();
     synchOutput();
   }
 
@@ -1699,9 +1699,9 @@ class JSkyCalcWindow extends JComponent {
       for (i = 0; i < 9; i++) {
         if (i != 2) {  // skip earth
           PlanetDispData[j][0] = p.names[i];
-          PlanetDispData[j][1] = p.PlanetObs[i].c.alpha.RoundedRAString(-1, ":");
-          PlanetDispData[j][2] = p.PlanetObs[i].c.delta.RoundedDecString(-2, ":");
-          PlanetDispData[j][3] = p.PlanetObs[i].ha.RoundedHAString(-2, ":");
+          PlanetDispData[j][1] = p.PlanetObs[i].c.alpha.roundedRAString(-1, ":");
+          PlanetDispData[j][2] = p.PlanetObs[i].c.delta.roundedDecString(-2, ":");
+          PlanetDispData[j][3] = p.PlanetObs[i].ha.roundedHAString(-2, ":");
           if (p.PlanetObs[i].altitude < 0.) {
             PlanetDispData[j][4] = "(Down.)";
           } else if (p.PlanetObs[i].airmass > 10.) {
@@ -1754,9 +1754,9 @@ class JSkyCalcWindow extends JComponent {
       for (i = 0; i < 9; i++) {
         if (i != 2) {  // skip earth
           ptable.setValueAt(p.names[i], j, 0);
-          ptable.setValueAt(p.PlanetObs[i].c.alpha.RoundedRAString(-1, ":"), j, 1);
-          ptable.setValueAt(p.PlanetObs[i].c.delta.RoundedDecString(-2, ":"), j, 2);
-          ptable.setValueAt(p.PlanetObs[i].ha.RoundedHAString(-2, ":"), j, 3);
+          ptable.setValueAt(p.PlanetObs[i].c.alpha.roundedRAString(-1, ":"), j, 1);
+          ptable.setValueAt(p.PlanetObs[i].c.delta.roundedDecString(-2, ":"), j, 2);
+          ptable.setValueAt(p.PlanetObs[i].ha.roundedHAString(-2, ":"), j, 3);
           if (p.PlanetObs[i].altitude < 0.) {
             ptable.setValueAt("(Down.)", j, 4);
           } else if (p.PlanetObs[i].airmass > 10.) {
@@ -1801,9 +1801,9 @@ class JSkyCalcWindow extends JComponent {
 //          for(i = 0; i < 9; i++) {
 //            if(i != 2) {  // skip earth
 //                PlanetDispData[j][0] = p.names[i];
-//                PlanetDispData[j][1] = p.PlanetObs[i].c.alpha.RoundedRAString(-1,":");
-//                PlanetDispData[j][2] = p.PlanetObs[i].c.delta.RoundedDecString(-2,":");
-//                PlanetDispData[j][3] = p.PlanetObs[i].ha.RoundedHAString(-2,":");
+//                PlanetDispData[j][1] = p.PlanetObs[i].c.alpha.roundedRAString(-1,":");
+//                PlanetDispData[j][2] = p.PlanetObs[i].c.delta.roundedDecString(-2,":");
+//                PlanetDispData[j][3] = p.PlanetObs[i].ha.roundedHAString(-2,":");
 //                if(p.PlanetObs[i].altitude < 0.) PlanetDispData[j][4] = "(Down.)";
 //                else if(p.PlanetObs[i].airmass > 10.) PlanetDispData[j][4] = "> 10.";
 //                else PlanetDispData[j][4] = String.format(Locale.ENGLISH, "%5.2f",
@@ -1983,29 +1983,29 @@ class JSkyCalcWindow extends JComponent {
       endhr = (int) (24. * (jdtemp - jdint));
 
       /*        System.out.printf("\nTabulation start and end:");
-      otmp.w.ChangeWhen((double) jdint + (double) starthr / 24.);
+      otmp.w.changeWhen((double) jdint + (double) starthr / 24.);
       otmp.w.when.localDate.quickprint();
       System.out.printf("\n end:");
-      otmp.w.ChangeWhen((double) jdint + (double) endhr / 24.);
+      otmp.w.changeWhen((double) jdint + (double) endhr / 24.);
       otmp.w.when.localDate.quickprint();
       System.out.printf("\n"); */
 
       i = starthr;
       j = 0;   // start with first row of table
       while (i <= endhr) {
-        otmp.w.ChangeWhen((double) jdint + (double) i / 24.);
-        otmp.ComputeSky();
-        otmp.ComputeSunMoon();
-        hrfield[j][0].setText(otmp.w.when.localDate.RoundedCalString(2, 0));
+        otmp.w.changeWhen((double) jdint + (double) i / 24.);
+        otmp.computeSky();
+        otmp.computeSunMoon();
+        hrfield[j][0].setText(otmp.w.when.localDate.roundedCalString(2, 0));
         hrfield[j][0].setBackground(outputcolor);
-        hrfield[j][1].setText(otmp.w.when.UTDate.RoundedCalString(12, 0));
+        hrfield[j][1].setText(otmp.w.when.UTDate.roundedCalString(12, 0));
         hrfield[j][1].setBackground(outputcolor);
         RA tempsid = new RA(otmp.w.sidereal);
-        hrfield[j][2].setText(tempsid.RoundedRAString(-2, ":"));
+        hrfield[j][2].setText(tempsid.roundedRAString(-2, ":"));
         hrfield[j][2].setBackground(outputcolor);
-        hrfield[j][3].setText(otmp.ha.RoundedHAString(-2, ":"));
+        hrfield[j][3].setText(otmp.ha.roundedHAString(-2, ":"));
         hrfield[j][3].setBackground(HAWarningColor(otmp.ha.value));
-        // System.out.printf("HAstr %s\n",otmp.ha.RoundedHAString(-2,":"));
+        // System.out.printf("HAstr %s\n",otmp.ha.roundedHAString(-2,":"));
         if (otmp.altitude < 0.) {
           hrfield[j][4].setText("(Down.)");
         } else if (otmp.airmass >= 10.) {
@@ -2112,23 +2112,23 @@ class JSkyCalcWindow extends JComponent {
 
     void UpdateDisplay() {  // assumes Nightly has been updated separately.
 
-      phenfield[0].setText(Nightly.sunset.when.localDate.RoundedCalString(2, 0));
-      phenfield[1].setText(Nightly.eveningTwilight18.when.localDate.RoundedCalString(2, 0));
-      phenfield[2].setText(Nightly.eveningTwilight18.siderealobj.RoundedRAString(-2, " "));
-      phenfield[3].setText(Nightly.nightcenter.when.localDate.RoundedCalString(2, 0));
-      phenfield[4].setText(Nightly.morningTwilight18.when.localDate.RoundedCalString(2, 0));
-      phenfield[5].setText(Nightly.morningTwilight18.siderealobj.RoundedRAString(-2, " "));
-      phenfield[6].setText(Nightly.sunrise.when.localDate.RoundedCalString(2, 0));
+      phenfield[0].setText(Nightly.sunset.when.localDate.roundedCalString(2, 0));
+      phenfield[1].setText(Nightly.eveningTwilight18.when.localDate.roundedCalString(2, 0));
+      phenfield[2].setText(Nightly.eveningTwilight18.siderealobj.roundedRAString(-2, " "));
+      phenfield[3].setText(Nightly.nightcenter.when.localDate.roundedCalString(2, 0));
+      phenfield[4].setText(Nightly.morningTwilight18.when.localDate.roundedCalString(2, 0));
+      phenfield[5].setText(Nightly.morningTwilight18.siderealobj.roundedRAString(-2, " "));
+      phenfield[6].setText(Nightly.sunrise.when.localDate.roundedCalString(2, 0));
 
       if (Nightly.moonrise.when.jd < Nightly.moonset.when.jd) {
-        phenfield[7].setText(Nightly.moonrise.when.localDate.RoundedCalString(2, 0));
+        phenfield[7].setText(Nightly.moonrise.when.localDate.roundedCalString(2, 0));
         phenlabel[7].setText("Moonrise");
-        phenfield[8].setText(Nightly.moonset.when.localDate.RoundedCalString(2, 0));
+        phenfield[8].setText(Nightly.moonset.when.localDate.roundedCalString(2, 0));
         phenlabel[8].setText("Moonset");
       } else {
-        phenfield[7].setText(Nightly.moonset.when.localDate.RoundedCalString(2, 0));
+        phenfield[7].setText(Nightly.moonset.when.localDate.roundedCalString(2, 0));
         phenlabel[7].setText("Moonset");
-        phenfield[8].setText(Nightly.moonrise.when.localDate.RoundedCalString(2, 0));
+        phenfield[8].setText(Nightly.moonrise.when.localDate.roundedCalString(2, 0));
         phenlabel[8].setText("Moonrise");
       }
     }
@@ -2257,9 +2257,9 @@ class JSkyCalcWindow extends JComponent {
               presenterKey.get(Selectors[i]).c.checkstring()
               ); */
               RAfield.setText(
-                      presenterKey.get(sel).c.alpha.RoundedRAString(3, " "));
+                      presenterKey.get(sel).c.alpha.roundedRAString(3, " "));
               decfield.setText(
-                      presenterKey.get(sel).c.delta.RoundedDecString(2, " "));
+                      presenterKey.get(sel).c.delta.roundedDecString(2, " "));
               equinoxfield.setText(String.format(Locale.ENGLISH, "%7.2f",
                       presenterKey.get(sel).c.equinox));
               synchOutput();
@@ -2399,8 +2399,8 @@ class JSkyCalcWindow extends JComponent {
       if (minsep < tolerance) {
         objcel = presenterKey.get(RASelectors[minindex]).c;
         objnamefield.setText(RASelectors[minindex]);
-        RAfield.setText(objcel.alpha.RoundedRAString(2, " "));
-        decfield.setText(objcel.delta.RoundedDecString(1, " "));
+        RAfield.setText(objcel.alpha.roundedRAString(2, " "));
+        decfield.setText(objcel.delta.roundedDecString(1, " "));
         equinoxfield.setText(String.format(Locale.ENGLISH, "%7.2f", objcel.equinox));
       }
     }
@@ -2683,12 +2683,12 @@ class JSkyCalcWindow extends JComponent {
         public void actionPerformed(ActionEvent e) {
           double galactlongit = Double.parseDouble(galactlongitfield.getText());
           double galactlatit = Double.parseDouble(galactlatitfield.getText());
-          Celest ctmp = Spherical.Gal2Cel(galactlongit, galactlatit);
+          Celest ctmp = Spherical.gal2Cel(galactlongit, galactlatit);
           // get equinox from main window
           double eq = Double.parseDouble(equinoxfield.getText());
           ctmp.selfprecess(eq);
-          RAfield.setText(ctmp.alpha.RoundedRAString(2, " "));
-          decfield.setText(ctmp.delta.RoundedDecString(1, " "));
+          RAfield.setText(ctmp.alpha.roundedRAString(2, " "));
+          decfield.setText(ctmp.delta.roundedDecString(1, " "));
           setToDate();
         }
       });
@@ -2699,12 +2699,12 @@ class JSkyCalcWindow extends JComponent {
           double galactlongit = Double.parseDouble(galactlongitfield.getText());
           double galactlatit = Double.parseDouble(galactlatitfield.getText());
           // System.out.printf("read %f %f from long/lat fields\n",galactlongit,galactlatit);
-          Celest ctmp = Spherical.Gal2Cel(galactlongit, galactlatit);
+          Celest ctmp = Spherical.gal2Cel(galactlongit, galactlatit);
           // get equinox from main window
           double eq = Double.parseDouble(equinoxfield.getText());
           ctmp.selfprecess(eq);
-          RAfield.setText(ctmp.alpha.RoundedRAString(2, " "));
-          decfield.setText(ctmp.delta.RoundedDecString(1, " "));
+          RAfield.setText(ctmp.alpha.roundedRAString(2, " "));
+          decfield.setText(ctmp.delta.roundedDecString(1, " "));
           setToDate();
         }
       });
@@ -2742,8 +2742,8 @@ class JSkyCalcWindow extends JComponent {
     void Refresh() {
       // to be called at the end of a synchOutput so site etc are all done.
 
-      currentrafield.setText(o.current.alpha.RoundedRAString(2, " "));
-      currentdecfield.setText(o.current.delta.RoundedDecString(1, " "));
+      currentrafield.setText(o.current.alpha.roundedRAString(2, " "));
+      currentdecfield.setText(o.current.delta.roundedDecString(1, " "));
       currenteqfield.setText(String.format(Locale.ENGLISH, "%7.2f", o.current.equinox));
       o.c.galactic();
       galactlongitfield.setText(String.format(Locale.ENGLISH, "%6.2f", o.c.galong));
@@ -2940,8 +2940,8 @@ class JSkyCalcWindow extends JComponent {
       } else if (mousevent.getButton() == MouseEvent.BUTTON2) {  // middle sets to coords
 //               System.out.printf("%d %d\n",mousevent.getX(),mousevent.getY());
         Celest markedC = pixtocelest(mousevent.getX(), mousevent.getY());
-        RAfield.setText(markedC.alpha.RoundedRAString(0, " "));
-        decfield.setText(markedC.delta.RoundedDecString(0, " "));
+        RAfield.setText(markedC.alpha.roundedRAString(0, " "));
+        decfield.setText(markedC.delta.roundedDecString(0, " "));
         synchOutput();
       }
     }
@@ -2985,8 +2985,8 @@ class JSkyCalcWindow extends JComponent {
       } else if (k.getKeyChar() == 'c') {
         //   System.out.printf("%d %d\n",mousevent.getX(),mousevent.getY());
         Celest markedC = pixtocelest(mousevent.getX(), mousevent.getY());
-        RAfield.setText(markedC.alpha.RoundedRAString(0, " "));
-        decfield.setText(markedC.delta.RoundedDecString(0, " "));
+        RAfield.setText(markedC.alpha.roundedRAString(0, " "));
+        decfield.setText(markedC.delta.roundedDecString(0, " "));
         synchOutput();
       } else if (k.getKeyChar() == 's') {
         //   System.out.printf("%d %d\n",mousevent.getX(),mousevent.getY());
@@ -3034,8 +3034,8 @@ class JSkyCalcWindow extends JComponent {
 
       if (minsep < tolerance) {
         objnamefield.setText(bs[minindex].name);
-        RAfield.setText(bs[minindex].c.alpha.RoundedRAString(2, " "));
-        decfield.setText(bs[minindex].c.delta.RoundedDecString(1, " "));
+        RAfield.setText(bs[minindex].c.alpha.roundedRAString(2, " "));
+        decfield.setText(bs[minindex].c.delta.roundedDecString(1, " "));
         equinoxfield.setText(String.format(Locale.ENGLISH, "%7.2f", bs[minindex].c.equinox));
       }
     }
@@ -3148,7 +3148,7 @@ class JSkyCalcWindow extends JComponent {
       puttext(xmid + 0.7 * halfwidthx, ymid - 0.90 * halfwidthy, o.w.where.name,
               mediumfont, mediumfontmetrics);
       puttext(xmid + 0.7 * halfwidthx, ymid - 0.95 * halfwidthy,
-              o.w.when.UTDate.RoundedCalString(7, 0) + " UT", mediumfont,
+              o.w.when.UTDate.roundedCalString(7, 0) + " UT", mediumfont,
               mediumfontmetrics);
 
       plotobjects();
@@ -3309,13 +3309,13 @@ class JSkyCalcWindow extends JComponent {
       double sinlat = Math.sin(o.w.where.lat.radians());
       double yc = yt * sinlat + zt * coslat;
       double zc = -1. * yt * coslat + zt * sinlat;
-      double[] hadecdist = Celest.XYZcel(xt, yc, zc);  // x remains the same
+      double[] hadecdist = Celest.xyzCel(xt, yc, zc);  // x remains the same
       // hadecdist[0] is the hour angle ...
       RA Alph = new RA(hadecdist[0] - 6. + o.w.sidereal);
       DEC Delt = new DEC(hadecdist[1]);
       Celest cel = new Celest(Alph, Delt, 2000d); // coord eq is sloppy ...
-//           System.out.printf("%s %s\n",cel.alpha.RoundedRAString(0,":"),
-      //                 cel.delta.RoundedDecString(-1,":"));
+//           System.out.printf("%s %s\n",cel.alpha.roundedRAString(0,":"),
+      //                 cel.delta.roundedDecString(-1,":"));
       return (cel);
     }
 
@@ -3522,7 +3522,7 @@ class JSkyCalcWindow extends JComponent {
           }
           //System.out.printf("\nfin[%d] = %f\n\n",i,fin[i]);
         }
-        radecdist = Celest.XYZcel(fin[0], fin[1], fin[2]);
+        radecdist = Celest.xyzCel(fin[0], fin[1], fin[2]);
         bs[ist].c.alpha.setRA(radecdist[0]);
         bs[ist].c.delta.setDec(radecdist[1]);
         bs[ist].c.equinox = equinox;
@@ -3574,7 +3574,7 @@ class JSkyCalcWindow extends JComponent {
       lst = o.w.sidereal;
 
       // precess the list if the epoch mismatch is > 1 yr
-      equinoxnow = o.w.when.JulianEpoch();
+      equinoxnow = o.w.when.julianEpoch();
       if (Math.abs(equinoxnow - bs[0].c.equinox) > 1.) {
         // System.out.printf("%s -> ",bs[0].c.checkstring());
         PrecessBrightStars(equinoxnow);
@@ -3721,7 +3721,7 @@ class JSkyCalcWindow extends JComponent {
       double ha, dec, lst;
       double magconst1 = 0.003, magslope = 0.002;  //
 
-      p.computemags();
+      p.computeMags();
 
       lst = o.w.sidereal;
       double coslat = Math.cos(o.w.where.lat.radians());
@@ -3749,7 +3749,7 @@ class JSkyCalcWindow extends JComponent {
       double magconst1 = 0.003, magslope = 0.002;  //
       AstrObj obj;
       Celest cel;
-      double currenteq = o.w.when.JulianEpoch();
+      double currenteq = o.w.when.julianEpoch();
 
       double coslat = Math.cos(o.w.where.lat.radians());
       double sinlat = Math.sin(o.w.where.lat.radians());
@@ -4037,10 +4037,10 @@ class JSkyCalcWindow extends JComponent {
       puttext(xlo - span * 0.04, ytoplabel, "UT:", mediumfont, mediumfontmetrics);
       puttext(xlo - span * 0.05, ybottomlabel, "Local:", mediumfont, mediumfontmetrics);
 
-      w.ChangeWhen(jdstart);
+      w.changeWhen(jdstart);
 
       String banner = String.format("%s - Evening date %s",
-              w.where.name, w.when.localDate.RoundedCalString(6, 0));
+              w.where.name, w.when.localDate.roundedCalString(6, 0));
       puttext((xlo + xhi) / 2., ybanner, banner, mediumfont, mediumfontmetrics);
 
 
@@ -4056,7 +4056,7 @@ class JSkyCalcWindow extends JComponent {
       }
 
       while (xtick < xhi) {
-        w.ChangeWhen(jdstart + (xtick - xlo) / 24.);
+        w.changeWhen(jdstart + (xtick - xlo) / 24.);
         ut = w.when.UTDate.timeofday.value;
         local = w.when.localDate.timeofday.value;
         puttext(xtick, ytoplabel, String.format("%02.0f", ut),
@@ -4079,9 +4079,9 @@ class JSkyCalcWindow extends JComponent {
           }
         }
 
-        omoon.w.ChangeWhen(jdstart + (xtick - xlo) / 24.);
-        omoon.ComputeSky();
-        omoon.ComputeSunMoon();
+        omoon.w.changeWhen(jdstart + (xtick - xlo) / 24.);
+        omoon.computeSky();
+        omoon.computeSunMoon();
         if (omoon.w.altmoon > 0.) {
           plotmoon();
         }
@@ -4211,7 +4211,7 @@ class JSkyCalcWindow extends JComponent {
 
       Observation oairm = new Observation((WhenWhere) wIn.clone(),
               (Celest) cIn.clone());
-      // System.out.printf("%s\n",oairm.c.alpha.RoundedRAString(2,":"));
+      // System.out.printf("%s\n",oairm.c.alpha.roundedRAString(2,":"));
       double jd = jdstart;
       double dt = 0.005;
       double[] xy1 = {0., 0.};
@@ -4232,9 +4232,9 @@ class JSkyCalcWindow extends JComponent {
       double xpl = 0.;
 
       while (!firstptfound && jd < jdend) {
-        oairm.w.ChangeWhen(jd);
-        oairm.ComputeSky();
-        // System.out.printf("%s %f\n",oairm.w.when.UTDate.RoundedCalString(0,0),oairm.airmass);
+        oairm.w.changeWhen(jd);
+        oairm.computeSky();
+        // System.out.printf("%s %f\n",oairm.w.when.UTDate.roundedCalString(0,0),oairm.airmass);
         if (oairm.airmass < ylo && oairm.airmass > 0.99 && Math.abs(oairm.ha.value) < 6.) {
           // System.out.printf("firstptfound, airmass %f\n",oairm.airmass);
           firstptfound = true;
@@ -4246,9 +4246,9 @@ class JSkyCalcWindow extends JComponent {
       }
       // System.out.printf("Out, airmass %f, jd %f\n",oairm.airmass,jd);
       while (oairm.airmass < ylo && oairm.airmass > 0.99 && jd < jdend && Math.abs(oairm.ha.value) < 6.) {
-        // System.out.printf("plt - %s %f\n",oairm.w.when.UTDate.RoundedCalString(0,0),oairm.airmass);
-        oairm.w.ChangeWhen(jd);
-        oairm.ComputeSky();
+        // System.out.printf("plt - %s %f\n",oairm.w.when.UTDate.roundedCalString(0,0),oairm.airmass);
+        oairm.w.changeWhen(jd);
+        oairm.computeSky();
         xpl = xlo + (jd - jdstart) * 24.;
         xy1 = xytopix(xpl, oairm.airmass);
         if (oairm.airmass > 0.99 && oairm.airmass < ylo && Math.abs(oairm.ha.value) < 6.) {   // don't follow it past max airm
@@ -4277,8 +4277,8 @@ class JSkyCalcWindow extends JComponent {
 
       firstptfound = false;
       while (!firstptfound && jd < jdend) {
-        oairm.w.ChangeWhen(jd);
-        oairm.ComputeSky();
+        oairm.w.changeWhen(jd);
+        oairm.computeSky();
         if (oairm.airmass < ylo && oairm.airmass > 0.99 && Math.abs(oairm.ha.value) < 6.) {
           firstptfound = true;
           uptwice = true;
@@ -4289,8 +4289,8 @@ class JSkyCalcWindow extends JComponent {
         jd += dt;
       }
       while (oairm.airmass < ylo && oairm.airmass > 0.99 && jd < jdend && Math.abs(oairm.ha.value) < 6.) {
-        oairm.w.ChangeWhen(jd);
-        oairm.ComputeSky();
+        oairm.w.changeWhen(jd);
+        oairm.computeSky();
         xpl = xlo + (jd - jdstart) * 24.;
         xy1 = xytopix(xpl, oairm.airmass);
         if (oairm.airmass > 0.99 && oairm.airmass < ylo) {   // don't follow it past 3.5
@@ -4311,8 +4311,8 @@ class JSkyCalcWindow extends JComponent {
     void plotmoon() {
 
       Observation omoon = new Observation(w, w.moon.topopos);
-      omoon.ComputeSky();
-      omoon.ComputeSunMoon();
+      omoon.computeSky();
+      omoon.computeSunMoon();
 
       int nseg = 21;
 

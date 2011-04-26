@@ -12,6 +12,7 @@ public final class Observation implements Cloneable {
   Celest c;
   Celest current;
   HA ha;
+  final double[] altazpar = new double[3];
   double altitude, azimuth, parallactic;
   double airmass;
   double barytcor, baryvcor;   // time and velocity corrections to barycenter
@@ -26,19 +27,32 @@ public final class Observation implements Cloneable {
     w = wIn.clone();
     c = celIn.clone();
     ha = new HA(0d);
-    ComputeSky();
+    computeSky();
   }
 
-  void ComputeSky() {   // bare-bones updater
+  void computeSky() {   // bare-bones updater
+    computeSky(true);
+  }
+
+  /**
+   * LAURENT : custom computeSky to avoid computing true_airmass and precess target at every calls (same night)
+   * @param doOptionalComputation true indicates to perform target precession and compute true_airmass
+   */
+  void computeSky(final boolean doOptionalComputation) {   // bare-bones updater
     // assumes WhenWhere w has been updated.
-    current = c.precessed(w.when.JulianEpoch());
+    if (doOptionalComputation) {
+      current = c.precessed(w.when.julianEpoch());
+    }
     ha.setHA(w.sidereal - current.alpha.value);
-    final double[] altazpar = altit(current.delta.value, ha.value, w.where.lat.value);
+    altit(current.delta.value, ha.value, w.where.lat.value, altazpar);
     altitude = altazpar[0];
     azimuth = altazpar[1];
     parallactic = altazpar[2];
-// LAURENT : disable airmass computation
-//    airmass = Spherical.true_airmass(altitude);
+
+    // LAURENT : disable airmass computation
+    if (doOptionalComputation) {
+      airmass = Spherical.true_airmass(altitude);
+    }
   }
 
   // Split off the sun, moon, barycenter etc. to save time -- they're
@@ -57,21 +71,20 @@ public final class Observation implements Cloneable {
     }
   }
 
-  void ComputeSunMoon() {
-    current = c.precessed(w.when.JulianEpoch());
-    //System.out.printf("ComputeSunMoon %s (%f)\n",
+  void computeSunMoon() {
+    current = c.precessed(w.when.julianEpoch());
+    //System.out.printf("computeSunMoon %s (%f)\n",
     //       current.alpha.RoundedRAString(2," "),current.equinox);
-    w.ComputeSunMoon();   // the non-object related parts are all done here
+    w.computeSunMoon();   // the non-object related parts are all done here
 
     sunobj = Const.DEG_IN_RADIAN * Spherical.subtend(w.sun.topopos, current);
     moonobj = Const.DEG_IN_RADIAN * Spherical.subtend(w.moon.topopos, current);
 
-    moonlight = SkyIllum.lunskybright(w.sunmoon, moonobj, 0.172d, w.altmoon,
-            altitude, w.moon.topopos.distance);
+    moonlight = SkyIllum.lunskybright(w.sunmoon, moonobj, 0.172d, w.altmoon, altitude, w.moon.topopos.distance);
   }
 
   /** returns altitiude (degr), azimuth (degrees), parallactic angle (degr) */
-  static double[] altit(final double decIn, final double hrangleIn, final double latIn) {
+  static void altit(final double decIn, final double hrangleIn, final double latIn, final double[] retval) {
     final double dec = decIn / Const.DEG_IN_RADIAN;
     final double hrangle = hrangleIn / Const.HRS_IN_RADIAN;
     final double lat = latIn / Const.DEG_IN_RADIAN;
@@ -115,19 +128,13 @@ public final class Observation implements Cloneable {
       az -= 360d;
     }
 
-    return new double[]{x, az, parang};
+    // set results:
+    retval[0] = x;
+    retval[1] = az;
+    retval[2] = parang;
   }
-//
-//   void computesun() {
-//      sun = new Sun(w);
-//   }
-//
-//   void computemoon() {
-//      moon = new Moon(w);
-//   }
-//
 
-  void computebary(final Planets p) {
+  void computeBary(final Planets p) {
     w.baryxyzvel(p, w.sun);  /* find the position and velocity of the
     observing site wrt the solar system barycent */
     double[] unitvec = current.cel_unitXYZ();

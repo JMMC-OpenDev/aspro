@@ -1,11 +1,15 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: AstroSkyCalc.java,v 1.27 2011-04-22 15:37:33 bourgesl Exp $"
+ * "@(#) $Id: AstroSkyCalc.java,v 1.28 2011-04-26 13:00:43 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.27  2011/04/22 15:37:33  bourgesl
+ * find midnight and proper night following given date
+ * use almanac once and translates moon / sun times
+ *
  * Revision 1.26  2010/10/01 15:25:56  bourgesl
  * fixed bug in findLst0 [Requires 'lower' < 'upper'] :
  * precision is better (<1ms) and LST must be < 1s
@@ -124,8 +128,8 @@ public final class AstroSkyCalc {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("Site dump : " + this.site.name
               + "\ntz offset : " + this.site.stdz
-              + "\nlongitude : " + this.site.longit.RoundedLongitString(1, ":", true)
-              + "\nlatitude  : " + this.site.lat.RoundedDecString(0, ":"));
+              + "\nlongitude : " + this.site.longit.roundedLongitString(1, ":", true)
+              + "\nlatitude  : " + this.site.lat.roundedDecString(0, ":"));
     }
   }
 
@@ -265,7 +269,7 @@ public final class AstroSkyCalc {
       }
 
       // adjust jd :
-      ww.ChangeWhen(ww.when.jd + sign * error / 24d);
+      ww.changeWhen(ww.when.jd + sign * error / 24d);
 
 //      dumpWhen(ww, "When");
     }
@@ -377,7 +381,7 @@ public final class AstroSkyCalc {
               + " " + t.UTDate.timeofday.hour
               + ":" + t.UTDate.timeofday.minute
               + ":" + t.UTDate.timeofday.second
-              + "\nlst : " + ww.siderealobj.RoundedRAString(3, ":"));
+              + "\nlst : " + ww.siderealobj.roundedRAString(3, ":"));
     }
   }
 
@@ -562,7 +566,7 @@ public final class AstroSkyCalc {
    */
   private double moonIllum(final double jd) {
     final WhenWhere wwMoon = new WhenWhere(jd, this.site);
-    wwMoon.ComputeSunMoon();
+    wwMoon.computeSunMoon();
 
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("moon zenith = " + toDateLST(jd));
@@ -598,7 +602,7 @@ public final class AstroSkyCalc {
       sunTime = sorted.get(i);
 
 //      if (logger.isLoggable(Level.FINE)) {
-//        dumpWhen(new WhenWhere(st.getJd(), this.site), st.getType().name());
+//        dumpWhen(new WhenWhere(sunTime.getJd(), this.site, false), sunTime.getType().name());
 //      }
 
       if (sunTime.getJd() >= jd0) {
@@ -624,9 +628,9 @@ public final class AstroSkyCalc {
     for (int i = i0; i <= i1; i++) {
       sunTime = sorted.get(i);
 
-      if (logger.isLoggable(Level.FINEST)) {
-        AstroSkyCalc.dumpWhen(new WhenWhere(sunTime.getJd(), this.site), sunTime.getType().name());
-      }
+//      if (logger.isLoggable(Level.FINEST)) {
+//        AstroSkyCalc.dumpWhen(new WhenWhere(sunTime.getJd(), this.site, false), sunTime.getType().name());
+//      }
 
       result.add(sunTime);
     }
@@ -640,7 +644,7 @@ public final class AstroSkyCalc {
    * @param almanac almanac instance set to store the AstroAlmanacTime objects
    */
   private void addAlmanacTimes(final double jd, final AstroAlmanac almanac) {
-    final WhenWhere ww = new WhenWhere(jd, this.site);
+    final WhenWhere ww = new WhenWhere(jd, this.site, false);
 
     final NightlyAlmanac na = new NightlyAlmanac(ww);
 

@@ -102,32 +102,32 @@ public final class Celest implements Cloneable {
   }
 
   String checkstring() {
-    String outstr = alpha.RoundedRAString(2, ":") + "  ";
-    outstr += delta.RoundedDecString(1, ":") + "  ";
+    String outstr = alpha.roundedRAString(2, ":") + "  ";
+    outstr += delta.roundedDecString(1, ":") + "  ";
     outstr += String.format(Locale.ENGLISH, "%6.1f", equinox);
     return outstr;
   }
 
   String shortstring() {
-    String outstr = alpha.RoundedRAString(1, ":") + "  ";
-    outstr += delta.RoundedDecString(0, ":") + "  ";
+    String outstr = alpha.roundedRAString(1, ":") + "  ";
+    outstr += delta.roundedDecString(0, ":") + "  ";
     //outstr = outstr + String.format(Locale.ENGLISH, "%6.1f",equinox);
     return outstr;
   }
 
   /** Given x, y, and z, returns {ra, DEC, distance}.  */
-  static double[] XYZcel(double x, double y, double z) {
+  static double[] xyzCel(double x, double y, double z) {
     final double mod = Math.sqrt(x * x + y * y + z * z);
     if (mod > 0d) {
       x /= mod;
       y /= mod;
       z /= mod;
     } else {
-//      System.out.println("Zero modulus in XYZcel.");
+//      System.out.println("Zero modulus in xyzCel.");
       return new double[]{0d, 0d, 0d};
     }
 
-    // System.out.printf("XYZcel: %f %f %f ->\n",x,y,z);
+    // System.out.printf("xyzCel: %f %f %f ->\n",x,y,z);
     double raout, decout;
 
     final double xy = Math.sqrt(x * x + y * y);
@@ -204,16 +204,16 @@ public final class Celest implements Cloneable {
 
     final double[] fin = new double[3];
 
-    for (int i = 0; i < 3; i++) {  // matrix multiplication
+    for (int i = 0, j = 0; i < 3; i++) {  // matrix multiplication
       fin[i] = 0d;
       //System.out.printf("orig[%d] = %f\n",i,orig[i]);
-      for (int j = 0; j < 3; j++) {
+      for (j = 0; j < 3; j++) {
         //System.out.printf("%d%d: %f  ",i,j,p[i][j]);
         fin[i] += p[i][j] * orig[j];
       }
       //System.out.printf("\nfin[%d] = %f\n\n",i,fin[i]);
     }
-    return XYZcel(fin[0], fin[1], fin[2]);
+    return xyzCel(fin[0], fin[1], fin[2]);
   }
 
   public void selfprecess(double newEquinox) {
@@ -256,7 +256,7 @@ public final class Celest implements Cloneable {
     xyzgal[0] = xyz[0] * p11 + xyz[1] * p12 + xyz[2] * p13;
     xyzgal[1] = xyz[0] * p21 + xyz[1] * p22 + xyz[2] * p23;
     xyzgal[2] = xyz[0] * p31 + xyz[1] * p32 + xyz[2] * p33;
-    temp = XYZcel(xyzgal[0], xyzgal[1], xyzgal[2]);
+    temp = xyzCel(xyzgal[0], xyzgal[1], xyzgal[2]);
     galong = temp[0] * 15d;
     while (galong < 0d) {
       galong += 360d;

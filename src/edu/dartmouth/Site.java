@@ -86,8 +86,8 @@ public final class Site implements Cloneable {
 
   void dumpsite() {  // for diagnostics
     System.out.printf("%s\n", name);
-    System.out.printf("longitude %s\n", longit.RoundedLongitString(1, ":", true));
-    System.out.printf("latitude  %s\n", lat.RoundedDecString(0, ":"));
+    System.out.printf("longitude %s\n", longit.roundedLongitString(1, ":", true));
+    System.out.printf("latitude  %s\n", lat.roundedDecString(0, ":"));
     System.out.printf("Zone offset from UT %6.3f hours\n", stdz);
   }
 

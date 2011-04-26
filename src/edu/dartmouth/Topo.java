@@ -64,6 +64,6 @@ public final class Topo {
 
     return new Celest(Math.atan2(y, x) * Const.HRS_IN_RADIAN,
             Math.asin(z) * Const.DEG_IN_RADIAN,
-            when.JulianEpoch(), topodist);
+            when.julianEpoch(), topodist);
   }
 }

@@ -65,7 +65,7 @@ public final class HA implements Cloneable {
     return (value * 15d);
   }
 
-  public String RoundedHAString(final int ndigits, final String divider) {
+  public String roundedHAString(final int ndigits, final String divider) {
     /** Sexagesimal dec string, with the cut at +- 12 hr */
     Sexagesimal rounded;
     int secfieldwidth;

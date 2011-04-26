@@ -51,30 +51,30 @@ public final class Seasonal {
         lun = lunstart + i;
 
         jdnew[i] = Moon.flmoon(lun, 0);
-        oseason.w.ChangeWhen(jdnew[i]);
+        oseason.w.changeWhen(jdnew[i]);
 
         ng.Update(oseason.w);
         tabledata[2 * i][0] = " New ";
         // tabulated date is EVENING DATE of the night closest to the instant of phase ...
-        tabledata[2 * i][1] = (Object) ng.sunset.when.localDate.RoundedCalString(3, 0);
-        // System.out.printf("New : %s  ",oseason.w.when.localDate.RoundedCalString(1,0));
+        tabledata[2 * i][1] = (Object) ng.sunset.when.localDate.roundedCalString(3, 0);
+        // System.out.printf("New : %s  ",oseason.w.when.localDate.roundedCalString(1,0));
 
-        // System.out.printf(" sunrise: %s\n",ng.sunrise.when.localDate.RoundedCalString(1,0));
+        // System.out.printf(" sunrise: %s\n",ng.sunrise.when.localDate.roundedCalString(1,0));
 
-        oseason.w.ChangeWhen(ng.eveningTwilight18.when.jd);
-        oseason.ComputeSky();
-        tabledata[2 * i][2] = oseason.ha.RoundedHAString(-2, ":");
+        oseason.w.changeWhen(ng.eveningTwilight18.when.jd);
+        oseason.computeSky();
+        tabledata[2 * i][2] = oseason.ha.roundedHAString(-2, ":");
         tabledata[2 * i][3] = airmassstring(oseason.altitude, oseason.airmass);
 
-        oseason.w.ChangeWhen(ng.nightcenter.when.jd);
-        oseason.ComputeSky();
-        tabledata[2 * i][4] = oseason.ha.RoundedHAString(-2, ":");
+        oseason.w.changeWhen(ng.nightcenter.when.jd);
+        oseason.computeSky();
+        tabledata[2 * i][4] = oseason.ha.roundedHAString(-2, ":");
         tabledata[2 * i][5] = airmassstring(oseason.altitude, oseason.airmass);
         ha_at_center = oseason.ha.value;  // store for later
 
-        oseason.w.ChangeWhen(ng.morningTwilight18.when.jd);
-        oseason.ComputeSky();
-        tabledata[2 * i][6] = oseason.ha.RoundedHAString(-2, ":");
+        oseason.w.changeWhen(ng.morningTwilight18.when.jd);
+        oseason.computeSky();
+        tabledata[2 * i][6] = oseason.ha.roundedHAString(-2, ":");
         tabledata[2 * i][7] = airmassstring(oseason.altitude, oseason.airmass);
 
         hoursup = NightHoursAboveAirmass(oseason, ng, min_alt, max_alt);
@@ -83,30 +83,30 @@ public final class Seasonal {
         tabledata[2 * i][10] = hoursup[2];
 
         jdfull[i] = Moon.flmoon(lun, 2);
-        oseason.w.ChangeWhen(jdfull[i]);
+        oseason.w.changeWhen(jdfull[i]);
 
         ng.Update(oseason.w);
         tabledata[2 * i + 1][0] = " Full";
-        tabledata[2 * i + 1][1] = ng.sunset.when.localDate.RoundedCalString(3, 0);
-        // System.out.printf("Full: %s  ",oseason.w.when.localDate.RoundedCalString(1,0));
+        tabledata[2 * i + 1][1] = ng.sunset.when.localDate.roundedCalString(3, 0);
+        // System.out.printf("Full: %s  ",oseason.w.when.localDate.roundedCalString(1,0));
 
         ng.Update(oseason.w);
-        // System.out.printf(" sunrise: %s\n",ng.sunrise.when.localDate.RoundedCalString(1,0));
+        // System.out.printf(" sunrise: %s\n",ng.sunrise.when.localDate.roundedCalString(1,0));
 
-        oseason.w.ChangeWhen(ng.eveningTwilight18.when.jd);
-        oseason.ComputeSky();
-        tabledata[2 * i + 1][2] = oseason.ha.RoundedHAString(-2, ":");
+        oseason.w.changeWhen(ng.eveningTwilight18.when.jd);
+        oseason.computeSky();
+        tabledata[2 * i + 1][2] = oseason.ha.roundedHAString(-2, ":");
         tabledata[2 * i + 1][3] = airmassstring(oseason.altitude, oseason.airmass);
 
-        oseason.w.ChangeWhen(ng.nightcenter.when.jd);
-        oseason.ComputeSky();
-        tabledata[2 * i + 1][4] = oseason.ha.RoundedHAString(-2, ":");
+        oseason.w.changeWhen(ng.nightcenter.when.jd);
+        oseason.computeSky();
+        tabledata[2 * i + 1][4] = oseason.ha.roundedHAString(-2, ":");
         tabledata[2 * i + 1][5] = airmassstring(oseason.altitude, oseason.airmass);
         ha_at_center = oseason.ha.value;  // store for later
 
-        oseason.w.ChangeWhen(ng.morningTwilight18.when.jd);
-        oseason.ComputeSky();
-        tabledata[2 * i + 1][6] = oseason.ha.RoundedHAString(-2, ":");
+        oseason.w.changeWhen(ng.morningTwilight18.when.jd);
+        oseason.computeSky();
+        tabledata[2 * i + 1][6] = oseason.ha.roundedHAString(-2, ":");
         tabledata[2 * i + 1][7] = airmassstring(oseason.altitude, oseason.airmass);
 
         hoursup = NightHoursAboveAirmass(oseason, ng, min_alt, max_alt);
@@ -206,9 +206,9 @@ public final class Seasonal {
 
     jdtrans = ng.nightcenter.when.jd - ha_at_center / (24d * Const.SID_RATE);
 
-//      diagn.ChangeWhen(jdtrans);
+//      diagn.changeWhen(jdtrans);
 //      System.out.printf("diagnostic: transit at local time %s\n",
-//             diagn.when.localDate.RoundedCalString(0,0));
+//             diagn.when.localDate.roundedCalString(0,0));
 
     for (i = 0; i < 3; i++) {
       if ((min_alt < critical_alt[i]) && (max_alt > critical_alt[i])) { // passes this altitude

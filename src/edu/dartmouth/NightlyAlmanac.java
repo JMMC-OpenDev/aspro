@@ -38,13 +38,13 @@ public final class NightlyAlmanac {
 
     jdguess = w.when.jd;
 //      System.out.printf("Before makelocalsun, w.when.jd %f\n",w.when.jd);
-    w.MakeLocalSun();
+    w.makeLocalSun();
     alt2 = w.altsun;
 //      System.out.printf("after alt2: w.when.jd %f alt2 %f\n",
     //                  w.when.jd,alt2);
     jdguess += del;
-    w.ChangeWhen(jdguess);
-    w.UpdateLocalSun();
+    w.changeWhen(jdguess);
+    w.updateLocalSun();
     alt3 = w.altsun;
     err = alt3 - alt;
     deriv = (alt3 - alt2) / del;
@@ -54,8 +54,8 @@ public final class NightlyAlmanac {
       lastjd = jdguess;
       alt2 = alt3;       // save last guess
       jdguess -= err / deriv;
-      w.ChangeWhen(jdguess);
-      w.UpdateLocalSun();
+      w.changeWhen(jdguess);
+      w.updateLocalSun();
       alt3 = w.altsun;
 //          System.out.printf("alt3 %f jdguess %f\n",alt3,jdguess);
       err = alt3 - alt;
@@ -90,13 +90,13 @@ public final class NightlyAlmanac {
 
     // System.out.printf("Into jd_moon_alt, target = %f\n",alt);
     jdguess = w.when.jd;
-    w.MakeLocalMoon();
+    w.makeLocalMoon();
     alt2 = w.altmoon;
     // System.out.printf("after alt2: w.when.jd %f alt2 %f\n",
     //              w.when.jd,alt2);
     jdguess += del;
-    w.ChangeWhen(jdguess);
-    w.UpdateLocalMoon();
+    w.changeWhen(jdguess);
+    w.updateLocalMoon();
     alt3 = w.altmoon;
     err = alt3 - alt;
     deriv = (alt3 - alt2) / del;
@@ -106,8 +106,8 @@ public final class NightlyAlmanac {
       lastjd = jdguess;
       alt2 = alt3;       // save last guess
       jdguess -= err / deriv;
-      w.ChangeWhen(jdguess);
-      w.UpdateLocalMoon();
+      w.changeWhen(jdguess);
+      w.updateLocalMoon();
       alt3 = w.altmoon;
       // System.out.printf("alt3 %f jdguess %f ",alt3,jdguess,deriv);
       err = alt3 - alt;
@@ -129,7 +129,7 @@ public final class NightlyAlmanac {
 
   /** Computes rise, set, and twilight for the night nearest in time to wIn.when */
   NightlyAlmanac(final WhenWhere wIn) {
-    // sure to call MakeLocalSun() / MakeLocalMoon()
+    // sure to call makeLocalSun() / makeLocalMoon()
     final WhenWhere w = new WhenWhere(wIn.when.clone(), wIn.where);
 
     // instantiate these ...
@@ -177,7 +177,7 @@ public final class NightlyAlmanac {
     // next midnight if after local noon.
 
     midnight.when = w.when.clone();
-//      System.out.printf("Entering almanac with local  %s\n",midnight.when.localDate.RoundedCalString(0,0));
+//      System.out.printf("Entering almanac with local  %s\n",midnight.when.localDate.roundedCalString(0,0));
     if (midnight.when.localDate.timeofday.hour >= 12) {
       midnight.when.localDate.timeofday.hour = 23;
       midnight.when.localDate.timeofday.minute = 59;
@@ -187,17 +187,17 @@ public final class NightlyAlmanac {
       midnight.when.localDate.timeofday.minute = 0;
       midnight.when.localDate.timeofday.second = 0d;
     }
-    jdtemp = midnight.when.localDate.Cal2JD();
+    jdtemp = midnight.when.localDate.cal2JD();
     // System.out.printf("jdtemp (local) = %f\n",jdtemp);
-    midnight.when.SetInstant(jdtemp, w.where.stdz, w.where.use_dst, false);
+    midnight.when.setInstant(jdtemp, w.where.stdz, w.where.use_dst, false);
     // System.out.printf("translates to midnight.jd %f\n",midnight.when.jd);
     final double jdmid = midnight.when.jd;   // the real JD
-    midnight.ChangeWhen(jdmid);        // to synch sidereal etc.
-//      System.out.printf("Midnight set to %s\n", midnight.when.UTDate.RoundedCalString(0,1));
+    midnight.changeWhen(jdmid);        // to synch sidereal etc.
+//      System.out.printf("Midnight set to %s\n", midnight.when.UTDate.roundedCalString(0,1));
 //      System.out.printf("lst at midnight = %f\n",midnight.sidereal);
 
-    midnight.UpdateLocalSun();
-    midnight.UpdateLocalMoon();
+    midnight.updateLocalSun();
+    midnight.updateLocalMoon();
 
     // See if the sun rises or sets ...
     final double hasunrise = Spherical.ha_alt(midnight.sun.topopos.delta.value, midnight.where.lat.value, rise_set_alt);
@@ -228,36 +228,36 @@ public final class NightlyAlmanac {
       }
 
 //         System.out.printf("going to jd_sun_alt with est sunrise = %f\n",jdmid + dtrise/24.);
-      sunrise.ChangeWhen(jdmid + dtrise / 24d);
-      sunrise.UpdateLocalSun();
+      sunrise.changeWhen(jdmid + dtrise / 24d);
+      sunrise.updateLocalSun();
 //         System.out.printf("sunrise.when.jd %f, sunrise.altsun %f\n",sunrise.when.jd,
 //             sunrise.altsun);
       jdtemp = jd_sun_alt(rise_set_alt, sunrise);
 //         System.out.printf("out, sunrise = %f\n",jdtemp);
-      sunrise.ChangeWhen(jdtemp);
+      sunrise.changeWhen(jdtemp);
 
 //         System.out.printf("going to jd_sun_alt with est sunset = %f\n",jdmid + dtset/24.);
-      sunset.ChangeWhen(jdmid + dtset / 24d);
-      sunset.UpdateLocalSun();
+      sunset.changeWhen(jdmid + dtset / 24d);
+      sunset.updateLocalSun();
       jdtemp = jd_sun_alt(rise_set_alt, sunset);
 //         System.out.printf("out, sunset = %f\n",jdtemp);
-      sunset.ChangeWhen(jdtemp);
+      sunset.changeWhen(jdtemp);
 //         System.out.printf("In NightlyAlmanac.Update, sunset set to:\n");
 //         sunset.dump();
-      nightcenter.ChangeWhen((sunset.when.jd + sunrise.when.jd) / 2d);
+      nightcenter.changeWhen((sunset.when.jd + sunrise.when.jd) / 2d);
     } else if (hasunrise < 0.2d) {  // may not rise ... set sunrise to noontime to flag.
       if (midnight.when.localDate.timeofday.hour == 23) {
         jdnoon = jdmid - 0.5d;
       } else {
         jdnoon = jdmid + 0.5d;
       }
-      sunrise.ChangeWhen(jdnoon);
-      sunset.ChangeWhen(jdnoon);
-      nightcenter.ChangeWhen(jdnoon);
+      sunrise.changeWhen(jdnoon);
+      sunset.changeWhen(jdnoon);
+      nightcenter.changeWhen(jdnoon);
     } else if (hasunrise >= 11.8d) { // may not set ... set sunset to midnight to flag.
-      sunrise.ChangeWhen(jdmid);
-      sunset.ChangeWhen(jdmid);
-      nightcenter.ChangeWhen(jdmid);
+      sunrise.changeWhen(jdmid);
+      sunset.changeWhen(jdmid);
+      nightcenter.changeWhen(jdmid);
     }
 
     // Now let's do the same thing for astronomical twilight ...
@@ -283,15 +283,15 @@ public final class NightlyAlmanac {
         dtset += 24d;
       }
 
-      eveningTwilight18.ChangeWhen(jdmid + dtset / 24d);
-      eveningTwilight18.UpdateLocalSun();
+      eveningTwilight18.changeWhen(jdmid + dtset / 24d);
+      eveningTwilight18.updateLocalSun();
       jdtemp = jd_sun_alt(twilight_alt_18, eveningTwilight18);
-      eveningTwilight18.ChangeWhen(jdtemp);
+      eveningTwilight18.changeWhen(jdtemp);
 
-      morningTwilight18.ChangeWhen(jdmid + dtrise / 24d);
-      morningTwilight18.UpdateLocalSun();
+      morningTwilight18.changeWhen(jdmid + dtrise / 24d);
+      morningTwilight18.updateLocalSun();
       jdtemp = jd_sun_alt(twilight_alt_18, morningTwilight18);
-      morningTwilight18.ChangeWhen(jdtemp);
+      morningTwilight18.changeWhen(jdtemp);
 
     } else if (hatwilight18 < 0.2d) {  // twilight may not begin ... set to noon to flag.
       if (midnight.when.localDate.timeofday.hour == 23) // this case will be rare.
@@ -300,12 +300,12 @@ public final class NightlyAlmanac {
       } else {
         jdnoon = jdmid + 0.5d;
       }
-      morningTwilight18.ChangeWhen(jdnoon);
-      eveningTwilight18.ChangeWhen(jdnoon);
+      morningTwilight18.changeWhen(jdnoon);
+      eveningTwilight18.changeWhen(jdnoon);
 
     } else if (hatwilight18 >= 11.8d) { // twilight may not end (midsummer at high lat).
-      morningTwilight18.ChangeWhen(jdmid);
-      eveningTwilight18.ChangeWhen(jdmid);
+      morningTwilight18.changeWhen(jdmid);
+      eveningTwilight18.changeWhen(jdmid);
       // flag -- set twilight to exactly midn.
     }
 
@@ -332,15 +332,15 @@ public final class NightlyAlmanac {
         dtset += 24d;
       }
 
-      eveningTwilight12.ChangeWhen(jdmid + dtset / 24d);
-      eveningTwilight12.UpdateLocalSun();
+      eveningTwilight12.changeWhen(jdmid + dtset / 24d);
+      eveningTwilight12.updateLocalSun();
       jdtemp = jd_sun_alt(twilight_alt_12, eveningTwilight12);
-      eveningTwilight12.ChangeWhen(jdtemp);
+      eveningTwilight12.changeWhen(jdtemp);
 
-      morningTwilight12.ChangeWhen(jdmid + dtrise / 24d);
-      morningTwilight12.UpdateLocalSun();
+      morningTwilight12.changeWhen(jdmid + dtrise / 24d);
+      morningTwilight12.updateLocalSun();
       jdtemp = jd_sun_alt(twilight_alt_12, morningTwilight12);
-      morningTwilight12.ChangeWhen(jdtemp);
+      morningTwilight12.changeWhen(jdtemp);
 
     } else if (hatwilight12 < 0.2d) {  // twilight may not begin ... set to noon to flag.
       if (midnight.when.localDate.timeofday.hour == 23) // this case will be rare.
@@ -349,12 +349,12 @@ public final class NightlyAlmanac {
       } else {
         jdnoon = jdmid + 0.5d;
       }
-      morningTwilight12.ChangeWhen(jdnoon);
-      eveningTwilight12.ChangeWhen(jdnoon);
+      morningTwilight12.changeWhen(jdnoon);
+      eveningTwilight12.changeWhen(jdnoon);
 
     } else if (hatwilight12 >= 11.8d) { // twilight may not end (midsummer at high lat).
-      morningTwilight12.ChangeWhen(jdmid);
-      eveningTwilight12.ChangeWhen(jdmid);
+      morningTwilight12.changeWhen(jdmid);
+      eveningTwilight12.changeWhen(jdmid);
       // flag -- set twilight to exactly midn.
     }
 
@@ -381,15 +381,15 @@ public final class NightlyAlmanac {
         dtset += 24d;
       }
 
-      eveningTwilight06.ChangeWhen(jdmid + dtset / 24d);
-      eveningTwilight06.UpdateLocalSun();
+      eveningTwilight06.changeWhen(jdmid + dtset / 24d);
+      eveningTwilight06.updateLocalSun();
       jdtemp = jd_sun_alt(twilight_alt_06, eveningTwilight06);
-      eveningTwilight06.ChangeWhen(jdtemp);
+      eveningTwilight06.changeWhen(jdtemp);
 
-      morningTwilight06.ChangeWhen(jdmid + dtrise / 24d);
-      morningTwilight06.UpdateLocalSun();
+      morningTwilight06.changeWhen(jdmid + dtrise / 24d);
+      morningTwilight06.updateLocalSun();
       jdtemp = jd_sun_alt(twilight_alt_06, morningTwilight06);
-      morningTwilight06.ChangeWhen(jdtemp);
+      morningTwilight06.changeWhen(jdtemp);
 
     } else if (hatwilight06 < 0.2d) {  // twilight may not begin ... set to noon to flag.
       if (midnight.when.localDate.timeofday.hour == 23) // this case will be rare.
@@ -398,12 +398,12 @@ public final class NightlyAlmanac {
       } else {
         jdnoon = jdmid + 0.5d;
       }
-      morningTwilight06.ChangeWhen(jdnoon);
-      eveningTwilight06.ChangeWhen(jdnoon);
+      morningTwilight06.changeWhen(jdnoon);
+      eveningTwilight06.changeWhen(jdnoon);
 
     } else if (hatwilight06 >= 11.8d) { // twilight may not end (midsummer at high lat).
-      morningTwilight06.ChangeWhen(jdmid);
-      eveningTwilight06.ChangeWhen(jdmid);
+      morningTwilight06.changeWhen(jdmid);
+      eveningTwilight06.changeWhen(jdmid);
       // flag -- set twilight to exactly midn.
     }
 
@@ -439,15 +439,15 @@ public final class NightlyAlmanac {
       System.out.printf("dtrise %f dtset %f\n",dtrise,dtset);
        */
 
-      moonrise.ChangeWhen(jdmid + dtrise / 24d);
-      moonrise.UpdateLocalMoon();
+      moonrise.changeWhen(jdmid + dtrise / 24d);
+      moonrise.updateLocalMoon();
       jdtemp = jd_moon_alt(rise_set_alt, moonrise);
-      moonrise.ChangeWhen(jdtemp);
+      moonrise.changeWhen(jdtemp);
 
-      moonset.ChangeWhen(jdmid + dtset / 24d);
-      moonset.UpdateLocalMoon();
+      moonset.changeWhen(jdmid + dtset / 24d);
+      moonset.updateLocalMoon();
       jdtemp = jd_moon_alt(rise_set_alt, moonset);
-      moonset.ChangeWhen(jdtemp);
+      moonset.changeWhen(jdtemp);
     }
   }
 }

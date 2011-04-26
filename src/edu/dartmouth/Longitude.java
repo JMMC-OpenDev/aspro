@@ -113,7 +113,7 @@ public final class Longitude implements Cloneable {
     return value * -15d;
   }
 
-  public String RoundedLongitString(final int ndigits, final String divider,
+  public String roundedLongitString(final int ndigits, final String divider,
                                     final boolean inDegrees) {
 
     Sexagesimal outvalsex, rounded;

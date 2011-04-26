@@ -34,7 +34,7 @@ public final class InstantInTime implements Cloneable {
     // default constructor sets to system time ...
     stdz = stdzin;
     useDST = use_dst;
-    SetInstant(stdzin, use_dst);
+    setInstant(stdzin, use_dst);
   }
 
   public InstantInTime(final String s, final double stdzin,
@@ -43,7 +43,7 @@ public final class InstantInTime implements Cloneable {
     be a three-letter abbreviation. */
     stdz = stdzin;
     useDST = use_dst;
-    SetInstant(s, stdzin, use_dst, is_ut);
+    setInstant(s, stdzin, use_dst, is_ut);
   }
 
   public InstantInTime(final double jdin, final double stdzin,
@@ -52,10 +52,10 @@ public final class InstantInTime implements Cloneable {
     be a three-letter abbreviation. */
     stdz = stdzin;
     useDST = use_dst;
-    SetInstant(jdin, stdzin, use_dst, is_ut);
+    setInstant(jdin, stdzin, use_dst, is_ut);
   }
 
-  void SetInstant(final double stdzin, final int use_dst) {
+  void setInstant(final double stdzin, final int use_dst) {
     // when no time specified, sets to system time.
     long milliseconds;
     double jdnow;
@@ -64,7 +64,7 @@ public final class InstantInTime implements Cloneable {
     useDST = use_dst;
     milliseconds = System.currentTimeMillis();
     jdnow = TheEpoch + milliseconds / 86400000d;
-    SetInstant(jdnow, stdzin, use_dst, true);
+    setInstant(jdnow, stdzin, use_dst, true);
   }
 
   @Override
@@ -79,13 +79,13 @@ public final class InstantInTime implements Cloneable {
     }
   }
 
-  void SetInstant(final String s, final double stdzin, final int use_dst, final boolean is_ut) {
+  void setInstant(final String s, final double stdzin, final int use_dst, final boolean is_ut) {
 
     useDST = use_dst;
 
     if (is_ut) {
       UTDate = new GenericCalDat(s);
-      jd = UTDate.Cal2JD();
+      jd = UTDate.cal2JD();
       // System.out.printf("Setting to UT, s = %s,jd = %f\n",s,jd);
       // The DST calculation is not sensitive to year if dstInEffect is
       // computed using the same year as used in findDSTBounds.
@@ -124,7 +124,7 @@ public final class InstantInTime implements Cloneable {
 
     } else {  // input string is local date and time.
       localDate = new GenericCalDat(s);  // by definition ..
-      localjd = localDate.Cal2JD();
+      localjd = localDate.cal2JD();
       // System.out.printf("using localjd = %f\n",localjd);
       if (use_dst == 0) {
         dstInEffect = false;
@@ -157,7 +157,7 @@ public final class InstantInTime implements Cloneable {
     }
   }
 
-  void AdvanceTime(final String s, final double stdzin, final int use_dst_in) {
+  void advanceTime(final String s, final double stdzin, final int use_dst_in) {
     String[] fields;
     String lastfield;
     double inputdelta, delta;
@@ -198,12 +198,12 @@ public final class InstantInTime implements Cloneable {
       delta = inputdelta / 24d;
     }
 
-    SetInstant(jd + delta, stdz, useDST, true);
+    setInstant(jd + delta, stdz, useDST, true);
     // jd is always UT, so use_dst is true
 
   }
 
-  void AdvanceTime(final String s, final double stdzin, final int use_dst_in, final boolean forward) {
+  void advanceTime(final String s, final double stdzin, final int use_dst_in, final boolean forward) {
     String[] fields;
     String lastfield;
     double inputdelta, delta;
@@ -243,20 +243,20 @@ public final class InstantInTime implements Cloneable {
     } else {
       delta = inputdelta / 24d;
     }
-    /*      System.out.println("AdvanceTime, delta = " + String.format(Locale.ENGLISH, "%f",delta) +
+    /*      System.out.println("advanceTime, delta = " + String.format(Locale.ENGLISH, "%f",delta) +
     "forward = " + forward); */
 
     if (forward) {
-      SetInstant(jd + delta, stdz, useDST, true);
+      setInstant(jd + delta, stdz, useDST, true);
     } // jd is always UT, so use_dst is true
     else {
-      SetInstant(jd - delta, stdz, useDST, true);
-      // System.out.printf("AdvanceTime: JD, delta %f %f  stdz %f useDST %d\n",
+      setInstant(jd - delta, stdz, useDST, true);
+      // System.out.printf("advanceTime: JD, delta %f %f  stdz %f useDST %d\n",
       //          jd,delta,stdz,useDST);
     }
   }
 
-  void SetInstant(final double jdin, final double stdzin, final int use_dst, final boolean is_ut) {
+  void setInstant(final double jdin, final double stdzin, final int use_dst, final boolean is_ut) {
     // Silly to repeat all that code just to change datatype ...
     // but it'll work correctly at least.
 
@@ -299,7 +299,7 @@ public final class InstantInTime implements Cloneable {
       localDate = new GenericCalDat(localjd);
     } else {  // input string is local date and time.
       localDate = new GenericCalDat(jdin);  // by definition ..
-      localjd = localDate.Cal2JD();
+      localjd = localDate.cal2JD();
       if (use_dst == 0) {
         dstInEffect = false;
       } else { // dst is used if applicable ... use local-time limits of
@@ -370,8 +370,8 @@ public final class InstantInTime implements Cloneable {
         trialday = 30;
         while (trialdow != 6) {
           trialstring = String.format(Locale.ENGLISH, "%d 4 %d 2 0 0", year, trialday);
-          trial.CalFromString(trialstring);
-          trialdow = trial.DayOfWeek();
+          trial.calFromString(trialstring);
+          trialdow = trial.dayOfWeek();
           trialday--;
         }
       } else if (year <= 2006) {  // first Sunday in April
@@ -379,8 +379,8 @@ public final class InstantInTime implements Cloneable {
         trialdow = 0;
         while (trialdow != 6) {
           trialstring = String.format(Locale.ENGLISH, "%d 4 %d 2 0 0", year, trialday);
-          trial.CalFromString(trialstring);
-          trialdow = trial.DayOfWeek();
+          trial.calFromString(trialstring);
+          trialdow = trial.dayOfWeek();
           trialday++;
         }
       } else {  // 2007 and after, it's 2nd Sunday in March ....
@@ -389,15 +389,15 @@ public final class InstantInTime implements Cloneable {
         trialdow = 0;
         while (nSundays < 2) {
           trialstring = String.format(Locale.ENGLISH, "%d 3 %d 2 0 0", year, trialday);
-          trial.CalFromString(trialstring);
-          trialdow = trial.DayOfWeek();
+          trial.calFromString(trialstring);
+          trialdow = trial.dayOfWeek();
           if (trialdow == 6) {
             nSundays++;
           }
           trialday++;
         }
       }
-      jdtmp = trial.Cal2JD();
+      jdtmp = trial.cal2JD();
       JDBoundary[0] = jdtmp + stdz / 24d;  // true JD of change.
       JDBoundary[2] = jdtmp;  // local-time version
 
@@ -408,8 +408,8 @@ public final class InstantInTime implements Cloneable {
         trialday = 31;
         while (trialdow != 6) {
           trialstring = String.format(Locale.ENGLISH, "%d 10 %d 2 0 0", year, trialday);
-          trial.CalFromString(trialstring);
-          trialdow = trial.DayOfWeek();
+          trial.calFromString(trialstring);
+          trialdow = trial.dayOfWeek();
           trialday--;
         }
       } else {   // first Sunday in November, didn't change in 1986.
@@ -417,23 +417,23 @@ public final class InstantInTime implements Cloneable {
         trialdow = 0;
         while (trialdow != 6) {
           trialstring = String.format(Locale.ENGLISH, "%d 11 %d 2 0 0", year, trialday);
-          trial.CalFromString(trialstring);
-          trialdow = trial.DayOfWeek();
+          trial.calFromString(trialstring);
+          trialdow = trial.dayOfWeek();
           trialday++;
         }
       }
-      jdtmp = trial.Cal2JD();
+      jdtmp = trial.cal2JD();
       JDBoundary[1] = jdtmp + (stdz - 1d) / 24d; // true JD
       JDBoundary[3] = jdtmp;  // local-time version
     } else if (use_dst == 2) { // EU convention
       trialday = 31; // start last Sunday in March at 1 AM
       while (trialdow != 6) {
         trialstring = String.format(Locale.ENGLISH, "%d 3 %d 1 0 0", year, trialday);
-        trial.CalFromString(trialstring);
-        trialdow = trial.DayOfWeek();
+        trial.calFromString(trialstring);
+        trialdow = trial.dayOfWeek();
         trialday--;
       }
-      jdtmp = trial.Cal2JD();
+      jdtmp = trial.cal2JD();
       JDBoundary[0] = jdtmp + stdz / 24d;
       JDBoundary[2] = jdtmp;
 
@@ -441,11 +441,11 @@ public final class InstantInTime implements Cloneable {
       trialdow = 0;
       while (trialdow != 6) {
         trialstring = String.format(Locale.ENGLISH, "%d 10 %d 1 0 0", year, trialday);
-        trial.CalFromString(trialstring);
-        trialdow = trial.DayOfWeek();
+        trial.calFromString(trialstring);
+        trialdow = trial.dayOfWeek();
         trialday--;
       }
-      jdtmp = trial.Cal2JD();
+      jdtmp = trial.cal2JD();
       JDBoundary[1] = jdtmp + (stdz - 1d) / 24d;
       JDBoundary[3] = jdtmp;
     } else if (use_dst == -1) { // Chile - negative -> southern
@@ -457,14 +457,14 @@ public final class InstantInTime implements Cloneable {
       while (nSaturdays != 2) {
         trialstring = String.format(Locale.ENGLISH, "%d 10 %d 23 0 0", year, trialday);
         // use 11 pm for day calculation to avoid any ambiguity
-        trial.CalFromString(trialstring);
-        trialdow = trial.DayOfWeek();
+        trial.calFromString(trialstring);
+        trialdow = trial.dayOfWeek();
         if (trialdow == 5) {
           nSaturdays++;
         }
         trialday++;
       }
-      jdtmp = trial.Cal2JD();
+      jdtmp = trial.cal2JD();
       JDBoundary[1] = jdtmp + (stdz + 1d) / 24d;
       JDBoundary[3] = jdtmp;
       // add the hour back here (DST start)
@@ -474,14 +474,14 @@ public final class InstantInTime implements Cloneable {
       while (nSaturdays != 2) { // end on the 2nd Sat in March
         trialstring = String.format(Locale.ENGLISH, "%d 3 %d 23 0 0", year, trialday);
         // use 11 pm for day calculation to avoid any ambiguity
-        trial.CalFromString(trialstring);
-        trialdow = trial.DayOfWeek();
+        trial.calFromString(trialstring);
+        trialdow = trial.dayOfWeek();
         if (trialdow == 5) {
           nSaturdays++;
         }
         trialday++;
       }
-      jdtmp = trial.Cal2JD();
+      jdtmp = trial.cal2JD();
       JDBoundary[0] = jdtmp + stdz / 24d;
       JDBoundary[2] = jdtmp;
       // no need to add the hour back, DST is ending now.
@@ -490,11 +490,11 @@ public final class InstantInTime implements Cloneable {
       trialdow = 0;
       while (trialdow != 6) { // DST begins at 2 AM, Last sun in Oct
         trialstring = String.format(Locale.ENGLISH, "%d 10 %d 2 0 0", year, trialday);
-        trial.CalFromString(trialstring);
-        trialdow = trial.DayOfWeek();
+        trial.calFromString(trialstring);
+        trialdow = trial.dayOfWeek();
         trialday--;
       }
-      jdtmp = trial.Cal2JD();
+      jdtmp = trial.cal2JD();
       JDBoundary[1] = jdtmp + stdz / 24d;
       JDBoundary[3] = jdtmp;
 
@@ -502,18 +502,22 @@ public final class InstantInTime implements Cloneable {
       trialdow = 0;
       while (trialdow != 6) { // DST ends at 3 AM, Last sun in March
         trialstring = String.format(Locale.ENGLISH, "%d 3 %d 3 0 0", year, trialday);
-        trial.CalFromString(trialstring);
-        trialdow = trial.DayOfWeek();
+        trial.calFromString(trialstring);
+        trialdow = trial.dayOfWeek();
         trialday--;
       }
-      jdtmp = trial.Cal2JD();
+      jdtmp = trial.cal2JD();
       JDBoundary[0] = jdtmp + (stdz + 1d) / 24d;
       JDBoundary[2] = jdtmp;
     }
     return JDBoundary;
   }
 
-  double JulianEpoch() {
-    return 2000d + (jd - Const.J2000) / 365.25d;   // as simple as that ...
+  double julianEpoch() {
+    return julianEpoch(jd);
+  }
+
+  public static double julianEpoch(final double jdIn) {
+    return 2000d + (jdIn - Const.J2000) / 365.25d;
   }
 }

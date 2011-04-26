@@ -325,7 +325,7 @@ public final class Planets {
     return result;
   }
 
-  void computemags() {
+  void computeMags() {
     /* assumes xyz[][] has been updated.  All the calculations are relative,
     so it doesn't matter what the system is. */
     int i, j;
@@ -355,14 +355,13 @@ public final class Planets {
   Celest earthview(double[] earthxyz, double[] planxyz, double jd) {
     double[] dxyz = {0., 0., 0.};
     double[] retvals = {0., 0., 0.};
-    double eq;
     int i;
 
-    eq = 2000d + (jd - Const.J2000) / 365.25d;
+    final double eq = InstantInTime.julianEpoch(jd);
     for (i = 0; i < 3; i++) {
       dxyz[i] = planxyz[i] - earthxyz[i];
     }
-    retvals = Celest.XYZcel(dxyz[0], dxyz[1], dxyz[2]);
+    retvals = Celest.xyzCel(dxyz[0], dxyz[1], dxyz[2]);
     Celest ViewFromEarth = new Celest(retvals[0], retvals[1], eq, retvals[2]);
     return ViewFromEarth;
   }

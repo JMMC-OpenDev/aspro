@@ -38,12 +38,12 @@ public final class GenericCalDat implements Cloneable {
   // accept either a string or a double.
   public GenericCalDat(final String s) {
     // "yyyy mm dd hh mm ss" ... or JD as character string.
-    CalFromString(s);
+    calFromString(s);
   }
   // overload the constructor method to take a JD number.
 
   public GenericCalDat(final double jdin) {
-    CalFromJD(jdin);
+    calFromJD(jdin);
   }
 
   @Override
@@ -57,7 +57,7 @@ public final class GenericCalDat implements Cloneable {
     }
   }
 
-  void CalFromJD(final double jd) {
+  void calFromJD(final double jd) {
     /* sets the calendar date using the current values of jd -- can
     be either a local or UT date */
 
@@ -74,7 +74,6 @@ public final class GenericCalDat implements Cloneable {
     boolean rounded_ok = false;
 
     double jdin = jd;
-
 
     while (!rounded_ok) {
       tmp = jdin + 0.5d;
@@ -116,7 +115,7 @@ public final class GenericCalDat implements Cloneable {
     }
   }
 
-  void CalFromString(final String s) {
+  void calFromString(final String s) {
     // "yyyy mm dd hh mm ss" ... or just a string "JD".
     // "yyyy mm dd" or "yyyy mm dd hh mm" work ok too.
     // "2006 Jul 14" works, as does "2006 July 14 18:00"
@@ -124,7 +123,7 @@ public final class GenericCalDat implements Cloneable {
 
     if (fields.length == 1) { // presumably only a JD ...
       final double jdin = Double.parseDouble(fields[0]);
-      CalFromJD(jdin);
+      calFromJD(jdin);
       return;
     }
 
@@ -157,7 +156,7 @@ public final class GenericCalDat implements Cloneable {
     }
   }
 
-  double Cal2JD() {
+  double cal2JD() {
 
     // System.out.printf("%d %d %d  %d %d %f\n",
     // year,month,day,timeofday.hour,timeofday.minute,timeofday.second);
@@ -187,11 +186,11 @@ public final class GenericCalDat implements Cloneable {
     return jdout;
   }
 
-  int DayOfWeek() {
+  int dayOfWeek() {
     /** Adapted straight from skycalc, returns 0=Mon throuh 6=Sun **/
     int d;
 
-    final double jd = Cal2JD() + 0.5d;
+    final double jd = cal2JD() + 0.5d;
     final long i = (long) jd;
     final double x = i / 7d + 0.01d;
     return (int) (7d * (x - (long) x));
@@ -200,10 +199,10 @@ public final class GenericCalDat implements Cloneable {
   void quickprint() {
     System.out.printf("%d %02d %02d  %02d %02d %f",
             year, month, day, timeofday.hour, timeofday.minute, timeofday.second);
-    System.out.printf(" -> %s\n", dayname[DayOfWeek()]);
+    System.out.printf(" -> %s\n", dayname[dayOfWeek()]);
   }
 
-  String RoundedCalString(final int style, int digits) {
+  String roundedCalString(final int style, int digits) {
     /** Returns a descriptive string; rather than writing a flexible
     format I'll code a number of options.  Much sturm und drang here
     because of the need to round the day along with everything else.
@@ -241,11 +240,11 @@ public final class GenericCalDat implements Cloneable {
       digits = -2;
     }
 
-    Sexagesimal Rounded = timeofday.roundsex(digits);
+    Sexagesimal rounded = timeofday.roundsex(digits);
     // round the date upward ...
-    if (Rounded.hour == 24) {
+    if (rounded.hour == 24) {
       // System.out.println("Oops, gotta round day upward.\n");
-      jdtemp = Cal2JD() + 0.4; // this will always round upward
+      jdtemp = cal2JD() + 0.4; // this will always round upward
       // and never screw the day of week
       GenericCalDat tempcal = new GenericCalDat(jdtemp);
       printYear = tempcal.year;
@@ -254,15 +253,15 @@ public final class GenericCalDat implements Cloneable {
       printHour = 0;
       printMinute = 0;
       printSecond = 0d;
-      printDOW = tempcal.DayOfWeek();
+      printDOW = tempcal.dayOfWeek();
     } else {
       printYear = year;
       printMonth = month;
       printDay = day;
-      printHour = Rounded.hour;
-      printMinute = Rounded.minute;
-      printSecond = Rounded.second;
-      printDOW = DayOfWeek();
+      printHour = rounded.hour;
+      printMinute = rounded.minute;
+      printSecond = rounded.second;
+      printDOW = dayOfWeek();
     }
     String monthAbr = months[printMonth].substring(0, 3);
     switch (style) {

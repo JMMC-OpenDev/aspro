@@ -41,7 +41,7 @@ public final class Spherical {
 
   /** Given the positions of the sun and the moon, returns the position angle
   of the line connecting the moon's two cusps.  Ported from python. */
-  static double[] CuspPA(final Celest s, final Celest m) {
+  static double[] cuspPA(final Celest s, final Celest m) {
     final double codecsun = (90d - s.delta.value) / Const.DEG_IN_RADIAN;
     final double codecmoon = (90d - m.delta.value) / Const.DEG_IN_RADIAN;
     double dra = s.alpha.value - m.alpha.value;
@@ -157,7 +157,7 @@ public final class Spherical {
 
   /** computes instance variables galong and galat.  Algorithm is
   rigorous. */
-  static Celest Gal2Cel(double galacticlongit, double galacticlatit) {
+  static Celest gal2Cel(double galacticlongit, double galacticlatit) {
     double[] xyz = {0d, 0d, 0d};
     double[] xyzgal = {0d, 0d, 0d};
     double[] temp;
@@ -186,7 +186,7 @@ public final class Spherical {
     xyz[2] = xyzgal[0] * p13 + xyzgal[1] * p23 + xyzgal[2] * p33;
     // System.out.printf("Equatorial xyz %f %f %f\n",xyz[0],xyz[1],xyz[2]);
 
-    double[] retvals = Celest.XYZcel(xyz[0], xyz[1], xyz[2]);
+    double[] retvals = Celest.xyzCel(xyz[0], xyz[1], xyz[2]);
     Celest cel = new Celest(retvals[0], retvals[1], 1950.);  // galactic are defined for 1950
 
     return cel;   // and precess elsehwere to whatever.

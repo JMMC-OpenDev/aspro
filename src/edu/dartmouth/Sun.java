@@ -20,22 +20,22 @@ public final class Sun implements Cloneable {
   }
 
   Sun(final InstantInTime inst) {  // no site, so no topo
-    final double[] retvals = computesun(inst.jd);
+    final double[] retvals = computeSun(inst.jd);
     xyz[0] = retvals[3];
     xyz[1] = retvals[4];
     xyz[2] = retvals[5];
-    geopos = new Celest(retvals[0], retvals[1], inst.JulianEpoch());
+    geopos = new Celest(retvals[0], retvals[1], inst.julianEpoch());
     geopos.distance = retvals[2];
-    topopos = new Celest(0d, 0d, inst.JulianEpoch());  // not set
+    topopos = new Celest(0d, 0d, inst.julianEpoch());  // not set
     topopos.distance = 0d;
   }
 
-  Sun(final double jdin) {        // no site, so no topo possible
-    final double[] retvals = computesun(jdin);
+  Sun(final double jdIn) {        // no site, so no topo possible
+    final double[] retvals = computeSun(jdIn);
     xyz[0] = retvals[3];
     xyz[1] = retvals[4];
     xyz[2] = retvals[5];
-    final double eq = 2000d + (jdin - Const.J2000) / 365.25d;
+    final double eq = InstantInTime.julianEpoch(jdIn);
     geopos = new Celest(retvals[0], retvals[1], eq);
     geopos.distance = retvals[2];
     topopos = new Celest(0d, 0d, eq); // not set, no geogr. info
@@ -58,7 +58,7 @@ public final class Sun implements Cloneable {
     // System.out.printf("updating sun jd %f ... ",w.when.jd);
 
     // need to avoid handing in a whenwhere or get circularity ...
-    final double[] retvals = computesun(when.jd);
+    final double[] retvals = computeSun(when.jd);
     xyz = new double[3];
     xyz[0] = retvals[3];
     xyz[1] = retvals[4];
@@ -69,7 +69,7 @@ public final class Sun implements Cloneable {
 
     // ignoring topocentric part of helio time correction.
 
-    geopos = new Celest(retvals[0], retvals[1], when.JulianEpoch());
+    geopos = new Celest(retvals[0], retvals[1], when.julianEpoch());
     geopos.distance = retvals[2];
     topopos = Topo.topocorr(geopos, when, where, sidereal);
     // System.out.printf("topo radec %s %s\n",topopos.alpha.RoundedRAString(2,":"),
@@ -80,7 +80,7 @@ public final class Sun implements Cloneable {
   /* Implements Jean Meeus' solar ephemeris, from Astronomical
   Formulae for Calculators, pp. 79 ff.  Position is wrt *mean* equinox of
   date. */
-  static double[] computesun(final double jdIn) {
+  static double[] computeSun(final double jdIn) {
 
     // correct jd to ephemeris time once we have that done ...
 
@@ -138,7 +138,7 @@ public final class Sun implements Cloneable {
     retvals[3] = equatorial[0] * R;  // xyz
     retvals[4] = equatorial[1] * R;
     retvals[5] = equatorial[2] * R;
-//       System.out.printf("computesun XYZ %f %f %f  %f\n",
+//       System.out.printf("computeSun XYZ %f %f %f  %f\n",
 //          retvals[3],retvals[4],retvals[5],jd);
 
     return retvals;
@@ -149,8 +149,8 @@ public final class Sun implements Cloneable {
     final double dt = 0.05d; // days ... gives about 8 digits ...
     int i;
 
-    final double[] pos1 = computesun(jd - dt / 2d);
-    final double[] pos2 = computesun(jd + dt / 2d);
+    final double[] pos1 = computeSun(jd - dt / 2d);
+    final double[] pos2 = computeSun(jd + dt / 2d);
     for (i = 0; i < 3; i++) {
       xyzvel[i] = (pos2[i + 3] - pos1[i + 3]) / dt;  // AU/d, eq. of date.
     }

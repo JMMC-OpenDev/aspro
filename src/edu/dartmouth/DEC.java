@@ -54,7 +54,7 @@ public class DEC implements Cloneable {
     return (value);   // duuhh - but may be good to have
   }
 
-  public final String RoundedDecString(final int ndigits, final String divider) {
+  public final String roundedDecString(final int ndigits, final String divider) {
     // no need to wrap, so again simpler than HA and RA
     Sexagesimal rounded;
     int secfieldwidth;
