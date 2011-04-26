@@ -1,18 +1,20 @@
 /*******************************************************************************
  * JMMC project
  *
- * "@(#) $Id: LSTTest.java,v 1.2 2011-04-22 15:33:34 bourgesl Exp $"
+ * "@(#) $Id: LSTTest.java,v 1.3 2011-04-26 15:53:10 bourgesl Exp $"
  *
  * History
  * -------
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2011/04/22 15:33:34  bourgesl
+ * new test cases relative to observability date handling (lst / midnight)
+ *
  * Revision 1.1  2010/10/01 15:21:09  bourgesl
  * new test case for find LST0 bug (date lower > date upper)
  *
  */
 package test;
 
-import edu.dartmouth.AstroAlmanac;
 import edu.dartmouth.AstroSkyCalc;
 import fr.jmmc.aspro.model.ConfigurationManager;
 import fr.jmmc.aspro.model.oi.InterferometerConfiguration;
@@ -101,7 +103,6 @@ public final class LSTTest {
 
     double jdLower, jdUpper, jdMidnight;
     Date dateMin, dateMax;
-    AstroAlmanac almanac;
     double len;
 
     do {
@@ -110,15 +111,6 @@ public final class LSTTest {
 
       // find the julian date corresponding to the LST origin LST=00:00:00 for the given date :
       jdLower = sc.defineDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH) + 1, cal.get(Calendar.DAY_OF_MONTH));
-
-      // check jdLst0 > jdUt12:
-      len = sc.getJdForLst0() - sc.getJdLt12();
-      if (len < 0d) {
-        throw new RuntimeException("jdLst0 [" + sc.getJdForLst0() + "]  is before jdLt12[" + sc.getJdLt12() + "]");
-      }
-      if (len > 1d) {
-        throw new RuntimeException("jdLst0 is next day [" + sc.getJdForLst0() + "]  - jdLt12[" + sc.getJdLt12() + "]");
-      }
 
       // find the julian date corresponding to LST=00:00:00 next day:
       jdUpper = sc.findJdForLst0(jdLower + AstroSkyCalc.LST_DAY_IN_JD);
@@ -154,22 +146,15 @@ public final class LSTTest {
 
       // 1 - Find the day / twlight / night zones :
       if (useNightLimit) {
-        //  sun rise/set with twilight : see NightlyAlmanac
-        almanac = sc.getAlmanac();
 
         if (doCenterMidnight) {
-          jdMidnight = sc.findMidnight(almanac);
+          jdMidnight = sc.getJdMidnight();
 
 //          logger.severe("jdMidnight = " + jdMidnight);
 
-          // check jdLst0 > jdUt12:
-          if (jdMidnight < sc.getJdLt12()) {
-            throw new RuntimeException("jdMidnight [" + jdMidnight + "]  is before jdLt12[" + sc.getJdLt12() + "]");
-          }
-
           // adjust the jd bounds :
-          jdLower = jdMidnight - AstroSkyCalc.lst2jd(12d);
-          jdUpper = jdMidnight + AstroSkyCalc.lst2jd(12d);
+          jdLower = jdMidnight - AstroSkyCalc.HALF_LST_DAY_IN_JD;
+          jdUpper = jdMidnight + AstroSkyCalc.HALF_LST_DAY_IN_JD;
 
 //          logger.severe("jdLower = " + jdLower);
 //          logger.severe("jdUpper = " + jdUpper);
