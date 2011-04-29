@@ -35,15 +35,42 @@ public final class SunTimeInterval extends DateTimeInterval {
   public enum SunType {
 
     /** DAY */
-    Day,
+    Day(0),
     /** NIGHT */
-    Night,
+    Night(-18),
     /** ASTRONOMICAL TWILIGHT */
-    AstronomicalTwilight,
+    AstronomicalTwilight(-15),
     /** NAUTICAL TWILIGHT */
-    NauticalTwilight,
+    NauticalTwilight(-9),
     /** CIVIL TWILIGHT */
-    CivilTwilight
+    CivilTwilight(-3);
+    /** sun elevation used to determine night */
+    private int sunElevation;
+
+    /**
+     * Constructor with sun elevation
+     * @param sunElevation sun elevation
+     */
+    private SunType(final int sunElevation) {
+      this.sunElevation = sunElevation;
+    }
+
+    /**
+     * Return true if that type can be considered as night using the given criteria
+     * @param limit sun type considered as night
+     * @return true if that type can be considered as night
+     */
+    public boolean isNight(final SunType limit) {
+      return getSunElevation() - limit.getSunElevation() <= 0;
+    }
+
+    /**
+     * Return the mean sun elevation
+     * @return sun elevation
+     */
+    public int getSunElevation() {
+      return sunElevation;
+    }
   }
   /** type of the interval : DAY / NIGHT / TWILIGHTS (ASTRO / NAUTIC / CIVIL) */
   private final SunType type;
