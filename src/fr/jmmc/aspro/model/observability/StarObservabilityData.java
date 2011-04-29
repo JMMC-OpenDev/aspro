@@ -64,11 +64,11 @@ public final class StarObservabilityData {
   /** type of data */
   private final int type;
   /** visible date intervals */
-  private final List<DateTimeInterval> visible = new ArrayList<DateTimeInterval>();
+  private final List<DateTimeInterval> visible = new ArrayList<DateTimeInterval>(3);
   /** transit date */
   private Date transitDate;
   /** elevation sampled data */
-  private final List<ElevationDate> elevations = new ArrayList<ElevationDate>();
+  private final List<ElevationDate> elevations = new ArrayList<ElevationDate>(8);
 
   /**
    * Constructor
