@@ -30,6 +30,7 @@ import java.util.logging.Level;
  * @author bourgesl
  */
 public final class AstroSkyCalcObservation {
+
   /** Class logger */
   private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(AstroSkyCalcObservation.class.getName());
 
@@ -170,6 +171,17 @@ public final class AstroSkyCalcObservation {
   }
 
   // static methods :
+  /**
+   * Return a string representation for RA (hms) and DEC (dms) with 3 digits
+   * @param ra right ascension in deg
+   * @param dec declination in deg
+   * @return string containing 'RA (hms) DEC (dms)'
+   */
+  public static String asString(final double ra, final double dec) {
+    final String[] raDec = toString(ra, 3, dec, 3);
+    return raDec[0] + " " + raDec[1];
+  }
+
   /**
    * Return a string representation for RA (hms) and DEC (dms) with 3 digits
    * @param ra right ascension in deg
