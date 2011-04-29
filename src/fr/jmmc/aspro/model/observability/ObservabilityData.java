@@ -55,6 +55,7 @@ import edu.dartmouth.AstroSkyCalc;
 import fr.jmmc.aspro.model.BaseLine;
 import fr.jmmc.aspro.model.Beam;
 import fr.jmmc.aspro.model.ObservationVersion;
+import fr.jmmc.aspro.model.observability.SunTimeInterval.SunType;
 import fr.jmmc.aspro.model.oi.Target;
 import java.util.Date;
 import java.util.HashMap;
@@ -77,6 +78,10 @@ public final class ObservabilityData {
   private final boolean doBaseLineLimits;
   /** flag to produce detailed output with all BL / horizon / rise intervals per target */
   private final boolean doDetailedOutput;
+  /** flag to center the plot arround midnight */
+  private final boolean doCenterMidnight;
+  /** twilight considered as night limit */
+  private final SunType twilightNightLimit;
 
   /* observability plot data */
   /** starting date */
@@ -115,11 +120,14 @@ public final class ObservabilityData {
    * @param doDetailedOutput flag to produce detailed output with all BL / horizon / rise intervals per target
    * @param doBaseLineLimits flag to find base line limits
    */
-  public ObservabilityData(final ObservationVersion version, final boolean useLST, final boolean doDetailedOutput, final boolean doBaseLineLimits) {
+  public ObservabilityData(final ObservationVersion version, final boolean useLST, final boolean doDetailedOutput, final boolean doBaseLineLimits,
+                           final boolean doCenterMidnight, final SunType twilightNightLimit) {
     this.version = version;
     this.useLST = useLST;
     this.doDetailedOutput = doDetailedOutput;
     this.doBaseLineLimits = doBaseLineLimits;
+    this.doCenterMidnight = doCenterMidnight;
+    this.twilightNightLimit = twilightNightLimit;
   }
 
   /* version */
@@ -154,6 +162,22 @@ public final class ObservabilityData {
    */
   public boolean isDoDetailedOutput() {
     return doDetailedOutput;
+  }
+
+  /**
+   * Return the flag to center the plot arround midnight
+   * @return flag to center the plot arround midnight
+   */
+  public boolean isDoCenterMidnight() {
+    return doCenterMidnight;
+  }
+
+  /**
+   * Return the twilight considered as night limit
+   * @return twilight considered as night limit
+   */
+  public SunType getTwilightNightLimit() {
+    return twilightNightLimit;
   }
 
   /* outputs */

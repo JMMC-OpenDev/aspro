@@ -57,6 +57,7 @@
 package edu.dartmouth;
 
 import edu.dartmouth.AstroAlmanacTime.AlmanacType;
+import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.Range;
 import fr.jmmc.aspro.model.oi.LonLatAlt;
 import fr.jmmc.aspro.util.AngleUtils;
@@ -144,37 +145,36 @@ public final class AstroSkyCalc {
    * @return jd corresponding to LST=00:00:00 for the current date night
    */
   public double defineDate(final int year, final int month, final int day) {
-    // yyyy mm dd hh:mm
-    final String dateTime = year + " " + month + " " + day + " 12:00";
+    // find midnight first:
+    final String dateTime = year + " " + month + " " + day + " 24:00";
 
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("dateTime : " + dateTime);
     }
 
-    // Define date as 12:00 (local time) :
-    final WhenWhere ww = new WhenWhere(new InstantInTime(dateTime, this.site.stdz, this.site.use_dst, false),
-            this.site);
+    // Define date as 24:00 (local time) :
+    final WhenWhere ww = new WhenWhere(new InstantInTime(dateTime, this.site.stdz, this.site.use_dst, false), this.site);
 
     if (logger.isLoggable(Level.FINE)) {
-      AstroSkyCalc.dumpWhen(ww, "LocalTime at 12:00");
+      AstroSkyCalc.dumpWhen(ww, "LocalTime at 24:00");
     }
 
-    // Define the julian date corresponding to LT=12:00:00 for the given date :
-    final double jdLt12 = ww.when.jd;
-
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("jdLt12 = " + jdLt12);
-    }
-
-    // midnight (local time) for the given date to locate LST origin arround:
-    this.jdMidnight = jdLt12 + 0.5d;
+    // Define the julian date corresponding to LT=24:00:00 for the given date :
+    // i.e. midnight (local time):
+    this.jdMidnight = ww.when.jd;
 
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("jdMidnight : " + this.jdMidnight);
     }
 
-    // Find the julian date corresponding to the LST origin LST=00:00:00 arround the given date :
-    final InstantInTime lst0 = findLst0(this.jdMidnight);
+    // Find the julian date corresponding to the LST origin LST=00:00:00 before the given midnight:
+    // note: lst0 is in range [-24 (lst); -0] relative to midnight to have LST[0-24]:
+
+    // TODO : explain why:
+    // case 1: JD in [LST0; LST24] frame => LST[-12;36] (target HA in [-12; +12])
+    // case 2: JD in [Midnight - 12 (midday 1); Midnight + 12 (midday2)] frame ...
+
+    final InstantInTime lst0 = findLst0(this.jdMidnight - HALF_LST_DAY_IN_JD);
 
     this.jdLst0 = lst0.jd;
 
@@ -212,9 +212,9 @@ public final class AstroSkyCalc {
   }
 
   /**
-   * Find the jd time value corresponding to LST=00:00:00 arround the given jd date
+   * Find the jd date corresponding to LST=00:00:00 arround the given jd date
    *
-   * Note : accurate +/-12 h within the given date
+   * Note : accurate +/-12 h within the given jd date
    *
    * @param jd julian date
    *
@@ -331,6 +331,10 @@ public final class AstroSkyCalc {
         days += MSEC_IN_DEC_HOUR;
         if (days > 1d) {
           ndays = (int) Math.floor(days);
+          if (calendar.get(Calendar.DAY_OF_MONTH) != this.dateLst0.get(Calendar.DAY_OF_MONTH)) {
+            // calendar has already one day more (rounding issue occuring when sidereal time = 23.9999...):
+            ndays--;
+          }
         }
       } else if (days < 0d) {
         ndays = -1;
@@ -416,6 +420,20 @@ public final class AstroSkyCalc {
 
     Set<AstroAlmanacTime> refTimes;
 
+    // SUN:
+    refTimes = almanacNight.getSunTimes();
+    final Set<AstroAlmanacTime> sunTimes = almanac.getSunTimes();
+
+    // MIDNIGHT - 1DAY :
+    AstroAlmanac.translate(-LST_DAY_IN_JD, refTimes, sunTimes);
+    // MIDNIGHT :
+    sunTimes.addAll(refTimes);
+    // MIDNIGHT + 1DAY :
+    AstroAlmanac.translate(+LST_DAY_IN_JD, refTimes, sunTimes);
+    // MIDNIGHT + 2DAY :
+    AstroAlmanac.translate(2d * LST_DAY_IN_JD, refTimes, sunTimes);
+
+
     // Hack on moon to have still fake moon ranges (rise / set):
     // findMoonRiseSet returns ranges if (rise / set) couples are present!
 
@@ -430,82 +448,14 @@ public final class AstroSkyCalc {
     moonTimes.addAll(refTimes);
     // MIDNIGHT + 1DAY :
     AstroAlmanac.translate(+LST_DAY_IN_JD, refTimes, moonTimes);
-
-    // SUN:
-    refTimes = almanacNight.getSunTimes();
-    final Set<AstroAlmanacTime> sunTimes = almanac.getSunTimes();
-
-    // MIDNIGHT - 1DAY :
-    AstroAlmanac.translate(-LST_DAY_IN_JD, refTimes, sunTimes);
-    // MIDNIGHT :
-    sunTimes.addAll(refTimes);
-    // MIDNIGHT + 1DAY :
-    AstroAlmanac.translate(+LST_DAY_IN_JD, refTimes, sunTimes);
     // MIDNIGHT + 2DAY :
-    AstroAlmanac.translate(2d * LST_DAY_IN_JD, refTimes, sunTimes);
+    AstroAlmanac.translate(2d * LST_DAY_IN_JD, refTimes, moonTimes);
 
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("almanac: " + almanac);
     }
 
     return almanac;
-  }
-
-  /**
-   * Return the list of Sun events in range [jdLower; jdUpper] +/- 12h
-   * @param almanac almanac instance
-   * @param jdLower lower jd
-   * @param jdUpper upper jd
-   * @return list of Sun events
-   */
-  public List<AstroAlmanacTime> findSunRiseSet(final AstroAlmanac almanac, final double jdLower, final double jdUpper) {
-
-    final double jd0 = jdLower - HALF_LST_DAY_IN_JD;
-    final double jd1 = jdUpper + HALF_LST_DAY_IN_JD;
-
-    final List<AstroAlmanacTime> sorted = new ArrayList<AstroAlmanacTime>(almanac.getSunTimes());
-
-    // find indexes inside the range [jd0; jd1] :
-    int i0 = -1;
-    int i1 = -1;
-    AstroAlmanacTime sunTime;
-
-    for (int i = 0, len = sorted.size(); i < len; i++) {
-      sunTime = sorted.get(i);
-
-//      if (logger.isLoggable(Level.FINE)) {
-//        dumpWhen(new WhenWhere(sunTime.getJd(), this.site, false), sunTime.getType().name());
-//      }
-
-      if ((sunTime.getJd() >= jd0) && (i0 == -1)) {
-        // include previous event :
-        i0 = (i > 0) ? (i - 1) : 0;
-      }
-
-      if (sunTime.getJd() > jd1) {
-        // include next event :
-        i1 = i;
-        break;
-      }
-    }
-
-    if (logger.isLoggable(Level.FINEST)) {
-      logger.finest("filtered sun events :");
-    }
-
-    final List<AstroAlmanacTime> result = new ArrayList<AstroAlmanacTime>(i1 - i0 + 1);
-
-    for (int i = i0; i <= i1; i++) {
-      sunTime = sorted.get(i);
-
-//      if (logger.isLoggable(Level.FINEST)) {
-//        AstroSkyCalc.dumpWhen(new WhenWhere(sunTime.getJd(), this.site, false), sunTime.getType().name());
-//      }
-
-      result.add(sunTime);
-    }
-
-    return result;
   }
 
   /**
@@ -631,8 +581,80 @@ public final class AstroSkyCalc {
   }
 
   /**
+   * Convert an HA range to a JD range.
+   * Returned JD values are in range [LST0 - 12; LST0 + 12]
+   *
+   * @param rangeHA given in hour angle (dec hours)
+   * @param precRA precessed target right ascension in decimal hours
+   * @return JD range
+   */
+  public Range convertHAToJDRange(final Range rangeHA, final double precRA) {
+    final double ha1 = rangeHA.getMin();
+    final double ha2 = rangeHA.getMax();
+
+    if (logger.isLoggable(Level.FINEST)) {
+      logger.finest("ha1 = " + ha1);
+      logger.finest("ha2 = " + ha2);
+    }
+
+    final double jd1 = convertHAToJD(ha1, precRA);
+    final double jd2 = convertHAToJD(ha2, precRA);
+
+    if (logger.isLoggable(Level.FINEST)) {
+      logger.finest("jd1 = " + toDateLST(jd1));
+      logger.finest("jd2 = " + toDateLST(jd2));
+    }
+
+    return new Range(jd1, jd2);
+  }
+
+  /**
+   * Convert a JD range to an HA range but keep only ranges with an HA in [-12;12]
+   * @param rangeJD JD range
+   * @param precRA precessed target right ascension in decimal hours
+   * @return HA range in [-12;12]
+   */
+  public Range convertJDToHARange(final Range rangeJD, final double precRA) {
+
+    final double jd1 = rangeJD.getMin();
+    final double jd2 = rangeJD.getMax();
+
+    if (logger.isLoggable(Level.FINEST)) {
+      logger.finest("jd1 = " + toDateLST(jd1));
+      logger.finest("jd2 = " + toDateLST(jd2));
+    }
+
+    double ha1 = convertJDToHA(jd1, precRA);
+    double ha2 = convertJDToHA(jd2, precRA);
+
+    // TODO: check modulo 24H ???
+
+    if (ha1 < AsproConstants.HA_MIN) {
+      ha1 = AsproConstants.HA_MIN;
+    }
+    if (ha1 > AsproConstants.HA_MAX) {
+      // invalid range :
+      return null;
+    }
+    if (ha2 < AsproConstants.HA_MIN) {
+      // invalid range :
+      return null;
+    }
+    if (ha2 > AsproConstants.HA_MAX) {
+      ha2 = AsproConstants.HA_MAX;
+    }
+
+    if (logger.isLoggable(Level.FINEST)) {
+      logger.finest("ha1 = " + ha1 + " h");
+      logger.finest("ha2 = " + ha2 + " h");
+    }
+
+    return new Range(ha1, ha2);
+  }
+
+  /**
    * Convert a decimal hour angle in Julian day using internal LST0 reference.
-   * Returned JD value is in range [LST0 - 12; LST0 + 12]
+   * Returned JD value is in range [LST0 - 12; LST0 + 36]
    * @param ha decimal hour angle
    * @param precRA precessed target right ascension in decimal hours
    * @return JD value

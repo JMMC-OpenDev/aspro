@@ -252,6 +252,7 @@ import fr.jmmc.aspro.model.observability.ElevationDate;
 import fr.jmmc.aspro.model.observability.StarData;
 import fr.jmmc.aspro.model.observability.StarObservabilityData;
 import fr.jmmc.aspro.model.observability.SunTimeInterval;
+import fr.jmmc.aspro.model.observability.SunTimeInterval.SunType;
 import fr.jmmc.aspro.model.oi.AzEl;
 import fr.jmmc.aspro.model.oi.Channel;
 import fr.jmmc.aspro.model.oi.ChannelLink;
@@ -314,6 +315,8 @@ public final class ObservabilityService {
   private final boolean doDetailedOutput;
   /** flag to center the plot arround midnight */
   private final boolean doCenterMidnight;
+  /** twilight considered as night limit */
+  private final SunType twilightNightLimit;
 
   /* internal */
   /** Get the current thread to check if the computation is interrupted */
@@ -362,19 +365,21 @@ public final class ObservabilityService {
    * @param doDetailedOutput flag to produce detailed output with all BL / horizon / rise intervals per target
    * @param doBaseLineLimits flag to find base line limits
    * @param doCenterMidnight flag to center JD range arround midnight
+   * @param twilightNightLimit twilight considered as night limit
    */
   public ObservabilityService(final ObservationSetting observation,
                               final boolean useLST, final boolean doDetailedOutput, final boolean doBaseLineLimits,
-                              final boolean doCenterMidnight) {
+                              final boolean doCenterMidnight, final SunType twilightNightLimit) {
     // Inputs :
     this.observation = observation;
     this.useLST = useLST;
     this.doDetailedOutput = doDetailedOutput;
     this.doBaseLineLimits = doBaseLineLimits;
     this.doCenterMidnight = doCenterMidnight;
+    this.twilightNightLimit = twilightNightLimit;
 
     // create the observability data corresponding to the observation version :
-    this.data = new ObservabilityData(observation.getVersion(), useLST, doDetailedOutput, doBaseLineLimits);
+    this.data = new ObservabilityData(observation.getVersion(), useLST, doDetailedOutput, doBaseLineLimits, doCenterMidnight, twilightNightLimit);
   }
 
   /**
@@ -413,7 +418,7 @@ public final class ObservabilityService {
   private ObservabilityService(final ObservationSetting observation,
                                final Target target, final double minElev, final boolean ignoreNightLimits) {
     // use LST :
-    this(observation, true, false, false, false);
+    this(observation, true, false, false, false, SunType.Night);
 
     // select target :
     this.selectedTarget = target;
@@ -542,8 +547,8 @@ public final class ObservabilityService {
     this.jdUpper = this.sc.findJdForLst0(this.jdLower + AstroSkyCalc.LST_DAY_IN_JD);
 
     if (logger.isLoggable(Level.FINE)) {
-      logger.fine("jdLower = " + this.jdLower);
-      logger.fine("jdUpper = " + this.jdUpper);
+      logger.fine("jdLst0 = " + this.jdLower);
+      logger.fine("jdLst24 = " + this.jdUpper);
     }
 
     this.data.setDateMin(jdToDate(this.jdLower));
@@ -562,7 +567,7 @@ public final class ObservabilityService {
     // 1 - Find the day / twlight / night zones :
     if (this.useNightLimit) {
       // initialize night limits anyway:
-      this.nightLimits = new ArrayList<Range>(3);
+      this.nightLimits = new ArrayList<Range>(2);
 
       if (this.doCenterMidnight) {
         final double jdMidnight = this.sc.getJdMidnight();
@@ -592,15 +597,11 @@ public final class ObservabilityService {
       //  sun rise/set with twilight : see NightlyAlmanac
       final AstroAlmanac almanac = this.sc.getAlmanac();
 
-      // Use the LST range [0;24h] +/- 12h to have valid night ranges to merge with target ranges :
-      final List<AstroAlmanacTime> sunEvents = this.sc.findSunRiseSet(almanac, this.jdLower, this.jdUpper);
+      // get sun times arround midnight (-1 day; + 2 days):
+      final List<AstroAlmanacTime> sunTimes = new ArrayList<AstroAlmanacTime>(almanac.getSunTimes());
 
-      // TODO : use two filters:
-      // 1-Display (sun intervals) : in jdLower / jdUpper
-
-      // 2-Night limits in [LST0 -12; LST0 + 36]
-
-      processSunAlmanach(sunEvents);
+      // Extract night limits in [LST0 -12; LST0 + 36] and sun intervals in range [jdLower; jdUpper]:
+      processSunAlmanach(sunTimes);
 
       // moon rise/set :
       final List<Range> moonRanges = this.sc.findMoonRiseSet(almanac, this.jdLower, this.jdUpper);
@@ -844,7 +845,7 @@ public final class ObservabilityService {
 
         Range rangeHA = null;
         for (Range rangeJD : this.nightLimits) {
-          rangeHA = convertJDToHARange(rangeJD, precRA);
+          rangeHA = this.sc.convertJDToHARange(rangeJD, precRA);
           if (rangeHA != null) {
             haNightLimits.add(rangeHA);
           }
@@ -901,6 +902,12 @@ public final class ObservabilityService {
     // precessed target declination in degrees :
     final double precDEC = raDec[1];
 
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("target[" + target.getName() + "] "
+              + AstroSkyCalcObservation.asString(target.getRADeg(), target.getDECDeg())
+              + " - precessed: " + AstroSkyCalcObservation.asString(15d * precRA, precDEC));
+    }
+
     // define transit date (HA = 0) :
     starObs.setTransitDate(convertJDToDate(this.sc.convertHAToJD(0d, precRA)));
 
@@ -936,7 +943,7 @@ public final class ObservabilityService {
 
           Range rangeHA = null;
           for (Range rangeJD : this.nightLimits) {
-            rangeHA = convertJDToHARange(rangeJD, precRA);
+            rangeHA = this.sc.convertJDToHARange(rangeJD, precRA);
             if (rangeHA != null) {
               haNightLimits.add(rangeHA);
             }
@@ -962,7 +969,7 @@ public final class ObservabilityService {
       }
 
       // convert HA range to JD range in range [LST0 - 12; LST0 + 12]
-      final Range rangeJDRiseSet = convertHAToJDRange(rangeHARiseSet, precRA);
+      final Range rangeJDRiseSet = this.sc.convertHAToJDRange(rangeHARiseSet, precRA);
 
       // For now : only VLTI has horizon profiles :
       List<Range> rangesJDHorizon = null;
@@ -1012,7 +1019,7 @@ public final class ObservabilityService {
 
             if (ranges != null) {
               for (Range range : ranges) {
-                obsRanges.add(convertHAToJDRange(range, precRA));
+                obsRanges.add(this.sc.convertHAToJDRange(range, precRA));
               }
             }
             if (logger.isLoggable(Level.FINE)) {
@@ -1027,8 +1034,10 @@ public final class ObservabilityService {
             for (Range range : obsRanges) {
               convertRangeToDateInterval(range, soBl.getVisible());
             }
-            // merge contiguous date ranges :
-            mergeDateIntervals(soBl.getVisible());
+            if (soBl.getVisible().size() > 1) {
+              // merge contiguous date ranges :
+              DateTimeInterval.merge(soBl.getVisible());
+            }
 
             if (logger.isLoggable(Level.FINE)) {
               logger.fine("Date ranges  : " + soBl.getVisible());
@@ -1048,7 +1057,7 @@ public final class ObservabilityService {
       for (List<Range> ranges : rangesHABaseLines) {
         if (ranges != null) {
           for (Range range : ranges) {
-            obsRanges.add(convertHAToJDRange(range, precRA));
+            obsRanges.add(this.sc.convertHAToJDRange(range, precRA));
           }
         }
       }
@@ -1072,7 +1081,7 @@ public final class ObservabilityService {
       }
 
       // finally : merge intervals :
-      final List<Range> finalRanges = Range.mergeRanges(obsRanges, nValid);
+      final List<Range> finalRanges = Range.intersectRanges(obsRanges, nValid);
 
       if (logger.isLoggable(Level.FINE)) {
         logger.fine("finalRanges : " + finalRanges);
@@ -1087,15 +1096,17 @@ public final class ObservabilityService {
         for (Range range : finalRanges) {
           convertRangeToDateInterval(range, starObs.getVisible());
         }
-        // merge contiguous date ranges :
-        mergeDateIntervals(starObs.getVisible());
+        if (starObs.getVisible().size() > 1) {
+          // merge contiguous date ranges :
+          DateTimeInterval.merge(starObs.getVisible());
+        }
 
         // update Star Data :
         final List<Range> haObsRanges = new ArrayList<Range>(2);
 
         Range rangeHA = null;
         for (Range rangeJD : finalRanges) {
-          rangeHA = convertJDToHARange(rangeJD, precRA);
+          rangeHA = this.sc.convertJDToHARange(rangeJD, precRA);
           if (rangeHA != null) {
             haObsRanges.add(rangeHA);
           }
@@ -1707,58 +1718,73 @@ public final class ObservabilityService {
 
   /**
    * Process the sun time stamps to have both night limits in the LST range [0;24] +/- 12h
-   * and all intervals (day/night/twilight) in the LST range [0;24]
-   * @param sunEvents jd sun events in the LST range [0;24] +/- 12h
+   * and all intervals (day/night/twilights) in the jd bounds [jdLower; jdUpper]
+   * @param sunTimes jd sun almanach times arround midnight (-1 day; + 2 days)
    */
-  private void processSunAlmanach(final List<AstroAlmanacTime> sunEvents) {
+  private void processSunAlmanach(final List<AstroAlmanacTime> sunTimes) {
     List<SunTimeInterval> intervals = null;
 
-    if (sunEvents != null && !sunEvents.isEmpty()) {
-      final int nbInterval = sunEvents.size() - 1;
+    if (sunTimes != null && !sunTimes.isEmpty()) {
+      final int nbInterval = sunTimes.size() - 1;
       intervals = new ArrayList<SunTimeInterval>();
+
+      // LST0 reference used to convert HA in JD:
+      final double jdLst0 = this.sc.getJdForLst0();
+      // lower LST bound = LST0 - 12h
+      final double jdLstLower = jdLst0 - AstroSkyCalc.HALF_LST_DAY_IN_JD;
+      // upper LST bound = LST0 + 24h + 12h
+      final double jdLstUpper = jdLst0 + 3d * AstroSkyCalc.HALF_LST_DAY_IN_JD;
+
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("jdLst bounds = [" + jdLstLower + ", " + jdLstUpper + "]");
+      }
 
       AstroAlmanacTime stFrom, stTo;
       double jdFrom, jdTo;
       Date from, to;
-      SunTimeInterval.SunType type = null;
+      SunType type = null;
 
       for (int i = 0; i < nbInterval; i++) {
-        stFrom = sunEvents.get(i);
-        stTo = sunEvents.get(i + 1);
+        stFrom = sunTimes.get(i);
+        stTo = sunTimes.get(i + 1);
 
         jdFrom = stFrom.getJd();
         jdTo = stTo.getJd();
 
         switch (stFrom.getType()) {
           case SunTwl18Rise:
-            type = SunTimeInterval.SunType.AstronomicalTwilight;
+            type = SunType.AstronomicalTwilight;
             break;
           case SunTwl12Rise:
-            type = SunTimeInterval.SunType.NauticalTwilight;
+            type = SunType.NauticalTwilight;
             break;
           case SunTwl06Rise:
-            type = SunTimeInterval.SunType.CivilTwilight;
+            type = SunType.CivilTwilight;
             break;
           case SunRise:
-            type = SunTimeInterval.SunType.Day;
+            type = SunType.Day;
             break;
           case SunSet:
-            type = SunTimeInterval.SunType.CivilTwilight;
+            type = SunType.CivilTwilight;
             break;
           case SunTwl06Set:
-            type = SunTimeInterval.SunType.NauticalTwilight;
+            type = SunType.NauticalTwilight;
             break;
           case SunTwl12Set:
-            type = SunTimeInterval.SunType.AstronomicalTwilight;
+            type = SunType.AstronomicalTwilight;
             break;
           case SunTwl18Set:
-            type = SunTimeInterval.SunType.Night;
+            type = SunType.Night;
             break;
           default:
+            type = null;
         }
 
-        if (type == SunTimeInterval.SunType.Night) {
-          this.nightLimits.add(new Range(jdFrom, jdTo));
+        if (type != null && type.isNight(this.twilightNightLimit)) {
+          // Keep nights that are inside or overlapping the range [jdLstLower; jdLstUpper] range :
+          if ((jdFrom >= jdLstLower && jdFrom <= jdLstUpper) || (jdTo >= jdLstLower && jdTo <= jdLstUpper)) {
+            this.nightLimits.add(new Range(jdFrom, jdTo));
+          }
         }
 
         // Keep intervals that are inside or overlapping the range [jdLower; jdUpper] range :
@@ -1779,83 +1805,15 @@ public final class ObservabilityService {
         }
       }
 
+      // merge contiguous intervals (already ordered):
+      Range.union(this.nightLimits);
+
       if (logger.isLoggable(Level.FINE)) {
         logger.fine("nightLimits : " + this.nightLimits);
       }
     }
 
     this.data.setSunIntervals(intervals);
-  }
-
-  /**
-   * Convert an HA range to a JD range.
-   * Returned JD values are in range [LST0 - 12; LST0 + 12]
-   *
-   * @param rangeHA given in hour angle (dec hours)
-   * @param precRA precessed target right ascension in decimal hours
-   * @return JD range
-   */
-  private Range convertHAToJDRange(final Range rangeHA, final double precRA) {
-
-    final double ha1 = rangeHA.getMin();
-    final double ha2 = rangeHA.getMax();
-
-    if (logger.isLoggable(Level.FINEST)) {
-      logger.finest("ha1 = " + ha1);
-      logger.finest("ha2 = " + ha2);
-    }
-
-    final double jd1 = this.sc.convertHAToJD(ha1, precRA);
-    final double jd2 = this.sc.convertHAToJD(ha2, precRA);
-
-    if (logger.isLoggable(Level.FINEST)) {
-      logger.finest("jd1 = " + this.sc.toDateLST(jd1));
-      logger.finest("jd2 = " + this.sc.toDateLST(jd2));
-    }
-
-    return new Range(jd1, jd2);
-  }
-
-  /**
-   * Convert a JD range to an HA range but keep only ranges with an HA in [-12;12]
-   * @param rangeJD JD range
-   * @param precRA precessed target right ascension in decimal hours
-   * @return HA range in [-12;12]
-   */
-  private Range convertJDToHARange(final Range rangeJD, final double precRA) {
-
-    final double jd1 = rangeJD.getMin();
-    final double jd2 = rangeJD.getMax();
-
-    if (logger.isLoggable(Level.FINEST)) {
-      logger.finest("jd1 = " + this.sc.toDateLST(jd1));
-      logger.finest("jd2 = " + this.sc.toDateLST(jd2));
-    }
-
-    double ha1 = this.sc.convertJDToHA(jd1, precRA);
-    double ha2 = this.sc.convertJDToHA(jd2, precRA);
-
-    if (ha1 < AsproConstants.HA_MIN) {
-      ha1 = AsproConstants.HA_MIN;
-    }
-    if (ha1 > AsproConstants.HA_MAX) {
-      // invalid range :
-      return null;
-    }
-    if (ha2 < AsproConstants.HA_MIN) {
-      // invalid range :
-      return null;
-    }
-    if (ha2 > AsproConstants.HA_MAX) {
-      ha2 = AsproConstants.HA_MAX;
-    }
-
-    if (logger.isLoggable(Level.FINEST)) {
-      logger.finest("ha1 = " + ha1 + " h");
-      logger.finest("ha2 = " + ha2 + " h");
-    }
-
-    return new Range(ha1, ha2);
   }
 
   /**
@@ -1918,51 +1876,9 @@ public final class ObservabilityService {
   }
 
   /**
-   * Sort and traverse the given list of date intervals to merge contiguous intervals.
-   * This fixes the problem due to HA limit [+/-12h] i.e. the converted JD / Date ranges
-   * can have a discontinuity on the date axis.
-   *
-   * @param intervals date intervals to fix
-   */
-  private void mergeDateIntervals(final List<DateTimeInterval> intervals) {
-    // first sort date intervals :
-    Collections.sort(intervals);
-    mergeSortedDateIntervals(intervals);
-  }
-
-  /**
-   * Traverse the given list of date intervals to merge contiguous intervals.
-   * This fixes the problem due to HA limit [+/-12h] i.e. the converted JD / Date ranges
-   * can have a discontinuity on the date axis.
-   *
-   * @param intervals SORTED date intervals to fix
-   */
-  private void mergeSortedDateIntervals(final List<DateTimeInterval> intervals) {
-    final int size = intervals.size();
-    if (size > 1) {
-      DateTimeInterval interval = null;
-      DateTimeInterval interval2 = null;
-      for (int i = 0, j = 1, end = size - 1; i < end; i++, j++) {
-        interval = intervals.get(i);
-        interval2 = intervals.get(j);
-
-        if (interval.getEndDate().compareTo(interval2.getStartDate()) == 0) {
-          // merge interval :
-          intervals.set(i, new DateTimeInterval(interval.getStartDate(), interval2.getEndDate()));
-          // merge interval2 :
-          intervals.remove(j);
-          end--;
-        }
-      }
-    }
-  }
-
-  /**
    * Convert a JD date to a date within LST range [0;24]
-   * Note : due to HA limit [+/-12h], the converted JD / Date ranges
-   * can have a discontinuity on the date axis !
    *
-   * @param jd range to convert
+   * @param jd date to convert
    * @return date
    */
   private final Date convertJDToDate(final double jd) {
@@ -2132,18 +2048,20 @@ public final class ObservabilityService {
    */
   public List<DateTimeInterval> convertHARangesToDateInterval(final List<Range> ranges, final double precRA) {
     if (ranges != null) {
-      final List<Range> jdRanges = new ArrayList<Range>();
+      final List<Range> jdRanges = new ArrayList<Range>(ranges.size());
       for (Range range : ranges) {
-        jdRanges.add(convertHAToJDRange(range, precRA));
+        jdRanges.add(this.sc.convertHAToJDRange(range, precRA));
       }
 
-      final List<DateTimeInterval> dateIntervals = new ArrayList<DateTimeInterval>();
+      final List<DateTimeInterval> dateIntervals = new ArrayList<DateTimeInterval>(jdRanges.size() + 2);
       // convert JD ranges to date ranges :
       for (Range range : jdRanges) {
         convertRangeToDateInterval(range, dateIntervals);
       }
-      // merge contiguous date ranges :
-      mergeDateIntervals(dateIntervals);
+      if (dateIntervals.size() > 1) {
+        // merge contiguous date ranges :
+        DateTimeInterval.merge(dateIntervals);
+      }
 
       // Replace the 24:00:00 date by 00:00:00 to merge contiguous intervals in LST :
       final Calendar cal = new GregorianCalendar();
@@ -2177,7 +2095,7 @@ public final class ObservabilityService {
         Collections.reverse(dateIntervals);
 
         // merge contiguous date ranges :
-        mergeSortedDateIntervals(dateIntervals);
+        DateTimeInterval.mergeSorted(dateIntervals);
 
         if (dateIntervals.size() > 1) {
           Collections.sort(dateIntervals);

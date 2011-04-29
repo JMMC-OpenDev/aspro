@@ -66,7 +66,7 @@ public final class PopObservabilityData implements Comparable<PopObservabilityDa
     }
 
     // Merge HA ranges with HA Rise/set ranges :
-    this.mergeRanges = Range.mergeRanges(flatRanges, nValid);
+    this.mergeRanges = Range.intersectRanges(flatRanges, nValid);
 
     double maxLen = 0d;
 

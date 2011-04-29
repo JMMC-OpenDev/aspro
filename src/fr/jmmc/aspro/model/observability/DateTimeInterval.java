@@ -18,7 +18,9 @@
  */
 package fr.jmmc.aspro.model.observability;
 
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 /**
  * This class contains a simple date/time interval
@@ -29,7 +31,7 @@ public class DateTimeInterval implements Comparable<DateTimeInterval> {
   /** starting date/time */
   private final Date startDate;
   /** ending date/time */
-  private final Date endDate;
+  private Date endDate;
 
   /**
    * Public constructor
@@ -42,12 +44,16 @@ public class DateTimeInterval implements Comparable<DateTimeInterval> {
   }
 
   /**
-   * Simple comparator that takes into account only the starting date
+   * Simple comparator that takes into account the starting date and finally the ending date if start dates are equals
    * @param other date interval
    * @return Double.compare(startDate1, startDate2)
    */
   public final int compareTo(final DateTimeInterval other) {
-    return this.startDate.compareTo(other.getStartDate());
+    int diff = this.startDate.compareTo(other.getStartDate());
+    if (diff == 0) {
+      diff = this.endDate.compareTo(other.getEndDate());
+    }
+    return diff;
   }
 
   /**
@@ -67,11 +73,57 @@ public class DateTimeInterval implements Comparable<DateTimeInterval> {
   }
 
   /**
+   * Update the ending date/time
+   * @param endDate ending date/time
+   */
+  public final void setEndDate(final Date endDate) {
+    this.endDate = endDate;
+  }
+
+  /**
    * Return a string representation "[startDate - endDate]"
    * @return "[startDate - endDate]"
    */
   @Override
   public final String toString() {
     return "[" + this.startDate + " - " + this.endDate + "]";
+  }
+
+  /**
+   * Sort and traverse the given list of date intervals to merge contiguous intervals.
+   * This fixes the problem due to HA limit [+/-12h] i.e. the converted JD / Date ranges
+   * can have a discontinuity on the date axis.
+   *
+   * @param intervals date intervals to fix
+   */
+  public static void merge(final List<DateTimeInterval> intervals) {
+    // first sort date intervals :
+    Collections.sort(intervals);
+    mergeSorted(intervals);
+  }
+
+  /**
+   * Traverse the given list of date intervals to merge contiguous intervals.
+   * This fixes the problem due to HA limit [+/-12h] i.e. the converted JD / Date ranges
+   * can have a discontinuity on the date axis.
+   *
+   * @param intervals SORTED date intervals to fix
+   */
+  public static void mergeSorted(final List<DateTimeInterval> intervals) {
+    int size = intervals.size();
+    if (size > 1) {
+      DateTimeInterval interval1, interval2;
+      for (int i = size - 2, j = size - 1; i >= 0; i--, j--) {
+        interval1 = intervals.get(i);
+        interval2 = intervals.get(j);
+
+        if (interval1.getEndDate().compareTo(interval2.getStartDate()) >= 0) {
+          // merge interval :
+          interval1.setEndDate(interval2.getEndDate());
+          // remove interval2 :
+          intervals.remove(j);
+        }
+      }
+    }
   }
 }

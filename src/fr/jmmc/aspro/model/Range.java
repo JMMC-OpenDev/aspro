@@ -52,15 +52,16 @@ import java.util.List;
 public final class Range {
 
   /** minimum value */
-  private double min = 0d;
+  private double min;
   /** maximum value */
-  private double max = 0d;
+  private double max;
 
   /**
    * Constructor
    */
   public Range() {
-    /* no-op */
+    this.min = 0d;
+    this.max = 0d;
   }
 
   /**
@@ -139,12 +140,22 @@ public final class Range {
    * @return true if the given value is inside given ranges
    */
   public static boolean contains(final List<Range> ranges, final double value) {
+    return find(ranges, value) != null;
+  }
+
+  /**
+   * Find the range containing the given value
+   * @param ranges list of ranges
+   * @param value value to test
+   * @return range containing the given value or null
+   */
+  public static Range find(final List<Range> ranges, final double value) {
     for (Range range : ranges) {
       if (range.contains(value)) {
-        return true;
+        return range;
       }
     }
-    return false;
+    return null;
   }
 
   /**
@@ -226,31 +237,54 @@ public final class Range {
   }
 
   /**
-   * Merge a list of overlapping ranges according to the nValid parameter that indicates how many times a point must be inside a range
+   * Traverse the given list of date intervals to merge contiguous intervals.
+   *
+   * @param ranges SORTED ranges to fix
+   */
+  public static void union(final List<Range> ranges) {
+    int size = ranges.size();
+    if (size > 1) {
+      Range range1, range2;
+      for (int i = size - 2, j = size - 1; i >= 0; i--, j--) {
+        range1 = ranges.get(i);
+        range2 = ranges.get(j);
+
+        if (range1.getMax() >= range2.getMin()) {
+          // merge interval :
+          range1.setMax(range2.getMax());
+          // remove interval2 :
+          ranges.remove(j);
+        }
+      }
+    }
+  }
+
+  /**
+   * Intersect overlapping ranges according to the nValid parameter that indicates how many times a point must be inside a range
    * to consider the point as valid
    * @param ranges list of ranges to merge
    * @param nValid number of ranges to consider a point is valid
    * @return new list of ranges
    */
-  public static List<Range> mergeRanges(final List<Range> ranges, final int nValid) {
-    return mergeRanges(ranges, nValid, null);
+  public static List<Range> intersectRanges(final List<Range> ranges, final int nValid) {
+    return intersectRanges(ranges, nValid, null);
   }
 
   /**
-   * Merge a list of overlapping ranges according to the nValid parameter that indicates how many times a point must be inside a range
+   * Intersect overlapping ranges according to the nValid parameter that indicates how many times a point must be inside a range
    * to consider the point as valid
    * @param ranges list of ranges to merge
    * @param nValid number of ranges to consider a point is valid
    * @param results output list of ranges
    * @return new list of ranges or null
    */
-  public static List<Range> mergeRanges(final List<Range> ranges, final int nValid, final List<Range> results) {
+  public static List<Range> intersectRanges(final List<Range> ranges, final int nValid, final List<Range> results) {
     // table of start/end time :
     final List<RangeLimit> limits = new ArrayList<RangeLimit>(ranges.size() * 2);
 
     for (Range range : ranges) {
-      limits.add(new RangeLimit(range.getMin(), 1));
-      limits.add(new RangeLimit(range.getMax(), -1));
+      limits.add(new RangeLimit(range.getMin(), true));
+      limits.add(new RangeLimit(range.getMax(), false));
     }
 
     // sort the array by increasing time :
@@ -267,7 +301,11 @@ public final class Range {
       limit = limits.get(i);
 
       // sum of flags :
-      s += limit.getFlag();
+      if (limit.isFlag()) {
+        s++;
+      } else {
+        s--;
+      }
 
       if (s == nValid) {
         if (mRanges == null) {
@@ -288,24 +326,24 @@ public final class Range {
 
     /** position of the limit */
     private final double position;
-    /** integer value to indicate the start [+1] or end of the initial range [-1] */
-    private final int flag;
+    /** boolean value to indicate the start [true] or end of the initial range [false] */
+    private final boolean flag;
 
     /**
      * Constructor with given position and flag
      * @param position position of the limit
-     * @param flag flag indicating a starting or ending range
+     * @param flag flag indicating a starting [true] or ending [false] range
      */
-    protected RangeLimit(final double position, final int flag) {
+    protected RangeLimit(final double position, final boolean flag) {
       this.position = position;
       this.flag = flag;
     }
 
     /**
-     * Return the flag indicating a starting or ending range
-     * @return flag indicating a starting or ending range
+     * Return the flag indicating a starting [true] or ending [false] range
+     * @return flag indicating a starting [true] or ending [false] range
      */
-    public int getFlag() {
+    public boolean isFlag() {
       return flag;
     }
 
