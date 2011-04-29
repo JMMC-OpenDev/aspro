@@ -30,7 +30,6 @@ package fr.jmmc.aspro;
 
 import fr.jmmc.aspro.model.observability.SunTimeInterval.SunType;
 import fr.jmmc.mcs.util.PreferencesException;
-import java.util.Arrays;
 
 /**
  * Handles preferences for Aspro.
@@ -47,8 +46,6 @@ public final class Preferences extends fr.jmmc.mcs.util.Preferences {
   private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
   /* Preferences */
-  /** Preference : display splash screen */
-  public final static String SHOW_SPLASH_SCREEN = "splash.screen.show";
   /** Preference : edit positions in XY (true) or rho/theta (false) in the model editor */
   public final static String MODELEDITOR_PREFERXY = "modeleditor.preferxy";
   /** Preference : LUT table to use for the object model image in the UV Coverage plot */
@@ -58,7 +55,7 @@ public final class Preferences extends fr.jmmc.mcs.util.Preferences {
   /** Preference : time reference (LST/UTC) */
   public final static String TIME_REFERENCE = "time.reference";
   /** Preference : minimum elevation */
-  public final static String MIN_ELEV = "min.elevation";
+  public final static String MIN_ELEVATION = "min.elevation";
   /** Preference : center observability plot arround night */
   public final static String CENTER_NIGHT = "center.night";
   /** Preference : twilight night (Astro_Twilight/Nautic_Twilight/Civil_Twilight): see SunTimeInterval */
@@ -66,9 +63,11 @@ public final class Preferences extends fr.jmmc.mcs.util.Preferences {
 
   /**
    * Private constructor that must be empty.
+   *
+   * @param notify flag to enable/disable observer notifications
    */
-  private Preferences() {
-    super();
+  private Preferences(final boolean notify) {
+    super(notify);
   }
 
   /**
@@ -82,7 +81,11 @@ public final class Preferences extends fr.jmmc.mcs.util.Preferences {
     if (_singleton == null) {
       logger.fine("Preferences.getInstance()");
 
-      _singleton = new Preferences();
+      // disable notifications:
+      _singleton = new Preferences(false);
+
+      // enable future notifications:
+      _singleton.setNotify(true);
     }
 
     return _singleton;
@@ -96,11 +99,8 @@ public final class Preferences extends fr.jmmc.mcs.util.Preferences {
   protected void setDefaultPreferences() throws PreferencesException {
     logger.fine("Preferences.setDefaultPreferences()");
 
-    /* Place general preferences  */
-    setDefaultPreference(SHOW_SPLASH_SCREEN, "true");
-
     // Model editor :
-    setDefaultPreference(MODELEDITOR_PREFERXY, "false");
+    setDefaultPreference(MODELEDITOR_PREFERXY, Boolean.FALSE);
 
     // UV Coverage - image size and LUT :
     setDefaultPreference(MODEL_IMAGE_LUT, AsproConstants.DEFAULT_IMAGE_LUT);
@@ -110,13 +110,13 @@ public final class Preferences extends fr.jmmc.mcs.util.Preferences {
     setDefaultPreference(TIME_REFERENCE, AsproConstants.TIME_LST);
 
     // minimum elevation:
-    setDefaultPreference(MIN_ELEV, AsproConstants.DEFAULT_MIN_ELEVATION);
+    setDefaultPreference(MIN_ELEVATION, Double.valueOf(AsproConstants.DEFAULT_MIN_ELEVATION));
 
     // center observability plot arround night:
-    setDefaultPreference(CENTER_NIGHT, "true");
+    setDefaultPreference(CENTER_NIGHT, Boolean.TRUE);
 
     // twilight night (Astro_Twilight):
-    setDefaultPreference(TWILIGHT_NIGHT, SunType.AstronomicalTwilight.toString());
+    setDefaultPreference(TWILIGHT_NIGHT, SunType.Night.toString());
   }
 
   /**
@@ -140,79 +140,17 @@ public final class Preferences extends fr.jmmc.mcs.util.Preferences {
   }
 
   /**
-   * Return true if the show splash screen preference is undefined or its value is not 'false'
-   * @return true if the show splash screen preference is undefined or its value is not 'false'
-   */
-  public boolean IsShowSplashScreen() {
-    final String value = getPreference(SHOW_SPLASH_SCREEN);
-
-    if (value != null && !Boolean.valueOf(value).booleanValue()) {
-      return false;
-    }
-    return true;
-  }
-
-  /**
-   * Return the time reference : use preferences or LST if it is undefined
-   * @return time reference
-   */
-  public String getTimeReference() {
-    final String value = getPreference(TIME_REFERENCE);
-
-    if (value == null || Arrays.binarySearch(AsproConstants.TIME_CHOICES, value) < 0) {
-      return AsproConstants.TIME_LST;
-    }
-    return value;
-  }
-
-  /**
-   * Return the minimum elevation Preference : use preferences or 30° if it is undefined
-   * @return minimum elevation
-   */
-  public double getMinElevation() {
-    final String value = getPreference(MIN_ELEV);
-
-    if (value != null) {
-      try {
-        final double minElevNew = Double.valueOf(value).doubleValue();
-
-        if (minElevNew >= 0d && minElevNew < 90d) {
-          return minElevNew;
-        }
-      } catch (NumberFormatException nfe) {
-        // invalid value:
-      }
-    }
-    return AsproConstants.DEFAULT_MIN_ELEVATION;
-  }
-
-  /**
-   * Return the center night Preference : use preferences or true if it is undefined
-   * @return center observability plot arround night
-   */
-  public boolean isCenterNight() {
-    final String value = getPreference(CENTER_NIGHT);
-
-    if (value != null && !Boolean.valueOf(value).booleanValue()) {
-      return false;
-    }
-    return true;
-  }
-
-  /**
    * Return the twilight night Preference : use preferences or Astro_Twilight if it is undefined
    * @return twilight night (Astro_Twilight/Nautic_Twilight/Civil_Twilight)
    */
-  public SunType getTwilightNight() {
+  public SunType getTwilightAsNightLimit() {
     final String value = getPreference(TWILIGHT_NIGHT);
 
-    if (value != null) {
-      try {
-        return SunType.valueOf(value);
-      } catch (IllegalArgumentException iae) {
-        // ignore
-      }
+    try {
+      return SunType.valueOf(value);
+    } catch (IllegalArgumentException iae) {
+      // ignore
     }
-    return SunType.AstronomicalTwilight;
+    return SunType.Night;
   }
 }

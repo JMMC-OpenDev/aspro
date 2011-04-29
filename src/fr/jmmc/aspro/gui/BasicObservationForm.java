@@ -795,6 +795,8 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
    */
   private void postInit() {
 
+    Preferences.getInstance().addObserver(this);
+
     this.warningIcon = new ImageIcon(getClass().getResource("/fr/jmmc/aspro/gui/icons/dialog-warning.png"));
 
     // add observer to the StarResolverWidget :
@@ -849,7 +851,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
 
         if (minElevNew < 0d || minElevNew >= 90d) {
           // invalid value :
-          jFieldMinElev.setValue(Preferences.getInstance().getMinElevation());
+          jFieldMinElev.setValue(Preferences.getInstance().getPreferenceAsDouble(Preferences.MIN_ELEVATION));
         }
         fireObservationUpdateEvent();
       }
@@ -1227,6 +1229,10 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         // update the data model and fire change events :
         om.addTarget(Target.formatName(star.getName()), star);
       }
+    } else if (o instanceof Preferences) {
+      // means Preferences:
+// disabled because it is also updated when any preference changes !!!
+//      this.jFieldMinElev.setValue(Preferences.getInstance().getPreferenceAsDouble(Preferences.MIN_ELEVATION));
     }
   }
 

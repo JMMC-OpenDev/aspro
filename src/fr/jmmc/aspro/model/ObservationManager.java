@@ -1495,7 +1495,7 @@ public final class ObservationManager extends BaseOIManager {
 
       final InterferometerConfigurationChoice interferometerChoice = new InterferometerConfigurationChoice();
       interferometerChoice.setName(defInterferometerConfiguration);
-      interferometerChoice.setMinElevation(Preferences.getInstance().getMinElevation());
+      interferometerChoice.setMinElevation(Preferences.getInstance().getPreferenceAsDouble(Preferences.MIN_ELEVATION));
 
       observation.setInterferometerConfiguration(interferometerChoice);
     }

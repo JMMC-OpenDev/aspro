@@ -253,6 +253,7 @@ import fr.jmmc.aspro.model.event.ObservationEvent;
 import fr.jmmc.aspro.model.observability.ElevationDate;
 import fr.jmmc.aspro.model.observability.StarObservabilityData;
 import fr.jmmc.aspro.model.observability.SunTimeInterval;
+import fr.jmmc.aspro.model.observability.SunTimeInterval.SunType;
 import fr.jmmc.aspro.model.oi.ObservationCollection;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Target;
@@ -483,7 +484,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     this.jComboTimeRef = new JComboBox(AsproConstants.TIME_CHOICES);
     this.jComboTimeRef.setName("jComboTimeRef");
 
-    this.jComboTimeRef.setSelectedItem(this.myPreferences.getTimeReference());
+    this.jComboTimeRef.setSelectedItem(this.myPreferences.getPreference(Preferences.TIME_REFERENCE));
     this.jComboTimeRef.addActionListener(new ActionListener() {
 
       public void actionPerformed(final ActionEvent e) {
@@ -510,7 +511,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
             jCheckBoxDetailedOutput.setSelected(false);
           } else {
             // restore user preference :
-            jComboTimeRef.setSelectedItem(myPreferences.getTimeReference());
+            jComboTimeRef.setSelectedItem(myPreferences.getPreference(Preferences.TIME_REFERENCE));
           }
 
           jComboTimeRef.setEnabled(!doBaseLineLimits);
@@ -584,7 +585,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
       logger.fine("Preferences updated on : " + this);
     }
 
-    this.jComboTimeRef.setSelectedItem(this.myPreferences.getTimeReference());
+    this.jComboTimeRef.setSelectedItem(this.myPreferences.getPreference(Preferences.TIME_REFERENCE));
+    // also trigger refresh plot if another preference changes (night center)
   }
 
   /**
@@ -720,7 +722,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     final boolean prevAutoRefresh = this.setAutoRefresh(false);
     try {
       // restore user preference :
-      this.jComboTimeRef.setSelectedItem(this.myPreferences.getTimeReference());
+      this.jComboTimeRef.setSelectedItem(this.myPreferences.getPreference(Preferences.TIME_REFERENCE));
 
       this.jCheckBoxBaseLineLimits.setSelected(DEFAULT_DO_BASELINE_LIMITS);
       this.jCheckBoxDetailedOutput.setSelected(DEFAULT_DO_DETAILED_OUTPUT);
@@ -809,7 +811,11 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     final boolean doDetailedOutput = this.jCheckBoxDetailedOutput.isSelected();
 
     // flag to center JD range arround midnight:
-    final boolean doCenterMidnight = myPreferences.isCenterNight();
+    final boolean doCenterMidnight = myPreferences.getPreferenceAsBoolean(Preferences.CENTER_NIGHT);
+
+    // twilight considered as night limit
+    final SunType twilightNightLimit = myPreferences.getTwilightAsNightLimit();
+
 
     // update the status bar :
     StatusBar.show("computing observability ...");
@@ -817,7 +823,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     // Create Observability task worker
     // Cancel other tasks and execute this new task :
     new ObservabilitySwingWorker(this,
-            obsCollection, useLST, doDetailedOutput, doBaseLineLimits, doCenterMidnight).executeTask();
+            obsCollection, useLST, doDetailedOutput, doBaseLineLimits, doCenterMidnight, twilightNightLimit).executeTask();
   }
 
   /**
@@ -836,6 +842,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     private final boolean doDetailedOutput;
     /** flag to center the plot arround midnight */
     private final boolean doCenterMidnight;
+    /** twilight considered as night limit */
+    private final SunType twilightNightLimit;
 
     /**
      * Hidden constructor
@@ -846,10 +854,11 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
      * @param doDetailedOutput flag to produce detailed output with all BL / horizon / rise intervals per target
      * @param doBaseLineLimits flag to find base line limits
      * @param doCenterMidnight flag to center JD range arround midnight
+     * @param twilightNightLimit twilight considered as night limit
      */
     private ObservabilitySwingWorker(final ObservabilityPanel obsPanel, final ObservationCollection obsCollection,
                                      final boolean useLST, final boolean doDetailedOutput, final boolean doBaseLineLimits,
-                                     final boolean doCenterMidnight) {
+                                     final boolean doCenterMidnight, final SunType twilightNightLimit) {
       // get current observation version :
       super(AsproTaskRegistry.TASK_OBSERVABILITY, obsCollection);
       this.obsPanel = obsPanel;
@@ -857,6 +866,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
       this.doDetailedOutput = doDetailedOutput;
       this.doBaseLineLimits = doBaseLineLimits;
       this.doCenterMidnight = doCenterMidnight;
+      this.twilightNightLimit = twilightNightLimit;
     }
 
     /**
@@ -875,7 +885,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
       for (ObservationSetting observation : getObservationCollection().getObservations()) {
         // compute the observability data :
         obsDataList.add(
-                new ObservabilityService(observation, this.useLST, this.doDetailedOutput, this.doBaseLineLimits, this.doCenterMidnight).compute());
+                new ObservabilityService(observation, this.useLST, this.doDetailedOutput, this.doBaseLineLimits,
+                this.doCenterMidnight, this.twilightNightLimit).compute());
 
         // fast interrupt :
         if (Thread.currentThread().isInterrupted()) {
