@@ -96,8 +96,8 @@ public interface AsproConstants {
   public final static double HA_MAX = 12D;
 
   /* UI Defaults */
-  /** default minimum elevation = 30 degrees */
-  public static final double DEFAULT_MIN_ELEVATION = 30d;
+  /** default minimum elevation = 45 degrees */
+  public static final double DEFAULT_MIN_ELEVATION = 45d;
   /** default maximum elevation = 85 degrees */
   public static final double DEFAULT_MAX_ELEVATION = 85d;
   /** minimum elevation for OB generation = 30 degrees */

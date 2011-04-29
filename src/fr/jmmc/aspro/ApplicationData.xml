@@ -197,7 +197,8 @@
     <release version="0.8">
       <prerelease version="0.8.2">
         <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/27">Added 'Center plot arround night' preference to have the complete night centered on the observability plot</change>
-        <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/26">Added civil and nautical twilight zones</change>
+        <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/26">Added civil and nautical twilight zones and a new preference 'Twilight used as Night limit' to choose which twilight for night restrictions</change>
+        <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/54">Added a new preference 'Default min Elevation' set to 45 degrees by default</change>
       </prerelease>
       <prerelease version="0.8.1">
         <change>Added 'Scroll view' checkbox button to see all targets (or only some of them) on the observability plot</change>
