@@ -69,6 +69,8 @@ public final class AsproNightBoundsTest extends JmcsFestSwingJUnitTestCase {
 
   /** name of the tab pane corresponding to the observability panel */
   private static final String TAB_OBSERVABILITY = "Observability";
+  /** initial year */
+  private static final int YEAR = 2005;
   /** number of days to traverse (30 years) */
   private static final int DAYS = 10 * 365;
 
@@ -81,7 +83,7 @@ public final class AsproNightBoundsTest extends JmcsFestSwingJUnitTestCase {
 
     JmcsApplicationSetup.define(
             fr.jmmc.aspro.AsproGui.class,
-            "-open", "/home/bourgesl/dev/aspro/test/Aspro2_sample.asprox");
+            "-open", "/home/bourgesl/dev/aspro/test/TEST_RA_LIMITS.asprox");
 
     // define robot delays :
     defineRobotDelayBetweenEvents(SHORT_DELAY);
@@ -170,7 +172,7 @@ public final class AsproNightBoundsTest extends JmcsFestSwingJUnitTestCase {
    * @param dateSpinner spinner field to update
    */
   private void traverseDays(final JSpinnerFixture dateSpinner) {
-    final int year = 2005;
+    final int year = YEAR;
     final int month = 1;
     final int day = 1;
 
