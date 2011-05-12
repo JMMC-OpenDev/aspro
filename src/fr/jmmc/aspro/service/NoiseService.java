@@ -64,7 +64,7 @@
  * Revision 1.1  2010/07/22 15:46:05  bourgesl
  * Band mapping done
  *
- */
+ ******************************************************************************/
 package fr.jmmc.aspro.service;
 
 import fr.jmmc.aspro.AsproConstants;

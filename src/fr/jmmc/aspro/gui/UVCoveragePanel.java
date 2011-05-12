@@ -300,7 +300,7 @@
  * Revision 1.1  2010/01/08 16:48:30  bourgesl
  * package refactoring
  *
- */
+ ******************************************************************************/
 package fr.jmmc.aspro.gui;
 
 import fr.jmmc.aspro.AsproConstants;

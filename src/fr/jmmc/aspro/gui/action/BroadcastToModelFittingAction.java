@@ -54,7 +54,7 @@
  * Add first (non-working) revision
  *
  *
- */
+ ******************************************************************************/
 package fr.jmmc.aspro.gui.action;
 
 import fr.jmmc.aspro.model.ObservationManager;

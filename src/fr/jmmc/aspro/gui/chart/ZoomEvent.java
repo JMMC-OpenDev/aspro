@@ -13,7 +13,7 @@
  * Revision 1.1  2010/02/03 09:48:53  bourgesl
  * target model uvmap added on the uv coverage with zooming supported
  *
- */
+ ******************************************************************************/
 package fr.jmmc.aspro.gui.chart;
 
 /**

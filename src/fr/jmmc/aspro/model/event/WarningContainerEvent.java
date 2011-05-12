@@ -12,7 +12,7 @@
  * Revision 1.1  2011/01/31 15:26:31  bourgesl
  * new event to contain warnings
  *
- */
+ ******************************************************************************/
 package fr.jmmc.aspro.model.event;
 
 import fr.jmmc.aspro.model.WarningContainer;

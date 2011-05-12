@@ -15,7 +15,7 @@
  * Revision 1.1  2009/11/23 16:49:17  bourgesl
  * added horizonService to check horizon profiles (VLTI)
  *
- */
+ ******************************************************************************/
 package fr.jmmc.aspro.service;
 
 import fr.jmmc.aspro.model.oi.AzEl;

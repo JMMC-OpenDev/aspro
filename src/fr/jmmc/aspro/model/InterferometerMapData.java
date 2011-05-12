@@ -12,7 +12,7 @@
  * Revision 1.1  2010/05/11 12:08:27  bourgesl
  * simple Interferometer Map (stations + baselines) automatically refreshed when the chosen baseline configuration changes
  *
- */
+ ******************************************************************************/
 package fr.jmmc.aspro.model;
 
 /**

@@ -9,7 +9,7 @@
  * Revision 1.1  2010/05/11 12:06:40  bourgesl
  * Overriden XYZDataSet to include a name property used by NameLabelGenerator
  *
- */
+ ******************************************************************************/
 package fr.jmmc.aspro.gui.chart;
 
 import java.util.List;

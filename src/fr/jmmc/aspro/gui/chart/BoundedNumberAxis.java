@@ -27,7 +27,7 @@
  * Revision 1.1  2010/01/12 16:53:20  bourgesl
  * customized JFreeChart classes to get a square XY Plot supporting zooming in/out with mouse and mouse wheel
  *
- */
+ ******************************************************************************/
 package fr.jmmc.aspro.gui.chart;
 
 import java.util.logging.Level;

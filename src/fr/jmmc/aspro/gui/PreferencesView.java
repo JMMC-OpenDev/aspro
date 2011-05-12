@@ -31,7 +31,7 @@
  * Add one preferences window first to choose the default style of display for positions
  *
  *
- */
+ ******************************************************************************/
 package fr.jmmc.aspro.gui;
 
 import fr.jmmc.aspro.AsproConstants;

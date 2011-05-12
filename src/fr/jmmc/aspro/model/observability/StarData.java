@@ -15,7 +15,7 @@
  * Revision 1.1  2010/01/08 16:48:30  bourgesl
  * package refactoring
  *
- */
+ ******************************************************************************/
 package fr.jmmc.aspro.model.observability;
 
 import fr.jmmc.aspro.model.Range;

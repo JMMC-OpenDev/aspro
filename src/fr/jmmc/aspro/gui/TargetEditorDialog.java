@@ -55,7 +55,7 @@
  * Revision 1.1  2010/11/18 17:19:35  bourgesl
  * new target and model editor using tabs (modal dialog)
  *
- */
+ ******************************************************************************/
 package fr.jmmc.aspro.gui;
 
 import fr.jmmc.aspro.gui.util.ComponentResizeAdapter;

@@ -38,7 +38,7 @@
  * new CHARA Vega Star List generation (OB like)
  *
  *
- */
+ ******************************************************************************/
 package fr.jmmc.aspro.gui.action;
 
 import fr.jmmc.aspro.ob.ExportOBVega;

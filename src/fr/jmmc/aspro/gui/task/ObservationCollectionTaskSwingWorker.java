@@ -24,11 +24,10 @@
  * Revision 1.1  2011/02/02 17:41:52  bourgesl
  * add observation and its version in task logs
  *
- */
+ ******************************************************************************/
 package fr.jmmc.aspro.gui.task;
 
 import fr.jmmc.aspro.model.oi.ObservationCollection;
-import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.mcs.gui.task.Task;
 import fr.jmmc.mcs.gui.task.TaskSwingWorker;
 

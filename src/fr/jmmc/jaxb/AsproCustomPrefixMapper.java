@@ -9,7 +9,7 @@
  * Revision 1.1  2011/03/04 16:57:21  bourgesl
  * new prefix mapper for Aspro (xsi)
  *
- */
+ ******************************************************************************/
 package fr.jmmc.jaxb;
 
 import com.sun.xml.bind.marshaller.NamespacePrefixMapper;

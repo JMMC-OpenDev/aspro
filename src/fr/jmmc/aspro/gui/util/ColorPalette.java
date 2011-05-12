@@ -9,7 +9,7 @@
  * Revision 1.1  2010/01/22 13:17:35  bourgesl
  * simple default color palette
  *
- */
+ ******************************************************************************/
 package fr.jmmc.aspro.gui.util;
 
 import java.awt.Color;

@@ -28,7 +28,7 @@
  * major changes to add sliding behaviour (scrollbar) to view only a subset of targets if there are too many.
  * PDF options according to the number of targets
  *
- */
+ ******************************************************************************/
 package fr.jmmc.aspro.gui.chart;
 
 import fr.jmmc.aspro.AsproConstants;

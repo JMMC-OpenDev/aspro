@@ -16,7 +16,7 @@
  * Revision 1.1  2010/06/09 12:51:09  bourgesl
  * new interface PDFExportable to define a standard method performPDFAction() that use ExportPDFAction to export the chart to PDF
  *
- */
+ ******************************************************************************/
 package fr.jmmc.aspro.gui;
 
 import fr.jmmc.aspro.gui.chart.PDFOptions;

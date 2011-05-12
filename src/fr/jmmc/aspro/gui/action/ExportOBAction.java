@@ -24,7 +24,7 @@
  * Revision 1.1  2010/06/09 12:53:00  bourgesl
  * new action (menu File) that calls the uv coverage panel method performOBAction()
  *
- */
+ ******************************************************************************/
 package fr.jmmc.aspro.gui.action;
 
 import fr.jmmc.aspro.AsproGui;

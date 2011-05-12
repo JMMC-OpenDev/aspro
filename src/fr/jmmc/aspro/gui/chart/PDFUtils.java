@@ -34,7 +34,7 @@
  * Revision 1.1  2010/01/13 16:11:43  bourgesl
  * pdf related classes
  *
- */
+ ******************************************************************************/
 package fr.jmmc.aspro.gui.chart;
 
 import com.lowagie.text.Document;

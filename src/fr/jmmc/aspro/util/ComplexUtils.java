@@ -6,7 +6,7 @@
  * History
  * -------
  * $Log: not supported by cvs2svn $
- */
+ ******************************************************************************/
 package fr.jmmc.aspro.util;
 
 import org.apache.commons.math.complex.Complex;

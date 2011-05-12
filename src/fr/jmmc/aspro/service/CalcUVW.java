@@ -11,7 +11,7 @@
  *
  * Revision 1.1  2010/01/05 17:17:50  bourgesl
  * added U,V,W computation
- */
+ ******************************************************************************/
 package fr.jmmc.aspro.service;
 
 import fr.jmmc.aspro.model.BaseLine;

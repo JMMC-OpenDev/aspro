@@ -81,7 +81,7 @@
  * Revision 1.1  2010/04/02 10:07:35  bourgesl
  * simple OB generation for AMBER
  *
- */
+ ******************************************************************************/
 package fr.jmmc.aspro.ob;
 
 import edu.dartmouth.AstroSkyCalcObservation;

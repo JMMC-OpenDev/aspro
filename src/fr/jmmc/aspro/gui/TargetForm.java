@@ -93,7 +93,7 @@
  * Revision 1.1  2010/11/18 17:20:33  bourgesl
  * initial GUI for target editor
  *
- */
+ ******************************************************************************/
 package fr.jmmc.aspro.gui;
 
 import fr.jmmc.aspro.gui.util.CalibratorInfoTableModel;

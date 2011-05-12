@@ -16,7 +16,7 @@
  * methods from AstoSkyCalc related to targets moved in AstoSkyCalcObservation
  *
  *
- */
+ ******************************************************************************/
 package edu.dartmouth;
 
 import fr.jmmc.aspro.AsproConstants;

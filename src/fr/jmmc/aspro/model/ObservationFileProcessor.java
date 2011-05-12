@@ -15,7 +15,7 @@
  * Revision 1.1  2010/11/30 15:52:13  bourgesl
  * added ObservationFileProcessor onLoad and onSave callbacks to check schema version and handle model conversion if needed
  *
- */
+ ******************************************************************************/
 package fr.jmmc.aspro.model;
 
 import fr.jmmc.aspro.model.oi.ObservationSetting;

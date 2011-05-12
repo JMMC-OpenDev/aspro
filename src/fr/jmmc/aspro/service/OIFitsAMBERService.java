@@ -22,7 +22,7 @@
  * restored computeVisError for AmberDiffVis
  * first port of amdlibFakeAmberDiffVis
  *
- */
+ ******************************************************************************/
 package fr.jmmc.aspro.service;
 
 import fr.jmmc.oitools.model.OIVis;

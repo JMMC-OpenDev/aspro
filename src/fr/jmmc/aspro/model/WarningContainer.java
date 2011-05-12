@@ -12,7 +12,7 @@
  * Revision 1.1  2010/09/02 15:46:32  bourgesl
  * simple warning message container extension of OIFiteFile
  *
- */
+ ******************************************************************************/
 package fr.jmmc.aspro.model;
 
 import java.util.ArrayList;

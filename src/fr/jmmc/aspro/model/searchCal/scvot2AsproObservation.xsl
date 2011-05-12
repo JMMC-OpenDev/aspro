@@ -1,30 +1,9 @@
 <?xml version="1.0"?>
 <!--
-********************************************************************************
- JMMC project
+ *******************************************************************************
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
+ ******************************************************************************
 
- "@(#) $Id: scvot2AsproObservation.xsl,v 1.7 2011-03-08 13:51:03 bourgesl Exp $"
-
- History
- ~~~~~~~
- $Log: not supported by cvs2svn $
- Revision 1.6  2011/03/03 15:51:29  bourgesl
- added calibrator informations (searchCal main parameters and all values)
-
- Revision 1.4  2010/10/22 11:10:20  bourgesl
- use deletedFlag to filter calibrators to mimic SearchCal delete action
- use HD identifier instead of HIP identifier to mimic SearchCal view
-
- Revision 1.3  2010/10/07 15:06:26  bourgesl
- added searchCal object name (target name in aspro) in observation name
-
- Revision 1.2  2010/10/07 13:30:39  mella
- Add one comment that explain why we do only consider calibrators with UDD_X diameters
-
- Revision 1.1  2010/10/07 11:55:10  bourgesl
- xslt to transform searchCal votable to Aspro 2 observation (targets)
-
-********************************************************************************
  NAME
  scvot2AsproObservation.xsl - SearchCal Votable into Aspro2 observation setting
 

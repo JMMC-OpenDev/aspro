@@ -7,7 +7,7 @@
  * -------
  * $Log: not supported by cvs2svn $
  *
- */
+ ******************************************************************************/
 package fr.jmmc.aspro.model.event;
 
 import fr.jmmc.oitools.model.OIFitsFile;

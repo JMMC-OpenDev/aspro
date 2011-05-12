@@ -25,7 +25,7 @@
  * Add one preferences window first to choose the default style of display for positions
  *
  *
- */
+ ******************************************************************************/
 package fr.jmmc.aspro;
 
 import fr.jmmc.aspro.model.observability.SunTimeInterval.SunType;

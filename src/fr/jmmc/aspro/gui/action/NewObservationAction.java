@@ -21,7 +21,7 @@
  * Revision 1.1  2010/07/07 15:16:25  bourgesl
  * added 'New Observation' action
  *
- */
+ ******************************************************************************/
 package fr.jmmc.aspro.gui.action;
 
 import fr.jmmc.aspro.model.ObservationManager;

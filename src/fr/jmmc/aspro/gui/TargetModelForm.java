@@ -131,7 +131,7 @@
  * Revision 1.2  2010/02/01 09:43:49  bourgesl
  * header + comments
  *
- */
+ ******************************************************************************/
 package fr.jmmc.aspro.gui;
 
 import fr.jmmc.aspro.Preferences;

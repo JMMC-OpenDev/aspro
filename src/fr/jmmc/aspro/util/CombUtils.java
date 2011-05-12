@@ -9,7 +9,7 @@
  * Revision 1.1  2010/06/30 14:53:29  bourgesl
  * new Combinatory utilities to get n-tuples and combinations + test case
  *
- */
+ ******************************************************************************/
 package fr.jmmc.aspro.util;
 
 import java.util.ArrayList;

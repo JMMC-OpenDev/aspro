@@ -18,7 +18,7 @@
  * Revision 1.3  2009/12/02 17:23:51  bourgesl
  * fixed several bugs on pop finder + refactoring
  *
- */
+ ******************************************************************************/
 package fr.jmmc.aspro.model.observability;
 
 import java.util.Date;

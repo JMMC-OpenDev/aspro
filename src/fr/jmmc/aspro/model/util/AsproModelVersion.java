@@ -9,7 +9,7 @@
  * Revision 1.1  2010/11/30 15:55:57  bourgesl
  * new model revision history as an enumeration
  *
- */
+ ******************************************************************************/
 package fr.jmmc.aspro.model.util;
 
 /**

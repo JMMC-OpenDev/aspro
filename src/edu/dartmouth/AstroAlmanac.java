@@ -9,7 +9,7 @@
  * Revision 1.1  2011/04/22 15:34:24  bourgesl
  * new JMMC classes to manage almanac data
  *
- */
+ ******************************************************************************/
 package edu.dartmouth;
 
 import java.util.Iterator;

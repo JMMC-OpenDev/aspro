@@ -18,7 +18,7 @@
  * Revision 1.1  2010/12/03 09:32:47  bourgesl
  * ListModel implementation using a List<Type>
  *
- */
+ ******************************************************************************/
 package fr.jmmc.aspro.gui.util;
 
 import java.util.List;

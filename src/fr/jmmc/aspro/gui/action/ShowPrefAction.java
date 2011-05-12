@@ -9,7 +9,7 @@
  * Revision 1.3  2010/06/09 12:54:12  bourgesl
  * javadoc
  *
- */
+ ******************************************************************************/
 package fr.jmmc.aspro.gui.action;
 
 import fr.jmmc.aspro.gui.PreferencesView;

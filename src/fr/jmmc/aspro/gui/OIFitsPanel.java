@@ -1,13 +1,9 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/*
- * OIFitsPanel.java
+/*******************************************************************************
+ * JMMC project
  *
- * Created on 22 juin 2010, 10:56:23
- */
+ * "@(#) $Id: OIFitsPanel.java,v 1.70 2011-04-22 15:38:41 bourgesl Exp $"
+ *
+ ******************************************************************************/
 package fr.jmmc.aspro.gui;
 
 import fr.jmmc.aspro.model.event.OIFitsEvent;

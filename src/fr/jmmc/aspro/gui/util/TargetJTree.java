@@ -16,7 +16,7 @@
  * Revision 1.1  2010/12/03 16:10:57  bourgesl
  * JTree utility classes to handle targets / models
  *
- */
+ ******************************************************************************/
 package fr.jmmc.aspro.gui.util;
 
 import fr.jmmc.aspro.model.oi.Target;

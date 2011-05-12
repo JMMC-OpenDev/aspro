@@ -9,7 +9,7 @@
  * Revision 1.1  2011/02/28 17:12:51  bourgesl
  * new result containers to have an easier API to manipulate lists
  *
- */
+ ******************************************************************************/
 package fr.jmmc.aspro.model;
 
 import fr.jmmc.aspro.model.observability.ObservabilityData;

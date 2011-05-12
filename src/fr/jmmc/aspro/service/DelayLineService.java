@@ -37,7 +37,7 @@
  * Revision 1.1  2009/11/24 15:12:09  bourgesl
  * first step to handle delay line limits
  *
- */
+ ******************************************************************************/
 package fr.jmmc.aspro.service;
 
 import fr.jmmc.aspro.AsproConstants;

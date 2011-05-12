@@ -12,7 +12,7 @@
  * Revision 1.1  2010/10/21 16:47:43  bourgesl
  * Custom XYTextAnnotation that adjust its font size to respect sizing constraints i.e. text width is fit to maxRadius
  *
- */
+ ******************************************************************************/
 package fr.jmmc.aspro.gui.chart;
 
 import java.awt.Font;

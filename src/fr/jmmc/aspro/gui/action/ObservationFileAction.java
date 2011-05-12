@@ -31,7 +31,7 @@
  * Revision 1.1  2009/12/08 13:09:55  bourgesl
  * Added FileFilter for observation settings
  *
- */
+ ******************************************************************************/
 package fr.jmmc.aspro.gui.action;
 
 import fr.jmmc.mcs.util.FileFilterRepository;

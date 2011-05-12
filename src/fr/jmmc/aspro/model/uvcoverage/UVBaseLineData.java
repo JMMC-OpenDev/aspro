@@ -9,7 +9,7 @@
  * Revision 1.1  2010/01/08 16:50:53  bourgesl
  * initial uv coverage
  *
- */
+ ******************************************************************************/
 package fr.jmmc.aspro.model.uvcoverage;
 
 /**

@@ -53,7 +53,7 @@
  * Revision 1.1  2010/10/07 15:04:23  bourgesl
  * first SearchCal votable Samp handler : extract calibrators and merge them to the target list
  *
- */
+ ******************************************************************************/
 package fr.jmmc.aspro.model.searchCal;
 
 import fr.jmmc.aspro.gui.TargetEditorDialog;

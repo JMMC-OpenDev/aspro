@@ -15,7 +15,7 @@
  * Revision 1.1  2011/02/03 17:30:55  bourgesl
  * new abstract action that detect if any task is running and waits for task completion before running action (use Timer)
  *
- */
+ ******************************************************************************/
 package fr.jmmc.aspro.gui.action;
 
 import fr.jmmc.mcs.gui.App;

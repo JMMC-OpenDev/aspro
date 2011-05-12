@@ -6,7 +6,7 @@
  * History
  * -------
  * $Log: not supported by cvs2svn $
- */
+ ******************************************************************************/
 package fr.jmmc.aspro.model;
 
 import fr.jmmc.aspro.model.observability.ObservabilityData;

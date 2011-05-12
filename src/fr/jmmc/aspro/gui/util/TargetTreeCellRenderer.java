@@ -9,7 +9,7 @@
  * Revision 1.1  2010/12/10 17:09:48  bourgesl
  * custom renderers (list/tree) to display target name with corresponding icon
  *
- */
+ ******************************************************************************/
 package fr.jmmc.aspro.gui.util;
 
 import fr.jmmc.aspro.model.oi.Target;

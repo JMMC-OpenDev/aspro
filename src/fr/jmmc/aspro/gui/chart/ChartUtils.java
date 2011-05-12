@@ -55,7 +55,7 @@
  * Revision 1.2  2010/01/08 16:51:17  bourgesl
  * initial uv coverage
  *
- */
+ ******************************************************************************/
 package fr.jmmc.aspro.gui.chart;
 
 import fr.jmmc.aspro.util.TimeFormat;

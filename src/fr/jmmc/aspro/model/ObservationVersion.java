@@ -9,7 +9,7 @@
  * Revision 1.1  2011/02/02 17:41:22  bourgesl
  * observation versions (target list, main, uv)
  *
- */
+ ******************************************************************************/
 package fr.jmmc.aspro.model;
 
 /**

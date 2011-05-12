@@ -7,7 +7,7 @@
  * -------
  * $Log: not supported by cvs2svn $
  *
- */
+ ******************************************************************************/
 package fr.jmmc.aspro.gui.util;
 
 import fr.jmmc.aspro.model.oi.BaseValue;

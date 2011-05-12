@@ -14,7 +14,7 @@
  * added calibrator list coupled with Calibrator button
  * changed font for target tree
  *
- */
+ ******************************************************************************/
 package fr.jmmc.aspro.gui.util;
 
 import java.awt.datatransfer.DataFlavor;

@@ -53,7 +53,7 @@
  * Revision 1.15  2010/01/08 16:51:18  bourgesl
  * initial uv coverage
  *
- */
+ ******************************************************************************/
 package edu.dartmouth;
 
 import edu.dartmouth.AstroAlmanacTime.AlmanacType;

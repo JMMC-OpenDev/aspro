@@ -9,7 +9,7 @@
  * Revision 1.1  2010/04/02 14:37:40  bourgesl
  * simple bean to store elevation information
  *
- */
+ ******************************************************************************/
 package fr.jmmc.aspro.model.observability;
 
 import java.util.Date;

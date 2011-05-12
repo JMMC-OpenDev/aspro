@@ -9,10 +9,9 @@
  * Revision 1.1  2011/04/13 14:33:45  bourgesl
  * added bounded date axis
  *
- */
+ ******************************************************************************/
 package fr.jmmc.aspro.gui.chart;
 
-import java.util.logging.Level;
 import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.event.AxisChangeEvent;
 import org.jfree.data.Range;

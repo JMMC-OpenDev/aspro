@@ -9,7 +9,7 @@
  * Revision 1.1  2011/01/21 16:30:38  bourgesl
  * create Aspro Tasks and describe their dependencies
  *
- */
+ ******************************************************************************/
 package fr.jmmc.aspro.gui.task;
 
 import fr.jmmc.mcs.gui.task.Task;

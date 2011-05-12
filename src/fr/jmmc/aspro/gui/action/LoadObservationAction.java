@@ -40,7 +40,7 @@
  * Revision 1.1  2009/12/04 16:26:58  bourgesl
  * Added Load action in the menu bar (partially handled)
  *
- */
+ ******************************************************************************/
 package fr.jmmc.aspro.gui.action;
 
 import fr.jmmc.aspro.model.ObservationManager;

@@ -40,7 +40,7 @@
  * Revision 1.1  2010/05/26 15:30:54  bourgesl
  * new CHARA Vega Star List generation (OB like)
  *
- */
+ ******************************************************************************/
 package fr.jmmc.aspro.ob;
 
 import edu.dartmouth.AstroSkyCalcObservation;

@@ -19,7 +19,7 @@
  * Revision 1.1  2009/12/18 11:52:02  bourgesl
  * added Pops Finder Compatible Mode for a list of targets
  *
- */
+ ******************************************************************************/
 package fr.jmmc.aspro.model.observability;
 
 import java.util.List;

@@ -9,7 +9,7 @@
  * Revision 1.1  2010/10/01 15:29:15  bourgesl
  * custom Date format to format time (HH:MM) and HA
  *
- */
+ ******************************************************************************/
 package fr.jmmc.aspro.util;
 
 import java.text.DateFormat;

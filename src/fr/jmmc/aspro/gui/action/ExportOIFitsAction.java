@@ -48,7 +48,7 @@
  * added ExportToOIFits action
  *
  *
- */
+ ******************************************************************************/
 package fr.jmmc.aspro.gui.action;
 
 import fr.jmmc.aspro.AsproConstants;

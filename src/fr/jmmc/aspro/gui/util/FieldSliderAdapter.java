@@ -21,7 +21,7 @@
  * Revision 1.1  2010/01/21 16:38:42  bourgesl
  * Custom Numeric text field binding with a JSlider
  *
- */
+ ******************************************************************************/
 package fr.jmmc.aspro.gui.util;
 
 import java.beans.PropertyChangeEvent;

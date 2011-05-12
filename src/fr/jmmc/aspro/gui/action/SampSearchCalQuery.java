@@ -33,7 +33,7 @@
  * Revision 1.1  2010/10/05 18:24:07  bourgesl
  * first running searchCal start query integration through SAMP (but cause bugs in SearchCal)
  *
- */
+ ******************************************************************************/
 package fr.jmmc.aspro.gui.action;
 
 import edu.dartmouth.AstroSkyCalcObservation;
