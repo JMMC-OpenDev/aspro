@@ -1,12 +1,5 @@
 /*******************************************************************************
- * JMMC project
- *
- * "@(#) $Id: OIFitsEvent.java,v 1.1 2011-03-01 17:08:05 bourgesl Exp $"
- *
- * History
- * -------
- * $Log: not supported by cvs2svn $
- *
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
 package fr.jmmc.aspro.model.event;
 

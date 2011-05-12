@@ -1,18 +1,5 @@
 /*******************************************************************************
- * JMMC project
- *
- * "@(#) $Id: ZoomEvent.java,v 1.3 2010-09-15 13:53:25 bourgesl Exp $"
- *
- * History
- * -------
- * $Log: not supported by cvs2svn $
- * Revision 1.2  2010/02/03 16:07:49  bourgesl
- * refactoring to use the custom swing worker executor
- * when zomming uv map is computed asynchronously
- *
- * Revision 1.1  2010/02/03 09:48:53  bourgesl
- * target model uvmap added on the uv coverage with zooming supported
- *
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
 package fr.jmmc.aspro.gui.chart;
 

@@ -1,20 +1,5 @@
 /*******************************************************************************
- * JMMC project
- *
- * "@(#) $Id: StarData.java,v 1.4 2011-01-25 13:48:56 bourgesl Exp $"
- *
- * History
- * -------
- * $Log: not supported by cvs2svn $
- * Revision 1.3  2010/10/01 15:36:58  bourgesl
- * added to do
- *
- * Revision 1.2  2010/01/22 13:16:19  bourgesl
- * fixed imports
- *
- * Revision 1.1  2010/01/08 16:48:30  bourgesl
- * package refactoring
- *
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
 package fr.jmmc.aspro.model.observability;
 

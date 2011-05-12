@@ -1,32 +1,5 @@
 /*******************************************************************************
- * JMMC project
- *
- * "@(#) $Id: OIBase.java,v 1.8 2010-12-06 17:03:33 bourgesl Exp $"
- *
- * History
- * -------
- * $Log: not supported by cvs2svn $
- * Revision 1.7  2010/12/03 16:28:30  bourgesl
- * Serializable support
- *
- * Revision 1.6  2010/11/30 15:53:27  bourgesl
- * added shared logger
- * added deepCopyList and copyList methods to simplify clone implementations
- *
- * Revision 1.5  2010/11/29 17:14:35  bourgesl
- * proper clone implementatio (deep-copy)
- *
- * Revision 1.4  2010/02/12 15:53:25  bourgesl
- * comments
- *
- * Revision 1.3  2010/01/05 17:16:59  bourgesl
- * add Cloneable support
- *
- * Revision 1.2  2009/10/22 15:47:22  bourgesl
- * beginning of observability computation with jSkyCalc
- *
- *
- *
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
 package fr.jmmc.aspro.model;
 

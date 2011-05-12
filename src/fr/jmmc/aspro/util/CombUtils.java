@@ -1,14 +1,5 @@
 /*******************************************************************************
- * JMMC project
- *
- * "@(#) $Id: CombUtils.java,v 1.2 2010-09-01 12:59:25 bourgesl Exp $"
- *
- * History
- * -------
- * $Log: not supported by cvs2svn $
- * Revision 1.1  2010/06/30 14:53:29  bourgesl
- * new Combinatory utilities to get n-tuples and combinations + test case
- *
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
 package fr.jmmc.aspro.util;
 

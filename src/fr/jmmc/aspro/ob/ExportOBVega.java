@@ -1,45 +1,5 @@
 /*******************************************************************************
- * JMMC project
- *
- * "@(#) $Id: ExportOBVega.java,v 1.12 2011-02-25 16:51:18 bourgesl Exp $"
- *
- * History
- * -------
- * $Log: not supported by cvs2svn $
- * Revision 1.11  2011/02/24 17:13:06  bourgesl
- * comments
- *
- * Revision 1.10  2011/02/14 15:33:10  bourgesl
- * use JMCS FileUtils
- *
- * Revision 1.9  2011/01/07 13:22:31  bourgesl
- * use UNDEFINED_MAGNITUDE
- *
- * Revision 1.8  2010/12/17 15:08:33  bourgesl
- * added comment
- *
- * Revision 1.7  2010/10/04 16:25:25  bourgesl
- * proper IO exception handling
- *
- * Revision 1.6  2010/06/25 14:17:21  bourgesl
- * refactoring due to changes done in AstroSkyCalc and AstroSkyCalcObservation
- *
- * Revision 1.5  2010/06/17 10:02:51  bourgesl
- * fixed warning hints - mainly not final static loggers
- *
- * Revision 1.4  2010/06/07 16:03:48  bourgesl
- * minimum elevation changed to 30 degrees
- *
- * Revision 1.3  2010/05/31 09:45:00  bourgesl
- * restored fluxes H and J
- *
- * Revision 1.2  2010/05/27 10:09:48  bourgesl
- * inverted flux H and J to be closer to VEGA_PLAN output
- * removed SEVERE traces
- *
- * Revision 1.1  2010/05/26 15:30:54  bourgesl
- * new CHARA Vega Star List generation (OB like)
- *
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
 package fr.jmmc.aspro.ob;
 

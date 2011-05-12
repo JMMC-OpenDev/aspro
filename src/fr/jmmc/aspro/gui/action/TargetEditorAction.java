@@ -1,11 +1,5 @@
 /*******************************************************************************
- * JMMC project
- *
- * "@(#) $Id: TargetEditorAction.java,v 1.1 2011-02-16 14:53:15 bourgesl Exp $"
- *
- * History
- * -------
- * $Log: not supported by cvs2svn $
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
 package fr.jmmc.aspro.gui.action;
 

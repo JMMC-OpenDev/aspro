@@ -1,17 +1,5 @@
 /*******************************************************************************
- * JMMC project
- *
- * "@(#) $Id: AngleUtils.java,v 1.3 2010-07-07 09:23:09 bourgesl Exp $"
- *
- * History
- * -------
- * $Log: not supported by cvs2svn $
- * Revision 1.2  2010/06/17 10:02:51  bourgesl
- * fixed warning hints - mainly not final static loggers
- *
- * Revision 1.1  2010/01/08 16:51:18  bourgesl
- * initial uv coverage
- *
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
 package fr.jmmc.aspro.util;
 

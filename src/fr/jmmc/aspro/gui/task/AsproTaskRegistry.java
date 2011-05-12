@@ -1,14 +1,5 @@
 /*******************************************************************************
- * JMMC project
- *
- * "@(#) $Id: AsproTaskRegistry.java,v 1.2 2011-02-14 17:13:07 bourgesl Exp $"
- *
- * History
- * -------
- * $Log: not supported by cvs2svn $
- * Revision 1.1  2011/01/21 16:30:38  bourgesl
- * create Aspro Tasks and describe their dependencies
- *
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
 package fr.jmmc.aspro.gui.task;
 

@@ -1,32 +1,5 @@
 /*******************************************************************************
- * JMMC project
- *
- * "@(#) $Id: BoundedNumberAxis.java,v 1.8 2011-04-14 14:36:03 bourgesl Exp $"
- *
- * History
- * -------
- * $Log: not supported by cvs2svn $
- * Revision 1.7  2011/04/13 14:33:45  bourgesl
- * added bounded date axis
- *
- * Revision 1.6  2010/10/01 15:34:28  bourgesl
- * moved constant
- *
- * Revision 1.5  2010/06/17 10:02:50  bourgesl
- * fixed warning hints - mainly not final static loggers
- *
- * Revision 1.4  2010/05/11 12:02:24  bourgesl
- * disable autoRange at all
- *
- * Revision 1.3  2010/02/12 15:53:25  bourgesl
- * comments
- *
- * Revision 1.2  2010/01/13 16:12:08  bourgesl
- * comments
- *
- * Revision 1.1  2010/01/12 16:53:20  bourgesl
- * customized JFreeChart classes to get a square XY Plot supporting zooming in/out with mouse and mouse wheel
- *
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
 package fr.jmmc.aspro.gui.chart;
 

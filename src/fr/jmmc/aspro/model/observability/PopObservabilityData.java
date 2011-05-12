@@ -1,20 +1,5 @@
 /*******************************************************************************
- * JMMC project
- *
- * "@(#) $Id: PopObservabilityData.java,v 1.3 2011-01-25 13:48:56 bourgesl Exp $"
- *
- * History
- * -------
- * $Log: not supported by cvs2svn $
- * Revision 1.2  2010/01/22 13:16:18  bourgesl
- * fixed imports
- *
- * Revision 1.1  2010/01/08 16:48:30  bourgesl
- * package refactoring
- *
- * Revision 1.2  2009/12/18 11:52:02  bourgesl
- * added Pops Finder Compatible Mode for a list of targets
- *
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
 package fr.jmmc.aspro.model.observability;
 

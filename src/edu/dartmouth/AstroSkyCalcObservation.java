@@ -1,21 +1,5 @@
 /*******************************************************************************
- * JMMC project
- *
- * "@(#) $Id: AstroSkyCalcObservation.java,v 1.4 2011-04-26 13:02:20 bourgesl Exp $"
- *
- * History
- * -------
- * $Log: not supported by cvs2svn $
- * Revision 1.3  2011/04/22 15:37:49  bourgesl
- * JSkyCalc refactoring
- *
- * Revision 1.2  2010/09/15 13:51:47  bourgesl
- * comments explaining how to get moon angular distance
- *
- * Revision 1.1  2010/06/25 14:12:38  bourgesl
- * methods from AstoSkyCalc related to targets moved in AstoSkyCalcObservation
- *
- *
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
 package edu.dartmouth;
 

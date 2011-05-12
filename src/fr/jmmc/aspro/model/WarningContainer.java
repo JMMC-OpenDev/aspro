@@ -1,17 +1,5 @@
 /*******************************************************************************
- * JMMC project
- *
- * "@(#) $Id: WarningContainer.java,v 1.2 2011-02-24 17:14:13 bourgesl Exp $"
- *
- * History
- * -------
- * $Log: not supported by cvs2svn $
- * Revision 1.1  2010/10/01 13:21:35  bourgesl
- * Warnings are not deidcated to OIFits noise service but also used by UVCoverageService to give warnings when the target is not observable
- *
- * Revision 1.1  2010/09/02 15:46:32  bourgesl
- * simple warning message container extension of OIFiteFile
- *
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
 package fr.jmmc.aspro.model;
 

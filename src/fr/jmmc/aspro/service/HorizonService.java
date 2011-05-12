@@ -1,20 +1,5 @@
 /*******************************************************************************
- * JMMC project
- *
- * "@(#) $Id: HorizonService.java,v 1.4 2010-10-14 14:18:20 bourgesl Exp $"
- *
- * History
- * -------
- * $Log: not supported by cvs2svn $
- * Revision 1.3  2010/06/17 10:02:50  bourgesl
- * fixed warning hints - mainly not final static loggers
- *
- * Revision 1.2  2009/11/27 16:37:51  bourgesl
- * fixed azimuth to south = 0
- *
- * Revision 1.1  2009/11/23 16:49:17  bourgesl
- * added horizonService to check horizon profiles (VLTI)
- *
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
 package fr.jmmc.aspro.service;
 

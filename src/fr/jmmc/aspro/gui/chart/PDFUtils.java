@@ -1,39 +1,5 @@
 /*******************************************************************************
- * JMMC project
- *
- * "@(#) $Id: PDFUtils.java,v 1.10 2011-04-04 13:58:50 bourgesl Exp $"
- *
- * History
- * -------
- * $Log: not supported by cvs2svn $
- * Revision 1.9  2011/03/01 17:13:37  bourgesl
- * added time monitoring when saving PDF
- *
- * Revision 1.8  2010/10/15 16:59:43  bourgesl
- * new PDF options (page size and orientation)
- * PDFExportable refactoring to include prepareChart, postPDF and getPDFOptions methods
- *
- * Revision 1.7  2010/10/08 12:30:30  bourgesl
- * added to do : adjust page size according to chart content
- *
- * Revision 1.6  2010/09/26 11:59:11  bourgesl
- * replaced RuntimeException by IllegalStateException to avoid catching runtime exceptions
- *
- * Revision 1.5  2010/09/24 15:53:44  bourgesl
- * IOexception is thrown to have better exception handling
- *
- * Revision 1.4  2010/06/17 10:02:50  bourgesl
- * fixed warning hints - mainly not final static loggers
- *
- * Revision 1.3  2010/01/19 11:01:08  bourgesl
- * force text rendering as shapes to avoid unicode issues
- *
- * Revision 1.2  2010/01/15 16:13:27  bourgesl
- * fixed margins
- *
- * Revision 1.1  2010/01/13 16:11:43  bourgesl
- * pdf related classes
- *
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
 package fr.jmmc.aspro.gui.chart;
 

@@ -1,12 +1,5 @@
 /*******************************************************************************
- * JMMC project
- *
- * "@(#) $Id: ComponentResizeAdapter.java,v 1.1 2009-09-21 15:38:50 bourgesl Exp $"
- *
- * History
- * -------
- * $Log: not supported by cvs2svn $
- *
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
 package fr.jmmc.aspro.gui.util;
 

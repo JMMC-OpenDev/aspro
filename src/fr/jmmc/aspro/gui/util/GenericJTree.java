@@ -1,20 +1,5 @@
 /*******************************************************************************
- * JMMC project
- *
- * "@(#) $Id: GenericJTree.java,v 1.4 2010-12-08 17:04:06 bourgesl Exp $"
- *
- * History
- * -------
- * $Log: not supported by cvs2svn $
- * Revision 1.3  2010/12/07 17:34:46  bourgesl
- * optionaly update selection when removing a node
- *
- * Revision 1.2  2010/12/06 17:01:14  bourgesl
- * findNode(parent, node) made public
- *
- * Revision 1.1  2010/12/03 16:10:57  bourgesl
- * JTree utility classes to handle targets / models
- *
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
 package fr.jmmc.aspro.gui.util;
 

@@ -1,33 +1,5 @@
 /*******************************************************************************
- * JMMC project
- *
- * "@(#) $Id: InterferometerMapService.java,v 1.8 2011-03-01 17:17:01 bourgesl Exp $"
- *
- * History
- * -------
- * $Log: not supported by cvs2svn $
- * Revision 1.7  2011/02/24 17:14:11  bourgesl
- * Major refactoring to support / handle observation collection (multi-conf)
- *
- * Revision 1.6  2010/10/22 11:12:02  bourgesl
- * javadoc
- * fixed minimum and maximum methods (Double extrema)
- *
- * Revision 1.5  2010/09/20 14:46:02  bourgesl
- * minor refactoring changes
- *
- * Revision 1.4  2010/06/30 15:02:25  bourgesl
- * comment changed
- *
- * Revision 1.3  2010/06/30 14:54:45  bourgesl
- * use CombUtils to simplify code (Pops combination and number of baselines)
- *
- * Revision 1.2  2010/06/17 10:02:50  bourgesl
- * fixed warning hints - mainly not final static loggers
- *
- * Revision 1.1  2010/05/11 12:08:27  bourgesl
- * simple Interferometer Map (stations + baselines) automatically refreshed when the chosen baseline configuration changes
- *
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
 package fr.jmmc.aspro.service;
 

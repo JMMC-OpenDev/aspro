@@ -1,19 +1,5 @@
 /*******************************************************************************
- * JMMC project
- *
- * "@(#) $Id: BaseLine.java,v 1.3 2010-10-22 11:13:16 bourgesl Exp $"
- *
- * History
- * -------
- * $Log: not supported by cvs2svn $
- * Revision 1.2  2009/11/24 15:12:09  bourgesl
- * first step to handle delay line limits
- *
- * Revision 1.1  2009/11/20 16:55:46  bourgesl
- * Added Beam / Delay Line definition
- * ObservabilityService is stateless to simplify coding
- *
- *
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
 package fr.jmmc.aspro.model;
 

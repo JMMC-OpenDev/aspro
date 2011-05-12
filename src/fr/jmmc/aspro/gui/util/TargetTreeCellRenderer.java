@@ -1,14 +1,5 @@
 /*******************************************************************************
- * JMMC project
- *
- * "@(#) $Id: TargetTreeCellRenderer.java,v 1.2 2010-12-15 13:33:07 bourgesl Exp $"
- *
- * History
- * -------
- * $Log: not supported by cvs2svn $
- * Revision 1.1  2010/12/10 17:09:48  bourgesl
- * custom renderers (list/tree) to display target name with corresponding icon
- *
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
 package fr.jmmc.aspro.gui.util;
 

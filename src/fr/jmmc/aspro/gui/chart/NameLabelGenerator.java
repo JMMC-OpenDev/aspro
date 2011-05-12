@@ -1,11 +1,5 @@
 /*******************************************************************************
- * JMMC project
- *
- * "@(#) $Id: NameLabelGenerator.java,v 1.1 2010-05-11 12:07:09 bourgesl Exp $"
- *
- * History
- * -------
- * $Log: not supported by cvs2svn $
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
 package fr.jmmc.aspro.gui.chart;
 

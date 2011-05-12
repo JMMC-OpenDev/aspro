@@ -1,14 +1,5 @@
 /*******************************************************************************
- * JMMC project
- *
- * "@(#) $Id: ObservationCollectionObsData.java,v 1.2 2011-03-01 17:14:09 bourgesl Exp $"
- *
- * History
- * -------
- * $Log: not supported by cvs2svn $
- * Revision 1.1  2011/02/28 17:12:51  bourgesl
- * new result containers to have an easier API to manipulate lists
- *
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
 package fr.jmmc.aspro.model;
 

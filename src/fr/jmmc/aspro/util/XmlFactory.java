@@ -1,27 +1,5 @@
 /*******************************************************************************
- * JMMC project
- *
- * "@(#) $Id: XmlFactory.java,v 1.6 2011-02-14 15:33:11 bourgesl Exp $"
- *
- * History
- * -------
- * $Log: not supported by cvs2svn $
- * Revision 1.5  2010/10/07 15:00:55  bourgesl
- * higher buffer size
- *
- * Revision 1.4  2010/09/26 11:57:36  bourgesl
- * replaced RuntimeException by IllegalArgumentException to avoid catching all runtime exceptions
- *
- * Revision 1.3  2010/09/24 15:48:24  bourgesl
- * proper exception handling (unexpected and runtime failures)
- *
- * Revision 1.2  2010/07/07 09:29:29  bourgesl
- * use buffered url.openStream
- *
- * Revision 1.1  2010/06/23 12:49:06  bourgesl
- * XSLT (JAXP) utility class to load (in cache) XSLT files and perform transformations
- *
- *
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
 package fr.jmmc.aspro.util;
 

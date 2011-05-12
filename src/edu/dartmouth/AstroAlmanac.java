@@ -1,14 +1,5 @@
 /*******************************************************************************
- * JMMC project
- *
- * "@(#) $Id: AstroAlmanac.java,v 1.2 2011-04-26 15:53:38 bourgesl Exp $"
- *
- * History
- * -------
- * $Log: not supported by cvs2svn $
- * Revision 1.1  2011/04/22 15:34:24  bourgesl
- * new JMMC classes to manage almanac data
- *
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
 package edu.dartmouth;
 

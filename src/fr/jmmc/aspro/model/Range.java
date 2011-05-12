@@ -1,43 +1,5 @@
 /*******************************************************************************
- * JMMC project
- *
- * "@(#) $Id: Range.java,v 1.11 2010-10-22 11:33:58 bourgesl Exp $"
- *
- * History
- * -------
- * $Log: not supported by cvs2svn $
- * Revision 1.10  2010/06/25 14:13:06  bourgesl
- * added method contains(List of ranges, value)
- *
- * Revision 1.9  2010/05/26 15:27:15  bourgesl
- * added restrictRange method to return a cropped list of ranges inside [min;max] range
- *
- * Revision 1.8  2010/04/02 14:39:54  bourgesl
- * added contains method
- *
- * Revision 1.7  2010/01/21 16:39:49  bourgesl
- * added static getMinimum(List) and getMaximum(List) methods
- *
- * Revision 1.6  2009/12/02 17:23:51  bourgesl
- * fixed several bugs on pop finder + refactoring
- *
- * Revision 1.5  2009/12/01 17:14:45  bourgesl
- * first try to add the pop configuration finder
- *
- * Revision 1.4  2009/11/24 17:27:12  bourgesl
- * first attempt to merge ranges
- *
- * Revision 1.3  2009/11/24 15:12:09  bourgesl
- * first step to handle delay line limits
- *
- * Revision 1.2  2009/11/23 16:49:17  bourgesl
- * added horizonService to check horizon profiles (VLTI)
- *
- * Revision 1.1  2009/11/20 16:55:47  bourgesl
- * Added Beam / Delay Line definition
- * ObservabilityService is stateless to simplify coding
- *
- *
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
 package fr.jmmc.aspro.model;
 

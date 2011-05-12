@@ -1,11 +1,5 @@
 /*******************************************************************************
- * JMMC project
- *
- * "@(#) $Id: Disposable.java,v 1.1 2010-09-08 16:00:30 bourgesl Exp $"
- *
- * History
- * -------
- * $Log: not supported by cvs2svn $
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
 package fr.jmmc.aspro.gui;
 

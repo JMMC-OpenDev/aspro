@@ -1,47 +1,5 @@
 /*******************************************************************************
- * JMMC project
- *
- * "@(#) $Id: SaveObservationAction.java,v 1.13 2011-03-08 13:49:39 bourgesl Exp $"
- *
- * History
- * -------
- * $Log: not supported by cvs2svn $
- * Revision 1.12  2010/10/04 16:25:39  bourgesl
- * proper JAXB / IO exception handling
- *
- * Revision 1.11  2010/10/01 15:34:06  bourgesl
- * use MessagePane.showConfirmFileOverwrite
- *
- * Revision 1.10  2010/09/24 15:54:25  bourgesl
- * better exception handling + use MessagePane
- *
- * Revision 1.9  2010/09/01 12:57:13  bourgesl
- * added runtime exception message to user message dialog
- *
- * Revision 1.8  2010/06/17 10:02:50  bourgesl
- * fixed warning hints - mainly not final static loggers
- *
- * Revision 1.7  2010/06/11 13:48:09  bourgesl
- * javadoc
- *
- * Revision 1.6  2010/06/09 12:54:12  bourgesl
- * javadoc
- *
- * Revision 1.5  2010/05/11 12:03:17  bourgesl
- * fix : check the file extension before the existence of the file to display the confirm dialog
- *
- * Revision 1.4  2010/04/02 10:06:29  bourgesl
- * add missing xml extension to the file name
- *
- * Revision 1.3  2009/12/08 13:09:55  bourgesl
- * Added FileFilter for observation settings
- *
- * Revision 1.2  2009/12/04 16:26:58  bourgesl
- * Added Load action in the menu bar (partially handled)
- *
- * Revision 1.1  2009/12/04 15:38:27  bourgesl
- * Added Save action in the menu bar
- *
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
 package fr.jmmc.aspro.gui.action;
 

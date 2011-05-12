@@ -1,17 +1,5 @@
 /*******************************************************************************
- * JMMC project
- *
- * "@(#) $Id: WarningContainerEvent.java,v 1.3 2011-02-24 17:14:12 bourgesl Exp $"
- *
- * History
- * -------
- * $Log: not supported by cvs2svn $
- * Revision 1.2  2011/02/02 17:40:36  bourgesl
- * added observation for debugging purposes
- *
- * Revision 1.1  2011/01/31 15:26:31  bourgesl
- * new event to contain warnings
- *
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
 package fr.jmmc.aspro.model.event;
 

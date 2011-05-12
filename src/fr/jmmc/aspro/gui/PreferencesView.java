@@ -1,36 +1,5 @@
 /*******************************************************************************
- * JMMC project
- *
- * "@(#) $Id: PreferencesView.java,v 1.9 2011-04-22 15:38:41 bourgesl Exp $"
- *
- * History
- * -------
- * $Log: not supported by cvs2svn $
- * Revision 1.8  2010/10/22 13:31:37  bourgesl
- * added preference for Time LST/UTC
- *
- * Revision 1.7  2010/09/08 16:00:31  bourgesl
- * unregister Preference Observers when the widget is released (Preference View, UV Coverage Panel)
- *
- * Revision 1.6  2010/06/17 10:02:50  bourgesl
- * fixed warning hints - mainly not final static loggers
- *
- * Revision 1.5  2010/06/08 12:32:46  bourgesl
- * javadoc
- *
- * Revision 1.4  2010/05/21 14:27:34  bourgesl
- * added preferences for Model Image Lut & Size
- *
- * Revision 1.3  2010/05/19 09:08:10  mella
- * dispose on close
- *
- * Revision 1.2  2010/05/17 16:09:03  mella
- * Add the preference view as preference observer
- *
- * Revision 1.1  2010/05/12 08:44:10  mella
- * Add one preferences window first to choose the default style of display for positions
- *
- *
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
 package fr.jmmc.aspro.gui;
 

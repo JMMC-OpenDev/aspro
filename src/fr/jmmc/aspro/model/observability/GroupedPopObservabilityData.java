@@ -1,24 +1,5 @@
 /*******************************************************************************
- * JMMC project
- *
- * "@(#) $Id: GroupedPopObservabilityData.java,v 1.4 2011-01-25 13:48:56 bourgesl Exp $"
- *
- * History
- * -------
- * $Log: not supported by cvs2svn $
- * Revision 1.3  2010/12/17 15:14:20  bourgesl
- * append char instead of string
- *
- * Revision 1.2  2010/10/22 11:12:02  bourgesl
- * javadoc
- * fixed minimum and maximum methods (Double extrema)
- *
- * Revision 1.1  2010/01/08 16:48:29  bourgesl
- * package refactoring
- *
- * Revision 1.1  2009/12/18 11:52:02  bourgesl
- * added Pops Finder Compatible Mode for a list of targets
- *
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
 package fr.jmmc.aspro.model.observability;
 

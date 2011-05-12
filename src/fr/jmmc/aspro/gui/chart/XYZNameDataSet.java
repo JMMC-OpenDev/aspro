@@ -1,14 +1,5 @@
 /*******************************************************************************
- * JMMC project
- *
- * "@(#) $Id: XYZNameDataSet.java,v 1.2 2011-01-25 12:29:36 bourgesl Exp $"
- *
- * History
- * -------
- * $Log: not supported by cvs2svn $
- * Revision 1.1  2010/05/11 12:06:40  bourgesl
- * Overriden XYZDataSet to include a name property used by NameLabelGenerator
- *
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
 package fr.jmmc.aspro.gui.chart;
 

@@ -1,26 +1,5 @@
 /*******************************************************************************
- * JMMC project
- *
- * "@(#) $Id: NewObservationAction.java,v 1.6 2011-02-03 17:29:55 bourgesl Exp $"
- *
- * History
- * -------
- * $Log: not supported by cvs2svn $
- * Revision 1.5  2010/10/01 15:33:52  bourgesl
- * Added a confirm dialog for the 'New Observation' action
- *
- * Revision 1.4  2010/09/26 12:43:58  bourgesl
- * removed try catch runtime exception
- *
- * Revision 1.3  2010/09/24 15:54:25  bourgesl
- * better exception handling + use MessagePane
- *
- * Revision 1.2  2010/09/01 12:57:13  bourgesl
- * added runtime exception message to user message dialog
- *
- * Revision 1.1  2010/07/07 15:16:25  bourgesl
- * added 'New Observation' action
- *
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
 package fr.jmmc.aspro.gui.action;
 

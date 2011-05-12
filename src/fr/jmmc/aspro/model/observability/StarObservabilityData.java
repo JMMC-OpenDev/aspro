@@ -1,35 +1,5 @@
 /*******************************************************************************
- * JMMC project
- *
- * "@(#) $Id: StarObservabilityData.java,v 1.8 2011-03-01 17:16:39 bourgesl Exp $"
- *
- * History
- * -------
- * $Log: not supported by cvs2svn $
- * Revision 1.7  2011/01/25 13:48:55  bourgesl
- * javadoc
- *
- * Revision 1.6  2010/12/17 15:13:37  bourgesl
- * name attribute split into targetName and info
- *
- * Revision 1.5  2010/10/08 12:29:44  bourgesl
- * add calibrator type (blue)
- *
- * Revision 1.4  2010/07/22 12:31:18  bourgesl
- * new moon type
- *
- * Revision 1.3  2010/04/02 14:40:39  bourgesl
- * added elevation data and transit date
- *
- * Revision 1.2  2010/01/22 13:16:18  bourgesl
- * fixed imports
- *
- * Revision 1.1  2010/01/08 16:48:29  bourgesl
- * package refactoring
- *
- * Revision 1.3  2009/12/18 11:52:02  bourgesl
- * added Pops Finder Compatible Mode for a list of targets
- *
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
 package fr.jmmc.aspro.model.observability;
 

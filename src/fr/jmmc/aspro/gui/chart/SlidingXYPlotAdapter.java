@@ -1,33 +1,5 @@
 /*******************************************************************************
- * JMMC project
- *
- * "@(#) $Id: SlidingXYPlotAdapter.java,v 1.7 2011-04-14 14:36:22 bourgesl Exp $"
- *
- * History
- * -------
- * $Log: not supported by cvs2svn $
- * Revision 1.6  2011/04/13 14:38:50  bourgesl
- * refactored annotations to use the plot context (only perform text / block fitting once)
- * support autofit size (height / width) for fonts / marks / ticks
- *
- * Revision 1.5  2011/03/01 17:14:00  bourgesl
- * renamed variables
- *
- * Revision 1.4  2010/12/15 13:33:18  bourgesl
- * removed comment
- *
- * Revision 1.3  2010/10/21 16:49:12  bourgesl
- * better annotation position and font size
- * modified bar width for many targets
- *
- * Revision 1.2  2010/10/18 14:27:07  bourgesl
- * javadoc
- * disabled logs
- *
- * Revision 1.1  2010/10/15 17:03:20  bourgesl
- * major changes to add sliding behaviour (scrollbar) to view only a subset of targets if there are too many.
- * PDF options according to the number of targets
- *
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
 package fr.jmmc.aspro.gui.chart;
 

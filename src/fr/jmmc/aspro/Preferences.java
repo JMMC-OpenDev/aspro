@@ -1,30 +1,5 @@
 /*******************************************************************************
- * JMMC project
- *
- * "@(#) $Id: Preferences.java,v 1.7 2011-04-22 15:38:18 bourgesl Exp $"
- *
- * History
- * -------
- * $Log: not supported by cvs2svn $
- * Revision 1.6  2011/04/04 13:58:56  bourgesl
- * javadoc
- *
- * Revision 1.5  2010/10/22 13:31:37  bourgesl
- * added preference for Time LST/UTC
- *
- * Revision 1.4  2010/06/17 10:02:51  bourgesl
- * fixed warning hints - mainly not final static loggers
- *
- * Revision 1.3  2010/06/09 12:49:39  bourgesl
- * added an hidden preference (splash.screen.show) to show the splashscreen at startup
- *
- * Revision 1.2  2010/05/21 14:27:34  bourgesl
- * added preferences for Model Image Lut & Size
- *
- * Revision 1.1  2010/05/12 08:44:10  mella
- * Add one preferences window first to choose the default style of display for positions
- *
- *
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
 package fr.jmmc.aspro;
 

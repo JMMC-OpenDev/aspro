@@ -1,23 +1,5 @@
 /*******************************************************************************
- * JMMC project
- *
- * "@(#) $Id: SunTimeInterval.java,v 1.4 2011-04-22 15:40:19 bourgesl Exp $"
- *
- * History
- * -------
- * $Log: not supported by cvs2svn $
- * Revision 1.3  2011/01/25 13:48:55  bourgesl
- * javadoc
- *
- * Revision 1.2  2010/04/13 15:26:21  bourgesl
- * add Comparable support
- *
- * Revision 1.1  2010/01/08 16:48:29  bourgesl
- * package refactoring
- *
- * Revision 1.3  2009/12/02 17:23:51  bourgesl
- * fixed several bugs on pop finder + refactoring
- *
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
 package fr.jmmc.aspro.model.observability;
 

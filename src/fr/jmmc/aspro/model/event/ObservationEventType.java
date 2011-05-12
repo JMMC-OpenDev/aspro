@@ -1,18 +1,5 @@
 /*******************************************************************************
- * JMMC project
- *
- * "@(#) $Id: ObservationEventType.java,v 1.5 2011-03-01 17:15:51 bourgesl Exp $"
- *
- * History
- * -------
- * $Log: not supported by cvs2svn $
- * Revision 1.4  2011/02/22 18:11:30  bourgesl
- * Major UI changes : configuration multi-selection, unique target selection in main form
- *
- * Revision 1.3  2011/01/31 15:24:34  bourgesl
- * added file header
- *
- *
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
 package fr.jmmc.aspro.model.event;
 

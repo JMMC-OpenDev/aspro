@@ -1,38 +1,5 @@
 /*******************************************************************************
- * JMMC project
- *
- * "@(#) $Id: SampSearchCalQuery.java,v 1.10 2011-03-01 17:12:51 bourgesl Exp $"
- *
- * History
- * -------
- * $Log: not supported by cvs2svn $
- * Revision 1.9  2011/02/28 17:13:14  bourgesl
- * comments
- *
- * Revision 1.8  2011/02/24 17:11:49  bourgesl
- * comments
- *
- * Revision 1.7  2011/02/14 15:33:10  bourgesl
- * use JMCS FileUtils
- *
- * Revision 1.6  2011/02/03 17:29:44  bourgesl
- * comment
- *
- * Revision 1.5  2011/01/07 13:21:24  bourgesl
- * moved code
- *
- * Revision 1.4  2010/12/14 09:25:41  bourgesl
- * use target directly instead of target name
- *
- * Revision 1.3  2010/10/14 13:12:53  bourgesl
- * Spectral band definition moved in JMCS
- *
- * Revision 1.2  2010/10/06 16:06:33  bourgesl
- * finalization : define bright, min/Max MagRange correctly
- *
- * Revision 1.1  2010/10/05 18:24:07  bourgesl
- * first running searchCal start query integration through SAMP (but cause bugs in SearchCal)
- *
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
 package fr.jmmc.aspro.gui.action;
 

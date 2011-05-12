@@ -1,12 +1,5 @@
 /*******************************************************************************
- * JMMC project
- *
- * "@(#) $Id: AsproGenConfig.java,v 1.2 2011-04-26 15:53:38 bourgesl Exp $"
- *
- * History
- * -------
- * $Log: not supported by cvs2svn $
- *
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
 
 import fr.jmmc.aspro.AsproConstants;

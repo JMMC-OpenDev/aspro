@@ -1,28 +1,5 @@
 /*******************************************************************************
- * JMMC project
- *
- * "@(#) $Id: GeocentricCoords.java,v 1.8 2010-09-24 15:51:32 bourgesl Exp $"
- *
- * History
- * -------
- * $Log: not supported by cvs2svn $
- * Revision 1.7  2010/09/09 16:01:19  bourgesl
- * convert cartesian ECEF coordinates to spherical coordinates to remove Astrogrid Pal dependency
- *
- * Revision 1.6  2010/06/17 10:02:50  bourgesl
- * fixed warning hints - mainly not final static loggers
- *
- * Revision 1.5  2010/04/02 14:37:52  bourgesl
- * javadoc
- *
- * Revision 1.4  2009/11/05 12:59:39  bourgesl
- * first simple source observability (only min elevation condition)
- *
- * Revision 1.3  2009/10/22 15:47:22  bourgesl
- * beginning of observability computation with jSkyCalc
- *
- *
- *
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
 package fr.jmmc.aspro.service;
 

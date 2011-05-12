@@ -1,58 +1,5 @@
 /*******************************************************************************
- * JMMC project
- *
- * "@(#) $Id: SearchCalSampMessageHandler.java,v 1.16 2011-03-16 16:14:28 bourgesl Exp $"
- *
- * History
- * -------
- * $Log: not supported by cvs2svn $
- * Revision 1.15  2011/03/08 17:27:14  bourgesl
- * added a parameter with SearchCal Gui version and use OM.defineCalibratorDiameter(calibrators)
- *
- * Revision 1.14  2011/03/04 16:59:07  bourgesl
- * define diameter using alternate diameters if computed UD_ are missing
- *
- * Revision 1.13  2011/03/03 17:40:49  bourgesl
- * filter the science targets that may be present in SearchCal response
- * define the disk model diameter using the selected instrument band and UD_ fields
- *
- * Revision 1.12  2011/03/02 17:36:03  bourgesl
- * do not skip calibrator without UD diameters / return all diameters as Target/calibratorInfos
- *
- * Revision 1.11  2011/02/16 14:52:43  bourgesl
- * added comments
- *
- * Revision 1.10  2011/02/14 15:33:10  bourgesl
- * use JMCS FileUtils
- *
- * Revision 1.9  2011/02/04 17:19:22  bourgesl
- * use main observation to get targets for edition
- *
- * Revision 1.8  2011/01/26 17:21:11  bourgesl
- * use deepClone (target/models ...)
- *
- * Revision 1.7  2011/01/10 12:47:16  bourgesl
- * use TargetEditorDialog.targetEditorActive flag to disable Samp action when the target editor is active to disable concurrent edition
- *
- * Revision 1.6  2010/12/17 15:09:39  bourgesl
- * added SearchCal origin to imported target
- * refactor to use calibrator flag and associations : updated merge targets
- *
- * Revision 1.5  2010/12/14 09:28:27  bourgesl
- * major update on mergeTargets to flag calibrators and update targets and target user informations
- *
- * Revision 1.4  2010/10/22 11:10:44  bourgesl
- * use App frame
- *
- * Revision 1.3  2010/10/11 14:15:37  bourgesl
- * SampMessageHandler refactoring
- *
- * Revision 1.2  2010/10/08 12:29:17  bourgesl
- * added error messages if nb(calibrators) = 0 or > 10
- *
- * Revision 1.1  2010/10/07 15:04:23  bourgesl
- * first SearchCal votable Samp handler : extract calibrators and merge them to the target list
- *
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
 package fr.jmmc.aspro.model.searchCal;
 

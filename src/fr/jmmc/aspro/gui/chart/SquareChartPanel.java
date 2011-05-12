@@ -1,29 +1,5 @@
 /*******************************************************************************
- * JMMC project
- *
- * "@(#) $Id: SquareChartPanel.java,v 1.7 2011-04-14 14:36:46 bourgesl Exp $"
- *
- * History
- * -------
- * $Log: not supported by cvs2svn $
- * Revision 1.6  2010/09/15 13:53:25  bourgesl
- * comments / javadoc
- *
- * Revision 1.5  2010/06/17 10:02:50  bourgesl
- * fixed warning hints - mainly not final static loggers
- *
- * Revision 1.4  2010/02/04 14:45:43  bourgesl
- * try / finally srtucture to be sure to call plot.setNotify in any case (exception ...) causing the plot to be frozen (no more refresh)
- *
- * Revision 1.3  2010/02/03 09:48:53  bourgesl
- * target model uvmap added on the uv coverage with zooming supported
- *
- * Revision 1.2  2010/01/13 16:12:08  bourgesl
- * comments
- *
- * Revision 1.1  2010/01/12 16:53:20  bourgesl
- * customized JFreeChart classes to get a square XY Plot supporting zooming in/out with mouse and mouse wheel
- *
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
 package fr.jmmc.aspro.gui.chart;
 

@@ -1,52 +1,5 @@
 #*******************************************************************************
-# JMMC project
-#
-# "@(#) $Id: Makefile,v 1.14 2010-10-07 15:03:36 bourgesl Exp $"
-#
-# Makefile of aspro module
-#
-# History
-# -------
-# $Log: not supported by cvs2svn $
-# Revision 1.13  2010/10/06 08:49:58  bourgesl
-# try again
-#
-# Revision 1.12  2010/10/06 08:46:19  bourgesl
-# add searchCal_template.xml in jar
-#
-# Revision 1.11  2010/09/13 14:12:49  bourgesl
-# fixed typo
-#
-# Revision 1.10  2010/09/13 14:10:35  bourgesl
-# added edu.dartmouth license
-#
-# Revision 1.9  2010/06/23 13:08:40  bourgesl
-# added xslt files
-#
-# Revision 1.8  2010/05/17 15:53:20  ccmgr
-# change jnlp file
-#
-# Revision 1.7  2010/04/02 14:38:58  bourgesl
-# added OBX files
-#
-# Revision 1.6  2010/01/13 16:17:29  bourgesl
-# added gif icons in the build
-#
-# Revision 1.5  2009/12/07 15:31:09  bourgesl
-# added missing icons
-#
-# Revision 1.4  2009/11/20 10:22:40  mella
-# Add jnlp deployement during installation step
-#
-# Revision 1.3  2009/11/20 10:17:29  mella
-# add jnlp to deploy aspro gui app
-#
-# Revision 1.2  2009/11/17 09:44:39  mella
-# add new util tool
-#
-# Revision 1.1  2009/09/08 08:15:21  ccmgr
-# Fix directory structure and add additional files
-#
+# JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
 #*******************************************************************************
 # REMARKS
 #    Makefile based on the VLT/ALMA Makefile

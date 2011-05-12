@@ -1,21 +1,5 @@
 /*******************************************************************************
- * JMMC project
- *
- * "@(#) $Id: TargetJTree.java,v 1.4 2011-02-18 16:33:54 bourgesl Exp $"
- *
- * History
- * -------
- * $Log: not supported by cvs2svn $
- * Revision 1.3  2010/12/07 17:37:54  bourgesl
- * use getTargetDisplayName
- * use do not update tree selection when removing a node (move action)
- *
- * Revision 1.2  2010/12/06 17:01:58  bourgesl
- * added addCalibrator and removeCalibrator that use data model and refresh tree
- *
- * Revision 1.1  2010/12/03 16:10:57  bourgesl
- * JTree utility classes to handle targets / models
- *
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
 package fr.jmmc.aspro.gui.util;
 

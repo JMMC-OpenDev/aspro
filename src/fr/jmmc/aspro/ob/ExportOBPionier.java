@@ -1,15 +1,5 @@
 /*******************************************************************************
- * JMMC project
- *
- * "@(#) $Id: ExportOBPionier.java,v 1.2 2011-02-14 15:33:10 bourgesl Exp $"
- *
- * History
- * -------
- * $Log: not supported by cvs2svn $
- * Revision 1.1  2010/12/15 13:32:00  bourgesl
- * added Export PIONIER OB
- *
- *
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
 package fr.jmmc.aspro.ob;
 

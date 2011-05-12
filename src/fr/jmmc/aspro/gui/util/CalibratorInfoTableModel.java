@@ -1,12 +1,5 @@
 /*******************************************************************************
- * JMMC project
- *
- * "@(#) $Id: CalibratorInfoTableModel.java,v 1.1 2011-03-08 17:27:50 bourgesl Exp $"
- *
- * History
- * -------
- * $Log: not supported by cvs2svn $
- *
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
 package fr.jmmc.aspro.gui.util;
 

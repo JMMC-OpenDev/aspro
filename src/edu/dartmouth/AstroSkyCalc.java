@@ -1,58 +1,5 @@
 /*******************************************************************************
- * JMMC project
- *
- * "@(#) $Id: AstroSkyCalc.java,v 1.29 2011-04-26 15:56:06 bourgesl Exp $"
- *
- * History
- * -------
- * $Log: not supported by cvs2svn $
- * Revision 1.28  2011/04/26 13:00:43  bourgesl
- * refactoring : renamed methods
- *
- * Revision 1.27  2011/04/22 15:37:33  bourgesl
- * find midnight and proper night following given date
- * use almanac once and translates moon / sun times
- *
- * Revision 1.26  2010/10/01 15:25:56  bourgesl
- * fixed bug in findLst0 [Requires 'lower' < 'upper'] :
- * precision is better (<1ms) and LST must be < 1s
- *
- * Revision 1.25  2010/09/15 13:51:47  bourgesl
- * comments explaining how to get moon angular distance
- *
- * Revision 1.24  2010/07/22 12:32:22  bourgesl
- * added moon rise/set and moon illumination fraction
- *
- * Revision 1.23  2010/06/28 12:26:17  bourgesl
- * added mjd(jd) to get modified julian day
- *
- * Revision 1.22  2010/06/25 15:14:54  bourgesl
- * added toCalendar method to get calendar instance instead of date
- *
- * Revision 1.21  2010/06/25 14:12:16  bourgesl
- * code cleanup
- * methods related to targets moved in AstoSkyCalcObservation
- * Added methods to convert HA to JD
- *
- * Revision 1.20  2010/06/17 10:02:51  bourgesl
- * fixed warning hints - mainly not final static loggers
- *
- * Revision 1.19  2010/05/26 15:28:09  bourgesl
- * added method toString(ra, raDigits, dec, decDigits) to choose the number of digits
- *
- * Revision 1.18  2010/04/02 14:39:19  bourgesl
- * elevation in degrees instead of rad
- *
- * Revision 1.17  2010/04/02 09:20:25  bourgesl
- * updated javadoc
- * added toString(ra / dec in degrees) conversion
- *
- * Revision 1.16  2010/01/14 15:23:01  bourgesl
- * changed logger's class name
- *
- * Revision 1.15  2010/01/08 16:51:18  bourgesl
- * initial uv coverage
- *
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
 package edu.dartmouth;
 

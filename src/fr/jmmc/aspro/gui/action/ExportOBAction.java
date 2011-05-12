@@ -1,29 +1,5 @@
 /*******************************************************************************
- * JMMC project
- *
- * "@(#) $Id: ExportOBAction.java,v 1.7 2011-02-28 17:13:14 bourgesl Exp $"
- *
- * History
- * -------
- * $Log: not supported by cvs2svn $
- * Revision 1.6  2011/01/07 13:21:08  bourgesl
- * removed import
- *
- * Revision 1.5  2010/10/05 15:06:00  bourgesl
- * use AsproGui:getInstance()
- *
- * Revision 1.4  2010/10/01 15:31:34  bourgesl
- * added message 'Please enter first a target to export it as an Observing block'
- *
- * Revision 1.3  2010/09/01 16:24:30  bourgesl
- * removed exception
- *
- * Revision 1.2  2010/06/17 10:02:50  bourgesl
- * fixed warning hints - mainly not final static loggers
- *
- * Revision 1.1  2010/06/09 12:53:00  bourgesl
- * new action (menu File) that calls the uv coverage panel method performOBAction()
- *
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
 package fr.jmmc.aspro.gui.action;
 

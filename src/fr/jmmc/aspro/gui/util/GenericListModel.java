@@ -1,23 +1,5 @@
 /*******************************************************************************
- * JMMC project
- *
- * "@(#) $Id: GenericListModel.java,v 1.5 2011-02-22 18:11:30 bourgesl Exp $"
- *
- * History
- * -------
- * $Log: not supported by cvs2svn $
- * Revision 1.4  2011/01/27 17:10:47  bourgesl
- * added comment
- *
- * Revision 1.3  2010/12/17 15:15:58  bourgesl
- * implements ComboBoxModel also
- *
- * Revision 1.2  2010/12/06 17:01:28  bourgesl
- * added addIfAbsent
- *
- * Revision 1.1  2010/12/03 09:32:47  bourgesl
- * ListModel implementation using a List<Type>
- *
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
 package fr.jmmc.aspro.gui.util;
 

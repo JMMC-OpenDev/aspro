@@ -1,17 +1,5 @@
 /*******************************************************************************
- * JMMC project
- *
- * "@(#) $Id: FitXYTextAnnotation.java,v 1.3 2011-04-13 14:38:50 bourgesl Exp $"
- *
- * History
- * -------
- * $Log: not supported by cvs2svn $
- * Revision 1.2  2011/04/08 15:11:41  bourgesl
- * margin set to 1px
- *
- * Revision 1.1  2010/10/21 16:47:43  bourgesl
- * Custom XYTextAnnotation that adjust its font size to respect sizing constraints i.e. text width is fit to maxRadius
- *
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
 package fr.jmmc.aspro.gui.chart;
 

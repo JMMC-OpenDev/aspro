@@ -1,26 +1,5 @@
 /*******************************************************************************
- * JMMC project
- *
- * "@(#) $Id: FieldSliderAdapter.java,v 1.6 2010-10-04 14:31:01 bourgesl Exp $"
- *
- * History
- * -------
- * $Log: not supported by cvs2svn $
- * Revision 1.5  2010/06/17 10:02:51  bourgesl
- * fixed warning hints - mainly not final static loggers
- *
- * Revision 1.4  2010/05/06 15:41:02  bourgesl
- * the default value sends a listener event
- *
- * Revision 1.3  2010/05/05 14:29:22  bourgesl
- * javadoc
- *
- * Revision 1.2  2010/02/08 17:00:17  bourgesl
- * added U-V max selector + checkboxes
- *
- * Revision 1.1  2010/01/21 16:38:42  bourgesl
- * Custom Numeric text field binding with a JSlider
- *
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
 package fr.jmmc.aspro.gui.util;
 

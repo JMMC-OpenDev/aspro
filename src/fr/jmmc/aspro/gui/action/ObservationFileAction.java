@@ -1,36 +1,5 @@
 /*******************************************************************************
- * JMMC project
- *
- * "@(#) $Id: ObservationFileAction.java,v 1.9 2011-02-14 15:33:10 bourgesl Exp $"
- *
- * History
- * -------
- * $Log: not supported by cvs2svn $
- * Revision 1.8  2010/12/15 13:33:35  bourgesl
- * removed warning
- *
- * Revision 1.7  2010/06/29 11:55:54  bourgesl
- * comment updated
- *
- * Revision 1.6  2010/06/14 13:16:36  bourgesl
- * changed aspro file extension to 'asprox'
- *
- * Revision 1.5  2010/06/10 13:44:01  bourgesl
- * Observation File extension is 'aspro'
- * fixed file description with extension
- *
- * Revision 1.4  2010/06/09 12:54:12  bourgesl
- * javadoc
- *
- * Revision 1.3  2010/04/02 10:06:29  bourgesl
- * add missing xml extension to the file name
- *
- * Revision 1.2  2010/01/14 17:02:38  bourgesl
- * FileFilter fix
- *
- * Revision 1.1  2009/12/08 13:09:55  bourgesl
- * Added FileFilter for observation settings
- *
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
 package fr.jmmc.aspro.gui.action;
 

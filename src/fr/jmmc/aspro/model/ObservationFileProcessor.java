@@ -1,20 +1,5 @@
 /*******************************************************************************
- * JMMC project
- *
- * "@(#) $Id: ObservationFileProcessor.java,v 1.4 2011-03-01 17:14:33 bourgesl Exp $"
- *
- * History
- * -------
- * $Log: not supported by cvs2svn $
- * Revision 1.3  2011/02/24 17:13:18  bourgesl
- * added model migration
- *
- * Revision 1.2  2010/12/17 15:15:25  bourgesl
- * comments
- *
- * Revision 1.1  2010/11/30 15:52:13  bourgesl
- * added ObservationFileProcessor onLoad and onSave callbacks to check schema version and handle model conversion if needed
- *
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
 package fr.jmmc.aspro.model;
 

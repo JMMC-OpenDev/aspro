@@ -1,33 +1,5 @@
 /*******************************************************************************
- * JMMC project
- *
- * "@(#) $Id: SquareXYPlot.java,v 1.8 2011-04-14 14:36:46 bourgesl Exp $"
- *
- * History
- * -------
- * $Log: not supported by cvs2svn $
- * Revision 1.7  2010/06/17 10:02:50  bourgesl
- * fixed warning hints - mainly not final static loggers
- *
- * Revision 1.6  2010/02/18 09:52:37  bourgesl
- * added rendering hints (anti-aliasing)
- *
- * Revision 1.5  2010/02/04 17:05:06  bourgesl
- * UV bounds are coming from UVCoverageService
- *
- * Revision 1.4  2010/02/03 16:07:49  bourgesl
- * refactoring to use the custom swing worker executor
- * when zomming uv map is computed asynchronously
- *
- * Revision 1.3  2010/02/03 09:48:53  bourgesl
- * target model uvmap added on the uv coverage with zooming supported
- *
- * Revision 1.2  2010/01/13 16:12:08  bourgesl
- * comments
- *
- * Revision 1.1  2010/01/12 16:53:21  bourgesl
- * customized JFreeChart classes to get a square XY Plot supporting zooming in/out with mouse and mouse wheel
- *
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
 package fr.jmmc.aspro.gui.chart;
 

@@ -1,29 +1,5 @@
 /*******************************************************************************
- * JMMC project
- *
- * "@(#) $Id: ObservationCollectionTaskSwingWorker.java,v 1.1 2011-03-01 17:07:44 bourgesl Exp $"
- *
- * History
- * -------
- * $Log: not supported by cvs2svn $
- * Revision 1.6  2011/02/25 16:52:11  bourgesl
- * removed unused code
- *
- * Revision 1.5  2011/02/24 17:14:13  bourgesl
- * Major refactoring to support / handle observation collection (multi-conf)
- *
- * Revision 1.4  2011/02/14 17:13:07  bourgesl
- * Use JMCS Task / TaskSwingWorker ...
- *
- * Revision 1.3  2011/02/04 17:18:59  bourgesl
- * minor
- *
- * Revision 1.2  2011/02/03 17:29:24  bourgesl
- * removed getVersion
- *
- * Revision 1.1  2011/02/02 17:41:52  bourgesl
- * add observation and its version in task logs
- *
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
 package fr.jmmc.aspro.gui.task;
 

@@ -1,16 +1,5 @@
 /*******************************************************************************
- * JMMC project
- *
- * "@(#) $Id: Beam.java,v 1.2 2010-10-22 11:13:16 bourgesl Exp $"
- *
- * History
- * -------
- * $Log: not supported by cvs2svn $
- * Revision 1.1  2009/11/20 16:55:47  bourgesl
- * Added Beam / Delay Line definition
- * ObservabilityService is stateless to simplify coding
- *
- *
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
 package fr.jmmc.aspro.model;
 

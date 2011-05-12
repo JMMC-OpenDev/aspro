@@ -1,26 +1,5 @@
 /*******************************************************************************
- * JMMC project
- *
- * "@(#) $Id: TargetTransferHandler.java,v 1.5 2010-12-08 17:03:55 bourgesl Exp $"
- *
- * History
- * -------
- * $Log: not supported by cvs2svn $
- * Revision 1.4  2010/12/07 17:37:31  bourgesl
- * do not update tree selection when removing a node (move action)
- *
- * Revision 1.3  2010/12/06 17:02:32  bourgesl
- * support copy and move operations using TargetTransferable objects
- * code clean up
- *
- * Revision 1.2  2010/12/03 16:28:48  bourgesl
- * first try to use drag and drop with List and Tree
- *
- * Revision 1.1  2010/12/03 09:34:01  bourgesl
- * first try using drag and drop between calibrator list and target tree
- * added calibrator list coupled with Calibrator button
- * changed font for target tree
- *
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
 package fr.jmmc.aspro.gui.util;
 

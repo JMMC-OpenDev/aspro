@@ -1,53 +1,5 @@
 /*******************************************************************************
- * JMMC project
- *
- * "@(#) $Id: ObservabilityData.java,v 1.14 2011-03-01 17:16:22 bourgesl Exp $"
- *
- * History
- * -------
- * $Log: not supported by cvs2svn $
- * Revision 1.13  2011/02/28 17:12:01  bourgesl
- * added user Pops flag to know if the best PoPs is in fact the user PoPs
- *
- * Revision 1.12  2011/02/25 16:51:29  bourgesl
- * added station names = configuration
- *
- * Revision 1.11  2011/02/03 17:27:38  bourgesl
- * added observation version in constructor
- *
- * Revision 1.10  2011/02/02 17:40:16  bourgesl
- * added version
- *
- * Revision 1.9  2011/01/26 17:20:53  bourgesl
- * added input parameters in Observability data for consistency
- *
- * Revision 1.8  2011/01/25 13:48:56  bourgesl
- * javadoc
- *
- * Revision 1.7  2010/12/17 15:14:11  bourgesl
- * list of StarObservabilityData replaced by map of StarObservabilityData list keyed by target name
- *
- * Revision 1.6  2010/09/15 13:56:10  bourgesl
- * added moon illumination (percent)
- *
- * Revision 1.5  2010/06/25 14:13:36  bourgesl
- * added dateCalc (AstroSkyCalc) to be reused by OIFits generation
- *
- * Revision 1.4  2010/06/23 12:54:17  bourgesl
- * added Beam list to use it in OIFits generation
- *
- * Revision 1.3  2010/01/22 13:16:44  bourgesl
- * added star observability type to change bar colors easily
- *
- * Revision 1.2  2010/01/12 16:54:19  bourgesl
- * added PoPs in title + several changes on charts
- *
- * Revision 1.1  2010/01/08 16:48:30  bourgesl
- * package refactoring
- *
- * Revision 1.3  2009/12/02 17:23:51  bourgesl
- * fixed several bugs on pop finder + refactoring
- *
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
 package fr.jmmc.aspro.model.observability;
 

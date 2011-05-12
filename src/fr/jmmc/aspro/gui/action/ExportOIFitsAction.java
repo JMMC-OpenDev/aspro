@@ -1,53 +1,5 @@
 /*******************************************************************************
- * JMMC project
- *
- * "@(#) $Id: ExportOIFitsAction.java,v 1.14 2011-03-08 13:49:39 bourgesl Exp $"
- *
- * History
- * -------
- * $Log: not supported by cvs2svn $
- * Revision 1.13  2011/03/01 17:12:06  bourgesl
- * added message if multiple configuration
- * use OM.getOIFitsFile instead of observation
- *
- * Revision 1.12  2011/02/25 16:51:18  bourgesl
- * use AsproConstants for regexp
- *
- * Revision 1.11  2011/02/14 15:33:10  bourgesl
- * use JMCS FileUtils
- *
- * Revision 1.10  2011/02/03 17:31:16  bourgesl
- * use WaitingTaskAction to export valid data
- *
- * Revision 1.9  2010/12/15 13:34:22  bourgesl
- * added baseline in default file name
- *
- * Revision 1.8  2010/12/13 16:39:39  mella
- * use new enum MimeType.OIFITS
- *
- * Revision 1.7  2010/10/22 13:45:45  bourgesl
- * fixed repackaging of nom.tam.fits library (oitools)
- *
- * Revision 1.6  2010/10/04 14:32:13  bourgesl
- * getDefaultFileName(fits) is now protected and static (used by BroadcastToMFGui)
- *
- * Revision 1.5  2010/10/01 15:33:11  bourgesl
- * added message 'There is currently no OIFits data (your target is not observable)'
- * use MessagePane.showConfirmFileOverwrite
- *
- * Revision 1.4  2010/09/26 11:59:39  bourgesl
- * catch correct exceptions
- *
- * Revision 1.3  2010/09/24 15:54:25  bourgesl
- * better exception handling + use MessagePane
- *
- * Revision 1.2  2010/09/02 15:47:19  bourgesl
- * use OI_VIS2 (always present)
- *
- * Revision 1.1  2010/06/29 12:13:21  bourgesl
- * added ExportToOIFits action
- *
- *
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
 package fr.jmmc.aspro.gui.action;
 

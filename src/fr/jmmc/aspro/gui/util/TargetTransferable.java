@@ -1,19 +1,5 @@
 /*******************************************************************************
- * JMMC project
- *
- * "@(#) $Id: TargetTransferable.java,v 1.1 2010-12-06 17:00:00 bourgesl Exp $"
- *
- * History
- * -------
- * $Log: not supported by cvs2svn $
- * Revision 1.2  2010/12/03 16:28:48  bourgesl
- * first try to use drag and drop with List and Tree
- *
- * Revision 1.1  2010/12/03 09:34:01  bourgesl
- * first try using drag and drop between calibrator list and target tree
- * added calibrator list coupled with Calibrator button
- * changed font for target tree
- *
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
 package fr.jmmc.aspro.gui.util;
 

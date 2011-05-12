@@ -1,42 +1,5 @@
 /*******************************************************************************
- * JMMC project
- *
- * "@(#) $Id: DelayLineService.java,v 1.11 2010-06-17 10:02:50 bourgesl Exp $"
- *
- * History
- * -------
- * $Log: not supported by cvs2svn $
- * Revision 1.10  2010/05/06 15:41:20  bourgesl
- * use AsproConstants HA Min/Max
- *
- * Revision 1.9  2010/01/08 16:51:17  bourgesl
- * initial uv coverage
- *
- * Revision 1.8  2010/01/05 17:17:50  bourgesl
- * added U,V,W computation
- *
- * Revision 1.7  2009/12/16 16:05:51  bourgesl
- * refactoring
- *
- * Revision 1.6  2009/12/01 17:14:45  bourgesl
- * first try to add the pop configuration finder
- *
- * Revision 1.5  2009/11/27 10:13:19  bourgesl
- * fixed LST day/night intervals
- * fixed NPE on computation cancellation
- *
- * Revision 1.4  2009/11/25 17:14:32  bourgesl
- * fixed bugs on HA limits + merge JD intervals
- *
- * Revision 1.3  2009/11/24 17:27:12  bourgesl
- * first attempt to merge ranges
- *
- * Revision 1.2  2009/11/24 16:30:54  bourgesl
- * correct HA intervals per base line
- *
- * Revision 1.1  2009/11/24 15:12:09  bourgesl
- * first step to handle delay line limits
- *
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
 package fr.jmmc.aspro.service;
 
