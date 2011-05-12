@@ -9,7 +9,7 @@
  * Revision 1.1  2010/06/30 14:53:30  bourgesl
  * new Combinatory utilities to get n-tuples and combinations + test case
  *
- */
+ ******************************************************************************/
 package test;
 
 import fr.jmmc.aspro.util.CombUtils;

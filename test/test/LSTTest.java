@@ -12,7 +12,7 @@
  * Revision 1.1  2010/10/01 15:21:09  bourgesl
  * new test case for find LST0 bug (date lower > date upper)
  *
- */
+ ******************************************************************************/
 package test;
 
 import edu.dartmouth.AstroSkyCalc;

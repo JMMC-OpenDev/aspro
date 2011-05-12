@@ -41,7 +41,7 @@
  * Revision 1.1  2011/03/11 12:55:35  bourgesl
  * added fest-swing test cases for Aspro 2
  *
- */
+ ******************************************************************************/
 package fest;
 
 import fest.common.JmcsApplicationSetup;

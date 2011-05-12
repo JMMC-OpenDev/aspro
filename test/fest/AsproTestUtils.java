@@ -9,7 +9,7 @@
  * Revision 1.1  2011/03/11 16:02:05  bourgesl
  * updated scenario
  *
- */
+ ******************************************************************************/
 package fest;
 
 import static org.fest.swing.timing.Pause.*;
