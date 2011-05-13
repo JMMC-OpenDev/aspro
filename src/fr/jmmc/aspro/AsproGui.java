@@ -5,6 +5,7 @@ package fr.jmmc.aspro;
 
 import fr.jmmc.aspro.gui.SettingPanel;
 import fr.jmmc.aspro.gui.action.BroadcastToModelFittingAction;
+import fr.jmmc.aspro.gui.action.ExportAllOBAction;
 import fr.jmmc.aspro.gui.action.ExportOBAction;
 import fr.jmmc.aspro.gui.action.ExportOIFitsAction;
 import fr.jmmc.aspro.gui.action.ExportPDFAction;
@@ -289,6 +290,8 @@ public final class AsproGui extends App {
     new ShowPrefAction();
     // export OB :
     new ExportOBAction();
+    // export ALl OB :
+    new ExportAllOBAction();
     // export PDF :
     new ExportPDFAction();
     // export OIFits :

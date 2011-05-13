@@ -4,7 +4,6 @@
 package fr.jmmc.aspro.gui.action;
 
 import fr.jmmc.aspro.Preferences;
-import fr.jmmc.aspro.gui.UVCoveragePanel;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Target;
@@ -16,7 +15,6 @@ import fr.jmmc.mcs.gui.MessagePane;
 import fr.jmmc.mcs.gui.StatusBar;
 import fr.jmmc.mcs.util.FileFilterRepository;
 import fr.jmmc.mcs.util.FileUtils;
-import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -29,7 +27,7 @@ import javax.swing.filechooser.FileFilter;
  *
  * @author bourgesl
  */
-public class ExportOBVLTIAction {
+public final class ExportOBVLTIAction {
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
@@ -70,98 +68,92 @@ public class ExportOBVLTIAction {
   /**
    * Execute the action.
    *
-   * Note : the action event's source must be the UVCoveragePanel instance
-   *
-   * @param event action event
+   * @param targets list of targets to export as VLTI Observing blocks
    */
-  public void process(final ActionEvent event) {
-    if (!(event.getSource() instanceof UVCoveragePanel)) {
-      return;
-    }
+  public void process(final List<Target> targets) {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("process");
     }
 
-    final UVCoveragePanel uvCoveragePanel = (UVCoveragePanel) event.getSource();
+    // TODO : avoid file chooser when multiple targets are given
+    for (Target target : targets) {
 
-    // extract the selected target in the UV Coverage Panel :
-    final Target target = uvCoveragePanel.getSelectedTarget();
+      File file = null;
 
-    File file = null;
+      final JFileChooser fileChooser = new JFileChooser();
+      fileChooser.setFileFilter(getFileFilter());
 
-    final JFileChooser fileChooser = new JFileChooser();
-    fileChooser.setFileFilter(getFileFilter());
-
-    if (this.getLastDir() != null) {
-      fileChooser.setCurrentDirectory(new File(this.getLastDir()));
-    }
-
-    // default OB file name :
-    fileChooser.setSelectedFile(new File(fileChooser.getCurrentDirectory(), ExportOBVLTI.generateOBFileName(target)));
-
-    fileChooser.setDialogTitle("Export the target [" + target.getName() + "] as an Observing Block");
-
-    final int returnVal = fileChooser.showSaveDialog(null);
-    if (returnVal == JFileChooser.APPROVE_OPTION) {
-      file = checkFileExtension(fileChooser.getSelectedFile());
-
-      if (file.exists()) {
-        if (!MessagePane.showConfirmFileOverwrite(file.getName())) {
-          file = null;
-        }
+      if (this.getLastDir() != null) {
+        fileChooser.setCurrentDirectory(new File(this.getLastDir()));
       }
-    } else {
-      file = null;
-    }
 
-    // If a file was defined (No cancel in the dialog)
-    if (file != null) {
-      this.setLastDir(file.getParent());
+      // default OB file name :
+      fileChooser.setSelectedFile(new File(fileChooser.getCurrentDirectory(), ExportOBVLTI.generateOBFileName(target)));
 
-      final File mainFile = file;
-      try {
+      fileChooser.setDialogTitle("Export the target [" + target.getName() + "] as an Observing Block");
 
-        // use main observation :
-        final ObservationSetting observation = ObservationManager.getInstance().getMainObservation();
+      final int returnVal = fileChooser.showSaveDialog(null);
+      if (returnVal == JFileChooser.APPROVE_OPTION) {
+        file = checkFileExtension(fileChooser.getSelectedFile());
 
-        // report buffer :
-        final StringBuilder sb = new StringBuilder(128);
-        sb.append("Export Observing Blocks for target [").append(target.getName());
-        sb.append("] in folder :\n").append(getLastDir()).append("\n\n");
+        if (file.exists()) {
+          if (!MessagePane.showConfirmFileOverwrite(file.getName())) {
+            file = null;
+          }
+        }
+      } else {
+        file = null;
+      }
 
-        ExportOBVLTI.process(mainFile, observation, target);
-        sb.append(mainFile.getName()).append("\n");
+      // If a file was defined (No cancel in the dialog)
+      if (file != null) {
+        this.setLastDir(file.getParent());
 
-        // Generate all calibrator OBs for a science target :
-        final TargetUserInformations targetUserInfos = observation.getTargetUserInfos();
+        final File mainFile = file;
+        try {
 
-        if (targetUserInfos != null && !targetUserInfos.isCalibrator(target)) {
-          final TargetInformation targetInfo = targetUserInfos.getTargetInformation(target);
-          if (targetInfo != null) {
-            final List<Target> calibrators = targetInfo.getCalibrators();
+          // use main observation :
+          final ObservationSetting observation = ObservationManager.getInstance().getMainObservation();
 
-            if (!calibrators.isEmpty()) {
-              for (Target calibrator : calibrators) {
-                file = new File(getLastDir(), ExportOBVLTI.generateOBFileName(calibrator));
+          // report buffer :
+          final StringBuilder sb = new StringBuilder(128);
+          sb.append("Export Observing Blocks for target [").append(target.getName());
+          sb.append("] in folder :\n").append(getLastDir()).append("\n\n");
 
-                ExportOBVLTI.process(file, observation, calibrator);
-                sb.append(file.getName()).append("\n");
+          ExportOBVLTI.process(mainFile, observation, target);
+          sb.append(mainFile.getName()).append("\n");
+
+          // Generate all calibrator OBs for a science target :
+          final TargetUserInformations targetUserInfos = observation.getTargetUserInfos();
+
+          if (targetUserInfos != null && !targetUserInfos.isCalibrator(target)) {
+            final TargetInformation targetInfo = targetUserInfos.getTargetInformation(target);
+            if (targetInfo != null) {
+              final List<Target> calibrators = targetInfo.getCalibrators();
+
+              if (!calibrators.isEmpty()) {
+                for (Target calibrator : calibrators) {
+                  file = new File(getLastDir(), ExportOBVLTI.generateOBFileName(calibrator));
+
+                  ExportOBVLTI.process(file, observation, calibrator);
+                  sb.append(file.getName()).append("\n");
+                }
               }
             }
           }
+
+          StatusBar.show(mainFile.getName() + " created.");
+
+          // display report message :
+          MessagePane.showMessage(sb.toString());
+
+          // PoP up to validate OB file against ESO CfP :
+          DismissableMessagePane.show(ESO_WARNING, Preferences.getInstance(), "ESO_OB_WARNING");
+
+        } catch (IOException ioe) {
+          MessagePane.showErrorMessage(
+                  "Could not export to file : " + file.getAbsolutePath(), ioe);
         }
-
-        StatusBar.show(mainFile.getName() + " created.");
-
-        // display report message :
-        MessagePane.showMessage(sb.toString());
-
-        // PoP up to validate OB file against ESO CfP :
-        DismissableMessagePane.show(ESO_WARNING, Preferences.getInstance(), "ESO_OB_WARNING");
-
-      } catch (IOException ioe) {
-        MessagePane.showErrorMessage(
-                "Could not export to file : " + file.getAbsolutePath(), ioe);
       }
     }
   }

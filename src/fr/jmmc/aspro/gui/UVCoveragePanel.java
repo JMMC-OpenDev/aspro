@@ -40,6 +40,7 @@ import fr.jmmc.aspro.model.oi.TargetConfiguration;
 import fr.jmmc.aspro.model.util.AtmosphereQualityUtils;
 import fr.jmmc.aspro.model.uvcoverage.UVBaseLineData;
 import fr.jmmc.aspro.model.uvcoverage.UVRangeBaseLineData;
+import fr.jmmc.aspro.ob.ExportOBMode;
 import fr.jmmc.aspro.service.UVCoverageService;
 import fr.jmmc.mcs.gui.MessagePane;
 import fr.jmmc.mcs.gui.StatusBar;
@@ -62,6 +63,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
@@ -457,10 +459,11 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
   }// </editor-fold>//GEN-END:initComponents
 
   /**
-   * Export the selected target as an Observing Block (OB)
+   * Export Observing Block(s) (OB)
    * @param evt action event
+   * @param mode export OB mode
    */
-  public void performOBAction(final ActionEvent evt) {
+  public void performOBAction(final ActionEvent evt, final ExportOBMode mode) {
 
     // Use main observation to check instrument :
     final ObservationSetting observation = om.getMainObservation();
@@ -479,7 +482,15 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       // set the source with this instance :
       evt.setSource(this);
 
-      ExportOBVLTIAction.getInstance().process(evt);
+      switch (mode) {
+        case ALL:
+          ExportOBVLTIAction.getInstance().process(observation.getTargets());
+          break;
+        case SINGLE:
+          ExportOBVLTIAction.getInstance().process(Arrays.asList(new Target[]{getSelectedTarget()}));
+          break;
+        default:
+      }
 
     } else if (insName.startsWith(AsproConstants.INS_VEGA)) {
 

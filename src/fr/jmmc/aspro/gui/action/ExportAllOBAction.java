@@ -12,26 +12,25 @@ import java.awt.event.ActionEvent;
 import java.util.logging.Level;
 
 /**
- * This registered action represents a File Menu entry to export an OB. 
- * It delegates the action handling to the UV coverage panel that knows which target is selected and
- * which instrument to use.
+ * This registered action represents a File Menu entry to export OBs for all targets. 
+ * It delegates the action handling to the UV coverage panel that knows which instrument to use.
  * @author bourgesl
  */
-public final class ExportOBAction extends RegisteredAction {
+public final class ExportAllOBAction extends RegisteredAction {
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
   /** Class name. This name is used to register to the ActionRegistrar */
-  private final static String className = "fr.jmmc.aspro.gui.action.ExportOBAction";
+  private final static String className = "fr.jmmc.aspro.gui.action.ExportAllOBAction";
   /** Action name. This name is used to register to the ActionRegistrar */
-  public final static String actionName = "exportOB";
+  public final static String actionName = "exportAllOB";
   /** Class logger */
   private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(className);
 
   /**
    * Public constructor that automatically register the action in RegisteredAction.
    */
-  public ExportOBAction() {
+  public ExportAllOBAction() {
     super(className, actionName);
   }
 
@@ -48,11 +47,9 @@ public final class ExportOBAction extends RegisteredAction {
 
     // note : there is at least one target :
     if (uvCoveragePanel != null) {
-
-      uvCoveragePanel.performOBAction(evt, ExportOBMode.SINGLE);
-
+      uvCoveragePanel.performOBAction(evt, ExportOBMode.ALL);
     } else {
-      MessagePane.showMessage("Please enter first a target to export it as an Observing block.");
+      MessagePane.showMessage("Please enter first a target to export Observing block(s).");
     }
   }
 }
