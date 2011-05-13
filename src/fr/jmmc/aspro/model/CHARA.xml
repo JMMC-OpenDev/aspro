@@ -1,9 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
- *******************************************************************************
- * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
- *******************************************************************************
- -->
 
 <!--
     Document   : CHARA.xml
@@ -1370,6 +1365,58 @@
         <channels>V1 V2 V3 V4</channels>
       </configuration>
     </instrument>
+  </configuration>
+
+  <configuration>
+    <!-- D.M. 13/05/2011 -->
+    <version>VEGA Juin 2011</version>
+    <interferometer>CHARA</interferometer>
+
+<!-- instruments (2T) -->
+
+    <instrument>
+      <focalInstrument>VEGA_2T</focalInstrument>
+      <configuration>
+        <stations>S1 S2</stations>
+        <!-- D.M. -->
+        <channels>V2 V1</channels>
+      </configuration>
+      <configuration>
+        <stations>E2 E1</stations>
+        <!-- D.M. -->
+        <channels>V2 V1</channels>
+      </configuration>
+      <configuration>
+        <stations>W1 W2</stations>
+        <!-- D.M. -->
+        <channels>V4 V3</channels>
+      </configuration>
+    </instrument>
+
+
+<!-- instruments (3T) -->
+
+    <instrument>
+      <focalInstrument>VEGA_3T</focalInstrument>
+      <configuration>
+        <stations>E2 E1 W2</stations>
+        <!-- D.M. -->
+        <channels>V2 V1 V3</channels>
+      </configuration>
+      <configuration>
+        <stations>W2 W1 E1</stations>
+        <!-- D.M. -->
+        <channels>V2 V1 V3</channels>
+      </configuration>
+      <configuration>
+        <stations>W2 W1 E2</stations>
+        <!-- D.M. -->
+        <channels>V2 V1 V3</channels>
+      </configuration>
+    </instrument>
+
+
+    <!-- instruments (4T) : VEGA_4T not available -->
   </configuration>
 
 </a:interferometerSetting>
