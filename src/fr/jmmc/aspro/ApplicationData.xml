@@ -9,7 +9,7 @@
 
   <program name="Aspro2" version="0.8.2"/>
 
-  <compilation date="22/04/2011" compiler="JDK 1.5.0_16"/>
+  <compilation date="13/05/2011" compiler="JDK 1.5.0_16"/>
 
   <text>
     <![CDATA[ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations
@@ -179,8 +179,13 @@
       <menu/> <!-- menu separator -->
       <menu label="Export to OIFits" classpath="fr.jmmc.aspro.gui.action.ExportOIFitsAction" action="exportOIFits" accelerator="F"
             description="Export your target observables to an OIFits file"/>
+      <menu/> <!-- menu separator -->
       <menu label="Export to an Observing Block" classpath="fr.jmmc.aspro.gui.action.ExportOBAction" action="exportOB" accelerator="B"
-            description="Export your observation to an Observing block"/>
+            description="Export your observation of the selected target to an Observing block"/>
+<!--
+      <menu label="Export targets to Observing Blocks" classpath="fr.jmmc.aspro.gui.action.ExportAllOBAction" action="exportAllOB"
+            description="Export your complete observation to Observing blocks"/>
+  -->            
       <menu/> <!-- menu separator -->
       <menu label="Export plot to PDF" classpath="fr.jmmc.aspro.gui.action.ExportPDFAction" action="exportPDF" accelerator="P"
             icon="/fr/jmmc/aspro/gui/icons/icon_pdf.gif" description="Export the current plot to a PDF document"/>
@@ -201,9 +206,10 @@
   <releasenotes>
     <release version="0.8">
       <prerelease version="0.8.2">
-        <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/27">Added 'Center plot arround night' preference to have the complete night centered on the observability plot</change>
-        <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/26">Added civil and nautical twilight zones and a new preference 'Twilight used as Night limit' to choose which twilight for night restrictions</change>
-        <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/54">Added a new preference 'Default min Elevation' set to 45 degrees by default</change>
+        <change>Added CHARA VEGA configurations (general and dedicated to June 2011 run)</change>
+        <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/27">Added 'Center plot arround night' preference to have the complete night centered on the observability plot</change>
+        <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/26">Added civil and nautical twilight zones and a new preference 'Twilight used as Night limit' to choose which twilight for night restrictions</change>
+        <change type="CHANGE" url="http://trac.jmmc.fr/jmmc-sw/ticket/54">Added a new preference 'Default min Elevation' set to 45 degrees by default</change>
       </prerelease>
       <prerelease version="0.8.1">
         <change>Added 'Scroll view' checkbox button to see all targets (or only some of them) on the observability plot</change>
