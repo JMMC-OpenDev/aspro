@@ -374,7 +374,7 @@
       <xsd:element name="pops" type="xsd:string" minOccurs="0">
         <xsd:annotation>
           <xsd:documentation>
-              The list of pops (124 means Pop1, Pop2, Pop4 respectively for U1, U2, U4 i.e. same ordering).
+              The list of PoPs (124 means PoP1, PoP2, PoP4 respectively for U1, U2, U4 i.e. same ordering).
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
@@ -952,11 +952,23 @@
       <xsd:element name="channels" type="xsd:IDREFS" minOccurs="0">
         <xsd:annotation>
           <xsd:documentation>
-              The list of channels for this configuration (V1 V2) used by CHARA/Vega
+              The list of channels for this configuration (V1 V2) used by CHARA VEGA
           </xsd:documentation>
           <xsd:appinfo>
             <jaxb:property>
               <jaxb:baseType name="Channel" />
+            </jaxb:property>
+          </xsd:appinfo>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="pops" type="xsd:IDREFS" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>
+              The list of PoPs for this configuration (PoP1 PoP2) used by CHARA VEGA
+          </xsd:documentation>
+          <xsd:appinfo>
+            <jaxb:property>
+              <jaxb:baseType name="Pop" />
             </jaxb:property>
           </xsd:appinfo>
         </xsd:annotation>
@@ -1055,7 +1067,7 @@
       <xsd:element name="pop" type="Pop" minOccurs="0" maxOccurs="unbounded">
         <xsd:annotation>
           <xsd:documentation>
-              The list of POPs for this interferometer (optional)
+              The list of PoPs for this interferometer (optional)
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
@@ -1206,7 +1218,7 @@
       <xsd:element name="popLink" type="PopLink" minOccurs="0" maxOccurs="unbounded">
         <xsd:annotation>
           <xsd:documentation>
-              The list of the links between a station and the POPs for this interferometer
+              The list of the links between a station and the PoPs for this interferometer
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
@@ -1228,14 +1240,14 @@
   <xsd:complexType name="PopLink">
     <xsd:annotation>
       <xsd:documentation>
-        This type describes a link to a POP with its optical length
+        This type describes a link to a PoP with its optical length
       </xsd:documentation>
     </xsd:annotation>
     <xsd:sequence>
       <xsd:element name="pop" type="xsd:IDREF">
         <xsd:annotation>
           <xsd:documentation>
-              The associated POP
+              The associated PoP
           </xsd:documentation>
           <xsd:appinfo>
             <jaxb:property>
@@ -1247,7 +1259,7 @@
       <xsd:element name="opticalLength" type="xsd:double">
         <xsd:annotation>
           <xsd:documentation>
-              The length in meter corresponding to the delay due to the associated POP
+              The length in meter corresponding to the delay due to the associated PoP
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
@@ -1425,23 +1437,23 @@
   <xsd:complexType name="Pop">
     <xsd:annotation>
       <xsd:documentation>
-        This type describes a Pipe of Pan (POP) present in the interferometer.
-        This only defines the identifier / name of the POP that is then used in
-        the station definition to give the fixed delay due to the POP.
+        This type describes a Pipe of Pan (PoP) present in the interferometer.
+        This only defines the identifier / name of the PoP that is then used in
+        the station definition to give the fixed delay due to the PoP.
       </xsd:documentation>
     </xsd:annotation>
     <xsd:sequence>
       <xsd:element name="name" type="xsd:ID">
         <xsd:annotation>
           <xsd:documentation>
-              POP identifier (Pop1 ...)
+              PoP identifier (PoP1 ...)
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
       <xsd:element name="index" type="xsd:int">
         <xsd:annotation>
           <xsd:documentation>
-              POP index (1 2 3 4 5 ...)
+              PoP index (1 2 3 4 5 ...)
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
