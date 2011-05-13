@@ -21,10 +21,8 @@ public abstract class ObservationFileAction extends RegisteredAction {
   public static final String OBSERVATION_MIME_TYPE = "application/x-aspro+xml";
   /** Observation extension = asprox */
   public static final String OBS_EXT = "asprox";
-
-  /* members */
-  /** last directory used to save a file; by default = user home */
-  private String lastDir = System.getProperty("user.home");
+  /** last directory used to load/save an Observation file; by default = user home */
+  private static String lastDir = System.getProperty("user.home");
 
   /**
    * Constructor, that automatically register the action in RegisteredAction.
