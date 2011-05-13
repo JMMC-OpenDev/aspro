@@ -27,7 +27,7 @@
     <jar href="jar/oitools.jar" />
 
     <!-- JMCS libs -->
-    <extension href="../JmcsLibs/JmcsLibs.jnlp"></extension>
+    <extension href="../JmcsLibs/JmcsLibs.jnlp"/>
     
     <!-- JFreeChart -->
     <jar href="@SHARED@/jfreechart-1.0.13.jar" />
