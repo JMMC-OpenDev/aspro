@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<jnlp spec="1.0+" codebase="REPLACECODEBASE" href="REPLACEHREF">
+<jnlp spec="1.0+" codebase="@GENERATED@" href="@GENERATED@">
   <information>
     <title>Aspro 2</title>
     <vendor>JMMC</vendor>
@@ -22,17 +22,21 @@
     <j2se version="1.5+" initial-heap-size="256m" max-heap-size="384m"/>    
 
     <!-- JMMC modules -->
+    <jar href="jar/jmcs.jar" />
     <jar href="jar/aspro.jar" />
-    <jar href="jar/Jmcs.jar" />
     <jar href="jar/oitools.jar" />
 
+    <!-- JMCS libs -->
+    <extension href="../JmcsLibs/JmcsLibs.jnlp"></extension>
+    
     <!-- JFreeChart -->
-    <jar href="jar/jfreechart-1.0.13.jar" />
+    <jar href="@SHARED@/jfreechart-1.0.13.jar" />
     <!-- jfreechart requires jcommon -->
-    <jar href="jar/jcommon-1.0.16.jar" />
+    <jar href="@SHARED@/jcommon-1.0.16.jar" />
     
     <!-- PDF -->
-    <jar href="jar/iText-2.1.5.jar" />
+    <jar href="@SHARED@/iText-2.1.5.jar" />
+
   </resources>
   <application-desc main-class="fr.jmmc.aspro.AsproGui"/>
 </jnlp>
