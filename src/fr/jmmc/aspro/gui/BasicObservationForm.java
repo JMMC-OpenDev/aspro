@@ -72,6 +72,9 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
           className_);
   /** flag to log a stack trace in method updateObservation() to detect multiple calls */
   private final static boolean DEBUG_UPDATE_EVENT = false;
+  /** blanking value to indicate that PoPs are defined in the instrument configuration but in multi-configuration */
+  private final static String POPS_MULTI_CONF = "PoPs_MULTI_CONF";
+  
   /** configuration manager */
   private final static ConfigurationManager cm = ConfigurationManager.getInstance();
   /** observation manager */
@@ -976,13 +979,15 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     // disable the automatic update observation :
     final boolean prevAutoUpdateObservation = this.setAutoUpdateObservation(false);
     try {
-      // use first instrument configuration:
       final String popConfig = getConfigurationPops();
+      final boolean popMulti = POPS_MULTI_CONF.equals(popConfig);
 
-      final Integer value = (popConfig != null) ? Integer.valueOf(popConfig) : null;
+      final Integer value = (popConfig != null && !popMulti) ? Integer.valueOf(popConfig) : null;
 
       // note : setValue() can fire a property change event :
       this.jTextPoPs.setValue(value);
+      // allow user inputs when no PoPs are defined in the configuration and not in multi-conf:
+      this.jTextPoPs.setEnabled(value == null || popMulti);
 
     } finally {
       // restore the automatic update observation :
@@ -999,25 +1004,37 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
 
     if (popConfig != null) {
       // update the selected pops (pops) :
-      // note : setText() does not fire a property change event :
-      this.jTextPoPs.setText(popConfig);
+      
+      if (POPS_MULTI_CONF.equals(popConfig)) {
+        // note : setValue() can fire a property change event :
+        this.jTextPoPs.setValue(null);
+        this.jTextPoPs.setEnabled(true);
+      } else {
+        // note : setText() does not fire a property change event :
+        this.jTextPoPs.setText(popConfig);
+        this.jTextPoPs.setEnabled(false);
+      }
     }
   }
 
   /**
    * Return the PoP identifiers defined for the current instrument configurations
    * only if one and only one configuration is selected.
-   * @return PoP identifiers
+   * @return PoP identifiers or null or POPS_MULTI if PoPs are defined in the instrument configuration but in multi-conf
    */
   private String getConfigurationPops() {
     final Object[] instConfs = getInstrumentConfigurations();
-    if (instConfs.length == 1) {
-      // use first one:
+    if (instConfs.length >= 1) {
+      // use first one to determine if there are PoPs defined in the instrument configuration :
       final String instrumentConfiguration = (String) instConfs[0];
       final List<Pop> popList = cm.getInstrumentConfigurationPoPs((String) this.jComboBoxInterferometerConfiguration.getSelectedItem(),
               (String) this.jComboBoxInstrument.getSelectedItem(), instrumentConfiguration);
 
       if (popList != null && !popList.isEmpty()) {
+        // PoPs are defined in the instrument configuration :
+        if (instConfs.length > 1) {
+          return POPS_MULTI_CONF;
+        }
         return Pop.toString(popList);
       }
     }
