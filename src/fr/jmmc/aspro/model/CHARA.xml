@@ -784,6 +784,7 @@
 
     <instrument>
       <focalInstrument>CLASSIC</focalInstrument>
+      <!-- CLASSIC: beams 5-6 -->
       <configuration>
         <stations>S1 S2</stations>
         <channels>V5 V6</channels>
@@ -849,41 +850,42 @@
 
     <instrument>
       <focalInstrument>PAVO_2T</focalInstrument>
+      <!-- PAVO: beams 1-2-3 -->
       <configuration>
         <stations>S1 S2</stations>
-        <channels>V4 V3</channels> <!-- Template D.M -->
+        <channels>V1 V2</channels>
       </configuration>
       <configuration>
         <stations>S1 E1</stations>
-        <channels>V2 V1</channels>
+        <channels>V1 V2</channels>
       </configuration>
       <configuration>
         <stations>S1 E2</stations>
-        <channels>V2 V1</channels>
+        <channels>V1 V2</channels>
       </configuration>
       <configuration>
         <stations>S1 W1</stations>
-        <channels>V3 V2</channels>
+        <channels>V1 V2</channels>
       </configuration>
       <configuration>
         <stations>S1 W2</stations>
-        <channels>V3 V4</channels>
+        <channels>V1 V2</channels>
       </configuration>
       <configuration>
         <stations>S2 E1</stations>
-        <channels>V3 V2</channels>
+        <channels>V1 V2</channels>
       </configuration>
       <configuration>
         <stations>S2 E2</stations>
-        <channels>V3 V2</channels>
+        <channels>V1 V2</channels>
       </configuration>
       <configuration>
         <stations>S2 W1</stations>
-        <channels>V3 V2</channels>
+        <channels>V1 V2</channels>
       </configuration>
       <configuration>
         <stations>S2 W2</stations>
-        <channels>V2 V3</channels> <!-- Template D.M -->
+        <channels>V1 V2</channels>
       </configuration>
       <configuration>
         <stations>E1 E2</stations>
@@ -895,7 +897,7 @@
       </configuration>
       <configuration>
         <stations>E1 W2</stations>
-        <channels>V2 V3</channels>
+        <channels>V1 V2</channels>
       </configuration>
       <configuration>
         <stations>E2 W1</stations>
@@ -903,11 +905,11 @@
       </configuration>
       <configuration>
         <stations>E2 W2</stations>
-        <channels>V2 V3</channels>
+        <channels>V1 V2</channels>
       </configuration>
       <configuration>
         <stations>W1 W2</stations>
-        <channels>V4 V3</channels> <!-- Template D.M -->
+        <channels>V1 V2</channels>
       </configuration>
     </instrument>
 
@@ -981,6 +983,7 @@
 
     <instrument>
       <focalInstrument>CLIMB</focalInstrument>
+      <!-- CLIMB: beams 1-2-3 -->
       <configuration>
         <stations>S1 S2 E1</stations>
         <channels>V1 V2 V3</channels>
@@ -1066,85 +1069,86 @@
 
     <instrument>
       <focalInstrument>PAVO_3T</focalInstrument>
+      <!-- PAVO: beams 1-2-3 -->
       <configuration>
         <stations>S1 S2 E1</stations>
-        <channels>V3 V4 V1</channels>
+        <channels>V1 V2 V3</channels>
       </configuration>
       <configuration>
         <stations>S1 S2 E2</stations>
-        <channels>V3 V4 V1</channels>
+        <channels>V1 V2 V3</channels>
       </configuration>
       <configuration>
         <stations>S1 S2 W1</stations>
-        <channels>V3 V4 V1</channels>
+        <channels>V1 V2 V3</channels>
       </configuration>
       <configuration>
         <stations>S1 S2 W2</stations>
-        <channels>V1 V3 V4</channels>
+        <channels>V1 V2 V3</channels>
       </configuration>
       <configuration>
         <stations>S1 E1 E2</stations>
-        <channels>V4 V1 V2</channels>
+        <channels>V1 V2 V3</channels>
       </configuration>
       <configuration>
         <stations>S1 E1 W1</stations>
-        <channels>V4 V1 V2</channels>
+        <channels>V1 V2 V3</channels>
       </configuration>
       <configuration>
         <stations>S1 E1 W2</stations>
-        <channels>V3 V1 V4</channels>
+        <channels>V1 V2 V3</channels>
       </configuration>
       <configuration>
         <stations>S1 E2 W1</stations>
-        <channels>V3 V1 V2</channels>
+        <channels>V1 V2 V3</channels>
       </configuration>
       <configuration>
         <stations>S1 E2 W2</stations>
-        <channels>V3 V1 V4</channels>
+        <channels>V1 V2 V3</channels>
       </configuration>
       <configuration>
         <stations>S1 W1 W2</stations>
-        <channels>V3 V1 V4</channels>
+        <channels>V1 V2 V3</channels>
       </configuration>
       <configuration>
         <stations>S2 E1 E2</stations>
-        <channels>V4 V1 V2</channels>
+        <channels>V1 V2 V3</channels>
       </configuration>
       <configuration>
         <stations>S2 E1 W1</stations>
-        <channels>V4 V1 V2</channels>
+        <channels>V1 V2 V3</channels>
       </configuration>
       <configuration>
         <stations>S2 E1 W2</stations>
-        <channels>V3 V1 V4</channels>
+        <channels>V1 V2 V3</channels>
       </configuration>
       <configuration>
         <stations>S2 E2 W1</stations>
-        <channels>V4 V1 V2</channels>
+        <channels>V1 V2 V3</channels>
       </configuration>
       <configuration>
         <stations>S2 E2 W2</stations>
-        <channels>V3 V1 V4</channels>
+        <channels>V1 V2 V3</channels>
       </configuration>
       <configuration>
         <stations>S2 W1 W2</stations>
-        <channels>V3 V1 V4</channels>
+        <channels>V1 V2 V3</channels>
       </configuration>
       <configuration>
         <stations>E1 E2 W1</stations>
-        <channels>V1 V2 V4</channels>
+        <channels>V1 V2 V3</channels>
       </configuration>
       <configuration>
         <stations>E1 E2 W2</stations>
-        <channels>V1 V2 V4</channels>
+        <channels>V1 V2 V3</channels>
       </configuration>
       <configuration>
         <stations>E1 W1 W2</stations>
-        <channels>V1 V2 V4</channels>
+        <channels>V1 V2 V3</channels>
       </configuration>
       <configuration>
         <stations>E2 W1 W2</stations>
-        <channels>V1 V2 V4</channels>
+        <channels>V1 V2 V3</channels>
       </configuration>
     </instrument>
 
@@ -1239,6 +1243,7 @@
 
     <instrument>
       <focalInstrument>MIRC</focalInstrument>
+      <!-- MIRC: beams 1-2-3-4 -->
       <configuration>
         <stations>S1 S2 E1 E2</stations>
         <channels>V3 V4 V1 V2</channels>
