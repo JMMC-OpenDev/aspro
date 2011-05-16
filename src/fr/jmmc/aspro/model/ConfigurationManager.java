@@ -500,6 +500,25 @@ public final class ConfigurationManager extends BaseOIManager {
   }
 
   /**
+   * Return the (optional) list of Pops for the given interferometer configuration, instrument name and instrument configuration
+   * @param configurationName name of the interferometer configuration
+   * @param instrumentName name of the instrument
+   * @param instrumentConfigurationName name of the instrument configuration
+   * @return list of PoPs or null if undefined
+   */
+  public List<Pop> getInstrumentConfigurationPoPs(final String configurationName, final String instrumentName, final String instrumentConfigurationName) {
+    final FocalInstrumentConfiguration ic = getInterferometerInstrumentConfiguration(configurationName, instrumentName);
+    if (ic != null) {
+      for (FocalInstrumentConfigurationItem c : ic.getConfigurations()) {
+        if (c.getName().equals(instrumentConfigurationName)) {
+          return c.getPops();
+        }
+      }
+    }
+    return null;
+  }
+  
+  /**
    * Return the default sampling time for the given interferometer configuration and instrument name
    * @param configurationName name of the interferometer configuration
    * @param instrumentName name of the instrument
