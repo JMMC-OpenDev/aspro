@@ -828,6 +828,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         }
         updateComboInstrument();
         updateComboInstrumentConfiguration();
+        checkPops();
       } else if (e.getSource() == this.jComboBoxInstrument) {
         if (logger.isLoggable(Level.FINE)) {
           logger.fine("Instrument changed : " + this.jComboBoxInstrument.getSelectedItem());
@@ -868,6 +869,9 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("Instrument Configuration changed : " + Arrays.toString(getInstrumentConfigurations()));
     }
+
+    // update PoPs text field if the selected instrument configurations have associated PoPs in the configuration:
+    updatePops();
 
     // group multiple calls into a single observation update event :
     fireObservationUpdateEvent();
@@ -944,22 +948,23 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
   public void jTextPoPsPropertyChange(final PropertyChangeEvent evt) {
     List<Pop> listPoPs = null;
 
-    if (evt.getNewValue() != null) {
-      final String popConfig = evt.getNewValue().toString();
+    final Object value = evt.getNewValue();
+    if (value != null) {
+      final String popConfig = value.toString();
 
       // parse the configuration (instrument = number of channels) + (interferometer = pop indexes [1-5]) :
-
       listPoPs = cm.parseInstrumentPoPs((String) this.jComboBoxInterferometerConfiguration.getSelectedItem(),
               (String) this.jComboBoxInstrument.getSelectedItem(), popConfig);
     }
     if (logger.isLoggable(Level.FINE)) {
-      logger.fine("Pops changed = " + evt.getNewValue() + " : " + listPoPs);
+      logger.fine("Pops changed = " + value + " : " + listPoPs);
     }
 
-    if (listPoPs == null && evt.getNewValue() != null) {
+    if (listPoPs == null && value != null) {
       // invalid, reset the field to empty :
       resetPops();
     }
+
     // then update the observation :
     fireObservationUpdateEvent();
   }
@@ -971,13 +976,52 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     // disable the automatic update observation :
     final boolean prevAutoUpdateObservation = this.setAutoUpdateObservation(false);
     try {
+      // use first instrument configuration:
+      final String popConfig = getConfigurationPops();
+
+      final Integer value = (popConfig != null) ? Integer.valueOf(popConfig) : null;
+
       // note : setValue() can fire a property change event :
-      this.jTextPoPs.setValue(null);
+      this.jTextPoPs.setValue(value);
 
     } finally {
       // restore the automatic update observation :
       this.setAutoUpdateObservation(prevAutoUpdateObservation);
     }
+  }
+
+  /**
+   * Update the PoPs text field using the PoPs defined in the current instrument configurations
+   * only if one and only one configuration is selected.
+   */
+  private void updatePops() {
+    final String popConfig = getConfigurationPops();
+
+    if (popConfig != null) {
+      // update the selected pops (pops) :
+      // note : setText() does not fire a property change event :
+      this.jTextPoPs.setText(popConfig);
+    }
+  }
+
+  /**
+   * Return the PoP identifiers defined for the current instrument configurations
+   * only if one and only one configuration is selected.
+   * @return PoP identifiers
+   */
+  private String getConfigurationPops() {
+    final Object[] instConfs = getInstrumentConfigurations();
+    if (instConfs.length == 1) {
+      // use first one:
+      final String instrumentConfiguration = (String) instConfs[0];
+      final List<Pop> popList = cm.getInstrumentConfigurationPoPs((String) this.jComboBoxInterferometerConfiguration.getSelectedItem(),
+              (String) this.jComboBoxInstrument.getSelectedItem(), instrumentConfiguration);
+
+      if (popList != null && !popList.isEmpty()) {
+        return Pop.toString(popList);
+      }
+    }
+    return null;
   }
 
   /**
