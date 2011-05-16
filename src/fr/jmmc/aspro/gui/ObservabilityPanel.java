@@ -316,7 +316,6 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     this.jCheckBoxScrollView = new JCheckBox("Scroll view");
     this.jCheckBoxScrollView.setName("jCheckBoxScrollView");
 
-    // TODO: use an user preference:
     this.jCheckBoxScrollView.setSelected(true);
     this.jCheckBoxScrollView.addItemListener(new ItemListener() {
 
