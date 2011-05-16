@@ -206,7 +206,8 @@
   <releasenotes>
     <release version="0.8">
       <prerelease version="0.8.2">
-        <change>Added CHARA VEGA configurations (general and dedicated to June 2011 run)</change>
+        <change>Automatic Pops set with values defined in CHARA VEGA configuration dedicated to June 2011 run</change>
+        <change>Added CHARA VEGA configurations (general with 2T/3T/4T and dedicated to June 2011 run)</change>
         <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/27">Added 'Center plot arround night' preference to have the complete night centered on the observability plot</change>
         <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/26">Added civil and nautical twilight zones and a new preference 'Twilight used as Night limit' to choose which twilight for night restrictions</change>
         <change type="CHANGE" url="http://trac.jmmc.fr/jmmc-sw/ticket/54">Added a new preference 'Default min Elevation' set to 45 degrees by default</change>
