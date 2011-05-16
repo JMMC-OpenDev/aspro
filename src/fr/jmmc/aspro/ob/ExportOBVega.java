@@ -16,6 +16,8 @@ import fr.jmmc.aspro.model.oi.Pop;
 import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetConfiguration;
+import fr.jmmc.aspro.model.oi.TargetInformation;
+import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.aspro.service.ObservabilityService;
 import fr.jmmc.mcs.util.FileUtils;
 import java.io.File;
@@ -51,8 +53,12 @@ public class ExportOBVega {
   public final static String UNDEFINED = "OFF";
   /** Star - observation = OBSV */
   public final static String STAR_OBSV = "OBSV";
-  /** Star - target = TARGET */
-  public final static String STAR_TARGET = "TARGET";
+  /** Science target = TARGET */
+  public final static String SCI_TARGET = "TARGET";
+  /** Calibrator target = REFERENCE */
+  public final static String CAL_TARGET = "REFERENCE";
+  /** Calibrator prefix = Cal */
+  public final static String CAL_PREFIX = "Cal";
   /** Default XOPLE reference = 0 */
   public final static String DEFAULT_XOPLE_REF = "0";
   /**
@@ -104,11 +110,38 @@ public class ExportOBVega {
     // Generate the file content :
     final StringBuilder sb = new StringBuilder(512);
 
-    // TODO CALS : we should use the display targets to have both science targets with their calibrators
+    // get target user informations to have proper target ordering (science + calibrators):
+    final TargetUserInformations targetUserInfos = observation.getOrCreateTargetUserInfos();
+
+    String scienceTargetName;
+    TargetInformation targetInfo;
+    List<Target> calibrators;
+    int calIndex;
 
     // fill the buffer per target :
     for (Target target : observation.getTargets()) {
-      processTarget(sb, obsData, target, baseLine, charaSetup);
+
+      // first science targets:
+      if (!targetUserInfos.isCalibrator(target)) {
+        scienceTargetName = processTarget(sb, obsData, target, baseLine, charaSetup, 0, null);
+
+        if (scienceTargetName != null) {
+          // science OB processed:
+          targetInfo = targetUserInfos.getTargetInformation(target);
+          if (targetInfo != null) {
+            calibrators = targetInfo.getCalibrators();
+
+            if (!calibrators.isEmpty()) {
+              // then calibrator targets:
+              calIndex = 0;
+              for (Target calibrator : calibrators) {
+                calIndex++;
+                processTarget(sb, obsData, calibrator, baseLine, charaSetup, calIndex, scienceTargetName);
+              }
+            }
+          }
+        }
+      }
     }
 
     final String document = sb.toString();
@@ -145,12 +178,23 @@ public class ExportOBVega {
    * @param target target to process
    * @param baseLine baseline like S1S2 ...
    * @param charaSetup chara setup
+   * @param calibratorIndex 0 means science target, >= 1 indicates the calibrator position in the calibrator list
+   * @param scienceTargetName science target name to form the name of this observation block
+   * @return science target name
    */
-  public static void processTarget(final StringBuilder sb, final ObservabilityData obsData, final Target target, final String baseLine, final String charaSetup) {
+  public static String processTarget(final StringBuilder sb, final ObservabilityData obsData, final Target target, final String baseLine, final String charaSetup,
+                                     final int calibratorIndex, final String scienceTargetName) {
+
+    String result = null;
+
+    final boolean isCalibrator = (calibratorIndex > 0);
 
     final String hdId = target.getIdentifier(HD_CATALOG);
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("target : " + target.getName() + " - " + hdId);
+    }
+    if (hdId == null) {
+      logger.warning("Missing HD identifier for target [" + target + "]");
     }
 
     // Get target HA ranges :
@@ -168,10 +212,15 @@ public class ExportOBVega {
       //   1.OBSV
       sb.append(STAR_OBSV).append(SEPARATOR);
       //   2.TARGET or REFERENCE
-      sb.append(STAR_TARGET).append(SEPARATOR);
-      // 3.Name of observation (string) = target name (only alpha and digit characters) + Base Line
-      final String altName = target.getName().replaceAll(AsproConstants.REGEXP_INVALID_TEXT_CHARS, "");
-      sb.append(altName).append(baseLine).append(SEPARATOR);
+      sb.append((isCalibrator) ? CAL_TARGET : SCI_TARGET).append(SEPARATOR);
+      // 3.Name of observation (string) = science target name (only alpha and digit characters) + (codes Cal1, Cal2, Chk) + Base Line
+      if (isCalibrator) {
+        sb.append(scienceTargetName).append(CAL_PREFIX).append(calibratorIndex);
+      } else {
+        result = target.getName().replaceAll(AsproConstants.REGEXP_INVALID_TEXT_CHARS, "");
+        sb.append(result);
+      }
+      sb.append(baseLine).append(SEPARATOR);
       // 4.HD number (string)
       sb.append(hdId.replace(" ", "")).append(SEPARATOR);
       // 5.Spectral Type (string)
@@ -224,6 +273,7 @@ public class ExportOBVega {
       // End of line :
       sb.append(FileUtils.LINE_SEPARATOR);
     }
+    return result;
   }
 
   /**
