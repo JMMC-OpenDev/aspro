@@ -1369,7 +1369,7 @@
 
 
   <configuration>
-    <!-- Only VEGA instrument (2T, 3T) with all baselines available to science users -->
+    <!-- Only VEGA instrument with all baselines available to science users -->
     <version>VEGA</version>
     <interferometer>CHARA</interferometer>
     
@@ -1529,7 +1529,72 @@
     </instrument>
 
 
-    <!-- instruments (4T) : VEGA_4T not available -->
+    <!-- instruments (4T) -->
+
+    <instrument>
+      <focalInstrument>VEGA_4T</focalInstrument>
+      <configuration>
+        <stations>S1 S2 E1 E2</stations>
+        <channels>V3 V4 V1 V2</channels>
+      </configuration>
+      <configuration>
+        <stations>S1 S2 E1 W1</stations>
+        <channels>V3 V4 V1 V2</channels>
+      </configuration>
+      <configuration>
+        <stations>S1 S2 E1 W2</stations>
+        <channels>V2 V3 V1 V4</channels>
+      </configuration>
+      <configuration>
+        <stations>S1 S2 E2 W1</stations>
+        <channels>V3 V4 V1 V2</channels>
+      </configuration>
+      <configuration>
+        <stations>S1 S2 E2 W2</stations>
+        <channels>V2 V3 V1 V4</channels>
+      </configuration>
+      <configuration>
+        <stations>S1 S2 W1 W2</stations>
+        <channels>V2 V3 V1 V4</channels>
+      </configuration>
+      <configuration>
+        <stations>S1 E1 E2 W1</stations>
+        <channels>V4 V1 V2 V3</channels>
+      </configuration>
+      <configuration>
+        <stations>S1 E1 E2 W2</stations>
+        <channels>V3 V1 V2 V4</channels>
+      </configuration>
+      <configuration>
+        <stations>S1 E1 W1 W2</stations>
+        <channels>V3 V1 V2 V4</channels>
+      </configuration>
+      <configuration>
+        <stations>S1 E2 W1 W2</stations>
+        <channels>V3 V1 V2 V4</channels>
+      </configuration>
+      <configuration>
+        <stations>S2 E1 E2 W1</stations>
+        <channels>V4 V1 V2 V3</channels>
+      </configuration>
+      <configuration>
+        <stations>S2 E1 E2 W2</stations>
+        <channels>V3 V1 V2 V4</channels>
+      </configuration>
+      <configuration>
+        <stations>S2 E1 W1 W2</stations>
+        <channels>V3 V1 V2 V4</channels>
+      </configuration>
+      <configuration>
+        <stations>S2 E2 W1 W2</stations>
+        <channels>V3 V1 V2 V4</channels>
+      </configuration>
+      <configuration>
+        <stations>E1 E2 W1 W2</stations>
+        <channels>V1 V2 V3 V4</channels>
+      </configuration>
+    </instrument>
+    
   </configuration>
 
 
