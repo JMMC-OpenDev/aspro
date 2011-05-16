@@ -12,7 +12,7 @@ import fr.jmmc.aspro.model.OIBase;
 
 /**
  * 
- *         This type describes a link to a POP with its optical length
+ *         This type describes a link to a PoP with its optical length
  *       
  * 
  * <p>Java class for PopLink complex type.

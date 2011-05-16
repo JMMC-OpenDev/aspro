@@ -29,6 +29,7 @@ import fr.jmmc.aspro.model.OIBase;
  *       &lt;sequence>
  *         &lt;element name="stations" type="{http://www.w3.org/2001/XMLSchema}IDREFS"/>
  *         &lt;element name="channels" type="{http://www.w3.org/2001/XMLSchema}IDREFS" minOccurs="0"/>
+ *         &lt;element name="pops" type="{http://www.w3.org/2001/XMLSchema}IDREFS" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -40,7 +41,8 @@ import fr.jmmc.aspro.model.OIBase;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "FocalInstrumentConfigurationItem", propOrder = {
     "stations",
-    "channels"
+    "channels",
+    "pops"
 })
 public class FocalInstrumentConfigurationItem
     extends OIBase
@@ -56,6 +58,11 @@ public class FocalInstrumentConfigurationItem
     @XmlIDREF
     @XmlSchemaType(name = "IDREFS")
     protected List<Channel> channels;
+    @XmlList
+    @XmlElement(type = Object.class)
+    @XmlIDREF
+    @XmlSchemaType(name = "IDREFS")
+    protected List<Pop> pops;
 
     /**
      * Gets the value of the stations property.
@@ -114,6 +121,35 @@ public class FocalInstrumentConfigurationItem
         }
         return this.channels;
     }
+
+    /**
+     * Gets the value of the pops property.
+     * 
+     * <p>
+     * This accessor method returns a reference to the live list,
+     * not a snapshot. Therefore any modification you make to the
+     * returned list will be present inside the JAXB object.
+     * This is why there is not a <CODE>set</CODE> method for the pops property.
+     * 
+     * <p>
+     * For example, to add a new item, do as follows:
+     * <pre>
+     *    getPops().add(newItem);
+     * </pre>
+     * 
+     * 
+     * <p>
+     * Objects of the following type(s) are allowed in the list
+     * {@link Object }
+     * 
+     * 
+     */
+    public List<Pop> getPops() {
+        if (pops == null) {
+            pops = new ArrayList<Pop>();
+        }
+        return this.pops;
+    }
     
 //--simple--preserve
   /** computed name */
@@ -151,7 +187,7 @@ public class FocalInstrumentConfigurationItem
       return s;
     }
   }
-
+  
   @Override
   public final String toString() {
     return "FocalInstrumentConfigurationItem [" + getName() + "]";

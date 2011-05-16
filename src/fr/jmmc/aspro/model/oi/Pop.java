@@ -14,9 +14,9 @@ import fr.jmmc.aspro.model.OIBase;
 
 /**
  * 
- *         This type describes a Pipe of Pan (POP) present in the interferometer.
- *         This only defines the identifier / name of the POP that is then used in
- *         the station definition to give the fixed delay due to the POP.
+ *         This type describes a Pipe of Pan (PoP) present in the interferometer.
+ *         This only defines the identifier / name of the PoP that is then used in
+ *         the station definition to give the fixed delay due to the PoP.
  *       
  * 
  * <p>Java class for Pop complex type.
@@ -101,6 +101,19 @@ public class Pop
     return this.name;
   }
 
+  /**
+   * Return a string containing only the pop identifiers
+   * @param popList PoP1 ... PoPN
+   * @return string like '1...N'
+   */
+  public static String toString(final java.util.List<Pop> popList) {
+    final StringBuilder sb = new StringBuilder(popList.size());
+    for (Pop pop : popList) {
+      sb.append(pop.getIndex());
+    }
+    return sb.toString();
+  }
+  
 //--simple--preserve
 
 }

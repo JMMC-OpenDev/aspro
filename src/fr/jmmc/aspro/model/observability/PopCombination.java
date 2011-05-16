@@ -26,12 +26,7 @@ public final class PopCombination {
    */
   public PopCombination(final List<Pop> popList) {
     this.popList = popList;
-
-    final StringBuffer sb = new StringBuffer();
-    for (Pop pop : this.popList) {
-      sb.append(pop.getIndex());
-    }
-    this.identifier = sb.toString();
+    this.identifier = Pop.toString(this.popList);
   }
 
   /**

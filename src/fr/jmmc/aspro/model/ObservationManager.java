@@ -1454,7 +1454,7 @@ public final class ObservationManager extends BaseOIManager {
    * @return string representation of the given observation settings
    */
   public static String toString(final ObservationSetting observation) {
-    final StringBuffer sb = new StringBuffer(255);
+    final StringBuilder sb = new StringBuilder(255);
     sb.append("name : ").append(observation.getName());
     sb.append(", date : ").append(observation.getWhen().getDate());
     sb.append(", interferometer : ").append(observation.getInterferometerConfiguration().getName());
@@ -1480,7 +1480,7 @@ public final class ObservationManager extends BaseOIManager {
    * @return string representation of the given observation collection
    */
   public static String toString(final ObservationCollection obsCollection) {
-    final StringBuffer sb = new StringBuffer(255);
+    final StringBuilder sb = new StringBuilder(255);
     sb.append("name : ").append(obsCollection.getName());
     int i = 0;
     for (ObservationSetting observation : obsCollection.getObservations()) {

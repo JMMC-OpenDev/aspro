@@ -97,7 +97,7 @@ public final class GroupedPopObservabilityData implements Comparable<GroupedPopO
 
   @Override
   public String toString() {
-    final StringBuffer sb = new StringBuffer(64).append(getIdentifier()).append(" [");
+    final StringBuilder sb = new StringBuilder(64).append(getIdentifier()).append(" [");
     for (PopObservabilityData popData : this.popDataList) {
       sb.append('\t').append(popData.getTargetName()).append(" : ").append(popData.getMaxLength());
     }
