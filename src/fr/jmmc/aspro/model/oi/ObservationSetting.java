@@ -9,6 +9,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import fr.jmmc.aspro.model.OIBase;
+import java.util.HashSet;
 
 
 /**
@@ -359,7 +360,7 @@ public class ObservationSetting
   }
   /** observation version (read only) */
   @javax.xml.bind.annotation.XmlTransient
-  private fr.jmmc.aspro.model.ObservationVersion version = new fr.jmmc.aspro.model.ObservationVersion();
+  fr.jmmc.aspro.model.ObservationVersion version = new fr.jmmc.aspro.model.ObservationVersion();
 
   /**
    * Return the observation version
@@ -462,22 +463,29 @@ public class ObservationSetting
    * @return Map<ID, Target> index
    */
   private java.util.Map<String, Target> createTargetIndex() {
+    final List<Target> innerTargets = getTargets();
     // create the Map<ID, Target> index :
-    final java.util.Map<String, Target> mapIDTargets = new java.util.HashMap<String, Target>();
-    for (Target target : this.targets) {
+    final java.util.Map<String, Target> mapIDTargets = new java.util.HashMap<String, Target>(innerTargets.size());
+    for (Target target : innerTargets) {
       mapIDTargets.put(target.getIdentifier(), target);
     }
     return mapIDTargets;
   }
+  
   /** computed displayable list of targets (read only) */
   @javax.xml.bind.annotation.XmlTransient
   private List<Target> cachedDisplayTargets = null;
+  
+  /** computed set of orphan calibrators (read only) */
+  @javax.xml.bind.annotation.XmlTransient
+  private java.util.Set<Target> cachedOrphanCalibrators = null;
 
   /**
    * Clear any cached value related to targets
    */
   public void clearCacheTargets() {
     this.cachedDisplayTargets = null;
+    this.cachedOrphanCalibrators = null;
   }
 
   /**
@@ -490,31 +498,48 @@ public class ObservationSetting
     if (this.cachedDisplayTargets != null) {
       return this.cachedDisplayTargets;
     }
-
     computeDisplayTargets();
 
     return this.cachedDisplayTargets;
   }
 
   /**
+   * Return the set of orphan calibrators
+   * @return set of orphan calibrators
+   */
+  public java.util.Set<Target> getOrphanCalibrators() {
+    if (this.cachedOrphanCalibrators != null) {
+      return this.cachedOrphanCalibrators;
+    }
+    computeDisplayTargets();
+
+    return this.cachedOrphanCalibrators;
+  }
+
+  /**
    * Compute the displayable list of targets containing
    * - science targets followed by their calibrators
    * - calibrator orphans
-   * And the parent target associated to display target list
+   * And the set of orphan calibrators
    */
   private void computeDisplayTargets() {
 
     final List<Target> innerTargets = getTargets();
 
     final List<Target> displayTargets;
+    final java.util.Set<Target> orphans;
 
     if (innerTargets.isEmpty()) {
       displayTargets = java.util.Collections.emptyList();
+      orphans = java.util.Collections.emptySet();
     } else {
-      displayTargets = new ArrayList<Target>();
+      final int len = innerTargets.size();
+      
+      displayTargets = new ArrayList<Target>(len);
+      orphans = new HashSet<Target>(4);
 
       // map of used calibrators :
-      final java.util.Map<Target, Target> usedCalibrators = new java.util.IdentityHashMap<Target, Target>();
+      final java.util.Map<Target, Target> usedCalibrators = new java.util.IdentityHashMap<Target, Target>(8);
 
       // get the existing target user informations (can be null) :
       final TargetUserInformations localTargetUserInfos = getTargetUserInfos();
@@ -543,13 +568,15 @@ public class ObservationSetting
         for (Target calibrator : localTargetUserInfos.getCalibrators()) {
           if (!usedCalibrators.containsKey(calibrator)) {
             displayTargets.add(calibrator);
+            orphans.add(calibrator);
           }
         }
       }
     }
 
-    // cache the computed lists :
+    // cache the computed collections :
     this.cachedDisplayTargets = displayTargets;
+    this.cachedOrphanCalibrators = orphans;
   }
 
   /**

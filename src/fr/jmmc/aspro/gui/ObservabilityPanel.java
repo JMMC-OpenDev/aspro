@@ -57,6 +57,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Set;
 import java.util.logging.Level;
 import javax.swing.BorderFactory;
 import javax.swing.BoundedRangeModel;
@@ -795,6 +796,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
     // computed data are valid :
     updateChart(observation.getDisplayTargets(),
+            observation.getOrphanCalibrators(),
             observation.getOrCreateTargetUserInfos(),
             chartData,
             obsData.getDateMin(), obsData.getDateMax(),
@@ -807,6 +809,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
   /**
    * Update the datasets and the symbol axis given the star observability data
    * @param displayTargets list of display targets
+   * @param orphanCalibrators set of orphan calibrators
    * @param targetUserInfos target user informations
    * @param chartData chart data
    * @param min lower date of the plot
@@ -815,11 +818,12 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
    */
   @SuppressWarnings("unchecked")
   private void updateChart(final List<Target> displayTargets,
+                           final Set<Target> orphanCalibrators,
                            final TargetUserInformations targetUserInfos,
                            final ObservationCollectionObsData chartData,
                            final Date min, final Date max,
                            final boolean doBaseLineLimits) {
-
+    
     final ColorPalette palette = ColorPalette.getDefaultColorPalette();
 
     final XYBarRenderer xyBarRenderer = (XYBarRenderer) this.xyPlot.getRenderer();
@@ -838,6 +842,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     TaskSeries taskSeries;
     Task task;
     int colorIndex;
+    boolean calibrator;
     Integer pos;
     int n = 0;
     String legendLabel;
@@ -849,6 +854,9 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     // current StarObservabilityData used in loops :
     List<StarObservabilityData> soList;
 
+    final boolean single = chartData.isSingle();
+    final int obsLen = chartData.size();
+
     // Target list :
     final List<Target> targets;
     if (doBaseLineLimits) {
@@ -858,11 +866,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     } else {
       // Use display target to get correct ordering and calibrator associations :
       targets = displayTargets;
-      annotations = new HashMap<Integer, List<XYAnnotation>>();
+      annotations = new HashMap<Integer, List<XYAnnotation>>(obsLen * targets.size());
     }
-
-    final boolean single = chartData.isSingle();
-    final int obsLen = chartData.size();
 
     // Iterate over objects targets :
     for (Target target : targets) {
@@ -903,10 +908,12 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
             // color :
             colorIndex = so.getType();
+            calibrator = false;
 
             if (!doBaseLineLimits && colorIndex == StarObservabilityData.TYPE_STAR && targetUserInfos.isCalibrator(target)) {
               // use different color for calibrators :
               colorIndex = StarObservabilityData.TYPE_CALIBRATOR;
+              calibrator = true;
             }
 
             if (single) {
@@ -920,7 +927,13 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
               colorIndex = c;
             }
 
-            paint = palette.getColor(colorIndex);
+            // display differently orphan calibrators:
+            if (calibrator && orphanCalibrators.contains(target)) {
+              legendLabel = "Orphan calibrator";
+              paint = Color.ORANGE;
+          } else {
+              paint = palette.getColor(colorIndex);
+            }
             targetColors.add(paint);
 
             if (!doBaseLineLimits) {
@@ -1020,7 +1033,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
   private void addAnnotation(final Map<Integer, List<XYAnnotation>> annotations, final Integer pos, final XYAnnotation annotation) {
     List<XYAnnotation> list = annotations.get(pos);
     if (list == null) {
-      list = new ArrayList<XYAnnotation>();
+      list = new ArrayList<XYAnnotation>(10);
       annotations.put(pos, list);
     }
     list.add(annotation);
@@ -1033,7 +1046,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
    * @param max max date of date axis
    * @return true if the given date is NOT close to date axis limits
    */
-  private final boolean checkDateAxisLimits(final Date date, final Date min, final Date max) {
+  private boolean checkDateAxisLimits(final Date date, final Date min, final Date max) {
     // if date is too close to date min:
     if (date.getTime() - min.getTime() < DATE_LIMIT_THRESHOLD) {
       return false;

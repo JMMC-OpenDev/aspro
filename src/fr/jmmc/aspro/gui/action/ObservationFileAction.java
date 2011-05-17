@@ -65,14 +65,14 @@ public abstract class ObservationFileAction extends RegisteredAction {
    * @return last directory used
    */
   protected String getLastDir() {
-    return this.lastDir;
+    return lastDir;
   }
 
   /**
    * Define the last directory used
-   * @param lastDir new value
+   * @param dir new value
    */
-  protected void setLastDir(String lastDir) {
-    this.lastDir = lastDir;
+  protected void setLastDir(String dir) {
+    lastDir = dir;
   }
 }

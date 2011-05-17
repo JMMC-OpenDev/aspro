@@ -766,10 +766,10 @@ public class Target
    * @return target identifier
    */
   public final String getIdentifier() {
-    if (getId() == null) {
+    if (this.id == null) {
       setId(fr.jmmc.aspro.model.util.XmlIdUtils.convert(getName()));
     }
-    return getId();
+    return this.id;
   }
 
   /**
