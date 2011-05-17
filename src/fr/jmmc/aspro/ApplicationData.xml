@@ -7,9 +7,9 @@
 
 <ApplicationData link="http://www.jmmc.fr/aspro2">
 
-  <program name="Aspro2" version="0.8.2"/>
+  <program name="Aspro2" version="0.8.1 beta 3"/>
 
-  <compilation date="13/05/2011" compiler="JDK 1.5.0_16"/>
+  <compilation date="17/05/2011" compiler="JDK 1.5.0_16"/>
 
   <text>
     <![CDATA[ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations
@@ -204,21 +204,27 @@
   </menubar>
 
   <releasenotes>
-    <release version="0.8">
-      <prerelease version="0.8.2">
+    <release version="0.8.1">
+      <prerelease version="0.8.1 beta 3">
+        <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/145">Changed color for orphan calibrators in the observability plot</change>
         <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/143">Fixed export OB for CHARA VEGA to handle properly calibrators in the StarList format</change>
         <change>Automatic Pops set with values defined in CHARA VEGA configuration dedicated to June 2011 run (read-only)</change>
-        <change>Added CHARA VEGA configurations (general with 2T/3T/4T and dedicated to June 2011 run)</change>
+        <change>Added CHARA VEGA configuration dedicated to June 2011 runs and minor changes in CHARA configuration (sorted instrument list)</change>
+      </prerelease>
+      <prerelease version="0.8.1 beta 2">
         <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/27">Added 'Center plot arround night' preference to have the complete night centered on the observability plot</change>
         <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/26">Added civil and nautical twilight zones and a new preference 'Twilight used as Night limit' to choose which twilight for night restrictions</change>
         <change type="CHANGE" url="http://trac.jmmc.fr/jmmc-sw/ticket/54">Added a new preference 'Default min Elevation' set to 45 degrees by default</change>
       </prerelease>
-      <prerelease version="0.8.1">
+      <prerelease version="0.8.1 beta 1">
         <change>Added 'Scroll view' checkbox button to see all targets (or only some of them) on the observability plot</change>
         <change>Enable mouse zooming for targets only on the observability plot</change>
         <change>Always show the scrollbar (with margins) on the observability plot</change>
         <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/109">Adapt the number of visible targets on the observability plot when the application window is resized</change>
       </prerelease>
+    </release>
+
+    <release version="0.8">
       <!-- <pubDate>Thu, 10 Mar 2011 11:16:37 GMT</pubDate> -->
       <prerelease version="0.8.0">
         <change>Added Button 'Sort by R.A.' in the target editor to sort both science and calibrator targets by their right ascension</change>
@@ -230,7 +236,7 @@
         <change>Added VLTI configuration for Period 88</change>
       </prerelease>
     </release>
-
+    
     <release version="0.7">
       <!-- <pubDate>Tue, 15 Feb 2011 11:41:46 GMT</pubDate> -->
       <prerelease version="0.7.8 beta">
