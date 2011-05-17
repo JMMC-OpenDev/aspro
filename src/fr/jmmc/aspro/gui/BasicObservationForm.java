@@ -151,9 +151,6 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     jPanelTargets.setBorder(javax.swing.BorderFactory.createTitledBorder("Targets"));
     jPanelTargets.setName("jPanelTargets"); // NOI18N
     jPanelTargets.setLayout(new java.awt.GridBagLayout());
-
-    jPanelTargetsLeft.setMinimumSize(new java.awt.Dimension(12, 12));
-    jPanelTargetsLeft.setPreferredSize(new java.awt.Dimension(12, 12));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
@@ -227,9 +224,6 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 1;
     jPanelTargets.add(jButtonTargetEditor, gridBagConstraints);
-
-    jPanelTargetsRight.setMinimumSize(new java.awt.Dimension(12, 12));
-    jPanelTargetsRight.setPreferredSize(new java.awt.Dimension(12, 12));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 3;
     gridBagConstraints.gridy = 0;
@@ -248,9 +242,6 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     jPanelMain.setBorder(javax.swing.BorderFactory.createTitledBorder("Main settings"));
     jPanelMain.setName("jPanelMain"); // NOI18N
     jPanelMain.setLayout(new java.awt.GridBagLayout());
-
-    jPanelObsLeft.setMinimumSize(new java.awt.Dimension(12, 12));
-    jPanelObsLeft.setPreferredSize(new java.awt.Dimension(12, 12));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
@@ -273,7 +264,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.weightx = 0.8;
+    gridBagConstraints.weightx = 0.5;
     gridBagConstraints.insets = new java.awt.Insets(0, 0, 4, 0);
     jPanelMain.add(jComboBoxInterferometer, gridBagConstraints);
 
@@ -328,9 +319,6 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     gridBagConstraints.gridy = 3;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     jPanelMain.add(jTextPoPs, gridBagConstraints);
-
-    jPanelObsRight.setMinimumSize(new java.awt.Dimension(12, 12));
-    jPanelObsRight.setPreferredSize(new java.awt.Dimension(12, 12));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 3;
     gridBagConstraints.gridy = 0;
@@ -338,6 +326,8 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.weightx = 0.1;
     jPanelMain.add(jPanelObsRight, gridBagConstraints);
+
+    jPanelObsBottom.setPreferredSize(new java.awt.Dimension(1, 1));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 4;
@@ -357,6 +347,8 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     jPanelConfigurations.setBorder(javax.swing.BorderFactory.createTitledBorder("Configuration(s)"));
     jPanelConfigurations.setName("jPanelConfigurations"); // NOI18N
     jPanelConfigurations.setLayout(new java.awt.GridBagLayout());
+
+    jScrollPaneInstrumentConfigurations.setPreferredSize(new java.awt.Dimension(120, 50));
 
     jListInstrumentConfigurations.setModel(new javax.swing.AbstractListModel() {
       String[] strings = { "Samples:", "UT1 UT2 UT3 UT4", "E1 E2 W1 W2" };
@@ -379,18 +371,12 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     gridBagConstraints.weightx = 0.8;
     gridBagConstraints.weighty = 1.0;
     jPanelConfigurations.add(jScrollPaneInstrumentConfigurations, gridBagConstraints);
-
-    jPanelConfLeft.setMinimumSize(new java.awt.Dimension(12, 12));
-    jPanelConfLeft.setPreferredSize(new java.awt.Dimension(12, 12));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.weightx = 0.1;
     jPanelConfigurations.add(jPanelConfLeft, gridBagConstraints);
-
-    jPanelConfRight.setMinimumSize(new java.awt.Dimension(12, 12));
-    jPanelConfRight.setPreferredSize(new java.awt.Dimension(12, 12));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 0;
@@ -825,6 +811,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         updateComboInstrument();
         updateComboInstrumentConfiguration();
         checkPops();
+        
       } else if (e.getSource() == this.jComboBoxInterferometerConfiguration) {
         if (logger.isLoggable(Level.FINE)) {
           logger.fine("Interferometer Configuration changed : " + this.jComboBoxInterferometerConfiguration.getSelectedItem());
