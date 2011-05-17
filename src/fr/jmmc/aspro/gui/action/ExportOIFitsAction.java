@@ -123,7 +123,7 @@ public class ExportOIFitsAction extends WaitingTaskAction {
    * @param oiFitsFile OIFits structure
    * @return default name [Aspro2_<TARGET>_<INSTRUMENT>_<CONFIGURATION>_<DATE>]
    */
-  protected static String getDefaultFileName(final OIFitsFile oiFitsFile) {
+  public static String getDefaultFileName(final OIFitsFile oiFitsFile) {
 
     final StringBuilder sb = new StringBuilder(32).append("Aspro2_");
 

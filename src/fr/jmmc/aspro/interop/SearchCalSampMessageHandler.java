@@ -1,7 +1,7 @@
 /*******************************************************************************
  * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
-package fr.jmmc.aspro.model.searchCal;
+package fr.jmmc.aspro.interop;
 
 import fr.jmmc.aspro.gui.TargetEditorDialog;
 import fr.jmmc.aspro.model.ObservationManager;
@@ -27,6 +27,7 @@ import java.net.URISyntaxException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.SwingUtilities;
 import org.astrogrid.samp.Message;
 import org.astrogrid.samp.Metadata;
@@ -38,15 +39,12 @@ import org.astrogrid.samp.client.SampException;
  */
 public final class SearchCalSampMessageHandler extends SampMessageHandler {
 
-  /** Class Name */
-  private static final String className_ = "fr.jmmc.aspro.model.searchCal.SearchCalSampMessageHandler";
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
-          className_);
+  private static final Logger logger = Logger.getLogger(SearchCalSampMessageHandler.class.getName());
   /** XSLT file path */
-  private final static String XSLT_FILE = "fr/jmmc/aspro/model/searchCal/scvot2AsproObservation.xsl";
+  private final static String XSLT_FILE = "fr/jmmc/aspro/interop/scvot2AsproObservation.xsl";
   /** maximum calibrators accepted at once */
-  private final static int MAX_CALIBRATORS = 10;
+  public final static int MAX_CALIBRATORS = 10;
 
   /**
    * Public constructor
@@ -241,12 +239,12 @@ public final class SearchCalSampMessageHandler extends SampMessageHandler {
           if (logger.isLoggable(Level.INFO)) {
             logger.info(report);
           }
+          
+          // bring this application to front :
+          App.showFrameToFront();
 
           // display report message :
           MessagePane.showMessage(report);
-
-          // change focus :
-          App.getFrame().toFront();
         }
       });
 

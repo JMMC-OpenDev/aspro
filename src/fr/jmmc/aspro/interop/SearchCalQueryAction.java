@@ -1,7 +1,7 @@
 /*******************************************************************************
  * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
-package fr.jmmc.aspro.gui.action;
+package fr.jmmc.aspro.interop;
 
 import edu.dartmouth.AstroSkyCalcObservation;
 import fr.jmmc.aspro.AsproGui;
@@ -30,18 +30,18 @@ import java.util.logging.Level;
  *
  * @author bourgesl
  */
-public final class SampSearchCalQuery extends SampCapabilityAction {
+public final class SearchCalQueryAction extends SampCapabilityAction {
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
   /** Class name. This name is used to register to the ActionRegistrar */
-  private final static String className = "fr.jmmc.aspro.gui.action.SampSearchCalQuery";
+  private final static String className = SearchCalQueryAction.class.getName();
   /** Action name. This name is used to register to the ActionRegistrar */
   public final static String actionName = "searchCalStartQuery";
   /** Class logger */
   private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(className);
   /** template name */
-  private final static String TEMPLATE_FILE = "fr/jmmc/aspro/gui/action/SearchCal_template.xml";
+  private final static String TEMPLATE_FILE = "fr/jmmc/aspro/interop/SearchCal_template.xml";
 
   /* keywords */
   /** keyword - objectName */
@@ -75,7 +75,7 @@ public final class SampSearchCalQuery extends SampCapabilityAction {
   /**
    * Public constructor that automatically register the action in RegisteredAction.
    */
-  public SampSearchCalQuery() {
+  public SearchCalQueryAction() {
     super(className, actionName, SampCapability.SEARCHCAL_START_QUERY);
   }
 
@@ -186,7 +186,7 @@ public final class SampSearchCalQuery extends SampCapabilityAction {
       minMag = objectMag - 2d;
       maxMag = objectMag + 2d;
 
-      bright = (objectMag <= BRIGHT_MAG_MAX);
+      bright = (insBand == SpectralBand.K && objectMag <= BRIGHT_MAG_MAX);
     }
 
     if (logger.isLoggable(Level.FINE)) {

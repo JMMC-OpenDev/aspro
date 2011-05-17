@@ -196,9 +196,9 @@
     </menu>
 
     <menu label="Interop">
-      <menu label="Search calibrators" classpath="fr.jmmc.aspro.gui.action.SampSearchCalQuery" action="searchCalStartQuery"
+      <menu label="Search calibrators" classpath="fr.jmmc.aspro.interop.SearchCalQueryAction" action="searchCalStartQuery"
             description="use SearchCal to search calibrators for the current selected target (SAMP)"/>
-      <menu label="Perform model fitting" classpath="fr.jmmc.aspro.gui.action.BroadcastToModelFittingAction" action="broadcastToModelFittingAction"
+      <menu label="Perform model fitting" classpath="fr.jmmc.aspro.interop.BroadcastToModelFittingAction" action="broadcastToModelFittingAction"
             description="use LITpro to prepare your model fitting and inspect your OIFits files (SAMP)"/>
     </menu>
   </menubar>

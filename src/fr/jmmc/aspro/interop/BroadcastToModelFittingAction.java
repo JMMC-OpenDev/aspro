@@ -1,8 +1,9 @@
 /*******************************************************************************
  * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
-package fr.jmmc.aspro.gui.action;
+package fr.jmmc.aspro.interop;
 
+import fr.jmmc.aspro.gui.action.ExportOIFitsAction;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.jaxb.JAXBFactory;
@@ -27,7 +28,7 @@ import java.util.Map;
  *
  * @author mella
  */
-public class BroadcastToModelFittingAction extends SampCapabilityAction {
+public final class BroadcastToModelFittingAction extends SampCapabilityAction {
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;

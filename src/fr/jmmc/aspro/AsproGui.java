@@ -4,14 +4,14 @@
 package fr.jmmc.aspro;
 
 import fr.jmmc.aspro.gui.SettingPanel;
-import fr.jmmc.aspro.gui.action.BroadcastToModelFittingAction;
+import fr.jmmc.aspro.interop.BroadcastToModelFittingAction;
 import fr.jmmc.aspro.gui.action.ExportAllOBAction;
 import fr.jmmc.aspro.gui.action.ExportOBAction;
 import fr.jmmc.aspro.gui.action.ExportOIFitsAction;
 import fr.jmmc.aspro.gui.action.ExportPDFAction;
 import fr.jmmc.aspro.gui.action.LoadObservationAction;
 import fr.jmmc.aspro.gui.action.NewObservationAction;
-import fr.jmmc.aspro.gui.action.SampSearchCalQuery;
+import fr.jmmc.aspro.interop.SearchCalQueryAction;
 import fr.jmmc.aspro.gui.action.SaveObservationAction;
 import fr.jmmc.aspro.gui.action.ShowPrefAction;
 import fr.jmmc.aspro.gui.action.TargetEditorAction;
@@ -19,7 +19,7 @@ import fr.jmmc.aspro.gui.task.AsproTaskRegistry;
 import fr.jmmc.aspro.gui.util.ComponentResizeAdapter;
 import fr.jmmc.aspro.model.ConfigurationManager;
 import fr.jmmc.aspro.model.ObservationManager;
-import fr.jmmc.aspro.model.searchCal.SearchCalSampMessageHandler;
+import fr.jmmc.aspro.interop.SearchCalSampMessageHandler;
 import fr.jmmc.mcs.gui.App;
 import fr.jmmc.mcs.gui.StatusBar;
 import fr.jmmc.mcs.gui.SwingSettings;
@@ -305,7 +305,7 @@ public final class AsproGui extends App {
     // use interop with modelfitting :
     new BroadcastToModelFittingAction();
     // searchCal query (SAMP) :
-    new SampSearchCalQuery();
+    new SearchCalQueryAction();
   }
 
   /**
