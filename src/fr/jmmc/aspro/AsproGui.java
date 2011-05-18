@@ -21,10 +21,11 @@ import fr.jmmc.aspro.model.ConfigurationManager;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.interop.SearchCalSampMessageHandler;
 import fr.jmmc.mcs.gui.App;
+import fr.jmmc.mcs.gui.MessagePane;
+import fr.jmmc.mcs.gui.MessagePane.ConfirmSaveChanges;
 import fr.jmmc.mcs.gui.StatusBar;
 import fr.jmmc.mcs.gui.SwingSettings;
 import fr.jmmc.mcs.gui.task.TaskSwingWorkerExecutor;
-import fr.jmmc.mcs.util.ActionRegistrar;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Toolkit;
@@ -32,10 +33,8 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.lang.reflect.InvocationTargetException;
 import java.util.logging.Level;
-import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 
@@ -54,6 +53,8 @@ public final class AsproGui extends App {
   /* members */
   /** Setting Panel */
   private SettingPanel settingPanel;
+  /** Save action */
+  private SaveObservationAction saveAction;
 
   /**
    * Main entry point : use swing setup and then start the application
@@ -181,24 +182,27 @@ public final class AsproGui extends App {
     logger.fine("AsproGui.finish() handler called.");
 
     // Ask the user if he wants to save modifications
-    final Object[] options = {"Save", "Cancel", "Don't Save"};
-    final int result = JOptionPane.showOptionDialog(getFrame(),
-            "Do you want to save changes before closing ?\nIf you don't save, your changes will be lost.\n\n",
-            null, JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, null, options,
-            options[0]);
+    final ConfirmSaveChanges result = MessagePane.showConfirmSaveChangesBeforeClosing();
 
-    // If the User clicked the "Save" button, save and quit
-    if (result == 0) {
-      final AbstractAction action = (SaveObservationAction) ActionRegistrar.getInstance().get(SaveObservationAction.className, SaveObservationAction.actionName);
+    // Handle user choice
+    switch (result) {
+      // If the user clicked the "Save" button, save and exit
+      case Save:
+        if (this.saveAction != null) {
+          return this.saveAction.save();
+        }
+        break;
 
-      action.actionPerformed(null);
+      // If the user clicked the "Don't Save" button, exit
+      case Ignore:
+        break;
+
+      // If the user clicked the "Cancel" button or pressed 'esc' key, don't exit
+      case Cancel:
+      default: // Any other case
+        return false;
     }
-    // If the user clicked the "Cancel" button, don't quit
-    if (result == 1) {
-      return false;
-    }
 
-    // If the user clicked the "Don't Save" button, quit
     return true;
   }
 
@@ -285,7 +289,7 @@ public final class AsproGui extends App {
     // load observation :
     new LoadObservationAction();
     // save observation :
-    new SaveObservationAction();
+    this.saveAction = new SaveObservationAction();
     // show preferences :
     new ShowPrefAction();
     // export OB :
