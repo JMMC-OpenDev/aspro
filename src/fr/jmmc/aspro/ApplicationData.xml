@@ -206,6 +206,8 @@
   <releasenotes>
     <release version="0.8.1">
       <prerelease version="0.8.1 beta 3">
+        <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/144">Fixed bug related to SearchCal integration: 
+        always use the bright scenario as the faint scenario is not available for all instrumental bands</change>
         <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/145">Changed color for orphan calibrators in the observability plot</change>
         <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/143">Fixed export OB for CHARA VEGA to handle properly calibrators in the StarList format</change>
         <change>Automatic Pops set with values defined in CHARA VEGA configuration dedicated to June 2011 run (read-only)</change>
