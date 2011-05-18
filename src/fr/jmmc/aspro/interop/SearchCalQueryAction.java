@@ -103,7 +103,7 @@ public final class SearchCalQueryAction extends SampCapabilityAction {
 
     final String votable = processTarget(target);
 
-    final Map<String, String> parameters = new HashMap<String, String>();
+    final Map<String, String> parameters = new HashMap<String, String>(2);
     parameters.put("query", votable);
 
     if (logger.isLoggable(Level.FINE)) {
@@ -132,7 +132,7 @@ public final class SearchCalQueryAction extends SampCapabilityAction {
       stations = obsCollection.getFirstObservation().getInstrumentConfiguration().getStationList();
     } else {
       // merge station lists to have the largest baseline ...
-      stations = new ArrayList<Station>();
+      stations = new ArrayList<Station>(4);
 
       for (ObservationSetting observation : obsCollection.getObservations()) {
         for (Station station : observation.getInstrumentConfiguration().getStationList()) {
@@ -172,21 +172,20 @@ public final class SearchCalQueryAction extends SampCapabilityAction {
     final Double flux = target.getFlux(insBand);
 
     final double objectMag;
+
+    // TODO: remove soon following parameters:
+    final boolean bright = true;
     final double minMag;
     final double maxMag;
-    final boolean bright;
 
     if (flux == null) {
       objectMag = Double.NaN;
       minMag = DEF_MAG_MIN;
       maxMag = DEF_MAG_MAX;
-      bright = true;
     } else {
       objectMag = flux.doubleValue();
       minMag = objectMag - 2d;
       maxMag = objectMag + 2d;
-
-      bright = (insBand == SpectralBand.K && objectMag <= BRIGHT_MAG_MAX);
     }
 
     if (logger.isLoggable(Level.FINE)) {
@@ -213,9 +212,6 @@ public final class SearchCalQueryAction extends SampCapabilityAction {
     votable = votable.replaceFirst(KEY_MAG, Double.toString(objectMag));
     votable = votable.replaceFirst(KEY_INS_BAND, insBand.value());
 
-    votable = votable.replaceFirst(KEY_MAG_MIN, Double.toString(minMag));
-    votable = votable.replaceFirst(KEY_MAG_MAX, Double.toString(maxMag));
-
     // convert RA/DEC (mas) up to 3 digits :
     final String[] raDec = AstroSkyCalcObservation.toString(target.getRADeg(), target.getDECDeg());
 
@@ -225,7 +221,10 @@ public final class SearchCalQueryAction extends SampCapabilityAction {
     votable = votable.replaceFirst(KEY_BASE_MAX, Double.toString(maxBaseline));
     votable = votable.replaceFirst(KEY_WAVELENGTH, Double.toString(lambda));
 
+    // TODO: remove soon following parameters:
     votable = votable.replaceFirst(KEY_BRIGHT, Boolean.toString(bright));
+    votable = votable.replaceFirst(KEY_MAG_MIN, Double.toString(minMag));
+    votable = votable.replaceFirst(KEY_MAG_MAX, Double.toString(maxMag));
 
     return votable;
   }
