@@ -42,6 +42,14 @@ public class SaveObservationAction extends ObservationFileAction {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("actionPerformed");
     }
+    save();
+  }
+
+  /**
+   * Save the current observation
+   * @return true if successfull
+   */
+  public boolean save() {
     final ObservationManager om = ObservationManager.getInstance();
 
     File file = om.getObservationFile();
@@ -70,6 +78,8 @@ public class SaveObservationAction extends ObservationFileAction {
       file = null;
     }
 
+    boolean result = true;
+
     // If a file was defined (No cancel in the dialog)
     if (file != null) {
       this.setLastDir(file.getParent());
@@ -80,9 +90,11 @@ public class SaveObservationAction extends ObservationFileAction {
         StatusBar.show("file saved : " + file.getName());
 
       } catch (IOException ioe) {
+        result = false;
         MessagePane.showErrorMessage(
                 "Could not save the file : " + file.getAbsolutePath(), ioe);
       }
     }
+    return result;
   }
 }
