@@ -7,9 +7,9 @@
 
 <ApplicationData link="http://www.jmmc.fr/aspro2">
 
-  <program name="Aspro2" version="0.8.1 beta 3"/>
+  <program name="Aspro2" version="0.8.1 beta 4"/>
 
-  <compilation date="17/05/2011" compiler="JDK 1.5.0_16"/>
+  <compilation date="27/05/2011" compiler="JDK 1.5.0_16"/>
 
   <text>
     <![CDATA[ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations
@@ -205,6 +205,9 @@
 
   <releasenotes>
     <release version="0.8.1">
+      <prerelease version="0.8.1 beta 4">
+        <change>Added MIRC_6T (preliminary support)</change>
+      </prerelease>
       <prerelease version="0.8.1 beta 3">
         <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/144">Fixed bug related to SearchCal integration: 
         always use the bright scenario as the faint scenario is not available for all instrumental bands</change>
