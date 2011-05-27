@@ -917,8 +917,7 @@
       <xsd:element name="configuration" type="FocalInstrumentConfigurationItem" minOccurs="0" maxOccurs="unbounded">
         <xsd:annotation>
           <xsd:documentation>
-              The list of configuration for the focal instrument. (optional)
-              If this list is undefined, any station can be used.
+              The list of configuration for the focal instrument
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
@@ -952,7 +951,7 @@
       <xsd:element name="channels" type="xsd:IDREFS" minOccurs="0">
         <xsd:annotation>
           <xsd:documentation>
-              The list of channels for this configuration (V1 V2) used by CHARA VEGA
+              The list of channels for this configuration (V1 V2) used by CHARA instruments (optional)
           </xsd:documentation>
           <xsd:appinfo>
             <jaxb:property>
@@ -964,7 +963,7 @@
       <xsd:element name="pops" type="xsd:IDREFS" minOccurs="0">
         <xsd:annotation>
           <xsd:documentation>
-              The list of PoPs for this configuration (PoP1 PoP2) used by CHARA VEGA
+              The fixed list of PoPs (uneditable) for this configuration (PoP1 PoP2) used by CHARA instruments (optional)
           </xsd:documentation>
           <xsd:appinfo>
             <jaxb:property>
