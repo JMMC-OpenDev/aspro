@@ -310,9 +310,9 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 6);
     jPanelMain.add(jLabelPops, gridBagConstraints);
 
-    jTextPoPs.setColumns(4);
+    jTextPoPs.setColumns(6);
     jTextPoPs.setToolTipText("<html>\ndefine a specific PoPs combination (PoP 1 to 5) by giving the list of PoP numbers<br/>\nin the same order than stations of the selected base line. For example:<ul>\n<li>VEGA_2T with baseline S1-S2<br/>'34' means PoP3 on S1 and PoP4 on S2</li>\n<li>MIRC (4T) with baseline S1-S2-E1-W2<br/>'1255' means PoP1 on S1, PoP2 on S2 and Pop5 on E1 and W2</li>\n</ul>\n<b>If you leave this field blank, ASPRO 2 will compute the 'best PoP' combination<br/>\nmaximizing the observability of your complete list of targets</b>\n</html>");
-    jTextPoPs.setMinimumSize(new java.awt.Dimension(40, 20));
+    jTextPoPs.setMinimumSize(new java.awt.Dimension(60, 20));
     jTextPoPs.setName("jTextPoPs"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
@@ -540,7 +540,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
    * @return number formatter
    */
   private static NumberFormatter getPopsFormatter() {
-    final NumberFormatter nf = new NumberFormatter(new DecimalFormat("####")) {
+    final NumberFormatter nf = new NumberFormatter(new DecimalFormat("######")) {
 
       /** default serial UID for Serializable interface */
       private static final long serialVersionUID = 1;
