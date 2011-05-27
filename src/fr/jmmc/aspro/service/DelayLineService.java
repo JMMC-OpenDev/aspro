@@ -24,6 +24,8 @@ public class DelayLineService {
   /** Class logger */
   private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
+  /** a list containing a single full range (-12; +12) */
+  private static final List<Range> FULL_RANGE_LIST = Arrays.asList(new Range(AsproConstants.HA_MIN, AsproConstants.HA_MAX));
 
   /**
    * Forbidden contructor
@@ -44,10 +46,12 @@ public class DelayLineService {
    * @return intervals (hour angles)
    */
   public static List<List<Range>> findHAIntervals(final double dec, final List<BaseLine> baseLines, final List<Range> wRanges) {
+    final double cosDec = Math.cos(dec);
+    final double sinDec = Math.sin(dec);
 
     final int size = baseLines.size();
 
-    final List<List<Range>> rangesBL = new ArrayList<List<Range>>();
+    final List<List<Range>> rangesBL = new ArrayList<List<Range>>(size);
 
     //List<Range>
     BaseLine bl;
@@ -56,7 +60,7 @@ public class DelayLineService {
       bl = baseLines.get(i);
       wRange = wRanges.get(i);
 
-      rangesBL.add(findHAIntervalsForBaseLine(dec, bl, wRange));
+      rangesBL.add(findHAIntervalsForBaseLine(cosDec, sinDec, bl, wRange));
     }
 
     return rangesBL;
@@ -69,19 +73,20 @@ public class DelayLineService {
    *
    * see astro_delayline.DELAYS_INTERVAL(WMIN,WMAX,D,X,Y,Z,HLIST,N)
    *
-   * @param dec target declination (rad)
+   * @param cosDec cosinus of target declination
+   * @param sinDec sinus of target declination
    * @param baseLine base line
    * @param wRange [wMin - wMax] range
    * @return intervals (hour angles) in dec hours.
    */
-  public static List<Range> findHAIntervalsForBaseLine(final double dec, final BaseLine baseLine, final Range wRange) {
+  public static List<Range> findHAIntervalsForBaseLine(final double cosDec, final double sinDec, final BaseLine baseLine, final Range wRange) {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("baseLine : " + baseLine);
       logger.fine("W range  : " + wRange);
     }
 
     // First check the W limits :
-    final double[] wExtrema = findWExtrema(dec, baseLine);
+    final double[] wExtrema = findWExtrema(cosDec, sinDec, baseLine);
 
     if (wExtrema == null) {
       // no solution :
@@ -110,7 +115,7 @@ public class DelayLineService {
       if (logger.isLoggable(Level.FINE)) {
         logger.fine("W inside range : " + baseLine.getName() + " : " + wRange);
       }
-      return Arrays.asList(new Range(AsproConstants.HA_MIN, AsproConstants.HA_MAX));
+      return FULL_RANGE_LIST;
     }
 
     double[] haValues;
@@ -122,7 +127,7 @@ public class DelayLineService {
     haList.add(-Math.PI);
     haList.add(Math.PI);
 
-    haValues = solveDelays(dec, baseLine, wMin);
+    haValues = solveDelays(cosDec, sinDec, baseLine, wMin);
 
     if (haValues != null) {
       for (double ha : haValues) {
@@ -130,7 +135,7 @@ public class DelayLineService {
       }
     }
 
-    haValues = solveDelays(dec, baseLine, wMax);
+    haValues = solveDelays(cosDec, sinDec, baseLine, wMax);
 
     if (haValues != null) {
       for (double ha : haValues) {
@@ -160,7 +165,7 @@ public class DelayLineService {
 
       ha = (ha1 + ha2) / 2d;
 
-      w = CalcUVW.computeW(dec, baseLine, ha);
+      w = CalcUVW.computeW(cosDec, sinDec, baseLine, ha);
 
       if (logger.isLoggable(Level.FINE)) {
         logger.fine("W(" + ha + ") = " + w);
@@ -214,26 +219,22 @@ public class DelayLineService {
    * and H = 2 ATAN(t)
    * -----------------------------------------------------------------------
    *
-   * @param dec target declination (rad)
+   * @param cosDec cosinus of target declination
+   * @param sinDec sinus of target declination
    * @param baseLine used base line
    * @param wThrow w limit value (throw)
    * @return ha solutions (rad) in [-PI;PI] range (0 or 2 solutions)
    */
-  private static double[] solveDelays(final double dec, final BaseLine baseLine, final double wThrow) {
-    // output :
-    double[] haValues = null;
-
+  private static double[] solveDelays(final double cosDec, final double sinDec, final BaseLine baseLine, final double wThrow) {
     // w=cos(D)(cos(H)*X-sin(H)*Y)+sin(D)*Z
-    final double cosDec = Math.cos(dec);
-    final double sinDec = Math.sin(dec);
 
     if (cosDec == 0d) {
       final double w = sinDec * baseLine.getZ();
       if (w == wThrow) {
-        haValues = new double[]{-Math.PI, Math.PI};
+        return new double[]{-Math.PI, Math.PI};
       } else {
         // impossible case : sinDec = 1 <=> cosDec = 0 !
-        haValues = null;
+        return null;
       }
     } else {
       final double coeff = (wThrow - sinDec * baseLine.getZ()) / cosDec;
@@ -241,14 +242,12 @@ public class DelayLineService {
       // A = (C + X)
       final double a = coeff + baseLine.getX();
       // B = (2 Y)
-      final double b = 2 * baseLine.getY();
+      final double b = 2d * baseLine.getY();
       // C = (C - X)
       final double c = coeff - baseLine.getX();
 
-      haValues = solveWEquation(a, b, c);
+      return solveWEquation(a, b, c);
     }
-
-    return haValues;
   }
 
   /**
@@ -268,18 +267,16 @@ public class DelayLineService {
    *  and H = 2 ATAN(t)
    * -----------------------------------------------------------------------
    * 
-   * @param dec target declination (rad)
+   * @param cosDec cosinus of target declination
+   * @param sinDec sinus of target declination
    * @param baseLine used base line
    * @return 2 W extrema or null
    */
-  private static double[] findWExtrema(final double dec, final BaseLine baseLine) {
-    // output :
-    double[] wValues = null;
-
+  private static double[] findWExtrema(final double cosDec, final double sinDec, final BaseLine baseLine) {
     // A = Y
     final double a = baseLine.getY();
     // B = (2 Y)
-    final double b = - 2 * baseLine.getX();
+    final double b = -2d * baseLine.getX();
     // C = (C - X)
     final double c = -baseLine.getY();
 
@@ -289,15 +286,13 @@ public class DelayLineService {
       // 2 solutions :
       // w=cos(D)(cos(H)*X-sin(H)*Y)+sin(D)*Z
 
-      wValues = new double[2];
-
-      for (int i = 0; i < 2; i++) {
-        wValues[i] = CalcUVW.computeW(dec, baseLine, haValues[i]);
-      }
-
+      return new double[]{
+        CalcUVW.computeW(cosDec, sinDec, baseLine, haValues[0]),
+        CalcUVW.computeW(cosDec, sinDec, baseLine, haValues[1])
+      };
     }
 
-    return wValues;
+    return null;
   }
 
   /**
@@ -327,22 +322,22 @@ public class DelayLineService {
       final double ha0 = Math.atan(-c / b);
       h0 = new double[]{ha0, ha0};
     } else {
-      final double disc = b * b - 4 * a * c;
-      if (disc <= 0) {
+      final double disc = b * b - 4d * a * c;
+      if (disc <= 0d) {
         // no solution or only 1 point so reject it
         return null;
       }
       // 2 solutions :
       final double square = Math.sqrt(disc);
-      h0 = new double[]{Math.atan2(-b - square, 2 * a), Math.atan2(-b + square, 2 * a)};
+      h0 = new double[]{Math.atan2(-b - square, 2d * a), Math.atan2(-b + square, 2d * a)};
     }
 
     for (int i = 0; i < 2; i++) {
-      h0[i] *= 2;
+      h0[i] *= 2d;
       if (h0[i] > Math.PI) {
-        h0[i] -= 2 * Math.PI;
+        h0[i] -= 2d * Math.PI;
       } else if (h0[i] < -Math.PI) {
-        h0[i] += 2 * Math.PI;
+        h0[i] += 2d * Math.PI;
       }
     }
     // arrange (useful for findWExtrema method) :

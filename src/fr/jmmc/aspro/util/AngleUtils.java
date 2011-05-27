@@ -11,6 +11,8 @@ public final class AngleUtils {
 
   /** degrees to hour angle = 15 */
   public final static double HA_TO_DEG = 15d;
+  /** radian to hour angle */
+  public final static double RAD_TO_HOUR = 180d / Math.PI / HA_TO_DEG;
 
   /**
    * Forbidden constructor
@@ -25,7 +27,8 @@ public final class AngleUtils {
    * @return angle in decimal hours
    */
   public static double rad2hours(final double angrad) {
-    return Math.toDegrees(angrad) / HA_TO_DEG;
+//    return Math.toDegrees(angrad) / HA_TO_DEG;
+    return angrad * RAD_TO_HOUR;    
   }
 
   /**

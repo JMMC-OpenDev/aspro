@@ -973,6 +973,8 @@ public final class ObservabilityService {
    * @return intervals (hour angles) or null if thread interrupted
    */
   private List<PopObservabilityData> getPopObservabilityData(final String targetName, final double dec, final List<Range> rangesTarget) {
+    final double cosDec = Math.cos(dec);
+    final double sinDec = Math.sin(dec);
 
     // For all PoP combinations : find the HA interval merged with the HA Rise/set interval
     // list of observability data associated to a pop combination :
@@ -1028,7 +1030,7 @@ public final class ObservabilityService {
           return null;
         }
 
-        ranges = DelayLineService.findHAIntervalsForBaseLine(dec, bl, wRangeWithOffset);
+        ranges = DelayLineService.findHAIntervalsForBaseLine(cosDec, sinDec, bl, wRangeWithOffset);
 
         if (ranges.isEmpty()) {
           // this base line is incompatible with that W range :
@@ -1433,7 +1435,7 @@ public final class ObservabilityService {
    */
   private double getPopOpticalLength(final Station station, final Pop pop) throws IllegalStateException {
     for (PopLink pl : station.getPopLinks()) {
-      if (pl.getPop().equals(pop)) {
+      if (pl.getPop() == pop) {
         return pl.getOpticalLength();
       }
     }
