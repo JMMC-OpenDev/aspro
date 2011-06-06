@@ -1097,13 +1097,9 @@
       <!-- configuration: The list of configuration for the focal instrument -->
       <configuration>
         <!-- stations: The list of stations for this configuration (U1 U2 U4) -->
-        <stations>S1 S2 E1 E2 W1 W2</stations>
+        <stations>S1 S2 W1 W2 E1 E2</stations>
         <!-- channels: The list of channels for this configuration (V1 V2) used by CHARA instruments -->
-        <channels>V1 V2 V3 V4 V5 V6</channels>
-        <!-- 
-          The fixed list of PoPs (uneditable) for this configuration (PoP1 PoP2) used by CHARA instruments (optional)
-          <pops>PoP1 PoP2 PoP3 PoP4 PoP5 PoP5</pops>
-        -->
+        <channels>V1 V2 V3 V4 V6 V5</channels>
       </configuration>
     </instrument>
 
