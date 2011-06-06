@@ -153,7 +153,8 @@ public class DelayLineService {
 
     final int size = haList.size() - 1;
     // output :
-    final List<Range> ranges = new ArrayList<Range>(size);
+    // size / 2 because only half intervals are inside [wMin; wMax]:
+    final List<Range> ranges = new ArrayList<Range>(haList.size() / 2);
 
     // Look if midpoints values are or not in the HMAX-HMIN interval
     // to find which intervals are correct :

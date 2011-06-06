@@ -4,7 +4,7 @@
 package fr.jmmc.aspro.model;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -241,16 +241,20 @@ public final class Range {
    * @return new list of ranges or null
    */
   public static List<Range> intersectRanges(final List<Range> ranges, final int nValid, final List<Range> results) {
+    final int len = ranges.size() * 2;
+    
     // table of start/end time :
-    final List<RangeLimit> limits = new ArrayList<RangeLimit>(ranges.size() * 2);
+    final RangeLimit[] limits = new RangeLimit[len];
+
+    int i = 0;
 
     for (Range range : ranges) {
-      limits.add(new RangeLimit(range.getMin(), true));
-      limits.add(new RangeLimit(range.getMax(), false));
+      limits[i++] = new RangeLimit(range.getMin(), true);
+      limits[i++] = new RangeLimit(range.getMax(), false);
     }
 
     // sort the array by increasing time :
-    Collections.sort(limits);
+    Arrays.sort(limits);
 
     //  Explore range. When the running sum of flag is equal to the
     //  number nValid, we are in a valid range
@@ -258,12 +262,10 @@ public final class Range {
     List<Range> mRanges = results;
 
     int s = 0;
-    RangeLimit limit;
-    for (int i = 0, size = limits.size(); i < size; i++) {
-      limit = limits.get(i);
+    for (i = 0; i < len; i++) {
 
       // sum of flags :
-      if (limit.isFlag()) {
+      if (limits[i].flag) {
         s++;
       } else {
         s--;
@@ -271,10 +273,10 @@ public final class Range {
 
       if (s == nValid) {
         if (mRanges == null) {
-          // lazy instanciation :
-          mRanges = new ArrayList<Range>();
+          // lazy instanciation (statically 1 range only) :
+          mRanges = new ArrayList<Range>(1);
         }
-        mRanges.add(new Range(limit.getPosition(), limits.get(i + 1).getPosition()));
+        mRanges.add(new Range(limits[i].position, limits[i + 1].position));
       }
     }
 
@@ -287,9 +289,9 @@ public final class Range {
   private static final class RangeLimit implements Comparable<RangeLimit> {
 
     /** position of the limit */
-    private final double position;
+    final double position;
     /** boolean value to indicate the start [true] or end of the initial range [false] */
-    private final boolean flag;
+    final boolean flag;
 
     /**
      * Constructor with given position and flag
@@ -299,22 +301,6 @@ public final class Range {
     protected RangeLimit(final double position, final boolean flag) {
       this.position = position;
       this.flag = flag;
-    }
-
-    /**
-     * Return the flag indicating a starting [true] or ending [false] range
-     * @return flag indicating a starting [true] or ending [false] range
-     */
-    public boolean isFlag() {
-      return flag;
-    }
-
-    /**
-     * Return the position of the limit
-     * @return position of the limit
-     */
-    public double getPosition() {
-      return position;
     }
 
     public int compareTo(final RangeLimit limit) {

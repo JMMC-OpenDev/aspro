@@ -207,7 +207,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     // allow zooming on targets only:
     this.chartPanel.setDomainZoomable(true);
     // date axis :
-    this.chartPanel.setRangeZoomable(false);
+    this.chartPanel.setRangeZoomable(true);
     // disable mouse wheel as it is already used when scrolling view:
     this.chartPanel.setMouseWheelEnabled(false);
 
