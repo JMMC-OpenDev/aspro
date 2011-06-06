@@ -976,6 +976,9 @@ public final class ObservabilityService {
     final double cosDec = Math.cos(dec);
     final double sinDec = Math.sin(dec);
 
+    final int sizeCb = this.popCombinations.size();
+    final int sizeBL = this.baseLines.size();
+
     // For all PoP combinations : find the HA interval merged with the HA Rise/set interval
     // list of observability data associated to a pop combination :
     final List<PopObservabilityData> popDataList = new ArrayList<PopObservabilityData>();
@@ -984,7 +987,7 @@ public final class ObservabilityService {
     PopObservabilityData popData;
 
     // list of HA ranges for all base lines :
-    final List<List<Range>> rangesBL = new ArrayList<List<Range>>();
+    final List<List<Range>> rangesBL = new ArrayList<List<Range>>(sizeBL);
 
     // Current list of HA ranges for a base line :
     List<Range> ranges;
@@ -994,9 +997,6 @@ public final class ObservabilityService {
 
     // w range using the pop offset for a given base line :
     final Range wRangeWithOffset = new Range();
-
-    final int sizeCb = this.popCombinations.size();
-    final int sizeBL = this.baseLines.size();
 
     BaseLine bl;
     Range wRange;
