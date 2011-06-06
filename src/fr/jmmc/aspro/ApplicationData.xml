@@ -206,6 +206,8 @@
   <releasenotes>
     <release version="0.8.1">
       <prerelease version="0.8.1 beta 4">
+        <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/165">Allow zooming on the observability plot (targets and time range)</change>
+        <change>Few optimizations used to determine best PoPs (CHARA) in the observability computation</change>
         <change>Added MIRC_6T (preliminary support)</change>
       </prerelease>
       <prerelease version="0.8.1 beta 3">
