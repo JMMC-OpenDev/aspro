@@ -74,26 +74,49 @@ public final class ExportOBVLTIAction {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("process");
     }
+    if (targets.isEmpty()) {
+      return;
+    }
 
-    // TODO : avoid file chooser when multiple targets are given
-    for (Target target : targets) {
+    final boolean exportAll = targets.size() > 1;
 
-      File file = null;
+    File file = null;
 
-      final JFileChooser fileChooser = new JFileChooser();
+    final JFileChooser fileChooser = new JFileChooser();
+
+    if (this.getLastDir() != null) {
+      fileChooser.setCurrentDirectory(new File(this.getLastDir()));
+    }
+
+    if (exportAll) {
+      // select one directory:
+      fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+
+      fileChooser.setDialogTitle("Export targets as Observing Blocks");
+
+    } else {
+      // select one file:
+      fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
       fileChooser.setFileFilter(getFileFilter());
 
-      if (this.getLastDir() != null) {
-        fileChooser.setCurrentDirectory(new File(this.getLastDir()));
-      }
+      final Target target = targets.get(0);
 
       // default OB file name :
       fileChooser.setSelectedFile(new File(fileChooser.getCurrentDirectory(), ExportOBVLTI.generateOBFileName(target)));
 
       fileChooser.setDialogTitle("Export the target [" + target.getName() + "] as an Observing Block");
+    }
 
-      final int returnVal = fileChooser.showSaveDialog(null);
-      if (returnVal == JFileChooser.APPROVE_OPTION) {
+    final int returnVal = fileChooser.showSaveDialog(null);
+
+    if (returnVal == JFileChooser.APPROVE_OPTION) {
+
+      if (exportAll) {
+        file = fileChooser.getSelectedFile();
+        if (!file.exists()) {
+          file.mkdirs();
+        }
+      } else {
         file = checkFileExtension(fileChooser.getSelectedFile());
 
         if (file.exists()) {
@@ -101,26 +124,50 @@ public final class ExportOBVLTIAction {
             file = null;
           }
         }
-      } else {
-        file = null;
       }
+    } else {
+      file = null;
+    }
 
-      // If a file was defined (No cancel in the dialog)
-      if (file != null) {
-        this.setLastDir(file.getParent());
+    // If a file was defined (No cancel in the dialog)
+    if (file != null) {
+      this.setLastDir((exportAll) ? file.getPath() : file.getParent());
 
-        final File mainFile = file;
-        try {
+      // report buffer :
+      final StringBuilder sb = new StringBuilder(1024);
 
-          // use main observation :
-          final ObservationSetting observation = ObservationManager.getInstance().getMainObservation();
+      // use main observation :
+      final ObservationSetting observation = ObservationManager.getInstance().getMainObservation();
+
+      try {
+        
+        if (exportAll) {
 
           // report buffer :
-          final StringBuilder sb = new StringBuilder(128);
+          sb.append("Export Observing Blocks for all targets");
+          sb.append(" in folder :\n").append(getLastDir()).append("\n\n");
+
+          for (Target target : targets) {
+
+            file = new File(getLastDir(), ExportOBVLTI.generateOBFileName(target));
+            
+            ExportOBVLTI.process(file, observation, target);
+
+            sb.append(file.getName()).append("\n");
+          }
+
+          StatusBar.show("Observing blocks saved in " + getLastDir() + ".");          
+          
+        } else {
+          final File mainFile = file;
+          final Target target = targets.get(0);
+           
+          // report buffer :
           sb.append("Export Observing Blocks for target [").append(target.getName());
           sb.append("] in folder :\n").append(getLastDir()).append("\n\n");
 
           ExportOBVLTI.process(mainFile, observation, target);
+          
           sb.append(mainFile.getName()).append("\n");
 
           // Generate all calibrator OBs for a science target :
@@ -143,17 +190,16 @@ public final class ExportOBVLTIAction {
           }
 
           StatusBar.show(mainFile.getName() + " created.");
-
-          // display report message :
-          MessagePane.showMessage(sb.toString());
-
-          // PoP up to validate OB file against ESO CfP :
-          DismissableMessagePane.show(ESO_WARNING, Preferences.getInstance(), "ESO_OB_WARNING");
-
-        } catch (IOException ioe) {
-          MessagePane.showErrorMessage(
-                  "Could not export to file : " + file.getAbsolutePath(), ioe);
         }
+
+        // display report message :
+        MessagePane.showMessage(sb.toString());
+
+        // PoP up to validate OB file against ESO CfP :
+        DismissableMessagePane.show(ESO_WARNING, Preferences.getInstance(), "ESO_OB_WARNING");
+
+      } catch (IOException ioe) {
+        MessagePane.showErrorMessage("Could not export to file : " + file.getAbsolutePath(), ioe);
       }
     }
   }

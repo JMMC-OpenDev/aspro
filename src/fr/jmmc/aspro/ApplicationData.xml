@@ -7,7 +7,7 @@
 
 <ApplicationData link="http://www.jmmc.fr/aspro2">
 
-  <program name="Aspro2" version="0.8.1 beta 4"/>
+  <program name="Aspro2" version="0.8.1 beta 5"/>
 
   <compilation date="27/05/2011" compiler="JDK 1.5.0_16"/>
 
@@ -182,10 +182,8 @@
       <menu/> <!-- menu separator -->
       <menu label="Export to an Observing Block" classpath="fr.jmmc.aspro.gui.action.ExportOBAction" action="exportOB" accelerator="B"
             description="Export your observation of the selected target to an Observing block"/>
-<!--
       <menu label="Export targets to Observing Blocks" classpath="fr.jmmc.aspro.gui.action.ExportAllOBAction" action="exportAllOB"
             description="Export your complete observation to Observing blocks"/>
-  -->            
       <menu/> <!-- menu separator -->
       <menu label="Export plot to PDF" classpath="fr.jmmc.aspro.gui.action.ExportPDFAction" action="exportPDF" accelerator="P"
             icon="/fr/jmmc/aspro/gui/icons/icon_pdf.gif" description="Export the current plot to a PDF document"/>
@@ -205,6 +203,9 @@
 
   <releasenotes>
     <release version="0.8.1">
+      <prerelease version="0.8.1 beta 5">
+        <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/78">Added 'Export targets to Observing blocks' in the File menu to export all targets at once (VLTI)</change>
+      </prerelease>
       <prerelease version="0.8.1 beta 4">
         <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/165">Allow zooming on the observability plot (targets and time range)</change>
         <change>Few optimizations used to determine best PoPs (CHARA) in the observability computation</change>
