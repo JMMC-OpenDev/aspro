@@ -703,11 +703,11 @@
       <ron>10</ron>
       <detectorSaturation>50000</detectorSaturation>
       <instrumentVisibility>0.9</instrumentVisibility>
-      <instrumentVisibilityBias>2</instrumentVisibilityBias>
-      <instrumentPhaseBias>2</instrumentPhaseBias>
-      <nbPixInterferometry>80</nbPixInterferometry>
-      <nbPixPhotometry>0</nbPixPhotometry>
-      <fracFluxInInterferometry>1</fracFluxInInterferometry>
+      <instrumentVisibilityBias>1</instrumentVisibilityBias>
+      <instrumentPhaseBias>1</instrumentPhaseBias>
+      <nbPixInterferometry>126</nbPixInterferometry>
+      <nbPixPhotometry>18</nbPixPhotometry>
+      <fracFluxInInterferometry>0.75</fracFluxInInterferometry>
 
       <mode>
         <name>Low_H</name>
@@ -800,15 +800,15 @@
         <!-- instrumentVisibility: The instrumental visibility (multiplicative) [0.0 - 1.0] (typically 0.9) -->
         <instrumentVisibility>0.9</instrumentVisibility>
         <!-- instrumentVisibilityBias: The Typical Visibility Bias (percent of V) (typically 1) -->
-        <instrumentVisibilityBias>2</instrumentVisibilityBias>
+        <instrumentVisibilityBias>1</instrumentVisibilityBias>
         <!-- instrumentPhaseBias: The Typical Phase/Phase Closure Bias in degrees (typically 1) -->
-        <instrumentPhaseBias>2</instrumentPhaseBias>
+        <instrumentPhaseBias>1</instrumentPhaseBias>
         <!-- nbPixInterferometry: The number of pixels to code all fringes together (interferometric channel) -->
-        <nbPixInterferometry>80</nbPixInterferometry>
+        <nbPixInterferometry>126</nbPixInterferometry>
         <!-- nbPixPhotometry: The number of pixels to code each photometric channel -->
-        <nbPixPhotometry>0</nbPixPhotometry>
+        <nbPixPhotometry>18</nbPixPhotometry>
         <!-- fracFluxInInterferometry: The fraction of flux going into interferometric channel (typically 0.9) -->
-        <fracFluxInInterferometry>1</fracFluxInInterferometry>
+        <fracFluxInInterferometry>0.75</fracFluxInInterferometry>
 
       <!-- 
         Instrument predefined modes :
