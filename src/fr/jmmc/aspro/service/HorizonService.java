@@ -28,7 +28,7 @@ public final class HorizonService {
 
   /* members */
   /** cached horizon profiles : low memory impact */
-  private final Map<String, Profile> cachedProfiles = new HashMap<String, Profile>();
+  private final Map<String, Profile> cachedProfiles = new HashMap<String, Profile>(128);
 
   /**
    * Return the singleton

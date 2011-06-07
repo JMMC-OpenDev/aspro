@@ -1103,13 +1103,12 @@ public final class ObservabilityService {
 
       for (final Profile p : profiles) {
         if (!hs.checkProfile(p, azEl.getAzimuth(), azEl.getElevation())) {
-          /*
-          if (logger.isLoggable(Level.FINE)) {
-          logger.fine("Target hidden by horizon profile = " + p.getName() + " [" +
-          azEl.getAzimuth() + ", " + azEl.getElevation() + "]");
-          }
-           */
           visible = false;
+
+//          if (logger.isLoggable(Level.FINE)) {
+//            logger.fine("Target hidden by horizon profile = " + p.getName() + " [" + azEl.getAzimuth() + ", " + azEl.getElevation() + "]");
+//          }
+
           break;
         }
       }
