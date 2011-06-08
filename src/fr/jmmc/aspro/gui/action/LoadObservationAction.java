@@ -3,11 +3,14 @@
  ******************************************************************************/
 package fr.jmmc.aspro.gui.action;
 
+import fr.jmmc.aspro.FilePreferences;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.mcs.gui.MessagePane;
 import fr.jmmc.mcs.gui.StatusBar;
 import fr.jmmc.mcs.util.ActionRegistrar;
 import fr.jmmc.mcs.util.FileUtils;
+import fr.jmmc.mcs.util.MimeType;
+import fr.jmmc.mcs.util.RegisteredAction;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
@@ -18,7 +21,7 @@ import javax.swing.JFileChooser;
  * Open observation settings action
  * @author bourgesl
  */
-public class LoadObservationAction extends ObservationFileAction {
+public final class LoadObservationAction extends RegisteredAction {
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
@@ -28,6 +31,8 @@ public class LoadObservationAction extends ObservationFileAction {
   public final static String actionName = "loadObservation";
   /** Class logger */
   private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(className);
+  /** AsproX MimeType */
+  private final static MimeType mimeType = MimeType.ASPRO_OBSERVATION;
 
   /**
    * Public constructor that automatically register the action in RegisteredAction.
@@ -55,11 +60,8 @@ public class LoadObservationAction extends ObservationFileAction {
     } else {
 
       final JFileChooser fileChooser = new JFileChooser();
-      fileChooser.setFileFilter(getFileFilter());
-
-      if (this.getLastDir() != null) {
-        fileChooser.setCurrentDirectory(new File(this.getLastDir()));
-      }
+      fileChooser.setFileFilter(mimeType.getFileFilter());
+      fileChooser.setCurrentDirectory(FilePreferences.getInstance().getDirectoryFile(mimeType));
 
       fileChooser.setDialogTitle("Load observation settings");
 
@@ -73,7 +75,7 @@ public class LoadObservationAction extends ObservationFileAction {
 
     // If a file was defined (No cancel in the dialog)
     if (file != null) {
-      this.setLastDir(file.getParent());
+      FilePreferences.getInstance().setDirectory(mimeType, file.getParent());
 
       boolean exist = file.exists();
 
@@ -81,7 +83,7 @@ public class LoadObservationAction extends ObservationFileAction {
       if (!exist) {
         if (FileUtils.getExtension(file) == null) {
           // try using the same file name with extension :
-          file = checkFileExtension(file);
+          file = mimeType.checkFileExtension(file);
           // check again if that file exists :
           exist = file.exists();
         }
@@ -94,15 +96,12 @@ public class LoadObservationAction extends ObservationFileAction {
           StatusBar.show("file loaded : " + file.getName());
 
         } catch (IllegalArgumentException iae) {
-          MessagePane.showErrorMessage(
-                  "Invalid observation file : " + file.getAbsolutePath(), iae);
+          MessagePane.showErrorMessage("Invalid observation file : " + file.getAbsolutePath(), iae);
         } catch (IOException ioe) {
-          MessagePane.showErrorMessage(
-                  "Could not load the file : " + file.getAbsolutePath(), ioe);
+          MessagePane.showErrorMessage("Could not load the file : " + file.getAbsolutePath(), ioe);
         }
       } else {
-        MessagePane.showErrorMessage(
-                "Could not load the file : " + file.getAbsolutePath());
+        MessagePane.showErrorMessage("Could not load the file : " + file.getAbsolutePath());
       }
     }
   }

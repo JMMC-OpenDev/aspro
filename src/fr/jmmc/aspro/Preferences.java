@@ -50,7 +50,7 @@ public final class Preferences extends fr.jmmc.mcs.util.Preferences {
    *
    * @return the singleton preference instance
    */
-  public final synchronized static Preferences getInstance() {
+  public synchronized static Preferences getInstance() {
     // Build new reference if singleton does not already exist
     // or return previous reference
     if (_singleton == null) {

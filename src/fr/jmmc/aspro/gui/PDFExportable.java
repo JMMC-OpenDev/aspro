@@ -4,6 +4,7 @@
 package fr.jmmc.aspro.gui;
 
 import fr.jmmc.aspro.gui.chart.PDFOptions;
+import fr.jmmc.mcs.util.MimeType;
 import org.jfree.chart.JFreeChart;
 
 /**
@@ -12,7 +13,7 @@ import org.jfree.chart.JFreeChart;
  */
 public interface PDFExportable {
   /** PDF extension */
-  public static final String PDF_EXT = "pdf";
+  public static final String PDF_EXT = MimeType.PDF.getExtension();
 
   /**
    * Export the chart component as a PDF document.

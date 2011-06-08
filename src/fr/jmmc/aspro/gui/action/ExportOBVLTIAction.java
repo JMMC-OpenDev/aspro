@@ -3,6 +3,7 @@
  ******************************************************************************/
 package fr.jmmc.aspro.gui.action;
 
+import fr.jmmc.aspro.FilePreferences;
 import fr.jmmc.aspro.Preferences;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
@@ -13,14 +14,12 @@ import fr.jmmc.aspro.ob.ExportOBVLTI;
 import fr.jmmc.mcs.gui.DismissableMessagePane;
 import fr.jmmc.mcs.gui.MessagePane;
 import fr.jmmc.mcs.gui.StatusBar;
-import fr.jmmc.mcs.util.FileFilterRepository;
-import fr.jmmc.mcs.util.FileUtils;
+import fr.jmmc.mcs.util.MimeType;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.logging.Level;
 import javax.swing.JFileChooser;
-import javax.swing.filechooser.FileFilter;
 
 /**
  * This class implements the OB generation for VLTI instruments.
@@ -35,10 +34,8 @@ public final class ExportOBVLTIAction {
   public final static String className = "fr.jmmc.aspro.gui.action.ExportOBVLTIAction";
   /** Class logger */
   private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(className);
-  /** OBX mime type */
-  public static final String OBX_MIME_TYPE = "application/obx";
-  /** OBX extension */
-  public static final String OBX_EXT = "obx";
+  /** OBX MimeType */
+  private final static MimeType mimeType = MimeType.OBX;
   /** Eso warning message */
   public static final String ESO_WARNING = "Please check that your observing blocks \n conform to the current ESO Call for Proposal \n (object magnitudes, instrument limits ...)";
   /** action singleton */
@@ -52,17 +49,11 @@ public final class ExportOBVLTIAction {
     return instance;
   }
 
-  /* members */
-  /** last directory used to save a file; by default = user home */
-  private String lastDir = System.getProperty("user.home");
-
   /**
    * Forbidden Constructor
    */
   private ExportOBVLTIAction() {
     super();
-
-    FileFilterRepository.getInstance().put(OBX_MIME_TYPE, OBX_EXT, "Observing Block (" + OBX_EXT + ")");
   }
 
   /**
@@ -83,10 +74,7 @@ public final class ExportOBVLTIAction {
     File file = null;
 
     final JFileChooser fileChooser = new JFileChooser();
-
-    if (this.getLastDir() != null) {
-      fileChooser.setCurrentDirectory(new File(this.getLastDir()));
-    }
+    fileChooser.setCurrentDirectory(FilePreferences.getInstance().getDirectoryFile(mimeType));
 
     if (exportAll) {
       // select one directory:
@@ -97,7 +85,7 @@ public final class ExportOBVLTIAction {
     } else {
       // select one file:
       fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-      fileChooser.setFileFilter(getFileFilter());
+      fileChooser.setFileFilter(mimeType.getFileFilter());
 
       final Target target = targets.get(0);
 
@@ -117,7 +105,7 @@ public final class ExportOBVLTIAction {
           file.mkdirs();
         }
       } else {
-        file = checkFileExtension(fileChooser.getSelectedFile());
+        file = mimeType.checkFileExtension(fileChooser.getSelectedFile());
 
         if (file.exists()) {
           if (!MessagePane.showConfirmFileOverwrite(file.getName())) {
@@ -131,7 +119,9 @@ public final class ExportOBVLTIAction {
 
     // If a file was defined (No cancel in the dialog)
     if (file != null) {
-      this.setLastDir((exportAll) ? file.getPath() : file.getParent());
+      final String directory = (exportAll) ? file.getPath() : file.getParent();
+      
+      FilePreferences.getInstance().setDirectory(mimeType, directory);
 
       // report buffer :
       final StringBuilder sb = new StringBuilder(1024);
@@ -145,18 +135,18 @@ public final class ExportOBVLTIAction {
 
           // report buffer :
           sb.append("Export Observing Blocks for all targets");
-          sb.append(" in folder :\n").append(getLastDir()).append("\n\n");
+          sb.append(" in folder :\n").append(directory).append("\n\n");
 
           for (Target target : targets) {
 
-            file = new File(getLastDir(), ExportOBVLTI.generateOBFileName(target));
+            file = new File(directory, ExportOBVLTI.generateOBFileName(target));
             
             ExportOBVLTI.process(file, observation, target);
 
             sb.append(file.getName()).append("\n");
           }
 
-          StatusBar.show("Observing blocks saved in " + getLastDir() + ".");          
+          StatusBar.show("Observing blocks saved in " + directory + ".");          
           
         } else {
           final File mainFile = file;
@@ -164,7 +154,7 @@ public final class ExportOBVLTIAction {
            
           // report buffer :
           sb.append("Export Observing Blocks for target [").append(target.getName());
-          sb.append("] in folder :\n").append(getLastDir()).append("\n\n");
+          sb.append("] in folder :\n").append(directory).append("\n\n");
 
           ExportOBVLTI.process(mainFile, observation, target);
           
@@ -180,7 +170,7 @@ public final class ExportOBVLTIAction {
 
               if (!calibrators.isEmpty()) {
                 for (Target calibrator : calibrators) {
-                  file = new File(getLastDir(), ExportOBVLTI.generateOBFileName(calibrator));
+                  file = new File(directory, ExportOBVLTI.generateOBFileName(calibrator));
 
                   ExportOBVLTI.process(file, observation, calibrator);
                   sb.append(file.getName()).append("\n");
@@ -202,43 +192,5 @@ public final class ExportOBVLTIAction {
         MessagePane.showErrorMessage("Could not export to file : " + file.getAbsolutePath(), ioe);
       }
     }
-  }
-
-  /**
-   * Return the file filter
-   * @return file filter
-   */
-  protected FileFilter getFileFilter() {
-    return FileFilterRepository.get(OBX_MIME_TYPE);
-  }
-
-  /**
-   * Check if the given file has the correct extension. If not, return a new file with it
-   * @param file file to check
-   * @return given file or new file with the correct extension
-   */
-  protected File checkFileExtension(final File file) {
-    final String ext = FileUtils.getExtension(file);
-
-    if (!OBX_EXT.equals(ext)) {
-      return new File(file.getParentFile(), file.getName() + "." + OBX_EXT);
-    }
-    return file;
-  }
-
-  /**
-   * Return the last directory used
-   * @return last directory used
-   */
-  protected String getLastDir() {
-    return this.lastDir;
-  }
-
-  /**
-   * Define the last directory used
-   * @param lastDir new value
-   */
-  protected void setLastDir(String lastDir) {
-    this.lastDir = lastDir;
   }
 }

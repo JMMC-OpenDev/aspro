@@ -5,7 +5,6 @@ package fr.jmmc.aspro.ob;
 
 import edu.dartmouth.AstroSkyCalcObservation;
 import fr.jmmc.aspro.AsproConstants;
-import fr.jmmc.aspro.gui.action.ExportOBVLTIAction;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.Range;
 import fr.jmmc.aspro.model.observability.DateTimeInterval;
@@ -19,6 +18,8 @@ import fr.jmmc.aspro.model.oi.TargetConfiguration;
 import fr.jmmc.aspro.model.oi.TargetInformation;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.aspro.service.ObservabilityService;
+import fr.jmmc.mcs.util.FileUtils;
+import fr.jmmc.mcs.util.MimeType;
 import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
@@ -35,11 +36,8 @@ import javax.xml.datatype.XMLGregorianCalendar;
  */
 public class ExportOBVLTI {
 
-  /** Class Name */
-  private static final String className_ = "fr.jmmc.aspro.ob.ExportOBVLTI";
   /** Class logger */
-  protected static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
-          className_);
+  protected static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(ExportOBVLTI.class.getName());
   /** P2PP file prefix for science targets */
   public static final String OB_SCIENCE = "SCI";
   /** P2PP file prefix for calibrator targets */
@@ -109,7 +107,7 @@ public class ExportOBVLTI {
    * @throws IllegalArgumentException if the instrument is not supported (only AMBER/MIDI/VEGA)
    * @throws IOException if an I/O exception occured while writing the observing block
    */
-  public final static void process(final File file, final ObservationSetting observation, final Target target) throws IllegalStateException, IllegalArgumentException, IOException {
+  public static void process(final File file, final ObservationSetting observation, final Target target) throws IllegalStateException, IllegalArgumentException, IOException {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("process " + target.getName() + " to " + file);
     }
@@ -138,7 +136,7 @@ public class ExportOBVLTI {
    * @param target target to process
    * @return processed template
    */
-  protected final static String processCommon(final String template, final String fileName,
+  protected static String processCommon(final String template, final String fileName,
                                               final ObservationSetting observation, final Target target) {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("processCommon " + target.getName());
@@ -148,12 +146,9 @@ public class ExportOBVLTI {
     String document = template;
 
     // Set name :
-    String name = fileName;
     // remove obx extension :
-    int pos = name.lastIndexOf('.');
-    if (pos != -1) {
-      name = name.substring(0, pos);
-    }
+    String name = FileUtils.getFileNameWithoutExtension(fileName);
+    
     // maximum length :
     if (name.length() > 32) {
       name = name.substring(0, 31);
@@ -172,13 +167,7 @@ public class ExportOBVLTI {
         final List<Target> calibrators = targetInfo.getCalibrators();
         if (!calibrators.isEmpty()) {
           final Target firstCalibrator = calibrators.get(0);
-          calibratorOBFileName = generateOBFileName(firstCalibrator);
-
-          // remove obx extension :
-          pos = calibratorOBFileName.lastIndexOf('.');
-          if (pos != -1) {
-            calibratorOBFileName = calibratorOBFileName.substring(0, pos);
-          }
+          calibratorOBFileName = FileUtils.getFileNameWithoutExtension(generateOBFileName(firstCalibrator));
         }
       }
     }
@@ -229,9 +218,9 @@ public class ExportOBVLTI {
    * @param observation observation settings
    * @return base line
    */
-  public final static String getBaseLine(final ObservationSetting observation) {
+  private static String getBaseLine(final ObservationSetting observation) {
 
-    final StringBuilder sb = new StringBuilder();
+    final StringBuilder sb = new StringBuilder(16);
 
     for (Station s : observation.getInstrumentConfiguration().getStationList()) {
       sb.append(s.getName()).append('-');
@@ -248,7 +237,7 @@ public class ExportOBVLTI {
    * @param target target to process
    * @return processed template
    */
-  private final static String processDateTime(String doc, final ObservationSetting observation, final Target target) {
+  private static String processDateTime(String doc, final ObservationSetting observation, final Target target) {
 
     String document = doc;
     String lstTimeIntervals = "";
@@ -342,7 +331,7 @@ public class ExportOBVLTI {
    * @param dateIntervals LST intervals
    * @return String value
    */
-  private final static String convertLstRanges(final List<DateTimeInterval> dateIntervals) {
+  private static String convertLstRanges(final List<DateTimeInterval> dateIntervals) {
     final StringBuilder sb = new StringBuilder(32);
 
     final Calendar cal = new GregorianCalendar();
@@ -367,7 +356,7 @@ public class ExportOBVLTI {
    * @param sign +/- 1
    * @return seconds
    */
-  private final static int convertDateToSeconds(final Calendar cal, final int sign) {
+  private static int convertDateToSeconds(final Calendar cal, final int sign) {
 
     final int h = cal.get(Calendar.HOUR_OF_DAY);
     final int m = cal.get(Calendar.MINUTE);
@@ -380,7 +369,7 @@ public class ExportOBVLTI {
    * @param mag magnitude or null
    * @return magnitude value or -99 if the magnitude is null
    */
-  public final static double getMagnitude(final Double mag) {
+  public static double getMagnitude(final Double mag) {
     if (mag != null) {
       return mag.doubleValue();
     }
@@ -412,6 +401,6 @@ public class ExportOBVLTI {
     final String suffix = insMode.getName() + '_' + (useFT ? "FT" : "noFT");
     final String prefix = om.isCalibrator(target) ? OB_CALIBRATOR : OB_SCIENCE;
 
-    return observation.generateFileName(target.getName(), prefix, suffix, ExportOBVLTIAction.OBX_EXT);
+    return observation.generateFileName(target.getName(), prefix, suffix, MimeType.OBX.getExtension());
   }
 }
