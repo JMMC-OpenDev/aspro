@@ -4,10 +4,10 @@
 package fr.jmmc.aspro.gui.action;
 
 import fr.jmmc.aspro.AsproConstants;
+import fr.jmmc.aspro.FilePreferences;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.mcs.gui.MessagePane;
 import fr.jmmc.mcs.gui.StatusBar;
-import fr.jmmc.mcs.util.FileUtils;
 import fr.jmmc.mcs.util.MimeType;
 import fr.jmmc.oitools.model.OIArray;
 import fr.jmmc.oitools.model.OIFitsFile;
@@ -18,14 +18,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
 import javax.swing.JFileChooser;
-import javax.swing.filechooser.FileFilter;
 
 /**
  * This registered action represents a File Menu entry to export an OIFits file
  * containing the visibilities of the selected target.
  * @author bourgesl
  */
-public class ExportOIFitsAction extends WaitingTaskAction {
+public final class ExportOIFitsAction extends WaitingTaskAction {
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
@@ -35,9 +34,8 @@ public class ExportOIFitsAction extends WaitingTaskAction {
   public final static String actionName = "exportOIFits";
   /** Class logger */
   private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(className);
-  /* members */
-  /** last directory used to save a file; by default = user home */
-  private String lastDir = System.getProperty("user.home");
+  /** OIFits MimeType */
+  private final static MimeType mimeType = MimeType.OIFITS;
 
   /**
    * Public constructor that automatically register the action in RegisteredAction.
@@ -67,17 +65,12 @@ public class ExportOIFitsAction extends WaitingTaskAction {
       File file = null;
 
       final JFileChooser fileChooser = new JFileChooser();
-      fileChooser.setFileFilter(getFileFilter());
-
-      fileChooser.setSelectedFile(file);
+      fileChooser.setFileFilter(mimeType.getFileFilter());
 
       if (oiFitsFile.getAbsoluteFilePath() != null) {
         fileChooser.setSelectedFile(new File(oiFitsFile.getAbsoluteFilePath()));
       } else {
-        if (this.getLastDir() != null) {
-          fileChooser.setCurrentDirectory(new File(this.getLastDir()));
-        }
-
+        fileChooser.setCurrentDirectory(FilePreferences.getInstance().getDirectoryFile(mimeType));
         fileChooser.setSelectedFile(new File(fileChooser.getCurrentDirectory(), getDefaultFileName(oiFitsFile)));
       }
 
@@ -85,7 +78,7 @@ public class ExportOIFitsAction extends WaitingTaskAction {
 
       final int returnVal = fileChooser.showSaveDialog(null);
       if (returnVal == JFileChooser.APPROVE_OPTION) {
-        file = checkFileExtension(fileChooser.getSelectedFile());
+        file = mimeType.checkFileExtension(fileChooser.getSelectedFile());
 
         if (file.exists()) {
           if (!MessagePane.showConfirmFileOverwrite(file.getName())) {
@@ -98,7 +91,7 @@ public class ExportOIFitsAction extends WaitingTaskAction {
 
       // If a file was defined (No cancel in the dialog)
       if (file != null) {
-        this.setLastDir(file.getParent());
+        FilePreferences.getInstance().setDirectory(mimeType, file.getParent());
 
         try {
           OIFitsWriter.writeOIFits(file.getAbsolutePath(), oiFitsFile);
@@ -106,11 +99,9 @@ public class ExportOIFitsAction extends WaitingTaskAction {
           StatusBar.show(file.getName() + " created.");
 
         } catch (FitsException fe) {
-          MessagePane.showErrorMessage(
-                  "Could not export to file : " + file.getAbsolutePath(), fe);
+          MessagePane.showErrorMessage("Could not export to file : " + file.getAbsolutePath(), fe);
         } catch (IOException ioe) {
-          MessagePane.showErrorMessage(
-                  "Could not export to file : " + file.getAbsolutePath(), ioe);
+          MessagePane.showErrorMessage("Could not export to file : " + file.getAbsolutePath(), ioe);
         }
       }
     } else {
@@ -150,46 +141,8 @@ public class ExportOIFitsAction extends WaitingTaskAction {
 
     sb.append(dateObs);
 
-    sb.append('.').append(MimeType.OIFITS.getExtension());
+    sb.append('.').append(mimeType.getExtension());
 
     return sb.toString();
-  }
-
-  /**
-   * Return the file filter
-   * @return file filter
-   */
-  protected FileFilter getFileFilter() {
-    return MimeType.OIFITS.getFileFilter();
-  }
-
-  /**
-   * Check if the given file has the correct extension. If not, return a new file with it
-   * @param file file to check
-   * @return given file or new file with the correct extension
-   */
-  protected File checkFileExtension(final File file) {
-    final String ext = FileUtils.getExtension(file);
-    final String oifitsExt = MimeType.OIFITS.getExtension();
-    if (!oifitsExt.equals(ext)) {
-      return new File(file.getParentFile(), file.getName() + "." + oifitsExt);
-    }
-    return file;
-  }
-
-  /**
-   * Return the last directory used
-   * @return last directory used
-   */
-  protected String getLastDir() {
-    return this.lastDir;
-  }
-
-  /**
-   * Define the last directory used
-   * @param lastDir new value
-   */
-  protected void setLastDir(String lastDir) {
-    this.lastDir = lastDir;
   }
 }
