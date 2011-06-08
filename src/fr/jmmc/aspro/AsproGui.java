@@ -116,11 +116,9 @@ public final class AsproGui extends App {
         public void run() {
           prepareFrame(getFrame());
 
-          // Should open a file ?
-          if (!hasFileArgument()) {
-            // No, create a new observation and update the GUI :
-            ObservationManager.getInstance().reset();
-          }
+          // Create a new observation and update the GUI :
+          // even if opening a file in case the file can not be loaded:
+          ObservationManager.getInstance().reset();
         }
       });
 
