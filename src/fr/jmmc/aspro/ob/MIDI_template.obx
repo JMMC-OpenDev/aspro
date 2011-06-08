@@ -33,7 +33,7 @@ longDescription              ""
 IPVersion                    "345.09"
 instrument                   "MIDI"
 LineNumber                   "0"
-OBSERVATION.DESCRIPTION.NAME "No Name"
+OBSERVATION.DESCRIPTION.NAME "<OB-NAME>"
 
 
 ACQUISITION.TEMPLATE.NAME "MIDI_starintf_acq"

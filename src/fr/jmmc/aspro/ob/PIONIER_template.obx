@@ -34,7 +34,7 @@ longDescription              ""
 IPVersion                    "38.0"
 instrument                   "PIONIER"
 LineNumber                   "0"
-OBSERVATION.DESCRIPTION.NAME "No Name"
+OBSERVATION.DESCRIPTION.NAME "<OB-NAME>"
  
  
 ACQUISITION.TEMPLATE.NAME "PIONIER_acq"

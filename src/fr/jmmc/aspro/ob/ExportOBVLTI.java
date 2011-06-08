@@ -10,14 +10,19 @@ import fr.jmmc.aspro.model.Range;
 import fr.jmmc.aspro.model.observability.DateTimeInterval;
 import fr.jmmc.aspro.model.observability.ObservabilityData;
 import fr.jmmc.aspro.model.observability.StarData;
+import fr.jmmc.aspro.model.oi.AdaptiveOptics;
 import fr.jmmc.aspro.model.oi.FocalInstrumentMode;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
+import fr.jmmc.aspro.model.oi.SpectralBand;
 import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetConfiguration;
 import fr.jmmc.aspro.model.oi.TargetInformation;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
+import fr.jmmc.aspro.model.oi.Telescope;
+import fr.jmmc.aspro.model.util.SpectralBandUtils;
 import fr.jmmc.aspro.service.ObservabilityService;
+import fr.jmmc.mcs.astro.Band;
 import fr.jmmc.mcs.util.FileUtils;
 import fr.jmmc.mcs.util.MimeType;
 import java.io.File;
@@ -82,6 +87,8 @@ public class ExportOBVLTI {
   public final static String KEY_CATEGORY = "<CATEGORY>";
   /** keyword - calibrator OB (InstrumentComments) */
   public final static String KEY_CALIBRATOR_OB = "<CALIBRATOR-OB>";
+  /** keyword - OBSERVATION.DESCRIPTION.NAME */
+  public final static String KEY_OB_NAME = "<OB-NAME>";
 
   /* keywords common to AMBER and MIDI */
   /** keyword - xxx.HMAG */
@@ -194,6 +201,9 @@ public class ExportOBVLTI {
 
     document = document.replaceFirst(KEY_RA, raDec[0]);
     document = document.replaceFirst(KEY_DEC, raDec[1]);
+    
+    // --- OB NAME ---
+    document = processObservationName(document, observation, raDec, target);
 
     // PMRA / PMDEC (optional) converted to arcsec/year :
     document = document.replaceFirst(KEY_PM_RA,
@@ -326,6 +336,81 @@ public class ExportOBVLTI {
     return document;
   }
 
+
+  /**
+   * Process the Observation name :
+   * [RA DEC TargetName Hmag Vmag] = [HH:MM:SS (+/-)DD:MM:SS <NAME> <INS_BAND>=0.### <AO_BAND>=0.###]
+   * @param document OB document
+   * @param observation observation settings
+   * @param raDec formatted RA/DEC
+   * @param target target to use
+   * @return processed template
+   */
+  private static String processObservationName(String document, final ObservationSetting observation, 
+                                                           final String[] raDec, final Target target) {  
+    
+    // get instrument band :
+    final FocalInstrumentMode insMode = observation.getInstrumentConfiguration().getFocalInstrumentMode();
+    if (insMode == null) {
+      throw new IllegalStateException("the instrumentMode is empty !");
+    }
+
+    final double lambda = insMode.getWaveLength();
+
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("lambda = " + lambda);
+    }
+
+    final Band band = Band.findBand(lambda);
+    final SpectralBand insBand = SpectralBandUtils.findBand(band);
+
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("insBand = " + insBand);
+    }
+
+    // get AO band :
+    final List<Station> stations = observation.getInstrumentConfiguration().getStationList();
+
+    // All telescopes in a configuration have the same AO system :
+    final Telescope tel = stations.get(0).getTelescope();
+
+    // AO :
+    final AdaptiveOptics ao = tel.getAdaptiveOptics();
+
+    final SpectralBand aoBand = (ao != null) ? ao.getBand() : null;
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("aoBand = " + aoBand);
+    }
+
+    // extract instrument and AO fluxes :
+    final Double insMag = target.getFlux(insBand);
+    final Double aoMag = target.getFlux(aoBand);
+    
+    // Generate Observation Name :
+    final StringBuilder sb = new StringBuilder(32);
+    sb.append(raDec[0], 0, raDec[0].length() - 4).append(' ');
+    sb.append(raDec[1], 0, raDec[1].length() - 4).append(' ');
+    
+    sb.append(target.getName().replaceAll(AsproConstants.REGEXP_INVALID_TEXT_CHARS, "_"));
+    sb.append(' ');
+
+    sb.append(insBand.name()).append('=');
+    sb.append(df3.format(ExportOBVLTI.getMagnitude(insMag)));
+    sb.append(' ');
+
+    sb.append(aoBand.name()).append('=');
+    sb.append(df3.format(ExportOBVLTI.getMagnitude(aoMag)));
+
+    final String OBName = sb.toString();
+
+    // replace values :
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("ObservationName = " + OBName);
+    }
+
+    return document.replaceAll(KEY_OB_NAME, OBName);
+  }
+  
   /**
    * Convert LST date intervals to STTimeIntervals format i.e. 'date1_in_seconds:date2_in_seconds;...'
    * @param dateIntervals LST intervals
@@ -403,4 +488,5 @@ public class ExportOBVLTI {
 
     return observation.generateFileName(target.getName(), prefix, suffix, MimeType.OBX.getExtension());
   }
+          
 }

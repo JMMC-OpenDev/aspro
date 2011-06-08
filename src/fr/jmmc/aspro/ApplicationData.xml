@@ -7,9 +7,9 @@
 
 <ApplicationData link="http://www.jmmc.fr/aspro2">
 
-  <program name="Aspro2" version="0.8.1 beta 5"/>
+  <program name="Aspro2" version="0.8.1 beta 6"/>
 
-  <compilation date="27/05/2011" compiler="JDK 1.5.0_16"/>
+  <compilation date="08/06/2011" compiler="JDK 1.5.0_16"/>
 
   <text>
     <![CDATA[ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations
@@ -203,6 +203,11 @@
 
   <releasenotes>
     <release version="0.8.1">
+      <prerelease version="0.8.1 beta 6">
+        <change>Better File choosers : use the last used directory (per file type and saved in user preferences)</change>
+        <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/166">Filled "OBSERVATION.DESCRIPTION.NAME" in VLTI OBs to help P2PP users better navigate among targets</change>
+        <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/167">Changed OIFits file extension to '.fits'</change>
+      </prerelease>
       <prerelease version="0.8.1 beta 5">
         <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/78">Added 'Export targets to Observing blocks' in the File menu to export all targets at once (VLTI)</change>
       </prerelease>

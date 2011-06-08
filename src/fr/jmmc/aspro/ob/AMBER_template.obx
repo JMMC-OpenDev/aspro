@@ -34,7 +34,7 @@ longDescription              ""
 IPVersion                    "1107.09"
 instrument                   "AMBER"
 LineNumber                   "0"
-OBSERVATION.DESCRIPTION.NAME "No Name"
+OBSERVATION.DESCRIPTION.NAME "<OB-NAME>"
 
 
 ACQUISITION.TEMPLATE.NAME "AMBER_3Tstd_acq"
