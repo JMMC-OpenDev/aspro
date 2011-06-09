@@ -48,6 +48,8 @@ public class ExportOBVLTI {
   /** P2PP file prefix for calibrator targets */
   public static final String OB_CALIBRATOR = "CAL";
   /** double formatter for magnitudes */
+  protected final static NumberFormat df1 = new DecimalFormat("0.0");
+  /** double formatter for magnitudes */
   protected final static NumberFormat df2 = new DecimalFormat("0.##");
   /** double formatter for magnitudes */
   protected final static NumberFormat df3 = new DecimalFormat("0.000");
@@ -339,7 +341,7 @@ public class ExportOBVLTI {
 
   /**
    * Process the Observation name :
-   * [RA DEC TargetName Hmag Vmag] = [HH:MM:SS (+/-)DD:MM:SS <NAME> <INS_BAND>=0.### <AO_BAND>=0.###]
+   * [RA DEC Hmag Vmag SpecType TargetName] = [HHMM [+/-]DDMM <INS_BAND>=0.0 <AO_BAND>=0.0 <SPEC_TYPE> <NAME>]
    * @param document OB document
    * @param observation observation settings
    * @param raDec formatted RA/DEC
@@ -388,19 +390,24 @@ public class ExportOBVLTI {
     
     // Generate Observation Name :
     final StringBuilder sb = new StringBuilder(32);
-    sb.append(raDec[0], 0, raDec[0].length() - 4).append(' ');
-    sb.append(raDec[1], 0, raDec[1].length() - 4).append(' ');
+    // HHMM
+    sb.append(raDec[0], 0, 2).append(raDec[0], 3, 5).append(' ');
+    // [+/-]DDMM
+    sb.append(raDec[1], 0, 3).append(raDec[1], 4, 6).append(' ');
     
-    sb.append(target.getName().replaceAll(AsproConstants.REGEXP_INVALID_TEXT_CHARS, "_"));
-    sb.append(' ');
-
     sb.append(insBand.name()).append('=');
-    sb.append(df3.format(ExportOBVLTI.getMagnitude(insMag)));
+    sb.append(df1.format(ExportOBVLTI.getMagnitude(insMag)));
     sb.append(' ');
 
     sb.append(aoBand.name()).append('=');
-    sb.append(df3.format(ExportOBVLTI.getMagnitude(aoMag)));
+    sb.append(df1.format(ExportOBVLTI.getMagnitude(aoMag)));
 
+    sb.append(' ');
+    sb.append(target.getSPECTYP().replaceAll(" ", "_"));
+    
+    sb.append(' ');
+    sb.append(target.getName().replaceAll(AsproConstants.REGEXP_INVALID_TEXT_CHARS, "_"));
+    
     final String OBName = sb.toString();
 
     // replace values :
