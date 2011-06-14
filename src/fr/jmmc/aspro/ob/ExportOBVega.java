@@ -13,6 +13,7 @@ import fr.jmmc.aspro.model.observability.StarData;
 import fr.jmmc.aspro.model.oi.Channel;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Pop;
+import fr.jmmc.aspro.model.oi.SpectralBand;
 import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetConfiguration;
@@ -42,7 +43,7 @@ public class ExportOBVega {
   /** double formatter for magnitudes */
   protected final static NumberFormat df2 = new DecimalFormat("0.00");
   /** default value for undefined angular diameter = 99 */
-  public final static double UNDEFINED_DIAMETER = 99d;
+  public final static Double UNDEFINED_DIAMETER = Double.valueOf(99d);
   /** HD catalog identifier (Simbad) */
   public final static String HD_CATALOG = "HD";
 
@@ -225,7 +226,7 @@ public class ExportOBVega {
       sb.append(hdId.replace(" ", "")).append(SEPARATOR);
       // 5.Spectral Type (string)
       final String spectralType = (target.getSPECTYP() != null && target.getSPECTYP().length() > 0) ? target.getSPECTYP() : SEPARATOR;
-      sb.append(spectralType).append(SEPARATOR);
+      sb.append(spectralType.replaceAll(" ", "_")).append(SEPARATOR);
       // 6.V magnitude (float)
       sb.append(df2.format(getMagnitude(target.getFLUXV()))).append(SEPARATOR);
       // 7.J magnitude (float)
@@ -234,8 +235,17 @@ public class ExportOBVega {
       sb.append(df2.format(getMagnitude(target.getFLUXH()))).append(SEPARATOR);
       // 9.K magnitude (float)
       sb.append(df2.format(getMagnitude(target.getFLUXK()))).append(SEPARATOR);
+
       // 10.Angular diameter (float, mas)
-      sb.append(df2.format(UNDEFINED_DIAMETER)).append(SEPARATOR);
+      Double diameter = null;
+      if (isCalibrator) {
+        diameter = target.getDiameter(SpectralBand.V);
+      }
+      if (diameter == null) {
+        diameter = UNDEFINED_DIAMETER;
+      }
+      
+      sb.append(df2.format(diameter)).append(SEPARATOR);
 
       // convert RA/DEC :
       final String[] raDec = AstroSkyCalcObservation.toString(target.getRADeg(), 2, target.getDECDeg(), 1);

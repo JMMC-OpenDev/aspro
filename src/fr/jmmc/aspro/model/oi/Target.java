@@ -914,6 +914,33 @@ public class Target
   }
 
   /**
+   * Return the uniform disk diameter from calibrator informations (SearchCal):
+   * use first UD_<band>, then alternate diameters UD, LD, UDDK, DIA12 (in order of priority)
+   * @param band instrumental band
+   * @return uniform disk diameter in the given band or null if undefined
+   */
+  public final Double getDiameter(final SpectralBand band) {
+    final CalibratorInformations calInfos = getCalibratorInfos();
+    if (band != null && calInfos != null) {
+      // if UD_<band> diameter is missing, use other values ...
+      final Double udBand = calInfos.getUDDiameter(band);
+
+      if (udBand != null) {
+        return udBand;
+
+      } else {
+        // use alternate diameter UD, LD, UDDK, DIA12 (in order of priority) :
+        final BaseValue diam = getCalibratorInfos().getAlternateDiameter();
+
+        if (diam != null) {
+          return diam.getNumber();
+        }
+      }
+    }
+    return null;
+  }
+
+  /**
    * Return a deep "copy" of this instance
    * @return deep "copy" of this instance
    */
@@ -939,7 +966,7 @@ public class Target
    * @param models list of models to clone
    * @return cloned model list
    */
-  public static final List<Model> cloneModels(final List<Model> models) {
+  public static List<Model> cloneModels(final List<Model> models) {
     return fr.jmmc.mcs.model.CloneableObject.deepCopyList(models);
   }
 
@@ -949,7 +976,7 @@ public class Target
    * @param targets list of targets
    * @return target or null if the target was not found
    */
-  public static final Target getTarget(final String name, final List<Target> targets) {
+  public static Target getTarget(final String name, final List<Target> targets) {
     if (name != null) {
       for (Target t : targets) {
         if (t.getName().equals(name)) {
@@ -966,7 +993,7 @@ public class Target
    * @param targets list of targets
    * @return target or null if the target was not found
    */
-  public static final Target getTargetById(final String id, final List<Target> targets) {
+  public static Target getTargetById(final String id, final List<Target> targets) {
     if (id != null) {
       for (Target t : targets) {
         if (t.getIdentifier().equals(id)) {
@@ -982,7 +1009,7 @@ public class Target
    * @param name any star name (not null)
    * @return target name
    */
-  public static final String formatName(final String name) {
+  public static String formatName(final String name) {
     // trim and upper case :
     return name.trim().toUpperCase();
   }

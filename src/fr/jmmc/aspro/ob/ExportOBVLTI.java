@@ -299,7 +299,7 @@ public class ExportOBVLTI {
           logger.fine("lst ranges = " + lstRanges);
         }
 
-        if (!lstRanges.isEmpty()) {
+        if (lstRanges != null) {
           // STTimeIntervals are expressed in seconds
           // sample "4980:17760;"
 

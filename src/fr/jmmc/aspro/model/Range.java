@@ -161,26 +161,29 @@ public final class Range {
    * @param ranges list of ranges to use
    * @param min lower bound
    * @param max upper bound
-   * @return list of ranges inside range [min;max]
+   * @return list of ranges inside range [min;max] or null
    */
   public static List<Range> restrictRange(final List<Range> ranges, final double min, final double max) {
-    final List<Range> intervals = new ArrayList<Range>(ranges.size());
+    List<Range> intervals = null;
 
+    Range rangeToAdd;
     double start, end;
     for (Range range : ranges) {
       start = range.getMin();
       end = range.getMax();
+      
+      rangeToAdd = null;
 
       if (start >= min) {
         if (end <= max) {
           // interval in inside [min;max]
-          intervals.add(range);
+          rangeToAdd = range;
         } else {
           if (start > max) {
             // two points over max : skip
           } else {
             // end occurs after max :
-            intervals.add(new Range(start, max));
+            rangeToAdd = new Range(start, max);
           }
         }
       } else {
@@ -189,10 +192,17 @@ public final class Range {
           // two points before min : skip
         } else if (end > max) {
           // two points overlapping [min;max] : keep
-          intervals.add(new Range(min, max));
+          rangeToAdd = new Range(min, max);
         } else {
-          intervals.add(new Range(min, end));
+          rangeToAdd = new Range(min, end);
         }
+      }
+      
+      if (rangeToAdd != null) {
+        if (intervals == null) {
+          intervals = new ArrayList<Range>(ranges.size());
+        }
+        intervals.add(rangeToAdd);
       }
     }
     return intervals;

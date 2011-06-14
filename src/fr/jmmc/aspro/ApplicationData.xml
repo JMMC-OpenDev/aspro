@@ -7,7 +7,7 @@
 
 <ApplicationData link="http://www.jmmc.fr/aspro2">
 
-  <program name="Aspro2" version="0.8.1 beta 6"/>
+  <program name="Aspro2" version="0.8.1 beta 7"/>
 
   <compilation date="08/06/2011" compiler="JDK 1.5.0_16"/>
 
@@ -203,6 +203,9 @@
 
   <releasenotes>
     <release version="0.8.1">
+      <prerelease version="0.8.1 beta 7">
+        <change>Minor changes related to CHARA VEGA Observing blocks (spectral type format, disk diameter set from SearchCal diameters)</change>
+      </prerelease>
       <prerelease version="0.8.1 beta 6">
         <change>Better File choosers : use the last used directory (per file type and saved in user preferences)</change>
         <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/166">Filled "OBSERVATION.DESCRIPTION.NAME" in VLTI OBs to help P2PP users better navigate among targets</change>
