@@ -20,18 +20,15 @@
 
     <!--
       Coordinates CHARA (= S1) :
-      [-118:03:25.313, 34:13:27.781, 1725.209951436147 m]
-
-      S1
-      LONG    -118 03 25.31272
+      LONG     -118 3 25.31272
       LAT       34 13 27.78130
     -->
     <position>
-      <posX>-2476998.0473108</posX>
-      <posY>-4647390.0900888</posY>
-      <posZ>3582240.6122693</posZ>
+      <posX>-2476998.047780274</posX>
+      <posY>-4647390.089884061</posY>
+      <posZ>3582240.6122966344</posZ>
     </position>
-
+    
     <telescope>
       <name>T</name>
       <diameter>1.0</diameter>
@@ -255,31 +252,32 @@
       <name>V6</name>
     </channel>
 
-    <!-- DL : (-1 to +44.2) = 45.2 : 90.4 -->
-    <!-- E1 : (-1 to +42.1) = 43.1 : 86.2 -->
+    <!-- DL : (-1.4 to +44.0) = 45.4 x2 = 90.8 -->
+    <!-- E1 : (-1.4 to +42.0) = 43.4 x2 = 86.8 -->
     <delayLine>
       <name>DL1</name>
-      <maximumThrow>90.4</maximumThrow>
+      <maximumThrow>90.8</maximumThrow>
     </delayLine>
     <delayLine>
       <name>DL2</name>
-      <maximumThrow>90.4</maximumThrow>
+      <maximumThrow>90.8</maximumThrow>
     </delayLine>
     <delayLine>
       <name>DL3</name>
-      <maximumThrow>90.4</maximumThrow>
+      <maximumThrow>90.8</maximumThrow>
     </delayLine>
     <delayLine>
       <name>DL4</name>
-      <maximumThrow>90.4</maximumThrow>
+      <maximumThrow>90.8</maximumThrow>
     </delayLine>
     <delayLine>
       <name>DL5</name>
-      <maximumThrow>90.4</maximumThrow>
+      <maximumThrow>90.8</maximumThrow>
     </delayLine>
     <delayLine>
       <name>DL6</name>
-      <maximumThrow>90.4</maximumThrow>
+      <station>E1</station>
+      <maximumThrow>86.8</maximumThrow>
     </delayLine>
 
     <switchyard>

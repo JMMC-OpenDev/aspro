@@ -93,5 +93,17 @@ public class Position3D
     public void setPosZ(double value) {
         this.posZ = value;
     }
+    
+//--simple--preserve
+
+  /**
+   * Return the string representation '[posX, posY, posZ]'
+   * @return '[posX, posY, posZ]'
+   */
+  @Override
+  public String toString() {
+    return "[" + getPosX() + ", " + getPosY() + ", " + getPosZ() + "]";
+  }
+//--simple--preserve
 
 }

@@ -9,7 +9,6 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import fr.jmmc.aspro.model.OIBase;
-import java.util.HashSet;
 
 
 /**
@@ -536,7 +535,7 @@ public class ObservationSetting
       final int len = innerTargets.size();
       
       displayTargets = new ArrayList<Target>(len);
-      orphans = new HashSet<Target>(4);
+      orphans = new java.util.HashSet<Target>(4);
 
       // map of used calibrators :
       final java.util.Map<Target, Target> usedCalibrators = new java.util.IdentityHashMap<Target, Target>(8);
