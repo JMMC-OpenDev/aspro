@@ -1247,7 +1247,7 @@ public final class ObservabilityService {
       // VLTI : find an available channel for every station
 
       // used channels :
-      final HashSet<Channel> channelSet = new HashSet<Channel>();
+      final HashSet<Channel> channelSet = new HashSet<Channel>(nBeams);
 
       StationLinks sl;
       for (Beam b : this.beams) {
@@ -1295,30 +1295,56 @@ public final class ObservabilityService {
       } // for loop on beams
 
       // Associate a delay line to the beam :
-      // Simple association between DL / Channel = DL_n linked to Channel_n
+      
+      // Use any Delay line available except if the delay line has a prefered station (CHARA E1 shorter than others)
 
-      // TODO : CHARA : use the delay line associated to the station : DL_E1 for E1 (shorter than others)
+      // used delay lines :
+      final HashSet<DelayLine> dlSet = new HashSet<DelayLine>(nBeams);
 
-      Channel ch;
-      int chPos;
       for (Beam b : this.beams) {
-        ch = b.getChannel();
-
-        chPos = channels.indexOf(ch);
-
-        if (chPos < nDelayLines) {
-          b.setDelayLine(delayLines.get(chPos));
+        
+        // first find the delay line dedicated to the beam station:
+        Station beamStation = b.getStation();
+        
+        DelayLine selectedDelayLine = null;
+        
+        for (DelayLine dl : delayLines) {
+          if (beamStation.equals(dl.getStation())) {
+            if (!dlSet.contains(dl)) {
+              selectedDelayLine = dl;
+            }
+            break;
+          }
+        }
+        
+        // If undefined, use any available delay line:
+        if (selectedDelayLine == null) {
+          for (DelayLine dl : delayLines) {
+            if (!dlSet.contains(dl)) {
+              selectedDelayLine = dl;
+              break;
+            }
+          }
+        }
+        
+        if (selectedDelayLine != null) {
+          dlSet.add(selectedDelayLine);
+          
+          b.setDelayLine(selectedDelayLine);
+          
         } else {
-          // Invalid Channel : no delay line ?
           // To be checked 
           throw new IllegalStateException("Impossible to associate a delay line to the beam [" + b + "].");
         }
-
       }
 
     } else {
       // Simpler interferometer : no channel definition nor switchyard :
 
+      if (logger.isLoggable(Level.WARNING)) {
+        logger.warning("Not validated code path : Case with no channel definition nor switchyard !");
+      }
+      
       // Warning : Not tested because both CHARA and VLTI use a switchyard !
 
       // Simple association between DL / Station = DL_n linked to Station_n
@@ -1339,9 +1365,16 @@ public final class ObservabilityService {
 
         i++;
       }
-
     }
 
+    if (logger.isLoggable(Level.FINE)) {
+      // dump beam information:
+      int i = 0;
+      for (Beam b : this.beams) {
+        logger.fine("beam [" + (i++) + "] : " + b.toString());
+      }    
+    }
+    
     this.data.setBeams(this.beams);
 
     if (logger.isLoggable(Level.FINE)) {
@@ -1651,7 +1684,7 @@ public final class ObservabilityService {
    * @param jd date to convert
    * @return date
    */
-  private final Date convertJDToDate(final double jd) {
+  private Date convertJDToDate(final double jd) {
     if (jd >= this.jdLower) {
 
       if (jd <= this.jdUpper) {
@@ -1682,7 +1715,7 @@ public final class ObservabilityService {
    * @param jd julian day
    * @return Date Object (LST or UTC)
    */
-  private final Date jdToDateInDateRange(final double jd) {
+  private Date jdToDateInDateRange(final double jd) {
     // adjust range limits :
     if (jd <= this.jdLower) {
       return this.data.getDateMin();
@@ -1720,7 +1753,7 @@ public final class ObservabilityService {
     int decMax = decStep * (int) Math.round((obsLat + 90 - this.minElev) / decStep);
     decMax = Math.min(decMax, 90);
 
-    final List<Target> targets = new ArrayList<Target>();
+    final List<Target> targets = new ArrayList<Target>((decMax - decMin) / decStep + 1);
     Target t;
     for (int i = decMax; i >= decMin; i -= decStep) {
       t = new Target();
