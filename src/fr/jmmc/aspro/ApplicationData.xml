@@ -204,6 +204,10 @@
   <releasenotes>
     <release version="0.8.1">
       <prerelease version="0.8.1 beta 7">
+        <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/151">Fixed CHARA delay line configuration: carts moves in range [-1.4 to +44.0] 
+          expect for E1 in range [-1.4 to +42.0] (shorter cables). It modifies slightly observability ranges [+/-] 5 minutes</change>
+        <change>Minor ergonomic change: when the target editor is opened, the 'Targets' tab is displayed by default; when the UV coverage plot is selected, 
+          the 'Models' tab is displayed instead.</change>
         <change>Minor changes related to CHARA VEGA Observing blocks (spectral type format, disk diameter set from SearchCal diameters)</change>
       </prerelease>
       <prerelease version="0.8.1 beta 6">
