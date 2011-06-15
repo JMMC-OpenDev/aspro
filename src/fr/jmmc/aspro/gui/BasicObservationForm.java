@@ -3,6 +3,7 @@
  ******************************************************************************/
 package fr.jmmc.aspro.gui;
 
+import fr.jmmc.aspro.AsproGui;
 import fr.jmmc.aspro.Preferences;
 import fr.jmmc.aspro.gui.util.GenericListModel;
 import fr.jmmc.aspro.gui.util.TargetListRenderer;
@@ -530,9 +531,13 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
    */
   public void showTargetEditor() {
     final Target target = getSelectedTarget();
+    
+    final String selectedTab = 
+            (AsproGui.getInstance().getSettingPanel().isSelectedTabUVCoveragePanel()) ? 
+            TargetEditorDialog.TAB_MODELS : TargetEditorDialog.TAB_TARGETS;
 
     // show model editor :
-    TargetEditorDialog.showEditor((target != null) ? target.getName() : null);
+    TargetEditorDialog.showEditor((target != null) ? target.getName() : null, selectedTab);
   }
 
   /**

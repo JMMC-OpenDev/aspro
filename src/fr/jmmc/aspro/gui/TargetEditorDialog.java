@@ -35,6 +35,11 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
   /** Class logger */
   private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
+  /** Tab Targets */
+  public static final String TAB_TARGETS = "Targets";
+  /** Tab Models */
+  public static final String TAB_MODELS = "Models";
+  
   /** flag indicating that the target editor dialog is active */
   private static boolean targetEditorActive = false;
 
@@ -60,9 +65,10 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
   /**
    * Display the model editor using the given target name as the initial selected target
    * @param targetName optional target name to display only the models of this target
+   * @param selectedTab name of the selected tab (see TAB_xxx constants)
    * @return true if the model editor changed anything
    */
-  public static boolean showEditor(final String targetName) {
+  public static boolean showEditor(final String targetName, final String selectedTab) {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("showing Editor : " + targetName);
     }
@@ -83,7 +89,7 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
       final List<Target> targets = cloned.getTargets();
       final TargetUserInformations targetUserInfos = cloned.getOrCreateTargetUserInfos();
 
-      final TargetEditorDialog form = new TargetEditorDialog(targets, targetUserInfos);
+      final TargetEditorDialog form = new TargetEditorDialog(targets, targetUserInfos, selectedTab);
 
       // initialise the editor and select the target :
       form.initialize(targetName);
@@ -145,15 +151,17 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
    * Creates new form TargetEditorDialog (used to test swing interface in NetBeans)
    */
   public TargetEditorDialog() {
-    this(new ArrayList<Target>(0), new TargetUserInformations());
+    this(new ArrayList<Target>(0), new TargetUserInformations(), TAB_TARGETS);
   }
 
   /**
    * Creates new form TargetEditorDialog with the given list of targets and user information
    * @param targets list of targets to edit
    * @param targetUserInfos target user informations
+   * @param selectedTab name of the selected tab (see TAB_xxx constants)
    */
-  protected TargetEditorDialog(final List<Target> targets, final TargetUserInformations targetUserInfos) {
+  protected TargetEditorDialog(final List<Target> targets, final TargetUserInformations targetUserInfos,
+                                 final String selectedTab) {
     super();
 
     // Define shared data model with tabbed forms :
@@ -162,6 +170,18 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
 
     // initialize swing components :
     initComponents();
+
+    // Select tab:
+    if (selectedTab != null) {
+      for (int i = 0; i < this.jTabbedPane.getTabCount(); i++) {
+        if (selectedTab.equals(this.jTabbedPane.getTitleAt(i))) {
+          logger.severe("selected tab = "+ this.jTabbedPane.getComponentAt(i));
+          
+          this.jTabbedPane.setSelectedIndex(i);
+          break;
+        }
+      }
+    }
 
     // Register a change listener for the tabbed panel :
     this.jTabbedPane.addChangeListener(new ChangeListener() {
@@ -210,16 +230,16 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
     java.awt.GridBagConstraints gridBagConstraints;
 
     jTabbedPane = new javax.swing.JTabbedPane();
-    targetModelForm = new fr.jmmc.aspro.gui.TargetModelForm(this.editTargets, this.editTargetUserInfos);
     targetForm = new fr.jmmc.aspro.gui.TargetForm(this.editTargets, this.editTargetUserInfos);
+    targetModelForm = new fr.jmmc.aspro.gui.TargetModelForm(this.editTargets, this.editTargetUserInfos);
     jPanelButtons = new javax.swing.JPanel();
     jButtonCancel = new javax.swing.JButton();
     jButtonOK = new javax.swing.JButton();
 
     setLayout(new java.awt.GridBagLayout());
 
-    jTabbedPane.addTab("Models", null, targetModelForm, "edit target models");
     jTabbedPane.addTab("Targets", null, targetForm, "edit target information and associate calibrators");
+    jTabbedPane.addTab("Models", null, targetModelForm, "edit target models");
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
@@ -331,7 +351,7 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
 
         try {
           ObservationManager.getInstance().load(new File("/home/bourgesl/VLTI_FUN2.asprox"));
-          logger.info("result = " + showEditor("HIP32768"));
+          logger.info("result = " + showEditor("HIP32768", TAB_TARGETS));
           System.exit(0);
         } catch (Exception e) { // main (test)
           logger.log(Level.SEVERE, "runtime exception", e);

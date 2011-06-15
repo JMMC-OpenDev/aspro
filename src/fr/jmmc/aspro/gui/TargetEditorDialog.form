@@ -25,19 +25,6 @@
 
       <Layout class="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout"/>
       <SubComponents>
-        <Component class="fr.jmmc.aspro.gui.TargetModelForm" name="targetModelForm">
-          <AuxValues>
-            <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new fr.jmmc.aspro.gui.TargetModelForm(this.editTargets, this.editTargetUserInfos)"/>
-          </AuxValues>
-          <Constraints>
-            <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout" value="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout$JTabbedPaneConstraintsDescription">
-              <JTabbedPaneConstraints tabName="Models" toolTip="edit target models">
-                <Property name="tabTitle" type="java.lang.String" value="Models"/>
-                <Property name="tabToolTip" type="java.lang.String" value="edit target models"/>
-              </JTabbedPaneConstraints>
-            </Constraint>
-          </Constraints>
-        </Component>
         <Component class="fr.jmmc.aspro.gui.TargetForm" name="targetForm">
           <AuxValues>
             <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new fr.jmmc.aspro.gui.TargetForm(this.editTargets, this.editTargetUserInfos)"/>
@@ -47,6 +34,19 @@
               <JTabbedPaneConstraints tabName="Targets" toolTip="edit target information and associate calibrators">
                 <Property name="tabTitle" type="java.lang.String" value="Targets"/>
                 <Property name="tabToolTip" type="java.lang.String" value="edit target information and associate calibrators"/>
+              </JTabbedPaneConstraints>
+            </Constraint>
+          </Constraints>
+        </Component>
+        <Component class="fr.jmmc.aspro.gui.TargetModelForm" name="targetModelForm">
+          <AuxValues>
+            <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new fr.jmmc.aspro.gui.TargetModelForm(this.editTargets, this.editTargetUserInfos)"/>
+          </AuxValues>
+          <Constraints>
+            <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout" value="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout$JTabbedPaneConstraintsDescription">
+              <JTabbedPaneConstraints tabName="Models" toolTip="edit target models">
+                <Property name="tabTitle" type="java.lang.String" value="Models"/>
+                <Property name="tabToolTip" type="java.lang.String" value="edit target models"/>
               </JTabbedPaneConstraints>
             </Constraint>
           </Constraints>

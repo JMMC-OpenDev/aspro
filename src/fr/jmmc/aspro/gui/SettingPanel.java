@@ -238,15 +238,23 @@ public final class SettingPanel extends JPanel implements ObservationListener {
    * Returns the currently selected component in the tabbedpane
    * @return selected component or null if the tabbedpane is empty
    */
-  public final Component getTabSelectedComponent() {
+  public Component getTabSelectedComponent() {
     return jTabbedPane.getSelectedComponent();
+  }
+  
+  /**
+   * Return true if the selected tab is the UV coverage panel
+   * @return true if the selected tab is the UV coverage panel 
+   */
+  public boolean isSelectedTabUVCoveragePanel() {
+    return getTabSelectedComponent() == getUVCoveragePanel();
   }
 
   /**
    * Return the observation form
    * @return observation form
    */
-  public final BasicObservationForm getObservationForm() {
+  public BasicObservationForm getObservationForm() {
     return observationForm;
   }
 
@@ -254,7 +262,7 @@ public final class SettingPanel extends JPanel implements ObservationListener {
    * Return the observability panel
    * @return observability panel or null if undefined
    */
-  public final ObservabilityPanel getObservabilityPanel() {
+  public ObservabilityPanel getObservabilityPanel() {
     return observabilityPanel;
   }
 
@@ -262,7 +270,7 @@ public final class SettingPanel extends JPanel implements ObservationListener {
    * Return the uv coverage panel
    * @return uv coverage panel or null if undefined
    */
-  public final UVCoveragePanel getUVCoveragePanel() {
+  public UVCoveragePanel getUVCoveragePanel() {
     return uvCoveragePanel;
   }
 }
