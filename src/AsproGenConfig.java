@@ -1,7 +1,7 @@
+
 /*******************************************************************************
  * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
-
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.oi.LonLatAlt;
 import fr.jmmc.aspro.model.oi.Position3D;
@@ -32,6 +32,17 @@ public final class AsproGenConfig {
   /** Class logger */
   private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
           className_);
+
+  /** interferometer enum */
+  private enum INTERFEROMETER {
+
+    /** VLTI (eso) */
+    VLTI,
+    /** CHARA array */
+    CHARA,
+    /** MROI (future) */
+    MROI
+  };
 
   /**
    * Forbidden constructor
@@ -268,15 +279,20 @@ public final class AsproGenConfig {
   # LIGHT	  - length of light pipe in microns
   #	    Note that this assumes the default Beam dn default Pop are used
    *
+   * @param station station name
    * @param light length of light pipe in microns
    * @param airPath amount of airpath  in microns using default beam
    * @param internal Pathlength (with default beam) for internal fringes
    * @param sb output buffer for xml output
    */
-  public static void convertCHARAAirPath(final double light, final double airPath, final double internal,
+  public static void convertCHARAAirPath(final String station, final double light, final double airPath, final double internal,
                                          final StringBuilder sb) {
-
-    sb.append("  <delayLineFixedOffset>").append((light + airPath + internal) * 1e-6d).append("</delayLineFixedOffset>\n");
+    
+    final double delay = (light + airPath + internal) * 1e-6d;
+    
+    logger.severe(station + " = " + delay);
+    
+    sb.append("  <delayLineFixedOffset>").append(delay).append("</delayLineFixedOffset>\n");
   }
 
   /**
@@ -301,18 +317,13 @@ public final class AsproGenConfig {
   /**
    * Convert CHARA station configs to ASPRO station configurations
    * @param stationConfigs station configs
+   * @param sb buffer
    */
-  private static void convertCHARAStations(final Map<String, Map<String, Double>> stationConfigs) {
+  private static void convertCHARAStations(final Map<String, Map<String, Double>> stationConfigs, final StringBuilder sb) {
 
-    // CHARA :
-    //LAT 34 13 27.78130
+    final double[] lonlat = CHARAposition(sb);
 
-    final double latDeg = 34d + 13d / 60d + 27.78130d / 3600d;
-    logger.severe("CHARA latitude (deg) : " + latDeg);
-
-    final double lat = Math.toRadians(latDeg);
-
-    final StringBuilder sb = new StringBuilder(5 * 1024);
+    final double lat = Math.toRadians(lonlat[1]);
 
     String station;
     Map<String, Double> config;
@@ -326,7 +337,7 @@ public final class AsproGenConfig {
 
       convertHorizToEquatorial(station, lat, config.get("XOFFSET"), config.get("YOFFSET"), config.get("ZOFFSET"), sb);
 
-      convertCHARAAirPath(config.get("LIGHT"), config.get("AIRPATH"), config.get("INTERNAL"), sb);
+      convertCHARAAirPath(station, config.get("LIGHT"), config.get("AIRPATH"), config.get("INTERNAL"), sb);
 
       sb.append("\n");
 
@@ -338,7 +349,7 @@ public final class AsproGenConfig {
     /*
     S1          0.000000000   0.000000000     0.00000000    0.0000000
      *
-    S1 = (0.0, 0.0, 0.0)
+    S1 = (0.0, 0.0, 0.0) 0.0
      *
      * 
      *
@@ -348,6 +359,7 @@ public final class AsproGenConfig {
      *
     S2 = (-18.360473037751714, -5.746854437,        28.12397435836417)   4.690179333000001
     S2 = (-18.360473037751714, -5.746854437,        28.12397435836417)   5.065469333 (+ INTERNAL)
+    S2 = (-18.360473037751714, -5.746854437,        28.12397435836417)   5.065469333
      *
      *
      *
@@ -359,6 +371,7 @@ public final class AsproGenConfig {
      *
     E1 = (-176.95372938066825, 125.333989819,      249.63388874133827)  15.513547531999999
     E1 = (-176.95372938066825, 125.333989819,      249.63388874133827)  15.513547531999999 (+ INTERNAL)
+    E1 = (-176.95372938066825, 125.333989819,      249.63388874133827)  15.513547531999999
      *
      *
      *
@@ -368,6 +381,7 @@ public final class AsproGenConfig {
      *
     E2 = (-154.00873148624743, 70.39660711799999, 221.43708278416645)   26.370872645
     E2 = (-154.00873148624743, 70.39660711799999, 221.43708278416645)   26.743470664999997 (+ INTERNAL)
+    E2 = (-154.00873148624743, 70.39660711799999, 221.43708278416645)   26.743470664999997
      *
      *
      *
@@ -377,6 +391,7 @@ public final class AsproGenConfig {
      *
     W1 = (-130.58878748879556, -175.07333221099998, 172.79336516697768) 29.122251552999998
     W1 = (-130.58878748879556, -175.07333221099998, 172.79336516697768) 29.122251552999998 (+ INTERNAL)
+    W1 = (-130.58878748879556, -175.07333221099998, 172.79336516697768) 29.122251552999998
      * 
      *
      *
@@ -386,18 +401,16 @@ public final class AsproGenConfig {
      *
     W2 = (-111.72648023453111, -69.093582796, 165.08103431717993)      -8.461862557
     W2 = (-111.72648023453111, -69.093582796, 165.08103431717993)      -8.079204556999999 (+ INTERNAL)
+    W2 = (-111.72648023453111, -69.093582796, 165.08103431717993)      -8.079204556999999
      */
-
-    logger.severe("Generated Station Configuration : " + sb.length() + "\n" + sb.toString());
   }
 
   /**
    * Convert CHARA station configs to ASPRO switchyard
    * @param stationConfigs station configs
+   * @param sb buffer
    */
-  public static void convertCHARASwitchyard(final Map<String, Map<String, Double>> stationConfigs) {
-
-    final StringBuilder sb = new StringBuilder(5 * 1024);
+  public static void convertCHARASwitchyard(final Map<String, Map<String, Double>> stationConfigs, final StringBuilder sb) {
 
     sb.append("<switchyard>\n");
 
@@ -416,9 +429,7 @@ public final class AsproGenConfig {
       convertCHARASwitchyardStation(station, values, sb);
     }
 
-    sb.append("</switchyard>\n");
-
-    logger.severe("Generated Switchyard : " + sb.length() + "\n" + sb.toString());
+    sb.append("</switchyard>\n\n");
   }
 
   /**
@@ -459,13 +470,13 @@ public final class AsproGenConfig {
   # XOFFSET - East offset in microns from S1
   # YOFFSET - North offset in microns from S1
   # ZOFFSET - vertical (+ is up) offset in microns from S1
-
+  
   # AIRPATH - amount of airpath  in microns using default beam
   #	    Note that this assumes the default Beam dn default Pop are used
   # INTERNAL- Pathlength (with default beam) for internal fringes
   # LIGHT	  - length of light pipe in microns
   #	    Note that this assumes the default Beam dn default Pop are used
-
+  
   # BEAMX   - Extra airpath to add when using beam X on this scope
   # POPX	  - Extra airpath to add when using POP X on this scope
    */
@@ -569,9 +580,47 @@ public final class AsproGenConfig {
 
     final Map<String, Map<String, Double>> stationConfigs = loadCHARAConfig(absFileName);
 
-    convertCHARAStations(stationConfigs);
+    final StringBuilder sb = new StringBuilder(10 * 1024);
+    
+    sb.append("<a:interferometerSetting>\n\n");
+    sb.append("  <description>\n\n  <name>CHARA</name>\n\n");
+    
+    convertCHARAStations(stationConfigs, sb);
 
-    convertCHARASwitchyard(stationConfigs);
+    convertCHARASwitchyard(stationConfigs, sb);
+    
+    sb.append("  </description>\n\n</a:interferometerSetting>\n");
+
+    logger.severe("Generated CHARA Configuration : " + sb.length() + "\n" + sb.toString());
+  }
+
+  /**
+   * Compute the CHARA position (S1 coordinates)
+   * @param sb buffer
+   * @return long and lat in degrees
+   */
+  private static double[] CHARAposition(final StringBuilder sb) {
+    // mean coordinates from CHARA_plan (system.chara):
+//    #  CHARA mean longitude and latitude from GPS
+//       LONG  -118 03 26.574
+//       LAT     34 13 34.110
+//    #  Geodetic height of the CHARA reference plane [meters]:
+//       HEIGHT  1725.21
+
+    // S1 from telescopes.chara:
+//    LONG    -118 3 25.31272
+//    LAT       34 13 27.78130
+    final double lonDeg = -(118d + 3d / 60d + 25.31272d / 3600d);
+    logger.severe("CHARA longitude (deg) : " + lonDeg);
+
+    final double latDeg = 34d + 13d / 60d + 27.78130d / 3600d;
+    logger.severe("CHARA latitude (deg)  : " + latDeg);
+
+    final double alt = 1725.21d;
+    
+    computeInterferometerPosition(lonDeg, latDeg, alt, sb);
+
+    return new double[]{lonDeg, latDeg};
   }
 
   /**
@@ -579,36 +628,39 @@ public final class AsproGenConfig {
    * @param args unused
    */
   public static void main(final String[] args) {
-    final String asproPath = "/home/bourgesl/dev/aspro-NEW/etc/";
+    final String asproPath = "/home/bourgesl/dev/aspro1/etc/";
 
-    if (false) {
+    final INTERFEROMETER selected = INTERFEROMETER.CHARA;
+    
+    switch(selected) {
+      case VLTI:
+          VLTIPosition();
 
-      // VLTI :
-      convertSwitchYard(asproPath + "VLT.switchyard");
+          convertSwitchYard(asproPath + "VLT.switchyard");
 
-      final String[] vltStations = {
-        "U1", "U2", "U3", "U4", "A0", "A1", "B0", "B1", "B2", "B3", "B4", "B5",
-        "C0", "C1", "C2", "C3", "D0", "D1", "D2", "E0", "G0", "G1", "G2", "H0",
-        "I1", "J1", "J2", "J3", "J4", "J5", "J6", "K0", "L0", "M0"};
+          final String[] vltStations = {
+            "U1", "U2", "U3", "U4", "A0", "A1", "B0", "B1", "B2", "B3", "B4", "B5",
+            "C0", "C1", "C2", "C3", "D0", "D1", "D2", "E0", "G0", "G1", "G2", "H0",
+            "I1", "J1", "J2", "J3", "J4", "J5", "J6", "K0", "L0", "M0"};
 
-      final StringBuilder sb = new StringBuilder(65535);
+          final StringBuilder sb = new StringBuilder(65535);
 
-      for (String station : vltStations) {
-        convertHorizon(station, asproPath + station + ".horizon", sb);
-      }
-      logger.severe("convertHorizons : \n" + sb.toString());
-    }
+          for (String station : vltStations) {
+            convertHorizon(station, asproPath + station + ".horizon", sb);
+          }
+          logger.severe("convertHorizons : \n" + sb.toString());        
+        break;
+      case CHARA:
+          convertCHARAConfig("/home/bourgesl/dev/aspro/test/telescopes.chara");
+        break;
+      case MROI:
+          MROIposition();
 
-    if (false) {
-      // CHARA :
-      convertCHARAConfig("/home/bourgesl/dev/aspro/test/telescopes.chara");
-    }
+          convertStationFile(asproPath + "MROI.stations");
+        break;
 
-    if (true) {
-      VLTIPosition();
-      MROIposition();
-
-      convertStationFile(asproPath + "MROI.stations");
+      default:
+        logger.severe("unsupported interferometer : "+selected);
     }
   }
 
@@ -621,14 +673,14 @@ public final class AsproGenConfig {
     logger.severe("VLTI latitude (deg) : " + latDeg);
 
     final double alt = 2681d;
-    computeInterferometerPosition(lonDeg, latDeg, alt);
+    computeInterferometerPosition(lonDeg, latDeg, alt, new StringBuilder());
 
     // 1942803.281897419, -5457847.407163382, -2648734.592484602
 /*
-      <posX>1942042.8584924</posX>
-      <posY>-5455305.996911</posY>
-      <posZ>-2654521.4011759</posZ>
-*/
+    <posX>1942042.8584924</posX>
+    <posY>-5455305.996911</posY>
+    <posZ>-2654521.4011759</posZ>
+     */
     final Position3D position = new Position3D();
     position.setPosX(1942042.8584924d);
     position.setPosY(-5455305.996911d);
@@ -649,16 +701,17 @@ public final class AsproGenConfig {
     logger.severe("MROI latitude (deg) : " + latDeg);
 
     final double alt = 3200d;
-    computeInterferometerPosition(lonDeg, latDeg, alt);
+    computeInterferometerPosition(lonDeg, latDeg, alt, new StringBuilder());
   }
 
   /**
-   *
+   * Convert geodetic long/lat/alt to geocentric coordinates
    * @param lon longitude in degrees
    * @param lat latitude in degrees
    * @param alt altitude in meters
+   * @param sb buffer
    */
-  private static void computeInterferometerPosition(final double lon, final double lat, final double alt) {
+  private static void computeInterferometerPosition(final double lon, final double lat, final double alt, final StringBuilder sb) {
 
     final double theta = Math.toRadians(90d - lat);
     final double phi = Math.toRadians(lon);
@@ -668,9 +721,14 @@ public final class AsproGenConfig {
     final double x = r * Math.sin(theta) * Math.cos(phi);
     final double y = r * Math.sin(theta) * Math.sin(phi);
     final double z = r * Math.cos(theta);
-
+    
     logger.severe("position (x,y,z) : " + x + ", " + y + ", " + z);
-
+    
+    sb.append("    <position>\n");
+    sb.append("      <posX>").append(x).append("</posX>\n");
+    sb.append("      <posY>").append(y).append("</posY>\n");
+    sb.append("      <posZ>").append(z).append("</posZ>\n");
+    sb.append("    </position>\n\n");
   }
 
   /**
@@ -730,18 +788,18 @@ public final class AsproGenConfig {
           /*
           System.out.println("station : " + station);
           System.out.println("values : " + Arrays.toString(values));
-          */
+           */
           /*
           <station>
-            <name>S1</name>
-            <telescope>T</telescope>
-            <relativePosition>
-              <posX>0.0</posX>
-              <posY>0.0</posY>
-              <posZ>0.0</posZ>
-            </relativePosition>
-            <delayLineFixedOffset>0.0</delayLineFixedOffset>
-           ...
+          <name>S1</name>
+          <telescope>T</telescope>
+          <relativePosition>
+          <posX>0.0</posX>
+          <posY>0.0</posY>
+          <posZ>0.0</posZ>
+          </relativePosition>
+          <delayLineFixedOffset>0.0</delayLineFixedOffset>
+          ...
           </station>
            */
 
@@ -778,5 +836,4 @@ public final class AsproGenConfig {
 
     logger.severe("convertStationFile : output :\n" + sb.toString());
   }
-
 }
