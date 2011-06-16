@@ -263,11 +263,11 @@ public final class AsproGenConfig {
 
     logger.severe(station + " = (" + xx + ", " + yy + ", " + zz + ")");
 
-    sb.append("  <relativePosition>\n");
-    sb.append("    <posX>").append(xx).append("</posX>\n");
-    sb.append("    <posY>").append(yy).append("</posY>\n");
-    sb.append("    <posZ>").append(zz).append("</posZ>\n");
-    sb.append("  </relativePosition>\n");
+    sb.append("      <relativePosition>\n");
+    sb.append("        <posX>").append(xx).append("</posX>\n");
+    sb.append("        <posY>").append(yy).append("</posY>\n");
+    sb.append("        <posZ>").append(zz).append("</posZ>\n");
+    sb.append("      </relativePosition>\n");
   }
 
   /**
@@ -292,7 +292,7 @@ public final class AsproGenConfig {
     
     logger.severe(station + " = " + delay);
     
-    sb.append("  <delayLineFixedOffset>").append(delay).append("</delayLineFixedOffset>\n");
+    sb.append("      <delayLineFixedOffset>").append(delay).append("</delayLineFixedOffset>\n");
   }
 
   /**
@@ -307,10 +307,10 @@ public final class AsproGenConfig {
                                      final StringBuilder sb) {
 
     for (int i = 1; i <= 5; i++) {
-      sb.append("  <popLink>\n");
-      sb.append("    <pop>PoP").append(i).append("</pop>\n");
-      sb.append("    <opticalLength>").append(config.get("POP" + i) * 1e-6d).append("</opticalLength>\n");
-      sb.append("  </popLink>\n");
+      sb.append("      <popLink>\n");
+      sb.append("        <pop>PoP").append(i).append("</pop>\n");
+      sb.append("        <opticalLength>").append(config.get("POP" + i) * 1e-6d).append("</opticalLength>\n");
+      sb.append("      </popLink>\n");
     }
   }
 
@@ -331,9 +331,9 @@ public final class AsproGenConfig {
       station = e.getKey();
       config = e.getValue();
 
-      sb.append("<station>\n");
-      sb.append("  <name>").append(station).append("</name>\n");
-      sb.append("  <telescope>T</telescope>\n");
+      sb.append("    <station>\n");
+      sb.append("      <name>").append(station).append("</name>\n");
+      sb.append("      <telescope>T</telescope>\n");
 
       convertHorizToEquatorial(station, lat, config.get("XOFFSET"), config.get("YOFFSET"), config.get("ZOFFSET"), sb);
 
@@ -343,7 +343,7 @@ public final class AsproGenConfig {
 
       convertCHARAPoP(config, sb);
 
-      sb.append("</station>\n\n");
+      sb.append("    </station>\n\n");
     }
 
     /*
@@ -412,7 +412,7 @@ public final class AsproGenConfig {
    */
   public static void convertCHARASwitchyard(final Map<String, Map<String, Double>> stationConfigs, final StringBuilder sb) {
 
-    sb.append("<switchyard>\n");
+    sb.append("    <switchyard>\n");
 
     final double[] values = new double[6];
 
@@ -429,7 +429,7 @@ public final class AsproGenConfig {
       convertCHARASwitchyardStation(station, values, sb);
     }
 
-    sb.append("</switchyard>\n\n");
+    sb.append("    </switchyard>\n\n");
   }
 
   /**
@@ -441,8 +441,8 @@ public final class AsproGenConfig {
   private static void convertCHARASwitchyardStation(final String station, final double[] values,
                                                     final StringBuilder sb) {
 
-    sb.append("  <stationLinks>\n");
-    sb.append("    <station>").append(station).append("</station>\n");
+    sb.append("      <stationLinks>\n");
+    sb.append("        <station>").append(station).append("</station>\n");
 
     final NumberFormat nf = NumberFormat.getInstance(Locale.ENGLISH);
     nf.setMaximumFractionDigits(8);
@@ -451,13 +451,13 @@ public final class AsproGenConfig {
     for (int i = 0, size = values.length; i < size; i++) {
       value = values[i];
 
-      sb.append("    <channelLink>\n");
-      sb.append("      <channel>V").append(i + 1).append("</channel>\n");
-      sb.append("      <opticalLength>").append(nf.format(value)).append("</opticalLength>\n");
-      sb.append("    </channelLink>\n");
+      sb.append("        <channelLink>\n");
+      sb.append("          <channel>V").append(i + 1).append("</channel>\n");
+      sb.append("          <opticalLength>").append(nf.format(value)).append("</opticalLength>\n");
+      sb.append("        </channelLink>\n");
     }
 
-    sb.append("  </stationLinks>\n\n");
+    sb.append("      </stationLinks>\n\n");
   }
 
   /**
@@ -580,10 +580,10 @@ public final class AsproGenConfig {
 
     final Map<String, Map<String, Double>> stationConfigs = loadCHARAConfig(absFileName);
 
-    final StringBuilder sb = new StringBuilder(10 * 1024);
+    final StringBuilder sb = new StringBuilder(12 * 1024);
     
     sb.append("<a:interferometerSetting>\n\n");
-    sb.append("  <description>\n\n  <name>CHARA</name>\n\n");
+    sb.append("  <description>\n\n    <name>CHARA</name>\n\n");
     
     convertCHARAStations(stationConfigs, sb);
 

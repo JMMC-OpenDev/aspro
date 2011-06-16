@@ -77,11 +77,11 @@
       <name>S2</name>
       <telescope>T</telescope>
       <relativePosition>
-        <posX>-18.360473037751714</posX>
-        <posY>-5.746854437</posY>
-        <posZ>28.12397435836417</posZ>
+        <posX>-18.36191339723222</posX>
+        <posY>-5.7466215069999995</posY>
+        <posZ>28.122403668741452</posZ>
       </relativePosition>
-      <delayLineFixedOffset>5.065469333</delayLineFixedOffset>
+      <delayLineFixedOffset>5.061712014</delayLineFixedOffset>
 
       <popLink>
         <pop>PoP1</pop>
@@ -109,11 +109,11 @@
       <name>E1</name>
       <telescope>T</telescope>
       <relativePosition>
-        <posX>-176.95372938066825</posX>
-        <posY>125.333989819</posY>
-        <posZ>249.63388874133827</posZ>
+        <posX>-176.95278286444685</posX>
+        <posY>125.333692968</posY>
+        <posZ>249.63409070288594</posZ>
       </relativePosition>
-      <delayLineFixedOffset>15.513547531999999</delayLineFixedOffset>
+      <delayLineFixedOffset>15.510766953</delayLineFixedOffset>
 
       <popLink>
         <pop>PoP1</pop>
@@ -141,11 +141,11 @@
       <name>E2</name>
       <telescope>T</telescope>
       <relativePosition>
-        <posX>-154.00873148624743</posX>
-        <posY>70.39660711799999</posY>
-        <posZ>221.43708278416645</posZ>
+        <posX>-154.01075810959253</posX>
+        <posY>70.396030473</posY>
+        <posZ>221.43644723349865</posZ>
       </relativePosition>
-      <delayLineFixedOffset>26.743470664999997</delayLineFixedOffset>
+      <delayLineFixedOffset>26.738055287999998</delayLineFixedOffset>
 
       <popLink>
         <pop>PoP1</pop>
@@ -173,11 +173,11 @@
       <name>W1</name>
       <telescope>T</telescope>
       <relativePosition>
-        <posX>-130.58878748879556</posX>
-        <posY>-175.07333221099998</posY>
-        <posZ>172.79336516697768</posZ>
+        <posX>-130.58744921486596</posX>
+        <posY>-175.072406694</posY>
+        <posZ>172.79247312458327</posZ>
       </relativePosition>
-      <delayLineFixedOffset>29.122251552999998</delayLineFixedOffset>
+      <delayLineFixedOffset>29.121709039</delayLineFixedOffset>
 
       <popLink>
         <pop>PoP1</pop>
@@ -205,11 +205,11 @@
       <name>W2</name>
       <telescope>T</telescope>
       <relativePosition>
-        <posX>-111.72648023453111</posX>
-        <posY>-69.093582796</posY>
-        <posZ>165.08103431717993</posZ>
+        <posX>-111.72662113252261</posX>
+        <posY>-69.092828745</posY>
+        <posZ>165.07986664205634</posZ>
       </relativePosition>
-      <delayLineFixedOffset>-8.079204556999999</delayLineFixedOffset>
+      <delayLineFixedOffset>-8.080552323000001</delayLineFixedOffset>
 
       <popLink>
         <pop>PoP1</pop>
@@ -448,6 +448,7 @@
           <opticalLength>-0.6243</opticalLength>
         </channelLink>
       </stationLinks>
+
     </switchyard>
 
     <!-- pop on CHARA -->
