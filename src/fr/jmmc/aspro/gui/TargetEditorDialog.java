@@ -175,8 +175,6 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
     if (selectedTab != null) {
       for (int i = 0; i < this.jTabbedPane.getTabCount(); i++) {
         if (selectedTab.equals(this.jTabbedPane.getTitleAt(i))) {
-          logger.severe("selected tab = "+ this.jTabbedPane.getComponentAt(i));
-          
           this.jTabbedPane.setSelectedIndex(i);
           break;
         }
