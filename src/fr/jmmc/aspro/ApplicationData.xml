@@ -7,9 +7,9 @@
 
 <ApplicationData link="http://www.jmmc.fr/aspro2">
 
-  <program name="Aspro2" version="0.8.1 beta 7"/>
+  <program name="Aspro2" version="0.8.1 beta 8"/>
 
-  <compilation date="08/06/2011" compiler="JDK 1.5.0_16"/>
+  <compilation date="28/06/2011" compiler="JDK 1.5.0_16"/>
 
   <text>
     <![CDATA[ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations
@@ -203,6 +203,10 @@
 
   <releasenotes>
     <release version="0.8.1">
+      <prerelease version="0.8.1 beta 8">
+        <change>Updated Export to Observing blocks (VEGA, VLTI) to use the user minimum elevation instead of 30 deg (required by ESO OB)</change>
+        <change>Updated CHARA configuration to have MIRC_5T configurations</change>
+      </prerelease>
       <prerelease version="0.8.1 beta 7">
         <change>Updated CHARA configuration using the latest official configuration file (telescopes.chara)</change>
         <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/151">Fixed CHARA delay line configuration: carts moves in range [-1.4 to +44.0] 
@@ -223,7 +227,7 @@
       <prerelease version="0.8.1 beta 4">
         <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/165">Allow zooming on the observability plot (targets and time range)</change>
         <change>Few optimizations used to determine best PoPs (CHARA) in the observability computation</change>
-        <change>Added MIRC_6T (preliminary support)</change>
+        <change>Added MIRC_6T support</change>
       </prerelease>
       <prerelease version="0.8.1 beta 3">
         <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/144">Fixed bug related to SearchCal integration: 
