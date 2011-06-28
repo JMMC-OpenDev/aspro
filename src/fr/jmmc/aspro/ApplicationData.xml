@@ -204,6 +204,7 @@
   <releasenotes>
     <release version="0.8.1">
       <prerelease version="0.8.1 beta 8">
+        <change>Added information about best PoPs in warnings (CHARA)</change>
         <change>Updated Export to Observing blocks (VEGA, VLTI) to use the user minimum elevation instead of 30 deg (required by ESO OB)</change>
         <change>Updated CHARA configuration to have MIRC_5T configurations</change>
       </prerelease>
