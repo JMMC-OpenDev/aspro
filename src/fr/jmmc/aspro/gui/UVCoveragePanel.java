@@ -1457,32 +1457,39 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         return null;
       }
 
+      // merged warning container :
+      final WarningContainer mergedWarningContainer = new WarningContainer();
+
       // merge results (warning, fits ...) :
       if (uvDataCollection.isSingle()) {
         final UVCoverageData uvData1 = uvDataCollection.getFirstUVData();
 
-        uvDataCollection.setWarningContainer(uvData1.getWarningContainer());
+        mergedWarningContainer.addWarningMessages(uvDataCollection.getFirstObsData().getWarningContainer());
+        mergedWarningContainer.addWarningMessages(uvData1.getWarningContainer());
+                
         uvDataCollection.setOiFitsFile(uvData1.getOiFitsFile());
 
       } else {
-
-        // merged warning container :
-        final WarningContainer mergedWarningContainer = new WarningContainer();
 
         if (uvDataCollection.getFirstObservation().getWhen().isNightRestriction()) {
           mergedWarningContainer.addWarningMessage("Multiple configurations cannot be done in one night (night restrictions are only valid for "
                   + uvDataCollection.getFirstObservation().getWhen().getDate().toString() + ")");
         }
 
+        for (int i = 0, len = observations.size(); i < len; i++) {
+          obsData = this.obsDataList.get(i);
+          mergedWarningContainer.addWarningMessages(obsData.getWarningContainer());
+        }
+
         for (UVCoverageData uvData : uvDataList) {
           mergedWarningContainer.addWarningMessages(uvData.getWarningContainer());
         }
 
-        uvDataCollection.setWarningContainer(mergedWarningContainer);
-
         // No merged OIFITS still :
         uvDataCollection.setOiFitsFile(null);
       }
+
+      uvDataCollection.setWarningContainer(mergedWarningContainer);
 
       if (logger.isLoggable(Level.INFO)) {
         logger.info("compute : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");

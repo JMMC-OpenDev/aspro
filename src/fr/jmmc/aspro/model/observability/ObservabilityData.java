@@ -7,6 +7,7 @@ import edu.dartmouth.AstroSkyCalc;
 import fr.jmmc.aspro.model.BaseLine;
 import fr.jmmc.aspro.model.Beam;
 import fr.jmmc.aspro.model.ObservationVersion;
+import fr.jmmc.aspro.model.WarningContainer;
 import fr.jmmc.aspro.model.observability.SunTimeInterval.SunType;
 import fr.jmmc.aspro.model.oi.Target;
 import java.util.Date;
@@ -52,6 +53,8 @@ public final class ObservabilityData {
   private boolean userPops;
   /** optional best PoPs combination */
   private PopCombination bestPops;
+  /** warning container */
+  private final WarningContainer warningContainer = new WarningContainer();
 
   /* other useful data for UV coverage */
   /** AstroSkyCalc instance useful to convert HA in LST or UTC */
@@ -343,4 +346,13 @@ public final class ObservabilityData {
   public StarData getStarData(final String name) {
     return this.mapStarDatas.get(name);
   }
+  
+  /**
+   * Return the warning container
+   * @return warning container
+   */
+  public WarningContainer getWarningContainer() {
+    return warningContainer;
+  }
+  
 }

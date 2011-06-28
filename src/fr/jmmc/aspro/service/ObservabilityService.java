@@ -63,6 +63,8 @@ public final class ObservabilityService {
           ObservabilityService.class.getName());
   /** flag to slow down the service to detect concurrency problems */
   private final static boolean DEBUG_SLOW_SERVICE = false;
+  /** number of best Pops displayed in warnings */
+  private final static int MAX_POPS_IN_WARNING = 15;
 
   /* members */
 
@@ -399,7 +401,8 @@ public final class ObservabilityService {
 
     PopCombination bestPopCombination = null;
 
-    final Map<String, GroupedPopObservabilityData> popMap = new HashMap<String, GroupedPopObservabilityData>();
+    final int capacity = Math.max(32, this.popCombinations.size() / 5);
+    final Map<String, GroupedPopObservabilityData> popMap = new HashMap<String, GroupedPopObservabilityData>(capacity);
 
     final int nTargets = targets.size();
 
@@ -482,9 +485,7 @@ public final class ObservabilityService {
     }
 
     if (popMergeList.isEmpty()) {
-      if (logger.isLoggable(Level.INFO)) {
-        logger.info("Impossible to find a PoPs combination compatible with all targets !");
-      }
+      addWarning("Impossible to find a PoPs combination compatible with all targets !");
     } else {
 
       if (logger.isLoggable(Level.FINE)) {
@@ -515,24 +516,34 @@ public final class ObservabilityService {
       final GroupedPopObservabilityData popBestData = popMergeList.get(end);
 
       if (popMergeList.size() > 1) {
-        GroupedPopObservabilityData pm;
+
+        final List<GroupedPopObservabilityData> bestPoPs = new ArrayList<GroupedPopObservabilityData>(MAX_POPS_IN_WARNING);
+
+        final StringBuilder sbBestPops = new StringBuilder(128);
+        final StringBuilder sbBetterPops = new StringBuilder(128);
+        sbBestPops.append("Equivalent Best PoPs found: ");
 
         // find all equivalent pop combinations :
-        final List<GroupedPopObservabilityData> bestPoPs = new ArrayList<GroupedPopObservabilityData>();
-        for (int i = end; i >= 0; i--) {
-          pm = popMergeList.get(i);
+        for (int i = end, n = 0; i >= 0 && n < MAX_POPS_IN_WARNING; i--, n++) {
+          GroupedPopObservabilityData pm = popMergeList.get(i);
           if (popBestData.getEstimation() == pm.getEstimation()) {
+            sbBestPops.append(pm.getPopCombination().getIdentifier()).append(" ");
             bestPoPs.add(pm);
           } else {
-            break;
+            sbBetterPops.append(pm.getPopCombination().getIdentifier()).append(" ");
+            bestPoPs.add(pm);
           }
         }
+
         if (logger.isLoggable(Level.INFO)) {
           logger.info("best PoPs : " + bestPoPs);
         }
-      } else {
-        if (logger.isLoggable(Level.INFO)) {
-          logger.info("best PoPs : " + popBestData);
+
+        addWarning(sbBestPops.toString());
+
+        if (sbBetterPops.length() > 0) {
+          sbBetterPops.insert(0, "Next good PoPs: ");
+          addWarning(sbBetterPops.toString());
         }
       }
 
@@ -901,19 +912,33 @@ public final class ObservabilityService {
       final PopObservabilityData popBestData = popDataList.get(end);
 
       if (this.popCombinations.size() > 1) {
+        final List<PopObservabilityData> bestPoPs = new ArrayList<PopObservabilityData>(MAX_POPS_IN_WARNING);
+
+        final StringBuilder sbBestPops = new StringBuilder(128);
+        final StringBuilder sbBetterPops = new StringBuilder(128);
+        sbBestPops.append("Equivalent Best PoPs found: ");
+
         // find all equivalent pop combinations :
-        final List<PopObservabilityData> bestPoPs = new ArrayList<PopObservabilityData>();
-        for (int i = end; i >= 0; i--) {
+        for (int i = end, n = 0; i >= 0 && n < MAX_POPS_IN_WARNING; i--, n++) {
           popData = popDataList.get(i);
           if (popBestData.getMaxLength() == popData.getMaxLength()) {
+            sbBestPops.append(popData.getPopCombination().getIdentifier()).append(" ");
             bestPoPs.add(popData);
           } else {
-            break;
+            sbBetterPops.append(popData.getPopCombination().getIdentifier()).append(" ");
+            bestPoPs.add(popData);
           }
         }
 
         if (logger.isLoggable(Level.INFO)) {
           logger.info("best PoPs : " + bestPoPs);
+        }
+
+        addWarning(sbBestPops.toString());
+
+        if (sbBetterPops.length() > 0) {
+          sbBetterPops.insert(0, "Next good PoPs: ");
+          addWarning(sbBetterPops.toString());
         }
       }
 
@@ -1262,19 +1287,19 @@ public final class ObservabilityService {
       } // for loop on beams
 
       // Associate a delay line to the beam :
-      
+
       // Use any Delay line available except if the delay line has a prefered station (CHARA E1 shorter than others)
 
       // used delay lines :
       final HashSet<DelayLine> dlSet = new HashSet<DelayLine>(nBeams);
 
       for (Beam b : this.beams) {
-        
+
         // first find the delay line dedicated to the beam station:
         Station beamStation = b.getStation();
-        
+
         DelayLine selectedDelayLine = null;
-        
+
         for (DelayLine dl : delayLines) {
           if (beamStation.equals(dl.getStation())) {
             if (!dlSet.contains(dl)) {
@@ -1283,7 +1308,7 @@ public final class ObservabilityService {
             break;
           }
         }
-        
+
         // If undefined, use any available delay line:
         if (selectedDelayLine == null) {
           for (DelayLine dl : delayLines) {
@@ -1293,12 +1318,12 @@ public final class ObservabilityService {
             }
           }
         }
-        
+
         if (selectedDelayLine != null) {
           dlSet.add(selectedDelayLine);
-          
+
           b.setDelayLine(selectedDelayLine);
-          
+
         } else {
           // To be checked 
           throw new IllegalStateException("Impossible to associate a delay line to the beam [" + b + "].");
@@ -1311,7 +1336,7 @@ public final class ObservabilityService {
       if (logger.isLoggable(Level.WARNING)) {
         logger.warning("Not validated code path : Case with no channel definition nor switchyard !");
       }
-      
+
       // Warning : Not tested because both CHARA and VLTI use a switchyard !
 
       // Simple association between DL / Station = DL_n linked to Station_n
@@ -1339,9 +1364,9 @@ public final class ObservabilityService {
       int i = 0;
       for (Beam b : this.beams) {
         logger.fine("beam [" + (i++) + "] : " + b.toString());
-      }    
+      }
     }
-    
+
     this.data.setBeams(this.beams);
 
     if (logger.isLoggable(Level.FINE)) {
@@ -1822,7 +1847,7 @@ public final class ObservabilityService {
       for (Range range : ranges) {
         jdRanges.add(this.sc.convertHAToJDRange(range, precRA));
       }
-      
+
       final List<DateTimeInterval> dateIntervals = new ArrayList<DateTimeInterval>(jdRanges.size() + 2);
       // convert JD ranges to date ranges :
       for (Range range : jdRanges) {
@@ -1836,7 +1861,7 @@ public final class ObservabilityService {
       // Replace the 24:00:00 date by 00:00:00 to merge contiguous intervals in LST :
       final Date lst0 = getData().getDateMin();
       final Date lst24 = getData().getDateMax();
-      
+
       boolean found = false;
       DateTimeInterval interval;
       for (final ListIterator<DateTimeInterval> it = dateIntervals.listIterator(); it.hasNext();) {
@@ -1875,12 +1900,23 @@ public final class ObservabilityService {
   private double jdCenter() {
     return (this.jdLower + this.jdUpper) / 2d;
   }
-  
+
   /**
    * Return the observability data (available after compute has been invoked)
    * @return observability data
    */
   public ObservabilityData getData() {
     return this.data;
+  }
+
+  /**
+   * Add a warning message in the OIFits file
+   * @param msg message to add
+   */
+  private void addWarning(final String msg) {
+    if (logger.isLoggable(Level.INFO)) {
+      logger.info(msg);
+    }
+    this.data.getWarningContainer().addWarningMessage(msg);
   }
 }
