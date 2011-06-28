@@ -40,11 +40,8 @@ import fr.jmmc.aspro.service.HorizonService.Profile;
 import fr.jmmc.aspro.util.CombUtils;
 import fr.jmmc.aspro.util.TestUtils;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -120,8 +117,6 @@ public final class ObservabilityService {
   private List<Range> wRanges = null;
   /** list of Pop combinations with pop delays per baseline */
   private List<PopCombination> popCombinations = null;
-  /** selected target (used by OB) */
-  private Target selectedTarget = null;
   /** flag to disable the observability restriction due to the night */
   private boolean ignoreUseNightLimit = false;
 
@@ -152,48 +147,25 @@ public final class ObservabilityService {
   }
 
   /**
-   * Specific Constructor to prepare CHARA Observing blocks for all targets (LST) ignoring night restrictions (OB VEGA only)
+   * Specific Constructor to prepare VLTI Observing blocks (LST)
    * Note : This service is statefull so it can not be reused by several calls.
    *
    * @param observation observation settings
-   * @param minElev minimum elevation (deg)
    */
-  public ObservabilityService(final ObservationSetting observation, final double minElev) {
-    this(observation, null, minElev, true);
+  public ObservabilityService(final ObservationSetting observation) {
+    this(observation, false);
   }
 
   /**
-   * Specific Constructor to prepare VLTI Observing blocks for a single target (LST) (OB VLTI only)
+   * Specific Constructor to prepare Observing blocks (LST) using astronomical night (-18 deg) ignoring night restrictions (OB VEGA only)
    * Note : This service is statefull so it can not be reused by several calls.
    *
    * @param observation observation settings
-   * @param target target to use
-   * @param minElev minimum elevation (deg)
-   */
-  public ObservabilityService(final ObservationSetting observation,
-                              final Target target, final double minElev) {
-    this(observation, target, minElev, false);
-  }
-
-  /**
-   * Specific Constructor to prepare Observing blocks
-   * Note : This service is statefull so it can not be reused by several calls.
-   *
-   * @param observation observation settings
-   * @param target target to use
-   * @param minElev minimum elevation (deg)
    * @param ignoreNightLimits true to disable the observability restriction due to the night
    */
-  private ObservabilityService(final ObservationSetting observation,
-                               final Target target, final double minElev, final boolean ignoreNightLimits) {
-    // use LST :
+  public ObservabilityService(final ObservationSetting observation, final boolean ignoreNightLimits) {
+    // use LST without using night center:
     this(observation, true, false, false, false, SunType.Night);
-
-    // select target :
-    this.selectedTarget = target;
-
-    // force to use the given minimum elevation :
-    this.minElev = minElev;
 
     // ignore night restrictions :
     this.ignoreUseNightLimit = ignoreNightLimits;
@@ -221,12 +193,7 @@ public final class ObservabilityService {
     if (this.doBaseLineLimits) {
       targets = generateTargetsForBaseLineLimits();
     } else {
-      if (this.selectedTarget == null) {
-        targets = this.observation.getTargets();
-      } else {
-        // use the given target (OB) :
-        targets = Arrays.asList(selectedTarget);
-      }
+      targets = this.observation.getTargets();
     }
 
     // define the targets anyway :
@@ -1855,7 +1822,7 @@ public final class ObservabilityService {
       for (Range range : ranges) {
         jdRanges.add(this.sc.convertHAToJDRange(range, precRA));
       }
-
+      
       final List<DateTimeInterval> dateIntervals = new ArrayList<DateTimeInterval>(jdRanges.size() + 2);
       // convert JD ranges to date ranges :
       for (Range range : jdRanges) {
@@ -1867,21 +1834,9 @@ public final class ObservabilityService {
       }
 
       // Replace the 24:00:00 date by 00:00:00 to merge contiguous intervals in LST :
-      final Calendar cal = new GregorianCalendar();
-      cal.set(Calendar.HOUR_OF_DAY, 0);
-      cal.set(Calendar.MINUTE, 0);
-      cal.set(Calendar.SECOND, 0);
-      // fix milliseconds to 0 to be able to compare date instances :
-      cal.set(Calendar.MILLISECOND, 0);
-
-      final Date lst0 = cal.getTime();
-
-      cal.set(Calendar.HOUR_OF_DAY, 24);
-      cal.set(Calendar.MINUTE, 0);
-      cal.set(Calendar.SECOND, 0);
-
-      final Date lst24 = cal.getTime();
-
+      final Date lst0 = getData().getDateMin();
+      final Date lst24 = getData().getDateMax();
+      
       boolean found = false;
       DateTimeInterval interval;
       for (final ListIterator<DateTimeInterval> it = dateIntervals.listIterator(); it.hasNext();) {
@@ -1919,5 +1874,13 @@ public final class ObservabilityService {
    */
   private double jdCenter() {
     return (this.jdLower + this.jdUpper) / 2d;
+  }
+  
+  /**
+   * Return the observability data (available after compute has been invoked)
+   * @return observability data
+   */
+  public ObservabilityData getData() {
+    return this.data;
   }
 }

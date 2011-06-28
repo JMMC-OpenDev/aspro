@@ -4,12 +4,16 @@
 package fr.jmmc.aspro.gui.action;
 
 import fr.jmmc.aspro.FilePreferences;
+import fr.jmmc.aspro.model.ObservationManager;
+import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.ob.ExportOBVega;
 import fr.jmmc.mcs.gui.MessagePane;
 import fr.jmmc.mcs.gui.StatusBar;
 import fr.jmmc.mcs.util.MimeType;
 import java.io.File;
 import java.io.IOException;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.logging.Level;
 import javax.swing.JFileChooser;
 
@@ -26,6 +30,8 @@ public final class ExportOBVegaAction {
   public final static String className = "fr.jmmc.aspro.gui.action.ExportOBVegaAction";
   /** Class logger */
   private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(className);
+  /** double formatter for min elevation */
+  protected final static NumberFormat df1 = new DecimalFormat("0.#");
   /** StarList MimeType */
   private final static MimeType mimeType = MimeType.STAR_LIST;
   /** action singleton */
@@ -84,6 +90,16 @@ public final class ExportOBVegaAction {
 
       try {
         ExportOBVega.process(file);
+
+        // use main observation :
+        final ObservationSetting observation = ObservationManager.getInstance().getMainObservation();
+        final double minElev = observation.getInterferometerConfiguration().getMinElevation();
+
+        final String message = "Observing blocks exported with following settings:\n"
+                + "  - night restrictions disabled\n"
+                + "  - minimum elevation set to " + df1.format(minElev) + " deg";
+
+        MessagePane.showMessage(message);
 
         StatusBar.show(file.getName() + " created.");
 

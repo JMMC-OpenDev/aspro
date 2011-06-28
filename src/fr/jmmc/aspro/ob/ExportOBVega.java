@@ -98,8 +98,8 @@ public class ExportOBVega {
     // use main observation :
     final ObservationSetting observation = ObservationManager.getInstance().getMainObservation();
 
-    // Compute Observability data with min elevation = 30 deg and without night restrictions :
-    final ObservabilityService os = new ObservabilityService(observation, AsproConstants.OB_MIN_ELEVATION);
+    // Compute Observability data using astronomical night (-18 deg) without night restrictions :
+    final ObservabilityService os = new ObservabilityService(observation, true);
     final ObservabilityData obsData = os.compute();
 
     // Prepare the Chara Setup according to the Pop configuration :

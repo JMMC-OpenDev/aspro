@@ -110,13 +110,16 @@ public class ExportOBVLTI {
    * According to the instrument defined in the observation, it uses ExportOBAmber, ExportOBMidi or ExportOBPionier.
    * @param file file to save
    * @param observation observation to use
+   * @param os observability service with computed data
    * @param target target to process
    *
    * @throws IllegalStateException if the template file is not found
    * @throws IllegalArgumentException if the instrument is not supported (only AMBER/MIDI/VEGA)
    * @throws IOException if an I/O exception occured while writing the observing block
    */
-  public static void process(final File file, final ObservationSetting observation, final Target target) throws IllegalStateException, IllegalArgumentException, IOException {
+  public static void process(final File file, final ObservationSetting observation, 
+                                              final ObservabilityService os,
+                                              final Target target) throws IllegalStateException, IllegalArgumentException, IOException {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("process " + target.getName() + " to " + file);
     }
@@ -126,11 +129,11 @@ public class ExportOBVLTI {
       final String instrumentName = observation.getInstrumentConfiguration().getName();
 
       if (AsproConstants.INS_AMBER.equals(instrumentName)) {
-        ExportOBAmber.generate(file, observation, target);
+        ExportOBAmber.generate(file, observation, os, target);
       } else if (AsproConstants.INS_MIDI.equals(instrumentName)) {
-        ExportOBMidi.generate(file, observation, target);
+        ExportOBMidi.generate(file, observation, os, target);
       } else if (AsproConstants.INS_PIONIER.equals(instrumentName)) {
-        ExportOBPionier.generate(file, observation, target);
+        ExportOBPionier.generate(file, observation, os, target);
       } else {
         throw new IllegalArgumentException("Aspro 2 can not generate an Observing Block for this instrument [" + instrumentName + "] !");
       }
@@ -142,11 +145,14 @@ public class ExportOBVLTI {
    * @param template OB template
    * @param fileName OB file name
    * @param observation observation settings
+   * @param os observability service with computed data
    * @param target target to process
    * @return processed template
    */
   protected static String processCommon(final String template, final String fileName,
-                                              final ObservationSetting observation, final Target target) {
+                                              final ObservationSetting observation, 
+                                              final ObservabilityService os,
+                                              final Target target) {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("processCommon " + target.getName());
     }
@@ -191,7 +197,7 @@ public class ExportOBVLTI {
 
     // --- Date / Time constraints ---
 
-    document = processDateTime(document, observation, target);
+    document = processDateTime(document, observation, os, target);
 
     // --- Target information ---
 
@@ -246,19 +252,24 @@ public class ExportOBVLTI {
    * Process the Date / Time constraints for the given target
    * @param doc OB document
    * @param observation observation settings
+   * @param os observability service with computed data
    * @param target target to process
    * @return processed template
    */
-  private static String processDateTime(String doc, final ObservationSetting observation, final Target target) {
+  private static String processDateTime(String doc, final ObservationSetting observation, 
+                                                    final ObservabilityService os, final Target target) {
 
     String document = doc;
     String lstTimeIntervals = "";
     String absTimeList = "";
 
     // Compute Observability data with min elevation = 30 deg (date and night restrictions depend on the current observation) :
+/*    
     final ObservabilityService os = new ObservabilityService(observation, target, AsproConstants.OB_MIN_ELEVATION);
     final ObservabilityData obsData = os.compute();
-
+*/
+    final ObservabilityData obsData = os.getData();
+            
     final StarData starData = obsData.getStarData(target.getName());
     if (starData != null) {
       final List<Range> obsRangesHA = starData.getObsRangesHA();

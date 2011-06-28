@@ -5,6 +5,7 @@ package fr.jmmc.aspro.ob;
 
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Target;
+import fr.jmmc.aspro.service.ObservabilityService;
 import fr.jmmc.mcs.util.FileUtils;
 import java.io.File;
 import java.io.IOException;
@@ -35,12 +36,14 @@ public final class ExportOBMidi extends ExportOBVLTI {
    * Generate the OB file for the given target
    * @param file file to save
    * @param observation observation settings
+   * @param os observability service with computed data
    * @param target target to process
    *
    * @throws IllegalStateException if the template file is not found or can not be read
    * @throws IOException if an I/O exception occured while writing the observing block
    */
-  public static void generate(final File file, final ObservationSetting observation, final Target target)
+  public static void generate(final File file, final ObservationSetting observation, 
+                                               final ObservabilityService os, final Target target)
                         throws IllegalStateException, IOException {
     
     if (logger.isLoggable(Level.FINE)) {
@@ -51,7 +54,7 @@ public final class ExportOBMidi extends ExportOBVLTI {
     final String template = FileUtils.readFile(TEMPLATE_FILE);
 
     // process common VLTI part :
-    String document = processCommon(template, file.getName(), observation, target);
+    String document = processCommon(template, file.getName(), observation, os, target);
 
     /*
      * TODO : compute fluxes from mag N in Jansky Jy unit :

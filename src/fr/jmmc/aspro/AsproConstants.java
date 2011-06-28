@@ -31,8 +31,6 @@ public interface AsproConstants {
   public static final double DEFAULT_MIN_ELEVATION = 45d;
   /** default maximum elevation = 85 degrees */
   public static final double DEFAULT_MAX_ELEVATION = 85d;
-  /** minimum elevation for OB generation = 30 degrees */
-  public static final double OB_MIN_ELEVATION = 30d;
   /** default observation duration per calibrated point = 300 seconds i.e. 5 minutes */
   public static final double DEFAULT_OBSERVATION_DURATION = 300d;
   /** default value for checkbox Night Limit = true */

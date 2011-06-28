@@ -11,12 +11,15 @@ import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetInformation;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.aspro.ob.ExportOBVLTI;
+import fr.jmmc.aspro.service.ObservabilityService;
 import fr.jmmc.mcs.gui.DismissableMessagePane;
 import fr.jmmc.mcs.gui.MessagePane;
 import fr.jmmc.mcs.gui.StatusBar;
 import fr.jmmc.mcs.util.MimeType;
 import java.io.File;
 import java.io.IOException;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.List;
 import java.util.logging.Level;
 import javax.swing.JFileChooser;
@@ -34,6 +37,8 @@ public final class ExportOBVLTIAction {
   public final static String className = "fr.jmmc.aspro.gui.action.ExportOBVLTIAction";
   /** Class logger */
   private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(className);
+  /** double formatter for min elevation */
+  protected final static NumberFormat df1 = new DecimalFormat("0.#");
   /** OBX MimeType */
   private final static MimeType mimeType = MimeType.OBX;
   /** Eso warning message */
@@ -128,20 +133,29 @@ public final class ExportOBVLTIAction {
 
       // use main observation :
       final ObservationSetting observation = ObservationManager.getInstance().getMainObservation();
-
+      final double minElev = observation.getInterferometerConfiguration().getMinElevation();
+      
       try {
+
+        // Compute Observability data using astronomical night (-18 deg)
+        // (date and night restrictions depend on the current observation) :
+        final ObservabilityService os = new ObservabilityService(observation);
+        
+        // compute observability data:
+        os.compute();
         
         if (exportAll) {
 
           // report buffer :
-          sb.append("Export Observing Blocks for all targets");
-          sb.append(" in folder :\n").append(directory).append("\n\n");
+          sb.append("Observing Blocks exported for all targets with following settings:\n");
+          sb.append("  - minimum elevation set to ").append(df1.format(minElev)).append(" deg\n");
+          sb.append("  - output folder :\n").append(directory).append("\n\n");
 
           for (Target target : targets) {
 
             file = new File(directory, ExportOBVLTI.generateOBFileName(target));
             
-            ExportOBVLTI.process(file, observation, target);
+            ExportOBVLTI.process(file, observation, os, target);
 
             sb.append(file.getName()).append("\n");
           }
@@ -153,10 +167,11 @@ public final class ExportOBVLTIAction {
           final Target target = targets.get(0);
            
           // report buffer :
-          sb.append("Export Observing Blocks for target [").append(target.getName());
-          sb.append("] in folder :\n").append(directory).append("\n\n");
+          sb.append("Observing Blocks exported for target [").append(target.getName()).append("] with following settings:\n");
+          sb.append("  - minimum elevation set to ").append(df1.format(minElev)).append(" deg\n");
+          sb.append("  - output folder :\n").append(directory).append("\n\n");
 
-          ExportOBVLTI.process(mainFile, observation, target);
+          ExportOBVLTI.process(mainFile, observation, os, target);
           
           sb.append(mainFile.getName()).append("\n");
 
@@ -172,7 +187,7 @@ public final class ExportOBVLTIAction {
                 for (Target calibrator : calibrators) {
                   file = new File(directory, ExportOBVLTI.generateOBFileName(calibrator));
 
-                  ExportOBVLTI.process(file, observation, calibrator);
+                  ExportOBVLTI.process(file, observation, os, calibrator);
                   sb.append(file.getName()).append("\n");
                 }
               }
