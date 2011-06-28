@@ -265,7 +265,7 @@ public final class UVCoverageService {
    * @param haElev rise/set ha
    * @return ha or -haElev or haElev
    */
-  private final static double checkHA(final double ha, final double haElev) {
+  private static double checkHA(final double ha, final double haElev) {
     if (ha < -haElev) {
       return -haElev;
     }
@@ -534,7 +534,7 @@ public final class UVCoverageService {
    * Add a warning message in the OIFits file
    * @param msg message to add
    */
-  protected final void addWarning(final String msg) {
+  private void addWarning(final String msg) {
     this.data.getWarningContainer().addWarningMessage(msg);
   }
 }
