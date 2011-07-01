@@ -17,7 +17,7 @@ import java.util.logging.Level;
  * This class manages the computation to find the base line limits
  * @author bourgesl
  */
-public class DelayLineService {
+public final class DelayLineService {
 
   /** Class Name */
   private static final String className_ = "fr.jmmc.aspro.service.DelayLineService";
@@ -56,11 +56,15 @@ public class DelayLineService {
     //List<Range>
     BaseLine bl;
     Range wRange;
+    double[] wExtrema;
     for (int i = 0; i < size; i++) {
       bl = baseLines.get(i);
       wRange = wRanges.get(i);
 
-      rangesBL.add(findHAIntervalsForBaseLine(cosDec, sinDec, bl, wRange));
+      // First check the W limits :
+      wExtrema = findWExtrema(cosDec, sinDec, bl);
+
+      rangesBL.add(findHAIntervalsForBaseLine(cosDec, sinDec, bl, wExtrema, wRange));
     }
 
     return rangesBL;
@@ -76,48 +80,48 @@ public class DelayLineService {
    * @param cosDec cosinus of target declination
    * @param sinDec sinus of target declination
    * @param baseLine base line
+   * @param wExtrema W extrema values for the given baseline
    * @param wRange [wMin - wMax] range
    * @return intervals (hour angles) in dec hours.
    */
-  public static List<Range> findHAIntervalsForBaseLine(final double cosDec, final double sinDec, final BaseLine baseLine, final Range wRange) {
+  public static List<Range> findHAIntervalsForBaseLine(final double cosDec, final double sinDec, final BaseLine baseLine, 
+                                                       double[] wExtrema, final Range wRange) {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("baseLine : " + baseLine);
       logger.fine("W range  : " + wRange);
     }
-
-    // First check the W limits :
-    final double[] wExtrema = findWExtrema(cosDec, sinDec, baseLine);
-
+  
     if (wExtrema == null) {
       // no solution :
       return Collections.emptyList();
     }
 
     // test if [WMIN,WMAX] has intersection with MAXW[1-2] :
-    final double w1 = Math.min(wExtrema[0], wExtrema[1]);
-    final double w2 = Math.max(wExtrema[0], wExtrema[1]);
-
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("W extrema = " + w1 + ", " + w2);
-    }
+    final double wLower = wExtrema[0];
+    final double wUpper = wExtrema[1];
 
     final double wMin = wRange.getMin();
     final double wMax = wRange.getMax();
-    if (wMax < w1 || wMin > w2) {
+    
+    if (wMax < wLower || wMin > wUpper) {
       // outside range, no solution :
       if (logger.isLoggable(Level.FINE)) {
-        logger.fine("W outside range : " + baseLine.getName() + " : " + wRange);
+        logger.fine("W outside range : " + baseLine.getName() + " : " + wRange + " / W extrema = [" + wLower + ", " + wUpper + "]");
       }
       return Collections.emptyList();
     }
-    if (w1 > wMin && w2 < wMax) {
+    if (wLower > wMin && wUpper < wMax) {
       // always inside range = full interval [-12h;12h]:
       if (logger.isLoggable(Level.FINE)) {
-        logger.fine("W inside range : " + baseLine.getName() + " : " + wRange);
+        logger.fine("W inside range : " + baseLine.getName() + " : " + wRange + " / W extrema = [" + wLower + ", " + wUpper + "]");
       }
       return FULL_RANGE_LIST;
     }
 
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("W extrema = [" + wLower + ", " + wUpper + "]");
+    }
+    
     double[] haValues;
 
     // list of hour angles (rad) in [-PI;PI] range :
@@ -273,7 +277,7 @@ public class DelayLineService {
    * @param baseLine used base line
    * @return 2 W extrema or null
    */
-  private static double[] findWExtrema(final double cosDec, final double sinDec, final BaseLine baseLine) {
+  public static double[] findWExtrema(final double cosDec, final double sinDec, final BaseLine baseLine) {
     // A = Y
     final double a = baseLine.getY();
     // B = (2 Y)
@@ -287,10 +291,15 @@ public class DelayLineService {
       // 2 solutions :
       // w=cos(D)(cos(H)*X-sin(H)*Y)+sin(D)*Z
 
-      return new double[]{
-        CalcUVW.computeW(cosDec, sinDec, baseLine, haValues[0]),
-        CalcUVW.computeW(cosDec, sinDec, baseLine, haValues[1])
-      };
+      final double w1 = CalcUVW.computeW(cosDec, sinDec, baseLine, haValues[0]);
+      final double w2 = CalcUVW.computeW(cosDec, sinDec, baseLine, haValues[1]);
+      
+      // Ensure lower < higher:
+      if (w1 < w2) {
+        return new double[] { w1, w2 };
+      } else {
+        return new double[] { w2, w1 };
+      }
     }
 
     return null;

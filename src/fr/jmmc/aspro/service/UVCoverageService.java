@@ -206,6 +206,9 @@ public final class UVCoverageService {
     // precessed target declination in rad :
     final double precDEC = Math.toRadians(this.starData.getPrecDEC());
 
+    final double cosDec = Math.cos(precDEC);
+    final double sinDec = Math.sin(precDEC);
+
     final int sizeBL = this.baseLines.size();
     final List<UVBaseLineData> targetUVRiseSet = new ArrayList<UVBaseLineData>(sizeBL);
 
@@ -233,7 +236,7 @@ public final class UVCoverageService {
 
         // Baseline projected vector (m) :
         u[j] = CalcUVW.computeU(baseLine, haRad);
-        v[j] = CalcUVW.computeV(precDEC, baseLine, haRad);
+        v[j] = CalcUVW.computeV(cosDec, sinDec, baseLine, haRad);
 
         // wavelength correction :
 
@@ -344,6 +347,9 @@ public final class UVCoverageService {
       // precessed target declination in rad :
       final double precDEC = Math.toRadians(this.starData.getPrecDEC());
 
+      final double cosDec = Math.cos(precDEC);
+      final double sinDec = Math.sin(precDEC);
+
       final int sizeBL = this.baseLines.size();
       final List<UVRangeBaseLineData> targetUVObservability = new ArrayList<UVRangeBaseLineData>(sizeBL);
 
@@ -379,7 +385,7 @@ public final class UVCoverageService {
 
           // Baseline projected vector (m) :
           u[j] = CalcUVW.computeU(baseLine, haRad);
-          v[j] = CalcUVW.computeV(precDEC, baseLine, haRad);
+          v[j] = CalcUVW.computeV(cosDec, sinDec, baseLine, haRad);
 
           // wavelength correction :
 

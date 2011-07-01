@@ -40,6 +40,7 @@ import fr.jmmc.aspro.service.HorizonService.Profile;
 import fr.jmmc.aspro.util.CombUtils;
 import fr.jmmc.aspro.util.TestUtils;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -735,7 +736,7 @@ public final class ObservabilityService {
       }
 
       // observable ranges (jd) :
-      final List<Range> obsRanges = new ArrayList<Range>();
+      final List<Range> obsRanges = new ArrayList<Range>(11);
 
       if (this.doDetailedOutput) {
 
@@ -973,7 +974,7 @@ public final class ObservabilityService {
 
     // For all PoP combinations : find the HA interval merged with the HA Rise/set interval
     // list of observability data associated to a pop combination :
-    final List<PopObservabilityData> popDataList = new ArrayList<PopObservabilityData>();
+    final List<PopObservabilityData> popDataList = new ArrayList<PopObservabilityData>(20);
 
     // Current pop observability :
     PopObservabilityData popData;
@@ -985,12 +986,30 @@ public final class ObservabilityService {
     List<Range> ranges;
 
     // Temporary lists to merge HA ranges with Rise/set range :
-    final List<Range> flatRanges = new ArrayList<Range>();
+    final List<Range> flatRanges = new ArrayList<Range>(2 * sizeBL + 2);
 
     // w range using the pop offset for a given base line :
     final Range wRangeWithOffset = new Range();
 
     BaseLine bl;
+    double[] wExtrema;
+
+    // precompute W extrema per baseline:
+    final List<double[]> wExtremas = new ArrayList<double[]>(sizeBL);
+
+    // For every Base Line :
+    for (int i = 0; i < sizeBL; i++) {
+      bl = this.baseLines.get(i);
+
+      wExtrema = DelayLineService.findWExtrema(cosDec, sinDec, bl);
+
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("wExtrema[" + bl.getName() + "] = " + Arrays.toString(wExtrema));
+      }
+
+      wExtremas.add(wExtrema);
+    }
+
     Range wRange;
     Double offset;
 
@@ -1010,6 +1029,7 @@ public final class ObservabilityService {
       // For every Base Line :
       for (int i = 0; i < sizeBL; i++) {
         bl = this.baseLines.get(i);
+        wExtrema = wExtremas.get(i);
         wRange = this.wRanges.get(i);
         offset = popOffsets.get(i);
 
@@ -1022,7 +1042,7 @@ public final class ObservabilityService {
           return null;
         }
 
-        ranges = DelayLineService.findHAIntervalsForBaseLine(cosDec, sinDec, bl, wRangeWithOffset);
+        ranges = DelayLineService.findHAIntervalsForBaseLine(cosDec, sinDec, bl, wExtrema, wRangeWithOffset);
 
         if (ranges.isEmpty()) {
           // this base line is incompatible with that W range :
@@ -1521,7 +1541,7 @@ public final class ObservabilityService {
 
     if (sunTimes != null && !sunTimes.isEmpty()) {
       final int nbInterval = sunTimes.size() - 1;
-      intervals = new ArrayList<SunTimeInterval>();
+      intervals = new ArrayList<SunTimeInterval>(9);
 
       // LST0 reference used to convert HA in JD:
       final double jdLst0 = this.sc.getJdForLst0();
