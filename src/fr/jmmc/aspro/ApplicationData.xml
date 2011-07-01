@@ -7,7 +7,7 @@
 
 <ApplicationData link="http://www.jmmc.fr/aspro2">
 
-  <program name="Aspro2" version="0.8.1 beta 8"/>
+  <program name="Aspro2" version="0.8.1 beta 9"/>
 
   <compilation date="28/06/2011" compiler="JDK 1.5.0_16"/>
 
@@ -203,6 +203,9 @@
 
   <releasenotes>
     <release version="0.8.1">
+      <prerelease version="0.8.1 beta 9">
+        <change>Optimized best Pops algorithm (CHARA)</change>
+      </prerelease>
       <prerelease version="0.8.1 beta 8">
         <change>Added information about best PoPs in warnings (CHARA)</change>
         <change>Updated Export to Observing blocks (VEGA, VLTI) to use the user minimum elevation instead of 30 deg (required by ESO OB)</change>
