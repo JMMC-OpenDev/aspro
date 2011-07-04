@@ -107,7 +107,16 @@ public class Pop
    * @return string like '1...N'
    */
   public static String toString(final java.util.List<Pop> popList) {
-    final StringBuilder sb = new StringBuilder(popList.size());
+    return toString(new StringBuilder(popList.size()), popList);
+  }
+  
+  /**
+   * Return a string containing only the pop identifiers
+   * @param sb string builder used to build the identifier (not empty when exiting this method)
+   * @param popList PoP1 ... PoPN
+   * @return string like '1...N'
+   */
+  public static String toString(final StringBuilder sb, final java.util.List<Pop> popList) {
     for (Pop pop : popList) {
       sb.append(pop.getIndex());
     }

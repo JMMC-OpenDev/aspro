@@ -18,8 +18,6 @@ public final class PopObservabilityData implements Comparable<PopObservabilityDa
   private final PopCombination popCombination;
   /** list of HA ranges per BL */
   private final List<List<Range>> rangesBL;
-  /** list of HA ranges merged with the target Rise / Set */
-  private List<Range> mergeRanges;
   /** maximum length of an HA range after merging HA ranges per BL with Rise/Set range */
   private double maxLength;
 
@@ -39,8 +37,9 @@ public final class PopObservabilityData implements Comparable<PopObservabilityDa
    * Compute the total observability length
    * @param nValid number of ranges to consider a point is valid
    * @param flatRanges ranges to merge
+   * @param mergeRanges merged ranges (temporary use) = empty list with 2 buckets
    */
-  public void computeMaxLength(final int nValid, final List<Range> flatRanges) {
+  public void computeMaxLength(final int nValid, final List<Range> flatRanges, final List<Range> mergeRanges) {
     // flatten ranges :
     for (List<Range> ranges : this.rangesBL) {
       if (ranges != null) {
@@ -51,14 +50,13 @@ public final class PopObservabilityData implements Comparable<PopObservabilityDa
     }
 
     // Merge HA ranges with HA Rise/set ranges :
-    this.mergeRanges = Range.intersectRanges(flatRanges, nValid);
+    Range.intersectRanges(flatRanges, nValid, mergeRanges);
 
     double maxLen = 0d;
 
     if (mergeRanges != null) {
-      double len;
       for (Range range : mergeRanges) {
-        len = range.getLength();
+        final double len = range.getLength();
         if (len > maxLen) {
           maxLen = len;
         }
@@ -68,6 +66,7 @@ public final class PopObservabilityData implements Comparable<PopObservabilityDa
     this.maxLength = maxLen;
 
     flatRanges.clear();
+    mergeRanges.clear();
   }
 
   /**
@@ -109,14 +108,6 @@ public final class PopObservabilityData implements Comparable<PopObservabilityDa
    */
   public List<List<Range>> getRangesBL() {
     return rangesBL;
-  }
-
-  /**
-   * Return the list of HA ranges merged with the target Rise / Set
-   * @return list of HA ranges merged with the target Rise / Set
-   */
-  public List<Range> getMergeRanges() {
-    return mergeRanges;
   }
 
   @Override

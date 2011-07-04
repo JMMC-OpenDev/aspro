@@ -18,15 +18,29 @@ public final class PopCombination {
   /** list of Pops with the same order than the station list */
   private final List<Pop> popList;
   /** list of pop delays (offset) corresponding to each base line (2 telescopes) */
-  private List<Double> popOffsets;
+  private double[] popOffsets;
+
+  /**
+   * Factory method : create one PopCombination for the given list of PoPs
+   * @param popList list of PoPs
+   * @param sb string builder used to build the identifier (empty when returning from this method)
+   * @return one PopCombination for the given list of PoPs
+   */
+  public static PopCombination newInstance(final List<Pop> popList, final StringBuilder sb) {
+    final String id = Pop.toString(sb, popList);
+    // recycle the given string builder
+    sb.setLength(0);
+    return new PopCombination(id, popList);
+  }
 
   /**
    * Constructor with the given list of Pops
+   * @param identifier identifier of this combination
    * @param popList list of Pops
    */
-  public PopCombination(final List<Pop> popList) {
+  private PopCombination(final String identifier, final List<Pop> popList) {
     this.popList = popList;
-    this.identifier = Pop.toString(this.popList);
+    this.identifier = identifier;
   }
 
   /**
@@ -46,18 +60,18 @@ public final class PopCombination {
   }
 
   /**
-   * Return the list of pop delays
-   * @return list of pop delays
+   * Return the list of pop delays per baseline
+   * @return list of pop delays per baseline
    */
-  public List<Double> getPopOffsets() {
+  public double[] getPopOffsets() {
     return popOffsets;
   }
 
   /**
-   * Define the list of pop delays
-   * @param popOffsets list of pop delays
+   * Define the list of pop delays per baseline
+   * @param popOffsets list of pop delays per baseline
    */
-  public void setPopOffsets(List<Double> popOffsets) {
+  public void setPopOffsets(final double[] popOffsets) {
     this.popOffsets = popOffsets;
   }
 

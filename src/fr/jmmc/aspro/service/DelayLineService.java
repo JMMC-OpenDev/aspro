@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * This class manages the computation to find the base line limits
@@ -19,11 +20,10 @@ import java.util.logging.Level;
  */
 public final class DelayLineService {
 
-  /** Class Name */
-  private static final String className_ = "fr.jmmc.aspro.service.DelayLineService";
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
-          className_);
+  private static final Logger logger = Logger.getLogger(DelayLineService.class.getName());
+  /** constant flag indicating if the class logger's level is FINE */
+  private static final boolean IS_LOGGABLE_FINE = logger.isLoggable(Level.FINE);
   /** a list containing a single full range (-12; +12) */
   private static final List<Range> FULL_RANGE_LIST = Arrays.asList(new Range(AsproConstants.HA_MIN, AsproConstants.HA_MAX));
 
@@ -53,7 +53,9 @@ public final class DelayLineService {
 
     final List<List<Range>> rangesBL = new ArrayList<List<Range>>(size);
 
-    //List<Range>
+    final double[] ha = new double[2];
+    final double[] haValues = new double[6];
+    
     BaseLine bl;
     Range wRange;
     double[] wExtrema;
@@ -64,7 +66,7 @@ public final class DelayLineService {
       // First check the W limits :
       wExtrema = findWExtrema(cosDec, sinDec, bl);
 
-      rangesBL.add(findHAIntervalsForBaseLine(cosDec, sinDec, bl, wExtrema, wRange));
+      rangesBL.add(findHAIntervalsForBaseLine(cosDec, sinDec, bl, wExtrema, wRange, ha, haValues));
     }
 
     return rangesBL;
@@ -82,11 +84,14 @@ public final class DelayLineService {
    * @param baseLine base line
    * @param wExtrema W extrema values for the given baseline
    * @param wRange [wMin - wMax] range
+   * @param ha double[2] array to avoid array allocations
+   * @param haValues double[6] array to avoid array allocations
    * @return intervals (hour angles) in dec hours.
    */
   public static List<Range> findHAIntervalsForBaseLine(final double cosDec, final double sinDec, final BaseLine baseLine, 
-                                                       double[] wExtrema, final Range wRange) {
-    if (logger.isLoggable(Level.FINE)) {
+                                                       final double[] wExtrema, final Range wRange,
+                                                       final double[] ha, final double[] haValues) {
+    if (IS_LOGGABLE_FINE) {
       logger.fine("baseLine : " + baseLine);
       logger.fine("W range  : " + wRange);
     }
@@ -105,84 +110,77 @@ public final class DelayLineService {
     
     if (wMax < wLower || wMin > wUpper) {
       // outside range, no solution :
-      if (logger.isLoggable(Level.FINE)) {
+      if (IS_LOGGABLE_FINE) {
         logger.fine("W outside range : " + baseLine.getName() + " : " + wRange + " / W extrema = [" + wLower + ", " + wUpper + "]");
       }
       return Collections.emptyList();
     }
     if (wLower > wMin && wUpper < wMax) {
       // always inside range = full interval [-12h;12h]:
-      if (logger.isLoggable(Level.FINE)) {
+      if (IS_LOGGABLE_FINE) {
         logger.fine("W inside range : " + baseLine.getName() + " : " + wRange + " / W extrema = [" + wLower + ", " + wUpper + "]");
       }
       return FULL_RANGE_LIST;
     }
 
-    if (logger.isLoggable(Level.FINE)) {
+    if (IS_LOGGABLE_FINE) {
       logger.fine("W extrema = [" + wLower + ", " + wUpper + "]");
     }
-    
-    double[] haValues;
 
-    // list of hour angles (rad) in [-PI;PI] range :
-    final List<Double> haList = new ArrayList<Double>(6);
+    // haValues[6] = list of hour angles (rad) in [-PI;PI] range :
+    int nHA = 0;
 
     // define ha limits :
-    haList.add(-Math.PI);
-    haList.add(Math.PI);
+    haValues[nHA++] = -Math.PI;
+    haValues[nHA++] = Math.PI;
 
-    haValues = solveDelays(cosDec, sinDec, baseLine, wMin);
-
-    if (haValues != null) {
-      for (double ha : haValues) {
-        haList.add(ha);
-      }
+    if (solveDelays(cosDec, sinDec, baseLine, wMin, ha)) {
+      haValues[nHA++] = ha[0];
+      haValues[nHA++] = ha[1];
     }
 
-    haValues = solveDelays(cosDec, sinDec, baseLine, wMax);
-
-    if (haValues != null) {
-      for (double ha : haValues) {
-        haList.add(ha);
-      }
+    if (solveDelays(cosDec, sinDec, baseLine, wMax, ha)) {
+      haValues[nHA++] = ha[0];
+      haValues[nHA++] = ha[1];
     }
 
     // We have then the (at max 6) peculiar hour angles.
     // Sort them by ascending order
-    Collections.sort(haList);
+    Arrays.sort(haValues, 0, nHA);
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("haList : " + haList);
+    if (IS_LOGGABLE_FINE) {
+      logger.fine("haList : " + Arrays.toString(Arrays.copyOfRange(haValues, 0, nHA)));
     }
-
-    final int size = haList.size() - 1;
+    
+    final int size = nHA - 1;
+    
     // output :
     // size / 2 because only half intervals are inside [wMin; wMax]:
-    final List<Range> ranges = new ArrayList<Range>(haList.size() / 2);
+    final List<Range> ranges = new ArrayList<Range>(nHA / 2);
 
     // Look if midpoints values are or not in the HMAX-HMIN interval
     // to find which intervals are correct :
 
-    double ha1, ha2, ha, w;
+    double haLow, haUp, haMid, wMid;
     for (int i = 0; i < size; i++) {
-      ha1 = haList.get(i);
-      ha2 = haList.get(i + 1);
+      haLow = haValues[i];
+      haUp = haValues[i + 1];
 
-      ha = (ha1 + ha2) / 2d;
+      haMid = (haLow + haUp) / 2d;
 
-      w = CalcUVW.computeW(cosDec, sinDec, baseLine, ha);
+      wMid = CalcUVW.computeW(cosDec, sinDec, baseLine, haMid);
 
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("W(" + ha + ") = " + w);
+      if (IS_LOGGABLE_FINE) {
+        logger.fine("W(" + haMid + ") = " + wMid);
       }
 
-      if (w >= wMin && w <= wMax) {
+      if (wMid >= wMin && wMid <= wMax) {
         // this ha interval is valid :
-        ranges.add(new Range(AngleUtils.rad2hours(ha1), AngleUtils.rad2hours(ha2)));
+        ranges.add(new Range(AngleUtils.rad2hours(haLow), AngleUtils.rad2hours(haUp)));
       }
     }
 
-    if (logger.isLoggable(Level.FINE)) {
+    if (IS_LOGGABLE_FINE) {
       logger.fine("valid intervals (dec hours) : " + ranges);
     }
 
@@ -228,19 +226,23 @@ public final class DelayLineService {
    * @param sinDec sinus of target declination
    * @param baseLine used base line
    * @param wThrow w limit value (throw)
-   * @return ha solutions (rad) in [-PI;PI] range (0 or 2 solutions)
+   * @param ha double[2] array to store ha solutions (rad) in [-PI;PI] range and avoid array allocations
+   * @return true if ha solutions found; false otherwise
    */
-  private static double[] solveDelays(final double cosDec, final double sinDec, final BaseLine baseLine, final double wThrow) {
+  private static boolean solveDelays(final double cosDec, final double sinDec, final BaseLine baseLine, final double wThrow, final double[] ha) {
     // w=cos(D)(cos(H)*X-sin(H)*Y)+sin(D)*Z
 
     if (cosDec == 0d) {
       final double w = sinDec * baseLine.getZ();
       if (w == wThrow) {
-        return new double[]{-Math.PI, Math.PI};
-      } else {
-        // impossible case : sinDec = 1 <=> cosDec = 0 !
-        return null;
+        // define results:
+        ha[0] = -Math.PI;
+        ha[1] = Math.PI;
+        return true;
       }
+      // impossible case : sinDec = 1 <=> cosDec = 0 !
+      return false;
+      
     } else {
       final double coeff = (wThrow - sinDec * baseLine.getZ()) / cosDec;
 
@@ -251,7 +253,7 @@ public final class DelayLineService {
       // C = (C - X)
       final double c = coeff - baseLine.getX();
 
-      return solveWEquation(a, b, c);
+      return solveWEquation(a, b, c, ha);
     }
   }
 
@@ -285,21 +287,27 @@ public final class DelayLineService {
     // C = (C - X)
     final double c = -baseLine.getY();
 
-    final double[] haValues = solveWEquation(a, b, c);
+    final double[] w = new double[2];
 
-    if (haValues != null) {
+    // w contains ha solutions:
+    if (solveWEquation(a, b, c, w)) {
       // 2 solutions :
       // w=cos(D)(cos(H)*X-sin(H)*Y)+sin(D)*Z
 
-      final double w1 = CalcUVW.computeW(cosDec, sinDec, baseLine, haValues[0]);
-      final double w2 = CalcUVW.computeW(cosDec, sinDec, baseLine, haValues[1]);
+      final double w1 = CalcUVW.computeW(cosDec, sinDec, baseLine, w[0]);
+      final double w2 = CalcUVW.computeW(cosDec, sinDec, baseLine, w[1]);
       
       // Ensure lower < higher:
       if (w1 < w2) {
-        return new double[] { w1, w2 };
+        // define results:
+        w[0] = w1;
+        w[1] = w2;
       } else {
-        return new double[] { w2, w1 };
+        // define results:
+        w[0] = w2;
+        w[1] = w1;
       }
+      return w;
     }
 
     return null;
@@ -317,48 +325,54 @@ public final class DelayLineService {
    * @param a coefficient a
    * @param b coefficient b
    * @param c coefficient c
-   * @return 2 ha solutions (rad) in [-PI;PI] range or null
+   * @param ha double[2] array to store ha solutions (rad) in [-PI;PI] range and avoid array allocations
+   * @return true if ha solutions found; false otherwise
+   * 
    */
-  private static double[] solveWEquation(final double a, final double b, final double c) {
+  private static boolean solveWEquation(final double a, final double b, final double c, final double[] ha) {
     // output :
-    double[] h0;
-
     if (a == 0d) {
       if (b == 0d) {
         // no solution :
-        return null;
+        return false;
       }
       // 1 solution :
       final double ha0 = Math.atan(-c / b);
-      h0 = new double[]{ha0, ha0};
+      
+      // define solutions:
+      ha[0] = ha0;
+      ha[1] = ha0;
     } else {
       final double disc = b * b - 4d * a * c;
       if (disc <= 0d) {
         // no solution or only 1 point so reject it
-        return null;
+        return false;
       }
       // 2 solutions :
       final double square = Math.sqrt(disc);
-      h0 = new double[]{Math.atan2(-b - square, 2d * a), Math.atan2(-b + square, 2d * a)};
+
+      // define solutions:
+      ha[0] = Math.atan2(-b - square, 2d * a);
+      ha[1] = Math.atan2(-b + square, 2d * a);
     }
 
     for (int i = 0; i < 2; i++) {
-      h0[i] *= 2d;
-      if (h0[i] > Math.PI) {
-        h0[i] -= 2d * Math.PI;
-      } else if (h0[i] < -Math.PI) {
-        h0[i] += 2d * Math.PI;
+      ha[i] *= 2d;
+      if (ha[i] > Math.PI) {
+        ha[i] -= 2d * Math.PI;
+      } else if (ha[i] < -Math.PI) {
+        ha[i] += 2d * Math.PI;
       }
     }
     // arrange (useful for findWExtrema method) :
-    if (h0[0] > h0[1]) {
-      final double h = h0[0];
-      h0[0] = h0[1];
-      h0[1] = h;
-    } else if (h0[0] == h0[1]) {
-      h0[1] = h0[0] + Math.PI;
+    if (ha[0] > ha[1]) {
+      final double h = ha[0];
+      ha[0] = ha[1];
+      ha[1] = h;
+    } else if (ha[0] == ha[1]) {
+      ha[1] = ha[0] + Math.PI;
     }
 
-    return h0;
+    return true;
   }
 }
