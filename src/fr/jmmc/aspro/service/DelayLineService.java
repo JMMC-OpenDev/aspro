@@ -149,7 +149,7 @@ public final class DelayLineService {
     Arrays.sort(haValues, 0, nHA);
 
     if (IS_LOGGABLE_FINE) {
-      logger.fine("haList : " + Arrays.toString(Arrays.copyOfRange(haValues, 0, nHA)));
+      logger.fine("haList (" + nHA + "first values) : " + Arrays.toString(haValues));
     }
     
     final int size = nHA - 1;
