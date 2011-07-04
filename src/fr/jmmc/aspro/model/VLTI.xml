@@ -32,7 +32,8 @@
     <telescope>
       <name>UT</name>
       <diameter>8.0</diameter>
-      <maxElevation>89.0</maxElevation>
+      <!-- Eso CfP: They are Alt / Az mounted and cannot observe at zenith distances less than 4 degrees -->
+      <maxElevation>86.0</maxElevation>
 
       <adaptiveOptics>
         <band>V</band>
@@ -46,7 +47,8 @@
     <telescope>
       <name>AT</name>
       <diameter>1.8</diameter>
-      <maxElevation>89.0</maxElevation>
+      <!-- Idem UT as it is undefined for AT -->
+      <maxElevation>86.0</maxElevation>
 
       <adaptiveOptics>
         <band>V</band>
