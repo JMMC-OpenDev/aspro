@@ -7,7 +7,7 @@
 
 <ApplicationData link="http://www.jmmc.fr/aspro2">
 
-  <program name="Aspro2" version="0.8.1 beta 9"/>
+  <program name="Aspro2" version="0.8.1 beta 10"/>
 
   <compilation date="28/06/2011" compiler="JDK 1.5.0_16"/>
 
@@ -203,6 +203,11 @@
 
   <releasenotes>
     <release version="0.8.1">
+      <prerelease version="0.8.1 beta 10">
+        <change>Enhanced performance to find best PoPs (CHARA)</change>
+        <change>Fixed logging configuration to avoid important performance loss during observability computations (best PoPs)</change>
+        <change>Corrected zenithal restriction to 4 degrees applied to UT and AT telescopes according to "ESO Call for Proposals – P88 (UT)" (VLTI)</change>
+      </prerelease>
       <prerelease version="0.8.1 beta 9">
         <change>Optimized best Pops algorithm (CHARA)</change>
       </prerelease>
