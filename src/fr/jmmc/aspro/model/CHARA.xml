@@ -1432,7 +1432,7 @@
       </configuration>
       <configuration>
         <stations>E2 W2</stations>
-        <channels>V2 V1</channels> <!-- TODO : Fix V2 V1 or V1 V2 -->
+        <channels>V1 V2</channels>
       </configuration>
       <configuration>
         <stations>W1 W2</stations>
