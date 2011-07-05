@@ -171,7 +171,7 @@ public final class Range {
     for (Range range : ranges) {
       start = range.getMin();
       end = range.getMax();
-      
+
       rangeToAdd = null;
 
       if (start >= min) {
@@ -197,7 +197,7 @@ public final class Range {
           rangeToAdd = new Range(min, end);
         }
       }
-      
+
       if (rangeToAdd != null) {
         if (intervals == null) {
           intervals = new ArrayList<Range>(ranges.size());
@@ -252,27 +252,39 @@ public final class Range {
    */
   public static List<Range> intersectRanges(final List<Range> ranges, final int nValid, final List<Range> results) {
     final int len = ranges.size() * 2;
-    
+
     // table of start/end time :
     final RangeLimit[] limits = new RangeLimit[len];
 
-    int i = 0;
-
+    int n = 0;
     for (Range range : ranges) {
-      limits[i++] = new RangeLimit(range.getMin(), true);
-      limits[i++] = new RangeLimit(range.getMax(), false);
+      limits[n++] = new RangeLimit(range.getMin(), true);
+      limits[n++] = new RangeLimit(range.getMax(), false);
     }
 
+    return intersectRanges(limits, n, nValid, results);
+  }
+
+  /**
+   * Intersect overlapping ranges according to the nValid parameter that indicates how many times a point must be inside a range
+   * to consider the point as valid
+   * @param limits array of range limits to intersect
+   * @param nLimits number of range limits present in the given array
+   * @param nValid number of ranges to consider a point is valid
+   * @param results output list of ranges
+   * @return new list of ranges or null
+   */
+  public static List<Range> intersectRanges(final RangeLimit[] limits, final int nLimits, final int nValid, final List<Range> results) {
+
     // sort the array by increasing time :
-    Arrays.sort(limits);
+    Arrays.sort(limits, 0, nLimits);
 
     //  Explore range. When the running sum of flag is equal to the
     //  number nValid, we are in a valid range
 
     List<Range> mRanges = results;
 
-    int s = 0;
-    for (i = 0; i < len; i++) {
+    for (int i = 0, s = 0, len = nLimits - nValid; i < len; i++) {
 
       // sum of flags :
       if (limits[i].flag) {
@@ -291,30 +303,5 @@ public final class Range {
     }
 
     return mRanges;
-  }
-
-  /**
-   * Utility class used by intersection and merge algorithms
-   */
-  private static final class RangeLimit implements Comparable<RangeLimit> {
-
-    /** position of the limit */
-    final double position;
-    /** boolean value to indicate the start [true] or end of the initial range [false] */
-    final boolean flag;
-
-    /**
-     * Constructor with given position and flag
-     * @param position position of the limit
-     * @param flag flag indicating a starting [true] or ending [false] range
-     */
-    protected RangeLimit(final double position, final boolean flag) {
-      this.position = position;
-      this.flag = flag;
-    }
-
-    public int compareTo(final RangeLimit limit) {
-      return Double.compare(this.position, limit.position);
-    }
   }
 }

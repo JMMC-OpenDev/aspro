@@ -223,6 +223,23 @@ public class Station
     
 //--simple--preserve
 
+    /** pop links array (read only) */
+  @javax.xml.bind.annotation.XmlTransient
+  private PopLink[] popLinkArray = null;
+
+  /**
+   * Return the popLinks as array
+   * @return popLinks as array
+   */
+  public final PopLink[] getPopLinkArray() {
+    if (this.popLinkArray == null) {
+      final List<PopLink> popLinkList = getPopLinks();
+        this.popLinkArray = new PopLink[popLinkList.size()];
+        popLinkList.toArray(this.popLinkArray);
+    }
+    return this.popLinkArray;
+  }
+    
   @Override
   public final String toString() {
     return "Station : " + ((this.name != null) ? this.name : "undefined");

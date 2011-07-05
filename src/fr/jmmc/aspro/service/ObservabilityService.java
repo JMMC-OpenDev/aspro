@@ -11,6 +11,7 @@ import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.BaseLine;
 import fr.jmmc.aspro.model.Beam;
 import fr.jmmc.aspro.model.ConfigurationManager;
+import fr.jmmc.aspro.model.ObservabilityContext;
 import fr.jmmc.aspro.model.observability.DateTimeInterval;
 import fr.jmmc.aspro.model.observability.ObservabilityData;
 import fr.jmmc.aspro.model.observability.PopCombination;
@@ -122,6 +123,9 @@ public final class ObservabilityService {
   private List<PopCombination> popCombinations = null;
   /** flag to disable the observability restriction due to the night */
   private boolean ignoreUseNightLimit = false;
+  /** create the observability context (temporary variables) */
+  private ObservabilityContext obsCtx = null;
+  
 
   /**
    * Constructor.
@@ -377,6 +381,10 @@ public final class ObservabilityService {
         // use the user defined PoPs configuration :
         this.popCombinations.clear();
         this.popCombinations.add(bestPopCombination);
+        
+        // Use arrays instead of List for performance:
+        this.obsCtx.setPopCombs(new PopCombination[1]);
+        this.popCombinations.toArray(this.obsCtx.getPopCombs());
       }
     }
 
@@ -723,7 +731,7 @@ public final class ObservabilityService {
       List<Range> rangesJDHorizon = null;
       if (this.hasHorizon) {
         // check horizon profiles inside rise/set range :
-        rangesJDHorizon = checkHorizonProfile(rangeJDRiseSet);
+        rangesJDHorizon = checkHorizonProfile(precDEC, rangeJDRiseSet);
 
         if (logger.isLoggable(Level.FINE)) {
           logger.fine("rangesJDHz : " + rangesJDHorizon);
@@ -903,7 +911,7 @@ public final class ObservabilityService {
     // flag to have extra information about DL (even if unobservable target):
 //    final boolean doSkipDL = !this.doDetailedOutput;
     final boolean doSkipDL = true;
-    
+
     // First Pass :
     // For all PoP combinations : find the HA interval merged with the HA Rise/set interval
     // list of observability data associated to a pop combination :
@@ -914,7 +922,7 @@ public final class ObservabilityService {
 
     // Find the PoP combination that gives the longest HA interval :
     if (popDataList != null && !popDataList.isEmpty()) {
-      
+
       if (this.popCombinations.size() > 1) {
         // Sort pop observability data according to max length :
         Collections.sort(popDataList);
@@ -988,19 +996,14 @@ public final class ObservabilityService {
     final double cosDec = Math.cos(dec);
     final double sinDec = Math.sin(dec);
 
-    final int sizeCb = this.popCombinations.size();
-    final int sizeBL = this.baseLines.size();
-
     // Use arrays instead of List for performance:
-    final PopCombination[] popCombs = new PopCombination[sizeCb];
-    this.popCombinations.toArray(popCombs);
-    
-    final BaseLine[] bls = new BaseLine[sizeBL];
-    this.baseLines.toArray(bls);
-    
-    final Range[] wranges = new Range[sizeBL];
-    this.wRanges.toArray(wranges);
-    
+    final PopCombination[] popCombs = this.obsCtx.getPopCombs();
+    final BaseLine[] bls = this.obsCtx.getBaseLines();
+    final Range[] wranges = this.obsCtx.getWRanges();
+
+    final int sizeCb = popCombs.length;
+    final int sizeBL = bls.length;
+
     // For all PoP combinations : find the HA interval merged with the HA Rise/set interval
     // list of observability data associated to a pop combination :
     final List<PopObservabilityData> popDataList = new ArrayList<PopObservabilityData>(20);
@@ -1013,12 +1016,6 @@ public final class ObservabilityService {
 
     // Current list of HA ranges for a base line :
     List<Range> ranges;
-
-    // Temporary lists to merge HA ranges with Rise/set range :
-    final List<Range> flatRanges = new ArrayList<Range>(2 * sizeBL + 2);
-
-    // Temporary lists to store merged HA ranges :
-    final List<Range> mergeRanges = new ArrayList<Range>(2);
 
     // w range using the pop offset for a given base line :
     final Range wRangeWithOffset = new Range();
@@ -1050,7 +1047,7 @@ public final class ObservabilityService {
 
     PopCombination popComb;
     double[] popOffsets;
-    
+
     // flag to skip DL evaluation when the target is not observable for at least one DL
     boolean skip = false;
 
@@ -1063,7 +1060,7 @@ public final class ObservabilityService {
       if (this.currentThread.isInterrupted()) {
         return null;
       }
-      
+
       skip = false;
 
       // For every Base Line :
@@ -1095,12 +1092,13 @@ public final class ObservabilityService {
       if (!skip) {
         popData = new PopObservabilityData(targetName, popComb, new ArrayList<List<Range>>(rangesBL));
 
-        flatRanges.addAll(rangesTarget);
-
         // note : rangesTarget contains both rise/set intervals + night limits in HA
 
+        this.obsCtx.resetFlagRanges();
+        this.obsCtx.addInFlatRangeLimits(rangesTarget);
+
         // merge the baseline ranges with the target intervals :
-        popData.computeMaxLength(sizeBL + 1 + ((this.useNightLimit) ? 1 : 0), flatRanges, mergeRanges);
+        popData.computeMaxLength(sizeBL + 1 + ((this.useNightLimit) ? 1 : 0), this.obsCtx);
 
         if (popData.getMaxLength() > 0d || !doSkipDL) {
           // skip pop solutions outside Rise/Set HA range :
@@ -1116,21 +1114,29 @@ public final class ObservabilityService {
 
   /**
    * Check the horizon profiles for all stations given the target rise/set range (JD)
+   * @param precDEC precessed DEC in degrees
    * @param jdRiseSet target rise/set range (JD)
    * @return list of observable ranges (no obstruction) or null if thread interrupted
    */
-  private List<Range> checkHorizonProfile(final Range jdRiseSet) {
+  private List<Range> checkHorizonProfile(final double precDEC, final Range jdRiseSet) {
     // output :
     final List<Range> ranges = new ArrayList<Range>(3);
 
     // Prepare profiles :
     final HorizonService hs = HorizonService.getInstance();
 
-    final List<Profile> profiles = new ArrayList<Profile>(this.beams.size());
+    final int nBeams = this.beams.size();
+    final Profile[] profiles = new Profile[nBeams];
 
-    for (Beam b : this.beams) {
-      profiles.add(hs.getProfile(this.interferometer.getName(), b.getStation()));
+    for (int i = 0; i < nBeams; i++) {
+      final Beam b = this.beams.get(i);
+      profiles[i] = hs.getProfile(this.interferometer.getName(), b.getStation());
     }
+
+    // prepare cosDec/sinDec:
+    final double dec = Math.toRadians(precDEC);
+    final double cosDec = Math.cos(dec);
+    final double sinDec = Math.sin(dec);
 
     // 1 minutes :
     final double jdStep = (1d / 60d) / 24d;
@@ -1146,7 +1152,7 @@ public final class ObservabilityService {
 
     for (double jd = jdMin; jd < jdMax; jd += jdStep) {
 
-      this.sco.getTargetPosition(jd, azEl);
+      this.sco.getTargetPosition(cosDec, sinDec, jd, azEl);
 
       // For every beam (station) :
       // check if there is no horizon obstruction :
@@ -1443,7 +1449,7 @@ public final class ObservabilityService {
 
     // Get chosen PoPs :
     final List<Pop> userPoPs = this.observation.getInstrumentConfiguration().getPopList();
-    
+
     final StringBuilder sb = new StringBuilder(nBeams);
 
     if (userPoPs == null) {
@@ -1477,7 +1483,7 @@ public final class ObservabilityService {
       this.data.setUserPops(true);
       this.data.setBestPops(user);
     }
-    
+
     // Use arrays instead of List for performance:
     final Beam[] bs = new Beam[nBeams];
     this.beams.toArray(bs);
@@ -1495,7 +1501,7 @@ public final class ObservabilityService {
       popOffsets = new double[sizeBL];
 
       int k = 0;
-      
+
       // use indices to get Pop associated to the station :
       for (int i = 0; i < nBeams; i++) {
         for (int j = i + 1; j < nBeams; j++) {
@@ -1515,6 +1521,21 @@ public final class ObservabilityService {
       }
       popComb.setPopOffsets(popOffsets);
     }
+    
+    // Prepare observability context:
+    this.obsCtx = new ObservabilityContext(sizeBL);
+    
+    final int sizeCb = this.popCombinations.size();
+
+    // Use arrays instead of List for performance:
+    this.obsCtx.setPopCombs(new PopCombination[sizeCb]);
+    this.popCombinations.toArray(this.obsCtx.getPopCombs());
+
+    this.obsCtx.setBaseLines(new BaseLine[sizeBL]);
+    this.baseLines.toArray(this.obsCtx.getBaseLines());
+
+    this.obsCtx.setWRanges(new Range[sizeBL]);
+    this.wRanges.toArray(this.obsCtx.getWRanges());
   }
 
   /**
@@ -1526,7 +1547,7 @@ public final class ObservabilityService {
    * @throws IllegalStateException if bad configuration (missing pop value in switchyard)
    */
   private double getPopOpticalLength(final Station station, final Pop pop) throws IllegalStateException {
-    for (PopLink pl : station.getPopLinks()) {
+    for (PopLink pl : station.getPopLinkArray()) {
       if (pl.getPop() == pop) {
         return pl.getOpticalLength();
       }
@@ -1833,8 +1854,8 @@ public final class ObservabilityService {
    * Define elevation marks on observability ranges for the current target
    * @param starObs star observability data
    * @param obsRangeJD observability ranges in JD
-   * @param precRA precessed RA
-   * @param precDEC precessed DEC
+   * @param precRA precessed RA in decimal hours
+   * @param precDEC precessed DEC in degrees
    */
   private void findElevations(final StarObservabilityData starObs, final List<Range> obsRangeJD, final double precRA, final double precDEC) {
     final List<ElevationDate> elevations = starObs.getElevations();
@@ -1864,12 +1885,17 @@ public final class ObservabilityService {
       }
     }
 
+    // prepare cosDec/sinDec:
+    final double dec = Math.toRadians(precDEC);
+    final double cosDec = Math.cos(dec);
+    final double sinDec = Math.sin(dec);
+
     final AzEl azEl = new AzEl();
 
     // tick for transit :
     jd = this.sc.convertHAToJD(0d, precRA);
     if (Range.contains(obsRangeJD, jd)) {
-      this.sco.getTargetPosition(jd, azEl);
+      this.sco.getTargetPosition(cosDec, sinDec, jd, azEl);
       elev = (int) Math.round(azEl.getElevation());
       elevations.add(new ElevationDate(convertJDToDate(jd), elev));
     }
@@ -1877,12 +1903,12 @@ public final class ObservabilityService {
     // ticks for observability intervals (limits) :
     for (Range range : obsRangeJD) {
       jd = range.getMin();
-      this.sco.getTargetPosition(jd, azEl);
+      this.sco.getTargetPosition(cosDec, sinDec, jd, azEl);
       elev = (int) Math.round(azEl.getElevation());
       elevations.add(new ElevationDate(convertJDToDate(jd), elev));
 
       jd = range.getMax();
-      this.sco.getTargetPosition(jd, azEl);
+      this.sco.getTargetPosition(cosDec, sinDec, jd, azEl);
       elev = (int) Math.round(azEl.getElevation());
       elevations.add(new ElevationDate(convertJDToDate(jd), elev));
     }

@@ -91,7 +91,9 @@ public final class DelayLineService {
   public static List<Range> findHAIntervalsForBaseLine(final double cosDec, final double sinDec, final BaseLine baseLine, 
                                                        final double[] wExtrema, final Range wRange,
                                                        final double[] ha, final double[] haValues) {
-    if (IS_LOGGABLE_FINE) {
+    final boolean isLog = IS_LOGGABLE_FINE;
+    
+    if (isLog) {
       logger.fine("baseLine : " + baseLine);
       logger.fine("W range  : " + wRange);
     }
@@ -110,20 +112,20 @@ public final class DelayLineService {
     
     if (wMax < wLower || wMin > wUpper) {
       // outside range, no solution :
-      if (IS_LOGGABLE_FINE) {
+      if (isLog) {
         logger.fine("W outside range : " + baseLine.getName() + " : " + wRange + " / W extrema = [" + wLower + ", " + wUpper + "]");
       }
       return Collections.emptyList();
     }
     if (wLower > wMin && wUpper < wMax) {
       // always inside range = full interval [-12h;12h]:
-      if (IS_LOGGABLE_FINE) {
+      if (isLog) {
         logger.fine("W inside range : " + baseLine.getName() + " : " + wRange + " / W extrema = [" + wLower + ", " + wUpper + "]");
       }
       return FULL_RANGE_LIST;
     }
 
-    if (IS_LOGGABLE_FINE) {
+    if (isLog) {
       logger.fine("W extrema = [" + wLower + ", " + wUpper + "]");
     }
 
@@ -148,11 +150,9 @@ public final class DelayLineService {
     // Sort them by ascending order
     Arrays.sort(haValues, 0, nHA);
 
-    if (IS_LOGGABLE_FINE) {
+    if (isLog) {
       logger.fine("haList (" + nHA + "first values) : " + Arrays.toString(haValues));
     }
-    
-    final int size = nHA - 1;
     
     // output :
     // size / 2 because only half intervals are inside [wMin; wMax]:
@@ -161,16 +161,15 @@ public final class DelayLineService {
     // Look if midpoints values are or not in the HMAX-HMIN interval
     // to find which intervals are correct :
 
-    double haLow, haUp, haMid, wMid;
-    for (int i = 0; i < size; i++) {
-      haLow = haValues[i];
-      haUp = haValues[i + 1];
+    for (int i = 0, size = nHA - 1; i < size; i++) {
+      final double haLow = haValues[i];
+      final double haUp = haValues[i + 1];
 
-      haMid = (haLow + haUp) / 2d;
+      final double haMid = (haLow + haUp) / 2d;
 
-      wMid = CalcUVW.computeW(cosDec, sinDec, baseLine, haMid);
+      final double wMid = CalcUVW.computeW(cosDec, sinDec, baseLine, haMid);
 
-      if (IS_LOGGABLE_FINE) {
+      if (isLog) {
         logger.fine("W(" + haMid + ") = " + wMid);
       }
 
@@ -180,7 +179,7 @@ public final class DelayLineService {
       }
     }
 
-    if (IS_LOGGABLE_FINE) {
+    if (isLog) {
       logger.fine("valid intervals (dec hours) : " + ranges);
     }
 

@@ -21,6 +21,10 @@ public final class AstroSkyCalcObservation {
   /* members */
   /** site location (package visibility) */
   private Site site;
+  /** cosinus of site latitude */
+  private double cosLat = 0d;
+   /** sinus of site latitude */
+  private double sinLat = 0d;
   /** target info */
   private Observation observation = null;
 
@@ -45,6 +49,11 @@ public final class AstroSkyCalcObservation {
   public void defineSite(final AstroSkyCalc sc) {
     // copy site info :
     this.site = sc.site;
+
+    // pre compute cosLat / sinLat used intensively by getTargetPosition():
+    final double latRad = this.site.lat.radians();
+    this.cosLat = Math.cos(latRad);
+    this.sinLat = Math.sin(latRad);
   }
 
   /**
@@ -82,14 +91,16 @@ public final class AstroSkyCalcObservation {
 
   /**
    * Return the current target position (azimuth / elevation) in degrees
+   * @param cosDec cosinus of target declination
+   * @param sinDec sinus of target declination
    * @param jd julian date
    * @param position target position: azimuth (0 to north) / elevation in degrees
    */
-  public void getTargetPosition(final double jd, final AzEl position) {
+  public void getTargetPosition(final double cosDec, final double sinDec, final double jd, final AzEl position) {
     this.observation.w.changeWhen(jd);
 
     // avoid computing precessed coordinates:
-    this.observation.computeSky(false);
+    this.observation.computeSkyFast(this.cosLat, this.sinLat, cosDec, sinDec);
 
 //    logger.severe("Target [RA/DEC/EPOCH] :" + this.observation.current.alpha.roundedRAString(3, ":") + " " + this.observation.current.delta.roundedDecString(3, ":"));
 

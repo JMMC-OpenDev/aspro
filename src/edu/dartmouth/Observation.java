@@ -31,28 +31,39 @@ public final class Observation implements Cloneable {
   }
 
   void computeSky() {   // bare-bones updater
-    computeSky(true);
-  }
-
-  /**
-   * LAURENT : custom computeSky to avoid computing true_airmass and precess target at every calls (same night)
-   * @param doOptionalComputation true indicates to perform target precession and compute true_airmass
-   */
-  void computeSky(final boolean doOptionalComputation) {   // bare-bones updater
     // assumes WhenWhere w has been updated.
-    if (doOptionalComputation) {
-      current = c.precessed(w.when.julianEpoch());
-    }
+    current = c.precessed(w.when.julianEpoch());
+
     ha.setHA(w.sidereal - current.alpha.value);
+    
     altit(current.delta.value, ha.value, w.where.lat.value, altazpar);
+
     altitude = altazpar[0];
     azimuth = altazpar[1];
     parallactic = altazpar[2];
 
-    // LAURENT : disable airmass computation
-    if (doOptionalComputation) {
-      airmass = Spherical.true_airmass(altitude);
-    }
+    airmass = Spherical.true_airmass(altitude);
+  }
+
+  /**
+   * LAURENT : custom computeSky implementation (optimized)
+   * @param cosLat cosinus of site latitude
+   * @param sinLat sinus of site latitude
+   * @param cosDec cosinus of target declination
+   * @param sinDec sinus of target declination
+   */
+  void computeSkyFast(final double cosLat, final double sinLat, 
+                      final double cosDec, final double sinDec) {
+    // assumes WhenWhere w has been updated.
+
+    ha.setHA(w.sidereal - current.alpha.value);
+    
+    altAz(cosLat, sinLat, cosDec, sinDec, ha.value, altazpar);
+
+    altitude = altazpar[0];
+    azimuth = altazpar[1];
+    // parallactic angle is undefined
+    parallactic = 0d;
   }
 
   // Split off the sun, moon, barycenter etc. to save time -- they're
@@ -83,7 +94,13 @@ public final class Observation implements Cloneable {
     moonlight = SkyIllum.lunskybright(w.sunmoon, moonobj, 0.172d, w.altmoon, altitude, w.moon.topopos.distance);
   }
 
-  /** returns altitiude (degr), azimuth (degrees), parallactic angle (degr) */
+  /** 
+   * Return altitude (deg), azimuth (deg), parallactic angle (deg) 
+   * @param decIn declination (deg)
+   * @param hrangleIn hour angle (decimal hours)
+   * @param latIn latitude (deg)
+   * @param retval double[3] array = altitude (deg), azimuth (deg) and parallactic angle (deg)
+   */
   static void altit(final double decIn, final double hrangleIn, final double latIn, final double[] retval) {
     final double dec = decIn / Const.DEG_IN_RADIAN;
     final double hrangle = hrangleIn / Const.HRS_IN_RADIAN;
@@ -134,6 +151,44 @@ public final class Observation implements Cloneable {
     retval[2] = parang;
   }
 
+  /** 
+   * Return altitude (deg) and azimuth (deg) only
+   * @param cosLat cosinus of observatory latitude
+   * @param sinLat sinus of observatory latitude
+   * @param cosDec cosinus of target declination
+   * @param sinDec sinus of target declination
+   * @param ha hour angle (decimal hours)
+   * @param retval double[3] array = altitude (deg), azimuth (deg)
+   */
+  static void altAz(final double cosLat, final double sinLat, 
+                    final double cosDec, final double sinDec, 
+                    final double ha,
+                    final double[] retval) {
+    
+    final double haRad = ha / Const.HRS_IN_RADIAN;
+
+    final double cosha = Math.cos(haRad);
+    final double sinha = Math.sin(haRad);
+
+    final double x = Const.DEG_IN_RADIAN * Math.asin(cosDec * cosha * cosLat + sinDec * sinLat); // x is the altitude.
+    final double y = sinDec * cosLat - cosDec * cosha * sinLat; /* due N comp. */
+    final double z = -1d * cosDec * sinha; /* due east comp. */
+    double az = Math.atan2(z, y);
+
+    az *= Const.DEG_IN_RADIAN;
+    while (az < 0d) {
+      az += 360d;
+    }
+    while (az >= 360d) {
+      az -= 360d;
+    }
+
+    // set results:
+    retval[0] = x;
+    retval[1] = az;
+    retval[2] = 0d;
+  }
+  
   void computeBary(final Planets p) {
     w.baryxyzvel(p, w.sun);  /* find the position and velocity of the
     observing site wrt the solar system barycent */

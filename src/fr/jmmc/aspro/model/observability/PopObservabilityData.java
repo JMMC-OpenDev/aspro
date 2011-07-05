@@ -3,6 +3,7 @@
  ******************************************************************************/
 package fr.jmmc.aspro.model.observability;
 
+import fr.jmmc.aspro.model.ObservabilityContext;
 import fr.jmmc.aspro.model.Range;
 import java.util.List;
 
@@ -36,21 +37,22 @@ public final class PopObservabilityData implements Comparable<PopObservabilityDa
   /**
    * Compute the total observability length
    * @param nValid number of ranges to consider a point is valid
-   * @param flatRanges ranges to merge
-   * @param mergeRanges merged ranges (temporary use) = empty list with 2 buckets
+   * @param obsCtx observability context (temporary data)
    */
-  public void computeMaxLength(final int nValid, final List<Range> flatRanges, final List<Range> mergeRanges) {
+  public void computeMaxLength(final int nValid, final ObservabilityContext obsCtx) {
+    
     // flatten ranges :
     for (List<Range> ranges : this.rangesBL) {
       if (ranges != null) {
-        for (Range range : ranges) {
-          flatRanges.add(range);
-        }
+        obsCtx.addInFlatRangeLimits(ranges);
       }
     }
 
+    // merged ranges (temporary use) = empty list with 2 buckets
+    final List<Range> mergeRanges = obsCtx.getMergeRanges();
+    
     // Merge HA ranges with HA Rise/set ranges :
-    Range.intersectRanges(flatRanges, nValid, mergeRanges);
+    Range.intersectRanges(obsCtx.getFlatRangeLimits(), obsCtx.getSizeFlatRangeLimits(), nValid, mergeRanges);
 
     double maxLen = 0d;
 
@@ -64,9 +66,6 @@ public final class PopObservabilityData implements Comparable<PopObservabilityDa
     }
 
     this.maxLength = maxLen;
-
-    flatRanges.clear();
-    mergeRanges.clear();
   }
 
   /**
