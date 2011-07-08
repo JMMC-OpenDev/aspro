@@ -1,17 +1,5 @@
 /*******************************************************************************
- * JMMC project
- *
- * "@(#) $Id: LSTTest.java,v 1.3 2011-04-26 15:53:10 bourgesl Exp $"
- *
- * History
- * -------
- * $Log: not supported by cvs2svn $
- * Revision 1.2  2011/04/22 15:33:34  bourgesl
- * new test cases relative to observability date handling (lst / midnight)
- *
- * Revision 1.1  2010/10/01 15:21:09  bourgesl
- * new test case for find LST0 bug (date lower > date upper)
- *
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
 package test;
 

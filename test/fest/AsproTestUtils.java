@@ -1,14 +1,5 @@
 /*******************************************************************************
- * JMMC project
- *
- * "@(#) $Id: AsproTestUtils.java,v 1.2 2011-03-15 15:45:27 bourgesl Exp $"
- *
- * History
- * -------
- * $Log: not supported by cvs2svn $
- * Revision 1.1  2011/03/11 16:02:05  bourgesl
- * updated scenario
- *
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
 package fest;
 

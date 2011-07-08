@@ -1,43 +1,5 @@
 /*******************************************************************************
- * JMMC project
- *
- * "@(#) $Id: AsproDocJUnitTest.java,v 1.11 2011-03-30 09:00:56 bourgesl Exp $"
- *
- * History
- * -------
- * $Log: not supported by cvs2svn $
- * Revision 1.10  2011/03/17 15:58:32  bourgesl
- * disable dev LAF menu
- *
- * Revision 1.9  2011/03/17 15:42:40  bourgesl
- * added shouldOpenSampleMultiConf test
- *
- * Revision 1.8  2011/03/15 16:36:00  bourgesl
- * comments
- *
- * Revision 1.7  2011/03/15 16:12:19  bourgesl
- * disable statusBar updates when running fest swing tests
- *
- * Revision 1.6  2011/03/15 15:46:37  bourgesl
- * new tests : PDF / OIFits / OB
- * observability (detailed / baseline limits)
- * Pops
- *
- * Revision 1.5  2011/03/14 17:43:10  bourgesl
- * use setText instead of enterText
- *
- * Revision 1.4  2011/03/14 14:47:50  bourgesl
- * added many tests
- *
- * Revision 1.3  2011/03/11 16:02:05  bourgesl
- * updated scenario
- *
- * Revision 1.2  2011/03/11 15:04:07  bourgesl
- * added image operations (resize, crop ...)
- *
- * Revision 1.1  2011/03/11 12:55:35  bourgesl
- * added fest-swing test cases for Aspro 2
- *
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
 package fest;
 
