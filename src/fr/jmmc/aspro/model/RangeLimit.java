@@ -69,10 +69,6 @@ public final class RangeLimit implements Comparable<RangeLimit> {
    * @return Double.compare(this.position, o.position)
    */
   public int compareTo(final RangeLimit other) {
-    final int res = Double.compare(this.position, other.position);
-    if (res == 0) {
-      return Boolean.compare(this.flag, other.flag);
-    }
-    return res;
+    return Double.compare(this.position, other.position);
   }
 }
