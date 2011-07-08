@@ -7,9 +7,9 @@
 
 <ApplicationData link="http://www.jmmc.fr/aspro2">
 
-  <program name="Aspro2" version="0.8.1 beta 10"/>
+  <program name="Aspro2" version="0.8.1 beta 11"/>
 
-  <compilation date="28/06/2011" compiler="JDK 1.5.0_16"/>
+  <compilation date="08/07/2011" compiler="JDK 1.5.0_16"/>
 
   <text>
     <![CDATA[ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations
@@ -203,6 +203,9 @@
 
   <releasenotes>
     <release version="0.8.1">
+      <prerelease version="0.8.1 beta 11">
+        <change>Updated CHARA VEGA (2T/3T/4T) configuration (beams and station reference per baseline)</change>
+      </prerelease>
       <prerelease version="0.8.1 beta 10">
         <change>Enhanced performance to find best PoPs (CHARA)</change>
         <change>Fixed logging configuration to avoid important performance loss during observability computations (best PoPs)</change>
