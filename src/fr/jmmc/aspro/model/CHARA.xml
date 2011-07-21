@@ -253,7 +253,7 @@
     </channel>
 
     <!-- DL : (-1.4 to +44.0) = 45.4 x2 = 90.8 -->
-    <!-- E1 : (-1.4 to +42.0) = 43.4 x2 = 86.8 -->
+    <!-- all delay lines have the same throw (july 2011) -->
     <delayLine>
       <name>DL1</name>
       <maximumThrow>90.8</maximumThrow>
@@ -276,8 +276,7 @@
     </delayLine>
     <delayLine>
       <name>DL6</name>
-      <station>E1</station>
-      <maximumThrow>86.8</maximumThrow>
+      <maximumThrow>90.8</maximumThrow>
     </delayLine>
 
     <switchyard>
