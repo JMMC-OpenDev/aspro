@@ -39,6 +39,8 @@ public final class SettingPanel extends JPanel implements ObservationListener {
   private static final String TAB_UV_COVERAGE = "UV coverage";
   /** name of the tab pane corresponding to the OIFits panel */
   private static final String TAB_OIFITS = "OIFits";
+  /** name of the tab pane corresponding to the vis2 view of generated OIFits */
+  private static final String TAB_VIS2 = "Vis2 plot";
 
   /* members */
   /** basic observation form */
@@ -49,6 +51,8 @@ public final class SettingPanel extends JPanel implements ObservationListener {
   private UVCoveragePanel uvCoveragePanel = null;
   /** OIFits panel */
   private OIFitsPanel oiFitsPanel = null;
+  /** Vis2 panel */
+  private Vis2Panel vis2Panel = null;
 
   /** 
    * Creates new form SettingPanel
@@ -123,7 +127,7 @@ public final class SettingPanel extends JPanel implements ObservationListener {
     ObservationManager.getInstance().register(this.observationForm);
 
     // add the observation form :
-    this.jSplitPane.setLeftComponent(this.observationForm);
+    this.jSplitPane.setLeftComponent(this.observationForm);        
   }
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JSplitPane jSplitPane;
@@ -202,31 +206,58 @@ public final class SettingPanel extends JPanel implements ObservationListener {
           this.uvCoveragePanel.dispose();
           this.uvCoveragePanel = null;
         }
+        if (this.vis2Panel != null) {
+          // remove the vis2 panel :
+          this.jTabbedPane.remove(this.vis2Panel);
+
+          // unregister the vis2 panel for the next event :
+          ObservationManager.getInstance().unregister(this.vis2Panel);
+
+          this.vis2Panel = null;
+        }
         if (ENABLE_OIFITS && this.oiFitsPanel != null) {
           // remove the OIFits panel :
           this.jTabbedPane.remove(this.oiFitsPanel);
 
-          // unregister the OIFits for the next event :
+          // unregister the OIFits panel for the next event :
           ObservationManager.getInstance().unregister(this.oiFitsPanel);
 
           this.oiFitsPanel = null;
         }
       }
-    } else if (ENABLE_OIFITS && type == ObservationEventType.OIFITS_DONE) {
-      // OIFits panel :
-      if (this.oiFitsPanel == null) {
-        // create the OIFits panel :
-        this.oiFitsPanel = new OIFitsPanel();
-        this.oiFitsPanel.setName("oiFitsPanel");
+    } else if (type == ObservationEventType.OIFITS_DONE) {
+            
+      // create the vis2 panel if null :      
+      if (this.vis2Panel == null) {
+        this.vis2Panel = new Vis2Panel();
+        this.vis2Panel.setName("vis2Panel");
 
-        // register the OIFits panel as an observation listener :
-        ObservationManager.getInstance().register(this.oiFitsPanel);
+        // register the vis2 panel as an observation listener (listener 4) :
+        ObservationManager.getInstance().register(this.vis2Panel);
 
         // the event must be propagated to the new registered listener :
-        this.oiFitsPanel.onProcess(event);
+        this.vis2Panel.onProcess(event);
 
-        // add the OIFits panel :
-        this.jTabbedPane.addTab(TAB_OIFITS, this.oiFitsPanel);
+        // add the vis2 panel :
+        this.jTabbedPane.addTab(TAB_VIS2, this.vis2Panel);
+      }
+
+      if (ENABLE_OIFITS) {
+        // OIFits panel :
+        if (this.oiFitsPanel == null) {
+          // create the OIFits panel :
+          this.oiFitsPanel = new OIFitsPanel();
+          this.oiFitsPanel.setName("oiFitsPanel");
+
+          // register the OIFits panel as an observation listener :
+          ObservationManager.getInstance().register(this.oiFitsPanel);
+
+          // the event must be propagated to the new registered listener :
+          this.oiFitsPanel.onProcess(event);
+
+          // add the OIFits panel :
+          this.jTabbedPane.addTab(TAB_OIFITS, this.oiFitsPanel);
+        }
       }
     }
     if (logger.isLoggable(Level.FINE)) {
@@ -243,11 +274,13 @@ public final class SettingPanel extends JPanel implements ObservationListener {
   }
   
   /**
-   * Return true if the selected tab is the UV coverage panel
-   * @return true if the selected tab is the UV coverage panel 
+   * Return true if the selected tab is using target models
+   * @return true if the selected tab is using target models
    */
-  public boolean isSelectedTabUVCoveragePanel() {
-    return getTabSelectedComponent() == getUVCoveragePanel();
+  public boolean isSelectedTabUsingTargetModel() {
+    final Component com = getTabSelectedComponent();
+    
+    return com == this.uvCoveragePanel || com == this.vis2Panel;
   }
 
   /**

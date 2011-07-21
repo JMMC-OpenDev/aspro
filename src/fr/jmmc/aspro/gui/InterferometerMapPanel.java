@@ -105,7 +105,7 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
   }
 
   /**
-   * Return the PDF default file name (without extension)
+   * Return the PDF default file name
    * @return PDF default file name
    */
   public String getPDFDefaultFileName() {
@@ -371,13 +371,13 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
         }
 
         // first station :
-        xySeries.add(blX1[i], blY1[i]);
+        xySeries.add(blX1[i], blY1[i], false);
 
         // second station :
-        xySeries.add(blX2[i], blY2[i]);
+        xySeries.add(blX2[i], blY2[i], false);
 
         // add an invalid point to break the line between the 2 segments :
-        xySeries.add(Double.NaN, Double.NaN);
+        xySeries.add(Double.NaN, Double.NaN, false);
 
       } // BL
     }

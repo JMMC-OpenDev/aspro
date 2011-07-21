@@ -513,7 +513,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
   }
 
   /**
-   * Return the PDF default file name (without extension)
+   * Return the PDF default file name
    * @return PDF default file name
    */
   public String getPDFDefaultFileName() {
@@ -1988,18 +1988,18 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
             y2 = toUVPlotScale(vWMin[i]);
 
             // first segment :
-            xySeries.add(x1, y1);
-            xySeries.add(x2, y2);
+            xySeries.add(x1, y1, false);
+            xySeries.add(x2, y2, false);
 
             // add an invalid point to break the line between the 2 segments :
-            xySeries.add(Double.NaN, Double.NaN);
+            xySeries.add(Double.NaN, Double.NaN, false);
 
             // second symetric segment :
-            xySeries.add(-x1, -y1);
-            xySeries.add(-x2, -y2);
+            xySeries.add(-x1, -y1, false);
+            xySeries.add(-x2, -y2, false);
 
             // add an invalid point to break the line between the 2 segments :
-            xySeries.add(Double.NaN, Double.NaN);
+            xySeries.add(Double.NaN, Double.NaN, false);
 
           } // points
         } // BL
@@ -2054,22 +2054,22 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
             x = toUVPlotScale(u[i]);
             y = toUVPlotScale(v[i]);
 
-            xySeries.add(x, y);
+            xySeries.add(x, y, false);
           } // points
 
           // add an invalid point to break the line between the 2 segments :
-          xySeries.add(Double.NaN, Double.NaN);
+          xySeries.add(Double.NaN, Double.NaN, false);
 
           // second symetric ellipse line :
           for (int i = 0, size = uvBL.getNPoints(); i < size; i++) {
             x = toUVPlotScale(-u[i]);
             y = toUVPlotScale(-v[i]);
 
-            xySeries.add(x, y);
+            xySeries.add(x, y, false);
           } // points
 
           // add an invalid point to break the line between the 2 segments :
-          xySeries.add(Double.NaN, Double.NaN);
+          xySeries.add(Double.NaN, Double.NaN, false);
         } // BL
       }
     }
@@ -2216,7 +2216,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
    * @param value u or v coordinate in rad-1
    * @return u or v coordinate in the plot unit
    */
-  private final double toUVPlotScale(final double value) {
+  private double toUVPlotScale(final double value) {
     return uvPlotScalingFactor * value;
   }
 
@@ -2225,7 +2225,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
    * @param value u or v coordinate in the plot unit
    * @return u or v coordinate in rad-1
    */
-  private final double fromUVPlotScale(final double value) {
+  private double fromUVPlotScale(final double value) {
     return value / uvPlotScalingFactor;
   }
 

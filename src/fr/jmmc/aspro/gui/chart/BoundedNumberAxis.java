@@ -15,7 +15,7 @@ import org.jfree.data.Range;
  *
  * @author bourgesl
  */
-public final class BoundedNumberAxis extends NumberAxis {
+public class BoundedNumberAxis extends NumberAxis {
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
@@ -56,7 +56,7 @@ public final class BoundedNumberAxis extends NumberAxis {
    * Return the axis bounds
    * @return axis bounds or null if undefined
    */
-  public Range getBounds() {
+  public final Range getBounds() {
     return this.bounds;
   }
 
@@ -64,7 +64,7 @@ public final class BoundedNumberAxis extends NumberAxis {
    * Define the axis bounds
    * @param bounds axis bounds or null
    */
-  public void setBounds(final Range bounds) {
+  public final void setBounds(final Range bounds) {
     this.bounds = bounds;
   }
 
@@ -103,7 +103,7 @@ public final class BoundedNumberAxis extends NumberAxis {
    *                notified.
    */
   @Override
-  public void setRange(final Range range, final boolean turnOffAutoRange,
+  public final void setRange(final Range range, final boolean turnOffAutoRange,
                        final boolean notify) {
 
     Range newRange = range;

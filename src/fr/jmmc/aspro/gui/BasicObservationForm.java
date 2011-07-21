@@ -533,8 +533,8 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     final Target target = getSelectedTarget();
     
     final String selectedTab = 
-            (AsproGui.getInstance().getSettingPanel().isSelectedTabUVCoveragePanel()) ? 
-            TargetEditorDialog.TAB_MODELS : TargetEditorDialog.TAB_TARGETS;
+            (AsproGui.getInstance().getSettingPanel().isSelectedTabUsingTargetModel()) ? 
+              TargetEditorDialog.TAB_MODELS : TargetEditorDialog.TAB_TARGETS;
 
     // show model editor :
     TargetEditorDialog.showEditor((target != null) ? target.getName() : null, selectedTab);

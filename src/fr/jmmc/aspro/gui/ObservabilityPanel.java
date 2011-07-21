@@ -204,7 +204,6 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     this.chartPanel.addComponentListener(new PanelResizeAdapter());
 
     // zoom options :
-    // allow zooming on targets only:
     this.chartPanel.setDomainZoomable(true);
     // date axis :
     this.chartPanel.setRangeZoomable(true);
@@ -370,7 +369,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
   }
 
   /**
-   * Return the PDF default file name (without extension)
+   * Return the PDF default file name
    * @return PDF default file name
    */
   public String getPDFDefaultFileName() {

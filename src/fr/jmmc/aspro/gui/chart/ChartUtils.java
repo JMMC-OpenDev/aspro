@@ -33,6 +33,7 @@ import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.StandardXYBarPainter;
 import org.jfree.chart.renderer.xy.XYBarRenderer;
+import org.jfree.chart.renderer.xy.XYErrorRenderer;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.chart.title.LegendTitle;
@@ -172,7 +173,7 @@ public final class ChartUtils {
    * @param size font size
    * @return annotation font
    */
-  protected static final Font getAnnotationFont(final int size) {
+  private static Font getAnnotationFont(final int size) {
     final Integer key = Integer.valueOf(size);
     Font f = cachedFonts.get(key);
     if (f == null) {
@@ -192,7 +193,7 @@ public final class ChartUtils {
    * @param allowDontFit flag indicating to use the minimum font size if the text dont fit; null otherwise
    * @return font
    */
-  protected static Font autoFitTextWidth(final Graphics2D g2d,
+  static Font autoFitTextWidth(final Graphics2D g2d,
                                          final String text, final double maxWidth,
                                          final int minFontSize, final int maxFontSize,
                                          final boolean allowDontFit) {
@@ -235,7 +236,7 @@ public final class ChartUtils {
    * @param allowDontFit flag indicating to use the minimum font size if the text dont fit; null otherwise
    * @return font
    */
-  protected static Font autoFitTextHeight(final Graphics2D g2d,
+  static Font autoFitTextHeight(final Graphics2D g2d,
                                           final String text, final double maxHeight,
                                           final int minFontSize, final int maxFontSize,
                                           final boolean allowDontFit) {
@@ -340,7 +341,7 @@ public final class ChartUtils {
 
     return chart;
   }
-
+  
   /**
    * Creates a line chart (based on an {@link XYDataset}) with default
    * settings BUT using a Square data area with consistent zooming in/out
@@ -382,6 +383,68 @@ public final class ChartUtils {
 
     // customized XYPlot to have a square data area :
     final XYPlot plot = new SquareXYPlot(dataset, xAxis, yAxis, renderer);
+
+    plot.setOrientation(orientation);
+    if (tooltips) {
+      renderer.setBaseToolTipGenerator(new StandardXYToolTipGenerator());
+    }
+    if (urls) {
+      renderer.setURLGenerator(new StandardXYURLGenerator());
+    }
+
+    final JFreeChart chart = new JFreeChart(title, JFreeChart.DEFAULT_TITLE_FONT,
+            plot, legend);
+
+    if (legend) {
+      chart.getLegend().setPosition(RectangleEdge.RIGHT);
+    }
+
+    return chart;
+  }
+
+  /**
+   * Creates a scatter plot (based on an {@link XYDataset}) with default
+   * settings BUT bounded axes
+   *
+   * @param title  the chart title (<code>null</code> permitted).
+   * @param xAxisLabel  a label for the X-axis (<code>null</code> permitted).
+   * @param yAxisLabel  a label for the Y-axis (<code>null</code> permitted).
+   * @param dataset  the dataset for the chart (<code>null</code> permitted).
+   * @param orientation  the plot orientation (horizontal or vertical)
+   *                     (<code>null</code> NOT permitted).
+   * @param legend  a flag specifying whether or not a legend is required.
+   * @param tooltips  configure chart to generate tool tips?
+   * @param urls  configure chart to generate URLs?
+   *
+   * @return The chart.
+   */
+  public static JFreeChart createScatterPlot(String title,
+                                             String xAxisLabel,
+                                             String yAxisLabel,
+                                             XYDataset dataset,
+                                             PlotOrientation orientation,
+                                             boolean legend,
+                                             boolean tooltips,
+                                             boolean urls) {
+
+    if (orientation == null) {
+      throw new IllegalArgumentException("Null 'orientation' argument.");
+    }
+
+    // Axes are bounded to avoid zooming out where there is no data :
+
+    final BoundedNumberAxis xAxis = new AutoBoundedNumberAxis(xAxisLabel);
+    xAxis.setAutoRangeIncludesZero(false);
+    final BoundedNumberAxis yAxis = new AutoBoundedNumberAxis(yAxisLabel);
+    yAxis.setAutoRangeIncludesZero(false);
+
+    // only lines are rendered :
+//    final XYItemRenderer renderer = new XYLineAndShapeRenderer(false, true);
+    final XYErrorRenderer renderer = new XYErrorRenderer();
+    renderer.setDrawXError(false);
+    
+    // customized XYPlot to have a square data area :
+    final XYPlot plot = new XYPlot(dataset, xAxis, yAxis, renderer);
 
     plot.setOrientation(orientation);
     if (tooltips) {
@@ -478,10 +541,24 @@ public final class ChartUtils {
    */
   public static TickUnitSource createScientificTickUnits() {
     final TickUnits units = new TickUnits();
+    final DecimalFormat df5 = new DecimalFormat("0.000##E0");
+    final DecimalFormat df3 = new DecimalFormat("0.000E0");
+    final DecimalFormat df000 = new DecimalFormat("0.00");
+    final DecimalFormat df00 = new DecimalFormat("0.0");
     final DecimalFormat df0 = new DecimalFormat("0");
     final DecimalFormat df1 = new DecimalFormat("0.0E0");
 
-    // note : number lower than 1 are not supported !
+    units.add(new NumberTickUnit(0.000001d, df5));
+    units.add(new NumberTickUnit(0.000005d, df5));
+
+    units.add(new NumberTickUnit(0.0001d, df3));
+    units.add(new NumberTickUnit(0.0005d, df3));
+    
+    units.add(new NumberTickUnit(0.01d, df000));
+    units.add(new NumberTickUnit(0.05d, df000));
+
+    units.add(new NumberTickUnit(0.1d, df00));
+    units.add(new NumberTickUnit(0.5d, df00));
 
     units.add(new NumberTickUnit(1, df0));
     units.add(new NumberTickUnit(5, df0));
