@@ -64,7 +64,7 @@ public final class Vis2Panel extends javax.swing.JPanel implements ChartProgress
   /** scaling factor to Mega Lambda for U,V points */
   private final static double MEGA_LAMBDA_SCALE = 1e-6;
   /** flag to use square instead of cross to reprensent points */
-  private final static boolean USE_SQUARE = false;
+  private final static boolean USE_SQUARE = true;
   /** data margin in percents */
   private final static double MARGIN_PERCENTS = 5d / 100d;
   /** double formatter for wave lengths */
@@ -216,7 +216,7 @@ public final class Vis2Panel extends javax.swing.JPanel implements ChartProgress
     renderer.clearSeriesPaints(false);
 
     // error color:
-    renderer.setErrorPaint(new Color(192, 192, 192, 64));
+    renderer.setErrorPaint(new Color(192, 192, 192, 128));
 
     // add listener :
     this.chart.addProgressListener(this);
@@ -531,7 +531,7 @@ public final class Vis2Panel extends javax.swing.JPanel implements ChartProgress
    */
   private static Shape getPointShape() {
 
-    final float size = 1f;
+    final float size = 2f;
 
     if (USE_SQUARE) {
       return new Rectangle2D.Double(-size, -size, 2 * size, 2 * size);
