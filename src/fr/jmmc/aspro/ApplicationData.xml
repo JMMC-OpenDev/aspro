@@ -7,9 +7,9 @@
 
 <ApplicationData link="http://www.jmmc.fr/aspro2">
 
-  <program name="Aspro2" version="0.8.1 beta 11"/>
+  <program name="Aspro2" version="0.8.1 beta 12"/>
 
-  <compilation date="08/07/2011" compiler="JDK 1.5.0_16"/>
+  <compilation date="21/07/2011" compiler="JDK 1.5.0_16"/>
 
   <text>
     <![CDATA[ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations
@@ -203,6 +203,10 @@
 
   <releasenotes>
     <release version="0.8.1">
+      <prerelease version="0.8.1 beta 12">
+        <change>Added preliminary OIFits viewer: only square visiblity (VIS2) vs radius plot is available</change>
+        <change>Fixed CHARA delay line configuration: E1 cart moves in range [-1.4 to +44.0] like others (july 2011)</change>
+      </prerelease>
       <prerelease version="0.8.1 beta 11">
         <change>Updated CHARA VEGA (2T/3T/4T) configuration (beams and station reference per baseline)</change>
       </prerelease>
