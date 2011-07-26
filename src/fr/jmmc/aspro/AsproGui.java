@@ -19,7 +19,8 @@ import fr.jmmc.aspro.gui.task.AsproTaskRegistry;
 import fr.jmmc.aspro.gui.util.ComponentResizeAdapter;
 import fr.jmmc.aspro.model.ConfigurationManager;
 import fr.jmmc.aspro.model.ObservationManager;
-import fr.jmmc.aspro.interop.SearchCalSampMessageHandler;
+import fr.jmmc.aspro.interop.VotableSampMessageHandler;
+import fr.jmmc.aspro.interop.StarListSendAction;
 import fr.jmmc.mcs.gui.App;
 import fr.jmmc.mcs.gui.MessagePane;
 import fr.jmmc.mcs.gui.MessagePane.ConfirmSaveChanges;
@@ -308,6 +309,9 @@ public final class AsproGui extends App {
     new BroadcastToModelFittingAction();
     // searchCal query (SAMP) :
     new SearchCalQueryAction();
+    
+    // PIVOT starlist (SAMP) :
+    new StarListSendAction();
   }
 
   /**
@@ -315,7 +319,7 @@ public final class AsproGui extends App {
    */
   private void declareInteroperability() {
     // Add handler to load searchCal votable and get calibrators
-    new SearchCalSampMessageHandler();
+    new VotableSampMessageHandler();
   }
 
   /**

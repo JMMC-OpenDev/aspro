@@ -31,6 +31,7 @@ import fr.jmmc.aspro.model.event.TargetSelectionEvent;
 import fr.jmmc.aspro.model.event.UpdateObservationEvent;
 import fr.jmmc.aspro.model.observability.ObservabilityData;
 import fr.jmmc.aspro.model.observability.StarData;
+import fr.jmmc.aspro.model.oi.AtmosphereQuality;
 import fr.jmmc.aspro.model.oi.InterferometerConfiguration;
 import fr.jmmc.aspro.model.oi.ObservationCollection;
 import fr.jmmc.aspro.model.uvcoverage.UVCoverageData;
@@ -984,7 +985,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       this.updateInstrumentData(observation);
 
       // update the selected instrument mode :
-      this.jComboBoxInstrumentMode.setSelectedItem(observation.getInstrumentConfiguration().getInstrumentMode());
+      if (observation.getInstrumentConfiguration().getInstrumentMode() != null) {
+        this.jComboBoxInstrumentMode.setSelectedItem(observation.getInstrumentConfiguration().getInstrumentMode());
+      }
 
       // update the sampling period :
       if (observation.getInstrumentConfiguration().getSamplingPeriod() != null) {
@@ -994,11 +997,15 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       // update the acquisition time :
       if (observation.getInstrumentConfiguration().getAcquisitionTime() != null) {
         this.jFieldObsDuration.setValue(Double.valueOf(observation.getInstrumentConfiguration().getAcquisitionTime()));
+      } else {
+        this.jFieldObsDuration.setValue(AsproConstants.DEFAULT_OBSERVATION_DURATION);
       }
 
       // update atmQuality :
       if (observation.getWhen().getAtmosphereQuality() != null) {
         this.jComboBoxAtmQual.setSelectedItem(observation.getWhen().getAtmosphereQuality().value());
+      } else {
+        this.jComboBoxAtmQual.setSelectedItem(AtmosphereQuality.AVERAGE);
       }
 
       // reset HA limits :

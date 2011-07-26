@@ -80,7 +80,7 @@ public final class ObservationManager extends BaseOIManager {
    * Return the ObservationManager singleton
    * @return ObservationManager singleton
    */
-  public final static ObservationManager getInstance() {
+  public static ObservationManager getInstance() {
     return instance;
   }
 
@@ -265,7 +265,20 @@ public final class ObservationManager extends BaseOIManager {
 
   /**
    * Change the current observation with the given one
-   * and fire load and change events
+   * and fire load and change events 
+   * @param observation observation to use
+   * 
+   * @throws IllegalStateException if an invalid reference was found (interferometer / instrument / instrument configuration)
+   */
+  public void resetAndChangeObservation(final ObservationSetting observation) {
+    setObservationFile(null);
+
+    changeObservation(observation);
+  }
+
+  /**
+   * Change the current observation with the given one
+   * and fire load and change events 
    * @param observation observation to use
    * 
    * @throws IllegalStateException if an invalid reference was found (interferometer / instrument / instrument configuration)
@@ -877,7 +890,7 @@ public final class ObservationManager extends BaseOIManager {
    * @param target target to use
    * @return true if the given target is a calibrator
    */
-  public final boolean isCalibrator(final Target target) {
+  public boolean isCalibrator(final Target target) {
     return getTargetUserInfos().isCalibrator(target);
   }
 
@@ -1223,7 +1236,7 @@ public final class ObservationManager extends BaseOIManager {
    * Return the computed OIFits structure (read only)
    * @return OIFits structure or null
    */
-  public final OIFitsFile getOIFitsFile() {
+  public OIFitsFile getOIFitsFile() {
     return this.oiFitsFile;
   }
 

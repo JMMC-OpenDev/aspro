@@ -7,9 +7,9 @@
 
 <ApplicationData link="http://www.jmmc.fr/aspro2">
 
-  <program name="Aspro2" version="0.8.1 beta 12"/>
+  <program name="Aspro2" version="0.8.1 beta 13"/>
 
-  <compilation date="21/07/2011" compiler="JDK 1.5.0_16"/>
+  <compilation date="26/07/2011" compiler="JDK 1.5.0_16"/>
 
   <text>
     <![CDATA[ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations
@@ -198,11 +198,17 @@
             description="use SearchCal to search calibrators for the current selected target (SAMP)"/>
       <menu label="Perform model fitting" classpath="fr.jmmc.aspro.interop.BroadcastToModelFittingAction" action="broadcastToModelFittingAction"
             description="use LITpro to prepare your model fitting and inspect your OIFits files (SAMP)"/>
+      <menu label="Send StarList to PIVOT" classpath="fr.jmmc.aspro.interop.StarListSendAction" action="starListSendAction"
+            description="Send back the star list to PIVOT (SAMP)"/>
     </menu>
   </menubar>
 
   <releasenotes>
     <release version="0.8.1">
+      <prerelease version="0.8.1 beta 13">
+        <change>Changed VOTable message handler (SAMP) to accept PIVOT messages</change>
+        <change>Added Send StarList to PIVOT action (SAMP)</change>
+      </prerelease>
       <prerelease version="0.8.1 beta 12">
         <change>Added preliminary OIFits viewer: only square visiblity (VIS2) vs radius plot is available</change>
         <change>Fixed CHARA delay line configuration: E1 cart moves in range [-1.4 to +44.0] like others (july 2011)</change>
