@@ -3,6 +3,9 @@
  ******************************************************************************/
 package fr.jmmc.aspro.interop;
 
+import fr.jmmc.aspro.AsproConstants;
+import fr.jmmc.aspro.model.ObservationManager;
+import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.ob.ExportOBVega;
 import fr.jmmc.mcs.gui.MessagePane;
 import fr.jmmc.mcs.interop.SampCapability;
@@ -48,23 +51,39 @@ public final class StarListSendAction extends SampCapabilityAction {
   public Map<?, ?> composeMessage() {
     Map<String, String> parameters = null;
 
-    final File file = FileUtils.getTempFile("starlist.txt");
-    try {
+    // Test if chara is the interferometer:
 
-      ExportOBVega.process(file);
+    // Use main observation to check instrument :
+    final ObservationSetting observation = ObservationManager.getInstance().getMainObservation();
 
-      parameters = new HashMap<String, String>(4);
-      parameters.put(PARAM_STAR_LIST, file.toURI().toString());
-      
-      // TODO: use request Id stored in observation context
-      parameters.put(PARAM_REQUEST_ID, null);
+    if (!observation.isSingle()) {
+      MessagePane.showMessage("Aspro 2 can not send a star list when multiple configurations are selected !");
+      return null;
+    }
 
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("parameters = \n" + parameters);
+    final String insName = observation.getInstrumentConfiguration().getName();
+
+    if (insName.startsWith(AsproConstants.INS_VEGA)) {
+      final File file = FileUtils.getTempFile("starlist.txt");
+      try {
+
+        ExportOBVega.process(file);
+
+        parameters = new HashMap<String, String>(4);
+        parameters.put(PARAM_STAR_LIST, file.toURI().toString());
+
+        // TODO: use request Id stored in observation context
+        parameters.put(PARAM_REQUEST_ID, "*** UNDEFINED ***");
+
+        if (logger.isLoggable(Level.FINE)) {
+          logger.fine("parameters = \n" + parameters);
+        }
+
+      } catch (IOException ioe) {
+        MessagePane.showErrorMessage("Could not export to file : " + file.getAbsolutePath(), ioe);
       }
-
-    } catch (IOException ioe) {
-      MessagePane.showErrorMessage("Could not export to file : " + file.getAbsolutePath(), ioe);
+    } else {
+      MessagePane.showMessage("Aspro 2 can only send a star list for the VEGA instrument !");
     }
 
     return parameters;
