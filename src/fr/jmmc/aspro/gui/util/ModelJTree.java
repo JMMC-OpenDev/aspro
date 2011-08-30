@@ -4,7 +4,7 @@
 package fr.jmmc.aspro.gui.util;
 
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
-import fr.jmmc.mcs.model.targetmodel.Model;
+import fr.jmmc.jmal.model.targetmodel.Model;
 
 /**
  * This JTree contains Targets and their models

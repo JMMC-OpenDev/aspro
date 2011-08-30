@@ -19,7 +19,7 @@ import fr.jmmc.aspro.model.oi.Telescope;
 import fr.jmmc.aspro.model.WarningContainer;
 import fr.jmmc.aspro.model.util.AtmosphereQualityUtils;
 import fr.jmmc.aspro.model.util.SpectralBandUtils;
-import fr.jmmc.mcs.astro.Band;
+import fr.jmmc.jmal.Band;
 import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Random;

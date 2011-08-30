@@ -47,10 +47,10 @@ import fr.jmmc.mcs.gui.MessagePane;
 import fr.jmmc.mcs.gui.StatusBar;
 import fr.jmmc.mcs.gui.task.TaskSwingWorker;
 import fr.jmmc.mcs.image.ColorModels;
-import fr.jmmc.mcs.model.ModelUVMapService;
-import fr.jmmc.mcs.model.ModelUVMapService.ImageMode;
-import fr.jmmc.mcs.model.UVMapData;
-import fr.jmmc.mcs.model.targetmodel.Model;
+import fr.jmmc.jmal.model.ModelUVMapService;
+import fr.jmmc.jmal.model.ModelUVMapService.ImageMode;
+import fr.jmmc.jmal.model.UVMapData;
+import fr.jmmc.jmal.model.targetmodel.Model;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Image;
@@ -1380,7 +1380,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
      * This code is executed by a Worker thread (Not Swing EDT)
      * @return UV Coverage data
      */
-    @Override
     public ObservationCollectionUVData computeInBackground() {
 
       // Start the computations :
@@ -1510,7 +1509,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
      * This code is executed by the Swing Event Dispatcher thread (EDT)
      * @param uvDataCollection computed UV Coverage data
      */
-    @Override
     public void refreshUI(final ObservationCollectionUVData uvDataCollection) {
 
       // Note : the main observation can have changed while computation
@@ -1532,7 +1530,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
      *
      * @param ee execution exception
      */
-    @Override
     public void handleException(final ExecutionException ee) {
       this.uvPanel.resetPlot();
       if (ee.getCause() instanceof IllegalArgumentException) {
@@ -1761,7 +1758,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
      * This code is executed by a Worker thread (Not Swing EDT)
      * @return UV Map data
      */
-    @Override
     public UVMapData computeInBackground() {
       // compute the uv map data :
       return ModelUVMapService.computeUVMap(
@@ -1773,7 +1769,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
      * This code is executed by the Swing Event Dispatcher thread (EDT)
      * @param uvMapData computed UV Map data
      */
-    @Override
     public void refreshUI(final UVMapData uvMapData) {
       // delegates to uv coverage panel :
       this.uvPanel.updateUVMap(uvMapData.getUvMap());
@@ -1788,7 +1783,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
      *
      * @param ee execution exception
      */
-    @Override
     public void handleException(final ExecutionException ee) {
       this.uvPanel.updateUVMap(null);
       if (ee.getCause() instanceof IllegalArgumentException) {

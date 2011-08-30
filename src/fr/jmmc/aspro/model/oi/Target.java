@@ -13,7 +13,7 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import fr.jmmc.aspro.model.OIBase;
-import fr.jmmc.mcs.model.targetmodel.Model;
+import fr.jmmc.jmal.model.targetmodel.Model;
 
 
 /**
@@ -725,7 +725,7 @@ public class Target
    */
   public final double getRADeg() {
     if (Double.isNaN(this.raDeg)) {
-      this.raDeg = fr.jmmc.mcs.astro.ALX.parseHMS(getRA());
+      this.raDeg = fr.jmmc.jmal.ALX.parseHMS(getRA());
     }
     return this.raDeg;
   }
@@ -747,7 +747,7 @@ public class Target
    */
   public final double getDECDeg() {
     if (Double.isNaN(this.decDeg)) {
-      this.decDeg = fr.jmmc.mcs.astro.ALX.parseDEC(getDEC());
+      this.decDeg = fr.jmmc.jmal.ALX.parseDEC(getDEC());
     }
     return this.decDeg;
   }
@@ -967,7 +967,7 @@ public class Target
    * @return cloned model list
    */
   public static List<Model> cloneModels(final List<Model> models) {
-    return fr.jmmc.mcs.model.CloneableObject.deepCopyList(models);
+    return fr.jmmc.jmal.model.CloneableObject.deepCopyList(models);
   }
 
   /**

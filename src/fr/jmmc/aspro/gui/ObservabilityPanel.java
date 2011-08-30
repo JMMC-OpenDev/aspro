@@ -646,7 +646,6 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
      * This code is executed by a Worker thread (Not Swing EDT)
      * @return observability data
      */
-    @Override
     public List<ObservabilityData> computeInBackground() {
 
       // Start the computations :
@@ -678,7 +677,6 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
      * This code is executed by the Swing Event Dispatcher thread (EDT)
      * @param obsDataList computed observability data
      */
-    @Override
     public void refreshUI(final List<ObservabilityData> obsDataList) {
 
       final ObservationCollection taskObsCollection = this.getObservationCollection();

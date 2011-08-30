@@ -6,7 +6,7 @@ package fr.jmmc.aspro.model;
 import fr.jmmc.aspro.model.observability.ObservabilityData;
 import fr.jmmc.aspro.model.oi.ObservationCollection;
 import fr.jmmc.aspro.model.uvcoverage.UVCoverageData;
-import fr.jmmc.mcs.model.UVMapData;
+import fr.jmmc.jmal.model.UVMapData;
 import fr.jmmc.oitools.model.OIFitsFile;
 import java.util.ArrayList;
 import java.util.List;

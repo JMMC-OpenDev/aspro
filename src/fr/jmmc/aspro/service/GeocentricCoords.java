@@ -6,7 +6,7 @@ package fr.jmmc.aspro.service;
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.oi.LonLatAlt;
 import fr.jmmc.aspro.model.oi.Position3D;
-import fr.jmmc.mcs.astro.ALX;
+import fr.jmmc.jmal.ALX;
 import java.util.logging.Level;
 
 /**

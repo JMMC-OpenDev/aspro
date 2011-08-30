@@ -11,7 +11,7 @@ import fr.jmmc.mcs.gui.MessagePane;
 import fr.jmmc.mcs.gui.task.TaskSwingWorkerExecutor;
 import fr.jmmc.mcs.interop.SampCapability;
 import fr.jmmc.mcs.interop.SampCapabilityAction;
-import fr.jmmc.mcs.model.targetmodel.Model;
+import fr.jmmc.jmal.model.targetmodel.Model;
 import fr.jmmc.mcs.util.FileUtils;
 import fr.jmmc.oitools.model.OIFitsFile;
 import fr.jmmc.oitools.model.OIFitsWriter;

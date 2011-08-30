@@ -23,7 +23,7 @@ import fr.jmmc.aspro.model.oi.ObservationVariant;
 import fr.jmmc.aspro.model.oi.Pop;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
-import fr.jmmc.mcs.astro.star.Star;
+import fr.jmmc.jmal.star.Star;
 import fr.jmmc.mcs.gui.MessagePane;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -114,7 +114,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
 
     jPanelTargets = new javax.swing.JPanel();
     jPanelTargetsLeft = new javax.swing.JPanel();
-    starSearchField = new fr.jmmc.mcs.astro.star.EditableStarResolverWidget();
+    starSearchField = new fr.jmmc.jmal.star.EditableStarResolverWidget();
     jScrollPaneTargets = new javax.swing.JScrollPane();
     jListTargets = createTargetList();
     jButtonDeleteTarget = new javax.swing.JButton();
@@ -1328,7 +1328,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
   private javax.swing.JScrollPane jScrollPaneInstrumentConfigurations;
   private javax.swing.JScrollPane jScrollPaneTargets;
   private javax.swing.JFormattedTextField jTextPoPs;
-  private fr.jmmc.mcs.astro.star.EditableStarResolverWidget starSearchField;
+  private fr.jmmc.jmal.star.EditableStarResolverWidget starSearchField;
   // End of variables declaration//GEN-END:variables
 
   /**

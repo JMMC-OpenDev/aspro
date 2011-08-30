@@ -12,7 +12,7 @@ import fr.jmmc.aspro.model.oi.StringValue;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.aspro.util.XmlFactory;
-import fr.jmmc.mcs.astro.ALX;
+import fr.jmmc.jmal.ALX;
 import fr.jmmc.mcs.gui.App;
 import fr.jmmc.mcs.gui.MessagePane;
 import fr.jmmc.mcs.interop.SampCapability;

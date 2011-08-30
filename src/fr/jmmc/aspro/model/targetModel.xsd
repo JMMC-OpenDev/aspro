@@ -27,13 +27,13 @@ This model is a subset of the model fitting model that describes models for a ta
       -->
       <!--
       <jaxb:globalBindings>
-        <xjc:superClass name="fr.jmmc.mcs.model.CloneableObject"/>
+        <xjc:superClass name="fr.jmmc.jmal.model.CloneableObject"/>
         <xjc:simple />
       </jaxb:globalBindings>
       -->
 
       <jaxb:schemaBindings>
-        <jaxb:package name="fr.jmmc.mcs.model.targetmodel"/>
+        <jaxb:package name="fr.jmmc.jmal.model.targetmodel"/>
       </jaxb:schemaBindings>
     </xsd:appinfo>
   </xsd:annotation>

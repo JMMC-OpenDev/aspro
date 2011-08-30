@@ -14,7 +14,7 @@ import fr.jmmc.aspro.model.oi.SpectralBand;
 import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.util.SpectralBandUtils;
-import fr.jmmc.mcs.astro.Band;
+import fr.jmmc.jmal.Band;
 import fr.jmmc.mcs.gui.MessagePane;
 import fr.jmmc.mcs.interop.SampCapability;
 import fr.jmmc.mcs.interop.SampCapabilityAction;

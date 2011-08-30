@@ -4,7 +4,7 @@
 package fr.jmmc.aspro.model.util;
 
 import fr.jmmc.aspro.model.oi.SpectralBand;
-import fr.jmmc.mcs.astro.Band;
+import fr.jmmc.jmal.Band;
 
 /**
  * This class provides static methods to use easily SpectralBand enum

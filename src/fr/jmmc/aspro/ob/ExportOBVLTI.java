@@ -22,7 +22,7 @@ import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.aspro.model.oi.Telescope;
 import fr.jmmc.aspro.model.util.SpectralBandUtils;
 import fr.jmmc.aspro.service.ObservabilityService;
-import fr.jmmc.mcs.astro.Band;
+import fr.jmmc.jmal.Band;
 import fr.jmmc.mcs.util.FileUtils;
 import fr.jmmc.mcs.util.MimeType;
 import java.io.File;
