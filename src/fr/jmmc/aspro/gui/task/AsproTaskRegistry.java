@@ -3,8 +3,8 @@
  ******************************************************************************/
 package fr.jmmc.aspro.gui.task;
 
-import fr.jmmc.mcs.gui.task.Task;
-import fr.jmmc.mcs.gui.task.TaskRegistry;
+import fr.jmmc.jmcs.gui.task.Task;
+import fr.jmmc.jmcs.gui.task.TaskRegistry;
 
 /**
  * This class describes the Aspro tasks associated with SwingWorker(s) and their execution order

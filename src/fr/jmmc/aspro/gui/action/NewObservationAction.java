@@ -4,11 +4,11 @@
 package fr.jmmc.aspro.gui.action;
 
 import fr.jmmc.aspro.model.ObservationManager;
-import fr.jmmc.mcs.gui.MessagePane;
-import fr.jmmc.mcs.gui.MessagePane.ConfirmSaveChanges;
-import fr.jmmc.mcs.gui.StatusBar;
-import fr.jmmc.mcs.util.ActionRegistrar;
-import fr.jmmc.mcs.util.RegisteredAction;
+import fr.jmmc.jmcs.gui.MessagePane;
+import fr.jmmc.jmcs.gui.MessagePane.ConfirmSaveChanges;
+import fr.jmmc.jmcs.gui.StatusBar;
+import fr.jmmc.jmcs.gui.action.ActionRegistrar;
+import fr.jmmc.jmcs.gui.action.RegisteredAction;
 import java.awt.event.ActionEvent;
 import java.util.logging.Level;
 import javax.swing.AbstractAction;

@@ -4,14 +4,14 @@
 package fr.jmmc.aspro;
 
 import fr.jmmc.aspro.model.observability.SunTimeInterval.SunType;
-import fr.jmmc.mcs.util.PreferencesException;
+import fr.jmmc.jmcs.data.preference.PreferencesException;
 
 /**
  * Handles preferences for Aspro.
  *
  * Note : There is a special preference 'splash.screen.show' used to disable the splash screen (dev mode) if its value is 'false'.
  */
-public final class Preferences extends fr.jmmc.mcs.util.Preferences {
+public final class Preferences extends fr.jmmc.jmcs.data.preference.Preferences {
 
   /** Singleton instance */
   private static Preferences _singleton = null;

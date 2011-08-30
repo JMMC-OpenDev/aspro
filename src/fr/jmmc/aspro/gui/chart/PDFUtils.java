@@ -12,8 +12,8 @@ import com.lowagie.text.pdf.PdfTemplate;
 import com.lowagie.text.pdf.PdfWriter;
 import fr.jmmc.aspro.gui.chart.PDFOptions.Orientation;
 
-import fr.jmmc.mcs.gui.App;
-import fr.jmmc.mcs.util.FileUtils;
+import fr.jmmc.jmcs.App;
+import fr.jmmc.jmcs.util.FileUtils;
 import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
 import java.io.BufferedOutputStream;

@@ -3,8 +3,8 @@
  ******************************************************************************/
 package fr.jmmc.aspro;
 
-import fr.jmmc.mcs.util.MimeType;
-import fr.jmmc.mcs.util.PreferencesException;
+import fr.jmmc.jmcs.util.MimeType;
+import fr.jmmc.jmcs.data.preference.PreferencesException;
 import java.io.File;
 import java.util.logging.Level;
 
@@ -12,7 +12,7 @@ import java.util.logging.Level;
  * This class gathers user preferences related to local folders
  * @author bourgesl
  */
-public final class FilePreferences extends fr.jmmc.mcs.util.Preferences {
+public final class FilePreferences extends fr.jmmc.jmcs.data.preference.Preferences {
 
   /** Singleton instance */
   private static FilePreferences _singleton = null;

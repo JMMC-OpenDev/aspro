@@ -5,10 +5,10 @@ package fr.jmmc.aspro.gui.action;
 
 import fr.jmmc.aspro.FilePreferences;
 import fr.jmmc.aspro.model.ObservationManager;
-import fr.jmmc.mcs.gui.MessagePane;
-import fr.jmmc.mcs.gui.StatusBar;
-import fr.jmmc.mcs.util.MimeType;
-import fr.jmmc.mcs.util.RegisteredAction;
+import fr.jmmc.jmcs.gui.MessagePane;
+import fr.jmmc.jmcs.gui.StatusBar;
+import fr.jmmc.jmcs.util.MimeType;
+import fr.jmmc.jmcs.gui.action.RegisteredAction;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;

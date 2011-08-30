@@ -3,9 +3,9 @@
  ******************************************************************************/
 package fr.jmmc.aspro.gui.action;
 
-import fr.jmmc.mcs.gui.App;
-import fr.jmmc.mcs.gui.task.TaskSwingWorkerExecutor;
-import fr.jmmc.mcs.util.RegisteredAction;
+import fr.jmmc.jmcs.App;
+import fr.jmmc.jmcs.gui.task.TaskSwingWorkerExecutor;
+import fr.jmmc.jmcs.gui.action.RegisteredAction;
 import java.awt.Cursor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;

@@ -6,7 +6,7 @@ package fest;
 import static org.fest.swing.timing.Pause.*;
 import org.fest.swing.timing.Timeout;
 
-import fr.jmmc.mcs.gui.task.TaskSwingWorkerExecutor;
+import fr.jmmc.jmcs.gui.task.TaskSwingWorkerExecutor;
 import java.util.logging.Level;
 import org.fest.swing.edt.GuiActionRunner;
 import org.fest.swing.edt.GuiQuery;

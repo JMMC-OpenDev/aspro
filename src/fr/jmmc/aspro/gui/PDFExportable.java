@@ -4,7 +4,7 @@
 package fr.jmmc.aspro.gui;
 
 import fr.jmmc.aspro.gui.chart.PDFOptions;
-import fr.jmmc.mcs.util.MimeType;
+import fr.jmmc.jmcs.util.MimeType;
 import org.jfree.chart.JFreeChart;
 
 /**

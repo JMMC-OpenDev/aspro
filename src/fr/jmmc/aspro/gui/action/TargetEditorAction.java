@@ -5,7 +5,7 @@ package fr.jmmc.aspro.gui.action;
 
 import fr.jmmc.aspro.AsproGui;
 import fr.jmmc.aspro.gui.BasicObservationForm;
-import fr.jmmc.mcs.util.RegisteredAction;
+import fr.jmmc.jmcs.gui.action.RegisteredAction;
 import java.awt.event.ActionEvent;
 import java.util.logging.Level;
 

@@ -21,12 +21,12 @@ import fr.jmmc.aspro.model.ConfigurationManager;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.interop.VotableSampMessageHandler;
 import fr.jmmc.aspro.interop.StarListSendAction;
-import fr.jmmc.mcs.gui.App;
-import fr.jmmc.mcs.gui.MessagePane;
-import fr.jmmc.mcs.gui.MessagePane.ConfirmSaveChanges;
-import fr.jmmc.mcs.gui.StatusBar;
-import fr.jmmc.mcs.gui.SwingSettings;
-import fr.jmmc.mcs.gui.task.TaskSwingWorkerExecutor;
+import fr.jmmc.jmcs.App;
+import fr.jmmc.jmcs.gui.MessagePane;
+import fr.jmmc.jmcs.gui.MessagePane.ConfirmSaveChanges;
+import fr.jmmc.jmcs.gui.StatusBar;
+import fr.jmmc.jmcs.gui.SwingSettings;
+import fr.jmmc.jmcs.gui.task.TaskSwingWorkerExecutor;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Toolkit;
@@ -227,7 +227,7 @@ public final class AsproGui extends App {
     frame.setTitle(App.getSharedApplicationDataModel().getProgramName());
 
     // handle frame icon
-    frame.setIconImage(new ImageIcon(getClass().getResource("/fr/jmmc/mcs/gui/favicon.png")).getImage());
+    frame.setIconImage(new ImageIcon(getClass().getResource("/fr/jmmc/jmcs/resource/favicon.png")).getImage());
 
     // get screen size to adjust minimum window size :
     final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();

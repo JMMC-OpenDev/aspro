@@ -6,7 +6,7 @@ package fr.jmmc.aspro.model;
 import fr.jmmc.jaxb.AsproCustomPrefixMapper;
 import fr.jmmc.jaxb.JAXBFactory;
 import fr.jmmc.jaxb.XmlBindException;
-import fr.jmmc.mcs.util.FileUtils;
+import fr.jmmc.jmcs.util.FileUtils;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;

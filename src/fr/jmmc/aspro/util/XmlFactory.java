@@ -3,7 +3,7 @@
  ******************************************************************************/
 package fr.jmmc.aspro.util;
 
-import fr.jmmc.mcs.util.FileUtils;
+import fr.jmmc.jmcs.util.FileUtils;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;

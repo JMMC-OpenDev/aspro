@@ -20,7 +20,7 @@ import fr.jmmc.aspro.model.oi.TargetConfiguration;
 import fr.jmmc.aspro.model.oi.TargetInformation;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.aspro.service.ObservabilityService;
-import fr.jmmc.mcs.util.FileUtils;
+import fr.jmmc.jmcs.util.FileUtils;
 import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;

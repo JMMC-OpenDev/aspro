@@ -4,8 +4,8 @@
 package fr.jmmc.aspro.gui.task;
 
 import fr.jmmc.aspro.model.oi.ObservationCollection;
-import fr.jmmc.mcs.gui.task.Task;
-import fr.jmmc.mcs.gui.task.TaskSwingWorker;
+import fr.jmmc.jmcs.gui.task.Task;
+import fr.jmmc.jmcs.gui.task.TaskSwingWorker;
 
 /**
  * This class extends TaskSwingWorker to :

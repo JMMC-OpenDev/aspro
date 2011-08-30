@@ -6,7 +6,7 @@ package fr.jmmc.aspro.ob;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.service.ObservabilityService;
-import fr.jmmc.mcs.util.FileUtils;
+import fr.jmmc.jmcs.util.FileUtils;
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;

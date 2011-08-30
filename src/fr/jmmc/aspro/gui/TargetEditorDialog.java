@@ -8,7 +8,7 @@ import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
-import fr.jmmc.mcs.gui.App;
+import fr.jmmc.jmcs.App;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.io.File;
