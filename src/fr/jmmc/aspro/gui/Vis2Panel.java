@@ -15,7 +15,7 @@ import fr.jmmc.aspro.gui.chart.ZoomEventListener;
 import fr.jmmc.aspro.model.event.OIFitsEvent;
 import fr.jmmc.aspro.model.event.ObservationEvent;
 import fr.jmmc.aspro.model.event.ObservationListener;
-import fr.jmmc.mcs.image.ColorModels;
+import fr.jmmc.jmal.image.ColorModels;
 import fr.jmmc.oitools.model.OIArray;
 import fr.jmmc.oitools.model.OIFitsFile;
 import fr.jmmc.oitools.model.OIVis2;

@@ -46,7 +46,7 @@ import fr.jmmc.aspro.service.UVCoverageService;
 import fr.jmmc.mcs.gui.MessagePane;
 import fr.jmmc.mcs.gui.StatusBar;
 import fr.jmmc.mcs.gui.task.TaskSwingWorker;
-import fr.jmmc.mcs.image.ColorModels;
+import fr.jmmc.jmal.image.ColorModels;
 import fr.jmmc.jmal.model.ModelUVMapService;
 import fr.jmmc.jmal.model.ModelUVMapService.ImageMode;
 import fr.jmmc.jmal.model.UVMapData;

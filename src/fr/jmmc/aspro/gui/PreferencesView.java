@@ -6,7 +6,7 @@ package fr.jmmc.aspro.gui;
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.Preferences;
 import fr.jmmc.aspro.model.observability.SunTimeInterval.SunType;
-import fr.jmmc.mcs.image.ColorModels;
+import fr.jmmc.jmal.image.ColorModels;
 import fr.jmmc.mcs.util.PreferencesException;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
