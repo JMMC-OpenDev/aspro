@@ -121,32 +121,57 @@
         FLUX_K
       -->
       
+      <!-- NAME field:
+          UCD1   = ''
+          UCD1.1 = 'meta.id;meta.main' -->
       <FIELD name="NAME" datatype="char" ucd="meta.id;meta.main" arraysize="*">
         <DESCRIPTION>Target name (identifier)</DESCRIPTION>
       </FIELD>
-      
+
+      <!-- RA field: J2000 (HMS)
+           UCD1   = 'POS_EQ_RA_MAIN'
+           UCD1.1 = 'pos.eq.ra;meta.main' -->
       <FIELD name="RA" datatype="char" ucd="pos.eq.ra;meta.main" arraysize="*" unit="h:m:s">
         <DESCRIPTION>Right ascension - J2000</DESCRIPTION>
       </FIELD>
+      <!-- DEC field: J2000 (DMS)
+           UCD1   = 'POS_EQ_DEC_MAIN'
+           UCD1.1 = 'pos.eq.ra;meta.main' -->
       <FIELD name="DEC" datatype="char" ucd="pos.eq.dec;meta.main" arraysize="*" unit="d:m:s">
         <DESCRIPTION>Declination - J2000</DESCRIPTION>
       </FIELD>
 
+      <!-- RV field:
+        UCD1   = 'VELOC_HC' (heliocentric ?)
+        UCD1.1 = 'spect.dopplerVeloc.opt' or 'PHYS.VELOC;POS.HELIOCENTRIC' -->
       <FIELD name="RV" datatype="double" ucd="spect.dopplerVeloc.opt" unit="km.s-1">
         <DESCRIPTION>Radial velocity</DESCRIPTION>
       </FIELD>
       <!-- VELTYP : undefined -->
 
+
+      <!-- PMRA field:
+        UCD1   = 'POS_EQ_PMRA'
+        UCD1.1 = 'pos.pm;pos.eq.ra' -->
       <FIELD name="PMRA" datatype="double" ucd="pos.pm;pos.eq.ra" unit="mas.yr-1">
         <DESCRIPTION>Proper motion in RA</DESCRIPTION>
       </FIELD>
+      <!-- PMDEC field:
+        UCD1   = 'POS_EQ_PMDEC'
+        UCD1.1 = 'pos.pm;pos.eq.dec' -->
       <FIELD name="PMDEC" datatype="double" ucd="pos.pm;pos.eq.dec" unit="mas.yr-1">
         <DESCRIPTION>Proper motion in DEC</DESCRIPTION>
       </FIELD>
-      
+
+      <!-- PLX field:
+        UCD1   = 'POS_PARLX_TRIG'
+        UCD1.1 = 'pos.parallax.trig' -->
       <FIELD name="PLX" datatype="double" ucd="pos.parallax.trig" unit="mas">
         <DESCRIPTION>Parallax</DESCRIPTION>
       </FIELD>
+      <!-- e_PLX field:
+        UCD1   = 'POS_PARLX_TRIG_ERROR'
+        UCD1.1 = 'stat.error;pos.parallax.trig' -->
       <FIELD name="e_PLX" datatype="double" ucd="stat.error;pos.parallax.trig" unit="mas">
         <DESCRIPTION>Parallax error</DESCRIPTION>
       </FIELD>
@@ -175,26 +200,47 @@
       </FIELD>      
 
       <!-- Spectral types: comma separated values -->
+      <!-- SP_TYPES field:
+        UCD1   = 'SPECT_TYPE_MK'
+        UCD1.1 = 'src.spType' -->
       <FIELD name="SP_TYPES" datatype="char" ucd="src.spType" arraysize="*">
         <DESCRIPTION>MK spectral type(s)</DESCRIPTION>
       </FIELD>
 
       <!-- fluxes (FLUX_V, FLUX_I, FLUX_J, FLUX_H, FLUX_K) -->
+      <!-- FLUX_V field:
+        UCD1   = 'PHOT_JHN_V'
+        UCD1.1 = 'phot.mag;em.opt.V' -->
       <FIELD name="FLUX_V" datatype="double" ucd="phot.mag;em.opt.V" unit="mag">
         <DESCRIPTION>Magnitude V</DESCRIPTION>
       </FIELD>
+      <!-- FLUX_I field:
+        UCD1   = 'PHOT_JHN_I'
+        UCD1.1 = 'phot.mag;em.opt.I' -->
       <FIELD name="FLUX_I" datatype="double" ucd="phot.mag;em.opt.I" unit="mag">
         <DESCRIPTION>Magnitude I</DESCRIPTION>
       </FIELD>
+      <!-- FLUX_J field:
+        UCD1   = 'PHOT_JHN_J'
+        UCD1.1 = 'phot.mag;em.IR.J' -->
       <FIELD name="FLUX_J" datatype="double" ucd="phot.mag;em.IR.J" unit="mag">
         <DESCRIPTION>Magnitude J</DESCRIPTION>
       </FIELD>
+      <!-- FLUX_H field:
+        UCD1   = 'PHOT_JHN_H'
+        UCD1.1 = 'phot.mag;em.IR.H' -->
       <FIELD name="FLUX_H" datatype="double" ucd="phot.mag;em.IR.H" unit="mag">
         <DESCRIPTION>Magnitude H</DESCRIPTION>
       </FIELD>
+      <!-- FLUX_K field:
+        UCD1   = 'PHOT_JHN_K'
+        UCD1.1 = 'phot.mag;em.IR.K' -->
       <FIELD name="FLUX_K" datatype="double" ucd="phot.mag;em.IR.K" unit="mag">
         <DESCRIPTION>Magnitude K</DESCRIPTION>
       </FIELD>
+      <!-- FLUX_N field:
+        UCD1   = 'PHOT_JHN_N'
+        UCD1.1 = 'phot.mag;em.IR.8-15um' -->
       <FIELD name="FLUX_N" datatype="double" ucd="phot.mag;em.IR.8-15um" unit="mag">
         <DESCRIPTION>Magnitude N</DESCRIPTION>
       </FIELD>
