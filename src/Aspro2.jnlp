@@ -26,6 +26,7 @@
 
     <!-- JMMC modules -->
     <jar href="jar/jmcs.jar" />
+    <jar href="jar/jmal.jar" />
     <jar href="jar/oitools.jar" />
 
     <!-- JMMC libs -->
