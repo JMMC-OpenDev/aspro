@@ -16,6 +16,7 @@ import fr.jmmc.aspro.model.event.OIFitsEvent;
 import fr.jmmc.aspro.model.event.ObservationEvent;
 import fr.jmmc.aspro.model.event.ObservationListener;
 import fr.jmmc.jmal.image.ColorModels;
+import fr.jmmc.jmal.image.ImageUtils;
 import fr.jmmc.oitools.model.OIArray;
 import fr.jmmc.oitools.model.OIFitsFile;
 import fr.jmmc.oitools.model.OIVis2;
@@ -111,6 +112,7 @@ public final class Vis2Panel extends javax.swing.JPanel implements ChartProgress
   /**
    * Export the chart component as a PDF document
    */
+  @Override
   public void performPDFAction() {
     ExportPDFAction.exportPDF(this);
   }
@@ -120,6 +122,7 @@ public final class Vis2Panel extends javax.swing.JPanel implements ChartProgress
    * [Vis2_<TARGET>_<INSTRUMENT>_<CONFIGURATION>_<DATE>]
    * @return PDF default file name
    */
+  @Override
   public String getPDFDefaultFileName() {
     if (this.oiFitsFile != null) {
       final StringBuilder sb = new StringBuilder(32).append("Vis2_");
@@ -158,6 +161,7 @@ public final class Vis2Panel extends javax.swing.JPanel implements ChartProgress
    * Return the PDF options
    * @return PDF options
    */
+  @Override
   public PDFOptions getPDFOptions() {
     return new PDFOptions(PageSize.A3, Orientation.Landscape);
   }
@@ -166,6 +170,7 @@ public final class Vis2Panel extends javax.swing.JPanel implements ChartProgress
    * Return the chart to export as a PDF document
    * @return chart
    */
+  @Override
   public JFreeChart prepareChart() {
     return this.chart;
   }
@@ -173,6 +178,7 @@ public final class Vis2Panel extends javax.swing.JPanel implements ChartProgress
   /**
    * Callback indicating the chart was processed by the PDF engine
    */
+  @Override
   public void postPDFExport() {
     // no-op
   }
@@ -236,6 +242,7 @@ public final class Vis2Panel extends javax.swing.JPanel implements ChartProgress
    * Handle the changed event to plot the vis2 plot synchronously.   
    * @param event event
    */
+  @Override
   public void onProcess(final ObservationEvent event) {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("event [" + event.getType() + "] process IN");
@@ -352,29 +359,22 @@ public final class Vis2Panel extends javax.swing.JPanel implements ChartProgress
     final int nWaves = vis2.getNWave();
 
     // Prepare palette
-    final int iMaxColor = RAINBOW_COLOR_MODEL.getMapSize() - 1;
+    final Color[] colors = new Color[nWaves];
+    
+    final IndexColorModel colorModel = RAINBOW_COLOR_MODEL;
+
+    final int iMaxColor = colorModel.getMapSize() - 1;
 
     final float factor = ((float) iMaxColor) / nWaves;
+    float value;
 
-    final Color[] colors = new Color[nWaves];
+    final int alphaMask = Math.round(255 * 0.8f) << 24;
 
-    final int a = Math.round(255 * 0.8f);
-    int r, g, b;
-
-    for (int i = 0, idx = 0; i < nWaves; i++) {
-
-      // TODO: interpolate colors RGB see ImageUtils.getRGB()
-
+    for (int i = 0; i < nWaves; i++) {
       // invert palette to have (VIOLET - BLUE - GREEN - RED) ie color spectrum:
-      idx = iMaxColor - Math.round(factor * i);
-      if (idx < 0) {
-        idx = 0;
-      }
-      r = RAINBOW_COLOR_MODEL.getRed(idx);
-      g = RAINBOW_COLOR_MODEL.getGreen(idx);
-      b = RAINBOW_COLOR_MODEL.getBlue(idx);
-
-      colors[i] = new Color(r, g, b, a);
+      value = iMaxColor - factor * i;
+      
+      colors[i] = new Color(ImageUtils.getRGB(colorModel, iMaxColor, value, alphaMask), true);
     }
 
     final double[][] vis2Data = vis2.getVis2Data();
@@ -390,11 +390,13 @@ public final class Vis2Panel extends javax.swing.JPanel implements ChartProgress
     double x, y, err;
 
     for (int j = 0; j < nWaves; j++) {
+      
       // 1 color per spectral channel (i.e. per XYSeries) :
       yIntervalSeries = new YIntervalSeries("VIS2 W" + j, false, true);
       yIntervalSeries.setNotify(false);
 
       for (int i = 0; i < nRows; i++) {
+        
         x = toUVPlotScale(spatialFreq[i][j]);
         y = vis2Data[i][j];
         err = vis2Err[i][j];
@@ -411,8 +413,6 @@ public final class Vis2Panel extends javax.swing.JPanel implements ChartProgress
         if (y > maxY) {
           maxY = y;
         }
-
-//        yIntervalSeries.add(x, y, false);
 
         yIntervalSeries.add(x, y, y - err, y + err);
       }
@@ -460,6 +460,7 @@ public final class Vis2Panel extends javax.swing.JPanel implements ChartProgress
    * Process the zoom event to refresh the model UV map according to the new coordinates
    * @param ze zoom event
    */
+  @Override
   public void chartChanged(final ZoomEvent ze) {
     // reset bounds between -0.1 and 1.1 :
     // @todo check if this code can be removed setting constraints on another place
@@ -483,6 +484,7 @@ public final class Vis2Panel extends javax.swing.JPanel implements ChartProgress
    * Handle the chart progress event to log the chart rendering delay
    * @param event chart progress event
    */
+  @Override
   public void chartProgress(final ChartProgressEvent event) {
     // TODO: use fine level when stable:
     if (logger.isLoggable(Level.INFO)) {
@@ -513,7 +515,7 @@ public final class Vis2Panel extends javax.swing.JPanel implements ChartProgress
    * @return u or v coordinate in the plot unit
    */
   private double toUVPlotScale(final double value) {
-    return uvPlotScalingFactor * value;
+    return this.uvPlotScalingFactor * value;
   }
 
   /**
@@ -522,7 +524,7 @@ public final class Vis2Panel extends javax.swing.JPanel implements ChartProgress
    * @return u or v coordinate in rad-1
    */
   private double fromUVPlotScale(final double value) {
-    return value / uvPlotScalingFactor;
+    return value / this.uvPlotScalingFactor;
   }
 
   /**
@@ -531,7 +533,7 @@ public final class Vis2Panel extends javax.swing.JPanel implements ChartProgress
    */
   private static Shape getPointShape() {
 
-    final float size = 2f;
+    final float size = 3f;
 
     if (USE_SQUARE) {
       return new Rectangle2D.Double(-size, -size, 2 * size, 2 * size);
