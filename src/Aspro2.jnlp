@@ -21,13 +21,16 @@
   <resources>
     <j2se version="1.5+" initial-heap-size="256m" max-heap-size="384m"/>    
 
+    <!-- Application module first (main class) -->
+    <jar href="jar/aspro.jar" />
+
     <!-- JMMC modules -->
     <jar href="jar/jmcs.jar" />
-    <jar href="jar/aspro.jar" />
     <jar href="jar/oitools.jar" />
 
-    <!-- JMCS libs -->
+    <!-- JMMC libs -->
     <extension href="../JmcsLibs/JmcsLibs.jnlp"/>
+    <extension href="../JmalLibs/JmalLibs.jnlp"/>
     
     <!-- JFreeChart -->
     <jar href="@SHARED@/jfreechart-1.0.13.jar" />
