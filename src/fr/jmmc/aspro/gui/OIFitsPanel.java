@@ -48,15 +48,12 @@ public final class OIFitsPanel extends javax.swing.JPanel implements Observation
    * If the oifits is computed, refresh the UI widgets
    * @param event event
    */
+  @Override
   public void onProcess(final ObservationEvent event) {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("event [" + event.getType() + "] process IN");
     }
     switch (event.getType()) {
-      case REFRESH:
-        // reset content :
-        this.updateOIFits(null);
-        break;
       case OIFITS_DONE:
         this.updateOIFits(((OIFitsEvent) event).getOIFitsFile());
         break;

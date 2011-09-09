@@ -89,6 +89,7 @@ import org.jfree.data.gantt.TaskSeries;
 import org.jfree.data.gantt.TaskSeriesCollection;
 import org.jfree.data.time.DateRange;
 import org.jfree.ui.Layer;
+import org.jfree.ui.TextAnchor;
 
 /**
  * This panel represents the observability plot
@@ -146,6 +147,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
   private JFreeChart chart;
   /** xy plot instance */
   private XYPlot xyPlot;
+  /** JMMC annotation */
+  private XYTextAnnotation aJMMC = null;
   /** sliding adapter to display a subset of targets */
   private SlidingXYPlotAdapter slidingXYPlotAdapter = null;
   /** plot rendering context */
@@ -193,8 +196,13 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     this.chart = ChartUtils.createXYBarChart();
     this.xyPlot = (XYPlot) this.chart.getPlot();
 
+    // create new JMMC annotation (moving position):
+    this.aJMMC = ChartUtils.createXYTextAnnotation(AsproConstants.JMMC_ANNOTATION, 0, 0);
+    this.aJMMC.setTextAnchor(TextAnchor.BOTTOM_RIGHT);
+    this.aJMMC.setPaint(Color.DARK_GRAY);
+
     // define sliding adapter :
-    this.slidingXYPlotAdapter = new SlidingXYPlotAdapter(this.chart, this.xyPlot, MAX_VIEW_ITEMS);
+    this.slidingXYPlotAdapter = new SlidingXYPlotAdapter(this.chart, this.xyPlot, MAX_VIEW_ITEMS, this.aJMMC);
 
     // add listener :
     this.chart.addProgressListener(this);
@@ -216,6 +224,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
     this.scroller.getModel().addChangeListener(new ChangeListener() {
 
+      @Override
       public void stateChanged(final ChangeEvent paramChangeEvent) {
         final DefaultBoundedRangeModel model = (DefaultBoundedRangeModel) paramChangeEvent.getSource();
         // update position and repaint the plot:
@@ -226,6 +235,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     // add the mouse wheel listener to the complete observability panel :
     this.addMouseWheelListener(new MouseWheelListener() {
 
+      @Override
       public void mouseWheelMoved(final MouseWheelEvent e) {
         if (scroller.isEnabled()) {
           if (logger.isLoggable(Level.FINER)) {
@@ -260,6 +270,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     this.jComboTimeRef.setSelectedItem(this.myPreferences.getPreference(Preferences.TIME_REFERENCE));
     this.jComboTimeRef.addActionListener(new ActionListener() {
 
+      @Override
       public void actionPerformed(final ActionEvent e) {
         refreshPlot();
       }
@@ -272,6 +283,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     this.jCheckBoxBaseLineLimits.setSelected(DEFAULT_DO_BASELINE_LIMITS);
     this.jCheckBoxBaseLineLimits.addItemListener(new ItemListener() {
 
+      @Override
       public void itemStateChanged(final ItemEvent e) {
         final boolean doBaseLineLimits = e.getStateChange() == ItemEvent.SELECTED;
 
@@ -306,6 +318,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     this.jCheckBoxDetailedOutput.setSelected(DEFAULT_DO_DETAILED_OUTPUT);
     this.jCheckBoxDetailedOutput.addItemListener(new ItemListener() {
 
+      @Override
       public void itemStateChanged(final ItemEvent e) {
         refreshPlot();
       }
@@ -319,6 +332,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     this.jCheckBoxScrollView.setSelected(true);
     this.jCheckBoxScrollView.addItemListener(new ItemListener() {
 
+      @Override
       public void itemStateChanged(final ItemEvent e) {
         // update scrollbar state and repaint the plot:
         updateSliderProperties(false);
@@ -338,6 +352,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
    * Free any ressource or reference to this instance :
    * remove this instance form Preference Observers
    */
+  @Override
   public void dispose() {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("dispose : " + this);
@@ -352,6 +367,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
    * @param o Preferences
    * @param arg unused
    */
+  @Override
   public void update(final Observable o, final Object arg) {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("Preferences updated on : " + this);
@@ -364,6 +380,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
   /**
    * Export the chart component as a PDF document
    */
+  @Override
   public void performPDFAction() {
     ExportPDFAction.exportPDF(this);
   }
@@ -372,6 +389,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
    * Return the PDF default file name
    * @return PDF default file name
    */
+  @Override
   public String getPDFDefaultFileName() {
     if (this.getChartData() != null) {
 
@@ -414,6 +432,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
    * Return the PDF options
    * @return PDF options
    */
+  @Override
   public PDFOptions getPDFOptions() {
     if (this.getChartData() != null) {
       // baseline limits flag used by the plot :
@@ -441,6 +460,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
    * Return the chart to export as a PDF document
    * @return chart
    */
+  @Override
   public JFreeChart prepareChart() {
     // Memorize subset mode before rendering PDF :
     this.useSubsetBeforePDF = this.slidingXYPlotAdapter.isUseSubset();
@@ -459,6 +479,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
   /**
    * Callback indicating the chart was processed by the PDF engine
    */
+  @Override
   public void postPDFExport() {
     if (this.useSubsetBeforePDF) {
       // Restore the chart as displayed
@@ -474,7 +495,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
    * This method is called by the SettingPanel when the selected tabbed panel is different from this
    * to disable the 'BaseLine Limits' checkbox in order to have correct results in the UV Coverage Panel.
    */
-  protected void disableBaseLineLimits() {
+  void disableBaseLineLimits() {
     if (this.jCheckBoxBaseLineLimits.isSelected()) {
       // this will send a refresh plot event ...
       this.jCheckBoxBaseLineLimits.setSelected(false);
@@ -510,6 +531,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
    * compute observability data and refresh the plot
    * @param event event
    */
+  @Override
   public void onProcess(final ObservationEvent event) {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("event [" + event.getType() + "] process IN");
@@ -533,7 +555,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
    * Refresh the plot when an UI widget changes that is not related to the observation.
    * Check the doAutoRefresh flag to avoid unwanted refresh (onLoadObservation)
    */
-  protected void refreshPlot() {
+  private void refreshPlot() {
     if (this.doAutoRefresh) {
       if (logger.isLoggable(Level.FINE)) {
         logger.fine("refreshPlot");
@@ -548,7 +570,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
    * This code is executed by the Swing Event Dispatcher thread (EDT)
    * @param obsCollection observation collection to use
    */
-  protected void plot(final ObservationCollection obsCollection) {
+  private void plot(final ObservationCollection obsCollection) {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("plot : " + ObservationManager.toString(obsCollection));
     }
@@ -646,6 +668,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
      * This code is executed by a Worker thread (Not Swing EDT)
      * @return observability data
      */
+    @Override
     public List<ObservabilityData> computeInBackground() {
 
       // Start the computations :
@@ -677,6 +700,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
      * This code is executed by the Swing Event Dispatcher thread (EDT)
      * @param obsDataList computed observability data
      */
+    @Override
     public void refreshUI(final List<ObservabilityData> obsDataList) {
 
       final ObservationCollection taskObsCollection = this.getObservationCollection();
@@ -1121,55 +1145,56 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     }
   }
   /** drawing started time value */
-  private long lastTime = 0l;
+  private long chartDrawStartTime = 0l;
 
   /**
    * Handle the chart progress event to log the chart rendering delay
    * @param event chart progress event
    */
+  @Override
   public void chartProgress(final ChartProgressEvent event) {
     if (logger.isLoggable(Level.FINE)) {
       switch (event.getType()) {
         case ChartProgressEvent.DRAWING_STARTED:
-          this.lastTime = System.nanoTime();
+          this.chartDrawStartTime = System.nanoTime();
           break;
         case ChartProgressEvent.DRAWING_FINISHED:
-          logger.fine("Drawing chart time : " + 1e-6d * (System.nanoTime() - this.lastTime) + " ms.");
-          this.lastTime = 0l;
+          logger.fine("Drawing chart time : " + 1e-6d * (System.nanoTime() - this.chartDrawStartTime) + " ms.");
+          this.chartDrawStartTime = 0l;
           break;
         default:
       }
     }
+    
+    // Perform custom operations before/after chart rendering:
+    // move JMMC annotation:
+    this.aJMMC.setX(this.xyPlot.getDomainAxis().getUpperBound());
+    this.aJMMC.setY(this.xyPlot.getRangeAxis().getUpperBound()); // upper bound instead of other plots
+    
+    // reset context state:
+    this.renderContext.reset();
+    
+    // adjust scrollbar properties:
+    if (event.getType() == ChartProgressEvent.DRAWING_FINISHED) {
+      // get chart rendering area:
+      final ChartRenderingInfo info = this.chartPanel.getChartRenderingInfo();
+      final PlotRenderingInfo pinfo = info.getPlotInfo();
 
-    switch (event.getType()) {
-      case ChartProgressEvent.DRAWING_STARTED:
-        // reset context state:
-        this.renderContext.reset();
-        break;
-      case ChartProgressEvent.DRAWING_FINISHED:
-        // free context state:
-        this.renderContext.reset();
-        // get chart rendering area:
-        final ChartRenderingInfo info = this.chartPanel.getChartRenderingInfo();
-        final PlotRenderingInfo pinfo = info.getPlotInfo();
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("chartArea = " + info.getChartArea());
+        logger.fine("dataArea  = " + pinfo.getDataArea());
+      }
 
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("chartArea = " + info.getChartArea());
-          logger.fine("dataArea  = " + pinfo.getDataArea());
-        }
+      final int top = (int) Math.floor(pinfo.getDataArea().getY());
+      final int bottom = (int) Math.floor(info.getChartArea().getHeight() - pinfo.getDataArea().getMaxY());
 
-        final int top = (int) Math.floor(pinfo.getDataArea().getY());
-        final int bottom = (int) Math.floor(info.getChartArea().getHeight() - pinfo.getDataArea().getMaxY());
+      final Insets current = this.scrollerPanel.getBorder().getBorderInsets(null);
+      if (current.top != top || current.bottom != bottom) {
+        // adjust scrollbar margins :
+        this.scrollerPanel.setBorder(BorderFactory.createEmptyBorder(top, 0, bottom, 0));
+      }
 
-        final Insets current = this.scrollerPanel.getBorder().getBorderInsets(null);
-        if (current.top != top || current.bottom != bottom) {
-          // adjust scrollbar margins :
-          this.scrollerPanel.setBorder(BorderFactory.createEmptyBorder(top, 0, bottom, 0));
-        }
-
-        this.plotNonDataHeight = top + bottom;
-        break;
-      default:
+      this.plotNonDataHeight = top + bottom;
     }
   }
 

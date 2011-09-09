@@ -509,6 +509,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
   /**
    * Export the chart component as a PDF document
    */
+  @Override
   public void performPDFAction() {
     ExportPDFAction.exportPDF(this);
   }
@@ -517,6 +518,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
    * Return the PDF default file name
    * @return PDF default file name
    */
+  @Override
   public String getPDFDefaultFileName() {
     if (this.getChartData() != null) {
       final ObservationSetting observation = this.getChartData().getFirstObservation();
@@ -541,6 +543,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
    * Return the PDF options
    * @return PDF options
    */
+  @Override
   public PDFOptions getPDFOptions() {
     return PDFOptions.DEFAULT_PDF_OPTIONS;
   }
@@ -549,6 +552,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
    * Return the chart to export as a PDF document
    * @return chart
    */
+  @Override
   public JFreeChart prepareChart() {
     return this.chart;
   }
@@ -556,6 +560,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
   /**
    * Callback indicating the chart was processed by the PDF engine
    */
+  @Override
   public void postPDFExport() {
     // no-op
   }
@@ -571,6 +576,12 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     // Adjust background settings :
     this.xyPlot.setBackgroundImageAlpha(1.0f);
 
+    // create new JMMC annotation (moving position):
+    this.aJMMC = ChartUtils.createXYTextAnnotation(AsproConstants.JMMC_ANNOTATION, 0, 0);
+    this.aJMMC.setTextAnchor(TextAnchor.BOTTOM_RIGHT);
+    this.aJMMC.setPaint(Color.DARK_GRAY);
+    this.xyPlot.getRenderer().addAnnotation(this.aJMMC, Layer.BACKGROUND);
+
     // add listener :
     this.chart.addProgressListener(this);
     this.chartPanel = ChartUtils.createSquareChartPanel(this.chart);
@@ -585,7 +596,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     // define min and prefered size for chart panel used by the split pane container :
     this.chartPanel.setMinimumSize(new Dimension(650, 500));
     this.jSplitPane.setRightComponent(this.chartPanel);
-
+    
     // define change listeners :
     this.jComboBoxInstrumentMode.addActionListener(this);
     this.jComboBoxFTMode.addActionListener(this);
@@ -597,6 +608,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     // define property change listener :
     this.jFieldSamplingPeriod.addPropertyChangeListener("value", new PropertyChangeListener() {
 
+      @Override
       public void propertyChange(final PropertyChangeEvent evt) {
         final double newValue = ((Number) jFieldSamplingPeriod.getValue()).doubleValue();
 
@@ -616,6 +628,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     this.jFieldObsDuration.setValue(AsproConstants.DEFAULT_OBSERVATION_DURATION);
     this.jFieldObsDuration.addPropertyChangeListener("value", new PropertyChangeListener() {
 
+      @Override
       public void propertyChange(final PropertyChangeEvent evt) {
         final double newValue = ((Number) jFieldObsDuration.getValue()).doubleValue();
 
@@ -642,6 +655,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
     this.jCheckBoxPlotUVSupport.addItemListener(new ItemListener() {
 
+      @Override
       public void itemStateChanged(final ItemEvent e) {
         refreshPlot();
       }
@@ -649,6 +663,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
     this.jCheckBoxModelImage.addItemListener(new ItemListener() {
 
+      @Override
       public void itemStateChanged(final ItemEvent e) {
         final boolean enabled = jCheckBoxModelImage.isSelected();
         jComboBoxImageMode.setEnabled(enabled);
@@ -667,6 +682,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
    * Free any ressource or reference to this instance :
    * remove this instance form Preference Observers
    */
+  @Override
   public void dispose() {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("dispose : " + this);
@@ -690,6 +706,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
    * @param o Preferences
    * @param arg unused
    */
+  @Override
   public void update(final Observable o, final Object arg) {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("Preferences updated on : " + this);
@@ -892,6 +909,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
    * Refresh the dependent combo boxes and update the observation according to the form state
    * @param e action event
    */
+  @Override
   public void actionPerformed(final ActionEvent e) {
     if (e.getSource() == this.jComboBoxInstrumentMode) {
       if (logger.isLoggable(Level.FINE)) {
@@ -923,6 +941,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
    * Handle the stateChanged event from the FieldSliderAdapter instances
    * @param ce change event
    */
+  @Override
   public void stateChanged(final ChangeEvent ce) {
     final FieldSliderAdapter source = (FieldSliderAdapter) ce.getSource();
 
@@ -1153,6 +1172,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
    * 2/ If the observability is computed, then refresh the plot
    * @param event event
    */
+  @Override
   public void onProcess(final ObservationEvent event) {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("event [" + event.getType() + "] process IN");
@@ -1219,7 +1239,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
    * Refresh the plot when an UI widget changes that is not related to the observation.
    * Check the doAutoRefresh flag to avoid unwanted refresh (resetOptions)
    */
-  protected void refreshPlot() {
+  private void refreshPlot() {
     if (this.doAutoRefresh) {
       if (logger.isLoggable(Level.FINE)) {
         logger.fine("refreshPlot");
@@ -1237,7 +1257,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
    * 
    * @param obsCollection observation collection to use
    */
-  protected void refreshPlot(final ObservationCollection obsCollection) {
+  private void refreshPlot(final ObservationCollection obsCollection) {
     if (obsCollection != null && this.getObservabilityData() != null) {
       // versions are the same for all observability data :
       final ObservabilityData obsData = this.getFirstObservabilityData();
@@ -1270,7 +1290,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
    * This code is executed by the Swing Event Dispatcher thread (EDT)
    * @param obsCollection observation collection to use
    */
-  protected void plot(final ObservationCollection obsCollection) {
+  private void plot(final ObservationCollection obsCollection) {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("plot : " + ObservationManager.toString(obsCollection));
     }
@@ -1380,6 +1400,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
      * This code is executed by a Worker thread (Not Swing EDT)
      * @return UV Coverage data
      */
+    @Override
     public ObservationCollectionUVData computeInBackground() {
 
       // Start the computations :
@@ -1509,6 +1530,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
      * This code is executed by the Swing Event Dispatcher thread (EDT)
      * @param uvDataCollection computed UV Coverage data
      */
+    @Override
     public void refreshUI(final ObservationCollectionUVData uvDataCollection) {
 
       // Note : the main observation can have changed while computation
@@ -1530,6 +1552,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
      *
      * @param ee execution exception
      */
+    @Override
     public void handleException(final ExecutionException ee) {
       this.uvPanel.resetPlot();
       if (ee.getCause() instanceof IllegalArgumentException) {
@@ -1646,18 +1669,11 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
    * Process the zoom event to refresh the model UV map according to the new coordinates
    * @param ze zoom event
    */
+  @Override
   public void chartChanged(final ZoomEvent ze) {
     // check if the zoom changed :
     if (!ze.equals(this.lastZoomEvent)) {
       this.lastZoomEvent = ze;
-
-      if (this.aJMMC != null) {
-        this.xyPlot.getRenderer(0).removeAnnotations();
-        this.aJMMC.setX(ze.getDomainUpperBound());
-        this.aJMMC.setY(ze.getRangeLowerBound());
-
-        this.xyPlot.getRenderer(0).addAnnotation(this.aJMMC, Layer.BACKGROUND);
-      }
 
       if (this.getChartData() != null && this.getChartData().getUVMapData() != null) {
         // Update model uv map :
@@ -1758,6 +1774,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
      * This code is executed by a Worker thread (Not Swing EDT)
      * @return UV Map data
      */
+    @Override
     public UVMapData computeInBackground() {
       // compute the uv map data :
       return ModelUVMapService.computeUVMap(
@@ -1769,6 +1786,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
      * This code is executed by the Swing Event Dispatcher thread (EDT)
      * @param uvMapData computed UV Map data
      */
+    @Override
     public void refreshUI(final UVMapData uvMapData) {
       // delegates to uv coverage panel :
       this.uvPanel.updateUVMap(uvMapData.getUvMap());
@@ -1783,6 +1801,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
      *
      * @param ee execution exception
      */
+    @Override
     public void handleException(final ExecutionException ee) {
       this.uvPanel.updateUVMap(null);
       if (ee.getCause() instanceof IllegalArgumentException) {
@@ -1871,18 +1890,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
     // set the main data set :
     this.xyPlot.setDataset(dataset);
-
-    // annotation JMMC (moving position) :
-    this.xyPlot.getRenderer(0).removeAnnotations();
-    if (this.aJMMC == null) {
-      this.aJMMC = ChartUtils.createXYTextAnnotation(AsproConstants.JMMC_ANNOTATION, boxSize, -boxSize);
-      this.aJMMC.setTextAnchor(TextAnchor.BOTTOM_RIGHT);
-      this.aJMMC.setPaint(Color.DARK_GRAY);
-    } else {
-      this.aJMMC.setX(boxSize);
-      this.aJMMC.setY(-boxSize);
-    }
-    this.xyPlot.getRenderer(0).addAnnotation(this.aJMMC, Layer.BACKGROUND);
   }
 
   /**
@@ -2109,25 +2116,31 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
   private javax.swing.JLabel jTargetHAMin;
   // End of variables declaration//GEN-END:variables
   /** drawing started time value */
-  private long lastTime = 0l;
+  private long chartDrawStartTime = 0l;
 
   /**
    * Handle the chart progress event to log the chart rendering delay
    * @param event chart progress event
    */
+  @Override
   public void chartProgress(final ChartProgressEvent event) {
     if (logger.isLoggable(Level.FINE)) {
       switch (event.getType()) {
         case ChartProgressEvent.DRAWING_STARTED:
-          this.lastTime = System.nanoTime();
+          this.chartDrawStartTime = System.nanoTime();
           break;
         case ChartProgressEvent.DRAWING_FINISHED:
-          logger.fine("Drawing chart time : " + 1e-6d * (System.nanoTime() - this.lastTime) + " ms.");
-          this.lastTime = 0l;
+          logger.fine("Drawing chart time : " + 1e-6d * (System.nanoTime() - this.chartDrawStartTime) + " ms.");
+          this.chartDrawStartTime = 0l;
           break;
         default:
       }
     }
+    
+    // Perform custom operations before/after chart rendering:
+    // move JMMC annotation:
+    this.aJMMC.setX(this.xyPlot.getDomainAxis().getUpperBound());
+    this.aJMMC.setY(this.xyPlot.getRangeAxis().getLowerBound());
   }
 
   /**

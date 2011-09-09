@@ -3,7 +3,6 @@
  ******************************************************************************/
 package fr.jmmc.aspro.gui.chart;
 
-import fr.jmmc.aspro.AsproConstants;
 import java.awt.Color;
 import java.awt.Paint;
 import java.util.List;
@@ -19,7 +18,6 @@ import org.jfree.data.Range;
 import org.jfree.data.gantt.TaskSeriesCollection;
 import org.jfree.data.gantt.XYTaskDataset;
 import org.jfree.ui.Layer;
-import org.jfree.ui.TextAnchor;
 
 /**
  * This class is a custom XYPlot adapter to provide both a sliding dataset and annotations in sync.
@@ -67,12 +65,14 @@ public final class SlidingXYPlotAdapter {
    * @param chart chart instance
    * @param plot xy plot
    * @param maxElements max items in the chart view
+   * @param aJMMC JMMC annotation instance to be added to renderer's annotations
    */
-  public SlidingXYPlotAdapter(final JFreeChart chart, final XYPlot plot, final int maxElements) {
+  public SlidingXYPlotAdapter(final JFreeChart chart, final XYPlot plot, final int maxElements, final XYTextAnnotation aJMMC) {
     this.chart = chart;
     this.xyPlot = plot;
     this.renderer = (XYBarRenderer) plot.getRenderer();
     this.maxViewItems = maxElements;
+    this.aJMMC = aJMMC;
   }
 
   /**
@@ -300,18 +300,8 @@ public final class SlidingXYPlotAdapter {
       }
     }
 
-    // annotation JMMC (fixed position) :
-    if (this.aJMMC == null) {
-      this.aJMMC = ChartUtils.createXYTextAnnotation(AsproConstants.JMMC_ANNOTATION,
-              symbolAxis.getRange().getUpperBound(),
-              this.xyPlot.getRangeAxis().getRange().getUpperBound());
-      this.aJMMC.setTextAnchor(TextAnchor.BOTTOM_RIGHT);
-      this.aJMMC.setPaint(Color.DARK_GRAY);
-    } else {
-      this.aJMMC.setX(symbolAxis.getRange().getUpperBound());
-      this.aJMMC.setY(this.xyPlot.getRangeAxis().getRange().getUpperBound());
-    }
-    this.renderer.addAnnotation(aJMMC, Layer.BACKGROUND);
+    // add JMMC annotation (moving position):
+    this.renderer.addAnnotation(this.aJMMC, Layer.BACKGROUND);
 
     // tick color :
     this.xyPlot.getRangeAxis().setTickMarkPaint(Color.BLACK);

@@ -6,6 +6,7 @@ package fr.jmmc.aspro.gui;
 import fr.jmmc.aspro.model.event.ObservationEventType;
 import fr.jmmc.aspro.model.event.ObservationListener;
 import fr.jmmc.aspro.model.ObservationManager;
+import fr.jmmc.aspro.model.event.OIFitsEvent;
 import fr.jmmc.aspro.model.event.ObservationEvent;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import java.awt.Component;
@@ -96,6 +97,7 @@ public final class SettingPanel extends JPanel implements ObservationListener {
        * This method is called whenever the selected tab changes
        * @param evt change event
        */
+      @Override
       public final void stateChanged(final ChangeEvent evt) {
         if (observabilityPanel != null && jTabbedPane.getSelectedComponent() != observabilityPanel) {
           // check if the BaseLine Limits are active; if true, disable the checkbox
@@ -140,6 +142,7 @@ public final class SettingPanel extends JPanel implements ObservationListener {
    * 
    * @param event event
    */
+  @Override
   public void onProcess(final ObservationEvent event) {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("event [" + event.getType() + "] process IN");
@@ -225,7 +228,8 @@ public final class SettingPanel extends JPanel implements ObservationListener {
           this.oiFitsPanel = null;
         }
       }
-    } else if (type == ObservationEventType.OIFITS_DONE) {
+    } else if (type == ObservationEventType.OIFITS_DONE
+            && ((OIFitsEvent) event).getOIFitsFile() != null) {
             
       // create the vis2 panel if null :      
       if (this.vis2Panel == null) {

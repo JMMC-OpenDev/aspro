@@ -11,8 +11,6 @@ import fr.jmmc.aspro.gui.chart.PDFOptions;
 import fr.jmmc.aspro.gui.chart.SquareChartPanel;
 import fr.jmmc.aspro.gui.chart.SquareXYPlot;
 import fr.jmmc.aspro.gui.chart.XYZNameDataSet;
-import fr.jmmc.aspro.gui.chart.ZoomEvent;
-import fr.jmmc.aspro.gui.chart.ZoomEventListener;
 import fr.jmmc.aspro.gui.util.ColorPalette;
 import fr.jmmc.aspro.model.InterferometerMapData;
 import fr.jmmc.aspro.model.ObservationCollectionMapData;
@@ -46,7 +44,7 @@ import org.jfree.ui.TextAnchor;
  * This panel presents the interferometer plot (station, base lines ...)
  * @author bourgesl
  */
-public final class InterferometerMapPanel extends javax.swing.JPanel implements ChartProgressListener, ZoomEventListener,
+public final class InterferometerMapPanel extends javax.swing.JPanel implements ChartProgressListener,
                                                                                 ObservationListener, PDFExportable {
 
   /** default serial UID for Serializable interface */
@@ -100,6 +98,7 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
   /**
    * Export the chart component as a PDF document
    */
+  @Override
   public void performPDFAction() {
     ExportPDFAction.exportPDF(this);
   }
@@ -108,6 +107,7 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
    * Return the PDF default file name
    * @return PDF default file name
    */
+  @Override
   public String getPDFDefaultFileName() {
     if (this.getChartData() != null) {
       final StringBuilder sb = new StringBuilder(32);
@@ -124,6 +124,7 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
    * Return the PDF options
    * @return PDF options
    */
+  @Override
   public PDFOptions getPDFOptions() {
     return PDFOptions.DEFAULT_PDF_OPTIONS;
   }
@@ -132,6 +133,7 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
    * Return the chart to export as a PDF document
    * @return chart
    */
+  @Override
   public JFreeChart prepareChart() {
     return this.chart;
   }
@@ -139,6 +141,7 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
   /**
    * Callback indicating the chart was processed by the PDF engine
    */
+  @Override
   public void postPDFExport() {
     // no-op
   }
@@ -174,6 +177,12 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
     renderer.setBasePositiveItemLabelPosition(new ItemLabelPosition(ItemLabelAnchor.CENTER, TextAnchor.BOTTOM_RIGHT));
     renderer.setBaseItemLabelsVisible(true);
 
+    // create new JMMC annotation (moving position):
+    this.aJMMC = ChartUtils.createXYTextAnnotation(AsproConstants.JMMC_ANNOTATION, 0, 0);
+    this.aJMMC.setTextAnchor(TextAnchor.BOTTOM_RIGHT);
+    this.aJMMC.setPaint(Color.DARK_GRAY);
+    this.xyPlot.getRenderer().addAnnotation(this.aJMMC, Layer.BACKGROUND);
+    
     // add listener :
     this.chart.addProgressListener(this);
     this.chartPanel = ChartUtils.createSquareChartPanel(this.chart);
@@ -181,9 +190,6 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
     // zoom options :
     this.chartPanel.setDomainZoomable(AsproConstants.ENABLE_ZOOM);
     this.chartPanel.setRangeZoomable(AsproConstants.ENABLE_ZOOM);
-
-    // define zoom listener :
-    this.chartPanel.setZoomEventListener(this);
 
     this.chartPanel.setMinimumSize(new Dimension(650, 500));
     this.add(this.chartPanel);
@@ -195,6 +201,7 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
    * before other plots / computations are done.
    * @param event event
    */
+  @Override
   public void onProcess(final ObservationEvent event) {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("event [" + event.getType() + "] process IN");
@@ -215,7 +222,7 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
    * This code must be executed by the Swing Event Dispatcher thread (EDT)
    * @param obsCollection observation collection to use
    */
-  protected void plot(final ObservationCollection obsCollection) {
+  private void plot(final ObservationCollection obsCollection) {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("plot : " + ObservationManager.toString(obsCollection));
     }
@@ -384,54 +391,35 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
 
     // set the second data set :
     this.xyPlot.setDataset(1, dataset);
-
-    // annotation JMMC (moving position) :
-    this.xyPlot.getRenderer(0).removeAnnotations();
-    if (this.aJMMC == null) {
-      this.aJMMC = ChartUtils.createXYTextAnnotation(AsproConstants.JMMC_ANNOTATION, boxSize, -boxSize);
-      this.aJMMC.setTextAnchor(TextAnchor.BOTTOM_RIGHT);
-      this.aJMMC.setPaint(Color.DARK_GRAY);
-    } else {
-      this.aJMMC.setX(boxSize);
-      this.aJMMC.setY(-boxSize);
-    }
-    this.xyPlot.getRenderer(0).addAnnotation(this.aJMMC, Layer.BACKGROUND);
   }
 
-  /**
-   * Process the zoom event to refresh the model UV map according to the new coordinates
-   * @param ze zoom event
-   */
-  public void chartChanged(final ZoomEvent ze) {
-    if (this.aJMMC != null) {
-      this.xyPlot.getRenderer(0).removeAnnotations();
-      this.aJMMC.setX(ze.getDomainUpperBound());
-      this.aJMMC.setY(ze.getRangeLowerBound());
-
-      this.xyPlot.getRenderer(0).addAnnotation(this.aJMMC, Layer.BACKGROUND);
-    }
-  }
   // Variables declaration - do not modify//GEN-BEGIN:variables
   // End of variables declaration//GEN-END:variables
   /** drawing started time value */
-  private long lastTime = 0l;
+  private long chartDrawStartTime = 0l;
 
   /**
    * Handle the chart progress event to log the chart rendering delay
    * @param event chart progress event
    */
+  @Override
   public void chartProgress(final ChartProgressEvent event) {
     if (logger.isLoggable(Level.FINE)) {
       switch (event.getType()) {
         case ChartProgressEvent.DRAWING_STARTED:
-          this.lastTime = System.nanoTime();
+          this.chartDrawStartTime = System.nanoTime();
           break;
         case ChartProgressEvent.DRAWING_FINISHED:
-          logger.fine("Drawing chart time : " + 1e-6d * (System.nanoTime() - this.lastTime) + " ms.");
-          this.lastTime = 0l;
+          logger.fine("Drawing chart time : " + 1e-6d * (System.nanoTime() - this.chartDrawStartTime) + " ms.");
+          this.chartDrawStartTime = 0l;
           break;
         default:
       }
     }
+    
+    // Perform custom operations before/after chart rendering:
+    // move JMMC annotation:
+    this.aJMMC.setX(this.xyPlot.getDomainAxis().getUpperBound());
+    this.aJMMC.setY(this.xyPlot.getRangeAxis().getLowerBound());
   }
 }
