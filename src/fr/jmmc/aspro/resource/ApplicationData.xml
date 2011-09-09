@@ -205,6 +205,9 @@
 
   <releasenotes>
     <release version="0.8.1">
+      <prerelease version="0.8.1 beta 14">
+        <change type="FEATURE">Added ESO P89 configuration</change>
+      </prerelease>
       <prerelease version="0.8.1 beta 13">
         <change>Changed VOTable message handler (SAMP) to accept PIVOT messages</change>
         <change>Added Send StarList to PIVOT action (SAMP)</change>
