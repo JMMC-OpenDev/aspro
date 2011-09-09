@@ -452,9 +452,6 @@ public final class ObservationManager extends BaseOIManager {
         logger.fine("observation version = " + version);
       }
 
-      // reset the OIFits structure :
-      setOIFitsFile(null);
-
       // then synchronize the main observation with the observation collection used by computations :
       synchronizeObservations();
 
@@ -1227,9 +1224,8 @@ public final class ObservationManager extends BaseOIManager {
 
     this.oiFitsFile = oiFitsFile;
 
-    if (oiFitsFile != null) {
-      this.fireOIFitsDone(oiFitsFile);
-    }
+    // Fire OIFitsDone event to inform panels to be updated anyway:
+    this.fireOIFitsDone(oiFitsFile);
   }
 
   /**
