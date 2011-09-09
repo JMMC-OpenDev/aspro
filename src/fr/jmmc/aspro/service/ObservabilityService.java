@@ -1082,11 +1082,8 @@ public final class ObservabilityService {
             skip = true;
             break;
           }
-          //TODO : test
-          rangesBL.add(ranges);
-        } else {
-          rangesBL.add(ranges);
         }
+        rangesBL.add(ranges);
       }
 
       if (!skip) {
@@ -1923,8 +1920,6 @@ public final class ObservabilityService {
 
   /**
    * Convert the given list of HA ranges to date intervals in LST (used by Export OB only)
-   *
-   * TODO : check that code when LST / night center is done!
    *
    * Note : date intervals that are over (00:00 or 24:00) are merged. 
    * For example : 22:00->24:00 and 00:00->01:00 returns 22:00->01:00
