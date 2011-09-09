@@ -22,7 +22,7 @@ public final class ExportOBAction extends RegisteredAction {
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
   /** Class name. This name is used to register to the ActionRegistrar */
-  private final static String className = "fr.jmmc.aspro.gui.action.ExportOBAction";
+  private final static String className = ExportOBAction.class.getName();
   /** Action name. This name is used to register to the ActionRegistrar */
   public final static String actionName = "exportOB";
   /** Class logger */

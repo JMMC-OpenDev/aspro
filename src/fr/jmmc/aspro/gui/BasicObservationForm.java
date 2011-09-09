@@ -66,11 +66,9 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
-  /** Class Name */
-  private static final String className_ = "fr.jmmc.aspro.gui.BasicObservationForm";
   /** Class logger */
   private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
-          className_);
+          BasicObservationForm.class.getName());
   /** flag to log a stack trace in method updateObservation() to detect multiple calls */
   private final static boolean DEBUG_UPDATE_EVENT = false;
   /** blanking value to indicate that PoPs are defined in the instrument configuration but in multi-configuration */

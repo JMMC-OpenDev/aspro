@@ -45,11 +45,9 @@ import javax.swing.SwingUtilities;
  */
 public final class AsproGui extends App {
 
-  /** Class Name */
-  private static final String className_ = "fr.jmmc.aspro.AsproGui";
   /** Class logger */
   private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
-          className_);
+          AsproGui.class.getName());
 
   /* members */
   /** Setting Panel */
