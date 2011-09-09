@@ -36,11 +36,9 @@ import java.util.logging.Level;
  */
 public final class ConfigurationManager extends BaseOIManager {
 
-  /** Class Name */
-  private static final String className_ = "fr.jmmc.aspro.model.ConfigurationManager";
   /** Class logger */
   private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
-          className_);
+          ConfigurationManager.class.getName());
   /** Configurations file name */
   private static final String CONF_FILE = "AsproOIConfigurations.xml";
   /** singleton pattern */

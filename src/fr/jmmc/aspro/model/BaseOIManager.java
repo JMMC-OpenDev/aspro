@@ -33,11 +33,9 @@ import javax.xml.datatype.XMLGregorianCalendar;
  */
 public class BaseOIManager {
 
-  /** Class Name */
-  private static final String className_ = "fr.jmmc.aspro.model.BaseOIManager";
   /** Class logger */
   private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
-          className_);
+          BaseOIManager.class.getName());
   /** JAXB property to define a custom namspace prefix mapper */
   public static final String JAXB_NAMESPACE_PREFIX_MAPPER = "com.sun.xml.bind.namespacePrefixMapper";
   /** package name for JAXB generated code */
