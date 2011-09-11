@@ -101,14 +101,14 @@ aspro_DIRS     = edu \
                  fr
 
 aspro_EXTRAS   = edu/dartmouth/License.txt \
-                 fr/jmmc/aspro/*.xml \
                  fr/jmmc/aspro/gui/*.xsl \
                  fr/jmmc/aspro/gui/icons/*.gif \
                  fr/jmmc/aspro/gui/icons/*.png \
                  fr/jmmc/aspro/model/*.xml \
                  fr/jmmc/aspro/interop/*.xml \
                  fr/jmmc/aspro/interop/*.xsl \
-                 fr/jmmc/aspro/ob/*.obx
+                 fr/jmmc/aspro/ob/*.obx \
+                 fr/jmmc/aspro/resource/*.xml
 
 #
 # Java programs
