@@ -75,8 +75,6 @@ public final class VotableSampMessageHandler extends SampMessageHandler {
       final File voTableFile = new File(uri);
 
       final String votable = FileUtils.readFile(voTableFile);
-      
-      logger.severe("votable: \n" + votable);
 
       final Metadata senderMetadata = SampManager.getMetaData(senderId);
       final String searchCalVersion = senderMetadata.getString("searchcal.version");
