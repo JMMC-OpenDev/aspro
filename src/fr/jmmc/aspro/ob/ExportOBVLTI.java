@@ -202,7 +202,7 @@ public class ExportOBVLTI {
     // --- Target information ---
 
     // comments = spectral type :
-    document = document.replaceFirst(KEY_COMMENTS, target.getSPECTYP());
+    document = document.replaceFirst(KEY_COMMENTS, (target.getSPECTYP() != null) ? target.getSPECTYP() : "");
 
     // convert RA/DEC (mas) up to 3 digits :
     final String[] raDec = AstroSkyCalcObservation.toString(target.getRADeg(), target.getDECDeg());
@@ -413,8 +413,10 @@ public class ExportOBVLTI {
     sb.append(aoBand.name()).append('=');
     sb.append(df1.format(ExportOBVLTI.getMagnitude(aoMag)));
 
-    sb.append(' ');
-    sb.append(target.getSPECTYP().replaceAll(" ", "_"));
+    if (target.getSPECTYP() != null) {
+      sb.append(' ');
+      sb.append(target.getSPECTYP().replaceAll(" ", "_"));
+    }
     
     sb.append(' ');
     sb.append(target.getName().replaceAll(AsproConstants.REGEXP_INVALID_TEXT_CHARS, "_"));
