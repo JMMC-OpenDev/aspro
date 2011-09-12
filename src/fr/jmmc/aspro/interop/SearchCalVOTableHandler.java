@@ -31,7 +31,7 @@ import javax.swing.SwingUtilities;
 public final class SearchCalVOTableHandler {
 
   /** Class logger */
-  private static final Logger logger = Logger.getLogger(VotableSampMessageHandler.class.getName());
+  private static final Logger logger = Logger.getLogger(SearchCalVOTableHandler.class.getName());
   /** XSLT file path */
   private final static String XSLT_FILE = "fr/jmmc/aspro/interop/scvot2AsproObservation.xsl";
   /** maximum calibrators accepted at once */

@@ -52,8 +52,7 @@ import org.jfree.ui.RectangleInsets;
 public final class ChartUtils {
 
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
-          ChartUtils.class.getName());
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(ChartUtils.class.getName());
   /** cache for annotation fonts to autofit size */
   private final static Map<Integer, Font> cachedFonts = new HashMap<Integer, Font>();
   /** The default font for titles. */

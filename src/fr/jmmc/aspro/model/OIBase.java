@@ -11,9 +11,8 @@ import java.util.List;
  * @author bourgesl
  */
 public class OIBase implements Cloneable {
-  /** Class logger */
-  protected static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
-          "fr.jmmc.aspro.model.OIBase");
+  /** Class logger for aspro model classes */
+  protected static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger("fr.jmmc.aspro.model");
 
   /**
    * Public Constructor

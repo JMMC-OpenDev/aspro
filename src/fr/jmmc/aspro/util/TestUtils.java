@@ -12,8 +12,7 @@ import java.util.logging.Level;
 public final class TestUtils {
 
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
-          TestUtils.class.getName());
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(TestUtils.class.getName());
 
   /**
    * Forbidden constructor : utility class

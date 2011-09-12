@@ -3,17 +3,6 @@
  ******************************************************************************/
 package fr.jmmc.aspro.interop;
 
-import fr.jmmc.aspro.gui.TargetEditorDialog;
-import fr.jmmc.aspro.model.ObservationManager;
-import fr.jmmc.aspro.model.oi.BaseValue;
-import fr.jmmc.aspro.model.oi.CalibratorInformations;
-import fr.jmmc.aspro.model.oi.ObservationSetting;
-import fr.jmmc.aspro.model.oi.StringValue;
-import fr.jmmc.aspro.model.oi.Target;
-import fr.jmmc.aspro.model.oi.TargetUserInformations;
-import fr.jmmc.aspro.util.XmlFactory;
-import fr.jmmc.jmal.ALX;
-import fr.jmmc.jmcs.App;
 import fr.jmmc.jmcs.gui.MessagePane;
 import fr.jmmc.jmcs.network.interop.SampCapability;
 import fr.jmmc.jmcs.network.interop.SampManager;
@@ -21,14 +10,10 @@ import fr.jmmc.jmcs.network.interop.SampMessageHandler;
 import fr.jmmc.jmcs.util.FileUtils;
 import java.io.File;
 import java.io.IOException;
-import java.io.StringReader;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Iterator;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.SwingUtilities;
 import org.astrogrid.samp.Message;
 import org.astrogrid.samp.Metadata;
 import org.astrogrid.samp.client.SampException;
@@ -58,6 +43,7 @@ public final class VotableSampMessageHandler extends SampMessageHandler {
    * @param message message with MType this handler is subscribed to
    * @throws SampException if any error occured while message processing
    */
+  @Override
   protected void processMessage(final String senderId, final Message message) throws SampException {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("\tReceived '" + this.handledMType() + "' message from '" + senderId + "' : '" + message + "'.");

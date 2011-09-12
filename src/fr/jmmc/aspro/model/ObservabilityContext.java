@@ -16,8 +16,7 @@ import java.util.logging.Level;
 public final class ObservabilityContext {
 
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
-          ObservabilityContext.class.getName());
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(ObservabilityContext.class.getName());
   /* members */
   /** temporary range limits array (for performance) to merge HA ranges with Rise/set range */
   private RangeLimit[] flatRangeLimits = null;

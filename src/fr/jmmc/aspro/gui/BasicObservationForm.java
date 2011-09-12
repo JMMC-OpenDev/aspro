@@ -67,8 +67,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
-          BasicObservationForm.class.getName());
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(BasicObservationForm.class.getName());
   /** flag to log a stack trace in method updateObservation() to detect multiple calls */
   private final static boolean DEBUG_UPDATE_EVENT = false;
   /** blanking value to indicate that PoPs are defined in the instrument configuration but in multi-configuration */
@@ -530,12 +529,14 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
   public void showTargetEditor() {
     final Target target = getSelectedTarget();
     
-    final String selectedTab = 
-            (AsproGui.getInstance().getSettingPanel().isSelectedTabUsingTargetModel()) ? 
-              TargetEditorDialog.TAB_MODELS : TargetEditorDialog.TAB_TARGETS;
+    if (target != null) {
+      final String selectedTab = 
+              (AsproGui.getInstance().getSettingPanel().isSelectedTabUsingTargetModel()) ? 
+                TargetEditorDialog.TAB_MODELS : TargetEditorDialog.TAB_TARGETS;
 
-    // show model editor :
-    TargetEditorDialog.showEditor((target != null) ? target.getName() : null, selectedTab);
+      // show model editor :
+      TargetEditorDialog.showEditor((target != null) ? target.getName() : null, selectedTab);
+    }
   }
 
   /**
@@ -802,6 +803,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
    * Refresh the dependent combo boxes and update the observation according to the form state
    * @param e action event
    */
+  @Override
   public void actionPerformed(final ActionEvent e) {
     // disable the automatic update observation :
     final boolean prevAutoUpdateObservation = this.setAutoUpdateObservation(false);

@@ -61,8 +61,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 public final class ObservabilityService {
 
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
-          ObservabilityService.class.getName());
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(ObservabilityService.class.getName());
   /** flag to slow down the service to detect concurrency problems */
   private final static boolean DEBUG_SLOW_SERVICE = false;
   /** number of best Pops displayed in warnings */

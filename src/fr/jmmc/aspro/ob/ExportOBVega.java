@@ -36,8 +36,7 @@ import java.util.logging.Level;
 public class ExportOBVega {
 
   /** Class logger */
-  protected static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
-          ExportOBVega.class.getName());
+  protected static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(ExportOBVega.class.getName());
   /** double formatter for magnitudes */
   protected final static NumberFormat df2 = new DecimalFormat("0.00");
   /** default value for undefined angular diameter = 99 */

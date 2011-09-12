@@ -26,10 +26,8 @@ public final class ExportOBVegaAction {
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
-  /** Class name. This name is used to register to the ActionRegistrar */
-  public final static String className = "fr.jmmc.aspro.gui.action.ExportOBVegaAction";
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(className);
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(ExportOBVegaAction.class.getName());
   /** double formatter for min elevation */
   protected final static NumberFormat df1 = new DecimalFormat("0.#");
   /** StarList MimeType */

@@ -20,11 +20,8 @@ import javax.swing.event.ChangeListener;
  */
 public final class FieldSliderAdapter implements ChangeListener, PropertyChangeListener {
 
-  /** Class Name */
-  private static final String className_ = "fr.jmmc.aspro.gui.util.FieldSliderAdapter";
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
-          className_);
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(FieldSliderAdapter.class.getName());
 
   /* members */
   /** minimum limit */

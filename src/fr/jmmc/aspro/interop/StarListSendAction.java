@@ -48,6 +48,7 @@ public final class StarListSendAction extends SampCapabilityAction {
    * Create the Samp message parameters with the SearchCal votable
    * @return Samp message parameters as a map
    */
+  @Override
   public Map<?, ?> composeMessage() {
     Map<String, String> parameters = null;
 

@@ -3,22 +3,12 @@
  ******************************************************************************/
 package fr.jmmc.aspro.interop;
 
-import fr.jmmc.aspro.gui.TargetEditorDialog;
 import fr.jmmc.aspro.model.ObservationManager;
-import fr.jmmc.aspro.model.oi.BaseValue;
-import fr.jmmc.aspro.model.oi.CalibratorInformations;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
-import fr.jmmc.aspro.model.oi.StringValue;
-import fr.jmmc.aspro.model.oi.Target;
-import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.aspro.util.XmlFactory;
-import fr.jmmc.jmal.ALX;
 import fr.jmmc.jmcs.App;
-import fr.jmmc.jmcs.gui.MessagePane;
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.Iterator;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.SwingUtilities;
@@ -31,7 +21,7 @@ import javax.swing.SwingUtilities;
 public final class AnyVOTableHandler {
 
   /** Class logger */
-  private static final Logger logger = Logger.getLogger(VotableSampMessageHandler.class.getName());
+  private static final Logger logger = Logger.getLogger(AnyVOTableHandler.class.getName());
   /** XSLT file path */
   private final static String XSLT_FILE = "fr/jmmc/aspro/interop/vot2AsproObservation.xsl";
 
@@ -74,6 +64,7 @@ public final class AnyVOTableHandler {
       // data model is modified and fire events using Swing EDT :
       SwingUtilities.invokeLater(new Runnable() {
 
+        @Override
         public void run() {
 
           om.resetAndChangeObservation(newObservation);

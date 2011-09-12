@@ -29,11 +29,8 @@ public final class SquareXYPlot extends XYPlot {
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
-  /** Class Name */
-  private static final String className_ = "fr.jmmc.aspro.gui.chart.SquareXYPlot";
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
-          className_);
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(SquareXYPlot.class.getName());
 
   /**
    * Creates a new plot with the specified dataset, axes and renderer.  Any

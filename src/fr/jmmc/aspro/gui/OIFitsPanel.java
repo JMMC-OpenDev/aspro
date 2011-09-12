@@ -24,11 +24,8 @@ public final class OIFitsPanel extends javax.swing.JPanel implements Observation
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
-  /** Class Name */
-  private static final String className_ = "fr.jmmc.aspro.gui.OIFitsPanel";
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
-          className_);
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(OIFitsPanel.class.getName());
   /** XSLT file path */
   private final static String XSLT_FILE = "fr/jmmc/aspro/gui/oiview.xsl";
   /** empty document */

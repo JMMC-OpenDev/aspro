@@ -15,11 +15,8 @@ import java.util.logging.Level;
  */
 public final class GeocentricCoords {
 
-  /** Class Name */
-  private static final String className_ = "fr.jmmc.aspro.service.GeocentricCoords";
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
-          className_);
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(GeocentricCoords.class.getName());
 
   /**
    * Forbidden constructor

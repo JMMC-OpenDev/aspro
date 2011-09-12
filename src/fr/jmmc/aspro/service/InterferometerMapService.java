@@ -23,11 +23,8 @@ import java.util.logging.Level;
  */
 public final class InterferometerMapService {
 
-  /** Class Name */
-  private static final String className_ = "fr.jmmc.aspro.service.InterferometerMapService";
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
-          className_);
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(InterferometerMapService.class.getName());
   /** double formatter for baseline length */
   protected final static NumberFormat df2 = new DecimalFormat("0.00");
 

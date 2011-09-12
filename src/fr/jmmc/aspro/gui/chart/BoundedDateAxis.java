@@ -19,8 +19,7 @@ public final class BoundedDateAxis extends DateAxis {
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
-          BoundedDateAxis.class.getName());
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(BoundedDateAxis.class.getName());
 
   /* members */
   /** axis bounds */

@@ -125,6 +125,7 @@ public abstract class WaitingTaskAction extends RegisteredAction {
      * Handle the timer calls until there is no running task
      * @param ae action event
      */
+    @Override
     public void actionPerformed(final ActionEvent ae) {
       final boolean taskRunning = TaskSwingWorkerExecutor.isTaskRunning();
 

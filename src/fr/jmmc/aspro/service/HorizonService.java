@@ -18,11 +18,8 @@ import java.util.Map;
  */
 public final class HorizonService {
 
-  /** Class Name */
-  private static final String className_ = "fr.jmmc.aspro.service.HorizonService";
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
-          className_);
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(HorizonService.class.getName());
   /** singleton instance */
   private static final HorizonService instance = new HorizonService();
 

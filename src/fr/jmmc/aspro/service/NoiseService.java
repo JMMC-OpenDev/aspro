@@ -36,11 +36,8 @@ import org.apache.commons.math.complex.Complex;
  */
 public final class NoiseService {
 
-  /** Class Name */
-  private static final String className_ = "fr.jmmc.aspro.service.NoiseService";
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
-          className_);
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(NoiseService.class.getName());
   /** Planck's constant in standard units (6.6262e-34) */
   public final static double H_PLANCK = 6.62606896e-34d;
   /** Speed of light (2.99792458e8) */
@@ -436,7 +433,7 @@ public final class NoiseService {
    * Add a warning message in the OIFits file
    * @param msg message to add
    */
-  protected final void addWarning(final String msg) {
+  private void addWarning(final String msg) {
     this.warningContainer.addWarningMessage(msg);
   }
 
@@ -638,7 +635,7 @@ public final class NoiseService {
    * @param sigma standard deviation
    * @return random value
    */
-  public final double randomGauss(final double sigma) {
+  double randomGauss(final double sigma) {
     return sigma * random.nextGaussian();
   }
 }

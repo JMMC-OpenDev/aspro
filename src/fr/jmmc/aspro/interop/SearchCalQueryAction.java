@@ -83,6 +83,7 @@ public final class SearchCalQueryAction extends SampCapabilityAction {
    * Create the Samp message parameters with the SearchCal votable
    * @return Samp message parameters as a map
    */
+  @Override
   public Map<?, ?> composeMessage() {
 
     // extract the selected target in the main form :

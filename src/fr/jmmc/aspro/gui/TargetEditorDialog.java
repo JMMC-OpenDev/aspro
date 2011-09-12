@@ -30,11 +30,8 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
-  /** Class Name */
-  private static final String className_ = "fr.jmmc.aspro.gui.TargetEditorDialog";
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
-          className_);
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(TargetEditorDialog.class.getName());
   /** Tab Targets */
   public static final String TAB_TARGETS = "Targets";
   /** Tab Models */

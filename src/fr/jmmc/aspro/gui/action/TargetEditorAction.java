@@ -18,7 +18,7 @@ public class TargetEditorAction extends RegisteredAction {
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
   /** Class name. This name is used to register to the ActionRegistrar */
-  public final static String className = "fr.jmmc.aspro.gui.action.TargetEditorAction";
+  public final static String className = TargetEditorAction.class.getName();
   /** Action name. This name is used to register to the ActionRegistrar */
   public final static String actionName = "targetEditor";
   /** Class logger */
@@ -35,6 +35,7 @@ public class TargetEditorAction extends RegisteredAction {
    * Handle the action event
    * @param evt action event
    */
+  @Override
   public void actionPerformed(final ActionEvent evt) {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("actionPerformed");

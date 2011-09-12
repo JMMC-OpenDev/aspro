@@ -28,7 +28,7 @@ public final class ExportPDFAction extends WaitingTaskAction {
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
   /** Class name. This name is used to register to the ActionRegistrar */
-  private final static String className = "fr.jmmc.aspro.gui.action.ExportPDFAction";
+  private final static String className = ExportPDFAction.class.getName();
   /** Class logger */
   private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(className);
   /** Action name. This name is used to register to the ActionRegistrar */

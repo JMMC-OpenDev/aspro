@@ -96,11 +96,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
-  /** Class Name */
-  private static final String className_ = "fr.jmmc.aspro.gui.UVChartPanel";
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
-          className_);
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(UVCoveragePanel.class.getName());
   /** flag to log a stack trace in method updateObservation() to detect multiple calls */
   private final static boolean DEBUG_UPDATE_EVENT = false;
   /** flag to log a stack trace in method plot() to detect multiple calls */

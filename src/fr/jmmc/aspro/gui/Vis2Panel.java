@@ -53,11 +53,8 @@ public final class Vis2Panel extends javax.swing.JPanel implements ChartProgress
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
-  /** Class Name */
-  private static final String className_ = Vis2Panel.class.getName();
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
-          className_);
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(Vis2Panel.class.getName());
   /** default color model (aspro - Rainbow) */
   private final static IndexColorModel RAINBOW_COLOR_MODEL = ColorModels.getColorModel("Rainbow");
   /** scaling factor to Mega Lambda for U,V points */

@@ -20,8 +20,7 @@ public class BoundedNumberAxis extends NumberAxis {
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
-          BoundedNumberAxis.class.getName());
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(BoundedNumberAxis.class.getName());
   /* members */
   /** axis bounds */
   private Range bounds = null;

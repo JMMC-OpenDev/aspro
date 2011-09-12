@@ -29,11 +29,8 @@ import java.util.logging.Level;
  */
 public final class UVCoverageService {
 
-  /** Class Name */
-  private static final String className_ = "fr.jmmc.aspro.service.UVCoverageService";
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
-          className_);
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(UVCoverageService.class.getName());
   /** flag to slow down the service to detect concurrency problems */
   private final static boolean DEBUG_SLOW_SERVICE = false;
   /** safety limit for the number of sampled HA points = 500 */

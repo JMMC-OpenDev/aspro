@@ -32,12 +32,9 @@ import javax.xml.transform.stream.StreamSource;
  * @author bourgesl
  */
 public final class XmlFactory {
-  /* constants */
-
-  /** Class Name */
-  private static final String className_ = "fr.jmmc.aspro.util.XmlFactory";
+  
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(className_);
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(XmlFactory.class.getName());
   /** encoding used for XML and XSL documents */
   public static final String ENCODING = "UTF-8";
   /** default buffer size for XSLT result document */

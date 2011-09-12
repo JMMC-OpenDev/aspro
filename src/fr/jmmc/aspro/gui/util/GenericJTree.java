@@ -21,11 +21,8 @@ public class GenericJTree extends JTree {
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
-  /** Class Name */
-  private static final String className_ = "fr.jmmc.aspro.gui.util.GenericJTree";
   /** Class logger */
-  protected static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
-          className_);
+  protected static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(GenericJTree.class.getName());
 
   /**
    * Public constructor changing default values : SINGLE_TREE_SELECTION

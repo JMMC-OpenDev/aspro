@@ -30,11 +30,8 @@ import org.jfree.chart.JFreeChart;
  */
 public final class PDFUtils {
 
-  /** Class Name */
-  private static final String className_ = "fr.jmmc.aspro.gui.chart.PDFUtils";
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
-          className_);
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(PDFUtils.class.getName());
   /** 
    * Force text rendering to use java rendering as Shapes.
    * This is a workaround to get unicode greek characters rendered properly.

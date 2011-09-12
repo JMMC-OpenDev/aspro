@@ -22,8 +22,7 @@ public final class CalibratorInfoTableModel extends AbstractTableModel {
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
-          CalibratorInfoTableModel.class.getName());
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(CalibratorInfoTableModel.class.getName());
   /** double formatter for number values */
   protected final static NumberFormat df3 = new DecimalFormat("0.0##");
 

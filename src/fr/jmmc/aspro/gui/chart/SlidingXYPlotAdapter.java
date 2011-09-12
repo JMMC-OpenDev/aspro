@@ -25,11 +25,8 @@ import org.jfree.ui.Layer;
  */
 public final class SlidingXYPlotAdapter {
 
-  /** Class Name */
-  private static final String className_ = "fr.jmmc.aspro.gui.chart.SlidingXYDatasetAdapter";
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
-          className_);
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(SlidingXYPlotAdapter.class.getName());
   /* members */
   /** jFreeChart instance */
   private final JFreeChart chart;

@@ -46,8 +46,7 @@ import javax.swing.SwingUtilities;
 public final class AsproGui extends App {
 
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
-          AsproGui.class.getName());
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(AsproGui.class.getName());
 
   /* members */
   /** Setting Panel */
@@ -112,6 +111,7 @@ public final class AsproGui extends App {
         /**
          * Initializes the swing components with their actions in EDT
          */
+        @Override
         public void run() {
           prepareFrame(getFrame());
 
@@ -160,6 +160,7 @@ public final class AsproGui extends App {
       /**
        * Show the application frame using EDT
        */
+      @Override
       public void run() {
         logger.fine("AsproGui.ready : handler called.");
 

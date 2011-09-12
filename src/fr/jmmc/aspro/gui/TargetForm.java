@@ -54,11 +54,8 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
-  /** Class Name */
-  private static final String className_ = "fr.jmmc.aspro.gui.TargetForm";
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
-          className_);
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(TargetForm.class.getName());
   /** Simbad URL (query by identifier) */
   private static final String SIMBAD_QUERY_ID = "http://simbad.u-strasbg.fr/simbad/sim-id?Ident=";
   /** custom number field formatter */

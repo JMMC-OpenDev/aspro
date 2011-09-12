@@ -15,11 +15,8 @@ import java.util.logging.Level;
  */
 public final class ObservationFileProcessor {
 
-  /** Class Name */
-  private static final String className_ = "fr.jmmc.aspro.model.util.ObservationFileProcessor";
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
-          className_);
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(ObservationFileProcessor.class.getName());
   /** Current revision of the Aspro DM */
   public final static AsproModelVersion CURRENT_REVISION = AsproModelVersion.Feb2011Revision;
 

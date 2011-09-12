@@ -45,11 +45,8 @@ import org.apache.commons.math.complex.Complex;
  */
 public final class OIFitsCreatorService {
 
-  /** Class Name */
-  private static final String className_ = "fr.jmmc.aspro.service.OIFitsCreatorService";
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
-          className_);
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(OIFitsCreatorService.class.getName());
   /** target Id */
   private final static short TARGET_ID = (short) 1;
   /** enable the OIFits validation */
@@ -188,7 +185,7 @@ public final class OIFitsCreatorService {
    * Create the OIFits structure with OI_ARRAY, OI_TARGET, OI_WAVELENGTH, OI_VIS tables
    * @return OIFits structure
    */
-  protected OIFitsFile createOIFits() {
+  OIFitsFile createOIFits() {
 
     // Start the computations :
     final long start = System.nanoTime();
@@ -284,7 +281,7 @@ public final class OIFitsCreatorService {
    *
    * Note : station indexes are given according to the beam list ordering starting from 1
    */
-  protected void createOIArray() {
+  private void createOIArray() {
 
     // Create OI_ARRAY table :
     final OIArray oiArray = new OIArray(this.oiFitsFile, this.nBeams);
@@ -332,7 +329,7 @@ public final class OIFitsCreatorService {
    *
    * Note : target index is 1
    */
-  protected void createOITarget() {
+  private void createOITarget() {
 
     // Create OI_TARGET table :
     final OITarget oiTarget = new OITarget(this.oiFitsFile, 1);
@@ -376,7 +373,9 @@ public final class OIFitsCreatorService {
     }
 
     // Spectral type :
-    oiTarget.getSpecTyp()[0] = this.target.getSPECTYP();
+    if (this.target.getSPECTYP() != null && this.target.getSPECTYP().length() > 0) {
+      oiTarget.getSpecTyp()[0] = target.getSPECTYP();
+    }
 
     this.oiFitsFile.addOiTable(oiTarget);
   }
@@ -384,7 +383,7 @@ public final class OIFitsCreatorService {
   /**
    * Create the OI_WAVELENGTH table
    */
-  protected void createOIWaveLength() {
+  private void createOIWaveLength() {
 
     // Create OI_WAVELENGTH table :
     final OIWavelength waves = new OIWavelength(this.oiFitsFile, this.nWaveLengths);
@@ -413,7 +412,7 @@ public final class OIFitsCreatorService {
   /**
    * compute complex visibilities from target models and store this data in local reference table
    */
-  protected void computeModelVisibilities() {
+  private void computeModelVisibilities() {
 
     if (this.hasModels) {
       final List<Model> models = this.target.getModels();
@@ -478,7 +477,7 @@ public final class OIFitsCreatorService {
   /**
    * Create the OI_VIS table using internal computed visComplex data
    */
-  protected void createOIVis() {
+  private void createOIVis() {
 
     // test if the instrument is AMBER to use dedicated diffVis algorithm :
     final boolean isAmber = AsproConstants.INS_AMBER.equals(this.instrumentName);
@@ -643,7 +642,7 @@ public final class OIFitsCreatorService {
   /**
    * Create the OI_VIS2 table using internal computed visComplex data
    */
-  protected void createOIVis2() {
+  private void createOIVis2() {
     // Get OI_VIS table :
     final OIVis vis = this.oiFitsFile.getOiVis()[0];
     final int nRows = vis.getNbRows();
@@ -720,7 +719,7 @@ public final class OIFitsCreatorService {
   /**
    * Create the OI_T3 table
    */
-  protected void createOIT3() {
+  private void createOIT3() {
 
     if (this.nBeams < 3) {
       return;
@@ -955,7 +954,7 @@ public final class OIFitsCreatorService {
    */
   private static Map<Beam, Short> createBeamMapping(final List<Beam> beams) {
     // Create Beam - index mapping :
-    final Map<Beam, Short> beamMapping = new HashMap<Beam, Short>();
+    final Map<Beam, Short> beamMapping = new HashMap<Beam, Short>(beams.size());
 
     // Note : as Beam.hashCode is not implemented, the map acts as an IdentityMap (pointer equality)
     int i = 0;
@@ -975,7 +974,7 @@ public final class OIFitsCreatorService {
    */
   private static Map<BaseLine, short[]> createBaseLineMapping(final Map<Beam, Short> beamMapping, final List<BaseLine> baseLines) {
     // Create BaseLine - indexes mapping :
-    final Map<BaseLine, short[]> baseLineIndexes = new LinkedHashMap<BaseLine, short[]>();
+    final Map<BaseLine, short[]> baseLineIndexes = new LinkedHashMap<BaseLine, short[]>(baseLines.size());
 
     for (BaseLine bl : baseLines) {
       baseLineIndexes.put(bl, new short[]{
@@ -1018,7 +1017,7 @@ public final class OIFitsCreatorService {
    * @return string representation
    */
   private static String calendarToString(final Calendar cal) {
-    final StringBuilder sb = new StringBuilder();
+    final StringBuilder sb = new StringBuilder(12);
     sb.append(cal.get(Calendar.YEAR)).append('-');
 
     final int month = cal.get(Calendar.MONTH) + 1;
@@ -1054,7 +1053,7 @@ public final class OIFitsCreatorService {
      * @param baseLineMapping baseline mapping
      * @return triplet instance
      */
-    protected static Triplet create(final int[] idx, final Map<BaseLine, short[]> baseLineMapping) {
+    static Triplet create(final int[] idx, final Map<BaseLine, short[]> baseLineMapping) {
 
       final short[] tIndexes = new short[3];
       for (int i = 0; i < 3; i++) {

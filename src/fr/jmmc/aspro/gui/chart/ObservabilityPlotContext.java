@@ -14,8 +14,7 @@ import java.util.logging.Level;
 public final class ObservabilityPlotContext {
 
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
-          ObservabilityPlotContext.class.getName());
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(ObservabilityPlotContext.class.getName());
   /** ObservabilityPlotContext singleton */
   private static final ObservabilityPlotContext instance = new ObservabilityPlotContext();
   /** default value for flag hideTextDontFit */

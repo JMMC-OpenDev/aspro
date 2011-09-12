@@ -48,11 +48,8 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
-  /** Class Name */
-  private static final String className_ = "fr.jmmc.aspro.gui.TargetModelForm";
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
-          className_);
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(TargetModelForm.class.getName());
 
   /* members */
   /** list of edited targets (clone) */
@@ -316,6 +313,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
    * Process any comboBox or radio change event
    * @param e action event
    */
+  @Override
   public void actionPerformed(final ActionEvent e) {
     if (e.getSource() == this.jComboBoxModelType) {
       final String type = (String) this.jComboBoxModelType.getSelectedItem();

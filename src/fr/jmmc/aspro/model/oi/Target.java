@@ -820,10 +820,10 @@ public class Target
     sb.append("<html>");
     sb.append("<b>Name</b> : ").append(getName());
     sb.append("<br><b>Coord</b> : ").append(getRA()).append(' ').append(getDEC());
-    if (getPMRA() != null) {
+    if (getPMRA() != null && getPMDEC() != null) {
       sb.append("<br><b>Proper motion</b> (mas/yr) : ").append(getPMRA()).append(' ').append(getPMDEC());
     }
-    if (getPARALLAX() != null) {
+    if (getPARALLAX() != null && getPARAERR() != null) {
       sb.append("<br><b>Parallax</b> (mas) : ").append(getPARALLAX()).append(" [").append(getPARAERR()).append(']');
     }
     if (getSYSVEL() != null) {

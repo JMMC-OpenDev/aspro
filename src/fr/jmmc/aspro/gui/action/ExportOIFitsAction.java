@@ -29,7 +29,7 @@ public final class ExportOIFitsAction extends WaitingTaskAction {
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
   /** Class name. This name is used to register to the ActionRegistrar */
-  private final static String className = "fr.jmmc.aspro.gui.action.ExportOIFitsAction";
+  private final static String className = ExportOIFitsAction.class.getName();
   /** Action name. This name is used to register to the ActionRegistrar */
   public final static String actionName = "exportOIFits";
   /** Class logger */

@@ -100,11 +100,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
-  /** Class Name */
-  private static final String className_ = "fr.jmmc.aspro.gui.ObservabilityPanel";
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
-          className_);
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(ObservabilityPanel.class.getName());
   /** flag to log version checking */
   private final static boolean DEBUG_VERSIONS = false;
   /** background color corresponding to the DAY zone */

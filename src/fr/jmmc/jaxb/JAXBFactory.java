@@ -19,11 +19,8 @@ import javax.xml.bind.Unmarshaller;
 public final class JAXBFactory {
   //~ Constants --------------------------------------------------------------------------------------------------------
 
-  /** Class Name */
-  private static final String className_ = "fr.jmmc.jaxb.JAXBFactory";
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
-          className_);
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(JAXBFactory.class.getName());
   /**
    * JAXB 2 Context Factory (System property) "javax.xml.bind.JAXBContext" instead of "javax.xml.bind.context.factory"
    * bug reported : http://java.net/jira/browse/JAXB-816

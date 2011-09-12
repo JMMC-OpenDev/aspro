@@ -38,6 +38,7 @@ public final class ExportAllOBAction extends RegisteredAction {
    * Handle the action event
    * @param evt action event
    */
+  @Override
   public void actionPerformed(final ActionEvent evt) {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("actionPerformed");

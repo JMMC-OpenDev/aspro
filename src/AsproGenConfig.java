@@ -28,8 +28,7 @@ import java.util.logging.Level;
 public final class AsproGenConfig {
 
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
-          AsproGenConfig.class.getName());
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(AsproGenConfig.class.getName());
 
   /** interferometer enum */
   private enum INTERFEROMETER {

@@ -16,10 +16,9 @@ public final class Preferences extends fr.jmmc.jmcs.data.preference.Preferences 
   /** Singleton instance */
   private static Preferences _singleton = null;
   /** Class Name */
-  private final static String className_ = "fr.jmmc.aspro.Preferences";
+  private final static String className = Preferences.class.getName();
   /** Logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
-          className_);
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(className);
   /* Preferences */
   /** Preference : edit positions in XY (true) or rho/theta (false) in the model editor */
   public final static String MODELEDITOR_PREFERXY = "modeleditor.preferxy";
@@ -100,7 +99,7 @@ public final class Preferences extends fr.jmmc.jmcs.data.preference.Preferences 
    * @return preference filename.
    */
   protected String getPreferenceFilename() {
-    logger.entering(className_, "getPreferenceFilename");
+    logger.entering(className, "getPreferenceFilename");
     return "fr.jmmc.aspro.properties";
   }
 
@@ -110,7 +109,7 @@ public final class Preferences extends fr.jmmc.jmcs.data.preference.Preferences 
    * @return preference version number.
    */
   protected int getPreferencesVersionNumber() {
-    logger.entering(className_, "getPreferencesVersionNumber");
+    logger.entering(className, "getPreferencesVersionNumber");
     return 1;
   }
 

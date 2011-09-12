@@ -53,11 +53,8 @@ import javax.xml.datatype.XMLGregorianCalendar;
  */
 public final class ObservationManager extends BaseOIManager {
 
-  /** Class Name */
-  private static final String className_ = "fr.jmmc.aspro.model.ObservationManager";
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
-          className_);
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(ObservationManager.class.getName());
   /** flag to log a stack trace in method fireEvent() to debug events */
   private final static boolean DEBUG_FIRE_EVENT = false;
   /** configuration manager */
