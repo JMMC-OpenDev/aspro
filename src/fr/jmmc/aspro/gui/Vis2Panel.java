@@ -323,7 +323,7 @@ public final class Vis2Panel extends javax.swing.JPanel implements ChartProgress
 
     if (this.oiFitsFile == null) {
       resetPlot();
-      this.jLabelMessage.setText("No VIS2 data available: the target is not observable.");
+      this.jLabelMessage.setText("No VIS2 data available: the target is not observable or multiple configurations are selected.");
       showMessage(true);
       return;
     }
@@ -512,14 +512,13 @@ public final class Vis2Panel extends javax.swing.JPanel implements ChartProgress
    */
   @Override
   public void chartProgress(final ChartProgressEvent event) {
-    // TODO: use fine level when stable:
-    if (logger.isLoggable(Level.INFO)) {
+    if (logger.isLoggable(Level.FINE)) {
       switch (event.getType()) {
         case ChartProgressEvent.DRAWING_STARTED:
           this.chartDrawStartTime = System.nanoTime();
           break;
         case ChartProgressEvent.DRAWING_FINISHED:
-          logger.info("Drawing chart time : " + 1e-6d * (System.nanoTime() - this.chartDrawStartTime) + " ms.");
+          logger.fine("Drawing chart time : " + 1e-6d * (System.nanoTime() - this.chartDrawStartTime) + " ms.");
           this.chartDrawStartTime = 0l;
           break;
         default:
