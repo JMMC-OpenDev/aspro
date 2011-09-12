@@ -47,6 +47,7 @@ public final class ExportOIFitsAction extends WaitingTaskAction {
   /**
    * Handle the action event
    */
+  @Override
   public void actionPerformed() {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("actionPerformed");
