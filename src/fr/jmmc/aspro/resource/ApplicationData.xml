@@ -7,9 +7,9 @@
 
 <ApplicationData link="http://www.jmmc.fr/aspro2">
 
-  <program name="Aspro2" version="0.8.1 beta 13"/>
+  <program name="Aspro2" version="0.8.1"/>
 
-  <compilation date="26/07/2011" compiler="JDK 1.5.0_16"/>
+  <compilation date="12/09/2011" compiler="JDK 1.5.0_16"/>
 
   <text>
     <![CDATA[ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations
@@ -205,44 +205,47 @@
 
   <releasenotes>
     <release version="0.8.1">
+      <prerelease version="0.8.1">
+        <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/198">Fixed exception when exporting an Observing block 
+          and the spectral type is undefined for one target (SearchCal calibrator)</change>
+      </prerelease>
       <prerelease version="0.8.1 beta 14">
         <change type="FEATURE">Added ESO P89 configuration</change>
       </prerelease>
       <prerelease version="0.8.1 beta 13">
-        <change>Changed VOTable message handler (SAMP) to accept PIVOT messages</change>
-        <change>Added Send StarList to PIVOT action (SAMP)</change>
+        <change>Changed VOTable message handler (SAMP) to accept PIVOT messages using VOTable for targets</change>
+        <change>Added 'Send StarList to PIVOT' action (SAMP)</change>
       </prerelease>
       <prerelease version="0.8.1 beta 12">
-        <change>Added preliminary OIFits viewer: only square visiblity (VIS2) vs radius plot is available</change>
-        <change>Fixed CHARA delay line configuration: E1 cart moves in range [-1.4 to +44.0] like others (july 2011)</change>
+        <change type="FEATURE">Added one preliminary OIFits viewer: only square visiblity (VIS2) vs radius plot is available with error bars 
+          when the noise modeling is able to compute them</change>
+        <change type="FEATURE">Fixed CHARA delay line configuration: E1 cart moves in range [-1.4 to +44.0] like others (july 2011)</change>
       </prerelease>
       <prerelease version="0.8.1 beta 11">
-        <change>Updated CHARA VEGA (2T/3T/4T) configuration (beams and station reference per baseline)</change>
+        <change type="FEATURE">Updated CHARA VEGA (2T/3T/4T) configuration (beams and station reference per baseline)</change>
       </prerelease>
       <prerelease version="0.8.1 beta 10">
         <change>Enhanced performance to find best PoPs (CHARA)</change>
         <change>Fixed logging configuration to avoid important performance loss during observability computations (best PoPs)</change>
-        <change>Corrected zenithal restriction to 4 degrees applied to UT and AT telescopes according to "ESO Call for Proposals – P88 (UT)" (VLTI)</change>
+        <change type="FEATURE">Corrected zenithal restriction to 4 degrees applied to UT and AT telescopes according to "ESO Call for Proposals – P88 (UT)" (VLTI)</change>
       </prerelease>
       <prerelease version="0.8.1 beta 9">
-        <change>Optimized best Pops algorithm (CHARA)</change>
+        <change>Major performance improvements to determine best PoPs (CHARA) in the observability computation</change>
       </prerelease>
       <prerelease version="0.8.1 beta 8">
-        <change>Added information about best PoPs in warnings (CHARA)</change>
+        <change>Added information about best / good PoPs in the warning messages displayed by the status indicator (CHARA)</change>
         <change>Updated Export to Observing blocks (VEGA, VLTI) to use the user minimum elevation instead of 30 deg (required by ESO OB)</change>
-        <change>Updated CHARA configuration to have MIRC_5T configurations</change>
+        <change type="FEATURE">Updated CHARA configuration to have both MIRC_5T and MIRC_6T configurations</change>
       </prerelease>
       <prerelease version="0.8.1 beta 7">
-        <change>Updated CHARA configuration using the latest official configuration file (telescopes.chara)</change>
-        <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/151">Fixed CHARA delay line configuration: carts moves in range [-1.4 to +44.0] 
-          except for E1 in range [-1.4 to +42.0] (shorter cables). It modifies slightly observability ranges [+/-] 5 minutes</change>
-        <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/175">Changed PIONIER OB template to take 100 scans of DARK instead of 50</change>
+        <change type="FEATURE">Updated CHARA configuration using the latest official configuration file (telescopes.chara)</change>
+        <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/175">Changed PIONIER OB template to take 100 scans of DARK instead of 50</change>
         <change>Minor ergonomic change: when the target editor is opened, the 'Targets' tab is displayed by default; when the UV coverage plot is selected, 
           the 'Models' tab is displayed instead.</change>
         <change>Minor changes related to CHARA VEGA Observing blocks (spectral type format, disk diameter set from SearchCal diameters)</change>
       </prerelease>
       <prerelease version="0.8.1 beta 6">
-        <change>Better File choosers : use the last used directory (per file type and saved in user preferences)</change>
+        <change type="FEATURE">Better File choosers: use the last used directory (per file type and saved in user preferences)</change>
         <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/166">Filled "OBSERVATION.DESCRIPTION.NAME" in VLTI OBs to help P2PP users better navigate among targets</change>
         <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/167">Changed OIFits file extension to '.fits'</change>
       </prerelease>
@@ -251,25 +254,23 @@
       </prerelease>
       <prerelease version="0.8.1 beta 4">
         <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/165">Allow zooming on the observability plot (targets and time range)</change>
-        <change>Few optimizations used to determine best PoPs (CHARA) in the observability computation</change>
-        <change>Added MIRC_6T support</change>
       </prerelease>
       <prerelease version="0.8.1 beta 3">
         <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/144">Fixed bug related to SearchCal integration: 
-        always use the bright scenario as the faint scenario is not available for all instrumental bands</change>
+          always use the bright scenario as the faint scenario is not available for all instrumental bands</change>
         <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/145">Changed color for orphan calibrators in the observability plot</change>
-        <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/143">Fixed export OB for CHARA VEGA to handle properly calibrators in the StarList format</change>
+        <change type="CHANGE" url="http://trac.jmmc.fr/jmmc-sw/ticket/143">Fixed export OB for CHARA VEGA to handle properly calibrators in the StarList format</change>
         <change>Automatic Pops set with values defined in CHARA VEGA configuration dedicated to June 2011 run (read-only)</change>
         <change>Added CHARA VEGA configuration dedicated to June 2011 runs and minor changes in CHARA configuration (sorted instrument list)</change>
       </prerelease>
       <prerelease version="0.8.1 beta 2">
         <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/27">Added 'Center plot arround night' preference to have the complete night centered on the observability plot</change>
-        <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/26">Added civil and nautical twilight zones and a new preference 'Twilight used as Night limit' to choose which twilight for night restrictions</change>
-        <change type="CHANGE" url="http://trac.jmmc.fr/jmmc-sw/ticket/54">Added a new preference 'Default min Elevation' set to 45 degrees by default</change>
+        <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/26">Added civil and nautical twilight zones and a new preference 'Twilight used as Night limit' to choose which twilight limits are used for night restrictions</change>
+        <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/54">Added a new preference 'Default min Elevation' set to 45 degrees by default</change>
       </prerelease>
       <prerelease version="0.8.1 beta 1">
         <change>Added 'Scroll view' checkbox button to see all targets (or only some of them) on the observability plot</change>
-        <change>Enable mouse zooming for targets only on the observability plot</change>
+        <change>Enable mouse zooming on the observability plot</change>
         <change>Always show the scrollbar (with margins) on the observability plot</change>
         <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/109">Adapt the number of visible targets on the observability plot when the application window is resized</change>
       </prerelease>
@@ -293,17 +294,17 @@
       <prerelease version="0.7.8 beta">
         <change>Fixed VLTI configuration for the PIONIER instrument (period 86 and 87)</change>
         <change>JSAMP library updated to release 1.2 that fix shutdown notification problems when the user closes any JMMC application.</change>
-        <change>Optimisation : the model image is not computed if it is useless</change>
+        <change>Optimisation: the model image is not computed if it is useless</change>
         <change>Actions Export to OIFits / PDF waits for computations to be done</change>
         <change>Internal changes related to computations running in background (concurrency and consistency)</change>
       </prerelease>
       <prerelease version="0.7.7 beta">
-        <change>Updated Export to Observing Blocks to support calibrators : the selected science target is exported
+        <change>Updated Export to Observing Blocks to support calibrators: the selected science target is exported
         to a science OB and its calibrators to calibrator OBs.</change>
       </prerelease>
       <prerelease version="0.7.6 beta">
         <change>Added Observing Blocks for PIONIER instrument</change>
-        <change>Added CHARA PAVO instrument : PAVO_2T and PAVO_3T (3T)</change>
+        <change>Added CHARA PAVO instrument: PAVO_2T and PAVO_3T (3T)</change>
         <change>Updated default file names for exports (PDF, OB, OIFits) to be more meaningful</change>
       </prerelease>
       <prerelease version="0.7.5 beta">
@@ -314,22 +315,22 @@
       </prerelease>
       <prerelease version="0.7.4 beta">
         <change>Added a version attribute in the Observation file to handle model conversions</change>
-        <change>Updated the Observation data model : targets have an ID attribute (derived from target name)
-        used to associate user informations : description, calibrator flag and calibrator list per target</change>
+        <change>Updated the Observation data model: targets have an ID attribute (derived from target name)
+        used to associate user informations: description, calibrator flag and calibrator list per target</change>
         <change>Added action to open the SimBad web page for the current target in the Target editor</change>
         <change>Fixed the selected target when opening the target editor and synchronize the selected target between 'Model' and 'Target' tabs</change>
         <change>Added new Target editor to let the user edit target fields (magnitudes ...) and provide user information per target</change>
         <change type="BUGFIX">Fixed major bug on target model editor when the user changes the selected target while editing a parameter value</change>
       </prerelease>
       <prerelease version="0.7.3 beta">
-        <change>SearchCal integration : use deletedFlag to filter calibrators to mimic SearchCal delete action and
+        <change>SearchCal integration: use deletedFlag to filter calibrators to mimic SearchCal delete action and
           display HD identifier instead of HIP identifier to mimic SearchCal view
         </change>
         <change>Added new preference for Time reference (LST or UTC)</change>
         <change type="BUGFIX" id="1287726162">Fixed bug when computing HA max (0 instead of a negative value)</change>
-        <change>Updated Observability plot : better position and automatic font size for hour annotations</change>
+        <change>Updated Observability plot: better position and automatic font size for hour annotations</change>
         <change>Modified JMMC trademark (less important)</change>
-        <change>Updated night area color : lighter to have better grayscale prints</change>
+        <change>Updated night area color: lighter to have better grayscale prints</change>
       </prerelease>
       <prerelease version="0.7.2 beta">
         <change>Totally rewritten CHARA configuration thanks to official configuration file (telescopes.chara)</change>
@@ -341,14 +342,14 @@
       <prerelease version="0.7.1 beta">
         <change>Added the zenithal restriction (VLTI) in the observability computation (elevation limit of 89 degrees)</change>
         <change>Added the zenithal restriction (CHARA) in the observability computation (elevation limit of 85 degrees)</change>
-        <change>Fixed concurrency bugs related to the SimBad star resolver : the search field is disabled while processing a request to avoid concurrent requests</change>
-        <change>Fixed bug related to sampling periodicity : use the instrument default sampling time when an invalid value is detected</change>
+        <change>Fixed concurrency bugs related to the SimBad star resolver: the search field is disabled while processing a request to avoid concurrent requests</change>
+        <change>Fixed bug related to sampling periodicity: use the instrument default sampling time when an invalid value is detected</change>
       </prerelease>
       <prerelease version="0.7.0 beta">
-        <change>SearchCal integration through SAMP VO protocol : send the selected target to let SearchCal find calibrators
+        <change>SearchCal integration through SAMP VO protocol: send the selected target to let SearchCal find calibrators
         and process SearchCal response to extract calibrators
         </change>
-        <change>LITpro integration through SAMP VO protocol : send models and generated oifits for the selected target</change>
+        <change>LITpro integration through SAMP VO protocol: send models and generated oifits for the selected target</change>
       </prerelease>
     </release>
 
@@ -356,14 +357,13 @@
       <!-- <pubDate>Tue, 05 Oct 2010 10:08:04 GMT</pubDate> -->
       <prerelease version="0.6.3">
         <change type="BUGFIX">Limit the memory footprint when the sampling periodicity is very small (less than 1 minute).
-        First 500 HA samples are computed and the following warning is displayed : 
-        Too many HA points (...), check your sampling periodicity. Only 500 samples computed
+        First 500 HA samples are computed and the following warning is displayed: 'Too many HA points (...), check your sampling periodicity. Only 500 samples computed'
         </change>
         <change type="BUGFIX">Fixed bug when the UV Max value is set to 0.
         This slider has now a minimum value set to the smallest baseline length of the selected interferometer
         </change>
-        <change type="BUGFIX" id="1285777818">Fixed bug concerning random dates : the LST axis is corrupted (Requires 'lower' &lt; 'upper')</change>
-        <change type="BUGFIX">Fixed bug in HA min/max restrictions : invalid values can cause a NegativeArrayException</change>
+        <change type="BUGFIX" id="1285777818">Fixed bug concerning random dates: the LST axis is corrupted (Requires 'lower' &lt; 'upper')</change>
+        <change type="BUGFIX">Fixed bug in HA min/max restrictions: invalid values can cause a NegativeArrayException</change>
         <change>Formatted DIT value in warning messages coming from noise modeling (FT or saturation)</change>
         <change>Added warning messages on GUI to indicate unobservable target and invalid HA min/max settings</change>
         <change>Added tooltips on target list and PoPs field</change>
@@ -377,7 +377,7 @@
                 and added an user message if there is no target to export</change>
         <change>Use an hour angle axis when the observability displays the baseline limits</change>
         <change>Normalize model flux weights to compute visibilities</change>
-        <change>Added CHARA instruments : CLASSIC (2T) and CLIMB (3T)</change>
+        <change>Added CHARA instruments: CLASSIC (2T) and CLIMB (3T)</change>
         <change>Better exception handling and user messages</change>
         <change>Unexpected exceptions are now propagated to the feedback report</change>
       </prerelease>
@@ -438,7 +438,7 @@
         <change>New logo for Aspro 2</change>
       </prerelease>
       <prerelease version="0.4b7">
-        <change>Minor UI changes : new File menu actions (Export to OB and PDF) and modified layout on the UV Coverage Panel</change>
+        <change>Minor UI changes: new File menu actions (Export to OB and PDF) and modified layout on the UV Coverage Panel</change>
         <change>default minimum elevation changed to 30 degrees</change>
         <change>Fixed a side effect caused by the BaseLine Limits option that leaves the UV coverage empty</change>
         <change>Better Look of the table for model parameters</change>
@@ -468,7 +468,7 @@
       <prerelease version="0.4b1"> <!-- 0.3b5 -->
         <change>Several UI changes to manage HA min / max and the fringe tracker mode fields depending on the selected target in the UV Coverage Panel</change>
         <change>HA min / max and the fringe tracker mode are related to a specific target and persisted in the observation file</change>
-        <change>Added date and time constraints on VLTI Observing Block : date is defined if night restrictions are enabled;
+        <change>Added date and time constraints on VLTI Observing Block: date is defined if night restrictions are enabled;
         LST intervals are defined with the target observability (elevation > 30 deg + delay lines + shadowing) restricted by the HA min / max defined
         in the UV Coverage Panel</change>
       </prerelease>
@@ -489,13 +489,13 @@
       <prerelease version="0.3b2">
         <change>Updated Aspro data model to keep simbad information like RA (HMS), DEC (DMS), Radial velocity, Identifiers and Object types</change>
         <change>Updated Target tooltip with new information</change>
-        <change>Several fixes to convert sexagesimal RA/DEC in degrees (internal). Known problem : the previously saved files can not be load anymore</change>
+        <change>Several fixes to convert sexagesimal RA/DEC in degrees (internal). Known problem: the previously saved files can not be load anymore</change>
       </prerelease>
       <prerelease version="0.3b1">
         <change>The star resolver now supports RA/DEC coordinates to enter manually a new target (useful when simbad is down or no internet connection)</change>
         <change>Missing fluxes used in Observing Block set to -99</change>
         <change>Several minor UI changes for mac OS X platform (10.4 and more)</change>
-        <change>Deployment : Pal library is embedded in its own Jnlp file to avoid signing issues</change>
+        <change>Deployment: Pal library is embedded in its own Jnlp file to avoid signing issues</change>
       </prerelease>
     </release>
 
