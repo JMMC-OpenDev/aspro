@@ -19,8 +19,7 @@ import org.fest.swing.timing.Condition;
 public final class AsproTestUtils {
 
   /** Class logger */
-  protected static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(
-          AsproTestUtils.class.getName());
+  protected static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(AsproTestUtils.class.getName());
   /** 5s timeout */
   protected static final Timeout LONG_TIMEOUT = Timeout.timeout(5000l);
 
