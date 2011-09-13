@@ -7,9 +7,9 @@
 
 <ApplicationData link="http://www.jmmc.fr/aspro2">
 
-  <program name="Aspro2" version="0.8.1"/>
+  <program name="Aspro2" version="0.8.2 beta 1"/>
 
-  <compilation date="12/09/2011" compiler="JDK 1.5.0_16"/>
+  <compilation date="13/09/2011" compiler="JDK 1.5.0_16"/>
 
   <text>
     <![CDATA[ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations
@@ -204,6 +204,12 @@
   </menubar>
 
   <releasenotes>
+    <release version="0.8.2">
+      <prerelease version="0.8.2 beta 1">
+        <change type="FEATURE">Updated PIONIER instrument configuration: noise parameters and spectral modes</change>
+        <change type="BUGFIX">Fixed out of range exception when mouse zooming on UV Coverage Panel arround borders</change>
+      </prerelease>
+    </release>
     <release version="0.8.1">
       <prerelease version="0.8.1">
         <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/198">Fixed exception when exporting an Observing block 
