@@ -72,7 +72,7 @@ public final class PDFUtils {
       FileUtils.closeStream(bo);
 
       if (logger.isLoggable(Level.INFO)) {
-        logger.info("saveChartAsPDF : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
+        logger.info("saveChartAsPDF[" + file + "] : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
       }
     }
   }
