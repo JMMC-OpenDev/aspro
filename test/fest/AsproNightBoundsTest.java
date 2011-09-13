@@ -112,6 +112,7 @@ public final class AsproNightBoundsTest extends JmcsFestSwingJUnitTestCase {
 
     GuiActionRunner.execute(new GuiTask() {
 
+      @Override
       protected void executeInEDT() {
         // Integer field :
         jTextPoPs.setValue(Integer.valueOf(54));

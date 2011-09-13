@@ -350,6 +350,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
 
     GuiActionRunner.execute(new GuiTask() {
 
+      @Override
       protected void executeInEDT() {
         // Integer field :
         jTextPoPs.setValue(Integer.valueOf(25));

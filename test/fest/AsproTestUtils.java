@@ -19,9 +19,9 @@ import org.fest.swing.timing.Condition;
 public final class AsproTestUtils {
 
   /** Class logger */
-  protected static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(AsproTestUtils.class.getName());
+  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(AsproTestUtils.class.getName());
   /** 5s timeout */
-  protected static final Timeout LONG_TIMEOUT = Timeout.timeout(5000l);
+  private static final Timeout LONG_TIMEOUT = Timeout.timeout(5000l);
 
   /**
    * Forbidden constructor
@@ -44,10 +44,12 @@ public final class AsproTestUtils {
        * Checks if the condition has been satisfied.
        * @return <code>true</code> if the condition has been satisfied, otherwise <code>false</code>.
        */
+      @Override
       public boolean test() {
 
         return GuiActionRunner.execute(new GuiQuery<Boolean>() {
 
+          @Override
           protected Boolean executeInEDT() {
             final boolean done = !TaskSwingWorkerExecutor.isTaskRunning();
 
