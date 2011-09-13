@@ -8794,18 +8794,48 @@
       <ron>10</ron>
       <detectorSaturation>50000</detectorSaturation>
       <instrumentVisibility>0.9</instrumentVisibility>
-      <instrumentVisibilityBias>0.1</instrumentVisibilityBias>
-      <instrumentPhaseBias>0.01</instrumentPhaseBias>
+      <instrumentVisibilityBias>5.0</instrumentVisibilityBias>
+      <instrumentPhaseBias>2.0</instrumentPhaseBias>
       <nbPixInterferometry>4</nbPixInterferometry>
       <nbPixPhotometry>4</nbPixPhotometry>
       <fracFluxInInterferometry>0.8</fracFluxInInterferometry>
 
+<!-- keep standard or not -->
       <mode>
-        <name>standard</name>
-        <resolution>40</resolution>
+        <!-- 
+          1) LARGE-H
+          7 canaux spectraux de 0.04microns,
+          lbd  = [1.56,1.60,1.64,1.68,1.72,1.76,1.80] microns
+        -->
+        <name>LARGE-H</name>
+        <resolution>49</resolution>
         <numberChannels>7</numberChannels>
-        <waveLengthMin>1.45</waveLengthMin>
-        <waveLengthMax>1.8</waveLengthMax>
+        <waveLengthMin>1.56</waveLengthMin>
+        <waveLengthMax>1.80</waveLengthMax>
+      </mode>
+      <mode>
+        <!-- 
+          2) SMALL-H
+          3 canaux spectraux de 0.09microns
+          lbd = [1.59, 1.68, 1.77] microns
+        -->
+        <name>SMALL-H</name>
+        <resolution>28</resolution>
+        <numberChannels>3</numberChannels>
+        <waveLengthMin>1.59</waveLengthMin>
+        <waveLengthMax>1.77</waveLengthMax>
+      </mode>
+      <mode>
+        <!-- 
+          3) BROAD-H  (broad-band)
+          1 canal spectral de 0.25 microns
+          lbd = 1.68 microns
+        -->
+        <name>BROAD-H</name>
+        <resolution>6.72</resolution>
+        <numberChannels>1</numberChannels>
+        <waveLengthMin>1.56</waveLengthMin>
+        <waveLengthMax>1.80</waveLengthMax>
       </mode>
     </focalInstrument>
 
