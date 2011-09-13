@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VOTABLE
+  xmlns="http://www.ivoa.net/xml/VOTable/v1.1"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.1"
+  xsi:schemaLocation="http://www.ivoa.net/xml/VOTable/v1.1 http://www.ivoa.net/xml/VOTable/VOTable-1.1.xsd">
+
+  <DESCRIPTION>
+    This sample votable can be given to Aspro2 through samp to load
+    given targets with given config programatically
+  </DESCRIPTION>
+  
+  <COOSYS ID="J2000" equinox="2000" epoch="J2000" system="eq_FK5"/>
+  
+  <!-- name attribute filled optionally by the name of the client application (pivot) -->
+  <RESOURCE name="pivot">
+    
+    <!-- TODO: define PARAM/VALUES to list choices and export ASPRO2 xml configuration into html web page -->
+
+    <!-- PARAM OPERATION indicates what operation to do among [NEW (new observation), ADD (default: add targets only)] -->
+    <PARAM name="OPERATION" datatype="char" arraysize="*" value="NEW"/>
+    
+    <!-- 
+      pivot step (1,2,3,4,5) ignored.
+      To stay VO oriented, the pivot step is too specific and is not considered as an input PARAM:
+        Each pivot step means particular ASPRO2 behaviour (unmodifiable fields, specific SAMP result ...);
+        we decide to describe this behaviour by generic PARAMs (see below)
+	
+      TO BE DISCUSSED
+    -->
+    
+    <!-- Main settings -->
+    
+    <!-- PARAM INTERFEROMETER indicates which interferometer to use among [VLTI, CHARA] -->
+    <PARAM name="INTERFEROMETER" datatype="char" arraysize="*" value="CHARA" />
+    <!-- PARAM INTERFEROMETER_EDITABLE indicates if the interferometer choice is editable [true, false] -->
+    <PARAM name="INTERFEROMETER_EDITABLE" datatype="boolean" value="false" />
+
+    <!-- PARAM PERIOD indicates which period to use among available periods for the selected interferometer
+         [VLTI Period xx, CHARA (general), CHARA VEGA June 2011 ...] 
+    -->
+    <PARAM name="PERIOD" datatype="char" arraysize="*" value="CHARA" />
+    <!-- PARAM PERIOD_EDITABLE indicates if the period choice is editable [true, false] -->
+    <PARAM name="PERIOD_EDITABLE" datatype="boolean" value="false" />
+
+    <!-- TODO : filter instrument list -->
+
+
+    <!-- PARAM INSTRUMENT indicates which instrument to use available instruments for the selected interferometer/period
+         - VLTI [AMBER, MIDI, PIONIER]
+	       - CHARA [CLASSIC, CLIMB, MIRC, MIRC_6T, PAVO_2T, PAVO_3T, VEGA_2T, VEGA_3T, VEGA_4T]
+    -->
+    <PARAM name="INSTRUMENT" datatype="char" arraysize="*" value="VEGA_3T" />
+    <!-- PARAM INSTRUMENT_EDITABLE indicates if the instrument choice is editable [true, false] -->
+    <PARAM name="INSTRUMENT_EDITABLE" datatype="boolean" value="false" />
+
+    <!-- Optional (CHARA only): PARAM POPS indicates which pops to use for the given configuration using the following format:
+        Pop numbers among (1 to 5) like '11', '123', '1514' ...
+        Note: the ordering must be consistent with the given configuration (i.e. station ordering)
+
+        Note pivot (phase 3): It is not necessary for pivot to set these fields as POPS/BEAM are automatically defined
+                    in the ASPRO2 configuration (CHARA VEGA June 2011 period)
+    -->
+    <PARAM name="POPS" datatype="char" arraysize="*" value="" />
+    <!-- Optional (CHARA only): PARAM POPS_EDITABLE indicates if the pops field is editable [true, false] -->
+    <PARAM name="POPS_EDITABLE" datatype="boolean" value="true" />
+    
+    <!-- Configuration(s) -->
+    
+    <!-- PARAM CONFIGURATIONS indicates which configuration(s) to use among available configurations for the selected 
+        interferometer/period/instrument
+         - VLTI PIONIER [UT1 UT2 UT3 UT4 ...]
+         - CHARA VEGA_3T [S1 S2 E1, E2 W1 W2 ...]
+         One configuration contains station identifiers separated by the character ' ' (0x20)
+         Note: station ordering is not required: ASPRO2 can resolve the configuration having given stations in any order.
+    -->
+    <PARAM name="CONFIGURATIONS" datatype="char" arraysize="*" value="S1 S2 E1" />
+    <!-- PARAM CONFIGURATIONS_EDITABLE indicates if the configuration choice(s) are editable [true, false] -->
+    <PARAM name="CONFIGURATIONS_EDITABLE" datatype="boolean" value="true" />
+
+    <!-- Constraints -->
+
+    <!-- PARAM NIGHT indicates if the night restriction is enabled [true, false] -->
+    <PARAM name="NIGHT" datatype="boolean" value="true" />
+    <!-- PARAM NIGHT_EDITABLE indicates if the night restriction choice is editable [true, false] -->
+    <PARAM name="NIGHT_EDITABLE" datatype="boolean" value="false" />
+    
+    <!-- PARAM DATE defines the observation date [YYYY-MM-DD] (iso8601)
+
+        TO BE DISCUSSED:
+        année d'obs: 2011 [int]
+        liste mois d'obs: 05-06-08-09 (chaine de caractères avec liste des mois, attention aux trous)[string]
+    -->
+    <PARAM name="DATE" datatype="char" arraysize="*" value="2011-06-17" />
+    <!-- PARAM DATE_EDITABLE indicates if the observation date is editable [true, false] -->
+    <PARAM name="DATE_EDITABLE" datatype="boolean" value="false" />
+
+    <!-- PARAM MIN_ELEVATION defines the minimum elevation in degrees (0 to 90) -->
+    <PARAM name="MIN_ELEVATION" datatype="int" value="30" />
+    <!-- PARAM MIN_ELEVATION_EDITABLE indicates if the minimum elevation field is editable [true, false] -->
+    <PARAM name="MIN_ELEVATION_EDITABLE" datatype="boolean" value="false" />
+
+
+    <!-- PARAM TARGETS_EDITABLE indicates if the target list is editable (add/remove/star resolver/target editor) [true, false]
+        TO BE DISCUSSED: is it necessary / relevant ?
+    -->
+    <PARAM name="TARGETS_EDITABLE" datatype="boolean" value="false" />
+    
+    <!-- table containing target(s) : 1..n -->
+    <TABLE name="Targets">
+      <!-- 
+        For pivot, required fields for StarList output:
+        NAME
+        RA/DEC
+        PMRA/	PMDEC
+        PLX
+        ID_HD
+        SP_TYPES
+        FLUX_V
+        FLUX_J
+        FLUX_H
+        FLUX_K
+      -->
+      
+      <!-- NAME field:
+          UCD1   = ''
+          UCD1.1 = 'meta.id;meta.main' -->
+      <FIELD name="NAME" datatype="char" ucd="meta.id;meta.main" arraysize="*">
+        <DESCRIPTION>Target name (identifier)</DESCRIPTION>
+      </FIELD>
+
+      <!-- RA field: J2000 (HMS)
+           UCD1   = 'POS_EQ_RA_MAIN'
+           UCD1.1 = 'pos.eq.ra;meta.main' -->
+      <FIELD name="RA" datatype="char" ucd="pos.eq.ra;meta.main" arraysize="*" unit="h:m:s">
+        <DESCRIPTION>Right ascension - J2000</DESCRIPTION>
+      </FIELD>
+      <!-- DEC field: J2000 (DMS)
+           UCD1   = 'POS_EQ_DEC_MAIN'
+           UCD1.1 = 'pos.eq.ra;meta.main' -->
+      <FIELD name="DEC" datatype="char" ucd="pos.eq.dec;meta.main" arraysize="*" unit="d:m:s">
+        <DESCRIPTION>Declination - J2000</DESCRIPTION>
+      </FIELD>
+
+      <!-- RV field:
+        UCD1   = 'VELOC_HC' (heliocentric ?)
+        UCD1.1 = 'spect.dopplerVeloc.opt' or 'PHYS.VELOC;POS.HELIOCENTRIC' -->
+      <FIELD name="RV" datatype="double" ucd="spect.dopplerVeloc.opt" unit="km.s-1">
+        <DESCRIPTION>Radial velocity</DESCRIPTION>
+      </FIELD>
+      <!-- VELTYP : undefined -->
+
+
+      <!-- PMRA field:
+        UCD1   = 'POS_EQ_PMRA'
+        UCD1.1 = 'pos.pm;pos.eq.ra' -->
+      <FIELD name="PMRA" datatype="double" ucd="pos.pm;pos.eq.ra" unit="mas.yr-1">
+        <DESCRIPTION>Proper motion in RA</DESCRIPTION>
+      </FIELD>
+      <!-- PMDEC field:
+        UCD1   = 'POS_EQ_PMDEC'
+        UCD1.1 = 'pos.pm;pos.eq.dec' -->
+      <FIELD name="PMDEC" datatype="double" ucd="pos.pm;pos.eq.dec" unit="mas.yr-1">
+        <DESCRIPTION>Proper motion in DEC</DESCRIPTION>
+      </FIELD>
+
+      <!-- PLX field:
+        UCD1   = 'POS_PARLX_TRIG'
+        UCD1.1 = 'pos.parallax.trig' -->
+      <FIELD name="PLX" datatype="double" ucd="pos.parallax.trig" unit="mas">
+        <DESCRIPTION>Parallax</DESCRIPTION>
+      </FIELD>
+      <!-- e_PLX field:
+        UCD1   = 'POS_PARLX_TRIG_ERROR'
+        UCD1.1 = 'stat.error;pos.parallax.trig' -->
+      <FIELD name="e_PLX" datatype="double" ucd="stat.error;pos.parallax.trig" unit="mas">
+        <DESCRIPTION>Parallax error</DESCRIPTION>
+      </FIELD>
+      
+      <!-- IDS in Aspro2 is the concatenation of '<CATALOG_PREFIX> <CATALOG_ID> ...' -->
+	
+      <FIELD ID="ID_HD" name="HD" datatype="char" ucd="meta.id" arraysize="*">
+        <DESCRIPTION>HD identifier (H. Draper: III/135A)</DESCRIPTION>
+        <LINK value="${ID_HD}" href="http://simbad.u-strasbg.fr/simbad/sim-id?Ident=HD${ID_HD}"/>
+      </FIELD>
+	
+      <FIELD ID="ID_HIP" name="ID_HIP" datatype="char" ucd="meta.id" arraysize="*">
+        <DESCRIPTION>HIP identifier (Hipparcos catalogue: I/239)</DESCRIPTION>
+        <LINK value="${ID_HIP}" href="http://simbad.u-strasbg.fr/simbad/sim-id?Ident=HIP${ID_HIP}"/>
+      </FIELD>
+	
+      <FIELD ID="ID_2MASS" name="2MASS" datatype="char" ucd="meta.id" arraysize="*">
+        <DESCRIPTION>2MASS identifier (2Micron All-Sky Survey: II/246)</DESCRIPTION>
+        <LINK value="${ID_2MASS}" href="http://simbad.u-strasbg.fr/simbad/sim-id?Ident=2MASS+J${ID_2MASS}"/>
+      </FIELD>
+ 
+      <!-- Object types: comma separated values -->
+      <FIELD name="OTYPES" datatype="char" ucd="src.class" arraysize="*">
+        <DESCRIPTION>Object type(s)</DESCRIPTION>
+        <LINK href="http://simbad.u-strasbg.fr/simbad/sim-display?data=otypes"/>
+      </FIELD>      
+
+      <!-- Spectral types: comma separated values -->
+      <!-- SP_TYPES field:
+        UCD1   = 'SPECT_TYPE_MK'
+        UCD1.1 = 'src.spType' -->
+      <FIELD name="SP_TYPES" datatype="char" ucd="src.spType" arraysize="*">
+        <DESCRIPTION>MK spectral type(s)</DESCRIPTION>
+      </FIELD>
+
+      <!-- fluxes (FLUX_V, FLUX_I, FLUX_J, FLUX_H, FLUX_K) -->
+      <!-- FLUX_V field:
+        UCD1   = 'PHOT_JHN_V'
+        UCD1.1 = 'phot.mag;em.opt.V' -->
+      <FIELD name="FLUX_V" datatype="double" ucd="phot.mag;em.opt.V" unit="mag">
+        <DESCRIPTION>Magnitude V</DESCRIPTION>
+      </FIELD>
+      <!-- FLUX_I field:
+        UCD1   = 'PHOT_JHN_I'
+        UCD1.1 = 'phot.mag;em.opt.I' -->
+      <FIELD name="FLUX_I" datatype="double" ucd="phot.mag;em.opt.I" unit="mag">
+        <DESCRIPTION>Magnitude I</DESCRIPTION>
+      </FIELD>
+      <!-- FLUX_J field:
+        UCD1   = 'PHOT_JHN_J'
+        UCD1.1 = 'phot.mag;em.IR.J' -->
+      <FIELD name="FLUX_J" datatype="double" ucd="phot.mag;em.IR.J" unit="mag">
+        <DESCRIPTION>Magnitude J</DESCRIPTION>
+      </FIELD>
+      <!-- FLUX_H field:
+        UCD1   = 'PHOT_JHN_H'
+        UCD1.1 = 'phot.mag;em.IR.H' -->
+      <FIELD name="FLUX_H" datatype="double" ucd="phot.mag;em.IR.H" unit="mag">
+        <DESCRIPTION>Magnitude H</DESCRIPTION>
+      </FIELD>
+      <!-- FLUX_K field:
+        UCD1   = 'PHOT_JHN_K'
+        UCD1.1 = 'phot.mag;em.IR.K' -->
+      <FIELD name="FLUX_K" datatype="double" ucd="phot.mag;em.IR.K" unit="mag">
+        <DESCRIPTION>Magnitude K</DESCRIPTION>
+      </FIELD>
+      <!-- FLUX_N field:
+        UCD1   = 'PHOT_JHN_N'
+        UCD1.1 = 'phot.mag;em.IR.8-15um' -->
+      <FIELD name="FLUX_N" datatype="double" ucd="phot.mag;em.IR.8-15um" unit="mag">
+        <DESCRIPTION>Magnitude N</DESCRIPTION>
+      </FIELD>
+      
+      <!-- missing calibrator informations : angular diameter -->
+
+      <DATA>
+        <TABLEDATA>
+          <TR>
+            <TD>ETA TAU</TD>
+            <!-- RA/DEC -->
+            <TD>03:47:29.0765</TD>
+            <TD>+24:06:18.494</TD>
+      	    <!-- RV -->
+            <TD>10.1</TD>
+            <!-- PMRA/PMDEC -->
+            <TD>19.35</TD>
+            <TD>-43.11</TD>
+      	    <!-- PLX/e_PLX -->
+            <TD>8.87</TD>
+            <TD>0.99</TD>
+      	    <!-- ID_HD -->
+            <TD>23630</TD>
+            <!-- ID_HIP -->
+            <TD>17702</TD>
+      	    <!-- ID_2MASS -->
+            <TD>03472908+2406184</TD>
+      	    <!-- OTYPES -->
+            <TD>**,IR,X,*,*iC,*iN,Em*,Be*,UV</TD>
+      	    <!-- SP_TYPES -->
+            <TD>B7III</TD>
+      	    <!-- FLUX_V -->
+            <TD>2.873</TD>
+      	    <!-- FLUX_J -->
+            <TD>2.735</TD>
+      	    <!-- FLUX_H -->
+            <TD>2.735</TD>
+      	    <!-- FLUX_K -->
+            <TD>2.636</TD>
+      	    <!-- FLUX_N (missing) -->
+            <TD></TD>
+          </TR>
+          <!-- other targets ... -->
+        </TABLEDATA>
+      </DATA>
+    </TABLE>
+  </RESOURCE>
+</VOTABLE>

@@ -1,0 +1,1638 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+    Document   : CHARA.xml
+    Created on : 14 october 2009
+    Author     : bourgesl
+    Description:
+        CHARA interferometer.
+-->
+
+<a:interferometerSetting
+   xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+   xmlns:a='http://www.jmmc.fr/aspro-oi/0.1'
+   xsi:schemaLocation='http://www.jmmc.fr/aspro-oi/0.1 AsproOIModel.xsd'>
+
+  <description>
+    <name>CHARA</name>
+
+    <description>CHARA ...</description>
+
+    <!--
+      Coordinates CHARA (= S1) :
+      LONG     -118 3 25.31272
+      LAT       34 13 27.78130
+    -->
+    <position>
+      <posX>-2476998.047780274</posX>
+      <posY>-4647390.089884061</posY>
+      <posZ>3582240.6122966344</posZ>
+    </position>
+    
+    <telescope>
+      <name>T</name>
+      <diameter>1.0</diameter>
+      <maxElevation>85.0</maxElevation>
+
+      <adaptiveOptics>
+        <band>V</band>
+        <!-- tip tilt -->
+        <numberActuators>2</numberActuators>
+      </adaptiveOptics>
+    </telescope>
+
+    <station>
+      <name>S1</name>
+      <telescope>T</telescope>
+      <relativePosition>
+        <posX>0.0</posX>
+        <posY>0.0</posY>
+        <posZ>0.0</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>0.0</delayLineFixedOffset>
+
+      <popLink>
+        <pop>PoP1</pop>
+        <opticalLength>0.0</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>PoP2</pop>
+        <opticalLength>36.563466066</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>PoP3</pop>
+        <opticalLength>73.12818008599999</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>PoP4</pop>
+        <opticalLength>109.72473292</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>PoP5</pop>
+        <opticalLength>143.03583087799998</opticalLength>
+      </popLink>
+    </station>
+
+    <station>
+      <name>S2</name>
+      <telescope>T</telescope>
+      <relativePosition>
+        <posX>-18.36191339723222</posX>
+        <posY>-5.7466215069999995</posY>
+        <posZ>28.122403668741452</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>5.061712014</delayLineFixedOffset>
+
+      <popLink>
+        <pop>PoP1</pop>
+        <opticalLength>-36.54492441399999</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>PoP2</pop>
+        <opticalLength>0.0</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>PoP3</pop>
+        <opticalLength>36.56764467</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>PoP4</pop>
+        <opticalLength>73.15766149199999</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>PoP5</pop>
+        <opticalLength>106.46715312399999</opticalLength>
+      </popLink>
+    </station>
+
+    <station>
+      <name>E1</name>
+      <telescope>T</telescope>
+      <relativePosition>
+        <posX>-176.95278286444685</posX>
+        <posY>125.333692968</posY>
+        <posZ>249.63409070288594</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>15.510766953</delayLineFixedOffset>
+
+      <popLink>
+        <pop>PoP1</pop>
+        <opticalLength>0.0</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>PoP2</pop>
+        <opticalLength>36.586549999999995</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>PoP3</pop>
+        <opticalLength>73.120786</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>PoP4</pop>
+        <opticalLength>109.708072</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>PoP5</pop>
+        <opticalLength>143.02003</opticalLength>
+      </popLink>
+    </station>
+
+    <station>
+      <name>E2</name>
+      <telescope>T</telescope>
+      <relativePosition>
+        <posX>-154.01075810959253</posX>
+        <posY>70.396030473</posY>
+        <posZ>221.43644723349865</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>26.738055287999998</delayLineFixedOffset>
+
+      <popLink>
+        <pop>PoP1</pop>
+        <opticalLength>-73.112068</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>PoP2</pop>
+        <opticalLength>-36.537942</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>PoP3</pop>
+        <opticalLength>0.0</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>PoP4</pop>
+        <opticalLength>36.578964</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>PoP5</pop>
+        <opticalLength>69.92112399999999</opticalLength>
+      </popLink>
+    </station>
+
+    <station>
+      <name>W1</name>
+      <telescope>T</telescope>
+      <relativePosition>
+        <posX>-130.58744921486596</posX>
+        <posY>-175.072406694</posY>
+        <posZ>172.79247312458327</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>29.121709039</delayLineFixedOffset>
+
+      <popLink>
+        <pop>PoP1</pop>
+        <opticalLength>-73.10947999999999</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>PoP2</pop>
+        <opticalLength>-36.536268</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>PoP3</pop>
+        <opticalLength>0.0</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>PoP4</pop>
+        <opticalLength>36.594083999999995</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>PoP5</pop>
+        <opticalLength>69.905974</opticalLength>
+      </popLink>
+    </station>
+
+    <station>
+      <name>W2</name>
+      <telescope>T</telescope>
+      <relativePosition>
+        <posX>-111.72662113252261</posX>
+        <posY>-69.092828745</posY>
+        <posZ>165.07986664205634</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>-8.080552323000001</delayLineFixedOffset>
+
+      <popLink>
+        <pop>PoP1</pop>
+        <opticalLength>-143.055</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>PoP2</pop>
+        <opticalLength>-106.45532399999999</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>PoP3</pop>
+        <opticalLength>-69.911098</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>PoP4</pop>
+        <opticalLength>-33.306356</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>PoP5</pop>
+        <opticalLength>0.0</opticalLength>
+      </popLink>
+    </station>
+
+    <channel>
+      <name>V1</name>
+    </channel>
+    <channel>
+      <name>V2</name>
+    </channel>
+    <channel>
+      <name>V3</name>
+    </channel>
+    <channel>
+      <name>V4</name>
+    </channel>
+    <channel>
+      <name>V5</name>
+    </channel>
+    <channel>
+      <name>V6</name>
+    </channel>
+
+    <!-- DL : (-1.4 to +44.0) = 45.4 x2 = 90.8 -->
+    <!-- all delay lines have the same throw (july 2011) -->
+    <delayLine>
+      <name>DL1</name>
+      <maximumThrow>90.8</maximumThrow>
+    </delayLine>
+    <delayLine>
+      <name>DL2</name>
+      <maximumThrow>90.8</maximumThrow>
+    </delayLine>
+    <delayLine>
+      <name>DL3</name>
+      <maximumThrow>90.8</maximumThrow>
+    </delayLine>
+    <delayLine>
+      <name>DL4</name>
+      <maximumThrow>90.8</maximumThrow>
+    </delayLine>
+    <delayLine>
+      <name>DL5</name>
+      <maximumThrow>90.8</maximumThrow>
+    </delayLine>
+    <delayLine>
+      <name>DL6</name>
+      <maximumThrow>90.8</maximumThrow>
+    </delayLine>
+
+    <switchyard>
+      <stationLinks>
+        <station>S1</station>
+        <channelLink>
+          <channel>V1</channel>
+          <opticalLength>0.4162</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>V2</channel>
+          <opticalLength>0.2081</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>V3</channel>
+          <opticalLength>0</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>V4</channel>
+          <opticalLength>-0.2081</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>V5</channel>
+          <opticalLength>-0.4162</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>V6</channel>
+          <opticalLength>-0.6243</opticalLength>
+        </channelLink>
+      </stationLinks>
+
+      <stationLinks>
+        <station>S2</station>
+        <channelLink>
+          <channel>V1</channel>
+          <opticalLength>0.4162</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>V2</channel>
+          <opticalLength>0.2081</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>V3</channel>
+          <opticalLength>0</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>V4</channel>
+          <opticalLength>-0.2081</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>V5</channel>
+          <opticalLength>-0.4162</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>V6</channel>
+          <opticalLength>-0.6243</opticalLength>
+        </channelLink>
+      </stationLinks>
+
+      <stationLinks>
+        <station>E1</station>
+        <channelLink>
+          <channel>V1</channel>
+          <opticalLength>0.4162</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>V2</channel>
+          <opticalLength>0.2081</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>V3</channel>
+          <opticalLength>0</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>V4</channel>
+          <opticalLength>-0.2081</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>V5</channel>
+          <opticalLength>-0.4162</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>V6</channel>
+          <opticalLength>-0.6243</opticalLength>
+        </channelLink>
+      </stationLinks>
+
+      <stationLinks>
+        <station>E2</station>
+        <channelLink>
+          <channel>V1</channel>
+          <opticalLength>0.4162</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>V2</channel>
+          <opticalLength>0.2081</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>V3</channel>
+          <opticalLength>0</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>V4</channel>
+          <opticalLength>-0.2081</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>V5</channel>
+          <opticalLength>-0.4162</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>V6</channel>
+          <opticalLength>-0.6243</opticalLength>
+        </channelLink>
+      </stationLinks>
+
+      <stationLinks>
+        <station>W1</station>
+        <channelLink>
+          <channel>V1</channel>
+          <opticalLength>0.4162</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>V2</channel>
+          <opticalLength>0.2081</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>V3</channel>
+          <opticalLength>0</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>V4</channel>
+          <opticalLength>-0.2081</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>V5</channel>
+          <opticalLength>-0.4162</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>V6</channel>
+          <opticalLength>-0.6243</opticalLength>
+        </channelLink>
+      </stationLinks>
+
+      <stationLinks>
+        <station>W2</station>
+        <channelLink>
+          <channel>V1</channel>
+          <opticalLength>0.4162</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>V2</channel>
+          <opticalLength>0.2081</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>V3</channel>
+          <opticalLength>0</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>V4</channel>
+          <opticalLength>-0.2081</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>V5</channel>
+          <opticalLength>-0.4162</opticalLength>
+        </channelLink>
+        <channelLink>
+          <channel>V6</channel>
+          <opticalLength>-0.6243</opticalLength>
+        </channelLink>
+      </stationLinks>
+
+    </switchyard>
+
+    <!-- pop on CHARA -->
+    <pop>
+      <name>PoP1</name>
+      <index>1</index>
+    </pop>
+    <pop>
+      <name>PoP2</name>
+      <index>2</index>
+    </pop>
+    <pop>
+      <name>PoP3</name>
+      <index>3</index>
+    </pop>
+    <pop>
+      <name>PoP4</name>
+      <index>4</index>
+    </pop>
+    <pop>
+      <name>PoP5</name>
+      <index>5</index>
+    </pop>
+
+
+<!-- instruments (2T) -->
+
+    <focalInstrument>
+      <name>CLASSIC</name>
+      <description></description>
+      <numberChannels>2</numberChannels>
+      <defaultSamplingTime>40</defaultSamplingTime>
+
+      <!-- noise parameters -->
+      <transmission>0.10</transmission>
+      <dit>0.002</dit>
+      <ron>10</ron>
+      <detectorSaturation>32700</detectorSaturation>
+      <instrumentVisibility>0.9</instrumentVisibility>
+      <instrumentVisibilityBias>2</instrumentVisibilityBias>
+      <instrumentPhaseBias>0</instrumentPhaseBias>
+      <nbPixInterferometry>2</nbPixInterferometry>
+      <nbPixPhotometry>0</nbPixPhotometry>
+      <fracFluxInInterferometry>1</fracFluxInInterferometry>
+
+      <mode>
+        <name>H</name>
+        <resolution>5.9</resolution>
+        <waveLengthMin>1.53</waveLengthMin>
+        <waveLengthMax>1.82</waveLengthMax>
+      </mode>
+
+      <mode>
+        <name>K-Prime</name>
+        <resolution>6.1</resolution>
+        <waveLengthMin>1.96</waveLengthMin>
+        <waveLengthMax>2.31</waveLengthMax>
+      </mode>
+
+      <mode>
+        <name>K-Cont</name>
+        <resolution>88.9</resolution>
+        <waveLengthMin>2.08</waveLengthMin>
+        <waveLengthMax>2.10</waveLengthMax>
+      </mode>
+
+      <mode>
+        <name>B-gamma</name>
+        <resolution>103.</resolution>
+        <waveLengthMin>2.153</waveLengthMin>
+        <waveLengthMax>2.175</waveLengthMax>
+      </mode>
+    </focalInstrument>
+
+
+    <focalInstrument>
+      <name>PAVO_2T</name>
+      <description>PAVO combiner using 2T</description>
+      <numberChannels>2</numberChannels>
+      <defaultSamplingTime>40</defaultSamplingTime>
+
+      <!-- noise parameters -->
+      <transmission>0.10</transmission>
+      <dit>0.002</dit>
+      <ron>10</ron>
+      <detectorSaturation>32700</detectorSaturation>
+      <instrumentVisibility>0.9</instrumentVisibility>
+      <instrumentVisibilityBias>2</instrumentVisibilityBias>
+      <instrumentPhaseBias>0</instrumentPhaseBias>
+      <nbPixInterferometry>2</nbPixInterferometry>
+      <nbPixPhotometry>0</nbPixPhotometry>
+      <fracFluxInInterferometry>1</fracFluxInInterferometry>
+
+      <mode>
+        <name>R</name>
+        <resolution>5.9</resolution>
+        <numberChannels>19</numberChannels>
+        <waveLengthMin>0.63</waveLengthMin>
+        <waveLengthMax>0.95</waveLengthMax>
+      </mode>
+
+    </focalInstrument>
+
+
+    <focalInstrument>
+      <name>VEGA_2T</name>
+      <description></description>
+      <numberChannels>2</numberChannels>
+      <defaultSamplingTime>40</defaultSamplingTime>
+
+      <!-- noise parameters -->
+      <transmission>0.05</transmission>
+      <dit>0.01</dit>
+      <ron>10</ron>
+      <detectorSaturation>50000</detectorSaturation>
+      <instrumentVisibility>0.9</instrumentVisibility>
+      <instrumentVisibilityBias>2</instrumentVisibilityBias>
+      <instrumentPhaseBias>2</instrumentPhaseBias>
+      <nbPixInterferometry>128</nbPixInterferometry>
+      <nbPixPhotometry>0</nbPixPhotometry>
+      <fracFluxInInterferometry>1</fracFluxInInterferometry>
+
+      <mode>
+        <name>standard</name>
+        <resolution>40</resolution>
+        <numberChannels>8</numberChannels>
+        <waveLengthMin>0.48</waveLengthMin>
+        <waveLengthMax>0.82</waveLengthMax>
+      </mode>
+    </focalInstrument>
+
+
+<!-- instruments (3T) -->
+
+    <focalInstrument>
+      <name>CLIMB</name>
+      <description></description>
+      <numberChannels>3</numberChannels>
+      <defaultSamplingTime>40</defaultSamplingTime>
+
+      <!-- noise parameters -->
+      <transmission>0.08</transmission>
+      <dit>0.002</dit>
+      <ron>10</ron>
+      <detectorSaturation>32700</detectorSaturation>
+      <instrumentVisibility>0.9</instrumentVisibility>
+      <instrumentVisibilityBias>2</instrumentVisibilityBias>
+      <instrumentPhaseBias>2</instrumentPhaseBias>
+      <nbPixInterferometry>3</nbPixInterferometry>
+      <nbPixPhotometry>0</nbPixPhotometry>
+      <fracFluxInInterferometry>1</fracFluxInInterferometry>
+
+      <mode>
+        <name>H</name>
+        <resolution>5.9</resolution>
+        <waveLengthMin>1.53</waveLengthMin>
+        <waveLengthMax>1.82</waveLengthMax>
+      </mode>
+
+      <mode>
+        <name>K-Prime</name>
+        <resolution>6.1</resolution>
+        <waveLengthMin>1.96</waveLengthMin>
+        <waveLengthMax>2.31</waveLengthMax>
+      </mode>
+
+      <mode>
+        <name>K-Cont</name>
+        <resolution>88.9</resolution>
+        <waveLengthMin>2.08</waveLengthMin>
+        <waveLengthMax>2.10</waveLengthMax>
+      </mode>
+
+      <mode>
+        <name>B-gamma</name>
+        <resolution>103.</resolution>
+        <waveLengthMin>2.153</waveLengthMin>
+        <waveLengthMax>2.175</waveLengthMax>
+      </mode>
+    </focalInstrument>
+
+
+    <focalInstrument>
+      <name>PAVO_3T</name>
+      <description>PAVO combiner using 3T</description>
+      <numberChannels>3</numberChannels>
+      <defaultSamplingTime>40</defaultSamplingTime>
+
+      <!-- noise parameters -->
+      <transmission>0.10</transmission>
+      <dit>0.002</dit>
+      <ron>10</ron>
+      <detectorSaturation>32700</detectorSaturation>
+      <instrumentVisibility>0.9</instrumentVisibility>
+      <instrumentVisibilityBias>2</instrumentVisibilityBias>
+      <instrumentPhaseBias>0</instrumentPhaseBias>
+      <nbPixInterferometry>2</nbPixInterferometry>
+      <nbPixPhotometry>0</nbPixPhotometry>
+      <fracFluxInInterferometry>1</fracFluxInInterferometry>
+
+      <mode>
+        <name>R</name>
+        <resolution>5.9</resolution>
+        <numberChannels>19</numberChannels>
+        <waveLengthMin>0.63</waveLengthMin>
+        <waveLengthMax>0.95</waveLengthMax>
+      </mode>
+
+    </focalInstrument>
+
+
+    <focalInstrument>
+      <name>VEGA_3T</name>
+      <description></description>
+      <numberChannels>3</numberChannels>
+      <defaultSamplingTime>40</defaultSamplingTime>
+
+      <!-- noise parameters -->
+      <transmission>0.05</transmission>
+      <dit>0.01</dit>
+      <ron>10</ron>
+      <detectorSaturation>50000</detectorSaturation>
+      <instrumentVisibility>0.9</instrumentVisibility>
+      <instrumentVisibilityBias>2</instrumentVisibilityBias>
+      <instrumentPhaseBias>2</instrumentPhaseBias>
+      <nbPixInterferometry>128</nbPixInterferometry>
+      <nbPixPhotometry>0</nbPixPhotometry>
+      <fracFluxInInterferometry>1</fracFluxInInterferometry>
+
+      <mode>
+        <name>standard</name>
+        <resolution>40</resolution>
+        <numberChannels>8</numberChannels>
+        <waveLengthMin>0.48</waveLengthMin>
+        <waveLengthMax>0.82</waveLengthMax>
+      </mode>
+    </focalInstrument>
+
+
+<!-- instruments (4T) -->
+
+    <focalInstrument>
+      <name>MIRC</name>
+      <description></description>
+      <numberChannels>4</numberChannels>
+      <defaultSamplingTime>40</defaultSamplingTime>
+
+      <!-- noise parameters -->
+      <transmission>0.05</transmission>
+      <dit>0.01</dit>
+      <ron>10</ron>
+      <detectorSaturation>50000</detectorSaturation>
+      <instrumentVisibility>0.9</instrumentVisibility>
+      <instrumentVisibilityBias>1</instrumentVisibilityBias>
+      <instrumentPhaseBias>1</instrumentPhaseBias>
+      <nbPixInterferometry>126</nbPixInterferometry>
+      <nbPixPhotometry>18</nbPixPhotometry>
+      <fracFluxInInterferometry>0.75</fracFluxInInterferometry>
+
+      <mode>
+        <name>Low_H</name>
+        <resolution>40</resolution>
+        <waveLengthMin>1.5</waveLengthMin>
+        <waveLengthMax>1.8</waveLengthMax>
+      </mode>
+      <mode>
+        <name>Low_K</name>
+        <resolution>40</resolution>
+        <waveLengthMin>2.0</waveLengthMin>
+        <waveLengthMax>2.5</waveLengthMax>
+      </mode>
+      <mode>
+        <name>Medium_H</name>
+        <resolution>150</resolution>
+        <waveLengthMin>1.5</waveLengthMin>
+        <waveLengthMax>1.8</waveLengthMax>
+      </mode>
+      <mode>
+        <name>Medium_K</name>
+        <resolution>150</resolution>
+        <waveLengthMin>2.0</waveLengthMin>
+        <waveLengthMax>2.5</waveLengthMax>
+      </mode>
+      <mode>
+        <name>High_H</name>
+        <resolution>400</resolution>
+        <waveLengthMin>1.5</waveLengthMin>
+        <waveLengthMax>1.8</waveLengthMax>
+      </mode>
+      <mode>
+        <name>High_K</name>
+        <resolution>400</resolution>
+        <waveLengthMin>2.0</waveLengthMin>
+        <waveLengthMax>2.5</waveLengthMax>
+      </mode>
+    </focalInstrument>
+
+
+    <focalInstrument>
+      <name>VEGA_4T</name>
+      <description></description>
+      <numberChannels>4</numberChannels>
+      <defaultSamplingTime>40</defaultSamplingTime>
+
+      <!-- noise parameters -->
+      <transmission>0.05</transmission>
+      <dit>0.01</dit>
+      <ron>10</ron>
+      <detectorSaturation>50000</detectorSaturation>
+      <instrumentVisibility>0.9</instrumentVisibility>
+      <instrumentVisibilityBias>2</instrumentVisibilityBias>
+      <instrumentPhaseBias>2</instrumentPhaseBias>
+      <nbPixInterferometry>128</nbPixInterferometry>
+      <nbPixPhotometry>0</nbPixPhotometry>
+      <fracFluxInInterferometry>1</fracFluxInInterferometry>
+
+      <mode>
+        <name>standard</name>
+        <resolution>40</resolution>
+        <numberChannels>8</numberChannels>
+        <waveLengthMin>0.48</waveLengthMin>
+        <waveLengthMax>0.82</waveLengthMax>
+      </mode>
+    </focalInstrument>
+
+
+<!-- instruments (5T) -->
+
+    <focalInstrument>
+      <!-- name: Name of the focal instrument (AMBER, MIDI ...) -->
+      <name>MIRC_5T</name>
+      <!-- description: Description of the instrument -->
+      <description>MIRC instrument using 5 telescopes (prototype)</description>
+      <!-- numberChannels : The number of channels used by this instrument -->
+      <numberChannels>5</numberChannels>
+      <!-- defaultSamplingTime: The default sampling time for this instrument (min) -->
+      <defaultSamplingTime>40</defaultSamplingTime>
+
+      <!-- Noise modelling parameters -->
+        <!-- The transmission of interferometer+instrument at observed wavelength (typically 0.01) -->
+        <transmission>0.05</transmission>
+        <!-- The Detector individual integration time in seconds (typically less than 0.1s) -->
+        <dit>0.01</dit>
+        <!-- ron: The Detector readout noise (typically 10) -->
+        <ron>10</ron>
+        <!-- detectorSaturation: The Detector is non-linear above (to avoid saturation/non-linearity) (typically more than 20000) -->
+        <detectorSaturation>50000</detectorSaturation>
+        <!-- instrumentVisibility: The instrumental visibility (multiplicative) [0.0 - 1.0] (typically 0.9) -->
+        <instrumentVisibility>0.9</instrumentVisibility>
+        <!-- instrumentVisibilityBias: The Typical Visibility Bias (percent of V) (typically 1) -->
+        <instrumentVisibilityBias>1</instrumentVisibilityBias>
+        <!-- instrumentPhaseBias: The Typical Phase/Phase Closure Bias in degrees (typically 1) -->
+        <instrumentPhaseBias>1</instrumentPhaseBias>
+        <!-- nbPixInterferometry: The number of pixels to code all fringes together (interferometric channel) -->
+        <nbPixInterferometry>126</nbPixInterferometry>
+        <!-- nbPixPhotometry: The number of pixels to code each photometric channel -->
+        <nbPixPhotometry>18</nbPixPhotometry>
+        <!-- fracFluxInInterferometry: The fraction of flux going into interferometric channel (typically 0.9) -->
+        <fracFluxInInterferometry>0.75</fracFluxInInterferometry>
+
+      <!-- 
+        Instrument predefined modes :
+        Each mode describes a focal instrument mode (AMBER : "Low_HK" ... "Medium_K_1_2300" ... "High_K_1_2481").
+        It has a wavelength range (waveLengthMin - waveLengthMax), a spectral resolution (resolution)
+        and optionaly a number of channels (numberChannels)
+      -->
+      <mode>
+        <!-- name: The name of this instrument mode -->
+        <name>Low_H</name>
+        <!-- resolution: The spectral resolution of this instrument mode -->
+        <resolution>40</resolution>
+        <!-- 
+          The number of spectral channels of this instrument mode (optional)
+          <numberChannels>n</numberChannels>
+        -->
+        <!-- waveLengthMin: The lower wave length of this instrument mode -->
+        <waveLengthMin>1.5</waveLengthMin>
+        <!-- waveLengthMax: The upper wave length of this instrument mode -->
+        <waveLengthMax>1.8</waveLengthMax>
+      </mode>
+      <mode>
+        <name>Low_K</name>
+        <resolution>40</resolution>
+        <waveLengthMin>2.0</waveLengthMin>
+        <waveLengthMax>2.5</waveLengthMax>
+      </mode>
+      <mode>
+        <name>Medium_H</name>
+        <resolution>150</resolution>
+        <waveLengthMin>1.5</waveLengthMin>
+        <waveLengthMax>1.8</waveLengthMax>
+      </mode>
+      <mode>
+        <name>Medium_K</name>
+        <resolution>150</resolution>
+        <waveLengthMin>2.0</waveLengthMin>
+        <waveLengthMax>2.5</waveLengthMax>
+      </mode>
+      <mode>
+        <name>High_H</name>
+        <resolution>400</resolution>
+        <waveLengthMin>1.5</waveLengthMin>
+        <waveLengthMax>1.8</waveLengthMax>
+      </mode>
+      <mode>
+        <name>High_K</name>
+        <resolution>400</resolution>
+        <waveLengthMin>2.0</waveLengthMin>
+        <waveLengthMax>2.5</waveLengthMax>
+      </mode>
+    </focalInstrument>
+
+
+<!-- instruments (6T) -->
+
+    <focalInstrument>
+      <!-- name: Name of the focal instrument (AMBER, MIDI ...) -->
+      <name>MIRC_6T</name>
+      <!-- description: Description of the instrument -->
+      <description>MIRC instrument using 6 telescopes (prototype)</description>
+      <!-- numberChannels : The number of channels used by this instrument -->
+      <numberChannels>6</numberChannels>
+      <!-- defaultSamplingTime: The default sampling time for this instrument (min) -->
+      <defaultSamplingTime>40</defaultSamplingTime>
+
+      <!-- Noise modelling parameters -->
+        <!-- The transmission of interferometer+instrument at observed wavelength (typically 0.01) -->
+        <transmission>0.05</transmission>
+        <!-- The Detector individual integration time in seconds (typically less than 0.1s) -->
+        <dit>0.01</dit>
+        <!-- ron: The Detector readout noise (typically 10) -->
+        <ron>10</ron>
+        <!-- detectorSaturation: The Detector is non-linear above (to avoid saturation/non-linearity) (typically more than 20000) -->
+        <detectorSaturation>50000</detectorSaturation>
+        <!-- instrumentVisibility: The instrumental visibility (multiplicative) [0.0 - 1.0] (typically 0.9) -->
+        <instrumentVisibility>0.9</instrumentVisibility>
+        <!-- instrumentVisibilityBias: The Typical Visibility Bias (percent of V) (typically 1) -->
+        <instrumentVisibilityBias>1</instrumentVisibilityBias>
+        <!-- instrumentPhaseBias: The Typical Phase/Phase Closure Bias in degrees (typically 1) -->
+        <instrumentPhaseBias>1</instrumentPhaseBias>
+        <!-- nbPixInterferometry: The number of pixels to code all fringes together (interferometric channel) -->
+        <nbPixInterferometry>126</nbPixInterferometry>
+        <!-- nbPixPhotometry: The number of pixels to code each photometric channel -->
+        <nbPixPhotometry>18</nbPixPhotometry>
+        <!-- fracFluxInInterferometry: The fraction of flux going into interferometric channel (typically 0.9) -->
+        <fracFluxInInterferometry>0.75</fracFluxInInterferometry>
+
+      <!-- 
+        Instrument predefined modes :
+        Each mode describes a focal instrument mode (AMBER : "Low_HK" ... "Medium_K_1_2300" ... "High_K_1_2481").
+        It has a wavelength range (waveLengthMin - waveLengthMax), a spectral resolution (resolution)
+        and optionaly a number of channels (numberChannels)
+      -->
+      <mode>
+        <!-- name: The name of this instrument mode -->
+        <name>Low_H</name>
+        <!-- resolution: The spectral resolution of this instrument mode -->
+        <resolution>40</resolution>
+        <!-- 
+          The number of spectral channels of this instrument mode (optional)
+          <numberChannels>n</numberChannels>
+        -->
+        <!-- waveLengthMin: The lower wave length of this instrument mode -->
+        <waveLengthMin>1.5</waveLengthMin>
+        <!-- waveLengthMax: The upper wave length of this instrument mode -->
+        <waveLengthMax>1.8</waveLengthMax>
+      </mode>
+      <mode>
+        <name>Low_K</name>
+        <resolution>40</resolution>
+        <waveLengthMin>2.0</waveLengthMin>
+        <waveLengthMax>2.5</waveLengthMax>
+      </mode>
+      <mode>
+        <name>Medium_H</name>
+        <resolution>150</resolution>
+        <waveLengthMin>1.5</waveLengthMin>
+        <waveLengthMax>1.8</waveLengthMax>
+      </mode>
+      <mode>
+        <name>Medium_K</name>
+        <resolution>150</resolution>
+        <waveLengthMin>2.0</waveLengthMin>
+        <waveLengthMax>2.5</waveLengthMax>
+      </mode>
+      <mode>
+        <name>High_H</name>
+        <resolution>400</resolution>
+        <waveLengthMin>1.5</waveLengthMin>
+        <waveLengthMax>1.8</waveLengthMax>
+      </mode>
+      <mode>
+        <name>High_K</name>
+        <resolution>400</resolution>
+        <waveLengthMin>2.0</waveLengthMin>
+        <waveLengthMax>2.5</waveLengthMax>
+      </mode>
+    </focalInstrument>
+
+  </description>
+
+  <configuration>
+    <interferometer>CHARA</interferometer>
+
+<!-- instruments (CLASSIC, CLIMB, MIRC 4T/6T, PAVO 2T/3T, VEGA 2T/3T/4T) -->
+
+    <!-- CLASSIC (2T) -->
+    <instrument>
+      <focalInstrument>CLASSIC</focalInstrument>
+      <!-- CLASSIC: beams 5-6 -->
+      <configuration>
+        <stations>S1 S2</stations>
+        <channels>V5 V6</channels>
+      </configuration>
+      <configuration>
+        <stations>S1 E1</stations>
+        <channels>V5 V6</channels>
+      </configuration>
+      <configuration>
+        <stations>S1 E2</stations>
+        <channels>V5 V6</channels>
+      </configuration>
+      <configuration>
+        <stations>S1 W1</stations>
+        <channels>V5 V6</channels>
+      </configuration>
+      <configuration>
+        <stations>S1 W2</stations>
+        <channels>V5 V6</channels>
+      </configuration>
+      <configuration>
+        <stations>S2 E1</stations>
+        <channels>V5 V6</channels>
+      </configuration>
+      <configuration>
+        <stations>S2 E2</stations>
+        <channels>V5 V6</channels>
+      </configuration>
+      <configuration>
+        <stations>S2 W1</stations>
+        <channels>V5 V6</channels>
+      </configuration>
+      <configuration>
+        <stations>S2 W2</stations>
+        <channels>V5 V6</channels>
+      </configuration>
+      <configuration>
+        <stations>E1 E2</stations>
+        <channels>V5 V6</channels>
+      </configuration>
+      <configuration>
+        <stations>E1 W1</stations>
+        <channels>V5 V6</channels>
+      </configuration>
+      <configuration>
+        <stations>E1 W2</stations>
+        <channels>V5 V6</channels>
+      </configuration>
+      <configuration>
+        <stations>E2 W1</stations>
+        <channels>V5 V6</channels>
+      </configuration>
+      <configuration>
+        <stations>E2 W2</stations>
+        <channels>V5 V6</channels>
+      </configuration>
+      <configuration>
+        <stations>W1 W2</stations>
+        <channels>V5 V6</channels>
+      </configuration>
+    </instrument>
+
+
+    <!-- CLIMB (3T) -->
+    <instrument>
+      <focalInstrument>CLIMB</focalInstrument>
+      <!-- CLIMB: beams 1-2-3 -->
+      <configuration>
+        <stations>S1 S2 E1</stations>
+        <channels>V1 V2 V3</channels>
+      </configuration>
+      <configuration>
+        <stations>S1 S2 E2</stations>
+        <channels>V1 V2 V3</channels>
+      </configuration>
+      <configuration>
+        <stations>S1 S2 W1</stations>
+        <channels>V1 V2 V3</channels>
+      </configuration>
+      <configuration>
+        <stations>S1 S2 W2</stations>
+        <channels>V1 V2 V3</channels>
+      </configuration>
+      <configuration>
+        <stations>S1 E1 E2</stations>
+        <channels>V1 V2 V3</channels>
+      </configuration>
+      <configuration>
+        <stations>S1 E1 W1</stations>
+        <channels>V1 V2 V3</channels>
+      </configuration>
+      <configuration>
+        <stations>S1 E1 W2</stations>
+        <channels>V1 V2 V3</channels>
+      </configuration>
+      <configuration>
+        <stations>S1 E2 W1</stations>
+        <channels>V1 V2 V3</channels>
+      </configuration>
+      <configuration>
+        <stations>S1 E2 W2</stations>
+        <channels>V1 V2 V3</channels>
+      </configuration>
+      <configuration>
+        <stations>S1 W1 W2</stations>
+        <channels>V1 V2 V3</channels>
+      </configuration>
+      <configuration>
+        <stations>S2 E1 E2</stations>
+        <channels>V1 V2 V3</channels>
+      </configuration>
+      <configuration>
+        <stations>S2 E1 W1</stations>
+        <channels>V1 V2 V3</channels>
+      </configuration>
+      <configuration>
+        <stations>S2 E1 W2</stations>
+        <channels>V1 V2 V3</channels>
+      </configuration>
+      <configuration>
+        <stations>S2 E2 W1</stations>
+        <channels>V1 V2 V3</channels>
+      </configuration>
+      <configuration>
+        <stations>S2 E2 W2</stations>
+        <channels>V1 V2 V3</channels>
+      </configuration>
+      <configuration>
+        <stations>S2 W1 W2</stations>
+        <channels>V1 V2 V3</channels>
+      </configuration>
+      <configuration>
+        <stations>E1 E2 W1</stations>
+        <channels>V1 V2 V3</channels>
+      </configuration>
+      <configuration>
+        <stations>E1 E2 W2</stations>
+        <channels>V1 V2 V3</channels>
+      </configuration>
+      <configuration>
+        <stations>E1 W1 W2</stations>
+        <channels>V1 V2 V3</channels>
+      </configuration>
+      <configuration>
+        <stations>E2 W1 W2</stations>
+        <channels>V1 V2 V3</channels>
+      </configuration>
+    </instrument>
+
+
+    <!-- MIRC (4T/5T/6T) -->
+    <instrument>
+      <focalInstrument>MIRC</focalInstrument>
+      <!-- MIRC: beams 1-2-3-4 -->
+      <configuration>
+        <stations>S1 S2 E1 E2</stations>
+        <channels>V3 V4 V1 V2</channels>
+      </configuration>
+      <configuration>
+        <stations>S1 S2 E1 W1</stations>
+        <channels>V3 V4 V1 V2</channels>
+      </configuration>
+      <configuration>
+        <stations>S1 S2 E1 W2</stations>
+        <channels>V2 V3 V1 V4</channels>
+      </configuration>
+      <configuration>
+        <stations>S1 S2 E2 W1</stations>
+        <channels>V3 V4 V1 V2</channels>
+      </configuration>
+      <configuration>
+        <stations>S1 S2 E2 W2</stations>
+        <channels>V2 V3 V1 V4</channels>
+      </configuration>
+      <configuration>
+        <stations>S1 S2 W1 W2</stations>
+        <channels>V2 V3 V1 V4</channels>
+      </configuration>
+      <configuration>
+        <stations>S1 E1 E2 W1</stations>
+        <channels>V4 V1 V2 V3</channels>
+      </configuration>
+      <configuration>
+        <stations>S1 E1 E2 W2</stations>
+        <channels>V3 V1 V2 V4</channels>
+      </configuration>
+      <configuration>
+        <stations>S1 E1 W1 W2</stations>
+        <channels>V3 V1 V2 V4</channels>
+      </configuration>
+      <configuration>
+        <stations>S1 E2 W1 W2</stations>
+        <channels>V3 V1 V2 V4</channels>
+      </configuration>
+      <configuration>
+        <stations>S2 E1 E2 W1</stations>
+        <channels>V4 V1 V2 V3</channels>
+      </configuration>
+      <configuration>
+        <stations>S2 E1 E2 W2</stations>
+        <channels>V3 V1 V2 V4</channels>
+      </configuration>
+      <configuration>
+        <stations>S2 E1 W1 W2</stations>
+        <channels>V3 V1 V2 V4</channels>
+      </configuration>
+      <configuration>
+        <stations>S2 E2 W1 W2</stations>
+        <channels>V3 V1 V2 V4</channels>
+      </configuration>
+      <configuration>
+        <stations>E1 E2 W1 W2</stations>
+        <channels>V1 V2 V3 V4</channels>
+      </configuration>
+    </instrument>
+
+
+    <instrument>
+      <focalInstrument>MIRC_5T</focalInstrument>
+      <!-- MIRC: S1 S2 W1 W2 E1 E2 = beams 1-2-3-4-6-5 -->
+      
+      <configuration>
+        <stations>S1 S2 W1 W2 E1</stations>
+        <channels>V1 V2 V3 V4 V6</channels>
+      </configuration>
+      <configuration>
+        <stations>S1 S2 W1 W2 E2</stations>
+        <channels>V1 V2 V3 V4 V5</channels>
+      </configuration>
+      <configuration>
+        <stations>S1 S2 W1 E1 E2</stations>
+        <channels>V1 V2 V3 V6 V5</channels>
+      </configuration>
+      <configuration>
+        <stations>S1 S2 W2 E1 E2</stations>
+        <channels>V1 V2 V4 V6 V5</channels>
+      </configuration>
+      <configuration>
+        <stations>S1 W1 W2 E1 E2</stations>
+        <channels>V1 V3 V4 V6 V5</channels>
+      </configuration>
+      <configuration>
+        <stations>S2 W1 W2 E1 E2</stations>
+        <channels>V2 V3 V4 V6 V5</channels>
+      </configuration>
+    </instrument>
+
+
+    <instrument>
+      <!-- focalInstrument: The focal instrument associated with this configuration -->
+      <focalInstrument>MIRC_6T</focalInstrument>
+      <!-- MIRC: S1 S2 W1 W2 E1 E2 = beams 1-2-3-4-6-5 -->
+      
+      <!-- configuration: The list of configuration for the focal instrument -->
+      <configuration>
+        <!-- stations: The list of stations for this configuration (U1 U2 U4) -->
+        <stations>S1 S2 W1 W2 E1 E2</stations>
+        <!-- channels: The list of channels for this configuration (V1 V2) used by CHARA instruments -->
+        <channels>V1 V2 V3 V4 V6 V5</channels>
+      </configuration>
+    </instrument>
+
+
+    <!-- PAVO 2T/3T -->
+    <instrument>
+      <focalInstrument>PAVO_2T</focalInstrument>
+      <!-- PAVO: beams 1-2-3 -->
+      <configuration>
+        <stations>S1 S2</stations>
+        <channels>V1 V2</channels>
+      </configuration>
+      <configuration>
+        <stations>S1 E1</stations>
+        <channels>V1 V2</channels>
+      </configuration>
+      <configuration>
+        <stations>S1 E2</stations>
+        <channels>V1 V2</channels>
+      </configuration>
+      <configuration>
+        <stations>S1 W1</stations>
+        <channels>V1 V2</channels>
+      </configuration>
+      <configuration>
+        <stations>S1 W2</stations>
+        <channels>V1 V2</channels>
+      </configuration>
+      <configuration>
+        <stations>S2 E1</stations>
+        <channels>V1 V2</channels>
+      </configuration>
+      <configuration>
+        <stations>S2 E2</stations>
+        <channels>V1 V2</channels>
+      </configuration>
+      <configuration>
+        <stations>S2 W1</stations>
+        <channels>V1 V2</channels>
+      </configuration>
+      <configuration>
+        <stations>S2 W2</stations>
+        <channels>V1 V2</channels>
+      </configuration>
+      <configuration>
+        <stations>E1 E2</stations>
+        <channels>V1 V2</channels>
+      </configuration>
+      <configuration>
+        <stations>E1 W1</stations>
+        <channels>V1 V2</channels>
+      </configuration>
+      <configuration>
+        <stations>E1 W2</stations>
+        <channels>V1 V2</channels>
+      </configuration>
+      <configuration>
+        <stations>E2 W1</stations>
+        <channels>V1 V2</channels>
+      </configuration>
+      <configuration>
+        <stations>E2 W2</stations>
+        <channels>V1 V2</channels>
+      </configuration>
+      <configuration>
+        <stations>W1 W2</stations>
+        <channels>V1 V2</channels>
+      </configuration>
+    </instrument>
+
+    <instrument>
+      <focalInstrument>PAVO_3T</focalInstrument>
+      <!-- PAVO: beams 1-2-3 -->
+      <configuration>
+        <stations>S1 S2 E1</stations>
+        <channels>V1 V2 V3</channels>
+      </configuration>
+      <configuration>
+        <stations>S1 S2 E2</stations>
+        <channels>V1 V2 V3</channels>
+      </configuration>
+      <configuration>
+        <stations>S1 S2 W1</stations>
+        <channels>V1 V2 V3</channels>
+      </configuration>
+      <configuration>
+        <stations>S1 S2 W2</stations>
+        <channels>V1 V2 V3</channels>
+      </configuration>
+      <configuration>
+        <stations>S1 E1 E2</stations>
+        <channels>V1 V2 V3</channels>
+      </configuration>
+      <configuration>
+        <stations>S1 E1 W1</stations>
+        <channels>V1 V2 V3</channels>
+      </configuration>
+      <configuration>
+        <stations>S1 E1 W2</stations>
+        <channels>V1 V2 V3</channels>
+      </configuration>
+      <configuration>
+        <stations>S1 E2 W1</stations>
+        <channels>V1 V2 V3</channels>
+      </configuration>
+      <configuration>
+        <stations>S1 E2 W2</stations>
+        <channels>V1 V2 V3</channels>
+      </configuration>
+      <configuration>
+        <stations>S1 W1 W2</stations>
+        <channels>V1 V2 V3</channels>
+      </configuration>
+      <configuration>
+        <stations>S2 E1 E2</stations>
+        <channels>V1 V2 V3</channels>
+      </configuration>
+      <configuration>
+        <stations>S2 E1 W1</stations>
+        <channels>V1 V2 V3</channels>
+      </configuration>
+      <configuration>
+        <stations>S2 E1 W2</stations>
+        <channels>V1 V2 V3</channels>
+      </configuration>
+      <configuration>
+        <stations>S2 E2 W1</stations>
+        <channels>V1 V2 V3</channels>
+      </configuration>
+      <configuration>
+        <stations>S2 E2 W2</stations>
+        <channels>V1 V2 V3</channels>
+      </configuration>
+      <configuration>
+        <stations>S2 W1 W2</stations>
+        <channels>V1 V2 V3</channels>
+      </configuration>
+      <configuration>
+        <stations>E1 E2 W1</stations>
+        <channels>V1 V2 V3</channels>
+      </configuration>
+      <configuration>
+        <stations>E1 E2 W2</stations>
+        <channels>V1 V2 V3</channels>
+      </configuration>
+      <configuration>
+        <stations>E1 W1 W2</stations>
+        <channels>V1 V2 V3</channels>
+      </configuration>
+      <configuration>
+        <stations>E2 W1 W2</stations>
+        <channels>V1 V2 V3</channels>
+      </configuration>
+    </instrument>
+
+    
+    <!-- VEGA 2T/3T/4T -->
+    <!-- last modified: 04/07/2011 according to Denis Mourard document (ConfigsBeamDefault.pdf - 30/06/2011)-->
+    <instrument>
+      <focalInstrument>VEGA_2T</focalInstrument>
+      <configuration>
+        <stations>S1 S2</stations>
+        <channels>V2 V1</channels>
+      </configuration>
+      <configuration>
+        <stations>E1 S1</stations>
+        <channels>V1 V2</channels>
+      </configuration>
+      <configuration>
+        <stations>E2 S1</stations>
+        <channels>V1 V2</channels>
+      </configuration>
+      <configuration>
+        <stations>S1 W1</stations>
+        <channels>V2 V1</channels>
+      </configuration>
+      <configuration>
+        <stations>S1 W2</stations>
+        <channels>V2 V1</channels>
+      </configuration>
+      <configuration>
+        <stations>E1 S2</stations>
+        <channels>V1 V2</channels>
+      </configuration>
+      <configuration>
+        <stations>E2 S2</stations>
+        <channels>V1 V2</channels>
+      </configuration>
+      <configuration>
+        <stations>S2 W1</stations>
+        <channels>V2 V1</channels>
+      </configuration>
+      <configuration>
+        <stations>S2 W2</stations>
+        <channels>V2 V1</channels>
+      </configuration>
+      <configuration>
+        <stations>E1 E2</stations>
+        <channels>V1 V2</channels>
+      </configuration>
+      <configuration>
+        <stations>E1 W1</stations>
+        <channels>V1 V2</channels>
+      </configuration>
+      <configuration>
+        <stations>E1 W2</stations>
+        <channels>V1 V2</channels>
+      </configuration>
+      <configuration>
+        <stations>E2 W1</stations>
+        <channels>V1 V2</channels>
+      </configuration>
+      <configuration>
+        <stations>E2 W2</stations>
+        <channels>V1 V2</channels>
+      </configuration>
+      <configuration>
+        <stations>W1 W2</stations>
+        <channels>V2 V1</channels>
+      </configuration>
+    </instrument>
+
+    <instrument>
+      <focalInstrument>VEGA_3T</focalInstrument>
+      <configuration>
+        <stations>S2 S1 E1</stations>
+        <channels>V2 V1 V3</channels>
+      </configuration>
+      <configuration>
+        <stations>S2 S1 E2</stations>
+        <channels>V2 V1 V3</channels>
+      </configuration>
+      <configuration>
+        <stations>S2 S1 W1</stations>
+        <channels>V2 V1 V3</channels>
+      </configuration>
+      <configuration>
+        <stations>S2 S1 W2</stations>
+        <channels>V2 V1 V3</channels>
+      </configuration>
+      <configuration>
+        <stations>E2 E1 S1</stations>
+        <channels>V2 V1 V3</channels>
+      </configuration>
+      <configuration>
+        <stations>W1 S1 E1</stations>
+        <channels>V2 V1 V3</channels>
+      </configuration>
+      <configuration>
+        <stations>W2 E1 S1</stations>
+        <channels>V2 V1 V3</channels>
+      </configuration>
+      <configuration>
+        <stations>E2 W1 S1</stations>
+        <channels>V2 V1 V3</channels>
+      </configuration>
+      <configuration>
+        <stations>W2 E2 S1</stations>
+        <channels>V2 V1 V3</channels>
+      </configuration>
+      <configuration>
+        <stations>W2 W1 S1</stations>
+        <channels>V2 V1 V3</channels>
+      </configuration>
+      <configuration>
+        <stations>E2 E1 S2</stations>
+        <channels>V2 V1 V3</channels>
+      </configuration>
+      <configuration>
+        <stations>S2 W1 E1</stations>
+        <channels>V2 V1 V3</channels>
+      </configuration>
+      <configuration>
+        <stations>W2 S2 E1</stations>
+        <channels>V2 V1 V3</channels>
+      </configuration>
+      <configuration>
+        <stations>E2 S2 W1</stations>
+        <channels>V2 V1 V3</channels>
+      </configuration>
+      <configuration>
+        <stations>W2 E2 S2</stations>
+        <channels>V2 V1 V3</channels>
+      </configuration>
+      <configuration>
+        <stations>W2 W1 S2</stations>
+        <channels>V2 V1 V3</channels>
+      </configuration>
+      <configuration>
+        <stations>E2 E1 W1</stations>
+        <channels>V2 V1 V3</channels>
+      </configuration>
+      <configuration>
+        <stations>E2 E1 W2</stations>
+        <channels>V2 V1 V3</channels>
+      </configuration>
+      <configuration>
+        <stations>W2 W1 E1</stations> <!-- TODO : Fix E3 means E1V3 -->
+        <channels>V2 V1 V3</channels>
+      </configuration>
+      <configuration>
+        <stations>W2 W1 E2</stations>
+        <channels>V2 V1 V3</channels>
+      </configuration>
+    </instrument>
+
+    <instrument>
+      <focalInstrument>VEGA_4T</focalInstrument>
+      <configuration>
+        <stations>S2 S1 E2 E1</stations>
+        <channels>V2 V1 V3 V4</channels>
+      </configuration>
+      <configuration>
+        <stations>S2 S1 W1 E1</stations>
+        <channels>V2 V1 V3 V4</channels>
+      </configuration>
+      <configuration>
+        <stations>S2 S1 W2 E1</stations>
+        <channels>V2 V1 V3 V4</channels>
+      </configuration>
+      <configuration>
+        <stations>S2 S1 W1 E2</stations>
+        <channels>V2 V1 V3 V4</channels>
+      </configuration>
+      <configuration>
+        <stations>S2 S1 W2 E2</stations>
+        <channels>V2 V1 V3 V4</channels>
+      </configuration>
+      <configuration>
+        <stations>S2 S1 W2 W1</stations>
+        <channels>V2 V1 V3 V4</channels>
+      </configuration>
+      <configuration>
+        <stations>E2 S2 W1 E1</stations>
+        <channels>V2 V1 V3 V4</channels>
+      </configuration>
+      <configuration>
+        <stations>W2 E2 S1 E1</stations>
+        <channels>V2 V1 V3 V4</channels>
+      </configuration>
+      <configuration>
+        <stations>W2 W1 S1 E1</stations>
+        <channels>V2 V1 V3 V4</channels>
+      </configuration>
+      <configuration>
+        <stations>W2 W1 S1 E2</stations>
+        <channels>V2 V1 V3 V4</channels>
+      </configuration>
+      <configuration>
+        <stations>E2 E1 W1 S2</stations>
+        <channels>V2 V1 V3 V4</channels>
+      </configuration>
+      <configuration>
+        <stations>E2 E1 W2 S2</stations>
+        <channels>V2 V1 V3 V4</channels>
+      </configuration>
+      <configuration>
+        <stations>W2 W1 S2 E1</stations>
+        <channels>V2 V1 V3 V4</channels>
+      </configuration>
+      <configuration>
+        <stations>W2 W1 S2 E2</stations>
+        <channels>V2 V1 V3 V4</channels>
+      </configuration>
+      <configuration>
+        <stations>E2 E1 W2 W1</stations>
+        <channels>V2 V1 V3 V4</channels>
+      </configuration>
+    </instrument>
+  </configuration>
+
+
+  <configuration>
+    <!-- D.M. 13/05/2011 -->
+    <version>VEGA June 2011</version>
+    <interferometer>CHARA</interferometer>
+
+    <instrument>
+      <focalInstrument>VEGA_2T</focalInstrument>
+      <configuration>
+        <stations>S1 S2</stations>
+        <channels>V2 V1</channels>
+        <pops>PoP4 PoP5</pops>
+      </configuration>
+      <configuration>
+        <stations>E2 E1</stations>
+        <channels>V2 V1</channels>
+        <pops>PoP2 PoP1</pops>
+      </configuration>
+      <configuration>
+        <stations>W1 W2</stations>
+        <channels>V4 V3</channels>
+        <pops>PoP1 PoP5</pops>
+      </configuration>
+    </instrument>
+
+    <instrument>
+      <focalInstrument>VEGA_3T</focalInstrument>
+      <configuration>
+        <stations>E2 E1 W2</stations>
+        <channels>V2 V1 V3</channels>
+        <pops>PoP2 PoP1 PoP5</pops>
+      </configuration>
+      <configuration>
+        <stations>W2 W1 E1</stations>
+        <channels>V2 V1 V3</channels>
+        <pops>PoP5 PoP1 PoP1</pops>
+      </configuration>
+      <configuration>
+        <stations>W2 W1 E2</stations>
+        <channels>V2 V1 V3</channels>
+        <pops>PoP5 PoP1 PoP2</pops>
+      </configuration>
+    </instrument>
+
+    <!-- VEGA_4T not available -->
+  </configuration>
+
+</a:interferometerSetting>
