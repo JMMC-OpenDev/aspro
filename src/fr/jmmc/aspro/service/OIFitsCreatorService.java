@@ -396,7 +396,9 @@ public final class OIFitsCreatorService {
     final float[] effWave = waves.getEffWave();
     final float[] effBand = waves.getEffBand();
 
-    double waveLength = this.lambdaMin;
+    // effective wavelength corresponds to the channel center:
+    double waveLength = this.lambdaMin + step / 2d;
+    
     for (int i = 0; i < this.nWaveLengths; i++) {
       this.waveLengths[i] = waveLength;
 
