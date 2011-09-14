@@ -8618,8 +8618,8 @@
       <ron>10</ron>
       <detectorSaturation>24000</detectorSaturation>
       <instrumentVisibility>0.9</instrumentVisibility>
-      <instrumentVisibilityBias>1</instrumentVisibilityBias>
-      <instrumentPhaseBias>0.1</instrumentPhaseBias>
+      <instrumentVisibilityBias>5.0</instrumentVisibilityBias>
+      <instrumentPhaseBias>3.0</instrumentPhaseBias>
       <nbPixInterferometry>32</nbPixInterferometry>
       <nbPixPhotometry>32</nbPixPhotometry>
       <fracFluxInInterferometry>0.5</fracFluxInInterferometry>
@@ -8789,7 +8789,7 @@
       <defaultSamplingTime>30</defaultSamplingTime>
 
       <!-- noise parameters -->
-      <transmission>0.1</transmission>
+      <transmission>0.01</transmission>
       <dit>0.01</dit>
       <ron>10</ron>
       <detectorSaturation>50000</detectorSaturation>
@@ -8800,7 +8800,6 @@
       <nbPixPhotometry>4</nbPixPhotometry>
       <fracFluxInInterferometry>0.8</fracFluxInInterferometry>
 
-<!-- keep standard or not -->
       <mode>
         <!-- 
           1) LARGE-H
@@ -8808,10 +8807,10 @@
           lbd  = [1.56,1.60,1.64,1.68,1.72,1.76,1.80] microns
         -->
         <name>LARGE-H</name>
-        <resolution>49</resolution>
+        <resolution>40</resolution>
         <numberChannels>7</numberChannels>
-        <waveLengthMin>1.56</waveLengthMin>
-        <waveLengthMax>1.80</waveLengthMax>
+        <waveLengthMin>1.54</waveLengthMin>
+        <waveLengthMax>1.82</waveLengthMax>
       </mode>
       <mode>
         <!-- 
@@ -8820,10 +8819,10 @@
           lbd = [1.59, 1.68, 1.77] microns
         -->
         <name>SMALL-H</name>
-        <resolution>28</resolution>
+        <resolution>18</resolution>
         <numberChannels>3</numberChannels>
-        <waveLengthMin>1.59</waveLengthMin>
-        <waveLengthMax>1.77</waveLengthMax>
+        <waveLengthMin>1.545</waveLengthMin>
+        <waveLengthMax>1.815</waveLengthMax>
       </mode>
       <mode>
         <!-- 
@@ -8832,10 +8831,10 @@
           lbd = 1.68 microns
         -->
         <name>BROAD-H</name>
-        <resolution>6.72</resolution>
+        <resolution>6</resolution>
         <numberChannels>1</numberChannels>
-        <waveLengthMin>1.56</waveLengthMin>
-        <waveLengthMax>1.80</waveLengthMax>
+        <waveLengthMin>1.555</waveLengthMin>
+        <waveLengthMax>1.805</waveLengthMax>
       </mode>
     </focalInstrument>
 
