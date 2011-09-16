@@ -34,6 +34,8 @@ public final class SearchCalVOTableHandler {
   private static final Logger logger = Logger.getLogger(SearchCalVOTableHandler.class.getName());
   /** XSLT file path */
   private final static String XSLT_FILE = "fr/jmmc/aspro/interop/scvot2AsproObservation.xsl";
+  /** flag to dump asprox document into logs */
+  private static final boolean DUMP_DOCUMENT = false;
   /** maximum calibrators accepted at once */
   public final static int MAX_CALIBRATORS = 10;
 
@@ -64,8 +66,8 @@ public final class SearchCalVOTableHandler {
       logger.info("VOTable transformation (XSLT) : " + 1e-6d * (System.nanoTime() - start) + " ms.");
     }
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("document :\n" + document);
+    if (DUMP_DOCUMENT) {
+      logger.info("document :\n" + document);
     }
 
     final ObservationManager om = ObservationManager.getInstance();
@@ -126,6 +128,7 @@ public final class SearchCalVOTableHandler {
     // data model is modified and fire events using Swing EDT :
     SwingUtilities.invokeLater(new Runnable() {
 
+      @Override
       public void run() {
 
         if (TargetEditorDialog.isTargetEditorActive()) {

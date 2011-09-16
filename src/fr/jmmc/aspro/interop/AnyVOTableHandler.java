@@ -24,6 +24,8 @@ public final class AnyVOTableHandler {
   private static final Logger logger = Logger.getLogger(AnyVOTableHandler.class.getName());
   /** XSLT file path */
   private final static String XSLT_FILE = "fr/jmmc/aspro/interop/vot2AsproObservation.xsl";
+  /** flag to dump asprox document into logs */
+  private static final boolean DUMP_DOCUMENT = true;
 
   /**
    * Private constructor
@@ -51,17 +53,19 @@ public final class AnyVOTableHandler {
       logger.info("VOTable transformation (XSLT) : " + 1e-6d * (System.nanoTime() - start) + " ms.");
     }
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("document :\n" + document);
+    if (DUMP_DOCUMENT) {
+      logger.info("document :\n" + document);
     }
 
+    // TODO: handle target only document => ADD targets: see SearchCalVOTableHandler
+    
     final ObservationManager om = ObservationManager.getInstance();
 
     final ObservationSetting newObservation = om.load(new StringReader(document));
 
     if (newObservation != null) {
       // Use invokeLater to avoid concurrency and ensure that 
-      // data model is modified and fire events using Swing EDT :
+      // data model is modified and fire eventsarg using Swing EDT :
       SwingUtilities.invokeLater(new Runnable() {
 
         @Override

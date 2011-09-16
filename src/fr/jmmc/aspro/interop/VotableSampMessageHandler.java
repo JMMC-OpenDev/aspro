@@ -4,6 +4,7 @@
 package fr.jmmc.aspro.interop;
 
 import fr.jmmc.jmcs.gui.MessagePane;
+import fr.jmmc.jmcs.network.Http;
 import fr.jmmc.jmcs.network.interop.SampCapability;
 import fr.jmmc.jmcs.network.interop.SampManager;
 import fr.jmmc.jmcs.network.interop.SampMessageHandler;
@@ -28,6 +29,8 @@ public final class VotableSampMessageHandler extends SampMessageHandler {
 
   /** Class logger */
   private static final Logger logger = Logger.getLogger(VotableSampMessageHandler.class.getName());
+  /** flag to dump votable into logs */
+  private static final boolean DUMP_VOTABLE = true;
 
   /**
    * Public constructor
@@ -50,39 +53,48 @@ public final class VotableSampMessageHandler extends SampMessageHandler {
     }
 
     // get url of votable (locally stored) :
-    final String voTableURL = (String) message.getParam("url");
+    final String voTableURL = (String) message.getRequiredParam("url");
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("VOTable URL = " + voTableURL);
-    }
+    logger.info("processMessage: VOTable URL = " + voTableURL);
 
     if (voTableURL == null) {
       throw new SampException("Can not get the url of the votable");
     }
 
-    final URI uri;
+    final URI voTableURI;
     try {
-      uri = new URI(voTableURL);
+      voTableURI = new URI(voTableURL);
     } catch (URISyntaxException use) {
       logger.log(Level.SEVERE, "invalid URI", use);
 
       throw new SampException("Can not read the votable : " + voTableURL, use);
     }
     
-    if (!uri.getScheme().equalsIgnoreCase("file")) {
-      throw new SampException("Not supported URI scheme : " + voTableURL);
-    }
+    File voTableFile = null;
 
     try {
+      final String scheme = voTableURI.getScheme();
 
-      // TODO: support any votable i.e. http URI
-      
-      // Use Http.getHttpClient(boolean) but warning about proxy settings
-      
-      // note : uri can be http://anything :
-      final File voTableFile = new File(uri);
+      if (scheme.equalsIgnoreCase("file")) {
+        voTableFile = new File(voTableURI);
+
+      } else if (scheme.equalsIgnoreCase("http")) {
+        final File file = FileUtils.getTempFile("votable-", ".vot");
+
+        if (Http.download(voTableURI, file)) {
+          voTableFile = file;
+        }
+      }
+
+      if (voTableFile == null) {
+        throw new SampException("Not supported URI scheme : " + voTableURL);
+      }
 
       final String votable = FileUtils.readFile(voTableFile);
+
+      if (DUMP_VOTABLE) {
+        logger.info("votable :\n" + votable);
+      }
 
       final Metadata senderMetadata = SampManager.getMetaData(senderId);
       final String searchCalVersion = senderMetadata.getString("searchcal.version");
