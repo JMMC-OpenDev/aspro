@@ -30,15 +30,15 @@ public final class SettingPanel extends JPanel implements ObservationListener {
 
   /* Tab names */
   /** name of the tab pane corresponding to the interferometer map */
-  private static final String TAB_INTERFEROMETER_MAP = "Map";
+  public static final String TAB_INTERFEROMETER_MAP = "Map";
   /** name of the tab pane corresponding to the observability panel */
-  private static final String TAB_OBSERVABILITY = "Observability";
+  public static final String TAB_OBSERVABILITY = "Observability";
   /** name of the tab pane corresponding to the uv coverage panel */
-  private static final String TAB_UV_COVERAGE = "UV coverage";
+  public static final String TAB_UV_COVERAGE = "UV coverage";
   /** name of the tab pane corresponding to the OIFits panel */
-  private static final String TAB_OIFITS = "OIFits";
+  public static final String TAB_OIFITS = "OIFits";
   /** name of the tab pane corresponding to the vis2 view of generated OIFits */
-  private static final String TAB_VIS2 = "Vis2 plot";
+  public static final String TAB_VIS2 = "Vis2 plot";
 
   /* members */
   /** basic observation form */
