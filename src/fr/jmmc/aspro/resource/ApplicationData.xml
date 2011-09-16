@@ -7,9 +7,9 @@
 
 <ApplicationData link="http://www.jmmc.fr/aspro2">
 
-  <program name="Aspro2" version="0.8.1"/>
+  <program name="Aspro2" version="0.8.2 beta 1"/>
 
-  <compilation date="14/09/2011" compiler="JDK 1.5.0_16"/>
+  <compilation date="16/09/2011" compiler="JDK 1.5.0_16"/>
 
   <text>
     <![CDATA[ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations
@@ -204,6 +204,11 @@
   </menubar>
 
   <releasenotes>
+    <release version="0.8.2">
+      <prerelease version="0.8.2 beta 1">
+        <change type="FEATURE">Support standard SAMP 'load.votable' message to get targets in VOTable format (topcat for example)</change>
+      </prerelease>
+    </release>
     <release version="0.8.1">
       <prerelease version="0.8.1">
         <change type="BUGFIX">Corrected effective wavelength in OIFits output (channel center)</change>
