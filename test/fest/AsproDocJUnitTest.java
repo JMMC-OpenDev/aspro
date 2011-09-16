@@ -14,6 +14,7 @@ import fest.common.JmcsApplicationSetup;
 
 import fest.common.JmcsFestSwingJUnitTestCase;
 
+import fr.jmmc.aspro.gui.SettingPanel;
 import java.awt.Frame;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -42,13 +43,6 @@ import org.junit.Test;
  * @author bourgesl
  */
 public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
-
-  /** name of the tab pane corresponding to the interferometer map */
-  private static final String TAB_INTERFEROMETER_MAP = "Map";
-  /** name of the tab pane corresponding to the observability panel */
-  private static final String TAB_OBSERVABILITY = "Observability";
-  /** name of the tab pane corresponding to the uv coverage panel */
-  private static final String TAB_UV_COVERAGE = "UV coverage";
 
   /**
    * Define the application
@@ -86,7 +80,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
     AsproTestUtils.checkRunningTasks();
 
     // Capture initial state :
-    showPlotTab(TAB_INTERFEROMETER_MAP, "Aspro2-map.png");
+    showPlotTab(SettingPanel.TAB_INTERFEROMETER_MAP, "Aspro2-map.png");
   }
 
   /**
@@ -106,7 +100,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
   public void shouldShowObservability() {
 
     // Capture observability plot :
-    showPlotTab(TAB_OBSERVABILITY, "Aspro2-obs.png");
+    showPlotTab(SettingPanel.TAB_OBSERVABILITY, "Aspro2-obs.png");
 
     final JPanelFixture panel = window.panel("observabilityPanel");
 
@@ -146,7 +140,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
   public void shouldShowUVCoverage() {
 
     // Capture UV Coverage plot :
-    final BufferedImage image = showPlotTab(TAB_UV_COVERAGE);
+    final BufferedImage image = showPlotTab(SettingPanel.TAB_UV_COVERAGE);
 
     saveImage(image, "Aspro2-uv.png");
     saveImage(image, "Aspro2-screen.png");
@@ -172,6 +166,33 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
     exportOB();
   }
 
+  /**
+   * Test Vis2 plot
+   */
+  @Test
+  @GUITest
+  public void shouldShowVis2Plot() {
+
+    // Capture Vis2 plot :
+    showPlotTab(SettingPanel.TAB_VIS2, "Aspro2-vis2-noErr.png");
+
+    // waits for computation to finish :
+    AsproTestUtils.checkRunningTasks();
+
+    window.list("jListTargets").selectItem("HD 1234");
+
+    // waits for computation to finish :
+    AsproTestUtils.checkRunningTasks();
+
+    // Capture Vis2 plot :
+    showPlotTab(SettingPanel.TAB_VIS2, "Aspro2-vis2-withErr.png");
+    
+    window.list("jListTargets").selectItem("HIP1234");
+
+    // waits for computation to finish :
+    AsproTestUtils.checkRunningTasks();
+  }
+  
   /**
    * Test Target editor
    */
@@ -294,7 +315,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
     AsproTestUtils.checkRunningTasks();
 
     // Export UV Coverage plot as PDF :
-    selectTab(TAB_UV_COVERAGE);
+    selectTab(SettingPanel.TAB_UV_COVERAGE);
 
     // Export OIFits / OB :
     exportOIFits();
@@ -324,7 +345,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
   public void shouldShowCharaPoPs() {
 
     // show observability plot :
-    window.tabbedPane().selectTab(TAB_OBSERVABILITY);
+    window.tabbedPane().selectTab(SettingPanel.TAB_OBSERVABILITY);
 
     window.list("jListTargets").selectItem("HIP1234");
 
@@ -361,7 +382,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
     AsproTestUtils.checkRunningTasks();
 
     // show observability plot (force plot refresh) :
-    window.tabbedPane().selectTab(TAB_OBSERVABILITY);
+    window.tabbedPane().selectTab(SettingPanel.TAB_OBSERVABILITY);
 
     saveCroppedScreenshotOf("popsUser.png", left, 0, width, height);
   }
@@ -386,10 +407,10 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
     AsproTestUtils.checkRunningTasks();
 
     // Capture observability plot :
-    showPlotTab(TAB_OBSERVABILITY, "Aspro2-calibrators-obs.png");
+    showPlotTab(SettingPanel.TAB_OBSERVABILITY, "Aspro2-calibrators-obs.png");
 
     // Capture UV Coverage plot :
-    showPlotTab(TAB_UV_COVERAGE, "Aspro2-calibrators-uv.png");
+    showPlotTab(SettingPanel.TAB_UV_COVERAGE, "Aspro2-calibrators-uv.png");
 
     // Export OIFits / OB :
     exportOIFits();
@@ -437,13 +458,13 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
     AsproTestUtils.checkRunningTasks();
 
     // Capture map plot :
-    showPlotTab(TAB_INTERFEROMETER_MAP, "Aspro2-multiConf-map.png");
+    showPlotTab(SettingPanel.TAB_INTERFEROMETER_MAP, "Aspro2-multiConf-map.png");
 
     // Capture observability plot :
-    showPlotTab(TAB_OBSERVABILITY, "Aspro2-multiConf-obs.png");
+    showPlotTab(SettingPanel.TAB_OBSERVABILITY, "Aspro2-multiConf-obs.png");
 
     // Capture UV Coverage plot :
-    showPlotTab(TAB_UV_COVERAGE, "Aspro2-multiConf-uv.png");
+    showPlotTab(SettingPanel.TAB_UV_COVERAGE, "Aspro2-multiConf-uv.png");
   }
 
   /**
