@@ -191,6 +191,9 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
 
     // waits for computation to finish :
     AsproTestUtils.checkRunningTasks();
+    
+    // select UV tab like before Vis2:
+    window.tabbedPane().selectTab(SettingPanel.TAB_UV_COVERAGE);
   }
   
   /**
@@ -308,7 +311,9 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
   @Test
   @GUITest
   public void shouldCallLITpro() {
-
+    // select tab to let menu lost focus:
+    window.tabbedPane().selectTab(SettingPanel.TAB_UV_COVERAGE);
+    
     window.list("jListTargets").selectItem("HD 1234");
 
     // waits for computation to finish :
