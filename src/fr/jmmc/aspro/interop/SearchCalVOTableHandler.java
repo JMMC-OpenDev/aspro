@@ -15,13 +15,13 @@ import fr.jmmc.aspro.util.XmlFactory;
 import fr.jmmc.jmal.ALX;
 import fr.jmmc.jmcs.App;
 import fr.jmmc.jmcs.gui.MessagePane;
+import fr.jmmc.jmcs.gui.SwingUtils;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.SwingUtilities;
 
 /**
  * This class handles SearchCal VOTables
@@ -126,7 +126,7 @@ public final class SearchCalVOTableHandler {
 
     // Use invokeLater to avoid concurrency and ensure that 
     // data model is modified and fire events using Swing EDT :
-    SwingUtilities.invokeLater(new Runnable() {
+    SwingUtils.invokeLaterEDT(new Runnable() {
 
       @Override
       public void run() {
@@ -195,7 +195,6 @@ public final class SearchCalVOTableHandler {
         MessagePane.showMessage(report);
       }
     });
-
   }
 
   /**

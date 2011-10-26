@@ -16,6 +16,7 @@ import fr.jmmc.jmal.model.gui.ModelParameterTableModel;
 import fr.jmmc.jmal.model.gui.ModelParameterTableModel.EditMode;
 import fr.jmmc.jmal.model.gui.ModelParameterTableModel.Mode;
 import fr.jmmc.jmal.model.targetmodel.Model;
+import fr.jmmc.jmcs.gui.SwingUtils;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
@@ -28,7 +29,6 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
-import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -213,8 +213,12 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
 
     if (currentNode != null) {
       // Use invokeLater to selection change issues with editors :
-      SwingUtilities.invokeLater(new Runnable() {
+      SwingUtils.invokeLaterEDT(new Runnable() {
 
+        /**
+         * Update tree selection
+         */
+        @Override
         public void run() {
 
           // Check if it is the root node :

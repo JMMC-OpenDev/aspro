@@ -25,6 +25,7 @@ import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.jmal.star.Star;
 import fr.jmmc.jmcs.gui.MessagePane;
+import fr.jmmc.jmcs.gui.SwingUtils;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
@@ -50,7 +51,6 @@ import javax.swing.JFormattedTextField;
 import javax.swing.JList;
 import javax.swing.JSpinner.DateEditor;
 import javax.swing.ListSelectionModel;
-import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
@@ -592,8 +592,9 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         if (fe.getSource() instanceof JTextComponent) {
           final JTextComponent textComponent = ((JTextComponent) fe.getSource());
 
-          SwingUtilities.invokeLater(new Runnable() {
+          SwingUtils.invokeLaterEDT(new Runnable() {
 
+            @Override
             public void run() {
               final int last = textComponent.getDocument().getLength();
               // select the day field to force the spinner to use it

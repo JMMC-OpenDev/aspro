@@ -17,6 +17,7 @@ import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.aspro.model.util.TargetRAComparator;
 import fr.jmmc.jmcs.network.BrowserLauncher;
 import fr.jmmc.jmcs.gui.MessagePane;
+import fr.jmmc.jmcs.gui.SwingUtils;
 import fr.jmmc.jmcs.util.Urls;
 import java.awt.Component;
 import java.beans.PropertyChangeEvent;
@@ -33,7 +34,6 @@ import javax.swing.JFormattedTextField;
 import javax.swing.JList;
 import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
-import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -229,8 +229,12 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
 
     if (currentNode != null) {
       // Use invokeLater to selection change issues with editors :
-      SwingUtilities.invokeLater(new Runnable() {
+      SwingUtils.invokeLaterEDT(new Runnable() {
 
+        /**
+         * Update tree selection
+         */
+        @Override
         public void run() {
           // Check if it is the root node :
           final DefaultMutableTreeNode rootNode = getTreeTargets().getRootNode();
@@ -282,8 +286,12 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     }
 
     // Use invokeLater to selection change issues with editors :
-    SwingUtilities.invokeLater(new Runnable() {
+    SwingUtils.invokeLaterEDT(new Runnable() {
 
+      /**
+       * Update tree selection
+       */
+      @Override
       public void run() {
 
         // Single selection mode :

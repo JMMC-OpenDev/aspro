@@ -3,6 +3,7 @@
  ******************************************************************************/
 package fr.jmmc.aspro.gui.util;
 
+import fr.jmmc.jmcs.gui.SwingUtils;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.ParseException;
@@ -10,7 +11,6 @@ import java.util.logging.Level;
 import javax.swing.event.EventListenerList;
 import javax.swing.JFormattedTextField;
 import javax.swing.JSlider;
-import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -42,7 +42,7 @@ public final class FieldSliderAdapter implements ChangeListener, PropertyChangeL
   /** flag to indicate that an event handling is in progress */
   private boolean isEventHandling = false;
   /** A list of event listeners for this component. */
-  protected EventListenerList listenerList = new EventListenerList();
+  private EventListenerList listenerList = new EventListenerList();
   /**
    * Only one <code>ChangeEvent</code> is needed per instance since the
    * event's only (read-only) state is the source property.  The source
@@ -51,7 +51,7 @@ public final class FieldSliderAdapter implements ChangeListener, PropertyChangeL
    *
    * @see #fireStateChanged
    */
-  protected transient ChangeEvent changeEvent = null;
+  private transient ChangeEvent changeEvent = null;
 
   /**
    * Constructor
@@ -103,6 +103,7 @@ public final class FieldSliderAdapter implements ChangeListener, PropertyChangeL
    * Handle the stateChanged event from the slider.
    * @param ce slider change event
    */
+  @Override
   public void stateChanged(final ChangeEvent ce) {
     if (!this.isEventHandling) {
       final Double value = Double.valueOf(getSliderValue());
@@ -111,8 +112,9 @@ public final class FieldSliderAdapter implements ChangeListener, PropertyChangeL
 
         if (value < this.minValue || value > this.maxValue) {
           // invalid value :
-          SwingUtilities.invokeLater(new Runnable() {
+          SwingUtils.invokeLaterEDT(new Runnable() {
 
+            @Override
             public void run() {
               setSliderValue(defValue);
             }
@@ -149,6 +151,7 @@ public final class FieldSliderAdapter implements ChangeListener, PropertyChangeL
   /** 
    * Handle the propertyChange event from the formatted text field
    */
+  @Override
   public void propertyChange(final PropertyChangeEvent evt) {
     if (!this.isEventHandling) {
       final double value = ((Number) this.field.getValue()).doubleValue();
@@ -210,7 +213,7 @@ public final class FieldSliderAdapter implements ChangeListener, PropertyChangeL
    * @see #addChangeListener
    * @see EventListenerList
    */
-  protected void fireStateChanged() {
+  private void fireStateChanged() {
     final Object[] listeners = this.listenerList.getListenerList();
     for (int i = listeners.length - 2; i >= 0; i -= 2) {
       if (listeners[i] == ChangeListener.class) {

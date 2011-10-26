@@ -35,6 +35,7 @@ import fr.jmmc.jmal.star.Star;
 import fr.jmmc.jmal.model.ModelDefinition;
 import fr.jmmc.jmal.model.targetmodel.Model;
 import fr.jmmc.jmal.model.targetmodel.Parameter;
+import fr.jmmc.jmcs.gui.SwingUtils;
 import fr.jmmc.oitools.model.OIFitsFile;
 import java.io.File;
 import java.io.IOException;
@@ -43,7 +44,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
-import javax.swing.SwingUtilities;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 /**
@@ -555,7 +555,7 @@ public final class ObservationManager extends BaseOIManager {
    */
   private void fireEvent(final ObservationEvent event) {
     // ensure events are fired by Swing EDT :
-    if (!SwingUtilities.isEventDispatchThread()) {
+    if (!SwingUtils.isEDT()) {
       logger.log(Level.SEVERE, "invalid thread : use EDT", new Throwable());
     }
     if (DEBUG_FIRE_EVENT) {

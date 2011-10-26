@@ -9,6 +9,7 @@ import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.jmcs.App;
+import fr.jmmc.jmcs.gui.SwingUtils;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.io.File;
@@ -18,7 +19,6 @@ import java.util.Locale;
 import java.util.logging.Level;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
-import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -340,8 +340,12 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
     // Set the default locale to en-US locale (for Numerical Fields "." ",")
     Locale.setDefault(Locale.US);
 
-    SwingUtilities.invokeLater(new Runnable() {
+    SwingUtils.invokeLaterEDT(new Runnable() {
 
+      /**
+       * Create the Gui using EDT
+       */
+      @Override
       public void run() {
 
         try {

@@ -26,6 +26,7 @@ import fr.jmmc.jmcs.gui.MessagePane;
 import fr.jmmc.jmcs.gui.MessagePane.ConfirmSaveChanges;
 import fr.jmmc.jmcs.gui.StatusBar;
 import fr.jmmc.jmcs.gui.SwingSettings;
+import fr.jmmc.jmcs.gui.SwingUtils;
 import fr.jmmc.jmcs.gui.task.TaskSwingWorkerExecutor;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -88,7 +89,7 @@ public final class AsproGui extends App {
    * @param args command line arguments
    */
   public AsproGui(final String[] args) {
-    super(args, false);
+    super(args);
   }
 
   /**
@@ -103,31 +104,22 @@ public final class AsproGui extends App {
 
     this.initServices();
 
-    try {
+    // Using invokeAndWait to be in sync with this thread :
+    // note: invokeAndWaitEDT throws an IllegalStateException if any exception occurs
+    SwingUtils.invokeAndWaitEDT(new Runnable() {
 
-      // Using invokeAndWait to be in sync with the main thread :
-      SwingUtilities.invokeAndWait(new Runnable() {
+      /**
+       * Initializes the swing components with their actions in EDT
+       */
+      @Override
+      public void run() {
+        prepareFrame(getFrame());
 
-        /**
-         * Initializes the swing components with their actions in EDT
-         */
-        @Override
-        public void run() {
-          prepareFrame(getFrame());
-
-          // Create a new observation and update the GUI :
-          // even if opening a file in case the file can not be loaded:
-          ObservationManager.getInstance().reset();
-        }
-      });
-
-    } catch (InterruptedException ie) {
-      // propagate the exception :
-      throw new IllegalStateException("AsproGui.init : interrupted", ie);
-    } catch (InvocationTargetException ite) {
-      // propagate the internal exception :
-      throw new IllegalStateException("AsproGui.init : exception", ite.getCause());
-    }
+        // Create a new observation and update the GUI :
+        // even if opening a file in case the file can not be loaded:
+        ObservationManager.getInstance().reset();
+      }
+    });
 
     logger.fine("AsproGui.init() handler : exit");
   }
@@ -155,7 +147,7 @@ public final class AsproGui extends App {
   protected void execute() {
     logger.fine("AsproGui.execute() handler called.");
 
-    SwingUtilities.invokeLater(new Runnable() {
+    SwingUtils.invokeLaterEDT(new Runnable() {
 
       /**
        * Show the application frame using EDT
@@ -308,7 +300,7 @@ public final class AsproGui extends App {
     new BroadcastToModelFittingAction();
     // searchCal query (SAMP) :
     new SearchCalQueryAction();
-    
+
     // PIVOT starlist (SAMP) :
     new StarListSendAction();
   }
