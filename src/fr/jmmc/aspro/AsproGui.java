@@ -33,12 +33,10 @@ import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.lang.reflect.InvocationTargetException;
 import java.util.logging.Level;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
-import javax.swing.SwingUtilities;
 
 /**
  * This class represents the Aspro GUI application
@@ -246,10 +244,7 @@ public final class AsproGui extends App {
 
     // initialize the actions :
     registerActions();
-
-    // initialize SAMP message handlers :
-    declareInteroperability();
-
+    
     // Handle status bar
     getFramePanel().add(new StatusBar(), BorderLayout.SOUTH);
 
@@ -308,7 +303,8 @@ public final class AsproGui extends App {
   /**
    * Create SAMP Message handlers
    */
-  private void declareInteroperability() {
+  @Override
+  protected void declareInteroperability() {
     // Add handler to load searchCal votable and get calibrators
     new VotableSampMessageHandler();
   }
