@@ -81,7 +81,7 @@ public final class VotableSampMessageHandler extends SampMessageHandler {
       } else if (scheme.equalsIgnoreCase("http")) {
         final File file = FileUtils.getTempFile("votable-", ".vot");
 
-        if (Http.download(voTableURI, file)) {
+        if (Http.download(voTableURI, file, true)) {
           voTableFile = file;
         }
       }
