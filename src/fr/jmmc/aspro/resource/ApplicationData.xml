@@ -7,9 +7,9 @@
 
 <ApplicationData link="http://www.jmmc.fr/aspro2">
 
-  <program name="Aspro2" version="0.8.2 beta 1"/>
+  <program name="Aspro2" version="0.8.2 beta 2"/>
 
-  <compilation date="16/09/2011" compiler="JDK 1.5.0_16"/>
+  <compilation date="23/11/2011" compiler="JDK 1.5.0_16"/>
 
   <text>
     <![CDATA[ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations
@@ -205,6 +205,13 @@
 
   <releasenotes>
     <release version="0.8.2">
+      <prerelease version="0.8.2 beta 2">
+        <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/231">Fixed min/max baseline computation to use projected baseline on UV plane 
+          instead of maximum baseline length (UVW); this impacts SearchCal interoperability and the UV plot scale (UVMax field).</change>
+        <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/203">Automatically adjust total integration time to 50% of the sampling periodicity 
+          when it changes in the UV Coverage Panel.</change>
+        <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/205">Fixed grid lines visibility on the Observability plot.</change>
+      </prerelease>
       <prerelease version="0.8.2 beta 1">
         <change type="FEATURE">Support standard SAMP 'load.votable' message to get targets in VOTable format (topcat for example)</change>
       </prerelease>
