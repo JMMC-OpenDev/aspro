@@ -59,6 +59,7 @@ public final class PreferencesView extends JFrame implements Observer {
 
     this.jFieldMinElev.addPropertyChangeListener("value", new PropertyChangeListener() {
 
+      @Override
       public void propertyChange(final PropertyChangeEvent evt) {
         final double minElevNew = ((Number) jFieldMinElev.getValue()).doubleValue();
 
@@ -433,6 +434,7 @@ public final class PreferencesView extends JFrame implements Observer {
    * @param o Preferences
    * @param arg unused
    */
+  @Override
   public void update(final Observable o, final Object arg) {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("Preferences updated on : " + this);
@@ -494,7 +496,6 @@ public final class PreferencesView extends JFrame implements Observer {
    * @return string choice
    */
   private String getTwilight(final SunType type) {
-    logger.severe("type :: "+ type);
     switch (type) {
       default:
       case Night:
