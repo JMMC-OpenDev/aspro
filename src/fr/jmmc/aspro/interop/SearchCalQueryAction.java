@@ -64,8 +64,6 @@ public final class SearchCalQueryAction extends SampCapabilityAction {
   public final static String KEY_WAVELENGTH = "_WAVELENGTH_";
   /** keyword - bright */
   public final static String KEY_BRIGHT = "_BRIGHT_MODE_";
-  /** maximal magnitude for bright scenario */
-  private final static double BRIGHT_MAG_MAX = 5.5d;
   /** default minimal magnitude if magnitude is undefined */
   private final static double DEF_MAG_MIN = 2d;
   /** default maximal magnitude if magnitude is undefined */
@@ -197,7 +195,7 @@ public final class SearchCalQueryAction extends SampCapabilityAction {
     }
 
     // max base line :
-    final double[] range = ConfigurationManager.computeLimitsUVCoverage(stations);
+    final double[] range = ConfigurationManager.computeBaselineUVBounds(stations);
     final double maxBaseline = range[1];
 
     if (logger.isLoggable(Level.FINE)) {

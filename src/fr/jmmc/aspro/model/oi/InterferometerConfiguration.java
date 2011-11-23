@@ -162,11 +162,49 @@ public class InterferometerConfiguration
     }
     
 //--simple--preserve
+ /** minimum distance between 2 stations in meter */
+  @javax.xml.bind.annotation.XmlTransient
+  private double minBaseLine = 0d;
 
-    @Override
-    public final String toString() {
-      return "InterferometerConfiguration : " + ((this.name != null) ? this.name : "undefined");
-    }
+  /**
+   * Return the minimum distance between 2 stations in meter
+   * @return minimum distance between 2 stations in meter
+   */
+  public final double getMinBaseLine() {
+    return minBaseLine;
+  }
+
+  /**
+   * Define the minimum distance between 2 stations in meter
+   * @param minBaseLine minimum distance between 2 stations in meter
+   */
+  public final void setMinBaseLine(final double minBaseLine) {
+    this.minBaseLine = minBaseLine;
+  }
+  /** maximum distance between 2 stations in meter */
+  @javax.xml.bind.annotation.XmlTransient
+  private double maxBaseLine = 0d;
+
+  /**
+   * Return the maximum distance between 2 stations in meter
+   * @return maximum distance between 2 stations in meter
+   */
+  public final double getMaxBaseLine() {
+    return maxBaseLine;
+  }
+
+  /**
+   * Define the maximum distance between 2 stations in meter
+   * @param maxBaseLine maximum distance between 2 stations in meter
+   */
+  public final void setMaxBaseLine(final double maxBaseLine) {
+    this.maxBaseLine = maxBaseLine;
+  }
+
+  @Override
+  public final String toString() {
+    return "InterferometerConfiguration : " + ((this.name != null) ? this.name : "undefined");
+  }
 
 //--simple--preserve
 

@@ -132,7 +132,6 @@ public final class ConfigurationManager extends BaseOIManager {
     }
 
     computeInterferometerLocation(id);
-    computeLimitsUVCoverage(id);
 
     adjustStationHorizons(id.getStations());
 
@@ -141,6 +140,8 @@ public final class ConfigurationManager extends BaseOIManager {
     for (InterferometerConfiguration c : is.getConfigurations()) {
       interferometerConfigurations.put(getConfigurationName(c), c);
 
+      computeBaselineUVBounds(c);
+      
       // reverse mapping :
       // declare interferometer configurations in the interferometer description
       is.getDescription().getConfigurations().add(c);
@@ -163,29 +164,64 @@ public final class ConfigurationManager extends BaseOIManager {
   }
 
   /**
-   * Compute the min and max UV coverage using all station couples
-   * Note : some station couples can not be available as instrument baselines
-   * @param id interferometer description
+   * Compute the min and max baseline length (m) using all instrument baselines of the given interferometer configuration
+   * @param intConf interferometer configuration
    */
-  private void computeLimitsUVCoverage(final InterferometerDescription id) {
-    final double[] range = computeLimitsUVCoverage(id.getStations());
-    id.setMinBaseLine(range[0]);
-    id.setMaxBaseLine(range[1]);
+  private void computeBaselineUVBounds(final InterferometerConfiguration intConf) {
+
+    double maxUV = 0d;
+    double minUV = Double.POSITIVE_INFINITY;
+    
+    final double[] minMax = new double[2];
+    
+    // for each instrument:
+    for (FocalInstrumentConfiguration insConf : intConf.getInstruments()) {
+      
+      // for each instrument configuration:
+      for (FocalInstrumentConfigurationItem c : insConf.getConfigurations()) {
+
+          computeBaselineUVBounds(c.getStations(), minMax);
+
+          minUV = Math.min(minUV, minMax[0]);
+          maxUV = Math.max(maxUV, minMax[1]);
+      }
+    }
+    
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("computeBaselineUVBounds = {" + minUV + " - " + maxUV + " m for configuration " + intConf.getName());
+    }
+    
+    intConf.setMinBaseLine(minUV);
+    intConf.setMaxBaseLine(maxUV);
   }
 
   /**
-   * Compute the min and max UV coverage using all possible baselines
-   * Note : some station couples can not be available as instrument baselines
-   * @param stations list of stations
+   * Compute the min and max baseline length (XY distance i.e. projected in the UV plane) using all possible baselines
+   * for given stations
+   * @param stations list of stations to determine baselines
    * @return min - max
    */
-  public static double[] computeLimitsUVCoverage(final List<Station> stations) {
+  public static double[] computeBaselineUVBounds(final List<Station> stations) {
+    final double[] minMax = new double[2];
+    
+    computeBaselineUVBounds(stations, minMax);
+    
+    return minMax;
+  }
+  
+  /**
+   * Compute the min and max baseline length (XY distance i.e. projected in the UV plane) using all possible baselines
+   * for given stations
+   * @param stations list of stations to determine baselines
+   * @param minMax double[min; max]
+   */
+  public static void computeBaselineUVBounds(final List<Station> stations, final double[] minMax) {
     double maxUV = 0d;
     double minUV = Double.POSITIVE_INFINITY;
 
     final int size = stations.size();
 
-    double x, y, z, dist;
+    double x, y, distXY;
     Station s1, s2;
     for (int i = 0; i < size; i++) {
       s1 = stations.get(i);
@@ -194,19 +230,20 @@ public final class ConfigurationManager extends BaseOIManager {
 
         x = s2.getRelativePosition().getPosX() - s1.getRelativePosition().getPosX();
         y = s2.getRelativePosition().getPosY() - s1.getRelativePosition().getPosY();
-        z = s2.getRelativePosition().getPosZ() - s1.getRelativePosition().getPosZ();
 
-        dist = Math.sqrt(x * x + y * y + z * z);
+        distXY = Math.sqrt(x * x + y * y);
 
-        minUV = Math.min(minUV, dist);
-        maxUV = Math.max(maxUV, dist);
+        minUV = Math.min(minUV, distXY);
+        maxUV = Math.max(maxUV, distXY);
       }
     }
-
+    
     if (logger.isLoggable(Level.FINE)) {
-      logger.fine("computeLimitsUVCoverage = {" + minUV + " - " + maxUV + " m");
+      logger.fine("computeBaselineUVBounds = {" + minUV + " - " + maxUV + " m for stations " + stations);
     }
-    return new double[]{minUV, maxUV};
+    
+    minMax[0] = minUV;
+    minMax[1] = maxUV;
   }
 
   /**
