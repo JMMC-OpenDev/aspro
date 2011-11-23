@@ -23,12 +23,16 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.LegendItem;
 import org.jfree.chart.StandardChartTheme;
 import org.jfree.chart.annotations.XYTextAnnotation;
+import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.axis.DateTickUnit;
 import org.jfree.chart.axis.DateTickUnitType;
+import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.axis.NumberTickUnit;
 import org.jfree.chart.axis.TickUnitSource;
 import org.jfree.chart.axis.TickUnits;
+import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.labels.StandardXYToolTipGenerator;
+import org.jfree.chart.labels.XYToolTipGenerator;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.StandardXYBarPainter;
@@ -40,6 +44,7 @@ import org.jfree.chart.title.LegendTitle;
 import org.jfree.chart.title.TextTitle;
 import org.jfree.chart.title.Title;
 import org.jfree.chart.urls.StandardXYURLGenerator;
+import org.jfree.data.xy.IntervalXYDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.text.TextUtilities;
 import org.jfree.ui.RectangleEdge;
@@ -193,9 +198,9 @@ public final class ChartUtils {
    * @return font
    */
   static Font autoFitTextWidth(final Graphics2D g2d,
-                                         final String text, final double maxWidth,
-                                         final int minFontSize, final int maxFontSize,
-                                         final boolean allowDontFit) {
+          final String text, final double maxWidth,
+          final int minFontSize, final int maxFontSize,
+          final boolean allowDontFit) {
 
     Font f;
     FontMetrics fm;
@@ -236,9 +241,9 @@ public final class ChartUtils {
    * @return font
    */
   static Font autoFitTextHeight(final Graphics2D g2d,
-                                          final String text, final double maxHeight,
-                                          final int minFontSize, final int maxFontSize,
-                                          final boolean allowDontFit) {
+          final String text, final double maxHeight,
+          final int minFontSize, final int maxFontSize,
+          final boolean allowDontFit) {
 
     Font f;
     FontMetrics fm;
@@ -274,7 +279,7 @@ public final class ChartUtils {
    */
   public static JFreeChart createXYBarChart() {
     // no title :
-    final JFreeChart chart = ChartFactory.createXYBarChart("", null, false, null, null, PlotOrientation.HORIZONTAL, true, false, false);
+    final JFreeChart chart = createXYBarChart("", null, false, null, null, PlotOrientation.HORIZONTAL, true, false, false);
 
     final XYPlot xyPlot = (XYPlot) chart.getPlot();
 
@@ -295,6 +300,73 @@ public final class ChartUtils {
     final XYBarRenderer xyBarRenderer = (XYBarRenderer) xyPlot.getRenderer();
     xyBarRenderer.setUseYInterval(true);
     xyBarRenderer.setDrawBarOutline(true);
+
+    return chart;
+  }
+
+  /**
+   * Creates and returns a default instance of an XY bar chart
+   * BUT it uses an alternate XYPlot implementation to have gridlines visible even with range markers
+   * <P>
+   * The chart object returned by this method uses an {@link XYPlot} instance
+   * as the plot, with a {@link DateAxis} for the domain axis, a
+   * {@link NumberAxis} as the range axis, and a {@link XYBarRenderer} as the
+   * renderer.
+   *
+   * @param title  the chart title (<code>null</code> permitted).
+   * @param xAxisLabel  a label for the X-axis (<code>null</code> permitted).
+   * @param dateAxis  make the domain axis display dates?
+   * @param yAxisLabel  a label for the Y-axis (<code>null</code> permitted).
+   * @param dataset  the dataset for the chart (<code>null</code> permitted).
+   * @param orientation  the orientation (horizontal or vertical)
+   *                     (<code>null</code> NOT permitted).
+   * @param legend  a flag specifying whether or not a legend is required.
+   * @param tooltips  configure chart to generate tool tips?
+   * @param urls  configure chart to generate URLs?
+   *
+   * @return An XY bar chart.
+   */
+  public static JFreeChart createXYBarChart(final String title,
+          final String xAxisLabel,
+          final boolean dateAxis,
+          final String yAxisLabel,
+          final IntervalXYDataset dataset,
+          final PlotOrientation orientation,
+          final boolean legend,
+          final boolean tooltips,
+          final boolean urls) {
+
+    if (orientation == null) {
+      throw new IllegalArgumentException("Null 'orientation' argument.");
+    }
+    ValueAxis domainAxis = null;
+    if (dateAxis) {
+      domainAxis = new DateAxis(xAxisLabel);
+    } else {
+      final NumberAxis axis = new NumberAxis(xAxisLabel);
+      axis.setAutoRangeIncludesZero(false);
+      domainAxis = axis;
+    }
+    final ValueAxis valueAxis = new NumberAxis(yAxisLabel);
+
+    final XYBarRenderer renderer = new XYBarRenderer();
+    if (tooltips) {
+      XYToolTipGenerator tt;
+      if (dateAxis) {
+        tt = StandardXYToolTipGenerator.getTimeSeriesInstance();
+      } else {
+        tt = new StandardXYToolTipGenerator();
+      }
+      renderer.setBaseToolTipGenerator(tt);
+    }
+    if (urls) {
+      renderer.setURLGenerator(new StandardXYURLGenerator());
+    }
+
+    final XYPlot plot = new GridLineFixedXYPlot(dataset, domainAxis, valueAxis, renderer);
+    plot.setOrientation(orientation);
+
+    final JFreeChart chart = new JFreeChart(title, JFreeChart.DEFAULT_TITLE_FONT, plot, legend);
 
     return chart;
   }
@@ -340,7 +412,7 @@ public final class ChartUtils {
 
     return chart;
   }
-  
+
   /**
    * Creates a line chart (based on an {@link XYDataset}) with default
    * settings BUT using a Square data area with consistent zooming in/out
@@ -357,14 +429,14 @@ public final class ChartUtils {
    *
    * @return The chart.
    */
-  public static JFreeChart createSquareXYLineChart(String title,
-                                                   String xAxisLabel,
-                                                   String yAxisLabel,
-                                                   XYDataset dataset,
-                                                   PlotOrientation orientation,
-                                                   boolean legend,
-                                                   boolean tooltips,
-                                                   boolean urls) {
+  public static JFreeChart createSquareXYLineChart(final String title,
+          final String xAxisLabel,
+          final String yAxisLabel,
+          final XYDataset dataset,
+          final PlotOrientation orientation,
+          final boolean legend,
+          final boolean tooltips,
+          final boolean urls) {
 
     if (orientation == null) {
       throw new IllegalArgumentException("Null 'orientation' argument.");
@@ -391,8 +463,7 @@ public final class ChartUtils {
       renderer.setURLGenerator(new StandardXYURLGenerator());
     }
 
-    final JFreeChart chart = new JFreeChart(title, JFreeChart.DEFAULT_TITLE_FONT,
-            plot, legend);
+    final JFreeChart chart = new JFreeChart(title, JFreeChart.DEFAULT_TITLE_FONT, plot, legend);
 
     if (legend) {
       chart.getLegend().setPosition(RectangleEdge.RIGHT);
@@ -417,14 +488,14 @@ public final class ChartUtils {
    *
    * @return The chart.
    */
-  public static JFreeChart createScatterPlot(String title,
-                                             String xAxisLabel,
-                                             String yAxisLabel,
-                                             XYDataset dataset,
-                                             PlotOrientation orientation,
-                                             boolean legend,
-                                             boolean tooltips,
-                                             boolean urls) {
+  public static JFreeChart createScatterPlot(final String title,
+          final String xAxisLabel,
+          final String yAxisLabel,
+          final XYDataset dataset,
+          final PlotOrientation orientation,
+          final boolean legend,
+          final boolean tooltips,
+          final boolean urls) {
 
     if (orientation == null) {
       throw new IllegalArgumentException("Null 'orientation' argument.");
@@ -441,7 +512,7 @@ public final class ChartUtils {
 //    final XYItemRenderer renderer = new XYLineAndShapeRenderer(false, true);
     final XYErrorRenderer renderer = new XYErrorRenderer();
     renderer.setDrawXError(false);
-    
+
     // customized XYPlot to have a square data area :
     final XYPlot plot = new XYPlot(dataset, xAxis, yAxis, renderer);
 
@@ -453,8 +524,7 @@ public final class ChartUtils {
       renderer.setURLGenerator(new StandardXYURLGenerator());
     }
 
-    final JFreeChart chart = new JFreeChart(title, JFreeChart.DEFAULT_TITLE_FONT,
-            plot, legend);
+    final JFreeChart chart = new JFreeChart(title, JFreeChart.DEFAULT_TITLE_FONT, plot, legend);
 
     if (legend) {
       chart.getLegend().setPosition(RectangleEdge.RIGHT);
@@ -552,7 +622,7 @@ public final class ChartUtils {
 
     units.add(new NumberTickUnit(0.0001d, df3));
     units.add(new NumberTickUnit(0.0005d, df3));
-    
+
     units.add(new NumberTickUnit(0.01d, df000));
     units.add(new NumberTickUnit(0.05d, df000));
 
@@ -686,7 +756,7 @@ public final class ChartUtils {
    * @return new annotation
    */
   public static XYTickAnnotation createXYTickAnnotation(final String text, final double x, final double y,
-                                                        final double angle) {
+          final double angle) {
 
     final XYTickAnnotation a = new XYTickAnnotation(text, x, y, angle);
     a.setFont(SMALL_TEXT_ANNOTATION_FONT);
