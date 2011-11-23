@@ -92,7 +92,7 @@ import org.jfree.ui.TextAnchor;
  * @author bourgesl
  */
 public final class UVCoveragePanel extends javax.swing.JPanel implements ChartProgressListener, ZoomEventListener,
-                                                                         ActionListener, ChangeListener, ObservationListener, Observer, PDFExportable, Disposable {
+        ActionListener, ChangeListener, ObservationListener, Observer, PDFExportable, Disposable {
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
@@ -593,7 +593,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     // define min and prefered size for chart panel used by the split pane container :
     this.chartPanel.setMinimumSize(new Dimension(650, 500));
     this.jSplitPane.setRightComponent(this.chartPanel);
-    
+
     // define change listeners :
     this.jComboBoxInstrumentMode.addActionListener(this);
     this.jComboBoxFTMode.addActionListener(this);
@@ -612,6 +612,15 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         if (newValue <= 0d) {
           // invalid value :
           resetSamplingPeriod(om.getMainObservation());
+        }
+
+        // Check that obs duration is less than jFieldSamplingPeriod / 2:
+        final double halfSamplingSec = ((Number) jFieldSamplingPeriod.getValue()).doubleValue() * 60d * 0.5d;
+        final double obsDurationSec = ((Number) jFieldObsDuration.getValue()).doubleValue();
+
+        if (obsDurationSec > halfSamplingSec) {
+          // update obs duration:
+          jFieldObsDuration.setValue(Double.valueOf(halfSamplingSec));
         }
 
         if (logger.isLoggable(Level.FINE)) {
@@ -722,16 +731,20 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     final boolean changed = intConfName != null && !intConfName.equals(this.interferometerConfigurationName);
     if (changed) {
       this.interferometerConfigurationName = intConfName;
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("interferometer configuration changed : " + intConfName);
-      }
 
       final InterferometerConfiguration intConf = observation.getInterferometerConfiguration().getInterferometerConfiguration();
 
       // update the UV range :
-      final double minBaseLine = intConf.getInterferometer().getMinBaseLine();
-      final double maxBaseLine = intConf.getInterferometer().getMaxBaseLine();
-      this.uvMaxAdapter.reset(minBaseLine, maxBaseLine, maxBaseLine);
+      final double minBaseLine = intConf.getMinBaseLine();
+      final double maxBaseLine = intConf.getMaxBaseLine();
+
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("interferometer configuration changed : " + intConfName + "; baseline min= " + minBaseLine + ", max= " + maxBaseLine);
+      }
+
+      // adjust uv max range to [minBaseLine; 2 * maxBaseLine] and 
+      // set value to maxBaseLine + 15% (arbitrary but necessary to see spectral dispersion):
+      this.uvMaxAdapter.reset(minBaseLine, 2.0d * maxBaseLine, 1.15d * maxBaseLine);
 
       // refresh the fringe tracker modes that depends on the interferometer :
       this.updateComboFTModes(observation);
@@ -768,6 +781,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
   /**
    * Reset the sampling period to the default sampling time of the selected instrument
+   * And reset the total integration time to defaults
    * @param observation observation to use
    */
   private void resetSamplingPeriod(final ObservationSetting observation) {
@@ -775,6 +789,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     final int defaultSamplingTime = getInstrumentDefaultSamplingTime(observation);
 
     this.jFieldSamplingPeriod.setValue(Double.valueOf(defaultSamplingTime));
+    this.jFieldObsDuration.setValue(AsproConstants.DEFAULT_OBSERVATION_DURATION);
 
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("defaultSamplingTime : " + defaultSamplingTime);
@@ -1374,10 +1389,10 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
      * @param currentUVMapData previously computed UV Map Data
      */
     private UVCoverageSwingWorker(final UVCoveragePanel uvPanel, final ObservationCollection obsCollection,
-                                  final List<ObservabilityData> obsDataList, final String targetName,
-                                  final double uvMax, final boolean doUVSupport,
-                                  final boolean doModelImage, final ImageMode imageMode, final int imageSize, final IndexColorModel colorModel,
-                                  final UVMapData currentUVMapData) {
+            final List<ObservabilityData> obsDataList, final String targetName,
+            final double uvMax, final boolean doUVSupport,
+            final boolean doModelImage, final ImageMode imageMode, final int imageSize, final IndexColorModel colorModel,
+            final UVMapData currentUVMapData) {
       // get current observation version :
       super(AsproTaskRegistry.TASK_UV_COVERAGE, obsCollection);
       this.uvPanel = uvPanel;
@@ -1490,7 +1505,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
         mergedWarningContainer.addWarningMessages(uvDataCollection.getFirstObsData().getWarningContainer());
         mergedWarningContainer.addWarningMessages(uvData1.getWarningContainer());
-                
+
         uvDataCollection.setOiFitsFile(uvData1.getOiFitsFile());
 
       } else {
@@ -1752,9 +1767,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
      * @param colorModel color model to use
      */
     private UVMapSwingWorker(final UVCoveragePanel uvPanel, final List<Model> models,
-                             final Rectangle2D.Double uvRect,
-                             final Float refMin, final Float refMax,
-                             final ImageMode imageMode, final int imageSize, final IndexColorModel colorModel) {
+            final Rectangle2D.Double uvRect,
+            final Float refMin, final Float refMax,
+            final ImageMode imageMode, final int imageSize, final IndexColorModel colorModel) {
       super(AsproTaskRegistry.TASK_UV_MAP);
       this.uvPanel = uvPanel;
       this.models = models;
@@ -1836,7 +1851,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
     // Inverse V axis issue :
     y = imageSize - y - h;
-    
+
     // check bounds:
     x = checkBounds(x, 0, imageSize - 1);
     y = checkBounds(y, 0, imageSize - 1);
@@ -1853,7 +1868,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     // update the background image :
     updateUVMap(subUVMap);
   }
-  
+
   /**
    * Return the value or the closest bound
    * @param value value to check
@@ -2156,7 +2171,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         default:
       }
     }
-    
+
     // Perform custom operations before/after chart rendering:
     // move JMMC annotation:
     this.aJMMC.setX(this.xyPlot.getDomainAxis().getUpperBound());
