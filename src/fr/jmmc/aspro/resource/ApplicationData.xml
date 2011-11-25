@@ -237,6 +237,9 @@
   <releasenotes>
     <release version="0.8.2">
       <prerelease version="0.8.2 beta 2">
+        <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/234">Added OI_VIS table in the OIFits output even if the instrument is not AMBER; 
+          it contains correlated fluxes VISDATA/VISERR anyway but VISAMP/VISPHI are set to NaN for other instruments because Aspro2 does not know 
+          how these quantities are computed by each instrument data reduction software</change>
         <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/231">Fixed min/max baseline computation to use projected baseline on UV plane 
           instead of maximum baseline length (UVW); this impacts SearchCal interoperability and the UV plot scale (UVMax field).</change>
         <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/203">Automatically adjust total integration time to 50% of the sampling periodicity 
