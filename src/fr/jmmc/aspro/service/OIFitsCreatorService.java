@@ -247,13 +247,15 @@ public final class OIFitsCreatorService {
     this.visComplex = null;
 
     // test if the instrument is AMBER to keep OI_VIS table :
+    // TODO: test and decide if the table is available even with VISAMP / VISPHI NaN (any instrument)
+/*    
     if (!AsproConstants.INS_AMBER.equals(this.instrumentName)) {
       // Remove OI_VIS table if instrument is not AMBER :
       final OIVis vis = this.oiFitsFile.getOiVis()[0];
 
       this.oiFitsFile.removeOiTable(vis);
     }
-
+*/
     if (logger.isLoggable(Level.INFO)) {
       logger.info("createOIFits : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
     }
@@ -607,7 +609,7 @@ public final class OIFitsCreatorService {
               visComplexNoisy[k][l] = this.visComplex[k][l];
             }
 
-            // store pure or noisy correlated fluxes :
+            // store pure (0..1) or noisy correlated fluxes (NaN if no flux):
             visData[k][l][0] = (float) (flux * visComplexNoisy[k][l].getReal());
             visData[k][l][1] = (float) (flux * visComplexNoisy[k][l].getImaginary());
 
