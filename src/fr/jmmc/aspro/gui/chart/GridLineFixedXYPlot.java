@@ -151,7 +151,7 @@ public final class GridLineFixedXYPlot extends XYPlot {
     for (int i = 0; i < rendererCount; i++) {
       drawRangeMarkers(g2, dataArea, i, Layer.BACKGROUND);
     }
-    
+
     AxisState domainAxisState = (AxisState) axisStateMap.get(getDomainAxis());
     if (domainAxisState == null) {
       if (parentState != null) {
@@ -184,12 +184,12 @@ public final class GridLineFixedXYPlot extends XYPlot {
 /*    
     // draw the markers that are associated with a specific renderer...
     for (int i = 0; i < rendererCount; i++) {
-      drawDomainMarkers(g2, dataArea, i, Layer.BACKGROUND);
+    drawDomainMarkers(g2, dataArea, i, Layer.BACKGROUND);
     }
     for (int i = 0; i < rendererCount; i++) {
-      drawRangeMarkers(g2, dataArea, i, Layer.BACKGROUND);
+    drawRangeMarkers(g2, dataArea, i, Layer.BACKGROUND);
     }
-*/
+     */
     // now draw annotations and render data items...
     boolean foundData = false;
     DatasetRenderingOrder order = getDatasetRenderingOrder();
@@ -256,20 +256,20 @@ public final class GridLineFixedXYPlot extends XYPlot {
     }
 
     // draw domain crosshair if required...
-    int xAxisIndex = crosshairState.getDomainAxisIndex();
-    ValueAxis xAxis = getDomainAxis(xAxisIndex);
-    RectangleEdge xAxisEdge = getDomainAxisEdge(xAxisIndex);
-    if (!this.isDomainCrosshairLockedOnData() && anchor != null) {
-      double xx;
-      if (orient == PlotOrientation.VERTICAL) {
-        xx = xAxis.java2DToValue(anchor.getX(), dataArea, xAxisEdge);
-      } else {
-        xx = xAxis.java2DToValue(anchor.getY(), dataArea, xAxisEdge);
-      }
-      crosshairState.setCrosshairX(xx);
-    }
-    setDomainCrosshairValue(crosshairState.getCrosshairX(), false);
     if (isDomainCrosshairVisible()) {
+      int xAxisIndex = crosshairState.getDomainAxisIndex();
+      ValueAxis xAxis = getDomainAxis(xAxisIndex);
+      RectangleEdge xAxisEdge = getDomainAxisEdge(xAxisIndex);
+      if (!this.isDomainCrosshairLockedOnData() && anchor != null) {
+        double xx;
+        if (orient == PlotOrientation.VERTICAL) {
+          xx = xAxis.java2DToValue(anchor.getX(), dataArea, xAxisEdge);
+        } else {
+          xx = xAxis.java2DToValue(anchor.getY(), dataArea, xAxisEdge);
+        }
+        crosshairState.setCrosshairX(xx);
+      }
+      setDomainCrosshairValue(crosshairState.getCrosshairX(), false);
       double x = getDomainCrosshairValue();
       Paint paint = getDomainCrosshairPaint();
       Stroke stroke = getDomainCrosshairStroke();
@@ -277,20 +277,20 @@ public final class GridLineFixedXYPlot extends XYPlot {
     }
 
     // draw range crosshair if required...
-    int yAxisIndex = crosshairState.getRangeAxisIndex();
-    ValueAxis yAxis = getRangeAxis(yAxisIndex);
-    RectangleEdge yAxisEdge = getRangeAxisEdge(yAxisIndex);
-    if (!this.isDomainCrosshairLockedOnData() && anchor != null) {
-      double yy;
-      if (orient == PlotOrientation.VERTICAL) {
-        yy = yAxis.java2DToValue(anchor.getY(), dataArea, yAxisEdge);
-      } else {
-        yy = yAxis.java2DToValue(anchor.getX(), dataArea, yAxisEdge);
-      }
-      crosshairState.setCrosshairY(yy);
-    }
-    setRangeCrosshairValue(crosshairState.getCrosshairY(), false);
     if (isRangeCrosshairVisible()) {
+      int yAxisIndex = crosshairState.getRangeAxisIndex();
+      ValueAxis yAxis = getRangeAxis(yAxisIndex);
+      RectangleEdge yAxisEdge = getRangeAxisEdge(yAxisIndex);
+      if (!this.isDomainCrosshairLockedOnData() && anchor != null) {
+        double yy;
+        if (orient == PlotOrientation.VERTICAL) {
+          yy = yAxis.java2DToValue(anchor.getY(), dataArea, yAxisEdge);
+        } else {
+          yy = yAxis.java2DToValue(anchor.getX(), dataArea, yAxisEdge);
+        }
+        crosshairState.setCrosshairY(yy);
+      }
+      setRangeCrosshairValue(crosshairState.getCrosshairY(), false);
       double y = getRangeCrosshairValue();
       Paint paint = getRangeCrosshairPaint();
       Stroke stroke = getRangeCrosshairStroke();
