@@ -30,7 +30,7 @@ public final class VotableSampMessageHandler extends SampMessageHandler {
   /** Class logger */
   private static final Logger logger = Logger.getLogger(VotableSampMessageHandler.class.getName());
   /** flag to dump votable into logs */
-  private static final boolean DUMP_VOTABLE = true;
+  private static final boolean DUMP_VOTABLE = false;
 
   /**
    * Public constructor
@@ -55,7 +55,9 @@ public final class VotableSampMessageHandler extends SampMessageHandler {
     // get url of votable (locally stored) :
     final String voTableURL = (String) message.getRequiredParam("url");
 
-    logger.info("processMessage: VOTable URL = " + voTableURL);
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("processMessage: VOTable URL = " + voTableURL);
+    }
 
     if (voTableURL == null) {
       throw new SampException("Can not get the url of the votable");
