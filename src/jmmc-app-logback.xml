@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+
+<!-- application specific configuration -->
+<included>
+
+  <!-- Jmal: target model -->
+  <logger name="fr.jmmc.jmal.model" level="INFO"/>
+  
+  <!-- Jmal: star resolver -->
+  <logger name="fr.jmmc.jmal.star" level="INFO"/>
+
+  <!-- OITools -->
+  <logger name="fr.jmmc.oitools" level="INFO"/>
+
+
+  <!-- JSkyCalc -->
+  <logger name="edu.dartmouth" level="INFO"/>
+
+
+  <!-- Aspro -->
+  <logger name="fr.jmmc.aspro" level="INFO"/>
+
+<!--
+# ASPRO GUI :
+fr.jmmc.aspro.gui.level = INFO
+
+fr.jmmc.aspro.gui.InterferometerMapPanel.level = INFO
+
+fr.jmmc.aspro.gui.action.level = INFO
+
+# ASPRO StarResolver :
+fr.jmmc.aspro.gui.star.level = INFO
+
+
+# ASPRO model :
+fr.jmmc.aspro.model.level = INFO
+
+# ASPRO service :
+fr.jmmc.aspro.service.level = INFO
+
+fr.jmmc.aspro.service.ObservabilityService.level = INFO
+fr.jmmc.aspro.service.DelayLineService.level = INFO
+
+#fr.jmmc.aspro.service.UVCoverageService.level = FINE
+
+# ASPRO OB generation :
+fr.jmmc.aspro.ob.level = INFO
+
+# Preferences :
+fr.jmmc.aspro.gui.PreferencesView.level = INFO
+
+
+#JSAMP :
+org.astrogrid.samp.client.level = INFO
+
+fr.jmmc.aspro.gui.action.SampSearchCalQuery.level = INFO
+-->
+</included>
