@@ -100,7 +100,8 @@ JARFILES        = aspro
 aspro_DIRS     = edu \
                  fr
 
-aspro_EXTRAS   = edu/dartmouth/License.txt \
+aspro_EXTRAS   = jmmc-app-logback.xml \
+                 edu/dartmouth/License.txt \
                  fr/jmmc/aspro/gui/*.xsl \
                  fr/jmmc/aspro/gui/icons/*.gif \
                  fr/jmmc/aspro/gui/icons/*.png \
