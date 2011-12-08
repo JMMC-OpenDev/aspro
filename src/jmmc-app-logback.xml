@@ -4,13 +4,19 @@
 <included>
 
   <!-- Jmal: target model -->
+<!--  
   <logger name="fr.jmmc.jmal.model" level="INFO"/>
-  
+-->
+
   <!-- Jmal: star resolver -->
+<!--  
   <logger name="fr.jmmc.jmal.star" level="INFO"/>
+-->
 
   <!-- OITools -->
+<!--  
   <logger name="fr.jmmc.oitools" level="INFO"/>
+-->
 
 
   <!-- JSkyCalc -->

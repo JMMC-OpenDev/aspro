@@ -16,7 +16,7 @@ import fr.jmmc.aspro.gui.action.SaveObservationAction;
 import fr.jmmc.aspro.gui.action.ShowPrefAction;
 import fr.jmmc.aspro.gui.action.TargetEditorAction;
 import fr.jmmc.aspro.gui.task.AsproTaskRegistry;
-import fr.jmmc.aspro.gui.util.ComponentResizeAdapter;
+import fr.jmmc.jmcs.gui.ComponentResizeAdapter;
 import fr.jmmc.aspro.model.ConfigurationManager;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.interop.VotableSampMessageHandler;
