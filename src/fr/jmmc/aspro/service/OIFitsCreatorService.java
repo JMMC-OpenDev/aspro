@@ -246,16 +246,14 @@ public final class OIFitsCreatorService {
     // free computed complex visibilities :
     this.visComplex = null;
 
-    // test if the instrument is AMBER to keep OI_VIS table :
-    // TODO: test and decide if the table is available even with VISAMP / VISPHI NaN (any instrument)
-/*    
-    if (!AsproConstants.INS_AMBER.equals(this.instrumentName)) {
-      // Remove OI_VIS table if instrument is not AMBER :
+    // remove the OI_VIS table for instruments that do not produce such results (PIONIER):
+    if (AsproConstants.INS_PIONIER.equals(this.instrumentName)) {
+      // Remove OI_VIS table if instrument is PIONIER:
       final OIVis vis = this.oiFitsFile.getOiVis()[0];
 
       this.oiFitsFile.removeOiTable(vis);
     }
-*/
+
     if (logger.isLoggable(Level.INFO)) {
       logger.info("createOIFits : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
     }
