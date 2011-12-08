@@ -3,6 +3,7 @@
  ******************************************************************************/
 package fr.jmmc.aspro.gui.util;
 
+import fr.jmmc.jmcs.gui.GenericJTree;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -12,7 +13,7 @@ import javax.swing.tree.TreePath;
  * This JTree contains Targets and their calibrators
  * @author bourgesl
  */
-public class TargetJTree extends GenericJTree {
+public class TargetJTree extends GenericJTree<Target> {
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
@@ -26,7 +27,7 @@ public class TargetJTree extends GenericJTree {
    * @param targetUserInfos target user informations
    */
   public TargetJTree(final TargetUserInformations targetUserInfos) {
-    super();
+    super(Target.class);
 
     this.editTargetUserInfos = targetUserInfos;
   }
@@ -60,37 +61,13 @@ public class TargetJTree extends GenericJTree {
   }
 
   /**
-   * Select the first child node
-   * @param rootNode root node
-   */
-  public final void selectFirstChildNode(final DefaultMutableTreeNode rootNode) {
-    if (rootNode.isLeaf()) {
-      return;
-    }
-
-    // first child = target :
-    final DefaultMutableTreeNode firstChild = (DefaultMutableTreeNode) rootNode.getFirstChild();
-    this.selectPath(new TreePath(firstChild.getPath()));
-
-    // expand target node if there is at least one child node :
-    if (!firstChild.isLeaf()) {
-      final DefaultMutableTreeNode secondChild = (DefaultMutableTreeNode) firstChild.getFirstChild();
-
-      this.scrollPathToVisible(new TreePath(secondChild.getPath()));
-    }
-  }
-
-  /**
-   * Convert a value object to string
+   * Convert a non-null value object to string
    * @param userObject user object to convert
    * @return string representation of the user object
    */
   @Override
-  protected String convertUserObjectToString(final Object userObject) {
-    if (userObject instanceof Target) {
-      return this.editTargetUserInfos.getTargetDisplayName((Target) userObject);
-    }
-    return super.convertUserObjectToString(userObject);
+  protected String convertUserObjectToString(final Target userObject) {
+    return this.editTargetUserInfos.getTargetDisplayName(userObject);
   }
 
   /**
@@ -121,7 +98,7 @@ public class TargetJTree extends GenericJTree {
    * @return true if the calibrator was removed
    */
   public final boolean removeCalibrator(final DefaultMutableTreeNode calibratorNode, final Target calibrator, final DefaultMutableTreeNode targetNode, final Target target,
-                                        final boolean doSelectParent) {
+          final boolean doSelectParent) {
 
     if (this.editTargetUserInfos.removeCalibratorFromTarget(target, calibrator)) {
       // remove node :
