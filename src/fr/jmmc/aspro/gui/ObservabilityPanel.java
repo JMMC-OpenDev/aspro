@@ -685,7 +685,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         }
       }
 
-      if (logger.isLoggable(Level.INFO)) {
+      if (logger.isInfoEnabled()) {
         logger.info("compute : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
       }
 
@@ -714,11 +714,11 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         final ObservationCollection lastObsCollection = om.getObservationCollection();
 
         if (taskObsCollection.getVersion().isSameMainVersion(lastObsCollection.getVersion())) {
-          if (logger.isLoggable(Level.FINE)) {
-            logger.fine("refreshUI : main version equals : " + taskObsCollection.getVersion() + " :: " + lastObsCollection.getVersion());
+          if (logger.isDebugEnabled()) {
+            logger.debug("refreshUI : main version equals : " + taskObsCollection.getVersion() + " :: " + lastObsCollection.getVersion());
           }
           if (DEBUG_VERSIONS) {
-            logger.severe("refreshUI : main version equals : " + taskObsCollection.getVersion() + " :: " + lastObsCollection.getVersion());
+            logger.warn("refreshUI : main version equals : " + taskObsCollection.getVersion() + " :: " + lastObsCollection.getVersion());
           }
 
           // use latest observation collection to see possible UV widget changes :
@@ -727,11 +727,11 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
           om.fireObservabilityDone(lastObsCollection, obsDataList);
 
         } else {
-          if (logger.isLoggable(Level.FINE)) {
-            logger.fine("refreshUI : main version mismatch : " + taskObsCollection.getVersion() + " :: " + lastObsCollection.getVersion());
+          if (logger.isDebugEnabled()) {
+            logger.debug("refreshUI : main version mismatch : " + taskObsCollection.getVersion() + " :: " + lastObsCollection.getVersion());
           }
           if (DEBUG_VERSIONS) {
-            logger.severe("refreshUI : main version mismatch : " + taskObsCollection.getVersion() + " :: " + lastObsCollection.getVersion());
+            logger.warn("refreshUI : main version mismatch : " + taskObsCollection.getVersion() + " :: " + lastObsCollection.getVersion());
           }
 
           // use consistent observation and observability data :

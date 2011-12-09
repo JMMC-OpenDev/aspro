@@ -709,9 +709,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
           throw new UnsupportedOperationException("Not implemented !");
         }
       } else {
-        if (logger.isLoggable(Level.SEVERE)) {
-          logger.severe("invalid selected node to perform the update operation = " + currentNode);
-        }
+        logger.severe("invalid selected node to perform the update operation = " + currentNode);
       }
     }
   }//GEN-LAST:event_jButtonUpdateActionPerformed
@@ -758,9 +756,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
           throw new UnsupportedOperationException("Not implemented !");
         }
       } else {
-        if (logger.isLoggable(Level.SEVERE)) {
-          logger.severe("invalid selected node to perform the remove operation = " + currentNode);
-        }
+        logger.severe("invalid selected node to perform the remove operation = " + currentNode);
       }
     }
   }//GEN-LAST:event_jButtonRemoveActionPerformed
@@ -794,9 +790,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
           throw new UnsupportedOperationException("Not implemented !");
         }
       } else {
-        if (logger.isLoggable(Level.SEVERE)) {
-          logger.severe("invalid selected node to perform the add operation = " + currentNode);
-        }
+        logger.severe("invalid selected node to perform the add operation = " + currentNode);
       }
 
       if (target != null) {

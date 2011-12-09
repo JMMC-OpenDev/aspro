@@ -1463,17 +1463,13 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
             if (this.currentUVMapData != null
                     && this.currentUVMapData.isValid(this.targetName, targetVersion, uvRect, this.imageMode, this.imageSize, this.colorModel)) {
 
-              if (logger.isLoggable(Level.FINE)) {
-                logger.fine("Reuse model image.");
-              }
+              logger.debug("Reuse model image.");
 
               // reuse computed UV Map Data :
               uvDataCollection.setUvMapData(this.currentUVMapData);
             } else {
 
-              if (logger.isLoggable(Level.FINE)) {
-                logger.fine("Computing model image ...");
-              }
+              logger.debug("Computing model image ...");
 
               // Compute Target Model for the UV coverage limits ONCE :
               final UVMapData uvMapData = ModelUVMapService.computeUVMap(models,
@@ -1530,7 +1526,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
       uvDataCollection.setWarningContainer(mergedWarningContainer);
 
-      if (logger.isLoggable(Level.INFO)) {
+      if (logger.isInfoEnabled()) {
         logger.info("compute : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
       }
 
