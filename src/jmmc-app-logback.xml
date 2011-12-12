@@ -25,40 +25,25 @@
 
   <!-- Aspro -->
   <logger name="fr.jmmc.aspro" level="INFO"/>
-
+  
 <!--
-# ASPRO GUI :
-fr.jmmc.aspro.gui.level = INFO
+  <logger name="fr.jmmc.aspro.gui" level="INFO"/>
+  <logger name="fr.jmmc.aspro.gui.InterferometerMapPanel" level="INFO"/>
+  <logger name="fr.jmmc.aspro.gui.ObservabilityPanel" level="INFO"/>
+  <logger name="fr.jmmc.aspro.gui.UVCoveragePanel" level="INFO"/>
+  <logger name="fr.jmmc.aspro.gui.Vis2Panel" level="INFO"/>
 
-fr.jmmc.aspro.gui.InterferometerMapPanel.level = INFO
+  <logger name="fr.jmmc.aspro.gui.action" level="INFO"/>
 
-fr.jmmc.aspro.gui.action.level = INFO
+  <logger name="fr.jmmc.aspro.interop" level="INFO"/>
+  
+  <logger name="fr.jmmc.aspro.model" level="INFO"/>
 
-# ASPRO StarResolver :
-fr.jmmc.aspro.gui.star.level = INFO
+  <logger name="fr.jmmc.aspro.ob" level="INFO"/>
 
-
-# ASPRO model :
-fr.jmmc.aspro.model.level = INFO
-
-# ASPRO service :
-fr.jmmc.aspro.service.level = INFO
-
-fr.jmmc.aspro.service.ObservabilityService.level = INFO
-fr.jmmc.aspro.service.DelayLineService.level = INFO
-
-#fr.jmmc.aspro.service.UVCoverageService.level = FINE
-
-# ASPRO OB generation :
-fr.jmmc.aspro.ob.level = INFO
-
-# Preferences :
-fr.jmmc.aspro.gui.PreferencesView.level = INFO
-
-
-#JSAMP :
-org.astrogrid.samp.client.level = INFO
-
-fr.jmmc.aspro.gui.action.SampSearchCalQuery.level = INFO
+  <logger name="fr.jmmc.aspro.service" level="INFO"/>
+  <logger name="fr.jmmc.aspro.service.DelayLineService" level="INFO"/>
+  <logger name="fr.jmmc.aspro.service.ObservabilityService" level="INFO"/>
+  <logger name="fr.jmmc.aspro.service.UVCoverageService" level="INFO"/>
 -->
 </included>
