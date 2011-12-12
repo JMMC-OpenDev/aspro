@@ -670,15 +670,15 @@ public final class ChartUtils {
     // H:MM format :
     final DateFormat tf = new TimeFormat(false, true);
 
+    // minutes
+    units.add(new DateTickUnit(DateTickUnitType.MINUTE, 15, DateTickUnitType.MINUTE, 5, tf));
+    units.add(new DateTickUnit(DateTickUnitType.MINUTE, 30, DateTickUnitType.MINUTE, 5, tf));
+    
     // hours
-    units.add(new DateTickUnit(DateTickUnitType.HOUR, 1,
-            DateTickUnitType.MINUTE, 5, tf));
-    units.add(new DateTickUnit(DateTickUnitType.HOUR, 2,
-            DateTickUnitType.MINUTE, 10, tf));
-    units.add(new DateTickUnit(DateTickUnitType.HOUR, 3,
-            DateTickUnitType.MINUTE, 30, tf));
-    units.add(new DateTickUnit(DateTickUnitType.HOUR, 6,
-            DateTickUnitType.HOUR, 1, tf));
+    units.add(new DateTickUnit(DateTickUnitType.HOUR, 1, DateTickUnitType.MINUTE, 5, tf));
+    units.add(new DateTickUnit(DateTickUnitType.HOUR, 2, DateTickUnitType.MINUTE, 10, tf));
+    units.add(new DateTickUnit(DateTickUnitType.HOUR, 3, DateTickUnitType.MINUTE, 30, tf));
+    units.add(new DateTickUnit(DateTickUnitType.HOUR, 6, DateTickUnitType.HOUR, 1, tf));
 
     return units;
   }
@@ -696,17 +696,18 @@ public final class ChartUtils {
     final TickUnits units = new TickUnits();
 
     // HA format :
+    // TODO: fix buf for HA < 0.0 !!
     final DateFormat haf = new TimeFormat(true, false);
-
+/*    
+    // minutes
+    units.add(new DateTickUnit(DateTickUnitType.MINUTE, 15, DateTickUnitType.MINUTE, 5, haf));
+    units.add(new DateTickUnit(DateTickUnitType.MINUTE, 30, DateTickUnitType.MINUTE, 5, haf));
+*/
     // hours
-    units.add(new DateTickUnit(DateTickUnitType.HOUR, 1,
-            DateTickUnitType.MINUTE, 5, haf));
-    units.add(new DateTickUnit(DateTickUnitType.HOUR, 2,
-            DateTickUnitType.MINUTE, 10, haf));
-    units.add(new DateTickUnit(DateTickUnitType.HOUR, 3,
-            DateTickUnitType.MINUTE, 30, haf));
-    units.add(new DateTickUnit(DateTickUnitType.HOUR, 6,
-            DateTickUnitType.HOUR, 1, haf));
+    units.add(new DateTickUnit(DateTickUnitType.HOUR, 1, DateTickUnitType.MINUTE, 5, haf));
+    units.add(new DateTickUnit(DateTickUnitType.HOUR, 2, DateTickUnitType.MINUTE, 10, haf));
+    units.add(new DateTickUnit(DateTickUnitType.HOUR, 3, DateTickUnitType.MINUTE, 30, haf));
+    units.add(new DateTickUnit(DateTickUnitType.HOUR, 6, DateTickUnitType.HOUR, 1, haf));
 
     return units;
   }
