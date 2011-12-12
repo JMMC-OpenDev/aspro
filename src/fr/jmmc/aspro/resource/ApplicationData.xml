@@ -7,8 +7,8 @@
 
 <ApplicationData link="http://www.jmmc.fr/aspro2">
 
-  <program name="Aspro2" version="0.8.2 beta 3"/>
-  <compilation date="08/12/2011" compiler="JDK 1.5.0_16"/>
+  <program name="Aspro2" version="0.8.2 beta 4"/>
+  <compilation date="12/12/2011" compiler="JDK 1.5.0_16"/>
 
   <text>
     <![CDATA[ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations
@@ -238,6 +238,11 @@
 
   <releasenotes>
     <release version="0.8.2">
+      <prerelease version="0.8.2 beta 4">
+        <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/233">Added the timeline (red line) on the observability plot to indicate the system current time (useful during real observations)</change>
+        <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/165">Added 'Night only' option on the observability plot to automatically zoom and focus on the night</change>
+        <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/238">Minor fix related to small screen support: allow the user to resize the main window up to 950x700</change>
+      </prerelease>
       <prerelease version="0.8.2 beta 3">
         <change type="CHANGE">Removed OI_VIS table for the PIONIER instrument as its data reduction software does</change>
         <change type="CHANGE">Added Show Log action in help menu to see the application log (and configure log details at runtime)</change>

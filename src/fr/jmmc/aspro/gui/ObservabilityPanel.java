@@ -3,6 +3,7 @@
  ******************************************************************************/
 package fr.jmmc.aspro.gui;
 
+import edu.dartmouth.AstroSkyCalc;
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.Preferences;
 import fr.jmmc.aspro.gui.action.ExportPDFAction;
@@ -49,6 +50,7 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -69,6 +71,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollBar;
 import javax.swing.JSeparator;
 import javax.swing.SwingConstants;
+import javax.swing.Timer;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import org.jfree.chart.ChartPanel;
@@ -82,6 +85,7 @@ import org.jfree.chart.event.ChartProgressEvent;
 import org.jfree.chart.event.ChartProgressListener;
 import org.jfree.chart.plot.IntervalMarker;
 import org.jfree.chart.plot.PlotRenderingInfo;
+import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYBarRenderer;
 import org.jfree.data.gantt.Task;
@@ -89,6 +93,9 @@ import org.jfree.data.gantt.TaskSeries;
 import org.jfree.data.gantt.TaskSeriesCollection;
 import org.jfree.data.time.DateRange;
 import org.jfree.ui.Layer;
+import org.jfree.ui.LengthAdjustmentType;
+import org.jfree.ui.RectangleAnchor;
+import org.jfree.ui.RectangleInsets;
 import org.jfree.ui.TextAnchor;
 
 /**
@@ -96,7 +103,7 @@ import org.jfree.ui.TextAnchor;
  * @author bourgesl
  */
 public final class ObservabilityPanel extends javax.swing.JPanel implements ChartProgressListener,
-                                                                            ObservationListener, Observer, PDFExportable, Disposable {
+        ObservationListener, Observer, PDFExportable, Disposable {
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
@@ -130,8 +137,12 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
   private final static int MAX_VIEW_ITEMS = MAX_PRINTABLE_ITEMS_A4;
   /** default item size to determine the max view items dynamically */
   private final static int ITEM_SIZE = 40;
+  /** default timeline refresh period = 1 minutes */
+  private static final int REFRESH_PERIOD = 60 * 1000;
 
   /* default plot options */
+  /** default value for the checkbox Night only */
+  private static final boolean DEFAULT_DO_NIGHT_ONLY = false;
   /** default value for the checkbox BaseLine Limits */
   private static final boolean DEFAULT_DO_BASELINE_LIMITS = false;
   /** default value for the checkbox Details */
@@ -152,10 +163,20 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
   private final ObservabilityPlotContext renderContext = ObservabilityPlotContext.getInstance();
   /** height (in pixels) corresponding to non data area (title / axis / legend) */
   private int plotNonDataHeight = 100;
+  /** 24h date formatter like in france */
+  private final DateFormat timeFormatter = DateFormat.getTimeInstance(DateFormat.SHORT, Locale.FRANCE);
+  /** timeline marker */
+  private ValueMarker timeMarker = null;
 
   /* plot data */
   /** chart data */
   private ObservationCollectionObsData chartData = null;
+  /** sky calc instance */
+  private AstroSkyCalc sc = null;
+  /** night lower bound */
+  private long nightLower = 0l;
+  /** night upper bound */
+  private long nightUpper = 0l;
 
   /* swing */
   /** chart panel */
@@ -168,6 +189,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
   private JCheckBox jCheckBoxScrollView;
   /** time reference combo box */
   private JComboBox jComboTimeRef;
+  /** checkbox night only*/
+  private JCheckBox jCheckBoxNightOnly;
   /** checkbox BaseLine Limits */
   private JCheckBox jCheckBoxBaseLineLimits;
   /** checkbox Detailed output */
@@ -176,6 +199,10 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
   private boolean doAutoRefresh = true;
   /** flag to indicate the subset mode before exporting to pdf */
   private boolean useSubsetBeforePDF = false;
+  /** flag to indicate that the plot is rendered for PDF output */
+  private boolean renderingPDF = false;
+  /** timeline refresh Swing timer */
+  private final Timer timerTimeRefresh;
 
   /**
    * Constructor
@@ -183,6 +210,18 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
   public ObservabilityPanel() {
     super(new BorderLayout());
     initComponents();
+
+    // Create the timeline refresh timer:
+    this.timerTimeRefresh = new Timer(REFRESH_PERIOD, new ActionListener() {
+
+      /**
+       * Invoked when the timer action occurs.
+       */
+      @Override
+      public void actionPerformed(final ActionEvent ae) {
+        updateTimeMarker();
+      }
+    });
   }
 
   /**
@@ -274,6 +313,29 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     });
     panelOptions.add(this.jComboTimeRef);
 
+    this.jCheckBoxNightOnly = new JCheckBox("Night only");
+    this.jCheckBoxNightOnly.setName("jCheckBoxNightOnly");
+
+    this.jCheckBoxNightOnly.setSelected(DEFAULT_DO_NIGHT_ONLY);
+    this.jCheckBoxNightOnly.addItemListener(new ItemListener() {
+
+      @Override
+      public void itemStateChanged(final ItemEvent e) {
+        if (getChartData() != null) {
+          if (e.getStateChange() == ItemEvent.SELECTED) {
+            // Update date axis = zoom on night bounds:
+            updateDateAxisBounds(nightLower, nightUpper);
+          } else {
+            // full range:
+            final ObservabilityData obsData = getChartData().getFirstObsData();
+            updateDateAxisBounds(obsData.getDateMin().getTime(), obsData.getDateMax().getTime());
+          }
+        }
+      }
+    });
+
+    panelOptions.add(this.jCheckBoxNightOnly);
+
     this.jCheckBoxBaseLineLimits = new JCheckBox("BaseLine limits");
     this.jCheckBoxBaseLineLimits.setName("jCheckBoxBaseLineLimits");
 
@@ -357,6 +419,9 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
     // unregister this instance as a Preference Observer :
     this.myPreferences.deleteObserver(this);
+
+    // disable timeline refresh timer:
+    enableTimelineRefreshTimer(false);
   }
 
   /**
@@ -459,6 +524,9 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
    */
   @Override
   public JFreeChart prepareChart() {
+    // Enable the PDF rendering flag:
+    this.renderingPDF = true;
+
     // Memorize subset mode before rendering PDF :
     this.useSubsetBeforePDF = this.slidingXYPlotAdapter.isUseSubset();
     if (this.useSubsetBeforePDF) {
@@ -470,6 +538,9 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     // Use smaller fonts (print):
     this.renderContext.setMinSizeFont(true);
 
+    // update the time marker to disable it:
+    updateTimeMarker();
+
     return this.chart;
   }
 
@@ -478,6 +549,9 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
    */
   @Override
   public void postPDFExport() {
+    // Disable the PDF rendering flag:
+    this.renderingPDF = false;
+
     if (this.useSubsetBeforePDF) {
       // Restore the chart as displayed
       this.slidingXYPlotAdapter.setUseSubset(true);
@@ -486,6 +560,9 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     this.renderContext.setHideAnnotationTooSmall(ObservabilityPlotContext.DEFAULT_HIDE_TEXT_DONT_FIT);
     // Use larger fonts (display):
     this.renderContext.setMinSizeFont(false);
+
+    // update the time marker to enable it:
+    updateTimeMarker();
   }
 
   /**
@@ -648,8 +725,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
      * @param twilightNightLimit twilight considered as night limit
      */
     private ObservabilitySwingWorker(final ObservabilityPanel obsPanel, final ObservationCollection obsCollection,
-                                     final boolean useLST, final boolean doDetailedOutput, final boolean doBaseLineLimits,
-                                     final boolean doCenterMidnight, final SunType twilightNightLimit) {
+            final boolean useLST, final boolean doDetailedOutput, final boolean doBaseLineLimits,
+            final boolean doCenterMidnight, final SunType twilightNightLimit) {
       // get current observation version :
       super(AsproTaskRegistry.TASK_OBSERVABILITY, obsCollection);
       this.obsPanel = obsPanel;
@@ -759,6 +836,9 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
    */
   private void setChartData(final ObservationCollectionObsData chartData) {
     this.chartData = chartData;
+
+    // Get AstroSkyCalc instance :
+    this.sc = this.chartData.getFirstObsData().getDateCalc();
   }
 
   /**
@@ -807,10 +887,15 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         dateAxisLabel = AsproConstants.TIME_UTC;
       }
     }
+
+    // define the date axis (bounds and current range):
     updateDateAxis(dateAxisLabel, obsData.getDateMin(), obsData.getDateMax(), doBaseLineLimits);
 
     // only valid for single observation :
-    updateSunMarkers(obsData.getSunIntervals());
+    updateSunMarkers(obsData.getSunIntervals(), obsData.getDateMin(), obsData.getDateMax());
+
+    // update the time marker:
+    updateTimeMarker();
 
     // computed data are valid :
     updateChart(observation.getDisplayTargets(),
@@ -836,18 +921,15 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
    */
   @SuppressWarnings("unchecked")
   private void updateChart(final List<Target> displayTargets,
-                           final Set<Target> orphanCalibrators,
-                           final TargetUserInformations targetUserInfos,
-                           final ObservationCollectionObsData chartData,
-                           final Date min, final Date max,
-                           final boolean doBaseLineLimits) {
-    
+          final Set<Target> orphanCalibrators,
+          final TargetUserInformations targetUserInfos,
+          final ObservationCollectionObsData chartData,
+          final Date min, final Date max,
+          final boolean doBaseLineLimits) {
+
     final ColorPalette palette = ColorPalette.getDefaultColorPalette();
 
     final XYBarRenderer xyBarRenderer = (XYBarRenderer) this.xyPlot.getRenderer();
-
-    // 24h date formatter like in france :
-    final DateFormat df = DateFormat.getTimeInstance(DateFormat.SHORT, Locale.FRANCE);
 
     // Prepare chart information used by SlidingXYPlotAdapter :
     final TaskSeriesCollection taskSeriesCollection = new TaskSeriesCollection();
@@ -949,7 +1031,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
             if (calibrator && orphanCalibrators.contains(target)) {
               legendLabel = "Orphan calibrator";
               paint = Color.ORANGE;
-          } else {
+            } else {
               paint = palette.getColor(colorIndex);
             }
             targetColors.add(paint);
@@ -976,13 +1058,13 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
               for (DateTimeInterval interval : so.getVisible()) {
                 if (checkDateAxisLimits(interval.getStartDate(), min, max)) {
-                  final XYTextAnnotation aStart = ChartUtils.createFitXYTextAnnotation(df.format(interval.getStartDate()), n, interval.getStartDate().getTime());
+                  final XYTextAnnotation aStart = ChartUtils.createFitXYTextAnnotation(timeFormatter.format(interval.getStartDate()), n, interval.getStartDate().getTime());
                   aStart.setRotationAngle(HALF_PI);
                   addAnnotation(annotations, pos, aStart);
                 }
 
                 if (checkDateAxisLimits(interval.getEndDate(), min, max)) {
-                  final XYTextAnnotation aEnd = ChartUtils.createFitXYTextAnnotation(df.format(interval.getEndDate()), n, interval.getEndDate().getTime());
+                  final XYTextAnnotation aEnd = ChartUtils.createFitXYTextAnnotation(timeFormatter.format(interval.getEndDate()), n, interval.getEndDate().getTime());
                   aEnd.setRotationAngle(HALF_PI);
                   addAnnotation(annotations, pos, aEnd);
                 }
@@ -1017,7 +1099,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
   private void updateSliderProperties(final boolean forceRefresh) {
     // baseline limits flag used by the plot :
     final boolean doBaseLineLimits =
-                  (this.getChartData() != null) ? this.getChartData().getFirstObsData().isDoBaseLineLimits() : false;
+            (this.getChartData() != null) ? this.getChartData().getFirstObsData().isDoBaseLineLimits() : false;
 
     final int size = this.slidingXYPlotAdapter.getSize();
 
@@ -1083,14 +1165,9 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
    * @param to ending date
    * @param doBaseLineLimits flag to plot baseline limits
    */
-  private void updateDateAxis(final String label, final Date from, final Date to,
-                              final boolean doBaseLineLimits) {
-
+  private void updateDateAxis(final String label, final Date from, final Date to, final boolean doBaseLineLimits) {
     // change the Range axis (horizontal) :
     final BoundedDateAxis dateAxis = new BoundedDateAxis(label);
-    // add a margin of 1 ms :
-    dateAxis.setBounds(new DateRange(from.getTime() - 1l, to.getTime() + 1l));
-    dateAxis.setRange(from.getTime() - 1l, to.getTime() + 1l);
 
     if (doBaseLineLimits) {
       dateAxis.setStandardTickUnits(HA_TICK_UNITS);
@@ -1100,18 +1177,41 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     dateAxis.setTickLabelInsets(ChartUtils.TICK_LABEL_INSETS);
 
     this.xyPlot.setRangeAxis(dateAxis);
+
+    // use the range [0;24]:
+    updateDateAxisBounds(from.getTime(), to.getTime());
+  }
+
+  /**
+   * Update the data axis range i.e. zoom on date range
+   * @param lower lower value in milliseconds
+   * @param upper upper value in milliseconds
+   */
+  private void updateDateAxisBounds(final long lower, final long upper) {
+    final BoundedDateAxis dateAxis = (BoundedDateAxis) this.xyPlot.getRangeAxis();
+    // add a margin of 1 ms :
+    dateAxis.setBounds(new DateRange(lower - 1l, upper + 1l));
+    dateAxis.setRange(lower - 1l, upper + 1l);
   }
 
   /**
    * Update the sun zones : twilight and night zones
    * @param intervals sun time intervals
+   * @param from starting date
+   * @param to ending date
    */
-  private void updateSunMarkers(final List<SunTimeInterval> intervals) {
+  private void updateSunMarkers(final List<SunTimeInterval> intervals, final Date from, final Date to) {
     // remove Markers :
     this.xyPlot.clearRangeMarkers();
 
     // add the Markers :
     if (intervals != null) {
+
+      long nightMin = Long.MAX_VALUE;
+      long nightMax = Long.MIN_VALUE;
+
+      long startTime, endTime;
+
       Color col;
 
       for (SunTimeInterval interval : intervals) {
@@ -1135,11 +1235,144 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
             col = Color.RED;
             break;
         }
+
+        startTime = interval.getStartDate().getTime();
+        endTime = interval.getEndDate().getTime();
+
+        // Update night limits:
+        if (col != DAY_COLOR) {
+          if (nightMin > startTime) {
+            nightMin = startTime;
+          }
+          if (nightMax < endTime) {
+            nightMax = endTime;
+          }
+        }
+
         // force Alpha to 1.0 to avoid PDF rendering problems (alpha layer ordering) :
-        this.xyPlot.addRangeMarker(new IntervalMarker(interval.getStartDate().getTime(),
-                interval.getEndDate().getTime(), col, ChartUtils.THIN_STROKE, null, null, 1f), Layer.BACKGROUND);
+        this.xyPlot.addRangeMarker(
+                new IntervalMarker(startTime, endTime, col, ChartUtils.THIN_STROKE, null, null, 1f),
+                Layer.BACKGROUND);
+      }
+
+      // Add 15 minutes margin:
+      final long margin = 15 * 60 * 1000l;
+      nightMin -= margin;
+      nightMax += margin;
+
+      if (nightMin < from.getTime()) {
+        nightMin = from.getTime();
+      }
+
+      if (nightMax > to.getTime()) {
+        nightMax = to.getTime();
+      }
+
+      // update the night boundaries:
+      this.nightLower = nightMin;
+      this.nightUpper = nightMax;
+
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("nightLower: " + new Date(this.nightLower));
+        logger.fine("nightUpper: " + new Date(this.nightUpper));
+      }
+
+      if (this.jCheckBoxNightOnly.isSelected()) {
+        // Update date axis = zoom on night bounds:
+        updateDateAxisBounds(nightLower, nightUpper);
       }
     }
+  }
+
+  /**
+   * Create or update the timeline marker (red)
+   */
+  private void updateTimeMarker() {
+    // remove time marker anyway:
+    if (this.timeMarker != null) {
+      this.xyPlot.removeRangeMarker(this.timeMarker, Layer.BACKGROUND);
+    }
+
+    boolean enableTimer = false;
+
+    // do not export time marker in PDF output:
+    if (!this.renderingPDF) {
+
+      final ObservabilityData obsData = chartData.getFirstObsData();
+
+      final boolean doBaseLineLimits = obsData.isDoBaseLineLimits();
+
+      if (!doBaseLineLimits) {
+
+        if (this.sc != null) {
+          final boolean useLST = obsData.isUseLST();
+
+          // Get jd of current date/time:
+          final double jd = this.sc.getCurrentJd();
+
+          // check if the current jd is within the good night:
+          if (jd >= obsData.getJdMin() && jd <= obsData.getJdMax()) {
+            // enable timeline refresh timer:
+            enableTimer = true;
+
+            // convert JD to LST/UT date/time:
+            final Calendar cal = this.sc.toCalendar(jd, useLST);
+
+            // roll +/- 1 day to be within plot range:
+            final Date now = convertCalendarToDate(cal, obsData.getDateMin(), obsData.getDateMax());
+
+            if (logger.isLoggable(Level.FINE)) {
+              logger.fine("timeMarker set at " + now);
+            }
+
+            final double timeValue = now.getTime();
+
+            if (timeMarker == null) {
+              // force Alpha to 1.0 to avoid PDF rendering problems (alpha layer ordering) :
+              this.timeMarker = new ValueMarker(timeValue, Color.RED, ChartUtils.THIN_STROKE, Color.GRAY, ChartUtils.THIN_STROKE, 1.0f);
+              this.timeMarker.setLabelPaint(Color.RED);
+              this.timeMarker.setLabelOffset(new RectangleInsets(1d, 0d, 1d, 0d));
+              this.timeMarker.setLabelAnchor(RectangleAnchor.TOP);
+            } else {
+              this.timeMarker.setValue(timeValue);
+            }
+            // update displayed time:
+            this.timeMarker.setLabel(timeFormatter.format(now));
+
+            this.xyPlot.addRangeMarker(this.timeMarker, Layer.BACKGROUND);
+          }
+        }
+      }
+    }
+    // anyway enable or disable timer:
+    enableTimelineRefreshTimer(enableTimer);
+  }
+
+  /**
+   * Convert the given calendar to a date within LST/UT range [0;24]
+   *
+   * @param cal date to convert
+   * @param min lower date of plot
+   * @param max upper date of plot
+   * @return date
+   */
+  private Date convertCalendarToDate(final Calendar cal, final Date min, final Date max) {
+    if (cal.getTimeInMillis() >= min.getTime()) {
+
+      if (cal.getTimeInMillis() > max.getTime()) {
+        // after date max :
+
+        // return [cal - 1 day]
+        cal.roll(Calendar.DATE, false);
+      }
+
+    } else {
+      // before date min:
+
+      // return [cal + 1 day]
+      cal.roll(Calendar.DATE, true);
+    }
+    return cal.getTime();
   }
   /** drawing started time value */
   private long chartDrawStartTime = 0l;
@@ -1162,15 +1395,36 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         default:
       }
     }
-    
+
     // Perform custom operations before/after chart rendering:
     // move JMMC annotation:
     this.aJMMC.setX(this.xyPlot.getDomainAxis().getUpperBound());
     this.aJMMC.setY(this.xyPlot.getRangeAxis().getUpperBound()); // upper bound instead of other plots
-    
+
+    if (isTimelineEnabled()) {
+      // set time marker label anchor:
+      final BoundedDateAxis dateAxis = (BoundedDateAxis) this.xyPlot.getRangeAxis();
+
+      double left = this.timeMarker.getValue() - dateAxis.getRange().getLowerBound();
+      if (left < 0) {
+        left = 0;
+      }
+
+      double right = dateAxis.getRange().getUpperBound() - this.timeMarker.getValue();
+      if (right < 0) {
+        right = 0;
+      }
+
+      if (left > right) {
+        this.timeMarker.setLabelTextAnchor(TextAnchor.TOP_RIGHT);
+      } else {
+        this.timeMarker.setLabelTextAnchor(TextAnchor.TOP_LEFT);
+      }
+    }
+
     // reset context state:
     this.renderContext.reset();
-    
+
     // adjust scrollbar properties:
     if (event.getType() == ChartProgressEvent.DRAWING_FINISHED) {
       // get chart rendering area:
@@ -1267,6 +1521,36 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     public void componentResized(final ComponentEvent e) {
       final Dimension d = e.getComponent().getSize();
       handleResize(d.width, d.height);
+    }
+  }
+
+  /**
+   * Return true if the timeline (timer) is enabled
+   * @return true if the timeline (timer) is enabled
+   */
+  private boolean isTimelineEnabled() {
+    return this.timerTimeRefresh.isRunning();
+  }
+
+  /**
+   * Start/Stop the internal timeline Refresh timer
+   * @param enable true to enable it, false otherwise
+   */
+  private void enableTimelineRefreshTimer(final boolean enable) {
+    if (enable) {
+      if (!this.timerTimeRefresh.isRunning()) {
+        if (logger.isLoggable(Level.FINE)) {
+          logger.fine("Starting timer: " + this.timerTimeRefresh);
+        }
+        this.timerTimeRefresh.start();
+      }
+    } else {
+      if (this.timerTimeRefresh.isRunning()) {
+        if (logger.isLoggable(Level.FINE)) {
+          logger.fine("Stopping timer: " + this.timerTimeRefresh);
+        }
+        this.timerTimeRefresh.stop();
+      }
     }
   }
 }
