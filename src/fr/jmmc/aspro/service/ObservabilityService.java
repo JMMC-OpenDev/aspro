@@ -124,7 +124,6 @@ public final class ObservabilityService {
   private boolean ignoreUseNightLimit = false;
   /** create the observability context (temporary variables) */
   private ObservabilityContext obsCtx = null;
-  
 
   /**
    * Constructor.
@@ -138,8 +137,8 @@ public final class ObservabilityService {
    * @param twilightNightLimit twilight considered as night limit
    */
   public ObservabilityService(final ObservationSetting observation,
-                              final boolean useLST, final boolean doDetailedOutput, final boolean doBaseLineLimits,
-                              final boolean doCenterMidnight, final SunType twilightNightLimit) {
+          final boolean useLST, final boolean doDetailedOutput, final boolean doBaseLineLimits,
+          final boolean doCenterMidnight, final SunType twilightNightLimit) {
     // Inputs :
     this.observation = observation;
     this.useLST = useLST;
@@ -293,6 +292,9 @@ public final class ObservabilityService {
       logger.fine("jdLst24 = " + this.jdUpper);
     }
 
+    this.data.setJdMin(this.jdLower);
+    this.data.setJdMax(this.jdUpper);
+
     this.data.setDateMin(jdToDate(this.jdLower));
     this.data.setDateMax(jdToDate(this.jdUpper));
 
@@ -326,6 +328,9 @@ public final class ObservabilityService {
           logger.fine("jdLower = " + this.jdLower);
           logger.fine("jdUpper = " + this.jdUpper);
         }
+
+        this.data.setJdMin(this.jdLower);
+        this.data.setJdMax(this.jdUpper);
 
         this.data.setDateMin(jdToDate(this.jdLower));
         this.data.setDateMax(jdToDate(this.jdUpper));
@@ -380,7 +385,7 @@ public final class ObservabilityService {
         // use the user defined PoPs configuration :
         this.popCombinations.clear();
         this.popCombinations.add(bestPopCombination);
-        
+
         // Use arrays instead of List for performance:
         this.obsCtx.setPopCombs(new PopCombination[1]);
         this.popCombinations.toArray(this.obsCtx.getPopCombs());
@@ -991,7 +996,7 @@ public final class ObservabilityService {
    * @return intervals (hour angles) or null if thread interrupted
    */
   private List<PopObservabilityData> getPopObservabilityData(final String targetName, final double dec, final List<Range> rangesTarget,
-                                                             final boolean doSkipDL) {
+          final boolean doSkipDL) {
     final double cosDec = Math.cos(dec);
     final double sinDec = Math.sin(dec);
 
@@ -1517,10 +1522,10 @@ public final class ObservabilityService {
       }
       popComb.setPopOffsets(popOffsets);
     }
-    
+
     // Prepare observability context:
     this.obsCtx = new ObservabilityContext(sizeBL);
-    
+
     final int sizeCb = this.popCombinations.size();
 
     // Use arrays instead of List for performance:

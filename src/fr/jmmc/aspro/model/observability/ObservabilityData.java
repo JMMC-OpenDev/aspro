@@ -41,6 +41,10 @@ public final class ObservabilityData {
   private Date dateMin = null;
   /** ending date */
   private Date dateMax = null;
+  /** starting date as julian date */
+  private double jdMin = 0d;
+  /** ending date as julian date */
+  private double jdMax = 0d;
   /** list of sun time intervals */
   private List<SunTimeInterval> sunIntervals = null;
   /** moon illumination fraction (percent) */
@@ -76,7 +80,7 @@ public final class ObservabilityData {
    * @param doBaseLineLimits flag to find base line limits
    */
   public ObservabilityData(final ObservationVersion version, final boolean useLST, final boolean doDetailedOutput, final boolean doBaseLineLimits,
-                           final boolean doCenterMidnight, final SunType twilightNightLimit) {
+          final boolean doCenterMidnight, final SunType twilightNightLimit) {
     this.version = version;
     this.useLST = useLST;
     this.doDetailedOutput = doDetailedOutput;
@@ -136,6 +140,38 @@ public final class ObservabilityData {
   }
 
   /* outputs */
+  /**
+   * Return the starting date as julian date
+   * @return starting date as julian date
+   */
+  public double getJdMin() {
+    return jdMin;
+  }
+
+  /**
+   * Define the starting date as julian date
+   * @param jdMin starting date as julian date
+   */
+  public void setJdMin(final double jdMin) {
+    this.jdMin = jdMin;
+  }
+
+  /**
+   * Return the ending date as julian date
+   * @return ending date as julian date
+   */
+  public double getJdMax() {
+    return jdMax;
+  }
+
+  /**
+   * Define the ending date as julian date
+   * @param jdMax ending date as julian date
+   */
+  public void setJdMax(final double jdMax) {
+    this.jdMax = jdMax;
+  }
+
   /**
    * Return the starting date
    * @return starting date
@@ -346,7 +382,7 @@ public final class ObservabilityData {
   public StarData getStarData(final String name) {
     return this.mapStarDatas.get(name);
   }
-  
+
   /**
    * Return the warning container
    * @return warning container
@@ -354,5 +390,4 @@ public final class ObservabilityData {
   public WarningContainer getWarningContainer() {
     return warningContainer;
   }
-  
 }
