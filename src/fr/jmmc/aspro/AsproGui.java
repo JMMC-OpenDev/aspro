@@ -227,10 +227,12 @@ public final class AsproGui extends App {
 
     // hack for screens smaller than 1152x864 screens :
     final int appWidth = 950;
-    final int appHeight = (screenSize.getHeight() >= 864) ? 800 : 700;
-
-    final Dimension dim = new Dimension(appWidth, appHeight);
+    final int appHeightMin = 700;
+    final int appHeightPref = (screenSize.getHeight() >= 864) ? 800 : appHeightMin;
+    
+    final Dimension dim = new Dimension(appWidth, appHeightMin);
     frame.setMinimumSize(dim);
+    frame.setPreferredSize(new Dimension(appWidth, appHeightPref));
     frame.addComponentListener(new ComponentResizeAdapter(dim));
 
     // handle closing by mouse :
