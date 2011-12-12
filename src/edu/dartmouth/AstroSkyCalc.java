@@ -140,6 +140,25 @@ public final class AstroSkyCalc {
   }
 
   /**
+   * Return the jd time value corresponding to the current system date/time
+   * @return jd time value
+   */
+  public double getCurrentJd() {
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("Current date/time : " + new Date());
+    }
+
+    // Get current  (local time) :
+    final WhenWhere ww = new WhenWhere(new InstantInTime(this.site.stdz, this.site.use_dst), this.site);
+
+    if (logger.isLoggable(Level.FINE)) {
+      AstroSkyCalc.dumpWhen(ww, "CurrentTime");
+    }
+
+    return ww.when.jd;
+  }
+
+  /**
    * Return the jd time value corresponding to LT=24:00:00 for the observation date
    *
    * @return jd corresponding to LT=24:00:00 for the observation date
