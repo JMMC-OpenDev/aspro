@@ -93,7 +93,6 @@ import org.jfree.data.gantt.TaskSeries;
 import org.jfree.data.gantt.TaskSeriesCollection;
 import org.jfree.data.time.DateRange;
 import org.jfree.ui.Layer;
-import org.jfree.ui.LengthAdjustmentType;
 import org.jfree.ui.RectangleAnchor;
 import org.jfree.ui.RectangleInsets;
 import org.jfree.ui.TextAnchor;
@@ -321,10 +320,12 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
       @Override
       public void itemStateChanged(final ItemEvent e) {
-        if (getChartData() != null) {
+        if (getChartData() != null && jCheckBoxNightOnly.isEnabled()) {
           if (e.getStateChange() == ItemEvent.SELECTED) {
             // Update date axis = zoom on night bounds:
-            updateDateAxisBounds(nightLower, nightUpper);
+            if (nightLower != 0d && nightUpper != 0d) {
+              updateDateAxisBounds(nightLower, nightUpper);
+            }
           } else {
             // full range:
             final ObservabilityData obsData = getChartData().getFirstObsData();
@@ -905,6 +906,14 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
             obsData.getDateMin(), obsData.getDateMax(),
             doBaseLineLimits);
 
+    // Enable or disable the 'Night only' option:
+    if (observation.getWhen().isNightRestriction()) {
+      this.jCheckBoxNightOnly.setEnabled(true);
+    } else {
+      this.jCheckBoxNightOnly.setEnabled(false);
+      this.jCheckBoxNightOnly.setSelected(false);
+    }
+
     // update the status bar :
     StatusBar.show("observability done.");
   }
@@ -1058,13 +1067,13 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
               for (DateTimeInterval interval : so.getVisible()) {
                 if (checkDateAxisLimits(interval.getStartDate(), min, max)) {
-                  final XYTextAnnotation aStart = ChartUtils.createFitXYTextAnnotation(timeFormatter.format(interval.getStartDate()), n, interval.getStartDate().getTime());
+                  final XYTextAnnotation aStart = ChartUtils.createFitXYTextAnnotation(this.timeFormatter.format(interval.getStartDate()), n, interval.getStartDate().getTime());
                   aStart.setRotationAngle(HALF_PI);
                   addAnnotation(annotations, pos, aStart);
                 }
 
                 if (checkDateAxisLimits(interval.getEndDate(), min, max)) {
-                  final XYTextAnnotation aEnd = ChartUtils.createFitXYTextAnnotation(timeFormatter.format(interval.getEndDate()), n, interval.getEndDate().getTime());
+                  final XYTextAnnotation aEnd = ChartUtils.createFitXYTextAnnotation(this.timeFormatter.format(interval.getEndDate()), n, interval.getEndDate().getTime());
                   aEnd.setRotationAngle(HALF_PI);
                   addAnnotation(annotations, pos, aEnd);
                 }
@@ -1204,6 +1213,10 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     // remove Markers :
     this.xyPlot.clearRangeMarkers();
 
+    // reset the night boundaries:
+    this.nightLower = 0L;
+    this.nightUpper = 0L;
+
     // add the Markers :
     if (intervals != null) {
 
@@ -1330,6 +1343,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
             if (timeMarker == null) {
               // force Alpha to 1.0 to avoid PDF rendering problems (alpha layer ordering) :
               this.timeMarker = new ValueMarker(timeValue, Color.RED, ChartUtils.THIN_STROKE, Color.GRAY, ChartUtils.THIN_STROKE, 1.0f);
+              this.timeMarker.setLabelFont(ChartUtils.DEFAULT_TEXT_SMALL_FONT);
               this.timeMarker.setLabelPaint(Color.RED);
               this.timeMarker.setLabelOffset(new RectangleInsets(1d, 0d, 1d, 0d));
               this.timeMarker.setLabelAnchor(RectangleAnchor.TOP);
@@ -1337,7 +1351,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
               this.timeMarker.setValue(timeValue);
             }
             // update displayed time:
-            this.timeMarker.setLabel(timeFormatter.format(now));
+            this.timeMarker.setLabel(this.timeFormatter.format(now));
 
             this.xyPlot.addRangeMarker(this.timeMarker, Layer.BACKGROUND);
           }
