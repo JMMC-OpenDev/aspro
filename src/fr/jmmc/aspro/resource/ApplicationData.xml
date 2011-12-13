@@ -7,8 +7,8 @@
 
 <ApplicationData link="http://www.jmmc.fr/aspro2">
 
-  <program name="Aspro2" version="0.8.2 beta 4"/>
-  <compilation date="12/12/2011" compiler="JDK 1.5.0_16"/>
+  <program name="Aspro2" version="0.8.2 beta 5"/>
+  <compilation date="13/12/2011" compiler="JDK 1.5.0_16"/>
 
   <text>
     <![CDATA[ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations
@@ -238,6 +238,9 @@
 
   <releasenotes>
     <release version="0.8.2">
+      <prerelease version="0.8.2 beta 5">
+        <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/242">Fixed computation of Ring object models: wrong diameter to radius conversion.</change>
+      </prerelease>
       <prerelease version="0.8.2 beta 4">
         <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/233">Added the timeline (red line) on the observability plot to indicate the system current time (useful during real observations)</change>
         <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/165">Added 'Night only' option on the observability plot to automatically zoom and focus on the night</change>
