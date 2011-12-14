@@ -160,6 +160,14 @@
       </xsl:call-template>
     </xsl:variable>
 
+    <xsl:variable name="ID_PIVOT_index">
+      <xsl:call-template name="getColumnIndex">
+        <xsl:with-param name="ucd11">meta.id</xsl:with-param>
+        <xsl:with-param name="ucd10">META.ID</xsl:with-param>
+        <xsl:with-param name="name">PIVOT</xsl:with-param>
+      </xsl:call-template>
+    </xsl:variable>
+
     <xsl:variable name="OTYPES_index">
       <xsl:call-template name="getColumnIndex">
         <xsl:with-param name="ucd11">src.class</xsl:with-param>
@@ -302,6 +310,11 @@
             <xsl:value-of select="concat('2MASS J',./VOT11:TD[position()=$ID_2MASS_index])"/>
           </xsl:if>
         </xsl:variable>
+        <xsl:variable name="ID_PIVOT">
+          <xsl:if test="./VOT11:TD[position()=$ID_PIVOT_index]/text()">
+            <xsl:value-of select="concat('PIVOT ',./VOT11:TD[position()=$ID_PIVOT_index])"/>
+          </xsl:if>
+        </xsl:variable>
 
         <xsl:variable name="RA">
           <xsl:if test="./VOT11:TD[position()=$RA_index]/text()">
@@ -380,11 +393,12 @@
               </PARA_ERR>
             </xsl:if>
 
-            <!-- identifiers (HD, HIP, 2MASS, DM, SBC9, WDS only) -->
+            <!-- identifiers (HD, HIP, 2MASS, PIVOT) -->
             <IDS>
               <xsl:if test="$ID_HD != ''"><xsl:value-of select="$ID_HD"/>,</xsl:if>
               <xsl:if test="$ID_HIP != ''"><xsl:value-of select="$ID_HIP"/>,</xsl:if>
               <xsl:if test="$ID_2MASS != ''"><xsl:value-of select="$ID_2MASS"/>,</xsl:if>
+              <xsl:if test="$ID_PIVOT != ''"><xsl:value-of select="$ID_PIVOT"/>,</xsl:if>
             </IDS>
 
             <!-- object types -->
