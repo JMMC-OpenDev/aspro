@@ -51,8 +51,6 @@ public final class OIFitsCreatorService {
   private final static short TARGET_ID = (short) 1;
   /** enable the OIFits validation */
   private final static boolean DO_VALIDATE = false;
-  /** flag to add gaussian noise to quantities */
-  private final static boolean DO_NOISE = true;
 
   /* members */
   /* input */
@@ -98,7 +96,7 @@ public final class OIFitsCreatorService {
   private final boolean hasModels;
   /** flag = true if returned errors are valid */
   private final boolean errorValid;
-  /** flag = true if errorValid and DO_NOISE */
+  /** flag to add gaussian noise to OIFits data; true if parameter doDataNoise = true and noise parameters are valid */
   private final boolean doNoise;
   /** interferometer name */
   private String arrayName = null;
@@ -128,6 +126,7 @@ public final class OIFitsCreatorService {
    * @param lambdaMin minimal wavelength (m)
    * @param lambdaMax maximal wavelength (m)
    * @param nSpectralChannels number of spectral channels
+   * @param doDataNoise flag to add gaussian noise to OIFits data
    * @param obsHa observable decimal hour angles
    * @param targetUVObservability list of UV coordinates per baseline
    * @param precRA precessed target right ascension in decimal hours
@@ -135,16 +134,17 @@ public final class OIFitsCreatorService {
    * @param warningContainer container for warning messages
    */
   protected OIFitsCreatorService(final ObservationSetting observation,
-                                 final Target target,
-                                 final List<Beam> beams,
-                                 final List<BaseLine> baseLines,
-                                 final double lambdaMin, final double lambdaMax,
-                                 final int nSpectralChannels,
-                                 final double[] obsHa,
-                                 final List<UVRangeBaseLineData> targetUVObservability,
-                                 final double precRA,
-                                 final AstroSkyCalc sc,
-                                 final WarningContainer warningContainer) {
+          final Target target,
+          final List<Beam> beams,
+          final List<BaseLine> baseLines,
+          final double lambdaMin, final double lambdaMax,
+          final int nSpectralChannels,
+          final boolean doDataNoise,
+          final double[] obsHa,
+          final List<UVRangeBaseLineData> targetUVObservability,
+          final double precRA,
+          final AstroSkyCalc sc,
+          final WarningContainer warningContainer) {
     this.observation = observation;
     this.target = target;
     this.beams = beams;
@@ -178,7 +178,7 @@ public final class OIFitsCreatorService {
     this.errorValid = this.noiseService.isValid();
 
     // do noise :
-    this.doNoise = (DO_NOISE && this.errorValid);
+    this.doNoise = (doDataNoise && this.errorValid);
   }
 
   /**
@@ -398,7 +398,7 @@ public final class OIFitsCreatorService {
 
     // effective wavelength corresponds to the channel center:
     double waveLength = this.lambdaMin + step / 2d;
-    
+
     for (int i = 0; i < this.nWaveLengths; i++) {
       this.waveLengths[i] = waveLength;
 

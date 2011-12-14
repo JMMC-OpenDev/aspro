@@ -53,6 +53,8 @@ public final class UVCoverageService {
   private double uvMax;
   /** flag to compute the UV support */
   private final boolean doUVSupport;
+  /** flag to add gaussian noise to OIFits data */
+  private final boolean doDataNoise;
 
   /* internal */
   /** Get the current thread to check if the computation is interrupted */
@@ -91,14 +93,16 @@ public final class UVCoverageService {
    * @param targetName target name
    * @param uvMax U-V max in meter
    * @param doUVSupport flag to compute the UV support
+   * @param doDataNoise enable data noise
    */
   public UVCoverageService(final ObservationSetting observation, final ObservabilityData obsData, final String targetName,
-                           final double uvMax, final boolean doUVSupport) {
+          final double uvMax, final boolean doUVSupport, final boolean doDataNoise) {
     this.observation = observation;
     this.obsData = obsData;
     this.targetName = targetName;
     this.uvMax = uvMax;
     this.doUVSupport = doUVSupport;
+    this.doDataNoise = doDataNoise;
 
     // create the uv coverage data corresponding to the observation version :
     this.data = new UVCoverageData(observation.getVersion());
@@ -515,7 +519,7 @@ public final class UVCoverageService {
       addWarning("OIFits data not available");
     } else {
 
-      // thread safety : observation can change ... extract observation info in prepare ??
+      // thread safety : TODO: observation can change ... extract observation info in prepare ??
 
       // get current target :
       final Target target = this.observation.getTarget(this.targetName);
@@ -523,7 +527,7 @@ public final class UVCoverageService {
       if (target != null) {
         // Create the OIFitsCreatorService :
         final OIFitsCreatorService oiFitsCreator = new OIFitsCreatorService(this.observation, target,
-                this.beams, this.baseLines, this.lambdaMin, this.lambdaMax, this.nSpectralChannels,
+                this.beams, this.baseLines, this.lambdaMin, this.lambdaMax, this.nSpectralChannels, this.doDataNoise,
                 this.data.getHA(), targetUVObservability, this.starData.getPrecRA(), this.sc,
                 this.data.getWarningContainer());
 
