@@ -48,6 +48,8 @@ public final class NoiseService {
   private final static Complex INVALID_COMPLEX = new Complex(Double.NaN, Double.NaN);
 
   /* members */
+  /** instrument name */
+  private String instrumentName = null;
 
   /* interferometer parameters */
   /** Telescope Diameter (m) */
@@ -76,8 +78,10 @@ public final class NoiseService {
   private double detectorSaturation = 100000d;
   /** Instrumental Visibility [0.0-1.0] */
   private double instrumentalVisibility = 1d;
-  /** Typical Visibility Bias (%) */
+  /** Typical Visibility Bias (absolute) */
   private double instrumentalVisibilityBias = 0d;
+  /** Vis2 Calibration Bias (absolute) */
+  private double instrumentVis2CalibrationBias = 0d;
   /** Typical Phase/Phase Closure Bias (deg) */
   private double instrumentalPhaseBias = 0d;
   /** number of pixels to code all fringes together (interferometric channel) */
@@ -138,7 +142,7 @@ public final class NoiseService {
    * @param warningContainer container for warning messages
    */
   protected NoiseService(final ObservationSetting observation, final Target target,
-                         final WarningContainer warningContainer) {
+          final WarningContainer warningContainer) {
     this.warningContainer = warningContainer;
 
     // extract parameters in observation and configuration :
@@ -200,16 +204,20 @@ public final class NoiseService {
 
     final FocalInstrument instrument = observation.getInstrumentConfiguration().getInstrumentConfiguration().getFocalInstrument();
 
+    this.instrumentName = instrument.getName();
     this.transmission = instrument.getTransmission();
     this.dit = instrument.getDit();
     this.ron = instrument.getRon();
     this.detectorSaturation = instrument.getDetectorSaturation();
     this.instrumentalVisibility = instrument.getInstrumentVisibility();
-    this.instrumentalVisibilityBias = instrument.getInstrumentVisibilityBias();
+    this.instrumentalVisibilityBias = 0.01d * instrument.getInstrumentVisibilityBias(); // percents
     this.instrumentalPhaseBias = instrument.getInstrumentPhaseBias();
     this.nbPixInterf = instrument.getNbPixInterferometry();
     this.nbPixPhoto = instrument.getNbPixPhotometry();
     this.fracFluxInInterferometry = instrument.getFracFluxInInterferometry();
+
+    final Double vis2CalibrationBias = instrument.getInstrumentVis2CalibrationBias(); // percents
+    this.instrumentVis2CalibrationBias = (vis2CalibrationBias != null) ? 0.01d * vis2CalibrationBias.doubleValue() : 0d;
 
     final FocalInstrumentMode insMode = observation.getInstrumentConfiguration().getFocalInstrumentMode();
 
@@ -217,19 +225,21 @@ public final class NoiseService {
     this.spectralResolution = insMode.getResolution();
 
     if (logger.isLoggable(Level.FINE)) {
-      logger.fine("totalObsTime               = " + totalObsTime);
-      logger.fine("transmission               = " + transmission);
-      logger.fine("dit                        = " + dit);
-      logger.fine("ron                        = " + ron);
-      logger.fine("detectorSaturation         = " + detectorSaturation);
-      logger.fine("instrumentalVisibility     = " + instrumentalVisibility);
-      logger.fine("instrumentalVisibilityBias = " + instrumentalVisibilityBias);
-      logger.fine("instrumentalPhaseBias      = " + instrumentalPhaseBias);
-      logger.fine("nbPixInterf                = " + nbPixInterf);
-      logger.fine("nbPixPhoto                 = " + nbPixPhoto);
-      logger.fine("fracFluxInInterferometry   = " + fracFluxInInterferometry);
-      logger.fine("lambda                     = " + lambda);
-      logger.fine("spectralResolution         = " + spectralResolution);
+      logger.fine("instrumentName                = " + instrumentName);
+      logger.fine("totalObsTime                  = " + totalObsTime);
+      logger.fine("transmission                  = " + transmission);
+      logger.fine("dit                           = " + dit);
+      logger.fine("ron                           = " + ron);
+      logger.fine("detectorSaturation            = " + detectorSaturation);
+      logger.fine("instrumentalVisibility        = " + instrumentalVisibility);
+      logger.fine("instrumentalVisibilityBias    = " + instrumentalVisibilityBias);
+      logger.fine("instrumentVis2CalibrationBias = " + instrumentVis2CalibrationBias);
+      logger.fine("instrumentalPhaseBias         = " + instrumentalPhaseBias);
+      logger.fine("nbPixInterf                   = " + nbPixInterf);
+      logger.fine("nbPixPhoto                    = " + nbPixPhoto);
+      logger.fine("fracFluxInInterferometry      = " + fracFluxInInterferometry);
+      logger.fine("lambda                        = " + lambda);
+      logger.fine("spectralResolution            = " + spectralResolution);
     }
   }
 
@@ -569,8 +579,11 @@ public final class NoiseService {
     svis2 /= Math.pow(this.vinst, 2d);
 
     if (useBias) {
-      // instrumentalVisibilityBias is in percents :
-      return Math.max(svis2, this.instrumentalVisibilityBias * 0.01d);
+      if (this.instrumentVis2CalibrationBias == 0d) {
+        return Math.max(svis2, this.instrumentalVisibilityBias);
+      }
+      // JBLB: PIONIER
+      return Math.max(svis2, this.instrumentalVisibilityBias + this.instrumentVis2CalibrationBias * visAmp * visAmp);
     }
     return svis2;
   }

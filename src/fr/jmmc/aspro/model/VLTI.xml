@@ -8794,7 +8794,8 @@
       <ron>10</ron>
       <detectorSaturation>50000</detectorSaturation>
       <instrumentVisibility>0.9</instrumentVisibility>
-      <instrumentVisibilityBias>5.0</instrumentVisibilityBias>
+      <instrumentVisibilityBias>1.0</instrumentVisibilityBias>
+      <instrumentVis2CalibrationBias>5.0</instrumentVis2CalibrationBias>
       <instrumentPhaseBias>2.0</instrumentPhaseBias>
       <nbPixInterferometry>4</nbPixInterferometry>
       <nbPixPhotometry>4</nbPixPhotometry>
