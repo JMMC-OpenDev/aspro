@@ -84,9 +84,9 @@
     <xjc destdir="${sources}"
          schema="${sources}/fr/jmmc/aspro/model/AsproOIModel.xsd" />
 
-    <!-- remove generated classes for jmcs package -->
+    <!-- remove generated classes for jmal package (target model) -->
     
-    <delete dir="${sources}/fr/jmmc/mcs/" />
+    <delete dir="${sources}/fr/jmmc/jmal/" />
 
 <!--
     <echo>generating java code for AsproDataModel.xsd</echo>
