@@ -761,12 +761,13 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       final double maxBaseLine = intConf.getMaxBaseLine();
 
       if (logger.isLoggable(Level.FINE)) {
-        logger.fine("interferometer configuration changed : " + intConfName + "; baseline min= " + minBaseLine + ", max= " + maxBaseLine);
+        logger.fine("interferometer configuration changed : " + intConfName
+                + "; baseline min= " + minBaseLine + ", max= " + maxBaseLine);
       }
 
-      // adjust uv max range to [minBaseLine; 2 * maxBaseLine] and 
-      // set value to maxBaseLine + 15% (arbitrary but necessary to see spectral dispersion):
-      this.uvMaxAdapter.reset(minBaseLine, 2.0d * maxBaseLine, 1.15d * maxBaseLine);
+      // adjust uv max range to [0.5 * minBaseLine; 2 * maxBaseLine] and 
+      // set value to maxBaseLine + 5% (margin):
+      this.uvMaxAdapter.reset(0.5 * minBaseLine, 2.0d * maxBaseLine, 1.05d * maxBaseLine);
 
       // refresh the fringe tracker modes that depends on the interferometer :
       this.updateComboFTModes(observation);

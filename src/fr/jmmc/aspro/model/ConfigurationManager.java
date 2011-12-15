@@ -140,7 +140,7 @@ public final class ConfigurationManager extends BaseOIManager {
     for (InterferometerConfiguration c : is.getConfigurations()) {
       interferometerConfigurations.put(getConfigurationName(c), c);
 
-      computeBaselineUVBounds(c);
+      computeBaselineUVWBounds(c);
       
       // reverse mapping :
       // declare interferometer configurations in the interferometer description
@@ -167,7 +167,7 @@ public final class ConfigurationManager extends BaseOIManager {
    * Compute the min and max baseline length (m) using all instrument baselines of the given interferometer configuration
    * @param intConf interferometer configuration
    */
-  private void computeBaselineUVBounds(final InterferometerConfiguration intConf) {
+  private void computeBaselineUVWBounds(final InterferometerConfiguration intConf) {
 
     double maxUV = 0d;
     double minUV = Double.POSITIVE_INFINITY;
@@ -180,7 +180,7 @@ public final class ConfigurationManager extends BaseOIManager {
       // for each instrument configuration:
       for (FocalInstrumentConfigurationItem c : insConf.getConfigurations()) {
 
-          computeBaselineUVBounds(c.getStations(), minMax);
+          computeBaselineUVWBounds(c.getStations(), minMax);
 
           minUV = Math.min(minUV, minMax[0]);
           maxUV = Math.max(maxUV, minMax[1]);
@@ -188,7 +188,7 @@ public final class ConfigurationManager extends BaseOIManager {
     }
     
     if (logger.isLoggable(Level.FINE)) {
-      logger.fine("computeBaselineUVBounds = {" + minUV + " - " + maxUV + " m for configuration " + intConf.getName());
+      logger.fine("computeBaselineUVWBounds = {" + minUV + " - " + maxUV + " m for configuration " + intConf.getName());
     }
     
     intConf.setMinBaseLine(minUV);
@@ -240,6 +240,44 @@ public final class ConfigurationManager extends BaseOIManager {
     
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("computeBaselineUVBounds = {" + minUV + " - " + maxUV + " m for stations " + stations);
+    }
+    
+    minMax[0] = minUV;
+    minMax[1] = maxUV;
+  }
+  
+  /**
+   * Compute the min and max baseline vector length (UVW) using all possible baselines
+   * for given stations
+   * @param stations list of stations to determine baselines
+   * @param minMax double[min; max]
+   */
+  public static void computeBaselineUVWBounds(final List<Station> stations, final double[] minMax) {
+    double maxUV = 0d;
+    double minUV = Double.POSITIVE_INFINITY;
+
+    final int size = stations.size();
+
+    double x, y, z, distXYZ;
+    Station s1, s2;
+    for (int i = 0; i < size; i++) {
+      s1 = stations.get(i);
+      for (int j = i + 1; j < size; j++) {
+        s2 = stations.get(j);
+
+        x = s2.getRelativePosition().getPosX() - s1.getRelativePosition().getPosX();
+        y = s2.getRelativePosition().getPosY() - s1.getRelativePosition().getPosY();
+        z = s2.getRelativePosition().getPosZ() - s1.getRelativePosition().getPosZ();
+
+        distXYZ = Math.sqrt(x * x + y * y + z * z);
+
+        minUV = Math.min(minUV, distXYZ);
+        maxUV = Math.max(maxUV, distXYZ);
+      }
+    }
+    
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("computeBaselineUVWBounds = {" + minUV + " - " + maxUV + " m for stations " + stations);
     }
     
     minMax[0] = minUV;
