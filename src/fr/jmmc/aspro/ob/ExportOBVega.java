@@ -43,6 +43,8 @@ public class ExportOBVega {
   public final static Double UNDEFINED_DIAMETER = Double.valueOf(99d);
   /** HD catalog identifier (Simbad) */
   public final static String HD_CATALOG = "HD";
+  /** PIVOT identifier (TARGET/IDS) */
+  public final static String PIVOT_IDENTIFIER = "PIVOT";
 
   /* CHARA Vega StarList File constants */
   /** field separator */
@@ -112,6 +114,7 @@ public class ExportOBVega {
     final TargetUserInformations targetUserInfos = observation.getOrCreateTargetUserInfos();
 
     String scienceTargetName;
+    String scienceTargetId;
     TargetInformation targetInfo;
     List<Target> calibrators;
     int calIndex;
@@ -121,7 +124,15 @@ public class ExportOBVega {
 
       // first science targets:
       if (!targetUserInfos.isCalibrator(target)) {
-        scienceTargetName = processTarget(sb, obsData, target, baseLine, charaSetup, 0, null);
+        
+        // Get ID PIVOT of the science target (null)
+        scienceTargetId = getPivotIdentifier(target);
+
+        if (logger.isLoggable(Level.FINE)) {
+          logger.fine("target : " + target.getName() + " - PIVOT: " + scienceTargetId);
+        }
+        
+        scienceTargetName = processTarget(sb, obsData, target, baseLine, charaSetup, 0, null, scienceTargetId);
 
         if (scienceTargetName != null) {
           // science OB processed:
@@ -134,7 +145,7 @@ public class ExportOBVega {
               calIndex = 0;
               for (Target calibrator : calibrators) {
                 calIndex++;
-                processTarget(sb, obsData, calibrator, baseLine, charaSetup, calIndex, scienceTargetName);
+                processTarget(sb, obsData, calibrator, baseLine, charaSetup, calIndex, scienceTargetName, scienceTargetId);
               }
             }
           }
@@ -170,6 +181,21 @@ public class ExportOBVega {
    *   17.Maximum Hour Angle (z>30° & OPLE)
    *
    * For example : OBSV TARGET epsOriS1S2 HD37128 B0Iab: 1.70 2.41 2.19 2.27 0.77 5:36:12.81 -1:12:6.9 1.49 -1.06 2.43 -3.42 3.42 
+   * 
+   * Add also Default Vega setup
+   *   1.Tracking detector (Red/Blue) = R
+   *   2.Slit selection = W070H4
+   *   3.Grating selection = 300
+   *   4.Camera = RB
+   *   5.Lambda = 656.0
+   *   6.polar choice (Off, ) = OFF
+   *   7.Red density = OPEN
+   *   8.Blue density = OPEN
+   *   9.Record configuration = RB
+   *   10.Nb block = 20
+   *   11.No Image = 1000
+   * 
+   * Add at the end ID_PIVOT or '-' if null
    *
    * @param sb string buffer
    * @param obsData observability results
@@ -178,10 +204,11 @@ public class ExportOBVega {
    * @param charaSetup chara setup
    * @param calibratorIndex 0 means science target, >= 1 indicates the calibrator position in the calibrator list
    * @param scienceTargetName science target name to form the name of this observation block
+   * @param scienceTargetId science target identifier to use for this observation block
    * @return science target name
    */
   public static String processTarget(final StringBuilder sb, final ObservabilityData obsData, final Target target, final String baseLine, final String charaSetup,
-                                     final int calibratorIndex, final String scienceTargetName) {
+                                     final int calibratorIndex, final String scienceTargetName, final String scienceTargetId) {
 
     String result = null;
 
@@ -277,6 +304,12 @@ public class ExportOBVega {
       sb.append(charaSetup);
       // Vega Setup
       sb.append(DEFAULT_VEGA_SETUP);
+      
+      // Identifier PIVOT if defined:
+      if (scienceTargetId != null) {
+        sb.append(SEPARATOR).append(scienceTargetId);
+      }
+      
       // End of line :
       sb.append(FileUtils.LINE_SEPARATOR);
     }
@@ -402,10 +435,24 @@ public class ExportOBVega {
    * @param mag magnitude or null
    * @return magnitude value or -99 if the magnitude is null
    */
-  protected final static double getMagnitude(final Double mag) {
+  protected static double getMagnitude(final Double mag) {
     if (mag != null) {
       return mag.doubleValue();
     }
     return AsproConstants.UNDEFINED_MAGNITUDE;
+  }
+  
+  /**
+   * Extract the PIVOT identifier from TARGET/IDS
+   * @param target target to use
+   * @return PIVOT identifier
+   */
+  private static String getPivotIdentifier(final Target target) {
+    String id = target.getIdentifier(PIVOT_IDENTIFIER);
+    if (id == null) {
+      return null;
+    }
+    id = id.substring(PIVOT_IDENTIFIER.length());
+    return id.trim();
   }
 }
