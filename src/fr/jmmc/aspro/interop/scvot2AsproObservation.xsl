@@ -146,6 +146,7 @@
 
     <xsl:variable name="TARGET" select="/VOT11:VOTABLE/VOT11:RESOURCE/VOT11:TABLE/VOT11:PARAM[@name = 'objectName']/@value"/>
 
+    <!-- TODO: check equinox and HMS / DMS are really J2000 -->
     <xsl:variable name="EQUINOX" select="translate(/VOT11:VOTABLE/VOT11:COOSYS/@equinox, 'J', '')"/>
 
 

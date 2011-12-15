@@ -7,8 +7,8 @@
 
 <ApplicationData link="http://www.jmmc.fr/aspro2">
 
-  <program name="Aspro2" version="0.8.2 beta 5"/>
-  <compilation date="14/12/2011" compiler="JDK 1.5.0_16"/>
+  <program name="Aspro2" version="0.8.2 beta 6"/>
+  <compilation date="15/12/2011" compiler="JDK 1.5.0_16"/>
 
   <text>
     <![CDATA[ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations
@@ -238,6 +238,11 @@
 
   <releasenotes>
     <release version="0.8.2">
+      <prerelease version="0.8.2 beta 6">
+        <change type="CHANGE">Added PIVOT identifier support in Samp 'table.load.votable' incoming and 'starlist.load' output messages</change>
+        <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/243">Fixed noise biases for PIONIER instrument: 
+          fixed bias to 1% and VIS2 calibration bias to 5% (minVis2Err = 0.01 + 0.05 x V2)</change>
+      </prerelease>
       <prerelease version="0.8.2 beta 5">
         <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/242">Added 'Add error noise to data' checkbox on the UV Coverage panel to enable or disable gaussian noise (sigma=error) on OIFits data tables (OI_VIS, OI_VIS2, OI_T3); it is visible on Vis2 plot</change>
         <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/242">Fixed computation of Ring object models: wrong diameter to radius conversion.</change>
