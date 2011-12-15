@@ -38,6 +38,7 @@ import fr.jmmc.aspro.model.OIBase;
  *         &lt;element name="detectorSaturation" type="{http://www.w3.org/2001/XMLSchema}double"/>
  *         &lt;element name="instrumentVisibility" type="{http://www.w3.org/2001/XMLSchema}double"/>
  *         &lt;element name="instrumentVisibilityBias" type="{http://www.w3.org/2001/XMLSchema}double"/>
+ *         &lt;element name="instrumentVis2CalibrationBias" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
  *         &lt;element name="instrumentPhaseBias" type="{http://www.w3.org/2001/XMLSchema}double"/>
  *         &lt;element name="nbPixInterferometry" type="{http://www.w3.org/2001/XMLSchema}int"/>
  *         &lt;element name="nbPixPhotometry" type="{http://www.w3.org/2001/XMLSchema}int"/>
@@ -63,6 +64,7 @@ import fr.jmmc.aspro.model.OIBase;
     "detectorSaturation",
     "instrumentVisibility",
     "instrumentVisibilityBias",
+    "instrumentVis2CalibrationBias",
     "instrumentPhaseBias",
     "nbPixInterferometry",
     "nbPixPhotometry",
@@ -88,6 +90,7 @@ public class FocalInstrument
     protected double detectorSaturation;
     protected double instrumentVisibility;
     protected double instrumentVisibilityBias;
+    protected Double instrumentVis2CalibrationBias;
     protected double instrumentPhaseBias;
     protected int nbPixInterferometry;
     protected int nbPixPhotometry;
@@ -269,6 +272,30 @@ public class FocalInstrument
      */
     public void setInstrumentVisibilityBias(double value) {
         this.instrumentVisibilityBias = value;
+    }
+
+    /**
+     * Gets the value of the instrumentVis2CalibrationBias property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getInstrumentVis2CalibrationBias() {
+        return instrumentVis2CalibrationBias;
+    }
+
+    /**
+     * Sets the value of the instrumentVis2CalibrationBias property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setInstrumentVis2CalibrationBias(Double value) {
+        this.instrumentVis2CalibrationBias = value;
     }
 
     /**

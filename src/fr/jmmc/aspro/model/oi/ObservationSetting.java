@@ -34,6 +34,7 @@ import fr.jmmc.aspro.model.OIBase;
  *         &lt;element name="target" type="{http://www.jmmc.fr/aspro-oi/0.1}Target" maxOccurs="unbounded"/>
  *         &lt;element name="targetUserInfos" type="{http://www.jmmc.fr/aspro-oi/0.1}TargetUserInformations" minOccurs="0"/>
  *         &lt;element name="variant" type="{http://www.jmmc.fr/aspro-oi/0.1}ObservationVariant" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="context" type="{http://www.jmmc.fr/aspro-oi/0.1}ObservationContext" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -52,7 +53,8 @@ import fr.jmmc.aspro.model.OIBase;
     "instrumentConfiguration",
     "targets",
     "targetUserInfos",
-    "variants"
+    "variants",
+    "context"
 })
 @XmlRootElement(name = "observationSetting")
 public class ObservationSetting
@@ -74,6 +76,7 @@ public class ObservationSetting
     protected TargetUserInformations targetUserInfos;
     @XmlElement(name = "variant")
     protected List<ObservationVariant> variants;
+    protected ObservationContext context;
 
     /**
      * Gets the value of the schemaVersion property.
@@ -291,6 +294,30 @@ public class ObservationSetting
             variants = new ArrayList<ObservationVariant>();
         }
         return this.variants;
+    }
+
+    /**
+     * Gets the value of the context property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link ObservationContext }
+     *     
+     */
+    public ObservationContext getContext() {
+        return context;
+    }
+
+    /**
+     * Sets the value of the context property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link ObservationContext }
+     *     
+     */
+    public void setContext(ObservationContext value) {
+        this.context = value;
     }
     
 //--simple--preserve

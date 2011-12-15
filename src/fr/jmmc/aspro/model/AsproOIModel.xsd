@@ -247,7 +247,109 @@
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
+      
+      <xsd:element name="context" type="ObservationContext" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>
+              Optional observation context to handle PIVOT interoperability
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
 
+    </xsd:sequence>
+  </xsd:complexType>
+
+
+
+
+<!-- ObservationContext -->
+  <xsd:complexType name="ObservationContext">
+    <xsd:annotation>
+      <xsd:documentation>
+        This type describes the runtime context containing PIVOT parameters
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+
+      <xsd:element name="operation" type="xsd:string">
+        <xsd:annotation>
+          <xsd:documentation>
+              TODO: Use enumeration
+              The parameter 'operation' indicates what operation to do among :
+                - NEW (new observation)
+                - ADD (default: add targets only)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
+      <!-- editable flags -->
+      <xsd:element name="interferometerEditable" type="xsd:boolean">
+        <xsd:annotation>
+          <xsd:documentation>
+              The parameter 'interferometerEditable' indicates if the interferometer choice is editable [true, false]
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="periodEditable" type="xsd:boolean">
+        <xsd:annotation>
+          <xsd:documentation>
+              The parameter 'periodEditable' indicates if the period choice is editable [true, false]
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="instrumentEditable" type="xsd:boolean">
+        <xsd:annotation>
+          <xsd:documentation>
+              The parameter 'instrumentEditable' indicates if the instrument choice is editable [true, false]
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
+      <xsd:element name="popsEditable" type="xsd:boolean">
+        <xsd:annotation>
+          <xsd:documentation>
+              Optional (CHARA only): The parameter 'popsEditable' indicates if the pops field is editable [true, false]
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
+      <xsd:element name="configurationsEditable" type="xsd:boolean">
+        <xsd:annotation>
+          <xsd:documentation>
+              The parameter 'configurationsEditable' indicates if the configuration choice(s) are editable [true, false]
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
+      <xsd:element name="nightEditable" type="xsd:boolean">
+        <xsd:annotation>
+          <xsd:documentation>
+              The parameter 'nightEditable' indicates if the night restriction choice is editable [true, false]
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="dateEditable" type="xsd:boolean">
+        <xsd:annotation>
+          <xsd:documentation>
+              The parameter 'dateEditable' indicates if the observation date is editable [true, false]
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="minElevationEditable" type="xsd:boolean">
+        <xsd:annotation>
+          <xsd:documentation>
+              The parameter 'minElevationEditable' indicates if the minimum elevation field is editable [true, false]
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
+      <xsd:element name="targetsEditable" type="xsd:boolean">
+        <xsd:annotation>
+          <xsd:documentation>
+              The parameter 'targetsEditable' indicates if the the target list is editable (add/remove/star resolver/target editor) [true, false]
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
     </xsd:sequence>
   </xsd:complexType>
 
@@ -1555,7 +1657,14 @@
       <xsd:element name="instrumentVisibilityBias" type="xsd:double">
         <xsd:annotation>
           <xsd:documentation>
-              The Typical Visibility Bias (percent of V) (typically 1)
+              The Typical Fixed Visibility Bias (percent of V) (typically 1)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="instrumentVis2CalibrationBias" type="xsd:double" minOccurs="0" >
+        <xsd:annotation>
+          <xsd:documentation>
+              The Typical Vis2 Calibration Bias (proportional to V2) (typically 5)
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>

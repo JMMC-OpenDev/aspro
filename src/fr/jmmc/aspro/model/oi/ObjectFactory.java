@@ -86,6 +86,14 @@ public class ObjectFactory {
     }
 
     /**
+     * Create an instance of {@link ObservationContext }
+     * 
+     */
+    public ObservationContext createObservationContext() {
+        return new ObservationContext();
+    }
+
+    /**
      * Create an instance of {@link Configurations }
      * 
      */
