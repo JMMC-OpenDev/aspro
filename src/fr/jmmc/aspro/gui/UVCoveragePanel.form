@@ -137,7 +137,8 @@
                 </Component>
                 <Component class="javax.swing.JLabel" name="jLabelUVMax">
                   <Properties>
-                    <Property name="text" type="java.lang.String" value="U-V range to plot"/>
+                    <Property name="text" type="java.lang.String" value="U-V range to plot (m)"/>
+                    <Property name="toolTipText" type="java.lang.String" value=""/>
                   </Properties>
                   <Constraints>
                     <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">

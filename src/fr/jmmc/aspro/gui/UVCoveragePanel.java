@@ -274,7 +274,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelLeft.add(jSeparator3, gridBagConstraints);
 
-        jLabelUVMax.setText("U-V range to plot");
+        jLabelUVMax.setText("U-V range to plot (m)");
+        jLabelUVMax.setToolTipText("");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 11;
