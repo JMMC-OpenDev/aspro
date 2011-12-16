@@ -87,7 +87,7 @@
         <package name="commons-math"
             description="Commons Math is a library of lightweight, self-contained mathematics and statistics components addressing the most common problems not available in the Java programming language or Commons Lang."
             link="http://commons.apache.org/math/"
-            jars="commons-math-2.0.jar"
+            jars="commons-math-2.2.jar"
             license="APACHE_V2"/>
 
         <!-- Model computations (bessel functions) -->
