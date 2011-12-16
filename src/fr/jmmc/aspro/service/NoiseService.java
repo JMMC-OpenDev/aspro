@@ -580,10 +580,12 @@ public final class NoiseService {
 
     if (useBias) {
       if (this.instrumentVis2CalibrationBias == 0d) {
-        return Math.max(svis2, this.instrumentalVisibilityBias);
+      // TODO: find correct coefficients for instruments AMBER, MIDI, VEGA and use instrumentVis2CalibrationBias in  estimation.
+//        return Math.max(svis2, Math.pow(this.instrumentalVisibilityBias, 2d));
+        return Math.max(svis2, this.instrumentalVisibilityBias);        
       }
-      // JBLB: PIONIER
-      return Math.max(svis2, this.instrumentalVisibilityBias + this.instrumentVis2CalibrationBias * visAmp * visAmp);
+      // JBLB: bias estimation (first order for PIONIER):
+      return Math.max(svis2, Math.pow(this.instrumentalVisibilityBias, 2d) + this.instrumentVis2CalibrationBias * Math.pow(visAmp, 2d));
     }
     return svis2;
   }
