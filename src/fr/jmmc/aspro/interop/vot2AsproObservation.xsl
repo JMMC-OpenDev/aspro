@@ -225,6 +225,7 @@
       </xsl:call-template>
     </xsl:variable>
 
+    <!-- TODO: check equinox and HMS / DMS are really J2000 -->
     <xsl:variable name="EQUINOX" select="translate(//VOT11:COOSYS[1]/@equinox, 'J', '')"/>
 
 

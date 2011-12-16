@@ -149,7 +149,7 @@ public final class SearchCalVOTableHandler {
         }
 
         if (calibrators.size() > MAX_CALIBRATORS) {
-          MessagePane.showErrorMessage("Too many calibrators (" + calibrators.size() + ") found in SearchCal response !");
+          MessagePane.showErrorMessage("Too many calibrators (" + calibrators.size() + " / " + MAX_CALIBRATORS + ") found in SearchCal response !");
           return;
         }
 
@@ -206,7 +206,7 @@ public final class SearchCalVOTableHandler {
    * @return merge operation report
    */
   private static String mergeTargets(final List<Target> editTargets, final TargetUserInformations editTargetUserInfos,
-                                     final String targetName, final List<Target> calibrators) {
+          final String targetName, final List<Target> calibrators) {
     // report buffer :
     final StringBuilder sb = new StringBuilder(512);
     sb.append("Import SearchCal calibrators to target [").append(targetName).append("]\n\n");
