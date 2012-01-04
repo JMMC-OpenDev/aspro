@@ -12,7 +12,18 @@ import java.util.List;
  */
 public class CombTest {
 
-  public static final void main(String[] args) {
+  /**
+   * Forbidden constructor
+   */
+  private CombTest() {
+    super();
+  }
+
+  /**
+   * Test
+   * @param args unused
+   */
+  public static void main(String[] args) {
     test(2);
     test(3);
     test(4);

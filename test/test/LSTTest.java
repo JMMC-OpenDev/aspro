@@ -30,7 +30,7 @@ public final class LSTTest {
   private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(LSTTest.class.getName());
 
   /**
-   * Private constructor
+   * Forbidden constructor
    */
   private LSTTest() {
     super();
@@ -40,7 +40,7 @@ public final class LSTTest {
    * Test
    * @param args unused
    */
-  public static final void main(String[] args) {
+  public static void main(String[] args) {
 
 
     // Set the default locale to en-US locale (for Numerical Fields "." ",")
