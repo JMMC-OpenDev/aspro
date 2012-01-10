@@ -1,6 +1,6 @@
 <VOTABLE>
     <COOSYS ID="J2000" equinox="J2000." epoch="J2000." system="eq_FK5"/>
-    <RESOURCE name="Aspro2">
+    <RESOURCE name="SearchCal from Aspro2">
         <TABLE>
             <PARAM datatype="string" name="band" value="_INSBAND_"/>
             <PARAM datatype="double" name="wlen"    value="_WAVELENGTH_" unit="um"/>

@@ -9,7 +9,7 @@
 
   <program name="Aspro2" version="0.8.1"/>
 
-  <compilation date="12/09/2011" compiler="JDK 1.5.0_16"/>
+  <compilation date="14/09/2011" compiler="JDK 1.5.0_16"/>
 
   <text>
     <![CDATA[ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations
@@ -206,6 +206,12 @@
   <releasenotes>
     <release version="0.8.1">
       <prerelease version="0.8.1">
+        <change type="BUGFIX">Corrected effective wavelength in OIFits output (channel center)</change>
+        <change type="FEATURE">Corrected AMBER noise parameters: visibility and phase bias set to 5% and 3 deg respectively</change>
+        <change type="FEATURE">Updated PIONIER instrument configuration: corrected noise parameters and added spectral modes (LARGE-H, SMALL-H and BROAD-H)</change>
+        <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/199">Fixed alternative distribution package (JAR file): missing jMAL embedded libraries</change>
+        <change type="BUGFIX">Fixed out of range exception when mouse zooming on UV Coverage Panel arround borders</change>
+        <change type="FEATURE">Improved Java Web Start packaging (JNLP) to provide faster downloads</change>
         <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/198">Fixed exception when exporting an Observing block 
           and the spectral type is undefined for one target (SearchCal calibrator)</change>
       </prerelease>

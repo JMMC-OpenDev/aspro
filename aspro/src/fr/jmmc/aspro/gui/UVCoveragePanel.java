@@ -1826,16 +1826,22 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     }
 
     // note : floor/ceil to be sure to have at least 1x1 pixel image
-    final int x = (int) Math.floor(imageSize * (uvRect.getX() - uvRectRef.getX()) / uvRectRef.getWidth());
+    int x = (int) Math.floor(imageSize * (uvRect.getX() - uvRectRef.getX()) / uvRectRef.getWidth());
     int y = (int) Math.floor(imageSize * (uvRect.getY() - uvRectRef.getY()) / uvRectRef.getHeight());
-    final int w = (int) Math.ceil(imageSize * uvRect.getWidth() / uvRectRef.getWidth());
-    final int h = (int) Math.ceil(imageSize * uvRect.getHeight() / uvRectRef.getHeight());
+    int w = (int) Math.ceil(imageSize * uvRect.getWidth() / uvRectRef.getWidth());
+    int h = (int) Math.ceil(imageSize * uvRect.getHeight() / uvRectRef.getHeight());
 
     // Note : the image is produced from an array where 0,0 corresponds to the upper left corner
     // whereas it corresponds in UV to the lower U and Upper V coordinates => inverse the V axis
 
     // Inverse V axis issue :
     y = imageSize - y - h;
+    
+    // check bounds:
+    x = checkBounds(x, 0, imageSize - 1);
+    y = checkBounds(y, 0, imageSize - 1);
+    w = checkBounds(w, 1, imageSize - x);
+    h = checkBounds(h, 1, imageSize - y);
 
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("sub uvMap [" + x + ", " + y + " - " + w + ", " + h + "]");
@@ -1846,6 +1852,23 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
     // update the background image :
     updateUVMap(subUVMap);
+  }
+  
+  /**
+   * Return the value or the closest bound
+   * @param value value to check
+   * @param min minimum value
+   * @param max maximum value
+   * @return value or the closest bound
+   */
+  private static int checkBounds(final int value, final int min, final int max) {
+    if (value < min) {
+      return min;
+    }
+    if (value > max) {
+      return max;
+    }
+    return value;
   }
 
   /**

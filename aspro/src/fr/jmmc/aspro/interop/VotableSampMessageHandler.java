@@ -68,9 +68,17 @@ public final class VotableSampMessageHandler extends SampMessageHandler {
 
       throw new SampException("Can not read the votable : " + voTableURL, use);
     }
+    
+    if (!uri.getScheme().equalsIgnoreCase("file")) {
+      throw new SampException("Not supported URI scheme : " + voTableURL);
+    }
 
     try {
 
+      // TODO: support any votable i.e. http URI
+      
+      // Use Http.getHttpClient(boolean) but warning about proxy settings
+      
       // note : uri can be http://anything :
       final File voTableFile = new File(uri);
 
