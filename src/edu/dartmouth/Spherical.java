@@ -67,7 +67,7 @@ public final class Spherical {
 //   print "pa of arc from moon to sun is %5.2f deg." % (pa * _skysub.DEG_IN_RADIAN)
 
     final double cusppa = pa - Const.PI / 2d;   // line of cusps ...
-//     System.out.printf("cusppa = %f\n",cusppa);
+//     System.out.printf("cusppa = %f%n",cusppa);
     return new double[]{cusppa, moonsun};
   }
 
@@ -83,14 +83,14 @@ public final class Spherical {
     if (Math.abs(x) <= 1d) {
       retvals[1] = Math.asin(x) * Const.DEG_IN_RADIAN;
     } else {
-//      System.out.printf("min_max_alt ... asin(>1)\n");
+//      System.out.printf("min_max_alt ... asin(>1)%n");
     }
 
     x = Math.sin(decrad) * Math.sin(latrad) - Math.cos(decrad) * Math.cos(latrad);
     if (Math.abs(x) <= 1d) {
       retvals[0] = Math.asin(x) * Const.DEG_IN_RADIAN;
     } else {
-//      System.out.printf("min_max_alt ... asin(>1)\n");
+//      System.out.printf("min_max_alt ... asin(>1)%n");
     }
 
     return retvals;
@@ -107,7 +107,7 @@ public final class Spherical {
     if (alt > minmax[1]) {
       return -1000d;  // always lower than asked
     }
-    // System.out.printf("DEC %f lat %f alt %f ... \n",DEC,lat,alt);
+    // System.out.printf("DEC %f lat %f alt %f ...%n",DEC,lat,alt);
     final double codec = Const.PI_OVER_2 - dec / Const.DEG_IN_RADIAN;
     final double colat = Const.PI_OVER_2 - lat / Const.DEG_IN_RADIAN;
     final double coalt = Const.PI_OVER_2 - alt / Const.DEG_IN_RADIAN;
@@ -116,7 +116,7 @@ public final class Spherical {
     if (Math.abs(x) <= 1d) {
       return (Math.acos(x) * Const.HRS_IN_RADIAN);
     } else {
-//      System.out.printf("Bad inverse trig in ha_alt ... acos(%f)\n", x);
+//      System.out.printf("Bad inverse trig in ha_alt ... acos(%f)%n", x);
       return 1000d;
     }
   }
@@ -178,13 +178,13 @@ public final class Spherical {
     xyzgal[0] = Math.cos(galongitrad) * Math.cos(galatitrad);
     xyzgal[1] = Math.sin(galongitrad) * Math.cos(galatitrad);
     xyzgal[2] = Math.sin(galatitrad);
-    // System.out.printf("Galactic xyz %f %f %f\n",xyzgal[0],xyzgal[1],xyzgal[2]);
+    // System.out.printf("Galactic xyz %f %f %f%n",xyzgal[0],xyzgal[1],xyzgal[2]);
 
     // for rotation matrices, inverse is the transpose, so ...
     xyz[0] = xyzgal[0] * p11 + xyzgal[1] * p21 + xyzgal[2] * p31;
     xyz[1] = xyzgal[0] * p12 + xyzgal[1] * p22 + xyzgal[2] * p32;
     xyz[2] = xyzgal[0] * p13 + xyzgal[1] * p23 + xyzgal[2] * p33;
-    // System.out.printf("Equatorial xyz %f %f %f\n",xyz[0],xyz[1],xyz[2]);
+    // System.out.printf("Equatorial xyz %f %f %f%n",xyz[0],xyz[1],xyz[2]);
 
     double[] retvals = Celest.xyzCel(xyz[0], xyz[1], xyz[2]);
     Celest cel = new Celest(retvals[0], retvals[1], 1950.);  // galactic are defined for 1950

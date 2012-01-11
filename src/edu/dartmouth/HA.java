@@ -81,7 +81,7 @@ public final class HA implements Cloneable {
       rounded.second = 0d;
       rounded.sign = 1;
     }
-    // System.out.printf("rounded.sign = %d\n",rounded.sign);
+    // System.out.printf("rounded.sign = %d%n",rounded.sign);
     if (rounded.sign > 0) {
       signout = "+";
     } else {

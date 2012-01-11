@@ -127,7 +127,7 @@ public final class Celest implements Cloneable {
       return new double[]{0d, 0d, 0d};
     }
 
-    // System.out.printf("xyzCel: %f %f %f ->\n",x,y,z);
+    // System.out.printf("xyzCel: %f %f %f ->%n",x,y,z);
     double raout, decout;
 
     final double xy = Math.sqrt(x * x + y * y);
@@ -141,7 +141,7 @@ public final class Celest implements Cloneable {
       raout = Math.atan2(y, x) * Const.HRS_IN_RADIAN;
       decout = Math.asin(z) * Const.DEG_IN_RADIAN;
     }
-    // System.out.printf("%f %f\n",raout,decout);
+    // System.out.printf("%f %f%n",raout,decout);
     return new double[]{raout, decout, mod};
     // it will sometimees be useful to have the dist.
   }
@@ -164,7 +164,7 @@ public final class Celest implements Cloneable {
   enough for most puropses. */
   double[] precess(final double NewEquinox) {
 
-    //System.out.printf("equinoxes %f %f\n",equinox,NewEquinox);
+    //System.out.printf("equinoxes %f %f%n",equinox,NewEquinox);
     final double ti = (equinox - 2000d) / 100d;
     final double tf = (NewEquinox - 2000d - 100d * ti) / 100d;
 
@@ -206,12 +206,12 @@ public final class Celest implements Cloneable {
 
     for (int i = 0, j = 0; i < 3; i++) {  // matrix multiplication
       fin[i] = 0d;
-      //System.out.printf("orig[%d] = %f\n",i,orig[i]);
+      //System.out.printf("orig[%d] = %f%n",i,orig[i]);
       for (j = 0; j < 3; j++) {
         //System.out.printf("%d%d: %f  ",i,j,p[i][j]);
         fin[i] += p[i][j] * orig[j];
       }
-      //System.out.printf("\nfin[%d] = %f\n\n",i,fin[i]);
+      //System.out.printf("%nfin[%d] = %f%n%n",i,fin[i]);
     }
     return xyzCel(fin[0], fin[1], fin[2]);
   }
@@ -229,7 +229,7 @@ public final class Celest implements Cloneable {
   public Celest precessed(final double newEquinox) {
     /** returns a new Celest precessed from this one. */
     final double[] radecOut = precess(newEquinox);
-    // System.out.printf("radecOut %f %f\n",radecOut[0],radecOut[1]);
+    // System.out.printf("radecOut %f %f%n",radecOut[0],radecOut[1]);
     return new Celest(radecOut[0], radecOut[1], newEquinox);
   }
 

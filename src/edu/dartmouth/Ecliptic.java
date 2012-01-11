@@ -16,7 +16,7 @@ public final class Ecliptic {
     final double incl = (23.439291d + T * (-0.0130042d - 0.00000016d * T)) / Const.DEG_IN_RADIAN;
     /* 1992 Astron Almanac, p. B18, dropping the
     cubic term, which is 2 milli-arcsec! */
-    // System.out.printf("T incl %f %f\n",T,incl);
+    // System.out.printf("T incl %f %f%n",T,incl);
     return new double[]{
               x,
               Math.cos(incl) * y - Math.sin(incl) * z,
@@ -37,7 +37,7 @@ public final class Ecliptic {
     incl = (23.439291 + T * (-0.0130042 - 0.00000016 * T)) / Const.DEG_IN_RADIAN;
     /* 1992 Astron Almanac, p. B18, dropping the
     cubic term, which is 2 milli-arcsec! */
-    // System.out.printf("T incl %f %f\n",T,incl);
+    // System.out.printf("T incl %f %f%n",T,incl);
 
     equat = o.current.cel_unitXYZ();
 

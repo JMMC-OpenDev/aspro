@@ -30,12 +30,12 @@ public final class WhenWhere implements Cloneable {
   double cusppa;
 
   void dump() {
-    System.out.printf("jd %f  Local %d %d %d  %d %d  UT %d %d %d  %d %d\n",
+    System.out.printf("jd %f  Local %d %d %d  %d %d  UT %d %d %d  %d %d%n",
             when.jd, when.localDate.year, when.localDate.month, when.localDate.day,
             when.localDate.timeofday.hour, when.localDate.timeofday.minute,
             when.UTDate.year, when.UTDate.month, when.UTDate.day, when.UTDate.timeofday.hour,
             when.UTDate.timeofday.minute);
-    System.out.printf("lst %f\n", sidereal);
+    System.out.printf("lst %f%n", sidereal);
   }
 
   WhenWhere(final InstantInTime t, final Site loc) {
@@ -91,15 +91,15 @@ public final class WhenWhere implements Cloneable {
     // so test to see if these are needed.
     final Site ss = hash.get(s);
     if (where.equals(ss) == false) {  // there's an equals method for this now ...
-      // System.out.printf("Changing site ... .\n");
+      // System.out.printf("Changing site ...%n");
       where = ss;
-      // System.out.printf("Site changed, stdz = %f\n",where.stdz);
+      // System.out.printf("Site changed, stdz = %f%n",where.stdz);
       sidereal = lstCalc(when.jd, where.longit.value);
       when.setInstant(when.jd, where.stdz, where.use_dst, true);
       siderealobj.setRA(sidereal);
     }
     // otherwise do nothing.
-    // else System.out.printf("Not changing site ... \n");
+    // else System.out.printf("Not changing site ...%n");
   }
 
   void advanceWhen(final String s) {
@@ -172,34 +172,33 @@ public final class WhenWhere implements Cloneable {
 
     // need sunvel now so get it ...
 
-    //      System.out.printf("into baryxyzvel, jd = %f\n",when.jd);
+    //      System.out.printf("into baryxyzvel, jd = %f%n",when.jd);
     s.sunvel(when.jd);  // compute sun velocity  ...
 
-//       System.out.printf("Helio Vxyz sun: %f %f %f  %f\n",
+//       System.out.printf("Helio Vxyz sun: %f %f %f  %f%n",
     //         s.xyzvel[0] * Const.KMS_AUDAY,
     //        s.xyzvel[1] * Const.KMS_AUDAY,
     //       s.xyzvel[2] * Const.KMS_AUDAY, when.jd);
 
     p.ComputeBaryCor(); // compute offset of barycenter from heliocenter
 
-//       System.out.printf("sun xyz  %f %f %f\n",s.xyz[0],s.xyz[1],s.xyz[2]);
-//       System.out.printf(" baryc   %f %f %f\n",p.barycor[0],p.barycor[1],p.barycor[2]);
+//       System.out.printf("sun xyz  %f %f %f%n",s.xyz[0],s.xyz[1],s.xyz[2]);
+//       System.out.printf(" baryc   %f %f %f%n",p.barycor[0],p.barycor[1],p.barycor[2]);
     for (i = 0; i < 3; i++) {
       barycenter[i] = (-1d * s.xyz[i] - p.barycor[i])
               * Const.LIGHTSEC_IN_AU;
       barycenter[i + 3] = (-1d * s.xyzvel[i] - p.barycor[i + 3])
               * Const.KMS_AUDAY;
-//          System.out.printf("pre-topo: %d   %f   %f \n",i,
-//              barycenter[i] / Const.LIGHTSEC_IN_AU,
-//                                                barycenter[i+3]);
+//          System.out.printf("pre-topo: %d   %f   %f%n",i,
+//              barycenter[i] / Const.LIGHTSEC_IN_AU, barycenter[i+3]);
     }
 
     // add in the topocentric velocity ... note use of sidereal for longit
 
     geopos = Topo.Geocent(sidereal, where.lat.value, where.elevsea);
 
-//       System.out.printf("Geopos: %f %f %f\n",geopos[0],geopos[1],geopos[2]);
-//       System.out.printf("topo corrn vx vy %f %f\n",
+//       System.out.printf("Geopos: %f %f %f%n",geopos[0],geopos[1],geopos[2]);
+//       System.out.printf("topo corrn vx vy %f %f%n",
 //          Const.OMEGA_EARTH * geopos[1] * Const.EARTHRAD_IN_KM,
 //          Const.OMEGA_EARTH * geopos[0] * Const.EARTHRAD_IN_KM);
 
@@ -211,15 +210,15 @@ public final class WhenWhere implements Cloneable {
   }
 
   void makeLocalSun() {
-    //System.out.printf("Making a new sun, jd = %f\n",when.jd);
+    //System.out.printf("Making a new sun, jd = %f%n",when.jd);
     sun = new Sun(this);
-    //System.out.printf("Made sun, sidereal = %f\n",sidereal);
+    //System.out.printf("Made sun, sidereal = %f%n",sidereal);
     hasun = new HA(sidereal - sun.topopos.alpha.value);
     Observation.altit(sun.topopos.delta.value, hasun.value, where.lat.value, altazparSun);
     altsun = altazparSun[0];
     azsun = altazparSun[1];
     twilight = SkyIllum.ztwilight(altsun);
-    //System.out.printf("Made a new sun: %s alt %f\n",sun.topopos.checkstring(),altazpar[0]);
+    //System.out.printf("Made a new sun: %s alt %f%n",sun.topopos.checkstring(),altazpar[0]);
   }
 
   void updateLocalSun() {
@@ -229,7 +228,7 @@ public final class WhenWhere implements Cloneable {
     altsun = altazparSun[0];
     azsun = altazparSun[1];
     twilight = SkyIllum.ztwilight(altsun);
-//       System.out.printf("Updated sun: %s %f\n",sun.topopos.checkstring(),altazpar[0]);
+//       System.out.printf("Updated sun: %s %f%n",sun.topopos.checkstring(),altazpar[0]);
   }
 
   void makeLocalMoon() {
@@ -239,7 +238,7 @@ public final class WhenWhere implements Cloneable {
     altmoon = altazparMoon[0];
     azmoon = altazparMoon[1];
 
-//      System.out.printf("Made a new moon: %s HA %s alt %f\n",moon.topopos.checkstring(),
+//      System.out.printf("Made a new moon: %s HA %s alt %f%n",moon.topopos.checkstring(),
 //          hamoon.roundedHAString(0,":"),altazpar[0]);
   }
 
@@ -250,7 +249,7 @@ public final class WhenWhere implements Cloneable {
     altmoon = altazparMoon[0];
     azmoon = altazparMoon[1];
 
-//      System.out.printf("Updated the moon: %s HA %s alt %f\n",moon.topopos.checkstring(),
+//      System.out.printf("Updated the moon: %s HA %s alt %f%n",moon.topopos.checkstring(),
 //          hamoon.roundedHAString(0,":"),altazpar[0]);
   }
 

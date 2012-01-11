@@ -86,7 +86,7 @@ public final class InstantInTime implements Cloneable {
     if (is_ut) {
       UTDate = new GenericCalDat(s);
       jd = UTDate.cal2JD();
-      // System.out.printf("Setting to UT, s = %s,jd = %f\n",s,jd);
+      // System.out.printf("Setting to UT, s = %s,jd = %f%n",s,jd);
       // The DST calculation is not sensitive to year if dstInEffect is
       // computed using the same year as used in findDSTBounds.
       if (use_dst == 0) {
@@ -94,52 +94,52 @@ public final class InstantInTime implements Cloneable {
       } else {  // determine if DST is in effect ...
         DSTBounds = findDSTBounds(UTDate.year, stdzin, use_dst);
         if (use_dst > 0) {  // northern hemisphere logic
-          if (jd > DSTBounds[0] & jd < DSTBounds[1]) {
+          if (jd > DSTBounds[0] && jd < DSTBounds[1]) {
             dstInEffect = true;
           } else {
             dstInEffect = false;
           }
         }
         if (use_dst < 0) {  // southern hemisphere logic
-          if (jd < DSTBounds[0] | jd > DSTBounds[1]) {
+          if (jd < DSTBounds[0] || jd > DSTBounds[1]) {
             dstInEffect = true;
           } else {
             dstInEffect = false;
           }
         }
-        // System.out.printf("use_dst %d jd %f Bounds[0,1] = %f %f\n",
+        // System.out.printf("use_dst %d jd %f Bounds[0,1] = %f %f%n",
         //   use_dst,jd,DSTBounds[0],DSTBounds[1]);
-        // if (dstInEffect) System.out.printf("DST is in effect.\n");
-        // else System.out.printf("DST is NOT in effect.\n");
+        // if (dstInEffect) System.out.printf("DST is in effect.%n");
+        // else System.out.printf("DST is NOT in effect.%n");
       }
 
       if (dstInEffect) {
         localjd = jd - (stdzin - 1d) / 24d;
-        //  System.out.printf("setting localjd using DST\n");
+        //  System.out.printf("setting localjd using DST%n");
       } else {
         localjd = jd - (stdzin / 24d);
-        //  System.out.printf("Setting localjd using std time\n");
+        //  System.out.printf("Setting localjd using std time%n");
       }
       localDate = new GenericCalDat(localjd);
 
     } else {  // input string is local date and time.
       localDate = new GenericCalDat(s);  // by definition ..
       localjd = localDate.cal2JD();
-      // System.out.printf("using localjd = %f\n",localjd);
+      // System.out.printf("using localjd = %f%n",localjd);
       if (use_dst == 0) {
         dstInEffect = false;
       } else { // dst is used if applicable ... use local-time limits of
         // applicability {DSTBounds [2] and [3] instead of [0] and [1])
         DSTBounds = findDSTBounds(localDate.year, stdzin, use_dst);
         if (use_dst > 0) {  // northern hemisphere logic
-          if (localjd > DSTBounds[2] & localjd < DSTBounds[3]) {
+          if (localjd > DSTBounds[2] && localjd < DSTBounds[3]) {
             dstInEffect = true;
           } else {
             dstInEffect = false;
           }
         }
         if (use_dst < 0) {  // southern hemisphere logic
-          if (localjd < DSTBounds[2] | localjd > DSTBounds[3]) {
+          if (localjd < DSTBounds[2] || localjd > DSTBounds[3]) {
             dstInEffect = true;
           } else {
             dstInEffect = false;
@@ -152,7 +152,7 @@ public final class InstantInTime implements Cloneable {
       } else {
         jd = localjd + stdzin / 24d;
       }
-      // System.out.printf("Setting jd to %f\n",jd);
+      // System.out.printf("Setting jd to %f%n",jd);
       UTDate = new GenericCalDat(jd);
     }
   }
@@ -176,7 +176,7 @@ public final class InstantInTime implements Cloneable {
       lastfield = "h";   // defaults to hours
     }
     // use first character to tell us what the unit is
-//      System.out.printf("last field %s  lastfield.substring(0,1) :%s:\n",
+//      System.out.printf("last field %s  lastfield.substring(0,1) :%s:%n",
     //          lastfield,lastfield.substring(0,1));
     if (lastfield.startsWith("h")) {
       delta = inputdelta / 24d;
@@ -222,7 +222,7 @@ public final class InstantInTime implements Cloneable {
       lastfield = "h";   // defaults to hours
     }
     // use first character to tell us what the unit is
-//      System.out.printf("last field %s  lastfield.substring(0,1) :%s:\n",
+//      System.out.printf("last field %s  lastfield.substring(0,1) :%s:%n",
     //          lastfield,lastfield.substring(0,1));
     if (lastfield.startsWith("h")) {
       delta = inputdelta / 24d;
@@ -251,7 +251,7 @@ public final class InstantInTime implements Cloneable {
     } // jd is always UT, so use_dst is true
     else {
       setInstant(jd - delta, stdz, useDST, true);
-      // System.out.printf("advanceTime: JD, delta %f %f  stdz %f useDST %d\n",
+      // System.out.printf("advanceTime: JD, delta %f %f  stdz %f useDST %d%n",
       //          jd,delta,stdz,useDST);
     }
   }
@@ -272,23 +272,23 @@ public final class InstantInTime implements Cloneable {
       } else {  // determine if DST is in effect ...
         DSTBounds = findDSTBounds(UTDate.year, stdzin, use_dst);
         if (use_dst > 0) {  // northern hemisphere logic
-          if (jd > DSTBounds[0] & jd < DSTBounds[1]) {
+          if (jd > DSTBounds[0] && jd < DSTBounds[1]) {
             dstInEffect = true;
           } else {
             dstInEffect = false;
           }
         }
         if (use_dst < 0) {  // southern hemisphere logic
-          if (jd < DSTBounds[0] | jd > DSTBounds[1]) {
+          if (jd < DSTBounds[0] || jd > DSTBounds[1]) {
             dstInEffect = true;
           } else {
             dstInEffect = false;
           }
         }
-        // System.out.printf("use_dst %d jd %f Bounds[0,1] = %f %f\n",
+        // System.out.printf("use_dst %d jd %f Bounds[0,1] = %f %f%n",
         //   use_dst,jd,DSTBounds[0],DSTBounds[1]);
-        // if (dstInEffect) System.out.printf("DST is in effect.\n");
-        // else System.out.printf("DST is NOT in effect.\n");
+        // if (dstInEffect) System.out.printf("DST is in effect.%n");
+        // else System.out.printf("DST is NOT in effect.%n");
       }
 
       if (dstInEffect) {
@@ -306,14 +306,14 @@ public final class InstantInTime implements Cloneable {
         // applicability (DSTBounds [2] and [3] instead of [0] and [1])
         DSTBounds = findDSTBounds(localDate.year, stdzin, use_dst);
         if (use_dst > 0) {  // northern hemisphere logic
-          if (localjd > DSTBounds[2] & localjd < DSTBounds[3]) {
+          if (localjd > DSTBounds[2] && localjd < DSTBounds[3]) {
             dstInEffect = true;
           } else {
             dstInEffect = false;
           }
         }
         if (use_dst < 0) {  // southern hemisphere logic
-          if (localjd < DSTBounds[2] | localjd > DSTBounds[3]) {
+          if (localjd < DSTBounds[2] || localjd > DSTBounds[3]) {
             dstInEffect = true;
           } else {
             dstInEffect = false;

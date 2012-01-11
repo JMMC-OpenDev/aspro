@@ -18,10 +18,10 @@ public final class Topo {
     // input is decimal hours, decimal degrees, and meters.
     // See 1992 Astr Almanac, p. K11.
 
-    //System.out.printf("lat long %f %f\n",latitin,longitin);
+    //System.out.printf("lat long %f %f%n",latitin,longitin);
     final double geolat = latitin / Const.DEG_IN_RADIAN;
     final double geolong = longitin / Const.HRS_IN_RADIAN;
-    //System.out.printf("radians %f %f \n",geolat,geolong);
+    //System.out.printf("radians %f %f%n",geolat,geolong);
     final double coslat = Math.cos(geolat);
     final double sinlat = Math.sin(geolat);
     final double coslong = Math.cos(geolong);

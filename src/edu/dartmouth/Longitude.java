@@ -66,7 +66,7 @@ public final class Longitude implements Cloneable {
     fields = s.split("\\s+");  // whitespace
     nf = fields.length;
     unitfield = fields[nf - 2].toLowerCase();
-    // System.out.printf("last field %s\n",lastfield);
+    // System.out.printf("last field %s%n",lastfield);
     i = unitfield.indexOf("h");
     if (i > -1) {
       indegrees = false;
@@ -96,7 +96,7 @@ public final class Longitude implements Cloneable {
     if (positiveEast) {
       value *= -1d;
     }
-    // System.out.printf("Value = %f\n",value);
+    // System.out.printf("Value = %f%n",value);
     value = adjlongit(value);
     sex.tosex(value);
   }
@@ -132,7 +132,7 @@ public final class Longitude implements Cloneable {
     outvalsex = new Sexagesimal(outval);
     rounded = outvalsex.roundsex(ndigits);
 
-    // System.out.printf("rounded value is %f\n",rounded.value);
+    // System.out.printf("rounded value is %f%n",rounded.value);
 
     if (rounded.hour == 24) {
       rounded.hour = 0;

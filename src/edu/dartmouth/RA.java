@@ -25,7 +25,7 @@ public final class RA implements Cloneable {
     while (inval > 24d) {
       inval -= 24d;
     }
-    // System.out.printf("returning inval = %f\n",inval);
+    // System.out.printf("returning inval = %f%n",inval);
     return inval;
   }
 
@@ -46,7 +46,7 @@ public final class RA implements Cloneable {
 //      System.out.printf("Setting start %d %d %5.2f  %f  -> ",
 //        sex.hour,sex.minute,sex.second,value);
     sex.tosex(value);
-//      System.out.printf("%d %d %5.2f ... \n",sex.hour,sex.minute,sex.second);
+//      System.out.printf("%d %d %5.2f ...%n",sex.hour,sex.minute,sex.second);
   }
 
   public void setRA(final String s) {

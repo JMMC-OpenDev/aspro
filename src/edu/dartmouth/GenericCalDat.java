@@ -25,8 +25,8 @@ UT or local - that's handled by InstantInTime. */
 public final class GenericCalDat implements Cloneable {
 
   final static String[] months = {"", "January", "February", "March", "April",
-                                  "May", "June", "July", "August", "September", "October", "November",
-                                  "December"};
+    "May", "June", "July", "August", "September", "October", "November",
+    "December"};
   final static String monthtest = "janfebmaraprmayjunjulaugsepoctnovdec";
   final static String[] dayname = {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
 
@@ -137,7 +137,7 @@ public final class GenericCalDat implements Cloneable {
       int ind = monthtest.indexOf(ss);
       if (ind > -1) {
         month = ((ind / 3) + 1);
-        // System.out.printf("ss %s ind %d month %d\n",ss,ind,month);
+        // System.out.printf("ss %s ind %d month %d%n",ss,ind,month);
       } else {
         // System.out.println("Undecipherable month, set to 1000.\n");
         month = 1000;
@@ -152,13 +152,13 @@ public final class GenericCalDat implements Cloneable {
     }
     if (fields.length > 5) {
       timeofday =
-      new Sexagesimal(String.format(Locale.ENGLISH, "%s:%s:%s", fields[3], fields[4], fields[5]));
+              new Sexagesimal(String.format(Locale.ENGLISH, "%s:%s:%s", fields[3], fields[4], fields[5]));
     }
   }
 
   double cal2JD() {
 
-    // System.out.printf("%d %d %d  %d %d %f\n",
+    // System.out.printf("%d %d %d  %d %d %f%n",
     // year,month,day,timeofday.hour,timeofday.minute,timeofday.second);
 
     final int y;
@@ -199,7 +199,7 @@ public final class GenericCalDat implements Cloneable {
   void quickprint() {
     System.out.printf("%d %02d %02d  %02d %02d %f",
             year, month, day, timeofday.hour, timeofday.minute, timeofday.second);
-    System.out.printf(" -> %s\n", dayname[dayOfWeek()]);
+    System.out.printf(" -> %s%n", dayname[dayOfWeek()]);
   }
 
   String roundedCalString(final int style, int digits) {
@@ -207,7 +207,7 @@ public final class GenericCalDat implements Cloneable {
     format I'll code a number of options.  Much sturm und drang here
     because of the need to round the day along with everything else.
     These styles follow cooclasses.py; I'll write more as needed. :
-
+    
     style 0 -> 2006 8 12  10 11 12
     style 1 -> 2005 Aug 12  10 11
     style 2 -> Fri Aug 12  10:11
@@ -216,14 +216,14 @@ public final class GenericCalDat implements Cloneable {
     style 5 -> 2005 6 12
     style 6 -> 2006 Aug 12 Tue
     style 7 -> Fri 2006 Aug 12  10:11
-
+    
     style 10 -> (time only) 10 11 12.0
     style 11 -> (time only) 10:11:12.0
     style 12 -> (time only) 10:11
-
+    
     These are included here to force correct rounding when printing
     only the time.
-
+    
      */
     String result;
     double jdtemp;
@@ -317,9 +317,8 @@ public final class GenericCalDat implements Cloneable {
         break;
       default:
         // System.out.println("*** Default ***");
-        result = String.format(Locale.ENGLISH, "%02d %02d %02.0f",
-                printYear, monthAbr, printDay, printHour, printMinute,
-                printSecond);
+        result = String.format(Locale.ENGLISH, "%4d %s %02d  %02d:%02d:%04.1f",
+                printYear, monthAbr, printDay, printHour, printMinute, printSecond);
     }
     return result;
   }

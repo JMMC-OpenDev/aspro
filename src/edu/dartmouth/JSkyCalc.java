@@ -1373,7 +1373,7 @@ class JSkyCalcWindow extends JComponent {
     moonradecfield.setText(o.w.moon.topopos.shortstring());
     sunaltazfield.setText(String.format(Locale.ENGLISH, "%5.1f   az = %6.1f", o.w.altsun, o.w.azsun));
     moonaltazfield.setText(String.format(Locale.ENGLISH, "%5.1f   az = %6.1f", o.w.altmoon, o.w.azmoon));
-    moonphasefield.setText(String.format(Locale.ENGLISH, "%s", o.w.moon.MoonPhaseDescr(o.w.when.jd)));
+    moonphasefield.setText(String.format(Locale.ENGLISH, "%s", o.w.moon.getPhaseDescription(o.w.when.jd)));
     illumfracfield.setText(String.format(Locale.ENGLISH, "%5.3f", o.w.moonillum));
     moonobjangfield.setText(String.format(Locale.ENGLISH, "%5.1f deg", o.moonobj));
     moonobjangfield.setBackground(mooncolor);

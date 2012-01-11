@@ -59,7 +59,7 @@ public final class Seasonal {
         tabledata[2 * i][1] = (Object) ng.sunset.when.localDate.roundedCalString(3, 0);
         // System.out.printf("New : %s  ",oseason.w.when.localDate.roundedCalString(1,0));
 
-        // System.out.printf(" sunrise: %s\n",ng.sunrise.when.localDate.roundedCalString(1,0));
+        // System.out.printf(" sunrise: %s%n",ng.sunrise.when.localDate.roundedCalString(1,0));
 
         oseason.w.changeWhen(ng.eveningTwilight18.when.jd);
         oseason.computeSky();
@@ -91,7 +91,7 @@ public final class Seasonal {
         // System.out.printf("Full: %s  ",oseason.w.when.localDate.roundedCalString(1,0));
 
         ng.Update(oseason.w);
-        // System.out.printf(" sunrise: %s\n",ng.sunrise.when.localDate.roundedCalString(1,0));
+        // System.out.printf(" sunrise: %s%n",ng.sunrise.when.localDate.roundedCalString(1,0));
 
         oseason.w.changeWhen(ng.eveningTwilight18.when.jd);
         oseason.computeSky();
@@ -120,7 +120,7 @@ public final class Seasonal {
       // dump();
     } else {
       wasupdated = false;
-      // System.out.printf("no seasonal update.\n");  // diagn. used to check skip condition.
+      // System.out.printf("no seasonal update.%n");  // diagn. used to check skip condition.
     }
   }
 
@@ -186,7 +186,7 @@ public final class Seasonal {
       for (j = 0; j < 11; j++) {
         System.out.printf("%8s ", tabledata[i][j]);
       }
-      System.out.printf("\n");
+      System.out.printf("%n");
     }
   }
 
@@ -200,14 +200,14 @@ public final class Seasonal {
     double[] jddown = {0., 0., 0.};
     int i;
 
-    WhenWhere diagn = obs.w.clone();
+//    WhenWhere diagn = obs.w.clone();
 
     // jd of transit nearest midnight
 
     jdtrans = ng.nightcenter.when.jd - ha_at_center / (24d * Const.SID_RATE);
 
 //      diagn.changeWhen(jdtrans);
-//      System.out.printf("diagnostic: transit at local time %s\n",
+//      System.out.printf("diagnostic: transit at local time %s%n",
 //             diagn.when.localDate.roundedCalString(0,0));
 
     for (i = 0; i < 3; i++) {

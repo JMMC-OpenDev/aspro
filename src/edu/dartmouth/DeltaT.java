@@ -51,10 +51,10 @@ public final class DeltaT {
     } else if (year >= 2004d && year < 2100d) {
       delt = 31.69d + (2.164e-3d) * (jd - 2436935.4d);  /* rough extrapolation */
     } /* the 31.69 is adjusted to give 64.09 sec at the start of 2001. */ else if (year < 1900d) {
-      // printf("etcorr ... no ephemeris time data for < 1900.\n");
+      // printf("etcorr ... no ephemeris time data for < 1900.%n");
       delt = 0d;
     } else if (year >= 2100d) {
-      // printf("etcorr .. very long extrapolation in delta T - inaccurate.\n");
+      // printf("etcorr .. very long extrapolation in delta T - inaccurate.%n");
       delt = 180d; /* who knows? */
     }
 

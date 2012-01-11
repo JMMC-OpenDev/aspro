@@ -64,7 +64,7 @@ public final class Sun implements Cloneable {
     xyz[1] = retvals[4];
     xyz[2] = retvals[5];
 
-    //System.out.printf("Sun constructor - jd %f xyz = %f %f %f\n",
+    //System.out.printf("Sun constructor - jd %f xyz = %f %f %f%n",
     //     w.when.jd,xyz[0],xyz[1],xyz[2]);
 
     // ignoring topocentric part of helio time correction.
@@ -72,7 +72,7 @@ public final class Sun implements Cloneable {
     geopos = new Celest(retvals[0], retvals[1], when.julianEpoch());
     geopos.distance = retvals[2];
     topopos = Topo.topocorr(geopos, when, where, sidereal);
-    // System.out.printf("topo radec %s %s\n",topopos.alpha.RoundedRAString(2,":"),
+    // System.out.printf("topo radec %s %s%n",topopos.alpha.RoundedRAString(2,":"),
     //        topopos.delta.RoundedDecString(1,":"));
   }
 
@@ -118,8 +118,8 @@ public final class Sun implements Cloneable {
             + 0.00000543d * Math.sin(A) + 0.00001575d * Math.sin(B) + 0.00001627d * Math.sin(C) + 0.00003076d * Math.cos(D) + 0.00000927d * Math.sin(H);
 
     final double sunlong = (L + Cent) / Const.DEG_IN_RADIAN;
-    /*      printf("solar Longitude: %10.5f  Radius vector %10.7f\n",sunlong,R);
-    printf("eccentricity %10.7f  eqn of center %10.5f\n",e,Cent);   */
+    /*      printf("solar Longitude: %10.5f  Radius vector %10.7f%n",sunlong,R);
+    printf("eccentricity %10.7f  eqn of center %10.5f%n",e,Cent);   */
 
     final double[] retvals = new double[6];
     // will be geora, geodec, geodist, x, y, z (geo)
@@ -138,7 +138,7 @@ public final class Sun implements Cloneable {
     retvals[3] = equatorial[0] * R;  // xyz
     retvals[4] = equatorial[1] * R;
     retvals[5] = equatorial[2] * R;
-//       System.out.printf("computeSun XYZ %f %f %f  %f\n",
+//       System.out.printf("computeSun XYZ %f %f %f  %f%n",
 //          retvals[3],retvals[4],retvals[5],jd);
 
     return retvals;

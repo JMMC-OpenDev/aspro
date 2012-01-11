@@ -37,7 +37,7 @@ public final class Sexagesimal implements Cloneable {
   }
 
   void tosex(double h) {  // decimal hour converter ...
-    // System.out.printf("h = %f\n",h);
+    // System.out.printf("h = %f%n",h);
     if (h >= 0d) {
       sign = 1;
     } else {
@@ -48,7 +48,7 @@ public final class Sexagesimal implements Cloneable {
     final double m = 60d * (h - (double) hour);
     minute = (int) m;
     second = 60d * (m - (double) minute);
-    // System.out.printf("sgn h m s %d  %d %d %f\n",sign,hour,minute,second);
+    // System.out.printf("sgn h m s %d  %d %d %f%n",sign,hour,minute,second);
   }
 
   void parseSexString(final String s) {
@@ -88,10 +88,10 @@ public final class Sexagesimal implements Cloneable {
         second = Double.parseDouble(fields[2]);
       }
     }
-    // System.out.printf("%d  %d %d %f\n",sign,hour,minute,second);
+    // System.out.printf("%d  %d %d %f%n",sign,hour,minute,second);
     value = (double) hour + minute / 60d + second / 3600d;
     value *= sign;
-    // System.out.printf("value: %f\n",value);
+    // System.out.printf("value: %f%n",value);
   }
 
   public Sexagesimal roundsex(final int ndigits) {
@@ -119,19 +119,19 @@ public final class Sexagesimal implements Cloneable {
         // System.out.println(testformat);
       }
 
-      // System.out.printf("In roundsex, testformat = %s\n",testformat);
+      // System.out.printf("In roundsex, testformat = %s%n",testformat);
       teststr = String.format(Locale.ENGLISH, testformat, hour, minute, second);
       Scanner readback = new Scanner(teststr).useDelimiter("\\s");
       readback.useLocale(Locale.ENGLISH);
       // read back the result ...
-      // System.out.printf("In roundsex, teststr = %s\n",teststr);
+      // System.out.printf("In roundsex, teststr = %s%n",teststr);
       hourback = readback.nextInt();
       if (hourback < 0d) {
         hourback *= -1d;
       }
       minuteback = readback.nextInt();
       secondback = readback.nextDouble();
-      // System.out.printf("read back: %d %d %f\n",hourback,minuteback,secondback);
+      // System.out.printf("read back: %d %d %f%n",hourback,minuteback,secondback);
       if (secondback > 59.999999999) {  // klugy, but should be very safe
         secondback = 0d;
         minuteback++;

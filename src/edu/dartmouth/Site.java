@@ -70,10 +70,10 @@ public final class Site implements Cloneable {
   }
 
   Site(final String[] sitepars) {
-    // for(int j = 0; j < 9; j++) System.out.printf("%d %s\n",j,sitepars[j]);
+    // for(int j = 0; j < 9; j++) System.out.printf("%d %s%n",j,sitepars[j]);
     name = sitepars[0];
     // System.out.printf("%s %s",sitepars[0],sitepars[1]);
-    // System.out.printf("-> %f\n",Double.parseDouble(sitepars[1].trim()));
+    // System.out.printf("-> %f%n",Double.parseDouble(sitepars[1].trim()));
     longit = new Longitude(Double.parseDouble(sitepars[1].trim()));
     lat = new Latitude(Double.parseDouble(sitepars[2].trim()));
     stdz = Double.parseDouble(sitepars[3].trim());
@@ -85,10 +85,10 @@ public final class Site implements Cloneable {
   }
 
   void dumpsite() {  // for diagnostics
-    System.out.printf("%s\n", name);
-    System.out.printf("longitude %s\n", longit.roundedLongitString(1, ":", true));
-    System.out.printf("latitude  %s\n", lat.roundedDecString(0, ":"));
-    System.out.printf("Zone offset from UT %6.3f hours\n", stdz);
+    System.out.printf("%s%n", name);
+    System.out.printf("longitude %s%n", longit.roundedLongitString(1, ":", true));
+    System.out.printf("latitude  %s%n", lat.roundedDecString(0, ":"));
+    System.out.printf("Zone offset from UT %6.3f hours%n", stdz);
   }
 
   @Override

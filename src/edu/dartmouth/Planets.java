@@ -23,7 +23,7 @@ public final class Planets {
 
   /* Arrays of planetary elements */
   static String[] names = {"Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn",
-                           "Uranus", "Neptune", "Pluto"}; // what the heck, let's keep Pluto
+    "Uranus", "Neptune", "Pluto"}; // what the heck, let's keep Pluto
   double[] incl = {0., 0., 0., 0., 0., 0., 0., 0., 0.};  // inclination
   double[] Omega = {0., 0., 0., 0., 0., 0., 0., 0., 0.}; // longit of asc node
   double[] omega = {0., 0., 0., 0., 0., 0., 0., 0., 0.}; // longit of perihelion
@@ -32,8 +32,8 @@ public final class Planets {
   double[] ecc = {0., 0., 0., 0., 0., 0., 0., 0., 0.};   // eccentricity
   double[] L_0 = {0., 0., 0., 0., 0., 0., 0., 0., 0.};   // starting Longitude (?)
   static double[] mass = {1.660137e-7, 2.447840e-6, 3.040433e-6,
-                          3.227149e-7, 9.547907e-4, 2.858776e-4, 4.355401e-5, 5.177591e-5,
-                          7.69e-9};  // IAU 1976 masses of planets in terms of solar mass
+    3.227149e-7, 9.547907e-4, 2.858776e-4, 4.355401e-5, 5.177591e-5,
+    7.69e-9};  // IAU 1976 masses of planets in terms of solar mass
   // used to weight barycenter calculation only.
 // Need to include instance variables of x,y,z and xdot,ydot,zdot
   double[][] xyz;
@@ -41,7 +41,7 @@ public final class Planets {
   double[] barycor;  // 0,1,2 = xyz in AU; 3,4,5 = xyzvel in km/s.
   double[] mags = {0., 0., 0., 0., 0., 0., 0., 0., 0.};   // apparent mags
   static final double[] V0 = {-0.42, -4.40, -3.86, -1.52, -9.40, -9.22, -7.19,
-                              -6.87, -1.0};
+    -6.87, -1.0};
 
   /*  From Astronomical Almanac, 2003, p. E88.  V mag of planet when
   full face on at unit distance from both sun and earth.  Saturn
@@ -62,7 +62,8 @@ public final class Planets {
   void comp_el(double jd_in) {
     /* Compute and load mean elements for the planets. */
     double T, Tsq, Tcb, d;
-    double ups, P, Q, S, V, W, G, H, zeta, psi;  // Meeus p. 110 ff.
+    double ups, P, Q, S, V, W, G, H, zeta;  // Meeus p. 110 ff.
+/*    double psi; */
     double sinQ, sinZeta, cosQ, cosZeta, sinV, cosV, sin2Zeta, cos2Zeta;
     double sin2Q, cos2Q, sinH, sin2H, cosH, cos2H;
 
@@ -139,7 +140,7 @@ public final class Planets {
     V = 5 * Q - 2 * P;
     W = 2 * P - 6 * Q + 3 * S;
     zeta = Q - P;
-    psi = S - Q;
+    /*    psi = S - Q; */
     sinQ = Math.sin(Q);  // compute some of the more popular ones ...
     cosQ = Math.cos(Q);
     sin2Q = Math.sin(2. * Q);
@@ -237,7 +238,7 @@ public final class Planets {
 
     // Pluto = 8; very approx elements, osculating for Sep 15 1992.
     d = jd_el - 2448880.5;  /* 1992 Sep 15 */
-    T = d / 36525.;
+    /* T = d / 36525.; */
     incl[8] = 17.1426;
     Omega[8] = 110.180;
     omega[8] = 223.782;
@@ -245,7 +246,6 @@ public final class Planets {
     daily[8] = 0.00393329;
     ecc[8] = 0.253834;
     L_0[8] = 228.1027 + 0.00393329 * d;
-
   }
 
   double[] planetxyz(int p, double jd) {
@@ -349,7 +349,7 @@ public final class Planets {
       }
     }
 
-    // for(i = 0; i < 9; i++) System.out.printf("%s  %f\n",names[i],mags[i]);
+    // for(i = 0; i < 9; i++) System.out.printf("%s  %f%n",names[i],mags[i]);
   }
 
   Celest earthview(double[] earthxyz, double[] planxyz, double jd) {
@@ -413,7 +413,7 @@ public final class Planets {
         xyzvel[i][2] = equatvel[2];
         planetcel = earthview(earthxyz, equat, w.when.jd);
         planetpos[i] = new Observation(w, planetcel);
-        //  System.out.printf("i %d %s\n",i,planetpos[i].ha.RoundedHAString(0,":"));
+        //  System.out.printf("i %d %s%n",i,planetpos[i].ha.RoundedHAString(0,":"));
       } else {         // earth
         planetpos[i] = new Observation(w, new Celest(0., 0., 2000d, 0.));
       }
@@ -432,7 +432,7 @@ public final class Planets {
       for (j = 0; j < 3; j++) {
         System.out.printf("%f ", xyzvel[i][j]);
       }
-      System.out.printf("\n");
+      System.out.printf("%n");
     }
   }
 
