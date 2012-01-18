@@ -134,7 +134,7 @@ public class BaseValue
     if (this instanceof BooleanValue) {
       return ((BooleanValue) this).isValue();
     }
-    return null;
+    return Boolean.FALSE;
   }
 
   /**

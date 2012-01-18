@@ -66,20 +66,4 @@ public final class AtmosphereQualityUtils {
         return 1.8d;
     }
   }
-
-  /**
-   * Tests
-   * @param args unused
-   */
-  public static void main(String[] args) {
-
-    System.out.println("atm = " + AtmosphereQuality.AVERAGE);
-
-    System.out.println("atm list = " + getAtmosphereQualityList());
-
-    System.out.println("atm = " + getAtmosphereQuality(AtmosphereQuality.AVERAGE.value()));
-
-    System.out.println("seeing = " + getSeeing(AtmosphereQuality.AVERAGE));
-
-  }
 }

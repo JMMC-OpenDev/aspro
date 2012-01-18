@@ -408,10 +408,12 @@ public class ExportOBVLTI {
     
     sb.append(insBand.name()).append('=');
     sb.append(df1.format(ExportOBVLTI.getMagnitude(insMag)));
-    sb.append(' ');
-
-    sb.append(aoBand.name()).append('=');
-    sb.append(df1.format(ExportOBVLTI.getMagnitude(aoMag)));
+    
+    if (aoBand != null) {
+      sb.append(' ');
+      sb.append(aoBand.name()).append('=');
+      sb.append(df1.format(ExportOBVLTI.getMagnitude(aoMag)));
+    }
 
     if (target.getSPECTYP() != null) {
       sb.append(' ');

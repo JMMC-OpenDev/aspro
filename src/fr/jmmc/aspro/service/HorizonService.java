@@ -3,11 +3,11 @@
  ******************************************************************************/
 package fr.jmmc.aspro.service;
 
+import fr.jmmc.aspro.model.HorizonShape;
 import fr.jmmc.aspro.model.oi.AzEl;
 import fr.jmmc.aspro.model.oi.HorizonProfile;
 import fr.jmmc.aspro.model.oi.Station;
 import java.awt.Polygon;
-import java.awt.Shape;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,8 +24,8 @@ public final class HorizonService {
   private static final HorizonService instance = new HorizonService();
 
   /* members */
-  /** cached horizon profiles : low memory impact */
-  private final Map<String, Profile> cachedProfiles = new HashMap<String, Profile>(128);
+  /** cached horizon shapes : low memory impact */
+  private final Map<String, HorizonShape> cachedProfiles = new HashMap<String, HorizonShape>(128);
 
   /**
    * Return the singleton
@@ -48,10 +48,11 @@ public final class HorizonService {
    * @param station station to use
    * @return profile or null if there is no horizon profile for the given station
    */
-  public Profile getProfile(final String interferometerName, final Station station) {
+  public HorizonShape getProfile(final String interferometerName, final Station station) {
     // profile key = '<interferometer> - <station>' :
     final String key = interferometerName + " - " + station.getName();
-    Profile profile = cachedProfiles.get(key);
+
+    HorizonShape profile = cachedProfiles.get(key);
 
     if (profile == null) {
       final HorizonProfile p = station.getHorizon();
@@ -81,7 +82,7 @@ public final class HorizonService {
 
         final Polygon polygon = new Polygon(xpoints, ypoints, npoints);
 
-        profile = new Profile(key, polygon);
+        profile = new HorizonShape(key, polygon);
 
         cachedProfiles.put(key, profile);
       }
@@ -97,54 +98,15 @@ public final class HorizonService {
    * @param elev elevation (deg)
    * @return true if no obstruction
    */
-  public boolean checkProfile(final Profile profile, final double az, final double elev) {
+  public boolean checkProfile(final HorizonShape profile, final double az, final double elev) {
     // adjust azimuth to be compatible with vlti profiles :
 
     // 0 = meridian (north-south) positive toward east :
-    double adjAz = az - 180;
+    double adjAz = az - 180d;
 
     if (adjAz < 0d) {
       adjAz += 360d;
     }
     return profile.check(adjAz, elev);
-  }
-
-  /**
-   * Simple protected class to use the java shape API to check if a point is inside a polygon
-   */
-  protected final class Profile {
-
-    /** profile name */
-    private final String name;
-    /** internal shape */
-    private final Shape shape;
-
-    /**
-     * Protected constructor
-     * @param name profile name
-     * @param shape shape (horizon)
-     */
-    protected Profile(final String name, final Shape shape) {
-      this.name = name;
-      this.shape = shape;
-    }
-
-    /**
-     * Check if the given azimuth and elevation is inside the observable shape
-     * @param az azimuth (degrees)
-     * @param elev elevation (degrees)
-     * @return true if the given coordinates are inside the observable shape
-     */
-    public boolean check(final double az, final double elev) {
-      return this.shape.contains(az, elev);
-    }
-
-    /**
-     * Return the profile name
-     * @return profile name
-     */
-    public String getName() {
-      return name;
-    }
   }
 }

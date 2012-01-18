@@ -70,6 +70,7 @@ public final class Preferences extends fr.jmmc.jmcs.data.preference.Preferences 
    *
    * @throws PreferencesException if any preference value has a unsupported class type
    */
+  @Override
   protected void setDefaultPreferences() throws PreferencesException {
     logger.fine("Preferences.setDefaultPreferences()");
 
@@ -98,6 +99,7 @@ public final class Preferences extends fr.jmmc.jmcs.data.preference.Preferences 
    *
    * @return preference filename.
    */
+  @Override
   protected String getPreferenceFilename() {
     logger.entering(className, "getPreferenceFilename");
     return "fr.jmmc.aspro.properties";
@@ -108,6 +110,7 @@ public final class Preferences extends fr.jmmc.jmcs.data.preference.Preferences 
    *
    * @return preference version number.
    */
+  @Override
   protected int getPreferencesVersionNumber() {
     logger.entering(className, "getPreferencesVersionNumber");
     return 1;

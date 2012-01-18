@@ -110,18 +110,4 @@ public final class GeocentricCoords {
     // [Y] = [ cos(lon) -sin(lat) * sin(lon) cos(lat)*sin(lon) ] [y] + [Y_orig]
     // [Z] = [    0            cos(lat)           sin(lat)     ] [z] + [Z_orig]
   }
-
-  /**
-   * Test coordinate conversions
-   * @param args
-   */
-  public static void main(String[] args) {
-    /*
-    -24.570106, -70.406044
-    -24° 34' 12.38", -70° 24' 21.76
-     */
-    System.out.println("-24.570106 [-24° 34' 12.38\"] : " + ALX.toDMS(-24.570106d));
-    System.out.println("-70.406044 [-70° 24' 21.76\"] : " + ALX.toDMS(-70.406044d));
-
-  }
 }

@@ -32,6 +32,8 @@ public final class SearchCalVOTableHandler {
 
   /** Class logger */
   private static final Logger logger = Logger.getLogger(SearchCalVOTableHandler.class.getName());
+  /** science object distance in degrees */
+  public static final double SCIENCE_DETECTION_DISTANCE = 1d * ALX.ARCSEC_IN_DEGREES;
   /** XSLT file path */
   private final static String XSLT_FILE = "fr/jmmc/aspro/interop/scvot2AsproObservation.xsl";
   /** flag to dump asprox document into logs */
@@ -89,14 +91,9 @@ public final class SearchCalVOTableHandler {
       }
     }
 
-    // Mimic SearchCal science object detection distance preference :
-      /*
-    setDefaultPreference("query.scienceObjectDetectionDistance",
-    "" + (1 * ALX.ARCSEC_IN_DEGREES));
-     */
-    final double scienceObjectDetectionDistance = (1d * ALX.ARCSEC_IN_DEGREES);
+    // Mimic SearchCal science object detection distance preference ("query.SCIENCE_DETECTION_DISTANCE")
 
-    // @note SCIENCE_DISTANCE_CHECK : filter science target if distance is less than science object detection distance preference (1 arcsec) :
+    // @note SCIENCE_DISTANCE_CHECK : filter science target if distance is less than science object detection distance preference (1 arcsec):
     for (Iterator<Target> it = calibrators.iterator(); it.hasNext();) {
       final Target cal = it.next();
 
@@ -106,7 +103,7 @@ public final class SearchCalVOTableHandler {
         final double rowDistance = dist.getNumber().doubleValue();
 
         // If the distance is close enough to be detected as a science object
-        if (rowDistance < scienceObjectDetectionDistance) {
+        if (rowDistance < SCIENCE_DETECTION_DISTANCE) {
           if (logger.isLoggable(Level.INFO)) {
             logger.info("calibrator distance is [" + rowDistance + "] - skip this calibrator considered as science object : " + cal + " - IDS = " + cal.getIDS());
           }
