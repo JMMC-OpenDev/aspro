@@ -54,6 +54,7 @@ public final class FilePreferences extends fr.jmmc.jmcs.data.preference.Preferen
    *
    * @throws PreferencesException if any preference value has a unsupported class type
    */
+  @Override
   protected void setDefaultPreferences() throws PreferencesException {
     logger.fine("FilePreferences.setDefaultPreferences");
     final String defaultDirectory = System.getProperty("user.home");
@@ -69,6 +70,7 @@ public final class FilePreferences extends fr.jmmc.jmcs.data.preference.Preferen
    *
    * @return preference filename.
    */
+  @Override
   protected String getPreferenceFilename() {
     return PREFERENCES_FILENAME;
   }
@@ -78,6 +80,7 @@ public final class FilePreferences extends fr.jmmc.jmcs.data.preference.Preferen
    *
    * @return preference version number.
    */
+  @Override
   protected int getPreferencesVersionNumber() {
     return 1;
   }
@@ -121,7 +124,7 @@ public final class FilePreferences extends fr.jmmc.jmcs.data.preference.Preferen
 
   /**
    * Run this program to generate the Aspro file preference file.
-   * @param args NC
+   * @param args unused
    */
   public static void main(String[] args) {
     try {

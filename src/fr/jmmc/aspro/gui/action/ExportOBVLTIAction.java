@@ -105,7 +105,10 @@ public final class ExportOBVLTIAction {
       if (exportAll) {
         file = fileChooser.getSelectedFile();
         if (!file.exists()) {
-          file.mkdirs();
+          if (!file.mkdirs()) {
+            MessagePane.showErrorMessage("Could not create directory: " + file.getAbsolutePath());
+            file = null;
+          }
         }
       } else {
         file = mimeType.checkFileExtension(fileChooser.getSelectedFile());

@@ -1051,12 +1051,12 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
       // update the sampling period :
       if (observation.getInstrumentConfiguration().getSamplingPeriod() != null) {
-        this.jFieldSamplingPeriod.setValue(Double.valueOf(observation.getInstrumentConfiguration().getSamplingPeriod()));
+        this.jFieldSamplingPeriod.setValue(observation.getInstrumentConfiguration().getSamplingPeriod());
       }
 
       // update the acquisition time :
       if (observation.getInstrumentConfiguration().getAcquisitionTime() != null) {
-        this.jFieldObsDuration.setValue(Double.valueOf(observation.getInstrumentConfiguration().getAcquisitionTime()));
+        this.jFieldObsDuration.setValue(observation.getInstrumentConfiguration().getAcquisitionTime());
       } else {
         this.jFieldObsDuration.setValue(AsproConstants.DEFAULT_OBSERVATION_DURATION);
       }
@@ -1223,17 +1223,23 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         this.onLoadObservation(event.getObservation());
         break;
       case TARGET_SELECTION_CHANGED:
-        this.onTargetSelectionChange(((TargetSelectionEvent) event).getTarget());
+        if (event instanceof TargetSelectionEvent) {
+          this.onTargetSelectionChange(((TargetSelectionEvent) event).getTarget());
+        }
         break;
       case DO_UPDATE:
-        this.onUpdateObservation((UpdateObservationEvent) event);
+        if (event instanceof UpdateObservationEvent) {
+          this.onUpdateObservation((UpdateObservationEvent) event);
+        }
         break;
       case REFRESH_UV:
         this.refreshPlot(event.getObservationCollection());
         break;
       case OBSERVABILITY_DONE:
-        this.updateObservabilityData(((ObservabilityEvent) event).getObservabilityData());
-        this.plot(event.getObservationCollection());
+        if (event instanceof ObservabilityEvent) {
+          this.updateObservabilityData(((ObservabilityEvent) event).getObservabilityData());
+          this.plot(event.getObservationCollection());
+        }
         break;
       default:
     }

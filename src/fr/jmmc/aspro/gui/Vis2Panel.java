@@ -260,7 +260,9 @@ public final class Vis2Panel extends javax.swing.JPanel implements ChartProgress
     }
     switch (event.getType()) {
       case OIFITS_DONE:
-        this.plot(((OIFitsEvent) event).getOIFitsFile());
+        if (event instanceof OIFitsEvent) {
+          this.plot(((OIFitsEvent) event).getOIFitsFile());
+        }
         break;
       default:
     }

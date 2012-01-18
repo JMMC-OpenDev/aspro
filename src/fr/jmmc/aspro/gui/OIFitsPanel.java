@@ -52,7 +52,9 @@ public final class OIFitsPanel extends javax.swing.JPanel implements Observation
     }
     switch (event.getType()) {
       case OIFITS_DONE:
-        this.updateOIFits(((OIFitsEvent) event).getOIFitsFile());
+        if (event instanceof OIFitsEvent) {
+          this.updateOIFits(((OIFitsEvent) event).getOIFitsFile());
+        }
         break;
       default:
     }

@@ -9,13 +9,10 @@ import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.jmcs.App;
-import fr.jmmc.jmcs.gui.SwingUtils;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.logging.Level;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -36,7 +33,6 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
   public static final String TAB_TARGETS = "Targets";
   /** Tab Models */
   public static final String TAB_MODELS = "Models";
-  
   /** flag indicating that the target editor dialog is active */
   private static boolean targetEditorActive = false;
 
@@ -158,7 +154,7 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
    * @param selectedTab name of the selected tab (see TAB_xxx constants)
    */
   protected TargetEditorDialog(final List<Target> targets, final TargetUserInformations targetUserInfos,
-                                 final String selectedTab) {
+          final String selectedTab) {
     super();
 
     // Define shared data model with tabbed forms :
@@ -185,6 +181,7 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
        * This method is called whenever the selected tab changes
        * @param evt change event
        */
+      @Override
       public final void stateChanged(final ChangeEvent ce) {
 
         final Component selected = jTabbedPane.getSelectedComponent();
@@ -205,7 +202,7 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
    * Initialize the editor forms and the selected target
    * @param targetName target name to select
    */
-  protected void initialize(final String targetName) {
+  void initialize(final String targetName) {
 
     // Generate trees and select the target :
 
@@ -303,7 +300,7 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
    * Return the editor result
    * @return true if the user validated (ok button)
    */
-  protected boolean isResult() {
+  private boolean isResult() {
     return result;
   }
 
@@ -311,7 +308,7 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
    * Return the list of target that is edited by this editor
    * @return list of target
    */
-  protected List<Target> getEditTargets() {
+  private List<Target> getEditTargets() {
     return editTargets;
   }
 
@@ -319,7 +316,7 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
    * Return the target user informations that is edited by this editor
    * @return target user informations
    */
-  protected TargetUserInformations getEditTargetUserInfos() {
+  private TargetUserInformations getEditTargetUserInfos() {
     return editTargetUserInfos;
   }
 
@@ -327,36 +324,7 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
    * Define the JDialog for this form
    * @param dialog JDialog instance
    */
-  protected void setDialog(final JDialog dialog) {
+  private void setDialog(final JDialog dialog) {
     this.dialog = dialog;
-  }
-
-  // --- TESTS -----------------------------------------------------------------
-  /**
-   * Simple GUI test
-   * @param args unused
-   */
-  public static void main(String[] args) {
-    // Set the default locale to en-US locale (for Numerical Fields "." ",")
-    Locale.setDefault(Locale.US);
-
-    SwingUtils.invokeLaterEDT(new Runnable() {
-
-      /**
-       * Create the Gui using EDT
-       */
-      @Override
-      public void run() {
-
-        try {
-          ObservationManager.getInstance().load(new File("/home/bourgesl/VLTI_FUN2.asprox"));
-          logger.info("result = " + showEditor("HIP32768", TAB_TARGETS));
-          System.exit(0);
-        } catch (Exception e) { // main (test)
-          logger.log(Level.SEVERE, "runtime exception", e);
-        }
-      }
-    });
-
   }
 }

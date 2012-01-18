@@ -226,6 +226,7 @@ public final class SettingPanel extends JPanel implements ObservationListener {
         }
       }
     } else if (type == ObservationEventType.OIFITS_DONE
+            && event instanceof OIFitsEvent
             && ((OIFitsEvent) event).getOIFitsFile() != null) {
             
       // create the vis2 panel if null :      

@@ -124,6 +124,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
   private static final double HALF_PI = Math.PI / 2d;
   /** milliseconds threshold to consider the date too close to date axis limits = 3 minutes */
   private static final long DATE_LIMIT_THRESHOLD = 3 * 60 * 1000;
+  /** night margin in milliseconds = 15 minutes */
+  private static final long NIGHT_MARGIN = 3 * 60 * 1000;
   /** hour angle tick units */
   private final static TickUnitSource HA_TICK_UNITS = ChartUtils.createHourAngleTickUnits();
   /** hour:minute units */
@@ -1269,9 +1271,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
       }
 
       // Add 15 minutes margin:
-      final long margin = 15 * 60 * 1000l;
-      nightMin -= margin;
-      nightMax += margin;
+      nightMin -= NIGHT_MARGIN;
+      nightMax += NIGHT_MARGIN;
 
       if (nightMin < from.getTime()) {
         nightMin = from.getTime();

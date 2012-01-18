@@ -138,14 +138,17 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     // add document listener to target description :
     this.jTextAreaTargetInfos.getDocument().addDocumentListener(new DocumentListener() {
 
+      @Override
       public void insertUpdate(final DocumentEvent e) {
         targetInfosChanged();
       }
 
+      @Override
       public void removeUpdate(final DocumentEvent e) {
         targetInfosChanged();
       }
 
+      @Override
       public void changedUpdate(DocumentEvent e) {
         //Plain text components do not fire these events
       }
@@ -156,7 +159,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
    * Initialize the internal model (tree) from the given list of targets
    * @param targetName target name to select
    */
-  protected void initialize(final String targetName) {
+  void initialize(final String targetName) {
 
     this.calibratorsModel = new GenericListModel<Target>(this.editTargetUserInfos.getCalibrators());
     this.jListCalibrators.setModel(this.calibratorsModel);
@@ -175,7 +178,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
    * Return the custom TargetJTree
    * @return TargetJTree
    */
-  private final TargetJTree getTreeTargets() {
+  private TargetJTree getTreeTargets() {
     return (TargetJTree) this.jTreeTargets;
   }
 
@@ -212,7 +215,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
    * Select the target int the target tree or in the calibrator list for the given target
    * @param target to select
    */
-  protected void selectTarget(final Target target) {
+  void selectTarget(final Target target) {
     if (isCalibrator(target)) {
       this.jListCalibrators.setSelectedValue(target, true);
     } else {
@@ -224,6 +227,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
    * Process the tree selection events
    * @param e tree selection event
    */
+  @Override
   public void valueChanged(final TreeSelectionEvent e) {
     final DefaultMutableTreeNode currentNode = this.getTreeTargets().getLastSelectedNode();
 
@@ -278,6 +282,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
    * Called whenever the value of the selection changes.
    * @param e the event that characterizes the change.
    */
+  @Override
   public void valueChanged(final ListSelectionEvent e) {
     final ListSelectionModel lsm = (ListSelectionModel) e.getSource();
 
@@ -410,6 +415,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
    * Validates the new input (check valid range) and update the associated target
    * @param evt property change event
    */
+  @Override
   public void propertyChange(final PropertyChangeEvent evt) {
     // check if the automatic update flag is enabled :
     if (this.doAutoUpdateTarget) {
@@ -489,7 +495,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
   /**
    * Process the document change event for the target user information
    */
-  protected void targetInfosChanged() {
+  private void targetInfosChanged() {
     // check if the automatic update flag is enabled :
     if (this.doAutoUpdateTarget) {
 
@@ -1275,7 +1281,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
    * Validate the form
    * @return true only if the data are valid
    */
-  protected boolean validateForm() {
+  boolean validateForm() {
     // nothing to validate
     return true;
   }
@@ -1284,7 +1290,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
    * Return the current edited target
    * @return current edited target
    */
-  protected final Target getCurrentTarget() {
+  Target getCurrentTarget() {
     return currentTarget;
   }
 
@@ -1480,7 +1486,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
    * @param target target to use
    * @return true if the given target is a calibrator
    */
-  public final boolean isCalibrator(final Target target) {
+  public boolean isCalibrator(final Target target) {
     return this.editTargetUserInfos.isCalibrator(target);
   }
 
@@ -1489,7 +1495,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
    * @param target target to use
    * @return target information
    */
-  private final TargetInformation getTargetUserInformation(final Target target) {
+  private TargetInformation getTargetUserInformation(final Target target) {
 
     TargetInformation targetInfo = this.mapIDTargetInformations.get(target.getIdentifier());
 

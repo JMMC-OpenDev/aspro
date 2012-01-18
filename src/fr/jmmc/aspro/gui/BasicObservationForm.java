@@ -72,7 +72,6 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
   private final static boolean DEBUG_UPDATE_EVENT = false;
   /** blanking value to indicate that PoPs are defined in the instrument configuration but in multi-configuration */
   private final static String POPS_MULTI_CONF = "PoPs_MULTI_CONF";
-  
   /** configuration manager */
   private final static ConfigurationManager cm = ConfigurationManager.getInstance();
   /** observation manager */
@@ -528,14 +527,13 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
    */
   public void showTargetEditor() {
     final Target target = getSelectedTarget();
-    
+
     if (target != null) {
-      final String selectedTab = 
-              (AsproGui.getInstance().getSettingPanel().isSelectedTabUsingTargetModel()) ? 
-                TargetEditorDialog.TAB_MODELS : TargetEditorDialog.TAB_TARGETS;
+      final String selectedTab = (AsproGui.getInstance().getSettingPanel().isSelectedTabUsingTargetModel())
+              ? TargetEditorDialog.TAB_MODELS : TargetEditorDialog.TAB_TARGETS;
 
       // show model editor :
-      TargetEditorDialog.showEditor((target != null) ? target.getName() : null, selectedTab);
+      TargetEditorDialog.showEditor(target.getName(), selectedTab);
     }
   }
 
@@ -817,7 +815,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         updateComboInstrument();
         updateComboInstrumentConfiguration();
         checkPops();
-        
+
       } else if (e.getSource() == this.jComboBoxInterferometerConfiguration) {
         if (logger.isLoggable(Level.FINE)) {
           logger.fine("Interferometer Configuration changed : " + this.jComboBoxInterferometerConfiguration.getSelectedItem());
@@ -997,7 +995,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
 
     if (popConfig != null) {
       // update the selected pops (pops) :
-      
+
       if (POPS_MULTI_CONF.equals(popConfig)) {
         // note : setValue() can fire a property change event :
         this.jTextPoPs.setValue(null);
@@ -1245,7 +1243,9 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         this.updateListTargets();
         break;
       case DO_UPDATE:
-        this.onUpdateObservation((UpdateObservationEvent) event);
+        if (event instanceof UpdateObservationEvent) {
+          this.onUpdateObservation((UpdateObservationEvent) event);
+        }
         break;
       case REFRESH:
         this.resetStatus();
@@ -1254,7 +1254,9 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         this.resetStatus();
         break;
       case WARNINGS_READY:
-        this.updateStatus(((WarningContainerEvent) event).getWarningContainer());
+        if (event instanceof WarningContainerEvent) {
+          this.updateStatus(((WarningContainerEvent) event).getWarningContainer());
+        }
         break;
       default:
     }

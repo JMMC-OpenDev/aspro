@@ -128,7 +128,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
    * Initialize the internal model (tree) from the given list of targets
    * @param targetName target name to select
    */
-  protected void initialize(final String targetName) {
+  void initialize(final String targetName) {
     this.generateTree();
     this.selectTarget(Target.getTarget(targetName, this.editTargets));
   }
@@ -138,7 +138,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
    * Return the custom ModelJTree
    * @return ModelJTree
    */
-  private final ModelJTree getTreeModels() {
+  private ModelJTree getTreeModels() {
     return (ModelJTree) this.jTreeModels;
   }
 
@@ -200,7 +200,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
    * Select the target node for the given target
    * @param target to select
    */
-  protected void selectTarget(final Target target) {
+  void selectTarget(final Target target) {
     this.getTreeModels().selectTarget(target);
   }
 
@@ -208,6 +208,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
    * Process the tree selection events
    * @param e tree selection event
    */
+  @Override
   public void valueChanged(final TreeSelectionEvent e) {
     final DefaultMutableTreeNode currentNode = this.getTreeModels().getLastSelectedNode();
 
@@ -360,6 +361,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
    * Called whenever the value of the selection changes.
    * @param e the event that characterizes the change.
    */
+  @Override
   public void valueChanged(final ListSelectionEvent e) {
     final ListSelectionModel lsm = (ListSelectionModel) e.getSource();
 
@@ -625,7 +627,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
    * Validate the form
    * @return true only if the data are valid
    */
-  protected boolean validateForm() {
+  boolean validateForm() {
     // Validate the models :
     for (Target target : this.editTargets) {
       try {
@@ -646,7 +648,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
    * Return the current edited target
    * @return current edited target
    */
-  protected final Target getCurrentTarget() {
+  Target getCurrentTarget() {
     return currentTarget;
   }
 
