@@ -7,6 +7,7 @@ import com.lowagie.text.Document;
 import com.lowagie.text.DocumentException;
 import com.lowagie.text.Rectangle;
 import com.lowagie.text.pdf.DefaultFontMapper;
+import com.lowagie.text.pdf.FontMapper;
 import com.lowagie.text.pdf.PdfContentByte;
 import com.lowagie.text.pdf.PdfTemplate;
 import com.lowagie.text.pdf.PdfWriter;
@@ -86,7 +87,7 @@ public final class PDFUtils {
    * @throws IllegalStateException if a PDF document exception occured
    */
   private static void writeChartAsPDF(final OutputStream outputStream, final JFreeChart chart,
-                                      final PDFOptions options) throws IllegalStateException {
+          final PDFOptions options) throws IllegalStateException {
 
     Graphics2D g2 = null;
 
@@ -148,8 +149,8 @@ public final class PDFUtils {
         // text rendered as shapes so the file is bigger but correct
         g2 = pdfTemplate.createGraphicsShapes(innerWidth, innerHeight);
       } else {
-        // text rendered as text + font but unicode characters are not rendered
-        g2 = pdfTemplate.createGraphics(innerWidth, innerHeight, new DefaultFontMapper());
+        // depending on the font mapper, special characters like greek chars are not rendered:
+        g2 = pdfTemplate.createGraphics(innerWidth, innerHeight, getFontMapper());
       }
 
       final Rectangle2D.Float drawArea = new Rectangle2D.Float(0F, 0F, innerWidth, innerHeight);
@@ -174,5 +175,19 @@ public final class PDFUtils {
    */
   private static void definePDFProperties(final Document document) {
     document.addCreator(App.getSharedApplicationDataModel().getProgramName() + " v" + App.getSharedApplicationDataModel().getProgramVersion());
+  }
+
+  /**
+   * Return the font mapper used to translate Java2D Fonts to PDF Fonts (virtual or embedded)
+   * @return font mapper
+   */
+  private static FontMapper getFontMapper() {
+
+    // ChartFontMapper (test) substitutes SansSerif fonts (plain and bold) by DejaVu fonts which supports both unicode and greek characters
+    // However, fonts must be distributed (GPL) and many problems can happen...
+    /* return new ChartFontMapper(); */
+
+    // default font mapper uses Helvetica (Cp1252) which DOES NOT SUPPORT UNICODE CHARACTERS:
+    return new DefaultFontMapper();
   }
 }

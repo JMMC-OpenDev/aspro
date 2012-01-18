@@ -61,11 +61,13 @@ public final class ChartUtils {
   /** cache for annotation fonts to autofit size */
   private final static Map<Integer, Font> cachedFonts = new HashMap<Integer, Font>();
   /** The default font for titles. */
-  public static final Font DEFAULT_TITLE_FONT = new Font("SansSerif", Font.BOLD, 14);
+  public static final Font DEFAULT_TITLE_FONT = getFont(14, Font.BOLD);
+  /** The default font for titles. */
+  public static final Font DEFAULT_FONT = getFont(12);
   /** The default font for small texts */
-  public static final Font DEFAULT_TEXT_SMALL_FONT = getAnnotationFont(9);
+  public static final Font DEFAULT_TEXT_SMALL_FONT = getFont(9);
   /** The default small font for annotation texts */
-  public static final Font SMALL_TEXT_ANNOTATION_FONT = getAnnotationFont(8);
+  public static final Font SMALL_TEXT_ANNOTATION_FONT = getFont(8);
   /** default draw stroke */
   public static final Stroke DEFAULT_STROKE = new BasicStroke(1.0f);
   /** thin draw stroke */
@@ -122,7 +124,13 @@ public final class ChartUtils {
 
       // text annotations :
       CHART_THEME.setItemLabelPaint(Color.BLACK);
-      CHART_THEME.setSmallFont(DEFAULT_TEXT_SMALL_FONT);
+      
+      // use 'SansSerif' fonts:
+      CHART_THEME.setExtraLargeFont(getFont(20, Font.BOLD)); /* new Font("Tahoma", Font.BOLD, 20) */
+      CHART_THEME.setLargeFont(DEFAULT_TITLE_FONT); /* new Font("Tahoma", Font.BOLD, 14); */
+      CHART_THEME.setRegularFont(DEFAULT_FONT); /* new Font("Tahoma", Font.PLAIN, 12); */
+      CHART_THEME.setSmallFont(DEFAULT_TEXT_SMALL_FONT); /* new Font("Tahoma", Font.PLAIN, 10) */
+
     } else {
       throw new IllegalStateException("unsupported chart theme : " + ChartFactory.getChartTheme());
     }
@@ -173,15 +181,25 @@ public final class ChartUtils {
   }
 
   /**
-   * Return the annotation font for the given size (cached)
+   * Return the font (SansSerif / Plain) for the given size (cached)
    * @param size font size
    * @return annotation font
    */
-  private static Font getAnnotationFont(final int size) {
+  private static Font getFont(final int size) {
+    return getFont(size, Font.PLAIN);
+  }  
+  
+  /**
+   * Return the font (SansSerif / Plain) for the given size (cached)
+   * @param size font size
+   * @param style font style
+   * @return annotation font
+   */
+  private static Font getFont(final int size, final int style) {
     final Integer key = Integer.valueOf(size);
     Font f = cachedFonts.get(key);
     if (f == null) {
-      f = new Font("SansSerif", Font.PLAIN, size);
+      f = new Font("SansSerif", style, size);
       cachedFonts.put(key, f);
     }
     return f;
@@ -209,7 +227,7 @@ public final class ChartUtils {
     double width;
 
     do {
-      f = ChartUtils.getAnnotationFont(size);
+      f = ChartUtils.getFont(size);
 
 //      logger.severe("font      = " + f);
       fm = g2d.getFontMetrics(f);
@@ -252,7 +270,7 @@ public final class ChartUtils {
     double height;
 
     do {
-      f = ChartUtils.getAnnotationFont(size);
+      f = ChartUtils.getFont(size);
 
 //      logger.severe("font      = " + f);
       fm = g2d.getFontMetrics(f);
