@@ -21,7 +21,8 @@ public final class Observation implements Cloneable {
   // expunged ... they're in the WhenWhere.  But moonlight, moonobj, and sunobj
   // depend on the object coordinates so they are here:
   double moonlight;
-  double moonobj, sunobj;    // angular sepn of moon from obj and sun from obj
+  double moonobj; // angular sepn of moon from obj and sun from obj
+/*  double sunobj;  // angular sepn of sun from obj */
 
   Observation(final WhenWhere wIn, final Celest celIn) {
     w = wIn.clone();
@@ -84,11 +85,11 @@ public final class Observation implements Cloneable {
 
   void computeSunMoon() {
     current = c.precessed(w.when.julianEpoch());
-    //System.out.printf("computeSunMoon %s (%f)\n",
+    //System.out.printf("computeSunMoon %s (%f)%n",
     //       current.alpha.RoundedRAString(2," "),current.equinox);
     w.computeSunMoon();   // the non-object related parts are all done here
 
-    sunobj = Const.DEG_IN_RADIAN * Spherical.subtend(w.sun.topopos, current);
+    // sunobj = Const.DEG_IN_RADIAN * Spherical.subtend(w.sun.topopos, current);
     moonobj = Const.DEG_IN_RADIAN * Spherical.subtend(w.moon.topopos, current);
 
     moonlight = SkyIllum.lunskybright(w.sunmoon, moonobj, 0.172d, w.altmoon, altitude, w.moon.topopos.distance);
@@ -193,16 +194,16 @@ public final class Observation implements Cloneable {
     w.baryxyzvel(p, w.sun);  /* find the position and velocity of the
     observing site wrt the solar system barycent */
     double[] unitvec = current.cel_unitXYZ();
-//      System.out.printf("Current: %s\n",current.checkstring());
+//      System.out.printf("Current: %s%n",current.checkstring());
     barytcor = 0d;
     baryvcor = 0d;
-//      System.out.printf("Bary xyz %f %f %f \n",w.barycenter[0],
+//      System.out.printf("Bary xyz %f %f %f%n",w.barycenter[0],
 //             w.barycenter[1],w.barycenter[2]);
     for (int i = 0; i < 3; i++) {
       barytcor += unitvec[i] * w.barycenter[i];
       baryvcor += unitvec[i] * w.barycenter[i + 3];
     }
-//      System.out.printf("Bary %f sec %f km/s ...\n",
+//      System.out.printf("Bary %f sec %f km/s ...%n",
 //          barytcor, baryvcor);
     baryjd = w.when.jd + barytcor / 86400d;
   }

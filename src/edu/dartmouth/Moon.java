@@ -171,7 +171,7 @@ public final class Moon implements Cloneable {
     lambda /= Const.DEG_IN_RADIAN;
 
     final double dist = 1d / Math.sin(pie / Const.DEG_IN_RADIAN);
-//      System.out.printf("dist %f\n",dist);
+//      System.out.printf("dist %f%n",dist);
 
     final double[] retvals = new double[6];
     retvals[2] = dist / Const.EARTHRAD_IN_AU;
@@ -243,12 +243,12 @@ public final class Moon implements Cloneable {
       newjd = flmoon(nlast, 0);
     }
     if (kount > 35) {
-//      System.out.printf("didn't find lunation!\n");
+//      System.out.printf("didn't find lunation!%n");
     }
     return (nlast - 1);
   }
 
-  public static String MoonPhaseDescr(final double jd) {
+  public static String getPhaseDescription(final double jd) {
 
     int nlast, noctiles;
     double newjd, lastnewjd;

@@ -37,10 +37,10 @@ public final class NightlyAlmanac {
     check using numerical derivatives). */
 
     jdguess = w.when.jd;
-//      System.out.printf("Before makelocalsun, w.when.jd %f\n",w.when.jd);
+//      System.out.printf("Before makelocalsun, w.when.jd %f%n",w.when.jd);
     w.makeLocalSun();
     alt2 = w.altsun;
-//      System.out.printf("after alt2: w.when.jd %f alt2 %f\n",
+//      System.out.printf("after alt2: w.when.jd %f alt2 %f%n",
     //                  w.when.jd,alt2);
     jdguess += del;
     w.changeWhen(jdguess);
@@ -48,7 +48,7 @@ public final class NightlyAlmanac {
     alt3 = w.altsun;
     err = alt3 - alt;
     deriv = (alt3 - alt2) / del;
-//      System.out.printf("alt2 alt3 %f %f  err %f deriv %f\n",
+//      System.out.printf("alt2 alt3 %f %f  err %f deriv %f%n",
     //             alt2,alt3,err,deriv);
     while ((Math.abs(err) > 0.02d) && (i < 10)) {
       lastjd = jdguess;
@@ -57,20 +57,20 @@ public final class NightlyAlmanac {
       w.changeWhen(jdguess);
       w.updateLocalSun();
       alt3 = w.altsun;
-//          System.out.printf("alt3 %f jdguess %f\n",alt3,jdguess);
+//          System.out.printf("alt3 %f jdguess %f%n",alt3,jdguess);
       err = alt3 - alt;
       i++;
       deriv = (alt3 - alt2) / (jdguess - lastjd);
 /*
       if (i == 9) {
-        System.out.printf("jd_sun_alt not converging.\n");
+        System.out.printf("jd_sun_alt not converging.%n");
       }
 */
     }
     if (i >= 9) {
       jdguess = -1000d;
     }
-//      System.out.printf("Leaving sun w/ wIn %f w %f\n",wIn.when.jd,w.when.jd);
+//      System.out.printf("Leaving sun w/ wIn %f w %f%n",wIn.when.jd,w.when.jd);
     return jdguess;
   }
 
@@ -88,11 +88,11 @@ public final class NightlyAlmanac {
 
     final WhenWhere w = wIn.clone();
 
-    // System.out.printf("Into jd_moon_alt, target = %f\n",alt);
+    // System.out.printf("Into jd_moon_alt, target = %f%n",alt);
     jdguess = w.when.jd;
     w.makeLocalMoon();
     alt2 = w.altmoon;
-    // System.out.printf("after alt2: w.when.jd %f alt2 %f\n",
+    // System.out.printf("after alt2: w.when.jd %f alt2 %f%n",
     //              w.when.jd,alt2);
     jdguess += del;
     w.changeWhen(jdguess);
@@ -100,7 +100,7 @@ public final class NightlyAlmanac {
     alt3 = w.altmoon;
     err = alt3 - alt;
     deriv = (alt3 - alt2) / del;
-    // System.out.printf("alt2 alt3 %f %f  err %f deriv %f\n",
+    // System.out.printf("alt2 alt3 %f %f  err %f deriv %f%n",
     //        alt2,alt3,err,deriv);
     while ((Math.abs(err) > 0.02d) && (i < 10)) {
       lastjd = jdguess;
@@ -113,17 +113,17 @@ public final class NightlyAlmanac {
       err = alt3 - alt;
       i++;
       deriv = (alt3 - alt2) / (jdguess - lastjd);
-      // System.out.printf(" err %f deriv %f\n",err,deriv);
+      // System.out.printf(" err %f deriv %f%n",err,deriv);
 /*
       if (i == 9) {
-        System.out.printf("jd_moon_alt not converging.\n");
+        System.out.printf("jd_moon_alt not converging.%n");
       }
 */
     }
     if (i >= 9) {
       jdguess = -1000d;
     }
-    // System.out.printf("Exiting with jdguess = %f\n\n",jdguess);
+    // System.out.printf("Exiting with jdguess = %f%n%n",jdguess);
     return jdguess;
   }
 
@@ -177,7 +177,7 @@ public final class NightlyAlmanac {
     // next midnight if after local noon.
 
     midnight.when = w.when.clone();
-//      System.out.printf("Entering almanac with local  %s\n",midnight.when.localDate.roundedCalString(0,0));
+//      System.out.printf("Entering almanac with local  %s%n",midnight.when.localDate.roundedCalString(0,0));
     if (midnight.when.localDate.timeofday.hour >= 12) {
       midnight.when.localDate.timeofday.hour = 23;
       midnight.when.localDate.timeofday.minute = 59;
@@ -188,20 +188,20 @@ public final class NightlyAlmanac {
       midnight.when.localDate.timeofday.second = 0d;
     }
     jdtemp = midnight.when.localDate.cal2JD();
-    // System.out.printf("jdtemp (local) = %f\n",jdtemp);
+    // System.out.printf("jdtemp (local) = %f%n",jdtemp);
     midnight.when.setInstant(jdtemp, w.where.stdz, w.where.use_dst, false);
-    // System.out.printf("translates to midnight.jd %f\n",midnight.when.jd);
+    // System.out.printf("translates to midnight.jd %f%n",midnight.when.jd);
     final double jdmid = midnight.when.jd;   // the real JD
     midnight.changeWhen(jdmid);        // to synch sidereal etc.
-//      System.out.printf("Midnight set to %s\n", midnight.when.UTDate.roundedCalString(0,1));
-//      System.out.printf("lst at midnight = %f\n",midnight.sidereal);
+//      System.out.printf("Midnight set to %s%n", midnight.when.UTDate.roundedCalString(0,1));
+//      System.out.printf("lst at midnight = %f%n",midnight.sidereal);
 
     midnight.updateLocalSun();
     midnight.updateLocalMoon();
 
     // See if the sun rises or sets ...
     final double hasunrise = Spherical.ha_alt(midnight.sun.topopos.delta.value, midnight.where.lat.value, rise_set_alt);
-//      System.out.printf("hourangle sunrise: %f\n",hasunrise);
+//      System.out.printf("hourangle sunrise: %f%n",hasunrise);
 
     if (hasunrise < 11.8d && hasunrise > 0.2d) {
       // if sun grazes horizon, small changes in DEC may affect whether it actually
@@ -227,22 +227,22 @@ public final class NightlyAlmanac {
         dtset += 24d;
       }
 
-//         System.out.printf("going to jd_sun_alt with est sunrise = %f\n",jdmid + dtrise/24.);
+//         System.out.printf("going to jd_sun_alt with est sunrise = %f%n",jdmid + dtrise/24.);
       sunrise.changeWhen(jdmid + dtrise / 24d);
       sunrise.updateLocalSun();
-//         System.out.printf("sunrise.when.jd %f, sunrise.altsun %f\n",sunrise.when.jd,
+//         System.out.printf("sunrise.when.jd %f, sunrise.altsun %f%n",sunrise.when.jd,
 //             sunrise.altsun);
       jdtemp = jd_sun_alt(rise_set_alt, sunrise);
-//         System.out.printf("out, sunrise = %f\n",jdtemp);
+//         System.out.printf("out, sunrise = %f%n",jdtemp);
       sunrise.changeWhen(jdtemp);
 
-//         System.out.printf("going to jd_sun_alt with est sunset = %f\n",jdmid + dtset/24.);
+//         System.out.printf("going to jd_sun_alt with est sunset = %f%n",jdmid + dtset/24.);
       sunset.changeWhen(jdmid + dtset / 24d);
       sunset.updateLocalSun();
       jdtemp = jd_sun_alt(rise_set_alt, sunset);
-//         System.out.printf("out, sunset = %f\n",jdtemp);
+//         System.out.printf("out, sunset = %f%n",jdtemp);
       sunset.changeWhen(jdtemp);
-//         System.out.printf("In NightlyAlmanac.Update, sunset set to:\n");
+//         System.out.printf("In NightlyAlmanac.Update, sunset set to:%n");
 //         sunset.dump();
       nightcenter.changeWhen((sunset.when.jd + sunrise.when.jd) / 2d);
     } else if (hasunrise < 0.2d) {  // may not rise ... set sunrise to noontime to flag.
@@ -262,7 +262,7 @@ public final class NightlyAlmanac {
 
     // Now let's do the same thing for astronomical twilight ...
     final double hatwilight18 = Spherical.ha_alt(midnight.sun.topopos.delta.value, midnight.where.lat.value, twilight_alt_18);
-    // System.out.printf("hourangle sunrise: %f\n",hasunrise);
+    // System.out.printf("hourangle sunrise: %f%n",hasunrise);
     if (hatwilight18 < 11.8d && hatwilight18 > 0.2d) {
 
       dtrise = midnight.sun.topopos.alpha.value - hatwilight18 - midnight.sidereal;
@@ -311,7 +311,7 @@ public final class NightlyAlmanac {
 
     // Now let's do the same thing for nautical twilight ...
     final double hatwilight12 = Spherical.ha_alt(midnight.sun.topopos.delta.value, midnight.where.lat.value, twilight_alt_12);
-    // System.out.printf("hourangle sunrise: %f\n",hasunrise);
+    // System.out.printf("hourangle sunrise: %f%n",hasunrise);
     if (hatwilight12 < 11.8d && hatwilight12 > 0.2d) {
 
       dtrise = midnight.sun.topopos.alpha.value - hatwilight12 - midnight.sidereal;
@@ -360,7 +360,7 @@ public final class NightlyAlmanac {
 
     // Now let's do the same thing for twilight ...
     final double hatwilight06 = Spherical.ha_alt(midnight.sun.topopos.delta.value, midnight.where.lat.value, twilight_alt_06);
-    // System.out.printf("hourangle sunrise: %f\n",hasunrise);
+    // System.out.printf("hourangle sunrise: %f%n",hasunrise);
     if (hatwilight06 < 11.8d && hatwilight06 > 0.2d) {
 
       dtrise = midnight.sun.topopos.alpha.value - hatwilight06 - midnight.sidereal;
@@ -433,10 +433,10 @@ public final class NightlyAlmanac {
         dtset += 24d;
       }
       /*
-      System.out.printf("ra moon midn    %s\n",midnight.moon.topopos.alpha.RoundedRAString(0,":"));
-      System.out.printf("lst at midnight %f\n",midnight.sidereal);
-      System.out.printf("rise-set HA %f\n",hamoonrise);
-      System.out.printf("dtrise %f dtset %f\n",dtrise,dtset);
+      System.out.printf("ra moon midn    %s%n",midnight.moon.topopos.alpha.RoundedRAString(0,":"));
+      System.out.printf("lst at midnight %f%n",midnight.sidereal);
+      System.out.printf("rise-set HA %f%n",hamoonrise);
+      System.out.printf("dtrise %f dtset %f%n",dtrise,dtset);
        */
 
       moonrise.changeWhen(jdmid + dtrise / 24d);
