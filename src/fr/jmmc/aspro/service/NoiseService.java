@@ -20,11 +20,12 @@ import fr.jmmc.aspro.model.WarningContainer;
 import fr.jmmc.aspro.model.util.AtmosphereQualityUtils;
 import fr.jmmc.aspro.model.util.SpectralBandUtils;
 import fr.jmmc.jmal.Band;
+import fr.jmmc.jmal.complex.Complex;
+import fr.jmmc.jmal.complex.ImmutableComplex;
 import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Random;
 import java.util.logging.Level;
-import org.apache.commons.math.complex.Complex;
 
 /**
  * This class performs the noise modelling of visibility data (error and noise) 
@@ -44,8 +45,6 @@ public final class NoiseService {
   public final static double C_LIGHT = 2.99792458e8d;
   /** constant 1 / SQRT(2) */
   private final static double SQRT_2_INV = 1d / Math.sqrt(2d);
-  /** invalid complex (NaN, NaN) */
-  private final static Complex INVALID_COMPLEX = new Complex(Double.NaN, Double.NaN);
 
   /* members */
   /** instrument name */
@@ -457,15 +456,15 @@ public final class NoiseService {
 
   /**
    * Compute error on complex visibility derived from computeVis2Error(visAmp).
-   * It returns NaN if the flux can not be computed
+   * It returns Complex.NaN if the flux can not be computed
    *
    * @param visAmp visibility amplitude
    * @return complex visiblity error or NaN if the error can not be computed
    */
   public Complex computeVisComplexError(final double visAmp) {
-    // fast return NaN if invalid configuration :
+    // fast return Complex.NaN if invalid configuration :
     if (this.invalidParameters) {
-      return INVALID_COMPLEX;
+      return Complex.NaN;
     }
 
     // visibility amplitude error :
@@ -479,7 +478,7 @@ public final class NoiseService {
     // complex visibility error : visErrRe = visErrIm = visAmpErr / SQRT(2) :
     final double visErr = visAmpErr * SQRT_2_INV;
 
-    return new Complex(visErr, visErr);
+    return new ImmutableComplex(visErr, visErr); // immutable complex for safety
   }
 
   /**

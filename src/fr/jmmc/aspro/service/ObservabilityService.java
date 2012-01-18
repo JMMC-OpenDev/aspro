@@ -11,6 +11,7 @@ import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.BaseLine;
 import fr.jmmc.aspro.model.Beam;
 import fr.jmmc.aspro.model.ConfigurationManager;
+import fr.jmmc.aspro.model.HorizonShape;
 import fr.jmmc.aspro.model.ObservabilityContext;
 import fr.jmmc.aspro.model.observability.DateTimeInterval;
 import fr.jmmc.aspro.model.observability.ObservabilityData;
@@ -37,7 +38,6 @@ import fr.jmmc.aspro.model.oi.PopLink;
 import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.StationLinks;
 import fr.jmmc.aspro.model.oi.Target;
-import fr.jmmc.aspro.service.HorizonService.Profile;
 import fr.jmmc.aspro.util.CombUtils;
 import fr.jmmc.aspro.util.TestUtils;
 import java.util.ArrayList;
@@ -1127,7 +1127,7 @@ public final class ObservabilityService {
     final HorizonService hs = HorizonService.getInstance();
 
     final int nBeams = this.beams.size();
-    final Profile[] profiles = new Profile[nBeams];
+    final HorizonShape[] profiles = new HorizonShape[nBeams];
 
     for (int i = 0; i < nBeams; i++) {
       final Beam b = this.beams.get(i);
@@ -1159,8 +1159,8 @@ public final class ObservabilityService {
       // check if there is no horizon obstruction :
       visible = true;
 
-      for (final Profile p : profiles) {
-        if (!hs.checkProfile(p, azEl.getAzimuth(), azEl.getElevation())) {
+      for (final HorizonShape profile : profiles) {
+        if (!hs.checkProfile(profile, azEl.getAzimuth(), azEl.getElevation())) {
           visible = false;
 
 //          if (logger.isLoggable(Level.FINE)) {

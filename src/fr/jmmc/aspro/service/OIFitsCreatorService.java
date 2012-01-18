@@ -18,6 +18,10 @@ import fr.jmmc.aspro.model.uvcoverage.UVRangeBaseLineData;
 import fr.jmmc.aspro.util.CombUtils;
 import fr.jmmc.aspro.util.ComplexUtils;
 import fr.jmmc.jmal.ALX;
+import fr.jmmc.jmal.complex.Complex;
+import fr.jmmc.jmal.complex.ImmutableComplex;
+import fr.jmmc.jmal.complex.MutableComplex;
+import fr.jmmc.jmal.model.ModelComputeContext;
 import fr.jmmc.jmal.model.ModelManager;
 import fr.jmmc.jmal.model.targetmodel.Model;
 import fr.jmmc.oitools.OIFitsConstants;
@@ -37,7 +41,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
-import org.apache.commons.math.complex.Complex;
 
 /**
  * This class contains the code to create OIFits structure from the current observation
@@ -417,14 +420,14 @@ public final class OIFitsCreatorService {
   private void computeModelVisibilities() {
 
     if (this.hasModels) {
-      final List<Model> models = this.target.getModels();
-
       // Clone models and normalize fluxes :
-      final List<Model> normModels = Target.cloneModels(models);
-      ModelManager.normalizeFluxes(normModels);
+      final List<Model> normModels = ModelManager.normalizeModels(this.target.getModels());
+
+      // prepare models once for all:
+      final ModelComputeContext context = ModelManager.getInstance().prepareModels(normModels, this.nWaveLengths);
 
       // Allocate data array for complex visibility and error :
-      final Complex[][] cVis = new Complex[this.nHAPoints * this.nBaseLines][];
+      final Complex[][] cVis = new Complex[this.nHAPoints * this.nBaseLines][this.nWaveLengths];
       final Complex[][] cVisError = new Complex[this.nHAPoints * this.nBaseLines][this.nWaveLengths];
 
       double u, v;
@@ -454,16 +457,16 @@ public final class OIFitsCreatorService {
           }
 
           // compute complex visibilities :
-          cVis[k] = ModelManager.getInstance().computeModels(ufreq, vfreq, normModels);
+          cVis[k] = convertArray(ModelManager.getInstance().computeModels(context, ufreq, vfreq));
 
-          if (cVis[k] == null) {
+          if (cVis[k] == null || Thread.currentThread().isInterrupted()) {
             // fast interrupt :
             return;
           }
 
           // Iterate on wave lengths :
           for (l = 0; l < this.nWaveLengths; l++) {
-            // complex visibility error :
+            // complex visibility error or Complex.NaN:
             cVisError[k][l] = this.noiseService.computeVisComplexError(cVis[k][l].abs());
           }
 
@@ -474,6 +477,21 @@ public final class OIFitsCreatorService {
       this.visComplex = cVis;
       this.visError = cVisError;
     }
+  }
+
+  /**
+   * Convert mutable complex array to immutable complex array for safety reasons
+   * @param array mutable complex array
+   * @return immutable complex array
+   */
+  private static Complex[] convertArray(final MutableComplex[] array) {
+    final int length = array.length;
+    final Complex[] result = new Complex[length];
+
+    for (int i = 0; i < length; i++) {
+      result[i] = new ImmutableComplex(array[i]); // immutable complex for safety
+    }
+    return result;
   }
 
   /**
@@ -555,8 +573,8 @@ public final class OIFitsCreatorService {
         uCoords[k] = u;
         vCoords[k] = v;
 
-        // if target has models, then complex visibility are computed :
-        if (!this.hasModels) {
+        // if target has models and errors are valid, then complex visibility are computed :
+        if (!this.hasModels || !this.errorValid) {
           // Invalid => NaN value :
 
           // Iterate on wave lengths :
@@ -581,6 +599,7 @@ public final class OIFitsCreatorService {
 
           // Iterate on wave lengths :
           for (l = 0; l < this.nWaveLengths; l++) {
+
             // pure complex visibility data :
             visRe = this.visComplex[k][l].getReal();
             visIm = this.visComplex[k][l].getImaginary();
@@ -588,10 +607,10 @@ public final class OIFitsCreatorService {
             // pure visibility amplitude :
             vAmp = this.visComplex[k][l].abs();
 
-            // pure correlated fluxes :
+            // pure correlated fluxes or NaN:
             flux = this.noiseService.computeCorrelatedFlux(vAmp);
 
-            // complex visibility error : visErrRe = visErrIm = visAmpErr / SQRT(2) :
+            // complex visibility error : visErrRe = visErrIm = visAmpErr / SQRT(2) or Complex.NaN :
             visErrRe = this.visError[k][l].getReal();
             visErrIm = this.visError[k][l].getImaginary();
 
@@ -601,8 +620,9 @@ public final class OIFitsCreatorService {
 
             if (this.doNoise) {
               // add gaussian noise with sigma = visErrRe / visErrIm :
-              visComplexNoisy[k][l] = new Complex(visRe + this.noiseService.randomGauss(visErrRe),
-                      visIm + this.noiseService.randomGauss(visErrIm));
+              visComplexNoisy[k][l] = new ImmutableComplex(
+                      visRe + this.noiseService.randomGauss(visErrRe),
+                      visIm + this.noiseService.randomGauss(visErrIm)); // immutable complex for safety
             } else {
               visComplexNoisy[k][l] = this.visComplex[k][l];
             }
@@ -611,7 +631,7 @@ public final class OIFitsCreatorService {
             visData[k][l][0] = (float) (flux * visComplexNoisy[k][l].getReal());
             visData[k][l][1] = (float) (flux * visComplexNoisy[k][l].getImaginary());
 
-            if (!isAmber || !this.errorValid) {
+            if (!isAmber) {
               // Waiting for explanations on every instrument processing to compute VisAmp/Phi :
               // following values are considered as invalid :
               visAmp[k][l] = Double.NaN;
@@ -790,9 +810,12 @@ public final class OIFitsCreatorService {
 
     // vars :
     Complex[] visData12, visData23, visData13;
-    Complex vis12, vis23, vis31, t3Data;
+    Complex vis12, vis23, vis31;
     double u12, v12, u23, v23;
     double errPhi, errAmp, rand;
+
+    // temporary mutable complex:
+    final MutableComplex t3Data = new MutableComplex();
 
     int[] relPos;
     int pos;
@@ -897,7 +920,7 @@ public final class OIFitsCreatorService {
             vis31 = visData13[l].conjugate();
 
             // Compute RE/IM bispectrum with C12*C23*~C13 :
-            t3Data = ComplexUtils.bispectrum(vis12, vis23, vis31);
+            ComplexUtils.bispectrum(vis12, vis23, vis31, t3Data);
 
             // amplitude :
             t3Amp[k][l] = t3Data.abs();

@@ -7,8 +7,8 @@
 
 <ApplicationData link="http://www.jmmc.fr/aspro2">
 
-  <program name="Aspro2" version="0.8.2 beta 6"/>
-  <compilation date="15/12/2011" compiler="JDK 1.5.0_16"/>
+  <program name="Aspro2" version="0.8.2 beta 7"/>
+  <compilation date="17/01/2011" compiler="JDK 1.5.0_16"/>
 
   <text>
     <![CDATA[ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations
@@ -82,13 +82,6 @@
             description="Get information from spectral type of stellar objects. Provided by CDS"
             link="nc"
             jars="sptype.jar"/>
-
-        <!-- Model computations -->
-        <package name="commons-math"
-            description="Commons Math is a library of lightweight, self-contained mathematics and statistics components addressing the most common problems not available in the Java programming language or Commons Lang."
-            link="http://commons.apache.org/math/"
-            jars="commons-math-2.2.jar"
-            license="APACHE_V2"/>
 
         <!-- Model computations (bessel functions) -->
         <package name="CERN colt"
@@ -238,6 +231,10 @@
 
   <releasenotes>
     <release version="0.8.2">
+      <prerelease version="0.8.2 beta 7">
+        <change type="CHANGE">Optimized computation of object model image: use divide and conquer algorithm (multi-core CPU) and smaller memory footprint</change>
+        <change type="CHANGE">Added new model image sizes in user preferences: 256, 384, 512, 768, 1024, 1536, 2048</change>
+      </prerelease>
       <prerelease version="0.8.2 beta 6">
         <change type="CHANGE">Added PIVOT identifier support in Samp 'table.load.votable' incoming and 'starlist.load' output messages</change>
         <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/243">Fixed noise biases for PIONIER instrument: 

@@ -3,8 +3,10 @@
  ******************************************************************************/
 package fr.jmmc.aspro.service;
 
+import fr.jmmc.jmal.complex.Complex;
+import fr.jmmc.jmal.complex.ImmutableComplex;
+import fr.jmmc.jmal.complex.MutableComplex;
 import fr.jmmc.oitools.model.OIVis;
-import org.apache.commons.math.complex.Complex;
 
 /**
  * This class is dedicated to the AMBER instrument to compute differential visibility and phase
@@ -17,16 +19,15 @@ public final class OIFitsAMBERService {
   /** constant used by abacusErrPhi */
   public final static double ASYMPTOT = Math.PI / Math.sqrt(3d);
   /** polynomial coefficients used by abacusErrPhi */
-  private final static double abacusCoeff[] = {2.7191808010909d,
-                                               -17.1901043936273d,
-                                               45.0654103760899d,
-                                               -63.4441678243197d,
-                                               52.3098941426378d,
-                                               -25.8090699917488d,
-                                               7.84352873962491d,
-                                               -1.57308595820081d};
-  /** constant complex (1,0) */
-  private final static Complex COMPLEX_1_0 = new Complex(1d, 0d);
+  private final static double abacusCoeff[] = {
+    2.7191808010909d,
+    -17.1901043936273d,
+    45.0654103760899d,
+    -63.4441678243197d,
+    52.3098941426378d,
+    -25.8090699917488d,
+    7.84352873962491d,
+    -1.57308595820081d};
 
   /**
    * Forbidden constructor
@@ -43,9 +44,9 @@ public final class OIFitsAMBERService {
    * @param waveLengths wavelengths
    */
   public static void amdlibFakeAmberDiffVis(final OIVis vis,
-                                            final Complex[][] visComplex,
-                                            final Complex[][] visError,
-                                            final double[] waveLengths) {
+          final Complex[][] visComplex,
+          final Complex[][] visError,
+          final double[] waveLengths) {
 
     /*
      * Note on amdlib port :
@@ -83,7 +84,7 @@ public final class OIFitsAMBERService {
     final double[] opd = new double[nRows];
     final double[] cpxVisVectR = new double[nRows];
 
-    Complex phasor, cpxVis, sigma2_cpxVis, w1Avg;
+    Complex phasor, w1Avg;
     double x;
 
     // Output in OI_VIS table :
@@ -105,9 +106,9 @@ public final class OIFitsAMBERService {
 
       for (lVis = 0; lVis < nbLVis; lVis++) {
 
-        sigma2_cpxVisTable[iRow][lVis] = new Complex(
+        sigma2_cpxVisTable[iRow][lVis] = new ImmutableComplex(
                 Math.pow(visError[iRow][lVis].getReal(), 2d),
-                Math.pow(visError[iRow][lVis].getImaginary(), 2d));
+                Math.pow(visError[iRow][lVis].getImaginary(), 2d)); // immutable complex for safety
       }
     }
 
@@ -133,39 +134,45 @@ public final class OIFitsAMBERService {
             waveLengths,
             opd);
 
+    // Use mutable complex carefully:
+    Complex cpxVis = new MutableComplex();
+    Complex sigma2_cpxVis = new MutableComplex();
+
     /* Production of the reference channel: mean of all R and I parts
      * of all channels except the one considered ( eq 2.3) */
     for (iRow = 0; iRow < nRows; iRow++) {
 
-      cpxVis = new Complex(0d, 0d);
-
-      sigma2_cpxVis = new Complex(0d, 0d);
+      // reset:
+      cpxVis.updateComplex(0d, 0d);
+      sigma2_cpxVis.updateComplex(0d, 0d);
 
       /* sum all R and I */
       for (lVis = 0; lVis < nbLVis; lVis++) {
         /* skipped flags
-        if (cpxVisTable[iRow][lVis].re != amdlibBLANKING_VALUE)
+         if (cpxVisTable[iRow][lVis].re != amdlibBLANKING_VALUE)
          */
-        cpxVis = cpxVis.add(cNopTable[iRow][lVis]);
-        sigma2_cpxVis = sigma2_cpxVis.add(sigma2_cpxVisTable[iRow][lVis]);
+        cpxVis.add(cNopTable[iRow][lVis]);
+        sigma2_cpxVis.add(sigma2_cpxVisTable[iRow][lVis]);
       }
 
       /* then construct Cref by substracting current R and I
        * at that Wlen and make the arithmetic mean */
       for (lVis = 0; lVis < nbLVis; lVis++) {
-        cRefTable[iRow][lVis] = new Complex(
+        cRefTable[iRow][lVis] = new ImmutableComplex(
                 (cpxVis.getReal() - cNopTable[iRow][lVis].getReal())
                 / (nbLVis - 1),
                 (cpxVis.getImaginary() - cNopTable[iRow][lVis].getImaginary())
-                / (nbLVis - 1));
+                / (nbLVis - 1)); // immutable complex for safety
 
-        sigma2_cRefTable[iRow][lVis] = new Complex(
+        sigma2_cRefTable[iRow][lVis] = new ImmutableComplex(
                 (sigma2_cpxVis.getReal() - sigma2_cpxVisTable[iRow][lVis].getReal())
                 / (nbLVis - 1),
                 (sigma2_cpxVis.getImaginary() - sigma2_cpxVisTable[iRow][lVis].getImaginary())
-                / (nbLVis - 1));
+                / (nbLVis - 1)); // immutable complex for safety
       }
     }
+
+    // variables cpxVis and sigma2_cpxVis will then store ImmutableComplex reference below:
 
     /* Now the interspectrum is cNopTable*~cRefTable. Store in w1. */
     for (iRow = 0; iRow < nRows; iRow++) {
@@ -177,10 +184,10 @@ public final class OIFitsAMBERService {
         w1[iRow][lVis] = cpxVis.multiply(phasor);
 
         /* Please have a look to the F. Millour thesis
-        (http://tel.archives-ouvertes.fr/tel-00134268),
-        pp.91-892 (eq. 4.55 to 4.58) */
+         (http://tel.archives-ouvertes.fr/tel-00134268),
+         pp.91-892 (eq. 4.55 to 4.58) */
 
-        sigma2_w1[iRow][lVis] = new Complex(
+        sigma2_w1[iRow][lVis] = new ImmutableComplex(
                 sigma2_cpxVisTable[iRow][lVis].getReal()
                 * Math.pow(cRefTable[iRow][lVis].getReal(), 2d)
                 + sigma2_cRefTable[iRow][lVis].getReal()
@@ -196,7 +203,7 @@ public final class OIFitsAMBERService {
                 + sigma2_cpxVisTable[iRow][lVis].getReal()
                 * Math.pow(cRefTable[iRow][lVis].getImaginary(), 2d)
                 + sigma2_cRefTable[iRow][lVis].getReal()
-                * Math.pow(cpxVisTable[iRow][lVis].getImaginary(), 2d));
+                * Math.pow(cpxVisTable[iRow][lVis].getImaginary(), 2d)); // immutable complex for safety
 
 
         /*Here there is no over-frame averaging. Compute 'averaged' values frame by frame */
@@ -232,11 +239,10 @@ public final class OIFitsAMBERService {
         /* see eq 2.8 */
         x = Math.toRadians(visPhi[iRow][lVis]);
 
-        phasor = new Complex(Math.cos(x), -Math.sin(x));
         cpxVis = w1[iRow][lVis];
 
         /*Here there is no over-frame averaging. Compute 'averaged' values frame by frame */
-        cpxVisVectR[iRow] = phasor.getReal() * cpxVis.getReal() - phasor.getImaginary() * cpxVis.getImaginary();
+        cpxVisVectR[iRow] = Math.cos(x) * cpxVis.getReal() + Math.sin(x) * cpxVis.getImaginary();
 
         visAmp[iRow][lVis] = cpxVisVectR[iRow];
         visAmpErr[iRow][lVis] = Math.sqrt(sigma2_w1[iRow][lVis].getImaginary() + sigma2_w1[iRow][lVis].getReal());
@@ -248,14 +254,14 @@ public final class OIFitsAMBERService {
    * Compute piston, iterative phasor method.
    */
   private static void amdlibFakeComputePiston2T(int nbLVis,
-                                                final double[] wlen,
-                                                final Complex[] cpxVisTable,
-                                                final Complex[] s2cpxVisTable,
-                                                final double[] pistonOPD,
-                                                final double[] sigma,
-                                                double wlenAvg,
-                                                double wlenDifAvg,
-                                                double R) {
+          final double[] wlen,
+          final Complex[] cpxVisTable,
+          final Complex[] s2cpxVisTable,
+          final double[] pistonOPD,
+          final double[] sigma,
+          double wlenAvg,
+          double wlenDifAvg,
+          double R) {
     // TODO : port amdlibPiston.c
   }
 
@@ -279,15 +285,16 @@ public final class OIFitsAMBERService {
     int iRow;
     int lVis;
     double x;
-    Complex phasor, cpxVis, cpxVisAvg;
+    Complex phasor, cpxVis, cpxVisAvgConj;
 
+    final MutableComplex cpxVisAvg = new MutableComplex();
     final Complex[][] tmpCpxVis = new Complex[nRows][nbLVis];
 
     for (iRow = 0; iRow < nRows; iRow++) {
 
       /*
        * skip test as pst = 0 here :
-      if( !(pst[iRow]==amdlibBLANKING_VALUE))
+       if( !(pst[iRow]==amdlibBLANKING_VALUE))
        */
       for (lVis = 0; lVis < nbLVis; lVis++) {
         /*Flagged Vis not important here*/
@@ -300,16 +307,16 @@ public final class OIFitsAMBERService {
          * lines that are used in templates.
          * x = (2 * M_PI/wlen[lVis]) * -1*pst[iFrame][iBase]; */
         if (pst[iRow] == 0d) {
-          phasor = COMPLEX_1_0;
+          phasor = Complex.ONE;
         } else {
           x = (2d * Math.PI / waveLengths[lVis]) * pst[iRow];
-          phasor = new Complex(Math.cos(x), -Math.sin(x));
+          phasor = new ImmutableComplex(Math.cos(x), -Math.sin(x)); // immutable complex for safety
         }
 
         cpxVis = cpxVisTable[iRow][lVis];
 
         /* Store complex Product of the phasor with the coherent flux
-        in cNopTable*/
+         in cNopTable*/
         cNopTable[iRow][lVis] = cpxVis.multiply(phasor);
       }
 
@@ -317,19 +324,24 @@ public final class OIFitsAMBERService {
 
       /* Recenter this by removing the mean, taking account of bad Vis */
       /* Compute the mean over lambda */
-      cpxVisAvg = new Complex(0d, 0d);
+
+      // reset:
+      cpxVisAvg.updateComplex(0d, 0d);
 
       for (lVis = 0; lVis < nbLVis; lVis++) {
         /* skipped flags
-        if (cNopTable[iRow][lVis].re!=amdlibBLANKING_VALUE)
+         if (cNopTable[iRow][lVis].re!=amdlibBLANKING_VALUE)
          */
-        cpxVisAvg = cpxVisAvg.add(cNopTable[iRow][lVis]);
+        cpxVisAvg.add(cNopTable[iRow][lVis]);
       }
-      cpxVisAvg = cpxVisAvg.multiply(1d / nbLVis);
+      cpxVisAvg.multiply(1d / nbLVis);
+
+      // store immutable conjugate complex:
+      cpxVisAvgConj = new ImmutableComplex(cpxVisAvg.conjugate());
 
       /* Store conjugate complex values in tmpCpxVis as (constant) vector */
       for (lVis = 0; lVis < nbLVis; lVis++) {
-        tmpCpxVis[iRow][lVis] = cpxVisAvg.conjugate();
+        tmpCpxVis[iRow][lVis] = cpxVisAvgConj;
       }
 
       /* Remove constant by multiplying the two */

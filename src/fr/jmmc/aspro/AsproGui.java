@@ -28,6 +28,7 @@ import fr.jmmc.jmcs.gui.StatusBar;
 import fr.jmmc.jmcs.gui.SwingSettings;
 import fr.jmmc.jmcs.gui.SwingUtils;
 import fr.jmmc.jmcs.gui.task.TaskSwingWorkerExecutor;
+import fr.jmmc.jmcs.util.concurrent.ParallelJobExecutor;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Toolkit;
@@ -136,6 +137,9 @@ public final class AsproGui extends App {
     // Initialize tasks and the task executor :
     AsproTaskRegistry.getInstance();
     TaskSwingWorkerExecutor.start();
+
+    // Initialize the parallel job executor:
+    ParallelJobExecutor.getInstance();
   }
 
   /**
@@ -203,6 +207,9 @@ public final class AsproGui extends App {
     // stop the task executor :
     TaskSwingWorkerExecutor.stop();
 
+    // stop the parallel job executor:
+    ParallelJobExecutor.shutdown();
+
     super.onFinish();
   }
 
@@ -229,7 +236,7 @@ public final class AsproGui extends App {
     final int appWidth = 950;
     final int appHeightMin = 700;
     final int appHeightPref = (screenSize.getHeight() >= 864) ? 800 : appHeightMin;
-    
+
     final Dimension dim = new Dimension(appWidth, appHeightMin);
     frame.setMinimumSize(dim);
     frame.setPreferredSize(new Dimension(appWidth, appHeightPref));
@@ -246,7 +253,7 @@ public final class AsproGui extends App {
 
     // initialize the actions :
     registerActions();
-    
+
     // Handle status bar
     getFramePanel().add(new StatusBar(), BorderLayout.SOUTH);
 
