@@ -3,6 +3,9 @@
  ******************************************************************************/
 package fr.jmmc.aspro;
 
+import java.util.Arrays;
+import java.util.Vector;
+
 /**
  * This class gathers main constant values
  * @author bourgesl
@@ -40,7 +43,16 @@ public interface AsproConstants {
   /** default image size */
   public final static Integer DEFAULT_IMAGE_SIZE = Integer.valueOf(512);
   /** image size choices */
-  public final static Integer[] IMAGE_SIZES = {Integer.valueOf(256), DEFAULT_IMAGE_SIZE, Integer.valueOf(1024)};
+  public final static Vector<Integer> IMAGE_SIZES = new Vector<Integer>(Arrays.asList(
+          new Integer[]{
+            Integer.valueOf(256),
+            Integer.valueOf(384),
+            DEFAULT_IMAGE_SIZE,
+            Integer.valueOf(768),
+            Integer.valueOf(1024),
+            Integer.valueOf(1536),
+            Integer.valueOf(2048),
+          }));
   /** no value for combo boxes */
   public static final String NONE = "None";
 
@@ -52,7 +64,7 @@ public interface AsproConstants {
   /** HA time reference */
   public static final String TIME_HA = "H.A.";
   /** list of choosable time references */
-  public static final String[] TIME_CHOICES = new String[]{TIME_LST, TIME_UTC};
+  public static final Vector<String> TIME_CHOICES = new Vector<String>(Arrays.asList(new String[]{TIME_LST, TIME_UTC}));
 
   /* instrument names for specific features */
   /** VLTI AMBER */
@@ -67,14 +79,10 @@ public interface AsproConstants {
   public static final String JMMC_ANNOTATION = "Made by ASPRO 2/JMMC ";
   /** suffix for calibrator names */
   public static final String CAL_SUFFIX = " (cal)";
-
   /** default value for undefined magnitude = -99 */
   public final static double UNDEFINED_MAGNITUDE = -99d;
-
   /** label to display when multiple configurations are in use (file names, chart titles ...) */
   public static final String MULTI_CONF = "MULTI CONFIGURATION";
-
   /** regular expression used to match characters different than alpha/numeric/+/- */
   public static final String REGEXP_INVALID_TEXT_CHARS = "[^a-zA-Z_\\+\\-0-9]";
-
 }
