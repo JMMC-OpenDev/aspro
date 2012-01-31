@@ -7,8 +7,8 @@
 
 <ApplicationData link="http://www.jmmc.fr/aspro2">
 
-  <program name="Aspro2" version="0.8.2 beta 7"/>
-  <compilation date="17/01/2011" compiler="JDK 1.5.0_16"/>
+  <program name="Aspro2" version="0.8.2 beta 8"/>
+  <compilation date="31/01/2011" compiler="JDK 1.5.0_16"/>
 
   <text>
     <![CDATA[ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations
@@ -231,6 +231,10 @@
 
   <releasenotes>
     <release version="0.8.2">
+      <prerelease version="0.8.2 beta 8">
+        <change type="CHANGE">Updated spectral configurations for CHARA VEGA instrument</change>
+        <change type="CHANGE">Added model image scale (LUT) on the UV Coverage plot</change>
+      </prerelease>
       <prerelease version="0.8.2 beta 7">
         <change type="CHANGE">Optimized computation of object model image: use divide and conquer algorithm (multi-core CPU) and smaller memory footprint</change>
         <change type="CHANGE">Added new model image sizes in user preferences: 256, 384, 512, 768, 1024, 1536, 2048</change>
