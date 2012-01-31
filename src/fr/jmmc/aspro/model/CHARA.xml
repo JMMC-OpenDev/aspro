@@ -577,6 +577,105 @@
         <waveLengthMin>0.48</waveLengthMin>
         <waveLengthMax>0.82</waveLengthMax>
       </mode>
+
+      <!-- Réseau=300 (MR), largeur de bande=45nm  (0.045 um) + resolution=6000 -->
+      <mode>
+        <name>R2656</name>
+        <!-- R2656 W070H4 300 RB 656.2 OFF OPEN OPEN RB R ? 1000 -->
+        <resolution>6000</resolution>
+        <numberChannels>400</numberChannels>
+        <waveLengthMin>0.6337</waveLengthMin>
+        <waveLengthMax>0.6787</waveLengthMax>
+      </mode>
+
+      <mode>
+        <name>R2668</name>
+        <!-- R2668 W070H4 300 RB 668.0 OFF OPEN OPEN RB R ? 1000 -->
+        <resolution>6000</resolution>
+        <numberChannels>400</numberChannels>
+        <waveLengthMin>0.6455</waveLengthMin>
+        <waveLengthMax>0.6905</waveLengthMax>
+      </mode>
+
+      <mode>
+        <name>R2720</name>
+        <!-- R2720 W070H4 300 RB 720.0 OFF OPEN OPEN RB R ? 1000 -->
+        <resolution>6000</resolution>
+        <numberChannels>400</numberChannels>
+        <waveLengthMin>0.6975</waveLengthMin>
+        <waveLengthMax>0.7425</waveLengthMax>
+      </mode>
+
+      <!-- Réseau=1800 (HR), largeur de bande=8nm  (0.008 um) + resolution=30000 -->
+      <mode>
+        <name>R1656</name>
+        <resolution>30000</resolution>
+        <!-- R1656 W070H4 1800 RB 656.2 OFF OPEN OPEN RB R ? 1000 -->
+        <numberChannels>400</numberChannels>
+        <waveLengthMin>0.6522</waveLengthMin>
+        <waveLengthMax>0.6602</waveLengthMax>
+      </mode>
+
+      <mode>
+        <name>R1589</name>
+        <resolution>30000</resolution>
+        <!-- R1589 W070H4 1800 RB 589.3 OFF OPEN OPEN RB R ? 1000 -->
+        <numberChannels>400</numberChannels>
+        <waveLengthMin>0.5853</waveLengthMin>
+        <waveLengthMax>0.5933</waveLengthMax>
+      </mode>
+
+      <mode>
+        <name>R1770</name>
+        <resolution>30000</resolution>
+        <!-- R1770 W070H4 1800 RB 769.9 OFF OPEN CLOSE R R ? 1000 -->
+        <numberChannels>400</numberChannels>
+        <waveLengthMin>0.7659</waveLengthMin>
+        <waveLengthMax>0.7739</waveLengthMax>
+      </mode>
+
+      <mode>
+        <name>R1849</name>
+        <resolution>30000</resolution>
+        <!-- R1849 W070H4 1800 RB 849.5 OFF OPEN CLOSE R R ? 1000 -->
+        <numberChannels>400</numberChannels>
+        <waveLengthMin>0.8455</waveLengthMin>
+        <waveLengthMax>0.8535</waveLengthMax>
+      </mode>
+
+      <mode>
+        <name>R1854</name>
+        <resolution>30000</resolution>
+        <!-- R1854 W070H4 1800 RB 854.0 OFF OPEN CLOSE R R ? 1000 -->
+        <numberChannels>400</numberChannels>
+        <waveLengthMin>0.850</waveLengthMin>
+        <waveLengthMax>0.858</waveLengthMax>
+      </mode>
+
+      <mode>
+        <name>R1867</name>
+        <resolution>30000</resolution>
+        <!-- R1867 W070H4 1800 RB 867.5 OFF OPEN CLOSE R R ? 1000 -->
+        <numberChannels>400</numberChannels>
+        <waveLengthMin>0.8635</waveLengthMin>
+        <waveLengthMax>0.8715</waveLengthMax>
+      </mode>
+      
+      <!--
+- dispersion spectrale = lambda min/max:
+si Réseau=1800 (HR), largeur de bande=8nm  (0.008 um)
+si Réseau=300 (MR), largeur de bande=45nm  (0.045 um)
+si Réseau=100 (LR), largeur de bande=150nm (0.15 um)
+
+- resolution:
+HR=30000
+MR=6000
+LR=1500 
+
+- nombre de canaux spectraux:
+400 quelle que soit la résolution. Ensuite au traitement on binne très souvent. 
+      -->
+      
     </focalInstrument>
 
 
@@ -684,6 +783,104 @@
         <waveLengthMin>0.48</waveLengthMin>
         <waveLengthMax>0.82</waveLengthMax>
       </mode>
+
+      <!-- Réseau=300 (MR), largeur de bande=45nm  (0.045 um) + resolution=6000 -->
+      <mode>
+        <name>R2656</name>
+        <!-- R2656 W070H4 300 RB 656.2 OFF OPEN OPEN RB R ? 1000 -->
+        <resolution>6000</resolution>
+        <numberChannels>400</numberChannels>
+        <waveLengthMin>0.6337</waveLengthMin>
+        <waveLengthMax>0.6787</waveLengthMax>
+      </mode>
+
+      <mode>
+        <name>R2668</name>
+        <!-- R2668 W070H4 300 RB 668.0 OFF OPEN OPEN RB R ? 1000 -->
+        <resolution>6000</resolution>
+        <numberChannels>400</numberChannels>
+        <waveLengthMin>0.6455</waveLengthMin>
+        <waveLengthMax>0.6905</waveLengthMax>
+      </mode>
+
+      <mode>
+        <name>R2720</name>
+        <!-- R2720 W070H4 300 RB 720.0 OFF OPEN OPEN RB R ? 1000 -->
+        <resolution>6000</resolution>
+        <numberChannels>400</numberChannels>
+        <waveLengthMin>0.6975</waveLengthMin>
+        <waveLengthMax>0.7425</waveLengthMax>
+      </mode>
+
+      <!-- Réseau=1800 (HR), largeur de bande=8nm  (0.008 um) + resolution=30000 -->
+      <mode>
+        <name>R1656</name>
+        <resolution>30000</resolution>
+        <!-- R1656 W070H4 1800 RB 656.2 OFF OPEN OPEN RB R ? 1000 -->
+        <numberChannels>400</numberChannels>
+        <waveLengthMin>0.6522</waveLengthMin>
+        <waveLengthMax>0.6602</waveLengthMax>
+      </mode>
+
+      <mode>
+        <name>R1589</name>
+        <resolution>30000</resolution>
+        <!-- R1589 W070H4 1800 RB 589.3 OFF OPEN OPEN RB R ? 1000 -->
+        <numberChannels>400</numberChannels>
+        <waveLengthMin>0.5853</waveLengthMin>
+        <waveLengthMax>0.5933</waveLengthMax>
+      </mode>
+
+      <mode>
+        <name>R1770</name>
+        <resolution>30000</resolution>
+        <!-- R1770 W070H4 1800 RB 769.9 OFF OPEN CLOSE R R ? 1000 -->
+        <numberChannels>400</numberChannels>
+        <waveLengthMin>0.7659</waveLengthMin>
+        <waveLengthMax>0.7739</waveLengthMax>
+      </mode>
+
+      <mode>
+        <name>R1849</name>
+        <resolution>30000</resolution>
+        <!-- R1849 W070H4 1800 RB 849.5 OFF OPEN CLOSE R R ? 1000 -->
+        <numberChannels>400</numberChannels>
+        <waveLengthMin>0.8455</waveLengthMin>
+        <waveLengthMax>0.8535</waveLengthMax>
+      </mode>
+
+      <mode>
+        <name>R1854</name>
+        <resolution>30000</resolution>
+        <!-- R1854 W070H4 1800 RB 854.0 OFF OPEN CLOSE R R ? 1000 -->
+        <numberChannels>400</numberChannels>
+        <waveLengthMin>0.850</waveLengthMin>
+        <waveLengthMax>0.858</waveLengthMax>
+      </mode>
+
+      <mode>
+        <name>R1867</name>
+        <resolution>30000</resolution>
+        <!-- R1867 W070H4 1800 RB 867.5 OFF OPEN CLOSE R R ? 1000 -->
+        <numberChannels>400</numberChannels>
+        <waveLengthMin>0.8635</waveLengthMin>
+        <waveLengthMax>0.8715</waveLengthMax>
+      </mode>
+      
+      <!--
+- dispersion spectrale = lambda min/max:
+si Réseau=1800 (HR), largeur de bande=8nm  (0.008 um)
+si Réseau=300 (MR), largeur de bande=45nm  (0.045 um)
+si Réseau=100 (LR), largeur de bande=150nm (0.15 um)
+
+- resolution:
+HR=30000
+MR=6000
+LR=1500 
+
+- nombre de canaux spectraux:
+400 quelle que soit la résolution. Ensuite au traitement on binne très souvent. 
+      -->
     </focalInstrument>
 
 
@@ -771,6 +968,104 @@
         <waveLengthMin>0.48</waveLengthMin>
         <waveLengthMax>0.82</waveLengthMax>
       </mode>
+
+      <!-- Réseau=300 (MR), largeur de bande=45nm  (0.045 um) + resolution=6000 -->
+      <mode>
+        <name>R2656</name>
+        <!-- R2656 W070H4 300 RB 656.2 OFF OPEN OPEN RB R ? 1000 -->
+        <resolution>6000</resolution>
+        <numberChannels>400</numberChannels>
+        <waveLengthMin>0.6337</waveLengthMin>
+        <waveLengthMax>0.6787</waveLengthMax>
+      </mode>
+
+      <mode>
+        <name>R2668</name>
+        <!-- R2668 W070H4 300 RB 668.0 OFF OPEN OPEN RB R ? 1000 -->
+        <resolution>6000</resolution>
+        <numberChannels>400</numberChannels>
+        <waveLengthMin>0.6455</waveLengthMin>
+        <waveLengthMax>0.6905</waveLengthMax>
+      </mode>
+
+      <mode>
+        <name>R2720</name>
+        <!-- R2720 W070H4 300 RB 720.0 OFF OPEN OPEN RB R ? 1000 -->
+        <resolution>6000</resolution>
+        <numberChannels>400</numberChannels>
+        <waveLengthMin>0.6975</waveLengthMin>
+        <waveLengthMax>0.7425</waveLengthMax>
+      </mode>
+
+      <!-- Réseau=1800 (HR), largeur de bande=8nm  (0.008 um) + resolution=30000 -->
+      <mode>
+        <name>R1656</name>
+        <resolution>30000</resolution>
+        <!-- R1656 W070H4 1800 RB 656.2 OFF OPEN OPEN RB R ? 1000 -->
+        <numberChannels>400</numberChannels>
+        <waveLengthMin>0.6522</waveLengthMin>
+        <waveLengthMax>0.6602</waveLengthMax>
+      </mode>
+
+      <mode>
+        <name>R1589</name>
+        <resolution>30000</resolution>
+        <!-- R1589 W070H4 1800 RB 589.3 OFF OPEN OPEN RB R ? 1000 -->
+        <numberChannels>400</numberChannels>
+        <waveLengthMin>0.5853</waveLengthMin>
+        <waveLengthMax>0.5933</waveLengthMax>
+      </mode>
+
+      <mode>
+        <name>R1770</name>
+        <resolution>30000</resolution>
+        <!-- R1770 W070H4 1800 RB 769.9 OFF OPEN CLOSE R R ? 1000 -->
+        <numberChannels>400</numberChannels>
+        <waveLengthMin>0.7659</waveLengthMin>
+        <waveLengthMax>0.7739</waveLengthMax>
+      </mode>
+
+      <mode>
+        <name>R1849</name>
+        <resolution>30000</resolution>
+        <!-- R1849 W070H4 1800 RB 849.5 OFF OPEN CLOSE R R ? 1000 -->
+        <numberChannels>400</numberChannels>
+        <waveLengthMin>0.8455</waveLengthMin>
+        <waveLengthMax>0.8535</waveLengthMax>
+      </mode>
+
+      <mode>
+        <name>R1854</name>
+        <resolution>30000</resolution>
+        <!-- R1854 W070H4 1800 RB 854.0 OFF OPEN CLOSE R R ? 1000 -->
+        <numberChannels>400</numberChannels>
+        <waveLengthMin>0.850</waveLengthMin>
+        <waveLengthMax>0.858</waveLengthMax>
+      </mode>
+
+      <mode>
+        <name>R1867</name>
+        <resolution>30000</resolution>
+        <!-- R1867 W070H4 1800 RB 867.5 OFF OPEN CLOSE R R ? 1000 -->
+        <numberChannels>400</numberChannels>
+        <waveLengthMin>0.8635</waveLengthMin>
+        <waveLengthMax>0.8715</waveLengthMax>
+      </mode>
+      
+      <!--
+- dispersion spectrale = lambda min/max:
+si Réseau=1800 (HR), largeur de bande=8nm  (0.008 um)
+si Réseau=300 (MR), largeur de bande=45nm  (0.045 um)
+si Réseau=100 (LR), largeur de bande=150nm (0.15 um)
+
+- resolution:
+HR=30000
+MR=6000
+LR=1500 
+
+- nombre de canaux spectraux:
+400 quelle que soit la résolution. Ensuite au traitement on binne très souvent. 
+      -->
     </focalInstrument>
 
 
