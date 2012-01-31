@@ -7,6 +7,7 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.util.logging.Level;
 import org.jfree.chart.axis.AxisSpace;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.plot.PlotRenderingInfo;
@@ -44,9 +45,9 @@ public final class SquareXYPlot extends XYPlot {
    * @param renderer  the renderer (<code>null</code> permitted).
    */
   public SquareXYPlot(final XYDataset dataset,
-                      final ValueAxis domainAxis,
-                      final ValueAxis rangeAxis,
-                      final XYItemRenderer renderer) {
+          final ValueAxis domainAxis,
+          final ValueAxis rangeAxis,
+          final XYItemRenderer renderer) {
     super(dataset, domainAxis, rangeAxis, renderer);
   }
 
@@ -64,7 +65,7 @@ public final class SquareXYPlot extends XYPlot {
    */
   @Override
   public void draw(final Graphics2D g2d, final Rectangle2D area, final Point2D anchor,
-                   final PlotState parentState, final PlotRenderingInfo info) {
+          final PlotState parentState, final PlotRenderingInfo info) {
 
     double hSpace = 0d;
     double vSpace = 0d;
@@ -81,12 +82,25 @@ public final class SquareXYPlot extends XYPlot {
     hSpace += space.getLeft() + space.getRight();
     vSpace += space.getTop() + space.getBottom();
 
+    // range (Y) / domain (X) ratio:
+    final double ratio = getAspectRatio();
+
     // compute the square data area size :
     final double size = Math.min(area.getWidth() - hSpace, area.getHeight() - vSpace);
 
     // adjusted dimensions to get a square data area :
-    final double adjustedWidth = size + hSpace;
-    final double adjustedHeight = size + vSpace;
+    final double adjustedWidth;
+    final double adjustedHeight;
+
+    if (ratio > 1d) {
+      // taller (Y > X):
+      adjustedWidth = size / ratio + hSpace;
+      adjustedHeight = size + vSpace;
+    } else {
+      // larger (X > Y):
+      adjustedWidth = size + hSpace;
+      adjustedHeight = size / ratio + vSpace;
+    }
 
     // margins to center the plot into the rectangle area :
     final double marginWidth = (area.getWidth() - adjustedWidth) / 2d;
@@ -100,7 +114,7 @@ public final class SquareXYPlot extends XYPlot {
     adjustedArea.setRect(Math.round(area.getX() + marginWidth), Math.round(area.getY() + marginHeight), Math.round(adjustedWidth), Math.round(adjustedHeight));
 
     // Force rendering hints :
-    
+
     // set quality flags:
     g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
     g2d.setRenderingHint(RenderingHints.KEY_COLOR_RENDERING, RenderingHints.VALUE_COLOR_RENDER_QUALITY);
@@ -128,20 +142,32 @@ public final class SquareXYPlot extends XYPlot {
   /**
    * Define the bounds for both range and domain axes using the given maximum value.
    *
-   * Note : this method must be called before calling plot.setDataset(...)
+   * Note : this method must be called before calling plot.setDataset(...) or restoreAxesBounds()
    *
    * @param max maximum value
    */
   public void defineBounds(final double max) {
-    final BoundedNumberAxis domainAxis = (BoundedNumberAxis) getDomainAxis(0);
-    final BoundedNumberAxis rangeAxis = (BoundedNumberAxis) getRangeAxis(0);
+    // same range on both axes :
+    final Range bounds = new Range(-max, max);
+    defineBounds(bounds, bounds);
+  }
 
+  /**
+   * Define the bounds for both range and domain axes using the given maximum value.
+   *
+   * Note : this method must be called before calling plot.setDataset(...) or restoreAxesBounds()
+   *
+   * @param domainRange range applied to the domain axis
+   * @param rangeRange range applied to the range axis
+   */
+  public void defineBounds(final Range domainRange, final Range rangeRange) {
+    final BoundedNumberAxis domainAxis = getBoundedAxis(getDomainAxis(0));
+    if (domainAxis != null) {
+      domainAxis.setBounds(domainRange);
+    }
+    final BoundedNumberAxis rangeAxis = getBoundedAxis(getRangeAxis(0));
     if (rangeAxis != null) {
-      // same range on both axes :
-      final Range bounds = new Range(-max, max);
-
-      domainAxis.setBounds(bounds);
-      rangeAxis.setBounds(bounds);
+      rangeAxis.setBounds(rangeRange);
     }
   }
 
@@ -149,18 +175,41 @@ public final class SquareXYPlot extends XYPlot {
    * Use the axis bounds to redefine the ranges for both axes (reset zoom)
    */
   public void restoreAxesBounds() {
-    final BoundedNumberAxis domainAxis = (BoundedNumberAxis) getDomainAxis(0);
-    final BoundedNumberAxis rangeAxis = (BoundedNumberAxis) getRangeAxis(0);
-
-    if (rangeAxis != null) {
-      // same bounds for both axes :
-      final Range bounds = rangeAxis.getBounds();
-
-      if (bounds != null) {
-        // do not disable auto range :
-        domainAxis.setRange(bounds, false, false);
-        rangeAxis.setRange(bounds, false, false);
-      }
+    final BoundedNumberAxis domainAxis = getBoundedAxis(getDomainAxis(0));
+    if (domainAxis != null && domainAxis.getBounds() != null) {
+      // do not disable auto range :
+      domainAxis.setRange(domainAxis.getBounds(), false, false);
     }
+    final BoundedNumberAxis rangeAxis = getBoundedAxis(getRangeAxis(0));
+    if (rangeAxis != null && rangeAxis.getBounds() != null) {
+      // do not disable auto range :
+      rangeAxis.setRange(rangeAxis.getBounds(), false, false);
+    }
+  }
+
+  /**
+   * Return the BoundedNumberAxis given an axis
+   * @param axis axis to cast
+   * @return BoundedNumberAxis or null if the given axis is not a BoundedNumberAxis
+   */
+  private static BoundedNumberAxis getBoundedAxis(final ValueAxis axis) {
+    if (axis instanceof BoundedNumberAxis) {
+      return (BoundedNumberAxis) axis;
+    }
+    return null;
+  }
+
+  /**
+   * Return the aspect ratio of the plot ie Range axis Length / Domain axis length
+   * @return aspect ratio of the plot ie Range axis Length / Domain axis length
+   */
+  public double getAspectRatio() {
+    final double ratio = getRangeAxis(0).getRange().getLength() / getDomainAxis(0).getRange().getLength();
+
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("aspect ratio = " + ratio);
+    }
+
+    return ratio;
   }
 }
