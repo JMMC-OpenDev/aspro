@@ -628,47 +628,72 @@ public final class ChartUtils {
    */
   public static TickUnitSource createScientificTickUnits() {
     final TickUnits units = new TickUnits();
-    final DecimalFormat df5 = new DecimalFormat("0.000##E0");
-    final DecimalFormat df3 = new DecimalFormat("0.000E0");
     final DecimalFormat df000 = new DecimalFormat("0.00");
     final DecimalFormat df00 = new DecimalFormat("0.0");
     final DecimalFormat df0 = new DecimalFormat("0");
-    final DecimalFormat df1 = new DecimalFormat("0.0E0");
+    final DecimalFormat df3 = new DecimalFormat("0.0##E0");
 
-    units.add(new NumberTickUnit(0.000001d, df5));
-    units.add(new NumberTickUnit(0.000005d, df5));
+    units.add(new NumberTickUnit(1e-10d, df3));
+    units.add(new NumberTickUnit(5e-10d, df3));
 
-    units.add(new NumberTickUnit(0.0001d, df3));
-    units.add(new NumberTickUnit(0.0005d, df3));
+    units.add(new NumberTickUnit(1e-9d, df3));
+    units.add(new NumberTickUnit(5e-9d, df3));
+    
+    units.add(new NumberTickUnit(1e-8d, df3));
+    units.add(new NumberTickUnit(5e-8d, df3));
+    
+    units.add(new NumberTickUnit(1e-7d, df3));
+    units.add(new NumberTickUnit(5e-7d, df3));
+    
+    units.add(new NumberTickUnit(1e-6d, df3));
+    units.add(new NumberTickUnit(5e-6d, df3));
 
-    units.add(new NumberTickUnit(0.01d, df000));
-    units.add(new NumberTickUnit(0.05d, df000));
+    units.add(new NumberTickUnit(1e-5d, df3));
+    units.add(new NumberTickUnit(5e-5d, df3));
 
-    units.add(new NumberTickUnit(0.1d, df00));
-    units.add(new NumberTickUnit(0.5d, df00));
+    units.add(new NumberTickUnit(1e-4d, df3));
+    units.add(new NumberTickUnit(5e-4d, df3));
 
-    units.add(new NumberTickUnit(1, df0));
-    units.add(new NumberTickUnit(5, df0));
-    units.add(new NumberTickUnit(10, df0));
-    units.add(new NumberTickUnit(50, df0));
-    units.add(new NumberTickUnit(100, df0));
-    units.add(new NumberTickUnit(500, df0));
+    units.add(new NumberTickUnit(1e-3d, df3));
+    units.add(new NumberTickUnit(5e-3d, df3));
 
-    units.add(new NumberTickUnit(1000, df1));
-    units.add(new NumberTickUnit(5000, df1));
-    units.add(new NumberTickUnit(10000, df1));
-    units.add(new NumberTickUnit(50000, df1));
-    units.add(new NumberTickUnit(100000, df1));
-    units.add(new NumberTickUnit(500000, df1));
-    units.add(new NumberTickUnit(1000000, df1));
-    units.add(new NumberTickUnit(5000000, df1));
-    units.add(new NumberTickUnit(10000000, df1));
-    units.add(new NumberTickUnit(50000000, df1));
-    units.add(new NumberTickUnit(100000000, df1));
-    units.add(new NumberTickUnit(500000000, df1));
-    units.add(new NumberTickUnit(1000000000, df1));
-    units.add(new NumberTickUnit(5000000000.0, df1));
-    units.add(new NumberTickUnit(10000000000.0, df1));
+    units.add(new NumberTickUnit(1e-2d, df000));
+    units.add(new NumberTickUnit(5e-2d, df000));
+
+    units.add(new NumberTickUnit(1e-1d, df00));
+    units.add(new NumberTickUnit(5e-1d, df00));
+
+    units.add(new NumberTickUnit(1d, df0));
+    units.add(new NumberTickUnit(5d, df0));
+    
+    units.add(new NumberTickUnit(1e1d, df0));
+    units.add(new NumberTickUnit(5e1d, df0));
+    
+    units.add(new NumberTickUnit(1e2d, df0));
+    units.add(new NumberTickUnit(5e2d, df0));
+
+    units.add(new NumberTickUnit(1e3d, df3));
+    units.add(new NumberTickUnit(5e3d, df3));
+    
+    units.add(new NumberTickUnit(1e4d, df3));
+    units.add(new NumberTickUnit(5e4d, df3));
+    
+    units.add(new NumberTickUnit(1e5d, df3));
+    units.add(new NumberTickUnit(5e5d, df3));
+    
+    units.add(new NumberTickUnit(1e6d, df3));
+    units.add(new NumberTickUnit(5e6d, df3));
+    
+    units.add(new NumberTickUnit(1e7d, df3));
+    units.add(new NumberTickUnit(5e7d, df3));
+    
+    units.add(new NumberTickUnit(1e8d, df3));
+    units.add(new NumberTickUnit(5e8d, df3));
+    
+    units.add(new NumberTickUnit(1e9d, df3));
+    units.add(new NumberTickUnit(5e9d, df3));
+    
+    units.add(new NumberTickUnit(1e10d, df3));
 
     return units;
   }
