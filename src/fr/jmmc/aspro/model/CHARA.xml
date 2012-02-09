@@ -569,7 +569,7 @@
       <nbPixInterferometry>128</nbPixInterferometry>
       <nbPixPhotometry>0</nbPixPhotometry>
       <fracFluxInInterferometry>1</fracFluxInInterferometry>
-
+<!--
       <mode>
         <name>standard</name>
         <resolution>40</resolution>
@@ -577,91 +577,9 @@
         <waveLengthMin>0.48</waveLengthMin>
         <waveLengthMax>0.82</waveLengthMax>
       </mode>
-
-      <!-- Réseau=300 (MR), largeur de bande=45nm  (0.045 um) + resolution=6000 -->
-      <mode>
-        <name>R2656</name>
-        <!-- R2656 W070H4 300 RB 656.2 OFF OPEN OPEN RB R ? 1000 -->
-        <resolution>6000</resolution>
-        <numberChannels>400</numberChannels>
-        <waveLengthMin>0.6337</waveLengthMin>
-        <waveLengthMax>0.6787</waveLengthMax>
-      </mode>
-
-      <mode>
-        <name>R2668</name>
-        <!-- R2668 W070H4 300 RB 668.0 OFF OPEN OPEN RB R ? 1000 -->
-        <resolution>6000</resolution>
-        <numberChannels>400</numberChannels>
-        <waveLengthMin>0.6455</waveLengthMin>
-        <waveLengthMax>0.6905</waveLengthMax>
-      </mode>
-
-      <mode>
-        <name>R2720</name>
-        <!-- R2720 W070H4 300 RB 720.0 OFF OPEN OPEN RB R ? 1000 -->
-        <resolution>6000</resolution>
-        <numberChannels>400</numberChannels>
-        <waveLengthMin>0.6975</waveLengthMin>
-        <waveLengthMax>0.7425</waveLengthMax>
-      </mode>
-
-      <!-- Réseau=1800 (HR), largeur de bande=8nm  (0.008 um) + resolution=30000 -->
-      <mode>
-        <name>R1656</name>
-        <resolution>30000</resolution>
-        <!-- R1656 W070H4 1800 RB 656.2 OFF OPEN OPEN RB R ? 1000 -->
-        <numberChannels>400</numberChannels>
-        <waveLengthMin>0.6522</waveLengthMin>
-        <waveLengthMax>0.6602</waveLengthMax>
-      </mode>
-
-      <mode>
-        <name>R1589</name>
-        <resolution>30000</resolution>
-        <!-- R1589 W070H4 1800 RB 589.3 OFF OPEN OPEN RB R ? 1000 -->
-        <numberChannels>400</numberChannels>
-        <waveLengthMin>0.5853</waveLengthMin>
-        <waveLengthMax>0.5933</waveLengthMax>
-      </mode>
-
-      <mode>
-        <name>R1770</name>
-        <resolution>30000</resolution>
-        <!-- R1770 W070H4 1800 RB 769.9 OFF OPEN CLOSE R R ? 1000 -->
-        <numberChannels>400</numberChannels>
-        <waveLengthMin>0.7659</waveLengthMin>
-        <waveLengthMax>0.7739</waveLengthMax>
-      </mode>
-
-      <mode>
-        <name>R1849</name>
-        <resolution>30000</resolution>
-        <!-- R1849 W070H4 1800 RB 849.5 OFF OPEN CLOSE R R ? 1000 -->
-        <numberChannels>400</numberChannels>
-        <waveLengthMin>0.8455</waveLengthMin>
-        <waveLengthMax>0.8535</waveLengthMax>
-      </mode>
-
-      <mode>
-        <name>R1854</name>
-        <resolution>30000</resolution>
-        <!-- R1854 W070H4 1800 RB 854.0 OFF OPEN CLOSE R R ? 1000 -->
-        <numberChannels>400</numberChannels>
-        <waveLengthMin>0.850</waveLengthMin>
-        <waveLengthMax>0.858</waveLengthMax>
-      </mode>
-
-      <mode>
-        <name>R1867</name>
-        <resolution>30000</resolution>
-        <!-- R1867 W070H4 1800 RB 867.5 OFF OPEN CLOSE R R ? 1000 -->
-        <numberChannels>400</numberChannels>
-        <waveLengthMin>0.8635</waveLengthMin>
-        <waveLengthMax>0.8715</waveLengthMax>
-      </mode>
-      
-      <!--
+-->
+<!-- VEGA SETUP Parameters -->
+<!--
 - dispersion spectrale = lambda min/max:
 si Réseau=1800 (HR), largeur de bande=8nm  (0.008 um)
 si Réseau=300 (MR), largeur de bande=45nm  (0.045 um)
@@ -673,9 +591,251 @@ MR=6000
 LR=1500 
 
 - nombre de canaux spectraux:
-400 quelle que soit la résolution. Ensuite au traitement on binne très souvent. 
-      -->
-      
+400 quelle que soit la résolution. Ensuite au traitement on binne très souvent:
+1 canal de 8nm en HR, 2 canaux spectraux de 20nm en MR et 5 canaux de 30nm en LR.
+
+- nombre de blocs (?):
+La bonne valeur par défaut est 20 blocs. 
+
+Configuration instrumentale
+- TRACKING : définit quel détecteur sert pour le traitement temps réel
+  o B, R
+  o Valeur par défaut : R
+- SLIT : choix de la fente d’entrée du spectrographe
+  o CLOSE, W047H2, W047H4, W056H2, W056H4, W070H2, W070H4, W100H2, W100H4, OPEN
+  o Valeur par défaut: W070H4
+- GRATING : choix du réseau ou par équivalent de la résolution spectrale
+  o 1800, 300, 100 ou HR, MR, LR
+  o Valeur par défaut : 300 ou MR
+- CAMERA : choix de la chambre de référence
+  o B, BR, R, RB
+  o Valeur par défaut : RB
+- LAMBDA : longueur d’onde centrale de la chambre de référence
+  o Valeur flottante en nanomètre
+  o Valeur par défaut : 656.2
+- SPIN : mode polarisation actif ou non
+  o ON, OFF
+  o Valeur par défaut : OFF
+Configuration d’enregistrement
+- RED FILTER : valeur de la densité neutre de la voie rouge
+  o OPEN, 0.3, 0.6, 1, 1.5, 2, 3, CLOSE
+  o Valeur par défaut : OPEN
+- BLUE FILTER : valeur de la densité neutre de la voie bleue
+  o OPEN, 0.3, 0.6, 1, 1.5, 2, 3, CLOSE
+  o Valeur par défaut : OPEN
+- RECORD : définit quels sont les détecteurs dont il faut enregistrer les données.
+  o B, R, RB
+  o Valeur par défaut : RB
+- NUMBER OF BLOCKS : nombre de blocs
+  o Valeur donnée sous forme d’un entier
+  o Valeur par défaut : 20
+- NUMBER OF FRAMES : nombre de poses individuelles par bloc
+  o Valeur donnée sous forme d’un entier
+  o Valeur par défaut : 1000
+
+      <mode>
+        <name>Mode</name>
+        <resolution>1500 ou 6000 ou 30000</resolution>
+        <numberChannels>5 ou 2 ou 1</numberChannels>
+        <waveLengthMin>lambda - (0.15 ou 0.045 ou 0.008) / 2</waveLengthMin>
+        <waveLengthMax>lambda + (0.15 ou 0.045 ou 0.008) / 2</waveLengthMax>
+        
+        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>SLIT</name><value>W070H4</value></parameter>
+        <parameter><name>GRATING</name><value>300</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
+        <parameter><name>LAMBDA</name><value>656.2</value></parameter>
+        <parameter><name>SPIN</name><value>OFF</value></parameter>
+        <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>RECORD</name><value>RB</value></parameter>
+        <parameter><name>BLOCKS</name><value>20</value></parameter>
+        <parameter><name>FRAMES</name><value>1000</value></parameter>
+      </mode>
+-->
+
+      <!-- Réseau=300 (MR), largeur de bande=45nm  (0.045 um) + resolution=6000 -->
+      <mode>
+        <name>R2656</name>
+        <resolution>6000</resolution>
+        <numberChannels>2</numberChannels>
+        <waveLengthMin>0.6337</waveLengthMin>
+        <waveLengthMax>0.6787</waveLengthMax>
+
+        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>SLIT</name><value>W070H4</value></parameter>
+        <parameter><name>GRATING</name><value>300</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
+        <parameter><name>LAMBDA</name><value>656.2</value></parameter>
+        <parameter><name>SPIN</name><value>OFF</value></parameter>
+        <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>RECORD</name><value>RB</value></parameter>
+        <parameter><name>BLOCKS</name><value>20</value></parameter>
+        <parameter><name>FRAMES</name><value>1000</value></parameter>
+      </mode>
+
+      <mode>
+        <name>R2668</name>
+        <resolution>6000</resolution>
+        <numberChannels>2</numberChannels>
+        <waveLengthMin>0.6455</waveLengthMin>
+        <waveLengthMax>0.6905</waveLengthMax>
+        
+        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>SLIT</name><value>W070H4</value></parameter>
+        <parameter><name>GRATING</name><value>300</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
+        <parameter><name>LAMBDA</name><value>668.0</value></parameter>
+        <parameter><name>SPIN</name><value>OFF</value></parameter>
+        <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>RECORD</name><value>RB</value></parameter>
+        <parameter><name>BLOCKS</name><value>20</value></parameter>
+        <parameter><name>FRAMES</name><value>1000</value></parameter>
+      </mode>
+
+      <mode>
+        <name>R2720</name>
+        <resolution>6000</resolution>
+        <numberChannels>2</numberChannels>
+        <waveLengthMin>0.6975</waveLengthMin>
+        <waveLengthMax>0.7425</waveLengthMax>
+        
+        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>SLIT</name><value>W070H4</value></parameter>
+        <parameter><name>GRATING</name><value>300</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
+        <parameter><name>LAMBDA</name><value>720.0</value></parameter>
+        <parameter><name>SPIN</name><value>OFF</value></parameter>
+        <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>RECORD</name><value>RB</value></parameter>
+        <parameter><name>BLOCKS</name><value>20</value></parameter>
+        <parameter><name>FRAMES</name><value>1000</value></parameter>
+      </mode>
+
+      <!-- Réseau=1800 (HR), largeur de bande=8nm  (0.008 um) + resolution=30000 -->
+      <mode>
+        <name>R1656</name>
+        <resolution>30000</resolution>
+        <numberChannels>1</numberChannels>
+        <waveLengthMin>0.6522</waveLengthMin>
+        <waveLengthMax>0.6602</waveLengthMax>
+        
+        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>SLIT</name><value>W070H4</value></parameter>
+        <parameter><name>GRATING</name><value>1800</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
+        <parameter><name>LAMBDA</name><value>656.2</value></parameter>
+        <parameter><name>SPIN</name><value>OFF</value></parameter>
+        <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>RECORD</name><value>RB</value></parameter>
+        <parameter><name>BLOCKS</name><value>20</value></parameter>
+        <parameter><name>FRAMES</name><value>1000</value></parameter>
+      </mode>
+
+      <mode>
+        <name>R1589</name>
+        <resolution>30000</resolution>
+        <numberChannels>1</numberChannels>
+        <waveLengthMin>0.5853</waveLengthMin>
+        <waveLengthMax>0.5933</waveLengthMax>
+        
+        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>SLIT</name><value>W070H4</value></parameter>
+        <parameter><name>GRATING</name><value>1800</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
+        <parameter><name>LAMBDA</name><value>589.3</value></parameter>
+        <parameter><name>SPIN</name><value>OFF</value></parameter>
+        <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>RECORD</name><value>RB</value></parameter>
+        <parameter><name>BLOCKS</name><value>20</value></parameter>
+        <parameter><name>FRAMES</name><value>1000</value></parameter>
+      </mode>
+
+      <mode>
+        <name>R1770</name>
+        <resolution>30000</resolution>
+        <numberChannels>1</numberChannels>
+        <waveLengthMin>0.7659</waveLengthMin>
+        <waveLengthMax>0.7739</waveLengthMax>
+        
+        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>SLIT</name><value>W070H4</value></parameter>
+        <parameter><name>GRATING</name><value>1800</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
+        <parameter><name>LAMBDA</name><value>769.9</value></parameter>
+        <parameter><name>SPIN</name><value>OFF</value></parameter>
+        <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>CLOSE</value></parameter>
+        <parameter><name>RECORD</name><value>R</value></parameter>
+        <parameter><name>BLOCKS</name><value>20</value></parameter>
+        <parameter><name>FRAMES</name><value>1000</value></parameter>
+      </mode>
+
+      <mode>
+        <name>R1849</name>
+        <resolution>30000</resolution>
+        <numberChannels>1</numberChannels>
+        <waveLengthMin>0.8455</waveLengthMin>
+        <waveLengthMax>0.8535</waveLengthMax>
+        
+        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>SLIT</name><value>W070H4</value></parameter>
+        <parameter><name>GRATING</name><value>1800</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
+        <parameter><name>LAMBDA</name><value>849.5</value></parameter>
+        <parameter><name>SPIN</name><value>OFF</value></parameter>
+        <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>CLOSE</value></parameter>
+        <parameter><name>RECORD</name><value>R</value></parameter>
+        <parameter><name>BLOCKS</name><value>20</value></parameter>
+        <parameter><name>FRAMES</name><value>1000</value></parameter>
+      </mode>
+
+      <mode>
+        <name>R1854</name>
+        <resolution>30000</resolution>
+        <numberChannels>1</numberChannels>
+        <waveLengthMin>0.850</waveLengthMin>
+        <waveLengthMax>0.858</waveLengthMax>
+        
+        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>SLIT</name><value>W070H4</value></parameter>
+        <parameter><name>GRATING</name><value>1800</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
+        <parameter><name>LAMBDA</name><value>854.0</value></parameter>
+        <parameter><name>SPIN</name><value>OFF</value></parameter>
+        <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>CLOSE</value></parameter>
+        <parameter><name>RECORD</name><value>R</value></parameter>
+        <parameter><name>BLOCKS</name><value>20</value></parameter>
+        <parameter><name>FRAMES</name><value>1000</value></parameter>
+      </mode>
+
+      <mode>
+        <name>R1867</name>
+        <resolution>30000</resolution>
+        <numberChannels>1</numberChannels>
+        <waveLengthMin>0.8635</waveLengthMin>
+        <waveLengthMax>0.8715</waveLengthMax>
+        
+        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>SLIT</name><value>W070H4</value></parameter>
+        <parameter><name>GRATING</name><value>1800</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
+        <parameter><name>LAMBDA</name><value>867.5</value></parameter>
+        <parameter><name>SPIN</name><value>OFF</value></parameter>
+        <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>CLOSE</value></parameter>
+        <parameter><name>RECORD</name><value>R</value></parameter>
+        <parameter><name>BLOCKS</name><value>20</value></parameter>
+        <parameter><name>FRAMES</name><value>1000</value></parameter>
+      </mode>
+
     </focalInstrument>
 
 
@@ -775,7 +935,7 @@ LR=1500
       <nbPixInterferometry>128</nbPixInterferometry>
       <nbPixPhotometry>0</nbPixPhotometry>
       <fracFluxInInterferometry>1</fracFluxInInterferometry>
-
+<!--
       <mode>
         <name>standard</name>
         <resolution>40</resolution>
@@ -783,104 +943,189 @@ LR=1500
         <waveLengthMin>0.48</waveLengthMin>
         <waveLengthMax>0.82</waveLengthMax>
       </mode>
-
+-->
       <!-- Réseau=300 (MR), largeur de bande=45nm  (0.045 um) + resolution=6000 -->
       <mode>
         <name>R2656</name>
-        <!-- R2656 W070H4 300 RB 656.2 OFF OPEN OPEN RB R ? 1000 -->
         <resolution>6000</resolution>
-        <numberChannels>400</numberChannels>
+        <numberChannels>2</numberChannels>
         <waveLengthMin>0.6337</waveLengthMin>
         <waveLengthMax>0.6787</waveLengthMax>
+
+        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>SLIT</name><value>W070H4</value></parameter>
+        <parameter><name>GRATING</name><value>300</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
+        <parameter><name>LAMBDA</name><value>656.2</value></parameter>
+        <parameter><name>SPIN</name><value>OFF</value></parameter>
+        <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>RECORD</name><value>RB</value></parameter>
+        <parameter><name>BLOCKS</name><value>20</value></parameter>
+        <parameter><name>FRAMES</name><value>1000</value></parameter>
       </mode>
 
       <mode>
         <name>R2668</name>
-        <!-- R2668 W070H4 300 RB 668.0 OFF OPEN OPEN RB R ? 1000 -->
         <resolution>6000</resolution>
-        <numberChannels>400</numberChannels>
+        <numberChannels>2</numberChannels>
         <waveLengthMin>0.6455</waveLengthMin>
         <waveLengthMax>0.6905</waveLengthMax>
+        
+        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>SLIT</name><value>W070H4</value></parameter>
+        <parameter><name>GRATING</name><value>300</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
+        <parameter><name>LAMBDA</name><value>668.0</value></parameter>
+        <parameter><name>SPIN</name><value>OFF</value></parameter>
+        <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>RECORD</name><value>RB</value></parameter>
+        <parameter><name>BLOCKS</name><value>20</value></parameter>
+        <parameter><name>FRAMES</name><value>1000</value></parameter>
       </mode>
 
       <mode>
         <name>R2720</name>
-        <!-- R2720 W070H4 300 RB 720.0 OFF OPEN OPEN RB R ? 1000 -->
         <resolution>6000</resolution>
-        <numberChannels>400</numberChannels>
+        <numberChannels>2</numberChannels>
         <waveLengthMin>0.6975</waveLengthMin>
         <waveLengthMax>0.7425</waveLengthMax>
+        
+        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>SLIT</name><value>W070H4</value></parameter>
+        <parameter><name>GRATING</name><value>300</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
+        <parameter><name>LAMBDA</name><value>720.0</value></parameter>
+        <parameter><name>SPIN</name><value>OFF</value></parameter>
+        <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>RECORD</name><value>RB</value></parameter>
+        <parameter><name>BLOCKS</name><value>20</value></parameter>
+        <parameter><name>FRAMES</name><value>1000</value></parameter>
       </mode>
 
       <!-- Réseau=1800 (HR), largeur de bande=8nm  (0.008 um) + resolution=30000 -->
       <mode>
         <name>R1656</name>
         <resolution>30000</resolution>
-        <!-- R1656 W070H4 1800 RB 656.2 OFF OPEN OPEN RB R ? 1000 -->
-        <numberChannels>400</numberChannels>
+        <numberChannels>1</numberChannels>
         <waveLengthMin>0.6522</waveLengthMin>
         <waveLengthMax>0.6602</waveLengthMax>
+        
+        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>SLIT</name><value>W070H4</value></parameter>
+        <parameter><name>GRATING</name><value>1800</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
+        <parameter><name>LAMBDA</name><value>656.2</value></parameter>
+        <parameter><name>SPIN</name><value>OFF</value></parameter>
+        <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>RECORD</name><value>RB</value></parameter>
+        <parameter><name>BLOCKS</name><value>20</value></parameter>
+        <parameter><name>FRAMES</name><value>1000</value></parameter>
       </mode>
 
       <mode>
         <name>R1589</name>
         <resolution>30000</resolution>
-        <!-- R1589 W070H4 1800 RB 589.3 OFF OPEN OPEN RB R ? 1000 -->
-        <numberChannels>400</numberChannels>
+        <numberChannels>1</numberChannels>
         <waveLengthMin>0.5853</waveLengthMin>
         <waveLengthMax>0.5933</waveLengthMax>
+        
+        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>SLIT</name><value>W070H4</value></parameter>
+        <parameter><name>GRATING</name><value>1800</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
+        <parameter><name>LAMBDA</name><value>589.3</value></parameter>
+        <parameter><name>SPIN</name><value>OFF</value></parameter>
+        <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>RECORD</name><value>RB</value></parameter>
+        <parameter><name>BLOCKS</name><value>20</value></parameter>
+        <parameter><name>FRAMES</name><value>1000</value></parameter>
       </mode>
 
       <mode>
         <name>R1770</name>
         <resolution>30000</resolution>
-        <!-- R1770 W070H4 1800 RB 769.9 OFF OPEN CLOSE R R ? 1000 -->
-        <numberChannels>400</numberChannels>
+        <numberChannels>1</numberChannels>
         <waveLengthMin>0.7659</waveLengthMin>
         <waveLengthMax>0.7739</waveLengthMax>
+        
+        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>SLIT</name><value>W070H4</value></parameter>
+        <parameter><name>GRATING</name><value>1800</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
+        <parameter><name>LAMBDA</name><value>769.9</value></parameter>
+        <parameter><name>SPIN</name><value>OFF</value></parameter>
+        <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>CLOSE</value></parameter>
+        <parameter><name>RECORD</name><value>R</value></parameter>
+        <parameter><name>BLOCKS</name><value>20</value></parameter>
+        <parameter><name>FRAMES</name><value>1000</value></parameter>
       </mode>
 
       <mode>
         <name>R1849</name>
         <resolution>30000</resolution>
-        <!-- R1849 W070H4 1800 RB 849.5 OFF OPEN CLOSE R R ? 1000 -->
-        <numberChannels>400</numberChannels>
+        <numberChannels>1</numberChannels>
         <waveLengthMin>0.8455</waveLengthMin>
         <waveLengthMax>0.8535</waveLengthMax>
+        
+        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>SLIT</name><value>W070H4</value></parameter>
+        <parameter><name>GRATING</name><value>1800</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
+        <parameter><name>LAMBDA</name><value>849.5</value></parameter>
+        <parameter><name>SPIN</name><value>OFF</value></parameter>
+        <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>CLOSE</value></parameter>
+        <parameter><name>RECORD</name><value>R</value></parameter>
+        <parameter><name>BLOCKS</name><value>20</value></parameter>
+        <parameter><name>FRAMES</name><value>1000</value></parameter>
       </mode>
 
       <mode>
         <name>R1854</name>
         <resolution>30000</resolution>
-        <!-- R1854 W070H4 1800 RB 854.0 OFF OPEN CLOSE R R ? 1000 -->
-        <numberChannels>400</numberChannels>
+        <numberChannels>1</numberChannels>
         <waveLengthMin>0.850</waveLengthMin>
         <waveLengthMax>0.858</waveLengthMax>
+        
+        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>SLIT</name><value>W070H4</value></parameter>
+        <parameter><name>GRATING</name><value>1800</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
+        <parameter><name>LAMBDA</name><value>854.0</value></parameter>
+        <parameter><name>SPIN</name><value>OFF</value></parameter>
+        <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>CLOSE</value></parameter>
+        <parameter><name>RECORD</name><value>R</value></parameter>
+        <parameter><name>BLOCKS</name><value>20</value></parameter>
+        <parameter><name>FRAMES</name><value>1000</value></parameter>
       </mode>
 
       <mode>
         <name>R1867</name>
         <resolution>30000</resolution>
-        <!-- R1867 W070H4 1800 RB 867.5 OFF OPEN CLOSE R R ? 1000 -->
-        <numberChannels>400</numberChannels>
+        <numberChannels>1</numberChannels>
         <waveLengthMin>0.8635</waveLengthMin>
         <waveLengthMax>0.8715</waveLengthMax>
+        
+        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>SLIT</name><value>W070H4</value></parameter>
+        <parameter><name>GRATING</name><value>1800</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
+        <parameter><name>LAMBDA</name><value>867.5</value></parameter>
+        <parameter><name>SPIN</name><value>OFF</value></parameter>
+        <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>CLOSE</value></parameter>
+        <parameter><name>RECORD</name><value>R</value></parameter>
+        <parameter><name>BLOCKS</name><value>20</value></parameter>
+        <parameter><name>FRAMES</name><value>1000</value></parameter>
       </mode>
-      
-      <!--
-- dispersion spectrale = lambda min/max:
-si Réseau=1800 (HR), largeur de bande=8nm  (0.008 um)
-si Réseau=300 (MR), largeur de bande=45nm  (0.045 um)
-si Réseau=100 (LR), largeur de bande=150nm (0.15 um)
 
-- resolution:
-HR=30000
-MR=6000
-LR=1500 
-
-- nombre de canaux spectraux:
-400 quelle que soit la résolution. Ensuite au traitement on binne très souvent. 
-      -->
     </focalInstrument>
 
 
@@ -960,7 +1205,7 @@ LR=1500
       <nbPixInterferometry>128</nbPixInterferometry>
       <nbPixPhotometry>0</nbPixPhotometry>
       <fracFluxInInterferometry>1</fracFluxInInterferometry>
-
+<!--
       <mode>
         <name>standard</name>
         <resolution>40</resolution>
@@ -968,104 +1213,189 @@ LR=1500
         <waveLengthMin>0.48</waveLengthMin>
         <waveLengthMax>0.82</waveLengthMax>
       </mode>
-
+-->
       <!-- Réseau=300 (MR), largeur de bande=45nm  (0.045 um) + resolution=6000 -->
       <mode>
         <name>R2656</name>
-        <!-- R2656 W070H4 300 RB 656.2 OFF OPEN OPEN RB R ? 1000 -->
         <resolution>6000</resolution>
-        <numberChannels>400</numberChannels>
+        <numberChannels>2</numberChannels>
         <waveLengthMin>0.6337</waveLengthMin>
         <waveLengthMax>0.6787</waveLengthMax>
+
+        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>SLIT</name><value>W070H4</value></parameter>
+        <parameter><name>GRATING</name><value>300</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
+        <parameter><name>LAMBDA</name><value>656.2</value></parameter>
+        <parameter><name>SPIN</name><value>OFF</value></parameter>
+        <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>RECORD</name><value>RB</value></parameter>
+        <parameter><name>BLOCKS</name><value>20</value></parameter>
+        <parameter><name>FRAMES</name><value>1000</value></parameter>
       </mode>
 
       <mode>
         <name>R2668</name>
-        <!-- R2668 W070H4 300 RB 668.0 OFF OPEN OPEN RB R ? 1000 -->
         <resolution>6000</resolution>
-        <numberChannels>400</numberChannels>
+        <numberChannels>2</numberChannels>
         <waveLengthMin>0.6455</waveLengthMin>
         <waveLengthMax>0.6905</waveLengthMax>
+        
+        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>SLIT</name><value>W070H4</value></parameter>
+        <parameter><name>GRATING</name><value>300</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
+        <parameter><name>LAMBDA</name><value>668.0</value></parameter>
+        <parameter><name>SPIN</name><value>OFF</value></parameter>
+        <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>RECORD</name><value>RB</value></parameter>
+        <parameter><name>BLOCKS</name><value>20</value></parameter>
+        <parameter><name>FRAMES</name><value>1000</value></parameter>
       </mode>
 
       <mode>
         <name>R2720</name>
-        <!-- R2720 W070H4 300 RB 720.0 OFF OPEN OPEN RB R ? 1000 -->
         <resolution>6000</resolution>
-        <numberChannels>400</numberChannels>
+        <numberChannels>2</numberChannels>
         <waveLengthMin>0.6975</waveLengthMin>
         <waveLengthMax>0.7425</waveLengthMax>
+        
+        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>SLIT</name><value>W070H4</value></parameter>
+        <parameter><name>GRATING</name><value>300</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
+        <parameter><name>LAMBDA</name><value>720.0</value></parameter>
+        <parameter><name>SPIN</name><value>OFF</value></parameter>
+        <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>RECORD</name><value>RB</value></parameter>
+        <parameter><name>BLOCKS</name><value>20</value></parameter>
+        <parameter><name>FRAMES</name><value>1000</value></parameter>
       </mode>
 
       <!-- Réseau=1800 (HR), largeur de bande=8nm  (0.008 um) + resolution=30000 -->
       <mode>
         <name>R1656</name>
         <resolution>30000</resolution>
-        <!-- R1656 W070H4 1800 RB 656.2 OFF OPEN OPEN RB R ? 1000 -->
-        <numberChannels>400</numberChannels>
+        <numberChannels>1</numberChannels>
         <waveLengthMin>0.6522</waveLengthMin>
         <waveLengthMax>0.6602</waveLengthMax>
+        
+        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>SLIT</name><value>W070H4</value></parameter>
+        <parameter><name>GRATING</name><value>1800</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
+        <parameter><name>LAMBDA</name><value>656.2</value></parameter>
+        <parameter><name>SPIN</name><value>OFF</value></parameter>
+        <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>RECORD</name><value>RB</value></parameter>
+        <parameter><name>BLOCKS</name><value>20</value></parameter>
+        <parameter><name>FRAMES</name><value>1000</value></parameter>
       </mode>
 
       <mode>
         <name>R1589</name>
         <resolution>30000</resolution>
-        <!-- R1589 W070H4 1800 RB 589.3 OFF OPEN OPEN RB R ? 1000 -->
-        <numberChannels>400</numberChannels>
+        <numberChannels>1</numberChannels>
         <waveLengthMin>0.5853</waveLengthMin>
         <waveLengthMax>0.5933</waveLengthMax>
+        
+        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>SLIT</name><value>W070H4</value></parameter>
+        <parameter><name>GRATING</name><value>1800</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
+        <parameter><name>LAMBDA</name><value>589.3</value></parameter>
+        <parameter><name>SPIN</name><value>OFF</value></parameter>
+        <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>RECORD</name><value>RB</value></parameter>
+        <parameter><name>BLOCKS</name><value>20</value></parameter>
+        <parameter><name>FRAMES</name><value>1000</value></parameter>
       </mode>
 
       <mode>
         <name>R1770</name>
         <resolution>30000</resolution>
-        <!-- R1770 W070H4 1800 RB 769.9 OFF OPEN CLOSE R R ? 1000 -->
-        <numberChannels>400</numberChannels>
+        <numberChannels>1</numberChannels>
         <waveLengthMin>0.7659</waveLengthMin>
         <waveLengthMax>0.7739</waveLengthMax>
+        
+        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>SLIT</name><value>W070H4</value></parameter>
+        <parameter><name>GRATING</name><value>1800</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
+        <parameter><name>LAMBDA</name><value>769.9</value></parameter>
+        <parameter><name>SPIN</name><value>OFF</value></parameter>
+        <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>CLOSE</value></parameter>
+        <parameter><name>RECORD</name><value>R</value></parameter>
+        <parameter><name>BLOCKS</name><value>20</value></parameter>
+        <parameter><name>FRAMES</name><value>1000</value></parameter>
       </mode>
 
       <mode>
         <name>R1849</name>
         <resolution>30000</resolution>
-        <!-- R1849 W070H4 1800 RB 849.5 OFF OPEN CLOSE R R ? 1000 -->
-        <numberChannels>400</numberChannels>
+        <numberChannels>1</numberChannels>
         <waveLengthMin>0.8455</waveLengthMin>
         <waveLengthMax>0.8535</waveLengthMax>
+        
+        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>SLIT</name><value>W070H4</value></parameter>
+        <parameter><name>GRATING</name><value>1800</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
+        <parameter><name>LAMBDA</name><value>849.5</value></parameter>
+        <parameter><name>SPIN</name><value>OFF</value></parameter>
+        <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>CLOSE</value></parameter>
+        <parameter><name>RECORD</name><value>R</value></parameter>
+        <parameter><name>BLOCKS</name><value>20</value></parameter>
+        <parameter><name>FRAMES</name><value>1000</value></parameter>
       </mode>
 
       <mode>
         <name>R1854</name>
         <resolution>30000</resolution>
-        <!-- R1854 W070H4 1800 RB 854.0 OFF OPEN CLOSE R R ? 1000 -->
-        <numberChannels>400</numberChannels>
+        <numberChannels>1</numberChannels>
         <waveLengthMin>0.850</waveLengthMin>
         <waveLengthMax>0.858</waveLengthMax>
+        
+        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>SLIT</name><value>W070H4</value></parameter>
+        <parameter><name>GRATING</name><value>1800</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
+        <parameter><name>LAMBDA</name><value>854.0</value></parameter>
+        <parameter><name>SPIN</name><value>OFF</value></parameter>
+        <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>CLOSE</value></parameter>
+        <parameter><name>RECORD</name><value>R</value></parameter>
+        <parameter><name>BLOCKS</name><value>20</value></parameter>
+        <parameter><name>FRAMES</name><value>1000</value></parameter>
       </mode>
 
       <mode>
         <name>R1867</name>
         <resolution>30000</resolution>
-        <!-- R1867 W070H4 1800 RB 867.5 OFF OPEN CLOSE R R ? 1000 -->
-        <numberChannels>400</numberChannels>
+        <numberChannels>1</numberChannels>
         <waveLengthMin>0.8635</waveLengthMin>
         <waveLengthMax>0.8715</waveLengthMax>
+        
+        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>SLIT</name><value>W070H4</value></parameter>
+        <parameter><name>GRATING</name><value>1800</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
+        <parameter><name>LAMBDA</name><value>867.5</value></parameter>
+        <parameter><name>SPIN</name><value>OFF</value></parameter>
+        <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>CLOSE</value></parameter>
+        <parameter><name>RECORD</name><value>R</value></parameter>
+        <parameter><name>BLOCKS</name><value>20</value></parameter>
+        <parameter><name>FRAMES</name><value>1000</value></parameter>
       </mode>
-      
-      <!--
-- dispersion spectrale = lambda min/max:
-si Réseau=1800 (HR), largeur de bande=8nm  (0.008 um)
-si Réseau=300 (MR), largeur de bande=45nm  (0.045 um)
-si Réseau=100 (LR), largeur de bande=150nm (0.15 um)
 
-- resolution:
-HR=30000
-MR=6000
-LR=1500 
-
-- nombre de canaux spectraux:
-400 quelle que soit la résolution. Ensuite au traitement on binne très souvent. 
-      -->
     </focalInstrument>
 
 
@@ -1845,7 +2175,7 @@ LR=1500
         <channels>V2 V1 V3 V4</channels>
       </configuration>
       <configuration>
-        <stations>E2 S2 W1 E1</stations>
+        <stations>E2 S1 W1 E1</stations>
         <channels>V2 V1 V3 V4</channels>
       </configuration>
       <configuration>

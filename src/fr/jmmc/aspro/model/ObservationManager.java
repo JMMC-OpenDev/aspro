@@ -1441,8 +1441,7 @@ public final class ObservationManager extends BaseOIManager {
       }
 
       // find station list corresponding to the station ids :
-      stationList = cm.getInstrumentConfigurationStations(
-              interferometerConfiguration, instrumentName, stationIds);
+      stationList = cm.getInstrumentConfigurationStations(interferometerConfiguration, instrumentName, stationIds);
 
       if (stationList != null) {
         if (logger.isLoggable(Level.INFO)) {

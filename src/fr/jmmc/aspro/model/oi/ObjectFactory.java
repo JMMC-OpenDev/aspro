@@ -238,6 +238,14 @@ public class ObjectFactory {
     }
 
     /**
+     * Create an instance of {@link Parameter }
+     * 
+     */
+    public Parameter createParameter() {
+        return new Parameter();
+    }
+
+    /**
      * Create an instance of {@link FocalInstrumentMode }
      * 
      */

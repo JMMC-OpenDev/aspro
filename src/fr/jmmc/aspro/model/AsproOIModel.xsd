@@ -1578,8 +1578,6 @@
 
 
 
-
-
   <!-- FocalInstrument -->
   <xsd:complexType name="FocalInstrument">
     <xsd:annotation>
@@ -1713,9 +1711,6 @@
 
 
 
-
-
-
   <!-- FocalInstrumentMode -->
   <xsd:complexType name="FocalInstrumentMode">
     <xsd:annotation>
@@ -1761,11 +1756,17 @@
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
+
+      <xsd:element name="parameter" type="Parameter" minOccurs="0" maxOccurs="unbounded">
+        <xsd:annotation>
+          <xsd:documentation>
+              The list of parameters associated to this focal instrument mode used by OB export (plugins)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      
     </xsd:sequence>
   </xsd:complexType>
-
-
-
 
 
 
@@ -1824,6 +1825,7 @@
 
     </xsd:sequence>
   </xsd:complexType>
+
 
 
 
@@ -1917,6 +1919,35 @@
       </xsd:enumeration>
     </xsd:restriction>
   </xsd:simpleType>
+
+
+
+
+<!-- Generic parameter key / value -->
+  <xsd:complexType name="Parameter">
+    <xsd:annotation>
+      <xsd:documentation>
+        A common representation of any generic parameters: name and value as string
+      </xsd:documentation>
+    </xsd:annotation>
+
+    <xsd:sequence>
+      <xsd:element name="name" type="xsd:string" minOccurs="1" maxOccurs="1">
+        <xsd:annotation>
+          <xsd:documentation>
+              The mandatory parameter name
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>          
+      <xsd:element name="value" type="xsd:string" minOccurs="1" maxOccurs="1">
+        <xsd:annotation>
+          <xsd:documentation>
+              The mandatory parameter value
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>          
+    </xsd:sequence>
+  </xsd:complexType>
 
 
 
