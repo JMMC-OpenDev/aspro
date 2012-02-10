@@ -21,13 +21,6 @@
 
         <!-- JMMC -->
 
-        <!-- Java Mariotti Common Software -->
-        <package name="jMCS"
-            description="JMMC framework, enabling better user interface and platform integration across Mac, Linux and Windows through numerous third-party libraries and in-house code"
-            link="https://www.jmmc.fr/dev/jmcs/"
-            jars="jmcs.jar"
-            license="CECILL-B ???"/>     
-
         <!-- Java Mariotti Astronomical library -->
         <package name="jMAL"
             description="JMMC library to provide common astronomical computations (coordinate conversion, SIMBAD star resolver and analytical object models in interferometry)"
@@ -65,15 +58,6 @@
               in the source code or included in or referred to in any
               derived software.
             -->
-
-        <!-- jMCS dependencies -->
-
-        <!-- VO interoperability -->
-        <package name="JSAMP"
-          description="JSAMP is a Java toolkit for use with the Simple Applications Messaging Protocol. Made by Mark Taylor, working in the Astrophysics Group at Bristol University."
-          link="http://software.astrogrid.org/doc/jsamp/"
-          jars="jsamp-1.3.jar"
-          license="(at least) the Academic Free Licence and the BSD License."/>
 
         <!-- jMAL dependencies -->
 
@@ -113,84 +97,6 @@
             link="http://itextpdf.com/"
             jars="iText-2.1.5.jar"
             license="AGPL (http://itextpdf.com/terms-of-use/agpl.php)" />
-
-        <!-- jMCS dependencies -->
-
-        <!-- Mac OS X Desktop integration -->
-        <package name="AppleJavaExtensions"
-          description="Adapt menus for Mac OS X"
-          link="http://developer.apple.com/samplecode/AppleJavaExtensions/index.html"
-          jars="AppleJavaExtensions.jar"/>
-
-        <!-- Launch one desktop browser -->
-        <package name="BrowserLauncher2"
-          description="Permit to use the default web browser"
-          link="http://browserlaunch2.sourceforge.net/"
-          jars="BrowserLauncher2-1_3.jar"/>
-
-        <!-- Documentation reader -->
-        <package name="jhall"
-          description="Show a help window from JavaHelp Jar file "
-          link="http://java.sun.com/javase/technologies/desktop/javahelp/"
-          jars="jhall.jar "/>
-        
-        <!-- Swing Task management -->
-        <package name="SwingWorker"
-          description="backport of SwingWorker included into Java 1.6"
-          link="https://swingworker.dev.java.net/"
-          jars="swing-worker-1.2.jar"
-          license="LGPL"/>     
-
-
-        <!-- 3. Tools -->
-
-        <!-- jMCS dependencies -->
-        
-        <!-- slf4j + JUL and JCL wrappers -->
-        <package name="SLF4J"
-          description="The Simple Logging Facade for Java or (SLF4J) serves as a simple facade or abstraction for various logging frameworks, e.g. java.util.logging, log4j and logback, allowing the end user to plug in the desired logging framework at deployment time"
-          link="http://www.slf4j.org/"
-          jars="slf4j-api-1.6.4.jar jul-to-slf4j-1.6.4.jar jcl-over-slf4j-1.6.4.jar"
-          license="MIT License" />
-
-        <!-- logback -->
-        <package name="Logback"
-          description="Logback is intended as a successor to the popular log4j project, picking up where log4j leaves off"
-          link="http://logback.qos.ch/"
-          jars="logback-core-1.0.0.jar logback-classic-1.0.0.jar"
-          license="EPL v1.0 / LGPL 2.1" />
-
-        <!-- Xml binding (ApplicationData, targetModel and aspro2) -->
-        <package name="JAXB"
-          description="Java Architecture for XML Binding (JAXB) allows Java developers to map Java classes to XML representations"
-          link="https://jaxb.dev.java.net/"
-          jars="activation.jar jaxb-api.jar jaxb-impl.jar jsr173_1.0_api.jar"
-          license="CDDL/GPL" />
-
-        <!-- HTTP client (feedback report and LITpro) (see fr.jmmc.mcs.util.Http wrapper) -->
-        <package name="commons-httpclient"
-          description="HTTP Client (used to send HTTP POST requests)"
-          link="http://hc.apache.org/httpclient-3.x/"
-          jars="commons-httpclient-3.1.jar "/>
-
-        <!-- HttpClient dependency -->
-        <package name="commons-codec"
-          description="Commons Codec provides implementations of common encoders and decoders such as Base64, Hex, Phonetic and URLs. "
-          link="http://commons.apache.org/codec/"
-          jars="commons-codec-1.3.jar"/>
-        
-        <!-- Parse command line arguments -->
-        <package name="java-getopt"
-          description="Interpret command line arguments"
-          link="http://www.urbanophile.com/arenn/hacking/download.html"
-          jars="java-getopt-1.0.13.jar"/>
-
-        <!-- Only used to detect the platform -->
-        <package name="commons-lang"
-          description="Provide much needed additions to the standard JDK's java.lang package"
-          link="http://commons.apache.org/lang/"
-          jars="commons-lang-2.6.jar"
-          license="APACHE_V2"/>
 
   </dependences>
 
