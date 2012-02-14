@@ -42,10 +42,12 @@ import fr.jmmc.jmcs.gui.MessagePane;
 import fr.jmmc.jmcs.gui.StatusBar;
 import fr.jmmc.jmcs.gui.task.TaskSwingWorker;
 import fr.jmmc.jmal.image.ColorModels;
+import fr.jmmc.jmal.image.ImageUtils.ColorScale;
 import fr.jmmc.jmal.model.ModelUVMapService;
 import fr.jmmc.jmal.model.ModelUVMapService.ImageMode;
 import fr.jmmc.jmal.model.UVMapData;
 import fr.jmmc.jmal.model.targetmodel.Model;
+import fr.jmmc.jmcs.gui.task.TaskSwingWorkerExecutor;
 import fr.jmmc.jmcs.util.concurrent.InterruptedJobException;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -75,6 +77,7 @@ import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.annotations.XYTextAnnotation;
 import org.jfree.chart.axis.AxisLocation;
+import org.jfree.chart.axis.LogarithmicAxis;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.block.BlockBorder;
 import org.jfree.chart.event.ChartProgressEvent;
@@ -1765,6 +1768,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
               new UVMapSwingWorker(this, models, uvRect,
                       refMin, refMax, imageMode, imageSize, colorModel).executeTask();
+            } else {
+              // cancel anyway currently running UVMapSwingWorker:
+              TaskSwingWorkerExecutor.cancelTask(AsproTaskRegistry.TASK_UV_MAP);
             }
           }
         }
@@ -1956,10 +1962,19 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     }
 
     if (uvMapData != null) {
-      final NumberAxis uvMapAxis = new NumberAxis();
+      final NumberAxis uvMapAxis;
+      if (uvMapData.getColorScale() == ColorScale.LINEAR) {
+        uvMapAxis = new NumberAxis();
+      } else {
+        uvMapAxis = new LogarithmicAxis(null);
+      }
+      
       uvMapAxis.setTickLabelFont(ChartUtils.DEFAULT_FONT);
 
-      mapLegend = new PaintScaleLegend(new ColorModelPaintScale(uvMapData.getMin(), uvMapData.getMax(), uvMapData.getColorModel()), uvMapAxis);
+      mapLegend = (uvMapData.getColorScale() == ColorScale.LINEAR) ? 
+              new PaintScaleLegend(new ColorModelPaintScale(uvMapData.getMin(), uvMapData.getMax(), uvMapData.getColorModel(), uvMapData.getColorScale()), uvMapAxis) :
+              new PaintLogScaleLegend(new ColorModelPaintScale(uvMapData.getMin(), uvMapData.getMax(), uvMapData.getColorModel(), uvMapData.getColorScale()), uvMapAxis);
+      
       mapLegend.setPosition(RectangleEdge.LEFT);
       mapLegend.setStripWidth(15d);
       mapLegend.setStripOutlinePaint(Color.BLACK);

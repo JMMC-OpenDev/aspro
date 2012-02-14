@@ -19,6 +19,7 @@ import fr.jmmc.jmcs.gui.StatusBar;
 import fr.jmmc.jmcs.gui.task.TaskSwingWorker;
 import fr.jmmc.jmal.image.ColorModels;
 import fr.jmmc.jmal.image.ImageUtils;
+import fr.jmmc.jmal.image.ImageUtils.ColorScale;
 import fr.jmmc.jmcs.gui.task.Task;
 import fr.jmmc.oitools.image.FitsImage;
 import java.awt.Color;
@@ -29,12 +30,12 @@ import java.awt.image.IndexColorModel;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.annotations.XYTextAnnotation;
 import org.jfree.chart.axis.AxisLocation;
-import org.jfree.chart.axis.LogarithmicAxis;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.block.BlockBorder;
@@ -58,10 +59,13 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
   private static final long serialVersionUID = 1L;
   /** Class logger */
   private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(FitsImagePanel.class.getName());
-  /** image convert task */
-  private static final Task IMAGE_TASK = new Task("convertFitsImage");
-
+  /** image task prefix 'convertFitsImage-' */
+  private static final String PREFIX_IMAGE_TASK = "convertFitsImage-";
+  /** global thread counter */
+  private final static AtomicInteger panelCounter = new AtomicInteger(1);
   /* members */
+  /** image convert task */
+  final Task task;
   /** fits image to plot */
   private FitsImage fitsImage = null;
   /** preference singleton */
@@ -91,6 +95,8 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
     initComponents();
 
     postInit();
+
+    this.task = new Task(PREFIX_IMAGE_TASK + panelCounter.getAndIncrement());
   }
 
   /**
@@ -286,7 +292,7 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
      */
     private ConvertFitsImageSwingWorker(final FitsImagePanel fitsPanel, final FitsImage fitsImage, final IndexColorModel colorModel) {
       // get current observation version :
-      super(IMAGE_TASK);
+      super(fitsPanel.task);
       this.fitsPanel = fitsPanel;
       this.fitsImage = fitsImage;
       this.colorModel = colorModel;
@@ -477,8 +483,6 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
       logger.fine("image rect     = " + imgRect);
       logger.fine("image rect REF = " + imgRectRef);
     }
-    logger.info("image rect     = " + imgRect);
-    logger.info("image rect REF = " + imgRectRef);
 
     // note : floor/ceil to be sure to have at least 1x1 pixel image
     int x = (int) Math.floor(imageWidth * (imgRect.getX() - imgRectRef.getX()) / imgRectRef.getWidth());
@@ -493,7 +497,7 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
       // Inverse X axis issue :
       x = imageWidth - x - w;
     }
-    
+
     if (imageData.getFitsImage().isIncRowPositive()) {
       // Inverse Y axis issue :
       y = imageHeight - y - h;
@@ -556,10 +560,9 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
       final IndexColorModel colorModel = imageData.getColorModel();
 
       final NumberAxis imageAxis = new NumberAxis();
-//      final NumberAxis imageAxis = new LogarithmicAxis(null);      
       imageAxis.setTickLabelFont(ChartUtils.DEFAULT_FONT);
 
-      mapLegend = new PaintScaleLegend(new ColorModelPaintScale(lFitsImage.getDataMin(), lFitsImage.getDataMax(), colorModel), imageAxis);
+      mapLegend = new PaintScaleLegend(new ColorModelPaintScale(lFitsImage.getDataMin(), lFitsImage.getDataMax(), colorModel, ColorScale.LINEAR), imageAxis);
       mapLegend.setPosition(RectangleEdge.LEFT);
       mapLegend.setStripWidth(15d);
       mapLegend.setStripOutlinePaint(Color.BLACK);
