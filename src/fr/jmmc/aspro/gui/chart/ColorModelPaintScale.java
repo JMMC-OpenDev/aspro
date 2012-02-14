@@ -4,11 +4,13 @@
 package fr.jmmc.aspro.gui.chart;
 
 import fr.jmmc.jmal.image.ImageUtils;
+import fr.jmmc.jmal.image.ImageUtils.ColorScale;
 import java.awt.Color;
 import java.awt.Paint;
 import java.awt.image.IndexColorModel;
 import java.io.Serializable;
 
+import java.util.logging.Logger;
 import org.jfree.chart.HashUtilities;
 import org.jfree.chart.renderer.PaintScale;
 import org.jfree.util.PublicCloneable;
@@ -28,11 +30,15 @@ public class ColorModelPaintScale
   private final double upperBound;
   /** color model (lut) */
   private transient final IndexColorModel colorModel;
+  /** color scaling method */
+  private transient final ColorScale colorScale;
   /* internal */
   /** index of the highest color */
   private final int iMaxColor;
   /** data to color linear scaling factor */
   private final float scalingFactor;
+  /** scaled minimum value */
+  private final float scaledMin;
 
   /**
    * Creates a new paint scale for values in the specified range.
@@ -40,11 +46,14 @@ public class ColorModelPaintScale
    * @param lowerBound  the lower bound.
    * @param upperBound  the upper bound.
    * @param colorModel color model
+   * @param colorScale color scaling method
    *
    * @throws IllegalArgumentException if <code>lowerBound</code> is not
    *       less than <code>upperBound</code>.
    */
-  public ColorModelPaintScale(final double lowerBound, final double upperBound, final IndexColorModel colorModel) {
+  public ColorModelPaintScale(final double lowerBound, final double upperBound,
+          final IndexColorModel colorModel, final ColorScale colorScale) {
+
     if (lowerBound >= upperBound) {
       throw new IllegalArgumentException(
               "Requires lowerBound < upperBound.");
@@ -52,10 +61,15 @@ public class ColorModelPaintScale
     this.lowerBound = lowerBound;
     this.upperBound = upperBound;
     this.colorModel = colorModel;
+    this.colorScale = colorScale;
 
     // prepare other variables:
     this.iMaxColor = colorModel.getMapSize() - 1;
-    this.scalingFactor = ImageUtils.computeScalingFactor((float) this.lowerBound, (float) this.upperBound, colorModel.getMapSize());
+
+    final float[] scaledMinMax = ImageUtils.scaleMinMax((float) this.lowerBound, (float) this.upperBound, colorScale);
+
+    this.scaledMin = scaledMinMax[0];
+    this.scalingFactor = ImageUtils.computeScalingFactor(scaledMinMax[0], scaledMinMax[1], colorModel.getMapSize());
   }
 
   /**
@@ -85,14 +99,15 @@ public class ColorModelPaintScale
   /**
    * Returns a paint for the specified value.
    *
-   * @param value  the value (must be within the range specified by the
-   *         lower and upper bounds for the scale).
+   * @param value  the value (must be within the range specified by the lower and upper bounds for the scale).
    *
    * @return A paint for the specified value.
    */
   @Override
   public Paint getPaint(final double value) {
-    final int colorIdx = ImageUtils.getColor(this.colorModel, this.iMaxColor, (float) ((value - this.lowerBound) * this.scalingFactor));
+    final int colorIdx = ImageUtils.getColor(this.colorModel, this.iMaxColor,
+            ImageUtils.getScaledValue((colorScale == ColorScale.LOGARITHMIC), scaledMin, scalingFactor, (float) value));
+
     return new Color(this.colorModel.getRGB(colorIdx));
   }
 
