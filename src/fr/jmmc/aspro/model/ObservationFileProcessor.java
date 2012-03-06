@@ -49,13 +49,13 @@ public final class ObservationFileProcessor {
       logger.fine("revision = " + revision);
     }
 
+    // convert ?
     if (revision != CURRENT_REVISION) {
       // model conversion is needed :
       convertModel(observation, revision);
     }
-    // convert ?
 
-    // check and update target references :
+    // check and update target references in TargetUserInformations :
     observation.checkReferences();
   }
 
@@ -109,6 +109,15 @@ public final class ObservationFileProcessor {
 
         // create a new collection :
         observation.getVariants().add(obsVariant);
+      }
+    }
+
+    if (revision.getVersion() < AsproModelVersion.Feb2012Revision.getVersion()) {
+      // update model to Feb2012Revision :
+
+      // define the target.useAnalyticalModel = true :
+      for (Target target : observation.getTargets()) {
+        target.setUseAnalyticalModel(Boolean.TRUE);
       }
     }
 

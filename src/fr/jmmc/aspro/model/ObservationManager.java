@@ -27,8 +27,10 @@ import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetConfiguration;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
+import fr.jmmc.aspro.model.oi.UserModel;
 import fr.jmmc.aspro.model.oi.WhenSetting;
 import fr.jmmc.aspro.model.util.SpectralBandUtils;
+import fr.jmmc.aspro.service.UserModelService;
 import fr.jmmc.aspro.util.CombUtils;
 import fr.jmmc.jmal.Band;
 import fr.jmmc.jmal.star.Star;
@@ -36,7 +38,10 @@ import fr.jmmc.jmal.model.ModelDefinition;
 import fr.jmmc.jmal.model.targetmodel.Model;
 import fr.jmmc.jmal.model.targetmodel.Parameter;
 import fr.jmmc.jmcs.gui.SwingUtils;
+import fr.jmmc.jmcs.util.FileUtils;
+import fr.jmmc.oitools.image.FitsImage;
 import fr.jmmc.oitools.model.OIFitsFile;
+import fr.nom.tam.fits.FitsException;
 import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
@@ -199,12 +204,15 @@ public final class ObservationManager extends BaseOIManager {
   /**
    * Load an observation from the given file
    * @param file file to load
+   * @return optional information message or null
    * 
+   * @throws FitsException if any FITS error occured when loading Fits images (user model)
    * @throws IOException if an I/O exception occured
    * @throws IllegalStateException if an invalid reference was found (interferometer / instrument / instrument configuration) or an unexpected exception occured
    * @throws IllegalArgumentException if the file is not an Observation
    */
-  public void load(final File file) throws IOException, IllegalStateException, IllegalArgumentException {
+  public String load(final File file) throws FitsException, IOException, IllegalStateException, IllegalArgumentException {
+    String message = null;
     if (file != null) {
       if (logger.isLoggable(Level.INFO)) {
         logger.info("Load observation from : " + file);
@@ -223,9 +231,13 @@ public final class ObservationManager extends BaseOIManager {
       // post load processing :
       ObservationFileProcessor.onLoad(observation);
 
+      // check external file references:
+      message = checkAndLoadFileReferences(observation);
+
       // ready to use :
       changeObservation(observation);
     }
+    return message;
   }
 
   /**
@@ -252,7 +264,7 @@ public final class ObservationManager extends BaseOIManager {
 
       final ObservationSetting observation = (ObservationSetting) loaded;
 
-      // post load processing :
+      // post load processing (ignore information message):
       ObservationFileProcessor.onLoad(observation);
 
       return observation;
@@ -1233,7 +1245,7 @@ public final class ObservationManager extends BaseOIManager {
     return this.oiFitsFile;
   }
 
-  // --- OBSERVATION VARIANTS --------------------------------------------------
+  // --- OBSERVATION VARIANTS -------------------------------------------------
   /**
    * Update the observation variant list to have the correct size and allocate observation variants if needed
    * @param obsVariants observation variant list (not null)
@@ -1253,6 +1265,74 @@ public final class ObservationManager extends BaseOIManager {
       obsVariants.remove(i);
     }
     return true;
+  }
+
+  // --- USER MODELS ----------------------------------------------------------
+  /**
+   * Check external file references (target user models) and load these files
+   * @param observation observation to process
+   * @return optional information message or null
+   * 
+   * @throws FitsException if any FITS error occured
+   * @throws IOException IO failure
+   */
+  private static String checkAndLoadFileReferences(final ObservationSetting observation)
+          throws FitsException, IOException {
+
+    final StringBuilder sb = new StringBuilder(128);
+
+    // Check target user model files:
+    for (Target target : observation.getTargets()) {
+      checkTargetUserModel(target, sb);
+    }
+
+    // Load only valid target user model files:
+    UserModel model;
+    FitsImage fitsImage;
+    for (Target target : observation.getTargets()) {
+      model = target.getUserModel();
+      if (model != null && model.isFileValid()) {
+        // throws exceptions if the given fits file or image is incorrect:
+        fitsImage = UserModelService.prepareFitsFile(model.getFile());
+        
+        model.setFitsImage(fitsImage);
+      }
+    }
+
+    return (sb.length() > 0) ? sb.toString() : null;
+  }
+
+  /**
+   * Check the given target's user model
+   * @param target target to check
+   * @param sb message buffer
+   */
+  private static void checkTargetUserModel(final Target target, final StringBuilder sb) {
+    final UserModel model = target.getUserModel();
+
+    if (model != null) {
+      final String filePath = model.getFile();
+
+      logger.info("checking file path [" + filePath + "]");
+
+      final File file = FileUtils.getFile(filePath);
+
+      boolean valid = false;
+
+      if (file == null) {
+        sb.append("User model file [").append(filePath).append("] does not exist.");
+      } else if (!file.canRead()) {
+        sb.append("User model file [").append(filePath).append("] can not be read.");
+      } else {
+        valid = true;
+      }
+
+      if (!valid) {
+        sb.append("\nThe target [").append(target.getName()).append("] has an invalid user model; this model is disabled.\n\n");
+      }
+
+      model.setFileValid(valid);
+    }
   }
 
   // --- INTERNAL METHODS ------------------------------------------------------
@@ -1390,8 +1470,8 @@ public final class ObservationManager extends BaseOIManager {
    * @return correct value for stations (C0 B0 A0) or null if no match found
    */
   private String findInstrumentConfigurationStations(final String interferometerConfiguration,
-                                                     final String instrumentName,
-                                                     final String stationConf) {
+          final String instrumentName,
+          final String stationConf) {
     boolean res = false;
 
     // trim to be sure (xml manually modified) :

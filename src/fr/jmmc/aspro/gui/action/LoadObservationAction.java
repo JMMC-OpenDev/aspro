@@ -11,6 +11,7 @@ import fr.jmmc.jmcs.gui.action.ActionRegistrar;
 import fr.jmmc.jmcs.util.FileUtils;
 import fr.jmmc.jmcs.util.MimeType;
 import fr.jmmc.jmcs.gui.action.RegisteredAction;
+import fr.nom.tam.fits.FitsException;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
@@ -92,14 +93,20 @@ public final class LoadObservationAction extends RegisteredAction {
 
       if (exist) {
         try {
-          om.load(file);
+          final String message = om.load(file);
 
           StatusBar.show("file loaded : " + file.getName());
 
-        } catch (IllegalArgumentException iae) {
-          MessagePane.showErrorMessage("Invalid observation file : " + file.getAbsolutePath(), iae);
+          if (message != null) {
+            MessagePane.showMessage(message);
+          }
+
+        } catch (FitsException fe) {
+          MessagePane.showErrorMessage("Could not load fits images from file : " + file.getAbsolutePath(), fe);
         } catch (IOException ioe) {
           MessagePane.showErrorMessage("Could not load the file : " + file.getAbsolutePath(), ioe);
+        } catch (IllegalArgumentException iae) {
+          MessagePane.showErrorMessage("Invalid observation file : " + file.getAbsolutePath(), iae);
         }
       } else {
         MessagePane.showErrorMessage("Could not load the file : " + file.getAbsolutePath());
