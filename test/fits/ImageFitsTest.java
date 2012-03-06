@@ -190,13 +190,13 @@ public class ImageFitsTest {
 
         logger.info("loaded FitsImageFile: " + imgFitsFile);
 
+        errors += infoFile(file);
+        errors += dumpFile(file);
+        errors += showFile(file);
+
       } catch (Exception e) {
         logger.log(Level.SEVERE, "An exception occured while working on file: " + file, e);
       }
-
-      errors += infoFile(file);
-      errors += dumpFile(file);
-      errors += showFile(file);
     }
 
 
