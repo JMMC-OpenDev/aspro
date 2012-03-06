@@ -384,7 +384,7 @@
                 <Component class="javax.swing.JComboBox" name="jComboBoxImageMode">
                   <Properties>
                     <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                      <Connection code="new DefaultComboBoxModel(ModelUVMapService.ImageMode.values())" type="code"/>
+                      <Connection code="new DefaultComboBoxModel(ImageMode.values())" type="code"/>
                     </Property>
                   </Properties>
                   <Constraints>

@@ -8,7 +8,14 @@ import fr.jmmc.aspro.Preferences;
 import fr.jmmc.aspro.gui.action.ExportOBVLTIAction;
 import fr.jmmc.aspro.gui.action.ExportOBVegaAction;
 import fr.jmmc.aspro.gui.action.ExportPDFAction;
-import fr.jmmc.aspro.gui.chart.*;
+import fr.jmmc.aspro.gui.chart.ChartUtils;
+import fr.jmmc.aspro.gui.chart.ColorModelPaintScale;
+import fr.jmmc.aspro.gui.chart.PDFOptions;
+import fr.jmmc.aspro.gui.chart.PaintLogScaleLegend;
+import fr.jmmc.aspro.gui.chart.SquareChartPanel;
+import fr.jmmc.aspro.gui.chart.SquareXYPlot;
+import fr.jmmc.aspro.gui.chart.ZoomEvent;
+import fr.jmmc.aspro.gui.chart.ZoomEventListener;
 import fr.jmmc.aspro.gui.task.AsproTaskRegistry;
 import fr.jmmc.aspro.gui.task.ObservationCollectionTaskSwingWorker;
 import fr.jmmc.aspro.gui.util.ColorPalette;
@@ -38,17 +45,19 @@ import fr.jmmc.aspro.model.uvcoverage.UVBaseLineData;
 import fr.jmmc.aspro.model.uvcoverage.UVRangeBaseLineData;
 import fr.jmmc.aspro.ob.ExportOBMode;
 import fr.jmmc.aspro.service.UVCoverageService;
+import fr.jmmc.aspro.service.UserModelService;
 import fr.jmmc.jmcs.gui.MessagePane;
 import fr.jmmc.jmcs.gui.StatusBar;
 import fr.jmmc.jmcs.gui.task.TaskSwingWorker;
 import fr.jmmc.jmal.image.ColorModels;
-import fr.jmmc.jmal.image.ImageUtils.ColorScale;
+import fr.jmmc.jmal.image.ColorScale;
 import fr.jmmc.jmal.model.ModelUVMapService;
-import fr.jmmc.jmal.model.ModelUVMapService.ImageMode;
+import fr.jmmc.jmal.model.ImageMode;
 import fr.jmmc.jmal.model.UVMapData;
 import fr.jmmc.jmal.model.targetmodel.Model;
 import fr.jmmc.jmcs.gui.task.TaskSwingWorkerExecutor;
 import fr.jmmc.jmcs.util.concurrent.InterruptedJobException;
+import fr.jmmc.oitools.image.FitsImage;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Image;
@@ -443,7 +452,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         gridBagConstraints.gridy = 25;
         jPanelLeft.add(jLabelImageMode, gridBagConstraints);
 
-        jComboBoxImageMode.setModel(new DefaultComboBoxModel(ModelUVMapService.ImageMode.values()));
+        jComboBoxImageMode.setModel(new DefaultComboBoxModel(ImageMode.values()));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 25;
@@ -937,9 +946,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
   private void changeStateForModelImageWidgets() {
     final Target target = getSelectedTarget();
     if (target != null) {
-      final List<Model> models = target.getModels();
-
-      final boolean hasModel = (models != null && !models.isEmpty());
+      final boolean hasModel = target.hasModel();
 
       this.jCheckBoxModelImage.setEnabled(hasModel);
       this.jComboBoxImageMode.setEnabled(hasModel);
@@ -1371,6 +1378,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       // Use model image Preferences :
       final int imageSize = this.myPreferences.getPreferenceAsInt(Preferences.MODEL_IMAGE_SIZE);
       final IndexColorModel colorModel = ColorModels.getColorModel(this.myPreferences.getPreference(Preferences.MODEL_IMAGE_LUT));
+      final ColorScale colorScale = this.myPreferences.getImageColorScale();
 
       // update the status bar :
       StatusBar.show("computing uv coverage ...");
@@ -1381,7 +1389,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       // Create uv coverage task worker :
       // Cancel other tasks and execute this new task :
       new UVCoverageSwingWorker(this, obsCollection, this.getObservabilityData(), targetName,
-              uvMax, doUVSupport, doDataNoise, doModelImage, imageMode, imageSize, colorModel,
+              uvMax, doUVSupport, doDataNoise, doModelImage, imageMode, imageSize, colorModel, colorScale,
               currentUVMapData).executeTask();
 
     } // observability data check
@@ -1413,6 +1421,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     private final int imageSize;
     /** image color model */
     private final IndexColorModel colorModel;
+    /** color scaling method */
+    private final ColorScale colorScale;
     /** previously computed UV Map Data (or null) */
     private final UVMapData currentUVMapData;
 
@@ -1428,14 +1438,16 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
      * @param doDataNoise enable data noise
      * @param doModelImage flag to compute the model image
      * @param imageMode image mode (amplitude or phase)
-     * @param imageSize number of pixels for both width and height of the generated image
+     * @param imageSize expected number of pixels for both width and height of the generated image
      * @param colorModel color model to use
+     * @param colorScale color scaling method
      * @param currentUVMapData previously computed UV Map Data
      */
     private UVCoverageSwingWorker(final UVCoveragePanel uvPanel, final ObservationCollection obsCollection,
             final List<ObservabilityData> obsDataList, final String targetName,
             final double uvMax, final boolean doUVSupport, final boolean doDataNoise,
-            final boolean doModelImage, final ImageMode imageMode, final int imageSize, final IndexColorModel colorModel,
+            final boolean doModelImage, final ImageMode imageMode, final int imageSize,
+            final IndexColorModel colorModel, final ColorScale colorScale,
             final UVMapData currentUVMapData) {
       // get current observation version :
       super(AsproTaskRegistry.TASK_UV_COVERAGE, obsCollection);
@@ -1449,6 +1461,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       this.imageMode = imageMode;
       this.imageSize = imageSize;
       this.colorModel = colorModel;
+      this.colorScale = colorScale;
       this.currentUVMapData = currentUVMapData;
     }
 
@@ -1473,8 +1486,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         obsData = this.obsDataList.get(i);
 
         // compute the uv coverage data :
-        uvDataList.add(
-                new UVCoverageService(observation, obsData, this.targetName, this.uvMax, this.doUVSupport, this.doDataNoise).compute());
+        uvDataList.add(new UVCoverageService(observation, obsData, this.targetName, this.uvMax,
+                this.doUVSupport, this.doDataNoise).compute());
 
         // fast interrupt :
         if (Thread.currentThread().isInterrupted()) {
@@ -1487,7 +1500,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       if (this.doModelImage) {
         // compute the uv map data :
 
-        // update uvMax according to UVCoverage Service (wavelength correction) :
+        // update uvMax according to UVCoverage Service (wavelength correction):
         this.uvMax = uvDataCollection.getFirstUVData().getUvMax();
 
         final Rectangle2D.Double uvRect = new Rectangle2D.Double();
@@ -1496,43 +1509,87 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         // get target from the first observation for consistency :
         final Target target = uvDataCollection.getFirstObservation().getTarget(this.targetName);
 
-        if (target != null) {
-          final List<Model> models = target.getModels();
+        if (target != null && target.hasModel()) {
 
-          if (models != null && models.size() > 0) {
+          // get observation target version :
+          final int targetVersion = uvDataCollection.getVersion().getTargetVersion();
 
-            // get observation target version :
-            final int targetVersion = uvDataCollection.getVersion().getTargetVersion();
+          // Check if the previously computed UV Map Data is still valid :
+          if (this.currentUVMapData != null
+                  && this.currentUVMapData.isValid(this.targetName, targetVersion, uvRect,
+                  this.imageMode, this.imageSize, this.colorModel, this.colorScale)) {
 
-            // Check if the previously computed UV Map Data is still valid :
-            if (this.currentUVMapData != null
-                    && this.currentUVMapData.isValid(this.targetName, targetVersion, uvRect, this.imageMode, this.imageSize, this.colorModel)) {
+            logger.debug("Reuse model image.");
 
-              logger.debug("Reuse model image.");
+            // reuse computed UV Map Data :
+            uvDataCollection.setUvMapData(this.currentUVMapData);
+          } else {
+            try {
+              final UVMapData uvMapData;
 
-              // reuse computed UV Map Data :
-              uvDataCollection.setUvMapData(this.currentUVMapData);
-            } else {
+              if (target.hasAnalyticalModel()) {
+                // Analytical model:
+                final List<Model> models = target.getModels();
 
-              logger.debug("Computing model image ...");
+                // Check if the previously computed visiblity Data is still valid :
+                if (this.currentUVMapData != null
+                        && this.currentUVMapData.isDataValid(this.targetName, targetVersion, uvRect, this.imageSize)) {
 
-              try {
-                // Compute Target Model for the UV coverage limits ONCE :
-                final UVMapData uvMapData = ModelUVMapService.computeUVMap(models,
-                        uvRect, null, null, this.imageMode, this.imageSize, this.colorModel);
+                  logger.debug("Reuse model visiblity.");
 
-                if (uvMapData != null) {
-                  // define target name and version :
-                  uvMapData.setTargetName(this.targetName);
-                  uvMapData.setTargetVersion(targetVersion);
+                  // Compute only image using existing complex visibility data :
+                  uvMapData = ModelUVMapService.computeUVMap(models,
+                          uvRect, null, null, this.currentUVMapData.getVisData(),
+                          this.imageMode, this.imageSize, this.colorModel, this.colorScale);
 
-                  uvDataCollection.setUvMapData(uvMapData);
+                } else {
+                  logger.debug("Computing model image ...");
+
+                  // Compute Target Model for the UV coverage limits ONCE :
+                  uvMapData = ModelUVMapService.computeUVMap(models, uvRect,
+                          this.imageMode, this.imageSize, this.colorModel, this.colorScale);
                 }
+              } else {
 
-              } catch (InterruptedJobException ije) {
-                logger.debug("Computing model image interrupted: ", ije);
-                return null;
+                // Get preloaded and prepared fits image:
+                final FitsImage fitsImage = target.getUserModel().getFitsImage();
+
+                if (fitsImage != null) {
+
+                  // Check if the previously computed visiblity Data is still valid :
+                  if (this.currentUVMapData != null
+                          && this.currentUVMapData.isDataValid(this.targetName, targetVersion, uvRect, this.imageSize)) {
+
+                    logger.debug("Reuse model visiblity.");
+
+                    // Compute only image using existing complex visibility data :
+                    uvMapData = UserModelService.computeUVMap(fitsImage,
+                            uvRect, this.imageMode, this.imageSize, this.colorModel, this.colorScale,
+                            this.currentUVMapData.getVisData());
+
+                  } else {
+                    logger.debug("Computing model image ...");
+
+                    // Compute Target Model for the UV coverage limits ONCE :
+                    uvMapData = UserModelService.computeUVMap(fitsImage,
+                            uvRect, this.imageMode, this.imageSize, this.colorModel, this.colorScale);
+                  }
+                } else {
+                  uvMapData = null;
+                }
               }
+
+              if (uvMapData != null) {
+                // define target name and version :
+                uvMapData.setTargetName(this.targetName);
+                uvMapData.setTargetVersion(targetVersion);
+
+                uvDataCollection.setUvMapData(uvMapData);
+              }
+
+            } catch (InterruptedJobException ije) {
+              logger.debug("Computing model image interrupted: ", ije);
+              return null;
             }
           }
         }
@@ -1707,7 +1764,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       setUvPlotScalingFactor(MEGA_LAMBDA_SCALE);
 
       // computed data are valid :
-      updateChart(chartData);
+      updateChart(chartData, uvMapData);
 
       // update the background image and legend:
       updateUVMapData(uvMapData);
@@ -1738,18 +1795,18 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         // get target from observation for consistency :
         final Target target = this.getChartData().getFirstObservation().getTarget(this.getChartData().getTargetName());
 
-        if (target != null) {
-          final List<Model> models = target.getModels();
+        if (target != null && target.hasModel()) {
 
-          if (models != null && models.size() > 0) {
+          final Rectangle2D.Double uvRect = new Rectangle2D.Double();
+          uvRect.setFrameFromDiagonal(
+                  fromUVPlotScale(ze.getDomainLowerBound()), fromUVPlotScale(ze.getRangeLowerBound()),
+                  fromUVPlotScale(ze.getDomainUpperBound()), fromUVPlotScale(ze.getRangeUpperBound()));
 
-            final Rectangle2D.Double uvRect = new Rectangle2D.Double();
-            uvRect.setFrameFromDiagonal(
-                    fromUVPlotScale(ze.getDomainLowerBound()), fromUVPlotScale(ze.getRangeLowerBound()),
-                    fromUVPlotScale(ze.getDomainUpperBound()), fromUVPlotScale(ze.getRangeUpperBound()));
+          // compute an approximated uv map from the reference UV Map :
+          if (computeSubUVMap(uvMapData, uvRect)) {
 
-            // compute an approximated uv map from the reference UV Map :
-            if (computeSubUVMap(uvMapData, uvRect)) {
+            // Compute a correct uv map for analytical models ONLY:
+            if (target.hasAnalyticalModel()) {
 
               // visibility reference extrema :
               final Float refMin = uvMapData.getMin();
@@ -1759,6 +1816,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
               final ImageMode imageMode = uvMapData.getImageMode();
               final int imageSize = uvMapData.getImageSize();
               final IndexColorModel colorModel = uvMapData.getColorModel();
+              final ColorScale colorScale = uvMapData.getColorScale();
 
               // update the status bar :
               StatusBar.show("computing uv map ...");
@@ -1766,12 +1824,12 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
               // Create uv map task worker :
               // Cancel other tasks and execute this new task :
 
-              new UVMapSwingWorker(this, models, uvRect,
-                      refMin, refMax, imageMode, imageSize, colorModel).executeTask();
-            } else {
-              // cancel anyway currently running UVMapSwingWorker:
-              TaskSwingWorkerExecutor.cancelTask(AsproTaskRegistry.TASK_UV_MAP);
+              new UVMapSwingWorker(this, target.getModels(), uvRect,
+                      refMin, refMax, imageMode, imageSize, colorModel, colorScale).executeTask();
             }
+          } else {
+            // cancel anyway currently running UVMapSwingWorker:
+            TaskSwingWorkerExecutor.cancelTask(AsproTaskRegistry.TASK_UV_MAP);
           }
         }
       }
@@ -1800,23 +1858,27 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     private final int imageSize;
     /** image color model */
     private final IndexColorModel colorModel;
+    /** color scaling method */
+    private final ColorScale colorScale;
 
     /**
      * Hidden constructor
      *
      * @param uvPanel observability panel
      * @param models list of models to use
-     * @param uvRect UV frequency area in rad-1
+     * @param uvRect expected UV frequency area in rad-1
      * @param refMin minimum reference double value used only for sub images
      * @param refMax maximum reference double value used only for sub images
      * @param imageMode image mode (amplitude or phase)
-     * @param imageSize number of pixels for both width and height of the generated image
+     * @param imageSize expected number of pixels for both width and height of the generated image
      * @param colorModel color model to use
+     * @param colorScale color scaling method
      */
     private UVMapSwingWorker(final UVCoveragePanel uvPanel, final List<Model> models,
             final Rectangle2D.Double uvRect,
             final Float refMin, final Float refMax,
-            final ImageMode imageMode, final int imageSize, final IndexColorModel colorModel) {
+            final ImageMode imageMode, final int imageSize,
+            final IndexColorModel colorModel, final ColorScale colorScale) {
       super(AsproTaskRegistry.TASK_UV_MAP);
       this.uvPanel = uvPanel;
       this.models = models;
@@ -1826,6 +1888,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       this.imageMode = imageMode;
       this.imageSize = imageSize;
       this.colorModel = colorModel;
+      this.colorScale = colorScale;
     }
 
     /**
@@ -1837,9 +1900,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     public UVMapData computeInBackground() {
       logger.debug("Computing model image ...");
       try {
-        // compute the uv map data :
-        return ModelUVMapService.computeUVMap(
-                this.models, this.uvRect, this.refMin, this.refMax, this.imageMode, this.imageSize, this.colorModel);
+        // compute anyway the uv map data :
+        return ModelUVMapService.computeUVMap(this.models,
+                this.uvRect, this.refMin, this.refMax, null, this.imageMode, this.imageSize, this.colorModel, this.colorScale);
 
       } catch (InterruptedJobException ije) {
         logger.debug("Computing model image interrupted: ", ije);
@@ -1886,11 +1949,11 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
    */
   private boolean computeSubUVMap(final UVMapData uvMapData, final Rectangle2D.Double uvRect) {
     boolean doCrop = false;
-    
-    final int imageSize = uvMapData.getImageSize();
+
+    final int imageSize = uvMapData.getUvMapSize();
 
     // uv area reference :
-    final Rectangle2D.Double uvRectRef = uvMapData.getUvRect();
+    final Rectangle2D.Double uvRectRef = uvMapData.getUvMapRect();
 
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("uv map rect     = " + uvRect);
@@ -1914,10 +1977,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     y = checkBounds(y, 0, imageSize - 1);
     w = checkBounds(w, 1, imageSize - x);
     h = checkBounds(h, 1, imageSize - y);
-    
-    doCrop = ((x != 0) || (y != 0)
-            || (w != imageSize)
-            || (h != imageSize));
+
+    doCrop = ((x != 0) || (y != 0) || (w != imageSize) || (h != imageSize));
 
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("sub uvMap [" + x + ", " + y + " - " + w + ", " + h + "] - doCrop = " + doCrop);
@@ -1928,9 +1989,11 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     // check reset zoom to avoid computing sub image == ref image:
     final Image subUVMap = (doCrop) ? uvMapData.getUvMap().getSubimage(x, y, w, h) : uvMapData.getUvMap();
 
+    // TODO: adjust axis bounds to exact viewed rectangle (i.e. avoid rounding errors) !!
+
     // update the background image :
     updateUVMap(subUVMap);
-    
+
     return doCrop;
   }
 
@@ -1961,27 +2024,32 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       this.chart.removeSubtitle(mapLegend);
     }
 
-    if (uvMapData != null) {
+    if (uvMapData != null && uvMapData.getUvMap() != null) {
+      final double min = uvMapData.getMin();
+      final double max = uvMapData.getMax();
+      final IndexColorModel colorModel = uvMapData.getColorModel();
+      final ColorScale colorScale = uvMapData.getColorScale();
+
       final NumberAxis uvMapAxis;
-      if (uvMapData.getColorScale() == ColorScale.LINEAR) {
+      if (colorScale == ColorScale.LINEAR) {
         uvMapAxis = new NumberAxis();
+        mapLegend = new PaintScaleLegend(new ColorModelPaintScale(min, max, colorModel, colorScale), uvMapAxis);
       } else {
         uvMapAxis = new LogarithmicAxis(null);
+        ((LogarithmicAxis) uvMapAxis).setExpTickLabelsFlag(true);
+        mapLegend = new PaintLogScaleLegend(new ColorModelPaintScale(min, max, colorModel, colorScale), uvMapAxis);
       }
-      
-      uvMapAxis.setTickLabelFont(ChartUtils.DEFAULT_FONT);
 
-      mapLegend = (uvMapData.getColorScale() == ColorScale.LINEAR) ? 
-              new PaintScaleLegend(new ColorModelPaintScale(uvMapData.getMin(), uvMapData.getMax(), uvMapData.getColorModel(), uvMapData.getColorScale()), uvMapAxis) :
-              new PaintLogScaleLegend(new ColorModelPaintScale(uvMapData.getMin(), uvMapData.getMax(), uvMapData.getColorModel(), uvMapData.getColorScale()), uvMapAxis);
-      
+      uvMapAxis.setTickLabelFont(ChartUtils.DEFAULT_FONT);
+      uvMapAxis.setAxisLinePaint(Color.BLACK);
+      uvMapAxis.setTickMarkPaint(Color.BLACK);
+
       mapLegend.setPosition(RectangleEdge.LEFT);
       mapLegend.setStripWidth(15d);
       mapLegend.setStripOutlinePaint(Color.BLACK);
       mapLegend.setStripOutlineVisible(true);
-      mapLegend.setSubdivisionCount(uvMapData.getColorModel().getMapSize());
+      mapLegend.setSubdivisionCount(colorModel.getMapSize());
       mapLegend.setAxisLocation(AxisLocation.BOTTOM_OR_LEFT);
-      mapLegend.setAxisOffset(5d);
       mapLegend.setFrame(new BlockBorder(Color.BLACK));
       mapLegend.setMargin(1d, 1d, 1d, 1d);
       mapLegend.setPadding(10d, 10d, 10d, 10d);
@@ -2012,8 +2080,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
   /**
    * Update the datasets
    * @param chartData chart data
+   * @param uvMapData optional uvMap data
    */
-  private void updateChart(final ObservationCollectionUVData chartData) {
+  private void updateChart(final ObservationCollectionUVData chartData, final UVMapData uvMapData) {
 
     // renderer :
     final AbstractRenderer renderer = (AbstractRenderer) this.xyPlot.getRenderer();
@@ -2028,8 +2097,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     this.updateUVTracks(dataset, chartData);
     this.updateUVTracksRiseSet(dataset, chartData);
 
-    // define bounds to the uv maximum value (before setDataset) :
-    final double boxSize = toUVPlotScale(chartData.getFirstUVData().getUvMax());
+    // define bounds to the uv maximum value (before setDataset which calls restoreAxisBounds()) :
+    final double boxSize = toUVPlotScale((uvMapData != null) ? -uvMapData.getUvMapRect().getMinX() : chartData.getFirstUVData().getUvMax());
     this.xyPlot.defineBounds(boxSize);
 
     // set the main data set :
