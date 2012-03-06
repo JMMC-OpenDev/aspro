@@ -10,6 +10,7 @@ import fr.jmmc.aspro.gui.action.ExportPDFAction;
 import fr.jmmc.aspro.gui.chart.ChartUtils;
 import fr.jmmc.aspro.gui.chart.ColorModelPaintScale;
 import fr.jmmc.aspro.gui.chart.PDFOptions;
+import fr.jmmc.aspro.gui.chart.PaintLogScaleLegend;
 import fr.jmmc.aspro.gui.chart.SquareChartPanel;
 import fr.jmmc.aspro.gui.chart.SquareXYPlot;
 import fr.jmmc.aspro.gui.chart.ZoomEvent;
@@ -19,7 +20,7 @@ import fr.jmmc.jmcs.gui.StatusBar;
 import fr.jmmc.jmcs.gui.task.TaskSwingWorker;
 import fr.jmmc.jmal.image.ColorModels;
 import fr.jmmc.jmal.image.ImageUtils;
-import fr.jmmc.jmal.image.ImageUtils.ColorScale;
+import fr.jmmc.jmal.image.ColorScale;
 import fr.jmmc.jmcs.gui.task.Task;
 import fr.jmmc.oitools.image.FitsImage;
 import java.awt.Color;
@@ -36,6 +37,7 @@ import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.annotations.XYTextAnnotation;
 import org.jfree.chart.axis.AxisLocation;
+import org.jfree.chart.axis.LogarithmicAxis;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.block.BlockBorder;
@@ -108,7 +110,6 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
   @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
-        java.awt.GridBagConstraints gridBagConstraints;
 
         setLayout(new java.awt.BorderLayout());
     }// </editor-fold>//GEN-END:initComponents
@@ -165,7 +166,7 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
    */
   private void postInit() {
 
-    this.chart = ChartUtils.createSquareXYLineChart("RA (rad)", "DEC (rad)", false);
+    this.chart = ChartUtils.createSquareXYLineChart(null, null, false);
     this.chart.setPadding(new RectangleInsets(0d, 0d, 0d, 10d));
 
     this.xyPlot = (SquareXYPlot) this.chart.getPlot();
@@ -231,8 +232,10 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
     }
 
     final IndexColorModel colorModel = ColorModels.getColorModel(this.myPreferences.getPreference(Preferences.MODEL_IMAGE_LUT));
+    final ColorScale colorScale = this.myPreferences.getImageColorScale();
 
-    if (getChartData() != null && getChartData().getColorModel() != colorModel) {
+    if (getChartData() != null
+            && (getChartData().getColorModel() != colorModel || getChartData().getColorScale() != colorScale)) {
       this.plot();
     }
   }
@@ -260,13 +263,14 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
 
       // Use model image Preferences :
       final IndexColorModel colorModel = ColorModels.getColorModel(this.myPreferences.getPreference(Preferences.MODEL_IMAGE_LUT));
+      final ColorScale colorScale = this.myPreferences.getImageColorScale();
 
       // update the status bar :
       StatusBar.show("computing image ...");
 
       // Create image convert task worker :
       // Cancel other tasks and execute this new task :
-      new ConvertFitsImageSwingWorker(this, this.fitsImage, colorModel).executeTask();
+      new ConvertFitsImageSwingWorker(this, this.fitsImage, colorModel, colorScale).executeTask();
     }
   }
 
@@ -282,6 +286,8 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
     private final FitsImage fitsImage;
     /** image color model */
     private final IndexColorModel colorModel;
+    /** color scaling method */
+    private final ColorScale colorScale;
 
     /**
      * Hidden constructor
@@ -289,13 +295,16 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
      * @param fitsPanel fits panel
      * @param fitsImage fits image
      * @param colorModel color model to use
+     * @param colorScale color scaling method
      */
-    private ConvertFitsImageSwingWorker(final FitsImagePanel fitsPanel, final FitsImage fitsImage, final IndexColorModel colorModel) {
+    private ConvertFitsImageSwingWorker(final FitsImagePanel fitsPanel, final FitsImage fitsImage,
+            final IndexColorModel colorModel, final ColorScale colorScale) {
       // get current observation version :
       super(fitsPanel.task);
       this.fitsPanel = fitsPanel;
       this.fitsImage = fitsImage;
       this.colorModel = colorModel;
+      this.colorScale = colorScale;
     }
 
     /**
@@ -309,9 +318,21 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
       // Start the computations :
       final long start = System.nanoTime();
 
+      final float dataMin = (float) this.fitsImage.getDataMin();
+      final float dataMax = (float) this.fitsImage.getDataMax();
+
+      final ColorScale usedColorScale;
+      if (colorScale == ColorScale.LOGARITHMIC
+              && (dataMin <= 0f || dataMax <= 0f || dataMin == dataMax || Float.isInfinite(dataMin) || Float.isInfinite(dataMax))) {
+        usedColorScale = ColorScale.LINEAR;
+      } else {
+        usedColorScale = colorScale;
+      }
+
       // throws InterruptedJobException if the current thread is interrupted (cancelled):
       final BufferedImage image = ImageUtils.createImage(this.fitsImage.getNbCols(), this.fitsImage.getNbRows(),
-              this.fitsImage.getData(), (float) this.fitsImage.getDataMin(), (float) this.fitsImage.getDataMax(), colorModel);
+              this.fitsImage.getData(), dataMin, dataMax,
+              this.colorModel, usedColorScale);
 
       // fast interrupt :
       if (Thread.currentThread().isInterrupted()) {
@@ -322,7 +343,7 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
         logger.info("compute : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
       }
 
-      return new ImageChartData(fitsImage, colorModel, image);
+      return new ImageChartData(fitsImage, colorModel, usedColorScale, image);
     }
 
     /**
@@ -407,8 +428,8 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
     // title :
     ChartUtils.clearTextSubTitle(this.chart);
 
-    if (imageData.getFitsImage().getFitsImageFile() != null) {
-      ChartUtils.addSubtitle(this.chart, "File: " + imageData.getFitsImage().getFitsImageFile().getAbsoluteFilePath());
+    if (imageData.getFitsImage().getFitsImageIdentifier() != null) {
+      ChartUtils.addSubtitle(this.chart, "Id: " + imageData.getFitsImage().getFitsImageIdentifier());
     }
 
     // define axis boundaries:
@@ -557,19 +578,32 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
 
     if (imageData != null) {
       final FitsImage lFitsImage = imageData.getFitsImage();
+
+      final double min = lFitsImage.getDataMin();
+      final double max = lFitsImage.getDataMax();
       final IndexColorModel colorModel = imageData.getColorModel();
+      final ColorScale colorScale = imageData.getColorScale();
 
-      final NumberAxis imageAxis = new NumberAxis();
-      imageAxis.setTickLabelFont(ChartUtils.DEFAULT_FONT);
+      final NumberAxis uvMapAxis;
+      if (colorScale == ColorScale.LINEAR) {
+        uvMapAxis = new NumberAxis();
+        mapLegend = new PaintScaleLegend(new ColorModelPaintScale(min, max, colorModel, colorScale), uvMapAxis);
+      } else {
+        uvMapAxis = new LogarithmicAxis(null);
+        ((LogarithmicAxis) uvMapAxis).setExpTickLabelsFlag(true);
+        mapLegend = new PaintLogScaleLegend(new ColorModelPaintScale(min, max, colorModel, colorScale), uvMapAxis);
+      }
 
-      mapLegend = new PaintScaleLegend(new ColorModelPaintScale(lFitsImage.getDataMin(), lFitsImage.getDataMax(), colorModel, ColorScale.LINEAR), imageAxis);
+      uvMapAxis.setTickLabelFont(ChartUtils.DEFAULT_FONT);
+      uvMapAxis.setAxisLinePaint(Color.BLACK);
+      uvMapAxis.setTickMarkPaint(Color.BLACK);
+
       mapLegend.setPosition(RectangleEdge.LEFT);
       mapLegend.setStripWidth(15d);
       mapLegend.setStripOutlinePaint(Color.BLACK);
       mapLegend.setStripOutlineVisible(true);
       mapLegend.setSubdivisionCount(colorModel.getMapSize());
       mapLegend.setAxisLocation(AxisLocation.BOTTOM_OR_LEFT);
-      mapLegend.setAxisOffset(5d);
       mapLegend.setFrame(new BlockBorder(Color.BLACK));
       mapLegend.setMargin(1d, 1d, 1d, 1d);
       mapLegend.setPadding(10d, 10d, 10d, 10d);
@@ -637,16 +671,21 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
     private final IndexColorModel colorModel;
     /** java2D image */
     private final BufferedImage image;
+    /** color scaling method */
+    private final ColorScale colorScale;
 
     /**
      * Protected constructor
      * @param fitsImage fits image
      * @param colorModel image color model
+     * @param colorScale color scaling method
      * @param image java2D image 
      */
-    ImageChartData(final FitsImage fitsImage, final IndexColorModel colorModel, final BufferedImage image) {
+    ImageChartData(final FitsImage fitsImage, final IndexColorModel colorModel, final ColorScale colorScale,
+            final BufferedImage image) {
       this.fitsImage = fitsImage;
       this.colorModel = colorModel;
+      this.colorScale = colorScale;
       this.image = image;
     }
 
@@ -654,7 +693,7 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
      * Return the fits image
      * @return fits image
      */
-    public FitsImage getFitsImage() {
+    FitsImage getFitsImage() {
       return fitsImage;
     }
 
@@ -662,15 +701,23 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
      * Return the image color model
      * @return image color model
      */
-    public IndexColorModel getColorModel() {
+    IndexColorModel getColorModel() {
       return colorModel;
+    }
+
+    /**
+     * Return the color scaling method
+     * @return color scaling method
+     */
+    ColorScale getColorScale() {
+      return colorScale;
     }
 
     /**
      * Return the java2D image
      * @return java2D image
      */
-    public BufferedImage getImage() {
+    BufferedImage getImage() {
       return image;
     }
   }
