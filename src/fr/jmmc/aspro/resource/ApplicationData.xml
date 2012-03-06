@@ -7,8 +7,9 @@
 
 <ApplicationData link="http://www.jmmc.fr/aspro2">
 
-  <program name="Aspro2" version="0.8.2 beta 10"/>
-  <compilation date="01/02/2011" compiler="JDK 1.5.0_16"/>
+  <program name="Aspro2" version="0.8.2 beta 11"/>
+  
+  <compilation date="06/03/2011" compiler="JDK 1.5.0_16"/>
 
   <text>
     <![CDATA[ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations
@@ -16,6 +17,10 @@
     This observation preparation tool is developed and maintained by the JMMC.
     ]]>
   </text>
+
+  <jnlp>http://apps.jmmc.fr/~swmgr/Aspro2/Aspro2.jnlp</jnlp>
+
+  <sampdescription>Prepare your interferometric observations with the VLTI or other interferometers</sampdescription>
 
   <dependences>
 
@@ -137,6 +142,12 @@
 
   <releasenotes>
     <release version="0.8.2">
+      <prerelease version="0.8.2 beta 11"> 
+        <change type="FEATURE">Added ESO P90 configuration</change> 
+        <change type="FEATURE">Added the Color scale legend on the UV Coverage plot</change> 
+        <change type="FEATURE">Added the Color scale (linear or logarithmic) preference to represent the model image amplitude</change> 
+        <change type="CHANGE">Updated spectral configurations for CHARA VEGA instrument (CAMERA=R)</change>
+      </prerelease>       
       <prerelease version="0.8.2 beta 10">
         <change type="CHANGE">Updated spectral configurations for CHARA VEGA instrument: spectral channels (binning)</change>
         <change type="CHANGE">Updated StarList export for the CHARA VEGA instrument: added vega setup and spectral calibration OB</change>
