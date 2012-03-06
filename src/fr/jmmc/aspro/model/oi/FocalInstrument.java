@@ -392,12 +392,70 @@ public class FocalInstrument
     }
     
 //--simple--preserve
+  /** lower wave length of this instrument (micrometer) */
+  @javax.xml.bind.annotation.XmlTransient
+  protected double waveLengthMin;
 
-    @Override
-    public final String toString() {
-      return "FocalInstrument [" + ((this.name != null) ? this.name : "undefined") + "]";
+  /**
+   * Return the lower wave length of this instrument (micrometer)
+   * @return lower wave length of this instrument (micrometer)
+   */
+  public final double getWaveLengthMin() {
+    return waveLengthMin;
+  }
+
+  /**
+   * Define the lower wave length of this instrument (micrometer)
+   * @param waveLengthMin lower wave length of this instrument (micrometer)
+   */
+  private final void setWaveLengthMin(final double waveLengthMin) {
+    this.waveLengthMin = waveLengthMin;
+  }
+  /** upper wave length of this instrument (micrometer) */
+  @javax.xml.bind.annotation.XmlTransient
+  protected double waveLengthMax;
+
+  /**
+   * Return the upper wave length of this instrument (micrometer)
+   * @return upper wave length of this instrument (micrometer)
+   */
+  public final double getWaveLengthMax() {
+    return waveLengthMax;
+  }
+
+  /**
+   * Define the upper wave length of this instrument (micrometer)
+   * @param waveLengthMax upper wave length of this instrument (micrometer)
+   */
+  private final void setWaveLengthMax(final double waveLengthMax) {
+    this.waveLengthMax = waveLengthMax;
+  }
+  
+  /**
+   * Define the instrument wavelength range
+   */
+  public void defineWaveLengthRange() {
+    double min = Double.POSITIVE_INFINITY;
+    double max = Double.NEGATIVE_INFINITY;
+    
+    for (FocalInstrumentMode mode : getModes()) {
+      if (mode.getWaveLengthMin() < min) {
+        min = mode.getWaveLengthMin();
+      }
+      if (mode.getWaveLengthMax() > max) {
+        max = mode.getWaveLengthMax();
+      }
     }
+    
+    setWaveLengthMin(min);
+    setWaveLengthMax(max);
+  }
 
+
+  @Override
+  public final String toString() {
+    return "FocalInstrument [" + ((this.name != null) ? this.name : "undefined") + "]";
+  }
 //--simple--preserve
 
 }

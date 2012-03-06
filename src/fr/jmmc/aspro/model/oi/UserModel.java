@@ -10,7 +10,7 @@ import fr.jmmc.aspro.model.OIBase;
 
 /**
  * 
- *         This type describes an user model (fits image or cube).
+ *         This type describes an user model (FITS image or cube).
  *       
  * 
  * <p>Java class for UserModel complex type.
@@ -139,5 +139,64 @@ public class UserModel
     public void setChecksum(long value) {
         this.checksum = value;
     }
+    
+//--simple--preserve
+  /** flag indicating that the file reference is valid (readable) */
+  @javax.xml.bind.annotation.XmlTransient
+  private boolean fileValid = false;
+
+  /**
+   * Return the true if the file reference is valid (readable)
+   * @return true if the file reference is valid (readable)
+   */
+  public final boolean isFileValid() {
+    return this.fileValid;
+  }
+
+  /**
+   * Return the true if the file reference is valid (readable)
+   * @param valid true if the file reference is valid (readable)
+   */
+  public final void setFileValid(final boolean valid) {
+    this.fileValid = valid;
+  }
+  
+  /** Cached FFT ready fits image corresponding to the file reference (read only) */
+  @javax.xml.bind.annotation.XmlTransient
+  private fr.jmmc.oitools.image.FitsImage fitsImage = null;
+  
+  /**
+   * Return the Cached FFT ready fits image corresponding to the file reference (read only)
+   * @return Cached FFT ready fits image corresponding to the file reference (read only)
+   */
+  public fr.jmmc.oitools.image.FitsImage getFitsImage() {
+    return fitsImage;
+  }
+
+  /**
+   * Define the Cached FFT ready fits image corresponding to the file reference (read only)
+   * @param fitsImage Cached FFT ready fits image corresponding to the file reference (read only)
+   */
+  public void setFitsImage(final fr.jmmc.oitools.image.FitsImage fitsImage) {
+    this.fitsImage = fitsImage;
+  }
+
+  /**
+   * Return a deep "copy" of this instance
+   * @return deep "copy" of this instance
+   */
+  @Override
+  public final Object clone() {
+    final UserModel copy = (UserModel) super.clone();
+
+    // Clear fits image:
+    if (copy.getFitsImage() != null) {
+      copy.setFitsImage(null);
+    }
+
+    return copy;
+  }
+  
+//--simple--preserve
 
 }

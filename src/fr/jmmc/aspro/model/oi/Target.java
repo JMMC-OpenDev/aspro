@@ -1019,16 +1019,25 @@ public class Target
 
     return copy;
   }
+
+  /**
+   * Return true if the model is an analytical model; false an user model
+   * @return true if the model is an analytical model; false an user model 
+   */
+  public final boolean hasAnalyticalModel() {
+    return (useAnalyticalModel == null) ? true : useAnalyticalModel.booleanValue();
+  }
   
   /**
    * Return true if this target has one model (analytical models or an user model)
    * @return true if this target has one model 
    */
   public final boolean hasModel() {
-    if (models != null && !models.isEmpty()) {
-      return true;
+    if (hasAnalyticalModel()) {
+      return (models != null && !models.isEmpty());
+    } else {
+      return (userModel != null && userModel.isFileValid());
     }
-    return userModel != null;
   }
 
   /* static helper methods */

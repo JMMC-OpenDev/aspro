@@ -712,7 +712,7 @@
       <xsd:element name="userModel" type="UserModel" minOccurs="0">
         <xsd:annotation>
           <xsd:documentation>
-              Optional user model (fits image or cube)
+              Optional user model (FITS image or cube)
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
@@ -755,7 +755,7 @@
   <xsd:complexType name="UserModel">
     <xsd:annotation>
       <xsd:documentation>
-        This type describes an user model (fits image or cube).
+        This type describes an user model (FITS image or cube).
       </xsd:documentation>
     </xsd:annotation>
 
