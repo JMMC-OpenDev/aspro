@@ -132,6 +132,7 @@ public final class ConfigurationManager extends BaseOIManager {
     }
 
     computeInterferometerLocation(id);
+    computeInstrumentWaveLengthRange(id);
 
     adjustStationHorizons(id.getStations());
 
@@ -141,7 +142,7 @@ public final class ConfigurationManager extends BaseOIManager {
       interferometerConfigurations.put(getConfigurationName(c), c);
 
       computeBaselineUVWBounds(c);
-      
+
       // reverse mapping :
       // declare interferometer configurations in the interferometer description
       is.getDescription().getConfigurations().add(c);
@@ -164,6 +165,21 @@ public final class ConfigurationManager extends BaseOIManager {
   }
 
   /**
+   * Compute the lower and upper wave length of every instrument
+   * @param id interferometer description
+   */
+  private void computeInstrumentWaveLengthRange(final InterferometerDescription id) {
+    for (FocalInstrument instrument : id.getFocalInstruments()) {
+      instrument.defineWaveLengthRange();
+
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("Instrument [" + instrument.getName() + "] - wavelengths ["
+                + instrument.getWaveLengthMin() + " - " + instrument.getWaveLengthMax() + "] microns");
+      }
+    }
+  }
+
+  /**
    * Compute the min and max baseline length (m) using all instrument baselines of the given interferometer configuration
    * @param intConf interferometer configuration
    */
@@ -171,26 +187,26 @@ public final class ConfigurationManager extends BaseOIManager {
 
     double maxUV = 0d;
     double minUV = Double.POSITIVE_INFINITY;
-    
+
     final double[] minMax = new double[2];
-    
+
     // for each instrument:
     for (FocalInstrumentConfiguration insConf : intConf.getInstruments()) {
-      
+
       // for each instrument configuration:
       for (FocalInstrumentConfigurationItem c : insConf.getConfigurations()) {
 
-          computeBaselineUVWBounds(c.getStations(), minMax);
+        computeBaselineUVWBounds(c.getStations(), minMax);
 
-          minUV = Math.min(minUV, minMax[0]);
-          maxUV = Math.max(maxUV, minMax[1]);
+        minUV = Math.min(minUV, minMax[0]);
+        maxUV = Math.max(maxUV, minMax[1]);
       }
     }
-    
+
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("computeBaselineUVWBounds = {" + minUV + " - " + maxUV + " m for configuration " + intConf.getName());
     }
-    
+
     intConf.setMinBaseLine(minUV);
     intConf.setMaxBaseLine(maxUV);
   }
@@ -203,12 +219,12 @@ public final class ConfigurationManager extends BaseOIManager {
    */
   public static double[] computeBaselineUVBounds(final List<Station> stations) {
     final double[] minMax = new double[2];
-    
+
     computeBaselineUVBounds(stations, minMax);
-    
+
     return minMax;
   }
-  
+
   /**
    * Compute the min and max baseline length (XY distance i.e. projected in the UV plane) using all possible baselines
    * for given stations
@@ -237,15 +253,15 @@ public final class ConfigurationManager extends BaseOIManager {
         maxUV = Math.max(maxUV, distXY);
       }
     }
-    
+
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("computeBaselineUVBounds = {" + minUV + " - " + maxUV + " m for stations " + stations);
     }
-    
+
     minMax[0] = minUV;
     minMax[1] = maxUV;
   }
-  
+
   /**
    * Compute the min and max baseline vector length (UVW) using all possible baselines
    * for given stations
@@ -275,11 +291,11 @@ public final class ConfigurationManager extends BaseOIManager {
         maxUV = Math.max(maxUV, distXYZ);
       }
     }
-    
+
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("computeBaselineUVWBounds = {" + minUV + " - " + maxUV + " m for stations " + stations);
     }
-    
+
     minMax[0] = minUV;
     minMax[1] = maxUV;
   }
@@ -589,7 +605,7 @@ public final class ConfigurationManager extends BaseOIManager {
     }
     return null;
   }
-  
+
   /**
    * Return the default sampling time for the given interferometer configuration and instrument name
    * @param configurationName name of the interferometer configuration
