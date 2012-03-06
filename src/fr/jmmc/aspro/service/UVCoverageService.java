@@ -61,11 +61,13 @@ public final class UVCoverageService {
   private final Thread currentThread = Thread.currentThread();
   /** hour angle step (see samplingPeriod) */
   private double haStep;
-  /** minimal wavelength */
+  /** lower wavelength of the selected instrument (meter) */
+  private double instrumentMinWaveLength;
+  /** minimal wavelength of the selected instrument mode (meter) */
   private double lambdaMin;
-  /** central wavelength */
+  /** central wavelength of the selected instrument mode (meter) */
   private double lambda;
-  /** maximal wavelength */
+  /** maximal wavelength of the selected instrument mode (meter) */
   private double lambdaMax;
   /** number of spectral channels (used by OIFits) */
   private int nSpectralChannels;
@@ -131,7 +133,7 @@ public final class UVCoverageService {
       // target name :
       this.data.setTargetName(this.targetName);
 
-      // wave length :
+      // central wave length :
       this.data.setLambda(this.lambda);
 
       // Is the target visible :
@@ -456,6 +458,10 @@ public final class UVCoverageService {
       logger.fine("starData : " + this.starData);
     }
 
+    // Get lower wavelength for the selected instrument:
+    this.instrumentMinWaveLength = AsproConstants.MICRO_METER * 
+            this.observation.getInstrumentConfiguration().getInstrumentConfiguration().getFocalInstrument().getWaveLengthMin();
+    
     final FocalInstrumentMode insMode = this.observation.getInstrumentConfiguration().getFocalInstrumentMode();
     if (insMode == null) {
       throw new IllegalStateException("the instrumentMode is empty !");
@@ -464,10 +470,12 @@ public final class UVCoverageService {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("instrumentMode : " + insMode.getName());
     }
-
-    this.lambdaMin = insMode.getWaveLengthMin() * AsproConstants.MICRO_METER;
-    this.lambdaMax = insMode.getWaveLengthMax() * AsproConstants.MICRO_METER;
-    this.lambda = insMode.getWaveLength() * AsproConstants.MICRO_METER;
+    
+    // Get wavelength range for the selected instrument mode :
+    this.lambdaMin = AsproConstants.MICRO_METER * insMode.getWaveLengthMin();
+    this.lambdaMax = AsproConstants.MICRO_METER * insMode.getWaveLengthMax();
+    this.lambda = AsproConstants.MICRO_METER * insMode.getWaveLength();
+    
     this.nSpectralChannels = insMode.getEffectiveNumberOfChannels();
 
     if (logger.isLoggable(Level.FINE)) {
@@ -500,12 +508,13 @@ public final class UVCoverageService {
     }
 
     // Adjust the user uv Max = max base line / minimum wave length
-    // note : use the minimum wave length to make all uv segment visible :
-
-    this.uvMax = Math.round(this.uvMax / this.lambdaMin);
+    // note : use the minimum wave length of the instrument to 
+    // - make all uv segment visible
+    // - avoid to much model computations (when the instrument mode changes)
+    this.uvMax /= this.instrumentMinWaveLength;
 
     if (logger.isLoggable(Level.FINE)) {
-      logger.fine("uvMax : " + this.uvMax);
+      logger.fine("Corrected uvMax : " + this.uvMax);
     }
   }
 
