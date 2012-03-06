@@ -7,9 +7,9 @@
 
 <ApplicationData link="http://www.jmmc.fr/aspro2">
 
-  <program name="Aspro2" version="0.8.1"/>
+  <program name="Aspro2" version="0.8.1.2"/>
 
-  <compilation date="14/09/2011" compiler="JDK 1.5.0_16"/>
+  <compilation date="06/03/2012" compiler="JDK 1.5.0_16"/>
 
   <text>
     <![CDATA[ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations
@@ -205,6 +205,9 @@
 
   <releasenotes>
     <release version="0.8.1">
+      <prerelease version="0.8.1.2">
+        <change type="FEATURE">Added ESO P90 configuration</change>
+      </prerelease>
       <prerelease version="0.8.1">
         <change type="BUGFIX">Corrected effective wavelength in OIFits output (channel center)</change>
         <change type="FEATURE">Corrected AMBER noise parameters: visibility and phase bias set to 5% and 3 deg respectively</change>
