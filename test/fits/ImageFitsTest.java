@@ -92,11 +92,7 @@ public class ImageFitsTest {
 
       try {
         // load and prepare images:
-        FitsImageFile imgFitsFile = UserModelService.prepareFitsFile(file);
-
-        logger.info("loaded FitsImageFile: " + imgFitsFile);
-
-        FitsImage fitsImage = imgFitsFile.getFirstFitsImage();
+        FitsImage fitsImage = UserModelService.prepareFitsFile(file);
 
         logger.info("Prepared FitsImage: " + fitsImage.toString(false));
 
@@ -182,6 +178,9 @@ public class ImageFitsTest {
 
         logger.info("writing: " + file);
 
+        FitsImageFile imgFitsFile = new FitsImageFile();
+        imgFitsFile.getFitsImages().add(fitsImage);
+        
         FitsImageWriter.write(file, imgFitsFile);
 
 //        file = "/home/bourgesl/ASPRO2/fits/SG_surface2.fits";
