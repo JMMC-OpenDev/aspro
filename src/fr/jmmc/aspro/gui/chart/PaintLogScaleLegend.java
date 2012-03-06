@@ -42,7 +42,7 @@ public class PaintLogScaleLegend extends PaintScaleLegend {
    * @return <code>null</code>.
    */
   @Override
-  public Object draw(Graphics2D g2, Rectangle2D area, Object params) {
+  public Object draw(final Graphics2D g2, final Rectangle2D area, final Object params) {
 
     Rectangle2D target = (Rectangle2D) area.clone();
     target = trimMargin(target);
@@ -60,7 +60,7 @@ public class PaintLogScaleLegend extends PaintScaleLegend {
     // LAURENT: convert to 10^increment instead of linear scale:
     final double base = Math.log10(getAxis().getLowerBound());
     final double increment = (Math.log10(getAxis().getUpperBound()) - base) / subdivisions;
-    
+
     Rectangle2D r = new Rectangle2D.Double();
 
     if (RectangleEdge.isTopOrBottom(getPosition())) {
@@ -68,11 +68,12 @@ public class PaintLogScaleLegend extends PaintScaleLegend {
               this.getAxisLocation(), PlotOrientation.HORIZONTAL);
       if (axisEdge == RectangleEdge.TOP) {
         for (int i = 0; i < subdivisions; i++) {
-          double v = Math.pow(10d, base + (i * increment));
-          Paint p = this.getScale().getPaint(v);
-          double vv0 = getAxis().valueToJava2D(v, target, RectangleEdge.TOP);
-          double vv1 = getAxis().valueToJava2D(v + increment, target, RectangleEdge.TOP);
-          double ww = Math.abs(vv1 - vv0) + 1.0;
+          final double v0 = Math.pow(10d, base + (i * increment));
+          final double v1 = Math.pow(10d, base + ((i + 1) * increment));
+          final Paint p = this.getScale().getPaint(v0);
+          final double vv0 = getAxis().valueToJava2D(v0, target, RectangleEdge.TOP);
+          final double vv1 = getAxis().valueToJava2D(v1, target, RectangleEdge.TOP);
+          final double ww = Math.abs(vv1 - vv0) + 1.0;
           r.setRect(Math.min(vv0, vv1), target.getMaxY() - stripWidth, ww, stripWidth);
           g2.setPaint(p);
           g2.fill(r);
@@ -86,11 +87,12 @@ public class PaintLogScaleLegend extends PaintScaleLegend {
 
       } else if (axisEdge == RectangleEdge.BOTTOM) {
         for (int i = 0; i < subdivisions; i++) {
-          double v = Math.pow(10d, base + (i * increment));
-          Paint p = this.getScale().getPaint(v);
-          double vv0 = getAxis().valueToJava2D(v, target, RectangleEdge.BOTTOM);
-          double vv1 = getAxis().valueToJava2D(v + increment, target, RectangleEdge.BOTTOM);
-          double ww = Math.abs(vv1 - vv0) + 1.0;
+          final double v0 = Math.pow(10d, base + (i * increment));
+          final double v1 = Math.pow(10d, base + ((i + 1) * increment));
+          final Paint p = this.getScale().getPaint(v0);
+          final double vv0 = getAxis().valueToJava2D(v0, target, RectangleEdge.BOTTOM);
+          final double vv1 = getAxis().valueToJava2D(v1, target, RectangleEdge.BOTTOM);
+          final double ww = Math.abs(vv1 - vv0) + 1.0;
           r.setRect(Math.min(vv0, vv1), target.getMinY(), ww, stripWidth);
           g2.setPaint(p);
           g2.fill(r);
@@ -107,11 +109,12 @@ public class PaintLogScaleLegend extends PaintScaleLegend {
               this.getAxisLocation(), PlotOrientation.VERTICAL);
       if (axisEdge == RectangleEdge.LEFT) {
         for (int i = 0; i < subdivisions; i++) {
-          double v = Math.pow(10d, base + (i * increment));
-          Paint p = this.getScale().getPaint(v);
-          double vv0 = getAxis().valueToJava2D(v, target, RectangleEdge.LEFT);
-          double vv1 = getAxis().valueToJava2D(v + increment, target, RectangleEdge.LEFT);
-          double hh = Math.abs(vv1 - vv0) + 1.0;
+          final double v0 = Math.pow(10d, base + (i * increment));
+          final double v1 = Math.pow(10d, base + ((i + 1) * increment));
+          final Paint p = this.getScale().getPaint(v0);
+          final double vv0 = getAxis().valueToJava2D(v0, target, RectangleEdge.LEFT);
+          final double vv1 = getAxis().valueToJava2D(v1, target, RectangleEdge.LEFT);
+          final double hh = Math.abs(vv1 - vv0) + 1.0;
           r.setRect(target.getMaxX() - stripWidth, Math.min(vv0, vv1), stripWidth, hh);
           g2.setPaint(p);
           g2.fill(r);
@@ -124,11 +127,12 @@ public class PaintLogScaleLegend extends PaintScaleLegend {
         getAxis().draw(g2, target.getMaxX() - stripWidth - this.getAxisOffset(), target, target, RectangleEdge.LEFT, null);
       } else if (axisEdge == RectangleEdge.RIGHT) {
         for (int i = 0; i < subdivisions; i++) {
-          double v = Math.pow(10d, base + (i * increment));
-          Paint p = this.getScale().getPaint(v);
-          double vv0 = getAxis().valueToJava2D(v, target, RectangleEdge.LEFT);
-          double vv1 = getAxis().valueToJava2D(v + increment, target, RectangleEdge.LEFT);
-          double hh = Math.abs(vv1 - vv0) + 1.0;
+          final double v0 = Math.pow(10d, base + (i * increment));
+          final double v1 = Math.pow(10d, base + ((i + 1) * increment));
+          final Paint p = this.getScale().getPaint(v0);
+          final double vv0 = getAxis().valueToJava2D(v0, target, RectangleEdge.RIGHT);
+          final double vv1 = getAxis().valueToJava2D(v1, target, RectangleEdge.RIGHT);
+          final double hh = Math.abs(vv1 - vv0) + 1.0;
           r.setRect(target.getMinX(), Math.min(vv0, vv1), stripWidth, hh);
           g2.setPaint(p);
           g2.fill(r);

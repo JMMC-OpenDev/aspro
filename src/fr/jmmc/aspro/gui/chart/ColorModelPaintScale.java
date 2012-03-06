@@ -4,7 +4,7 @@
 package fr.jmmc.aspro.gui.chart;
 
 import fr.jmmc.jmal.image.ImageUtils;
-import fr.jmmc.jmal.image.ImageUtils.ColorScale;
+import fr.jmmc.jmal.image.ColorScale;
 import java.awt.Color;
 import java.awt.Paint;
 import java.awt.image.IndexColorModel;
