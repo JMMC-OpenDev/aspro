@@ -1,3 +1,4 @@
+
 package fr.jmmc.aspro.model.oi;
 
 import java.util.ArrayList;
@@ -7,6 +8,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 import fr.jmmc.aspro.model.OIBase;
+
 
 /**
  * 
@@ -40,150 +42,151 @@ import fr.jmmc.aspro.model.OIBase;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "FocalInstrumentMode", propOrder = {
-  "name",
-  "resolution",
-  "numberChannels",
-  "waveLengthMin",
-  "waveLengthMax",
-  "parameters"
+    "name",
+    "resolution",
+    "numberChannels",
+    "waveLengthMin",
+    "waveLengthMax",
+    "parameters"
 })
 public class FocalInstrumentMode
-        extends OIBase {
+    extends OIBase
+{
 
-  @XmlElement(required = true)
-  protected String name;
-  protected double resolution;
-  protected Integer numberChannels;
-  protected double waveLengthMin;
-  protected double waveLengthMax;
-  @XmlElement(name = "parameter")
-  protected List<Parameter> parameters;
+    @XmlElement(required = true)
+    protected String name;
+    protected double resolution;
+    protected Integer numberChannels;
+    protected double waveLengthMin;
+    protected double waveLengthMax;
+    @XmlElement(name = "parameter")
+    protected List<Parameter> parameters;
 
-  /**
-   * Gets the value of the name property.
-   * 
-   * @return
-   *     possible object is
-   *     {@link String }
-   *     
-   */
-  public String getName() {
-    return name;
-  }
-
-  /**
-   * Sets the value of the name property.
-   * 
-   * @param value
-   *     allowed object is
-   *     {@link String }
-   *     
-   */
-  public void setName(String value) {
-    this.name = value;
-  }
-
-  /**
-   * Gets the value of the resolution property.
-   * 
-   */
-  public double getResolution() {
-    return resolution;
-  }
-
-  /**
-   * Sets the value of the resolution property.
-   * 
-   */
-  public void setResolution(double value) {
-    this.resolution = value;
-  }
-
-  /**
-   * Gets the value of the numberChannels property.
-   * 
-   * @return
-   *     possible object is
-   *     {@link Integer }
-   *     
-   */
-  public Integer getNumberChannels() {
-    return numberChannels;
-  }
-
-  /**
-   * Sets the value of the numberChannels property.
-   * 
-   * @param value
-   *     allowed object is
-   *     {@link Integer }
-   *     
-   */
-  public void setNumberChannels(Integer value) {
-    this.numberChannels = value;
-  }
-
-  /**
-   * Gets the value of the waveLengthMin property.
-   * 
-   */
-  public double getWaveLengthMin() {
-    return waveLengthMin;
-  }
-
-  /**
-   * Sets the value of the waveLengthMin property.
-   * 
-   */
-  public void setWaveLengthMin(double value) {
-    this.waveLengthMin = value;
-  }
-
-  /**
-   * Gets the value of the waveLengthMax property.
-   * 
-   */
-  public double getWaveLengthMax() {
-    return waveLengthMax;
-  }
-
-  /**
-   * Sets the value of the waveLengthMax property.
-   * 
-   */
-  public void setWaveLengthMax(double value) {
-    this.waveLengthMax = value;
-  }
-
-  /**
-   * Gets the value of the parameters property.
-   * 
-   * <p>
-   * This accessor method returns a reference to the live list,
-   * not a snapshot. Therefore any modification you make to the
-   * returned list will be present inside the JAXB object.
-   * This is why there is not a <CODE>set</CODE> method for the parameters property.
-   * 
-   * <p>
-   * For example, to add a new item, do as follows:
-   * <pre>
-   *    getParameters().add(newItem);
-   * </pre>
-   * 
-   * 
-   * <p>
-   * Objects of the following type(s) are allowed in the list
-   * {@link Parameter }
-   * 
-   * 
-   */
-  public List<Parameter> getParameters() {
-    if (parameters == null) {
-      parameters = new ArrayList<Parameter>();
+    /**
+     * Gets the value of the name property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getName() {
+        return name;
     }
-    return this.parameters;
-  }
 
+    /**
+     * Sets the value of the name property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setName(String value) {
+        this.name = value;
+    }
+
+    /**
+     * Gets the value of the resolution property.
+     * 
+     */
+    public double getResolution() {
+        return resolution;
+    }
+
+    /**
+     * Sets the value of the resolution property.
+     * 
+     */
+    public void setResolution(double value) {
+        this.resolution = value;
+    }
+
+    /**
+     * Gets the value of the numberChannels property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Integer }
+     *     
+     */
+    public Integer getNumberChannels() {
+        return numberChannels;
+    }
+
+    /**
+     * Sets the value of the numberChannels property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Integer }
+     *     
+     */
+    public void setNumberChannels(Integer value) {
+        this.numberChannels = value;
+    }
+
+    /**
+     * Gets the value of the waveLengthMin property.
+     * 
+     */
+    public double getWaveLengthMin() {
+        return waveLengthMin;
+    }
+
+    /**
+     * Sets the value of the waveLengthMin property.
+     * 
+     */
+    public void setWaveLengthMin(double value) {
+        this.waveLengthMin = value;
+    }
+
+    /**
+     * Gets the value of the waveLengthMax property.
+     * 
+     */
+    public double getWaveLengthMax() {
+        return waveLengthMax;
+    }
+
+    /**
+     * Sets the value of the waveLengthMax property.
+     * 
+     */
+    public void setWaveLengthMax(double value) {
+        this.waveLengthMax = value;
+    }
+
+    /**
+     * Gets the value of the parameters property.
+     * 
+     * <p>
+     * This accessor method returns a reference to the live list,
+     * not a snapshot. Therefore any modification you make to the
+     * returned list will be present inside the JAXB object.
+     * This is why there is not a <CODE>set</CODE> method for the parameters property.
+     * 
+     * <p>
+     * For example, to add a new item, do as follows:
+     * <pre>
+     *    getParameters().add(newItem);
+     * </pre>
+     * 
+     * 
+     * <p>
+     * Objects of the following type(s) are allowed in the list
+     * {@link Parameter }
+     * 
+     * 
+     */
+    public List<Parameter> getParameters() {
+        if (parameters == null) {
+            parameters = new ArrayList<Parameter>();
+        }
+        return this.parameters;
+    }
+    
 //--simple--preserve
   /**
    * Return the central wave length (read only)
@@ -245,4 +248,5 @@ public class FocalInstrumentMode
     return null;
   }
 //--simple--preserve
+
 }

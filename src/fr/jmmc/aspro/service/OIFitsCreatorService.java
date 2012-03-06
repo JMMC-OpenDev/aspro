@@ -173,10 +173,11 @@ public final class OIFitsCreatorService {
     // Prepare the noise service :
     this.noiseService = new NoiseService(this.observation, target, warningContainer);
 
+    // TODO: handle user model here
     // Has models ?
     final List<Model> models = this.target.getModels();
 
-    this.hasModels = (models != null && !models.isEmpty());
+    this.hasModels = (!models.isEmpty());
 
     this.errorValid = this.noiseService.isValid();
 
@@ -419,6 +420,8 @@ public final class OIFitsCreatorService {
    */
   private void computeModelVisibilities() {
 
+    // TODO: support user models here (requires FFT + interpolation)
+    
     if (this.hasModels) {
       // Clone models and normalize fluxes :
       final List<Model> normModels = ModelManager.normalizeModels(this.target.getModels());

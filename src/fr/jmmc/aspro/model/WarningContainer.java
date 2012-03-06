@@ -55,7 +55,7 @@ public final class WarningContainer {
    * @return true if there are warning messages
    */
   public boolean hasWarningMessages() {
-    return this.warningMessages != null && this.warningMessages.size() > 0;
+    return this.warningMessages != null && !this.warningMessages.isEmpty();
   }
 
   /**

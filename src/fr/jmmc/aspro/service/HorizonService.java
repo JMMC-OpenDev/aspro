@@ -61,7 +61,7 @@ public final class HorizonService {
 
       final List<AzEl> points = p.getPoints();
 
-      if (points != null && points.size() > 0) {
+      if (!points.isEmpty()) {
         final int npoints = points.size() + 1;
         final int[] xpoints = new int[npoints];
         final int[] ypoints = new int[npoints];
