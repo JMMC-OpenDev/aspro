@@ -14,7 +14,9 @@ public enum AsproModelVersion {
   /** december 2010 revision : target IDs and user informations (calibrators) */
   Dec2010Revision(2010.12f),
   /** february 2011 revision : added observation variants and observation collection */
-  Feb2011Revision(2011.02f);
+  Feb2011Revision(2011.02f),
+  /** february 2012 revision : added user model */
+  Feb2012Revision(2012.02f);
 
   /* members */
   /** version as a float value */

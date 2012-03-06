@@ -8,7 +8,6 @@ import fr.jmmc.aspro.model.oi.ObservationCollection;
 import fr.jmmc.aspro.model.uvcoverage.UVCoverageData;
 import fr.jmmc.jmal.model.UVMapData;
 import fr.jmmc.oitools.model.OIFitsFile;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -58,7 +57,7 @@ public final class ObservationCollectionUVData extends ObservationCollectionObsD
    * Return the target name corresponding to this data collection
    * @return target name
    */
-  public final String getTargetName() {
+  public String getTargetName() {
     return getFirstUVData().getTargetName();
   }
 

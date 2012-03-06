@@ -43,7 +43,7 @@ public final class ObservationVersion {
    * Return the target list version
    * @return target list version
    */
-  public final int getTargetVersion() {
+  public int getTargetVersion() {
     return this.targetVersion;
   }
 
@@ -51,7 +51,7 @@ public final class ObservationVersion {
    * Increment the target list version
    * Only used by ObservationManager.fireObservationTargetsChanged()
    */
-  final void incTargetVersion() {
+  void incTargetVersion() {
     this.targetVersion++;
   }
 
@@ -59,7 +59,7 @@ public final class ObservationVersion {
    * Return the observation main version
    * @return observation main version
    */
-  public final int getMainVersion() {
+  public int getMainVersion() {
     return this.mainVersion;
   }
 
@@ -67,7 +67,7 @@ public final class ObservationVersion {
    * Increment the observation main version
    * Only used by ObservationManager.fireObservationUpdate()
    */
-  final void incMainVersion() {
+  void incMainVersion() {
     this.mainVersion++;
   }
 
@@ -75,7 +75,7 @@ public final class ObservationVersion {
    * Return the observation UV version
    * @return observation UV version
    */
-  public final int getUVVersion() {
+  public int getUVVersion() {
     return this.uvVersion;
   }
 
@@ -83,18 +83,17 @@ public final class ObservationVersion {
    * Increment the observation UV version.
    * Only used by ObservationManager.fireObservationUpdate()
    */
-  final void incUVVersion() {
+  void incUVVersion() {
     this.uvVersion++;
   }
 
   /* version checking */
-
   /**
    * Return true only if the current main version is equal to the main version of the other version object
    * @param otherVersion observation version to compare with
    * @return true if main versions are equals
    */
-  public final boolean isSameMainVersion(final ObservationVersion otherVersion) {
+  public boolean isSameMainVersion(final ObservationVersion otherVersion) {
     return this.getMainVersion() == otherVersion.getMainVersion();
   }
 
@@ -103,7 +102,7 @@ public final class ObservationVersion {
    * @return versions as string
    */
   @Override
-  public final String toString() {
+  public String toString() {
     return "{targetVersion=" + getTargetVersion() + ", version=" + getMainVersion() + ", uvVersion=" + getUVVersion() + "}";
   }
 }
