@@ -4,6 +4,7 @@
 package fr.jmmc.aspro;
 
 import fr.jmmc.aspro.model.observability.SunTimeInterval.SunType;
+import fr.jmmc.jmal.image.ColorScale;
 import fr.jmmc.jmcs.data.preference.PreferencesException;
 
 /**
@@ -26,6 +27,8 @@ public final class Preferences extends fr.jmmc.jmcs.data.preference.Preferences 
   public final static String MODEL_IMAGE_LUT = "model.image.lut";
   /** Preference : Image size to use for the object model image in the UV Coverage plot */
   public final static String MODEL_IMAGE_SIZE = "model.image.size";
+  /** Preference : Color scaling method to use for the object model image in the UV Coverage plot */
+  public final static String MODEL_IMAGE_SCALE = "model.image.scale";
   /** Preference : time reference (LST/UTC) */
   public final static String TIME_REFERENCE = "time.reference";
   /** Preference : minimum elevation */
@@ -80,6 +83,7 @@ public final class Preferences extends fr.jmmc.jmcs.data.preference.Preferences 
     // UV Coverage - image size and LUT :
     setDefaultPreference(MODEL_IMAGE_LUT, AsproConstants.DEFAULT_IMAGE_LUT);
     setDefaultPreference(MODEL_IMAGE_SIZE, AsproConstants.DEFAULT_IMAGE_SIZE);
+    setDefaultPreference(MODEL_IMAGE_SCALE, ColorScale.LINEAR.toString());
 
     // Time reference :
     setDefaultPreference(TIME_REFERENCE, AsproConstants.TIME_LST);
@@ -129,5 +133,20 @@ public final class Preferences extends fr.jmmc.jmcs.data.preference.Preferences 
       // ignore
     }
     return SunType.Night;
+  }
+
+  /**
+   * Return the Color scaling method Preference : use preferences or LINEAR if it is undefined
+   * @return Color scaling method (LINEAR/LOGARITHMIC)
+   */
+  public ColorScale getImageColorScale() {
+    final String value = getPreference(MODEL_IMAGE_SCALE);
+
+    try {
+      return ColorScale.valueOf(value);
+    } catch (IllegalArgumentException iae) {
+      // ignore
+    }
+    return ColorScale.LINEAR;
   }
 }
