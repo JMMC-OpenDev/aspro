@@ -32,6 +32,8 @@ public final class SquareXYPlot extends XYPlot {
   private static final long serialVersionUID = 1;
   /** Class logger */
   private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(SquareXYPlot.class.getName());
+  /** flag to enable image anti aliasing and bicubic interpolation */
+  public static final boolean USE_INTERPOLATION = true;
 
   /**
    * Creates a new plot with the specified dataset, axes and renderer.  Any
@@ -114,15 +116,18 @@ public final class SquareXYPlot extends XYPlot {
     adjustedArea.setRect(Math.round(area.getX() + marginWidth), Math.round(area.getY() + marginHeight), Math.round(adjustedWidth), Math.round(adjustedHeight));
 
     // Force rendering hints :
-
     // set quality flags:
     g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
     g2d.setRenderingHint(RenderingHints.KEY_COLOR_RENDERING, RenderingHints.VALUE_COLOR_RENDER_QUALITY);
     g2d.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY);
 
-    // Use bicubic interpolation (slower) for quality:
-    g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-
+    if (USE_INTERPOLATION) {
+      // Use bicubic interpolation (slower) for quality:
+      g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+    } else {
+      // Use no interpolation (faster) for raw display:
+      g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
+    }
     super.draw(g2d, adjustedArea, anchor, parentState, info);
   }
 
