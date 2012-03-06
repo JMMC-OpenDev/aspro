@@ -690,8 +690,33 @@
         </xsd:annotation>
       </xsd:element>
 
+
+      <xsd:element name="useAnalyticalModel" type="xsd:boolean" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>
+              This flag indicates which kind of model is enabled: true (analytical models), false (user model); true by default.
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
       <!-- target models -->
-      <xsd:element ref="tm:model" minOccurs="0" maxOccurs="unbounded"/>
+      <xsd:element ref="tm:model" minOccurs="0" maxOccurs="unbounded">
+        <xsd:annotation>
+          <xsd:documentation>
+              Optional list of analytical models
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
+      <!-- user model (optional) -->
+      <xsd:element name="userModel" type="UserModel" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>
+              Optional user model (fits image or cube)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
 
       <!-- target configuration -->
       <xsd:element name="configuration" type="TargetConfiguration" minOccurs="0">
@@ -726,6 +751,53 @@
 
 
 
+  <!-- UserModel -->
+  <xsd:complexType name="UserModel">
+    <xsd:annotation>
+      <xsd:documentation>
+        This type describes an user model (fits image or cube).
+      </xsd:documentation>
+    </xsd:annotation>
+
+    <xsd:sequence>
+      <xsd:element name="name" type="xsd:string">
+        <xsd:annotation>
+          <xsd:documentation>
+              Identifier for this user model
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
+      <xsd:element name="description" type="xsd:string" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>
+            User information related to this user model
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
+      <xsd:element name="file" type="xsd:string">
+        <xsd:annotation>
+          <xsd:documentation>
+              File reference of this user model
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
+      <xsd:element name="checksum" type="xsd:long">
+        <xsd:annotation>
+          <xsd:documentation>
+              CRC-32 checksum of the file
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
+    </xsd:sequence>
+  </xsd:complexType>
+
+  
+  
+  
   <!-- TargetConfiguration -->
   <xsd:complexType name="TargetConfiguration">
     <xsd:annotation>

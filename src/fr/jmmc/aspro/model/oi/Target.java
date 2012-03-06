@@ -50,7 +50,9 @@ import fr.jmmc.jmal.model.targetmodel.Model;
  *         &lt;element name="FLUX_H" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
  *         &lt;element name="FLUX_K" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
  *         &lt;element name="FLUX_N" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
+ *         &lt;element name="useAnalyticalModel" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
  *         &lt;element ref="{http://www.jmmc.fr/jmcs/models/0.1}model" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="userModel" type="{http://www.jmmc.fr/aspro-oi/0.1}UserModel" minOccurs="0"/>
  *         &lt;element name="configuration" type="{http://www.jmmc.fr/aspro-oi/0.1}TargetConfiguration" minOccurs="0"/>
  *         &lt;element name="calibratorInfos" type="{http://www.jmmc.fr/aspro-oi/0.1}CalibratorInformations" minOccurs="0"/>
  *       &lt;/sequence>
@@ -84,7 +86,9 @@ import fr.jmmc.jmal.model.targetmodel.Model;
     "fluxh",
     "fluxk",
     "fluxn",
+    "useAnalyticalModel",
     "models",
+    "userModel",
     "configuration",
     "calibratorInfos"
 })
@@ -131,8 +135,10 @@ public class Target
     protected Double fluxk;
     @XmlElement(name = "FLUX_N")
     protected Double fluxn;
+    protected Boolean useAnalyticalModel;
     @XmlElement(name = "model", namespace = "http://www.jmmc.fr/jmcs/models/0.1")
     protected List<Model> models;
+    protected UserModel userModel;
     protected TargetConfiguration configuration;
     protected CalibratorInformations calibratorInfos;
     @XmlAttribute(name = "id", required = true)
@@ -614,7 +620,33 @@ public class Target
     }
 
     /**
-     * Gets the value of the models property.
+     * Gets the value of the useAnalyticalModel property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Boolean }
+     *     
+     */
+    public Boolean isUseAnalyticalModel() {
+        return useAnalyticalModel;
+    }
+
+    /**
+     * Sets the value of the useAnalyticalModel property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Boolean }
+     *     
+     */
+    public void setUseAnalyticalModel(Boolean value) {
+        this.useAnalyticalModel = value;
+    }
+
+    /**
+     * 
+     *               Optional list of analytical models
+     *           Gets the value of the models property.
      * 
      * <p>
      * This accessor method returns a reference to the live list,
@@ -640,6 +672,30 @@ public class Target
             models = new ArrayList<Model>();
         }
         return this.models;
+    }
+
+    /**
+     * Gets the value of the userModel property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link UserModel }
+     *     
+     */
+    public UserModel getUserModel() {
+        return userModel;
+    }
+
+    /**
+     * Sets the value of the userModel property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link UserModel }
+     *     
+     */
+    public void setUserModel(UserModel value) {
+        this.userModel = value;
     }
 
     /**
@@ -952,6 +1008,9 @@ public class Target
     if (copy.models != null) {
       copy.models = Target.cloneModels(copy.models);
     }
+    if (copy.userModel != null) {
+      copy.userModel = (UserModel) copy.userModel.clone();
+    }
 
     // Deep copy of target configuration :
     if (copy.configuration != null) {
@@ -960,7 +1019,20 @@ public class Target
 
     return copy;
   }
+  
+  /**
+   * Return true if this target has one model (analytical models or an user model)
+   * @return true if this target has one model 
+   */
+  public final boolean hasModel() {
+    if (models != null && !models.isEmpty()) {
+      return true;
+    }
+    return userModel != null;
+  }
 
+  /* static helper methods */
+  
   /**
    * Return a deep "copy" of the list of models
    * @param models list of models to clone

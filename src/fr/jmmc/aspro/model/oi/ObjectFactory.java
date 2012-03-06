@@ -198,6 +198,14 @@ public class ObjectFactory {
     }
 
     /**
+     * Create an instance of {@link UserModel }
+     * 
+     */
+    public UserModel createUserModel() {
+        return new UserModel();
+    }
+
+    /**
      * Create an instance of {@link Station }
      * 
      */
