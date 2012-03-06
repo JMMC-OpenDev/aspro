@@ -19,11 +19,11 @@ public final class UVCoverageData {
   private final ObservationVersion version;
   /** name of the target */
   private String targetName;
-  /** maximum U or V coordinate (scale) */
+  /** maximum U and V coordinate (scale) */
   private double uvMax;
-  /** wave length */
+  /** central wave length (meter) */
   private double lambda;
-  /** configuration */
+  /** configuration i.e. station names */
   private String stationNames;
   /** base line list */
   private List<BaseLine> baseLines = null;
@@ -55,34 +55,66 @@ public final class UVCoverageData {
     return version;
   }
 
+  /**
+   * Return the name of the target
+   * @return name of the target
+   */
   public String getTargetName() {
     return targetName;
   }
 
+  /**
+   * Define the name of the target
+   * @param name name of the target
+   */
   public void setTargetName(final String name) {
     this.targetName = name;
   }
 
-  public double getLambda() {
-    return lambda;
-  }
-
-  public void setLambda(final double lambda) {
-    this.lambda = lambda;
-  }
-
+  /**
+   * Return the maximum U and V coordinate (scale)
+   * @return maximum U and V coordinate (scale)
+   */
   public double getUvMax() {
     return uvMax;
   }
 
+  /**
+   * Define the maximum U and V coordinate (scale)
+   * @param uvMax maximum U and V coordinate (scale)
+   */
   public void setUvMax(final double uvMax) {
     this.uvMax = uvMax;
   }
 
+  /**
+   * Return the central wave length
+   * @return central wave length
+   */
+  public double getLambda() {
+    return lambda;
+  }
+
+  /**
+   * Define the central wave length (meter)
+   * @param lambda central wave length (meter)
+   */
+  public void setLambda(final double lambda) {
+    this.lambda = lambda;
+  }
+
+  /**
+   * Return the configuration i.e. station names
+   * @return configuration i.e. station names
+   */
   public String getStationNames() {
     return stationNames;
   }
 
+  /**
+   * Define the configuration i.e. station names
+   * @param stationNames configuration i.e. station names
+   */
   public void setStationNames(final String stationNames) {
     this.stationNames = stationNames;
   }
@@ -103,38 +135,74 @@ public final class UVCoverageData {
     this.baseLines = baseLines;
   }
 
+  /**
+   * Return the list of uv points corresponding to the target rise/set
+   * @return list of uv points corresponding to the target rise/set
+   */
   public List<UVBaseLineData> getTargetUVRiseSet() {
     return targetUVRiseSet;
   }
 
+  /**
+   * Define the list of uv points corresponding to the target rise/set
+   * @param targetUVRiseSet list of uv points corresponding to the target rise/set
+   */
   public void setTargetUVRiseSet(final List<UVBaseLineData> targetUVRiseSet) {
     this.targetUVRiseSet = targetUVRiseSet;
   }
 
+  /**
+   * Return the observable decimal hour angles (used by OIFits)
+   * @return observable decimal hour angles (used by OIFits)
+   */
   public double[] getHA() {
     return ha;
   }
 
+  /**
+   * Define the observable decimal hour angles (used by OIFits)
+   * @param ha observable decimal hour angles (used by OIFits)
+   */
   public void setHA(final double[] ha) {
     this.ha = ha;
   }
 
+  /**
+   * Return the list of uv point couples corresponding to the target observability
+   * @return list of uv point couples corresponding to the target observability
+   */
   public List<UVRangeBaseLineData> getTargetUVObservability() {
     return targetUVObservability;
   }
 
+  /**
+   * Define the list of uv point couples corresponding to the target observability
+   * @param targetUVObservability list of uv point couples corresponding to the target observability
+   */
   public void setTargetUVObservability(final List<UVRangeBaseLineData> targetUVObservability) {
     this.targetUVObservability = targetUVObservability;
   }
 
+  /**
+   * Return the warning container
+   * @return warning container
+   */
   public WarningContainer getWarningContainer() {
     return warningContainer;
   }
 
+  /**
+   * Return the oifits structure
+   * @return oifits structure
+   */
   public OIFitsFile getOiFitsFile() {
     return oiFitsFile;
   }
 
+  /**
+   * Define the oifits structure
+   * @param oiFitsFile oifits structure
+   */
   public void setOiFitsFile(final OIFitsFile oiFitsFile) {
     this.oiFitsFile = oiFitsFile;
   }
