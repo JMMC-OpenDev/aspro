@@ -15,6 +15,7 @@ import fr.jmmc.aspro.gui.chart.SquareChartPanel;
 import fr.jmmc.aspro.gui.chart.SquareXYPlot;
 import fr.jmmc.aspro.gui.chart.ZoomEvent;
 import fr.jmmc.aspro.gui.chart.ZoomEventListener;
+import fr.jmmc.aspro.image.FitsImageUtils;
 import fr.jmmc.jmcs.gui.MessagePane;
 import fr.jmmc.jmcs.gui.StatusBar;
 import fr.jmmc.jmcs.gui.task.TaskSwingWorker;
@@ -318,13 +319,22 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
       // Start the computations :
       final long start = System.nanoTime();
 
-      final float dataMin = (float) this.fitsImage.getDataMin();
-      final float dataMax = (float) this.fitsImage.getDataMax();
+      float dataMin = (float) this.fitsImage.getDataMin();
+      float dataMax = (float) this.fitsImage.getDataMax();
 
       final ColorScale usedColorScale;
       if (colorScale == ColorScale.LOGARITHMIC
               && (dataMin <= 0f || dataMax <= 0f || dataMin == dataMax || Float.isInfinite(dataMin) || Float.isInfinite(dataMax))) {
         usedColorScale = ColorScale.LINEAR;
+        
+        // update min/max:
+        FitsImageUtils.updateDataRange(fitsImage);
+        dataMin = (float) this.fitsImage.getDataMin();
+        dataMax = (float) this.fitsImage.getDataMax();
+        
+        if (dataMin == dataMax) {
+          dataMax = dataMin + 1f;
+        }
       } else {
         usedColorScale = colorScale;
       }
