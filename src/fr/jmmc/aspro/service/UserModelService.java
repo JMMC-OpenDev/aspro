@@ -30,7 +30,7 @@ public final class UserModelService {
   /** Class logger */
   private static final Logger logger = LoggerFactory.getLogger(UserModelService.class.getName());
   /** zeroThreshold lowest positive value (1e-5 for example) to ignore data values below AFTER normalization */
-  public static final float ZERO_THRESHOLD = 2e-5f;
+  public static final float ZERO_THRESHOLD = 1e-7f;
   /** maximum fft size (power of two) */
   public static final int MAX_FFT_SIZE = 256 * 1024;
 
