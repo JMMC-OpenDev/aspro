@@ -316,18 +316,23 @@ public final class FitsImageUtils {
     // update fits image:
     // note: this extraction does not check boundary overlapping:
     data = ImageArrayUtils.extract(nbRows, nbCols, data, rows1, cols1, rows2, cols2);
+    
+    if (data == null) {
+      // outside ranges:
+      data = fitsImage.getData();
+    } else {
+      // update data/dataMin/dataMax:
+      updateFitsImage(fitsImage, data, fitsImage.getDataMin(), fitsImage.getDataMax());
 
-    // update data/dataMin/dataMax:
-    updateFitsImage(fitsImage, data, fitsImage.getDataMin(), fitsImage.getDataMax());
+      // update ref pixel:
+      fitsImage.setPixRefRow(fitsImage.getPixRefRow() - rows1);
+      fitsImage.setPixRefCol(fitsImage.getPixRefCol() - cols1);
 
-    // update ref pixel:
-    fitsImage.setPixRefRow(fitsImage.getPixRefRow() - rows1);
-    fitsImage.setPixRefCol(fitsImage.getPixRefCol() - cols1);
+      nbRows = fitsImage.getNbRows();
+      nbCols = fitsImage.getNbCols();
 
-    nbRows = fitsImage.getNbRows();
-    nbCols = fitsImage.getNbCols();
-
-    logger.info("ROI size = " + nbRows + " x " + nbCols);
+      logger.info("ROI size = " + nbRows + " x " + nbCols);
+    }
 
 
     // 5 - Normalize data (total flux):
