@@ -82,13 +82,35 @@ public class ImageFitsTest {
 
     final ColorScale colorScale = ColorScale.LINEAR;
 
-    if (true) {
+    if (false) {
 //      String file = "/home/bourgesl/ASPRO2/fits/SG_surface2.fits";
-      String file = "/home/bourgesl/ASPRO2/fits/ellipsePlusPunct.fits";
+//      String file = "/home/bourgesl/ASPRO2/fits/ellipsePlusPunct.fits";
 
-//      String file = "/home/bourgesl/ASPRO2/fits/SG_surface2_vert.fits";
-//      String file = "/home/bourgesl/ASPRO2/fits/diskUniform.fits";
-//      String file = "/home/bourgesl/ASPRO2/fits/LITpro_disk.fits";
+      String file = "/home/bourgesl/ASPRO2/fits/tests/3c273_all_pl27.fits.gz";
+//      String file = "/home/bourgesl/ASPRO2/fits/tests/58Eri_clumpy_K_1024.fits.gz";
+
+//      String file = "/home/bourgesl/ASPRO2/fits/tests/AGN.fits.gz";      
+
+//      String file = "/home/bourgesl/ASPRO2/fits/tests/ch4_i_60_big.fits.gz";
+//      String file = "/home/bourgesl/ASPRO2/fits/tests/ch4_i_60_big.fits";      
+//      String file = "/home/bourgesl/ASPRO2/fits/tests/ch4_i_00_big2.fits.gz";
+
+//      String file = "/home/bourgesl/ASPRO2/fits/tests/EvolvedStar.fits.gz";      
+
+//      String file = "/home/bourgesl/ASPRO2/fits/tests/flux_bf_intens_continuum_002_extended.fits.gz";      
+//      String file = "/home/bourgesl/ASPRO2/fits/tests/HighMass.fits.gz";         
+
+//java.lang.ClassCastException: [[[[I cannot be cast to [[I      
+//      String file = "/home/bourgesl/ASPRO2/fits/tests/isella_large_grain_inc000.fits.gz";  
+//      String file = "/home/bourgesl/ASPRO2/fits/tests/isella_large_grain_inc060.fits.gz";  
+//      String file = "/home/bourgesl/ASPRO2/fits/tests/isella_small_grain_inc060.fits.gz";  
+
+//      String file = "/home/bourgesl/ASPRO2/fits/tests/Microlensing.fits.gz";  
+//      String file = "/home/bourgesl/ASPRO2/fits/tests/Microquasar_grs1915a.fits.gz";  
+//      String file = "/home/bourgesl/ASPRO2/fits/tests/NGC1365.i60.K.ima279.fits.gz";  
+//      String file = "/home/bourgesl/ASPRO2/fits/tests/SG_surface2.fits.gz";  
+//      String file = "/home/bourgesl/ASPRO2/fits/tests/SG_surface.fits.gz";  
+//      String file = "/home/bourgesl/ASPRO2/fits/tests/YSO_disk.fits.gz";  
 
       try {
         // load and prepare images:
@@ -180,7 +202,7 @@ public class ImageFitsTest {
 
         FitsImageFile imgFitsFile = new FitsImageFile();
         imgFitsFile.getFitsImages().add(fitsImage);
-        
+
         FitsImageWriter.write(file, imgFitsFile);
 
 //        file = "/home/bourgesl/ASPRO2/fits/SG_surface2.fits";
@@ -198,20 +220,50 @@ public class ImageFitsTest {
       }
     }
 
-
-    if (false) {
-      final File directory = new File("/home/bourgesl/ASPRO2/fits/");
+    if (true) {
+      final File directory = new File("/home/bourgesl/ASPRO2/fits/tests/");
       if (directory.exists() && directory.isDirectory()) {
+
+        // display fits image:
+        new PreferencesView().setVisible(true);
 
         final long start = System.nanoTime();
 
         final File[] files = directory.listFiles();
 
+        String file;
         for (File f : files) {
-          if (f.isFile() && (f.getName().endsWith("fits") || f.getName().endsWith("fits.gz"))) {
-            errors += infoFile(f.getAbsolutePath());
-            errors += dumpFile(f.getAbsolutePath());
-            errors += showFile(f.getAbsolutePath());
+          if (f.isFile() && !f.getName().startsWith("COPY_") && (f.getName().endsWith("fits") || f.getName().endsWith("fits.gz"))) {
+
+            file = f.getAbsolutePath();
+            try {
+              // load and prepare images:
+              FitsImage fitsImage = UserModelService.prepareFitsFile(file);
+
+              logger.info("Prepared FitsImage: " + fitsImage.toString(false));
+
+              showFitsPanel(fitsImage.getFitsImageIdentifier(), fitsImage);
+
+              if (false) {
+                return;
+              }
+
+              file = directory.getAbsolutePath() + "/COPY_" + f.getName();
+              logger.info("writing: " + file);
+
+              FitsImageFile imgFitsFile = new FitsImageFile();
+              imgFitsFile.getFitsImages().add(fitsImage);
+
+              FitsImageWriter.write(file, imgFitsFile);
+
+              errors += infoFile(file);
+              errors += dumpFile(file);
+              errors += showFile(file);
+
+            } catch (Exception e) {
+              logger.log(Level.SEVERE, "An exception occured while working on file: " + file, e);
+            }
+
           }
         }
 
@@ -593,11 +645,11 @@ public class ImageFitsTest {
       final boolean testFullFFT = false;
       final boolean testConcurrency = false;
 
-      final int INIT = 1;
+      final int INIT = 32;
 
       final int factor = 2;
       final int START = 1024 * INIT;
-      final int LIMIT = 1024 * 128; // 128
+      final int LIMIT = 1024 * 32; // 128
       final int OUTPUT = 16 * INIT; // 16.75 pixels for 1024 pixels (AMBER)
 
       for (int size = START, outputSize = OUTPUT; size <= LIMIT; size *= factor, outputSize *= factor) {
