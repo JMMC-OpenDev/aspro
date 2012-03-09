@@ -60,6 +60,7 @@ public final class FilePreferences extends fr.jmmc.jmcs.data.preference.Preferen
     final String defaultDirectory = System.getProperty("user.home");
     setDefaultPreference(MimeType.ASPRO_OBSERVATION.toString(), defaultDirectory);
     setDefaultPreference(MimeType.OBX.toString(), defaultDirectory);
+    setDefaultPreference(MimeType.FITS_IMAGE.toString(), defaultDirectory);
     setDefaultPreference(MimeType.OIFITS.toString(), defaultDirectory);
     setDefaultPreference(MimeType.PDF.toString(), defaultDirectory);
     setDefaultPreference(MimeType.STAR_LIST.toString(), defaultDirectory);
