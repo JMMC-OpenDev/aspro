@@ -4,11 +4,13 @@
 package fr.jmmc.aspro.service;
 
 import fr.jmmc.aspro.image.FitsImageUtils;
+import fr.jmmc.jmal.complex.MutableComplex;
 import fr.jmmc.jmal.image.FFTUtils;
 import fr.jmmc.jmal.image.ColorScale;
 import fr.jmmc.jmal.model.ImageMode;
 import fr.jmmc.jmal.model.ModelUVMapService;
 import fr.jmmc.jmal.model.UVMapData;
+import fr.jmmc.jmal.model.VisNoiseService;
 import fr.jmmc.jmcs.util.concurrent.InterruptedJobException;
 import fr.jmmc.oitools.image.FitsImage;
 import fr.jmmc.oitools.image.FitsImageFile;
@@ -29,10 +31,14 @@ public final class UserModelService {
 
   /** Class logger */
   private static final Logger logger = LoggerFactory.getLogger(UserModelService.class.getName());
-  /** zeroThreshold lowest positive value (1e-5 for example) to ignore data values below AFTER normalization */
-  public static final float ZERO_THRESHOLD = 1e-7f;
+  /** minimum visiblity threshold (1e-4) for model image */
+  public static final float MIN_VISIBILITY_UV_MAP = 1e-4f;
+  /** minimum visiblity threshold (1e-2) for direct fourier transform */
+  public static final float MIN_VISIBILITY_DATA = 1e-2f;
   /** maximum fft size (power of two) */
   public static final int MAX_FFT_SIZE = 256 * 1024;
+  /** Two PI constant */
+  public static final double TWO_PI = 6.28318530717958623199592693708837032;
 
   /**
    * Forbidden constructor
@@ -44,7 +50,7 @@ public final class UserModelService {
   /**
    * Load the FitsImageFile structure and prepare ONLY the first image for FFT processing
    * @param file fits file to load and process 
-   * @return FitsImage
+   * @return fitsImage user model as FitsImage
    * @throws FitsException if any FITS error occured
    * @throws IOException IO failure
    */
@@ -55,7 +61,7 @@ public final class UserModelService {
       throw new FitsException("The Fits file '" + file + "' does not contain any Fits image !");
     }
 
-    final FitsImage fitsImage = FitsImageUtils.prepareImage(imgFitsFile.getFirstFitsImage(), ZERO_THRESHOLD);
+    final FitsImage fitsImage = FitsImageUtils.prepareImage(imgFitsFile.getFirstFitsImage(), MIN_VISIBILITY_UV_MAP);
 
     logger.info("Prepared FitsImage: " + fitsImage.toString(false));
 
@@ -83,7 +89,7 @@ public final class UserModelService {
           final int imageSize,
           final IndexColorModel colorModel,
           final ColorScale colorScale) {
-    return computeUVMap(fitsImage, uvRect, mode, imageSize, colorModel, colorScale, null);
+    return computeUVMap(fitsImage, uvRect, mode, imageSize, colorModel, colorScale, null, null);
   }
 
   /**
@@ -95,7 +101,7 @@ public final class UserModelService {
    * @param imageSize expected number of pixels for both width and height of the generated image
    * @param colorModel color model to use
    * @param colorScale color scaling method
-   * @param refVisData reference complex visibility data (optional)
+   * @param noiseService optional noise service to compute noisy complex visibilities before computing amplitude or phase
    * @return UVMapData
    * 
    * @throws InterruptedJobException if the current thread is interrupted (cancelled)
@@ -108,6 +114,34 @@ public final class UserModelService {
           final int imageSize,
           final IndexColorModel colorModel,
           final ColorScale colorScale,
+          final VisNoiseService noiseService) {
+    return computeUVMap(fitsImage, uvRect, mode, imageSize, colorModel, colorScale, noiseService, null);
+  }
+
+  /**
+   * Compute the UV Map for to the given user model (fits image or cube)
+   *
+   * @param fitsImage user model as FitsImage
+   * @param uvRect expected UV frequency area in rad-1
+   * @param mode image mode (amplitude or phase)
+   * @param imageSize expected number of pixels for both width and height of the generated image
+   * @param colorModel color model to use
+   * @param colorScale color scaling method
+   * @param refVisData reference complex visibility data (optional)
+   * @param noiseService optional noise service to compute noisy complex visibilities before computing amplitude or phase
+   * @return UVMapData
+   * 
+   * @throws InterruptedJobException if the current thread is interrupted (cancelled)
+   * @throws IllegalArgumentException if a model parameter value is invalid
+   * @throws RuntimeException if any exception occured during the computation
+   */
+  public static UVMapData computeUVMap(final FitsImage fitsImage,
+          final Rectangle2D.Double uvRect,
+          final ImageMode mode,
+          final int imageSize,
+          final IndexColorModel colorModel,
+          final ColorScale colorScale,
+          final VisNoiseService noiseService,
           final float[][] refVisData) {
 
     if (fitsImage == null) {
@@ -196,7 +230,7 @@ public final class UserModelService {
     // 2 - Extract the amplitude/phase to get the uv map :
 
     // data as float [rows][cols]:
-    float[][] data = FFTUtils.convert(fftOutputSize, visData, mode, outputSize);
+    float[][] data = FFTUtils.convert(fftOutputSize, visData, mode, outputSize, noiseService);
 
     final int dataSize = outputSize;
 
@@ -212,7 +246,7 @@ public final class UserModelService {
     uvMapRect.setFrameFromDiagonal(-mapUvMax, -mapUvMax, mapUvMax, mapUvMax);
 
     final UVMapData uvMapData = ModelUVMapService.computeImage(uvRect, null, null, mode, imageSize, colorModel, colorScale,
-            dataSize, visData, data, uvMapRect);
+            dataSize, visData, data, uvMapRect, noiseService);
 
     if (logger.isInfoEnabled()) {
       logger.info("compute : duration = {} ms.", 1e-6d * (System.nanoTime() - start));
@@ -286,5 +320,201 @@ public final class UserModelService {
     logger.info("UV plane size (pixels) = " + outputSize);
 
     return outputSize;
+  }
+
+  /**
+   * Compute the spatial coordinates (rad) (relative to the half length) given the number of values and the increment
+   * @param length number of values
+   * @param increment increment (rad)
+   * @return spatial coordinates (rad) (relative to the half length)
+   */
+  public static float[] computeSpatialCoords(final int length, final double increment) {
+
+    final float[] coords = new float[length];
+
+    final int half = length / 2;
+
+    for (int i = 0; i < length; i++) {
+      coords[i] = (float) (increment * (i - half)); //in sky (radians). 
+      // On peut aussi utiliser les
+      // valeurs du header avec values = (i-xref-1)*xdelt+xval 
+      // (fits commence à 1)
+    }
+
+    return coords;
+  }
+
+  /**
+   * Clone the given context
+   *
+   * @param context compute context
+   *
+   * @return new compute context
+   */
+  public static UserModelComputeContext cloneContext(final UserModelComputeContext context) {
+    return new UserModelComputeContext(context.getFreqCount(), context.getN1D(), context.getData1D(), context.getColCoord1D(), context.getRowCoord1D());
+  }
+
+  /**
+   * Prepare the complex visiblity computation of given models
+   *
+   * @param fitsImage user model as FitsImage
+   * @param freqCount uv frequencey count used to preallocate arrays
+   * @return new compute context
+   */
+  public static UserModelComputeContext prepareModel(final FitsImage fitsImage, final int freqCount) {
+    if (fitsImage == null || freqCount <= 0) {
+      return null;
+    }
+
+    /** Get the current thread to check if the computation is interrupted */
+    final Thread currentThread = Thread.currentThread();
+
+    final int nbRows = fitsImage.getNbRows();
+    final int nbCols = fitsImage.getNbCols();
+    final int nData = fitsImage.getNData();
+    final float[][] data = fitsImage.getData();
+    final double dataMin = fitsImage.getDataMin();
+    final double dataMax = fitsImage.getDataMax();
+
+    logger.info("FitsImage: min: " + dataMin + " - max: " + dataMax);
+
+    final int nPixels = nbRows * nbCols;
+    logger.info("FitsImage: nData: " + nData + " / " + nPixels);
+
+    // prepare spatial coordinates:
+    final float[] rowCoords = UserModelService.computeSpatialCoords(nbRows, fitsImage.getSignedIncRow());
+    final float[] colCoords = UserModelService.computeSpatialCoords(nbCols, fitsImage.getSignedIncCol());
+
+
+    // Skip zero values only as the image was previously filtered to ignore small values:
+    final float threshold = 2f * MIN_VISIBILITY_DATA / nData;
+    logger.info("FitsImage: threshold = " + threshold);
+
+
+    // prepare 1D data (eliminate values lower than threshold):
+    float[] row;
+    int n1D = 0;
+    final float[] data1D = new float[nPixels];
+    final float[] rowCoord1D = new float[nPixels];
+    final float[] colCoord1D = new float[nPixels];
+
+    float flux, rowCoord;
+
+    // iterate on rows:
+    for (int r = 0, c; r < nbRows; r++) {
+      row = data[r];
+      rowCoord = rowCoords[r];
+
+      // iterate on columns:
+      for (c = 0; c < nbCols; c++) {
+        flux = row[c];
+
+        // skip values lower than threshold:
+        if (flux > threshold) {
+          // keep this data point:
+          data1D[n1D] = flux;
+          rowCoord1D[n1D] = rowCoord;
+          colCoord1D[n1D] = colCoords[c];
+          n1D++;
+        }
+
+        // fast interrupt :
+        if (currentThread.isInterrupted()) {
+          return null;
+        }
+      } // columns
+    } // rows
+
+    logger.info("FitsImage: used pixels = " + n1D + " / " + nPixels);
+
+    return new UserModelComputeContext(freqCount, n1D, data1D, colCoord1D, rowCoord1D);
+  }
+
+  /**
+   * Compute the complex visiblity of the given user model for the given Ufreq and Vfreq arrays
+   *
+   * @param context compute context
+   * @param ufreq U frequencies in rad-1
+   * @param vfreq V frequencies in rad-1
+   * @return normalized complex visibility or null if thread interrupted
+   */
+  public static MutableComplex[] computeModel(final UserModelComputeContext context, final double[] ufreq, final double[] vfreq) {
+    MutableComplex[] vis = null;
+
+    if (ufreq != null && vfreq != null && context != null) {
+
+      final int nVis = ufreq.length;
+
+      if (nVis != vfreq.length || nVis != context.getFreqCount()) {
+        throw new IllegalStateException("incorrect array sizes (Ufreq, VFreq, freqCount) !");
+      }
+
+      // reset complex visiblities:
+      vis = context.resetAndGetVis();
+
+      final int n1D = context.getN1D();
+      final float[] data1D = context.getData1D();
+      final float[] colCoord1D = context.getColCoord1D();
+      final float[] rowCoord1D = context.getRowCoord1D();
+
+      // compute complex visiblities using exact fourier transform (slow):
+      compute1D(n1D, data1D, colCoord1D, rowCoord1D, ufreq, vfreq, nVis, vis);
+    }
+
+    return vis;
+  }
+
+  /**
+   * Compute exact discrete fourier transform / complex visiblity of given user model for the given Ufreq and Vfreq arrays
+   * @param n1D number number of data points
+   * @param data1D flattened data points (1D)
+   * @param colCoord1D spatial coordinates along the column axis (rad) corresponding to data points
+   * @param rowCoord1D spatial coordinates along the row axis (rad) corresponding to data points
+   * @param ufreq U frequencies in rad-1
+   * @param vfreq V frequencies in rad-1
+   * @param nVis number of visibility to compute
+   * @param vis complex visibility array
+   */
+  private static void compute1D(final int n1D, final float[] data1D,
+          final float[] colCoord1D, final float[] rowCoord1D,
+          final double[] ufreq, final double[] vfreq, final int nVis, final MutableComplex[] vis) {
+
+    /** Get the current thread to check if the computation is interrupted */
+    final Thread currentThread = Thread.currentThread();
+
+    double kwCol, kwRow, z, flux, re, im;
+
+    // iterate on ufreq / vfreq:
+    for (int i = 0, j; i < nVis; i++) {
+
+      // divide by lambda ?
+      kwCol = TWO_PI * ufreq[i];
+      kwRow = TWO_PI * vfreq[i];
+
+      // initialize:
+      re = 0d;
+      im = 0d;
+
+      // iterate on data points:
+      for (j = n1D - 1; j >= 0; j--) {
+        flux = data1D[j];
+
+        z = kwCol * colCoord1D[j] + kwRow * rowCoord1D[j];
+
+        re += flux * Math.cos(z);
+        im -= flux * Math.sin(z);
+
+      } // data1D
+
+      // fast interrupt :
+      if (currentThread.isInterrupted()) {
+        return;
+      }
+
+      // update complex instance (mutable):
+      vis[i].updateComplex(re, im);
+
+    } // vis
   }
 }
