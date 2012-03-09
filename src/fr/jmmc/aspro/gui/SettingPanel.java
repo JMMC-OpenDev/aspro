@@ -9,9 +9,14 @@ import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.event.OIFitsEvent;
 import fr.jmmc.aspro.model.event.ObservationEvent;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
+import fr.jmmc.jmcs.gui.task.TaskSwingWorkerExecutor;
 import java.awt.Component;
+import java.awt.Cursor;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.logging.Level;
 import javax.swing.JPanel;
+import javax.swing.Timer;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -19,12 +24,14 @@ import javax.swing.event.ChangeListener;
  * This panel corresponds to the single observation setting panel
  * @author bourgesl
  */
-public final class SettingPanel extends JPanel implements ObservationListener {
+public final class SettingPanel extends JPanel implements ObservationListener, Disposable {
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
   /** Class logger */
   private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(SettingPanel.class.getName());
+  /** default mouse cursor refresh period = 100 ms */
+  private static final int REFRESH_PERIOD = 100;
   /** enable / disable OIFits panel */
   private static final boolean ENABLE_OIFITS = false;
 
@@ -41,6 +48,8 @@ public final class SettingPanel extends JPanel implements ObservationListener {
   public static final String TAB_VIS2 = "Vis2 plot";
 
   /* members */
+  /** timeline refresh Swing timer */
+  private final Timer timerMouseCursorRefresh;
   /** basic observation form */
   private BasicObservationForm observationForm = null;
   /** observability panel */
@@ -57,7 +66,78 @@ public final class SettingPanel extends JPanel implements ObservationListener {
    */
   public SettingPanel() {
     initComponents();
+
+    final SettingPanel instance = this;
+
+    // Create the timeline refresh timer:
+    this.timerMouseCursorRefresh = new Timer(REFRESH_PERIOD, new ActionListener() {
+
+      /**
+       * Invoked when the timer action occurs.
+       */
+      @Override
+      public void actionPerformed(final ActionEvent ae) {
+        final Cursor currentCursor = instance.getCursor();
+
+        final Cursor newCursor = (TaskSwingWorkerExecutor.isTaskRunning()) ? Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR)
+                : Cursor.getDefaultCursor();
+
+        if (newCursor != currentCursor) {
+          instance.setCursor(newCursor);
+        }
+      }
+    });
+
     postInit();
+
+    // anyway enable mouse cursor timer:
+    enableMouseCursorRefreshTimer(true);
+  }
+
+  /**
+   * Start/Stop the internal mouse cursor Refresh timer
+   * @param enable true to enable it, false otherwise
+   */
+  private void enableMouseCursorRefreshTimer(final boolean enable) {
+    if (enable) {
+      if (!this.timerMouseCursorRefresh.isRunning()) {
+        if (logger.isLoggable(Level.FINE)) {
+          logger.fine("Starting timer: " + this.timerMouseCursorRefresh);
+        }
+        this.timerMouseCursorRefresh.start();
+      }
+    } else {
+      if (this.timerMouseCursorRefresh.isRunning()) {
+        if (logger.isLoggable(Level.FINE)) {
+          logger.fine("Stopping timer: " + this.timerMouseCursorRefresh);
+        }
+        this.timerMouseCursorRefresh.stop();
+      }
+    }
+  }
+
+  /**
+   * Free any ressource or reference to this instance :
+   * remove this instance form Preference Observers
+   */
+  @Override
+  public void dispose() {
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("dispose : " + this);
+    }
+
+    // call disposable components:
+    if (observabilityPanel != null) {
+      observabilityPanel.dispose();
+      observabilityPanel = null;
+    }
+    if (uvCoveragePanel != null) {
+      uvCoveragePanel.dispose();
+      uvCoveragePanel = null;
+    }
+
+    // disable timeline refresh timer:
+    enableMouseCursorRefreshTimer(false);
   }
 
   /** This method is called from within the constructor to
@@ -126,7 +206,7 @@ public final class SettingPanel extends JPanel implements ObservationListener {
     ObservationManager.getInstance().register(this.observationForm);
 
     // add the observation form :
-    this.jSplitPane.setLeftComponent(this.observationForm);        
+    this.jSplitPane.setLeftComponent(this.observationForm);
   }
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JSplitPane jSplitPane;
@@ -228,7 +308,7 @@ public final class SettingPanel extends JPanel implements ObservationListener {
     } else if (type == ObservationEventType.OIFITS_DONE
             && event instanceof OIFitsEvent
             && ((OIFitsEvent) event).getOIFitsFile() != null) {
-            
+
       // create the vis2 panel if null :      
       if (this.vis2Panel == null) {
         this.vis2Panel = new Vis2Panel();
@@ -274,14 +354,14 @@ public final class SettingPanel extends JPanel implements ObservationListener {
   public Component getTabSelectedComponent() {
     return jTabbedPane.getSelectedComponent();
   }
-  
+
   /**
    * Return true if the selected tab is using target models
    * @return true if the selected tab is using target models
    */
   public boolean isSelectedTabUsingTargetModel() {
     final Component com = getTabSelectedComponent();
-    
+
     return com == this.uvCoveragePanel || com == this.vis2Panel;
   }
 

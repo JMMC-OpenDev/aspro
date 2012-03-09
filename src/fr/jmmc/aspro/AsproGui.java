@@ -204,6 +204,9 @@ public final class AsproGui extends App {
    */
   @Override
   public void onFinish() {
+    // dispose Swing SettingPanel:
+    getSettingPanel().dispose();
+
     // stop the task executor :
     TaskSwingWorkerExecutor.stop();
 
