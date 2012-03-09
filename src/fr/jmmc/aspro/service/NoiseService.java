@@ -22,6 +22,7 @@ import fr.jmmc.aspro.model.util.SpectralBandUtils;
 import fr.jmmc.jmal.Band;
 import fr.jmmc.jmal.complex.Complex;
 import fr.jmmc.jmal.complex.ImmutableComplex;
+import fr.jmmc.jmal.model.VisNoiseService;
 import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Random;
@@ -35,7 +36,7 @@ import java.util.logging.Level;
  *
  * @author bourgesl
  */
-public final class NoiseService {
+public final class NoiseService implements VisNoiseService {
 
   /** Class logger */
   private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(NoiseService.class.getName());
@@ -132,7 +133,7 @@ public final class NoiseService {
   /** total instrumental visibility (with FT if any) */
   private double vinst;
   /** random generator */
-  public final Random random = new Random();
+  private final Random random = new Random();
 
   /**
    * Protected constructor
@@ -455,6 +456,15 @@ public final class NoiseService {
   }
 
   /**
+   * Return true if this service is enabled
+   * @return true if this service is enabled 
+   */
+  @Override
+  public boolean isEnabled() {
+    return isValid();
+  }
+
+  /**
    * Compute error on complex visibility derived from computeVis2Error(visAmp).
    * It returns Complex.NaN if the flux can not be computed
    *
@@ -462,9 +472,29 @@ public final class NoiseService {
    * @return complex visiblity error or NaN if the error can not be computed
    */
   public Complex computeVisComplexError(final double visAmp) {
+    // complex visibility error:
+    final double visErr = computeVisComplexErrorValue(visAmp);
+
     // fast return Complex.NaN if invalid configuration :
-    if (this.invalidParameters) {
+    if (Double.isNaN(visErr)) {
       return Complex.NaN;
+    }
+
+    return new ImmutableComplex(visErr, visErr); // immutable complex for safety
+  }
+
+  /**
+   * Compute error on complex visibility derived from computeVis2Error(visAmp).
+   * It returns Double.NaN if the error can not be computed
+   *
+   * @param visAmp visibility amplitude
+   * @return complex visiblity error or NaN if the error can not be computed
+   */
+  @Override
+  public double computeVisComplexErrorValue(final double visAmp) {
+    // fast return Double.NaN if invalid configuration :
+    if (this.invalidParameters) {
+      return Double.NaN;
     }
 
     // visibility amplitude error :
@@ -478,7 +508,7 @@ public final class NoiseService {
     // complex visibility error : visErrRe = visErrIm = visAmpErr / SQRT(2) :
     final double visErr = visAmpErr * SQRT_2_INV;
 
-    return new ImmutableComplex(visErr, visErr); // immutable complex for safety
+    return visErr;
   }
 
   /**
@@ -579,9 +609,9 @@ public final class NoiseService {
 
     if (useBias) {
       if (this.instrumentVis2CalibrationBias == 0d) {
-      // TODO: find correct coefficients for instruments AMBER, MIDI, VEGA and use instrumentVis2CalibrationBias in  estimation.
+        // TODO: find correct coefficients for instruments AMBER, MIDI, VEGA and use instrumentVis2CalibrationBias in  estimation.
 //        return Math.max(svis2, Math.pow(this.instrumentalVisibilityBias, 2d));
-        return Math.max(svis2, this.instrumentalVisibilityBias);        
+        return Math.max(svis2, this.instrumentalVisibilityBias);
       }
       // JBLB: bias estimation (first order for PIONIER):
       return Math.max(svis2, Math.pow(this.instrumentalVisibilityBias, 2d) + this.instrumentVis2CalibrationBias * Math.pow(visAmp, 2d));
@@ -637,19 +667,12 @@ public final class NoiseService {
   }
 
   /**
-   * Return a random value from a Normal (a.k.a. Gaussian) distribution with the given standard deviation
-   *
-   * Equivalent to fortran code (kernel/lib/gsys/sysfor.f90)
-   *
-   * function rangau(sigma)
-   * !---------------------------------------------------------------------
-   * !       Normal gaussian distribution with R.M.S. equal to sigma
-   * !---------------------------------------------------------------------
-   *
-   * @param sigma standard deviation
-   * @return random value
+   * Get gaussian noise value given its error (= standard deviation)
+   * @param visErr complex visiblity error or NaN if the error can not be computed
+   * @return gaussian noise value
    */
-  double randomGauss(final double sigma) {
-    return sigma * random.nextGaussian();
+  @Override
+  public double gaussianNoise(final double visErr) {
+    return visErr * random.nextGaussian();
   }
 }
