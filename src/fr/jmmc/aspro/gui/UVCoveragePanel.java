@@ -1697,6 +1697,11 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     public void refreshUI(final ObservationCollectionUVData uvDataCollection) {
       final boolean resetOIFits = (doOIFits) ? !this.uvPanel.computeOIFits(uvDataCollection) : true;
 
+      if (!doOIFits) {
+        // add warning to indicate that OIFits are disabled:
+        uvDataCollection.getWarningContainer().addWarningMessage("OIFits data computation is disabled");
+      }
+      
       // reset the OIFits structure in the current observation - No OIFitsSwingWorker running:
       if (resetOIFits) {
         ObservationManager.getInstance().setOIFitsFile(null);

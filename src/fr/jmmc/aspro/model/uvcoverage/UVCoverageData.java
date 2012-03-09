@@ -6,7 +6,8 @@ package fr.jmmc.aspro.model.uvcoverage;
 import fr.jmmc.aspro.model.BaseLine;
 import fr.jmmc.aspro.model.ObservationVersion;
 import fr.jmmc.aspro.model.WarningContainer;
-import fr.jmmc.oitools.model.OIFitsFile;
+import fr.jmmc.aspro.service.NoiseService;
+import fr.jmmc.aspro.service.OIFitsCreatorService;
 import java.util.List;
 
 /**
@@ -35,8 +36,10 @@ public final class UVCoverageData {
   private List<UVRangeBaseLineData> targetUVObservability;
   /** warning container */
   private final WarningContainer warningContainer = new WarningContainer();
-  /** oifits structure */
-  private OIFitsFile oiFitsFile;
+  /** optional NoiseService ready to use to compute noise on model images */
+  private NoiseService noiseService = null;
+  /** OIFitsCreatorService ready to compute later OIFits: TODO : move elsewhere / another task worker */
+  private OIFitsCreatorService oiFitsCreator = null;
 
   /**
    * Public Constructor
@@ -192,18 +195,34 @@ public final class UVCoverageData {
   }
 
   /**
-   * Return the oifits structure
-   * @return oifits structure
+   * Return the optional NoiseService ready to use to compute noise on model images
+   * @return optional NoiseService ready to use to compute noise on model images
    */
-  public OIFitsFile getOiFitsFile() {
-    return oiFitsFile;
+  public NoiseService getNoiseService() {
+    return noiseService;
   }
 
   /**
-   * Define the oifits structure
-   * @param oiFitsFile oifits structure
+   * Define the optional NoiseService ready to use to compute noise on model images
+   * @param noiseService optional NoiseService ready to use to compute noise on model images
    */
-  public void setOiFitsFile(final OIFitsFile oiFitsFile) {
-    this.oiFitsFile = oiFitsFile;
+  public void setNoiseService(final NoiseService noiseService) {
+    this.noiseService = noiseService;
+  }
+
+  /**
+   * Return the OIFitsCreatorService ready to compute later OIFits: TODO : move elsewhere / another task worker
+   * @return OIFitsCreatorService ready to compute later OIFits: TODO : move elsewhere / another task worker
+   */
+  public OIFitsCreatorService getOiFitsCreator() {
+    return oiFitsCreator;
+  }
+
+  /**
+   * Define the OIFitsCreatorService ready to compute later OIFits: TODO : move elsewhere / another task worker
+   * @param oiFitsCreator OIFitsCreatorService ready to compute later OIFits: TODO : move elsewhere / another task worker
+   */
+  public void setOiFitsCreator(final OIFitsCreatorService oiFitsCreator) {
+    this.oiFitsCreator = oiFitsCreator;
   }
 }

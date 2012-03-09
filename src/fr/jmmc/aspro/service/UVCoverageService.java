@@ -459,9 +459,9 @@ public final class UVCoverageService {
     }
 
     // Get lower wavelength for the selected instrument:
-    this.instrumentMinWaveLength = AsproConstants.MICRO_METER * 
-            this.observation.getInstrumentConfiguration().getInstrumentConfiguration().getFocalInstrument().getWaveLengthMin();
-    
+    this.instrumentMinWaveLength = AsproConstants.MICRO_METER
+            * this.observation.getInstrumentConfiguration().getInstrumentConfiguration().getFocalInstrument().getWaveLengthMin();
+
     final FocalInstrumentMode insMode = this.observation.getInstrumentConfiguration().getFocalInstrumentMode();
     if (insMode == null) {
       throw new IllegalStateException("the instrumentMode is empty !");
@@ -470,12 +470,12 @@ public final class UVCoverageService {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("instrumentMode : " + insMode.getName());
     }
-    
+
     // Get wavelength range for the selected instrument mode :
     this.lambdaMin = AsproConstants.MICRO_METER * insMode.getWaveLengthMin();
     this.lambdaMax = AsproConstants.MICRO_METER * insMode.getWaveLengthMax();
     this.lambda = AsproConstants.MICRO_METER * insMode.getWaveLength();
-    
+
     this.nSpectralChannels = insMode.getEffectiveNumberOfChannels();
 
     if (logger.isLoggable(Level.FINE)) {
@@ -527,21 +527,24 @@ public final class UVCoverageService {
     if (targetUVObservability == null) {
       addWarning("OIFits data not available");
     } else {
-
       // thread safety : TODO: observation can change ... extract observation info in prepare ??
 
       // get current target :
       final Target target = this.observation.getTarget(this.targetName);
 
       if (target != null) {
-        // Create the OIFitsCreatorService :
+        // Create the OIFitsCreatorService / NoiseService :
         final OIFitsCreatorService oiFitsCreator = new OIFitsCreatorService(this.observation, target,
                 this.beams, this.baseLines, this.lambdaMin, this.lambdaMax, this.nSpectralChannels, this.doDataNoise,
                 this.data.getHA(), targetUVObservability, this.starData.getPrecRA(), this.sc,
                 this.data.getWarningContainer());
 
-        // Create the OIFits structure :
-        this.data.setOiFitsFile(oiFitsCreator.createOIFits());
+        // TODO: create elsewhere the OIFitsCreatorService:
+        this.data.setOiFitsCreator(oiFitsCreator);
+
+        if (oiFitsCreator.isDoNoise()) {
+          this.data.setNoiseService(oiFitsCreator.getNoiseService());
+        }
       }
     }
   }

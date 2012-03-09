@@ -22,9 +22,12 @@ import fr.jmmc.jmal.complex.Complex;
 import fr.jmmc.jmal.complex.ImmutableComplex;
 import fr.jmmc.jmal.complex.MutableComplex;
 import fr.jmmc.jmal.model.ModelComputeContext;
+import fr.jmmc.jmal.model.ModelFunctionComputeContext;
 import fr.jmmc.jmal.model.ModelManager;
 import fr.jmmc.jmal.model.targetmodel.Model;
+import fr.jmmc.jmcs.util.concurrent.ParallelJobExecutor;
 import fr.jmmc.oitools.OIFitsConstants;
+import fr.jmmc.oitools.image.FitsImage;
 import fr.jmmc.oitools.model.OIArray;
 import fr.jmmc.oitools.model.OIFitsChecker;
 import fr.jmmc.oitools.model.OIFitsFile;
@@ -40,10 +43,11 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Future;
 import java.util.logging.Level;
 
 /**
- * This class contains the code to create OIFits structure from the current observation
+ * This class contains the code to create OIFits structure from the current observation and performs noise modeling
  * @author bourgesl
  */
 public final class OIFitsCreatorService {
@@ -54,6 +58,10 @@ public final class OIFitsCreatorService {
   private final static short TARGET_ID = (short) 1;
   /** enable the OIFits validation */
   private final static boolean DO_VALIDATE = false;
+  /** threshold to use parallel jobs (32 UV points) */
+  private final static int JOB_THRESHOLD = 32;
+  /** Jmcs Parallel Job executor */
+  private static final ParallelJobExecutor jobExecutor = ParallelJobExecutor.getInstance();
 
   /* members */
   /* input */
@@ -92,11 +100,11 @@ public final class OIFitsCreatorService {
 
   /* output */
   /** oifits structure */
-  private final OIFitsFile oiFitsFile;
+  private OIFitsFile oiFitsFile = null;
 
   /* internal */
-  /** target has models */
-  private final boolean hasModels;
+  /** target has model (analytical or user model) */
+  private final boolean hasModel;
   /** flag = true if returned errors are valid */
   private final boolean errorValid;
   /** flag to add gaussian noise to OIFits data; true if parameter doDataNoise = true and noise parameters are valid */
@@ -167,17 +175,10 @@ public final class OIFitsCreatorService {
       this.integrationTime = observation.getInstrumentConfiguration().getAcquisitionTime().doubleValue();
     }
 
-    // create a new OIFits structure :
-    this.oiFitsFile = new OIFitsFile();
-
     // Prepare the noise service :
     this.noiseService = new NoiseService(this.observation, target, warningContainer);
 
-    // TODO: handle user model here
-    // Has models ?
-    final List<Model> models = this.target.getModels();
-
-    this.hasModels = (!models.isEmpty());
+    this.hasModel = target.hasModel();
 
     this.errorValid = this.noiseService.isValid();
 
@@ -189,10 +190,13 @@ public final class OIFitsCreatorService {
    * Create the OIFits structure with OI_ARRAY, OI_TARGET, OI_WAVELENGTH, OI_VIS tables
    * @return OIFits structure
    */
-  OIFitsFile createOIFits() {
+  public OIFitsFile createOIFits() {
 
     // Start the computations :
     final long start = System.nanoTime();
+
+    // create a new EMPTY OIFits structure :
+    this.oiFitsFile = new OIFitsFile();
 
     this.arrayName = this.observation.getInterferometerConfiguration().getName();
     this.instrumentName = this.observation.getInstrumentConfiguration().getName();
@@ -416,66 +420,161 @@ public final class OIFitsCreatorService {
   }
 
   /**
-   * compute complex visibilities from target models and store this data in local reference table
+   * Compute complex visibilities using the target model (analytical or user model)
+   * and store this data in local reference table
    */
   private void computeModelVisibilities() {
 
-    // TODO: support user models here (requires FFT + interpolation)
-    
-    if (this.hasModels) {
-      // Clone models and normalize fluxes :
-      final List<Model> normModels = ModelManager.normalizeModels(this.target.getModels());
+    if (this.hasModel) {
 
-      // prepare models once for all:
-      final ModelComputeContext context = ModelManager.getInstance().prepareModels(normModels, this.nWaveLengths);
+      /** Get the current thread to check if the computation is interrupted */
+      final Thread currentThread = Thread.currentThread();
+
+      // TODO: compare directFT vs FFT + interpolation
+
+      final long start = System.nanoTime();
+
+      final boolean useAnalyticalModel = this.target.hasAnalyticalModel();
+
+      final ModelManager modelManager;
+      // model computation context              
+      final ModelComputeContext context;
+
+      if (useAnalyticalModel) {
+        // Analytical model:
+        modelManager = ModelManager.getInstance();
+
+        // Clone models and normalize fluxes :
+        final List<Model> normModels = ModelManager.normalizeModels(this.target.getModels());
+
+        // prepare models once for all:
+        context = modelManager.prepareModels(normModels, this.nWaveLengths);
+
+      } else {
+        // User Model:
+        modelManager = null;
+
+        // Get preloaded and prepared fits image:
+        final FitsImage fitsImage = target.getUserModel().getFitsImage();
+
+        if (fitsImage == null) {
+          return;
+        }
+
+        // prepare models once for all:
+        context = UserModelService.prepareModel(fitsImage, this.nWaveLengths);
+      }
+
+      // fast interrupt :
+      if (currentThread.isInterrupted()) {
+        return;
+      }
+
+      final int nPoints = this.nHAPoints * this.nBaseLines * this.nWaveLengths;
+
+      if (logger.isLoggable(Level.INFO)) {
+        logger.info("computeModelVisibilities: " + nPoints + " points - please wait ...");
+      }
+
 
       // Allocate data array for complex visibility and error :
       final Complex[][] cVis = new Complex[this.nHAPoints * this.nBaseLines][this.nWaveLengths];
       final Complex[][] cVisError = new Complex[this.nHAPoints * this.nBaseLines][this.nWaveLengths];
 
-      double u, v;
-      final double[] ufreq = new double[this.nWaveLengths];
-      final double[] vfreq = new double[this.nWaveLengths];
 
-      // Iterate on HA points :
-      for (int i = 0, j = 0, k = 0, l = 0; i < this.nHAPoints; i++) {
+      // enable parallel jobs if many points using user model:
+      final int nJobs = (!useAnalyticalModel && nPoints > JOB_THRESHOLD) ? jobExecutor.getMaxParallelJob() : 1;
 
-        j = 0;
+      // computation tasks:
+      final Runnable[] jobs = new Runnable[nJobs];
 
-        // Iterate on baselines :
-        for (final UVRangeBaseLineData uvBL : this.targetUVObservability) {
+      // create tasks:
+      for (int i = 0; i < nJobs; i++) {
+        final int jobIndex = i;
 
-          k = this.nBaseLines * i + j;
-
-          // UV coords (m) :
-          u = uvBL.getU()[i];
-          v = uvBL.getV()[i];
-
-          // Compute complex visibility for the given models :
-
-          // prepare spatial frequencies :
-          for (l = 0; l < this.nWaveLengths; l++) {
-            ufreq[l] = u / this.waveLengths[l];
-            vfreq[l] = v / this.waveLengths[l];
-          }
-
-          // compute complex visibilities :
-          cVis[k] = convertArray(ModelManager.getInstance().computeModels(context, ufreq, vfreq));
-
-          if (cVis[k] == null || Thread.currentThread().isInterrupted()) {
-            // fast interrupt :
-            return;
-          }
-
-          // Iterate on wave lengths :
-          for (l = 0; l < this.nWaveLengths; l++) {
-            // complex visibility error or Complex.NaN:
-            cVisError[k][l] = this.noiseService.computeVisComplexError(cVis[k][l].abs());
-          }
-
-          j++;
+        final ModelComputeContext jobContext;
+        if (i == 0) {
+          jobContext = context;
+        } else {
+          jobContext = (useAnalyticalModel) ? ModelManager.cloneContext((ModelFunctionComputeContext) context)
+                  : UserModelService.cloneContext((UserModelComputeContext) context);
         }
+
+        jobs[i] = new Runnable() {
+
+          @Override
+          public void run() {
+            // spatial frequencies for a single HA (spectral dispersion):
+            final double[] ufreq = new double[nWaveLengths];
+            final double[] vfreq = new double[nWaveLengths];
+
+            double u, v;
+
+            // Iterate on HA points :
+            for (int i = 0, j = 0, k = 0, l = 0; i < nHAPoints; i++) {
+
+              j = 0;
+
+              // Iterate on baselines :
+              for (final UVRangeBaseLineData uvBL : targetUVObservability) {
+                k = nBaseLines * i + j;
+
+                // job parallelism:
+                if (k % nJobs == jobIndex) {
+
+                  // UV coords (m) :
+                  u = uvBL.getU()[i];
+                  v = uvBL.getV()[i];
+
+                  // Compute complex visibility using the target model:
+
+                  // prepare spatial frequencies :
+                  for (l = 0; l < nWaveLengths; l++) {
+                    ufreq[l] = u / waveLengths[l];
+                    vfreq[l] = v / waveLengths[l];
+                  }
+
+                  // compute complex visibilities :
+                  if (useAnalyticalModel) {
+                    cVis[k] = convertArray(modelManager.computeModels((ModelFunctionComputeContext) jobContext, ufreq, vfreq));
+                  } else {
+                    cVis[k] = convertArray(UserModelService.computeModel((UserModelComputeContext) jobContext, ufreq, vfreq));
+                  }
+
+                  if (cVis[k] == null || currentThread.isInterrupted()) {
+                    // fast interrupt :
+                    return;
+                  }
+
+                  // Iterate on wave lengths :
+                  for (l = 0; l < nWaveLengths; l++) {
+                    // complex visibility error or Complex.NaN:
+                    cVisError[k][l] = noiseService.computeVisComplexError(cVis[k][l].abs());
+                  }
+                }
+
+                // increment j:
+                j++;
+              } // baselines
+            } // HA
+          }
+        };
       }
+
+      if (nJobs > 1) {
+        // execute jobs in parallel:
+        final Future<?>[] futures = jobExecutor.fork(jobs);
+
+        logger.fine("wait for jobs to terminate ...");
+
+        jobExecutor.join("OIFitsCreatorService.computeModelVisibilities", futures);
+
+      } else {
+        // execute the single task using the current thread:
+        jobs[0].run();
+      }
+
+      logger.info("computeModelVisibilities: duration = " + (1e-6d * (System.nanoTime() - start)) + " ms.");
 
       this.visComplex = cVis;
       this.visError = cVisError;
@@ -491,7 +590,7 @@ public final class OIFitsCreatorService {
     final int length = array.length;
     final Complex[] result = new Complex[length];
 
-    for (int i = 0; i < length; i++) {
+    for (int i = length - 1; i >= 0; i--) {
       result[i] = new ImmutableComplex(array[i]); // immutable complex for safety
     }
     return result;
@@ -577,7 +676,7 @@ public final class OIFitsCreatorService {
         vCoords[k] = v;
 
         // if target has models and errors are valid, then complex visibility are computed :
-        if (!this.hasModels || !this.errorValid) {
+        if (!this.hasModel || !this.errorValid) {
           // Invalid => NaN value :
 
           // Iterate on wave lengths :
@@ -624,8 +723,8 @@ public final class OIFitsCreatorService {
             if (this.doNoise) {
               // add gaussian noise with sigma = visErrRe / visErrIm :
               visComplexNoisy[k][l] = new ImmutableComplex(
-                      visRe + this.noiseService.randomGauss(visErrRe),
-                      visIm + this.noiseService.randomGauss(visErrIm)); // immutable complex for safety
+                      visRe + this.noiseService.gaussianNoise(visErrRe),
+                      visIm + this.noiseService.gaussianNoise(visErrIm)); // immutable complex for safety
             } else {
               visComplexNoisy[k][l] = this.visComplex[k][l];
             }
@@ -657,7 +756,7 @@ public final class OIFitsCreatorService {
     }
 
     /* Compute visAmp / visPhi as amber does */
-    if (isAmber && this.hasModels && this.errorValid) {
+    if (isAmber && this.hasModel && this.errorValid) {
       OIFitsAMBERService.amdlibFakeAmberDiffVis(vis, visComplexNoisy, this.visError, this.waveLengths);
     }
 
@@ -695,7 +794,7 @@ public final class OIFitsCreatorService {
     for (int k = 0, l = 0; k < nRows; k++) {
 
       // if target has models, then complex visibility are computed :
-      if (!this.hasModels) {
+      if (!this.hasModel) {
 
         // Iterate on wave lengths :
         for (l = 0; l < this.nWaveLengths; l++) {
@@ -724,7 +823,7 @@ public final class OIFitsCreatorService {
 
           if (this.doNoise) {
             // add gaussian noise with sigma = err :
-            vis2Data[k][l] += this.noiseService.randomGauss(v2Err);
+            vis2Data[k][l] += this.noiseService.gaussianNoise(v2Err);
           }
 
           // mark this value as valid only if error is valid :
@@ -860,7 +959,7 @@ public final class OIFitsCreatorService {
         }
 
         // pure complex visibility data :
-        visData12 = (this.hasModels) ? this.visComplex[vp + pos] : null;
+        visData12 = (this.hasModel) ? this.visComplex[vp + pos] : null;
         u12 = visUCoords[vp + pos];
         v12 = visVCoords[vp + pos];
 
@@ -873,7 +972,7 @@ public final class OIFitsCreatorService {
         }
 
         // pure complex visibility data :
-        visData23 = (this.hasModels) ? this.visComplex[vp + pos] : null;
+        visData23 = (this.hasModel) ? this.visComplex[vp + pos] : null;
         u23 = visUCoords[vp + pos];
         v23 = visVCoords[vp + pos];
 
@@ -891,10 +990,10 @@ public final class OIFitsCreatorService {
         }
 
         // pure complex visibility data :
-        visData13 = (this.hasModels) ? this.visComplex[vp + pos] : null;
+        visData13 = (this.hasModel) ? this.visComplex[vp + pos] : null;
 
         // if target has models, then complex visibility are computed :
-        if (!this.hasModels) {
+        if (!this.hasModel) {
 
           // Iterate on wave lengths :
           for (l = 0; l < this.nWaveLengths; l++) {
@@ -944,7 +1043,7 @@ public final class OIFitsCreatorService {
 
             if (this.doNoise) {
               // use same random number for the 2 values (sigma = 1) :
-              rand = this.noiseService.randomGauss(1d);
+              rand = this.noiseService.gaussianNoise(1d);
 
               // add gaussian noise with sigma = errAmp :
               t3Amp[k][l] += rand * errAmp;
@@ -1201,5 +1300,29 @@ public final class OIFitsCreatorService {
       sb.append(']');
       return sb.toString();
     }
+  }
+
+  /**
+   * Return the flag to add gaussian noise to OIFits data; true if parameter doDataNoise = true and noise parameters are valid
+   * @return flag to add gaussian noise to OIFits data; true if parameter doDataNoise = true and noise parameters are valid
+   */
+  public boolean isDoNoise() {
+    return doNoise;
+  }
+
+  /**
+   * Return true if returned errors are valid
+   * @return true if returned errors are valid
+   */
+  public boolean isErrorValid() {
+    return errorValid;
+  }
+
+  /**
+   * Return the noise service
+   * @return noise service
+   */
+  public NoiseService getNoiseService() {
+    return noiseService;
   }
 }
