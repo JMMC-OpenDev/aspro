@@ -160,7 +160,8 @@ public final class FitsImageUtils {
     final FitsImageFile imgFitsFile = FitsImageLoader.load(absFilePath);
 
     for (FitsImage fitsImage : imgFitsFile.getFitsImages()) {
-      updateDataRange(fitsImage);
+      // update boundaries excluding zero values:
+      updateDataRangeExcludingZero(fitsImage);
     }
 
     return imgFitsFile;
@@ -196,27 +197,34 @@ public final class FitsImageUtils {
 
     minMaxJob.forkAndJoin();
 
-    logger.info("ImageMinMaxJob result: " + minMaxJob.getMin() + " - " + minMaxJob.getMax());
+    logger.info("ImageMinMaxJob min: " + minMaxJob.getMin() + " - max: " + minMaxJob.getMax());
+    logger.info("ImageMinMaxJob nData: " + minMaxJob.getNData() + " - sum: " + minMaxJob.getSum());
+
+    // update nData:
+    image.setNData(minMaxJob.getNData());
 
     // update dataMin/dataMax:
     image.setDataMin(minMaxJob.getMin());
     image.setDataMax(minMaxJob.getMax());
+    // update sum:
+    image.setSum(minMaxJob.getSum());
   }
 
   /**
    * Prepare the given image for FFT (normalize, threshold, pad to next power of two)
    * and return another FitsImage ready for FFT
    * @param image FitsImage to process
-   * @param zeroThreshold lowest positive value (1e-5 for example) to ignore data values below AFTER normalization
+   * @param minVisibility minimum visiblity (1e-2) to define low threshold (ignore too small values)
    * @return another FitsImage
    */
-  public static FitsImage prepareImage(final FitsImage image, final float zeroThreshold) {
-
-    if (!image.isDataRangeDefined()) {
-      updateDataRange(image);
-    }
+  public static FitsImage prepareImage(final FitsImage image, final float minVisibility) {
 
     final FitsImage fitsImage = copyFitsImage(image);
+
+    if (!fitsImage.isDataRangeDefined()) {
+      // update boundaries excluding zero values:
+      updateDataRangeExcludingZero(image);
+    }
 
     // in place modifications:
     float[][] data = fitsImage.getData();
@@ -241,25 +249,59 @@ public final class FitsImageUtils {
     normJob.forkAndJoin();
 
     // update boundaries excluding zero values:
-    updateDataRange(fitsImage, true);
+    updateDataRangeExcludingZero(fitsImage);
 
 
-    // 2 - Ignore negative values and lower than given zeroThreshold i.e. replace them by 0.0:
+    // 2.1 - Ignore negative values and lower than given zeroThreshold i.e. replace them by 0.0:
+    float tunedZeroThreshold = 2f * minVisibility / fitsImage.getNData();
+    logger.info("tuned threshold = " + tunedZeroThreshold);
 
-    if (fitsImage.getDataMin() < zeroThreshold) {
+    if (fitsImage.getDataMin() < tunedZeroThreshold) {
 
-      final ImageLowerThresholdJob fixNegativeJob = new ImageLowerThresholdJob(data, nbCols, nbRows, zeroThreshold, 0f);
+      final ImageLowerThresholdJob fixNegativeJob = new ImageLowerThresholdJob(data, nbCols, nbRows, tunedZeroThreshold, 0f);
 
-      logger.info("ImageLowerThresholdJob forkAndJoin - threshold = " + zeroThreshold);
+      logger.info("ImageLowerThresholdJob forkAndJoin - threshold = " + tunedZeroThreshold);
 
       fixNegativeJob.forkAndJoin();
 
       logger.info("ImageLowerThresholdJob result: " + fixNegativeJob.getUpdateCount());
 
       // update boundaries excluding zero values:
-      updateDataRange(fitsImage, true);
+      updateDataRangeExcludingZero(fitsImage);
     }
 
+    
+    // 2.2 - Normalize data (total flux):
+    normFactor = (float) (1d / fitsImage.getSum());
+
+    normJob = new ImageNormalizeJob(data, nbCols, nbRows, normFactor);
+
+    logger.info("ImageNormalizeJob forkAndJoin - factor = " + normFactor);
+
+    normJob.forkAndJoin();
+
+    // update boundaries excluding zero values:
+    updateDataRangeExcludingZero(fitsImage);
+
+    
+    // 2.3 - Skip data lower than threshold again:
+    tunedZeroThreshold = 2f * minVisibility / fitsImage.getNData();
+    logger.info("tuned threshold = " + tunedZeroThreshold);
+
+    if (fitsImage.getDataMin() < tunedZeroThreshold) {
+
+      final ImageLowerThresholdJob fixThresholdJob = new ImageLowerThresholdJob(data, nbCols, nbRows, tunedZeroThreshold, 0f);
+
+      logger.info("ImageLowerThresholdJob forkAndJoin - threshold = " + tunedZeroThreshold);
+
+      fixThresholdJob.forkAndJoin();
+
+      logger.info("ImageLowerThresholdJob result: " + fixThresholdJob.getUpdateCount());
+
+      // update boundaries excluding zero values:
+      updateDataRangeExcludingZero(fitsImage);
+    }
+    
 
     // 3 - Locate data inside image i.e. perform an XY Projection and determine data boundaries:
 
@@ -270,7 +312,7 @@ public final class FitsImageUtils {
     projXYJob.forkAndJoin();
 
 
-    // 4 - extract ROI:
+    // 4 - Extract ROI:
     // keep the center of the ROI and keep the image square (width = height = even number):
     int rows1 = projXYJob.getRowLowerIndex();
     int rows2 = projXYJob.getRowUpperIndex();
@@ -316,7 +358,7 @@ public final class FitsImageUtils {
     // update fits image:
     // note: this extraction does not check boundary overlapping:
     data = ImageArrayUtils.extract(nbRows, nbCols, data, rows1, cols1, rows2, cols2);
-    
+
     if (data == null) {
       // outside ranges:
       data = fitsImage.getData();
@@ -333,25 +375,9 @@ public final class FitsImageUtils {
 
       logger.info("ROI size = " + nbRows + " x " + nbCols);
     }
+    
 
-
-    // 5 - Normalize data (total flux):
-    final float total = ImageArrayUtils.sum(projXYJob.getRowData()) + ImageArrayUtils.sum(projXYJob.getColumnData());
-
-    // multiply by 2 as only half of data is processed => normalize RE[0][0] = 1.0
-    normFactor = (float) (2d / total);
-
-    normJob = new ImageNormalizeJob(data, nbCols, nbRows, normFactor);
-
-    logger.info("ImageNormalizeJob forkAndJoin - factor = " + normFactor);
-
-    normJob.forkAndJoin();
-
-    // update boundaries excluding zero values:
-    updateDataRange(fitsImage, true);
-
-
-    // 6 - Make sure the image is square i.e. padding (width = height = even number):
+    // 5 - Make sure the image is square i.e. padding (width = height = even number):
     final int newSize = Math.max(
             (nbRows % 2 == 1) ? nbRows + 1 : nbRows,
             (nbCols % 2 == 1) ? nbCols + 1 : nbCols);
@@ -371,7 +397,7 @@ public final class FitsImageUtils {
     }
 
 
-    // 7 - flip axes to have positive increments (left to right for the column axis and bottom to top for the row axis)
+    // 6 - flip axes to have positive increments (left to right for the column axis and bottom to top for the row axis)
     // note: flip operation requires image size to be an even number
     final double incRow = fitsImage.getSignedIncRow();
     if (incRow < 0d) {
