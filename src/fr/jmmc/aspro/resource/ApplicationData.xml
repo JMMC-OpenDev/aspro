@@ -7,9 +7,9 @@
 
 <ApplicationData link="http://www.jmmc.fr/aspro2">
 
-  <program name="Aspro2" version="0.8.2 beta 11"/>
+  <program name="Aspro2" version="0.9.0 beta 1"/>
   
-  <compilation date="06/03/2011" compiler="JDK 1.5.0_16"/>
+  <compilation date="08/03/2011" compiler="JDK 1.5.0_16"/>
 
   <text>
     <![CDATA[ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations
@@ -141,6 +141,19 @@
   </menubar>
 
   <releasenotes>
+    <release version="0.9.0">
+      <prerelease version="0.9.0 beta 1"> 
+        <change type="FEATURE">Added User model editor (single Fits image) in the target model editor including image preview</change> 
+        <change type="FEATURE">Added 'Compute OIFits data' checkbox on the UV Coverage panel to enable/disable the OIFits computation 
+          which can be very slow (for example: high resolution AMBER observation)</change> 
+        <change type="FEATURE">Added User model support to compute OIFits data using direct fourier transform (slow even in multithreading)</change> 
+        <change type="FEATURE">Added User model support (single Fits image) to compute UV Map (gray model) using fractional FFT (multithreading)</change> 
+        <change type="CHANGE">OIFits data are now computed in background (multithreading)</change> 
+        <change type="CHANGE">Changed mouse cursor when computations are running (busy wait cursor) but the application is still usable</change> 
+        <change type="CHANGE">Enhanced status bar messages to better indicate when background computations are running</change> 
+      </prerelease>
+    </release>
+    
     <release version="0.8.2">
       <prerelease version="0.8.2 beta 11"> 
         <change type="FEATURE">Added ESO P90 configuration</change> 
