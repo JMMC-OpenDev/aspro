@@ -55,8 +55,7 @@ public class ColorModelPaintScale
           final IndexColorModel colorModel, final ColorScale colorScale) {
 
     if (lowerBound >= upperBound) {
-      throw new IllegalArgumentException(
-              "Requires lowerBound < upperBound.");
+      throw new IllegalArgumentException("Requires lowerBound < upperBound.");
     }
     this.lowerBound = lowerBound;
     this.upperBound = upperBound;
