@@ -22,8 +22,8 @@ public final class ObservationCollectionUVData extends ObservationCollectionObsD
   private UVMapData uvMapData = null;
   /** warning container (merged) */
   private WarningContainer warningContainer;
-  /** oifits structure (merged) : TODO implement merge OIFITS */
-  private OIFitsFile oiFitsFile;
+  /** flag indicating that OIFits computation is done */
+  private boolean OIFitsDone = false;
 
   /**
    * Public constructor : copy information from the given observation collection (by reference)
@@ -32,7 +32,7 @@ public final class ObservationCollectionUVData extends ObservationCollectionObsD
    * @param uvDataList UV Coverage data
    */
   public ObservationCollectionUVData(final ObservationCollection obsCollection,
-                                     final List<ObservabilityData> obsDataList, final List<UVCoverageData> uvDataList) {
+          final List<ObservabilityData> obsDataList, final List<UVCoverageData> uvDataList) {
     super(obsCollection, obsDataList);
     this.uvDataList = uvDataList;
   }
@@ -94,18 +94,18 @@ public final class ObservationCollectionUVData extends ObservationCollectionObsD
   }
 
   /**
-   * Return the oifits structure (merged)
-   * @return oifits structure (merged)
+   * Return the flag indicating that OIFits computation is done
+   * @return flag indicating that OIFits computation is done
    */
-  public OIFitsFile getOiFitsFile() {
-    return oiFitsFile;
+  public boolean isOIFitsDone() {
+    return OIFitsDone;
   }
 
   /**
-   * Define the oifits structure (merged)
-   * @param oiFitsFile oifits structure (merged)
+   * Define the flag indicating that OIFits computation is done
+   * @param OIFitsDone flag indicating that OIFits computation is done
    */
-  public void setOiFitsFile(final OIFitsFile oiFitsFile) {
-    this.oiFitsFile = oiFitsFile;
+  public void setOIFitsDone(final boolean OIFitsDone) {
+    this.OIFitsDone = OIFitsDone;
   }
 }
