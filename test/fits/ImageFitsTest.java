@@ -82,11 +82,12 @@ public class ImageFitsTest {
 
     final ColorScale colorScale = ColorScale.LINEAR;
 
-    if (false) {
-//      String file = "/home/bourgesl/ASPRO2/fits/SG_surface2.fits";
+    if (true) {
+      String file = "/home/bourgesl/ASPRO2/fits/SG_surface2.fits";
+//      String file = "/home/bourgesl/ASPRO2/fits/tests/HighMass.fits.gz";         
 //      String file = "/home/bourgesl/ASPRO2/fits/ellipsePlusPunct.fits";
 
-      String file = "/home/bourgesl/ASPRO2/fits/tests/3c273_all_pl27.fits.gz";
+//      String file = "/home/bourgesl/ASPRO2/fits/tests/3c273_all_pl27.fits.gz";
 //      String file = "/home/bourgesl/ASPRO2/fits/tests/58Eri_clumpy_K_1024.fits.gz";
 
 //      String file = "/home/bourgesl/ASPRO2/fits/tests/AGN.fits.gz";      
@@ -98,7 +99,6 @@ public class ImageFitsTest {
 //      String file = "/home/bourgesl/ASPRO2/fits/tests/EvolvedStar.fits.gz";      
 
 //      String file = "/home/bourgesl/ASPRO2/fits/tests/flux_bf_intens_continuum_002_extended.fits.gz";      
-//      String file = "/home/bourgesl/ASPRO2/fits/tests/HighMass.fits.gz";         
 
 //java.lang.ClassCastException: [[[[I cannot be cast to [[I      
 //      String file = "/home/bourgesl/ASPRO2/fits/tests/isella_large_grain_inc000.fits.gz";  
@@ -220,7 +220,7 @@ public class ImageFitsTest {
       }
     }
 
-    if (true) {
+    if (false) {
       final File directory = new File("/home/bourgesl/ASPRO2/fits/tests/");
       if (directory.exists() && directory.isDirectory()) {
 
