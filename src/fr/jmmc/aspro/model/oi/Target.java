@@ -1025,7 +1025,7 @@ public class Target
    * @return true if the model is an analytical model; false an user model 
    */
   public final boolean hasAnalyticalModel() {
-    return (useAnalyticalModel == null) ? true : useAnalyticalModel.booleanValue();
+    return (this.useAnalyticalModel == null) ? true : this.useAnalyticalModel.booleanValue();
   }
   
   /**
@@ -1034,12 +1034,23 @@ public class Target
    */
   public final boolean hasModel() {
     if (hasAnalyticalModel()) {
-      return (models != null && !models.isEmpty());
+      return (this.models != null && !this.models.isEmpty());
     } else {
-      return (userModel != null && userModel.isFileValid());
+      return (this.userModel != null && this.userModel.isFileValid());
     }
   }
 
+  /**
+   * Get or create a new User Model
+   * @return User Model
+   */
+  public final UserModel getOrCreateUserModel() {
+    if (this.userModel == null) {
+      this.userModel = new UserModel();
+    }
+    return this.userModel;
+  }
+  
   /* static helper methods */
   
   /**
