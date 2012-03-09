@@ -9,12 +9,14 @@ import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.event.OIFitsEvent;
 import fr.jmmc.aspro.model.event.ObservationEvent;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
+import fr.jmmc.jmcs.App;
 import fr.jmmc.jmcs.gui.task.TaskSwingWorkerExecutor;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.logging.Level;
+import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 import javax.swing.event.ChangeEvent;
@@ -67,8 +69,6 @@ public final class SettingPanel extends JPanel implements ObservationListener, D
   public SettingPanel() {
     initComponents();
 
-    final SettingPanel instance = this;
-
     // Create the timeline refresh timer:
     this.timerMouseCursorRefresh = new Timer(REFRESH_PERIOD, new ActionListener() {
 
@@ -77,13 +77,14 @@ public final class SettingPanel extends JPanel implements ObservationListener, D
        */
       @Override
       public void actionPerformed(final ActionEvent ae) {
-        final Cursor currentCursor = instance.getCursor();
+        final JFrame appFrame = App.getFrame();
+        final Cursor currentCursor = appFrame.getCursor();
 
         final Cursor newCursor = (TaskSwingWorkerExecutor.isTaskRunning()) ? Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR)
                 : Cursor.getDefaultCursor();
 
         if (newCursor != currentCursor) {
-          instance.setCursor(newCursor);
+          appFrame.setCursor(newCursor);
         }
       }
     });

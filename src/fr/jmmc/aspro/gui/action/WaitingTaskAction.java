@@ -3,10 +3,8 @@
  ******************************************************************************/
 package fr.jmmc.aspro.gui.action;
 
-import fr.jmmc.jmcs.App;
 import fr.jmmc.jmcs.gui.task.TaskSwingWorkerExecutor;
 import fr.jmmc.jmcs.gui.action.RegisteredAction;
-import java.awt.Cursor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.logging.Level;
@@ -31,19 +29,6 @@ public abstract class WaitingTaskAction extends RegisteredAction {
   private static boolean pending = false;
 
   /**
-   * Define the shared pending flag and the main frame cursor (default|wait)
-   * @param value new value to set
-   */
-  private static void setPending(final boolean value) {
-    pending = value;
-
-    App.getFrame().setCursor(
-            (value)
-            ? Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR)
-            : Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-  }
-
-  /**
    * Constructor, that automatically register the action in RegisteredAction.
    * Action name, icon, accelerator and description is first inited using
    * fieldName to build a MCSAction.
@@ -59,6 +44,7 @@ public abstract class WaitingTaskAction extends RegisteredAction {
    * Handle the action event
    * @param ae action event
    */
+  @Override
   public final void actionPerformed(final ActionEvent ae) {
     if (logger.isLoggable(Level.FINE)) {
       logger.fine("actionPerformed");
@@ -77,7 +63,7 @@ public abstract class WaitingTaskAction extends RegisteredAction {
     // check if there is any running task :
     if (TaskSwingWorkerExecutor.isTaskRunning()) {
       // indicate to other actions that this action is pending for execution :
-      setPending(true);
+      pending = true;
 
       // delay the delegate action until there is no running task :
       new DelayedActionPerformer(this).start();
@@ -117,7 +103,7 @@ public abstract class WaitingTaskAction extends RegisteredAction {
     /**
      * Starts the <code>Timer</code>
      */
-    protected void start() {
+    void start() {
       this.timer.start();
     }
 
@@ -135,7 +121,7 @@ public abstract class WaitingTaskAction extends RegisteredAction {
 
       if (!taskRunning) {
         // indicate to other actions that this action is no more pending :
-        setPending(false);
+        pending = false;
 
         // stop this timer :
         this.timer.stop();
