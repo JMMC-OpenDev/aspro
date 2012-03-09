@@ -260,7 +260,9 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
     }
 
     // check if fits image is available :
-    if (this.fitsImage != null) {
+    if (this.fitsImage == null) {
+      resetPlot();
+    } else {
 
       // Use model image Preferences :
       final IndexColorModel colorModel = ColorModels.getColorModel(this.myPreferences.getPreference(Preferences.MODEL_IMAGE_LUT));
@@ -324,6 +326,18 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
 
       final ColorScale usedColorScale;
       if (colorScale == ColorScale.LOGARITHMIC
+              && (dataMin <= 0f || dataMax <= 0f || dataMin == dataMax || Float.isInfinite(dataMin) || Float.isInfinite(dataMax))) {
+        usedColorScale = ColorScale.LINEAR;
+        
+        // update min/max:
+        FitsImageUtils.updateDataRange(fitsImage);
+        dataMin = (float) this.fitsImage.getDataMin();
+        dataMax = (float) this.fitsImage.getDataMax();
+        
+        if (dataMin == dataMax) {
+          dataMax = dataMin + 1f;
+        }
+      } else if (colorScale == ColorScale.LINEAR
               && (dataMin <= 0f || dataMax <= 0f || dataMin == dataMax || Float.isInfinite(dataMin) || Float.isInfinite(dataMax))) {
         usedColorScale = ColorScale.LINEAR;
         
