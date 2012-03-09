@@ -189,10 +189,7 @@ public class UserModel
   public final Object clone() {
     final UserModel copy = (UserModel) super.clone();
 
-    // Clear fits image:
-    if (copy.getFitsImage() != null) {
-      copy.setFitsImage(null);
-    }
+    // Note: fits image is a shallow copy
 
     return copy;
   }
