@@ -108,6 +108,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
   private static final long serialVersionUID = 1;
   /** Class logger */
   private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(ObservabilityPanel.class.getName());
+  /** message indicating computations */
+  private static final String MSG_COMPUTING = "computing observability ...";
   /** flag to log version checking */
   private final static boolean DEBUG_VERSIONS = false;
   /** background color corresponding to the DAY zone */
@@ -689,7 +691,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
 
     // update the status bar :
-    StatusBar.show("computing observability ...");
+    StatusBar.show(MSG_COMPUTING);
 
     // Create Observability task worker
     // Cancel other tasks and execute this new task :
@@ -916,8 +918,11 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
       this.jCheckBoxNightOnly.setSelected(false);
     }
 
-    // update the status bar :
-    StatusBar.show("observability done.");
+    // update the status bar:
+    final String lastStatus = StatusBar.getStatusLabel();
+    if (lastStatus != null && lastStatus.equalsIgnoreCase(MSG_COMPUTING)) {
+      StatusBar.show("observability done.");
+    }
   }
 
   /**
