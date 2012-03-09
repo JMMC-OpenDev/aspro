@@ -44,6 +44,8 @@ import fr.jmmc.aspro.model.util.AtmosphereQualityUtils;
 import fr.jmmc.aspro.model.uvcoverage.UVBaseLineData;
 import fr.jmmc.aspro.model.uvcoverage.UVRangeBaseLineData;
 import fr.jmmc.aspro.ob.ExportOBMode;
+import fr.jmmc.aspro.service.NoiseService;
+import fr.jmmc.aspro.service.OIFitsCreatorService;
 import fr.jmmc.aspro.service.UVCoverageService;
 import fr.jmmc.aspro.service.UserModelService;
 import fr.jmmc.jmcs.gui.MessagePane;
@@ -54,10 +56,12 @@ import fr.jmmc.jmal.image.ColorScale;
 import fr.jmmc.jmal.model.ModelUVMapService;
 import fr.jmmc.jmal.model.ImageMode;
 import fr.jmmc.jmal.model.UVMapData;
+import fr.jmmc.jmal.model.VisNoiseService;
 import fr.jmmc.jmal.model.targetmodel.Model;
 import fr.jmmc.jmcs.gui.task.TaskSwingWorkerExecutor;
 import fr.jmmc.jmcs.util.concurrent.InterruptedJobException;
 import fr.jmmc.oitools.image.FitsImage;
+import fr.jmmc.oitools.model.OIFitsFile;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Image;
@@ -111,6 +115,14 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
   private static final long serialVersionUID = 1L;
   /** Class logger */
   private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(UVCoveragePanel.class.getName());
+  /** message indicating computations */
+  private static final String MSG_COMPUTING_COVERAGE = "computing uv coverage ...";
+  /** message indicating computations */
+  private static final String MSG_COMPUTING_MAP = "computing uv map ...";
+  /** message indicating computations */
+  private static final String MSG_COMPUTING_OIFITS = "computing OIFits data ...";
+  /** flag to enable noise modeling on UV Map (DEV only) */
+  private final static boolean DO_NOISE_UV_MAP = false;
   /** flag to log a stack trace in method updateObservation() to detect multiple calls */
   private final static boolean DEBUG_UPDATE_EVENT = false;
   /** flag to log a stack trace in method plot() to detect multiple calls */
@@ -219,6 +231,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         jSeparator2 = new javax.swing.JSeparator();
         jCheckBoxAddNoise = new javax.swing.JCheckBox();
         jPanelSpacer = new javax.swing.JPanel();
+        jCheckBoxDoOIFits = new javax.swing.JCheckBox();
 
         setLayout(new java.awt.BorderLayout());
 
@@ -472,18 +485,28 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         jCheckBoxAddNoise.setText("Add error noise to data");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 27;
+        gridBagConstraints.gridy = 28;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
         jPanelLeft.add(jCheckBoxAddNoise, gridBagConstraints);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 28;
+        gridBagConstraints.gridy = 30;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weighty = 0.1;
         jPanelLeft.add(jPanelSpacer, gridBagConstraints);
+
+        jCheckBoxDoOIFits.setSelected(true);
+        jCheckBoxDoOIFits.setText("Compute OIFits data");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 27;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
+        jPanelLeft.add(jCheckBoxDoOIFits, gridBagConstraints);
 
         jScrollPaneForm.setViewportView(jPanelLeft);
 
@@ -716,6 +739,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
     this.jComboBoxImageMode.addActionListener(this);
 
+    this.jCheckBoxDoOIFits.addActionListener(this);
     this.jCheckBoxAddNoise.addActionListener(this);
 
     // register this instance as a Preference Observer :
@@ -988,6 +1012,21 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         logger.fine("do noise : " + this.jCheckBoxAddNoise.isSelected());
       }
       refreshPlot();
+    } else if (e.getSource() == this.jCheckBoxDoOIFits) {
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("do OIFits : " + this.jCheckBoxDoOIFits.isSelected());
+      }
+      if (this.getChartData() != null) {
+        if (this.jCheckBoxDoOIFits.isSelected()) {
+          computeOIFits(this.getChartData());
+        } else {
+          // cancel anyway currently running OIFitsSwingWorker:
+          if (TaskSwingWorkerExecutor.cancelTask(AsproTaskRegistry.TASK_OIFITS)) {
+            // update the status bar:
+            StatusBar.showIfPrevious(MSG_COMPUTING_OIFITS, "OIFits data cancelled.");
+          }
+        }
+      }
     }
   }
 
@@ -1369,6 +1408,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
       final double uvMax = this.uvMaxAdapter.getValue();
       final boolean doUVSupport = this.jCheckBoxPlotUVSupport.isSelected();
+      final boolean doOIFits = this.jCheckBoxDoOIFits.isSelected();
       final boolean doDataNoise = this.jCheckBoxAddNoise.isSelected();
       final boolean doModelImage = this.jCheckBoxModelImage.isSelected();
 
@@ -1381,7 +1421,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       final ColorScale colorScale = this.myPreferences.getImageColorScale();
 
       // update the status bar :
-      StatusBar.show("computing uv coverage ...");
+      StatusBar.show(MSG_COMPUTING_COVERAGE);
 
       // Get previously computed UV Map Data (can be null) :
       final UVMapData currentUVMapData = (getChartData() != null) ? getChartData().getUVMapData() : null;
@@ -1389,7 +1429,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       // Create uv coverage task worker :
       // Cancel other tasks and execute this new task :
       new UVCoverageSwingWorker(this, obsCollection, this.getObservabilityData(), targetName,
-              uvMax, doUVSupport, doDataNoise, doModelImage, imageMode, imageSize, colorModel, colorScale,
+              uvMax, doUVSupport, doOIFits, doDataNoise, doModelImage, imageMode, imageSize, colorModel, colorScale,
               currentUVMapData).executeTask();
 
     } // observability data check
@@ -1411,6 +1451,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     private double uvMax;
     /** flag to compute the UV support */
     private final boolean doUVSupport;
+    /** flag to compute OIFits */
+    private final boolean doOIFits;
     /** flag to add gaussian noise to OIFits data */
     private final boolean doDataNoise;
     /** flag to compute the model image */
@@ -1435,6 +1477,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
      * @param targetName target name
      * @param uvMax U-V max in meter
      * @param doUVSupport flag to compute the UV support
+     * @param doOIFits flag to compute OIFits
      * @param doDataNoise enable data noise
      * @param doModelImage flag to compute the model image
      * @param imageMode image mode (amplitude or phase)
@@ -1445,7 +1488,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
      */
     private UVCoverageSwingWorker(final UVCoveragePanel uvPanel, final ObservationCollection obsCollection,
             final List<ObservabilityData> obsDataList, final String targetName,
-            final double uvMax, final boolean doUVSupport, final boolean doDataNoise,
+            final double uvMax, final boolean doUVSupport, final boolean doOIFits, final boolean doDataNoise,
             final boolean doModelImage, final ImageMode imageMode, final int imageSize,
             final IndexColorModel colorModel, final ColorScale colorScale,
             final UVMapData currentUVMapData) {
@@ -1456,6 +1499,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       this.targetName = targetName;
       this.uvMax = uvMax;
       this.doUVSupport = doUVSupport;
+      this.doOIFits = doOIFits;
       this.doDataNoise = doDataNoise;
       this.doModelImage = doModelImage;
       this.imageMode = imageMode;
@@ -1473,6 +1517,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     @Override
     public ObservationCollectionUVData computeInBackground() {
 
+      // TODO: externalize NoiseService and OIFitsCreatorService from UVCoverageService (IMPORTANT)
+
       // Start the computations :
       final long start = System.nanoTime();
 
@@ -1481,13 +1527,13 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
       ObservationSetting observation;
       ObservabilityData obsData;
+
       for (int i = 0, len = observations.size(); i < len; i++) {
         observation = observations.get(i);
         obsData = this.obsDataList.get(i);
 
         // compute the uv coverage data :
-        uvDataList.add(new UVCoverageService(observation, obsData, this.targetName, this.uvMax,
-                this.doUVSupport, this.doDataNoise).compute());
+        uvDataList.add(new UVCoverageService(observation, obsData, this.targetName, this.uvMax, this.doUVSupport, this.doDataNoise).compute());
 
         // fast interrupt :
         if (Thread.currentThread().isInterrupted()) {
@@ -1497,11 +1543,17 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
       final ObservationCollectionUVData uvDataCollection = new ObservationCollectionUVData(getObservationCollection(), this.obsDataList, uvDataList);
 
+      // first UVCoverageData i.e. corresponding to the first observation:
+      final UVCoverageData uvDataFirst = uvDataCollection.getFirstUVData();
+
       if (this.doModelImage) {
         // compute the uv map data :
 
         // update uvMax according to UVCoverage Service (wavelength correction):
-        this.uvMax = uvDataCollection.getFirstUVData().getUvMax();
+        this.uvMax = uvDataFirst.getUvMax();
+
+        // Get noise service if enabled:
+        final NoiseService noiseService = (DO_NOISE_UV_MAP) ? uvDataFirst.getNoiseService() : null;
 
         final Rectangle2D.Double uvRect = new Rectangle2D.Double();
         uvRect.setFrameFromDiagonal(-this.uvMax, -this.uvMax, this.uvMax, this.uvMax);
@@ -1517,7 +1569,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
           // Check if the previously computed UV Map Data is still valid :
           if (this.currentUVMapData != null
                   && this.currentUVMapData.isValid(this.targetName, targetVersion, uvRect,
-                  this.imageMode, this.imageSize, this.colorModel, this.colorScale)) {
+                  this.imageMode, this.imageSize, this.colorModel, this.colorScale, noiseService)) {
 
             logger.debug("Reuse model image.");
 
@@ -1540,16 +1592,17 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
                   // Compute only image using existing complex visibility data :
                   uvMapData = ModelUVMapService.computeUVMap(models,
                           uvRect, null, null, this.currentUVMapData.getVisData(),
-                          this.imageMode, this.imageSize, this.colorModel, this.colorScale);
+                          this.imageMode, this.imageSize, this.colorModel, this.colorScale, noiseService);
 
                 } else {
                   logger.debug("Computing model image ...");
 
                   // Compute Target Model for the UV coverage limits ONCE :
                   uvMapData = ModelUVMapService.computeUVMap(models, uvRect,
-                          this.imageMode, this.imageSize, this.colorModel, this.colorScale);
+                          this.imageMode, this.imageSize, this.colorModel, this.colorScale, noiseService);
                 }
               } else {
+                // User Model:
 
                 // Get preloaded and prepared fits image:
                 final FitsImage fitsImage = target.getUserModel().getFitsImage();
@@ -1564,7 +1617,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
                     // Compute only image using existing complex visibility data :
                     uvMapData = UserModelService.computeUVMap(fitsImage,
-                            uvRect, this.imageMode, this.imageSize, this.colorModel, this.colorScale,
+                            uvRect, this.imageMode, this.imageSize, this.colorModel, this.colorScale, noiseService,
                             this.currentUVMapData.getVisData());
 
                   } else {
@@ -1572,7 +1625,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
                     // Compute Target Model for the UV coverage limits ONCE :
                     uvMapData = UserModelService.computeUVMap(fitsImage,
-                            uvRect, this.imageMode, this.imageSize, this.colorModel, this.colorScale);
+                            uvRect, this.imageMode, this.imageSize, this.colorModel, this.colorScale, noiseService);
                   }
                 } else {
                   uvMapData = null;
@@ -1603,19 +1656,16 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       // merged warning container :
       final WarningContainer mergedWarningContainer = new WarningContainer();
 
-      // merge results (warning, fits ...) :
+      // merge warning messages:
       if (uvDataCollection.isSingle()) {
-        final UVCoverageData uvData1 = uvDataCollection.getFirstUVData();
-
         mergedWarningContainer.addWarningMessages(uvDataCollection.getFirstObsData().getWarningContainer());
-        mergedWarningContainer.addWarningMessages(uvData1.getWarningContainer());
-
-        uvDataCollection.setOiFitsFile(uvData1.getOiFitsFile());
+        mergedWarningContainer.addWarningMessages(uvDataFirst.getWarningContainer());
 
       } else {
 
         if (uvDataCollection.getFirstObservation().getWhen().isNightRestriction()) {
-          mergedWarningContainer.addWarningMessage("Multiple configurations cannot be done in one night (night restrictions are only valid for "
+          mergedWarningContainer.addWarningMessage(
+                  "Multiple configurations cannot be done in one night (night restrictions are only valid for "
                   + uvDataCollection.getFirstObservation().getWhen().getDate().toString() + ")");
         }
 
@@ -1627,9 +1677,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         for (UVCoverageData uvData : uvDataList) {
           mergedWarningContainer.addWarningMessages(uvData.getWarningContainer());
         }
-
-        // No merged OIFITS still :
-        uvDataCollection.setOiFitsFile(null);
       }
 
       uvDataCollection.setWarningContainer(mergedWarningContainer);
@@ -1648,15 +1695,15 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
      */
     @Override
     public void refreshUI(final ObservationCollectionUVData uvDataCollection) {
+      final boolean resetOIFits = (doOIFits) ? !this.uvPanel.computeOIFits(uvDataCollection) : true;
 
-      // Note : the main observation can have changed while computation
-      // i.e. the this.observation.getVersion() != this.getVersion()
+      // reset the OIFits structure in the current observation - No OIFitsSwingWorker running:
+      if (resetOIFits) {
+        ObservationManager.getInstance().setOIFitsFile(null);
+      }
 
       // Fire a warnings ready event :
       ObservationManager.getInstance().fireWarningsReady(uvDataCollection.getWarningContainer());
-
-      // update the OIFits structure in the current observation :
-      ObservationManager.getInstance().setOIFitsFile(uvDataCollection.getOiFitsFile());
 
       // Refresh the GUI using coherent data :
       this.uvPanel.updatePlot(uvDataCollection);
@@ -1680,6 +1727,61 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
   }
 
   /**
+   * Start computing OIFits
+   * @param uvDataCollection computed UV Coverage data
+   * @return true if computation started
+   */
+  private boolean computeOIFits(final ObservationCollectionUVData uvDataCollection) {
+    // check if OIFits computation already done ?
+    if (uvDataCollection.isOIFitsDone()) {
+      return true;
+    }
+    boolean computed = false;
+    // Note : the main observation can have changed while computation
+
+    final ObservationCollection taskObsCollection = uvDataCollection;
+
+    // use the latest observation for computations to check versions :
+    final ObservationCollection lastObsCollection = om.getObservationCollection();
+
+    if (taskObsCollection.getVersion().isSameMainVersion(lastObsCollection.getVersion())) {
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("refreshUI : main version equals : " + taskObsCollection.getVersion() + " :: " + lastObsCollection.getVersion());
+      }
+      if (DEBUG_VERSIONS) {
+        logger.warning("refreshUI : main version equals : " + taskObsCollection.getVersion() + " :: " + lastObsCollection.getVersion());
+      }
+
+      final List<OIFitsCreatorService> oiFitsCreatorList = new ArrayList<OIFitsCreatorService>(uvDataCollection.size());
+
+      OIFitsCreatorService oiFitsCreator;
+
+      for (UVCoverageData uvData : uvDataCollection.getUVDataList()) {
+        oiFitsCreator = uvData.getOiFitsCreator();
+
+        // check if OIFits data available:
+        if (oiFitsCreator != null) {
+          oiFitsCreatorList.add(oiFitsCreator);
+        }
+      }
+
+      // Note: compute OIFits only for single observation UNTIL OIFits merge is ready
+      if (oiFitsCreatorList.size() == 1) {
+        computed = true;
+
+        // update the status bar :
+        StatusBar.show(MSG_COMPUTING_OIFITS);
+
+        // Create OIFits task worker :
+        // Cancel other tasks and execute this new task :
+        new OIFitsSwingWorker(uvDataCollection, oiFitsCreatorList).executeTask();
+      }
+    }
+
+    return computed;
+  }
+
+  /**
    * Reset the plot in case of model exception
    */
   private void resetPlot() {
@@ -1700,8 +1802,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     // update theme at end :
     ChartUtilities.applyCurrentTheme(this.chart);
 
-    // update the status bar :
-    StatusBar.show("uv coverage done.");
+    // update the status bar:
+    StatusBar.showIfPrevious(MSG_COMPUTING_COVERAGE, "uv coverage done.");
   }
 
   /**
@@ -1772,8 +1874,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       // update theme at end :
       ChartUtilities.applyCurrentTheme(this.chart);
 
-      // update the status bar :
-      StatusBar.show("uv coverage done.");
+      // update the status bar:
+      StatusBar.showIfPrevious(MSG_COMPUTING_COVERAGE, "uv coverage done.");
     }
   }
 
@@ -1817,19 +1919,23 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
               final int imageSize = uvMapData.getImageSize();
               final IndexColorModel colorModel = uvMapData.getColorModel();
               final ColorScale colorScale = uvMapData.getColorScale();
+              final VisNoiseService noiseService = uvMapData.getNoiseService();
 
               // update the status bar :
-              StatusBar.show("computing uv map ...");
+              StatusBar.show(MSG_COMPUTING_MAP);
 
               // Create uv map task worker :
               // Cancel other tasks and execute this new task :
 
-              new UVMapSwingWorker(this, target.getModels(), uvRect,
-                      refMin, refMax, imageMode, imageSize, colorModel, colorScale).executeTask();
+              new UVMapSwingWorker(this, target.getModels(), uvRect, refMin, refMax,
+                      imageMode, imageSize, colorModel, colorScale, noiseService).executeTask();
             }
           } else {
             // cancel anyway currently running UVMapSwingWorker:
-            TaskSwingWorkerExecutor.cancelTask(AsproTaskRegistry.TASK_UV_MAP);
+            if (TaskSwingWorkerExecutor.cancelTask(AsproTaskRegistry.TASK_UV_MAP)) {
+              // update the status bar:
+              StatusBar.showIfPrevious(MSG_COMPUTING_MAP, "uv map cancelled.");
+            }
           }
         }
       }
@@ -1860,6 +1966,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     private final IndexColorModel colorModel;
     /** color scaling method */
     private final ColorScale colorScale;
+    /** optional Complex visibility Noise Service ready to use to compute noise on model images */
+    private final VisNoiseService noiseService;
 
     /**
      * Hidden constructor
@@ -1873,12 +1981,14 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
      * @param imageSize expected number of pixels for both width and height of the generated image
      * @param colorModel color model to use
      * @param colorScale color scaling method
+     * @param noiseService optional Complex visibility Noise Service ready to use to compute noise on model images
      */
     private UVMapSwingWorker(final UVCoveragePanel uvPanel, final List<Model> models,
             final Rectangle2D.Double uvRect,
             final Float refMin, final Float refMax,
             final ImageMode imageMode, final int imageSize,
-            final IndexColorModel colorModel, final ColorScale colorScale) {
+            final IndexColorModel colorModel, final ColorScale colorScale,
+            final VisNoiseService noiseService) {
       super(AsproTaskRegistry.TASK_UV_MAP);
       this.uvPanel = uvPanel;
       this.models = models;
@@ -1889,6 +1999,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       this.imageSize = imageSize;
       this.colorModel = colorModel;
       this.colorScale = colorScale;
+      this.noiseService = noiseService;
     }
 
     /**
@@ -1901,8 +2012,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       logger.debug("Computing model image ...");
       try {
         // compute anyway the uv map data :
-        return ModelUVMapService.computeUVMap(this.models,
-                this.uvRect, this.refMin, this.refMax, null, this.imageMode, this.imageSize, this.colorModel, this.colorScale);
+        return ModelUVMapService.computeUVMap(this.models, this.uvRect, this.refMin, this.refMax, null,
+                this.imageMode, this.imageSize, this.colorModel, this.colorScale, this.noiseService);
 
       } catch (InterruptedJobException ije) {
         logger.debug("Computing model image interrupted: ", ije);
@@ -1920,8 +2031,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       // delegates to uv coverage panel :
       this.uvPanel.updateUVMap(uvMapData.getUvMap());
 
-      // update the status bar :
-      StatusBar.show("uv map done.");
+      // update the status bar:
+      StatusBar.showIfPrevious(MSG_COMPUTING_MAP, "uv map done.");
     }
 
     /**
@@ -2291,12 +2402,93 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
           // add an invalid point to break the line between the 2 segments :
           xySeries.add(Double.NaN, Double.NaN, false);
+
+
         } // BL
       }
     }
   }
+
+  /**
+   * TaskSwingWorker child class to compute OIFits and send OIFits done events
+   * 
+   * TODO: create OIFits creator services automatically using UVCoverageData + observation directly ... 
+   * + use a single NoiseService instance ...
+   */
+  private final static class OIFitsSwingWorker extends TaskSwingWorker<OIFitsFile> {
+
+    /* members */
+    /** uv coverage data collection */
+    private final ObservationCollectionUVData uvDataCollection;
+    /** list of oiFitsCreator services to execute */
+    private final List<OIFitsCreatorService> oiFitsCreatorList;
+
+    /**
+     * Hidden constructor
+     *
+     * @param uvDataCollection uv coverage data collection
+     * @param oiFitsCreatorList list of oiFitsCreator services to execute
+     */
+    private OIFitsSwingWorker(final ObservationCollectionUVData uvDataCollection, final List<OIFitsCreatorService> oiFitsCreatorList) {
+      super(AsproTaskRegistry.TASK_OIFITS);
+      this.uvDataCollection = uvDataCollection;
+      this.oiFitsCreatorList = oiFitsCreatorList;
+    }
+
+    /**
+     * Compute the OIFits structures in background
+     * This code is executed by a Worker thread (Not Swing EDT)
+     * @return OIFitsFile single OIFitsFile result (TODO: merge)
+     */
+    @Override
+    public OIFitsFile computeInBackground() {
+      logger.debug("Computing oifits data ...");
+
+      OIFitsFile result = null;
+      try {
+        final List<OIFitsFile> oiFitsList = new ArrayList<OIFitsFile>(this.oiFitsCreatorList.size());
+
+        for (OIFitsCreatorService oiFitsCreator : this.oiFitsCreatorList) {
+          // Create the OIFits structure :
+          oiFitsList.add(oiFitsCreator.createOIFits());
+        }
+
+        // merge results (fits ...) :
+        if (oiFitsList.size() == 1) {
+          result = oiFitsList.get(0);
+        } else {
+          // TODO: merge OIFits to a single OIFits result:
+          // No merged OIFITS still :
+          result = null;
+        }
+
+      } catch (InterruptedJobException ije) {
+        logger.debug("Computing oifits data interrupted: ", ije);
+      }
+      return result;
+    }
+
+    /**
+     * Dispatch the computed OIFits to the current observation (which triggers events)
+     * This code is executed by the Swing Event Dispatcher thread (EDT)
+     * @param oiFitsFile single OIFitsFile result (TODO: merge)
+     */
+    @Override
+    public void refreshUI(final OIFitsFile oiFitsFile) {
+
+      // update OIFits done flag on uv data collection:
+      this.uvDataCollection.setOIFitsDone(true);
+
+      // update the OIFits structure in the current observation :
+      ObservationManager.getInstance().setOIFitsFile(oiFitsFile);
+
+      // update the status bar:
+      StatusBar.showIfPrevious(MSG_COMPUTING_OIFITS, "OIFits done.");
+    }
+  }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox jCheckBoxAddNoise;
+    private javax.swing.JCheckBox jCheckBoxDoOIFits;
     private javax.swing.JCheckBox jCheckBoxModelImage;
     private javax.swing.JCheckBox jCheckBoxPlotUVSupport;
     private javax.swing.JComboBox jComboBoxAtmQual;
