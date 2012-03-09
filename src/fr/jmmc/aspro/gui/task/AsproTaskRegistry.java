@@ -22,11 +22,9 @@ public final class AsproTaskRegistry extends TaskRegistry {
   public final static Task TASK_UV_COVERAGE;
   /** UV Map task */
   public final static Task TASK_UV_MAP;
-
   /** Fits task (future) */
-  /*
   public final static Task TASK_OIFITS;
-   */
+
   /**
    * Static initializer to define tasks and their child tasks
    */
@@ -38,16 +36,16 @@ public final class AsproTaskRegistry extends TaskRegistry {
     TASK_OBSERVABILITY = new Task("Observability");
     TASK_UV_COVERAGE = new Task("UVCoverage");
     TASK_UV_MAP = new Task("UVMap");
-//    TASK_OIFITS = new Task(n++, "OIFits");
+    TASK_OIFITS = new Task("OIFits");
 
     // register tasks :
     instance.addTask(TASK_OBSERVABILITY);
     instance.addTask(TASK_UV_COVERAGE);
+    instance.addTask(TASK_OIFITS);
     instance.addTask(TASK_UV_MAP);
 
     // task chain :
-    final Task[] tasks = new Task[]{
-      TASK_OBSERVABILITY, TASK_UV_COVERAGE, TASK_UV_MAP /* , TASK_OIFITS */};
+    final Task[] tasks = new Task[]{TASK_OBSERVABILITY, TASK_UV_COVERAGE, TASK_OIFITS, TASK_UV_MAP};
 
     // iterate over tasks :
     for (int i = 0, n = tasks.length; i < n; i++) {
