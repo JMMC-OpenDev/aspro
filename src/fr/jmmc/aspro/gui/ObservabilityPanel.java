@@ -919,10 +919,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     }
 
     // update the status bar:
-    final String lastStatus = StatusBar.getStatusLabel();
-    if (lastStatus != null && lastStatus.equalsIgnoreCase(MSG_COMPUTING)) {
-      StatusBar.show("observability done.");
-    }
+    StatusBar.showIfPrevious(MSG_COMPUTING, "observability done.");
   }
 
   /**
