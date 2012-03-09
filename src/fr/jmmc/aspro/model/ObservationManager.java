@@ -1288,14 +1288,22 @@ public final class ObservationManager extends BaseOIManager {
 
     // Load only valid target user model files:
     UserModel model;
-    FitsImage fitsImage;
+
     for (Target target : observation.getTargets()) {
       model = target.getUserModel();
       if (model != null && model.isFileValid()) {
-        // throws exceptions if the given fits file or image is incorrect:
-        fitsImage = UserModelService.prepareFitsFile(model.getFile());
-        
-        model.setFitsImage(fitsImage);
+        try {
+          // throws exceptions if the given fits file or image is incorrect:
+          model.setFitsImage(UserModelService.prepareFitsFile(model.getFile()));
+
+        } catch (IllegalArgumentException iae) {
+          logger.log(Level.INFO, "prepareFitsFile [" + model.getFile() + "] failed", iae);
+
+          sb.append("Loading user model file [").append(model.getFile()).append("] failed: ").append(iae.getMessage());
+          sb.append("\nThe target [").append(target.getName()).append("] has an invalid user model; this model is disabled.\n\n");
+
+          model.setFileValid(false);
+        }
       }
     }
 
