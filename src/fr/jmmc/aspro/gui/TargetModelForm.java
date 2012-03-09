@@ -3,12 +3,15 @@
  ******************************************************************************/
 package fr.jmmc.aspro.gui;
 
+import fr.jmmc.aspro.FilePreferences;
 import fr.jmmc.aspro.Preferences;
 import fr.jmmc.aspro.gui.util.ModelJTree;
 import fr.jmmc.aspro.gui.util.TargetRenderer;
 import fr.jmmc.aspro.gui.util.TargetTreeCellRenderer;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
+import fr.jmmc.aspro.model.oi.UserModel;
+import fr.jmmc.aspro.service.UserModelService;
 import fr.jmmc.jmcs.gui.MessagePane;
 import fr.jmmc.jmcs.gui.NumericJTable;
 import fr.jmmc.jmal.model.ModelManager;
@@ -17,15 +20,20 @@ import fr.jmmc.jmal.model.gui.ModelParameterTableModel.EditMode;
 import fr.jmmc.jmal.model.gui.ModelParameterTableModel.Mode;
 import fr.jmmc.jmal.model.targetmodel.Model;
 import fr.jmmc.jmcs.gui.SwingUtils;
+import fr.jmmc.jmcs.util.MimeType;
+import fr.nom.tam.fits.FitsException;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.logging.Level;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComponent;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
@@ -50,8 +58,12 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
   private static final long serialVersionUID = 1;
   /** Class logger */
   private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(TargetModelForm.class.getName());
+  /** OIFits MimeType */
+  private final static MimeType mimeType = MimeType.FITS_IMAGE;
 
   /* members */
+  /** fits image panel */
+  private FitsImagePanel fitsImagePanel = null;
   /** list of edited targets (clone) */
   private final List<Target> editTargets;
   /** edited target user informations (clone) */
@@ -101,6 +113,10 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
    * This method is useful to set the models and specific features of initialized swing components.
    */
   private void postInit() {
+
+    // model mode:
+    this.jRadioButtonAnalytical.addActionListener(this);
+    this.jRadioButtonUserModel.addActionListener(this);
 
     // model type choice :
     this.jComboBoxModelType.setModel(new DefaultComboBoxModel(ModelManager.getInstance().getSupportedModels()));
@@ -259,11 +275,53 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
     this.jButtonUpdate.setEnabled(false);
     this.jButtonRemove.setEnabled(false);
 
+    // model mode:
+    final boolean isAnalytical = target.hasAnalyticalModel();
+
+    if (isAnalytical) {
+      this.jRadioButtonAnalytical.setSelected(true);
+    } else {
+      this.jRadioButtonUserModel.setSelected(true);
+    }
+
+    // User model:
+    final UserModel userModel = target.getUserModel();
+    if (userModel != null) {
+      if (userModel.isFileValid()) {
+        this.jRadioButtonValid.setSelected(true);
+      } else {
+        this.jRadioButtonInvalid.setSelected(true);
+      }
+      this.jTextFieldFileReference.setText(userModel.getFile());
+
+      if (!isAnalytical && userModel.getFitsImage() != null) {
+        // update fits Image:
+        if (fitsImagePanel == null) {
+          fitsImagePanel = new FitsImagePanel();
+        }
+        // TODO: call FitsImagePanel.dispose()
+        fitsImagePanel.setFitsImage(userModel.getFitsImage());
+
+        this.jPanelImage.add(fitsImagePanel);
+      }
+
+    } else {
+      this.jRadioButtonInvalid.setSelected(true);
+      this.jTextFieldFileReference.setText(null);
+
+      // remove any FitsImage:
+      this.jPanelImage.removeAll();
+    }
+
+    // Analytical models:
     // reset text field name :
     this.jTextFieldName.setText(null);
 
     // update parameter table model :
     this.defineModels(target);
+
+    // Update visible panels:
+    updateVisibleModelPanels();
   }
 
   /**
@@ -275,6 +333,14 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
     this.jButtonUpdate.setEnabled(true);
     this.jButtonRemove.setEnabled(true);
 
+    // model mode:
+    this.jRadioButtonAnalytical.setSelected(true);
+
+    // User model:
+    this.jRadioButtonInvalid.setSelected(true);
+    this.jTextFieldFileReference.setText(null);
+
+    // Analytical models:
     // update text field name :
     this.jTextFieldName.setText(model.getName());
 
@@ -283,6 +349,22 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
 
     // update parameter table model :
     this.defineModels(target);
+
+    // Update visible panels:
+    updateVisibleModelPanels();
+  }
+
+  /**
+   * Update visible panels depending on model mode (analytical or user model)
+   */
+  private void updateVisibleModelPanels() {
+    final boolean isAnalytical = this.jRadioButtonAnalytical.isSelected();
+
+    this.jPanelModelAnalytic.setVisible(isAnalytical);
+    this.jPanelDescription.setVisible(isAnalytical);
+    this.jPanelParameters.setVisible(isAnalytical);
+    this.jPanelUserModel.setVisible(!isAnalytical);
+    this.jPanelImage.setVisible(!isAnalytical);
   }
 
   /**
@@ -338,6 +420,20 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
       }
       // change edit mode to Rho/Theta :
       this.defineModels(this.currentTarget, EditMode.RHO_THETA);
+    } else if (e.getSource() == this.jRadioButtonAnalytical) {
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("mode Analytical : " + this.jRadioButtonAnalytical.isSelected());
+      }
+      this.currentTarget.setUseAnalyticalModel(Boolean.TRUE);
+      // reselect target to change panel visibility:
+      processTargetSelection(currentTarget);
+    } else if (e.getSource() == this.jRadioButtonUserModel) {
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("mode User model : " + this.jRadioButtonUserModel.isSelected());
+      }
+      this.currentTarget.setUseAnalyticalModel(Boolean.FALSE);
+      // reselect target to change panel visibility:
+      processTargetSelection(currentTarget);
     }
   }
 
@@ -391,237 +487,374 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
    * always regenerated by the Form Editor.
    */
   @SuppressWarnings("unchecked")
-  // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-  private void initComponents() {
-    java.awt.GridBagConstraints gridBagConstraints;
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+        java.awt.GridBagConstraints gridBagConstraints;
 
-    buttonGroupEditMode = new javax.swing.ButtonGroup();
-    jScrollPaneTreeModels = new javax.swing.JScrollPane();
-    jTreeModels = new ModelJTree(this.editTargetUserInfos);
-    jPanelModelActions = new javax.swing.JPanel();
-    jComboBoxModelType = new javax.swing.JComboBox();
-    jButtonAdd = new javax.swing.JButton();
-    jButtonRemove = new javax.swing.JButton();
-    jButtonUpdate = new javax.swing.JButton();
-    jLabel3 = new javax.swing.JLabel();
-    jLabel5 = new javax.swing.JLabel();
-    jTextFieldName = new javax.swing.JTextField();
-    jPanelDescription = new javax.swing.JPanel();
-    jScrollPaneModelDescription = new javax.swing.JScrollPane();
-    jLabelModelDescrption = new javax.swing.JLabel();
-    jPanelParameters = new javax.swing.JPanel();
-    jScrollPaneTableModelParameters = new javax.swing.JScrollPane();
-    jTableModelParameters = createJTable();
-    jRadioButtonXY = new javax.swing.JRadioButton();
-    jRadioButtonRhoTheta = new javax.swing.JRadioButton();
-    jLabelOffsetEditMode = new javax.swing.JLabel();
-    jButtonNormalizeFluxes = new javax.swing.JButton();
+        buttonGroupEditMode = new javax.swing.ButtonGroup();
+        buttonGroupModelMode = new javax.swing.ButtonGroup();
+        buttonGroupUserModelValid = new javax.swing.ButtonGroup();
+        jScrollPaneTreeModels = new javax.swing.JScrollPane();
+        jTreeModels = new ModelJTree(this.editTargetUserInfos);
+        jPanelModel = new javax.swing.JPanel();
+        jLabelMode = new javax.swing.JLabel();
+        jRadioButtonAnalytical = new javax.swing.JRadioButton();
+        jRadioButtonUserModel = new javax.swing.JRadioButton();
+        jSeparatorMode = new javax.swing.JSeparator();
+        jPanelModelAnalytic = new javax.swing.JPanel();
+        jButtonAdd = new javax.swing.JButton();
+        jButtonRemove = new javax.swing.JButton();
+        jButtonUpdate = new javax.swing.JButton();
+        jLabelName = new javax.swing.JLabel();
+        jTextFieldName = new javax.swing.JTextField();
+        jLabelType = new javax.swing.JLabel();
+        jComboBoxModelType = new javax.swing.JComboBox();
+        jPanelUserModel = new javax.swing.JPanel();
+        jLabelValid = new javax.swing.JLabel();
+        jRadioButtonValid = new javax.swing.JRadioButton();
+        jRadioButtonInvalid = new javax.swing.JRadioButton();
+        jLabelFile = new javax.swing.JLabel();
+        jTextFieldFileReference = new javax.swing.JTextField();
+        jButtonOpenFile = new javax.swing.JButton();
+        jPanelDescription = new javax.swing.JPanel();
+        jScrollPaneModelDescription = new javax.swing.JScrollPane();
+        jLabelModelDescrption = new javax.swing.JLabel();
+        jPanelParameters = new javax.swing.JPanel();
+        jScrollPaneTableModelParameters = new javax.swing.JScrollPane();
+        jTableModelParameters = createJTable();
+        jRadioButtonXY = new javax.swing.JRadioButton();
+        jRadioButtonRhoTheta = new javax.swing.JRadioButton();
+        jLabelOffsetEditMode = new javax.swing.JLabel();
+        jButtonNormalizeFluxes = new javax.swing.JButton();
+        jPanelImage = new javax.swing.JPanel();
 
-    setLayout(new java.awt.GridBagLayout());
+        setLayout(new java.awt.GridBagLayout());
 
-    jScrollPaneTreeModels.setMinimumSize(new java.awt.Dimension(100, 100));
-    jScrollPaneTreeModels.setPreferredSize(new java.awt.Dimension(100, 100));
+        jScrollPaneTreeModels.setMinimumSize(new java.awt.Dimension(100, 100));
+        jScrollPaneTreeModels.setPreferredSize(new java.awt.Dimension(100, 100));
 
-    jTreeModels.setFont(new java.awt.Font("Dialog", 1, 12));
-    javax.swing.tree.DefaultMutableTreeNode treeNode1 = new javax.swing.tree.DefaultMutableTreeNode("Models");
-    jTreeModels.setModel(new javax.swing.tree.DefaultTreeModel(treeNode1));
-    jScrollPaneTreeModels.setViewportView(jTreeModels);
+        jTreeModels.setFont(new java.awt.Font("Dialog", 1, 12));
+        javax.swing.tree.DefaultMutableTreeNode treeNode1 = new javax.swing.tree.DefaultMutableTreeNode("Models");
+        jTreeModels.setModel(new javax.swing.tree.DefaultTreeModel(treeNode1));
+        jScrollPaneTreeModels.setViewportView(jTreeModels);
 
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.weightx = 0.3;
-    gridBagConstraints.weighty = 0.2;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-    add(jScrollPaneTreeModels, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 0.3;
+        gridBagConstraints.weighty = 0.2;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        add(jScrollPaneTreeModels, gridBagConstraints);
 
-    jPanelModelActions.setBorder(javax.swing.BorderFactory.createTitledBorder("Model actions"));
-    jPanelModelActions.setMinimumSize(new java.awt.Dimension(200, 80));
-    jPanelModelActions.setPreferredSize(new java.awt.Dimension(200, 80));
-    jPanelModelActions.setLayout(new java.awt.GridBagLayout());
+        jPanelModel.setBorder(javax.swing.BorderFactory.createTitledBorder("Model"));
+        jPanelModel.setLayout(new java.awt.GridBagLayout());
 
-    jComboBoxModelType.setMinimumSize(new java.awt.Dimension(100, 24));
-    jComboBoxModelType.setPreferredSize(new java.awt.Dimension(100, 24));
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-    jPanelModelActions.add(jComboBoxModelType, gridBagConstraints);
+        jLabelMode.setText("Mode");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        gridBagConstraints.weightx = 0.1;
+        jPanelModel.add(jLabelMode, gridBagConstraints);
 
-    jButtonAdd.setText("Add");
-    jButtonAdd.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        jButtonAddActionPerformed(evt);
-      }
-    });
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 2;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-    jPanelModelActions.add(jButtonAdd, gridBagConstraints);
+        buttonGroupModelMode.add(jRadioButtonAnalytical);
+        jRadioButtonAnalytical.setSelected(true);
+        jRadioButtonAnalytical.setText("Analytical");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.weightx = 0.5;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelModel.add(jRadioButtonAnalytical, gridBagConstraints);
 
-    jButtonRemove.setText("Remove");
-    jButtonRemove.setEnabled(false);
-    jButtonRemove.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        jButtonRemoveActionPerformed(evt);
-      }
-    });
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 3;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-    jPanelModelActions.add(jButtonRemove, gridBagConstraints);
+        buttonGroupModelMode.add(jRadioButtonUserModel);
+        jRadioButtonUserModel.setText("User Model");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.weightx = 0.5;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelModel.add(jRadioButtonUserModel, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        jPanelModel.add(jSeparatorMode, gridBagConstraints);
 
-    jButtonUpdate.setText("Update");
-    jButtonUpdate.setEnabled(false);
-    jButtonUpdate.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        jButtonUpdateActionPerformed(evt);
-      }
-    });
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 3;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-    jPanelModelActions.add(jButtonUpdate, gridBagConstraints);
+        jPanelModelAnalytic.setMinimumSize(new java.awt.Dimension(200, 80));
+        jPanelModelAnalytic.setLayout(new java.awt.GridBagLayout());
 
-    jLabel3.setText("model type");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-    jPanelModelActions.add(jLabel3, gridBagConstraints);
+        jButtonAdd.setText("Add");
+        jButtonAdd.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonAddActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 1;
+        jPanelModelAnalytic.add(jButtonAdd, gridBagConstraints);
 
-    jLabel5.setText("Name");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-    jPanelModelActions.add(jLabel5, gridBagConstraints);
+        jButtonRemove.setText("Remove");
+        jButtonRemove.setEnabled(false);
+        jButtonRemove.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonRemoveActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelModelAnalytic.add(jButtonRemove, gridBagConstraints);
 
-    jTextFieldName.setColumns(10);
-    jTextFieldName.setEditable(false);
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-    jPanelModelActions.add(jTextFieldName, gridBagConstraints);
+        jButtonUpdate.setText("Update");
+        jButtonUpdate.setEnabled(false);
+        jButtonUpdate.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonUpdateActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelModelAnalytic.add(jButtonUpdate, gridBagConstraints);
 
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.weightx = 0.7;
-    gridBagConstraints.weighty = 0.2;
-    add(jPanelModelActions, gridBagConstraints);
+        jLabelName.setText("Name");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelModelAnalytic.add(jLabelName, gridBagConstraints);
 
-    jPanelDescription.setBorder(javax.swing.BorderFactory.createTitledBorder("Model description"));
-    jPanelDescription.setMaximumSize(new java.awt.Dimension(2147483647, 250));
-    jPanelDescription.setMinimumSize(new java.awt.Dimension(100, 150));
-    jPanelDescription.setPreferredSize(new java.awt.Dimension(100, 150));
-    jPanelDescription.setLayout(new java.awt.GridBagLayout());
+        jTextFieldName.setColumns(10);
+        jTextFieldName.setEditable(false);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelModelAnalytic.add(jTextFieldName, gridBagConstraints);
 
-    jLabelModelDescrption.setBackground(new java.awt.Color(255, 255, 255));
-    jLabelModelDescrption.setFont(new java.awt.Font("Dialog", 0, 12));
-    jLabelModelDescrption.setOpaque(true);
-    jScrollPaneModelDescription.setViewportView(jLabelModelDescrption);
+        jLabelType.setText("model type");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelModelAnalytic.add(jLabelType, gridBagConstraints);
 
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.weighty = 1.0;
-    jPanelDescription.add(jScrollPaneModelDescription, gridBagConstraints);
+        jComboBoxModelType.setMinimumSize(new java.awt.Dimension(100, 24));
+        jComboBoxModelType.setPreferredSize(new java.awt.Dimension(100, 24));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelModelAnalytic.add(jComboBoxModelType, gridBagConstraints);
 
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.weighty = 0.2;
-    add(jPanelDescription, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 0.7;
+        gridBagConstraints.weighty = 0.2;
+        jPanelModel.add(jPanelModelAnalytic, gridBagConstraints);
 
-    jPanelParameters.setBorder(javax.swing.BorderFactory.createTitledBorder("Model Parameters"));
-    jPanelParameters.setMinimumSize(new java.awt.Dimension(300, 100));
-    jPanelParameters.setPreferredSize(new java.awt.Dimension(300, 100));
-    jPanelParameters.setLayout(new java.awt.GridBagLayout());
+        jPanelUserModel.setLayout(new java.awt.GridBagLayout());
 
-    jScrollPaneTableModelParameters.setMinimumSize(new java.awt.Dimension(200, 100));
-    jScrollPaneTableModelParameters.setPreferredSize(new java.awt.Dimension(200, 100));
+        jLabelValid.setText("State");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
+        gridBagConstraints.weightx = 0.1;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 6);
+        jPanelUserModel.add(jLabelValid, gridBagConstraints);
 
-    jTableModelParameters.setModel(new ModelParameterTableModel(Mode.ASPRO));
-    jTableModelParameters.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_ALL_COLUMNS);
-    jScrollPaneTableModelParameters.setViewportView(jTableModelParameters);
+        buttonGroupUserModelValid.add(jRadioButtonValid);
+        jRadioButtonValid.setSelected(true);
+        jRadioButtonValid.setText("enabled");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.weightx = 0.3;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelUserModel.add(jRadioButtonValid, gridBagConstraints);
 
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-    jPanelParameters.add(jScrollPaneTableModelParameters, gridBagConstraints);
+        buttonGroupUserModelValid.add(jRadioButtonInvalid);
+        jRadioButtonInvalid.setText("disabled");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.weightx = 0.3;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelUserModel.add(jRadioButtonInvalid, gridBagConstraints);
 
-    buttonGroupEditMode.add(jRadioButtonXY);
-    jRadioButtonXY.setSelected(true);
-    jRadioButtonXY.setText("x / y (mas)");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.weightx = 0.5;
-    jPanelParameters.add(jRadioButtonXY, gridBagConstraints);
+        jLabelFile.setText("File");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 6);
+        jPanelUserModel.add(jLabelFile, gridBagConstraints);
 
-    buttonGroupEditMode.add(jRadioButtonRhoTheta);
-    jRadioButtonRhoTheta.setText("rho (mas) / theta [-180°; 180°]");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 2;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.weightx = 0.5;
-    jPanelParameters.add(jRadioButtonRhoTheta, gridBagConstraints);
+        jTextFieldFileReference.setColumns(20);
+        jTextFieldFileReference.setEditable(false);
+        jTextFieldFileReference.setText("FileReference");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 0.7;
+        jPanelUserModel.add(jTextFieldFileReference, gridBagConstraints);
 
-    jLabelOffsetEditMode.setText("edit positions :");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-    jPanelParameters.add(jLabelOffsetEditMode, gridBagConstraints);
+        jButtonOpenFile.setText("Open");
+        jButtonOpenFile.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonOpenFileActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.weightx = 0.1;
+        jPanelUserModel.add(jButtonOpenFile, gridBagConstraints);
 
-    jButtonNormalizeFluxes.setText("Normalize fluxes");
-    jButtonNormalizeFluxes.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        jButtonNormalizeFluxesActionPerformed(evt);
-      }
-    });
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 3;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-    jPanelParameters.add(jButtonNormalizeFluxes, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 0.7;
+        gridBagConstraints.weighty = 0.2;
+        jPanelModel.add(jPanelUserModel, gridBagConstraints);
 
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 2;
-    gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.weighty = 0.6;
-    add(jPanelParameters, gridBagConstraints);
-  }// </editor-fold>//GEN-END:initComponents
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 0.7;
+        gridBagConstraints.weighty = 0.2;
+        add(jPanelModel, gridBagConstraints);
+
+        jPanelDescription.setBorder(javax.swing.BorderFactory.createTitledBorder("Model description"));
+        jPanelDescription.setMaximumSize(new java.awt.Dimension(2147483647, 250));
+        jPanelDescription.setMinimumSize(new java.awt.Dimension(100, 150));
+        jPanelDescription.setPreferredSize(new java.awt.Dimension(100, 150));
+        jPanelDescription.setLayout(new java.awt.GridBagLayout());
+
+        jLabelModelDescrption.setBackground(new java.awt.Color(255, 255, 255));
+        jLabelModelDescrption.setFont(new java.awt.Font("Dialog", 0, 12));
+        jLabelModelDescrption.setOpaque(true);
+        jScrollPaneModelDescription.setViewportView(jLabelModelDescrption);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
+        jPanelDescription.add(jScrollPaneModelDescription, gridBagConstraints);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weighty = 0.2;
+        add(jPanelDescription, gridBagConstraints);
+
+        jPanelParameters.setBorder(javax.swing.BorderFactory.createTitledBorder("Model Parameters"));
+        jPanelParameters.setMinimumSize(new java.awt.Dimension(300, 100));
+        jPanelParameters.setPreferredSize(new java.awt.Dimension(300, 100));
+        jPanelParameters.setLayout(new java.awt.GridBagLayout());
+
+        jScrollPaneTableModelParameters.setMinimumSize(new java.awt.Dimension(200, 100));
+        jScrollPaneTableModelParameters.setPreferredSize(new java.awt.Dimension(200, 100));
+
+        jTableModelParameters.setModel(new ModelParameterTableModel(Mode.ASPRO));
+        jTableModelParameters.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_ALL_COLUMNS);
+        jScrollPaneTableModelParameters.setViewportView(jTableModelParameters);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelParameters.add(jScrollPaneTableModelParameters, gridBagConstraints);
+
+        buttonGroupEditMode.add(jRadioButtonXY);
+        jRadioButtonXY.setSelected(true);
+        jRadioButtonXY.setText("x / y (mas)");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 0.5;
+        jPanelParameters.add(jRadioButtonXY, gridBagConstraints);
+
+        buttonGroupEditMode.add(jRadioButtonRhoTheta);
+        jRadioButtonRhoTheta.setText("rho (mas) / theta [-180°; 180°]");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 0.5;
+        jPanelParameters.add(jRadioButtonRhoTheta, gridBagConstraints);
+
+        jLabelOffsetEditMode.setText("edit positions :");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelParameters.add(jLabelOffsetEditMode, gridBagConstraints);
+
+        jButtonNormalizeFluxes.setText("Normalize fluxes");
+        jButtonNormalizeFluxes.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonNormalizeFluxesActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelParameters.add(jButtonNormalizeFluxes, gridBagConstraints);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 0.6;
+        add(jPanelParameters, gridBagConstraints);
+
+        jPanelImage.setBorder(javax.swing.BorderFactory.createTitledBorder("Fits Image"));
+        jPanelImage.setLayout(new java.awt.BorderLayout());
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 0.8;
+        add(jPanelImage, gridBagConstraints);
+    }// </editor-fold>//GEN-END:initComponents
 
   /**
    * Validate the form
@@ -827,29 +1060,101 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
     // refresh whole values
     getModelParameterTableModel().fireTableDataChanged();
   }//GEN-LAST:event_jButtonNormalizeFluxesActionPerformed
-  // Variables declaration - do not modify//GEN-BEGIN:variables
-  private javax.swing.ButtonGroup buttonGroupEditMode;
-  private javax.swing.JButton jButtonAdd;
-  private javax.swing.JButton jButtonNormalizeFluxes;
-  private javax.swing.JButton jButtonRemove;
-  private javax.swing.JButton jButtonUpdate;
-  private javax.swing.JComboBox jComboBoxModelType;
-  private javax.swing.JLabel jLabel3;
-  private javax.swing.JLabel jLabel5;
-  private javax.swing.JLabel jLabelModelDescrption;
-  private javax.swing.JLabel jLabelOffsetEditMode;
-  private javax.swing.JPanel jPanelDescription;
-  private javax.swing.JPanel jPanelModelActions;
-  private javax.swing.JPanel jPanelParameters;
-  private javax.swing.JRadioButton jRadioButtonRhoTheta;
-  private javax.swing.JRadioButton jRadioButtonXY;
-  private javax.swing.JScrollPane jScrollPaneModelDescription;
-  private javax.swing.JScrollPane jScrollPaneTableModelParameters;
-  private javax.swing.JScrollPane jScrollPaneTreeModels;
-  private javax.swing.JTable jTableModelParameters;
-  private javax.swing.JTextField jTextFieldName;
-  private javax.swing.JTree jTreeModels;
-  // End of variables declaration//GEN-END:variables
+
+  private void jButtonOpenFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonOpenFileActionPerformed
+
+    final UserModel userModel = this.currentTarget.getOrCreateUserModel();
+    
+    File file = null;
+
+    final JFileChooser fileChooser = new JFileChooser();
+    fileChooser.setFileFilter(mimeType.getFileFilter());
+
+    if (userModel.getFile() != null) {
+      fileChooser.setSelectedFile(new File(userModel.getFile()));
+    } else {
+      fileChooser.setCurrentDirectory(FilePreferences.getInstance().getDirectoryFile(mimeType));
+    }
+
+    fileChooser.setDialogTitle("Open a FITS image as user model");
+
+    final int returnVal = fileChooser.showOpenDialog(null);
+    if (returnVal == JFileChooser.APPROVE_OPTION) {
+      file = fileChooser.getSelectedFile();
+    } else {
+      file = null;
+    }
+
+    // If a file was defined (No cancel in the dialog)
+    if (file != null) {
+      FilePreferences.getInstance().setDirectory(mimeType, file.getParent());
+
+      userModel.setFile(file.getAbsolutePath());
+      userModel.setFileValid(false);
+
+      try {
+        // throws exceptions if the given fits file or image is incorrect:
+        userModel.setFitsImage(UserModelService.prepareFitsFile(userModel.getFile()));
+
+        // has increments ?
+        if (!userModel.getFitsImage().isIncColDefined() || !userModel.getFitsImage().isIncRowDefined()) {
+          MessagePane.showErrorMessage("Missing pixel increments in file:\n" + userModel.getFile() + "\n\nthis model is disabled.");
+        } else {
+          // TODO: validate image information (keywords ...) => put information in model description
+          userModel.setFileValid(true);
+        }
+
+      } catch (IllegalArgumentException iae) {
+        logger.log(Level.INFO, "prepareFitsFile [" + userModel.getFile() + "] failed", iae);
+        MessagePane.showErrorMessage("Could not use file: " + file.getAbsolutePath(), iae);
+      } catch (FitsException fe) {
+        MessagePane.showErrorMessage("Could not read file: " + file.getAbsolutePath(), fe);
+      } catch (IOException ioe) {
+        MessagePane.showErrorMessage("Could not read file: " + file.getAbsolutePath(), ioe);
+      }
+
+      // reselect target to update image:
+      processTargetSelection(currentTarget);
+    }
+  }//GEN-LAST:event_jButtonOpenFileActionPerformed
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.ButtonGroup buttonGroupEditMode;
+    private javax.swing.ButtonGroup buttonGroupModelMode;
+    private javax.swing.ButtonGroup buttonGroupUserModelValid;
+    private javax.swing.JButton jButtonAdd;
+    private javax.swing.JButton jButtonNormalizeFluxes;
+    private javax.swing.JButton jButtonOpenFile;
+    private javax.swing.JButton jButtonRemove;
+    private javax.swing.JButton jButtonUpdate;
+    private javax.swing.JComboBox jComboBoxModelType;
+    private javax.swing.JLabel jLabelFile;
+    private javax.swing.JLabel jLabelMode;
+    private javax.swing.JLabel jLabelModelDescrption;
+    private javax.swing.JLabel jLabelName;
+    private javax.swing.JLabel jLabelOffsetEditMode;
+    private javax.swing.JLabel jLabelType;
+    private javax.swing.JLabel jLabelValid;
+    private javax.swing.JPanel jPanelDescription;
+    private javax.swing.JPanel jPanelImage;
+    private javax.swing.JPanel jPanelModel;
+    private javax.swing.JPanel jPanelModelAnalytic;
+    private javax.swing.JPanel jPanelParameters;
+    private javax.swing.JPanel jPanelUserModel;
+    private javax.swing.JRadioButton jRadioButtonAnalytical;
+    private javax.swing.JRadioButton jRadioButtonInvalid;
+    private javax.swing.JRadioButton jRadioButtonRhoTheta;
+    private javax.swing.JRadioButton jRadioButtonUserModel;
+    private javax.swing.JRadioButton jRadioButtonValid;
+    private javax.swing.JRadioButton jRadioButtonXY;
+    private javax.swing.JScrollPane jScrollPaneModelDescription;
+    private javax.swing.JScrollPane jScrollPaneTableModelParameters;
+    private javax.swing.JScrollPane jScrollPaneTreeModels;
+    private javax.swing.JSeparator jSeparatorMode;
+    private javax.swing.JTable jTableModelParameters;
+    private javax.swing.JTextField jTextFieldFileReference;
+    private javax.swing.JTextField jTextFieldName;
+    private javax.swing.JTree jTreeModels;
+    // End of variables declaration//GEN-END:variables
 
   /**
    * Create a custom JTable with specific behaviour (custom numeric editors and renderers)
