@@ -12,6 +12,10 @@ import java.util.Vector;
  */
 public interface AsproConstants {
 
+  /* JMMC applications */
+  /** SearchCal samp.name keyword */
+  public final static String SEARCHCAL_SAMP_NAME = "SearchCal";
+  
   /** chart : enables the zoom in / out */
   public final static boolean ENABLE_ZOOM = true;
 

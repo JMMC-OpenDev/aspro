@@ -8,6 +8,7 @@ import fr.jmmc.jmcs.network.Http;
 import fr.jmmc.jmcs.network.interop.SampCapability;
 import fr.jmmc.jmcs.network.interop.SampManager;
 import fr.jmmc.jmcs.network.interop.SampMessageHandler;
+import fr.jmmc.jmcs.network.interop.SampMetaData;
 import fr.jmmc.jmcs.util.FileUtils;
 import java.io.File;
 import java.io.IOException;
@@ -99,7 +100,7 @@ public final class VotableSampMessageHandler extends SampMessageHandler {
       }
 
       final Metadata senderMetadata = SampManager.getMetaData(senderId);
-      final String searchCalVersion = senderMetadata.getString("searchcal.version");
+      final String searchCalVersion = senderMetadata.getString(SampMetaData.RELEASE_VERSION.id());
 
       if (searchCalVersion == null) {
         AnyVOTableHandler.processMessage(votable);

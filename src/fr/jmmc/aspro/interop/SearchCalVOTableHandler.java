@@ -3,6 +3,7 @@
  ******************************************************************************/
 package fr.jmmc.aspro.interop;
 
+import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.gui.TargetEditorDialog;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.oi.BaseValue;
@@ -219,7 +220,7 @@ public final class SearchCalVOTableHandler {
 
         // update target name :
         newCal.setName(calName);
-        newCal.setOrigin("SearchCal");
+        newCal.setOrigin(AsproConstants.SEARCHCAL_SAMP_NAME);
 
         oldCal = Target.getTarget(calName, editTargets);
 

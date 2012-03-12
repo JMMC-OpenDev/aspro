@@ -93,7 +93,7 @@ public final class AnyVOTableHandler {
 
           // check the number of targets :
           if (targets.isEmpty()) {
-            MessagePane.showErrorMessage("No calibrator found in SearchCal response !");
+            MessagePane.showErrorMessage("No target found in VOTable !");
             return;
           }
 
