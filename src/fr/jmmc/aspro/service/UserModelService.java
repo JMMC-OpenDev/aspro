@@ -3,6 +3,7 @@
  ******************************************************************************/
 package fr.jmmc.aspro.service;
 
+import fr.jmmc.aspro.Preferences;
 import fr.jmmc.aspro.image.FitsImageUtils;
 import fr.jmmc.jmal.complex.MutableComplex;
 import fr.jmmc.jmal.image.FFTUtils;
@@ -61,7 +62,10 @@ public final class UserModelService {
       throw new FitsException("The Fits file '" + file + "' does not contain any Fits image !");
     }
 
-    final FitsImage fitsImage = FitsImageUtils.prepareImage(imgFitsFile.getFirstFitsImage(), MIN_VISIBILITY_UV_MAP);
+    final boolean useFastMode = Preferences.getInstance().isFastUserModel();
+
+    final FitsImage fitsImage = FitsImageUtils.prepareImage(imgFitsFile.getFirstFitsImage(),
+            (useFastMode) ? MIN_VISIBILITY_UV_MAP : 0f);
 
     logger.info("Prepared FitsImage: " + fitsImage.toString(false));
 
@@ -387,8 +391,10 @@ public final class UserModelService {
     final float[] colCoords = UserModelService.computeSpatialCoords(nbCols, fitsImage.getSignedIncCol());
 
 
+    final boolean useFastMode = Preferences.getInstance().isFastUserModel();
+
     // Skip zero values only as the image was previously filtered to ignore small values:
-    final float threshold = 2f * MIN_VISIBILITY_DATA / nData;
+    final float threshold = (useFastMode) ? 2f * MIN_VISIBILITY_DATA / nData : 0f;
     logger.info("FitsImage: threshold = " + threshold);
 
 

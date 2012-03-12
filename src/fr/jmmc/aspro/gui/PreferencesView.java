@@ -73,7 +73,7 @@ public final class PreferencesView extends JFrame implements Observer {
           // will fire triggerObserversNotification so update() will be called
           myPreferences.setPreference(Preferences.MIN_ELEVATION, Double.valueOf(((Number) jFieldMinElev.getValue()).doubleValue()));
         } catch (PreferencesException pe) {
-          logger.log(Level.SEVERE, null, pe);
+          logger.log(Level.SEVERE, "property failure : ", pe);
         }
       }
     });
@@ -123,7 +123,8 @@ public final class PreferencesView extends JFrame implements Observer {
         buttonGroupPositionStyle = new javax.swing.ButtonGroup();
         buttonGroupTimeRef = new javax.swing.ButtonGroup();
         buttonGroupTimeAxis = new javax.swing.ButtonGroup();
-        jPanel1 = new javax.swing.JPanel();
+        buttonGroupFastUserModel = new javax.swing.ButtonGroup();
+        jPanelObservability = new javax.swing.JPanel();
         jLabelTimeRef = new javax.swing.JLabel();
         jRadioButtonTimeLST = new javax.swing.JRadioButton();
         jRadioButtonTimeUTC = new javax.swing.JRadioButton();
@@ -145,6 +146,10 @@ public final class PreferencesView extends JFrame implements Observer {
         jComboBoxImageSize = new javax.swing.JComboBox();
         jLabelColorScale = new javax.swing.JLabel();
         jComboBoxColorScale = new javax.swing.JComboBox();
+        jPanelUserModel = new javax.swing.JPanel();
+        jLabelFastUserModel = new javax.swing.JLabel();
+        jRadioButtonFastUserModelYes = new javax.swing.JRadioButton();
+        jRadioButtonFastUserModelNo = new javax.swing.JRadioButton();
         jPanelButtons = new javax.swing.JPanel();
         jButtonDefault = new javax.swing.JButton();
         jButtonSave = new javax.swing.JButton();
@@ -153,14 +158,14 @@ public final class PreferencesView extends JFrame implements Observer {
         setTitle("Preferences");
         getContentPane().setLayout(new javax.swing.BoxLayout(getContentPane(), javax.swing.BoxLayout.PAGE_AXIS));
 
-        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Observability"));
-        jPanel1.setLayout(new java.awt.GridBagLayout());
+        jPanelObservability.setBorder(javax.swing.BorderFactory.createTitledBorder("Observability"));
+        jPanelObservability.setLayout(new java.awt.GridBagLayout());
 
         jLabelTimeRef.setText("Time reference");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 6);
-        jPanel1.add(jLabelTimeRef, gridBagConstraints);
+        jPanelObservability.add(jLabelTimeRef, gridBagConstraints);
 
         buttonGroupTimeRef.add(jRadioButtonTimeLST);
         jRadioButtonTimeLST.setSelected(true);
@@ -173,7 +178,7 @@ public final class PreferencesView extends JFrame implements Observer {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-        jPanel1.add(jRadioButtonTimeLST, gridBagConstraints);
+        jPanelObservability.add(jRadioButtonTimeLST, gridBagConstraints);
 
         buttonGroupTimeRef.add(jRadioButtonTimeUTC);
         jRadioButtonTimeUTC.setText(AsproConstants.TIME_UTC);
@@ -185,7 +190,7 @@ public final class PreferencesView extends JFrame implements Observer {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-        jPanel1.add(jRadioButtonTimeUTC, gridBagConstraints);
+        jPanelObservability.add(jRadioButtonTimeUTC, gridBagConstraints);
 
         jLabelCenterNight.setText("Center plot arround night");
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -193,7 +198,7 @@ public final class PreferencesView extends JFrame implements Observer {
         gridBagConstraints.gridy = 1;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 6);
-        jPanel1.add(jLabelCenterNight, gridBagConstraints);
+        jPanelObservability.add(jLabelCenterNight, gridBagConstraints);
 
         buttonGroupTimeAxis.add(jRadioButtonCenterNightYes);
         jRadioButtonCenterNightYes.setSelected(true);
@@ -207,7 +212,7 @@ public final class PreferencesView extends JFrame implements Observer {
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-        jPanel1.add(jRadioButtonCenterNightYes, gridBagConstraints);
+        jPanelObservability.add(jRadioButtonCenterNightYes, gridBagConstraints);
 
         buttonGroupTimeAxis.add(jRadioButtonCenterNightNo);
         jRadioButtonCenterNightNo.setText("no");
@@ -220,7 +225,7 @@ public final class PreferencesView extends JFrame implements Observer {
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-        jPanel1.add(jRadioButtonCenterNightNo, gridBagConstraints);
+        jPanelObservability.add(jRadioButtonCenterNightNo, gridBagConstraints);
 
         jLabelMinElev.setText("Default min. Elevation");
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -228,7 +233,7 @@ public final class PreferencesView extends JFrame implements Observer {
         gridBagConstraints.gridy = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 6);
-        jPanel1.add(jLabelMinElev, gridBagConstraints);
+        jPanelObservability.add(jLabelMinElev, gridBagConstraints);
 
         jFieldMinElev.setColumns(2);
         jFieldMinElev.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0"))));
@@ -237,14 +242,14 @@ public final class PreferencesView extends JFrame implements Observer {
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 2;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 2);
-        jPanel1.add(jFieldMinElev, gridBagConstraints);
+        jPanelObservability.add(jFieldMinElev, gridBagConstraints);
 
         jLabelTwilight.setText("Twilight used as Night limit");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 3;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-        jPanel1.add(jLabelTwilight, gridBagConstraints);
+        jPanelObservability.add(jLabelTwilight, gridBagConstraints);
 
         jComboBoxTwilight.setModel(new DefaultComboBoxModel(TWILIGHTS));
         jComboBoxTwilight.setSelectedItem(TWILIGHTS[0]);
@@ -258,9 +263,9 @@ public final class PreferencesView extends JFrame implements Observer {
         gridBagConstraints.gridy = 3;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-        jPanel1.add(jComboBoxTwilight, gridBagConstraints);
+        jPanelObservability.add(jComboBoxTwilight, gridBagConstraints);
 
-        getContentPane().add(jPanel1);
+        getContentPane().add(jPanelObservability);
 
         jPanelModelEditor.setBorder(javax.swing.BorderFactory.createTitledBorder("Model Editor"));
         jPanelModelEditor.setLayout(new java.awt.GridBagLayout());
@@ -357,6 +362,41 @@ public final class PreferencesView extends JFrame implements Observer {
 
         getContentPane().add(jPanelModelImage);
 
+        jPanelUserModel.setBorder(javax.swing.BorderFactory.createTitledBorder("User Model"));
+        jPanelUserModel.setLayout(new java.awt.GridBagLayout());
+
+        jLabelFastUserModel.setText("Fast mode (optimize image)");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.weightx = 0.2;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 6);
+        jPanelUserModel.add(jLabelFastUserModel, gridBagConstraints);
+
+        buttonGroupFastUserModel.add(jRadioButtonFastUserModelYes);
+        jRadioButtonFastUserModelYes.setText("yes");
+        jRadioButtonFastUserModelYes.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButtonFastUserModelActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.weightx = 0.4;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelUserModel.add(jRadioButtonFastUserModelYes, gridBagConstraints);
+
+        buttonGroupFastUserModel.add(jRadioButtonFastUserModelNo);
+        jRadioButtonFastUserModelNo.setText("no");
+        jRadioButtonFastUserModelNo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButtonFastUserModelActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.weightx = 0.4;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelUserModel.add(jRadioButtonFastUserModelNo, gridBagConstraints);
+
+        getContentPane().add(jPanelUserModel);
+
         jButtonDefault.setText("Restore Default Settings");
         jButtonDefault.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -381,7 +421,7 @@ public final class PreferencesView extends JFrame implements Observer {
         // will fire triggerObserversNotification so update() will be called
         this.myPreferences.setPreference(Preferences.MODELEDITOR_PREFERXY, Boolean.valueOf(this.jRadioButtonXY.isSelected()));
       } catch (PreferencesException pe) {
-        logger.log(Level.SEVERE, null, pe);
+        logger.log(Level.SEVERE, "property failure : ", pe);
       }
     }//GEN-LAST:event_jRadioButtonPositionStyleActionPerformed
 
@@ -391,7 +431,7 @@ public final class PreferencesView extends JFrame implements Observer {
       } catch (PreferencesException pe) {
         // this try catch should not be solved here
         // one feedback report could be thrown on error into Preference code
-        logger.log(Level.SEVERE, null, pe);
+        logger.log(Level.SEVERE, "property failure : ", pe);
       }
     }//GEN-LAST:event_jButtonSaveActionPerformed
 
@@ -404,7 +444,7 @@ public final class PreferencesView extends JFrame implements Observer {
         // will fire triggerObserversNotification so update() will be called
         this.myPreferences.setPreference(Preferences.MODEL_IMAGE_SIZE, this.jComboBoxImageSize.getSelectedItem());
       } catch (PreferencesException pe) {
-        logger.log(Level.SEVERE, null, pe);
+        logger.log(Level.SEVERE, "property failure : ", pe);
       }
     }//GEN-LAST:event_jComboBoxImageSizeActionPerformed
 
@@ -413,7 +453,7 @@ public final class PreferencesView extends JFrame implements Observer {
         // will fire triggerObserversNotification so update() will be called
         this.myPreferences.setPreference(Preferences.MODEL_IMAGE_LUT, this.jComboBoxLUT.getSelectedItem());
       } catch (PreferencesException pe) {
-        logger.log(Level.SEVERE, null, pe);
+        logger.log(Level.SEVERE, "property failure : ", pe);
       }
     }//GEN-LAST:event_jComboBoxLUTActionPerformed
 
@@ -429,7 +469,7 @@ public final class PreferencesView extends JFrame implements Observer {
         // will fire triggerObserversNotification so update() will be called
         this.myPreferences.setPreference(Preferences.TIME_REFERENCE, value);
       } catch (PreferencesException pe) {
-        logger.log(Level.SEVERE, null, pe);
+        logger.log(Level.SEVERE, "property failure : ", pe);
       }
     }//GEN-LAST:event_jRadioButtonTimeRefActionPerformed
 
@@ -438,7 +478,7 @@ public final class PreferencesView extends JFrame implements Observer {
         // will fire triggerObserversNotification so update() will be called
         this.myPreferences.setPreference(Preferences.CENTER_NIGHT, Boolean.valueOf(this.jRadioButtonCenterNightYes.isSelected()));
       } catch (PreferencesException pe) {
-        logger.log(Level.SEVERE, null, pe);
+        logger.log(Level.SEVERE, "property failure : ", pe);
       }
     }//GEN-LAST:event_jRadioButtonCenterNightActionPerformed
 
@@ -447,7 +487,7 @@ public final class PreferencesView extends JFrame implements Observer {
         // will fire triggerObserversNotification so update() will be called
         this.myPreferences.setPreference(Preferences.TWILIGHT_NIGHT, getTwilight((String) this.jComboBoxTwilight.getSelectedItem()).toString());
       } catch (PreferencesException pe) {
-        logger.log(Level.SEVERE, null, pe);
+        logger.log(Level.SEVERE, "property failure : ", pe);
       }
     }//GEN-LAST:event_jComboBoxTwilightActionPerformed
 
@@ -456,9 +496,18 @@ public final class PreferencesView extends JFrame implements Observer {
       // will fire triggerObserversNotification so update() will be called
       this.myPreferences.setPreference(Preferences.MODEL_IMAGE_SCALE, this.jComboBoxColorScale.getSelectedItem().toString());
     } catch (PreferencesException pe) {
-      logger.log(Level.SEVERE, null, pe);
+      logger.log(Level.SEVERE, "property failure : ", pe);
     }
   }//GEN-LAST:event_jComboBoxColorScaleActionPerformed
+
+  private void jRadioButtonFastUserModelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonFastUserModelActionPerformed
+    try {
+      // will fire triggerObserversNotification so update() will be called
+      this.myPreferences.setPreference(Preferences.MODEL_USER_FAST, Boolean.valueOf(this.jRadioButtonFastUserModelYes.isSelected()));
+    } catch (PreferencesException pe) {
+      logger.log(Level.SEVERE, "property failure : ", pe);
+    }
+  }//GEN-LAST:event_jRadioButtonFastUserModelActionPerformed
 
   /**
    * Listen to preferences changes
@@ -491,8 +540,13 @@ public final class PreferencesView extends JFrame implements Observer {
     this.jFieldMinElev.setValue(this.myPreferences.getPreferenceAsDouble(Preferences.MIN_ELEVATION));
 
     this.jComboBoxTwilight.setSelectedItem(getTwilight(this.myPreferences.getTwilightAsNightLimit()));
+
+    final boolean useFastUserModel = this.myPreferences.isFastUserModel();
+    this.jRadioButtonFastUserModelYes.setSelected(useFastUserModel);
+    this.jRadioButtonFastUserModelNo.setSelected(!useFastUserModel);
   }
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.ButtonGroup buttonGroupFastUserModel;
     private javax.swing.ButtonGroup buttonGroupPositionStyle;
     private javax.swing.ButtonGroup buttonGroupTimeAxis;
     private javax.swing.ButtonGroup buttonGroupTimeRef;
@@ -505,18 +559,22 @@ public final class PreferencesView extends JFrame implements Observer {
     private javax.swing.JFormattedTextField jFieldMinElev;
     private javax.swing.JLabel jLabelCenterNight;
     private javax.swing.JLabel jLabelColorScale;
+    private javax.swing.JLabel jLabelFastUserModel;
     private javax.swing.JLabel jLabelImageSize;
     private javax.swing.JLabel jLabelLutTable;
     private javax.swing.JLabel jLabelMinElev;
     private javax.swing.JLabel jLabelPositionStyle;
     private javax.swing.JLabel jLabelTimeRef;
     private javax.swing.JLabel jLabelTwilight;
-    private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanelButtons;
     private javax.swing.JPanel jPanelModelEditor;
     private javax.swing.JPanel jPanelModelImage;
+    private javax.swing.JPanel jPanelObservability;
+    private javax.swing.JPanel jPanelUserModel;
     private javax.swing.JRadioButton jRadioButtonCenterNightNo;
     private javax.swing.JRadioButton jRadioButtonCenterNightYes;
+    private javax.swing.JRadioButton jRadioButtonFastUserModelNo;
+    private javax.swing.JRadioButton jRadioButtonFastUserModelYes;
     private javax.swing.JRadioButton jRadioButtonRhoTheta;
     private javax.swing.JRadioButton jRadioButtonTimeLST;
     private javax.swing.JRadioButton jRadioButtonTimeUTC;

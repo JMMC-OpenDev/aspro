@@ -29,6 +29,10 @@ public final class Preferences extends fr.jmmc.jmcs.data.preference.Preferences 
   public final static String MODEL_IMAGE_SIZE = "model.image.size";
   /** Preference : Color scaling method to use for the object model image in the UV Coverage plot */
   public final static String MODEL_IMAGE_SCALE = "model.image.scale";
+  /** Preference : Enable noise modeling for the object model image in the UV Coverage plot */
+  public final static String MODEL_IMAGE_NOISE = "model.image.noise";
+  /** Preference : Enable fast user model (optimize FFT and direct FT i.e. skip useless data) */
+  public final static String MODEL_USER_FAST = "model.user.fast";
   /** Preference : time reference (LST/UTC) */
   public final static String TIME_REFERENCE = "time.reference";
   /** Preference : minimum elevation */
@@ -77,15 +81,19 @@ public final class Preferences extends fr.jmmc.jmcs.data.preference.Preferences 
   protected void setDefaultPreferences() throws PreferencesException {
     logger.fine("Preferences.setDefaultPreferences()");
 
-    // Model editor :
+    // Model editor:
     setDefaultPreference(MODELEDITOR_PREFERXY, Boolean.FALSE);
 
-    // UV Coverage - image size and LUT :
+    // UV Coverage - image size and LUT:
     setDefaultPreference(MODEL_IMAGE_LUT, AsproConstants.DEFAULT_IMAGE_LUT);
     setDefaultPreference(MODEL_IMAGE_SIZE, AsproConstants.DEFAULT_IMAGE_SIZE);
     setDefaultPreference(MODEL_IMAGE_SCALE, ColorScale.LINEAR.toString());
+    setDefaultPreference(MODEL_IMAGE_NOISE, Boolean.FALSE);
 
-    // Time reference :
+    // User model:
+    setDefaultPreference(MODEL_USER_FAST, Boolean.TRUE);
+
+    // Time reference:
     setDefaultPreference(TIME_REFERENCE, AsproConstants.TIME_LST);
 
     // minimum elevation:
@@ -149,4 +157,14 @@ public final class Preferences extends fr.jmmc.jmcs.data.preference.Preferences 
     }
     return ColorScale.LINEAR;
   }
+  
+  
+  /**
+   * Return true if the fast mode for user model is enabled
+   * @return true if the fast mode for user model is enabled 
+   */
+  public boolean isFastUserModel() {
+    return getPreferenceAsBoolean(Preferences.MODEL_USER_FAST);
+  }
+  
 }

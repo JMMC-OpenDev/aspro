@@ -37,9 +37,9 @@ import fr.jmmc.jmal.star.Star;
 import fr.jmmc.jmal.model.ModelDefinition;
 import fr.jmmc.jmal.model.targetmodel.Model;
 import fr.jmmc.jmal.model.targetmodel.Parameter;
+import fr.jmmc.jmcs.gui.MessagePane;
 import fr.jmmc.jmcs.gui.SwingUtils;
 import fr.jmmc.jmcs.util.FileUtils;
-import fr.jmmc.oitools.image.FitsImage;
 import fr.jmmc.oitools.model.OIFitsFile;
 import fr.nom.tam.fits.FitsException;
 import java.io.File;
@@ -47,6 +47,8 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.Date;
 import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
 import javax.xml.datatype.XMLGregorianCalendar;
@@ -56,7 +58,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *
  * @author bourgesl
  */
-public final class ObservationManager extends BaseOIManager {
+public final class ObservationManager extends BaseOIManager implements Observer {
 
   /** Class logger */
   private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(ObservationManager.class.getName());
@@ -67,6 +69,8 @@ public final class ObservationManager extends BaseOIManager {
   /** singleton pattern */
   private static final ObservationManager instance = new ObservationManager();
   /* members */
+  /** preference singleton */
+  private final Preferences myPreferences = Preferences.getInstance();
   /** observation listeners */
   private final CopyOnWriteArrayList<ObservationListener> listeners = new CopyOnWriteArrayList<ObservationListener>();
   /** main observation settings */
@@ -77,6 +81,8 @@ public final class ObservationManager extends BaseOIManager {
   private ObservationCollection obsCollection = null;
   /** computed OIFits structure */
   private OIFitsFile oiFitsFile = null;
+  /** (cached) flag to use fast user model (preference) */
+  private boolean useFastUserModel;
 
   /**
    * Return the ObservationManager singleton
@@ -91,6 +97,43 @@ public final class ObservationManager extends BaseOIManager {
    */
   private ObservationManager() {
     super();
+
+    // copy fast user model preference:
+    this.useFastUserModel = this.myPreferences.isFastUserModel();
+
+    this.myPreferences.addObserver(this);
+  }
+
+  /**
+   * Listen to preferences changes
+   * @param o Preferences
+   * @param arg unused
+   */
+  @Override
+  public void update(final Observable o, final Object arg) {
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("Preferences updated on : " + this);
+    }
+
+    final boolean newFastUserModel = this.myPreferences.isFastUserModel();
+    if (this.useFastUserModel != newFastUserModel) {
+      this.useFastUserModel = newFastUserModel;
+
+      if (!SwingUtils.isEDT()) {
+        throw new IllegalStateException("Not in EDT !!", new Throwable());
+      }
+
+      logger.info("ObservationManager.update: checkAndLoadFileReferences ...");
+      try {
+        // reload user models to prepare them again:
+        checkAndLoadFileReferences(getMainObservation());
+      } catch (FitsException fe) {
+        MessagePane.showErrorMessage("Could not load fits images", fe);
+      } catch (IOException ioe) {
+        MessagePane.showErrorMessage("Could not load fits images", ioe);
+      }
+      logger.info("ObservationManager.update: done.");
+    }
   }
 
   /**

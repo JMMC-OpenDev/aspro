@@ -867,8 +867,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         ModelManager.getInstance().validateModels(target.getModels());
       } catch (IllegalArgumentException iae) {
         // display an error message for the first error found :
-        MessagePane.showErrorMessage(
-                iae.getMessage(), "Error on target " + target.getName());
+        MessagePane.showErrorMessage(iae.getMessage(), "Error on target " + target.getName());
 
         // stop and continue editing the form :
         return false;
@@ -1090,6 +1089,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
       FilePreferences.getInstance().setDirectory(mimeType, file.getParent());
 
       userModel.setFile(file.getAbsolutePath());
+      userModel.setName(file.getName());
       userModel.setFileValid(false);
 
       try {

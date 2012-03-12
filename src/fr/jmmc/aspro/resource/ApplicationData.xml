@@ -7,7 +7,7 @@
 
 <ApplicationData link="http://www.jmmc.fr/aspro2">
 
-  <program name="Aspro2" version="0.9.0 beta 1"/>
+  <program name="Aspro2" version="0.9.0 beta 2"/>
   
   <compilation date="08/03/2011" compiler="JDK 1.5.0_16"/>
 
@@ -142,6 +142,11 @@
 
   <releasenotes>
     <release version="0.9.0">
+      <prerelease version="0.9.0 beta 2"> 
+        <change type="CHANGE">Fixed (SAMP) interoperability with SearchCal 4.4.1</change> 
+        <change type="CHANGE">Added 'Fast mode (optimize image)' preferences to prepare user models (FITS image) for FFT and direct fourier transform: 
+          discard negative, zero values and data lower than the visibility threshold (1 percent) to have smaller datasets to process</change> 
+      </prerelease>
       <prerelease version="0.9.0 beta 1"> 
         <change type="FEATURE">Added User model editor (single Fits image) in the target model editor including image preview</change> 
         <change type="FEATURE">Added 'Compute OIFits data' checkbox on the UV Coverage panel to enable/disable the OIFits computation 

@@ -17,6 +17,9 @@ import java.io.IOException;
 
 /**
  * This utility class provides several helper methods over FitsImage class
+ * 
+ * TODO: enhance profile usage and add new dynamic histogram (log(value))
+ * 
  * @author bourgesl
  */
 public final class FitsImageUtils {
@@ -24,6 +27,8 @@ public final class FitsImageUtils {
 
   /** Logger associated to image classes */
   private final static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(FitsImageUtils.class.getName());
+  /** flag to use flux profile threshold */
+  private final static boolean USE_FLUX_PROFILE = false;
 
   /**
    * Forbidden constructor
@@ -193,11 +198,9 @@ public final class FitsImageUtils {
     final ImageMinMaxJob minMaxJob = new ImageMinMaxJob(image.getData(),
             image.getNbCols(), image.getNbRows(), excludeZero);
 
-    logger.info("ImageMinMaxJob forkAndJoin");
-
     minMaxJob.forkAndJoin();
 
-    logger.info("ImageMinMaxJob min: " + minMaxJob.getMin() + " - max: " + minMaxJob.getMax());
+    logger.info("ImageMinMaxJob min:   " + minMaxJob.getMin() + " - max: " + minMaxJob.getMax());
     logger.info("ImageMinMaxJob nData: " + minMaxJob.getNData() + " - sum: " + minMaxJob.getSum());
 
     // update nData:
@@ -231,11 +234,11 @@ public final class FitsImageUtils {
     int nbRows = fitsImage.getNbRows();
     int nbCols = fitsImage.getNbCols();
 
-    logger.info("Image size = " + nbRows + " x " + nbCols);
+    logger.info("Image size:  " + nbRows + " x " + nbCols);
+    logger.info("Image nData: " + fitsImage.getNData() + " - total: " + fitsImage.getSum());
 
 
-    // 1- Normalize:
-
+    // 1- Normalize data (amplitude):
     if (fitsImage.getDataMax() <= 0d) {
       throw new IllegalArgumentException("Input image has only negative data !");
     }
@@ -244,7 +247,7 @@ public final class FitsImageUtils {
 
     ImageNormalizeJob normJob = new ImageNormalizeJob(data, nbCols, nbRows, normFactor);
 
-    logger.info("ImageNormalizeJob forkAndJoin - factor = " + normFactor);
+    logger.info("ImageNormalizeJob - factor = " + normFactor);
 
     normJob.forkAndJoin();
 
@@ -253,14 +256,14 @@ public final class FitsImageUtils {
 
 
     // 2.1 - Ignore negative values and lower than given zeroThreshold i.e. replace them by 0.0:
-    float tunedZeroThreshold = 2f * minVisibility / fitsImage.getNData();
+    float tunedZeroThreshold = (minVisibility > 0f) ? 2f * minVisibility / fitsImage.getNData() : 0f;
     logger.info("tuned threshold = " + tunedZeroThreshold);
 
     if (fitsImage.getDataMin() < tunedZeroThreshold) {
 
       final ImageLowerThresholdJob fixNegativeJob = new ImageLowerThresholdJob(data, nbCols, nbRows, tunedZeroThreshold, 0f);
 
-      logger.info("ImageLowerThresholdJob forkAndJoin - threshold = " + tunedZeroThreshold);
+      logger.info("ImageLowerThresholdJob - threshold = " + tunedZeroThreshold);
 
       fixNegativeJob.forkAndJoin();
 
@@ -270,29 +273,29 @@ public final class FitsImageUtils {
       updateDataRangeExcludingZero(fitsImage);
     }
 
-    
+
     // 2.2 - Normalize data (total flux):
     normFactor = (float) (1d / fitsImage.getSum());
 
     normJob = new ImageNormalizeJob(data, nbCols, nbRows, normFactor);
 
-    logger.info("ImageNormalizeJob forkAndJoin - factor = " + normFactor);
+    logger.info("ImageNormalizeJob - factor = " + normFactor);
 
     normJob.forkAndJoin();
 
     // update boundaries excluding zero values:
     updateDataRangeExcludingZero(fitsImage);
 
-    
+
     // 2.3 - Skip data lower than threshold again:
-    tunedZeroThreshold = 2f * minVisibility / fitsImage.getNData();
+    tunedZeroThreshold = (minVisibility > 0f) ? 2f * minVisibility / fitsImage.getNData() : 0f;
     logger.info("tuned threshold = " + tunedZeroThreshold);
 
     if (fitsImage.getDataMin() < tunedZeroThreshold) {
 
       final ImageLowerThresholdJob fixThresholdJob = new ImageLowerThresholdJob(data, nbCols, nbRows, tunedZeroThreshold, 0f);
 
-      logger.info("ImageLowerThresholdJob forkAndJoin - threshold = " + tunedZeroThreshold);
+      logger.info("ImageLowerThresholdJob - threshold = " + tunedZeroThreshold);
 
       fixThresholdJob.forkAndJoin();
 
@@ -301,37 +304,63 @@ public final class FitsImageUtils {
       // update boundaries excluding zero values:
       updateDataRangeExcludingZero(fitsImage);
     }
-    
+
 
     // 3 - Locate data inside image i.e. perform an XY Projection and determine data boundaries:
-
     final ImageXYProjectionJob projXYJob = new ImageXYProjectionJob(data, nbCols, nbRows);
-
-    logger.info("ImageXYProjectionJob forkAndJoin");
 
     projXYJob.forkAndJoin();
 
 
     // 4 - Extract ROI:
     // keep the center of the ROI and keep the image square (width = height = even number):
-    int rows1 = projXYJob.getRowLowerIndex();
-    int rows2 = projXYJob.getRowUpperIndex();
-    int cols1 = projXYJob.getColumnLowerIndex();
-    int cols2 = projXYJob.getColumnUpperIndex();
-
-    logger.info("ImageXYProjectionJob: row indexes: " + rows1 + " - " + rows2);
-    logger.info("ImageXYProjectionJob: col indexes: " + cols1 + " - " + cols2);
+    int rows1, rows2, cols1, cols2;
 
     final float halfRows = 0.5f * nbRows;
     final float halfCols = 0.5f * nbCols;
 
-    final float rowDistToCenter = Math.max(Math.abs(halfRows - rows1), Math.abs(halfRows - rows2));
-    final float colDistToCenter = Math.max(Math.abs(halfCols - cols1), Math.abs(halfCols - cols2));
+    final float distToCenter;
 
-    logger.info("ImageXYProjectionJob: rowDistToCenter = " + rowDistToCenter);
-    logger.info("ImageXYProjectionJob: colDistToCenter = " + colDistToCenter);
+    if (USE_FLUX_PROFILE) {
+      // use flux profile method:
+      final double[] profile = makeDistanceProfile(nbRows, nbCols, projXYJob.getRowData(), projXYJob.getColumnData());
 
-    final float distToCenter = Math.max(rowDistToCenter, colDistToCenter);
+      if (false) {
+        final StringBuilder sb = new StringBuilder(32 * 1024);
+
+        for (int i = 0, len = profile.length; i < len; i++) {
+          sb.append("localXYSeries.add(").append(i).append("D, ").append(profile[i]).append("D);\n");
+        }
+        logger.severe("Test profile histogram:\n" + sb.toString());
+      }
+
+      final double totalFlux = sum(profile);
+      logger.info("flux total = " + totalFlux);
+
+      final double upperFlux = totalFlux * (1d - minVisibility);
+      logger.info("tuned flux threshold = " + upperFlux);
+
+      final int distIndex = findBestDistance(profile, upperFlux);
+
+      distToCenter = (distIndex != -1) ? distIndex + 0.5f : Math.max(halfRows, halfCols);
+    } else {
+      // use non zero area:
+      rows1 = projXYJob.getRowLowerIndex();
+      rows2 = projXYJob.getRowUpperIndex();
+      cols1 = projXYJob.getColumnLowerIndex();
+      cols2 = projXYJob.getColumnUpperIndex();
+
+      logger.info("ImageXYProjectionJob: row indexes: " + rows1 + " - " + rows2);
+      logger.info("ImageXYProjectionJob: col indexes: " + cols1 + " - " + cols2);
+
+      final float rowDistToCenter = Math.max(Math.abs(halfRows - rows1), Math.abs(halfRows - rows2));
+      final float colDistToCenter = Math.max(Math.abs(halfCols - cols1), Math.abs(halfCols - cols2));
+
+      logger.info("ImageXYProjectionJob: rowDistToCenter = " + rowDistToCenter);
+      logger.info("ImageXYProjectionJob: colDistToCenter = " + colDistToCenter);
+
+      distToCenter = Math.max(rowDistToCenter, colDistToCenter);
+    }
 
     // range check ?
     rows1 = (int) Math.floor(halfRows - distToCenter);
@@ -375,7 +404,7 @@ public final class FitsImageUtils {
 
       logger.info("ROI size = " + nbRows + " x " + nbCols);
     }
-    
+
 
     // 5 - Make sure the image is square i.e. padding (width = height = even number):
     final int newSize = Math.max(
@@ -404,7 +433,7 @@ public final class FitsImageUtils {
       // flip row axis:
       final ImageFlipJob flipJob = new ImageFlipJob(data, nbCols, nbRows, false);
 
-      logger.info("ImageFlipJob forkAndJoin - flipY");
+      logger.info("ImageFlipJob - flipY");
 
       flipJob.forkAndJoin();
 
@@ -418,7 +447,7 @@ public final class FitsImageUtils {
       // flip column axis:
       final ImageFlipJob flipJob = new ImageFlipJob(data, nbCols, nbRows, true);
 
-      logger.info("ImageFlipJob forkAndJoin - flipX");
+      logger.info("ImageFlipJob - flipX");
 
       flipJob.forkAndJoin();
 
@@ -442,5 +471,83 @@ public final class FitsImageUtils {
       sum += data[i];
     }
     return sum;
+  }
+
+  /**
+   * Return the distance profile relative to the image center 
+   * i.e. sum of data values according to the distance to the image center
+   * @param nbRows number of rows
+   * @param nbCols number of columns
+   * @param rowData sum of data values on row axis (Y)
+   * @param columnData sum of data values on column axis (X)
+   * @return distance profile relative to the image center
+   */
+  private static double[] makeDistanceProfile(final int nbRows, final int nbCols, final double[] rowData, final double[] columnData) {
+    final int length = Math.max(nbRows, nbCols) / 2;
+
+    final double profile[] = new double[length];
+
+    final int halfRows = nbRows / 2;
+    final int halfCols = nbCols / 2;
+
+    // process rows:
+    for (int i = 0, distance; i < halfRows; i++) {
+      distance = halfRows + i; // distance to row center
+      profile[i] += rowData[distance];
+
+      if (i != 0) {
+        distance = halfRows - i; // distance to row center
+        profile[i] += rowData[distance];
+      }
+    }
+
+    // process columns:
+    for (int i = 0, distance; i < halfCols; i++) {
+      distance = halfCols + i; // distance to column center
+      profile[i] += columnData[distance];
+
+      if (i != 0) {
+        distance = halfCols - i; // distance to column center
+        profile[i] += columnData[distance];
+      }
+    }
+
+    // divide by 2:
+    for (int i = 0; i < length; i++) {
+      profile[i] *= 0.5d;
+    }
+    return profile;
+  }
+
+  /**
+   * Find the index (distance to image center) 
+   * when the cumulative sum of profile values becomes higher than the given upper threshold
+   * @param profile profile data
+   * @param upperThreshold upper threshold
+   * @return index (distance to image center) 
+   */
+  private static int findBestDistance(final double[] profile, final double upperThreshold) {
+    double acc = 0d;
+    for (int i = 0, len = profile.length; i < len; i++) {
+      acc += profile[i];
+
+      if (acc > upperThreshold) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  /**
+   * Return the sum of all values
+   * @param array values to sum
+   * @return sum
+   */
+  private static double sum(final double[] array) {
+    double acc = 0d;
+    for (int i = 0, len = array.length; i < len; i++) {
+      acc += array[i];
+    }
+    return acc;
   }
 }

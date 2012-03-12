@@ -121,8 +121,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
   private static final String MSG_COMPUTING_MAP = "computing uv map ...";
   /** message indicating computations */
   private static final String MSG_COMPUTING_OIFITS = "computing OIFits data ...";
-  /** flag to enable noise modeling on UV Map (DEV only) */
-  private final static boolean DO_NOISE_UV_MAP = false;
   /** flag to log a stack trace in method updateObservation() to detect multiple calls */
   private final static boolean DEBUG_UPDATE_EVENT = false;
   /** flag to log a stack trace in method plot() to detect multiple calls */
@@ -1419,6 +1417,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       final int imageSize = this.myPreferences.getPreferenceAsInt(Preferences.MODEL_IMAGE_SIZE);
       final IndexColorModel colorModel = ColorModels.getColorModel(this.myPreferences.getPreference(Preferences.MODEL_IMAGE_LUT));
       final ColorScale colorScale = this.myPreferences.getImageColorScale();
+      final boolean doImageNoise = this.myPreferences.getPreferenceAsBoolean(Preferences.MODEL_IMAGE_NOISE);
 
       // update the status bar :
       StatusBar.show(MSG_COMPUTING_COVERAGE);
@@ -1429,7 +1428,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       // Create uv coverage task worker :
       // Cancel other tasks and execute this new task :
       new UVCoverageSwingWorker(this, obsCollection, this.getObservabilityData(), targetName,
-              uvMax, doUVSupport, doOIFits, doDataNoise, doModelImage, imageMode, imageSize, colorModel, colorScale,
+              uvMax, doUVSupport, doOIFits, doDataNoise, doModelImage, imageMode, imageSize, colorModel, colorScale, doImageNoise,
               currentUVMapData).executeTask();
 
     } // observability data check
@@ -1465,6 +1464,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     private final IndexColorModel colorModel;
     /** color scaling method */
     private final ColorScale colorScale;
+    /** flag to add gaussian noise to UV map */
+    private final boolean doImageNoise;
     /** previously computed UV Map Data (or null) */
     private final UVMapData currentUVMapData;
 
@@ -1484,13 +1485,14 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
      * @param imageSize expected number of pixels for both width and height of the generated image
      * @param colorModel color model to use
      * @param colorScale color scaling method
+     * @param doImageNoise enable image noise
      * @param currentUVMapData previously computed UV Map Data
      */
     private UVCoverageSwingWorker(final UVCoveragePanel uvPanel, final ObservationCollection obsCollection,
             final List<ObservabilityData> obsDataList, final String targetName,
             final double uvMax, final boolean doUVSupport, final boolean doOIFits, final boolean doDataNoise,
             final boolean doModelImage, final ImageMode imageMode, final int imageSize,
-            final IndexColorModel colorModel, final ColorScale colorScale,
+            final IndexColorModel colorModel, final ColorScale colorScale, final boolean doImageNoise,
             final UVMapData currentUVMapData) {
       // get current observation version :
       super(AsproTaskRegistry.TASK_UV_COVERAGE, obsCollection);
@@ -1506,6 +1508,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       this.imageSize = imageSize;
       this.colorModel = colorModel;
       this.colorScale = colorScale;
+      this.doImageNoise = doImageNoise;
       this.currentUVMapData = currentUVMapData;
     }
 
@@ -1553,7 +1556,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         this.uvMax = uvDataFirst.getUvMax();
 
         // Get noise service if enabled:
-        final NoiseService noiseService = (DO_NOISE_UV_MAP) ? uvDataFirst.getNoiseService() : null;
+        final NoiseService noiseService = (this.doImageNoise) ? uvDataFirst.getNoiseService() : null;
 
         final Rectangle2D.Double uvRect = new Rectangle2D.Double();
         uvRect.setFrameFromDiagonal(-this.uvMax, -this.uvMax, this.uvMax, this.uvMax);
