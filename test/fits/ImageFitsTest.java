@@ -83,12 +83,12 @@ public class ImageFitsTest {
     final ColorScale colorScale = ColorScale.LINEAR;
 
     if (true) {
-      String file = "/home/bourgesl/ASPRO2/fits/SG_surface2.fits";
-//      String file = "/home/bourgesl/ASPRO2/fits/tests/HighMass.fits.gz";         
+//      String file = "/home/bourgesl/ASPRO2/fits/SG_surface2.fits";
+//      String file = "/home/bourgesl/ASPRO2/fits/tests/HighMass.fits.gz"; // spiral       
 //      String file = "/home/bourgesl/ASPRO2/fits/ellipsePlusPunct.fits";
 
 //      String file = "/home/bourgesl/ASPRO2/fits/tests/3c273_all_pl27.fits.gz";
-//      String file = "/home/bourgesl/ASPRO2/fits/tests/58Eri_clumpy_K_1024.fits.gz";
+      String file = "/home/bourgesl/ASPRO2/fits/tests/58Eri_clumpy_K_1024.fits.gz"; // diluted
 
 //      String file = "/home/bourgesl/ASPRO2/fits/tests/AGN.fits.gz";      
 
