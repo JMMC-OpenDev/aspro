@@ -18,6 +18,7 @@ import fr.jmmc.aspro.model.oi.AtmosphereQuality;
 import fr.jmmc.aspro.model.oi.BaseValue;
 import fr.jmmc.aspro.model.oi.FocalInstrumentConfigurationChoice;
 import fr.jmmc.aspro.model.oi.FocalInstrumentMode;
+import fr.jmmc.aspro.model.oi.InterferometerConfiguration;
 import fr.jmmc.aspro.model.oi.InterferometerConfigurationChoice;
 import fr.jmmc.aspro.model.oi.ObservationCollection;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
@@ -119,18 +120,13 @@ public final class ObservationManager extends BaseOIManager implements Observer 
     if (this.useFastUserModel != newFastUserModel) {
       this.useFastUserModel = newFastUserModel;
 
-      if (!SwingUtils.isEDT()) {
-        throw new IllegalStateException("Not in EDT !!", new Throwable());
-      }
-
       logger.info("ObservationManager.update: checkAndLoadFileReferences ...");
-      try {
-        // reload user models to prepare them again:
-        checkAndLoadFileReferences(getMainObservation());
-      } catch (FitsException fe) {
-        MessagePane.showErrorMessage("Could not load fits images", fe);
-      } catch (IOException ioe) {
-        MessagePane.showErrorMessage("Could not load fits images", ioe);
+
+      // reload user models (to prepare and validate again):
+      final String message = checkAndLoadFileReferences(getMainObservation());
+
+      if (message != null) {
+        MessagePane.showMessage(message);
       }
       logger.info("ObservationManager.update: done.");
     }
@@ -249,12 +245,11 @@ public final class ObservationManager extends BaseOIManager implements Observer 
    * @param file file to load
    * @return optional information message or null
    * 
-   * @throws FitsException if any FITS error occured when loading Fits images (user model)
    * @throws IOException if an I/O exception occured
    * @throws IllegalStateException if an invalid reference was found (interferometer / instrument / instrument configuration) or an unexpected exception occured
    * @throws IllegalArgumentException if the file is not an Observation
    */
-  public String load(final File file) throws FitsException, IOException, IllegalStateException, IllegalArgumentException {
+  public String load(final File file) throws IOException, IllegalStateException, IllegalArgumentException {
     String message = null;
     if (file != null) {
       if (logger.isLoggable(Level.INFO)) {
@@ -274,7 +269,10 @@ public final class ObservationManager extends BaseOIManager implements Observer 
       // post load processing :
       ObservationFileProcessor.onLoad(observation);
 
-      // check external file references:
+      // update defaults and resolve references:
+      defineDefaults(observation);
+
+      // load user models (to prepare and validate):
       message = checkAndLoadFileReferences(observation);
 
       // ready to use :
@@ -773,7 +771,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
    */
   public boolean setInstrumentConfigurationStations(final Object[] stationConfs) {
     if (stationConfs == null || stationConfs.length == 0) {
-      throw new IllegalStateException("setInstrumentConfigurationStations : undefined configurations !");
+      throw new IllegalStateException("Undefined configurations !");
     }
 
     final int len = stationConfs.length;
@@ -1076,7 +1074,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
     // Find instrument band from main observation :
     final FocalInstrumentMode insMode = getMainObservation().getInstrumentConfiguration().getFocalInstrumentMode();
     if (insMode == null) {
-      throw new IllegalStateException("the instrumentMode is empty !");
+      throw new IllegalStateException("The instrumentMode is empty !");
     }
 
     final double lambda = insMode.getWaveLength();
@@ -1315,37 +1313,48 @@ public final class ObservationManager extends BaseOIManager implements Observer 
    * Check external file references (target user models) and load these files
    * @param observation observation to process
    * @return optional information message or null
-   * 
-   * @throws FitsException if any FITS error occured
-   * @throws IOException IO failure
    */
-  private static String checkAndLoadFileReferences(final ObservationSetting observation)
-          throws FitsException, IOException {
-
+  private static String checkAndLoadFileReferences(final ObservationSetting observation) {
     final StringBuilder sb = new StringBuilder(128);
 
-    // Check target user model files:
+    // Check target user model files (exist and can read):
     for (Target target : observation.getTargets()) {
       checkTargetUserModel(target, sb);
     }
 
     // Load only valid target user model files:
-    UserModel model;
+    UserModel userModel;
 
     for (Target target : observation.getTargets()) {
-      model = target.getUserModel();
-      if (model != null && model.isFileValid()) {
+      userModel = target.getUserModel();
+      if (userModel != null && userModel.isFileValid()) {
+        boolean valid = false;
+
         try {
           // throws exceptions if the given fits file or image is incorrect:
-          model.setFitsImage(UserModelService.prepareFitsFile(model.getFile()));
+          userModel.setFitsImage(UserModelService.prepareFitsFile(userModel.getFile()));
+
+          // validate image against the given observation:
+          ObservationManager.validateUserModel(observation, userModel);
+
+          // model is valid:
+          valid = true;
 
         } catch (IllegalArgumentException iae) {
-          logger.log(Level.INFO, "prepareFitsFile [" + model.getFile() + "] failed", iae);
-
-          sb.append("Loading user model file [").append(model.getFile()).append("] failed: ").append(iae.getMessage());
-          sb.append("\nThe target [").append(target.getName()).append("] has an invalid user model; this model is disabled.\n\n");
-
-          model.setFileValid(false);
+          logger.log(Level.WARNING, "Incorrect fits image in file [" + userModel.getFile() + "]", iae);
+          sb.append("Loading user model file [").append(userModel.getFile()).append("] failed:\n").append(iae.getMessage());
+        } catch (FitsException fe) {
+          logger.log(Level.SEVERE, "FITS failure on file [" + userModel.getFile() + "]", fe);
+          sb.append("Loading user model file [").append(userModel.getFile()).append("] failed:\n").append(fe.getMessage());
+        } catch (IOException ioe) {
+          logger.log(Level.SEVERE, "IO failure on file [" + userModel.getFile() + "]", ioe);
+          sb.append("Loading user model file [").append(userModel.getFile()).append("] failed:\n").append(ioe.getMessage());
+        } finally {
+          if (!valid) {
+            sb.append("\n\nThe target [").append(target.getName()).append("] has an invalid user model; this model is disabled.\n\n");
+          }
+          // anyway, update the valid flag:
+          userModel.setFileValid(valid);
         }
       }
     }
@@ -1359,10 +1368,10 @@ public final class ObservationManager extends BaseOIManager implements Observer 
    * @param sb message buffer
    */
   private static void checkTargetUserModel(final Target target, final StringBuilder sb) {
-    final UserModel model = target.getUserModel();
+    final UserModel userModel = target.getUserModel();
 
-    if (model != null) {
-      final String filePath = model.getFile();
+    if (userModel != null) {
+      final String filePath = userModel.getFile();
 
       logger.info("checking file path [" + filePath + "]");
 
@@ -1381,9 +1390,59 @@ public final class ObservationManager extends BaseOIManager implements Observer 
       if (!valid) {
         sb.append("\nThe target [").append(target.getName()).append("] has an invalid user model; this model is disabled.\n\n");
       }
-
-      model.setFileValid(valid);
+      // anyway, update the valid flag:
+      userModel.setFileValid(valid);
     }
+  }
+
+  /**
+   * Validate the given user model using the main observation to get the maximum UV frequency (rad-1) possible
+   * @param model user model to validate
+   */
+  public void validateUserModel(final UserModel model) {
+    validateUserModel(getMainObservation(), model);
+  }
+
+  /**
+   * Validate the given user model using the given observation to get the maximum UV frequency (rad-1) possible
+   * @param observation observation to get interferometer and instrument configurations
+   * @param model user model to validate
+   */
+  public static void validateUserModel(final ObservationSetting observation, final UserModel model) {
+    UserModelService.validateModel(model, getUVMax(observation));
+  }
+
+  /**
+   * Get the maximum UV frequency (rad-1) possible in the GUI
+   * @param observation observation to get interferometer and instrument configurations
+   * @return maximum UV frequency (rad-1)
+   */
+  private static double getUVMax(final ObservationSetting observation) {
+
+    final InterferometerConfiguration intConf = observation.getInterferometerConfiguration().getInterferometerConfiguration();
+
+    final double maxBaseLine = intConf.getMaxBaseLine();
+
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("interferometer configuration : " + intConf.getName() + "; baseline max= " + maxBaseLine);
+    }
+
+    // TODO: get correct value in the UVCoveragePanel instead ...
+
+    // use default value for UVMax slider (see UVCoveragePanel):
+    double uvMax = 1.05d * maxBaseLine;
+
+    // Get lower wavelength for the selected instrument (se UVCoverageService):
+    final double instrumentMinWaveLength = AsproConstants.MICRO_METER
+            * observation.getInstrumentConfiguration().getInstrumentConfiguration().getFocalInstrument().getWaveLengthMin();
+
+    // Adjust the user uv Max = max base line / minimum wave length
+    // note : use the minimum wave length of the instrument to 
+    // - make all uv segment visible
+    // - avoid to much model computations (when the instrument mode changes)
+    uvMax /= instrumentMinWaveLength;
+
+    return uvMax;
   }
 
   // --- INTERNAL METHODS ------------------------------------------------------
@@ -1462,7 +1521,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
     interferometerChoice.setInterferometerConfiguration(cm.getInterferometerConfiguration(interferometerConfiguration));
 
     if (interferometerChoice.getInterferometerConfiguration() == null) {
-      throw new IllegalStateException("the interferometer configuration [" + interferometerConfiguration + "] is invalid !");
+      throw new IllegalStateException("The interferometer configuration [" + interferometerConfiguration + "] is invalid !");
     }
 
     final FocalInstrumentConfigurationChoice instrumentChoice = observation.getInstrumentConfiguration();
@@ -1471,7 +1530,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
     instrumentChoice.setInstrumentConfiguration(cm.getInterferometerInstrumentConfiguration(interferometerConfiguration, instrument));
 
     if (instrumentChoice.getInstrumentConfiguration() == null) {
-      throw new IllegalStateException("the instrument [" + instrument + "] is invalid !");
+      throw new IllegalStateException("The instrument [" + instrument + "] is invalid !");
     }
 
     // first resolve / fix observation variants :
@@ -1483,7 +1542,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
         final String stationIds = findInstrumentConfigurationStations(interferometerConfiguration, instrument, obsVariant.getStations());
 
         if (stationIds == null) {
-          throw new IllegalStateException("the instrument configuration [" + obsVariant.getStations() + "] is invalid !");
+          throw new IllegalStateException("The instrument configuration [" + obsVariant.getStations() + "] is invalid !");
         }
 
         obsVariant.setStations(stationIds);
