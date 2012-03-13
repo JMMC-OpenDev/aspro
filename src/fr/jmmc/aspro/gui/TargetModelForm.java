@@ -8,6 +8,7 @@ import fr.jmmc.aspro.Preferences;
 import fr.jmmc.aspro.gui.util.ModelJTree;
 import fr.jmmc.aspro.gui.util.TargetRenderer;
 import fr.jmmc.aspro.gui.util.TargetTreeCellRenderer;
+import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.aspro.model.oi.UserModel;
@@ -117,6 +118,10 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
     // model mode:
     this.jRadioButtonAnalytical.addActionListener(this);
     this.jRadioButtonUserModel.addActionListener(this);
+
+    // enable/disable user model:
+    this.jRadioButtonValid.addActionListener(this);
+    this.jRadioButtonInvalid.addActionListener(this);
 
     // model type choice :
     this.jComboBoxModelType.setModel(new DefaultComboBoxModel(ModelManager.getInstance().getSupportedModels()));
@@ -297,7 +302,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
       if (!isAnalytical && userModel.getFitsImage() != null) {
         // update fits Image:
         if (fitsImagePanel == null) {
-          fitsImagePanel = new FitsImagePanel();
+          fitsImagePanel = new FitsImagePanel(false); // do not show id
         }
         // TODO: call FitsImagePanel.dispose()
         fitsImagePanel.setFitsImage(userModel.getFitsImage());
@@ -434,6 +439,27 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
       this.currentTarget.setUseAnalyticalModel(Boolean.FALSE);
       // reselect target to change panel visibility:
       processTargetSelection(currentTarget);
+    } else if (e.getSource() == this.jRadioButtonValid) {
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("enable userModel : " + this.jRadioButtonValid.isSelected());
+      }
+      final UserModel userModel = this.currentTarget.getUserModel();
+      if (userModel == null) {
+        this.jRadioButtonInvalid.setSelected(true);
+      } else {
+        prepareAndValidateUserModel(userModel);
+
+        // reselect target to update image:
+        processTargetSelection(currentTarget);
+      }
+    } else if (e.getSource() == this.jRadioButtonInvalid) {
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("disable userModel : " + this.jRadioButtonInvalid.isSelected());
+      }
+      final UserModel userModel = this.currentTarget.getUserModel();
+      if (userModel != null) {
+        userModel.setFileValid(false);
+      }
     }
   }
 
@@ -687,8 +713,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.weightx = 0.3;
+        gridBagConstraints.weightx = 0.4;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelUserModel.add(jRadioButtonValid, gridBagConstraints);
 
@@ -697,8 +722,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.weightx = 0.3;
+        gridBagConstraints.weightx = 0.4;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelUserModel.add(jRadioButtonInvalid, gridBagConstraints);
 
@@ -718,10 +742,11 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         gridBagConstraints.gridy = 1;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weightx = 0.7;
+        gridBagConstraints.weightx = 0.6;
         jPanelUserModel.add(jTextFieldFileReference, gridBagConstraints);
 
         jButtonOpenFile.setText("Open");
+        jButtonOpenFile.setToolTipText("Open a FITS image ...");
         jButtonOpenFile.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonOpenFileActionPerformed(evt);
@@ -730,7 +755,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 1;
-        gridBagConstraints.weightx = 0.1;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelUserModel.add(jButtonOpenFile, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -861,10 +886,13 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
    * @return true only if the data are valid
    */
   boolean validateForm() {
-    // Validate the models :
+    // Validate only analytical models :
     for (Target target : this.editTargets) {
       try {
-        ModelManager.getInstance().validateModels(target.getModels());
+        if (target.hasAnalyticalModel()) {
+          // validate only analytical models for target using them:
+          ModelManager.getInstance().validateModels(target.getModels());
+        }
       } catch (IllegalArgumentException iae) {
         // display an error message for the first error found :
         MessagePane.showErrorMessage(iae.getMessage(), "Error on target " + target.getName());
@@ -1063,7 +1091,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
   private void jButtonOpenFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonOpenFileActionPerformed
 
     final UserModel userModel = this.currentTarget.getOrCreateUserModel();
-    
+
     File file = null;
 
     final JFileChooser fileChooser = new JFileChooser();
@@ -1090,28 +1118,8 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
 
       userModel.setFile(file.getAbsolutePath());
       userModel.setName(file.getName());
-      userModel.setFileValid(false);
 
-      try {
-        // throws exceptions if the given fits file or image is incorrect:
-        userModel.setFitsImage(UserModelService.prepareFitsFile(userModel.getFile()));
-
-        // has increments ?
-        if (!userModel.getFitsImage().isIncColDefined() || !userModel.getFitsImage().isIncRowDefined()) {
-          MessagePane.showErrorMessage("Missing pixel increments in file:\n" + userModel.getFile() + "\n\nthis model is disabled.");
-        } else {
-          // TODO: validate image information (keywords ...) => put information in model description
-          userModel.setFileValid(true);
-        }
-
-      } catch (IllegalArgumentException iae) {
-        logger.log(Level.INFO, "prepareFitsFile [" + userModel.getFile() + "] failed", iae);
-        MessagePane.showErrorMessage("Could not use file: " + file.getAbsolutePath(), iae);
-      } catch (FitsException fe) {
-        MessagePane.showErrorMessage("Could not read file: " + file.getAbsolutePath(), fe);
-      } catch (IOException ioe) {
-        MessagePane.showErrorMessage("Could not read file: " + file.getAbsolutePath(), ioe);
-      }
+      prepareAndValidateUserModel(userModel);
 
       // reselect target to update image:
       processTargetSelection(currentTarget);
@@ -1209,5 +1217,36 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         return comp;
       }
     };
+  }
+
+  /**
+   * Prepare and validate the given user model
+   * @param userModel user model to use
+   */
+  private static void prepareAndValidateUserModel(final UserModel userModel) {
+    boolean valid = false;
+    try {
+      // throws exceptions if the given fits file or image is incorrect:
+      userModel.setFitsImage(UserModelService.prepareFitsFile(userModel.getFile()));
+
+      // update checksum before validation:
+      userModel.setChecksum(userModel.getFitsImage().getChecksum());
+
+      // validate image against the main observation:
+      ObservationManager.getInstance().validateUserModel(userModel);
+
+      // model is valid:
+      valid = true;
+
+    } catch (IllegalArgumentException iae) {
+      MessagePane.showErrorMessage("Could not use FITS image in file: " + userModel.getFile(), iae);
+    } catch (FitsException fe) {
+      MessagePane.showErrorMessage("Could not read file: " + userModel.getFile(), fe);
+    } catch (IOException ioe) {
+      MessagePane.showErrorMessage("Could not read file: " + userModel.getFile(), ioe);
+    } finally {
+      // anyway, update the valid flag:
+      userModel.setFileValid(valid);
+    }
   }
 }
