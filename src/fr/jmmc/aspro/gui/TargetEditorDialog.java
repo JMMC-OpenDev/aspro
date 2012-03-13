@@ -90,7 +90,7 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
       // 1. Create the dialog
       dialog = new JDialog(App.getFrame(), "Target Editor", true);
 
-      final Dimension dim = new Dimension(600, 700);
+      final Dimension dim = new Dimension(800, 700);
       dialog.setMinimumSize(dim);
       dialog.addComponentListener(new ComponentResizeAdapter(dim));
 
