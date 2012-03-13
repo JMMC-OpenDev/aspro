@@ -40,6 +40,7 @@ import fr.jmmc.aspro.model.uvcoverage.UVCoverageData;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetConfiguration;
+import fr.jmmc.aspro.model.oi.UserModel;
 import fr.jmmc.aspro.model.util.AtmosphereQualityUtils;
 import fr.jmmc.aspro.model.uvcoverage.UVBaseLineData;
 import fr.jmmc.aspro.model.uvcoverage.UVRangeBaseLineData;
@@ -1580,7 +1581,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
             uvDataCollection.setUvMapData(this.currentUVMapData);
           } else {
             try {
-              final UVMapData uvMapData;
+              UVMapData uvMapData;
 
               if (target.hasAnalyticalModel()) {
                 // Analytical model:
@@ -1626,9 +1627,19 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
                   } else {
                     logger.debug("Computing model image ...");
 
-                    // Compute Target Model for the UV coverage limits ONCE :
-                    uvMapData = UserModelService.computeUVMap(fitsImage,
-                            uvRect, this.imageMode, this.imageSize, this.colorModel, this.colorScale, noiseService);
+                    try {
+                      // Compute Target Model for the UV coverage limits ONCE :
+                      // Note: throws IllegalArgumentException if the fits image is invalid:
+                      uvMapData = UserModelService.computeUVMap(fitsImage,
+                              uvRect, this.imageMode, this.imageSize, this.colorModel, this.colorScale, noiseService);
+
+                    } catch (IllegalArgumentException iae) {
+                      logger.warn("Incorrect fits image in file [" + target.getUserModel().getFile() + "]", iae);
+
+                      // disable model:
+                      target.getUserModel().setFileValid(false);
+                      uvMapData = null;
+                    }
                   }
                 } else {
                   uvMapData = null;
@@ -1682,6 +1693,19 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         }
       }
 
+      // add warning if the user model is disabled:
+      if (this.doModelImage) {
+        // get target from the first observation for consistency :
+        final Target target = uvDataCollection.getFirstObservation().getTarget(this.targetName);
+
+        if (target != null && !target.hasAnalyticalModel()) {
+          final UserModel userModel = target.getUserModel();
+          if (userModel != null && !userModel.isFileValid()) {
+            mergedWarningContainer.addWarningMessage("User model [" + userModel.getName() + "] is disabled.");
+          }
+        }
+      }
+
       uvDataCollection.setWarningContainer(mergedWarningContainer);
 
       if (logger.isInfoEnabled()) {
@@ -1704,7 +1728,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         // add warning to indicate that OIFits are disabled:
         uvDataCollection.getWarningContainer().addWarningMessage("OIFits data computation is disabled");
       }
-      
+
       // reset the OIFits structure in the current observation - No OIFitsSwingWorker running:
       if (resetOIFits) {
         ObservationManager.getInstance().setOIFitsFile(null);
