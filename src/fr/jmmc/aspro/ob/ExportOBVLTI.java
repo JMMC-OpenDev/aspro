@@ -365,7 +365,7 @@ public class ExportOBVLTI {
     // get instrument band :
     final FocalInstrumentMode insMode = observation.getInstrumentConfiguration().getFocalInstrumentMode();
     if (insMode == null) {
-      throw new IllegalStateException("the instrumentMode is empty !");
+      throw new IllegalStateException("The instrumentMode is empty !");
     }
 
     final double lambda = insMode.getWaveLength();
@@ -498,7 +498,7 @@ public class ExportOBVLTI {
     // get instrument band :
     final FocalInstrumentMode insMode = observation.getInstrumentConfiguration().getFocalInstrumentMode();
     if (insMode == null) {
-      throw new IllegalStateException("the instrumentMode is empty !");
+      throw new IllegalStateException("The instrumentMode is empty !");
     }
 
     final TargetConfiguration targetConf = target.getConfiguration();
