@@ -5,6 +5,7 @@ package fr.jmmc.aspro.service;
 
 import fr.jmmc.aspro.Preferences;
 import fr.jmmc.aspro.image.FitsImageUtils;
+import fr.jmmc.aspro.model.oi.UserModel;
 import fr.jmmc.jmal.complex.MutableComplex;
 import fr.jmmc.jmal.image.FFTUtils;
 import fr.jmmc.jmal.image.ColorScale;
@@ -19,6 +20,7 @@ import fr.nom.tam.fits.FitsException;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.IndexColorModel;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +41,9 @@ public final class UserModelService {
   /** maximum fft size (power of two) */
   public static final int MAX_FFT_SIZE = 256 * 1024;
   /** Two PI constant */
-  public static final double TWO_PI = 6.28318530717958623199592693708837032;
+  public static final double TWO_PI = 6.28318530717958623199592693708837032d;
+  /** formatter for frequencies */
+  private final static DecimalFormat df = new DecimalFormat("0.00#E0");
 
   /**
    * Forbidden constructor
@@ -59,17 +63,85 @@ public final class UserModelService {
     final FitsImageFile imgFitsFile = FitsImageUtils.load(file);
 
     if (imgFitsFile.getImageCount() == 0) {
-      throw new FitsException("The Fits file '" + file + "' does not contain any Fits image !");
+      throw new FitsException("The Fits file '" + file + "' does not contain any supported Fits image !");
     }
 
     final boolean useFastMode = Preferences.getInstance().isFastUserModel();
+    logger.info("useFastMode: " + useFastMode);
+
+    final long start = System.nanoTime();
 
     final FitsImage fitsImage = FitsImageUtils.prepareImage(imgFitsFile.getFirstFitsImage(),
             (useFastMode) ? MIN_VISIBILITY_UV_MAP : 0f);
 
-    logger.info("Prepared FitsImage: " + fitsImage.toString(false));
+    if (logger.isInfoEnabled()) {
+      logger.info("prepareFitsFile : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
+      logger.info("Prepared FitsImage: " + fitsImage.toString(false));
+    }
 
     return fitsImage;
+  }
+
+  /**
+   * Validate the given user model i.e. both file and image values are valid
+   *
+   * @param model user model to validate
+   * @param uvMax maximum UV frequency (rad-1)
+   * 
+   * @throws IllegalArgumentException if the file or the image is invalid !
+   */
+  public static void validateModel(final UserModel model, final double uvMax) throws IllegalArgumentException {
+    if (model == null) {
+      throw new IllegalStateException("User model is empty !");
+    }
+    if (model.getFitsImage() == null) {
+      throw new IllegalStateException("Fits image is empty !");
+    }
+
+    final FitsImage fitsImage = model.getFitsImage();
+    // check CRC:
+    if (model.getChecksum() != fitsImage.getChecksum()) {
+      throw new IllegalArgumentException("Fits image checksum is incorrect; please verify your file (probably modified) !");
+    }
+    checkFitsImage(fitsImage, uvMax);
+  }
+
+  /**
+   * Check the given fits image with the given corrected UV Max (rad-1)
+   * @param fitsImage fits image to check
+   * @param uvMax maximum UV frequency (rad-1)
+   * 
+   * @throws IllegalArgumentException if the fits image is invalid (undefined increments or too small increments)
+   * @throws IllegalStateException if the image is invalid (null or not square)
+   */
+  private static void checkFitsImage(final FitsImage fitsImage, final double uvMax) {
+    if (fitsImage == null) {
+      throw new IllegalStateException("Fits image is empty !");
+    }
+
+    // Suppose the image is square (see FitsImageUtils.prepareImage):
+    if (fitsImage.getNbCols() != fitsImage.getNbRows()) {
+      throw new IllegalStateException("Fits image must be a square image !");
+    }
+
+    if (!fitsImage.isIncColDefined() || !fitsImage.isIncRowDefined()) {
+      throw new IllegalArgumentException("Undefined pixel increments (rad) !");
+    }
+
+    if (fitsImage.getIncCol() != fitsImage.getIncRow()) {
+      throw new IllegalArgumentException("Fits image increments along row and column axes must be equals !");
+    }
+    // TODO: support different axis increments ?
+
+    final double increment = fitsImage.getIncRow();
+
+    final double maxFreq = 1d / (2d * increment);
+
+    if (maxFreq < uvMax) {
+      throw new IllegalArgumentException("The Fits image [" + fitsImage.getFitsImageIdentifier()
+              + "] must have smaller pixel increments (" + df.format(increment) + " rad) to have a maximum frequency ("
+              + df.format(maxFreq) + " rad-1) larger than the corrected UV Max (" + df.format(uvMax) + " rad-1) !");
+    }
   }
 
   /**
@@ -84,7 +156,7 @@ public final class UserModelService {
    * @return UVMapData
    * 
    * @throws InterruptedJobException if the current thread is interrupted (cancelled)
-   * @throws IllegalArgumentException if a model parameter value is invalid
+   * @throws IllegalArgumentException if the fits image is invalid (not square or too small increments)
    * @throws RuntimeException if any exception occured during the computation
    */
   public static UVMapData computeUVMap(final FitsImage fitsImage,
@@ -109,7 +181,7 @@ public final class UserModelService {
    * @return UVMapData
    * 
    * @throws InterruptedJobException if the current thread is interrupted (cancelled)
-   * @throws IllegalArgumentException if a model parameter value is invalid
+   * @throws IllegalArgumentException if the fits image is invalid (not square or too small increments)
    * @throws RuntimeException if any exception occured during the computation
    */
   public static UVMapData computeUVMap(final FitsImage fitsImage,
@@ -136,7 +208,7 @@ public final class UserModelService {
    * @return UVMapData
    * 
    * @throws InterruptedJobException if the current thread is interrupted (cancelled)
-   * @throws IllegalArgumentException if a model parameter value is invalid
+   * @throws IllegalArgumentException if the fits image is invalid (not square or too small increments)
    * @throws RuntimeException if any exception occured during the computation
    */
   public static UVMapData computeUVMap(final FitsImage fitsImage,
@@ -148,28 +220,22 @@ public final class UserModelService {
           final VisNoiseService noiseService,
           final float[][] refVisData) {
 
+    // Get corrected uvMax from uv rectangle (-this.uvMax, -this.uvMax, this.uvMax, this.uvMax):
+    final double uvMax = -uvRect.getX();
+    logger.info("UserModelService.computeUVMap: uvMax (rad-1) = " + uvMax);
+
+    // throws exceptions:
+    checkFitsImage(fitsImage, uvMax);
+
     if (fitsImage == null) {
       return null;
     }
-
-    // Suppose the image is square (see FitsImageUtils.prepareImage:
-    if (fitsImage.getNbCols() != fitsImage.getNbRows()) {
-      throw new IllegalStateException("Fits image must be a square image !");
-    }
-    if (fitsImage.getIncCol() != fitsImage.getIncRow()) {
-      throw new IllegalStateException("Fits image increments along row and column axes must be equals !");
-    }
-    // TODO: support different axis increments ?
 
     /** Get the current thread to check if the computation is interrupted */
     final Thread currentThread = Thread.currentThread();
 
     // Start the computations :
     final long start = System.nanoTime();
-
-    // Get corrected uvMax from uv rectangle (-this.uvMax, -this.uvMax, this.uvMax, this.uvMax):
-    final double uvMax = -uvRect.getX();
-    logger.info("UserModelService.computeUVMap: uvMax (rad-1) = " + uvMax);
 
     final int inputSize = fitsImage.getNbRows();
     logger.info("Image size = " + inputSize);
@@ -180,18 +246,12 @@ public final class UserModelService {
     final double maxFreq = 1d / (2d * increment);
     logger.info("Max UV (rad-1) = " + maxFreq);
 
-    if (maxFreq < uvMax) {
-      throw new IllegalStateException("The Fits image [" + fitsImage.getFitsImageIdentifier()
-              + "] must have smaller pixel increments (" + increment + " rad) to have a maximum frequency ("
-              + maxFreq + " rad-1) larger than the corrected UV Max (" + uvMax + " rad-1) !");
-    }
-
     // UV / maxFreq ratio
     final double ratio = uvMax / maxFreq;
     logger.info("ratio = " + ratio);
 
     // find best FFT size:
-    final int fftSize = findBestFFTSize(ratio, imageSize);
+    final int fftSize = findBestFFTSize(ratio, imageSize, inputSize);
 
     // use the next even integer for pixel size:
     final int outputSize = getOutputSize(ratio, fftSize);
@@ -260,14 +320,15 @@ public final class UserModelService {
 
   /**
    * Return the best FFT size (power of two) i.e. giving the output size closest than the expected image size
-   * @param imageSize expected image size in pixels
    * @param ratio UV / maxFreq ratio
+   * @param imageSize expected image size in pixels
+   * @param inputSize image input size to check minimum FFT size
    * @return best FFT size (power of two)
    */
-  private static int findBestFFTSize(final double ratio, final int imageSize) {
+  private static int findBestFFTSize(final double ratio, final int imageSize, final int inputSize) {
 
-    final int fftSizeMax = getFFTSize(ratio, imageSize);
-    final int fftSizeMin = getFFTSize(ratio, imageSize / 2);
+    final int fftSizeMax = getFFTSize(ratio, imageSize, inputSize);
+    final int fftSizeMin = getFFTSize(ratio, imageSize / 2, inputSize);
 
     if (fftSizeMin == fftSizeMax) {
       return fftSizeMin;
@@ -288,9 +349,10 @@ public final class UserModelService {
    * Return the FFT size (power of two) for the given ratio and expected image size
    * @param ratio UV / maxFreq ratio
    * @param imageSize expected image size in pixels
+   * @param inputSize image input size to check minimum FFT size
    * @return best FFT size (power of two)
    */
-  private static int getFFTSize(final double ratio, final int imageSize) {
+  private static int getFFTSize(final double ratio, final int imageSize, final int inputSize) {
     // Correct power of two for FFT:
     int fftSize = FFTUtils.getPowerOfTwo((int) Math.ceil(imageSize / ratio));
 
@@ -300,6 +362,10 @@ public final class UserModelService {
     if (fftSize > MAX_FFT_SIZE) {
       fftSize = MAX_FFT_SIZE;
       logger.info("Max FFT size reached (pixels) = " + fftSize);
+    }
+    if (fftSize < inputSize) {
+      fftSize = FFTUtils.getPowerOfTwo(inputSize);
+      logger.info("Min FFT size reached (pixels) = " + fftSize);
     }
     return fftSize;
   }
@@ -453,7 +519,7 @@ public final class UserModelService {
       final int nVis = ufreq.length;
 
       if (nVis != vfreq.length || nVis != context.getFreqCount()) {
-        throw new IllegalStateException("incorrect array sizes (Ufreq, VFreq, freqCount) !");
+        throw new IllegalStateException("Incorrect array sizes (Ufreq, VFreq, freqCount) !");
       }
 
       // reset complex visiblities:
