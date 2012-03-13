@@ -41,6 +41,13 @@ public class ShowPrefAction extends RegisteredAction {
       logger.fine("actionPerformed");
     }
 
+    showPreferencesView();
+  }
+  
+  /**
+   * Show a new preferences view
+   */
+  public static void showPreferencesView() {
     new PreferencesView().setVisible(true);
   }
 }

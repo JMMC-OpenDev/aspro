@@ -38,6 +38,7 @@ public final class PreferencesView extends JFrame implements Observer {
    * Creates a new PreferencesView
    */
   public PreferencesView() {
+    super();
     initComponents();
 
     postInit();
