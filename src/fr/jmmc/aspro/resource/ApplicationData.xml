@@ -143,7 +143,8 @@
   <releasenotes>
     <release version="0.9.0">
       <prerelease version="0.9.0 beta 2"> 
-        <change type="CHANGE">Fixed (SAMP) interoperability with SearchCal 4.4.1</change> 
+        <change type="CHANGE">Enhanced exception handling during user model validation and computation: automatically disable invalid model and add a warning message</change> 
+        <change type="CHANGE">Added user model information (pixel increments + FOV) on the target editor</change> 
         <change type="CHANGE">Added 'Fast mode (optimize image)' preferences to prepare user models (FITS image) for FFT and direct fourier transform: 
           discard negative, zero values and data lower than the visibility threshold (1 percent) to have smaller datasets to process</change> 
       </prerelease>
