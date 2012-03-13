@@ -1226,7 +1226,7 @@ public final class OIFitsCreatorService {
           }
         }
         if (pos[n] == -1) {
-          throw new IllegalStateException("impossible to find couple [" + find[0] + find[1] + "]");
+          throw new IllegalStateException("Impossible to find couple [" + find[0] + find[1] + "]");
         }
       }
 
