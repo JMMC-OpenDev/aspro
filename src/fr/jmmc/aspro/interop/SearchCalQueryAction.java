@@ -143,12 +143,12 @@ public final class SearchCalQueryAction extends SampCapabilityAction {
     }
 
     if (stations == null || stations.isEmpty()) {
-      throw new IllegalStateException("processTarget : the station list is empty !");
+      throw new IllegalStateException("The station list is empty !");
     }
 
     final FocalInstrumentMode insMode = obsCollection.getFirstObservation().getInstrumentConfiguration().getFocalInstrumentMode();
     if (insMode == null) {
-      throw new IllegalStateException("the instrumentMode is empty !");
+      throw new IllegalStateException("The instrumentMode is empty !");
     }
 
     final double lambda = insMode.getWaveLength();

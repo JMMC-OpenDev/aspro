@@ -126,7 +126,7 @@ public final class InterferometerMapService {
 
       final List<Station> stations = observation.getInstrumentConfiguration().getStationList();
       if (stations == null || stations.isEmpty()) {
-        throw new IllegalStateException("compute : the station list is empty !");
+        throw new IllegalStateException("The station list is empty !");
       }
 
       final int nStations = stations.size();

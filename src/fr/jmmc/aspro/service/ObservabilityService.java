@@ -1240,7 +1240,7 @@ public final class ObservabilityService {
     // Get chosen stations :
     final List<Station> stations = this.observation.getInstrumentConfiguration().getStationList();
     if (stations == null || stations.isEmpty()) {
-      throw new IllegalStateException("prepareBeams : the station list is empty !");
+      throw new IllegalStateException("The station list is empty !");
     }
 
     if (logger.isLoggable(Level.FINE)) {
@@ -1266,7 +1266,7 @@ public final class ObservabilityService {
     final boolean useRelatedChannels = nRelChannels > 0;
 
     if (useRelatedChannels && nBeams != nRelChannels) {
-      throw new IllegalStateException("prepareBeams : the number of associated channels does not match the station list : " + stations + " <> " + relatedChannels);
+      throw new IllegalStateException("The number of associated channels does not match the station list : " + stations + " <> " + relatedChannels);
     }
 
     this.beams = new ArrayList<Beam>(nBeams);
