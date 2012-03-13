@@ -124,7 +124,7 @@ public final class ChartUtils {
 
       // text annotations :
       CHART_THEME.setItemLabelPaint(Color.BLACK);
-      
+
       // use 'SansSerif' fonts:
       CHART_THEME.setExtraLargeFont(getFont(20, Font.BOLD)); /* new Font("Tahoma", Font.BOLD, 20) */
       CHART_THEME.setLargeFont(DEFAULT_TITLE_FONT); /* new Font("Tahoma", Font.BOLD, 14); */
@@ -132,7 +132,7 @@ public final class ChartUtils {
       CHART_THEME.setSmallFont(DEFAULT_TEXT_SMALL_FONT); /* new Font("Tahoma", Font.PLAIN, 10) */
 
     } else {
-      throw new IllegalStateException("unsupported chart theme : " + ChartFactory.getChartTheme());
+      throw new IllegalStateException("Unsupported chart theme : " + ChartFactory.getChartTheme());
     }
   }
 
@@ -187,8 +187,8 @@ public final class ChartUtils {
    */
   private static Font getFont(final int size) {
     return getFont(size, Font.PLAIN);
-  }  
-  
+  }
+
   /**
    * Return the font (SansSerif / Plain) for the given size (cached)
    * @param size font size
@@ -638,13 +638,13 @@ public final class ChartUtils {
 
     units.add(new NumberTickUnit(1e-9d, df3));
     units.add(new NumberTickUnit(5e-9d, df3));
-    
+
     units.add(new NumberTickUnit(1e-8d, df3));
     units.add(new NumberTickUnit(5e-8d, df3));
-    
+
     units.add(new NumberTickUnit(1e-7d, df3));
     units.add(new NumberTickUnit(5e-7d, df3));
-    
+
     units.add(new NumberTickUnit(1e-6d, df3));
     units.add(new NumberTickUnit(5e-6d, df3));
 
@@ -665,34 +665,34 @@ public final class ChartUtils {
 
     units.add(new NumberTickUnit(1d, df0));
     units.add(new NumberTickUnit(5d, df0));
-    
+
     units.add(new NumberTickUnit(1e1d, df0));
     units.add(new NumberTickUnit(5e1d, df0));
-    
+
     units.add(new NumberTickUnit(1e2d, df0));
     units.add(new NumberTickUnit(5e2d, df0));
 
     units.add(new NumberTickUnit(1e3d, df3));
     units.add(new NumberTickUnit(5e3d, df3));
-    
+
     units.add(new NumberTickUnit(1e4d, df3));
     units.add(new NumberTickUnit(5e4d, df3));
-    
+
     units.add(new NumberTickUnit(1e5d, df3));
     units.add(new NumberTickUnit(5e5d, df3));
-    
+
     units.add(new NumberTickUnit(1e6d, df3));
     units.add(new NumberTickUnit(5e6d, df3));
-    
+
     units.add(new NumberTickUnit(1e7d, df3));
     units.add(new NumberTickUnit(5e7d, df3));
-    
+
     units.add(new NumberTickUnit(1e8d, df3));
     units.add(new NumberTickUnit(5e8d, df3));
-    
+
     units.add(new NumberTickUnit(1e9d, df3));
     units.add(new NumberTickUnit(5e9d, df3));
-    
+
     units.add(new NumberTickUnit(1e10d, df3));
 
     return units;
@@ -716,7 +716,7 @@ public final class ChartUtils {
     // minutes
     units.add(new DateTickUnit(DateTickUnitType.MINUTE, 15, DateTickUnitType.MINUTE, 5, tf));
     units.add(new DateTickUnit(DateTickUnitType.MINUTE, 30, DateTickUnitType.MINUTE, 5, tf));
-    
+
     // hours
     units.add(new DateTickUnit(DateTickUnitType.HOUR, 1, DateTickUnitType.MINUTE, 5, tf));
     units.add(new DateTickUnit(DateTickUnitType.HOUR, 2, DateTickUnitType.MINUTE, 10, tf));
@@ -741,11 +741,11 @@ public final class ChartUtils {
     // HA format :
     // TODO: fix buf for HA < 0.0 !!
     final DateFormat haf = new TimeFormat(true, false);
-/*    
+    /*    
     // minutes
     units.add(new DateTickUnit(DateTickUnitType.MINUTE, 15, DateTickUnitType.MINUTE, 5, haf));
     units.add(new DateTickUnit(DateTickUnitType.MINUTE, 30, DateTickUnitType.MINUTE, 5, haf));
-*/
+     */
     // hours
     units.add(new DateTickUnit(DateTickUnitType.HOUR, 1, DateTickUnitType.MINUTE, 5, haf));
     units.add(new DateTickUnit(DateTickUnitType.HOUR, 2, DateTickUnitType.MINUTE, 10, haf));

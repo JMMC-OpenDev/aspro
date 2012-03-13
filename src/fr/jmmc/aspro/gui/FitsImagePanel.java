@@ -29,6 +29,7 @@ import java.awt.Image;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.IndexColorModel;
+import java.text.DecimalFormat;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.concurrent.ExecutionException;
@@ -42,9 +43,14 @@ import org.jfree.chart.axis.LogarithmicAxis;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.block.BlockBorder;
+import org.jfree.chart.block.BlockContainer;
+import org.jfree.chart.block.ColumnArrangement;
 import org.jfree.chart.event.ChartProgressEvent;
 import org.jfree.chart.event.ChartProgressListener;
+import org.jfree.chart.title.CompositeTitle;
 import org.jfree.chart.title.PaintScaleLegend;
+import org.jfree.chart.title.TextTitle;
+import org.jfree.chart.title.Title;
 import org.jfree.data.Range;
 import org.jfree.ui.Layer;
 import org.jfree.ui.RectangleEdge;
@@ -67,6 +73,8 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
   /** global thread counter */
   private final static AtomicInteger panelCounter = new AtomicInteger(1);
   /* members */
+  /** show the image identifier */
+  private final boolean showId;
   /** image convert task */
   final Task task;
   /** fits image to plot */
@@ -81,7 +89,10 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
   private XYTextAnnotation aJMMC = null;
   /** image scale legend */
   private PaintScaleLegend mapLegend = null;
-
+  /** formatter for legend title */
+  private final DecimalFormat df = new DecimalFormat("0.0#E0");
+  /** angle formatter for legend title */
+  private final DecimalFormat df3 = new DecimalFormat("0.0##");
   /* plot data */
   /** last zoom event to check if the zoom area changed */
   private ZoomEvent lastZoomEvent = null;
@@ -95,10 +106,19 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
    * Constructor
    */
   public FitsImagePanel() {
+    this(true);
+  }
+
+  /**
+   * Constructor
+   * @param showId show the image identifier
+   */
+  public FitsImagePanel(final boolean showId) {
     initComponents();
 
     postInit();
 
+    this.showId = showId;
     this.task = new Task(PREFIX_IMAGE_TASK + panelCounter.getAndIncrement());
   }
 
@@ -328,24 +348,24 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
       if (colorScale == ColorScale.LOGARITHMIC
               && (dataMin <= 0f || dataMax <= 0f || dataMin == dataMax || Float.isInfinite(dataMin) || Float.isInfinite(dataMax))) {
         usedColorScale = ColorScale.LINEAR;
-        
+
         // update min/max:
         FitsImageUtils.updateDataRange(fitsImage);
         dataMin = (float) this.fitsImage.getDataMin();
         dataMax = (float) this.fitsImage.getDataMax();
-        
+
         if (dataMin == dataMax) {
           dataMax = dataMin + 1f;
         }
       } else if (colorScale == ColorScale.LINEAR
               && (dataMin <= 0f || dataMax <= 0f || dataMin == dataMax || Float.isInfinite(dataMin) || Float.isInfinite(dataMax))) {
         usedColorScale = ColorScale.LINEAR;
-        
+
         // update min/max:
         FitsImageUtils.updateDataRange(fitsImage);
         dataMin = (float) this.fitsImage.getDataMin();
         dataMax = (float) this.fitsImage.getDataMax();
-        
+
         if (dataMin == dataMax) {
           dataMax = dataMin + 1f;
         }
@@ -452,12 +472,36 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
     // title :
     ChartUtils.clearTextSubTitle(this.chart);
 
-    if (imageData.getFitsImage().getFitsImageIdentifier() != null) {
-      ChartUtils.addSubtitle(this.chart, "Id: " + imageData.getFitsImage().getFitsImageIdentifier());
+    final FitsImage lFitsImage = imageData.getFitsImage();
+
+    if (this.showId && lFitsImage.getFitsImageIdentifier() != null) {
+      ChartUtils.addSubtitle(this.chart, "Id: " + lFitsImage.getFitsImageIdentifier());
+    }
+
+    final Title infoTitle;
+
+    if (!lFitsImage.isIncRowDefined() || !lFitsImage.isIncColDefined()) {
+      infoTitle = null;
+    } else {
+
+      final BlockContainer infoBlock = new BlockContainer(new ColumnArrangement());
+
+      infoBlock.add(new TextTitle("Increment (rad):", ChartUtils.DEFAULT_FONT));
+      infoBlock.add(new TextTitle("RA : " + df.format(lFitsImage.getIncCol()), ChartUtils.DEFAULT_FONT));
+      infoBlock.add(new TextTitle("DEC: " + df.format(lFitsImage.getIncRow()), ChartUtils.DEFAULT_FONT));
+
+      infoBlock.add(new TextTitle("\nFOV:", ChartUtils.DEFAULT_FONT));
+      infoBlock.add(new TextTitle(FitsImage.getAngleAsString(lFitsImage.getMaxAngle(), df3), ChartUtils.DEFAULT_FONT));
+
+      infoTitle = new CompositeTitle(infoBlock);
+      infoTitle.setFrame(new BlockBorder(Color.BLACK));
+      infoTitle.setMargin(1d, 1d, 1d, 1d);
+      infoTitle.setPadding(5d, 5d, 5d, 5d);
+      infoTitle.setPosition(RectangleEdge.RIGHT);
     }
 
     // define axis boundaries:
-    final Rectangle2D.Double imgRectRef = imageData.getFitsImage().getArea();
+    final Rectangle2D.Double imgRectRef = lFitsImage.getArea();
 
     this.xyPlot.defineBounds(new Range(imgRectRef.getX(), imgRectRef.getX() + imgRectRef.getWidth()),
             new Range(imgRectRef.getY(), imgRectRef.getY() + imgRectRef.getHeight()));
@@ -465,11 +509,11 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
     this.xyPlot.restoreAxesBounds();
 
     // define axis orientation:
-    if (!imageData.getFitsImage().isIncColPositive()) {
+    if (!lFitsImage.isIncColPositive()) {
       final ValueAxis domainAxis = this.xyPlot.getDomainAxis(0);
       domainAxis.setInverted(true);
     }
-    if (!imageData.getFitsImage().isIncRowPositive()) {
+    if (!lFitsImage.isIncRowPositive()) {
       final ValueAxis rangeAxis = this.xyPlot.getRangeAxis(0);
       rangeAxis.setInverted(true);
     }
@@ -479,6 +523,11 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
 
     // update theme at end :
     ChartUtilities.applyCurrentTheme(this.chart);
+
+    if (infoTitle != null) {
+      // after theme:
+      chart.addSubtitle(infoTitle);
+    }
 
     // update the status bar :
     StatusBar.show("image done.");
