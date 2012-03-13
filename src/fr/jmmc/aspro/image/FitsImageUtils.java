@@ -148,7 +148,9 @@ public final class FitsImageUtils {
     final FitsImage image = createFitsImage(input.getData(), input.getDataMin(), input.getDataMax(),
             input.getPixRefRow(), input.getPixRefCol(), input.getSignedIncRow(), input.getSignedIncCol());
 
-    image.setFitsImageIdentifier(input.getFitsImageIdentifier() + "(copy)");
+    image.setFitsImageIdentifier(input.getFitsImageIdentifier());
+    // copy checksum of the original data:
+    image.setChecksum(input.getChecksum());
     return image;
   }
 
@@ -200,8 +202,8 @@ public final class FitsImageUtils {
 
     minMaxJob.forkAndJoin();
 
-    logger.info("ImageMinMaxJob min:   " + minMaxJob.getMin() + " - max: " + minMaxJob.getMax());
-    logger.info("ImageMinMaxJob nData: " + minMaxJob.getNData() + " - sum: " + minMaxJob.getSum());
+    logger.info("ImageMinMaxJob min: " + minMaxJob.getMin() + " - max: " + minMaxJob.getMax()
+            + " - nData: " + minMaxJob.getNData() + " - sum: " + minMaxJob.getSum());
 
     // update nData:
     image.setNData(minMaxJob.getNData());
@@ -235,7 +237,6 @@ public final class FitsImageUtils {
     int nbCols = fitsImage.getNbCols();
 
     logger.info("Image size:  " + nbRows + " x " + nbCols);
-    logger.info("Image nData: " + fitsImage.getNData() + " - total: " + fitsImage.getSum());
 
 
     // 1- Normalize data (amplitude):
@@ -243,7 +244,7 @@ public final class FitsImageUtils {
       throw new IllegalArgumentException("Input image has only negative data !");
     }
 
-    float normFactor = (float) (1d / fitsImage.getDataMax());
+    double normFactor = 1d / fitsImage.getDataMax();
 
     ImageNormalizeJob normJob = new ImageNormalizeJob(data, nbCols, nbRows, normFactor);
 
@@ -256,18 +257,17 @@ public final class FitsImageUtils {
 
 
     // 2.1 - Ignore negative values and lower than given zeroThreshold i.e. replace them by 0.0:
-    float tunedZeroThreshold = (minVisibility > 0f) ? 2f * minVisibility / fitsImage.getNData() : 0f;
-    logger.info("tuned threshold = " + tunedZeroThreshold);
+    float tunedLowerThreshold = (minVisibility > 0f) ? 2f * minVisibility / fitsImage.getNData() : 0f;
 
-    if (fitsImage.getDataMin() < tunedZeroThreshold) {
+    if (fitsImage.getDataMin() < tunedLowerThreshold) {
 
-      final ImageLowerThresholdJob fixNegativeJob = new ImageLowerThresholdJob(data, nbCols, nbRows, tunedZeroThreshold, 0f);
+      final ImageLowerThresholdJob thresholdJob = new ImageLowerThresholdJob(data, nbCols, nbRows, tunedLowerThreshold, 0f);
 
-      logger.info("ImageLowerThresholdJob - threshold = " + tunedZeroThreshold);
+      logger.info("ImageLowerThresholdJob - threshold = " + tunedLowerThreshold);
 
-      fixNegativeJob.forkAndJoin();
+      thresholdJob.forkAndJoin();
 
-      logger.info("ImageLowerThresholdJob result: " + fixNegativeJob.getUpdateCount());
+      logger.info("ImageLowerThresholdJob - updateCount: " + thresholdJob.getUpdateCount());
 
       // update boundaries excluding zero values:
       updateDataRangeExcludingZero(fitsImage);
@@ -275,7 +275,7 @@ public final class FitsImageUtils {
 
 
     // 2.2 - Normalize data (total flux):
-    normFactor = (float) (1d / fitsImage.getSum());
+    normFactor = 1d / fitsImage.getSum();
 
     normJob = new ImageNormalizeJob(data, nbCols, nbRows, normFactor);
 
@@ -288,18 +288,17 @@ public final class FitsImageUtils {
 
 
     // 2.3 - Skip data lower than threshold again:
-    tunedZeroThreshold = (minVisibility > 0f) ? 2f * minVisibility / fitsImage.getNData() : 0f;
-    logger.info("tuned threshold = " + tunedZeroThreshold);
+    tunedLowerThreshold = (minVisibility > 0f) ? 2f * minVisibility / fitsImage.getNData() : 0f;
 
-    if (fitsImage.getDataMin() < tunedZeroThreshold) {
+    if (fitsImage.getDataMin() < tunedLowerThreshold) {
 
-      final ImageLowerThresholdJob fixThresholdJob = new ImageLowerThresholdJob(data, nbCols, nbRows, tunedZeroThreshold, 0f);
+      final ImageLowerThresholdJob thresholdJob = new ImageLowerThresholdJob(data, nbCols, nbRows, tunedLowerThreshold, 0f);
 
-      logger.info("ImageLowerThresholdJob - threshold = " + tunedZeroThreshold);
+      logger.info("ImageLowerThresholdJob - threshold = " + tunedLowerThreshold);
 
-      fixThresholdJob.forkAndJoin();
+      thresholdJob.forkAndJoin();
 
-      logger.info("ImageLowerThresholdJob result: " + fixThresholdJob.getUpdateCount());
+      logger.info("ImageLowerThresholdJob - updateCount: " + thresholdJob.getUpdateCount());
 
       // update boundaries excluding zero values:
       updateDataRangeExcludingZero(fitsImage);
@@ -423,6 +422,8 @@ public final class FitsImageUtils {
 
       nbRows = fitsImage.getNbRows();
       nbCols = fitsImage.getNbCols();
+
+      logger.info("Fixed size = " + nbRows + " x " + nbCols);
     }
 
 
@@ -432,8 +433,6 @@ public final class FitsImageUtils {
     if (incRow < 0d) {
       // flip row axis:
       final ImageFlipJob flipJob = new ImageFlipJob(data, nbCols, nbRows, false);
-
-      logger.info("ImageFlipJob - flipY");
 
       flipJob.forkAndJoin();
 
@@ -446,8 +445,6 @@ public final class FitsImageUtils {
     if (incCol < 0d) {
       // flip column axis:
       final ImageFlipJob flipJob = new ImageFlipJob(data, nbCols, nbRows, true);
-
-      logger.info("ImageFlipJob - flipX");
 
       flipJob.forkAndJoin();
 
