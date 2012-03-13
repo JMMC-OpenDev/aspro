@@ -464,7 +464,7 @@ public final class UVCoverageService {
 
     final FocalInstrumentMode insMode = this.observation.getInstrumentConfiguration().getFocalInstrumentMode();
     if (insMode == null) {
-      throw new IllegalStateException("the instrumentMode is empty !");
+      throw new IllegalStateException("The instrumentMode is empty !");
     }
 
     if (logger.isLoggable(Level.FINE)) {
