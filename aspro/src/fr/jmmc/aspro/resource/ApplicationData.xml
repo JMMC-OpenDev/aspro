@@ -7,7 +7,7 @@
 
 <ApplicationData link="http://www.jmmc.fr/aspro2">
 
-  <program name="Aspro2" version="0.9.0 beta 3"/>
+  <program name="Aspro2" version="0.9.0"/>
   
   <compilation date="14/03/2011" compiler="JDK 1.5.0_16"/>
 
@@ -151,6 +151,9 @@
 
   <releasenotes>
     <release version="0.9.0">
+      <prerelease version="0.9.0"> 
+        <change type="FEATURE">Public release for ESO P90</change> 
+      </prerelease>
       <prerelease version="0.9.0 beta 3"> 
         <change type="CHANGE">Added LUT and color scale widgets on the FITS image preview of the target model editor</change> 
         <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/271">Added UP / DOWN buttons to move targets among 
@@ -229,7 +232,12 @@
       </prerelease>
     </release>
     <release version="0.8.1">
+      <prerelease version="0.8.1.2"> 
+        <!-- <pubDate>Tue, 06 Mar 2012 11:38:54 GMT</pubDate> -->
+        <change type="FEATURE">Added ESO P90 configuration</change> 
+      </prerelease> 
       <prerelease version="0.8.1">
+        <!-- <pubDate>Wed, 13 Sep 2011 15:20:55 GMT</pubDate> -->
         <change type="BUGFIX">Corrected effective wavelength in OIFits output (channel center)</change>
         <change type="FEATURE">Corrected AMBER noise parameters: visibility and phase bias set to 5% and 3 deg respectively</change>
         <change type="FEATURE">Updated PIONIER instrument configuration: corrected noise parameters and added spectral modes (LARGE-H, SMALL-H and BROAD-H)</change>
