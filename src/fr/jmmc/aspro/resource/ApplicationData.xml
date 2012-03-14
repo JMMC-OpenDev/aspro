@@ -151,7 +151,7 @@
 
   <releasenotes>
     <release version="0.9.0">
-      <!-- <pubDate>Wed, 14 Mar 2012 16:51:46 GMT</pubDate> -->
+      <!-- <pubDate>Wed, 14 Mar 2012 16:58:26 GMT</pubDate> -->
       <prerelease version="0.9.0"> 
         <change type="FEATURE">Public release for ESO P90</change> 
       </prerelease>
@@ -179,7 +179,7 @@
     </release>
     
     <release version="0.8.2">
-      <!-- <pubDate>Wed, 14 Mar 2012 16:51:46 GMT</pubDate> -->
+      <!-- <pubDate>Wed, 14 Mar 2012 16:58:26 GMT</pubDate> -->
       <prerelease version="0.8.2 beta 11"> 
         <change type="FEATURE">Added ESO P90 configuration</change> 
         <change type="FEATURE">Added the Color scale legend on the UV Coverage plot</change> 
