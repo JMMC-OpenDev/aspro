@@ -559,7 +559,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         jScrollPaneTreeModels.setMinimumSize(new java.awt.Dimension(100, 100));
         jScrollPaneTreeModels.setPreferredSize(new java.awt.Dimension(100, 100));
 
-        jTreeModels.setFont(new java.awt.Font("Dialog", 1, 12)); // NOI18N
+        jTreeModels.setFont(new java.awt.Font("Dialog", 1, 12));
         javax.swing.tree.DefaultMutableTreeNode treeNode1 = new javax.swing.tree.DefaultMutableTreeNode("Models");
         jTreeModels.setModel(new javax.swing.tree.DefaultTreeModel(treeNode1));
         jScrollPaneTreeModels.setViewportView(jTreeModels);
