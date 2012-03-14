@@ -7,7 +7,7 @@
 
 <ApplicationData link="http://www.jmmc.fr/aspro2">
 
-  <program name="Aspro2" version="0.9.0 beta 2"/>
+  <program name="Aspro2" version="0.9.0 beta 3"/>
   
   <compilation date="08/03/2011" compiler="JDK 1.5.0_16"/>
 
@@ -142,9 +142,12 @@
 
   <releasenotes>
     <release version="0.9.0">
+      <prerelease version="0.9.0 beta 3"> 
+        <change type="CHANGE">Added LUT and color scale widgets on the FITS image preview of the target model editor</change> 
+      </prerelease>
       <prerelease version="0.9.0 beta 2"> 
         <change type="CHANGE">Enhanced exception handling during user model validation and computation: automatically disable invalid model and add a warning message</change> 
-        <change type="CHANGE">Added user model information (pixel increments + FOV) on the target editor</change> 
+        <change type="CHANGE">Added user model information (pixel increments + FOV) on the target model editor</change> 
         <change type="CHANGE">Added 'Fast mode (optimize image)' preferences to prepare user models (FITS image) for FFT and direct fourier transform: 
           discard negative, zero values and data lower than the visibility threshold (1 percent) to have smaller datasets to process</change> 
       </prerelease>
