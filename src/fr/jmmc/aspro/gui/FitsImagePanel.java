@@ -35,6 +35,7 @@ import java.util.Observer;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
+import javax.swing.DefaultComboBoxModel;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.annotations.XYTextAnnotation;
@@ -75,12 +76,16 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
   /* members */
   /** show the image identifier */
   private final boolean showId;
+  /** show the image options (LUT, color scale) */
+  private final boolean showOptions;
   /** image convert task */
   final Task task;
   /** fits image to plot */
   private FitsImage fitsImage = null;
   /** preference singleton */
   private final Preferences myPreferences = Preferences.getInstance();
+  /** flag to enable / disable the automatic refresh of the plot when any swing component changes */
+  private boolean doAutoRefresh = true;
   /** jFreeChart instance */
   private JFreeChart chart;
   /** xy plot instance */
@@ -89,7 +94,7 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
   private XYTextAnnotation aJMMC = null;
   /** image scale legend */
   private PaintScaleLegend mapLegend = null;
-  /** formatter for legend title */
+  /** formatter for legend title / scale */
   private final DecimalFormat df = new DecimalFormat("0.0#E0");
   /** angle formatter for legend title */
   private final DecimalFormat df3 = new DecimalFormat("0.0##");
@@ -106,20 +111,22 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
    * Constructor
    */
   public FitsImagePanel() {
-    this(true);
+    this(true, false);
   }
 
   /**
    * Constructor
-   * @param showId show the image identifier
+   * @param showId true to show the image identifier
+   * @param showOptions true to show the image options (LUT, color scale)
    */
-  public FitsImagePanel(final boolean showId) {
+  public FitsImagePanel(final boolean showId, final boolean showOptions) {
+    this.showId = showId;
+    this.showOptions = showOptions;
+    this.task = new Task(PREFIX_IMAGE_TASK + panelCounter.getAndIncrement());
+
     initComponents();
 
     postInit();
-
-    this.showId = showId;
-    this.task = new Task(PREFIX_IMAGE_TASK + panelCounter.getAndIncrement());
   }
 
   /**
@@ -132,8 +139,46 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jPanelOptions = new javax.swing.JPanel();
+        jLabelLutTable = new javax.swing.JLabel();
+        jComboBoxLUT = new javax.swing.JComboBox();
+        jLabelColorScale = new javax.swing.JLabel();
+        jComboBoxColorScale = new javax.swing.JComboBox();
+
         setLayout(new java.awt.BorderLayout());
+
+        jPanelOptions.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 10, 2));
+
+        jLabelLutTable.setText("LUT table");
+        jPanelOptions.add(jLabelLutTable);
+
+        jComboBoxLUT.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jComboBoxLUTActionPerformed(evt);
+            }
+        });
+        jPanelOptions.add(jComboBoxLUT);
+
+        jLabelColorScale.setText("Color scale");
+        jPanelOptions.add(jLabelColorScale);
+
+        jComboBoxColorScale.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jComboBoxColorScaleActionPerformed(evt);
+            }
+        });
+        jPanelOptions.add(jComboBoxColorScale);
+
+        add(jPanelOptions, java.awt.BorderLayout.PAGE_END);
     }// </editor-fold>//GEN-END:initComponents
+
+  private void jComboBoxColorScaleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxColorScaleActionPerformed
+    refreshPlot();
+  }//GEN-LAST:event_jComboBoxColorScaleActionPerformed
+
+  private void jComboBoxLUTActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxLUTActionPerformed
+    refreshPlot();
+  }//GEN-LAST:event_jComboBoxLUTActionPerformed
 
   /**
    * Export the current chart as a PDF document
@@ -186,7 +231,6 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
    * This method is useful to set the models and specific features of initialized swing components :
    */
   private void postInit() {
-
     this.chart = ChartUtils.createSquareXYLineChart(null, null, false);
     this.chart.setPadding(new RectangleInsets(0d, 0d, 0d, 10d));
 
@@ -216,6 +260,23 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
 
     // register this instance as a Preference Observer :
     this.myPreferences.addObserver(this);
+
+    // disable the automatic refresh :
+    final boolean prevAutoRefresh = setAutoRefresh(false);
+    try {
+      // define custom models :
+      this.jComboBoxLUT.setModel(new DefaultComboBoxModel(ColorModels.getColorModelNames()));
+      this.jComboBoxColorScale.setModel(new DefaultComboBoxModel(ColorScale.values()));
+
+      // update selected items:
+      this.jComboBoxLUT.setSelectedItem(this.myPreferences.getPreference(Preferences.MODEL_IMAGE_LUT));
+      this.jComboBoxColorScale.setSelectedItem(this.myPreferences.getImageColorScale());
+    } finally {
+      // restore the automatic refresh :
+      setAutoRefresh(prevAutoRefresh);
+    }
+    // show / hide the option panel:
+    this.jPanelOptions.setVisible(this.showOptions);
   }
 
   /**
@@ -252,12 +313,24 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
       logger.fine("Preferences updated on : " + this);
     }
 
-    final IndexColorModel colorModel = ColorModels.getColorModel(this.myPreferences.getPreference(Preferences.MODEL_IMAGE_LUT));
+    final String colorModelPref = this.myPreferences.getPreference(Preferences.MODEL_IMAGE_LUT);
     final ColorScale colorScale = this.myPreferences.getImageColorScale();
 
-    if (getChartData() != null
-            && (getChartData().getColorModel() != colorModel || getChartData().getColorScale() != colorScale)) {
-      this.plot();
+    // disable the automatic refresh :
+    final boolean prevAutoRefresh = setAutoRefresh(false);
+    try {
+      // update selected items:
+      this.jComboBoxLUT.setSelectedItem(colorModelPref);
+      this.jComboBoxColorScale.setSelectedItem(colorScale);
+    } finally {
+      // restore the automatic refresh :
+      setAutoRefresh(prevAutoRefresh);
+    }
+
+    final IndexColorModel colorModel = ColorModels.getColorModel(colorModelPref);
+
+    if (getChartData() != null && (getChartData().getColorModel() != colorModel || getChartData().getColorScale() != colorScale)) {
+      refreshPlot();
     }
   }
 
@@ -267,7 +340,20 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
    */
   public void setFitsImage(final FitsImage image) {
     this.fitsImage = image;
-    this.plot();
+    refreshPlot();
+  }
+
+  /**
+   * Refresh the plot when an UI widget changes.
+   * Check the doAutoRefresh flag to avoid unwanted refresh
+   */
+  private void refreshPlot() {
+    if (this.doAutoRefresh) {
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("refreshPlot");
+      }
+      this.plot();
+    }
   }
 
   /**
@@ -285,8 +371,8 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
     } else {
 
       // Use model image Preferences :
-      final IndexColorModel colorModel = ColorModels.getColorModel(this.myPreferences.getPreference(Preferences.MODEL_IMAGE_LUT));
-      final ColorScale colorScale = this.myPreferences.getImageColorScale();
+      final IndexColorModel colorModel = ColorModels.getColorModel((String) this.jComboBoxLUT.getSelectedItem());
+      final ColorScale colorScale = (ColorScale) this.jComboBoxColorScale.getSelectedItem();
 
       // update the status bar :
       StatusBar.show("computing image ...");
@@ -531,6 +617,16 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
 
     // update the status bar :
     StatusBar.show("image done.");
+
+    // disable the automatic refresh :
+    final boolean prevAutoRefresh = setAutoRefresh(false);
+    try {
+      // update color scale if changed during image computation (logarithmic to linear):
+      this.jComboBoxColorScale.setSelectedItem(imageData.getColorScale());
+    } finally {
+      // restore the automatic refresh :
+      setAutoRefresh(prevAutoRefresh);
+    }
   }
 
   /**
@@ -660,6 +756,9 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
       final NumberAxis uvMapAxis;
       if (colorScale == ColorScale.LINEAR) {
         uvMapAxis = new NumberAxis();
+        if (max < 1e-3d) {
+          uvMapAxis.setNumberFormatOverride(df);
+        }
         mapLegend = new PaintScaleLegend(new ColorModelPaintScale(min, max, colorModel, colorScale), uvMapAxis);
       } else {
         uvMapAxis = new LogarithmicAxis(null);
@@ -704,6 +803,11 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
     }
   }
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JComboBox jComboBoxColorScale;
+    private javax.swing.JComboBox jComboBoxLUT;
+    private javax.swing.JLabel jLabelColorScale;
+    private javax.swing.JLabel jLabelLutTable;
+    private javax.swing.JPanel jPanelOptions;
     // End of variables declaration//GEN-END:variables
   /** drawing started time value */
   private long chartDrawStartTime = 0l;
@@ -731,6 +835,35 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
     // move JMMC annotation:
     this.aJMMC.setX(this.xyPlot.getDomainAxis().getUpperBound());
     this.aJMMC.setY(this.xyPlot.getRangeAxis().getLowerBound());
+  }
+
+  /**
+   * Enable / Disable the automatic refresh of the plot when any swing component changes.
+   * Return its previous value.
+   *
+   * Typical use is as following :
+   * // disable the automatic refresh :
+   * final boolean prevAutoRefresh = this.setAutoRefresh(false);
+   * try {
+   *   // operations ...
+   *
+   * } finally {
+   *   // restore the automatic refresh :
+   *   this.setAutoRefresh(prevAutoRefresh);
+   * }
+   *
+   * @param value new value
+   * @return previous value
+   */
+  private boolean setAutoRefresh(final boolean value) {
+    // first backup the state of the automatic update observation :
+    final boolean previous = this.doAutoRefresh;
+
+    // then change its state :
+    this.doAutoRefresh = value;
+
+    // return previous state :
+    return previous;
   }
 
   /**
