@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+
+<!-- application specific configuration -->
+<included>
+
+  <!-- Jmal: target model -->
+<!--  
+  <logger name="fr.jmmc.jmal.model" level="INFO"/>
+-->
+
+  <!-- Jmal: star resolver -->
+<!--  
+  <logger name="fr.jmmc.jmal.star" level="INFO"/>
+-->
+
+  <!-- OITools -->
+<!--  
+  <logger name="fr.jmmc.oitools" level="INFO"/>
+-->
+
+
+  <!-- JSkyCalc -->
+  <logger name="edu.dartmouth" level="INFO"/>
+
+
+  <!-- Aspro -->
+  <logger name="fr.jmmc.aspro" level="INFO"/>
+  
+<!--
+  <logger name="fr.jmmc.aspro.gui" level="INFO"/>
+  <logger name="fr.jmmc.aspro.gui.InterferometerMapPanel" level="INFO"/>
+  <logger name="fr.jmmc.aspro.gui.ObservabilityPanel" level="INFO"/>
+  <logger name="fr.jmmc.aspro.gui.UVCoveragePanel" level="INFO"/>
+  <logger name="fr.jmmc.aspro.gui.Vis2Panel" level="INFO"/>
+
+  <logger name="fr.jmmc.aspro.gui.action" level="INFO"/>
+
+  <logger name="fr.jmmc.aspro.interop" level="INFO"/>
+  
+  <logger name="fr.jmmc.aspro.model" level="INFO"/>
+
+  <logger name="fr.jmmc.aspro.ob" level="INFO"/>
+
+  <logger name="fr.jmmc.aspro.service" level="INFO"/>
+  <logger name="fr.jmmc.aspro.service.DelayLineService" level="INFO"/>
+  <logger name="fr.jmmc.aspro.service.ObservabilityService" level="INFO"/>
+  <logger name="fr.jmmc.aspro.service.UVCoverageService" level="INFO"/>
+-->
+</included>
