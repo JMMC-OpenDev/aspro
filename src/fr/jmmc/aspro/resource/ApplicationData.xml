@@ -9,7 +9,7 @@
 
   <program name="Aspro2" version="0.9.0 beta 3"/>
   
-  <compilation date="08/03/2011" compiler="JDK 1.5.0_16"/>
+  <compilation date="14/03/2011" compiler="JDK 1.5.0_16"/>
 
   <text>
     <![CDATA[ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations
@@ -64,13 +64,16 @@
               derived software.
             -->
 
-        <!-- jMAL dependencies -->
+        <!-- jMCS dependencies -->
 
-        <!-- CDS Used by ld2ud computation (fr.jmmc.mcs.astro) -->
-        <package name="CDS_SpType"
-            description="Get information from spectral type of stellar objects. Provided by CDS"
-            link="nc"
-            jars="sptype.jar"/>
+        <!-- VO interoperability -->
+        <package name="JSAMP"
+          description="JSAMP is a Java toolkit for use with the Simple Applications Messaging Protocol. Made by Mark Taylor, working in the Astrophysics Group at Bristol University."
+          link="http://software.astrogrid.org/doc/jsamp/"
+          jars="jsamp-1.3.jar"
+          license="(at least) the Academic Free Licence and the BSD License."/>
+
+        <!-- jMAL dependencies -->
 
         <!-- Model computations (bessel functions) -->
         <package name="CERN colt"
@@ -85,6 +88,12 @@
               copyright notice and this permission notice appear in supporting documentation. CERN makes no representations
               about the suitability of this software for any purpose. It is provided "as is" without expressed or implied warranty.
             -->
+
+        <package name="JTransforms"
+            description="JTransforms is the first, open source, multithreaded FFT library written in pure Java. Made by Dr Piotr Wendykier, Wolfram Research, Inc."
+            link="http://sourceforge.net/projects/jtransforms/"
+            license="MPL/LGPL/GPL" />
+            <!-- Mozilla Public License: http://www.mozilla.org/MPL/ -->
 
 
         <!-- 2. Swing -->
@@ -144,6 +153,8 @@
     <release version="0.9.0">
       <prerelease version="0.9.0 beta 3"> 
         <change type="CHANGE">Added LUT and color scale widgets on the FITS image preview of the target model editor</change> 
+        <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/271">Added UP / DOWN buttons to move targets among 
+          science or calibrator targets (manual sort) in the target editor</change>
       </prerelease>
       <prerelease version="0.9.0 beta 2"> 
         <change type="CHANGE">Enhanced exception handling during user model validation and computation: automatically disable invalid model and add a warning message</change> 
