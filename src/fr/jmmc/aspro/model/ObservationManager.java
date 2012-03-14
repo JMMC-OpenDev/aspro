@@ -1327,10 +1327,14 @@ public final class ObservationManager extends BaseOIManager implements Observer 
 
     for (Target target : observation.getTargets()) {
       userModel = target.getUserModel();
-      if (userModel != null && userModel.isFileValid()) {
-        boolean valid = false;
 
+      if (userModel != null && userModel.isFileValid()) {
+        // see TargetModelForm.prepareAndValidateUserModel()
+        boolean valid = false;
         try {
+          // clear previously cached fits image:
+          userModel.setFitsImage(null);
+
           // throws exceptions if the given fits file or image is incorrect:
           userModel.setFitsImage(UserModelService.prepareFitsFile(userModel.getFile()));
 
