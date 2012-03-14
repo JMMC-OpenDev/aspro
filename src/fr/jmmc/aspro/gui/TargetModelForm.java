@@ -302,7 +302,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
       if (!isAnalytical && userModel.getFitsImage() != null) {
         // update fits Image:
         if (fitsImagePanel == null) {
-          fitsImagePanel = new FitsImagePanel(false); // do not show id
+          fitsImagePanel = new FitsImagePanel(false, true); // do not show id but options
         }
         // TODO: call FitsImagePanel.dispose()
         fitsImagePanel.setFitsImage(userModel.getFitsImage());
@@ -559,7 +559,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         jScrollPaneTreeModels.setMinimumSize(new java.awt.Dimension(100, 100));
         jScrollPaneTreeModels.setPreferredSize(new java.awt.Dimension(100, 100));
 
-        jTreeModels.setFont(new java.awt.Font("Dialog", 1, 12));
+        jTreeModels.setFont(new java.awt.Font("Dialog", 1, 12)); // NOI18N
         javax.swing.tree.DefaultMutableTreeNode treeNode1 = new javax.swing.tree.DefaultMutableTreeNode("Models");
         jTreeModels.setModel(new javax.swing.tree.DefaultTreeModel(treeNode1));
         jScrollPaneTreeModels.setViewportView(jTreeModels);
@@ -570,7 +570,6 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 0.3;
         gridBagConstraints.weighty = 0.2;
-        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         add(jScrollPaneTreeModels, gridBagConstraints);
 
         jPanelModel.setBorder(javax.swing.BorderFactory.createTitledBorder("Model"));
@@ -1224,8 +1223,12 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
    * @param userModel user model to use
    */
   private static void prepareAndValidateUserModel(final UserModel userModel) {
+    // see ObservationManager.checkAndLoadFileReferences() 
     boolean valid = false;
     try {
+      // clear previously cached fits image:
+      userModel.setFitsImage(null);
+    
       // throws exceptions if the given fits file or image is incorrect:
       userModel.setFitsImage(UserModelService.prepareFitsFile(userModel.getFile()));
 
