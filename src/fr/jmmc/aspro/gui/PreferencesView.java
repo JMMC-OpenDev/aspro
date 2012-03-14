@@ -50,8 +50,8 @@ public final class PreferencesView extends JFrame implements Observer {
    */
   private void postInit() {
     // define custom models :
-    this.jComboBoxLUT.setModel(new DefaultComboBoxModel(ColorModels.getColorModelNames()));
     this.jComboBoxImageSize.setModel(new DefaultComboBoxModel(AsproConstants.IMAGE_SIZES));
+    this.jComboBoxLUT.setModel(new DefaultComboBoxModel(ColorModels.getColorModelNames()));
     this.jComboBoxColorScale.setModel(new DefaultComboBoxModel(ColorScale.values()));
 
     // register this instance as a Preference Observer :
@@ -308,7 +308,7 @@ public final class PreferencesView extends JFrame implements Observer {
         jLabelLutTable.setText("LUT table");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridy = 1;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 6);
         jPanelModelImage.add(jLabelLutTable, gridBagConstraints);
@@ -320,14 +320,14 @@ public final class PreferencesView extends JFrame implements Observer {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridy = 1;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelModelImage.add(jComboBoxLUT, gridBagConstraints);
 
         jLabelImageSize.setText("Image size");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridy = 0;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 6);
         jPanelModelImage.add(jLabelImageSize, gridBagConstraints);
@@ -339,7 +339,7 @@ public final class PreferencesView extends JFrame implements Observer {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridy = 0;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelModelImage.add(jComboBoxImageSize, gridBagConstraints);
 
@@ -526,8 +526,8 @@ public final class PreferencesView extends JFrame implements Observer {
     this.jRadioButtonXY.setSelected(preferXyMode);
     this.jRadioButtonRhoTheta.setSelected(!preferXyMode);
 
-    this.jComboBoxLUT.setSelectedItem(this.myPreferences.getPreference(Preferences.MODEL_IMAGE_LUT));
     this.jComboBoxImageSize.setSelectedItem(this.myPreferences.getPreferenceAsInt(Preferences.MODEL_IMAGE_SIZE));
+    this.jComboBoxLUT.setSelectedItem(this.myPreferences.getPreference(Preferences.MODEL_IMAGE_LUT));
     this.jComboBoxColorScale.setSelectedItem(this.myPreferences.getImageColorScale());
 
     final boolean preferTimeLst = AsproConstants.TIME_LST.equals(this.myPreferences.getPreference(Preferences.TIME_REFERENCE));
