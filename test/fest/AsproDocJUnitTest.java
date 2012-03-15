@@ -44,6 +44,9 @@ import org.junit.Test;
  */
 public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
 
+  /** absolute path to test folder to load observations */
+  private final static String TEST_FOLDER = "/home/bourgesl/dev/aspro/test/";
+
   /**
    * Define the application
    */
@@ -53,7 +56,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
 
     JmcsApplicationSetup.define(
             fr.jmmc.aspro.AsproGui.class,
-            "-open", "/home/bourgesl/dev/aspro/test/Aspro2_sample.asprox");
+            "-open", TEST_FOLDER + "Aspro2_sample.asprox");
 
     // define robot delays :
     defineRobotDelayBetweenEvents(SHORT_DELAY);
@@ -186,16 +189,16 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
 
     // Capture Vis2 plot :
     showPlotTab(SettingPanel.TAB_VIS2, "Aspro2-vis2-withErr.png");
-    
+
     window.list("jListTargets").selectItem("HIP1234");
 
     // waits for computation to finish :
     AsproTestUtils.checkRunningTasks();
-    
+
     // select UV tab like before Vis2:
     window.tabbedPane().selectTab(SettingPanel.TAB_UV_COVERAGE);
   }
-  
+
   /**
    * Test Target editor
    */
@@ -313,7 +316,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
   public void shouldCallLITpro() {
     // select tab to let menu lost focus:
     window.tabbedPane().selectTab(SettingPanel.TAB_UV_COVERAGE);
-    
+
     window.list("jListTargets").selectItem("HD 1234");
 
     // waits for computation to finish :
@@ -393,7 +396,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
   }
 
   /**
-   * Test Open file "/home/bourgesl/dev/aspro/test/Aspro2_sample_with_calibrators.asprox"
+   * Test Open file "Aspro2_sample_with_calibrators.asprox"
    */
   @Test
   @GUITest
@@ -403,7 +406,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
     window.menuItemWithPath("File").focus();
     window.menuItemWithPath("File", "Open observation").click();
 
-    window.fileChooser().selectFile(new File("/home/bourgesl/dev/aspro/test/Aspro2_sample_with_calibrators.asprox"));
+    window.fileChooser().selectFile(new File(TEST_FOLDER + "Aspro2_sample_with_calibrators.asprox"));
     window.fileChooser().approve();
 
     window.list("jListTargets").selectItem("HD 3546 (cal)");
@@ -446,7 +449,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
   }
 
   /**
-   * Test Open file "/home/bourgesl/dev/aspro/test/Aspro2_sample_multi.asprox"
+   * Test Open file "Aspro2_sample_multi.asprox"
    */
   @Test
   @GUITest
@@ -456,7 +459,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
     window.menuItemWithPath("File").focus();
     window.menuItemWithPath("File", "Open observation").click();
 
-    window.fileChooser().selectFile(new File("/home/bourgesl/dev/aspro/test/Aspro2_sample_multi.asprox"));
+    window.fileChooser().selectFile(new File(TEST_FOLDER + "Aspro2_sample_multi.asprox"));
     window.fileChooser().approve();
 
     // waits for computation to finish :
@@ -484,7 +487,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
 
     window.menuItemWithPath("Help", "Report Feedback to JMMC...").click();
 
-    final DialogFixture dialog = window.dialog(withTitle("JMMC Feedback Report ").andShowing());
+    final DialogFixture dialog = window.dialog(withTitle("Feedback Report ").andShowing());
 
     dialog.requireVisible();
     dialog.moveToFront();
