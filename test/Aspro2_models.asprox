@@ -3,13 +3,13 @@
     <schemaVersion>2011.02</schemaVersion>
     <name>default</name>
     <when>
-        <date>2012-01-18</date>
+        <date>2011-10-15</date>
         <nightRestriction>true</nightRestriction>
         <atmosphereQuality>Average</atmosphereQuality>
     </when>
     <interferometerConfiguration>
-        <name>VLTI Period 89</name>
-        <minElevation>45.0</minElevation>
+        <name>VLTI Period 88</name>
+        <minElevation>30.0</minElevation>
     </interferometerConfiguration>
     <instrumentConfiguration>
         <name>AMBER</name>

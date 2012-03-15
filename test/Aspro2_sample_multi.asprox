@@ -5,11 +5,11 @@
     <when>
         <date>2011-10-15</date>
         <nightRestriction>true</nightRestriction>
-        <atmosphereQuality>Excellent</atmosphereQuality>
+        <atmosphereQuality>Average</atmosphereQuality>
     </when>
     <interferometerConfiguration>
-        <name>VLTI Period 89</name>
-        <minElevation>20.0</minElevation>
+        <name>VLTI Period 88</name>
+        <minElevation>30.0</minElevation>
     </interferometerConfiguration>
     <instrumentConfiguration>
         <name>AMBER</name>
