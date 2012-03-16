@@ -14,6 +14,7 @@ import fest.common.JmcsApplicationSetup;
 
 import fest.common.JmcsFestSwingJUnitTestCase;
 
+import fr.jmmc.aspro.Preferences;
 import fr.jmmc.aspro.gui.SettingPanel;
 import java.awt.Frame;
 import java.awt.image.BufferedImage;
@@ -53,6 +54,9 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
   static {
     // disable dev LAF menu :
     System.setProperty("jmcs.laf.menu", "false");
+
+    // reset Preferences:
+    Preferences.getInstance().resetToDefaultPreferences();
 
     JmcsApplicationSetup.define(
             fr.jmmc.aspro.AsproGui.class,
@@ -473,6 +477,38 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
 
     // Capture UV Coverage plot :
     showPlotTab(SettingPanel.TAB_UV_COVERAGE, "Aspro2-multiConf-uv.png");
+  }
+
+  /**
+   * Test Open file "Aspro2_sample_spiral.asprox" (User model)
+   */
+  @Test
+  @GUITest
+  public void shouldOpenSampleWithUserModel() {
+
+    // hack to solve focus trouble in menu items :
+    window.menuItemWithPath("File").focus();
+    window.menuItemWithPath("File", "Open observation").click();
+
+    window.fileChooser().selectFile(new File(TEST_FOLDER + "Aspro2_sample_spiral.asprox"));
+    window.fileChooser().approve();
+
+    // target editor with calibrators :
+    window.button("jButtonTargetEditor").click();
+
+    final DialogFixture dialog = window.dialog(withTitle("Target Editor").andShowing());
+
+    dialog.requireVisible();
+    dialog.moveToFront();
+
+    dialog.tabbedPane().selectTab("Models");
+
+    dialog.tree().selectPath("Models/HD 1234");
+
+    saveScreenshot(dialog, "Aspro2-UserModel.png");
+
+    // close dialog :
+    dialog.button(JButtonMatcher.withText("Cancel")).click();
   }
 
   /**
