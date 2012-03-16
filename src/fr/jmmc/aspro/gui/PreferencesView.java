@@ -193,7 +193,7 @@ public final class PreferencesView extends JFrame implements Observer {
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelObservability.add(jRadioButtonTimeUTC, gridBagConstraints);
 
-        jLabelCenterNight.setText("Center plot arround night");
+        jLabelCenterNight.setText("Center plot around night");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;

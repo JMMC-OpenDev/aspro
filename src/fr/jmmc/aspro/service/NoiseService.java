@@ -322,7 +322,7 @@ public final class NoiseService implements VisNoiseService {
       // missing magnitude
       this.invalidParameters = true;
 
-      addWarning("Missing photometry on target [" + target.getName() + "] in following bands : "
+      addWarning("Missing photometry on target [" + target.getName() + "] in following bands: "
               + (Double.isNaN(this.objectMag) ? this.insBand : "")
               + (this.fringeTrackerPresent && Double.isNaN(this.fringeTrackerMag) ? this.ftBand : "")
               + (Double.isNaN(this.adaptiveOpticsMag) ? this.aoBand : ""));
@@ -382,7 +382,7 @@ public final class NoiseService implements VisNoiseService {
       // the dit is too long
       this.dit *= this.detectorSaturation / peakflux;
 
-      addWarning("DIT too long (saturation). Adjusting it to (possibly impossible) : " + formatDIT(this.dit));
+      addWarning("DIT too long (saturation). Adjusting it to (possibly impossible): " + formatDIT(this.dit));
 
       nbFrameToSaturation = 1;
     } else {
@@ -394,7 +394,7 @@ public final class NoiseService implements VisNoiseService {
       this.dit = Math.min(this.dit * nbFrameToSaturation, this.totalObsTime);
       this.dit = Math.min(this.dit, this.fringeTrackerMaxIntTime);
 
-      addWarning("Observation can take advantage of FT. Adjusting DIT to : " + formatDIT(this.dit));
+      addWarning("Observation can take advantage of FT. Adjusting DIT to: " + formatDIT(this.dit));
     }
 
     nbTotalPhot = nbTotalPhotPerS * this.dit;

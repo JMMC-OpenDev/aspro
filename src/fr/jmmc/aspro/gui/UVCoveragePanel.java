@@ -1701,7 +1701,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         if (target != null && !target.hasAnalyticalModel()) {
           final UserModel userModel = target.getUserModel();
           if (userModel != null && !userModel.isFileValid()) {
-            mergedWarningContainer.addWarningMessage("User model [" + userModel.getName() + "] is disabled.");
+            mergedWarningContainer.addWarningMessage("User model [" + userModel.getName() + "] is disabled");
           }
         }
       }
@@ -1887,11 +1887,11 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         obsData.getBestPops().toString(sb);
       }
       ChartUtils.addSubtitle(this.chart, sb.toString());
-      ChartUtils.addSubtitle(this.chart, "Source : " + chartData.getTargetName());
+      ChartUtils.addSubtitle(this.chart, "Source: " + chartData.getTargetName());
 
       if (observation.getWhen().isNightRestriction()) {
         // date :
-        ChartUtils.addSubtitle(this.chart, "Day : " + observation.getWhen().getDate().toString());
+        ChartUtils.addSubtitle(this.chart, "Day: " + observation.getWhen().getDate().toString());
       }
 
       // change the scaling factor ?

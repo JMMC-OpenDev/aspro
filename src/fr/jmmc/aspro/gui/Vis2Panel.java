@@ -353,10 +353,10 @@ public final class Vis2Panel extends javax.swing.JPanel implements ChartProgress
     
     ChartUtils.addSubtitle(this.chart, sb.toString());
 
-    ChartUtils.addSubtitle(this.chart, "Source : " + this.oiFitsFile.getOiTarget().getTarget()[0]);
+    ChartUtils.addSubtitle(this.chart, "Source: " + this.oiFitsFile.getOiTarget().getTarget()[0]);
 
     // date :
-    ChartUtils.addSubtitle(this.chart, "Day : " + vis2.getDateObs());
+    ChartUtils.addSubtitle(this.chart, "Day: " + vis2.getDateObs());
 
     // change the scaling factor ?
     setUvPlotScalingFactor(MEGA_LAMBDA_SCALE);
