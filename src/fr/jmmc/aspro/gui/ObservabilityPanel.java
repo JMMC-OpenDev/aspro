@@ -876,7 +876,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
     if (!doBaseLineLimits && (observation.getWhen().isNightRestriction() || !useLST)) {
       // date and moon FLI :
-      ChartUtils.addSubtitle(this.chart, "Day : " + observation.getWhen().getDate().toString()
+      ChartUtils.addSubtitle(this.chart, "Day: " + observation.getWhen().getDate().toString()
               + (observation.getWhen().isNightRestriction()
               ? " - Moon = " + (int) Math.round(obsData.getMoonIllumPercent()) + "%"
               : ""));
@@ -1304,6 +1304,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
    * Create or update the timeline marker (red)
    */
   private void updateTimeMarker() {
+
     // remove time marker anyway:
     if (this.timeMarker != null) {
       this.xyPlot.removeRangeMarker(this.timeMarker, Layer.BACKGROUND);
@@ -1418,24 +1419,28 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     this.aJMMC.setX(this.xyPlot.getDomainAxis().getUpperBound());
     this.aJMMC.setY(this.xyPlot.getRangeAxis().getUpperBound()); // upper bound instead of other plots
 
-    if (isTimelineEnabled()) {
-      // set time marker label anchor:
-      final BoundedDateAxis dateAxis = (BoundedDateAxis) this.xyPlot.getRangeAxis();
+    if (event.getType() == ChartProgressEvent.DRAWING_STARTED) {
+      if (isTimelineEnabled()) {
+        // set time marker label anchor:
+        final BoundedDateAxis dateAxis = (BoundedDateAxis) this.xyPlot.getRangeAxis();
 
-      double left = this.timeMarker.getValue() - dateAxis.getRange().getLowerBound();
-      if (left < 0) {
-        left = 0;
-      }
+        double left = this.timeMarker.getValue() - dateAxis.getRange().getLowerBound();
+        if (left < 0d) {
+          left = 0d;
+        }
 
-      double right = dateAxis.getRange().getUpperBound() - this.timeMarker.getValue();
-      if (right < 0) {
-        right = 0;
-      }
+        double right = dateAxis.getRange().getUpperBound() - this.timeMarker.getValue();
+        if (right < 0d) {
+          right = 0d;
+        }
 
-      if (left > right) {
-        this.timeMarker.setLabelTextAnchor(TextAnchor.TOP_RIGHT);
-      } else {
-        this.timeMarker.setLabelTextAnchor(TextAnchor.TOP_LEFT);
+        final TextAnchor anchor = (left > right) ? TextAnchor.TOP_RIGHT : TextAnchor.TOP_LEFT;
+
+        // check values to avoid refresh loop:
+        if (anchor != this.timeMarker.getLabelTextAnchor()) {
+          // triggers MarkerChangeEvent which causes repaint loop:
+          this.timeMarker.setLabelTextAnchor(anchor);
+        }
       }
     }
 
