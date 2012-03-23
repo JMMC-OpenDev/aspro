@@ -78,6 +78,8 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
   private final boolean showId;
   /** show the image options (LUT, color scale) */
   private final boolean showOptions;
+  /** optional minimum range for data */
+  private final float[] minDataRange;
   /** image convert task */
   final Task task;
   /** fits image to plot */
@@ -111,7 +113,7 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
    * Constructor
    */
   public FitsImagePanel() {
-    this(true, false);
+    this(true, false, null);
   }
 
   /**
@@ -120,8 +122,19 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
    * @param showOptions true to show the image options (LUT, color scale)
    */
   public FitsImagePanel(final boolean showId, final boolean showOptions) {
+    this(showId, showOptions, null);
+  }
+
+  /**
+   * Constructor
+   * @param showId true to show the image identifier
+   * @param showOptions true to show the image options (LUT, color scale)
+   * @param minDataRange optional minimal range for data
+   */
+  public FitsImagePanel(final boolean showId, final boolean showOptions, final float[] minDataRange) {
     this.showId = showId;
     this.showOptions = showOptions;
+    this.minDataRange = minDataRange;
     this.task = new Task(PREFIX_IMAGE_TASK + panelCounter.getAndIncrement());
 
     initComponents();
@@ -379,7 +392,7 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
 
       // Create image convert task worker :
       // Cancel other tasks and execute this new task :
-      new ConvertFitsImageSwingWorker(this, this.fitsImage, colorModel, colorScale).executeTask();
+      new ConvertFitsImageSwingWorker(this, this.fitsImage, this.minDataRange, colorModel, colorScale).executeTask();
     }
   }
 
@@ -393,6 +406,8 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
     private final FitsImagePanel fitsPanel;
     /** fits image */
     private final FitsImage fitsImage;
+    /** optional minimum range for data */
+    private final float[] minDataRange;
     /** image color model */
     private final IndexColorModel colorModel;
     /** color scaling method */
@@ -403,15 +418,17 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
      *
      * @param fitsPanel fits panel
      * @param fitsImage fits image
+     * @param minDataRange optional minimal range for data
      * @param colorModel color model to use
      * @param colorScale color scaling method
      */
-    private ConvertFitsImageSwingWorker(final FitsImagePanel fitsPanel, final FitsImage fitsImage,
+    private ConvertFitsImageSwingWorker(final FitsImagePanel fitsPanel, final FitsImage fitsImage, final float[] minDataRange,
             final IndexColorModel colorModel, final ColorScale colorScale) {
       // get current observation version :
       super(fitsPanel.task);
       this.fitsPanel = fitsPanel;
       this.fitsImage = fitsImage;
+      this.minDataRange = minDataRange;
       this.colorModel = colorModel;
       this.colorScale = colorScale;
     }
@@ -427,33 +444,43 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
       // Start the computations :
       final long start = System.nanoTime();
 
-      float dataMin = (float) this.fitsImage.getDataMin();
-      float dataMax = (float) this.fitsImage.getDataMax();
+      float min = (float) this.fitsImage.getDataMin();
+      float max = (float) this.fitsImage.getDataMax();
+
+      if (this.minDataRange != null) {
+        // check minimum data range:
+        if (min > this.minDataRange[0]) {
+          min = this.minDataRange[0];
+        }
+        if (max < this.minDataRange[1]) {
+          max = this.minDataRange[1];
+        }
+      }
 
       final ColorScale usedColorScale;
       if (colorScale == ColorScale.LOGARITHMIC
-              && (dataMin <= 0f || dataMax <= 0f || dataMin == dataMax || Float.isInfinite(dataMin) || Float.isInfinite(dataMax))) {
+              && (min <= 0f || max <= 0f || min == max || Float.isInfinite(min) || Float.isInfinite(max))) {
         usedColorScale = ColorScale.LINEAR;
 
         // update min/max:
         FitsImageUtils.updateDataRange(fitsImage);
-        dataMin = (float) this.fitsImage.getDataMin();
-        dataMax = (float) this.fitsImage.getDataMax();
+        min = (float) this.fitsImage.getDataMin();
+        max = (float) this.fitsImage.getDataMax();
 
-        if (dataMin == dataMax) {
-          dataMax = dataMin + 1f;
+        if (min == max) {
+          max = min + 1f;
         }
       } else if (colorScale == ColorScale.LINEAR
-              && (dataMin <= 0f || dataMax <= 0f || dataMin == dataMax || Float.isInfinite(dataMin) || Float.isInfinite(dataMax))) {
+              && (min <= 0f || max <= 0f || min == max || Float.isInfinite(min) || Float.isInfinite(max))) {
         usedColorScale = ColorScale.LINEAR;
 
         // update min/max:
         FitsImageUtils.updateDataRange(fitsImage);
-        dataMin = (float) this.fitsImage.getDataMin();
-        dataMax = (float) this.fitsImage.getDataMax();
+        min = (float) this.fitsImage.getDataMin();
+        max = (float) this.fitsImage.getDataMax();
 
-        if (dataMin == dataMax) {
-          dataMax = dataMin + 1f;
+        if (min == max) {
+          max = min + 1f;
         }
       } else {
         usedColorScale = colorScale;
@@ -461,7 +488,7 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
 
       // throws InterruptedJobException if the current thread is interrupted (cancelled):
       final BufferedImage image = ImageUtils.createImage(this.fitsImage.getNbCols(), this.fitsImage.getNbRows(),
-              this.fitsImage.getData(), dataMin, dataMax,
+              this.fitsImage.getData(), min, max,
               this.colorModel, usedColorScale);
 
       // fast interrupt :
@@ -473,7 +500,7 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
         logger.info("compute : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
       }
 
-      return new ImageChartData(fitsImage, colorModel, usedColorScale, image);
+      return new ImageChartData(fitsImage, colorModel, usedColorScale, min, max, image);
     }
 
     /**
@@ -746,10 +773,8 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
     }
 
     if (imageData != null) {
-      final FitsImage lFitsImage = imageData.getFitsImage();
-
-      final double min = lFitsImage.getDataMin();
-      final double max = lFitsImage.getDataMax();
+      final double min = imageData.getMin();
+      final double max = imageData.getMax();
       final IndexColorModel colorModel = imageData.getColorModel();
       final ColorScale colorScale = imageData.getColorScale();
 
@@ -879,19 +904,28 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
     private final BufferedImage image;
     /** color scaling method */
     private final ColorScale colorScale;
+    /** minimum value used by color conversion */
+    private final float min;
+    /** maximum value used by color conversion */
+    private final float max;
 
     /**
      * Protected constructor
      * @param fitsImage fits image
      * @param colorModel image color model
      * @param colorScale color scaling method
+     * @param min minimum value used by color conversion
+     * @param max maximum value used by color conversion
      * @param image java2D image 
      */
     ImageChartData(final FitsImage fitsImage, final IndexColorModel colorModel, final ColorScale colorScale,
+            final float min, final float max,
             final BufferedImage image) {
       this.fitsImage = fitsImage;
       this.colorModel = colorModel;
       this.colorScale = colorScale;
+      this.min = min;
+      this.max = max;
       this.image = image;
     }
 
@@ -925,6 +959,22 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
      */
     BufferedImage getImage() {
       return image;
+    }
+
+    /**
+     * Return the minimum value used by color conversion
+     * @return minimum value used by color conversion
+     */
+    public float getMin() {
+      return min;
+    }
+
+    /**
+     * Return the maximum value used by color conversion
+     * @return maximum value used by color conversion
+     */
+    public float getMax() {
+      return max;
     }
   }
 }
