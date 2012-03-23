@@ -152,7 +152,7 @@ public final class UVCoverageService {
           return null;
         }
 
-        // OIFits structure :
+        // prepare OIFits computation :
         createOIFits();
       }
 
@@ -534,6 +534,13 @@ public final class UVCoverageService {
 
       if (target != null) {
         // Create the OIFitsCreatorService / NoiseService :
+        
+        // note: OIFitsCreatorService parameter dependencies:
+        // observation {target, instrumentMode {lambdaMin, lambdaMax, nSpectralChannels}}
+        // obsData {beams, baseLines, starData, sc (DateCalc)}
+        // parameter: doDataNoise
+        // results: computeObservableUV {HA, targetUVObservability} and warning container
+        
         final OIFitsCreatorService oiFitsCreator = new OIFitsCreatorService(this.observation, target,
                 this.beams, this.baseLines, this.lambdaMin, this.lambdaMax, this.nSpectralChannels, this.doDataNoise,
                 this.data.getHA(), targetUVObservability, this.starData.getPrecRA(), this.sc,

@@ -27,7 +27,6 @@ import fr.jmmc.jmal.model.ModelManager;
 import fr.jmmc.jmal.model.targetmodel.Model;
 import fr.jmmc.jmcs.util.concurrent.ParallelJobExecutor;
 import fr.jmmc.oitools.OIFitsConstants;
-import fr.jmmc.oitools.image.FitsImage;
 import fr.jmmc.oitools.model.OIArray;
 import fr.jmmc.oitools.model.OIFitsChecker;
 import fr.jmmc.oitools.model.OIFitsFile;
@@ -176,6 +175,10 @@ public final class OIFitsCreatorService {
     }
 
     // Prepare the noise service :
+    
+    // note: NoiseService parameter dependencies:
+    // observation {target}
+    // parameter: warningContainer
     this.noiseService = new NoiseService(this.observation, target, warningContainer);
 
     this.hasModel = target.hasModel();
@@ -454,15 +457,15 @@ public final class OIFitsCreatorService {
         // User Model:
         modelManager = null;
 
-        // Get preloaded and prepared fits image:
-        final FitsImage fitsImage = target.getUserModel().getFitsImage();
+        // Get prepared model data:
+        final UserModelData modelData = target.getUserModel().getModelData();
 
-        if (fitsImage == null) {
+        if (modelData == null) {
           return;
         }
 
         // prepare models once for all:
-        context = UserModelService.prepareModel(fitsImage, this.nWaveLengths);
+        context = UserModelService.prepareModel(modelData, this.nWaveLengths);
       }
 
       // fast interrupt :
