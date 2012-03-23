@@ -1,6 +1,7 @@
 
 package fr.jmmc.aspro.model.oi;
 
+import fr.jmmc.aspro.service.UserModelData;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -180,20 +181,41 @@ public class UserModel
   public void setFitsImage(final fr.jmmc.oitools.image.FitsImage fitsImage) {
     this.fitsImage = fitsImage;
   }
+  
+  /** Cached model data corresponding to the file reference (read only) */
+  @javax.xml.bind.annotation.XmlTransient
+  private fr.jmmc.aspro.service.UserModelData modelData = null;
 
   /**
-   * Return a deep "copy" of this instance
-   * @return deep "copy" of this instance
+   * Return the Cached model data corresponding to the file reference (read only)
+   * @return Cached model data corresponding to the file reference (read only)
+   */
+  public UserModelData getModelData() {
+    return modelData;
+  }
+
+  /**
+   * Define the Cached model data corresponding to the file reference (read only)
+   * @param modelData Cached model data corresponding to the file reference (read only)
+   */
+  public void setModelData(UserModelData modelData) {
+    this.modelData = modelData;
+  }
+
+  
+  
+  /**
+   * Return a shallow "copy" of this instance
+   * @return shallow "copy" of this instance
    */
   @Override
   public final Object clone() {
     final UserModel copy = (UserModel) super.clone();
 
-    // Note: fits image is a shallow copy
+    // Note: fits image and modelData are shallow copies
 
     return copy;
   }
   
 //--simple--preserve
-
 }

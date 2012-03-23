@@ -9,6 +9,11 @@ import fr.jmmc.aspro.model.oi.UserModel;
 import fr.jmmc.jmal.complex.MutableComplex;
 import fr.jmmc.jmal.image.FFTUtils;
 import fr.jmmc.jmal.image.ColorScale;
+import fr.jmmc.jmal.image.ImageArrayUtils;
+import fr.jmmc.jmal.image.job.ImageFlipJob;
+import fr.jmmc.jmal.image.job.ImageLowerThresholdJob;
+import fr.jmmc.jmal.image.job.ImageNormalizeJob;
+import fr.jmmc.jmal.image.job.ImageRegionThresholdJob;
 import fr.jmmc.jmal.model.ImageMode;
 import fr.jmmc.jmal.model.ModelUVMapService;
 import fr.jmmc.jmal.model.UVMapData;
@@ -21,6 +26,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.IndexColorModel;
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.util.Arrays;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,10 +40,10 @@ public final class UserModelService {
 
   /** Class logger */
   private static final Logger logger = LoggerFactory.getLogger(UserModelService.class.getName());
-  /** minimum visiblity threshold (1e-4) for model image */
-  public static final float MIN_VISIBILITY_UV_MAP = 1e-4f;
   /** minimum visiblity threshold (1e-2) for direct fourier transform */
-  public static final float MIN_VISIBILITY_DATA = 1e-2f;
+  public static final double MIN_VISIBILITY_DATA = 1e-2d;
+  /** ratio to ignore data values i.e. data value < LIMIT_RATIO * dataLowThreshold */
+  public static final float LIMIT_RATIO = 1e-3f;
   /** maximum fft size (power of two) */
   public static final int MAX_FFT_SIZE = 256 * 1024;
   /** Two PI constant */
@@ -53,17 +59,21 @@ public final class UserModelService {
   }
 
   /**
-   * Load the FitsImageFile structure and prepare ONLY the first image for FFT processing
-   * @param file fits file to load and process 
-   * @return fitsImage user model as FitsImage
+   * Load the given user model file and prepare ONLY the first image for FFT processing and direct Fourier transform
+   * @param userModel user model to load and prepare
    * @throws FitsException if any FITS error occured
    * @throws IOException IO failure
    */
-  public static FitsImage prepareFitsFile(final String file) throws FitsException, IOException {
-    final FitsImageFile imgFitsFile = FitsImageUtils.load(file);
+  public static void prepareUserModel(final UserModel userModel) throws FitsException, IOException {
+    // clear previously cached data:
+    userModel.setFitsImage(null);
+    userModel.setModelData(null);
+
+    // throws FitsException or IOException if the image can not be read properly:
+    final FitsImageFile imgFitsFile = FitsImageUtils.load(userModel.getFile());
 
     if (imgFitsFile.getImageCount() == 0) {
-      throw new FitsException("The Fits file '" + file + "' does not contain any supported Fits image !");
+      throw new FitsException("The Fits file '" + userModel.getFile() + "' does not contain any supported Fits image !");
     }
 
     final boolean useFastMode = Preferences.getInstance().isFastUserModel();
@@ -71,15 +81,19 @@ public final class UserModelService {
 
     final long start = System.nanoTime();
 
-    final FitsImage fitsImage = FitsImageUtils.prepareImage(imgFitsFile.getFirstFitsImage(),
-            (useFastMode) ? MIN_VISIBILITY_UV_MAP : 0f);
+    final FitsImage fitsImage = imgFitsFile.getFirstFitsImage();
+    final UserModelData modelData = new UserModelData();
+
+    prepareImage(fitsImage, modelData, useFastMode);
 
     if (logger.isInfoEnabled()) {
       logger.info("prepareFitsFile : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
       logger.info("Prepared FitsImage: " + fitsImage.toString(false));
     }
 
-    return fitsImage;
+    // update cached data if no exception occured:
+    userModel.setFitsImage(fitsImage);
+    userModel.setModelData(modelData);
   }
 
   /**
@@ -422,85 +436,24 @@ public final class UserModelService {
    * @return new compute context
    */
   public static UserModelComputeContext cloneContext(final UserModelComputeContext context) {
-    return new UserModelComputeContext(context.getFreqCount(), context.getN1D(), context.getData1D(), context.getColCoord1D(), context.getRowCoord1D());
+    return new UserModelComputeContext(context.getFreqCount(), context.getUserModelData());
   }
 
   /**
    * Prepare the complex visiblity computation of given models
    *
-   * @param fitsImage user model as FitsImage
+   * @param modelData user model data
    * @param freqCount uv frequencey count used to preallocate arrays
    * @return new compute context
    */
-  public static UserModelComputeContext prepareModel(final FitsImage fitsImage, final int freqCount) {
-    if (fitsImage == null || freqCount <= 0) {
+  public static UserModelComputeContext prepareModel(final UserModelData modelData, final int freqCount) {
+    if (modelData == null || freqCount <= 0) {
       return null;
     }
 
-    /** Get the current thread to check if the computation is interrupted */
-    final Thread currentThread = Thread.currentThread();
+    logger.info("ModelData: nData: " + modelData.getNData());
 
-    final int nbRows = fitsImage.getNbRows();
-    final int nbCols = fitsImage.getNbCols();
-    final int nData = fitsImage.getNData();
-    final float[][] data = fitsImage.getData();
-    final double dataMin = fitsImage.getDataMin();
-    final double dataMax = fitsImage.getDataMax();
-
-    logger.info("FitsImage: min: " + dataMin + " - max: " + dataMax);
-
-    final int nPixels = nbRows * nbCols;
-    logger.info("FitsImage: nData: " + nData + " / " + nPixels);
-
-    // prepare spatial coordinates:
-    final float[] rowCoords = UserModelService.computeSpatialCoords(nbRows, fitsImage.getSignedIncRow());
-    final float[] colCoords = UserModelService.computeSpatialCoords(nbCols, fitsImage.getSignedIncCol());
-
-
-    final boolean useFastMode = Preferences.getInstance().isFastUserModel();
-
-    // Skip zero values only as the image was previously filtered to ignore small values:
-    final float threshold = (useFastMode) ? 2f * MIN_VISIBILITY_DATA / nData : 0f;
-    logger.info("FitsImage: threshold = " + threshold);
-
-
-    // prepare 1D data (eliminate values lower than threshold):
-    float[] row;
-    int n1D = 0;
-    final float[] data1D = new float[nPixels];
-    final float[] rowCoord1D = new float[nPixels];
-    final float[] colCoord1D = new float[nPixels];
-
-    float flux, rowCoord;
-
-    // iterate on rows:
-    for (int r = 0, c; r < nbRows; r++) {
-      row = data[r];
-      rowCoord = rowCoords[r];
-
-      // iterate on columns:
-      for (c = 0; c < nbCols; c++) {
-        flux = row[c];
-
-        // skip values lower than threshold:
-        if (flux > threshold) {
-          // keep this data point:
-          data1D[n1D] = flux;
-          rowCoord1D[n1D] = rowCoord;
-          colCoord1D[n1D] = colCoords[c];
-          n1D++;
-        }
-
-        // fast interrupt :
-        if (currentThread.isInterrupted()) {
-          return null;
-        }
-      } // columns
-    } // rows
-
-    logger.info("FitsImage: used pixels = " + n1D + " / " + nPixels);
-
-    return new UserModelComputeContext(freqCount, n1D, data1D, colCoord1D, rowCoord1D);
+    return new UserModelComputeContext(freqCount, modelData);
   }
 
   /**
@@ -525,13 +478,8 @@ public final class UserModelService {
       // reset complex visiblities:
       vis = context.resetAndGetVis();
 
-      final int n1D = context.getN1D();
-      final float[] data1D = context.getData1D();
-      final float[] colCoord1D = context.getColCoord1D();
-      final float[] rowCoord1D = context.getRowCoord1D();
-
       // compute complex visiblities using exact fourier transform (slow):
-      compute1D(n1D, data1D, colCoord1D, rowCoord1D, ufreq, vfreq, nVis, vis);
+      compute1D(context.getUserModelData(), ufreq, vfreq, nVis, vis);
     }
 
     return vis;
@@ -539,18 +487,19 @@ public final class UserModelService {
 
   /**
    * Compute exact discrete fourier transform / complex visiblity of given user model for the given Ufreq and Vfreq arrays
-   * @param n1D number number of data points
-   * @param data1D flattened data points (1D)
-   * @param colCoord1D spatial coordinates along the column axis (rad) corresponding to data points
-   * @param rowCoord1D spatial coordinates along the row axis (rad) corresponding to data points
+   * @param modelData user model data
    * @param ufreq U frequencies in rad-1
    * @param vfreq V frequencies in rad-1
    * @param nVis number of visibility to compute
    * @param vis complex visibility array
    */
-  private static void compute1D(final int n1D, final float[] data1D,
-          final float[] colCoord1D, final float[] rowCoord1D,
+  private static void compute1D(final UserModelData modelData,
           final double[] ufreq, final double[] vfreq, final int nVis, final MutableComplex[] vis) {
+
+    final int n1D = modelData.getNData();
+    final float[] data1D = modelData.getData1D();
+    final float[] colCoord1D = modelData.getColCoord1D();
+    final float[] rowCoord1D = modelData.getRowCoord1D();
 
     /** Get the current thread to check if the computation is interrupted */
     final Thread currentThread = Thread.currentThread();
@@ -588,5 +537,468 @@ public final class UserModelService {
       vis[i].updateComplex(re, im);
 
     } // vis
+  }
+
+  /**
+   * Prepare the given image for FFT (normalize, threshold, pad to next power of two) and direct Fourier transform.
+   * Update the given FitsImage by the prepared FitsImage ready for FFT and prepared model data for direct Fourier transform
+   * @param fitsImage FitsImage to process
+   * @param modelData prepared model data for direct Fourier transform
+   * @param useFastMode true to ignore useless data
+   */
+  public static void prepareImage(final FitsImage fitsImage, final UserModelData modelData, final boolean useFastMode) {
+    if (!fitsImage.isDataRangeDefined()) {
+      // update boundaries excluding zero values:
+      FitsImageUtils.updateDataRangeExcludingZero(fitsImage);
+    }
+
+    // in place modifications:
+    float[][] data = fitsImage.getData();
+    int nbRows = fitsImage.getNbRows();
+    int nbCols = fitsImage.getNbCols();
+
+    logger.info("Image size:  " + nbRows + " x " + nbCols);
+
+
+    // 1 - Ignore negative values:
+    if (fitsImage.getDataMax() <= 0d) {
+      throw new IllegalArgumentException("Fits image [" + fitsImage.getFitsImageIdentifier() + "] has only negative data !");
+    }
+    if (fitsImage.getDataMin() < 0d) {
+      final float threshold = 0f;
+
+      final ImageLowerThresholdJob thresholdJob = new ImageLowerThresholdJob(data, nbCols, nbRows, threshold, 0f);
+      logger.info("ImageLowerThresholdJob - threshold = " + threshold + " (ignore negative values)");
+
+      thresholdJob.forkAndJoin();
+
+      logger.info("ImageLowerThresholdJob - updateCount: " + thresholdJob.getUpdateCount());
+
+      // update boundaries excluding zero values:
+      FitsImageUtils.updateDataRangeExcludingZero(fitsImage);
+    }
+
+
+    // 2 - Normalize data (total flux):
+    if (fitsImage.getSum() != 1d) {
+      final double normFactor = 1d / fitsImage.getSum();
+
+      final ImageNormalizeJob normJob = new ImageNormalizeJob(data, nbCols, nbRows, normFactor);
+      logger.info("ImageNormalizeJob - factor = " + normFactor);
+
+      normJob.forkAndJoin();
+
+      // update boundaries excluding zero values:
+      FitsImageUtils.updateDataRangeExcludingZero(fitsImage);
+    }
+
+
+    // 2.1 - Determine flux threshold to ignore useless values:
+    final float thresholdImage;
+    final float thresholdVis;
+
+    if (useFastMode) {
+      final double totalFlux = fitsImage.getSum();
+      logger.info("Total flux:  " + totalFlux);
+
+      final int nData = fitsImage.getNData();
+      final float[] data1D = sortData(fitsImage);
+
+      final int thLen = 4; // means MIN_VISIBILITY_DATA / 10^3
+      final int[] thIdx = new int[thLen];
+      int thValid = -1;
+
+      double error = MIN_VISIBILITY_DATA;
+      for (int i = 0; i < thLen; i++) {
+        thIdx[i] = findThresholdIndex(data1D, totalFlux, error);
+        if (thIdx[i] == -1) {
+          break;
+        }
+        thValid++;
+        error *= 1e-1d;
+      }
+
+      if (thValid != -1) {
+        final int[] thPixRatio = new int[thValid + 1];
+
+        for (int i = thValid; i >= 0; i--) {
+          thPixRatio[i] = (100 * (nData - thIdx[i])) / nData;
+        }
+
+        logger.info("threshold ratios: " + Arrays.toString(thPixRatio));
+
+        // decide which valid threshold use (empirical):
+        // idea: keep more pixels when the image is diluted:
+        final int[] thPixLimits = new int[]{100, 95, 85, 50};
+        int thLim = 0;
+        for (int i = thValid; i >= 1; i--) {
+          if (thPixRatio[i] < thPixLimits[i]) {
+            thLim = i;
+            break;
+          }
+        }
+        logger.info("selected threshold ratio: " + thPixRatio[thLim]);
+
+        thresholdImage = data1D[thIdx[thLim]];
+
+        thresholdVis = data1D[thIdx[0]];
+
+        logger.info("thresholdVis: " + thresholdVis);
+        logger.info("thresholdImage: " + thresholdImage);
+
+      } else {
+        thresholdImage = 0f;
+        thresholdVis = 0f;
+      }
+
+    } else {
+      thresholdImage = 0f;
+      thresholdVis = 0f;
+    }
+
+
+    // 2.2 - Skip too small data values i.e. lower than thresholdImage / 10^6:
+    if (useFastMode) {
+      final float smallThreshold = LIMIT_RATIO * thresholdImage;
+
+      if (fitsImage.getDataMin() < smallThreshold) {
+
+        final ImageLowerThresholdJob thresholdJob = new ImageLowerThresholdJob(data, nbCols, nbRows, smallThreshold, 0f);
+        logger.info("ImageLowerThresholdJob - threshold = " + smallThreshold);
+
+        thresholdJob.forkAndJoin();
+
+        logger.info("ImageLowerThresholdJob - updateCount: " + thresholdJob.getUpdateCount());
+
+        // update boundaries excluding zero values:
+        FitsImageUtils.updateDataRangeExcludingZero(fitsImage);
+      }
+    }
+
+
+    // 3 - Locate useful data values inside image:
+    final ImageRegionThresholdJob regionJob = new ImageRegionThresholdJob(data, nbCols, nbRows, thresholdImage);
+
+    logger.info("ImageRegionThresholdJob: thresholdImage = " + thresholdImage);
+    regionJob.forkAndJoin();
+
+
+    // 4 - Extract ROI:
+    // keep the center of the ROI and keep the image square (width = height = even number):
+    int rows1, rows2, cols1, cols2;
+
+    final float halfRows = 0.5f * nbRows;
+    final float halfCols = 0.5f * nbCols;
+
+    final float distToCenter;
+
+    // use non zero area:
+    rows1 = regionJob.getRowLowerIndex();
+    rows2 = regionJob.getRowUpperIndex();
+    cols1 = regionJob.getColumnLowerIndex();
+    cols2 = regionJob.getColumnUpperIndex();
+
+    logger.info("ImageRegionThresholdJob: row indexes: " + rows1 + " - " + rows2);
+    logger.info("ImageRegionThresholdJob: col indexes: " + cols1 + " - " + cols2);
+
+    final float rowDistToCenter = Math.max(Math.abs(halfRows - rows1), Math.abs(halfRows - rows2));
+    final float colDistToCenter = Math.max(Math.abs(halfCols - cols1), Math.abs(halfCols - cols2));
+
+    logger.info("ImageRegionThresholdJob: rowDistToCenter = " + rowDistToCenter);
+    logger.info("ImageRegionThresholdJob: colDistToCenter = " + colDistToCenter);
+
+    distToCenter = Math.max(rowDistToCenter, colDistToCenter);
+    logger.info("ImageRegionThresholdJob: distToCenter = " + distToCenter);
+
+    // range check ?
+    rows1 = (int) Math.floor(halfRows - distToCenter);
+    rows2 = (int) Math.ceil(halfRows + distToCenter);
+
+    // fix width to be an even number:
+    if ((rows2 - rows1) % 2 == 1) {
+      rows2++;
+    }
+
+    logger.info("ImageRegionThresholdJob: fixed row indexes: " + rows1 + " - " + rows2);
+
+    // range check ?
+    cols1 = (int) Math.floor(halfCols - distToCenter);
+    cols2 = (int) Math.ceil(halfCols + distToCenter);
+
+    // fix width to be an even number:
+    if ((cols2 - cols1) % 2 == 1) {
+      cols2++;
+    }
+
+    logger.info("ImageRegionThresholdJob: fixed col indexes: " + cols1 + " - " + cols2);
+
+    // update fits image:
+    // note: this extraction does not check boundary overlapping:
+    data = ImageArrayUtils.extract(nbRows, nbCols, data, rows1, cols1, rows2, cols2);
+
+    if (data == null) {
+      // outside ranges:
+      data = fitsImage.getData();
+    } else {
+      // update data:
+      FitsImageUtils.updateFitsImage(fitsImage, data);
+
+      // update ref pixel:
+      fitsImage.setPixRefRow(fitsImage.getPixRefRow() - rows1);
+      fitsImage.setPixRefCol(fitsImage.getPixRefCol() - cols1);
+
+      nbRows = fitsImage.getNbRows();
+      nbCols = fitsImage.getNbCols();
+
+      logger.info("ROI size = " + nbRows + " x " + nbCols);
+    }
+
+
+    // 5 - Make sure the image is square i.e. padding (width = height = even number):
+    final int newSize = Math.max(
+            (nbRows % 2 == 1) ? nbRows + 1 : nbRows,
+            (nbCols % 2 == 1) ? nbCols + 1 : nbCols);
+
+    if (newSize != nbRows || newSize != nbCols) {
+      data = ImageArrayUtils.enlarge(nbRows, nbCols, data, newSize, newSize);
+
+      // update data/dataMin/dataMax:
+      FitsImageUtils.updateFitsImage(fitsImage, data, fitsImage.getDataMin(), fitsImage.getDataMax());
+
+      // update ref pixel:
+      fitsImage.setPixRefRow(fitsImage.getPixRefRow() + 0.5d * (newSize - nbRows));
+      fitsImage.setPixRefCol(fitsImage.getPixRefCol() + 0.5d * (newSize - nbCols));
+
+      nbRows = fitsImage.getNbRows();
+      nbCols = fitsImage.getNbCols();
+
+      logger.info("Fixed size = " + nbRows + " x " + nbCols);
+    }
+
+
+    // 6 - flip axes to have positive increments (left to right for the column axis and bottom to top for the row axis)
+    // note: flip operation requires image size to be an even number
+    final double incRow = fitsImage.getSignedIncRow();
+    if (incRow < 0d) {
+      // flip row axis:
+      final ImageFlipJob flipJob = new ImageFlipJob(data, nbCols, nbRows, false);
+
+      flipJob.forkAndJoin();
+
+      logger.info("ImageFlipJob - flipY done");
+
+      fitsImage.setSignedIncRow(-incRow);
+    }
+
+    final double incCol = fitsImage.getSignedIncCol();
+    if (incCol < 0d) {
+      // flip column axis:
+      final ImageFlipJob flipJob = new ImageFlipJob(data, nbCols, nbRows, true);
+
+      flipJob.forkAndJoin();
+
+      logger.info("ImageFlipJob - flipX done");
+
+      fitsImage.setSignedIncCol(-incCol);
+    }
+
+    // 7 - prepare model data to compute direct Fourier transform:
+    prepareModelData(fitsImage, modelData, thresholdVis);
+  }
+
+  /**
+   * Flatten 2D image data to 1D array and sort data by ascending order
+   *
+   * @param fitsImage user model as FitsImage
+   * @return sorted model data as 1D array
+   */
+  public static float[] sortData(final FitsImage fitsImage) {
+
+    /** Get the current thread to check if the computation is interrupted */
+    final Thread currentThread = Thread.currentThread();
+
+    final int nbRows = fitsImage.getNbRows();
+    final int nbCols = fitsImage.getNbCols();
+    final int nData = fitsImage.getNData();
+    final float[][] data = fitsImage.getData();
+
+    // prepare 1D data:
+    float[] row;
+    int n1D = 0;
+    final float[] data1D = new float[nData];
+
+    float flux;
+
+    // iterate on rows:
+    for (int r = 0, c; r < nbRows; r++) {
+      row = data[r];
+
+      // iterate on columns:
+      for (c = 0; c < nbCols; c++) {
+        flux = row[c];
+
+        // skip values different from zero:
+        if (flux > 0f) {
+          // keep this data point:
+          data1D[n1D] = flux;
+          n1D++;
+        }
+      } // columns
+
+      // fast interrupt :
+      if (currentThread.isInterrupted()) {
+        return null;
+      }
+    } // rows
+
+    logger.info("FitsImage: used pixels = " + n1D + " / " + nData);
+
+    Arrays.sort(data1D);
+
+    logger.info("FitsImage: " + n1D + " float sorted.");
+//    logger.info("FitsImage: " + n1D + " float sorted: " + Arrays.toString(data1DSort));
+
+    return data1D;
+  }
+
+  /**
+   * Prepare the user model data to compute direct Fourier transform
+   *
+   * @param fitsImage user model as FitsImage
+   * @param modelData prepared model data for direct Fourier transform
+   * @param threshold low threshold (ignore too small values)
+   */
+  private static void prepareModelData(final FitsImage fitsImage, final UserModelData modelData, final float threshold) {
+
+    logger.info("prepareModelData: threshold = " + threshold);
+
+    /** Get the current thread to check if the computation is interrupted */
+    final Thread currentThread = Thread.currentThread();
+
+    final int nbRows = fitsImage.getNbRows();
+    final int nbCols = fitsImage.getNbCols();
+    final int nData = fitsImage.getNData();
+    final float[][] data = fitsImage.getData();
+    final double dataMin = fitsImage.getDataMin();
+    final double dataMax = fitsImage.getDataMax();
+
+    logger.info("prepareModelData: min: " + dataMin + " - max: " + dataMax);
+
+    final int nPixels = nbRows * nbCols;
+
+    logger.info("prepareModelData: nData: " + nData + " / " + nPixels);
+
+
+    // prepare spatial coordinates:
+    final float[] rowCoords = UserModelService.computeSpatialCoords(nbRows, fitsImage.getSignedIncRow());
+    final float[] colCoords = UserModelService.computeSpatialCoords(nbCols, fitsImage.getSignedIncCol());
+
+
+    // prepare 1D data (eliminate values lower than threshold):
+    float[] row;
+    int nUsedData = 0;
+    final float[] data1D = new float[nData];
+    final float[] colCoord1D = new float[nData];
+    final float[] rowCoord1D = new float[nData];
+
+    double totalFlux = 0d;
+    float flux, rowCoord;
+
+    // iterate on rows:
+    for (int r = 0, c; r < nbRows; r++) {
+      row = data[r];
+      rowCoord = rowCoords[r];
+
+      // iterate on columns:
+      for (c = 0; c < nbCols; c++) {
+        flux = row[c];
+
+        // skip values lower than threshold:
+        if (flux > threshold) {
+          // keep this data point:
+          totalFlux += flux;
+          data1D[nUsedData] = flux;
+          colCoord1D[nUsedData] = colCoords[c];
+          rowCoord1D[nUsedData] = rowCoord;
+          nUsedData++;
+        }
+      } // columns
+
+      // fast interrupt :
+      if (currentThread.isInterrupted()) {
+        return;
+      }
+    } // rows
+
+    logger.info("prepareModelData: used pixels = " + nUsedData + " / " + nPixels);
+
+
+    // normalize flux to 1.0:
+    logger.info("prepareModelData: totalFlux = " + totalFlux);
+
+    if (threshold != 0f) {
+      final double normFactor = 1d / totalFlux;
+
+      for (int i = nUsedData - 1; i >= 0; i--) {
+        data1D[i] = (float) (normFactor * data1D[i]);
+      }
+
+      totalFlux = 0d;
+      for (int i = nUsedData - 1; i >= 0; i--) {
+        totalFlux += data1D[i];
+      }
+      logger.info("prepareModelData: totalFlux after normalization = " + totalFlux);
+    }
+
+    // trim array size:
+    if (nUsedData != nData) {
+      final float[] mData1D = new float[nUsedData];
+      final float[] mColCoord1D = new float[nUsedData];
+      final float[] mRowCoord1D = new float[nUsedData];
+
+      System.arraycopy(data1D, 0, mData1D, 0, nUsedData);
+      System.arraycopy(rowCoord1D, 0, mRowCoord1D, 0, nUsedData);
+      System.arraycopy(colCoord1D, 0, mColCoord1D, 0, nUsedData);
+
+      modelData.set(nUsedData, mData1D, mColCoord1D, mRowCoord1D);
+    } else {
+      modelData.set(nUsedData, data1D, colCoord1D, rowCoord1D);
+    }
+  }
+
+  /**
+   * Find the threshold index when the sum of values becomes higher than the given upper threshold
+   * @param data1D sorted data (ascending order)
+   * @param total total of all values
+   * @param error upper threshold
+   * @return threshold value or 0.0 if not found
+   */
+  private static int findThresholdIndex(final float[] data1D, final double total, final double error) {
+
+    final double upperThreshold = total * (1d - error);
+    logger.info("findThresholdIndex: upperThreshold = " + upperThreshold);
+
+    float value;
+    float lastValue = 0f;
+    double partialFlux = 0d;
+
+    for (int i = data1D.length - 1; i >= 0; i--) {
+      value = data1D[i];
+      partialFlux += value;
+
+      if (partialFlux > upperThreshold) {
+        // keep equal values
+        if (lastValue != 0f) {
+          if (value != lastValue) {
+            logger.info("findThresholdValue: threshold reached: " + partialFlux + " > " + upperThreshold
+                    + " - value = " + value + " - nPixels = " + (data1D.length - 1 - i));
+            return i;
+          }
+        } else {
+          lastValue = value;
+        }
+      }
+    }
+    return -1;
   }
 }
