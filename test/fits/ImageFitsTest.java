@@ -5,9 +5,11 @@ package fits;
 
 import edu.emory.mathcs.jtransforms.fft.FloatFFT_2D;
 import edu.emory.mathcs.utils.ConcurrencyUtils;
+import fr.jmmc.aspro.Preferences;
 import fr.jmmc.aspro.gui.FitsImagePanel;
 import fr.jmmc.aspro.gui.PreferencesView;
 import fr.jmmc.aspro.image.FitsImageUtils;
+import fr.jmmc.aspro.model.oi.UserModel;
 import fr.jmmc.aspro.service.UserModelService;
 import fr.jmmc.jmal.complex.ImmutableComplex;
 import fr.jmmc.jmal.image.ColorModels;
@@ -56,6 +58,8 @@ public class ImageFitsTest {
   private final static boolean PRINT_COL = false;
   /** flag to enable HIERARCH keyword support */
   private final static boolean USE_HIERARCH_FITS_KEYWORDS = true;
+  /** default amplitude range */
+  private final static float[] AMP_RANGE = new float[]{0.95f, 0.99f};
 
   /**
    * Forbidden constructor
@@ -82,13 +86,32 @@ public class ImageFitsTest {
 
     final ColorScale colorScale = ColorScale.LINEAR;
 
+    // display fits image:
+    new PreferencesView().setVisible(true);
+
+    // fast mode tests:
+
+    if (true) {
+      String file = "/home/bourgesl/ASPRO2/fits/58Eri_clumpy_K_1024.fits"; // diluted
+
+      try {
+        testFastMode(file, Boolean.FALSE);
+        testFastMode(file, Boolean.TRUE);
+
+      } catch (Exception e) {
+        logger.log(Level.SEVERE, "An exception occured while working on file: " + file, e);
+      }
+      return;
+    }
+
     if (true) {
 //      String file = "/home/bourgesl/ASPRO2/fits/SG_surface2.fits";
 //      String file = "/home/bourgesl/ASPRO2/fits/tests/HighMass.fits.gz"; // spiral       
 //      String file = "/home/bourgesl/ASPRO2/fits/ellipsePlusPunct.fits";
 
 //      String file = "/home/bourgesl/ASPRO2/fits/tests/3c273_all_pl27.fits.gz";
-      String file = "/home/bourgesl/ASPRO2/fits/tests/58Eri_clumpy_K_1024.fits.gz"; // diluted
+//      String file = "/home/bourgesl/ASPRO2/fits/tests/58Eri_clumpy_K_1024.fits.gz"; // diluted
+      String file = "/home/bourgesl/ASPRO2/fits/58Eri_clumpy_K_1024.fits"; // diluted
 
 //      String file = "/home/bourgesl/ASPRO2/fits/tests/AGN.fits.gz";      
 
@@ -114,12 +137,14 @@ public class ImageFitsTest {
 
       try {
         // load and prepare images:
-        FitsImage fitsImage = UserModelService.prepareFitsFile(file);
+        final UserModel model = new UserModel();
+        model.setFile(file);
+
+        UserModelService.prepareUserModel(model);
+
+        FitsImage fitsImage = model.getFitsImage();
 
         logger.info("Prepared FitsImage: " + fitsImage.toString(false));
-
-        // display fits image:
-        new PreferencesView().setVisible(true);
 
         showFitsPanel(fitsImage.getFitsImageIdentifier(), fitsImage);
 
@@ -231,6 +256,8 @@ public class ImageFitsTest {
 
         final File[] files = directory.listFiles();
 
+        // load and prepare images:
+        final UserModel model = new UserModel();
         String file;
         for (File f : files) {
           if (f.isFile() && !f.getName().startsWith("COPY_") && (f.getName().endsWith("fits") || f.getName().endsWith("fits.gz"))) {
@@ -238,7 +265,11 @@ public class ImageFitsTest {
             file = f.getAbsolutePath();
             try {
               // load and prepare images:
-              FitsImage fitsImage = UserModelService.prepareFitsFile(file);
+              model.setFile(file);
+
+              UserModelService.prepareUserModel(model);
+
+              FitsImage fitsImage = model.getFitsImage();
 
               logger.info("Prepared FitsImage: " + fitsImage.toString(false));
 
@@ -272,6 +303,47 @@ public class ImageFitsTest {
     }
 
     logger.info("Errors = " + errors);
+  }
+
+  /**
+   * Prepare the given file using fast mode or not and show FFT amplitude
+   * @param file file to process
+   * @param fastMode true to use fast mode 
+   * @throws Exception if any exception occurs
+   */
+  private static void testFastMode(final String file, final Boolean fastMode) throws Exception {
+    // force fast mode preference:
+    Preferences.getInstance().setPreference(Preferences.MODEL_USER_FAST, fastMode);
+
+    // load and prepare images:
+    final UserModel model = new UserModel();
+    model.setFile(file);
+
+    UserModelService.prepareUserModel(model);
+
+    FitsImage fitsImage = model.getFitsImage();
+
+    logger.info("Prepared FitsImage[" + fastMode + "]: " + fitsImage.toString(false));
+
+    showFitsPanel(fitsImage.getFitsImageIdentifier(), fitsImage);
+
+    /*
+     * VLTI AMBER
+     */
+    final String insName = "AMBER";
+    final double uvMax = 300d / 2e-6d;
+    final int imageSize = 1024;
+
+    final Rectangle2D.Double uvRect = new Rectangle2D.Double();
+    uvRect.setFrameFromDiagonal(-uvMax, -uvMax, uvMax, uvMax);
+
+    final UVMapData uvMap = UserModelService.computeUVMap(fitsImage, uvRect, ImageMode.AMP, imageSize,
+            ColorModels.getDefaultColorModel(), ColorScale.LOGARITHMIC);
+
+    final float[][] visData = uvMap.getVisData();
+    final float[][] data = FFTUtils.convert(visData.length, visData, ImageMode.AMP, visData.length - 2);
+
+    showImage("UVMapData-" + fastMode + "-" + insName + "-" + imageSize, data);
   }
 
   public static int infoFile(final String absFilePath) {
@@ -650,7 +722,7 @@ public class ImageFitsTest {
       final int factor = 2;
       final int START = 1024 * INIT;
       final int LIMIT = 1024 * 32; // 128
-      final int OUTPUT = 16 * INIT; // 16.75 pixels for 1024 pixels (AMBER)
+      final int OUTPUT = 128 * INIT; // 16.75 pixels for 1024 pixels (AMBER)
 
       for (int size = START, outputSize = OUTPUT; size <= LIMIT; size *= factor, outputSize *= factor) {
 
@@ -743,7 +815,7 @@ public class ImageFitsTest {
               1d + paddedSize / 2d, 1d + paddedSize / 2d,
               1d, 1d); // TODO
 
-      showFitsPanel("padded-" + fftSize, paddedImg);
+      showFitsPanel("padded-" + fftSize, paddedImg, null);
     }
 
     // prepare FFT2D:
@@ -1069,7 +1141,17 @@ public class ImageFitsTest {
    * @param data float[rows][columns] to use
    */
   public static void showImage(final String name, final float[][] data) {
-    showFitsPanel(name, FitsImageUtils.createFitsImage(data));
+    showFitsPanel(name, FitsImageUtils.createFitsImage(data), null);
+  }
+
+  /**
+   * Show the given image using the Fits Image panel
+   * @param name name of the frame
+   * @param data float[rows][columns] to use
+   * @param minDataRange optional minimal range for data
+   */
+  public static void showImage(final String name, final float[][] data, final float[] minDataRange) {
+    showFitsPanel(name, FitsImageUtils.createFitsImage(data), minDataRange);
   }
 
   /**
@@ -1078,11 +1160,21 @@ public class ImageFitsTest {
    * @param fitsImage fits image structure
    */
   private static void showFitsPanel(final String name, final FitsImage fitsImage) {
+    showFitsPanel(name, fitsImage, null);
+  }
+
+  /**
+   * Show the given fits image
+   * @param name name of the frame
+   * @param fitsImage fits image structure
+   * @param minDataRange optional minimal range for data
+   */
+  private static void showFitsPanel(final String name, final FitsImage fitsImage, final float[] minDataRange) {
     SwingUtils.invokeEDT(new Runnable() {
 
       @Override
       public void run() {
-        final FitsImagePanel panel = new FitsImagePanel();
+        final FitsImagePanel panel = new FitsImagePanel(true, false, minDataRange);
         panel.setFitsImage(fitsImage);
 
         final JFrame frame = new JFrame(name);
