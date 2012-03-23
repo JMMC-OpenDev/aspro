@@ -436,7 +436,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
    */
   public void fireTargetSelectionChanged(final Target target) {
     if (logger.isLoggable(Level.FINE)) {
-      logger.fine("fireTargetSelectionChange : " + toString(getMainObservation()));
+      logger.fine("fireTargetSelectionChange : " + target);
     }
 
     fireEvent(new TargetSelectionEvent(target));
