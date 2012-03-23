@@ -78,6 +78,8 @@ public final class ObservabilityData {
    * @param useLST indicates if the timestamps are expressed in LST or in UTC
    * @param doDetailedOutput flag to produce detailed output with all BL / horizon / rise intervals per target
    * @param doBaseLineLimits flag to find base line limits
+   * @param doCenterMidnight flag to center the plot arround midnight
+   * @param twilightNightLimit twilight considered as night limit
    */
   public ObservabilityData(final ObservationVersion version, final boolean useLST, final boolean doDetailedOutput, final boolean doBaseLineLimits,
           final boolean doCenterMidnight, final SunType twilightNightLimit) {
