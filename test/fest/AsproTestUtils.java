@@ -21,7 +21,7 @@ public final class AsproTestUtils {
   /** Class logger */
   private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(AsproTestUtils.class.getName());
   /** 5s timeout */
-  private static final Timeout LONG_TIMEOUT = Timeout.timeout(5000l);
+  private static final Timeout LONG_TIMEOUT = Timeout.timeout(10000l);
 
   /**
    * Forbidden constructor

@@ -3,7 +3,10 @@
  ******************************************************************************/
 package fest;
 
+import fr.jmmc.jmcs.data.preference.PreferencesException;
 import static java.awt.event.KeyEvent.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import static org.fest.swing.core.KeyPressInfo.*;
 import static org.fest.swing.core.matcher.DialogMatcher.*;
 
@@ -485,7 +488,13 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
   @Test
   @GUITest
   public void shouldOpenSampleWithUserModel() {
-
+    try {
+      Preferences.getInstance().setPreference(Preferences.MODEL_IMAGE_LUT, "heat");
+      Preferences.getInstance().setPreference(Preferences.MODEL_IMAGE_SIZE, Integer.valueOf(1024));
+    } catch (PreferencesException pe) {
+      logger.log(Level.SEVERE, "setPreference failed", pe);
+    }
+    
     // hack to solve focus trouble in menu items :
     window.menuItemWithPath("File").focus();
     window.menuItemWithPath("File", "Open observation").click();
@@ -509,6 +518,28 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
 
     // close dialog :
     dialog.button(JButtonMatcher.withText("Cancel")).click();
+
+    window.list("jListTargets").selectItem("HD 1234");
+
+    // select UV tab:
+    window.tabbedPane().selectTab(SettingPanel.TAB_UV_COVERAGE);
+
+    final JPanelFixture panel = window.panel("uvCoveragePanel");
+
+    // disable Compute OIFits data :
+    panel.checkBox("jCheckBoxDoOIFits").uncheck();
+    
+    // zoom uv max (trigger uv model to compute again):
+    panel.textBox("jFieldUVMax").setText("20.00");
+
+    // select UV tab to let fields lost focus (trigger change listeners):
+    window.tabbedPane().selectTab(SettingPanel.TAB_UV_COVERAGE);
+
+    // waits for computation to finish :
+    AsproTestUtils.checkRunningTasks();
+
+    // Capture UV Coverage plot :
+    showPlotTab(SettingPanel.TAB_UV_COVERAGE, "Aspro2-UserModel-uv.png");
   }
 
   /**
