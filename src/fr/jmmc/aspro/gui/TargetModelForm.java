@@ -1226,11 +1226,8 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
     // see ObservationManager.checkAndLoadFileReferences() 
     boolean valid = false;
     try {
-      // clear previously cached fits image:
-      userModel.setFitsImage(null);
-    
       // throws exceptions if the given fits file or image is incorrect:
-      userModel.setFitsImage(UserModelService.prepareFitsFile(userModel.getFile()));
+      UserModelService.prepareUserModel(userModel);
 
       // update checksum before validation:
       userModel.setChecksum(userModel.getFitsImage().getChecksum());

@@ -98,6 +98,15 @@ public final class ObservationVersion {
   }
 
   /**
+   * Return true only if the current UV version is equal to the UV version of the other version object
+   * @param otherVersion observation version to compare with
+   * @return true if UV versions are equals
+   */
+  public boolean isSameUVVersion(final ObservationVersion otherVersion) {
+    return this.getUVVersion() == otherVersion.getUVVersion();
+  }
+
+  /**
    * Return a string giving versions for debugging purposes
    * @return versions as string
    */

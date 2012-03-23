@@ -324,6 +324,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         jFieldUVMax.setColumns(6);
         jFieldUVMax.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0.00"))));
         jFieldUVMax.setMinimumSize(new java.awt.Dimension(50, 20));
+        jFieldUVMax.setName("jFieldUVMax"); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 12;
@@ -482,6 +483,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
         jCheckBoxAddNoise.setSelected(true);
         jCheckBoxAddNoise.setText("Add error noise to data");
+        jCheckBoxAddNoise.setName("jCheckBoxAddNoise"); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 28;
@@ -499,6 +501,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
         jCheckBoxDoOIFits.setSelected(true);
         jCheckBoxDoOIFits.setText("Compute OIFits data");
+        jCheckBoxDoOIFits.setName("jCheckBoxDoOIFits"); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 27;
@@ -1776,7 +1779,10 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     // use the latest observation for computations to check versions :
     final ObservationCollection lastObsCollection = om.getObservationCollection();
 
-    if (taskObsCollection.getVersion().isSameMainVersion(lastObsCollection.getVersion())) {
+    // avoid to mix inconsistent observation and uv coverage data :
+    // Next plot (uv coverage done event) will take into account UI widget changes.
+
+    if (taskObsCollection.getVersion().isSameUVVersion(lastObsCollection.getVersion())) {
       if (logger.isLoggable(Level.FINE)) {
         logger.fine("refreshUI : main version equals : " + taskObsCollection.getVersion() + " :: " + lastObsCollection.getVersion());
       }
