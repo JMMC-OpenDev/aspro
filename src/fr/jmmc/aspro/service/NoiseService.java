@@ -156,7 +156,7 @@ public final class NoiseService implements VisNoiseService {
   }
 
   /**
-   * Prepare interferometer and AO parameters
+   * Prepare interferometer and AO parameters (related to telescopes so to each configuration)
    * @param observation observation settings
    */
   private void prepareInterferometer(final ObservationSetting observation) {
@@ -655,8 +655,7 @@ public final class NoiseService implements VisNoiseService {
             + Math.pow(this.nbTel / this.nbPhotonInI, 4d) * ((Math.pow(v1, 2d) + Math.pow(v2, 2d) + Math.pow(v3, 2d)) * (3 * this.nbPixInterf * Math.pow(this.ron, 4d) + Math.pow(this.nbPixInterf, 2d) * Math.pow(this.ron, 4d)))
             + Math.pow(this.nbTel / this.nbPhotonInI, 2d) * (this.nbPixInterf * Math.pow(ron, 2d) * (Math.pow(v12, 2d) + Math.pow(v13, 2d) + Math.pow(v23, 2d)))) / (2 * Math.pow(v123, 2d));
 
-    // total noise on closure phase
-    // per frame
+    // total noise on closure phase per frame
     double sclosph = Math.sqrt(scpphot + scpdet);
 
     // repeat OBS measurements to reach totalObsTime minutes

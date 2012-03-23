@@ -539,7 +539,8 @@ public final class UVCoverageService {
         // observation {target, instrumentMode {lambdaMin, lambdaMax, nSpectralChannels}}
         // obsData {beams, baseLines, starData, sc (DateCalc)}
         // parameter: doDataNoise
-        // results: computeObservableUV {HA, targetUVObservability} and warning container
+        // results: computeObservableUV {HA, targetUVObservability} {obsData + observation{haMin/haMax, instrumentMode {lambdaMin, lambdaMax}}}
+        // and warning container
         
         final OIFitsCreatorService oiFitsCreator = new OIFitsCreatorService(this.observation, target,
                 this.beams, this.baseLines, this.lambdaMin, this.lambdaMax, this.nSpectralChannels, this.doDataNoise,
