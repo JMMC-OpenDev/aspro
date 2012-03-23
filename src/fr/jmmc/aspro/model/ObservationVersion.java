@@ -89,6 +89,14 @@ public final class ObservationVersion {
 
   /* version checking */
   /**
+   * Return true only if the current target list version is equal to the target list version of the other version object
+   * @param otherVersion observation version to compare with
+   * @return true if main versions are equals
+   */
+  public boolean isSameTargetVersion(final ObservationVersion otherVersion) {
+    return this.getTargetVersion() == otherVersion.getTargetVersion();
+  }
+  /**
    * Return true only if the current main version is equal to the main version of the other version object
    * @param otherVersion observation version to compare with
    * @return true if main versions are equals
