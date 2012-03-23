@@ -5,8 +5,7 @@
   xsi:schemaLocation="http://www.ivoa.net/xml/VOTable/v1.1 http://www.ivoa.net/xml/VOTable/VOTable-1.1.xsd">
 
   <DESCRIPTION>
-    This sample votable can be given to Aspro2 through samp to load
-    given targets with given config programatically
+    This sample votable can be given to Aspro2 through samp to load given targets with given config programatically
   </DESCRIPTION>
   
   <COOSYS ID="J2000" equinox="2000" epoch="J2000" system="eq_FK5"/>
@@ -16,8 +15,9 @@
     
     <!-- TODO: define PARAM/VALUES to list choices and export ASPRO2 xml configuration into html web page -->
 
-    <!-- PARAM OPERATION indicates what operation to do among [NEW (new observation), ADD (default: add targets only)] -->
-    <PARAM name="OPERATION" datatype="char" arraysize="*" value="NEW"/>
+    <PARAM name="OPERATION" datatype="char" arraysize="*" value="NEW">
+      <DESCRIPTION>PARAM OPERATION indicates what operation to do among [NEW (new observation), ADD (default: add targets only)]</DESCRIPTION>
+    </PARAM>
     
     <!-- 
       pivot step (1,2,3,4,5) ignored.
@@ -30,83 +30,163 @@
     
     <!-- Main settings -->
     
-    <!-- PARAM INTERFEROMETER indicates which interferometer to use among [VLTI, CHARA] -->
-    <PARAM name="INTERFEROMETER" datatype="char" arraysize="*" value="CHARA" />
-    <!-- PARAM INTERFEROMETER_EDITABLE indicates if the interferometer choice is editable [true, false] -->
-    <PARAM name="INTERFEROMETER_EDITABLE" datatype="boolean" value="false" />
+    <!-- INTERFEROMETER -->
+    <PARAM name="INTERFEROMETER" datatype="char" arraysize="*" value="CHARA">
+      <DESCRIPTION>PARAM INTERFEROMETER indicates which interferometer is used</DESCRIPTION>
+      <VALUES>
+        <OPTION value="CHARA"/>
+        <OPTION value="VLTI"/>
+      </VALUES>
+    </PARAM>
+    <PARAM name="INTERFEROMETER_EDITABLE" datatype="boolean" value="false">
+      <DESCRIPTION>PARAM INTERFEROMETER_EDITABLE indicates if the interferometer choice is editable</DESCRIPTION>
+      <VALUES>
+        <OPTION value="true"/>
+        <OPTION value="false"/>
+      </VALUES>
+    </PARAM>
 
-    <!-- PARAM PERIOD indicates which period to use among available periods for the selected interferometer
-         [VLTI Period xx, CHARA (general), CHARA VEGA June 2011 ...] 
-    -->
-    <PARAM name="PERIOD" datatype="char" arraysize="*" value="CHARA" />
-    <!-- PARAM PERIOD_EDITABLE indicates if the period choice is editable [true, false] -->
-    <PARAM name="PERIOD_EDITABLE" datatype="boolean" value="false" />
+    <!-- PERIOD -->
+    <PARAM name="PERIOD" datatype="char" arraysize="*" value="CHARA">
+      <DESCRIPTION>PARAM PERIOD indicates which period is used among available periods for the selected interferometer</DESCRIPTION>
+      <VALUES>
+        <OPTION value="CHARA"/>
+        <OPTION value="VLTI PERIOD 84"/>
+        <OPTION value="VLTI PERIOD 85"/>
+        <OPTION value="VLTI PERIOD 86"/>
+        <OPTION value="VLTI PERIOD 87"/>
+        <OPTION value="VLTI PERIOD 88"/>
+        <OPTION value="VLTI PERIOD 89"/>
+        <OPTION value="VLTI PERIOD 90"/>
+      </VALUES>
+    </PARAM>
+    <PARAM name="PERIOD_EDITABLE" datatype="boolean" value="false">
+      <DESCRIPTION>PARAM PERIOD_EDITABLE indicates if the period choice is editable</DESCRIPTION>
+      <VALUES>
+        <OPTION value="true"/>
+        <OPTION value="false"/>
+      </VALUES>
+    </PARAM>
 
-    <!-- TODO : filter instrument list -->
+    <!-- INSTRUMENT -->
+    <PARAM name="INSTRUMENT" datatype="char" arraysize="*" value="VEGA_3T">
+      <DESCRIPTION>PARAM INSTRUMENT indicates which instrument is used among available instruments for the selected interferometer/period</DESCRIPTION>
+      <VALUES>
+        <!-- CHARA interferometer -->
+        <OPTION value="CLASSIC"/>
+        <OPTION value="CLIMB"/>
+        <OPTION value="MIRC"/>
+        <OPTION value="MIRC_5T"/>
+        <OPTION value="MIRC_6T"/>
+        <OPTION value="PAVO_2T"/>
+        <OPTION value="PAVO_3T"/>
+        <OPTION value="VEGA_2T"/>
+        <OPTION value="VEGA_3T"/>
+        <OPTION value="VEGA_4T"/>
+        <!-- VLTI interferometer -->
+        <OPTION value="AMBER"/>
+        <OPTION value="MIDI"/>
+        <OPTION value="PIONIER"/>
+      </VALUES>
+    </PARAM>
+    <PARAM name="INSTRUMENT_EDITABLE" datatype="boolean" value="false">
+      <DESCRIPTION>PARAM INSTRUMENT_EDITABLE indicates if the instrument choice is editable</DESCRIPTION>
+      <VALUES>
+        <OPTION value="true"/>
+        <OPTION value="false"/>
+      </VALUES>
+    </PARAM>
 
+    <!-- POPS (CHARA only) -->
+    <PARAM name="POPS" datatype="char" arraysize="*" value="">
+      <DESCRIPTION>Optional (CHARA only) PARAM POPS indicates which pops combination is used for the given configuration using the following format:
+  Pop numbers among (1 to 5) like '11', '123', '1514' ...
+  Note: the ordering must be consistent with the given configuration (i.e. station ordering)
+      </DESCRIPTION>
+    </PARAM>
+    <PARAM name="POPS_EDITABLE" datatype="boolean" value="true">
+      <DESCRIPTION>Optional (CHARA only) PARAM POPS_EDITABLE indicates if the pops field is editable</DESCRIPTION>
+      <VALUES>
+        <OPTION value="true"/>
+        <OPTION value="false"/>
+      </VALUES>
+    </PARAM>
 
-    <!-- PARAM INSTRUMENT indicates which instrument to use available instruments for the selected interferometer/period
-         - VLTI [AMBER, MIDI, PIONIER]
-	       - CHARA [CLASSIC, CLIMB, MIRC, MIRC_6T, PAVO_2T, PAVO_3T, VEGA_2T, VEGA_3T, VEGA_4T]
-    -->
-    <PARAM name="INSTRUMENT" datatype="char" arraysize="*" value="VEGA_3T" />
-    <!-- PARAM INSTRUMENT_EDITABLE indicates if the instrument choice is editable [true, false] -->
-    <PARAM name="INSTRUMENT_EDITABLE" datatype="boolean" value="false" />
-
-    <!-- Optional (CHARA only): PARAM POPS indicates which pops to use for the given configuration using the following format:
-        Pop numbers among (1 to 5) like '11', '123', '1514' ...
-        Note: the ordering must be consistent with the given configuration (i.e. station ordering)
-    -->
-    <PARAM name="POPS" datatype="char" arraysize="*" value="" />
-    <!-- Optional (CHARA only): PARAM POPS_EDITABLE indicates if the pops field is editable [true, false] -->
-    <PARAM name="POPS_EDITABLE" datatype="boolean" value="true" />
-
-    <!-- Optional (CHARA only): PARAM BEAMS indicates which beams to use for the given configuration using the following format:
-        Beams contains beam identifiers separated by the character ' ' (0x20) i.e. V1 ... V6
-        Note: the ordering must be consistent with the given configuration (i.e. station ordering)
-    -->
-    <PARAM name="BEAMS" datatype="char" arraysize="*" value="" />
+    <!-- BEAMS (CHARA only) -->
+    <PARAM name="BEAMS" datatype="char" arraysize="*" value="">
+      <DESCRIPTION>Optional (CHARA only) PARAM BEAMS indicates which beams are used for the given configuration using the following format:
+  Beams contains beam identifiers (1 to 6) separated by the character ' ' (0x20) i.e. V1 ... V6
+  Note: the ordering must be consistent with the given configuration (i.e. station ordering)
+      </DESCRIPTION>
+    </PARAM>
     
     <!-- Configuration(s) -->
-    
-    <!-- PARAM CONFIGURATIONS indicates which configuration(s) to use among available configurations for the selected 
-        interferometer/period/instrument
-         - VLTI PIONIER [UT1 UT2 UT3 UT4 ...]
-         - CHARA VEGA_3T [S1 S2 E1, E2 W1 W2 ...]
-         One configuration contains station identifiers separated by the character ' ' (0x20)
-         Note: station ordering is not required: ASPRO2 can resolve the configuration having given stations in any order.
-    -->
-    <PARAM name="CONFIGURATIONS" datatype="char" arraysize="*" value="S1 S2 E1" />
-    <!-- PARAM CONFIGURATIONS_EDITABLE indicates if the configuration choice(s) are editable [true, false] -->
-    <PARAM name="CONFIGURATIONS_EDITABLE" datatype="boolean" value="true" />
+    <PARAM name="CONFIGURATIONS" datatype="char" arraysize="*" value="S1 S2 E1">
+      <DESCRIPTION>PARAM CONFIGURATIONS indicates which configuration(s) to use among available configurations for the selected interferometer / period / instrument separated by the character ',' (comma):
+  - VLTI PIONIER [UT1 UT2 UT3 UT4 ...]
+  - CHARA VEGA_3T [S1 S2 E1, E2 W1 W2 ...]
+  One configuration contains station identifiers separated by the character ' ' (0x20)
+  Note: station ordering is not required: ASPRO2 can resolve the configuration having given stations in any order.
+      </DESCRIPTION>
+    </PARAM>
+    <PARAM name="CONFIGURATIONS_EDITABLE" datatype="boolean" value="true">
+      <DESCRIPTION>PARAM CONFIGURATIONS_EDITABLE indicates if the configuration choice(s) are editable</DESCRIPTION>
+      <VALUES>
+        <OPTION value="true"/>
+        <OPTION value="false"/>
+      </VALUES>
+    </PARAM>
 
     <!-- Constraints -->
 
-    <!-- PARAM NIGHT indicates if the night restriction is enabled [true, false] -->
-    <PARAM name="NIGHT" datatype="boolean" value="true" />
-    <!-- PARAM NIGHT_EDITABLE indicates if the night restriction choice is editable [true, false] -->
-    <PARAM name="NIGHT_EDITABLE" datatype="boolean" value="false" />
+    <!-- NIGHT -->
+    <PARAM name="NIGHT" datatype="boolean" value="true">
+      <DESCRIPTION>PARAM NIGHT indicates if the night restriction is enabled</DESCRIPTION>
+    </PARAM>
+    <PARAM name="NIGHT_EDITABLE" datatype="boolean" value="false">
+      <DESCRIPTION>PARAM NIGHT_EDITABLE indicates if the night restriction choice is editable</DESCRIPTION>
+      <VALUES>
+        <OPTION value="true"/>
+        <OPTION value="false"/>
+      </VALUES>
+    </PARAM>
     
-    <!-- PARAM DATE defines the observation date [YYYY-MM-DD] (iso8601)
+    <!-- DATE -->
+    <PARAM name="DATE" datatype="char" arraysize="*" value="2011-06-17">
+      <DESCRIPTION>PARAM DATE defines the observation date [YYYY-MM-DD] (iso8601); mandatory if the night restriction is enabled
+  TO BE DISCUSSED:
+  année d'obs: 2011 [int]
+  liste mois d'obs: 05-06-08-09 (chaine de caractères avec liste des mois, attention aux trous)[string]
+      </DESCRIPTION>
+    </PARAM>
+    <PARAM name="DATE_EDITABLE" datatype="boolean" value="false">
+      <DESCRIPTION>PARAM DATE_EDITABLE indicates if the observation date is editable</DESCRIPTION>
+      <VALUES>
+        <OPTION value="true"/>
+        <OPTION value="false"/>
+      </VALUES>
+    </PARAM>
 
-        TO BE DISCUSSED:
-        année d'obs: 2011 [int]
-        liste mois d'obs: 05-06-08-09 (chaine de caractères avec liste des mois, attention aux trous)[string]
-    -->
-    <PARAM name="DATE" datatype="char" arraysize="*" value="2011-06-17" />
-    <!-- PARAM DATE_EDITABLE indicates if the observation date is editable [true, false] -->
-    <PARAM name="DATE_EDITABLE" datatype="boolean" value="false" />
+    <!-- MIN_ELEVATION -->
+    <PARAM name="MIN_ELEVATION" datatype="int" value="30">
+      <DESCRIPTION>PARAM MIN_ELEVATION defines the minimum elevation in degrees (0 to 90)</DESCRIPTION>
+    </PARAM>
+    <PARAM name="MIN_ELEVATION_EDITABLE" datatype="boolean" value="false">
+      <DESCRIPTION>PARAM MIN_ELEVATION_EDITABLE indicates if the minimum elevation field is editable</DESCRIPTION>
+      <VALUES>
+        <OPTION value="true"/>
+        <OPTION value="false"/>
+      </VALUES>
+    </PARAM>
 
-    <!-- PARAM MIN_ELEVATION defines the minimum elevation in degrees (0 to 90) -->
-    <PARAM name="MIN_ELEVATION" datatype="int" value="30" />
-    <!-- PARAM MIN_ELEVATION_EDITABLE indicates if the minimum elevation field is editable [true, false] -->
-    <PARAM name="MIN_ELEVATION_EDITABLE" datatype="boolean" value="false" />
-
-
-    <!-- PARAM TARGETS_EDITABLE indicates if the target list is editable (add/remove/star resolver/target editor) [true, false]
-        TO BE DISCUSSED: is it necessary / relevant ?
-    -->
-    <PARAM name="TARGETS_EDITABLE" datatype="boolean" value="false" />
+    <!-- TARGETS -->
+    <PARAM name="TARGETS_EDITABLE" datatype="boolean" value="false">
+      <DESCRIPTION>PARAM TARGETS_EDITABLE indicates if the target list is editable (add/remove/star resolver/target editor). TO BE DISCUSSED: is it necessary / relevant ?</DESCRIPTION>
+      <VALUES>
+        <OPTION value="true"/>
+        <OPTION value="false"/>
+      </VALUES>
+    </PARAM>
     
     <!-- table containing target(s) : 1..n -->
     <TABLE name="Targets">
