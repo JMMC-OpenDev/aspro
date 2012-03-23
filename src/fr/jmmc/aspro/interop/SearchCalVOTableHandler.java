@@ -37,8 +37,6 @@ public final class SearchCalVOTableHandler {
   public static final double SCIENCE_DETECTION_DISTANCE = 1d * ALX.ARCSEC_IN_DEGREES;
   /** XSLT file path */
   private final static String XSLT_FILE = "fr/jmmc/aspro/interop/scvot2AsproObservation.xsl";
-  /** flag to dump asprox document into logs */
-  private static final boolean DUMP_DOCUMENT = false;
   /** maximum calibrators accepted at once */
   public final static int MAX_CALIBRATORS = 10;
 
@@ -69,8 +67,8 @@ public final class SearchCalVOTableHandler {
       logger.info("VOTable transformation (XSLT) : " + 1e-6d * (System.nanoTime() - start) + " ms.");
     }
 
-    if (DUMP_DOCUMENT) {
-      logger.info("document :\n" + document);
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("document :\n" + document);
     }
 
     final ObservationManager om = ObservationManager.getInstance();

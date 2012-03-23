@@ -30,8 +30,6 @@ public final class VotableSampMessageHandler extends SampMessageHandler {
 
   /** Class logger */
   private static final Logger logger = Logger.getLogger(VotableSampMessageHandler.class.getName());
-  /** flag to dump votable into logs */
-  private static final boolean DUMP_VOTABLE = false;
 
   /**
    * Public constructor
@@ -72,7 +70,7 @@ public final class VotableSampMessageHandler extends SampMessageHandler {
 
       throw new SampException("Can not read the votable : " + voTableURL, use);
     }
-    
+
     File voTableFile = null;
 
     try {
@@ -95,17 +93,17 @@ public final class VotableSampMessageHandler extends SampMessageHandler {
 
       final String votable = FileUtils.readFile(voTableFile);
 
-      if (DUMP_VOTABLE) {
-        logger.info("votable :\n" + votable);
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine("votable :\n" + votable);
       }
 
       final Metadata senderMetadata = SampManager.getMetaData(senderId);
-      
+
       String searchCalVersion = null;
-      
+
       // SearchCal release > 4.4.1:
       searchCalVersion = senderMetadata.getString(SampMetaData.RELEASE_VERSION.id());
-      
+
       if (searchCalVersion == null) {
         // SearchCal release <= 4.4.1:
         searchCalVersion = senderMetadata.getString("searchcal.version");

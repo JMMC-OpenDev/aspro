@@ -29,8 +29,6 @@ public final class AnyVOTableHandler {
   private static final Logger logger = Logger.getLogger(AnyVOTableHandler.class.getName());
   /** XSLT file path */
   private final static String XSLT_FILE = "fr/jmmc/aspro/interop/vot2AsproObservation.xsl";
-  /** flag to dump asprox document into logs */
-  private static final boolean DUMP_DOCUMENT = false;
   /** maximum targets accepted at once */
   public final static int MAX_TARGETS = 50;
 
@@ -60,8 +58,8 @@ public final class AnyVOTableHandler {
       logger.info("VOTable transformation (XSLT) : " + 1e-6d * (System.nanoTime() - start) + " ms.");
     }
 
-    if (DUMP_DOCUMENT) {
-      logger.info("document :\n" + document);
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine("document :\n" + document);
     }
 
     final ObservationManager om = ObservationManager.getInstance();
