@@ -129,6 +129,9 @@ public final class ObservationManager extends BaseOIManager implements Observer 
         MessagePane.showMessage(message);
       }
       logger.info("ObservationManager.update: done.");
+
+      // fire change events :
+      this.fireTargetChangedEvents();
     }
   }
 
@@ -1332,11 +1335,8 @@ public final class ObservationManager extends BaseOIManager implements Observer 
         // see TargetModelForm.prepareAndValidateUserModel()
         boolean valid = false;
         try {
-          // clear previously cached fits image:
-          userModel.setFitsImage(null);
-
           // throws exceptions if the given fits file or image is incorrect:
-          userModel.setFitsImage(UserModelService.prepareFitsFile(userModel.getFile()));
+          UserModelService.prepareUserModel(userModel);
 
           // validate image against the given observation:
           ObservationManager.validateUserModel(observation, userModel);
