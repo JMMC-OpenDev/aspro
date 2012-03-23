@@ -1026,6 +1026,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
           if (TaskSwingWorkerExecutor.cancelTask(AsproTaskRegistry.TASK_OIFITS)) {
             // update the status bar:
             StatusBar.showIfPrevious(MSG_COMPUTING_OIFITS, "OIFits data cancelled.");
+
+            // reset the OIFits structure in the current observation - No OIFitsSwingWorker running:
+            ObservationManager.getInstance().setOIFitsFile(null);
           }
         }
       }
@@ -1221,11 +1224,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       if (DEBUG_UPDATE_EVENT) {
         logger.log(Level.SEVERE, "UPDATE", new Throwable());
       }
-      final String targetName = getSelectedTargetName();
-
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("onUpdateObservation : " + targetName);
-      }
 
       boolean changed = false;
 
@@ -1240,19 +1238,22 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       final Number obsDuration = (Number) this.jFieldObsDuration.getValue();
       changed |= om.setInstrumentAcquisitionTime(Double.valueOf(obsDuration.doubleValue()));
 
-      if (targetName != null) {
+      // update atmQuality :
+      changed |= om.setAtmosphereQuality(AtmosphereQualityUtils.getAtmosphereQuality((String) this.jComboBoxAtmQual.getSelectedItem()));
 
+      final String targetName = getSelectedTargetName();
+
+      if (targetName != null) {
+        if (logger.isLoggable(Level.FINE)) {
+          logger.fine("onUpdateObservation : " + targetName);
+        }
         // Update target HA Min/Max :
         changed |= om.setTargetHAMin(targetName, Double.valueOf(this.haMinAdapter.getValue()));
         changed |= om.setTargetHAMax(targetName, Double.valueOf(this.haMaxAdapter.getValue()));
 
         // update ft mode :
         changed |= om.setTargetFTMode(targetName, (String) this.jComboBoxFTMode.getSelectedItem());
-
       }
-
-      // update atmQuality :
-      changed |= om.setAtmosphereQuality(AtmosphereQualityUtils.getAtmosphereQuality((String) this.jComboBoxAtmQual.getSelectedItem()));
 
       if (changed) {
         // update change flag to make the ObservationManager fire an observation refresh event later
@@ -1529,6 +1530,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       // Start the computations :
       final long start = System.nanoTime();
 
+      // get target from the first observation for consistency :
+      final Target target = getObservationCollection().getFirstObservation().getTarget(this.targetName);
+
       final List<ObservationSetting> observations = getObservationCollection().getObservations();
       final List<UVCoverageData> uvDataList = new ArrayList<UVCoverageData>(observations.size());
 
@@ -1540,7 +1544,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         obsData = this.obsDataList.get(i);
 
         // compute the uv coverage data :
-        uvDataList.add(new UVCoverageService(observation, obsData, this.targetName, this.uvMax, this.doUVSupport, this.doDataNoise).compute());
+        uvDataList.add(new UVCoverageService(observation, obsData, targetName, this.uvMax, this.doUVSupport, this.doDataNoise).compute());
 
         // fast interrupt :
         if (Thread.currentThread().isInterrupted()) {
@@ -1559,14 +1563,12 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         // update uvMax according to UVCoverage Service (wavelength correction):
         this.uvMax = uvDataFirst.getUvMax();
 
-        // Get noise service if enabled:
-        final NoiseService noiseService = (this.doImageNoise) ? uvDataFirst.getNoiseService() : null;
+        // Get the noise service if enabled:
+        // note: it depends on telescopes so it is enabled only for single configuration:
+        final NoiseService noiseService = (this.doImageNoise && uvDataCollection.isSingle()) ? uvDataFirst.getNoiseService() : null;
 
         final Rectangle2D.Double uvRect = new Rectangle2D.Double();
         uvRect.setFrameFromDiagonal(-this.uvMax, -this.uvMax, this.uvMax, this.uvMax);
-
-        // get target from the first observation for consistency :
-        final Target target = uvDataCollection.getFirstObservation().getTarget(this.targetName);
 
         if (target != null && target.hasModel()) {
 
@@ -1575,7 +1577,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
           // Check if the previously computed UV Map Data is still valid :
           if (this.currentUVMapData != null
-                  && this.currentUVMapData.isValid(this.targetName, targetVersion, uvRect,
+                  && this.currentUVMapData.isValid(targetName, targetVersion, uvRect,
                   this.imageMode, this.imageSize, this.colorModel, this.colorScale, noiseService)) {
 
             logger.debug("Reuse model image.");
@@ -1592,7 +1594,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
                 // Check if the previously computed visiblity Data is still valid :
                 if (this.currentUVMapData != null
-                        && this.currentUVMapData.isDataValid(this.targetName, targetVersion, uvRect, this.imageSize)) {
+                        && this.currentUVMapData.isDataValid(targetName, targetVersion, uvRect, this.imageSize)) {
 
                   logger.debug("Reuse model visiblity.");
 
@@ -1618,7 +1620,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
                   // Check if the previously computed visiblity Data is still valid :
                   if (this.currentUVMapData != null
-                          && this.currentUVMapData.isDataValid(this.targetName, targetVersion, uvRect, this.imageSize)) {
+                          && this.currentUVMapData.isDataValid(targetName, targetVersion, uvRect, this.imageSize)) {
 
                     logger.debug("Reuse model visiblity.");
 
@@ -1651,7 +1653,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
               if (uvMapData != null) {
                 // define target name and version :
-                uvMapData.setTargetName(this.targetName);
+                uvMapData.setTargetName(targetName);
                 uvMapData.setTargetVersion(targetVersion);
 
                 uvDataCollection.setUvMapData(uvMapData);
@@ -1675,7 +1677,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
       // merge warning messages:
       if (uvDataCollection.isSingle()) {
+        // ObservabilityService warnings:
         mergedWarningContainer.addWarningMessages(uvDataCollection.getFirstObsData().getWarningContainer());
+        // UVCoverageService warnings:
         mergedWarningContainer.addWarningMessages(uvDataFirst.getWarningContainer());
 
       } else {
@@ -1686,11 +1690,13 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
                   + uvDataCollection.getFirstObservation().getWhen().getDate().toString() + ")");
         }
 
+        // ObservabilityService warnings:
         for (int i = 0, len = observations.size(); i < len; i++) {
           obsData = this.obsDataList.get(i);
           mergedWarningContainer.addWarningMessages(obsData.getWarningContainer());
         }
 
+        // UVCoverageService warnings:
         for (UVCoverageData uvData : uvDataList) {
           mergedWarningContainer.addWarningMessages(uvData.getWarningContainer());
         }
@@ -1698,9 +1704,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
       // add warning if the user model is disabled:
       if (this.doModelImage) {
-        // get target from the first observation for consistency :
-        final Target target = uvDataCollection.getFirstObservation().getTarget(this.targetName);
-
         if (target != null && !target.hasAnalyticalModel()) {
           final UserModel userModel = target.getUserModel();
           if (userModel != null && !userModel.isFileValid()) {
@@ -1725,6 +1728,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
      */
     @Override
     public void refreshUI(final ObservationCollectionUVData uvDataCollection) {
+      // Start computing OIFits ...
       final boolean resetOIFits = (doOIFits) ? !this.uvPanel.computeOIFits(uvDataCollection) : true;
 
       if (!doOIFits) {
@@ -1771,7 +1775,38 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     if (uvDataCollection.isOIFitsDone()) {
       return true;
     }
-    boolean computed = false;
+    // Note: compute OIFits only for single observation UNTIL OIFits merge is ready
+    if (!uvDataCollection.isSingle()) {
+      return false;
+    }
+    
+    boolean computing = false;
+    
+    // check if the OIFits data are still available:
+    if (ObservationManager.getInstance().getOIFitsFile() != null) {
+      // Check if the previously computed UV Data is still valid :
+      final ObservationCollectionUVData currentUVData = getChartData();
+
+      if (currentUVData != null) {
+        // note: OIFitsCreatorService parameter dependencies:
+        // observation {target, instrumentMode {lambdaMin, lambdaMax, nSpectralChannels}}
+        // obsData {beams, baseLines, starData, sc (DateCalc)}
+        // parameter: doDataNoise
+        // results: computeObservableUV {HA, targetUVObservability} {obsData + observation{haMin/haMax, instrumentMode {lambdaMin, lambdaMax}}}
+        // and warning container
+
+        // check if computation needed:
+        // - check observation (UV version includes main version)
+        // - check obsData (main version)
+        // - check doNoise: noiseService.isDoNoise()
+
+        if (currentUVData.isOIFitsValid(uvDataCollection)) {
+          // means no reset and current OIFits data are correct:
+          return true;
+        }    
+      }
+    }
+    
     // Note : the main observation can have changed while computation
 
     final ObservationCollection taskObsCollection = uvDataCollection;
@@ -1803,9 +1838,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         }
       }
 
-      // Note: compute OIFits only for single observation UNTIL OIFits merge is ready
       if (oiFitsCreatorList.size() == 1) {
-        computed = true;
+        computing = true;
 
         // update the status bar :
         StatusBar.show(MSG_COMPUTING_OIFITS);
@@ -1816,7 +1850,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       }
     }
 
-    return computed;
+    return computing;
   }
 
   /**
@@ -2440,7 +2474,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
           // add an invalid point to break the line between the 2 segments :
           xySeries.add(Double.NaN, Double.NaN, false);
-
 
         } // BL
       }

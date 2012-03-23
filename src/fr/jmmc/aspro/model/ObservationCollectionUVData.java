@@ -6,6 +6,7 @@ package fr.jmmc.aspro.model;
 import fr.jmmc.aspro.model.observability.ObservabilityData;
 import fr.jmmc.aspro.model.oi.ObservationCollection;
 import fr.jmmc.aspro.model.uvcoverage.UVCoverageData;
+import fr.jmmc.aspro.service.OIFitsCreatorService;
 import fr.jmmc.jmal.model.UVMapData;
 import fr.jmmc.oitools.model.OIFitsFile;
 import java.util.List;
@@ -107,5 +108,48 @@ public final class ObservationCollectionUVData extends ObservationCollectionObsD
    */
   public void setOIFitsDone(final boolean OIFitsDone) {
     this.OIFitsDone = OIFitsDone;
+  }
+
+  /**
+   * Check if this ObservationCollectionUVData has the same input parameters to reuse its computed OIFits data :
+   * @param uvDataCollection another ObservationCollectionUVData previously computed
+   * @return true only if input parameters are equals
+   */
+  public boolean isOIFitsValid(final ObservationCollectionUVData uvDataCollection) {
+
+    // note: OIFitsCreatorService parameter dependencies:
+    // observation {target, instrumentMode {lambdaMin, lambdaMax, nSpectralChannels}}
+    // obsData {beams, baseLines, starData, sc (DateCalc)}
+    // parameter: doDataNoise
+    // results: computeObservableUV {HA, targetUVObservability} {obsData + observation{haMin/haMax, instrumentMode {lambdaMin, lambdaMax}}}
+    // and warning container
+
+    // check if computation needed:
+    // - check same target
+    // - check observation (target and UV version includes main version)
+    // - check obsData (main version)
+    // - check doNoise: noiseService.isDoNoise()
+
+    if (!getTargetName().equals(uvDataCollection.getTargetName())) {
+        return false;
+    }
+    if (!getVersion().isSameTargetVersion(uvDataCollection.getVersion())) {
+      return false;
+    }
+    if (!getVersion().isSameUVVersion(uvDataCollection.getVersion())) {
+      return false;
+    }
+    if (!getFirstObsData().getVersion().isSameMainVersion(uvDataCollection.getFirstObsData().getVersion())) {
+      return false;
+    }
+
+    // check if OIFitsCreatorServices have noise enabled:
+    final OIFitsCreatorService current = getFirstUVData().getOiFitsCreator();
+    final OIFitsCreatorService other = uvDataCollection.getFirstUVData().getOiFitsCreator();
+    
+    if (current != null && current.isDoNoise() != other.isDoNoise()) {
+      return false;
+    }
+    return true;
   }
 }
