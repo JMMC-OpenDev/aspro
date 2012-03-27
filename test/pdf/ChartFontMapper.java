@@ -8,7 +8,8 @@ import com.lowagie.text.pdf.BaseFont;
 import com.lowagie.text.pdf.DefaultFontMapper;
 import java.awt.Font;
 import java.io.IOException;
-import java.util.logging.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This font mapper replaces SansSerif virtual fonts by DejaVu fonts (GPL) to support unicode characters and
@@ -21,7 +22,7 @@ import java.util.logging.Level;
 public final class ChartFontMapper extends DefaultFontMapper {
 
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(ChartFontMapper.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(ChartFontMapper.class.getName());
 
   @Override
   public BaseFont awtToPdf(final Font font) {
@@ -32,7 +33,7 @@ public final class ChartFontMapper extends DefaultFontMapper {
         // customize mapping to embed custom font instead of Helvetica standard font (not supporting unicode characters)
 
         try {
-          logger.warning("awtToPdf: substitute SansSerif font= '" + font + "'");
+          logger.warn("awtToPdf: substitute SansSerif font= '" + font + "'");
 
           final String fontFile;
           switch (font.getStyle()) {
@@ -48,18 +49,18 @@ public final class ChartFontMapper extends DefaultFontMapper {
           bf.setSubset(true);
 
         } catch (DocumentException de) {
-          logger.log(Level.SEVERE, "awtToPdf failed:", de);
+          logger.error("awtToPdf failed:", de);
         } catch (IOException ioe) {
-          logger.log(Level.SEVERE, "awtToPdf failed:", ioe);
+          logger.error("awtToPdf failed:", ioe);
         }
       }
 
-      logger.warning("awtToPdf: font= '" + font + "' returns " + bf + "{encoding= '" + bf.getEncoding() + "'}");
+      logger.warn("awtToPdf: font= '" + font + "' returns " + bf + "{encoding= '" + bf.getEncoding() + "'}");
 
       return bf;
 
     } catch (RuntimeException re) {
-      logger.log(Level.SEVERE, "awtToPdf failed:", re);
+      logger.error("awtToPdf failed:", re);
       throw re;
     }
   }
@@ -68,7 +69,7 @@ public final class ChartFontMapper extends DefaultFontMapper {
   public Font pdfToAwt(final BaseFont font, final int size) {
     final Font f = super.pdfToAwt(font, size);
 
-    logger.warning("pdfToAwt: font= '" + font + "' size= " + size + " returns " + f);
+    logger.warn("pdfToAwt: font= '" + font + "' size= " + size + " returns " + f);
 
     return f;
   }

@@ -6,7 +6,6 @@ package fest;
 import fr.jmmc.jmcs.data.preference.PreferencesException;
 import static java.awt.event.KeyEvent.*;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import static org.fest.swing.core.KeyPressInfo.*;
 import static org.fest.swing.core.matcher.DialogMatcher.*;
 

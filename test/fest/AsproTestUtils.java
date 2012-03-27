@@ -7,10 +7,11 @@ import static org.fest.swing.timing.Pause.*;
 import org.fest.swing.timing.Timeout;
 
 import fr.jmmc.jmcs.gui.task.TaskSwingWorkerExecutor;
-import java.util.logging.Level;
 import org.fest.swing.edt.GuiActionRunner;
 import org.fest.swing.edt.GuiQuery;
 import org.fest.swing.timing.Condition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class contains utility methods
@@ -19,7 +20,7 @@ import org.fest.swing.timing.Condition;
 public final class AsproTestUtils {
 
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(AsproTestUtils.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(AsproTestUtils.class.getName());
   /** 5s timeout */
   private static final Timeout LONG_TIMEOUT = Timeout.timeout(10000l);
 
@@ -34,9 +35,7 @@ public final class AsproTestUtils {
    * Waits until the Aspro computation tasks are done (+ timeout)
    */
   public static void checkRunningTasks() {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("checkRunningTasks : enter");
-    }
+    logger.debug("checkRunningTasks : enter");
 
     pause(new Condition("TaskRunning") {
 
@@ -53,8 +52,8 @@ public final class AsproTestUtils {
           protected Boolean executeInEDT() {
             final boolean done = !TaskSwingWorkerExecutor.isTaskRunning();
 
-            if (logger.isLoggable(Level.FINE)) {
-              logger.fine("checkRunningTasks : test = " + done);
+            if (logger.isDebugEnabled()) {
+              logger.debug("checkRunningTasks : test = {}", done);
             }
             return done;
           }
@@ -63,8 +62,6 @@ public final class AsproTestUtils {
       }
     }, LONG_TIMEOUT);
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("checkRunningTasks : exit");
-    }
+    logger.debug("checkRunningTasks : exit");
   }
 }

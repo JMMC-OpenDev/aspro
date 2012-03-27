@@ -9,7 +9,8 @@ import fr.jmmc.jmcs.App;
 import fr.jmmc.jmcs.gui.SwingUtils;
 import java.io.File;
 import java.util.Locale;
-import java.util.logging.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Simple
@@ -18,7 +19,7 @@ import java.util.logging.Level;
 public class TargetEditorTest {
 
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(TargetEditorTest.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(TargetEditorTest.class.getName());
 
   /**
    * Private constructor
@@ -53,7 +54,7 @@ public class TargetEditorTest {
 
           System.exit(0);
         } catch (Exception e) { // main (test)
-          logger.log(Level.SEVERE, "runtime exception", e);
+          logger.error("runtime exception", e);
         }
       }
     });

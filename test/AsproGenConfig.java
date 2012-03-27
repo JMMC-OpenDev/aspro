@@ -18,7 +18,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.StringTokenizer;
-import java.util.logging.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class converts the VLT switchyard to an XML fragment compliant with the aspro DM
@@ -28,7 +29,7 @@ import java.util.logging.Level;
 public final class AsproGenConfig {
 
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(AsproGenConfig.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(AsproGenConfig.class.getName());
 
   /** interferometer enum */
   private enum INTERFEROMETER {
@@ -55,7 +56,7 @@ public final class AsproGenConfig {
    */
   private static void convertSwitchYard(final String absFileName) {
 
-    logger.severe("convertSwitchYard : " + absFileName);
+    logger.info("convertSwitchYard : " + absFileName);
 
     final StringBuilder sb = new StringBuilder(16384);
     sb.append("<switchyard>\n");
@@ -135,22 +136,22 @@ public final class AsproGenConfig {
       }
 
     } catch (FileNotFoundException fnfe) {
-      logger.log(Level.SEVERE, null, fnfe);
+      logger.error("File not found", fnfe);
     } catch (IOException ioe) {
-      logger.log(Level.SEVERE, null, ioe);
+      logger.error("IO failure", ioe);
     } finally {
       if (reader != null) {
         try {
           reader.close();
-        } catch (IOException ex) {
-          logger.log(Level.SEVERE, null, ex);
+        } catch (IOException ioe) {
+          logger.error("IO failure", ioe);
         }
       }
     }
 
     sb.append("</switchyard>\n");
 
-    logger.severe("convertSwitchYard : output :\n" + sb.toString());
+    logger.info("convertSwitchYard : output :\n" + sb.toString());
   }
 
   /**
@@ -214,15 +215,15 @@ public final class AsproGenConfig {
       }
 
     } catch (FileNotFoundException fnfe) {
-      logger.log(Level.SEVERE, null, fnfe);
+      logger.error("File not found", fnfe);
     } catch (IOException ioe) {
-      logger.log(Level.SEVERE, null, ioe);
+      logger.error("IO failure", ioe);
     } finally {
       if (reader != null) {
         try {
           reader.close();
-        } catch (IOException ex) {
-          logger.log(Level.SEVERE, null, ex);
+        } catch (IOException ioe) {
+          logger.error("IO failure", ioe);
         }
       }
     }
@@ -247,8 +248,8 @@ public final class AsproGenConfig {
    * @param sb output buffer for xml output
    */
   private static void convertHorizToEquatorial(final String station, final double latitude,
-                                               final double xOffset, final double yOffset, final double zOffset,
-                                               final StringBuilder sb) {
+          final double xOffset, final double yOffset, final double zOffset,
+          final StringBuilder sb) {
 
     final double x = xOffset * 1e-6d;
     final double y = yOffset * 1e-6d;
@@ -258,7 +259,7 @@ public final class AsproGenConfig {
     final double yy = x;
     final double zz = Math.cos(latitude) * y + Math.sin(latitude) * z;
 
-    logger.severe(station + " = (" + xx + ", " + yy + ", " + zz + ")");
+    logger.info(station + " = (" + xx + ", " + yy + ", " + zz + ")");
 
     sb.append("      <relativePosition>\n");
     sb.append("        <posX>").append(xx).append("</posX>\n");
@@ -283,12 +284,12 @@ public final class AsproGenConfig {
    * @param sb output buffer for xml output
    */
   public static void convertCHARAAirPath(final String station, final double light, final double airPath, final double internal,
-                                         final StringBuilder sb) {
-    
+          final StringBuilder sb) {
+
     final double delay = (light + airPath + internal) * 1e-6d;
-    
-    logger.severe(station + " = " + delay);
-    
+
+    logger.info(station + " = " + delay);
+
     sb.append("      <delayLineFixedOffset>").append(delay).append("</delayLineFixedOffset>\n");
   }
 
@@ -301,7 +302,7 @@ public final class AsproGenConfig {
    * @param sb output buffer for xml output
    */
   public static void convertCHARAPoP(final Map<String, Double> config,
-                                     final StringBuilder sb) {
+          final StringBuilder sb) {
 
     for (int i = 1; i <= 5; i++) {
       sb.append("      <popLink>\n");
@@ -436,7 +437,7 @@ public final class AsproGenConfig {
    * @param sb output buffer for xml output
    */
   private static void convertCHARASwitchyardStation(final String station, final double[] values,
-                                                    final StringBuilder sb) {
+          final StringBuilder sb) {
 
     sb.append("      <stationLinks>\n");
     sb.append("        <station>").append(station).append("</station>\n");
@@ -479,7 +480,7 @@ public final class AsproGenConfig {
    */
   private static Map<String, Map<String, Double>> loadCHARAConfig(final String absFileName) {
 
-    logger.severe("loadCHARAConfig : " + absFileName);
+    logger.info("loadCHARAConfig : " + absFileName);
 
     final List<String> labels = Arrays.asList(new String[]{
               "XOFFSET", "YOFFSET", "ZOFFSET", "AIRPATH", "LIGHT", "INTERNAL",
@@ -515,7 +516,7 @@ public final class AsproGenConfig {
             name = line;
             current = new LinkedHashMap<String, Double>();
 
-//            logger.severe("new station : " + name);
+//            logger.info("new station : " + name);
 
             continue;
           }
@@ -524,7 +525,7 @@ public final class AsproGenConfig {
             // end station block :
             stationConfigs.put(name, current);
 
-            logger.severe("end station : " + name + " =\n" + current);
+            logger.info("end station : " + name + " =\n" + current);
 
             name = null;
             current = null;
@@ -533,7 +534,7 @@ public final class AsproGenConfig {
           }
 
           // Parse values :
-//          logger.severe("line = " + line);
+//          logger.info("line = " + line);
 
           tok = new StringTokenizer(line, delimiter);
 
@@ -554,15 +555,15 @@ public final class AsproGenConfig {
       }
 
     } catch (FileNotFoundException fnfe) {
-      logger.log(Level.SEVERE, null, fnfe);
+      logger.error("File not found", fnfe);
     } catch (IOException ioe) {
-      logger.log(Level.SEVERE, null, ioe);
+      logger.error("IO failure", ioe);
     } finally {
       if (reader != null) {
         try {
           reader.close();
-        } catch (IOException ex) {
-          logger.log(Level.SEVERE, null, ex);
+        } catch (IOException ioe) {
+          logger.error("IO failure", ioe);
         }
       }
     }
@@ -578,17 +579,17 @@ public final class AsproGenConfig {
     final Map<String, Map<String, Double>> stationConfigs = loadCHARAConfig(absFileName);
 
     final StringBuilder sb = new StringBuilder(12 * 1024);
-    
+
     sb.append("<a:interferometerSetting>\n\n");
     sb.append("  <description>\n\n    <name>CHARA</name>\n\n");
-    
+
     convertCHARAStations(stationConfigs, sb);
 
     convertCHARASwitchyard(stationConfigs, sb);
-    
+
     sb.append("  </description>\n\n</a:interferometerSetting>\n");
 
-    logger.severe("Generated CHARA Configuration : " + sb.length() + "\n" + sb.toString());
+    logger.info("Generated CHARA Configuration : " + sb.length() + "\n" + sb.toString());
   }
 
   /**
@@ -608,13 +609,13 @@ public final class AsproGenConfig {
 //    LONG    -118 3 25.31272
 //    LAT       34 13 27.78130
     final double lonDeg = -(118d + 3d / 60d + 25.31272d / 3600d);
-    logger.severe("CHARA longitude (deg) : " + lonDeg);
+    logger.info("CHARA longitude (deg) : " + lonDeg);
 
     final double latDeg = 34d + 13d / 60d + 27.78130d / 3600d;
-    logger.severe("CHARA latitude (deg)  : " + latDeg);
+    logger.info("CHARA latitude (deg)  : " + latDeg);
 
     final double alt = 1725.21d;
-    
+
     computeInterferometerPosition(lonDeg, latDeg, alt, sb);
 
     return new double[]{lonDeg, latDeg};
@@ -628,46 +629,46 @@ public final class AsproGenConfig {
     final String asproPath = "/home/bourgesl/dev/aspro1/etc/";
 
     final INTERFEROMETER selected = INTERFEROMETER.CHARA;
-    
-    switch(selected) {
+
+    switch (selected) {
       case VLTI:
-          VLTIPosition();
+        VLTIPosition();
 
-          convertSwitchYard(asproPath + "VLT.switchyard");
+        convertSwitchYard(asproPath + "VLT.switchyard");
 
-          final String[] vltStations = {
-            "U1", "U2", "U3", "U4", "A0", "A1", "B0", "B1", "B2", "B3", "B4", "B5",
-            "C0", "C1", "C2", "C3", "D0", "D1", "D2", "E0", "G0", "G1", "G2", "H0",
-            "I1", "J1", "J2", "J3", "J4", "J5", "J6", "K0", "L0", "M0"};
+        final String[] vltStations = {
+          "U1", "U2", "U3", "U4", "A0", "A1", "B0", "B1", "B2", "B3", "B4", "B5",
+          "C0", "C1", "C2", "C3", "D0", "D1", "D2", "E0", "G0", "G1", "G2", "H0",
+          "I1", "J1", "J2", "J3", "J4", "J5", "J6", "K0", "L0", "M0"};
 
-          final StringBuilder sb = new StringBuilder(65535);
+        final StringBuilder sb = new StringBuilder(65535);
 
-          for (String station : vltStations) {
-            convertHorizon(station, asproPath + station + ".horizon", sb);
-          }
-          logger.severe("convertHorizons : \n" + sb.toString());        
+        for (String station : vltStations) {
+          convertHorizon(station, asproPath + station + ".horizon", sb);
+        }
+        logger.info("convertHorizons : \n" + sb.toString());
         break;
       case CHARA:
-          convertCHARAConfig("/home/bourgesl/dev/aspro/test/telescopes.chara");
+        convertCHARAConfig("/home/bourgesl/dev/aspro/test/telescopes.chara");
         break;
       case MROI:
-          MROIposition();
+        MROIposition();
 
-          convertStationFile(asproPath + "MROI.stations");
+        convertStationFile(asproPath + "MROI.stations");
         break;
 
       default:
-        logger.severe("unsupported interferometer : "+selected);
+        logger.info("unsupported interferometer : " + selected);
     }
   }
 
   private static void VLTIPosition() {
 
     final double lonDeg = -(70d + 24d / 60d + 16.92d / 3600d);
-    logger.severe("VLTI longitude (deg) : " + lonDeg);
+    logger.info("VLTI longitude (deg) : " + lonDeg);
 
     final double latDeg = -(24d + 37d / 60d + 38.46d / 3600d);
-    logger.severe("VLTI latitude (deg) : " + latDeg);
+    logger.info("VLTI latitude (deg) : " + latDeg);
 
     final double alt = 2681d;
     computeInterferometerPosition(lonDeg, latDeg, alt, new StringBuilder());
@@ -685,17 +686,17 @@ public final class AsproGenConfig {
 
     final LonLatAlt coords = GeocentricCoords.getLonLatAlt(position);
 
-    logger.severe("VLTI position : " + coords.toString());
+    logger.info("VLTI position : " + coords.toString());
 // 1942042.8584924035, -5455305.996911049, -2654521.401175926
   }
 
   private static void MROIposition() {
 
     final double lonDeg = -(107d + 11d / 60d + 05.12d / 3600d);
-    logger.severe("MROI longitude (deg) : " + lonDeg);
+    logger.info("MROI longitude (deg) : " + lonDeg);
 
     final double latDeg = 33d + 58d / 60d + 47.6d / 3600d;
-    logger.severe("MROI latitude (deg) : " + latDeg);
+    logger.info("MROI latitude (deg) : " + latDeg);
 
     final double alt = 3200d;
     computeInterferometerPosition(lonDeg, latDeg, alt, new StringBuilder());
@@ -718,9 +719,9 @@ public final class AsproGenConfig {
     final double x = r * Math.sin(theta) * Math.cos(phi);
     final double y = r * Math.sin(theta) * Math.sin(phi);
     final double z = r * Math.cos(theta);
-    
-    logger.severe("position (x,y,z) : " + x + ", " + y + ", " + z);
-    
+
+    logger.info("position (x,y,z) : " + x + ", " + y + ", " + z);
+
     sb.append("    <position>\n");
     sb.append("      <posX>").append(x).append("</posX>\n");
     sb.append("      <posY>").append(y).append("</posY>\n");
@@ -740,7 +741,7 @@ public final class AsproGenConfig {
    */
   private static void convertStationFile(final String absFileName) {
 
-    logger.severe("convertStationFile : " + absFileName);
+    logger.info("convertStationFile : " + absFileName);
 
     final StringBuilder sb = new StringBuilder(16384);
 
@@ -818,19 +819,19 @@ public final class AsproGenConfig {
       }
 
     } catch (FileNotFoundException fnfe) {
-      logger.log(Level.SEVERE, null, fnfe);
+      logger.error("File not found", fnfe);
     } catch (IOException ioe) {
-      logger.log(Level.SEVERE, null, ioe);
+      logger.error("IO failure", ioe);
     } finally {
       if (reader != null) {
         try {
           reader.close();
-        } catch (IOException ex) {
-          logger.log(Level.SEVERE, null, ex);
+        } catch (IOException ioe) {
+          logger.error("IO failure", ioe);
         }
       }
     }
 
-    logger.severe("convertStationFile : output :\n" + sb.toString());
+    logger.info("convertStationFile : output :\n" + sb.toString());
   }
 }

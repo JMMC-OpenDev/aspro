@@ -18,7 +18,8 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
-import java.util.logging.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class tests the AstroSkyCalc class to locate LST [0;24] range for every day between 1/1/1980 and 31/12/2049
@@ -27,7 +28,7 @@ import java.util.logging.Level;
 public final class LSTTest {
 
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(LSTTest.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(LSTTest.class.getName());
 
   /**
    * Forbidden constructor
@@ -87,7 +88,7 @@ public final class LSTTest {
    * @param doCenterMidnight flag to center the plot arround midnight
    */
   public static void test(final String interferometerConfiguration, final boolean useLst,
-                          final boolean useNightLimit, final boolean doCenterMidnight) {
+          final boolean useNightLimit, final boolean doCenterMidnight) {
 
     logger.info("test[interferometer=" + interferometerConfiguration
             + ", useLst=" + useLst
@@ -168,13 +169,13 @@ public final class LSTTest {
         /*
         // find the julian date corresponding to LST=00:00:00 previous day:
         final double jdLower1D = sc.findJdForLst0(jdLower - AstroSkyCalc.LST_DAY_IN_JD);
-
+        
         final Date dateMin1D = sc.toDate(jdLower1D, useLst);
-
+        
         logger.severe("date min-1 = " + dateMin1D);
-
+        
         len = dateMin.getTime() - dateMin1D.getTime();
-
+        
         // 1s error:
         if (!NumberUtils.equals(len, dayLength, dayLenError)) {
         throw new RuntimeException("Invalid date length : upper[" + dateMin + "] - lower[" + dateMin1D + "] = " + len);
@@ -294,7 +295,7 @@ public final class LSTTest {
       } while (cal.get(Calendar.YEAR) < lastYear);
 
     } catch (RuntimeException re) {
-      logger.log(Level.SEVERE, "test[interferometer=" + interferometerConfiguration
+      logger.error("test[interferometer=" + interferometerConfiguration
               + ", useLst=" + useLst
               + ", useNightLimit=" + useNightLimit
               + ", doCenterMidnight=" + doCenterMidnight
@@ -313,10 +314,10 @@ public final class LSTTest {
    * @param intervals interval list where new date intervals will be added
    */
   private static void convertRangeToDateInterval(final Range rangeJD, final List<DateTimeInterval> intervals,
-                                                 /* missing members */
-                                                 final Date dateMin, final Date dateMax,
-                                                 final double jdLower, final double jdUpper,
-                                                 final boolean useLst, final AstroSkyCalc sc) {
+          /* missing members */
+          final Date dateMin, final Date dateMax,
+          final double jdLower, final double jdUpper,
+          final boolean useLst, final AstroSkyCalc sc) {
     final double jdStart = rangeJD.getMin();
     final double jdEnd = rangeJD.getMax();
 
@@ -382,10 +383,10 @@ public final class LSTTest {
    * @return Date Object (LST or UTC)
    */
   private static final Date jdToDateInDateRange(final double jd,
-                                                /* missing members */
-                                                final Date dateMin, final Date dateMax,
-                                                final double jdLower, final double jdUpper,
-                                                final boolean useLst, final AstroSkyCalc sc) {
+          /* missing members */
+          final Date dateMin, final Date dateMax,
+          final double jdLower, final double jdUpper,
+          final boolean useLst, final AstroSkyCalc sc) {
     // adjust range limits :
     if (jd <= jdLower) {
       return dateMin;
@@ -404,8 +405,8 @@ public final class LSTTest {
    * @return Date Object (LST or UTC)
    */
   private static Date jdToDate(final double jd,
-                               /* missing members */
-                               final boolean useLst, final AstroSkyCalc sc) {
+          /* missing members */
+          final boolean useLst, final AstroSkyCalc sc) {
     return sc.toDate(jd, useLst);
   }
 }

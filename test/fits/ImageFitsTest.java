@@ -41,8 +41,9 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Locale;
-import java.util.logging.Level;
 import javax.swing.JFrame;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class makes several image tests using nom.tam fits library
@@ -51,7 +52,7 @@ import javax.swing.JFrame;
 public class ImageFitsTest {
 
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(ImageFitsTest.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(ImageFitsTest.class.getName());
   /** flag to disable infoFile() */
   private final static boolean INFO_ENABLE = false;
   /** flag to dump column content */
@@ -99,7 +100,7 @@ public class ImageFitsTest {
         testFastMode(file, Boolean.TRUE);
 
       } catch (Exception e) {
-        logger.log(Level.SEVERE, "An exception occured while working on file: " + file, e);
+        logger.error("An exception occured while working on file: " + file, e);
       }
       return;
     }
@@ -241,7 +242,7 @@ public class ImageFitsTest {
         errors += showFile(file);
 
       } catch (Exception e) {
-        logger.log(Level.SEVERE, "An exception occured while working on file: " + file, e);
+        logger.error("An exception occured while working on file: " + file, e);
       }
     }
 
@@ -292,7 +293,7 @@ public class ImageFitsTest {
               errors += showFile(file);
 
             } catch (Exception e) {
-              logger.log(Level.SEVERE, "An exception occured while working on file: " + file, e);
+              logger.error("An exception occured while working on file: " + file, e);
             }
 
           }
@@ -380,7 +381,7 @@ public class ImageFitsTest {
       logger.info("infoFile : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
 
     } catch (Throwable th) {
-      logger.log(Level.SEVERE, "infoFile : IO failure occured while reading file : " + absFilePath, th);
+      logger.error("infoFile : IO failure occured while reading file : " + absFilePath, th);
       error = 1;
     }
     return error;
@@ -412,7 +413,7 @@ public class ImageFitsTest {
       }
 
     } catch (Throwable th) {
-      logger.log(Level.SEVERE, "dumpFile : failure occured while dumping file : " + absFilePath, th);
+      logger.error("dumpFile : failure occured while dumping file : " + absFilePath, th);
       error = 1;
     } finally {
       final long end = System.nanoTime();
@@ -448,7 +449,7 @@ public class ImageFitsTest {
       }
 
     } catch (Throwable th) {
-      logger.log(Level.SEVERE, "showFile : failure occured while dumping file : " + absFilePath, th);
+      logger.error("showFile : failure occured while dumping file : " + absFilePath, th);
       error = 1;
     } finally {
       final long end = System.nanoTime();
@@ -468,7 +469,7 @@ public class ImageFitsTest {
     } else if (hdu instanceof ImageHDU) {
       dumpData(sb, (ImageHDU) hdu);
     } else {
-      logger.warning("Unsupported HDU: " + hdu.getClass());
+      logger.warn("Unsupported HDU: " + hdu.getClass());
     }
   }
 
@@ -571,14 +572,14 @@ public class ImageFitsTest {
     if (hdu instanceof ImageHDU) {
 
       if (hdu.getBitPix() != BasicHDU.BITPIX_FLOAT) {
-        logger.warning("Unsupported Image type: bitPix= " + hdu.getBitPix() + "; expected = " + BasicHDU.BITPIX_FLOAT);
+        logger.warn("Unsupported Image type: bitPix= " + hdu.getBitPix() + "; expected = " + BasicHDU.BITPIX_FLOAT);
 //        return;
       }
 
       final int[] axes = hdu.getAxes();
 
       if (axes.length != 2) {
-        logger.warning("Unsupported Image type: naxis= " + axes.length + "; expected = 2");
+        logger.warn("Unsupported Image type: naxis= " + axes.length + "; expected = 2");
         return;
       }
 
@@ -764,7 +765,7 @@ public class ImageFitsTest {
       }
 
     } else {
-      logger.warning("Unsupported HDU: " + hdu.getClass());
+      logger.warn("Unsupported HDU: " + hdu.getClass());
     }
   }
 
@@ -822,7 +823,7 @@ public class ImageFitsTest {
     fftSubSize = paddedSize;
 
     if (fftSize >= 16384) {
-      logger.severe("\n\nFFT complexForward: size = " + fftSize + " ... please wait, slow computation ... \n\n");
+      logger.error("\n\nFFT complexForward: size = " + fftSize + " ... please wait, slow computation ... \n\n");
     }
 
     // use size to have hyper resolution in fourier plane:
@@ -1200,7 +1201,7 @@ public class ImageFitsTest {
     try {
       Thread.sleep(100l);
     } catch (InterruptedException ex) {
-      logger.log(Level.INFO, "thread interrupted", ex);
+      logger.info("thread interrupted", ex);
     }
   }
 }
