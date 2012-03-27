@@ -6,7 +6,8 @@ package edu.dartmouth;
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.oi.AzEl;
 import fr.jmmc.aspro.util.AngleUtils;
-import java.util.logging.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class uses JSkyCalc to perform several observation computations (target position with elevation and azimuth ...)
@@ -16,14 +17,14 @@ import java.util.logging.Level;
 public final class AstroSkyCalcObservation {
 
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(AstroSkyCalcObservation.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(AstroSkyCalcObservation.class.getName());
 
   /* members */
   /** site location (package visibility) */
   private Site site;
   /** cosinus of site latitude */
   private double cosLat = 0d;
-   /** sinus of site latitude */
+  /** sinus of site latitude */
   private double sinLat = 0d;
   /** target info */
   private Observation observation = null;
@@ -69,8 +70,10 @@ public final class AstroSkyCalcObservation {
     // RA (decimal hours), DEC (degrees)
     final Celest target = new Celest(AngleUtils.deg2hours(ra), dec, AsproConstants.EPOCH_J2000);
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("Target [RA/DEC/EPOCH] :" + target.alpha.roundedRAString(3, ":") + " " + target.delta.roundedDecString(3, ":"));
+    if (logger.isDebugEnabled()) {
+      logger.debug("Target [RA/DEC/EPOCH]: {} {}",
+              target.alpha.roundedRAString(3, ":"),
+              target.delta.roundedDecString(3, ":"));
     }
 
     // define jd as lst0 to precess the target:
@@ -80,10 +83,10 @@ public final class AstroSkyCalcObservation {
     // it has a minor impact on coordinates (few arcsec per year):
     this.observation = new Observation(ww, target);
 
-//    logger.severe("Target [RA/DEC/EPOCH] CENTER :" + this.observation.current.alpha.roundedRAString(3, ":") + " " + this.observation.current.delta.roundedDecString(3, ":"));
-
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("Target [RA/DEC/EPOCH] precessed :" + this.observation.current.alpha.roundedRAString(3, ":") + " " + this.observation.current.delta.roundedDecString(3, ":"));
+    if (logger.isDebugEnabled()) {
+      logger.debug("Target [RA/DEC/EPOCH] precessed: {} {}",
+              this.observation.current.alpha.roundedRAString(3, ":"),
+              this.observation.current.delta.roundedDecString(3, ":"));
     }
 
     return new double[]{this.observation.current.alpha.value, this.observation.current.delta.value};
@@ -102,8 +105,6 @@ public final class AstroSkyCalcObservation {
     // avoid computing precessed coordinates:
     this.observation.computeSkyFast(this.cosLat, this.sinLat, cosDec, sinDec);
 
-//    logger.severe("Target [RA/DEC/EPOCH] :" + this.observation.current.alpha.roundedRAString(3, ":") + " " + this.observation.current.delta.roundedDecString(3, ":"));
-
     // TODO : check angular distance between target and moon :
     /*
      * // Check moon distance :
@@ -111,11 +112,11 @@ public final class AstroSkyCalcObservation {
      *
      * observation.moonobj gives the angular distance with moon in degrees
      *
-     * logger.severe("jd " + jd + " moon distance = " + this.observation.moonobj);
+     * logger.warn("jd " + jd + " moon distance = " + this.observation.moonobj);
      *
-     * if (logger.isLoggable(Level.FINE)) {
+     * if (logger.isDebugEnabled()) {
      *   AstroSkyCalc.dumpWhen(this.observation.w, "Target");
-     *   logger.fine("az|alt   : " + this.observation.azimuth + " " + this.observation.altitude);
+     *   logger.debug("az|alt   : " + this.observation.azimuth + " " + this.observation.altitude);
      * }
      */
 
@@ -129,8 +130,8 @@ public final class AstroSkyCalcObservation {
     final double[] minmax = Spherical.min_max_alt(this.site.lat.value, this.observation.current.delta.value);
 
     // degrees :
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("min/max alt = " + minmax[0] + " / " + minmax[1]);
+    if (logger.isDebugEnabled()) {
+      logger.debug("min/max alt = {} / {}", minmax[0], minmax[1]);
     }
   }
 
@@ -142,7 +143,7 @@ public final class AstroSkyCalcObservation {
    */
   public double getHAForElevation(final double dec, final double minElev) {
 
-    if (logger.isLoggable(Level.INFO)) {
+    if (logger.isDebugEnabled()) {
       getTargetMinMaxAlt();
     }
 
@@ -158,8 +159,8 @@ public final class AstroSkyCalcObservation {
       return 12d;
     }
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("ha = " + ha);
+    if (logger.isDebugEnabled()) {
+      logger.debug("ha = {}", ha);
     }
 
     return ha;
