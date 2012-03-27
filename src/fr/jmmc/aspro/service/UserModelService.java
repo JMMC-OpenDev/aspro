@@ -397,7 +397,7 @@ public final class UserModelService {
 
     // use the next even integer for pixel size:
     int outputSize = (int) Math.ceil(outputExactSize);
-    if (outputSize % 2 == 1) {
+    if (outputSize % 2 != 0) {
       outputSize++;
     }
 
@@ -715,7 +715,7 @@ public final class UserModelService {
     rows2 = (int) Math.ceil(halfRows + distToCenter);
 
     // fix width to be an even number:
-    if ((rows2 - rows1) % 2 == 1) {
+    if ((rows2 - rows1) % 2 != 0) {
       rows2++;
     }
 
@@ -726,7 +726,7 @@ public final class UserModelService {
     cols2 = (int) Math.ceil(halfCols + distToCenter);
 
     // fix width to be an even number:
-    if ((cols2 - cols1) % 2 == 1) {
+    if ((cols2 - cols1) % 2 != 0) {
       cols2++;
     }
 
@@ -756,8 +756,8 @@ public final class UserModelService {
 
     // 5 - Make sure the image is square i.e. padding (width = height = even number):
     final int newSize = Math.max(
-            (nbRows % 2 == 1) ? nbRows + 1 : nbRows,
-            (nbCols % 2 == 1) ? nbCols + 1 : nbCols);
+            (nbRows % 2 != 0) ? nbRows + 1 : nbRows,
+            (nbCols % 2 != 0) ? nbCols + 1 : nbCols);
 
     if (newSize != nbRows || newSize != nbCols) {
       data = ImageArrayUtils.enlarge(nbRows, nbCols, data, newSize, newSize);
