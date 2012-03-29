@@ -10,7 +10,6 @@ import java.awt.Paint;
 import java.awt.image.IndexColorModel;
 import java.io.Serializable;
 
-import java.util.logging.Logger;
 import org.jfree.chart.HashUtilities;
 import org.jfree.chart.renderer.PaintScale;
 import org.jfree.util.PublicCloneable;

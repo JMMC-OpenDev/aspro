@@ -7,7 +7,8 @@ import fr.jmmc.aspro.AsproGui;
 import fr.jmmc.aspro.gui.BasicObservationForm;
 import fr.jmmc.jmcs.gui.action.RegisteredAction;
 import java.awt.event.ActionEvent;
-import java.util.logging.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This action opens the target editor
@@ -22,7 +23,7 @@ public class TargetEditorAction extends RegisteredAction {
   /** Action name. This name is used to register to the ActionRegistrar */
   public final static String actionName = "targetEditor";
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(className);
+  private static final Logger logger = LoggerFactory.getLogger(className);
 
   /**
    * Public constructor that automatically register the action in RegisteredAction.
@@ -37,9 +38,7 @@ public class TargetEditorAction extends RegisteredAction {
    */
   @Override
   public void actionPerformed(final ActionEvent evt) {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("actionPerformed");
-    }
+    logger.debug("actionPerformed");
 
     final BasicObservationForm form = AsproGui.getInstance().getSettingPanel().getObservationForm();
 

@@ -3,7 +3,8 @@
  ******************************************************************************/
 package fr.jmmc.aspro.util;
 
-import java.util.logging.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class provides several utility methods dedicated to tests and development.
@@ -12,7 +13,7 @@ import java.util.logging.Level;
 public final class TestUtils {
 
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(TestUtils.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(TestUtils.class.getName());
 
   /**
    * Forbidden constructor : utility class
@@ -42,8 +43,8 @@ public final class TestUtils {
 
     } while (now <= future);
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("busyWait : " + 1e-6d * (now - start) + " ms.");
+    if (logger.isDebugEnabled()) {
+      logger.debug("busyWait{} ms.", 1e-6d * (now - start));
     }
   }
 }

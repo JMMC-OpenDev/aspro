@@ -7,7 +7,8 @@ import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.oi.LonLatAlt;
 import fr.jmmc.aspro.model.oi.Position3D;
 import fr.jmmc.jmal.ALX;
-import java.util.logging.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class has several methods useful to convert the Geocentric Earth Coordinate frame to Geographic coordinates
@@ -16,7 +17,7 @@ import java.util.logging.Level;
 public final class GeocentricCoords {
 
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(GeocentricCoords.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(GeocentricCoords.class.getName());
 
   /**
    * Forbidden constructor
@@ -73,9 +74,7 @@ public final class GeocentricCoords {
    * @param sph longitude, latitude in radians and the distance (m)
    */
   public static void dump(final String msg, final LonLatAlt sph) {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine(msg + " = " + sph.toString());
-    }
+    logger.debug("{} = {}", msg, sph);
   }
 
   /**

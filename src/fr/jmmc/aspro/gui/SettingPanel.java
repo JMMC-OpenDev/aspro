@@ -15,7 +15,8 @@ import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.logging.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.Timer;
@@ -31,7 +32,7 @@ public final class SettingPanel extends JPanel implements ObservationListener, D
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(SettingPanel.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(SettingPanel.class.getName());
   /** default mouse cursor refresh period = 100 ms */
   private static final int REFRESH_PERIOD = 100;
   /** enable / disable OIFits panel */
@@ -102,16 +103,14 @@ public final class SettingPanel extends JPanel implements ObservationListener, D
   private void enableMouseCursorRefreshTimer(final boolean enable) {
     if (enable) {
       if (!this.timerMouseCursorRefresh.isRunning()) {
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("Starting timer: " + this.timerMouseCursorRefresh);
-        }
+        logger.debug("Starting timer: {}", this.timerMouseCursorRefresh);
+
         this.timerMouseCursorRefresh.start();
       }
     } else {
       if (this.timerMouseCursorRefresh.isRunning()) {
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("Stopping timer: " + this.timerMouseCursorRefresh);
-        }
+        logger.debug("Stopping timer: {}", this.timerMouseCursorRefresh);
+
         this.timerMouseCursorRefresh.stop();
       }
     }
@@ -123,9 +122,7 @@ public final class SettingPanel extends JPanel implements ObservationListener, D
    */
   @Override
   public void dispose() {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("dispose : " + this);
-    }
+    logger.debug("dispose: {}", this);
 
     // call disposable components:
     if (observabilityPanel != null) {
@@ -222,8 +219,8 @@ public final class SettingPanel extends JPanel implements ObservationListener, D
    */
   @Override
   public void onProcess(final ObservationEvent event) {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("event [" + event.getType() + "] process IN");
+    if (logger.isDebugEnabled()) {
+      logger.debug("event [{}] process IN", event.getType());
     }
 
     final ObservationEventType type = event.getType();
@@ -343,8 +340,8 @@ public final class SettingPanel extends JPanel implements ObservationListener, D
         }
       }
     }
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("event [" + type + "] process OUT");
+    if (logger.isDebugEnabled()) {
+      logger.debug("event [{}] process OUT", event.getType());
     }
   }
 

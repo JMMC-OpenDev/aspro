@@ -11,6 +11,8 @@ import java.awt.Polygon;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class checks if an azimuth / elevation coordinate is over the telescope horizon
@@ -19,7 +21,7 @@ import java.util.Map;
 public final class HorizonService {
 
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(HorizonService.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(HorizonService.class.getName());
   /** singleton instance */
   private static final HorizonService instance = new HorizonService();
 

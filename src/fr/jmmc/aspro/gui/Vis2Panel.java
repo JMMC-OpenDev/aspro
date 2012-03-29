@@ -25,7 +25,8 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.IndexColorModel;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.logging.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.ChartUtilities;
@@ -49,12 +50,12 @@ import org.jfree.ui.TextAnchor;
  * @author bourgesl
  */
 public final class Vis2Panel extends javax.swing.JPanel implements ChartProgressListener,
-                                                                   ObservationListener, PDFExportable {
+        ObservationListener, PDFExportable {
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(Vis2Panel.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(Vis2Panel.class.getName());
   /** default color model (aspro - Rainbow) */
   private final static IndexColorModel RAINBOW_COLOR_MODEL = ColorModels.getColorModel("Rainbow");
   /** scaling factor to Mega Lambda for U,V points */
@@ -229,7 +230,7 @@ public final class Vis2Panel extends javax.swing.JPanel implements ChartProgress
     // error color:
     renderer.setCapLength(0d);
     renderer.setErrorPaint(new Color(192, 192, 192, 128));
-    
+
     this.aJMMC = ChartUtils.createXYTextAnnotation(AsproConstants.JMMC_ANNOTATION, 0, 0);
     this.aJMMC.setTextAnchor(TextAnchor.BOTTOM_RIGHT);
     this.aJMMC.setPaint(Color.DARK_GRAY);
@@ -245,7 +246,7 @@ public final class Vis2Panel extends javax.swing.JPanel implements ChartProgress
 
     // enable mouse wheel:
     this.chartPanel.setMouseWheelEnabled(true);
-    
+
     this.jPanelCenter.add(this.chartPanel);
   }
 
@@ -255,8 +256,8 @@ public final class Vis2Panel extends javax.swing.JPanel implements ChartProgress
    */
   @Override
   public void onProcess(final ObservationEvent event) {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("event [" + event.getType() + "] process IN");
+    if (logger.isDebugEnabled()) {
+      logger.debug("event [{}] process IN", event.getType());
     }
     switch (event.getType()) {
       case OIFITS_DONE:
@@ -266,8 +267,8 @@ public final class Vis2Panel extends javax.swing.JPanel implements ChartProgress
         break;
       default:
     }
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("event [" + event.getType() + "] process OUT");
+    if (logger.isDebugEnabled()) {
+      logger.debug("event [{}] process OUT", event.getType());
     }
   }
 
@@ -277,23 +278,19 @@ public final class Vis2Panel extends javax.swing.JPanel implements ChartProgress
    * @param oiFitsFile OIFits file to use
    */
   private void plot(final OIFitsFile oiFitsFile) {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("plot : " + oiFitsFile);
-    }
+    logger.debug("plot : {}", oiFitsFile);
 
     // refresh the plot :
     this.oiFitsFile = oiFitsFile;
-    
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("plot : refresh");
-    }
+
+    logger.debug("plot : refresh");
 
     final long start = System.nanoTime();
 
     this.updatePlot();
 
-    if (logger.isLoggable(Level.INFO)) {
-      logger.info("plot : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
+    if (logger.isInfoEnabled()) {
+      logger.info("plot : duration = {} ms.", 1e-6d * (System.nanoTime() - start));
     }
   }
 
@@ -307,7 +304,7 @@ public final class Vis2Panel extends javax.swing.JPanel implements ChartProgress
     // reset dataset:
     this.xyPlot.setDataset(null);
   }
-  
+
   /**
    * Show message or plot
    * @param show flag to indicate to show label
@@ -350,7 +347,7 @@ public final class Vis2Panel extends javax.swing.JPanel implements ChartProgress
     for (String station : array.getStaName()) {
       sb.append(station).append(' ');
     }
-    
+
     ChartUtils.addSubtitle(this.chart, sb.toString());
 
     ChartUtils.addSubtitle(this.chart, "Source: " + this.oiFitsFile.getOiTarget().getTarget()[0]);
@@ -374,7 +371,7 @@ public final class Vis2Panel extends javax.swing.JPanel implements ChartProgress
     } else {
       this.jLabelMessage.setText("No VIS2 data available: the target has no model.");
     }
-    
+
     showMessage(!hasData);
   }
 
@@ -384,7 +381,7 @@ public final class Vis2Panel extends javax.swing.JPanel implements ChartProgress
    */
   private boolean updateChart() {
     boolean hasData = false;
-    
+
     final XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) this.xyPlot.getRenderer();
 
     // try to fill with squared visibilities
@@ -398,7 +395,7 @@ public final class Vis2Panel extends javax.swing.JPanel implements ChartProgress
 
     // Prepare palette
     final Color[] colors = new Color[nWaves];
-    
+
     final IndexColorModel colorModel = RAINBOW_COLOR_MODEL;
 
     final int iMaxColor = colorModel.getMapSize() - 1;
@@ -411,7 +408,7 @@ public final class Vis2Panel extends javax.swing.JPanel implements ChartProgress
     for (int i = 0; i < nWaves; i++) {
       // invert palette to have (VIOLET - BLUE - GREEN - RED) ie color spectrum:
       value = iMaxColor - factor * i;
-      
+
       colors[i] = new Color(ImageUtils.getRGB(colorModel, iMaxColor, value, alphaMask), true);
     }
 
@@ -429,20 +426,20 @@ public final class Vis2Panel extends javax.swing.JPanel implements ChartProgress
     double x, y, err;
 
     for (int j = 0; j < nWaves; j++) {
-      
+
       // 1 color per spectral channel (i.e. per XYSeries) :
       yIntervalSeries = new YIntervalSeries("VIS2 W" + j, false, true);
       yIntervalSeries.setNotify(false);
 
       for (int i = 0; i < nRows; i++) {
-        
+
         x = toUVPlotScale(spatialFreq[i][j]);
         y = vis2Data[i][j];
         err = vis2Err[i][j];
-        
+
         if (!Double.isNaN(y)) {
           hasData = true;
-          
+
           if (x < minX) {
             minX = x;
           }
@@ -471,11 +468,11 @@ public final class Vis2Panel extends javax.swing.JPanel implements ChartProgress
     }
 
     this.xyPlot.setDataset(dataset);
-    
+
     if (!hasData) {
       return false;
     }
-    
+
     // set shape depending on error:
     renderer.setBaseShape(getPointShape(hasErr));
 
@@ -497,10 +494,9 @@ public final class Vis2Panel extends javax.swing.JPanel implements ChartProgress
     axis = (BoundedNumberAxis) this.xyPlot.getRangeAxis();
     axis.setBounds(new Range(minY, maxY));
     axis.setRange(minY, maxY);
-    
+
     return true;
   }
-  
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLabelMessage;
     private javax.swing.JPanel jPanelCenter;
@@ -514,19 +510,19 @@ public final class Vis2Panel extends javax.swing.JPanel implements ChartProgress
    */
   @Override
   public void chartProgress(final ChartProgressEvent event) {
-    if (logger.isLoggable(Level.FINE)) {
+    if (logger.isDebugEnabled()) {
       switch (event.getType()) {
         case ChartProgressEvent.DRAWING_STARTED:
           this.chartDrawStartTime = System.nanoTime();
           break;
         case ChartProgressEvent.DRAWING_FINISHED:
-          logger.fine("Drawing chart time : " + 1e-6d * (System.nanoTime() - this.chartDrawStartTime) + " ms.");
+          logger.debug("Drawing chart time = {} ms.", 1e-6d * (System.nanoTime() - this.chartDrawStartTime));
           this.chartDrawStartTime = 0l;
           break;
         default:
       }
     }
-    
+
     // Perform custom operations before/after chart rendering:
     // move JMMC annotation:
     this.aJMMC.setX(this.xyPlot.getDomainAxis().getUpperBound());
@@ -569,7 +565,7 @@ public final class Vis2Panel extends javax.swing.JPanel implements ChartProgress
     if (hasError) {
       return new Rectangle2D.Double(-3d, -3d, 6d, 6d);
     }
-    
+
     // equilateral triangle centered on its barycenter:
     final GeneralPath path = new GeneralPath();
 

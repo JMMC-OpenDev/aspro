@@ -14,7 +14,8 @@ import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.logging.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import javax.swing.JFileChooser;
 
 /**
@@ -27,7 +28,7 @@ public final class ExportOBVegaAction {
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(ExportOBVegaAction.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(ExportOBVegaAction.class.getName());
   /** double formatter for min elevation */
   protected final static NumberFormat df1 = new DecimalFormat("0.#");
   /** StarList MimeType */
@@ -54,9 +55,7 @@ public final class ExportOBVegaAction {
    * Execute the action.
    */
   public void process() {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("process");
-    }
+    logger.debug("process");
 
     File file = null;
 

@@ -34,7 +34,8 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import javax.swing.DefaultComboBoxModel;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
@@ -68,7 +69,7 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1L;
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(FitsImagePanel.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(FitsImagePanel.class.getName());
   /** image task prefix 'convertFitsImage-' */
   private static final String PREFIX_IMAGE_TASK = "convertFitsImage-";
   /** global thread counter */
@@ -298,9 +299,7 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
    */
   @Override
   public void dispose() {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("dispose : " + this);
-    }
+      logger.debug("dispose: {}", this);
 
     // unregister this instance as a Preference Observer :
     this.myPreferences.deleteObserver(this);
@@ -322,9 +321,7 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
    */
   @Override
   public void update(final Observable o, final Object arg) {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("Preferences updated on : " + this);
-    }
+      logger.debug("Preferences updated on : {}", this);
 
     final String colorModelPref = this.myPreferences.getPreference(Preferences.MODEL_IMAGE_LUT);
     final ColorScale colorScale = this.myPreferences.getImageColorScale();
@@ -362,9 +359,7 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
    */
   private void refreshPlot() {
     if (this.doAutoRefresh) {
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("refreshPlot");
-      }
+        logger.debug("refreshPlot");
       this.plot();
     }
   }
@@ -374,9 +369,7 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
    * This code is executed by the Swing Event Dispatcher thread (EDT)
    */
   private void plot() {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("plot : " + this.fitsImage);
-    }
+      logger.debug("plot : {}", this.fitsImage);
 
     // check if fits image is available :
     if (this.fitsImage == null) {
@@ -497,7 +490,7 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
       }
 
       if (logger.isInfoEnabled()) {
-        logger.info("compute : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
+        logger.info("compute : duration = {} ms.", 1e-6d * (System.nanoTime() - start));
       }
 
       return new ImageChartData(fitsImage, colorModel, usedColorScale, min, max, image);
@@ -696,9 +689,9 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
     // area reference :
     final Rectangle2D.Double imgRectRef = imageData.getFitsImage().getArea();
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("image rect     = " + imgRect);
-      logger.fine("image rect REF = " + imgRectRef);
+    if (logger.isDebugEnabled()) {
+      logger.debug("image rect     = {}", imgRect);
+      logger.debug("image rect REF = {}", imgRectRef);
     }
 
     // note : floor/ceil to be sure to have at least 1x1 pixel image
@@ -726,8 +719,8 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
     w = checkBounds(w, 1, imageWidth - x);
     h = checkBounds(h, 1, imageHeight - y);
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("sub image [" + x + ", " + y + " - " + w + ", " + h + "] - doCrop = " + doCrop);
+    if (logger.isDebugEnabled()) {
+      logger.debug("sub image [{}, {} - {}, {}] - doCrop = {}", new Object[] {x, y, w, h, doCrop});
     }
 
     doCrop = ((x != 0) || (y != 0) || (w != imageWidth) || (h != imageHeight));
@@ -843,13 +836,13 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
    */
   @Override
   public void chartProgress(final ChartProgressEvent event) {
-    if (logger.isLoggable(Level.FINE)) {
+    if (logger.isDebugEnabled()) {
       switch (event.getType()) {
         case ChartProgressEvent.DRAWING_STARTED:
           this.chartDrawStartTime = System.nanoTime();
           break;
         case ChartProgressEvent.DRAWING_FINISHED:
-          logger.fine("Drawing chart time : " + 1e-6d * (System.nanoTime() - this.chartDrawStartTime) + " ms.");
+          logger.debug("Drawing chart time = {} ms.", 1e-6d * (System.nanoTime() - this.chartDrawStartTime));
           this.chartDrawStartTime = 0l;
           break;
         default:

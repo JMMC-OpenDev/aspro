@@ -49,6 +49,8 @@ import org.jfree.data.xy.XYDataset;
 import org.jfree.text.TextUtilities;
 import org.jfree.ui.RectangleEdge;
 import org.jfree.ui.RectangleInsets;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Several static methods related to the JFreeChart library
@@ -57,7 +59,7 @@ import org.jfree.ui.RectangleInsets;
 public final class ChartUtils {
 
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(ChartUtils.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(ChartUtils.class.getName());
   /** cache for annotation fonts to autofit size */
   private final static Map<Integer, Font> cachedFonts = new HashMap<Integer, Font>();
   /** The default font for titles. */
@@ -229,13 +231,13 @@ public final class ChartUtils {
     do {
       f = ChartUtils.getFont(size);
 
-//      logger.severe("font      = " + f);
+//      logger.info("font      : {}", f);
       fm = g2d.getFontMetrics(f);
 
       // get pixel width of the given text with the current font :
       width = TextUtilities.getTextBounds(text, g2d, fm).getWidth();
 
-//      logger.severe("width     = " + width);
+//      logger.info("width     : {}", width);
 
       size--;
 
@@ -272,13 +274,13 @@ public final class ChartUtils {
     do {
       f = ChartUtils.getFont(size);
 
-//      logger.severe("font      = " + f);
+//      logger.info("font      : {}", f);
       fm = g2d.getFontMetrics(f);
 
       // get pixel height of the given text with the current font :
       height = TextUtilities.getTextBounds(text, g2d, fm).getHeight();
 
-//      logger.severe("height     = " + height);
+//      logger.info("height     : {}", height);
 
       size--;
 

@@ -15,7 +15,8 @@ import fr.jmmc.aspro.util.CombUtils;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.List;
-import java.util.logging.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This service is stateless to compute the station positions (X,Y) and the chosen baselines
@@ -24,7 +25,7 @@ import java.util.logging.Level;
 public final class InterferometerMapService {
 
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(InterferometerMapService.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(InterferometerMapService.class.getName());
   /** double formatter for baseline length */
   protected final static NumberFormat df2 = new DecimalFormat("0.00");
 
@@ -42,8 +43,8 @@ public final class InterferometerMapService {
    * @return InterferometerMapData container
    */
   public static InterferometerMapData compute(final ObservationSetting observation) {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("compute : " + ObservationManager.toString(observation));
+    if (logger.isDebugEnabled()) {
+      logger.debug("compute: {}", ObservationManager.toString(observation));
     }
     final InterferometerMapData data = new InterferometerMapData();
 
@@ -57,9 +58,9 @@ public final class InterferometerMapService {
       final InterferometerDescription id = ic.getInterferometer();
 
       final LonLatAlt position = id.getPosSph();
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("Site Long : " + Math.toDegrees(position.getLongitude()));
-        logger.fine("Site Lat  : " + Math.toDegrees(position.getLatitude()));
+      if (logger.isDebugEnabled()) {
+        logger.debug("Site Long: {}", Math.toDegrees(position.getLongitude()));
+        logger.debug("Site Lat : {}", Math.toDegrees(position.getLatitude()));
       }
 
       final double cosLat = Math.cos(position.getLatitude());

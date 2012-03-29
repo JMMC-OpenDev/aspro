@@ -10,7 +10,8 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import javax.swing.table.AbstractTableModel;
 
 /**
@@ -22,7 +23,7 @@ public final class CalibratorInfoTableModel extends AbstractTableModel {
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(CalibratorInfoTableModel.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(CalibratorInfoTableModel.class.getName());
   /** double formatter for number values */
   protected final static NumberFormat df3 = new DecimalFormat("0.0##");
 
@@ -112,9 +113,8 @@ public final class CalibratorInfoTableModel extends AbstractTableModel {
    * @param calInfos calibrator informations
    */
   public void setData(final CalibratorInformations calInfos) {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("setData[" + calInfos);
-    }
+    logger.debug("setData: {}", calInfos);
+
     resetData();
     processData(calInfos);
 

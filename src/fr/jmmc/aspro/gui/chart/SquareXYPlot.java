@@ -7,7 +7,8 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
-import java.util.logging.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.jfree.chart.axis.AxisSpace;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.plot.PlotRenderingInfo;
@@ -31,7 +32,7 @@ public final class SquareXYPlot extends XYPlot {
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(SquareXYPlot.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(SquareXYPlot.class.getName());
   /** flag to enable image anti aliasing and bicubic interpolation */
   public static final boolean USE_INTERPOLATION = true;
 
@@ -211,8 +212,8 @@ public final class SquareXYPlot extends XYPlot {
   public double getAspectRatio() {
     final double ratio = getRangeAxis(0).getRange().getLength() / getDomainAxis(0).getRange().getLength();
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("aspect ratio = " + ratio);
+    if (logger.isDebugEnabled()) {
+      logger.debug("aspect ratio: {}", ratio);
     }
 
     return ratio;

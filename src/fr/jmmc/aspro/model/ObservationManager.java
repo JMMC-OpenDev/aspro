@@ -51,7 +51,8 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.logging.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 /**
@@ -62,7 +63,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 public final class ObservationManager extends BaseOIManager implements Observer {
 
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(ObservationManager.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(ObservationManager.class.getName());
   /** flag to log a stack trace in method fireEvent() to debug events */
   private final static boolean DEBUG_FIRE_EVENT = false;
   /** configuration manager */
@@ -112,9 +113,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
    */
   @Override
   public void update(final Observable o, final Object arg) {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("Preferences updated on : " + this);
-    }
+    logger.debug("Preferences updated on : {}", this);
 
     final boolean newFastUserModel = this.myPreferences.isFastUserModel();
     if (this.useFastUserModel != newFastUserModel) {
@@ -158,8 +157,8 @@ public final class ObservationManager extends BaseOIManager implements Observer 
    */
   private void synchronizeObservations() {
     final ObservationSetting observation = getMainObservation();
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("synchronizeObservations : " + toString(observation));
+    if (logger.isDebugEnabled()) {
+      logger.debug("synchronizeObservations: {}", toString(observation));
     }
 
     // create a new observation collection :
@@ -187,8 +186,8 @@ public final class ObservationManager extends BaseOIManager implements Observer 
       newObsCollection.getObservations().add(newObservation);
     }
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("synchronizeObservations : obsCollection = " + toString(newObsCollection));
+    if (logger.isDebugEnabled()) {
+      logger.debug("synchronizeObservations : obsCollection: {}", toString(newObsCollection));
     }
 
     setObservationCollection(newObsCollection);
@@ -255,9 +254,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
   public String load(final File file) throws IOException, IllegalStateException, IllegalArgumentException {
     String message = null;
     if (file != null) {
-      if (logger.isLoggable(Level.INFO)) {
-        logger.info("Load observation from : " + file);
-      }
+      logger.info("Load observation from file: {}", file);
 
       final Object loaded = loadObject(file);
 
@@ -296,9 +293,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
    */
   public ObservationSetting load(final Reader reader) throws IOException, IllegalArgumentException {
     if (reader != null) {
-      if (logger.isLoggable(Level.INFO)) {
-        logger.info("Load observation from : " + reader);
-      }
+      logger.debug("Load observation from stream: ", reader);
 
       final Object loaded = loadObject(reader);
 
@@ -358,9 +353,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
    */
   public void save(final File file) throws IOException, IllegalStateException {
     if (file != null) {
-      if (logger.isLoggable(Level.INFO)) {
-        logger.info("Save observation to : " + file);
-      }
+      logger.info("Save observation to file: {}", file);
 
       final ObservationSetting observation = getMainObservation();
 
@@ -397,8 +390,8 @@ public final class ObservationManager extends BaseOIManager implements Observer 
    * Listeners : SettingPanel / BasicObservationForm / ObservabilityPanel / UVCoveragePanel
    */
   private void fireObservationLoaded() {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("fireObservationLoaded : " + toString(getMainObservation()));
+    if (logger.isDebugEnabled()) {
+      logger.debug("fireObservationLoaded: {}", toString(getMainObservation()));
     }
 
     fireEvent(new ObservationEvent(ObservationEventType.LOADED, getMainObservation()));
@@ -417,9 +410,9 @@ public final class ObservationManager extends BaseOIManager implements Observer 
     version.incTargetVersion();
     version.incMainVersion();
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("fireObservationTargetsChanged : " + toString(getMainObservation()));
-      logger.fine("observation version = " + getMainObservation().getVersion());
+    if (logger.isDebugEnabled()) {
+      logger.debug("fireObservationTargetsChanged: {}", toString(getMainObservation()));
+      logger.debug("observation version: {}", getMainObservation().getVersion());
     }
 
     fireEvent(new ObservationEvent(ObservationEventType.TARGET_CHANGED, getMainObservation()));
@@ -435,9 +428,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
    * @param target selected target
    */
   public void fireTargetSelectionChanged(final Target target) {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("fireTargetSelectionChange : " + target);
-    }
+    logger.debug("fireTargetSelectionChange: {}", target);
 
     fireEvent(new TargetSelectionEvent(target));
   }
@@ -464,8 +455,8 @@ public final class ObservationManager extends BaseOIManager implements Observer 
    * @param forceRefresh flag to force an observation refresh event (MAIN)
    */
   private void fireObservationUpdate(final boolean forceRefresh) {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("fireObservationUpdate : " + toString(getMainObservation()));
+    if (logger.isDebugEnabled()) {
+      logger.debug("fireObservationUpdate: {}", toString(getMainObservation()));
     }
 
     final UpdateObservationEvent event = new UpdateObservationEvent(getMainObservation());
@@ -473,13 +464,13 @@ public final class ObservationManager extends BaseOIManager implements Observer 
     fireEvent(event);
 
     if (forceRefresh) {
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("fireObservationUpdate : FORCE REFRESH - changed = " + event.getChanged());
+      if (logger.isDebugEnabled()) {
+        logger.debug("fireObservationUpdate : FORCE REFRESH - changed: {}", event.getChanged());
       }
       event.setChanged(UpdateObservationEvent.ChangeType.MAIN);
     } else {
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("fireObservationUpdate : changed = " + event.getChanged());
+      if (logger.isDebugEnabled()) {
+        logger.debug("fireObservationUpdate : changed: {}", event.getChanged());
       }
     }
 
@@ -501,9 +492,8 @@ public final class ObservationManager extends BaseOIManager implements Observer 
         default:
           break;
       }
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("observation version = " + version);
-      }
+
+      logger.debug("observation version = {}", version);
 
       // then synchronize the main observation with the observation collection used by computations :
       synchronizeObservations();
@@ -531,8 +521,8 @@ public final class ObservationManager extends BaseOIManager implements Observer 
    */
   private void fireObservationRefresh() {
     // use the observation collection used by computations :
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("fireObservationRefresh : " + toString(getObservationCollection()));
+    if (logger.isDebugEnabled()) {
+      logger.debug("fireObservationRefresh: {}", toString(getObservationCollection()));
     }
 
     fireEvent(new ObservationEvent(ObservationEventType.REFRESH, getObservationCollection()));
@@ -547,8 +537,8 @@ public final class ObservationManager extends BaseOIManager implements Observer 
    */
   private void fireObservationRefreshUV() {
     // use the observation collection used by computations :
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("fireObservationRefreshUV : " + toString(getObservationCollection()));
+    if (logger.isDebugEnabled()) {
+      logger.debug("fireObservationRefreshUV: {}", toString(getObservationCollection()));
     }
 
     fireEvent(new ObservationEvent(ObservationEventType.REFRESH_UV, getObservationCollection()));
@@ -564,8 +554,8 @@ public final class ObservationManager extends BaseOIManager implements Observer 
    */
   public void fireObservabilityDone(final ObservationCollection obsCollection, final List<ObservabilityData> obsDataList) {
     // use the given observation collection used by computations :
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("fireObservabilityDone : " + toString(obsCollection));
+    if (logger.isDebugEnabled()) {
+      logger.debug("fireObservabilityDone: {}", toString(obsCollection));
     }
 
     fireEvent(new ObservabilityEvent(obsCollection, obsDataList));
@@ -580,9 +570,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
    * @param warningContainer warning container
    */
   public void fireWarningsReady(final WarningContainer warningContainer) {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("fireWarningsReady : " + warningContainer);
-    }
+    logger.debug("fireWarningsReady: {}", warningContainer);
 
     fireEvent(new WarningContainerEvent(warningContainer));
   }
@@ -597,9 +585,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
    */
   public void fireOIFitsDone(final OIFitsFile oiFitsFile) {
     // use observation for computations :
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("fireOIFitsDone : " + oiFitsFile);
-    }
+    logger.debug("fireOIFitsDone: {}", oiFitsFile);
 
     fireEvent(new OIFitsEvent(oiFitsFile));
   }
@@ -612,16 +598,17 @@ public final class ObservationManager extends BaseOIManager implements Observer 
   private void fireEvent(final ObservationEvent event) {
     // ensure events are fired by Swing EDT :
     if (!SwingUtils.isEDT()) {
-      logger.log(Level.SEVERE, "invalid thread : use EDT", new Throwable());
+      logger.warn("invalid thread : use EDT", new Throwable());
     }
     if (DEBUG_FIRE_EVENT) {
-      logger.log(Level.SEVERE, "FIRE " + event
-              + (event.getVersion() != null ? (" on " + event.getVersion()) : ""), new Throwable());
+      if (event.getVersion() != null) {
+        logger.warn("FIRE {} on version = {}", new Object[]{event, event.getVersion(), new Throwable()});
+      } else {
+        logger.warn("FIRE {}", event, new Throwable());
+      }
     }
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("fireEvent : " + event);
-    }
+    logger.debug("fireEvent: {}", event);
 
     final long start = System.nanoTime();
 
@@ -629,8 +616,8 @@ public final class ObservationManager extends BaseOIManager implements Observer 
       listener.onProcess(event);
     }
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("fireEvent : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
+    if (logger.isDebugEnabled()) {
+      logger.debug("fireEvent: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
     }
   }
 
@@ -649,8 +636,8 @@ public final class ObservationManager extends BaseOIManager implements Observer 
 
     final boolean changed = !newValue.equals(when.getDate());
     if (changed) {
-      if (logger.isLoggable(Level.FINEST)) {
-        logger.finest("setWhen : " + newValue);
+      if (logger.isTraceEnabled()) {
+        logger.trace("setWhen: {}", newValue);
       }
       when.setDate(newValue);
     }
@@ -669,8 +656,8 @@ public final class ObservationManager extends BaseOIManager implements Observer 
 
     final boolean changed = when.isNightRestriction() != useNightLimits;
     if (changed) {
-      if (logger.isLoggable(Level.FINEST)) {
-        logger.finest("setNightRestriction : " + useNightLimits);
+      if (logger.isTraceEnabled()) {
+        logger.trace("setNightRestriction: {}", useNightLimits);
       }
       when.setNightRestriction(useNightLimits);
     }
@@ -689,8 +676,8 @@ public final class ObservationManager extends BaseOIManager implements Observer 
 
     final boolean changed = !atmQuality.equals(when.getAtmosphereQuality());
     if (changed) {
-      if (logger.isLoggable(Level.FINEST)) {
-        logger.finest("setAtmosphereQuality : " + atmQuality);
+      if (logger.isTraceEnabled()) {
+        logger.trace("setAtmosphereQuality: {}", atmQuality);
       }
       when.setAtmosphereQuality(atmQuality);
     }
@@ -710,8 +697,8 @@ public final class ObservationManager extends BaseOIManager implements Observer 
 
     final boolean changed = interferometerChoice.getMinElevation() != minElev;
     if (changed) {
-      if (logger.isLoggable(Level.FINEST)) {
-        logger.finest("setInterferometerMinElevation : " + minElev);
+      if (logger.isTraceEnabled()) {
+        logger.trace("setInterferometerMinElevation: {}", minElev);
       }
       interferometerChoice.setMinElevation(minElev);
     }
@@ -731,8 +718,8 @@ public final class ObservationManager extends BaseOIManager implements Observer 
 
     final boolean changed = !name.equals(interferometerChoice.getName());
     if (changed) {
-      if (logger.isLoggable(Level.FINEST)) {
-        logger.finest("setInterferometerConfigurationName : " + name);
+      if (logger.isTraceEnabled()) {
+        logger.trace("setInterferometerConfigurationName: {}", name);
       }
       interferometerChoice.setName(name);
       interferometerChoice.setInterferometerConfiguration(cm.getInterferometerConfiguration(name));
@@ -754,8 +741,8 @@ public final class ObservationManager extends BaseOIManager implements Observer 
 
     final boolean changed = !name.equals(instrumentChoice.getName());
     if (changed) {
-      if (logger.isLoggable(Level.FINEST)) {
-        logger.finest("setInstrumentConfigurationName : " + name);
+      if (logger.isTraceEnabled()) {
+        logger.trace("setInstrumentConfigurationName: {}", name);
       }
       instrumentChoice.setName(name);
       instrumentChoice.setInstrumentConfiguration(cm.getInterferometerInstrumentConfiguration(
@@ -794,8 +781,8 @@ public final class ObservationManager extends BaseOIManager implements Observer 
 
       if (!stations.equals(obsVariant.getStations())) {
         changed |= true;
-        if (logger.isLoggable(Level.FINEST)) {
-          logger.finest("setInstrumentConfigurationStations[" + i + "] : " + stations);
+        if (logger.isTraceEnabled()) {
+          logger.trace("setInstrumentConfigurationStations[{}]: {}", i, stations);
         }
         obsVariant.setStations(stations);
         obsVariant.setStationList(cm.getInstrumentConfigurationStations(
@@ -830,8 +817,8 @@ public final class ObservationManager extends BaseOIManager implements Observer 
     // pops can be null :
     final boolean changed = isChanged(pops, instrumentChoice.getPops());
     if (changed) {
-      if (logger.isLoggable(Level.FINEST)) {
-        logger.finest("setInstrumentConfigurationPoPs : " + pops);
+      if (logger.isTraceEnabled()) {
+        logger.trace("setInstrumentConfigurationPoPs: {}", pops);
       }
       instrumentChoice.setPops(pops);
       instrumentChoice.setPopList(cm.parseInstrumentPoPs(
@@ -855,8 +842,8 @@ public final class ObservationManager extends BaseOIManager implements Observer 
     // mode can be null :
     final boolean changed = isChanged(mode, instrumentChoice.getInstrumentMode());
     if (changed) {
-      if (logger.isLoggable(Level.FINEST)) {
-        logger.finest("setInstrumentMode : " + mode);
+      if (logger.isTraceEnabled()) {
+        logger.trace("setInstrumentMode: {}", mode);
       }
       instrumentChoice.setInstrumentMode(mode);
       instrumentChoice.setFocalInstrumentMode(cm.getInstrumentMode(
@@ -879,8 +866,8 @@ public final class ObservationManager extends BaseOIManager implements Observer 
     // period can be null :
     final boolean changed = isChanged(samplingPeriod, instrumentChoice.getSamplingPeriod());
     if (changed) {
-      if (logger.isLoggable(Level.FINEST)) {
-        logger.finest("setInstrumentSamplingPeriod : " + samplingPeriod);
+      if (logger.isTraceEnabled()) {
+        logger.trace("setInstrumentSamplingPeriod: {}", samplingPeriod);
       }
       instrumentChoice.setSamplingPeriod(samplingPeriod);
     }
@@ -900,8 +887,8 @@ public final class ObservationManager extends BaseOIManager implements Observer 
     // obsDuration can be null :
     final boolean changed = isChanged(obsDuration, instrumentChoice.getAcquisitionTime());
     if (changed) {
-      if (logger.isLoggable(Level.FINEST)) {
-        logger.finest("setInstrumentAcquisitionTime : " + obsDuration);
+      if (logger.isTraceEnabled()) {
+        logger.trace("setInstrumentAcquisitionTime: {}", obsDuration);
       }
       instrumentChoice.setAcquisitionTime(obsDuration);
     }
@@ -965,9 +952,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
     if (name != null && name.length() > 0) {
       final boolean changed = (getTarget(name) == null);
       if (changed) {
-        if (logger.isLoggable(Level.FINEST)) {
-          logger.finest("addTarget : " + name);
-        }
+        logger.trace("addTarget : {}", name);
 
         final Target t = new Target();
         t.setName(name);
@@ -1031,9 +1016,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
       getTargetUserInfos().getCalibrators(target).clear();
 
       if (getTargets().remove(target)) {
-        if (logger.isLoggable(Level.FINEST)) {
-          logger.finest("removeTarget : " + target);
-        }
+        logger.trace("removeTarget: {}", target);
 
         // fire change events :
         this.fireTargetChangedEvents();
@@ -1081,16 +1064,16 @@ public final class ObservationManager extends BaseOIManager implements Observer 
     }
 
     final double lambda = insMode.getWaveLength();
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("lambda = " + lambda);
+    if (logger.isDebugEnabled()) {
+      logger.debug("lambda: {}", lambda);
     }
 
     final Band band = Band.findBand(lambda);
     final SpectralBand insBand = SpectralBandUtils.findBand(band);
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("band    = " + band);
-      logger.fine("insBand = " + insBand);
+    if (logger.isDebugEnabled()) {
+      logger.debug("band: {}", band);
+      logger.debug("insBand: {}", insBand);
     }
 
     for (Target cal : calibrators) {
@@ -1107,7 +1090,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
             final Double udBand = cal.getCalibratorInfos().getUDDiameter(insBand);
 
             if (udBand != null) {
-              if (logger.isLoggable(Level.INFO)) {
+              if (logger.isInfoEnabled()) {
                 logger.info("Define uniform disk diameter for calibrator ["
                         + cal.getName() + "] using diameter UD_" + insBand + " = " + udBand);
               }
@@ -1119,7 +1102,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
               final BaseValue diam = cal.getCalibratorInfos().getAlternateDiameter();
 
               if (diam != null) {
-                if (logger.isLoggable(Level.INFO)) {
+                if (logger.isInfoEnabled()) {
                   logger.info("Define uniform disk diameter for calibrator ["
                           + cal.getName() + "] using diameter " + diam.getName() + " = " + diam.getValue());
                 }
@@ -1128,8 +1111,8 @@ public final class ObservationManager extends BaseOIManager implements Observer 
                 changed = true;
 
               } else {
-                if (logger.isLoggable(Level.INFO)) {
-                  logger.info("No diameter available for calibrator [" + cal.getName() + "], set to 0.0");
+                if (logger.isInfoEnabled()) {
+                  logger.info("No diameter available for calibrator [{}], set to 0.0", cal.getName());
                 }
 
                 diameterParameter.setValue(0d);
@@ -1140,8 +1123,8 @@ public final class ObservationManager extends BaseOIManager implements Observer 
         }
       }
     }
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("diameter(s) changed = " + changed);
+    if (logger.isDebugEnabled()) {
+      logger.debug("diameter(s) changed: {}", changed);
     }
     return changed;
   }
@@ -1206,8 +1189,8 @@ public final class ObservationManager extends BaseOIManager implements Observer 
     // haMin can be null :
     final boolean changed = isChanged(haMin, targetConf.getHAMin());
     if (changed) {
-      if (logger.isLoggable(Level.FINEST)) {
-        logger.finest("setTargetHAMin : " + haMin);
+      if (logger.isTraceEnabled()) {
+        logger.trace("setTargetHAMin: {}", haMin);
       }
       targetConf.setHAMin(haMin);
     }
@@ -1228,8 +1211,8 @@ public final class ObservationManager extends BaseOIManager implements Observer 
     // haMax can be null :
     final boolean changed = isChanged(haMax, targetConf.getHAMax());
     if (changed) {
-      if (logger.isLoggable(Level.FINEST)) {
-        logger.finest("setTargetHAMax : " + haMax);
+      if (logger.isTraceEnabled()) {
+        logger.trace("setTargetHAMax: {}", haMax);
       }
       targetConf.setHAMax(haMax);
     }
@@ -1253,8 +1236,8 @@ public final class ObservationManager extends BaseOIManager implements Observer 
     // ftMode can be null :
     final boolean changed = isChanged(mode, targetConf.getFringeTrackerMode());
     if (changed) {
-      if (logger.isLoggable(Level.FINEST)) {
-        logger.finest("setTargetFTMode : " + mode);
+      if (logger.isTraceEnabled()) {
+        logger.trace("setTargetFTMode: {}", mode);
       }
       targetConf.setFringeTrackerMode(mode);
     }
@@ -1269,9 +1252,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
    * @param oiFitsFile OIFits structure
    */
   public void setOIFitsFile(final OIFitsFile oiFitsFile) {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("setOIFitsFile : " + oiFitsFile);
-    }
+    logger.debug("setOIFitsFile: {}", oiFitsFile);
 
     // TODO: use a new class OIFitsData (version / File / Target) ...
 
@@ -1345,13 +1326,13 @@ public final class ObservationManager extends BaseOIManager implements Observer 
           valid = true;
 
         } catch (IllegalArgumentException iae) {
-          logger.log(Level.WARNING, "Incorrect fits image in file [" + userModel.getFile() + "]", iae);
+          logger.warn("Incorrect fits image in file [{}]", userModel.getFile(), iae);
           sb.append("Loading user model file [").append(userModel.getFile()).append("] failed:\n").append(iae.getMessage());
         } catch (FitsException fe) {
-          logger.log(Level.SEVERE, "FITS failure on file [" + userModel.getFile() + "]", fe);
+          logger.error("FITS failure on file [{}]", userModel.getFile(), fe);
           sb.append("Loading user model file [").append(userModel.getFile()).append("] failed:\n").append(fe.getMessage());
         } catch (IOException ioe) {
-          logger.log(Level.SEVERE, "IO failure on file [" + userModel.getFile() + "]", ioe);
+          logger.error("IO failure on file [{}]", userModel.getFile(), ioe);
           sb.append("Loading user model file [").append(userModel.getFile()).append("] failed:\n").append(ioe.getMessage());
         } finally {
           if (!valid) {
@@ -1377,7 +1358,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
     if (userModel != null) {
       final String filePath = userModel.getFile();
 
-      logger.info("checking file path [" + filePath + "]");
+      logger.info("checking file path [{}]", filePath);
 
       final File file = FileUtils.getFile(filePath);
 
@@ -1427,8 +1408,8 @@ public final class ObservationManager extends BaseOIManager implements Observer 
 
     final double maxBaseLine = intConf.getMaxBaseLine();
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("interferometer configuration : " + intConf.getName() + "; baseline max= " + maxBaseLine);
+    if (logger.isDebugEnabled()) {
+      logger.debug("interferometer configuration: {}; baseline max = {}", intConf.getName(), maxBaseLine);
     }
 
     // TODO: get correct value in the UVCoveragePanel instead ...
@@ -1470,9 +1451,9 @@ public final class ObservationManager extends BaseOIManager implements Observer 
       final String defInterferometer = cm.getInterferometerNames().get(0);
       final String defInterferometerConfiguration = cm.getInterferometerConfigurationNames(defInterferometer).get(0);
 
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("default Interferometer = " + defInterferometer);
-        logger.fine("default InterferometerConfiguration = " + defInterferometerConfiguration);
+      if (logger.isDebugEnabled()) {
+        logger.debug("default Interferometer: {}", defInterferometer);
+        logger.debug("default InterferometerConfiguration: {}", defInterferometerConfiguration);
       }
 
       final InterferometerConfigurationChoice interferometerChoice = new InterferometerConfigurationChoice();
@@ -1485,9 +1466,9 @@ public final class ObservationManager extends BaseOIManager implements Observer 
       final String defInstrument = cm.getInterferometerInstrumentNames(observation.getInterferometerConfiguration().getName()).get(0);
       final String defInstrumentConfiguration = cm.getInstrumentConfigurationNames(observation.getInterferometerConfiguration().getName(), defInstrument).get(0);
 
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("default Instrument = " + defInstrument);
-        logger.fine("default InstrumentConfiguration = " + defInstrumentConfiguration);
+      if (logger.isDebugEnabled()) {
+        logger.debug("default Instrument: {}", defInstrument);
+        logger.debug("default InstrumentConfiguration: {}", defInstrumentConfiguration);
       }
 
       final FocalInstrumentConfigurationChoice instrumentChoice = new FocalInstrumentConfigurationChoice();
@@ -1565,8 +1546,8 @@ public final class ObservationManager extends BaseOIManager implements Observer 
     // instrument mode can be undefined :
     instrumentChoice.setFocalInstrumentMode(cm.getInstrumentMode(interferometerConfiguration, instrument, instrumentChoice.getInstrumentMode()));
 
-    if (logger.isLoggable(Level.FINEST)) {
-      logger.finest("updateObservation : " + toString(observation));
+    if (logger.isTraceEnabled()) {
+      logger.trace("updateObservation: {}", toString(observation));
     }
   }
 
@@ -1591,9 +1572,8 @@ public final class ObservationManager extends BaseOIManager implements Observer 
     // trim to be sure (xml manually modified) :
     final String stationNames = stationConf.trim();
 
-    if (logger.isLoggable(Level.INFO)) {
-      logger.info("the instrument configuration [" + stationNames + "] is incorrect, trying to match a possible configuration ...");
-    }
+    logger.info("the instrument configuration [{}] is incorrect, trying to match a possible configuration ...",
+            stationNames);
 
     // A0 B0 C0 is equivalent to C0 B0 A0
     final String[] stations = stationNames.split(" ");
@@ -1630,17 +1610,17 @@ public final class ObservationManager extends BaseOIManager implements Observer 
       // recycle :
       sb.setLength(0);
 
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("trying instrument configuration [" + stationIds + "]");
+      if (logger.isDebugEnabled()) {
+        logger.debug("trying instrument configuration: {}", stationIds);
       }
 
       // find station list corresponding to the station ids :
       stationList = cm.getInstrumentConfigurationStations(interferometerConfiguration, instrumentName, stationIds);
 
       if (stationList != null) {
-        if (logger.isLoggable(Level.INFO)) {
-          logger.info("the correct instrument configuration is [" + stationIds + "]. Save your file to keep this modification");
-        }
+        logger.info("the correct instrument configuration is [{}]. Save your file to keep this modification",
+                stationIds);
+
         return stationIds;
       }
     }

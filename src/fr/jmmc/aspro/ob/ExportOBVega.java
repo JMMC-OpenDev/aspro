@@ -27,7 +27,8 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.List;
-import java.util.logging.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class implements the Star List generation for the CHARA Vega instrument.
@@ -37,7 +38,7 @@ import java.util.logging.Level;
 public final class ExportOBVega {
 
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(ExportOBVega.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(ExportOBVega.class.getName());
   /** double formatter for magnitudes */
   private final static NumberFormat df2 = new DecimalFormat("0.00");
   /** default value for undefined angular diameter = 99 */
@@ -117,9 +118,7 @@ public final class ExportOBVega {
    * @throws IOException if an I/O exception occured while writing the observing block
    */
   public static void process(final File file) throws IOException {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("generate file : " + file);
-    }
+    logger.debug("generate file: {}", file);
 
     // use main observation :
     final ObservationSetting observation = ObservationManager.getInstance().getMainObservation();
@@ -158,8 +157,8 @@ public final class ExportOBVega {
         // Get ID PIVOT of the science target (null)
         scienceTargetId = getPivotIdentifier(target);
 
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("target : " + target.getName() + " - PIVOT: " + scienceTargetId);
+        if (logger.isDebugEnabled()) {
+          logger.debug("target: {} - PIVOT: {}", target.getName(), scienceTargetId);
         }
 
         scienceTargetName = processTarget(sb, obsData, target, baseLine, charaSetup, vegaSetup, 0, null, scienceTargetId);
@@ -273,17 +272,17 @@ public final class ExportOBVega {
     final boolean isCalibrator = (calibratorIndex > 0);
 
     final String hdId = target.getIdentifier(HD_CATALOG);
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("target : " + target.getName() + " - " + hdId);
+    if (logger.isDebugEnabled()) {
+      logger.debug("target: {} - HD: {}", target.getName(), hdId);
     }
     if (hdId == null) {
-      logger.warning("Missing HD identifier for target [" + target + "]");
+      logger.warn("Missing HD identifier for target [{}]", target);
     }
 
     // Get target HA ranges :
     final List<Range> rangesHA = getTargetHARange(obsData, target);
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("rangesHA : " + rangesHA);
+    if (logger.isDebugEnabled()) {
+      logger.debug("rangesHA: {}", rangesHA);
     }
 
     // Skip unobservable target ?
@@ -444,8 +443,8 @@ public final class ExportOBVega {
     if (starData != null) {
       final List<Range> obsRangesHA = starData.getObsRangesHA();
 
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("obsRangesHA = " + obsRangesHA);
+      if (logger.isDebugEnabled()) {
+        logger.debug("obsRangesHA: {}", obsRangesHA);
       }
 
       if (obsRangesHA != null) {
@@ -464,15 +463,15 @@ public final class ExportOBVega {
             haMax = targetConf.getHAMax().doubleValue();
           }
         }
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("ha min    : " + haMin);
-          logger.fine("ha max    : " + haMax);
+        if (logger.isDebugEnabled()) {
+          logger.debug("ha min    : {}", haMin);
+          logger.debug("ha max    : {}", haMax);
         }
 
         final List<Range> limRangesHA = Range.restrictRange(obsRangesHA, haMin, haMax);
 
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("limRangesHA = " + limRangesHA);
+        if (logger.isDebugEnabled()) {
+          logger.debug("limRangesHA: {}", limRangesHA);
         }
         return limRangesHA;
       }
@@ -529,8 +528,8 @@ public final class ExportOBVega {
     // 11.No Image = 1000
     sb.append(getInstrumentModeParameter(insMode, PARAM_FRAMES)).append(SEPARATOR);
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("Chara Setup : " + sb.toString());
+    if (logger.isDebugEnabled()) {
+      logger.debug("Chara Setup: {}", sb.toString());
     }
 
     return sb.toString();
@@ -596,8 +595,8 @@ public final class ExportOBVega {
       sb.append(telescope).append(SEPARATOR).append(pop).append(SEPARATOR).append(switchyard).append(SEPARATOR);
     }
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("Chara Setup : " + sb.toString());
+    if (logger.isDebugEnabled()) {
+      logger.debug("Chara Setup: {}", sb.toString());
     }
 
     return sb.toString();

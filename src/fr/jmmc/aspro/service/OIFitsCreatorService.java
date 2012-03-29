@@ -43,7 +43,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
-import java.util.logging.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class contains the code to create OIFits structure from the current observation and performs noise modeling
@@ -52,7 +53,7 @@ import java.util.logging.Level;
 public final class OIFitsCreatorService {
 
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(OIFitsCreatorService.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(OIFitsCreatorService.class.getName());
   /** target Id */
   private final static short TARGET_ID = (short) 1;
   /** enable the OIFits validation */
@@ -175,7 +176,7 @@ public final class OIFitsCreatorService {
     }
 
     // Prepare the noise service :
-    
+
     // note: NoiseService parameter dependencies:
     // observation {target}
     // parameter: warningContainer
@@ -204,9 +205,9 @@ public final class OIFitsCreatorService {
     this.arrayName = this.observation.getInterferometerConfiguration().getName();
     this.instrumentName = this.observation.getInstrumentConfiguration().getName();
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("arrName : " + this.arrayName);
-      logger.fine("insName : " + this.instrumentName);
+    if (logger.isDebugEnabled()) {
+      logger.debug("arrName: {}", this.arrayName);
+      logger.debug("insName: {}", this.instrumentName);
     }
 
     // Create beams and base line mappings :
@@ -265,8 +266,8 @@ public final class OIFitsCreatorService {
       this.oiFitsFile.removeOiTable(vis);
     }
 
-    if (logger.isLoggable(Level.INFO)) {
-      logger.info("createOIFits : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
+    if (logger.isInfoEnabled()) {
+      logger.info("createOIFits: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
     }
 
     if (DO_VALIDATE) {
@@ -274,8 +275,8 @@ public final class OIFitsCreatorService {
       this.oiFitsFile.check(checker);
 
       // validation results
-      if (logger.isLoggable(Level.INFO)) {
-        logger.info("createOIFits : validation results\n" + checker.getCheckReport());
+      if (logger.isInfoEnabled()) {
+        logger.info("createOIFits: validation results\n{}", checker.getCheckReport());
       }
     }
 
@@ -475,10 +476,9 @@ public final class OIFitsCreatorService {
 
       final int nPoints = this.nHAPoints * this.nBaseLines * this.nWaveLengths;
 
-      if (logger.isLoggable(Level.INFO)) {
-        logger.info("computeModelVisibilities: " + nPoints + " points - please wait ...");
+      if (logger.isInfoEnabled()) {
+        logger.info("computeModelVisibilities: {} points - please wait ...", nPoints);
       }
-
 
       // Allocate data array for complex visibility and error :
       final Complex[][] cVis = new Complex[this.nHAPoints * this.nBaseLines][this.nWaveLengths];
@@ -568,7 +568,7 @@ public final class OIFitsCreatorService {
         // execute jobs in parallel:
         final Future<?>[] futures = jobExecutor.fork(jobs);
 
-        logger.fine("wait for jobs to terminate ...");
+        logger.debug("wait for jobs to terminate ...");
 
         jobExecutor.join("OIFitsCreatorService.computeModelVisibilities", futures);
 
@@ -577,7 +577,9 @@ public final class OIFitsCreatorService {
         jobs[0].run();
       }
 
-      logger.info("computeModelVisibilities: duration = " + (1e-6d * (System.nanoTime() - start)) + " ms.");
+      if (logger.isInfoEnabled()) {
+        logger.info("computeModelVisibilities: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
+      }
 
       this.visComplex = cVis;
       this.visError = cVisError;
@@ -865,8 +867,8 @@ public final class OIFitsCreatorService {
       triplets.add(Triplet.create(idx, this.baseLineMapping));
     }
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("triplets  = " + triplets);
+    if (logger.isDebugEnabled()) {
+      logger.debug("triplets: {}", triplets);
     }
 
     // Get OI_VIS table :
@@ -956,9 +958,9 @@ public final class OIFitsCreatorService {
         // Find baseline AB = 12 :
         pos = relPos[0];
 
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("vis baseline = " + Arrays.toString(visStaIndexes[vp + pos]));
-          logger.fine("T3  baseline = " + Arrays.toString(triplet.getBaselineIndexes()[0]));
+        if (logger.isDebugEnabled()) {
+          logger.debug("vis baseline: {}", Arrays.toString(visStaIndexes[vp + pos]));
+          logger.debug("T3  baseline: {}", Arrays.toString(triplet.getBaselineIndexes()[0]));
         }
 
         // pure complex visibility data :
@@ -969,9 +971,9 @@ public final class OIFitsCreatorService {
         // Find baseline BC = 23 :
         pos = relPos[1];
 
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("vis baseline = " + Arrays.toString(visStaIndexes[vp + pos]));
-          logger.fine("T3  baseline = " + Arrays.toString(triplet.getBaselineIndexes()[1]));
+        if (logger.isDebugEnabled()) {
+          logger.debug("vis baseline: {}", Arrays.toString(visStaIndexes[vp + pos]));
+          logger.debug("T3  baseline: {}", Arrays.toString(triplet.getBaselineIndexes()[1]));
         }
 
         // pure complex visibility data :
@@ -982,14 +984,14 @@ public final class OIFitsCreatorService {
         // Find baseline AC = 13 :
         pos = relPos[2];
 
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("vis baseline = " + Arrays.toString(visStaIndexes[vp + pos]));
-          logger.fine("T3  baseline = " + Arrays.toString(triplet.getBaselineIndexes()[2]));
+        if (logger.isDebugEnabled()) {
+          logger.debug("vis baseline: {}", Arrays.toString(visStaIndexes[vp + pos]));
+          logger.debug("T3  baseline: {}", Arrays.toString(triplet.getBaselineIndexes()[2]));
         }
 
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("UV 13    = " + visUCoords[vp + pos] + ", " + visVCoords[vp + pos]);
-          logger.fine("UV 12+23 = " + (u12 + u23) + ", " + (v12 + v23));
+        if (logger.isDebugEnabled()) {
+          logger.debug("UV 13    = ({}, {})", visUCoords[vp + pos], visVCoords[vp + pos]);
+          logger.debug("UV 12+23 = ({}, {})", (u12 + u23), (v12 + v23));
         }
 
         // pure complex visibility data :
@@ -1113,10 +1115,10 @@ public final class OIFitsCreatorService {
               });
     }
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("BaseLine indexes = ");
+    if (logger.isDebugEnabled()) {
+      logger.debug("BaseLine indexes = ");
       for (short[] idx : baseLineIndexes.values()) {
-        logger.fine(" " + idx[0] + " " + idx[1]);
+        logger.debug("\t{} {}", idx[0], idx[1]);
       }
     }
 

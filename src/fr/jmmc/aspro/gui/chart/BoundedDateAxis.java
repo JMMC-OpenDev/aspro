@@ -6,6 +6,8 @@ package fr.jmmc.aspro.gui.chart;
 import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.event.AxisChangeEvent;
 import org.jfree.data.Range;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This customized date axis uses bounds to limits its expansion (zoom out).
@@ -19,7 +21,7 @@ public final class BoundedDateAxis extends DateAxis {
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(BoundedDateAxis.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(BoundedDateAxis.class.getName());
 
   /* members */
   /** axis bounds */

@@ -5,7 +5,8 @@ package fr.jmmc.aspro.gui.chart;
 
 import java.awt.Font;
 import java.awt.Graphics2D;
-import java.util.logging.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class gathers rendering options used when rendering the JFreeChart plot
@@ -14,7 +15,7 @@ import java.util.logging.Level;
 public final class ObservabilityPlotContext {
 
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(ObservabilityPlotContext.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(ObservabilityPlotContext.class.getName());
   /** ObservabilityPlotContext singleton */
   private static final ObservabilityPlotContext instance = new ObservabilityPlotContext();
   /** default value for flag hideTextDontFit */
@@ -189,8 +190,8 @@ public final class ObservabilityPlotContext {
       }
     }
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("autoFitDiamondSize : " + scale + " <=> " + (scale * displaySize));
+    if (logger.isDebugEnabled()) {
+      logger.debug("autoFitDiamondSize: {} <=> {}", scale, (scale * displaySize));
     }
 
     this.autoFitDiamondScale = scale;
@@ -242,8 +243,8 @@ public final class ObservabilityPlotContext {
 
     final Font bestFont = ChartUtils.autoFitTextWidth(g2d, AUTO_FIT_TIME, maxWidth, getMinSizeFont(), MAX_SIZE_FONT, !isHideAnnotationTooSmall());
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("autoFitTimeWidth : " + bestFont);
+    if (logger.isDebugEnabled()) {
+      logger.debug("autoFitTimeWidth: {}", bestFont);
     }
 
     this.autoFitTimeFont = bestFont;
@@ -322,8 +323,8 @@ public final class ObservabilityPlotContext {
 
     this.autoFitHalfTickLength = halfTickLen;
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("autoFitTickLength : " + scale + " <=> " + halfTickLen);
+    if (logger.isDebugEnabled()) {
+      logger.debug("autoFitTickLength: {} <=> {}", scale, halfTickLen);
     }
 
     return halfTickLen;
@@ -348,8 +349,8 @@ public final class ObservabilityPlotContext {
 
     final Font bestFont = ChartUtils.autoFitTextHeight(g2d, AUTO_FIT_TIP, maxHeight, getMinSizeFont(), MAX_SIZE_FONT, !isHideAnnotationTooSmall());
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("autoFitTipFont : " + bestFont);
+    if (logger.isDebugEnabled()) {
+      logger.debug("autoFitTipFont: {}", bestFont);
     }
 
     this.autoFitTipFont = bestFont;

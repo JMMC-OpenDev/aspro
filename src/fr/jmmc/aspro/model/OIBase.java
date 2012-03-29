@@ -5,6 +5,8 @@ package fr.jmmc.aspro.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This is a base class for all generated classes in model.oi (Optical Interferometry Data Model)
@@ -12,7 +14,7 @@ import java.util.List;
  */
 public class OIBase implements Cloneable {
   /** Class logger for aspro model classes */
-  protected static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger("fr.jmmc.aspro.model");
+  protected static final Logger logger = LoggerFactory.getLogger("fr.jmmc.aspro.model");
 
   /**
    * Public Constructor

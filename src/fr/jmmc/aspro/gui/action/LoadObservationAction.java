@@ -14,7 +14,8 @@ import fr.jmmc.jmcs.gui.action.RegisteredAction;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
-import java.util.logging.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import javax.swing.JFileChooser;
 
 /**
@@ -30,7 +31,7 @@ public final class LoadObservationAction extends RegisteredAction {
   /** Action name. This name is used to register to the ActionRegistrar */
   public final static String actionName = "loadObservation";
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(className);
+  private static final Logger logger = LoggerFactory.getLogger(className);
   /** AsproX MimeType */
   private final static MimeType mimeType = MimeType.ASPRO_OBSERVATION;
 
@@ -48,9 +49,8 @@ public final class LoadObservationAction extends RegisteredAction {
    */
   @Override
   public void actionPerformed(final ActionEvent evt) {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("actionPerformed");
-    }
+    logger.debug("actionPerformed");
+
     final ObservationManager om = ObservationManager.getInstance();
 
     File file = null;

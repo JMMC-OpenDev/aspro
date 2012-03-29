@@ -28,7 +28,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JFormattedTextField;
 import javax.swing.JList;
@@ -55,7 +56,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(TargetForm.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(TargetForm.class.getName());
   /** Simbad URL (query by identifier) */
   private static final String SIMBAD_QUERY_ID = "http://simbad.u-strasbg.fr/simbad/sim-id?Ident=";
   /** custom number field formatter */
@@ -257,9 +258,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
 
             final Target target = (Target) userObject;
 
-            if (logger.isLoggable(Level.FINE)) {
-              logger.fine("tree selection : " + target);
-            }
+            logger.debug("tree selection: {}", target);
 
             final boolean isCalibrator = isCalibrator(target);
 
@@ -435,8 +434,8 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
         return;
       }
 
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("field " + field.getName() + " new: " + value + " old: " + oldValue);
+      if (logger.isDebugEnabled()) {
+        logger.debug("field {} new: {} old: {}", new Object[]{field.getName(), value, oldValue});
       }
 
       if (value != null) {
@@ -447,8 +446,8 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
         if (field == this.jFieldParaErr) {
           // check if error is negative :
           if (val < 0d) {
-            if (logger.isLoggable(Level.FINE)) {
-              logger.fine("Parallax Error negative : " + val);
+            if (logger.isDebugEnabled()) {
+              logger.debug("Parallax Error negative: {}", val);
             }
 
             field.setValue(oldValue);
@@ -457,8 +456,8 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
         } else if (field.getName().startsWith("FLUX")) {
           // check if magnitudes are in range [-30;100]
           if (val < -30d || val > 100d) {
-            if (logger.isLoggable(Level.FINE)) {
-              logger.fine("Magnitude " + field.getName() + " invalid : " + val);
+            if (logger.isDebugEnabled()) {
+              logger.debug("Magnitude {} invalid : {}", field.getName(), val);
             }
 
             field.setValue(oldValue);
@@ -493,7 +492,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
       } else if (field == this.jFieldMagN) {
         this.currentTarget.setFLUXN(value);
       } else {
-        logger.severe("unsupported field : " + field);
+        logger.warn("unsupported field: {}", field);
       }
     }
   }
@@ -507,9 +506,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
 
       final String text = this.jTextAreaTargetInfos.getText();
 
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("user infos : " + text);
-      }
+      logger.debug("user infos: {}", text);
 
       getTargetUserInformation(this.currentTarget).setDescription((text.length() > 0) ? text : null);
     }
@@ -1121,19 +1118,16 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
   private void jButtonSimbadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSimbadActionPerformed
     final String url = SIMBAD_QUERY_ID + Urls.encode(this.currentTarget.getName());
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("Simbad url = " + url);
-    }
+    logger.debug("Simbad url = {}", url);
 
     BrowserLauncher.openURL(url);
   }//GEN-LAST:event_jButtonSimbadActionPerformed
 
   private void jToggleButtonCalibratorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButtonCalibratorActionPerformed
-
     final boolean isCalibrator = this.jToggleButtonCalibrator.isSelected();
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("isCalibrator = " + isCalibrator + " for " + this.currentTarget.getName());
+    if (logger.isDebugEnabled()) {
+      logger.debug("isCalibrator = {} for {}", isCalibrator, this.currentTarget.getName());
     }
 
     if (isCalibrator) {
@@ -1245,15 +1239,13 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
       if (userObject instanceof Target) {
         final Target target = (Target) userObject;
 
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("tree selection : " + target);
-        }
+        logger.debug("tree selection: {}", target);
 
         // remove the current calibrator from its science target :
         if (isCalibrator(target)) {
 
-          if (logger.isLoggable(Level.FINE)) {
-            logger.fine("remove calibrator " + target.getName());
+          if (logger.isDebugEnabled()) {
+            logger.debug("remove calibrator: {}", target.getName());
           }
 
           // Parent can be a target or null :
@@ -1305,18 +1297,14 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
       if (userObject instanceof Target) {
         final Target target = (Target) userObject;
 
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("tree selection : " + target);
-        }
+        logger.debug("tree selection: {}", target);
 
         userObject = nextNode.getUserObject();
 
         if (userObject instanceof Target) {
           final Target refTarget = (Target) userObject;
 
-          if (logger.isLoggable(Level.FINE)) {
-            logger.fine("tree selection : " + refTarget);
-          }
+          logger.debug("tree selection: {}", refTarget);
 
           // both are calibrators or not (same level in the tree):
           final boolean isCalibrator = isCalibrator(target);
@@ -1348,18 +1336,14 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
       if (userObject instanceof Target) {
         final Target target = (Target) userObject;
 
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("tree selection : " + target);
-        }
+        logger.debug("tree selection: {}", target);
 
         userObject = prevNode.getUserObject();
 
         if (userObject instanceof Target) {
           final Target refTarget = (Target) userObject;
 
-          if (logger.isLoggable(Level.FINE)) {
-            logger.fine("tree selection : " + refTarget);
-          }
+          logger.debug("tree selection: {}", refTarget);
 
           // both are calibrators or not (same level in the tree):
           final boolean isCalibrator = isCalibrator(target);
@@ -1389,8 +1373,9 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
    * @param after true to move the given target after the reference target; false before
    */
   private void moveTarget(final Target target, final Target refTarget, final Target parentTarget, final boolean after) {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("moveTarget - after: " + after + "\ntarget: " + target + "\nrefTarget: " + refTarget + "\nparentTarget: " + parentTarget);
+    if (logger.isDebugEnabled()) {
+      logger.debug("moveTarget - after: {}\ntarget: {}\nrefTarget: {}\nparentTarget: {}",
+              new Object[]{after, target, refTarget, parentTarget});
     }
 
     final String name = target.getName();
@@ -1441,7 +1426,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     if (refPos != -1) {
       targets.add(refPos + ((after) ? 1 : 0), target);
     } else {
-      logger.info("reference target not found: " + refTarget);
+      logger.info("reference target not found: {}", refTarget);
 
       // anyway: restore target:
       if (after) {
@@ -1457,14 +1442,11 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
    * @param targets target list to sort (modified)
    */
   private static void sortTargets(final List<Target> targets) {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("targets to sort : " + targets);
-    }
+    logger.debug("targets to sort: {}", targets);
+
     Collections.sort(targets, TargetRAComparator.getInstance());
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("targets sorted   : " + targets);
-    }
+    logger.debug("targets sorted: {}", targets);
   }
 
   /**

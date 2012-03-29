@@ -13,7 +13,8 @@ import java.io.Writer;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Source;
@@ -32,9 +33,9 @@ import javax.xml.transform.stream.StreamSource;
  * @author bourgesl
  */
 public final class XmlFactory {
-  
+
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(XmlFactory.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(XmlFactory.class.getName());
   /** encoding used for XML and XSL documents */
   public static final String ENCODING = "UTF-8";
   /** default buffer size for XSLT result document */
@@ -196,12 +197,10 @@ public final class XmlFactory {
    * @throws IllegalArgumentException if transformation failure or the xsl file path is empty or I/O exception occurs while reading XSLT
    */
   private static void transform(final String xmlSource, final String xslFilePath,
-                                final boolean doCacheXsl, final Writer out)
+          final boolean doCacheXsl, final Writer out)
           throws IllegalStateException, IllegalArgumentException {
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("XmlFactory.transform : enter : xslFilePath : " + xslFilePath);
-    }
+    logger.debug("XmlFactory.transform : enter : xslFilePath : {}", xslFilePath);
 
     if ((xmlSource != null) && (xslFilePath != null)) {
       final Transformer tf;
@@ -212,16 +211,12 @@ public final class XmlFactory {
         tf = newTransformer(resolveXSLTPath(xslFilePath));
       }
 
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("XmlFactory.transform : XML Source : " + xmlSource);
-      }
+      logger.debug("XmlFactory.transform : XML Source : {}", xmlSource);
 
       asString(tf, new StreamSource(new StringReader(xmlSource)), out);
     }
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("XmlFactory.transform : exit : " + out);
-    }
+    logger.debug("XmlFactory.transform : exit : {}", out);
   }
 
   /**
@@ -249,20 +244,18 @@ public final class XmlFactory {
 
       cachedTemplates.put(xslFilePath, tmp);
 
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("XmlFactory.loadXsl : template : " + Integer.toHexString(tmp.hashCode()));
+      if (logger.isDebugEnabled()) {
+        logger.debug("XmlFactory.loadXsl : template: {}", Integer.toHexString(tmp.hashCode()));
       }
     }
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("XmlFactory.loadXsl : template in cache : " + Integer.toHexString(tmp.hashCode()));
+    if (logger.isDebugEnabled()) {
+      logger.debug("XmlFactory.loadXsl : template in cache: {}", Integer.toHexString(tmp.hashCode()));
     }
 
     tf = newTransformer(tmp);
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("XmlFactory.loadXsl : xslt : " + tf);
-    }
+    logger.debug("XmlFactory.loadXsl : xslt : {}", tf);
 
     return tf;
   }
@@ -286,9 +279,7 @@ public final class XmlFactory {
 
     final URL url = FileUtils.getResource(xslFilePath);
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("XmlFactory.resolveXSLTPath : url : " + url);
-    }
+    logger.debug("XmlFactory.resolveXSLTPath : url : {}", url);
 
     try {
       return new StreamSource(new BufferedInputStream(url.openStream()));

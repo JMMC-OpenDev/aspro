@@ -6,7 +6,8 @@ package fr.jmmc.aspro.model;
 import fr.jmmc.aspro.model.observability.PopCombination;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class gathers several variables used by the observability computation to enhance performance
@@ -16,7 +17,7 @@ import java.util.logging.Level;
 public final class ObservabilityContext {
 
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(ObservabilityContext.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(ObservabilityContext.class.getName());
   /* members */
   /** temporary range limits array (for performance) to merge HA ranges with Rise/set range */
   private RangeLimit[] flatRangeLimits = null;
@@ -39,8 +40,8 @@ public final class ObservabilityContext {
    * @param nBaseLines number of baselines
    */
   public ObservabilityContext(final int nBaseLines) {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("ObservabilityContext : nBaseLines = " + nBaseLines);
+    if (logger.isDebugEnabled()) {
+      logger.debug("ObservabilityContext : nBaseLines: {}", nBaseLines);
     }
     // minimal capacity = 2 rangeLimits per range * ( 3 ranges * nBaseLines + 2 rise/set range + 2 nightLimits range)
     resizeFlatRangeLimits(2 * (3 * nBaseLines + 2 + 2));
@@ -52,14 +53,14 @@ public final class ObservabilityContext {
    */
   private void resizeFlatRangeLimits(final int capacity) {
     if (this.flatRangeLimits == null) {
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("resizeFlatRangeLimits : create with capacity = " + capacity);
+      if (logger.isDebugEnabled()) {
+        logger.debug("resizeFlatRangeLimits : create with capacity: {}", capacity);
       }
 
       this.flatRangeLimits = RangeLimit.createArray(capacity);
     } else {
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("resizeFlatRangeLimits : resize with capacity = " + capacity + " / " + this.lenFlatRangeLimits);
+      if (logger.isDebugEnabled()) {
+        logger.debug("resizeFlatRangeLimits : resize with capacity = {} / {}", capacity, this.lenFlatRangeLimits);
       }
 
       final RangeLimit[] newArray = RangeLimit.createArray(capacity);

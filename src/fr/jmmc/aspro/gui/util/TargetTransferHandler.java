@@ -10,7 +10,8 @@ import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
 import java.util.List;
-import java.util.logging.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import javax.swing.JComponent;
 import javax.swing.JList;
 import javax.swing.TransferHandler;
@@ -28,7 +29,7 @@ public final class TargetTransferHandler extends TransferHandler {
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(TargetTransferHandler.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(TargetTransferHandler.class.getName());
 
   /* members */
   /** list of edited targets (clone) */
@@ -71,15 +72,13 @@ public final class TargetTransferHandler extends TransferHandler {
           // Check if the target is a calibrator ?
           if (isCalibrator(sourceTarget)) {
 
-            if (logger.isLoggable(Level.FINE)) {
-              logger.fine("JList DRAG selection : " + sourceTarget);
-            }
+            logger.debug("JList DRAG selection: {}", sourceTarget);
 
             // only drag calibrators (not science targets) :
             return new TargetTransferable(sourceTarget.getIdentifier());
           }
         } else {
-          logger.severe("unsupported object type : " + userObject);
+          logger.warn("unsupported object type: {}", userObject);
         }
       }
 
@@ -99,9 +98,7 @@ public final class TargetTransferHandler extends TransferHandler {
             // Check if the target is a calibrator ?
             if (isCalibrator(sourceTarget)) {
 
-              if (logger.isLoggable(Level.FINE)) {
-                logger.fine("JTree DRAG selection : " + sourceTarget);
-              }
+              logger.debug("JTree DRAG selection: {}", sourceTarget);
 
               Target parentTarget = null;
 
@@ -119,13 +116,13 @@ public final class TargetTransferHandler extends TransferHandler {
               return new TargetTransferable(sourceTarget.getIdentifier(), (parentTarget != null) ? parentTarget.getIdentifier() : null);
             }
           } else {
-            logger.severe("unsupported object type : " + userObject);
+            logger.warn("unsupported object type: {}", userObject);
           }
         }
       }
 
     } else {
-      logger.severe("unsupported component : " + sourceComponent);
+      logger.warn("unsupported component: {}", sourceComponent);
     }
 
     return null;
@@ -167,7 +164,7 @@ public final class TargetTransferHandler extends TransferHandler {
    */
   @Override
   public boolean canImport(final JComponent destinationComponent,
-                           final DataFlavor[] transferFlavors) {
+          final DataFlavor[] transferFlavors) {
 
     if (destinationComponent instanceof TargetJTree) {
       // Check if the transferFlavors are supported :
@@ -212,18 +209,14 @@ public final class TargetTransferHandler extends TransferHandler {
 
             // Check if the target is NOT a calibrator i.e. a science target ?
             if (!isCalibrator(destinationTarget)) {
-              if (logger.isLoggable(Level.FINE)) {
-                logger.fine("JTree DROP selection : " + destinationTarget);
-              }
+              logger.debug("JTree DROP selection: {}", destinationTarget);
 
               // Extract data :
               final TargetTransferable transfer = extractData(data);
               if (transfer != null) {
                 final Target srcTarget = getTargetById(transfer.getTargetId());
                 if (srcTarget != null) {
-                  if (logger.isLoggable(Level.FINE)) {
-                    logger.fine("target (calibrator) : " + srcTarget);
-                  }
+                  logger.debug("target (calibrator): {}", srcTarget);
 
                   return tree.addCalibrator(srcTarget, destinationNode, destinationTarget);
                 }
@@ -231,9 +224,7 @@ public final class TargetTransferHandler extends TransferHandler {
             }
           } else {
             // can occur on root node ('Targets' string)
-            if (logger.isLoggable(Level.FINE)) {
-              logger.fine("unsupported object type : " + userObject);
-            }
+            logger.debug("unsupported object type: {}", userObject);
           }
         }
       }
@@ -260,21 +251,15 @@ public final class TargetTransferHandler extends TransferHandler {
       // Extract data :
       final TargetTransferable transfer = extractData(data);
       if (transfer != null) {
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("exportDone : Transfered object : " + transfer);
-        }
+        logger.debug("exportDone : Transfered object: {}", transfer);
 
         final Target srcTarget = getTargetById(transfer.getTargetId());
         if (srcTarget != null) {
-          if (logger.isLoggable(Level.FINE)) {
-            logger.fine("target (calibrator) : " + srcTarget);
-          }
+          logger.debug("target (calibrator): {}", srcTarget);
 
           final Target parentTarget = getTargetById(transfer.getParentTargetId());
           if (parentTarget != null) {
-            if (logger.isLoggable(Level.FINE)) {
-              logger.fine("target (science) : " + parentTarget);
-            }
+            logger.debug("target (science): {}", parentTarget);
 
             final TargetJTree tree = (TargetJTree) sourceComponent;
 
@@ -303,9 +288,9 @@ public final class TargetTransferHandler extends TransferHandler {
     try {
       transfer = (TargetTransferable) data.getTransferData(TargetTransferable.TargetIdentifiersDataFlavor);
     } catch (UnsupportedFlavorException ufe) {
-      logger.log(Level.SEVERE, "unsupported format", ufe);
+      logger.error("unsupported format", ufe);
     } catch (IOException ioe) {
-      logger.log(Level.SEVERE, "I/O failure", ioe);
+      logger.error("I/O failure", ioe);
     }
     return transfer;
   }

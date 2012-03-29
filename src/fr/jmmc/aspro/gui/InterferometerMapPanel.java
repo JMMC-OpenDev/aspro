@@ -24,7 +24,8 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.annotations.XYTextAnnotation;
@@ -50,7 +51,7 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(InterferometerMapPanel.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(InterferometerMapPanel.class.getName());
 
   /* members */
   /** jFreeChart instance */
@@ -200,8 +201,8 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
    */
   @Override
   public void onProcess(final ObservationEvent event) {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("event [" + event.getType() + "] process IN");
+    if (logger.isDebugEnabled()) {
+      logger.debug("event [{}] process IN", event.getType());
     }
     switch (event.getType()) {
       case REFRESH:
@@ -209,8 +210,8 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
         break;
       default:
     }
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("event [" + event.getType() + "] process OUT");
+    if (logger.isDebugEnabled()) {
+      logger.debug("event [{}] process OUT", event.getType());
     }
   }
 
@@ -220,8 +221,8 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
    * @param obsCollection observation collection to use
    */
   private void plot(final ObservationCollection obsCollection) {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("plot : " + ObservationManager.toString(obsCollection));
+    if (logger.isDebugEnabled()) {
+      logger.debug("plot: {}", ObservationManager.toString(obsCollection));
     }
 
     // create a unique key (interferometer configuration|stations...)
@@ -235,9 +236,7 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
       // refresh the plot :
       this.configuration = config;
 
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("plot : refresh");
-      }
+        logger.debug("plot : refresh");
 
       final long start = System.nanoTime();
 
@@ -249,8 +248,8 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
 
       this.updatePlot(new ObservationCollectionMapData(obsCollection, mapDataList));
 
-      if (logger.isLoggable(Level.INFO)) {
-        logger.info("plot : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
+      if (logger.isInfoEnabled()) {
+        logger.info("plot : duration = {} ms.", 1e-6d * (System.nanoTime() - start));
       }
     }
   }
@@ -401,13 +400,13 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
    */
   @Override
   public void chartProgress(final ChartProgressEvent event) {
-    if (logger.isLoggable(Level.FINE)) {
+    if (logger.isDebugEnabled()) {
       switch (event.getType()) {
         case ChartProgressEvent.DRAWING_STARTED:
           this.chartDrawStartTime = System.nanoTime();
           break;
         case ChartProgressEvent.DRAWING_FINISHED:
-          logger.fine("Drawing chart time : " + 1e-6d * (System.nanoTime() - this.chartDrawStartTime) + " ms.");
+          logger.debug("Drawing chart time = {} ms.", 1e-6d * (System.nanoTime() - this.chartDrawStartTime));
           this.chartDrawStartTime = 0l;
           break;
         default:

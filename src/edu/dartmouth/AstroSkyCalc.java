@@ -77,10 +77,10 @@ public final class AstroSkyCalc {
             position.getAltitude());
 
     if (logger.isDebugEnabled()) {
-      logger.debug("Site dump : " + this.site.name
-              + "\ntz offset : " + this.site.stdz
-              + "\nlongitude : " + this.site.longit.roundedLongitString(1, ":", true)
-              + "\nlatitude  : " + this.site.lat.roundedDecString(0, ":"));
+      logger.debug("Site dump: {}\ntz offset: {}\nlongitude: {}\nlatitude  : {}", new Object[]{
+                this.site.name, this.site.stdz,
+                this.site.longit.roundedLongitString(1, ":", true),
+                this.site.lat.roundedDecString(0, ":")});
     }
   }
 
@@ -287,7 +287,6 @@ public final class AstroSkyCalc {
               sidereal.sex.hour, sidereal.sex.minute, (int) Math.round(sidereal.sex.second));
 
       double days = (jd - this.jdLst0) * Const.SID_RATE;
-//      logger.severe("days=" + days);
 
       // tricky code here to ensure correct rounding error handling (inclusive):
       int ndays = 0;
@@ -310,7 +309,6 @@ public final class AstroSkyCalc {
         }
       }
       if (ndays != 0) {
-//        logger.severe("ndays=" + ndays);
         calendar.add(Calendar.DAY_OF_YEAR, ndays);
       }
 
@@ -332,14 +330,11 @@ public final class AstroSkyCalc {
   static void dumpWhen(final WhenWhere ww, final String label) {
     if (logger.isDebugEnabled()) {
       final InstantInTime t = ww.when;
-      logger.debug(label + " dump : " + t.jd
-              + "\nUT : " + t.UTDate.day
-              + "/" + t.UTDate.month
-              + "/" + t.UTDate.year
-              + " " + t.UTDate.timeofday.hour
-              + ":" + t.UTDate.timeofday.minute
-              + ":" + t.UTDate.timeofday.second
-              + "\nlst : " + ww.siderealobj.roundedRAString(3, ":"));
+      logger.debug("{} dump : {}\nUT : {}/{}/{} {}:{}:{}\nlst : {}", new Object[]{
+                label, t.jd, t.UTDate.day, t.UTDate.month, t.UTDate.year,
+                t.UTDate.timeofday.hour, t.UTDate.timeofday.minute, t.UTDate.timeofday.second,
+                ww.siderealobj.roundedRAString(3, ":")
+              });
     }
   }
 

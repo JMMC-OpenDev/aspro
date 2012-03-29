@@ -106,19 +106,18 @@ public final class AstroSkyCalcObservation {
     this.observation.computeSkyFast(this.cosLat, this.sinLat, cosDec, sinDec);
 
     // TODO : check angular distance between target and moon :
-    /*
-     * // Check moon distance :
-     * this.observation.computeSunMoon();
-     *
-     * observation.moonobj gives the angular distance with moon in degrees
-     *
-     * logger.warn("jd " + jd + " moon distance = " + this.observation.moonobj);
-     *
-     * if (logger.isDebugEnabled()) {
-     *   AstroSkyCalc.dumpWhen(this.observation.w, "Target");
-     *   logger.debug("az|alt   : " + this.observation.azimuth + " " + this.observation.altitude);
-     * }
-     */
+    if (false) {
+      // Check moon distance :
+      this.observation.computeSunMoon();
+
+      // observation.moonobj gives the angular distance with moon in degrees
+      logger.info("jd {} - moon distance = {}", jd, this.observation.moonobj);
+
+      if (logger.isInfoEnabled()) {
+        AstroSkyCalc.dumpWhen(this.observation.w, "Target");
+        logger.info("az / alt : {} {}", this.observation.azimuth, this.observation.altitude);
+      }
+    }
 
     position.setAzEl(this.observation.azimuth, this.observation.altitude);
   }

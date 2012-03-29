@@ -32,7 +32,8 @@ import java.text.NumberFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.logging.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 /**
@@ -42,7 +43,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 public class ExportOBVLTI {
 
   /** Class logger */
-  protected static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(ExportOBVLTI.class.getName());
+  protected static final Logger logger = LoggerFactory.getLogger(ExportOBVLTI.class.getName());
   /** P2PP file prefix for science targets */
   public static final String OB_SCIENCE = "SCI";
   /** P2PP file prefix for calibrator targets */
@@ -117,11 +118,12 @@ public class ExportOBVLTI {
    * @throws IllegalArgumentException if the instrument is not supported (only AMBER/MIDI/VEGA)
    * @throws IOException if an I/O exception occured while writing the observing block
    */
-  public static void process(final File file, final ObservationSetting observation, 
-                                              final ObservabilityService os,
-                                              final Target target) throws IllegalStateException, IllegalArgumentException, IOException {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("process " + target.getName() + " to " + file);
+  public static void process(final File file, final ObservationSetting observation,
+          final ObservabilityService os,
+          final Target target) throws IllegalStateException, IllegalArgumentException, IOException {
+    
+    if (logger.isDebugEnabled()) {
+      logger.debug("process target {} to file: ", target.getName(), file);
     }
 
     if (observation != null && target != null) {
@@ -150,11 +152,11 @@ public class ExportOBVLTI {
    * @return processed template
    */
   protected static String processCommon(final String template, final String fileName,
-                                              final ObservationSetting observation, 
-                                              final ObservabilityService os,
-                                              final Target target) {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("processCommon " + target.getName());
+          final ObservationSetting observation,
+          final ObservabilityService os,
+          final Target target) {
+    if (logger.isDebugEnabled()) {
+      logger.debug("processCommon: {}", target.getName());
     }
 
     // get OB template :
@@ -163,7 +165,7 @@ public class ExportOBVLTI {
     // Set name :
     // remove obx extension :
     String name = FileUtils.getFileNameWithoutExtension(fileName);
-    
+
     // maximum length :
     if (name.length() > 32) {
       name = name.substring(0, 31);
@@ -209,7 +211,7 @@ public class ExportOBVLTI {
 
     document = document.replaceFirst(KEY_RA, raDec[0]);
     document = document.replaceFirst(KEY_DEC, raDec[1]);
-    
+
     // --- OB NAME ---
     document = processObservationName(document, observation, raDec, target);
 
@@ -256,8 +258,8 @@ public class ExportOBVLTI {
    * @param target target to process
    * @return processed template
    */
-  private static String processDateTime(String doc, final ObservationSetting observation, 
-                                                    final ObservabilityService os, final Target target) {
+  private static String processDateTime(String doc, final ObservationSetting observation,
+          final ObservabilityService os, final Target target) {
 
     String document = doc;
     String lstTimeIntervals = "";
@@ -267,15 +269,15 @@ public class ExportOBVLTI {
 /*    
     final ObservabilityService os = new ObservabilityService(observation, target, AsproConstants.OB_MIN_ELEVATION);
     final ObservabilityData obsData = os.compute();
-*/
+     */
     final ObservabilityData obsData = os.getData();
-            
+
     final StarData starData = obsData.getStarData(target.getName());
     if (starData != null) {
       final List<Range> obsRangesHA = starData.getObsRangesHA();
 
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("obsRangesHA = " + obsRangesHA);
+      if (logger.isDebugEnabled()) {
+        logger.debug("obsRangesHA: {}", obsRangesHA);
       }
 
       if (obsRangesHA != null) {
@@ -294,20 +296,20 @@ public class ExportOBVLTI {
             haMax = targetConf.getHAMax().doubleValue();
           }
         }
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("ha min    : " + haMin);
-          logger.fine("ha max    : " + haMax);
+        if (logger.isDebugEnabled()) {
+          logger.debug("ha min    : {}", haMin);
+          logger.debug("ha max    : {}", haMax);
         }
 
         final List<Range> limRangesHA = Range.restrictRange(obsRangesHA, haMin, haMax);
 
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("limRangesHA = " + limRangesHA);
+        if (logger.isDebugEnabled()) {
+          logger.debug("limRangesHA: {}", limRangesHA);
         }
 
         final List<DateTimeInterval> lstRanges = os.convertHARangesToDateInterval(limRangesHA, starData.getPrecRA());
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("lst ranges = " + lstRanges);
+        if (logger.isDebugEnabled()) {
+          logger.debug("lst ranges: {}", lstRanges);
         }
 
         if (lstRanges != null) {
@@ -320,8 +322,8 @@ public class ExportOBVLTI {
           if (observation.getWhen().isNightRestriction()) {
             // get observation date :
             final XMLGregorianCalendar cal = observation.getWhen().getDate();
-            if (logger.isLoggable(Level.FINE)) {
-              logger.fine("obs Date = " + cal);
+            if (logger.isDebugEnabled()) {
+              logger.debug("obs Date: {}", cal);
             }
 
             // define Date constraint in eso date format is '2010-05-04' :
@@ -334,21 +336,20 @@ public class ExportOBVLTI {
     }
 
     // replace values :
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("lstTimeIntervals = " + lstTimeIntervals);
+    if (logger.isDebugEnabled()) {
+      logger.debug("lstTimeIntervals: {}", lstTimeIntervals);
     }
 
     document = document.replaceAll(KEY_LST_INTERVALS, lstTimeIntervals);
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("absTimeList = " + absTimeList);
+    if (logger.isDebugEnabled()) {
+      logger.debug("absTimeList: {}", absTimeList);
     }
 
     document = document.replaceAll(KEY_ABS_TIME_LIST, absTimeList);
 
     return document;
   }
-
 
   /**
    * Process the Observation name :
@@ -359,9 +360,9 @@ public class ExportOBVLTI {
    * @param target target to use
    * @return processed template
    */
-  private static String processObservationName(String document, final ObservationSetting observation, 
-                                                           final String[] raDec, final Target target) {  
-    
+  private static String processObservationName(String document, final ObservationSetting observation,
+          final String[] raDec, final Target target) {
+
     // get instrument band :
     final FocalInstrumentMode insMode = observation.getInstrumentConfiguration().getFocalInstrumentMode();
     if (insMode == null) {
@@ -370,15 +371,15 @@ public class ExportOBVLTI {
 
     final double lambda = insMode.getWaveLength();
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("lambda = " + lambda);
+    if (logger.isDebugEnabled()) {
+      logger.debug("lambda: {}", lambda);
     }
 
     final Band band = Band.findBand(lambda);
     final SpectralBand insBand = SpectralBandUtils.findBand(band);
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("insBand = " + insBand);
+    if (logger.isDebugEnabled()) {
+      logger.debug("insBand: {}", insBand);
     }
 
     // get AO band :
@@ -391,24 +392,24 @@ public class ExportOBVLTI {
     final AdaptiveOptics ao = tel.getAdaptiveOptics();
 
     final SpectralBand aoBand = (ao != null) ? ao.getBand() : null;
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("aoBand = " + aoBand);
+    if (logger.isDebugEnabled()) {
+      logger.debug("aoBand: {}", aoBand);
     }
 
     // extract instrument and AO fluxes :
     final Double insMag = target.getFlux(insBand);
     final Double aoMag = target.getFlux(aoBand);
-    
+
     // Generate Observation Name :
     final StringBuilder sb = new StringBuilder(32);
     // HHMM
     sb.append(raDec[0], 0, 2).append(raDec[0], 3, 5).append(' ');
     // [+/-]DDMM
     sb.append(raDec[1], 0, 3).append(raDec[1], 4, 6).append(' ');
-    
+
     sb.append(insBand.name()).append('=');
     sb.append(df1.format(ExportOBVLTI.getMagnitude(insMag)));
-    
+
     if (aoBand != null) {
       sb.append(' ');
       sb.append(aoBand.name()).append('=');
@@ -419,20 +420,20 @@ public class ExportOBVLTI {
       sb.append(' ');
       sb.append(target.getSPECTYP().replaceAll(" ", "_"));
     }
-    
+
     sb.append(' ');
     sb.append(target.getName().replaceAll(AsproConstants.REGEXP_INVALID_TEXT_CHARS, "_"));
-    
+
     final String OBName = sb.toString();
 
     // replace values :
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("ObservationName = " + OBName);
+    if (logger.isDebugEnabled()) {
+      logger.debug("OBName: {}", OBName);
     }
 
     return document.replaceAll(KEY_OB_NAME, OBName);
   }
-  
+
   /**
    * Convert LST date intervals to STTimeIntervals format i.e. 'date1_in_seconds:date2_in_seconds;...'
    * @param dateIntervals LST intervals
@@ -510,5 +511,4 @@ public class ExportOBVLTI {
 
     return observation.generateFileName(target.getName(), prefix, suffix, MimeType.OBX.getExtension());
   }
-          
 }

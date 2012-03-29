@@ -3,7 +3,8 @@
  ******************************************************************************/
 package fr.jmmc.aspro.gui.chart;
 
-import java.util.logging.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.event.AxisChangeEvent;
 import org.jfree.data.Range;
@@ -20,7 +21,7 @@ public class BoundedNumberAxis extends NumberAxis {
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(BoundedNumberAxis.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(BoundedNumberAxis.class.getName());
   /* members */
   /** axis bounds */
   private Range bounds = null;
@@ -81,7 +82,7 @@ public class BoundedNumberAxis extends NumberAxis {
   @Override
   protected void setAutoRange(final boolean auto, final boolean notify) {
     if (auto) {
-      logger.log(Level.SEVERE, "AutoRange must not be used: ", new Throwable());
+      logger.warn( "AutoRange must not be used: ", new Throwable());
       return;
     }
 

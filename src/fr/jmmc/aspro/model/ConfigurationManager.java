@@ -28,7 +28,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
-import java.util.logging.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class manages configuration files for the Interferometer configurations
@@ -37,7 +38,7 @@ import java.util.logging.Level;
 public final class ConfigurationManager extends BaseOIManager {
 
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(ConfigurationManager.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(ConfigurationManager.class.getName());
   /** Configurations file name */
   private static final String CONF_FILE = "AsproOIConfigurations.xml";
   /** singleton pattern */
@@ -97,23 +98,20 @@ public final class ConfigurationManager extends BaseOIManager {
 
     InterferometerSetting is;
     for (String fileName : conf.getFiles()) {
-      if (logger.isLoggable(Level.CONFIG)) {
-        logger.config("initialize : loading configuration file = " + fileName);
-      }
+      logger.info("initialize : loading configuration file = {}", fileName);
+
       is = (InterferometerSetting) loadObject(fileName);
 
       addInterferometerSetting(is);
     }
 
-    final long time = (System.nanoTime() - start);
-
-    if (logger.isLoggable(Level.INFO)) {
-      logger.info("initialize : duration = " + 1e-6d * time + " ms.");
+    if (logger.isInfoEnabled()) {
+      logger.info("initialize : duration = {} ms.", 1e-6d * (System.nanoTime() - start));
     }
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("descriptions   = " + getInterferometerDescriptions());
-      logger.fine("configurations = " + getInterferometerConfigurations());
+    if (logger.isDebugEnabled()) {
+      logger.debug("descriptions   : {}", getInterferometerDescriptions());
+      logger.debug("configurations : {}", getInterferometerConfigurations());
     }
   }
 
@@ -161,7 +159,9 @@ public final class ConfigurationManager extends BaseOIManager {
 
     id.setPosSph(posSph);
 
-    GeocentricCoords.dump(id.getName(), posSph);
+    if (logger.isDebugEnabled()) {
+      GeocentricCoords.dump(id.getName(), posSph);
+    }
   }
 
   /**
@@ -172,9 +172,9 @@ public final class ConfigurationManager extends BaseOIManager {
     for (FocalInstrument instrument : id.getFocalInstruments()) {
       instrument.defineWaveLengthRange();
 
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("Instrument [" + instrument.getName() + "] - wavelengths ["
-                + instrument.getWaveLengthMin() + " - " + instrument.getWaveLengthMax() + "] microns");
+      if (logger.isDebugEnabled()) {
+        logger.debug("Instrument [{}] - wavelengths [{} - {}]",
+                new Object[]{instrument.getName(), instrument.getWaveLengthMin(), instrument.getWaveLengthMax()});
       }
     }
   }
@@ -203,8 +203,8 @@ public final class ConfigurationManager extends BaseOIManager {
       }
     }
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("computeBaselineUVWBounds = {" + minUV + " - " + maxUV + " m for configuration " + intConf.getName());
+    if (logger.isDebugEnabled()) {
+      logger.debug("computeBaselineUVWBounds = [{} - {}] m for configuration {}", new Object[]{minUV, maxUV, intConf.getName()});
     }
 
     intConf.setMinBaseLine(minUV);
@@ -254,8 +254,8 @@ public final class ConfigurationManager extends BaseOIManager {
       }
     }
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("computeBaselineUVBounds = {" + minUV + " - " + maxUV + " m for stations " + stations);
+    if (logger.isDebugEnabled()) {
+      logger.debug("computeBaselineUVBounds = [{} - {}] m for stations {}", new Object[]{minUV, maxUV, stations});
     }
 
     minMax[0] = minUV;
@@ -292,8 +292,8 @@ public final class ConfigurationManager extends BaseOIManager {
       }
     }
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("computeBaselineUVWBounds = {" + minUV + " - " + maxUV + " m for stations " + stations);
+    if (logger.isDebugEnabled()) {
+      logger.debug("computeBaselineUVWBounds = [{} - {}] m for stations {}", new Object[]{minUV, maxUV, stations});
     }
 
     minMax[0] = minUV;
@@ -307,9 +307,7 @@ public final class ConfigurationManager extends BaseOIManager {
   private void adjustStationHorizons(final List<Station> stations) {
     double maxElev;
     for (Station station : stations) {
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("station : " + station);
-      }
+      logger.debug("station: {}", station);
 
       // maximum elevation in degrees per telescope :
       maxElev = station.getTelescope().getMaxElevation();
@@ -318,8 +316,8 @@ public final class ConfigurationManager extends BaseOIManager {
         // horizon is defined : check elevation
         for (AzEl point : station.getHorizon().getPoints()) {
           if (point.getElevation() > maxElev) {
-            if (logger.isLoggable(Level.FINE)) {
-              logger.fine("station : " + station + " : fix point : " + point);
+            if (logger.isDebugEnabled()) {
+              logger.debug("station: {} : fix point: {}", station, point);
             }
             point.setElevation(maxElev);
           }
@@ -339,9 +337,8 @@ public final class ConfigurationManager extends BaseOIManager {
           defaultHorizon = horizon;
         }
 
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("station : " + station + " use default horizon");
-        }
+        logger.debug("station: {} use default horizon", station);
+
         // define fake horizon :
         station.setHorizon(defaultHorizon);
       }

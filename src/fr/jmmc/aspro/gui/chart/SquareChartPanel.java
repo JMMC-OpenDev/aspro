@@ -9,7 +9,8 @@ import java.awt.event.MouseWheelListener;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.io.Serializable;
-import java.util.logging.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.ChartRenderingInfo;
 import org.jfree.chart.JFreeChart;
@@ -33,7 +34,7 @@ public final class SquareChartPanel extends ChartPanel {
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(SquareChartPanel.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(SquareChartPanel.class.getName());
 
   /* members */
   /** single zoom event listener */
@@ -68,10 +69,10 @@ public final class SquareChartPanel extends ChartPanel {
    * @since 1.0.13
    */
   public SquareChartPanel(final JFreeChart chart, final int width, final int height,
-                          final int minimumDrawWidth, final int minimumDrawHeight, final int maximumDrawWidth,
-                          final int maximumDrawHeight, final boolean useBuffer, final boolean properties,
-                          final boolean copy, boolean save, final boolean print, final boolean zoom,
-                          final boolean tooltips) {
+          final int minimumDrawWidth, final int minimumDrawHeight, final int maximumDrawWidth,
+          final int maximumDrawHeight, final boolean useBuffer, final boolean properties,
+          final boolean copy, boolean save, final boolean print, final boolean zoom,
+          final boolean tooltips) {
     super(chart, width, height, minimumDrawWidth, minimumDrawHeight, maximumDrawWidth, maximumDrawHeight,
             useBuffer, properties, copy, save, print, zoom, tooltips);
 
@@ -282,9 +283,8 @@ public final class SquareChartPanel extends ChartPanel {
     if (this.zoomListener != null) {
       final ZoomEvent ze = new ZoomEvent(domainLowerBound, domainUpperBound, rangeLowerBound, rangeUpperBound);
 
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("fireZoomEvent " + ze);
-      }
+      logger.debug("fireZoomEvent: {}", ze);
+
       this.zoomListener.chartChanged(ze);
     }
   }

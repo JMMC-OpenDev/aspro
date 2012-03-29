@@ -21,8 +21,10 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.Iterator;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class handles SearchCal VOTables
@@ -32,7 +34,7 @@ import java.util.logging.Logger;
 public final class SearchCalVOTableHandler {
 
   /** Class logger */
-  private static final Logger logger = Logger.getLogger(SearchCalVOTableHandler.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(SearchCalVOTableHandler.class.getName());
   /** science object distance in degrees */
   public static final double SCIENCE_DETECTION_DISTANCE = 1d * ALX.ARCSEC_IN_DEGREES;
   /** XSLT file path */
@@ -63,13 +65,11 @@ public final class SearchCalVOTableHandler {
 
     final String document = XmlFactory.transform(votable, XSLT_FILE);
 
-    if (logger.isLoggable(Level.INFO)) {
-      logger.info("VOTable transformation (XSLT) : " + 1e-6d * (System.nanoTime() - start) + " ms.");
+    if (logger.isInfoEnabled()) {
+      logger.info("VOTable transformation (XSLT) duration = {} ms.", 1e-6d * (System.nanoTime() - start));
     }
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("document :\n" + document);
-    }
+    logger.debug("document :\n{}", document);
 
     final ObservationManager om = ObservationManager.getInstance();
 
@@ -77,16 +77,14 @@ public final class SearchCalVOTableHandler {
 
     final String targetName = searchCalObservation.getName();
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("science target : " + targetName);
-    }
+    logger.debug("science target: {}", targetName);
 
     final List<Target> calibrators = searchCalObservation.getTargets();
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("calibrators :");
+    if (logger.isDebugEnabled()) {
+      logger.debug("calibrators :");
       for (Target cal : calibrators) {
-        logger.fine(cal.toString());
+        logger.debug(cal.toString());
       }
     }
 
@@ -103,8 +101,9 @@ public final class SearchCalVOTableHandler {
 
         // If the distance is close enough to be detected as a science object
         if (rowDistance < SCIENCE_DETECTION_DISTANCE) {
-          if (logger.isLoggable(Level.INFO)) {
-            logger.info("calibrator distance is [" + rowDistance + "] - skip this calibrator considered as science object : " + cal + " - IDS = " + cal.getIDS());
+          if (logger.isInfoEnabled()) {
+            logger.info("calibrator distance is [{}] - skip this calibrator considered as science object : {} - IDS = {}",
+                    new Object[]{rowDistance, cal, cal.getIDS()});
           }
           it.remove();
         }
@@ -160,19 +159,19 @@ public final class SearchCalVOTableHandler {
         final List<Target> editTargets = obsCloned.getTargets();
         final TargetUserInformations editTargetUserInfos = obsCloned.getOrCreateTargetUserInfos();
 
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("initial targets :");
+        if (logger.isDebugEnabled()) {
+          logger.debug("initial targets :");
           for (Target t : editTargets) {
-            logger.fine(t.toString());
+            logger.debug(t.toString());
           }
         }
 
         final String report = mergeTargets(editTargets, editTargetUserInfos, targetName, calibrators);
 
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("updated targets :");
+        if (logger.isDebugEnabled()) {
+          logger.debug("updated targets :");
           for (Target t : editTargets) {
-            logger.fine(t.toString());
+            logger.debug(t.toString());
           }
         }
 
@@ -180,7 +179,7 @@ public final class SearchCalVOTableHandler {
         // needed to replace old target references by the new calibrator targets :
         om.updateTargets(editTargets, editTargetUserInfos);
 
-        if (logger.isLoggable(Level.INFO)) {
+        if (logger.isInfoEnabled()) {
           logger.info(report);
         }
 

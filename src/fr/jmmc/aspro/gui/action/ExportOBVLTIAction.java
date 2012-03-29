@@ -21,7 +21,8 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.List;
-import java.util.logging.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import javax.swing.JFileChooser;
 
 /**
@@ -34,7 +35,7 @@ public final class ExportOBVLTIAction {
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(ExportOBVLTIAction.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(ExportOBVLTIAction.class.getName());
   /** double formatter for min elevation */
   protected final static NumberFormat df1 = new DecimalFormat("0.#");
   /** OBX MimeType */
@@ -65,9 +66,8 @@ public final class ExportOBVLTIAction {
    * @param targets list of targets to export as VLTI Observing blocks
    */
   public void process(final List<Target> targets) {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("process");
-    }
+    logger.debug("process");
+
     if (targets.isEmpty()) {
       return;
     }
@@ -126,7 +126,7 @@ public final class ExportOBVLTIAction {
     // If a file was defined (No cancel in the dialog)
     if (file != null) {
       final String directory = (exportAll) ? file.getPath() : file.getParent();
-      
+
       FilePreferences.getInstance().setDirectory(mimeType, directory);
 
       // report buffer :
@@ -135,16 +135,16 @@ public final class ExportOBVLTIAction {
       // use main observation :
       final ObservationSetting observation = ObservationManager.getInstance().getMainObservation();
       final double minElev = observation.getInterferometerConfiguration().getMinElevation();
-      
+
       try {
 
         // Compute Observability data using astronomical night (-18 deg)
         // (date and night restrictions depend on the current observation) :
         final ObservabilityService os = new ObservabilityService(observation);
-        
+
         // compute observability data:
         os.compute();
-        
+
         if (exportAll) {
 
           // report buffer :
@@ -155,25 +155,25 @@ public final class ExportOBVLTIAction {
           for (Target target : targets) {
 
             file = new File(directory, ExportOBVLTI.generateOBFileName(target));
-            
+
             ExportOBVLTI.process(file, observation, os, target);
 
             sb.append(file.getName()).append("\n");
           }
 
-          StatusBar.show("Observing blocks saved in " + directory + ".");          
-          
+          StatusBar.show("Observing blocks saved in " + directory + ".");
+
         } else {
           final File mainFile = file;
           final Target target = targets.get(0);
-           
+
           // report buffer :
           sb.append("Observing Blocks exported for target [").append(target.getName()).append("] with following settings:\n");
           sb.append("  - minimum elevation set to ").append(df1.format(minElev)).append(" deg\n");
           sb.append("  - output folder :\n").append(directory).append("\n\n");
 
           ExportOBVLTI.process(mainFile, observation, os, target);
-          
+
           sb.append(mainFile.getName()).append("\n");
 
           // Generate all calibrator OBs for a science target :

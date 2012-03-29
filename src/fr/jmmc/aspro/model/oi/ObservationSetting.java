@@ -469,16 +469,14 @@ public class ObservationSetting
   public void checkReferences() {
     // check target user infos :
     if (this.targetUserInfos != null) {
-      if (logger.isLoggable(java.util.logging.Level.FINE)) {
-        logger.fine("checkReferences = " + this.targetUserInfos);
-      }
+      logger.debug("checkReferences = {}", this.targetUserInfos);
+
       this.targetUserInfos.updateTargetReferences(this.createTargetIndex());
 
       // remove if empty :
       if (this.targetUserInfos.isEmpty()) {
-        if (logger.isLoggable(java.util.logging.Level.FINE)) {
-          logger.fine("Removing empty target user informations.");
-        }
+        logger.debug("Removing empty target user informations.");
+
         this.targetUserInfos = null;
       }
     }

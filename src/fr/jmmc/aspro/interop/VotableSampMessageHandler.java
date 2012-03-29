@@ -14,8 +14,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.astrogrid.samp.Message;
 import org.astrogrid.samp.Metadata;
 import org.astrogrid.samp.client.SampException;
@@ -29,7 +29,7 @@ import org.astrogrid.samp.client.SampException;
 public final class VotableSampMessageHandler extends SampMessageHandler {
 
   /** Class logger */
-  private static final Logger logger = Logger.getLogger(VotableSampMessageHandler.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(VotableSampMessageHandler.class.getName());
 
   /**
    * Public constructor
@@ -47,16 +47,14 @@ public final class VotableSampMessageHandler extends SampMessageHandler {
    */
   @Override
   protected void processMessage(final String senderId, final Message message) throws SampException {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("\tReceived '" + this.handledMType() + "' message from '" + senderId + "' : '" + message + "'.");
+    if (logger.isDebugEnabled()) {
+      logger.debug("\tReceived '{}' message from '{}' : '{}'.", new Object[]{this.handledMType(), senderId, message});
     }
 
     // get url of votable (locally stored) :
     final String voTableURL = (String) message.getRequiredParam("url");
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("processMessage: VOTable URL = " + voTableURL);
-    }
+    logger.debug("processMessage: VOTable URL = {}", voTableURL);
 
     if (voTableURL == null) {
       throw new SampException("Can not get the url of the votable");
@@ -66,7 +64,7 @@ public final class VotableSampMessageHandler extends SampMessageHandler {
     try {
       voTableURI = new URI(voTableURL);
     } catch (URISyntaxException use) {
-      logger.log(Level.SEVERE, "invalid URI", use);
+      logger.error("invalid URI", use);
 
       throw new SampException("Can not read the votable : " + voTableURL, use);
     }
@@ -93,9 +91,7 @@ public final class VotableSampMessageHandler extends SampMessageHandler {
 
       final String votable = FileUtils.readFile(voTableFile);
 
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("votable :\n" + votable);
-      }
+      logger.debug("votable :\n{}", votable);
 
       final Metadata senderMetadata = SampManager.getMetaData(senderId);
 
@@ -113,9 +109,8 @@ public final class VotableSampMessageHandler extends SampMessageHandler {
         AnyVOTableHandler.processMessage(votable);
 
       } else {
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("SearchCal version = " + searchCalVersion);
-        }
+        logger.debug("SearchCal version = {}", searchCalVersion);
+
         SearchCalVOTableHandler.processMessage(votable, searchCalVersion);
       }
 

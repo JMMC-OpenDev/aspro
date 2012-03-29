@@ -6,7 +6,8 @@ package fr.jmmc.aspro;
 import fr.jmmc.jmcs.util.MimeType;
 import fr.jmmc.jmcs.data.preference.PreferencesException;
 import java.io.File;
-import java.util.logging.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class gathers user preferences related to local folders
@@ -17,7 +18,7 @@ public final class FilePreferences extends fr.jmmc.jmcs.data.preference.Preferen
   /** Singleton instance */
   private static FilePreferences _singleton = null;
   /** Logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(FilePreferences.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(FilePreferences.class.getName());
   /* Preferences */
   /** Store the filename of the ASPRO file preference file */
   public static final String PREFERENCES_FILENAME = "fr.jmmc.aspro.file.properties";
@@ -40,7 +41,7 @@ public final class FilePreferences extends fr.jmmc.jmcs.data.preference.Preferen
     // Build new reference if singleton does not already exist
     // or return previous reference
     if (_singleton == null) {
-      logger.fine("FilePreferences.getInstance()");
+      logger.debug("FilePreferences.getInstance()");
       // disable notifications:
       _singleton = new FilePreferences(false);
       // enable future notifications:
@@ -56,7 +57,7 @@ public final class FilePreferences extends fr.jmmc.jmcs.data.preference.Preferen
    */
   @Override
   protected void setDefaultPreferences() throws PreferencesException {
-    logger.fine("FilePreferences.setDefaultPreferences");
+    logger.debug("FilePreferences.setDefaultPreferences");
     final String defaultDirectory = System.getProperty("user.home");
     setDefaultPreference(MimeType.ASPRO_OBSERVATION.toString(), defaultDirectory);
     setDefaultPreference(MimeType.OBX.toString(), defaultDirectory);
@@ -117,7 +118,7 @@ public final class FilePreferences extends fr.jmmc.jmcs.data.preference.Preferen
           setPreference(mimeType.toString(), path);
           saveToFile();
         } catch (PreferencesException pe) {
-          logger.log(Level.WARNING, "Saving FilePreferences failure :", pe);
+          logger.warn("Saving FilePreferences failure:", pe);
         }
       }
     }
@@ -131,7 +132,7 @@ public final class FilePreferences extends fr.jmmc.jmcs.data.preference.Preferen
     try {
       FilePreferences.getInstance().saveToFile();
     } catch (PreferencesException pe) {
-      logger.log(Level.SEVERE, "property failure : ", pe);
+      logger.error("property failure : ", pe);
     }
   }
 }

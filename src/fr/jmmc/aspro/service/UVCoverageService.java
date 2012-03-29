@@ -21,7 +21,8 @@ import fr.jmmc.aspro.util.AngleUtils;
 import fr.jmmc.aspro.util.TestUtils;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This service is dedicated to compute the UV tracks for a given target
@@ -30,7 +31,7 @@ import java.util.logging.Level;
 public final class UVCoverageService {
 
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(UVCoverageService.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(UVCoverageService.class.getName());
   /** flag to slow down the service to detect concurrency problems */
   private final static boolean DEBUG_SLOW_SERVICE = false;
   /** safety limit for the number of sampled HA points = 500 */
@@ -116,8 +117,8 @@ public final class UVCoverageService {
    * @return UVCoverageData container
    */
   public UVCoverageData compute() {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("compute : " + this.observation);
+    if (logger.isDebugEnabled()) {
+      logger.debug("compute: {}", this.observation);
     }
 
     // Start the computations :
@@ -160,8 +161,8 @@ public final class UVCoverageService {
       if (this.currentThread.isInterrupted()) {
         return null;
       }
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("UV coordinate maximum = [" + this.uvMax + "]");
+      if (logger.isDebugEnabled()) {
+        logger.debug("UV coordinate maximum: {}", this.uvMax);
       }
 
       // uv Max = max base line / minimum wave length
@@ -187,8 +188,8 @@ public final class UVCoverageService {
       }
     }
 
-    if (logger.isLoggable(Level.INFO)) {
-      logger.info("compute : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
+    if (logger.isInfoEnabled()) {
+      logger.info("compute : duration = {} ms.", 1e-6d * (System.nanoTime() - start));
     }
 
     return this.data;
@@ -288,8 +289,8 @@ public final class UVCoverageService {
 
     final List<Range> obsRangesHA = this.starData.getObsRangesHA();
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("obsRangesHA = " + obsRangesHA);
+    if (logger.isDebugEnabled()) {
+      logger.debug("obsRangesHA: {}", obsRangesHA);
     }
 
     if (obsRangesHA == null) {
@@ -301,8 +302,8 @@ public final class UVCoverageService {
       final double haLower = checkHA(this.haMin, haElev);
       final double haUpper = checkHA(this.haMax, haElev);
 
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("HA min/Max = " + haLower + " - " + haUpper);
+      if (logger.isDebugEnabled()) {
+        logger.debug("HA min/Max: {} - {}", haLower, haUpper);
       }
 
       final double step = this.haStep;
@@ -454,8 +455,8 @@ public final class UVCoverageService {
     // Get starData for the selected target name :
     this.starData = this.obsData.getStarData(this.targetName);
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("starData : " + this.starData);
+    if (logger.isDebugEnabled()) {
+      logger.debug("starData: {}", this.starData);
     }
 
     // Get lower wavelength for the selected instrument:
@@ -467,8 +468,8 @@ public final class UVCoverageService {
       throw new IllegalStateException("The instrumentMode is empty !");
     }
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("instrumentMode : " + insMode.getName());
+    if (logger.isDebugEnabled()) {
+      logger.debug("instrumentMode: {}", insMode.getName());
     }
 
     // Get wavelength range for the selected instrument mode :
@@ -478,11 +479,11 @@ public final class UVCoverageService {
 
     this.nSpectralChannels = insMode.getEffectiveNumberOfChannels();
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("lambdaMin : " + this.lambdaMin);
-      logger.fine("lambda    : " + this.lambda);
-      logger.fine("lambdaMax : " + this.lambdaMax);
-      logger.fine("nChannels : " + this.nSpectralChannels);
+    if (logger.isDebugEnabled()) {
+      logger.debug("lambdaMin: {}", this.lambdaMin);
+      logger.debug("lambda: {}", this.lambda);
+      logger.debug("lambdaMax: {}", this.lambdaMax);
+      logger.debug("nChannels: {}", this.nSpectralChannels);
     }
 
     // HA Min / Max :
@@ -495,16 +496,16 @@ public final class UVCoverageService {
         this.haMax = targetConf.getHAMax().doubleValue();
       }
     }
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("ha min    : " + this.haMin);
-      logger.fine("ha max    : " + this.haMax);
+    if (logger.isDebugEnabled()) {
+      logger.debug("ha min: {}", this.haMin);
+      logger.debug("ha max: {}", this.haMax);
     }
 
     // hour angle step in decimal hours :
     this.haStep = this.observation.getInstrumentConfiguration().getSamplingPeriod() / 60d;
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("ha step   : " + this.haStep);
+    if (logger.isDebugEnabled()) {
+      logger.debug("ha step: {}", this.haStep);
     }
 
     // Adjust the user uv Max = max base line / minimum wave length
@@ -513,8 +514,8 @@ public final class UVCoverageService {
     // - avoid to much model computations (when the instrument mode changes)
     this.uvMax /= this.instrumentMinWaveLength;
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("Corrected uvMax : " + this.uvMax);
+    if (logger.isDebugEnabled()) {
+      logger.debug("Corrected uvMax: {}", this.uvMax);
     }
   }
 

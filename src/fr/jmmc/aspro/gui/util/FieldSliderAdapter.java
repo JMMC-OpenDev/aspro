@@ -7,7 +7,8 @@ import fr.jmmc.jmcs.gui.SwingUtils;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.ParseException;
-import java.util.logging.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import javax.swing.event.EventListenerList;
 import javax.swing.JFormattedTextField;
 import javax.swing.JSlider;
@@ -21,7 +22,7 @@ import javax.swing.event.ChangeListener;
 public final class FieldSliderAdapter implements ChangeListener, PropertyChangeListener {
 
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(FieldSliderAdapter.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(FieldSliderAdapter.class.getName());
 
   /* members */
   /** minimum limit */
@@ -122,9 +123,7 @@ public final class FieldSliderAdapter implements ChangeListener, PropertyChangeL
           return;
         }
 
-        if (logger.isLoggable(Level.FINEST)) {
-          logger.finest("slider changed : " + value);
-        }
+        logger.trace("slider changed: {}", value);
 
         // done adjusting
         try {
@@ -142,7 +141,7 @@ public final class FieldSliderAdapter implements ChangeListener, PropertyChangeL
           //value is adjusting; just set the text
           this.field.setText(this.field.getFormatter().valueToString(value));
         } catch (ParseException pe) {
-          logger.log(Level.SEVERE, "parsing exception", pe);
+          logger.error("parsing exception", pe);
         }
       }
     }
@@ -162,8 +161,8 @@ public final class FieldSliderAdapter implements ChangeListener, PropertyChangeL
         return;
       }
 
-      if (logger.isLoggable(Level.FINEST)) {
-        logger.finest("field changed : " + value);
+      if (logger.isTraceEnabled()) {
+        logger.trace("field changed: {}", value);
       }
       try {
         this.isEventHandling = true;
@@ -194,7 +193,7 @@ public final class FieldSliderAdapter implements ChangeListener, PropertyChangeL
    * @param l the ChangeListener to remove
    * @see #fireStateChanged
    * @see #addChangeListener
-
+  
    */
   public void removeChangeListener(ChangeListener l) {
     this.listenerList.remove(ChangeListener.class, l);
@@ -254,8 +253,8 @@ public final class FieldSliderAdapter implements ChangeListener, PropertyChangeL
    * @param maxValue maximum value <= maximum Limit
    */
   public void setMaxValue(double maxValue) {
-    if (logger.isLoggable(Level.FINEST)) {
-      logger.finest("maxValue changed : " + maxValue);
+    if (logger.isTraceEnabled()) {
+      logger.trace("maxValue changed: {}", maxValue);
     }
     this.maxValue = maxValue;
   }
@@ -273,8 +272,8 @@ public final class FieldSliderAdapter implements ChangeListener, PropertyChangeL
    * @param minValue minimum value >= minimum Limit
    */
   public void setMinValue(double minValue) {
-    if (logger.isLoggable(Level.FINEST)) {
-      logger.finest("minValue changed : " + minValue);
+    if (logger.isTraceEnabled()) {
+      logger.trace("minValue changed: {}", minValue);
     }
     this.minValue = minValue;
   }

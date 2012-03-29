@@ -13,7 +13,8 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.event.ChangeEvent;
@@ -28,7 +29,7 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(TargetEditorDialog.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(TargetEditorDialog.class.getName());
   /** Tab Targets */
   public static final String TAB_TARGETS = "Targets";
   /** Tab Models */
@@ -62,9 +63,8 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
    * @return true if the model editor changed anything
    */
   public static boolean showEditor(final String targetName, final String selectedTab) {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("showing Editor : " + targetName);
-    }
+    logger.debug("showing Editor : {}", targetName);
+
     boolean result = false;
 
     JDialog dialog = null;
@@ -116,9 +116,7 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
       result = form.isResult();
 
       if (result) {
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("update the targets ...");
-        }
+        logger.debug("update the targets ...");
 
         // update the complete list of targets and force to update references :
         // and fire target and observation change events :
@@ -130,9 +128,8 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
       targetEditorActive = false;
 
       if (dialog != null) {
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("dispose Model Editor ...");
-        }
+        logger.debug("dispose Model Editor ...");
+
         dialog.dispose();
       }
     }

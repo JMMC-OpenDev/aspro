@@ -15,8 +15,10 @@ import fr.jmmc.jmcs.gui.SwingUtils;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class handles generic VOTables (targets) and PIVOT VOTables
@@ -26,7 +28,7 @@ import java.util.logging.Logger;
 public final class AnyVOTableHandler {
 
   /** Class logger */
-  private static final Logger logger = Logger.getLogger(AnyVOTableHandler.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(AnyVOTableHandler.class.getName());
   /** XSLT file path */
   private final static String XSLT_FILE = "fr/jmmc/aspro/interop/vot2AsproObservation.xsl";
   /** maximum targets accepted at once */
@@ -54,13 +56,11 @@ public final class AnyVOTableHandler {
 
     final String document = XmlFactory.transform(votable, XSLT_FILE);
 
-    if (logger.isLoggable(Level.INFO)) {
-      logger.info("VOTable transformation (XSLT) : " + 1e-6d * (System.nanoTime() - start) + " ms.");
+    if (logger.isInfoEnabled()) {
+      logger.info("VOTable transformation (XSLT): {} ms.", 1e-6d * (System.nanoTime() - start));
     }
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("document :\n" + document);
-    }
+    logger.debug("document :\n{}", document);
 
     final ObservationManager om = ObservationManager.getInstance();
 
@@ -70,10 +70,10 @@ public final class AnyVOTableHandler {
 
       final List<Target> targets = newObservation.getTargets();
 
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("targets :");
+      if (logger.isDebugEnabled()) {
+        logger.debug("targets :");
         for (Target cal : targets) {
-          logger.fine(cal.toString());
+          logger.debug(cal.toString());
         }
       }
 
@@ -111,19 +111,19 @@ public final class AnyVOTableHandler {
             final List<Target> editTargets = obsCloned.getTargets();
             final TargetUserInformations editTargetUserInfos = obsCloned.getOrCreateTargetUserInfos();
 
-            if (logger.isLoggable(Level.FINE)) {
-              logger.fine("initial targets :");
+            if (logger.isDebugEnabled()) {
+              logger.debug("initial targets :");
               for (Target t : editTargets) {
-                logger.fine(t.toString());
+                logger.debug(t.toString());
               }
             }
 
             final String report = mergeTargets(editTargets, targets);
 
-            if (logger.isLoggable(Level.FINE)) {
-              logger.fine("updated targets :");
+            if (logger.isDebugEnabled()) {
+              logger.debug("updated targets :");
               for (Target t : editTargets) {
-                logger.fine(t.toString());
+                logger.debug(t.toString());
               }
             }
 
@@ -131,7 +131,7 @@ public final class AnyVOTableHandler {
             // needed to replace old target references by the new calibrator targets :
             om.updateTargets(editTargets, editTargetUserInfos);
 
-            if (logger.isLoggable(Level.INFO)) {
+            if (logger.isInfoEnabled()) {
               logger.info(report);
             }
 

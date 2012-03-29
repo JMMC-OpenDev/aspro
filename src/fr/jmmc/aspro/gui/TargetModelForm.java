@@ -30,7 +30,8 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.logging.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComponent;
@@ -58,7 +59,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(TargetModelForm.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(TargetModelForm.class.getName());
   /** OIFits MimeType */
   private final static MimeType mimeType = MimeType.FITS_IMAGE;
 
@@ -253,9 +254,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
           /* retrieve the node that was selected */
           final Object userObject = currentNode.getUserObject();
 
-          if (logger.isLoggable(Level.FINE)) {
-            logger.fine("tree selection : " + userObject);
-          }
+            logger.debug("tree selection : {}", userObject);
 
           if (userObject instanceof Target) {
             // Target :
@@ -409,39 +408,38 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
   public void actionPerformed(final ActionEvent e) {
     if (e.getSource() == this.jComboBoxModelType) {
       final String type = (String) this.jComboBoxModelType.getSelectedItem();
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("model type changed : " + type);
-      }
-      updateModelDescription(type);
+        logger.debug("model type changed : {}", type);
+
+        updateModelDescription(type);
     } else if (e.getSource() == this.jRadioButtonXY) {
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("edit mode X/Y : " + this.jRadioButtonXY.isSelected());
+      if (logger.isDebugEnabled()) {
+        logger.debug("edit mode X/Y: {}", this.jRadioButtonXY.isSelected());
       }
       // change edit mode to X/Y :
       this.defineModels(this.currentTarget, EditMode.X_Y);
     } else if (e.getSource() == this.jRadioButtonRhoTheta) {
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("edit mode Rho/Theta : " + this.jRadioButtonRhoTheta.isSelected());
+      if (logger.isDebugEnabled()) {
+        logger.debug("edit mode Rho/Theta: {}", this.jRadioButtonRhoTheta.isSelected());
       }
       // change edit mode to Rho/Theta :
       this.defineModels(this.currentTarget, EditMode.RHO_THETA);
     } else if (e.getSource() == this.jRadioButtonAnalytical) {
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("mode Analytical : " + this.jRadioButtonAnalytical.isSelected());
+      if (logger.isDebugEnabled()) {
+        logger.debug("mode Analytical: {}", this.jRadioButtonAnalytical.isSelected());
       }
       this.currentTarget.setUseAnalyticalModel(Boolean.TRUE);
       // reselect target to change panel visibility:
       processTargetSelection(currentTarget);
     } else if (e.getSource() == this.jRadioButtonUserModel) {
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("mode User model : " + this.jRadioButtonUserModel.isSelected());
+      if (logger.isDebugEnabled()) {
+        logger.debug("mode User model: {}", this.jRadioButtonUserModel.isSelected());
       }
       this.currentTarget.setUseAnalyticalModel(Boolean.FALSE);
       // reselect target to change panel visibility:
       processTargetSelection(currentTarget);
     } else if (e.getSource() == this.jRadioButtonValid) {
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("enable userModel : " + this.jRadioButtonValid.isSelected());
+      if (logger.isDebugEnabled()) {
+        logger.debug("enable userModel: {}", this.jRadioButtonValid.isSelected());
       }
       final UserModel userModel = this.currentTarget.getUserModel();
       if (userModel == null) {
@@ -453,8 +451,8 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         processTargetSelection(currentTarget);
       }
     } else if (e.getSource() == this.jRadioButtonInvalid) {
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("disable userModel : " + this.jRadioButtonInvalid.isSelected());
+      if (logger.isDebugEnabled()) {
+        logger.debug("disable userModel: {}", this.jRadioButtonInvalid.isSelected());
       }
       final UserModel userModel = this.currentTarget.getUserModel();
       if (userModel != null) {
@@ -935,16 +933,12 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         if (parentNode.getUserObject() instanceof Target) {
           final Target target = (Target) parentNode.getUserObject();
 
-          if (logger.isLoggable(Level.FINE)) {
-            logger.fine("update model : " + model);
-          }
+            logger.debug("update model : {}", model);
 
           // create a new model with defined names (model and parameters) replacing the selected model :
           final Model newModel = ModelManager.getInstance().replaceModel(type, model, target.getModels());
 
-          if (logger.isLoggable(Level.FINE)) {
-            logger.fine("new merged model : " + newModel);
-          }
+            logger.debug("new merged model : {}", newModel);
 
           // Remove and add model at the right place :
           int idx = target.getModels().indexOf(model);
@@ -970,7 +964,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
           throw new UnsupportedOperationException("Not implemented !");
         }
       } else {
-        logger.severe("invalid selected node to perform the update operation = " + currentNode);
+        logger.warn("invalid selected node to perform the update operation = {}", currentNode);
       }
     }
   }//GEN-LAST:event_jButtonUpdateActionPerformed
@@ -994,9 +988,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         if (parentNode.getUserObject() instanceof Target) {
           final Target target = (Target) parentNode.getUserObject();
 
-          if (logger.isLoggable(Level.FINE)) {
-            logger.fine("remove model : " + model);
-          }
+            logger.debug("remove model : {}", model);
 
           // Remove model from target :
           int idx = target.getModels().indexOf(model);
@@ -1017,7 +1009,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
           throw new UnsupportedOperationException("Not implemented !");
         }
       } else {
-        logger.severe("invalid selected node to perform the remove operation = " + currentNode);
+        logger.warn("invalid selected node to perform the remove operation = {}", currentNode);
       }
     }
   }//GEN-LAST:event_jButtonRemoveActionPerformed
@@ -1051,7 +1043,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
           throw new UnsupportedOperationException("Not implemented !");
         }
       } else {
-        logger.severe("invalid selected node to perform the add operation = " + currentNode);
+        logger.warn("invalid selected node to perform the add operation = {}", currentNode);
       }
 
       if (target != null) {
@@ -1060,9 +1052,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         // create a new model with defined names (model and parameters) :
         final Model newModel = ModelManager.getInstance().newModel(type, target.getModels());
 
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("add model : " + newModel);
-        }
+          logger.debug("add model : {}", newModel);
 
         // Add model to target :
         target.getModels().add(newModel);

@@ -34,7 +34,8 @@ import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.util.logging.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
@@ -46,7 +47,7 @@ import javax.swing.JScrollPane;
 public final class AsproGui extends App {
 
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(AsproGui.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(AsproGui.class.getName());
 
   /* members */
   /** Setting Panel */
@@ -67,10 +68,8 @@ public final class AsproGui extends App {
       // Start application with the command line arguments
       new AsproGui(args);
     } finally {
-      final long time = (System.nanoTime() - start);
-
-      if (logger.isLoggable(Level.INFO)) {
-        logger.info("startup : duration = " + 1e-6d * time + " ms.");
+      if (logger.isInfoEnabled()) {
+        logger.info("startup : duration = {} ms.", 1e-6d * (System.nanoTime() - start));
       }
     }
   }
@@ -99,7 +98,7 @@ public final class AsproGui extends App {
    */
   @Override
   protected void init(final String[] args) throws RuntimeException {
-    logger.fine("AsproGui.init() handler : enter");
+    logger.debug("AsproGui.init() handler : enter");
 
     this.initServices();
 
@@ -120,7 +119,7 @@ public final class AsproGui extends App {
       }
     });
 
-    logger.fine("AsproGui.init() handler : exit");
+    logger.debug("AsproGui.init() handler : exit");
   }
 
   /**
@@ -147,7 +146,7 @@ public final class AsproGui extends App {
    */
   @Override
   protected void execute() {
-    logger.fine("AsproGui.execute() handler called.");
+    logger.debug("AsproGui.execute() handler called.");
 
     SwingUtils.invokeLaterEDT(new Runnable() {
 
@@ -156,7 +155,7 @@ public final class AsproGui extends App {
        */
       @Override
       public void run() {
-        logger.fine("AsproGui.ready : handler called.");
+        logger.debug("AsproGui.ready : handler called.");
 
         getFrame().setVisible(true);
       }
@@ -171,7 +170,7 @@ public final class AsproGui extends App {
    */
   @Override
   protected boolean finish() {
-    logger.fine("AsproGui.finish() handler called.");
+    logger.debug("AsproGui.finish() handler called.");
 
     // Ask the user if he wants to save modifications
     final ConfirmSaveChanges result = MessagePane.showConfirmSaveChangesBeforeClosing();
@@ -221,7 +220,7 @@ public final class AsproGui extends App {
    * @param frame
    */
   private void prepareFrame(final JFrame frame) {
-    logger.fine("prepareFrame : enter");
+    logger.debug("prepareFrame : enter");
 
     frame.setTitle(App.getSharedApplicationDataModel().getProgramName());
 
@@ -231,8 +230,8 @@ public final class AsproGui extends App {
     // get screen size to adjust minimum window size :
     final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 
-    if (logger.isLoggable(Level.INFO)) {
-      logger.info("screen size = " + screenSize.getWidth() + " x " + screenSize.getHeight());
+    if (logger.isInfoEnabled()) {
+      logger.info("screen size = {} x {}", screenSize.getWidth(), screenSize.getHeight());
     }
 
     // hack for screens smaller than 1152x864 screens :
@@ -262,7 +261,7 @@ public final class AsproGui extends App {
 
     StatusBar.show("application started.");
 
-    logger.fine("prepareFrame : exit");
+    logger.debug("prepareFrame : exit");
   }
 
   /**

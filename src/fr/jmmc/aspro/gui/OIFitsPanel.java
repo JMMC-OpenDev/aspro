@@ -11,7 +11,8 @@ import fr.jmmc.oitools.model.OIFitsFile;
 import fr.jmmc.oitools.model.XmlOutputVisitor;
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.logging.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import javax.swing.JEditorPane;
 import javax.swing.text.Document;
 import javax.swing.text.html.HTMLEditorKit;
@@ -25,7 +26,7 @@ public final class OIFitsPanel extends javax.swing.JPanel implements Observation
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(OIFitsPanel.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(OIFitsPanel.class.getName());
   /** XSLT file path */
   private final static String XSLT_FILE = "fr/jmmc/aspro/gui/oiview.xsl";
   /** empty document */
@@ -47,8 +48,8 @@ public final class OIFitsPanel extends javax.swing.JPanel implements Observation
    */
   @Override
   public void onProcess(final ObservationEvent event) {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("event [" + event.getType() + "] process IN");
+    if (logger.isDebugEnabled()) {
+      logger.debug("event [{}] process IN", event.getType());
     }
     switch (event.getType()) {
       case OIFITS_DONE:
@@ -58,8 +59,8 @@ public final class OIFitsPanel extends javax.swing.JPanel implements Observation
         break;
       default:
     }
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("event [" + event.getType() + "] process OUT");
+    if (logger.isDebugEnabled()) {
+      logger.debug("event [{}] process OUT", event.getType());
     }
   }
 
@@ -78,8 +79,8 @@ public final class OIFitsPanel extends javax.swing.JPanel implements Observation
       // use an XSLT to transform the XML document to an HTML representation :
       document = XmlFactory.transform(document, XSLT_FILE);
 
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("update : " + 1e-6d * (System.nanoTime() - start) + " ms.");
+      if (logger.isDebugEnabled()) {
+        logger.debug("update: {} ms.", 1e-6d * (System.nanoTime() - start));
       }
     }
 
@@ -90,11 +91,11 @@ public final class OIFitsPanel extends javax.swing.JPanel implements Observation
         this.jOutputPane.read(new StringReader(document), null);
         this.jOutputPane.setCaretPosition(0);
       } catch (IOException ioe) {
-        logger.log(Level.SEVERE, "IO exception : ", ioe);
+        logger.error( "IO exception : ", ioe);
       }
 
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("html : " + 1e-6d * (System.nanoTime() - start) + " ms.");
+      if (logger.isDebugEnabled()) {
+        logger.debug("html{} ms.", 1e-6d * (System.nanoTime() - start));
       }
 
       this.isEmpty = false;

@@ -304,8 +304,8 @@ public class TargetUserInformations
           mapIDCalibrators.put(newTarget.getIdentifier(), newTarget);
 
         } else {
-          if (logger.isLoggable(java.util.logging.Level.FINE)) {
-            logger.fine("Removing missing target reference '" + target.getIdentifier() + "'.");
+          if (logger.isDebugEnabled()) {
+            logger.debug("Removing missing target reference: {}", target.getIdentifier());
           }
           it.remove();
         }
@@ -325,9 +325,7 @@ public class TargetUserInformations
         target = targetInfo.getTargetRef();
 
         if (target == null) {
-          if (logger.isLoggable(java.util.logging.Level.FINE)) {
-            logger.fine("Removing invalid target reference.");
-          }
+          logger.debug("Removing invalid target reference.");
           it.remove();
         } else {
           newTarget = mapIDTargets.get(target.getIdentifier());
@@ -340,15 +338,15 @@ public class TargetUserInformations
 
             // remove if empty :
             if (targetInfo.isEmpty()) {
-              if (logger.isLoggable(java.util.logging.Level.FINE)) {
-                logger.fine("Removing empty target information '" + target.getIdentifier() + "'.");
+              if (logger.isDebugEnabled()) {
+                logger.debug("Removing empty target information: {}", target.getIdentifier());
               }
               it.remove();
             }
 
           } else {
-            if (logger.isLoggable(java.util.logging.Level.FINE)) {
-              logger.fine("Removing missing target reference '" + target.getIdentifier() + "'.");
+            if (logger.isDebugEnabled()) {
+              logger.debug("Removing missing target reference: {}", target.getIdentifier());
             }
             it.remove();
           }

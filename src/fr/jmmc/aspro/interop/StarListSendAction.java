@@ -15,7 +15,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This action sends the starlist to Pivot
@@ -31,11 +32,9 @@ public final class StarListSendAction extends SampCapabilityAction {
   /** Action name. This name is used to register to the ActionRegistrar */
   public final static String actionName = "starListSendAction";
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(className);
+  private static final Logger logger = LoggerFactory.getLogger(className);
   /** SAMP Parameter 'starlist' */
   public final static String PARAM_STAR_LIST = "starlist";
-  /** SAMP Parameter 'request_id' */
-  public final static String PARAM_REQUEST_ID = "request_id";
 
   /**
    * Public constructor that automatically register the action in RegisteredAction.
@@ -73,12 +72,7 @@ public final class StarListSendAction extends SampCapabilityAction {
         parameters = new HashMap<String, String>(4);
         parameters.put(PARAM_STAR_LIST, file.toURI().toString());
 
-        // TODO: use request Id stored in observation context
-        parameters.put(PARAM_REQUEST_ID, "*** UNDEFINED ***");
-
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("parameters = \n" + parameters);
-        }
+        logger.debug("parameters = \n{}", parameters);
 
       } catch (IOException ioe) {
         MessagePane.showErrorMessage("Could not export to file : " + file.getAbsolutePath(), ioe);

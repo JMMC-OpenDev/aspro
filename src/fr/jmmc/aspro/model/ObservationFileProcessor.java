@@ -7,7 +7,8 @@ import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.ObservationVariant;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.util.AsproModelVersion;
-import java.util.logging.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class handles Aspro model conversion between model revisions
@@ -16,7 +17,7 @@ import java.util.logging.Level;
 public final class ObservationFileProcessor {
 
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(ObservationFileProcessor.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(ObservationFileProcessor.class.getName());
   /** Current revision of the Aspro DM */
   public final static AsproModelVersion CURRENT_REVISION = AsproModelVersion.Feb2012Revision;
 
@@ -32,22 +33,16 @@ public final class ObservationFileProcessor {
    * @param observation observation to process
    */
   public static void onLoad(final ObservationSetting observation) {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("onLoad : " + observation);
-    }
+    logger.debug("onLoad: {}", observation);
 
     // Check version :
-    final float SchemaVersion = observation.getSchemaVersion();
+    final float schemaVersion = observation.getSchemaVersion();
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("SchemaVersion = " + SchemaVersion);
-    }
+    logger.debug("SchemaVersion = {}", schemaVersion);
 
-    final AsproModelVersion revision = AsproModelVersion.valueOf(SchemaVersion);
+    final AsproModelVersion revision = AsproModelVersion.valueOf(schemaVersion);
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("revision = " + revision);
-    }
+    logger.debug("revision = {}", revision);
 
     // convert ?
     if (revision != CURRENT_REVISION) {
@@ -64,9 +59,7 @@ public final class ObservationFileProcessor {
    * @param observation observation to process
    */
   public static void onSave(final ObservationSetting observation) {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("onSave : " + observation);
-    }
+    logger.debug("onSave: {}", observation);
 
     observation.setSchemaVersion(CURRENT_REVISION.getVersion());
 
@@ -80,9 +73,7 @@ public final class ObservationFileProcessor {
    * @param revision observation revision
    */
   private static void convertModel(final ObservationSetting observation, final AsproModelVersion revision) {
-    if (logger.isLoggable(Level.INFO)) {
-      logger.info("convert observation model from " + revision + " to " + CURRENT_REVISION);
-    }
+    logger.info("convert observation model from {} to {}", revision, CURRENT_REVISION);
 
     if (revision.getVersion() < AsproModelVersion.Dec2010Revision.getVersion()) {
       // update model to Dec2010Revision :
@@ -90,9 +81,7 @@ public final class ObservationFileProcessor {
       String id;
       for (Target target : observation.getTargets()) {
         id = target.getIdentifier();
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("generate target ID '" + target.getName() + "' = '" + id + "'");
-        }
+        logger.debug("generate target ID '{}' = '{}'", target.getName(), id);
       }
     }
 
@@ -121,8 +110,6 @@ public final class ObservationFileProcessor {
       }
     }
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("convertModel done : " + revision);
-    }
+    logger.debug("convertModel done : {}", revision);
   }
 }

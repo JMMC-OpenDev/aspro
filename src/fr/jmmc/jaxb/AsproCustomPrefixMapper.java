@@ -49,7 +49,7 @@ public final class AsproCustomPrefixMapper extends NamespacePrefixMapper {
    *    // a human friendly prefix is not really a fatal problem,
    *    // you can just continue marshalling without failing
    *
-   *    logger.log(Level.WARNING, "jaxb property failure", pe);
+   *    logger.warn("jaxb property failure", pe);
    *  }
    */
   private AsproCustomPrefixMapper() {

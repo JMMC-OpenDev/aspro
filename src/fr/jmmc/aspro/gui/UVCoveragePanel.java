@@ -82,7 +82,8 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.Vector;
 import java.util.concurrent.ExecutionException;
-import java.util.logging.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JFormattedTextField;
 import javax.swing.event.ChangeEvent;
@@ -115,7 +116,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1L;
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(UVCoveragePanel.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(UVCoveragePanel.class.getName());
   /** message indicating computations */
   private static final String MSG_COMPUTING_COVERAGE = "computing uv coverage ...";
   /** message indicating computations */
@@ -684,8 +685,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
           jFieldObsDuration.setValue(Double.valueOf(halfSamplingSec));
         }
 
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("samplingPeriod changed : " + newValue);
+        if (logger.isDebugEnabled()) {
+          logger.debug("samplingPeriod changed: {}", newValue);
         }
         fireObservationUpdateEvent();
       }
@@ -704,8 +705,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
           jFieldObsDuration.setValue(AsproConstants.DEFAULT_OBSERVATION_DURATION);
         }
 
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("obsDuration changed : " + newValue);
+        if (logger.isDebugEnabled()) {
+          logger.debug("obsDuration changed: {}", newValue);
         }
         fireObservationUpdateEvent();
       }
@@ -754,9 +755,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
    */
   @Override
   public void dispose() {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("dispose : " + this);
-    }
+    logger.debug("dispose: {}", this);
 
     // unregister this instance as a Preference Observer :
     this.myPreferences.deleteObserver(this);
@@ -778,9 +777,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
    */
   @Override
   public void update(final Observable o, final Object arg) {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("Preferences updated on : " + this);
-    }
+    logger.debug("Preferences updated on : {}", this);
 
     this.refreshPlot();
   }
@@ -802,9 +799,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       final double minBaseLine = intConf.getMinBaseLine();
       final double maxBaseLine = intConf.getMaxBaseLine();
 
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("interferometer configuration changed : " + intConfName
-                + "; baseline min= " + minBaseLine + ", max= " + maxBaseLine);
+      if (logger.isDebugEnabled()) {
+        logger.debug("interferometer configuration changed: {}; baseline min= {}, max= {}",
+                new Object[]{intConfName, minBaseLine, maxBaseLine});
       }
 
       // adjust uv max range to [0.5 * minBaseLine; 2 * maxBaseLine] and 
@@ -826,9 +823,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     final boolean changed = insName != null && !insName.equals(this.instrumentName);
     if (changed) {
       this.instrumentName = insName;
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("instrument changed : " + insName);
-      }
+
+      logger.debug("instrument changed : {}", insName);
 
       resetSamplingPeriod(observation);
 
@@ -838,8 +834,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
               observation.getInstrumentConfiguration().getName());
       this.jComboBoxInstrumentMode.setModel(new DefaultComboBoxModel(v));
 
-      if (logger.isLoggable(Level.FINEST)) {
-        logger.finest("jComboBoxInstrumentMode updated : " + this.jComboBoxInstrumentMode.getSelectedItem());
+      if (logger.isTraceEnabled()) {
+        logger.trace("jComboBoxInstrumentMode updated: {}", this.jComboBoxInstrumentMode.getSelectedItem());
       }
     }
   }
@@ -856,8 +852,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     this.jFieldSamplingPeriod.setValue(Double.valueOf(defaultSamplingTime));
     this.jFieldObsDuration.setValue(AsproConstants.DEFAULT_OBSERVATION_DURATION);
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("defaultSamplingTime : " + defaultSamplingTime);
+    if (logger.isDebugEnabled()) {
+      logger.debug("defaultSamplingTime: {}", defaultSamplingTime);
     }
   }
 
@@ -890,8 +886,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     if (oldValue != null) {
       this.jComboBoxFTMode.setSelectedItem(oldValue);
     }
-    if (logger.isLoggable(Level.FINEST)) {
-      logger.finest("jComboBoxFTMode updated : " + this.jComboBoxFTMode.getSelectedItem());
+    if (logger.isTraceEnabled()) {
+      logger.trace("jComboBoxFTMode updated: {}", this.jComboBoxFTMode.getSelectedItem());
     }
 
     final boolean visible = !modes.isEmpty();
@@ -908,9 +904,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     final TargetConfiguration targetConf = om.getTargetConfiguration(targetName);
     if (targetConf != null) {
 
-      if (logger.isLoggable(Level.FINEST)) {
-        logger.finest("updateTargetConfiguration : " + targetName);
-      }
+      logger.trace("updateTargetConfiguration : {}", targetName);
 
       // disable the automatic update observation :
       final boolean prevAutoUpdateObservation = this.setAutoUpdateObservation(false);
@@ -953,9 +947,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         this.jTargetHAMin.setText(format(this.jFieldHAMin, min));
         this.jTargetHAMax.setText(format(this.jFieldHAMax, max));
 
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("target HA min : " + min);
-          logger.fine("target HA max : " + min);
+        if (logger.isDebugEnabled()) {
+          logger.debug("target HA min: {}", min);
+          logger.debug("target HA max: {}", min);
         }
         reset = false;
       }
@@ -987,36 +981,36 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
   @Override
   public void actionPerformed(final ActionEvent e) {
     if (e.getSource() == this.jComboBoxInstrumentMode) {
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("instrument mode changed : " + this.jComboBoxInstrumentMode.getSelectedItem());
+      if (logger.isDebugEnabled()) {
+        logger.debug("instrument mode changed: {}", this.jComboBoxInstrumentMode.getSelectedItem());
       }
       fireObservationUpdateEvent();
 
     } else if (e.getSource() == this.jComboBoxFTMode) {
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("ft mode changed : " + this.jComboBoxFTMode.getSelectedItem());
+      if (logger.isDebugEnabled()) {
+        logger.debug("ft mode changed: {}", this.jComboBoxFTMode.getSelectedItem());
       }
       fireObservationUpdateEvent();
 
     } else if (e.getSource() == this.jComboBoxAtmQual) {
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("atmQuality changed : " + this.jComboBoxAtmQual.getSelectedItem());
+      if (logger.isDebugEnabled()) {
+        logger.debug("atmQuality changed: {}", this.jComboBoxAtmQual.getSelectedItem());
       }
       fireObservationUpdateEvent();
 
     } else if (e.getSource() == this.jComboBoxImageMode) {
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("image mode changed : " + this.jComboBoxImageMode.getSelectedItem());
+      if (logger.isDebugEnabled()) {
+        logger.debug("image mode changed: {}", this.jComboBoxImageMode.getSelectedItem());
       }
       refreshPlot();
     } else if (e.getSource() == this.jCheckBoxAddNoise) {
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("do noise : " + this.jCheckBoxAddNoise.isSelected());
+      if (logger.isDebugEnabled()) {
+        logger.debug("do noise: {}", this.jCheckBoxAddNoise.isSelected());
       }
       refreshPlot();
     } else if (e.getSource() == this.jCheckBoxDoOIFits) {
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("do OIFits : " + this.jCheckBoxDoOIFits.isSelected());
+      if (logger.isDebugEnabled()) {
+        logger.debug("do OIFits: {}", this.jCheckBoxDoOIFits.isSelected());
       }
       if (this.getChartData() != null) {
         if (this.jCheckBoxDoOIFits.isSelected()) {
@@ -1044,24 +1038,24 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     final FieldSliderAdapter source = (FieldSliderAdapter) ce.getSource();
 
     if (source == this.haMinAdapter) {
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("haMin changed : " + source.getValue());
+      if (logger.isDebugEnabled()) {
+        logger.debug("haMin changed: {}", source.getValue());
       }
       this.haMaxAdapter.setMinValue(source.getValue());
 
       fireObservationUpdateEvent();
 
     } else if (source == this.haMaxAdapter) {
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("haMax changed : " + source.getValue());
+      if (logger.isDebugEnabled()) {
+        logger.debug("haMax changed: {}", source.getValue());
       }
       this.haMinAdapter.setMaxValue(source.getValue());
 
       fireObservationUpdateEvent();
 
     } else if (source == this.uvMaxAdapter) {
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("U-V Max changed : " + source.getValue());
+      if (logger.isDebugEnabled()) {
+        logger.debug("U-V Max changed: {}", source.getValue());
       }
       refreshPlot();
     }
@@ -1084,8 +1078,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
    * @param observation observation
    */
   private void onLoadObservation(final ObservationSetting observation) {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("onLoadObservation :\n" + ObservationManager.toString(observation));
+    if (logger.isDebugEnabled()) {
+      logger.debug("onLoadObservation :\n{}", ObservationManager.toString(observation));
     }
     // disable the automatic update observation :
     final boolean prevAutoUpdateObservation = this.setAutoUpdateObservation(false);
@@ -1156,9 +1150,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
    * @param target selected target
    */
   private void onTargetSelectionChange(final Target target) {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("onTargetSelectionChange : " + target);
-    }
+    logger.debug("onTargetSelectionChange : {}", target);
 
     // disable the automatic update observation :
     final boolean prevAutoUpdateObservation = this.setAutoUpdateObservation(false);
@@ -1192,8 +1184,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
    * @param event update event
    */
   private void onUpdateObservation(final UpdateObservationEvent event) {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("observation :\n" + ObservationManager.toString(event.getObservation()));
+    if (logger.isDebugEnabled()) {
+      logger.debug("observation :\n{}", ObservationManager.toString(event.getObservation()));
     }
 
     // Refresh the UI widgets related to Observation Main changes :
@@ -1222,7 +1214,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     // check if the automatic update flag is enabled :
     if (this.doAutoUpdateObservation) {
       if (DEBUG_UPDATE_EVENT) {
-        logger.log(Level.SEVERE, "UPDATE", new Throwable());
+        logger.warn("UPDATE", new Throwable());
       }
 
       boolean changed = false;
@@ -1244,9 +1236,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       final String targetName = getSelectedTargetName();
 
       if (targetName != null) {
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("onUpdateObservation : " + targetName);
-        }
+        logger.debug("onUpdateObservation : {}", targetName);
+
         // Update target HA Min/Max :
         changed |= om.setTargetHAMin(targetName, Double.valueOf(this.haMinAdapter.getValue()));
         changed |= om.setTargetHAMax(targetName, Double.valueOf(this.haMaxAdapter.getValue()));
@@ -1270,8 +1261,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
    */
   @Override
   public void onProcess(final ObservationEvent event) {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("event [" + event.getType() + "] process IN");
+    if (logger.isDebugEnabled()) {
+      logger.debug("event [{}] process IN", event.getType());
     }
     switch (event.getType()) {
       case LOADED:
@@ -1298,8 +1289,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         break;
       default:
     }
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("event [" + event.getType() + "] process OUT");
+    if (logger.isDebugEnabled()) {
+      logger.debug("event [{}] process OUT", event.getType());
     }
   }
 
@@ -1343,9 +1334,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
    */
   private void refreshPlot() {
     if (this.doAutoRefresh) {
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("refreshPlot");
-      }
+      logger.debug("refreshPlot");
+
       // use the latest observation for computations :
       this.refreshPlot(om.getObservationCollection());
     }
@@ -1368,20 +1358,20 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       // Next plot (observability done event) will take into account UI widget changes.
 
       if (obsData.getVersion().isSameMainVersion(obsCollection.getVersion())) {
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("refreshPlot : main version equals : " + obsData.getVersion() + " :: " + obsCollection.getVersion());
+        if (logger.isDebugEnabled()) {
+          logger.debug("refreshPlot: main version equals: {} :: {}", obsData.getVersion(), obsCollection.getVersion());
         }
         if (DEBUG_VERSIONS) {
-          logger.severe("refreshPlot : main version equals : " + obsData.getVersion() + " :: " + obsCollection.getVersion());
+          logger.warn("refreshPlot: main version equals: {} :: {}", obsData.getVersion(), obsCollection.getVersion());
         }
 
         this.plot(obsCollection);
       } else {
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("refreshPlot : main version mismatch : " + obsData.getVersion() + " :: " + obsCollection.getVersion());
+        if (logger.isDebugEnabled()) {
+          logger.debug("refreshPlot: main version mismatch: {} :: {}", obsData.getVersion(), obsCollection.getVersion());
         }
         if (DEBUG_VERSIONS) {
-          logger.severe("refreshPlot : main version mismatch : " + obsData.getVersion() + " :: " + obsCollection.getVersion());
+          logger.warn("refreshPlot: main version mismatch: {} :: {}", obsData.getVersion(), obsCollection.getVersion());
         }
       }
     }
@@ -1393,11 +1383,11 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
    * @param obsCollection observation collection to use
    */
   private void plot(final ObservationCollection obsCollection) {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("plot : " + ObservationManager.toString(obsCollection));
+    if (logger.isDebugEnabled()) {
+      logger.debug("plot: {}", ObservationManager.toString(obsCollection));
     }
     if (DEBUG_PLOT_EVENT) {
-      logger.log(Level.SEVERE, "PLOT", new Throwable());
+      logger.warn("PLOT", new Throwable());
     }
 
     // Note : version checks are already done in refreshPlot(observation) :
@@ -1639,7 +1629,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
                               uvRect, this.imageMode, this.imageSize, this.colorModel, this.colorScale, noiseService);
 
                     } catch (IllegalArgumentException iae) {
-                      logger.warn("Incorrect fits image in file [" + target.getUserModel().getFile() + "]", iae);
+                      logger.warn("Incorrect fits image in file [{}]", target.getUserModel().getFile(), iae);
 
                       // disable model:
                       target.getUserModel().setFileValid(false);
@@ -1715,7 +1705,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       uvDataCollection.setWarningContainer(mergedWarningContainer);
 
       if (logger.isInfoEnabled()) {
-        logger.info("compute : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
+        logger.info("compute : duration = {} ms.", 1e-6d * (System.nanoTime() - start));
       }
 
       return uvDataCollection;
@@ -1779,9 +1769,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     if (!uvDataCollection.isSingle()) {
       return false;
     }
-    
+
     boolean computing = false;
-    
+
     // check if the OIFits data are still available:
     if (ObservationManager.getInstance().getOIFitsFile() != null) {
       // Check if the previously computed UV Data is still valid :
@@ -1803,10 +1793,10 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         if (currentUVData.isOIFitsValid(uvDataCollection)) {
           // means no reset and current OIFits data are correct:
           return true;
-        }    
+        }
       }
     }
-    
+
     // Note : the main observation can have changed while computation
 
     final ObservationCollection taskObsCollection = uvDataCollection;
@@ -1818,11 +1808,11 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     // Next plot (uv coverage done event) will take into account UI widget changes.
 
     if (taskObsCollection.getVersion().isSameUVVersion(lastObsCollection.getVersion())) {
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("refreshUI : main version equals : " + taskObsCollection.getVersion() + " :: " + lastObsCollection.getVersion());
+      if (logger.isDebugEnabled()) {
+        logger.debug("computeOIFits: uv version equals: {} :: {}", taskObsCollection.getVersion(), lastObsCollection.getVersion());
       }
       if (DEBUG_VERSIONS) {
-        logger.warning("refreshUI : main version equals : " + taskObsCollection.getVersion() + " :: " + lastObsCollection.getVersion());
+        logger.warn("computeOIFits: uv version equals: {} :: {}", taskObsCollection.getVersion(), lastObsCollection.getVersion());
       }
 
       final List<OIFitsCreatorService> oiFitsCreatorList = new ArrayList<OIFitsCreatorService>(uvDataCollection.size());
@@ -2138,9 +2128,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     // uv area reference :
     final Rectangle2D.Double uvRectRef = uvMapData.getUvMapRect();
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("uv map rect     = " + uvRect);
-      logger.fine("uv map rect REF = " + uvRectRef);
+    if (logger.isDebugEnabled()) {
+      logger.debug("uv map rect     = {}", uvRect);
+      logger.debug("uv map rect REF = {}", uvRectRef);
     }
 
     // note : floor/ceil to be sure to have at least 1x1 pixel image
@@ -2163,8 +2153,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
     doCrop = ((x != 0) || (y != 0) || (w != imageSize) || (h != imageSize));
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("sub uvMap [" + x + ", " + y + " - " + w + ", " + h + "] - doCrop = " + doCrop);
+    if (logger.isDebugEnabled()) {
+      logger.debug("sub image [{}, {} - {}, {}] - doCrop = {}", new Object[]{x, y, w, h, doCrop});
     }
 
     // crop a small sub image displayed while the correct model image is computed:
@@ -2602,13 +2592,13 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
    */
   @Override
   public void chartProgress(final ChartProgressEvent event) {
-    if (logger.isLoggable(Level.FINE)) {
+    if (logger.isDebugEnabled()) {
       switch (event.getType()) {
         case ChartProgressEvent.DRAWING_STARTED:
           this.chartDrawStartTime = System.nanoTime();
           break;
         case ChartProgressEvent.DRAWING_FINISHED:
-          logger.fine("Drawing chart time : " + 1e-6d * (System.nanoTime() - this.chartDrawStartTime) + " ms.");
+          logger.debug("Drawing chart time = {} ms.", 1e-6d * (System.nanoTime() - this.chartDrawStartTime));
           this.chartDrawStartTime = 0l;
           break;
         default:
@@ -2632,7 +2622,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     try {
       res = field.getFormatter().valueToString(value);
     } catch (ParseException pe) {
-      logger.log(Level.SEVERE, "parsing exception", pe);
+      logger.error("parsing exception", pe);
     }
     return res;
   }

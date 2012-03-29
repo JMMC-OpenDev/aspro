@@ -7,7 +7,8 @@ import fr.jmmc.jmcs.gui.task.TaskSwingWorkerExecutor;
 import fr.jmmc.jmcs.gui.action.RegisteredAction;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.logging.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import javax.swing.Timer;
 
 /**
@@ -22,7 +23,7 @@ public abstract class WaitingTaskAction extends RegisteredAction {
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(WaitingTaskAction.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(WaitingTaskAction.class.getName());
   /** delay in milliseconds between each poll to check if there is still a task running */
   private final static int POLLING_DELAY = 100;
   /** shared flag to know if there is already a  pending action */
@@ -46,16 +47,14 @@ public abstract class WaitingTaskAction extends RegisteredAction {
    */
   @Override
   public final void actionPerformed(final ActionEvent ae) {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("actionPerformed");
-    }
+    logger.debug("actionPerformed");
 
     // If there is already a pending action ?
     if (pending) {
       // discard this action event :
 
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("discard action (another action is pending) : " + this.getClass().getName());
+      if (logger.isDebugEnabled()) {
+        logger.debug("discard action (another action is pending): {}", this.getClass().getName());
       }
       return;
     }
@@ -69,9 +68,7 @@ public abstract class WaitingTaskAction extends RegisteredAction {
       new DelayedActionPerformer(this).start();
 
     } else {
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("execute action : " + this);
-      }
+      logger.debug("execute action : {}", this);
 
       actionPerformed();
     }
@@ -115,8 +112,8 @@ public abstract class WaitingTaskAction extends RegisteredAction {
     public void actionPerformed(final ActionEvent ae) {
       final boolean taskRunning = TaskSwingWorkerExecutor.isTaskRunning();
 
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("running task : " + taskRunning);
+      if (logger.isDebugEnabled()) {
+        logger.debug("running task : {}", taskRunning);
       }
 
       if (!taskRunning) {
@@ -126,9 +123,7 @@ public abstract class WaitingTaskAction extends RegisteredAction {
         // stop this timer :
         this.timer.stop();
 
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("execute action : " + this.adapter);
-        }
+        logger.debug("execute action : {}", this.adapter);
 
         // execute the action :
         this.adapter.actionPerformed();

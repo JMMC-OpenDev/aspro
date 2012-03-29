@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This registered action represents a File Menu entry to
@@ -37,7 +39,7 @@ public final class BroadcastToModelFittingAction extends SampCapabilityAction {
   /** Action name. This name is used to register to the ActionRegistrar */
   public final static String actionName = "broadcastToModelFittingAction";
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(className);
+  private static final Logger logger = LoggerFactory.getLogger(className);
 
   /* members */
   /** package name for JAXB generated code */
@@ -60,7 +62,7 @@ public final class BroadcastToModelFittingAction extends SampCapabilityAction {
    */
   @Override
   public Map<?, ?> composeMessage() throws IllegalStateException {
-    logger.fine("composeMessage");
+    logger.debug("composeMessage");
 
     // Use main observation to check variants :
     if (!ObservationManager.getInstance().getMainObservation().isSingle()) {

@@ -60,7 +60,8 @@ import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Set;
-import java.util.logging.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import javax.swing.BorderFactory;
 import javax.swing.BoundedRangeModel;
 import javax.swing.DefaultBoundedRangeModel;
@@ -107,7 +108,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(ObservabilityPanel.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(ObservabilityPanel.class.getName());
   /** message indicating computations */
   private static final String MSG_COMPUTING = "computing observability ...";
   /** flag to log version checking */
@@ -277,9 +278,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
       @Override
       public void mouseWheelMoved(final MouseWheelEvent e) {
         if (scroller.isEnabled()) {
-          if (logger.isLoggable(Level.FINER)) {
-            logger.finer("mouseWheelMoved : " + e);
-          }
+          logger.debug("mouseWheelMoved: {}", e);
+
           final DefaultBoundedRangeModel model = (DefaultBoundedRangeModel) scroller.getModel();
 
           final int clicks = e.getWheelRotation();
@@ -418,9 +418,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
    */
   @Override
   public void dispose() {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("dispose : " + this);
-    }
+    logger.debug("dispose: {}", this);
 
     // unregister this instance as a Preference Observer :
     this.myPreferences.deleteObserver(this);
@@ -436,9 +434,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
    */
   @Override
   public void update(final Observable o, final Object arg) {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("Preferences updated on : " + this);
-    }
+    logger.debug("Preferences updated on : {}", this);
 
     this.jComboTimeRef.setSelectedItem(this.myPreferences.getPreference(Preferences.TIME_REFERENCE));
     // also trigger refresh plot if another preference changes (night center)
@@ -508,8 +504,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
       if (!doBaseLineLimits) {
         final int size = this.slidingXYPlotAdapter.getSize();
 
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("row count = " + size);
+        if (logger.isDebugEnabled()) {
+          logger.debug("row count: {}", size);
         }
 
         if (size > MAX_PRINTABLE_ITEMS_A3) {
@@ -587,8 +583,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
    * @param observation observation (unused)
    */
   private void onLoadObservation(final ObservationSetting observation) {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("onLoadObservation :\n" + ObservationManager.toString(observation));
+    if (logger.isDebugEnabled()) {
+      logger.debug("onLoadObservation:\n{}", ObservationManager.toString(observation));
     }
     // disable the automatic refresh :
     final boolean prevAutoRefresh = this.setAutoRefresh(false);
@@ -612,10 +608,9 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
    */
   @Override
   public void onProcess(final ObservationEvent event) {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("event [" + event.getType() + "] process IN");
+    if (logger.isDebugEnabled()) {
+      logger.debug("event [{}] process IN", event.getType());
     }
-
     switch (event.getType()) {
       case LOADED:
         this.onLoadObservation(event.getObservation());
@@ -625,8 +620,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         break;
       default:
     }
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("event [" + event.getType() + "] process OUT");
+    if (logger.isDebugEnabled()) {
+      logger.debug("event [{}] process OUT", event.getType());
     }
   }
 
@@ -636,9 +631,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
    */
   private void refreshPlot() {
     if (this.doAutoRefresh) {
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("refreshPlot");
-      }
+      logger.debug("refreshPlot");
+
       // use the latest observation collection used by computations :
       this.plot(ObservationManager.getInstance().getObservationCollection());
     }
@@ -650,8 +644,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
    * @param obsCollection observation collection to use
    */
   private void plot(final ObservationCollection obsCollection) {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("plot : " + ObservationManager.toString(obsCollection));
+    if (logger.isDebugEnabled()) {
+      logger.debug("plot: {}", ObservationManager.toString(obsCollection));
     }
 
     final boolean isSingle = obsCollection.isSingle();
@@ -768,7 +762,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
       }
 
       if (logger.isInfoEnabled()) {
-        logger.info("compute : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
+        logger.info("compute : duration = {} ms.", 1e-6d * (System.nanoTime() - start));
       }
 
       return obsDataList;
@@ -797,10 +791,10 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
         if (taskObsCollection.getVersion().isSameMainVersion(lastObsCollection.getVersion())) {
           if (logger.isDebugEnabled()) {
-            logger.debug("refreshUI : main version equals : " + taskObsCollection.getVersion() + " :: " + lastObsCollection.getVersion());
+            logger.debug("refreshUI: main version equals: {} :: {}", taskObsCollection.getVersion(), lastObsCollection.getVersion());
           }
           if (DEBUG_VERSIONS) {
-            logger.warn("refreshUI : main version equals : " + taskObsCollection.getVersion() + " :: " + lastObsCollection.getVersion());
+            logger.warn("refreshUI: main version equals: {} :: {}", taskObsCollection.getVersion(), lastObsCollection.getVersion());
           }
 
           // use latest observation collection to see possible UV widget changes :
@@ -810,10 +804,10 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
         } else {
           if (logger.isDebugEnabled()) {
-            logger.debug("refreshUI : main version mismatch : " + taskObsCollection.getVersion() + " :: " + lastObsCollection.getVersion());
+            logger.debug("refreshUI: main version mismatch: {} :: {}", taskObsCollection.getVersion(), lastObsCollection.getVersion());
           }
           if (DEBUG_VERSIONS) {
-            logger.warn("refreshUI : main version mismatch : " + taskObsCollection.getVersion() + " :: " + lastObsCollection.getVersion());
+            logger.warn("refreshUI: main version mismatch: {} :: {}", taskObsCollection.getVersion(), lastObsCollection.getVersion());
           }
 
           // use consistent observation and observability data :
@@ -1288,9 +1282,9 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
       this.nightLower = nightMin;
       this.nightUpper = nightMax;
 
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("nightLower: " + new Date(this.nightLower));
-        logger.fine("nightUpper: " + new Date(this.nightUpper));
+      if (logger.isDebugEnabled()) {
+        logger.debug("nightLower: {}", new Date(this.nightLower));
+        logger.debug("nightUpper: {}", new Date(this.nightUpper));
       }
 
       if (this.jCheckBoxNightOnly.isSelected()) {
@@ -1338,8 +1332,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
             // roll +/- 1 day to be within plot range:
             final Date now = convertCalendarToDate(cal, obsData.getDateMin(), obsData.getDateMax());
 
-            if (logger.isLoggable(Level.FINE)) {
-              logger.fine("timeMarker set at " + now);
+            if (logger.isDebugEnabled()) {
+              logger.debug("timeMarker set at: {}", now);
             }
 
             final double timeValue = now.getTime();
@@ -1401,13 +1395,13 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
    */
   @Override
   public void chartProgress(final ChartProgressEvent event) {
-    if (logger.isLoggable(Level.FINE)) {
+    if (logger.isDebugEnabled()) {
       switch (event.getType()) {
         case ChartProgressEvent.DRAWING_STARTED:
           this.chartDrawStartTime = System.nanoTime();
           break;
         case ChartProgressEvent.DRAWING_FINISHED:
-          logger.fine("Drawing chart time : " + 1e-6d * (System.nanoTime() - this.chartDrawStartTime) + " ms.");
+          logger.debug("Drawing chart time = {} ms.", 1e-6d * (System.nanoTime() - this.chartDrawStartTime));
           this.chartDrawStartTime = 0l;
           break;
         default:
@@ -1453,9 +1447,9 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
       final ChartRenderingInfo info = this.chartPanel.getChartRenderingInfo();
       final PlotRenderingInfo pinfo = info.getPlotInfo();
 
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("chartArea = " + info.getChartArea());
-        logger.fine("dataArea  = " + pinfo.getDataArea());
+      if (logger.isDebugEnabled()) {
+        logger.debug("chartArea = {}", info.getChartArea());
+        logger.debug("dataArea  = {}", pinfo.getDataArea());
       }
 
       final int top = (int) Math.floor(pinfo.getDataArea().getY());
@@ -1509,8 +1503,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     // use non data height (title + axis + legend):
     final int maxViewItems = (height - this.plotNonDataHeight) / ITEM_SIZE;
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("size = " + width + " x " + height + " => maxViewItems = " + maxViewItems);
+    if (logger.isDebugEnabled()) {
+      logger.debug("size = {} x {} => maxViewItems = {}", new Object[]{width, height, maxViewItems});
     }
 
     if (maxViewItems != this.slidingXYPlotAdapter.getMaxViewItems()) {
@@ -1561,16 +1555,14 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
   private void enableTimelineRefreshTimer(final boolean enable) {
     if (enable) {
       if (!this.timerTimeRefresh.isRunning()) {
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("Starting timer: " + this.timerTimeRefresh);
-        }
+        logger.debug("Starting timer: {}", this.timerTimeRefresh);
+
         this.timerTimeRefresh.start();
       }
     } else {
       if (this.timerTimeRefresh.isRunning()) {
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("Stopping timer: " + this.timerTimeRefresh);
-        }
+        logger.debug("Stopping timer: {}", this.timerTimeRefresh);
+
         this.timerTimeRefresh.stop();
       }
     }

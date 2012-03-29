@@ -9,6 +9,8 @@ import fr.jmmc.oitools.image.FitsImageFile;
 import fr.jmmc.oitools.image.FitsImageLoader;
 import fr.nom.tam.fits.FitsException;
 import java.io.IOException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This utility class provides several helper methods over FitsImage class
@@ -21,7 +23,7 @@ public final class FitsImageUtils {
   /* constants */
 
   /** Logger associated to image classes */
-  private final static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(FitsImageUtils.class.getName());
+  private final static Logger logger = LoggerFactory.getLogger(FitsImageUtils.class.getName());
 
   /**
    * Forbidden constructor
@@ -37,7 +39,7 @@ public final class FitsImageUtils {
    */
   public static FitsImage createFitsImage(final float[][] data) {
     final FitsImage image = new FitsImage();
-    
+
     updateFitsImage(image, data);
 
     return image;
@@ -205,8 +207,10 @@ public final class FitsImageUtils {
 
     minMaxJob.forkAndJoin();
 
-    logger.info("ImageMinMaxJob min: " + minMaxJob.getMin() + " - max: " + minMaxJob.getMax()
-            + " - nData: " + minMaxJob.getNData() + " - sum: " + minMaxJob.getSum());
+    if (logger.isInfoEnabled()) {
+      logger.info("ImageMinMaxJob min: {} - max: {} - nData: {} - sum: {}",
+              new Object[]{minMaxJob.getMin(), minMaxJob.getMax(), minMaxJob.getNData(), minMaxJob.getSum()});
+    }
 
     // update nData:
     image.setNData(minMaxJob.getNData());

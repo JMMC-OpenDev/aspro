@@ -26,7 +26,8 @@ import fr.jmmc.jmal.model.VisNoiseService;
 import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Random;
-import java.util.logging.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class performs the noise modelling of visibility data (error and noise) 
@@ -39,7 +40,7 @@ import java.util.logging.Level;
 public final class NoiseService implements VisNoiseService {
 
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(NoiseService.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(NoiseService.class.getName());
   /** Planck's constant in standard units (6.6262e-34) */
   public final static double H_PLANCK = 6.62606896e-34d;
   /** Speed of light (2.99792458e8) */
@@ -183,12 +184,12 @@ public final class NoiseService implements VisNoiseService {
       this.seeing = AtmosphereQualityUtils.getSeeing(atmQual);
     }
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("nbTel                      = " + nbTel);
-      logger.fine("telDiam                    = " + telDiam);
-      logger.fine("aoBand                     = " + aoBand);
-      logger.fine("nbOfActuators              = " + nbOfActuators);
-      logger.fine("seeing                     = " + seeing);
+    if (logger.isDebugEnabled()) {
+      logger.debug("nbTel                      : {}", nbTel);
+      logger.debug("telDiam                    : {}", telDiam);
+      logger.debug("aoBand                     : {}", aoBand);
+      logger.debug("nbOfActuators              : {}", nbOfActuators);
+      logger.debug("seeing                     : {}", seeing);
     }
   }
 
@@ -224,22 +225,22 @@ public final class NoiseService implements VisNoiseService {
     this.lambda = insMode.getWaveLength();
     this.spectralResolution = insMode.getResolution();
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("instrumentName                = " + instrumentName);
-      logger.fine("totalObsTime                  = " + totalObsTime);
-      logger.fine("transmission                  = " + transmission);
-      logger.fine("dit                           = " + dit);
-      logger.fine("ron                           = " + ron);
-      logger.fine("detectorSaturation            = " + detectorSaturation);
-      logger.fine("instrumentalVisibility        = " + instrumentalVisibility);
-      logger.fine("instrumentalVisibilityBias    = " + instrumentalVisibilityBias);
-      logger.fine("instrumentVis2CalibrationBias = " + instrumentVis2CalibrationBias);
-      logger.fine("instrumentalPhaseBias         = " + instrumentalPhaseBias);
-      logger.fine("nbPixInterf                   = " + nbPixInterf);
-      logger.fine("nbPixPhoto                    = " + nbPixPhoto);
-      logger.fine("fracFluxInInterferometry      = " + fracFluxInInterferometry);
-      logger.fine("lambda                        = " + lambda);
-      logger.fine("spectralResolution            = " + spectralResolution);
+    if (logger.isDebugEnabled()) {
+      logger.debug("instrumentName                : {}", instrumentName);
+      logger.debug("totalObsTime                  : {}", totalObsTime);
+      logger.debug("transmission                  : {}", transmission);
+      logger.debug("dit                           : {}", dit);
+      logger.debug("ron                           : {}", ron);
+      logger.debug("detectorSaturation            : {}", detectorSaturation);
+      logger.debug("instrumentalVisibility        : {}", instrumentalVisibility);
+      logger.debug("instrumentalVisibilityBias    : {}", instrumentalVisibilityBias);
+      logger.debug("instrumentVis2CalibrationBias : {}", instrumentVis2CalibrationBias);
+      logger.debug("instrumentalPhaseBias         : {}", instrumentalPhaseBias);
+      logger.debug("nbPixInterf                   : {}", nbPixInterf);
+      logger.debug("nbPixPhoto                    : {}", nbPixPhoto);
+      logger.debug("fracFluxInInterferometry      : {}", fracFluxInInterferometry);
+      logger.debug("lambda                        : {}", lambda);
+      logger.debug("spectralResolution            : {}", spectralResolution);
     }
   }
 
@@ -264,15 +265,15 @@ public final class NoiseService implements VisNoiseService {
       }
     }
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("fringeTrackerPresent       = " + fringeTrackerPresent);
+    if (logger.isDebugEnabled()) {
+      logger.debug("fringeTrackerPresent       : {}", fringeTrackerPresent);
     }
     if (this.fringeTrackerPresent) {
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("fringeTrackerInstrumentalVisibility = " + fringeTrackerInstrumentalVisibility);
-        logger.fine("fringeTrackerLimit         = " + fringeTrackerLimit);
-        logger.fine("fringeTrackerMaxIntTime    = " + fringeTrackerMaxIntTime);
-        logger.fine("ftBand                     = " + ftBand);
+      if (logger.isDebugEnabled()) {
+        logger.debug("fringeTrackerInstrumentalVisibility : {}", fringeTrackerInstrumentalVisibility);
+        logger.debug("fringeTrackerLimit         : {}", fringeTrackerLimit);
+        logger.debug("fringeTrackerMaxIntTime    : {}", fringeTrackerMaxIntTime);
+        logger.debug("ftBand                     : {}", ftBand);
       }
     }
   }
@@ -288,9 +289,9 @@ public final class NoiseService implements VisNoiseService {
 
     this.insBand = SpectralBandUtils.findBand(band);
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("band                       = " + band);
-      logger.fine("insBand                    = " + insBand);
+    if (logger.isDebugEnabled()) {
+      logger.debug("band                       : {}", band);
+      logger.debug("insBand                    : {}", insBand);
     }
 
     // If a flux / magnitude is missing => user message
@@ -298,22 +299,22 @@ public final class NoiseService implements VisNoiseService {
 
     flux = target.getFlux(this.insBand);
     this.objectMag = (flux != null) ? flux.doubleValue() : Double.NaN;
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("objectMag                  = " + objectMag);
+    if (logger.isDebugEnabled()) {
+      logger.debug("objectMag                  : {}", objectMag);
     }
 
     if (this.fringeTrackerPresent) {
       flux = target.getFlux(this.ftBand);
       this.fringeTrackerMag = (flux != null) ? flux.doubleValue() : Double.NaN;
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("fringeTrackerMag           = " + fringeTrackerMag);
+      if (logger.isDebugEnabled()) {
+        logger.debug("fringeTrackerMag           : {}", fringeTrackerMag);
       }
     }
 
     flux = target.getFlux(this.aoBand);
     this.adaptiveOpticsMag = (flux != null) ? flux.doubleValue() : Double.NaN;
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("adaptiveOpticsMag          = " + adaptiveOpticsMag);
+    if (logger.isDebugEnabled()) {
+      logger.debug("adaptiveOpticsMag          : {}", adaptiveOpticsMag);
     }
 
     if (Double.isNaN(this.objectMag)
@@ -369,12 +370,12 @@ public final class NoiseService implements VisNoiseService {
     // fraction of total interferometric flux in peak pixel :
     final double peakflux = this.fracFluxInInterferometry * nbTotalPhot / this.nbPixInterf;
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("adaptiveOpticsMag          = " + this.adaptiveOpticsMag);
-      logger.fine("strehl ratio               = " + sr);
-      logger.fine("dlam                       = " + dlam);
-      logger.fine("nbTotalPhot                = " + nbTotalPhot);
-      logger.fine("peakflux                   = " + peakflux);
+    if (logger.isDebugEnabled()) {
+      logger.debug("adaptiveOpticsMag          : {}", this.adaptiveOpticsMag);
+      logger.debug("strehl ratio               : {}", sr);
+      logger.debug("dlam                       : {}", dlam);
+      logger.debug("nbTotalPhot                : {}", nbTotalPhot);
+      logger.debug("peakflux                   : {}", peakflux);
     }
 
     int nbFrameToSaturation;
@@ -399,9 +400,9 @@ public final class NoiseService implements VisNoiseService {
 
     nbTotalPhot = nbTotalPhotPerS * this.dit;
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("nbFrameToSaturation        = " + nbFrameToSaturation);
-      logger.fine("nbTotalPhot                = " + nbTotalPhot);
+    if (logger.isDebugEnabled()) {
+      logger.debug("nbFrameToSaturation        : {}", nbFrameToSaturation);
+      logger.debug("nbTotalPhot                : {}", nbTotalPhot);
     }
 
     this.frameRate = 1d / this.dit;
@@ -413,10 +414,10 @@ public final class NoiseService implements VisNoiseService {
     // number of photons in photometric channel :
     this.nbPhotonInP = nbTotalPhot * (1 - this.fracFluxInInterferometry) / this.nbTel;
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("frameRate                  = " + frameRate);
-      logger.fine("nbPhotonInI                = " + nbPhotonInI);
-      logger.fine("nbPhotonInP                = " + nbPhotonInP);
+    if (logger.isDebugEnabled()) {
+      logger.debug("frameRate                  : {}", frameRate);
+      logger.debug("nbPhotonInI                : {}", nbPhotonInI);
+      logger.debug("nbPhotonInP                : {}", nbPhotonInP);
     }
   }
 

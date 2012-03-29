@@ -50,7 +50,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
-import java.util.logging.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 /**
@@ -61,13 +62,15 @@ import javax.xml.datatype.XMLGregorianCalendar;
 public final class ObservabilityService {
 
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(ObservabilityService.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(ObservabilityService.class.getName());
   /** flag to slow down the service to detect concurrency problems */
   private final static boolean DEBUG_SLOW_SERVICE = false;
   /** number of best Pops displayed in warnings */
   private final static int MAX_POPS_IN_WARNING = 15;
 
   /* members */
+  /** cached log debug enabled */
+  private final boolean isLogDebug = logger.isDebugEnabled();
 
   /* output */
   /** observability data */
@@ -182,9 +185,9 @@ public final class ObservabilityService {
    * @return ObservabilityData container
    */
   public ObservabilityData compute() {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("\n\n--------------------------------------------------------------------------------\n\n");
-      logger.fine("compute : " + this.observation);
+    if (isLogDebug) {
+      logger.debug("\n\n--------------------------------------------------------------------------------\n\n");
+      logger.debug("compute: {}", this.observation);
     }
 
     // Start the computations :
@@ -220,9 +223,7 @@ public final class ObservabilityService {
     // 2 - Observability per target :
 
     if (targets == null || targets.isEmpty()) {
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("No target defined.");
-      }
+      logger.debug("No target defined.");
     } else {
 
       // Prepare the beams (station / channel / delay line) :
@@ -240,12 +241,12 @@ public final class ObservabilityService {
       findObservability(targets);
 
       // dump star visibilities :
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("Star observability intervals : ");
+      if (isLogDebug) {
+        logger.debug("Star observability intervals:");
 
         for (List<StarObservabilityData> soList : this.data.getMapStarVisibilities().values()) {
           for (StarObservabilityData so : soList) {
-            logger.fine(so.toString());
+            logger.debug(so.toString());
           }
         }
       }
@@ -264,8 +265,8 @@ public final class ObservabilityService {
       }
     }
 
-    if (logger.isLoggable(Level.INFO)) {
-      logger.info("compute : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
+    if (logger.isInfoEnabled()) {
+      logger.info("compute : duration = {} ms.", 1e-6d * (System.nanoTime() - start));
     }
 
     return this.data;
@@ -287,9 +288,9 @@ public final class ObservabilityService {
     // find the julian date corresponding to LST=00:00:00 next day:
     this.jdUpper = this.sc.findJdForLst0(this.jdLower + AstroSkyCalc.LST_DAY_IN_JD);
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("jdLst0 = " + this.jdLower);
-      logger.fine("jdLst24 = " + this.jdUpper);
+    if (isLogDebug) {
+      logger.debug("jdLst0:  {}", this.jdLower);
+      logger.debug("jdLst24: {}", this.jdUpper);
     }
 
     this.data.setJdMin(this.jdLower);
@@ -298,9 +299,9 @@ public final class ObservabilityService {
     this.data.setDateMin(jdToDate(this.jdLower));
     this.data.setDateMax(jdToDate(this.jdUpper));
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("date min = " + this.data.getDateMin());
-      logger.fine("date max = " + this.data.getDateMax());
+    if (isLogDebug) {
+      logger.debug("date min: {}", this.data.getDateMin());
+      logger.debug("date max: {}", this.data.getDateMax());
     }
 
     // fast interrupt :
@@ -316,17 +317,17 @@ public final class ObservabilityService {
       if (this.doCenterMidnight) {
         final double jdMidnight = this.sc.getJdMidnight();
 
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("jdMidnight = " + jdMidnight);
+        if (isLogDebug) {
+          logger.debug("jdMidnight: {}", jdMidnight);
         }
 
         // adjust the jd bounds :
         this.jdLower = jdMidnight - AstroSkyCalc.HALF_LST_DAY_IN_JD;
         this.jdUpper = jdMidnight + AstroSkyCalc.HALF_LST_DAY_IN_JD;
 
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("jdLower = " + this.jdLower);
-          logger.fine("jdUpper = " + this.jdUpper);
+        if (isLogDebug) {
+          logger.debug("jdLower: {}", this.jdLower);
+          logger.debug("jdUpper: {}", this.jdUpper);
         }
 
         this.data.setJdMin(this.jdLower);
@@ -335,9 +336,9 @@ public final class ObservabilityService {
         this.data.setDateMin(jdToDate(this.jdLower));
         this.data.setDateMax(jdToDate(this.jdUpper));
 
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("date min = " + this.data.getDateMin());
-          logger.fine("date max = " + this.data.getDateMax());
+        if (isLogDebug) {
+          logger.debug("date min: {}", this.data.getDateMin());
+          logger.debug("date max: {}", this.data.getDateMax());
         }
       }
 
@@ -361,8 +362,8 @@ public final class ObservabilityService {
 
       this.data.setMoonIllumPercent(100d * moonIllum);
 
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("moon illum   : " + moonIllum);
+      if (isLogDebug) {
+        logger.debug("moon illum: {}", moonIllum);
       }
     }
   }
@@ -468,10 +469,10 @@ public final class ObservabilityService {
     popMap.clear();
 
     // merged results per PoP combination :
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("Complete GroupedPopData : ");
+    if (isLogDebug) {
+      logger.debug("Complete GroupedPopData : ");
       for (GroupedPopObservabilityData pm : popMergeList) {
-        logger.fine(pm.toString());
+        logger.debug(pm.toString());
       }
     }
 
@@ -485,8 +486,8 @@ public final class ObservabilityService {
       }
     }
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("Observable targets : max / total = " + maxObsTarget + " / " + nObsTarget);
+    if (isLogDebug) {
+      logger.debug("Observable targets : max: {} - total: ", maxObsTarget, nObsTarget);
     }
 
     // filter to keep only results for all valid targets :
@@ -501,10 +502,10 @@ public final class ObservabilityService {
       addWarning("Impossible to find a PoPs combination compatible with all targets !");
     } else {
 
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("Filtered GroupedPopData : ");
+      if (isLogDebug) {
+        logger.debug("Filtered GroupedPopData : ");
         for (GroupedPopObservabilityData pm : popMergeList) {
-          logger.fine(pm.toString());
+          logger.debug(pm.toString());
         }
       }
 
@@ -516,10 +517,10 @@ public final class ObservabilityService {
       // Sort pop merge data according to its estimator :
       Collections.sort(popMergeList);
 
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("Sorted GroupedPopData with estimation : ");
+      if (isLogDebug) {
+        logger.debug("Sorted GroupedPopData with estimation : ");
         for (GroupedPopObservabilityData pm : popMergeList) {
-          logger.fine(pm.toString());
+          logger.debug(pm.toString());
         }
       }
 
@@ -548,8 +549,8 @@ public final class ObservabilityService {
           }
         }
 
-        if (logger.isLoggable(Level.INFO)) {
-          logger.info("best PoPs : " + bestPoPs);
+        if (isLogDebug) {
+          logger.debug("best PoPs: {}", bestPoPs);
         }
 
         addWarning(sbBestPops.toString());
@@ -611,8 +612,8 @@ public final class ObservabilityService {
           }
         }
 
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("HA night limits = " + haNightLimits);
+        if (isLogDebug) {
+          logger.debug("HA night limits: {}", haNightLimits);
         }
         rangesTarget.addAll(haNightLimits);
       }
@@ -620,8 +621,8 @@ public final class ObservabilityService {
       popDataList = getPopObservabilityData(target.getName(), Math.toRadians(precDEC), rangesTarget, true);
 
     } else {
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("Target never rise : " + target);
+      if (isLogDebug) {
+        logger.debug("Target never rise: {}", target);
       }
     }
 
@@ -638,8 +639,8 @@ public final class ObservabilityService {
 
     final String targetName = target.getName();
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("targetName = " + targetName);
+    if (isLogDebug) {
+      logger.debug("targetName: {}", targetName);
     }
 
     final int listSize = (this.doDetailedOutput) ? (3 + this.baseLines.size()) : 1;
@@ -662,10 +663,10 @@ public final class ObservabilityService {
     // precessed target declination in degrees :
     final double precDEC = raDec[1];
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("target[" + target.getName() + "] "
-              + AstroSkyCalcObservation.asString(target.getRADeg(), target.getDECDeg())
-              + " - precessed: " + AstroSkyCalcObservation.asString(15d * precRA, precDEC));
+    if (isLogDebug) {
+      logger.debug("target[{}] {} - precessed: {}", new Object[]{target.getName(),
+                AstroSkyCalcObservation.asString(target.getRADeg(), target.getDECDeg()),
+                AstroSkyCalcObservation.asString(15d * precRA, precDEC)});
     }
 
     // define transit date (HA = 0) :
@@ -684,8 +685,8 @@ public final class ObservabilityService {
       // rise/set range :
       final Range rangeHARiseSet = new Range(-haElev, haElev);
 
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("rangeHARiseSet = " + rangeHARiseSet);
+      if (isLogDebug) {
+        logger.debug("rangeHARiseSet: {}", rangeHARiseSet);
       }
 
       // HA intervals for every base line :
@@ -709,8 +710,8 @@ public final class ObservabilityService {
             }
           }
 
-          if (logger.isLoggable(Level.FINE)) {
-            logger.fine("HA night limits = " + haNightLimits);
+          if (isLogDebug) {
+            logger.debug("HA night limits: {}", haNightLimits);
           }
           rangesTarget.addAll(haNightLimits);
         }
@@ -719,7 +720,7 @@ public final class ObservabilityService {
 
       } else {
         // Get intervals (HA) compatible with all base lines :
-        rangesHABaseLines = DelayLineService.findHAIntervals(Math.toRadians(precDEC), this.baseLines, this.wRanges);
+        rangesHABaseLines = DelayLineService.findHAIntervals(Math.toRadians(precDEC), this.baseLines, this.wRanges, isLogDebug, logger);
       }
 
       // rangesHABaseLines can be null if the thread was interrupted :
@@ -737,8 +738,8 @@ public final class ObservabilityService {
         // check horizon profiles inside rise/set range :
         rangesJDHorizon = checkHorizonProfile(precDEC, rangeJDRiseSet);
 
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("rangesJDHz : " + rangesJDHorizon);
+        if (isLogDebug) {
+          logger.debug("rangesJDHz: {}", rangesJDHorizon);
         }
 
         // fast interrupt :
@@ -792,9 +793,9 @@ public final class ObservabilityService {
                 obsRanges.add(this.sc.convertHAToJDRange(range, precRA));
               }
             }
-            if (logger.isLoggable(Level.FINE)) {
-              logger.fine("baseLine : " + baseLine);
-              logger.fine("JD ranges  : " + obsRanges);
+            if (isLogDebug) {
+              logger.debug("baseLine: {}", baseLine);
+              logger.debug("JD ranges: {}", obsRanges);
             }
 
             soBl = new StarObservabilityData(targetName, baseLine.getName(), StarObservabilityData.TYPE_BASE_LINE + i);
@@ -809,8 +810,8 @@ public final class ObservabilityService {
               DateTimeInterval.merge(soBl.getVisible());
             }
 
-            if (logger.isLoggable(Level.FINE)) {
-              logger.fine("Date ranges  : " + soBl.getVisible());
+            if (isLogDebug) {
+              logger.debug("Date ranges: {}", soBl.getVisible());
             }
 
             obsRanges.clear();
@@ -846,15 +847,15 @@ public final class ObservabilityService {
         nValid++;
       }
 
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("obsRanges : " + obsRanges);
+      if (isLogDebug) {
+        logger.debug("obsRanges: {}", obsRanges);
       }
 
       // finally : merge intervals :
       final List<Range> finalRanges = Range.intersectRanges(obsRanges, nValid);
 
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("finalRanges : " + finalRanges);
+      if (isLogDebug) {
+        logger.debug("finalRanges: {}", finalRanges);
       }
 
       // store merge result as date intervals :
@@ -882,15 +883,15 @@ public final class ObservabilityService {
           }
         }
 
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("HA observability = " + haObsRanges);
+        if (isLogDebug) {
+          logger.debug("HA observability: {}", haObsRanges);
         }
         starData.setObsRangesHA(haObsRanges);
       }
 
     } else {
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("Target never rise : " + target);
+      if (isLogDebug) {
+        logger.debug("Target never rise: {}", target);
       }
     }
 
@@ -931,8 +932,8 @@ public final class ObservabilityService {
         // Sort pop observability data according to max length :
         Collections.sort(popDataList);
 
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("Sorted PopData : " + popDataList);
+        if (isLogDebug) {
+          logger.debug("Sorted PopData: {}", popDataList);
         }
       }
 
@@ -960,8 +961,8 @@ public final class ObservabilityService {
           }
         }
 
-        if (logger.isLoggable(Level.INFO)) {
-          logger.info("best PoPs : " + bestPoPs);
+        if (isLogDebug) {
+          logger.debug("best PoPs: {}", bestPoPs);
         }
 
         addWarning(sbBestPops.toString());
@@ -1039,8 +1040,8 @@ public final class ObservabilityService {
 
       wExtrema = DelayLineService.findWExtrema(cosDec, sinDec, bl);
 
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("wExtrema[" + bl.getName() + "] = " + Arrays.toString(wExtrema));
+      if (isLogDebug) {
+        logger.debug("wExtrema[{}] = {}", bl.getName(), Arrays.toString(wExtrema));
       }
 
       wExtremas[i] = wExtrema;
@@ -1078,7 +1079,7 @@ public final class ObservabilityService {
         wRangeWithOffset.setMin(wRange.getMin() + offset.doubleValue());
         wRangeWithOffset.setMax(wRange.getMax() + offset.doubleValue());
 
-        ranges = DelayLineService.findHAIntervalsForBaseLine(cosDec, sinDec, bl, wExtrema, wRangeWithOffset, ha, haValues);
+        ranges = DelayLineService.findHAIntervalsForBaseLine(cosDec, sinDec, bl, wExtrema, wRangeWithOffset, ha, haValues, isLogDebug, logger);
 
         if (ranges.isEmpty()) {
           // this base line is incompatible with that W range :
@@ -1163,9 +1164,12 @@ public final class ObservabilityService {
         if (!hs.checkProfile(profile, azEl.getAzimuth(), azEl.getElevation())) {
           visible = false;
 
-//          if (logger.isLoggable(Level.FINE)) {
-//            logger.fine("Target hidden by horizon profile = " + p.getName() + " [" + azEl.getAzimuth() + ", " + azEl.getElevation() + "]");
-//          }
+          if (false) {
+            if (isLogDebug) {
+              logger.debug("Target hidden by horizon profile = {} [{} {}]",
+                      new Object[]{profile.getName(), azEl.getAzimuth(), azEl.getElevation()});
+            }
+          }
 
           break;
         }
@@ -1225,9 +1229,9 @@ public final class ObservabilityService {
     // check Pops :
     this.hasPops = !this.interferometer.getPops().isEmpty();
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("interferometer = " + this.interferometer.getName());
-      logger.fine("instrument     = " + this.instrument.getName());
+    if (isLogDebug) {
+      logger.debug("interferometer: {}", this.interferometer.getName());
+      logger.debug("instrument: {}", this.instrument.getName());
     }
   }
 
@@ -1243,8 +1247,8 @@ public final class ObservabilityService {
       throw new IllegalStateException("The station list is empty !");
     }
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("stations = " + stations);
+    if (isLogDebug) {
+      logger.debug("stations: {}", stations);
     }
 
     this.data.setStationNames(this.observation.getInstrumentConfiguration().getStations());
@@ -1258,8 +1262,8 @@ public final class ObservabilityService {
             this.observation.getInstrumentConfiguration().getName(),
             this.observation.getInstrumentConfiguration().getStations());
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("relatedChannels = " + relatedChannels);
+    if (isLogDebug) {
+      logger.debug("relatedChannels: {}", relatedChannels);
     }
 
     final int nRelChannels = relatedChannels.size();
@@ -1342,10 +1346,10 @@ public final class ObservabilityService {
               b.addOpticalLength(b.getStation().getDelayLineFixedOffset());
             }
 
-            if (logger.isLoggable(Level.FINE)) {
-              logger.fine("station = " + b.getStation() + ", Channel = " + b.getChannel().getName());
-              logger.fine("switchyard = " + cl.getOpticalLength() + ", fixed = " + b.getStation().getDelayLineFixedOffset());
-              logger.fine("total = " + b.getOpticalLength());
+            if (isLogDebug) {
+              logger.debug("station = {} - channel = {}", b.getStation(), b.getChannel().getName());
+              logger.debug("switchyard = {} - fixed offset = {}", cl.getOpticalLength(), b.getStation().getDelayLineFixedOffset());
+              logger.debug("total: {}", b.getOpticalLength());
             }
             break;
           }
@@ -1399,9 +1403,7 @@ public final class ObservabilityService {
     } else {
       // Simpler interferometer : no channel definition nor switchyard :
 
-      if (logger.isLoggable(Level.WARNING)) {
-        logger.warning("Not validated code path : Case with no channel definition nor switchyard !");
-      }
+      logger.warn("Not validated code path : Case with no channel definition nor switchyard !");
 
       // Warning : Not tested because both CHARA and VLTI use a switchyard !
 
@@ -1425,18 +1427,19 @@ public final class ObservabilityService {
       }
     }
 
-    if (logger.isLoggable(Level.FINE)) {
+    if (isLogDebug) {
       // dump beam information:
       int i = 0;
       for (Beam b : this.beams) {
-        logger.fine("beam [" + (i++) + "] : " + b.toString());
+        logger.debug("beam [{}]: ", i, b.toString());
+        i++;
       }
     }
 
     this.data.setBeams(this.beams);
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("Beams = " + this.beams);
+    if (isLogDebug) {
+      logger.debug("Beams: {}", this.beams);
     }
   }
 
@@ -1620,8 +1623,8 @@ public final class ObservabilityService {
       // upper LST bound = LST0 + 24h + 12h
       final double jdLstUpper = jdLst0 + 3d * AstroSkyCalc.HALF_LST_DAY_IN_JD;
 
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("jdLst bounds = [" + jdLstLower + ", " + jdLstUpper + "]");
+      if (isLogDebug) {
+        logger.debug("jdLst bounds = [{} - {}]", jdLstLower, jdLstUpper);
       }
 
       AstroAlmanacTime stFrom, stTo;
@@ -1675,15 +1678,15 @@ public final class ObservabilityService {
         // Keep intervals that are inside or overlapping the range [jdLower; jdUpper] range :
         if ((jdFrom >= this.jdLower && jdFrom <= this.jdUpper) || (jdTo >= this.jdLower && jdTo <= this.jdUpper)) {
 
-          if (logger.isLoggable(Level.FINE)) {
-            logger.fine("Range[" + jdFrom + " - " + jdTo + "] : " + type);
+          if (isLogDebug) {
+            logger.debug("Range[{} - {}] : {}", new Object[]{jdFrom, jdTo, type});
           }
 
           from = jdToDateInDateRange(jdFrom);
           to = jdToDateInDateRange(jdTo);
 
-          if (logger.isLoggable(Level.FINE)) {
-            logger.fine("SunInterval[" + from + " - " + to + "] : " + type);
+          if (isLogDebug) {
+            logger.debug("SunInterval[{} - {}] : {}", new Object[]{from, to, type});
           }
 
           intervals.add(new SunTimeInterval(from, to, type));
@@ -1693,8 +1696,8 @@ public final class ObservabilityService {
       // merge contiguous intervals (already ordered):
       Range.union(this.nightLimits);
 
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("nightLimits : " + this.nightLimits);
+      if (isLogDebug) {
+        logger.debug("nightLimits: {}", this.nightLimits);
       }
     }
 
@@ -1914,10 +1917,10 @@ public final class ObservabilityService {
       elevations.add(new ElevationDate(convertJDToDate(jd), elev));
     }
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("elevations : ");
+    if (isLogDebug) {
+      logger.debug("elevations : ");
       for (ElevationDate elevationDate : elevations) {
-        logger.fine(elevationDate.toString());
+        logger.debug(elevationDate.toString());
       }
     }
   }
@@ -1978,8 +1981,8 @@ public final class ObservabilityService {
         }
       }
 
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("dateIntervals = " + dateIntervals);
+      if (isLogDebug) {
+        logger.debug("dateIntervals: {}", dateIntervals);
       }
       return dateIntervals;
     }
@@ -2007,7 +2010,7 @@ public final class ObservabilityService {
    * @param msg message to add
    */
   private void addWarning(final String msg) {
-    if (logger.isLoggable(Level.INFO)) {
+    if (logger.isInfoEnabled()) {
       logger.info(msg);
     }
     this.data.getWarningContainer().addWarningMessage(msg);

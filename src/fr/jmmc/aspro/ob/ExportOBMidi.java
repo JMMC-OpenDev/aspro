@@ -9,7 +9,6 @@ import fr.jmmc.aspro.service.ObservabilityService;
 import fr.jmmc.jmcs.util.FileUtils;
 import java.io.File;
 import java.io.IOException;
-import java.util.logging.Level;
 
 /**
  * This class generates an observing block for the VLTI MIDI instrument
@@ -42,13 +41,11 @@ public final class ExportOBMidi extends ExportOBVLTI {
    * @throws IllegalStateException if the template file is not found or can not be read
    * @throws IOException if an I/O exception occured while writing the observing block
    */
-  public static void generate(final File file, final ObservationSetting observation, 
-                                               final ObservabilityService os, final Target target)
-                        throws IllegalStateException, IOException {
-    
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("generate file : " + file);
-    }
+  public static void generate(final File file, final ObservationSetting observation,
+          final ObservabilityService os, final Target target)
+          throws IllegalStateException, IOException {
+
+    logger.debug("generate file: {}", file);
 
     // get OB template :
     final String template = FileUtils.readFile(TEMPLATE_FILE);

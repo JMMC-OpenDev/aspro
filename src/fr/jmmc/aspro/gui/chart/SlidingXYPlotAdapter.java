@@ -7,7 +7,8 @@ import java.awt.Color;
 import java.awt.Paint;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.annotations.XYAnnotation;
@@ -26,7 +27,7 @@ import org.jfree.ui.Layer;
 public final class SlidingXYPlotAdapter {
 
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(SlidingXYPlotAdapter.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(SlidingXYPlotAdapter.class.getName());
   /* members */
   /** jFreeChart instance */
   private final JFreeChart chart;
@@ -80,7 +81,7 @@ public final class SlidingXYPlotAdapter {
    * @param annotations map of annotations keyed by position
    */
   public void setData(final TaskSeriesCollection collection, final List<String> symbols, final List<Paint> colors,
-                      final Map<Integer, List<XYAnnotation>> annotations) {
+          final Map<Integer, List<XYAnnotation>> annotations) {
     this.size = symbols.size();
     this.collection = collection;
     this.symbols = symbols;
@@ -145,8 +146,8 @@ public final class SlidingXYPlotAdapter {
    * @param useSubset new value
    */
   public void setUseSubset(final boolean useSubset) {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("useSubset = " + useSubset);
+    if (logger.isDebugEnabled()) {
+      logger.debug("useSubset: {}", useSubset);
     }
 
     this.useSubset = useSubset;
@@ -179,8 +180,8 @@ public final class SlidingXYPlotAdapter {
     }
 
     if (!forceUpdate && start == this.lastStart && end == this.lastEnd) {
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("same positions : ignoring (" + start + " to " + end + ")");
+      if (logger.isDebugEnabled()) {
+        logger.debug("same positions : ignoring ({} to {})", start, end);
       }
       return;
     }
@@ -190,8 +191,8 @@ public final class SlidingXYPlotAdapter {
 
     final int newSize = end - start;
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("updatePlotDataset : pos = " + this.position + " :: (" + start + " to " + end + ")");
+    if (logger.isDebugEnabled()) {
+      logger.debug("updatePlot: pos = {} :: ({} to {})", new Object[]{this.position, start, end});
     }
 
     final double barWidth;

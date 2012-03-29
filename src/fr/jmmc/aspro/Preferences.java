@@ -6,6 +6,8 @@ package fr.jmmc.aspro;
 import fr.jmmc.aspro.model.observability.SunTimeInterval.SunType;
 import fr.jmmc.jmal.image.ColorScale;
 import fr.jmmc.jmcs.data.preference.PreferencesException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Handles preferences for Aspro.
@@ -16,10 +18,8 @@ public final class Preferences extends fr.jmmc.jmcs.data.preference.Preferences 
 
   /** Singleton instance */
   private static Preferences _singleton = null;
-  /** Class Name */
-  private final static String className = Preferences.class.getName();
   /** Logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(className);
+  private static final Logger logger = LoggerFactory.getLogger(Preferences.class.getName());
   /* Preferences */
   /** Preference : edit positions in XY (true) or rho/theta (false) in the model editor */
   public final static String MODELEDITOR_PREFERXY = "modeleditor.preferxy";
@@ -60,7 +60,7 @@ public final class Preferences extends fr.jmmc.jmcs.data.preference.Preferences 
     // Build new reference if singleton does not already exist
     // or return previous reference
     if (_singleton == null) {
-      logger.fine("Preferences.getInstance()");
+      logger.debug("Preferences.getInstance()");
 
       // disable notifications:
       _singleton = new Preferences(false);
@@ -79,7 +79,7 @@ public final class Preferences extends fr.jmmc.jmcs.data.preference.Preferences 
    */
   @Override
   protected void setDefaultPreferences() throws PreferencesException {
-    logger.fine("Preferences.setDefaultPreferences()");
+    logger.debug("Preferences.setDefaultPreferences()");
 
     // Model editor:
     setDefaultPreference(MODELEDITOR_PREFERXY, Boolean.FALSE);
@@ -113,7 +113,6 @@ public final class Preferences extends fr.jmmc.jmcs.data.preference.Preferences 
    */
   @Override
   protected String getPreferenceFilename() {
-    logger.entering(className, "getPreferenceFilename");
     return "fr.jmmc.aspro.properties";
   }
 
@@ -124,7 +123,6 @@ public final class Preferences extends fr.jmmc.jmcs.data.preference.Preferences 
    */
   @Override
   protected int getPreferencesVersionNumber() {
-    logger.entering(className, "getPreferencesVersionNumber");
     return 1;
   }
 
@@ -157,8 +155,7 @@ public final class Preferences extends fr.jmmc.jmcs.data.preference.Preferences 
     }
     return ColorScale.LINEAR;
   }
-  
-  
+
   /**
    * Return true if the fast mode for user model is enabled
    * @return true if the fast mode for user model is enabled 
@@ -166,5 +163,4 @@ public final class Preferences extends fr.jmmc.jmcs.data.preference.Preferences 
   public boolean isFastUserModel() {
     return getPreferenceAsBoolean(Preferences.MODEL_USER_FAST);
   }
-  
 }

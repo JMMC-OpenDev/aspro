@@ -14,7 +14,8 @@ import java.beans.PropertyChangeListener;
 import java.util.Arrays;
 import java.util.Observable;
 import java.util.Observer;
-import java.util.logging.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JFrame;
 
@@ -26,7 +27,7 @@ public final class PreferencesView extends JFrame implements Observer {
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(PreferencesView.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(PreferencesView.class.getName());
   /** twilight choices */
   private final static String[] TWILIGHTS = new String[]{"Astronomical (-18°)", "Nautical (-12°)", "Civil (-6°)", "Sun (0°)"};
 
@@ -74,7 +75,7 @@ public final class PreferencesView extends JFrame implements Observer {
           // will fire triggerObserversNotification so update() will be called
           myPreferences.setPreference(Preferences.MIN_ELEVATION, Double.valueOf(((Number) jFieldMinElev.getValue()).doubleValue()));
         } catch (PreferencesException pe) {
-          logger.log(Level.SEVERE, "property failure : ", pe);
+          logger.error("property failure : ", pe);
         }
       }
     });
@@ -90,9 +91,7 @@ public final class PreferencesView extends JFrame implements Observer {
    */
   @Override
   public void dispose() {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("dispose : " + this);
-    }
+    logger.debug("dispose: {}", this);
 
     // unregister this instance as a Preference Observer :
     this.myPreferences.deleteObserver(this);
@@ -422,7 +421,7 @@ public final class PreferencesView extends JFrame implements Observer {
         // will fire triggerObserversNotification so update() will be called
         this.myPreferences.setPreference(Preferences.MODELEDITOR_PREFERXY, Boolean.valueOf(this.jRadioButtonXY.isSelected()));
       } catch (PreferencesException pe) {
-        logger.log(Level.SEVERE, "property failure : ", pe);
+        logger.error("property failure : ", pe);
       }
     }//GEN-LAST:event_jRadioButtonPositionStyleActionPerformed
 
@@ -432,7 +431,7 @@ public final class PreferencesView extends JFrame implements Observer {
       } catch (PreferencesException pe) {
         // this try catch should not be solved here
         // one feedback report could be thrown on error into Preference code
-        logger.log(Level.SEVERE, "property failure : ", pe);
+        logger.error("property failure : ", pe);
       }
     }//GEN-LAST:event_jButtonSaveActionPerformed
 
@@ -445,7 +444,7 @@ public final class PreferencesView extends JFrame implements Observer {
         // will fire triggerObserversNotification so update() will be called
         this.myPreferences.setPreference(Preferences.MODEL_IMAGE_SIZE, this.jComboBoxImageSize.getSelectedItem());
       } catch (PreferencesException pe) {
-        logger.log(Level.SEVERE, "property failure : ", pe);
+        logger.error("property failure : ", pe);
       }
     }//GEN-LAST:event_jComboBoxImageSizeActionPerformed
 
@@ -454,7 +453,7 @@ public final class PreferencesView extends JFrame implements Observer {
         // will fire triggerObserversNotification so update() will be called
         this.myPreferences.setPreference(Preferences.MODEL_IMAGE_LUT, this.jComboBoxLUT.getSelectedItem());
       } catch (PreferencesException pe) {
-        logger.log(Level.SEVERE, "property failure : ", pe);
+        logger.error("property failure : ", pe);
       }
     }//GEN-LAST:event_jComboBoxLUTActionPerformed
 
@@ -470,7 +469,7 @@ public final class PreferencesView extends JFrame implements Observer {
         // will fire triggerObserversNotification so update() will be called
         this.myPreferences.setPreference(Preferences.TIME_REFERENCE, value);
       } catch (PreferencesException pe) {
-        logger.log(Level.SEVERE, "property failure : ", pe);
+        logger.error("property failure : ", pe);
       }
     }//GEN-LAST:event_jRadioButtonTimeRefActionPerformed
 
@@ -479,7 +478,7 @@ public final class PreferencesView extends JFrame implements Observer {
         // will fire triggerObserversNotification so update() will be called
         this.myPreferences.setPreference(Preferences.CENTER_NIGHT, Boolean.valueOf(this.jRadioButtonCenterNightYes.isSelected()));
       } catch (PreferencesException pe) {
-        logger.log(Level.SEVERE, "property failure : ", pe);
+        logger.error("property failure : ", pe);
       }
     }//GEN-LAST:event_jRadioButtonCenterNightActionPerformed
 
@@ -488,7 +487,7 @@ public final class PreferencesView extends JFrame implements Observer {
         // will fire triggerObserversNotification so update() will be called
         this.myPreferences.setPreference(Preferences.TWILIGHT_NIGHT, getTwilight((String) this.jComboBoxTwilight.getSelectedItem()).toString());
       } catch (PreferencesException pe) {
-        logger.log(Level.SEVERE, "property failure : ", pe);
+        logger.error("property failure : ", pe);
       }
     }//GEN-LAST:event_jComboBoxTwilightActionPerformed
 
@@ -497,7 +496,7 @@ public final class PreferencesView extends JFrame implements Observer {
       // will fire triggerObserversNotification so update() will be called
       this.myPreferences.setPreference(Preferences.MODEL_IMAGE_SCALE, this.jComboBoxColorScale.getSelectedItem().toString());
     } catch (PreferencesException pe) {
-      logger.log(Level.SEVERE, "property failure : ", pe);
+      logger.error("property failure : ", pe);
     }
   }//GEN-LAST:event_jComboBoxColorScaleActionPerformed
 
@@ -506,7 +505,7 @@ public final class PreferencesView extends JFrame implements Observer {
       // will fire triggerObserversNotification so update() will be called
       this.myPreferences.setPreference(Preferences.MODEL_USER_FAST, Boolean.valueOf(this.jRadioButtonFastUserModelYes.isSelected()));
     } catch (PreferencesException pe) {
-      logger.log(Level.SEVERE, "property failure : ", pe);
+      logger.error("property failure : ", pe);
     }
   }//GEN-LAST:event_jRadioButtonFastUserModelActionPerformed
 
@@ -517,9 +516,7 @@ public final class PreferencesView extends JFrame implements Observer {
    */
   @Override
   public void update(final Observable o, final Object arg) {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("Preferences updated on : " + this);
-    }
+    logger.debug("Preferences updated on : {}", this);
 
     // read prefs to set states of GUI elements
     final boolean preferXyMode = this.myPreferences.getPreferenceAsBoolean(Preferences.MODELEDITOR_PREFERXY);
@@ -615,7 +612,7 @@ public final class PreferencesView extends JFrame implements Observer {
       }
     }
     if (pos == -1) {
-      logger.severe("choice[" + choice + "] not found in " + Arrays.toString(TWILIGHTS));
+      logger.warn("choice[{}] not found in {}", choice, Arrays.toString(TWILIGHTS));
     }
     switch (pos) {
       default:

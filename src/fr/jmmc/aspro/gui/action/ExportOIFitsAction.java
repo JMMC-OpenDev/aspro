@@ -16,7 +16,8 @@ import fr.jmmc.oitools.model.OIVis2;
 import fr.nom.tam.fits.FitsException;
 import java.io.File;
 import java.io.IOException;
-import java.util.logging.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import javax.swing.JFileChooser;
 
 /**
@@ -33,7 +34,7 @@ public final class ExportOIFitsAction extends WaitingTaskAction {
   /** Action name. This name is used to register to the ActionRegistrar */
   public final static String actionName = "exportOIFits";
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(className);
+  private static final Logger logger = LoggerFactory.getLogger(className);
   /** OIFits MimeType */
   private final static MimeType mimeType = MimeType.OIFITS;
 
@@ -49,9 +50,7 @@ public final class ExportOIFitsAction extends WaitingTaskAction {
    */
   @Override
   public void actionPerformed() {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("actionPerformed");
-    }
+    logger.debug("actionPerformed");
 
     // Use main observation to check variants :
     if (!ObservationManager.getInstance().getMainObservation().isSingle()) {

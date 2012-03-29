@@ -11,8 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
 
 /**
  * This class manages the computation to find the base line limits
@@ -20,10 +19,6 @@ import java.util.logging.Logger;
  */
 public final class DelayLineService {
 
-  /** Class logger */
-  private static final Logger logger = Logger.getLogger(DelayLineService.class.getName());
-  /** constant flag indicating if the class logger's level is FINE */
-  private static final boolean IS_LOGGABLE_FINE = logger.isLoggable(Level.FINE);
   /** a list containing a single full range (-12; +12) */
   private static final List<Range> FULL_RANGE_LIST = Arrays.asList(new Range(AsproConstants.HA_MIN, AsproConstants.HA_MAX));
 
@@ -43,9 +38,13 @@ public final class DelayLineService {
    * @param dec target declination (rad)
    * @param baseLines base line list
    * @param wRanges [wMin - wMax] ranges per base line
+   * @param isLogDebug true to enable debug logs
+   * @param logger logger to use
    * @return intervals (hour angles)
    */
-  public static List<List<Range>> findHAIntervals(final double dec, final List<BaseLine> baseLines, final List<Range> wRanges) {
+  public static List<List<Range>> findHAIntervals(final double dec, final List<BaseLine> baseLines, final List<Range> wRanges,
+          final boolean isLogDebug, final Logger logger) {
+
     final double cosDec = Math.cos(dec);
     final double sinDec = Math.sin(dec);
 
@@ -55,7 +54,7 @@ public final class DelayLineService {
 
     final double[] ha = new double[2];
     final double[] haValues = new double[6];
-    
+
     BaseLine bl;
     Range wRange;
     double[] wExtrema;
@@ -66,7 +65,7 @@ public final class DelayLineService {
       // First check the W limits :
       wExtrema = findWExtrema(cosDec, sinDec, bl);
 
-      rangesBL.add(findHAIntervalsForBaseLine(cosDec, sinDec, bl, wExtrema, wRange, ha, haValues));
+      rangesBL.add(findHAIntervalsForBaseLine(cosDec, sinDec, bl, wExtrema, wRange, ha, haValues, isLogDebug, logger));
     }
 
     return rangesBL;
@@ -86,18 +85,20 @@ public final class DelayLineService {
    * @param wRange [wMin - wMax] range
    * @param ha double[2] array to avoid array allocations
    * @param haValues double[6] array to avoid array allocations
+   * @param isLogDebug true to enable debug logs
+   * @param logger logger to use
    * @return intervals (hour angles) in dec hours.
    */
-  public static List<Range> findHAIntervalsForBaseLine(final double cosDec, final double sinDec, final BaseLine baseLine, 
-                                                       final double[] wExtrema, final Range wRange,
-                                                       final double[] ha, final double[] haValues) {
-    final boolean isLog = IS_LOGGABLE_FINE;
-    
-    if (isLog) {
-      logger.fine("baseLine : " + baseLine);
-      logger.fine("W range  : " + wRange);
+  public static List<Range> findHAIntervalsForBaseLine(final double cosDec, final double sinDec, final BaseLine baseLine,
+          final double[] wExtrema, final Range wRange,
+          final double[] ha, final double[] haValues,
+          final boolean isLogDebug, final Logger logger) {
+
+    if (isLogDebug) {
+      logger.debug("baseLine : {}", baseLine);
+      logger.debug("W range  : {}", wRange);
     }
-  
+
     if (wExtrema == null) {
       // no solution :
       return Collections.emptyList();
@@ -109,24 +110,26 @@ public final class DelayLineService {
 
     final double wMin = wRange.getMin();
     final double wMax = wRange.getMax();
-    
+
     if (wMax < wLower || wMin > wUpper) {
       // outside range, no solution :
-      if (isLog) {
-        logger.fine("W outside range : " + baseLine.getName() + " : " + wRange + " / W extrema = [" + wLower + ", " + wUpper + "]");
+      if (isLogDebug) {
+        logger.debug("W outside range: {} : {} / W extrema = [{}, {}]",
+                new Object[]{baseLine.getName(), wRange, wLower, wUpper});
       }
       return Collections.emptyList();
     }
     if (wLower > wMin && wUpper < wMax) {
       // always inside range = full interval [-12h;12h]:
-      if (isLog) {
-        logger.fine("W inside range : " + baseLine.getName() + " : " + wRange + " / W extrema = [" + wLower + ", " + wUpper + "]");
+      if (isLogDebug) {
+        logger.debug("W inside range: {} : {} / W extrema = [{}, {}]",
+                new Object[]{baseLine.getName(), wRange, wLower, wUpper});
       }
       return FULL_RANGE_LIST;
     }
 
-    if (isLog) {
-      logger.fine("W extrema = [" + wLower + ", " + wUpper + "]");
+    if (isLogDebug) {
+      logger.debug("W extrema = [{}, {}]", wLower, wUpper);
     }
 
     // haValues[6] = list of hour angles (rad) in [-PI;PI] range :
@@ -150,10 +153,10 @@ public final class DelayLineService {
     // Sort them by ascending order
     Arrays.sort(haValues, 0, nHA);
 
-    if (isLog) {
-      logger.fine("haList (" + nHA + "first values) : " + Arrays.toString(haValues));
+    if (isLogDebug) {
+      logger.debug("haList ({} first values): {}", nHA, Arrays.toString(haValues));
     }
-    
+
     // output :
     // size / 2 because only half intervals are inside [wMin; wMax]:
     final List<Range> ranges = new ArrayList<Range>(nHA / 2);
@@ -169,8 +172,8 @@ public final class DelayLineService {
 
       final double wMid = CalcUVW.computeW(cosDec, sinDec, baseLine, haMid);
 
-      if (isLog) {
-        logger.fine("W(" + haMid + ") = " + wMid);
+      if (isLogDebug) {
+        logger.debug("W({}) = {}", haMid, wMid);
       }
 
       if (wMid >= wMin && wMid <= wMax) {
@@ -179,8 +182,8 @@ public final class DelayLineService {
       }
     }
 
-    if (isLog) {
-      logger.fine("valid intervals (dec hours) : " + ranges);
+    if (isLogDebug) {
+      logger.debug("valid intervals (dec hours): {}", ranges);
     }
 
     return ranges;
@@ -241,7 +244,7 @@ public final class DelayLineService {
       }
       // impossible case : sinDec = 1 <=> cosDec = 0 !
       return false;
-      
+
     } else {
       final double coeff = (wThrow - sinDec * baseLine.getZ()) / cosDec;
 
@@ -295,7 +298,7 @@ public final class DelayLineService {
 
       final double w1 = CalcUVW.computeW(cosDec, sinDec, baseLine, w[0]);
       final double w2 = CalcUVW.computeW(cosDec, sinDec, baseLine, w[1]);
-      
+
       // Ensure lower < higher:
       if (w1 < w2) {
         // define results:
@@ -337,7 +340,7 @@ public final class DelayLineService {
       }
       // 1 solution :
       final double ha0 = Math.atan(-c / b);
-      
+
       // define solutions:
       ha[0] = ha0;
       ha[1] = ha0;

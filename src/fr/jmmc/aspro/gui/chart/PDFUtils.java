@@ -22,7 +22,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.logging.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.jfree.chart.JFreeChart;
 
 /**
@@ -32,7 +33,7 @@ import org.jfree.chart.JFreeChart;
 public final class PDFUtils {
 
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(PDFUtils.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(PDFUtils.class.getName());
   /** 
    * Force text rendering to use java rendering as Shapes.
    * This is a workaround to get unicode greek characters rendered properly.
@@ -72,8 +73,8 @@ public final class PDFUtils {
     } finally {
       FileUtils.closeStream(bo);
 
-      if (logger.isLoggable(Level.INFO)) {
-        logger.info("saveChartAsPDF[" + file + "] : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
+      if (logger.isInfoEnabled()) {
+        logger.info("saveChartAsPDF[{}] : duration = {} ms.", file, 1e-6d * (System.nanoTime() - start));
       }
     }
   }

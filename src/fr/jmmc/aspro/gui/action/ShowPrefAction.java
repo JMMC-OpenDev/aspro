@@ -6,7 +6,8 @@ package fr.jmmc.aspro.gui.action;
 import fr.jmmc.aspro.gui.PreferencesView;
 import fr.jmmc.jmcs.gui.action.RegisteredAction;
 import java.awt.event.ActionEvent;
-import java.util.logging.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This registered preference action simply show the Preference view.
@@ -21,7 +22,7 @@ public class ShowPrefAction extends RegisteredAction {
   /** Action name. This name is used to register to the ActionRegistrar */
   public final static String actionName = "showPreferences";
   /** Class logger */
-  private final static java.util.logging.Logger logger = java.util.logging.Logger.getLogger(className);
+  private final static Logger logger = LoggerFactory.getLogger(className);
 
   /**
    * Public constructor that automatically register the action in RegisteredAction.
@@ -37,9 +38,7 @@ public class ShowPrefAction extends RegisteredAction {
    */
   @Override
   public void actionPerformed(final ActionEvent evt) {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("actionPerformed");
-    }
+    logger.debug("actionPerformed");
 
     showPreferencesView();
   }

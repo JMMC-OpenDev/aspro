@@ -7,6 +7,8 @@ import fr.jmmc.jmal.complex.Complex;
 import fr.jmmc.jmal.complex.ImmutableComplex;
 import fr.jmmc.jmal.complex.MutableComplex;
 import fr.jmmc.oitools.model.OIVis;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class is dedicated to the AMBER instrument to compute differential visibility and phase
@@ -15,7 +17,7 @@ import fr.jmmc.oitools.model.OIVis;
 public final class OIFitsAMBERService {
 
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(OIFitsAMBERService.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(OIFitsAMBERService.class.getName());
   /** constant used by abacusErrPhi */
   public final static double ASYMPTOT = Math.PI / Math.sqrt(3d);
   /** polynomial coefficients used by abacusErrPhi */

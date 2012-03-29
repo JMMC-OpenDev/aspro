@@ -17,7 +17,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Vector;
-import java.util.logging.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.PropertyException;
@@ -34,7 +35,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 public class BaseOIManager {
 
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(BaseOIManager.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(BaseOIManager.class.getName());
   /** JAXB property to define a custom namspace prefix mapper */
   public static final String JAXB_NAMESPACE_PREFIX_MAPPER = "com.sun.xml.bind.namespacePrefixMapper";
   /** package name for JAXB generated code */
@@ -57,9 +58,7 @@ public class BaseOIManager {
 
     this.jf = JAXBFactory.getInstance(OI_JAXB_PATH);
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("BaseOIManager : " + this.jf);
-    }
+    logger.debug("BaseOIManager: {}", this.jf);
     try {
       this.df = DatatypeFactory.newInstance();
     } catch (DatatypeConfigurationException dce) {
@@ -79,18 +78,15 @@ public class BaseOIManager {
   protected final Object loadObject(final String uri)
           throws IllegalStateException, IllegalArgumentException, XmlBindException {
 
-    if (logger.isLoggable(Level.INFO)) {
-      logger.info("loading file : " + uri);
-    }
+    logger.info("loading file: {}", uri);
+
     Object result = null;
 
     try {
       // use the class loader resource resolver
       final URL url = FileUtils.getResource("fr/jmmc/aspro/model/" + uri);
 
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("BaseOIManager.loadObject : url : " + url);
-      }
+      logger.debug("BaseOIManager.loadObject: {}", url);
 
       // Note : use input stream to avoid JNLP offline bug with URL (Unknown host exception)
       result = this.jf.createUnMarshaller().unmarshal(new BufferedInputStream(url.openStream()));
@@ -123,8 +119,8 @@ public class BaseOIManager {
 
       result = this.jf.createUnMarshaller().unmarshal(inputFile);
 
-      if (logger.isLoggable(Level.INFO)) {
-        logger.info("unmarshall : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
+      if (logger.isInfoEnabled()) {
+        logger.info("unmarshall : duration = {} ms.", 1e-6d * (System.nanoTime() - start));
       }
 
     } catch (JAXBException je) {
@@ -152,8 +148,8 @@ public class BaseOIManager {
 
       result = this.jf.createUnMarshaller().unmarshal(reader);
 
-      if (logger.isLoggable(Level.INFO)) {
-        logger.info("unmarshall : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
+      if (logger.isInfoEnabled()) {
+        logger.info("unmarshall : duration = {} ms.", 1e-6d * (System.nanoTime() - start));
       }
 
     } catch (JAXBException je) {
@@ -179,8 +175,8 @@ public class BaseOIManager {
 
       this.createMarshaller().marshal(object, outputFile);
 
-      if (logger.isLoggable(Level.INFO)) {
-        logger.info("marshall : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
+      if (logger.isInfoEnabled()) {
+        logger.info("marshall : duration = {} ms.", 1e-6d * (System.nanoTime() - start));
       }
 
     } catch (JAXBException je) {
@@ -230,9 +226,8 @@ public class BaseOIManager {
       // a human friendly prefix is not really a fatal problem,
       // you can just continue marshalling without failing
 
-      if (logger.isLoggable(Level.WARNING)) {
-        logger.warning("marshaller class = " + m.getClass().getName());
-        logger.log(Level.WARNING, "JAXB Marshaller.setProperty failure", pe);
+      if (logger.isWarnEnabled()) {
+        logger.warn("JAXB Marshaller.setProperty() failure using marshaller class: {}", m.getClass().getName(), pe);
       }
     }
     return m;

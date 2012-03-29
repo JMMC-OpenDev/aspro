@@ -14,7 +14,8 @@ import fr.jmmc.jmcs.util.MimeType;
 import java.awt.Component;
 import java.io.File;
 import java.io.IOException;
-import java.util.logging.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import javax.swing.JFileChooser;
 import org.jfree.chart.JFreeChart;
 
@@ -30,7 +31,7 @@ public final class ExportPDFAction extends WaitingTaskAction {
   /** Class name. This name is used to register to the ActionRegistrar */
   private final static String className = ExportPDFAction.class.getName();
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(className);
+  private static final Logger logger = LoggerFactory.getLogger(className);
   /** Action name. This name is used to register to the ActionRegistrar */
   public final static String actionName = "exportPDF";
   /** PDF MimeType */
@@ -75,9 +76,7 @@ public final class ExportPDFAction extends WaitingTaskAction {
    */
   @Override
   public void actionPerformed() {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("actionPerformed");
-    }
+    logger.debug("actionPerformed");
 
     final Component selectedPanel = AsproGui.getInstance().getSettingPanel().getTabSelectedComponent();
 
@@ -92,9 +91,7 @@ public final class ExportPDFAction extends WaitingTaskAction {
    * @param exportable exportable component
    */
   public void process(final PDFExportable exportable) {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("process");
-    }
+    logger.debug("process");
 
     File file = null;
 

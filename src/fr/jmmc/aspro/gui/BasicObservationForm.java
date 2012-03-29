@@ -43,7 +43,8 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Vector;
-import java.util.logging.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListSelectionModel;
 import javax.swing.ImageIcon;
@@ -67,7 +68,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(BasicObservationForm.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(BasicObservationForm.class.getName());
   /** flag to log a stack trace in method updateObservation() to detect multiple calls */
   private final static boolean DEBUG_UPDATE_EVENT = false;
   /** blanking value to indicate that PoPs are defined in the instrument configuration but in multi-configuration */
@@ -740,8 +741,8 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     // ensure one target is selected :
     this.checkTargetSelection();
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("jListTargets updated : " + getSelectedTarget());
+    if (logger.isDebugEnabled()) {
+      logger.debug("jListTargets updated: {}", getSelectedTarget());
     }
   }
 
@@ -777,8 +778,8 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
 
       // handle single selection :
 
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("Selected Target changed : " + getSelectedTarget());
+      if (logger.isDebugEnabled()) {
+        logger.debug("Selected Target changed: {}", getSelectedTarget());
       }
 
       // update observation :
@@ -808,8 +809,8 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     final boolean prevAutoUpdateObservation = this.setAutoUpdateObservation(false);
     try {
       if (e.getSource() == this.jComboBoxInterferometer) {
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("Interferometer changed : " + this.jComboBoxInterferometer.getSelectedItem());
+        if (logger.isDebugEnabled()) {
+          logger.debug("Interferometer changed: {}", this.jComboBoxInterferometer.getSelectedItem());
         }
         updateComboInterferometerConfiguration();
         updateComboInstrument();
@@ -817,15 +818,15 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         checkPops();
 
       } else if (e.getSource() == this.jComboBoxInterferometerConfiguration) {
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("Interferometer Configuration changed : " + this.jComboBoxInterferometerConfiguration.getSelectedItem());
+        if (logger.isDebugEnabled()) {
+          logger.debug("Interferometer Configuration changed: {}", this.jComboBoxInterferometerConfiguration.getSelectedItem());
         }
         updateComboInstrument();
         updateComboInstrumentConfiguration();
         checkPops();
       } else if (e.getSource() == this.jComboBoxInstrument) {
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("Instrument changed : " + this.jComboBoxInstrument.getSelectedItem());
+        if (logger.isDebugEnabled()) {
+          logger.debug("Instrument changed: {}", this.jComboBoxInstrument.getSelectedItem());
         }
         updateComboInstrumentConfiguration();
         checkPops();
@@ -860,8 +861,8 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     // memorize the first selected item :
     this.currentInstrumentConfiguration = (String) this.jListInstrumentConfigurations.getSelectedValue();
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("Instrument Configuration changed : " + Arrays.toString(getInstrumentConfigurations()));
+    if (logger.isDebugEnabled()) {
+      logger.debug("Instrument Configuration changed: {}", Arrays.toString(getInstrumentConfigurations()));
     }
 
     // update PoPs text field if the selected instrument configurations have associated PoPs in the configuration:
@@ -896,8 +897,8 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
    */
   private void selectInstrumentConfigurations(final Object[] values) {
     if (values != null && values.length > 0) {
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("selectInstrumentConfigurations : " + Arrays.toString(values));
+      if (logger.isDebugEnabled()) {
+        logger.debug("selectInstrumentConfigurations: {}", Arrays.toString(values));
       }
 
       final GenericListModel<String> lm = getInstrumentConfigurationModel();
@@ -917,8 +918,8 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         this.jListInstrumentConfigurations.ensureIndexIsVisible(index);
         this.jListInstrumentConfigurations.ensureIndexIsVisible(index + 1);
       }
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("selectInstrumentConfigurations : selectedValues : " + Arrays.toString(getInstrumentConfigurations()));
+      if (logger.isDebugEnabled()) {
+        logger.debug("selectInstrumentConfigurations : selectedValues: {}", Arrays.toString(getInstrumentConfigurations()));
       }
     }
   }
@@ -950,9 +951,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
       listPoPs = cm.parseInstrumentPoPs((String) this.jComboBoxInterferometerConfiguration.getSelectedItem(),
               (String) this.jComboBoxInstrument.getSelectedItem(), popConfig);
     }
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("Pops changed = " + value + " : " + listPoPs);
-    }
+    logger.debug("Pops changed = {} : {}", value, listPoPs);
 
     if (listPoPs == null && value != null) {
       // invalid, reset the field to empty :
@@ -1039,8 +1038,8 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
    */
   public void stateChanged(final ChangeEvent ce) {
     if (ce.getSource() == this.jDateSpinner) {
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("Date changed : " + this.jDateSpinner.getModel().getValue());
+      if (logger.isDebugEnabled()) {
+        logger.debug("Date changed: {}", this.jDateSpinner.getModel().getValue());
       }
       fireObservationUpdateEvent();
     }
@@ -1060,9 +1059,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
       final Star.Notification notification = (Star.Notification) arg;
 
       if (notification == Star.Notification.QUERY_COMPLETE) {
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("Star resolved : \n" + star);
-        }
+        logger.debug("Star resolved: \n{}", star);
 
         // update the data model and fire change events :
         om.addTarget(Target.formatName(star.getName()), star);
@@ -1081,11 +1078,10 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
   private void fireObservationUpdateEvent() {
     // check if the automatic update flag is enabled :
     if (this.doAutoUpdateObservation) {
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("fireObservationUpdateEvent");
-      }
+      logger.debug("fireObservationUpdateEvent");
+
       if (DEBUG_UPDATE_EVENT) {
-        logger.log(Level.SEVERE, "FIRE_UPDATE", new Throwable());
+        logger.warn("FIRE_UPDATE", new Throwable());
       }
 
       ObservationManager.getInstance().fireObservationUpdate();
@@ -1099,9 +1095,8 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
 
     final Target selected = getSelectedTarget();
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("fireTargetSelectionChangeEvent : target = " + selected);
-    }
+    logger.debug("fireTargetSelectionChangeEvent : target = {}", selected);
+
     ObservationManager.getInstance().fireTargetSelectionChanged(selected);
   }
 
@@ -1111,8 +1106,8 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
    * @param observation observation
    */
   private void onLoadObservation(final ObservationSetting observation) {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("onLoadObservation :\n" + ObservationManager.toString(observation));
+    if (logger.isDebugEnabled()) {
+      logger.debug("onLoadObservation:\n{}", ObservationManager.toString(observation));
     }
     // disable the automatic update observation :
     final boolean prevAutoUpdateObservation = this.setAutoUpdateObservation(false);
@@ -1200,7 +1195,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     // check if the automatic update flag is enabled :
     if (this.doAutoUpdateObservation) {
       if (DEBUG_UPDATE_EVENT) {
-        logger.log(Level.SEVERE, "UPDATE", new Throwable());
+        logger.warn("UPDATE", new Throwable());
       }
 
       boolean changed = false;
@@ -1232,8 +1227,8 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
    * @param event event
    */
   public void onProcess(final ObservationEvent event) {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("event [" + event.getType() + "] process IN");
+    if (logger.isDebugEnabled()) {
+      logger.debug("event [{}] process IN", event.getType());
     }
     switch (event.getType()) {
       case LOADED:
@@ -1260,8 +1255,8 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         break;
       default:
     }
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("event [" + event.getType() + "] process OUT");
+    if (logger.isDebugEnabled()) {
+      logger.debug("event [{}] process OUT", event.getType());
     }
   }
 
@@ -1347,9 +1342,8 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
       /** This method is called as the cursor moves within the list */
       @Override
       public String getToolTipText(final MouseEvent evt) {
-        if (logger.isLoggable(Level.FINEST)) {
-          logger.finest("getToolTipText : " + evt);
-        }
+        logger.trace("getToolTipText: {}", evt);
+
         // Get item index :
         final int index = locationToIndex(evt.getPoint());
         if (index != -1) {
@@ -1394,14 +1388,11 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         selection = (model.isEmpty()) ? null : model.get(0);
       }
       if (selection != null) {
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("list selection empty - select : " + selection);
-        }
+        logger.debug("list selection empty - select: {}", selection);
+
         list.setSelectedValue(selection, true);
       } else {
-        if (logger.isLoggable(Level.FINE)) {
-          logger.fine("list selection empty - nothing to select !");
-        }
+        logger.debug("list selection empty - nothing to select !");
       }
     }
   }

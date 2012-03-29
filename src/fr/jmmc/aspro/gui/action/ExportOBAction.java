@@ -9,7 +9,8 @@ import fr.jmmc.aspro.ob.ExportOBMode;
 import fr.jmmc.jmcs.gui.MessagePane;
 import fr.jmmc.jmcs.gui.action.RegisteredAction;
 import java.awt.event.ActionEvent;
-import java.util.logging.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This registered action represents a File Menu entry to export an OB. 
@@ -26,7 +27,7 @@ public final class ExportOBAction extends RegisteredAction {
   /** Action name. This name is used to register to the ActionRegistrar */
   public final static String actionName = "exportOB";
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(className);
+  private static final Logger logger = LoggerFactory.getLogger(className);
 
   /**
    * Public constructor that automatically register the action in RegisteredAction.
@@ -41,9 +42,7 @@ public final class ExportOBAction extends RegisteredAction {
    */
   @Override
   public void actionPerformed(final ActionEvent evt) {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("actionPerformed");
-    }
+    logger.debug("actionPerformed");
 
     final UVCoveragePanel uvCoveragePanel = AsproGui.getInstance().getSettingPanel().getUVCoveragePanel();
 

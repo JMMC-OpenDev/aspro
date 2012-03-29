@@ -23,7 +23,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This action asks SearchCal to search calibrators for the current selected target
@@ -39,7 +40,7 @@ public final class SearchCalQueryAction extends SampCapabilityAction {
   /** Action name. This name is used to register to the ActionRegistrar */
   public final static String actionName = "searchCalStartQuery";
   /** Class logger */
-  private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(className);
+  private static final Logger logger = LoggerFactory.getLogger(className);
   /** template name */
   private final static String TEMPLATE_FILE = "fr/jmmc/aspro/interop/SearchCal_template.xml";
 
@@ -96,18 +97,14 @@ public final class SearchCalQueryAction extends SampCapabilityAction {
       return null;
     }
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("composeMessage for target : " + target);
-    }
+      logger.debug("composeMessage for target: {}", target);
 
     final String votable = processTarget(target);
 
+      logger.debug("votable = \n{}", votable);
+
     final Map<String, String> parameters = new HashMap<String, String>(2);
     parameters.put("query", votable);
-
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("votable = \n" + votable);
-    }
 
     return parameters;
   }
@@ -153,16 +150,16 @@ public final class SearchCalQueryAction extends SampCapabilityAction {
 
     final double lambda = insMode.getWaveLength();
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("lambda = " + lambda);
+    if (logger.isDebugEnabled()) {
+      logger.debug("lambda: {}", lambda);
     }
 
     final Band band = Band.findBand(lambda);
     final SpectralBand insBand = SpectralBandUtils.findBand(band);
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("band    = " + band);
-      logger.fine("insBand = " + insBand);
+    if (logger.isDebugEnabled()) {
+      logger.debug("band: {}", band);
+      logger.debug("insBand: {}", insBand);
     }
 
     // If a flux / magnitude is missing => user message
@@ -187,20 +184,20 @@ public final class SearchCalQueryAction extends SampCapabilityAction {
       maxMag = objectMag + 2d;
     }
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("objectMag = " + objectMag);
-      logger.fine("minMag    = " + minMag);
-      logger.fine("maxMag    = " + maxMag);
-      logger.fine("bright    = " + bright);
+    if (logger.isDebugEnabled()) {
+      logger.debug("objectMag: {}", objectMag);
+      logger.debug("minMag: {}", minMag);
+      logger.debug("maxMag: {}", maxMag);
+      logger.debug("bright: {}", bright);
     }
 
     // max base line :
     final double[] range = ConfigurationManager.computeBaselineUVBounds(stations);
     final double maxBaseline = range[1];
 
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine("stations    = " + stations);
-      logger.fine("maxBaseline = " + maxBaseline);
+    if (logger.isDebugEnabled()) {
+      logger.debug("stations: {}", stations);
+      logger.debug("maxBaseline: {}", maxBaseline);
     }
 
     // --- Target information ---
