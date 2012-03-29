@@ -9,7 +9,7 @@
 
   <program name="Aspro2" version="0.9.1 beta 3"/>
   
-  <compilation date="27/03/2011" compiler="JDK 1.5.0_16"/>
+  <compilation date="29/03/2011" compiler="JDK 1.5.0_16"/>
 
   <text>
     <![CDATA[ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations
@@ -153,6 +153,7 @@
     <release version="0.9.1">
       <prerelease version="0.9.1 beta 3"> 
         <change type="BUGFIX">Fixed RA / DEC parsing (Simbad resolver) with missing second token</change> 
+        <change type="CHANGE">Internal changes (Logback API)</change> 
       </prerelease>
       <prerelease version="0.9.1 beta 2"> 
         <change type="FEATURE">Enhanced Fast mode to compute user models: determine useful model data using total flux threshold (99% or better)</change> 
