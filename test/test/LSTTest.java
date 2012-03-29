@@ -116,7 +116,7 @@ public final class LSTTest {
     // 2 seconds of error (2 times rounding error on second field):
     final double dayLenError = 2 * 1000d;
 
-//    logger.severe("dayLength = " + dayLength);
+//    logger.error("dayLength = " + dayLength);
 
     // HA range [-12;12]:
     final Range haRangeLimits = new Range(AsproConstants.HA_MIN, AsproConstants.HA_MAX);
@@ -145,7 +145,7 @@ public final class LSTTest {
     try {
       do {
 
-//      logger.severe("---------------------------------------\ndate = " + cal.getTime());
+//      logger.error("---------------------------------------\ndate = " + cal.getTime());
 
         // find the julian date corresponding to the LST origin LST=00:00:00 for the given date :
         jdLower = sc.defineDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH) + 1, cal.get(Calendar.DAY_OF_MONTH));
@@ -172,7 +172,7 @@ public final class LSTTest {
         
         final Date dateMin1D = sc.toDate(jdLower1D, useLst);
         
-        logger.severe("date min-1 = " + dateMin1D);
+        logger.error("date min-1 = " + dateMin1D);
         
         len = dateMin.getTime() - dateMin1D.getTime();
         
@@ -188,20 +188,20 @@ public final class LSTTest {
           if (doCenterMidnight) {
             jdMidnight = sc.getJdMidnight();
 
-//          logger.severe("jdMidnight = " + jdMidnight);
+//          logger.error("jdMidnight = " + jdMidnight);
 
             // adjust the jd bounds :
             jdLower = jdMidnight - AstroSkyCalc.HALF_LST_DAY_IN_JD;
             jdUpper = jdMidnight + AstroSkyCalc.HALF_LST_DAY_IN_JD;
 
-//          logger.severe("jdLower = " + jdLower);
-//          logger.severe("jdUpper = " + jdUpper);
+//          logger.error("jdLower = " + jdLower);
+//          logger.error("jdUpper = " + jdUpper);
 
             dateMin = sc.toDate(jdLower, useLst);
             dateMax = sc.toDate(jdUpper, useLst);
 
-//          logger.severe("date min = " + dateMin);
-//          logger.severe("date max = " + dateMax);
+//          logger.error("date min = " + dateMin);
+//          logger.error("date max = " + dateMax);
 
             if (dateMax.before(dateMin)) {
               throw new RuntimeException("upper[" + dateMax + "] before lower[" + dateMin + "]");

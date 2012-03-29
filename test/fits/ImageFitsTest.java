@@ -299,7 +299,7 @@ public class ImageFitsTest {
           }
         }
 
-        logger.info("showDirectory : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
+        logger.info("showDirectory: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
       }
     }
 
@@ -378,7 +378,7 @@ public class ImageFitsTest {
         }
       } while (hdu != null);
 
-      logger.info("infoFile : duration = " + 1e-6d * (System.nanoTime() - start) + " ms.");
+      logger.info("infoFile: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
 
     } catch (Throwable th) {
       logger.error("infoFile : IO failure occured while reading file : " + absFilePath, th);
@@ -420,7 +420,7 @@ public class ImageFitsTest {
 
       logger.info(sb.toString());
       logger.info("buffer len = " + sb.length());
-      logger.info("dumpFile : duration = " + 1e-6d * (end - start) + " ms.");
+      logger.info("dumpFile: duration = {} ms.", 1e-6d * (end - start));
     }
 
     return error;
@@ -454,7 +454,7 @@ public class ImageFitsTest {
     } finally {
       final long end = System.nanoTime();
 
-      logger.info("showFile : duration = " + 1e-6d * (end - start) + " ms.");
+      logger.info("showFile: duration = {} ms.", 1e-6d * (end - start));
     }
 
     return error;
@@ -858,7 +858,7 @@ public class ImageFitsTest {
       time = System.nanoTime() - start;
       acc += time;
 
-      logger.info("FFT complexForward: duration = " + (1e-6d * time) + " ms.");
+      logger.info("FFT complexForward: duration = {} ms.", 1e-6d * (time));
     }
 
     logger.info("FFT complexForward[" + fftSubSize + " - " + fftSize + "]: average duration = "
@@ -882,7 +882,7 @@ public class ImageFitsTest {
           // extract amplitude (copy data):
           fftAmp = FFTUtils.convert(fftSubSize, fftArray, ImageMode.AMP);
 
-          logger.info("convert: duration = " + (1e-6d * (System.nanoTime() - start)) + " ms.");
+          logger.info("convert: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
 
           final FitsImage ampFull = FitsImageUtils.createFitsImage(fftAmp);
           showFitsPanel("ampFull-" + fftSize + "-" + fftSubSize, ampFull);
@@ -896,14 +896,14 @@ public class ImageFitsTest {
         // extract amplitude (copy data):
         fftAmp = FFTUtils.convert(fftSubSize, fftArray, ImageMode.AMP);
 
-        logger.info("convert: duration = " + (1e-6d * (System.nanoTime() - start)) + " ms.");
+        logger.info("convert: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
 
         start = System.nanoTime();
 
         // extract amplitude (copy data):
         fftAmpCut = ImageArrayUtils.extract(fftSubSize, fftSubSize, fftAmp, outputSize, outputSize);
 
-        logger.info("extractAmp: duration = " + (1e-6d * (System.nanoTime() - start)) + " ms.");
+        logger.info("extractAmp: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
 
         final FitsImage ampImg = FitsImageUtils.createFitsImage(fftAmpCut);
         showFitsPanel("ampCut-" + fftSize + "-" + fftSubSize + "-" + outputSize, ampImg);
@@ -925,7 +925,7 @@ public class ImageFitsTest {
 
           fftArrayCut = FFTUtils.extractFFT(fftSubSize, fftArray, outputSize);
 
-          logger.info("extractFFT: duration = " + (1e-6d * (System.nanoTime() - start)) + " ms.");
+          logger.info("extractFFT: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
         } else {
           fftArrayCut = fftArray;
         }
@@ -935,7 +935,7 @@ public class ImageFitsTest {
         // extract amplitude (copy data):
         float[][] fftAmp2 = FFTUtils.convert(outputSize, fftArrayCut, ImageMode.AMP);
 
-        logger.info("convert(2): duration = " + (1e-6d * (System.nanoTime() - start)) + " ms.");
+        logger.info("convert(2): duration = {} ms.", 1e-6d * (System.nanoTime() - start));
 
         if (doCompare) {
           for (int r = 0; r < outputSize; r++) {
@@ -968,7 +968,7 @@ public class ImageFitsTest {
         // extract phase (copy data):
         float[][] fftPhase = FFTUtils.convert(fftSubSize, fftArray, ImageMode.PHASE);
 
-        logger.info("convert: duration = " + (1e-6d * (System.nanoTime() - start)) + " ms.");
+        logger.info("convert: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
 
         showImage("phaseFULL-" + fftSize + "-" + fftSubSize, fftPhase);
 
@@ -977,7 +977,7 @@ public class ImageFitsTest {
         // extract phase (copy data):
         fftPhiCut = ImageArrayUtils.extract(fftSubSize, fftSubSize, fftPhase, outputSize, outputSize);
 
-        logger.info("extractPhi: duration = " + (1e-6d * (System.nanoTime() - start)) + " ms.");
+        logger.info("extractPhi: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
 
         showImage("phase-" + fftSize + "-" + fftSubSize, fftPhiCut);
       }
@@ -987,7 +987,7 @@ public class ImageFitsTest {
       // extract phase (copy data):
       float[][] fftPhi2 = FFTUtils.convert(outputSize, fftArrayCut, ImageMode.PHASE);
 
-      logger.info("convert(2): duration = " + (1e-6d * (System.nanoTime() - start)) + " ms.");
+      logger.info("convert(2): duration = {} ms.", 1e-6d * (System.nanoTime() - start));
 
       if (doCompare) {
         for (int r = 0; r < outputSize; r++) {
@@ -1013,7 +1013,7 @@ public class ImageFitsTest {
       // compute inverse real FFT with scaling:
       fft2d.realInverse(fftArray, true);
 
-      logger.info("FFT complexInverse: duration = " + (1e-6d * (System.nanoTime() - start)) + " ms.");
+      logger.info("FFT complexInverse: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
 
       showImage("inv-" + fftSubSize, fftArray);
     }
