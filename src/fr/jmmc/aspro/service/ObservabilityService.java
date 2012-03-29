@@ -720,7 +720,7 @@ public final class ObservabilityService {
 
       } else {
         // Get intervals (HA) compatible with all base lines :
-        rangesHABaseLines = DelayLineService.findHAIntervals(Math.toRadians(precDEC), this.baseLines, this.wRanges, isLogDebug, logger);
+        rangesHABaseLines = DelayLineService.findHAIntervals(Math.toRadians(precDEC), this.baseLines, this.wRanges);
       }
 
       // rangesHABaseLines can be null if the thread was interrupted :
@@ -1079,7 +1079,7 @@ public final class ObservabilityService {
         wRangeWithOffset.setMin(wRange.getMin() + offset.doubleValue());
         wRangeWithOffset.setMax(wRange.getMax() + offset.doubleValue());
 
-        ranges = DelayLineService.findHAIntervalsForBaseLine(cosDec, sinDec, bl, wExtrema, wRangeWithOffset, ha, haValues, isLogDebug, logger);
+        ranges = DelayLineService.findHAIntervalsForBaseLine(cosDec, sinDec, bl, wExtrema, wRangeWithOffset, ha, haValues);
 
         if (ranges.isEmpty()) {
           // this base line is incompatible with that W range :

@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class manages the computation to find the base line limits
@@ -19,6 +20,10 @@ import org.slf4j.Logger;
  */
 public final class DelayLineService {
 
+  /** Class logger */
+  private static final Logger logger = LoggerFactory.getLogger(DelayLineService.class.getName());
+  /** cached log debug enabled */
+  private static final boolean DEBUG = false;
   /** a list containing a single full range (-12; +12) */
   private static final List<Range> FULL_RANGE_LIST = Arrays.asList(new Range(AsproConstants.HA_MIN, AsproConstants.HA_MAX));
 
@@ -38,12 +43,9 @@ public final class DelayLineService {
    * @param dec target declination (rad)
    * @param baseLines base line list
    * @param wRanges [wMin - wMax] ranges per base line
-   * @param isLogDebug true to enable debug logs
-   * @param logger logger to use
    * @return intervals (hour angles)
    */
-  public static List<List<Range>> findHAIntervals(final double dec, final List<BaseLine> baseLines, final List<Range> wRanges,
-          final boolean isLogDebug, final Logger logger) {
+  public static List<List<Range>> findHAIntervals(final double dec, final List<BaseLine> baseLines, final List<Range> wRanges) {
 
     final double cosDec = Math.cos(dec);
     final double sinDec = Math.sin(dec);
@@ -65,7 +67,7 @@ public final class DelayLineService {
       // First check the W limits :
       wExtrema = findWExtrema(cosDec, sinDec, bl);
 
-      rangesBL.add(findHAIntervalsForBaseLine(cosDec, sinDec, bl, wExtrema, wRange, ha, haValues, isLogDebug, logger));
+      rangesBL.add(findHAIntervalsForBaseLine(cosDec, sinDec, bl, wExtrema, wRange, ha, haValues));
     }
 
     return rangesBL;
@@ -85,19 +87,11 @@ public final class DelayLineService {
    * @param wRange [wMin - wMax] range
    * @param ha double[2] array to avoid array allocations
    * @param haValues double[6] array to avoid array allocations
-   * @param isLogDebug true to enable debug logs
-   * @param logger logger to use
    * @return intervals (hour angles) in dec hours.
    */
   public static List<Range> findHAIntervalsForBaseLine(final double cosDec, final double sinDec, final BaseLine baseLine,
           final double[] wExtrema, final Range wRange,
-          final double[] ha, final double[] haValues,
-          final boolean isLogDebug, final Logger logger) {
-
-    if (isLogDebug) {
-      logger.debug("baseLine : {}", baseLine);
-      logger.debug("W range  : {}", wRange);
-    }
+          final double[] ha, final double[] haValues) {
 
     if (wExtrema == null) {
       // no solution :
@@ -113,23 +107,23 @@ public final class DelayLineService {
 
     if (wMax < wLower || wMin > wUpper) {
       // outside range, no solution :
-      if (isLogDebug) {
-        logger.debug("W outside range: {} : {} / W extrema = [{}, {}]",
+      if (DEBUG) {
+        logger.info("W outside range: {} : {} / W extrema = [{}, {}]",
                 new Object[]{baseLine.getName(), wRange, wLower, wUpper});
       }
       return Collections.emptyList();
     }
     if (wLower > wMin && wUpper < wMax) {
       // always inside range = full interval [-12h;12h]:
-      if (isLogDebug) {
-        logger.debug("W inside range: {} : {} / W extrema = [{}, {}]",
+      if (DEBUG) {
+        logger.info("W inside range: {} : {} / W extrema = [{}, {}]",
                 new Object[]{baseLine.getName(), wRange, wLower, wUpper});
       }
       return FULL_RANGE_LIST;
     }
 
-    if (isLogDebug) {
-      logger.debug("W extrema = [{}, {}]", wLower, wUpper);
+    if (DEBUG) {
+      logger.info("W extrema = [{}, {}]", wLower, wUpper);
     }
 
     // haValues[6] = list of hour angles (rad) in [-PI;PI] range :
@@ -153,8 +147,8 @@ public final class DelayLineService {
     // Sort them by ascending order
     Arrays.sort(haValues, 0, nHA);
 
-    if (isLogDebug) {
-      logger.debug("haList ({} first values): {}", nHA, Arrays.toString(haValues));
+    if (DEBUG) {
+      logger.info("haList ({} first values): {}", nHA, Arrays.toString(haValues));
     }
 
     // output :
@@ -172,8 +166,8 @@ public final class DelayLineService {
 
       final double wMid = CalcUVW.computeW(cosDec, sinDec, baseLine, haMid);
 
-      if (isLogDebug) {
-        logger.debug("W({}) = {}", haMid, wMid);
+      if (DEBUG) {
+        logger.info("W({}) = {}", haMid, wMid);
       }
 
       if (wMid >= wMin && wMid <= wMax) {
@@ -182,8 +176,8 @@ public final class DelayLineService {
       }
     }
 
-    if (isLogDebug) {
-      logger.debug("valid intervals (dec hours): {}", ranges);
+    if (DEBUG) {
+      logger.info("valid intervals (dec hours): {}", ranges);
     }
 
     return ranges;
