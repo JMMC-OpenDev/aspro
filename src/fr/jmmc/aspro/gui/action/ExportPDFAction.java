@@ -7,7 +7,7 @@ import fr.jmmc.aspro.AsproGui;
 import fr.jmmc.aspro.FilePreferences;
 import fr.jmmc.aspro.gui.PDFExportable;
 import fr.jmmc.aspro.gui.chart.PDFUtils;
-import fr.jmmc.jmcs.gui.MessagePane;
+import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.gui.component.StatusBar;
 import fr.jmmc.jmcs.gui.action.ActionRegistrar;
 import fr.jmmc.jmcs.util.MimeType;

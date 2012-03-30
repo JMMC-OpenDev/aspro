@@ -6,7 +6,7 @@ package fr.jmmc.aspro.gui.action;
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.FilePreferences;
 import fr.jmmc.aspro.model.ObservationManager;
-import fr.jmmc.jmcs.gui.MessagePane;
+import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.gui.component.StatusBar;
 import fr.jmmc.jmcs.util.MimeType;
 import fr.jmmc.oitools.model.OIArray;

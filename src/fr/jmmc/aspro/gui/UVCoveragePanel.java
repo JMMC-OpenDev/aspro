@@ -49,7 +49,7 @@ import fr.jmmc.aspro.service.NoiseService;
 import fr.jmmc.aspro.service.OIFitsCreatorService;
 import fr.jmmc.aspro.service.UVCoverageService;
 import fr.jmmc.aspro.service.UserModelService;
-import fr.jmmc.jmcs.gui.MessagePane;
+import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.gui.component.StatusBar;
 import fr.jmmc.jmcs.gui.task.TaskSwingWorker;
 import fr.jmmc.jmal.image.ColorModels;

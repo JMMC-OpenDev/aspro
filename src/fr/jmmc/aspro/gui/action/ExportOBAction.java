@@ -6,7 +6,7 @@ package fr.jmmc.aspro.gui.action;
 import fr.jmmc.aspro.AsproGui;
 import fr.jmmc.aspro.gui.UVCoveragePanel;
 import fr.jmmc.aspro.ob.ExportOBMode;
-import fr.jmmc.jmcs.gui.MessagePane;
+import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.gui.action.RegisteredAction;
 import java.awt.event.ActionEvent;
 import org.slf4j.Logger;
