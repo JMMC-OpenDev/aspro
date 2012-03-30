@@ -4,7 +4,7 @@
 package fr.jmmc.aspro.gui;
 
 import fr.jmmc.aspro.gui.util.CalibratorInfoTableModel;
-import fr.jmmc.jmcs.gui.GenericJTree;
+import fr.jmmc.jmcs.gui.component.GenericJTree;
 import fr.jmmc.aspro.gui.util.GenericListModel;
 import fr.jmmc.aspro.gui.util.TargetJTree;
 import fr.jmmc.aspro.gui.util.TargetListRenderer;

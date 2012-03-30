@@ -3,7 +3,7 @@
  ******************************************************************************/
 package fr.jmmc.aspro.gui.util;
 
-import fr.jmmc.jmcs.gui.GenericJTree;
+import fr.jmmc.jmcs.gui.component.GenericJTree;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import javax.swing.tree.DefaultMutableTreeNode;

@@ -6,7 +6,7 @@ package fr.jmmc.aspro.gui.util;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.jmal.model.targetmodel.Model;
-import fr.jmmc.jmcs.gui.GenericJTree;
+import fr.jmmc.jmcs.gui.component.GenericJTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 
