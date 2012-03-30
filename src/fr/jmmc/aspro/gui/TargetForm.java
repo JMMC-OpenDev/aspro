@@ -18,7 +18,7 @@ import fr.jmmc.aspro.model.util.TargetRAComparator;
 import fr.jmmc.jmcs.network.BrowserLauncher;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
-import fr.jmmc.jmcs.util.Urls;
+import fr.jmmc.jmcs.util.UrlUtils;
 import java.awt.Component;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -1116,7 +1116,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     }// </editor-fold>//GEN-END:initComponents
 
   private void jButtonSimbadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSimbadActionPerformed
-    final String url = SIMBAD_QUERY_ID + Urls.encode(this.currentTarget.getName());
+    final String url = SIMBAD_QUERY_ID + UrlUtils.encode(this.currentTarget.getName());
 
     logger.debug("Simbad url = {}", url);
 
