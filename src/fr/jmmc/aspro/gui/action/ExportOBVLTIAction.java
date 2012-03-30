@@ -12,7 +12,7 @@ import fr.jmmc.aspro.model.oi.TargetInformation;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.aspro.ob.ExportOBVLTI;
 import fr.jmmc.aspro.service.ObservabilityService;
-import fr.jmmc.jmcs.gui.DismissableMessagePane;
+import fr.jmmc.jmcs.gui.component.DismissableMessagePane;
 import fr.jmmc.jmcs.gui.MessagePane;
 import fr.jmmc.jmcs.gui.StatusBar;
 import fr.jmmc.jmcs.util.MimeType;
