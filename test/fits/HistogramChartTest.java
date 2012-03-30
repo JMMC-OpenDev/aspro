@@ -3,7 +3,7 @@
  ******************************************************************************/
 package fits;
 
-import fr.jmmc.jmcs.gui.SwingUtils;
+import fr.jmmc.jmcs.gui.util.SwingUtils;
 import java.awt.Dimension;
 import javax.swing.JFrame;
 import javax.swing.JPanel;

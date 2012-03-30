@@ -17,7 +17,7 @@ import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.aspro.model.util.TargetRAComparator;
 import fr.jmmc.jmcs.network.BrowserLauncher;
 import fr.jmmc.jmcs.gui.MessagePane;
-import fr.jmmc.jmcs.gui.SwingUtils;
+import fr.jmmc.jmcs.gui.util.SwingUtils;
 import fr.jmmc.jmcs.util.Urls;
 import java.awt.Component;
 import java.beans.PropertyChangeEvent;

@@ -3,7 +3,7 @@
  ******************************************************************************/
 package fr.jmmc.aspro.gui.util;
 
-import fr.jmmc.jmcs.gui.SwingUtils;
+import fr.jmmc.jmcs.gui.util.SwingUtils;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.ParseException;

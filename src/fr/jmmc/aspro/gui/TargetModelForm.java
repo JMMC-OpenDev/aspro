@@ -20,7 +20,7 @@ import fr.jmmc.jmal.model.gui.ModelParameterTableModel;
 import fr.jmmc.jmal.model.gui.ModelParameterTableModel.EditMode;
 import fr.jmmc.jmal.model.gui.ModelParameterTableModel.Mode;
 import fr.jmmc.jmal.model.targetmodel.Model;
-import fr.jmmc.jmcs.gui.SwingUtils;
+import fr.jmmc.jmcs.gui.util.SwingUtils;
 import fr.jmmc.jmcs.util.MimeType;
 import fr.nom.tam.fits.FitsException;
 import java.awt.Color;

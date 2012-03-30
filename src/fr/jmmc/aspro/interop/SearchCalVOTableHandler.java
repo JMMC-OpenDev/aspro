@@ -16,7 +16,7 @@ import fr.jmmc.aspro.util.XmlFactory;
 import fr.jmmc.jmal.ALX;
 import fr.jmmc.jmcs.App;
 import fr.jmmc.jmcs.gui.MessagePane;
-import fr.jmmc.jmcs.gui.SwingUtils;
+import fr.jmmc.jmcs.gui.util.SwingUtils;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Iterator;
