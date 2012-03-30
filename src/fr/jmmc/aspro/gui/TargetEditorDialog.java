@@ -3,7 +3,7 @@
  ******************************************************************************/
 package fr.jmmc.aspro.gui;
 
-import fr.jmmc.jmcs.gui.ComponentResizeAdapter;
+import fr.jmmc.jmcs.gui.component.ComponentResizeAdapter;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Target;
