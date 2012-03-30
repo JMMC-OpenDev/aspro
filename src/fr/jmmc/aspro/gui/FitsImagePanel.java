@@ -17,7 +17,7 @@ import fr.jmmc.aspro.gui.chart.ZoomEvent;
 import fr.jmmc.aspro.gui.chart.ZoomEventListener;
 import fr.jmmc.aspro.image.FitsImageUtils;
 import fr.jmmc.jmcs.gui.MessagePane;
-import fr.jmmc.jmcs.gui.StatusBar;
+import fr.jmmc.jmcs.gui.component.StatusBar;
 import fr.jmmc.jmcs.gui.task.TaskSwingWorker;
 import fr.jmmc.jmal.image.ColorModels;
 import fr.jmmc.jmal.image.ImageUtils;

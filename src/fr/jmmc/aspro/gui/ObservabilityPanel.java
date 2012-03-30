@@ -33,7 +33,7 @@ import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.aspro.service.ObservabilityService;
-import fr.jmmc.jmcs.gui.StatusBar;
+import fr.jmmc.jmcs.gui.component.StatusBar;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
