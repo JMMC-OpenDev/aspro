@@ -32,6 +32,7 @@ import org.jfree.chart.ChartPanel;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.annotations.XYTextAnnotation;
+import org.jfree.chart.axis.LogarithmicAxis;
 import org.jfree.chart.event.ChartProgressEvent;
 import org.jfree.chart.event.ChartProgressListener;
 import org.jfree.chart.plot.PlotOrientation;
@@ -56,6 +57,8 @@ public final class Vis2Panel extends javax.swing.JPanel implements ChartProgress
   private static final long serialVersionUID = 1;
   /** Class logger */
   private static final Logger logger = LoggerFactory.getLogger(Vis2Panel.class.getName());
+  /** flag to enable log axis to display log(Vis2) */
+  private final static boolean USE_LOG_SCALE = false;
   /** default color model (aspro - Rainbow) */
   private final static IndexColorModel RAINBOW_COLOR_MODEL = ColorModels.getColorModel("Rainbow");
   /** scaling factor to Mega Lambda for U,V points */
@@ -421,7 +424,7 @@ public final class Vis2Panel extends javax.swing.JPanel implements ChartProgress
     boolean hasErr = false;
     double minX = Double.POSITIVE_INFINITY;
     double maxX = 0d;
-    double minY = 0d;
+    double minY = (USE_LOG_SCALE) ? 1d : 0d;
     double maxY = 1d;
     double x, y, err;
 
@@ -440,6 +443,11 @@ public final class Vis2Panel extends javax.swing.JPanel implements ChartProgress
         if (!Double.isNaN(y)) {
           hasData = true;
 
+          if (USE_LOG_SCALE && y < 0d) {
+            // keep only positive data:
+            y = -y;
+          }
+
           if (x < minX) {
             minX = x;
           }
@@ -456,7 +464,8 @@ public final class Vis2Panel extends javax.swing.JPanel implements ChartProgress
           if (Double.isNaN(err)) {
             yIntervalSeries.add(x, y, Double.NaN, Double.NaN);
           } else {
-            yIntervalSeries.add(x, y, y - err, y + err);
+            // USE_LOG_SCALE: check if y - err < 0:
+            yIntervalSeries.add(x, y, (USE_LOG_SCALE && (y - err) < 0d) ? 0d : (y - err), y + err);
             hasErr = true;
           }
         }
@@ -481,9 +490,11 @@ public final class Vis2Panel extends javax.swing.JPanel implements ChartProgress
     minX -= marginX;
     maxX += marginX;
 
-    final double marginY = (maxY - minY) * MARGIN_PERCENTS;
-    minY -= marginY;
-    maxY += marginY;
+    if (!USE_LOG_SCALE) {
+      final double marginY = (maxY - minY) * MARGIN_PERCENTS;
+      minY -= marginY;
+      maxY += marginY;
+    }
 
     BoundedNumberAxis axis;
 
@@ -491,10 +502,26 @@ public final class Vis2Panel extends javax.swing.JPanel implements ChartProgress
     axis.setBounds(new Range(minX, maxX));
     axis.setRange(minX, maxX);
 
-    axis = (BoundedNumberAxis) this.xyPlot.getRangeAxis();
-    axis.setBounds(new Range(minY, maxY));
-    axis.setRange(minY, maxY);
+    if (this.xyPlot.getRangeAxis() instanceof BoundedNumberAxis) {
+      axis = (BoundedNumberAxis) this.xyPlot.getRangeAxis();
+      axis.setBounds(new Range(minY, maxY));
+      axis.setRange(minY, maxY);
+    }
 
+    if (USE_LOG_SCALE) {
+      // test logarithmic axis:
+      final LogarithmicAxis logAxis = new LogarithmicAxis("log(V²)");
+      logAxis.setExpTickLabelsFlag(true);
+      //      logAxis.setAllowNegativesFlag(true);
+      //      logAxis.setStrictValuesFlag(false);
+      logAxis.setAutoRangeNextLogFlag(true);
+
+      logger.warn("logAxis range: [{} - {}]", minY, maxY);
+
+      logAxis.setRange(minY, maxY);
+
+      this.xyPlot.setRangeAxis(logAxis);
+    }
     return true;
   }
     // Variables declaration - do not modify//GEN-BEGIN:variables
