@@ -25,7 +25,6 @@ import fr.jmmc.jmal.complex.ImmutableComplex;
 import fr.jmmc.jmal.model.VisNoiseService;
 import java.text.DecimalFormat;
 import java.util.List;
-import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +36,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author bourgesl
  */
-public final class NoiseService implements VisNoiseService {
+public final class NoiseService extends VisNoiseService {
 
   /** Class logger */
   private static final Logger logger = LoggerFactory.getLogger(NoiseService.class.getName());
@@ -45,8 +44,6 @@ public final class NoiseService implements VisNoiseService {
   public final static double H_PLANCK = 6.62606896e-34d;
   /** Speed of light (2.99792458e8) */
   public final static double C_LIGHT = 2.99792458e8d;
-  /** constant 1 / SQRT(2) */
-  private final static double SQRT_2_INV = 1d / Math.sqrt(2d);
 
   /* members */
   /** instrument name */
@@ -55,8 +52,8 @@ public final class NoiseService implements VisNoiseService {
   /* interferometer parameters */
   /** Telescope Diameter (m) */
   private double telDiam = 1d;
-  /** Number of telescopes interfering */
-  private int nbTel = 1;
+  /** Number of telescopes interfering as double */
+  private double nbTel = 1;
 
   /* adaptive optics parameters */
   /** seeing (arc sec) */
@@ -79,21 +76,26 @@ public final class NoiseService implements VisNoiseService {
   private double detectorSaturation = 100000d;
   /** Instrumental Visibility [0.0-1.0] */
   private double instrumentalVisibility = 1d;
-  /** Typical Visibility Bias (absolute) */
-  private double instrumentalVisibilityBias = 0d;
-  /** Vis2 Calibration Bias (absolute) */
-  private double instrumentVis2CalibrationBias = 0d;
-  /** Typical Phase/Phase Closure Bias (deg) */
-  private double instrumentalPhaseBias = 0d;
   /** number of pixels to code all fringes together (interferometric channel) */
   private int nbPixInterf = 600;
   /** number of pixels to code each photometric channel */
   private int nbPixPhoto = 4;
   /** fraction of flux going into interferometric channel */
   private double fracFluxInInterferometry = 0.9d;
+  /** flag to use the photometry */
+  private boolean usePhotometry = false;
   /** instrument band */
   private SpectralBand insBand;
 
+  /* bias */
+  /** Typical Visibility Bias (absolute) */
+  private double instrumentalVisibilityBias = 0d;
+  /** Typical Phase/Phase Closure Bias (rad) */
+  private double instrumentalPhaseBias = 0d;
+  /** flag to use the Vis2 Calibration Bias */
+  private boolean useVis2CalibrationBias = false;
+  /** Vis2 Calibration Bias (proportional to square visibility) */
+  private double instrumentVis2CalibrationBias = 0d;
   /* instrument mode parameters */
   /** Observation central wavelength (microns) */
   private double lambda = 2.2d;
@@ -127,14 +129,34 @@ public final class NoiseService implements VisNoiseService {
   private boolean invalidParameters = false;
   /** number of photons in interferometer channel */
   private double nbPhotonInI;
-  /** number of photons in each photometric channel */
+  /** number of photons in each photometric channel (photometric flux) */
   private double nbPhotonInP;
-  /** number of frames per second */
-  private double frameRate;
   /** total instrumental visibility (with FT if any) */
   private double vinst;
-  /** random generator */
-  private final Random random = new Random();
+
+  /* cached intermediate constants */
+  /** photometric error contribution on the square visiblity */
+  private double errV2Phot;
+  /** coefficient used to the squared correlated flux */
+  private double sqCorFluxCoef;
+  /** coefficient used to compute variance of the squared correlated flux */
+  private double varSqCorFluxCoef;
+  /** constant used to compute variance of the squared correlated flux */
+  private double varSqCorFluxConst;
+  /** error correction = 1 / SQRT(total frame) */
+  private double totFrameCorrection;
+  /** t3 phi error - coefficient */
+  private double t3photCoef;
+  /** t3 phi error - coefficient^2 */
+  private double t3photCoef2;
+  /** t3 phi error - coefficient^3 */
+  private double t3photCoef3;
+  /** t3 phi detector error - constant */
+  private double t3detConst;
+  /** t3 phi detector error - coefficient 1 */
+  private double t3detCoef1;
+  /** t3 phi detector error - coefficient 2 */
+  private double t3detCoef2;
 
   /**
    * Protected constructor
@@ -185,11 +207,11 @@ public final class NoiseService implements VisNoiseService {
     }
 
     if (logger.isDebugEnabled()) {
-      logger.debug("nbTel                      : {}", nbTel);
-      logger.debug("telDiam                    : {}", telDiam);
-      logger.debug("aoBand                     : {}", aoBand);
-      logger.debug("nbOfActuators              : {}", nbOfActuators);
-      logger.debug("seeing                     : {}", seeing);
+      logger.debug("nbTel                         : {}", nbTel);
+      logger.debug("telDiam                       : {}", telDiam);
+      logger.debug("aoBand                        : {}", aoBand);
+      logger.debug("nbOfActuators                 : {}", nbOfActuators);
+      logger.debug("seeing                        : {}", seeing);
     }
   }
 
@@ -212,13 +234,23 @@ public final class NoiseService implements VisNoiseService {
     this.detectorSaturation = instrument.getDetectorSaturation();
     this.instrumentalVisibility = instrument.getInstrumentVisibility();
     this.instrumentalVisibilityBias = 0.01d * instrument.getInstrumentVisibilityBias(); // percents
-    this.instrumentalPhaseBias = instrument.getInstrumentPhaseBias();
+    this.instrumentalPhaseBias = Math.toRadians(instrument.getInstrumentPhaseBias()); // radians
     this.nbPixInterf = instrument.getNbPixInterferometry();
-    this.nbPixPhoto = instrument.getNbPixPhotometry();
-    this.fracFluxInInterferometry = instrument.getFracFluxInInterferometry();
+
+    // optional photometry parameters
+    this.nbPixPhoto = instrument.getNbPixPhotometry(); // can be 0
+    this.fracFluxInInterferometry = instrument.getFracFluxInInterferometry(); // can be 1
+
+    this.usePhotometry = (fracFluxInInterferometry < 1.0d && nbPixPhoto > 0);
 
     final Double vis2CalibrationBias = instrument.getInstrumentVis2CalibrationBias(); // percents
-    this.instrumentVis2CalibrationBias = (vis2CalibrationBias != null) ? 0.01d * vis2CalibrationBias.doubleValue() : 0d;
+    if (vis2CalibrationBias == null) {
+      this.useVis2CalibrationBias = false;
+      this.instrumentVis2CalibrationBias = 0d;
+    } else {
+      this.useVis2CalibrationBias = true;
+      this.instrumentVis2CalibrationBias = 0.01d * vis2CalibrationBias.doubleValue();
+    }
 
     final FocalInstrumentMode insMode = observation.getInstrumentConfiguration().getFocalInstrumentMode();
 
@@ -234,11 +266,13 @@ public final class NoiseService implements VisNoiseService {
       logger.debug("detectorSaturation            : {}", detectorSaturation);
       logger.debug("instrumentalVisibility        : {}", instrumentalVisibility);
       logger.debug("instrumentalVisibilityBias    : {}", instrumentalVisibilityBias);
-      logger.debug("instrumentVis2CalibrationBias : {}", instrumentVis2CalibrationBias);
       logger.debug("instrumentalPhaseBias         : {}", instrumentalPhaseBias);
+      logger.debug("useVis2CalibrationBias        : {}", useVis2CalibrationBias);
+      logger.debug("instrumentVis2CalibrationBias : {}", instrumentVis2CalibrationBias);
       logger.debug("nbPixInterf                   : {}", nbPixInterf);
       logger.debug("nbPixPhoto                    : {}", nbPixPhoto);
       logger.debug("fracFluxInInterferometry      : {}", fracFluxInInterferometry);
+      logger.debug("usePhotometry                 : {}", usePhotometry);
       logger.debug("lambda                        : {}", lambda);
       logger.debug("spectralResolution            : {}", spectralResolution);
     }
@@ -266,14 +300,14 @@ public final class NoiseService implements VisNoiseService {
     }
 
     if (logger.isDebugEnabled()) {
-      logger.debug("fringeTrackerPresent       : {}", fringeTrackerPresent);
+      logger.debug("fringeTrackerPresent          : {}", fringeTrackerPresent);
     }
-    if (this.fringeTrackerPresent) {
+    if (fringeTrackerPresent) {
       if (logger.isDebugEnabled()) {
         logger.debug("fringeTrackerInstrumentalVisibility : {}", fringeTrackerInstrumentalVisibility);
-        logger.debug("fringeTrackerLimit         : {}", fringeTrackerLimit);
-        logger.debug("fringeTrackerMaxIntTime    : {}", fringeTrackerMaxIntTime);
-        logger.debug("ftBand                     : {}", ftBand);
+        logger.debug("fringeTrackerLimit            : {}", fringeTrackerLimit);
+        logger.debug("fringeTrackerMaxIntTime       : {}", fringeTrackerMaxIntTime);
+        logger.debug("ftBand                        : {}", ftBand);
       }
     }
   }
@@ -285,48 +319,48 @@ public final class NoiseService implements VisNoiseService {
   private void prepareTarget(final Target target) {
     Double flux;
 
-    final Band band = Band.findBand(this.lambda);
+    final Band band = Band.findBand(lambda);
 
     this.insBand = SpectralBandUtils.findBand(band);
 
     if (logger.isDebugEnabled()) {
-      logger.debug("band                       : {}", band);
-      logger.debug("insBand                    : {}", insBand);
+      logger.debug("band                          : {}", band);
+      logger.debug("insBand                       : {}", insBand);
     }
 
     // If a flux / magnitude is missing => user message
     // and it is impossible to compute any error
 
-    flux = target.getFlux(this.insBand);
+    flux = target.getFlux(insBand);
     this.objectMag = (flux != null) ? flux.doubleValue() : Double.NaN;
     if (logger.isDebugEnabled()) {
-      logger.debug("objectMag                  : {}", objectMag);
+      logger.debug("objectMag                     : {}", objectMag);
     }
 
-    if (this.fringeTrackerPresent) {
-      flux = target.getFlux(this.ftBand);
+    if (fringeTrackerPresent) {
+      flux = target.getFlux(ftBand);
       this.fringeTrackerMag = (flux != null) ? flux.doubleValue() : Double.NaN;
       if (logger.isDebugEnabled()) {
-        logger.debug("fringeTrackerMag           : {}", fringeTrackerMag);
+        logger.debug("fringeTrackerMag              : {}", fringeTrackerMag);
       }
     }
 
-    flux = target.getFlux(this.aoBand);
+    flux = target.getFlux(aoBand);
     this.adaptiveOpticsMag = (flux != null) ? flux.doubleValue() : Double.NaN;
     if (logger.isDebugEnabled()) {
-      logger.debug("adaptiveOpticsMag          : {}", adaptiveOpticsMag);
+      logger.debug("adaptiveOpticsMag             : {}", adaptiveOpticsMag);
     }
 
-    if (Double.isNaN(this.objectMag)
-            || (this.fringeTrackerPresent && Double.isNaN(this.fringeTrackerMag))
-            || Double.isNaN(this.adaptiveOpticsMag)) {
+    if (Double.isNaN(objectMag)
+            || (fringeTrackerPresent && Double.isNaN(fringeTrackerMag))
+            || Double.isNaN(adaptiveOpticsMag)) {
       // missing magnitude
       this.invalidParameters = true;
 
       addWarning("Missing photometry on target [" + target.getName() + "] in following bands: "
-              + (Double.isNaN(this.objectMag) ? this.insBand : "")
-              + (this.fringeTrackerPresent && Double.isNaN(this.fringeTrackerMag) ? this.ftBand : "")
-              + (Double.isNaN(this.adaptiveOpticsMag) ? this.aoBand : ""));
+              + (Double.isNaN(objectMag) ? insBand : "")
+              + (fringeTrackerPresent && Double.isNaN(fringeTrackerMag) ? ftBand : "")
+              + (Double.isNaN(adaptiveOpticsMag) ? aoBand : ""));
     }
   }
 
@@ -335,105 +369,142 @@ public final class NoiseService implements VisNoiseService {
    */
   private void initParameters() {
     // fast return if invalid configuration :
-    if (this.invalidParameters) {
+    if (invalidParameters) {
       return;
     }
 
     this.vinst = instrumentalVisibility;
-    if (this.fringeTrackerPresent) {
-      this.vinst *= this.fringeTrackerInstrumentalVisibility;
-    }
 
-    final Band band = Band.findBand(this.lambda);
+    final Band band = Band.findBand(lambda);
 
-    double dlam;
-    if (this.spectralResolution <= 1d) {
+    final double dlam;
+    if (spectralResolution <= 1d) {
       dlam = band.getBandWidth();
     } else {
-      dlam = this.lambda / this.spectralResolution;
+      dlam = lambda / spectralResolution;
     }
 
     // strehl ratio of AO :
-    final double sr = Band.strehl(this.adaptiveOpticsMag, this.lambda, this.telDiam, this.seeing, this.nbOfActuators);
-
-    // nb of photons m^-2 m^-1 :
-    final double fzero = Math.pow(10d, band.getLogFluxZero())
-            / (H_PLANCK * C_LIGHT / (this.lambda * AsproConstants.MICRO_METER));
-
-    final double nbTotalPhotPerS = fzero * this.nbTel * Math.PI * Math.pow(this.telDiam / 2d, 2d)
-            * (dlam * AsproConstants.MICRO_METER) * this.transmission * sr
-            * Math.pow(10d, -0.4d * this.objectMag);
-
-    // number of expected photoevents in dit :
-    double nbTotalPhot = nbTotalPhotPerS * this.dit;
-
-    // fraction of total interferometric flux in peak pixel :
-    final double peakflux = this.fracFluxInInterferometry * nbTotalPhot / this.nbPixInterf;
+    final double sr = Band.strehl(adaptiveOpticsMag, lambda, telDiam, seeing, nbOfActuators);
 
     if (logger.isDebugEnabled()) {
-      logger.debug("adaptiveOpticsMag          : {}", this.adaptiveOpticsMag);
-      logger.debug("strehl ratio               : {}", sr);
-      logger.debug("dlam                       : {}", dlam);
-      logger.debug("nbTotalPhot                : {}", nbTotalPhot);
-      logger.debug("peakflux                   : {}", peakflux);
+      logger.debug("band                          : {}", band);
+      logger.debug("lambda                        : {}", lambda);
+      logger.debug("dlam                          : {}", dlam);
+      logger.debug("strehl ratio                  : {}", sr);
     }
 
-    int nbFrameToSaturation;
-    if (this.detectorSaturation < peakflux) {
-      // the dit is too long
-      this.dit *= this.detectorSaturation / peakflux;
+    // nb of photons m^-2 m^-1 :
+    final double fzero = Math.pow(10d, band.getLogFluxZero()) / (H_PLANCK * C_LIGHT / (lambda * AsproConstants.MICRO_METER));
 
-      addWarning("DIT too long (saturation). Adjusting it to (possibly impossible): " + formatDIT(this.dit));
+    final double nbTotalPhotPerS = fzero * nbTel * Math.PI * Math.pow(telDiam / 2d, 2d)
+            * (dlam * AsproConstants.MICRO_METER) * transmission * sr
+            * Math.pow(10d, -0.4d * objectMag);
+
+    if (logger.isDebugEnabled()) {
+      logger.debug("fzero                         : {}", fzero);
+      logger.debug("nbTotalPhotPerS               : {}", nbTotalPhotPerS);
+    }
+
+    // dit used by this observation:
+    double obsDit = dit;
+
+    // number of expected photoevents in dit :
+    double nbTotalPhot = nbTotalPhotPerS * obsDit;
+
+    // fraction of total interferometric flux in peak pixel :
+    final double peakflux = fracFluxInInterferometry * nbTotalPhot / nbPixInterf;
+
+    if (logger.isDebugEnabled()) {
+      logger.debug("nbTotalPhot                   : {}", nbTotalPhot);
+      logger.debug("peakflux                      : {}", peakflux);
+    }
+
+    final int nbFrameToSaturation;
+    if (detectorSaturation < peakflux) {
+      // the dit is too long
+      obsDit *= detectorSaturation / peakflux;
+
+      addWarning("DIT too long (saturation). Adjusting it to (possibly impossible): " + formatTime(obsDit));
 
       nbFrameToSaturation = 1;
     } else {
-      nbFrameToSaturation = (int) Math.round(this.detectorSaturation / peakflux);
+      nbFrameToSaturation = (int) Math.floor(detectorSaturation / peakflux);
     }
-
-    if (this.fringeTrackerPresent && (this.fringeTrackerMag <= this.fringeTrackerLimit) && (nbFrameToSaturation > 1)) {
-      // FT is asked, can work, and is useful (need to integrate longer)
-      this.dit = Math.min(this.dit * nbFrameToSaturation, this.totalObsTime);
-      this.dit = Math.min(this.dit, this.fringeTrackerMaxIntTime);
-
-      addWarning("Observation can take advantage of FT. Adjusting DIT to: " + formatDIT(this.dit));
-    }
-
-    nbTotalPhot = nbTotalPhotPerS * this.dit;
 
     if (logger.isDebugEnabled()) {
-      logger.debug("nbFrameToSaturation        : {}", nbFrameToSaturation);
-      logger.debug("nbTotalPhot                : {}", nbTotalPhot);
+      logger.debug("dit (no saturation)           : {}", obsDit);
+      logger.debug("nbFrameToSaturation           : {}", nbFrameToSaturation);
     }
 
-    this.frameRate = 1d / this.dit;
+    if (fringeTrackerPresent) {
+      if ((fringeTrackerMag <= fringeTrackerLimit) && (nbFrameToSaturation > 1)) {
+        // FT is asked, can work, and is useful (need to integrate longer)
+        obsDit = Math.min(obsDit * nbFrameToSaturation, totalObsTime);
+        obsDit = Math.min(obsDit, fringeTrackerMaxIntTime);
+
+        // correct instrumental visibility:
+        this.vinst *= fringeTrackerInstrumentalVisibility;
+
+        if (logger.isDebugEnabled()) {
+          logger.debug("dit (FT)                      : {}", obsDit);
+          logger.debug("vinst (FT)                    : {}", vinst);
+        }
+
+        addWarning("Observation can take advantage of FT. Adjusting DIT to: " + formatTime(obsDit));
+      } else {
+        addWarning("Observation can not use FT (magnitude limit or saturation).");
+      }
+    }
+
+    // total number of frames:
+    final double nbFrames = totalObsTime / obsDit;
+
+    // total frame correction = 1 / SQRT(nFrames):
+    this.totFrameCorrection = 1d / Math.sqrt(nbFrames);
+
+    if (logger.isDebugEnabled()) {
+      logger.debug("nbFrames                      : {}", nbFrames);
+      logger.debug("totFrameCorrection            : {}", totFrameCorrection);
+    }
+
+    // corrected total number of photons using final observation dit:
+    nbTotalPhot = nbTotalPhotPerS * obsDit;
+
+    if (logger.isDebugEnabled()) {
+      logger.debug("nbTotalPhot                   : {}", nbTotalPhot);
+    }
 
     // give back the two useful values for the noise estimate :
 
     // number of photons in interferometric channel :
-    this.nbPhotonInI = nbTotalPhot * this.fracFluxInInterferometry;
-    // number of photons in photometric channel :
-    this.nbPhotonInP = nbTotalPhot * (1 - this.fracFluxInInterferometry) / this.nbTel;
+    this.nbPhotonInI = nbTotalPhot * fracFluxInInterferometry;
+    // number of photons in photometric channel (photometric flux):
+    this.nbPhotonInP = nbTotalPhot * (1d - fracFluxInInterferometry) / nbTel;
 
     if (logger.isDebugEnabled()) {
-      logger.debug("frameRate                  : {}", frameRate);
-      logger.debug("nbPhotonInI                : {}", nbPhotonInI);
-      logger.debug("nbPhotonInP                : {}", nbPhotonInP);
+      logger.debug("nbPhotonInI                   : {}", nbPhotonInI);
+      logger.debug("nbPhotonInP                   : {}", nbPhotonInP);
     }
+
+    // Prepare numeric constants for fast error computation:
+    prepareVis2Error();
+    prepareT3PhiError();
   }
 
   /**
-   * Format DIT value for warning messages
-   * @param dit detector integration time (s)
-   * @return DIT value
+   * Format time value for warning messages
+   * @param value time (s)
+   * @return formatted value
    */
-  private String formatDIT(final double dit) {
+  private String formatTime(final double value) {
     final String unit;
     final double val;
-    if (dit >= 1d) {
-      val = dit;
+    if (value >= 1d) {
+      val = value;
       unit = " s";
     } else {
-      val = dit * 1000d;
+      val = value * 1000d;
       unit = " ms";
     }
     final DecimalFormat df = new DecimalFormat("##0.##");
@@ -507,9 +578,7 @@ public final class NoiseService implements VisNoiseService {
     // sigma2(visRe) = 1/2 ( sigma2(visRe) + sigma2(visIm) = sigma2(vis) / 2
 
     // complex visibility error : visErrRe = visErrIm = visAmpErr / SQRT(2) :
-    final double visErr = visAmpErr * SQRT_2_INV;
-
-    return visErr;
+    return visAmpErr * VIS_AMP_TO_VIS_CPX_ERR;
   }
 
   /**
@@ -519,15 +588,14 @@ public final class NoiseService implements VisNoiseService {
    * @return visiblity error
    */
   private double computeVisError(final double visAmp) {
-
     // vis2 error without bias :
     final double errV2 = computeVis2Error(visAmp, false);
 
     // dvis = d(vis2) / (2 * vis) :
     final double visAmpErr = errV2 / (2d * visAmp);
 
-    // convert instrumental phase bias as an error too. Use it as a limit.
-    return Math.max(visAmpErr, visAmp * Math.toRadians(this.instrumentalPhaseBias));
+    // convert instrumental phase bias as an error too. Use it as a limit:
+    return Math.max(visAmpErr, visAmp * instrumentalPhaseBias);
   }
 
   /**
@@ -541,13 +609,10 @@ public final class NoiseService implements VisNoiseService {
       return Double.NaN;
     }
 
-    // include instrumental visib
-    final double visib = visAmp * this.vinst;
+    // correlated flux (include instrumental visibility loss):
+    final double fcorrel = nbPhotonInI * visAmp * vinst / nbTel;
 
-    // squared correlated flux
-    final double fcorrelsq = this.nbPhotonInI * visib / this.nbTel;
-
-    return fcorrelsq;
+    return fcorrel;
   }
 
   /**
@@ -556,6 +621,7 @@ public final class NoiseService implements VisNoiseService {
    * @param visAmp visibility amplitude
    * @return square visiblity error or NaN if the error can not be computed
    */
+  @Override
   public double computeVis2Error(final double visAmp) {
     // fast return NaN if invalid configuration :
     if (this.invalidParameters) {
@@ -566,58 +632,131 @@ public final class NoiseService implements VisNoiseService {
   }
 
   /**
+   * Prepare numeric constants for square visiblity error
+   * 
+   * Note: this method is statefull and NOT thread safe
+   */
+  private void prepareVis2Error() {
+
+    if (usePhotometry) {
+      // variance of the photometric flux in photometric channel:
+      final double varFluxPhot = nbPhotonInP + nbPixPhoto * Math.pow(ron, 2d);
+
+      // photometric error contribution on the square visiblity:
+      this.errV2Phot = 2d * varFluxPhot / Math.pow(nbPhotonInP, 2d);
+
+      if (logger.isDebugEnabled()) {
+        logger.debug("varFluxPhot                   : {}", varFluxPhot);
+        logger.debug("errV2Phot                     : {}", errV2Phot);
+      }
+    } else {
+      this.errV2Phot = 0d;
+    }
+
+    // squared correlated flux (include instrumental visibility loss) for vis2 = 1.0:
+    this.sqCorFluxCoef = Math.pow(nbPhotonInI * vinst / nbTel, 2d);
+
+    // variance of the squared correlated flux = sqCorFlux * coef + constant
+    this.varSqCorFluxCoef = 2d * nbPhotonInI + 4d + 2d * nbPixInterf * Math.pow(ron, 2d);
+
+    this.varSqCorFluxConst = nbPhotonInI * (1d + nbPhotonInI)
+            + nbPixInterf * (nbPixInterf + 3d) * Math.pow(ron, 4d)
+            + 2d * nbPixInterf * Math.pow(ron, 2d) * nbPhotonInI;
+
+    if (logger.isDebugEnabled()) {
+      logger.debug("sqCorFluxCoef                 : {}", sqCorFluxCoef);
+      logger.debug("varSqCorFluxCoef              : {}", varSqCorFluxCoef);
+      logger.debug("varSqCorFluxConst             : {}", varSqCorFluxConst);
+
+      logger.debug("computeVis2Error(1.0)         : {}", computeVis2Error(1d, false));
+      logger.debug("computeVis2Error(0.5)         : {}", computeVis2Error(0.5d, false));
+      logger.debug("computeVis2Error(0.1)         : {}", computeVis2Error(0.1d, false));
+      logger.debug("computeVis2Error(0.05)        : {}", computeVis2Error(0.05d, false));
+      logger.debug("computeVis2Error(0.01)        : {}", computeVis2Error(0.01d, false));
+      logger.debug("computeVis2Error(0.001)       : {}", computeVis2Error(0.001d, false));
+      logger.debug("computeVis2Error(0.0001)      : {}", computeVis2Error(0.0001d, false));
+      logger.debug("computeVis2Error(0.00001)     : {}", computeVis2Error(0.00001d, false));
+      logger.debug("computeVis2Error(0.000001)    : {}", computeVis2Error(0.000001d, false));
+    }
+  }
+
+  /**
    * Compute error on square visibility
    *
    * @param visAmp visibility amplitude
-   * @param useBias use instrumentalVisibilityBias
+   * @param useBias use instrumentalVisibilityBias and instrumentVis2CalibrationBias
    * @return square visiblity error
    */
   private double computeVis2Error(final double visAmp, final boolean useBias) {
 
-    // include instrumental visib
-    final double visib = visAmp * this.vinst;
+    final double vis2 = visAmp * visAmp;
 
-    // squared correlated flux
-    double fcorrelsq = Math.pow(this.nbPhotonInI * visib / this.nbTel, 2d);
+    // squared correlated flux (include instrumental visibility loss):
+    double sqCorFlux = sqCorFluxCoef * vis2;
+    /*    
+    double sqCorFlux = Math.pow(nbPhotonInI * vinst / nbTel, 2d) * vis2;
+     */
 
-    final double sfcorrelsq = 2d * Math.pow(this.nbPhotonInI, 3d) * Math.pow(visib / this.nbTel, 2d)
-            + 4d * Math.pow(this.nbPhotonInI * visib / this.nbTel, 2d) + Math.pow(this.nbPhotonInI, 2d) + this.nbPhotonInI
-            + Math.pow(this.nbPixInterf, 2d) * Math.pow(this.ron, 4d) + 3d * this.nbPixInterf * Math.pow(this.ron, 4d)
-            + 2d * this.nbPixInterf * this.nbPhotonInI * Math.pow(this.ron, 2d)
-            + 2d * this.nbPixInterf * Math.pow(this.ron * this.nbPhotonInI * visib / this.nbTel, 2d);
+    // variance of the squared correlated flux:
+    // variance = sqCorFlux * coef + constant
+    final double varSqCorFlux = sqCorFlux * varSqCorFluxCoef + varSqCorFluxConst;
 
-    // photometric flux
-    final double fphot = this.nbPhotonInP;
-    // noise on photometric flux
-    final double sfphot = Math.sqrt(this.nbPhotonInP + this.nbPixPhoto * Math.pow(this.ron, 2d));
+    /*
+    final double varSqCorFlux = sqCorFlux * (2d * nbPhotonInI + 4d + 2d * nbPixInterf * ron * ron)
+    + nbPhotonInI * (1d + nbPhotonInI)
+    + nbPixInterf * (nbPixInterf + 3d) * Math.pow(ron, 4d)
+    + 2d * nbPixInterf * ron * ron * nbPhotonInI;
+     */
 
-    // protect zero divide
-    fcorrelsq = Math.max(fcorrelsq, 1e-3d);
+    // protect zero divide: TODO: why 1e-3d ?
+    sqCorFlux = Math.max(sqCorFlux, 1e-20d);
 
-    // Uncertainty on square visibility
-    double svis2;
-    if (this.fracFluxInInterferometry >= 1.0) {
-      // no photometry...
-      svis2 = Math.pow(visib, 2d) * Math.sqrt(sfcorrelsq / Math.pow(fcorrelsq, 2d));
+    // Uncertainty on square visibility:
+    double errVis2;
+    if (usePhotometry) {
+      errVis2 = vis2 * Math.sqrt(varSqCorFlux / (sqCorFlux * sqCorFlux) + errV2Phot);
     } else {
-      svis2 = Math.pow(visib, 2d) * Math.sqrt(sfcorrelsq / Math.pow(fcorrelsq, 2d) + 2d * Math.pow(sfphot / fphot, 2d));
+      // no photometry...
+      errVis2 = vis2 * Math.sqrt(varSqCorFlux / (sqCorFlux * sqCorFlux));
     }
-    // repeat OBS measurements to reach totalObsTime minutes
-    svis2 /= Math.sqrt(this.totalObsTime * this.frameRate);
-
-    // correct for instrumental visibility :
-    svis2 /= Math.pow(this.vinst, 2d);
+    // repeat OBS measurements to reach totalObsTime minutes:
+    errVis2 *= totFrameCorrection;
 
     if (useBias) {
-      if (this.instrumentVis2CalibrationBias == 0d) {
-        // TODO: find correct coefficients for instruments AMBER, MIDI, VEGA and use instrumentVis2CalibrationBias in  estimation.
-//        return Math.max(svis2, Math.pow(this.instrumentalVisibilityBias, 2d));
-        return Math.max(svis2, this.instrumentalVisibilityBias);
+      if (useVis2CalibrationBias) {
+        // JBLB: bias estimation (first order for PIONIER):
+        return Math.max(errVis2, instrumentVis2CalibrationBias * vis2 + instrumentalVisibilityBias * instrumentalVisibilityBias);
       }
-      // JBLB: bias estimation (first order for PIONIER):
-      return Math.max(svis2, Math.pow(this.instrumentalVisibilityBias, 2d) + this.instrumentVis2CalibrationBias * Math.pow(visAmp, 2d));
+      // TODO: find correct coefficients for instruments AMBER, MIDI, VEGA and use instrumentVis2CalibrationBias in  estimation.
+//        return Math.max(svis2, Math.pow(instrumentalVisibilityBias, 2d));
+      return Math.max(errVis2, instrumentalVisibilityBias);
     }
-    return svis2;
+    return errVis2;
+  }
+
+  /**
+   * Prepare numeric constants for closure phase error
+   * 
+   * Note: this method is statefull and NOT thread safe
+   */
+  private void prepareT3PhiError() {
+
+    // photon noise on closure phase
+    this.t3photCoef = nbTel / nbPhotonInI;
+    this.t3photCoef2 = Math.pow(nbTel / nbPhotonInI, 2d);
+    this.t3photCoef3 = Math.pow(nbTel / nbPhotonInI, 3d);
+
+    // detector noise on closure phase
+    this.t3detConst = Math.pow(nbTel / nbPhotonInI, 6d) * (Math.pow(nbPixInterf, 3d) * Math.pow(ron, 6d) + 3 * Math.pow(nbPixInterf, 2d) * Math.pow(ron, 6d));
+    this.t3detCoef1 = Math.pow(nbTel / nbPhotonInI, 4d) * (3d * nbPixInterf * Math.pow(ron, 4d) + Math.pow(nbPixInterf, 2d) * Math.pow(ron, 4d));
+    this.t3detCoef2 = t3photCoef2 * nbPixInterf * Math.pow(ron, 2d);
+
+    if (logger.isDebugEnabled()) {
+      logger.debug("t3photCoef                    : {}", t3photCoef);
+      logger.debug("t3detConst                    : {}", t3detConst);
+      logger.debug("t3detCoef1                    : {}", t3detCoef1);
+      logger.debug("t3detCoef2                    : {}", t3detCoef2);
+    }
   }
 
   /**
@@ -635,44 +774,49 @@ public final class NoiseService implements VisNoiseService {
     }
 
     // include instrumental visib
-    final double v1 = visAmp12 * this.vinst;
-    final double v2 = visAmp23 * this.vinst;
-    final double v3 = visAmp31 * this.vinst;
+    final double v1 = visAmp12 * vinst;
+    final double v2 = visAmp23 * vinst;
+    final double v3 = visAmp31 * vinst;
 
     final double v123 = v1 * v2 * v3;
     final double v12 = v1 * v2;
     final double v13 = v1 * v3;
     final double v23 = v2 * v3;
 
+    final double sv1 = v1 * v1;
+    final double sv2 = v2 * v2;
+    final double sv3 = v3 * v3;
+
+    final double sv123 = v123 * v123;
+    final double sv12 = v12 * v12;
+    final double sv13 = v13 * v13;
+    final double sv23 = v23 * v23;
+
     // photon noise on closure phase
-    final double scpphot = (Math.pow(this.nbTel / this.nbPhotonInI, 3d) * (Math.pow(this.nbTel, 3d) - 2d * v123)
-            + Math.pow(this.nbTel / this.nbPhotonInI, 2d) * (Math.pow(this.nbTel, 2d) * (Math.pow(v1, 2d) + Math.pow(v2, 2d) + Math.pow(v3, 2d))
-            - (Math.pow(v1, 4d) + Math.pow(v2, 4d) + Math.pow(v3, 4d) + 2 * (Math.pow(v12, 2d) + Math.pow(v13, 2d) + Math.pow(v23, 2d))))
-            + (this.nbTel / this.nbPhotonInI) * (this.nbTel * (Math.pow(v12, 2d) + Math.pow(v13, 2d) + Math.pow(v23, 2d))
-            - 2 * v123 * (Math.pow(v1, 2d) + Math.pow(v2, 2d) + Math.pow(v3, 2d)))) / (2 * Math.pow(v123, 2d));
+    final double scpphot = (t3photCoef3 * (nbTel * nbTel * nbTel - 2d * v123)
+            + t3photCoef2 * (nbTel * nbTel * (sv1 + sv2 + sv3) - (sv1 * sv1 + sv2 * sv2 + sv3 * sv3 + 2 * (sv12 + sv13 + sv23)))
+            + t3photCoef * (nbTel * (sv12 + sv13 + sv23) - 2d * v123 * (sv1 + sv2 + sv3))) / (2d * sv123);
+    /*
+    final double scpphot = (Math.pow(nbTel / nbPhotonInI, 3d) * (nbTel * nbTel * nbTel - 2d * v123)
+    + Math.pow(nbTel / nbPhotonInI, 2d) * (nbTel * nbTel * (sv1 + sv2 + sv3) - (sv1 * sv1 + sv2 * sv2 + sv3 * sv3 + 2 * (sv12 + sv13 + sv23)))
+    + (nbTel / nbPhotonInI) * (nbTel * (sv12 + sv13 + sv23) - 2d * v123 * (sv1 + sv2 + sv3))) / (2d * sv123);
+     */
 
     // detector noise on closure phase
-    final double scpdet = (Math.pow(this.nbTel / this.nbPhotonInI, 6d) * (Math.pow(this.nbPixInterf, 3d) * Math.pow(this.ron, 6d) + 3 * Math.pow(this.nbPixInterf, 2d) * Math.pow(this.ron, 6d))
-            + Math.pow(this.nbTel / this.nbPhotonInI, 4d) * ((Math.pow(v1, 2d) + Math.pow(v2, 2d) + Math.pow(v3, 2d)) * (3 * this.nbPixInterf * Math.pow(this.ron, 4d) + Math.pow(this.nbPixInterf, 2d) * Math.pow(this.ron, 4d)))
-            + Math.pow(this.nbTel / this.nbPhotonInI, 2d) * (this.nbPixInterf * Math.pow(ron, 2d) * (Math.pow(v12, 2d) + Math.pow(v13, 2d) + Math.pow(v23, 2d)))) / (2 * Math.pow(v123, 2d));
+    final double scpdet = (t3detConst + t3detCoef1 * (sv1 + sv2 + sv3) + t3detCoef2 * (sv12 + sv13 + sv23)) / (2d * sv123);
+    /*
+    double scpdet = (Math.pow(nbTel / nbPhotonInI, 6d) * (Math.pow(nbPixInterf, 3d) * Math.pow(ron, 6d) + 3 * Math.pow(nbPixInterf, 2d) * Math.pow(ron, 6d))
+    + Math.pow(nbTel / nbPhotonInI, 4d) * (sv1 + sv2 + sv3) * (3d * nbPixInterf * Math.pow(ron, 4d) + Math.pow(nbPixInterf, 2d) * Math.pow(ron, 4d))
+    + Math.pow(nbTel / nbPhotonInI, 2d) * nbPixInterf * Math.pow(ron, 2d) * (sv12 + sv13 + sv23) ) / (2d * sv123);
+     */
 
-    // total noise on closure phase per frame
+    // total noise on closure phase per frame:
     double sclosph = Math.sqrt(scpphot + scpdet);
 
     // repeat OBS measurements to reach totalObsTime minutes
-    sclosph /= Math.sqrt(this.totalObsTime * this.frameRate);
+    sclosph *= totFrameCorrection;
 
     // t3PhiErr and t3AmpErr = t3Amp * t3PhiErr :
-    return Math.max(sclosph, Math.toRadians(this.instrumentalPhaseBias));
-  }
-
-  /**
-   * Get gaussian noise value given its error (= standard deviation)
-   * @param visErr complex visiblity error or NaN if the error can not be computed
-   * @return gaussian noise value
-   */
-  @Override
-  public double gaussianNoise(final double visErr) {
-    return visErr * random.nextGaussian();
+    return Math.max(sclosph, instrumentalPhaseBias);
   }
 }

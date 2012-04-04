@@ -24,6 +24,7 @@ import fr.jmmc.jmal.complex.MutableComplex;
 import fr.jmmc.jmal.model.ModelComputeContext;
 import fr.jmmc.jmal.model.ModelFunctionComputeContext;
 import fr.jmmc.jmal.model.ModelManager;
+import fr.jmmc.jmal.model.VisNoiseService;
 import fr.jmmc.jmal.model.targetmodel.Model;
 import fr.jmmc.jmcs.util.concurrent.ParallelJobExecutor;
 import fr.jmmc.oitools.OIFitsConstants;
@@ -42,6 +43,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.Future;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -127,6 +129,8 @@ public final class OIFitsCreatorService {
   private Complex[][] visComplex = null;
   /** internal complex visibility error [row][waveLength] */
   private Complex[][] visError = null;
+  /** random generator */
+  private final Random random = new Random();
 
   /**
    * Protected constructor
@@ -728,8 +732,8 @@ public final class OIFitsCreatorService {
             if (this.doNoise) {
               // add gaussian noise with sigma = visErrRe / visErrIm :
               visComplexNoisy[k][l] = new ImmutableComplex(
-                      visRe + this.noiseService.gaussianNoise(visErrRe),
-                      visIm + this.noiseService.gaussianNoise(visErrIm)); // immutable complex for safety
+                      visRe + VisNoiseService.gaussianNoise(this.random, visErrRe),
+                      visIm + VisNoiseService.gaussianNoise(this.random, visErrIm)); // immutable complex for safety
             } else {
               visComplexNoisy[k][l] = this.visComplex[k][l];
             }
@@ -828,7 +832,7 @@ public final class OIFitsCreatorService {
 
           if (this.doNoise) {
             // add gaussian noise with sigma = err :
-            vis2Data[k][l] += this.noiseService.gaussianNoise(v2Err);
+            vis2Data[k][l] += VisNoiseService.gaussianNoise(this.random, v2Err);
           }
 
           // mark this value as valid only if error is valid :
@@ -1048,7 +1052,7 @@ public final class OIFitsCreatorService {
 
             if (this.doNoise) {
               // use same random number for the 2 values (sigma = 1) :
-              rand = this.noiseService.gaussianNoise(1d);
+              rand = VisNoiseService.gaussianNoise(this.random, 1d);
 
               // add gaussian noise with sigma = errAmp :
               t3Amp[k][l] += rand * errAmp;
