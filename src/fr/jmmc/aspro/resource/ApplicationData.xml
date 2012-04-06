@@ -7,9 +7,9 @@
 
 <ApplicationData link="http://www.jmmc.fr/aspro2">
 
-  <program name="Aspro2" version="0.9.1 beta 3"/>
+  <program name="Aspro2" version="0.9.1 beta 4"/>
   
-  <compilation date="29/03/2011" compiler="JDK 1.5.0_16"/>
+  <compilation date="06/04/2011" compiler="JDK 1.5.0_16"/>
 
   <text>
     <![CDATA[ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations
@@ -151,6 +151,13 @@
 
   <releasenotes>
     <release version="0.9.1">
+      <prerelease version="0.9.1 beta 4"> 
+        <change type="FEATURE">Fixed CHARA configuration: PAVO (resolution), removed configuration CHARA Vega June 2011</change> 
+        <change type="FEATURE">Fixed VLTI configuration: FINITO: mag limit = 7, no FT for PIONIER</change> 
+        <change type="CHANGE">Fixed CHARA OIFits data: use all spectral channels (~ 400) until binning support</change> 
+        <change type="CHANGE">Fixed Noise modeling: FINITO GroupTrack mode do not allow longer dit</change> 
+        <change type="CHANGE">Added square visiblity (SQUARE) as model image mode</change> 
+      </prerelease>
       <prerelease version="0.9.1 beta 3"> 
         <change type="BUGFIX">Fixed RA / DEC parsing (Simbad resolver) with missing second token</change> 
         <change type="CHANGE">Internal changes (Logback API)</change> 
