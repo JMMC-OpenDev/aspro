@@ -477,7 +477,9 @@ public final class UVCoverageService {
     this.lambdaMax = AsproConstants.MICRO_METER * insMode.getWaveLengthMax();
     this.lambda = AsproConstants.MICRO_METER * insMode.getWaveLength();
 
-    this.nSpectralChannels = insMode.getEffectiveNumberOfChannels();
+    // TODO: handle properly spectral channels (rebinning):
+//    this.nSpectralChannels = insMode.getEffectiveNumberOfChannels();
+    this.nSpectralChannels = insMode.getSpectralChannels();
 
     if (logger.isDebugEnabled()) {
       logger.debug("lambdaMin: {}", this.lambdaMin);
@@ -535,14 +537,14 @@ public final class UVCoverageService {
 
       if (target != null) {
         // Create the OIFitsCreatorService / NoiseService :
-        
+
         // note: OIFitsCreatorService parameter dependencies:
         // observation {target, instrumentMode {lambdaMin, lambdaMax, nSpectralChannels}}
         // obsData {beams, baseLines, starData, sc (DateCalc)}
         // parameter: doDataNoise
         // results: computeObservableUV {HA, targetUVObservability} {obsData + observation{haMin/haMax, instrumentMode {lambdaMin, lambdaMax}}}
         // and warning container
-        
+
         final OIFitsCreatorService oiFitsCreator = new OIFitsCreatorService(this.observation, target,
                 this.beams, this.baseLines, this.lambdaMin, this.lambdaMax, this.nSpectralChannels, this.doDataNoise,
                 this.data.getHA(), targetUVObservability, this.starData.getPrecRA(), this.sc,

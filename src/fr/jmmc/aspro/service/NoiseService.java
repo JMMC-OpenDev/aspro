@@ -9,7 +9,6 @@ import fr.jmmc.aspro.model.oi.AtmosphereQuality;
 import fr.jmmc.aspro.model.oi.FocalInstrument;
 import fr.jmmc.aspro.model.oi.FocalInstrumentMode;
 import fr.jmmc.aspro.model.oi.FringeTracker;
-import fr.jmmc.aspro.model.oi.InterferometerDescription;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.SpectralBand;
 import fr.jmmc.aspro.model.oi.Station;
@@ -105,6 +104,8 @@ public final class NoiseService extends VisNoiseService {
   /* fringe tracker parameters */
   /** Fringe Tracker is Present */
   private boolean fringeTrackerPresent = false;
+  /** Fringe Tracking Mode i.e. not group tracking (FINITO) */
+  private boolean fringeTrackingMode = false;
   /** Fringe Tracker (multiplicative) Instrumental Visibility */
   private double fringeTrackerInstrumentalVisibility = 1d;
   /** Fringe Tracker Usage limit (mag) */
@@ -287,11 +288,13 @@ public final class NoiseService extends VisNoiseService {
     final TargetConfiguration targetConf = target.getConfiguration();
 
     if (targetConf != null && targetConf.getFringeTrackerMode() != null) {
-      final InterferometerDescription interferometer = observation.getInterferometerConfiguration().getInterferometerConfiguration().getInterferometer();
+      final FocalInstrument instrument = observation.getInstrumentConfiguration().getInstrumentConfiguration().getFocalInstrument();
 
-      final FringeTracker ft = interferometer.getFringeTracker();
+      final FringeTracker ft = instrument.getFringeTracker();
       if (ft != null) {
         this.fringeTrackerPresent = true;
+        // TODO: handle FT modes properly: GroupTrack is hard coded !
+        this.fringeTrackingMode = !"GroupTrack".equalsIgnoreCase(targetConf.getFringeTrackerMode());
         this.fringeTrackerInstrumentalVisibility = ft.getInstrumentVisibility();
         this.fringeTrackerLimit = ft.getMagLimit();
         this.fringeTrackerMaxIntTime = ft.getMaxIntegration();
@@ -304,6 +307,7 @@ public final class NoiseService extends VisNoiseService {
     }
     if (fringeTrackerPresent) {
       if (logger.isDebugEnabled()) {
+        logger.debug("fringeTrackingMode            : {}", fringeTrackingMode);
         logger.debug("fringeTrackerInstrumentalVisibility : {}", fringeTrackerInstrumentalVisibility);
         logger.debug("fringeTrackerLimit            : {}", fringeTrackerLimit);
         logger.debug("fringeTrackerMaxIntTime       : {}", fringeTrackerMaxIntTime);
@@ -377,12 +381,14 @@ public final class NoiseService extends VisNoiseService {
 
     final Band band = Band.findBand(lambda);
 
-    final double dlam;
+    // spectral bandwith per resolution element:
+    final double deltalambda;
     if (spectralResolution <= 1d) {
-      dlam = band.getBandWidth();
+      deltalambda = band.getBandWidth();
     } else {
-      dlam = lambda / spectralResolution;
+      deltalambda = lambda / spectralResolution;
     }
+    // deltalambda = (lambdaMax - lambdaMin) / nPixels[toute la largeur spectrale] 
 
     // strehl ratio of AO :
     final double sr = Band.strehl(adaptiveOpticsMag, lambda, telDiam, seeing, nbOfActuators);
@@ -390,19 +396,23 @@ public final class NoiseService extends VisNoiseService {
     if (logger.isDebugEnabled()) {
       logger.debug("band                          : {}", band);
       logger.debug("lambda                        : {}", lambda);
-      logger.debug("dlam                          : {}", dlam);
+      logger.debug("dlam                          : {}", deltalambda);
       logger.debug("strehl ratio                  : {}", sr);
     }
 
     // nb of photons m^-2 m^-1 :
     final double fzero = Math.pow(10d, band.getLogFluxZero()) / (H_PLANCK * C_LIGHT / (lambda * AsproConstants.MICRO_METER));
 
-    final double nbTotalPhotPerS = fzero * nbTel * Math.PI * Math.pow(telDiam / 2d, 2d)
-            * (dlam * AsproConstants.MICRO_METER) * transmission * sr
-            * Math.pow(10d, -0.4d * objectMag);
+    // nbTotalPhot for the all spectra:
+    final double nbTotalPhotSpectra = fzero * nbTel * Math.PI * Math.pow(telDiam / 2d, 2d)
+            * transmission * sr * Math.pow(10d, -0.4d * objectMag);
+    
+    // nbTotalPhot per resolution element:
+    final double nbTotalPhotPerS = nbTotalPhotSpectra * (deltalambda * AsproConstants.MICRO_METER);
 
     if (logger.isDebugEnabled()) {
       logger.debug("fzero                         : {}", fzero);
+      logger.debug("nbTotalPhotSpectra            : {}", nbTotalPhotSpectra);
       logger.debug("nbTotalPhotPerS               : {}", nbTotalPhotPerS);
     }
 
@@ -439,19 +449,26 @@ public final class NoiseService extends VisNoiseService {
 
     if (fringeTrackerPresent) {
       if ((fringeTrackerMag <= fringeTrackerLimit) && (nbFrameToSaturation > 1)) {
-        // FT is asked, can work, and is useful (need to integrate longer)
-        obsDit = Math.min(obsDit * nbFrameToSaturation, totalObsTime);
-        obsDit = Math.min(obsDit, fringeTrackerMaxIntTime);
-
         // correct instrumental visibility:
         this.vinst *= fringeTrackerInstrumentalVisibility;
 
         if (logger.isDebugEnabled()) {
-          logger.debug("dit (FT)                      : {}", obsDit);
           logger.debug("vinst (FT)                    : {}", vinst);
         }
 
-        addWarning("Observation can take advantage of FT. Adjusting DIT to: " + formatTime(obsDit));
+        if (fringeTrackingMode) {
+          // FT is asked, can work, and is useful (need to integrate longer)
+          obsDit = Math.min(obsDit * nbFrameToSaturation, totalObsTime);
+          obsDit = Math.min(obsDit, fringeTrackerMaxIntTime);
+
+          if (logger.isDebugEnabled()) {
+            logger.debug("dit (FT)                      : {}", obsDit);
+          }
+
+          addWarning("Observation can take advantage of FT. Adjusting DIT to: " + formatTime(obsDit));
+        } else {
+          addWarning("Observation can take advantage of FT (Group track).");
+        }
       } else {
         addWarning("Observation can not use FT (magnitude limit or saturation).");
       }
@@ -589,12 +606,13 @@ public final class NoiseService extends VisNoiseService {
    */
   private double computeVisError(final double visAmp) {
     // vis2 error without bias :
-    final double errV2 = computeVis2Error(visAmp, false);
+    final double errV2 = computeVis2ErrorNoBias(visAmp);
 
     // dvis = d(vis2) / (2 * vis) :
     final double visAmpErr = errV2 / (2d * visAmp);
 
     // convert instrumental phase bias as an error too. Use it as a limit:
+    // Note: bias are normally not one gaussian distribution (mean = 0) so should not be used to compute gaussian noise !!
     return Math.max(visAmpErr, visAmp * instrumentalPhaseBias);
   }
 
@@ -629,6 +647,21 @@ public final class NoiseService extends VisNoiseService {
     }
 
     return computeVis2Error(visAmp, true);
+  }
+
+  /**
+   * Compute error on square visibility without bias. It returns NaN if the error can not be computed
+   *
+   * @param visAmp visibility amplitude
+   * @return square visiblity error or NaN if the error can not be computed
+   */
+  public double computeVis2ErrorNoBias(final double visAmp) {
+    // fast return NaN if invalid configuration :
+    if (this.invalidParameters) {
+      return Double.NaN;
+    }
+
+    return computeVis2Error(visAmp, false);
   }
 
   /**
@@ -668,15 +701,15 @@ public final class NoiseService extends VisNoiseService {
       logger.debug("varSqCorFluxCoef              : {}", varSqCorFluxCoef);
       logger.debug("varSqCorFluxConst             : {}", varSqCorFluxConst);
 
-      logger.debug("computeVis2Error(1.0)         : {}", computeVis2Error(1d, false));
-      logger.debug("computeVis2Error(0.5)         : {}", computeVis2Error(0.5d, false));
-      logger.debug("computeVis2Error(0.1)         : {}", computeVis2Error(0.1d, false));
-      logger.debug("computeVis2Error(0.05)        : {}", computeVis2Error(0.05d, false));
-      logger.debug("computeVis2Error(0.01)        : {}", computeVis2Error(0.01d, false));
-      logger.debug("computeVis2Error(0.001)       : {}", computeVis2Error(0.001d, false));
-      logger.debug("computeVis2Error(0.0001)      : {}", computeVis2Error(0.0001d, false));
-      logger.debug("computeVis2Error(0.00001)     : {}", computeVis2Error(0.00001d, false));
-      logger.debug("computeVis2Error(0.000001)    : {}", computeVis2Error(0.000001d, false));
+      logger.debug("computeVis2Error(1.0)         : {}", computeVis2ErrorNoBias(1d));
+      logger.debug("computeVis2Error(0.5)         : {}", computeVis2ErrorNoBias(0.5d));
+      logger.debug("computeVis2Error(0.1)         : {}", computeVis2ErrorNoBias(0.1d));
+      logger.debug("computeVis2Error(0.05)        : {}", computeVis2ErrorNoBias(0.05d));
+      logger.debug("computeVis2Error(0.01)        : {}", computeVis2ErrorNoBias(0.01d));
+      logger.debug("computeVis2Error(0.001)       : {}", computeVis2ErrorNoBias(0.001d));
+      logger.debug("computeVis2Error(0.0001)      : {}", computeVis2ErrorNoBias(0.0001d));
+      logger.debug("computeVis2Error(0.00001)     : {}", computeVis2ErrorNoBias(0.00001d));
+      logger.debug("computeVis2Error(0.000001)    : {}", computeVis2ErrorNoBias(0.000001d));
     }
   }
 
@@ -723,6 +756,7 @@ public final class NoiseService extends VisNoiseService {
     errVis2 *= totFrameCorrection;
 
     if (useBias) {
+      // Note: bias are normally not one gaussian distribution (mean = 0) so should not be used to compute gaussian noise !!
       if (useVis2CalibrationBias) {
         // JBLB: bias estimation (first order for PIONIER):
         return Math.max(errVis2, instrumentVis2CalibrationBias * vis2 + instrumentalVisibilityBias * instrumentalVisibilityBias);
@@ -817,6 +851,7 @@ public final class NoiseService extends VisNoiseService {
     sclosph *= totFrameCorrection;
 
     // t3PhiErr and t3AmpErr = t3Amp * t3PhiErr :
+    // Note: bias are normally not one gaussian distribution (mean = 0) so should not be used to compute gaussian noise !!
     return Math.max(sclosph, instrumentalPhaseBias);
   }
 }

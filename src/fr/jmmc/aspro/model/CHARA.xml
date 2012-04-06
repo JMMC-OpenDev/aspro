@@ -488,7 +488,7 @@
       <detectorSaturation>32700</detectorSaturation>
       <instrumentVisibility>0.9</instrumentVisibility>
       <instrumentVisibilityBias>2</instrumentVisibilityBias>
-      <instrumentPhaseBias>0</instrumentPhaseBias>
+      <instrumentPhaseBias>1</instrumentPhaseBias>
       <nbPixInterferometry>2</nbPixInterferometry>
       <nbPixPhotometry>0</nbPixPhotometry>
       <fracFluxInInterferometry>1</fracFluxInInterferometry>
@@ -536,15 +536,14 @@
       <detectorSaturation>32700</detectorSaturation>
       <instrumentVisibility>0.9</instrumentVisibility>
       <instrumentVisibilityBias>2</instrumentVisibilityBias>
-      <instrumentPhaseBias>0</instrumentPhaseBias>
+      <instrumentPhaseBias>1</instrumentPhaseBias>
       <nbPixInterferometry>2</nbPixInterferometry>
       <nbPixPhotometry>0</nbPixPhotometry>
       <fracFluxInInterferometry>1</fracFluxInInterferometry>
 
       <mode>
         <name>R</name>
-        <resolution>5.9</resolution>
-        <numberChannels>19</numberChannels>
+        <resolution>40</resolution>
         <waveLengthMin>0.63</waveLengthMin>
         <waveLengthMax>0.95</waveLengthMax>
       </mode>
@@ -560,7 +559,7 @@
 
       <!-- noise parameters -->
       <transmission>0.05</transmission>
-      <dit>0.01</dit>
+      <dit>0.015</dit>
       <ron>10</ron>
       <detectorSaturation>50000</detectorSaturation>
       <instrumentVisibility>0.9</instrumentVisibility>
@@ -902,15 +901,14 @@ Configuration d’enregistrement
       <detectorSaturation>32700</detectorSaturation>
       <instrumentVisibility>0.9</instrumentVisibility>
       <instrumentVisibilityBias>2</instrumentVisibilityBias>
-      <instrumentPhaseBias>0</instrumentPhaseBias>
+      <instrumentPhaseBias>1</instrumentPhaseBias>
       <nbPixInterferometry>2</nbPixInterferometry>
       <nbPixPhotometry>0</nbPixPhotometry>
       <fracFluxInInterferometry>1</fracFluxInInterferometry>
 
       <mode>
         <name>R</name>
-        <resolution>5.9</resolution>
-        <numberChannels>19</numberChannels>
+        <resolution>40</resolution>
         <waveLengthMin>0.63</waveLengthMin>
         <waveLengthMax>0.95</waveLengthMax>
       </mode>
@@ -926,7 +924,7 @@ Configuration d’enregistrement
 
       <!-- noise parameters -->
       <transmission>0.05</transmission>
-      <dit>0.01</dit>
+      <dit>0.015</dit>
       <ron>10</ron>
       <detectorSaturation>50000</detectorSaturation>
       <instrumentVisibility>0.9</instrumentVisibility>
@@ -1196,7 +1194,7 @@ Configuration d’enregistrement
 
       <!-- noise parameters -->
       <transmission>0.05</transmission>
-      <dit>0.01</dit>
+      <dit>0.015</dit>
       <ron>10</ron>
       <detectorSaturation>50000</detectorSaturation>
       <instrumentVisibility>0.9</instrumentVisibility>
@@ -2211,53 +2209,6 @@ Configuration d’enregistrement
         <channels>V2 V1 V3 V4</channels>
       </configuration>
     </instrument>
-  </configuration>
-
-
-  <configuration>
-    <!-- D.M. 13/05/2011 -->
-    <version>VEGA June 2011</version>
-    <interferometer>CHARA</interferometer>
-
-    <instrument>
-      <focalInstrument>VEGA_2T</focalInstrument>
-      <configuration>
-        <stations>S1 S2</stations>
-        <channels>V2 V1</channels>
-        <pops>PoP4 PoP5</pops>
-      </configuration>
-      <configuration>
-        <stations>E2 E1</stations>
-        <channels>V2 V1</channels>
-        <pops>PoP2 PoP1</pops>
-      </configuration>
-      <configuration>
-        <stations>W1 W2</stations>
-        <channels>V4 V3</channels>
-        <pops>PoP1 PoP5</pops>
-      </configuration>
-    </instrument>
-
-    <instrument>
-      <focalInstrument>VEGA_3T</focalInstrument>
-      <configuration>
-        <stations>E2 E1 W2</stations>
-        <channels>V2 V1 V3</channels>
-        <pops>PoP2 PoP1 PoP5</pops>
-      </configuration>
-      <configuration>
-        <stations>W2 W1 E1</stations>
-        <channels>V2 V1 V3</channels>
-        <pops>PoP5 PoP1 PoP1</pops>
-      </configuration>
-      <configuration>
-        <stations>W2 W1 E2</stations>
-        <channels>V2 V1 V3</channels>
-        <pops>PoP5 PoP1 PoP2</pops>
-      </configuration>
-    </instrument>
-
-    <!-- VEGA_4T not available -->
   </configuration>
 
 </a:interferometerSetting>

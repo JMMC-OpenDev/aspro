@@ -1245,10 +1245,10 @@
         </xsd:annotation>
       </xsd:element>
 
-      <xsd:element name="fringeTracker" type="FringeTracker" minOccurs="0">
+      <xsd:element name="fringeTracker" type="FringeTracker" minOccurs="0" maxOccurs="unbounded">
         <xsd:annotation>
           <xsd:documentation>
-              The interferometer has a fringe tracker system (optional)
+              The interferometer can have (optional) fringe tracker systems including fringe trackers associated to one specific instrument
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
@@ -1686,6 +1686,28 @@
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
+      
+      <xsd:element name="fringeTracker" type="xsd:IDREF" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>
+              The fringe tracker associated with this instrument (optional)
+          </xsd:documentation>
+          <xsd:appinfo>
+            <jaxb:property>
+              <jaxb:baseType name="FringeTracker" />
+            </jaxb:property>
+          </xsd:appinfo>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="fringeTrackerRequired" type="xsd:boolean" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>
+              This flag indicates if the fringe tracker is mandatory to perform observations using this instrument (optional)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+        
+
 
       <!-- noise modelling parameters -->
 
@@ -1852,7 +1874,7 @@
     </xsd:annotation>
     <xsd:sequence>
 
-      <xsd:element name="name" type="xsd:string">
+      <xsd:element name="name" type="xsd:ID">
         <xsd:annotation>
           <xsd:documentation>
               The name of this fringe tracker system (FINITO for VLTI)

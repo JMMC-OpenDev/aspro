@@ -7,6 +7,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlID;
+import javax.xml.bind.annotation.XmlIDREF;
 import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
@@ -32,6 +33,8 @@ import fr.jmmc.aspro.model.OIBase;
  *         &lt;element name="description" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *         &lt;element name="numberChannels" type="{http://www.w3.org/2001/XMLSchema}int"/>
  *         &lt;element name="defaultSamplingTime" type="{http://www.w3.org/2001/XMLSchema}int"/>
+ *         &lt;element name="fringeTracker" type="{http://www.w3.org/2001/XMLSchema}IDREF" minOccurs="0"/>
+ *         &lt;element name="fringeTrackerRequired" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
  *         &lt;element name="transmission" type="{http://www.w3.org/2001/XMLSchema}double"/>
  *         &lt;element name="dit" type="{http://www.w3.org/2001/XMLSchema}double"/>
  *         &lt;element name="ron" type="{http://www.w3.org/2001/XMLSchema}double"/>
@@ -58,6 +61,8 @@ import fr.jmmc.aspro.model.OIBase;
     "description",
     "numberChannels",
     "defaultSamplingTime",
+    "fringeTracker",
+    "fringeTrackerRequired",
     "transmission",
     "dit",
     "ron",
@@ -84,6 +89,11 @@ public class FocalInstrument
     protected String description;
     protected int numberChannels;
     protected int defaultSamplingTime;
+    @XmlElement(type = Object.class)
+    @XmlIDREF
+    @XmlSchemaType(name = "IDREF")
+    protected FringeTracker fringeTracker;
+    protected Boolean fringeTrackerRequired;
     protected double transmission;
     protected double dit;
     protected double ron;
@@ -176,6 +186,54 @@ public class FocalInstrument
      */
     public void setDefaultSamplingTime(int value) {
         this.defaultSamplingTime = value;
+    }
+
+    /**
+     * Gets the value of the fringeTracker property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Object }
+     *     
+     */
+    public FringeTracker getFringeTracker() {
+        return fringeTracker;
+    }
+
+    /**
+     * Sets the value of the fringeTracker property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Object }
+     *     
+     */
+    public void setFringeTracker(FringeTracker value) {
+        this.fringeTracker = value;
+    }
+
+    /**
+     * Gets the value of the fringeTrackerRequired property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Boolean }
+     *     
+     */
+    public Boolean isFringeTrackerRequired() {
+        return fringeTrackerRequired;
+    }
+
+    /**
+     * Sets the value of the fringeTrackerRequired property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Boolean }
+     *     
+     */
+    public void setFringeTrackerRequired(Boolean value) {
+        this.fringeTrackerRequired = value;
     }
 
     /**

@@ -38,7 +38,7 @@ import fr.jmmc.aspro.model.OIBase;
  *         &lt;element name="delayLine" type="{http://www.jmmc.fr/aspro-oi/0.1}DelayLine" maxOccurs="unbounded"/>
  *         &lt;element name="switchyard" type="{http://www.jmmc.fr/aspro-oi/0.1}SwitchYard" minOccurs="0"/>
  *         &lt;element name="pop" type="{http://www.jmmc.fr/aspro-oi/0.1}Pop" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element name="fringeTracker" type="{http://www.jmmc.fr/aspro-oi/0.1}FringeTracker" minOccurs="0"/>
+ *         &lt;element name="fringeTracker" type="{http://www.jmmc.fr/aspro-oi/0.1}FringeTracker" maxOccurs="unbounded" minOccurs="0"/>
  *         &lt;element name="focalInstrument" type="{http://www.jmmc.fr/aspro-oi/0.1}FocalInstrument" maxOccurs="unbounded"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
@@ -60,7 +60,7 @@ import fr.jmmc.aspro.model.OIBase;
     "delayLines",
     "switchyard",
     "pops",
-    "fringeTracker",
+    "fringeTrackers",
     "focalInstruments"
 })
 public class InterferometerDescription
@@ -88,7 +88,8 @@ public class InterferometerDescription
     protected SwitchYard switchyard;
     @XmlElement(name = "pop")
     protected List<Pop> pops;
-    protected FringeTracker fringeTracker;
+    @XmlElement(name = "fringeTracker")
+    protected List<FringeTracker> fringeTrackers;
     @XmlElement(name = "focalInstrument", required = true)
     protected List<FocalInstrument> focalInstruments;
 
@@ -358,27 +359,32 @@ public class InterferometerDescription
     }
 
     /**
-     * Gets the value of the fringeTracker property.
+     * Gets the value of the fringeTrackers property.
      * 
-     * @return
-     *     possible object is
-     *     {@link FringeTracker }
-     *     
-     */
-    public FringeTracker getFringeTracker() {
-        return fringeTracker;
-    }
-
-    /**
-     * Sets the value of the fringeTracker property.
+     * <p>
+     * This accessor method returns a reference to the live list,
+     * not a snapshot. Therefore any modification you make to the
+     * returned list will be present inside the JAXB object.
+     * This is why there is not a <CODE>set</CODE> method for the fringeTrackers property.
      * 
-     * @param value
-     *     allowed object is
-     *     {@link FringeTracker }
-     *     
+     * <p>
+     * For example, to add a new item, do as follows:
+     * <pre>
+     *    getFringeTrackers().add(newItem);
+     * </pre>
+     * 
+     * 
+     * <p>
+     * Objects of the following type(s) are allowed in the list
+     * {@link FringeTracker }
+     * 
+     * 
      */
-    public void setFringeTracker(FringeTracker value) {
-        this.fringeTracker = value;
+    public List<FringeTracker> getFringeTrackers() {
+        if (fringeTrackers == null) {
+            fringeTrackers = new ArrayList<FringeTracker>();
+        }
+        return this.fringeTrackers;
     }
 
     /**

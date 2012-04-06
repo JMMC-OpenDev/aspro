@@ -8601,7 +8601,12 @@
       <mode>FringeTrack</mode>
 
       <instrumentVisibility>0.9</instrumentVisibility>
-      <magLimit>12</magLimit>
+      <!-- 
+        FINITO magnitude limit is: 
+        The limiting correlated magnitude for FINITO on the ATs is H = 5 and the minimum visibility in the H band is 15%. 
+        The limiting correlated magnitude for FINITO on the UTs is H=7 with a minimum visiblity of 10%.         
+      -->
+      <magLimit>7</magLimit>
       <maxIntegration>10</maxIntegration>
     </fringeTracker>
 
@@ -8611,6 +8616,8 @@
       <description></description>
       <numberChannels>3</numberChannels>
       <defaultSamplingTime>60</defaultSamplingTime>
+      <fringeTracker>FINITO</fringeTracker>
+      <fringeTrackerRequired>false</fringeTrackerRequired>
 
       <!-- noise parameters -->
       <transmission>0.01</transmission>
@@ -8739,6 +8746,8 @@
       <description></description>
       <numberChannels>2</numberChannels>
       <defaultSamplingTime>60</defaultSamplingTime>
+      <fringeTracker>FINITO</fringeTracker>
+      <fringeTrackerRequired>false</fringeTrackerRequired>
 
       <!-- noise parameters -->
       <transmission>0.02</transmission>
@@ -8755,28 +8764,24 @@
       <mode>
         <name>HIGH_SENS+PRISM</name>
         <resolution>30</resolution>
-        <numberChannels>10</numberChannels>
         <waveLengthMin>8</waveLengthMin>
         <waveLengthMax>13</waveLengthMax>
       </mode>
       <mode>
         <name>HIGH_SENS+GRISM</name>
         <resolution>230</resolution>
-        <numberChannels>40</numberChannels>
         <waveLengthMin>8</waveLengthMin>
         <waveLengthMax>13</waveLengthMax>
       </mode>
       <mode>
         <name>SCI_PHOT+PRISM</name>
         <resolution>30</resolution>
-        <numberChannels>10</numberChannels>
         <waveLengthMin>8</waveLengthMin>
         <waveLengthMax>13</waveLengthMax>
       </mode>
       <mode>
         <name>SCI_PHOT+GRISM</name>
         <resolution>230</resolution>
-        <numberChannels>40</numberChannels>
         <waveLengthMin>8</waveLengthMin>
         <waveLengthMax>13</waveLengthMax>
       </mode>
@@ -8787,6 +8792,7 @@
       <description>PIONIER instrument</description>
       <numberChannels>4</numberChannels>
       <defaultSamplingTime>30</defaultSamplingTime>
+      <!-- no fringe tracker supported -->
 
       <!-- noise parameters -->
       <transmission>0.01</transmission>
@@ -8809,7 +8815,6 @@
         -->
         <name>LARGE-H</name>
         <resolution>40</resolution>
-        <numberChannels>7</numberChannels>
         <waveLengthMin>1.54</waveLengthMin>
         <waveLengthMax>1.82</waveLengthMax>
       </mode>
@@ -8821,7 +8826,6 @@
         -->
         <name>SMALL-H</name>
         <resolution>18</resolution>
-        <numberChannels>3</numberChannels>
         <waveLengthMin>1.545</waveLengthMin>
         <waveLengthMax>1.815</waveLengthMax>
       </mode>
@@ -8833,7 +8837,6 @@
         -->
         <name>BROAD-H</name>
         <resolution>6</resolution>
-        <numberChannels>1</numberChannels>
         <waveLengthMin>1.555</waveLengthMin>
         <waveLengthMax>1.805</waveLengthMax>
       </mode>

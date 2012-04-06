@@ -197,7 +197,8 @@ public class FocalInstrumentMode
   }
 
   /**
-   * Return the number of channels :
+   * Return the number of channels:
+   * @deprecated TODO KILL ASAP
    * numberChannels if defined else computed from spectral resolution
    * @return number of channels
    */
@@ -205,15 +206,22 @@ public class FocalInstrumentMode
     if (getNumberChannels() != null) {
       return getNumberChannels().intValue();
     }
-    return computeNumberOfChannels();
+    return getSpectralChannels();
   }
+  
+  /** spectral channels (derived from resolution)(read-only) */
+  @javax.xml.bind.annotation.XmlTransient
+  private int spectralChannels = -1;
 
   /**
-   * Compute the number of channels from the spectral resolution
-   * @return number of channels
+   * Return the number of spectral channels derived from resolution and bandwidth
+   * @return number of spectral channels
    */
-  public final int computeNumberOfChannels() {
-    return Math.max(1, (int) Math.round(getResolution() * (this.waveLengthMax - this.waveLengthMin) / getWaveLength()));
+  public final int getSpectralChannels() {
+    if (this.spectralChannels == -1) {
+      this.spectralChannels = Math.max(1, (int) Math.round(getResolution() * (this.waveLengthMax - this.waveLengthMin) / getWaveLength()));
+    }
+    return this.spectralChannels;
   }
 
   /**

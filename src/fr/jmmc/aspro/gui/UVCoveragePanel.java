@@ -807,9 +807,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       // adjust uv max range to [0.5 * minBaseLine; 2 * maxBaseLine] and 
       // set value to maxBaseLine + 5% (margin):
       this.uvMaxAdapter.reset(0.5 * minBaseLine, 2.0d * maxBaseLine, 1.05d * maxBaseLine);
-
-      // refresh the fringe tracker modes that depends on the interferometer :
-      this.updateComboFTModes(observation);
     }
   }
 
@@ -837,6 +834,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       if (logger.isTraceEnabled()) {
         logger.trace("jComboBoxInstrumentMode updated: {}", this.jComboBoxInstrumentMode.getSelectedItem());
       }
+      
+      // refresh the fringe tracker modes that depends on the interferometer :
+      this.updateComboFTModes(observation);
     }
   }
 
@@ -877,7 +877,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     final Object oldValue = this.jComboBoxFTMode.getSelectedItem();
 
     final Vector<String> modes = ConfigurationManager.getInstance().getFringeTrackerModes(
-            observation.getInterferometerConfiguration().getName());
+            observation.getInterferometerConfiguration().getName(),
+            observation.getInstrumentConfiguration().getName());
 
     // modes can be empty :
     this.jComboBoxFTMode.setModel(new DefaultComboBoxModel(modes));
@@ -889,7 +890,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     if (logger.isTraceEnabled()) {
       logger.trace("jComboBoxFTMode updated: {}", this.jComboBoxFTMode.getSelectedItem());
     }
-
+    
     final boolean visible = !modes.isEmpty();
     this.jComboBoxFTMode.setVisible(visible);
     this.jLabelFTMode.setVisible(visible);

@@ -1,7 +1,6 @@
 
 package fr.jmmc.aspro.model.oi;
 
-import fr.jmmc.aspro.service.UserModelData;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -190,7 +189,7 @@ public class UserModel
    * Return the Cached model data corresponding to the file reference (read only)
    * @return Cached model data corresponding to the file reference (read only)
    */
-  public UserModelData getModelData() {
+  public fr.jmmc.aspro.service.UserModelData getModelData() {
     return modelData;
   }
 
@@ -198,11 +197,9 @@ public class UserModel
    * Define the Cached model data corresponding to the file reference (read only)
    * @param modelData Cached model data corresponding to the file reference (read only)
    */
-  public void setModelData(UserModelData modelData) {
+  public void setModelData(fr.jmmc.aspro.service.UserModelData modelData) {
     this.modelData = modelData;
   }
-
-  
   
   /**
    * Return a shallow "copy" of this instance
@@ -218,4 +215,5 @@ public class UserModel
   }
   
 //--simple--preserve
+
 }

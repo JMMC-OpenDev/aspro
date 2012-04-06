@@ -132,6 +132,22 @@ public final class ConfigurationManager extends BaseOIManager {
     computeInterferometerLocation(id);
     computeInstrumentWaveLengthRange(id);
 
+    // check instrument modes (spectral channels):
+    // TODO: handle properly spectral channels (rebinning):
+    for (FocalInstrument instrument : id.getFocalInstruments()) {
+      for (FocalInstrumentMode insMode : instrument.getModes()) {
+        if (insMode.getNumberChannels() != null) {
+          if (insMode.getSpectralChannels() == insMode.getNumberChannels()) {
+            logger.warn("Instrument [{}] mode [{}] useless numberChannels: {}", new Object[]{
+                      instrument.getName(), insMode.getName(), insMode.getNumberChannels()});
+          } else {
+            logger.warn("Instrument [{}] mode [{}] channel configuration: {} / {}", new Object[]{
+                      instrument.getName(), insMode.getName(), insMode.getNumberChannels(), insMode.getSpectralChannels()});
+          }
+        }
+      }
+    }
+
     adjustStationHorizons(id.getStations());
 
     interferometerDescriptions.put(id.getName(), id);
@@ -478,25 +494,6 @@ public final class ConfigurationManager extends BaseOIManager {
   }
 
   /**
-   * Return the list of all fringe tracker modes available for the given configuration
-   * @param configurationName name of the interferometer configuration
-   * @return list of all fringe tracker modes
-   */
-  public Vector<String> getFringeTrackerModes(final String configurationName) {
-    final InterferometerConfiguration c = getInterferometerConfiguration(configurationName);
-    if (c != null) {
-      final FringeTracker ft = c.getInterferometer().getFringeTracker();
-      if (ft != null) {
-        final Vector<String> v = new Vector<String>(ft.getModes().size() + 1);
-        v.add(AsproConstants.NONE);
-        v.addAll(ft.getModes());
-        return v;
-      }
-    }
-    return EMPTY_VECTOR;
-  }
-
-  /**
    * Return the instrument configuration for the given interferometer configuration and instrument name
    * @param configurationName name of the interferometer configuration
    * @param instrumentName name of the instrument
@@ -601,6 +598,29 @@ public final class ConfigurationManager extends BaseOIManager {
       }
     }
     return null;
+  }
+
+  /**
+   * Return the list of all fringe tracker modes available for the given interferometer configuration and instrument name
+   * @param configurationName name of the interferometer configuration
+   * @param instrumentName name of the instrument
+   * @return list of all fringe tracker modes
+   */
+  public Vector<String> getFringeTrackerModes(final String configurationName, final String instrumentName) {
+    final FocalInstrument ins = getInterferometerInstrument(configurationName, instrumentName);
+    if (ins != null) {
+      final boolean ftOptional = (ins.isFringeTrackerRequired() == null || !ins.isFringeTrackerRequired().booleanValue());
+      final FringeTracker ft = ins.getFringeTracker();
+      if (ft != null) {
+        final Vector<String> v = new Vector<String>(ft.getModes().size() + ((ftOptional) ? 1 : 0));
+        if (ftOptional) {
+          v.add(AsproConstants.NONE);
+        }
+        v.addAll(ft.getModes());
+        return v;
+      }
+    }
+    return EMPTY_VECTOR;
   }
 
   /**
