@@ -202,7 +202,7 @@ public final class AsproGui extends App {
    * @see App#exit(int)
    */
   @Override
-  public void onFinish() {
+  public void cleanup() {
     // dispose Swing SettingPanel:
     getSettingPanel().dispose();
 
@@ -212,7 +212,7 @@ public final class AsproGui extends App {
     // stop the parallel job executor:
     ParallelJobExecutor.shutdown();
 
-    super.onFinish();
+    super.cleanup();
   }
 
   /**
