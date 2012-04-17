@@ -23,9 +23,9 @@
     <description>VLTI ...</description>
 
     <position>
-      <posX>1942042.8584924</posX>
-      <posY>-5455305.996911</posY>
-      <posZ>-2654521.4011759</posZ>
+      <posX>1942014.1545180853</posX>
+      <posY>-5455311.818167002</posY>
+      <posZ>-2654530.4375114734</posZ>
     </position>
 
     <!-- For now we have only one shared instance of UT because all UTs are considered equivalent -->
@@ -780,10 +780,10 @@
     <station>
       <name>A0</name>
       <telescope>AT</telescope>
-      <relativePosition>
-        <posX>-23.25759842248829</posX>
-        <posY>-14.64162224831863</posY>
-        <posZ>-50.73479263341687</posZ>
+      <relativePosition> 
+        <posX>-19.130844623</posX>
+        <posY>-14.641622</posY>
+        <posZ>-52.6265587846</posZ>
       </relativePosition>
       <horizon>
         <point>
@@ -3117,9 +3117,9 @@
       <name>D0</name>
       <telescope>AT</telescope>
       <relativePosition>
-        <posX>-18.91780970298599</posX>
-        <posY>15.62795669593466</posY>
-        <posZ>-41.2678529796693</posZ>
+        <posX>-14.7906575248</posX>
+        <posY>15.630369</posY>
+        <posZ>-43.14039467708937</posZ>
       </relativePosition>
       <horizon>
         <point>
@@ -4798,9 +4798,9 @@
       <name>H0</name>
       <telescope>AT</telescope>
       <relativePosition>
-        <posX>-10.23935462293035</posX>
-        <posY>76.15006331140505</posY>
-        <posZ>-22.33642201819436</posZ>
+        <posX>-6.11260100157000</posX>
+        <posY>76.150063</posY>
+        <posZ>-24.22818855733000</posZ>
       </relativePosition>
       <horizon>
         <point>
@@ -7290,9 +7290,9 @@
       <name>K0</name>
       <telescope>AT</telescope>
       <relativePosition>
-        <posX>-5.90281933106384</posX>
-        <posY>106.3969476287501</posY>
-        <posZ>-12.87657948485671</posZ>
+        <posX>-1.77606553165768</posX>
+        <posY>106.395714</posY>
+        <posZ>-14.77829725529000</posZ>
       </relativePosition>
       <horizon>
         <point>

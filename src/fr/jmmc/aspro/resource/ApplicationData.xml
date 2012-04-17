@@ -7,9 +7,9 @@
 
 <ApplicationData link="http://www.jmmc.fr/aspro2">
 
-  <program name="Aspro2" version="0.9.1 beta 4"/>
+  <program name="Aspro2" version="0.9.1 beta 5"/>
   
-  <compilation date="06/04/2011" compiler="JDK 1.5.0_16"/>
+  <compilation date="17/04/2011" compiler="JDK 1.5.0_16"/>
 
   <text>
     <![CDATA[ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations
@@ -151,6 +151,9 @@
 
   <releasenotes>
     <release version="0.9.1">
+      <prerelease version="0.9.1 beta 5"> 
+        <change type="CHANGE">Corrected VLTI station coordinates (A0, D0, H0, K0)</change> 
+      </prerelease>
       <prerelease version="0.9.1 beta 4"> 
         <change type="FEATURE">Fixed CHARA configuration: PAVO (resolution), removed configuration CHARA Vega June 2011</change> 
         <change type="FEATURE">Fixed VLTI configuration: FINITO: mag limit = 7, no FT for PIONIER</change> 

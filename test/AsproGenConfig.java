@@ -628,7 +628,7 @@ public final class AsproGenConfig {
   public static void main(final String[] args) {
     final String asproPath = "/home/bourgesl/dev/aspro1/etc/";
 
-    final INTERFEROMETER selected = INTERFEROMETER.CHARA;
+    final INTERFEROMETER selected = INTERFEROMETER.VLTI;
 
     switch (selected) {
       case VLTI:
@@ -664,33 +664,36 @@ public final class AsproGenConfig {
 
   private static void VLTIPosition() {
 
-    final double lonDeg = -(70d + 24d / 60d + 16.92d / 3600d);
-    logger.info("VLTI longitude (deg) : " + lonDeg);
-
-    final double latDeg = -(24d + 37d / 60d + 38.46d / 3600d);
-    logger.info("VLTI latitude (deg) : " + latDeg);
+    final StringBuilder sb = new StringBuilder(128);
+    
+    // ASPRO1: 17/04/2012:
+    final double lonDeg = -70.40498688D;
+    final double latDeg = -24.62743941D;
+    logger.info("VLTI longitude / latitude (deg) : " + lonDeg + " - "+ latDeg);
 
     final double alt = 2681d;
-    computeInterferometerPosition(lonDeg, latDeg, alt, new StringBuilder());
+    final double[] pos = computeInterferometerPosition(lonDeg, latDeg, alt, sb);
 
-    // 1942803.281897419, -5457847.407163382, -2648734.592484602
-/*
-    <posX>1942042.8584924</posX>
-    <posY>-5455305.996911</posY>
-    <posZ>-2654521.4011759</posZ>
-     */
     final Position3D position = new Position3D();
-    position.setPosX(1942042.8584924d);
-    position.setPosY(-5455305.996911d);
-    position.setPosZ(-2654521.4011759d);
+    position.setPosX(pos[0]);
+    position.setPosY(pos[1]);
+    position.setPosZ(pos[2]);
 
     final LonLatAlt coords = GeocentricCoords.getLonLatAlt(position);
 
     logger.info("VLTI position : " + coords.toString());
-// 1942042.8584924035, -5455305.996911049, -2654521.401175926
+  
+/*    
+10:55:19.679 [main] INFO  AsproGenConfig - VLTI longitude / latitude (deg) : -70.40498688 - -24.62743941
+10:55:19.685 [main] INFO  AsproGenConfig - position (x,y,z) : 1942014.1545180853, -5455311.818167002, -2654530.4375114734
+10:55:19.690 [main] INFO  AsproGenConfig - VLTI position : [-70:24:17,953, -24:37:38,782, 2681.0000000009313 m]
+*/
+    logger.info("Generated VLTI position:\n" + sb.toString());
   }
 
   private static void MROIposition() {
+
+    final StringBuilder sb = new StringBuilder(128);
 
     final double lonDeg = -(107d + 11d / 60d + 05.12d / 3600d);
     logger.info("MROI longitude (deg) : " + lonDeg);
@@ -699,7 +702,9 @@ public final class AsproGenConfig {
     logger.info("MROI latitude (deg) : " + latDeg);
 
     final double alt = 3200d;
-    computeInterferometerPosition(lonDeg, latDeg, alt, new StringBuilder());
+    computeInterferometerPosition(lonDeg, latDeg, alt, sb);
+    
+    logger.info("Generated MROI position:\n" + sb.toString());
   }
 
   /**
@@ -708,8 +713,9 @@ public final class AsproGenConfig {
    * @param lat latitude in degrees
    * @param alt altitude in meters
    * @param sb buffer
+   * @return positions (x,y,z)
    */
-  private static void computeInterferometerPosition(final double lon, final double lat, final double alt, final StringBuilder sb) {
+  private static double[] computeInterferometerPosition(final double lon, final double lat, final double alt, final StringBuilder sb) {
 
     final double theta = Math.toRadians(90d - lat);
     final double phi = Math.toRadians(lon);
@@ -727,6 +733,8 @@ public final class AsproGenConfig {
     sb.append("      <posY>").append(y).append("</posY>\n");
     sb.append("      <posZ>").append(z).append("</posZ>\n");
     sb.append("    </position>\n\n");
+    
+    return new double[]{x,y,z};
   }
 
   /**
