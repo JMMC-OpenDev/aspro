@@ -535,7 +535,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
   }//GEN-LAST:event_jListTargetsValueChanged
 
   private void jLabelStatusMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabelStatusMouseClicked
-    App.showLogGui(AsproConstants.ASPRO_WARNING_LOG);
+    App.showLogConsole(AsproConstants.ASPRO_WARNING_LOG);
   }//GEN-LAST:event_jLabelStatusMouseClicked
 
   /**
