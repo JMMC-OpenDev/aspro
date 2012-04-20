@@ -152,6 +152,8 @@
   <releasenotes>
     <release version="0.9.1">
       <prerelease version="0.9.1 beta 5"> 
+        <change type="CHANGE">Support VOTable 1.2 for incoming SAMP 'load.votable' messages (vizier)</change>
+        <change type="FEATURE">Added warning log: click on the warning icon</change> 
         <change type="CHANGE">Corrected VLTI station coordinates (A0, D0, H0, K0)</change> 
       </prerelease>
       <prerelease version="0.9.1 beta 4"> 
