@@ -12,6 +12,10 @@ import java.util.Vector;
  */
 public interface AsproConstants {
 
+  /** Warning Logger */
+    /** jmmc status log */
+    public final static String ASPRO_WARNING_LOG = "fr.jmmc.aspro.warning";
+  
   /* JMMC applications */
   /** SearchCal samp.name keyword */
   public final static String SEARCHCAL_SAMP_NAME = "SearchCal";

@@ -29,6 +29,7 @@ import fr.jmmc.jmcs.gui.util.SwingSettings;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
 import fr.jmmc.jmcs.gui.task.TaskSwingWorkerExecutor;
 import fr.jmmc.jmcs.util.concurrent.ParallelJobExecutor;
+import fr.jmmc.jmcs.util.logging.ApplicationLogSingleton;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Toolkit;
@@ -139,6 +140,9 @@ public final class AsproGui extends App {
 
     // Initialize the parallel job executor:
     ParallelJobExecutor.getInstance();
+    
+    // Initialize warning log:
+    ApplicationLogSingleton.getInstance().addLogMapper("Warning messages", AsproConstants.ASPRO_WARNING_LOG, "WARNINGLOG");
   }
 
   /**

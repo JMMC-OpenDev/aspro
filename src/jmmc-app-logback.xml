@@ -2,6 +2,12 @@
 
 <!-- application specific configuration -->
 <included>
+  
+  <appender name="WARNINGLOG" class="fr.jmmc.jmcs.util.logging.ByteArrayOutputStreamAppender">
+      <encoder>
+          <pattern>%d{HH:mm:ss.SSS} - %msg%n</pattern>
+      </encoder>
+  </appender>
 
   <!-- Jmal: target model -->
 <!--  
@@ -25,6 +31,11 @@
 
   <!-- Aspro -->
   <logger name="fr.jmmc.aspro" level="INFO"/>
+
+  <!-- Aspro warning -->
+  <logger name="fr.jmmc.aspro.warning" level="INFO" additivity="true">
+      <appender-ref ref="WARNINGLOG" />
+  </logger>
   
 <!--
   <logger name="fr.jmmc.aspro.gui" level="INFO"/>

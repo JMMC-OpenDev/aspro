@@ -2010,9 +2010,6 @@ public final class ObservabilityService {
    * @param msg message to add
    */
   private void addWarning(final String msg) {
-    if (logger.isInfoEnabled()) {
-      logger.info(msg);
-    }
     this.data.getWarningContainer().addWarningMessage(msg);
   }
 }
