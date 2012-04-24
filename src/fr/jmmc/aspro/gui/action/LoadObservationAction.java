@@ -8,15 +8,14 @@ import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.gui.component.StatusBar;
 import fr.jmmc.jmcs.gui.action.ActionRegistrar;
-import fr.jmmc.jmcs.util.FileUtils;
 import fr.jmmc.jmcs.util.MimeType;
 import fr.jmmc.jmcs.gui.action.RegisteredAction;
+import fr.jmmc.jmcs.gui.component.FileChooser;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import javax.swing.JFileChooser;
 
 /**
  * Open observation settings action
@@ -58,55 +57,47 @@ public final class LoadObservationAction extends RegisteredAction {
     // If the action was automatically triggered from App launch
     if (evt.getSource() == ActionRegistrar.getInstance()) {
       file = new File(evt.getActionCommand());
-    } else {
 
-      final JFileChooser fileChooser = new JFileChooser();
-      fileChooser.setFileFilter(mimeType.getFileFilter());
-      fileChooser.setCurrentDirectory(FilePreferences.getInstance().getDirectoryFile(mimeType));
-
-      fileChooser.setDialogTitle("Load observation settings");
-
-      final int returnVal = fileChooser.showOpenDialog(null);
-      if (returnVal == JFileChooser.APPROVE_OPTION) {
-        file = fileChooser.getSelectedFile();
-      } else {
+      if (!file.exists() || !file.isFile()) {
+        MessagePane.showErrorMessage("Could not load the file : " + file.getAbsolutePath());
         file = null;
       }
+
+    } else {
+
+      final File obsFile = om.getObservationFile();
+
+      final File currentDir;
+      final String defaultFileName;
+
+      if (obsFile != null) {
+        currentDir = obsFile.getParentFile();
+        defaultFileName = obsFile.getName();
+      } else {
+        currentDir = FilePreferences.getInstance().getDirectoryFile(mimeType);
+        defaultFileName = null;
+      }
+
+      file = FileChooser.showOpenFileChooser("Load observation settings", currentDir, mimeType, defaultFileName);
     }
 
     // If a file was defined (No cancel in the dialog)
     if (file != null) {
       FilePreferences.getInstance().setDirectory(mimeType, file.getParent());
 
-      boolean exist = file.exists();
+      try {
+        final String message = om.load(file);
 
-      // check if file exists :
-      if (!exist) {
-        if (FileUtils.getExtension(file) == null) {
-          // try using the same file name with extension :
-          file = mimeType.checkFileExtension(file);
-          // check again if that file exists :
-          exist = file.exists();
+        StatusBar.show("file loaded : " + file.getName());
+
+        if (message != null) {
+          MessagePane.showMessage(message);
         }
-      }
 
-      if (exist) {
-        try {
-          final String message = om.load(file);
-
-          StatusBar.show("file loaded : " + file.getName());
-
-          if (message != null) {
-            MessagePane.showMessage(message);
-          }
-
-        } catch (IOException ioe) {
-          MessagePane.showErrorMessage("Could not load the file : " + file.getAbsolutePath(), ioe);
-        } catch (IllegalArgumentException iae) {
-          MessagePane.showErrorMessage("Invalid observation file : " + file.getAbsolutePath(), iae);
-        }
-      } else {
-        MessagePane.showErrorMessage("Could not load the file : " + file.getAbsolutePath());
+      } catch (IOException ioe) {
+        MessagePane.showErrorMessage("Could not load the file : " + file.getAbsolutePath(), ioe);
+      } catch (IllegalArgumentException iae) {
+        MessagePane.showErrorMessage("Invalid observation file : " + file.getAbsolutePath(), iae);
       }
     }
   }

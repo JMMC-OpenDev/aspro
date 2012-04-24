@@ -13,6 +13,7 @@ import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.aspro.ob.ExportOBVLTI;
 import fr.jmmc.aspro.service.ObservabilityService;
 import fr.jmmc.jmcs.gui.component.DismissableMessagePane;
+import fr.jmmc.jmcs.gui.component.FileChooser;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.gui.component.StatusBar;
 import fr.jmmc.jmcs.util.MimeType;
@@ -23,7 +24,6 @@ import java.text.NumberFormat;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import javax.swing.JFileChooser;
 
 /**
  * This class implements the OB generation for VLTI instruments.
@@ -74,54 +74,20 @@ public final class ExportOBVLTIAction {
 
     final boolean exportAll = targets.size() > 1;
 
-    File file = null;
+    final File currentDir = FilePreferences.getInstance().getDirectoryFile(mimeType);
 
-    final JFileChooser fileChooser = new JFileChooser();
-    fileChooser.setCurrentDirectory(FilePreferences.getInstance().getDirectoryFile(mimeType));
+    File file;
 
     if (exportAll) {
-      // select one directory:
-      fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-
-      fileChooser.setDialogTitle("Export targets as Observing Blocks");
-
+      file = FileChooser.showDirectoryChooser("Export targets as Observing Blocks", currentDir);
     } else {
-      // select one file:
-      fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-      fileChooser.setFileFilter(mimeType.getFileFilter());
-
       final Target target = targets.get(0);
 
-      // default OB file name :
-      fileChooser.setSelectedFile(new File(fileChooser.getCurrentDirectory(), ExportOBVLTI.generateOBFileName(target)));
-
-      fileChooser.setDialogTitle("Export the target [" + target.getName() + "] as an Observing Block");
+      file = FileChooser.showSaveFileChooser("Export the target [" + target.getName() + "] as an Observing Block",
+              currentDir, mimeType, ExportOBVLTI.generateOBFileName(target));
     }
 
-    final int returnVal = fileChooser.showSaveDialog(null);
-
-    if (returnVal == JFileChooser.APPROVE_OPTION) {
-
-      if (exportAll) {
-        file = fileChooser.getSelectedFile();
-        if (!file.exists()) {
-          if (!file.mkdirs()) {
-            MessagePane.showErrorMessage("Could not create directory: " + file.getAbsolutePath());
-            file = null;
-          }
-        }
-      } else {
-        file = mimeType.checkFileExtension(fileChooser.getSelectedFile());
-
-        if (file.exists()) {
-          if (!MessagePane.showConfirmFileOverwrite(file.getName())) {
-            file = null;
-          }
-        }
-      }
-    } else {
-      file = null;
-    }
+    logger.warn("Selected file: {}", file);
 
     // If a file was defined (No cancel in the dialog)
     if (file != null) {

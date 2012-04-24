@@ -6,6 +6,7 @@ package fr.jmmc.aspro.gui.action;
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.FilePreferences;
 import fr.jmmc.aspro.model.ObservationManager;
+import fr.jmmc.jmcs.gui.component.FileChooser;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.gui.component.StatusBar;
 import fr.jmmc.jmcs.util.MimeType;
@@ -62,32 +63,19 @@ public final class ExportOIFitsAction extends WaitingTaskAction {
 
     if (oiFitsFile != null) {
 
-      File file = null;
-
-      final JFileChooser fileChooser = new JFileChooser();
-      fileChooser.setFileFilter(mimeType.getFileFilter());
+      final File currentDir;
+      final String defaultFileName;
 
       if (oiFitsFile.getAbsoluteFilePath() != null) {
-        fileChooser.setSelectedFile(new File(oiFitsFile.getAbsoluteFilePath()));
+        final File file = new File(oiFitsFile.getAbsoluteFilePath());
+        currentDir = file.getParentFile();
+        defaultFileName = file.getName();
       } else {
-        fileChooser.setCurrentDirectory(FilePreferences.getInstance().getDirectoryFile(mimeType));
-        fileChooser.setSelectedFile(new File(fileChooser.getCurrentDirectory(), getDefaultFileName(oiFitsFile)));
+        currentDir = FilePreferences.getInstance().getDirectoryFile(mimeType);
+        defaultFileName = null;
       }
 
-      fileChooser.setDialogTitle("Export the current target as an OIFits file");
-
-      final int returnVal = fileChooser.showSaveDialog(null);
-      if (returnVal == JFileChooser.APPROVE_OPTION) {
-        file = mimeType.checkFileExtension(fileChooser.getSelectedFile());
-
-        if (file.exists()) {
-          if (!MessagePane.showConfirmFileOverwrite(file.getName())) {
-            file = null;
-          }
-        }
-      } else {
-        file = null;
-      }
+      final File file = FileChooser.showSaveFileChooser("Export the current target as an OIFits file", currentDir, mimeType, defaultFileName);
 
       // If a file was defined (No cancel in the dialog)
       if (file != null) {

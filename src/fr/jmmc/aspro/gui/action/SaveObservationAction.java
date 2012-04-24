@@ -5,10 +5,12 @@ package fr.jmmc.aspro.gui.action;
 
 import fr.jmmc.aspro.FilePreferences;
 import fr.jmmc.aspro.model.ObservationManager;
+import fr.jmmc.aspro.ob.ExportOBVLTI;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.gui.component.StatusBar;
 import fr.jmmc.jmcs.util.MimeType;
 import fr.jmmc.jmcs.gui.action.RegisteredAction;
+import fr.jmmc.jmcs.gui.component.FileChooser;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
@@ -57,28 +59,20 @@ public final class SaveObservationAction extends RegisteredAction {
    */
   public boolean save() {
     final ObservationManager om = ObservationManager.getInstance();
+    final File obsFile = om.getObservationFile();
 
-    File file = om.getObservationFile();
-
-    final JFileChooser fileChooser = new JFileChooser();
-    fileChooser.setFileFilter(mimeType.getFileFilter());
-    fileChooser.setCurrentDirectory(FilePreferences.getInstance().getDirectoryFile(mimeType));
-    fileChooser.setSelectedFile(file);
-
-    fileChooser.setDialogTitle("Save the current observation settings");
-
-    final int returnVal = fileChooser.showSaveDialog(null);
-    if (returnVal == JFileChooser.APPROVE_OPTION) {
-      file = mimeType.checkFileExtension(fileChooser.getSelectedFile());
-
-      if (file.exists()) {
-        if (!MessagePane.showConfirmFileOverwrite(file.getName())) {
-          file = null;
-        }
-      }
+    final File currentDir;
+    final String defaultFileName;
+    
+    if (obsFile != null) {
+      currentDir = obsFile.getParentFile();
+      defaultFileName = obsFile.getName();
     } else {
-      file = null;
+      currentDir = FilePreferences.getInstance().getDirectoryFile(mimeType);
+      defaultFileName = null;
     }
+
+    final File file = FileChooser.showSaveFileChooser("Save the current observation settings", currentDir, mimeType, defaultFileName);
 
     boolean result = true;
 

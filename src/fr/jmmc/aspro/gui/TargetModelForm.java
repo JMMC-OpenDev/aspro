@@ -20,6 +20,7 @@ import fr.jmmc.jmal.model.gui.ModelParameterTableModel;
 import fr.jmmc.jmal.model.gui.ModelParameterTableModel.EditMode;
 import fr.jmmc.jmal.model.gui.ModelParameterTableModel.Mode;
 import fr.jmmc.jmal.model.targetmodel.Model;
+import fr.jmmc.jmcs.gui.component.FileChooser;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
 import fr.jmmc.jmcs.util.MimeType;
 import fr.nom.tam.fits.FitsException;
@@ -254,7 +255,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
           /* retrieve the node that was selected */
           final Object userObject = currentNode.getUserObject();
 
-            logger.debug("tree selection : {}", userObject);
+          logger.debug("tree selection : {}", userObject);
 
           if (userObject instanceof Target) {
             // Target :
@@ -408,9 +409,9 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
   public void actionPerformed(final ActionEvent e) {
     if (e.getSource() == this.jComboBoxModelType) {
       final String type = (String) this.jComboBoxModelType.getSelectedItem();
-        logger.debug("model type changed : {}", type);
+      logger.debug("model type changed : {}", type);
 
-        updateModelDescription(type);
+      updateModelDescription(type);
     } else if (e.getSource() == this.jRadioButtonXY) {
       if (logger.isDebugEnabled()) {
         logger.debug("edit mode X/Y: {}", this.jRadioButtonXY.isSelected());
@@ -933,12 +934,12 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         if (parentNode.getUserObject() instanceof Target) {
           final Target target = (Target) parentNode.getUserObject();
 
-            logger.debug("update model : {}", model);
+          logger.debug("update model : {}", model);
 
           // create a new model with defined names (model and parameters) replacing the selected model :
           final Model newModel = ModelManager.getInstance().replaceModel(type, model, target.getModels());
 
-            logger.debug("new merged model : {}", newModel);
+          logger.debug("new merged model : {}", newModel);
 
           // Remove and add model at the right place :
           int idx = target.getModels().indexOf(model);
@@ -988,7 +989,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         if (parentNode.getUserObject() instanceof Target) {
           final Target target = (Target) parentNode.getUserObject();
 
-            logger.debug("remove model : {}", model);
+          logger.debug("remove model : {}", model);
 
           // Remove model from target :
           int idx = target.getModels().indexOf(model);
@@ -1052,7 +1053,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         // create a new model with defined names (model and parameters) :
         final Model newModel = ModelManager.getInstance().newModel(type, target.getModels());
 
-          logger.debug("add model : {}", newModel);
+        logger.debug("add model : {}", newModel);
 
         // Add model to target :
         target.getModels().add(newModel);
@@ -1081,25 +1082,19 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
 
     final UserModel userModel = this.currentTarget.getOrCreateUserModel();
 
-    File file = null;
-
-    final JFileChooser fileChooser = new JFileChooser();
-    fileChooser.setFileFilter(mimeType.getFileFilter());
+    final File currentDir;
+    final String defaultFileName;
 
     if (userModel.getFile() != null) {
-      fileChooser.setSelectedFile(new File(userModel.getFile()));
+      final File file = new File(userModel.getFile());
+      currentDir = file.getParentFile();
+      defaultFileName = file.getName();
     } else {
-      fileChooser.setCurrentDirectory(FilePreferences.getInstance().getDirectoryFile(mimeType));
+      currentDir = FilePreferences.getInstance().getDirectoryFile(mimeType);
+      defaultFileName = null;
     }
 
-    fileChooser.setDialogTitle("Open a FITS image as user model");
-
-    final int returnVal = fileChooser.showOpenDialog(null);
-    if (returnVal == JFileChooser.APPROVE_OPTION) {
-      file = fileChooser.getSelectedFile();
-    } else {
-      file = null;
-    }
+    final File file = FileChooser.showOpenFileChooser("Open a FITS image as user model", currentDir, mimeType, defaultFileName);
 
     // If a file was defined (No cancel in the dialog)
     if (file != null) {

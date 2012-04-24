@@ -10,13 +10,13 @@ import fr.jmmc.aspro.gui.chart.PDFUtils;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.gui.component.StatusBar;
 import fr.jmmc.jmcs.gui.action.ActionRegistrar;
+import fr.jmmc.jmcs.gui.component.FileChooser;
 import fr.jmmc.jmcs.util.MimeType;
 import java.awt.Component;
 import java.io.File;
 import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import javax.swing.JFileChooser;
 import org.jfree.chart.JFreeChart;
 
 /**
@@ -93,32 +93,8 @@ public final class ExportPDFAction extends WaitingTaskAction {
   public void process(final PDFExportable exportable) {
     logger.debug("process");
 
-    File file = null;
-
-    final JFileChooser fileChooser = new JFileChooser();
-    fileChooser.setFileFilter(mimeType.getFileFilter());
-    fileChooser.setCurrentDirectory(FilePreferences.getInstance().getDirectoryFile(mimeType));
-
-    // default PDF file name :
-    final String fileName = exportable.getPDFDefaultFileName();
-    if (fileName != null) {
-      fileChooser.setSelectedFile(new File(fileChooser.getCurrentDirectory(), fileName));
-    }
-
-    fileChooser.setDialogTitle("Export the plot to PDF");
-
-    final int returnVal = fileChooser.showSaveDialog(null);
-    if (returnVal == JFileChooser.APPROVE_OPTION) {
-      file = mimeType.checkFileExtension(fileChooser.getSelectedFile());
-
-      if (file.exists()) {
-        if (!MessagePane.showConfirmFileOverwrite(file.getName())) {
-          file = null;
-        }
-      }
-    } else {
-      file = null;
-    }
+    final File file = FileChooser.showSaveFileChooser("Export the plot to PDF",
+            FilePreferences.getInstance().getDirectoryFile(mimeType), mimeType, exportable.getPDFDefaultFileName());
 
     // If a file was defined (No cancel in the dialog)
     if (file != null) {
