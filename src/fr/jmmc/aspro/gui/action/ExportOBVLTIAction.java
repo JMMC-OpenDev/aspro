@@ -3,7 +3,6 @@
  ******************************************************************************/
 package fr.jmmc.aspro.gui.action;
 
-import fr.jmmc.aspro.FilePreferences;
 import fr.jmmc.aspro.Preferences;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
@@ -74,17 +73,14 @@ public final class ExportOBVLTIAction {
 
     final boolean exportAll = targets.size() > 1;
 
-    final File currentDir = FilePreferences.getInstance().getDirectoryFile(mimeType);
-
     File file;
 
     if (exportAll) {
-      file = FileChooser.showDirectoryChooser("Export targets as Observing Blocks", currentDir);
+      file = FileChooser.showDirectoryChooser("Export targets as Observing Blocks", null, mimeType);
     } else {
       final Target target = targets.get(0);
 
-      file = FileChooser.showSaveFileChooser("Export the target [" + target.getName() + "] as an Observing Block",
-              currentDir, mimeType, ExportOBVLTI.generateOBFileName(target));
+      file = FileChooser.showSaveFileChooser("Export the target [" + target.getName() + "] as an Observing Block", null, mimeType, ExportOBVLTI.generateOBFileName(target));
     }
 
     logger.warn("Selected file: {}", file);
@@ -92,8 +88,6 @@ public final class ExportOBVLTIAction {
     // If a file was defined (No cancel in the dialog)
     if (file != null) {
       final String directory = (exportAll) ? file.getPath() : file.getParent();
-
-      FilePreferences.getInstance().setDirectory(mimeType, directory);
 
       // report buffer :
       final StringBuilder sb = new StringBuilder(1024);

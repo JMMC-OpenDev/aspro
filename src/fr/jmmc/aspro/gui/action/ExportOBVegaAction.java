@@ -3,7 +3,6 @@
  ******************************************************************************/
 package fr.jmmc.aspro.gui.action;
 
-import fr.jmmc.aspro.FilePreferences;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.ob.ExportOBVega;
@@ -57,13 +56,10 @@ public final class ExportOBVegaAction {
   public void process() {
     logger.debug("process");
 
-    final File file = FileChooser.showSaveFileChooser("Export targets as one Vega Star List",
-            FilePreferences.getInstance().getDirectoryFile(mimeType), mimeType, getDefaultFileName());
+    final File file = FileChooser.showSaveFileChooser("Export targets as one Vega Star List", null, mimeType, getDefaultFileName());
 
     // If a file was defined (No cancel in the dialog)
     if (file != null) {
-      FilePreferences.getInstance().setDirectory(mimeType, file.getParent());
-
       try {
         ExportOBVega.process(file);
 

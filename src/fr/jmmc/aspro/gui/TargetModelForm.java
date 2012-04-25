@@ -3,7 +3,6 @@
  ******************************************************************************/
 package fr.jmmc.aspro.gui;
 
-import fr.jmmc.aspro.FilePreferences;
 import fr.jmmc.aspro.Preferences;
 import fr.jmmc.aspro.gui.util.ModelJTree;
 import fr.jmmc.aspro.gui.util.TargetRenderer;
@@ -1082,24 +1081,19 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
 
     final UserModel userModel = this.currentTarget.getOrCreateUserModel();
 
-    final File currentDir;
     final String defaultFileName;
 
     if (userModel.getFile() != null) {
       final File file = new File(userModel.getFile());
-      currentDir = file.getParentFile();
       defaultFileName = file.getName();
     } else {
-      currentDir = FilePreferences.getInstance().getDirectoryFile(mimeType);
       defaultFileName = null;
     }
 
-    final File file = FileChooser.showOpenFileChooser("Open a FITS image as user model", currentDir, mimeType, defaultFileName);
+    final File file = FileChooser.showOpenFileChooser("Open a FITS image as user model", null, mimeType, defaultFileName);
 
     // If a file was defined (No cancel in the dialog)
     if (file != null) {
-      FilePreferences.getInstance().setDirectory(mimeType, file.getParent());
-
       userModel.setFile(file.getAbsolutePath());
       userModel.setName(file.getName());
 

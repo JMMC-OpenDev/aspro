@@ -4,7 +4,6 @@
 package fr.jmmc.aspro.gui.action;
 
 import fr.jmmc.aspro.AsproConstants;
-import fr.jmmc.aspro.FilePreferences;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.jmcs.gui.component.FileChooser;
 import fr.jmmc.jmcs.gui.component.MessagePane;
@@ -19,7 +18,6 @@ import java.io.File;
 import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import javax.swing.JFileChooser;
 
 /**
  * This registered action represents a File Menu entry to export an OIFits file
@@ -63,24 +61,19 @@ public final class ExportOIFitsAction extends WaitingTaskAction {
 
     if (oiFitsFile != null) {
 
-      final File currentDir;
       final String defaultFileName;
 
       if (oiFitsFile.getAbsoluteFilePath() != null) {
         final File file = new File(oiFitsFile.getAbsoluteFilePath());
-        currentDir = file.getParentFile();
         defaultFileName = file.getName();
       } else {
-        currentDir = FilePreferences.getInstance().getDirectoryFile(mimeType);
         defaultFileName = getDefaultFileName(oiFitsFile);
       }
 
-      final File file = FileChooser.showSaveFileChooser("Export the current target as an OIFits file", currentDir, mimeType, defaultFileName);
+      final File file = FileChooser.showSaveFileChooser("Export the current target as an OIFits file", null, mimeType, defaultFileName);
 
       // If a file was defined (No cancel in the dialog)
       if (file != null) {
-        FilePreferences.getInstance().setDirectory(mimeType, file.getParent());
-
         try {
           OIFitsWriter.writeOIFits(file.getAbsolutePath(), oiFitsFile);
 

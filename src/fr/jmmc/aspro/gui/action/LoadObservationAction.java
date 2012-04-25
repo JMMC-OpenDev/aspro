@@ -3,7 +3,6 @@
  ******************************************************************************/
 package fr.jmmc.aspro.gui.action;
 
-import fr.jmmc.aspro.FilePreferences;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.gui.component.StatusBar;
@@ -67,24 +66,19 @@ public final class LoadObservationAction extends RegisteredAction {
 
       final File obsFile = om.getObservationFile();
 
-      final File currentDir;
       final String defaultFileName;
 
       if (obsFile != null) {
-        currentDir = obsFile.getParentFile();
         defaultFileName = obsFile.getName();
       } else {
-        currentDir = FilePreferences.getInstance().getDirectoryFile(mimeType);
         defaultFileName = null;
       }
 
-      file = FileChooser.showOpenFileChooser("Load observation settings", currentDir, mimeType, defaultFileName);
+      file = FileChooser.showOpenFileChooser("Load observation settings", null, mimeType, defaultFileName);
     }
 
     // If a file was defined (No cancel in the dialog)
     if (file != null) {
-      FilePreferences.getInstance().setDirectory(mimeType, file.getParent());
-
       try {
         final String message = om.load(file);
 

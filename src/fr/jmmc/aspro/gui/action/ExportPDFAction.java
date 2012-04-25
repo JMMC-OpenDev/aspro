@@ -4,7 +4,6 @@
 package fr.jmmc.aspro.gui.action;
 
 import fr.jmmc.aspro.AsproGui;
-import fr.jmmc.aspro.FilePreferences;
 import fr.jmmc.aspro.gui.PDFExportable;
 import fr.jmmc.aspro.gui.chart.PDFUtils;
 import fr.jmmc.jmcs.gui.component.MessagePane;
@@ -93,14 +92,12 @@ public final class ExportPDFAction extends WaitingTaskAction {
   public void process(final PDFExportable exportable) {
     logger.debug("process");
 
-    final File file = FileChooser.showSaveFileChooser("Export the plot to PDF",
-            FilePreferences.getInstance().getDirectoryFile(mimeType), mimeType, exportable.getPDFDefaultFileName());
+    final File file = FileChooser.showSaveFileChooser("Export the plot to PDF", null, mimeType, exportable.getPDFDefaultFileName());
 
     // If a file was defined (No cancel in the dialog)
     if (file != null) {
-      FilePreferences.getInstance().setDirectory(mimeType, file.getParent());
 
-      // prepare Chart :
+        // prepare Chart :
       final JFreeChart chart = exportable.prepareChart();
       try {
         PDFUtils.saveChartAsPDF(file, chart, exportable.getPDFOptions());

@@ -3,9 +3,7 @@
  ******************************************************************************/
 package fr.jmmc.aspro.gui.action;
 
-import fr.jmmc.aspro.FilePreferences;
 import fr.jmmc.aspro.model.ObservationManager;
-import fr.jmmc.aspro.ob.ExportOBVLTI;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.gui.component.StatusBar;
 import fr.jmmc.jmcs.util.MimeType;
@@ -16,7 +14,6 @@ import java.io.File;
 import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import javax.swing.JFileChooser;
 
 /**
  * Save observation settings action
@@ -55,31 +52,26 @@ public final class SaveObservationAction extends RegisteredAction {
 
   /**
    * Save the current observation
-   * @return true if successfull
+   * @return true if successful
    */
   public boolean save() {
     final ObservationManager om = ObservationManager.getInstance();
     final File obsFile = om.getObservationFile();
 
-    final File currentDir;
     final String defaultFileName;
     
     if (obsFile != null) {
-      currentDir = obsFile.getParentFile();
       defaultFileName = obsFile.getName();
     } else {
-      currentDir = FilePreferences.getInstance().getDirectoryFile(mimeType);
       defaultFileName = null;
     }
 
-    final File file = FileChooser.showSaveFileChooser("Save the current observation settings", currentDir, mimeType, defaultFileName);
+    final File file = FileChooser.showSaveFileChooser("Save the current observation settings", null, mimeType, defaultFileName);
 
     boolean result = true;
 
     // If a file was defined (No cancel in the dialog)
     if (file != null) {
-      FilePreferences.getInstance().setDirectory(mimeType, file.getParent());
-
       try {
         om.save(file);
 
