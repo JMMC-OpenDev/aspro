@@ -4,6 +4,7 @@
 package fr.jmmc.aspro.gui.action;
 
 import fr.jmmc.aspro.model.ObservationManager;
+import fr.jmmc.jmcs.data.preference.FileChooserPreferences;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.gui.component.StatusBar;
 import fr.jmmc.jmcs.gui.action.ActionRegistrar;
@@ -60,6 +61,11 @@ public final class LoadObservationAction extends RegisteredAction {
       if (!file.exists() || !file.isFile()) {
         MessagePane.showErrorMessage("Could not load the file : " + file.getAbsolutePath());
         file = null;
+      }
+
+      if (file != null) {
+        // update current directory for Observation settings:
+        FileChooserPreferences.setCurrentDirectoryForMimeType(mimeType, file.getParent());
       }
 
     } else {
