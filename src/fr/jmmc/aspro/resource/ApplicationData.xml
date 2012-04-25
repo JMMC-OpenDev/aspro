@@ -7,9 +7,9 @@
 
 <ApplicationData link="http://www.jmmc.fr/aspro2">
 
-  <program name="Aspro2" version="0.9.1 beta 5"/>
+  <program name="Aspro2" version="0.9.1 beta 6"/>
   
-  <compilation date="17/04/2011" compiler="JDK 1.5.0_16"/>
+  <compilation date="25/04/2011" compiler="JDK 1.5.0_16"/>
 
   <text>
     <![CDATA[ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations
@@ -151,6 +151,12 @@
 
   <releasenotes>
     <release version="0.9.1">
+      <prerelease version="0.9.1 beta 6"> 
+        <change type="FEATURE">Updated PIONIER instrument modes to add K band: LARGE_H, BROAD_K and LARGE_K</change>
+        <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/305">Use native file choosers on Mac OS X; 
+        avoid directory creation bug when exporting targets to Observing blocks</change>
+        <change type="FEATURE">Moved File chooser preferences file (last used directory per file type) i.e. previous settings are lost.</change>
+      </prerelease>
       <prerelease version="0.9.1 beta 5"> 
         <change type="CHANGE">Support VOTable 1.2 for incoming SAMP 'load.votable' messages (vizier)</change>
         <change type="FEATURE">Added warning log: click on the warning icon</change> 
