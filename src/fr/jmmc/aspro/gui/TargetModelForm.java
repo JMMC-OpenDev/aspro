@@ -1081,16 +1081,19 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
 
     final UserModel userModel = this.currentTarget.getOrCreateUserModel();
 
+    final File currentDir;
     final String defaultFileName;
 
     if (userModel.getFile() != null) {
       final File file = new File(userModel.getFile());
+      currentDir = file.getParentFile();
       defaultFileName = file.getName();
     } else {
+      currentDir = null;
       defaultFileName = null;
     }
 
-    final File file = FileChooser.showOpenFileChooser("Open a FITS image as user model", null, mimeType, defaultFileName);
+    final File file = FileChooser.showOpenFileChooser("Open a FITS image as user model", currentDir, mimeType, defaultFileName);
 
     // If a file was defined (No cancel in the dialog)
     if (file != null) {
