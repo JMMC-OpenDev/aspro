@@ -18,6 +18,7 @@ import fr.jmmc.aspro.model.util.TargetRAComparator;
 import fr.jmmc.jmcs.network.BrowserLauncher;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
+import fr.jmmc.jmcs.resource.image.ResourceImage;
 import fr.jmmc.jmcs.util.UrlUtils;
 import java.awt.Component;
 import java.beans.PropertyChangeEvent;
@@ -593,7 +594,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
         jScrollPaneTreeTargets.setMinimumSize(new java.awt.Dimension(80, 100));
         jScrollPaneTreeTargets.setPreferredSize(new java.awt.Dimension(130, 100));
 
-        jTreeTargets.setFont(new java.awt.Font("Dialog", 1, 12));
+        jTreeTargets.setFont(new java.awt.Font("Dialog", 1, 12)); // NOI18N
         javax.swing.tree.DefaultMutableTreeNode treeNode1 = new javax.swing.tree.DefaultMutableTreeNode("Targets");
         jTreeTargets.setModel(new javax.swing.tree.DefaultTreeModel(treeNode1));
         jTreeTargets.setDragEnabled(true);
@@ -640,7 +641,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
         jToolBarActions.setFloatable(false);
         jToolBarActions.setRollover(true);
 
-        jButtonBefore.setIcon( new javax.swing.ImageIcon(getClass().getResource("/fr/jmmc/jmcs/resource/uparrow.png")));
+        jButtonBefore.setIcon(ResourceImage.UP_ARROW.icon());
         jButtonBefore.setToolTipText("");
         jButtonBefore.setFocusable(false);
         jButtonBefore.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -652,7 +653,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
         });
         jToolBarActions.add(jButtonBefore);
 
-        jButtonAfter.setIcon( new javax.swing.ImageIcon(getClass().getResource("/fr/jmmc/jmcs/resource/downarrow.png")));
+        jButtonAfter.setIcon(ResourceImage.DOWN_ARROW.icon());
         jButtonAfter.setFocusable(false);
         jButtonAfter.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         jButtonAfter.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);

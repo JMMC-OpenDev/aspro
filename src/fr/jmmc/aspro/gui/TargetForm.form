@@ -126,7 +126,7 @@
         <Component class="javax.swing.JButton" name="jButtonBefore">
           <Properties>
             <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code=" new javax.swing.ImageIcon(getClass().getResource(&quot;/fr/jmmc/jmcs/resource/uparrow.png&quot;))" type="code"/>
+              <Connection code="ResourceImage.UP_ARROW.icon()" type="code"/>
             </Property>
             <Property name="toolTipText" type="java.lang.String" value=""/>
             <Property name="focusable" type="boolean" value="false"/>
@@ -140,7 +140,7 @@
         <Component class="javax.swing.JButton" name="jButtonAfter">
           <Properties>
             <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code=" new javax.swing.ImageIcon(getClass().getResource(&quot;/fr/jmmc/jmcs/resource/downarrow.png&quot;))" type="code"/>
+              <Connection code="ResourceImage.DOWN_ARROW.icon()" type="code"/>
             </Property>
             <Property name="focusable" type="boolean" value="false"/>
             <Property name="horizontalTextPosition" type="int" value="0"/>
