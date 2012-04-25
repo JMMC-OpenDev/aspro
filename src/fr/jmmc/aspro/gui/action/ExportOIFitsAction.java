@@ -72,7 +72,7 @@ public final class ExportOIFitsAction extends WaitingTaskAction {
         defaultFileName = file.getName();
       } else {
         currentDir = FilePreferences.getInstance().getDirectoryFile(mimeType);
-        defaultFileName = null;
+        defaultFileName = getDefaultFileName(oiFitsFile);
       }
 
       final File file = FileChooser.showSaveFileChooser("Export the current target as an OIFits file", currentDir, mimeType, defaultFileName);
