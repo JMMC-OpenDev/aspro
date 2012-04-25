@@ -29,7 +29,6 @@ import fr.jmmc.jmcs.App;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
 import fr.jmmc.jmcs.resource.image.ResourceImage;
-import fr.jmmc.jmcs.util.ImageUtils;
 import fr.jmmc.jmcs.util.logging.ApplicationLogSingleton;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -592,8 +591,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
 
         Preferences.getInstance().addObserver(this);
 
-        final String warningIconPath = ResourceImage.WARNING_ICON.path();//"";
-        this.warningIcon = ImageUtils.loadResourceIcon(warningIconPath);
+        this.warningIcon = ResourceImage.WARNING_ICON.icon();
 
         // add observer to the StarResolverWidget :
         this.starSearchField.getStar().addObserver(this);

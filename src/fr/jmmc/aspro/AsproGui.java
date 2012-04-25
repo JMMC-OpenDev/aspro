@@ -29,7 +29,6 @@ import fr.jmmc.jmcs.gui.util.SwingSettings;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
 import fr.jmmc.jmcs.gui.task.TaskSwingWorkerExecutor;
 import fr.jmmc.jmcs.resource.image.ResourceImage;
-import fr.jmmc.jmcs.util.ImageUtils;
 import fr.jmmc.jmcs.util.concurrent.ParallelJobExecutor;
 import fr.jmmc.jmcs.util.logging.ApplicationLogSingleton;
 import java.awt.BorderLayout;
@@ -38,10 +37,8 @@ import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.net.URL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 
@@ -233,8 +230,7 @@ public final class AsproGui extends App {
         frame.setTitle(App.getSharedApplicationDataModel().getProgramName());
 
         // handle frame icon
-        final String jmmcFavIconPath = ResourceImage.JMMC_FAVICON.path();
-        final Image jmmcFavImage = ImageUtils.loadResourceIcon(jmmcFavIconPath).getImage();
+        final Image jmmcFavImage = ResourceImage.JMMC_FAVICON.icon().getImage();
         frame.setIconImage(jmmcFavImage);
 
         // get screen size to adjust minimum window size :
