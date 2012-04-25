@@ -8807,39 +8807,71 @@
       <nbPixPhotometry>4</nbPixPhotometry>
       <fracFluxInInterferometry>0.8</fracFluxInInterferometry>
 
+      <!-- H band -->
       <mode>
         <!-- 
-          1) LARGE-H
-          7 canaux spectraux de 0.04microns,
-          lbd  = [1.56,1.60,1.64,1.68,1.72,1.76,1.80] microns
+          1) BROAD-H  (broad-band)
+          lbd  = [1.68108e-06];
+          lbdB = [2.45e-07];
         -->
-        <name>LARGE-H</name>
-        <resolution>40</resolution>
-        <waveLengthMin>1.54</waveLengthMin>
-        <waveLengthMax>1.82</waveLengthMax>
+        <name>BROAD-H</name>
+        <resolution>7</resolution>
+        <waveLengthMin>1.55858</waveLengthMin>
+        <waveLengthMax>1.80358</waveLengthMax>
       </mode>
       <mode>
         <!-- 
           2) SMALL-H
-          3 canaux spectraux de 0.09microns
-          lbd = [1.59, 1.68, 1.77] microns
+          lbd = [1.59e-06,1.678e-06,1.768e-06];
+          lbdB = lbd*0 + 9.35e-08;
         -->
         <name>SMALL-H</name>
         <resolution>18</resolution>
-        <waveLengthMin>1.545</waveLengthMin>
-        <waveLengthMax>1.815</waveLengthMax>
+        <waveLengthMin>1.53775</waveLengthMin>
+        <waveLengthMax>1.81825</waveLengthMax>
       </mode>
       <mode>
         <!-- 
-          3) BROAD-H  (broad-band)
-          1 canal spectral de 0.25 microns
-          lbd = 1.68 microns
+          3) LARGE-H
+          lbd = [1.81373,1.77345,1.72029,1.66879,1.61622,1.56531,1.52855] *1e-6;
+          lbdB = lbd*0 + 4.08333e-08;
+          note: channels are not contiguous, so bandwidth = 4.4 microns !
         -->
-        <name>BROAD-H</name>
-        <resolution>6</resolution>
-        <waveLengthMin>1.555</waveLengthMin>
-        <waveLengthMax>1.805</waveLengthMax>
+        <name>LARGE-H</name>
+        <resolution>35</resolution>
+        <waveLengthMin>1.504785</waveLengthMin>
+        <waveLengthMax>1.8375</waveLengthMax>
       </mode>
+
+      <!-- K band -->
+      <mode>
+        <!-- 
+          1) BROAD-K  (broad-band)
+          lbd  = [2.051e-06];
+          lbdB = [1.75e-07];
+        -->
+        <name>BROAD-K</name>
+        <resolution>12</resolution>
+        <waveLengthMin>1.9635</waveLengthMin>
+        <waveLengthMax>2.1385</waveLengthMax>
+      </mode>
+        <!-- 
+          2) SMALL-K
+          pas encore connu
+        -->
+      <mode>
+        <!-- 
+          3) LARGE-K
+          lbd = [2.17433,2.13937,2.09438,2.04813,2.00948,1.9702,1.935] *1e-6;
+          lbdB = lbd*0 + 3.5e-08; 
+          note: channels are not contiguous, so bandwidth = 3.9 microns !
+        -->
+        <name>LARGE-K</name>
+        <resolution>51</resolution>
+        <waveLengthMin>1.915</waveLengthMin>
+        <waveLengthMax>2.195</waveLengthMax>
+      </mode>
+      
     </focalInstrument>
 
   </description>
