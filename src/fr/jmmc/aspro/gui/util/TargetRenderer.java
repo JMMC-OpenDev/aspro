@@ -29,10 +29,8 @@ public final class TargetRenderer {
      * @param targetUserInfos target user informations
      */
     public TargetRenderer(final TargetUserInformations targetUserInfos) {
-        final String calibratorIconPath = "/fr/jmmc/aspro/gui/icons/calibrator.png";
-        this.calibratorIcon = ImageUtils.loadResourceIcon(calibratorIconPath);
-        final String targetIconPath = "/fr/jmmc/aspro/gui/icons/target.png";
-        this.targetIcon = ImageUtils.loadResourceIcon(targetIconPath);
+        this.calibratorIcon = ImageUtils.loadResourceIcon("fr/jmmc/aspro/gui/icons/calibrator.png");
+        this.targetIcon = ImageUtils.loadResourceIcon("fr/jmmc/aspro/gui/icons/target.png");
         this.targetUserInfos = targetUserInfos;
     }
 
