@@ -9,7 +9,7 @@
 
   <program name="Aspro2" version="0.9.1 beta 6"/>
   
-  <compilation date="25/04/2011" compiler="JDK 1.5.0_16"/>
+  <compilation date="26/04/2011" compiler="JDK 1.5.0_16"/>
 
   <text>
     <![CDATA[ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations
@@ -152,6 +152,7 @@
   <releasenotes>
     <release version="0.9.1">
       <prerelease version="0.9.1 beta 6"> 
+        <change type="FEATURE">Updated number of scans in PIONIER P2PP template</change>
         <change type="FEATURE">Updated PIONIER instrument modes to add K band: LARGE_H, BROAD_K and LARGE_K</change>
         <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/305">Use native file choosers on Mac OS X; 
         avoid directory creation bug when exporting targets to Observing blocks</change>
