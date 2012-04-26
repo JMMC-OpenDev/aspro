@@ -23,7 +23,6 @@ import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.StationLinks;
 import fr.jmmc.aspro.service.GeocentricCoords;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,7 +47,7 @@ public final class ConfigurationManager extends BaseOIManager {
   /** Map : id, interferometer description */
   private final Map<String, InterferometerDescription> interferometerDescriptions = new LinkedHashMap<String, InterferometerDescription>();
   /** Map : id, interferometer configuration */
-  private final Map<String, InterferometerConfiguration> interferometerConfigurations = new HashMap<String, InterferometerConfiguration>();
+  private final Map<String, InterferometerConfiguration> interferometerConfigurations = new LinkedHashMap<String, InterferometerConfiguration>();
   /** default horizon profile */
   private HorizonProfile defaultHorizon = null;
 
@@ -474,6 +473,22 @@ public final class ConfigurationManager extends BaseOIManager {
    */
   public InterferometerConfiguration getInterferometerConfiguration(final String name) {
     return getInterferometerConfigurations().get(name);
+  }
+  
+  /**
+   * Return the first instrument configuration having the given instrument name
+   * @param instrumentName name of the instrument
+   * @return interferometer configuration or null if not found
+   */
+  public InterferometerConfiguration getInterferometerConfigurationWithInstrument(final String instrumentName) {
+    for (InterferometerConfiguration c : getInterferometerConfigurations().values()) {
+      for (FocalInstrumentConfiguration ic : c.getInstruments()) {
+        if (ic.getFocalInstrument().getName().equals(instrumentName)) {
+          return c;
+        }
+      }
+    }
+    return null;
   }
 
   /**

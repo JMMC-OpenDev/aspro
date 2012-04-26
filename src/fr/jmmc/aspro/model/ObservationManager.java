@@ -1493,7 +1493,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
     updateObservation(observation);
   }
 
-  /**n
+  /**
    * Update observation with resolved references  (interferometer / instrument / instrument configuration ...)
    * @param observation observation to use
    * @throws IllegalStateException if an invalid reference was found (interferometer / instrument / instrument configuration)
@@ -1502,15 +1502,28 @@ public final class ObservationManager extends BaseOIManager implements Observer 
     // ugly code to update all resolved references used on post load :
     final InterferometerConfigurationChoice interferometerChoice = observation.getInterferometerConfiguration();
 
-    final String interferometerConfiguration = interferometerChoice.getName();
+    String interferometerConfiguration = interferometerChoice.getName();
     interferometerChoice.setInterferometerConfiguration(cm.getInterferometerConfiguration(interferometerConfiguration));
-
-    if (interferometerChoice.getInterferometerConfiguration() == null) {
-      throw new IllegalStateException("The interferometer configuration [" + interferometerConfiguration + "] is invalid !");
-    }
 
     final FocalInstrumentConfigurationChoice instrumentChoice = observation.getInstrumentConfiguration();
     final String instrument = instrumentChoice.getName();
+
+    if (interferometerChoice.getInterferometerConfiguration() == null) {
+      logger.info("the interferometer configuration [{}] is not supported.", interferometerConfiguration);
+
+      // use the first interferometer configuration that has the instrument:
+      interferometerChoice.setInterferometerConfiguration(cm.getInterferometerConfigurationWithInstrument(instrument));
+
+      if (interferometerChoice.getInterferometerConfiguration() != null) {
+        interferometerConfiguration = interferometerChoice.getInterferometerConfiguration().getName();
+        interferometerChoice.setName(interferometerConfiguration);
+
+        logger.info("A correct instrument configuration is [{}]. Save your file to keep this modification", interferometerConfiguration);
+      } else {
+        throw new IllegalStateException("The interferometer configuration [" + interferometerConfiguration + "] is invalid"
+                + " and none has the instrument [" + instrument + "] !");
+      }
+    }
 
     instrumentChoice.setInstrumentConfiguration(cm.getInterferometerInstrumentConfiguration(interferometerConfiguration, instrument));
 
