@@ -36,7 +36,9 @@
   <logger name="fr.jmmc.aspro.warning" level="INFO" additivity="true">
       <appender-ref ref="WARNINGLOG" />
   </logger>
-  
+
+  <logger name="fr.jmmc.aspro.model.ConfigurationManager" level="INFO"/>
+
 <!--
   <logger name="fr.jmmc.aspro.gui" level="INFO"/>
   <logger name="fr.jmmc.aspro.gui.InterferometerMapPanel" level="INFO"/>

@@ -94,6 +94,14 @@ public class ObjectFactory {
     }
 
     /**
+     * Create an instance of {@link InterferometerConfiguration }
+     * 
+     */
+    public InterferometerConfiguration createInterferometerConfiguration() {
+        return new InterferometerConfiguration();
+    }
+
+    /**
      * Create an instance of {@link Configurations }
      * 
      */
@@ -123,14 +131,6 @@ public class ObjectFactory {
      */
     public InterferometerDescription createInterferometerDescription() {
         return new InterferometerDescription();
-    }
-
-    /**
-     * Create an instance of {@link InterferometerConfiguration }
-     * 
-     */
-    public InterferometerConfiguration createInterferometerConfiguration() {
-        return new InterferometerConfiguration();
     }
 
     /**

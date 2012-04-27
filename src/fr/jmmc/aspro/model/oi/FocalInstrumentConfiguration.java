@@ -105,4 +105,25 @@ public class FocalInstrumentConfiguration
         return this.configurations;
     }
 
+
+//--simple--preserve
+
+  /**
+   * Return a deep "copy" of this instance
+   * @return deep "copy" of this instance
+   */
+  @Override
+  public final Object clone() {
+    final FocalInstrumentConfiguration copy = (FocalInstrumentConfiguration) super.clone();
+
+    // Copy list of instrument configuration:
+    if (copy.configurations != null) {
+      copy.configurations = new ArrayList<FocalInstrumentConfigurationItem>(copy.configurations);
+    }
+
+    return copy;
+  }
+
+//--simple--preserve
+    
 }

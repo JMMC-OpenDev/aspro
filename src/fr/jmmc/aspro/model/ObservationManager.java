@@ -237,9 +237,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
 
     final ObservationSetting observation = new ObservationSetting();
 
-    setObservationFile(null);
-
-    changeObservation(observation);
+    resetAndChangeObservation(observation);
   }
 
   /**
@@ -318,7 +316,9 @@ public final class ObservationManager extends BaseOIManager implements Observer 
    * 
    * @throws IllegalStateException if an invalid reference was found (interferometer / instrument / instrument configuration)
    */
-  public void resetAndChangeObservation(final ObservationSetting observation) {
+  public void resetAndChangeObservation(final ObservationSetting observation) throws IllegalStateException {
+    defineDefaults(observation);
+
     setObservationFile(null);
 
     changeObservation(observation);
@@ -328,12 +328,8 @@ public final class ObservationManager extends BaseOIManager implements Observer 
    * Change the current observation with the given one
    * and fire load and change events 
    * @param observation observation to use
-   * 
-   * @throws IllegalStateException if an invalid reference was found (interferometer / instrument / instrument configuration)
    */
-  private void changeObservation(final ObservationSetting observation) throws IllegalStateException {
-    defineDefaults(observation);
-
+  private void changeObservation(final ObservationSetting observation) {
     // change the current observation :
     setMainObservation(observation);
 
@@ -1437,60 +1433,74 @@ public final class ObservationManager extends BaseOIManager implements Observer 
    * @throws IllegalStateException if an invalid reference was found (interferometer / instrument / instrument configuration)
    */
   private void defineDefaults(final ObservationSetting observation) throws IllegalStateException {
-    if (observation.getName() == null || observation.getName().length() == 0) {
-      observation.setName("default");
-    }
-    if (observation.getWhen() == null) {
-      final WhenSetting when = new WhenSetting();
-      when.setDate(getCalendar(new Date()));
-      when.setNightRestriction(AsproConstants.DEFAULT_USE_NIGHT_LIMITS);
 
-      observation.setWhen(when);
-    }
-    if (observation.getInterferometerConfiguration() == null) {
-      final String defInterferometer = cm.getInterferometerNames().get(0);
-      final String defInterferometerConfiguration = cm.getInterferometerConfigurationNames(defInterferometer).get(0);
+    boolean changeConfiguration = false;
+    try {
+      // First: update Configuration
+      cm.changeConfiguration(observation.getExtendedConfiguration());
 
-      if (logger.isDebugEnabled()) {
-        logger.debug("default Interferometer: {}", defInterferometer);
-        logger.debug("default InterferometerConfiguration: {}", defInterferometerConfiguration);
+      if (observation.getName() == null || observation.getName().length() == 0) {
+        observation.setName("default");
+      }
+      if (observation.getWhen() == null) {
+        final WhenSetting when = new WhenSetting();
+        when.setDate(getCalendar(new Date()));
+        when.setNightRestriction(AsproConstants.DEFAULT_USE_NIGHT_LIMITS);
+
+        observation.setWhen(when);
+      }
+      if (observation.getInterferometerConfiguration() == null) {
+        final String defInterferometer = cm.getInterferometerNames().get(0);
+        final String defInterferometerConfiguration = cm.getInterferometerConfigurationNames(defInterferometer).get(0);
+
+        if (logger.isDebugEnabled()) {
+          logger.debug("default Interferometer: {}", defInterferometer);
+          logger.debug("default InterferometerConfiguration: {}", defInterferometerConfiguration);
+        }
+
+        final InterferometerConfigurationChoice interferometerChoice = new InterferometerConfigurationChoice();
+        interferometerChoice.setName(defInterferometerConfiguration);
+        interferometerChoice.setMinElevation(Preferences.getInstance().getPreferenceAsDouble(Preferences.MIN_ELEVATION));
+
+        observation.setInterferometerConfiguration(interferometerChoice);
+      }
+      if (observation.getInstrumentConfiguration() == null) {
+        final String defInstrument = cm.getInterferometerInstrumentNames(observation.getInterferometerConfiguration().getName()).get(0);
+        final String defInstrumentConfiguration = cm.getInstrumentConfigurationNames(observation.getInterferometerConfiguration().getName(), defInstrument).get(0);
+
+        if (logger.isDebugEnabled()) {
+          logger.debug("default Instrument: {}", defInstrument);
+          logger.debug("default InstrumentConfiguration: {}", defInstrumentConfiguration);
+        }
+
+        final FocalInstrumentConfigurationChoice instrumentChoice = new FocalInstrumentConfigurationChoice();
+        instrumentChoice.setName(defInstrument);
+        instrumentChoice.setStations(defInstrumentConfiguration);
+
+        observation.setInstrumentConfiguration(instrumentChoice);
+      }
+      if (observation.getVariants().isEmpty()) {
+        // create a new variant having the same configuration (stations only) :
+        final ObservationVariant obsVariant = new ObservationVariant();
+
+        // Note : stations can not be null :
+        obsVariant.setStations(observation.getInstrumentConfiguration().getStations());
+
+        // create a new collection :
+        observation.getVariants().add(obsVariant);
       }
 
-      final InterferometerConfigurationChoice interferometerChoice = new InterferometerConfigurationChoice();
-      interferometerChoice.setName(defInterferometerConfiguration);
-      interferometerChoice.setMinElevation(Preferences.getInstance().getPreferenceAsDouble(Preferences.MIN_ELEVATION));
+      // update references :
+      // can throw IllegalStateException if an invalid reference was found :
+      updateObservation(observation);
 
-      observation.setInterferometerConfiguration(interferometerChoice);
+      // commit configuration changes:
+      changeConfiguration = true;
+
+    } finally {
+      // Finally: commit or rollback Configuration change:
+      cm.validateChangedConfiguration(changeConfiguration);
     }
-    if (observation.getInstrumentConfiguration() == null) {
-      final String defInstrument = cm.getInterferometerInstrumentNames(observation.getInterferometerConfiguration().getName()).get(0);
-      final String defInstrumentConfiguration = cm.getInstrumentConfigurationNames(observation.getInterferometerConfiguration().getName(), defInstrument).get(0);
-
-      if (logger.isDebugEnabled()) {
-        logger.debug("default Instrument: {}", defInstrument);
-        logger.debug("default InstrumentConfiguration: {}", defInstrumentConfiguration);
-      }
-
-      final FocalInstrumentConfigurationChoice instrumentChoice = new FocalInstrumentConfigurationChoice();
-      instrumentChoice.setName(defInstrument);
-      instrumentChoice.setStations(defInstrumentConfiguration);
-
-      observation.setInstrumentConfiguration(instrumentChoice);
-    }
-    if (observation.getVariants().isEmpty()) {
-      // create a new variant having the same configuration (stations only) :
-      final ObservationVariant obsVariant = new ObservationVariant();
-
-      // Note : stations can not be null :
-      obsVariant.setStations(observation.getInstrumentConfiguration().getStations());
-
-      // create a new collection :
-      observation.getVariants().add(obsVariant);
-    }
-
-    // update references :
-    // can throw IllegalStateException if an invalid reference was found :
-    updateObservation(observation);
   }
 
   /**

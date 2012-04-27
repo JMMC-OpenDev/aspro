@@ -35,6 +35,7 @@ import fr.jmmc.aspro.model.OIBase;
  *         &lt;element name="targetUserInfos" type="{http://www.jmmc.fr/aspro-oi/0.1}TargetUserInformations" minOccurs="0"/>
  *         &lt;element name="variant" type="{http://www.jmmc.fr/aspro-oi/0.1}ObservationVariant" maxOccurs="unbounded" minOccurs="0"/>
  *         &lt;element name="context" type="{http://www.jmmc.fr/aspro-oi/0.1}ObservationContext" minOccurs="0"/>
+ *         &lt;element name="extendedConfiguration" type="{http://www.jmmc.fr/aspro-oi/0.1}InterferometerConfiguration" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -54,7 +55,8 @@ import fr.jmmc.aspro.model.OIBase;
     "targets",
     "targetUserInfos",
     "variants",
-    "context"
+    "context",
+    "extendedConfiguration"
 })
 @XmlRootElement(name = "observationSetting")
 public class ObservationSetting
@@ -77,6 +79,7 @@ public class ObservationSetting
     @XmlElement(name = "variant")
     protected List<ObservationVariant> variants;
     protected ObservationContext context;
+    protected InterferometerConfiguration extendedConfiguration;
 
     /**
      * Gets the value of the schemaVersion property.
@@ -318,6 +321,30 @@ public class ObservationSetting
      */
     public void setContext(ObservationContext value) {
         this.context = value;
+    }
+
+    /**
+     * Gets the value of the extendedConfiguration property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link InterferometerConfiguration }
+     *     
+     */
+    public InterferometerConfiguration getExtendedConfiguration() {
+        return extendedConfiguration;
+    }
+
+    /**
+     * Sets the value of the extendedConfiguration property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link InterferometerConfiguration }
+     *     
+     */
+    public void setExtendedConfiguration(InterferometerConfiguration value) {
+        this.extendedConfiguration = value;
     }
     
 //--simple--preserve

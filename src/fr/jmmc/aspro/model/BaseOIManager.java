@@ -3,7 +3,9 @@
  ******************************************************************************/
 package fr.jmmc.aspro.model;
 
+import com.sun.xml.bind.IDResolver;
 import fr.jmmc.jaxb.AsproCustomPrefixMapper;
+import fr.jmmc.jaxb.AsproConfigurationIDResolver;
 import fr.jmmc.jmcs.jaxb.JAXBFactory;
 import fr.jmmc.jmcs.jaxb.XmlBindException;
 import fr.jmmc.jmcs.util.FileUtils;
@@ -23,6 +25,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.PropertyException;
 import javax.xml.bind.UnmarshalException;
+import javax.xml.bind.Unmarshaller;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.DatatypeFactory;
@@ -117,7 +120,11 @@ public class BaseOIManager {
 
       final long start = System.nanoTime();
 
-      result = this.jf.createUnMarshaller().unmarshal(inputFile);
+      final Unmarshaller u = this.jf.createUnMarshaller();
+
+      u.setProperty(IDResolver.class.getName(), new AsproConfigurationIDResolver(ConfigurationManager.getInstance().getInitialConfiguration()));
+
+      result = u.unmarshal(inputFile);
 
       if (logger.isInfoEnabled()) {
         logger.info("unmarshall : duration = {} ms.", 1e-6d * (System.nanoTime() - start));
@@ -210,13 +217,13 @@ public class BaseOIManager {
     final Marshaller m = this.jf.createMarshaller();
 
     /*
-    to specify the URI->prefix mapping, you'll need to provide an
-    implementation of NamespacePrefixMapper, which determines the
-    prefixes used for marshalling.
+     to specify the URI->prefix mapping, you'll need to provide an
+     implementation of NamespacePrefixMapper, which determines the
+     prefixes used for marshalling.
     
-    you specify this as a property of Marshaller to
-    tell the marshaller to consult your mapper
-    to assign a prefix for a namespace.
+     you specify this as a property of Marshaller to
+     tell the marshaller to consult your mapper
+     to assign a prefix for a namespace.
      */
     try {
       m.setProperty(JAXB_NAMESPACE_PREFIX_MAPPER, AsproCustomPrefixMapper.getInstance());

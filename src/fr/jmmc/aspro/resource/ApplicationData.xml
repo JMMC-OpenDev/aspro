@@ -151,6 +151,9 @@
 
   <releasenotes>
     <release version="0.9.1">
+      <prerelease version="0.9.1 beta 7"> 
+        <change type="CHANGE">Automatically correct invalid interferometer configuration (CHARA VEGA June 2011) to CHARA</change>
+      </prerelease>
       <prerelease version="0.9.1 beta 6"> 
         <change type="FEATURE">Updated number of scans in PIONIER P2PP template</change>
         <change type="FEATURE">Updated PIONIER instrument modes to add K band: LARGE_H, BROAD_K and LARGE_K</change>

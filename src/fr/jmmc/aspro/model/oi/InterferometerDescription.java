@@ -418,22 +418,6 @@ public class InterferometerDescription
     
 //--simple--preserve
 
-  /* custom members */
-  /** list of configurations referring to this interferometer (read only) */
-  @javax.xml.bind.annotation.XmlTransient
-  private List<InterferometerConfiguration> configurations = null;
-
-  /**
-   * Return the list of configurations using this interferometer (read only)
-   * @return list of configurations using this interferometer
-   */
-  public final List<InterferometerConfiguration> getConfigurations() {
-    if (configurations == null) {
-      configurations = new ArrayList<InterferometerConfiguration>();
-    }
-    return configurations;
-  }
-
   @Override
   public final String toString() {
     return "InterferometerDescription [" + ((this.name != null) ? this.name : "undefined") + "]";

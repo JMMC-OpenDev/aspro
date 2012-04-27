@@ -201,6 +201,22 @@ public class InterferometerConfiguration
     this.maxBaseLine = maxBaseLine;
   }
 
+  /**
+   * Return a deep "copy" of this instance
+   * @return deep "copy" of this instance
+   */
+  @Override
+  public final Object clone() {
+    final InterferometerConfiguration copy = (InterferometerConfiguration) super.clone();
+
+    // Copy list of instrument configuration:
+    if (copy.instruments != null) {
+      copy.instruments = new ArrayList<FocalInstrumentConfiguration>(copy.instruments);
+    }
+
+    return copy;
+  }
+
   @Override
   public final String toString() {
     return "InterferometerConfiguration : " + ((this.name != null) ? this.name : "undefined");

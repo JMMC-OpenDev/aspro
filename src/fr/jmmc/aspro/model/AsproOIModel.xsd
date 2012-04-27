@@ -256,6 +256,15 @@
         </xsd:annotation>
       </xsd:element>
 
+      <xsd:element name="extendedConfiguration" type="InterferometerConfiguration" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>
+            this element contains an optional Interferometer configuration 
+            to create custom configuration for this observation (baselines, pops, beams ...)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
     </xsd:sequence>
   </xsd:complexType>
 

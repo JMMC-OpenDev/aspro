@@ -2211,4 +2211,51 @@ Configuration d’enregistrement
     </instrument>
   </configuration>
 
+<!-- TODO: KILL -->
+  <configuration>
+    <!-- D.M. 13/05/2011 -->
+    <version>VEGA June 2011</version>
+    <interferometer>CHARA</interferometer>
+
+    <instrument>
+      <focalInstrument>VEGA_2T</focalInstrument>
+      <configuration>
+        <stations>S1 S2</stations>
+        <channels>V2 V1</channels>
+        <pops>PoP4 PoP5</pops>
+      </configuration>
+      <configuration>
+        <stations>E2 E1</stations>
+        <channels>V2 V1</channels>
+        <pops>PoP2 PoP1</pops>
+      </configuration>
+      <configuration>
+        <stations>W1 W2</stations>
+        <channels>V4 V3</channels>
+        <pops>PoP1 PoP5</pops>
+      </configuration>
+    </instrument>
+
+    <instrument>
+      <focalInstrument>VEGA_3T</focalInstrument>
+      <configuration>
+        <stations>E2 E1 W2</stations>
+        <channels>V2 V1 V3</channels>
+        <pops>PoP2 PoP1 PoP5</pops>
+      </configuration>
+      <configuration>
+        <stations>W2 W1 E1</stations>
+        <channels>V2 V1 V3</channels>
+        <pops>PoP5 PoP1 PoP1</pops>
+      </configuration>
+      <configuration>
+        <stations>W2 W1 E2</stations>
+        <channels>V2 V1 V3</channels>
+        <pops>PoP5 PoP1 PoP2</pops>
+      </configuration>
+    </instrument>
+
+    <!-- VEGA_4T not available -->
+  </configuration>
+
 </a:interferometerSetting>

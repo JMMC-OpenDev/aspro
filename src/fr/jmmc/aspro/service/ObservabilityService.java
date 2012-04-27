@@ -1266,6 +1266,9 @@ public final class ObservabilityService {
       logger.debug("relatedChannels: {}", relatedChannels);
     }
 
+    // TODO: KILL
+    logger.warn("predefined channel: {}", relatedChannels);
+
     final int nRelChannels = relatedChannels.size();
     final boolean useRelatedChannels = nRelChannels > 0;
 
