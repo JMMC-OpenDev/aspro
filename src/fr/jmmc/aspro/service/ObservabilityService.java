@@ -1266,9 +1266,6 @@ public final class ObservabilityService {
       logger.debug("relatedChannels: {}", relatedChannels);
     }
 
-    // TODO: KILL
-    logger.warn("predefined channel: {}", relatedChannels);
-
     final int nRelChannels = relatedChannels.size();
     final boolean useRelatedChannels = nRelChannels > 0;
 
@@ -1489,6 +1486,10 @@ public final class ObservabilityService {
 
       this.data.setUserPops(true);
       this.data.setBestPops(user);
+
+      if (isLogDebug) {
+        logger.debug("User PoPs: {}", user);
+      }
     }
 
     // Use arrays instead of List for performance:
