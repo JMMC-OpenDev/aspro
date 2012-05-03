@@ -100,6 +100,7 @@ public final class AnyVOTableHandler {
             return;
           }
 
+          // TODO: use the observationContext.operation ?
           if (newObservation.getInterferometerConfiguration() == null
                   || newObservation.getInstrumentConfiguration() == null) {
             // empty configuration: add targets ...
