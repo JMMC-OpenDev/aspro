@@ -251,7 +251,7 @@
       <xsd:element name="context" type="ObservationContext" minOccurs="0">
         <xsd:annotation>
           <xsd:documentation>
-              Optional observation context to handle PIVOT interoperability
+              Optional observation context to enable/disable ASPRO GUI features used by SAMP interoperability (VOTable)
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
