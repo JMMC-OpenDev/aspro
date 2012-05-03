@@ -97,6 +97,8 @@ public final class AsproConfigurationIDResolver extends IDResolver {
 
         if (reference == null) {
           logger.warn("resolve('{}'): unresolved reference", id);
+
+          throw new SAXException("resolve: unresolved identifier '" + id + "' of class type [" + type + "]");
         } else {
           logger.debug("resolve('{}'): conf ref = {}", id, reference);
         }
