@@ -17,7 +17,7 @@
     <instrumentConfiguration>
         <name>VEGA_3T</name>
         <stations>W2 W1 E2</stations>
-        <pops>512</pops>
+        <pops>123</pops>
         <instrumentMode>standard</instrumentMode>
         <samplingPeriod>40.0</samplingPeriod>
         <acquisitionTime>300.0</acquisitionTime>

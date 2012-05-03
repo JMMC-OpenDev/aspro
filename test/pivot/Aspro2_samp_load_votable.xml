@@ -17,8 +17,12 @@
 
     <PARAM name="OPERATION" datatype="char" arraysize="*" value="NEW">
       <DESCRIPTION>PARAM OPERATION indicates what operation to do among [NEW (new observation), ADD (default: add targets only)]</DESCRIPTION>
+      <VALUES>
+        <OPTION value="NEW"/>
+        <OPTION value="ADD"/>
+      </VALUES>
     </PARAM>
-    
+
     <!-- 
       pivot step (1,2,3,4,5) ignored.
       To stay VO oriented, the pivot step is too specific and is not considered as an input PARAM:
@@ -98,9 +102,9 @@
     </PARAM>
 
     <!-- POPS (CHARA only) -->
-    <PARAM name="POPS" datatype="char" arraysize="*" value="">
+    <PARAM name="POPS" datatype="char" arraysize="*" value="514">
       <DESCRIPTION>Optional (CHARA only) PARAM POPS indicates which pops combination is used for the given configuration using the following format:
-  Pop numbers among (1 to 5) like '11', '123', '1514' ...
+  Pop numbers among (1 to 5) like '11' (2T), '123' (3T), '1514' (4T), '123455' (6T) ...
   Note: the ordering must be consistent with the given configuration (i.e. station ordering)
       </DESCRIPTION>
     </PARAM>
@@ -113,9 +117,9 @@
     </PARAM>
 
     <!-- BEAMS (CHARA only) -->
-    <PARAM name="BEAMS" datatype="char" arraysize="*" value="">
+    <PARAM name="BEAMS" datatype="char" arraysize="*" value="V3 V4 V6">
       <DESCRIPTION>Optional (CHARA only) PARAM BEAMS indicates which beams are used for the given configuration using the following format:
-  Beams contains beam identifiers (1 to 6) separated by the character ' ' (0x20) i.e. V1 ... V6
+  Beams contains beam identifiers ('V1' to 'V6') separated by the character ' ' (0x20) i.e. 'V1 V2' (2T), 'V1 V2 V4' (3T) ...
   Note: the ordering must be consistent with the given configuration (i.e. station ordering)
       </DESCRIPTION>
     </PARAM>
