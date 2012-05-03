@@ -433,9 +433,9 @@ public final class ConfigurationManager extends BaseOIManager {
 
     if (extendedConfiguration != null) {
       // compute extended inteferometer configuration name:
-      final String name = getConfigurationName(extendedConfiguration);
+      final String confName = getConfigurationName(extendedConfiguration);
 
-      logger.info("changeConfiguration: extendedConfiguration = {}", name);
+      logger.info("changeConfiguration: use extendedConfiguration = {}", confName);
 
       // Configuration merge (clone + update parts)
       newConfiguration = new Configuration();
@@ -446,38 +446,38 @@ public final class ConfigurationManager extends BaseOIManager {
       }
 
       // process the InterferometerConfiguration list:
-      InterferometerConfiguration icOriginal = null;
+      boolean merged = false;
+
       for (InterferometerConfiguration ic : initialConfiguration.getInterferometerConfigurations().values()) {
-        if (name.equals(ic.getName())) {
-          icOriginal = ic;
+        if (!merged && confName.equalsIgnoreCase(ic.getName())) {
+          merged = true;
+
+          logger.info("changeConfiguration: merge configuration = {}", confName);
+
+          // note: do not modify extendedConfiguration as it belongs to ObservationSetting used when marshalling to XML.
+          // note: do not modify ic as it belongs to initial configuration.
+
+          final InterferometerConfiguration mergedConfiguration = mergeConfiguration(ic, extendedConfiguration);
+
+          // add merged configuration:
+          addInterferometerConfiguration(newConfiguration, mergedConfiguration);
         } else {
           newConfiguration.getInterferometerConfigurations().put(ic.getName(), ic);
         }
       }
 
-      if (icOriginal == null) {
-        logger.info("changeConfiguration: no original configuration = {}; add extendedConfiguration", name);
+      if (!merged) {
+        logger.info("changeConfiguration: added configuration = {}", confName);
 
         // add configuration (clone not needed):
         addInterferometerConfiguration(newConfiguration, extendedConfiguration);
-
-      } else {
-        logger.info("changeConfiguration: newConfiguration = merged configuration = {}", name);
-
-        // note: do not modify extendedConfiguration as it belongs to ObservationSetting used when marshalling to XML.
-        // note: do not modify icOriginal as it belongs to initial configuration.
-
-        final InterferometerConfiguration mergedConfiguration = mergeConfiguration(icOriginal, extendedConfiguration);
-
-        // add merged configuration:
-        addInterferometerConfiguration(newConfiguration, mergedConfiguration);
       }
 
     } else {
       // use only initial configuration:
       newConfiguration = initialConfiguration;
 
-      logger.info("changeConfiguration: newConfiguration = initialConfiguration");
+      logger.info("changeConfiguration: use initialConfiguration");
     }
 
     this.configuration = newConfiguration;
@@ -501,6 +501,7 @@ public final class ConfigurationManager extends BaseOIManager {
       int i = 0;
 
       for (FocalInstrumentConfiguration insConfInitial : merged.getInstruments()) {
+        // instrument reference equality (see AsproConfigurationIDResolver):
         if (insConfInitial.getFocalInstrument() == insConf.getFocalInstrument()) {
           insConfOriginal = insConfInitial;
           pos = i;
@@ -510,15 +511,16 @@ public final class ConfigurationManager extends BaseOIManager {
       }
 
       if (insConfOriginal == null) {
-        logger.info("mergeConfiguration: no original insConf = {}; add extended insConf", insConf.getFocalInstrument());
+        logger.info("mergeConfiguration: added instrumentConfiguration = {}", insConf.getFocalInstrument());
 
         merged.getInstruments().add(insConf);
 
       } else {
-        logger.info("changeConfiguration: merge insConf = {}", insConf.getFocalInstrument());
+        logger.info("mergeConfiguration: merge instrumentConfiguration = {}", insConf.getFocalInstrument());
 
         final FocalInstrumentConfiguration insConfMerged = (FocalInstrumentConfiguration) insConfOriginal.clone();
 
+        // replace by new instance:
         merged.getInstruments().remove(pos);
         merged.getInstruments().add(pos, insConfMerged);
 
@@ -537,12 +539,12 @@ public final class ConfigurationManager extends BaseOIManager {
           }
 
           if (insConfItemOriginal == null) {
-            logger.info("mergeConfiguration: no original insConfItem = {}; add extended insConfItem", insConfItem.getName());
+            logger.info("mergeConfiguration: added configuration item = {}", insConfItem.getName());
 
             insConfMerged.getConfigurations().add(insConfItem);
 
           } else {
-            logger.info("changeConfiguration: replace insConfItem = {}", insConfItem.getName());
+            logger.info("mergeConfiguration: merge configuration item = {}", insConfItem.getName());
 
             insConfMerged.getConfigurations().remove(pos);
             insConfMerged.getConfigurations().add(pos, insConfItem);
@@ -551,7 +553,7 @@ public final class ConfigurationManager extends BaseOIManager {
       }
     }
 
-    logger.info("changeConfiguration: newConfiguration = merged configuration = {}", merged);
+    logger.info("mergeConfiguration: newConfiguration = merged configuration = {}", merged);
 
     return merged;
   }
@@ -561,7 +563,7 @@ public final class ConfigurationManager extends BaseOIManager {
    * @param commit true to keep current configuration; false to use previous configuration
    */
   public void validateChangedConfiguration(final boolean commit) {
-    logger.info("validateChangedConfiguration: commit = {}", commit);
+    logger.debug("validateChangedConfiguration: commit = {}", commit);
 
     if (!commit) {
       // restore previous configuration:
