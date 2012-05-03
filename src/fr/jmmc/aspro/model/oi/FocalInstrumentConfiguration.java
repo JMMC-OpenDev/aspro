@@ -104,8 +104,7 @@ public class FocalInstrumentConfiguration
         }
         return this.configurations;
     }
-
-
+    
 //--simple--preserve
 
   /**
@@ -125,5 +124,5 @@ public class FocalInstrumentConfiguration
   }
 
 //--simple--preserve
-    
+
 }
