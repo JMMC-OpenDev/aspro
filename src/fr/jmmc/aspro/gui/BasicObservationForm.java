@@ -86,18 +86,18 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
   private final static ObservationManager om = ObservationManager.getInstance();
 
   /* members */
-  /** flag to enable / disable the automatic update of the observation when any swing component changes */
-  private boolean doAutoUpdateObservation = true;
   /** Warning image icon */
   private ImageIcon warningIcon = null;
-  /** current selected target to avoid empty list selection */
-  private Target currentTarget = null;
+  /** flag to enable / disable the automatic update of the observation when any swing component changes */
+  private boolean doAutoUpdateObservation = true;
   /** flag to enable / disable the automatic selection check of the target list */
   private boolean doAutoCheckTargets = true;
-  /** current selected instrument configuration to avoid empty list selection */
-  private String currentInstrumentConfiguration = null;
   /** flag to enable / disable the automatic selection check of the instrument configuration */
   private boolean doAutoCheckConfigurations = true;
+  /** current selected target to avoid empty list selection */
+  private Target currentTarget = null;
+  /** current selected instrument configuration to avoid empty list selection */
+  private String currentInstrumentConfiguration = null;
   /** last Pop config given by the interferometer configuration */
   private String lastConfPopConfig = null;
 
@@ -1173,13 +1173,16 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     // disable the automatic selection check of the target list :
     final boolean prevAutoCheckTargets = this.setAutoCheckTargets(false);
     try {
-      // reset cached values :
-      this.currentTarget = null;
       // clear selected target :
       this.jListTargets.clearSelection();
-
+      // reset cached values :
+      this.currentTarget = null;
       this.currentInstrumentConfiguration = null;
+      this.lastConfPopConfig = null;
 
+      // use observation context to enable/disable POPS FIRST (event ordering issue):
+      this.jTextPoPs.setEnabled(isPopsEditable());
+      
       // observation :
 
       // update the interferometer and interferometer configuration :
@@ -1247,9 +1250,6 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
       this.jComboBoxInterferometerConfiguration.setEnabled(ctx.isPeriodEditable());
       this.jComboBoxInstrument.setEnabled(ctx.isInstrumentEditable());
 
-      // TODO: conflicts with resetPops() / updatePops():
-      this.jTextPoPs.setEnabled(ctx.isPopsEditable());
-
       // Configuration(s):
       this.jListInstrumentConfigurations.setEnabled(ctx.isConfigurationsEditable());
 
@@ -1265,7 +1265,6 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
       this.jComboBoxInterferometer.setEnabled(true);
       this.jComboBoxInterferometerConfiguration.setEnabled(true);
       this.jComboBoxInstrument.setEnabled(true);
-      this.jTextPoPs.setEnabled(true);
 
       // Configuration(s):
       this.jListInstrumentConfigurations.setEnabled(true);
