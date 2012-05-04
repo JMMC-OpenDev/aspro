@@ -95,10 +95,8 @@ public final class VotableSampMessageHandler extends SampMessageHandler {
 
       final Metadata senderMetadata = SampManager.getMetaData(senderId);
 
-      String searchCalVersion = null;
-
       // SearchCal release > 4.4.1:
-      searchCalVersion = senderMetadata.getString(SampMetaData.RELEASE_VERSION.id());
+      String searchCalVersion = senderMetadata.getString(SampMetaData.RELEASE_VERSION.id());
 
       if (searchCalVersion == null) {
         // SearchCal release <= 4.4.1:
