@@ -435,8 +435,6 @@ public final class ConfigurationManager extends BaseOIManager {
       // compute extended inteferometer configuration name:
       final String confName = getConfigurationName(extendedConfiguration);
 
-      logger.info("changeConfiguration: use extendedConfiguration = {}", confName);
-
       // Configuration merge (clone + update parts)
       newConfiguration = new Configuration();
 
@@ -452,7 +450,7 @@ public final class ConfigurationManager extends BaseOIManager {
         if (!merged && confName.equalsIgnoreCase(ic.getName())) {
           merged = true;
 
-          logger.info("changeConfiguration: merge configuration = {}", confName);
+          logger.info("changeConfiguration: merge configuration [{}]", confName);
 
           // note: do not modify extendedConfiguration as it belongs to ObservationSetting used when marshalling to XML.
           // note: do not modify ic as it belongs to initial configuration.
@@ -467,7 +465,7 @@ public final class ConfigurationManager extends BaseOIManager {
       }
 
       if (!merged) {
-        logger.info("changeConfiguration: added configuration = {}", confName);
+        logger.info("changeConfiguration: add configuration [{}]", confName);
 
         // add configuration (clone not needed):
         addInterferometerConfiguration(newConfiguration, extendedConfiguration);
@@ -477,7 +475,7 @@ public final class ConfigurationManager extends BaseOIManager {
       // use only initial configuration:
       newConfiguration = initialConfiguration;
 
-      logger.info("changeConfiguration: use initialConfiguration");
+      logger.info("changeConfiguration: use initial configuration");
     }
 
     this.configuration = newConfiguration;
@@ -511,12 +509,12 @@ public final class ConfigurationManager extends BaseOIManager {
       }
 
       if (insConfOriginal == null) {
-        logger.info("mergeConfiguration: added instrumentConfiguration = {}", insConf.getFocalInstrument());
+        logger.info("mergeConfiguration: add instrumentConfiguration [{}]", insConf.getFocalInstrument().getName());
 
         merged.getInstruments().add(insConf);
 
       } else {
-        logger.info("mergeConfiguration: merge instrumentConfiguration = {}", insConf.getFocalInstrument());
+        logger.info("mergeConfiguration: merge instrumentConfiguration [{}]", insConf.getFocalInstrument().getName());
 
         final FocalInstrumentConfiguration insConfMerged = (FocalInstrumentConfiguration) insConfOriginal.clone();
 
@@ -539,12 +537,12 @@ public final class ConfigurationManager extends BaseOIManager {
           }
 
           if (insConfItemOriginal == null) {
-            logger.info("mergeConfiguration: added configuration item = {}", insConfItem.getName());
+            logger.info("mergeConfiguration: add configuration item [{}]", insConfItem.getName());
 
             insConfMerged.getConfigurations().add(insConfItem);
 
           } else {
-            logger.info("mergeConfiguration: merge configuration item = {}", insConfItem.getName());
+            logger.info("mergeConfiguration: merge configuration item [{}]", insConfItem.getName());
 
             insConfMerged.getConfigurations().remove(pos);
             insConfMerged.getConfigurations().add(pos, insConfItem);
@@ -552,8 +550,6 @@ public final class ConfigurationManager extends BaseOIManager {
         }
       }
     }
-
-    logger.info("mergeConfiguration: newConfiguration = merged configuration = {}", merged);
 
     return merged;
   }
