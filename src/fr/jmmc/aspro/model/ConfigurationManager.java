@@ -408,8 +408,14 @@ public final class ConfigurationManager extends BaseOIManager {
     // compute configuration name if missing :
     String name = ic.getName();
     if (name == null) {
+      name = "";
+
       // interferometer name is an id :
-      name = ic.getInterferometer().getName();
+      if (ic.getInterferometer() != null) {
+        name = ic.getInterferometer().getName();
+      } else {
+        name += "UNDEFINED";
+      }
 
       if (ic.getVersion() != null) {
         name += " " + ic.getVersion();
