@@ -120,9 +120,7 @@ public class BaseOIManager {
 
       final long start = System.nanoTime();
 
-      final Unmarshaller u = this.jf.createUnMarshaller();
-
-      u.setProperty(IDResolver.class.getName(), new AsproConfigurationIDResolver(ConfigurationManager.getInstance().getInitialConfiguration()));
+      final Unmarshaller u = createUnMarshallerWithAsproConfigurationIDResolver();
 
       result = u.unmarshal(inputFile);
 
@@ -153,7 +151,9 @@ public class BaseOIManager {
 
       final long start = System.nanoTime();
 
-      result = this.jf.createUnMarshaller().unmarshal(reader);
+      final Unmarshaller u = createUnMarshallerWithAsproConfigurationIDResolver();
+
+      result = u.unmarshal(reader);
 
       if (logger.isInfoEnabled()) {
         logger.info("unmarshall : duration = {} ms.", 1e-6d * (System.nanoTime() - start));
@@ -208,6 +208,24 @@ public class BaseOIManager {
   }
 
   /**
+   * Creates a JAXB Unmarshaller customized for Aspro 2 Observation Settings (custom ID resolver)
+   *
+   * @return JAXB Unmarshaller
+   * @throws XmlBindException if a JAXBException was caught while creating an unmarshaller
+   */
+  protected final Unmarshaller createUnMarshallerWithAsproConfigurationIDResolver() throws XmlBindException {
+    final Unmarshaller u = this.jf.createUnMarshaller();
+
+    // This custom ID Resolver resolves xsd:IDREF(s) pointing to configuration elements (InterferometerDescription):
+    try {
+      u.setProperty(IDResolver.class.getName(), new AsproConfigurationIDResolver(ConfigurationManager.getInstance().getInitialConfiguration()));
+    } catch (PropertyException pe) {
+      throw new XmlBindException("JAXB Unmarshaller.setProperty() failure:", pe);
+    }
+    return u;
+  }
+
+  /**
    * Creates a JAXB Marshaller customized for Aspro 2 (name spaces)
    *
    * @return JAXB Marshaller
@@ -248,7 +266,7 @@ public class BaseOIManager {
    * @throws IllegalStateException if an unexpected exception occured
    * @throws IOException if an I/O exception occured
    */
-  protected final static void handleException(final String message, final JAXBException je) throws IllegalStateException, IOException {
+  protected static void handleException(final String message, final JAXBException je) throws IllegalStateException, IOException {
     final Throwable cause = je.getCause();
     if (cause != null) {
       if (cause instanceof IOException) {
