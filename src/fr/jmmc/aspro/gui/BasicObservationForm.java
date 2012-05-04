@@ -19,6 +19,7 @@ import fr.jmmc.aspro.model.event.WarningContainerEvent;
 import fr.jmmc.aspro.model.oi.FocalInstrumentConfigurationChoice;
 import fr.jmmc.aspro.model.oi.InterferometerConfiguration;
 import fr.jmmc.aspro.model.oi.InterferometerConfigurationChoice;
+import fr.jmmc.aspro.model.oi.ObservationContext;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.ObservationVariant;
 import fr.jmmc.aspro.model.oi.Pop;
@@ -545,14 +546,16 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
    * Open the target editor using the selected target
    */
   public void showTargetEditor() {
-    final Target target = getSelectedTarget();
+    if (isTargetEditable()) {
+      final Target target = getSelectedTarget();
 
-    if (target != null) {
-      final String selectedTab = (AsproGui.getInstance().getSettingPanel().isSelectedTabUsingTargetModel())
-              ? TargetEditorDialog.TAB_MODELS : TargetEditorDialog.TAB_TARGETS;
+      if (target != null) {
+        final String selectedTab = (AsproGui.getInstance().getSettingPanel().isSelectedTabUsingTargetModel())
+                ? TargetEditorDialog.TAB_MODELS : TargetEditorDialog.TAB_TARGETS;
 
-      // show model editor :
-      TargetEditorDialog.showEditor(target.getName(), selectedTab);
+        // show model editor :
+        TargetEditorDialog.showEditor(target.getName(), selectedTab);
+      }
     }
   }
 
@@ -751,10 +754,11 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         this.jListTargets.setSelectedValue(selectedTarget, true);
       }
 
-      // disable buttons if the target list is empty :
-      this.jButtonDeleteTarget.setEnabled(!displayTargets.isEmpty());
-      this.jButtonTargetEditor.setEnabled(!displayTargets.isEmpty());
-
+      if (isTargetEditable()) {
+        // disable buttons if the target list is empty :
+        this.jButtonDeleteTarget.setEnabled(!displayTargets.isEmpty());
+        this.jButtonTargetEditor.setEnabled(!displayTargets.isEmpty());
+      }
     } finally {
       // restore the automatic selection check of the target list :
       this.setAutoCheckTargets(prevAutoCheckTargets);
@@ -1005,7 +1009,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         // note : setValue() can fire a property change event :
         this.jTextPoPs.setValue(value);
         // allow user inputs when no PoPs are defined in the configuration and not in multi-conf:
-        this.jTextPoPs.setEnabled(value == null || popMulti);
+        this.jTextPoPs.setEnabled(isPopsEditable() && (value == null || popMulti));
       } else {
         // note : setValue() can fire a property change event :
         this.jTextPoPs.setValue(null);
@@ -1039,7 +1043,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         if (POPS_MULTI_CONF.equals(popConfig)) {
           // note : setValue() can fire a property change event :
           this.jTextPoPs.setValue(null);
-          this.jTextPoPs.setEnabled(true);
+          this.jTextPoPs.setEnabled(isPopsEditable());
         } else {
           // note : setText() does not fire a property change event :
           this.jTextPoPs.setText(popConfig);
@@ -1051,7 +1055,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         if (lastPopConfig != null) {
           // note : setValue() can fire a property change event :
           this.jTextPoPs.setValue(null);
-          this.jTextPoPs.setEnabled(true);
+          this.jTextPoPs.setEnabled(isPopsEditable());
         }
       }
     }
@@ -1233,6 +1237,66 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     }
     // ensure one configuration is selected :
     this.checkInstrumentConfigurationSelection();
+
+    // use observation context to enable/disable GUI features:
+    final ObservationContext ctx = getObservationContext();
+
+    if (ctx != null) {
+      // Main settings:
+      this.jComboBoxInterferometer.setEnabled(ctx.isInterferometerEditable());
+      this.jComboBoxInterferometerConfiguration.setEnabled(ctx.isPeriodEditable());
+      this.jComboBoxInstrument.setEnabled(ctx.isInstrumentEditable());
+
+      // TODO: conflicts with resetPops() / updatePops():
+      this.jTextPoPs.setEnabled(ctx.isPopsEditable());
+
+      // Configuration(s):
+      this.jListInstrumentConfigurations.setEnabled(ctx.isConfigurationsEditable());
+
+      // Constraints:
+      this.jCheckBoxNightLimit.setEnabled(ctx.isNightEditable());
+      this.jDateSpinner.setEnabled(ctx.isDateEditable());
+      this.jFieldMinElev.setEnabled(ctx.isMinElevationEditable());
+
+    } else {
+      // reset GUI:
+
+      // Main settings:
+      this.jComboBoxInterferometer.setEnabled(true);
+      this.jComboBoxInterferometerConfiguration.setEnabled(true);
+      this.jComboBoxInstrument.setEnabled(true);
+      this.jTextPoPs.setEnabled(true);
+
+      // Configuration(s):
+      this.jListInstrumentConfigurations.setEnabled(true);
+
+      // Constraints:
+      this.jCheckBoxNightLimit.setEnabled(true);
+      this.jDateSpinner.setEnabled(true);
+      this.jFieldMinElev.setEnabled(true);
+    }
+
+    // TARGETS:
+    final boolean targetEditable = isTargetEditable();
+
+    this.starSearchField.setEnabled(targetEditable);
+    this.jListTargets.setEnabled(targetEditable);
+    this.jButtonTargetEditor.setEnabled(targetEditable);
+    this.jButtonDeleteTarget.setEnabled(targetEditable);
+  }
+
+  /**
+   * @return true if the pops are editable
+   */
+  private boolean isPopsEditable() {
+    return (getObservationContext() != null) ? getObservationContext().isPopsEditable() : true;
+  }
+
+  /**
+   * @return true if the target(s) is editable
+   */
+  private boolean isTargetEditable() {
+    return (getObservationContext() != null) ? getObservationContext().isTargetsEditable() : true;
   }
 
   /**
@@ -1539,5 +1603,13 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
 
     // return previous state :
     return previous;
+  }
+
+  /**
+   * Return the optional observation context of the main observation
+   * @return observation context or null
+   */
+  private ObservationContext getObservationContext() {
+    return om.getMainObservation().getContext();
   }
 }
