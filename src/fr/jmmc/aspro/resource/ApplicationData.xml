@@ -7,9 +7,9 @@
 
 <ApplicationData link="http://www.jmmc.fr/aspro2">
 
-  <program name="Aspro2" version="0.9.1 beta 6"/>
+  <program name="Aspro2" version="0.9.1 beta 7"/>
   
-  <compilation date="26/04/2011" compiler="JDK 1.5.0_16"/>
+  <compilation date="04/05/2012" compiler="JDK 1.5.0_16"/>
 
   <text>
     <![CDATA[ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations
@@ -152,13 +152,15 @@
   <releasenotes>
     <release version="0.9.1">
       <prerelease version="0.9.1 beta 7"> 
-        <change type="CHANGE">Automatically correct invalid interferometer configuration (CHARA VEGA June 2011) to CHARA</change>
+        <change type="FEATURE">Added complete support for VOTable ASPRO parameters to provide custom configuration (baseline, pops, beams) 
+          and disable GUI features used by the SAMP interoperability with PIVOT (CHARA VEGA)</change>
+        <change type="CHANGE">Automatically fix invalid interferometer configuration (CHARA VEGA June 2011) to CHARA</change>
       </prerelease>
       <prerelease version="0.9.1 beta 6"> 
         <change type="FEATURE">Updated number of scans in PIONIER P2PP template</change>
         <change type="FEATURE">Updated PIONIER instrument modes to add K band: LARGE_H, BROAD_K and LARGE_K</change>
         <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/305">Use native file choosers on Mac OS X; 
-        avoid directory creation bug when exporting targets to Observing blocks</change>
+          avoid directory creation bug when exporting targets to Observing blocks</change>
         <change type="FEATURE">Moved File chooser preferences file (last used directory per file type) i.e. previous settings are lost.</change>
       </prerelease>
       <prerelease version="0.9.1 beta 5"> 
