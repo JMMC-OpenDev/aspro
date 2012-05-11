@@ -33,7 +33,7 @@ public final class AsproCustomPrefixMapper extends NamespacePrefixMapper {
 
   /**
    * Return the singleton instance
-   * @return
+   * @return singleton instance
    */
   public final static NamespacePrefixMapper getInstance() {
     return instance;

@@ -96,7 +96,7 @@ public final class FitsImageUtils {
    * @param pixRefCol column position of the reference pixel (real starting from 1.0)
    * @param incRow signed coordinate increment along the row axis in radians
    * @param incCol signed coordinate increment along the column axis in radians
-   * @return 
+   * @return new FitsImage
    */
   public static FitsImage createFitsImage(final float[][] data,
           final double pixRefRow, final double pixRefCol,
@@ -123,7 +123,7 @@ public final class FitsImageUtils {
    * @param pixRefCol column position of the reference pixel (real starting from 1.0)
    * @param incRow signed coordinate increment along the row axis in radians
    * @param incCol signed coordinate increment along the column axis in radians
-   * @return 
+   * @return new FitsImage
    */
   public static FitsImage createFitsImage(final float[][] data,
           final double dataMin, final double dataMax,
