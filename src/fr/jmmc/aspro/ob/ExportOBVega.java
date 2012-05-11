@@ -6,7 +6,6 @@ package fr.jmmc.aspro.ob;
 import edu.dartmouth.AstroSkyCalcObservation;
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.ConfigurationManager;
-import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.Range;
 import fr.jmmc.aspro.model.observability.ObservabilityData;
 import fr.jmmc.aspro.model.observability.StarData;
@@ -20,10 +19,6 @@ import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetConfiguration;
 import fr.jmmc.aspro.model.oi.TargetInformation;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
-import fr.jmmc.aspro.service.ObservabilityService;
-import fr.jmmc.jmcs.util.FileUtils;
-import java.io.File;
-import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.List;
@@ -52,7 +47,7 @@ public final class ExportOBVega {
   /** field separator ( )*/
   public final static String SEPARATOR = " ";
   /** end of line character (\n) */
-  public final static String END_OF_LINE = FileUtils.LINE_SEPARATOR;
+  public final static String END_OF_LINE = System.getProperty("line.separator");
   /** line separator (****) */
   public final static String LINE_SEPARATOR = "****" + END_OF_LINE;
   /** file separator (####) */
@@ -113,19 +108,12 @@ public final class ExportOBVega {
   }
 
   /**
-   * Generate the Star List for the current observation.
-   * @param file file to save
-   * @throws IOException if an I/O exception occured while writing the observing block
+   * Generate the Star List for the current observation into the given buffer
+   * @param sb buffer to fill
+   * @param observation observation to use
+   * @param obsData computed observability data using astronomical night (-18 deg) without night restrictions
    */
-  public static void process(final File file) throws IOException {
-    logger.debug("generate file: {}", file);
-
-    // use main observation :
-    final ObservationSetting observation = ObservationManager.getInstance().getMainObservation();
-
-    // Compute Observability data using astronomical night (-18 deg) without night restrictions :
-    final ObservabilityService os = new ObservabilityService(observation, true);
-    final ObservabilityData obsData = os.compute();
+  public static void generate(final StringBuilder sb, final ObservationSetting observation, final ObservabilityData obsData) {
 
     // Prepare the Chara Setup according to the Pop configuration :
     final String charaSetup = prepareCharaSetup(observation, obsData.getBestPops().getPopList());
@@ -135,9 +123,6 @@ public final class ExportOBVega {
 
     // Prepare the baseline suffix for observation name :
     final String baseLine = observation.getInstrumentConfiguration().getStations().replaceAll(" ", "");
-
-    // Generate the file content :
-    final StringBuilder sb = new StringBuilder(512);
 
     // get target user informations to have proper target ordering (science + calibrators):
     final TargetUserInformations targetUserInfos = observation.getOrCreateTargetUserInfos();
@@ -188,11 +173,6 @@ public final class ExportOBVega {
     processCalib(sb, observation);
 
     sb.append(END_OF_FILE);
-
-    final String document = sb.toString();
-
-    // Finally, write the file :
-    FileUtils.writeFile(file, document);
   }
 
   /**

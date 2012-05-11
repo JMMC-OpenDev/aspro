@@ -4,9 +4,9 @@
 package fr.jmmc.aspro.interop;
 
 import fr.jmmc.aspro.AsproConstants;
+import fr.jmmc.aspro.gui.action.ExportOBVegaAction;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
-import fr.jmmc.aspro.ob.ExportOBVega;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.network.interop.SampCapability;
 import fr.jmmc.jmcs.network.interop.SampCapabilityAction;
@@ -67,7 +67,7 @@ public final class StarListSendAction extends SampCapabilityAction {
       final File file = FileUtils.getTempFile("starlist.txt");
       try {
 
-        ExportOBVega.process(file);
+        ExportOBVegaAction.process(file);
 
         parameters = new HashMap<String, String>(4);
         parameters.put(PARAM_STAR_LIST, file.toURI().toString());

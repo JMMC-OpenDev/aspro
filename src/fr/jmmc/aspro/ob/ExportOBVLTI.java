@@ -266,10 +266,6 @@ public class ExportOBVLTI {
     String absTimeList = "";
 
     // Compute Observability data with min elevation = 30 deg (date and night restrictions depend on the current observation) :
-/*    
-    final ObservabilityService os = new ObservabilityService(observation, target, AsproConstants.OB_MIN_ELEVATION);
-    final ObservabilityData obsData = os.compute();
-     */
     final ObservabilityData obsData = os.getData();
 
     final StarData starData = obsData.getStarData(target.getName());

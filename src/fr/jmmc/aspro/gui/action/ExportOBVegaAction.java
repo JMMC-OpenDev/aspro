@@ -4,11 +4,14 @@
 package fr.jmmc.aspro.gui.action;
 
 import fr.jmmc.aspro.model.ObservationManager;
+import fr.jmmc.aspro.model.observability.ObservabilityData;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.ob.ExportOBVega;
+import fr.jmmc.aspro.service.ObservabilityService;
 import fr.jmmc.jmcs.gui.component.FileChooser;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.gui.component.StatusBar;
+import fr.jmmc.jmcs.util.FileUtils;
 import fr.jmmc.jmcs.util.MimeType;
 import java.io.File;
 import java.io.IOException;
@@ -61,7 +64,7 @@ public final class ExportOBVegaAction {
     // If a file was defined (No cancel in the dialog)
     if (file != null) {
       try {
-        ExportOBVega.process(file);
+        process(file);
 
         // use main observation :
         final ObservationSetting observation = ObservationManager.getInstance().getMainObservation();
@@ -79,6 +82,37 @@ public final class ExportOBVegaAction {
         MessagePane.showErrorMessage("Could not export to file : " + file.getAbsolutePath(), ioe);
       }
     }
+  }
+
+  /**
+   * Generate the Star List for the current observation.
+   * 
+   * Used by:
+   * - ExportOBVegaAction (File/Export to an Observing Block)
+   * - StarListSendAction (Interop/Send StarList to PIVOT)
+   * 
+   * @param file file to save
+   * @throws IOException if an I/O exception occured while writing the observing block
+   */
+  public static void process(final File file) throws IOException {
+    logger.debug("generate file: {}", file);
+
+    // use main observation :
+    final ObservationSetting observation = ObservationManager.getInstance().getMainObservation();
+
+    // Compute Observability data using astronomical night (-18 deg) without night restrictions :
+    final ObservabilityService os = new ObservabilityService(observation, true);
+    final ObservabilityData obsData = os.compute();
+
+    // Generate the StarList content into this buffer:
+    final StringBuilder sb = new StringBuilder(1024);
+
+    ExportOBVega.generate(sb, observation, obsData);
+
+    final String document = sb.toString();
+
+    // Finally, write the file :
+    FileUtils.writeFile(file, document);
   }
 
   /**
