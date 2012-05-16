@@ -7,9 +7,9 @@
 
 <ApplicationData link="http://www.jmmc.fr/aspro2">
 
-  <program name="Aspro2" version="0.9.1 beta 7"/>
+  <program name="Aspro2" version="0.9.1 beta 8"/>
   
-  <compilation date="04/05/2012" compiler="JDK 1.5.0_16"/>
+  <compilation date="16/05/2012" compiler="JDK 1.5.0_16"/>
 
   <text>
     <![CDATA[ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations
@@ -151,6 +151,11 @@
 
   <releasenotes>
     <release version="0.9.1">
+      <prerelease version="0.9.1 beta 8"> 
+        <change type="CHANGE" url="http://trac.jmmc.fr/jmmc-sw/ticket/316">Merge custom configuration (baseline, pops, beams) with internal configuration (missing beams / PoPs) for interoperability with PIVOT (CHARA VEGA)</change>
+        <change type="CHANGE" url="http://trac.jmmc.fr/jmmc-sw/ticket/316">Added CHARA detailled configuration as one warning to display baseline, beams and optionally user-defined PoPs</change>
+        <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/316">Fixed StarList generation (CHARA VEGA) when beams are undefined in the Aspro2 configuration; use default interferometer beams (V1 ... V6)</change>
+      </prerelease>
       <prerelease version="0.9.1 beta 7"> 
         <change type="FEATURE">Added complete support for VOTable ASPRO parameters to provide custom configuration (baseline, pops, beams) 
           and disable GUI features used by the SAMP interoperability with PIVOT (CHARA VEGA)</change>
