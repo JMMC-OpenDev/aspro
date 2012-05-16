@@ -543,10 +543,17 @@ public final class ExportOBVega {
     final List<Station> stations = observation.getInstrumentConfiguration().getStationList();
 
     // CHARA : predefined channel per station for a specific base line :
-    final List<Channel> relatedChannels = ConfigurationManager.getInstance().getInstrumentConfigurationChannels(
+    List<Channel> relatedChannels = ConfigurationManager.getInstance().getInstrumentConfigurationChannels(
             observation.getInterferometerConfiguration().getName(),
             observation.getInstrumentConfiguration().getName(),
             observation.getInstrumentConfiguration().getStations());
+
+    // if no channels defined, use any interferometer channels:
+    if (relatedChannels == null || relatedChannels.isEmpty()) {
+      relatedChannels = observation.getInterferometerConfiguration().getInterferometerConfiguration().getInterferometer().getChannels();
+
+      logger.info("No predefined channels for baseline [{}]; use default interferometer channels: {}", stations, relatedChannels);
+    }
 
     final int nStations = stations.size();
 
