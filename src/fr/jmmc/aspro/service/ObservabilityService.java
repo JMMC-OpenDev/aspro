@@ -373,26 +373,45 @@ public final class ObservabilityService {
    * @param targets target list
    */
   private void findObservability(final List<Target> targets) {
+    if (this.hasPops) {
+      // show baseline and beams in warnings:
+      final StringBuilder sbConf = new StringBuilder(64);
+      sbConf.append("Baseline: ");
+      for (Beam b : this.beams) {
+        sbConf.append(b.getStation().getName()).append(" ");
+      }
 
-    // PoPs : Compatible Mode if no user defined Pop Combination :
-    if (this.hasPops && targets.size() > 1 && this.popCombinations.size() > 1) {
-      // Objective : find the pop combination that maximize the observability of the complete list of target
+      sbConf.append("- Beams: ");
+      for (Beam b : this.beams) {
+        sbConf.append(b.getChannel().getName()).append(" ");
+      }
 
-      final PopCombination bestPopCombination = findCompatiblePoPs(targets);
+      if (this.popCombinations.size() == 1) {
+        // user defined Pop combination:
+        sbConf.append("- PoPs: ").append(this.popCombinations.get(0).getIdentifier());
+      }
 
-      if (bestPopCombination != null) {
-        this.data.setBestPops(bestPopCombination);
+      addWarning(sbConf.toString());
 
-        // use the user defined PoPs configuration :
-        this.popCombinations.clear();
-        this.popCombinations.add(bestPopCombination);
+      // PoPs : Compatible Mode if no user defined Pop Combination :
+      if (targets.size() > 1 && this.popCombinations.size() > 1) {
+        // Objective : find the pop combination that maximize the observability of the complete list of target
 
-        // Use arrays instead of List for performance:
-        this.obsCtx.setPopCombs(new PopCombination[1]);
-        this.popCombinations.toArray(this.obsCtx.getPopCombs());
+        final PopCombination bestPopCombination = findCompatiblePoPs(targets);
+
+        if (bestPopCombination != null) {
+          this.data.setBestPops(bestPopCombination);
+
+          // use the user defined PoPs configuration :
+          this.popCombinations.clear();
+          this.popCombinations.add(bestPopCombination);
+
+          // Use arrays instead of List for performance:
+          this.obsCtx.setPopCombs(new PopCombination[1]);
+          this.popCombinations.toArray(this.obsCtx.getPopCombs());
+        }
       }
     }
-
     for (Target target : targets) {
 
       // fast interrupt :
@@ -403,7 +422,6 @@ public final class ObservabilityService {
       findTargetObservability(target);
 
     } // for Target
-
   }
 
   /**
@@ -530,7 +548,6 @@ public final class ObservabilityService {
       final GroupedPopObservabilityData popBestData = popMergeList.get(end);
 
       if (popMergeList.size() > 1) {
-
         final List<GroupedPopObservabilityData> bestPoPs = new ArrayList<GroupedPopObservabilityData>(MAX_POPS_IN_WARNING);
 
         final StringBuilder sbBestPops = new StringBuilder(128);
