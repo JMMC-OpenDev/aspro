@@ -1,13 +1,7 @@
 #ifndef aspro_H
 #define aspro_H
 /*******************************************************************************
- * JMMC project
- *
- * "@(#) $Id: aspro.h,v 1.1 2009-09-08 08:15:21 ccmgr Exp $"
- *
- * History
- * -------
- * $Log: not supported by cvs2svn $
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
 
 /**
