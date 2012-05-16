@@ -14,25 +14,9 @@ import fr.jmmc.aspro.model.event.ObservationEvent;
 import fr.jmmc.aspro.model.event.TargetSelectionEvent;
 import fr.jmmc.aspro.model.event.UpdateObservationEvent;
 import fr.jmmc.aspro.model.event.WarningContainerEvent;
-import fr.jmmc.aspro.model.oi.AtmosphereQuality;
-import fr.jmmc.aspro.model.oi.BaseValue;
-import fr.jmmc.aspro.model.oi.FocalInstrumentConfigurationChoice;
-import fr.jmmc.aspro.model.oi.FocalInstrumentMode;
-import fr.jmmc.aspro.model.oi.InterferometerConfiguration;
-import fr.jmmc.aspro.model.oi.InterferometerConfigurationChoice;
-import fr.jmmc.aspro.model.oi.ObservationCollection;
-import fr.jmmc.aspro.model.oi.ObservationSetting;
-import fr.jmmc.aspro.model.oi.ObservationVariant;
-import fr.jmmc.aspro.model.oi.SpectralBand;
-import fr.jmmc.aspro.model.oi.Station;
-import fr.jmmc.aspro.model.oi.Target;
-import fr.jmmc.aspro.model.oi.TargetConfiguration;
-import fr.jmmc.aspro.model.oi.TargetUserInformations;
-import fr.jmmc.aspro.model.oi.UserModel;
-import fr.jmmc.aspro.model.oi.WhenSetting;
+import fr.jmmc.aspro.model.oi.*;
 import fr.jmmc.aspro.model.util.SpectralBandUtils;
 import fr.jmmc.aspro.service.UserModelService;
-import fr.jmmc.aspro.util.CombUtils;
 import fr.jmmc.jmal.Band;
 import fr.jmmc.jmal.star.Star;
 import fr.jmmc.jmal.model.ModelDefinition;
@@ -954,8 +938,8 @@ public final class ObservationManager extends BaseOIManager implements Observer 
         t.setName(name);
 
         /*
-        Strings = {DEC=+43 49 23.910, RA=05 01 58.1341, OTYPELIST=**,Al*,SB*,*,Em*,V*,IR,UV, SPECTRALTYPES=A8Iab:}
-        Doubles = {PROPERMOTION_RA=0.18, PARALLAX=1.6, DEC_d=43.8233083, FLUX_J=1.88, PROPERMOTION_DEC=-2.31, FLUX_K=1.533, PARALLAX_err=1.16, FLUX_V=3.039, FLUX_H=1.702, RA_d=75.4922254}
+         Strings = {DEC=+43 49 23.910, RA=05 01 58.1341, OTYPELIST=**,Al*,SB*,*,Em*,V*,IR,UV, SPECTRALTYPES=A8Iab:}
+         Doubles = {PROPERMOTION_RA=0.18, PARALLAX=1.6, DEC_d=43.8233083, FLUX_J=1.88, PROPERMOTION_DEC=-2.31, FLUX_K=1.533, PARALLAX_err=1.16, FLUX_V=3.039, FLUX_H=1.702, RA_d=75.4922254}
          */
 
         // coordinates (deg) :
@@ -1537,24 +1521,29 @@ public final class ObservationManager extends BaseOIManager implements Observer 
 
     instrumentChoice.setInstrumentConfiguration(cm.getInterferometerInstrumentConfiguration(interferometerConfiguration, instrument));
 
-    if (instrumentChoice.getInstrumentConfiguration() == null) {
+    final FocalInstrumentConfiguration insConf = instrumentChoice.getInstrumentConfiguration();
+    if (insConf == null) {
       throw new IllegalStateException("The instrument [" + instrument + "] is invalid !");
     }
 
     // first resolve / fix observation variants :
     for (ObservationVariant obsVariant : observation.getVariants()) {
-      obsVariant.setStationList(cm.getInstrumentConfigurationStations(interferometerConfiguration, instrument, obsVariant.getStations()));
+      obsVariant.setStationList(ConfigurationManager.getInstrumentConfigurationStations(insConf, obsVariant.getStations()));
 
       // fix invalid stations :
       if (obsVariant.getStationList() == null) {
-        final String stationIds = findInstrumentConfigurationStations(interferometerConfiguration, instrument, obsVariant.getStations());
+        logger.info("the instrument configuration [{}] is incorrect, trying to match a possible configuration ...", obsVariant.getStations());
+
+        final String stationIds = ConfigurationManager.findInstrumentConfigurationStations(insConf, obsVariant.getStations());
 
         if (stationIds == null) {
           throw new IllegalStateException("The instrument configuration [" + obsVariant.getStations() + "] is invalid !");
         }
 
+        logger.info("the correct instrument configuration is [{}]. Save your file to keep this modification", stationIds);
+
         obsVariant.setStations(stationIds);
-        obsVariant.setStationList(cm.getInstrumentConfigurationStations(interferometerConfiguration, instrument, stationIds));
+        obsVariant.setStationList(ConfigurationManager.getInstrumentConfigurationStations(insConf, stationIds));
       }
     }
 
@@ -1572,82 +1561,6 @@ public final class ObservationManager extends BaseOIManager implements Observer 
     if (logger.isTraceEnabled()) {
       logger.trace("updateObservation: {}", toString(observation));
     }
-  }
-
-  /**
-   * Try to find an invalid instrument configuration (A0 B0 C0) by testing all possible permutation of the stations.
-   * This problem that can happen if
-   * - ESO CfP changes
-   * - we have errors in our configuration files
-   *
-   * for example : A0 B0 C0 is equivalent to C0 B0 A0
-   *
-   * @param interferometerConfiguration interferometer configuration name
-   * @param instrumentName name of the instrument
-   * @param stationConf stations (A0 B0 C0)
-   * @return correct value for stations (C0 B0 A0) or null if no match found
-   */
-  private String findInstrumentConfigurationStations(final String interferometerConfiguration,
-          final String instrumentName,
-          final String stationConf) {
-    boolean res = false;
-
-    // trim to be sure (xml manually modified) :
-    final String stationNames = stationConf.trim();
-
-    logger.info("the instrument configuration [{}] is incorrect, trying to match a possible configuration ...",
-            stationNames);
-
-    // A0 B0 C0 is equivalent to C0 B0 A0
-    final String[] stations = stationNames.split(" ");
-
-    // number of stations in the string :
-    final int nStation = stations.length;
-
-    if (nStation < 2) {
-      // bad value
-      return null;
-    }
-
-    // generate station combinations (indexes) : :
-    final List<int[]> iStations = CombUtils.generatePermutations(nStation);
-
-    String stationIds = null;
-    List<Station> stationList = null;
-
-    final StringBuilder sb = new StringBuilder(16);
-
-    int[] idx;
-    // skip first permutation as it is equivalent to stationNames :
-    for (int i = 1, j = 0, size = iStations.size(); i < size; i++) {
-      idx = iStations.get(i);
-
-      for (j = 0; j < nStation; j++) {
-        if (j > 0) {
-          sb.append(' ');
-        }
-        sb.append(stations[idx[j]]);
-      }
-
-      stationIds = sb.toString();
-      // recycle :
-      sb.setLength(0);
-
-      if (logger.isDebugEnabled()) {
-        logger.debug("trying instrument configuration: {}", stationIds);
-      }
-
-      // find station list corresponding to the station ids :
-      stationList = cm.getInstrumentConfigurationStations(interferometerConfiguration, instrumentName, stationIds);
-
-      if (stationList != null) {
-        logger.info("the correct instrument configuration is [{}]. Save your file to keep this modification",
-                stationIds);
-
-        return stationIds;
-      }
-    }
-    return null;
   }
 
   /**

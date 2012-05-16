@@ -22,6 +22,7 @@ import fr.jmmc.aspro.model.oi.Position3D;
 import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.StationLinks;
 import fr.jmmc.aspro.service.GeocentricCoords;
+import fr.jmmc.aspro.util.CombUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -456,7 +457,7 @@ public final class ConfigurationManager extends BaseOIManager {
         if (!merged && confName.equalsIgnoreCase(ic.getName())) {
           merged = true;
 
-          logger.info("changeConfiguration: merge configuration [{}]", confName);
+          logger.info("changeConfiguration: merge InterferometerConfiguration [{}]", confName);
 
           // note: do not modify extendedConfiguration as it belongs to ObservationSetting used when marshalling to XML.
           // note: do not modify ic as it belongs to initial configuration.
@@ -471,7 +472,7 @@ public final class ConfigurationManager extends BaseOIManager {
       }
 
       if (!merged) {
-        logger.info("changeConfiguration: add configuration [{}]", confName);
+        logger.info("changeConfiguration: add InterferometerConfiguration [{}]", confName);
 
         // add configuration (clone not needed):
         addInterferometerConfiguration(newConfiguration, extendedConfiguration);
@@ -515,12 +516,13 @@ public final class ConfigurationManager extends BaseOIManager {
       }
 
       if (insConfOriginal == null) {
-        logger.info("mergeConfiguration: add instrumentConfiguration [{}]", insConf.getFocalInstrument().getName());
+        logger.info("mergeConfiguration: add FocalInstrumentConfiguration [{}]", insConf.getFocalInstrument().getName());
 
+        // Suppose that FocalInstrumentConfiguration are valids (stations, channels, pops):
         merged.getInstruments().add(insConf);
 
       } else {
-        logger.info("mergeConfiguration: merge instrumentConfiguration [{}]", insConf.getFocalInstrument().getName());
+        logger.info("mergeConfiguration: merge FocalInstrumentConfiguration [{}]", insConf.getFocalInstrument().getName());
 
         final FocalInstrumentConfiguration insConfMerged = (FocalInstrumentConfiguration) insConfOriginal.clone();
 
@@ -528,6 +530,7 @@ public final class ConfigurationManager extends BaseOIManager {
         merged.getInstruments().remove(pos);
         merged.getInstruments().add(pos, insConfMerged);
 
+        // for each configuration item:
         for (FocalInstrumentConfigurationItem insConfItem : insConf.getConfigurations()) {
           FocalInstrumentConfigurationItem insConfItemOriginal = null;
           pos = -1;
@@ -543,21 +546,82 @@ public final class ConfigurationManager extends BaseOIManager {
           }
 
           if (insConfItemOriginal == null) {
-            logger.info("mergeConfiguration: add configuration item [{}]", insConfItem.getName());
+
+            // If the channels are undefined, try merging channels/PoPs from equivalent configuration (same stations, different order):
+            if (insConfItem.getChannels().isEmpty()) {
+              logger.debug("mergeConfiguration: try merging channels  {}", insConfItem);
+
+              final String stationIds = findInstrumentConfigurationStations(insConfOriginal, insConfItem.getName());
+
+              if (stationIds != null) {
+                insConfItemOriginal = getInstrumentConfiguration(insConfOriginal, stationIds);
+
+                logger.debug("mergeConfiguration: found equivalent configuration {}", insConfItemOriginal);
+
+                if (!insConfItemOriginal.getChannels().isEmpty()) {
+                  // handle permutations to get channels / pops:
+                  logger.info("mergeConfiguration: merge channels / pops for configuration {} with {}", insConfItem, insConfItemOriginal);
+
+                  mergeInstrumentConfiguration(insConfItem, insConfItemOriginal);
+                }
+              }
+            }
+
+            logger.info("mergeConfiguration: add {}", insConfItem);
 
             insConfMerged.getConfigurations().add(insConfItem);
 
           } else {
-            logger.info("mergeConfiguration: merge configuration item [{}]", insConfItem.getName());
+            // if channels are defined, use the given configuration; otherwise keep original configuration:
+            if (!insConfItem.getChannels().isEmpty()) {
+              logger.info("mergeConfiguration: use given {}", insConfItem);
 
-            insConfMerged.getConfigurations().remove(pos);
-            insConfMerged.getConfigurations().add(pos, insConfItem);
+              insConfMerged.getConfigurations().remove(pos);
+              insConfMerged.getConfigurations().add(pos, insConfItem);
+            } else {
+              logger.info("mergeConfiguration: ignore given {}; use {}", insConfItem, insConfItemOriginal);
+            }
           }
         }
       }
     }
 
     return merged;
+  }
+
+  /**
+   * Merge two instrument configuration item data (pops, beams) for matching stations
+   * @param insConfItem instrument configuration item to update
+   * @param insConfItemOriginal other instrument configuration item to get data
+   */
+  private static void mergeInstrumentConfiguration(final FocalInstrumentConfigurationItem insConfItem, final FocalInstrumentConfigurationItem insConfItemOriginal) {
+    final boolean copyChannels = insConfItem.getChannels().isEmpty() && !insConfItemOriginal.getChannels().isEmpty();
+    final boolean copyPops = insConfItem.getPops().isEmpty() && !insConfItemOriginal.getPops().isEmpty();
+
+    // for each station, merge beams / pop data:
+    for (int i = 0, size = insConfItem.getStations().size(); i < size; i++) {
+      final Station station = insConfItem.getStations().get(i);
+
+      // find corresponding station in the other instrument configuration item (station order may be different):
+      int pos = -1;
+      for (int j = 0; j < size; j++) {
+        if (station.getName().equalsIgnoreCase(insConfItemOriginal.getStations().get(j).getName())) {
+          pos = j;
+          break;
+        }
+      }
+
+      if (pos != -1) {
+        if (copyChannels) {
+          // copy channel information:
+          insConfItem.getChannels().add(insConfItemOriginal.getChannels().get(pos));
+        }
+        if (copyPops) {
+          // copy PoPs information:
+          insConfItem.getPops().add(insConfItemOriginal.getPops().get(pos));
+        }
+      }
+    }
   }
 
   /**
@@ -756,6 +820,37 @@ public final class ConfigurationManager extends BaseOIManager {
   }
 
   /**
+   * Return the instrument configuration item for the given interferometer configuration, instrument name and instrument configuration
+   * @param insConf instrument configuration
+   * @param instrumentConfigurationName name of the instrument configuration
+   * @return instrument configuration item
+   */
+  public static FocalInstrumentConfigurationItem getInstrumentConfiguration(final FocalInstrumentConfiguration insConf, final String instrumentConfigurationName) {
+    if (insConf != null) {
+      for (FocalInstrumentConfigurationItem c : insConf.getConfigurations()) {
+        if (c.getName().equals(instrumentConfigurationName)) {
+          return c;
+        }
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Return the list of stations for the given interferometer configuration, instrument name and instrument configuration
+   * @param insConf instrument configuration
+   * @param instrumentConfigurationName name of the instrument configuration
+   * @return list of stations
+   */
+  public static List<Station> getInstrumentConfigurationStations(final FocalInstrumentConfiguration insConf, final String instrumentConfigurationName) {
+    final FocalInstrumentConfigurationItem c = getInstrumentConfiguration(insConf, instrumentConfigurationName);
+    if (c != null) {
+      return c.getStations();
+    }
+    return null;
+  }
+
+  /**
    * Return the list of stations for the given interferometer configuration, instrument name and instrument configuration
    * @param configurationName name of the interferometer configuration
    * @param instrumentName name of the instrument
@@ -765,11 +860,7 @@ public final class ConfigurationManager extends BaseOIManager {
   public List<Station> getInstrumentConfigurationStations(final String configurationName, final String instrumentName, final String instrumentConfigurationName) {
     final FocalInstrumentConfiguration ic = getInterferometerInstrumentConfiguration(configurationName, instrumentName);
     if (ic != null) {
-      for (FocalInstrumentConfigurationItem c : ic.getConfigurations()) {
-        if (c.getName().equals(instrumentConfigurationName)) {
-          return c.getStations();
-        }
-      }
+      return getInstrumentConfigurationStations(ic, instrumentConfigurationName);
     }
     return null;
   }
@@ -784,10 +875,9 @@ public final class ConfigurationManager extends BaseOIManager {
   public List<Channel> getInstrumentConfigurationChannels(final String configurationName, final String instrumentName, final String instrumentConfigurationName) {
     final FocalInstrumentConfiguration ic = getInterferometerInstrumentConfiguration(configurationName, instrumentName);
     if (ic != null) {
-      for (FocalInstrumentConfigurationItem c : ic.getConfigurations()) {
-        if (c.getName().equals(instrumentConfigurationName)) {
-          return c.getChannels();
-        }
+      final FocalInstrumentConfigurationItem c = getInstrumentConfiguration(ic, instrumentConfigurationName);
+      if (c != null) {
+        return c.getChannels();
       }
     }
     return null;
@@ -803,10 +893,9 @@ public final class ConfigurationManager extends BaseOIManager {
   public List<Pop> getInstrumentConfigurationPoPs(final String configurationName, final String instrumentName, final String instrumentConfigurationName) {
     final FocalInstrumentConfiguration ic = getInterferometerInstrumentConfiguration(configurationName, instrumentName);
     if (ic != null) {
-      for (FocalInstrumentConfigurationItem c : ic.getConfigurations()) {
-        if (c.getName().equals(instrumentConfigurationName)) {
-          return c.getPops();
-        }
+      final FocalInstrumentConfigurationItem c = getInstrumentConfiguration(ic, instrumentConfigurationName);
+      if (c != null) {
+        return c.getPops();
       }
     }
     return null;
@@ -932,6 +1021,69 @@ public final class ConfigurationManager extends BaseOIManager {
             }
           }
         }
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Try to find an invalid instrument configuration (A0 B0 C0) by testing all possible permutation of the stations.
+   * This problem that can happen if
+   * - ESO CfP changes
+   * - we have errors in our configuration files
+   *
+   * for example : A0 B0 C0 is equivalent to C0 B0 A0
+   *
+   * @param insConf instrument configuration
+   * @param stationConf stations (A0 B0 C0)
+   * @return correct value for stations (C0 B0 A0) or null if no match found
+   */
+  public static String findInstrumentConfigurationStations(final FocalInstrumentConfiguration insConf, final String stationConf) {
+
+    // trim to be sure (xml manually modified) :
+    final String stationNames = stationConf.trim();
+
+    // A0 B0 C0 is equivalent to C0 B0 A0
+    final String[] stations = stationNames.split(" ");
+
+    // number of stations in the string :
+    final int nStation = stations.length;
+
+    if (nStation < 2) {
+      // bad value
+      return null;
+    }
+
+    // generate station combinations (indexes) : :
+    final List<int[]> iStations = CombUtils.generatePermutations(nStation);
+
+    final StringBuilder sb = new StringBuilder(16);
+
+    int[] idx;
+    // skip first permutation as it is equivalent to stationNames :
+    for (int i = 1, j, size = iStations.size(); i < size; i++) {
+      idx = iStations.get(i);
+
+      for (j = 0; j < nStation; j++) {
+        if (j > 0) {
+          sb.append(' ');
+        }
+        sb.append(stations[idx[j]]);
+      }
+
+      final String stationIds = sb.toString();
+      // recycle :
+      sb.setLength(0);
+
+      if (logger.isDebugEnabled()) {
+        logger.debug("trying instrument configuration: {}", stationIds);
+      }
+
+      // find station list corresponding to the station ids :
+      final List<Station> stationList = getInstrumentConfigurationStations(insConf, stationIds);
+
+      if (stationList != null) {
+        return stationIds;
       }
     }
     return null;

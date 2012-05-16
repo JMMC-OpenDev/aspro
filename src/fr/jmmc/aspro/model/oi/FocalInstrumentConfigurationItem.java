@@ -190,7 +190,7 @@ public class FocalInstrumentConfigurationItem
   
   @Override
   public final String toString() {
-    return "FocalInstrumentConfigurationItem [" + getName() + "]";
+    return "FocalInstrumentConfigurationItem [ stations: " + getName() + " - pops: " + getPops() + " - channels: " + getChannels() + " ]";
   }
 //--simple--preserve
 
