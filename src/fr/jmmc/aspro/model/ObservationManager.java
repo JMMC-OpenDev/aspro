@@ -34,6 +34,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Vector;
 import java.util.concurrent.CopyOnWriteArrayList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -938,8 +939,8 @@ public final class ObservationManager extends BaseOIManager implements Observer 
         t.setName(name);
 
         /*
-         Strings = {DEC=+43 49 23.910, RA=05 01 58.1341, OTYPELIST=**,Al*,SB*,*,Em*,V*,IR,UV, SPECTRALTYPES=A8Iab:}
-         Doubles = {PROPERMOTION_RA=0.18, PARALLAX=1.6, DEC_d=43.8233083, FLUX_J=1.88, PROPERMOTION_DEC=-2.31, FLUX_K=1.533, PARALLAX_err=1.16, FLUX_V=3.039, FLUX_H=1.702, RA_d=75.4922254}
+        Strings = {DEC=+43 49 23.910, RA=05 01 58.1341, OTYPELIST=**,Al*,SB*,*,Em*,V*,IR,UV, SPECTRALTYPES=A8Iab:}
+        Doubles = {PROPERMOTION_RA=0.18, PARALLAX=1.6, DEC_d=43.8233083, FLUX_J=1.88, PROPERMOTION_DEC=-2.31, FLUX_K=1.533, PARALLAX_err=1.16, FLUX_V=3.039, FLUX_H=1.702, RA_d=75.4922254}
          */
 
         // coordinates (deg) :
@@ -1038,9 +1039,22 @@ public final class ObservationManager extends BaseOIManager implements Observer 
     boolean changed = false;
 
     // Find instrument band from main observation :
-    final FocalInstrumentMode insMode = getMainObservation().getInstrumentConfiguration().getFocalInstrumentMode();
+    FocalInstrumentMode insMode = getMainObservation().getInstrumentConfiguration().getFocalInstrumentMode();
     if (insMode == null) {
-      throw new IllegalStateException("The instrumentMode is empty !");
+      // use the first instrument mode of the instrument:
+      final Vector<String> instrumentModes = ConfigurationManager.getInstance().getInstrumentModes(
+              getMainObservation().getInterferometerConfiguration().getName(),
+              getMainObservation().getInstrumentConfiguration().getName());
+
+      if (instrumentModes.isEmpty()) {
+        throw new IllegalStateException("The instrumentMode is empty !");
+      }
+      insMode = ConfigurationManager.getInstance().getInstrumentMode(
+              getMainObservation().getInterferometerConfiguration().getName(),
+              getMainObservation().getInstrumentConfiguration().getName(),
+              instrumentModes.get(0));
+
+      logger.info("The instrumentMode is empty; using first instrument Mode {}", insMode.getName());
     }
 
     final double lambda = insMode.getWaveLength();

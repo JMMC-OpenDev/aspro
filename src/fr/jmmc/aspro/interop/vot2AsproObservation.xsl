@@ -452,6 +452,7 @@
       </xsl:if>
 
       <!-- GUI context -->
+      <!-- Note: topcat convert boolean to 'F' instead of 'false' -->
       <context>
         <operation><xsl:choose>
           <xsl:when test="$CTX_OPERATION != '' and ($CTX_OPERATION = 'NEW' or $CTX_OPERATION = 'ADD')"><xsl:value-of select="$CTX_OPERATION"/></xsl:when>

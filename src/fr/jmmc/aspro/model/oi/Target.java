@@ -827,6 +827,17 @@ public class Target
     }
     return this.id;
   }
+  
+  /**
+   * Update the name and identifier.
+   * Warning: this modified identifier is not updated in relationships
+   * @param name target name
+   */
+  public final void updateNameAndIdentifier(final String name) {
+    this.id = null;
+    setName(name);
+    getIdentifier();
+  }
 
   /**
    * This equals method uses the identifier equality
@@ -1105,6 +1116,68 @@ public class Target
     // trim and upper case :
     return name.trim().toUpperCase();
   }
+  
+  
+  /**
+   * Merge target information on the given target with information from the source target
+   * @param target target to update
+   * @param source target where information comes from
+   */
+  public static void mergeTarget(final Target target, final Target source) {
+    if (target.getEQUINOX() == 0f && source.getEQUINOX() != 0f) {
+      target.setEQUINOX(source.getEQUINOX());
+    }
+    if (target.getSYSVEL() == null && source.getSYSVEL() != null) {
+      target.setSYSVEL(source.getSYSVEL());
+    }
+    if (target.getVELTYP() == null && source.getVELTYP() != null) {
+      target.setVELTYP(source.getVELTYP());
+    }
+    
+    if (target.getPMRA() == null && source.getPMRA() != null) {
+      target.setPMRA(source.getPMRA());
+    }
+    if (target.getPMDEC() == null && source.getPMDEC() != null) {
+      target.setPMDEC(source.getPMDEC());
+    }
+    
+    if (target.getPARALLAX() == null && source.getPARALLAX() != null) {
+      target.setPARALLAX(source.getPARALLAX());
+    }
+    if (target.getPARAERR() == null && source.getPARAERR() != null) {
+      target.setPARAERR(source.getPARAERR());
+    }
+
+    if (target.getIDS() == null && source.getIDS() != null) {
+      target.setIDS(source.getIDS());
+    }
+    if (target.getOBJTYP() == null && source.getOBJTYP() != null) {
+      target.setOBJTYP(source.getOBJTYP());
+    }
+    if (target.getSPECTYP() == null && source.getSPECTYP() != null) {
+      target.setSPECTYP(source.getSPECTYP());
+    }
+
+    if (target.getFLUXV() == null && source.getFLUXV() != null) {
+      target.setFLUXV(source.getFLUXV());
+    }
+    if (target.getFLUXI() == null && source.getFLUXI() != null) {
+      target.setFLUXI(source.getFLUXI());
+    }
+    if (target.getFLUXJ() == null && source.getFLUXJ() != null) {
+      target.setFLUXJ(source.getFLUXJ());
+    }
+    if (target.getFLUXH() == null && source.getFLUXH() != null) {
+      target.setFLUXH(source.getFLUXH());
+    }
+    if (target.getFLUXK() == null && source.getFLUXK() != null) {
+      target.setFLUXK(source.getFLUXK());
+    }
+    if (target.getFLUXN() == null && source.getFLUXN() != null) {
+      target.setFLUXN(source.getFLUXN());
+    }
+  }
+  
 //--simple--preserve
 
 }

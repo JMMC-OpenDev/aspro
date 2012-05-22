@@ -54,69 +54,88 @@ public final class SearchCalVOTableHandler {
    *
    * @param votable votable to process
    * @param searchCalVersion SearchCal GUI version
+   * @return true if the votable was processed i.e. contains proper SearchCal data
    * 
    * @throws IOException if an I/O exception occured
    * @throws IllegalArgumentException if the file is not an Observation
    */
-  static void processMessage(final String votable, final String searchCalVersion) throws IOException {
+  static boolean processMessage(final String votable, final String searchCalVersion) throws IOException {
 
     // use an XSLT to transform the SearchCal votable document to an Aspro 2 Observation :
     final long start = System.nanoTime();
 
-    final String document = XmlFactory.transform(votable, XSLT_FILE);
+    final String document = XmlFactory.transform(votable, XSLT_FILE).trim();
 
     if (logger.isInfoEnabled()) {
       logger.info("VOTable transformation (XSLT) duration = {} ms.", 1e-6d * (System.nanoTime() - start));
     }
 
+    if (document.length() == 0) {
+      logger.debug("document is empty (probably not one SearchCal VOTable)");
+
+      return false;
+    }
     logger.debug("document :\n{}", document);
 
     final ObservationManager om = ObservationManager.getInstance();
 
     final ObservationSetting searchCalObservation = om.load(new StringReader(document));
 
-    final String targetName = searchCalObservation.getName();
-
-    logger.debug("science target: {}", targetName);
-
     final List<Target> calibrators = searchCalObservation.getTargets();
 
-    if (logger.isDebugEnabled()) {
-      logger.debug("calibrators :");
-      for (Target cal : calibrators) {
-        logger.debug(cal.toString());
-      }
-    }
+    final Target scienceTarget;
 
-    // Mimic SearchCal science object detection distance preference ("query.SCIENCE_DETECTION_DISTANCE")
+    if (calibrators.isEmpty()) {
+      scienceTarget = null;
+    } else {
+      // first target is the science target (partial information only):
+      scienceTarget = calibrators.remove(0);
 
-    // @note SCIENCE_DISTANCE_CHECK : filter science target if distance is less than science object detection distance preference (1 arcsec):
-    for (Iterator<Target> it = calibrators.iterator(); it.hasNext();) {
-      final Target cal = it.next();
+      // fix target name:
+      scienceTarget.updateNameAndIdentifier(Target.formatName(scienceTarget.getName()));
 
-      final BaseValue dist = cal.getCalibratorInfos().getField(CalibratorInformations.FIELD_DISTANCE);
+      logger.debug("science target: {}", scienceTarget);
 
-      if (dist != null) {
-        final double rowDistance = dist.getNumber().doubleValue();
-
-        // If the distance is close enough to be detected as a science object
-        if (rowDistance < SCIENCE_DETECTION_DISTANCE) {
-          if (logger.isInfoEnabled()) {
-            logger.info("calibrator distance is [{}] - skip this calibrator considered as science object : {} - IDS = {}",
-                    new Object[]{rowDistance, cal, cal.getIDS()});
-          }
-          it.remove();
+      if (logger.isDebugEnabled()) {
+        logger.debug("calibrators :");
+        for (Target cal : calibrators) {
+          logger.debug(cal.toString());
         }
       }
-    }
 
-    // Add the SearchCalVersion parameter to calibrators :
-    final StringValue paramSearchCalVersion = new StringValue();
-    paramSearchCalVersion.setName(CalibratorInformations.PARAMETER_SCL_GUI_VERSION);
-    paramSearchCalVersion.setValue(searchCalVersion);
+      // Mimic SearchCal science object detection distance preference ("query.SCIENCE_DETECTION_DISTANCE")
 
-    for (Target cal : calibrators) {
-      cal.getCalibratorInfos().getParameters().add(paramSearchCalVersion);
+      // @note SCIENCE_DISTANCE_CHECK : filter science target if distance is less than science object detection distance preference (1 arcsec):
+      for (Iterator<Target> it = calibrators.iterator(); it.hasNext();) {
+        final Target cal = it.next();
+
+        final BaseValue dist = cal.getCalibratorInfos().getField(CalibratorInformations.FIELD_DISTANCE);
+
+        if (dist != null) {
+          final double rowDistance = dist.getNumber().doubleValue();
+
+          // If the distance is close enough to be detected as a science object
+          if (rowDistance < SCIENCE_DETECTION_DISTANCE) {
+            if (logger.isInfoEnabled()) {
+              logger.info("calibrator distance is [{}] - skip this calibrator considered as science object : {} - IDS = {}",
+                      new Object[]{rowDistance, cal, cal.getIDS()});
+            }
+            it.remove();
+
+            // reuse science target data to update scienceTarget object:
+            Target.mergeTarget(scienceTarget, cal);
+          }
+        }
+      }
+
+      // Add the SearchCalVersion parameter to calibrators :
+      final StringValue paramSearchCalVersion = new StringValue();
+      paramSearchCalVersion.setName(CalibratorInformations.PARAMETER_SCL_GUI_VERSION);
+      paramSearchCalVersion.setValue(searchCalVersion);
+
+      for (Target cal : calibrators) {
+        cal.getCalibratorInfos().getParameters().add(paramSearchCalVersion);
+      }
     }
 
     // Use invokeLater to avoid concurrency and ensure that 
@@ -128,12 +147,6 @@ public final class SearchCalVOTableHandler {
 
         if (TargetEditorDialog.isTargetEditorActive()) {
           MessagePane.showErrorMessage("Please close the target editor first !");
-          return;
-        }
-
-        // check that science target is present :
-        if (om.getTarget(targetName) == null) {
-          MessagePane.showErrorMessage("Target '" + targetName + "' not found in targets (wrong SearchCal target) !");
           return;
         }
 
@@ -166,6 +179,15 @@ public final class SearchCalVOTableHandler {
           }
         }
 
+        final String targetName = scienceTarget.getName();
+
+        // check that science target is present :
+        if (om.getTarget(targetName) == null) {
+          logger.info("Target '" + targetName + "' not found in targets; adding it (partial information).");
+
+          editTargets.add(scienceTarget);
+        }
+
         final String report = mergeTargets(editTargets, editTargetUserInfos, targetName, calibrators);
 
         if (logger.isDebugEnabled()) {
@@ -190,6 +212,9 @@ public final class SearchCalVOTableHandler {
         MessagePane.showMessage(report);
       }
     });
+
+    // interpreted as SearchCal votable:
+    return true;
   }
 
   /**

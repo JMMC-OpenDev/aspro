@@ -95,26 +95,36 @@ public final class VotableSampMessageHandler extends SampMessageHandler {
 
       String searchCalVersion = null;
 
-      // can be null if the client map is not up to date or the client disconnected !
+      // Note: Getting SearchCal version in sender meta data is not robust:
+      // do not work with AppLauncher as senderMetadata corresponds to AppLauncher.metadata and not SearchCal !
+      // TODO: use VOTABLE information instead !
+
+      // Note: can be null if the client map is not up to date or the client disconnected:
       final Metadata senderMetadata = SampManager.getMetaData(senderId);
 
-      logger.debug("senderMetadata: {}", senderMetadata);
+      if (senderMetadata != null) {
+        logger.debug("senderMetadata: {}", senderMetadata);
 
-// TODO: not robust to detect SearchCal votable format:
-      if (senderMetadata == null) {
-        // SearchCal release > 4.4.1:
-        searchCalVersion = senderMetadata.getString(SampMetaData.RELEASE_VERSION.id());
+        if ("searchcal".equalsIgnoreCase(senderMetadata.getName())) {
+          // SearchCal release > 4.4.1:
+          searchCalVersion = senderMetadata.getString(SampMetaData.RELEASE_VERSION.id());
 
-        if (searchCalVersion == null) {
-          // SearchCal release <= 4.4.1:
-          searchCalVersion = senderMetadata.getString("searchcal.version");
+          if (searchCalVersion == null) {
+            // SearchCal release <= 4.4.1:
+            searchCalVersion = senderMetadata.getString("searchcal.version");
+          }
         }
       }
 
       logger.debug("SearchCal version = {}", searchCalVersion);
 
       if (searchCalVersion == null) {
-        AnyVOTableHandler.processMessage(votable);
+        // try to interpret votable as SearchCal one then as one generic votable (target):
+
+        // TODO: use 'undefined' as SearchCal version temporarly:
+        if (!SearchCalVOTableHandler.processMessage(votable, "undefined")) {
+          AnyVOTableHandler.processMessage(votable);
+        }
       } else {
         SearchCalVOTableHandler.processMessage(votable, searchCalVersion);
       }
