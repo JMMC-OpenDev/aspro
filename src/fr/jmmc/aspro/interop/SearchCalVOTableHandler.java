@@ -40,7 +40,7 @@ public final class SearchCalVOTableHandler {
   /** XSLT file path */
   private final static String XSLT_FILE = "fr/jmmc/aspro/interop/scvot2AsproObservation.xsl";
   /** maximum calibrators accepted at once */
-  public final static int MAX_CALIBRATORS = 10;
+  public final static int MAX_CALIBRATORS = 50;
 
   /**
    * Private constructor
