@@ -93,22 +93,29 @@ public final class VotableSampMessageHandler extends SampMessageHandler {
 
       logger.debug("votable :\n{}", votable);
 
+      String searchCalVersion = null;
+
+      // can be null if the client map is not up to date or the client disconnected !
       final Metadata senderMetadata = SampManager.getMetaData(senderId);
 
-      // SearchCal release > 4.4.1:
-      String searchCalVersion = senderMetadata.getString(SampMetaData.RELEASE_VERSION.id());
+      logger.debug("senderMetadata: {}", senderMetadata);
 
-      if (searchCalVersion == null) {
-        // SearchCal release <= 4.4.1:
-        searchCalVersion = senderMetadata.getString("searchcal.version");
+// TODO: not robust to detect SearchCal votable format:
+      if (senderMetadata == null) {
+        // SearchCal release > 4.4.1:
+        searchCalVersion = senderMetadata.getString(SampMetaData.RELEASE_VERSION.id());
+
+        if (searchCalVersion == null) {
+          // SearchCal release <= 4.4.1:
+          searchCalVersion = senderMetadata.getString("searchcal.version");
+        }
       }
+
+      logger.debug("SearchCal version = {}", searchCalVersion);
 
       if (searchCalVersion == null) {
         AnyVOTableHandler.processMessage(votable);
-
       } else {
-        logger.debug("SearchCal version = {}", searchCalVersion);
-
         SearchCalVOTableHandler.processMessage(votable, searchCalVersion);
       }
 
