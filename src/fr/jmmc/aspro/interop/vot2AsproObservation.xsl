@@ -79,20 +79,51 @@
         <xsl:with-param name="ucd10">META.MAIN</xsl:with-param>
       </xsl:call-template>
     </xsl:variable>
-    
+
+    <!-- handle correct coordinate frame (J2000 / EPOCH = 2000) ie COOSYS -->
+            
     <xsl:variable name="RA_index">
       <xsl:call-template name="getColumnIndexVOT11">
         <xsl:with-param name="ucd11">pos.eq.ra</xsl:with-param>
         <xsl:with-param name="ucd10">POS_EQ_RA</xsl:with-param>
         <xsl:with-param name="unit">h:m:s</xsl:with-param>
+        <xsl:with-param name="unit_other">hms</xsl:with-param>
       </xsl:call-template>
     </xsl:variable>
+
+    <xsl:variable name="RADeg_index">
+      <xsl:choose>
+        <xsl:when test="$RA_index = ''">
+          <xsl:call-template name="getColumnIndexVOT11">
+            <xsl:with-param name="ucd11">pos.eq.ra</xsl:with-param>
+            <xsl:with-param name="ucd10">POS_EQ_RA</xsl:with-param>
+            <xsl:with-param name="unit">deg</xsl:with-param>
+          </xsl:call-template>
+        </xsl:when>
+        <xsl:otherwise></xsl:otherwise>
+      </xsl:choose>
+    </xsl:variable>
+    
     <xsl:variable name="DEC_index">
       <xsl:call-template name="getColumnIndexVOT11">
         <xsl:with-param name="ucd11">pos.eq.dec</xsl:with-param>
         <xsl:with-param name="ucd10">POS_EQ_DEC</xsl:with-param>
         <xsl:with-param name="unit">d:m:s</xsl:with-param>
+        <xsl:with-param name="unit_other">dms</xsl:with-param>
       </xsl:call-template>
+    </xsl:variable>
+
+    <xsl:variable name="DECDeg_index">
+      <xsl:choose>
+        <xsl:when test="$DEC_index = ''">
+          <xsl:call-template name="getColumnIndexVOT11">
+            <xsl:with-param name="ucd11">pos.eq.dec</xsl:with-param>
+            <xsl:with-param name="ucd10">POS_EQ_DEC</xsl:with-param>
+            <xsl:with-param name="unit">deg</xsl:with-param>
+          </xsl:call-template>
+        </xsl:when>
+        <xsl:otherwise></xsl:otherwise>
+      </xsl:choose>
     </xsl:variable>
 
     <xsl:variable name="RV_index">
@@ -227,6 +258,14 @@
     </xsl:variable>
 
     <!-- TODO: check equinox and HMS / DMS are really J2000 -->
+    <!--
+  <COOSYS ID="J2000" equinox="2000" epoch="J2000" system="eq_FK5"/>
+
+  <COOSYS ID="J2000" system="eq_FK5" equinox="J2000"/>
+
+  <COOSYS ID="J2000_1991.250" system="eq_FK5" equinox="J2000" epoch="1991.250"/>
+  <COOSYS ID="J2000" system="eq_FK5" equinox="J2000"/>
+    -->
     <xsl:variable name="EQUINOX" select="translate(//VOT11:COOSYS[1]/@equinox, 'J', '')"/>
 
 
@@ -284,166 +323,184 @@
   -->          
         </instrumentConfiguration>
       </xsl:if>
+                              
+      <!-- skip data if no columns matching NAME/RA/DEC -->
+      <xsl:if test="$NAME_index != '' and ($RA_index != '' or $RADeg_index != '') and ($DEC_index != '' or $DECDeg_index != '')">
 
-      <!-- Build one target element per votable row -->
-      <xsl:for-each select="./VOT11:TABLE/VOT11:DATA/VOT11:TABLEDATA/VOT11:TR">
+        <!-- Build one target element per votable row -->
+        <xsl:for-each select="./VOT11:TABLE/VOT11:DATA/VOT11:TABLEDATA/VOT11:TR">
 
-        <xsl:variable name="ID_HD">
-          <xsl:if test="./VOT11:TD[position()=$ID_HD_index]/text()">
-            <xsl:value-of select="concat('HD ',./VOT11:TD[position()=$ID_HD_index])"/>
+          <xsl:variable name="ID_HD">
+            <xsl:if test="./VOT11:TD[position()=$ID_HD_index]/text()">
+              <xsl:value-of select="concat('HD ',./VOT11:TD[position()=$ID_HD_index])"/>
+            </xsl:if>
+          </xsl:variable>
+          <xsl:variable name="ID_HIP">
+            <xsl:if test="./VOT11:TD[position()=$ID_HIP_index]/text()">
+              <xsl:value-of select="concat('HIP ',./VOT11:TD[position()=$ID_HIP_index])"/>
+            </xsl:if>
+          </xsl:variable>
+          <xsl:variable name="ID_2MASS">
+            <xsl:if test="./VOT11:TD[position()=$ID_2MASS_index]/text()">
+              <xsl:value-of select="concat('2MASS J',./VOT11:TD[position()=$ID_2MASS_index])"/>
+            </xsl:if>
+          </xsl:variable>
+          <xsl:variable name="ID_PIVOT">
+            <xsl:if test="./VOT11:TD[position()=$ID_PIVOT_index]/text()">
+              <xsl:value-of select="concat('PIVOT ',./VOT11:TD[position()=$ID_PIVOT_index])"/>
+            </xsl:if>
+          </xsl:variable>
+
+          <xsl:variable name="RA">
+            <xsl:choose>
+              <xsl:when test="$RA_index != '' and ./VOT11:TD[position()=$RA_index]/text()">
+                <xsl:value-of select="translate(./VOT11:TD[position()=$RA_index], ' ', ':')"/>
+              </xsl:when>
+              <xsl:when test="$RADeg_index != '' and ./VOT11:TD[position()=$RADeg_index]/text()">
+                <!-- convert degrees to decimal hours -->
+                <xsl:value-of select="format-number(./VOT11:TD[position()=$RADeg_index]/text() div 15.0, '#0.000###')"/> 
+              </xsl:when>
+              <xsl:otherwise></xsl:otherwise>
+            </xsl:choose>
+          </xsl:variable>
+          <xsl:variable name="DEC">
+            <xsl:choose>
+              <xsl:when test="$DEC_index != '' and ./VOT11:TD[position()=$DEC_index]/text()">
+                <xsl:value-of select="translate(./VOT11:TD[position()=$DEC_index], ' ', ':')"/>
+              </xsl:when>
+              <xsl:when test="$DECDeg_index != '' and ./VOT11:TD[position()=$DECDeg_index]/text()">
+                <xsl:value-of select="format-number(./VOT11:TD[position()=$DECDeg_index]/text(), '#0.000###')"/> 
+              </xsl:when>
+              <xsl:otherwise></xsl:otherwise>
+            </xsl:choose>
+          </xsl:variable>
+
+          <xsl:variable name="NAME"     select="./VOT11:TD[position()=$NAME_index]"/>
+          <xsl:variable name="RV"       select="./VOT11:TD[position()=$RV_index]"/>
+          <xsl:variable name="PMRA"     select="./VOT11:TD[position()=$PMRA_index]"/>
+          <xsl:variable name="PMDEC"    select="./VOT11:TD[position()=$PMDEC_index]"/>
+          <xsl:variable name="PLX"      select="./VOT11:TD[position()=$PLX_index]"/>
+          <xsl:variable name="e_PLX"    select="./VOT11:TD[position()=$e_PLX_index]"/>
+          <xsl:variable name="OTYPES"   select="./VOT11:TD[position()=$OTYPES_index]"/>
+          <xsl:variable name="SP_TYPES" select="./VOT11:TD[position()=$SP_TYPES_index]"/>
+          <xsl:variable name="FLUX_V"   select="./VOT11:TD[position()=$FLUX_V_index]"/>
+          <xsl:variable name="FLUX_I"   select="./VOT11:TD[position()=$FLUX_I_index]"/>
+          <xsl:variable name="FLUX_J"   select="./VOT11:TD[position()=$FLUX_J_index]"/>
+          <xsl:variable name="FLUX_H"   select="./VOT11:TD[position()=$FLUX_H_index]"/>
+          <xsl:variable name="FLUX_K"   select="./VOT11:TD[position()=$FLUX_K_index]"/>
+          <xsl:variable name="FLUX_N"   select="./VOT11:TD[position()=$FLUX_N_index]"/>
+
+          <xsl:if test="$NAME/text() and $RA != '' and $DEC != ''">
+            <target>
+              <!-- no id attribute : defined by Aspro2 -->
+
+              <!-- identifier -->
+              <name>
+                <xsl:value-of select="$NAME"/>
+              </name>
+
+              <!-- position -->
+              <RA>
+                <xsl:value-of select="$RA"/>
+              </RA>
+              <DEC>
+                <xsl:value-of select="$DEC"/>
+              </DEC>
+              <EQUINOX>
+                <xsl:value-of select="$EQUINOX"/>
+              </EQUINOX>
+
+              <!-- radial velocity -->
+              <xsl:if test="$RV/text()">
+                <SYSVEL>
+                  <xsl:value-of select="$RV"/>
+                </SYSVEL>
+              </xsl:if>
+
+              <!-- proper motion -->
+              <xsl:if test="$PMRA/text()">
+                <PMRA>
+                  <xsl:value-of select="$PMRA"/>
+                </PMRA>
+              </xsl:if>
+              <xsl:if test="$PMDEC/text()">
+                <PMDEC>
+                  <xsl:value-of select="$PMDEC"/>
+                </PMDEC>
+              </xsl:if>
+
+              <!-- parallax -->
+              <xsl:if test="$PLX/text()">
+                <PARALLAX>
+                  <xsl:value-of select="$PLX"/>
+                </PARALLAX>
+              </xsl:if>
+              <xsl:if test="$e_PLX/text()">
+                <PARA_ERR>
+                  <xsl:value-of select="$e_PLX"/>
+                </PARA_ERR>
+              </xsl:if>
+
+              <!-- identifiers (HD, HIP, 2MASS, PIVOT) -->
+              <IDS>
+                <xsl:if test="$ID_HD != ''"><xsl:value-of select="$ID_HD"/>,</xsl:if>
+                <xsl:if test="$ID_HIP != ''"><xsl:value-of select="$ID_HIP"/>,</xsl:if>
+                <xsl:if test="$ID_2MASS != ''"><xsl:value-of select="$ID_2MASS"/>,</xsl:if>
+                <xsl:if test="$ID_PIVOT != ''"><xsl:value-of select="$ID_PIVOT"/>,</xsl:if>
+              </IDS>
+
+              <!-- object types -->
+              <xsl:if test="$OTYPES/text()">
+                <OBJTYP>
+                  <xsl:value-of select="$OTYPES"/>
+                </OBJTYP>
+              </xsl:if>
+
+              <!-- spectral types -->
+              <xsl:if test="$SP_TYPES/text()">
+                <SPECTYP>
+                  <xsl:value-of select="$SP_TYPES"/>
+                </SPECTYP>
+              </xsl:if>
+
+              <!-- magnitudes -->
+              <xsl:if test="$FLUX_V/text()">
+                <FLUX_V>
+                  <xsl:value-of select="$FLUX_V"/>
+                </FLUX_V>
+              </xsl:if>
+              <xsl:if test="$FLUX_I/text()">
+                <FLUX_I>
+                  <xsl:value-of select="$FLUX_I"/>
+                </FLUX_I>
+              </xsl:if>
+              <xsl:if test="$FLUX_J/text()">
+                <FLUX_J>
+                  <xsl:value-of select="$FLUX_J"/>
+                </FLUX_J>
+              </xsl:if>
+              <xsl:if test="$FLUX_H/text()">
+                <FLUX_H>
+                  <xsl:value-of select="$FLUX_H"/>
+                </FLUX_H>
+              </xsl:if>
+              <xsl:if test="$FLUX_K/text()">
+                <FLUX_K>
+                  <xsl:value-of select="$FLUX_K"/>
+                </FLUX_K>
+              </xsl:if>
+              <xsl:if test="$FLUX_N/text()">
+                <FLUX_N>
+                  <xsl:value-of select="$FLUX_N"/>
+                </FLUX_N>
+              </xsl:if>
+              <useAnalyticalModel>true</useAnalyticalModel>
+            </target>
           </xsl:if>
-        </xsl:variable>
-        <xsl:variable name="ID_HIP">
-          <xsl:if test="./VOT11:TD[position()=$ID_HIP_index]/text()">
-            <xsl:value-of select="concat('HIP ',./VOT11:TD[position()=$ID_HIP_index])"/>
-          </xsl:if>
-        </xsl:variable>
-        <xsl:variable name="ID_2MASS">
-          <xsl:if test="./VOT11:TD[position()=$ID_2MASS_index]/text()">
-            <xsl:value-of select="concat('2MASS J',./VOT11:TD[position()=$ID_2MASS_index])"/>
-          </xsl:if>
-        </xsl:variable>
-        <xsl:variable name="ID_PIVOT">
-          <xsl:if test="./VOT11:TD[position()=$ID_PIVOT_index]/text()">
-            <xsl:value-of select="concat('PIVOT ',./VOT11:TD[position()=$ID_PIVOT_index])"/>
-          </xsl:if>
-        </xsl:variable>
 
-        <xsl:variable name="RA">
-          <xsl:if test="./VOT11:TD[position()=$RA_index]/text()">
-            <xsl:value-of select="translate(./VOT11:TD[position()=$RA_index], ' ', ':')"/>
-          </xsl:if>
-        </xsl:variable>
-        <xsl:variable name="DEC">
-          <xsl:if test="./VOT11:TD[position()=$DEC_index]/text()">
-            <xsl:value-of select="translate(./VOT11:TD[position()=$DEC_index], ' ', ':')"/>
-          </xsl:if>
-        </xsl:variable>
-
-        <xsl:variable name="NAME"     select="./VOT11:TD[position()=$NAME_index]"/>
-        <xsl:variable name="RV"       select="./VOT11:TD[position()=$RV_index]"/>
-        <xsl:variable name="PMRA"     select="./VOT11:TD[position()=$PMRA_index]"/>
-        <xsl:variable name="PMDEC"    select="./VOT11:TD[position()=$PMDEC_index]"/>
-        <xsl:variable name="PLX"      select="./VOT11:TD[position()=$PLX_index]"/>
-        <xsl:variable name="e_PLX"    select="./VOT11:TD[position()=$e_PLX_index]"/>
-        <xsl:variable name="OTYPES"   select="./VOT11:TD[position()=$OTYPES_index]"/>
-        <xsl:variable name="SP_TYPES" select="./VOT11:TD[position()=$SP_TYPES_index]"/>
-        <xsl:variable name="FLUX_V"   select="./VOT11:TD[position()=$FLUX_V_index]"/>
-        <xsl:variable name="FLUX_I"   select="./VOT11:TD[position()=$FLUX_I_index]"/>
-        <xsl:variable name="FLUX_J"   select="./VOT11:TD[position()=$FLUX_J_index]"/>
-        <xsl:variable name="FLUX_H"   select="./VOT11:TD[position()=$FLUX_H_index]"/>
-        <xsl:variable name="FLUX_K"   select="./VOT11:TD[position()=$FLUX_K_index]"/>
-        <xsl:variable name="FLUX_N"   select="./VOT11:TD[position()=$FLUX_N_index]"/>
-
-        <xsl:if test="$NAME/text() and $RA != '' and $DEC != ''">
-          <target>
-            <!-- no id attribute : defined by Aspro2 -->
-
-            <!-- identifier -->
-            <name>
-              <xsl:value-of select="$NAME"/>
-            </name>
-
-            <!-- position -->
-            <RA>
-              <xsl:value-of select="$RA"/>
-            </RA>
-            <DEC>
-              <xsl:value-of select="$DEC"/>
-            </DEC>
-            <EQUINOX>
-              <xsl:value-of select="$EQUINOX"/>
-            </EQUINOX>
-
-            <!-- radial velocity -->
-            <xsl:if test="$RV/text()">
-              <SYSVEL>
-                <xsl:value-of select="$RV"/>
-              </SYSVEL>
-            </xsl:if>
-
-            <!-- proper motion -->
-            <xsl:if test="$PMRA/text()">
-              <PMRA>
-                <xsl:value-of select="$PMRA"/>
-              </PMRA>
-            </xsl:if>
-            <xsl:if test="$PMDEC/text()">
-              <PMDEC>
-                <xsl:value-of select="$PMDEC"/>
-              </PMDEC>
-            </xsl:if>
-
-            <!-- parallax -->
-            <xsl:if test="$PLX/text()">
-              <PARALLAX>
-                <xsl:value-of select="$PLX"/>
-              </PARALLAX>
-            </xsl:if>
-            <xsl:if test="$e_PLX/text()">
-              <PARA_ERR>
-                <xsl:value-of select="$e_PLX"/>
-              </PARA_ERR>
-            </xsl:if>
-
-            <!-- identifiers (HD, HIP, 2MASS, PIVOT) -->
-            <IDS>
-              <xsl:if test="$ID_HD != ''"><xsl:value-of select="$ID_HD"/>,</xsl:if>
-              <xsl:if test="$ID_HIP != ''"><xsl:value-of select="$ID_HIP"/>,</xsl:if>
-              <xsl:if test="$ID_2MASS != ''"><xsl:value-of select="$ID_2MASS"/>,</xsl:if>
-              <xsl:if test="$ID_PIVOT != ''"><xsl:value-of select="$ID_PIVOT"/>,</xsl:if>
-            </IDS>
-
-            <!-- object types -->
-            <xsl:if test="$OTYPES/text()">
-              <OBJTYP>
-                <xsl:value-of select="$OTYPES"/>
-              </OBJTYP>
-            </xsl:if>
-
-            <!-- spectral types -->
-            <xsl:if test="$SP_TYPES/text()">
-              <SPECTYP>
-                <xsl:value-of select="$SP_TYPES"/>
-              </SPECTYP>
-            </xsl:if>
-
-            <!-- magnitudes -->
-            <xsl:if test="$FLUX_V/text()">
-              <FLUX_V>
-                <xsl:value-of select="$FLUX_V"/>
-              </FLUX_V>
-            </xsl:if>
-            <xsl:if test="$FLUX_I/text()">
-              <FLUX_I>
-                <xsl:value-of select="$FLUX_I"/>
-              </FLUX_I>
-            </xsl:if>
-            <xsl:if test="$FLUX_J/text()">
-              <FLUX_J>
-                <xsl:value-of select="$FLUX_J"/>
-              </FLUX_J>
-            </xsl:if>
-            <xsl:if test="$FLUX_H/text()">
-              <FLUX_H>
-                <xsl:value-of select="$FLUX_H"/>
-              </FLUX_H>
-            </xsl:if>
-            <xsl:if test="$FLUX_K/text()">
-              <FLUX_K>
-                <xsl:value-of select="$FLUX_K"/>
-              </FLUX_K>
-            </xsl:if>
-            <xsl:if test="$FLUX_N/text()">
-              <FLUX_N>
-                <xsl:value-of select="$FLUX_N"/>
-              </FLUX_N>
-            </xsl:if>
-            <useAnalyticalModel>true</useAnalyticalModel>
-          </target>
-        </xsl:if>
-
-      </xsl:for-each>
+        </xsl:for-each>
+        
+      </xsl:if>
 
       <xsl:if test="$CONFIGURATIONS != ''">
         <variant>
@@ -629,20 +686,51 @@
         <xsl:with-param name="ucd10">META.MAIN</xsl:with-param>
       </xsl:call-template>
     </xsl:variable>
-    
+
+    <!-- handle correct coordinate frame (J2000 / EPOCH = 2000) ie COOSYS -->
+            
     <xsl:variable name="RA_index">
       <xsl:call-template name="getColumnIndexVOT12">
         <xsl:with-param name="ucd11">pos.eq.ra</xsl:with-param>
         <xsl:with-param name="ucd10">POS_EQ_RA</xsl:with-param>
         <xsl:with-param name="unit">h:m:s</xsl:with-param>
+        <xsl:with-param name="unit_other">hms</xsl:with-param>
       </xsl:call-template>
     </xsl:variable>
+
+    <xsl:variable name="RADeg_index">
+      <xsl:choose>
+        <xsl:when test="$RA_index = ''">
+          <xsl:call-template name="getColumnIndexVOT12">
+            <xsl:with-param name="ucd11">pos.eq.ra</xsl:with-param>
+            <xsl:with-param name="ucd10">POS_EQ_RA</xsl:with-param>
+            <xsl:with-param name="unit">deg</xsl:with-param>
+          </xsl:call-template>
+        </xsl:when>
+        <xsl:otherwise></xsl:otherwise>
+      </xsl:choose>
+    </xsl:variable>
+    
     <xsl:variable name="DEC_index">
       <xsl:call-template name="getColumnIndexVOT12">
         <xsl:with-param name="ucd11">pos.eq.dec</xsl:with-param>
         <xsl:with-param name="ucd10">POS_EQ_DEC</xsl:with-param>
         <xsl:with-param name="unit">d:m:s</xsl:with-param>
+        <xsl:with-param name="unit_other">dms</xsl:with-param>
       </xsl:call-template>
+    </xsl:variable>
+
+    <xsl:variable name="DECDeg_index">
+      <xsl:choose>
+        <xsl:when test="$DEC_index = ''">
+          <xsl:call-template name="getColumnIndexVOT12">
+            <xsl:with-param name="ucd11">pos.eq.dec</xsl:with-param>
+            <xsl:with-param name="ucd10">POS_EQ_DEC</xsl:with-param>
+            <xsl:with-param name="unit">deg</xsl:with-param>
+          </xsl:call-template>
+        </xsl:when>
+        <xsl:otherwise></xsl:otherwise>
+      </xsl:choose>
     </xsl:variable>
 
     <xsl:variable name="RV_index">
@@ -777,6 +865,14 @@
     </xsl:variable>
 
     <!-- TODO: check equinox and HMS / DMS are really J2000 -->
+    <!--
+  <COOSYS ID="J2000" equinox="2000" epoch="J2000" system="eq_FK5"/>
+
+  <COOSYS ID="J2000" system="eq_FK5" equinox="J2000"/>
+
+  <COOSYS ID="J2000_1991.250" system="eq_FK5" equinox="J2000" epoch="1991.250"/>
+  <COOSYS ID="J2000" system="eq_FK5" equinox="J2000"/>
+    -->
     <xsl:variable name="EQUINOX" select="translate(//VOT12:COOSYS[1]/@equinox, 'J', '')"/>
 
 
@@ -834,166 +930,184 @@
   -->          
         </instrumentConfiguration>
       </xsl:if>
+                              
+      <!-- skip data if no columns matching NAME/RA/DEC -->
+      <xsl:if test="$NAME_index != '' and ($RA_index != '' or $RADeg_index != '') and ($DEC_index != '' or $DECDeg_index != '')">
 
-      <!-- Build one target element per votable row -->
-      <xsl:for-each select="./VOT12:TABLE/VOT12:DATA/VOT12:TABLEDATA/VOT12:TR">
+        <!-- Build one target element per votable row -->
+        <xsl:for-each select="./VOT12:TABLE/VOT12:DATA/VOT12:TABLEDATA/VOT12:TR">
 
-        <xsl:variable name="ID_HD">
-          <xsl:if test="./VOT12:TD[position()=$ID_HD_index]/text()">
-            <xsl:value-of select="concat('HD ',./VOT12:TD[position()=$ID_HD_index])"/>
+          <xsl:variable name="ID_HD">
+            <xsl:if test="./VOT12:TD[position()=$ID_HD_index]/text()">
+              <xsl:value-of select="concat('HD ',./VOT12:TD[position()=$ID_HD_index])"/>
+            </xsl:if>
+          </xsl:variable>
+          <xsl:variable name="ID_HIP">
+            <xsl:if test="./VOT12:TD[position()=$ID_HIP_index]/text()">
+              <xsl:value-of select="concat('HIP ',./VOT12:TD[position()=$ID_HIP_index])"/>
+            </xsl:if>
+          </xsl:variable>
+          <xsl:variable name="ID_2MASS">
+            <xsl:if test="./VOT12:TD[position()=$ID_2MASS_index]/text()">
+              <xsl:value-of select="concat('2MASS J',./VOT12:TD[position()=$ID_2MASS_index])"/>
+            </xsl:if>
+          </xsl:variable>
+          <xsl:variable name="ID_PIVOT">
+            <xsl:if test="./VOT12:TD[position()=$ID_PIVOT_index]/text()">
+              <xsl:value-of select="concat('PIVOT ',./VOT12:TD[position()=$ID_PIVOT_index])"/>
+            </xsl:if>
+          </xsl:variable>
+
+          <xsl:variable name="RA">
+            <xsl:choose>
+              <xsl:when test="$RA_index != '' and ./VOT12:TD[position()=$RA_index]/text()">
+                <xsl:value-of select="translate(./VOT12:TD[position()=$RA_index], ' ', ':')"/>
+              </xsl:when>
+              <xsl:when test="$RADeg_index != '' and ./VOT12:TD[position()=$RADeg_index]/text()">
+                <!-- convert degrees to decimal hours -->
+                <xsl:value-of select="format-number(./VOT12:TD[position()=$RADeg_index]/text() div 15.0, '#0.000###')"/> 
+              </xsl:when>
+              <xsl:otherwise></xsl:otherwise>
+            </xsl:choose>
+          </xsl:variable>
+          <xsl:variable name="DEC">
+            <xsl:choose>
+              <xsl:when test="$DEC_index != '' and ./VOT12:TD[position()=$DEC_index]/text()">
+                <xsl:value-of select="translate(./VOT12:TD[position()=$DEC_index], ' ', ':')"/>
+              </xsl:when>
+              <xsl:when test="$DECDeg_index != '' and ./VOT12:TD[position()=$DECDeg_index]/text()">
+                <xsl:value-of select="format-number(./VOT12:TD[position()=$DECDeg_index]/text(), '#0.000###')"/> 
+              </xsl:when>
+              <xsl:otherwise></xsl:otherwise>
+            </xsl:choose>
+          </xsl:variable>
+
+          <xsl:variable name="NAME"     select="./VOT12:TD[position()=$NAME_index]"/>
+          <xsl:variable name="RV"       select="./VOT12:TD[position()=$RV_index]"/>
+          <xsl:variable name="PMRA"     select="./VOT12:TD[position()=$PMRA_index]"/>
+          <xsl:variable name="PMDEC"    select="./VOT12:TD[position()=$PMDEC_index]"/>
+          <xsl:variable name="PLX"      select="./VOT12:TD[position()=$PLX_index]"/>
+          <xsl:variable name="e_PLX"    select="./VOT12:TD[position()=$e_PLX_index]"/>
+          <xsl:variable name="OTYPES"   select="./VOT12:TD[position()=$OTYPES_index]"/>
+          <xsl:variable name="SP_TYPES" select="./VOT12:TD[position()=$SP_TYPES_index]"/>
+          <xsl:variable name="FLUX_V"   select="./VOT12:TD[position()=$FLUX_V_index]"/>
+          <xsl:variable name="FLUX_I"   select="./VOT12:TD[position()=$FLUX_I_index]"/>
+          <xsl:variable name="FLUX_J"   select="./VOT12:TD[position()=$FLUX_J_index]"/>
+          <xsl:variable name="FLUX_H"   select="./VOT12:TD[position()=$FLUX_H_index]"/>
+          <xsl:variable name="FLUX_K"   select="./VOT12:TD[position()=$FLUX_K_index]"/>
+          <xsl:variable name="FLUX_N"   select="./VOT12:TD[position()=$FLUX_N_index]"/>
+
+          <xsl:if test="$NAME/text() and $RA != '' and $DEC != ''">
+            <target>
+              <!-- no id attribute : defined by Aspro2 -->
+
+              <!-- identifier -->
+              <name>
+                <xsl:value-of select="$NAME"/>
+              </name>
+
+              <!-- position -->
+              <RA>
+                <xsl:value-of select="$RA"/>
+              </RA>
+              <DEC>
+                <xsl:value-of select="$DEC"/>
+              </DEC>
+              <EQUINOX>
+                <xsl:value-of select="$EQUINOX"/>
+              </EQUINOX>
+
+              <!-- radial velocity -->
+              <xsl:if test="$RV/text()">
+                <SYSVEL>
+                  <xsl:value-of select="$RV"/>
+                </SYSVEL>
+              </xsl:if>
+
+              <!-- proper motion -->
+              <xsl:if test="$PMRA/text()">
+                <PMRA>
+                  <xsl:value-of select="$PMRA"/>
+                </PMRA>
+              </xsl:if>
+              <xsl:if test="$PMDEC/text()">
+                <PMDEC>
+                  <xsl:value-of select="$PMDEC"/>
+                </PMDEC>
+              </xsl:if>
+
+              <!-- parallax -->
+              <xsl:if test="$PLX/text()">
+                <PARALLAX>
+                  <xsl:value-of select="$PLX"/>
+                </PARALLAX>
+              </xsl:if>
+              <xsl:if test="$e_PLX/text()">
+                <PARA_ERR>
+                  <xsl:value-of select="$e_PLX"/>
+                </PARA_ERR>
+              </xsl:if>
+
+              <!-- identifiers (HD, HIP, 2MASS, PIVOT) -->
+              <IDS>
+                <xsl:if test="$ID_HD != ''"><xsl:value-of select="$ID_HD"/>,</xsl:if>
+                <xsl:if test="$ID_HIP != ''"><xsl:value-of select="$ID_HIP"/>,</xsl:if>
+                <xsl:if test="$ID_2MASS != ''"><xsl:value-of select="$ID_2MASS"/>,</xsl:if>
+                <xsl:if test="$ID_PIVOT != ''"><xsl:value-of select="$ID_PIVOT"/>,</xsl:if>
+              </IDS>
+
+              <!-- object types -->
+              <xsl:if test="$OTYPES/text()">
+                <OBJTYP>
+                  <xsl:value-of select="$OTYPES"/>
+                </OBJTYP>
+              </xsl:if>
+
+              <!-- spectral types -->
+              <xsl:if test="$SP_TYPES/text()">
+                <SPECTYP>
+                  <xsl:value-of select="$SP_TYPES"/>
+                </SPECTYP>
+              </xsl:if>
+
+              <!-- magnitudes -->
+              <xsl:if test="$FLUX_V/text()">
+                <FLUX_V>
+                  <xsl:value-of select="$FLUX_V"/>
+                </FLUX_V>
+              </xsl:if>
+              <xsl:if test="$FLUX_I/text()">
+                <FLUX_I>
+                  <xsl:value-of select="$FLUX_I"/>
+                </FLUX_I>
+              </xsl:if>
+              <xsl:if test="$FLUX_J/text()">
+                <FLUX_J>
+                  <xsl:value-of select="$FLUX_J"/>
+                </FLUX_J>
+              </xsl:if>
+              <xsl:if test="$FLUX_H/text()">
+                <FLUX_H>
+                  <xsl:value-of select="$FLUX_H"/>
+                </FLUX_H>
+              </xsl:if>
+              <xsl:if test="$FLUX_K/text()">
+                <FLUX_K>
+                  <xsl:value-of select="$FLUX_K"/>
+                </FLUX_K>
+              </xsl:if>
+              <xsl:if test="$FLUX_N/text()">
+                <FLUX_N>
+                  <xsl:value-of select="$FLUX_N"/>
+                </FLUX_N>
+              </xsl:if>
+              <useAnalyticalModel>true</useAnalyticalModel>
+            </target>
           </xsl:if>
-        </xsl:variable>
-        <xsl:variable name="ID_HIP">
-          <xsl:if test="./VOT12:TD[position()=$ID_HIP_index]/text()">
-            <xsl:value-of select="concat('HIP ',./VOT12:TD[position()=$ID_HIP_index])"/>
-          </xsl:if>
-        </xsl:variable>
-        <xsl:variable name="ID_2MASS">
-          <xsl:if test="./VOT12:TD[position()=$ID_2MASS_index]/text()">
-            <xsl:value-of select="concat('2MASS J',./VOT12:TD[position()=$ID_2MASS_index])"/>
-          </xsl:if>
-        </xsl:variable>
-        <xsl:variable name="ID_PIVOT">
-          <xsl:if test="./VOT12:TD[position()=$ID_PIVOT_index]/text()">
-            <xsl:value-of select="concat('PIVOT ',./VOT12:TD[position()=$ID_PIVOT_index])"/>
-          </xsl:if>
-        </xsl:variable>
 
-        <xsl:variable name="RA">
-          <xsl:if test="./VOT12:TD[position()=$RA_index]/text()">
-            <xsl:value-of select="translate(./VOT12:TD[position()=$RA_index], ' ', ':')"/>
-          </xsl:if>
-        </xsl:variable>
-        <xsl:variable name="DEC">
-          <xsl:if test="./VOT12:TD[position()=$DEC_index]/text()">
-            <xsl:value-of select="translate(./VOT12:TD[position()=$DEC_index], ' ', ':')"/>
-          </xsl:if>
-        </xsl:variable>
-
-        <xsl:variable name="NAME"     select="./VOT12:TD[position()=$NAME_index]"/>
-        <xsl:variable name="RV"       select="./VOT12:TD[position()=$RV_index]"/>
-        <xsl:variable name="PMRA"     select="./VOT12:TD[position()=$PMRA_index]"/>
-        <xsl:variable name="PMDEC"    select="./VOT12:TD[position()=$PMDEC_index]"/>
-        <xsl:variable name="PLX"      select="./VOT12:TD[position()=$PLX_index]"/>
-        <xsl:variable name="e_PLX"    select="./VOT12:TD[position()=$e_PLX_index]"/>
-        <xsl:variable name="OTYPES"   select="./VOT12:TD[position()=$OTYPES_index]"/>
-        <xsl:variable name="SP_TYPES" select="./VOT12:TD[position()=$SP_TYPES_index]"/>
-        <xsl:variable name="FLUX_V"   select="./VOT12:TD[position()=$FLUX_V_index]"/>
-        <xsl:variable name="FLUX_I"   select="./VOT12:TD[position()=$FLUX_I_index]"/>
-        <xsl:variable name="FLUX_J"   select="./VOT12:TD[position()=$FLUX_J_index]"/>
-        <xsl:variable name="FLUX_H"   select="./VOT12:TD[position()=$FLUX_H_index]"/>
-        <xsl:variable name="FLUX_K"   select="./VOT12:TD[position()=$FLUX_K_index]"/>
-        <xsl:variable name="FLUX_N"   select="./VOT12:TD[position()=$FLUX_N_index]"/>
-
-        <xsl:if test="$NAME/text() and $RA != '' and $DEC != ''">
-          <target>
-            <!-- no id attribute : defined by Aspro2 -->
-
-            <!-- identifier -->
-            <name>
-              <xsl:value-of select="$NAME"/>
-            </name>
-
-            <!-- position -->
-            <RA>
-              <xsl:value-of select="$RA"/>
-            </RA>
-            <DEC>
-              <xsl:value-of select="$DEC"/>
-            </DEC>
-            <EQUINOX>
-              <xsl:value-of select="$EQUINOX"/>
-            </EQUINOX>
-
-            <!-- radial velocity -->
-            <xsl:if test="$RV/text()">
-              <SYSVEL>
-                <xsl:value-of select="$RV"/>
-              </SYSVEL>
-            </xsl:if>
-
-            <!-- proper motion -->
-            <xsl:if test="$PMRA/text()">
-              <PMRA>
-                <xsl:value-of select="$PMRA"/>
-              </PMRA>
-            </xsl:if>
-            <xsl:if test="$PMDEC/text()">
-              <PMDEC>
-                <xsl:value-of select="$PMDEC"/>
-              </PMDEC>
-            </xsl:if>
-
-            <!-- parallax -->
-            <xsl:if test="$PLX/text()">
-              <PARALLAX>
-                <xsl:value-of select="$PLX"/>
-              </PARALLAX>
-            </xsl:if>
-            <xsl:if test="$e_PLX/text()">
-              <PARA_ERR>
-                <xsl:value-of select="$e_PLX"/>
-              </PARA_ERR>
-            </xsl:if>
-
-            <!-- identifiers (HD, HIP, 2MASS, PIVOT) -->
-            <IDS>
-              <xsl:if test="$ID_HD != ''"><xsl:value-of select="$ID_HD"/>,</xsl:if>
-              <xsl:if test="$ID_HIP != ''"><xsl:value-of select="$ID_HIP"/>,</xsl:if>
-              <xsl:if test="$ID_2MASS != ''"><xsl:value-of select="$ID_2MASS"/>,</xsl:if>
-              <xsl:if test="$ID_PIVOT != ''"><xsl:value-of select="$ID_PIVOT"/>,</xsl:if>
-            </IDS>
-
-            <!-- object types -->
-            <xsl:if test="$OTYPES/text()">
-              <OBJTYP>
-                <xsl:value-of select="$OTYPES"/>
-              </OBJTYP>
-            </xsl:if>
-
-            <!-- spectral types -->
-            <xsl:if test="$SP_TYPES/text()">
-              <SPECTYP>
-                <xsl:value-of select="$SP_TYPES"/>
-              </SPECTYP>
-            </xsl:if>
-
-            <!-- magnitudes -->
-            <xsl:if test="$FLUX_V/text()">
-              <FLUX_V>
-                <xsl:value-of select="$FLUX_V"/>
-              </FLUX_V>
-            </xsl:if>
-            <xsl:if test="$FLUX_I/text()">
-              <FLUX_I>
-                <xsl:value-of select="$FLUX_I"/>
-              </FLUX_I>
-            </xsl:if>
-            <xsl:if test="$FLUX_J/text()">
-              <FLUX_J>
-                <xsl:value-of select="$FLUX_J"/>
-              </FLUX_J>
-            </xsl:if>
-            <xsl:if test="$FLUX_H/text()">
-              <FLUX_H>
-                <xsl:value-of select="$FLUX_H"/>
-              </FLUX_H>
-            </xsl:if>
-            <xsl:if test="$FLUX_K/text()">
-              <FLUX_K>
-                <xsl:value-of select="$FLUX_K"/>
-              </FLUX_K>
-            </xsl:if>
-            <xsl:if test="$FLUX_N/text()">
-              <FLUX_N>
-                <xsl:value-of select="$FLUX_N"/>
-              </FLUX_N>
-            </xsl:if>
-            <useAnalyticalModel>true</useAnalyticalModel>
-          </target>
-        </xsl:if>
-
-      </xsl:for-each>
+        </xsl:for-each>
+        
+      </xsl:if>
 
       <xsl:if test="$CONFIGURATIONS != ''">
         <variant>

@@ -23,8 +23,6 @@ import java.util.Iterator;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * This class handles SearchCal VOTables
@@ -39,8 +37,6 @@ public final class SearchCalVOTableHandler {
   public static final double SCIENCE_DETECTION_DISTANCE = 1d * ALX.ARCSEC_IN_DEGREES;
   /** XSLT file path */
   private final static String XSLT_FILE = "fr/jmmc/aspro/interop/scvot2AsproObservation.xsl";
-  /** maximum calibrators accepted at once */
-  public final static int MAX_CALIBRATORS = 50;
 
   /**
    * Private constructor
@@ -141,7 +137,6 @@ public final class SearchCalVOTableHandler {
     // Use invokeLater to avoid concurrency and ensure that 
     // data model is modified and fire events using Swing EDT :
     SwingUtils.invokeLaterEDT(new Runnable() {
-
       @Override
       public void run() {
 
@@ -156,8 +151,7 @@ public final class SearchCalVOTableHandler {
           return;
         }
 
-        if (calibrators.size() > MAX_CALIBRATORS) {
-          MessagePane.showErrorMessage("Too many calibrators (" + calibrators.size() + " / " + MAX_CALIBRATORS + ") found in SearchCal response !");
+        if (!VotableSampMessageHandler.confirmImport(calibrators.size())) {
           return;
         }
 

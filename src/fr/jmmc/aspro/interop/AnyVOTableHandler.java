@@ -29,8 +29,6 @@ public final class AnyVOTableHandler {
   private static final Logger logger = LoggerFactory.getLogger(AnyVOTableHandler.class.getName());
   /** XSLT file path */
   private final static String XSLT_FILE = "fr/jmmc/aspro/interop/vot2AsproObservation.xsl";
-  /** maximum targets accepted at once */
-  public final static int MAX_TARGETS = 50;
 
   /**
    * Private constructor
@@ -78,7 +76,6 @@ public final class AnyVOTableHandler {
       // Use invokeLater to avoid concurrency and ensure that 
       // data model is modified and fire eventsarg using Swing EDT :
       SwingUtils.invokeLaterEDT(new Runnable() {
-
         @Override
         public void run() {
 
@@ -93,8 +90,7 @@ public final class AnyVOTableHandler {
             return;
           }
 
-          if (targets.size() > MAX_TARGETS) {
-            MessagePane.showErrorMessage("Too many targets (" + targets.size() + " / " + MAX_TARGETS + ") found in VOTable !");
+          if (!VotableSampMessageHandler.confirmImport(targets.size())) {
             return;
           }
 
