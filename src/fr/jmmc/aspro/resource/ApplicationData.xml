@@ -9,7 +9,7 @@
 
   <program name="Aspro2" version="0.9.1 beta 10"/>
   
-  <compilation date="29/05/2012" compiler="JDK 1.5.0_16"/>
+  <compilation date="31/05/2012" compiler="JDK 1.5.0_16"/>
 
   <text>
     <![CDATA[ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations
@@ -152,7 +152,9 @@
   <releasenotes>
     <release version="0.9.1">
       <prerelease version="0.9.1 beta 10"> 
-        <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/320">Added support for RA/DEC expressed in degrees in the VOtable SAMP message handler</change>
+        <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/320">Added support for RA/DEC expressed in degrees in the VOtable SAMP message handler 
+          and check for correct coordinate system (FK5, J2000)
+        </change>
         <change type="CHANGE">Changed VOTable import limits: up to 50 targets accepted without user confirmation; import discarded if more than 1000 targets</change>
       </prerelease>
       <prerelease version="0.9.1 beta 9"> 
