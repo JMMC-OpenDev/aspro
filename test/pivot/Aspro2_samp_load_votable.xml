@@ -7,9 +7,9 @@
   <DESCRIPTION>
     This sample votable can be given to Aspro2 through samp to load given targets with given config programatically
   </DESCRIPTION>
-  
+
   <COOSYS ID="J2000" equinox="2000" epoch="J2000" system="eq_FK5"/>
-  
+    
   <!-- name attribute filled optionally by the name of the client application (pivot) -->
   <RESOURCE name="pivot">
     
@@ -216,16 +216,16 @@
         <DESCRIPTION>Target name (identifier)</DESCRIPTION>
       </FIELD>
 
-      <!-- RA field: J2000 (HMS)
+      <!-- RA field: J2000 (HMS or degrees) i.e. units contains ("h:m:s" or "hms" or "deg")
            UCD1   = 'POS_EQ_RA_MAIN'
            UCD1.1 = 'pos.eq.ra;meta.main' -->
-      <FIELD name="RA" datatype="char" ucd="pos.eq.ra;meta.main" arraysize="*" unit="h:m:s">
+      <FIELD name="RA" datatype="char" ucd="pos.eq.ra;meta.main" arraysize="*" unit="h:m:s" ref="J2000">
         <DESCRIPTION>Right ascension - J2000</DESCRIPTION>
       </FIELD>
-      <!-- DEC field: J2000 (DMS)
+      <!-- DEC field: J2000 (DMS or degrees) i.e. units contains ("d:m:s" or "dms" or "deg")
            UCD1   = 'POS_EQ_DEC_MAIN'
            UCD1.1 = 'pos.eq.ra;meta.main' -->
-      <FIELD name="DEC" datatype="char" ucd="pos.eq.dec;meta.main" arraysize="*" unit="d:m:s">
+      <FIELD name="DEC" datatype="char" ucd="pos.eq.dec;meta.main" arraysize="*" unit="d:m:s" ref="J2000">
         <DESCRIPTION>Declination - J2000</DESCRIPTION>
       </FIELD>
 
