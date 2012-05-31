@@ -86,7 +86,7 @@ public final class AnyVOTableHandler {
 
           // check the number of targets :
           if (targets.isEmpty()) {
-            MessagePane.showErrorMessage("No target found in VOTable !");
+            MessagePane.showErrorMessage("No valid target found in VOTable : missing name or RA/DEC coordinates (J2000) !");
             return;
           }
 

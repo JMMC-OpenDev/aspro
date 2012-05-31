@@ -257,18 +257,67 @@
       </xsl:call-template>
     </xsl:variable>
 
-    <!-- TODO: check equinox and HMS / DMS are really J2000 -->
-    <!--
-  <COOSYS ID="J2000" equinox="2000" epoch="J2000" system="eq_FK5"/>
+    <!-- check coordinate system to have epoch = J2000 / equinox = 2000 -->
+    <xsl:variable name="EQUINOX">
+      <xsl:choose>
+        <!-- only one COOSYS element -->
+        <xsl:when test="count(//VOT11:COOSYS) = 1">
+          <xsl:call-template name="getEquinoxFromCooSys">
+            <xsl:with-param name="COOSYS" select="//VOT11:COOSYS[1]"/>
+          </xsl:call-template>
+        </xsl:when>
+        <!-- test reference from RA/DEC fields to ref coosys -->
+        <xsl:when test="($RA_index != '' or $RADeg_index != '') and ($DEC_index != '' or $DECDeg_index != '')">
+          <xsl:variable name="RA_ref">
+            <xsl:choose>
+              <xsl:when test="$RA_index != ''">
+                <xsl:value-of select="/VOT11:VOTABLE/VOT11:RESOURCE/VOT11:TABLE/VOT11:FIELD[position() = $RA_index]/@ref"/>
+              </xsl:when>
+              <xsl:when test="$RADeg_index != ''">
+                <xsl:value-of select="/VOT11:VOTABLE/VOT11:RESOURCE/VOT11:TABLE/VOT11:FIELD[position() = $RADeg_index]/@ref"/>
+              </xsl:when>
+              <xsl:otherwise></xsl:otherwise>
+            </xsl:choose>
+          </xsl:variable>
+          <xsl:variable name="DEC_ref">
+            <xsl:choose>
+              <xsl:when test="$DEC_index != ''">
+                <xsl:value-of select="/VOT11:VOTABLE/VOT11:RESOURCE/VOT11:TABLE/VOT11:FIELD[position() = $DEC_index]/@ref"/>
+              </xsl:when>
+              <xsl:when test="$DECDeg_index != ''">
+                <xsl:value-of select="/VOT11:VOTABLE/VOT11:RESOURCE/VOT11:TABLE/VOT11:FIELD[position() = $DECDeg_index]/@ref"/>
+              </xsl:when>
+              <xsl:otherwise></xsl:otherwise>
+            </xsl:choose>
+          </xsl:variable>
 
-  <COOSYS ID="J2000" system="eq_FK5" equinox="J2000"/>
+          <xsl:variable name="RA_EQUINOX">
+            <xsl:call-template name="getEquinoxFromCooSys">
+              <xsl:with-param name="COOSYS" select="//VOT11:COOSYS[@ID = $RA_ref]"/>
+            </xsl:call-template>
+          </xsl:variable>
 
-  <COOSYS ID="J2000_1991.250" system="eq_FK5" equinox="J2000" epoch="1991.250"/>
-  <COOSYS ID="J2000" system="eq_FK5" equinox="J2000"/>
-    -->
-    <xsl:variable name="EQUINOX" select="translate(//VOT11:COOSYS[1]/@equinox, 'J', '')"/>
+          <xsl:variable name="DEC_EQUINOX">
+            <xsl:call-template name="getEquinoxFromCooSys">
+              <xsl:with-param name="COOSYS" select="//VOT11:COOSYS[@ID = $DEC_ref]"/>
+            </xsl:call-template>
+          </xsl:variable>
 
+          <xsl:choose>
+            <xsl:when test="$RA_EQUINOX != '' and $RA_EQUINOX = $DEC_EQUINOX">
+              <xsl:value-of select="$RA_EQUINOX"/>
+            </xsl:when>
+            <xsl:when test="$RA_ref != '' and $RA_ref = $DEC_ref and $RA_ref = 'J2000'">2000</xsl:when>
+            <xsl:otherwise></xsl:otherwise>
+          </xsl:choose>
+                    
+        </xsl:when>
+        <!-- undefined -->
+        <xsl:otherwise></xsl:otherwise>
+      </xsl:choose>
+    </xsl:variable>
 
+    
 <!-- starting output document -->
     <a:observationSetting
       xmlns:a="http://www.jmmc.fr/aspro-oi/0.1"
@@ -325,7 +374,7 @@
       </xsl:if>
                               
       <!-- skip data if no columns matching NAME/RA/DEC -->
-      <xsl:if test="$NAME_index != '' and ($RA_index != '' or $RADeg_index != '') and ($DEC_index != '' or $DECDeg_index != '')">
+      <xsl:if test="$NAME_index != '' and ($RA_index != '' or $RADeg_index != '') and ($DEC_index != '' or $DECDeg_index != '') and $EQUINOX != ''">
 
         <!-- Build one target element per votable row -->
         <xsl:for-each select="./VOT11:TABLE/VOT11:DATA/VOT11:TABLEDATA/VOT11:TR">
@@ -864,18 +913,69 @@
       </xsl:call-template>
     </xsl:variable>
 
-    <!-- TODO: check equinox and HMS / DMS are really J2000 -->
-    <!--
-  <COOSYS ID="J2000" equinox="2000" epoch="J2000" system="eq_FK5"/>
+    <!-- TODO: Handle also STC meta data as COOSYS is deprecated in VOTABLE 1.2 -->
 
-  <COOSYS ID="J2000" system="eq_FK5" equinox="J2000"/>
+    <!-- check coordinate system to have epoch = J2000 / equinox = 2000 -->
+    <xsl:variable name="EQUINOX">
+      <xsl:choose>
+        <!-- only one COOSYS element -->
+        <xsl:when test="count(//VOT12:COOSYS) = 1">
+          <xsl:call-template name="getEquinoxFromCooSys">
+            <xsl:with-param name="COOSYS" select="//VOT12:COOSYS[1]"/>
+          </xsl:call-template>
+        </xsl:when>
+        <!-- test reference from RA/DEC fields to ref coosys -->
+        <xsl:when test="($RA_index != '' or $RADeg_index != '') and ($DEC_index != '' or $DECDeg_index != '')">
+          <xsl:variable name="RA_ref">
+            <xsl:choose>
+              <xsl:when test="$RA_index != ''">
+                <xsl:value-of select="/VOT12:VOTABLE/VOT12:RESOURCE/VOT12:TABLE/VOT12:FIELD[position() = $RA_index]/@ref"/>
+              </xsl:when>
+              <xsl:when test="$RADeg_index != ''">
+                <xsl:value-of select="/VOT12:VOTABLE/VOT12:RESOURCE/VOT12:TABLE/VOT12:FIELD[position() = $RADeg_index]/@ref"/>
+              </xsl:when>
+              <xsl:otherwise></xsl:otherwise>
+            </xsl:choose>
+          </xsl:variable>
+          <xsl:variable name="DEC_ref">
+            <xsl:choose>
+              <xsl:when test="$DEC_index != ''">
+                <xsl:value-of select="/VOT12:VOTABLE/VOT12:RESOURCE/VOT12:TABLE/VOT12:FIELD[position() = $DEC_index]/@ref"/>
+              </xsl:when>
+              <xsl:when test="$DECDeg_index != ''">
+                <xsl:value-of select="/VOT12:VOTABLE/VOT12:RESOURCE/VOT12:TABLE/VOT12:FIELD[position() = $DECDeg_index]/@ref"/>
+              </xsl:when>
+              <xsl:otherwise></xsl:otherwise>
+            </xsl:choose>
+          </xsl:variable>
 
-  <COOSYS ID="J2000_1991.250" system="eq_FK5" equinox="J2000" epoch="1991.250"/>
-  <COOSYS ID="J2000" system="eq_FK5" equinox="J2000"/>
-    -->
-    <xsl:variable name="EQUINOX" select="translate(//VOT12:COOSYS[1]/@equinox, 'J', '')"/>
+          <xsl:variable name="RA_EQUINOX">
+            <xsl:call-template name="getEquinoxFromCooSys">
+              <xsl:with-param name="COOSYS" select="//VOT12:COOSYS[@ID = $RA_ref]"/>
+            </xsl:call-template>
+          </xsl:variable>
 
+          <xsl:variable name="DEC_EQUINOX">
+            <xsl:call-template name="getEquinoxFromCooSys">
+              <xsl:with-param name="COOSYS" select="//VOT12:COOSYS[@ID = $DEC_ref]"/>
+            </xsl:call-template>
+          </xsl:variable>
 
+          <xsl:choose>
+            <xsl:when test="$RA_EQUINOX != '' and $RA_EQUINOX = $DEC_EQUINOX">
+              <xsl:value-of select="$RA_EQUINOX"/>
+            </xsl:when>
+            <xsl:when test="$RA_ref != '' and $RA_ref = $DEC_ref and $RA_ref = 'J2000'">2000</xsl:when>
+            <xsl:otherwise></xsl:otherwise>
+          </xsl:choose>
+                    
+        </xsl:when>
+        <!-- undefined -->
+        <xsl:otherwise></xsl:otherwise>
+      </xsl:choose>
+    </xsl:variable>
+
+    
 <!-- starting output document -->
     <a:observationSetting
       xmlns:a="http://www.jmmc.fr/aspro-oi/0.1"
@@ -932,7 +1032,7 @@
       </xsl:if>
                               
       <!-- skip data if no columns matching NAME/RA/DEC -->
-      <xsl:if test="$NAME_index != '' and ($RA_index != '' or $RADeg_index != '') and ($DEC_index != '' or $DECDeg_index != '')">
+      <xsl:if test="$NAME_index != '' and ($RA_index != '' or $RADeg_index != '') and ($DEC_index != '' or $DECDeg_index != '') and $EQUINOX != ''">
 
         <!-- Build one target element per votable row -->
         <xsl:for-each select="./VOT12:TABLE/VOT12:DATA/VOT12:TABLEDATA/VOT12:TR">
@@ -1244,6 +1344,23 @@
     </xsl:if>
     
   </xsl:template>
+
+
+
+<!-- get Equinox (= 2000) from COOSYS only if system = 'eq_FK5' and epoch = equinox = J2000 -->
+<xsl:template name="getEquinoxFromCooSys">
+  <xsl:param name="COOSYS"/>
+
+  <xsl:variable name="COOSYS_EQUINOX" select="number(translate($COOSYS/@equinox, 'J', ''))" />
+  <xsl:variable name="COOSYS_EPOCH"   select="number(translate($COOSYS/@epoch, 'J', ''))" />
+  <xsl:choose>
+    <!-- not supported coordinate frame -->
+    <xsl:when test="$COOSYS/@system and $COOSYS/@system != 'eq_FK5'"></xsl:when>
+    <xsl:when test="$COOSYS_EQUINOX != NaN and $COOSYS_EQUINOX != 2000"></xsl:when>
+    <xsl:when test="$COOSYS_EPOCH != NaN and $COOSYS_EPOCH != 2000"></xsl:when>
+    <xsl:otherwise>2000</xsl:otherwise>
+  </xsl:choose>
+</xsl:template>
 
 
 
