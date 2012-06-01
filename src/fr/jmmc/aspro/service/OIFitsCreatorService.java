@@ -8,6 +8,7 @@ import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.BaseLine;
 import fr.jmmc.aspro.model.Beam;
 import fr.jmmc.aspro.model.WarningContainer;
+import fr.jmmc.aspro.model.oi.FocalInstrument;
 import fr.jmmc.aspro.model.oi.InterferometerConfiguration;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Position3D;
@@ -115,6 +116,8 @@ public final class OIFitsCreatorService {
   private String arrayName = null;
   /** instrument name */
   private String instrumentName = null;
+  /** instrument experimental flag */
+  private boolean instrumentExperimental = false;
   /** wavelengths */
   private double[] waveLengths;
   /** beam mapping */
@@ -207,11 +210,16 @@ public final class OIFitsCreatorService {
     this.oiFitsFile = new OIFitsFile();
 
     this.arrayName = this.observation.getInterferometerConfiguration().getName();
-    this.instrumentName = this.observation.getInstrumentConfiguration().getName();
+
+    final FocalInstrument instrument = this.observation.getInstrumentConfiguration().getInstrumentConfiguration().getFocalInstrument();
+
+    this.instrumentName = instrument.getName();
+    this.instrumentExperimental = (instrument.isExperimental() != null) ? instrument.isExperimental().booleanValue() : false;
 
     if (logger.isDebugEnabled()) {
       logger.debug("arrName: {}", this.arrayName);
       logger.debug("insName: {}", this.instrumentName);
+      logger.debug("experimental: {}", this.instrumentExperimental);
     }
 
     // Create beams and base line mappings :
@@ -445,7 +453,7 @@ public final class OIFitsCreatorService {
       final boolean useAnalyticalModel = this.target.hasAnalyticalModel();
 
       final ModelManager modelManager;
-      // model computation context              
+      // model computation context
       final ModelComputeContext context;
 
       if (useAnalyticalModel) {
@@ -743,13 +751,25 @@ public final class OIFitsCreatorService {
             visData[k][l][1] = (float) (flux * visComplexNoisy[k][l].getImaginary());
 
             if (!isAmber) {
-              // Waiting for explanations on every instrument processing to compute VisAmp/Phi :
-              // following values are considered as invalid :
-              visAmp[k][l] = Double.NaN;
-              visAmpErr[k][l] = Double.NaN;
+              if (this.instrumentExperimental) {
+                // For experimental instruments: VisAmp/Phi are only amplitude and phase of complex visibility and errors are undefined:
+                visAmp[k][l] = visComplexNoisy[k][l].abs();
 
-              visPhi[k][l] = Double.NaN;
-              visPhiErr[k][l] = Double.NaN;
+                // visErrRe = visErrIm = visAmpErr / SQRT(2):
+                visAmpErr[k][l] = VisNoiseService.VIS_CPX_TO_VIS_AMP_ERR * visErrRe;
+
+                visPhi[k][l] = Math.toDegrees(visComplexNoisy[k][l].getArgument());
+                // undefined error on phase:
+                visPhiErr[k][l] = Double.NaN;
+              } else {
+                // Waiting for explanations on every instrument processing to compute VisAmp/Phi :
+                // following values are considered as invalid :
+                visAmp[k][l] = Double.NaN;
+                visAmpErr[k][l] = Double.NaN;
+
+                visPhi[k][l] = Double.NaN;
+                visPhiErr[k][l] = Double.NaN;
+              }
             }
 
             // mark this value as valid only if error is valid :

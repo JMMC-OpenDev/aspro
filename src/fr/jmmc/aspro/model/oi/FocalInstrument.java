@@ -31,6 +31,7 @@ import fr.jmmc.aspro.model.OIBase;
  *       &lt;sequence>
  *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}ID"/>
  *         &lt;element name="description" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *         &lt;element name="experimental" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
  *         &lt;element name="numberChannels" type="{http://www.w3.org/2001/XMLSchema}int"/>
  *         &lt;element name="defaultSamplingTime" type="{http://www.w3.org/2001/XMLSchema}int"/>
  *         &lt;element name="fringeTracker" type="{http://www.w3.org/2001/XMLSchema}IDREF" minOccurs="0"/>
@@ -59,6 +60,7 @@ import fr.jmmc.aspro.model.OIBase;
 @XmlType(name = "FocalInstrument", propOrder = {
     "name",
     "description",
+    "experimental",
     "numberChannels",
     "defaultSamplingTime",
     "fringeTracker",
@@ -87,6 +89,7 @@ public class FocalInstrument
     protected String name;
     @XmlElement(required = true)
     protected String description;
+    protected Boolean experimental;
     protected int numberChannels;
     protected int defaultSamplingTime;
     @XmlElement(type = Object.class)
@@ -154,6 +157,30 @@ public class FocalInstrument
      */
     public void setDescription(String value) {
         this.description = value;
+    }
+
+    /**
+     * Gets the value of the experimental property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Boolean }
+     *     
+     */
+    public Boolean isExperimental() {
+        return experimental;
+    }
+
+    /**
+     * Sets the value of the experimental property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Boolean }
+     *     
+     */
+    public void setExperimental(Boolean value) {
+        this.experimental = value;
     }
 
     /**

@@ -247,7 +247,7 @@
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
-      
+
       <xsd:element name="context" type="ObservationContext" minOccurs="0">
         <xsd:annotation>
           <xsd:documentation>
@@ -259,7 +259,7 @@
       <xsd:element name="extendedConfiguration" type="InterferometerConfiguration" minOccurs="0">
         <xsd:annotation>
           <xsd:documentation>
-            this element contains an optional Interferometer configuration 
+            this element contains an optional Interferometer configuration
             to create custom configuration for this observation (baselines, pops, beams ...)
           </xsd:documentation>
         </xsd:annotation>
@@ -804,9 +804,9 @@
     </xsd:sequence>
   </xsd:complexType>
 
-  
-  
-  
+
+
+
   <!-- TargetConfiguration -->
   <xsd:complexType name="TargetConfiguration">
     <xsd:annotation>
@@ -1602,7 +1602,7 @@
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
-      
+
       <xsd:element name="station" type="xsd:IDREF" minOccurs="0">
         <xsd:annotation>
           <xsd:documentation>
@@ -1615,7 +1615,7 @@
           </xsd:appinfo>
         </xsd:annotation>
       </xsd:element>
-      
+
       <xsd:element name="maximumThrow" type="xsd:double">
         <xsd:annotation>
           <xsd:documentation>
@@ -1681,6 +1681,13 @@
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
+      <xsd:element name="experimental" type="xsd:boolean" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>
+              This flag indicates that this instrument is experimental (not on the sky) (optional)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
       <xsd:element name="numberChannels" type="xsd:int">
         <xsd:annotation>
           <xsd:documentation>
@@ -1695,7 +1702,7 @@
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
-      
+
       <xsd:element name="fringeTracker" type="xsd:IDREF" minOccurs="0">
         <xsd:annotation>
           <xsd:documentation>
@@ -1715,7 +1722,7 @@
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
-        
+
 
 
       <!-- noise modelling parameters -->
@@ -1867,7 +1874,7 @@
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
-      
+
     </xsd:sequence>
   </xsd:complexType>
 
@@ -2041,14 +2048,14 @@
               The mandatory parameter name
           </xsd:documentation>
         </xsd:annotation>
-      </xsd:element>          
+      </xsd:element>
       <xsd:element name="value" type="xsd:string" minOccurs="1" maxOccurs="1">
         <xsd:annotation>
           <xsd:documentation>
               The mandatory parameter value
           </xsd:documentation>
         </xsd:annotation>
-      </xsd:element>          
+      </xsd:element>
     </xsd:sequence>
   </xsd:complexType>
 
