@@ -516,7 +516,6 @@ public final class OIFitsCreatorService {
         }
 
         jobs[i] = new Runnable() {
-
           @Override
           public void run() {
             // spatial frequencies for a single HA (spectral dispersion):
@@ -526,7 +525,7 @@ public final class OIFitsCreatorService {
             double u, v;
 
             // Iterate on HA points :
-            for (int i = 0, j = 0, k = 0, l = 0; i < nHAPoints; i++) {
+            for (int i = 0, j, k, l; i < nHAPoints; i++) {
 
               j = 0;
 
@@ -655,13 +654,20 @@ public final class OIFitsCreatorService {
     // vars:
     double jd;
     double u, v;
-    double visRe, visIm, flux, vAmp, visErrRe, visErrIm;
+    double visRe, visIm, flux, vAmp, vPhi, visErrRe, visErrIm;
+    final MutableComplex visComplexSample = new MutableComplex();
+
+    // number of complex visiblity samples to compute standard deviation:
+    final int NSamples = 100;
+
+    double diff, ampSquareDiffAcc, phiSquareDiffAcc;
+
 
     // complex visiblity with noise (sigma = visError)
     final Complex[][] visComplexNoisy = new Complex[vis.getNbRows()][this.nWaveLengths];
 
     // Iterate on HA points :
-    for (int i = 0, j = 0, k = 0, l = 0; i < this.nHAPoints; i++) {
+    for (int i = 0, j, k, l, n; i < this.nHAPoints; i++) {
 
       j = 0;
 
@@ -754,13 +760,40 @@ public final class OIFitsCreatorService {
               if (this.instrumentExperimental) {
                 // For experimental instruments: VisAmp/Phi are only amplitude and phase of complex visibility and errors are undefined:
                 visAmp[k][l] = visComplexNoisy[k][l].abs();
-
-                // visErrRe = visErrIm = visAmpErr / SQRT(2):
-                visAmpErr[k][l] = VisNoiseService.VIS_CPX_TO_VIS_AMP_ERR * visErrRe;
-
                 visPhi[k][l] = Math.toDegrees(visComplexNoisy[k][l].getArgument());
-                // undefined error on phase:
-                visPhiErr[k][l] = Double.NaN;
+
+                // use 100 random visComplex realisations to compute standard deviation for both visAmp / visPhi:
+
+                // pure visibility phase :
+                vPhi = this.visComplex[k][l].getArgument();
+
+                // howto ensure that errors on Im / Re are inside error disk ?
+                ampSquareDiffAcc = 0d;
+                phiSquareDiffAcc = 0d;
+
+                for (n = 0; n < NSamples; n++) {
+                  // update nth sample:
+                  visComplexSample.updateComplex(
+                          visRe + VisNoiseService.gaussianNoise(this.random, visErrRe),
+                          visIm + VisNoiseService.gaussianNoise(this.random, visErrIm));
+
+                  // compute square distance to visAmp mean:
+                  diff = visComplexSample.abs() - vAmp;
+
+                  ampSquareDiffAcc += diff * diff;
+
+                  // compute square distance to visPhi mean:
+                  diff = visComplexSample.getArgument() - vPhi;
+
+                  phiSquareDiffAcc += diff * diff;
+                }
+
+                // standard deviation on vis amplitude:
+                visAmpErr[k][l] = Math.sqrt(ampSquareDiffAcc / (NSamples - 1));
+
+                // standard deviation on vis phase:
+                visPhiErr[k][l] = Math.toDegrees(Math.sqrt(phiSquareDiffAcc / (NSamples - 1)));
+
               } else {
                 // Waiting for explanations on every instrument processing to compute VisAmp/Phi :
                 // following values are considered as invalid :
@@ -820,7 +853,7 @@ public final class OIFitsCreatorService {
     double visRe, visIm;
     double v2, v2Err;
 
-    for (int k = 0, l = 0; k < nRows; k++) {
+    for (int k = 0, l; k < nRows; k++) {
 
       // if target has models, then complex visibility are computed :
       if (!this.hasModel) {
@@ -952,7 +985,7 @@ public final class OIFitsCreatorService {
     int pos;
 
     // Iterate on HA points :
-    for (int i = 0, j = 0, k = 0, l = 0, vp = 0; i < this.nHAPoints; i++) {
+    for (int i = 0, j, k, l, vp; i < this.nHAPoints; i++) {
 
       // position in OI_VIS HA row group :
       vp = this.nBaseLines * i;
