@@ -7,9 +7,9 @@
 
 <ApplicationData link="http://www.jmmc.fr/aspro2">
 
-  <program name="Aspro2" version="0.9.1 beta 10"/>
-  
-  <compilation date="31/05/2012" compiler="JDK 1.5.0_16"/>
+  <program name="Aspro2" version="0.9.1 beta 11"/>
+
+  <compilation date="01/06/2012" compiler="JDK 1.5.0_16"/>
 
   <text>
     <![CDATA[ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations
@@ -31,20 +31,20 @@
             description="JMMC library to provide common astronomical computations (coordinate conversion, SIMBAD star resolver and analytical object models in interferometry)"
             link="https://www.jmmc.fr/dev/jmal/"
             jars="jmal.jar"
-            license="CECILL-B ???"/>     
+            license="CECILL-B ???"/>
 
         <!-- Java Mariotti OITools -->
         <package name="OITools"
             description="OITools is the JMMC library dedicated to OIFits manipulation (load, save and validation)"
             link="https://www.jmmc.fr/dev/oitools/"
             jars="oitools.jar"
-            license="CECILL-B ???"/>     
+            license="CECILL-B ???"/>
 
 
         <!-- 1. Science / VO libraries (always on top for better visibility) -->
 
         <!-- Aspro2 dependencies -->
-        
+
         <package name="JSkyCalc"
             description="Observability constraints based on JSkyCalc by J. R. Thorstensen, Dartmouth College"
             link="http://www.dartmouth.edu/~physics/faculty/skycalc/flyer.html"
@@ -99,7 +99,7 @@
         <!-- 2. Swing -->
 
         <!-- Aspro2 dependencies -->
-        
+
         <package name="JFreeChart"
             description="JFreeChart is a free 100% Java chart library that makes it easy for developers to display professional quality charts in their applications"
             link="http://www.jfree.org/jfreechart/"
@@ -151,97 +151,100 @@
 
   <releasenotes>
     <release version="0.9.1">
-      <prerelease version="0.9.1 beta 10"> 
-        <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/320">Added support for RA/DEC expressed in degrees in the VOtable SAMP message handler 
+      <prerelease version="0.9.1 beta 11">
+        <change type="FEATURE">Added Period 'VLTI Future' to define coming instruments in future ESO periods: preliminary GRAVITY support</change>
+      </prerelease>
+      <prerelease version="0.9.1 beta 10">
+        <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/320">Added support for RA/DEC expressed in degrees in the VOtable SAMP message handler
           and check for correct coordinate system (FK5, J2000)
         </change>
         <change type="CHANGE">Changed VOTable import limits: up to 50 targets accepted without user confirmation; import discarded if more than 1000 targets</change>
       </prerelease>
-      <prerelease version="0.9.1 beta 9"> 
-        <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/315">Fixed VOtable SAMP interoperability when Aspro2 is started by the JMMC AppLauncher 
+      <prerelease version="0.9.1 beta 9">
+        <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/315">Fixed VOtable SAMP interoperability when Aspro2 is started by the JMMC AppLauncher
           and the VOTable contains calibrator targets (SearchCal)</change>
         <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/315">Fixed missing science target (automatically added) when Aspro2 handles SearchCal VOtable SAMP messages:
           no more message "Target '...' not found in targets (wrong SearchCal target)"</change>
         <change type="BUGFIX">Better unexpected exception handling in any SAMP message handler</change>
       </prerelease>
-      <prerelease version="0.9.1 beta 8"> 
+      <prerelease version="0.9.1 beta 8">
         <change type="CHANGE" url="http://trac.jmmc.fr/jmmc-sw/ticket/316">Merge custom configuration (baseline, pops, beams) with internal configuration (missing beams / PoPs) for interoperability with PIVOT (CHARA VEGA)</change>
         <change type="CHANGE" url="http://trac.jmmc.fr/jmmc-sw/ticket/316">Added CHARA detailled configuration as one warning to display baseline, beams and optionally user-defined PoPs</change>
         <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/316">Fixed StarList generation (CHARA VEGA) when beams are undefined in the Aspro2 configuration; use default interferometer beams (V1 ... V6)</change>
       </prerelease>
-      <prerelease version="0.9.1 beta 7"> 
-        <change type="FEATURE">Added complete support for VOTable ASPRO parameters to provide custom configuration (baseline, pops, beams) 
+      <prerelease version="0.9.1 beta 7">
+        <change type="FEATURE">Added complete support for VOTable ASPRO parameters to provide custom configuration (baseline, pops, beams)
           and disable GUI features used by the SAMP interoperability with PIVOT (CHARA VEGA)</change>
         <change type="CHANGE">Automatically fix invalid interferometer configuration (CHARA VEGA June 2011) to CHARA</change>
       </prerelease>
-      <prerelease version="0.9.1 beta 6"> 
+      <prerelease version="0.9.1 beta 6">
         <change type="FEATURE">Updated number of scans in PIONIER P2PP template</change>
         <change type="FEATURE">Updated PIONIER instrument modes to add K band: LARGE_H, BROAD_K and LARGE_K</change>
-        <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/305">Use native file choosers on Mac OS X; 
+        <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/305">Use native file choosers on Mac OS X;
           avoid directory creation bug when exporting targets to Observing blocks</change>
         <change type="FEATURE">Moved File chooser preferences file (last used directory per file type) i.e. previous settings are lost.</change>
       </prerelease>
-      <prerelease version="0.9.1 beta 5"> 
+      <prerelease version="0.9.1 beta 5">
         <change type="CHANGE">Support VOTable 1.2 for incoming SAMP 'load.votable' messages (vizier)</change>
-        <change type="FEATURE">Added warning log: click on the warning icon</change> 
-        <change type="CHANGE">Corrected VLTI station coordinates (A0, D0, H0, K0)</change> 
+        <change type="FEATURE">Added warning log: click on the warning icon</change>
+        <change type="CHANGE">Corrected VLTI station coordinates (A0, D0, H0, K0)</change>
       </prerelease>
-      <prerelease version="0.9.1 beta 4"> 
-        <change type="FEATURE">Fixed CHARA configuration: PAVO (resolution), removed configuration CHARA Vega June 2011</change> 
-        <change type="FEATURE">Fixed VLTI configuration: FINITO: mag limit = 7, no FT for PIONIER</change> 
-        <change type="CHANGE">Fixed CHARA OIFits data: use all spectral channels (~ 400) until binning support</change> 
-        <change type="CHANGE">Fixed Noise modeling: FINITO GroupTrack mode do not allow longer dit</change> 
-        <change type="CHANGE">Added square visiblity (SQUARE) as model image mode</change> 
+      <prerelease version="0.9.1 beta 4">
+        <change type="FEATURE">Fixed CHARA configuration: PAVO (resolution), removed configuration CHARA Vega June 2011</change>
+        <change type="FEATURE">Fixed VLTI configuration: FINITO: mag limit = 7, no FT for PIONIER</change>
+        <change type="CHANGE">Fixed CHARA OIFits data: use all spectral channels (~ 400) until binning support</change>
+        <change type="CHANGE">Fixed Noise modeling: FINITO GroupTrack mode do not allow longer dit</change>
+        <change type="CHANGE">Added square visiblity (SQUARE) as model image mode</change>
       </prerelease>
-      <prerelease version="0.9.1 beta 3"> 
-        <change type="BUGFIX">Fixed RA / DEC parsing (Simbad resolver) with missing second token</change> 
-        <change type="CHANGE">Internal changes (Logback API)</change> 
+      <prerelease version="0.9.1 beta 3">
+        <change type="BUGFIX">Fixed RA / DEC parsing (Simbad resolver) with missing second token</change>
+        <change type="CHANGE">Internal changes (Logback API)</change>
       </prerelease>
-      <prerelease version="0.9.1 beta 2"> 
-        <change type="FEATURE">Enhanced Fast mode to compute user models: determine useful model data using total flux threshold (99% or better)</change> 
-        <change type="CHANGE">Avoid useless OIFits data computation when some widgets changes on the UV Coverage panel</change> 
-        <change type="CHANGE">Refresh UV Map and OIFits data when the Fast mode preference changes</change> 
+      <prerelease version="0.9.1 beta 2">
+        <change type="FEATURE">Enhanced Fast mode to compute user models: determine useful model data using total flux threshold (99% or better)</change>
+        <change type="CHANGE">Avoid useless OIFits data computation when some widgets changes on the UV Coverage panel</change>
+        <change type="CHANGE">Refresh UV Map and OIFits data when the Fast mode preference changes</change>
       </prerelease>
-      <prerelease version="0.9.1 beta 1"> 
-        <change type="BUGFIX">Fixed performance issue related to the time marker (label anchor refreshed in for ever loop)</change> 
+      <prerelease version="0.9.1 beta 1">
+        <change type="BUGFIX">Fixed performance issue related to the time marker (label anchor refreshed in for ever loop)</change>
       </prerelease>
     </release>
     <release version="0.9.0">
       <!-- <pubDate>Wed, 14 Mar 2012 16:58:26 GMT</pubDate> -->
-      <prerelease version="0.9.0"> 
-        <change type="FEATURE">Public release for ESO P90</change> 
+      <prerelease version="0.9.0">
+        <change type="FEATURE">Public release for ESO P90</change>
       </prerelease>
-      <prerelease version="0.9.0 beta 3"> 
-        <change type="CHANGE">Added LUT and color scale widgets on the FITS image preview of the target model editor</change> 
-        <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/271">Added UP / DOWN buttons to move targets among 
+      <prerelease version="0.9.0 beta 3">
+        <change type="CHANGE">Added LUT and color scale widgets on the FITS image preview of the target model editor</change>
+        <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/271">Added UP / DOWN buttons to move targets among
           science or calibrator targets (manual sort) in the target editor</change>
       </prerelease>
-      <prerelease version="0.9.0 beta 2"> 
-        <change type="CHANGE">Enhanced exception handling during user model validation and computation: automatically disable invalid model and add a warning message</change> 
-        <change type="CHANGE">Added user model information (pixel increments + FOV) on the target model editor</change> 
-        <change type="CHANGE">Added 'Fast mode (optimize image)' preferences to prepare user models (FITS image) for FFT and direct fourier transform: 
-          discard negative, zero values and data lower than the visibility threshold (1 percent) to have smaller datasets to process</change> 
+      <prerelease version="0.9.0 beta 2">
+        <change type="CHANGE">Enhanced exception handling during user model validation and computation: automatically disable invalid model and add a warning message</change>
+        <change type="CHANGE">Added user model information (pixel increments + FOV) on the target model editor</change>
+        <change type="CHANGE">Added 'Fast mode (optimize image)' preferences to prepare user models (FITS image) for FFT and direct fourier transform:
+          discard negative, zero values and data lower than the visibility threshold (1 percent) to have smaller datasets to process</change>
       </prerelease>
-      <prerelease version="0.9.0 beta 1"> 
-        <change type="FEATURE">Added User model editor (single Fits image) in the target model editor including image preview</change> 
-        <change type="FEATURE">Added 'Compute OIFits data' checkbox on the UV Coverage panel to enable/disable the OIFits computation 
-          which can be very slow (for example: high resolution AMBER observation)</change> 
-        <change type="FEATURE">Added User model support to compute OIFits data using direct fourier transform (slow even in multithreading)</change> 
-        <change type="FEATURE">Added User model support (single Fits image) to compute UV Map (gray model) using fractional FFT (multithreading)</change> 
-        <change type="CHANGE">OIFits data are now computed in background (multithreading)</change> 
-        <change type="CHANGE">Changed mouse cursor when computations are running (busy wait cursor) but the application is still usable</change> 
-        <change type="CHANGE">Enhanced status bar messages to better indicate when background computations are running</change> 
+      <prerelease version="0.9.0 beta 1">
+        <change type="FEATURE">Added User model editor (single Fits image) in the target model editor including image preview</change>
+        <change type="FEATURE">Added 'Compute OIFits data' checkbox on the UV Coverage panel to enable/disable the OIFits computation
+          which can be very slow (for example: high resolution AMBER observation)</change>
+        <change type="FEATURE">Added User model support to compute OIFits data using direct fourier transform (slow even in multithreading)</change>
+        <change type="FEATURE">Added User model support (single Fits image) to compute UV Map (gray model) using fractional FFT (multithreading)</change>
+        <change type="CHANGE">OIFits data are now computed in background (multithreading)</change>
+        <change type="CHANGE">Changed mouse cursor when computations are running (busy wait cursor) but the application is still usable</change>
+        <change type="CHANGE">Enhanced status bar messages to better indicate when background computations are running</change>
       </prerelease>
     </release>
-    
+
     <release version="0.8.2">
       <!-- <pubDate>Wed, 14 Mar 2012 16:58:26 GMT</pubDate> -->
-      <prerelease version="0.8.2 beta 11"> 
-        <change type="FEATURE">Added ESO P90 configuration</change> 
-        <change type="FEATURE">Added the Color scale legend on the UV Coverage plot</change> 
-        <change type="FEATURE">Added the Color scale (linear or logarithmic) preference to represent the model image amplitude</change> 
+      <prerelease version="0.8.2 beta 11">
+        <change type="FEATURE">Added ESO P90 configuration</change>
+        <change type="FEATURE">Added the Color scale legend on the UV Coverage plot</change>
+        <change type="FEATURE">Added the Color scale (linear or logarithmic) preference to represent the model image amplitude</change>
         <change type="CHANGE">Updated spectral configurations for CHARA VEGA instrument (CAMERA=R)</change>
-      </prerelease>       
+      </prerelease>
       <prerelease version="0.8.2 beta 10">
         <change type="CHANGE">Updated spectral configurations for CHARA VEGA instrument: spectral channels (binning)</change>
         <change type="CHANGE">Updated StarList export for the CHARA VEGA instrument: added vega setup and spectral calibration OB</change>
@@ -259,7 +262,7 @@
       </prerelease>
       <prerelease version="0.8.2 beta 6">
         <change type="CHANGE">Added PIVOT identifier support in Samp 'table.load.votable' incoming and 'starlist.load' output messages</change>
-        <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/243">Fixed noise biases for PIONIER instrument: 
+        <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/243">Fixed noise biases for PIONIER instrument:
           fixed bias to 1% and VIS2 calibration bias to 5% (minVis2Err = 0.0001 + 0.05 x V2)</change>
       </prerelease>
       <prerelease version="0.8.2 beta 5">
@@ -276,12 +279,12 @@
         <change type="CHANGE">Added Show Log action in help menu to see the application log (and configure log details at runtime)</change>
       </prerelease>
       <prerelease version="0.8.2 beta 2">
-        <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/234">Added OI_VIS table in the OIFits output even if the instrument is not AMBER; 
-          it contains correlated fluxes VISDATA/VISERR anyway but VISAMP/VISPHI are set to NaN for other instruments because Aspro2 does not know 
+        <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/234">Added OI_VIS table in the OIFits output even if the instrument is not AMBER;
+          it contains correlated fluxes VISDATA/VISERR anyway but VISAMP/VISPHI are set to NaN for other instruments because Aspro2 does not know
           how these quantities are computed by each instrument data reduction software</change>
-        <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/231">Fixed min/max baseline computation to use projected baseline on UV plane 
+        <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/231">Fixed min/max baseline computation to use projected baseline on UV plane
           instead of maximum baseline length (UVW); this impacts SearchCal interoperability and the UV plot scale (UVMax field).</change>
-        <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/203">Automatically adjust total integration time to 50% of the sampling periodicity 
+        <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/203">Automatically adjust total integration time to 50% of the sampling periodicity
           when it changes in the UV Coverage Panel.</change>
         <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/205">Fixed grid lines visibility on the Observability plot.</change>
       </prerelease>
@@ -290,10 +293,10 @@
       </prerelease>
     </release>
     <release version="0.8.1">
-      <prerelease version="0.8.1.2"> 
+      <prerelease version="0.8.1.2">
         <!-- <pubDate>Tue, 06 Mar 2012 11:38:54 GMT</pubDate> -->
-        <change type="FEATURE">Added ESO P90 configuration</change> 
-      </prerelease> 
+        <change type="FEATURE">Added ESO P90 configuration</change>
+      </prerelease>
       <prerelease version="0.8.1">
         <!-- <pubDate>Wed, 14 Sep 2011 16:27:21 GMT</pubDate> -->
         <change type="BUGFIX">Corrected effective wavelength in OIFits output (channel center)</change>
@@ -302,7 +305,7 @@
         <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/199">Fixed alternative distribution package (JAR file): missing jMAL embedded libraries</change>
         <change type="BUGFIX">Fixed out of range exception when mouse zooming on UV Coverage Panel arround borders</change>
         <change type="FEATURE">Improved Java Web Start packaging (JNLP) to provide faster downloads</change>
-        <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/198">Fixed exception when exporting an Observing block 
+        <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/198">Fixed exception when exporting an Observing block
           and the spectral type is undefined for one target (SearchCal calibrator)</change>
       </prerelease>
       <prerelease version="0.8.1 beta 14">
@@ -313,7 +316,7 @@
         <change>Added 'Send StarList to PIVOT' action (SAMP)</change>
       </prerelease>
       <prerelease version="0.8.1 beta 12">
-        <change type="FEATURE">Added one preliminary OIFits viewer: only square visiblity (VIS2) vs radius plot is available with error bars 
+        <change type="FEATURE">Added one preliminary OIFits viewer: only square visiblity (VIS2) vs radius plot is available with error bars
           when the noise modeling is able to compute them</change>
         <change type="FEATURE">Fixed CHARA delay line configuration: E1 cart moves in range [-1.4 to +44.0] like others (july 2011)</change>
       </prerelease>
@@ -336,7 +339,7 @@
       <prerelease version="0.8.1 beta 7">
         <change type="FEATURE">Updated CHARA configuration using the latest official configuration file (telescopes.chara)</change>
         <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/175">Changed PIONIER OB template to take 100 scans of DARK instead of 50</change>
-        <change>Minor ergonomic change: when the target editor is opened, the 'Targets' tab is displayed by default; when the UV coverage plot is selected, 
+        <change>Minor ergonomic change: when the target editor is opened, the 'Targets' tab is displayed by default; when the UV coverage plot is selected,
           the 'Models' tab is displayed instead.</change>
         <change>Minor changes related to CHARA VEGA Observing blocks (spectral type format, disk diameter set from SearchCal diameters)</change>
       </prerelease>
@@ -352,7 +355,7 @@
         <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/165">Allow zooming on the observability plot (targets and time range)</change>
       </prerelease>
       <prerelease version="0.8.1 beta 3">
-        <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/144">Fixed bug related to SearchCal integration: 
+        <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/144">Fixed bug related to SearchCal integration:
           always use the bright scenario as the faint scenario is not available for all instrumental bands</change>
         <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/145">Changed color for orphan calibrators in the observability plot</change>
         <change type="CHANGE" url="http://trac.jmmc.fr/jmmc-sw/ticket/143">Fixed export OB for CHARA VEGA to handle properly calibrators in the StarList format</change>
@@ -384,7 +387,7 @@
         <change>Added VLTI configuration for Period 88</change>
       </prerelease>
     </release>
-    
+
     <release version="0.7">
       <!-- <pubDate>Tue, 15 Feb 2011 11:41:46 GMT</pubDate> -->
       <prerelease version="0.7.8 beta">
