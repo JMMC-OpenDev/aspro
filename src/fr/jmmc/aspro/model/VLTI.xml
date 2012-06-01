@@ -42,7 +42,7 @@
       </adaptiveOptics>
 
     </telescope>
-    
+
     <!-- For now we have only one shared instance of AT because all ATs are considered equivalent -->
     <telescope>
       <name>AT</name>
@@ -780,7 +780,7 @@
     <station>
       <name>A0</name>
       <telescope>AT</telescope>
-      <relativePosition> 
+      <relativePosition>
         <posX>-19.130844623</posX>
         <posY>-14.641622</posY>
         <posZ>-52.6265587846</posZ>
@@ -8596,15 +8596,15 @@
     <fringeTracker>
       <name>FINITO</name>
       <band>H</band>
-      
+
       <mode>GroupTrack</mode>
       <mode>FringeTrack</mode>
 
       <instrumentVisibility>0.9</instrumentVisibility>
-      <!-- 
-        FINITO magnitude limit is: 
-        The limiting correlated magnitude for FINITO on the ATs is H = 5 and the minimum visibility in the H band is 15%. 
-        The limiting correlated magnitude for FINITO on the UTs is H=7 with a minimum visiblity of 10%.         
+      <!--
+        FINITO magnitude limit is:
+        The limiting correlated magnitude for FINITO on the ATs is H = 5 and the minimum visibility in the H band is 15%.
+        The limiting correlated magnitude for FINITO on the UTs is H=7 with a minimum visiblity of 10%.
       -->
       <magLimit>7</magLimit>
       <maxIntegration>10</maxIntegration>
@@ -8809,7 +8809,7 @@
 
       <!-- H band -->
       <mode>
-        <!-- 
+        <!--
           1) BROAD-H  (broad-band)
           lbd  = [1.68108e-06];
           lbdB = [2.45e-07];
@@ -8820,7 +8820,7 @@
         <waveLengthMax>1.80358</waveLengthMax>
       </mode>
       <mode>
-        <!-- 
+        <!--
           2) SMALL-H
           lbd = [1.59e-06,1.678e-06,1.768e-06];
           lbdB = lbd*0 + 9.35e-08;
@@ -8831,7 +8831,7 @@
         <waveLengthMax>1.81825</waveLengthMax>
       </mode>
       <mode>
-        <!-- 
+        <!--
           3) LARGE-H
           lbd = [1.81373,1.77345,1.72029,1.66879,1.61622,1.56531,1.52855] *1e-6;
           lbdB = lbd*0 + 4.08333e-08;
@@ -8845,7 +8845,7 @@
 
       <!-- K band -->
       <mode>
-        <!-- 
+        <!--
           1) BROAD-K  (broad-band)
           lbd  = [2.051e-06];
           lbdB = [1.75e-07];
@@ -8855,15 +8855,15 @@
         <waveLengthMin>1.9635</waveLengthMin>
         <waveLengthMax>2.1385</waveLengthMax>
       </mode>
-        <!-- 
+        <!--
           2) SMALL-K
           pas encore connu
         -->
       <mode>
-        <!-- 
+        <!--
           3) LARGE-K
           lbd = [2.17433,2.13937,2.09438,2.04813,2.00948,1.9702,1.935] *1e-6;
-          lbdB = lbd*0 + 3.5e-08; 
+          lbdB = lbd*0 + 3.5e-08;
           note: channels are not contiguous, so bandwidth = 3.9 microns !
         -->
         <name>LARGE-K</name>
@@ -8871,7 +8871,62 @@
         <waveLengthMin>1.915</waveLengthMin>
         <waveLengthMax>2.195</waveLengthMax>
       </mode>
-      
+
+    </focalInstrument>
+
+
+    <!-- future instruments -->
+
+    <focalInstrument>
+      <name>GRAVITY</name>
+      <description>GRAVITY instrument</description>
+      <experimental>true</experimental>
+      <numberChannels>4</numberChannels>
+      <defaultSamplingTime>30</defaultSamplingTime>
+
+      <!-- noise parameters -->
+      <transmission>0.01</transmission>
+      <dit>0.01</dit>
+      <ron>10</ron>
+      <detectorSaturation>50000</detectorSaturation>
+      <instrumentVisibility>0.9</instrumentVisibility>
+      <instrumentVisibilityBias>1.0</instrumentVisibilityBias>
+      <instrumentVis2CalibrationBias>5.0</instrumentVis2CalibrationBias>
+      <instrumentPhaseBias>2.0</instrumentPhaseBias>
+      <nbPixInterferometry>4</nbPixInterferometry>
+      <nbPixPhotometry>4</nbPixPhotometry>
+      <fracFluxInInterferometry>0.8</fracFluxInInterferometry>
+
+      <mode>
+        <!--
+          1)  BROAD-BAND R~22 (5 canaux spectraux)
+        -->
+        <name>BROAD-BAND</name>
+        <resolution>22</resolution>
+        <numberChannels>5</numberChannels>
+        <waveLengthMin>1.95</waveLengthMin>
+        <waveLengthMax>2.45</waveLengthMax>
+      </mode>
+      <mode>
+        <!--
+          2) LOW R~500 (128 canaux spectraux)
+        -->
+        <name>LOW</name>
+        <resolution>500</resolution>
+        <numberChannels>128</numberChannels>
+        <waveLengthMin>1.95</waveLengthMin>
+        <waveLengthMax>2.45</waveLengthMax>
+      </mode>
+      <mode>
+        <!--
+          3) MEDIUM R~4500 (128 canaux spectraux)
+        -->
+        <name>MEDIUM</name>
+        <resolution>4500</resolution>
+        <numberChannels>1024</numberChannels>
+        <waveLengthMin>1.95</waveLengthMin>
+        <waveLengthMax>2.45</waveLengthMax>
+      </mode>
     </focalInstrument>
 
   </description>
@@ -9146,11 +9201,11 @@
       <configuration>
         <stations>D0 I1</stations>
       </configuration>
-<!--      
+<!--
       <configuration>
         <stations>G1 I1</stations>
       </configuration>
- -->      
+ -->
       <configuration>
         <stations>H0 I1</stations>
       </configuration>
@@ -9306,11 +9361,11 @@
       <configuration>
         <stations>D0 I1</stations>
       </configuration>
-<!--      
+<!--
       <configuration>
         <stations>G1 I1</stations>
       </configuration>
- -->      
+ -->
       <configuration>
         <stations>H0 I1</stations>
       </configuration>
@@ -9466,11 +9521,11 @@
       <configuration>
         <stations>D0 I1</stations>
       </configuration>
-<!--      
+<!--
       <configuration>
         <stations>G1 I1</stations>
       </configuration>
- -->      
+ -->
       <configuration>
         <stations>H0 I1</stations>
       </configuration>
@@ -9878,6 +9933,26 @@
       </configuration>
     </instrument>
 
+  </configuration>
+
+  <configuration>
+    <version>Future</version>
+    <interferometer>VLTI</interferometer>
+    <instrument>
+      <focalInstrument>GRAVITY</focalInstrument>
+      <configuration>
+        <stations>UT1 UT2 UT3 UT4</stations>
+      </configuration>
+      <configuration>
+        <stations>A1 G1 K0 J3</stations>
+      </configuration>
+      <configuration>
+        <stations>D0 H0 G1 I1</stations>
+      </configuration>
+      <configuration>
+        <stations>A1 B2 C1 D0</stations>
+      </configuration>
+    </instrument>
   </configuration>
 
 </a:interferometerSetting>
