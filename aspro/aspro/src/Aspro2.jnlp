@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<jnlp spec="1.0+" codebase="@GENERATED@" href="@GENERATED@">
+  <information>
+    <title>Aspro 2</title>
+    <vendor>JMMC</vendor>
+    <homepage href="http://www.jmmc.fr/aspro2"/>
+    <description>This application is the new version of the ASPRO tool to prepare your interferometric observations</description>
+    <icon href="Aspro2.png"/>
+    <offline-allowed/>
+    <association mime-type="application/x-aspro+xml" extensions="asprox">
+      <icon href="Aspro2.png"/>
+      <description>Aspro 2 Observation files</description>
+    </association>
+    <shortcut>
+      <desktop/>
+    </shortcut>
+  </information>
+  <security>
+    <all-permissions/>
+  </security>
+  <resources>
+    <j2se version="1.5+" initial-heap-size="256m" max-heap-size="512m"/>    
+
+    <!-- Application module first (main class) -->
+    <jar href="jar/aspro.jar" />
+
+    <!-- JMMC modules -->
+    <jar href="jar/jmcs.jar" />
+    <jar href="jar/jmal.jar" />
+    <jar href="jar/oitools.jar" />
+
+    <!-- JMMC libs -->
+    <extension href="../JmcsLibs/JmcsLibs.jnlp"/>
+    <extension href="../JmalLibs/JmalLibs.jnlp"/>
+    
+    <!-- JFreeChart -->
+    <jar href="@SHARED@/jfreechart-1.0.13.jar" />
+    <!-- jfreechart requires jcommon -->
+    <jar href="@SHARED@/jcommon-1.0.16.jar" />
+    
+    <!-- PDF -->
+    <jar href="@SHARED@/iText-2.1.5.jar" />
+
+  </resources>
+  <application-desc main-class="fr.jmmc.aspro.AsproGui"/>
+</jnlp>
