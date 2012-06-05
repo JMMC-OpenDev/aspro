@@ -151,6 +151,7 @@
 
   <releasenotes>
     <release version="0.9.1">
+      <pubDate>Tue, 05 Jun 2012 14:22:31 GMT</pubDate>
       <prerelease version="0.9.1 beta 11">
         <change type="FEATURE">Added Period 'VLTI Future' to define coming instruments in future ESO periods: preliminary GRAVITY support</change>
         <change type="FEATURE">Added visAmp/visPhi error computation for experimental instruments (GRAVITY) i.e. compute standard deviation on 100 noisy complex visibility samples</change>
@@ -211,7 +212,7 @@
       </prerelease>
     </release>
     <release version="0.9.0">
-      <!-- <pubDate>Wed, 14 Mar 2012 16:58:26 GMT</pubDate> -->
+      <pubDate>Wed, 14 Mar 2012 16:58:26 GMT</pubDate>
       <prerelease version="0.9.0">
         <change type="FEATURE">Public release for ESO P90</change>
       </prerelease>
@@ -239,7 +240,7 @@
     </release>
 
     <release version="0.8.2">
-      <!-- <pubDate>Wed, 14 Mar 2012 16:58:26 GMT</pubDate> -->
+      <pubDate>Wed, 14 Mar 2012 16:58:26 GMT</pubDate>
       <prerelease version="0.8.2 beta 11">
         <change type="FEATURE">Added ESO P90 configuration</change>
         <change type="FEATURE">Added the Color scale legend on the UV Coverage plot</change>
@@ -294,12 +295,8 @@
       </prerelease>
     </release>
     <release version="0.8.1">
-      <prerelease version="0.8.1.2">
-        <!-- <pubDate>Tue, 06 Mar 2012 11:38:54 GMT</pubDate> -->
-        <change type="FEATURE">Added ESO P90 configuration</change>
-      </prerelease>
+      <pubDate>Wed, 14 Sep 2011 16:27:21 GMT</pubDate>
       <prerelease version="0.8.1">
-        <!-- <pubDate>Wed, 14 Sep 2011 16:27:21 GMT</pubDate> -->
         <change type="BUGFIX">Corrected effective wavelength in OIFits output (channel center)</change>
         <change type="FEATURE">Corrected AMBER noise parameters: visibility and phase bias set to 5% and 3 deg respectively</change>
         <change type="FEATURE">Updated PIONIER instrument configuration: corrected noise parameters and added spectral modes (LARGE-H, SMALL-H and BROAD-H)</change>
@@ -377,7 +374,7 @@
     </release>
 
     <release version="0.8">
-      <!-- <pubDate>Thu, 10 Mar 2011 11:16:37 GMT</pubDate> -->
+      <pubDate>Thu, 10 Mar 2011 11:16:37 GMT</pubDate>
       <prerelease version="0.8.0">
         <change>Added Button 'Sort by R.A.' in the target editor to sort both science and calibrator targets by their right ascension</change>
         <change>Added calibrator information (SearchCal) in the observation file and display important ones in the target editor (diameters)</change>
@@ -390,7 +387,7 @@
     </release>
 
     <release version="0.7">
-      <!-- <pubDate>Tue, 15 Feb 2011 11:41:46 GMT</pubDate> -->
+      <pubDate>Tue, 15 Feb 2011 11:41:46 GMT</pubDate>
       <prerelease version="0.7.8 beta">
         <change>Fixed VLTI configuration for the PIONIER instrument (period 86 and 87)</change>
         <change>JSAMP library updated to release 1.2 that fix shutdown notification problems when the user closes any JMMC application.</change>
@@ -454,7 +451,7 @@
     </release>
 
     <release version="0.6">
-      <!-- <pubDate>Tue, 05 Oct 2010 10:08:04 GMT</pubDate> -->
+      <pubDate>Tue, 05 Oct 2010 10:08:04 GMT</pubDate>
       <prerelease version="0.6.3">
         <change type="BUGFIX">Limit the memory footprint when the sampling periodicity is very small (less than 1 minute).
         First 500 HA samples are computed and the following warning is displayed: 'Too many HA points (...), check your sampling periodicity. Only 500 samples computed'
@@ -493,7 +490,7 @@
     </release>
 
     <release version="0.5">
-      <!-- <pubDate>Mon, 06 Sep 2010 18:00:58 GMT</pubDate> -->
+      <pubDate>Mon, 06 Sep 2010 18:00:58 GMT</pubDate>
       <prerelease version="0.5.5">
         <change>Added warning messages on GUI to display information relative to error / noise modelling</change>
         <change>Error and noise computation for OI_VIS (AMBER only) using the differential phase / amplitude algorithm (amdlib)</change>
@@ -532,7 +529,7 @@
     </release>
 
     <release version="0.4">
-      <!-- <pubDate>Tue, 15 Jun 2010 14:26:07 GMT</pubDate> -->
+      <pubDate>Tue, 15 Jun 2010 14:26:07 GMT</pubDate>
       <prerelease version="0.4b8">
         <change>Changed Observation file extension to 'asprox'</change>
         <change>New logo for Aspro 2</change>
@@ -575,7 +572,7 @@
     </release>
 
     <release version="0.3">
-      <!-- <pubDate>Wed, 19 May 2010 11:25:43 GMT</pubDate> -->
+      <pubDate>Wed, 19 May 2010 11:25:43 GMT</pubDate>
       <prerelease version="0.3b4">
         <change>Added VLTI configuration for the period 87 (new baselines) and fixed period 86</change>
         <change>Added VLTI configuration for the period 86 (idem period 85)</change>
@@ -600,7 +597,7 @@
     </release>
 
     <release version="0.2">
-      <!-- <pubDate>Mon, 5 Apr 2010 12:00:00 GMT</pubDate> -->
+      <pubDate>Mon, 5 Apr 2010 12:00:00 GMT</pubDate>
       <prerelease version="0.2b5"> <!-- 0.1b11 -->
         <change>Added a transit mark and ticks for the elevation on the observability plot</change>
         <change>Export VLTI AMBER Observing Block (OB) for a single target (simple)</change>
@@ -628,7 +625,7 @@
     </release>
 
     <release version="0.1">
-      <!-- <pubDate>Tue, 16 Feb 2010 12:00:00 GMT</pubDate> -->
+      <pubDate>Tue, 16 Feb 2010 12:00:00 GMT</pubDate>
       <prerelease version="0.1b6">
         <change>Minor bug fixed on UV Coverage plot when the observability displays the baseline limits</change>
         <change>Fixed PDF text rendering to support greek unicode characters</change>
