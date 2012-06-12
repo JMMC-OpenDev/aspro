@@ -7,9 +7,9 @@
 
 <ApplicationData link="http://www.jmmc.fr/aspro2">
 
-  <program name="Aspro2" version="0.9.1"/>
+  <program name="Aspro2" version="0.9.1.2"/>
 
-  <compilation date="05/06/2012" compiler="JDK 1.5.0_16"/>
+  <compilation date="12/06/2012" compiler="JDK 1.5.0_16"/>
 
   <text>
     <![CDATA[ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations
@@ -151,8 +151,12 @@
 
   <releasenotes>
     <release version="0.9.1">
-      <pubDate>Tue, 05 Jun 2012 14:22:31 GMT</pubDate>
+      <prerelease version="0.9.1.2">
+        <change type="FEATURE">Added an easy way to choose Simbad mirrors in the star resolver</change>
+        <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/324">Fixed SearchCal interoperability to use V band (not I) for VEGA instrument</change>
+      </prerelease>
       <prerelease version="0.9.1 beta 11">
+        <pubDate>Tue, 05 Jun 2012 14:22:31 GMT</pubDate>
         <change type="FEATURE">Added Period 'VLTI Future' to define coming instruments in future ESO periods: preliminary GRAVITY support</change>
         <change type="FEATURE">Added visAmp/visPhi error computation for experimental instruments (GRAVITY) i.e. compute standard deviation on 100 noisy complex visibility samples</change>
       </prerelease>
