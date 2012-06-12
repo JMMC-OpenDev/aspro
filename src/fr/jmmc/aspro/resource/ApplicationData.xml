@@ -151,6 +151,7 @@
 
   <releasenotes>
     <release version="0.9.1">
+      <pubDate>Tue, 12 Jun 2012 17:35:09 GMT</pubDate>
       <prerelease version="0.9.1.2">
         <change type="FEATURE">Added an easy way to choose Simbad mirrors in the star resolver</change>
         <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/324">Fixed SearchCal interoperability to use V band (not I) for VEGA instrument</change>
