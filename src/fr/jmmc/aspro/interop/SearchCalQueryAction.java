@@ -97,11 +97,11 @@ public final class SearchCalQueryAction extends SampCapabilityAction {
       return null;
     }
 
-      logger.debug("composeMessage for target: {}", target);
+    logger.debug("composeMessage for target: {}", target);
 
     final String votable = processTarget(target);
 
-      logger.debug("votable = \n{}", votable);
+    logger.debug("votable = \n{}", votable);
 
     final Map<String, String> parameters = new HashMap<String, String>(2);
     parameters.put("query", votable);
@@ -155,7 +155,7 @@ public final class SearchCalQueryAction extends SampCapabilityAction {
     }
 
     final Band band = Band.findBand(lambda);
-    final SpectralBand insBand = SpectralBandUtils.findBand(band);
+    final SpectralBand insBand = getSearchCalBand(band);
 
     if (logger.isDebugEnabled()) {
       logger.debug("band: {}", band);
@@ -169,8 +169,8 @@ public final class SearchCalQueryAction extends SampCapabilityAction {
 
     final double objectMag;
 
-    // TODO: remove soon following parameters:
-    final boolean bright = true;
+    // TODO: remove soon following parameters (bright, minMag, maxMag):
+    final boolean bright = true; // always BRIGHT scenario
     final double minMag;
     final double maxMag;
 
@@ -223,5 +223,34 @@ public final class SearchCalQueryAction extends SampCapabilityAction {
     votable = votable.replaceFirst(KEY_MAG_MAX, Double.toString(maxMag));
 
     return votable;
+  }
+
+  /**
+   * Find the SpectralBand corresponding to the given Band to query SearchCal
+   * @param band band to use
+   * @return SpectralBand or null
+   */
+  public static SpectralBand getSearchCalBand(final Band band) {
+    switch (band) {
+      case V:
+      case R:
+      case I:
+        // use scenario V for VEGA:
+        return SpectralBand.V;
+      case J:
+        // use scenario K but band J:
+        return SpectralBand.J;
+      case H:
+        // use scenario K but band H:
+        return SpectralBand.H;
+      case K:
+        // use scenario K:
+        return SpectralBand.K;
+      case N:
+        // use scenario N for MIDI:
+        return SpectralBand.N;
+      default:
+        return null;
+    }
   }
 }
