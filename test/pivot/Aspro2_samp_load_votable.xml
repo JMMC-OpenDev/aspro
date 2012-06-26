@@ -192,7 +192,7 @@
       </VALUES>
     </PARAM>
     
-    <!-- table containing target(s) : 1..n -->
+        <!-- table containing target(s) : 1..n -->
     <TABLE name="Targets">
       <!-- 
         For pivot, required fields for StarList output:
@@ -379,7 +379,41 @@
       	    <!-- FLUX_N (missing) -->
             <TD></TD>
           </TR>
-          <!-- other targets ... -->
+          <TR>
+            <TD>HD 1234</TD>
+            <!-- RA/DEC -->
+            <TD>00:16:27.6605</TD>
+            <TD>-36:47:46.641</TD>
+            <!-- ... -->
+          </TR>
+          <!-- other targets ... -->          
+        </TABLEDATA>
+      </DATA>
+    </TABLE>
+    
+    <!-- table containing target-calibrator relation : 1..n -->
+    <TABLE name="TargetsCalibrators">
+
+      <!-- SCIENCE_TARGET_NAME field:
+          UCD1   = 'META.ID'
+          UCD1.1 = 'meta.id' -->
+      <FIELD name="SCIENCE_TARGET_NAME" datatype="char" ucd="meta.id" arraysize="*">
+        <DESCRIPTION>Target name (identifier) defined in another table describing Targets</DESCRIPTION>
+      </FIELD>
+      <!-- CALIBRATOR_NAME field:
+          UCD1   = 'META.ID'
+          UCD1.1 = 'meta.id' -->
+      <FIELD name="CALIBRATOR_NAME" datatype="char" ucd="meta.id" arraysize="*">
+        <DESCRIPTION>Calibrator name (identifier) defined in another table describing Targets</DESCRIPTION>
+      </FIELD>
+      
+      <DATA>
+        <TABLEDATA>
+          <TR>
+            <TD>ETA TAU</TD>
+            <TD>HD 1234</TD>            
+          </TR>
+          <!-- other targets calibrators ... -->
         </TABLEDATA>
       </DATA>
     </TABLE>
