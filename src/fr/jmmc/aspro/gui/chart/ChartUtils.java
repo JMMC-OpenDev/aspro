@@ -33,11 +33,11 @@ import org.jfree.chart.axis.TickUnits;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.labels.StandardXYToolTipGenerator;
 import org.jfree.chart.labels.XYToolTipGenerator;
+import org.jfree.chart.plot.Plot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.StandardXYBarPainter;
 import org.jfree.chart.renderer.xy.XYBarRenderer;
-import org.jfree.chart.renderer.xy.XYErrorRenderer;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.chart.title.LegendTitle;
@@ -144,7 +144,7 @@ public final class ChartUtils {
    * @return chart panel
    */
   public static ChartPanel createChartPanel(final JFreeChart chart) {
-    final ChartPanel panel = new ChartPanel(chart,
+    final ChartPanel panel = new EnhancedChartPanel(chart,
             DEFAULT_WIDTH, DEFAULT_HEIGHT, /* prefered size */
             DEFAULT_MINIMUM_DRAW_WIDTH, DEFAULT_MINIMUM_DRAW_HEIGHT, /* minimum size before scaling */
             DEFAULT_MAXIMUM_DRAW_WIDTH, DEFAULT_MAXIMUM_DRAW_HEIGHT, /* maximum size before scaling */
@@ -156,6 +156,7 @@ public final class ChartUtils {
             false, /* zoom */
             false /* tooltips */);
 
+    // Disable Storage for the chart entities:
     panel.getChartRenderingInfo().setEntityCollection(null);
     return panel;
   }
@@ -178,6 +179,7 @@ public final class ChartUtils {
             false, /* zoom */
             false /* tooltips */);
 
+    // Disable Storage for the chart entities:
     panel.getChartRenderingInfo().setEntityCollection(null);
     return panel;
   }
@@ -306,10 +308,11 @@ public final class ChartUtils {
     // enlarge right margin to have last displayed hour (00:00)
     xyPlot.setInsets(new RectangleInsets(2d, 10d, 2d, 20d));
 
+    // disable cross hairs (and distance computation):
     xyPlot.setDomainCrosshairVisible(false);
-    // show crosshair on date axis :
-    xyPlot.setRangeCrosshairLockedOnData(false);
+    xyPlot.setDomainCrosshairLockedOnData(false);
     xyPlot.setRangeCrosshairVisible(false);
+    xyPlot.setRangeCrosshairLockedOnData(false);
 
     xyPlot.getDomainAxis().setVisible(false);
     xyPlot.getRangeAxis().setVisible(false);
@@ -359,7 +362,7 @@ public final class ChartUtils {
     if (orientation == null) {
       throw new IllegalArgumentException("Null 'orientation' argument.");
     }
-    ValueAxis domainAxis = null;
+    final ValueAxis domainAxis;
     if (dateAxis) {
       domainAxis = new DateAxis(xAxisLabel);
     } else {
@@ -386,7 +389,7 @@ public final class ChartUtils {
     final XYPlot plot = new GridLineFixedXYPlot(dataset, domainAxis, valueAxis, renderer);
     plot.setOrientation(orientation);
 
-    final JFreeChart chart = new JFreeChart(title, JFreeChart.DEFAULT_TITLE_FONT, plot, legend);
+    final JFreeChart chart = createChart(title, plot, legend);
 
     return chart;
   }
@@ -409,6 +412,12 @@ public final class ChartUtils {
     // display axes at [0,0] :
     xyPlot.setDomainZeroBaselineVisible(true);
     xyPlot.setRangeZeroBaselineVisible(true);
+
+    // disable cross hairs (and distance computation):
+    xyPlot.setDomainCrosshairVisible(false);
+    xyPlot.setDomainCrosshairLockedOnData(false);
+    xyPlot.setRangeCrosshairVisible(false);
+    xyPlot.setRangeCrosshairLockedOnData(false);
 
     // use custom units :
     xyPlot.getRangeAxis().setStandardTickUnits(ChartUtils.createScientificTickUnits());
@@ -483,7 +492,7 @@ public final class ChartUtils {
       renderer.setURLGenerator(new StandardXYURLGenerator());
     }
 
-    final JFreeChart chart = new JFreeChart(title, JFreeChart.DEFAULT_TITLE_FONT, plot, legend);
+    final JFreeChart chart = createChart(title, plot, legend);
 
     if (legend) {
       chart.getLegend().setPosition(RectangleEdge.RIGHT);
@@ -506,9 +515,9 @@ public final class ChartUtils {
    * @param tooltips  configure chart to generate tool tips?
    * @param urls  configure chart to generate URLs?
    *
-   * @return The chart.
+   * @return The xy plot.
    */
-  public static JFreeChart createScatterPlot(final String title,
+  public static XYPlot createScatterPlot(final String title,
           final String xAxisLabel,
           final String yAxisLabel,
           final XYDataset dataset,
@@ -529,9 +538,7 @@ public final class ChartUtils {
     yAxis.setAutoRangeIncludesZero(false);
 
     // only lines are rendered :
-//    final XYItemRenderer renderer = new XYLineAndShapeRenderer(false, true);
-    final XYErrorRenderer renderer = new XYErrorRenderer();
-    renderer.setDrawXError(false);
+    final FastXYErrorRenderer renderer = new FastXYErrorRenderer();
 
     // customized XYPlot to have a square data area :
     final XYPlot plot = new XYPlot(dataset, xAxis, yAxis, renderer);
@@ -544,13 +551,27 @@ public final class ChartUtils {
       renderer.setURLGenerator(new StandardXYURLGenerator());
     }
 
-    final JFreeChart chart = new JFreeChart(title, JFreeChart.DEFAULT_TITLE_FONT, plot, legend);
+    return plot;
+  }
 
-    if (legend) {
-      chart.getLegend().setPosition(RectangleEdge.RIGHT);
-    }
-
-    return chart;
+  /**
+   * Creates a new chart with the given title and plot.  The
+   * <code>createLegend</code> argument specifies whether or not a legend
+   * should be added to the chart.
+   * <br><br>
+   * Note that the  {@link ChartFactory} class contains a range
+   * of static methods that will return ready-made charts, and often this
+   * is a more convenient way to create charts than using this constructor.
+   *
+   * @param title  the chart title (<code>null</code> permitted).
+   * @param plot  controller of the visual representation of the data
+   *              (<code>null</code> not permitted).
+   * @param createLegend  a flag indicating whether or not a legend should
+   *                      be created for the chart.
+   * @return The chart.
+   */
+  public static JFreeChart createChart(final String title, final Plot plot, boolean createLegend) {
+    return new JFreeChart(title, JFreeChart.DEFAULT_TITLE_FONT, plot, createLegend);
   }
 
   /**
@@ -743,10 +764,10 @@ public final class ChartUtils {
     // HA format :
     // TODO: fix buf for HA < 0.0 !!
     final DateFormat haf = new TimeFormat(true, false);
-    /*    
-    // minutes
-    units.add(new DateTickUnit(DateTickUnitType.MINUTE, 15, DateTickUnitType.MINUTE, 5, haf));
-    units.add(new DateTickUnit(DateTickUnitType.MINUTE, 30, DateTickUnitType.MINUTE, 5, haf));
+    /*
+     // minutes
+     units.add(new DateTickUnit(DateTickUnitType.MINUTE, 15, DateTickUnitType.MINUTE, 5, haf));
+     units.add(new DateTickUnit(DateTickUnitType.MINUTE, 30, DateTickUnitType.MINUTE, 5, haf));
      */
     // hours
     units.add(new DateTickUnit(DateTickUnitType.HOUR, 1, DateTickUnitType.MINUTE, 5, haf));
@@ -775,7 +796,7 @@ public final class ChartUtils {
   }
 
   /**
-   * Creates a new text annotation to be displayed at the given coordinates.  
+   * Creates a new text annotation to be displayed at the given coordinates.
    * The coordinates are specified in data space.
    *
    * @param text  the text (<code>null</code> not permitted).

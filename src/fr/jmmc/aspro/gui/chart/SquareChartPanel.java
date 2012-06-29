@@ -22,14 +22,14 @@ import org.jfree.chart.plot.Zoomable;
 import org.jfree.data.Range;
 
 /**
- * This class extends the ChartPanel to customize the zoom and restoreAutoBounds methods 
+ * This class extends the ChartPanel to customize the zoom and restoreAutoBounds methods
  * in order to maintain a square data area and fire a zoom event
  *
  * Note : this class must support the inherited cloneable interface.
  *
  * @author bourgesl
  */
-public final class SquareChartPanel extends ChartPanel {
+public final class SquareChartPanel extends EnhancedChartPanel {
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
@@ -257,7 +257,7 @@ public final class SquareChartPanel extends ChartPanel {
    * This method fires a Zoom event
    * @param plot plot that causes the event
    */
-  protected void fireZoomEvent(final SquareXYPlot plot) {
+  private void fireZoomEvent(final SquareXYPlot plot) {
     final ValueAxis domainAxis = plot.getDomainAxis(0);
     final ValueAxis rangeAxis = plot.getRangeAxis(0);
 
@@ -303,14 +303,14 @@ public final class SquareChartPanel extends ChartPanel {
     /** The chart panel. */
     private final ChartPanel chartPanel;
     /** The zoom factor. */
-    protected double zoomFactor;
+    private double zoomFactor;
 
     /**
      * Creates a new instance.
      *
      * @param chartPanel  the chart panel (<code>null</code> not permitted).
      */
-    public MouseWheelHandler(final ChartPanel chartPanel) {
+    MouseWheelHandler(final ChartPanel chartPanel) {
       this.chartPanel = chartPanel;
       this.zoomFactor = DEFAULT_ZOOM_FACTOR;
     }
@@ -342,6 +342,7 @@ public final class SquareChartPanel extends ChartPanel {
      *
      * @param mwe  the event.
      */
+    @Override
     public void mouseWheelMoved(final MouseWheelEvent mwe) {
       final JFreeChart chart = this.chartPanel.getChart();
       if (chart == null) {

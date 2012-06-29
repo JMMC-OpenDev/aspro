@@ -111,7 +111,7 @@ public final class SquareXYPlot extends XYPlot {
 
     final Rectangle2D adjustedArea = new Rectangle2D.Double();
 
-    // note : 
+    // note :
     // - rounding is required to have the background image fitted (int coordinates) in the plot area (double rectangle) :
     // - there can be some rounding issue that adjust lightly the square shape :
     adjustedArea.setRect(Math.round(area.getX() + marginWidth), Math.round(area.getY() + marginHeight), Math.round(adjustedWidth), Math.round(adjustedHeight));
@@ -153,9 +153,7 @@ public final class SquareXYPlot extends XYPlot {
    * @param max maximum value
    */
   public void defineBounds(final double max) {
-    // same range on both axes :
-    final Range bounds = new Range(-max, max);
-    defineBounds(bounds, bounds);
+    defineAxisBounds(0, max);
   }
 
   /**
@@ -163,15 +161,42 @@ public final class SquareXYPlot extends XYPlot {
    *
    * Note : this method must be called before calling plot.setDataset(...) or restoreAxesBounds()
    *
+   * @param axisIndex index of the range and domain axes to use
+   * @param max maximum value
+   */
+  public void defineAxisBounds(final int axisIndex, final double max) {
+    // same range on both axes :
+    final Range bounds = new Range(-max, max);
+    defineAxisBounds(axisIndex, bounds, bounds);
+  }
+
+  /**
+   * Define the bounds for both range and domain axes using the given ranges.
+   *
+   * Note : this method must be called before calling plot.setDataset(...) or restoreAxesBounds()
+   *
    * @param domainRange range applied to the domain axis
    * @param rangeRange range applied to the range axis
    */
   public void defineBounds(final Range domainRange, final Range rangeRange) {
-    final BoundedNumberAxis domainAxis = getBoundedAxis(getDomainAxis(0));
+    defineAxisBounds(0, domainRange, rangeRange);
+  }
+
+  /**
+   * Define the bounds for both range and domain axes for the given axis index using the given ranges.
+   *
+   * Note : this method must be called before calling plot.setDataset(...) or restoreAxesBounds()
+   *
+   * @param axisIndex index of the range and domain axes to use
+   * @param domainRange range applied to the domain axis
+   * @param rangeRange range applied to the range axis
+   */
+  public void defineAxisBounds(final int axisIndex, final Range domainRange, final Range rangeRange) {
+    final BoundedNumberAxis domainAxis = getBoundedAxis(getDomainAxis(axisIndex));
     if (domainAxis != null) {
       domainAxis.setBounds(domainRange);
     }
-    final BoundedNumberAxis rangeAxis = getBoundedAxis(getRangeAxis(0));
+    final BoundedNumberAxis rangeAxis = getBoundedAxis(getRangeAxis(axisIndex));
     if (rangeAxis != null) {
       rangeAxis.setBounds(rangeRange);
     }
@@ -181,15 +206,19 @@ public final class SquareXYPlot extends XYPlot {
    * Use the axis bounds to redefine the ranges for both axes (reset zoom)
    */
   public void restoreAxesBounds() {
-    final BoundedNumberAxis domainAxis = getBoundedAxis(getDomainAxis(0));
-    if (domainAxis != null && domainAxis.getBounds() != null) {
-      // do not disable auto range :
-      domainAxis.setRange(domainAxis.getBounds(), false, false);
+    for (int i = 0, len = getDomainAxisCount(); i < len; i++) {
+      final BoundedNumberAxis domainAxis = getBoundedAxis(getDomainAxis(i));
+      if (domainAxis != null && domainAxis.getBounds() != null) {
+        // do not disable auto range :
+        domainAxis.setRange(domainAxis.getBounds(), false, false);
+      }
     }
-    final BoundedNumberAxis rangeAxis = getBoundedAxis(getRangeAxis(0));
-    if (rangeAxis != null && rangeAxis.getBounds() != null) {
-      // do not disable auto range :
-      rangeAxis.setRange(rangeAxis.getBounds(), false, false);
+    for (int i = 0, len = getRangeAxisCount(); i < len; i++) {
+      final BoundedNumberAxis rangeAxis = getBoundedAxis(getRangeAxis(i));
+      if (rangeAxis != null && rangeAxis.getBounds() != null) {
+        // do not disable auto range :
+        rangeAxis.setRange(rangeAxis.getBounds(), false, false);
+      }
     }
   }
 
@@ -198,7 +227,7 @@ public final class SquareXYPlot extends XYPlot {
    * @param axis axis to cast
    * @return BoundedNumberAxis or null if the given axis is not a BoundedNumberAxis
    */
-  private static BoundedNumberAxis getBoundedAxis(final ValueAxis axis) {
+  public static BoundedNumberAxis getBoundedAxis(final ValueAxis axis) {
     if (axis instanceof BoundedNumberAxis) {
       return (BoundedNumberAxis) axis;
     }
