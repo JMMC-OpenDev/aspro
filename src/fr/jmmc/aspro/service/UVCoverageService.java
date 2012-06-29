@@ -109,6 +109,8 @@ public final class UVCoverageService {
 
     // create the uv coverage data corresponding to the observation version :
     this.data = new UVCoverageData(observation.getVersion());
+
+    this.data.setUvMaxInMeter(uvMax);
   }
 
   /**
@@ -244,7 +246,7 @@ public final class UVCoverageService {
 
         // wavelength correction :
 
-        // Spatial frequency (rad-1) :
+        // Spatial frequency (xLambda) :
         u[j] /= this.lambda;
         v[j] /= this.lambda;
 
@@ -511,7 +513,7 @@ public final class UVCoverageService {
     }
 
     // Adjust the user uv Max = max base line / minimum wave length
-    // note : use the minimum wave length of the instrument to 
+    // note : use the minimum wave length of the instrument to
     // - make all uv segment visible
     // - avoid to much model computations (when the instrument mode changes)
     this.uvMax /= this.instrumentMinWaveLength;
