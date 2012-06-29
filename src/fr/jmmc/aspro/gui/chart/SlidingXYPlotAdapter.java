@@ -215,97 +215,109 @@ public final class SlidingXYPlotAdapter {
       barWidth = 0.25d;
     }
 
-    // reset colors :
-    this.renderer.clearSeriesPaints(false);
-    // side effect with chart theme :
-    this.renderer.setAutoPopulateSeriesPaint(false);
+    // disable chart & plot notifications:
+    final boolean savedNotify = this.chart.isNotify();
+    this.chart.setNotify(false);
+    this.xyPlot.setNotify(false);
+    try {
 
-    final TaskSeriesCollection subTaskSeriesCollection = new TaskSeriesCollection();
+      // reset colors :
+      this.renderer.clearSeriesPaints(false);
+      // side effect with chart theme :
+      this.renderer.setAutoPopulateSeriesPaint(false);
 
-    final String[] subSymbols = new String[newSize];
+      final TaskSeriesCollection subTaskSeriesCollection = new TaskSeriesCollection();
 
-    for (int i = start, n = 0; i < end; i++, n++) {
-      subSymbols[n] = this.symbols.get(i);
+      final String[] subSymbols = new String[newSize];
 
-      subTaskSeriesCollection.add(this.collection.getSeries(i));
-
-      // color :
-      this.renderer.setSeriesPaint(n, this.colors.get(i), false);
-    }
-
-    final XYTaskDataset dataset = new XYTaskDataset(subTaskSeriesCollection);
-
-    dataset.setSeriesWidth(barWidth);
-
-    // update dataset :
-    this.xyPlot.setDataset(dataset);
-
-    // change the Domain axis (vertical) :
-    final BoundedSymbolAxis symbolAxis = new BoundedSymbolAxis(null, subSymbols);
-    symbolAxis.setInverted(true);
-    symbolAxis.setGridBandsVisible(false);
-    symbolAxis.setBounds(new Range(rangeMin, rangeMax));
-    symbolAxis.setRange(rangeMin, rangeMax);
-    this.xyPlot.setDomainAxis(symbolAxis);
-
-    // remove Annotations :
-    this.renderer.removeAnnotations();
-
-    // annotations :
-    if (this.annotations != null) {
-
-      final ObservabilityPlotContext renderContext = ObservabilityPlotContext.getInstance();
-
-      // set text maximum width = bar width :
-      renderContext.setMaxTextWidth(barWidth);
-
-      // set diamond maximum size = 85% bar width :
-      renderContext.setMaxDiamondWidth(barWidth * 0.85d);
-
-      // set tip radius = 50% bar width (tick location over bar edges) :
-      renderContext.setTipRadius(barWidth * 0.5d);
-
-      // set max tip height = margin between bars (half tick + text) :
-      renderContext.setMaxTipHeight(1d - barWidth);
-
-
-      // Redefine the x-position of annotations (corresponding to visible targets) :
-
-      List<XYAnnotation> list;
-      Integer pos;
       for (int i = start, n = 0; i < end; i++, n++) {
-        pos = Integer.valueOf(i);
+        subSymbols[n] = this.symbols.get(i);
 
-        list = this.annotations.get(pos);
+        subTaskSeriesCollection.add(this.collection.getSeries(i));
 
-        if (list != null) {
+        // color :
+        this.renderer.setSeriesPaint(n, this.colors.get(i), false);
+      }
 
-          for (XYAnnotation annotation : list) {
+      final XYTaskDataset dataset = new XYTaskDataset(subTaskSeriesCollection);
 
-            if (annotation instanceof XYTextAnnotation) {
-              // Applies to XYTickAnnotation also :
-              final XYTextAnnotation a = (XYTextAnnotation) annotation;
-              a.setX(n);
-              this.renderer.addAnnotation(a);
+      dataset.setSeriesWidth(barWidth);
 
-            } else if (annotation instanceof XYDiamondAnnotation) {
-              final XYDiamondAnnotation a = (XYDiamondAnnotation) annotation;
-              a.setX(n);
-              this.renderer.addAnnotation(a);
+      // update dataset :
+      this.xyPlot.setDataset(dataset);
+
+      // change the Domain axis (vertical) :
+      final BoundedSymbolAxis symbolAxis = new BoundedSymbolAxis(null, subSymbols);
+      symbolAxis.setInverted(true);
+      symbolAxis.setGridBandsVisible(false);
+      symbolAxis.setBounds(new Range(rangeMin, rangeMax));
+      symbolAxis.setRange(rangeMin, rangeMax);
+      this.xyPlot.setDomainAxis(symbolAxis);
+
+      // remove Annotations :
+      this.renderer.removeAnnotations();
+
+      // annotations :
+      if (this.annotations != null) {
+
+        final ObservabilityPlotContext renderContext = ObservabilityPlotContext.getInstance();
+
+        // set text maximum width = bar width :
+        renderContext.setMaxTextWidth(barWidth);
+
+        // set diamond maximum size = 85% bar width :
+        renderContext.setMaxDiamondWidth(barWidth * 0.85d);
+
+        // set tip radius = 50% bar width (tick location over bar edges) :
+        renderContext.setTipRadius(barWidth * 0.5d);
+
+        // set max tip height = margin between bars (half tick + text) :
+        renderContext.setMaxTipHeight(1d - barWidth);
+
+
+        // Redefine the x-position of annotations (corresponding to visible targets) :
+
+        List<XYAnnotation> list;
+        Integer pos;
+        for (int i = start, n = 0; i < end; i++, n++) {
+          pos = Integer.valueOf(i);
+
+          list = this.annotations.get(pos);
+
+          if (list != null) {
+
+            for (XYAnnotation annotation : list) {
+
+              if (annotation instanceof XYTextAnnotation) {
+                // Applies to XYTickAnnotation also :
+                final XYTextAnnotation a = (XYTextAnnotation) annotation;
+                a.setX(n);
+                this.renderer.addAnnotation(a);
+
+              } else if (annotation instanceof XYDiamondAnnotation) {
+                final XYDiamondAnnotation a = (XYDiamondAnnotation) annotation;
+                a.setX(n);
+                this.renderer.addAnnotation(a);
+              }
             }
           }
         }
       }
+
+      // add JMMC annotation (moving position):
+      this.renderer.addAnnotation(this.aJMMC, Layer.BACKGROUND);
+
+      // tick color :
+      this.xyPlot.getRangeAxis().setTickMarkPaint(Color.BLACK);
+      this.xyPlot.getDomainAxis().setTickMarkPaint(Color.BLACK);
+
+      // update theme at end :
+      ChartUtilities.applyCurrentTheme(this.chart);
+
+    } finally {
+      // restore chart & plot notifications:
+      this.xyPlot.setNotify(savedNotify);
+      this.chart.setNotify(savedNotify);
     }
-
-    // add JMMC annotation (moving position):
-    this.renderer.addAnnotation(this.aJMMC, Layer.BACKGROUND);
-
-    // tick color :
-    this.xyPlot.getRangeAxis().setTickMarkPaint(Color.BLACK);
-    this.xyPlot.getDomainAxis().setTickMarkPaint(Color.BLACK);
-
-    // update theme at end :
-    ChartUtilities.applyCurrentTheme(this.chart);
   }
 }

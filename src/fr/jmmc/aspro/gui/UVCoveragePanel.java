@@ -8,6 +8,7 @@ import fr.jmmc.aspro.Preferences;
 import fr.jmmc.aspro.gui.action.ExportOBVLTIAction;
 import fr.jmmc.aspro.gui.action.ExportOBVegaAction;
 import fr.jmmc.aspro.gui.action.ExportPDFAction;
+import fr.jmmc.aspro.gui.chart.BoundedNumberAxis;
 import fr.jmmc.aspro.gui.chart.ChartUtils;
 import fr.jmmc.aspro.gui.chart.ColorModelPaintScale;
 import fr.jmmc.aspro.gui.chart.PDFOptions;
@@ -641,6 +642,17 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     this.aJMMC.setPaint(Color.DARK_GRAY);
     this.xyPlot.getRenderer().addAnnotation(this.aJMMC, Layer.BACKGROUND);
 
+    // add UV axes in meters:
+    final BoundedNumberAxis uAxisMeter = new BoundedNumberAxis("U (m)");
+    uAxisMeter.setAutoRangeIncludesZero(false);
+    uAxisMeter.setTickLabelFont(ChartUtils.DEFAULT_TITLE_FONT);
+    this.xyPlot.setDomainAxis(1, uAxisMeter);
+
+    final BoundedNumberAxis vAxisMeter = new BoundedNumberAxis("V (m)");
+    vAxisMeter.setAutoRangeIncludesZero(false);
+    vAxisMeter.setTickLabelFont(ChartUtils.DEFAULT_TITLE_FONT);
+    this.xyPlot.setRangeAxis(1, vAxisMeter);
+
     // add listener :
     this.chart.addProgressListener(this);
     this.chartPanel = ChartUtils.createSquareChartPanel(this.chart);
@@ -666,7 +678,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
     // define property change listener :
     this.jFieldSamplingPeriod.addPropertyChangeListener("value", new PropertyChangeListener() {
-
       @Override
       public void propertyChange(final PropertyChangeEvent evt) {
         final double newValue = ((Number) jFieldSamplingPeriod.getValue()).doubleValue();
@@ -695,7 +706,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     // default obs duration and property change listener :
     this.jFieldObsDuration.setValue(AsproConstants.DEFAULT_OBSERVATION_DURATION);
     this.jFieldObsDuration.addPropertyChangeListener("value", new PropertyChangeListener() {
-
       @Override
       public void propertyChange(final PropertyChangeEvent evt) {
         final double newValue = ((Number) jFieldObsDuration.getValue()).doubleValue();
@@ -722,7 +732,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     this.jTargetHAMax.setText(null);
 
     this.jCheckBoxPlotUVSupport.addItemListener(new ItemListener() {
-
       @Override
       public void itemStateChanged(final ItemEvent e) {
         refreshPlot();
@@ -730,7 +739,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     });
 
     this.jCheckBoxModelImage.addItemListener(new ItemListener() {
-
       @Override
       public void itemStateChanged(final ItemEvent e) {
         final boolean enabled = jCheckBoxModelImage.isSelected();
@@ -804,7 +812,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
                 new Object[]{intConfName, minBaseLine, maxBaseLine});
       }
 
-      // adjust uv max range to [0.5 * minBaseLine; 2 * maxBaseLine] and 
+      // adjust uv max range to [0.5 * minBaseLine; 2 * maxBaseLine] and
       // set value to maxBaseLine + 5% (margin):
       this.uvMaxAdapter.reset(0.5 * minBaseLine, 2.0d * maxBaseLine, 1.05d * maxBaseLine);
     }
@@ -834,7 +842,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       if (logger.isTraceEnabled()) {
         logger.trace("jComboBoxInstrumentMode updated: {}", this.jComboBoxInstrumentMode.getSelectedItem());
       }
-      
+
       // refresh the fringe tracker modes that depends on the interferometer :
       this.updateComboFTModes(observation);
     }
@@ -890,7 +898,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     if (logger.isTraceEnabled()) {
       logger.trace("jComboBoxFTMode updated: {}", this.jComboBoxFTMode.getSelectedItem());
     }
-    
+
     final boolean visible = !modes.isEmpty();
     this.jComboBoxFTMode.setVisible(visible);
     this.jLabelFTMode.setVisible(visible);
@@ -1210,7 +1218,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       this.setAutoUpdateObservation(prevAutoUpdateObservation);
     }
 
-    // Update Observation : 
+    // Update Observation :
 
     // check if the automatic update flag is enabled :
     if (this.doAutoUpdateObservation) {
@@ -1347,7 +1355,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
    * Check if observation and observability data are consistent.
    * Used by refreshPlot() (UV widget change not related to observation)
    *  and by onProcess(REFRESH_UV) (UV widget change related to observation)
-   * 
+   *
    * @param obsCollection observation collection to use
    */
   private void refreshPlot(final ObservationCollection obsCollection) {
@@ -1442,7 +1450,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     private final List<ObservabilityData> obsDataList;
     /** target name */
     private final String targetName;
-    /** maximum U or V coordinate (corrected by the minimal wavelength) */
+    /** maximum U or V coordinate (lambda scale) */
     private double uvMax;
     /** flag to compute the UV support */
     private final boolean doUVSupport;
@@ -1848,23 +1856,31 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
    * Reset the plot in case of model exception
    */
   private void resetPlot() {
+    // disable chart & plot notifications:
+    this.chart.setNotify(false);
+    this.xyPlot.setNotify(false);
+    try {
+      ChartUtils.clearTextSubTitle(this.chart);
 
-    ChartUtils.clearTextSubTitle(this.chart);
+      this.lastZoomEvent = null;
+      this.chartData = null;
 
-    this.lastZoomEvent = null;
-    this.chartData = null;
+      // reset bounds to [-1;1] (before setDataset) :
+      this.xyPlot.defineBounds(1d);
+      // reset dataset for baseline limits :
+      this.xyPlot.setDataset(null);
 
-    // reset bounds to [-1;1] (before setDataset) :
-    this.xyPlot.defineBounds(1d);
-    // reset dataset for baseline limits :
-    this.xyPlot.setDataset(null);
+      // update the background image :
+      this.updateUVMap(null);
 
-    // update the background image :
-    this.updateUVMap(null);
+      // update theme at end :
+      ChartUtilities.applyCurrentTheme(this.chart);
 
-    // update theme at end :
-    ChartUtilities.applyCurrentTheme(this.chart);
-
+    } finally {
+      // restore chart & plot notifications:
+      this.xyPlot.setNotify(true);
+      this.chart.setNotify(true);
+    }
     // update the status bar:
     StatusBar.showIfPrevious(MSG_COMPUTING_COVERAGE, "uv coverage done.");
   }
@@ -1907,35 +1923,48 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       final ObservabilityData obsData = chartData.getFirstObsData();
       final UVMapData uvMapData = chartData.getUVMapData();
 
-      // title :
-      ChartUtils.clearTextSubTitle(this.chart);
+      // disable chart & plot notifications:
+      this.chart.setNotify(false);
+      this.xyPlot.setNotify(false);
+      try {
+        // title :
+        ChartUtils.clearTextSubTitle(this.chart);
 
-      final StringBuilder sb = new StringBuilder(32);
-      sb.append(chartData.getInterferometerConfiguration(false)).append(" - ");
-      sb.append(observation.getInstrumentConfiguration().getName()).append(" - ");
-      sb.append(chartData.getDisplayConfigurations(" / "));
-      if ((chartData.isSingle() || obsData.isUserPops()) && obsData.getBestPops() != null) {
-        obsData.getBestPops().toString(sb);
+        final StringBuilder sb = new StringBuilder(32);
+        sb.append(chartData.getInterferometerConfiguration(false)).append(" - ");
+        sb.append(observation.getInstrumentConfiguration().getName()).append(" - ");
+        sb.append(chartData.getDisplayConfigurations(" / "));
+        if ((chartData.isSingle() || obsData.isUserPops()) && obsData.getBestPops() != null) {
+          obsData.getBestPops().toString(sb);
+        }
+        ChartUtils.addSubtitle(this.chart, sb.toString());
+
+        if (observation.getWhen().isNightRestriction()) {
+          // date - Source:
+          ChartUtils.addSubtitle(this.chart, "Day: " + observation.getWhen().getDate().toString()
+                  + " - Source: " + chartData.getTargetName());
+        } else {
+          // Source only:
+          ChartUtils.addSubtitle(this.chart, "Source: " + chartData.getTargetName());
+        }
+
+        // change the scaling factor ?
+        setUvPlotScalingFactor(MEGA_LAMBDA_SCALE);
+
+        // computed data are valid :
+        updateChart(chartData, uvMapData);
+
+        // update the background image and legend:
+        updateUVMapData(uvMapData);
+
+        // update theme at end :
+        ChartUtilities.applyCurrentTheme(this.chart);
+
+      } finally {
+        // restore chart & plot notifications:
+        this.xyPlot.setNotify(true);
+        this.chart.setNotify(true);
       }
-      ChartUtils.addSubtitle(this.chart, sb.toString());
-      ChartUtils.addSubtitle(this.chart, "Source: " + chartData.getTargetName());
-
-      if (observation.getWhen().isNightRestriction()) {
-        // date :
-        ChartUtils.addSubtitle(this.chart, "Day: " + observation.getWhen().getDate().toString());
-      }
-
-      // change the scaling factor ?
-      setUvPlotScalingFactor(MEGA_LAMBDA_SCALE);
-
-      // computed data are valid :
-      updateChart(chartData, uvMapData);
-
-      // update the background image and legend:
-      updateUVMapData(uvMapData);
-
-      // update theme at end :
-      ChartUtilities.applyCurrentTheme(this.chart);
 
       // update the status bar:
       StatusBar.showIfPrevious(MSG_COMPUTING_COVERAGE, "uv coverage done.");
@@ -2119,7 +2148,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
    * Compute a sub image for the UV Map given the new uv area
    * @param uvMapData UV Map data
    * @param uvRect uv area
-   * @return true if the given uvRect is smaller than uvRect of the reference image 
+   * @return true if the given uvRect is smaller than uvRect of the reference image
    */
   private boolean computeSubUVMap(final UVMapData uvMapData, final Rectangle2D.Double uvRect) {
     boolean doCrop = false;
@@ -2272,8 +2301,14 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     this.updateUVTracksRiseSet(dataset, chartData);
 
     // define bounds to the uv maximum value (before setDataset which calls restoreAxisBounds()) :
-    final double boxSize = toUVPlotScale((uvMapData != null) ? -uvMapData.getUvMapRect().getMinX() : chartData.getFirstUVData().getUvMax());
+    final UVCoverageData uvData = chartData.getFirstUVData();
+
+    final double uvMaxInLambda = (uvMapData != null) ? -uvMapData.getUvMapRect().getMinX() : uvData.getUvMax();
+    final double boxSize = toUVPlotScale(uvMaxInLambda);
     this.xyPlot.defineBounds(boxSize);
+
+    // uv in meters (not corrected by uv map area):
+    this.xyPlot.defineAxisBounds(1, uvData.getUvMaxInMeter());
 
     // set the main data set :
     this.xyPlot.setDataset(dataset);
@@ -2473,8 +2508,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
   /**
    * TaskSwingWorker child class to compute OIFits and send OIFits done events
-   * 
-   * TODO: create OIFits creator services automatically using UVCoverageData + observation directly ... 
+   *
+   * TODO: create OIFits creator services automatically using UVCoverageData + observation directly ...
    * + use a single NoiseService instance ...
    */
   private final static class OIFitsSwingWorker extends TaskSwingWorker<OIFitsFile> {
