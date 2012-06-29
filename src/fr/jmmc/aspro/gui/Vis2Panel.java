@@ -6,25 +6,40 @@ package fr.jmmc.aspro.gui;
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.gui.action.ExportPDFAction;
 import fr.jmmc.aspro.gui.chart.BoundedNumberAxis;
+import fr.jmmc.aspro.gui.chart.ChartMouseSelectionListener;
 import fr.jmmc.aspro.gui.chart.ChartUtils;
+import fr.jmmc.aspro.gui.chart.CombinedCrosshairOverlay;
+import fr.jmmc.aspro.gui.chart.EnhancedChartMouseListener;
+import fr.jmmc.aspro.gui.chart.FastXYErrorRenderer;
 import fr.jmmc.aspro.gui.chart.PDFOptions;
 import fr.jmmc.aspro.gui.chart.PDFOptions.Orientation;
 import fr.jmmc.aspro.gui.chart.PDFOptions.PageSize;
+import fr.jmmc.aspro.gui.chart.SelectionOverlay;
 import fr.jmmc.aspro.model.event.OIFitsEvent;
 import fr.jmmc.aspro.model.event.ObservationEvent;
 import fr.jmmc.aspro.model.event.ObservationListener;
 import fr.jmmc.jmal.image.ColorModels;
 import fr.jmmc.jmal.image.ImageUtils;
 import fr.jmmc.oitools.model.OIArray;
+import fr.jmmc.oitools.model.OIData;
 import fr.jmmc.oitools.model.OIFitsFile;
+import fr.jmmc.oitools.model.OIT3;
 import fr.jmmc.oitools.model.OIVis2;
 import java.awt.Color;
+import java.awt.Point;
 import java.awt.Shape;
 import java.awt.geom.GeneralPath;
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.IndexColorModel;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.IdentityHashMap;
+import java.util.List;
+import java.util.Map;
+import org.jfree.chart.ChartMouseEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,15 +48,18 @@ import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.annotations.XYTextAnnotation;
 import org.jfree.chart.axis.LogarithmicAxis;
+import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.event.ChartProgressEvent;
 import org.jfree.chart.event.ChartProgressListener;
+import org.jfree.chart.plot.CombinedDomainXYPlot;
+import org.jfree.chart.plot.Crosshair;
 import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.plot.PlotRenderingInfo;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.xy.XYErrorRenderer;
-import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
+import org.jfree.chart.renderer.AbstractRenderer;
 import org.jfree.data.Range;
-import org.jfree.data.xy.YIntervalSeries;
-import org.jfree.data.xy.YIntervalSeriesCollection;
+import org.jfree.data.xy.DefaultIntervalXYDataset;
+import org.jfree.data.xy.XYDataset;
 import org.jfree.ui.Layer;
 import org.jfree.ui.RectangleInsets;
 import org.jfree.ui.TextAnchor;
@@ -50,7 +68,7 @@ import org.jfree.ui.TextAnchor;
  * This panel presents the interferometer plot (station, base lines ...)
  * @author bourgesl
  */
-public final class Vis2Panel extends javax.swing.JPanel implements ChartProgressListener,
+public final class Vis2Panel extends javax.swing.JPanel implements ChartProgressListener, EnhancedChartMouseListener, ChartMouseSelectionListener,
         ObservationListener, PDFExportable {
 
   /** default serial UID for Serializable interface */
@@ -71,10 +89,20 @@ public final class Vis2Panel extends javax.swing.JPanel implements ChartProgress
   /* members */
   /** jFreeChart instance */
   private JFreeChart chart;
-  /** xy plot instance */
-  private XYPlot xyPlot;
+  /** combined xy plot sharing domain axis */
+  private CombinedDomainXYPlot combinedXYPlot;
+  /** mapping between xy plot and subplot index */
+  private Map<XYPlot, Integer> plotMapping = new IdentityHashMap<XYPlot, Integer>();
+  /** mapping between subplot index and xy plot (reverse) */
+  private Map<Integer, XYPlot> plotIndexMapping = new HashMap<Integer, XYPlot>();
+  /** xy plot instance for VIS2 */
+  private XYPlot xyPlotVis2;
+  /** xy plot instance for T3 */
+  private XYPlot xyPlotT3;
   /** JMMC annotation */
-  private XYTextAnnotation aJMMC = null;
+  private XYTextAnnotation aJMMCVis2 = null;
+  /** JMMC annotation */
+  private XYTextAnnotation aJMMCT3 = null;
   /** uv coordinates scaling factor */
   private double uvPlotScalingFactor = MEGA_LAMBDA_SCALE;
   /* plot data */
@@ -83,6 +111,10 @@ public final class Vis2Panel extends javax.swing.JPanel implements ChartProgress
   /* swing */
   /** chart panel */
   private ChartPanel chartPanel;
+  /** crosshair overlay */
+  private CombinedCrosshairOverlay crosshairOverlay = null;
+  /** selection overlay */
+  private SelectionOverlay selectionOverlay = null;
 
   /**
    * Constructor
@@ -200,46 +232,41 @@ public final class Vis2Panel extends javax.swing.JPanel implements ChartProgress
    * This method is useful to set the models and specific features of initialized swing components :
    */
   private void postInit() {
-    this.chart = ChartUtils.createScatterPlot("", "UV radius (M\u03BB)", "V²", null, PlotOrientation.VERTICAL, false, false, false);
-    this.xyPlot = this.chart.getXYPlot();
 
-    // enlarge right margin to have last displayed hour (00:00)
-    this.xyPlot.setInsets(new RectangleInsets(2d, 10d, 2d, 20d));
+    final boolean usePlotCrossHairSupport = false;
+    final boolean useSelectionSupport = false;
 
-    /*
-    xyPlot.setDomainCrosshairLockedOnData(true);
-    xyPlot.setDomainCrosshairVisible(true);
-    
-    xyPlot.setRangeCrosshairLockedOnData(true);
-    xyPlot.setRangeCrosshairVisible(true);
-     */
+    this.xyPlotVis2 = createScientificScatterPlot("UV radius (M\u03BB)", "V²", usePlotCrossHairSupport);
 
-    this.xyPlot.setDomainGridlinePaint(Color.LIGHT_GRAY);
-    this.xyPlot.setRangeGridlinePaint(Color.LIGHT_GRAY);
+    this.aJMMCVis2 = ChartUtils.createXYTextAnnotation(AsproConstants.JMMC_ANNOTATION, 0, 0);
+    this.aJMMCVis2.setTextAnchor(TextAnchor.BOTTOM_RIGHT);
+    this.aJMMCVis2.setPaint(Color.DARK_GRAY);
+    this.xyPlotVis2.getRenderer().addAnnotation(this.aJMMCVis2, Layer.BACKGROUND);
 
-    // use custom units :
-    this.xyPlot.getRangeAxis().setStandardTickUnits(ChartUtils.createScientificTickUnits());
-    this.xyPlot.getDomainAxis().setStandardTickUnits(ChartUtils.createScientificTickUnits());
+    this.xyPlotT3 = createScientificScatterPlot("UV radius (M\u03BB)", "Closure phase (deg)", usePlotCrossHairSupport);
 
-    final XYErrorRenderer renderer = (XYErrorRenderer) xyPlot.getRenderer();
+    this.aJMMCT3 = ChartUtils.createXYTextAnnotation(AsproConstants.JMMC_ANNOTATION, 0, 0);
+    this.aJMMCT3.setTextAnchor(TextAnchor.BOTTOM_RIGHT);
+    this.aJMMCT3.setPaint(Color.DARK_GRAY);
+    this.xyPlotT3.getRenderer().addAnnotation(this.aJMMCT3, Layer.BACKGROUND);
 
-    // force to use the base shape :
-    renderer.setAutoPopulateSeriesShape(false);
+    final ValueAxis domainAxis = this.xyPlotVis2.getDomainAxis();
 
-    // reset colors :
-    renderer.setAutoPopulateSeriesPaint(false);
-    renderer.clearSeriesPaints(false);
+    // create chart and add listener :
+    this.combinedXYPlot = new CombinedDomainXYPlot(domainAxis);
+    this.combinedXYPlot.setGap(10.0D);
+    this.combinedXYPlot.setOrientation(PlotOrientation.VERTICAL);
+    this.combinedXYPlot.add(this.xyPlotVis2, 1);
+    this.combinedXYPlot.add(this.xyPlotT3, 1);
 
-    // error color:
-    renderer.setCapLength(0d);
-    renderer.setErrorPaint(new Color(192, 192, 192, 128));
+    this.plotMapping.put(this.xyPlotVis2, Integer.valueOf(1));
+    this.plotIndexMapping.put(Integer.valueOf(1), this.xyPlotVis2);
+    this.plotMapping.put(this.xyPlotT3, Integer.valueOf(2));
+    this.plotIndexMapping.put(Integer.valueOf(2), this.xyPlotT3);
 
-    this.aJMMC = ChartUtils.createXYTextAnnotation(AsproConstants.JMMC_ANNOTATION, 0, 0);
-    this.aJMMC.setTextAnchor(TextAnchor.BOTTOM_RIGHT);
-    this.aJMMC.setPaint(Color.DARK_GRAY);
-    this.xyPlot.getRenderer().addAnnotation(this.aJMMC, Layer.BACKGROUND);
+    configureCrosshair(this.combinedXYPlot, usePlotCrossHairSupport);
 
-    // add listener :
+    this.chart = ChartUtils.createChart(null, this.combinedXYPlot, false);
     this.chart.addProgressListener(this);
     this.chartPanel = ChartUtils.createChartPanel(this.chart);
 
@@ -250,11 +277,324 @@ public final class Vis2Panel extends javax.swing.JPanel implements ChartProgress
     // enable mouse wheel:
     this.chartPanel.setMouseWheelEnabled(true);
 
+    if (useSelectionSupport) {
+      this.selectionOverlay = new SelectionOverlay(this.chartPanel, this);
+      this.chartPanel.addOverlay(this.selectionOverlay);
+    }
+
+    if (!usePlotCrossHairSupport) {
+      this.crosshairOverlay = new CombinedCrosshairOverlay();
+
+      for (Integer plotIndex : this.plotMapping.values()) {
+        crosshairOverlay.addDomainCrosshair(plotIndex, createCrosshair());
+        crosshairOverlay.addRangeCrosshair(plotIndex, createCrosshair());
+      }
+
+      this.chartPanel.addOverlay(crosshairOverlay);
+    }
+
+    if (useSelectionSupport || !usePlotCrossHairSupport) {
+      this.chartPanel.addChartMouseListener(this);
+    }
+
     this.jPanelCenter.add(this.chartPanel);
   }
 
-  /**t
-   * Handle the changed event to plot the vis2 plot synchronously.   
+  private static Crosshair createCrosshair() {
+    final Crosshair crosshair = new Crosshair(Double.NaN);
+    crosshair.setPaint(Color.BLUE);
+    crosshair.setLabelVisible(true);
+    crosshair.setLabelFont(ChartUtils.DEFAULT_TEXT_SMALL_FONT);
+    crosshair.setLabelBackgroundPaint(new Color(255, 255, 0, 200));
+    return crosshair;
+  }
+
+  /**
+   * Create custom scatter plot with several display options (error renderer)
+   * @param xAxisLabel x axis label
+   * @param yAxisLabel y axis label
+   * @param usePlotCrossHairSupport flag to use internal crosshair support on plot
+   * @return xy plot
+   */
+  private static XYPlot createScientificScatterPlot(final String xAxisLabel, final String yAxisLabel, final boolean usePlotCrossHairSupport) {
+
+    final XYPlot plot = ChartUtils.createScatterPlot(null, xAxisLabel, yAxisLabel, null, PlotOrientation.VERTICAL, false, false, false);
+
+    // enlarge right margin to have last displayed value:
+    plot.setInsets(new RectangleInsets(2d, 10d, 2d, 20d));
+
+    configureCrosshair(plot, usePlotCrossHairSupport);
+
+    plot.setDomainGridlinePaint(Color.LIGHT_GRAY);
+    plot.setRangeGridlinePaint(Color.LIGHT_GRAY);
+
+    // use custom units :
+    plot.getRangeAxis().setStandardTickUnits(ChartUtils.createScientificTickUnits());
+    plot.getDomainAxis().setStandardTickUnits(ChartUtils.createScientificTickUnits());
+
+    final FastXYErrorRenderer renderer = (FastXYErrorRenderer) plot.getRenderer();
+
+    // only display Y error:
+    renderer.setDrawXError(false);
+
+    // force to use the base shape
+    renderer.setAutoPopulateSeriesShape(false);
+
+    // reset colors :
+    renderer.setAutoPopulateSeriesPaint(false);
+    renderer.clearSeriesPaints(false);
+
+    // define deprecated methods to set renderer options for ALL series (performance):
+    renderer.setDrawOutlines(false);
+    renderer.setShapesVisible(true);
+    renderer.setShapesFilled(true);
+    renderer.setLinesVisible(false);
+    renderer.setItemLabelsVisible(false);
+
+    // define error bar settings:
+    renderer.setErrorStroke(AbstractRenderer.DEFAULT_STROKE);
+    renderer.setCapLength(0d);
+    renderer.setErrorPaint(new Color(192, 192, 192, 128));
+
+    return plot;
+  }
+
+  private static void configureCrosshair(final XYPlot plot, final boolean usePlotCrossHairSupport) {
+    // configure xyplot or overlay crosshairs:
+    plot.setDomainCrosshairLockedOnData(usePlotCrossHairSupport);
+    plot.setDomainCrosshairVisible(usePlotCrossHairSupport);
+
+    plot.setRangeCrosshairLockedOnData(usePlotCrossHairSupport);
+    plot.setRangeCrosshairVisible(usePlotCrossHairSupport);
+  }
+
+  /* EnhancedChartMouseListener implementation */
+  /**
+   * Return true if this listener implements / uses this mouse event type
+   * @param eventType mouse event type
+   * @return true if this listener implements / uses this mouse event type
+   */
+  @Override
+  public boolean support(final int eventType) {
+    return (eventType == EnhancedChartMouseListener.EVENT_CLICKED);
+  }
+
+  /**
+   * Handle click on plot
+   * @param chartMouseEvent chart mouse event
+   */
+  @Override
+  public void chartMouseClicked(final ChartMouseEvent chartMouseEvent) {
+    final int i = chartMouseEvent.getTrigger().getX();
+    final int j = chartMouseEvent.getTrigger().getY();
+
+    if (this.chartPanel.getScreenDataArea().contains(i, j)) {
+      final Point2D point2D = this.chartPanel.translateScreenToJava2D(new Point(i, j));
+
+      final PlotRenderingInfo plotInfo = this.chartPanel.getChartRenderingInfo().getPlotInfo();
+
+      final int subplotIndex = plotInfo.getSubplotIndex(point2D);
+      if (subplotIndex == -1) {
+        return;
+      }
+
+      // data area for sub plot:
+      final Rectangle2D dataArea = plotInfo.getSubplotInfo(subplotIndex).getDataArea();
+
+      final Integer plotIndex = Integer.valueOf(subplotIndex + 1);
+
+      final XYPlot plot = this.plotIndexMapping.get(plotIndex);
+      if (plot == null) {
+        return;
+      }
+
+      final ValueAxis domainAxis = plot.getDomainAxis();
+      final double domainValue = domainAxis.java2DToValue(point2D.getX(), dataArea, plot.getDomainAxisEdge());
+
+      final ValueAxis rangeAxis = plot.getRangeAxis();
+      final double rangeValue = rangeAxis.java2DToValue(point2D.getY(), dataArea, plot.getRangeAxisEdge());
+
+      logger.warn("Mouse coordinates are (" + i + ", " + j + "), in data space = (" + domainValue + ", " + rangeValue + ")");
+
+      // aspect ratio:
+      final double xRatio = dataArea.getWidth() / Math.abs(domainAxis.getUpperBound() - domainAxis.getLowerBound());
+      final double yRatio = dataArea.getHeight() / Math.abs(rangeAxis.getUpperBound() - rangeAxis.getLowerBound());
+
+      // find matching data ie. closest data point according to its screen distance to the mouse clicked point:
+      Point2D dataPoint = findDataPoint(plot, domainValue, rangeValue, xRatio, yRatio);
+
+      List<Crosshair> xCrosshairs = this.crosshairOverlay.getDomainCrosshairs(plotIndex);
+      if (xCrosshairs.size() == 1) {
+        xCrosshairs.get(0).setValue(dataPoint.getX());
+      }
+      List<Crosshair> yCrosshairs = this.crosshairOverlay.getRangeCrosshairs(plotIndex);
+      if (yCrosshairs.size() == 1) {
+        yCrosshairs.get(0).setValue(dataPoint.getY());
+      }
+
+      // update other plot crosshairs:
+      for (Integer index : this.plotIndexMapping.keySet()) {
+        if (index != plotIndex) {
+          final XYPlot otherPlot = this.plotIndexMapping.get(index);
+          if (otherPlot != null) {
+            xCrosshairs = this.crosshairOverlay.getDomainCrosshairs(index);
+            if (xCrosshairs.size() == 1) {
+              xCrosshairs.get(0).setValue(dataPoint.getX());
+            }
+            yCrosshairs = this.crosshairOverlay.getRangeCrosshairs(index);
+            if (yCrosshairs.size() == 1) {
+              yCrosshairs.get(0).setValue(Double.NaN);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * Not implemented
+   * @param chartMouseEvent useless
+   */
+  @Override
+  public void chartMouseMoved(final ChartMouseEvent chartMouseEvent) {
+    if (false) {
+      chartMouseClicked(chartMouseEvent);
+    }
+  }
+
+  /**
+   * Handle rectangular selection event
+   *
+   * @param selection the selected region.
+   */
+  @Override
+  public void mouseSelected(final Rectangle2D selection) {
+    logger.warn("mouseSelected: rectangle {}", selection);
+
+    // find data points:
+    final List<Point2D> points = findDataPoints(selection);
+
+    this.selectionOverlay.setRectSelArea(selection);
+
+    // push data points to overlay for rendering:
+    this.selectionOverlay.setPoints(points);
+  }
+
+  /**
+   * Find data point closest in FIRST dataset to the given coordinates X / Y
+   * @param plot xy plot to get its dataset
+   * @param anchorX domain axis coordinate
+   * @param anchorY range axis coordinate
+   * @param xRatio pixels per data on domain axis
+   * @param yRatio pixels per data on range axis
+   * @return found Point2D (data coordinates) or Point2D(NaN, NaN)
+   */
+  private static Point2D findDataPoint(final XYPlot plot, final double anchorX, final double anchorY, final double xRatio, final double yRatio) {
+    final XYDataset dataset = plot.getDataset();
+
+    // TODO: move such code elsewhere : ChartUtils or XYDataSetUtils ?
+
+    final long startTime = System.nanoTime();
+
+    double minDistance = Double.POSITIVE_INFINITY;
+    int matchSerie = -1;
+    int matchItem = -1;
+
+    double x, y, dx, dy, distance;
+
+    // NOTE: not optimized
+
+    // standard case - plain XYDataset
+    for (int serie = 0, seriesCount = dataset.getSeriesCount(), item, itemCount; serie < seriesCount; serie++) {
+      itemCount = dataset.getItemCount(serie);
+      for (item = 0; item < itemCount; item++) {
+        x = dataset.getXValue(serie, item);
+        y = dataset.getYValue(serie, item);
+
+        if (!Double.isNaN(x) && !Double.isNaN(y)) {
+          // converted in pixels:
+          dx = (x - anchorX) * xRatio;
+          dy = (y - anchorY) * yRatio;
+
+          distance = dx * dx + dy * dy;
+
+          if (distance < minDistance) {
+            minDistance = distance;
+            matchSerie = serie;
+            matchItem = item;
+          }
+        }
+      }
+    }
+
+    logger.warn("findDataPoint: time = {} ms.", 1e-6d * (System.nanoTime() - startTime));
+
+    if (matchItem != -1) {
+      final double matchX = dataset.getXValue(matchSerie, matchItem);
+      final double matchY = dataset.getYValue(matchSerie, matchItem);
+
+      logger.warn("Matching item [serie = " + matchSerie + ", item = " + matchItem + "] : (" + matchX + ", " + matchY + ")");
+
+      return new Point2D.Double(matchX, matchY);
+    }
+
+    logger.warn("No Matching item.");
+
+    return new Point2D.Double(Double.NaN, Double.NaN);
+  }
+
+  /**
+   * Find data points inside the given Shape (data coordinates)
+   * @param shape shape to use
+   * @return found list of Point2D (data coordinates) or empty list
+   */
+  private List<Point2D> findDataPoints(final Shape shape) {
+    final XYDataset dataset = this.xyPlotVis2.getDataset();
+
+    // TODO: move such code elsewhere : ChartUtils or XYDataSetUtils ?
+
+    final long startTime = System.nanoTime();
+    /*
+     int matchSerie = -1;
+     int matchItem = -1;
+     */
+    double x, y;
+
+    final List<Point2D> points = new ArrayList<Point2D>();
+
+    // NOTE: not optimized
+
+    // standard case - plain XYDataset
+    for (int serie = 0, seriesCount = dataset.getSeriesCount(), item, itemCount; serie < seriesCount; serie++) {
+      itemCount = dataset.getItemCount(serie);
+      for (item = 0; item < itemCount; item++) {
+        x = dataset.getXValue(serie, item);
+        y = dataset.getYValue(serie, item);
+
+        if (!Double.isNaN(x) && !Double.isNaN(y)) {
+
+          if (shape.contains(x, y)) {
+            // TODO: keep data selection (pointer to real data)
+            /*
+             matchSerie = serie;
+             matchItem = item;
+             */
+            points.add(new Point2D.Double(x, y));
+          }
+        }
+      }
+    }
+
+    logger.warn("findDataPoints: time = {} ms.", 1e-6d * (System.nanoTime() - startTime));
+    if (false) {
+      logger.warn("Matching points: {}", points);
+    }
+
+    return points;
+  }
+
+  /**
+   * Handle the changed event to plot the vis2 plot synchronously.
    * @param event event
    */
   @Override
@@ -301,11 +641,26 @@ public final class Vis2Panel extends javax.swing.JPanel implements ChartProgress
    * Reset plot
    */
   private void resetPlot() {
-    // reset title:
-    ChartUtils.clearTextSubTitle(this.chart);
+    // disable chart & plot notifications:
+    this.chart.setNotify(false);
+    this.xyPlotVis2.setNotify(false);
+    this.xyPlotT3.setNotify(false);
+    try {
+      // reset title:
+      ChartUtils.clearTextSubTitle(this.chart);
 
-    // reset dataset:
-    this.xyPlot.setDataset(null);
+      // reset dataset:
+      this.xyPlotVis2.setDataset(null);
+      this.xyPlotT3.setDataset(null);
+
+      this.resetOverlays();
+
+    } finally {
+      // restore chart & plot notifications:
+      this.xyPlotT3.setNotify(true);
+      this.xyPlotVis2.setNotify(true);
+      this.chart.setNotify(true);
+    }
   }
 
   /**
@@ -339,43 +694,84 @@ public final class Vis2Panel extends javax.swing.JPanel implements ChartProgress
     final double wlMin = 1e6d * effWaves[0];
     final double wlMax = 1e6d * effWaves[effWaves.length - 1];
 
-    // title :
-    ChartUtils.clearTextSubTitle(this.chart);
+    final boolean hasData;
+    // disable chart & plot notifications:
+    this.chart.setNotify(false);
+    this.xyPlotVis2.setNotify(false);
+    this.xyPlotT3.setNotify(false);
 
-    final StringBuilder sb = new StringBuilder(32);
-    sb.append(arrayName).append(" - ");
-    sb.append(insName);
-    sb.append(" [").append(df4.format(wlMin)).append(" \u00B5m - ").append(df4.format(wlMax)).append(" \u00B5m] - ");
+    try {
+      // title :
+      ChartUtils.clearTextSubTitle(this.chart);
 
-    for (String station : array.getStaName()) {
-      sb.append(station).append(' ');
-    }
+      final StringBuilder sb = new StringBuilder(32);
+      sb.append(arrayName).append(" - ");
+      sb.append(insName);
+      sb.append(" [").append(df4.format(wlMin)).append(" \u00B5m - ").append(df4.format(wlMax)).append(" \u00B5m] - ");
 
-    ChartUtils.addSubtitle(this.chart, sb.toString());
+      for (String station : array.getStaName()) {
+        sb.append(station).append(' ');
+      }
 
-    ChartUtils.addSubtitle(this.chart, "Source: " + this.oiFitsFile.getOiTarget().getTarget()[0]);
+      ChartUtils.addSubtitle(this.chart, sb.toString());
 
-    // date :
-    ChartUtils.addSubtitle(this.chart, "Day: " + vis2.getDateObs());
+      // date - Source:
+      ChartUtils.addSubtitle(this.chart, "Day: " + vis2.getDateObs()
+              + " - Source: " + this.oiFitsFile.getOiTarget().getTarget()[0]);
 
-    // change the scaling factor ?
-    setUvPlotScalingFactor(MEGA_LAMBDA_SCALE);
+      // change the scaling factor ?
+      setUvPlotScalingFactor(MEGA_LAMBDA_SCALE);
 
-    // computed data are valid :
-    final boolean hasData = updateChart();
+      // computed data are valid :
+      hasData = updateChart();
 
-    if (hasData) {
-      // update theme at end :
-      ChartUtilities.applyCurrentTheme(this.chart);
+      if (hasData) {
+        // update theme at end :
+        ChartUtilities.applyCurrentTheme(this.chart);
 
-      this.xyPlot.setBackgroundPaint(Color.WHITE);
-      this.xyPlot.setDomainGridlinePaint(Color.LIGHT_GRAY);
-      this.xyPlot.setRangeGridlinePaint(Color.LIGHT_GRAY);
-    } else {
-      this.jLabelMessage.setText("No VIS2 data available: the target has no model.");
+        this.xyPlotVis2.setBackgroundPaint(Color.WHITE);
+        this.xyPlotVis2.setDomainGridlinePaint(Color.LIGHT_GRAY);
+        this.xyPlotVis2.setRangeGridlinePaint(Color.LIGHT_GRAY);
+
+        this.xyPlotT3.setBackgroundPaint(Color.WHITE);
+        this.xyPlotT3.setDomainGridlinePaint(Color.LIGHT_GRAY);
+        this.xyPlotT3.setRangeGridlinePaint(Color.LIGHT_GRAY);
+      } else {
+        this.jLabelMessage.setText("No VIS2 data available: the target has no model.");
+      }
+
+      this.resetOverlays();
+
+    } finally {
+      // restore chart & plot notifications:
+      this.xyPlotT3.setNotify(true);
+      this.xyPlotVis2.setNotify(true);
+      this.chart.setNotify(true);
     }
 
     showMessage(!hasData);
+  }
+
+  /**
+   * reset overlays
+   */
+  private void resetOverlays() {
+    // reset crossHairs:
+    if (this.crosshairOverlay != null) {
+      for (Integer plotIndex : this.plotMapping.values()) {
+        for (Crosshair ch : this.crosshairOverlay.getDomainCrosshairs(plotIndex)) {
+          ch.setValue(Double.NaN);
+        }
+        for (Crosshair ch : this.crosshairOverlay.getRangeCrosshairs(plotIndex)) {
+          ch.setValue(Double.NaN);
+        }
+      }
+    }
+
+    // reset selection:
+    if (this.selectionOverlay != null) {
+      this.selectionOverlay.reset();
+    }
   }
 
   /**
@@ -383,18 +779,56 @@ public final class Vis2Panel extends javax.swing.JPanel implements ChartProgress
    * @return true if vis2 has data to plot
    */
   private boolean updateChart() {
-    boolean hasData = false;
 
-    final XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) this.xyPlot.getRenderer();
+    Range xRangeVis2 = null;
+    Range xRangeT3 = null;
 
-    // try to fill with squared visibilities
-    final YIntervalSeriesCollection dataset = new YIntervalSeriesCollection();
-    YIntervalSeries yIntervalSeries = null;
+    if (this.oiFitsFile.hasOiVis2()) {
+      final OIVis2 vis2 = this.oiFitsFile.getOiVis2()[0];
 
-    final OIVis2 vis2 = this.oiFitsFile.getOiVis2()[0];
+      // compute derived data i.e. spatial frequencies:
+      final double[][] spatialFreq = vis2.getSpatialFreq();
 
-    final int nRows = vis2.getNbRows();
-    final int nWaves = vis2.getNWave();
+      xRangeVis2 = updatePlot(xyPlotVis2, vis2, vis2.getVis2Data(), vis2.getVis2Err(), spatialFreq);
+    }
+    if (this.oiFitsFile.hasOiT3()) {
+      final OIT3 t3 = this.oiFitsFile.getOiT3()[0];
+
+      // compute derived data i.e. spatial frequencies:
+      final double[][] spatialFreq = t3.getSpatial();
+
+      xRangeT3 = updatePlot(xyPlotT3, t3, t3.getT3Phi(), t3.getT3PhiErr(), spatialFreq);
+    }
+
+    if (xRangeVis2 == null && xRangeT3 == null) {
+      return false;
+    }
+
+    final double minX = Math.min(xRangeVis2.getLowerBound(), (xRangeT3 != null) ? xRangeT3.getLowerBound() : Double.POSITIVE_INFINITY);
+    final double maxX = Math.max(xRangeVis2.getUpperBound(), (xRangeT3 != null) ? xRangeT3.getUpperBound() : Double.NEGATIVE_INFINITY);
+
+    BoundedNumberAxis axis;
+
+    axis = (BoundedNumberAxis) this.combinedXYPlot.getDomainAxis();
+    axis.setBounds(new Range(minX, maxX));
+    axis.setRange(minX, maxX);
+
+    return true;
+  }
+
+  /**
+   * TODO use column names and virtual columns (spatial ...)
+   * @param plot
+   * @param table
+   * @param data
+   * @param dataErr
+   * @return
+   */
+  private Range updatePlot(final XYPlot plot, final OIData table,
+          final double[][] data, final double[][] dataErr, final double[][] spatialFreq) {
+
+    final int nRows = table.getNbRows();
+    final int nWaves = table.getNWave();
 
     // Prepare palette
     final Color[] colors = new Color[nWaves];
@@ -415,32 +849,52 @@ public final class Vis2Panel extends javax.swing.JPanel implements ChartProgress
       colors[i] = new Color(ImageUtils.getRGB(colorModel, iMaxColor, value, alphaMask), true);
     }
 
-    final double[][] vis2Data = vis2.getVis2Data();
-    final double[][] vis2Err = vis2.getVis2Err();
 
-    // compute spatial frequencies:
-    final double[][] spatialFreq = vis2.getSpatialFreq();
+    final FastXYErrorRenderer renderer = (FastXYErrorRenderer) plot.getRenderer();
 
+    // try to fill with squared visibilities:
+
+    // Use DefaultIntervalXYDataset for performance (arrays XY intervals)
+    boolean hasData = false;
     boolean hasErr = false;
+
     double minX = Double.POSITIVE_INFINITY;
     double maxX = 0d;
     double minY = (USE_LOG_SCALE) ? 1d : 0d;
     double maxY = 1d;
+
+    final DefaultIntervalXYDataset dataset = new DefaultIntervalXYDataset();
+
+    double[] xValue, xLower, xUpper, yValue, yLower, yUpper;
+
     double x, y, err;
 
     for (int j = 0; j < nWaves; j++) {
 
-      // 1 color per spectral channel (i.e. per XYSeries) :
-      yIntervalSeries = new YIntervalSeries("VIS2 W" + j, false, true);
-      yIntervalSeries.setNotify(false);
+      // 1 color per spectral channel (i.e. per Serie) :
+      xValue = new double[nRows];
+      xLower = new double[nRows];
+      xUpper = new double[nRows];
+      yValue = new double[nRows];
+      yLower = new double[nRows];
+      yUpper = new double[nRows];
 
       for (int i = 0; i < nRows; i++) {
 
         x = toUVPlotScale(spatialFreq[i][j]);
-        y = vis2Data[i][j];
-        err = vis2Err[i][j];
+        y = data[i][j];
+        err = dataErr[i][j];
 
-        if (!Double.isNaN(y)) {
+        // TODO: use also OIVIS2 Flags to skip flagged data:
+
+        if (Double.isNaN(y)) {
+          xValue[i] = Double.NaN;
+          xLower[i] = Double.NaN;
+          xUpper[i] = Double.NaN;
+          yValue[i] = Double.NaN;
+          yLower[i] = Double.NaN;
+          yUpper[i] = Double.NaN;
+        } else {
           hasData = true;
 
           if (USE_LOG_SCALE && y < 0d) {
@@ -461,33 +915,56 @@ public final class Vis2Panel extends javax.swing.JPanel implements ChartProgress
             maxY = y;
           }
 
+          // TODO: handle x error too:
+          xValue[i] = x;
+          xLower[i] = Double.NaN;
+          xUpper[i] = Double.NaN;
+
           if (Double.isNaN(err)) {
-            yIntervalSeries.add(x, y, Double.NaN, Double.NaN);
+            yValue[i] = y;
+            yLower[i] = Double.NaN;
+            yUpper[i] = Double.NaN;
           } else {
             // USE_LOG_SCALE: check if y - err < 0:
-            yIntervalSeries.add(x, y, (USE_LOG_SCALE && (y - err) < 0d) ? 0d : (y - err), y + err);
+            yValue[i] = y;
+            yLower[i] = (USE_LOG_SCALE && (y - err) < 0d) ? 0d : (y - err);
+            yUpper[i] = y + err;
+
             hasErr = true;
           }
         }
       }
 
-      dataset.addSeries(yIntervalSeries);
+      dataset.addSeries("OIDATA W" + j, new double[][]{xValue, xLower, xUpper, yValue, yLower, yUpper});
 
       renderer.setSeriesPaint(j, colors[j], false);
     }
 
-    this.xyPlot.setDataset(dataset);
+    plot.setDataset(dataset);
 
     if (!hasData) {
-      return false;
+      return null;
     }
 
-    // set shape depending on error:
-    renderer.setBaseShape(getPointShape(hasErr));
+    // set shape depending on error (triangle or square):
+    final Shape shape = getPointShape(hasErr);
+
+    // disable error rendering (performance):
+    renderer.setDrawYError(hasErr);
+
+    // use deprecated method but defines shape once for ALL series (performance):
+    renderer.setShape(shape);
+
+    // fix minX to include zero spatial frequency:
+    if (minX > 0d) {
+      minX = 0d;
+    }
 
     // margin:
     final double marginX = (maxX - minX) * MARGIN_PERCENTS;
-    minX -= marginX;
+    if (minX > 0d) {
+      minX -= marginX;
+    }
     maxX += marginX;
 
     if (!USE_LOG_SCALE) {
@@ -498,12 +975,8 @@ public final class Vis2Panel extends javax.swing.JPanel implements ChartProgress
 
     BoundedNumberAxis axis;
 
-    axis = (BoundedNumberAxis) this.xyPlot.getDomainAxis();
-    axis.setBounds(new Range(minX, maxX));
-    axis.setRange(minX, maxX);
-
-    if (this.xyPlot.getRangeAxis() instanceof BoundedNumberAxis) {
-      axis = (BoundedNumberAxis) this.xyPlot.getRangeAxis();
+    if (plot.getRangeAxis() instanceof BoundedNumberAxis) {
+      axis = (BoundedNumberAxis) plot.getRangeAxis();
       axis.setBounds(new Range(minY, maxY));
       axis.setRange(minY, maxY);
     }
@@ -516,13 +989,14 @@ public final class Vis2Panel extends javax.swing.JPanel implements ChartProgress
       //      logAxis.setStrictValuesFlag(false);
       logAxis.setAutoRangeNextLogFlag(true);
 
-      logger.warn("logAxis range: [{} - {}]", minY, maxY);
+      logger.debug("logAxis range: [{} - {}]", minY, maxY);
 
       logAxis.setRange(minY, maxY);
 
-      this.xyPlot.setRangeAxis(logAxis);
+      plot.setRangeAxis(logAxis);
     }
-    return true;
+
+    return new Range(minX, maxX);
   }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLabelMessage;
@@ -550,10 +1024,25 @@ public final class Vis2Panel extends javax.swing.JPanel implements ChartProgress
       }
     }
 
+    // DEBUG:
+    switch (event.getType()) {
+      case ChartProgressEvent.DRAWING_STARTED:
+        this.chartDrawStartTime = System.nanoTime();
+        break;
+      case ChartProgressEvent.DRAWING_FINISHED:
+        logger.warn("Drawing chart time = {} ms.", 1e-6d * (System.nanoTime() - this.chartDrawStartTime));
+        this.chartDrawStartTime = 0l;
+        break;
+      default:
+    }
+
     // Perform custom operations before/after chart rendering:
-    // move JMMC annotation:
-    this.aJMMC.setX(this.xyPlot.getDomainAxis().getUpperBound());
-    this.aJMMC.setY(this.xyPlot.getRangeAxis().getLowerBound());
+    // move JMMC annotations:
+    this.aJMMCVis2.setX(this.xyPlotVis2.getDomainAxis().getUpperBound());
+    this.aJMMCVis2.setY(this.xyPlotVis2.getRangeAxis().getLowerBound());
+
+    this.aJMMCT3.setX(this.xyPlotT3.getDomainAxis().getUpperBound());
+    this.aJMMCT3.setY(this.xyPlotT3.getRangeAxis().getLowerBound());
   }
 
   /**
