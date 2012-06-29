@@ -28,7 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This class performs the noise modelling of visibility data (error and noise) 
+ * This class performs the noise modelling of visibility data (error and noise)
  * from the current observation
  *
  * Note : this code is inspired by the Aspro/tasks/lib/noise_lib.f90
@@ -323,7 +323,7 @@ public final class NoiseService extends VisNoiseService {
   private void prepareTarget(final Target target) {
     Double flux;
 
-    final Band band = Band.findBand(lambda);
+    final Band band = findBand(lambda);
 
     this.insBand = SpectralBandUtils.findBand(band);
 
@@ -379,7 +379,7 @@ public final class NoiseService extends VisNoiseService {
 
     this.vinst = instrumentalVisibility;
 
-    final Band band = Band.findBand(lambda);
+    final Band band = findBand(lambda);
 
     // spectral bandwith per resolution element:
     final double deltalambda;
@@ -388,10 +388,10 @@ public final class NoiseService extends VisNoiseService {
     } else {
       deltalambda = lambda / spectralResolution;
     }
-    // deltalambda = (lambdaMax - lambdaMin) / nPixels[toute la largeur spectrale] 
+    // deltalambda = (lambdaMax - lambdaMin) / nPixels[toute la largeur spectrale]
 
     // strehl ratio of AO :
-    final double sr = Band.strehl(adaptiveOpticsMag, lambda, telDiam, seeing, nbOfActuators);
+    final double sr = (instrumentName.startsWith(AsproConstants.INS_VEGA)) ? 1d : Band.strehl(adaptiveOpticsMag, lambda, telDiam, seeing, nbOfActuators);
 
     if (logger.isDebugEnabled()) {
       logger.debug("band                          : {}", band);
@@ -401,12 +401,12 @@ public final class NoiseService extends VisNoiseService {
     }
 
     // nb of photons m^-2 m^-1 :
-    final double fzero = Math.pow(10d, band.getLogFluxZero()) / (H_PLANCK * C_LIGHT / (lambda * AsproConstants.MICRO_METER));
+    final double fzero = Math.pow(10d, band.getLogFluxZero()) * (lambda * AsproConstants.MICRO_METER) / (H_PLANCK * C_LIGHT);
 
     // nbTotalPhot for the all spectra:
     final double nbTotalPhotSpectra = fzero * nbTel * Math.PI * Math.pow(telDiam / 2d, 2d)
             * transmission * sr * Math.pow(10d, -0.4d * objectMag);
-    
+
     // nbTotalPhot per resolution element:
     final double nbTotalPhotPerS = nbTotalPhotSpectra * (deltalambda * AsproConstants.MICRO_METER);
 
@@ -510,6 +510,27 @@ public final class NoiseService extends VisNoiseService {
   }
 
   /**
+   * Find the band corresponding to the given wavelength
+   * but always use V band instead of I & R bands
+   *
+   * @param waveLength wave length in microns
+   * @return corresponding band
+   * @throws IllegalArgumentException if no band found
+   */
+  public static Band findBand(final double waveLength) throws IllegalArgumentException {
+    Band band = Band.findBand(waveLength);
+    switch (band) {
+      case V:
+      case R:
+      case I:
+        // always use V for VEGA:
+        return Band.V;
+      default:
+        return band;
+    }
+  }
+
+  /**
    * Format time value for warning messages
    * @param value time (s)
    * @return formatted value
@@ -546,7 +567,7 @@ public final class NoiseService extends VisNoiseService {
 
   /**
    * Return true if this service is enabled
-   * @return true if this service is enabled 
+   * @return true if this service is enabled
    */
   @Override
   public boolean isEnabled() {
@@ -666,7 +687,7 @@ public final class NoiseService extends VisNoiseService {
 
   /**
    * Prepare numeric constants for square visiblity error
-   * 
+   *
    * Note: this method is statefull and NOT thread safe
    */
   private void prepareVis2Error() {
@@ -726,8 +747,8 @@ public final class NoiseService extends VisNoiseService {
 
     // squared correlated flux (include instrumental visibility loss):
     double sqCorFlux = sqCorFluxCoef * vis2;
-    /*    
-    double sqCorFlux = Math.pow(nbPhotonInI * vinst / nbTel, 2d) * vis2;
+    /*
+     double sqCorFlux = Math.pow(nbPhotonInI * vinst / nbTel, 2d) * vis2;
      */
 
     // variance of the squared correlated flux:
@@ -735,10 +756,10 @@ public final class NoiseService extends VisNoiseService {
     final double varSqCorFlux = sqCorFlux * varSqCorFluxCoef + varSqCorFluxConst;
 
     /*
-    final double varSqCorFlux = sqCorFlux * (2d * nbPhotonInI + 4d + 2d * nbPixInterf * ron * ron)
-    + nbPhotonInI * (1d + nbPhotonInI)
-    + nbPixInterf * (nbPixInterf + 3d) * Math.pow(ron, 4d)
-    + 2d * nbPixInterf * ron * ron * nbPhotonInI;
+     final double varSqCorFlux = sqCorFlux * (2d * nbPhotonInI + 4d + 2d * nbPixInterf * ron * ron)
+     + nbPhotonInI * (1d + nbPhotonInI)
+     + nbPixInterf * (nbPixInterf + 3d) * Math.pow(ron, 4d)
+     + 2d * nbPixInterf * ron * ron * nbPhotonInI;
      */
 
     // protect zero divide: TODO: why 1e-3d ?
@@ -770,7 +791,7 @@ public final class NoiseService extends VisNoiseService {
 
   /**
    * Prepare numeric constants for closure phase error
-   * 
+   *
    * Note: this method is statefull and NOT thread safe
    */
   private void prepareT3PhiError() {
@@ -787,6 +808,8 @@ public final class NoiseService extends VisNoiseService {
 
     if (logger.isDebugEnabled()) {
       logger.debug("t3photCoef                    : {}", t3photCoef);
+      logger.debug("t3photCoef2                   : {}", t3photCoef2);
+      logger.debug("t3photCoef3                   : {}", t3photCoef3);
       logger.debug("t3detConst                    : {}", t3detConst);
       logger.debug("t3detCoef1                    : {}", t3detCoef1);
       logger.debug("t3detCoef2                    : {}", t3detCoef2);
@@ -812,7 +835,11 @@ public final class NoiseService extends VisNoiseService {
     final double v2 = visAmp23 * vinst;
     final double v3 = visAmp31 * vinst;
 
-    final double v123 = v1 * v2 * v3;
+    double v123 = v1 * v2 * v3;
+
+    // protect zero divide: TODO: why 1e-4d / 1e-20d ?
+    v123 = Math.max(v123, 1e-4d);
+
     final double v12 = v1 * v2;
     final double v13 = v1 * v3;
     final double v23 = v2 * v3;
@@ -831,17 +858,17 @@ public final class NoiseService extends VisNoiseService {
             + t3photCoef2 * (nbTel * nbTel * (sv1 + sv2 + sv3) - (sv1 * sv1 + sv2 * sv2 + sv3 * sv3 + 2 * (sv12 + sv13 + sv23)))
             + t3photCoef * (nbTel * (sv12 + sv13 + sv23) - 2d * v123 * (sv1 + sv2 + sv3))) / (2d * sv123);
     /*
-    final double scpphot = (Math.pow(nbTel / nbPhotonInI, 3d) * (nbTel * nbTel * nbTel - 2d * v123)
-    + Math.pow(nbTel / nbPhotonInI, 2d) * (nbTel * nbTel * (sv1 + sv2 + sv3) - (sv1 * sv1 + sv2 * sv2 + sv3 * sv3 + 2 * (sv12 + sv13 + sv23)))
-    + (nbTel / nbPhotonInI) * (nbTel * (sv12 + sv13 + sv23) - 2d * v123 * (sv1 + sv2 + sv3))) / (2d * sv123);
+     final double scpphot = (Math.pow(nbTel / nbPhotonInI, 3d) * (nbTel * nbTel * nbTel - 2d * v123)
+     + Math.pow(nbTel / nbPhotonInI, 2d) * (nbTel * nbTel * (sv1 + sv2 + sv3) - (sv1 * sv1 + sv2 * sv2 + sv3 * sv3 + 2 * (sv12 + sv13 + sv23)))
+     + (nbTel / nbPhotonInI) * (nbTel * (sv12 + sv13 + sv23) - 2d * v123 * (sv1 + sv2 + sv3))) / (2d * sv123);
      */
 
     // detector noise on closure phase
     final double scpdet = (t3detConst + t3detCoef1 * (sv1 + sv2 + sv3) + t3detCoef2 * (sv12 + sv13 + sv23)) / (2d * sv123);
     /*
-    double scpdet = (Math.pow(nbTel / nbPhotonInI, 6d) * (Math.pow(nbPixInterf, 3d) * Math.pow(ron, 6d) + 3 * Math.pow(nbPixInterf, 2d) * Math.pow(ron, 6d))
-    + Math.pow(nbTel / nbPhotonInI, 4d) * (sv1 + sv2 + sv3) * (3d * nbPixInterf * Math.pow(ron, 4d) + Math.pow(nbPixInterf, 2d) * Math.pow(ron, 4d))
-    + Math.pow(nbTel / nbPhotonInI, 2d) * nbPixInterf * Math.pow(ron, 2d) * (sv12 + sv13 + sv23) ) / (2d * sv123);
+     double scpdet = (Math.pow(nbTel / nbPhotonInI, 6d) * (Math.pow(nbPixInterf, 3d) * Math.pow(ron, 6d) + 3 * Math.pow(nbPixInterf, 2d) * Math.pow(ron, 6d))
+     + Math.pow(nbTel / nbPhotonInI, 4d) * (sv1 + sv2 + sv3) * (3d * nbPixInterf * Math.pow(ron, 4d) + Math.pow(nbPixInterf, 2d) * Math.pow(ron, 4d))
+     + Math.pow(nbTel / nbPhotonInI, 2d) * nbPixInterf * Math.pow(ron, 2d) * (sv12 + sv13 + sv23) ) / (2d * sv123);
      */
 
     // total noise on closure phase per frame:
