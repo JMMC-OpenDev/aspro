@@ -217,7 +217,6 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
     // Create the timeline refresh timer:
     this.timerTimeRefresh = new Timer(REFRESH_PERIOD, new ActionListener() {
-
       /**
        * Invoked when the timer action occurs.
        */
@@ -263,7 +262,6 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     this.scroller = new JScrollBar(JScrollBar.VERTICAL, 0, 0, 0, 0);
 
     this.scroller.getModel().addChangeListener(new ChangeListener() {
-
       @Override
       public void stateChanged(final ChangeEvent paramChangeEvent) {
         final DefaultBoundedRangeModel model = (DefaultBoundedRangeModel) paramChangeEvent.getSource();
@@ -274,7 +272,6 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
     // add the mouse wheel listener to the complete observability panel :
     this.addMouseWheelListener(new MouseWheelListener() {
-
       @Override
       public void mouseWheelMoved(final MouseWheelEvent e) {
         if (scroller.isEnabled()) {
@@ -308,7 +305,6 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
     this.jComboTimeRef.setSelectedItem(this.myPreferences.getPreference(Preferences.TIME_REFERENCE));
     this.jComboTimeRef.addActionListener(new ActionListener() {
-
       @Override
       public void actionPerformed(final ActionEvent e) {
         refreshPlot();
@@ -321,7 +317,6 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
     this.jCheckBoxNightOnly.setSelected(DEFAULT_DO_NIGHT_ONLY);
     this.jCheckBoxNightOnly.addItemListener(new ItemListener() {
-
       @Override
       public void itemStateChanged(final ItemEvent e) {
         if (getChartData() != null && jCheckBoxNightOnly.isEnabled()) {
@@ -346,7 +341,6 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
     this.jCheckBoxBaseLineLimits.setSelected(DEFAULT_DO_BASELINE_LIMITS);
     this.jCheckBoxBaseLineLimits.addItemListener(new ItemListener() {
-
       @Override
       public void itemStateChanged(final ItemEvent e) {
         final boolean doBaseLineLimits = e.getStateChange() == ItemEvent.SELECTED;
@@ -381,7 +375,6 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
     this.jCheckBoxDetailedOutput.setSelected(DEFAULT_DO_DETAILED_OUTPUT);
     this.jCheckBoxDetailedOutput.addItemListener(new ItemListener() {
-
       @Override
       public void itemStateChanged(final ItemEvent e) {
         refreshPlot();
@@ -395,7 +388,6 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
     this.jCheckBoxScrollView.setSelected(true);
     this.jCheckBoxScrollView.addItemListener(new ItemListener() {
-
       @Override
       public void itemStateChanged(final ItemEvent e) {
         // update scrollbar state and repaint the plot:
@@ -856,53 +848,63 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     final boolean useLST = obsData.isUseLST();
     final boolean doBaseLineLimits = obsData.isDoBaseLineLimits();
 
-    // title :
-    ChartUtils.clearTextSubTitle(this.chart);
+    // disable chart & plot notifications:
+    this.chart.setNotify(false);
+    this.xyPlot.setNotify(false);
+    try {
+      // title :
+      ChartUtils.clearTextSubTitle(this.chart);
 
-    final StringBuilder sb = new StringBuilder(32);
-    sb.append(chartData.getInterferometerConfiguration(false)).append(" - ");
-    sb.append(observation.getInstrumentConfiguration().getName()).append(" - ");
-    sb.append(chartData.getDisplayConfigurations(" / "));
-    if ((chartData.isSingle() || obsData.isUserPops()) && obsData.getBestPops() != null) {
-      obsData.getBestPops().toString(sb);
-    }
-    ChartUtils.addSubtitle(this.chart, sb.toString());
-
-    if (!doBaseLineLimits && (observation.getWhen().isNightRestriction() || !useLST)) {
-      // date and moon FLI :
-      ChartUtils.addSubtitle(this.chart, "Day: " + observation.getWhen().getDate().toString()
-              + (observation.getWhen().isNightRestriction()
-              ? " - Moon = " + (int) Math.round(obsData.getMoonIllumPercent()) + "%"
-              : ""));
-    }
-
-    final String dateAxisLabel;
-    if (doBaseLineLimits) {
-      dateAxisLabel = AsproConstants.TIME_HA;
-    } else {
-      if (useLST) {
-        dateAxisLabel = AsproConstants.TIME_LST;
-      } else {
-        dateAxisLabel = AsproConstants.TIME_UTC;
+      final StringBuilder sb = new StringBuilder(32);
+      sb.append(chartData.getInterferometerConfiguration(false)).append(" - ");
+      sb.append(observation.getInstrumentConfiguration().getName()).append(" - ");
+      sb.append(chartData.getDisplayConfigurations(" / "));
+      if ((chartData.isSingle() || obsData.isUserPops()) && obsData.getBestPops() != null) {
+        obsData.getBestPops().toString(sb);
       }
+      ChartUtils.addSubtitle(this.chart, sb.toString());
+
+      if (!doBaseLineLimits && (observation.getWhen().isNightRestriction() || !useLST)) {
+        // date and moon FLI :
+        ChartUtils.addSubtitle(this.chart, "Day: " + observation.getWhen().getDate().toString()
+                + (observation.getWhen().isNightRestriction()
+                ? " - Moon = " + (int) Math.round(obsData.getMoonIllumPercent()) + "%"
+                : ""));
+      }
+
+      final String dateAxisLabel;
+      if (doBaseLineLimits) {
+        dateAxisLabel = AsproConstants.TIME_HA;
+      } else {
+        if (useLST) {
+          dateAxisLabel = AsproConstants.TIME_LST;
+        } else {
+          dateAxisLabel = AsproConstants.TIME_UTC;
+        }
+      }
+
+      // define the date axis (bounds and current range):
+      updateDateAxis(dateAxisLabel, obsData.getDateMin(), obsData.getDateMax(), doBaseLineLimits);
+
+      // only valid for single observation :
+      updateSunMarkers(obsData.getSunIntervals(), obsData.getDateMin(), obsData.getDateMax());
+
+      // update the time marker:
+      updateTimeMarker();
+
+      // computed data are valid :
+      updateChart(observation.getDisplayTargets(),
+              observation.getOrphanCalibrators(),
+              observation.getOrCreateTargetUserInfos(),
+              chartData,
+              obsData.getDateMin(), obsData.getDateMax(),
+              doBaseLineLimits);
+
+    } finally {
+      // restore chart & plot notifications:
+      this.xyPlot.setNotify(true);
+      this.chart.setNotify(true);
     }
-
-    // define the date axis (bounds and current range):
-    updateDateAxis(dateAxisLabel, obsData.getDateMin(), obsData.getDateMax(), doBaseLineLimits);
-
-    // only valid for single observation :
-    updateSunMarkers(obsData.getSunIntervals(), obsData.getDateMin(), obsData.getDateMax());
-
-    // update the time marker:
-    updateTimeMarker();
-
-    // computed data are valid :
-    updateChart(observation.getDisplayTargets(),
-            observation.getOrphanCalibrators(),
-            observation.getOrCreateTargetUserInfos(),
-            chartData,
-            obsData.getDateMin(), obsData.getDateMax(),
-            doBaseLineLimits);
 
     // Enable or disable the 'Night only' option:
     if (observation.getWhen().isNightRestriction()) {

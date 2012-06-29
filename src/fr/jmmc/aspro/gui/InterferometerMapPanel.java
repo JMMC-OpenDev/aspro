@@ -46,7 +46,7 @@ import org.jfree.ui.TextAnchor;
  * @author bourgesl
  */
 public final class InterferometerMapPanel extends javax.swing.JPanel implements ChartProgressListener,
-                                                                                ObservationListener, PDFExportable {
+        ObservationListener, PDFExportable {
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
@@ -180,7 +180,7 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
     this.aJMMC.setTextAnchor(TextAnchor.BOTTOM_RIGHT);
     this.aJMMC.setPaint(Color.DARK_GRAY);
     this.xyPlot.getRenderer().addAnnotation(this.aJMMC, Layer.BACKGROUND);
-    
+
     // add listener :
     this.chart.addProgressListener(this);
     this.chartPanel = ChartUtils.createSquareChartPanel(this.chart);
@@ -236,7 +236,7 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
       // refresh the plot :
       this.configuration = config;
 
-        logger.debug("plot : refresh");
+      logger.debug("plot : refresh");
 
       final long start = System.nanoTime();
 
@@ -280,22 +280,32 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
     // memorize chart data (used by export PDF) :
     setChartData(chartData);
 
-    // title :
-    ChartUtils.clearTextSubTitle(this.chart);
+    // disable chart & plot notifications:
+    this.chart.setNotify(false);
+    this.xyPlot.setNotify(false);
+    try {
+      // title :
+      ChartUtils.clearTextSubTitle(this.chart);
 
-    final StringBuilder sb = new StringBuilder(32);
-    sb.append(chartData.getInterferometerConfiguration(false)).append(" - ");
-    sb.append(chartData.getDisplayConfigurations(" / "));
+      final StringBuilder sb = new StringBuilder(32);
+      sb.append(chartData.getInterferometerConfiguration(false)).append(" - ");
+      sb.append(chartData.getDisplayConfigurations(" / "));
 
-    ChartUtils.addSubtitle(this.chart, sb.toString());
+      ChartUtils.addSubtitle(this.chart, sb.toString());
 
-    // computed data are valid :
-    updateChart(chartData);
+      // computed data are valid :
+      updateChart(chartData);
 
-    // update theme at end :
-    ChartUtilities.applyCurrentTheme(this.chart);
+      // update theme at end :
+      ChartUtilities.applyCurrentTheme(this.chart);
 
-    this.xyPlot.setBackgroundPaint(Color.WHITE);
+      this.xyPlot.setBackgroundPaint(Color.WHITE);
+
+    } finally {
+      // restore chart & plot notifications:
+      this.xyPlot.setNotify(true);
+      this.chart.setNotify(true);
+    }
   }
 
   /**
@@ -388,7 +398,6 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
     // set the second data set :
     this.xyPlot.setDataset(1, dataset);
   }
-
   // Variables declaration - do not modify//GEN-BEGIN:variables
   // End of variables declaration//GEN-END:variables
   /** drawing started time value */
@@ -412,7 +421,7 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
         default:
       }
     }
-    
+
     // Perform custom operations before/after chart rendering:
     // move JMMC annotation:
     this.aJMMC.setX(this.xyPlot.getDomainAxis().getUpperBound());
