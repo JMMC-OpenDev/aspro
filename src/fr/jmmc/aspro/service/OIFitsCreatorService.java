@@ -516,6 +516,7 @@ public final class OIFitsCreatorService {
         }
 
         jobs[i] = new Runnable() {
+
           @Override
           public void run() {
             // spatial frequencies for a single HA (spectral dispersion):
@@ -616,6 +617,7 @@ public final class OIFitsCreatorService {
    * Create the OI_VIS table using internal computed visComplex data
    */
   private void createOIVis() {
+    final long start = System.nanoTime();
 
     // test if the instrument is AMBER to use dedicated diffVis algorithm :
     final boolean isAmber = AsproConstants.INS_AMBER.equals(this.instrumentName);
@@ -652,7 +654,7 @@ public final class OIFitsCreatorService {
     final boolean[][] flags = vis.getFlag();
 
     // vars:
-    double jd;
+    double jd, time, mjd;
     double u, v;
     double visRe, visIm, flux, vAmp, vPhi, visErrRe, visErrIm;
     final MutableComplex visComplexSample = new MutableComplex();
@@ -662,12 +664,26 @@ public final class OIFitsCreatorService {
 
     double diff, ampSquareDiffAcc, phiSquareDiffAcc;
 
+    if (this.hasModel && this.errorValid && !isAmber && this.instrumentExperimental) {
+      if (logger.isInfoEnabled()) {
+        logger.info("createOIVis: experimental instrument: VisAmp/Phi errors computed using {} random complex visiblities", NSamples);
+      }
+    }
 
     // complex visiblity with noise (sigma = visError)
     final Complex[][] visComplexNoisy = new Complex[vis.getNbRows()][this.nWaveLengths];
 
     // Iterate on HA points :
     for (int i = 0, j, k, l, n; i < this.nHAPoints; i++) {
+
+      // jd from HA :
+      jd = this.sc.convertHAToJD(this.obsHa[i], this.precRA);
+
+      // UTC :
+      time = calendarToTime(this.sc.toCalendar(jd, false), calObs);
+
+      // modified julian day :
+      mjd = AstroSkyCalc.mjd(jd);
 
       j = 0;
 
@@ -679,14 +695,11 @@ public final class OIFitsCreatorService {
         // target id
         targetIds[k] = TARGET_ID;
 
-        // jd from HA :
-        jd = this.sc.convertHAToJD(this.obsHa[i], this.precRA);
-
         // UTC :
-        times[k] = calendarToTime(this.sc.toCalendar(jd, false), calObs);
+        times[k] = time;
 
         // modified julian day :
-        mjds[k] = AstroSkyCalc.mjd(jd);
+        mjds[k] = mjd;
 
         // integration time (s) :
         intTimes[k] = this.integrationTime;
@@ -758,11 +771,12 @@ public final class OIFitsCreatorService {
 
             if (!isAmber) {
               if (this.instrumentExperimental) {
+
                 // For experimental instruments: VisAmp/Phi are only amplitude and phase of complex visibility and errors are undefined:
                 visAmp[k][l] = visComplexNoisy[k][l].abs();
                 visPhi[k][l] = Math.toDegrees(visComplexNoisy[k][l].getArgument());
 
-                // use 100 random visComplex realisations to compute standard deviation for both visAmp / visPhi:
+                // use NSamples random visComplex realisations to compute standard deviation for both visAmp / visPhi:
 
                 // pure visibility phase :
                 vPhi = this.visComplex[k][l].getArgument();
@@ -823,12 +837,18 @@ public final class OIFitsCreatorService {
     }
 
     this.oiFitsFile.addOiTable(vis);
+
+    if (logger.isDebugEnabled()) {
+      logger.debug("createOIVis: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
+    }
   }
 
   /**
    * Create the OI_VIS2 table using internal computed visComplex data
    */
   private void createOIVis2() {
+    final long start = System.nanoTime();
+
     // Get OI_VIS table :
     final OIVis vis = this.oiFitsFile.getOiVis()[0];
     final int nRows = vis.getNbRows();
@@ -900,6 +920,10 @@ public final class OIFitsCreatorService {
     System.arraycopy(vis.getStaIndex(), 0, vis2.getStaIndex(), 0, nRows);
 
     this.oiFitsFile.addOiTable(vis2);
+
+    if (logger.isDebugEnabled()) {
+      logger.debug("createOIVis2: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
+    }
   }
 
   /**
@@ -910,6 +934,8 @@ public final class OIFitsCreatorService {
     if (this.nBeams < 3) {
       return;
     }
+
+    final long start = System.nanoTime();
 
     // number of triplets :
     final List<int[]> iTriplets = CombUtils.generateCombinations(this.nBeams, 3);
@@ -1134,6 +1160,10 @@ public final class OIFitsCreatorService {
     }
 
     this.oiFitsFile.addOiTable(t3);
+
+    if (logger.isDebugEnabled()) {
+      logger.debug("createOIT3: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
+    }
   }
 
   /**
