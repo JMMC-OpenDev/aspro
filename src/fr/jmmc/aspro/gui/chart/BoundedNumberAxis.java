@@ -82,7 +82,7 @@ public class BoundedNumberAxis extends NumberAxis {
   @Override
   protected void setAutoRange(final boolean auto, final boolean notify) {
     if (auto) {
-      logger.warn( "AutoRange must not be used: ", new Throwable());
+      logger.warn("AutoRange must not be used: ", new Throwable());
       return;
     }
 
@@ -104,7 +104,7 @@ public class BoundedNumberAxis extends NumberAxis {
    */
   @Override
   public final void setRange(final Range range, final boolean turnOffAutoRange,
-                       final boolean notify) {
+          final boolean notify) {
 
     Range newRange = range;
 
@@ -150,6 +150,8 @@ public class BoundedNumberAxis extends NumberAxis {
       }
     }
 
-    super.setRange(newRange, turnOffAutoRange, notify);
+    if (!getRange().equals(newRange)) {
+      super.setRange(newRange, turnOffAutoRange, notify);
+    }
   }
 }

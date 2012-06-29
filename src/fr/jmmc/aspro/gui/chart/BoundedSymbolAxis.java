@@ -168,6 +168,8 @@ public final class BoundedSymbolAxis extends SymbolAxis {
       }
     }
 
-    super.setRange(newRange, turnOffAutoRange, notify);
+    if (!getRange().equals(newRange)) {
+      super.setRange(newRange, turnOffAutoRange, notify);
+    }
   }
 }

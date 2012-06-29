@@ -85,15 +85,15 @@ public final class BoundedDateAxis extends DateAxis {
 
       // This is called by JFreeChart to reset the zoom:
       /*
-      at fr.jmmc.aspro.gui.chart.BoundedDateAxis.setAutoRange(BoundedDateAxis.java:93)
-      at org.jfree.chart.axis.ValueAxis.setAutoRange(ValueAxis.java:975)
-      at org.jfree.chart.axis.ValueAxis.resizeRange(ValueAxis.java:1563)
-      at org.jfree.chart.axis.ValueAxis.resizeRange(ValueAxis.java:1539)
-      at org.jfree.chart.plot.XYPlot.zoomRangeAxes(XYPlot.java:5158)
-      at org.jfree.chart.plot.XYPlot.zoomRangeAxes(XYPlot.java:5123)
-      at org.jfree.chart.ChartPanel.restoreAutoRangeBounds(ChartPanel.java:2430)
-      at org.jfree.chart.ChartPanel.restoreAutoBounds(ChartPanel.java:2391)
-      at org.jfree.chart.ChartPanel.mouseReleased(ChartPanel.java:2044)
+       at fr.jmmc.aspro.gui.chart.BoundedDateAxis.setAutoRange(BoundedDateAxis.java:93)
+       at org.jfree.chart.axis.ValueAxis.setAutoRange(ValueAxis.java:975)
+       at org.jfree.chart.axis.ValueAxis.resizeRange(ValueAxis.java:1563)
+       at org.jfree.chart.axis.ValueAxis.resizeRange(ValueAxis.java:1539)
+       at org.jfree.chart.plot.XYPlot.zoomRangeAxes(XYPlot.java:5158)
+       at org.jfree.chart.plot.XYPlot.zoomRangeAxes(XYPlot.java:5123)
+       at org.jfree.chart.ChartPanel.restoreAutoRangeBounds(ChartPanel.java:2430)
+       at org.jfree.chart.ChartPanel.restoreAutoBounds(ChartPanel.java:2391)
+       at org.jfree.chart.ChartPanel.mouseReleased(ChartPanel.java:2044)
        */
 
       // Use the axis bounds to redefine the ranges (reset zoom)
@@ -120,7 +120,7 @@ public final class BoundedDateAxis extends DateAxis {
    */
   @Override
   public void setRange(final Range range, final boolean turnOffAutoRange,
-                       final boolean notify) {
+          final boolean notify) {
 
     Range newRange = range;
 
@@ -166,6 +166,8 @@ public final class BoundedDateAxis extends DateAxis {
       }
     }
 
-    super.setRange(newRange, turnOffAutoRange, notify);
+    if (!getRange().equals(newRange)) {
+      super.setRange(newRange, turnOffAutoRange, notify);
+    }
   }
 }
