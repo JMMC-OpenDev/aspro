@@ -28,7 +28,7 @@
       <posY>-4647390.089884061</posY>
       <posZ>3582240.6122966344</posZ>
     </position>
-    
+
     <telescope>
       <name>T</name>
       <diameter>1.0</diameter>
@@ -558,14 +558,18 @@
       <defaultSamplingTime>40</defaultSamplingTime>
 
       <!-- noise parameters -->
-      <transmission>0.05</transmission>
-      <dit>0.015</dit>
-      <ron>10</ron>
-      <detectorSaturation>50000</detectorSaturation>
-      <instrumentVisibility>0.9</instrumentVisibility>
+      <!-- chara transmission = 0.03 -->
+      <!-- instrumentalTransmission = mirrorTransmission * gratingTransmission * slitTransmission = 0.9^13 * 0.6 * 0.3 -->
+      <!-- global transmission = chara transmission * instrumentalTransmission * detectorQuantumEff * 4 = 0.03 * instrumentalTransmission * 0.2 * 4 -->
+      <!-- why x4 ? -->
+      <transmission>0.001098088</transmission>
+      <dit>0.015</dit> <!-- exposure time (15ms) every 25ms -->
+      <ron>0</ron>
+      <detectorSaturation>5000</detectorSaturation>
+      <instrumentVisibility>1.0</instrumentVisibility> <!-- 1.0 -->
       <instrumentVisibilityBias>2</instrumentVisibilityBias>
       <instrumentPhaseBias>2</instrumentPhaseBias>
-      <nbPixInterferometry>128</nbPixInterferometry>
+      <nbPixInterferometry>1</nbPixInterferometry> <!-- per spectral element -->
       <nbPixPhotometry>0</nbPixPhotometry>
       <fracFluxInInterferometry>1</fracFluxInInterferometry>
 <!--
@@ -587,14 +591,14 @@ si Réseau=100 (LR), largeur de bande=150nm (0.15 um)
 - resolution:
 HR=30000
 MR=6000
-LR=1500 
+LR=1500
 
 - nombre de canaux spectraux:
 400 quelle que soit la résolution. Ensuite au traitement on binne très souvent:
 1 canal de 8nm en HR, 2 canaux spectraux de 20nm en MR et 5 canaux de 30nm en LR.
 
 - nombre de blocs (?):
-La bonne valeur par défaut est 20 blocs. 
+La bonne valeur par défaut est 20 blocs.
 
 Configuration instrumentale
 - TRACKING : définit quel détecteur sert pour le traitement temps réel
@@ -638,7 +642,7 @@ Configuration d’enregistrement
         <numberChannels>5 ou 2 ou 1</numberChannels>
         <waveLengthMin>lambda - (0.15 ou 0.045 ou 0.008) / 2</waveLengthMin>
         <waveLengthMax>lambda + (0.15 ou 0.045 ou 0.008) / 2</waveLengthMax>
-        
+
         <parameter><name>TRACKING</name><value>R</value></parameter>
         <parameter><name>SLIT</name><value>W070H4</value></parameter>
         <parameter><name>GRATING</name><value>300</value></parameter>
@@ -680,7 +684,7 @@ Configuration d’enregistrement
         <numberChannels>2</numberChannels>
         <waveLengthMin>0.6455</waveLengthMin>
         <waveLengthMax>0.6905</waveLengthMax>
-        
+
         <parameter><name>TRACKING</name><value>R</value></parameter>
         <parameter><name>SLIT</name><value>W070H4</value></parameter>
         <parameter><name>GRATING</name><value>300</value></parameter>
@@ -700,7 +704,7 @@ Configuration d’enregistrement
         <numberChannels>2</numberChannels>
         <waveLengthMin>0.6975</waveLengthMin>
         <waveLengthMax>0.7425</waveLengthMax>
-        
+
         <parameter><name>TRACKING</name><value>R</value></parameter>
         <parameter><name>SLIT</name><value>W070H4</value></parameter>
         <parameter><name>GRATING</name><value>300</value></parameter>
@@ -721,7 +725,7 @@ Configuration d’enregistrement
         <numberChannels>1</numberChannels>
         <waveLengthMin>0.6522</waveLengthMin>
         <waveLengthMax>0.6602</waveLengthMax>
-        
+
         <parameter><name>TRACKING</name><value>R</value></parameter>
         <parameter><name>SLIT</name><value>W070H4</value></parameter>
         <parameter><name>GRATING</name><value>1800</value></parameter>
@@ -741,7 +745,7 @@ Configuration d’enregistrement
         <numberChannels>1</numberChannels>
         <waveLengthMin>0.5853</waveLengthMin>
         <waveLengthMax>0.5933</waveLengthMax>
-        
+
         <parameter><name>TRACKING</name><value>R</value></parameter>
         <parameter><name>SLIT</name><value>W070H4</value></parameter>
         <parameter><name>GRATING</name><value>1800</value></parameter>
@@ -761,7 +765,7 @@ Configuration d’enregistrement
         <numberChannels>1</numberChannels>
         <waveLengthMin>0.7659</waveLengthMin>
         <waveLengthMax>0.7739</waveLengthMax>
-        
+
         <parameter><name>TRACKING</name><value>R</value></parameter>
         <parameter><name>SLIT</name><value>W070H4</value></parameter>
         <parameter><name>GRATING</name><value>1800</value></parameter>
@@ -781,7 +785,7 @@ Configuration d’enregistrement
         <numberChannels>1</numberChannels>
         <waveLengthMin>0.8455</waveLengthMin>
         <waveLengthMax>0.8535</waveLengthMax>
-        
+
         <parameter><name>TRACKING</name><value>R</value></parameter>
         <parameter><name>SLIT</name><value>W070H4</value></parameter>
         <parameter><name>GRATING</name><value>1800</value></parameter>
@@ -801,7 +805,7 @@ Configuration d’enregistrement
         <numberChannels>1</numberChannels>
         <waveLengthMin>0.850</waveLengthMin>
         <waveLengthMax>0.858</waveLengthMax>
-        
+
         <parameter><name>TRACKING</name><value>R</value></parameter>
         <parameter><name>SLIT</name><value>W070H4</value></parameter>
         <parameter><name>GRATING</name><value>1800</value></parameter>
@@ -821,7 +825,7 @@ Configuration d’enregistrement
         <numberChannels>1</numberChannels>
         <waveLengthMin>0.8635</waveLengthMin>
         <waveLengthMax>0.8715</waveLengthMax>
-        
+
         <parameter><name>TRACKING</name><value>R</value></parameter>
         <parameter><name>SLIT</name><value>W070H4</value></parameter>
         <parameter><name>GRATING</name><value>1800</value></parameter>
@@ -923,14 +927,18 @@ Configuration d’enregistrement
       <defaultSamplingTime>40</defaultSamplingTime>
 
       <!-- noise parameters -->
-      <transmission>0.05</transmission>
-      <dit>0.015</dit>
-      <ron>10</ron>
-      <detectorSaturation>50000</detectorSaturation>
-      <instrumentVisibility>0.9</instrumentVisibility>
+      <!-- chara transmission = 0.03 -->
+      <!-- instrumentalTransmission = mirrorTransmission * gratingTransmission * slitTransmission = 0.9^13 * 0.6 * 0.3 -->
+      <!-- global transmission = chara transmission * instrumentalTransmission * detectorQuantumEff * 4 = 0.03 * instrumentalTransmission * 0.2 * 4 -->
+      <!-- why x4 ? -->
+      <transmission>0.001098088</transmission>
+      <dit>0.015</dit> <!-- exposure time (15ms) every 25ms -->
+      <ron>0</ron>
+      <detectorSaturation>5000</detectorSaturation>
+      <instrumentVisibility>1.0</instrumentVisibility> <!-- 1.0 -->
       <instrumentVisibilityBias>2</instrumentVisibilityBias>
       <instrumentPhaseBias>2</instrumentPhaseBias>
-      <nbPixInterferometry>128</nbPixInterferometry>
+      <nbPixInterferometry>1</nbPixInterferometry> <!-- per spectral element -->
       <nbPixPhotometry>0</nbPixPhotometry>
       <fracFluxInInterferometry>1</fracFluxInInterferometry>
 <!--
@@ -969,7 +977,7 @@ Configuration d’enregistrement
         <numberChannels>2</numberChannels>
         <waveLengthMin>0.6455</waveLengthMin>
         <waveLengthMax>0.6905</waveLengthMax>
-        
+
         <parameter><name>TRACKING</name><value>R</value></parameter>
         <parameter><name>SLIT</name><value>W070H4</value></parameter>
         <parameter><name>GRATING</name><value>300</value></parameter>
@@ -989,7 +997,7 @@ Configuration d’enregistrement
         <numberChannels>2</numberChannels>
         <waveLengthMin>0.6975</waveLengthMin>
         <waveLengthMax>0.7425</waveLengthMax>
-        
+
         <parameter><name>TRACKING</name><value>R</value></parameter>
         <parameter><name>SLIT</name><value>W070H4</value></parameter>
         <parameter><name>GRATING</name><value>300</value></parameter>
@@ -1010,7 +1018,7 @@ Configuration d’enregistrement
         <numberChannels>1</numberChannels>
         <waveLengthMin>0.6522</waveLengthMin>
         <waveLengthMax>0.6602</waveLengthMax>
-        
+
         <parameter><name>TRACKING</name><value>R</value></parameter>
         <parameter><name>SLIT</name><value>W070H4</value></parameter>
         <parameter><name>GRATING</name><value>1800</value></parameter>
@@ -1030,7 +1038,7 @@ Configuration d’enregistrement
         <numberChannels>1</numberChannels>
         <waveLengthMin>0.5853</waveLengthMin>
         <waveLengthMax>0.5933</waveLengthMax>
-        
+
         <parameter><name>TRACKING</name><value>R</value></parameter>
         <parameter><name>SLIT</name><value>W070H4</value></parameter>
         <parameter><name>GRATING</name><value>1800</value></parameter>
@@ -1050,7 +1058,7 @@ Configuration d’enregistrement
         <numberChannels>1</numberChannels>
         <waveLengthMin>0.7659</waveLengthMin>
         <waveLengthMax>0.7739</waveLengthMax>
-        
+
         <parameter><name>TRACKING</name><value>R</value></parameter>
         <parameter><name>SLIT</name><value>W070H4</value></parameter>
         <parameter><name>GRATING</name><value>1800</value></parameter>
@@ -1070,7 +1078,7 @@ Configuration d’enregistrement
         <numberChannels>1</numberChannels>
         <waveLengthMin>0.8455</waveLengthMin>
         <waveLengthMax>0.8535</waveLengthMax>
-        
+
         <parameter><name>TRACKING</name><value>R</value></parameter>
         <parameter><name>SLIT</name><value>W070H4</value></parameter>
         <parameter><name>GRATING</name><value>1800</value></parameter>
@@ -1090,7 +1098,7 @@ Configuration d’enregistrement
         <numberChannels>1</numberChannels>
         <waveLengthMin>0.850</waveLengthMin>
         <waveLengthMax>0.858</waveLengthMax>
-        
+
         <parameter><name>TRACKING</name><value>R</value></parameter>
         <parameter><name>SLIT</name><value>W070H4</value></parameter>
         <parameter><name>GRATING</name><value>1800</value></parameter>
@@ -1110,7 +1118,7 @@ Configuration d’enregistrement
         <numberChannels>1</numberChannels>
         <waveLengthMin>0.8635</waveLengthMin>
         <waveLengthMax>0.8715</waveLengthMax>
-        
+
         <parameter><name>TRACKING</name><value>R</value></parameter>
         <parameter><name>SLIT</name><value>W070H4</value></parameter>
         <parameter><name>GRATING</name><value>1800</value></parameter>
@@ -1193,14 +1201,18 @@ Configuration d’enregistrement
       <defaultSamplingTime>40</defaultSamplingTime>
 
       <!-- noise parameters -->
-      <transmission>0.05</transmission>
-      <dit>0.015</dit>
-      <ron>10</ron>
-      <detectorSaturation>50000</detectorSaturation>
-      <instrumentVisibility>0.9</instrumentVisibility>
+      <!-- chara transmission = 0.03 -->
+      <!-- instrumentalTransmission = mirrorTransmission * gratingTransmission * slitTransmission = 0.9^13 * 0.6 * 0.3 -->
+      <!-- global transmission = chara transmission * instrumentalTransmission * detectorQuantumEff * 4 = 0.03 * instrumentalTransmission * 0.2 * 4 -->
+      <!-- why x4 ? -->
+      <transmission>0.001098088</transmission>
+      <dit>0.015</dit> <!-- exposure time (15ms) every 25ms -->
+      <ron>0</ron>
+      <detectorSaturation>5000</detectorSaturation>
+      <instrumentVisibility>1.0</instrumentVisibility> <!-- 1.0 -->
       <instrumentVisibilityBias>2</instrumentVisibilityBias>
       <instrumentPhaseBias>2</instrumentPhaseBias>
-      <nbPixInterferometry>128</nbPixInterferometry>
+      <nbPixInterferometry>1</nbPixInterferometry> <!-- per spectral element -->
       <nbPixPhotometry>0</nbPixPhotometry>
       <fracFluxInInterferometry>1</fracFluxInInterferometry>
 <!--
@@ -1239,7 +1251,7 @@ Configuration d’enregistrement
         <numberChannels>2</numberChannels>
         <waveLengthMin>0.6455</waveLengthMin>
         <waveLengthMax>0.6905</waveLengthMax>
-        
+
         <parameter><name>TRACKING</name><value>R</value></parameter>
         <parameter><name>SLIT</name><value>W070H4</value></parameter>
         <parameter><name>GRATING</name><value>300</value></parameter>
@@ -1259,7 +1271,7 @@ Configuration d’enregistrement
         <numberChannels>2</numberChannels>
         <waveLengthMin>0.6975</waveLengthMin>
         <waveLengthMax>0.7425</waveLengthMax>
-        
+
         <parameter><name>TRACKING</name><value>R</value></parameter>
         <parameter><name>SLIT</name><value>W070H4</value></parameter>
         <parameter><name>GRATING</name><value>300</value></parameter>
@@ -1280,7 +1292,7 @@ Configuration d’enregistrement
         <numberChannels>1</numberChannels>
         <waveLengthMin>0.6522</waveLengthMin>
         <waveLengthMax>0.6602</waveLengthMax>
-        
+
         <parameter><name>TRACKING</name><value>R</value></parameter>
         <parameter><name>SLIT</name><value>W070H4</value></parameter>
         <parameter><name>GRATING</name><value>1800</value></parameter>
@@ -1300,7 +1312,7 @@ Configuration d’enregistrement
         <numberChannels>1</numberChannels>
         <waveLengthMin>0.5853</waveLengthMin>
         <waveLengthMax>0.5933</waveLengthMax>
-        
+
         <parameter><name>TRACKING</name><value>R</value></parameter>
         <parameter><name>SLIT</name><value>W070H4</value></parameter>
         <parameter><name>GRATING</name><value>1800</value></parameter>
@@ -1320,7 +1332,7 @@ Configuration d’enregistrement
         <numberChannels>1</numberChannels>
         <waveLengthMin>0.7659</waveLengthMin>
         <waveLengthMax>0.7739</waveLengthMax>
-        
+
         <parameter><name>TRACKING</name><value>R</value></parameter>
         <parameter><name>SLIT</name><value>W070H4</value></parameter>
         <parameter><name>GRATING</name><value>1800</value></parameter>
@@ -1340,7 +1352,7 @@ Configuration d’enregistrement
         <numberChannels>1</numberChannels>
         <waveLengthMin>0.8455</waveLengthMin>
         <waveLengthMax>0.8535</waveLengthMax>
-        
+
         <parameter><name>TRACKING</name><value>R</value></parameter>
         <parameter><name>SLIT</name><value>W070H4</value></parameter>
         <parameter><name>GRATING</name><value>1800</value></parameter>
@@ -1360,7 +1372,7 @@ Configuration d’enregistrement
         <numberChannels>1</numberChannels>
         <waveLengthMin>0.850</waveLengthMin>
         <waveLengthMax>0.858</waveLengthMax>
-        
+
         <parameter><name>TRACKING</name><value>R</value></parameter>
         <parameter><name>SLIT</name><value>W070H4</value></parameter>
         <parameter><name>GRATING</name><value>1800</value></parameter>
@@ -1380,7 +1392,7 @@ Configuration d’enregistrement
         <numberChannels>1</numberChannels>
         <waveLengthMin>0.8635</waveLengthMin>
         <waveLengthMax>0.8715</waveLengthMax>
-        
+
         <parameter><name>TRACKING</name><value>R</value></parameter>
         <parameter><name>SLIT</name><value>W070H4</value></parameter>
         <parameter><name>GRATING</name><value>1800</value></parameter>
@@ -1431,7 +1443,7 @@ Configuration d’enregistrement
         <!-- fracFluxInInterferometry: The fraction of flux going into interferometric channel (typically 0.9) -->
         <fracFluxInInterferometry>0.75</fracFluxInInterferometry>
 
-      <!-- 
+      <!--
         Instrument predefined modes :
         Each mode describes a focal instrument mode (AMBER : "Low_HK" ... "Medium_K_1_2300" ... "High_K_1_2481").
         It has a wavelength range (waveLengthMin - waveLengthMax), a spectral resolution (resolution)
@@ -1442,7 +1454,7 @@ Configuration d’enregistrement
         <name>Low_H</name>
         <!-- resolution: The spectral resolution of this instrument mode -->
         <resolution>40</resolution>
-        <!-- 
+        <!--
           The number of spectral channels of this instrument mode (optional)
           <numberChannels>n</numberChannels>
         -->
@@ -1518,7 +1530,7 @@ Configuration d’enregistrement
         <!-- fracFluxInInterferometry: The fraction of flux going into interferometric channel (typically 0.9) -->
         <fracFluxInInterferometry>0.75</fracFluxInInterferometry>
 
-      <!-- 
+      <!--
         Instrument predefined modes :
         Each mode describes a focal instrument mode (AMBER : "Low_HK" ... "Medium_K_1_2300" ... "High_K_1_2481").
         It has a wavelength range (waveLengthMin - waveLengthMax), a spectral resolution (resolution)
@@ -1529,7 +1541,7 @@ Configuration d’enregistrement
         <name>Low_H</name>
         <!-- resolution: The spectral resolution of this instrument mode -->
         <resolution>40</resolution>
-        <!-- 
+        <!--
           The number of spectral channels of this instrument mode (optional)
           <numberChannels>n</numberChannels>
         -->
@@ -1801,7 +1813,7 @@ Configuration d’enregistrement
     <instrument>
       <focalInstrument>MIRC_5T</focalInstrument>
       <!-- MIRC: S1 S2 W1 W2 E1 E2 = beams 1-2-3-4-6-5 -->
-      
+
       <configuration>
         <stations>S1 S2 W1 W2 E1</stations>
         <channels>V1 V2 V3 V4 V6</channels>
@@ -1833,7 +1845,7 @@ Configuration d’enregistrement
       <!-- focalInstrument: The focal instrument associated with this configuration -->
       <focalInstrument>MIRC_6T</focalInstrument>
       <!-- MIRC: S1 S2 W1 W2 E1 E2 = beams 1-2-3-4-6-5 -->
-      
+
       <!-- configuration: The list of configuration for the focal instrument -->
       <configuration>
         <!-- stations: The list of stations for this configuration (U1 U2 U4) -->
@@ -1995,7 +2007,7 @@ Configuration d’enregistrement
       </configuration>
     </instrument>
 
-    
+
     <!-- VEGA 2T/3T/4T -->
     <!-- last modified: 04/07/2011 according to Denis Mourard document (ConfigsBeamDefault.pdf - 30/06/2011)-->
     <instrument>
