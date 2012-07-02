@@ -7,7 +7,7 @@
 
 <ApplicationData link="http://www.jmmc.fr/aspro2">
 
-  <program name="Aspro2" version="0.9.2 beta 1"/>
+  <program name="Aspro2" version="0.9.2 beta 2"/>
 
   <compilation date="12/06/2012" compiler="JDK 1.5.0_16"/>
 
@@ -151,6 +151,9 @@
 
   <releasenotes>
     <release version="0.9.2">
+      <prerelease version="0.9.2 beta 2">
+        <change type="FEATURE">Added calibrators in VOTable format (SAMP) to indicate calibrators per science target (PIVOT)</change>
+      </prerelease>
       <prerelease version="0.9.2 beta 1">
         <change type="FEATURE">Updated CHARA VEGA noise parameters to have better real error estimates (V band)</change>
         <change type="FEATURE">Added closure phases (OI_T3) below Vis2 plot</change>
