@@ -28,6 +28,13 @@
       <posZ>-2654530.4375114734</posZ>
     </position>
 
+    <!--
+      Atmospheric Restrictions
+      When the wind speed is larger than 12m/s, the telescope should point at least 90 degrees away from wind direction.
+      The telescope will be closed for wind speed larger than 18m/s.
+    -->
+    <windPointingRestriction>90.0</windPointingRestriction>
+
     <!-- For now we have only one shared instance of UT because all UTs are considered equivalent -->
     <telescope>
       <name>UT</name>
@@ -8929,6 +8936,121 @@
       </mode>
     </focalInstrument>
 
+    <focalInstrument>
+      <name>MATISSE</name>
+      <description>MATISSE instrument</description>
+      <experimental>true</experimental>
+      <numberChannels>4</numberChannels>
+      <defaultSamplingTime>60</defaultSamplingTime>
+
+      <!-- noise parameters -->
+      <transmission>0.02</transmission>
+      <dit>0.05</dit>
+      <ron>10</ron>
+      <detectorSaturation>50000</detectorSaturation>
+      <instrumentVisibility>0.9</instrumentVisibility>
+      <instrumentVisibilityBias>2.5</instrumentVisibilityBias>
+      <instrumentVis2CalibrationBias>2.5</instrumentVis2CalibrationBias>
+      <instrumentPhaseBias>2.0</instrumentPhaseBias>
+      <nbPixInterferometry>32</nbPixInterferometry>
+      <nbPixPhotometry>32</nbPixPhotometry>
+      <fracFluxInInterferometry>0.8</fracFluxInInterferometry>
+
+<!--
+Modes:  SciPhot (photometry on), HighSens (no photometry), hybrid (LM with photometry, N no photometry)
+
+L/M 2.8 - 4.2 um
+M 4.5 - 5.5
+N 7.5 - 13.5 um
+
+resolution:
+LM 30, 500
+L 950, 1 plus haute resolution (3800 - 5000)
+N 30, 300
+-->
+
+      <!-- L/M modes -->
+      <mode>
+        <name>SCI_PHOT_LM_LOW</name>
+        <resolution>30</resolution>
+        <waveLengthMin>2.8</waveLengthMin>
+        <waveLengthMax>5.5</waveLengthMax>
+      </mode>
+      <mode>
+        <name>HIGH_SENS_LM_LOW</name>
+        <resolution>30</resolution>
+        <waveLengthMin>2.8</waveLengthMin>
+        <waveLengthMax>5.5</waveLengthMax>
+      </mode>
+
+      <mode>
+        <name>SCI_PHOT_LM_MEDIUM</name>
+        <resolution>500</resolution>
+        <waveLengthMin>2.8</waveLengthMin>
+        <waveLengthMax>5.5</waveLengthMax>
+      </mode>
+      <mode>
+        <name>HIGH_SENS_LM_MEDIUM</name>
+        <resolution>500</resolution>
+        <waveLengthMin>2.8</waveLengthMin>
+        <waveLengthMax>5.5</waveLengthMax>
+      </mode>
+
+      <!-- L modes -->
+      <mode>
+        <name>SCI_PHOT_L_MEDIUM</name>
+        <resolution>950</resolution>
+        <waveLengthMin>2.8</waveLengthMin>
+        <waveLengthMax>4.2</waveLengthMax>
+      </mode>
+      <mode>
+        <name>HIGH_SENS_L_MEDIUM</name>
+        <resolution>950</resolution>
+        <waveLengthMin>2.8</waveLengthMin>
+        <waveLengthMax>4.2</waveLengthMax>
+      </mode>
+
+      <mode>
+        <name>SCI_PHOT_L_HIGH</name>
+        <resolution>5000</resolution>
+        <waveLengthMin>2.8</waveLengthMin>
+        <waveLengthMax>4.2</waveLengthMax>
+      </mode>
+      <mode>
+        <name>HIGH_SENS_L_HIGH</name>
+        <resolution>5000</resolution>
+        <waveLengthMin>2.8</waveLengthMin>
+        <waveLengthMax>4.2</waveLengthMax>
+      </mode>
+
+      <!-- N modes -->
+      <mode>
+        <name>SCI_PHOT_N_LOW</name>
+        <resolution>30</resolution>
+        <waveLengthMin>7.5</waveLengthMin>
+        <waveLengthMax>13.5</waveLengthMax>
+      </mode>
+      <mode>
+        <name>HIGH_SENS_N_LOW</name>
+        <resolution>30</resolution>
+        <waveLengthMin>7.5</waveLengthMin>
+        <waveLengthMax>13.5</waveLengthMax>
+      </mode>
+
+      <mode>
+        <name>SCI_PHOT_N_MEDIUM</name>
+        <resolution>300</resolution>
+        <waveLengthMin>7.5</waveLengthMin>
+        <waveLengthMax>13.5</waveLengthMax>
+      </mode>
+      <mode>
+        <name>HIGH_SENS_N_MEDIUM</name>
+        <resolution>300</resolution>
+        <waveLengthMin>7.5</waveLengthMin>
+        <waveLengthMax>13.5</waveLengthMax>
+      </mode>
+    </focalInstrument>
+
   </description>
 
 
@@ -9953,6 +10075,23 @@
         <stations>A1 B2 C1 D0</stations>
       </configuration>
     </instrument>
+
+    <instrument>
+      <focalInstrument>MATISSE</focalInstrument>
+      <configuration>
+        <stations>UT1 UT2 UT3 UT4</stations>
+      </configuration>
+      <configuration>
+        <stations>A1 G1 K0 J3</stations>
+      </configuration>
+      <configuration>
+        <stations>D0 H0 G1 I1</stations>
+      </configuration>
+      <configuration>
+        <stations>A1 B2 C1 D0</stations>
+      </configuration>
+    </instrument>
+
   </configuration>
 
 </a:interferometerSetting>
