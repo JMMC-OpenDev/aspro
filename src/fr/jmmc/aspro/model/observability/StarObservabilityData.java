@@ -16,15 +16,19 @@ public final class StarObservabilityData {
   /* type of data */
 
   /** star observability */
-  public final static int TYPE_STAR = 0;
+  public final static int TYPE_STAR = 0; // red
   /** calibrator observability */
-  public final static int TYPE_CALIBRATOR = 1;
+  public final static int TYPE_CALIBRATOR = 1; // blue
   /** rise/set intervals */
-  public final static int TYPE_RISE_SET = 2;
+  public final static int TYPE_RISE_SET = 2; // green
   /** horizon intervals */
-  public final static int TYPE_HORIZON = 3;
+  public final static int TYPE_HORIZON = 4; // violet
+  /** moon distance OK intervals */
+  public final static int TYPE_MOON_DIST = 3; // yellow
+  /** wind intervals */
+  public final static int TYPE_WIND = 5; // cyan
   /** baseline intervals */
-  public final static int TYPE_BASE_LINE = 4;
+  public final static int TYPE_BASE_LINE = 6; // automatic color
 
   /* members */
   /** name of the target */
@@ -37,8 +41,8 @@ public final class StarObservabilityData {
   private final List<DateTimeInterval> visible = new ArrayList<DateTimeInterval>(3);
   /** transit date */
   private Date transitDate;
-  /** elevation sampled data */
-  private final List<ElevationDate> elevations = new ArrayList<ElevationDate>(8);
+  /** sampled target position */
+  private final List<TargetPositionDate> targetPositions = new ArrayList<TargetPositionDate>(8);
 
   /**
    * Constructor
@@ -126,11 +130,11 @@ public final class StarObservabilityData {
   }
 
   /**
-   * Return the elevation sampled data
-   * @return elevation sampled data
+   * Return the sampled target position
+   * @return sampled target position
    */
-  public List<ElevationDate> getElevations() {
-    return elevations;
+  public List<TargetPositionDate> getTargetPositions() {
+    return targetPositions;
   }
 
   @Override

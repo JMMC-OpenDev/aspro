@@ -6,23 +6,27 @@ package fr.jmmc.aspro.model.observability;
 import java.util.Date;
 
 /**
- * This class describes the date corresponding to the elevation of the target
+ * This class describes the date corresponding to the position (azimuth / elevation) of the target
  * @author bourgesl
  */
-public final class ElevationDate {
+public final class TargetPositionDate {
 
   /** date/time */
   private final Date date;
+  /** azimuth in degrees */
+  private final int azimuth;
   /** elevation in degrees */
   private final int elevation;
 
   /**
    * Public constructor
    * @param date date/time
+   * @param azimuth azimuth in degrees
    * @param elevation elevation in degrees
    */
-  public ElevationDate(final Date date, final int elevation) {
+  public TargetPositionDate(final Date date, final int azimuth, final int elevation) {
     this.date = date;
+    this.azimuth = (azimuth >= 360) ? azimuth - 360: azimuth;
     this.elevation = elevation;
   }
 
@@ -32,6 +36,14 @@ public final class ElevationDate {
    */
   public Date getDate() {
     return date;
+  }
+
+  /**
+   * Return the azimuth in degrees
+   * @return azimuth in degrees
+   */
+  public int getAzimuth() {
+    return azimuth;
   }
 
   /**
@@ -48,6 +60,6 @@ public final class ElevationDate {
    */
   @Override
   public String toString() {
-    return "[" + this.date + " = " + this.elevation + "°]";
+    return "[" + this.date + "] = (" + this.azimuth + "°, " + this.elevation + "°)";
   }
 }

@@ -19,7 +19,7 @@ import fr.jmmc.aspro.model.observability.PopCombination;
 import fr.jmmc.aspro.model.observability.GroupedPopObservabilityData;
 import fr.jmmc.aspro.model.observability.PopObservabilityData;
 import fr.jmmc.aspro.model.Range;
-import fr.jmmc.aspro.model.observability.ElevationDate;
+import fr.jmmc.aspro.model.observability.TargetPositionDate;
 import fr.jmmc.aspro.model.observability.StarData;
 import fr.jmmc.aspro.model.observability.StarObservabilityData;
 import fr.jmmc.aspro.model.observability.SunTimeInterval;
@@ -40,6 +40,9 @@ import fr.jmmc.aspro.model.oi.StationLinks;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.util.CombUtils;
 import fr.jmmc.aspro.util.TestUtils;
+import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -49,6 +52,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Locale;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,6 +71,8 @@ public final class ObservabilityService {
   private final static boolean DEBUG_SLOW_SERVICE = false;
   /** number of best Pops displayed in warnings */
   private final static int MAX_POPS_IN_WARNING = 15;
+  /** jd step = 1 minute */
+  private final double JD_STEP = (1d / 60d) / 24d;
 
   /* members */
   /** cached log debug enabled */
@@ -91,6 +97,10 @@ public final class ObservabilityService {
   private final SunType twilightNightLimit;
 
   /* internal */
+  /** double formatter for moon separation */
+  private final NumberFormat df1 = new DecimalFormat("0.0");
+  /** 24h date formatter like in france */
+  private final DateFormat timeFormatter = DateFormat.getTimeInstance(DateFormat.SHORT, Locale.FRANCE);
   /** Get the current thread to check if the computation is interrupted */
   private final Thread currentThread = Thread.currentThread();
   /** sky calc instance */
@@ -115,6 +125,8 @@ public final class ObservabilityService {
   private boolean hasHorizon = false;
   /** flag to indicate that pops are used */
   private boolean hasPops = false;
+  /** flag to indicate that wind restriction is used */
+  private boolean hasWindRestriction = false;
   /** beam list */
   private List<Beam> beams = null;
   /** base line list */
@@ -127,6 +139,12 @@ public final class ObservabilityService {
   private boolean ignoreUseNightLimit = false;
   /** create the observability context (temporary variables) */
   private ObservabilityContext obsCtx = null;
+  /** moon rise ranges in JD */
+  private List<Range> moonRiseRanges = null;
+  /** azimuth expressed in [0; 360 deg] */
+  private Double windAzimuth = null;
+  /** discarded azimuth ranges due to wind direction */
+  private List<Range> azimuthRanges = null;
 
   /**
    * Constructor.
@@ -352,12 +370,26 @@ public final class ObservabilityService {
       processSunAlmanach(sunTimes);
 
       // moon rise/set :
-      final List<Range> moonRanges = this.sc.findMoonRiseSet(almanac, this.jdLower, this.jdUpper);
+      this.moonRiseRanges = this.sc.findMoonRiseSet(almanac, this.jdLower, this.jdUpper);
+
+      if (isLogDebug) {
+        logger.debug("moonRiseRanges: {}", this.moonRiseRanges);
+      }
+
+      // compute moon visibility over night:
+      final List<Range> obsMoonRanges = new ArrayList<Range>(6);
+      obsMoonRanges.addAll(this.nightLimits);
+      obsMoonRanges.addAll(this.moonRiseRanges);
+
+      final List<Range> moonRanges = Range.intersectRanges(obsMoonRanges, 2);
+
+      if (isLogDebug) {
+        logger.debug("moonRanges: {}", moonRanges);
+      }
 
       // Moon filters:
-      // 1-use ranges in  [LST0 -12; LST0 + 36]:
-      // 2- moon Illum in jdLower / jdUpper !
-
+      // 1- use ranges in  [LST0 -12; LST0 + 36] over night ranges
+      // 2- moon Illum in jdLower / jdUpper
       final double moonIllum = this.sc.getMaxMoonIllum(moonRanges);
 
       this.data.setMoonIllumPercent(100d * moonIllum);
@@ -441,10 +473,10 @@ public final class ObservabilityService {
     int nObsTarget = 0;
 
     // pop data per target
-    List<PopObservabilityData> targetPopDataList = null;
+    List<PopObservabilityData> targetPopDataList;
 
-    GroupedPopObservabilityData popMergeData = null;
-    List<PopObservabilityData> flatPopDataList = null;
+    GroupedPopObservabilityData popMergeData;
+    List<PopObservabilityData> flatPopDataList;
     String key;
 
     for (Target target : targets) {
@@ -621,7 +653,7 @@ public final class ObservabilityService {
       if (this.useNightLimit) {
         final List<Range> haNightLimits = new ArrayList<Range>(2);
 
-        Range rangeHA = null;
+        Range rangeHA;
         for (Range rangeJD : this.nightLimits) {
           rangeHA = this.sc.convertJDToHARange(rangeJD, precRA);
           if (rangeHA != null) {
@@ -660,7 +692,7 @@ public final class ObservabilityService {
       logger.debug("targetName: {}", targetName);
     }
 
-    final int listSize = (this.doDetailedOutput) ? (3 + this.baseLines.size()) : 1;
+    final int listSize = (this.doDetailedOutput) ? (4 + this.baseLines.size()) : 1;
     final List<StarObservabilityData> starVisList = new ArrayList<StarObservabilityData>(listSize);
     this.data.addStarVisibilities(targetName, starVisList);
 
@@ -719,7 +751,7 @@ public final class ObservabilityService {
         if (this.useNightLimit) {
           final List<Range> haNightLimits = new ArrayList<Range>(2);
 
-          Range rangeHA = null;
+          Range rangeHA;
           for (Range rangeJD : this.nightLimits) {
             rangeHA = this.sc.convertJDToHARange(rangeJD, precRA);
             if (rangeHA != null) {
@@ -749,7 +781,7 @@ public final class ObservabilityService {
       // convert HA range to JD range in range [LST0 - 12; LST0 + 12]
       final Range rangeJDRiseSet = this.sc.convertHAToJDRange(rangeHARiseSet, precRA);
 
-      // For now : only VLTI has horizon profiles :
+      // For now : only VLTI/CHARA has horizon profiles :
       List<Range> rangesJDHorizon = null;
       if (this.hasHorizon) {
         // check horizon profiles inside rise/set range :
@@ -765,8 +797,39 @@ public final class ObservabilityService {
         }
       }
 
+      // Check Moon restriction:
+      List<Range> rangesJDMoon = null;
+      if (this.useNightLimit) {
+        rangesJDMoon = checkMoonRestriction(targetName, precDEC, rangeJDRiseSet);
+
+        if (isLogDebug) {
+          logger.debug("rangesJDMoon: {}", rangesJDMoon);
+        }
+
+        // fast interrupt :
+        if (this.currentThread.isInterrupted()) {
+          return;
+        }
+      }
+
+      // Check wind restriction:
+      List<Range> rangesJDWind = null;
+      if (this.hasWindRestriction) {
+        // check target azimuth inside rise/set range :
+        rangesJDWind = checkWindRestriction(precDEC, rangeJDRiseSet);
+
+        if (isLogDebug) {
+          logger.debug("rangesJDWind: {}", rangesJDWind);
+        }
+
+        // fast interrupt :
+        if (this.currentThread.isInterrupted()) {
+          return;
+        }
+      }
+
       // observable ranges (jd) :
-      final List<Range> obsRanges = new ArrayList<Range>(11);
+      final List<Range> obsRanges = new ArrayList<Range>(13);
 
       if (this.doDetailedOutput) {
 
@@ -793,6 +856,36 @@ public final class ObservabilityService {
           if (soHz.getVisible().size() > 1) {
             // merge contiguous date ranges :
             DateTimeInterval.merge(soHz.getVisible());
+          }
+        }
+
+        if (rangesJDMoon != null) {
+          // Add Moon separation :
+          final StarObservabilityData soMoon = new StarObservabilityData(targetName, "Moon Sep.", StarObservabilityData.TYPE_MOON_DIST);
+          starVisList.add(soMoon);
+
+          // convert JD ranges to date ranges :
+          for (Range range : rangesJDMoon) {
+            convertRangeToDateInterval(range, soMoon.getVisible());
+          }
+          if (soMoon.getVisible().size() > 1) {
+            // merge contiguous date ranges :
+            DateTimeInterval.merge(soMoon.getVisible());
+          }
+        }
+
+        if (rangesJDWind != null) {
+          // Add Horizon :
+          final StarObservabilityData soWind = new StarObservabilityData(targetName, "Wind", StarObservabilityData.TYPE_WIND);
+          starVisList.add(soWind);
+
+          // convert JD ranges to date ranges :
+          for (Range range : rangesJDWind) {
+            convertRangeToDateInterval(range, soWind.getVisible());
+          }
+          if (soWind.getVisible().size() > 1) {
+            // merge contiguous date ranges :
+            DateTimeInterval.merge(soWind.getVisible());
           }
         }
 
@@ -854,8 +947,19 @@ public final class ObservabilityService {
         obsRanges.addAll(rangesJDHorizon);
       } else {
         // Check Shadowing for every stations ?
-
         obsRanges.add(rangeJDRiseSet);
+      }
+
+      // Intersect with wind ranges :
+      if (this.hasWindRestriction) {
+        obsRanges.addAll(rangesJDWind);
+        nValid++;
+      }
+
+      // Intersect with moon separation ranges :
+      if (rangesJDMoon != null) {
+        obsRanges.addAll(rangesJDMoon);
+        nValid++;
       }
 
       // Intersect with night limits :
@@ -878,7 +982,7 @@ public final class ObservabilityService {
       // store merge result as date intervals :
       if (finalRanges != null) {
         // elevation marks for the current target :
-        findElevations(starObs, finalRanges, precRA, precDEC);
+        getTargetPosition(starObs, finalRanges, precRA, precDEC);
 
         // convert JD ranges to date ranges :
         for (Range range : finalRanges) {
@@ -892,7 +996,7 @@ public final class ObservabilityService {
         // update Star Data :
         final List<Range> haObsRanges = new ArrayList<Range>(2);
 
-        Range rangeHA = null;
+        Range rangeHA;
         for (Range rangeJD : finalRanges) {
           rangeHA = this.sc.convertJDToHARange(rangeJD, precRA);
           if (rangeHA != null) {
@@ -919,7 +1023,7 @@ public final class ObservabilityService {
   /**
    * Return the intervals (hour angles) for all base lines compatible with wMin < w(h) < wMax,
    * wMin and wMax are given by wRanges.
-   * 
+   *
    * This method is similar to DelayLineService.findHAIntervals(...) but it takes into account the PoPs i.e.
    * it finds the best PoP combination to maximize the HA interval (delay line + rise/set)
    *
@@ -1029,7 +1133,6 @@ public final class ObservabilityService {
     // For all PoP combinations : find the HA interval merged with the HA Rise/set interval
     // list of observability data associated to a pop combination :
     final List<PopObservabilityData> popDataList = new ArrayList<PopObservabilityData>(20);
-
     // Current pop observability :
     PopObservabilityData popData;
 
@@ -1071,7 +1174,7 @@ public final class ObservabilityService {
     double[] popOffsets;
 
     // flag to skip DL evaluation when the target is not observable for at least one DL
-    boolean skip = false;
+    boolean skip;
 
     // For every Pop Combination :
     for (int k = 0; k < sizeCb; k++) {
@@ -1157,35 +1260,30 @@ public final class ObservabilityService {
     final double cosDec = Math.cos(dec);
     final double sinDec = Math.sin(dec);
 
-    // 1 minutes :
-    final double jdStep = (1d / 60d) / 24d;
-
     final double jdMin = jdRiseSet.getMin();
     final double jdMax = jdRiseSet.getMax();
 
     final AzEl azEl = new AzEl();
-    boolean visible = false;
+    boolean visible;
     boolean last = false;
 
     Range range = new Range();
 
-    for (double jd = jdMin; jd < jdMax; jd += jdStep) {
+    for (double jd = jdMin; jd < jdMax; jd += JD_STEP) {
 
       this.sco.getTargetPosition(cosDec, sinDec, jd, azEl);
 
-      // For every beam (station) :
-      // check if there is no horizon obstruction :
       visible = true;
 
+      // For every beam (station) :
+      // check if there is no horizon obstruction :
       for (final HorizonShape profile : profiles) {
         if (!hs.checkProfile(profile, azEl.getAzimuth(), azEl.getElevation())) {
           visible = false;
 
-          if (false) {
-            if (isLogDebug) {
-              logger.debug("Target hidden by horizon profile = {} [{} {}]",
-                      new Object[]{profile.getName(), azEl.getAzimuth(), azEl.getElevation()});
-            }
+          if (isLogDebug) {
+            logger.debug("Target hidden by horizon profile = {} [{} {}]",
+                    new Object[]{profile.getName(), azEl.getAzimuth(), azEl.getElevation()});
           }
 
           break;
@@ -1220,6 +1318,233 @@ public final class ObservabilityService {
   }
 
   /**
+   * Check the wind restriction given the target rise/set range (JD)
+   * @param precDEC precessed DEC in degrees
+   * @param jdRiseSet target rise/set range (JD)
+   * @return list of observable ranges (no obstruction) or null if thread interrupted
+   */
+  private List<Range> checkWindRestriction(final double precDEC, final Range jdRiseSet) {
+    // output :
+    final List<Range> ranges = new ArrayList<Range>(2);
+
+    // prepare cosDec/sinDec:
+    final double dec = Math.toRadians(precDEC);
+    final double cosDec = Math.cos(dec);
+    final double sinDec = Math.sin(dec);
+
+    final double jdMin = jdRiseSet.getMin();
+    final double jdMax = jdRiseSet.getMax();
+
+    final AzEl azEl = new AzEl();
+    boolean visible;
+    boolean last = false;
+
+    Range range = new Range();
+
+    for (double jd = jdMin; jd < jdMax; jd += JD_STEP) {
+
+      this.sco.getTargetPosition(cosDec, sinDec, jd, azEl);
+
+      visible = true;
+
+      // Check pointing restrictions according to the wind direction:
+      if (Range.contains(this.azimuthRanges, azEl.getAzimuth())) {
+
+        if (isLogDebug) {
+          logger.debug("Target pointing discarded by wind direction = {} [{}]", azEl.getAzimuth(), this.windAzimuth);
+        }
+
+        visible = false;
+      }
+
+      // manage intervals :
+      if (visible) {
+        if (!last) {
+          last = true;
+          // start point
+          range.setMin(jd);
+        }
+      } else {
+        if (last) {
+          last = false;
+          // end point
+          range.setMax(jd);
+          ranges.add(range);
+          range = new Range();
+        }
+      }
+    }
+
+    // close last interval if opened :
+    if (range.getMin() > 0d) {
+      range.setMax(jdMax);
+      ranges.add(range);
+    }
+
+    return ranges;
+  }
+
+  /**
+   * Check the moon restriction given the target rise/set range (JD) (FLI threshold and object magnitude)
+   * @param targetName target name
+   * @param precDEC precessed DEC in degrees
+   * @param jdRiseSet target rise/set range (JD)
+   * @return list of observable ranges (no restriction) or null if thread interrupted
+   */
+  private List<Range> checkMoonRestriction(final String targetName, final double precDEC, final Range jdRiseSet) {
+    // Use default separation check to report warning messages:
+    final double moonSeparationThreshold = AsproConstants.DEFAULT_MOON_SEPARATION_CHECK;
+    double threshold = moonSeparationThreshold * 1.05d; // 5% margin
+
+    // output :
+    final List<Range> ranges = new ArrayList<Range>(2);
+
+    // prepare cosDec/sinDec:
+    final double dec = Math.toRadians(precDEC);
+    final double cosDec = Math.cos(dec);
+    final double sinDec = Math.sin(dec);
+
+    final double jdMin = jdRiseSet.getMin();
+    final double jdMax = jdRiseSet.getMax();
+    final double jdMid = 0.5d * (jdMin + jdMax);
+
+    boolean doCheck = false;
+
+    // First check if moon and target are close enough to check for the complete rise/set interval:
+    double separation;
+
+    // check at jd min:
+    separation = this.sco.getMoonSeparation(cosDec, sinDec, jdMin);
+
+    if (separation <= threshold) {
+      doCheck = true;
+    } else {
+      // check at jd mid:
+      separation = this.sco.getMoonSeparation(cosDec, sinDec, jdMid);
+
+      if (separation <= threshold) {
+        doCheck = true;
+      } else {
+        // check at jd max:
+        separation = this.sco.getMoonSeparation(cosDec, sinDec, jdMax);
+
+        if (separation <= threshold) {
+          doCheck = true;
+        }
+      }
+    }
+
+    if (doCheck) {
+      // use exact moon distance threshold:
+      threshold = moonSeparationThreshold;
+
+      double minSeparation = Double.POSITIVE_INFINITY;
+      double minJd = 0d;
+
+      boolean visible;
+      boolean last = false;
+
+      Range range = new Range();
+
+      for (double jd = jdMin; jd < jdMax; jd += JD_STEP) {
+
+        visible = true;
+
+        // ensure moon rise:
+        if (Range.contains(this.moonRiseRanges, jd)) {
+          // check at jd:
+          separation = this.sco.getMoonSeparation(cosDec, sinDec, jd);
+
+          if (separation < minSeparation) {
+            minSeparation = separation;
+            minJd = jdMid;
+          }
+
+          visible = separation > threshold;
+        }
+
+        // manage intervals :
+        if (visible) {
+          if (!last) {
+            last = true;
+            // start point
+            range.setMin(jd);
+          }
+        } else {
+          if (last) {
+            last = false;
+            // end point
+            range.setMax(jd);
+            ranges.add(range);
+            range = new Range();
+          }
+        }
+      }
+
+      // close last interval if opened :
+      if (range.getMin() > 0d) {
+        range.setMax(jdMax);
+        ranges.add(range);
+      }
+
+      // check again threshold:
+      if (minSeparation < threshold) {
+        // add warning:
+        this.addWarning("Moon separation is " + df1.format(minSeparation)
+                + " deg at " + timeFormatter.format(convertJDToDate(minJd))
+                + " for target [" + targetName + "]<br> Please check pointing restrictions.");
+      }
+
+    } else {
+      // moon is too far:
+      ranges.add(jdRiseSet);
+    }
+
+    return ranges;
+  }
+
+  /**
+   * Compute discarded target azimuth ranges by telescope pointing restrictions due to the wind direction
+   * @param windAzimuth wind direction as azimuth in degrees (0 to north)
+   * @param windAzimuthalRestriction angle in degrees forbidden
+   * @return discarded target azimuth ranges or null
+   */
+  private static List<Range> getAzimuthRange(final Double windAzimuth, final Double windAzimuthalRestriction) {
+    if (windAzimuth == null || windAzimuthalRestriction == null || windAzimuthalRestriction < 0d) {
+      return null;
+    }
+    final List<Range> ranges = new ArrayList<Range>(2);
+    double azMin, azMax;
+
+    // discarded pointing azimuth opposite to wind direction:
+    final double discardedAzimuth = (windAzimuth < 180d) ? windAzimuth + 180d : windAzimuth - 180d;
+
+    azMin = discardedAzimuth - windAzimuthalRestriction;
+    azMax = discardedAzimuth + windAzimuthalRestriction;
+
+    if (azMin >= 0d && azMax <= 360d) {
+      ranges.add(new Range(azMin, azMax));
+    } else {
+      if (azMin < 0d) {
+
+        if (azMax < 0d) {
+          azMin += 360d;
+          azMax += 360d;
+
+          ranges.add(new Range(Math.min(azMin, azMax), Math.max(azMin, azMax)));
+        } else {
+          ranges.add(new Range(azMin + 360d, 360d));
+          ranges.add(new Range(0d, azMax));
+        }
+      } else {
+        ranges.add(new Range(azMin, 360d));
+        ranges.add(new Range(0d, azMax - 360d));
+      }
+    }
+    return ranges;
+  }
+
+  /**
    * Use the observation to define the interferometer and instrument configurations and check if the interferometer has PoPs
    */
   private void prepareObservation() {
@@ -1243,12 +1568,31 @@ public final class ObservabilityService {
 
     this.instrument = insConf.getFocalInstrument();
 
+    if (isLogDebug) {
+      logger.debug("interferometer: {}", this.interferometer.getName());
+      logger.debug("instrument: {}", this.instrument.getName());
+    }
+
     // check Pops :
     this.hasPops = !this.interferometer.getPops().isEmpty();
 
     if (isLogDebug) {
-      logger.debug("interferometer: {}", this.interferometer.getName());
-      logger.debug("instrument: {}", this.instrument.getName());
+      logger.debug("hasPops: {}", this.hasPops);
+    }
+
+    // wind restriction only if night limits are enabled :
+    if (this.useNightLimit) {
+      this.windAzimuth = this.observation.getWhen().getWindAzimuth();
+      final Double windAzimuthalRestriction = this.interferometer.getWindPointingRestriction();
+
+      this.azimuthRanges = getAzimuthRange(this.windAzimuth, windAzimuthalRestriction);
+      this.hasWindRestriction = this.azimuthRanges != null;
+
+      if (isLogDebug) {
+        logger.debug("windAzimuth: {}", windAzimuth);
+        logger.debug("windRestriction: {}", windAzimuthalRestriction);
+        logger.debug("azimuthRanges: {}", azimuthRanges);
+      }
     }
   }
 
@@ -1412,7 +1756,7 @@ public final class ObservabilityService {
           b.setDelayLine(selectedDelayLine);
 
         } else {
-          // To be checked 
+          // To be checked
           throw new IllegalStateException("Impossible to associate a delay line to the beam [" + b + "].");
         }
       }
@@ -1651,7 +1995,7 @@ public final class ObservabilityService {
       AstroAlmanacTime stFrom, stTo;
       double jdFrom, jdTo;
       Date from, to;
-      SunType type = null;
+      SunType type;
 
       for (int i = 0; i < nbInterval; i++) {
         stFrom = sunTimes.get(i);
@@ -1817,7 +2161,7 @@ public final class ObservabilityService {
    * Convert a JD value to a Date Object (LST or UTC)
    * within range [jdLst0;jdLst24]]<=>[DateMin;DateMax]
    * @see #useLST
-   * @see #jdToDate(double) 
+   * @see #jdToDate(double)
    * @param jd julian day
    * @return Date Object (LST or UTC)
    */
@@ -1876,39 +2220,14 @@ public final class ObservabilityService {
   }
 
   /**
-   * Define elevation marks on observability ranges for the current target
+   * Define azimuth / elevation marks on observability ranges for the current target
    * @param starObs star observability data
    * @param obsRangeJD observability ranges in JD
    * @param precRA precessed RA in decimal hours
    * @param precDEC precessed DEC in degrees
    */
-  private void findElevations(final StarObservabilityData starObs, final List<Range> obsRangeJD, final double precRA, final double precDEC) {
-    final List<ElevationDate> elevations = starObs.getElevations();
-
-    int elev;
-    double jd;
-    double haElev;
-
-    final int minElevation = (int) Math.round(this.minElev);
-
-    // internal ticks for elevation :
-    for (elev = 20; elev <= 80; elev += 20) {
-      if (elev > minElevation) {
-        haElev = this.sco.getHAForElevation(precDEC, elev);
-
-        if (haElev > 0) {
-          jd = this.sc.convertHAToJD(-haElev, precRA);
-          if (Range.contains(obsRangeJD, jd)) {
-            elevations.add(new ElevationDate(convertJDToDate(jd), elev));
-          }
-
-          jd = this.sc.convertHAToJD(haElev, precRA);
-          if (Range.contains(obsRangeJD, jd)) {
-            elevations.add(new ElevationDate(convertJDToDate(jd), elev));
-          }
-        }
-      }
-    }
+  private void getTargetPosition(final StarObservabilityData starObs, final List<Range> obsRangeJD, final double precRA, final double precDEC) {
+    final List<TargetPositionDate> targetPositions = starObs.getTargetPositions();
 
     // prepare cosDec/sinDec:
     final double dec = Math.toRadians(precDEC);
@@ -1917,43 +2236,73 @@ public final class ObservabilityService {
 
     final AzEl azEl = new AzEl();
 
+    double jd;
+
+    final int minElevation = (int) Math.round(this.minElev);
+
+    // internal ticks for elevation :
+    for (int elevation = 20; elevation <= 80; elevation += 20) {
+      if (elevation > minElevation) {
+        final double haElev = this.sco.getHAForElevation(precDEC, elevation);
+
+        if (haElev > 0d) {
+          jd = this.sc.convertHAToJD(-haElev, precRA);
+          if (Range.contains(obsRangeJD, jd)) {
+            addTargetPosition(targetPositions, cosDec, sinDec, azEl, jd);
+          }
+
+          jd = this.sc.convertHAToJD(haElev, precRA);
+          if (Range.contains(obsRangeJD, jd)) {
+            addTargetPosition(targetPositions, cosDec, sinDec, azEl, jd);
+          }
+        }
+      }
+    }
+
     // tick for transit :
     jd = this.sc.convertHAToJD(0d, precRA);
     if (Range.contains(obsRangeJD, jd)) {
-      this.sco.getTargetPosition(cosDec, sinDec, jd, azEl);
-      elev = (int) Math.round(azEl.getElevation());
-      elevations.add(new ElevationDate(convertJDToDate(jd), elev));
+      addTargetPosition(targetPositions, cosDec, sinDec, azEl, jd);
     }
 
     // ticks for observability intervals (limits) :
     for (Range range : obsRangeJD) {
       jd = range.getMin();
-      this.sco.getTargetPosition(cosDec, sinDec, jd, azEl);
-      elev = (int) Math.round(azEl.getElevation());
-      elevations.add(new ElevationDate(convertJDToDate(jd), elev));
+      addTargetPosition(targetPositions, cosDec, sinDec, azEl, jd);
 
       jd = range.getMax();
-      this.sco.getTargetPosition(cosDec, sinDec, jd, azEl);
-      elev = (int) Math.round(azEl.getElevation());
-      elevations.add(new ElevationDate(convertJDToDate(jd), elev));
+      addTargetPosition(targetPositions, cosDec, sinDec, azEl, jd);
     }
 
     if (isLogDebug) {
       logger.debug("elevations : ");
-      for (ElevationDate elevationDate : elevations) {
+      for (TargetPositionDate elevationDate : targetPositions) {
         logger.debug(elevationDate.toString());
       }
     }
   }
 
   /**
+   * Add target position (azimuth and elevation)
+   * @param targetPositions list of target position to add into
+   * @param cosDec cosinus of target declination
+   * @param sinDec sinus of target declination
+   * @param azEl AzEl instance
+   * @param jd julian date
+   */
+  private void addTargetPosition(final List<TargetPositionDate> targetPositions, final double cosDec, final double sinDec, final AzEl azEl, final double jd) {
+    this.sco.getTargetPosition(cosDec, sinDec, jd, azEl);
+    targetPositions.add(new TargetPositionDate(convertJDToDate(jd), (int) Math.round(azEl.getAzimuth()), (int) Math.round(azEl.getElevation())));
+  }
+
+  /**
    * Convert the given list of HA ranges to date intervals in LST (used by Export OB only)
    *
-   * Note : date intervals that are over (00:00 or 24:00) are merged. 
+   * Note : date intervals that are over (00:00 or 24:00) are merged.
    * For example : 22:00->24:00 and 00:00->01:00 returns 22:00->01:00
    *
    * @see fr.jmmc.aspro.ob.ExportOBVLTI#processDateTime(String, ObservationSetting, Target)
-   * 
+   *
    * @param ranges HA ranges
    * @param precRA precessed target right ascension in decimal hours
    * @return date intervals
