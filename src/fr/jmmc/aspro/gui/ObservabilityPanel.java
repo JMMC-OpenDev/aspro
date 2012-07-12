@@ -15,6 +15,7 @@ import fr.jmmc.aspro.gui.chart.PDFOptions.PageSize;
 import fr.jmmc.aspro.gui.chart.ObservabilityPlotContext;
 import fr.jmmc.aspro.gui.chart.SlidingXYPlotAdapter;
 import fr.jmmc.aspro.gui.chart.XYDiamondAnnotation;
+import fr.jmmc.aspro.gui.chart.XYTickAnnotation;
 import fr.jmmc.aspro.gui.task.AsproTaskRegistry;
 import fr.jmmc.aspro.gui.task.ObservationCollectionTaskSwingWorker;
 import fr.jmmc.aspro.gui.util.ColorPalette;
@@ -24,7 +25,7 @@ import fr.jmmc.aspro.model.observability.ObservabilityData;
 import fr.jmmc.aspro.model.event.ObservationListener;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.event.ObservationEvent;
-import fr.jmmc.aspro.model.observability.ElevationDate;
+import fr.jmmc.aspro.model.observability.TargetPositionDate;
 import fr.jmmc.aspro.model.observability.StarObservabilityData;
 import fr.jmmc.aspro.model.observability.SunTimeInterval;
 import fr.jmmc.aspro.model.observability.SunTimeInterval.SunType;
@@ -245,7 +246,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
     // add listener :
     this.chart.addProgressListener(this);
-    this.chartPanel = ChartUtils.createChartPanel(this.chart);
+    this.chartPanel = ChartUtils.createChartPanel(this.chart, true);
 
     // intercept component resize events:
     this.chartPanel.addComponentListener(new PanelResizeAdapter());
@@ -940,12 +941,30 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
     final XYBarRenderer xyBarRenderer = (XYBarRenderer) this.xyPlot.getRenderer();
 
-    // Prepare chart information used by SlidingXYPlotAdapter :
-    final TaskSeriesCollection taskSeriesCollection = new TaskSeriesCollection();
-    final List<String> targetNames = new ArrayList<String>();
-    final List<Paint> targetColors = new ArrayList<Paint>();
+    final boolean single = chartData.isSingle();
+    final int obsLen = chartData.size();
+
     final Map<Integer, List<XYAnnotation>> annotations;
-    final Map<String, Paint> legendItems = new LinkedHashMap<String, Paint>();
+    // Target list :
+    final List<Target> targets;
+    if (doBaseLineLimits) {
+      // Use generated targets for baseline limits :
+      targets = chartData.getFirstObsData().getTargets();
+      annotations = null;
+    } else {
+      // Use display target to get correct ordering and calibrator associations :
+      targets = displayTargets;
+      annotations = new HashMap<Integer, List<XYAnnotation>>(obsLen * targets.size());
+    }
+
+    // Prepare chart information used by SlidingXYPlotAdapter :
+    final int initialSize = obsLen * targets.size();
+    final TaskSeriesCollection taskSeriesCollection = new TaskSeriesCollection();
+    final List<Target> targetList = new ArrayList<Target>(initialSize);
+    final List<String> symbolList = new ArrayList<String>(initialSize);
+    final List<String> labelList = new ArrayList<String>(initialSize);
+    final List<Paint> colorList = new ArrayList<Paint>(initialSize);
+    final Map<String, Paint> legendItems = new LinkedHashMap<String, Paint>(initialSize);
 
     String name;
     TaskSeries taskSeries;
@@ -962,21 +981,6 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     Map<String, List<StarObservabilityData>> starVisMap;
     // current StarObservabilityData used in loops :
     List<StarObservabilityData> soList;
-
-    final boolean single = chartData.isSingle();
-    final int obsLen = chartData.size();
-
-    // Target list :
-    final List<Target> targets;
-    if (doBaseLineLimits) {
-      // Use generated targets for baseline limits :
-      targets = chartData.getFirstObsData().getTargets();
-      annotations = null;
-    } else {
-      // Use display target to get correct ordering and calibrator associations :
-      targets = displayTargets;
-      annotations = new HashMap<Integer, List<XYAnnotation>>(obsLen * targets.size());
-    }
 
     // Iterate over objects targets :
     for (Target target : targets) {
@@ -995,12 +999,16 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
           for (StarObservabilityData so : soList) {
             if (doBaseLineLimits) {
               name = so.getTargetName();
+              // no tooltip:
+              targetList.add(null);
             } else {
               // display name :
               name = targetUserInfos.getTargetDisplayName(target);
+
+              targetList.add(target);
             }
 
-            targetNames.add(name);
+            symbolList.add(name);
 
             // use the target name as the name of the serie :
             taskSeries = new TaskSeries(name);
@@ -1043,9 +1051,15 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
             } else {
               paint = palette.getColor(colorIndex);
             }
-            targetColors.add(paint);
+            colorList.add(paint);
 
-            if (!doBaseLineLimits) {
+            if (doBaseLineLimits) {
+              // no tooltip:
+              labelList.add(null);
+            } else {
+              // add legend to tooltip:
+              labelList.add(legendLabel);
+
               // define legend :
               legendItems.put(legendLabel, paint);
 
@@ -1058,9 +1072,18 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
               if (so.getType() == StarObservabilityData.TYPE_STAR) {
                 addAnnotation(annotations, pos, new XYDiamondAnnotation(n, so.getTransitDate().getTime()));
 
-                for (ElevationDate ed : so.getElevations()) {
+                XYTickAnnotation a;
+                for (TargetPositionDate ed : so.getTargetPositions()) {
                   if (checkDateAxisLimits(ed.getDate(), min, max)) {
-                    addAnnotation(annotations, pos, ChartUtils.createXYTickAnnotation(Integer.toString(ed.getElevation()), n, ed.getDate().getTime(), HALF_PI));
+                    a = ChartUtils.createXYTickAnnotation(Integer.toString(ed.getAzimuth()), n, ed.getDate().getTime(), -HALF_PI);
+                    a.setTextAnchor(TextAnchor.BOTTOM_CENTER);
+                    a.setRotationAnchor(TextAnchor.BOTTOM_CENTER);
+                    addAnnotation(annotations, pos, a);
+
+                    a = ChartUtils.createXYTickAnnotation(Integer.toString(ed.getElevation()), n, ed.getDate().getTime(), HALF_PI);
+                    a.setTextAnchor(TextAnchor.TOP_CENTER);
+                    a.setRotationAnchor(TextAnchor.TOP_CENTER);
+                    addAnnotation(annotations, pos, a);
                   }
                 }
               }
@@ -1086,7 +1109,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     }
 
     // update plot data :
-    this.slidingXYPlotAdapter.setData(taskSeriesCollection, targetNames, targetColors, annotations);
+    this.slidingXYPlotAdapter.setData(taskSeriesCollection, symbolList, colorList, annotations, targetList, labelList);
 
     // force a plot refresh:
     this.updateSliderProperties(true);

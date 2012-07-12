@@ -3,9 +3,12 @@
  ******************************************************************************/
 package fr.jmmc.aspro.gui.chart;
 
+import fr.jmmc.aspro.model.oi.Target;
 import java.awt.Color;
 import java.awt.Paint;
+import java.text.DateFormat;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,18 +16,22 @@ import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.annotations.XYAnnotation;
 import org.jfree.chart.annotations.XYTextAnnotation;
+import org.jfree.chart.labels.XYToolTipGenerator;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYBarRenderer;
 import org.jfree.data.Range;
+import org.jfree.data.gantt.TaskSeries;
 import org.jfree.data.gantt.TaskSeriesCollection;
 import org.jfree.data.gantt.XYTaskDataset;
+import org.jfree.data.time.TimePeriod;
+import org.jfree.data.xy.XYDataset;
 import org.jfree.ui.Layer;
 
 /**
  * This class is a custom XYPlot adapter to provide both a sliding dataset and annotations in sync.
  * @author bourgesl
  */
-public final class SlidingXYPlotAdapter {
+public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
 
   /** Class logger */
   private static final Logger logger = LoggerFactory.getLogger(SlidingXYPlotAdapter.class.getName());
@@ -53,10 +60,16 @@ public final class SlidingXYPlotAdapter {
   private List<Paint> colors = null;
   /** annotations */
   private Map<Integer, List<XYAnnotation>> annotations = null;
+  /** target list for tooltip generation */
+  private List<Target> targetList = null;
+  /** data labels (legend) */
+  private List<String> labels = null;
   /** last used start position for the subset */
   private int lastStart = -1;
   /** last used end position for the subset */
   private int lastEnd = -1;
+  /** 24h date formatter like in france */
+  private final DateFormat timeFormatter = DateFormat.getTimeInstance(DateFormat.SHORT, Locale.FRANCE);
 
   /**
    * Constructor
@@ -69,6 +82,7 @@ public final class SlidingXYPlotAdapter {
     this.chart = chart;
     this.xyPlot = plot;
     this.renderer = (XYBarRenderer) plot.getRenderer();
+    this.renderer.setBaseToolTipGenerator(this);
     this.maxViewItems = maxElements;
     this.aJMMC = aJMMC;
   }
@@ -79,14 +93,19 @@ public final class SlidingXYPlotAdapter {
    * @param symbols data symbols
    * @param colors data colors
    * @param annotations map of annotations keyed by position
+   * @param targetList target list for tooltip generation
+   * @param labels data labels (legend)
    */
   public void setData(final TaskSeriesCollection collection, final List<String> symbols, final List<Paint> colors,
-          final Map<Integer, List<XYAnnotation>> annotations) {
+          final Map<Integer, List<XYAnnotation>> annotations,
+          final List<Target> targetList, final List<String> labels) {
     this.size = symbols.size();
     this.collection = collection;
     this.symbols = symbols;
     this.colors = colors;
     this.annotations = annotations;
+    this.targetList = targetList;
+    this.labels = labels;
   }
 
   /**
@@ -207,8 +226,10 @@ public final class SlidingXYPlotAdapter {
     }
 
     // adjust bar width :
-    if (newSize > 6) {
-      barWidth = 0.75d;
+    if (newSize > 15) {
+      barWidth = 0.8d;
+    } else if (newSize > 6) {
+      barWidth = 0.6d;
     } else if (newSize > 1) {
       barWidth = 0.5d;
     } else {
@@ -272,7 +293,7 @@ public final class SlidingXYPlotAdapter {
         renderContext.setTipRadius(barWidth * 0.5d);
 
         // set max tip height = margin between bars (half tick + text) :
-        renderContext.setMaxTipHeight(1d - barWidth);
+        renderContext.setMaxTipHeight(0.5d * (1d - barWidth));
 
 
         // Redefine the x-position of annotations (corresponding to visible targets) :
@@ -319,5 +340,43 @@ public final class SlidingXYPlotAdapter {
       this.xyPlot.setNotify(savedNotify);
       this.chart.setNotify(savedNotify);
     }
+  }
+
+  /**
+   * Generates the tooltip text for the specified item.
+   *
+   * @param dataset  the dataset (<code>null</code> not permitted).
+   * @param series  the series index (zero-based).
+   * @param item  the item index (zero-based).
+   *
+   * @return The tooltip text (possibly <code>null</code>).
+   */
+  public String generateToolTip(final XYDataset dataset, final int series, final int item) {
+    // note: series corresponds to the target, item to its observability ranges
+    if (targetList != null && !targetList.isEmpty()) {
+      final int index = this.lastStart + series;
+
+      final Target target = targetList.get(index);
+
+      if (target != null) {
+        logger.debug("target= {}", target);
+
+        final String label = labels.get(index);
+
+        final StringBuilder sb = new StringBuilder(32);
+        sb.append(label).append(" Observability: ");
+
+        final TaskSeries taskSeries = this.collection.getSeries(index);
+
+        final TimePeriod period = taskSeries.get(item).getDuration();
+
+        sb.append(this.timeFormatter.format(period.getStart()));
+        sb.append(" - ");
+        sb.append(this.timeFormatter.format(period.getEnd()));
+
+        return target.toHtml(sb.toString(), false);
+      }
+    }
+    return null;
   }
 }
