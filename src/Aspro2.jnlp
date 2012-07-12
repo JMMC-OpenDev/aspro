@@ -19,7 +19,7 @@
     <all-permissions/>
   </security>
   <resources>
-    <j2se version="1.5+" initial-heap-size="256m" max-heap-size="512m"/>    
+    <j2se version="1.5+" initial-heap-size="256m" max-heap-size="512m"/>
 
     <!-- Application module first (main class) -->
     <jar href="jar/aspro.jar" />
@@ -32,14 +32,18 @@
     <!-- JMMC libs -->
     <extension href="../JmcsLibs/JmcsLibs.jnlp"/>
     <extension href="../JmalLibs/JmalLibs.jnlp"/>
-    
+
     <!-- JFreeChart -->
     <jar href="@SHARED@/jfreechart-1.0.13.jar" />
     <!-- jfreechart requires jcommon -->
     <jar href="@SHARED@/jcommon-1.0.16.jar" />
-    
+
     <!-- PDF -->
     <jar href="@SHARED@/iText-2.1.5.jar" />
+
+    <!-- SteelSeries Compass -->
+    <jar href="@SHARED@/SteelSeries-3.9.26.jar" />
+    <jar href="@SHARED@/trident.jar" />
 
   </resources>
   <application-desc main-class="fr.jmmc.aspro.AsproGui"/>
