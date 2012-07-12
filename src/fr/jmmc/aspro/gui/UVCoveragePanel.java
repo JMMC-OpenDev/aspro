@@ -1626,7 +1626,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
                     // Compute only image using existing complex visibility data :
                     uvMapData = UserModelService.computeUVMap(fitsImage,
                             uvRect, this.imageMode, this.imageSize, this.colorModel, this.colorScale, noiseService,
-                            this.currentUVMapData.getVisData());
+                            null, null, this.currentUVMapData.getVisData());
 
                   } else {
                     logger.debug("Computing model image ...");
@@ -1999,27 +1999,33 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
           // compute an approximated uv map from the reference UV Map :
           if (computeSubUVMap(uvMapData, uvRect)) {
 
+            // visibility reference extrema :
+            final Float refMin = uvMapData.getMin();
+            final Float refMax = uvMapData.getMax();
+
+            // model image options :
+            final ImageMode imageMode = uvMapData.getImageMode();
+            final int imageSize = uvMapData.getImageSize();
+            final IndexColorModel colorModel = uvMapData.getColorModel();
+            final ColorScale colorScale = uvMapData.getColorScale();
+            final VisNoiseService noiseService = uvMapData.getNoiseService();
+
+            // update the status bar :
+            StatusBar.show(MSG_COMPUTING_MAP);
+
             // Compute a correct uv map for analytical models ONLY:
             if (target.hasAnalyticalModel()) {
-
-              // visibility reference extrema :
-              final Float refMin = uvMapData.getMin();
-              final Float refMax = uvMapData.getMax();
-
-              // model image options :
-              final ImageMode imageMode = uvMapData.getImageMode();
-              final int imageSize = uvMapData.getImageSize();
-              final IndexColorModel colorModel = uvMapData.getColorModel();
-              final ColorScale colorScale = uvMapData.getColorScale();
-              final VisNoiseService noiseService = uvMapData.getNoiseService();
-
-              // update the status bar :
-              StatusBar.show(MSG_COMPUTING_MAP);
 
               // Create uv map task worker :
               // Cancel other tasks and execute this new task :
 
               new UVMapSwingWorker(this, target.getModels(), uvRect, refMin, refMax,
+                      imageMode, imageSize, colorModel, colorScale, noiseService).executeTask();
+
+            } else if (false) {
+              // TODO: support custom rectangular area ie extract area in centered FFT
+              // User model
+              new UVMapSwingWorker(this, target.getUserModel().getFitsImage(), uvRect, refMin, refMax,
                       imageMode, imageSize, colorModel, colorScale, noiseService).executeTask();
             }
           } else {
@@ -2044,6 +2050,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     private final UVCoveragePanel uvPanel;
     /** list of models to use */
     private final List<Model> models;
+    /** user-defined  model */
+    private final FitsImage fitsImage;
     /** UV frequency area in rad-1 */
     private final Rectangle2D.Double uvRect;
     /** minimum reference double value used only for sub images */
@@ -2084,6 +2092,41 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       super(AsproTaskRegistry.TASK_UV_MAP);
       this.uvPanel = uvPanel;
       this.models = models;
+      this.fitsImage = null;
+      this.uvRect = uvRect;
+      this.refMin = refMin;
+      this.refMax = refMax;
+      this.imageMode = imageMode;
+      this.imageSize = imageSize;
+      this.colorModel = colorModel;
+      this.colorScale = colorScale;
+      this.noiseService = noiseService;
+    }
+
+    /**
+     * Hidden constructor
+     *
+     * @param uvPanel observability panel
+     * @param fitsImage fits image to compute user-defined model
+     * @param uvRect expected UV frequency area in rad-1
+     * @param refMin minimum reference double value used only for sub images
+     * @param refMax maximum reference double value used only for sub images
+     * @param imageMode image mode (amplitude or phase)
+     * @param imageSize expected number of pixels for both width and height of the generated image
+     * @param colorModel color model to use
+     * @param colorScale color scaling method
+     * @param noiseService optional Complex visibility Noise Service ready to use to compute noise on model images
+     */
+    private UVMapSwingWorker(final UVCoveragePanel uvPanel, final FitsImage fitsImage,
+            final Rectangle2D.Double uvRect,
+            final Float refMin, final Float refMax,
+            final ImageMode imageMode, final int imageSize,
+            final IndexColorModel colorModel, final ColorScale colorScale,
+            final VisNoiseService noiseService) {
+      super(AsproTaskRegistry.TASK_UV_MAP);
+      this.uvPanel = uvPanel;
+      this.models = null;
+      this.fitsImage = fitsImage;
       this.uvRect = uvRect;
       this.refMin = refMin;
       this.refMax = refMax;
@@ -2103,14 +2146,24 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     public UVMapData computeInBackground() {
       logger.debug("Computing model image ...");
       try {
-        // compute anyway the uv map data :
-        return ModelUVMapService.computeUVMap(this.models, this.uvRect, this.refMin, this.refMax, null,
-                this.imageMode, this.imageSize, this.colorModel, this.colorScale, this.noiseService);
+        if (this.models != null) {
+          // compute anyway the uv map data :
+          return ModelUVMapService.computeUVMap(this.models, this.uvRect, this.refMin, this.refMax, null,
+                  this.imageMode, this.imageSize, this.colorModel, this.colorScale, this.noiseService);
+
+        } else if (fitsImage != null) {
+          // User Model:
+
+          // Compute Target Model for the UV coverage limits ONCE :
+          // Note: throws IllegalArgumentException if the fits image is invalid:
+          return UserModelService.computeUVMap(this.fitsImage, this.uvRect, this.imageMode,
+                  this.imageSize, this.colorModel, this.colorScale, noiseService, this.refMin, this.refMax, null);
+        }
 
       } catch (InterruptedJobException ije) {
         logger.debug("Computing model image interrupted: ", ije);
-        return null;
       }
+      return null;
     }
 
     /**
