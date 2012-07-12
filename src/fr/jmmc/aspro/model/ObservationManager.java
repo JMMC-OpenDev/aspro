@@ -229,7 +229,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
    * Load an observation from the given file
    * @param file file to load
    * @return optional information message or null
-   * 
+   *
    * @throws IOException if an I/O exception occured
    * @throws IllegalStateException if an invalid reference was found (interferometer / instrument / instrument configuration) or an unexpected exception occured
    * @throws IllegalArgumentException if the file is not an Observation
@@ -267,7 +267,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
   /**
    * Load an observation from the given reader
    * Used by SearchCalSampMessageHandler
-   * 
+   *
    * @param reader any reader
    * @return loaded observation
    *
@@ -296,9 +296,9 @@ public final class ObservationManager extends BaseOIManager implements Observer 
 
   /**
    * Change the current observation with the given one
-   * and fire load and change events 
+   * and fire load and change events
    * @param observation observation to use
-   * 
+   *
    * @throws IllegalStateException if an invalid reference was found (interferometer / instrument / instrument configuration)
    */
   public void resetAndChangeObservation(final ObservationSetting observation) throws IllegalStateException {
@@ -311,7 +311,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
 
   /**
    * Change the current observation with the given one
-   * and fire load and change events 
+   * and fire load and change events
    * @param observation observation to use
    */
   private void changeObservation(final ObservationSetting observation) {
@@ -628,7 +628,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
   /**
    * Set the night restriction flag
    * Used by BasicObservationForm.updateObservation()
-   * 
+   *
    * @param useNightLimits flag to enable/disable the night restriction (observability)
    * @return true if the value changed
    */
@@ -665,11 +665,31 @@ public final class ObservationManager extends BaseOIManager implements Observer 
     return changed;
   }
 
+  /**
+   * Set the wind azimuth (deg)
+   * Used by BasicObservationForm.updateObservation()
+   *
+   * @param windAzimuth wind azimuth value
+   * @return true if the value changed
+   */
+  public boolean setWindAzimuth(final Double windAzimuth) {
+    final WhenSetting when = getMainObservation().getWhen();
+
+    final boolean changed = isChanged(when.getWindAzimuth(), windAzimuth);
+    if (changed) {
+      if (logger.isTraceEnabled()) {
+        logger.trace("setWindAzimuth: {}", windAzimuth);
+      }
+      when.setWindAzimuth(windAzimuth);
+    }
+    return changed;
+  }
+
   // --- INTERFEROMETER --------------------------------------------------------
   /**
    * Set the minimum elevation (deg)
    * Used by BasicObservationForm.updateObservation()
-   *
+
    * @param minElev minimum elevation value
    * @return true if the value changed
    */
@@ -924,7 +944,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
 
   /**
    * Add a target given its unique name and
-   * fires a target change and an observation change event 
+   * fires a target change and an observation change event
    * Note : it does not check anything on coordinates (cross matching)
    * @param name target name
    * @param star object to create the target object
@@ -939,8 +959,8 @@ public final class ObservationManager extends BaseOIManager implements Observer 
         t.setName(name);
 
         /*
-        Strings = {DEC=+43 49 23.910, RA=05 01 58.1341, OTYPELIST=**,Al*,SB*,*,Em*,V*,IR,UV, SPECTRALTYPES=A8Iab:}
-        Doubles = {PROPERMOTION_RA=0.18, PARALLAX=1.6, DEC_d=43.8233083, FLUX_J=1.88, PROPERMOTION_DEC=-2.31, FLUX_K=1.533, PARALLAX_err=1.16, FLUX_V=3.039, FLUX_H=1.702, RA_d=75.4922254}
+         Strings = {DEC=+43 49 23.910, RA=05 01 58.1341, OTYPELIST=**,Al*,SB*,*,Em*,V*,IR,UV, SPECTRALTYPES=A8Iab:}
+         Doubles = {PROPERMOTION_RA=0.18, PARALLAX=1.6, DEC_d=43.8233083, FLUX_J=1.88, PROPERMOTION_DEC=-2.31, FLUX_K=1.533, PARALLAX_err=1.16, FLUX_V=3.039, FLUX_H=1.702, RA_d=75.4922254}
          */
 
         // coordinates (deg) :
@@ -987,7 +1007,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
 
   /**
    * Remove the given science target from the target list and
-   * fires a target change and an observation change event 
+   * fires a target change and an observation change event
    * @param target science target to remove
    */
   public void removeTarget(final Target target) {
@@ -1007,7 +1027,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
 
   /**
    * Remove the given calibrator target from the target list
-   * and fires a target change and an observation change event 
+   * and fires a target change and an observation change event
    * @param calibrator calibrator target to remove
    */
   public void removeCalibrator(final Target calibrator) {
@@ -1125,7 +1145,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
 
   /**
    * Update the list of targets using the given list of targets and target user informations
-   * (different instances) and fires a target change and an observation change event 
+   * (different instances) and fires a target change and an observation change event
    * @param newTargets new target list
    * @param newTargetUserInfos new target user informations
    */
@@ -1242,7 +1262,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
   /**
    * Defines the OIFits structure (SHARED) for later reuse (Visiblity Explorer)
    * Used by UVCoveragePanel.UVCoverageSwingWorker.refreshUI()
-   * 
+   *
    * @param oiFitsFile OIFits structure
    */
   public void setOIFitsFile(final OIFitsFile oiFitsFile) {
@@ -1416,7 +1436,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
             * observation.getInstrumentConfiguration().getInstrumentConfiguration().getFocalInstrument().getWaveLengthMin();
 
     // Adjust the user uv Max = max base line / minimum wave length
-    // note : use the minimum wave length of the instrument to 
+    // note : use the minimum wave length of the instrument to
     // - make all uv segment visible
     // - avoid to much model computations (when the instrument mode changes)
     uvMax /= instrumentMinWaveLength;

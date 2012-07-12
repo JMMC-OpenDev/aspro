@@ -84,7 +84,7 @@ public final class ConfigurationManager extends BaseOIManager {
    * - load AsproOIConfigurations.xml to get configuration file paths
    * - load those files (InterferometerSetting)
    * - update interferometer description and configuration maps
-   * 
+   *
    * @throws IllegalStateException if the configuration files are not found or IO failure
    * @throws IllegalArgumentException if the load configuration failed
    */
@@ -99,7 +99,7 @@ public final class ConfigurationManager extends BaseOIManager {
    * - load AsproOIConfigurations.xml to get configuration file paths
    * - load those files (InterferometerSetting)
    * - update interferometer description and configuration maps
-   * 
+   *
    * @param configuration configuration holder
    * @throws IllegalStateException if the configuration files are not found or IO failure
    * @throws IllegalArgumentException if the load configuration failed
@@ -716,6 +716,19 @@ public final class ConfigurationManager extends BaseOIManager {
       return !id.getPops().isEmpty();
     }
     return false;
+  }
+
+  /**
+   * Return if the given interferometer has wind pointing restriction
+   * @param interferometerName name of the interferometer
+   * @return the wind pointing restriction in degrees or null
+   */
+  public Double getWindPointingRestriction(final String interferometerName) {
+    final InterferometerDescription id = getInterferometerDescription(interferometerName);
+    if (id != null) {
+      return id.getWindPointingRestriction();
+    }
+    return null;
   }
 
   /* InterferometerConfiguration */
