@@ -268,7 +268,7 @@ public final class Vis2Panel extends javax.swing.JPanel implements ChartProgress
 
     this.chart = ChartUtils.createChart(null, this.combinedXYPlot, false);
     this.chart.addProgressListener(this);
-    this.chartPanel = ChartUtils.createChartPanel(this.chart);
+    this.chartPanel = ChartUtils.createChartPanel(this.chart, false);
 
     // zoom options :
     this.chartPanel.setDomainZoomable(AsproConstants.ENABLE_ZOOM);

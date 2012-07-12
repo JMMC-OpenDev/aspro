@@ -141,9 +141,10 @@ public final class ChartUtils {
   /**
    * Return new chart panel using special draw widths to avoid scaling effects
    * @param chart chart to use
+   * @param tooltips  a flag indicating whether or not tooltips should be enabled for the chart.
    * @return chart panel
    */
-  public static ChartPanel createChartPanel(final JFreeChart chart) {
+  public static ChartPanel createChartPanel(final JFreeChart chart, final boolean tooltips) {
     final ChartPanel panel = new EnhancedChartPanel(chart,
             DEFAULT_WIDTH, DEFAULT_HEIGHT, /* prefered size */
             DEFAULT_MINIMUM_DRAW_WIDTH, DEFAULT_MINIMUM_DRAW_HEIGHT, /* minimum size before scaling */
@@ -154,10 +155,12 @@ public final class ChartUtils {
             true, /* save */
             true, /* print */
             false, /* zoom */
-            false /* tooltips */);
+            tooltips);
 
-    // Disable Storage for the chart entities:
-    panel.getChartRenderingInfo().setEntityCollection(null);
+    if (!tooltips) {
+      // Disable Storage for the chart entities:
+      panel.getChartRenderingInfo().setEntityCollection(null);
+    }
     return panel;
   }
 

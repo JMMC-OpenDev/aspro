@@ -13,13 +13,11 @@ import java.util.Vector;
 public interface AsproConstants {
 
   /** Warning Logger */
-    /** jmmc status log */
-    public final static String ASPRO_WARNING_LOG = "fr.jmmc.aspro.warning";
-  
+  /** jmmc status log */
+  public final static String ASPRO_WARNING_LOG = "fr.jmmc.aspro.warning";
   /* JMMC applications */
   /** SearchCal samp.name keyword */
   public final static String SEARCHCAL_SAMP_NAME = "SearchCal";
-  
   /** chart : enables the zoom in / out */
   public final static boolean ENABLE_ZOOM = true;
 
@@ -46,6 +44,8 @@ public interface AsproConstants {
   public static final double DEFAULT_OBSERVATION_DURATION = 300d;
   /** default value for checkbox Night Limit = true */
   public static final boolean DEFAULT_USE_NIGHT_LIMITS = true;
+  /** default moon separation check = 20 degrees */
+  public static final double DEFAULT_MOON_SEPARATION_CHECK = 20d;
   /** default image LUT */
   public final static String DEFAULT_IMAGE_LUT = "aspro";
   /** default image size */
@@ -59,8 +59,7 @@ public interface AsproConstants {
             Integer.valueOf(768),
             Integer.valueOf(1024),
             Integer.valueOf(1536),
-            Integer.valueOf(2048),
-          }));
+            Integer.valueOf(2048),}));
   /** no value for combo boxes */
   public static final String NONE = "None";
 
