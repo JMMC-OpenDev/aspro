@@ -1,5 +1,6 @@
 package edu.dartmouth;
 
+import fr.jmmc.jmcs.gui.util.SwingUtils;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Container;
@@ -37,10 +38,11 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
-import java.util.Scanner;
+import javax.swing.AbstractButton;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -65,13 +67,14 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableColumn;
 import javax.swing.text.html.HTMLEditorKit;
+import javax.xml.datatype.XMLGregorianCalendar;
 
 /* JSkyCalc.java -- copyright 2007, John Thorstensen, Dartmouth College. */
 /** TERMS OF USE -- Anyone is free to use this software for any purpose, and to
-modify it for their own purposes, provided that credit is given to the author
-in a prominent place.  For the present program that means that the green
-title and author banner appearing on the main window must not be removed,
-and may not be altered without premission of the author. */
+ modify it for their own purposes, provided that credit is given to the author
+ in a prominent place.  For the present program that means that the green
+ title and author banner appearing on the main window must not be removed,
+ and may not be altered without premission of the author. */
 
 /* JSkyCalc is not used by ASPRO 2 */
 public final class JSkyCalc {
@@ -96,25 +99,91 @@ public final class JSkyCalc {
 
     JSkyCalcWindow MainWin = new JSkyCalcWindow();
   }
+  // LBO: JSkyCalc API integration
+  /** allow Quit action */
+  public static boolean ALLOW_QUIT = true;
+  /** allow Site Window */
+  public static boolean ALLOW_SITE_WINDOW = true;
+  /** shared JSkyCalc window instance */
+  private static JSkyCalcWindow jSkyCalcWin = null;
+
+  /**
+   * Show the JSkyCalc window for the given site and target (given its RA/DEC) at the given calendar date
+   * @param site site to use
+   * @param ra target RA as string
+   * @param dec target DEC as string
+   * @param cal calendar date
+   */
+  public static void showJSkyCalc(final Site site, final String ra, final String dec, final XMLGregorianCalendar cal) {
+    if (jSkyCalcWin == null) {
+      ALLOW_QUIT = false;
+      ALLOW_SITE_WINDOW = false;
+      jSkyCalcWin = new JSkyCalcWindow();
+    }
+
+    jSkyCalcWin.obsnamefield.setText(site.name);
+    jSkyCalcWin.latitudefield.setText(site.lat.roundedDecString(0, " "));
+    jSkyCalcWin.longitudefield.setText(site.longit.roundedLongitString(1, " ", false));
+
+    jSkyCalcWin.stdzfield.setText(Double.toString(site.stdz));
+    jSkyCalcWin.use_dstfield.setText(Integer.toString(site.use_dst));
+
+    // ignore zonenamefield
+    jSkyCalcWin.elevseafield.setText(Double.toString(site.elevsea));
+    jSkyCalcWin.elevhorizfield.setText(Double.toString(site.elevhoriz));
+
+    // choose user-defined site:
+    final Enumeration<AbstractButton> siteButtons = jSkyCalcWin.SiteButtons.getElements();
+    for (; siteButtons.hasMoreElements();) {
+      AbstractButton b = siteButtons.nextElement();
+      if ("x".equals(b.getActionCommand())) {
+        b.doClick();
+      }
+    }
+    jSkyCalcWin.synchSite();
+
+    // target:
+    jSkyCalcWin.RAfield.setText(ra.replace(':', ' ').trim());
+    jSkyCalcWin.decfield.setText(dec.replace(':', ' ').trim());
+    jSkyCalcWin.equinoxfield.setText("2000");
+    jSkyCalcWin.synchOutput();
+
+    // date:
+    // choose Local date:
+    final Enumeration<AbstractButton> dateButtons = jSkyCalcWin.UTbuttons.getElements();
+    for (; dateButtons.hasMoreElements();) {
+      AbstractButton b = dateButtons.nextElement();
+      if ("Local".equals(b.getActionCommand())) {
+        b.doClick();
+      }
+    }
+
+    jSkyCalcWin.datefield.setText(cal.getYear() + " " + cal.getMonth() + " " + cal.getDay());
+    jSkyCalcWin.timefield.setText("20:00");
+    jSkyCalcWin.setToDate();
+
+    // show anyway:
+    jSkyCalcWin.frame.setVisible(true);
+  }
 }
 
 /** This ENORMOUS class includes the entire user interface -- subwindows are
-implemented as subclasses. */
+ implemented as subclasses. */
 class JSkyCalcWindow extends JComponent {
 
-
+  final JFrame frame;
   /*
-  final UIManager.LookAndFeelInfo [] landfs  = UIManager.getInstalledLookAndFeels();
-  final String className;
-  className = landfs[2].getClassName();
-  try  {
-  UIManager.setLookAndFeel(className);
-  } catch catch (Exception e) { System.out.println(e); }
+   final UIManager.LookAndFeelInfo [] landfs  = UIManager.getInstalledLookAndFeels();
+   final String className;
+   className = landfs[2].getClassName();
+   try  {
+   UIManager.setLookAndFeel(className);
+   } catch catch (Exception e) { System.out.println(e); }
    */
 
   /* I also tried to add a MouseListener to this, but it was ignored because the
-  SkyDisplay subclass pre-empts it.  Mouse events are always dispatched to the
-  "deepest" component in the hierarchy.  */
+   SkyDisplay subclass pre-empts it.  Mouse events are always dispatched to the
+   "deepest" component in the hierarchy.  */
   WhenWhere w;
   InstantInTime i;
   Site s;
@@ -213,15 +282,17 @@ class JSkyCalcWindow extends JComponent {
 
   JSkyCalcWindow() {
 
-    final JFrame frame = new JFrame("JSkyCalc");
+    frame = new JFrame("JSkyCalc");
 
     /* Put up site panel and grab the first site ... */
 
     siteframe = new SiteWindow();
-    siteframevisible = true;
-    siteframe.setVisible(siteframevisible);
+    if (JSkyCalc.ALLOW_SITE_WINDOW) {
+      siteframevisible = true;
+      siteframe.setVisible(siteframevisible);
+    }
 
-//      String [] initialsite = {"Kitt Peak [MDM Obs.]",  "7.44111",  "31.9533",  
+//      String [] initialsite = {"Kitt Peak [MDM Obs.]",  "7.44111",  "31.9533",
 //           "7.",  "0",  "Mountain",  "M",  "1925",  "700."};
 
     s = siteframe.firstSite();
@@ -242,8 +313,8 @@ class JSkyCalcWindow extends JComponent {
     /* ****************** DO NOT REMOVE THIS BANNER *********************************
      ******************************************************************************
 
-    I am distributing this COPYRIGHTED code freely with the condition that this
-    credit banner will not be removed.  */
+     I am distributing this COPYRIGHTED code freely with the condition that this
+     credit banner will not be removed.  */
     JPanel bannerpanel = new JPanel();
     JLabel bannerlabel = new JLabel("JSkyCalc v1.1.1: John Thorstensen, Dartmouth College");
     Color dartmouthgreen = new Color(0, 105, 62);  // Official Dartmouth Green
@@ -462,7 +533,6 @@ class JSkyCalcWindow extends JComponent {
     buttonpan.add(Localradiobutton = new JRadioButton("Local", true));
     Localradiobutton.setActionCommand("Local");
     Localradiobutton.addActionListener(new ActionListener() {    // so it toggles time ...
-
       public void actionPerformed(ActionEvent e) {
         setToJD();
       }
@@ -472,7 +542,6 @@ class JSkyCalcWindow extends JComponent {
     buttonpan.add(UTradiobutton = new JRadioButton("UT", false));
     UTradiobutton.setActionCommand("UT");
     UTradiobutton.addActionListener(new ActionListener() {    // so it toggles time ...
-
       public void actionPerformed(ActionEvent e) {
         setToJD();
       }
@@ -767,7 +836,7 @@ class JSkyCalcWindow extends JComponent {
     //     final JWindow SkyWin = new JWindow(); -- can't move it with the mouse.
     SkyWin.setSize(skywinxpix + 15, skywinypix + 35);
     // add a bit to window size to account for JFrame borders.
-//      SkyWin.setSize(skywinxpix+15, skywinypix+75);  
+//      SkyWin.setSize(skywinxpix+15, skywinypix+75);
     // and more to account for the top border in weblaunch ...
     SkyWin.setLocation(50, 300);
     SkyWin.add(SkyDisp);
@@ -806,7 +875,6 @@ class JSkyCalcWindow extends JComponent {
 
     JButton synchbutton = new JButton("Refresh output");
     synchbutton.addActionListener(new ActionListener() {
-
       public void actionPerformed(ActionEvent e) {
         setToDate();
       }
@@ -815,7 +883,6 @@ class JSkyCalcWindow extends JComponent {
 
     JButton nowbutton = new JButton("Set to Now");
     nowbutton.addActionListener(new ActionListener() {
-
       public void actionPerformed(ActionEvent e) {
         SetToNow();
       }
@@ -824,7 +891,6 @@ class JSkyCalcWindow extends JComponent {
 
     JButton forwardbutton = new JButton("Step Forward");
     forwardbutton.addActionListener(new ActionListener() {
-
       public void actionPerformed(ActionEvent e) {
         advanceTime();
       }
@@ -833,7 +899,6 @@ class JSkyCalcWindow extends JComponent {
 
     JButton backbutton = new JButton("Step Back");
     backbutton.addActionListener(new ActionListener() {
-
       public void actionPerformed(ActionEvent e) {
         advanceTime(false);
       }
@@ -842,7 +907,6 @@ class JSkyCalcWindow extends JComponent {
 
     final JButton updatebutton = new JButton("Auto Update");
     updatebutton.addActionListener(new ActionListener() {
-
       public void actionPerformed(ActionEvent e) {
         if (!autoupdaterunning) {
           sleepfield.setBackground(runningcolor);  // draw attention
@@ -864,7 +928,6 @@ class JSkyCalcWindow extends JComponent {
 
     final JButton stepbutton = new JButton("Auto Step");
     stepbutton.addActionListener(new ActionListener() {
-
       public void actionPerformed(ActionEvent e) {
         if (!autosteprunning) {
           sleepfield.setBackground(runningcolor);  // draw attention
@@ -887,33 +950,33 @@ class JSkyCalcWindow extends JComponent {
     controlbuttonpan.add(stepbutton);
 
 //  -- I can't figure out how to alter the UT/local radiobuttons from within
-//     the program.  
+//     the program.
 //      JButton UTLocalbutton = new JButton("UT <-> Local");
 //      UTLocalbutton.addActionListener(new ActionListener() {
 //         public void actionPerformed(ActionEvent e) {
-//            SwapUTLocal();           
+//            SwapUTLocal();
 //         }
 //      });
 //      controlbuttonpan.add(UTLocalbutton);
 
-    JButton sitebutton = new JButton("Site\n Menu");
-    sitebutton.addActionListener(new ActionListener() {
-
-      public void actionPerformed(ActionEvent e) {
-        if (siteframevisible) {  // there's got to be a better way ..
-          siteframe.setVisible(false);
-          siteframevisible = false;
-        } else {  // site frame is invisible
-          siteframe.setVisible(true);
-          siteframevisible = true;
+    if (JSkyCalc.ALLOW_SITE_WINDOW) {
+      JButton sitebutton = new JButton("Site\n Menu");
+      sitebutton.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          if (siteframevisible) {  // there's got to be a better way ..
+            siteframe.setVisible(false);
+            siteframevisible = false;
+          } else {  // site frame is invisible
+            siteframe.setVisible(true);
+            siteframevisible = true;
+          }
         }
-      }
-    });
-    controlbuttonpan.add(sitebutton);
+      });
+      controlbuttonpan.add(sitebutton);
+    }
 
     JButton planetbutton = new JButton("Planet Table");
     planetbutton.addActionListener(new ActionListener() {
-
       public void actionPerformed(ActionEvent e) {
         if (planetframevisible) {  // there's got to be a better way ..
           PlWin.setVisible(false);
@@ -929,7 +992,6 @@ class JSkyCalcWindow extends JComponent {
 
     JButton hourlybutton = new JButton("Hourly Circumstances");
     hourlybutton.addActionListener(new ActionListener() {
-
       public void actionPerformed(ActionEvent e) {
         if (hourlyframevisible) {  // there's got to be a better way ..
           HrWin.setVisible(false);
@@ -946,7 +1008,6 @@ class JSkyCalcWindow extends JComponent {
 
     JButton nightlybutton = new JButton("Nightly Almanac");
     nightlybutton.addActionListener(new ActionListener() {
-
       public void actionPerformed(ActionEvent e) {
         if (nightlyframevisible) {  // there's got to be a better way ..
           NgWin.setVisible(false);
@@ -963,7 +1024,6 @@ class JSkyCalcWindow extends JComponent {
 
     JButton seasonalshow = new JButton("Seasonal Observability");
     seasonalshow.addActionListener(new ActionListener() {
-
       public void actionPerformed(ActionEvent e) {
         if (seasonframevisible) {
           SeasonWin.DisplayUpdate();
@@ -979,7 +1039,6 @@ class JSkyCalcWindow extends JComponent {
 
     JButton objselshow = new JButton("Object Lists ...");
     objselshow.addActionListener(new ActionListener() {
-
       public void actionPerformed(ActionEvent e) {
         objselwinvisible = true;
         ObjSelWin.setVisible(true);
@@ -989,7 +1048,6 @@ class JSkyCalcWindow extends JComponent {
 
     JButton skydisplayshow = new JButton("Sky Display");
     skydisplayshow.addActionListener(new ActionListener() {
-
       public void actionPerformed(ActionEvent e) {
         if (skydisplayvisible) {
           skydisplayvisible = false;
@@ -1005,7 +1063,6 @@ class JSkyCalcWindow extends JComponent {
 
     JButton altwinshow = new JButton("Alt. Coordinates");
     altwinshow.addActionListener(new ActionListener() {
-
       public void actionPerformed(ActionEvent e) {
         if (altcoowinvisible) {
           altcoowinvisible = false;
@@ -1021,7 +1078,6 @@ class JSkyCalcWindow extends JComponent {
 
     JButton airmassshow = new JButton("Airmass Graphs");
     airmassshow.addActionListener(new ActionListener() {
-
       public void actionPerformed(ActionEvent e) {
         if (!airmasswindowvisible) {
           airmasswindowvisible = true;
@@ -1038,33 +1094,33 @@ class JSkyCalcWindow extends JComponent {
 
     controlbuttonpan.add(airmassshow);
 
-    JButton stopper = new JButton("Quit");
-    stopper.addActionListener(new ActionListener() {
-
-      public void actionPerformed(ActionEvent e) {
-        /* If you hate the confirm-exit, start killing lines here.... */
-        int result = JOptionPane.showConfirmDialog(frame,
-                "Really quit JSkyCalc?");
-        switch (result) {
-          case JOptionPane.YES_OPTION:
-            System.exit(1);      // protected exit call ...
-            break;
-          case JOptionPane.NO_OPTION:
-          case JOptionPane.CANCEL_OPTION:
-          case JOptionPane.CLOSED_OPTION:
-            break;
+    if (JSkyCalc.ALLOW_QUIT) {
+      JButton stopper = new JButton("Quit");
+      stopper.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          /* If you hate the confirm-exit, start killing lines here.... */
+          int result = JOptionPane.showConfirmDialog(frame,
+                  "Really quit JSkyCalc?");
+          switch (result) {
+            case JOptionPane.YES_OPTION:
+              System.exit(1);      // protected exit call ...
+              break;
+            case JOptionPane.NO_OPTION:
+            case JOptionPane.CANCEL_OPTION:
+            case JOptionPane.CLOSED_OPTION:
+              break;
+          }
+          /* ... and stop killing them here, then uncomment the line below. */
+          // System.exit(1);    // ... naked exit call.
         }
-        /* ... and stop killing them here, then uncomment the line below. */
-        // System.exit(1);    // ... naked exit call.
-      }
-    });
-    stopper.setBackground(sitecolor);
-    controlbuttonpan.add(stopper);
+      });
+      stopper.setBackground(sitecolor);
+      controlbuttonpan.add(stopper);
+    }
 
     JButton helpwinshow = new JButton("Help");
     helpwinshow.setBackground(runningcolor);
     helpwinshow.addActionListener(new ActionListener() {
-
       public void actionPerformed(ActionEvent e) {
         if (helpwindowvisible) {
           helpwindowvisible = false;
@@ -1090,7 +1146,7 @@ class JSkyCalcWindow extends JComponent {
 //               airmasswindowvisible = false;
 //               AirWin.setVisible(false);
 //               AirmSelWin.setVisible(false);
-//            } 
+//            }
 //         }
 //      });
 //
@@ -1101,7 +1157,6 @@ class JSkyCalcWindow extends JComponent {
     /* action listeners for the text fields ... */
 
     objnamefield.addActionListener(new ActionListener() {
-
       public void actionPerformed(ActionEvent e) {
         try {
           String sel = objnamefield.getText();
@@ -1119,49 +1174,42 @@ class JSkyCalcWindow extends JComponent {
     });
 
     RAfield.addActionListener(new ActionListener() {
-
       public void actionPerformed(ActionEvent e) {
         setToDate();
       }
     });
 
     decfield.addActionListener(new ActionListener() {
-
       public void actionPerformed(ActionEvent e) {
         setToDate();
       }
     });
 
     equinoxfield.addActionListener(new ActionListener() {
-
       public void actionPerformed(ActionEvent e) {
         setToDate();
       }
     });
 
     datefield.addActionListener(new ActionListener() {
-
       public void actionPerformed(ActionEvent e) {
         setToDate();
       }
     });
 
     timefield.addActionListener(new ActionListener() {
-
       public void actionPerformed(ActionEvent e) {
         setToDate();
       }
     });
 
     JDfield.addActionListener(new ActionListener() {
-
       public void actionPerformed(ActionEvent e) {
         setToJD();
       }
     });
 
     timestepfield.addActionListener(new ActionListener() {
-
       public void actionPerformed(ActionEvent e) {
         advanceTime();
       }
@@ -1171,56 +1219,48 @@ class JSkyCalcWindow extends JComponent {
     // to parallel behavior of the site menu.
 
     obsnamefield.addActionListener(new ActionListener() {
-
       public void actionPerformed(ActionEvent e) {
         setToJD();
       }
     });
 
     longitudefield.addActionListener(new ActionListener() {
-
       public void actionPerformed(ActionEvent e) {
         setToJD();
       }
     });
 
     latitudefield.addActionListener(new ActionListener() {
-
       public void actionPerformed(ActionEvent e) {
         setToJD();
       }
     });
 
     stdzfield.addActionListener(new ActionListener() {
-
       public void actionPerformed(ActionEvent e) {
         setToJD();
       }
     });
 
     use_dstfield.addActionListener(new ActionListener() {
-
       public void actionPerformed(ActionEvent e) {
         setToJD();
       }
     });
 
     zonenamefield.addActionListener(new ActionListener() {
-
       public void actionPerformed(ActionEvent e) {
         setToJD();
       }
     });
 
     elevseafield.addActionListener(new ActionListener() {
-
       public void actionPerformed(ActionEvent e) {
         setToJD();
       }
     });
 
     elevhorizfield.addActionListener(new ActionListener() {
-
       public void actionPerformed(ActionEvent e) {
         setToJD();
       }
@@ -1233,7 +1273,11 @@ class JSkyCalcWindow extends JComponent {
     outer.add(controlbuttonpan);
     outer.setBackground(panelcolor);
 
-    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    // default is hide on close:
+    if (JSkyCalc.ALLOW_QUIT) {
+      frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    }
+
     frame.setSize(540, 590);
 //      frame.setSize(560,620);
     frame.setLocation(30, 30);
@@ -1278,7 +1322,7 @@ class JSkyCalcWindow extends JComponent {
     o.computeBary(p);
     checkPlanets();
 
-//      if(hourlyframevisible) {   // an expensive operation 
+//      if(hourlyframevisible) {   // an expensive operation
 //         HrWin.Update();
 //      }
 
@@ -1437,7 +1481,7 @@ class JSkyCalcWindow extends JComponent {
   }
 
   Color MoonWarningColor(double altmoon,
-                         double altitude, double altsun, double moonobj, double moonlight) {
+          double altitude, double altsun, double moonobj, double moonlight) {
     if (altmoon < 0. | altitude < 0.) {
       return outputcolor;
     }
@@ -1565,13 +1609,13 @@ class JSkyCalcWindow extends JComponent {
 
 //   void SwapUTLocal() {
 //      boolean is_ut;
-// 
+//
 //      // Get site and UT options
 //      String SiteString = SiteButtons.getSelection().getActionCommand();
 //      w.changeSite(SiteString);
-// 
+//
 //      System.out.printf("swapping ... ");
-//   
+//
 //      String UTstring = UTbuttons.getSelection().getActionCommand();
 //      if (UTstring.equals("UT")) {
 //          System.out.printf("UT was selected ... \n");
@@ -1584,7 +1628,7 @@ class JSkyCalcWindow extends JComponent {
 //    //     UTbuttons.setSelectedJRadioButton(Localradiobutton,true);
 //          is_ut = false;
 //      }
-//      else { 
+//      else {
 //          System.out.printf("Local was selected ... \n");
 //     //     UTbuttons.setSelected("UT",true);
 //          UTradiobutton.setSelected(true);
@@ -1723,7 +1767,6 @@ class JSkyCalcWindow extends JComponent {
 
       JButton hider = new JButton("Hide Planet Table");
       hider.addActionListener(new ActionListener() {
-
         public void actionPerformed(ActionEvent e) {
           setVisible(false);
           planetframevisible = false;
@@ -1733,7 +1776,6 @@ class JSkyCalcWindow extends JComponent {
 
       JButton printer = new JButton("Print Planet Table");
       printer.addActionListener(new ActionListener() {
-
         public void actionPerformed(ActionEvent e) {
           Print();  // JTable has this automated utility to do this ...
         }
@@ -1793,7 +1835,7 @@ class JSkyCalcWindow extends JComponent {
       int j = 0;
 
       headings = new String[]{"Moon", "Evening Date", "HA.eve", "airm.eve", "HA.ctr", "airm.ctr",
-                              "HA.morn", "airm.morn", "hrs<3", "hrs<2", "hrs<1.5"};
+        "HA.morn", "airm.morn", "hrs<3", "hrs<2", "hrs<1.5"};
       JPanel container = new JPanel();
       season.Update(o);
 
@@ -1812,8 +1854,8 @@ class JSkyCalcWindow extends JComponent {
 //                PlanetDispData[j][5] = String.format(Locale.ENGLISH, "%6.2f",PlanObjAng[i]);
 //                j = j + 1;
 //             }
-//         }        
-//     
+//         }
+//
       seasontable = new JTable(season.tabledata, headings);
 
       // complicated rigamarole to set column widths
@@ -1835,7 +1877,6 @@ class JSkyCalcWindow extends JComponent {
 
       JButton hider = new JButton("Hide Observability Table");
       hider.addActionListener(new ActionListener() {
-
         public void actionPerformed(ActionEvent e) {
           setVisible(false);
           seasonframevisible = false;
@@ -1845,7 +1886,6 @@ class JSkyCalcWindow extends JComponent {
 
       JButton printer = new JButton("Print Observability Table");
       printer.addActionListener(new ActionListener() {
-
         public void actionPerformed(ActionEvent e) {
           Print();  // JTable has this automated utility to do this ...
         }
@@ -1885,10 +1925,10 @@ class JSkyCalcWindow extends JComponent {
   class HourlyWindow extends JFrame {
 
     /** I'd hoped to use the JTable class for this, but the java developers
-    in their infinite wisdom do not provide any handy way of changing the color
-    of an individual cell.  So I will go with an array of entry boxes, which
-    should be much easier to handle (though getting it to print will involve
-    more labor). */
+     in their infinite wisdom do not provide any handy way of changing the color
+     of an individual cell.  So I will go with an array of entry boxes, which
+     should be much easier to handle (though getting it to print will involve
+     more labor). */
     JTextField[][] hrfield;
 
     HourlyWindow() {
@@ -1934,7 +1974,6 @@ class JSkyCalcWindow extends JComponent {
 
       JButton hider = new JButton("Hide Hourly Table");
       hider.addActionListener(new ActionListener() {
-
         public void actionPerformed(ActionEvent e) {
           setVisible(false);
           hourlyframevisible = false;
@@ -1943,7 +1982,6 @@ class JSkyCalcWindow extends JComponent {
 
       JButton printer = new JButton("Dump to 'jskycalc.out'");
       printer.addActionListener(new ActionListener() {
-
         public void actionPerformed(ActionEvent e) {
           DumpToFile();
         }
@@ -1983,12 +2021,12 @@ class JSkyCalcWindow extends JComponent {
       endhr = (int) (24. * (jdtemp - jdint));
 
       /*        System.out.printf("\nTabulation start and end:");
-      otmp.w.changeWhen((double) jdint + (double) starthr / 24.);
-      otmp.w.when.localDate.quickprint();
-      System.out.printf("\n end:");
-      otmp.w.changeWhen((double) jdint + (double) endhr / 24.);
-      otmp.w.when.localDate.quickprint();
-      System.out.printf("\n"); */
+       otmp.w.changeWhen((double) jdint + (double) starthr / 24.);
+       otmp.w.when.localDate.quickprint();
+       System.out.printf("\n end:");
+       otmp.w.changeWhen((double) jdint + (double) endhr / 24.);
+       otmp.w.when.localDate.quickprint();
+       System.out.printf("\n"); */
 
       i = starthr;
       j = 0;   // start with first row of table
@@ -2071,7 +2109,7 @@ class JSkyCalcWindow extends JComponent {
     JTextField[] phenfield;
     JLabel[] phenlabel;
     String[] labeltext = {"Sunset", "Twilight Ends", "LST Eve. Twi.", "Night Center", "Twilight Begins",
-                          "LST Morn. Twi.", "Sunrise", "Moonrise", "Moonset"};
+      "LST Morn. Twi.", "Sunrise", "Moonrise", "Moonset"};
 
     NightlyWindow() {
       int i;
@@ -2096,7 +2134,6 @@ class JSkyCalcWindow extends JComponent {
 
       JButton hider = new JButton("Hide Nightly Almanac");
       hider.addActionListener(new ActionListener() {
-
         public void actionPerformed(ActionEvent e) {
           setVisible(false);
           nightlyframevisible = false;
@@ -2158,7 +2195,6 @@ class JSkyCalcWindow extends JComponent {
 
       JButton objselbutton = new JButton("Load Object List");
       objselbutton.addActionListener(new ActionListener() {
-
         public void actionPerformed(ActionEvent e) {
           LoadAstrObjs();
           SkyDisp.repaint();   // cause them to appear on display.
@@ -2168,7 +2204,6 @@ class JSkyCalcWindow extends JComponent {
 
       JButton byra = new JButton("Sort by RA");
       byra.addActionListener(new ActionListener() {
-
         public void actionPerformed(ActionEvent e) {
           selectorList.setListData(RASelectors);
         }
@@ -2177,7 +2212,6 @@ class JSkyCalcWindow extends JComponent {
 
       JButton byname = new JButton("Alphabetical Order");
       byname.addActionListener(new ActionListener() {
-
         public void actionPerformed(ActionEvent e) {
           selectorList.setListData(NameSelectors);
           //   for(int i = 0; i < NameSelectors.length; i++)
@@ -2188,7 +2222,6 @@ class JSkyCalcWindow extends JComponent {
 
       JButton clearbutton = new JButton("Clear list");
       clearbutton.addActionListener(new ActionListener() {
-
         public void actionPerformed(ActionEvent e) {
           ClearAstrObjs();
           SkyDisp.repaint();
@@ -2200,7 +2233,6 @@ class JSkyCalcWindow extends JComponent {
 
         JButton plotairmasses = new JButton("Plot airmasses");
         plotairmasses.addActionListener(new ActionListener() {
-
           public void actionPerformed(ActionEvent e) {
             airmassPlotSelections = selectorList.getSelectedValues();
             System.out.printf("%d objects selected\n", airmassPlotSelections.length);
@@ -2211,7 +2243,6 @@ class JSkyCalcWindow extends JComponent {
 
         JButton deselector = new JButton("Deselect all");
         deselector.addActionListener(new ActionListener() {
-
           public void actionPerformed(ActionEvent e) {
             selectorList.clearSelection();
           }
@@ -2221,7 +2252,6 @@ class JSkyCalcWindow extends JComponent {
 
       JButton hider = new JButton("Hide Window");
       hider.addActionListener(new ActionListener() {
-
         public void actionPerformed(ActionEvent e) {
           setVisible(false);
           objselwinvisible = false;
@@ -2245,17 +2275,16 @@ class JSkyCalcWindow extends JComponent {
 
       if (is_single) {
         selectorList.addListSelectionListener(new ListSelectionListener() {
-
           public void valueChanged(ListSelectionEvent l) {
             /* Changing the list fires a selection event that can
-            generate bad data.  Catch the resulting exceptions. */
+             generate bad data.  Catch the resulting exceptions. */
             try {
               String sel = (String) selectorList.getSelectedValues()[0];
               /*                    System.out.printf("%d %s %s %s\n",i,
-              Selectors[i],
-              presenterKey.get(Selectors[i]).name,
-              presenterKey.get(Selectors[i]).c.checkstring()
-              ); */
+               Selectors[i],
+               presenterKey.get(Selectors[i]).name,
+               presenterKey.get(Selectors[i]).c.checkstring()
+               ); */
               RAfield.setText(
                       presenterKey.get(sel).c.alpha.roundedRAString(3, " "));
               decfield.setText(
@@ -2279,7 +2308,8 @@ class JSkyCalcWindow extends JComponent {
 
     FileGrabber ff = new FileGrabber();
 
-    if (ff == null) {
+    // LBO: fixed NPE
+    if (ff == null || ff.br == null) {
       System.out.printf("No objects loaded.\n");
       return;
     }
@@ -2375,7 +2405,7 @@ class JSkyCalcWindow extends JComponent {
 
   void SelObjByPos(Celest incel) {
     /* get input from the graphical display, or wherever, and get the nearest
-    object on the list within a tolerance.  Precession is ignored. */
+     object on the list within a tolerance.  Precession is ignored. */
     double tolerance = 0.1;  // radians
     double decband = 6.;     // degrees
     double decin;
@@ -2412,20 +2442,20 @@ class JSkyCalcWindow extends JComponent {
 //
 //      littleHints() {
 //         area = new JTextArea();
-//         area.append("Hints: ");   
-//         area.append("- White fields are for input data\n");   
-//         area.append("- Output refreshes with 'Enter' in input\n");   
-//         area.append("- Control buttons are in bottom panel \n");   
-//         area.append("- Some pop extra windows (e.g. hourly)\n");   
-//         area.append("- To enter your own site params, you must first\n");   
-//         area.append("  select 'Allow User Input' on site menu. \n");   
-//         area.append("- Sky Display has several useful keyboard  \n");   
+//         area.append("Hints: ");
+//         area.append("- White fields are for input data\n");
+//         area.append("- Output refreshes with 'Enter' in input\n");
+//         area.append("- Control buttons are in bottom panel \n");
+//         area.append("- Some pop extra windows (e.g. hourly)\n");
+//         area.append("- To enter your own site params, you must first\n");
+//         area.append("  select 'Allow User Input' on site menu. \n");
+//         area.append("- Sky Display has several useful keyboard  \n");
 //         area.append("  and mouse controls - menu on right button.\n");
 //         area.setBackground(brightyellow);
 //         this.setSize(275,150);
 //         this.add(area);
 //      }
-//     
+//
 //      void showme(int x, int y) {
 //         this.setLocation(x, y);
 //         this.setVisible(true);
@@ -2459,7 +2489,6 @@ class JSkyCalcWindow extends JComponent {
       sitepan.add(radioButton = new JRadioButton("Enable User Input", false), constr);
       radioButton.setActionCommand("x");  // we'll wait before refreshing.
       radioButton.addActionListener(new ActionListener() {
-
         public void actionPerformed(ActionEvent e) {
           ColorUserInput(true);  // change site to input color
         }
@@ -2476,7 +2505,6 @@ class JSkyCalcWindow extends JComponent {
         sitepan.add(radioButton = new JRadioButton(name, true), constr);
         radioButton.setActionCommand(name);
         radioButton.addActionListener(new ActionListener() {  // ugly to do it to all...
-
           public void actionPerformed(ActionEvent e) {
             setToJD();
             ColorUserInput(false);
@@ -2490,7 +2518,6 @@ class JSkyCalcWindow extends JComponent {
       constr.gridy = iy;
       JButton sitehider = new JButton("Hide Site Chooser");
       sitehider.addActionListener(new ActionListener() {
-
         public void actionPerformed(ActionEvent e) {
           setVisible(false);
           siteframevisible = false;
@@ -2575,7 +2602,7 @@ class JSkyCalcWindow extends JComponent {
 
     void ColorUserInput(boolean allowed) {
       /* sets the background color in all the site param boxes according to whether
-      user input is allowed or not. */
+       user input is allowed or not. */
       if (allowed) {
         obsnamefield.setBackground(inputcolor);
         longitudefield.setBackground(inputcolor);
@@ -2679,7 +2706,6 @@ class JSkyCalcWindow extends JComponent {
       galactlatitfield.setBackground(inputcolor);
 
       galactlongitfield.addActionListener(new ActionListener() {
-
         public void actionPerformed(ActionEvent e) {
           double galactlongit = Double.parseDouble(galactlongitfield.getText());
           double galactlatit = Double.parseDouble(galactlatitfield.getText());
@@ -2694,7 +2720,6 @@ class JSkyCalcWindow extends JComponent {
       });
 
       galactlatitfield.addActionListener(new ActionListener() {
-
         public void actionPerformed(ActionEvent e) {
           double galactlongit = Double.parseDouble(galactlongitfield.getText());
           double galactlatit = Double.parseDouble(galactlatitfield.getText());
@@ -2832,7 +2857,6 @@ class JSkyCalcWindow extends JComponent {
 
       JButton hideme = new JButton("Hide Help Text");
       hideme.addActionListener(new ActionListener() {
-
         public void actionPerformed(ActionEvent e) {
           setVisible(false);
           helpwindowvisible = false;
@@ -2850,7 +2874,7 @@ class JSkyCalcWindow extends JComponent {
 
   class SkyDisplay extends JComponent
           implements MouseMotionListener,
-                     KeyListener, MouseListener {
+          KeyListener, MouseListener {
 
     int xpixint, ypixint;       // number of pixels in x and y directions, int
     double xpix, ypix, aspect;  // number of pixels in x and y directions, double
@@ -2892,9 +2916,9 @@ class JSkyCalcWindow extends JComponent {
       pixperunitfull = pixperunit;
       zoomedby = 1.;
       /*
-      System.out.printf("xpix %f ypix %f aspect %f\n",xpix,ypix,aspect);
-      System.out.printf("halfwidthx %f halfwidthy %f\n",halfwidthx, halfwidthy);
-      System.out.printf("pixperunit %f\n",pixperunit);
+       System.out.printf("xpix %f ypix %f aspect %f\n",xpix,ypix,aspect);
+       System.out.printf("halfwidthx %f halfwidthy %f\n",halfwidthx, halfwidthy);
+       System.out.printf("pixperunit %f\n",pixperunit);
        */
 
       Graphics g;
@@ -3013,7 +3037,7 @@ class JSkyCalcWindow extends JComponent {
 
     void SelBrightByPos(Celest incel) {
       /* get input from the graphical display, or wherever, and get the nearest
-      bright star on the list within a tolerance.  Precession is ignored. */
+       bright star on the list within a tolerance.  Precession is ignored. */
       double tolerance = 0.1;  // radians
       double decband = 6.;     // degrees
       double decin;
@@ -3621,7 +3645,7 @@ class JSkyCalcWindow extends JComponent {
 
       double pa = o.w.cusppa + (Const.PI) / 2.;   // cusppa already in rad.
       double[][] turnmoon = {{Math.cos(pa), Math.sin(pa)},
-                             {-1. * Math.sin(pa), Math.cos(pa)}};
+        {-1. * Math.sin(pa), Math.cos(pa)}};
       for (j = 0; j < nseg; j++) {
         for (i = 0; i < 2; i++) {
           limbxypr[i][j] = 0.;
@@ -3673,11 +3697,11 @@ class JSkyCalcWindow extends JComponent {
       termpath.moveTo((float) xypix[0], (float) xypix[1]);
 
 //          for(i = 1; i < 11; i++) {
-//              
+//
 //             xy = SkyProject(ralimb[i],declimb[i],coslat,sinlat);
 //             xypix = xytopix(xy[0],xy[1]);
 //             limbpath.lineTo((float) xypix[0], (float) xypix[1]);
-//   
+//
 //             xy = SkyProject(raterm[i],decterm[i],coslat,sinlat);
 //             xypix = xytopix(xy[0],xy[1]);
 //             termpath.lineTo((float) xypix[0], (float) xypix[1]);
@@ -4194,7 +4218,7 @@ class JSkyCalcWindow extends JComponent {
 //            retvals[0] = xpix * (x - xlobord) / (xhibord - xlobord);
 //            retvals[1] = ypix * (1. - (y - ylobord) / (yhibord - ylobord));
 //            return(retvals);
-//       }    
+//       }
     void puttext(double x, double y, String text, Font font, FontMetrics metrics) {
       double[] xy;
       // write text centered left-to-right on user coords x and y.
@@ -4341,9 +4365,9 @@ class JSkyCalcWindow extends JComponent {
 
       // rotate to appropriate position angle
 
-//          double pa = w.cusppa + (Const.PI)/2. + 
+//          double pa = w.cusppa + (Const.PI)/2. +
       //                    omoon.parallactic / Const.DEG_IN_RADIAN;
-//          double pa = w.cusppa - 
+//          double pa = w.cusppa -
       //                   omoon.parallactic / Const.DEG_IN_RADIAN;
       double pa = omoon.w.cusppa - (Const.PI) / 2.;
       // cusppa already in rad.
@@ -4351,7 +4375,7 @@ class JSkyCalcWindow extends JComponent {
         pa += Const.PI;  // flip in S.
       }
       double[][] turnmoon = {{Math.cos(pa), Math.sin(pa)},
-                             {-1. * Math.sin(pa), Math.cos(pa)}};
+        {-1. * Math.sin(pa), Math.cos(pa)}};
       for (j = 0; j < nseg; j++) {
         for (i = 0; i < 2; i++) {
           limbxypr[i][j] = 0.;
