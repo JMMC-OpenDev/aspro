@@ -26,6 +26,10 @@ public final class SpectralBandUtils {
    */
   public static SpectralBand findBand(final Band band) {
     switch (band) {
+      case U:
+        // band U not supported return V
+      case B:
+        // band B not supported return V
       case V:
         return SpectralBand.V;
       case R:
@@ -39,8 +43,14 @@ public final class SpectralBandUtils {
         return SpectralBand.H;
       case K:
         return SpectralBand.K;
+      case L:
+        // band L not supported return N
+      case M:
+        // band M not supported return N
       case N:
         return SpectralBand.N;
+      case Q:
+        // band Q not supported return N
       default:
         return null;
     }
