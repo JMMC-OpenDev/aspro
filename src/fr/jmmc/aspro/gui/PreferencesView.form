@@ -1,4 +1,4 @@
-<?xml version="1.1" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8" ?>
 
 <Form version="1.5" maxVersion="1.7" type="org.netbeans.modules.form.forminfo.JFrameFormInfo">
   <NonVisualComponents>
@@ -203,7 +203,7 @@
       <SubComponents>
         <Component class="javax.swing.JLabel" name="jLabelPositionStyle">
           <Properties>
-            <Property name="text" type="java.lang.String" value="&lt;html&gt;Default style to &lt;br/&gt;edit model positions&lt;/htmL&gt;"/>
+            <Property name="text" type="java.lang.String" value="&lt;html&gt;Default style to&lt;br&gt;edit model positions&lt;/html&gt;"/>
           </Properties>
           <Constraints>
             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
