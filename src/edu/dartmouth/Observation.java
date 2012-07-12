@@ -36,7 +36,7 @@ public final class Observation implements Cloneable {
     current = c.precessed(w.when.julianEpoch());
 
     ha.setHA(w.sidereal - current.alpha.value);
-    
+
     altit(current.delta.value, ha.value, w.where.lat.value, altazpar);
 
     altitude = altazpar[0];
@@ -53,18 +53,22 @@ public final class Observation implements Cloneable {
    * @param cosDec cosinus of target declination
    * @param sinDec sinus of target declination
    */
-  void computeSkyFast(final double cosLat, final double sinLat, 
+  void computeSkyFast(final double cosLat, final double sinLat,
                       final double cosDec, final double sinDec) {
     // assumes WhenWhere w has been updated.
+    // do not precess current coordinates as JD does not change much during night:
+//  current = c.precessed(w.when.julianEpoch());
 
     ha.setHA(w.sidereal - current.alpha.value);
-    
+
     altAz(cosLat, sinLat, cosDec, sinDec, ha.value, altazpar);
 
     altitude = altazpar[0];
     azimuth = altazpar[1];
-    // parallactic angle is undefined
+
+    // parallactic angle and airmass are undefined:
     parallactic = 0d;
+    airmass = 0d;
   }
 
   // Split off the sun, moon, barycenter etc. to save time -- they're
@@ -83,20 +87,39 @@ public final class Observation implements Cloneable {
     }
   }
 
+  /**
+   * LAURENT : custom computeMoonSeparation implementation (optimized)
+   */
+  void computeMoonSeparation() {
+    // assumes WhenWhere w has been updated.
+    // do not precess current coordinates as JD does not change much during night:
+//  current = c.precessed(w.when.julianEpoch());
+
+    //System.out.printf("computeSunMoon %s (%f)%n",
+    //       current.alpha.RoundedRAString(2," "),current.equinox);
+    // compute only the moon position:
+    w.updateLocalMoon();
+
+    moonobj = Const.DEG_IN_RADIAN * Spherical.subtend(w.moon.topopos, current);
+
+    // moonlight is undefined
+    moonlight = 0d;
+  }
+
   void computeSunMoon() {
     current = c.precessed(w.when.julianEpoch());
     //System.out.printf("computeSunMoon %s (%f)%n",
     //       current.alpha.RoundedRAString(2," "),current.equinox);
     w.computeSunMoon();   // the non-object related parts are all done here
 
-    // sunobj = Const.DEG_IN_RADIAN * Spherical.subtend(w.sun.topopos, current);
+//    sunobj = Const.DEG_IN_RADIAN * Spherical.subtend(w.sun.topopos, current);
     moonobj = Const.DEG_IN_RADIAN * Spherical.subtend(w.moon.topopos, current);
 
     moonlight = SkyIllum.lunskybright(w.sunmoon, moonobj, 0.172d, w.altmoon, altitude, w.moon.topopos.distance);
   }
 
-  /** 
-   * Return altitude (deg), azimuth (deg), parallactic angle (deg) 
+  /**
+   * Return altitude (deg), azimuth (deg), parallactic angle (deg)
    * @param decIn declination (deg)
    * @param hrangleIn hour angle (decimal hours)
    * @param latIn latitude (deg)
@@ -152,7 +175,7 @@ public final class Observation implements Cloneable {
     retval[2] = parang;
   }
 
-  /** 
+  /**
    * Return altitude (deg) and azimuth (deg) only
    * @param cosLat cosinus of observatory latitude
    * @param sinLat sinus of observatory latitude
@@ -161,11 +184,11 @@ public final class Observation implements Cloneable {
    * @param ha hour angle (decimal hours)
    * @param retval double[3] array = altitude (deg), azimuth (deg)
    */
-  static void altAz(final double cosLat, final double sinLat, 
-                    final double cosDec, final double sinDec, 
+  static void altAz(final double cosLat, final double sinLat,
+                    final double cosDec, final double sinDec,
                     final double ha,
                     final double[] retval) {
-    
+
     final double haRad = ha / Const.HRS_IN_RADIAN;
 
     final double cosha = Math.cos(haRad);
@@ -189,7 +212,7 @@ public final class Observation implements Cloneable {
     retval[1] = az;
     retval[2] = 0d;
   }
-  
+
   void computeBary(final Planets p) {
     w.baryxyzvel(p, w.sun);  /* find the position and velocity of the
     observing site wrt the solar system barycent */

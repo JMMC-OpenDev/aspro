@@ -20,6 +20,8 @@ public final class AstroSkyCalcObservation {
   private static final Logger logger = LoggerFactory.getLogger(AstroSkyCalcObservation.class.getName());
 
   /* members */
+  /** cached log debug enabled */
+  private final boolean isLogDebug = logger.isDebugEnabled();
   /** site location (package visibility) */
   private Site site;
   /** cosinus of site latitude */
@@ -66,11 +68,10 @@ public final class AstroSkyCalcObservation {
    * @return double[] containing precessed ra (dec hours) and dec (deg) for the given jd date
    */
   public double[] defineTarget(final double jd, final double ra, final double dec) {
-
     // RA (decimal hours), DEC (degrees)
     final Celest target = new Celest(AngleUtils.deg2hours(ra), dec, AsproConstants.EPOCH_J2000);
 
-    if (logger.isDebugEnabled()) {
+    if (isLogDebug) {
       logger.debug("Target [RA/DEC/EPOCH]: {} {}",
               target.alpha.roundedRAString(3, ":"),
               target.delta.roundedDecString(3, ":"));
@@ -83,7 +84,7 @@ public final class AstroSkyCalcObservation {
     // it has a minor impact on coordinates (few arcsec per year):
     this.observation = new Observation(ww, target);
 
-    if (logger.isDebugEnabled()) {
+    if (isLogDebug) {
       logger.debug("Target [RA/DEC/EPOCH] precessed: {} {}",
               this.observation.current.alpha.roundedRAString(3, ":"),
               this.observation.current.delta.roundedDecString(3, ":"));
@@ -100,26 +101,56 @@ public final class AstroSkyCalcObservation {
    * @param position target position: azimuth (0 to north) / elevation in degrees
    */
   public void getTargetPosition(final double cosDec, final double sinDec, final double jd, final AzEl position) {
+    getTargetPosition(cosDec, sinDec, jd);
+    position.setAzEl(this.observation.azimuth, this.observation.altitude);
+  }
+
+  /**
+   * Compute the current target position (azimuth / elevation) in degrees
+   * @param cosDec cosinus of target declination
+   * @param sinDec sinus of target declination
+   * @param jd julian date
+   */
+  private void getTargetPosition(final double cosDec, final double sinDec, final double jd) {
     this.observation.w.changeWhen(jd);
 
     // avoid computing precessed coordinates:
     this.observation.computeSkyFast(this.cosLat, this.sinLat, cosDec, sinDec);
+  }
 
-    // TODO : check angular distance between target and moon :
-    if (false) {
-      // Check moon distance :
-      this.observation.computeSunMoon();
+  /**
+   * Return the moon separation in degrees of the current target position
+   * @param cosDec cosinus of target declination
+   * @param sinDec sinus of target declination
+   * @param jd julian date
+   * @return moon separation in degrees
+   */
+  public double getMoonSeparation(final double cosDec, final double sinDec, final double jd) {
+    getTargetPosition(cosDec, sinDec, jd);
+    return getMoonSeparation();
+  }
 
-      // observation.moonobj gives the angular distance with moon in degrees
-      logger.info("jd {} - moon distance = {}", jd, this.observation.moonobj);
+  /**
+   * Return the moon separation in degrees of the current observation
+   *
+   * Note: Must be called after getTargetPosition() as the target position is not computed here
+   *
+   * @return moon separation in degrees
+   */
+  private double getMoonSeparation() {
+    // Compute moon position and distances :
+    this.observation.computeMoonSeparation();
 
-      if (logger.isInfoEnabled()) {
-        AstroSkyCalc.dumpWhen(this.observation.w, "Target");
-        logger.info("az / alt : {} {}", this.observation.azimuth, this.observation.altitude);
-      }
+    // observation.moonobj gives the angular distance with moon in degrees
+    final double moonSeparation = this.observation.moonobj;
+
+    if (isLogDebug) {
+      logger.debug("jd {} - moon distance = {}", this.observation.w.when.jd, moonSeparation);
+      AstroSkyCalc.dumpWhen(this.observation.w, "Target");
+      logger.debug("az / alt : {} {}", this.observation.azimuth, this.observation.altitude);
     }
 
-    position.setAzEl(this.observation.azimuth, this.observation.altitude);
+    return moonSeparation;
   }
 
   /**
@@ -129,7 +160,7 @@ public final class AstroSkyCalcObservation {
     final double[] minmax = Spherical.min_max_alt(this.site.lat.value, this.observation.current.delta.value);
 
     // degrees :
-    if (logger.isDebugEnabled()) {
+    if (isLogDebug) {
       logger.debug("min/max alt = {} / {}", minmax[0], minmax[1]);
     }
   }
@@ -141,8 +172,7 @@ public final class AstroSkyCalcObservation {
    * @return hour angle (dec hours) or -1 if the target never reaches this elevation
    */
   public double getHAForElevation(final double dec, final double minElev) {
-
-    if (logger.isDebugEnabled()) {
+    if (isLogDebug) {
       getTargetMinMaxAlt();
     }
 
@@ -158,7 +188,7 @@ public final class AstroSkyCalcObservation {
       return 12d;
     }
 
-    if (logger.isDebugEnabled()) {
+    if (isLogDebug) {
       logger.debug("ha = {}", ha);
     }
 

@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * This class uses JSkyCalc to perform several astronomical computations (sun ephemerids, LST/UTC time, JD time ...)
- * 
+ *
  * @author bourgesl
  */
 public final class AstroSkyCalc {
@@ -42,6 +42,10 @@ public final class AstroSkyCalc {
   private final static double PREC_IN_DEC_HOUR = MSEC_IN_DEC_HOUR / 10d;
 
   /* members */
+  /** cached log debug enabled */
+  private final boolean isLogDebug = logger.isDebugEnabled();
+  /** cached log debug enabled */
+  private final boolean isLogTrace = logger.isTraceEnabled();
   /** site location */
   Site site;
   /** jd corresponding to LT=24:00:00 for the observation date */
@@ -59,11 +63,12 @@ public final class AstroSkyCalc {
   }
 
   /**
-   * Define the observation site from the longitude, latitude and altitude coordinates (geographic)
+   * Return a new site from the longitude, latitude and altitude coordinates (geographic)
    * @param name site name
    * @param position longitude (rad), latitude (rad) and altitude (m) coordinates
+   * @return new site
    */
-  public void defineSite(final String name, final LonLatAlt position) {
+  public static Site createSite(final String name, final LonLatAlt position) {
     if (logger.isDebugEnabled()) {
       logger.debug("Site Long : {}", Math.toDegrees(position.getLongitude()));
       logger.debug("Site Lat  : {}", Math.toDegrees(position.getLatitude()));
@@ -71,17 +76,27 @@ public final class AstroSkyCalc {
 
     // note : the given longitude is hours west in jSkyCalc :
     // stdz = longitude (dec hours) is also the GMT offset (UTC)
-    this.site = new Site(name,
+    final Site site = new Site(name,
             -AngleUtils.rad2hours(position.getLongitude()),
             Math.toDegrees(position.getLatitude()),
             position.getAltitude());
 
     if (logger.isDebugEnabled()) {
       logger.debug("Site dump: {}\ntz offset: {}\nlongitude: {}\nlatitude  : {}", new Object[]{
-                this.site.name, this.site.stdz,
-                this.site.longit.roundedLongitString(1, ":", true),
-                this.site.lat.roundedDecString(0, ":")});
+                site.name, site.stdz,
+                site.longit.roundedLongitString(1, ":", true),
+                site.lat.roundedDecString(0, ":")});
     }
+    return site;
+  }
+
+  /**
+   * Define the observation site from the longitude, latitude and altitude coordinates (geographic)
+   * @param name site name
+   * @param position longitude (rad), latitude (rad) and altitude (m) coordinates
+   */
+  public void defineSite(final String name, final LonLatAlt position) {
+    this.site = createSite(name, position);
   }
 
   /**
@@ -101,7 +116,7 @@ public final class AstroSkyCalc {
     // Define date as 24:00 (local time) :
     final WhenWhere ww = new WhenWhere(new InstantInTime(dateTime, this.site.stdz, this.site.use_dst, false), this.site);
 
-    if (logger.isDebugEnabled()) {
+    if (isLogDebug) {
       AstroSkyCalc.dumpWhen(ww, "LocalTime at 24:00");
     }
 
@@ -109,7 +124,7 @@ public final class AstroSkyCalc {
     // i.e. midnight (local time):
     this.jdMidnight = ww.when.jd;
 
-    if (logger.isDebugEnabled()) {
+    if (isLogDebug) {
       logger.debug("jdMidnight : {}", this.jdMidnight);
     }
 
@@ -124,14 +139,14 @@ public final class AstroSkyCalc {
 
     this.jdLst0 = lst0.jd;
 
-    if (logger.isDebugEnabled()) {
+    if (isLogDebug) {
       logger.debug("jdLst0 = {}", this.jdLst0);
     }
 
     // define the date at LST origin to have it when converting LST time in java dates (date + time):
     this.dateLst0 = new GregorianCalendar(lst0.UTDate.year, lst0.UTDate.month - 1, lst0.UTDate.day);
 
-    if (logger.isDebugEnabled()) {
+    if (isLogDebug) {
       logger.debug("dateLst0 = ", this.dateLst0.getTime());
     }
 
@@ -143,14 +158,14 @@ public final class AstroSkyCalc {
    * @return jd time value
    */
   public double getCurrentJd() {
-    if (logger.isDebugEnabled()) {
+    if (isLogDebug) {
       logger.debug("Current date/time : {}", new Date());
     }
 
     // Get current  (local time) :
     final WhenWhere ww = new WhenWhere(new InstantInTime(this.site.stdz, this.site.use_dst), this.site);
 
-    if (logger.isDebugEnabled()) {
+    if (isLogDebug) {
       AstroSkyCalc.dumpWhen(ww, "CurrentTime");
     }
 
@@ -236,7 +251,7 @@ public final class AstroSkyCalc {
 //      dumpWhen(ww, "When");
     }
 
-    if (logger.isDebugEnabled()) {
+    if (isLogDebug) {
       AstroSkyCalc.dumpWhen(ww, "LST=00:00:00");
     }
 
@@ -351,7 +366,7 @@ public final class AstroSkyCalc {
     // MIDNIGHT :
     addAlmanacTimes(this.jdMidnight, almanacNight);
 
-    if (logger.isDebugEnabled()) {
+    if (isLogDebug) {
       logger.debug("almanacNight: {}", almanacNight);
     }
 
@@ -401,7 +416,7 @@ public final class AstroSkyCalc {
     // MIDNIGHT + 2DAY :
     AstroAlmanac.translate(2d * LST_DAY_IN_JD, refTimes, moonTimes);
 
-    if (logger.isDebugEnabled()) {
+    if (isLogDebug) {
       logger.debug("almanac: {}", almanac);
     }
 
@@ -467,7 +482,7 @@ public final class AstroSkyCalc {
         // Keep intervals that are inside or overlapping the range [jd0; jd1] :
         if ((jdFrom >= jd0 && jdFrom <= jd1) || (jdTo >= jd0 && jdTo <= jd1)) {
 
-          if (logger.isDebugEnabled()) {
+          if (isLogDebug) {
             logger.debug("Range[{} - {}]", jdFrom, jdTo);
           }
 
@@ -484,7 +499,7 @@ public final class AstroSkyCalc {
       }
     }
 
-    if (logger.isDebugEnabled()) {
+    if (isLogDebug) {
       logger.debug("moon ranges: {}", ranges);
     }
 
@@ -497,6 +512,9 @@ public final class AstroSkyCalc {
    * @return maximum of the moon illumination fraction
    */
   public double getMaxMoonIllum(final List<Range> moonRanges) {
+    if (moonRanges == null) {
+      return 0d;
+    }
     double maxIllum = 0d;
     double jdMin, jdMax, jdMid;
 
@@ -521,7 +539,7 @@ public final class AstroSkyCalc {
     final WhenWhere wwMoon = new WhenWhere(jd, this.site);
     wwMoon.computeSunMoon();
 
-    if (logger.isDebugEnabled()) {
+    if (isLogDebug) {
       logger.debug("moon zenith = {}", toDateLST(jd));
       logger.debug("alt illum   = {}", wwMoon.altmoon);
       logger.debug("moon illum  = {}", wwMoon.moonillum);
@@ -542,7 +560,7 @@ public final class AstroSkyCalc {
     final double ha1 = rangeHA.getMin();
     final double ha2 = rangeHA.getMax();
 
-    if (logger.isTraceEnabled()) {
+    if (isLogTrace) {
       logger.trace("ha1 = {}", ha1);
       logger.trace("ha2 = {}", ha2);
     }
@@ -550,7 +568,7 @@ public final class AstroSkyCalc {
     final double jd1 = convertHAToJD(ha1, precRA);
     final double jd2 = convertHAToJD(ha2, precRA);
 
-    if (logger.isTraceEnabled()) {
+    if (isLogTrace) {
       logger.trace("jd1 = {}", toDateLST(jd1));
       logger.trace("jd2 = {}", toDateLST(jd2));
     }
@@ -569,7 +587,7 @@ public final class AstroSkyCalc {
     final double jd1 = rangeJD.getMin();
     final double jd2 = rangeJD.getMax();
 
-    if (logger.isTraceEnabled()) {
+    if (isLogTrace) {
       logger.trace("jd1 = {}", toDateLST(jd1));
       logger.trace("jd2 = {}", toDateLST(jd2));
     }
@@ -594,7 +612,7 @@ public final class AstroSkyCalc {
       ha2 = AsproConstants.HA_MAX;
     }
 
-    if (logger.isTraceEnabled()) {
+    if (isLogTrace) {
       logger.trace("ha1 = {} h", ha1);
       logger.trace("ha2 = {} h", ha2);
     }
