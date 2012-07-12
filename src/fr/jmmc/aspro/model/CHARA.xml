@@ -473,6 +473,17 @@
     </pop>
 
 
+    <fringeTracker>
+      <name>PAVO_FT</name>
+      <band>I</band>
+
+      <mode>Group</mode>
+
+      <instrumentVisibility>0.8</instrumentVisibility>
+      <magLimit>8.5</magLimit>
+      <maxIntegration>1</maxIntegration>
+    </fringeTracker>
+
 <!-- instruments (2T) -->
 
     <focalInstrument>
@@ -528,16 +539,18 @@
       <description>PAVO combiner using 2T</description>
       <numberChannels>2</numberChannels>
       <defaultSamplingTime>40</defaultSamplingTime>
+      <fringeTracker>PAVO_FT</fringeTracker>
+      <fringeTrackerRequired>true</fringeTrackerRequired>
 
       <!-- noise parameters -->
-      <transmission>0.10</transmission>
-      <dit>0.002</dit>
+      <transmission>0.02</transmission>
+      <dit>0.008</dit>
       <ron>10</ron>
       <detectorSaturation>32700</detectorSaturation>
       <instrumentVisibility>0.9</instrumentVisibility>
       <instrumentVisibilityBias>2</instrumentVisibilityBias>
       <instrumentPhaseBias>1</instrumentPhaseBias>
-      <nbPixInterferometry>2</nbPixInterferometry>
+      <nbPixInterferometry>4</nbPixInterferometry>
       <nbPixPhotometry>0</nbPixPhotometry>
       <fracFluxInInterferometry>1</fracFluxInInterferometry>
 
@@ -565,7 +578,7 @@
       <transmission>0.001098088</transmission>
       <dit>0.015</dit> <!-- exposure time (15ms) every 25ms -->
       <ron>0</ron>
-      <detectorSaturation>5000</detectorSaturation>
+      <detectorSaturation>3000</detectorSaturation>
       <instrumentVisibility>1.0</instrumentVisibility> <!-- 1.0 -->
       <instrumentVisibilityBias>2</instrumentVisibilityBias>
       <instrumentPhaseBias>2</instrumentPhaseBias>
@@ -897,16 +910,18 @@ Configuration d’enregistrement
       <description>PAVO combiner using 3T</description>
       <numberChannels>3</numberChannels>
       <defaultSamplingTime>40</defaultSamplingTime>
+      <fringeTracker>PAVO_FT</fringeTracker>
+      <fringeTrackerRequired>true</fringeTrackerRequired>
 
       <!-- noise parameters -->
-      <transmission>0.10</transmission>
-      <dit>0.002</dit>
+      <transmission>0.02</transmission>
+      <dit>0.008</dit>
       <ron>10</ron>
       <detectorSaturation>32700</detectorSaturation>
       <instrumentVisibility>0.9</instrumentVisibility>
       <instrumentVisibilityBias>2</instrumentVisibilityBias>
       <instrumentPhaseBias>1</instrumentPhaseBias>
-      <nbPixInterferometry>2</nbPixInterferometry>
+      <nbPixInterferometry>4</nbPixInterferometry>
       <nbPixPhotometry>0</nbPixPhotometry>
       <fracFluxInInterferometry>1</fracFluxInInterferometry>
 
@@ -934,7 +949,7 @@ Configuration d’enregistrement
       <transmission>0.001098088</transmission>
       <dit>0.015</dit> <!-- exposure time (15ms) every 25ms -->
       <ron>0</ron>
-      <detectorSaturation>5000</detectorSaturation>
+      <detectorSaturation>3000</detectorSaturation>
       <instrumentVisibility>1.0</instrumentVisibility> <!-- 1.0 -->
       <instrumentVisibilityBias>2</instrumentVisibilityBias>
       <instrumentPhaseBias>2</instrumentPhaseBias>
@@ -1208,7 +1223,7 @@ Configuration d’enregistrement
       <transmission>0.001098088</transmission>
       <dit>0.015</dit> <!-- exposure time (15ms) every 25ms -->
       <ron>0</ron>
-      <detectorSaturation>5000</detectorSaturation>
+      <detectorSaturation>3000</detectorSaturation>
       <instrumentVisibility>1.0</instrumentVisibility> <!-- 1.0 -->
       <instrumentVisibilityBias>2</instrumentVisibilityBias>
       <instrumentPhaseBias>2</instrumentPhaseBias>
