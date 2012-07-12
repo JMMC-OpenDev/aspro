@@ -27,6 +27,7 @@ import fr.jmmc.aspro.model.OIBase;
  *         &lt;element name="date" type="{http://www.w3.org/2001/XMLSchema}date"/>
  *         &lt;element name="nightRestriction" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
  *         &lt;element name="atmosphereQuality" type="{http://www.jmmc.fr/aspro-oi/0.1}AtmosphereQuality" minOccurs="0"/>
+ *         &lt;element name="windAzimuth" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -39,7 +40,8 @@ import fr.jmmc.aspro.model.OIBase;
 @XmlType(name = "WhenSetting", propOrder = {
     "date",
     "nightRestriction",
-    "atmosphereQuality"
+    "atmosphereQuality",
+    "windAzimuth"
 })
 public class WhenSetting
     extends OIBase
@@ -51,6 +53,7 @@ public class WhenSetting
     @XmlElement(defaultValue = "true")
     protected boolean nightRestriction;
     protected AtmosphereQuality atmosphereQuality;
+    protected Double windAzimuth;
 
     /**
      * Gets the value of the date property.
@@ -114,6 +117,30 @@ public class WhenSetting
      */
     public void setAtmosphereQuality(AtmosphereQuality value) {
         this.atmosphereQuality = value;
+    }
+
+    /**
+     * Gets the value of the windAzimuth property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getWindAzimuth() {
+        return windAzimuth;
+    }
+
+    /**
+     * Sets the value of the windAzimuth property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setWindAzimuth(Double value) {
+        this.windAzimuth = value;
     }
 
 }

@@ -827,7 +827,7 @@ public class Target
     }
     return this.id;
   }
-  
+
   /**
    * Update the name and identifier.
    * Warning: this modified identifier is not updated in relationships
@@ -864,7 +864,7 @@ public class Target
 
   /**
    * This hashcode implementation uses only the id field
-   * @return hashcode 
+   * @return hashcode
    */
   @Override
   public final int hashCode() {
@@ -883,48 +883,64 @@ public class Target
    * @return HTML representation
    */
   public final String toHtml() {
+    return toHtml(null, true);
+  }
+
+  /**
+   * Return an HTML representation of the target used by tooltips
+   * @param message optional message displayed at the beginning
+   * @param full flag to display full information
+   * @return HTML representation
+   */
+  public final String toHtml(final String message, final boolean full) {
     final StringBuilder sb = new StringBuilder(128);
     sb.append("<html>");
-    sb.append("<b>Name</b> : ").append(getName());
-    sb.append("<br><b>Coord</b> : ").append(getRA()).append(' ').append(getDEC());
-    if (getPMRA() != null && getPMDEC() != null) {
-      sb.append("<br><b>Proper motion</b> (mas/yr) : ").append(getPMRA()).append(' ').append(getPMDEC());
+    if (message != null) {
+      sb.append("<b>").append(message).append("</b><br>");
     }
-    if (getPARALLAX() != null && getPARAERR() != null) {
-      sb.append("<br><b>Parallax</b> (mas) : ").append(getPARALLAX()).append(" [").append(getPARAERR()).append(']');
+    sb.append("<b>Name</b>: ").append(getName());
+    sb.append("<br><b>Coords</b>: ").append(getRA()).append(' ').append(getDEC());
+    if (full && getPMRA() != null && getPMDEC() != null) {
+      sb.append("<br><b>Proper motion</b> (mas/yr): ").append(getPMRA()).append(' ').append(getPMDEC());
     }
-    if (getSYSVEL() != null) {
-      sb.append("<br><b>Radial Velocity</b> (km/s) : ").append(getSYSVEL());
+    if (full && getPARALLAX() != null && getPARAERR() != null) {
+      sb.append("<br><b>Parallax</b> (mas): ").append(getPARALLAX()).append(" [").append(getPARAERR()).append(']');
+    }
+    if (full && getSYSVEL() != null) {
+      sb.append("<br><b>Radial Velocity</b> (km/s): ").append(getSYSVEL());
       if (getVELTYP() != null) {
         sb.append(" (").append(getVELTYP()).append(')');
       }
     }
-    if (getOBJTYP() != null && getOBJTYP().length() > 0) {
-      sb.append("<br><b>Object types</b> : ").append(getOBJTYP());
+    if (full && getOBJTYP() != null && getOBJTYP().length() > 0) {
+      sb.append("<br><b>Object types</b>: ").append(getOBJTYP());
     }
-    if (getSPECTYP() != null && getSPECTYP().length() > 0) {
-      sb.append("<br><b>Spectral types</b> : ").append(getSPECTYP());
+    if (full && getSPECTYP() != null && getSPECTYP().length() > 0) {
+      sb.append("<br><b>Spectral types</b>: ").append(getSPECTYP());
     }
     // Fluxes :
-    if (getFLUXV() != null) {
-      sb.append("<br><b>Flux V</b> : ").append(getFLUXV());
-    }
-    if (getFLUXI() != null) {
-      sb.append("<br><b>Flux I</b> : ").append(getFLUXI());
-    }
-    if (getFLUXJ() != null) {
-      sb.append("<br><b>Flux J</b> : ").append(getFLUXJ());
-    }
-    if (getFLUXH() != null) {
-      sb.append("<br><b>Flux H</b> : ").append(getFLUXH());
-    }
-    if (getFLUXK() != null) {
-      sb.append("<br><b>Flux K</b> : ").append(getFLUXK());
-    }
-    if (getFLUXN() != null) {
-      sb.append("<br><b>Flux N</b> : ").append(getFLUXN());
-    }
+    sb.append("<br>");
+    int n = 0;
+    Double flux;
+    for (SpectralBand b : SpectralBand.values()) {
+      if (b != SpectralBand.R) {
+        flux = getFlux(b);
+        if (flux != null) {
+          if (n != 0 && n <= 3) {
+            sb.append(" - ");
+          }
 
+          sb.append("<b>").append(b.value()).append("</b>: ").append(flux);
+
+          n++;
+
+          if (n > 3) {
+            sb.append("<br>");
+            n = 0;
+          }
+        }
+      }
+    }
     // Ids ?
 
     sb.append("</html>");
@@ -1033,15 +1049,15 @@ public class Target
 
   /**
    * Return true if the model is an analytical model; false an user model
-   * @return true if the model is an analytical model; false an user model 
+   * @return true if the model is an analytical model; false an user model
    */
   public final boolean hasAnalyticalModel() {
     return (this.useAnalyticalModel == null) ? true : this.useAnalyticalModel.booleanValue();
   }
-  
+
   /**
    * Return true if this target has one model (analytical models or an user model)
-   * @return true if this target has one model 
+   * @return true if this target has one model
    */
   public final boolean hasModel() {
     if (hasAnalyticalModel()) {
@@ -1061,9 +1077,8 @@ public class Target
     }
     return this.userModel;
   }
-  
+
   /* static helper methods */
-  
   /**
    * Return a deep "copy" of the list of models
    * @param models list of models to clone
@@ -1116,8 +1131,7 @@ public class Target
     // trim and upper case :
     return name.trim().toUpperCase();
   }
-  
-  
+
   /**
    * Merge target information on the given target with information from the source target
    * @param target target to update
@@ -1133,14 +1147,14 @@ public class Target
     if (target.getVELTYP() == null && source.getVELTYP() != null) {
       target.setVELTYP(source.getVELTYP());
     }
-    
+
     if (target.getPMRA() == null && source.getPMRA() != null) {
       target.setPMRA(source.getPMRA());
     }
     if (target.getPMDEC() == null && source.getPMDEC() != null) {
       target.setPMDEC(source.getPMDEC());
     }
-    
+
     if (target.getPARALLAX() == null && source.getPARALLAX() != null) {
       target.setPARALLAX(source.getPARALLAX());
     }
@@ -1177,7 +1191,6 @@ public class Target
       target.setFLUXN(source.getFLUXN());
     }
   }
-  
 //--simple--preserve
 
 }

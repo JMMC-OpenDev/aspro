@@ -32,6 +32,7 @@ import fr.jmmc.aspro.model.OIBase;
  *         &lt;element name="description" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *         &lt;element name="position" type="{http://www.jmmc.fr/aspro-oi/0.1}Position3D"/>
  *         &lt;element name="posSph" type="{http://www.jmmc.fr/aspro-oi/0.1}LonLatAlt" minOccurs="0"/>
+ *         &lt;element name="windPointingRestriction" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
  *         &lt;element name="telescope" type="{http://www.jmmc.fr/aspro-oi/0.1}Telescope" maxOccurs="unbounded"/>
  *         &lt;element name="station" type="{http://www.jmmc.fr/aspro-oi/0.1}Station" maxOccurs="unbounded"/>
  *         &lt;element name="channel" type="{http://www.jmmc.fr/aspro-oi/0.1}Channel" maxOccurs="unbounded" minOccurs="0"/>
@@ -54,6 +55,7 @@ import fr.jmmc.aspro.model.OIBase;
     "description",
     "position",
     "posSph",
+    "windPointingRestriction",
     "telescopes",
     "stations",
     "channels",
@@ -77,6 +79,7 @@ public class InterferometerDescription
     @XmlElement(required = true)
     protected Position3D position;
     protected LonLatAlt posSph;
+    protected Double windPointingRestriction;
     @XmlElement(name = "telescope", required = true)
     protected List<Telescope> telescopes;
     @XmlElement(name = "station", required = true)
@@ -187,6 +190,30 @@ public class InterferometerDescription
      */
     public void setPosSph(LonLatAlt value) {
         this.posSph = value;
+    }
+
+    /**
+     * Gets the value of the windPointingRestriction property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getWindPointingRestriction() {
+        return windPointingRestriction;
+    }
+
+    /**
+     * Sets the value of the windPointingRestriction property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setWindPointingRestriction(Double value) {
+        this.windPointingRestriction = value;
     }
 
     /**
