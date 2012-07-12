@@ -232,6 +232,10 @@ public final class SearchCalQueryAction extends SampCapabilityAction {
    */
   public static SpectralBand getSearchCalBand(final Band band) {
     switch (band) {
+      case U:
+      case B:
+        // band U and B not supported by SearchCal:
+        return null;
       case V:
       case R:
       case I:
@@ -246,9 +250,13 @@ public final class SearchCalQueryAction extends SampCapabilityAction {
       case K:
         // use scenario K:
         return SpectralBand.K;
+      case L:
+      case M:
       case N:
         // use scenario N for MIDI:
         return SpectralBand.N;
+      case Q:
+      // band Q not supported by SearchCal:
       default:
         return null;
     }
