@@ -7,9 +7,9 @@
 
 <ApplicationData link="http://www.jmmc.fr/aspro2">
 
-  <program name="Aspro2" version="0.9.2 beta 2"/>
+  <program name="Aspro2" version="0.9.2 beta 3"/>
 
-  <compilation date="12/06/2012" compiler="JDK 1.5.0_16"/>
+  <compilation date="12/07/2012" compiler="JDK 1.5.0_16"/>
 
   <text>
     <![CDATA[ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations
@@ -112,6 +112,12 @@
             jars="iText-2.1.5.jar"
             license="AGPL (http://itextpdf.com/terms-of-use/agpl.php)" />
 
+        <package name="SteelSeries"
+            description="SteelSeries is library of gauges for Java applications"
+            link="http://kenai.com/projects/steelseries"
+            jars="SteelSeries-3.9.26.jar trident.jar"
+            license="BSD" />
+
   </dependences>
 
   <menubar>
@@ -151,6 +157,20 @@
 
   <releasenotes>
     <release version="0.9.2">
+      <prerelease version="0.9.2 beta 3">
+        <change type="FEATURE">Added sky button on the main panel to open JSkyCalc which provides sky display (moon, planets),
+          airmass plots and many other features for the current target and date
+        </change>
+        <change type="FEATURE">Added preliminary MATISSE instrument to VLTI Future Period</change>
+        <change type="CHANGE">Added tooltips on the observability plot to get main target and range information</change>
+        <change type="CHANGE">Added azimuth ticks on the observability plot (azimuth on the top; elevation on the bottom)</change>
+        <change type="FEATURE">Added pesimistic pointing restrictions due to the Moon (20 deg) when night restrictions are enabled to quickly find nights without any problem.
+          A warning message gives the minimum angular separation and its corresponding time; use Details to see its impact
+        </change>
+        <change type="FEATURE">Added optional VLTI pointing restrictions due to the wind direction (compass) when night restrictions are enabled;
+          use Details to see its impact
+        </change>
+      </prerelease>
       <prerelease version="0.9.2 beta 2">
         <change type="FEATURE">Added calibrators in VOTable format (SAMP) to indicate calibrators per science target (PIVOT)</change>
       </prerelease>
