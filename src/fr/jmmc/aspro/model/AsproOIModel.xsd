@@ -421,6 +421,14 @@
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
+
+      <xsd:element name="windAzimuth" type="xsd:double" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>
+            Define the direction of the wind (deg). Must be in the range [0;360] (0 means North)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
     </xsd:sequence>
   </xsd:complexType>
 
@@ -1179,6 +1187,7 @@
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
+
       <xsd:element name="description" type="xsd:string">
         <xsd:annotation>
           <xsd:documentation>
@@ -1186,6 +1195,7 @@
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
+
       <xsd:element name="position" type="Position3D">
         <xsd:annotation>
           <xsd:documentation>
@@ -1198,10 +1208,19 @@
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
+
       <xsd:element name="posSph" type="LonLatAlt" minOccurs="0">
         <xsd:annotation>
           <xsd:documentation>
             These coordinates are computed internally and must not be provided in the configuration file
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
+      <xsd:element name="windPointingRestriction" type="xsd:double" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>
+              Define the optional wind pointing restriction in degrees (90 deg for VLTI)
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
