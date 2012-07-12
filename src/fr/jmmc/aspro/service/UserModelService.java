@@ -101,7 +101,7 @@ public final class UserModelService {
    *
    * @param model user model to validate
    * @param uvMax maximum UV frequency (rad-1)
-   * 
+   *
    * @throws IllegalArgumentException if the file or the image is invalid !
    */
   public static void validateModel(final UserModel model, final double uvMax) throws IllegalArgumentException {
@@ -124,7 +124,7 @@ public final class UserModelService {
    * Check the given fits image with the given corrected UV Max (rad-1)
    * @param fitsImage fits image to check
    * @param uvMax maximum UV frequency (rad-1)
-   * 
+   *
    * @throws IllegalArgumentException if the fits image is invalid (undefined increments or too small increments)
    * @throws IllegalStateException if the image is invalid (null or not square)
    */
@@ -168,7 +168,7 @@ public final class UserModelService {
    * @param colorModel color model to use
    * @param colorScale color scaling method
    * @return UVMapData
-   * 
+   *
    * @throws InterruptedJobException if the current thread is interrupted (cancelled)
    * @throws IllegalArgumentException if the fits image is invalid (not square or too small increments)
    * @throws RuntimeException if any exception occured during the computation
@@ -179,7 +179,7 @@ public final class UserModelService {
           final int imageSize,
           final IndexColorModel colorModel,
           final ColorScale colorScale) {
-    return computeUVMap(fitsImage, uvRect, mode, imageSize, colorModel, colorScale, null, null);
+    return computeUVMap(fitsImage, uvRect, mode, imageSize, colorModel, colorScale, null, null, null, null);
   }
 
   /**
@@ -193,7 +193,7 @@ public final class UserModelService {
    * @param colorScale color scaling method
    * @param noiseService optional noise service to compute noisy complex visibilities before computing amplitude or phase
    * @return UVMapData
-   * 
+   *
    * @throws InterruptedJobException if the current thread is interrupted (cancelled)
    * @throws IllegalArgumentException if the fits image is invalid (not square or too small increments)
    * @throws RuntimeException if any exception occured during the computation
@@ -205,7 +205,7 @@ public final class UserModelService {
           final IndexColorModel colorModel,
           final ColorScale colorScale,
           final VisNoiseService noiseService) {
-    return computeUVMap(fitsImage, uvRect, mode, imageSize, colorModel, colorScale, noiseService, null);
+    return computeUVMap(fitsImage, uvRect, mode, imageSize, colorModel, colorScale, noiseService, null, null, null);
   }
 
   /**
@@ -218,9 +218,11 @@ public final class UserModelService {
    * @param colorModel color model to use
    * @param colorScale color scaling method
    * @param refVisData reference complex visibility data (optional)
+   * @param refMin minimum reference value used only for sub images
+   * @param refMax maximum reference value used only for sub images
    * @param noiseService optional noise service to compute noisy complex visibilities before computing amplitude or phase
    * @return UVMapData
-   * 
+   *
    * @throws InterruptedJobException if the current thread is interrupted (cancelled)
    * @throws IllegalArgumentException if the fits image is invalid (not square or too small increments)
    * @throws RuntimeException if any exception occured during the computation
@@ -232,10 +234,16 @@ public final class UserModelService {
           final IndexColorModel colorModel,
           final ColorScale colorScale,
           final VisNoiseService noiseService,
+          final Float refMin, final Float refMax,
           final float[][] refVisData) {
 
     // Get corrected uvMax from uv rectangle (-this.uvMax, -this.uvMax, this.uvMax, this.uvMax):
-    final double uvMax = -uvRect.getX();
+    final double uvMax = Math.max(Math.max(Math.max(Math.abs(uvRect.getX()), Math.abs(uvRect.getY())),
+            Math.abs(uvRect.getX() + uvRect.getWidth())),
+            Math.abs(uvRect.getY() + uvRect.getHeight()));
+
+    // todo enhance image size to fit sub image!
+
     logger.info("UserModelService.computeUVMap: uvMax (rad-1): {}", uvMax);
 
     // throws exceptions:
@@ -323,7 +331,7 @@ public final class UserModelService {
     final Rectangle2D.Double uvMapRect = new Rectangle2D.Double();
     uvMapRect.setFrameFromDiagonal(-mapUvMax, -mapUvMax, mapUvMax, mapUvMax);
 
-    final UVMapData uvMapData = ModelUVMapService.computeImage(uvRect, null, null, mode, imageSize, colorModel, colorScale,
+    final UVMapData uvMapData = ModelUVMapService.computeImage(uvRect, refMin, refMax, mode, imageSize, colorModel, colorScale,
             dataSize, visData, data, uvMapRect, noiseService);
 
     if (logger.isInfoEnabled()) {
@@ -419,9 +427,9 @@ public final class UserModelService {
     final int half = length / 2;
 
     for (int i = 0; i < length; i++) {
-      coords[i] = (float) (increment * (i - half)); //in sky (radians). 
+      coords[i] = (float) (increment * (i - half)); //in sky (radians).
       // On peut aussi utiliser les
-      // valeurs du header avec values = (i-xref-1)*xdelt+xval 
+      // valeurs du header avec values = (i-xref-1)*xdelt+xval
       // (fits commence à 1)
     }
 
