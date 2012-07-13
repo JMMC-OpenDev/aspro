@@ -673,6 +673,8 @@ public final class OIFitsCreatorService {
     // complex visiblity with noise (sigma = visError)
     final Complex[][] visComplexNoisy = new Complex[vis.getNbRows()][this.nWaveLengths];
 
+    // TODO: parallelize such array processing ...
+
     // Iterate on HA points :
     for (int i = 0, j, k, l, n; i < this.nHAPoints; i++) {
 
