@@ -230,6 +230,14 @@ public class ObjectFactory {
     }
 
     /**
+     * Create an instance of {@link MoonRestriction }
+     * 
+     */
+    public MoonRestriction createMoonRestriction() {
+        return new MoonRestriction();
+    }
+
+    /**
      * Create an instance of {@link TargetInformation }
      * 
      */
@@ -251,6 +259,14 @@ public class ObjectFactory {
      */
     public Parameter createParameter() {
         return new Parameter();
+    }
+
+    /**
+     * Create an instance of {@link MoonPointingRestriction }
+     * 
+     */
+    public MoonPointingRestriction createMoonPointingRestriction() {
+        return new MoonPointingRestriction();
     }
 
     /**

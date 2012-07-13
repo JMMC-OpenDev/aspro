@@ -17,14 +17,14 @@ import fr.jmmc.jmal.model.targetmodel.Model;
 
 
 /**
- * 
+ *
  *         This type describes a target
- *       
- * 
+ *
+ *
  * <p>Java class for Target complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="Target">
  *   &lt;complexContent>
@@ -61,8 +61,8 @@ import fr.jmmc.jmal.model.targetmodel.Model;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "Target", propOrder = {
@@ -149,11 +149,11 @@ public class Target
 
     /**
      * Gets the value of the name property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getName() {
         return name;
@@ -161,11 +161,11 @@ public class Target
 
     /**
      * Sets the value of the name property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setName(String value) {
         this.name = value;
@@ -173,11 +173,11 @@ public class Target
 
     /**
      * Gets the value of the origin property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getOrigin() {
         return origin;
@@ -185,11 +185,11 @@ public class Target
 
     /**
      * Sets the value of the origin property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setOrigin(String value) {
         this.origin = value;
@@ -197,11 +197,11 @@ public class Target
 
     /**
      * Gets the value of the ra property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getRA() {
         return ra;
@@ -209,11 +209,11 @@ public class Target
 
     /**
      * Sets the value of the ra property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setRA(String value) {
         this.ra = value;
@@ -221,11 +221,11 @@ public class Target
 
     /**
      * Gets the value of the dec property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getDEC() {
         return dec;
@@ -233,11 +233,11 @@ public class Target
 
     /**
      * Sets the value of the dec property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setDEC(String value) {
         this.dec = value;
@@ -245,7 +245,7 @@ public class Target
 
     /**
      * Gets the value of the equinox property.
-     * 
+     *
      */
     public float getEQUINOX() {
         return equinox;
@@ -253,7 +253,7 @@ public class Target
 
     /**
      * Sets the value of the equinox property.
-     * 
+     *
      */
     public void setEQUINOX(float value) {
         this.equinox = value;
@@ -261,11 +261,11 @@ public class Target
 
     /**
      * Gets the value of the sysvel property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Double }
-     *     
+     *
      */
     public Double getSYSVEL() {
         return sysvel;
@@ -273,11 +273,11 @@ public class Target
 
     /**
      * Sets the value of the sysvel property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Double }
-     *     
+     *
      */
     public void setSYSVEL(Double value) {
         this.sysvel = value;
@@ -285,11 +285,11 @@ public class Target
 
     /**
      * Gets the value of the veltyp property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getVELTYP() {
         return veltyp;
@@ -297,11 +297,11 @@ public class Target
 
     /**
      * Sets the value of the veltyp property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setVELTYP(String value) {
         this.veltyp = value;
@@ -309,11 +309,11 @@ public class Target
 
     /**
      * Gets the value of the pmra property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Double }
-     *     
+     *
      */
     public Double getPMRA() {
         return pmra;
@@ -321,11 +321,11 @@ public class Target
 
     /**
      * Sets the value of the pmra property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Double }
-     *     
+     *
      */
     public void setPMRA(Double value) {
         this.pmra = value;
@@ -333,11 +333,11 @@ public class Target
 
     /**
      * Gets the value of the pmdec property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Double }
-     *     
+     *
      */
     public Double getPMDEC() {
         return pmdec;
@@ -345,11 +345,11 @@ public class Target
 
     /**
      * Sets the value of the pmdec property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Double }
-     *     
+     *
      */
     public void setPMDEC(Double value) {
         this.pmdec = value;
@@ -357,11 +357,11 @@ public class Target
 
     /**
      * Gets the value of the parallax property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Double }
-     *     
+     *
      */
     public Double getPARALLAX() {
         return parallax;
@@ -369,11 +369,11 @@ public class Target
 
     /**
      * Sets the value of the parallax property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Double }
-     *     
+     *
      */
     public void setPARALLAX(Double value) {
         this.parallax = value;
@@ -381,11 +381,11 @@ public class Target
 
     /**
      * Gets the value of the paraerr property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Double }
-     *     
+     *
      */
     public Double getPARAERR() {
         return paraerr;
@@ -393,11 +393,11 @@ public class Target
 
     /**
      * Sets the value of the paraerr property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Double }
-     *     
+     *
      */
     public void setPARAERR(Double value) {
         this.paraerr = value;
@@ -405,11 +405,11 @@ public class Target
 
     /**
      * Gets the value of the ids property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getIDS() {
         return ids;
@@ -417,11 +417,11 @@ public class Target
 
     /**
      * Sets the value of the ids property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setIDS(String value) {
         this.ids = value;
@@ -429,11 +429,11 @@ public class Target
 
     /**
      * Gets the value of the objtyp property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getOBJTYP() {
         return objtyp;
@@ -441,11 +441,11 @@ public class Target
 
     /**
      * Sets the value of the objtyp property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setOBJTYP(String value) {
         this.objtyp = value;
@@ -453,11 +453,11 @@ public class Target
 
     /**
      * Gets the value of the spectyp property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getSPECTYP() {
         return spectyp;
@@ -465,11 +465,11 @@ public class Target
 
     /**
      * Sets the value of the spectyp property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setSPECTYP(String value) {
         this.spectyp = value;
@@ -477,11 +477,11 @@ public class Target
 
     /**
      * Gets the value of the fluxv property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Double }
-     *     
+     *
      */
     public Double getFLUXV() {
         return fluxv;
@@ -489,11 +489,11 @@ public class Target
 
     /**
      * Sets the value of the fluxv property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Double }
-     *     
+     *
      */
     public void setFLUXV(Double value) {
         this.fluxv = value;
@@ -501,11 +501,11 @@ public class Target
 
     /**
      * Gets the value of the fluxi property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Double }
-     *     
+     *
      */
     public Double getFLUXI() {
         return fluxi;
@@ -513,11 +513,11 @@ public class Target
 
     /**
      * Sets the value of the fluxi property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Double }
-     *     
+     *
      */
     public void setFLUXI(Double value) {
         this.fluxi = value;
@@ -525,11 +525,11 @@ public class Target
 
     /**
      * Gets the value of the fluxj property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Double }
-     *     
+     *
      */
     public Double getFLUXJ() {
         return fluxj;
@@ -537,11 +537,11 @@ public class Target
 
     /**
      * Sets the value of the fluxj property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Double }
-     *     
+     *
      */
     public void setFLUXJ(Double value) {
         this.fluxj = value;
@@ -549,11 +549,11 @@ public class Target
 
     /**
      * Gets the value of the fluxh property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Double }
-     *     
+     *
      */
     public Double getFLUXH() {
         return fluxh;
@@ -561,11 +561,11 @@ public class Target
 
     /**
      * Sets the value of the fluxh property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Double }
-     *     
+     *
      */
     public void setFLUXH(Double value) {
         this.fluxh = value;
@@ -573,11 +573,11 @@ public class Target
 
     /**
      * Gets the value of the fluxk property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Double }
-     *     
+     *
      */
     public Double getFLUXK() {
         return fluxk;
@@ -585,11 +585,11 @@ public class Target
 
     /**
      * Sets the value of the fluxk property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Double }
-     *     
+     *
      */
     public void setFLUXK(Double value) {
         this.fluxk = value;
@@ -597,11 +597,11 @@ public class Target
 
     /**
      * Gets the value of the fluxn property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Double }
-     *     
+     *
      */
     public Double getFLUXN() {
         return fluxn;
@@ -609,11 +609,11 @@ public class Target
 
     /**
      * Sets the value of the fluxn property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Double }
-     *     
+     *
      */
     public void setFLUXN(Double value) {
         this.fluxn = value;
@@ -621,11 +621,11 @@ public class Target
 
     /**
      * Gets the value of the useAnalyticalModel property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isUseAnalyticalModel() {
         return useAnalyticalModel;
@@ -633,39 +633,39 @@ public class Target
 
     /**
      * Sets the value of the useAnalyticalModel property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setUseAnalyticalModel(Boolean value) {
         this.useAnalyticalModel = value;
     }
 
     /**
-     * 
+     *
      *               Optional list of analytical models
      *           Gets the value of the models property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the models property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getModels().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link Model }
-     * 
-     * 
+     *
+     *
      */
     public List<Model> getModels() {
         if (models == null) {
@@ -676,11 +676,11 @@ public class Target
 
     /**
      * Gets the value of the userModel property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link UserModel }
-     *     
+     *
      */
     public UserModel getUserModel() {
         return userModel;
@@ -688,11 +688,11 @@ public class Target
 
     /**
      * Sets the value of the userModel property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link UserModel }
-     *     
+     *
      */
     public void setUserModel(UserModel value) {
         this.userModel = value;
@@ -700,11 +700,11 @@ public class Target
 
     /**
      * Gets the value of the configuration property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link TargetConfiguration }
-     *     
+     *
      */
     public TargetConfiguration getConfiguration() {
         return configuration;
@@ -712,11 +712,11 @@ public class Target
 
     /**
      * Sets the value of the configuration property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link TargetConfiguration }
-     *     
+     *
      */
     public void setConfiguration(TargetConfiguration value) {
         this.configuration = value;
@@ -724,11 +724,11 @@ public class Target
 
     /**
      * Gets the value of the calibratorInfos property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link CalibratorInformations }
-     *     
+     *
      */
     public CalibratorInformations getCalibratorInfos() {
         return calibratorInfos;
@@ -736,11 +736,11 @@ public class Target
 
     /**
      * Sets the value of the calibratorInfos property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link CalibratorInformations }
-     *     
+     *
      */
     public void setCalibratorInfos(CalibratorInformations value) {
         this.calibratorInfos = value;
@@ -748,11 +748,11 @@ public class Target
 
     /**
      * Gets the value of the id property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getId() {
         return id;
@@ -760,16 +760,16 @@ public class Target
 
     /**
      * Sets the value of the id property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setId(String value) {
         this.id = value;
     }
-    
+
 //--simple--preserve
   /** computed RA in degrees */
   @javax.xml.bind.annotation.XmlTransient
@@ -896,7 +896,7 @@ public class Target
     final StringBuilder sb = new StringBuilder(128);
     sb.append("<html>");
     if (message != null) {
-      sb.append("<b>").append(message).append("</b><br>");
+      sb.append(message).append("<hr>");
     }
     sb.append("<b>Name</b>: ").append(getName());
     sb.append("<br><b>Coords</b>: ").append(getRA()).append(' ').append(getDEC());

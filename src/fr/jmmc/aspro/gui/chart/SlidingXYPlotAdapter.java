@@ -3,10 +3,15 @@
  ******************************************************************************/
 package fr.jmmc.aspro.gui.chart;
 
+import fr.jmmc.aspro.model.observability.StarObservabilityData;
+import fr.jmmc.aspro.model.observability.TargetPositionDate;
 import fr.jmmc.aspro.model.oi.Target;
 import java.awt.Color;
 import java.awt.Paint;
 import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -60,16 +65,21 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
   private List<Paint> colors = null;
   /** annotations */
   private Map<Integer, List<XYAnnotation>> annotations = null;
-  /** target list for tooltip generation */
-  private List<Target> targetList = null;
-  /** data labels (legend) */
-  private List<String> labels = null;
   /** last used start position for the subset */
   private int lastStart = -1;
   /** last used end position for the subset */
   private int lastEnd = -1;
+  /* tooltip information */
+  /** target list for tooltip generation */
+  private List<Target> targetList = null;
+  /** data labels (legend) */
+  private List<String> labels = null;
+  /** StarObservabilityData list for tooltip generation */
+  private List<StarObservabilityData> soTargetList = null;
   /** 24h date formatter like in france */
   private final DateFormat timeFormatter = DateFormat.getTimeInstance(DateFormat.SHORT, Locale.FRANCE);
+  /** double formatter for HA */
+  private final NumberFormat df1 = new DecimalFormat("0.0");
 
   /**
    * Constructor
@@ -95,10 +105,13 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
    * @param annotations map of annotations keyed by position
    * @param targetList target list for tooltip generation
    * @param labels data labels (legend)
+   * @param soTargetList StarObservabilityData list for tooltip generation
+   * @param sdTargetList StarData list for tooltip generation
    */
   public void setData(final TaskSeriesCollection collection, final List<String> symbols, final List<Paint> colors,
           final Map<Integer, List<XYAnnotation>> annotations,
-          final List<Target> targetList, final List<String> labels) {
+          final List<Target> targetList, final List<String> labels,
+          final List<StarObservabilityData> soTargetList) {
     this.size = symbols.size();
     this.collection = collection;
     this.symbols = symbols;
@@ -106,6 +119,7 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
     this.annotations = annotations;
     this.targetList = targetList;
     this.labels = labels;
+    this.soTargetList = soTargetList;
   }
 
   /**
@@ -363,16 +377,50 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
 
         final String label = labels.get(index);
 
-        final StringBuilder sb = new StringBuilder(32);
-        sb.append(label).append(" Observability: ");
+        final StringBuilder sb = new StringBuilder(255);
+        sb.append("<b>").append(label).append(" Observability</b>");
 
         final TaskSeries taskSeries = this.collection.getSeries(index);
 
+        // use interval or star data:
         final TimePeriod period = taskSeries.get(item).getDuration();
 
-        sb.append(this.timeFormatter.format(period.getStart()));
-        sb.append(" - ");
-        sb.append(this.timeFormatter.format(period.getEnd()));
+        final StarObservabilityData starObs = this.soTargetList.get(index);
+        if (starObs != null) {
+
+          // note: often the start or end TargetPositionDate can not be found
+          // when the interval has been splitted due to night overlaps (RA)
+
+          Date date = period.getStart();
+          TargetPositionDate pos = starObs.getTargetPosition(date);
+
+          if (pos != null) {
+            sb.append("<br><b>Start</b>: ").append(this.timeFormatter.format(date));
+            sb.append(" - <b>HA</b>: ").append(this.df1.format(pos.getHa()));
+            sb.append(" (az ").append(pos.getAzimuth());
+            sb.append(", el ").append(pos.getElevation()).append(")");
+          }
+
+          date = period.getEnd();
+          pos = starObs.getTargetPosition(date);
+
+          if (pos != null) {
+            sb.append("<br><b>End</b>: ").append(this.timeFormatter.format(date));
+            sb.append(" - <b>HA</b>: ").append(this.df1.format(pos.getHa()));
+            sb.append(" (az ").append(pos.getAzimuth());
+            sb.append(", el ").append(pos.getElevation()).append(")");
+          }
+
+          date = starObs.getTransitDate();
+          pos = starObs.getTargetPosition(date);
+
+          if (pos != null) {
+            sb.append("<br><b>Transit</b>: ").append(this.timeFormatter.format(date));
+            sb.append(" - <b>HA</b>: ").append(this.df1.format(pos.getHa()));
+            sb.append(" (az ").append(pos.getAzimuth());
+            sb.append(", el ").append(pos.getElevation()).append(")");
+          }
+        }
 
         return target.toHtml(sb.toString(), false);
       }

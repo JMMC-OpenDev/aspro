@@ -5,7 +5,9 @@ package fr.jmmc.aspro.model.observability;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This class contains several results for the observability of a target
@@ -41,8 +43,8 @@ public final class StarObservabilityData {
   private final List<DateTimeInterval> visible = new ArrayList<DateTimeInterval>(3);
   /** transit date */
   private Date transitDate;
-  /** sampled target position */
-  private final List<TargetPositionDate> targetPositions = new ArrayList<TargetPositionDate>(8);
+  /** sampled target positions (ha, az, el) keyed by date */
+  private final Map<Date, TargetPositionDate> targetPositions = new LinkedHashMap<Date, TargetPositionDate>(8);
 
   /**
    * Constructor
@@ -130,11 +132,20 @@ public final class StarObservabilityData {
   }
 
   /**
-   * Return the sampled target position
-   * @return sampled target position
+   * Return the sampled target positions (ha, az, el) keyed by date
+   * @return sampled target positions (ha, az, el) keyed by date
    */
-  public List<TargetPositionDate> getTargetPositions() {
+  public Map<Date, TargetPositionDate> getTargetPositions() {
     return targetPositions;
+  }
+
+  /**
+   * Return the target position (ha, az, el) at the given date
+   * @param date date to look up
+   * @return target position (ha, az, el) or null if not found
+   */
+  public TargetPositionDate getTargetPosition(final Date date) {
+    return targetPositions.get(date);
   }
 
   @Override

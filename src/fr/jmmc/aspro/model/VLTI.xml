@@ -38,7 +38,7 @@
     <!-- For now we have only one shared instance of UT because all UTs are considered equivalent -->
     <telescope>
       <name>UT</name>
-      <diameter>8.0</diameter>
+      <diameter>8.2</diameter>
       <!-- Eso CfP: They are Alt / Az mounted and cannot observe at zenith distances less than 4 degrees -->
       <maxElevation>86.0</maxElevation>
 
@@ -47,6 +47,22 @@
         <!-- MACAO / VLTI -->
         <numberActuators>64</numberActuators>
       </adaptiveOptics>
+
+      <!--
+        Moon Pointing Restrictions on UT:
+        the UT active optics can be adversely affected by the proximity of the
+        bright moon (i.e. FLI >= 70%) to the science target, requiring a moon minimum angular distance of 30◦
+      -->
+      <moonPointingRestriction>
+        <warningThreshold>30</warningThreshold>
+        <restriction>
+          <separation>5.0</separation>
+        </restriction>
+        <restriction>
+          <fli>70.0</fli>
+          <separation>30.0</separation>
+        </restriction>
+      </moonPointingRestriction>
 
     </telescope>
 
@@ -62,6 +78,24 @@
         <!-- tip tilt -->
         <numberActuators>2</numberActuators>
       </adaptiveOptics>
+
+      <!--
+        Moon Pointing Restrictions on AT:
+        For a FLI above 85% guiding will be impossible if the target is too close to the moon.
+          - For a star brighter than 9th magnitude, guiding is not possible for a moon distance smaller than 10 degrees.
+          - For a star fainter  than 9th magnitude, guiding is not possible for a moon distance smaller than 20 degrees.
+      -->
+      <moonPointingRestriction>
+        <warningThreshold>20</warningThreshold>
+        <restriction>
+          <separation>5.0</separation>
+        </restriction>
+        <restriction>
+          <fli>85.0</fli>
+          <separation>20.0</separation>
+        </restriction>
+      </moonPointingRestriction>
+
     </telescope>
 
     <station>

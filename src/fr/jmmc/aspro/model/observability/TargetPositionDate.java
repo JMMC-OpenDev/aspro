@@ -13,6 +13,9 @@ public final class TargetPositionDate {
 
   /** date/time */
   private final Date date;
+  /** hour angle [-12; +12] */
+  private final double ha;
+  // TODO: use double values
   /** azimuth in degrees */
   private final int azimuth;
   /** elevation in degrees */
@@ -20,13 +23,15 @@ public final class TargetPositionDate {
 
   /**
    * Public constructor
-   * @param date date/time
+   * @param date date/time (LST or UTC)
+   * @param ha hour angle
    * @param azimuth azimuth in degrees
    * @param elevation elevation in degrees
    */
-  public TargetPositionDate(final Date date, final int azimuth, final int elevation) {
+  public TargetPositionDate(final Date date, final double ha, final int azimuth, final int elevation) {
     this.date = date;
-    this.azimuth = (azimuth >= 360) ? azimuth - 360: azimuth;
+    this.ha = ha;
+    this.azimuth = (azimuth >= 360) ? azimuth - 360 : azimuth;
     this.elevation = elevation;
   }
 
@@ -36,6 +41,14 @@ public final class TargetPositionDate {
    */
   public Date getDate() {
     return date;
+  }
+
+  /**
+   * Return the hour angle [-12; +12]
+   * @return hour angle
+   */
+  public double getHa() {
+    return ha;
   }
 
   /**
@@ -60,6 +73,6 @@ public final class TargetPositionDate {
    */
   @Override
   public String toString() {
-    return "[" + this.date + "] = (" + this.azimuth + "°, " + this.elevation + "°)";
+    return "[" + this.date + "][" + this.ha + "] = (" + this.azimuth + "°, " + this.elevation + "°)";
   }
 }

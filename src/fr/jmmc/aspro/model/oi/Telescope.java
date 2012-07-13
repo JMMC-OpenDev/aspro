@@ -30,6 +30,7 @@ import fr.jmmc.aspro.model.OIBase;
  *         &lt;element name="diameter" type="{http://www.w3.org/2001/XMLSchema}double"/>
  *         &lt;element name="maxElevation" type="{http://www.w3.org/2001/XMLSchema}double"/>
  *         &lt;element name="adaptiveOptics" type="{http://www.jmmc.fr/aspro-oi/0.1}AdaptiveOptics" minOccurs="0"/>
+ *         &lt;element name="moonPointingRestriction" type="{http://www.jmmc.fr/aspro-oi/0.1}MoonPointingRestriction" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -43,7 +44,8 @@ import fr.jmmc.aspro.model.OIBase;
     "name",
     "diameter",
     "maxElevation",
-    "adaptiveOptics"
+    "adaptiveOptics",
+    "moonPointingRestriction"
 })
 public class Telescope
     extends OIBase
@@ -57,6 +59,7 @@ public class Telescope
     protected double diameter;
     protected double maxElevation;
     protected AdaptiveOptics adaptiveOptics;
+    protected MoonPointingRestriction moonPointingRestriction;
 
     /**
      * Gets the value of the name property.
@@ -136,6 +139,30 @@ public class Telescope
      */
     public void setAdaptiveOptics(AdaptiveOptics value) {
         this.adaptiveOptics = value;
+    }
+
+    /**
+     * Gets the value of the moonPointingRestriction property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link MoonPointingRestriction }
+     *     
+     */
+    public MoonPointingRestriction getMoonPointingRestriction() {
+        return moonPointingRestriction;
+    }
+
+    /**
+     * Sets the value of the moonPointingRestriction property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link MoonPointingRestriction }
+     *     
+     */
+    public void setMoonPointingRestriction(MoonPointingRestriction value) {
+        this.moonPointingRestriction = value;
     }
 
 }

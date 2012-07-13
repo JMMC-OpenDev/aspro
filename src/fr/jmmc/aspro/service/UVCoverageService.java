@@ -140,10 +140,7 @@ public final class UVCoverageService {
       this.data.setLambda(this.lambda);
 
       // Is the target visible :
-      if (this.starData.getHaElev() <= 0d) {
-        addWarning("The target [" + this.targetName + "] is not observable (never rise)");
-      } else {
-
+      if (this.starData.getHaElev() > 0d) {
         if (this.doUVSupport) {
           computeUVSupport();
         }
@@ -226,7 +223,7 @@ public final class UVCoverageService {
 
     double haRad;
 
-    for (int i = 0, j = 0; i < sizeBL; i++) {
+    for (int i = 0, j; i < sizeBL; i++) {
       baseLine = this.baseLines.get(i);
 
       uvData = new UVBaseLineData(baseLine.getName());
@@ -295,10 +292,7 @@ public final class UVCoverageService {
       logger.debug("obsRangesHA: {}", obsRangesHA);
     }
 
-    if (obsRangesHA == null) {
-      addWarning("The target [" + this.targetName + "] is not observable");
-    } else {
-
+    if (obsRangesHA != null) {
       final double haElev = this.starData.getHaElev();
 
       final double haLower = checkHA(this.haMin, haElev);

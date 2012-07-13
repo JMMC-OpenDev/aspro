@@ -1310,6 +1310,7 @@
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
+
       <xsd:element name="diameter" type="xsd:double">
         <xsd:annotation>
           <xsd:documentation>
@@ -1317,6 +1318,7 @@
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
+
       <xsd:element name="maxElevation" type="xsd:double">
         <xsd:annotation>
           <xsd:documentation>
@@ -1324,10 +1326,19 @@
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
+
       <xsd:element name="adaptiveOptics" type="AdaptiveOptics" minOccurs="0">
         <xsd:annotation>
           <xsd:documentation>
               Telescope has an Adaptive Optics system (optional)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
+      <xsd:element name="moonPointingRestriction" type="MoonPointingRestriction" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>
+              Define the optional moon pointing restrictions
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
@@ -1364,6 +1375,62 @@
         <xsd:annotation>
           <xsd:documentation>
               The usage limit (mag) (values TBD)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+
+
+
+
+  <!-- MoonPointingRestriction -->
+  <xsd:complexType name="MoonPointingRestriction">
+    <xsd:annotation>
+      <xsd:documentation>
+        This type describes the Moon Pointing Restrictions (angular separation depending on FLI ...)
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="warningThreshold" type="xsd:double">
+        <xsd:annotation>
+          <xsd:documentation>
+              The lower angular separation threshold in degrees to report a warning message
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="restriction" type="MoonRestriction" minOccurs="0" maxOccurs="unbounded">
+        <xsd:annotation>
+          <xsd:documentation>
+              This collection defines moon restriction rules (FLI, separation ...)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+
+
+
+
+  <!-- MoonRestriction -->
+  <xsd:complexType name="MoonRestriction">
+    <xsd:annotation>
+      <xsd:documentation>
+        This type describes one moon restriction rule (FLI, separation ...)
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="fli" type="xsd:double" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>
+              The optional upper Moon illumination (fraction of lunar illumination) threshold (percents) to apply this rule
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="separation" type="xsd:double">
+        <xsd:annotation>
+          <xsd:documentation>
+              The lower angular separation threshold in degrees to apply this rule
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>

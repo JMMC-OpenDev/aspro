@@ -94,15 +94,17 @@ public final class AstroSkyCalcObservation {
   }
 
   /**
-   * Return the current target position (azimuth / elevation) in degrees
+   * Return the current target position (azimuth / elevation) in degrees and hour angle
    * @param cosDec cosinus of target declination
    * @param sinDec sinus of target declination
    * @param jd julian date
    * @param position target position: azimuth (0 to north) / elevation in degrees
+   * @return hour angle
    */
-  public void getTargetPosition(final double cosDec, final double sinDec, final double jd, final AzEl position) {
+  public double getTargetPosition(final double cosDec, final double sinDec, final double jd, final AzEl position) {
     getTargetPosition(cosDec, sinDec, jd);
     position.setAzEl(this.observation.azimuth, this.observation.altitude);
+    return this.observation.ha.value;
   }
 
   /**
@@ -119,11 +121,11 @@ public final class AstroSkyCalcObservation {
   }
 
   /**
-   * Return the moon separation in degrees of the current target position
+   * Return the moon separation in degrees of the current target at the given julian date
    * @param cosDec cosinus of target declination
    * @param sinDec sinus of target declination
    * @param jd julian date
-   * @return moon separation in degrees
+   * @return moon separation in degrees or +INFINITY if moon is not visible
    */
   public double getMoonSeparation(final double cosDec, final double sinDec, final double jd) {
     getTargetPosition(cosDec, sinDec, jd);
@@ -135,11 +137,15 @@ public final class AstroSkyCalcObservation {
    *
    * Note: Must be called after getTargetPosition() as the target position is not computed here
    *
-   * @return moon separation in degrees
+   * @return moon separation in degrees or +INFINITY if moon is not visible
    */
   private double getMoonSeparation() {
     // Compute moon position and distances :
     this.observation.computeMoonSeparation();
+
+    if (this.observation.w.altmoon < 0d) {
+      return Double.POSITIVE_INFINITY;
+    }
 
     // observation.moonobj gives the angular distance with moon in degrees
     final double moonSeparation = this.observation.moonobj;

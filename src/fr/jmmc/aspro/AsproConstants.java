@@ -44,8 +44,6 @@ public interface AsproConstants {
   public static final double DEFAULT_OBSERVATION_DURATION = 300d;
   /** default value for checkbox Night Limit = true */
   public static final boolean DEFAULT_USE_NIGHT_LIMITS = true;
-  /** default moon separation check = 20 degrees */
-  public static final double DEFAULT_MOON_SEPARATION_CHECK = 20d;
   /** default image LUT */
   public final static String DEFAULT_IMAGE_LUT = "aspro";
   /** default image size */

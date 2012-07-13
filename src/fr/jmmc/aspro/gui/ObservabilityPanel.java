@@ -25,6 +25,7 @@ import fr.jmmc.aspro.model.observability.ObservabilityData;
 import fr.jmmc.aspro.model.event.ObservationListener;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.event.ObservationEvent;
+import fr.jmmc.aspro.model.observability.StarData;
 import fr.jmmc.aspro.model.observability.TargetPositionDate;
 import fr.jmmc.aspro.model.observability.StarObservabilityData;
 import fr.jmmc.aspro.model.observability.SunTimeInterval;
@@ -960,11 +961,14 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     // Prepare chart information used by SlidingXYPlotAdapter :
     final int initialSize = obsLen * targets.size();
     final TaskSeriesCollection taskSeriesCollection = new TaskSeriesCollection();
-    final List<Target> targetList = new ArrayList<Target>(initialSize);
     final List<String> symbolList = new ArrayList<String>(initialSize);
-    final List<String> labelList = new ArrayList<String>(initialSize);
     final List<Paint> colorList = new ArrayList<Paint>(initialSize);
     final Map<String, Paint> legendItems = new LinkedHashMap<String, Paint>(initialSize);
+
+    // for tooltip information:
+    final List<Target> targetList = new ArrayList<Target>(initialSize);
+    final List<String> labelList = new ArrayList<String>(initialSize);
+    final List<StarObservabilityData> soTargetList = new ArrayList<StarObservabilityData>(initialSize);
 
     String name;
     TaskSeries taskSeries;
@@ -977,8 +981,6 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     Paint paint;
 
     ObservabilityData obsData;
-    // map of StarObservabilityData list keyed by target name
-    Map<String, List<StarObservabilityData>> starVisMap;
     // current StarObservabilityData used in loops :
     List<StarObservabilityData> soList;
 
@@ -990,8 +992,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         obsData = chartData.getObsDataList().get(c);
 
         // get StarObservabilityData results :
-        starVisMap = obsData.getMapStarVisibilities();
-        soList = starVisMap.get(target.getName());
+        soList = obsData.getMapStarVisibilities().get(target.getName());
 
         if (soList != null) {
 
@@ -1007,8 +1008,10 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
               targetList.add(target);
             }
-
             symbolList.add(name);
+
+            // add tooltip info:
+            soTargetList.add(so);
 
             // use the target name as the name of the serie :
             taskSeries = new TaskSeries(name);
@@ -1073,7 +1076,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                 addAnnotation(annotations, pos, new XYDiamondAnnotation(n, so.getTransitDate().getTime()));
 
                 XYTickAnnotation a;
-                for (TargetPositionDate ed : so.getTargetPositions()) {
+                for (TargetPositionDate ed : so.getTargetPositions().values()) {
                   if (checkDateAxisLimits(ed.getDate(), min, max)) {
                     a = ChartUtils.createXYTickAnnotation(Integer.toString(ed.getAzimuth()), n, ed.getDate().getTime(), -HALF_PI);
                     a.setTextAnchor(TextAnchor.BOTTOM_CENTER);
@@ -1109,7 +1112,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     }
 
     // update plot data :
-    this.slidingXYPlotAdapter.setData(taskSeriesCollection, symbolList, colorList, annotations, targetList, labelList);
+    this.slidingXYPlotAdapter.setData(taskSeriesCollection, symbolList, colorList, annotations, targetList, labelList, soTargetList);
 
     // force a plot refresh:
     this.updateSliderProperties(true);

@@ -32,12 +32,15 @@ import fr.jmmc.aspro.model.oi.FocalInstrument;
 import fr.jmmc.aspro.model.oi.FocalInstrumentConfiguration;
 import fr.jmmc.aspro.model.oi.InterferometerConfiguration;
 import fr.jmmc.aspro.model.oi.InterferometerDescription;
+import fr.jmmc.aspro.model.oi.MoonPointingRestriction;
+import fr.jmmc.aspro.model.oi.MoonRestriction;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Pop;
 import fr.jmmc.aspro.model.oi.PopLink;
 import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.StationLinks;
 import fr.jmmc.aspro.model.oi.Target;
+import fr.jmmc.aspro.model.oi.Telescope;
 import fr.jmmc.aspro.util.CombUtils;
 import fr.jmmc.aspro.util.TestUtils;
 import java.text.DateFormat;
@@ -139,12 +142,12 @@ public final class ObservabilityService {
   private boolean ignoreUseNightLimit = false;
   /** create the observability context (temporary variables) */
   private ObservabilityContext obsCtx = null;
-  /** moon rise ranges in JD */
-  private List<Range> moonRiseRanges = null;
   /** azimuth expressed in [0; 360 deg] */
   private Double windAzimuth = null;
   /** discarded azimuth ranges due to wind direction */
   private List<Range> azimuthRanges = null;
+  /** optional moon pointing restrictions */
+  private MoonPointingRestriction moonPointingRestriction = null;
 
   /**
    * Constructor.
@@ -369,17 +372,17 @@ public final class ObservabilityService {
       // Extract night limits in [LST0 -12; LST0 + 36] and sun intervals in range [jdLower; jdUpper]:
       processSunAlmanach(sunTimes);
 
-      // moon rise/set :
-      this.moonRiseRanges = this.sc.findMoonRiseSet(almanac, this.jdLower, this.jdUpper);
+      // moon rise/set arround night:
+      final List<Range> moonRiseRanges = this.sc.findMoonRiseSet(almanac, this.jdLower, this.jdUpper);
 
       if (isLogDebug) {
-        logger.debug("moonRiseRanges: {}", this.moonRiseRanges);
+        logger.debug("moonRiseRanges: {}", moonRiseRanges);
       }
 
-      // compute moon visibility over night:
+      // compute moon illumination over night:
       final List<Range> obsMoonRanges = new ArrayList<Range>(6);
       obsMoonRanges.addAll(this.nightLimits);
-      obsMoonRanges.addAll(this.moonRiseRanges);
+      obsMoonRanges.addAll(moonRiseRanges);
 
       final List<Range> moonRanges = Range.intersectRanges(obsMoonRanges, 2);
 
@@ -703,7 +706,7 @@ public final class ObservabilityService {
     final StarData starData = new StarData(target.getName());
     this.data.addStarData(starData);
 
-    // get Target coordinates precessed to jd and define target to get later az/alt positions from JSkyCalc :
+    // get Target coordinates precessed to JD CENTER and define target to get later az/alt positions from JSkyCalc :
     final double[] raDec = this.sco.defineTarget(jdCenter(), target.getRADeg(), target.getDECDeg());
 
     // precessed target right ascension in decimal hours :
@@ -799,7 +802,7 @@ public final class ObservabilityService {
 
       // Check Moon restriction:
       List<Range> rangesJDMoon = null;
-      if (this.useNightLimit) {
+      if (this.useNightLimit && this.moonPointingRestriction != null) {
         rangesJDMoon = checkMoonRestriction(targetName, precDEC, rangeJDRiseSet);
 
         if (isLogDebug) {
@@ -835,6 +838,8 @@ public final class ObservabilityService {
 
         // Add Rise/Set :
         final StarObservabilityData soRiseSet = new StarObservabilityData(targetName, "Rise/Set", StarObservabilityData.TYPE_RISE_SET);
+        // get target position (ha, az, el) at range boundaries:
+        getTargetPosition(soRiseSet, Arrays.asList(new Range[]{rangeJDRiseSet}), precRA, precDEC, false);
         starVisList.add(soRiseSet);
 
         // convert JD ranges to date ranges :
@@ -847,6 +852,8 @@ public final class ObservabilityService {
         if (rangesJDHorizon != null) {
           // Add Horizon :
           final StarObservabilityData soHz = new StarObservabilityData(targetName, "Horizon", StarObservabilityData.TYPE_HORIZON);
+          // get target position (ha, az, el) at range boundaries:
+          getTargetPosition(soHz, rangesJDHorizon, precRA, precDEC, false);
           starVisList.add(soHz);
 
           // convert JD ranges to date ranges :
@@ -862,6 +869,8 @@ public final class ObservabilityService {
         if (rangesJDMoon != null) {
           // Add Moon separation :
           final StarObservabilityData soMoon = new StarObservabilityData(targetName, "Moon Sep.", StarObservabilityData.TYPE_MOON_DIST);
+          // get target position (ha, az, el) at range boundaries:
+          getTargetPosition(soMoon, rangesJDMoon, precRA, precDEC, false);
           starVisList.add(soMoon);
 
           // convert JD ranges to date ranges :
@@ -877,6 +886,8 @@ public final class ObservabilityService {
         if (rangesJDWind != null) {
           // Add Horizon :
           final StarObservabilityData soWind = new StarObservabilityData(targetName, "Wind", StarObservabilityData.TYPE_WIND);
+          // get target position (ha, az, el) at range boundaries:
+          getTargetPosition(soWind, rangesJDWind, precRA, precDEC, false);
           starVisList.add(soWind);
 
           // convert JD ranges to date ranges :
@@ -909,6 +920,8 @@ public final class ObservabilityService {
             }
 
             soBl = new StarObservabilityData(targetName, baseLine.getName(), StarObservabilityData.TYPE_BASE_LINE + i);
+            // get target position (ha, az, el) at range boundaries:
+            getTargetPosition(soBl, obsRanges, precRA, precDEC, false);
             starVisList.add(soBl);
 
             // convert JD ranges to date ranges :
@@ -981,8 +994,8 @@ public final class ObservabilityService {
 
       // store merge result as date intervals :
       if (finalRanges != null) {
-        // elevation marks for the current target :
-        getTargetPosition(starObs, finalRanges, precRA, precDEC);
+        // get detailled target position (ha, az, el) for the current target (ticks):
+        getTargetPosition(starObs, finalRanges, precRA, precDEC, true);
 
         // convert JD ranges to date ranges :
         for (Range range : finalRanges) {
@@ -1008,12 +1021,18 @@ public final class ObservabilityService {
           logger.debug("HA observability: {}", haObsRanges);
         }
         starData.setObsRangesHA(haObsRanges);
+      } else {
+        if (isLogDebug) {
+          logger.debug("Target not observable: {}", target);
+        }
+        addWarning("The target [" + targetName + "] is not observable");
       }
 
     } else {
       if (isLogDebug) {
         logger.debug("Target never rise: {}", target);
       }
+      addWarning("The target [" + targetName + "] is not observable (never rise)");
     }
 
     // reset current target :
@@ -1269,9 +1288,12 @@ public final class ObservabilityService {
 
     Range range = new Range();
 
-    for (double jd = jdMin; jd < jdMax; jd += JD_STEP) {
+    for (double jd = jdMin, jdIn; jd < jdMax; jd += JD_STEP) {
 
-      this.sco.getTargetPosition(cosDec, sinDec, jd, azEl);
+      // fix JD in LST range [0; 24] in order to have accurate target position:
+      jdIn = getJDInLstRange(jd);
+
+      this.sco.getTargetPosition(cosDec, sinDec, jdIn, azEl);
 
       visible = true;
 
@@ -1341,9 +1363,12 @@ public final class ObservabilityService {
 
     Range range = new Range();
 
-    for (double jd = jdMin; jd < jdMax; jd += JD_STEP) {
+    for (double jd = jdMin, jdIn; jd < jdMax; jd += JD_STEP) {
 
-      this.sco.getTargetPosition(cosDec, sinDec, jd, azEl);
+      // fix JD in LST range [0; 24] in order to have accurate target position:
+      jdIn = getJDInLstRange(jd);
+
+      this.sco.getTargetPosition(cosDec, sinDec, jdIn, azEl);
 
       visible = true;
 
@@ -1392,9 +1417,17 @@ public final class ObservabilityService {
    * @return list of observable ranges (no restriction) or null if thread interrupted
    */
   private List<Range> checkMoonRestriction(final String targetName, final double precDEC, final Range jdRiseSet) {
-    // Use default separation check to report warning messages:
-    final double moonSeparationThreshold = AsproConstants.DEFAULT_MOON_SEPARATION_CHECK;
-    double threshold = moonSeparationThreshold * 1.05d; // 5% margin
+    final double warningThreshold = this.moonPointingRestriction.getWarningThreshold();
+
+    // get moon restriction rules as array:
+    final MoonRestriction[] moonRestrictions = new MoonRestriction[this.moonPointingRestriction.getRestrictions().size()];
+    this.moonPointingRestriction.getRestrictions().toArray(moonRestrictions);
+
+    // get FLI on current night:
+    final double fli = this.data.getMoonIllumPercent();
+
+    // Add 5% margin for quick check:
+    final double threshold = warningThreshold * 1.05d;
 
     // output :
     final List<Range> ranges = new ArrayList<Range>(2);
@@ -1414,19 +1447,19 @@ public final class ObservabilityService {
     double separation;
 
     // check at jd min:
-    separation = this.sco.getMoonSeparation(cosDec, sinDec, jdMin);
+    separation = getMoonSeparation(cosDec, sinDec, jdMin);
 
     if (separation <= threshold) {
       doCheck = true;
     } else {
       // check at jd mid:
-      separation = this.sco.getMoonSeparation(cosDec, sinDec, jdMid);
+      separation = getMoonSeparation(cosDec, sinDec, jdMid);
 
       if (separation <= threshold) {
         doCheck = true;
       } else {
         // check at jd max:
-        separation = this.sco.getMoonSeparation(cosDec, sinDec, jdMax);
+        separation = getMoonSeparation(cosDec, sinDec, jdMax);
 
         if (separation <= threshold) {
           doCheck = true;
@@ -1435,9 +1468,10 @@ public final class ObservabilityService {
     }
 
     if (doCheck) {
-      // use exact moon distance threshold:
-      threshold = moonSeparationThreshold;
+      // 0.5 arcmin for uncertainty:
+      final double margin = 0.5d / 60d;
 
+      Double ruleFli;
       double minSeparation = Double.POSITIVE_INFINITY;
       double minJd = 0d;
 
@@ -1450,17 +1484,30 @@ public final class ObservabilityService {
 
         visible = true;
 
-        // ensure moon rise:
-        if (Range.contains(this.moonRiseRanges, jd)) {
-          // check at jd:
-          separation = this.sco.getMoonSeparation(cosDec, sinDec, jd);
+        // check at jd:
+        separation = getMoonSeparation(cosDec, sinDec, jd);
 
-          if (separation < minSeparation) {
-            minSeparation = separation;
-            minJd = jdMid;
+        if (separation < minSeparation) {
+          minSeparation = separation;
+          minJd = jdMid;
+        }
+
+        // use uncertainty:
+        separation -= margin;
+
+        // evaluate moon restriction rules:
+        for (MoonRestriction restriction : moonRestrictions) {
+          ruleFli = restriction.getFli();
+          if (ruleFli != null) {
+            if (fli < ruleFli.doubleValue()) {
+              // skip rule
+              continue;
+            }
           }
-
-          visible = separation > threshold;
+          if (separation < restriction.getSeparation()) {
+            visible = false;
+            break;
+          }
         }
 
         // manage intervals :
@@ -1487,8 +1534,8 @@ public final class ObservabilityService {
         ranges.add(range);
       }
 
-      // check again threshold:
-      if (minSeparation < threshold) {
+      // check again warning threshold:
+      if (minSeparation < warningThreshold) {
         // add warning:
         this.addWarning("Moon separation is " + df1.format(minSeparation)
                 + " deg at " + timeFormatter.format(convertJDToDate(minJd))
@@ -1501,6 +1548,20 @@ public final class ObservabilityService {
     }
 
     return ranges;
+  }
+
+  /**
+   * Return the moon separation in degrees of the current target at the given julian date
+   * @param cosDec cosinus of target declination
+   * @param sinDec sinus of target declination
+   * @param jd julian date
+   * @return moon separation in degrees or +INFINITY if moon is not visible
+   */
+  private double getMoonSeparation(final double cosDec, final double sinDec, final double jd) {
+    // fix JD in LST range [0; 24] in order to have accurate target position:
+    final double jdIn = getJDInLstRange(jd);
+
+    return this.sco.getMoonSeparation(cosDec, sinDec, jdIn);
   }
 
   /**
@@ -1613,6 +1674,14 @@ public final class ObservabilityService {
     }
 
     this.data.setStationNames(this.observation.getInstrumentConfiguration().getStations());
+
+    // All telescopes have the same properties for a given baseline :
+    final Telescope tel = stations.get(0).getTelescope();
+
+    final MoonPointingRestriction mpr = tel.getMoonPointingRestriction();
+    if (mpr != null) {
+      this.moonPointingRestriction = mpr;
+    }
 
     final int nBeams = stations.size();
 
@@ -2129,32 +2198,42 @@ public final class ObservabilityService {
   }
 
   /**
-   * Convert a JD date to a date within LST range [0;24]
+   * Fix a JD date into LST range [0;24]
    *
-   * @param jd date to convert
+   * @param jd date to fix
    * @return date
    */
-  private Date convertJDToDate(final double jd) {
+  private double getJDInLstRange(final double jd) {
     if (jd >= this.jdLower) {
 
       if (jd <= this.jdUpper) {
 
-        // date in [jdLst0;jdLst24]
-        return jdToDateInDateRange(jd);
+        // JD in [jdLst0;jdLst24]
+        return jd;
 
       } else {
         // over LST 24 :
 
         // return [jd - day]
-        return jdToDateInDateRange(jd - AstroSkyCalc.LST_DAY_IN_JD);
+        return jd - AstroSkyCalc.LST_DAY_IN_JD;
       }
 
     } else {
       // start occurs before LST 0h :
 
       // return [jd + day]
-      return jdToDateInDateRange(jd + AstroSkyCalc.LST_DAY_IN_JD);
+      return jd + AstroSkyCalc.LST_DAY_IN_JD;
     }
+  }
+
+  /**
+   * Convert a JD date to a date within LST range [0;24]
+   *
+   * @param jd date to convert
+   * @return date
+   */
+  private Date convertJDToDate(final double jd) {
+    return jdToDateInDateRange(getJDInLstRange(jd));
   }
 
   /**
@@ -2220,14 +2299,17 @@ public final class ObservabilityService {
   }
 
   /**
-   * Define azimuth / elevation marks on observability ranges for the current target
+   * Define HA / azimuth / elevation information about observability ranges and transit for the current target
    * @param starObs star observability data
    * @param obsRangeJD observability ranges in JD
    * @param precRA precessed RA in decimal hours
    * @param precDEC precessed DEC in degrees
+   * @param doDetails flag to enable detailled (ticks and transit information)
    */
-  private void getTargetPosition(final StarObservabilityData starObs, final List<Range> obsRangeJD, final double precRA, final double precDEC) {
-    final List<TargetPositionDate> targetPositions = starObs.getTargetPositions();
+  private void getTargetPosition(final StarObservabilityData starObs, final List<Range> obsRangeJD,
+          final double precRA, final double precDEC,
+          final boolean doDetails) {
+    final Map<Date, TargetPositionDate> targetPositions = starObs.getTargetPositions();
 
     // prepare cosDec/sinDec:
     final double dec = Math.toRadians(precDEC);
@@ -2238,34 +2320,36 @@ public final class ObservabilityService {
 
     double jd;
 
-    final int minElevation = (int) Math.round(this.minElev);
+    if (doDetails) {
+      final int minElevation = (int) Math.round(this.minElev);
 
-    // internal ticks for elevation :
-    for (int elevation = 20; elevation <= 80; elevation += 20) {
-      if (elevation > minElevation) {
-        final double haElev = this.sco.getHAForElevation(precDEC, elevation);
+      // internal ticks for elevation :
+      for (int elevation = 20; elevation <= 80; elevation += 20) {
+        if (elevation > minElevation) {
+          final double haElev = this.sco.getHAForElevation(precDEC, elevation);
 
-        if (haElev > 0d) {
-          jd = this.sc.convertHAToJD(-haElev, precRA);
-          if (Range.contains(obsRangeJD, jd)) {
-            addTargetPosition(targetPositions, cosDec, sinDec, azEl, jd);
-          }
+          if (haElev > 0d) {
+            jd = this.sc.convertHAToJD(-haElev, precRA);
+            if (Range.contains(obsRangeJD, jd)) {
+              addTargetPosition(targetPositions, cosDec, sinDec, azEl, jd);
+            }
 
-          jd = this.sc.convertHAToJD(haElev, precRA);
-          if (Range.contains(obsRangeJD, jd)) {
-            addTargetPosition(targetPositions, cosDec, sinDec, azEl, jd);
+            jd = this.sc.convertHAToJD(haElev, precRA);
+            if (Range.contains(obsRangeJD, jd)) {
+              addTargetPosition(targetPositions, cosDec, sinDec, azEl, jd);
+            }
           }
         }
       }
+
+      // tick for transit :
+      jd = this.sc.convertHAToJD(0d, precRA);
+      if (Range.contains(obsRangeJD, jd)) {
+        addTargetPosition(targetPositions, cosDec, sinDec, azEl, jd);
+      }
     }
 
-    // tick for transit :
-    jd = this.sc.convertHAToJD(0d, precRA);
-    if (Range.contains(obsRangeJD, jd)) {
-      addTargetPosition(targetPositions, cosDec, sinDec, azEl, jd);
-    }
-
-    // ticks for observability intervals (limits) :
+    // ticks for observability intervals (limits):
     for (Range range : obsRangeJD) {
       jd = range.getMin();
       addTargetPosition(targetPositions, cosDec, sinDec, azEl, jd);
@@ -2276,23 +2360,28 @@ public final class ObservabilityService {
 
     if (isLogDebug) {
       logger.debug("elevations : ");
-      for (TargetPositionDate elevationDate : targetPositions) {
+      for (TargetPositionDate elevationDate : targetPositions.values()) {
         logger.debug(elevationDate.toString());
       }
     }
   }
 
   /**
-   * Add target position (azimuth and elevation)
-   * @param targetPositions list of target position to add into
+   * Add new target position (azimuth and elevation) for the given target and julian date
+   * @param targetPositions map of target positions keyed by date
    * @param cosDec cosinus of target declination
    * @param sinDec sinus of target declination
    * @param azEl AzEl instance
    * @param jd julian date
    */
-  private void addTargetPosition(final List<TargetPositionDate> targetPositions, final double cosDec, final double sinDec, final AzEl azEl, final double jd) {
-    this.sco.getTargetPosition(cosDec, sinDec, jd, azEl);
-    targetPositions.add(new TargetPositionDate(convertJDToDate(jd), (int) Math.round(azEl.getAzimuth()), (int) Math.round(azEl.getElevation())));
+  private void addTargetPosition(final Map<Date, TargetPositionDate> targetPositions, final double cosDec, final double sinDec, final AzEl azEl, final double jd) {
+    // fix JD in LST range [0; 24] in order to have accurate target position:
+    final double jdIn = getJDInLstRange(jd);
+
+    final double ha = this.sco.getTargetPosition(cosDec, sinDec, jdIn, azEl);
+
+    final Date date = convertJDToDate(jd);
+    targetPositions.put(date, new TargetPositionDate(date, ha, (int) Math.round(azEl.getAzimuth()), (int) Math.round(azEl.getElevation())));
   }
 
   /**

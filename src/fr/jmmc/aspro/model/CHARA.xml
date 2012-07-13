@@ -39,6 +39,18 @@
         <!-- tip tilt -->
         <numberActuators>2</numberActuators>
       </adaptiveOptics>
+
+      <!--
+        Moon Pointing Restrictions on CHARA:
+        undefined
+      -->
+      <moonPointingRestriction>
+        <warningThreshold>20</warningThreshold>
+        <restriction>
+          <separation>5.0</separation>
+        </restriction>
+      </moonPointingRestriction>
+
     </telescope>
 
     <station>
