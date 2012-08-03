@@ -38,6 +38,8 @@ public final class AsproGenConfig {
     VLTI,
     /** CHARA array */
     CHARA,
+    /** SUSI (future) */
+    SUSI,
     /** MROI (future) */
     MROI
   };
@@ -621,47 +623,6 @@ public final class AsproGenConfig {
     return new double[]{lonDeg, latDeg};
   }
 
-  /**
-   * Main entry point to generate configuration parts (xml)
-   * @param args unused
-   */
-  public static void main(final String[] args) {
-    final String asproPath = "/home/bourgesl/dev/aspro1/etc/";
-
-    final INTERFEROMETER selected = INTERFEROMETER.VLTI;
-
-    switch (selected) {
-      case VLTI:
-        VLTIPosition();
-
-        convertSwitchYard(asproPath + "VLT.switchyard");
-
-        final String[] vltStations = {
-          "U1", "U2", "U3", "U4", "A0", "A1", "B0", "B1", "B2", "B3", "B4", "B5",
-          "C0", "C1", "C2", "C3", "D0", "D1", "D2", "E0", "G0", "G1", "G2", "H0",
-          "I1", "J1", "J2", "J3", "J4", "J5", "J6", "K0", "L0", "M0"};
-
-        final StringBuilder sb = new StringBuilder(65535);
-
-        for (String station : vltStations) {
-          convertHorizon(station, asproPath + station + ".horizon", sb);
-        }
-        logger.info("convertHorizons : \n" + sb.toString());
-        break;
-      case CHARA:
-        convertCHARAConfig("/home/bourgesl/dev/aspro/test/telescopes.chara");
-        break;
-      case MROI:
-        MROIposition();
-
-        convertStationFile(asproPath + "MROI.stations");
-        break;
-
-      default:
-        logger.info("unsupported interferometer : " + selected);
-    }
-  }
-
   private static void VLTIPosition() {
 
     final StringBuilder sb = new StringBuilder(128);
@@ -841,5 +802,65 @@ public final class AsproGenConfig {
     }
 
     logger.info("convertStationFile : output :\n" + sb.toString());
+  }
+  
+  private static void SUSIposition() {
+
+    final StringBuilder sb = new StringBuilder(128);
+
+    final double lonDeg = 149.548224972222d;
+    logger.info("SUSI longitude (deg) : " + lonDeg);
+
+    final double latDeg = -30.322273888889d;
+    logger.info("SUSI latitude (deg) : " + latDeg);
+
+    final double alt = 210d;
+    computeInterferometerPosition(lonDeg, latDeg, alt, sb);
+    
+    logger.info("Generated SUSI position:\n" + sb.toString());
+  }
+
+  /**
+   * Main entry point to generate configuration parts (xml)
+   * @param args unused
+   */
+  public static void main(final String[] args) {
+    final String asproPath = "/home/bourgesl/dev/aspro1/etc/";
+
+    final INTERFEROMETER selected = INTERFEROMETER.SUSI;
+
+    switch (selected) {
+      case VLTI:
+        VLTIPosition();
+
+        convertSwitchYard(asproPath + "VLT.switchyard");
+
+        final String[] vltStations = {
+          "U1", "U2", "U3", "U4", "A0", "A1", "B0", "B1", "B2", "B3", "B4", "B5",
+          "C0", "C1", "C2", "C3", "D0", "D1", "D2", "E0", "G0", "G1", "G2", "H0",
+          "I1", "J1", "J2", "J3", "J4", "J5", "J6", "K0", "L0", "M0"};
+
+        final StringBuilder sb = new StringBuilder(65535);
+
+        for (String station : vltStations) {
+          convertHorizon(station, asproPath + station + ".horizon", sb);
+        }
+        logger.info("convertHorizons : \n" + sb.toString());
+        break;
+      case CHARA:
+        convertCHARAConfig("/home/bourgesl/dev/aspro/test/telescopes.chara");
+        break;
+      case MROI:
+        MROIposition();
+
+        convertStationFile(asproPath + "MROI.stations");
+        break;
+      case SUSI:
+        SUSIposition();
+        break;
+
+      default:
+        logger.info("unsupported interferometer : " + selected);
+    }
   }
 }

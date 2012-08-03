@@ -557,7 +557,7 @@
       <!-- noise parameters -->
       <transmission>0.02</transmission>
       <dit>0.008</dit>
-      <ron>10</ron>
+      <ron>20</ron>
       <detectorSaturation>32700</detectorSaturation>
       <instrumentVisibility>0.9</instrumentVisibility>
       <instrumentVisibilityBias>2</instrumentVisibilityBias>
@@ -928,7 +928,7 @@ Configuration d’enregistrement
       <!-- noise parameters -->
       <transmission>0.02</transmission>
       <dit>0.008</dit>
-      <ron>10</ron>
+      <ron>20</ron>
       <detectorSaturation>32700</detectorSaturation>
       <instrumentVisibility>0.9</instrumentVisibility>
       <instrumentVisibilityBias>2</instrumentVisibilityBias>
