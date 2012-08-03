@@ -798,6 +798,9 @@ public final class Vis2Panel extends javax.swing.JPanel implements ChartProgress
       final double[][] spatialFreq = t3.getSpatial();
 
       xRangeT3 = updatePlot(xyPlotT3, t3, t3.getT3Phi(), t3.getT3PhiErr(), spatialFreq);
+    } else {
+      // reset T3 dataset:
+      this.xyPlotT3.setDataset(null);
     }
 
     if (xRangeVis2 == null && xRangeT3 == null) {
