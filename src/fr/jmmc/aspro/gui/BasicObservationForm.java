@@ -4,6 +4,7 @@
 package fr.jmmc.aspro.gui;
 
 import edu.dartmouth.AstroSkyCalc;
+import edu.dartmouth.AstroSkyCalcObservation;
 import edu.dartmouth.JSkyCalc;
 import edu.dartmouth.Observation;
 import edu.dartmouth.Site;
@@ -540,9 +541,27 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
       final ObservationSetting observation = om.getMainObservation();
       final InterferometerDescription interferometer = observation.getInterferometerConfiguration().getInterferometerConfiguration().getInterferometer();
 
-      final Site site  = AstroSkyCalc.createSite(interferometer.getName(), interferometer.getPosSph());
+      final Site site = AstroSkyCalc.createSite(interferometer.getName(), interferometer.getPosSph());
 
-      JSkyCalc.showJSkyCalc(site, selectedTarget.getRA(), selectedTarget.getDEC(), observation.getWhen().getDate());
+      final List<Target> displayTargets = om.getDisplayTargets();
+
+      final int size = displayTargets.size();
+      final String[] name = new String[size];
+      final String[] ra = new String[size];
+      final String[] dec = new String[size];
+
+      for (int i = 0; i < size; i++) {
+        final Target target = displayTargets.get(i);
+        name[i] = target.getName();
+
+        // convert RA/DEC in HH:MM:SS.sss or DD:MM:SS.sss :
+        final String[] raDec = AstroSkyCalcObservation.toString(target.getRADeg(), target.getDECDeg());
+
+        ra[i] = raDec[0];
+        dec[i] = raDec[1];
+      }
+
+      JSkyCalc.showJSkyCalc(site, name, ra, dec, selectedTarget.getName(), observation.getWhen().getDate());
     }
   }//GEN-LAST:event_jButtonSkyCalcActionPerformed
 
@@ -1182,8 +1201,8 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     final Double windRestriction = cm.getWindPointingRestriction((String) this.jComboBoxInterferometer.getSelectedItem());
 
     // wind restriction is enabled only if night restriction are enabled and interferometer support it:
-    final boolean useWind = this.jCheckBoxNightLimit.isSelected() &&
-            (windRestriction != null && windRestriction > 0d && windRestriction < 180d);
+    final boolean useWind = this.jCheckBoxNightLimit.isSelected()
+            && (windRestriction != null && windRestriction > 0d && windRestriction < 180d);
 
     if (!useWind) {
       // reset

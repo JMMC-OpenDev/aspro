@@ -1,6 +1,5 @@
 package edu.dartmouth;
 
-import fr.jmmc.jmcs.gui.util.SwingUtils;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Container;
@@ -36,11 +35,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Locale;
 import javax.swing.AbstractButton;
 import javax.swing.ButtonGroup;
@@ -76,7 +77,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
  title and author banner appearing on the main window must not be removed,
  and may not be altered without premission of the author. */
 
-/* JSkyCalc is not used by ASPRO 2 */
+/* JSkyCalc is used by ASPRO 2 only for sky display ... */
 public final class JSkyCalc {
 
   public static void main(String[] args) {
@@ -110,11 +111,15 @@ public final class JSkyCalc {
   /**
    * Show the JSkyCalc window for the given site and target (given its RA/DEC) at the given calendar date
    * @param site site to use
-   * @param ra target RA as string
-   * @param dec target DEC as string
+   * @param name target name(s) as string
+   * @param ra target RA(s) as string
+   * @param dec target DEC(s) as string
+   * @param selected selected target
    * @param cal calendar date
    */
-  public static void showJSkyCalc(final Site site, final String ra, final String dec, final XMLGregorianCalendar cal) {
+  public static void showJSkyCalc(final Site site, final String[] name, final String[] ra, final String[] dec, 
+          final String selected, final XMLGregorianCalendar cal) {
+    
     if (jSkyCalcWin == null) {
       ALLOW_QUIT = false;
       ALLOW_SITE_WINDOW = false;
@@ -142,10 +147,20 @@ public final class JSkyCalc {
     }
     jSkyCalcWin.synchSite();
 
-    // target:
-    jSkyCalcWin.RAfield.setText(ra.replace(':', ' ').trim());
-    jSkyCalcWin.decfield.setText(dec.replace(':', ' ').trim());
-    jSkyCalcWin.equinoxfield.setText("2000");
+    // update complete list of targets:
+    final BufferedReader reader = new BufferedReader(new StringReader(prepareAstroObjs(name, ra, dec)));
+
+    jSkyCalcWin.freeAstroObjs();
+    jSkyCalcWin.LoadAstrObjs(reader);
+    try {
+      reader.close();
+    } catch (IOException ioe) {
+      System.out.println(ioe);
+    }
+    
+    // define selected target:
+    jSkyCalcWin.objnamefield.setText(selected.replace(' ', '_').trim());
+    jSkyCalcWin.objnamefield.getActionListeners()[0].actionPerformed(null);
     jSkyCalcWin.synchOutput();
 
     // date:
@@ -164,6 +179,27 @@ public final class JSkyCalc {
 
     // show anyway:
     jSkyCalcWin.frame.setVisible(true);
+    
+    jSkyCalcWin.skydisplayvisible = true;
+    jSkyCalcWin.SkyWin.setVisible(true);
+  }
+  
+  private static String prepareAstroObjs(final String[] name, final String[] ra, final String[] dec) {
+    final int len = name.length;
+    if (len != ra.length || len != dec.length) {
+      return "";
+    }
+    final StringBuilder sb = new StringBuilder(64 * len);
+    
+    for (int i = 0; i < len; i++) {
+      // name_no_blanks   hh mm ss   dd mm ss   equinox
+      sb.append(name[i].replace(' ', '_').trim()).append(' ');
+      sb.append(ra[i].replace(':', ' ').trim()).append(' ');
+      sb.append(dec[i].replace(':', ' ').trim()).append(' ');
+      sb.append("2000\n");
+    }
+    
+    return sb.toString();
   }
 }
 
@@ -221,7 +257,7 @@ class JSkyCalcWindow extends JComponent {
   AstrObjSelector ObjSelWin;
   boolean objselwinvisible = false;
   static String st = null;
-  static HashMap<String, AstrObj> byname = new HashMap<String, AstrObj>();
+  static HashMap<String, AstrObj> byname = new LinkedHashMap<String, AstrObj>();
   static HashMap<Double, AstrObj> byra = new HashMap<Double, AstrObj>();
   static Double rakey;
   static String[] RASelectors;  // real names, sorted by ra
@@ -964,12 +1000,11 @@ class JSkyCalcWindow extends JComponent {
       sitebutton.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           if (siteframevisible) {  // there's got to be a better way ..
-            siteframe.setVisible(false);
             siteframevisible = false;
           } else {  // site frame is invisible
-            siteframe.setVisible(true);
             siteframevisible = true;
           }
+          siteframe.setVisible(siteframevisible);
         }
       });
       controlbuttonpan.add(sitebutton);
@@ -979,13 +1014,12 @@ class JSkyCalcWindow extends JComponent {
     planetbutton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         if (planetframevisible) {  // there's got to be a better way ..
-          PlWin.setVisible(false);
           planetframevisible = false;
         } else {  // planet frame is invisible
-          PlWin.setVisible(true);
           PlWin.DisplayUpdate();   // refresh it ...
           planetframevisible = true;
         }
+        PlWin.setVisible(planetframevisible);
       }
     });
     controlbuttonpan.add(planetbutton);
@@ -994,14 +1028,13 @@ class JSkyCalcWindow extends JComponent {
     hourlybutton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         if (hourlyframevisible) {  // there's got to be a better way ..
-          HrWin.setVisible(false);
           hourlyframevisible = false;
         } else {  // hourly frame is invisible
           HrWin.Update();
-          HrWin.setVisible(true);
           hourlyframevisible = true;
         }
         //      hourlyframe.repaint();
+        HrWin.setVisible(hourlyframevisible);
       }
     });
     controlbuttonpan.add(hourlybutton);
@@ -1010,14 +1043,13 @@ class JSkyCalcWindow extends JComponent {
     nightlybutton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         if (nightlyframevisible) {  // there's got to be a better way ..
-          NgWin.setVisible(false);
           nightlyframevisible = false;
         } else {  // nightly frame is invisible
           Nightly.Update(o.w);
           NgWin.UpdateDisplay();
-          NgWin.setVisible(true);
           nightlyframevisible = true;
         }
+        NgWin.setVisible(nightlyframevisible);
       }
     });
     controlbuttonpan.add(nightlybutton);
@@ -1027,12 +1059,11 @@ class JSkyCalcWindow extends JComponent {
       public void actionPerformed(ActionEvent e) {
         if (seasonframevisible) {
           SeasonWin.DisplayUpdate();
-          SeasonWin.setVisible(false);
           seasonframevisible = false;
         } else {
           seasonframevisible = true;
-          SeasonWin.setVisible(true);
         }
+        SeasonWin.setVisible(seasonframevisible);
       }
     });
     controlbuttonpan.add(seasonalshow);
@@ -1040,8 +1071,12 @@ class JSkyCalcWindow extends JComponent {
     JButton objselshow = new JButton("Object Lists ...");
     objselshow.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        objselwinvisible = true;
-        ObjSelWin.setVisible(true);
+        if (objselwinvisible) {
+          objselwinvisible = false;
+        } else {
+          objselwinvisible = true;
+        }
+        ObjSelWin.setVisible(objselwinvisible);
       }
     });
     controlbuttonpan.add(objselshow);
@@ -1051,12 +1086,11 @@ class JSkyCalcWindow extends JComponent {
       public void actionPerformed(ActionEvent e) {
         if (skydisplayvisible) {
           skydisplayvisible = false;
-          SkyWin.setVisible(false);
         } else {
           skydisplayvisible = true;
           SkyDisp.repaint();
-          SkyWin.setVisible(true);
         }
+        SkyWin.setVisible(skydisplayvisible);
       }
     });
     controlbuttonpan.add(skydisplayshow);
@@ -1066,12 +1100,11 @@ class JSkyCalcWindow extends JComponent {
       public void actionPerformed(ActionEvent e) {
         if (altcoowinvisible) {
           altcoowinvisible = false;
-          AltWin.setVisible(false);
         } else {
           altcoowinvisible = true;
           AltWin.Refresh();
-          AltWin.setVisible(true);
         }
+        AltWin.setVisible(altcoowinvisible);
       }
     });
     controlbuttonpan.add(altwinshow);
@@ -1081,14 +1114,12 @@ class JSkyCalcWindow extends JComponent {
       public void actionPerformed(ActionEvent e) {
         if (!airmasswindowvisible) {
           airmasswindowvisible = true;
-          AirWin.setVisible(true);
-          AirmSelWin.setVisible(true);
           synchOutput();
         } else {
           airmasswindowvisible = false;
-          AirWin.setVisible(false);
-          AirmSelWin.setVisible(false);
         }
+        AirWin.setVisible(airmasswindowvisible);
+        AirmSelWin.setVisible(airmasswindowvisible);
       }
     });
 
@@ -1124,11 +1155,10 @@ class JSkyCalcWindow extends JComponent {
       public void actionPerformed(ActionEvent e) {
         if (helpwindowvisible) {
           helpwindowvisible = false;
-          HelpWin.setVisible(false);
         } else {
           helpwindowvisible = true;
-          HelpWin.setVisible(true);
         }
+        HelpWin.setVisible(helpwindowvisible);
       }
     });
 
@@ -2299,8 +2329,11 @@ class JSkyCalcWindow extends JComponent {
       }
     }
 
-    void LoadList() {
+    void LoadListByRA() {
       selectorList.setListData(RASelectors);
+    }
+    void LoadListByName() {
+      selectorList.setListData(NameSelectors);
     }
   }
 
@@ -2309,20 +2342,29 @@ class JSkyCalcWindow extends JComponent {
     FileGrabber ff = new FileGrabber();
 
     // LBO: fixed NPE
-    if (ff == null || ff.br == null) {
+    if (ff == null || ff.infile == null) {
       System.out.printf("No objects loaded.\n");
       return;
     }
+    
+    try {
+      LoadAstrObjs(ff.br);
+    } finally {
+      ff.closer();
+    }
+  }
+  
+  void LoadAstrObjs(BufferedReader br) {
 
     try {
-      while ((st = ff.br.readLine()) != null) {
+      while ((st = br.readLine()) != null) {
         obj = new AstrObj(st);
         if (obj.name != null & obj.c != null) {
           byname.put(obj.name.toLowerCase(), obj);
           rakey = (Double) obj.c.alpha.value;
           // ensure unique RA keys by inserting small tie-breaker offset
           while (byra.keySet().contains(rakey)) {
-            rakey = rakey + 0.00001;
+            rakey += 0.00001d;
           }
           byra.put(rakey, obj);
         }
@@ -2331,12 +2373,11 @@ class JSkyCalcWindow extends JComponent {
       System.out.println(e);
     }
 
-    ff.closer();
-
     java.util.List<String> namekeys = new ArrayList<String>(byname.keySet());
     java.util.List<Double> rakeys = new ArrayList<Double>(byra.keySet());
 
-    Collections.sort(namekeys);
+// LBO: disable alphabetical sort to keep things ordered
+//    Collections.sort(namekeys);
     Collections.sort(rakeys);
 
     RASelectors = new String[rakeys.size()];
@@ -2363,11 +2404,18 @@ class JSkyCalcWindow extends JComponent {
       NameSelectors[i] = tempobj.name;
       i++;
     }
-    // AstrObjSelector objsel = new AstrObjSelector();
-    ObjSelWin.LoadList();
-    AirmSelWin.LoadList();
+    // LBO: use name to keep order
+    ObjSelWin.LoadListByName();
+    AirmSelWin.LoadListByName();
   }
 
+  
+  void freeAstroObjs() {
+    byname.clear();
+    byra.clear();
+    presenterKey.clear();
+  }
+  
   void ClearAstrObjs() {
 
     NameSelectors = new String[1];
@@ -2399,8 +2447,8 @@ class JSkyCalcWindow extends JComponent {
     presenterKey.put("null", nullobj);
 
     // AstrObjSelector objsel = new AstrObjSelector();
-    ObjSelWin.LoadList();   // which is now empty.
-    AirmSelWin.LoadList();
+    ObjSelWin.LoadListByName();   // which is now empty.
+    AirmSelWin.LoadListByName();
   }
 
   void SelObjByPos(Celest incel) {
@@ -2883,7 +2931,6 @@ class JSkyCalcWindow extends JComponent {
     double pixperunit;
     double xmid, ymid;          // x, y coords of the center of the screen.
     double halfwidthxfull, halfwidthyfull, pixperunitfull;
-    Graphics2D g2;
     Font smallfont;
     FontMetrics smallfontmetrics;
     Font mediumfont;
@@ -3129,12 +3176,13 @@ class JSkyCalcWindow extends JComponent {
       double[] xy2 = {0., 0.};
       int i;
 
-      g2 = (Graphics2D) g;
+      Graphics2D g2 = (Graphics2D) g;
+      g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+      g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+
       smallfontmetrics = g2.getFontMetrics(smallfont);
       mediumfontmetrics = g2.getFontMetrics(mediumfont);
       largefontmetrics = g2.getFontMetrics(largefont);
-      g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-              RenderingHints.VALUE_ANTIALIAS_ON);
       g2.setBackground(skycolor());
       g2.clearRect(0, 0, xpixint, ypixint);
 
@@ -3152,31 +3200,30 @@ class JSkyCalcWindow extends JComponent {
         g2.draw(HAgrid[i]);
       }
 
-      drawcircle(0., 0., 1., "solid", 0.7f);   // horizon
-      drawcircle(0., 0., 0.57735, "dotted", 0.7f); // 2 airmasses
-      drawcircle(0., 0., 0.70711, "dotted", 0.7f); // 3 airmasses
-      drawcircle(0., 0., 0.7746, "dotted", 0.7f); // 4 airmasses
+      drawcircle(g2, 0., 0., 1., "solid", 0.7f);   // horizon
+      drawcircle(g2, 0., 0., 0.57735, "dotted", 0.7f); // 2 airmasses
+      drawcircle(g2, 0., 0., 0.70711, "dotted", 0.7f); // 3 airmasses
+      drawcircle(g2, 0., 0., 0.7746, "dotted", 0.7f); // 4 airmasses
       g2.setStroke(new BasicStroke(1.0f));
 
-      labelDirections();
+      labelDirections(g2);
 
-      PlotBright();
+      PlotBright(g2);
 
-      markcoords();
-      plotsun();
-      plotmoon();
-      plotplanets();
+      markcoords(g2);
+      plotsun(g2);
+      plotmoon(g2);
+      plotplanets(g2);
 
-      drawclock(xmid + 0.85 * halfwidthx, ymid + 0.85 * halfwidthy, 0.10 * halfwidthx);
+      drawclock(g2, xmid + 0.85 * halfwidthx, ymid + 0.85 * halfwidthy, 0.10 * halfwidthx);
 
-      puttext(xmid + 0.7 * halfwidthx, ymid - 0.90 * halfwidthy, o.w.where.name,
+      puttext(g2, xmid + 0.7 * halfwidthx, ymid - 0.90 * halfwidthy, o.w.where.name,
               mediumfont, mediumfontmetrics);
-      puttext(xmid + 0.7 * halfwidthx, ymid - 0.95 * halfwidthy,
+      puttext(g2, xmid + 0.7 * halfwidthx, ymid - 0.95 * halfwidthy,
               o.w.when.UTDate.roundedCalString(7, 0) + " UT", mediumfont,
               mediumfontmetrics);
 
-      plotobjects();
-
+      plotobjects(g2);
     }
 
     Color skycolor() {
@@ -3196,7 +3243,7 @@ class JSkyCalcWindow extends JComponent {
       }
     }
 
-    void drawclock(double x, double y, double radius) {
+    void drawclock(Graphics2D g2, double x, double y, double radius) {
 
       int i;
       double angle, tickx1, tickx2, ticky1, ticky2;
@@ -3223,7 +3270,7 @@ class JSkyCalcWindow extends JComponent {
         tickx2 = x + radius * cosang;
         ticky1 = y + 0.93 * radius * sinang;
         ticky2 = y + radius * sinang;
-        drawline(tickx1, ticky1, tickx2, ticky2);
+        drawline(g2, tickx1, ticky1, tickx2, ticky2);
       }
       timeval = o.w.when.localDate.timeofday.value;
       isAM = true;
@@ -3240,13 +3287,13 @@ class JSkyCalcWindow extends JComponent {
       cosang = Math.cos(angle);
       sinang = Math.sin(angle);
       g2.setStroke(new BasicStroke(2.5f));
-      drawline(x, y, x + 0.65 * radius * sinang, y + 0.65 * radius * cosang);
+      drawline(g2, x, y, x + 0.65 * radius * sinang, y + 0.65 * radius * cosang);
       g2.setStroke(new BasicStroke(1.5f));
 
       angle = 6.2831853 * (timeval - (int) timeval);
       cosang = Math.cos(angle);
       sinang = Math.sin(angle);
-      drawline(x, y, x + 0.83 * radius * sinang, y + 0.83 * radius * cosang);
+      drawline(g2, x, y, x + 0.83 * radius * sinang, y + 0.83 * radius * cosang);
 
       /* Uncomment to plot a second hand   */
       g2.setPaint(Color.RED);
@@ -3255,7 +3302,7 @@ class JSkyCalcWindow extends JComponent {
       cosang = Math.cos(angle);
       sinang = Math.sin(angle);
       g2.setStroke(new BasicStroke(1.0f));
-      drawline(x + 0.7 * radius * sinang, y + 0.7 * radius * cosang,
+      drawline(g2, x + 0.7 * radius * sinang, y + 0.7 * radius * cosang,
               x + 0.88 * radius * sinang, y + 0.88 * radius * cosang);
       g2.setStroke(new BasicStroke(1.5f));
       g2.setPaint(Color.CYAN);
@@ -3271,7 +3318,7 @@ class JSkyCalcWindow extends JComponent {
 
       String outstr = String.format(Locale.ENGLISH, "%s %s%sT", ampm, o.w.where.zone_abbrev,
               dststr);
-      puttext(x, y - 1.4 * radius, outstr, mediumfont,
+      puttext(g2, x, y - 1.4 * radius, outstr, mediumfont,
               mediumfontmetrics);
       if (o.w.altsun > -0.9) {
         outstr = "Daytime";
@@ -3281,7 +3328,7 @@ class JSkyCalcWindow extends JComponent {
         outstr = "Twilight";
       }
       // outstr = String.format(Locale.ENGLISH, "%s",o.w.where.name);
-      puttext(x, y - 1.7 * radius, outstr, mediumfont,
+      puttext(g2, x, y - 1.7 * radius, outstr, mediumfont,
               mediumfontmetrics);
 //           String dststr = "Standard";
       //          if (o.w.when.dstInEffect) dststr = "Daylight";
@@ -3343,7 +3390,7 @@ class JSkyCalcWindow extends JComponent {
       return (cel);
     }
 
-    void drawline(double x1, double y1, double x2, double y2) {  // user coords
+    void drawline(Graphics2D g2, double x1, double y1, double x2, double y2) {  // user coords
       double[] xy1;
       double[] xy2;
       xy1 = xytopix(x1, y1);
@@ -3351,7 +3398,7 @@ class JSkyCalcWindow extends JComponent {
       g2.draw(new Line2D.Double(xy1[0], xy1[1], xy2[0], xy2[1]));
     }
 
-    void drawcircle(double x1, double y1, double radius, String style, float thickness) {
+    void drawcircle(Graphics2D g2, double x1, double y1, double radius, String style, float thickness) {
       // centered on x1, y1 user coords, radius is also in user coords,
       // string can be "solid" or "dashed"
       double[] xy = {0., 0.};
@@ -3375,7 +3422,7 @@ class JSkyCalcWindow extends JComponent {
       g2.setStroke(new BasicStroke(thickness));
     }
 
-    void drawbox(double x1, double y1, double edge, String style, float thickness) {
+    void drawbox(Graphics2D g2, double x1, double y1, double edge, String style, float thickness) {
       // centered on x1, y1 user coords, radius is also in user coords,
       // string can be "solid" or "dashed"
       double[] xy = {0., 0.};
@@ -3399,7 +3446,7 @@ class JSkyCalcWindow extends JComponent {
       g2.setStroke(new BasicStroke(thickness));
     }
 
-    void markcoords() {
+    void markcoords(Graphics2D g2) {
       double lst;
       double xy[];
 
@@ -3409,10 +3456,10 @@ class JSkyCalcWindow extends JComponent {
       xy = SkyProject(lst - o.current.alpha.value,
               o.current.delta.value, coslat, sinlat);
       g2.setPaint(objboxcolor);
-      drawbox(xy[0], xy[1], 0.05, "solid", 1.3f);
+      drawbox(g2, xy[0], xy[1], 0.05, "solid", 1.3f);
     }
 
-    void plotsun() {
+    void plotsun(Graphics2D g2) {
       double lst;
       double xy[];
 
@@ -3421,12 +3468,12 @@ class JSkyCalcWindow extends JComponent {
       double sinlat = Math.sin(o.w.where.lat.radians());
       xy = SkyProject(lst - o.w.sun.topopos.alpha.value,
               o.w.sun.topopos.delta.value, coslat, sinlat);
-      putDot(xy[0], xy[1], 0.009, brightyellow);
+      putDot(g2, xy[0], xy[1], 0.009, brightyellow);
       g2.setPaint(brightyellow);
-      drawcircle(xy[0], xy[1], 0.02, "solid", 1.5f);
+      drawcircle(g2, xy[0], xy[1], 0.02, "solid", 1.5f);
     }
 
-    void puttext(double x, double y, String text, Font font, FontMetrics metrics) {
+    void puttext(Graphics2D g2, double x, double y, String text, Font font, FontMetrics metrics) {
       double[] xy;
       // write text centered left-to-right on user coords x and y.
       xy = xytopix(x, y);
@@ -3437,21 +3484,21 @@ class JSkyCalcWindow extends JComponent {
       g2.drawString(text, (int) xy[0] - adv / 2, (int) xy[1]);
     }
 
-    void labelDirections() {
+    void labelDirections(Graphics2D g2) {
       if (o.w.where.lat.value > 0.) {
-        puttext(-0.97, 0., "E", largefont, largefontmetrics);
-        puttext(0.97, 0., "W", largefont, largefontmetrics);
-        puttext(0.0, 0.80, "N", largefont, largefontmetrics);
-        puttext(0.0, -0.83, "S", largefont, largefontmetrics);
+        puttext(g2, -0.97, 0., "E", largefont, largefontmetrics);
+        puttext(g2, 0.97, 0., "W", largefont, largefontmetrics);
+        puttext(g2, 0.0, 0.80, "N", largefont, largefontmetrics);
+        puttext(g2, 0.0, -0.83, "S", largefont, largefontmetrics);
       } else {
-        puttext(-0.97, 0., "W", largefont, largefontmetrics);
-        puttext(0.97, 0., "E", largefont, largefontmetrics);
-        puttext(0.0, 0.80, "S", largefont, largefontmetrics);
-        puttext(0.0, -0.83, "N", largefont, largefontmetrics);
+        puttext(g2, -0.97, 0., "W", largefont, largefontmetrics);
+        puttext(g2, 0.97, 0., "E", largefont, largefontmetrics);
+        puttext(g2, 0.0, 0.80, "S", largefont, largefontmetrics);
+        puttext(g2, 0.0, -0.83, "N", largefont, largefontmetrics);
       }
     }
 
-    void putDot(double x, double y, double size, Color color) {
+    void putDot(Graphics2D g2, double x, double y, double size, Color color) {
       double[] xy;
       // dotsize, unfortunately, is in user units.
       xy = xytopix(x - size / 2., y + size / 2.);
@@ -3585,7 +3632,7 @@ class JSkyCalcWindow extends JComponent {
       return retvals;
     }
 
-    void PlotBright() {
+    void PlotBright(Graphics2D g2) {
       // stripped down for speed -- avoids the OO stuff .
       // Precesses only if mismatch is > 1 year.
       double ha, dec, lst;
@@ -3610,11 +3657,11 @@ class JSkyCalcWindow extends JComponent {
       for (i = 0; i < bs.length; i++) {
         xy = SkyProject(lst - bs[i].c.alpha.value, bs[i].c.delta.value, coslat, sinlat);
         //System.out.printf("PB %f %f\n",xy[0],xy[1]);
-        putDot(xy[0], xy[1], magconst1 + magslope * (magzpt - bs[i].m), bs[i].col);
+        putDot(g2, xy[0], xy[1], magconst1 + magslope * (magzpt - bs[i].m), bs[i].col);
       }
     }
 
-    void plotmoon() {
+    void plotmoon(Graphics2D g2) {
 
       int nseg = 21;
 
@@ -3738,7 +3785,7 @@ class JSkyCalcWindow extends JComponent {
 
     }
 
-    void plotplanets() {
+    void plotplanets(Graphics2D g2) {
       int i;
       double xy[] = {0., 0.};
       double xypix[] = {0., 0.};
@@ -3756,16 +3803,16 @@ class JSkyCalcWindow extends JComponent {
           xy = SkyProject(lst - p.PlanetObs[i].c.alpha.value,
                   p.PlanetObs[i].c.delta.value, coslat, sinlat);
           if (p.mags[i] < 4.7) {
-            putDot(xy[0], xy[1], magconst1 + magslope * (4.5 - p.mags[i]), Color.YELLOW);
+            putDot(g2, xy[0], xy[1], magconst1 + magslope * (4.5 - p.mags[i]), Color.YELLOW);
           } else {
-            putDot(xy[0], xy[1], magconst1, Color.YELLOW);
+            putDot(g2, xy[0], xy[1], magconst1, Color.YELLOW);
           }
-          puttext(xy[0], xy[1] + 0.01, p.names[i], smallfont, smallfontmetrics);
+          puttext(g2, xy[0], xy[1] + 0.01, p.names[i], smallfont, smallfontmetrics);
         }
       }
     }
 
-    void plotobjects() {  // plots out the objects on the user list.
+    void plotobjects(Graphics2D g2) {  // plots out the objects on the user list.
       int i;
       double xy[] = {0., 0.};
       double xypix[] = {0., 0.};
@@ -3787,7 +3834,7 @@ class JSkyCalcWindow extends JComponent {
           cel = obj.c.precessed(currenteq);
           xy = SkyProject(lst - cel.alpha.value,
                   cel.delta.value, coslat, sinlat);
-          puttext(xy[0], xy[1], obj.name, smallfont, smallfontmetrics);
+          puttext(g2, xy[0], xy[1], obj.name, smallfont, smallfontmetrics);
         }
       }
     }
@@ -3875,7 +3922,6 @@ class JSkyCalcWindow extends JComponent {
     double xlo, xhi, ylo, yhi;      // user coordinates of frame
     double endfade, startfade;      // beginning and end of "twilight" for fade
     double xvplo, xvphi, yvplo, yvphi;  // borders of frame as fraction of viewport
-    Graphics2D g2;
     double jdstart, jdend;
     WhenWhere w;
     Font smallfont;
@@ -3966,6 +4012,9 @@ class JSkyCalcWindow extends JComponent {
     }
 
     public void paint(Graphics g) {
+      Graphics2D g2 = (Graphics2D) g;
+      g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+      g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
 
       int i, j;
       double xtick;
@@ -3976,8 +4025,6 @@ class JSkyCalcWindow extends JComponent {
       double jd, ut, local;
 
       Observation omoon = (Observation) o.clone();
-
-      g2 = (Graphics2D) g;
 
       Stroke defStroke = g2.getStroke();   // store the default stroke.
       Color gridcolor = new Color(153, 0, 0);  // dark red
@@ -4036,16 +4083,16 @@ class JSkyCalcWindow extends JComponent {
 
       g2.setStroke(new BasicStroke(1.0f));
       // draw the box
-      drawline(xlo, yhi, xhi, yhi);
-      drawline(xlo, yhi, xlo, ylo);
-      drawline(xlo, ylo, xhi, ylo);
-      drawline(xhi, ylo, xhi, yhi);
+      drawline(g2, xlo, yhi, xhi, yhi);
+      drawline(g2, xlo, yhi, xlo, ylo);
+      drawline(g2, xlo, ylo, xhi, ylo);
+      drawline(g2, xhi, ylo, xhi, yhi);
 
       double span = xhi - xlo;
 
       xy1 = xytopix(xlo - 0.07 * span, (ylo + yhi) / 2.);
       g2.rotate(-1. * Const.PI / 2., xy1[0], xy1[1]);
-      puttext(xlo - 0.07 * span, (ylo + yhi) / 2., "Airmass", mediumfont, mediumfontmetrics);
+      puttext(g2, xlo - 0.07 * span, (ylo + yhi) / 2., "Airmass", mediumfont, mediumfontmetrics);
       // g2.transform(saveXform);
       g2.rotate(Const.PI / 2, xy1[0], xy1[1]);
 
@@ -4058,15 +4105,14 @@ class JSkyCalcWindow extends JComponent {
       double ticklen = (yhi - ylo) / 80.;
       double minordiv = 0.25; // hard code divisions, sorry ...
 
-      puttext(xlo - span * 0.04, ytoplabel, "UT:", mediumfont, mediumfontmetrics);
-      puttext(xlo - span * 0.05, ybottomlabel, "Local:", mediumfont, mediumfontmetrics);
+      puttext(g2, xlo - span * 0.04, ytoplabel, "UT:", mediumfont, mediumfontmetrics);
+      puttext(g2, xlo - span * 0.05, ybottomlabel, "Local:", mediumfont, mediumfontmetrics);
 
       w.changeWhen(jdstart);
 
       String banner = String.format("%s - Evening date %s",
               w.where.name, w.when.localDate.roundedCalString(6, 0));
-      puttext((xlo + xhi) / 2., ybanner, banner, mediumfont, mediumfontmetrics);
-
+      puttext(g2, (xlo + xhi) / 2., ybanner, banner, mediumfont, mediumfontmetrics);
 
       xtick = (double) ((int) xlo + 1);
       double xminortick;
@@ -4074,8 +4120,8 @@ class JSkyCalcWindow extends JComponent {
       for (j = 1; j < 4; j++) {  // fill in start ..
         xminortick = xtick - j * minordiv;
         if (xminortick > xlo) {
-          drawline(xminortick, yhi, xminortick, yhi - ticklen / 2.);
-          drawline(xminortick, ylo, xminortick, ylo + ticklen / 2.);
+          drawline(g2, xminortick, yhi, xminortick, yhi - ticklen / 2.);
+          drawline(g2, xminortick, ylo, xminortick, ylo + ticklen / 2.);
         }
       }
 
@@ -4083,23 +4129,23 @@ class JSkyCalcWindow extends JComponent {
         w.changeWhen(jdstart + (xtick - xlo) / 24.);
         ut = w.when.UTDate.timeofday.value;
         local = w.when.localDate.timeofday.value;
-        puttext(xtick, ytoplabel, String.format("%02.0f", ut),
+        puttext(g2, xtick, ytoplabel, String.format("%02.0f", ut),
                 mediumfont, mediumfontmetrics);
-        puttext(xtick, ybottomlabel, String.format("%02.0f", local),
+        puttext(g2, xtick, ybottomlabel, String.format("%02.0f", local),
                 mediumfont, mediumfontmetrics);
 
-        drawline(xtick, yhi, xtick, yhi - ticklen);
-        drawline(xtick, ylo, xtick, ylo + ticklen);
+        drawline(g2, xtick, yhi, xtick, yhi - ticklen);
+        drawline(g2, xtick, ylo, xtick, ylo + ticklen);
         g2.setStroke(dotted);
         g2.setPaint(gridcolor);
-        drawline(xtick, yhi, xtick, ylo);
+        drawline(g2, xtick, yhi, xtick, ylo);
         g2.setStroke(defStroke);
         g2.setPaint(Color.WHITE);
         for (j = 1; j < 4; j++) {
           xminortick = xtick + j * minordiv;
           if (xminortick < xhi) {
-            drawline(xminortick, yhi, xminortick, yhi - ticklen / 2.);
-            drawline(xminortick, ylo, xminortick, ylo + ticklen / 2.);
+            drawline(g2, xminortick, yhi, xminortick, yhi - ticklen / 2.);
+            drawline(g2, xminortick, ylo, xminortick, ylo + ticklen / 2.);
           }
         }
 
@@ -4107,7 +4153,7 @@ class JSkyCalcWindow extends JComponent {
         omoon.computeSky();
         omoon.computeSunMoon();
         if (omoon.w.altmoon > 0.) {
-          plotmoon();
+          plotmoon(g2);
         }
 
         xtick += 1.;
@@ -4123,7 +4169,7 @@ class JSkyCalcWindow extends JComponent {
         Color nowColor = new Color(128, 128, 128); // grey
         // g2.setStroke(dotted);
         g2.setPaint(nowColor);
-        drawline(hrs_since, yhi, hrs_since, ylo);
+        drawline(g2, hrs_since, yhi, hrs_since, ylo);
         // g2.setStroke(defStroke);
         g2.setPaint(Color.WHITE);
       }
@@ -4135,20 +4181,20 @@ class JSkyCalcWindow extends JComponent {
       double labelx = xlo - (xhi - xlo) / 30.;
       double ylabeloffset = (yhi - ylo) / 60.;
       while (ytick < ylo) {
-        drawline(xlo, ytick, xlo + yticklen, ytick);
-        drawline(xhi, ytick, xhi - yticklen, ytick);
-        puttext(labelx, ytick - ylabeloffset, String.format("%3.1f", ytick),
+        drawline(g2, xlo, ytick, xlo + yticklen, ytick);
+        drawline(g2, xhi, ytick, xhi - yticklen, ytick);
+        puttext(g2, labelx, ytick - ylabeloffset, String.format("%3.1f", ytick),
                 mediumfont, mediumfontmetrics);
         g2.setStroke(dotted);
         g2.setPaint(gridcolor);
-        drawline(xlo, ytick, xhi, ytick);
+        drawline(g2, xlo, ytick, xhi, ytick);
         g2.setStroke(defStroke);
         g2.setPaint(Color.WHITE);
         for (j = 1; j < 5; j++) {
           yminortick = ytick + j * 0.1;
           if (yminortick < ylo) {
-            drawline(xlo, yminortick, xlo + yticklen / 2., yminortick);
-            drawline(xhi, yminortick, xhi - yticklen / 2., yminortick);
+            drawline(g2, xlo, yminortick, xlo + yticklen / 2., yminortick);
+            drawline(g2, xhi, yminortick, xhi - yticklen / 2., yminortick);
           }
         }
         ytick = ytick + 0.5;
@@ -4160,13 +4206,13 @@ class JSkyCalcWindow extends JComponent {
       g2.setPaint(Color.YELLOW);
       span = xhi - xlo;
       double xmoonaxis = xhi + span * 0.04;
-      drawline(xmoonaxis, ylo, xmoonaxis, yhi);
+      drawline(g2, xmoonaxis, ylo, xmoonaxis, yhi);
       double tickstep = (ylo - yhi) / 9.;  // 10 degrees
       for (i = 0; i < 10; i++) {
         ytick = yhi + i * tickstep;
-        drawline(xmoonaxis - yticklen, ytick, xmoonaxis, ytick);
+        drawline(g2, xmoonaxis - yticklen, ytick, xmoonaxis, ytick);
         if (i % 3 == 0) {
-          puttext(xmoonaxis + span / 40., ytick + 0.05, String.format("%d", (9 - i) * 10),
+          puttext(g2, xmoonaxis + span / 40., ytick + 0.05, String.format("%d", (9 - i) * 10),
                   mediumfont, mediumfontmetrics);
         }
       }
@@ -4174,21 +4220,20 @@ class JSkyCalcWindow extends JComponent {
       double xmoonlabel = xmoonaxis + span * 0.05;
       xy1 = xytopix(xmoonlabel, (ylo + yhi) / 2.);
       g2.rotate(Const.PI / 2, xy1[0], xy1[1]);
-      puttext(xmoonlabel, (ylo + yhi) / 2., "Moon Altitude [deg]", mediumfont,
+      puttext(g2, xmoonlabel, (ylo + yhi) / 2., "Moon Altitude [deg]", mediumfont,
               mediumfontmetrics);
       g2.rotate(-1. * Const.PI / 2, xy1[0], xy1[1]);
 
       g2.setPaint(Color.WHITE);
 
-      plotAirmass(o.w, o.c, " ", Color.WHITE);  // white = main window object.
+      plotAirmass(g2, o.w, o.c, " ", Color.WHITE);  // white = main window object.
 
       if (airmassPlotSelections.length > 0 && airmassPlotSelections[0] != null) {
         String sel;
-        String airmname;
         int cindex = 0;
         for (i = 0; i < airmassPlotSelections.length; i++) {
           sel = (String) airmassPlotSelections[i];
-          plotAirmass(o.w, presenterKey.get(sel).c, sel, objcolors[cindex]);
+          plotAirmass(g2, o.w, presenterKey.get(sel).c, sel, objcolors[cindex]);
           cindex++;
           if (cindex == objcolors.length) {
             cindex = 0;  // cycle colors
@@ -4197,7 +4242,7 @@ class JSkyCalcWindow extends JComponent {
       }
     }
 
-    void drawline(double x1, double y1, double x2, double y2) {  // user coords
+    void drawline(Graphics2D g2, double x1, double y1, double x2, double y2) {  // user coords
       double[] xy1;
       double[] xy2;
       xy1 = xytopix(x1, y1);
@@ -4219,7 +4264,7 @@ class JSkyCalcWindow extends JComponent {
 //            retvals[1] = ypix * (1. - (y - ylobord) / (yhibord - ylobord));
 //            return(retvals);
 //       }
-    void puttext(double x, double y, String text, Font font, FontMetrics metrics) {
+    void puttext(Graphics2D g2, double x, double y, String text, Font font, FontMetrics metrics) {
       double[] xy;
       // write text centered left-to-right on user coords x and y.
       xy = xytopix(x, y);
@@ -4229,7 +4274,7 @@ class JSkyCalcWindow extends JComponent {
       g2.drawString(text, (int) xy[0] - adv / 2, (int) xy[1]);
     }
 
-    void plotAirmass(WhenWhere wIn, Celest cIn, String objectname, Color objcolor) {
+    void plotAirmass(Graphics2D g2, WhenWhere wIn, Celest cIn, String objectname, Color objcolor) {
 
       g2.setPaint(objcolor);
 
@@ -4286,13 +4331,13 @@ class JSkyCalcWindow extends JComponent {
 
       if (firstptfound) {  // label tracks near their ends ....
         if (jd > jdend) {
-          puttext(xpl - 0.5, oairm.airmass, objectname,
+          puttext(g2, xpl - 0.5, oairm.airmass, objectname,
                   smallfont, smallfontmetrics);
         } else if (oairm.airmass > ylo) {
-          puttext(xpl + 0.2, ylo - 0.05, objectname,
+          puttext(g2, xpl + 0.2, ylo - 0.05, objectname,
                   smallfont, smallfontmetrics);
         } else {
-          puttext(xpl + 0.2, oairm.airmass, objectname, smallfont,
+          puttext(g2, xpl + 0.2, oairm.airmass, objectname, smallfont,
                   smallfontmetrics);
         }
       }
@@ -4332,7 +4377,7 @@ class JSkyCalcWindow extends JComponent {
       g2.setPaint(Color.WHITE);
     }
 
-    void plotmoon() {
+    void plotmoon(Graphics2D g2) {
 
       Observation omoon = new Observation(w, w.moon.topopos);
       omoon.computeSky();
@@ -4461,7 +4506,7 @@ class filewriter {
 class FileGrabber extends JFrame {
 // similar utility class for opening an infile, pops a file chooser.
 
-  File infile;
+  File infile = null;
   BufferedReader br = null;
   FileReader fr = null;
 
@@ -4484,7 +4529,15 @@ class FileGrabber extends JFrame {
 
   void closer() {
     try {
-      fr.close();
+      if (br != null) {
+        br.close();
+        br = null;
+        fr = null;
+      }
+      if (fr != null) {
+        fr.close();
+        fr = null;
+      }
     } catch (IOException e) {
       System.out.println("File reader didn't close.");
     }
