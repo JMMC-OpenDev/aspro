@@ -42,10 +42,10 @@
 
       <!--
         Moon Pointing Restrictions on CHARA:
-        undefined
+        Theo: Bright light like that into the system would certainly stop tiptilt and tracking. If you want to enter numbers I would say to use for a star brighter than 12th magnitude guiding is not possible for a moon distance smaller than 5 degrees.
       -->
       <moonPointingRestriction>
-        <warningThreshold>20</warningThreshold>
+        <warningThreshold>10</warningThreshold>
         <restriction>
           <separation>5.0</separation>
         </restriction>
