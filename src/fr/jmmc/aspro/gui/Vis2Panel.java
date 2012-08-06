@@ -244,6 +244,7 @@ public final class Vis2Panel extends javax.swing.JPanel implements ChartProgress
     this.xyPlotVis2.getRenderer().addAnnotation(this.aJMMCVis2, Layer.BACKGROUND);
 
     this.xyPlotT3 = createScientificScatterPlot("UV radius (M\u03BB)", "Closure phase (deg)", usePlotCrossHairSupport);
+    this.xyPlotT3.setNoDataMessage("No closure phase data (OI_T3)");
 
     this.aJMMCT3 = ChartUtils.createXYTextAnnotation(AsproConstants.JMMC_ANNOTATION, 0, 0);
     this.aJMMCT3.setTextAnchor(TextAnchor.BOTTOM_RIGHT);
@@ -779,7 +780,6 @@ public final class Vis2Panel extends javax.swing.JPanel implements ChartProgress
    * @return true if vis2 has data to plot
    */
   private boolean updateChart() {
-
     Range xRangeVis2 = null;
     Range xRangeT3 = null;
 
@@ -791,6 +791,7 @@ public final class Vis2Panel extends javax.swing.JPanel implements ChartProgress
 
       xRangeVis2 = updatePlot(xyPlotVis2, vis2, vis2.getVis2Data(), vis2.getVis2Err(), spatialFreq);
     }
+
     if (this.oiFitsFile.hasOiT3()) {
       final OIT3 t3 = this.oiFitsFile.getOiT3()[0];
 
@@ -801,6 +802,17 @@ public final class Vis2Panel extends javax.swing.JPanel implements ChartProgress
     } else {
       // reset T3 dataset:
       this.xyPlotT3.setDataset(null);
+    }
+
+    final boolean showT3Plot = (xRangeT3 != null);
+    final boolean hasT3Plot = this.combinedXYPlot.getSubplots().contains(this.xyPlotT3);
+
+    if (showT3Plot != hasT3Plot) {
+      if (showT3Plot) {
+        this.combinedXYPlot.add(this.xyPlotT3, 1);
+      } else {
+        this.combinedXYPlot.remove(this.xyPlotT3);
+      }
     }
 
     if (xRangeVis2 == null && xRangeT3 == null) {
@@ -1044,8 +1056,10 @@ public final class Vis2Panel extends javax.swing.JPanel implements ChartProgress
     this.aJMMCVis2.setX(this.xyPlotVis2.getDomainAxis().getUpperBound());
     this.aJMMCVis2.setY(this.xyPlotVis2.getRangeAxis().getLowerBound());
 
-    this.aJMMCT3.setX(this.xyPlotT3.getDomainAxis().getUpperBound());
-    this.aJMMCT3.setY(this.xyPlotT3.getRangeAxis().getLowerBound());
+    if (this.xyPlotT3.getDomainAxis() != null) {
+      this.aJMMCT3.setX(this.xyPlotT3.getDomainAxis().getUpperBound());
+      this.aJMMCT3.setY(this.xyPlotT3.getRangeAxis().getLowerBound());
+    }
   }
 
   /**
