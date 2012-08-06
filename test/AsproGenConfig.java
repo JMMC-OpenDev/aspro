@@ -803,11 +803,154 @@ public final class AsproGenConfig {
 
     logger.info("convertStationFile : output :\n" + sb.toString());
   }
-  
-  private static void SUSIposition() {
+  /**
+   * Load the SUSI config file (SUSI.txt)
+   * @param absFileName absolute file path to SUSI config file
+   * @return susi station config
+   *
+   */
+  private static Map<String, Map<String, Double>> loadSUSIConfig(final String absFileName) {
 
-    final StringBuilder sb = new StringBuilder(128);
+    logger.info("loadSUSIConfig : " + absFileName);
 
+    final List<String> labels = Arrays.asList(new String[]{
+              "S1", "S2", "S3", "S4", 
+              "N1", "N3", "N4"
+            });
+
+    final String[] columns = new String[]{
+              "index", "XOFFSET", "YOFFSET", "ZOFFSET", "WEIGHT", "DIAMETER"
+            };
+    
+    final Map<String, Map<String, Double>> stationConfigs = new LinkedHashMap<String, Map<String, Double>>();
+
+    // load data from file :
+    BufferedReader reader = null;
+    try {
+      final File data = new File(absFileName);
+
+      reader = new BufferedReader(new FileReader(data));
+
+      // column separator :
+      final String delimiter = " ";
+
+      String name = null;
+      String key = null;
+      Double value = null;
+      Map<String, Double> current = null;
+
+      StringTokenizer tok;
+      String line;
+      while ((line = reader.readLine()) != null) {
+        
+        line = line.replaceAll("\\s+", " ").trim();
+
+        // Parse values :
+        logger.info("line = " + line);
+
+        tok = new StringTokenizer(line, delimiter);
+
+        if (tok.hasMoreTokens()) {
+          // key
+          key = tok.nextToken();
+
+          if (labels.contains(key)) {
+            name = key;
+            
+            logger.info("new station : " + name);
+            current = new LinkedHashMap<String, Double>();
+
+            int i = 0;
+            // value (only first used) :
+            while (tok.hasMoreTokens()) {
+              key = columns[i];
+              value = Double.valueOf(tok.nextToken());
+
+              logger.info("value : " + value);
+              
+              current.put(key, value);
+              i++;
+            }
+            
+            // end station block :
+            stationConfigs.put(name, current);
+
+            logger.info("end station : " + name + " =\n" + current);
+          }
+        }
+      }
+
+    } catch (FileNotFoundException fnfe) {
+      logger.error("File not found", fnfe);
+    } catch (IOException ioe) {
+      logger.error("IO failure", ioe);
+    } finally {
+      if (reader != null) {
+        try {
+          reader.close();
+        } catch (IOException ioe) {
+          logger.error("IO failure", ioe);
+        }
+      }
+    }
+    return stationConfigs;
+  }
+
+  /**
+   * Convert SUSI station configs to ASPRO station configurations
+   * @param stationConfigs station configs
+   * @param sb buffer
+   */
+  private static void convertSUSIStations(final Map<String, Map<String, Double>> stationConfigs, final StringBuilder sb) {
+
+    final double[] lonlat = SUSIposition(sb);
+
+    final double lat = Math.toRadians(lonlat[1]);
+
+    String station;
+    Map<String, Double> config;
+    for (Map.Entry<String, Map<String, Double>> e : stationConfigs.entrySet()) {
+      station = e.getKey();
+      config = e.getValue();
+
+      sb.append("    <station>\n");
+      sb.append("      <name>").append(station).append("</name>\n");
+      sb.append("      <telescope>T</telescope>\n");
+
+      convertHorizToEquatorial(station, lat, 1e6d * config.get("XOFFSET"), 1e6d * config.get("YOFFSET"), 1e6d * config.get("ZOFFSET"), sb);
+
+      sb.append("      <delayLineFixedOffset>0.0</delayLineFixedOffset>\n");
+      sb.append("    </station>\n\n");
+    }
+  }
+
+  /**
+   * Convert the SUSI config file (SUSI.txt)
+   * @param absFileName absolute file path to SUSI config file
+   */
+  private static void convertSUSIConfig(final String absFileName) {
+
+    final Map<String, Map<String, Double>> stationConfigs = loadSUSIConfig(absFileName);
+
+    final StringBuilder sb = new StringBuilder(12 * 1024);
+
+    sb.append("<a:interferometerSetting>\n\n");
+    sb.append("  <description>\n\n    <name>SUSI</name>\n\n");
+
+    convertSUSIStations(stationConfigs, sb);
+
+    sb.append("  </description>\n\n</a:interferometerSetting>\n");
+
+    logger.info("Generated SUSI Configuration : " + sb.length() + "\n" + sb.toString());
+  }
+
+
+  /**
+   * Compute the SUSI position (S1 coordinates)
+   * @param sb buffer
+   * @return long and lat in degrees
+   */
+  private static double[] SUSIposition(final StringBuilder sb) {
     final double lonDeg = 149.548224972222d;
     logger.info("SUSI longitude (deg) : " + lonDeg);
 
@@ -818,6 +961,8 @@ public final class AsproGenConfig {
     computeInterferometerPosition(lonDeg, latDeg, alt, sb);
     
     logger.info("Generated SUSI position:\n" + sb.toString());
+
+    return new double[]{lonDeg, latDeg};
   }
 
   /**
@@ -856,7 +1001,7 @@ public final class AsproGenConfig {
         convertStationFile(asproPath + "MROI.stations");
         break;
       case SUSI:
-        SUSIposition();
+        convertSUSIConfig("/home/bourgesl/dev/aspro/test/SUSI.txt");
         break;
 
       default:
