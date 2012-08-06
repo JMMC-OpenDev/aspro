@@ -1470,7 +1470,7 @@
       <xsd:element name="relativePosition" type="Position3D">
         <xsd:annotation>
           <xsd:documentation>
-              Relative position (m) to the interferometer location
+              Relative position (m) to the interferometer location in local equatorial plane
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>

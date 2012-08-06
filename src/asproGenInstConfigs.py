@@ -2,7 +2,7 @@
 """ This script computes all tuples of stations for instruments with 2,3,4 channels """
 
 # CHARA:
-a=["S1","S2","W1","W2","E1","E2"]
+#a=["S1","S2","W1","W2","E1","E2"]
 
 # MROI:
 #a = ["W0","W1","W2","W3","W4", "W5", "W6", "W7", "W8", "W9",
@@ -11,7 +11,7 @@ a=["S1","S2","W1","W2","E1","E2"]
 # ]
 
 # SUSI:
-#a=["S1","S2","S3","S4","N1","N3","N4"]
+a=["N1","N3","N4","S1","S2","S3","S4"]
 
 nbStations=len(a)
 

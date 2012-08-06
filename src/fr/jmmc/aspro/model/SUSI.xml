@@ -32,7 +32,7 @@
     
     <telescope>
       <name>T</name>
-      <diameter>0.2</diameter>
+      <diameter>0.14</diameter> <!-- 20 cm or 14 cm -->
       <maxElevation>85.0</maxElevation>
 
       <adaptiveOptics>
@@ -68,9 +68,9 @@
       <name>S2</name>
       <telescope>T</telescope>
       <relativePosition>
-        <posX>-0.000792</posX>
-        <posY>-4.997297</posY>
-        <posZ>0.008046</posZ>
+        <posX>-2.516006217881425</posX>
+        <posY>-7.92E-4</posY>
+        <posZ>-4.31772564620623</posZ>
       </relativePosition>
       <delayLineFixedOffset>0.0</delayLineFixedOffset>
     </station>
@@ -79,9 +79,9 @@
       <name>S3</name>
       <telescope>T</telescope>
       <relativePosition>
-        <posX>-0.001261</posX>
-        <posY>-24.994068</posY>
-        <posZ>0.045190</posZ>
+        <posX>-12.57957799853269</posX>
+        <posY>-0.001261</posY>
+        <posZ>-21.597677993329658</posZ>
       </relativePosition>
       <delayLineFixedOffset>0.0</delayLineFixedOffset>
     </station>
@@ -90,9 +90,9 @@
       <name>S4</name>
       <telescope>T</telescope>
       <relativePosition>
-        <posX>0.002581</posX>
-        <posY>-105.000399</posY>
-        <posZ>0.184646</posZ>
+        <posX>-52.851454601845845</posX>
+        <posY>0.002581</posY>
+        <posZ>-90.72949702700629</posZ>
       </relativePosition>
       <delayLineFixedOffset>0.0</delayLineFixedOffset>
     </station>
@@ -101,9 +101,9 @@
       <name>N1</name>
       <telescope>T</telescope>
       <relativePosition>
-        <posX>0.002281</posX>
-        <posY>4.997701</posY>
-        <posZ>-0.007854</posZ>
+        <posX>2.5163759169025575</posX>
+        <posY>0.002281</posY>
+        <posZ>4.317977445002441</posZ>
       </relativePosition>
       <delayLineFixedOffset>0.0</delayLineFixedOffset>
     </station>
@@ -112,9 +112,9 @@
       <name>N3</name>
       <telescope>T</telescope>
       <relativePosition>
-        <posX>0.005409</posX>
-        <posY>14.998239</posY>
-        <posZ>-0.025706</posZ>
+        <posX>7.549870028868496</posX>
+        <posY>0.005409</posY>
+        <posZ>12.959448153634868</posZ>
       </relativePosition>
       <delayLineFixedOffset>0.0</delayLineFixedOffset>
     </station>
@@ -123,13 +123,13 @@
       <name>N4</name>
       <telescope>T</telescope>
       <relativePosition>
-        <posX>0.000358</posX>
-        <posY>54.996267</posY>
-        <posZ>-0.096034</posZ>
+        <posX>27.682696676056032</posX>
+        <posY>3.58E-4</posY>
+        <posZ>47.52122590175806</posZ>
       </relativePosition>
       <delayLineFixedOffset>0.0</delayLineFixedOffset>
     </station>
-
+    
     <channel>
       <name>V1</name>
     </channel>
@@ -140,14 +140,14 @@
     <!-- DL : 
     2-in-1 delay line for SUSI. The maximum length of each is 70m. 
     As 1 delay increases, the other decreases by the same amount.
-    = 2 DL with half length: 35m -->
+    = 2 DL with 1/2 ( 2 x length): 70m -->
     <delayLine>
       <name>DL1</name>
-      <maximumThrow>35</maximumThrow>
+      <maximumThrow>70</maximumThrow>
     </delayLine>
     <delayLine>
       <name>DL2</name>
-      <maximumThrow>35</maximumThrow>
+      <maximumThrow>70</maximumThrow>
     </delayLine>
 
 
@@ -172,8 +172,8 @@
       <fringeTracker>PAVO_FT</fringeTracker>
 
       <!-- noise parameters -->
-      <transmission>0.02</transmission>
-      <dit>0.004</dit>
+      <transmission>0.01</transmission>
+      <dit>0.0045</dit>
       <ron>20</ron>
       <detectorSaturation>32700</detectorSaturation>
       <instrumentVisibility>0.9</instrumentVisibility>
@@ -200,69 +200,43 @@
     <!-- PAVO 2T -->
     <instrument>
       <focalInstrument>PAVO_2T</focalInstrument>
-
+      
+      <!-- The baseline configuration is limited to one telescope from the North and one telescope from the South -->
       <configuration>
-        <stations>S1 S2</stations>
+        <stations>N1 S1</stations>
       </configuration>
       <configuration>
-        <stations>S1 S3</stations>
+        <stations>N1 S2</stations>
       </configuration>
       <configuration>
-        <stations>S1 S4</stations>
+        <stations>N1 S3</stations>
       </configuration>
       <configuration>
-        <stations>S1 N1</stations>
+        <stations>N1 S4</stations>
       </configuration>
       <configuration>
-        <stations>S1 N3</stations>
+        <stations>N3 S1</stations>
       </configuration>
       <configuration>
-        <stations>S1 N4</stations>
+        <stations>N3 S2</stations>
       </configuration>
       <configuration>
-        <stations>S2 S3</stations>
+        <stations>N3 S3</stations>
       </configuration>
       <configuration>
-        <stations>S2 S4</stations>
+        <stations>N3 S4</stations>
       </configuration>
       <configuration>
-        <stations>S2 N1</stations>
+        <stations>N4 S1</stations>
       </configuration>
       <configuration>
-        <stations>S2 N3</stations>
+        <stations>N4 S2</stations>
       </configuration>
       <configuration>
-        <stations>S2 N4</stations>
+        <stations>N4 S3</stations>
       </configuration>
       <configuration>
-        <stations>S3 S4</stations>
-      </configuration>
-      <configuration>
-        <stations>S3 N1</stations>
-      </configuration>
-      <configuration>
-        <stations>S3 N3</stations>
-      </configuration>
-      <configuration>
-        <stations>S3 N4</stations>
-      </configuration>
-      <configuration>
-        <stations>S4 N1</stations>
-      </configuration>
-      <configuration>
-        <stations>S4 N3</stations>
-      </configuration>
-      <configuration>
-        <stations>S4 N4</stations>
-      </configuration>
-      <configuration>
-        <stations>N1 N3</stations>
-      </configuration>
-      <configuration>
-        <stations>N1 N4</stations>
-      </configuration>
-      <configuration>
-        <stations>N3 N4</stations>
+        <stations>N4 S4</stations>
       </configuration>
     </instrument>
   </configuration>
