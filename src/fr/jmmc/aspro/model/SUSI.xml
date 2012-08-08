@@ -61,7 +61,7 @@
         <posY>0.0</posY>
         <posZ>0.0</posZ>
       </relativePosition>
-      <delayLineFixedOffset>0.0</delayLineFixedOffset>
+      <delayLineFixedOffset>2.5</delayLineFixedOffset>
     </station>
 
     <station>
@@ -72,7 +72,7 @@
         <posY>-7.92E-4</posY>
         <posZ>-4.31772564620623</posZ>
       </relativePosition>
-      <delayLineFixedOffset>0.0</delayLineFixedOffset>
+      <delayLineFixedOffset>7.5</delayLineFixedOffset>
     </station>
 
     <station>
@@ -83,7 +83,7 @@
         <posY>-0.001261</posY>
         <posZ>-21.597677993329658</posZ>
       </relativePosition>
-      <delayLineFixedOffset>0.0</delayLineFixedOffset>
+      <delayLineFixedOffset>27.5</delayLineFixedOffset>
     </station>
 
     <station>
@@ -94,7 +94,7 @@
         <posY>0.002581</posY>
         <posZ>-90.72949702700629</posZ>
       </relativePosition>
-      <delayLineFixedOffset>0.0</delayLineFixedOffset>
+      <delayLineFixedOffset>107.5</delayLineFixedOffset>
     </station>
 
     <station>
@@ -105,7 +105,7 @@
         <posY>0.002281</posY>
         <posZ>4.317977445002441</posZ>
       </relativePosition>
-      <delayLineFixedOffset>0.0</delayLineFixedOffset>
+      <delayLineFixedOffset>2.5</delayLineFixedOffset>
     </station>
 
     <station>
@@ -116,7 +116,7 @@
         <posY>0.005409</posY>
         <posZ>12.959448153634868</posZ>
       </relativePosition>
-      <delayLineFixedOffset>0.0</delayLineFixedOffset>
+      <delayLineFixedOffset>12.5</delayLineFixedOffset>
     </station>
 
     <station>
@@ -127,27 +127,23 @@
         <posY>3.58E-4</posY>
         <posZ>47.52122590175806</posZ>
       </relativePosition>
-      <delayLineFixedOffset>0.0</delayLineFixedOffset>
+      <delayLineFixedOffset>52.5</delayLineFixedOffset>
     </station>
-    
-    <channel>
-      <name>V1</name>
-    </channel>
-    <channel>
-      <name>V2</name>
-    </channel>
+
+    <!-- no channel nor switchyard -->    
 
     <!-- DL : 
-    2-in-1 delay line for SUSI. The maximum length of each is 70m. 
+    2-in-1 delay line for SUSI with two 'cat's eye. The maximum length of each is 70m. 
     As 1 delay increases, the other decreases by the same amount.
-    = 2 DL with 1/2 ( 2 x length): 70m -->
+    The total OPD range that can be compensated by the OPLC is approximately +/- 140m.
+    = 2 DL with 140m length -->
     <delayLine>
       <name>DL1</name>
-      <maximumThrow>70</maximumThrow>
+      <maximumThrow>140</maximumThrow>
     </delayLine>
     <delayLine>
       <name>DL2</name>
-      <maximumThrow>70</maximumThrow>
+      <maximumThrow>140</maximumThrow>
     </delayLine>
 
 

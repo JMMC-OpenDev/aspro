@@ -100,18 +100,18 @@ public final class AsproGenConfig {
 
         if (station != null) {
           /*
-          System.out.println("station : " + station);
-          System.out.println("values : " + Arrays.toString(values));
+           System.out.println("station : " + station);
+           System.out.println("values : " + Arrays.toString(values));
            */
           /*
-          <stationLinks>
-          <station>U1</station>
-          <channelLink>
-          <channel>Channel1</channel>
-          <opticalLength>165.8497</opticalLength>
-          </channelLink>
-          ...
-          </stationLinks>
+           <stationLinks>
+           <station>U1</station>
+           <channelLink>
+           <channel>Channel1</channel>
+           <opticalLength>165.8497</opticalLength>
+           </channelLink>
+           ...
+           </stationLinks>
            */
 
           // output :
@@ -158,12 +158,12 @@ public final class AsproGenConfig {
 
   /**
    * Convert ASPRO 1 VLTI horizons for the given station :
-  360.000000000000       0.000000000000000E+000
-  235.000000000000       0.000000000000000E+000
-  235.000000000000        8.00000000000000
-  224.000000000000        8.00000000000000
-  224.000000000000       0.000000000000000E+000
-  ...
+   360.000000000000       0.000000000000000E+000
+   235.000000000000       0.000000000000000E+000
+   235.000000000000        8.00000000000000
+   224.000000000000        8.00000000000000
+   224.000000000000       0.000000000000000E+000
+   ...
    * @param station station name
    * @param absFileName absolute file path of the ASPRO 1 station profile
    * @param sb output buffer for xml output
@@ -206,7 +206,7 @@ public final class AsproGenConfig {
           i++;
         }
         /*
-        System.out.println("values : " + Arrays.toString(values));
+         System.out.println("values : " + Arrays.toString(values));
          */
 
         // output :
@@ -273,11 +273,11 @@ public final class AsproGenConfig {
   /**
    * Compute CHARA fixed delay (AIRPATH + LIGHT)
    *
-  # AIRPATH - amount of airpath  in microns using default beam
-  #	    Note that this assumes the default Beam dn default Pop are used
-  # INTERNAL- Pathlength (with default beam) for internal fringes
-  # LIGHT	  - length of light pipe in microns
-  #	    Note that this assumes the default Beam dn default Pop are used
+   # AIRPATH - amount of airpath  in microns using default beam
+   #	    Note that this assumes the default Beam dn default Pop are used
+   # INTERNAL- Pathlength (with default beam) for internal fringes
+   # LIGHT	  - length of light pipe in microns
+   #	    Note that this assumes the default Beam dn default Pop are used
    *
    * @param station station name
    * @param light length of light pipe in microns
@@ -298,7 +298,7 @@ public final class AsproGenConfig {
   /**
    * Compute CHARA PoP delay (POPX)
    *
-  # POPX	  - Extra airpath to add when using POP X on this scope
+   # POPX	  - Extra airpath to add when using POP X on this scope
    *
    * @param config station config
    * @param sb output buffer for xml output
@@ -347,61 +347,61 @@ public final class AsproGenConfig {
     }
 
     /*
-    S1          0.000000000   0.000000000     0.00000000    0.0000000
+     S1          0.000000000   0.000000000     0.00000000    0.0000000
      *
-    S1 = (0.0, 0.0, 0.0) 0.0
+     S1 = (0.0, 0.0, 0.0) 0.0
      *
      * 
      *
-    S2        -18.354945174    -5.748393059         28.128580103         4.532654762 (ASPRO 1)
-    S2 = (-18.35494517183226,  -5.7483930590000005, 28.128580104400015)
-    S2 = (-18.364916206804995, -5.7444145760000005, 28.12661922364987)   4.74371459
+     S2        -18.354945174    -5.748393059         28.128580103         4.532654762 (ASPRO 1)
+     S2 = (-18.35494517183226,  -5.7483930590000005, 28.128580104400015)
+     S2 = (-18.364916206804995, -5.7444145760000005, 28.12661922364987)   4.74371459
      *
-    S2 = (-18.360473037751714, -5.746854437,        28.12397435836417)   4.690179333000001
-    S2 = (-18.360473037751714, -5.746854437,        28.12397435836417)   5.065469333 (+ INTERNAL)
-    S2 = (-18.360473037751714, -5.746854437,        28.12397435836417)   5.065469333
-     *
-     *
+     S2 = (-18.360473037751714, -5.746854437,        28.12397435836417)   4.690179333000001
+     S2 = (-18.360473037751714, -5.746854437,        28.12397435836417)   5.065469333 (+ INTERNAL)
+     S2 = (-18.360473037751714, -5.746854437,        28.12397435836417)   5.065469333
      *
      *
      *
-    E1       -176.947579603    125.349003099       249.643974581        15.309717902 (ASPRO 1)
-    E1 = (-176.94757958628557, 125.349003099,      249.64397459290652)
-    E1 = (-176.95914597777053, 125.33313329999999, 249.6252027666933)   15.504650597999998
-     *
-    E1 = (-176.95372938066825, 125.333989819,      249.63388874133827)  15.513547531999999
-    E1 = (-176.95372938066825, 125.333989819,      249.63388874133827)  15.513547531999999 (+ INTERNAL)
-    E1 = (-176.95372938066825, 125.333989819,      249.63388874133827)  15.513547531999999
      *
      *
+     E1       -176.947579603    125.349003099       249.643974581        15.309717902 (ASPRO 1)
+     E1 = (-176.94757958628557, 125.349003099,      249.64397459290652)
+     E1 = (-176.95914597777053, 125.33313329999999, 249.6252027666933)   15.504650597999998
      *
-    E2       -154.003121030    70.400864470       221.444997474         26.721359853 (ASPRO 1)
-    E2 = (-154.00312101526163, 70.40086447,       221.44499748445782)
-    E2 = (-154.01434025673439, 70.3891451,        221.43497871824562)   26.372594395
-     *
-    E2 = (-154.00873148624743, 70.39660711799999, 221.43708278416645)   26.370872645
-    E2 = (-154.00873148624743, 70.39660711799999, 221.43708278416645)   26.743470664999997 (+ INTERNAL)
-    E2 = (-154.00873148624743, 70.39660711799999, 221.43708278416645)   26.743470664999997
+     E1 = (-176.95372938066825, 125.333989819,      249.63388874133827)  15.513547531999999
+     E1 = (-176.95372938066825, 125.333989819,      249.63388874133827)  15.513547531999999 (+ INTERNAL)
+     E1 = (-176.95372938066825, 125.333989819,      249.63388874133827)  15.513547531999999
      *
      *
      *
-    W1       -130.620014605    -175.068583489       172.774093891       29.087218284 (ASPRO 1)
-    W1 = (-130.6200145937469,  -175.068583489,      172.7740938996687)
-    W1 = (-130.59792281771624, -175.0684101,        172.79538958138997) 29.157963303
+     E2       -154.003121030    70.400864470       221.444997474         26.721359853 (ASPRO 1)
+     E2 = (-154.00312101526163, 70.40086447,       221.44499748445782)
+     E2 = (-154.01434025673439, 70.3891451,        221.43497871824562)   26.372594395
      *
-    W1 = (-130.58878748879556, -175.07333221099998, 172.79336516697768) 29.122251552999998
-    W1 = (-130.58878748879556, -175.07333221099998, 172.79336516697768) 29.122251552999998 (+ INTERNAL)
-    W1 = (-130.58878748879556, -175.07333221099998, 172.79336516697768) 29.122251552999998
+     E2 = (-154.00873148624743, 70.39660711799999, 221.43708278416645)   26.370872645
+     E2 = (-154.00873148624743, 70.39660711799999, 221.43708278416645)   26.743470664999997 (+ INTERNAL)
+     E2 = (-154.00873148624743, 70.39660711799999, 221.43708278416645)   26.743470664999997
+     *
+     *
+     *
+     W1       -130.620014605    -175.068583489       172.774093891       29.087218284 (ASPRO 1)
+     W1 = (-130.6200145937469,  -175.068583489,      172.7740938996687)
+     W1 = (-130.59792281771624, -175.0684101,        172.79538958138997) 29.157963303
+     *
+     W1 = (-130.58878748879556, -175.07333221099998, 172.79336516697768) 29.122251552999998
+     W1 = (-130.58878748879556, -175.07333221099998, 172.79336516697768) 29.122251552999998 (+ INTERNAL)
+     W1 = (-130.58878748879556, -175.07333221099998, 172.79336516697768) 29.122251552999998
      * 
      *
      *
-    W2       -111.736598481    -69.088236186  165.067607370            -5.413000000 !was "-8.654293636???" (ASPRO 1)
-    W2 = (-111.73659847358483, -69.088236186, 165.0676073825641)
-    W2 = (-111.72810585237123, -69.0845925,   165.08924273662112)      -8.450162002
+     W2       -111.736598481    -69.088236186  165.067607370            -5.413000000 !was "-8.654293636???" (ASPRO 1)
+     W2 = (-111.73659847358483, -69.088236186, 165.0676073825641)
+     W2 = (-111.72810585237123, -69.0845925,   165.08924273662112)      -8.450162002
      *
-    W2 = (-111.72648023453111, -69.093582796, 165.08103431717993)      -8.461862557
-    W2 = (-111.72648023453111, -69.093582796, 165.08103431717993)      -8.079204556999999 (+ INTERNAL)
-    W2 = (-111.72648023453111, -69.093582796, 165.08103431717993)      -8.079204556999999
+     W2 = (-111.72648023453111, -69.093582796, 165.08103431717993)      -8.461862557
+     W2 = (-111.72648023453111, -69.093582796, 165.08103431717993)      -8.079204556999999 (+ INTERNAL)
+     W2 = (-111.72648023453111, -69.093582796, 165.08103431717993)      -8.079204556999999
      */
   }
 
@@ -465,20 +465,20 @@ public final class AsproGenConfig {
    * @param absFileName absolute file path to CHARA config file
    * @return chara station config
    *
-  # The USED labels and their data fields are:
-  #
-  # XOFFSET - East offset in microns from S1
-  # YOFFSET - North offset in microns from S1
-  # ZOFFSET - vertical (+ is up) offset in microns from S1
+   # The USED labels and their data fields are:
+   #
+   # XOFFSET - East offset in microns from S1
+   # YOFFSET - North offset in microns from S1
+   # ZOFFSET - vertical (+ is up) offset in microns from S1
   
-  # AIRPATH - amount of airpath  in microns using default beam
-  #	    Note that this assumes the default Beam dn default Pop are used
-  # INTERNAL- Pathlength (with default beam) for internal fringes
-  # LIGHT	  - length of light pipe in microns
-  #	    Note that this assumes the default Beam dn default Pop are used
+   # AIRPATH - amount of airpath  in microns using default beam
+   #	    Note that this assumes the default Beam dn default Pop are used
+   # INTERNAL- Pathlength (with default beam) for internal fringes
+   # LIGHT	  - length of light pipe in microns
+   #	    Note that this assumes the default Beam dn default Pop are used
   
-  # BEAMX   - Extra airpath to add when using beam X on this scope
-  # POPX	  - Extra airpath to add when using POP X on this scope
+   # BEAMX   - Extra airpath to add when using beam X on this scope
+   # POPX	  - Extra airpath to add when using POP X on this scope
    */
   private static Map<String, Map<String, Double>> loadCHARAConfig(final String absFileName) {
 
@@ -626,11 +626,11 @@ public final class AsproGenConfig {
   private static void VLTIPosition() {
 
     final StringBuilder sb = new StringBuilder(128);
-    
+
     // ASPRO1: 17/04/2012:
     final double lonDeg = -70.40498688D;
     final double latDeg = -24.62743941D;
-    logger.info("VLTI longitude / latitude (deg) : " + lonDeg + " - "+ latDeg);
+    logger.info("VLTI longitude / latitude (deg) : " + lonDeg + " - " + latDeg);
 
     final double alt = 2681d;
     final double[] pos = computeInterferometerPosition(lonDeg, latDeg, alt, sb);
@@ -643,12 +643,12 @@ public final class AsproGenConfig {
     final LonLatAlt coords = GeocentricCoords.getLonLatAlt(position);
 
     logger.info("VLTI position : " + coords.toString());
-  
-/*    
-10:55:19.679 [main] INFO  AsproGenConfig - VLTI longitude / latitude (deg) : -70.40498688 - -24.62743941
-10:55:19.685 [main] INFO  AsproGenConfig - position (x,y,z) : 1942014.1545180853, -5455311.818167002, -2654530.4375114734
-10:55:19.690 [main] INFO  AsproGenConfig - VLTI position : [-70:24:17,953, -24:37:38,782, 2681.0000000009313 m]
-*/
+
+    /*    
+     10:55:19.679 [main] INFO  AsproGenConfig - VLTI longitude / latitude (deg) : -70.40498688 - -24.62743941
+     10:55:19.685 [main] INFO  AsproGenConfig - position (x,y,z) : 1942014.1545180853, -5455311.818167002, -2654530.4375114734
+     10:55:19.690 [main] INFO  AsproGenConfig - VLTI position : [-70:24:17,953, -24:37:38,782, 2681.0000000009313 m]
+     */
     logger.info("Generated VLTI position:\n" + sb.toString());
   }
 
@@ -664,7 +664,7 @@ public final class AsproGenConfig {
 
     final double alt = 3200d;
     computeInterferometerPosition(lonDeg, latDeg, alt, sb);
-    
+
     logger.info("Generated MROI position:\n" + sb.toString());
   }
 
@@ -694,8 +694,8 @@ public final class AsproGenConfig {
     sb.append("      <posY>").append(y).append("</posY>\n");
     sb.append("      <posZ>").append(z).append("</posZ>\n");
     sb.append("    </position>\n\n");
-    
-    return new double[]{x,y,z};
+
+    return new double[]{x, y, z};
   }
 
   /**
@@ -753,21 +753,21 @@ public final class AsproGenConfig {
 
         if (station != null) {
           /*
-          System.out.println("station : " + station);
-          System.out.println("values : " + Arrays.toString(values));
+           System.out.println("station : " + station);
+           System.out.println("values : " + Arrays.toString(values));
            */
           /*
-          <station>
-          <name>S1</name>
-          <telescope>T</telescope>
-          <relativePosition>
-          <posX>0.0</posX>
-          <posY>0.0</posY>
-          <posZ>0.0</posZ>
-          </relativePosition>
-          <delayLineFixedOffset>0.0</delayLineFixedOffset>
-          ...
-          </station>
+           <station>
+           <name>S1</name>
+           <telescope>T</telescope>
+           <relativePosition>
+           <posX>0.0</posX>
+           <posY>0.0</posY>
+           <posZ>0.0</posZ>
+           </relativePosition>
+           <delayLineFixedOffset>0.0</delayLineFixedOffset>
+           ...
+           </station>
            */
 
           // output :
@@ -803,6 +803,7 @@ public final class AsproGenConfig {
 
     logger.info("convertStationFile : output :\n" + sb.toString());
   }
+
   /**
    * Load the SUSI config file (SUSI.txt)
    * @param absFileName absolute file path to SUSI config file
@@ -814,14 +815,14 @@ public final class AsproGenConfig {
     logger.info("loadSUSIConfig : " + absFileName);
 
     final List<String> labels = Arrays.asList(new String[]{
-              "S1", "S2", "S3", "S4", 
+              "S1", "S2", "S3", "S4",
               "N1", "N3", "N4"
             });
 
     final String[] columns = new String[]{
-              "index", "XOFFSET", "YOFFSET", "ZOFFSET", "WEIGHT", "DIAMETER"
-            };
-    
+      "index", "XOFFSET", "YOFFSET", "ZOFFSET", "WEIGHT", "DIAMETER"
+    };
+
     final Map<String, Map<String, Double>> stationConfigs = new LinkedHashMap<String, Map<String, Double>>();
 
     // load data from file :
@@ -842,7 +843,7 @@ public final class AsproGenConfig {
       StringTokenizer tok;
       String line;
       while ((line = reader.readLine()) != null) {
-        
+
         line = line.replaceAll("\\s+", " ").trim();
 
         // Parse values :
@@ -856,7 +857,7 @@ public final class AsproGenConfig {
 
           if (labels.contains(key)) {
             name = key;
-            
+
             logger.info("new station : " + name);
             current = new LinkedHashMap<String, Double>();
 
@@ -867,11 +868,11 @@ public final class AsproGenConfig {
               value = Double.valueOf(tok.nextToken());
 
               logger.info("value : " + value);
-              
+
               current.put(key, value);
               i++;
             }
-            
+
             // end station block :
             stationConfigs.put(name, current);
 
@@ -907,6 +908,7 @@ public final class AsproGenConfig {
 
     final double lat = Math.toRadians(lonlat[1]);
 
+    double x, y, z, offset;
     String station;
     Map<String, Double> config;
     for (Map.Entry<String, Map<String, Double>> e : stationConfigs.entrySet()) {
@@ -917,9 +919,22 @@ public final class AsproGenConfig {
       sb.append("      <name>").append(station).append("</name>\n");
       sb.append("      <telescope>T</telescope>\n");
 
-      convertHorizToEquatorial(station, lat, 1e6d * config.get("XOFFSET"), 1e6d * config.get("YOFFSET"), 1e6d * config.get("ZOFFSET"), sb);
+      x = config.get("XOFFSET");
+      y = config.get("YOFFSET");
+      z = config.get("ZOFFSET");
 
-      sb.append("      <delayLineFixedOffset>0.0</delayLineFixedOffset>\n");
+      convertHorizToEquatorial(station, lat, 1e6d * x, 1e6d * y, 1e6d * z, sb);
+
+      // norm of baseline vector:
+      offset = Math.sqrt(x * x + y * y + z * z);
+
+      if (station.startsWith("N")) {
+        offset -= 2.5d;
+      } else {
+        offset += 2.5d;
+      }
+
+      sb.append("      <delayLineFixedOffset>").append((int) Math.round(10d * offset) / 10d).append("</delayLineFixedOffset>\n");
       sb.append("    </station>\n\n");
     }
   }
@@ -944,7 +959,6 @@ public final class AsproGenConfig {
     logger.info("Generated SUSI Configuration : " + sb.length() + "\n" + sb.toString());
   }
 
-
   /**
    * Compute the SUSI position (S1 coordinates)
    * @param sb buffer
@@ -959,7 +973,7 @@ public final class AsproGenConfig {
 
     final double alt = 210d;
     computeInterferometerPosition(lonDeg, latDeg, alt, sb);
-    
+
     logger.info("Generated SUSI position:\n" + sb.toString());
 
     return new double[]{lonDeg, latDeg};
