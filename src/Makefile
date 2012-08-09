@@ -104,7 +104,6 @@ aspro_EXTRAS   = jmmc-app-logback.xml \
                  edu/dartmouth/*.dat \
                  edu/dartmouth/helptext.html \
                  edu/dartmouth/License.txt \
-                 fr/jmmc/aspro/gui/*.xsl \
                  fr/jmmc/aspro/gui/icons/*.gif \
                  fr/jmmc/aspro/gui/icons/*.png \
                  fr/jmmc/aspro/model/*.xml \

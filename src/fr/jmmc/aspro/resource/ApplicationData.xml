@@ -33,6 +33,13 @@
             jars="jmal.jar"
             license="CECILL-B ???"/>
 
+        <!-- Java Mariotti OIfitsExplorer-core -->
+        <package name="OIFits Explorer core"
+            description="OIFits Explorer core is the JMMC library dedicated to share OIFits GUI components (plots)"
+            link="http://www.jmmc.fr/dev/oiexplorer-core/"
+            jars="oiexplorer-core.jar"
+            license="CECILL-B ???"/>
+
         <!-- Java Mariotti OITools -->
         <package name="OITools"
             description="OITools is the JMMC library dedicated to OIFits manipulation (load, save and validation)"

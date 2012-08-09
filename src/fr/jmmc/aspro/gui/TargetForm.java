@@ -4,8 +4,6 @@
 package fr.jmmc.aspro.gui;
 
 import fr.jmmc.aspro.gui.util.CalibratorInfoTableModel;
-import fr.jmmc.jmcs.gui.component.GenericJTree;
-import fr.jmmc.aspro.gui.util.GenericListModel;
 import fr.jmmc.aspro.gui.util.TargetJTree;
 import fr.jmmc.aspro.gui.util.TargetListRenderer;
 import fr.jmmc.aspro.gui.util.TargetRenderer;
@@ -15,9 +13,11 @@ import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetInformation;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.aspro.model.util.TargetRAComparator;
-import fr.jmmc.jmcs.network.BrowserLauncher;
+import fr.jmmc.jmcs.gui.component.GenericJTree;
+import fr.jmmc.jmcs.gui.component.GenericListModel;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
+import fr.jmmc.jmcs.network.BrowserLauncher;
 import fr.jmmc.jmcs.resource.image.ResourceImage;
 import fr.jmmc.jmcs.util.UrlUtils;
 import java.awt.Component;
@@ -29,8 +29,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JFormattedTextField;
 import javax.swing.JList;
@@ -46,6 +44,8 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.text.NumberFormatter;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class represents the target information editor ...

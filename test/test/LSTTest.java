@@ -10,7 +10,8 @@ import fr.jmmc.aspro.model.Range;
 import fr.jmmc.aspro.model.observability.DateTimeInterval;
 import fr.jmmc.aspro.model.oi.InterferometerConfiguration;
 import fr.jmmc.aspro.model.oi.InterferometerDescription;
-import fr.jmmc.aspro.util.NumberUtils;
+
+import fr.jmmc.jmcs.util.NumberUtils;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
