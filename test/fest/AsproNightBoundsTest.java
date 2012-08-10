@@ -54,7 +54,7 @@ public final class AsproNightBoundsTest extends JmcsFestSwingJUnitTestCase {
     enableTooltips(false);
 
     // customize PDF action to avoid use StatusBar :
-    fr.jmmc.aspro.gui.action.ExportPDFAction.setAvoidUseStatusBar(true);
+    fr.jmmc.aspro.gui.action.AsproExportPDFAction.setAvoidUseStatusBar(true);
   }
 
   /**
