@@ -5,16 +5,16 @@ package fr.jmmc.aspro.gui;
 
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.Preferences;
-import fr.jmmc.aspro.gui.action.ExportPDFAction;
+import fr.jmmc.aspro.gui.action.AsproExportPDFAction;
 
-import fr.jmmc.aspro.gui.chart.ChartUtils;
+import fr.jmmc.oiexplorer.core.gui.chart.ChartUtils;
 import fr.jmmc.aspro.gui.chart.ColorModelPaintScale;
-import fr.jmmc.aspro.gui.chart.PDFOptions;
+import fr.jmmc.oiexplorer.core.gui.chart.PDFOptions;
 import fr.jmmc.aspro.gui.chart.PaintLogScaleLegend;
-import fr.jmmc.aspro.gui.chart.SquareChartPanel;
-import fr.jmmc.aspro.gui.chart.SquareXYPlot;
-import fr.jmmc.aspro.gui.chart.ZoomEvent;
-import fr.jmmc.aspro.gui.chart.ZoomEventListener;
+import fr.jmmc.oiexplorer.core.gui.chart.SquareChartPanel;
+import fr.jmmc.oiexplorer.core.gui.chart.SquareXYPlot;
+import fr.jmmc.oiexplorer.core.gui.chart.ZoomEvent;
+import fr.jmmc.oiexplorer.core.gui.chart.ZoomEventListener;
 import fr.jmmc.aspro.image.FitsImageUtils;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.gui.component.StatusBar;
@@ -23,6 +23,8 @@ import fr.jmmc.jmal.image.ColorModels;
 import fr.jmmc.jmal.image.ImageUtils;
 import fr.jmmc.jmal.image.ColorScale;
 import fr.jmmc.jmcs.gui.task.Task;
+import fr.jmmc.oiexplorer.core.gui.PDFExportable;
+import fr.jmmc.oiexplorer.core.util.Constants;
 import fr.jmmc.oitools.image.FitsImage;
 import java.awt.Color;
 import java.awt.Image;
@@ -203,7 +205,7 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
    */
   @Override
   public void performPDFAction() {
-    ExportPDFAction.exportPDF(this);
+    AsproExportPDFAction.exportPDF(this);
   }
 
   /**
@@ -264,8 +266,8 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
     this.chartPanel = ChartUtils.createSquareChartPanel(this.chart);
 
     // zoom options :
-    this.chartPanel.setDomainZoomable(AsproConstants.ENABLE_ZOOM);
-    this.chartPanel.setRangeZoomable(AsproConstants.ENABLE_ZOOM);
+    this.chartPanel.setDomainZoomable(Constants.ENABLE_ZOOM);
+    this.chartPanel.setRangeZoomable(Constants.ENABLE_ZOOM);
 
     // define zoom listener :
     this.chartPanel.setZoomEventListener(this);

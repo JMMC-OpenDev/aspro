@@ -6,12 +6,13 @@ package fr.jmmc.aspro.gui;
 import edu.dartmouth.AstroSkyCalc;
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.Preferences;
-import fr.jmmc.aspro.gui.action.ExportPDFAction;
-import fr.jmmc.aspro.gui.chart.BoundedDateAxis;
-import fr.jmmc.aspro.gui.chart.ChartUtils;
-import fr.jmmc.aspro.gui.chart.PDFOptions;
-import fr.jmmc.aspro.gui.chart.PDFOptions.Orientation;
-import fr.jmmc.aspro.gui.chart.PDFOptions.PageSize;
+import fr.jmmc.aspro.gui.action.AsproExportPDFAction;
+import fr.jmmc.aspro.gui.chart.AsproChartUtils;
+import fr.jmmc.oiexplorer.core.gui.chart.BoundedDateAxis;
+import fr.jmmc.oiexplorer.core.gui.chart.ChartUtils;
+import fr.jmmc.oiexplorer.core.gui.chart.PDFOptions;
+import fr.jmmc.oiexplorer.core.gui.chart.PDFOptions.Orientation;
+import fr.jmmc.oiexplorer.core.gui.chart.PDFOptions.PageSize;
 import fr.jmmc.aspro.gui.chart.ObservabilityPlotContext;
 import fr.jmmc.aspro.gui.chart.SlidingXYPlotAdapter;
 import fr.jmmc.aspro.gui.chart.XYDiamondAnnotation;
@@ -25,7 +26,6 @@ import fr.jmmc.aspro.model.observability.ObservabilityData;
 import fr.jmmc.aspro.model.event.ObservationListener;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.event.ObservationEvent;
-import fr.jmmc.aspro.model.observability.StarData;
 import fr.jmmc.aspro.model.observability.TargetPositionDate;
 import fr.jmmc.aspro.model.observability.StarObservabilityData;
 import fr.jmmc.aspro.model.observability.SunTimeInterval;
@@ -36,6 +36,7 @@ import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.aspro.service.ObservabilityService;
 import fr.jmmc.jmcs.gui.component.StatusBar;
+import fr.jmmc.oiexplorer.core.gui.PDFExportable;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -234,7 +235,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
    */
   private void initComponents() {
 
-    this.chart = ChartUtils.createXYBarChart();
+    this.chart = AsproChartUtils.createXYBarChart();
     this.xyPlot = (XYPlot) this.chart.getPlot();
 
     // create new JMMC annotation (moving position):
@@ -439,7 +440,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
    */
   @Override
   public void performPDFAction() {
-    ExportPDFAction.exportPDF(this);
+    AsproExportPDFAction.exportPDF(this);
   }
 
   /**
@@ -1078,12 +1079,12 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                 XYTickAnnotation a;
                 for (TargetPositionDate ed : so.getTargetPositions().values()) {
                   if (checkDateAxisLimits(ed.getDate(), min, max)) {
-                    a = ChartUtils.createXYTickAnnotation(Integer.toString(ed.getAzimuth()), n, ed.getDate().getTime(), -HALF_PI);
+                    a = AsproChartUtils.createXYTickAnnotation(Integer.toString(ed.getAzimuth()), n, ed.getDate().getTime(), -HALF_PI);
                     a.setTextAnchor(TextAnchor.BOTTOM_CENTER);
                     a.setRotationAnchor(TextAnchor.BOTTOM_CENTER);
                     addAnnotation(annotations, pos, a);
 
-                    a = ChartUtils.createXYTickAnnotation(Integer.toString(ed.getElevation()), n, ed.getDate().getTime(), HALF_PI);
+                    a = AsproChartUtils.createXYTickAnnotation(Integer.toString(ed.getElevation()), n, ed.getDate().getTime(), HALF_PI);
                     a.setTextAnchor(TextAnchor.TOP_CENTER);
                     a.setRotationAnchor(TextAnchor.TOP_CENTER);
                     addAnnotation(annotations, pos, a);
@@ -1093,13 +1094,13 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
               for (DateTimeInterval interval : so.getVisible()) {
                 if (checkDateAxisLimits(interval.getStartDate(), min, max)) {
-                  final XYTextAnnotation aStart = ChartUtils.createFitXYTextAnnotation(this.timeFormatter.format(interval.getStartDate()), n, interval.getStartDate().getTime());
+                  final XYTextAnnotation aStart = AsproChartUtils.createFitXYTextAnnotation(this.timeFormatter.format(interval.getStartDate()), n, interval.getStartDate().getTime());
                   aStart.setRotationAngle(HALF_PI);
                   addAnnotation(annotations, pos, aStart);
                 }
 
                 if (checkDateAxisLimits(interval.getEndDate(), min, max)) {
-                  final XYTextAnnotation aEnd = ChartUtils.createFitXYTextAnnotation(this.timeFormatter.format(interval.getEndDate()), n, interval.getEndDate().getTime());
+                  final XYTextAnnotation aEnd = AsproChartUtils.createFitXYTextAnnotation(this.timeFormatter.format(interval.getEndDate()), n, interval.getEndDate().getTime());
                   aEnd.setRotationAngle(HALF_PI);
                   addAnnotation(annotations, pos, aEnd);
                 }

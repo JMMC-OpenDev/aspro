@@ -3,6 +3,7 @@
  ******************************************************************************/
 package fr.jmmc.aspro.gui.chart;
 
+import fr.jmmc.oiexplorer.core.gui.chart.BoundedSymbolAxis;
 import fr.jmmc.aspro.model.observability.StarObservabilityData;
 import fr.jmmc.aspro.model.observability.TargetPositionDate;
 import fr.jmmc.aspro.model.oi.Target;

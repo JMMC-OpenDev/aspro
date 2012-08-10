@@ -3,6 +3,7 @@
  ******************************************************************************/
 package fr.jmmc.aspro.gui.chart;
 
+import fr.jmmc.oiexplorer.core.gui.chart.ChartUtils;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import org.slf4j.Logger;

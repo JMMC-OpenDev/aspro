@@ -144,7 +144,7 @@
       <menu label="Export targets to Observing Blocks" classpath="fr.jmmc.aspro.gui.action.ExportAllOBAction" action="exportAllOB"
             description="Export your complete observation to Observing blocks"/>
       <menu/> <!-- menu separator -->
-      <menu label="Export plot to PDF" classpath="fr.jmmc.aspro.gui.action.ExportPDFAction" action="exportPDF" accelerator="P"
+      <menu label="Export plot to PDF" classpath="fr.jmmc.oiexplorer.core.gui.action.ExportPDFAction" action="exportPDF" accelerator="P"
             icon="/fr/jmmc/aspro/gui/icons/icon_pdf.gif" description="Export the current plot to a PDF document"/>
     </menu>
 

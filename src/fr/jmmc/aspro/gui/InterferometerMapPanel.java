@@ -4,12 +4,12 @@
 package fr.jmmc.aspro.gui;
 
 import fr.jmmc.aspro.AsproConstants;
-import fr.jmmc.aspro.gui.action.ExportPDFAction;
-import fr.jmmc.aspro.gui.chart.ChartUtils;
+import fr.jmmc.aspro.gui.action.AsproExportPDFAction;
+import fr.jmmc.oiexplorer.core.gui.chart.ChartUtils;
 import fr.jmmc.aspro.gui.chart.NameLabelGenerator;
-import fr.jmmc.aspro.gui.chart.PDFOptions;
-import fr.jmmc.aspro.gui.chart.SquareChartPanel;
-import fr.jmmc.aspro.gui.chart.SquareXYPlot;
+import fr.jmmc.oiexplorer.core.gui.chart.PDFOptions;
+import fr.jmmc.oiexplorer.core.gui.chart.SquareChartPanel;
+import fr.jmmc.oiexplorer.core.gui.chart.SquareXYPlot;
 import fr.jmmc.aspro.gui.chart.XYZNameDataSet;
 import fr.jmmc.aspro.gui.util.ColorPalette;
 import fr.jmmc.aspro.model.InterferometerMapData;
@@ -20,6 +20,8 @@ import fr.jmmc.aspro.model.event.ObservationEvent;
 import fr.jmmc.aspro.model.oi.ObservationCollection;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.service.InterferometerMapService;
+import fr.jmmc.oiexplorer.core.gui.PDFExportable;
+import fr.jmmc.oiexplorer.core.util.Constants;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.util.ArrayList;
@@ -98,7 +100,7 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
    */
   @Override
   public void performPDFAction() {
-    ExportPDFAction.exportPDF(this);
+    AsproExportPDFAction.exportPDF(this);
   }
 
   /**
@@ -186,8 +188,8 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
     this.chartPanel = ChartUtils.createSquareChartPanel(this.chart);
 
     // zoom options :
-    this.chartPanel.setDomainZoomable(AsproConstants.ENABLE_ZOOM);
-    this.chartPanel.setRangeZoomable(AsproConstants.ENABLE_ZOOM);
+    this.chartPanel.setDomainZoomable(Constants.ENABLE_ZOOM);
+    this.chartPanel.setRangeZoomable(Constants.ENABLE_ZOOM);
 
     this.chartPanel.setMinimumSize(new Dimension(650, 500));
     this.add(this.chartPanel);

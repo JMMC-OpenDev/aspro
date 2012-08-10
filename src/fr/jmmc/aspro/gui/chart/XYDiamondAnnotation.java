@@ -37,6 +37,7 @@
  */
 package fr.jmmc.aspro.gui.chart;
 
+import fr.jmmc.oiexplorer.core.gui.chart.ChartUtils;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Paint;

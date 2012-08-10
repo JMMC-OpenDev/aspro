@@ -7,16 +7,16 @@ import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.Preferences;
 import fr.jmmc.aspro.gui.action.ExportOBVLTIAction;
 import fr.jmmc.aspro.gui.action.ExportOBVegaAction;
-import fr.jmmc.aspro.gui.action.ExportPDFAction;
-import fr.jmmc.aspro.gui.chart.BoundedNumberAxis;
-import fr.jmmc.aspro.gui.chart.ChartUtils;
+import fr.jmmc.aspro.gui.action.AsproExportPDFAction;
+import fr.jmmc.oiexplorer.core.gui.chart.BoundedNumberAxis;
+import fr.jmmc.oiexplorer.core.gui.chart.ChartUtils;
 import fr.jmmc.aspro.gui.chart.ColorModelPaintScale;
-import fr.jmmc.aspro.gui.chart.PDFOptions;
+import fr.jmmc.oiexplorer.core.gui.chart.PDFOptions;
 import fr.jmmc.aspro.gui.chart.PaintLogScaleLegend;
-import fr.jmmc.aspro.gui.chart.SquareChartPanel;
-import fr.jmmc.aspro.gui.chart.SquareXYPlot;
-import fr.jmmc.aspro.gui.chart.ZoomEvent;
-import fr.jmmc.aspro.gui.chart.ZoomEventListener;
+import fr.jmmc.oiexplorer.core.gui.chart.SquareChartPanel;
+import fr.jmmc.oiexplorer.core.gui.chart.SquareXYPlot;
+import fr.jmmc.oiexplorer.core.gui.chart.ZoomEvent;
+import fr.jmmc.oiexplorer.core.gui.chart.ZoomEventListener;
 import fr.jmmc.aspro.gui.task.AsproTaskRegistry;
 import fr.jmmc.aspro.gui.task.ObservationCollectionTaskSwingWorker;
 import fr.jmmc.aspro.gui.util.ColorPalette;
@@ -62,6 +62,8 @@ import fr.jmmc.jmal.model.VisNoiseService;
 import fr.jmmc.jmal.model.targetmodel.Model;
 import fr.jmmc.jmcs.gui.task.TaskSwingWorkerExecutor;
 import fr.jmmc.jmcs.util.concurrent.InterruptedJobException;
+import fr.jmmc.oiexplorer.core.gui.PDFExportable;
+import fr.jmmc.oiexplorer.core.util.Constants;
 import fr.jmmc.oitools.image.FitsImage;
 import fr.jmmc.oitools.model.OIFitsFile;
 import java.awt.Color;
@@ -571,7 +573,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
    */
   @Override
   public void performPDFAction() {
-    ExportPDFAction.exportPDF(this);
+    AsproExportPDFAction.exportPDF(this);
   }
 
   /**
@@ -658,8 +660,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     this.chartPanel = ChartUtils.createSquareChartPanel(this.chart);
 
     // zoom options :
-    this.chartPanel.setDomainZoomable(AsproConstants.ENABLE_ZOOM);
-    this.chartPanel.setRangeZoomable(AsproConstants.ENABLE_ZOOM);
+    this.chartPanel.setDomainZoomable(Constants.ENABLE_ZOOM);
+    this.chartPanel.setRangeZoomable(Constants.ENABLE_ZOOM);
 
     // define zoom listener :
     this.chartPanel.setZoomEventListener(this);

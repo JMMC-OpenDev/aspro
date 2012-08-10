@@ -12,14 +12,14 @@ import java.util.Vector;
  */
 public interface AsproConstants {
 
+  // TODO: reuse OIFitsExplorer-Core or JMCS Constants
+  
   /** Warning Logger */
   /** jmmc status log */
   public final static String ASPRO_WARNING_LOG = "fr.jmmc.aspro.warning";
   /* JMMC applications */
   /** SearchCal samp.name keyword */
   public final static String SEARCHCAL_SAMP_NAME = "SearchCal";
-  /** chart : enables the zoom in / out */
-  public final static boolean ENABLE_ZOOM = true;
 
   /* ASTRO constants */
   /** EPOCH J2000 */
