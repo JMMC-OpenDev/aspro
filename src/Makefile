@@ -110,8 +110,7 @@ aspro_EXTRAS   = jmmc-app-logback.xml \
                  fr/jmmc/aspro/interop/*.xml \
                  fr/jmmc/aspro/interop/*.xsl \
                  fr/jmmc/aspro/ob/*.obx \
-                 fr/jmmc/aspro/resource/*.xml \
-                 fr/jmmc/aspro/resource/*.gif
+                 fr/jmmc/aspro/resource/*.xml
 
 #
 # Java programs
