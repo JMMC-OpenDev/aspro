@@ -9,6 +9,7 @@ import fr.jmmc.aspro.model.event.ObservationEvent;
 import fr.jmmc.aspro.model.event.ObservationListener;
 import fr.jmmc.oiexplorer.core.gui.PDFExportable;
 import fr.jmmc.oiexplorer.core.gui.Vis2Panel;
+import fr.jmmc.oiexplorer.core.model.TargetUID;
 import fr.jmmc.oitools.model.OIFitsFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -147,14 +148,22 @@ public final class OIFitsViewPanel extends javax.swing.JPanel implements Observa
   private void plot(final OIFitsFile oiFitsFile) {
     logger.debug("plot : {}", oiFitsFile);
 
+    // Extract the single target from OIFitsFile:
+    final TargetUID target;
+    if (oiFitsFile != null) {
+      target = new TargetUID(oiFitsFile.getOiTarget().getTarget()[0]);
+    } else {
+      target = null;
+    }
+
     if (oiFitsFile == null) {
       this.jLabelMessage.setText("No VIS2 data available: the target is not observable or multiple configurations are selected.");
       showMessage(true);
       // reset plot anyway:
-      this.vis2Panel.plot(oiFitsFile);
+      this.vis2Panel.plot(target, oiFitsFile);
     } else {
-      // reset plot anyway:
-      this.vis2Panel.plot(oiFitsFile);
+      // plot data:
+      this.vis2Panel.plot(target, oiFitsFile);
 
       final boolean hasData = this.vis2Panel.isHasData();
       if (!hasData) {

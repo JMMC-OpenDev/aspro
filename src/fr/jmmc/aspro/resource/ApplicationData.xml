@@ -145,7 +145,7 @@
             description="Export your complete observation to Observing blocks"/>
       <menu/> <!-- menu separator -->
       <menu label="Export plot to PDF" classpath="fr.jmmc.oiexplorer.core.gui.action.ExportPDFAction" action="exportPDF" accelerator="P"
-            icon="/fr/jmmc/aspro/gui/icons/icon_pdf.gif" description="Export the current plot to a PDF document"/>
+            icon="/fr/jmmc/oiexplorer/core/resource/image/icon_pdf.gif" description="Export the current plot to a PDF document"/>
     </menu>
 
     <menu label="Edit">
