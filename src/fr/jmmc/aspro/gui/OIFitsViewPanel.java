@@ -10,6 +10,7 @@ import fr.jmmc.aspro.model.event.ObservationListener;
 import fr.jmmc.oiexplorer.core.gui.PDFExportable;
 import fr.jmmc.oiexplorer.core.gui.Vis2Panel;
 import fr.jmmc.oiexplorer.core.model.OIFitsCollectionManager;
+import fr.jmmc.oiexplorer.core.model.PlotDefinitionFactory;
 import fr.jmmc.oiexplorer.core.model.TargetUID;
 import fr.jmmc.oitools.model.OIFitsFile;
 import org.slf4j.Logger;
@@ -117,6 +118,9 @@ public final class OIFitsViewPanel extends javax.swing.JPanel implements Observa
     this.vis2Panel = new Vis2Panel();
 
     this.jPanelCenter.add(this.vis2Panel);
+    
+    // hack for now: TODO: fix asap
+    PlotDefinitionFactory.getInstance().getDefault(PlotDefinitionFactory.PLOT_VIS2DATA_T3PHI_SPATIAL_FREQ).setSkipFlaggedData(false);
   }
 
   /**
