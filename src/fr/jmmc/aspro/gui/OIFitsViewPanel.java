@@ -9,6 +9,7 @@ import fr.jmmc.aspro.model.event.ObservationEvent;
 import fr.jmmc.aspro.model.event.ObservationListener;
 import fr.jmmc.oiexplorer.core.gui.PDFExportable;
 import fr.jmmc.oiexplorer.core.gui.Vis2Panel;
+import fr.jmmc.oiexplorer.core.model.OIFitsCollectionManager;
 import fr.jmmc.oiexplorer.core.model.TargetUID;
 import fr.jmmc.oitools.model.OIFitsFile;
 import org.slf4j.Logger;
@@ -162,8 +163,20 @@ public final class OIFitsViewPanel extends javax.swing.JPanel implements Observa
       // reset plot anyway:
       this.vis2Panel.plot(target, oiFitsFile);
     } else {
+      // analyse data:
+      OIFitsCollectionManager.getInstance().reset();
+      
+      oiFitsFile.setAbsoluteFilePath("ASPRO2");
+      OIFitsCollectionManager.getInstance().addOIFitsFile(oiFitsFile);
+      
+      // TODO: use OIFitsManager & collection ...
+      
+      // TODO: Disable FLAGS
+      
+      final OIFitsFile oiFitsTarget = OIFitsCollectionManager.getInstance().getOIFitsCollection().getOiDataList(target);
+      
       // plot data:
-      this.vis2Panel.plot(target, oiFitsFile);
+      this.vis2Panel.plot(target, oiFitsTarget);
 
       final boolean hasData = this.vis2Panel.isHasData();
       if (!hasData) {

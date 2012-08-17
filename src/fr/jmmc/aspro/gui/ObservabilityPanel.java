@@ -239,9 +239,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     this.xyPlot = (XYPlot) this.chart.getPlot();
 
     // create new JMMC annotation (moving position):
-    this.aJMMC = ChartUtils.createXYTextAnnotation(AsproConstants.JMMC_ANNOTATION, 0, 0);
-    this.aJMMC.setTextAnchor(TextAnchor.BOTTOM_RIGHT);
-    this.aJMMC.setPaint(Color.DARK_GRAY);
+    this.aJMMC = ChartUtils.createJMMCAnnotation(AsproConstants.JMMC_ANNOTATION);
 
     // define sliding adapter :
     this.slidingXYPlotAdapter = new SlidingXYPlotAdapter(this.chart, this.xyPlot, MAX_VIEW_ITEMS, this.aJMMC);

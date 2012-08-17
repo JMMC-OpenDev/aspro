@@ -178,9 +178,7 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
     renderer.setBaseItemLabelsVisible(true);
 
     // create new JMMC annotation (moving position):
-    this.aJMMC = ChartUtils.createXYTextAnnotation(AsproConstants.JMMC_ANNOTATION, 0, 0);
-    this.aJMMC.setTextAnchor(TextAnchor.BOTTOM_RIGHT);
-    this.aJMMC.setPaint(Color.DARK_GRAY);
+    this.aJMMC = ChartUtils.createJMMCAnnotation(AsproConstants.JMMC_ANNOTATION);
     this.xyPlot.getRenderer().addAnnotation(this.aJMMC, Layer.BACKGROUND);
 
     // add listener :

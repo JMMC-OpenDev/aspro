@@ -256,9 +256,7 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
     this.xyPlot.setBackgroundImageAlpha(1.0f);
 
     // create new JMMC annotation (moving position):
-    this.aJMMC = ChartUtils.createXYTextAnnotation(AsproConstants.JMMC_ANNOTATION, 0, 0);
-    this.aJMMC.setTextAnchor(TextAnchor.BOTTOM_RIGHT);
-    this.aJMMC.setPaint(Color.DARK_GRAY);
+    this.aJMMC = ChartUtils.createJMMCAnnotation(AsproConstants.JMMC_ANNOTATION);
     this.xyPlot.getRenderer().addAnnotation(this.aJMMC, Layer.BACKGROUND);
 
     // add listener :
