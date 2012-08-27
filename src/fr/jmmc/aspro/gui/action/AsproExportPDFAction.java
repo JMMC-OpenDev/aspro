@@ -3,7 +3,7 @@
  ******************************************************************************/
 package fr.jmmc.aspro.gui.action;
 
-import fr.jmmc.aspro.AsproGui;
+import fr.jmmc.aspro.Aspro2;
 import fr.jmmc.oiexplorer.core.gui.chart.PDFUtils;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.gui.component.StatusBar;
@@ -42,6 +42,6 @@ public final class AsproExportPDFAction extends ExportPDFAction {
    * @return selected GUI panel
    */
   protected Component getSelectedComponent() {
-    return AsproGui.getInstance().getSettingPanel().getTabSelectedComponent();
+    return Aspro2.getInstance().getSettingPanel().getTabSelectedComponent();
   }
 }

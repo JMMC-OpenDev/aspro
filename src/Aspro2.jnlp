@@ -40,5 +40,5 @@
     <jar href="@SHARED@/trident.jar" />
 
   </resources>
-  <application-desc main-class="fr.jmmc.aspro.AsproGui"/>
+  <application-desc main-class="fr.jmmc.aspro.Aspro2"/>
 </jnlp>

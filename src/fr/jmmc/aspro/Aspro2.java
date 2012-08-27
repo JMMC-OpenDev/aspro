@@ -46,10 +46,10 @@ import javax.swing.JScrollPane;
  * This class represents the Aspro GUI application
  * @author bourgesl
  */
-public final class AsproGui extends App {
+public final class Aspro2 extends App {
 
   /** Class logger */
-  private static final Logger logger = LoggerFactory.getLogger(AsproGui.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(Aspro2.class.getName());
 
   /* members */
   /** Setting Panel */
@@ -68,7 +68,7 @@ public final class AsproGui extends App {
     final long start = System.nanoTime();
     try {
       // Start application with the command line arguments
-      new AsproGui(args);
+      new Aspro2(args);
     } finally {
       if (logger.isInfoEnabled()) {
         logger.info("startup : duration = {} ms.", 1e-6d * (System.nanoTime() - start));
@@ -80,15 +80,15 @@ public final class AsproGui extends App {
    * Return the Aspro Gui singleton
    * @return Aspro Gui singleton
    */
-  public static AsproGui getInstance() {
-    return (AsproGui) App.getSharedInstance();
+  public static Aspro2 getInstance() {
+    return (Aspro2) App.getSharedInstance();
   }
 
   /**
    * Public constructor with command line arguments
    * @param args command line arguments
    */
-  public AsproGui(final String[] args) {
+  public Aspro2(final String[] args) {
     super(args);
   }
 
@@ -96,7 +96,7 @@ public final class AsproGui extends App {
    * Initialize application objects
    * @param args ignored arguments
    *
-   * @throws RuntimeException if the AsproGui initialisation failed
+   * @throws RuntimeException if the Aspro2 initialisation failed
    */
   @Override
   protected void init(final String[] args) throws RuntimeException {

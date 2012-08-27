@@ -118,7 +118,7 @@ JAVA_EXECUTABLES= AsproGUI
 
 #
 # <brief description of jjjjjj java program>
-AsproGUI_CLASS    = fr.jmmc.aspro.AsproGui
+AsproGUI_CLASS    = fr.jmmc.aspro.Aspro2
 
 #
 # Command Definition Files (CDF)

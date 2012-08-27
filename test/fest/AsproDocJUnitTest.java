@@ -61,7 +61,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
     Preferences.getInstance().resetToDefaultPreferences();
 
     JmcsApplicationSetup.define(
-            fr.jmmc.aspro.AsproGui.class,
+            fr.jmmc.aspro.Aspro2.class,
             "-open", TEST_FOLDER + "Aspro2_sample.asprox");
 
     // define robot delays :

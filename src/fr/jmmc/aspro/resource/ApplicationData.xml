@@ -7,22 +7,22 @@
 
 <ApplicationData link="http://www.jmmc.fr/aspro2">
 
-  <program name="Aspro2" version="0.9.2 beta 4"/>
+    <company>
+        <short_name>JMMC</short_name>
+        <legal_name>Jean-Marie Mariotti Center</legal_name>
+        <logo_resource>fr/jmmc/jmcs/resource/image/jmmc_logo.png</logo_resource>
+        <homepage_url>http://www.jmmc.fr/</homepage_url>
+        <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
+    </company>
 
-  <compilation date="06/08/2012" compiler="JDK 1.5.0_16"/>
+    <program name="Aspro2" version="0.9.2 beta 4"/>
+    <compilation date="06/08/2012" compiler="JDK 1.5.0_16"/>
+    <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
+    <authors>the JMMC Technical Group</authors>
+    <jnlp>http://apps.jmmc.fr/~swmgr/Aspro2/Aspro2.jnlp</jnlp>
+    <sampdescription>Prepare your interferometric observations with the VLTI or other interferometers</sampdescription>
 
-  <text>
-    <![CDATA[ASPRO 2 is the new version of the ASPRO tool to prepare your interferometric observations
-    with the VLTI or other interferometers.
-    This observation preparation tool is developed and maintained by the JMMC.
-    ]]>
-  </text>
-
-  <jnlp>http://apps.jmmc.fr/~swmgr/Aspro2/Aspro2.jnlp</jnlp>
-
-  <sampdescription>Prepare your interferometric observations with the VLTI or other interferometers</sampdescription>
-
-  <dependences>
+    <dependences>
 
         <!-- JMMC -->
 

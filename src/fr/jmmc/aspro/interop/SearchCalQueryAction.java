@@ -4,7 +4,7 @@
 package fr.jmmc.aspro.interop;
 
 import edu.dartmouth.AstroSkyCalcObservation;
-import fr.jmmc.aspro.AsproGui;
+import fr.jmmc.aspro.Aspro2;
 import fr.jmmc.aspro.model.ConfigurationManager;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.oi.FocalInstrumentMode;
@@ -86,7 +86,7 @@ public final class SearchCalQueryAction extends SampCapabilityAction {
   public Map<?, ?> composeMessage() {
 
     // extract the selected target in the main form :
-    final Target target = AsproGui.getInstance().getSettingPanel().getObservationForm().getSelectedTarget();
+    final Target target = Aspro2.getInstance().getSettingPanel().getObservationForm().getSelectedTarget();
 
     if (target == null) {
       MessagePane.showMessage("Please select a target before calling SearchCal !");

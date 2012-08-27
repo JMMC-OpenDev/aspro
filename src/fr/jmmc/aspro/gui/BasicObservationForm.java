@@ -8,7 +8,7 @@ import edu.dartmouth.AstroSkyCalcObservation;
 import edu.dartmouth.JSkyCalc;
 import edu.dartmouth.Site;
 import fr.jmmc.aspro.AsproConstants;
-import fr.jmmc.aspro.AsproGui;
+import fr.jmmc.aspro.Aspro2;
 import fr.jmmc.aspro.Preferences;
 import fr.jmmc.aspro.gui.util.TargetListRenderer;
 import fr.jmmc.aspro.gui.util.TargetRenderer;
@@ -616,7 +616,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
       final Target target = getSelectedTarget();
 
       if (target != null) {
-        final String selectedTab = (AsproGui.getInstance().getSettingPanel().isSelectedTabUsingTargetModel())
+        final String selectedTab = (Aspro2.getInstance().getSettingPanel().isSelectedTabUsingTargetModel())
                 ? TargetEditorDialog.TAB_MODELS : TargetEditorDialog.TAB_TARGETS;
 
         // show model editor :

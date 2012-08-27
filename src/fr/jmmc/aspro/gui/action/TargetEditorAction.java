@@ -3,7 +3,7 @@
  ******************************************************************************/
 package fr.jmmc.aspro.gui.action;
 
-import fr.jmmc.aspro.AsproGui;
+import fr.jmmc.aspro.Aspro2;
 import fr.jmmc.aspro.gui.BasicObservationForm;
 import fr.jmmc.jmcs.gui.action.RegisteredAction;
 import java.awt.event.ActionEvent;
@@ -40,7 +40,7 @@ public class TargetEditorAction extends RegisteredAction {
   public void actionPerformed(final ActionEvent evt) {
     logger.debug("actionPerformed");
 
-    final BasicObservationForm form = AsproGui.getInstance().getSettingPanel().getObservationForm();
+    final BasicObservationForm form = Aspro2.getInstance().getSettingPanel().getObservationForm();
 
     form.showTargetEditor();
   }

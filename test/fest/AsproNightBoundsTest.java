@@ -41,7 +41,7 @@ public final class AsproNightBoundsTest extends JmcsFestSwingJUnitTestCase {
     System.setProperty("jmcs.laf.menu", "false");
 
     JmcsApplicationSetup.define(
-            fr.jmmc.aspro.AsproGui.class,
+            fr.jmmc.aspro.Aspro2.class,
             "-open", "/home/bourgesl/dev/aspro/test/TEST_RA_LIMITS.asprox");
 
     // define robot delays :

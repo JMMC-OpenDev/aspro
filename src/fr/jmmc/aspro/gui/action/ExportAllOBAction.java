@@ -3,7 +3,7 @@
  ******************************************************************************/
 package fr.jmmc.aspro.gui.action;
 
-import fr.jmmc.aspro.AsproGui;
+import fr.jmmc.aspro.Aspro2;
 import fr.jmmc.aspro.gui.UVCoveragePanel;
 import fr.jmmc.aspro.ob.ExportOBMode;
 import fr.jmmc.jmcs.gui.component.MessagePane;
@@ -43,7 +43,7 @@ public final class ExportAllOBAction extends RegisteredAction {
   public void actionPerformed(final ActionEvent evt) {
     logger.debug("actionPerformed");
 
-    final UVCoveragePanel uvCoveragePanel = AsproGui.getInstance().getSettingPanel().getUVCoveragePanel();
+    final UVCoveragePanel uvCoveragePanel = Aspro2.getInstance().getSettingPanel().getUVCoveragePanel();
 
     // note : there is at least one target :
     if (uvCoveragePanel != null) {
