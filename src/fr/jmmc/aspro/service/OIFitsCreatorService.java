@@ -16,7 +16,7 @@ import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.Telescope;
 import fr.jmmc.aspro.model.uvcoverage.UVRangeBaseLineData;
-import fr.jmmc.aspro.util.CombUtils;
+import fr.jmmc.oitools.util.CombUtils;
 import fr.jmmc.aspro.util.ComplexUtils;
 import fr.jmmc.jmal.ALX;
 import fr.jmmc.jmal.complex.Complex;

@@ -22,7 +22,7 @@ import fr.jmmc.aspro.model.oi.Position3D;
 import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.StationLinks;
 import fr.jmmc.aspro.service.GeocentricCoords;
-import fr.jmmc.aspro.util.CombUtils;
+import fr.jmmc.oitools.util.CombUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

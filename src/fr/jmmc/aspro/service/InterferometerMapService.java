@@ -11,7 +11,7 @@ import fr.jmmc.aspro.model.oi.InterferometerDescription;
 import fr.jmmc.aspro.model.oi.LonLatAlt;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Station;
-import fr.jmmc.aspro.util.CombUtils;
+import fr.jmmc.oitools.util.CombUtils;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.List;

@@ -3,7 +3,7 @@
  ******************************************************************************/
 package test;
 
-import fr.jmmc.aspro.util.CombUtils;
+import fr.jmmc.oitools.util.CombUtils;
 import java.util.List;
 
 /**

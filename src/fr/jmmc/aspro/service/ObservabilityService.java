@@ -41,7 +41,7 @@ import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.StationLinks;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.Telescope;
-import fr.jmmc.aspro.util.CombUtils;
+import fr.jmmc.oitools.util.CombUtils;
 import fr.jmmc.aspro.util.TestUtils;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
