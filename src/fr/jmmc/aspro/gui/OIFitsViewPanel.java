@@ -3,20 +3,19 @@
  ******************************************************************************/
 package fr.jmmc.aspro.gui;
 
-import fr.jmmc.oiexplorer.core.gui.chart.PDFOptions;
 import fr.jmmc.aspro.model.event.OIFitsEvent;
 import fr.jmmc.aspro.model.event.ObservationEvent;
 import fr.jmmc.aspro.model.event.ObservationListener;
 import fr.jmmc.oiexplorer.core.gui.PDFExportable;
 import fr.jmmc.oiexplorer.core.gui.Vis2Panel;
+import fr.jmmc.oiexplorer.core.gui.chart.PDFOptions;
 import fr.jmmc.oiexplorer.core.model.OIFitsCollectionManager;
 import fr.jmmc.oiexplorer.core.model.PlotDefinitionFactory;
-import fr.jmmc.oiexplorer.core.model.TargetUID;
+import fr.jmmc.oiexplorer.core.model.oi.TargetUID;
 import fr.jmmc.oitools.model.OIFitsFile;
+import org.jfree.chart.JFreeChart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import org.jfree.chart.JFreeChart;
 
 /**
  * This panel embeds the OIFitsExplorer into Aspro2
@@ -120,7 +119,7 @@ public final class OIFitsViewPanel extends javax.swing.JPanel implements Observa
     this.jPanelCenter.add(this.vis2Panel);
     
     // hack for now: TODO: fix asap
-    PlotDefinitionFactory.getInstance().getDefault(PlotDefinitionFactory.PLOT_VIS2DATA_T3PHI_SPATIAL_FREQ).setSkipFlaggedData(false);
+    PlotDefinitionFactory.getInstance().getDefault(PlotDefinitionFactory.PLOT_DEFAULT).setSkipFlaggedData(false);
   }
 
   /**
