@@ -8,7 +8,6 @@ import fr.jmmc.aspro.model.oi.ObservationCollection;
 import fr.jmmc.aspro.model.uvcoverage.UVCoverageData;
 import fr.jmmc.aspro.service.OIFitsCreatorService;
 import fr.jmmc.jmal.model.UVMapData;
-import fr.jmmc.oitools.model.OIFitsFile;
 import java.util.List;
 
 /**

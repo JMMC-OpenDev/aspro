@@ -3,25 +3,25 @@
  ******************************************************************************/
 package fr.jmmc.aspro.model;
 
-import fr.jmmc.aspro.model.event.ObservationListener;
-import fr.jmmc.aspro.model.event.ObservationEventType;
-import fr.jmmc.aspro.model.observability.ObservabilityData;
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.Preferences;
 import fr.jmmc.aspro.model.event.OIFitsEvent;
 import fr.jmmc.aspro.model.event.ObservabilityEvent;
 import fr.jmmc.aspro.model.event.ObservationEvent;
+import fr.jmmc.aspro.model.event.ObservationEventType;
+import fr.jmmc.aspro.model.event.ObservationListener;
 import fr.jmmc.aspro.model.event.TargetSelectionEvent;
 import fr.jmmc.aspro.model.event.UpdateObservationEvent;
 import fr.jmmc.aspro.model.event.WarningContainerEvent;
+import fr.jmmc.aspro.model.observability.ObservabilityData;
 import fr.jmmc.aspro.model.oi.*;
 import fr.jmmc.aspro.model.util.SpectralBandUtils;
 import fr.jmmc.aspro.service.UserModelService;
 import fr.jmmc.jmal.Band;
-import fr.jmmc.jmal.star.Star;
 import fr.jmmc.jmal.model.ModelDefinition;
 import fr.jmmc.jmal.model.targetmodel.Model;
 import fr.jmmc.jmal.model.targetmodel.Parameter;
+import fr.jmmc.jmal.star.Star;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
 import fr.jmmc.jmcs.util.FileUtils;
@@ -36,9 +36,9 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.Vector;
 import java.util.concurrent.CopyOnWriteArrayList;
+import javax.xml.datatype.XMLGregorianCalendar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 /**
  * This class manages observation files i.e. user defined observation settings
@@ -66,8 +66,8 @@ public final class ObservationManager extends BaseOIManager implements Observer 
   private File observationFile = null;
   /** derived observation collection used by computations */
   private ObservationCollection obsCollection = null;
-  /** computed OIFits structure */
-  private OIFitsFile oiFitsFile = null;
+  /** computed OIFits structures */
+  private List<OIFitsFile> oiFitsList = null;
   /** (cached) flag to use fast user model (preference) */
   private boolean useFastUserModel;
 
@@ -558,17 +558,17 @@ public final class ObservationManager extends BaseOIManager implements Observer 
 
   /**
    * This fires an OIFits done event to all registered listeners.
-   * Fired by setOIFitsFile() <= UVCoveragePanel.UVCoverageSwingWorker.refreshUI() (EDT) when the OIFits is computed
+   * Fired by setOIFitsFiles() <= UVCoveragePanel.UVCoverageSwingWorker.refreshUI() (EDT) when the OIFits is computed
    *
    * Listeners : SettingPanel / OIFitsPanel
    *
-   * @param oiFitsFile OIFits structure
+   * @param oiFitsFiles OIFits structures
    */
-  public void fireOIFitsDone(final OIFitsFile oiFitsFile) {
+  public void fireOIFitsDone(final List<OIFitsFile> oiFitsFiles) {
     // use observation for computations :
-    logger.debug("fireOIFitsDone: {}", oiFitsFile);
+    logger.debug("fireOIFitsDone: {}", oiFitsFiles);
 
-    fireEvent(new OIFitsEvent(oiFitsFile));
+    fireEvent(new OIFitsEvent(oiFitsFiles));
   }
 
   /**
@@ -1260,28 +1260,30 @@ public final class ObservationManager extends BaseOIManager implements Observer 
 
   // --- COMPUTATION RESULTS ---------------------------------------------------
   /**
-   * Defines the OIFits structure (SHARED) for later reuse (Visiblity Explorer)
+   * Defines the OIFits structures (SHARED) for later reuse (OIFits Explorer)
    * Used by UVCoveragePanel.UVCoverageSwingWorker.refreshUI()
    *
-   * @param oiFitsFile OIFits structure
+   * @param oiFitsList OIFits structures
    */
-  public void setOIFitsFile(final OIFitsFile oiFitsFile) {
-    logger.debug("setOIFitsFile: {}", oiFitsFile);
+  public void setOIFitsList(final List<OIFitsFile> oiFitsList) {
+    logger.debug("setOIFitsList: {}", oiFitsList);
 
     // TODO: use a new class OIFitsData (version / File / Target) ...
+    
+    // Use OIFitsCollectionManager ?
 
-    this.oiFitsFile = oiFitsFile;
+    this.oiFitsList = oiFitsList;
 
     // Fire OIFitsDone event to inform panels to be updated anyway:
-    this.fireOIFitsDone(oiFitsFile);
+    this.fireOIFitsDone(oiFitsList);
   }
 
   /**
-   * Return the computed OIFits structure (read only)
+   * Return the computed OIFits structures (read only)
    * @return OIFits structure or null
    */
-  public OIFitsFile getOIFitsFile() {
-    return this.oiFitsFile;
+  public List<OIFitsFile> getOIFitsList() {
+    return this.oiFitsList;
   }
 
   // --- OBSERVATION VARIANTS -------------------------------------------------

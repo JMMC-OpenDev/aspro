@@ -4,29 +4,30 @@
 package fr.jmmc.aspro.model.event;
 
 import fr.jmmc.oitools.model.OIFitsFile;
+import java.util.List;
 
 /**
  * This event extends the ObservationEvent to contain only the OIFits structure
  */
 public final class OIFitsEvent extends ObservationEvent {
 
-  /** OIFits structure */
-  private final OIFitsFile oiFitsFile;
+  /** OIFits structures */
+  private final List<OIFitsFile> oiFitsList;
 
   /**
    * Public constructor
-   * @param oiFitsFile OIFits structure
+   * @param oiFitsList OIFits structures
    */
-  public OIFitsEvent(final OIFitsFile oiFitsFile) {
+  public OIFitsEvent(final List<OIFitsFile> oiFitsList) {
     super(ObservationEventType.OIFITS_DONE);
-    this.oiFitsFile = oiFitsFile;
+    this.oiFitsList = oiFitsList;
   }
 
   /**
-   * Return the computed OIFits structure (read only)
-   * @return OIFits structure or null
+   * Return the computed OIFits structures (read only)
+   * @return OIFits structures or null
    */
-  public final OIFitsFile getOIFitsFile() {
-    return this.oiFitsFile;
+  public List<OIFitsFile> getOIFitsList() {
+    return this.oiFitsList;
   }
 }

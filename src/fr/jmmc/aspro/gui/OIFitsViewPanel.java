@@ -3,6 +3,7 @@
  ******************************************************************************/
 package fr.jmmc.aspro.gui;
 
+import fr.jmmc.aspro.gui.action.ExportOIFitsAction;
 import fr.jmmc.aspro.model.event.OIFitsEvent;
 import fr.jmmc.aspro.model.event.ObservationEvent;
 import fr.jmmc.aspro.model.event.ObservationListener;
@@ -11,8 +12,12 @@ import fr.jmmc.oiexplorer.core.gui.Vis2Panel;
 import fr.jmmc.oiexplorer.core.gui.chart.PDFOptions;
 import fr.jmmc.oiexplorer.core.model.OIFitsCollectionManager;
 import fr.jmmc.oiexplorer.core.model.PlotDefinitionFactory;
+import fr.jmmc.oiexplorer.core.model.event.EventNotifier;
+import fr.jmmc.oiexplorer.core.model.oi.SubsetDefinition;
 import fr.jmmc.oiexplorer.core.model.oi.TargetUID;
+import fr.jmmc.oiexplorer.core.model.plot.PlotDefinition;
 import fr.jmmc.oitools.model.OIFitsFile;
+import java.util.List;
 import org.jfree.chart.JFreeChart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +34,8 @@ public final class OIFitsViewPanel extends javax.swing.JPanel implements Observa
   private static final Logger logger = LoggerFactory.getLogger(OIFitsViewPanel.class.getName());
 
   /* members */
+  /** OIFitsCollectionManager singleton */
+  private OIFitsCollectionManager ocm = OIFitsCollectionManager.getInstance();
   /** Oifits explorer Vis2Plot */
   private Vis2Panel vis2Panel;
 
@@ -117,9 +124,14 @@ public final class OIFitsViewPanel extends javax.swing.JPanel implements Observa
     this.vis2Panel = new Vis2Panel();
 
     this.jPanelCenter.add(this.vis2Panel);
-    
+
+    // TODO: Disable FLAGS
     // hack for now: TODO: fix asap
-    PlotDefinitionFactory.getInstance().getDefault(PlotDefinitionFactory.PLOT_DEFAULT).setSkipFlaggedData(false);
+    final PlotDefinition plotDef = PlotDefinitionFactory.getInstance().getDefault(PlotDefinitionFactory.PLOT_DEFAULT);
+    plotDef.setSkipFlaggedData(false);
+
+    // external configuration:
+    this.vis2Panel.setPlotDefinition(plotDef);
   }
 
   /**
@@ -134,7 +146,7 @@ public final class OIFitsViewPanel extends javax.swing.JPanel implements Observa
     switch (event.getType()) {
       case OIFITS_DONE:
         if (event instanceof OIFitsEvent) {
-          this.plot(((OIFitsEvent) event).getOIFitsFile());
+          this.plot(((OIFitsEvent) event).getOIFitsList());
         }
         break;
       default:
@@ -145,48 +157,62 @@ public final class OIFitsViewPanel extends javax.swing.JPanel implements Observa
   }
 
   /**
-   * Plot the squarred visibilities of the generated file synchronously.
+   * Plot OIFits data using embedded OIFitsExplorer Plot panel
    * This code must be executed by the Swing Event Dispatcher thread (EDT)
-   * @param oiFitsFile OIFits file to use
+   * @param oiFitsList OIFits files to use
    */
-  private void plot(final OIFitsFile oiFitsFile) {
-    logger.debug("plot : {}", oiFitsFile);
+  private void plot(final List<OIFitsFile> oiFitsList) {
+    logger.debug("plot : {}", oiFitsList);
 
-    // Extract the single target from OIFitsFile:
-    final TargetUID target;
-    if (oiFitsFile != null) {
-      target = new TargetUID(oiFitsFile.getOiTarget().getTarget()[0]);
-    } else {
-      target = null;
-    }
-
-    if (oiFitsFile == null) {
+    if (oiFitsList == null) {
       this.jLabelMessage.setText("No VIS2 data available: the target is not observable or multiple configurations are selected.");
       showMessage(true);
-      // reset plot anyway:
-      this.vis2Panel.plot(target, oiFitsFile);
-    } else {
-      // analyse data:
-      OIFitsCollectionManager.getInstance().reset();
-      
-      oiFitsFile.setAbsoluteFilePath("ASPRO2");
-      OIFitsCollectionManager.getInstance().addOIFitsFile(oiFitsFile);
-      
-      // TODO: use OIFitsManager & collection ...
-      
-      // TODO: Disable FLAGS
-      
-      final OIFitsFile oiFitsTarget = OIFitsCollectionManager.getInstance().getOIFitsCollection().getOiDataList(target);
-      
-      // plot data:
-      this.vis2Panel.plot(target, oiFitsTarget);
 
-      final boolean hasData = this.vis2Panel.isHasData();
-      if (!hasData) {
-        this.jLabelMessage.setText("No VIS2 data available: the target has no model.");
+      // reset:
+      ocm.reset();
+
+      // get current subset definition (empty):
+      final SubsetDefinition subset = ocm.getCurrentSubsetDefinition();
+
+      // fire subset changed event (generates OIFitsSubset and then plot synchronously):
+      ocm.updateSubsetDefinition(this, subset);
+
+      // reset plot anyway:
+      this.vis2Panel.plot();
+    } else {
+      // Fix file paths ie generate file names ?
+      for (OIFitsFile oiFitsFile : oiFitsList) {
+        oiFitsFile.setAbsoluteFilePath(ExportOIFitsAction.getDefaultFileName(oiFitsFile));
       }
 
-      showMessage(!hasData);
+      // Extract the single target from any OIFitsFile:
+      final TargetUID target = new TargetUID(oiFitsList.get(0).getOiTarget().getTarget()[0]);
+
+      // reset and update oifits collection:
+      ocm.reset();
+      for (OIFitsFile oiFitsFile : oiFitsList) {
+        ocm.addOIFitsFile(oiFitsFile);
+      }
+
+      // get current subset definition (empty):
+      final SubsetDefinition subset = ocm.getCurrentSubsetDefinition();
+      subset.setTarget(target);
+      // use all data files (default):
+      // subset.getTables().clear();
+
+      // fire subset changed event (generates OIFitsSubset and then plot synchronously):
+      ocm.updateSubsetDefinition(this, subset);
+
+      EventNotifier.addCallback(new Runnable() {
+        public void run() {
+          final boolean hasData = vis2Panel.isHasData();
+          if (!hasData) {
+            jLabelMessage.setText("No VIS2 data available: the target has no model.");
+          }
+
+          showMessage(!hasData);
+        }
+      });
     }
   }
 

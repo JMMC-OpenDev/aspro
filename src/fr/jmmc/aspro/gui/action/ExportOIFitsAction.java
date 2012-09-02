@@ -17,6 +17,7 @@ import fr.jmmc.oitools.model.OIVis2;
 import fr.nom.tam.fits.FitsException;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,9 +59,12 @@ public final class ExportOIFitsAction extends WaitingTaskAction {
       return;
     }
 
-    final OIFitsFile oiFitsFile = ObservationManager.getInstance().getOIFitsFile();
+    final List<OIFitsFile> oiFitsFiles = ObservationManager.getInstance().getOIFitsList();
 
-    if (oiFitsFile != null) {
+    if (oiFitsFiles != null) {
+
+      // use first (for now): TODO FIX
+      final OIFitsFile oiFitsFile = oiFitsFiles.get(0);
 
       final String defaultFileName;
 

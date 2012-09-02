@@ -6,12 +6,12 @@ package fr.jmmc.aspro.interop;
 import fr.jmmc.aspro.gui.action.ExportOIFitsAction;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.oi.Target;
-import fr.jmmc.jmcs.jaxb.JAXBFactory;
+import fr.jmmc.jmal.model.targetmodel.Model;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.gui.task.TaskSwingWorkerExecutor;
+import fr.jmmc.jmcs.jaxb.JAXBFactory;
 import fr.jmmc.jmcs.network.interop.SampCapability;
 import fr.jmmc.jmcs.network.interop.SampCapabilityAction;
-import fr.jmmc.jmal.model.targetmodel.Model;
 import fr.jmmc.jmcs.util.FileUtils;
 import fr.jmmc.oitools.model.OIFitsFile;
 import fr.jmmc.oitools.model.OIFitsWriter;
@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,12 +82,15 @@ public final class BroadcastToModelFittingAction extends SampCapabilityAction {
     // get Target model from the targetId given by oifits.oiTargets
     // serialize and build one samp message
 
-    final OIFitsFile oiFitsFile = ObservationManager.getInstance().getOIFitsFile();
+    final List<OIFitsFile> oiFitsFiles = ObservationManager.getInstance().getOIFitsList();
 
-    if (oiFitsFile == null) {
+    if (oiFitsFiles == null) {
       MessagePane.showMessage("There is currently no OIFits data (your target is not observable)");
       return null;
     }
+
+    // use first (for now): TODO FIX
+    final OIFitsFile oiFitsFile = oiFitsFiles.get(0);
 
     final File file = FileUtils.getTempFile(ExportOIFitsAction.getDefaultFileName(oiFitsFile));
 

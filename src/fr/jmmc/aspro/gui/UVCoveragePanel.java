@@ -107,7 +107,6 @@ import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 import org.jfree.ui.Layer;
 import org.jfree.ui.RectangleEdge;
-import org.jfree.ui.TextAnchor;
 
 /**
  * This panel presents the UV coverage plot with its parameters (target, instrument mode ...)
@@ -1031,7 +1030,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
             StatusBar.showIfPrevious(MSG_COMPUTING_OIFITS, "OIFits data cancelled.");
 
             // reset the OIFits structure in the current observation - No OIFitsSwingWorker running:
-            ObservationManager.getInstance().setOIFitsFile(null);
+            ObservationManager.getInstance().setOIFitsList(null);
           }
         }
       }
@@ -1737,7 +1736,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
       // reset the OIFits structure in the current observation - No OIFitsSwingWorker running:
       if (resetOIFits) {
-        ObservationManager.getInstance().setOIFitsFile(null);
+        ObservationManager.getInstance().setOIFitsList(null);
       }
 
       // Fire a warnings ready event :
@@ -1774,15 +1773,11 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     if (uvDataCollection.isOIFitsDone()) {
       return true;
     }
-    // Note: compute OIFits only for single observation UNTIL OIFits merge is ready
-    if (!uvDataCollection.isSingle()) {
-      return false;
-    }
 
     boolean computing = false;
 
     // check if the OIFits data are still available:
-    if (ObservationManager.getInstance().getOIFitsFile() != null) {
+    if (ObservationManager.getInstance().getOIFitsList() != null) {
       // Check if the previously computed UV Data is still valid :
       final ObservationCollectionUVData currentUVData = getChartData();
 
@@ -1837,7 +1832,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         }
       }
 
-      if (oiFitsCreatorList.size() == 1) {
+      if (oiFitsCreatorList.size() > 0) {
         computing = true;
 
         // update the status bar :
@@ -2565,7 +2560,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
    * TODO: create OIFits creator services automatically using UVCoverageData + observation directly ...
    * + use a single NoiseService instance ...
    */
-  private final static class OIFitsSwingWorker extends TaskSwingWorker<OIFitsFile> {
+  private final static class OIFitsSwingWorker extends TaskSwingWorker<List<OIFitsFile>> {
 
     /* members */
     /** uv coverage data collection */
@@ -2588,13 +2583,13 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     /**
      * Compute the OIFits structures in background
      * This code is executed by a Worker thread (Not Swing EDT)
-     * @return OIFitsFile single OIFitsFile result (TODO: merge)
+     * @return OIFitsFiles OIFitsFile results
      */
     @Override
-    public OIFitsFile computeInBackground() {
+    public List<OIFitsFile> computeInBackground() {
       logger.debug("Computing oifits data ...");
 
-      OIFitsFile result = null;
+      List<OIFitsFile> result = null;
       try {
         final List<OIFitsFile> oiFitsList = new ArrayList<OIFitsFile>(this.oiFitsCreatorList.size());
 
@@ -2603,14 +2598,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
           oiFitsList.add(oiFitsCreator.createOIFits());
         }
 
-        // merge results (fits ...) :
-        if (oiFitsList.size() == 1) {
-          result = oiFitsList.get(0);
-        } else {
-          // TODO: merge OIFits to a single OIFits result:
-          // No merged OIFITS still :
-          result = null;
-        }
+        result = oiFitsList;
 
       } catch (InterruptedJobException ije) {
         logger.debug("Computing oifits data interrupted: ", ije);
@@ -2621,16 +2609,16 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     /**
      * Dispatch the computed OIFits to the current observation (which triggers events)
      * This code is executed by the Swing Event Dispatcher thread (EDT)
-     * @param oiFitsFile single OIFitsFile result (TODO: merge)
+     * @param oiFitsList OIFitsFile results
      */
     @Override
-    public void refreshUI(final OIFitsFile oiFitsFile) {
+    public void refreshUI(final List<OIFitsFile> oiFitsList) {
 
       // update OIFits done flag on uv data collection:
       this.uvDataCollection.setOIFitsDone(true);
 
       // update the OIFits structure in the current observation :
-      ObservationManager.getInstance().setOIFitsFile(oiFitsFile);
+      ObservationManager.getInstance().setOIFitsList(oiFitsList);
 
       // update the status bar:
       StatusBar.showIfPrevious(MSG_COMPUTING_OIFITS, "OIFits done.");

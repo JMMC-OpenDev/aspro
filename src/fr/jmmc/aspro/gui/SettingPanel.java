@@ -12,10 +12,12 @@ import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.jmcs.App;
 import fr.jmmc.jmcs.gui.task.TaskSwingWorkerExecutor;
 import fr.jmmc.oiexplorer.core.gui.OIFitsHtmlPanel;
+import fr.jmmc.oitools.model.OIFitsFile;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import javax.swing.JFrame;
@@ -62,8 +64,8 @@ public final class SettingPanel extends JPanel implements ObservationListener, D
   private UVCoveragePanel uvCoveragePanel = null;
   /** OIFits HTML panel */
   private OIFitsHtmlPanel oiFitsPanel = null;
-  /** Vis2 panel */
-  private OIFitsViewPanel vis2Panel = null;
+  /** OIFits Plot panel */
+  private OIFitsViewPanel oiFitsViewPanel = null;
 
   /** 
    * Creates new form SettingPanel
@@ -283,14 +285,14 @@ public final class SettingPanel extends JPanel implements ObservationListener, D
           this.uvCoveragePanel.dispose();
           this.uvCoveragePanel = null;
         }
-        if (this.vis2Panel != null) {
+        if (this.oiFitsViewPanel != null) {
           // remove the vis2 panel :
-          this.jTabbedPane.remove(this.vis2Panel);
+          this.jTabbedPane.remove(this.oiFitsViewPanel);
 
           // unregister the vis2 panel for the next event :
-          ObservationManager.getInstance().unregister(this.vis2Panel);
+          ObservationManager.getInstance().unregister(this.oiFitsViewPanel);
 
-          this.vis2Panel = null;
+          this.oiFitsViewPanel = null;
         }
         if (ENABLE_OIFITS && this.oiFitsPanel != null) {
           // remove the OIFits panel :
@@ -300,21 +302,21 @@ public final class SettingPanel extends JPanel implements ObservationListener, D
       }
     } else if (type == ObservationEventType.OIFITS_DONE
             && event instanceof OIFitsEvent
-            && ((OIFitsEvent) event).getOIFitsFile() != null) {
+            && ((OIFitsEvent) event).getOIFitsList() != null) {
 
       // create the vis2 panel if null :      
-      if (this.vis2Panel == null) {
-        this.vis2Panel = new OIFitsViewPanel();
-        this.vis2Panel.setName("vis2Panel");
+      if (this.oiFitsViewPanel == null) {
+        this.oiFitsViewPanel = new OIFitsViewPanel();
+        this.oiFitsViewPanel.setName("vis2Panel");
 
         // register the vis2 panel as an observation listener (listener 4) :
-        ObservationManager.getInstance().register(this.vis2Panel);
+        ObservationManager.getInstance().register(this.oiFitsViewPanel);
 
         // the event must be propagated to the new registered listener :
-        this.vis2Panel.onProcess(event);
+        this.oiFitsViewPanel.onProcess(event);
 
         // add the vis2 panel :
-        this.jTabbedPane.addTab(TAB_VIS2, this.vis2Panel);
+        this.jTabbedPane.addTab(TAB_VIS2, this.oiFitsViewPanel);
       }
 
       if (ENABLE_OIFITS) {
@@ -328,7 +330,12 @@ public final class SettingPanel extends JPanel implements ObservationListener, D
           this.jTabbedPane.addTab(TAB_OIFITS, this.oiFitsPanel);
         }
         // update the OIFits:
-        this.oiFitsPanel.updateOIFits(((OIFitsEvent) event).getOIFitsFile());
+        final List<OIFitsFile> oiFitsList = ((OIFitsEvent) event).getOIFitsList();
+        if (oiFitsList != null) {
+          this.oiFitsPanel.updateOIFits(oiFitsList.get(0)); // first only
+        } else {
+          this.oiFitsPanel.updateOIFits((OIFitsFile) null); // reset
+        }
       }
     }
     if (logger.isDebugEnabled()) {
@@ -351,7 +358,7 @@ public final class SettingPanel extends JPanel implements ObservationListener, D
   public boolean isSelectedTabUsingTargetModel() {
     final Component com = getTabSelectedComponent();
 
-    return com == this.uvCoveragePanel || com == this.vis2Panel;
+    return com == this.uvCoveragePanel || com == this.oiFitsViewPanel;
   }
 
   /**
