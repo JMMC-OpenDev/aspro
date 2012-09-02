@@ -9088,6 +9088,163 @@ N 30, 300
   </description>
 
 
+  <configuration>
+    <version>Period 91</version>
+    <interferometer>VLTI</interferometer>
+
+    <instrument>
+      <focalInstrument>AMBER</focalInstrument>
+      <!-- UT1 UT2 UT3 UT4 -->
+      <configuration>
+        <stations>UT1 UT2 UT3</stations>
+      </configuration>
+      <configuration>
+        <stations>UT1 UT2 UT4</stations>
+      </configuration>
+      <configuration>
+        <stations>UT1 UT3 UT4</stations>
+      </configuration>
+      <configuration>
+        <stations>UT2 UT3 UT4</stations>
+      </configuration>
+      <!-- A1-G1-K0-J3 -->
+      <configuration>
+        <stations>A1 K0 G1</stations>
+      </configuration>
+      <configuration>
+        <stations>A1 K0 J3</stations>
+      </configuration>
+      <configuration>
+        <stations>A1 G1 J3</stations>
+      </configuration>
+      <configuration>
+        <stations>K0 G1 J3</stations>
+      </configuration>
+      <!-- D0 H0 G1 I1 -->
+      <configuration>
+        <stations>D0 H0 G1</stations>
+      </configuration>
+      <configuration>
+        <stations>D0 H0 I1</stations>
+      </configuration>
+      <configuration>
+        <stations>D0 G1 I1</stations>
+      </configuration>
+      <configuration>
+        <stations>H0 G1 I1</stations>
+      </configuration>
+      <!-- A1 B2 C1 D0 -->
+      <configuration>
+        <stations>A1 B2 C1</stations>
+      </configuration>
+      <configuration>
+        <stations>A1 B2 D0</stations>
+      </configuration>
+      <configuration>
+        <stations>A1 C1 D0</stations>
+      </configuration>
+      <configuration>
+        <stations>B2 C1 D0</stations>
+      </configuration>
+    </instrument>
+
+    <instrument>
+      <focalInstrument>MIDI</focalInstrument>
+      <!-- UT1 UT2 UT3 UT4 -->
+      <configuration>
+        <stations>UT1 UT2</stations>
+      </configuration>
+      <configuration>
+        <stations>UT1 UT3</stations>
+      </configuration>
+      <configuration>
+        <stations>UT1 UT4</stations>
+      </configuration>
+      <configuration>
+        <stations>UT2 UT3</stations>
+      </configuration>
+      <configuration>
+        <stations>UT2 UT4</stations>
+      </configuration>
+      <configuration>
+        <stations>UT3 UT4</stations>
+      </configuration>
+      <!-- A1-G1-K0-J3 -->
+      <configuration>
+        <stations>A1 K0</stations>
+      </configuration>
+      <configuration>
+        <stations>A1 G1</stations>
+      </configuration>
+      <configuration>
+        <stations>A1 J3</stations>
+      </configuration>
+      <configuration>
+        <stations>K0 G1</stations>
+      </configuration>
+      <configuration>
+        <stations>K0 J3</stations>
+      </configuration>
+      <configuration>
+        <stations>G1 J3</stations>
+      </configuration>
+      <!-- D0 H0 G1 I1 -->
+      <configuration>
+        <stations>D0 H0</stations>
+      </configuration>
+      <configuration>
+        <stations>D0 G1</stations>
+      </configuration>
+      <configuration>
+        <stations>D0 I1</stations>
+      </configuration>
+      <configuration>
+        <stations>G1 I1</stations>
+      </configuration>
+      <configuration>
+        <stations>H0 I1</stations>
+      </configuration>
+      <configuration>
+        <stations>H0 G1</stations>
+      </configuration>
+      <!-- A1 B2 C1 D0 -->
+      <configuration>
+        <stations>A1 B2</stations>
+      </configuration>
+      <configuration>
+        <stations>A1 C1</stations>
+      </configuration>
+      <configuration>
+        <stations>A1 D0</stations>
+      </configuration>
+      <configuration>
+        <stations>B2 C1</stations>
+      </configuration>
+      <configuration>
+        <stations>B2 D0</stations>
+      </configuration>
+      <configuration>
+        <stations>C1 D0</stations>
+      </configuration>
+    </instrument>
+
+    <instrument>
+      <focalInstrument>PIONIER</focalInstrument>
+      <configuration>
+        <stations>UT1 UT2 UT3 UT4</stations>
+      </configuration>
+      <configuration>
+        <stations>A1 G1 K0 J3</stations>
+      </configuration>
+      <configuration>
+        <stations>D0 H0 G1 I1</stations>
+      </configuration>
+      <configuration>
+        <stations>A1 B2 C1 D0</stations>
+      </configuration>
+    </instrument>
+
+  </configuration>
 
   <configuration>
     <version>Period 90</version>
