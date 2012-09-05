@@ -124,14 +124,6 @@ public final class OIFitsViewPanel extends javax.swing.JPanel implements Observa
     this.vis2Panel = new Vis2Panel();
 
     this.jPanelCenter.add(this.vis2Panel);
-
-    // TODO: Disable FLAGS
-    // hack for now: TODO: fix asap
-    final PlotDefinition plotDef = PlotDefinitionFactory.getInstance().getDefault(PlotDefinitionFactory.PLOT_DEFAULT);
-    plotDef.setSkipFlaggedData(false);
-
-    // external configuration:
-    this.vis2Panel.setPlotDefinition(plotDef);
   }
 
   /**
@@ -177,7 +169,7 @@ public final class OIFitsViewPanel extends javax.swing.JPanel implements Observa
       // fire subset changed event (generates OIFitsSubset and then plot synchronously):
       ocm.updateSubsetDefinition(this, subset);
 
-      // reset plot anyway:
+      // reset plot anyway: (TODO: remove)
       this.vis2Panel.plot();
     } else {
       // Fix file paths ie generate file names ?
@@ -185,17 +177,29 @@ public final class OIFitsViewPanel extends javax.swing.JPanel implements Observa
         oiFitsFile.setAbsoluteFilePath(ExportOIFitsAction.getDefaultFileName(oiFitsFile));
       }
 
-      // Extract the single target from any OIFitsFile:
-      final TargetUID target = new TargetUID(oiFitsList.get(0).getOiTarget().getTarget()[0]);
-
       // reset and update oifits collection:
       ocm.reset();
+      
       for (OIFitsFile oiFitsFile : oiFitsList) {
         ocm.addOIFitsFile(oiFitsFile);
       }
+      
+      // analyze
+
+    // TODO: Disable FLAGS
+    // hack for now: TODO: fix asap
+    final PlotDefinition plotDef = PlotDefinitionFactory.getInstance().getDefault(PlotDefinitionFactory.PLOT_DEFAULT);
+    plotDef.setSkipFlaggedData(false);
+
+    // external configuration:
+        ocm.getCurrentPlot().setPlotDefinition(plotDef);
+
 
       // get current subset definition (empty):
       final SubsetDefinition subset = ocm.getCurrentSubsetDefinition();
+      // Extract the single target from any OIFitsFile:
+      final TargetUID target = new TargetUID(oiFitsList.get(0).getOiTarget().getTarget()[0]);
+
       subset.setTarget(target);
       // use all data files (default):
       // subset.getTables().clear();
