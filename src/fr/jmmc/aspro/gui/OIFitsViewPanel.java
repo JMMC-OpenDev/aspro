@@ -13,6 +13,7 @@ import fr.jmmc.oiexplorer.core.gui.chart.PDFOptions;
 import fr.jmmc.oiexplorer.core.model.OIFitsCollectionManager;
 import fr.jmmc.oiexplorer.core.model.PlotDefinitionFactory;
 import fr.jmmc.oiexplorer.core.model.event.EventNotifier;
+import fr.jmmc.oiexplorer.core.model.oi.Plot;
 import fr.jmmc.oiexplorer.core.model.oi.SubsetDefinition;
 import fr.jmmc.oiexplorer.core.model.oi.TargetUID;
 import fr.jmmc.oiexplorer.core.model.plot.PlotDefinition;
@@ -169,8 +170,6 @@ public final class OIFitsViewPanel extends javax.swing.JPanel implements Observa
       // fire subset changed event (generates OIFitsSubset and then plot synchronously):
       ocm.updateSubsetDefinition(this, subset);
 
-      // reset plot anyway: (TODO: remove)
-      this.vis2Panel.plot();
     } else {
       // Fix file paths ie generate file names ?
       for (OIFitsFile oiFitsFile : oiFitsList) {
@@ -179,33 +178,36 @@ public final class OIFitsViewPanel extends javax.swing.JPanel implements Observa
 
       // reset and update oifits collection:
       ocm.reset();
-      
+
       for (OIFitsFile oiFitsFile : oiFitsList) {
         ocm.addOIFitsFile(oiFitsFile);
       }
-      
-      // analyze
-
-    // TODO: Disable FLAGS
-    // hack for now: TODO: fix asap
-    final PlotDefinition plotDef = PlotDefinitionFactory.getInstance().getDefault(PlotDefinitionFactory.PLOT_DEFAULT);
-    plotDef.setSkipFlaggedData(false);
-
-    // external configuration:
-        ocm.getCurrentPlot().setPlotDefinition(plotDef);
-
 
       // get current subset definition (empty):
-      final SubsetDefinition subset = ocm.getCurrentSubsetDefinition();
+      final SubsetDefinition subsetDefinition = ocm.getCurrentSubsetDefinition();
       // Extract the single target from any OIFitsFile:
       final TargetUID target = new TargetUID(oiFitsList.get(0).getOiTarget().getTarget()[0]);
 
-      subset.setTarget(target);
+      subsetDefinition.setTarget(target);
       // use all data files (default):
       // subset.getTables().clear();
 
       // fire subset changed event (generates OIFitsSubset and then plot synchronously):
-      ocm.updateSubsetDefinition(this, subset);
+      ocm.updateSubsetDefinition(this, subsetDefinition);
+
+      // Copy plotDef into current plot def:
+      final PlotDefinition plotDefinition = ocm.getCurrentPlotDefinition();
+
+      plotDefinition.copy(PlotDefinitionFactory.getInstance().getDefault(PlotDefinitionFactory.PLOT_DEFAULT));
+      plotDefinition.setSkipFlaggedData(false);
+
+      ocm.updatePlotDefinition(this, plotDefinition);
+
+      // external configuration:
+      final Plot plot = ocm.getCurrentPlot();
+      plot.setSubsetDefinition(subsetDefinition);
+      plot.setPlotDefinition(plotDefinition);
+      ocm.updatePlot(plot);
 
       EventNotifier.addCallback(new Runnable() {
         public void run() {
