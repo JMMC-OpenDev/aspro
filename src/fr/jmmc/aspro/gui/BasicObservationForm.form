@@ -44,7 +44,7 @@
         </Container>
         <Component class="fr.jmmc.jmal.star.EditableStarResolverWidget" name="starSearchField">
           <Properties>
-            <Property name="toolTipText" type="java.lang.String" value="&lt;html&gt;&#xa;Enter targets here :&lt;br&gt;&#xa;Target identifier (CDS Simbad service)&lt;br&gt;&#xa;or RA / DEC coordinates (J2000) with optional star name (&apos;HMS DMS [star name]&apos;)&#xa;&lt;/html&gt;"/>
+            <Property name="toolTipText" type="java.lang.String" value="&lt;html&gt;&#xa;Enter targets here :&lt;br&gt;&#xa;Target identifier (CDS Simbad service)&lt;br&gt;&#xa;or RA / DEC coordinates (J2000) with optional star name:&lt;br&gt;&#xa;&apos;H:M:S [+/-]D:M:S [star name]&apos;&#xa;&lt;/html&gt;"/>
             <Property name="name" type="java.lang.String" value="starSearchField" noResource="true"/>
           </Properties>
           <Constraints>
