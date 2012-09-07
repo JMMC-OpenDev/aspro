@@ -125,6 +125,9 @@ public final class OIFitsViewPanel extends javax.swing.JPanel implements Observa
     this.vis2Panel = new Vis2Panel();
 
     this.jPanelCenter.add(this.vis2Panel);
+
+    // precise which plot to use:
+    this.vis2Panel.setPlotId(OIFitsCollectionManager.CURRENT);
   }
 
   /**
@@ -164,12 +167,6 @@ public final class OIFitsViewPanel extends javax.swing.JPanel implements Observa
       // reset:
       ocm.reset();
 
-      // get current subset definition (empty):
-      final SubsetDefinition subset = ocm.getCurrentSubsetDefinition();
-
-      // fire subset changed event (generates OIFitsSubset and then plot synchronously):
-      ocm.updateSubsetDefinition(this, subset);
-
     } else {
       // Fix file paths ie generate file names ?
       for (OIFitsFile oiFitsFile : oiFitsList) {
@@ -183,7 +180,7 @@ public final class OIFitsViewPanel extends javax.swing.JPanel implements Observa
         ocm.addOIFitsFile(oiFitsFile);
       }
 
-      // get current subset definition (empty):
+      // get current subset definition (copy):
       final SubsetDefinition subsetDefinition = ocm.getCurrentSubsetDefinition();
       // Extract the single target from any OIFitsFile:
       final TargetUID target = new TargetUID(oiFitsList.get(0).getOiTarget().getTarget()[0]);
