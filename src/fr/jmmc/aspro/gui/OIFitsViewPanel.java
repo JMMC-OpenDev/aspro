@@ -127,7 +127,7 @@ public final class OIFitsViewPanel extends javax.swing.JPanel implements Observa
     this.jPanelCenter.add(this.vis2Panel);
 
     // precise which plot to use:
-    this.vis2Panel.setPlotId(OIFitsCollectionManager.CURRENT);
+    this.vis2Panel.setPlotId(OIFitsCollectionManager.CURRENT_VIEW);
   }
 
   /**
