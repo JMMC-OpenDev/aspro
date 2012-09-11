@@ -122,6 +122,8 @@ public final class OIFitsViewPanel extends javax.swing.JPanel implements Observa
    * This method is useful to set the models and specific features of initialized swing components :
    */
   private void postInit() {
+    ocm.start();
+
     this.vis2Panel = new Vis2Panel();
 
     this.jPanelCenter.add(this.vis2Panel);
@@ -189,7 +191,7 @@ public final class OIFitsViewPanel extends javax.swing.JPanel implements Observa
       // use all data files (default):
       // subset.getTables().clear();
 
-      // fire subset changed event (generates OIFitsSubset and then plot synchronously):
+      // fire subset changed event (generates OIFitsSubset and then plot asynchronously):
       ocm.updateSubsetDefinition(this, subsetDefinition);
 
       // Copy plotDef into current plot def:
@@ -202,9 +204,11 @@ public final class OIFitsViewPanel extends javax.swing.JPanel implements Observa
 
       // external configuration:
       final Plot plot = ocm.getCurrentPlot();
+
       plot.setSubsetDefinition(subsetDefinition);
       plot.setPlotDefinition(plotDefinition);
-      ocm.updatePlot(plot);
+
+      ocm.updatePlot(this, plot);
 
       EventNotifier.addCallback(new Runnable() {
         public void run() {
