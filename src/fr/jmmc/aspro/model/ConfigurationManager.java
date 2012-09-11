@@ -172,11 +172,11 @@ public final class ConfigurationManager extends BaseOIManager {
       for (FocalInstrumentMode insMode : instrument.getModes()) {
         if (insMode.getNumberChannels() != null) {
           if (insMode.getSpectralChannels() == insMode.getNumberChannels()) {
-            logger.warn("Instrument [{}] mode [{}] useless numberChannels: {}", new Object[]{
-                      instrument.getName(), insMode.getName(), insMode.getNumberChannels()});
+            logger.warn("Instrument [{}] mode [{}] useless numberChannels: {}", 
+                      instrument.getName(), insMode.getName(), insMode.getNumberChannels());
           } else {
-            logger.warn("Instrument [{}] mode [{}] channel configuration: {} / {}", new Object[]{
-                      instrument.getName(), insMode.getName(), insMode.getNumberChannels(), insMode.getSpectralChannels()});
+            logger.warn("Instrument [{}] mode [{}] channel configuration: {} / {}", 
+                      instrument.getName(), insMode.getName(), insMode.getNumberChannels(), insMode.getSpectralChannels());
           }
         }
       }
@@ -232,7 +232,7 @@ public final class ConfigurationManager extends BaseOIManager {
 
       if (logger.isDebugEnabled()) {
         logger.debug("Instrument [{}] - wavelengths [{} - {}]",
-                new Object[]{instrument.getName(), instrument.getWaveLengthMin(), instrument.getWaveLengthMax()});
+                instrument.getName(), instrument.getWaveLengthMin(), instrument.getWaveLengthMax());
       }
     }
   }
@@ -262,7 +262,7 @@ public final class ConfigurationManager extends BaseOIManager {
     }
 
     if (logger.isDebugEnabled()) {
-      logger.debug("computeBaselineUVWBounds = [{} - {}] m for configuration {}", new Object[]{minUV, maxUV, intConf.getName()});
+      logger.debug("computeBaselineUVWBounds = [{} - {}] m for configuration {}", minUV, maxUV, intConf.getName());
     }
 
     intConf.setMinBaseLine(minUV);
@@ -313,7 +313,7 @@ public final class ConfigurationManager extends BaseOIManager {
     }
 
     if (logger.isDebugEnabled()) {
-      logger.debug("computeBaselineUVBounds = [{} - {}] m for stations {}", new Object[]{minUV, maxUV, stations});
+      logger.debug("computeBaselineUVBounds = [{} - {}] m for stations {}", minUV, maxUV, stations);
     }
 
     minMax[0] = minUV;
@@ -351,7 +351,7 @@ public final class ConfigurationManager extends BaseOIManager {
     }
 
     if (logger.isDebugEnabled()) {
-      logger.debug("computeBaselineUVWBounds = [{} - {}] m for stations {}", new Object[]{minUV, maxUV, stations});
+      logger.debug("computeBaselineUVWBounds = [{} - {}] m for stations {}", minUV, maxUV, stations);
     }
 
     minMax[0] = minUV;

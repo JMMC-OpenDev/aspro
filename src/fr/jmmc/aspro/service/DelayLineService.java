@@ -109,7 +109,7 @@ public final class DelayLineService {
       // outside range, no solution :
       if (DEBUG) {
         logger.info("W outside range: {} : {} / W extrema = [{}, {}]",
-                new Object[]{baseLine.getName(), wRange, wLower, wUpper});
+                baseLine.getName(), wRange, wLower, wUpper);
       }
       return Collections.emptyList();
     }
@@ -117,7 +117,7 @@ public final class DelayLineService {
       // always inside range = full interval [-12h;12h]:
       if (DEBUG) {
         logger.info("W inside range: {} : {} / W extrema = [{}, {}]",
-                new Object[]{baseLine.getName(), wRange, wLower, wUpper});
+                baseLine.getName(), wRange, wLower, wUpper);
       }
       return FULL_RANGE_LIST;
     }

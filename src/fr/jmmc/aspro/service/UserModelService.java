@@ -1003,7 +1003,7 @@ public final class UserModelService {
           if (value != lastValue) {
             if (logger.isDebugEnabled()) {
               logger.debug("findThresholdValue: threshold reached: {} > {} - value = {} - nPixels = {}",
-                      new Object[]{partialFlux, upperThreshold, value, (data1D.length - 1 - i)});
+                      partialFlux, upperThreshold, value, (data1D.length - 1 - i));
             }
             return i;
           }

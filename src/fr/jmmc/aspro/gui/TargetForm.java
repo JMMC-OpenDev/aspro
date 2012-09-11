@@ -139,7 +139,6 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
 
     // add document listener to target description :
     this.jTextAreaTargetInfos.getDocument().addDocumentListener(new DocumentListener() {
-
       @Override
       public void insertUpdate(final DocumentEvent e) {
         targetInfosChanged();
@@ -235,7 +234,6 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     if (currentNode != null) {
       // Use invokeLater to selection change issues with editors :
       SwingUtils.invokeLaterEDT(new Runnable() {
-
         /**
          * Update tree selection
          */
@@ -296,7 +294,6 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
 
     // Use invokeLater to selection change issues with editors :
     SwingUtils.invokeLaterEDT(new Runnable() {
-
       /**
        * Update tree selection
        */
@@ -436,7 +433,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
       }
 
       if (logger.isDebugEnabled()) {
-        logger.debug("field {} new: {} old: {}", new Object[]{field.getName(), value, oldValue});
+        logger.debug("field {} new: {} old: {}", field.getName(), value, oldValue);
       }
 
       if (value != null) {
@@ -1376,7 +1373,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
   private void moveTarget(final Target target, final Target refTarget, final Target parentTarget, final boolean after) {
     if (logger.isDebugEnabled()) {
       logger.debug("moveTarget - after: {}\ntarget: {}\nrefTarget: {}\nparentTarget: {}",
-              new Object[]{after, target, refTarget, parentTarget});
+              after, target, refTarget, parentTarget);
     }
 
     final String name = target.getName();
@@ -1573,7 +1570,6 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
    */
   private static ListCellRenderer createTargetListCellRenderer() {
     return new DefaultListCellRenderer() {
-
       /** default serial UID for Serializable interface */
       private static final long serialVersionUID = 1;
 
@@ -1624,7 +1620,6 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
       return numberFieldFormatter;
     }
     final NumberFormatter nf = new NumberFormatter(new DecimalFormat("####.####")) {
-
       /** default serial UID for Serializable interface */
       private static final long serialVersionUID = 1;
 

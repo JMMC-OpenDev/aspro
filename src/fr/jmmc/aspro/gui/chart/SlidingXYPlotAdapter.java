@@ -226,7 +226,7 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
     final int newSize = end - start;
 
     if (logger.isDebugEnabled()) {
-      logger.debug("updatePlot: pos = {} :: ({} to {})", new Object[]{this.position, start, end});
+      logger.debug("updatePlot: pos = {} :: ({} to {})", this.position, start, end);
     }
 
     final double barWidth;

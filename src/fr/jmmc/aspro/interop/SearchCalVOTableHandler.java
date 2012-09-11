@@ -114,7 +114,7 @@ public final class SearchCalVOTableHandler {
           if (rowDistance < SCIENCE_DETECTION_DISTANCE) {
             if (logger.isInfoEnabled()) {
               logger.info("calibrator distance is [{}] - skip this calibrator considered as science object : {} - IDS = {}",
-                      new Object[]{rowDistance, cal, cal.getIDS()});
+                      rowDistance, cal, cal.getIDS());
             }
             it.remove();
 

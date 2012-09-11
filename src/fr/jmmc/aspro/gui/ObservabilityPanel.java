@@ -1531,7 +1531,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     final int maxViewItems = (height - this.plotNonDataHeight) / ITEM_SIZE;
 
     if (logger.isDebugEnabled()) {
-      logger.debug("size = {} x {} => maxViewItems = {}", new Object[]{width, height, maxViewItems});
+      logger.debug("size = {} x {} => maxViewItems = {}", width, height, maxViewItems);
     }
 
     if (maxViewItems != this.slidingXYPlotAdapter.getMaxViewItems()) {

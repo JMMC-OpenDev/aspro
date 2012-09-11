@@ -52,7 +52,7 @@ public final class VotableSampMessageHandler extends SampMessageHandler {
   @Override
   protected void processMessage(final String senderId, final Message message) throws SampException {
     if (logger.isDebugEnabled()) {
-      logger.debug("\tReceived '{}' message from '{}' : '{}'.", new Object[]{this.handledMType(), senderId, message});
+      logger.debug("\tReceived '{}' message from '{}' : '{}'.", this.handledMType(), senderId, message);
     }
 
     // get url of votable (locally stored) :

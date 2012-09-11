@@ -209,7 +209,7 @@ public final class FitsImageUtils {
 
     if (logger.isInfoEnabled()) {
       logger.info("ImageMinMaxJob min: {} - max: {} - nData: {} - sum: {}",
-              new Object[]{minMaxJob.getMin(), minMaxJob.getMax(), minMaxJob.getNData(), minMaxJob.getSum()});
+              minMaxJob.getMin(), minMaxJob.getMax(), minMaxJob.getNData(), minMaxJob.getSum());
     }
 
     // update nData:

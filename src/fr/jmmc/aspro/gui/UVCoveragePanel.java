@@ -808,7 +808,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
       if (logger.isDebugEnabled()) {
         logger.debug("interferometer configuration changed: {}; baseline min= {}, max= {}",
-                new Object[]{intConfName, minBaseLine, maxBaseLine});
+                intConfName, minBaseLine, maxBaseLine);
       }
 
       // adjust uv max range to [0.5 * minBaseLine; 2 * maxBaseLine] and
@@ -2232,7 +2232,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     doCrop = ((x != 0) || (y != 0) || (w != imageSize) || (h != imageSize));
 
     if (logger.isDebugEnabled()) {
-      logger.debug("sub image [{}, {} - {}, {}] - doCrop = {}", new Object[]{x, y, w, h, doCrop});
+      logger.debug("sub image [{}, {} - {}, {}] - doCrop = {}", x, y, w, h, doCrop);
     }
 
     // crop a small sub image displayed while the correct model image is computed:

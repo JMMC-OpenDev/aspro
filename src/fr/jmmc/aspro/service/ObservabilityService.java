@@ -716,9 +716,9 @@ public final class ObservabilityService {
     final double precDEC = raDec[1];
 
     if (isLogDebug) {
-      logger.debug("target[{}] {} - precessed: {}", new Object[]{target.getName(),
+      logger.debug("target[{}] {} - precessed: {}", target.getName(),
                 AstroSkyCalcObservation.asString(target.getRADeg(), target.getDECDeg()),
-                AstroSkyCalcObservation.asString(15d * precRA, precDEC)});
+                AstroSkyCalcObservation.asString(15d * precRA, precDEC));
     }
 
     // define transit date (HA = 0) :
@@ -1305,7 +1305,7 @@ public final class ObservabilityService {
 
           if (isLogDebug) {
             logger.debug("Target hidden by horizon profile = {} [{} {}]",
-                    new Object[]{profile.getName(), azEl.getAzimuth(), azEl.getElevation()});
+                    profile.getName(), azEl.getAzimuth(), azEl.getElevation());
           }
 
           break;
@@ -2113,14 +2113,14 @@ public final class ObservabilityService {
         if ((jdFrom >= this.jdLower && jdFrom <= this.jdUpper) || (jdTo >= this.jdLower && jdTo <= this.jdUpper)) {
 
           if (isLogDebug) {
-            logger.debug("Range[{} - {}] : {}", new Object[]{jdFrom, jdTo, type});
+            logger.debug("Range[{} - {}] : {}", jdFrom, jdTo, type);
           }
 
           from = jdToDateInDateRange(jdFrom);
           to = jdToDateInDateRange(jdTo);
 
           if (isLogDebug) {
-            logger.debug("SunInterval[{} - {}] : {}", new Object[]{from, to, type});
+            logger.debug("SunInterval[{} - {}] : {}", from, to, type);
           }
 
           intervals.add(new SunTimeInterval(from, to, type));

@@ -583,7 +583,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
     }
     if (DEBUG_FIRE_EVENT) {
       if (event.getVersion() != null) {
-        logger.warn("FIRE {} on version = {}", new Object[]{event, event.getVersion(), new Throwable()});
+        logger.warn("FIRE {} on version = {}", event, event.getVersion(), new Throwable());
       } else {
         logger.warn("FIRE {}", event, new Throwable());
       }

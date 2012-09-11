@@ -82,10 +82,10 @@ public final class AstroSkyCalc {
             position.getAltitude());
 
     if (logger.isDebugEnabled()) {
-      logger.debug("Site dump: {}\ntz offset: {}\nlongitude: {}\nlatitude  : {}", new Object[]{
-                site.name, site.stdz,
-                site.longit.roundedLongitString(1, ":", true),
-                site.lat.roundedDecString(0, ":")});
+      logger.debug("Site dump: {}\ntz offset: {}\nlongitude: {}\nlatitude  : {}",
+              site.name, site.stdz,
+              site.longit.roundedLongitString(1, ":", true),
+              site.lat.roundedDecString(0, ":"));
     }
     return site;
   }
@@ -345,11 +345,10 @@ public final class AstroSkyCalc {
   static void dumpWhen(final WhenWhere ww, final String label) {
     if (logger.isDebugEnabled()) {
       final InstantInTime t = ww.when;
-      logger.debug("{} dump : {}\nUT : {}/{}/{} {}:{}:{}\nlst : {}", new Object[]{
-                label, t.jd, t.UTDate.day, t.UTDate.month, t.UTDate.year,
-                t.UTDate.timeofday.hour, t.UTDate.timeofday.minute, t.UTDate.timeofday.second,
-                ww.siderealobj.roundedRAString(3, ":")
-              });
+      logger.debug("{} dump : {}\nUT : {}/{}/{} {}:{}:{}\nlst : {}",
+              label, t.jd, t.UTDate.day, t.UTDate.month, t.UTDate.year,
+              t.UTDate.timeofday.hour, t.UTDate.timeofday.minute, t.UTDate.timeofday.second,
+              ww.siderealobj.roundedRAString(3, ":"));
     }
   }
 
