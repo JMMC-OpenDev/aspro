@@ -3,6 +3,7 @@
  ******************************************************************************/
 package fr.jmmc.aspro.gui;
 
+import fr.jmmc.jmcs.gui.component.Disposable;
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.Preferences;
 import fr.jmmc.aspro.gui.action.AsproExportPDFAction;
@@ -23,6 +24,7 @@ import fr.jmmc.jmal.image.ColorModels;
 import fr.jmmc.jmal.image.ImageUtils;
 import fr.jmmc.jmal.image.ColorScale;
 import fr.jmmc.jmcs.gui.task.Task;
+import fr.jmmc.jmcs.util.ObjectUtils;
 import fr.jmmc.oiexplorer.core.gui.PDFExportable;
 import fr.jmmc.oiexplorer.core.util.Constants;
 import fr.jmmc.oitools.image.FitsImage;
@@ -59,7 +61,6 @@ import org.jfree.data.Range;
 import org.jfree.ui.Layer;
 import org.jfree.ui.RectangleEdge;
 import org.jfree.ui.RectangleInsets;
-import org.jfree.ui.TextAnchor;
 
 /**
  * This panel represents a FitsImage plot
@@ -299,7 +300,9 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
    */
   @Override
   public void dispose() {
-      logger.debug("dispose: {}", this);
+    if (logger.isDebugEnabled()) {
+      logger.debug("dispose: {}", ObjectUtils.getObjectInfo(this));
+    }
 
     // unregister this instance as a Preference Observer :
     this.myPreferences.deleteObserver(this);
@@ -321,7 +324,7 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
    */
   @Override
   public void update(final Observable o, final Object arg) {
-      logger.debug("Preferences updated on : {}", this);
+    logger.debug("Preferences updated on : {}", this);
 
     final String colorModelPref = this.myPreferences.getPreference(Preferences.MODEL_IMAGE_LUT);
     final ColorScale colorScale = this.myPreferences.getImageColorScale();
@@ -359,7 +362,7 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
    */
   private void refreshPlot() {
     if (this.doAutoRefresh) {
-        logger.debug("refreshPlot");
+      logger.debug("refreshPlot");
       this.plot();
     }
   }
@@ -369,7 +372,7 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
    * This code is executed by the Swing Event Dispatcher thread (EDT)
    */
   private void plot() {
-      logger.debug("plot : {}", this.fitsImage);
+    logger.debug("plot : {}", this.fitsImage);
 
     // check if fits image is available :
     if (this.fitsImage == null) {
@@ -720,7 +723,7 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
     h = checkBounds(h, 1, imageHeight - y);
 
     if (logger.isDebugEnabled()) {
-      logger.debug("sub image [{}, {} - {}, {}] - doCrop = {}", new Object[] {x, y, w, h, doCrop});
+      logger.debug("sub image [{}, {} - {}, {}] - doCrop = {}", new Object[]{x, y, w, h, doCrop});
     }
 
     doCrop = ((x != 0) || (y != 0) || (w != imageWidth) || (h != imageHeight));

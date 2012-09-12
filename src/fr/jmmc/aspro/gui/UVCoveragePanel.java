@@ -3,6 +3,7 @@
  ******************************************************************************/
 package fr.jmmc.aspro.gui;
 
+import fr.jmmc.jmcs.gui.component.Disposable;
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.Preferences;
 import fr.jmmc.aspro.gui.action.ExportOBVLTIAction;
@@ -61,6 +62,7 @@ import fr.jmmc.jmal.model.UVMapData;
 import fr.jmmc.jmal.model.VisNoiseService;
 import fr.jmmc.jmal.model.targetmodel.Model;
 import fr.jmmc.jmcs.gui.task.TaskSwingWorkerExecutor;
+import fr.jmmc.jmcs.util.ObjectUtils;
 import fr.jmmc.jmcs.util.concurrent.InterruptedJobException;
 import fr.jmmc.oiexplorer.core.gui.PDFExportable;
 import fr.jmmc.oiexplorer.core.util.Constants;
@@ -762,7 +764,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
    */
   @Override
   public void dispose() {
-    logger.debug("dispose: {}", this);
+    if (logger.isDebugEnabled()) {
+      logger.debug("dispose: {}", ObjectUtils.getObjectInfo(this));
+    }
 
     // unregister this instance as a Preference Observer :
     this.myPreferences.deleteObserver(this);

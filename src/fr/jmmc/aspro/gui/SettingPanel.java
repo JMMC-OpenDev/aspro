@@ -3,6 +3,7 @@
  ******************************************************************************/
 package fr.jmmc.aspro.gui;
 
+import fr.jmmc.jmcs.gui.component.Disposable;
 import fr.jmmc.aspro.model.event.ObservationEventType;
 import fr.jmmc.aspro.model.event.ObservationListener;
 import fr.jmmc.aspro.model.ObservationManager;
@@ -11,6 +12,7 @@ import fr.jmmc.aspro.model.event.ObservationEvent;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.jmcs.App;
 import fr.jmmc.jmcs.gui.task.TaskSwingWorkerExecutor;
+import fr.jmmc.jmcs.util.ObjectUtils;
 import fr.jmmc.oiexplorer.core.gui.OIFitsHtmlPanel;
 import fr.jmmc.oitools.model.OIFitsFile;
 import java.awt.Component;
@@ -124,7 +126,9 @@ public final class SettingPanel extends JPanel implements ObservationListener, D
    */
   @Override
   public void dispose() {
-    logger.debug("dispose: {}", this);
+    if (logger.isDebugEnabled()) {
+      logger.debug("dispose: {}", ObjectUtils.getObjectInfo(this));
+    }
 
     // call disposable components:
     if (observabilityPanel != null) {

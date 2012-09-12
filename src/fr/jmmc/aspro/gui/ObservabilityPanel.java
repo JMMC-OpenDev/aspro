@@ -3,6 +3,7 @@
  ******************************************************************************/
 package fr.jmmc.aspro.gui;
 
+import fr.jmmc.jmcs.gui.component.Disposable;
 import edu.dartmouth.AstroSkyCalc;
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.Preferences;
@@ -36,6 +37,7 @@ import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.aspro.service.ObservabilityService;
 import fr.jmmc.jmcs.gui.component.StatusBar;
+import fr.jmmc.jmcs.util.ObjectUtils;
 import fr.jmmc.oiexplorer.core.gui.PDFExportable;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -411,7 +413,9 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
    */
   @Override
   public void dispose() {
-    logger.debug("dispose: {}", this);
+    if (logger.isDebugEnabled()) {
+      logger.debug("dispose: {}", ObjectUtils.getObjectInfo(this));
+    }
 
     // unregister this instance as a Preference Observer :
     this.myPreferences.deleteObserver(this);
