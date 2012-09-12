@@ -53,36 +53,50 @@ public final class ExportOIFitsAction extends WaitingTaskAction {
   public void actionPerformed() {
     logger.debug("actionPerformed");
 
-    // Use main observation to check variants :
-    if (!ObservationManager.getInstance().getMainObservation().isSingle()) {
-      MessagePane.showMessage("Aspro 2 can not generate an OIFits file when multiple configurations are selected !");
-      return;
-    }
-
     final List<OIFitsFile> oiFitsFiles = ObservationManager.getInstance().getOIFitsList();
 
     if (oiFitsFiles != null) {
 
-      // use first (for now): TODO FIX
-      final OIFitsFile oiFitsFile = oiFitsFiles.get(0);
+      final boolean exportAll = oiFitsFiles.size() > 1;
 
-      final String defaultFileName;
+      File file;
 
-      if (oiFitsFile.getAbsoluteFilePath() != null) {
-        final File file = new File(oiFitsFile.getAbsoluteFilePath());
-        defaultFileName = file.getName();
+      if (exportAll) {
+        file = FileChooser.showDirectoryChooser("Export observations as OIFits files", null, mimeType);
       } else {
-        defaultFileName = getDefaultFileName(oiFitsFile);
+        final OIFitsFile oiFitsFile = oiFitsFiles.get(0);
+
+        file = FileChooser.showSaveFileChooser("Export this observation as an OIFits file", null, mimeType, getDefaultFileName(oiFitsFile));
       }
 
-      final File file = FileChooser.showSaveFileChooser("Export the current target as an OIFits file", null, mimeType, defaultFileName);
+      logger.debug("Selected file: {}", file);
 
       // If a file was defined (No cancel in the dialog)
       if (file != null) {
-        try {
-          OIFitsWriter.writeOIFits(file.getAbsolutePath(), oiFitsFile);
+        final String directory = (exportAll) ? file.getPath() : file.getParent();
 
-          StatusBar.show(file.getName() + " created.");
+        try {
+
+          if (exportAll) {
+
+            for (OIFitsFile oiFitsFile : oiFitsFiles) {
+
+              file = new File(directory, getDefaultFileName(oiFitsFile));
+
+              OIFitsWriter.writeOIFits(file.getAbsolutePath(), oiFitsFile);
+
+              StatusBar.show(file.getName() + " created.");
+            }
+
+            StatusBar.show("OIFits files saved in " + directory + ".");
+
+          } else {
+            final OIFitsFile oiFitsFile = oiFitsFiles.get(0);
+
+            OIFitsWriter.writeOIFits(file.getAbsolutePath(), oiFitsFile);
+
+            StatusBar.show(file.getName() + " created.");
+          }
 
         } catch (FitsException fe) {
           MessagePane.showErrorMessage("Could not export to file : " + file.getAbsolutePath(), fe);

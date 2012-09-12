@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
  * This action opens the target editor
  * @author bourgesl
  */
-public class TargetEditorAction extends RegisteredAction {
+public final class TargetEditorAction extends RegisteredAction {
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;

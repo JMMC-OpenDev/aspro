@@ -5,12 +5,12 @@ package fr.jmmc.aspro.gui.action;
 
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.jmcs.data.preference.FileChooserPreferences;
-import fr.jmmc.jmcs.gui.component.MessagePane;
-import fr.jmmc.jmcs.gui.component.StatusBar;
 import fr.jmmc.jmcs.gui.action.ActionRegistrar;
-import fr.jmmc.jmcs.util.MimeType;
 import fr.jmmc.jmcs.gui.action.RegisteredAction;
 import fr.jmmc.jmcs.gui.component.FileChooser;
+import fr.jmmc.jmcs.gui.component.MessagePane;
+import fr.jmmc.jmcs.gui.component.StatusBar;
+import fr.jmmc.jmcs.util.MimeType;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
@@ -52,7 +52,7 @@ public final class LoadObservationAction extends RegisteredAction {
 
     final ObservationManager om = ObservationManager.getInstance();
 
-    File file = null;
+    File file;
 
     // If the action was automatically triggered from App launch
     if (evt.getSource() == ActionRegistrar.getInstance()) {

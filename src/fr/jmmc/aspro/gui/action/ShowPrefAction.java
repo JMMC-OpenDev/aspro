@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
  * This registered preference action simply show the Preference view.
  * @author bourgesl
  */
-public class ShowPrefAction extends RegisteredAction {
+public final class ShowPrefAction extends RegisteredAction {
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
@@ -42,7 +42,7 @@ public class ShowPrefAction extends RegisteredAction {
 
     showPreferencesView();
   }
-  
+
   /**
    * Show a new preferences view
    */

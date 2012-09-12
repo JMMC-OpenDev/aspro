@@ -36,7 +36,7 @@ public final class ExportOBVLTIAction {
   /** Class logger */
   private static final Logger logger = LoggerFactory.getLogger(ExportOBVLTIAction.class.getName());
   /** double formatter for min elevation */
-  protected final static NumberFormat df1 = new DecimalFormat("0.#");
+  private final static NumberFormat df1 = new DecimalFormat("0.#");
   /** OBX MimeType */
   private final static MimeType mimeType = MimeType.OBX;
   /** Eso warning message */
@@ -83,7 +83,7 @@ public final class ExportOBVLTIAction {
       file = FileChooser.showSaveFileChooser("Export the target [" + target.getName() + "] as an Observing Block", null, mimeType, ExportOBVLTI.generateOBFileName(target));
     }
 
-    logger.warn("Selected file: {}", file);
+    logger.debug("Selected file: {}", file);
 
     // If a file was defined (No cancel in the dialog)
     if (file != null) {
