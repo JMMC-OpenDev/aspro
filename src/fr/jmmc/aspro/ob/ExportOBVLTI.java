@@ -27,14 +27,16 @@ import fr.jmmc.jmcs.util.FileUtils;
 import fr.jmmc.jmcs.util.MimeType;
 import java.io.File;
 import java.io.IOException;
+import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 /**
  * This class generates the common part of observing blocks for the VLTI
@@ -48,6 +50,8 @@ public class ExportOBVLTI {
   public static final String OB_SCIENCE = "SCI";
   /** P2PP file prefix for calibrator targets */
   public static final String OB_CALIBRATOR = "CAL";
+  /** P2PP version used for LST interval conversion */
+  protected final static int P2PP_VERSION = 3;
   /** double formatter for magnitudes */
   protected final static NumberFormat df1 = new DecimalFormat("0.0");
   /** double formatter for magnitudes */
@@ -56,10 +60,14 @@ public class ExportOBVLTI {
   protected final static NumberFormat df3 = new DecimalFormat("0.000");
   /** double formatter for PM */
   protected final static NumberFormat df6 = new DecimalFormat("0.000000");
+  /** ESO date/time formatter */
+  private final static DateFormat timeFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
   /** absolute_times_list template value */
-  public final static String VAL_ABS_TIME_LIST = "{<DATE>T00:00:00 <DATE>T00:00:00 1}";
-  /** date keyword for absolute_times_list template value */
-  public final static String VAL_ABS_TIME_LIST_DATE = "<DATE>";
+  public final static String VAL_ABS_TIME_LIST = "{<DATE_START> <DATE_END> 0}";
+  /** start date keyword for absolute_times_list template value */
+  public final static String VAL_ABS_TIME_LIST_DATE_START = "<DATE_START>";
+  /** end date keyword for absolute_times_list template value */
+  public final static String VAL_ABS_TIME_LIST_DATE_END = "<DATE_END>";
   /** category value for SCIENCE OB */
   public final static String VAL_CATEGORY_SCIENCE = "SCIENCE";
   /** category value for CALIBRATOR OB */
@@ -121,7 +129,7 @@ public class ExportOBVLTI {
   public static void process(final File file, final ObservationSetting observation,
           final ObservabilityService os,
           final Target target) throws IllegalStateException, IllegalArgumentException, IOException {
-    
+
     if (logger.isDebugEnabled()) {
       logger.debug("process target {} to file: ", target.getName(), file);
     }
@@ -171,7 +179,7 @@ public class ExportOBVLTI {
       name = name.substring(0, 31);
     }
 
-    document = document.replaceFirst(KEY_NAME, name);
+    document = document.replaceFirst(KEY_NAME, name); // 32 chars max
 
     // --- Calibrator OB ---
     final TargetUserInformations targetUserInfos = observation.getTargetUserInfos();
@@ -310,22 +318,26 @@ public class ExportOBVLTI {
 
         if (lstRanges != null) {
           // STTimeIntervals are expressed in seconds
-          // sample "4980:17760;"
+          // "4980:17760;" (P2PP v2.x)
+          // "{0 31320 0} {78120 86400 0} " (P2PP v3.x)
 
           lstTimeIntervals = convertLstRanges(lstRanges);
 
           // if night restriction is active, LST ranges are only valid for the observation date :
           if (observation.getWhen().isNightRestriction()) {
-            // get observation date :
-            final XMLGregorianCalendar cal = observation.getWhen().getDate();
+            // get observation date as GregorianCalendar :
+            final GregorianCalendar cal = observation.getWhen().getDate().toGregorianCalendar();
             if (logger.isDebugEnabled()) {
               logger.debug("obs Date: {}", cal);
             }
+            // define Date constraint in eso date format is '2010-05-04T00:00:00' :
 
-            // define Date constraint in eso date format is '2010-05-04' :
+            // {<DATE_START> <DATE_END> 0}
+            absTimeList = VAL_ABS_TIME_LIST.replaceFirst(VAL_ABS_TIME_LIST_DATE_START, timeFormatter.format(cal.getTime()));
 
-            // {<DATE>T00:00:00 <DATE>T00:00:00 1}
-            absTimeList = VAL_ABS_TIME_LIST.replaceAll(VAL_ABS_TIME_LIST_DATE, cal.toString());
+            cal.add(Calendar.DATE, 1);
+
+            absTimeList = absTimeList.replaceFirst(VAL_ABS_TIME_LIST_DATE_END, timeFormatter.format(cal.getTime()));
           }
         }
       }
@@ -412,26 +424,32 @@ public class ExportOBVLTI {
       sb.append(df1.format(ExportOBVLTI.getMagnitude(aoMag)));
     }
 
+    sb.append(' ');
+    sb.append(target.getName().replaceAll(AsproConstants.REGEXP_INVALID_TEXT_CHARS, "_"));
+
+    // Spectral type at the end as it can exceed maximum length: 
     if (target.getSPECTYP() != null) {
       sb.append(' ');
       sb.append(target.getSPECTYP().replaceAll(" ", "_"));
     }
 
-    sb.append(' ');
-    sb.append(target.getName().replaceAll(AsproConstants.REGEXP_INVALID_TEXT_CHARS, "_"));
+    String OBName = sb.toString();
 
-    final String OBName = sb.toString();
+    // maximum length :
+    if (OBName.length() > 32) {
+      OBName = OBName.substring(0, 31);
+    }
 
     // replace values :
     if (logger.isDebugEnabled()) {
       logger.debug("OBName: {}", OBName);
     }
 
-    return document.replaceAll(KEY_OB_NAME, OBName);
+    return document.replaceAll(KEY_OB_NAME, OBName); // 32 chars max
   }
 
   /**
-   * Convert LST date intervals to STTimeIntervals format i.e. 'date1_in_seconds:date2_in_seconds;...'
+   * Convert LST date intervals to STTimeIntervals format (depending on P2PP_VERSION)
    * @param dateIntervals LST intervals
    * @return String value
    */
@@ -441,16 +459,69 @@ public class ExportOBVLTI {
     final Calendar cal = new GregorianCalendar();
 
     for (DateTimeInterval interval : dateIntervals) {
-      cal.setTime(interval.getStartDate());
-      // upper minute :
-      sb.append(convertDateToSeconds(cal, 1)).append(':');
-
-      cal.setTime(interval.getEndDate());
-      // lower minute :
-      sb.append(convertDateToSeconds(cal, -1)).append(';');
+      convertLstRange(interval, sb, cal);
     }
 
     return sb.toString();
+  }
+
+  /**
+   * Convert one LST date interval to STTimeIntervals format (depending on P2PP_VERSION)
+   * @param interval LST interval to convert
+   * @param sb string buffer to append to
+   * @param cal temporary calendar instance
+   */
+  private static void convertLstRange(final DateTimeInterval interval, final StringBuilder sb, final Calendar cal) {
+
+    if (P2PP_VERSION == 2) {
+      // "4980:17760;" i.e. 'date1_in_seconds:date2_in_seconds;...' (P2PP v2.x)
+
+      cal.setTime(interval.getStartDate());
+      sb.append(convertDateToSeconds(cal, 1)).append(':'); // upper minute
+
+      cal.setTime(interval.getEndDate());
+      sb.append(convertDateToSeconds(cal, -1));
+
+      sb.append(';'); // interval separator
+
+    } else if (P2PP_VERSION == 3) {
+      // "{0 31320 0} {78120 86400 0} " (P2PP v3.x)
+
+      final Date start = interval.getStartDate();
+      final Date end = interval.getEndDate();
+
+      if (end.before(start)) {
+        // single interval over midnight splitted into two intervals:
+
+        sb.append("{0 "); // from midnight [00:00]
+
+        cal.setTime(end);
+        sb.append(convertDateToSeconds(cal, -1)); // lower minute
+
+        sb.append(" 0} {");
+
+        cal.setTime(start);
+        sb.append(convertDateToSeconds(cal, 1)); // upper minute
+
+        sb.append(" 86400 0}"); // until midnight [00:00]
+
+      } else {
+        sb.append('{');
+
+        cal.setTime(start);
+        sb.append(convertDateToSeconds(cal, 1)).append(' '); // upper minute
+
+        cal.setTime(end);
+        sb.append(convertDateToSeconds(cal, -1)); // lower minute
+
+        sb.append(" 0}");
+      }
+
+      sb.append(' '); // interval separator
+
+    } else {
+      throw new IllegalStateException("Unsupported P2PP_VERSION: " + P2PP_VERSION);
+    }
   }
 
   /**

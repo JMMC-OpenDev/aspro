@@ -4,26 +4,26 @@
 package fr.jmmc.aspro.service;
 
 import edu.dartmouth.AstroAlmanac;
+import edu.dartmouth.AstroAlmanacTime;
 import edu.dartmouth.AstroSkyCalc;
 import edu.dartmouth.AstroSkyCalcObservation;
-import edu.dartmouth.AstroAlmanacTime;
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.BaseLine;
 import fr.jmmc.aspro.model.Beam;
 import fr.jmmc.aspro.model.ConfigurationManager;
 import fr.jmmc.aspro.model.HorizonShape;
 import fr.jmmc.aspro.model.ObservabilityContext;
+import fr.jmmc.aspro.model.Range;
 import fr.jmmc.aspro.model.observability.DateTimeInterval;
+import fr.jmmc.aspro.model.observability.GroupedPopObservabilityData;
 import fr.jmmc.aspro.model.observability.ObservabilityData;
 import fr.jmmc.aspro.model.observability.PopCombination;
-import fr.jmmc.aspro.model.observability.GroupedPopObservabilityData;
 import fr.jmmc.aspro.model.observability.PopObservabilityData;
-import fr.jmmc.aspro.model.Range;
-import fr.jmmc.aspro.model.observability.TargetPositionDate;
 import fr.jmmc.aspro.model.observability.StarData;
 import fr.jmmc.aspro.model.observability.StarObservabilityData;
 import fr.jmmc.aspro.model.observability.SunTimeInterval;
 import fr.jmmc.aspro.model.observability.SunTimeInterval.SunType;
+import fr.jmmc.aspro.model.observability.TargetPositionDate;
 import fr.jmmc.aspro.model.oi.AzEl;
 import fr.jmmc.aspro.model.oi.Channel;
 import fr.jmmc.aspro.model.oi.ChannelLink;
@@ -41,8 +41,8 @@ import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.StationLinks;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.Telescope;
-import fr.jmmc.oitools.util.CombUtils;
 import fr.jmmc.aspro.util.TestUtils;
+import fr.jmmc.oitools.util.CombUtils;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -57,9 +57,9 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Locale;
 import java.util.Map;
+import javax.xml.datatype.XMLGregorianCalendar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 /**
  * This service determines the observability of a list of targets given an observation setting
