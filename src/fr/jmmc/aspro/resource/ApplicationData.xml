@@ -1,129 +1,129 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
- *******************************************************************************
- * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
- *******************************************************************************
- -->
+*******************************************************************************
+* JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
+*******************************************************************************
+-->
 
 <ApplicationData link="http://www.jmmc.fr/aspro2">
 
-    <company>
-        <short_name>JMMC</short_name>
-        <legal_name>Jean-Marie Mariotti Center</legal_name>
-        <logo_resource>fr/jmmc/jmcs/resource/image/jmmc_logo.png</logo_resource>
-        <homepage_url>http://www.jmmc.fr/</homepage_url>
-        <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
-    </company>
+  <company>
+    <short_name>JMMC</short_name>
+    <legal_name>Jean-Marie Mariotti Center</legal_name>
+    <logo_resource>fr/jmmc/jmcs/resource/image/jmmc_logo.png</logo_resource>
+    <homepage_url>http://www.jmmc.fr/</homepage_url>
+    <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
+  </company>
 
-    <program name="Aspro2" version="0.9.2 beta 5"/>
-    <compilation date="06/08/2012" compiler="JDK 1.5.0_16"/>
-    <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
-    <authors>the JMMC Technical Group</authors>
-    <jnlp>http://apps.jmmc.fr/~swmgr/Aspro2/Aspro2.jnlp</jnlp>
-    <sampdescription>Prepare your interferometric observations with the VLTI or other interferometers</sampdescription>
+  <program name="Aspro2" version="0.9.2 beta 5"/>
+  <compilation date="06/08/2012" compiler="JDK 1.5.0_16"/>
+  <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
+  <authors>the JMMC Technical Group</authors>
+  <jnlp>http://apps.jmmc.fr/~swmgr/Aspro2/Aspro2.jnlp</jnlp>
+  <sampdescription>Prepare your interferometric observations with the VLTI or other interferometers</sampdescription>
 
-    <dependences>
+  <dependences>
 
-        <!-- JMMC -->
+    <!-- JMMC -->
 
-        <!-- Java Mariotti Astronomical library -->
-        <package name="jMAL"
-            description="JMMC library to provide common astronomical computations (coordinate conversion, SIMBAD star resolver and analytical object models in interferometry)"
-            link="https://www.jmmc.fr/dev/jmal/"
-            jars="jmal.jar"
-            license="CECILL-B ???"/>
+    <!-- Java Mariotti Astronomical library -->
+    <package name="jMAL"
+                 description="JMMC library to provide common astronomical computations (coordinate conversion, SIMBAD star resolver and analytical object models in interferometry)"
+                 link="https://www.jmmc.fr/dev/jmal/"
+                 jars="jmal.jar"
+                 license="CECILL-B ???"/>
 
-        <!-- Java Mariotti OIfitsExplorer-core -->
-        <package name="OIFits Explorer core"
-            description="OIFits Explorer core is the JMMC library dedicated to share OIFits GUI components (plots)"
-            link="http://www.jmmc.fr/dev/oiexplorer-core/"
-            jars="oiexplorer-core.jar"
-            license="CECILL-B ???"/>
+    <!-- Java Mariotti OIfitsExplorer-core -->
+    <package name="OIFits Explorer core"
+                 description="OIFits Explorer core is the JMMC library dedicated to share OIFits GUI components (plots)"
+                 link="http://www.jmmc.fr/dev/oiexplorer-core/"
+                 jars="oiexplorer-core.jar"
+                 license="CECILL-B ???"/>
 
-        <!-- Java Mariotti OITools -->
-        <package name="OITools"
-            description="OITools is the JMMC library dedicated to OIFits manipulation (load, save and validation)"
-            link="https://www.jmmc.fr/dev/oitools/"
-            jars="oitools.jar"
-            license="CECILL-B ???"/>
-
-
-        <!-- 1. Science / VO libraries (always on top for better visibility) -->
-
-        <!-- Aspro2 dependencies -->
-
-        <package name="JSkyCalc"
-            description="Observability constraints based on JSkyCalc by J. R. Thorstensen, Dartmouth College"
-            link="http://www.dartmouth.edu/~physics/faculty/skycalc/flyer.html"
-            license="redistribution allowed including this acknowledgment 'Observability constraints based on JSkyCalc by J. R. Thorstensen, Dartmouth College'" />
-
-        <!-- OITools dependencies -->
-
-        <package name="nom.tam.fits"
-            description="The Java FITS library (nom.tam.fits) has been developed which provides efficient I/O for FITS images and binary tables. Made by Dr Thomas A. McGlynn, HEASARC"
-            link="http://heasarc.gsfc.nasa.gov/docs/heasarc/fits/java/v1.0/"
-            license="Copyright: Thomas McGlynn 1997-1999." />
-            <!--
-              Copyright: Thomas McGlynn 1997-1999.
-              This code may be used for any purpose, non-commercial
-              or commercial so long as this copyright notice is retained
-              in the source code or included in or referred to in any
-              derived software.
-            -->
-
-        <!-- jMCS dependencies -->
-
-        <!-- VO interoperability -->
-        <package name="JSAMP"
-          description="JSAMP is a Java toolkit for use with the Simple Applications Messaging Protocol. Made by Mark Taylor, working in the Astrophysics Group at Bristol University."
-          link="http://software.astrogrid.org/doc/jsamp/"
-          jars="jsamp-1.3.jar"
-          license="(at least) the Academic Free Licence and the BSD License."/>
-
-        <!-- jMAL dependencies -->
-
-        <!-- Model computations (bessel functions) -->
-        <package name="CERN colt"
-            description="provides a set of Open Source Libraries for High Performance Scientific and Technical Computing in Java"
-            link="http://acs.lbl.gov/software/colt/"
-            jars="colt.jar"
-            license="Copyright (c) 1999 CERN - European Organization for Nuclear Research"/>
-            <!--
-              Copyright (c) 1999 CERN - European Organization for Nuclear Research.
-              Permission to use, copy, modify, distribute and sell this software and its documentation for any purpose is
-              hereby granted without fee, provided that the above copyright notice appear in all copies and that both that
-              copyright notice and this permission notice appear in supporting documentation. CERN makes no representations
-              about the suitability of this software for any purpose. It is provided "as is" without expressed or implied warranty.
-            -->
-
-        <package name="JTransforms"
-            description="JTransforms is the first, open source, multithreaded FFT library written in pure Java. Made by Dr Piotr Wendykier, Wolfram Research, Inc."
-            link="http://sourceforge.net/projects/jtransforms/"
-            license="MPL/LGPL/GPL" />
-            <!-- Mozilla Public License: http://www.mozilla.org/MPL/ -->
+    <!-- Java Mariotti OITools -->
+    <package name="OITools"
+                 description="OITools is the JMMC library dedicated to OIFits manipulation (load, save and validation)"
+                 link="https://www.jmmc.fr/dev/oitools/"
+                 jars="oitools.jar"
+                 license="CECILL-B ???"/>
 
 
-        <!-- 2. Swing -->
+    <!-- 1. Science / VO libraries (always on top for better visibility) -->
 
-        <!-- Aspro2 dependencies -->
+    <!-- Aspro2 dependencies -->
 
-        <package name="JFreeChart"
-            description="JFreeChart is a free 100% Java chart library that makes it easy for developers to display professional quality charts in their applications"
-            link="http://www.jfree.org/jfreechart/"
-            jars="jfreechart-1.0.13.jar jcommon-1.0.16.jar"
-            license="LGPL" />
+    <package name="JSkyCalc"
+                 description="Observability constraints based on JSkyCalc by J. R. Thorstensen, Dartmouth College"
+                 link="http://www.dartmouth.edu/~physics/faculty/skycalc/flyer.html"
+                 license="redistribution allowed including this acknowledgment 'Observability constraints based on JSkyCalc by J. R. Thorstensen, Dartmouth College'" />
 
-        <package name="iText"
-            description="iText is a library that allows you to generate PDF files on the fly"
-            link="http://itextpdf.com/"
-            jars="iText-2.1.5.jar"
-            license="AGPL (http://itextpdf.com/terms-of-use/agpl.php)" />
+    <!-- OITools dependencies -->
 
-        <package name="SteelSeries"
-            description="SteelSeries is library of gauges for Java applications"
-            link="http://kenai.com/projects/steelseries"
-            jars="SteelSeries-3.9.26.jar trident.jar"
-            license="BSD" />
+    <package name="nom.tam.fits"
+                 description="The Java FITS library (nom.tam.fits) has been developed which provides efficient I/O for FITS images and binary tables. Made by Dr Thomas A. McGlynn, HEASARC"
+                 link="http://heasarc.gsfc.nasa.gov/docs/heasarc/fits/java/v1.0/"
+                 license="Copyright: Thomas McGlynn 1997-1999." />
+    <!--
+      Copyright: Thomas McGlynn 1997-1999.
+      This code may be used for any purpose, non-commercial
+      or commercial so long as this copyright notice is retained
+      in the source code or included in or referred to in any
+      derived software.
+    -->
+
+    <!-- jMCS dependencies -->
+
+    <!-- VO interoperability -->
+    <package name="JSAMP"
+                 description="JSAMP is a Java toolkit for use with the Simple Applications Messaging Protocol. Made by Mark Taylor, working in the Astrophysics Group at Bristol University."
+                 link="http://software.astrogrid.org/doc/jsamp/"
+                 jars="jsamp-1.3.jar"
+                 license="(at least) the Academic Free Licence and the BSD License."/>
+
+    <!-- jMAL dependencies -->
+
+    <!-- Model computations (bessel functions) -->
+    <package name="CERN colt"
+                 description="provides a set of Open Source Libraries for High Performance Scientific and Technical Computing in Java"
+                 link="http://acs.lbl.gov/software/colt/"
+                 jars="colt.jar"
+                 license="Copyright (c) 1999 CERN - European Organization for Nuclear Research"/>
+    <!--
+      Copyright (c) 1999 CERN - European Organization for Nuclear Research.
+      Permission to use, copy, modify, distribute and sell this software and its documentation for any purpose is
+      hereby granted without fee, provided that the above copyright notice appear in all copies and that both that
+      copyright notice and this permission notice appear in supporting documentation. CERN makes no representations
+      about the suitability of this software for any purpose. It is provided "as is" without expressed or implied warranty.
+    -->
+
+    <package name="JTransforms"
+                 description="JTransforms is the first, open source, multithreaded FFT library written in pure Java. Made by Dr Piotr Wendykier, Wolfram Research, Inc."
+                 link="http://sourceforge.net/projects/jtransforms/"
+                 license="MPL/LGPL/GPL" />
+    <!-- Mozilla Public License: http://www.mozilla.org/MPL/ -->
+
+
+    <!-- 2. Swing -->
+
+    <!-- Aspro2 dependencies -->
+
+    <package name="JFreeChart"
+                 description="JFreeChart is a free 100% Java chart library that makes it easy for developers to display professional quality charts in their applications"
+                 link="http://www.jfree.org/jfreechart/"
+                 jars="jfreechart-1.0.13.jar jcommon-1.0.16.jar"
+                 license="LGPL" />
+
+    <package name="iText"
+                 description="iText is a library that allows you to generate PDF files on the fly"
+                 link="http://itextpdf.com/"
+                 jars="iText-2.1.5.jar"
+                 license="AGPL (http://itextpdf.com/terms-of-use/agpl.php)" />
+
+    <package name="SteelSeries"
+                 description="SteelSeries is library of gauges for Java applications"
+                 link="http://kenai.com/projects/steelseries"
+                 jars="SteelSeries-3.9.26.jar trident.jar"
+                 license="BSD" />
 
   </dependences>
 
@@ -165,6 +165,7 @@
   <releasenotes>
     <release version="0.9.2">
       <prerelease version="0.9.2 beta 5">
+        <change>Added VLTI configuration for ESO Period 91 (idem ESO Period 90)</change>
         <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/255">Export all OIFits files in multi configuration
           (one file per configuration : no merged OIFits)
         </change>
@@ -173,7 +174,8 @@
         <change type="FEATURE">Fixed SUSI station positions, baselines (North - South) and delay line maximum throw</change>
         <change type="FEATURE">Added preliminary support for the Sydney University Stellar Interferometer (SUSI) with PAVO instrument (2T)</change>
         <change type="FEATURE">Enhanced JSkyCalc interoperability to provide complete target list as an object list 
-            that are all plotted on the sky display and airmass plots</change>
+          that are all plotted on the sky display and airmass plots
+        </change>
       </prerelease>
       <prerelease version="0.9.2 beta 3">
         <change type="FEATURE">Added sky button on the main panel to open JSkyCalc which provides sky display (moon, planets),
@@ -223,9 +225,11 @@
       </prerelease>
       <prerelease version="0.9.1 beta 9">
         <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/315">Fixed VOtable SAMP interoperability when Aspro2 is started by the JMMC AppLauncher
-          and the VOTable contains calibrator targets (SearchCal)</change>
+          and the VOTable contains calibrator targets (SearchCal)
+        </change>
         <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/315">Fixed missing science target (automatically added) when Aspro2 handles SearchCal VOtable SAMP messages:
-          no more message "Target '...' not found in targets (wrong SearchCal target)"</change>
+          no more message "Target '...' not found in targets (wrong SearchCal target)"
+        </change>
         <change type="BUGFIX">Better unexpected exception handling in any SAMP message handler</change>
       </prerelease>
       <prerelease version="0.9.1 beta 8">
@@ -235,14 +239,16 @@
       </prerelease>
       <prerelease version="0.9.1 beta 7">
         <change type="FEATURE">Added complete support for VOTable ASPRO parameters to provide custom configuration (baseline, pops, beams)
-          and disable GUI features used by the SAMP interoperability with PIVOT (CHARA VEGA)</change>
+          and disable GUI features used by the SAMP interoperability with PIVOT (CHARA VEGA)
+        </change>
         <change type="CHANGE">Automatically fix invalid interferometer configuration (CHARA VEGA June 2011) to CHARA</change>
       </prerelease>
       <prerelease version="0.9.1 beta 6">
         <change type="FEATURE">Updated number of scans in PIONIER P2PP template</change>
         <change type="FEATURE">Updated PIONIER instrument modes to add K band: LARGE_H, BROAD_K and LARGE_K</change>
         <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/305">Use native file choosers on Mac OS X;
-          avoid directory creation bug when exporting targets to Observing blocks</change>
+          avoid directory creation bug when exporting targets to Observing blocks
+        </change>
         <change type="FEATURE">Moved File chooser preferences file (last used directory per file type) i.e. previous settings are lost.</change>
       </prerelease>
       <prerelease version="0.9.1 beta 5">
@@ -273,23 +279,26 @@
     <release version="0.9.0">
       <pubDate>Wed, 14 Mar 2012 16:58:26 GMT</pubDate>
       <prerelease version="0.9.0">
-        <change type="FEATURE">Public release for ESO P90</change>
+        <change type="FEATURE">Public release for ESO Period 90</change>
       </prerelease>
       <prerelease version="0.9.0 beta 3">
         <change type="CHANGE">Added LUT and color scale widgets on the FITS image preview of the target model editor</change>
         <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/271">Added UP / DOWN buttons to move targets among
-          science or calibrator targets (manual sort) in the target editor</change>
+          science or calibrator targets (manual sort) in the target editor
+        </change>
       </prerelease>
       <prerelease version="0.9.0 beta 2">
         <change type="CHANGE">Enhanced exception handling during user model validation and computation: automatically disable invalid model and add a warning message</change>
         <change type="CHANGE">Added user model information (pixel increments + FOV) on the target model editor</change>
         <change type="CHANGE">Added 'Fast mode (optimize image)' preferences to prepare user models (FITS image) for FFT and direct fourier transform:
-          discard negative, zero values and data lower than the visibility threshold (1 percent) to have smaller datasets to process</change>
+          discard negative, zero values and data lower than the visibility threshold (1 percent) to have smaller datasets to process
+        </change>
       </prerelease>
       <prerelease version="0.9.0 beta 1">
         <change type="FEATURE">Added User model editor (single Fits image) in the target model editor including image preview</change>
         <change type="FEATURE">Added 'Compute OIFits data' checkbox on the UV Coverage panel to enable/disable the OIFits computation
-          which can be very slow (for example: high resolution AMBER observation)</change>
+          which can be very slow (for example: high resolution AMBER observation)
+        </change>
         <change type="FEATURE">Added User model support to compute OIFits data using direct fourier transform (slow even in multithreading)</change>
         <change type="FEATURE">Added User model support (single Fits image) to compute UV Map (gray model) using fractional FFT (multithreading)</change>
         <change type="CHANGE">OIFits data are now computed in background (multithreading)</change>
@@ -301,7 +310,7 @@
     <release version="0.8.2">
       <pubDate>Wed, 14 Mar 2012 16:58:26 GMT</pubDate>
       <prerelease version="0.8.2 beta 11">
-        <change type="FEATURE">Added ESO P90 configuration</change>
+        <change type="FEATURE">Added VLTI configuration for ESO Period 90</change>
         <change type="FEATURE">Added the Color scale legend on the UV Coverage plot</change>
         <change type="FEATURE">Added the Color scale (linear or logarithmic) preference to represent the model image amplitude</change>
         <change type="CHANGE">Updated spectral configurations for CHARA VEGA instrument (CAMERA=R)</change>
@@ -324,7 +333,8 @@
       <prerelease version="0.8.2 beta 6">
         <change type="CHANGE">Added PIVOT identifier support in Samp 'table.load.votable' incoming and 'starlist.load' output messages</change>
         <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/243">Fixed noise biases for PIONIER instrument:
-          fixed bias to 1% and VIS2 calibration bias to 5% (minVis2Err = 0.0001 + 0.05 x V2)</change>
+          fixed bias to 1% and VIS2 calibration bias to 5% (minVis2Err = 0.0001 + 0.05 x V2)
+        </change>
       </prerelease>
       <prerelease version="0.8.2 beta 5">
         <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/242">Added 'Add error noise to data' checkbox on the UV Coverage panel to enable or disable gaussian noise (sigma=error) on OIFits data tables (OI_VIS, OI_VIS2, OI_T3); it is visible on Vis2 plot</change>
@@ -342,11 +352,14 @@
       <prerelease version="0.8.2 beta 2">
         <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/234">Added OI_VIS table in the OIFits output even if the instrument is not AMBER;
           it contains correlated fluxes VISDATA/VISERR anyway but VISAMP/VISPHI are set to NaN for other instruments because Aspro2 does not know
-          how these quantities are computed by each instrument data reduction software</change>
+          how these quantities are computed by each instrument data reduction software
+        </change>
         <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/231">Fixed min/max baseline computation to use projected baseline on UV plane
-          instead of maximum baseline length (UVW); this impacts SearchCal interoperability and the UV plot scale (UVMax field).</change>
+          instead of maximum baseline length (UVW); this impacts SearchCal interoperability and the UV plot scale (UVMax field).
+        </change>
         <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/203">Automatically adjust total integration time to 50% of the sampling periodicity
-          when it changes in the UV Coverage Panel.</change>
+          when it changes in the UV Coverage Panel.
+        </change>
         <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/205">Fixed grid lines visibility on the Observability plot.</change>
       </prerelease>
       <prerelease version="0.8.2 beta 1">
@@ -363,10 +376,11 @@
         <change type="BUGFIX">Fixed out of range exception when mouse zooming on UV Coverage Panel arround borders</change>
         <change type="FEATURE">Improved Java Web Start packaging (JNLP) to provide faster downloads</change>
         <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/198">Fixed exception when exporting an Observing block
-          and the spectral type is undefined for one target (SearchCal calibrator)</change>
+          and the spectral type is undefined for one target (SearchCal calibrator)
+        </change>
       </prerelease>
       <prerelease version="0.8.1 beta 14">
-        <change type="FEATURE">Added ESO P89 configuration</change>
+        <change type="FEATURE">Added VLTI configuration for ESO Period 89</change>
       </prerelease>
       <prerelease version="0.8.1 beta 13">
         <change>Changed VOTable message handler (SAMP) to accept PIVOT messages using VOTable for targets</change>
@@ -374,7 +388,8 @@
       </prerelease>
       <prerelease version="0.8.1 beta 12">
         <change type="FEATURE">Added one preliminary OIFits viewer: only square visiblity (VIS2) vs radius plot is available with error bars
-          when the noise modeling is able to compute them</change>
+          when the noise modeling is able to compute them
+        </change>
         <change type="FEATURE">Fixed CHARA delay line configuration: E1 cart moves in range [-1.4 to +44.0] like others (july 2011)</change>
       </prerelease>
       <prerelease version="0.8.1 beta 11">
@@ -397,7 +412,8 @@
         <change type="FEATURE">Updated CHARA configuration using the latest official configuration file (telescopes.chara)</change>
         <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/175">Changed PIONIER OB template to take 100 scans of DARK instead of 50</change>
         <change>Minor ergonomic change: when the target editor is opened, the 'Targets' tab is displayed by default; when the UV coverage plot is selected,
-          the 'Models' tab is displayed instead.</change>
+          the 'Models' tab is displayed instead.
+        </change>
         <change>Minor changes related to CHARA VEGA Observing blocks (spectral type format, disk diameter set from SearchCal diameters)</change>
       </prerelease>
       <prerelease version="0.8.1 beta 6">
@@ -413,7 +429,8 @@
       </prerelease>
       <prerelease version="0.8.1 beta 3">
         <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/144">Fixed bug related to SearchCal integration:
-          always use the bright scenario as the faint scenario is not available for all instrumental bands</change>
+          always use the bright scenario as the faint scenario is not available for all instrumental bands
+        </change>
         <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/145">Changed color for orphan calibrators in the observability plot</change>
         <change type="CHANGE" url="http://trac.jmmc.fr/jmmc-sw/ticket/143">Fixed export OB for CHARA VEGA to handle properly calibrators in the StarList format</change>
         <change>Automatic Pops set with values defined in CHARA VEGA configuration dedicated to June 2011 run (read-only)</change>
@@ -440,15 +457,16 @@
         <change>Updated plots (Interferometer Map, Observability and UV Coverage) to display data for all selected instrument configurations</change>
         <change>Major refactoring to compute observability and UV Coverage for all selected instrument configurations</change>
         <change>Important changes in the user interface (main panel) to allow multi selection of instrument configurations
-        and use the main target list to select the current target used in the UV Coverage Panel</change>
-        <change>Added VLTI configuration for Period 88</change>
+          and use the main target list to select the current target used in the UV Coverage Panel
+        </change>
+        <change>Added VLTI configuration for ESO Period 88</change>
       </prerelease>
     </release>
 
     <release version="0.7">
       <pubDate>Tue, 15 Feb 2011 11:41:46 GMT</pubDate>
       <prerelease version="0.7.8 beta">
-        <change>Fixed VLTI configuration for the PIONIER instrument (period 86 and 87)</change>
+        <change>Fixed VLTI configuration for the PIONIER instrument (ESO Period 86 and 87)</change>
         <change>JSAMP library updated to release 1.2 that fix shutdown notification problems when the user closes any JMMC application.</change>
         <change>Optimisation: the model image is not computed if it is useless</change>
         <change>Actions Export to OIFits / PDF waits for computations to be done</change>
@@ -456,7 +474,8 @@
       </prerelease>
       <prerelease version="0.7.7 beta">
         <change>Updated Export to Observing Blocks to support calibrators: the selected science target is exported
-        to a science OB and its calibrators to calibrator OBs.</change>
+          to a science OB and its calibrators to calibrator OBs.
+        </change>
       </prerelease>
       <prerelease version="0.7.6 beta">
         <change>Added Observing Blocks for PIONIER instrument</change>
@@ -472,7 +491,8 @@
       <prerelease version="0.7.4 beta">
         <change>Added a version attribute in the Observation file to handle model conversions</change>
         <change>Updated the Observation data model: targets have an ID attribute (derived from target name)
-        used to associate user informations: description, calibrator flag and calibrator list per target</change>
+          used to associate user informations: description, calibrator flag and calibrator list per target
+        </change>
         <change>Added action to open the SimBad web page for the current target in the Target editor</change>
         <change>Fixed the selected target when opening the target editor and synchronize the selected target between 'Model' and 'Target' tabs</change>
         <change>Added new Target editor to let the user edit target fields (magnitudes ...) and provide user information per target</change>
@@ -503,7 +523,7 @@
       </prerelease>
       <prerelease version="0.7.0 beta">
         <change>SearchCal integration through SAMP VO protocol: send the selected target to let SearchCal find calibrators
-        and process SearchCal response to extract calibrators
+          and process SearchCal response to extract calibrators
         </change>
         <change>LITpro integration through SAMP VO protocol: send models and generated oifits for the selected target</change>
       </prerelease>
@@ -513,10 +533,10 @@
       <pubDate>Tue, 05 Oct 2010 10:08:04 GMT</pubDate>
       <prerelease version="0.6.3">
         <change type="BUGFIX">Limit the memory footprint when the sampling periodicity is very small (less than 1 minute).
-        First 500 HA samples are computed and the following warning is displayed: 'Too many HA points (...), check your sampling periodicity. Only 500 samples computed'
+          First 500 HA samples are computed and the following warning is displayed: 'Too many HA points (...), check your sampling periodicity. Only 500 samples computed'
         </change>
         <change type="BUGFIX">Fixed bug when the UV Max value is set to 0.
-        This slider has now a minimum value set to the smallest baseline length of the selected interferometer
+          This slider has now a minimum value set to the smallest baseline length of the selected interferometer
         </change>
         <change type="BUGFIX" id="1285777818">Fixed bug concerning random dates: the LST axis is corrupted (Requires 'lower' &lt; 'upper')</change>
         <change type="BUGFIX">Fixed bug in HA min/max restrictions: invalid values can cause a NegativeArrayException</change>
@@ -528,9 +548,11 @@
       </prerelease>
       <prerelease version="0.6.2">
         <change type="BUGFIX" id="1285082082">Added the following message when the user use the 'Export to OIFits' action and the oifits is null :
-        'There is currently no OIFits data (no target or your target is not observable)'</change>
+          'There is currently no OIFits data (no target or your target is not observable)'
+        </change>
         <change type="BUGFIX" id="1285167992">Corrected focus problem with the action 'Export to an Observing block'
-                and added an user message if there is no target to export</change>
+          and added an user message if there is no target to export
+        </change>
         <change>Use an hour angle axis when the observability displays the baseline limits</change>
         <change>Normalize model flux weights to compute visibilities</change>
         <change>Added CHARA instruments: CLASSIC (2T) and CLIMB (3T)</change>
@@ -555,7 +577,8 @@
         <change>Error and noise computation for OI_VIS (AMBER only) using the differential phase / amplitude algorithm (amdlib)</change>
         <change>Added a pop up to tell the user to check its VLTI OB file against ESO CfP rules</change>
         <change>Fixed some configuration for AMBER in Period 87 (wrong station ordering) and the
-        loading action to even load such observation files</change>
+          loading action to even load such observation files
+        </change>
       </prerelease>
       <prerelease version="0.5.4">
         <change>Correlated fluxes set in OI_VIS</change>
@@ -625,17 +648,18 @@
         <change>Several UI changes to manage HA min / max and the fringe tracker mode fields depending on the selected target in the UV Coverage Panel</change>
         <change>HA min / max and the fringe tracker mode are related to a specific target and persisted in the observation file</change>
         <change>Added date and time constraints on VLTI Observing Block: date is defined if night restrictions are enabled;
-        LST intervals are defined with the target observability (elevation > 30 deg + delay lines + shadowing) restricted by the HA min / max defined
-        in the UV Coverage Panel</change>
+          LST intervals are defined with the target observability (elevation > 30 deg + delay lines + shadowing) restricted by the HA min / max defined
+          in the UV Coverage Panel
+        </change>
       </prerelease>
     </release>
 
     <release version="0.3">
       <pubDate>Wed, 19 May 2010 11:25:43 GMT</pubDate>
       <prerelease version="0.3b4">
-        <change>Added VLTI configuration for the period 87 (new baselines) and fixed period 86</change>
-        <change>Added VLTI configuration for the period 86 (idem period 85)</change>
-        <change>Added VLTI configuration for the future PIONIER instrument (period 86)</change>
+        <change>Added VLTI configuration for ESO Period 87 (new baselines)</change>
+        <change>Added VLTI configuration for ESO Period 86 (idem ESO Period 85)</change>
+        <change>Added VLTI configuration for the future PIONIER instrument (ESO Period 86)</change>
       </prerelease>
       <prerelease version="0.3b3">
         <change>Added basic Observing Block for MIDI</change>
