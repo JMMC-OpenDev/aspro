@@ -7,8 +7,8 @@ import fr.jmmc.aspro.gui.action.ExportOIFitsAction;
 import fr.jmmc.aspro.model.event.OIFitsEvent;
 import fr.jmmc.aspro.model.event.ObservationEvent;
 import fr.jmmc.aspro.model.event.ObservationListener;
+import fr.jmmc.oiexplorer.core.gui.PlotChartPanel;
 import fr.jmmc.oiexplorer.core.gui.PDFExportable;
-import fr.jmmc.oiexplorer.core.gui.Vis2Panel;
 import fr.jmmc.oiexplorer.core.gui.chart.PDFOptions;
 import fr.jmmc.oiexplorer.core.model.OIFitsCollectionManager;
 import fr.jmmc.oiexplorer.core.model.PlotDefinitionFactory;
@@ -37,8 +37,8 @@ public final class OIFitsViewPanel extends javax.swing.JPanel implements Observa
   /* members */
   /** OIFitsCollectionManager singleton */
   private OIFitsCollectionManager ocm = OIFitsCollectionManager.getInstance();
-  /** Oifits explorer Vis2Plot */
-  private Vis2Panel vis2Panel;
+  /** Oifits explorer Plot chart panel */
+  private PlotChartPanel plotChartPanel;
 
   /**
    * Constructor
@@ -80,7 +80,7 @@ public final class OIFitsViewPanel extends javax.swing.JPanel implements Observa
    */
   @Override
   public void performPDFAction() {
-    this.vis2Panel.performPDFAction();
+    this.plotChartPanel.performPDFAction();
   }
 
   /**
@@ -89,7 +89,7 @@ public final class OIFitsViewPanel extends javax.swing.JPanel implements Observa
    */
   @Override
   public String getPDFDefaultFileName() {
-    return this.vis2Panel.getPDFDefaultFileName();
+    return this.plotChartPanel.getPDFDefaultFileName();
   }
 
   /**
@@ -98,7 +98,7 @@ public final class OIFitsViewPanel extends javax.swing.JPanel implements Observa
    */
   @Override
   public PDFOptions getPDFOptions() {
-    return this.vis2Panel.getPDFOptions();
+    return this.plotChartPanel.getPDFOptions();
   }
 
   /**
@@ -107,7 +107,7 @@ public final class OIFitsViewPanel extends javax.swing.JPanel implements Observa
    */
   @Override
   public JFreeChart prepareChart() {
-    return this.vis2Panel.prepareChart();
+    return this.plotChartPanel.prepareChart();
   }
 
   /**
@@ -115,7 +115,7 @@ public final class OIFitsViewPanel extends javax.swing.JPanel implements Observa
    */
   @Override
   public void postPDFExport() {
-    this.vis2Panel.postPDFExport();
+    this.plotChartPanel.postPDFExport();
   }
 
   /**
@@ -124,12 +124,12 @@ public final class OIFitsViewPanel extends javax.swing.JPanel implements Observa
   private void postInit() {
     ocm.start();
 
-    this.vis2Panel = new Vis2Panel();
+    this.plotChartPanel = new PlotChartPanel();
 
-    this.jPanelCenter.add(this.vis2Panel);
+    this.jPanelCenter.add(this.plotChartPanel);
 
     // precise which plot to use:
-    this.vis2Panel.setPlotId(OIFitsCollectionManager.CURRENT_VIEW);
+    this.plotChartPanel.setPlotId(OIFitsCollectionManager.CURRENT_VIEW);
   }
 
   /**
@@ -212,7 +212,7 @@ public final class OIFitsViewPanel extends javax.swing.JPanel implements Observa
 
       EventNotifier.addCallback(new Runnable() {
         public void run() {
-          final boolean hasData = vis2Panel.isHasData();
+          final boolean hasData = plotChartPanel.isHasData();
           if (!hasData) {
             jLabelMessage.setText("No VIS2 data available: the target has no model.");
           }
@@ -229,7 +229,7 @@ public final class OIFitsViewPanel extends javax.swing.JPanel implements Observa
    */
   private void showMessage(final boolean show) {
     this.jLabelMessage.setVisible(show);
-    this.vis2Panel.setVisible(!show);
+    this.plotChartPanel.setVisible(!show);
   }
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JLabel jLabelMessage;
