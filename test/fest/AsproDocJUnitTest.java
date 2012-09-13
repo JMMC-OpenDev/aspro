@@ -176,14 +176,14 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
   }
 
   /**
-   * Test Vis2 plot
+   * Test OIFits viewer plot
    */
   @Test
   @GUITest
   public void shouldShowVis2Plot() {
 
-    // Capture Vis2 plot :
-    showPlotTab(SettingPanel.TAB_VIS2, "Aspro2-vis2-noErr.png");
+    // Capture OIFits viewer plot :
+    showPlotTab(SettingPanel.TAB_OIFITS_VIEWER, "Aspro2-vis2-noErr.png");
 
     // waits for computation to finish :
     AsproTestUtils.checkRunningTasks();
@@ -193,15 +193,15 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
     // waits for computation to finish :
     AsproTestUtils.checkRunningTasks();
 
-    // Capture Vis2 plot :
-    showPlotTab(SettingPanel.TAB_VIS2, "Aspro2-vis2-withErr.png");
+    // Capture OIFits viewer plot :
+    showPlotTab(SettingPanel.TAB_OIFITS_VIEWER, "Aspro2-vis2-withErr.png");
 
     window.list("jListTargets").selectItem("HIP1234");
 
     // waits for computation to finish :
     AsproTestUtils.checkRunningTasks();
 
-    // select UV tab like before Vis2:
+    // select UV tab like before OIFits viewer:
     window.tabbedPane().selectTab(SettingPanel.TAB_UV_COVERAGE);
   }
 
