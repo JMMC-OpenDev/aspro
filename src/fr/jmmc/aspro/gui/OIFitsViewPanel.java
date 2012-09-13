@@ -7,8 +7,8 @@ import fr.jmmc.aspro.gui.action.ExportOIFitsAction;
 import fr.jmmc.aspro.model.event.OIFitsEvent;
 import fr.jmmc.aspro.model.event.ObservationEvent;
 import fr.jmmc.aspro.model.event.ObservationListener;
-import fr.jmmc.oiexplorer.core.gui.PlotChartPanel;
 import fr.jmmc.oiexplorer.core.gui.PDFExportable;
+import fr.jmmc.oiexplorer.core.gui.PlotChartPanel;
 import fr.jmmc.oiexplorer.core.gui.chart.PDFOptions;
 import fr.jmmc.oiexplorer.core.model.OIFitsCollectionManager;
 import fr.jmmc.oiexplorer.core.model.PlotDefinitionFactory;
@@ -163,7 +163,7 @@ public final class OIFitsViewPanel extends javax.swing.JPanel implements Observa
     logger.debug("plot : {}", oiFitsList);
 
     if (oiFitsList == null) {
-      this.jLabelMessage.setText("No VIS2 data available: the target is not observable or multiple configurations are selected.");
+      this.jLabelMessage.setText("No OIFits data available: the target is not observable.");
       showMessage(true);
 
       // reset:
@@ -214,7 +214,7 @@ public final class OIFitsViewPanel extends javax.swing.JPanel implements Observa
         public void run() {
           final boolean hasData = plotChartPanel.isHasData();
           if (!hasData) {
-            jLabelMessage.setText("No VIS2 data available: the target has no model.");
+            jLabelMessage.setText("No OIFits data available: the target has no model.");
           }
 
           showMessage(!hasData);
