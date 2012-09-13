@@ -133,7 +133,7 @@ public final class OIFitsViewPanel extends javax.swing.JPanel implements Observa
   }
 
   /**
-   * Handle the changed event to plot the vis2 plot synchronously.
+   * Handle the changed event to plot the new OIFits data synchronously.
    * @param event event
    */
   @Override

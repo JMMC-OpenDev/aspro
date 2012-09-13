@@ -52,8 +52,8 @@ public final class SettingPanel extends JPanel implements ObservationListener, D
   public static final String TAB_UV_COVERAGE = "UV coverage";
   /** name of the tab pane corresponding to the OIFits panel */
   public static final String TAB_OIFITS = "OIFits";
-  /** name of the tab pane corresponding to the vis2 view of generated OIFits */
-  public static final String TAB_VIS2 = "Vis2 plot";
+  /** name of the tab pane corresponding to the OIFits viewer of generated OIFits files */
+  public static final String TAB_VIS2 = "OIFits viewer";
 
   /* members */
   /** timeline refresh Swing timer */
@@ -311,7 +311,7 @@ public final class SettingPanel extends JPanel implements ObservationListener, D
       // create the vis2 panel if null :      
       if (this.oiFitsViewPanel == null) {
         this.oiFitsViewPanel = new OIFitsViewPanel();
-        this.oiFitsViewPanel.setName("vis2Panel");
+        this.oiFitsViewPanel.setName("oiFitsView");
 
         // register the vis2 panel as an observation listener (listener 4) :
         ObservationManager.getInstance().register(this.oiFitsViewPanel);

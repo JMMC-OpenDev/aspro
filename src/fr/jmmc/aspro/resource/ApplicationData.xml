@@ -167,6 +167,7 @@
       <prerelease version="0.9.2 beta 5">
         <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/352">Fixed Observing block (OB) format to be compatible with ESO P2PP v3.3.1 (P2PP v2.x is no more supported)</change>
         <change type="FEATURE">Added VLTI configuration for ESO Period 91 (idem ESO Period 90)</change>
+        <change type="FEATURE">Enhanced OIFits viewer to plot multiple OIFits files i.e. simulated data in multi configuration mode</change>
         <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/255">Export all OIFits files in multi configuration
           (one file per configuration : no merged OIFits)
         </change>
