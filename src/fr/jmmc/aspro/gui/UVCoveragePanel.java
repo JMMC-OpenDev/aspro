@@ -134,7 +134,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
   /** flag to log version checking */
   private final static boolean DEBUG_VERSIONS = false;
   /** scaling factor to Mega Lambda for U,V points */
-  private final static double MEGA_LAMBDA_SCALE = 1e-6;
+  private final static double MEGA_LAMBDA_SCALE = 1e-6d;
   /** observation manager */
   private final static ObservationManager om = ObservationManager.getInstance();
 
