@@ -66,6 +66,7 @@ import javax.swing.JTextField;
 import javax.swing.JWindow;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.event.ListSelectionEvent;
@@ -88,21 +89,26 @@ public final class JSkyCalc {
     //   Locale locale = Locale.getDefault();  ... fixes the problems with German locale,
     //   Locale.setDefault(Locale.ENGLISH);    ... but, breaks the webstart!!
 
-    try {
-      // Set cross-platform Java L&F (also called "Metal")
-      UIManager.setLookAndFeel(
-              UIManager.getCrossPlatformLookAndFeelClassName());
-    } catch (UnsupportedLookAndFeelException e) {
-      System.out.printf("UnsupportedLookAndFeelException ... \n");
-    } catch (ClassNotFoundException e) {
-      System.out.printf("Class not found while trying to set look-and-feel ...\n");
-    } catch (InstantiationException e) {
-      System.out.printf("Instantiation exception while trying to set look-and-feel ...\n");
-    } catch (IllegalAccessException e) {
-      System.out.printf("Illegal access exception while trying to set look-and-feel ...\n");
-    }
+    // Use EDT to create JSkyCalc window:
+    SwingUtilities.invokeLater(new Runnable() {
+      public void run() {
+        try {
+          // Set cross-platform Java L&F (also called "Metal")
+          UIManager.setLookAndFeel(
+                  UIManager.getCrossPlatformLookAndFeelClassName());
+        } catch (UnsupportedLookAndFeelException e) {
+          System.out.printf("UnsupportedLookAndFeelException ... \n");
+        } catch (ClassNotFoundException e) {
+          System.out.printf("Class not found while trying to set look-and-feel ...\n");
+        } catch (InstantiationException e) {
+          System.out.printf("Instantiation exception while trying to set look-and-feel ...\n");
+        } catch (IllegalAccessException e) {
+          System.out.printf("Illegal access exception while trying to set look-and-feel ...\n");
+        }
 
-    JSkyCalcWindow MainWin = new JSkyCalcWindow();
+        new JSkyCalcWindow();
+      }
+    });
   }
   // LBO: JSkyCalc API integration
   /** allow Quit action */
@@ -181,9 +187,8 @@ public final class JSkyCalc {
     jSkyCalcWin.timefield.setText("20:00");
     jSkyCalcWin.setToDate();
 
-    // show anyway:
+    // show anyway to force focus:
     jSkyCalcWin.frame.setVisible(true);
-    jSkyCalcWin.SkyDisp.setVisible(true);
   }
 
   private static String prepareAstroObjs(final String[] name, final String[] ra, final String[] dec) {
@@ -247,7 +252,7 @@ class JSkyCalcWindow extends JComponent {
   boolean helpwindowvisible = false;
   AirmassDisplay AirDisp;
   boolean airmasswindowvisible = false;
-  int sleepinterval = 2000;
+  long sleepinterval = 2000l;
   boolean autoupdaterunning = false;
   AutoUpdate au;
   boolean autosteprunning = false;
@@ -306,6 +311,8 @@ class JSkyCalcWindow extends JComponent {
   JRadioButton UTradiobutton;  // save references for swapper (later)
   JRadioButton Localradiobutton;
   ButtonGroup SiteButtons;
+  JButton autoupdatebutton;
+  JButton autostepbutton;
   Color outputcolor = new Color(230, 230, 230);  // light grey
   Color inputcolor = Color.WHITE;  // for input fields
   Color lightblue = new Color(150, 220, 255);
@@ -318,7 +325,43 @@ class JSkyCalcWindow extends JComponent {
 
   JSkyCalcWindow() {
 
-    frame = new JFrame("JSkyCalc");
+    frame = new JFrame("JSkyCalc") {
+      /**
+       * Hide all opened window if the JSkyCalcWindow is hidden
+       * @param visible true to show the JSkyCalcWindow frame; false to hide it
+       */
+      @Override
+      public void setVisible(final boolean visible) {
+        if (!visible) {
+          // hide all:
+          PlWin.setVisible(false);
+          siteframe.setVisible(false);
+          HrWin.setVisible(false);
+          NgWin.setVisible(false);
+          SeasonWin.setVisible(false);
+          SkyDisp.setVisible(false);
+          AltWin.setVisible(false);
+          HelpWin.setVisible(false);
+          AirDisp.setVisible(false);
+          ObjSelWin.setVisible(false);
+          AirmSelWin.setVisible(false);
+
+          // Stop automatic updates:
+          if (autoupdaterunning) {
+            autoupdatebutton.doClick();
+          }
+          if (autosteprunning) {
+            autostepbutton.doClick();
+          }
+
+        } else {
+          // show Sky display:
+          SkyDisp.setVisible(true);
+        }
+
+        super.setVisible(visible);
+      }
+    };
 
     /* Put up site panel and grab the first site ... */
 
@@ -397,7 +440,7 @@ class JSkyCalcWindow extends JComponent {
     JLabel timesteplabel = new JLabel("timestep: ", SwingConstants.RIGHT);
 
     sleepfield = new JTextField(13);
-    sleepfield.setText("2");
+    sleepfield.setText("3");
     sleepfield.setToolTipText("Used in Auto Update and Auto Step");
     JLabel sleeplabel = new JLabel("sleep for (s): ", SwingConstants.RIGHT);
 
@@ -930,49 +973,55 @@ class JSkyCalcWindow extends JComponent {
     });
     controlbuttonpanel.add(backbutton);
 
-    final JButton updatebutton = new JButton("Auto Update");
-    updatebutton.addActionListener(new ActionListener() {
+    this.autoupdatebutton = new JButton("Auto Update");
+    autoupdatebutton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
+        if (autosteprunning) {
+          autostepbutton.doClick();
+        }
         if (!autoupdaterunning) {
           sleepfield.setBackground(runningcolor);  // draw attention
           thr = new Thread(au);
           autoupdaterunning = true;
           thr.start();
-          updatebutton.setText("Stop Update");
-          updatebutton.setBackground(Color.ORANGE);
+          autoupdatebutton.setText("Stop Update");
+          autoupdatebutton.setBackground(Color.ORANGE);
         } else {
           autoupdaterunning = false;
           thr.interrupt();
-          updatebutton.setText("Resume Update");
+          autoupdatebutton.setText("Resume Update");
           sleepfield.setBackground(Color.WHITE);
-          updatebutton.setBackground(Color.WHITE);  // not quite right
+          autoupdatebutton.setBackground(Color.WHITE);  // not quite right
         }
       }
     });
-    controlbuttonpanel.add(updatebutton);
+    controlbuttonpanel.add(autoupdatebutton);
 
-    final JButton stepbutton = new JButton("Auto Step");
-    stepbutton.addActionListener(new ActionListener() {
+    this.autostepbutton = new JButton("Auto Step");
+    autostepbutton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
+        if (autoupdaterunning) {
+          autoupdatebutton.doClick();
+        }
         if (!autosteprunning) {
           sleepfield.setBackground(runningcolor);  // draw attention
           timestepfield.setBackground(runningcolor);  // draw attention
           thr = new Thread(as);
           autosteprunning = true;
           thr.start();
-          stepbutton.setText("Stop Stepping");
-          stepbutton.setBackground(Color.ORANGE);
+          autostepbutton.setText("Stop Stepping");
+          autostepbutton.setBackground(Color.ORANGE);
         } else {
           autosteprunning = false;
           thr.interrupt();
-          stepbutton.setText("Resume Stepping");
+          autostepbutton.setText("Resume Stepping");
           sleepfield.setBackground(Color.WHITE);
           timestepfield.setBackground(Color.WHITE);
-          stepbutton.setBackground(Color.WHITE);  // not quite right
+          autostepbutton.setBackground(Color.WHITE);  // not quite right
         }
       }
     });
-    controlbuttonpanel.add(stepbutton);
+    controlbuttonpanel.add(autostepbutton);
 
 //  -- I can't figure out how to alter the UT/local radiobuttons from within
 //     the program.
@@ -1533,6 +1582,8 @@ class JSkyCalcWindow extends JComponent {
     o.w.setToNow();
     o.w.computeSunMoon();
     synchOutput();
+
+
   }
 
   class AutoUpdate implements Runnable {
@@ -1544,15 +1595,17 @@ class JSkyCalcWindow extends JComponent {
     }
 
     public void run() {
-      while (autoupdaterunning) {
-        SetToNow();
-        sleepinterval = 1000 * Integer.parseInt(sleepfield.getText());
-        try {
+      try {
+        while (autoupdaterunning) {
+          SetToNow();
+          sleepinterval = 1000l * Integer.parseInt(sleepfield.getText());
+
           Thread.sleep(sleepinterval);
-        } catch (InterruptedException e) {
-          System.out.println("Auto-update interrupted.");
         }
+      } catch (InterruptedException e) {
+//          System.out.println("Auto-update interrupted.");
       }
+//      System.out.println("Thread: exit");
     }
   }
 
@@ -1565,18 +1618,19 @@ class JSkyCalcWindow extends JComponent {
     }
 
     public void run() {
-      while (autosteprunning) {
-        advanceTime();
-        sleepinterval = 1000 * Integer.parseInt(sleepfield.getText());
-        try {
+      try {
+        while (autosteprunning) {
+          advanceTime();
+          sleepinterval = 1000l * Integer.parseInt(sleepfield.getText());
+
           Thread.sleep(sleepinterval);
-        } catch (InterruptedException e) {
-          System.out.println("Auto-step interrupted.");
         }
+      } catch (InterruptedException e) {
+//        System.out.println("Auto-step interrupted.");
       }
+//      System.out.println("Thread: exit");
     }
   }
-
 //   void SwapUTLocal() {
 //      boolean is_ut;
 //
@@ -1612,6 +1666,7 @@ class JSkyCalcWindow extends JComponent {
 //      System.out.println("ut " + UTradiobutton.isSelected());
 //      setToDate();
 //   }
+
   void advanceTime() {
 
     synchSite();
@@ -1690,6 +1745,8 @@ class JSkyCalcWindow extends JComponent {
     o.w.changeWhen(jd);
     o.w.computeSunMoon();
     synchOutput();
+
+
   }
 
   class PlanetWindow extends JFrame {
@@ -2262,9 +2319,12 @@ class JSkyCalcWindow extends JComponent {
 
   class AstrObjSelector extends JFrame {
 
+    final boolean isSingle;
     JList selectorList;
 
     AstrObjSelector(boolean is_single) {
+      isSingle = is_single;
+
       JPanel outer = new JPanel();
       // LBO: use BoxLayout instead of FlowLayout:
       outer.setLayout(new BoxLayout(outer, BoxLayout.Y_AXIS));
@@ -2409,16 +2469,18 @@ class JSkyCalcWindow extends JComponent {
      */
     @Override
     public void setVisible(final boolean visible) {
-      if (visible) {
-        if (objselwinvisible) {
-          return;
+      if (isSingle) {
+        if (visible) {
+          if (objselwinvisible) {
+            return;
+          }
+        } else {
+          if (!objselwinvisible) {
+            return;
+          }
         }
-      } else {
-        if (!objselwinvisible) {
-          return;
-        }
+        objselwinvisible = visible;
       }
-      objselwinvisible = visible;
       super.setVisible(visible);
     }
 
@@ -2573,6 +2635,8 @@ class JSkyCalcWindow extends JComponent {
         RAfield.setText(objcel.alpha.roundedRAString(2, " "));
         decfield.setText(objcel.delta.roundedDecString(1, " "));
         equinoxfield.setText(String.format(Locale.ENGLISH, "%7.2f", objcel.equinox));
+
+
       }
     }
   }
@@ -2998,6 +3062,8 @@ class JSkyCalcWindow extends JComponent {
         planetproximfield.setBackground(Color.ORANGE);
       } else {
         planetproximfield.setBackground(Color.RED);
+
+
       }
     }
   }
