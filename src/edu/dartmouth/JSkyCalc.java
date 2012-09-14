@@ -869,9 +869,7 @@ class JSkyCalcWindow extends JComponent {
 
     // Use SkyDisp and not SkyWin:
     SkyDisp.setLocation(50, 300);
-    // LBO: use Swing pattern to size the window:
-    SkyDisp.pack();
-    SkyDisp.setVisible(true);
+    SkyDisp.setVisible(skydisplayvisible);
 
     /* A panel for alternate coords (e.g. current RA and DEC, galactic etc.) */
 
@@ -895,10 +893,10 @@ class JSkyCalcWindow extends JComponent {
 
     // control buttons go in a separate panel at the bottom ...
 
-    JPanel controlbuttonpan = new JPanel();
-    controlbuttonpan.setLayout(new FlowLayout());  // it's the default anyway
+    JPanel controlbuttonpanel = new JPanel();
+    controlbuttonpanel.setLayout(new FlowLayout());  // it's the default anyway
     Dimension controlbuttonpansize = new Dimension(540, 170);  // ugh
-    controlbuttonpan.setPreferredSize(controlbuttonpansize);
+    controlbuttonpanel.setPreferredSize(controlbuttonpansize);
 
     JButton synchbutton = new JButton("Refresh output");
     synchbutton.addActionListener(new ActionListener() {
@@ -906,7 +904,7 @@ class JSkyCalcWindow extends JComponent {
         setToDate();
       }
     });
-    controlbuttonpan.add(synchbutton);
+    controlbuttonpanel.add(synchbutton);
 
     JButton nowbutton = new JButton("Set to Now");
     nowbutton.addActionListener(new ActionListener() {
@@ -914,7 +912,7 @@ class JSkyCalcWindow extends JComponent {
         SetToNow();
       }
     });
-    controlbuttonpan.add(nowbutton);
+    controlbuttonpanel.add(nowbutton);
 
     JButton forwardbutton = new JButton("Step Forward");
     forwardbutton.addActionListener(new ActionListener() {
@@ -922,7 +920,7 @@ class JSkyCalcWindow extends JComponent {
         advanceTime();
       }
     });
-    controlbuttonpan.add(forwardbutton);
+    controlbuttonpanel.add(forwardbutton);
 
     JButton backbutton = new JButton("Step Back");
     backbutton.addActionListener(new ActionListener() {
@@ -930,7 +928,7 @@ class JSkyCalcWindow extends JComponent {
         advanceTime(false);
       }
     });
-    controlbuttonpan.add(backbutton);
+    controlbuttonpanel.add(backbutton);
 
     final JButton updatebutton = new JButton("Auto Update");
     updatebutton.addActionListener(new ActionListener() {
@@ -951,7 +949,7 @@ class JSkyCalcWindow extends JComponent {
         }
       }
     });
-    controlbuttonpan.add(updatebutton);
+    controlbuttonpanel.add(updatebutton);
 
     final JButton stepbutton = new JButton("Auto Step");
     stepbutton.addActionListener(new ActionListener() {
@@ -974,7 +972,7 @@ class JSkyCalcWindow extends JComponent {
         }
       }
     });
-    controlbuttonpan.add(stepbutton);
+    controlbuttonpanel.add(stepbutton);
 
 //  -- I can't figure out how to alter the UT/local radiobuttons from within
 //     the program.
@@ -993,7 +991,7 @@ class JSkyCalcWindow extends JComponent {
           siteframe.setVisible(!siteframevisible);
         }
       });
-      controlbuttonpan.add(sitebutton);
+      controlbuttonpanel.add(sitebutton);
     }
 
     JButton planetbutton = new JButton("Planet Table");
@@ -1002,7 +1000,7 @@ class JSkyCalcWindow extends JComponent {
         PlWin.setVisible(!planetframevisible);
       }
     });
-    controlbuttonpan.add(planetbutton);
+    controlbuttonpanel.add(planetbutton);
 
     JButton hourlybutton = new JButton("Hourly Circumstances");
     hourlybutton.addActionListener(new ActionListener() {
@@ -1010,7 +1008,7 @@ class JSkyCalcWindow extends JComponent {
         HrWin.setVisible(!hourlyframevisible);
       }
     });
-    controlbuttonpan.add(hourlybutton);
+    controlbuttonpanel.add(hourlybutton);
 
     JButton nightlybutton = new JButton("Nightly Almanac");
     nightlybutton.addActionListener(new ActionListener() {
@@ -1018,7 +1016,7 @@ class JSkyCalcWindow extends JComponent {
         NgWin.setVisible(!nightlyframevisible);
       }
     });
-    controlbuttonpan.add(nightlybutton);
+    controlbuttonpanel.add(nightlybutton);
 
     JButton seasonalshow = new JButton("Seasonal Observability");
     seasonalshow.addActionListener(new ActionListener() {
@@ -1026,7 +1024,7 @@ class JSkyCalcWindow extends JComponent {
         SeasonWin.setVisible(!seasonframevisible);
       }
     });
-    controlbuttonpan.add(seasonalshow);
+    controlbuttonpanel.add(seasonalshow);
 
     JButton objselshow = new JButton("Object Lists ...");
     objselshow.addActionListener(new ActionListener() {
@@ -1034,7 +1032,7 @@ class JSkyCalcWindow extends JComponent {
         ObjSelWin.setVisible(!objselwinvisible);
       }
     });
-    controlbuttonpan.add(objselshow);
+    controlbuttonpanel.add(objselshow);
 
     JButton skydisplayshow = new JButton("Sky Display");
     skydisplayshow.addActionListener(new ActionListener() {
@@ -1042,7 +1040,7 @@ class JSkyCalcWindow extends JComponent {
         SkyDisp.setVisible(!skydisplayvisible);
       }
     });
-    controlbuttonpan.add(skydisplayshow);
+    controlbuttonpanel.add(skydisplayshow);
 
     JButton altwinshow = new JButton("Alt. Coordinates");
     altwinshow.addActionListener(new ActionListener() {
@@ -1050,7 +1048,7 @@ class JSkyCalcWindow extends JComponent {
         AltWin.setVisible(!altcoowinvisible);
       }
     });
-    controlbuttonpan.add(altwinshow);
+    controlbuttonpanel.add(altwinshow);
 
     JButton airmassshow = new JButton("Airmass Graphs");
     airmassshow.addActionListener(new ActionListener() {
@@ -1064,7 +1062,7 @@ class JSkyCalcWindow extends JComponent {
       }
     });
 
-    controlbuttonpan.add(airmassshow);
+    controlbuttonpanel.add(airmassshow);
 
     if (JSkyCalc.ALLOW_QUIT) {
       JButton stopper = new JButton("Quit");
@@ -1087,7 +1085,7 @@ class JSkyCalcWindow extends JComponent {
         }
       });
       stopper.setBackground(sitecolor);
-      controlbuttonpan.add(stopper);
+      controlbuttonpanel.add(stopper);
     }
 
     JButton helpwinshow = new JButton("Help");
@@ -1098,7 +1096,7 @@ class JSkyCalcWindow extends JComponent {
       }
     });
 
-    controlbuttonpan.add(helpwinshow);
+    controlbuttonpanel.add(helpwinshow);
 //
 //      JButton airmassshow = new JButton("Airmass Graphs");
 //      airmassshow.addActionListener(new ActionListener() {
@@ -1118,7 +1116,7 @@ class JSkyCalcWindow extends JComponent {
 //
 //      controlbuttonpan.add(airmassshow);
 
-    controlbuttonpan.setBackground(panelcolor);
+    controlbuttonpanel.setBackground(panelcolor);
 
     /* action listeners for the text fields ... */
 
@@ -1238,7 +1236,7 @@ class JSkyCalcWindow extends JComponent {
     outer.setLayout(new BoxLayout(outer, BoxLayout.Y_AXIS));
     outer.add(bannerpanel);
     outer.add(textpanel);
-    outer.add(controlbuttonpan);
+    outer.add(controlbuttonpanel);
     outer.setBackground(panelcolor);
 
     // default is hide on close:
@@ -1247,7 +1245,7 @@ class JSkyCalcWindow extends JComponent {
     }
 
     // LBO: do not use window.setSize()
-    setPreferredSize(new Dimension(560, 620));
+    setMinimumSize(new Dimension(560, 620));
 //      frame.setSize(560,620);    
     frame.setLocation(30, 30);
     frame.setContentPane(outer);
@@ -1761,7 +1759,7 @@ class JSkyCalcWindow extends JComponent {
       container.add(buttonPanel);
 
       // LBO: do not use window.setSize()
-      setPreferredSize(new Dimension(490, 220));
+      setMinimumSize(new Dimension(490, 220));
 //      this.setSize(490, 220);
 //          this.setSize(520,260);
       this.setLocation(400, 200);
@@ -1900,7 +1898,7 @@ class JSkyCalcWindow extends JComponent {
       container.add(buttonPanel);
 
       // LBO: do not use window.setSize()
-      setPreferredSize(new Dimension(710, 370));
+      setMinimumSize(new Dimension(710, 370));
 //      this.setSize(710, 370);
 //          this.setSize(730,420);
       this.setLocation(400, 200);
@@ -2027,7 +2025,7 @@ class JSkyCalcWindow extends JComponent {
       container.add(buttonPanel);
 
       // LBO: do not use window.setSize()
-      setPreferredSize(new Dimension(495, 440));
+      setMinimumSize(new Dimension(495, 440));
 //      this.setSize(495, 440);
 //        this.setSize(510,480);
       this.setLocation(400, 150);
@@ -2207,7 +2205,7 @@ class JSkyCalcWindow extends JComponent {
       container.add(hider);
 
       // LBO: do not use window.setSize()
-      setPreferredSize(new Dimension(250, 240));
+      setMinimumSize(new Dimension(250, 240));
 //      this.setSize(250, 240);
 //         this.setSize(280,270);
       this.setLocation(400, 100);
@@ -2364,11 +2362,11 @@ class JSkyCalcWindow extends JComponent {
 
       if (is_single) {
         // LBO: do not use window.setSize()
-        setPreferredSize(new Dimension(210, 340));
+        setMinimumSize(new Dimension(210, 340));
 //        this.setSize(210, 340);
       } else {
         // LBO: do not use window.setSize()
-        setPreferredSize(new Dimension(210, 390));
+        setMinimumSize(new Dimension(210, 390));
 //        this.setSize(210, 390);
       }
       if (is_single) {
@@ -2671,10 +2669,9 @@ class JSkyCalcWindow extends JComponent {
       sitecontainer.add(sitepan);
 
       // LBO: do not use window.setSize()
-      setPreferredSize(new Dimension(180, 580));
+      setMinimumSize(new Dimension(180, 580));
 //      this.setSize(180, 580);
 //         this.setSize(210,640);
-      // this.pack();
       this.setLocation(585, 20);
       this.setContentPane(sitepan);
 
@@ -2919,7 +2916,7 @@ class JSkyCalcWindow extends JComponent {
       ecliptlatitfield.setBackground(outputcolor);
 
       // LBO: do not use window.setSize()
-      setPreferredSize(new Dimension(330, 200));
+      setMinimumSize(new Dimension(330, 200));
 //      this.setSize(330, 200);
 //        this.setSize(350,250);
       this.setLocation(400, 150);
@@ -3048,7 +3045,7 @@ class JSkyCalcWindow extends JComponent {
       add(container);
 
       // LBO: do not use window.setSize()
-      setPreferredSize(new Dimension(700, 740));
+      setMinimumSize(new Dimension(700, 740));
 //      setSize(700, 740);
 //         setSize(720,780);
       setLocation(400, 10);
@@ -3145,6 +3142,8 @@ class JSkyCalcWindow extends JComponent {
           onResize(new Dimension(d.width, d.height));
         }
       });
+      // LBO: use Swing pattern to size the window:
+      pack();
     }
 
     /**
@@ -3185,6 +3184,7 @@ class JSkyCalcWindow extends JComponent {
 
       // reset currentlat to redraw HA grid:
       currentlat = 0d;
+      repaint();
     }
 
     public void mousePressed(MouseEvent e) {
@@ -4201,6 +4201,7 @@ class JSkyCalcWindow extends JComponent {
 
       xwidth = (double) dim.width;
       yheight = (double) dim.height;
+      repaint();
     }
 
     void Update() {
