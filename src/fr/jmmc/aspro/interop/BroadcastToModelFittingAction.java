@@ -9,7 +9,6 @@ import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.jmal.model.targetmodel.Model;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.gui.task.TaskSwingWorkerExecutor;
-import fr.jmmc.jmcs.jaxb.JAXBFactory;
 import fr.jmmc.jmcs.network.interop.SampCapability;
 import fr.jmmc.jmcs.network.interop.SampCapabilityAction;
 import fr.jmmc.jmcs.util.FileUtils;
@@ -45,15 +44,12 @@ public final class BroadcastToModelFittingAction extends SampCapabilityAction {
   /* members */
   /** package name for JAXB generated code */
   private final static String OI_JAXB_PATH = "fr.jmmc.aspro.model.oi";
-  /** internal JAXB Factory */
-  private JAXBFactory jf;
 
   /**
    * Public constructor that automatically register the action in RegisteredAction.
    */
   public BroadcastToModelFittingAction() {
     super(className, actionName, SampCapability.LITPRO_START_SETTING);
-    this.jf = JAXBFactory.getInstance(OI_JAXB_PATH);
   }
 
   /**
@@ -122,7 +118,7 @@ public final class BroadcastToModelFittingAction extends SampCapabilityAction {
     final String xmlModel = sw.toString();
 
     // Store parameters for reply message
-    final Map<String, String> params = new HashMap<String, String>();
+    final Map<String, String> params = new HashMap<String, String>(4);
     params.put("model", xmlModel);
     params.put("filename", file.getAbsolutePath());
 
