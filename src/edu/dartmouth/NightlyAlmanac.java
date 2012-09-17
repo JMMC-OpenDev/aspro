@@ -2,10 +2,10 @@ package edu.dartmouth;
 
 /* JSkyCalc.java -- copyright 2007, John Thorstensen, Dartmouth College. */
 /** TERMS OF USE -- Anyone is free to use this software for any purpose, and to
-modify it for their own purposes, provided that credit is given to the author
-in a prominent place.  For the present program that means that the green
-title and author banner appearing on the main window must not be removed,
-and may not be altered without premission of the author. */
+ modify it for their own purposes, provided that credit is given to the author
+ in a prominent place.  For the present program that means that the green
+ title and author banner appearing on the main window must not be removed,
+ and may not be altered without premission of the author. */
 public final class NightlyAlmanac {
 
   /** For finding timing of various phenomena, esp sun and moon rise and set. */
@@ -24,7 +24,7 @@ public final class NightlyAlmanac {
 
   static double jd_sun_alt(final double alt, final WhenWhere wIn) {
     /**  finds the jd at which the sun is at altitude alt, given initial guess handed
-    in with a whenwhere.  */
+     in with a whenwhere.  */
     double jdguess, lastjd;
     double deriv, err;
     final double del = 0.002d;
@@ -34,7 +34,7 @@ public final class NightlyAlmanac {
     final WhenWhere w = wIn.clone();
 
     /* Set up calculation, then walk in with Newton-Raphson scheme (guess and
-    check using numerical derivatives). */
+     check using numerical derivatives). */
 
     jdguess = w.when.jd;
 //      System.out.printf("Before makelocalsun, w.when.jd %f%n",w.when.jd);
@@ -61,11 +61,11 @@ public final class NightlyAlmanac {
       err = alt3 - alt;
       i++;
       deriv = (alt3 - alt2) / (jdguess - lastjd);
-/*
-      if (i == 9) {
-        System.out.printf("jd_sun_alt not converging.%n");
-      }
-*/
+      /*
+       if (i == 9) {
+       System.out.printf("jd_sun_alt not converging.%n");
+       }
+       */
     }
     if (i >= 9) {
       jdguess = -1000d;
@@ -76,7 +76,7 @@ public final class NightlyAlmanac {
 
   static double jd_moon_alt(final double alt, final WhenWhere wIn) {
     /**  finds the jd at which the moon is at altitude alt, given initial guess handed
-    in with a whenwhere.  */
+     in with a whenwhere.  */
     double jdguess, lastjd;
     double deriv, err;
     final double del = 0.002d;
@@ -84,7 +84,7 @@ public final class NightlyAlmanac {
     int i = 0;
 
     /* Set up calculation, then walk in with Newton-Raphson scheme (guess and
-    check using numerical derivatives). */
+     check using numerical derivatives). */
 
     final WhenWhere w = wIn.clone();
 
@@ -115,10 +115,10 @@ public final class NightlyAlmanac {
       deriv = (alt3 - alt2) / (jdguess - lastjd);
       // System.out.printf(" err %f deriv %f%n",err,deriv);
 /*
-      if (i == 9) {
-        System.out.printf("jd_moon_alt not converging.%n");
-      }
-*/
+       if (i == 9) {
+       System.out.printf("jd_moon_alt not converging.%n");
+       }
+       */
     }
     if (i >= 9) {
       jdguess = -1000d;
@@ -127,18 +127,19 @@ public final class NightlyAlmanac {
     return jdguess;
   }
 
-  /** Computes rise, set, and twilight for the night nearest in time to wIn.when */
+  /** 
+   * Computes rise, set, and twilight for the night nearest in time to wIn.when 
+   * @param wIn WhenWhere input
+   */
   NightlyAlmanac(final WhenWhere wIn) {
-    // sure to call makeLocalSun() / makeLocalMoon()
-    final WhenWhere w = new WhenWhere(wIn.when.clone(), wIn.where);
 
-    // instantiate these ...
-    midnight = w.clone();
+    /** Computes rise, set, and twilight for the night nearest in time to wIn.when */
+    final WhenWhere w = new WhenWhere(wIn.when.clone(), wIn.where);
 
     // AAACK!  Have to clone EVERY WHEN, or they are all the SAME WHEN forever.
 
-    // use clone to have quickly new instances where when/where are different and local sun / moon done
-
+    // LBO: use clone() to clone when information but not where (site):
+    midnight = w.clone();
     sunrise = w.clone();
     sunset = w.clone();
     moonrise = w.clone();
@@ -154,7 +155,27 @@ public final class NightlyAlmanac {
     Update(w);
   }
 
-  void Update(final WhenWhere w) {
+  void Update(final WhenWhere wIn) {
+
+    final WhenWhere w = wIn.clone();
+
+    // be sure the site information is up to date
+
+    // LBO: use single site copy:
+    w.where = wIn.where.clone();
+    midnight.where = w.where;
+    sunrise.where = w.where;
+    sunset.where = w.where;
+    moonrise.where = w.where;
+    moonset.where = w.where;
+    eveningTwilight18.where = w.where;
+    morningTwilight18.where = w.where;
+    eveningTwilight12.where = w.where;
+    morningTwilight12.where = w.where;
+    eveningTwilight06.where = w.where;
+    morningTwilight06.where = w.where;
+    nightcenter.where = w.where;
+
     /** Computes rise, set, and twilight for the night nearest in time to wIn.when */
     double dtrise, dtset;
     double jdtemp, jdnoon;
@@ -433,10 +454,10 @@ public final class NightlyAlmanac {
         dtset += 24d;
       }
       /*
-      System.out.printf("ra moon midn    %s%n",midnight.moon.topopos.alpha.RoundedRAString(0,":"));
-      System.out.printf("lst at midnight %f%n",midnight.sidereal);
-      System.out.printf("rise-set HA %f%n",hamoonrise);
-      System.out.printf("dtrise %f dtset %f%n",dtrise,dtset);
+       System.out.printf("ra moon midn    %s%n",midnight.moon.topopos.alpha.RoundedRAString(0,":"));
+       System.out.printf("lst at midnight %f%n",midnight.sidereal);
+       System.out.printf("rise-set HA %f%n",hamoonrise);
+       System.out.printf("dtrise %f dtset %f%n",dtrise,dtset);
        */
 
       moonrise.changeWhen(jdmid + dtrise / 24d);
