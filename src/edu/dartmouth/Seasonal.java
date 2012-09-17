@@ -33,7 +33,7 @@ public final class Seasonal {
     String[] hoursup = {" ", " ", " "};
 
     // check to see if anything has changed significantly, otherwise skip it.
-    if (Math.abs(lastcomputedobs.w.when.jd - obs.w.when.jd) > 5.
+    if (Math.abs(lastcomputedobs.w.when.jd - obs.w.when.jd) > 5d
             || !obs.c.equals(lastcomputedobs.c) || !obs.w.where.equals(lastcomputedobs.w.where)) {
 
       Observation oseason = obs.clone();

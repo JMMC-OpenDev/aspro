@@ -12,7 +12,7 @@ public final class Observation implements Cloneable {
   Celest c;
   Celest current;
   HA ha;
-  final double[] altazpar = new double[3];
+  final double[] altazpar = new double[3]; // LBO: tmp array
   double altitude, azimuth, parallactic;
   double airmass;
   double barytcor, baryvcor;   // time and velocity corrections to barycenter
@@ -57,7 +57,7 @@ public final class Observation implements Cloneable {
                       final double cosDec, final double sinDec) {
     // assumes WhenWhere w has been updated.
     // do not precess current coordinates as JD does not change much during night:
-//  current = c.precessed(w.when.julianEpoch());
+    //  current = c.precessed(w.when.julianEpoch());
 
     ha.setHA(w.sidereal - current.alpha.value);
 
@@ -88,12 +88,12 @@ public final class Observation implements Cloneable {
   }
 
   /**
-   * LAURENT : custom computeMoonSeparation implementation (optimized)
+   * LBO: custom computeMoonSeparation implementation (optimized)
    */
   void computeMoonSeparation() {
     // assumes WhenWhere w has been updated.
     // do not precess current coordinates as JD does not change much during night:
-//  current = c.precessed(w.when.julianEpoch());
+    //  current = c.precessed(w.when.julianEpoch());
 
     //System.out.printf("computeSunMoon %s (%f)%n",
     //       current.alpha.RoundedRAString(2," "),current.equinox);

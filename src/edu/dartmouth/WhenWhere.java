@@ -16,12 +16,12 @@ public final class WhenWhere implements Cloneable {
   RA siderealobj;   // for output
   double[] barycenter = {0d, 0d, 0d, 0d, 0d, 0d};
   // Barycentric coords in epoch of date; 0-2 are XYZ, 3-5 are velocity.
-  final double[] altazparSun = new double[3];
+  final double[] altazparSun = new double[3]; // LBO: tmp array
   Sun sun;
   HA hasun;
   double altsun, azsun;
   double twilight;
-  final double[] altazparMoon = new double[3];
+  final double[] altazparMoon = new double[3]; // LBO: tmp array
   Moon moon;    // mostly for use in rise-set calculations.
   HA hamoon;
   double altmoon, azmoon;
@@ -125,6 +125,7 @@ public final class WhenWhere implements Cloneable {
     try {
       final WhenWhere copy = (WhenWhere) super.clone();   // this needs to be try/catch to make it work
       copy.when = when.clone();
+// LBO: avoid cloning site all the time:
 //      copy.where = where.clone();
       copy.siderealobj = siderealobj.clone();
       copy.sun = sun.clone();
