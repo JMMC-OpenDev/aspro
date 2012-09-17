@@ -16,7 +16,7 @@
   </company>
 
   <program name="Aspro2" version="0.9.2 beta 6"/>
-  <compilation date="14/09/2012" compiler="JDK 1.5.0_16"/>
+  <compilation date="17/09/2012" compiler="JDK 1.5.0_16"/>
   <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
   <authors>the JMMC Technical Group</authors>
   <jnlp>http://apps.jmmc.fr/~swmgr/Aspro2/Aspro2.jnlp</jnlp>
@@ -166,6 +166,7 @@
     <release version="0.9.2">
       <prerelease version="0.9.2 beta 6">
         <change>Fixed JSkyCalc window layouts on mac os X and automatically close all opened windows when closing the main JSkyCalc window</change>
+        <change>Enhanced JSkyCalc window resizing on Sky Display and plot airmass</change>
       </prerelease>
       <prerelease version="0.9.2 beta 5">
         <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/352">Fixed Observing block (OB) format to be compatible with ESO P2PP v3.3.1 (P2PP v2.x is no more supported)</change>
