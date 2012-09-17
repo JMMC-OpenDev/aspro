@@ -143,7 +143,7 @@ public final class Celest implements Cloneable {
     }
     // System.out.printf("%f %f%n",raout,decout);
     return new double[]{raout, decout, mod};
-    // it will sometimees be useful to have the dist.
+    // it will sometimes be useful to have the dist.
   }
 
   /** Given instance variables, returns UNIT VECTOR {x,y,z}. */

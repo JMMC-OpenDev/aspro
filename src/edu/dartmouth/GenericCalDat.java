@@ -78,8 +78,6 @@ public final class GenericCalDat implements Cloneable {
     while (!rounded_ok) {
       tmp = jdin + 0.5d;
       Z = (long) tmp;
-//      x = Z / 7d + 0.01d;
-//      dow = (int) (7d * Math.floor(x));
 
       F = tmp - Z;
       if (Z < 2299161d) {
