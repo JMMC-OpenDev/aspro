@@ -1831,11 +1831,7 @@ public final class ObservabilityService {
       }
 
     } else {
-      // Simpler interferometer : no channel definition nor switchyard :
-
-      logger.warn("Not validated code path : Case with no channel definition nor switchyard !");
-
-      // Warning : Not tested because both CHARA and VLTI use a switchyard !
+      // Simpler interferometer : no channel definition nor switchyard = SUSI
 
       // Simple association between DL / Station = DL_n linked to Station_n
       // Use only the fixed offset of the station :
