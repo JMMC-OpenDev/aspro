@@ -16,6 +16,7 @@ import fr.jmmc.oiexplorer.core.model.event.EventNotifier;
 import fr.jmmc.oiexplorer.core.model.oi.Plot;
 import fr.jmmc.oiexplorer.core.model.oi.SubsetDefinition;
 import fr.jmmc.oiexplorer.core.model.oi.TargetUID;
+import fr.jmmc.oiexplorer.core.model.plot.ColorMapping;
 import fr.jmmc.oiexplorer.core.model.plot.PlotDefinition;
 import fr.jmmc.oitools.model.OIFitsFile;
 import java.util.List;
@@ -198,7 +199,10 @@ public final class OIFitsViewPanel extends javax.swing.JPanel implements Observa
       final PlotDefinition plotDefinition = ocm.getCurrentPlotDefinition();
 
       plotDefinition.copy(PlotDefinitionFactory.getInstance().getDefault(PlotDefinitionFactory.PLOT_DEFAULT));
+      // show flagged data:
       plotDefinition.setSkipFlaggedData(false);
+      // use configuration color mapping if useful then wavelength mapping:
+      plotDefinition.setColorMapping(ColorMapping.CONFIGURATION);
 
       ocm.updatePlotDefinition(this, plotDefinition);
 
@@ -214,7 +218,7 @@ public final class OIFitsViewPanel extends javax.swing.JPanel implements Observa
         public void run() {
           final boolean hasData = plotChartPanel.isHasData();
           if (!hasData) {
-            jLabelMessage.setText("No OIFits data available: the target has no model.");
+            jLabelMessage.setText("No OIFits data available: the target has no model or the OIFits computation is in progress.");
           }
 
           showMessage(!hasData);
