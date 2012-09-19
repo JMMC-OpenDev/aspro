@@ -11,7 +11,7 @@ import fr.jmmc.oiexplorer.core.gui.chart.PDFOptions;
 import fr.jmmc.oiexplorer.core.gui.chart.SquareChartPanel;
 import fr.jmmc.oiexplorer.core.gui.chart.SquareXYPlot;
 import fr.jmmc.aspro.gui.chart.XYZNameDataSet;
-import fr.jmmc.aspro.gui.util.ColorPalette;
+import fr.jmmc.oiexplorer.core.gui.chart.ColorPalette;
 import fr.jmmc.aspro.model.InterferometerMapData;
 import fr.jmmc.aspro.model.ObservationCollectionMapData;
 import fr.jmmc.aspro.model.event.ObservationListener;

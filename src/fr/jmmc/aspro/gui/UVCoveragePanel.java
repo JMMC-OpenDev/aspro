@@ -20,7 +20,7 @@ import fr.jmmc.oiexplorer.core.gui.chart.ZoomEvent;
 import fr.jmmc.oiexplorer.core.gui.chart.ZoomEventListener;
 import fr.jmmc.aspro.gui.task.AsproTaskRegistry;
 import fr.jmmc.aspro.gui.task.ObservationCollectionTaskSwingWorker;
-import fr.jmmc.aspro.gui.util.ColorPalette;
+import fr.jmmc.oiexplorer.core.gui.chart.ColorPalette;
 import fr.jmmc.aspro.gui.util.FieldSliderAdapter;
 import fr.jmmc.aspro.model.BaseLine;
 import fr.jmmc.aspro.model.ConfigurationManager;

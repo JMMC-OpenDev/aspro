@@ -20,7 +20,7 @@ import fr.jmmc.aspro.gui.chart.XYDiamondAnnotation;
 import fr.jmmc.aspro.gui.chart.XYTickAnnotation;
 import fr.jmmc.aspro.gui.task.AsproTaskRegistry;
 import fr.jmmc.aspro.gui.task.ObservationCollectionTaskSwingWorker;
-import fr.jmmc.aspro.gui.util.ColorPalette;
+import fr.jmmc.oiexplorer.core.gui.chart.ColorPalette;
 import fr.jmmc.aspro.model.ObservationCollectionObsData;
 import fr.jmmc.aspro.model.observability.DateTimeInterval;
 import fr.jmmc.aspro.model.observability.ObservabilityData;
