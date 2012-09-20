@@ -172,11 +172,11 @@ public final class ConfigurationManager extends BaseOIManager {
       for (FocalInstrumentMode insMode : instrument.getModes()) {
         if (insMode.getNumberChannels() != null) {
           if (insMode.getSpectralChannels() == insMode.getNumberChannels()) {
-            logger.warn("Instrument [{}] mode [{}] useless numberChannels: {}", 
-                      instrument.getName(), insMode.getName(), insMode.getNumberChannels());
+            logger.info("Instrument [{}] mode [{}] useless numberChannels: {}",
+                    instrument.getName(), insMode.getName(), insMode.getNumberChannels());
           } else {
-            logger.warn("Instrument [{}] mode [{}] channel configuration: {} / {}", 
-                      instrument.getName(), insMode.getName(), insMode.getNumberChannels(), insMode.getSpectralChannels());
+            logger.info("Instrument [{}] mode [{}] channel configuration: {} / {}",
+                    instrument.getName(), insMode.getName(), insMode.getNumberChannels(), insMode.getSpectralChannels());
           }
         }
       }
