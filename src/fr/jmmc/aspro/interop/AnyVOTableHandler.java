@@ -60,90 +60,97 @@ public final class AnyVOTableHandler {
 
     final ObservationManager om = ObservationManager.getInstance();
 
-    final ObservationSetting newObservation = om.load(new StringReader(document));
+    try {
 
-    if (newObservation != null) {
+      // throws IllegalArgumentException if the document can not be loaded (invalid or unmarshalling exception):
+      final ObservationSetting newObservation = om.load(new StringReader(document));
 
-      final List<Target> targets = newObservation.getTargets();
+      if (newObservation != null) {
 
-      if (logger.isDebugEnabled()) {
-        logger.debug("targets :");
-        for (Target cal : targets) {
-          logger.debug(cal.toString());
+        final List<Target> targets = newObservation.getTargets();
+
+        if (logger.isDebugEnabled()) {
+          logger.debug("targets :");
+          for (Target cal : targets) {
+            logger.debug(cal.toString());
+          }
         }
-      }
 
-      // Use invokeLater to avoid concurrency and ensure that 
-      // data model is modified and fire eventsarg using Swing EDT :
-      SwingUtils.invokeLaterEDT(new Runnable() {
-        @Override
-        public void run() {
+        // Use invokeLater to avoid concurrency and ensure that 
+        // data model is modified and fire eventsarg using Swing EDT :
+        SwingUtils.invokeLaterEDT(new Runnable() {
+          @Override
+          public void run() {
 
-          if (TargetEditorDialog.isTargetEditorActive()) {
-            MessagePane.showErrorMessage("Please close the target editor first !");
-            return;
-          }
-
-          // check the number of targets :
-          if (targets.isEmpty()) {
-            MessagePane.showErrorMessage("No valid target found in VOTable : missing name or RA/DEC coordinates (J2000) !");
-            return;
-          }
-
-          if (!VotableSampMessageHandler.confirmImport(targets.size())) {
-            return;
-          }
-
-          // TODO: use the observationContext.operation ?
-          if (newObservation.getInterferometerConfiguration() == null
-                  || newObservation.getInstrumentConfiguration() == null) {
-            // empty configuration: add targets ...
-
-            // use deep copy of the current observation to manipulate target and calibrator list properly :
-            final ObservationSetting obsCloned = om.getMainObservation().deepClone();
-
-            // Prepare the data model (editable targets and user infos) :
-            final List<Target> editTargets = obsCloned.getTargets();
-            final TargetUserInformations editTargetUserInfos = obsCloned.getOrCreateTargetUserInfos();
-
-            if (logger.isDebugEnabled()) {
-              logger.debug("initial targets :");
-              for (Target t : editTargets) {
-                logger.debug(t.toString());
-              }
+            if (TargetEditorDialog.isTargetEditorActive()) {
+              MessagePane.showErrorMessage("Please close the target editor first !");
+              return;
             }
 
-            final String report = mergeTargets(editTargets, targets);
-
-            if (logger.isDebugEnabled()) {
-              logger.debug("updated targets :");
-              for (Target t : editTargets) {
-                logger.debug(t.toString());
-              }
+            // check the number of targets :
+            if (targets.isEmpty()) {
+              MessagePane.showErrorMessage("No valid target found in VOTable : missing name or RA/DEC coordinates (J2000) !");
+              return;
             }
 
-            // update the complete list of targets and force to update references :
-            // needed to replace old target references by the new calibrator targets :
-            om.updateTargets(editTargets, editTargetUserInfos);
+            if (!VotableSampMessageHandler.confirmImport(targets.size())) {
+              return;
+            }
 
-            if (logger.isInfoEnabled()) {
-              logger.info(report);
+            // TODO: use the observationContext.operation ?
+            if (newObservation.getInterferometerConfiguration() == null
+                    || newObservation.getInstrumentConfiguration() == null) {
+              // empty configuration: add targets ...
+
+              // use deep copy of the current observation to manipulate target and calibrator list properly :
+              final ObservationSetting obsCloned = om.getMainObservation().deepClone();
+
+              // Prepare the data model (editable targets and user infos) :
+              final List<Target> editTargets = obsCloned.getTargets();
+              final TargetUserInformations editTargetUserInfos = obsCloned.getOrCreateTargetUserInfos();
+
+              if (logger.isDebugEnabled()) {
+                logger.debug("initial targets :");
+                for (Target t : editTargets) {
+                  logger.debug(t.toString());
+                }
+              }
+
+              final String report = mergeTargets(editTargets, targets);
+
+              if (logger.isDebugEnabled()) {
+                logger.debug("updated targets :");
+                for (Target t : editTargets) {
+                  logger.debug(t.toString());
+                }
+              }
+
+              // update the complete list of targets and force to update references :
+              // needed to replace old target references by the new calibrator targets :
+              om.updateTargets(editTargets, editTargetUserInfos);
+
+              if (logger.isInfoEnabled()) {
+                logger.info(report);
+              }
+
+              // bring this application to front :
+              App.showFrameToFront();
+
+              // display report message :
+              MessagePane.showMessage(report);
+
+            } else {
+              om.resetAndChangeObservation(newObservation);
             }
 
             // bring this application to front :
             App.showFrameToFront();
-
-            // display report message :
-            MessagePane.showMessage(report);
-
-          } else {
-            om.resetAndChangeObservation(newObservation);
           }
-
-          // bring this application to front :
-          App.showFrameToFront();
-        }
-      });
+        });
+      }
+    } catch (IllegalArgumentException iae) {
+      // Report both Observation and VOTable in a new IllegalArgumentException to get them in the feedback report:
+      throw new IllegalArgumentException("Invalid generated Aspro2 Observation:\n\n" + document + "\n\nSAMP VOTable argument:\n\n" + votable, iae);
     }
   }
 

@@ -75,137 +75,143 @@ public final class SearchCalVOTableHandler {
 
     final ObservationManager om = ObservationManager.getInstance();
 
-    final ObservationSetting searchCalObservation = om.load(new StringReader(document));
+    try {
+      final ObservationSetting searchCalObservation = om.load(new StringReader(document));
 
-    final List<Target> calibrators = searchCalObservation.getTargets();
+      final List<Target> calibrators = searchCalObservation.getTargets();
 
-    final Target scienceTarget;
+      final Target scienceTarget;
 
-    if (calibrators.isEmpty()) {
-      scienceTarget = null;
-    } else {
-      // first target is the science target (partial information only):
-      scienceTarget = calibrators.remove(0);
+      if (calibrators.isEmpty()) {
+        scienceTarget = null;
+      } else {
+        // first target is the science target (partial information only):
+        scienceTarget = calibrators.remove(0);
 
-      // fix target name:
-      scienceTarget.updateNameAndIdentifier(Target.formatName(scienceTarget.getName()));
+        // fix target name:
+        scienceTarget.updateNameAndIdentifier(Target.formatName(scienceTarget.getName()));
 
-      logger.debug("science target: {}", scienceTarget);
+        logger.debug("science target: {}", scienceTarget);
 
-      if (logger.isDebugEnabled()) {
-        logger.debug("calibrators :");
-        for (Target cal : calibrators) {
-          logger.debug(cal.toString());
+        if (logger.isDebugEnabled()) {
+          logger.debug("calibrators :");
+          for (Target cal : calibrators) {
+            logger.debug(cal.toString());
+          }
         }
-      }
 
-      // Mimic SearchCal science object detection distance preference ("query.SCIENCE_DETECTION_DISTANCE")
+        // Mimic SearchCal science object detection distance preference ("query.SCIENCE_DETECTION_DISTANCE")
 
-      // @note SCIENCE_DISTANCE_CHECK : filter science target if distance is less than science object detection distance preference (1 arcsec):
-      for (Iterator<Target> it = calibrators.iterator(); it.hasNext();) {
-        final Target cal = it.next();
+        // @note SCIENCE_DISTANCE_CHECK : filter science target if distance is less than science object detection distance preference (1 arcsec):
+        for (Iterator<Target> it = calibrators.iterator(); it.hasNext();) {
+          final Target cal = it.next();
 
-        final BaseValue dist = cal.getCalibratorInfos().getField(CalibratorInformations.FIELD_DISTANCE);
+          final BaseValue dist = cal.getCalibratorInfos().getField(CalibratorInformations.FIELD_DISTANCE);
 
-        if (dist != null) {
-          final double rowDistance = dist.getNumber().doubleValue();
+          if (dist != null) {
+            final double rowDistance = dist.getNumber().doubleValue();
 
-          // If the distance is close enough to be detected as a science object
-          if (rowDistance < SCIENCE_DETECTION_DISTANCE) {
-            if (logger.isInfoEnabled()) {
-              logger.info("calibrator distance is [{}] - skip this calibrator considered as science object : {} - IDS = {}",
-                      rowDistance, cal, cal.getIDS());
+            // If the distance is close enough to be detected as a science object
+            if (rowDistance < SCIENCE_DETECTION_DISTANCE) {
+              if (logger.isInfoEnabled()) {
+                logger.info("calibrator distance is [{}] - skip this calibrator considered as science object : {} - IDS = {}",
+                        rowDistance, cal, cal.getIDS());
+              }
+              it.remove();
+
+              // reuse science target data to update scienceTarget object:
+              Target.mergeTarget(scienceTarget, cal);
             }
-            it.remove();
-
-            // reuse science target data to update scienceTarget object:
-            Target.mergeTarget(scienceTarget, cal);
           }
+        }
+
+        // Add the SearchCalVersion parameter to calibrators :
+        final StringValue paramSearchCalVersion = new StringValue();
+        paramSearchCalVersion.setName(CalibratorInformations.PARAMETER_SCL_GUI_VERSION);
+        paramSearchCalVersion.setValue(searchCalVersion);
+
+        for (Target cal : calibrators) {
+          cal.getCalibratorInfos().getParameters().add(paramSearchCalVersion);
         }
       }
 
-      // Add the SearchCalVersion parameter to calibrators :
-      final StringValue paramSearchCalVersion = new StringValue();
-      paramSearchCalVersion.setName(CalibratorInformations.PARAMETER_SCL_GUI_VERSION);
-      paramSearchCalVersion.setValue(searchCalVersion);
+      // Use invokeLater to avoid concurrency and ensure that 
+      // data model is modified and fire events using Swing EDT :
+      SwingUtils.invokeLaterEDT(new Runnable() {
+        @Override
+        public void run() {
 
-      for (Target cal : calibrators) {
-        cal.getCalibratorInfos().getParameters().add(paramSearchCalVersion);
-      }
+          if (TargetEditorDialog.isTargetEditorActive()) {
+            MessagePane.showErrorMessage("Please close the target editor first !");
+            return;
+          }
+
+          // check the number of calibrators :
+          if (calibrators.isEmpty()) {
+            MessagePane.showErrorMessage("No calibrator found in SearchCal response !");
+            return;
+          }
+
+          if (!VotableSampMessageHandler.confirmImport(calibrators.size())) {
+            return;
+          }
+
+          // find correct diameter among UD_ for the Aspro instrument band ...
+          // or using alternate diameters (in order of priority) : UD, LD, UDDK, DIA12
+          om.defineCalibratorDiameter(calibrators);
+
+          // use deep copy of the current observation to manipulate target and calibrator list properly :
+          final ObservationSetting obsCloned = om.getMainObservation().deepClone();
+
+          // Prepare the data model (editable targets and user infos) :
+          final List<Target> editTargets = obsCloned.getTargets();
+          final TargetUserInformations editTargetUserInfos = obsCloned.getOrCreateTargetUserInfos();
+
+          if (logger.isDebugEnabled()) {
+            logger.debug("initial targets :");
+            for (Target t : editTargets) {
+              logger.debug(t.toString());
+            }
+          }
+
+          final String targetName = scienceTarget.getName();
+
+          // check that science target is present :
+          if (om.getTarget(targetName) == null) {
+            logger.info("Target '" + targetName + "' not found in targets; adding it (partial information).");
+
+            editTargets.add(scienceTarget);
+          }
+
+          final String report = mergeTargets(editTargets, editTargetUserInfos, targetName, calibrators);
+
+          if (logger.isDebugEnabled()) {
+            logger.debug("updated targets :");
+            for (Target t : editTargets) {
+              logger.debug(t.toString());
+            }
+          }
+
+          // update the complete list of targets and force to update references :
+          // needed to replace old target references by the new calibrator targets :
+          om.updateTargets(editTargets, editTargetUserInfos);
+
+          if (logger.isInfoEnabled()) {
+            logger.info(report);
+          }
+
+          // bring this application to front :
+          App.showFrameToFront();
+
+          // display report message :
+          MessagePane.showMessage(report);
+        }
+      });
+
+    } catch (IllegalArgumentException iae) {
+      // Report both Observation and VOTable in a new IllegalArgumentException to get them in the feedback report:
+      throw new IllegalArgumentException("Invalid generated Aspro2 Observation:\n\n" + document + "\n\nSAMP VOTable argument:\n\n" + votable, iae);
     }
-
-    // Use invokeLater to avoid concurrency and ensure that 
-    // data model is modified and fire events using Swing EDT :
-    SwingUtils.invokeLaterEDT(new Runnable() {
-      @Override
-      public void run() {
-
-        if (TargetEditorDialog.isTargetEditorActive()) {
-          MessagePane.showErrorMessage("Please close the target editor first !");
-          return;
-        }
-
-        // check the number of calibrators :
-        if (calibrators.isEmpty()) {
-          MessagePane.showErrorMessage("No calibrator found in SearchCal response !");
-          return;
-        }
-
-        if (!VotableSampMessageHandler.confirmImport(calibrators.size())) {
-          return;
-        }
-
-        // find correct diameter among UD_ for the Aspro instrument band ...
-        // or using alternate diameters (in order of priority) : UD, LD, UDDK, DIA12
-        om.defineCalibratorDiameter(calibrators);
-
-        // use deep copy of the current observation to manipulate target and calibrator list properly :
-        final ObservationSetting obsCloned = om.getMainObservation().deepClone();
-
-        // Prepare the data model (editable targets and user infos) :
-        final List<Target> editTargets = obsCloned.getTargets();
-        final TargetUserInformations editTargetUserInfos = obsCloned.getOrCreateTargetUserInfos();
-
-        if (logger.isDebugEnabled()) {
-          logger.debug("initial targets :");
-          for (Target t : editTargets) {
-            logger.debug(t.toString());
-          }
-        }
-
-        final String targetName = scienceTarget.getName();
-
-        // check that science target is present :
-        if (om.getTarget(targetName) == null) {
-          logger.info("Target '" + targetName + "' not found in targets; adding it (partial information).");
-
-          editTargets.add(scienceTarget);
-        }
-
-        final String report = mergeTargets(editTargets, editTargetUserInfos, targetName, calibrators);
-
-        if (logger.isDebugEnabled()) {
-          logger.debug("updated targets :");
-          for (Target t : editTargets) {
-            logger.debug(t.toString());
-          }
-        }
-
-        // update the complete list of targets and force to update references :
-        // needed to replace old target references by the new calibrator targets :
-        om.updateTargets(editTargets, editTargetUserInfos);
-
-        if (logger.isInfoEnabled()) {
-          logger.info(report);
-        }
-
-        // bring this application to front :
-        App.showFrameToFront();
-
-        // display report message :
-        MessagePane.showMessage(report);
-      }
-    });
 
     // interpreted as SearchCal votable:
     return true;
