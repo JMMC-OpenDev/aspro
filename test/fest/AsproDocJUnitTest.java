@@ -24,6 +24,7 @@ import java.io.File;
 import javax.swing.JComponent;
 import javax.swing.JFormattedTextField;
 import javax.swing.JList;
+import org.apache.commons.lang.SystemUtils;
 
 import org.fest.swing.annotation.GUITest;
 import org.fest.swing.core.GenericTypeMatcher;
@@ -54,6 +55,14 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
    * Define the application
    */
   static {
+    // Test JDK 1.6
+    
+    if (!SystemUtils.IS_JAVA_1_6) {
+      logger.warning("Please use a JVM 1.6 (Sun) before running tests (fonts and LAF may be wrong) !");
+      System.exit(1);
+    }
+    
+    
     // disable dev LAF menu :
     System.setProperty("jmcs.laf.menu", "false");
 
