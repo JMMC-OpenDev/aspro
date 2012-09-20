@@ -578,29 +578,38 @@
 
       </xsl:if>
 
+      <!-- PIVOT only ie VOTABLE 1.1 only -->
       <!-- skip calibrator info if missing -->
-      <xsl:if test="$SCI_TARGET_NAME_index != '' and $CAL_TARGET_NAME_index != ''">
+      <xsl:if test="$NAME_index != '' and $SCI_TARGET_NAME_index != '' and $CAL_TARGET_NAME_index != ''">
         <targetUserInfos>
-
+<!--
         <xsl:message>SCI_TARGET_NAME_index: <xsl:value-of select="$SCI_TARGET_NAME_index"/></xsl:message>
         <xsl:message>CAL_TARGET_NAME_index: <xsl:value-of select="$CAL_TARGET_NAME_index"/></xsl:message>
-
+  -->
+        <xsl:variable name="TARGET_TABLE" select="./VOT11:TABLE[1]"/>
         <xsl:variable name="CAL_TABLE" select="./VOT11:TABLE[2]"/>
 
         <!-- list of all calibrators -->
         <calibrators>
           <xsl:for-each select="$CAL_TABLE/VOT11:DATA/VOT11:TABLEDATA/VOT11:TR">
             <xsl:variable name="CAL_NAME" select="./VOT11:TD[position()=$CAL_TARGET_NAME_index]"/>
+<!--
+        <xsl:message>CAL_NAME: <xsl:value-of select="$CAL_NAME"/></xsl:message>
+  -->
+            <xsl:if test="$TARGET_TABLE/VOT11:DATA/VOT11:TABLEDATA/VOT11:TR/VOT11:TD[position()=$NAME_index] = $CAL_NAME">
+<!--
+        <xsl:message>CAL_NAME exists in target table</xsl:message>
+  -->
+              <!-- DO UNIQUE -->
+              <xsl:if test="$CAL_NAME != '' and not(./preceding-sibling::VOT11:TR/VOT11:TD[position()=$CAL_TARGET_NAME_index]=$CAL_NAME)">
+                <xsl:variable name="CAL_ID">
+                  <xsl:call-template name="getTargetId">
+                    <xsl:with-param name="name" select="$CAL_NAME" />
+                  </xsl:call-template>
+                </xsl:variable>
 
-            <!-- DO UNIQUE -->
-            <xsl:if test="$CAL_NAME != '' and not(./preceding-sibling::VOT11:TR/VOT11:TD[position()=$CAL_TARGET_NAME_index]=$CAL_NAME)">
-              <xsl:variable name="CAL_ID">
-                <xsl:call-template name="getTargetId">
-                  <xsl:with-param name="name" select="$CAL_NAME" />
-                </xsl:call-template>
-              </xsl:variable>
-
-              <xsl:value-of select="$CAL_ID"/><xsl:value-of select="' '"/>
+                <xsl:value-of select="$CAL_ID"/><xsl:value-of select="' '"/>
+              </xsl:if>
             </xsl:if>
           </xsl:for-each>
         </calibrators>
@@ -608,40 +617,54 @@
         <!-- list of calibrators per science target -->
         <xsl:for-each select="$CAL_TABLE/VOT11:DATA/VOT11:TABLEDATA/VOT11:TR">
           <xsl:variable name="SCI_NAME" select="./VOT11:TD[position()=$SCI_TARGET_NAME_index]"/>
+<!--
+          <xsl:message>SCI_NAME: <xsl:value-of select="$SCI_NAME"/></xsl:message>
+  -->
+          <xsl:if test="$TARGET_TABLE/VOT11:DATA/VOT11:TABLEDATA/VOT11:TR/VOT11:TD[position()=$NAME_index] = $SCI_NAME">
+<!--
+            <xsl:message>SCI_NAME exists in target table</xsl:message>
+  -->
+            <xsl:if test="$SCI_NAME != '' and not(./preceding-sibling::VOT11:TR/VOT11:TD[position()=$SCI_TARGET_NAME_index]=$SCI_NAME)">
+<!--
+              <xsl:message>SCI_NAME: <xsl:value-of select="$SCI_NAME"/></xsl:message>
+  -->
+              <xsl:variable name="SCI_ID">
+                <xsl:call-template name="getTargetId">
+                  <xsl:with-param name="name" select="$SCI_NAME" />
+                </xsl:call-template>
+              </xsl:variable>
 
-          <xsl:if test="$SCI_NAME != '' and not(./preceding-sibling::VOT11:TR/VOT11:TD[position()=$SCI_TARGET_NAME_index]=$SCI_NAME)">
-            <xsl:message>SCI_NAME: <xsl:value-of select="$SCI_NAME"/></xsl:message>
+              <!-- DO UNIQUE -->
+              <targetInfo>
+                  <targetRef><xsl:value-of select="$SCI_ID"/></targetRef>
 
-            <xsl:variable name="SCI_ID">
-              <xsl:call-template name="getTargetId">
-                <xsl:with-param name="name" select="$SCI_NAME" />
-              </xsl:call-template>
-            </xsl:variable>
+                  <calibrators>
+                    <xsl:for-each select="$CAL_TABLE/VOT11:DATA/VOT11:TABLEDATA/VOT11:TR">
 
-            <!-- DO UNIQUE -->
-            <targetInfo>
-                <targetRef><xsl:value-of select="$SCI_ID"/></targetRef>
+                      <xsl:variable name="CAL_NAME" select="./VOT11:TD[position()=$CAL_TARGET_NAME_index]"/>
+<!--
+                      <xsl:message>CAL_NAME: <xsl:value-of select="$CAL_NAME"/></xsl:message>
+  -->
+                      <xsl:if test="$TARGET_TABLE/VOT11:DATA/VOT11:TABLEDATA/VOT11:TR/VOT11:TD[position()=$NAME_index] = $CAL_NAME">
+<!--
+                        <xsl:message>CAL_NAME exists in target table</xsl:message>
+  -->
+                        <xsl:if test="$CAL_NAME != '' and ./VOT11:TD[position()=$SCI_TARGET_NAME_index] = $SCI_NAME">
+                            <xsl:variable name="CAL_ID">
+                              <xsl:call-template name="getTargetId">
+                                <xsl:with-param name="name" select="$CAL_NAME" />
+                              </xsl:call-template>
+                            </xsl:variable>
 
-                <calibrators>
-                  <xsl:for-each select="$CAL_TABLE/VOT11:DATA/VOT11:TABLEDATA/VOT11:TR">
+                            <xsl:value-of select="$CAL_ID"/><xsl:value-of select="' '"/>
+                        </xsl:if>
+                      </xsl:if>
 
-                    <xsl:variable name="CAL_NAME" select="./VOT11:TD[position()=$CAL_TARGET_NAME_index]"/>
+                    </xsl:for-each>
+                  </calibrators>
 
-                    <xsl:if test="$CAL_NAME != '' and ./VOT11:TD[position()=$SCI_TARGET_NAME_index] = $SCI_NAME">
-                        <xsl:variable name="CAL_ID">
-                          <xsl:call-template name="getTargetId">
-                            <xsl:with-param name="name" select="$CAL_NAME" />
-                          </xsl:call-template>
-                        </xsl:variable>
-
-                        <xsl:value-of select="$CAL_ID"/><xsl:value-of select="' '"/>
-                    </xsl:if>
-
-                  </xsl:for-each>
-                </calibrators>
-
-            </targetInfo>
-
+              </targetInfo>
+            </xsl:if>
           </xsl:if>
         </xsl:for-each>
 
