@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<jnlp spec="1.0+" codebase="@GENERATED@" href="@GENERATED@">
+  <information>
+    <title>Aspro 2</title>
+    <vendor>JMMC</vendor>
+    <homepage href="http://www.jmmc.fr/aspro2"/>
+    <description>This application is the new version of the ASPRO tool to prepare your interferometric observations</description>
+    <icon href="Aspro2.png"/>
+    <offline-allowed/>
+    <association mime-type="application/x-aspro+xml" extensions="asprox">
+      <icon href="Aspro2.png"/>
+      <description>Aspro 2 Observation files</description>
+    </association>
+    <shortcut>
+      <desktop/>
+    </shortcut>
+  </information>
+  <security>
+    <all-permissions/>
+  </security>
+  <resources>
+    <j2se version="1.5+" initial-heap-size="256m" max-heap-size="512m"/>
+
+    <!-- Application module first (main class) -->
+    <jar href="jar/aspro.jar" />
+
+    <!-- JMMC modules -->
+    <jar href="jar/jmcs.jar" />
+    <jar href="jar/jmal.jar" />
+    <jar href="jar/oitools.jar" />
+    <jar href="jar/oiexplorer_core.jar" />
+
+    <!-- JMMC libs -->
+    <extension href="../JmcsLibs/JmcsLibs.jnlp"/>
+    <extension href="../JmalLibs/JmalLibs.jnlp"/>
+    <extension href="../OIExplorerCoreLibs/OIExplorerCoreLibs.jnlp"/>
+
+    <!-- SteelSeries Compass -->
+    <jar href="@SHARED@/SteelSeries-3.9.26.jar" />
+    <jar href="@SHARED@/trident.jar" />
+
+  </resources>
+  <application-desc main-class="fr.jmmc.aspro.Aspro2"/>
+</jnlp>

@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+    Document   : SUSI.xml
+    Created on : 3 august 2012
+    Author     : bourgesl
+    Description:
+        SUSI interferometer.
+-->
+
+<a:interferometerSetting
+  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+  xmlns:a='http://www.jmmc.fr/aspro-oi/0.1'
+  xsi:schemaLocation='http://www.jmmc.fr/aspro-oi/0.1 AsproOIModel.xsd'>
+
+  <description>
+    <name>SUSI</name>
+
+    <description>Sydney University Stellar Interferometer (SUSI)</description>
+
+    <!--
+      Coordinates SUSI:
+        lat = -30.322273888889
+        lon = 149.548224972222
+        alt = 210.0
+    -->
+    <position>
+      <posX>-4738331.569113477</posX>
+      <posY>2785721.2822074075</posY>
+      <posZ>-3214789.84150198</posZ>
+    </position>
+    
+    <telescope>
+      <name>T</name>
+      <diameter>0.14</diameter> <!-- 20 cm or 14 cm -->
+      <maxElevation>85.0</maxElevation>
+
+      <adaptiveOptics>
+        <band>V</band>
+        <!-- tip tilt -->
+        <numberActuators>2</numberActuators>
+      </adaptiveOptics>
+
+      <!--
+        Moon Pointing Restrictions on SUSI: 5 deg at least !
+      -->
+      <moonPointingRestriction>
+        <warningThreshold>10</warningThreshold>
+        <restriction>
+          <separation>5.0</separation>
+        </restriction>
+      </moonPointingRestriction>
+
+    </telescope>
+
+    <station>
+      <name>S1</name>
+      <telescope>T</telescope>
+      <relativePosition>
+        <posX>0.0</posX>
+        <posY>0.0</posY>
+        <posZ>0.0</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>2.5</delayLineFixedOffset>
+    </station>
+
+    <station>
+      <name>S2</name>
+      <telescope>T</telescope>
+      <relativePosition>
+        <posX>-2.516006217881425</posX>
+        <posY>-7.92E-4</posY>
+        <posZ>-4.31772564620623</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>7.5</delayLineFixedOffset>
+    </station>
+
+    <station>
+      <name>S3</name>
+      <telescope>T</telescope>
+      <relativePosition>
+        <posX>-12.57957799853269</posX>
+        <posY>-0.001261</posY>
+        <posZ>-21.597677993329658</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>27.5</delayLineFixedOffset>
+    </station>
+
+    <station>
+      <name>S4</name>
+      <telescope>T</telescope>
+      <relativePosition>
+        <posX>-52.851454601845845</posX>
+        <posY>0.002581</posY>
+        <posZ>-90.72949702700629</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>107.5</delayLineFixedOffset>
+    </station>
+
+    <station>
+      <name>N1</name>
+      <telescope>T</telescope>
+      <relativePosition>
+        <posX>2.5163759169025575</posX>
+        <posY>0.002281</posY>
+        <posZ>4.317977445002441</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>2.5</delayLineFixedOffset>
+    </station>
+
+    <station>
+      <name>N3</name>
+      <telescope>T</telescope>
+      <relativePosition>
+        <posX>7.549870028868496</posX>
+        <posY>0.005409</posY>
+        <posZ>12.959448153634868</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>12.5</delayLineFixedOffset>
+    </station>
+
+    <station>
+      <name>N4</name>
+      <telescope>T</telescope>
+      <relativePosition>
+        <posX>27.682696676056032</posX>
+        <posY>3.58E-4</posY>
+        <posZ>47.52122590175806</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>52.5</delayLineFixedOffset>
+    </station>
+
+    <!-- no channel nor switchyard -->    
+
+    <!-- DL : 
+    2-in-1 delay line for SUSI with two 'cat's eye. The maximum length of each is 70m. 
+    As 1 delay increases, the other decreases by the same amount.
+    The total OPD range that can be compensated by the OPLC is approximately +/- 140m.
+    = 2 DL with 140m length -->
+    <delayLine>
+      <name>DL1</name>
+      <maximumThrow>140</maximumThrow>
+    </delayLine>
+    <delayLine>
+      <name>DL2</name>
+      <maximumThrow>140</maximumThrow>
+    </delayLine>
+
+
+    <fringeTracker>
+      <name>PAVO_FT</name>
+      <band>I</band>
+
+      <mode>Group</mode>
+
+      <instrumentVisibility>0.8</instrumentVisibility>
+      <magLimit>4.5</magLimit>
+      <maxIntegration>1</maxIntegration>
+    </fringeTracker>
+
+    <!-- instruments (2T) -->
+
+    <focalInstrument>
+      <name>PAVO_2T</name>
+      <description>PAVO combiner using 2T</description>
+      <numberChannels>2</numberChannels>
+      <defaultSamplingTime>40</defaultSamplingTime>
+      <fringeTracker>PAVO_FT</fringeTracker>
+
+      <!-- noise parameters -->
+      <transmission>0.01</transmission>
+      <dit>0.0045</dit>
+      <ron>20</ron>
+      <detectorSaturation>32700</detectorSaturation>
+      <instrumentVisibility>0.9</instrumentVisibility>
+      <instrumentVisibilityBias>2</instrumentVisibilityBias>
+      <instrumentPhaseBias>1</instrumentPhaseBias>
+      <nbPixInterferometry>4</nbPixInterferometry>
+      <nbPixPhotometry>0</nbPixPhotometry>
+      <fracFluxInInterferometry>1</fracFluxInInterferometry>
+
+      <mode>
+        <name>R</name>
+        <resolution>40</resolution>
+        <waveLengthMin>0.51</waveLengthMin>
+        <waveLengthMax>0.8</waveLengthMax>
+      </mode>
+
+    </focalInstrument>
+
+  </description>
+
+  <configuration>
+    <interferometer>SUSI</interferometer>
+
+    <!-- PAVO 2T -->
+    <instrument>
+      <focalInstrument>PAVO_2T</focalInstrument>
+      
+      <!-- The baseline configuration is limited to one telescope from the North and one telescope from the South -->
+      <configuration>
+        <stations>N1 S1</stations>
+      </configuration>
+      <configuration>
+        <stations>N1 S2</stations>
+      </configuration>
+      <configuration>
+        <stations>N1 S3</stations>
+      </configuration>
+      <configuration>
+        <stations>N1 S4</stations>
+      </configuration>
+      <configuration>
+        <stations>N3 S1</stations>
+      </configuration>
+      <configuration>
+        <stations>N3 S2</stations>
+      </configuration>
+      <configuration>
+        <stations>N3 S3</stations>
+      </configuration>
+      <configuration>
+        <stations>N3 S4</stations>
+      </configuration>
+      <configuration>
+        <stations>N4 S1</stations>
+      </configuration>
+      <configuration>
+        <stations>N4 S2</stations>
+      </configuration>
+      <configuration>
+        <stations>N4 S3</stations>
+      </configuration>
+      <configuration>
+        <stations>N4 S4</stations>
+      </configuration>
+    </instrument>
+  </configuration>
+
+</a:interferometerSetting>

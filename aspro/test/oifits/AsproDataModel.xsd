@@ -1,0 +1,822 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ *******************************************************************************
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
+ *******************************************************************************
+ -->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xmlns="http://www.jmmc.fr/aspro/0.1"
+            targetNamespace="http://www.jmmc.fr/aspro/0.1"
+            xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
+            xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
+            jaxb:version="2.1" jaxb:extensionBindingPrefixes="xjc">
+
+  <xsd:annotation>
+    <xsd:documentation>
+        This xml schema describes the data model used in the ASPRO software
+
+        Created : 08/09/2009 :
+          Laurent : Initial revision
+    </xsd:documentation>
+    <xsd:appinfo>
+      <jaxb:globalBindings>
+        <xjc:simple />
+      </jaxb:globalBindings>
+
+      <jaxb:schemaBindings>
+        <jaxb:package name="fr.jmmc.aspro.model.oifits"/>
+      </jaxb:schemaBindings>
+    </xsd:appinfo>
+  </xsd:annotation>
+
+
+  <!-- Elements -->
+
+  <!-- OI_DATA element -->
+  <xsd:element name="OI_DATA" type="OIFitsFile">
+    <xsd:annotation>
+      <xsd:documentation>
+        this element contains a complete OIFits structure
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+
+
+  <!-- OI_ARRAY element -->
+  <xsd:element name="OI_ARRAY" type="OIArrayTable">
+    <xsd:annotation>
+      <xsd:documentation>
+        this element contains only the telescope definition
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+
+
+  <!-- OI_TARGET element -->
+  <xsd:element name="OI_TARGET" type="OITargetTable">
+    <xsd:annotation>
+      <xsd:documentation>
+        this element contains only the target definition
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+
+
+
+
+<!-- OI Fits base model -->
+
+  <!-- OIFits structure -->
+  <xsd:complexType name="OIFitsFile">
+    <xsd:annotation>
+      <xsd:documentation>
+        This type describes the OIFits Table structure
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="OI_TARGET" type="OITargetTable">
+        <xsd:annotation>
+          <xsd:documentation>
+              A single required OI_TARGET Table
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
+      <!-- should we support multiple OI_ARRAY tables ? maxOccurs="unbounded" -->
+      <xsd:element name="OI_ARRAY" type="OIArrayTable" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>
+              An optional OI_ARRAY Table
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
+      <xsd:element name="OI_WAVELENGTH" type="OIWaveLengthTable" minOccurs="0" maxOccurs="unbounded">
+        <xsd:annotation>
+          <xsd:documentation>
+              0..n OI_WAVELENGTH Table(s) corresponding to the spectral responses for a given detector
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
+      <xsd:element name="OI_VIS" type="OIVisTable" minOccurs="1" maxOccurs="unbounded">
+        <xsd:annotation>
+          <xsd:documentation>
+              1..n OI_VIS Table(s) corresponding to the complex visiblity for a given detector
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
+      <xsd:element name="OI_VIS2" type="OIVis2Table" minOccurs="1" maxOccurs="unbounded">
+        <xsd:annotation>
+          <xsd:documentation>
+              1..n OI_VIS2 Table(s) corresponding to the squared visiblity for a given detector
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
+      <xsd:element name="OI_T3" type="OIT3Table" minOccurs="1" maxOccurs="unbounded">
+        <xsd:annotation>
+          <xsd:documentation>
+              1..n OI_T3 Table(s) corresponding to the squared visiblity for a given detector
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
+    </xsd:sequence>
+  </xsd:complexType>
+
+
+<!-- abstract OIFitsTable -->
+  <xsd:complexType name="OIFitsTable" abstract="true">
+    <xsd:annotation>
+      <xsd:documentation>
+        This type describes the abstract OIFITS table
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="EXTVER" type="xsd:int">
+        <xsd:annotation>
+          <xsd:documentation>
+            FITS Extension keyword used to index tables with the same EXTNAME
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="OI_REVN" type="xsd:int">
+        <xsd:annotation>
+          <xsd:documentation>
+              Revision number of the table definition
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+    <!-- possible common java attributes -->
+  </xsd:complexType>
+
+
+
+
+
+<!-- Telescope section -->
+
+  <!-- OIArrayTable -->
+  <xsd:complexType name="OIArrayTable">
+    <xsd:annotation>
+      <xsd:documentation>
+        This type describes the OI_ARRAY Table of the OIFits specification
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexContent>
+      <xsd:extension base="OIFitsTable">
+        <xsd:sequence>
+          <xsd:element name="ARRNAME" type="xsd:string">
+            <xsd:annotation>
+              <xsd:documentation>
+                  Array name, for cross-referencing
+              </xsd:documentation>
+            </xsd:annotation>
+          </xsd:element>
+          <xsd:element name="FRAME" type="CoordinateFrame">
+            <xsd:annotation>
+              <xsd:documentation>
+                  Coordinate Frame
+              </xsd:documentation>
+            </xsd:annotation>
+          </xsd:element>
+          <xsd:element name="ARRAYX" type="xsd:double">
+            <xsd:annotation>
+              <xsd:documentation>
+                  Array center coordinates (m) : X Position
+              </xsd:documentation>
+            </xsd:annotation>
+          </xsd:element>
+          <xsd:element name="ARRAYY" type="xsd:double">
+            <xsd:annotation>
+              <xsd:documentation>
+                  Array center coordinates (m) : Y Position
+              </xsd:documentation>
+            </xsd:annotation>
+          </xsd:element>
+          <xsd:element name="ARRAYZ" type="xsd:double">
+            <xsd:annotation>
+              <xsd:documentation>
+                  Array center coordinates (m) : Z Position
+              </xsd:documentation>
+            </xsd:annotation>
+          </xsd:element>
+          <xsd:element name="STATION" type="OIStation" minOccurs="1" maxOccurs="unbounded"/>
+        </xsd:sequence>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+
+
+  <!-- OIStation -->
+  <xsd:complexType name="OIStation">
+    <xsd:annotation>
+      <xsd:documentation>
+        This type describes one row in the OI_ARRAY Table
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="TEL_NAME" type="string16">
+        <xsd:annotation>
+          <xsd:documentation>
+            Telescope name
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="STA_NAME" type="string16">
+        <xsd:annotation>
+          <xsd:documentation>
+            Station name
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="STA_INDEX" type="xsd:int">
+        <xsd:annotation>
+          <xsd:documentation>
+            Station number
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="DIAMETER" type="xsd:int">
+        <xsd:annotation>
+          <xsd:documentation>
+            Element diameter (m)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <!--
+        Should we keep the xyz data type ?
+        STAXYZ .... D (3)  Station coordinates relative to array center (m)
+      -->
+      <xsd:element name="STAX" type="xsd:double">
+        <xsd:annotation>
+          <xsd:documentation>
+              Station coordinates relative to array center (m) : X Position
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="STAY" type="xsd:double">
+        <xsd:annotation>
+          <xsd:documentation>
+              Station coordinates relative to array center (m) : Y Position
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="STAZ" type="xsd:double">
+        <xsd:annotation>
+          <xsd:documentation>
+              Station coordinates relative to array center (m) : Z Position
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+
+  <!-- Coordinate Frame used by OIArrayTable.FRAME -->
+  <xsd:simpleType name="CoordinateFrame">
+    <xsd:annotation>
+      <xsd:documentation>Possible values for the Coordinate Frame</xsd:documentation>
+    </xsd:annotation>
+    <xsd:restriction base="xsd:string">
+      <xsd:enumeration value="GEOCENTRIC">
+        <xsd:annotation>
+          <xsd:documentation>
+            the coordinates are given in an Earth-centered, Earth-fixed, Cartesian reference frame
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+    </xsd:restriction>
+  </xsd:simpleType>
+
+
+
+
+<!-- Target section -->
+
+  <!-- OITargetTable -->
+  <xsd:complexType name="OITargetTable">
+    <xsd:annotation>
+      <xsd:documentation>
+        This type describes the OI_TARGET Table of the OIFits specification
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexContent>
+      <xsd:extension base="OIFitsTable">
+        <xsd:sequence>
+          <xsd:element name="TARGET" type="OITarget" minOccurs="1" maxOccurs="unbounded"/>
+        </xsd:sequence>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+
+
+  <!-- OITarget -->
+  <xsd:complexType name="OITarget">
+    <xsd:annotation>
+      <xsd:documentation>
+        This type describes one row in the OI_TARGET Table
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="TARGET_ID" type="xsd:int">
+        <xsd:annotation>
+          <xsd:documentation>
+            Index number of this target
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="TARGET" type="string16">
+        <xsd:annotation>
+          <xsd:documentation>
+            Target name (16 characters)
+              ASPRO variable = DEFSRCE%SOUNAME_%i%
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
+<!-- position -->
+      <xsd:element name="RAEP0" type="xsd:double">
+        <xsd:annotation>
+          <xsd:documentation>
+            R.A. at mean equinox (deg).
+              ASPRO variable = DEFSRCE%RA_%i%
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="DECEP0" type="xsd:double">
+        <xsd:annotation>
+          <xsd:documentation>
+            Decl. at mean equinox (deg)
+              ASPRO variable = DEFSRCE%DEC_%i%
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="EQUINOX" type="xsd:float">
+        <xsd:annotation>
+          <xsd:documentation>
+            The EQUINOX field contains a (ﬂoating point) Julian year, giving both the
+            epoch of the position (RAEP0 and DECEP0) and the equinox for the celestial
+            coordinate system in which the position is expressed
+              ASPRO variable = DEFSRCE%EPO_%i%
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="RA_ERR" type="xsd:double">
+        <xsd:annotation>
+          <xsd:documentation>
+            Error in R.A. at mean equinox (deg)
+              ASPRO variable = NONE
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="DEC_ERR" type="xsd:double">
+        <xsd:annotation>
+          <xsd:documentation>
+            Error in decl. at mean equinox (deg)
+              ASPRO variable = NONE
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
+<!-- velocity -->
+      <xsd:element name="SYSVEL" type="xsd:double">
+        <xsd:annotation>
+          <xsd:documentation>
+            Systemic radial velocity (m s 1)
+              ASPRO variable = NONE
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="VELTYP" type="VelocityType">
+        <xsd:annotation>
+          <xsd:documentation>
+            Reference for radial velocity (LSR, GEOCENTR, etc.)
+              ASPRO variable = NONE
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="VELDEF" type="VelocityDefinition">
+        <xsd:annotation>
+          <xsd:documentation>
+            Definition of radial velocity (OPTICAL, RADIO)
+              ASPRO variable = NONE
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
+<!-- proper motion -->
+      <xsd:element name="PMRA" type="xsd:double">
+        <xsd:annotation>
+          <xsd:documentation>
+            Proper motion in R.A. (deg yr 1)
+              ASPRO variable = NONE
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="PMDEC" type="xsd:double">
+        <xsd:annotation>
+          <xsd:documentation>
+            Proper motion in decl. (deg yr 1)
+              ASPRO variable = NONE
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="PMRA_ERR" type="xsd:double">
+        <xsd:annotation>
+          <xsd:documentation>
+            Error of proper motion in R.A. (deg yr 1)
+              ASPRO variable = NONE
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="PMDEC_ERR" type="xsd:double">
+        <xsd:annotation>
+          <xsd:documentation>
+            Error of proper motion in decl. (deg yr 1)
+              ASPRO variable = NONE
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
+<!-- parallax -->
+      <xsd:element name="PARALLAX" type="xsd:float">
+        <xsd:annotation>
+          <xsd:documentation>
+            Parallax (deg)
+              ASPRO variable = NONE
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="PARA_ERR" type="xsd:double">
+        <xsd:annotation>
+          <xsd:documentation>
+            Error in parallax (deg)
+              ASPRO variable = NONE
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
+<!-- spectral type -->
+      <xsd:element name="SPECTYP" type="string16">
+        <xsd:annotation>
+          <xsd:documentation>
+            Spectral type
+              ASPRO variable = NONE
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
+    </xsd:sequence>
+  </xsd:complexType>
+
+
+  <!-- Velocity Type used by OITarget.VELTYP -->
+  <xsd:simpleType name="VelocityType">
+    <xsd:annotation>
+      <xsd:documentation>Possible values for the Velocity Type</xsd:documentation>
+    </xsd:annotation>
+    <xsd:restriction base="string8">
+      <xsd:enumeration value="LSR">
+        <xsd:annotation>
+          <xsd:documentation>Local Standard of rest</xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="HELIOCEN">
+        <xsd:annotation>
+          <xsd:documentation>Relative to the Sun</xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="BARYCENT">
+        <xsd:annotation>
+          <xsd:documentation>Solar system barycenter</xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="GEOCENTR">
+        <xsd:annotation>
+          <xsd:documentation>Center of mass of the Earth</xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="TOPOCENT">
+        <xsd:annotation>
+          <xsd:documentation>Uncorrected</xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+    </xsd:restriction>
+  </xsd:simpleType>
+
+
+  <!-- Velocity Definition used by OITarget.VELDEF -->
+  <xsd:simpleType name="VelocityDefinition">
+    <xsd:annotation>
+      <xsd:documentation>Possible values for the Velocity Definition</xsd:documentation>
+    </xsd:annotation>
+    <xsd:restriction base="string8">
+      <xsd:enumeration value="OPTICAL">
+        <xsd:annotation>
+          <xsd:documentation>Optical</xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="RADIO">
+        <xsd:annotation>
+          <xsd:documentation>Radio</xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+    </xsd:restriction>
+  </xsd:simpleType>
+
+
+
+
+<!-- WaveLength section -->
+
+  <!-- OIWaveLengthTable -->
+  <xsd:complexType name="OIWaveLengthTable">
+    <xsd:annotation>
+      <xsd:documentation>
+        This type describes the OI_WAVELENGTH Table of the OIFits specification
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexContent>
+      <xsd:extension base="OIFitsTable">
+        <xsd:sequence>
+          <xsd:element name="INSNAME" type="xsd:string">
+            <xsd:annotation>
+              <xsd:documentation>
+                  Name of detector, for cross-referencing
+              </xsd:documentation>
+            </xsd:annotation>
+          </xsd:element>
+          <xsd:element name="CHANNEL" type="OIChannel" minOccurs="1" maxOccurs="unbounded"/>
+        </xsd:sequence>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+
+
+  <!-- OIChannel -->
+  <xsd:complexType name="OIChannel">
+    <xsd:annotation>
+      <xsd:documentation>
+        This type describes one row in the OI_WAVELENGTH Table
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="EFF_WAVE" type="xsd:float">
+        <xsd:annotation>
+          <xsd:documentation>
+            Effective wavelength of channel (m)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="EFF_BAND" type="xsd:float">
+        <xsd:annotation>
+          <xsd:documentation>
+            Effective bandpass of channel (m)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+
+
+<!-- Data Tables -->
+
+  <!-- OIFitsDataTable -->
+  <xsd:complexType name="OIFitsDataTable">
+    <xsd:annotation>
+      <xsd:documentation>
+        This type extends the OIFitsDataTable to add common elements in data tables
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexContent>
+      <xsd:extension base="OIFitsTable">
+        <xsd:sequence>
+          <xsd:element name="DATE-OBS" type="xsd:string">
+            <xsd:annotation>
+              <xsd:documentation>
+                UTC start date of observations
+              </xsd:documentation>
+            </xsd:annotation>
+          </xsd:element>
+          <xsd:element name="ARRNAME" type="xsd:string">
+            <xsd:annotation>
+              <xsd:documentation>
+                (Optional) Identifies corresponding OI_ARRAY
+              </xsd:documentation>
+            </xsd:annotation>
+          </xsd:element>
+          <xsd:element name="INSNAME" type="xsd:string">
+            <xsd:annotation>
+              <xsd:documentation>
+                  Identifies corresponding OI_WAVELENGTH table
+              </xsd:documentation>
+            </xsd:annotation>
+          </xsd:element>
+        </xsd:sequence>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+
+
+
+
+<!-- Complex Visibility section -->
+
+  <!-- OIVisTable -->
+  <xsd:complexType name="OIVisTable">
+    <xsd:annotation>
+      <xsd:documentation>
+        This type describes the OI_VIS Table of the OIFits specification
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexContent>
+      <xsd:extension base="OIFitsDataTable">
+        <xsd:sequence>
+          <xsd:element name="VIS" type="OIVis" minOccurs="1" maxOccurs="unbounded"/>
+        </xsd:sequence>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+
+
+  <!-- OIStation -->
+  <xsd:complexType name="OIVis">
+    <xsd:annotation>
+      <xsd:documentation>
+        This type describes one row in the OI_VIS Table
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="TARGET_ID" type="xsd:int">
+        <xsd:annotation>
+          <xsd:documentation>
+            Target number as index into OI_TARGET table
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="TIME" type="xsd:double">
+        <xsd:annotation>
+          <xsd:documentation>
+            UTC time of observation (s)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="MJD" type="xsd:double">
+        <xsd:annotation>
+          <xsd:documentation>
+            Modified Julian Date
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="INT_TIME" type="xsd:double">
+        <xsd:annotation>
+          <xsd:documentation>
+            Integration time (s)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
+<!-- should we use arrays or a specific Type or simply a string representation ? -->
+<!--
+VISAMP . . . . . . . . . . .     D (NWAVE) Visibility amplitude
+VISAMPERR . . . . . .            D (NWAVE) Error in visibility amplitude
+VISPHI . . . . . . . . . . . .   D (NWAVE) Visibility phase in degrees
+VISPHIERR . . . . . . .          D (NWAVE) Error in visibility phase in degrees
+-->
+
+      <xsd:element name="VISAMP" type="xsd:double" minOccurs="1" maxOccurs="unbounded">
+        <xsd:annotation>
+          <xsd:documentation>
+            Visibility amplitude for all detector channels
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="VISAMPERR" type="xsd:double" minOccurs="1" maxOccurs="unbounded">
+        <xsd:annotation>
+          <xsd:documentation>
+            Error in visibility amplitude for all detector channels
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="VISPHI" type="xsd:double" minOccurs="1" maxOccurs="unbounded">
+        <xsd:annotation>
+          <xsd:documentation>
+            Visibility phase in degrees for all detector channels
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="VISPHIERR" type="xsd:double" minOccurs="1" maxOccurs="unbounded">
+        <xsd:annotation>
+          <xsd:documentation>
+            Error in visibility phase in degrees for all detector channels
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
+<!--
+UCOORD . . . . . . . . . .          D (1)  u coordinate of the data (m)
+VCOORD . . . . . . . . . .          D (1)  v coordinate of the data (m)
+
+STA_INDEX . . . . . . .              I (2) Station numbers contributing to the data
+FLAG . . . . . . . . . . . . . . L (NWAVE) Flag
+-->
+      <xsd:element name="UCOORD" type="xsd:double">
+        <xsd:annotation>
+          <xsd:documentation>
+            u coordinate of the data (m)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="VCOORD" type="xsd:double">
+        <xsd:annotation>
+          <xsd:documentation>
+            v coordinate of the data (m)
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
+<!-- why array[2] ? -->
+      <xsd:element name="STA_INDEX" type="xsd:int">
+        <xsd:annotation>
+          <xsd:documentation>
+            Station numbers contributing to the data
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
+      <xsd:element name="FLAG" type="xsd:boolean" minOccurs="1" maxOccurs="unbounded">
+        <xsd:annotation>
+          <xsd:documentation>
+            Flag for all detector channels
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+
+    </xsd:sequence>
+
+  </xsd:complexType>
+
+
+
+
+
+
+<!-- Squared Visibility section -->
+
+  <!-- OIVis2Table -->
+  <xsd:complexType name="OIVis2Table">
+    <xsd:annotation>
+      <xsd:documentation>
+        This type describes the OI_VIS2 Table of the OIFits specification
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexContent>
+      <xsd:extension base="OIFitsDataTable">
+        <!-- TBD -->
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+
+
+
+
+<!-- Triple Product section -->
+
+  <!-- OIT3Table -->
+  <xsd:complexType name="OIT3Table">
+    <xsd:annotation>
+      <xsd:documentation>
+        This type describes the OI_T3 Table of the OIFits specification
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexContent>
+      <xsd:extension base="OIFitsDataTable">
+        <!-- TBD -->
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+
+
+
+
+<!-- String types -->
+
+  <xsd:simpleType name="string8">
+    <xsd:restriction base="xsd:string">
+      <xsd:minLength value="0"/>
+      <xsd:maxLength value="8"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+
+  <xsd:simpleType name="string16">
+    <xsd:restriction base="xsd:string">
+      <xsd:minLength value="0"/>
+      <xsd:maxLength value="16"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+
+</xsd:schema>
