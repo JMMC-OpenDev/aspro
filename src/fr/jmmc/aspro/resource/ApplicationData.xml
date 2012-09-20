@@ -168,6 +168,7 @@
 
   <releasenotes>
     <release version="0.9.2">
+      <pubDate>Thu, 20 Sep 2012 15:09:59 GMT</pubDate>
       <prerelease version="0.9.2 beta 8">
         <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/357">Fixed handling of invalid target identifier(s) present in the calibrator table of Aspro2's VOTable format (SAMP) (PIVOT)</change>
       </prerelease>
