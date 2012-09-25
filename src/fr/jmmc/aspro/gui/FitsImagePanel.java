@@ -493,7 +493,7 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
       }
 
       if (logger.isInfoEnabled()) {
-        logger.info("compute : duration = {} ms.", 1e-6d * (System.nanoTime() - start));
+        logger.info("compute[ImageChartData]: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
       }
 
       return new ImageChartData(fitsImage, colorModel, usedColorScale, min, max, image);

@@ -1717,7 +1717,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       uvDataCollection.setWarningContainer(mergedWarningContainer);
 
       if (logger.isInfoEnabled()) {
-        logger.info("compute : duration = {} ms.", 1e-6d * (System.nanoTime() - start));
+        logger.info("compute[ObservationCollectionUVData]: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
       }
 
       return uvDataCollection;
@@ -2595,6 +2595,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
       List<OIFitsFile> result = null;
       try {
+        // Start the computations :
+        final long start = System.nanoTime();
+
         final List<OIFitsFile> oiFitsList = new ArrayList<OIFitsFile>(this.oiFitsCreatorList.size());
 
         for (OIFitsCreatorService oiFitsCreator : this.oiFitsCreatorList) {
@@ -2603,6 +2606,10 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         }
 
         result = oiFitsList;
+
+        if (logger.isInfoEnabled()) {
+          logger.info("compute[OIFitsFiles]: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
+        }
 
       } catch (InterruptedJobException ije) {
         logger.debug("Computing oifits data interrupted: ", ije);

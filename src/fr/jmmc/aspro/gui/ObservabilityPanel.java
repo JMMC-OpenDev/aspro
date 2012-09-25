@@ -759,7 +759,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
       }
 
       if (logger.isInfoEnabled()) {
-        logger.info("compute : duration = {} ms.", 1e-6d * (System.nanoTime() - start));
+        logger.info("compute[ObservabilityData]: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
       }
 
       return obsDataList;
