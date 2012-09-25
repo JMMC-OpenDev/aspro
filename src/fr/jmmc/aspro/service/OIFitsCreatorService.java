@@ -16,7 +16,6 @@ import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.Telescope;
 import fr.jmmc.aspro.model.uvcoverage.UVRangeBaseLineData;
-import fr.jmmc.oitools.util.CombUtils;
 import fr.jmmc.aspro.util.ComplexUtils;
 import fr.jmmc.jmal.ALX;
 import fr.jmmc.jmal.complex.Complex;
@@ -27,6 +26,7 @@ import fr.jmmc.jmal.model.ModelFunctionComputeContext;
 import fr.jmmc.jmal.model.ModelManager;
 import fr.jmmc.jmal.model.VisNoiseService;
 import fr.jmmc.jmal.model.targetmodel.Model;
+import fr.jmmc.jmal.util.ThreadLocalRandom;
 import fr.jmmc.jmcs.util.concurrent.ParallelJobExecutor;
 import fr.jmmc.oitools.OIFitsConstants;
 import fr.jmmc.oitools.model.OIArray;
@@ -37,6 +37,7 @@ import fr.jmmc.oitools.model.OITarget;
 import fr.jmmc.oitools.model.OIVis;
 import fr.jmmc.oitools.model.OIVis2;
 import fr.jmmc.oitools.model.OIWavelength;
+import fr.jmmc.oitools.util.CombUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -61,8 +62,12 @@ public final class OIFitsCreatorService {
   private final static short TARGET_ID = (short) 1;
   /** enable the OIFits validation */
   private final static boolean DO_VALIDATE = false;
-  /** threshold to use parallel jobs (32 UV points) */
-  private final static int JOB_THRESHOLD = 32;
+  /** threshold to use parallel jobs for user models (32 UV points) */
+  private final static int JOB_THRESHOLD_USER_MODELS = 32;
+  /** threshold to use parallel jobs for experimental noise sampling (2000 UV points) */
+  private final static int JOB_THRESHOLD_NOISE_SAMPLES = 2000;
+  /** number of complex visiblity samples to compute standard deviation (experimental instrument) */
+  private final static int N_SAMPLES = 100;
   /** Jmcs Parallel Job executor */
   private static final ParallelJobExecutor jobExecutor = ParallelJobExecutor.getInstance();
 
@@ -498,7 +503,7 @@ public final class OIFitsCreatorService {
 
 
       // enable parallel jobs if many points using user model:
-      final int nJobs = (!useAnalyticalModel && nPoints > JOB_THRESHOLD) ? jobExecutor.getMaxParallelJob() : 1;
+      final int nJobs = (!useAnalyticalModel && nPoints > JOB_THRESHOLD_USER_MODELS) ? jobExecutor.getMaxParallelJob() : 1;
 
       // computation tasks:
       final Runnable[] jobs = new Runnable[nJobs];
@@ -516,7 +521,6 @@ public final class OIFitsCreatorService {
         }
 
         jobs[i] = new Runnable() {
-
           @Override
           public void run() {
             // spatial frequencies for a single HA (spectral dispersion):
@@ -653,184 +657,219 @@ public final class OIFitsCreatorService {
     final short[][] staIndexes = vis.getStaIndex();
     final boolean[][] flags = vis.getFlag();
 
-    // vars:
-    double jd, time, mjd;
-    double u, v;
-    double visRe, visIm, flux, vAmp, vPhi, visErrRe, visErrIm;
-    final MutableComplex visComplexSample = new MutableComplex();
-
-    // number of complex visiblity samples to compute standard deviation:
-    final int NSamples = 100;
-
-    double diff, ampSquareDiffAcc, phiSquareDiffAcc;
-
-    if (this.hasModel && this.errorValid && !isAmber && this.instrumentExperimental) {
-      if (logger.isInfoEnabled()) {
-        logger.info("createOIVis: experimental instrument: VisAmp/Phi errors computed using {} random complex visiblities", NSamples);
-      }
-    }
-
     // complex visiblity with noise (sigma = visError)
     final Complex[][] visComplexNoisy = new Complex[vis.getNbRows()][this.nWaveLengths];
 
-    // TODO: parallelize such array processing ...
+    final int nPoints = this.nHAPoints * this.nBaseLines * this.nWaveLengths;
+    final boolean doNoiseSampling = (this.hasModel && this.errorValid && !isAmber && this.instrumentExperimental);
 
-    // Iterate on HA points :
-    for (int i = 0, j, k, l, n; i < this.nHAPoints; i++) {
+    if (doNoiseSampling) {
+      if (logger.isInfoEnabled()) {
+        logger.info("createOIVis: {} points - experimental instrument: VisAmp/Phi errors computed using {} random complex visiblities", nPoints, N_SAMPLES);
+      }
+    }
 
-      // jd from HA :
-      jd = this.sc.convertHAToJD(this.obsHa[i], this.precRA);
+    // enable parallel jobs if many points using user model:
+    final int nJobs = (doNoiseSampling && nPoints > JOB_THRESHOLD_NOISE_SAMPLES) ? jobExecutor.getMaxParallelJob() : 1;
 
-      // UTC :
-      time = calendarToTime(this.sc.toCalendar(jd, false), calObs);
+    // computation tasks:
+    final Runnable[] jobs = new Runnable[nJobs];
 
-      // modified julian day :
-      mjd = AstroSkyCalc.mjd(jd);
+    // create tasks:
+    for (int i = 0; i < nJobs; i++) {
+      final int jobIndex = i;
 
-      j = 0;
+      jobs[i] = new Runnable() {
+        @Override
+        public void run() {
+          // random instance dedicated to this thread:
+          final Random threadRandom = ThreadLocalRandom.current();
 
-      // Iterate on baselines :
-      for (final UVRangeBaseLineData uvBL : this.targetUVObservability) {
+          // vars:
+          double jd, time, mjd;
+          double u, v;
+          double visRe, visIm, flux, vAmp, vPhi, visErrRe, visErrIm;
 
-        k = this.nBaseLines * i + j;
+          double diff, ampSquareDiffAcc, phiSquareDiffAcc;
+          final MutableComplex visComplexSample = new MutableComplex();
 
-        // target id
-        targetIds[k] = TARGET_ID;
+          // Iterate on HA points :
+          for (int i = 0, j, k, l, n; i < nHAPoints; i++) {
 
-        // UTC :
-        times[k] = time;
+            // jd from HA :
+            jd = sc.convertHAToJD(obsHa[i], precRA);
 
-        // modified julian day :
-        mjds[k] = mjd;
+            // UTC :
+            time = calendarToTime(sc.toCalendar(jd, false), calObs);
 
-        // integration time (s) :
-        intTimes[k] = this.integrationTime;
+            // modified julian day :
+            mjd = AstroSkyCalc.mjd(jd);
 
-        // UV coords (m) :
-        u = uvBL.getU()[i];
-        v = uvBL.getV()[i];
+            j = 0;
 
-        uCoords[k] = u;
-        vCoords[k] = v;
+            // Iterate on baselines :
+            for (final UVRangeBaseLineData uvBL : targetUVObservability) {
 
-        // if target has models and errors are valid, then complex visibility are computed :
-        if (!this.hasModel || !this.errorValid) {
-          // Invalid => NaN value :
+              k = nBaseLines * i + j;
 
-          // Iterate on wave lengths :
-          for (l = 0; l < this.nWaveLengths; l++) {
-            visData[k][l][0] = Float.NaN;
-            visData[k][l][1] = Float.NaN;
+              // job parallelism:
+              if (k % nJobs == jobIndex) {
 
-            visErr[k][l][0] = Float.NaN;
-            visErr[k][l][1] = Float.NaN;
+                // target id
+                targetIds[k] = TARGET_ID;
 
-            visAmp[k][l] = Double.NaN;
-            visAmpErr[k][l] = Double.NaN;
+                // UTC :
+                times[k] = time;
 
-            visPhi[k][l] = Double.NaN;
-            visPhiErr[k][l] = Double.NaN;
+                // modified julian day :
+                mjds[k] = mjd;
 
-            // mark this value as invalid :
-            flags[k][l] = true;
-          }
+                // integration time (s) :
+                intTimes[k] = integrationTime;
 
-        } else {
+                // UV coords (m) :
+                u = uvBL.getU()[i];
+                v = uvBL.getV()[i];
 
-          // Iterate on wave lengths :
-          for (l = 0; l < this.nWaveLengths; l++) {
+                uCoords[k] = u;
+                vCoords[k] = v;
 
-            // pure complex visibility data :
-            visRe = this.visComplex[k][l].getReal();
-            visIm = this.visComplex[k][l].getImaginary();
+                // if target has models and errors are valid, then complex visibility are computed :
+                if (!hasModel || !errorValid) {
+                  // Invalid => NaN value :
 
-            // pure visibility amplitude :
-            vAmp = this.visComplex[k][l].abs();
+                  // Iterate on wave lengths :
+                  for (l = 0; l < nWaveLengths; l++) {
+                    visData[k][l][0] = Float.NaN;
+                    visData[k][l][1] = Float.NaN;
 
-            // pure correlated fluxes or NaN:
-            flux = this.noiseService.computeCorrelatedFlux(vAmp);
+                    visErr[k][l][0] = Float.NaN;
+                    visErr[k][l][1] = Float.NaN;
 
-            // complex visibility error : visErrRe = visErrIm = visAmpErr / SQRT(2) or Complex.NaN :
-            visErrRe = this.visError[k][l].getReal();
-            visErrIm = this.visError[k][l].getImaginary();
+                    visAmp[k][l] = Double.NaN;
+                    visAmpErr[k][l] = Double.NaN;
 
-            // error on correlated fluxes :
-            visErr[k][l][0] = (float) (flux * visErrRe);
-            visErr[k][l][1] = (float) (flux * visErrIm);
+                    visPhi[k][l] = Double.NaN;
+                    visPhiErr[k][l] = Double.NaN;
 
-            if (this.doNoise) {
-              // add gaussian noise with sigma = visErrRe / visErrIm :
-              visComplexNoisy[k][l] = new ImmutableComplex(
-                      visRe + VisNoiseService.gaussianNoise(this.random, visErrRe),
-                      visIm + VisNoiseService.gaussianNoise(this.random, visErrIm)); // immutable complex for safety
-            } else {
-              visComplexNoisy[k][l] = this.visComplex[k][l];
-            }
+                    // mark this value as invalid :
+                    flags[k][l] = true;
+                  }
 
-            // store pure (0..1) or noisy correlated fluxes (NaN if no flux):
-            visData[k][l][0] = (float) (flux * visComplexNoisy[k][l].getReal());
-            visData[k][l][1] = (float) (flux * visComplexNoisy[k][l].getImaginary());
+                } else {
 
-            if (!isAmber) {
-              if (this.instrumentExperimental) {
+                  // Iterate on wave lengths :
+                  for (l = 0; l < nWaveLengths; l++) {
 
-                // For experimental instruments: VisAmp/Phi are only amplitude and phase of complex visibility and errors are undefined:
-                visAmp[k][l] = visComplexNoisy[k][l].abs();
-                visPhi[k][l] = Math.toDegrees(visComplexNoisy[k][l].getArgument());
+                    // pure complex visibility data :
+                    visRe = visComplex[k][l].getReal();
+                    visIm = visComplex[k][l].getImaginary();
 
-                // use NSamples random visComplex realisations to compute standard deviation for both visAmp / visPhi:
+                    // pure visibility amplitude :
+                    vAmp = visComplex[k][l].abs();
 
-                // pure visibility phase :
-                vPhi = this.visComplex[k][l].getArgument();
+                    // pure correlated fluxes or NaN:
+                    flux = noiseService.computeCorrelatedFlux(vAmp);
 
-                // howto ensure that errors on Im / Re are inside error disk ?
-                ampSquareDiffAcc = 0d;
-                phiSquareDiffAcc = 0d;
+                    // complex visibility error : visErrRe = visErrIm = visAmpErr / SQRT(2) or Complex.NaN :
+                    visErrRe = visError[k][l].getReal();
+                    visErrIm = visError[k][l].getImaginary();
 
-                for (n = 0; n < NSamples; n++) {
-                  // update nth sample:
-                  visComplexSample.updateComplex(
-                          visRe + VisNoiseService.gaussianNoise(this.random, visErrRe),
-                          visIm + VisNoiseService.gaussianNoise(this.random, visErrIm));
+                    // error on correlated fluxes :
+                    visErr[k][l][0] = (float) (flux * visErrRe);
+                    visErr[k][l][1] = (float) (flux * visErrIm);
 
-                  // compute square distance to visAmp mean:
-                  diff = visComplexSample.abs() - vAmp;
+                    if (doNoise) {
+                      // add gaussian noise with sigma = visErrRe / visErrIm :
+                      visComplexNoisy[k][l] = new ImmutableComplex(
+                              visRe + VisNoiseService.gaussianNoise(threadRandom, visErrRe),
+                              visIm + VisNoiseService.gaussianNoise(threadRandom, visErrIm)); // immutable complex for safety
+                    } else {
+                      visComplexNoisy[k][l] = visComplex[k][l];
+                    }
 
-                  ampSquareDiffAcc += diff * diff;
+                    // store pure (0..1) or noisy correlated fluxes (NaN if no flux):
+                    visData[k][l][0] = (float) (flux * visComplexNoisy[k][l].getReal());
+                    visData[k][l][1] = (float) (flux * visComplexNoisy[k][l].getImaginary());
 
-                  // compute square distance to visPhi mean:
-                  diff = visComplexSample.getArgument() - vPhi;
+                    if (!isAmber) {
+                      if (instrumentExperimental) {
 
-                  phiSquareDiffAcc += diff * diff;
+                        // For experimental instruments: VisAmp/Phi are only amplitude and phase of complex visibility and errors are undefined:
+                        visAmp[k][l] = visComplexNoisy[k][l].abs();
+                        visPhi[k][l] = Math.toDegrees(visComplexNoisy[k][l].getArgument());
+
+                        // use NSamples random visComplex realisations to compute standard deviation for both visAmp / visPhi:
+
+                        // pure visibility phase :
+                        vPhi = visComplex[k][l].getArgument();
+
+                        // howto ensure that errors on Im / Re are inside error disk ?
+                        ampSquareDiffAcc = 0d;
+                        phiSquareDiffAcc = 0d;
+
+                        for (n = 0; n < N_SAMPLES; n++) {
+                          // update nth sample:
+                          visComplexSample.updateComplex(
+                                  visRe + VisNoiseService.gaussianNoise(threadRandom, visErrRe),
+                                  visIm + VisNoiseService.gaussianNoise(threadRandom, visErrIm));
+
+                          // compute square distance to visAmp mean:
+                          diff = visComplexSample.abs() - vAmp;
+
+                          ampSquareDiffAcc += diff * diff;
+
+                          // compute square distance to visPhi mean:
+                          diff = visComplexSample.getArgument() - vPhi;
+
+                          phiSquareDiffAcc += diff * diff;
+                        }
+
+                        // standard deviation on vis amplitude:
+                        visAmpErr[k][l] = Math.sqrt(ampSquareDiffAcc / (N_SAMPLES - 1));
+
+                        // standard deviation on vis phase:
+                        visPhiErr[k][l] = Math.toDegrees(Math.sqrt(phiSquareDiffAcc / (N_SAMPLES - 1)));
+
+                      } else {
+                        // Waiting for explanations on every instrument processing to compute VisAmp/Phi :
+                        // following values are considered as invalid :
+                        visAmp[k][l] = Double.NaN;
+                        visAmpErr[k][l] = Double.NaN;
+
+                        visPhi[k][l] = Double.NaN;
+                        visPhiErr[k][l] = Double.NaN;
+                      }
+                    }
+
+                    // mark this value as valid only if error is valid :
+                    flags[k][l] = !errorValid;
+                  }
                 }
 
-                // standard deviation on vis amplitude:
-                visAmpErr[k][l] = Math.sqrt(ampSquareDiffAcc / (NSamples - 1));
-
-                // standard deviation on vis phase:
-                visPhiErr[k][l] = Math.toDegrees(Math.sqrt(phiSquareDiffAcc / (NSamples - 1)));
-
-              } else {
-                // Waiting for explanations on every instrument processing to compute VisAmp/Phi :
-                // following values are considered as invalid :
-                visAmp[k][l] = Double.NaN;
-                visAmpErr[k][l] = Double.NaN;
-
-                visPhi[k][l] = Double.NaN;
-                visPhiErr[k][l] = Double.NaN;
+                // station indexes :
+                staIndexes[k] = baseLineMapping.get(uvBL.getBaseLine());
               }
-            }
 
-            // mark this value as valid only if error is valid :
-            flags[k][l] = !this.errorValid;
-          }
+              // increment j:
+              j++;
+            } // baselines
+          } // HA
         }
+      };
+    }
 
-        // station indexes :
-        staIndexes[k] = this.baseLineMapping.get(uvBL.getBaseLine());
+    if (nJobs > 1) {
+      // execute jobs in parallel:
+      final Future<?>[] futures = jobExecutor.fork(jobs);
 
-        j++;
-      }
+      logger.debug("wait for jobs to terminate ...");
+
+      jobExecutor.join("OIFitsCreatorService.createOIVis", futures);
+
+    } else {
+      // execute the single task using the current thread:
+      jobs[0].run();
     }
 
     /* Compute visAmp / visPhi as amber does */
