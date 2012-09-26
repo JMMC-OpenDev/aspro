@@ -263,6 +263,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     this.add(this.chartPanel, BorderLayout.CENTER);
 
     this.scroller = new JScrollBar(JScrollBar.VERTICAL, 0, 0, 0, 0);
+    this.scroller.setName("scroller");
 
     this.scroller.getModel().addChangeListener(new ChangeListener() {
       @Override

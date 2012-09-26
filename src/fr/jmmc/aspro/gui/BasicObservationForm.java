@@ -253,6 +253,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     jPanelTargets.add(jPanelTargetsRight, gridBagConstraints);
 
     jButtonSkyCalc.setText("sky");
+    jButtonSkyCalc.setName("jButtonSkyCalc"); // NOI18N
     jButtonSkyCalc.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(java.awt.event.ActionEvent evt) {
         jButtonSkyCalcActionPerformed(evt);
@@ -483,7 +484,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     jCheckBoxWind.setText("Wind");
     jCheckBoxWind.setHorizontalTextPosition(javax.swing.SwingConstants.LEADING);
     jCheckBoxWind.setIconTextGap(6);
-    jCheckBoxWind.setName("jCheckBoxNightLimit"); // NOI18N
+    jCheckBoxWind.setName("jCheckBoxWind"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 2;

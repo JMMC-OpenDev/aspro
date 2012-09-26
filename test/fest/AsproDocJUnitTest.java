@@ -3,31 +3,27 @@
  ******************************************************************************/
 package fest;
 
-import fr.jmmc.jmcs.data.preference.PreferencesException;
-import static java.awt.event.KeyEvent.*;
-import java.util.logging.Level;
-import static org.fest.swing.core.KeyPressInfo.*;
-import static org.fest.swing.core.matcher.DialogMatcher.*;
-
 import com.mortennobel.imagescaling.AdvancedResizeOp;
 import com.mortennobel.imagescaling.ResampleOp;
-
 import fest.common.JmcsApplicationSetup;
-
 import fest.common.JmcsFestSwingJUnitTestCase;
-
 import fr.jmmc.aspro.Preferences;
 import fr.jmmc.aspro.gui.SettingPanel;
+import fr.jmmc.aspro.gui.util.WindWidget;
+import fr.jmmc.jmcs.data.preference.PreferencesException;
 import java.awt.Frame;
+import static java.awt.event.KeyEvent.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.logging.Level;
 import javax.swing.JComponent;
 import javax.swing.JFormattedTextField;
 import javax.swing.JList;
 import org.apache.commons.lang.SystemUtils;
-
 import org.fest.swing.annotation.GUITest;
 import org.fest.swing.core.GenericTypeMatcher;
+import static org.fest.swing.core.KeyPressInfo.*;
+import static org.fest.swing.core.matcher.DialogMatcher.*;
 import org.fest.swing.core.matcher.FrameMatcher;
 import org.fest.swing.core.matcher.JButtonMatcher;
 import org.fest.swing.core.matcher.JTextComponentMatcher;
@@ -38,7 +34,6 @@ import org.fest.swing.fixture.FrameFixture;
 import org.fest.swing.fixture.JPanelFixture;
 import org.fest.swing.fixture.JTextComponentFixture;
 import org.fest.swing.util.Platform;
-
 import org.junit.Test;
 
 /**
@@ -56,13 +51,13 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
    */
   static {
     // Test JDK 1.6
-    
+
     if (!SystemUtils.IS_JAVA_1_6) {
       logger.warning("Please use a JVM 1.6 (Sun) before running tests (fonts and LAF may be wrong) !");
       System.exit(1);
     }
-    
-    
+
+
     // disable dev LAF menu :
     System.setProperty("jmcs.laf.menu", "false");
 
@@ -108,6 +103,92 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
   @GUITest
   public void captureMain() {
     captureMainForm("Aspro2-main.png");
+  }
+
+  /**
+   * Capture the main panel with wind compass enabled
+   */
+  @Test
+  @GUITest
+  public void captureWindCompass() {
+    // enable wind restriction:
+    window.checkBox("jCheckBoxWind").check();
+
+    final WindWidget windWidget = robot().finder().findByName("WindWidget", WindWidget.class);
+
+    GuiActionRunner.execute(new GuiTask() {
+      @Override
+      protected void executeInEDT() {
+        windWidget.setValue(60d);
+      }
+    });
+
+    // waits for computation to finish :
+    AsproTestUtils.checkRunningTasks();
+
+    // Capture observability plot :
+    window.tabbedPane().selectTab(SettingPanel.TAB_OBSERVABILITY);
+    saveScreenshot(window, "Aspro2-wind-obs.png");
+
+    final JPanelFixture panel = window.panel("observabilityPanel");
+
+    // enable detailed plot :
+    panel.checkBox("jCheckBoxDetailedOutput").check();
+
+    // waits for computation to finish :
+    AsproTestUtils.checkRunningTasks();
+
+    panel.scrollBar("scroller").scrollToMaximum(); // see HD 1234
+
+    // Capture observability plot of detailed plot :
+    saveScreenshot(window.tabbedPane(), "Aspro2-wind-obs-det.png");
+
+    panel.scrollBar("scroller").scrollTo(8); // see ETA TAU (moon) [0 to 14]
+
+    // Capture observability plot of detailed plot :
+    saveScreenshot(window.tabbedPane(), "Aspro2-moon-obs-det.png");
+
+
+    // disable detailed plot :
+    panel.checkBox("jCheckBoxDetailedOutput").uncheck();
+
+    // disable wind restriction:
+    GuiActionRunner.execute(new GuiTask() {
+      @Override
+      protected void executeInEDT() {
+        windWidget.setValue(0d);
+      }
+    });
+    window.checkBox("jCheckBoxWind").uncheck();
+
+    // waits for computation to finish :
+    AsproTestUtils.checkRunningTasks();
+
+    System.exit(1);
+  }
+
+  /**
+   * Capture the JSkyCalc windows
+   */
+  @Test
+  @GUITest
+  public void captureJSkyCalc() {
+    window.button("jButtonSkyCalc").click();
+
+    final FrameFixture skyCalcWin = getFrame("JSkyCalc");
+
+    // Capture SkyCalcWindow screenshot :
+    saveScreenshot(skyCalcWin, "Aspro2-SkyCalcWindow.png");
+
+    skyCalcWin.button(JButtonMatcher.withText("Sky Display")).click();
+
+    final FrameFixture skyDispWin = getFrame("Sky Display");
+
+    // Capture SkyDisplay screenshot :
+    saveScreenshot(skyDispWin, "Aspro2-SkyDisplay.png");
+
+    // close all JSkyCalc windows:
+    skyCalcWin.close();
   }
 
   /**
@@ -169,13 +250,11 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
     final int width = 350;
     final int height = Math.round(1f * width * image.getHeight() / image.getWidth());
 
-    BufferedImage rescaledImage = null;
-    ResampleOp resampleOp = null;
-
     // use Lanczos3 resampler and soft unsharp mask :
-    resampleOp = new ResampleOp(width, height);
+    final ResampleOp resampleOp = new ResampleOp(width, height);
     resampleOp.setUnsharpenMask(AdvancedResizeOp.UnsharpenMask.Soft);
-    rescaledImage = resampleOp.filter(image, null);
+
+    final BufferedImage rescaledImage = resampleOp.filter(image, null);
 
     saveImage(rescaledImage, "Aspro2-screen-small.png");
 
@@ -287,7 +366,6 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
       frame.moveToFront();
 
       frame.list(new GenericTypeMatcher<JList>(JList.class) {
-
         @Override
         protected boolean isMatching(JList component) {
           return "org.astrogrid.samp.gui.ClientListCellRenderer".equals(component.getCellRenderer().getClass().getName());
@@ -393,7 +471,6 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
     final JFormattedTextField jTextPoPs = (JFormattedTextField) form.textBox("jTextPoPs").component();
 
     GuiActionRunner.execute(new GuiTask() {
-
       @Override
       protected void executeInEDT() {
         // Integer field :
@@ -488,6 +565,9 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
 
     // Capture UV Coverage plot :
     showPlotTab(SettingPanel.TAB_UV_COVERAGE, "Aspro2-multiConf-uv.png");
+
+    // Capture OIFits viewer plot :
+    showPlotTab(SettingPanel.TAB_OIFITS_VIEWER, "Aspro2-multiConf-oifitsViewer.png");
   }
 
   /**
@@ -502,7 +582,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
     } catch (PreferencesException pe) {
       logger.log(Level.SEVERE, "setPreference failed", pe);
     }
-    
+
     // hack to solve focus trouble in menu items :
     window.menuItemWithPath("File").focus();
     window.menuItemWithPath("File", "Open observation").click();
@@ -536,7 +616,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
 
     // disable Compute OIFits data :
     panel.checkBox("jCheckBoxDoOIFits").uncheck();
-    
+
     // zoom uv max (trigger uv model to compute again):
     panel.textBox("jFieldUVMax").setText("20.00");
 
@@ -597,7 +677,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
   }
 
   /* 
-  --- Utility methods  ---------------------------------------------------------
+   --- Utility methods  ---------------------------------------------------------
    */
   /**
    * Export Observing block file using default file name

@@ -86,6 +86,7 @@ public abstract class WindWidget extends JPanel {
      * Constructor
      */
     private WindCompassWidget() {
+      setName("WindWidget");
       initComponents();
     }
 
@@ -172,6 +173,7 @@ public abstract class WindWidget extends JPanel {
      * Constructor
      */
     private WindSliderWidget() {
+      setName("WindWidget");
       initComponents();
     }
 
