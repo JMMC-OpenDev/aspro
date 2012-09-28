@@ -19,7 +19,7 @@
   </company>
 
   <program name="Aspro2" version="0.9.3 beta 1"/>
-  <compilation date="25/09/2012" compiler="JDK 1.5.0_16"/>
+  <compilation date="28/09/2012" compiler="JDK 1.5.0_16"/>
   
   <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
   <authors>the JMMC Technical Group</authors>
@@ -169,6 +169,7 @@
   <releasenotes>
     <release version="0.9.3">
       <prerelease version="0.9.3 beta 1">
+        <change type="BUGFIX">Fixed incorrect time indicated in moon avoidance warning message</change>
         <change type="CHANGE">Optimized visAmp/visPhi error computation for experimental instruments (GRAVITY, MATISSE) (multithreading)</change>
       </prerelease>
     </release>

@@ -1489,7 +1489,7 @@ public final class ObservabilityService {
 
         if (separation < minSeparation) {
           minSeparation = separation;
-          minJd = jdMid;
+          minJd = jd;
         }
 
         // use uncertainty:
