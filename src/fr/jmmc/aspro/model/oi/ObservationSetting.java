@@ -647,7 +647,7 @@ public class ObservationSetting
     }
 
     // replace invalid characters :
-    final String altTargetName = targetName.replaceAll(fr.jmmc.aspro.AsproConstants.REGEXP_INVALID_TEXT_CHARS, "_");
+    final String altTargetName = fr.jmmc.jmcs.util.StringUtils.replaceNonAlphaNumericCharsByUnderscore(targetName);
 
     sb.append(altTargetName).append('_');
 
@@ -655,7 +655,7 @@ public class ObservationSetting
 
     sb.append(instrumentName).append('_');
 
-    final String baseLine = this.getInstrumentConfiguration().getStations().replaceAll(" ", "-");
+    final String baseLine = fr.jmmc.jmcs.util.StringUtils.replaceWhiteSpacesByMinusSign(this.getInstrumentConfiguration().getStations());
 
     sb.append(baseLine).append('_');
 
