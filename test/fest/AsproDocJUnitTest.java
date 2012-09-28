@@ -163,8 +163,6 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
 
     // waits for computation to finish :
     AsproTestUtils.checkRunningTasks();
-
-    System.exit(1);
   }
 
   /**
@@ -199,7 +197,23 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
   public void shouldShowObservability() {
 
     // Capture observability plot :
-    showPlotTab(SettingPanel.TAB_OBSERVABILITY, "Aspro2-obs.png");
+    window.tabbedPane().selectTab(SettingPanel.TAB_OBSERVABILITY);
+
+    enableTooltips(true);
+    
+    // move the mouse on the first observability interval (top right corner):
+    robot().moveMouse(window.component(), 520, 320);
+    
+    // let tooltip appear:
+    pauseMedium();
+    
+    saveScreenshot(window, "Aspro2-obs.png");
+
+    enableTooltips(false);
+    
+    
+    // export PDF :
+    exportPDF();
 
     final JPanelFixture panel = window.panel("observabilityPanel");
 
