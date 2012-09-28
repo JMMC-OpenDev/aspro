@@ -7,17 +7,17 @@ import edu.dartmouth.AstroSkyCalc;
 import edu.dartmouth.AstroSkyCalcObservation;
 import edu.dartmouth.JSkyCalc;
 import edu.dartmouth.Site;
-import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.Aspro2;
+import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.Preferences;
 import fr.jmmc.aspro.gui.util.TargetListRenderer;
 import fr.jmmc.aspro.gui.util.TargetRenderer;
 import fr.jmmc.aspro.gui.util.WindWidget;
 import fr.jmmc.aspro.model.ConfigurationManager;
-import fr.jmmc.aspro.model.event.ObservationListener;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.WarningContainer;
 import fr.jmmc.aspro.model.event.ObservationEvent;
+import fr.jmmc.aspro.model.event.ObservationListener;
 import fr.jmmc.aspro.model.event.UpdateObservationEvent;
 import fr.jmmc.aspro.model.event.WarningContainerEvent;
 import fr.jmmc.aspro.model.oi.FocalInstrumentConfigurationChoice;
@@ -36,6 +36,7 @@ import fr.jmmc.jmcs.gui.component.GenericListModel;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
 import fr.jmmc.jmcs.resource.image.ResourceImage;
+import fr.jmmc.jmcs.util.StringUtils;
 import fr.jmmc.jmcs.util.logging.ApplicationLogSingleton;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
@@ -56,8 +57,6 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Vector;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListSelectionModel;
 import javax.swing.ImageIcon;
@@ -71,6 +70,8 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.NumberFormatter;
 import javax.xml.datatype.XMLGregorianCalendar;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This form allows the user to select main observation settings : date, interferometer, configuration, stations and targets ...
@@ -1531,7 +1532,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         sb.append(msg).append("<br>");
 
         // add warning to the warning log:
-        _warningLogger.info(msg);
+        _warningLogger.info(StringUtils.removeTags(msg));
       }
       sb.append("</html>");
       this.jLabelStatus.setToolTipText(sb.toString());
