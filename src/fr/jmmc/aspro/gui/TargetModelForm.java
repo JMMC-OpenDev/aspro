@@ -12,16 +12,17 @@ import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.aspro.model.oi.UserModel;
 import fr.jmmc.aspro.service.UserModelService;
-import fr.jmmc.jmcs.gui.component.MessagePane;
-import fr.jmmc.jmcs.gui.component.NumericJTable;
 import fr.jmmc.jmal.model.ModelManager;
 import fr.jmmc.jmal.model.gui.ModelParameterTableModel;
 import fr.jmmc.jmal.model.gui.ModelParameterTableModel.EditMode;
 import fr.jmmc.jmal.model.gui.ModelParameterTableModel.Mode;
 import fr.jmmc.jmal.model.targetmodel.Model;
 import fr.jmmc.jmcs.gui.component.FileChooser;
+import fr.jmmc.jmcs.gui.component.MessagePane;
+import fr.jmmc.jmcs.gui.component.NumericJTable;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
 import fr.jmmc.jmcs.util.MimeType;
+import fr.jmmc.jmcs.util.StringUtils;
 import fr.nom.tam.fits.FitsException;
 import java.awt.Color;
 import java.awt.Component;
@@ -30,12 +31,9 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComponent;
-import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
@@ -48,6 +46,8 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class represents the target model editor ...
@@ -472,7 +472,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
       final String desc = ModelManager.getInstance().getModelDescription(type);
 
       // note : use html to have multi line label :
-      this.jLabelModelDescrption.setText("<html>" + desc.replaceAll("\n", "<br>") + "</html>");
+      this.jLabelModelDescrption.setText("<html>" + StringUtils.replaceCR(desc, "<br>") + "</html>");
     }
   }
 

@@ -25,6 +25,7 @@ import fr.jmmc.aspro.service.ObservabilityService;
 import fr.jmmc.jmal.Band;
 import fr.jmmc.jmcs.util.FileUtils;
 import fr.jmmc.jmcs.util.MimeType;
+import fr.jmmc.jmcs.util.StringUtils;
 import java.io.File;
 import java.io.IOException;
 import java.text.DateFormat;
@@ -230,7 +231,7 @@ public class ExportOBVLTI {
             df6.format((target.getPMDEC() != null) ? target.getPMDEC().doubleValue() / 1000d : 0d));
 
     // replace invalid characters (i.e. not alpha numeric) :
-    final String altName = target.getName().replaceAll(AsproConstants.REGEXP_INVALID_TEXT_CHARS, "_");
+    final String altName = StringUtils.replaceNonAlphaNumericCharsByUnderscore(target.getName());
     document = document.replaceFirst(KEY_TARGET_NAME, altName);
 
     // Later : atmosphere / seeing
@@ -348,13 +349,13 @@ public class ExportOBVLTI {
       logger.debug("lstTimeIntervals: {}", lstTimeIntervals);
     }
 
-    document = document.replaceAll(KEY_LST_INTERVALS, lstTimeIntervals);
+    document = document.replaceFirst(KEY_LST_INTERVALS, lstTimeIntervals);
 
     if (logger.isDebugEnabled()) {
       logger.debug("absTimeList: {}", absTimeList);
     }
 
-    document = document.replaceAll(KEY_ABS_TIME_LIST, absTimeList);
+    document = document.replaceFirst(KEY_ABS_TIME_LIST, absTimeList);
 
     return document;
   }
@@ -425,12 +426,12 @@ public class ExportOBVLTI {
     }
 
     sb.append(' ');
-    sb.append(target.getName().replaceAll(AsproConstants.REGEXP_INVALID_TEXT_CHARS, "_"));
+    sb.append(StringUtils.replaceNonAlphaNumericCharsByUnderscore(target.getName()));
 
     // Spectral type at the end as it can exceed maximum length: 
     if (target.getSPECTYP() != null) {
       sb.append(' ');
-      sb.append(target.getSPECTYP().replaceAll(" ", "_"));
+      sb.append(StringUtils.replaceWhiteSpacesByUnderscore(target.getSPECTYP()));
     }
 
     String OBName = sb.toString();
@@ -445,7 +446,7 @@ public class ExportOBVLTI {
       logger.debug("OBName: {}", OBName);
     }
 
-    return document.replaceAll(KEY_OB_NAME, OBName); // 32 chars max
+    return document.replaceFirst(KEY_OB_NAME, OBName); // 32 chars max
   }
 
   /**

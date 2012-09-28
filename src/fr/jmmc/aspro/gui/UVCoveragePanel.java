@@ -3,34 +3,25 @@
  ******************************************************************************/
 package fr.jmmc.aspro.gui;
 
-import fr.jmmc.jmcs.gui.component.Disposable;
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.Preferences;
+import fr.jmmc.aspro.gui.action.AsproExportPDFAction;
 import fr.jmmc.aspro.gui.action.ExportOBVLTIAction;
 import fr.jmmc.aspro.gui.action.ExportOBVegaAction;
-import fr.jmmc.aspro.gui.action.AsproExportPDFAction;
-import fr.jmmc.oiexplorer.core.gui.chart.BoundedNumberAxis;
-import fr.jmmc.oiexplorer.core.gui.chart.ChartUtils;
 import fr.jmmc.aspro.gui.chart.ColorModelPaintScale;
-import fr.jmmc.oiexplorer.core.gui.chart.PDFOptions;
 import fr.jmmc.aspro.gui.chart.PaintLogScaleLegend;
-import fr.jmmc.oiexplorer.core.gui.chart.SquareChartPanel;
-import fr.jmmc.oiexplorer.core.gui.chart.SquareXYPlot;
-import fr.jmmc.oiexplorer.core.gui.chart.ZoomEvent;
-import fr.jmmc.oiexplorer.core.gui.chart.ZoomEventListener;
 import fr.jmmc.aspro.gui.task.AsproTaskRegistry;
 import fr.jmmc.aspro.gui.task.ObservationCollectionTaskSwingWorker;
-import fr.jmmc.oiexplorer.core.gui.chart.ColorPalette;
 import fr.jmmc.aspro.gui.util.FieldSliderAdapter;
 import fr.jmmc.aspro.model.BaseLine;
 import fr.jmmc.aspro.model.ConfigurationManager;
 import fr.jmmc.aspro.model.ObservationCollectionUVData;
-import fr.jmmc.aspro.model.event.ObservationListener;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.Range;
 import fr.jmmc.aspro.model.WarningContainer;
 import fr.jmmc.aspro.model.event.ObservabilityEvent;
 import fr.jmmc.aspro.model.event.ObservationEvent;
+import fr.jmmc.aspro.model.event.ObservationListener;
 import fr.jmmc.aspro.model.event.TargetSelectionEvent;
 import fr.jmmc.aspro.model.event.UpdateObservationEvent;
 import fr.jmmc.aspro.model.observability.ObservabilityData;
@@ -38,33 +29,43 @@ import fr.jmmc.aspro.model.observability.StarData;
 import fr.jmmc.aspro.model.oi.AtmosphereQuality;
 import fr.jmmc.aspro.model.oi.InterferometerConfiguration;
 import fr.jmmc.aspro.model.oi.ObservationCollection;
-import fr.jmmc.aspro.model.uvcoverage.UVCoverageData;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetConfiguration;
 import fr.jmmc.aspro.model.oi.UserModel;
 import fr.jmmc.aspro.model.util.AtmosphereQualityUtils;
 import fr.jmmc.aspro.model.uvcoverage.UVBaseLineData;
+import fr.jmmc.aspro.model.uvcoverage.UVCoverageData;
 import fr.jmmc.aspro.model.uvcoverage.UVRangeBaseLineData;
 import fr.jmmc.aspro.ob.ExportOBMode;
 import fr.jmmc.aspro.service.NoiseService;
 import fr.jmmc.aspro.service.OIFitsCreatorService;
 import fr.jmmc.aspro.service.UVCoverageService;
 import fr.jmmc.aspro.service.UserModelService;
-import fr.jmmc.jmcs.gui.component.MessagePane;
-import fr.jmmc.jmcs.gui.component.StatusBar;
-import fr.jmmc.jmcs.gui.task.TaskSwingWorker;
 import fr.jmmc.jmal.image.ColorModels;
 import fr.jmmc.jmal.image.ColorScale;
-import fr.jmmc.jmal.model.ModelUVMapService;
 import fr.jmmc.jmal.model.ImageMode;
+import fr.jmmc.jmal.model.ModelUVMapService;
 import fr.jmmc.jmal.model.UVMapData;
 import fr.jmmc.jmal.model.VisNoiseService;
 import fr.jmmc.jmal.model.targetmodel.Model;
+import fr.jmmc.jmcs.gui.component.Disposable;
+import fr.jmmc.jmcs.gui.component.MessagePane;
+import fr.jmmc.jmcs.gui.component.StatusBar;
+import fr.jmmc.jmcs.gui.task.TaskSwingWorker;
 import fr.jmmc.jmcs.gui.task.TaskSwingWorkerExecutor;
 import fr.jmmc.jmcs.util.ObjectUtils;
+import fr.jmmc.jmcs.util.StringUtils;
 import fr.jmmc.jmcs.util.concurrent.InterruptedJobException;
 import fr.jmmc.oiexplorer.core.gui.PDFExportable;
+import fr.jmmc.oiexplorer.core.gui.chart.BoundedNumberAxis;
+import fr.jmmc.oiexplorer.core.gui.chart.ChartUtils;
+import fr.jmmc.oiexplorer.core.gui.chart.ColorPalette;
+import fr.jmmc.oiexplorer.core.gui.chart.PDFOptions;
+import fr.jmmc.oiexplorer.core.gui.chart.SquareChartPanel;
+import fr.jmmc.oiexplorer.core.gui.chart.SquareXYPlot;
+import fr.jmmc.oiexplorer.core.gui.chart.ZoomEvent;
+import fr.jmmc.oiexplorer.core.gui.chart.ZoomEventListener;
 import fr.jmmc.oiexplorer.core.util.Constants;
 import fr.jmmc.oitools.image.FitsImage;
 import fr.jmmc.oitools.model.OIFitsFile;
@@ -87,8 +88,6 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.Vector;
 import java.util.concurrent.ExecutionException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JFormattedTextField;
 import javax.swing.event.ChangeEvent;
@@ -109,6 +108,8 @@ import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 import org.jfree.ui.Layer;
 import org.jfree.ui.RectangleEdge;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This panel presents the UV coverage plot with its parameters (target, instrument mode ...)
@@ -588,7 +589,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
       final StringBuilder sb = new StringBuilder(32);
       sb.append("UV_");
-      sb.append(this.getChartData().getTargetName().replaceAll(fr.jmmc.aspro.AsproConstants.REGEXP_INVALID_TEXT_CHARS, "_")).append('_');
+      sb.append(StringUtils.replaceNonAlphaNumericCharsByUnderscore(this.getChartData().getTargetName())).append('_');
       sb.append(observation.getInstrumentConfiguration().getName()).append('_');
       sb.append(this.getChartData().getDisplayConfigurations("_", true));
       if (observation.getWhen().isNightRestriction()) {
@@ -2203,7 +2204,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
    * @return true if the given uvRect is smaller than uvRect of the reference image
    */
   private boolean computeSubUVMap(final UVMapData uvMapData, final Rectangle2D.Double uvRect) {
-    boolean doCrop = false;
+    boolean doCrop;
 
     final int imageSize = uvMapData.getUvMapSize();
 
@@ -2379,7 +2380,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
     final XYSeriesCollection dataset = new XYSeriesCollection();
 
-    XYSeries xySeries = null;
+    XYSeries xySeries;
     int n;
 
     final boolean single = chartData.isSingle();

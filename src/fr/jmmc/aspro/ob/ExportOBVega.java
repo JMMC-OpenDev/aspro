@@ -19,6 +19,7 @@ import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetConfiguration;
 import fr.jmmc.aspro.model.oi.TargetInformation;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
+import fr.jmmc.jmcs.util.StringUtils;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.List;
@@ -122,7 +123,7 @@ public final class ExportOBVega {
     final String vegaSetup = prepareVegaSetup(observation);
 
     // Prepare the baseline suffix for observation name :
-    final String baseLine = observation.getInstrumentConfiguration().getStations().replaceAll(" ", "");
+    final String baseLine = StringUtils.removeWhiteSpaces(observation.getInstrumentConfiguration().getStations());
 
     // get target user informations to have proper target ordering (science + calibrators):
     final TargetUserInformations targetUserInfos = observation.getOrCreateTargetUserInfos();
@@ -279,7 +280,7 @@ public final class ExportOBVega {
       if (isCalibrator) {
         sb.append(scienceTargetName).append(CAL_PREFIX).append(calibratorIndex);
       } else {
-        result = target.getName().replaceAll(AsproConstants.REGEXP_INVALID_TEXT_CHARS, "");
+        result = StringUtils.removeNonAlphaNumericChars(target.getName());
         sb.append(result);
       }
       sb.append(baseLine).append(SEPARATOR);
@@ -287,7 +288,7 @@ public final class ExportOBVega {
       sb.append(hdId.replace(" ", "")).append(SEPARATOR);
       // 5.Spectral Type (string)
       final String spectralType = (target.getSPECTYP() != null && target.getSPECTYP().length() > 0) ? target.getSPECTYP() : SEPARATOR;
-      sb.append(spectralType.replaceAll(" ", "_")).append(SEPARATOR);
+      sb.append(StringUtils.replaceWhiteSpacesByUnderscore(spectralType)).append(SEPARATOR);
       // 6.V magnitude (float)
       sb.append(df2.format(getMagnitude(target.getFLUXV()))).append(SEPARATOR);
       // 7.J magnitude (float)

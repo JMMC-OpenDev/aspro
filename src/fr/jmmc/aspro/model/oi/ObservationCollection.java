@@ -1,6 +1,7 @@
 
 package fr.jmmc.aspro.model.oi;
 
+import fr.jmmc.aspro.model.OIBase;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -8,7 +9,6 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
-import fr.jmmc.aspro.model.OIBase;
 
 
 /**
@@ -235,8 +235,7 @@ public class ObservationCollection
    */
   public final String getInterferometerConfiguration(final boolean encode) {
     final String result = getFirstObservation().getInterferometerConfiguration().getName();
-    return (encode)
-            ? result.replaceAll(fr.jmmc.aspro.AsproConstants.REGEXP_INVALID_TEXT_CHARS, "_") : result;
+    return (encode) ? fr.jmmc.jmcs.util.StringUtils.replaceNonAlphaNumericCharsByUnderscore(result) : result;
   }
 
   /**
@@ -268,8 +267,7 @@ public class ObservationCollection
     } else {
       result = fr.jmmc.aspro.AsproConstants.MULTI_CONF;
     }
-    return (encode)
-            ? result.replaceAll(" ", "-") : result;
+    return (encode) ? fr.jmmc.jmcs.util.StringUtils.replaceWhiteSpacesByMinusSign(result) : result;
   }
 
   /**

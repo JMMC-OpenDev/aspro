@@ -3,12 +3,12 @@
  ******************************************************************************/
 package fr.jmmc.aspro.gui.action;
 
-import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.jmcs.gui.component.FileChooser;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.gui.component.StatusBar;
 import fr.jmmc.jmcs.util.MimeType;
+import fr.jmmc.jmcs.util.StringUtils;
 import fr.jmmc.oiexplorer.core.gui.action.WaitingTaskAction;
 import fr.jmmc.oitools.model.OIArray;
 import fr.jmmc.oitools.model.OIFitsFile;
@@ -118,8 +118,7 @@ public final class ExportOIFitsAction extends WaitingTaskAction {
 
     final StringBuilder sb = new StringBuilder(32).append("Aspro2_");
 
-    final String targetName = oiFitsFile.getOiTarget().getTarget()[0];
-    final String altName = targetName.replaceAll(AsproConstants.REGEXP_INVALID_TEXT_CHARS, "_");
+    final String altName = StringUtils.replaceNonAlphaNumericCharsByUnderscore(oiFitsFile.getOiTarget().getTarget()[0]);
 
     sb.append(altName).append('_');
 
