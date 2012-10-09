@@ -404,6 +404,8 @@ public final class OIFitsCreatorService {
     // Spectral type :
     if (this.target.getSPECTYP() != null && this.target.getSPECTYP().length() > 0) {
       oiTarget.getSpecTyp()[0] = target.getSPECTYP();
+    } else {
+      oiTarget.getSpecTyp()[0] = "";
     }
 
     this.oiFitsFile.addOiTable(oiTarget);
