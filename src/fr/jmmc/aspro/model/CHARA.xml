@@ -736,7 +736,7 @@ Configuration d’enregistrement
         <parameter><name>CAMERA</name><value>RB</value></parameter>
         <parameter><name>LAMBDA</name><value>720.0</value></parameter>
         <parameter><name>SPIN</name><value>OFF</value></parameter>
-        <parameter><name>RED FILTER</name><value>2.0</value></parameter> <!-- 29/10/2012: 2.0 instead of OPEN for R2720 -->
+        <parameter><name>RED FILTER</name><value>OPEN</value></parameter> 
         <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
         <parameter><name>RECORD</name><value>RB</value></parameter>
         <parameter><name>BLOCKS</name><value>20</value></parameter>
@@ -1031,7 +1031,7 @@ Configuration d’enregistrement
         <parameter><name>CAMERA</name><value>RB</value></parameter>
         <parameter><name>LAMBDA</name><value>720.0</value></parameter>
         <parameter><name>SPIN</name><value>OFF</value></parameter>
-        <parameter><name>RED FILTER</name><value>2.0</value></parameter> <!-- 29/10/2012: 2.0 instead of OPEN for R2720 -->
+        <parameter><name>RED FILTER</name><value>OPEN</value></parameter> 
         <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
         <parameter><name>RECORD</name><value>RB</value></parameter>
         <parameter><name>BLOCKS</name><value>20</value></parameter>
@@ -1305,7 +1305,7 @@ Configuration d’enregistrement
         <parameter><name>CAMERA</name><value>RB</value></parameter>
         <parameter><name>LAMBDA</name><value>720.0</value></parameter>
         <parameter><name>SPIN</name><value>OFF</value></parameter>
-        <parameter><name>RED FILTER</name><value>2.0</value></parameter> <!-- 29/10/2012: 2.0 instead of OPEN for R2720 -->
+        <parameter><name>RED FILTER</name><value>OPEN</value></parameter> 
         <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
         <parameter><name>RECORD</name><value>RB</value></parameter>
         <parameter><name>BLOCKS</name><value>20</value></parameter>

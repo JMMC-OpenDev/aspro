@@ -399,7 +399,12 @@ public final class ExportOBVega {
     // 8. polar choice (Off, ) = OFF
     sb.append(getInstrumentModeParameter(insMode, PARAM_SPIN)).append(SEPARATOR);
     // 9. Red density = OPEN
-    sb.append(getInstrumentModeParameter(insMode, PARAM_RED_FILTER)).append(SEPARATOR);
+    // 29/10/2012: 2.0 instead of OPEN for R2720 ONLY (HACK):
+    String redFilter = getInstrumentModeParameter(insMode, PARAM_RED_FILTER);
+    if ("R2720".equals(insMode.getName())) {
+      redFilter = "2.0";
+    }
+    sb.append(redFilter).append(SEPARATOR);
     // 10.Blue density = OPEN
     sb.append(getInstrumentModeParameter(insMode, PARAM_BLUE_FILTER)).append(SEPARATOR);
     // 11.Record configuration = RB

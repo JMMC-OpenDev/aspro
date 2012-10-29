@@ -169,6 +169,7 @@
   <releasenotes>
     <release version="0.9.3">
       <prerelease version="0.9.3 beta 3">
+        <change type="FEATURE">Fixed Red filter = 2.0 for the CHARA VEGA spectral calibration OB (R2720)</change>
         <change type="FEATURE">Updated CHARA VEGA spectral configuration due to new detector setup (OB / StarList export)</change>
       </prerelease>
       <prerelease version="0.9.3 beta 2">
