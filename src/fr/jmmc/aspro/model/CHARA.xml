@@ -668,15 +668,15 @@ Configuration d’enregistrement
         <waveLengthMin>lambda - (0.15 ou 0.045 ou 0.008) / 2</waveLengthMin>
         <waveLengthMax>lambda + (0.15 ou 0.045 ou 0.008) / 2</waveLengthMax>
 
-        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>TRACKING</name><value>B</value></parameter>
         <parameter><name>SLIT</name><value>W070H4</value></parameter>
         <parameter><name>GRATING</name><value>300</value></parameter>
-        <parameter><name>CAMERA</name><value>R</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
         <parameter><name>LAMBDA</name><value>656.2</value></parameter>
         <parameter><name>SPIN</name><value>OFF</value></parameter>
         <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
-        <parameter><name>BLUE FILTER</name><value>CLOSE</value></parameter>
-        <parameter><name>RECORD</name><value>R</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>RECORD</name><value>RB</value></parameter>
         <parameter><name>BLOCKS</name><value>20</value></parameter>
         <parameter><name>FRAMES</name><value>1000</value></parameter>
       </mode>
@@ -690,15 +690,15 @@ Configuration d’enregistrement
         <waveLengthMin>0.6337</waveLengthMin>
         <waveLengthMax>0.6787</waveLengthMax>
 
-        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>TRACKING</name><value>B</value></parameter>
         <parameter><name>SLIT</name><value>W070H4</value></parameter>
         <parameter><name>GRATING</name><value>300</value></parameter>
-        <parameter><name>CAMERA</name><value>R</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
         <parameter><name>LAMBDA</name><value>656.2</value></parameter>
         <parameter><name>SPIN</name><value>OFF</value></parameter>
         <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
-        <parameter><name>BLUE FILTER</name><value>CLOSE</value></parameter>
-        <parameter><name>RECORD</name><value>R</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>RECORD</name><value>RB</value></parameter>
         <parameter><name>BLOCKS</name><value>20</value></parameter>
         <parameter><name>FRAMES</name><value>1000</value></parameter>
       </mode>
@@ -710,15 +710,15 @@ Configuration d’enregistrement
         <waveLengthMin>0.6455</waveLengthMin>
         <waveLengthMax>0.6905</waveLengthMax>
 
-        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>TRACKING</name><value>B</value></parameter>
         <parameter><name>SLIT</name><value>W070H4</value></parameter>
         <parameter><name>GRATING</name><value>300</value></parameter>
-        <parameter><name>CAMERA</name><value>R</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
         <parameter><name>LAMBDA</name><value>668.0</value></parameter>
         <parameter><name>SPIN</name><value>OFF</value></parameter>
         <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
-        <parameter><name>BLUE FILTER</name><value>CLOSE</value></parameter>
-        <parameter><name>RECORD</name><value>R</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>RECORD</name><value>RB</value></parameter>
         <parameter><name>BLOCKS</name><value>20</value></parameter>
         <parameter><name>FRAMES</name><value>1000</value></parameter>
       </mode>
@@ -730,15 +730,15 @@ Configuration d’enregistrement
         <waveLengthMin>0.6975</waveLengthMin>
         <waveLengthMax>0.7425</waveLengthMax>
 
-        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>TRACKING</name><value>B</value></parameter>
         <parameter><name>SLIT</name><value>W070H4</value></parameter>
         <parameter><name>GRATING</name><value>300</value></parameter>
-        <parameter><name>CAMERA</name><value>R</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
         <parameter><name>LAMBDA</name><value>720.0</value></parameter>
         <parameter><name>SPIN</name><value>OFF</value></parameter>
-        <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
-        <parameter><name>BLUE FILTER</name><value>CLOSE</value></parameter>
-        <parameter><name>RECORD</name><value>R</value></parameter>
+        <parameter><name>RED FILTER</name><value>2.0</value></parameter> <!-- 29/10/2012: 2.0 instead of OPEN for R2720 -->
+        <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>RECORD</name><value>RB</value></parameter>
         <parameter><name>BLOCKS</name><value>20</value></parameter>
         <parameter><name>FRAMES</name><value>1000</value></parameter>
       </mode>
@@ -751,15 +751,15 @@ Configuration d’enregistrement
         <waveLengthMin>0.6522</waveLengthMin>
         <waveLengthMax>0.6602</waveLengthMax>
 
-        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>TRACKING</name><value>B</value></parameter>
         <parameter><name>SLIT</name><value>W070H4</value></parameter>
         <parameter><name>GRATING</name><value>1800</value></parameter>
-        <parameter><name>CAMERA</name><value>R</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
         <parameter><name>LAMBDA</name><value>656.2</value></parameter>
         <parameter><name>SPIN</name><value>OFF</value></parameter>
         <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
-        <parameter><name>BLUE FILTER</name><value>CLOSE</value></parameter>
-        <parameter><name>RECORD</name><value>R</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>RECORD</name><value>RB</value></parameter>
         <parameter><name>BLOCKS</name><value>20</value></parameter>
         <parameter><name>FRAMES</name><value>1000</value></parameter>
       </mode>
@@ -771,15 +771,15 @@ Configuration d’enregistrement
         <waveLengthMin>0.5853</waveLengthMin>
         <waveLengthMax>0.5933</waveLengthMax>
 
-        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>TRACKING</name><value>B</value></parameter>
         <parameter><name>SLIT</name><value>W070H4</value></parameter>
         <parameter><name>GRATING</name><value>1800</value></parameter>
-        <parameter><name>CAMERA</name><value>R</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
         <parameter><name>LAMBDA</name><value>589.3</value></parameter>
         <parameter><name>SPIN</name><value>OFF</value></parameter>
         <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
-        <parameter><name>BLUE FILTER</name><value>CLOSE</value></parameter>
-        <parameter><name>RECORD</name><value>R</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>RECORD</name><value>RB</value></parameter>
         <parameter><name>BLOCKS</name><value>20</value></parameter>
         <parameter><name>FRAMES</name><value>1000</value></parameter>
       </mode>
@@ -791,15 +791,15 @@ Configuration d’enregistrement
         <waveLengthMin>0.7659</waveLengthMin>
         <waveLengthMax>0.7739</waveLengthMax>
 
-        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>TRACKING</name><value>B</value></parameter>
         <parameter><name>SLIT</name><value>W070H4</value></parameter>
         <parameter><name>GRATING</name><value>1800</value></parameter>
-        <parameter><name>CAMERA</name><value>R</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
         <parameter><name>LAMBDA</name><value>769.9</value></parameter>
         <parameter><name>SPIN</name><value>OFF</value></parameter>
         <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
-        <parameter><name>BLUE FILTER</name><value>CLOSE</value></parameter>
-        <parameter><name>RECORD</name><value>R</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>RECORD</name><value>RB</value></parameter>
         <parameter><name>BLOCKS</name><value>20</value></parameter>
         <parameter><name>FRAMES</name><value>1000</value></parameter>
       </mode>
@@ -811,15 +811,15 @@ Configuration d’enregistrement
         <waveLengthMin>0.8455</waveLengthMin>
         <waveLengthMax>0.8535</waveLengthMax>
 
-        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>TRACKING</name><value>B</value></parameter>
         <parameter><name>SLIT</name><value>W070H4</value></parameter>
         <parameter><name>GRATING</name><value>1800</value></parameter>
-        <parameter><name>CAMERA</name><value>R</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
         <parameter><name>LAMBDA</name><value>849.5</value></parameter>
         <parameter><name>SPIN</name><value>OFF</value></parameter>
         <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
-        <parameter><name>BLUE FILTER</name><value>CLOSE</value></parameter>
-        <parameter><name>RECORD</name><value>R</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>RECORD</name><value>RB</value></parameter>
         <parameter><name>BLOCKS</name><value>20</value></parameter>
         <parameter><name>FRAMES</name><value>1000</value></parameter>
       </mode>
@@ -831,15 +831,15 @@ Configuration d’enregistrement
         <waveLengthMin>0.850</waveLengthMin>
         <waveLengthMax>0.858</waveLengthMax>
 
-        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>TRACKING</name><value>B</value></parameter>
         <parameter><name>SLIT</name><value>W070H4</value></parameter>
         <parameter><name>GRATING</name><value>1800</value></parameter>
-        <parameter><name>CAMERA</name><value>R</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
         <parameter><name>LAMBDA</name><value>854.0</value></parameter>
         <parameter><name>SPIN</name><value>OFF</value></parameter>
         <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
-        <parameter><name>BLUE FILTER</name><value>CLOSE</value></parameter>
-        <parameter><name>RECORD</name><value>R</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>RECORD</name><value>RB</value></parameter>
         <parameter><name>BLOCKS</name><value>20</value></parameter>
         <parameter><name>FRAMES</name><value>1000</value></parameter>
       </mode>
@@ -851,15 +851,15 @@ Configuration d’enregistrement
         <waveLengthMin>0.8635</waveLengthMin>
         <waveLengthMax>0.8715</waveLengthMax>
 
-        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>TRACKING</name><value>B</value></parameter>
         <parameter><name>SLIT</name><value>W070H4</value></parameter>
         <parameter><name>GRATING</name><value>1800</value></parameter>
-        <parameter><name>CAMERA</name><value>R</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
         <parameter><name>LAMBDA</name><value>867.5</value></parameter>
         <parameter><name>SPIN</name><value>OFF</value></parameter>
         <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
-        <parameter><name>BLUE FILTER</name><value>CLOSE</value></parameter>
-        <parameter><name>RECORD</name><value>R</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>RECORD</name><value>RB</value></parameter>
         <parameter><name>BLOCKS</name><value>20</value></parameter>
         <parameter><name>FRAMES</name><value>1000</value></parameter>
       </mode>
@@ -985,15 +985,15 @@ Configuration d’enregistrement
         <waveLengthMin>0.6337</waveLengthMin>
         <waveLengthMax>0.6787</waveLengthMax>
 
-        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>TRACKING</name><value>B</value></parameter>
         <parameter><name>SLIT</name><value>W070H4</value></parameter>
         <parameter><name>GRATING</name><value>300</value></parameter>
-        <parameter><name>CAMERA</name><value>R</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
         <parameter><name>LAMBDA</name><value>656.2</value></parameter>
         <parameter><name>SPIN</name><value>OFF</value></parameter>
         <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
-        <parameter><name>BLUE FILTER</name><value>CLOSE</value></parameter>
-        <parameter><name>RECORD</name><value>R</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>RECORD</name><value>RB</value></parameter>
         <parameter><name>BLOCKS</name><value>20</value></parameter>
         <parameter><name>FRAMES</name><value>1000</value></parameter>
       </mode>
@@ -1005,15 +1005,15 @@ Configuration d’enregistrement
         <waveLengthMin>0.6455</waveLengthMin>
         <waveLengthMax>0.6905</waveLengthMax>
 
-        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>TRACKING</name><value>B</value></parameter>
         <parameter><name>SLIT</name><value>W070H4</value></parameter>
         <parameter><name>GRATING</name><value>300</value></parameter>
-        <parameter><name>CAMERA</name><value>R</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
         <parameter><name>LAMBDA</name><value>668.0</value></parameter>
         <parameter><name>SPIN</name><value>OFF</value></parameter>
         <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
-        <parameter><name>BLUE FILTER</name><value>CLOSE</value></parameter>
-        <parameter><name>RECORD</name><value>R</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>RECORD</name><value>RB</value></parameter>
         <parameter><name>BLOCKS</name><value>20</value></parameter>
         <parameter><name>FRAMES</name><value>1000</value></parameter>
       </mode>
@@ -1025,15 +1025,15 @@ Configuration d’enregistrement
         <waveLengthMin>0.6975</waveLengthMin>
         <waveLengthMax>0.7425</waveLengthMax>
 
-        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>TRACKING</name><value>B</value></parameter>
         <parameter><name>SLIT</name><value>W070H4</value></parameter>
         <parameter><name>GRATING</name><value>300</value></parameter>
-        <parameter><name>CAMERA</name><value>R</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
         <parameter><name>LAMBDA</name><value>720.0</value></parameter>
         <parameter><name>SPIN</name><value>OFF</value></parameter>
-        <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
-        <parameter><name>BLUE FILTER</name><value>CLOSE</value></parameter>
-        <parameter><name>RECORD</name><value>R</value></parameter>
+        <parameter><name>RED FILTER</name><value>2.0</value></parameter> <!-- 29/10/2012: 2.0 instead of OPEN for R2720 -->
+        <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>RECORD</name><value>RB</value></parameter>
         <parameter><name>BLOCKS</name><value>20</value></parameter>
         <parameter><name>FRAMES</name><value>1000</value></parameter>
       </mode>
@@ -1046,15 +1046,15 @@ Configuration d’enregistrement
         <waveLengthMin>0.6522</waveLengthMin>
         <waveLengthMax>0.6602</waveLengthMax>
 
-        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>TRACKING</name><value>B</value></parameter>
         <parameter><name>SLIT</name><value>W070H4</value></parameter>
         <parameter><name>GRATING</name><value>1800</value></parameter>
-        <parameter><name>CAMERA</name><value>R</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
         <parameter><name>LAMBDA</name><value>656.2</value></parameter>
         <parameter><name>SPIN</name><value>OFF</value></parameter>
         <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
-        <parameter><name>BLUE FILTER</name><value>CLOSE</value></parameter>
-        <parameter><name>RECORD</name><value>R</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>RECORD</name><value>RB</value></parameter>
         <parameter><name>BLOCKS</name><value>20</value></parameter>
         <parameter><name>FRAMES</name><value>1000</value></parameter>
       </mode>
@@ -1066,15 +1066,15 @@ Configuration d’enregistrement
         <waveLengthMin>0.5853</waveLengthMin>
         <waveLengthMax>0.5933</waveLengthMax>
 
-        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>TRACKING</name><value>B</value></parameter>
         <parameter><name>SLIT</name><value>W070H4</value></parameter>
         <parameter><name>GRATING</name><value>1800</value></parameter>
-        <parameter><name>CAMERA</name><value>R</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
         <parameter><name>LAMBDA</name><value>589.3</value></parameter>
         <parameter><name>SPIN</name><value>OFF</value></parameter>
         <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
-        <parameter><name>BLUE FILTER</name><value>CLOSE</value></parameter>
-        <parameter><name>RECORD</name><value>R</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>RECORD</name><value>RB</value></parameter>
         <parameter><name>BLOCKS</name><value>20</value></parameter>
         <parameter><name>FRAMES</name><value>1000</value></parameter>
       </mode>
@@ -1086,15 +1086,15 @@ Configuration d’enregistrement
         <waveLengthMin>0.7659</waveLengthMin>
         <waveLengthMax>0.7739</waveLengthMax>
 
-        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>TRACKING</name><value>B</value></parameter>
         <parameter><name>SLIT</name><value>W070H4</value></parameter>
         <parameter><name>GRATING</name><value>1800</value></parameter>
-        <parameter><name>CAMERA</name><value>R</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
         <parameter><name>LAMBDA</name><value>769.9</value></parameter>
         <parameter><name>SPIN</name><value>OFF</value></parameter>
         <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
-        <parameter><name>BLUE FILTER</name><value>CLOSE</value></parameter>
-        <parameter><name>RECORD</name><value>R</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>RECORD</name><value>RB</value></parameter>
         <parameter><name>BLOCKS</name><value>20</value></parameter>
         <parameter><name>FRAMES</name><value>1000</value></parameter>
       </mode>
@@ -1106,15 +1106,15 @@ Configuration d’enregistrement
         <waveLengthMin>0.8455</waveLengthMin>
         <waveLengthMax>0.8535</waveLengthMax>
 
-        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>TRACKING</name><value>B</value></parameter>
         <parameter><name>SLIT</name><value>W070H4</value></parameter>
         <parameter><name>GRATING</name><value>1800</value></parameter>
-        <parameter><name>CAMERA</name><value>R</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
         <parameter><name>LAMBDA</name><value>849.5</value></parameter>
         <parameter><name>SPIN</name><value>OFF</value></parameter>
         <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
-        <parameter><name>BLUE FILTER</name><value>CLOSE</value></parameter>
-        <parameter><name>RECORD</name><value>R</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>RECORD</name><value>RB</value></parameter>
         <parameter><name>BLOCKS</name><value>20</value></parameter>
         <parameter><name>FRAMES</name><value>1000</value></parameter>
       </mode>
@@ -1126,15 +1126,15 @@ Configuration d’enregistrement
         <waveLengthMin>0.850</waveLengthMin>
         <waveLengthMax>0.858</waveLengthMax>
 
-        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>TRACKING</name><value>B</value></parameter>
         <parameter><name>SLIT</name><value>W070H4</value></parameter>
         <parameter><name>GRATING</name><value>1800</value></parameter>
-        <parameter><name>CAMERA</name><value>R</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
         <parameter><name>LAMBDA</name><value>854.0</value></parameter>
         <parameter><name>SPIN</name><value>OFF</value></parameter>
         <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
-        <parameter><name>BLUE FILTER</name><value>CLOSE</value></parameter>
-        <parameter><name>RECORD</name><value>R</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>RECORD</name><value>RB</value></parameter>
         <parameter><name>BLOCKS</name><value>20</value></parameter>
         <parameter><name>FRAMES</name><value>1000</value></parameter>
       </mode>
@@ -1146,15 +1146,15 @@ Configuration d’enregistrement
         <waveLengthMin>0.8635</waveLengthMin>
         <waveLengthMax>0.8715</waveLengthMax>
 
-        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>TRACKING</name><value>B</value></parameter>
         <parameter><name>SLIT</name><value>W070H4</value></parameter>
         <parameter><name>GRATING</name><value>1800</value></parameter>
-        <parameter><name>CAMERA</name><value>R</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
         <parameter><name>LAMBDA</name><value>867.5</value></parameter>
         <parameter><name>SPIN</name><value>OFF</value></parameter>
         <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
-        <parameter><name>BLUE FILTER</name><value>CLOSE</value></parameter>
-        <parameter><name>RECORD</name><value>R</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>RECORD</name><value>RB</value></parameter>
         <parameter><name>BLOCKS</name><value>20</value></parameter>
         <parameter><name>FRAMES</name><value>1000</value></parameter>
       </mode>
@@ -1259,15 +1259,15 @@ Configuration d’enregistrement
         <waveLengthMin>0.6337</waveLengthMin>
         <waveLengthMax>0.6787</waveLengthMax>
 
-        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>TRACKING</name><value>B</value></parameter>
         <parameter><name>SLIT</name><value>W070H4</value></parameter>
         <parameter><name>GRATING</name><value>300</value></parameter>
-        <parameter><name>CAMERA</name><value>R</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
         <parameter><name>LAMBDA</name><value>656.2</value></parameter>
         <parameter><name>SPIN</name><value>OFF</value></parameter>
         <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
-        <parameter><name>BLUE FILTER</name><value>CLOSE</value></parameter>
-        <parameter><name>RECORD</name><value>R</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>RECORD</name><value>RB</value></parameter>
         <parameter><name>BLOCKS</name><value>20</value></parameter>
         <parameter><name>FRAMES</name><value>1000</value></parameter>
       </mode>
@@ -1279,15 +1279,15 @@ Configuration d’enregistrement
         <waveLengthMin>0.6455</waveLengthMin>
         <waveLengthMax>0.6905</waveLengthMax>
 
-        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>TRACKING</name><value>B</value></parameter>
         <parameter><name>SLIT</name><value>W070H4</value></parameter>
         <parameter><name>GRATING</name><value>300</value></parameter>
-        <parameter><name>CAMERA</name><value>R</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
         <parameter><name>LAMBDA</name><value>668.0</value></parameter>
         <parameter><name>SPIN</name><value>OFF</value></parameter>
         <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
-        <parameter><name>BLUE FILTER</name><value>CLOSE</value></parameter>
-        <parameter><name>RECORD</name><value>R</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>RECORD</name><value>RB</value></parameter>
         <parameter><name>BLOCKS</name><value>20</value></parameter>
         <parameter><name>FRAMES</name><value>1000</value></parameter>
       </mode>
@@ -1299,15 +1299,15 @@ Configuration d’enregistrement
         <waveLengthMin>0.6975</waveLengthMin>
         <waveLengthMax>0.7425</waveLengthMax>
 
-        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>TRACKING</name><value>B</value></parameter>
         <parameter><name>SLIT</name><value>W070H4</value></parameter>
         <parameter><name>GRATING</name><value>300</value></parameter>
-        <parameter><name>CAMERA</name><value>R</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
         <parameter><name>LAMBDA</name><value>720.0</value></parameter>
         <parameter><name>SPIN</name><value>OFF</value></parameter>
-        <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
-        <parameter><name>BLUE FILTER</name><value>CLOSE</value></parameter>
-        <parameter><name>RECORD</name><value>R</value></parameter>
+        <parameter><name>RED FILTER</name><value>2.0</value></parameter> <!-- 29/10/2012: 2.0 instead of OPEN for R2720 -->
+        <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>RECORD</name><value>RB</value></parameter>
         <parameter><name>BLOCKS</name><value>20</value></parameter>
         <parameter><name>FRAMES</name><value>1000</value></parameter>
       </mode>
@@ -1320,15 +1320,15 @@ Configuration d’enregistrement
         <waveLengthMin>0.6522</waveLengthMin>
         <waveLengthMax>0.6602</waveLengthMax>
 
-        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>TRACKING</name><value>B</value></parameter>
         <parameter><name>SLIT</name><value>W070H4</value></parameter>
         <parameter><name>GRATING</name><value>1800</value></parameter>
-        <parameter><name>CAMERA</name><value>R</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
         <parameter><name>LAMBDA</name><value>656.2</value></parameter>
         <parameter><name>SPIN</name><value>OFF</value></parameter>
         <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
-        <parameter><name>BLUE FILTER</name><value>CLOSE</value></parameter>
-        <parameter><name>RECORD</name><value>R</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>RECORD</name><value>RB</value></parameter>
         <parameter><name>BLOCKS</name><value>20</value></parameter>
         <parameter><name>FRAMES</name><value>1000</value></parameter>
       </mode>
@@ -1340,15 +1340,15 @@ Configuration d’enregistrement
         <waveLengthMin>0.5853</waveLengthMin>
         <waveLengthMax>0.5933</waveLengthMax>
 
-        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>TRACKING</name><value>B</value></parameter>
         <parameter><name>SLIT</name><value>W070H4</value></parameter>
         <parameter><name>GRATING</name><value>1800</value></parameter>
-        <parameter><name>CAMERA</name><value>R</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
         <parameter><name>LAMBDA</name><value>589.3</value></parameter>
         <parameter><name>SPIN</name><value>OFF</value></parameter>
         <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
-        <parameter><name>BLUE FILTER</name><value>CLOSE</value></parameter>
-        <parameter><name>RECORD</name><value>R</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>RECORD</name><value>RB</value></parameter>
         <parameter><name>BLOCKS</name><value>20</value></parameter>
         <parameter><name>FRAMES</name><value>1000</value></parameter>
       </mode>
@@ -1360,15 +1360,15 @@ Configuration d’enregistrement
         <waveLengthMin>0.7659</waveLengthMin>
         <waveLengthMax>0.7739</waveLengthMax>
 
-        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>TRACKING</name><value>B</value></parameter>
         <parameter><name>SLIT</name><value>W070H4</value></parameter>
         <parameter><name>GRATING</name><value>1800</value></parameter>
-        <parameter><name>CAMERA</name><value>R</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
         <parameter><name>LAMBDA</name><value>769.9</value></parameter>
         <parameter><name>SPIN</name><value>OFF</value></parameter>
         <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
-        <parameter><name>BLUE FILTER</name><value>CLOSE</value></parameter>
-        <parameter><name>RECORD</name><value>R</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>RECORD</name><value>RB</value></parameter>
         <parameter><name>BLOCKS</name><value>20</value></parameter>
         <parameter><name>FRAMES</name><value>1000</value></parameter>
       </mode>
@@ -1380,15 +1380,15 @@ Configuration d’enregistrement
         <waveLengthMin>0.8455</waveLengthMin>
         <waveLengthMax>0.8535</waveLengthMax>
 
-        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>TRACKING</name><value>B</value></parameter>
         <parameter><name>SLIT</name><value>W070H4</value></parameter>
         <parameter><name>GRATING</name><value>1800</value></parameter>
-        <parameter><name>CAMERA</name><value>R</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
         <parameter><name>LAMBDA</name><value>849.5</value></parameter>
         <parameter><name>SPIN</name><value>OFF</value></parameter>
         <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
-        <parameter><name>BLUE FILTER</name><value>CLOSE</value></parameter>
-        <parameter><name>RECORD</name><value>R</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>RECORD</name><value>RB</value></parameter>
         <parameter><name>BLOCKS</name><value>20</value></parameter>
         <parameter><name>FRAMES</name><value>1000</value></parameter>
       </mode>
@@ -1400,15 +1400,15 @@ Configuration d’enregistrement
         <waveLengthMin>0.850</waveLengthMin>
         <waveLengthMax>0.858</waveLengthMax>
 
-        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>TRACKING</name><value>B</value></parameter>
         <parameter><name>SLIT</name><value>W070H4</value></parameter>
         <parameter><name>GRATING</name><value>1800</value></parameter>
-        <parameter><name>CAMERA</name><value>R</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
         <parameter><name>LAMBDA</name><value>854.0</value></parameter>
         <parameter><name>SPIN</name><value>OFF</value></parameter>
         <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
-        <parameter><name>BLUE FILTER</name><value>CLOSE</value></parameter>
-        <parameter><name>RECORD</name><value>R</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>RECORD</name><value>RB</value></parameter>
         <parameter><name>BLOCKS</name><value>20</value></parameter>
         <parameter><name>FRAMES</name><value>1000</value></parameter>
       </mode>
@@ -1420,15 +1420,15 @@ Configuration d’enregistrement
         <waveLengthMin>0.8635</waveLengthMin>
         <waveLengthMax>0.8715</waveLengthMax>
 
-        <parameter><name>TRACKING</name><value>R</value></parameter>
+        <parameter><name>TRACKING</name><value>B</value></parameter>
         <parameter><name>SLIT</name><value>W070H4</value></parameter>
         <parameter><name>GRATING</name><value>1800</value></parameter>
-        <parameter><name>CAMERA</name><value>R</value></parameter>
+        <parameter><name>CAMERA</name><value>RB</value></parameter>
         <parameter><name>LAMBDA</name><value>867.5</value></parameter>
         <parameter><name>SPIN</name><value>OFF</value></parameter>
         <parameter><name>RED FILTER</name><value>OPEN</value></parameter>
-        <parameter><name>BLUE FILTER</name><value>CLOSE</value></parameter>
-        <parameter><name>RECORD</name><value>R</value></parameter>
+        <parameter><name>BLUE FILTER</name><value>OPEN</value></parameter>
+        <parameter><name>RECORD</name><value>RB</value></parameter>
         <parameter><name>BLOCKS</name><value>20</value></parameter>
         <parameter><name>FRAMES</name><value>1000</value></parameter>
       </mode>

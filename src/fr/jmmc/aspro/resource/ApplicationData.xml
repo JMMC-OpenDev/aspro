@@ -18,8 +18,8 @@
     <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
   </company>
 
-  <program name="Aspro2" version="0.9.3 beta 2"/>
-  <compilation date="09/10/2012" compiler="JDK 1.5.0_16"/>
+  <program name="Aspro2" version="0.9.3 beta 3"/>
+  <compilation date="29/10/2012" compiler="JDK 1.5.0_16"/>
   
   <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
   <authors>the JMMC Technical Group</authors>
@@ -168,6 +168,9 @@
 
   <releasenotes>
     <release version="0.9.3">
+      <prerelease version="0.9.3 beta 3">
+        <change type="FEATURE">Updated CHARA VEGA spectral configuration due to new detector setup (OB / StarList export)</change>
+      </prerelease>
       <prerelease version="0.9.3 beta 2">
         <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/363">Fixed Export to OIFits file(s) when the spectral type is undefined (null string values)</change>
       </prerelease>
