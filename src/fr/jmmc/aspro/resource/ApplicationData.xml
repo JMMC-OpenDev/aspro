@@ -18,8 +18,8 @@
     <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
   </company>
 
-  <program name="Aspro2" version="0.9.3 beta 3"/>
-  <compilation date="29/10/2012" compiler="JDK 1.5.0_16"/>
+  <program name="Aspro2" version="0.9.3"/>
+  <compilation date="31/10/2012" compiler="JDK 1.5.0_16"/>
   
   <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
   <authors>the JMMC Technical Group</authors>
@@ -168,6 +168,7 @@
 
   <releasenotes>
     <release version="0.9.3">
+      <pubDate>Web, 31 Oct 2012 13:00:00 GMT</pubDate>
       <prerelease version="0.9.3 beta 3">
         <change type="FEATURE">Fixed Red filter = 2.0 for the CHARA VEGA spectral calibration OB (R2720)</change>
         <change type="FEATURE">Updated CHARA VEGA spectral configuration due to new detector setup (OB / StarList export)</change>
