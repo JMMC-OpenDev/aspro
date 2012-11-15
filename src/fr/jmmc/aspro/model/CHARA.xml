@@ -1165,28 +1165,56 @@ Configuration d’enregistrement
 <!-- instruments (4T) -->
 
     <focalInstrument>
+      <!-- name: Name of the focal instrument (AMBER, MIDI ...) -->
       <name>MIRC</name>
-      <description></description>
+      <!-- description: Description of the instrument -->
+      <description>MIRC instrument using 4 telescopes</description>
+      <!-- numberChannels : The number of channels used by this instrument -->
       <numberChannels>4</numberChannels>
+      <!-- defaultSamplingTime: The default sampling time for this instrument (min) -->
       <defaultSamplingTime>40</defaultSamplingTime>
 
-      <!-- noise parameters -->
-      <transmission>0.05</transmission>
-      <dit>0.01</dit>
-      <ron>10</ron>
-      <detectorSaturation>50000</detectorSaturation>
-      <instrumentVisibility>0.9</instrumentVisibility>
-      <instrumentVisibilityBias>1</instrumentVisibilityBias>
-      <instrumentPhaseBias>1</instrumentPhaseBias>
-      <nbPixInterferometry>126</nbPixInterferometry>
-      <nbPixPhotometry>18</nbPixPhotometry>
-      <fracFluxInInterferometry>0.75</fracFluxInInterferometry>
+      <!-- Noise modelling parameters -->
+        <!-- The transmission of interferometer+instrument at observed wavelength (typically 0.01) -->
+        <transmission>0.05</transmission>
+        <!-- The Detector individual integration time in seconds (typically less than 0.1s) -->
+        <dit>0.01</dit>
+        <!-- ron: The Detector readout noise (typically 10) -->
+        <ron>10</ron>
+        <!-- detectorSaturation: The Detector is non-linear above (to avoid saturation/non-linearity) (typically more than 20000) -->
+        <detectorSaturation>50000</detectorSaturation>
+        <!-- instrumentVisibility: The instrumental visibility (multiplicative) [0.0 - 1.0] (typically 0.9) -->
+        <instrumentVisibility>0.9</instrumentVisibility>
+        <!-- instrumentVisibilityBias: The Typical Visibility Bias (percent of V) (typically 1) -->
+        <instrumentVisibilityBias>1</instrumentVisibilityBias>
+        <!-- instrumentPhaseBias: The Typical Phase/Phase Closure Bias in degrees (typically 1) -->
+        <instrumentPhaseBias>1</instrumentPhaseBias>
+        <!-- nbPixInterferometry: The number of pixels to code all fringes together (interferometric channel) -->
+        <nbPixInterferometry>126</nbPixInterferometry>
+        <!-- nbPixPhotometry: The number of pixels to code each photometric channel -->
+        <nbPixPhotometry>18</nbPixPhotometry>
+        <!-- fracFluxInInterferometry: The fraction of flux going into interferometric channel (typically 0.9) -->
+        <fracFluxInInterferometry>0.75</fracFluxInInterferometry>
 
+      <!--
+        Instrument predefined modes :
+        Each mode describes a focal instrument mode (AMBER : "Low_HK" ... "Medium_K_1_2300" ... "High_K_1_2481").
+        It has a wavelength range (waveLengthMin - waveLengthMax), a spectral resolution (resolution)
+        and optionaly a number of channels (numberChannels)
+      -->
       <mode>
+        <!-- name: The name of this instrument mode -->
         <name>Low_H</name>
-        <resolution>40</resolution>
-        <waveLengthMin>1.5</waveLengthMin>
-        <waveLengthMax>1.8</waveLengthMax>
+        <!-- resolution: The spectral resolution of this instrument mode -->
+        <resolution>41</resolution>
+        <!--
+          The number of spectral channels of this instrument mode (optional)
+          <numberChannels>n</numberChannels>
+        -->
+        <!-- waveLengthMin: The lower wave length of this instrument mode -->
+        <waveLengthMin>1.45509384</waveLengthMin>
+        <!-- waveLengthMax: The upper wave length of this instrument mode -->
+        <waveLengthMax>1.77235691</waveLengthMax>
       </mode>
       <mode>
         <name>Low_K</name>
@@ -1442,7 +1470,7 @@ Configuration d’enregistrement
       <!-- name: Name of the focal instrument (AMBER, MIDI ...) -->
       <name>MIRC_5T</name>
       <!-- description: Description of the instrument -->
-      <description>MIRC instrument using 5 telescopes (prototype)</description>
+      <description>MIRC instrument using 5 telescopes</description>
       <!-- numberChannels : The number of channels used by this instrument -->
       <numberChannels>5</numberChannels>
       <!-- defaultSamplingTime: The default sampling time for this instrument (min) -->
@@ -1480,19 +1508,19 @@ Configuration d’enregistrement
         <!-- name: The name of this instrument mode -->
         <name>Low_H</name>
         <!-- resolution: The spectral resolution of this instrument mode -->
-        <resolution>40</resolution>
+        <resolution>41</resolution>
         <!--
           The number of spectral channels of this instrument mode (optional)
           <numberChannels>n</numberChannels>
         -->
         <!-- waveLengthMin: The lower wave length of this instrument mode -->
-        <waveLengthMin>1.5</waveLengthMin>
+        <waveLengthMin>1.45509384</waveLengthMin>
         <!-- waveLengthMax: The upper wave length of this instrument mode -->
-        <waveLengthMax>1.8</waveLengthMax>
+        <waveLengthMax>1.77235691</waveLengthMax>
       </mode>
       <mode>
         <name>Low_K</name>
-        <resolution>40</resolution>
+        <resolution>45</resolution>
         <waveLengthMin>2.0</waveLengthMin>
         <waveLengthMax>2.5</waveLengthMax>
       </mode>
@@ -1529,7 +1557,7 @@ Configuration d’enregistrement
       <!-- name: Name of the focal instrument (AMBER, MIDI ...) -->
       <name>MIRC_6T</name>
       <!-- description: Description of the instrument -->
-      <description>MIRC instrument using 6 telescopes (prototype)</description>
+      <description>MIRC instrument using 6 telescopes</description>
       <!-- numberChannels : The number of channels used by this instrument -->
       <numberChannels>6</numberChannels>
       <!-- defaultSamplingTime: The default sampling time for this instrument (min) -->
@@ -1567,19 +1595,19 @@ Configuration d’enregistrement
         <!-- name: The name of this instrument mode -->
         <name>Low_H</name>
         <!-- resolution: The spectral resolution of this instrument mode -->
-        <resolution>40</resolution>
+        <resolution>41</resolution>
         <!--
           The number of spectral channels of this instrument mode (optional)
           <numberChannels>n</numberChannels>
         -->
         <!-- waveLengthMin: The lower wave length of this instrument mode -->
-        <waveLengthMin>1.5</waveLengthMin>
+        <waveLengthMin>1.45509384</waveLengthMin>
         <!-- waveLengthMax: The upper wave length of this instrument mode -->
-        <waveLengthMax>1.8</waveLengthMax>
+        <waveLengthMax>1.77235691</waveLengthMax>
       </mode>
       <mode>
         <name>Low_K</name>
-        <resolution>40</resolution>
+        <resolution>45</resolution>
         <waveLengthMin>2.0</waveLengthMin>
         <waveLengthMax>2.5</waveLengthMax>
       </mode>
