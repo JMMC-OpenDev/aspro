@@ -4,30 +4,30 @@
 package fr.jmmc.aspro;
 
 import fr.jmmc.aspro.gui.SettingPanel;
-import fr.jmmc.aspro.interop.BroadcastToModelFittingAction;
+import fr.jmmc.aspro.gui.action.AsproExportPDFAction;
 import fr.jmmc.aspro.gui.action.ExportAllOBAction;
 import fr.jmmc.aspro.gui.action.ExportOBAction;
 import fr.jmmc.aspro.gui.action.ExportOIFitsAction;
-import fr.jmmc.aspro.gui.action.AsproExportPDFAction;
 import fr.jmmc.aspro.gui.action.LoadObservationAction;
 import fr.jmmc.aspro.gui.action.NewObservationAction;
-import fr.jmmc.aspro.interop.SearchCalQueryAction;
 import fr.jmmc.aspro.gui.action.SaveObservationAction;
 import fr.jmmc.aspro.gui.action.ShowPrefAction;
 import fr.jmmc.aspro.gui.action.TargetEditorAction;
 import fr.jmmc.aspro.gui.task.AsproTaskRegistry;
-import fr.jmmc.jmcs.gui.component.ComponentResizeAdapter;
+import fr.jmmc.aspro.interop.BroadcastToModelFittingAction;
+import fr.jmmc.aspro.interop.SearchCalQueryAction;
+import fr.jmmc.aspro.interop.StarListSendAction;
+import fr.jmmc.aspro.interop.VotableSampMessageHandler;
 import fr.jmmc.aspro.model.ConfigurationManager;
 import fr.jmmc.aspro.model.ObservationManager;
-import fr.jmmc.aspro.interop.VotableSampMessageHandler;
-import fr.jmmc.aspro.interop.StarListSendAction;
 import fr.jmmc.jmcs.App;
+import fr.jmmc.jmcs.gui.component.ComponentResizeAdapter;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.gui.component.MessagePane.ConfirmSaveChanges;
 import fr.jmmc.jmcs.gui.component.StatusBar;
+import fr.jmmc.jmcs.gui.task.TaskSwingWorkerExecutor;
 import fr.jmmc.jmcs.gui.util.SwingSettings;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
-import fr.jmmc.jmcs.gui.task.TaskSwingWorkerExecutor;
 import fr.jmmc.jmcs.resource.image.ResourceImage;
 import fr.jmmc.jmcs.util.concurrent.ParallelJobExecutor;
 import fr.jmmc.jmcs.util.logging.ApplicationLogSingleton;
@@ -37,10 +37,10 @@ import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class represents the Aspro GUI application
@@ -94,12 +94,11 @@ public final class Aspro2 extends App {
 
   /**
    * Initialize application objects
-   * @param args ignored arguments
    *
    * @throws RuntimeException if the Aspro2 initialisation failed
    */
   @Override
-  protected void init(final String[] args) throws RuntimeException {
+  protected void init() throws RuntimeException {
     logger.debug("AsproGui.init() handler : enter");
 
     this.initServices();
