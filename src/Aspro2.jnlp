@@ -5,10 +5,10 @@
     <vendor>JMMC</vendor>
     <homepage href="http://www.jmmc.fr/aspro2"/>
     <description>This application is the new version of the ASPRO tool to prepare your interferometric observations</description>
-    <icon href="Aspro2.png"/>
+    <icon href="Aspro2.jpg"/>
     <offline-allowed/>
     <association mime-type="application/x-aspro+xml" extensions="asprox">
-      <icon href="Aspro2.png"/>
+      <icon href="Aspro2.jpg"/>
       <description>Aspro 2 Observation files</description>
     </association>
     <shortcut>
