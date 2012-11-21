@@ -110,7 +110,7 @@ public final class BroadcastToModelFittingAction extends SampCapabilityAction {
     }
 
     // Create a 4K buffer for models :
-    final StringWriter sw = new StringWriter(4096);
+    final StringWriter sw = new StringWriter(4096); // 4K buffer
 
     // serialize models to xml :
     ObservationManager.getInstance().saveObject(sw, targetModel);
