@@ -171,7 +171,7 @@
       <prerelease version="0.9.4 beta 1">
         <change type="CHANGE">Use a jpg icon instead of the png previous one to work arround a known bug onto macos/java7</change>
       </prerelease>
-    <release>
+    </release>
     <release version="0.9.3">
       <pubDate>Web, 31 Oct 2012 13:00:00 GMT</pubDate>
       <prerelease version="0.9.3 beta 3">
