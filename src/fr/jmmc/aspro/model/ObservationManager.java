@@ -14,7 +14,22 @@ import fr.jmmc.aspro.model.event.TargetSelectionEvent;
 import fr.jmmc.aspro.model.event.UpdateObservationEvent;
 import fr.jmmc.aspro.model.event.WarningContainerEvent;
 import fr.jmmc.aspro.model.observability.ObservabilityData;
-import fr.jmmc.aspro.model.oi.*;
+import fr.jmmc.aspro.model.oi.AtmosphereQuality;
+import fr.jmmc.aspro.model.oi.BaseValue;
+import fr.jmmc.aspro.model.oi.FocalInstrumentConfiguration;
+import fr.jmmc.aspro.model.oi.FocalInstrumentConfigurationChoice;
+import fr.jmmc.aspro.model.oi.FocalInstrumentMode;
+import fr.jmmc.aspro.model.oi.InterferometerConfiguration;
+import fr.jmmc.aspro.model.oi.InterferometerConfigurationChoice;
+import fr.jmmc.aspro.model.oi.ObservationCollection;
+import fr.jmmc.aspro.model.oi.ObservationSetting;
+import fr.jmmc.aspro.model.oi.ObservationVariant;
+import fr.jmmc.aspro.model.oi.SpectralBand;
+import fr.jmmc.aspro.model.oi.Target;
+import fr.jmmc.aspro.model.oi.TargetConfiguration;
+import fr.jmmc.aspro.model.oi.TargetUserInformations;
+import fr.jmmc.aspro.model.oi.UserModel;
+import fr.jmmc.aspro.model.oi.WhenSetting;
 import fr.jmmc.aspro.model.util.SpectralBandUtils;
 import fr.jmmc.aspro.service.UserModelService;
 import fr.jmmc.jmal.Band;
@@ -22,6 +37,7 @@ import fr.jmmc.jmal.model.ModelDefinition;
 import fr.jmmc.jmal.model.targetmodel.Model;
 import fr.jmmc.jmal.model.targetmodel.Parameter;
 import fr.jmmc.jmal.star.Star;
+import fr.jmmc.jmcs.gui.action.RecentFilesManager;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
 import fr.jmmc.jmcs.util.FileUtils;
@@ -209,6 +225,10 @@ public final class ObservationManager extends BaseOIManager implements Observer 
    */
   private void setObservationFile(final File file) {
     this.observationFile = file;
+    if (file != null) {
+      // Now that a file has been loaded or saved:
+      RecentFilesManager.addFile(file);
+    }
   }
 
   // --- MAIN FUNCTIONS --------------------------------------------------------
@@ -1269,7 +1289,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
     logger.debug("setOIFitsList: {}", oiFitsList);
 
     // TODO: use a new class OIFitsData (version / File / Target) ...
-    
+
     // Use OIFitsCollectionManager ?
 
     this.oiFitsList = oiFitsList;
