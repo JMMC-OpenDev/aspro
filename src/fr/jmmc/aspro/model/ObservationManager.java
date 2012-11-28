@@ -225,10 +225,9 @@ public final class ObservationManager extends BaseOIManager implements Observer 
    */
   private void setObservationFile(final File file) {
     this.observationFile = file;
-    if (file != null) {
-      // Now that a file has been loaded or saved:
-      RecentFilesManager.addFile(file);
-    }
+
+    // Now that a file has been loaded or saved:
+    RecentFilesManager.addFile(file);
   }
 
   // --- MAIN FUNCTIONS --------------------------------------------------------
