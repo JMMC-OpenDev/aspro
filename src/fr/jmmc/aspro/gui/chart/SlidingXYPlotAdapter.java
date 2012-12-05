@@ -3,10 +3,10 @@
  ******************************************************************************/
 package fr.jmmc.aspro.gui.chart;
 
-import fr.jmmc.oiexplorer.core.gui.chart.BoundedSymbolAxis;
 import fr.jmmc.aspro.model.observability.StarObservabilityData;
 import fr.jmmc.aspro.model.observability.TargetPositionDate;
 import fr.jmmc.aspro.model.oi.Target;
+import fr.jmmc.oiexplorer.core.gui.chart.BoundedSymbolAxis;
 import java.awt.Color;
 import java.awt.Paint;
 import java.text.DateFormat;
@@ -16,8 +16,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.annotations.XYAnnotation;
@@ -32,6 +30,8 @@ import org.jfree.data.gantt.XYTaskDataset;
 import org.jfree.data.time.TimePeriod;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.ui.Layer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class is a custom XYPlot adapter to provide both a sliding dataset and annotations in sync.
@@ -107,7 +107,6 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
    * @param targetList target list for tooltip generation
    * @param labels data labels (legend)
    * @param soTargetList StarObservabilityData list for tooltip generation
-   * @param sdTargetList StarData list for tooltip generation
    */
   public void setData(final TaskSeriesCollection collection, final List<String> symbols, final List<Paint> colors,
           final Map<Integer, List<XYAnnotation>> annotations,
@@ -309,7 +308,6 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
 
         // set max tip height = margin between bars (half tick + text) :
         renderContext.setMaxTipHeight(0.5d * (1d - barWidth));
-
 
         // Redefine the x-position of annotations (corresponding to visible targets) :
 

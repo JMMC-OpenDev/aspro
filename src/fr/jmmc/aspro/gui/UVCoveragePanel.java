@@ -1876,6 +1876,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       // update theme at end :
       ChartUtilities.applyCurrentTheme(this.chart);
 
+      this.xyPlot.setBackgroundPaint(Color.WHITE);
+
     } finally {
       // restore chart & plot notifications:
       this.xyPlot.setNotify(true);

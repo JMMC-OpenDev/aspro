@@ -5,29 +5,26 @@ package fr.jmmc.aspro.gui;
 
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.gui.action.AsproExportPDFAction;
-import fr.jmmc.oiexplorer.core.gui.chart.ChartUtils;
 import fr.jmmc.aspro.gui.chart.NameLabelGenerator;
-import fr.jmmc.oiexplorer.core.gui.chart.PDFOptions;
-import fr.jmmc.oiexplorer.core.gui.chart.SquareChartPanel;
-import fr.jmmc.oiexplorer.core.gui.chart.SquareXYPlot;
 import fr.jmmc.aspro.gui.chart.XYZNameDataSet;
-import fr.jmmc.oiexplorer.core.gui.chart.ColorPalette;
 import fr.jmmc.aspro.model.InterferometerMapData;
 import fr.jmmc.aspro.model.ObservationCollectionMapData;
-import fr.jmmc.aspro.model.event.ObservationListener;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.event.ObservationEvent;
+import fr.jmmc.aspro.model.event.ObservationListener;
 import fr.jmmc.aspro.model.oi.ObservationCollection;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.service.InterferometerMapService;
 import fr.jmmc.oiexplorer.core.gui.PDFExportable;
+import fr.jmmc.oiexplorer.core.gui.chart.ChartUtils;
+import fr.jmmc.oiexplorer.core.gui.chart.ColorPalette;
+import fr.jmmc.oiexplorer.core.gui.chart.PDFOptions;
+import fr.jmmc.oiexplorer.core.gui.chart.SquareChartPanel;
+import fr.jmmc.oiexplorer.core.gui.chart.SquareXYPlot;
 import fr.jmmc.oiexplorer.core.util.Constants;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.util.ArrayList;
 import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.annotations.XYTextAnnotation;
@@ -42,6 +39,8 @@ import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 import org.jfree.ui.Layer;
 import org.jfree.ui.TextAnchor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This panel presents the interferometer plot (station, base lines ...)
@@ -161,10 +160,6 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
 
     // Use Line Renderer for the second dataset :
     this.xyPlot.setRenderer(1, lineRenderer);
-
-    // Hide grid lines :
-    this.xyPlot.setDomainGridlinesVisible(false);
-    this.xyPlot.setRangeGridlinesVisible(false);
 
     // hide axes at [0,0] :
     this.xyPlot.setDomainZeroBaselineVisible(false);
@@ -299,8 +294,6 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
       // update theme at end :
       ChartUtilities.applyCurrentTheme(this.chart);
 
-      this.xyPlot.setBackgroundPaint(Color.WHITE);
-
     } finally {
       // restore chart & plot notifications:
       this.xyPlot.setNotify(true);
@@ -349,7 +342,7 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
 
     String[] blName;
     double[] blX1, blY1, blX2, blY2;
-    int n = 0;
+    int n;
 
     final boolean single = chartData.isSingle();
 
