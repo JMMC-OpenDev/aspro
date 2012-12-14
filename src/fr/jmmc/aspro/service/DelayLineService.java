@@ -26,6 +26,14 @@ public final class DelayLineService {
   private static final boolean DEBUG = false;
   /** a list containing a single full range (-12; +12) */
   private static final List<Range> FULL_RANGE_LIST = Arrays.asList(new Range(AsproConstants.HA_MIN, AsproConstants.HA_MAX));
+  /** an empty list */
+  private static final List<Range> EMPTY_RANGE_LIST = Collections.emptyList();
+  /** PI */
+  private static final double PI = Math.PI;
+  /** -PI */
+  private static final double MINUS_PI = -Math.PI;
+  /** 2 x PI */
+  private static final double TWO_PI = 2d * Math.PI;
 
   /**
    * Forbidden contructor
@@ -95,7 +103,7 @@ public final class DelayLineService {
 
     if (wExtrema == null) {
       // no solution :
-      return Collections.emptyList();
+      return EMPTY_RANGE_LIST;
     }
 
     // test if [WMIN,WMAX] has intersection with MAXW[1-2] :
@@ -108,16 +116,14 @@ public final class DelayLineService {
     if (wMax < wLower || wMin > wUpper) {
       // outside range, no solution :
       if (DEBUG) {
-        logger.info("W outside range: {} : {} / W extrema = [{}, {}]",
-                baseLine.getName(), wRange, wLower, wUpper);
+        logger.info("W outside range: {} : {} / W extrema = [{}, {}]", baseLine.getName(), wRange, wLower, wUpper);
       }
-      return Collections.emptyList();
+      return EMPTY_RANGE_LIST;
     }
     if (wLower > wMin && wUpper < wMax) {
       // always inside range = full interval [-12h;12h]:
       if (DEBUG) {
-        logger.info("W inside range: {} : {} / W extrema = [{}, {}]",
-                baseLine.getName(), wRange, wLower, wUpper);
+        logger.info("W inside range: {} : {} / W extrema = [{}, {}]", baseLine.getName(), wRange, wLower, wUpper);
       }
       return FULL_RANGE_LIST;
     }
@@ -127,11 +133,12 @@ public final class DelayLineService {
     }
 
     // haValues[6] = list of hour angles (rad) in [-PI;PI] range :
-    int nHA = 0;
 
     // define ha limits :
-    haValues[nHA++] = -Math.PI;
-    haValues[nHA++] = Math.PI;
+    haValues[0] = MINUS_PI;
+    haValues[1] = PI;
+
+    int nHA = 2;
 
     if (solveDelays(cosDec, sinDec, baseLine, wMin, ha)) {
       haValues[nHA++] = ha[0];
@@ -157,14 +164,15 @@ public final class DelayLineService {
 
     // Look if midpoints values are or not in the HMAX-HMIN interval
     // to find which intervals are correct :
+    double haLow, haUp, haMid, wMid;
 
     for (int i = 0, size = nHA - 1; i < size; i++) {
-      final double haLow = haValues[i];
-      final double haUp = haValues[i + 1];
+      haLow = haValues[i];
+      haUp = haValues[i + 1];
 
-      final double haMid = (haLow + haUp) / 2d;
+      haMid = 0.5d * (haLow + haUp);
 
-      final double wMid = CalcUVW.computeW(cosDec, sinDec, baseLine, haMid);
+      wMid = CalcUVW.computeW(cosDec, sinDec, baseLine, haMid);
 
       if (DEBUG) {
         logger.info("W({}) = {}", haMid, wMid);
@@ -232,8 +240,8 @@ public final class DelayLineService {
       final double w = sinDec * baseLine.getZ();
       if (w == wThrow) {
         // define results:
-        ha[0] = -Math.PI;
-        ha[1] = Math.PI;
+        ha[0] = MINUS_PI;
+        ha[1] = PI;
         return true;
       }
       // impossible case : sinDec = 1 <=> cosDec = 0 !
@@ -354,10 +362,10 @@ public final class DelayLineService {
 
     for (int i = 0; i < 2; i++) {
       ha[i] *= 2d;
-      if (ha[i] > Math.PI) {
-        ha[i] -= 2d * Math.PI;
-      } else if (ha[i] < -Math.PI) {
-        ha[i] += 2d * Math.PI;
+      if (ha[i] > PI) {
+        ha[i] -= TWO_PI;
+      } else if (ha[i] < MINUS_PI) {
+        ha[i] += TWO_PI;
       }
     }
     // arrange (useful for findWExtrema method) :
@@ -366,7 +374,7 @@ public final class DelayLineService {
       ha[0] = ha[1];
       ha[1] = h;
     } else if (ha[0] == ha[1]) {
-      ha[1] = ha[0] + Math.PI;
+      ha[1] = ha[0] + PI;
     }
 
     return true;
