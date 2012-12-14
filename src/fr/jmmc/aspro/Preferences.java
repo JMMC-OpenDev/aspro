@@ -4,6 +4,8 @@
 package fr.jmmc.aspro;
 
 import fr.jmmc.aspro.model.observability.SunTimeInterval.SunType;
+import fr.jmmc.aspro.service.pops.BestPopsEstimatorFactory.Algorithm;
+import fr.jmmc.aspro.service.pops.Criteria;
 import fr.jmmc.jmal.image.ColorScale;
 import fr.jmmc.jmcs.data.preference.PreferencesException;
 import org.slf4j.Logger;
@@ -41,6 +43,14 @@ public final class Preferences extends fr.jmmc.jmcs.data.preference.Preferences 
   public final static String CENTER_NIGHT = "center.night";
   /** Preference : twilight night (Astro_Twilight/Nautic_Twilight/Civil_Twilight): see SunTimeInterval */
   public final static String TWILIGHT_NIGHT = "twilight.night";
+  /** Preference : show only night */
+  public final static String ONLY_NIGHT = "only.night";
+  /** Preference : best Pops algorithm */
+  public final static String BEST_POPS_ALGORITHM = "bestPops.algorithm";
+  /** Preference : best Pops criteria on sigma */
+  public final static String BEST_POPS_CRITERIA_SIGMA = "bestPops.criteria.sigma";
+  /** Preference : best Pops criteria on average weight */
+  public final static String BEST_POPS_CRITERIA_AVERAGE_WEIGHT = "bestPops.criteria.averageWeight";
 
   /**
    * Private constructor that must be empty.
@@ -104,6 +114,14 @@ public final class Preferences extends fr.jmmc.jmcs.data.preference.Preferences 
 
     // twilight night (Astro_Twilight):
     setDefaultPreference(TWILIGHT_NIGHT, SunType.Night.toString());
+
+    // show only night on observability plot:
+    setDefaultPreference(ONLY_NIGHT, Boolean.TRUE);
+
+    // best Pops algorithm:
+    setDefaultPreference(BEST_POPS_ALGORITHM, Algorithm.HALimits.toString());
+    setDefaultPreference(BEST_POPS_CRITERIA_SIGMA, Criteria.MEDIUM.toString());
+    setDefaultPreference(BEST_POPS_CRITERIA_AVERAGE_WEIGHT, Criteria.LARGE.toString());
   }
 
   /**
@@ -136,7 +154,7 @@ public final class Preferences extends fr.jmmc.jmcs.data.preference.Preferences 
     try {
       return SunType.valueOf(value);
     } catch (IllegalArgumentException iae) {
-      // ignore
+      logger.debug("ignored invalid value: {}", value);
     }
     return SunType.Night;
   }
@@ -151,7 +169,7 @@ public final class Preferences extends fr.jmmc.jmcs.data.preference.Preferences 
     try {
       return ColorScale.valueOf(value);
     } catch (IllegalArgumentException iae) {
-      // ignore
+      logger.debug("ignored invalid value: {}", value);
     }
     return ColorScale.LINEAR;
   }
@@ -162,5 +180,53 @@ public final class Preferences extends fr.jmmc.jmcs.data.preference.Preferences 
    */
   public boolean isFastUserModel() {
     return getPreferenceAsBoolean(Preferences.MODEL_USER_FAST);
+  }
+
+  /**
+   * Return the best Pops algorithm Preference : use preferences or Algorithm.HALimits if it is undefined
+   * @return best Pops algorithm
+   */
+  public Algorithm getBestPopsAlgorithm() {
+    final String value = getPreference(BEST_POPS_ALGORITHM);
+
+    try {
+      return Algorithm.valueOf(value);
+    } catch (IllegalArgumentException iae) {
+      logger.debug("ignored invalid value: {}", value);
+    }
+    return Algorithm.HALimits;
+  }
+
+  /**
+   * Return the best Pops criteria on sigma Preference : use preferences or Criteria.MEDIUM if it is undefined
+   * @return Criteria
+   */
+  public Criteria getBestPopsCriteriaSigma() {
+    return getCriteria(BEST_POPS_CRITERIA_SIGMA, Criteria.MEDIUM);
+  }
+
+  /**
+   * Return the best Pops criteria on average weight : use preferences or Criteria.LARGE if it is undefined
+   * @return Criteria
+   */
+  public Criteria getBestPopsCriteriaAverageWeight() {
+    return getCriteria(BEST_POPS_CRITERIA_AVERAGE_WEIGHT, Criteria.LARGE);
+  }
+
+  /**
+   * Return the Criteria Preference for the given preference name: use preferences or def value if it is undefined
+   * @param preferenceName preference key
+   * @param def default value
+   * @return Criteria instance
+   */
+  private Criteria getCriteria(final Object preferenceName, final Criteria def) {
+    final String value = getPreference(preferenceName);
+
+    try {
+      return Criteria.valueOf(value);
+    } catch (IllegalArgumentException iae) {
+      logger.debug("ignored invalid value: {}", value);
+    }
+    return def;
   }
 }
