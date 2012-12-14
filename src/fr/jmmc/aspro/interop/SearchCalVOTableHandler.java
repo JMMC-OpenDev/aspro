@@ -62,9 +62,7 @@ public final class SearchCalVOTableHandler {
 
     final String document = XmlFactory.transform(votable, XSLT_FILE).trim();
 
-    if (logger.isInfoEnabled()) {
       logger.info("VOTable transformation (XSLT) duration = {} ms.", 1e-6d * (System.nanoTime() - start));
-    }
 
     if (document.length() == 0) {
       logger.debug("document is empty (probably not one SearchCal VOTable)");

@@ -17,7 +17,7 @@ import org.jfree.ui.RectangleEdge;
  * This class hacks PaintScaleLegend to support correct log axis Paint
  * @author bourgesl
  */
-public class PaintLogScaleLegend extends PaintScaleLegend {
+public final class PaintLogScaleLegend extends PaintScaleLegend {
 
   /** For serialization. */
   static final long serialVersionUID = -1L;

@@ -123,9 +123,7 @@ public final class ConfigurationManager extends BaseOIManager {
       addInterferometerSetting(configuration, is);
     }
 
-    if (logger.isInfoEnabled()) {
-      logger.info("initializeConfiguration : duration = {} ms.", 1e-6d * (System.nanoTime() - start));
-    }
+    logger.info("initializeConfiguration : duration = {} ms.", 1e-6d * (System.nanoTime() - start));
 
     if (logger.isDebugEnabled()) {
       logger.debug("descriptions   : {}", configuration.getInterferometerDescriptions());

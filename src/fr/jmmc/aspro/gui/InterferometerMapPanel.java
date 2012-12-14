@@ -243,9 +243,7 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
 
       this.updatePlot(new ObservationCollectionMapData(obsCollection, mapDataList));
 
-      if (logger.isInfoEnabled()) {
-        logger.info("plot : duration = {} ms.", 1e-6d * (System.nanoTime() - start));
-      }
+      logger.info("plot : duration = {} ms.", 1e-6d * (System.nanoTime() - start));
     }
   }
 

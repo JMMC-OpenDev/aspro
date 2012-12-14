@@ -52,9 +52,7 @@ public final class AnyVOTableHandler {
 
     final String document = XmlFactory.transform(votable, XSLT_FILE);
 
-    if (logger.isInfoEnabled()) {
-      logger.info("VOTable transformation (XSLT): {} ms.", 1e-6d * (System.nanoTime() - start));
-    }
+    logger.info("VOTable transformation (XSLT): {} ms.", 1e-6d * (System.nanoTime() - start));
 
     logger.debug("document :\n{}", document);
 

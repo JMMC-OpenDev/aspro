@@ -124,9 +124,7 @@ public class BaseOIManager {
 
       result = u.unmarshal(inputFile);
 
-      if (logger.isInfoEnabled()) {
-        logger.info("unmarshall : duration = {} ms.", 1e-6d * (System.nanoTime() - start));
-      }
+      logger.info("unmarshall : duration = {} ms.", 1e-6d * (System.nanoTime() - start));
 
     } catch (JAXBException je) {
       handleException("Load failure on " + inputFile, je);
@@ -155,9 +153,7 @@ public class BaseOIManager {
 
       result = u.unmarshal(reader);
 
-      if (logger.isInfoEnabled()) {
-        logger.info("unmarshall : duration = {} ms.", 1e-6d * (System.nanoTime() - start));
-      }
+      logger.info("unmarshall : duration = {} ms.", 1e-6d * (System.nanoTime() - start));
 
     } catch (JAXBException je) {
       handleException("Load failure on " + reader, je);
@@ -182,9 +178,7 @@ public class BaseOIManager {
 
       this.createMarshaller().marshal(object, outputFile);
 
-      if (logger.isInfoEnabled()) {
-        logger.info("marshall : duration = {} ms.", 1e-6d * (System.nanoTime() - start));
-      }
+      logger.info("marshall : duration = {} ms.", 1e-6d * (System.nanoTime() - start));
 
     } catch (JAXBException je) {
       handleException("Save failure on " + outputFile, je);
