@@ -6,6 +6,7 @@ package fr.jmmc.aspro.gui.chart;
 import fr.jmmc.aspro.model.observability.StarObservabilityData;
 import fr.jmmc.aspro.model.observability.TargetPositionDate;
 import fr.jmmc.aspro.model.oi.Target;
+import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.oiexplorer.core.gui.chart.BoundedSymbolAxis;
 import java.awt.Color;
 import java.awt.Paint;
@@ -77,6 +78,8 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
   private List<String> labels = null;
   /** StarObservabilityData list for tooltip generation */
   private List<StarObservabilityData> soTargetList = null;
+  /** true to indicate to change grid line colors; false otherwise */
+  private boolean hasBackground = false;
   /** 24h date formatter like in france */
   private final DateFormat timeFormatter = DateFormat.getTimeInstance(DateFormat.SHORT, Locale.FRANCE);
   /** double formatter for HA */
@@ -107,11 +110,12 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
    * @param targetList target list for tooltip generation
    * @param labels data labels (legend)
    * @param soTargetList StarObservabilityData list for tooltip generation
+   * @param hasBackground true to indicate to change grid line colors; false otherwise
    */
   public void setData(final TaskSeriesCollection collection, final List<String> symbols, final List<Paint> colors,
           final Map<Integer, List<XYAnnotation>> annotations,
           final List<Target> targetList, final List<String> labels,
-          final List<StarObservabilityData> soTargetList) {
+          final List<StarObservabilityData> soTargetList, final boolean hasBackground) {
     this.size = symbols.size();
     this.collection = collection;
     this.symbols = symbols;
@@ -120,6 +124,7 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
     this.targetList = targetList;
     this.labels = labels;
     this.soTargetList = soTargetList;
+    this.hasBackground = hasBackground;
   }
 
   /**
@@ -295,6 +300,8 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
       // annotations :
       if (this.annotations != null) {
 
+        final double halfBarWidth = 0.5d * barWidth;
+
         final ObservabilityPlotContext renderContext = ObservabilityPlotContext.getInstance();
 
         // set text maximum width = bar width :
@@ -304,7 +311,7 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
         renderContext.setMaxDiamondWidth(barWidth * 0.85d);
 
         // set tip radius = 50% bar width (tick location over bar edges) :
-        renderContext.setTipRadius(barWidth * 0.5d);
+        renderContext.setTipRadius(halfBarWidth);
 
         // set max tip height = margin between bars (half tick + text) :
         renderContext.setMaxTipHeight(0.5d * (1d - barWidth));
@@ -314,7 +321,7 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
         List<XYAnnotation> list;
         Integer pos;
         for (int i = start, n = 0; i < end; i++, n++) {
-          pos = Integer.valueOf(i);
+          pos = NumberUtils.valueOf(i);
 
           list = this.annotations.get(pos);
 
@@ -331,7 +338,15 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
               } else if (annotation instanceof XYDiamondAnnotation) {
                 final XYDiamondAnnotation a = (XYDiamondAnnotation) annotation;
                 a.setX(n);
-                this.renderer.addAnnotation(a);
+
+                this.renderer.addAnnotation(a, Layer.FOREGROUND);
+              } else if (annotation instanceof EnhancedXYBoxAnnotation) {
+                final EnhancedXYBoxAnnotation a = (EnhancedXYBoxAnnotation) annotation;
+                a.setX0(n - halfBarWidth);
+                a.setX1(n + halfBarWidth);
+
+                // note: use background layer:
+                this.renderer.addAnnotation(a, Layer.BACKGROUND);
               }
             }
           }
@@ -347,6 +362,12 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
 
       // update theme at end :
       ChartUtilities.applyCurrentTheme(this.chart);
+
+      if (hasBackground) {
+        // Set grid line colors:
+        this.xyPlot.setDomainGridlinePaint(Color.WHITE);
+        this.xyPlot.setRangeGridlinePaint(Color.WHITE);
+      }
 
     } finally {
       // restore chart & plot notifications:
