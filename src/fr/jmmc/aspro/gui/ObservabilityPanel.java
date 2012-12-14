@@ -8,6 +8,7 @@ import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.Preferences;
 import fr.jmmc.aspro.gui.action.AsproExportPDFAction;
 import fr.jmmc.aspro.gui.chart.AsproChartUtils;
+import fr.jmmc.aspro.gui.chart.EnhancedXYBoxAnnotation;
 import fr.jmmc.aspro.gui.chart.ObservabilityPlotContext;
 import fr.jmmc.aspro.gui.chart.SlidingXYPlotAdapter;
 import fr.jmmc.aspro.gui.chart.XYDiamondAnnotation;
@@ -29,9 +30,13 @@ import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.aspro.service.ObservabilityService;
+import fr.jmmc.aspro.service.pops.BestPopsEstimatorFactory.Algorithm;
+import fr.jmmc.aspro.service.pops.Criteria;
 import fr.jmmc.jmcs.gui.component.Disposable;
 import fr.jmmc.jmcs.gui.component.StatusBar;
+import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.jmcs.util.ObjectUtils;
+import fr.jmmc.jmcs.util.concurrent.InterruptedJobException;
 import fr.jmmc.oiexplorer.core.gui.PDFExportable;
 import fr.jmmc.oiexplorer.core.gui.chart.BoundedDateAxis;
 import fr.jmmc.oiexplorer.core.gui.chart.ChartUtils;
@@ -133,7 +138,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
   /** milliseconds threshold to consider the date too close to date axis limits = 3 minutes */
   private static final long DATE_LIMIT_THRESHOLD = 3 * 60 * 1000;
   /** night margin in milliseconds = 15 minutes */
-  private static final long NIGHT_MARGIN = 3 * 60 * 1000;
+  private static final long NIGHT_MARGIN = 15 * 60 * 1000;
   /** hour angle tick units */
   private final static TickUnitSource HA_TICK_UNITS = ChartUtils.createHourAngleTickUnits();
   /** hour:minute units */
@@ -150,8 +155,6 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
   private static final int REFRESH_PERIOD = 60 * 1000;
 
   /* default plot options */
-  /** default value for the checkbox Night only */
-  private static final boolean DEFAULT_DO_NIGHT_ONLY = false;
   /** default value for the checkbox BaseLine Limits */
   private static final boolean DEFAULT_DO_BASELINE_LIMITS = false;
   /** default value for the checkbox Details */
@@ -160,6 +163,16 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
   /* members */
   /** preference singleton */
   private final Preferences myPreferences = Preferences.getInstance();
+  /** preference: flag to center JD range arround midnight */
+  private boolean prefCenterNight = myPreferences.getPreferenceAsBoolean(Preferences.CENTER_NIGHT);
+  /** preference: twilight considered as night limit */
+  private SunType prefTwilightNightLimit = myPreferences.getTwilightAsNightLimit();
+  /** Best Pops algorithm */
+  private Algorithm prefBestPopsAlgorithm = myPreferences.getBestPopsAlgorithm();
+  /** optional Best Pops criteria on sigma */
+  private Criteria prefBestPopEstimatorCriteriaSigma = myPreferences.getBestPopsCriteriaSigma();
+  /** optional Best Pops criteria on average weight */
+  private Criteria prefBestPopEstimatorCriteriaAverageWeight = myPreferences.getBestPopsCriteriaAverageWeight();
   /** jFreeChart instance */
   private JFreeChart chart;
   /** xy plot instance */
@@ -319,7 +332,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     this.jCheckBoxNightOnly = new JCheckBox("Night only");
     this.jCheckBoxNightOnly.setName("jCheckBoxNightOnly");
 
-    this.jCheckBoxNightOnly.setSelected(DEFAULT_DO_NIGHT_ONLY);
+    this.jCheckBoxNightOnly.setSelected(myPreferences.getPreferenceAsBoolean(Preferences.ONLY_NIGHT));
     this.jCheckBoxNightOnly.addItemListener(new ItemListener() {
       @Override
       public void itemStateChanged(final ItemEvent e) {
@@ -434,8 +447,66 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
   public void update(final Observable o, final Object arg) {
     logger.debug("Preferences updated on : {}", this);
 
-    this.jComboTimeRef.setSelectedItem(this.myPreferences.getPreference(Preferences.TIME_REFERENCE));
-    // also trigger refresh plot if another preference changes (night center)
+    boolean changed = false;
+
+    // disable the automatic refresh :
+    final boolean prevAutoRefresh = this.setAutoRefresh(false);
+    try {
+      final String timeRef = this.myPreferences.getPreference(Preferences.TIME_REFERENCE);
+      if (!ObjectUtils.areEquals(this.jComboTimeRef.getSelectedItem(), timeRef)) {
+        changed |= true;
+        this.jComboTimeRef.setSelectedItem(timeRef);
+      }
+
+      final boolean centerNight = myPreferences.getPreferenceAsBoolean(Preferences.CENTER_NIGHT);
+      if (centerNight != this.prefCenterNight) {
+        changed |= true;
+        this.prefCenterNight = centerNight;
+      }
+
+      final SunType twilightNightLimit = myPreferences.getTwilightAsNightLimit();
+      if (twilightNightLimit != this.prefTwilightNightLimit) {
+        changed |= true;
+        this.prefTwilightNightLimit = twilightNightLimit;
+      }
+
+      final boolean nightOnly = myPreferences.getPreferenceAsBoolean(Preferences.ONLY_NIGHT);
+      if (nightOnly != this.jCheckBoxNightOnly.isSelected()) {
+        changed |= true;
+        this.jCheckBoxNightOnly.setSelected(nightOnly);
+      }
+
+      if (chartData != null
+              && !chartData.getFirstObservation().getInterferometerConfiguration().getInterferometerConfiguration().getInterferometer().getPops().isEmpty()) {
+
+        // Best Pops algorithm
+        final Algorithm bestPopsAlgorithm = myPreferences.getBestPopsAlgorithm();
+        if (bestPopsAlgorithm != this.prefBestPopsAlgorithm) {
+          changed |= true;
+          this.prefBestPopsAlgorithm = bestPopsAlgorithm;
+        }
+
+        final Criteria bestPopEstimatorCriteriaSigma = myPreferences.getBestPopsCriteriaSigma();
+        if (bestPopEstimatorCriteriaSigma != this.prefBestPopEstimatorCriteriaSigma) {
+          changed |= true;
+          this.prefBestPopEstimatorCriteriaSigma = bestPopEstimatorCriteriaSigma;
+        }
+
+        final Criteria bestPopsCriteriaAverageWeight = myPreferences.getBestPopsCriteriaAverageWeight();
+        if (bestPopsCriteriaAverageWeight != this.prefBestPopEstimatorCriteriaAverageWeight) {
+          changed |= true;
+          this.prefBestPopEstimatorCriteriaAverageWeight = bestPopsCriteriaAverageWeight;
+        }
+      }
+
+    } finally {
+      // restore the automatic refresh :
+      this.setAutoRefresh(prevAutoRefresh);
+    }
+
+    if (changed) {
+      refreshPlot();
+    }
   }
 
   /**
@@ -675,20 +746,15 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     // flag to produce detailed output with all BL / horizon / rise intervals per target:
     final boolean doDetailedOutput = this.jCheckBoxDetailedOutput.isSelected();
 
-    // flag to center JD range arround midnight:
-    final boolean doCenterMidnight = myPreferences.getPreferenceAsBoolean(Preferences.CENTER_NIGHT);
-
-    // twilight considered as night limit
-    final SunType twilightNightLimit = myPreferences.getTwilightAsNightLimit();
-
-
     // update the status bar :
     StatusBar.show(MSG_COMPUTING);
 
     // Create Observability task worker
     // Cancel other tasks and execute this new task :
     new ObservabilitySwingWorker(this,
-            obsCollection, useLST, doDetailedOutput, doBaseLineLimits, doCenterMidnight, twilightNightLimit).executeTask();
+            obsCollection, useLST, doDetailedOutput, doBaseLineLimits,
+            this.prefCenterNight, this.prefTwilightNightLimit, this.prefBestPopsAlgorithm,
+            this.prefBestPopEstimatorCriteriaSigma, this.prefBestPopEstimatorCriteriaAverageWeight).executeTask();
   }
 
   /**
@@ -709,6 +775,12 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     private final boolean doCenterMidnight;
     /** twilight considered as night limit */
     private final SunType twilightNightLimit;
+    /** Best Pops algorithm */
+    private final Algorithm bestPopsAlgorithm;
+    /** optional Best Pops criteria on sigma */
+    private final Criteria bestPopEstimatorCriteriaSigma;
+    /** optional Best Pops criteria on average weight */
+    private final Criteria bestPopEstimatorCriteriaAverageWeight;
 
     /**
      * Hidden constructor
@@ -720,10 +792,16 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
      * @param doBaseLineLimits flag to find base line limits
      * @param doCenterMidnight flag to center JD range arround midnight
      * @param twilightNightLimit twilight considered as night limit
+     * @param bestPopsAlgorithm Best Pops algorithm
+     * @param bestPopEstimatorCriteriaSigma optional Best Pops criteria on sigma
+     * @param bestPopEstimatorCriteriaAverageWeight optional Best Pops criteria on average weight
      */
     private ObservabilitySwingWorker(final ObservabilityPanel obsPanel, final ObservationCollection obsCollection,
             final boolean useLST, final boolean doDetailedOutput, final boolean doBaseLineLimits,
-            final boolean doCenterMidnight, final SunType twilightNightLimit) {
+            final boolean doCenterMidnight, final SunType twilightNightLimit,
+            final Algorithm bestPopsAlgorithm,
+            final Criteria bestPopEstimatorCriteriaSigma, final Criteria bestPopEstimatorCriteriaAverageWeight) {
+
       // get current observation version :
       super(AsproTaskRegistry.TASK_OBSERVABILITY, obsCollection);
       this.obsPanel = obsPanel;
@@ -732,6 +810,9 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
       this.doBaseLineLimits = doBaseLineLimits;
       this.doCenterMidnight = doCenterMidnight;
       this.twilightNightLimit = twilightNightLimit;
+      this.bestPopsAlgorithm = bestPopsAlgorithm;
+      this.bestPopEstimatorCriteriaSigma = bestPopEstimatorCriteriaSigma;
+      this.bestPopEstimatorCriteriaAverageWeight = bestPopEstimatorCriteriaAverageWeight;
     }
 
     /**
@@ -742,28 +823,32 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     @Override
     public List<ObservabilityData> computeInBackground() {
 
-      // Start the computations :
-      final long start = System.nanoTime();
+      try {
+        // Start the computations :
+        final long start = System.nanoTime();
 
-      final List<ObservabilityData> obsDataList = new ArrayList<ObservabilityData>(getObservationCollection().size());
+        final List<ObservabilityData> obsDataList = new ArrayList<ObservabilityData>(getObservationCollection().size());
 
-      for (ObservationSetting observation : getObservationCollection().getObservations()) {
-        // compute the observability data :
-        obsDataList.add(
-                new ObservabilityService(observation, this.useLST, this.doDetailedOutput, this.doBaseLineLimits,
-                this.doCenterMidnight, this.twilightNightLimit).compute());
+        for (ObservationSetting observation : getObservationCollection().getObservations()) {
+          // compute the observability data :
+          obsDataList.add(new ObservabilityService(observation, this.useLST, this.doDetailedOutput, this.doBaseLineLimits,
+                  this.doCenterMidnight, this.twilightNightLimit, this.bestPopsAlgorithm,
+                  this.bestPopEstimatorCriteriaSigma, this.bestPopEstimatorCriteriaAverageWeight).compute());
 
-        // fast interrupt :
-        if (Thread.currentThread().isInterrupted()) {
-          return null;
+          // fast interrupt :
+          if (Thread.currentThread().isInterrupted()) {
+            return null;
+          }
         }
-      }
 
-      if (logger.isInfoEnabled()) {
         logger.info("compute[ObservabilityData]: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
-      }
 
-      return obsDataList;
+        return obsDataList;
+
+      } catch (InterruptedJobException ije) {
+        logger.debug("compute[ObservabilityData]: interrupted: ", ije);
+      }
+      return null;
     }
 
     /**
@@ -854,6 +939,9 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     final boolean useLST = obsData.isUseLST();
     final boolean doBaseLineLimits = obsData.isDoBaseLineLimits();
 
+    // Enable or disable the 'Night only' option:
+    this.jCheckBoxNightOnly.setEnabled(!doBaseLineLimits && observation.getWhen().isNightRestriction());
+
     // disable chart & plot notifications:
     this.chart.setNotify(false);
     this.xyPlot.setNotify(false);
@@ -910,14 +998,6 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
       // restore chart & plot notifications:
       this.xyPlot.setNotify(true);
       this.chart.setNotify(true);
-    }
-
-    // Enable or disable the 'Night only' option:
-    if (observation.getWhen().isNightRestriction()) {
-      this.jCheckBoxNightOnly.setEnabled(true);
-    } else {
-      this.jCheckBoxNightOnly.setEnabled(false);
-      this.jCheckBoxNightOnly.setSelected(false);
     }
 
     // update the status bar:
@@ -982,7 +1062,9 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     Integer pos;
     int n = 0;
     String legendLabel;
-    Paint paint;
+    Color paint;
+
+    final StringBuilder sb = new StringBuilder(4);
 
     ObservabilityData obsData;
     // current StarObservabilityData used in loops :
@@ -1023,7 +1105,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
             int j = 1;
             for (DateTimeInterval interval : so.getVisible()) {
-              task = new Task("T" + j, interval.getStartDate(), interval.getEndDate());
+              task = new Task(sb.append('T').append(j).toString(), interval.getStartDate(), interval.getEndDate());
+              sb.setLength(0); // recycle buffer
               taskSeries.add(task);
               j++;
             }
@@ -1073,12 +1156,13 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
               // add the Annotations :
               // 24h date formatter like in france :
 
-              pos = Integer.valueOf(n);
+              pos = NumberUtils.valueOf(n);
 
               // transit annotation :
               if (so.getType() == StarObservabilityData.TYPE_STAR) {
                 addAnnotation(annotations, pos, new XYDiamondAnnotation(n, so.getTransitDate().getTime()));
 
+                // azimuth and elevation ticks:
                 XYTickAnnotation a;
                 for (TargetPositionDate ed : so.getTargetPositions().values()) {
                   if (checkDateAxisLimits(ed.getDate(), min, max)) {
@@ -1095,6 +1179,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                 }
               }
 
+              // time annotations at range boundaries:
               for (DateTimeInterval interval : so.getVisible()) {
                 if (checkDateAxisLimits(interval.getStartDate(), min, max)) {
                   final XYTextAnnotation aStart = AsproChartUtils.createFitXYTextAnnotation(this.timeFormatter.format(interval.getStartDate()), n, interval.getStartDate().getTime());
@@ -1108,6 +1193,18 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                   addAnnotation(annotations, pos, aEnd);
                 }
               }
+
+              // Observable range limits without HA restrictions:
+              if (so.getVisibleNoHaLimits() != null) {
+                final Paint fillPaint = new Color(paint.getRed(), paint.getGreen(), paint.getBlue(), 48); // 80% transparent
+//                final Paint fillPaint = ImageUtils.createHatchedTexturePaint(15, new Color(0, true), paint, new BasicStroke(2.0f));
+
+                for (DateTimeInterval interval : so.getVisibleNoHaLimits()) {
+                  addAnnotation(annotations, pos,
+                          new EnhancedXYBoxAnnotation(n, interval.getStartDate().getTime(), n, interval.getEndDate().getTime(),
+                          ChartUtils.DOTTED_STROKE, Color.BLACK, fillPaint));
+                }
+              }
             }
             n++;
           }
@@ -1116,7 +1213,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     }
 
     // update plot data :
-    this.slidingXYPlotAdapter.setData(taskSeriesCollection, symbolList, colorList, annotations, targetList, labelList, soTargetList);
+    this.slidingXYPlotAdapter.setData(taskSeriesCollection, symbolList, colorList, annotations, targetList, labelList, soTargetList,
+            !chartData.isDoBaseLineLimits() && chartData.getFirstObservation().getWhen().isNightRestriction());
 
     // force a plot refresh:
     this.updateSliderProperties(true);
@@ -1293,9 +1391,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         }
 
         // force Alpha to 1.0 to avoid PDF rendering problems (alpha layer ordering) :
-        this.xyPlot.addRangeMarker(
-                new IntervalMarker(startTime, endTime, col, ChartUtils.THIN_STROKE, null, null, 1f),
-                Layer.BACKGROUND);
+        this.xyPlot.addRangeMarker(new IntervalMarker(startTime, endTime, col, ChartUtils.THIN_STROKE, null, null, 1f), Layer.BACKGROUND);
       }
 
       // Add 15 minutes margin:
@@ -1319,7 +1415,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         logger.debug("nightUpper: {}", new Date(this.nightUpper));
       }
 
-      if (this.jCheckBoxNightOnly.isSelected()) {
+      if (this.jCheckBoxNightOnly.isEnabled() && this.jCheckBoxNightOnly.isSelected()) {
         // Update date axis = zoom on night bounds:
         updateDateAxisBounds(nightLower, nightUpper);
       }
@@ -1401,9 +1497,9 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
    * @return date
    */
   private Date convertCalendarToDate(final Calendar cal, final Date min, final Date max) {
-    
+
     // TODO: check if it is correct: Calendar.roll vs Calendar.add !!
-    
+
     if (cal.getTimeInMillis() >= min.getTime()) {
 
       if (cal.getTimeInMillis() > max.getTime()) {
