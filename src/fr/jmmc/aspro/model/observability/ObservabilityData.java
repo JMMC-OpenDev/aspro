@@ -57,6 +57,10 @@ public final class ObservabilityData {
   private boolean userPops;
   /** optional best PoPs combination */
   private PopCombination bestPops;
+  /** optional best PoPs combinations */
+  private List<PopCombination> bestPopList;
+  /** optional good PoPs combinations */
+  private List<PopCombination> betterPopList;
   /** warning container */
   private final WarningContainer warningContainer = new WarningContainer();
 
@@ -301,6 +305,22 @@ public final class ObservabilityData {
    */
   public void setBestPops(final PopCombination bestPops) {
     this.bestPops = bestPops;
+  }
+
+  public List<PopCombination> getBestPopList() {
+    return bestPopList;
+  }
+
+  public void setBestPopList(List<PopCombination> bestPopList) {
+    this.bestPopList = bestPopList;
+  }
+
+  public List<PopCombination> getBetterPopList() {
+    return betterPopList;
+  }
+
+  public void setBetterPopList(List<PopCombination> betterPopList) {
+    this.betterPopList = betterPopList;
   }
 
   /* other useful data for UV coverage */
