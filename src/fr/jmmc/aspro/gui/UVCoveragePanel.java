@@ -24,6 +24,7 @@ import fr.jmmc.aspro.model.event.ObservationEvent;
 import fr.jmmc.aspro.model.event.ObservationListener;
 import fr.jmmc.aspro.model.event.TargetSelectionEvent;
 import fr.jmmc.aspro.model.event.UpdateObservationEvent;
+import fr.jmmc.aspro.model.event.UpdateObservationEvent.ChangeType;
 import fr.jmmc.aspro.model.observability.ObservabilityData;
 import fr.jmmc.aspro.model.observability.StarData;
 import fr.jmmc.aspro.model.oi.AtmosphereQuality;
@@ -149,7 +150,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
   /** JMMC annotation */
   private XYTextAnnotation aJMMC = null;
   /** uv map image scale legend */
-  private PaintScaleLegend mapLegend = null;
+  PaintScaleLegend mapLegend = null;
   /** uv coordinates scaling factor */
   private double uvPlotScalingFactor = MEGA_LAMBDA_SCALE;
 
@@ -1248,12 +1249,17 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
       final String targetName = getSelectedTargetName();
 
+      ChangeType changeType = ChangeType.UV;
       if (targetName != null) {
         logger.debug("onUpdateObservation : {}", targetName);
 
         // Update target HA Min/Max :
-        changed |= om.setTargetHAMin(targetName, Double.valueOf(this.haMinAdapter.getValue()));
-        changed |= om.setTargetHAMax(targetName, Double.valueOf(this.haMaxAdapter.getValue()));
+        if (om.setTargetHAMin(targetName, Double.valueOf(this.haMinAdapter.getValue()))
+                || om.setTargetHAMax(targetName, Double.valueOf(this.haMaxAdapter.getValue()))) {
+          // Special case to force computing observability (HA restriction are also used):
+          changed = true;
+          changeType = ChangeType.MAIN;
+        }
 
         // update ft mode :
         changed |= om.setTargetFTMode(targetName, (String) this.jComboBoxFTMode.getSelectedItem());
@@ -1261,7 +1267,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
       if (changed) {
         // update change flag to make the ObservationManager fire an observation refresh event later
-        event.setChanged(UpdateObservationEvent.ChangeType.UV);
+        event.setChanged(changeType);
       }
     }
   }
@@ -1603,7 +1609,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
                   // Compute only image using existing complex visibility data :
                   uvMapData = ModelUVMapService.computeUVMap(models,
-                          uvRect, null, null, this.currentUVMapData.getVisData(),
+                          uvRect, null, null, this.currentUVMapData.getData(),
                           this.imageMode, this.imageSize, this.colorModel, this.colorScale, noiseService);
 
                 } else {
@@ -1630,7 +1636,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
                     // Compute only image using existing complex visibility data :
                     uvMapData = UserModelService.computeUVMap(fitsImage,
                             uvRect, this.imageMode, this.imageSize, this.colorModel, this.colorScale, noiseService,
-                            null, null, this.currentUVMapData.getVisData());
+                            null, null, this.currentUVMapData.getData());
 
                   } else {
                     logger.debug("Computing model image ...");
@@ -1717,9 +1723,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
       uvDataCollection.setWarningContainer(mergedWarningContainer);
 
-      if (logger.isInfoEnabled()) {
-        logger.info("compute[ObservationCollectionUVData]: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
-      }
+      logger.info("compute[ObservationCollectionUVData]: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
 
       return uvDataCollection;
     }
@@ -1871,7 +1875,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       this.xyPlot.setDataset(null);
 
       // update the background image :
-      this.updateUVMap(null);
+      this.resetUVMap();
 
       // update theme at end :
       ChartUtilities.applyCurrentTheme(this.chart);
@@ -2176,7 +2180,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     @Override
     public void refreshUI(final UVMapData uvMapData) {
       // delegates to uv coverage panel :
-      this.uvPanel.updateUVMap(uvMapData.getUvMap());
+      this.uvPanel.updateUVMap(uvMapData.getUvMap(), uvMapData.getDataMin(), uvMapData.getDataMax());
 
       // update the status bar:
       StatusBar.showIfPrevious(MSG_COMPUTING_MAP, "uv map done.");
@@ -2190,7 +2194,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
      */
     @Override
     public void handleException(final ExecutionException ee) {
-      this.uvPanel.updateUVMap(null);
+      this.uvPanel.resetUVMap();
       if (ee.getCause() instanceof IllegalArgumentException) {
         MessagePane.showErrorMessage(ee.getCause().getMessage());
       } else {
@@ -2245,12 +2249,18 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     // crop a small sub image displayed while the correct model image is computed:
 
     // check reset zoom to avoid computing sub image == ref image:
-    final Image subUVMap = (doCrop) ? uvMapData.getUvMap().getSubimage(x, y, w, h) : uvMapData.getUvMap();
+    if (doCrop) {
+      final Image subUVMap = uvMapData.getUvMap().getSubimage(x, y, w, h);
+
+      // update the background image only:
+      updateUVMap(subUVMap, null, null);
+
+    } else {
+      // restore the background image and legend scale:
+      updateUVMap(uvMapData.getUvMap(), uvMapData.getDataMin(), uvMapData.getDataMax());
+    }
 
     // TODO: adjust axis bounds to exact viewed rectangle (i.e. avoid rounding errors) !!
-
-    // update the background image :
-    updateUVMap(subUVMap);
 
     return doCrop;
   }
@@ -2314,19 +2324,34 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
       this.chart.addSubtitle(mapLegend);
 
-      updateUVMap(uvMapData.getUvMap());
+      updateUVMap(uvMapData.getUvMap(), uvMapData.getDataMin(), uvMapData.getDataMax());
 
     } else {
-      updateUVMap(null);
+      resetUVMap();
     }
+  }
+
+  /**
+   * Reset the background image of the chart
+   */
+  private void resetUVMap() {
+    updateUVMap(null, null, null);
   }
 
   /**
    * Update the background image of the chart with the UV Map
    * @param uvMap image or null
+   * @param dataMin minimum value to update color scale bounds
+   * @param dataMax maximum value to update color scale bounds
    */
-  private void updateUVMap(final Image uvMap) {
+  private void updateUVMap(final Image uvMap, final Float dataMin, final Float dataMax) {
     if (uvMap != null) {
+      if (dataMin != null && dataMax != null
+              && dataMin.floatValue() != dataMax.floatValue() && !Float.isInfinite(dataMin) && !Float.isInfinite(dataMax)) {
+        // fix axis boundaries:
+        this.mapLegend.getAxis().setRange(dataMin, dataMax);
+      }
+
       this.xyPlot.setBackgroundPaint(null);
       this.xyPlot.setBackgroundImage(uvMap);
     } else {
@@ -2610,9 +2635,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
         result = oiFitsList;
 
-        if (logger.isInfoEnabled()) {
-          logger.info("compute[OIFitsFiles]: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
-        }
+        logger.info("compute[OIFitsFiles]: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
 
       } catch (InterruptedJobException ije) {
         logger.debug("Computing oifits data interrupted: ", ije);
