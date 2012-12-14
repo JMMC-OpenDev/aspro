@@ -149,8 +149,8 @@ public final class Sun implements Cloneable {
     final double dt = 0.05d; // days ... gives about 8 digits ...
     int i;
 
-    final double[] pos1 = computeSun(jd - dt / 2d);
-    final double[] pos2 = computeSun(jd + dt / 2d);
+    final double[] pos1 = computeSun(jd - 0.5d * dt);
+    final double[] pos2 = computeSun(jd + 0.5d * dt);
     for (i = 0; i < 3; i++) {
       xyzvel[i] = (pos2[i + 3] - pos1[i + 3]) / dt;  // AU/d, eq. of date.
     }

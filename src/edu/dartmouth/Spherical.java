@@ -30,7 +30,7 @@ public final class Spherical {
     if (theta < 1.0e-5d) {
       if (Math.abs(a.delta.radians()) < (Const.PI_OVER_2 - 0.001d) && Math.abs(bprime.delta.radians()) < (Const.PI_OVER_2 - 0.001d)) {
         final double dr = (bprime.alpha.radians() - a.alpha.radians())
-                * Math.cos((a.delta.radians() + bprime.delta.radians()) / 2d);
+                * Math.cos(0.5d * (a.delta.radians() + bprime.delta.radians()));
         final double dd = bprime.delta.radians() - a.delta.radians();
         theta = Math.sqrt(dr * dr + dd * dd);
 
@@ -66,7 +66,7 @@ public final class Spherical {
 
 //   print "pa of arc from moon to sun is %5.2f deg." % (pa * _skysub.DEG_IN_RADIAN)
 
-    final double cusppa = pa - Const.PI / 2d;   // line of cusps ...
+    final double cusppa = pa - 0.5d * Const.PI;   // line of cusps ...
 //     System.out.printf("cusppa = %f%n",cusppa);
     return new double[]{cusppa, moonsun};
   }
