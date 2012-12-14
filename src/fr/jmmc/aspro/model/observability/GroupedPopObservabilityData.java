@@ -3,6 +3,8 @@
  ******************************************************************************/
 package fr.jmmc.aspro.model.observability;
 
+import fr.jmmc.aspro.service.pops.BestPopsEstimator;
+import fr.jmmc.jmcs.util.NumberUtils;
 import java.util.List;
 
 /**
@@ -17,7 +19,11 @@ public final class GroupedPopObservabilityData implements Comparable<GroupedPopO
   /** Pop data grouped by Pop combination per target */
   private List<PopObservabilityData> popDataList;
   /** observability estimation */
-  private double estimation = -1d;
+  private double estimation;
+  /** total length of HA ranges */
+  private double totalLength;
+  /** minimum length of an HA range */
+  private double minLength;
 
   /**
    * Public constructor
@@ -30,28 +36,33 @@ public final class GroupedPopObservabilityData implements Comparable<GroupedPopO
   }
 
   /**
-   * Estimator : computes the observability estimation = somme(maxLength) * minimum(maxLength).
+   * Estimator : computes the global observability estimation.
+   * @param estimator best PoPs estimator
    */
-  public void estimateData() {
-    // try a simple estimator (not using any union or intersection check) :
+  public void estimateData(final BestPopsEstimator estimator) {
 
-    // estimation = somme(maxLength) * minimum(maxLength) :
-    double len;
-
+    double total = 0d;
     double acc = 0d;
     double min = Double.POSITIVE_INFINITY;
-    for (PopObservabilityData popData : this.popDataList) {
-      len = popData.getMaxLength();
+    double minEstimation = 0d;
+    double len;
 
-      acc += len;
+    for (PopObservabilityData popData : this.popDataList) {
+      acc += popData.getEstimation();
+
+      len = popData.getMaxLength();
+      total += len;
 
       // min :
       if (len < min) {
         min = len;
+        minEstimation = popData.getEstimation();
       }
     }
 
-    this.estimation = acc * min;
+    this.estimation = estimator.compute(acc / this.popDataList.size(), minEstimation);
+    this.totalLength = total;
+    this.minLength = min;
   }
 
   /**
@@ -80,6 +91,22 @@ public final class GroupedPopObservabilityData implements Comparable<GroupedPopO
   }
 
   /**
+   * Return the total length of HA ranges
+   * @return total length of HA ranges
+   */
+  public double getTotalLength() {
+    return totalLength;
+  }
+
+  /**
+   * Return the minimum length of an HA range
+   * @return minimum length of an HA range
+   */
+  public double getMinLength() {
+    return minLength;
+  }
+
+  /**
    * Return the observability estimation
    * @return observability estimation
    */
@@ -95,15 +122,16 @@ public final class GroupedPopObservabilityData implements Comparable<GroupedPopO
     return this.popDataList;
   }
 
+  // TODO: use ToStringable
   @Override
   public String toString() {
     final StringBuilder sb = new StringBuilder(64).append(getIdentifier()).append(" [");
     for (PopObservabilityData popData : this.popDataList) {
-      sb.append('\t').append(popData.getTargetName()).append(" : ").append(popData.getMaxLength());
+      sb.append('\t').append(popData.getTargetName()).append(" : ").append(NumberUtils.trimTo3Digits(popData.getMaxLength()));
     }
     sb.append(']');
     if (this.estimation != -1d) {
-      sb.append('\t').append(this.estimation);
+      sb.append('\t').append(NumberUtils.trimTo3Digits(this.estimation));
     }
     return sb.toString();
   }

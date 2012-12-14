@@ -5,6 +5,8 @@ package fr.jmmc.aspro.model.observability;
 
 import fr.jmmc.aspro.model.ObservabilityContext;
 import fr.jmmc.aspro.model.Range;
+import fr.jmmc.aspro.service.pops.BestPopsEstimator;
+import fr.jmmc.jmcs.util.NumberUtils;
 import java.util.List;
 
 /**
@@ -18,7 +20,9 @@ public final class PopObservabilityData implements Comparable<PopObservabilityDa
   /** pop combination */
   private final PopCombination popCombination;
   /** list of HA ranges per BL */
-  private final List<List<Range>> rangesBL;
+  private List<List<Range>> rangesBL;
+  /** observability estimation */
+  private double estimation;
   /** maximum length of an HA range after merging HA ranges per BL with Rise/Set range */
   private double maxLength;
 
@@ -35,12 +39,15 @@ public final class PopObservabilityData implements Comparable<PopObservabilityDa
   }
 
   /**
-   * Compute the total observability length
+   * Estimator : find the longest observability interval and computes its estimation.
+   * 
+   * Compute the maximum length of HA observability intervals
    * @param nValid number of ranges to consider a point is valid
    * @param obsCtx observability context (temporary data)
+   * @param estimator best PoPs estimator
+   * @param clearRangesBL true to free rangesBL; false otherwise
    */
-  public void computeMaxLength(final int nValid, final ObservabilityContext obsCtx) {
-    
+  public void estimateData(final int nValid, final ObservabilityContext obsCtx, final BestPopsEstimator estimator, final boolean clearRangesBL) {
     // flatten ranges :
     for (List<Range> ranges : this.rangesBL) {
       if (ranges != null) {
@@ -48,33 +55,45 @@ public final class PopObservabilityData implements Comparable<PopObservabilityDa
       }
     }
 
+    // free memory (GC):
+    if (clearRangesBL) {
+      this.rangesBL = null;
+    }
+
     // merged ranges (temporary use) = empty list with 2 buckets
     final List<Range> mergeRanges = obsCtx.getMergeRanges();
-    
-    // Merge HA ranges with HA Rise/set ranges :
+
+    // Merge HA ranges (BL) with HA Rise/set ranges (and optionally night limits) :
     Range.intersectRanges(obsCtx.getFlatRangeLimits(), obsCtx.getSizeFlatRangeLimits(), nValid, mergeRanges);
+    
+    Range maxRange = null;
 
-    double maxLen = 0d;
-
+    // find the maximum length of HA observable intervals:
     if (mergeRanges != null) {
       for (Range range : mergeRanges) {
         final double len = range.getLength();
-        if (len > maxLen) {
-          maxLen = len;
+        if (maxRange == null || len > maxRange.getLength()) {
+          maxRange = range;
         }
       }
     }
 
-    this.maxLength = maxLen;
+    if (maxRange == null) {
+      this.estimation = 0d;
+      this.maxLength = 0d;
+    } else {
+      this.estimation = estimator.compute(maxRange);
+      this.maxLength = maxRange.getLength();
+    }
   }
 
   /**
-   * Simple comparator that takes into account only the maximum length 
+   * Simple comparator that takes into account first the maximum length and then the distance to transit (if maximum length are equals)
    * @param other pop observability data
    * @return Double.compare(maxLength1, maxLength2)
    */
   public int compareTo(final PopObservabilityData other) {
-    return Double.compare(this.maxLength, other.getMaxLength());
+    return Double.compare(this.getEstimation(), other.getEstimation());
   }
 
   /**
@@ -91,6 +110,14 @@ public final class PopObservabilityData implements Comparable<PopObservabilityDa
    */
   public double getMaxLength() {
     return maxLength;
+  }
+
+  /**
+   * Return the observability estimation (maximum length x transit weight)
+   * @return observability estimation
+   */
+  public double getEstimation() {
+    return estimation;
   }
 
   /**
@@ -111,6 +138,6 @@ public final class PopObservabilityData implements Comparable<PopObservabilityDa
 
   @Override
   public String toString() {
-    return this.targetName + " : " + this.popCombination + " = " + this.maxLength;
+    return this.targetName + " : " + this.popCombination + '[' + NumberUtils.trimTo3Digits(this.estimation) + "] = " + NumberUtils.trimTo3Digits(this.maxLength);
   }
 }
