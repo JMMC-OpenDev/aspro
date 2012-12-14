@@ -4,6 +4,7 @@
 package fr.jmmc.aspro.model;
 
 import fr.jmmc.aspro.model.observability.PopCombination;
+import fr.jmmc.aspro.service.pops.BestPopsEstimator;
 import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
@@ -29,11 +30,13 @@ public final class ObservabilityContext {
   private final List<Range> mergeRanges = new ArrayList<Range>(2);
   /* arrays instead of list for traversal performance */
   /** pop combinations array */
-  private PopCombination[] popCombs = null;
+  PopCombination[] popCombs = null;
   /** base line array */
-  private BaseLine[] baseLines = null;
+  BaseLine[] baseLines = null;
   /** W ranges array */
-  private Range[] wRanges = null;
+  Range[] wRanges = null;
+  /** best PoPs estimator related to the current target (HA ranges) */
+  private BestPopsEstimator popEstimator = null;
 
   /**
    * Public constructor
@@ -45,6 +48,19 @@ public final class ObservabilityContext {
     }
     // minimal capacity = 2 rangeLimits per range * ( 3 ranges * nBaseLines + 2 rise/set range + 2 nightLimits range)
     resizeFlatRangeLimits(2 * (3 * nBaseLines + 2 + 2));
+  }
+
+  /**
+   * Public Copy constructor
+   * @param obsCtx observability context to copy
+   */
+  public ObservabilityContext(final ObservabilityContext obsCtx) {
+    this(obsCtx.baseLines.length);
+
+    // Use arrays instead of List for performance:
+    setPopCombs(obsCtx.popCombs);
+    setBaseLines(obsCtx.baseLines);
+    setWRanges(obsCtx.wRanges);
   }
 
   /**
@@ -97,7 +113,7 @@ public final class ObservabilityContext {
       limits[n++].set(range.getMin(), true);
       limits[n++].set(range.getMax(), false);
     }
-    
+
     this.nFlatRangeLimits = n;
   }
 
@@ -179,5 +195,21 @@ public final class ObservabilityContext {
    */
   public void setWRanges(final Range[] wRanges) {
     this.wRanges = wRanges;
+  }
+
+  /**
+   * Return the best PoPs estimator related to the current target
+   * @return best PoPs estimator related to the current target
+   */
+  public BestPopsEstimator getPopEstimator() {
+    return popEstimator;
+  }
+
+  /**
+   * Define the best PoPs estimator related to the current target
+   * @param popEstimator best PoPs estimator related to the current target
+   */
+  public void setPopEstimator(final BestPopsEstimator popEstimator) {
+    this.popEstimator = popEstimator;
   }
 }
