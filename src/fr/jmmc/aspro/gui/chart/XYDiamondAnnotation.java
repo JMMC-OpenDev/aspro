@@ -46,7 +46,6 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Rectangle2D;
 import java.io.Serializable;
-
 import org.jfree.chart.annotations.AbstractXYAnnotation;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.plot.Plot;
@@ -229,7 +228,7 @@ public final class XYDiamondAnnotation extends AbstractXYAnnotation implements
 
     final Rectangle2D drawArea = new Rectangle2D.Double(0d, 0d, size, size);
 
-    g2.translate(j2DX - size / 2d, j2DY - size / 2d);
+    g2.translate(j2DX - 0.5d * size, j2DY - 0.5d * size);
 
     drawDiamond(g2, drawArea);
 
@@ -238,7 +237,7 @@ public final class XYDiamondAnnotation extends AbstractXYAnnotation implements
     final String toolTip = getToolTipText();
     final String url = getURL();
     if (toolTip != null || url != null) {
-      final Rectangle2D displayArea = new Rectangle2D.Double(j2DX - size / 2d, j2DY - size / 2d, size, size);
+      final Rectangle2D displayArea = new Rectangle2D.Double(j2DX - 0.5d * size, j2DY - 0.5d * size, size, size);
 
       addEntity(info, displayArea, rendererIndex, toolTip, url);
     }
@@ -250,7 +249,7 @@ public final class XYDiamondAnnotation extends AbstractXYAnnotation implements
    */
   private void drawDiamond(final Graphics2D g2, final Rectangle2D drawArea) {
     // use float (java 1.5 support):
-    final float offset = (float) (drawArea.getWidth() / 2d);
+    final float offset = (float) (0.5d * drawArea.getWidth());
     final float coordX = (float) drawArea.getCenterX();
     final float coordY = (float) drawArea.getCenterY();
 
@@ -278,6 +277,7 @@ public final class XYDiamondAnnotation extends AbstractXYAnnotation implements
    *
    * @return <code>true</code> or <code>false</code>.
    */
+  @Override
   public boolean equals(final Object object) {
 
     if (object == null) {
@@ -287,7 +287,7 @@ public final class XYDiamondAnnotation extends AbstractXYAnnotation implements
       return true;
     }
     if (object instanceof XYDiamondAnnotation) {
-      XYDiamondAnnotation diamond = (XYDiamondAnnotation) object;
+      final XYDiamondAnnotation diamond = (XYDiamondAnnotation) object;
       if (super.equals(object)) {
         return (this.x == diamond.getX()) && (this.y == diamond.getY());
       }
@@ -302,6 +302,7 @@ public final class XYDiamondAnnotation extends AbstractXYAnnotation implements
    *
    * @throws CloneNotSupportedException questa classe può non lanciare questa exception, ma le sottoclassi (se esistono) debbono.
    */
+  @Override
   public Object clone() throws CloneNotSupportedException {
     return super.clone();
   }

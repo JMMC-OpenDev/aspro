@@ -228,7 +228,7 @@ public final class XYTickAnnotation extends XYTextAnnotation
     // convert the tip radius in data units (equals to bar width / 2) i.e. domain axis :
     final double j2Radius = domainAxis.lengthToJava2D(renderContext.getTipRadius(), dataArea, domainEdge);
 
-    Font bestFont = null;
+    Font bestFont;
     double halfTickLength;
 
     if (renderContext.autoFitTipDone()) {
@@ -294,8 +294,7 @@ public final class XYTickAnnotation extends XYTextAnnotation
     }
 
     g2d.setPaint(getPaint());
-    TextUtilities.drawRotatedString(getText(), g2d, labelX, labelY,
-            getTextAnchor(), getRotationAngle(), getRotationAnchor());
+    TextUtilities.drawRotatedString(getText(), g2d, labelX, labelY, getTextAnchor(), getRotationAngle(), getRotationAnchor());
 
     if (isOutlineVisible()) {
       g2d.setStroke(getOutlineStroke());
