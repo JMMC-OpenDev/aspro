@@ -89,14 +89,14 @@ public final class InterferometerMapService {
         z = s.getRelativePosition().getPosZ();
 
         /*
-        SP = SIN(PI*(LONLAT(2))/180.0D0)
-        CP = COS(PI*(LONLAT(2))/180.0D0)
-        XX = STATX(1)
-        YY = STATY(1)
-        ZZ = STATZ(1)
+         SP = SIN(PI*(LONLAT(2))/180.0D0)
+         CP = COS(PI*(LONLAT(2))/180.0D0)
+         XX = STATX(1)
+         YY = STATY(1)
+         ZZ = STATZ(1)
 
-        x=YY
-        y=ZZ*CP-XX*SP
+         x=YY
+         y=ZZ*CP-XX*SP
          */
 
         mapX[i] = y;
@@ -106,13 +106,13 @@ public final class InterferometerMapService {
       // relocate center :
       final double minX = getMin(mapX);
       final double maxX = getMax(mapX);
-      relocate(mapX, minX + (maxX - minX) / 2d);
+      relocate(mapX, minX + 0.5d * (maxX - minX));
 
       final double minY = getMin(mapY);
       final double maxY = getMax(mapY);
-      relocate(mapY, minY + (maxY - minY) / 2d);
+      relocate(mapY, minY + 0.5d * (maxY - minY));
 
-      final double maxXY = Math.max((maxX - minX) / 2d, (maxY - minY) / 2d);
+      final double maxXY = Math.max(0.5d * (maxX - minX), 0.5d * (maxY - minY));
 
       // copy results :
       data.setMaxXY(maxXY);

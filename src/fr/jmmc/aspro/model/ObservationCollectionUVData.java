@@ -130,7 +130,7 @@ public final class ObservationCollectionUVData extends ObservationCollectionObsD
     // - check doNoise: noiseService.isDoNoise()
 
     if (!getTargetName().equals(uvDataCollection.getTargetName())) {
-        return false;
+      return false;
     }
     if (!getVersion().isSameTargetVersion(uvDataCollection.getVersion())) {
       return false;
@@ -145,8 +145,8 @@ public final class ObservationCollectionUVData extends ObservationCollectionObsD
     // check if OIFitsCreatorServices have noise enabled:
     final OIFitsCreatorService current = getFirstUVData().getOiFitsCreator();
     final OIFitsCreatorService other = uvDataCollection.getFirstUVData().getOiFitsCreator();
-    
-    if (current != null && current.isDoNoise() != other.isDoNoise()) {
+
+    if (current != null && other != null && current.isDoNoise() != other.isDoNoise()) {
       return false;
     }
     return true;

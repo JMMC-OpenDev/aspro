@@ -404,7 +404,7 @@ public final class NoiseService extends VisNoiseService {
     final double fzero = Math.pow(10d, band.getLogFluxZero()) * (lambda * AsproConstants.MICRO_METER) / (H_PLANCK * C_LIGHT);
 
     // nbTotalPhot for the all spectra:
-    final double nbTotalPhotSpectra = fzero * nbTel * Math.PI * Math.pow(telDiam / 2d, 2d)
+    final double nbTotalPhotSpectra = fzero * nbTel * Math.PI * Math.pow(0.5d * telDiam, 2d)
             * transmission * sr * Math.pow(10d, -0.4d * objectMag);
 
     // nbTotalPhot per resolution element:

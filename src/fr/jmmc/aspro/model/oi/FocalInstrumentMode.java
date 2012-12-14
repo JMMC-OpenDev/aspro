@@ -193,7 +193,7 @@ public class FocalInstrumentMode
    * @return central wave length
    */
   public final double getWaveLength() {
-    return (this.waveLengthMax + this.waveLengthMin) / 2d;
+    return 0.5d * (this.waveLengthMax + this.waveLengthMin);
   }
 
   /**
