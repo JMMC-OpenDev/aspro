@@ -40,12 +40,12 @@ public final class AstroSkyCalc {
   private final static double MSEC_IN_DEC_HOUR = SEC_IN_DEC_HOUR / 1000d;
   /** minimal precision value in decimal hour */
   private final static double PREC_IN_DEC_HOUR = MSEC_IN_DEC_HOUR / 10d;
+  /** cached log trace disabled */
+  private final static boolean isLogTrace = false; /* logger.isTraceEnabled(); */
 
   /* members */
   /** cached log debug enabled */
   private final boolean isLogDebug = logger.isDebugEnabled();
-  /** cached log debug enabled */
-  private final boolean isLogTrace = logger.isTraceEnabled();
   /** site location */
   Site site;
   /** jd corresponding to LT=24:00:00 for the observation date */
@@ -520,7 +520,7 @@ public final class AstroSkyCalc {
     for (final Range range : moonRanges) {
       jdMin = range.getMin();
       jdMax = range.getMax();
-      jdMid = (jdMin + jdMax) / 2d;
+      jdMid = 0.5d * (jdMin + jdMax);
 
       maxIllum = Math.max(maxIllum, moonIllum(jdMin));
       maxIllum = Math.max(maxIllum, moonIllum(jdMid));

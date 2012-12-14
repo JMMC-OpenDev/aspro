@@ -23,11 +23,11 @@ public final class AstroSkyCalcObservation {
   /** cached log debug enabled */
   private final boolean isLogDebug = logger.isDebugEnabled();
   /** site location (package visibility) */
-  private Site site;
+  Site site;
   /** cosinus of site latitude */
-  private double cosLat = 0d;
+  double cosLat = 0d;
   /** sinus of site latitude */
-  private double sinLat = 0d;
+  double sinLat = 0d;
   /** target info */
   private Observation observation = null;
 
@@ -36,6 +36,19 @@ public final class AstroSkyCalcObservation {
    */
   public AstroSkyCalcObservation() {
     // no-op
+  }
+
+  /**
+   * Copy Constructor
+   * 
+   * @param sco other instance to copy
+   */
+  public AstroSkyCalcObservation(final AstroSkyCalcObservation sco) {
+    // copy site info :
+    this.site = sco.site;
+
+    this.cosLat = sco.cosLat;
+    this.sinLat = sco.sinLat;
   }
 
   /**

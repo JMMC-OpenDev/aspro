@@ -265,7 +265,7 @@ public final class NightlyAlmanac {
       sunset.changeWhen(jdtemp);
 //         System.out.printf("In NightlyAlmanac.Update, sunset set to:%n");
 //         sunset.dump();
-      nightcenter.changeWhen((sunset.when.jd + sunrise.when.jd) / 2d);
+      nightcenter.changeWhen(0.5d * (sunset.when.jd + sunrise.when.jd));
     } else if (hasunrise < 0.2d) {  // may not rise ... set sunrise to noontime to flag.
       if (midnight.when.localDate.timeofday.hour == 23) {
         jdnoon = jdmid - 0.5d;
