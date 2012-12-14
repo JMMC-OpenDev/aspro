@@ -171,9 +171,10 @@
       <prerelease version="0.9.4 beta 2">
         <change type="FEATURE">Added HA constraints (per target) in the observability computation displayed using translucent area and dotted outline</change>
         <change type="FEATURE">Added a combo box in the main settings to see estimated best Pops combinations and their effect on observability</change>
-        <change type="FEATURE">Enhanced Best PoPs algorithm to take new rules into account (transit distance and HA constraints); 
+        <change type="FEATURE">Enhanced the Best PoPs algorithm to take new rules into account (transit distance and HA constraints); 
           it is based on a normal law estimator that allows more control (gaussian variance and average estimation versus min estimation)
         </change>
+        <change type="CHANGE">Optimized Best PoPs algorithm (multithreading)</change>
         <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/390">Made the color scale on UV coverage plot interactive to show only effective data range (even when zooming in/out)</change>
         <change type="FEATURE">Added preferences for night only and best PoPs algorithms (Simple, Transit or HALimits)</change>
       </prerelease>
