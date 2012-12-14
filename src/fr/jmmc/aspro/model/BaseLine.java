@@ -28,7 +28,7 @@ public final class BaseLine {
    * @param beam2 beam 2
    * @param x relative position of stations in local equatorial plane
    * @param y relative position of stations in local equatorial plane
-   * @param z relative position of stations Z
+   * @param z relative position of stations Z toward North
    */
   public BaseLine(final Beam beam1, final Beam beam2, final double x, final double y, final double z) {
     this.name = beam1.getStation().getName() + "-" + beam2.getStation().getName();
@@ -72,7 +72,7 @@ public final class BaseLine {
   }
 
   /**
-   * Return relative position of stations Z - toward north
+   * Return relative position of stations - Z toward north
    * @return relative position of stations Z
    */
   public double getZ() {
