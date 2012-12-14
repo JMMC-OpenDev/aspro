@@ -3,13 +3,12 @@
  ******************************************************************************/
 package fr.jmmc.aspro.gui.chart;
 
-import fr.jmmc.jmal.image.ImageUtils;
 import fr.jmmc.jmal.image.ColorScale;
+import fr.jmmc.jmal.image.ImageUtils;
 import java.awt.Color;
 import java.awt.Paint;
 import java.awt.image.IndexColorModel;
 import java.io.Serializable;
-
 import org.jfree.chart.HashUtilities;
 import org.jfree.chart.renderer.PaintScale;
 import org.jfree.util.PublicCloneable;
@@ -28,7 +27,7 @@ public class ColorModelPaintScale
   /** The upper bound. */
   private final double upperBound;
   /** color model (lut) */
-  private transient final IndexColorModel colorModel;
+  transient final IndexColorModel colorModel;
   /** color scaling method */
   private transient final ColorScale colorScale;
   /* internal */

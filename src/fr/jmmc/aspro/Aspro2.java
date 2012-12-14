@@ -62,17 +62,15 @@ public final class Aspro2 extends App {
    * @param args command line arguments
    */
   public static void main(final String[] args) {
-        // init swing application for science
-        SwingSettings.setup();
+    // init swing application for science
+    SwingSettings.setup();
 
     final long start = System.nanoTime();
     try {
       // Start application with the command line arguments
       new Aspro2(args);
     } finally {
-      if (logger.isInfoEnabled()) {
-        logger.info("startup : duration = {} ms.", 1e-6d * (System.nanoTime() - start));
-      }
+      logger.info("startup : duration = {} ms.", 1e-6d * (System.nanoTime() - start));
     }
   }
 
@@ -106,7 +104,6 @@ public final class Aspro2 extends App {
     // Using invokeAndWait to be in sync with this thread :
     // note: invokeAndWaitEDT throws an IllegalStateException if any exception occurs
     SwingUtils.invokeAndWaitEDT(new Runnable() {
-
       /**
        * Initializes the swing components with their actions in EDT
        */
@@ -153,7 +150,6 @@ public final class Aspro2 extends App {
     logger.debug("AsproGui.execute() handler called.");
 
     SwingUtils.invokeLaterEDT(new Runnable() {
-
       /**
        * Show the application frame using EDT
        */
@@ -235,9 +231,7 @@ public final class Aspro2 extends App {
     // get screen size to adjust minimum window size :
     final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 
-    if (logger.isInfoEnabled()) {
-      logger.info("screen size = {} x {}", screenSize.getWidth(), screenSize.getHeight());
-    }
+    logger.info("screen size = {} x {}", screenSize.getWidth(), screenSize.getHeight());
 
     // hack for screens smaller than 1152x864 screens :
     final int appWidth = 950;
