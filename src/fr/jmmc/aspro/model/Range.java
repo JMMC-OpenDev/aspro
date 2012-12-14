@@ -3,6 +3,7 @@
  ******************************************************************************/
 package fr.jmmc.aspro.model;
 
+import fr.jmmc.jmcs.util.ObjectUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -69,6 +70,14 @@ public final class Range {
   }
 
   /**
+   * Return the center value
+   * @return center value
+   */
+  public double getCenter() {
+    return 0.5d * (this.min + this.max);
+  }
+
+  /**
    * Return the length (max - min)
    * @return length
    */
@@ -86,6 +95,33 @@ public final class Range {
   }
 
   /**
+   * Returns true if this range equals the given range
+   * @param obj another object instance
+   * @return true if this range equals the given range
+   */
+  @Override
+  public boolean equals(final Object obj) {
+    if (obj == null) {
+      return false;
+    }
+    // identity check:
+    if (this == obj) {
+      return true;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    final Range other = (Range) obj;
+    if (this.min != other.getMin()) {
+      return false;
+    }
+    if (this.max != other.getMax()) {
+      return false;
+    }
+    return true;
+  }
+
+  /**
    * Return a string representation of this range
    * @return string representation of this range
    */
@@ -96,12 +132,44 @@ public final class Range {
 
   /* --- Utility methods ---------------------------------------------------- */
   /**
+   * Return true if both range list are equals
+   * @param ranges list of ranges
+   * @param otherRanges other list of ranges
+   * @return true if both range list are equals
+   */
+  public static boolean equals(final List<Range> ranges, final List<Range> otherRanges) {
+    if (ranges == otherRanges) {
+      // identity or both nulls:
+      return true;
+    }
+    if ((ranges == null && otherRanges != null) || (ranges != null && otherRanges == null)) {
+      return false;
+    }
+    // not nulls:
+    final int len = ranges.size();
+    if (len != otherRanges.size()) {
+      return false;
+    }
+    for (int i = 0; i < len; i++) {
+      final Range range = ranges.get(i);
+      final Range otherRange = otherRanges.get(i);
+      if (!ObjectUtils.areEquals(range, otherRange)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
    * Test if the given value is inside the given list of ranges
    * @param ranges list of ranges
    * @param value value to test
    * @return true if the given value is inside given ranges
    */
   public static boolean contains(final List<Range> ranges, final double value) {
+    if (ranges == null) {
+      return false;
+    }
     return find(ranges, value) != null;
   }
 
