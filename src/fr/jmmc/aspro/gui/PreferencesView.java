@@ -6,18 +6,22 @@ package fr.jmmc.aspro.gui;
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.Preferences;
 import fr.jmmc.aspro.model.observability.SunTimeInterval.SunType;
+import fr.jmmc.aspro.service.pops.BestPopsEstimatorFactory.Algorithm;
+import fr.jmmc.aspro.service.pops.Criteria;
 import fr.jmmc.jmal.image.ColorModels;
 import fr.jmmc.jmal.image.ColorScale;
 import fr.jmmc.jmcs.data.preference.PreferencesException;
+import fr.jmmc.jmcs.gui.component.ComponentResizeAdapter;
+import java.awt.Dimension;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Arrays;
 import java.util.Observable;
 import java.util.Observer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JFrame;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Preferences GUI
@@ -55,6 +59,10 @@ public final class PreferencesView extends JFrame implements Observer {
     this.jComboBoxLUT.setModel(new DefaultComboBoxModel(ColorModels.getColorModelNames()));
     this.jComboBoxColorScale.setModel(new DefaultComboBoxModel(ColorScale.values()));
 
+    this.jComboBoxBestPopsAlgorithm.setModel(new DefaultComboBoxModel(Algorithm.values()));
+    this.jComboBoxBestPopsCriteriaSigma.setModel(new DefaultComboBoxModel(Criteria.values()));
+    this.jComboBoxBestPopsCriteriaAverageWeight.setModel(new DefaultComboBoxModel(Criteria.values()));
+
     // register this instance as a Preference Observer :
     this.myPreferences.addObserver(this);
 
@@ -62,7 +70,6 @@ public final class PreferencesView extends JFrame implements Observer {
     update(null, null);
 
     this.jFieldMinElev.addPropertyChangeListener("value", new PropertyChangeListener() {
-
       @Override
       public void propertyChange(final PropertyChangeEvent evt) {
         final double minElevNew = ((Number) jFieldMinElev.getValue()).doubleValue();
@@ -79,6 +86,10 @@ public final class PreferencesView extends JFrame implements Observer {
         }
       }
     });
+
+    final Dimension dim = new Dimension(500, 500);
+    setMinimumSize(dim);
+    addComponentListener(new ComponentResizeAdapter(dim));
 
     // pack and center window
     pack();
@@ -124,6 +135,9 @@ public final class PreferencesView extends JFrame implements Observer {
     buttonGroupTimeRef = new javax.swing.ButtonGroup();
     buttonGroupTimeAxis = new javax.swing.ButtonGroup();
     buttonGroupFastUserModel = new javax.swing.ButtonGroup();
+    buttonGroupNightOnly = new javax.swing.ButtonGroup();
+    jScrollPaneView = new javax.swing.JScrollPane();
+    jPanelView = new javax.swing.JPanel();
     jPanelObservability = new javax.swing.JPanel();
     jLabelTimeRef = new javax.swing.JLabel();
     jRadioButtonTimeLST = new javax.swing.JRadioButton();
@@ -131,10 +145,20 @@ public final class PreferencesView extends JFrame implements Observer {
     jLabelCenterNight = new javax.swing.JLabel();
     jRadioButtonCenterNightYes = new javax.swing.JRadioButton();
     jRadioButtonCenterNightNo = new javax.swing.JRadioButton();
+    jLabelNightOnly = new javax.swing.JLabel();
+    jRadioButtonNightOnlyYes = new javax.swing.JRadioButton();
+    jRadioButtonNightOnlyNo = new javax.swing.JRadioButton();
     jLabelMinElev = new javax.swing.JLabel();
     jFieldMinElev = new javax.swing.JFormattedTextField();
     jLabelTwilight = new javax.swing.JLabel();
     jComboBoxTwilight = new javax.swing.JComboBox();
+    jSeparator = new javax.swing.JSeparator();
+    jLabelBestPopsAlgorithm = new javax.swing.JLabel();
+    jComboBoxBestPopsAlgorithm = new javax.swing.JComboBox();
+    jLabelBestPopsCriteriaSigma = new javax.swing.JLabel();
+    jComboBoxBestPopsCriteriaSigma = new javax.swing.JComboBox();
+    jLabelBestPopsCriteriaAverageWeight = new javax.swing.JLabel();
+    jComboBoxBestPopsCriteriaAverageWeight = new javax.swing.JComboBox();
     jPanelModelEditor = new javax.swing.JPanel();
     jLabelPositionStyle = new javax.swing.JLabel();
     jRadioButtonXY = new javax.swing.JRadioButton();
@@ -156,7 +180,9 @@ public final class PreferencesView extends JFrame implements Observer {
 
     setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
     setTitle("Preferences");
-    getContentPane().setLayout(new javax.swing.BoxLayout(getContentPane(), javax.swing.BoxLayout.PAGE_AXIS));
+    getContentPane().setLayout(new javax.swing.BoxLayout(getContentPane(), javax.swing.BoxLayout.LINE_AXIS));
+
+    jPanelView.setLayout(new javax.swing.BoxLayout(jPanelView, javax.swing.BoxLayout.PAGE_AXIS));
 
     jPanelObservability.setBorder(javax.swing.BorderFactory.createTitledBorder("Observability"));
     jPanelObservability.setLayout(new java.awt.GridBagLayout());
@@ -227,10 +253,45 @@ public final class PreferencesView extends JFrame implements Observer {
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
     jPanelObservability.add(jRadioButtonCenterNightNo, gridBagConstraints);
 
-    jLabelMinElev.setText("Default min. Elevation");
+    jLabelNightOnly.setText("Night only");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 2;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 6);
+    jPanelObservability.add(jLabelNightOnly, gridBagConstraints);
+
+    buttonGroupNightOnly.add(jRadioButtonNightOnlyYes);
+    jRadioButtonNightOnlyYes.setSelected(true);
+    jRadioButtonNightOnlyYes.setText("yes");
+    jRadioButtonNightOnlyYes.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jRadioButtonNightOnlyActionPerformed(evt);
+      }
+    });
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    jPanelObservability.add(jRadioButtonNightOnlyYes, gridBagConstraints);
+
+    buttonGroupNightOnly.add(jRadioButtonNightOnlyNo);
+    jRadioButtonNightOnlyNo.setText("no");
+    jRadioButtonNightOnlyNo.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jRadioButtonNightOnlyActionPerformed(evt);
+      }
+    });
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    jPanelObservability.add(jRadioButtonNightOnlyNo, gridBagConstraints);
+
+    jLabelMinElev.setText("Default min. Elevation");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 3;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 6);
     jPanelObservability.add(jLabelMinElev, gridBagConstraints);
@@ -240,15 +301,15 @@ public final class PreferencesView extends JFrame implements Observer {
     jFieldMinElev.setName("jFieldMinElev"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridy = 3;
     gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 2);
     jPanelObservability.add(jFieldMinElev, gridBagConstraints);
 
     jLabelTwilight.setText("Twilight used as Night limit");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 3;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    gridBagConstraints.gridy = 4;
+    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 6);
     jPanelObservability.add(jLabelTwilight, gridBagConstraints);
 
     jComboBoxTwilight.setModel(new DefaultComboBoxModel(TWILIGHTS));
@@ -260,12 +321,78 @@ public final class PreferencesView extends JFrame implements Observer {
     });
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.insets = new java.awt.Insets(2, 2, 4, 2);
+    jPanelObservability.add(jComboBoxTwilight, gridBagConstraints);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 5;
+    gridBagConstraints.gridwidth = 3;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    jPanelObservability.add(jSeparator, gridBagConstraints);
+
+    jLabelBestPopsAlgorithm.setText("Best PoPs algorithm");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 6;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 6);
+    jPanelObservability.add(jLabelBestPopsAlgorithm, gridBagConstraints);
+
+    jComboBoxBestPopsAlgorithm.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jComboBoxBestPopsAlgorithmActionPerformed(evt);
+      }
+    });
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 6;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.insets = new java.awt.Insets(4, 2, 2, 2);
+    jPanelObservability.add(jComboBoxBestPopsAlgorithm, gridBagConstraints);
+
+    jLabelBestPopsCriteriaSigma.setText("Gaussian sigma");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 7;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 6);
+    jPanelObservability.add(jLabelBestPopsCriteriaSigma, gridBagConstraints);
+
+    jComboBoxBestPopsCriteriaSigma.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jComboBoxBestPopsCriteriaSigmaActionPerformed(evt);
+      }
+    });
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 7;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-    jPanelObservability.add(jComboBoxTwilight, gridBagConstraints);
+    jPanelObservability.add(jComboBoxBestPopsCriteriaSigma, gridBagConstraints);
 
-    getContentPane().add(jPanelObservability);
+    jLabelBestPopsCriteriaAverageWeight.setText("Average weight % Min");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 8;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 6);
+    jPanelObservability.add(jLabelBestPopsCriteriaAverageWeight, gridBagConstraints);
+
+    jComboBoxBestPopsCriteriaAverageWeight.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jComboBoxBestPopsCriteriaAverageWeightActionPerformed(evt);
+      }
+    });
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 8;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+    jPanelObservability.add(jComboBoxBestPopsCriteriaAverageWeight, gridBagConstraints);
+
+    jPanelView.add(jPanelObservability);
 
     jPanelModelEditor.setBorder(javax.swing.BorderFactory.createTitledBorder("Model Editor"));
     jPanelModelEditor.setLayout(new java.awt.GridBagLayout());
@@ -299,7 +426,7 @@ public final class PreferencesView extends JFrame implements Observer {
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
     jPanelModelEditor.add(jRadioButtonRhoTheta, gridBagConstraints);
 
-    getContentPane().add(jPanelModelEditor);
+    jPanelView.add(jPanelModelEditor);
 
     jPanelModelImage.setBorder(javax.swing.BorderFactory.createTitledBorder("Model Image"));
     jPanelModelImage.setLayout(new java.awt.GridBagLayout());
@@ -360,7 +487,7 @@ public final class PreferencesView extends JFrame implements Observer {
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
     jPanelModelImage.add(jComboBoxColorScale, gridBagConstraints);
 
-    getContentPane().add(jPanelModelImage);
+    jPanelView.add(jPanelModelImage);
 
     jPanelUserModel.setBorder(javax.swing.BorderFactory.createTitledBorder("User Model"));
     jPanelUserModel.setLayout(new java.awt.GridBagLayout());
@@ -395,7 +522,7 @@ public final class PreferencesView extends JFrame implements Observer {
     gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
     jPanelUserModel.add(jRadioButtonFastUserModelNo, gridBagConstraints);
 
-    getContentPane().add(jPanelUserModel);
+    jPanelView.add(jPanelUserModel);
 
     jButtonDefault.setText("Restore Default Settings");
     jButtonDefault.addActionListener(new java.awt.event.ActionListener() {
@@ -413,7 +540,11 @@ public final class PreferencesView extends JFrame implements Observer {
     });
     jPanelButtons.add(jButtonSave);
 
-    getContentPane().add(jPanelButtons);
+    jPanelView.add(jPanelButtons);
+
+    jScrollPaneView.setViewportView(jPanelView);
+
+    getContentPane().add(jScrollPaneView);
   }// </editor-fold>//GEN-END:initComponents
 
     private void jRadioButtonPositionStyleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonPositionStyleActionPerformed
@@ -509,6 +640,42 @@ public final class PreferencesView extends JFrame implements Observer {
     }
   }//GEN-LAST:event_jRadioButtonFastUserModelActionPerformed
 
+  private void jRadioButtonNightOnlyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonNightOnlyActionPerformed
+    try {
+      // will fire triggerObserversNotification so update() will be called
+      this.myPreferences.setPreference(Preferences.ONLY_NIGHT, Boolean.valueOf(this.jRadioButtonNightOnlyYes.isSelected()));
+    } catch (PreferencesException pe) {
+      logger.error("property failure : ", pe);
+    }
+  }//GEN-LAST:event_jRadioButtonNightOnlyActionPerformed
+
+  private void jComboBoxBestPopsAlgorithmActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxBestPopsAlgorithmActionPerformed
+    try {
+      // will fire triggerObserversNotification so update() will be called
+      this.myPreferences.setPreference(Preferences.BEST_POPS_ALGORITHM, this.jComboBoxBestPopsAlgorithm.getSelectedItem().toString());
+    } catch (PreferencesException pe) {
+      logger.error("property failure : ", pe);
+    }
+  }//GEN-LAST:event_jComboBoxBestPopsAlgorithmActionPerformed
+
+  private void jComboBoxBestPopsCriteriaSigmaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxBestPopsCriteriaSigmaActionPerformed
+    try {
+      // will fire triggerObserversNotification so update() will be called
+      this.myPreferences.setPreference(Preferences.BEST_POPS_CRITERIA_SIGMA, this.jComboBoxBestPopsCriteriaSigma.getSelectedItem().toString());
+    } catch (PreferencesException pe) {
+      logger.error("property failure : ", pe);
+    }
+  }//GEN-LAST:event_jComboBoxBestPopsCriteriaSigmaActionPerformed
+
+  private void jComboBoxBestPopsCriteriaAverageWeightActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxBestPopsCriteriaAverageWeightActionPerformed
+    try {
+      // will fire triggerObserversNotification so update() will be called
+      this.myPreferences.setPreference(Preferences.BEST_POPS_CRITERIA_AVERAGE_WEIGHT, this.jComboBoxBestPopsCriteriaAverageWeight.getSelectedItem().toString());
+    } catch (PreferencesException pe) {
+      logger.error("property failure : ", pe);
+    }
+  }//GEN-LAST:event_jComboBoxBestPopsCriteriaAverageWeightActionPerformed
+
   /**
    * Listen to preferences changes
    * @param o Preferences
@@ -542,25 +709,37 @@ public final class PreferencesView extends JFrame implements Observer {
     final boolean useFastUserModel = this.myPreferences.isFastUserModel();
     this.jRadioButtonFastUserModelYes.setSelected(useFastUserModel);
     this.jRadioButtonFastUserModelNo.setSelected(!useFastUserModel);
+
+    this.jComboBoxBestPopsAlgorithm.setSelectedItem(this.myPreferences.getBestPopsAlgorithm());
+    this.jComboBoxBestPopsCriteriaSigma.setSelectedItem(this.myPreferences.getBestPopsCriteriaSigma());
+    this.jComboBoxBestPopsCriteriaAverageWeight.setSelectedItem(this.myPreferences.getBestPopsCriteriaAverageWeight());
   }
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.ButtonGroup buttonGroupFastUserModel;
+  private javax.swing.ButtonGroup buttonGroupNightOnly;
   private javax.swing.ButtonGroup buttonGroupPositionStyle;
   private javax.swing.ButtonGroup buttonGroupTimeAxis;
   private javax.swing.ButtonGroup buttonGroupTimeRef;
   private javax.swing.JButton jButtonDefault;
   private javax.swing.JButton jButtonSave;
+  private javax.swing.JComboBox jComboBoxBestPopsAlgorithm;
+  private javax.swing.JComboBox jComboBoxBestPopsCriteriaAverageWeight;
+  private javax.swing.JComboBox jComboBoxBestPopsCriteriaSigma;
   private javax.swing.JComboBox jComboBoxColorScale;
   private javax.swing.JComboBox jComboBoxImageSize;
   private javax.swing.JComboBox jComboBoxLUT;
   private javax.swing.JComboBox jComboBoxTwilight;
   private javax.swing.JFormattedTextField jFieldMinElev;
+  private javax.swing.JLabel jLabelBestPopsAlgorithm;
+  private javax.swing.JLabel jLabelBestPopsCriteriaAverageWeight;
+  private javax.swing.JLabel jLabelBestPopsCriteriaSigma;
   private javax.swing.JLabel jLabelCenterNight;
   private javax.swing.JLabel jLabelColorScale;
   private javax.swing.JLabel jLabelFastUserModel;
   private javax.swing.JLabel jLabelImageSize;
   private javax.swing.JLabel jLabelLutTable;
   private javax.swing.JLabel jLabelMinElev;
+  private javax.swing.JLabel jLabelNightOnly;
   private javax.swing.JLabel jLabelPositionStyle;
   private javax.swing.JLabel jLabelTimeRef;
   private javax.swing.JLabel jLabelTwilight;
@@ -569,14 +748,19 @@ public final class PreferencesView extends JFrame implements Observer {
   private javax.swing.JPanel jPanelModelImage;
   private javax.swing.JPanel jPanelObservability;
   private javax.swing.JPanel jPanelUserModel;
+  private javax.swing.JPanel jPanelView;
   private javax.swing.JRadioButton jRadioButtonCenterNightNo;
   private javax.swing.JRadioButton jRadioButtonCenterNightYes;
   private javax.swing.JRadioButton jRadioButtonFastUserModelNo;
   private javax.swing.JRadioButton jRadioButtonFastUserModelYes;
+  private javax.swing.JRadioButton jRadioButtonNightOnlyNo;
+  private javax.swing.JRadioButton jRadioButtonNightOnlyYes;
   private javax.swing.JRadioButton jRadioButtonRhoTheta;
   private javax.swing.JRadioButton jRadioButtonTimeLST;
   private javax.swing.JRadioButton jRadioButtonTimeUTC;
   private javax.swing.JRadioButton jRadioButtonXY;
+  private javax.swing.JScrollPane jScrollPaneView;
+  private javax.swing.JSeparator jSeparator;
   // End of variables declaration//GEN-END:variables
 
   /**
