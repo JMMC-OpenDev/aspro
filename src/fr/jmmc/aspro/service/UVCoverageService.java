@@ -7,15 +7,15 @@ import edu.dartmouth.AstroSkyCalc;
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.BaseLine;
 import fr.jmmc.aspro.model.Beam;
-import fr.jmmc.aspro.model.observability.ObservabilityData;
 import fr.jmmc.aspro.model.Range;
+import fr.jmmc.aspro.model.observability.ObservabilityData;
 import fr.jmmc.aspro.model.observability.StarData;
 import fr.jmmc.aspro.model.oi.FocalInstrumentMode;
-import fr.jmmc.aspro.model.uvcoverage.UVCoverageData;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetConfiguration;
 import fr.jmmc.aspro.model.uvcoverage.UVBaseLineData;
+import fr.jmmc.aspro.model.uvcoverage.UVCoverageData;
 import fr.jmmc.aspro.model.uvcoverage.UVRangeBaseLineData;
 import fr.jmmc.aspro.util.AngleUtils;
 import fr.jmmc.aspro.util.TestUtils;
@@ -187,9 +187,7 @@ public final class UVCoverageService {
       }
     }
 
-    if (logger.isInfoEnabled()) {
-      logger.info("compute : duration = {} ms.", 1e-6d * (System.nanoTime() - start));
-    }
+    logger.info("compute : duration = {} ms.", 1e-6d * (System.nanoTime() - start));
 
     return this.data;
   }
