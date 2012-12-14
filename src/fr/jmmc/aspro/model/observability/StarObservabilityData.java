@@ -41,6 +41,8 @@ public final class StarObservabilityData {
   private final int type;
   /** visible date intervals */
   private final List<DateTimeInterval> visible = new ArrayList<DateTimeInterval>(3);
+  /** visible date intervals without HA limits */
+  private List<DateTimeInterval> visibleNoHALimits = null;
   /** transit date */
   private Date transitDate;
   /** sampled target positions (ha, az, el) keyed by date */
@@ -113,6 +115,22 @@ public final class StarObservabilityData {
    */
   public List<DateTimeInterval> getVisible() {
     return visible;
+  }
+
+  /**
+   * Return the visible date intervals without HA limits
+   * @return visible date intervals without HA limits
+   */
+  public List<DateTimeInterval> getVisibleNoHaLimits() {
+    return visibleNoHALimits;
+  }
+
+  /**
+   * Return the visible date intervals without HA limits
+   * @param ranges visible date intervals without HA limits
+   */
+  public void setVisibleNoHaLimits(final List<DateTimeInterval> ranges) {
+    visibleNoHALimits = ranges;
   }
 
   /**
