@@ -3,6 +3,7 @@
  ******************************************************************************/
 package fr.jmmc.aspro;
 
+import fr.jmmc.jmcs.util.NumberUtils;
 import java.util.Arrays;
 import java.util.Vector;
 
@@ -47,17 +48,17 @@ public interface AsproConstants {
   /** default image LUT */
   public final static String DEFAULT_IMAGE_LUT = "aspro";
   /** default image size */
-  public final static Integer DEFAULT_IMAGE_SIZE = Integer.valueOf(512);
+  public final static Integer DEFAULT_IMAGE_SIZE = NumberUtils.valueOf(512);
   /** image size choices */
   public final static Vector<Integer> IMAGE_SIZES = new Vector<Integer>(Arrays.asList(
           new Integer[]{
-            Integer.valueOf(256),
-            Integer.valueOf(384),
+            NumberUtils.valueOf(256),
+            NumberUtils.valueOf(384),
             DEFAULT_IMAGE_SIZE,
-            Integer.valueOf(768),
-            Integer.valueOf(1024),
-            Integer.valueOf(1536),
-            Integer.valueOf(2048),}));
+            NumberUtils.valueOf(768),
+            NumberUtils.valueOf(1024),
+            NumberUtils.valueOf(1536),
+            NumberUtils.valueOf(2048)}));
   /** no value for combo boxes */
   public static final String NONE = "None";
 
