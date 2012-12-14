@@ -18,8 +18,8 @@
     <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
   </company>
 
-  <program name="Aspro2" version="0.9.4 beta 1"/>
-  <compilation date="31/10/2012" compiler="JDK 1.5.0_16"/>
+  <program name="Aspro2" version="0.9.4 beta 2"/>
+  <compilation date="14/12/2012" compiler="JDK 1.5.0_16"/>
   
   <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
   <authors>the JMMC Technical Group</authors>
@@ -32,24 +32,24 @@
 
     <!-- Java Mariotti Astronomical library -->
     <package name="jMAL"
-                 description="JMMC library to provide common astronomical computations (coordinate conversion, SIMBAD star resolver and analytical object models in interferometry)"
-                 link="https://www.jmmc.fr/dev/jmal/"
-                 jars="jmal.jar"
-                 license="CECILL-B ???"/>
+             description="JMMC library to provide common astronomical computations (coordinate conversion, SIMBAD star resolver and analytical object models in interferometry)"
+             link="https://www.jmmc.fr/dev/jmal/"
+             jars="jmal.jar"
+             license="CECILL-B ???"/>
 
     <!-- Java Mariotti OIfitsExplorer-core -->
     <package name="OIFits Explorer core"
-                 description="OIFits Explorer core is the JMMC library dedicated to share OIFits GUI components (plots)"
-                 link="http://www.jmmc.fr/dev/oiexplorer-core/"
-                 jars="oiexplorer-core.jar"
-                 license="CECILL-B ???"/>
+             description="OIFits Explorer core is the JMMC library dedicated to share OIFits GUI components (plots)"
+             link="http://www.jmmc.fr/dev/oiexplorer-core/"
+             jars="oiexplorer-core.jar"
+             license="CECILL-B ???"/>
 
     <!-- Java Mariotti OITools -->
     <package name="OITools"
-                 description="OITools is the JMMC library dedicated to OIFits manipulation (load, save and validation)"
-                 link="https://www.jmmc.fr/dev/oitools/"
-                 jars="oitools.jar"
-                 license="CECILL-B ???"/>
+             description="OITools is the JMMC library dedicated to OIFits manipulation (load, save and validation)"
+             link="https://www.jmmc.fr/dev/oitools/"
+             jars="oitools.jar"
+             license="CECILL-B ???"/>
 
 
     <!-- 1. Science / VO libraries (always on top for better visibility) -->
@@ -57,16 +57,16 @@
     <!-- Aspro2 dependencies -->
 
     <package name="JSkyCalc"
-                 description="Observability constraints and Sky Display based on JSkyCalc by J. R. Thorstensen, Dartmouth College"
-                 link="http://www.dartmouth.edu/~physics/faculty/skycalc/flyer.html"
-                 license="redistribution allowed including this acknowledgment 'Observability constraints and Sky Display based on JSkyCalc by J. R. Thorstensen, Dartmouth College'" />
+             description="Observability constraints and Sky Display based on JSkyCalc by J. R. Thorstensen, Dartmouth College"
+             link="http://www.dartmouth.edu/~physics/faculty/skycalc/flyer.html"
+             license="redistribution allowed including this acknowledgment 'Observability constraints and Sky Display based on JSkyCalc by J. R. Thorstensen, Dartmouth College'" />
 
     <!-- OITools dependencies -->
 
     <package name="nom.tam.fits"
-                 description="The Java FITS library (nom.tam.fits) has been developed which provides efficient I/O for FITS images and binary tables. Made by Dr Thomas A. McGlynn, HEASARC"
-                 link="http://heasarc.gsfc.nasa.gov/docs/heasarc/fits/java/v1.0/"
-                 license="Copyright: Thomas McGlynn 1997-1999." />
+             description="The Java FITS library (nom.tam.fits) has been developed which provides efficient I/O for FITS images and binary tables. Made by Dr Thomas A. McGlynn, HEASARC"
+             link="http://heasarc.gsfc.nasa.gov/docs/heasarc/fits/java/v1.0/"
+             license="Copyright: Thomas McGlynn 1997-1999." />
     <!--
       Copyright: Thomas McGlynn 1997-1999.
       This code may be used for any purpose, non-commercial
@@ -79,19 +79,19 @@
 
     <!-- VO interoperability -->
     <package name="JSAMP"
-                 description="JSAMP is a Java toolkit for use with the Simple Applications Messaging Protocol. Made by Mark Taylor, Bristol University."
-                 link="http://software.astrogrid.org/doc/jsamp/"
-                 jars="jsamp-1.3-2.jar"
-                 license="AFL v2.1"/>
+             description="JSAMP is a Java toolkit for use with the Simple Applications Messaging Protocol. Made by Mark Taylor, Bristol University."
+             link="http://software.astrogrid.org/doc/jsamp/"
+             jars="jsamp-1.3-2.jar"
+             license="AFL v2.1"/>
 
     <!-- jMAL dependencies -->
 
     <!-- Model computations (bessel functions) -->
     <package name="CERN colt"
-                 description="provides a set of Open Source Libraries for High Performance Scientific and Technical Computing in Java"
-                 link="http://acs.lbl.gov/software/colt/"
-                 jars="colt.jar"
-                 license="Copyright (c) 1999 CERN - European Organization for Nuclear Research"/>
+             description="provides a set of Open Source Libraries for High Performance Scientific and Technical Computing in Java"
+             link="http://acs.lbl.gov/software/colt/"
+             jars="colt.jar"
+             license="Copyright (c) 1999 CERN - European Organization for Nuclear Research"/>
     <!--
       Copyright (c) 1999 CERN - European Organization for Nuclear Research.
       Permission to use, copy, modify, distribute and sell this software and its documentation for any purpose is
@@ -101,9 +101,9 @@
     -->
 
     <package name="JTransforms"
-                 description="JTransforms is the first, open source, multithreaded FFT library written in pure Java. Made by Dr Piotr Wendykier, Wolfram Research, Inc."
-                 link="http://sourceforge.net/projects/jtransforms/"
-                 license="MPL/LGPL/GPL" />
+             description="JTransforms is the first, open source, multithreaded FFT library written in pure Java. Made by Dr Piotr Wendykier, Wolfram Research, Inc."
+             link="http://sourceforge.net/projects/jtransforms/"
+             license="MPL/LGPL/GPL" />
     <!-- Mozilla Public License: http://www.mozilla.org/MPL/ -->
 
 
@@ -112,22 +112,22 @@
     <!-- Aspro2 dependencies -->
 
     <package name="JFreeChart"
-                 description="JFreeChart is a free 100% Java chart library that makes it easy for developers to display professional quality charts in their applications"
-                 link="http://www.jfree.org/jfreechart/"
-                 jars="jfreechart-1.0.13.jar jcommon-1.0.16.jar"
-                 license="LGPL" />
+             description="JFreeChart is a free 100% Java chart library that makes it easy for developers to display professional quality charts in their applications"
+             link="http://www.jfree.org/jfreechart/"
+             jars="jfreechart-1.0.13.jar jcommon-1.0.16.jar"
+             license="LGPL" />
 
     <package name="iText"
-                 description="iText is a library that allows you to generate PDF files on the fly"
-                 link="http://itextpdf.com/"
-                 jars="iText-2.1.5.jar"
-                 license="AGPL (http://itextpdf.com/terms-of-use/agpl.php)" />
+             description="iText is a library that allows you to generate PDF files on the fly"
+             link="http://itextpdf.com/"
+             jars="iText-2.1.5.jar"
+             license="AGPL (http://itextpdf.com/terms-of-use/agpl.php)" />
 
     <package name="SteelSeries"
-                 description="SteelSeries is library of gauges for Java applications"
-                 link="http://kenai.com/projects/steelseries"
-                 jars="SteelSeries-3.9.26.jar trident.jar"
-                 license="BSD" />
+             description="SteelSeries is library of gauges for Java applications"
+             link="http://kenai.com/projects/steelseries"
+             jars="SteelSeries-3.9.26.jar trident.jar"
+             license="BSD" />
 
   </dependences>
 
@@ -168,8 +168,19 @@
 
   <releasenotes>
     <release version="0.9.4">
+      <prerelease version="0.9.4 beta 2">
+        <change type="FEATURE">Added HA constraints (per target) in the observability computation displayed using translucent area and dotted outline</change>
+        <change type="FEATURE">Added a combo box in the main settings to see estimated best Pops combinations and their effect on observability</change>
+        <change type="FEATURE">Enhanced Best PoPs algorithm to take new rules into account (transit distance and HA constraints); 
+          it is based on a normal law estimator that allows more control (gaussian variance and average estimation versus min estimation)
+        </change>
+        <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/390">Made the color scale on UV coverage plot interactive to show only effective data range (even when zooming in/out)</change>
+        <change type="FEATURE">Added preferences for night only and best PoPs algorithms (Simple, Transit or HALimits)</change>
+      </prerelease>
       <prerelease version="0.9.4 beta 1">
-        <change type="CHANGE">Use a jpg icon instead of the png previous one to work arround a known bug onto macos/java7</change>
+        <change type="FEATURE">Added an 'Open Recent' menu.</change>
+        <change type="FEATURE">Updated chart theme to have uniform charts: white background and light gray grid lines (printer friendly)</change>
+        <change type="CHANGE">Use a jpg icon instead of the previous png one to work arround a known bug onto macos/java7</change>
       </prerelease>
     </release>
     <release version="0.9.3">
