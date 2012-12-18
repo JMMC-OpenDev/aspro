@@ -384,7 +384,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     jPanelMain.add(jPanelObsBottom, gridBagConstraints);
 
     jComboBoxPops.setMaximumRowCount(6);
-    jComboBoxPops.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "123451" }));
+    jComboBoxPops.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "555555" }));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 3;
     gridBagConstraints.gridy = 3;
@@ -616,19 +616,35 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     }
   }
 
-  private void jButtonTargetEditorActionPerformed(java.awt.event.ActionEvent evt) {
+  /**
+   * Handle click on the target editor button: show the target editor
+   * @param ae unused
+   */
+  private void jButtonTargetEditorActionPerformed(ActionEvent ae) {
     showTargetEditor();
   }
 
-  private void jListInstrumentConfigurationsValueChanged(javax.swing.event.ListSelectionEvent evt) {
-    this.processInstrumentConfigurationValueChanged(evt);
+  /**
+   * Handle the instrument selection
+   * @param lse unused
+   */
+  private void jListInstrumentConfigurationsValueChanged(ListSelectionEvent lse) {
+    this.processInstrumentConfigurationValueChanged(lse);
   }
 
-  private void jListTargetsValueChanged(javax.swing.event.ListSelectionEvent evt) {
-    this.processTargetValueChanged(evt);
+  /**
+   * Handle the (single) target selection
+   * @param lse unused
+   */
+  private void jListTargetsValueChanged(ListSelectionEvent lse) {
+    this.processTargetValueChanged(lse);
   }
 
-  private void jLabelStatusMouseClicked(java.awt.event.MouseEvent evt) {
+  /**
+   * Handle click on the status panel: show warning log console
+   * @param me unused
+   */
+  private void jLabelStatusMouseClicked(MouseEvent me) {
     App.showLogConsole(AsproConstants.ASPRO_WARNING_LOG);
   }
 
@@ -1101,7 +1117,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     // note: label pops is only visible if the interferometer has Pops:
     this.jLabelPops.setVisible(hasPops);
     this.jTextPoPs.setVisible(hasPops);
-    
+
     this.jComboBoxPops.setVisible(hasPops);
 
     // reset the pops configuration anyway because it can be invalid because of the chosen instrument:
