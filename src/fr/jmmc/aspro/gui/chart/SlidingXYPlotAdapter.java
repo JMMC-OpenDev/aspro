@@ -3,10 +3,12 @@
  ******************************************************************************/
 package fr.jmmc.aspro.gui.chart;
 
+import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.observability.StarObservabilityData;
 import fr.jmmc.aspro.model.observability.TargetPositionDate;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.jmcs.util.NumberUtils;
+import fr.jmmc.jmcs.util.StringUtils;
 import fr.jmmc.oiexplorer.core.gui.chart.BoundedSymbolAxis;
 import java.awt.Color;
 import java.awt.Paint;
@@ -42,6 +44,8 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
 
   /** Class logger */
   private static final Logger logger = LoggerFactory.getLogger(SlidingXYPlotAdapter.class.getName());
+  /** observation manager */
+  private final static ObservationManager om = ObservationManager.getInstance();
   /* members */
   /** jFreeChart instance */
   private final JFreeChart chart;
@@ -442,7 +446,20 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
           }
         }
 
-        return target.toHtml(sb.toString(), false);
+        final String prependMessage = sb.toString();
+        final String appendMessage;
+
+        // Target user info:
+        final String userDescription = om.getTargetUserInfos().getDescription(target);
+
+        if (userDescription != null) {
+          sb.setLength(0);
+          appendMessage = sb.append("<b>Notes</b>:<br>").append(StringUtils.replaceCR(userDescription, "<br>")).toString();
+        } else {
+          appendMessage = null;
+        }
+
+        return target.toHtml(prependMessage, appendMessage, false);
       }
     }
     return null;
