@@ -1087,14 +1087,14 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
     add(jPanelTarget, gridBagConstraints);
 
-    jPanelDescription.setBorder(javax.swing.BorderFactory.createTitledBorder("Target notes"));
+    jPanelDescription.setBorder(javax.swing.BorderFactory.createTitledBorder("Target notes [\u2139]"));
     jPanelDescription.setMinimumSize(new java.awt.Dimension(10, 50));
     jPanelDescription.setPreferredSize(new java.awt.Dimension(100, 80));
     jPanelDescription.setLayout(new java.awt.GridBagLayout());
 
     jTextAreaTargetInfos.setBackground(new java.awt.Color(255, 255, 153));
     jTextAreaTargetInfos.setColumns(20);
-    jTextAreaTargetInfos.setFont(new java.awt.Font("Monospaced", 0, 10)); // NOI18N
+    jTextAreaTargetInfos.setFont(new java.awt.Font("Monospaced", 0, 12)); // NOI18N
     jTextAreaTargetInfos.setRows(1);
     jScrollPaneTargetInfos.setViewportView(jTextAreaTargetInfos);
 
