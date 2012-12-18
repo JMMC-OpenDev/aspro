@@ -1092,6 +1092,11 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
               // display name :
               name = targetUserInfos.getTargetDisplayName(target);
 
+              // add information character:
+              if (targetUserInfos.getDescription(target) != null) {
+                name += " [\u2139]";
+              }
+
               targetList.add(target);
             }
             symbolList.add(name);
