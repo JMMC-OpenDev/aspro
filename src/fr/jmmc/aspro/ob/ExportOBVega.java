@@ -16,7 +16,6 @@ import fr.jmmc.aspro.model.oi.Pop;
 import fr.jmmc.aspro.model.oi.SpectralBand;
 import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.Target;
-import fr.jmmc.aspro.model.oi.TargetConfiguration;
 import fr.jmmc.aspro.model.oi.TargetInformation;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.jmcs.util.StringUtils;
@@ -117,7 +116,7 @@ public final class ExportOBVega {
   public static void generate(final StringBuilder sb, final ObservationSetting observation, final ObservabilityData obsData) {
 
     // Prepare the Chara Setup according to the Pop configuration :
-    final String charaSetup = prepareCharaSetup(observation, obsData.getBestPops().getPopList());
+    final String charaSetup = prepareCharaSetup(observation, obsData.getBestPops().getPops());
 
     // Prepare the Vega Setup according to the instrument mode :
     final String vegaSetup = prepareVegaSetup(observation);
@@ -435,31 +434,7 @@ public final class ExportOBVega {
 
       if (obsRangesHA != null) {
         // target is observable :
-
-        double haMin = AsproConstants.HA_MIN;
-        double haMax = AsproConstants.HA_MAX;
-
-        // HA Min / Max :
-        final TargetConfiguration targetConf = target.getConfiguration();
-        if (targetConf != null) {
-          if (targetConf.getHAMin() != null) {
-            haMin = targetConf.getHAMin().doubleValue();
-          }
-          if (targetConf.getHAMax() != null) {
-            haMax = targetConf.getHAMax().doubleValue();
-          }
-        }
-        if (logger.isDebugEnabled()) {
-          logger.debug("ha min    : {}", haMin);
-          logger.debug("ha max    : {}", haMax);
-        }
-
-        final List<Range> limRangesHA = Range.restrictRange(obsRangesHA, haMin, haMax);
-
-        if (logger.isDebugEnabled()) {
-          logger.debug("limRangesHA: {}", limRangesHA);
-        }
-        return limRangesHA;
+        return obsRangesHA;
       }
     }
     return null;
@@ -540,10 +515,10 @@ public final class ExportOBVega {
    * For example : 15 S1 POP4 V2 S2 POP5 V1 OFF OFF OFF OFF OFF OFF 
    *
    * @param observation current observation
-   * @param popList list of PoPs
+   * @param pops array of PoPs
    * @return string representing the Chara Setup
    */
-  private static String prepareCharaSetup(final ObservationSetting observation, final List<Pop> popList) {
+  private static String prepareCharaSetup(final ObservationSetting observation, final Pop[] pops) {
 
     // Get chosen stations :
     final List<Station> stations = observation.getInstrumentConfiguration().getStationList();
@@ -578,7 +553,7 @@ public final class ExportOBVega {
        */
       if (i < nStations) {
         telescope = stations.get(i).getName();
-        pop = popList.get(i).getName().toUpperCase();
+        pop = pops[i].getName().toUpperCase();
         switchyard = relatedChannels.get(i).getName();
       } else {
         telescope = UNDEFINED;

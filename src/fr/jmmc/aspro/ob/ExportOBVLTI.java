@@ -287,32 +287,7 @@ public class ExportOBVLTI {
 
       if (obsRangesHA != null) {
         // target is observable :
-
-        double haMin = AsproConstants.HA_MIN;
-        double haMax = AsproConstants.HA_MAX;
-
-        // HA Min / Max :
-        final TargetConfiguration targetConf = target.getConfiguration();
-        if (targetConf != null) {
-          if (targetConf.getHAMin() != null) {
-            haMin = targetConf.getHAMin().doubleValue();
-          }
-          if (targetConf.getHAMax() != null) {
-            haMax = targetConf.getHAMax().doubleValue();
-          }
-        }
-        if (logger.isDebugEnabled()) {
-          logger.debug("ha min    : {}", haMin);
-          logger.debug("ha max    : {}", haMax);
-        }
-
-        final List<Range> limRangesHA = Range.restrictRange(obsRangesHA, haMin, haMax);
-
-        if (logger.isDebugEnabled()) {
-          logger.debug("limRangesHA: {}", limRangesHA);
-        }
-
-        final List<DateTimeInterval> lstRanges = os.convertHARangesToDateInterval(limRangesHA, starData.getPrecRA());
+        final List<DateTimeInterval> lstRanges = os.convertHARangesToDateInterval(obsRangesHA, starData.getPrecRA());
         if (logger.isDebugEnabled()) {
           logger.debug("lst ranges: {}", lstRanges);
         }
