@@ -883,20 +883,21 @@ public class Target
    * @return HTML representation
    */
   public final String toHtml() {
-    return toHtml(null, true);
+    return toHtml(null, null, true);
   }
 
   /**
    * Return an HTML representation of the target used by tooltips
-   * @param message optional message displayed at the beginning
+   * @param prependMessage optional message displayed at the beginning
+   * @param appendMessage optional message displayed at the end
    * @param full flag to display full information
    * @return HTML representation
    */
-  public final String toHtml(final String message, final boolean full) {
+  public final String toHtml(final String prependMessage, final String appendMessage, final boolean full) {
     final StringBuilder sb = new StringBuilder(128);
     sb.append("<html>");
-    if (message != null) {
-      sb.append(message).append("<hr>");
+    if (prependMessage != null) {
+      sb.append(prependMessage).append("<hr>");
     }
     sb.append("<b>Name</b>: ").append(getName());
     sb.append("<br><b>Coords</b>: ").append(getRA()).append(' ').append(getDEC());
@@ -943,6 +944,9 @@ public class Target
     }
     // Ids ?
 
+    if (appendMessage != null) {
+      sb.append("<hr>").append(appendMessage);
+    }
     sb.append("</html>");
     return sb.toString();
   }
