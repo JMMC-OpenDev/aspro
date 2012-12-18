@@ -18,8 +18,8 @@
     <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
   </company>
 
-  <program name="Aspro2" version="0.9.4 beta 2"/>
-  <compilation date="14/12/2012" compiler="JDK 1.5.0_16"/>
+  <program name="Aspro2" version="0.9.4 beta 3"/>
+  <compilation date="18/12/2012" compiler="JDK 1.5.0_16"/>
   
   <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
   <authors>the JMMC Technical Group</authors>
@@ -168,6 +168,10 @@
 
   <releasenotes>
     <release version="0.9.4">
+      <prerelease version="0.9.4 beta 3">
+        <change type="FEATURE">Changed Observability plot to show HA constraints, moon avoidance and wind restriction using translucent area and dotted outline</change>
+        <change type="CHANGE">Reduced memory footprint used by Best PoPs algorithms</change>
+      </prerelease>
       <prerelease version="0.9.4 beta 2">
         <change type="FEATURE">Added HA constraints (per target) in the observability computation displayed using translucent area and dotted outline</change>
         <change type="FEATURE">Added a combo box in the main settings to see estimated best Pops combinations and their effect on observability</change>
