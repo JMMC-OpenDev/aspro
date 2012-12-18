@@ -48,15 +48,21 @@ public final class PopObservabilityData implements Comparable<PopObservabilityDa
    * @param clearRangesBL true to free rangesBL; false otherwise
    */
   public void estimateData(final int nValid, final ObservabilityContext obsCtx, final BestPopsEstimator estimator, final boolean clearRangesBL) {
+    final List<List<Range>> rangesPerBL = this.rangesBL;
+
     // flatten ranges :
-    for (List<Range> ranges : this.rangesBL) {
-      if (ranges != null) {
+    List<Range> ranges;
+    for (int i = 0, size = rangesPerBL.size(); i < size; i++) {
+      ranges = rangesPerBL.get(i);
+      if (!ranges.isEmpty()) {
         obsCtx.addInFlatRangeLimits(ranges);
       }
     }
 
-    // free memory (GC):
     if (clearRangesBL) {
+      // recycle memory (to avoid GC):
+      obsCtx.recycleRanges(rangesPerBL);
+
       this.rangesBL = null;
     }
 
@@ -65,14 +71,15 @@ public final class PopObservabilityData implements Comparable<PopObservabilityDa
 
     // Merge HA ranges (BL) with HA Rise/set ranges (and optionally night limits) :
     Range.intersectRanges(obsCtx.getFlatRangeLimits(), obsCtx.getSizeFlatRangeLimits(), nValid, mergeRanges);
-    
+
     Range maxRange = null;
 
     // find the maximum length of HA observable intervals:
     if (mergeRanges != null) {
-      for (Range range : mergeRanges) {
-        final double len = range.getLength();
-        if (maxRange == null || len > maxRange.getLength()) {
+      Range range;
+      for (int i = 0, size = mergeRanges.size(); i < size; i++) {
+        range = mergeRanges.get(i);
+        if (maxRange == null || range.getLength() > maxRange.getLength()) {
           maxRange = range;
         }
       }
