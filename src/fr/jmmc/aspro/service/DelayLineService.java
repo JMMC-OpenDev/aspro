@@ -6,6 +6,7 @@ package fr.jmmc.aspro.service;
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.BaseLine;
 import fr.jmmc.aspro.model.Range;
+import fr.jmmc.aspro.model.RangeFactory;
 import fr.jmmc.aspro.util.AngleUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,10 +25,10 @@ public final class DelayLineService {
   private static final Logger logger = LoggerFactory.getLogger(DelayLineService.class.getName());
   /** cached log debug enabled */
   private static final boolean DEBUG = false;
-  /** a list containing a single full range (-12; +12) */
-  private static final List<Range> FULL_RANGE_LIST = Arrays.asList(new Range(AsproConstants.HA_MIN, AsproConstants.HA_MAX));
-  /** an empty list */
-  private static final List<Range> EMPTY_RANGE_LIST = Collections.emptyList();
+  /** Range List containing a single full range (-12; +12) */
+  public static final List<Range> FULL_RANGE_LIST = Arrays.asList(new Range(AsproConstants.HA_MIN, AsproConstants.HA_MAX));
+  /** Empty Range list */
+  public static final List<Range> EMPTY_RANGE_LIST = Collections.emptyList();
   /** PI */
   private static final double PI = Math.PI;
   /** -PI */
@@ -51,9 +52,11 @@ public final class DelayLineService {
    * @param dec target declination (rad)
    * @param baseLines base line list
    * @param wRanges [wMin - wMax] ranges per base line
+   * @param rangeFactory Factory used to create Range instance
    * @return intervals (hour angles)
    */
-  public static List<List<Range>> findHAIntervals(final double dec, final List<BaseLine> baseLines, final List<Range> wRanges) {
+  public static List<List<Range>> findHAIntervals(final double dec, final List<BaseLine> baseLines, final List<Range> wRanges,
+          final RangeFactory rangeFactory) {
 
     final double cosDec = Math.cos(dec);
     final double sinDec = Math.sin(dec);
@@ -75,7 +78,7 @@ public final class DelayLineService {
       // First check the W limits :
       wExtrema = findWExtrema(cosDec, sinDec, bl);
 
-      rangesBL.add(findHAIntervalsForBaseLine(cosDec, sinDec, bl, wExtrema, wRange, ha, haValues));
+      rangesBL.add(findHAIntervalsForBaseLine(cosDec, sinDec, bl, wExtrema, wRange, ha, haValues, rangeFactory));
     }
 
     return rangesBL;
@@ -95,11 +98,13 @@ public final class DelayLineService {
    * @param wRange [wMin - wMax] range
    * @param ha double[2] array to avoid array allocations
    * @param haValues double[6] array to avoid array allocations
+   * @param rangeFactory Factory used to create Range instance
    * @return intervals (hour angles) in dec hours.
    */
   public static List<Range> findHAIntervalsForBaseLine(final double cosDec, final double sinDec, final BaseLine baseLine,
           final double[] wExtrema, final Range wRange,
-          final double[] ha, final double[] haValues) {
+          final double[] ha, final double[] haValues,
+          final RangeFactory rangeFactory) {
 
     if (wExtrema == null) {
       // no solution :
@@ -160,7 +165,7 @@ public final class DelayLineService {
 
     // output :
     // size / 2 because only half intervals are inside [wMin; wMax]:
-    final List<Range> ranges = new ArrayList<Range>(nHA / 2);
+    final List<Range> ranges = rangeFactory.getList(); // new ArrayList<Range>(nHA / 2);
 
     // Look if midpoints values are or not in the HMAX-HMIN interval
     // to find which intervals are correct :
@@ -180,7 +185,7 @@ public final class DelayLineService {
 
       if (wMid >= wMin && wMid <= wMax) {
         // this ha interval is valid :
-        ranges.add(new Range(AngleUtils.rad2hours(haLow), AngleUtils.rad2hours(haUp)));
+        ranges.add(rangeFactory.valueOf(AngleUtils.rad2hours(haLow), AngleUtils.rad2hours(haUp)));
       }
     }
 
