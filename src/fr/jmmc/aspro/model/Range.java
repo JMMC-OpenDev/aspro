@@ -23,8 +23,7 @@ public final class Range {
    * Constructor
    */
   public Range() {
-    this.min = 0d;
-    this.max = 0d;
+    this(0d, 0d);
   }
 
   /**
@@ -33,6 +32,16 @@ public final class Range {
    * @param max maximum value
    */
   public Range(final double min, final double max) {
+    this.min = min;
+    this.max = max;
+  }
+
+  /**
+   * Update with given minimum and maximum value
+   * @param min minimum value
+   * @param max maximum value
+   */
+  public void set(final double min, final double max) {
     this.min = min;
     this.max = max;
   }
