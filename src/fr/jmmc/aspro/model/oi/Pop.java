@@ -122,6 +122,19 @@ public class Pop
     }
     return sb.toString();
   }
+
+  /**
+   * Return a string containing only the pop identifiers
+   * @param sb string builder used to build the identifier (not empty when exiting this method)
+   * @param pops PoP1 ... PoPN
+   * @return string like '1...N'
+   */
+  public static String toString(final StringBuilder sb, final Pop[] pops) {
+    for (Pop pop : pops) {
+      sb.append(pop.getIndex());
+    }
+    return sb.toString();
+  }
   
 //--simple--preserve
 
