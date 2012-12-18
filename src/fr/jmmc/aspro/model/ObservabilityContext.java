@@ -4,6 +4,7 @@
 package fr.jmmc.aspro.model;
 
 import fr.jmmc.aspro.model.observability.PopCombination;
+import fr.jmmc.aspro.service.DelayLineService;
 import fr.jmmc.aspro.service.pops.BestPopsEstimator;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,10 +16,16 @@ import org.slf4j.LoggerFactory;
  * and avoid memory allocations (best pops)
  * @author bourgesl
  */
-public final class ObservabilityContext {
+public final class ObservabilityContext implements RangeFactory {
 
   /** Class logger */
   private static final Logger logger = LoggerFactory.getLogger(ObservabilityContext.class.getName());
+  /** skip range checks (out of bounds) */
+  private final static boolean SKIP_RANGE_CHECK = true;
+  /** max number of Range in pool */
+  private final static int MAX_RANGE = 3 * 15 + 1; // 6T = 15 BL and 3 ranges per BL max !
+  /** max number of List<Range> in pool */
+  private final static int MAX_RANGE_LIST = 15 + 1; // 6T = 15 BL !
   /* members */
   /** temporary range limits array (for performance) to merge HA ranges with Rise/set range */
   private RangeLimit[] flatRangeLimits = null;
@@ -28,15 +35,29 @@ public final class ObservabilityContext {
   private int lenFlatRangeLimits = 0;
   /** temporary lists to store merged HA ranges */
   private final List<Range> mergeRanges = new ArrayList<Range>(2);
-  /* arrays instead of list for traversal performance */
+  /** position in the Range pool (-1 if empty) */
+  private int nRange = -1;
+  /** position in the List<Range> pool (-1 if empty) */
+  private int nRangeList = -1;
+  /** Range pool */
+  private final Range[] rangePool = new Range[MAX_RANGE];
+  /** List<Range> pool */
+  private final List[] rangeListPool = new List<?>[MAX_RANGE_LIST];
+  /** created range instances */
+  private int createdRanges = 0;
+  /** created List<Range> instances */
+  private int createdRangeLists = 0;
+  /* arrays instead of list for traversal performance (read only) */
   /** pop combinations array */
-  PopCombination[] popCombs = null;
+  private PopCombination[] popCombs = null;
   /** base line array */
-  BaseLine[] baseLines = null;
+  private BaseLine[] baseLines = null;
   /** W ranges array */
-  Range[] wRanges = null;
+  private Range[] wRanges = null;
   /** best PoPs estimator related to the current target (HA ranges) */
   private BestPopsEstimator popEstimator = null;
+  /** padding to avoid any cache line issues (false sharing) */
+  private final int[] padding = new int[16];
 
   /**
    * Public constructor
@@ -47,7 +68,7 @@ public final class ObservabilityContext {
       logger.debug("ObservabilityContext : nBaseLines: {}", nBaseLines);
     }
     // minimal capacity = 2 rangeLimits per range * ( 3 ranges * nBaseLines + 2 rise/set range + 2 nightLimits range)
-    resizeFlatRangeLimits(2 * (3 * nBaseLines + 2 + 2));
+    this.resizeFlatRangeLimits(2 * (3 * nBaseLines + 2 + 2));
   }
 
   /**
@@ -55,12 +76,12 @@ public final class ObservabilityContext {
    * @param obsCtx observability context to copy
    */
   public ObservabilityContext(final ObservabilityContext obsCtx) {
-    this(obsCtx.baseLines.length);
+    this(obsCtx.getBaseLines().length);
 
     // Use arrays instead of List for performance:
-    setPopCombs(obsCtx.popCombs);
-    setBaseLines(obsCtx.baseLines);
-    setWRanges(obsCtx.wRanges);
+    setPopCombs(obsCtx.getPopCombs());
+    setBaseLines(obsCtx.getBaseLines());
+    setWRanges(obsCtx.getWRanges());
   }
 
   /**
@@ -89,6 +110,15 @@ public final class ObservabilityContext {
     }
 
     this.lenFlatRangeLimits = this.flatRangeLimits.length;
+  }
+
+  /**
+   * Reset the flat range limits array and add the given list
+   * @param ranges list of ranges
+   */
+  public void resetAndAddInFlatRangeLimits(final List<Range> ranges) {
+    this.nFlatRangeLimits = 0;
+    this.addInFlatRangeLimits(ranges);
   }
 
   /**
@@ -126,13 +156,6 @@ public final class ObservabilityContext {
   }
 
   /**
-   * Reset the number of valid elements in the flatRangeLimits array
-   */
-  public void resetFlagRanges() {
-    this.nFlatRangeLimits = 0;
-  }
-
-  /**
    * Return the flat range limits array to merge HA ranges with Rise/set range
    * @return flat range limits array
    */
@@ -145,8 +168,9 @@ public final class ObservabilityContext {
    * @return temporary lists to store merged HA ranges
    */
   public List<Range> getMergeRanges() {
-    this.mergeRanges.clear();
-    return this.mergeRanges;
+    final List<Range> ranges = this.mergeRanges;
+    ranges.clear();
+    return ranges;
   }
 
   /**
@@ -211,5 +235,82 @@ public final class ObservabilityContext {
    */
   public void setPopEstimator(final BestPopsEstimator popEstimator) {
     this.popEstimator = popEstimator;
+  }
+  // RangeFactory:
+
+  /**
+   * Return a Range instance with given minimum and maximum value
+   * @param min minimum value
+   * @param max maximum value
+   * @return Range instance
+   */
+  public Range valueOf(final double min, final double max) {
+    if (nRange >= 0) {
+      final Range range = rangePool[nRange--];
+      range.set(min, max);
+      return range;
+    }
+    ++createdRanges;
+    return new Range(min, max);
+  }
+
+  /**
+   * Return a List<Range> instance
+   * @return List<Range> instance
+   */
+  @SuppressWarnings("unchecked")
+  public List<Range> getList() {
+    if (nRangeList >= 0) {
+      return rangeListPool[nRangeList--];
+    }
+    ++createdRangeLists;
+    return new ArrayList<Range>(3); // max 3 intervals per BL
+  }
+
+  /**
+   * Recycle both Range and List<Range> instances 
+   * @param ranges List<Range> to recycle as List
+   */
+  public void recycleRanges(final List<List<Range>> ranges) {
+    final Range[] pr = rangePool;
+    final List[] pl = rangeListPool;
+    int nr = nRange;
+    int nl = nRangeList;
+
+    List<Range> rangeList;
+    for (int i = 0, size = ranges.size(), len, j; i < size; i++) {
+      rangeList = ranges.get(i);
+      if (rangeList != DelayLineService.EMPTY_RANGE_LIST && rangeList != DelayLineService.FULL_RANGE_LIST) {
+        len = (SKIP_RANGE_CHECK) ? rangeList.size() : Math.min(MAX_RANGE - nr, rangeList.size());
+
+        // recycle ranges:
+        for (j = 0; j < len; j++) {
+          pr[++nr] = rangeList.get(j);
+        }
+
+        // recycle list:
+        if (SKIP_RANGE_CHECK || nl < MAX_RANGE_LIST) {
+          rangeList.clear(); // set to null !
+          pl[++nl] = rangeList;
+        }
+      }
+    }
+    nRange = nr;
+    nRangeList = nl;
+  }
+
+  /**
+   * Reset the factory state
+   */
+  public void reset() {
+    createdRanges = 0;
+    createdRangeLists = 0;
+  }
+
+  /**
+   * Dump the factory statistics
+   */
+  public void dumpStats() {
+    logger.info("RangeFactory: {} created ranges - {} created lists.", createdRanges, createdRangeLists);
   }
 }
