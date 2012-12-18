@@ -39,7 +39,7 @@ public final class StarData {
     return name;
   }
 
- /**
+  /**
    * Return the precessed target right ascension in decimal hours
    * @return precessed target right ascension in decimal hours
    */
@@ -55,7 +55,7 @@ public final class StarData {
     this.precRA = precRA;
   }
 
- /**
+  /**
    * Return the precessed target declination in degrees
    * @return precessed target declination in degrees
    */
@@ -71,7 +71,7 @@ public final class StarData {
     this.precDEC = precDEC;
   }
 
- /**
+  /**
    * Return the hour angle over the minimum elevation
    * @return hour angle over the minimum elevation
    */
@@ -89,8 +89,7 @@ public final class StarData {
 
   /**
    * Return the observability HA intervals
-   *
-   * TODO : check usages and provide proper user messages (not observable in actions ...)
+   * Used by:
    * ExportOBVega.java
    * ExportOBVLTI.java
    * UVCoverageService.java
