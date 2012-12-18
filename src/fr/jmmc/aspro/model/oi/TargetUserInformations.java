@@ -200,6 +200,22 @@ public class TargetUserInformations
   }
 
   /**
+   * Return the user target description or null if undefined
+   * @param target target to use
+   * @return user target description or null if undefined
+   */
+  public final String getDescription(final Target target) {
+    final TargetInformation targetInfo = getTargetInformation(target);
+    if (targetInfo != null) {
+      final String description = targetInfo.getDescription();
+      if (description != null && description.length() != 0) {
+        return description;
+      }
+    }
+    return null;
+  }
+
+  /**
    * Return true if the given target has calibrators
    * @param target target to use
    * @return true if the given target has calibrators
