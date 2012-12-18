@@ -27,7 +27,6 @@ public final class AngleUtils {
    * @return angle in decimal hours
    */
   public static double rad2hours(final double angrad) {
-//    return Math.toDegrees(angrad) / HA_TO_DEG;
     return angrad * RAD_TO_HOUR;    
   }
 
