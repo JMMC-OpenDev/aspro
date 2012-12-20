@@ -165,7 +165,7 @@ public final class ObservabilityService {
   private List<PopCombination> popCombinations = null;
   /** flag to disable the observability restriction due to the night */
   private boolean ignoreUseNightLimit = false;
-  /** create the observability context (temporary variables) */
+  /** estimate the observability context (temporary variables) */
   private ObservabilityContext obsCtx = null;
   /** azimuth expressed in [0; 360 deg] */
   private Double windAzimuth = null;
@@ -207,7 +207,7 @@ public final class ObservabilityService {
     this.bestPopEstimatorCriteriaSigma = bestPopEstimatorCriteriaSigma;
     this.bestPopEstimatorCriteriaAverageWeight = bestPopEstimatorCriteriaAverageWeight;
 
-    // create the observability data corresponding to the observation version :
+    // estimate the observability data corresponding to the observation version :
     this.data = new ObservabilityData(observation.getVersion(), useLST, doDetailedOutput, doBaseLineLimits, doCenterMidnight, twilightNightLimit);
   }
 
@@ -430,7 +430,7 @@ public final class ObservabilityService {
       obsMoonRanges.addAll(this.nightLimits);
       obsMoonRanges.addAll(moonRiseRanges);
 
-      final List<Range> moonRanges = Range.intersectRanges(obsMoonRanges, 2);
+      final List<Range> moonRanges = Range.intersectRanges(obsMoonRanges, 2, defaultRangeFactory);
 
       if (isLogDebug) {
         logger.debug("moonRanges: {}", moonRanges);
@@ -530,19 +530,19 @@ public final class ObservabilityService {
     final int nJobs = (sizeCb > 100) ? jobExecutor.getMaxParallelJob() : 1;
 
     // Use an Object array to avoid synchronization:
-    final List[][] targetPopDataListResults = new List<?>[nJobs][nTargets / nJobs + 16]; // cache line padding
+    final List[][] targetPopDataListResults = new List<?>[nJobs][nTargets / nJobs + 1 + 8]; // cache line padding
 
     // computation tasks:
     final Runnable[] jobs = new Runnable[nJobs];
 
-    // create tasks:
+    // estimate tasks:
     for (int i = 0; i < nJobs; i++) {
       final int jobIndex = i;
 
       final ObservabilityContext obsCtxLocal;
       final AstroSkyCalcObservation scoLocal;
 
-      if (i == 0) {
+      if (jobIndex == 0) {
         obsCtxLocal = this.obsCtx;
         scoLocal = this.sco;
       } else {
@@ -552,7 +552,7 @@ public final class ObservabilityService {
 
       final List[] targetPopDataListThread = targetPopDataListResults[jobIndex];
 
-      jobs[i] = new Runnable() {
+      jobs[jobIndex] = new Runnable() {
         @Override
         public void run() {
           final Thread currentTh = Thread.currentThread(); // multi threading
@@ -1125,7 +1125,7 @@ public final class ObservabilityService {
       }
 
       // finally : merge intervals :
-      final List<Range> finalRangesHardLimits = Range.intersectRanges(obsRanges, nValid);
+      final List<Range> finalRangesHardLimits = Range.intersectRanges(obsRanges, nValid, defaultRangeFactory);
 
       if (isLogDebug) {
         logger.debug("finalRangesHardLimits: {}", finalRangesHardLimits);
@@ -1169,7 +1169,7 @@ public final class ObservabilityService {
             nValid++;
           }
 
-          final List<Range> restrictedRanges = Range.intersectRanges(obsRanges, nValid);
+          final List<Range> restrictedRanges = Range.intersectRanges(obsRanges, nValid, defaultRangeFactory);
 
           if (isLogDebug) {
             logger.debug("restrictedRanges: {}", restrictedRanges);
@@ -1447,18 +1447,15 @@ public final class ObservabilityService {
 
       if (skip) {
         // recycle memory (to avoid GC):
-        obsCtxLocal.recycleRanges(rangesBL);
+        obsCtxLocal.recycleAll(rangesBL);
       } else {
-        popData = new PopObservabilityData(targetName, popComb, new ArrayList<List<Range>>(rangesBL));
-
         // note : rangesTarget contains both rise/set intervals + night limits in HA
-
         obsCtxLocal.resetAndAddInFlatRangeLimits(rangesTarget);
 
-        // merge the baseline ranges with the target intervals :
-        popData.estimateData(nValid, obsCtxLocal, estimator, clearRangesBL);
+        // merge the baseline ranges with the target intervals to estimate observability:
+        popData = PopObservabilityData.estimate(targetName, popComb, rangesBL, nValid, obsCtxLocal, estimator, doSkipDL, clearRangesBL);
 
-        if (popData.getMaxLength() != 0d || !doSkipDL) {
+        if (popData != null) {
           // skip pop solutions outside Rise/Set HA range:
           popDataList.add(popData);
         }
@@ -1507,6 +1504,7 @@ public final class ObservabilityService {
     final double jdMax = jdRiseSet.getMax();
 
     final AzEl azEl = new AzEl();
+    HorizonShape profile;
     boolean visible;
     boolean last = false;
 
@@ -1523,7 +1521,9 @@ public final class ObservabilityService {
 
       // For every beam (station) :
       // check if there is no horizon obstruction :
-      for (final HorizonShape profile : profiles) {
+      for (int i = 0; i < nBeams; i++) {
+        profile = profiles[i];
+
         if (!hs.checkProfile(profile, azEl.getAzimuth(), azEl.getElevation())) {
           visible = false;
 
@@ -2832,7 +2832,7 @@ public final class ObservabilityService {
   }
 
   /**
-   * Simple RangeFactory implementation that create new Range or List<Range> instances
+   * Simple RangeFactory implementation that estimate new Range or List<Range> instances
    */
   private final static class SimpleRangeFactory implements RangeFactory {
 
