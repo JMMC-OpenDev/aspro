@@ -47,7 +47,13 @@ public final class GroupedPopObservabilityData implements Comparable<GroupedPopO
     double minEstimation = 0d;
     double len;
 
-    for (PopObservabilityData popData : this.popDataList) {
+    final int size = this.popDataList.size();
+
+    PopObservabilityData popData;
+
+    for (int i = 0; i < size; i++) {
+      popData = this.popDataList.get(i);
+
       acc += popData.getEstimation();
 
       len = popData.getMaxLength();
@@ -60,7 +66,7 @@ public final class GroupedPopObservabilityData implements Comparable<GroupedPopO
       }
     }
 
-    this.estimation = estimator.compute(acc / this.popDataList.size(), minEstimation);
+    this.estimation = estimator.compute(acc / size, minEstimation);
     this.totalLength = total;
     this.minLength = min;
   }
