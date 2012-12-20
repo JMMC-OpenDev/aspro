@@ -8,6 +8,7 @@ import fr.jmmc.aspro.model.oi.AzEl;
 import fr.jmmc.aspro.model.oi.HorizonProfile;
 import fr.jmmc.aspro.model.oi.Station;
 import java.awt.Polygon;
+import java.awt.Rectangle;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -78,7 +79,101 @@ public final class HorizonService {
         xpoints[i] = (int) orig.getAzimuth();
         ypoints[i] = (int) orig.getElevation();
 
-        final Polygon polygon = new Polygon(xpoints, ypoints, npoints);
+        final Polygon polygon = new Polygon(xpoints, ypoints, npoints) {
+          /** default serial UID for Serializable interface */
+          private static final long serialVersionUID = 1L;
+
+          /**
+           * Gets the bounding box of this <code>Polygon</code>.
+           * The bounding box is the smallest {@link Rectangle} whose
+           * sides are parallel to the x and y axes of the
+           * coordinate space, and can completely contain the <code>Polygon</code>.
+           * @return a <code>Rectangle</code> that defines the bounds of this
+           * <code>Polygon</code>.
+           * @since 1.1
+           */
+          @Override
+          public Rectangle getBounds() {
+            if (bounds != null) {
+              // avoid creating new Rectangle at each call !!
+              return bounds;
+            }
+            return super.getBounds();
+          }
+
+          /**
+           * {@inheritDoc}
+           * @since 1.2
+           */
+          @Override
+          public final boolean contains(final double x, final double y) {
+            if (!getBounds().contains(x, y)) {
+              return false;
+            }
+            int hits = 0;
+
+            // local vars for performance:
+            final int np = npoints;
+            final int[] xp = xpoints;
+            final int[] yp = ypoints;
+
+            int lastx = xp[np - 1];
+            int lasty = yp[np - 1];
+            int curx, cury;
+            int leftx;
+            double test1, test2;
+
+            // Walk the edges of the polygon
+            for (int i = 0; i < np; lastx = curx, lasty = cury, i++) {
+              curx = xp[i];
+              cury = yp[i];
+
+              if (cury == lasty) {
+                continue;
+              }
+
+              if (curx < lastx) {
+                if (x >= lastx) {
+                  continue;
+                }
+                leftx = curx;
+              } else {
+                if (x >= curx) {
+                  continue;
+                }
+                leftx = lastx;
+              }
+
+              if (cury < lasty) {
+                if (y < cury || y >= lasty) {
+                  continue;
+                }
+                if (x < leftx) {
+                  hits++;
+                  continue;
+                }
+                test1 = x - curx;
+                test2 = y - cury;
+              } else {
+                if (y < lasty || y >= cury) {
+                  continue;
+                }
+                if (x < leftx) {
+                  hits++;
+                  continue;
+                }
+                test1 = x - lastx;
+                test2 = y - lasty;
+              }
+
+              if (test1 < (test2 / (lasty - cury) * (lastx - curx))) {
+                hits++;
+              }
+            }
+
+            return ((hits & 1) != 0);
+          }
+        };
 
         profile = new HorizonShape(key, polygon);
 
@@ -100,11 +195,8 @@ public final class HorizonService {
     // adjust azimuth to be compatible with vlti profiles :
 
     // 0 = meridian (north-south) positive toward east :
-    double adjAz = az - 180d;
+    final double adjAz = (az < 180d) ? az + 180d : az - 180d;
 
-    if (adjAz < 0d) {
-      adjAz += 360d;
-    }
     return profile.check(adjAz, elev);
   }
 }
