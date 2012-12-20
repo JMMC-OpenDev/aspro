@@ -7,6 +7,7 @@ import fr.jmmc.aspro.model.ObservabilityContext;
 import fr.jmmc.aspro.model.Range;
 import fr.jmmc.aspro.service.pops.BestPopsEstimator;
 import fr.jmmc.jmcs.util.NumberUtils;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -20,40 +21,36 @@ public final class PopObservabilityData implements Comparable<PopObservabilityDa
   /** pop combination */
   private final PopCombination popCombination;
   /** list of HA ranges per BL */
-  private List<List<Range>> rangesBL;
+  private final List<List<Range>> rangesBL;
   /** observability estimation */
-  private double estimation;
+  private final double estimation;
   /** maximum length of an HA range after merging HA ranges per BL with Rise/Set range */
-  private double maxLength;
-
-  /**
-   * Public constructor
-   * @param targetName target name
-   * @param popCombination pop combination
-   * @param rangesBL list of HA ranges per BL
-   */
-  public PopObservabilityData(final String targetName, final PopCombination popCombination, final List<List<Range>> rangesBL) {
-    this.targetName = targetName;
-    this.popCombination = popCombination;
-    this.rangesBL = rangesBL;
-  }
+  private final double maxLength;
 
   /**
    * Estimator : find the longest observability interval and computes its estimation.
    * 
    * Compute the maximum length of HA observability intervals
+   * @param targetName target name
+   * @param popCombination pop combination
+   * @param rangesBL list of HA ranges per BL
    * @param nValid number of ranges to consider a point is valid
-   * @param obsCtx observability context (temporary data)
+   * @param obsCtx observability context (temporary data) having rise/set intervals + night limits in HA
    * @param estimator best PoPs estimator
+   * @param doSkipDL skip pop combination if any DL is unobservable (useful for performance and detailed output)
    * @param clearRangesBL true to free rangesBL; false otherwise
+   * @return PopObservabilityData instance or null if intersection is empty (unobservable)
    */
-  public void estimateData(final int nValid, final ObservabilityContext obsCtx, final BestPopsEstimator estimator, final boolean clearRangesBL) {
-    final List<List<Range>> rangesPerBL = this.rangesBL;
+  public static PopObservabilityData estimate(final String targetName, final PopCombination popCombination, final List<List<Range>> rangesBL,
+          final int nValid, final ObservabilityContext obsCtx, final BestPopsEstimator estimator,
+          final boolean doSkipDL, final boolean clearRangesBL) {
+
+    // Estimate data first:
 
     // flatten ranges :
     List<Range> ranges;
-    for (int i = 0, size = rangesPerBL.size(); i < size; i++) {
-      ranges = rangesPerBL.get(i);
+    for (int i = 0, size = rangesBL.size(); i < size; i++) {
+      ranges = rangesBL.get(i);
       if (!ranges.isEmpty()) {
         obsCtx.addInFlatRangeLimits(ranges);
       }
@@ -61,37 +58,62 @@ public final class PopObservabilityData implements Comparable<PopObservabilityDa
 
     if (clearRangesBL) {
       // recycle memory (to avoid GC):
-      obsCtx.recycleRanges(rangesPerBL);
-
-      this.rangesBL = null;
+      obsCtx.recycleAll(rangesBL);
     }
 
-    // merged ranges (temporary use) = empty list with 2 buckets
+    // merged ranges (temporary use) = empty list with 3 buckets
     final List<Range> mergeRanges = obsCtx.getMergeRanges();
 
     // Merge HA ranges (BL) with HA Rise/set ranges (and optionally night limits) :
-    Range.intersectRanges(obsCtx.getFlatRangeLimits(), obsCtx.getSizeFlatRangeLimits(), nValid, mergeRanges);
 
-    Range maxRange = null;
+    // TODO: use rangeFactory:
+    Range.intersectRanges(obsCtx.getFlatRangeLimits(), obsCtx.getSizeFlatRangeLimits(), nValid, mergeRanges, obsCtx);
 
     // find the maximum length of HA observable intervals:
-    if (mergeRanges != null) {
-      Range range;
-      for (int i = 0, size = mergeRanges.size(); i < size; i++) {
-        range = mergeRanges.get(i);
-        if (maxRange == null || range.getLength() > maxRange.getLength()) {
-          maxRange = range;
-        }
+    Range maxRange = null;
+    Range range;
+    for (int i = 0, size = mergeRanges.size(); i < size; i++) {
+      range = mergeRanges.get(i);
+      if (maxRange == null || range.getLength() > maxRange.getLength()) {
+        maxRange = range;
       }
     }
 
     if (maxRange == null) {
-      this.estimation = 0d;
-      this.maxLength = 0d;
-    } else {
-      this.estimation = estimator.compute(maxRange);
-      this.maxLength = maxRange.getLength();
+      // intersection is empty:
+      if (doSkipDL) {
+        return null;
+      }
+      return new PopObservabilityData(targetName, popCombination,
+              (clearRangesBL) ? null : new ArrayList<List<Range>>(rangesBL), 0d, 0d);
     }
+
+    // copy range list as given rangeBL instance is reused:
+    final PopObservabilityData popData = new PopObservabilityData(targetName, popCombination,
+            (clearRangesBL) ? null : new ArrayList<List<Range>>(rangesBL),
+            estimator.compute(maxRange), maxRange.getLength());
+
+    // recycle memory (to avoid GC):
+    obsCtx.recycleRanges(mergeRanges);
+
+    return popData;
+  }
+
+  /**
+   * Public constructor
+   * @param targetName target name
+   * @param popCombination pop combination
+   * @param rangesBL list of HA ranges per BL
+   * @param estimation observability estimation
+   * @param maxLength maximum length of an HA range after merging HA ranges per BL with Rise/Set range
+   */
+  private PopObservabilityData(final String targetName, final PopCombination popCombination, final List<List<Range>> rangesBL,
+          final double estimation, final double maxLength) {
+    this.targetName = targetName;
+    this.popCombination = popCombination;
+    this.rangesBL = rangesBL;
+    this.estimation = estimation;
+    this.maxLength = maxLength;
   }
 
   /**
