@@ -52,7 +52,7 @@ public final class DelayLineService {
    * @param dec target declination (rad)
    * @param baseLines base line list
    * @param wRanges [wMin - wMax] ranges per base line
-   * @param rangeFactory Factory used to create Range instance
+   * @param rangeFactory Factory used to create Range and List<Range> instances
    * @return intervals (hour angles)
    */
   public static List<List<Range>> findHAIntervals(final double dec, final List<BaseLine> baseLines, final List<Range> wRanges,
@@ -98,7 +98,7 @@ public final class DelayLineService {
    * @param wRange [wMin - wMax] range
    * @param ha double[2] array to avoid array allocations
    * @param haValues double[6] array to avoid array allocations
-   * @param rangeFactory Factory used to create Range instance
+   * @param rangeFactory Factory used to create Range and List<Range> instances
    * @return intervals (hour angles) in dec hours.
    */
   public static List<Range> findHAIntervalsForBaseLine(final double cosDec, final double sinDec, final BaseLine baseLine,
