@@ -22,10 +22,10 @@ public final class ObservabilityContext implements RangeFactory {
   private static final Logger logger = LoggerFactory.getLogger(ObservabilityContext.class.getName());
   /** skip range checks (out of bounds) */
   private final static boolean SKIP_RANGE_CHECK = true;
-  /** max number of Range in pool */
-  private final static int MAX_RANGE = 3 * 15 + 1; // 6T = 15 BL and 3 ranges per BL max !
   /** max number of List<Range> in pool */
-  private final static int MAX_RANGE_LIST = 15 + 1; // 6T = 15 BL !
+  public final static int MAX_RANGE_LIST = 15 + 1; // 6T = 15 BL !
+  /** max number of Range in pool */
+  public final static int MAX_RANGE = 3 * MAX_RANGE_LIST + 1; // 6T = 15 BL and 3 ranges per BL max + 1 (merged ranges)
   /* members */
   /** temporary range limits array (for performance) to merge HA ranges with Rise/set range */
   private RangeLimit[] flatRangeLimits = null;
@@ -34,15 +34,15 @@ public final class ObservabilityContext implements RangeFactory {
   /** length of the flatRangeLimits array */
   private int lenFlatRangeLimits = 0;
   /** temporary lists to store merged HA ranges */
-  private final List<Range> mergeRanges = new ArrayList<Range>(2);
+  private final List<Range> mergeRanges = new ArrayList<Range>(3 + 8); // cache line padding
   /** position in the Range pool (-1 if empty) */
   private int nRange = -1;
   /** position in the List<Range> pool (-1 if empty) */
   private int nRangeList = -1;
   /** Range pool */
-  private final Range[] rangePool = new Range[MAX_RANGE];
+  private final Range[] rangePool = new Range[MAX_RANGE + 8]; // cache line padding
   /** List<Range> pool */
-  private final List[] rangeListPool = new List<?>[MAX_RANGE_LIST];
+  private final List[] rangeListPool = new List<?>[MAX_RANGE_LIST + 8]; // cache line padding
   /** created range instances */
   private int createdRanges = 0;
   /** created List<Range> instances */
@@ -56,8 +56,6 @@ public final class ObservabilityContext implements RangeFactory {
   private Range[] wRanges = null;
   /** best PoPs estimator related to the current target (HA ranges) */
   private BestPopsEstimator popEstimator = null;
-  /** padding to avoid any cache line issues (false sharing) */
-  private final int[] padding = new int[16];
 
   /**
    * Public constructor
@@ -271,7 +269,7 @@ public final class ObservabilityContext implements RangeFactory {
    * Recycle both Range and List<Range> instances 
    * @param ranges List<Range> to recycle as List
    */
-  public void recycleRanges(final List<List<Range>> ranges) {
+  public void recycleAll(final List<List<Range>> ranges) {
     final Range[] pr = rangePool;
     final List[] pl = rangeListPool;
     int nr = nRange;
@@ -297,6 +295,20 @@ public final class ObservabilityContext implements RangeFactory {
     }
     nRange = nr;
     nRangeList = nl;
+  }
+
+  /**
+   * Recycle both Range instances only
+   * @param ranges List<Range> to recycle
+   */
+  public void recycleRanges(final List<Range> ranges) {
+    final Range[] pr = rangePool;
+    int nr = nRange;
+
+    for (int i = 0, len = (SKIP_RANGE_CHECK) ? ranges.size() : Math.min(MAX_RANGE - nr, ranges.size()); i < len; i++) {
+      pr[++nr] = ranges.get(i);
+    }
+    nRange = nr;
   }
 
   /**
