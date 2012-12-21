@@ -131,7 +131,9 @@ public final class Aspro2 extends App {
 
     // Preload configurations :
     ConfigurationManager.getInstance();
-    // Create singleton at startup (JAXB factory, event queues ...)
+    
+    // Create OIFitsCollectionManager at startup (JAXB factory, event queues and PlotDefinitionFactory ...)
+    // to avoid OpenJDK classloader issues (ie use main thread):
     OIFitsCollectionManager.getInstance();
 
     // Initialize tasks and the task executor :
