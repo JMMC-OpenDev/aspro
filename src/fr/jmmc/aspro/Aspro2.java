@@ -31,6 +31,7 @@ import fr.jmmc.jmcs.gui.util.SwingUtils;
 import fr.jmmc.jmcs.resource.image.ResourceImage;
 import fr.jmmc.jmcs.util.concurrent.ParallelJobExecutor;
 import fr.jmmc.jmcs.util.logging.ApplicationLogSingleton;
+import fr.jmmc.oiexplorer.core.model.OIFitsCollectionManager;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Image;
@@ -130,6 +131,8 @@ public final class Aspro2 extends App {
 
     // Preload configurations :
     ConfigurationManager.getInstance();
+    // Create singleton at startup (JAXB factory, event queues ...)
+    OIFitsCollectionManager.getInstance();
 
     // Initialize tasks and the task executor :
     AsproTaskRegistry.getInstance();
