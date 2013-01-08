@@ -30,12 +30,22 @@ public final class AstroSkyCalcObservation {
   double sinLat = 0d;
   /** target info */
   private Observation observation = null;
+  /** 
+   * Padding to help avoid memory contention among seed updates in
+   * different TLRs in the common case that they are located near
+   * each other.
+   */
+  private final long[] padding = new long[8];
 
   /**
    * Public Constructor
    */
   public AstroSkyCalcObservation() {
     // no-op
+    // use padding array to avoid unused var removal (jvm optimizations)
+    for (int i = 0; i < padding.length; i++) {
+      padding[i] = i;
+    }
   }
 
   /**
@@ -44,6 +54,10 @@ public final class AstroSkyCalcObservation {
    * @param sco other instance to copy
    */
   public AstroSkyCalcObservation(final AstroSkyCalcObservation sco) {
+    // use padding array to avoid unused var removal (jvm optimizations)
+    for (int i = 0; i < padding.length; i++) {
+      padding[i] = i;
+    }
     // copy site info :
     this.site = sco.site;
 

@@ -56,6 +56,12 @@ public final class ObservabilityContext implements RangeFactory {
   private Range[] wRanges = null;
   /** best PoPs estimator related to the current target (HA ranges) */
   private BestPopsEstimator popEstimator = null;
+  /** 
+   * Padding to help avoid memory contention among seed updates in
+   * different TLRs in the common case that they are located near
+   * each other.
+   */
+  private final long[] padding = new long[8];
 
   /**
    * Public constructor
@@ -64,6 +70,10 @@ public final class ObservabilityContext implements RangeFactory {
   public ObservabilityContext(final int nBaseLines) {
     if (logger.isDebugEnabled()) {
       logger.debug("ObservabilityContext : nBaseLines: {}", nBaseLines);
+    }
+    // use padding array to avoid unused var removal (jvm optimizations)
+    for (int i = 0; i < padding.length; i++) {
+      padding[i] = i;
     }
     // minimal capacity = 2 rangeLimits per range * ( 3 ranges * nBaseLines + 2 rise/set range + 2 nightLimits range)
     this.resizeFlatRangeLimits(2 * (3 * nBaseLines + 2 + 2));
