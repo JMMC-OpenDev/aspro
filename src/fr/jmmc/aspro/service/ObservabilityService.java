@@ -50,6 +50,7 @@ import fr.jmmc.aspro.service.pops.BestPopsEstimatorFactory;
 import fr.jmmc.aspro.service.pops.BestPopsEstimatorFactory.Algorithm;
 import fr.jmmc.aspro.service.pops.Criteria;
 import fr.jmmc.aspro.util.TestUtils;
+import fr.jmmc.jmcs.util.concurrent.InterruptedJobException;
 import fr.jmmc.jmcs.util.concurrent.ParallelJobExecutor;
 import fr.jmmc.oitools.util.CombUtils;
 import java.text.DateFormat;
@@ -66,7 +67,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.Future;
+import java.util.concurrent.Callable;
 import javax.xml.datatype.XMLGregorianCalendar;
 import org.ivoa.util.CollectionUtils;
 import org.slf4j.Logger;
@@ -85,6 +86,8 @@ public final class ObservabilityService {
   private final static boolean DEBUG_SLOW_SERVICE = false;
   /** flag to show range factory statistics */
   private final static boolean SHOW_RANGE_FACTORY_STATS = false;
+  /** flag to show thread statistics */
+  private final static boolean SHOW_THREAD_STATS = false;
   /** number of best Pops displayed in warnings */
   private final static int MAX_POPS_IN_WARNING = 15;
   /** jd step = 1 minute */
@@ -240,6 +243,16 @@ public final class ObservabilityService {
   }
 
   /**
+   * Test if the current thread is interrupted: if true then throw an InterruptedJobException
+   * @throws InterruptedJobException if the current thread is interrupted
+   */
+  private void checkInterrupted() throws InterruptedJobException {
+    if (this.currentThread.isInterrupted()) {
+      throw new InterruptedJobException("ObservabilityService.compute: interrupted");
+    }
+  }
+
+  /**
    * Main operation to determine the source observability for a given interferometer configuration
    *
    * @return ObservabilityData container
@@ -249,6 +262,9 @@ public final class ObservabilityService {
       logger.debug("\n\n--------------------------------------------------------------------------------\n\n");
       logger.debug("compute: {}", this.observation);
     }
+
+    // fast interrupt:
+    checkInterrupted();
 
     // Start the computations :
     final long start = System.nanoTime();
@@ -277,10 +293,8 @@ public final class ObservabilityService {
     // find the appropriate night (LST range):
     this.defineObservationRange();
 
-    // fast interrupt :
-    if (this.currentThread.isInterrupted()) {
-      return null;
-    }
+    // fast interrupt:
+    checkInterrupted();
 
     // 2 - Observability per target :
 
@@ -299,10 +313,8 @@ public final class ObservabilityService {
         preparePopCombinations();
       }
 
-      // fast interrupt :
-      if (this.currentThread.isInterrupted()) {
-        return null;
-      }
+      // fast interrupt:
+      checkInterrupted();
 
       // Find the observability intervals for the target list :
       findObservability(targets);
@@ -317,17 +329,14 @@ public final class ObservabilityService {
       }
     }
 
-    // fast interrupt :
-    if (this.currentThread.isInterrupted()) {
-      return null;
-    }
+    // fast interrupt:
+    checkInterrupted();
 
     if (DEBUG_SLOW_SERVICE) {
       TestUtils.busyWait(2000l);
 
-      if (this.currentThread.isInterrupted()) {
-        return null;
-      }
+      // fast interrupt:
+      checkInterrupted();
     }
 
     logger.info("compute : duration = {} ms.", 1e-6d * (System.nanoTime() - start));
@@ -371,10 +380,8 @@ public final class ObservabilityService {
       logger.debug("date max: {}", this.data.getDateMax());
     }
 
-    // fast interrupt :
-    if (this.currentThread.isInterrupted()) {
-      return;
-    }
+    // fast interrupt:
+    checkInterrupted();
 
     // 1 - Find the day / twlight / night zones :
     if (this.useNightLimit) {
@@ -480,6 +487,9 @@ public final class ObservabilityService {
 
         final PopCombination bestPopCombination = findCompatiblePoPs(targets);
 
+        // fast interrupt:
+        checkInterrupted();
+
         if (bestPopCombination == null) {
           // no Pop compatible:
           this.popCombinations.clear();
@@ -501,10 +511,8 @@ public final class ObservabilityService {
     }
     for (Target target : targets) {
 
-      // fast interrupt :
-      if (this.currentThread.isInterrupted()) {
-        return;
-      }
+      // fast interrupt:
+      checkInterrupted();
 
       findTargetObservability(target);
 
@@ -527,66 +535,69 @@ public final class ObservabilityService {
 
     // enable parallel jobs if many targets and pop combinations:
     // 3T represents 125 pop combinations:
-    final int nJobs = (sizeCb > 100) ? jobExecutor.getMaxParallelJob() : 1;
+    final int nTh = (sizeCb * nTargets >= 100) ? jobExecutor.getMaxParallelJob() : 1;
 
-    // Use an Object array to avoid synchronization:
-    final List[][] targetPopDataListResults = new List<?>[nJobs][nTargets / nJobs + 1 + 8]; // cache line padding
+    logger.debug("findCompatiblePoPs: {} targets using {} threads", nTargets, nTh);
 
-    // computation tasks:
-    final Runnable[] jobs = new Runnable[nJobs];
+    // Prepare thread context variables:
+    final ObservabilityContext[] obsCtxThreads = new ObservabilityContext[nTh];
+    final AstroSkyCalcObservation[] scoThreads = new AstroSkyCalcObservation[nTh];
+    final int[] nTaskThreads = (SHOW_THREAD_STATS) ? new int[nTh] : null;
 
-    // estimate tasks:
-    for (int i = 0; i < nJobs; i++) {
-      final int jobIndex = i;
+    for (int t = 0; t < nTh; t++) {
+      obsCtxThreads[t] = (t == 0) ? this.obsCtx : new ObservabilityContext(this.obsCtx);
+      scoThreads[t] = (t == 0) ? this.sco : new AstroSkyCalcObservation(this.sco);
+    }
 
-      final ObservabilityContext obsCtxLocal;
-      final AstroSkyCalcObservation scoLocal;
+    // computation tasks = 1 job per target (work stealing):
+    final Callable<?>[] jobs = new Callable<?>[nTargets];
 
-      if (jobIndex == 0) {
-        obsCtxLocal = this.obsCtx;
-        scoLocal = this.sco;
-      } else {
-        obsCtxLocal = new ObservabilityContext(this.obsCtx);
-        scoLocal = new AstroSkyCalcObservation(this.sco);
-      }
+    // create estimate tasks:
+    for (int i = 0; i < nTargets; i++) {
+      // target index to be processed by this task:
+      final int targetIndex = i;
 
-      final List[] targetPopDataListThread = targetPopDataListResults[jobIndex];
-
-      jobs[jobIndex] = new Runnable() {
+      jobs[targetIndex] = new Callable<List<PopObservabilityData>>() {
+        /**
+         * Called by the ParallelJobExecutor to perform task computation
+         */
         @Override
-        public void run() {
-          final Thread currentTh = Thread.currentThread(); // multi threading
+        public List<PopObservabilityData> call() {
+          // Get thread index to get appropriate thread vars (could be thread local but requires cleanup !)
+          final int threadIndex = ParallelJobExecutor.currentThreadIndex(nTh);
 
-          // for all targets:
-          for (int i = jobIndex, j = 0; i < nTargets; i += nJobs) {
+          // data partitioning so no synchronization required:
+          final List<PopObservabilityData> popDataList = findPoPsForTargetObservability(
+                  targets.get(targetIndex), obsCtxThreads[threadIndex], scoThreads[threadIndex]);
 
-            // partitioning so no synchronization required:
-            targetPopDataListThread[j++] = findPoPsForTargetObservability(targets.get(i), obsCtxLocal, scoLocal);
-
-            // fast interrupt :
-            if (currentTh.isInterrupted()) {
-              return;
-            }
+          // fast interrupt:
+          if (Thread.currentThread().isInterrupted()) {
+            return null;
           }
 
-          if (SHOW_RANGE_FACTORY_STATS) {
-            obsCtxLocal.dumpStats();
+          if (SHOW_THREAD_STATS) {
+            nTaskThreads[threadIndex]++;
           }
+
+          return popDataList;
         }
       };
     }
 
-    if (nJobs > 1) {
-      // execute jobs in parallel:
-      final Future<?>[] futures = jobExecutor.fork(jobs);
+    // execute jobs in parallel:
+    // results where Object is in fact  List<List<PopData>>
+    final List<Object> targetPopDataListResults = jobExecutor.forkAndJoin("ObservabilityService.findCompatiblePoPs", jobs, nTh > 1);
 
-      logger.debug("wait for jobs to terminate ...");
+    if (SHOW_THREAD_STATS || SHOW_RANGE_FACTORY_STATS) {
+      for (int t = 0; t < nTh; t++) {
+        if (SHOW_THREAD_STATS) {
+          logger.info("Thread[{}] done: {} processed targets", t, nTaskThreads[t]);
+        }
 
-      jobExecutor.join("ObservabilityService.findCompatiblePoPs", futures);
-
-    } else {
-      // execute the single task using the current thread:
-      jobs[0].run();
+        if (SHOW_RANGE_FACTORY_STATS) {
+          obsCtxThreads[t].dumpStats();
+        }
+      }
     }
 
     int nObsTarget = 0;
@@ -597,33 +608,30 @@ public final class ObservabilityService {
     List<PopObservabilityData> flatPopDataList;
     String key;
 
-    for (final List[] targetPopDataListThread : targetPopDataListResults) {
-      if (targetPopDataListThread != null) {
+    for (final Object targetPopDataListResult : targetPopDataListResults) {
+      if (targetPopDataListResult != null) {
+        targetPopDataList = (List<PopObservabilityData>) targetPopDataListResult;
 
-        for (final List<?> targetPopDataListResult : targetPopDataListThread) {
-          targetPopDataList = (List<PopObservabilityData>) targetPopDataListResult;
+        // targetPopDataList can be empty if the target never rises or is incompatible (skip) :
+        if (!targetPopDataList.isEmpty()) {
+          nObsTarget++;
 
-          // targetPopDataList can be empty if the target never rises or is incompatible (skip) :
-          if (targetPopDataList != null && !targetPopDataList.isEmpty()) {
-            nObsTarget++;
+          // rearrange results :
+          for (PopObservabilityData popData : targetPopDataList) {
+            key = popData.getPopCombination().getIdentifier();
 
-            // rearrange results :
-            for (PopObservabilityData popData : targetPopDataList) {
-              key = popData.getPopCombination().getIdentifier();
+            popMergeData = popMap.get(key);
 
-              popMergeData = popMap.get(key);
-
-              if (popMergeData == null) {
-                flatPopDataList = new ArrayList<PopObservabilityData>(nTargets);
-                popMergeData = new GroupedPopObservabilityData(popData.getPopCombination(), flatPopDataList);
-                popMap.put(key, popMergeData);
-              } else {
-                flatPopDataList = popMergeData.getPopDataList();
-              }
-
-              // add result :
-              flatPopDataList.add(popData);
+            if (popMergeData == null) {
+              flatPopDataList = new ArrayList<PopObservabilityData>(nTargets);
+              popMergeData = new GroupedPopObservabilityData(popData.getPopCombination(), flatPopDataList);
+              popMap.put(key, popMergeData);
+            } else {
+              flatPopDataList = popMergeData.getPopDataList();
             }
+
+            // add result :
+            flatPopDataList.add(popData);
           }
         }
       }
@@ -682,7 +690,11 @@ public final class ObservabilityService {
         logger.debug("Filtered GroupedPopData : {}", CollectionUtils.toString(popMergeList));
       }
 
-      final BestPopsEstimator estimator = this.obsCtx.getPopEstimator();
+      // fast interrupt:
+      checkInterrupted();
+
+      // Get a new Grouped Best Pops estimator:
+      final BestPopsEstimator estimator = getGroupedBestPopsEstimator();
 
       // estimator to maximize observability for all observable targets :
       for (GroupedPopObservabilityData pm : popMergeList) {
@@ -752,6 +764,8 @@ public final class ObservabilityService {
    */
   private List<PopObservabilityData> findPoPsForTargetObservability(final Target target,
           final ObservabilityContext obsCtxLocal, final AstroSkyCalcObservation scoLocal) {
+
+    // Note: this method can be called by multiple threads (so ensure thread safety and interruption)
 
     // get Target coordinates precessed to jd :
     final double[] raDec = scoLocal.defineTarget(jdCenter(), target.getRADeg(), target.getDECDeg());
@@ -823,7 +837,7 @@ public final class ObservabilityService {
     final String targetName = target.getName();
 
     if (isLogDebug) {
-      logger.debug("targetName: {}", targetName);
+      logger.debug("findTargetObservability: target '{}'", targetName);
     }
 
     final int listSize = (this.doDetailedOutput) ? (4 + this.baseLines.size()) : 1;
@@ -911,10 +925,7 @@ public final class ObservabilityService {
       }
 
       // rangesHABaseLines can be null if the thread was interrupted :
-      // fast interrupt :
-      if (this.currentThread.isInterrupted()) {
-        return;
-      }
+      checkInterrupted();
 
       // convert HA range to JD range in range [LST0 - 12; LST0 + 12]
       final Range rangeJDRiseSet = this.sc.convertHAToJDRange(rangeHARiseSet, precRA);
@@ -929,10 +940,8 @@ public final class ObservabilityService {
           logger.debug("rangesJDHz: {}", rangesJDHorizon);
         }
 
-        // fast interrupt :
-        if (this.currentThread.isInterrupted()) {
-          return;
-        }
+        // fast interrupt:
+        checkInterrupted();
       }
 
       // Check Moon restriction:
@@ -945,10 +954,8 @@ public final class ObservabilityService {
           logger.debug("rangesJDMoon: {}", rangesJDMoon);
         }
 
-        // fast interrupt :
-        if (this.currentThread.isInterrupted()) {
-          return;
-        }
+        // fast interrupt:
+        checkInterrupted();
 
         if (rangesJDMoon == null) {
           // means JD Rise/Set:
@@ -969,10 +976,8 @@ public final class ObservabilityService {
           logger.debug("rangesJDWind: {}", rangesJDWind);
         }
 
-        // fast interrupt :
-        if (this.currentThread.isInterrupted()) {
-          return;
-        }
+        // fast interrupt:
+        checkInterrupted();
 
         if (rangesJDWind == null) {
           // means JD Rise/Set:
@@ -1124,6 +1129,9 @@ public final class ObservabilityService {
         logger.debug("obsRanges: {}", obsRanges);
       }
 
+      // fast interrupt:
+      checkInterrupted();
+
       // finally : merge intervals :
       final List<Range> finalRangesHardLimits = Range.intersectRanges(obsRanges, nValid, defaultRangeFactory);
 
@@ -1169,6 +1177,9 @@ public final class ObservabilityService {
             nValid++;
           }
 
+          // fast interrupt:
+          checkInterrupted();
+
           final List<Range> restrictedRanges = Range.intersectRanges(obsRanges, nValid, defaultRangeFactory);
 
           if (isLogDebug) {
@@ -1201,6 +1212,9 @@ public final class ObservabilityService {
         } else {
           finalRanges = finalRangesHardLimits;
         }
+
+        // fast interrupt:
+        checkInterrupted();
 
         // get detailled target position (ha, az, el) for the current target (ticks):
         getTargetPosition(starObs, finalRanges, precRA, precDEC, true);
@@ -1351,6 +1365,8 @@ public final class ObservabilityService {
   private List<PopObservabilityData> getPopObservabilityData(final String targetName, final double dec, final List<Range> rangesTarget,
           final boolean doSkipDL, final ObservabilityContext obsCtxLocal, final boolean clearRangesBL) {
 
+    // Note: this method can be called by multiple threads (so ensure thread safety and interruption)
+
     // local vars for performance:
     final boolean isDebug = isLogDebug;
     final Thread currentTh = Thread.currentThread(); // multi threading
@@ -1420,17 +1436,17 @@ public final class ObservabilityService {
       popComb = popCombs[k];
       popOffsets = popComb.getPopOffsets();
 
-      // fast interrupt :
-      if (currentTh.isInterrupted()) {
-        return null;
-      }
-
       skip = false;
 
       // For every Base Line :
       for (i = 0; i < sizeBL; i++) {
         wRange = wRangeArray[i];
         offset = popOffsets[i];
+
+        // fast interrupt (multi threading):
+        if (currentTh.isInterrupted()) {
+          return null;
+        }
 
         // adjust w range with the current pop combination's Offset :
         wRangeWithOffset.set(wRange.getMin() + offset, wRange.getMax() + offset);
@@ -1478,7 +1494,6 @@ public final class ObservabilityService {
    * @return list of observable ranges (no obstruction)
    */
   private List<Range> checkHorizonProfile(final double precDEC, final Range jdRiseSet) {
-
     final boolean isDebug = isLogDebug; // local var
 
     // output :
@@ -1511,6 +1526,9 @@ public final class ObservabilityService {
     Range range = new Range();
 
     for (double jd = jdMin, jdIn; jd < jdMax; jd += JD_STEP) {
+
+      // fast interrupt:
+      checkInterrupted();
 
       // fix JD in LST range [0; 24] in order to have accurate target position:
       jdIn = getJDInLstRange(jd);
@@ -1552,7 +1570,7 @@ public final class ObservabilityService {
           range = new Range();
         }
       }
-    }
+    } // jd
 
     // close last interval if opened :
     if (range.getMin() > 0d) {
@@ -1589,6 +1607,9 @@ public final class ObservabilityService {
 
     for (double jd = jdMin, jdIn; jd < jdMax; jd += JD_STEP) {
 
+      // fast interrupt:
+      checkInterrupted();
+
       // fix JD in LST range [0; 24] in order to have accurate target position:
       jdIn = getJDInLstRange(jd);
 
@@ -1622,7 +1643,7 @@ public final class ObservabilityService {
           range = new Range();
         }
       }
-    }
+    } // jd
 
     // close last interval if opened :
     if (range.getMin() > 0d) {
@@ -1646,8 +1667,6 @@ public final class ObservabilityService {
    * @return list of observable ranges (no restriction) or null if no restriction
    */
   private List<Range> checkMoonRestriction(final String targetName, final double precDEC, final Range jdRiseSet) {
-    final double warningThreshold = this.moonPointingRestriction.getWarningThreshold();
-
     // get moon restriction rules as array:
     final MoonRestriction[] moonRestrictions = new MoonRestriction[this.moonPointingRestriction.getRestrictions().size()];
     this.moonPointingRestriction.getRestrictions().toArray(moonRestrictions);
@@ -1656,6 +1675,7 @@ public final class ObservabilityService {
     final double fli = this.data.getMoonIllumPercent();
 
     // Add 5% margin for quick check:
+    final double warningThreshold = this.moonPointingRestriction.getWarningThreshold();
     final double threshold = warningThreshold * 1.05d;
 
     // output :
@@ -1713,6 +1733,9 @@ public final class ObservabilityService {
 
       for (double jd = jdMin; jd < jdMax; jd += JD_STEP) {
 
+        // fast interrupt:
+        checkInterrupted();
+
         visible = true;
 
         // check at jd:
@@ -1757,7 +1780,7 @@ public final class ObservabilityService {
             range = new Range();
           }
         }
-      }
+      } // jd
 
       // close last interval if opened :
       if (range.getMin() > 0d) {
@@ -2154,10 +2177,8 @@ public final class ObservabilityService {
         }
       } // synchronized
 
-      // fast interrupt :
-      if (this.currentThread.isInterrupted()) {
-        return;
-      }
+      // fast interrupt:
+      checkInterrupted();
 
       // Create the Pops combination:
       popCombs = new ArrayList<PopCombination>(sharedPopCombinations.size());
@@ -2826,6 +2847,26 @@ public final class ObservabilityService {
         }
 
         bestPopsEstimator = BestPopsEstimatorFactory.getHALimitsEstimator(haCenter, this.bestPopEstimatorCriteriaSigma, this.bestPopEstimatorCriteriaAverageWeight);
+        break;
+    }
+    return bestPopsEstimator;
+  }
+
+  /**
+   * Return new grouped best PoPs estimator according to user preferences
+   * @return new grouped best PoPs estimator
+   */
+  private BestPopsEstimator getGroupedBestPopsEstimator() {
+    final BestPopsEstimator bestPopsEstimator;
+    switch (this.bestPopsAlgorithm) {
+      default:
+      case Simple:
+        bestPopsEstimator = BestPopsEstimatorFactory.getSimpleEstimator();
+        break;
+      case Transit:
+      case HALimits:
+        // only criteriaAverageWeight is useful:
+        bestPopsEstimator = BestPopsEstimatorFactory.getTransitEstimator(this.bestPopEstimatorCriteriaSigma, this.bestPopEstimatorCriteriaAverageWeight);
         break;
     }
     return bestPopsEstimator;
