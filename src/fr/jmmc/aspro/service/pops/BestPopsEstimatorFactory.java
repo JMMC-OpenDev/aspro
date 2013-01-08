@@ -47,7 +47,7 @@ public final class BestPopsEstimatorFactory {
    * @return new NormalLawBestPopsEstimator instance
    */
   public static BestPopsEstimator getTransitEstimator(final Criteria criteriaSigma, final Criteria criteriaAverageWeight) {
-    return new NormalLawBestPopsEstimator(0d, getSigma(criteriaSigma), getAverageWeight(criteriaAverageWeight));
+    return getHALimitsEstimator(0d, criteriaSigma, criteriaAverageWeight);
   }
 
   /**
