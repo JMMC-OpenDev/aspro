@@ -65,8 +65,6 @@ public final class PopObservabilityData implements Comparable<PopObservabilityDa
     final List<Range> mergeRanges = obsCtx.getMergeRanges();
 
     // Merge HA ranges (BL) with HA Rise/set ranges (and optionally night limits) :
-
-    // TODO: use rangeFactory:
     Range.intersectRanges(obsCtx.getFlatRangeLimits(), obsCtx.getSizeFlatRangeLimits(), nValid, mergeRanges, obsCtx);
 
     // find the maximum length of HA observable intervals:

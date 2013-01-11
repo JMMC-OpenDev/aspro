@@ -86,8 +86,8 @@ public final class ObservabilityService {
   private final static boolean DEBUG_SLOW_SERVICE = false;
   /** flag to show range factory statistics */
   private final static boolean SHOW_RANGE_FACTORY_STATS = false;
-  /** flag to show thread statistics */
-  private final static boolean SHOW_THREAD_STATS = false;
+  /** flag to show best pops statistics */
+  private final static boolean SHOW_BEST_POPS_STATS = false;
   /** number of best Pops displayed in warnings */
   private final static int MAX_POPS_IN_WARNING = 15;
   /** jd step = 1 minute */
@@ -485,10 +485,17 @@ public final class ObservabilityService {
       if (targets.size() > 1 && this.popCombinations.size() > 1) {
         // Objective : find the pop combination that maximize the observability of the complete list of target
 
+        // Start the Best Pops algorithm :
+        final long start = System.nanoTime();
+
         final PopCombination bestPopCombination = findCompatiblePoPs(targets);
 
         // fast interrupt:
         checkInterrupted();
+
+        if (isLogDebug) {
+          logger.debug("findCompatiblePoPs : duration = {} ms.", 1e-6d * (System.nanoTime() - start));
+        }
 
         if (bestPopCombination == null) {
           // no Pop compatible:
@@ -509,6 +516,9 @@ public final class ObservabilityService {
         }
       }
     }
+    // Start the Best Pops algorithm :
+    final long start = System.nanoTime();
+
     for (Target target : targets) {
 
       // fast interrupt:
@@ -517,6 +527,10 @@ public final class ObservabilityService {
       findTargetObservability(target);
 
     } // for Target
+
+    if (isLogDebug) {
+      logger.debug("findObservability(targets) : duration = {} ms.", 1e-6d * (System.nanoTime() - start));
+    }
   }
 
   /**
@@ -537,12 +551,14 @@ public final class ObservabilityService {
     // 3T represents 125 pop combinations:
     final int nTh = (sizeCb * nTargets >= 100) ? jobExecutor.getMaxParallelJob() : 1;
 
-    logger.debug("findCompatiblePoPs: {} targets using {} threads", nTargets, nTh);
+    if (isLogDebug) {
+      logger.debug("findCompatiblePoPs: {} targets using {} threads", nTargets, nTh);
+    }
 
     // Prepare thread context variables:
     final ObservabilityContext[] obsCtxThreads = new ObservabilityContext[nTh];
     final AstroSkyCalcObservation[] scoThreads = new AstroSkyCalcObservation[nTh];
-    final int[] nTaskThreads = (SHOW_THREAD_STATS) ? new int[nTh] : null;
+    final int[] nTaskThreads = (SHOW_BEST_POPS_STATS) ? new int[nTh] : null;
 
     for (int t = 0; t < nTh; t++) {
       obsCtxThreads[t] = (t == 0) ? this.obsCtx : new ObservabilityContext(this.obsCtx);
@@ -575,7 +591,7 @@ public final class ObservabilityService {
             return null;
           }
 
-          if (SHOW_THREAD_STATS) {
+          if (SHOW_BEST_POPS_STATS) {
             nTaskThreads[threadIndex]++;
           }
 
@@ -588,9 +604,9 @@ public final class ObservabilityService {
     // results where Object is in fact  List<List<PopData>>
     final List<Object> targetPopDataListResults = jobExecutor.forkAndJoin("ObservabilityService.findCompatiblePoPs", jobs, nTh > 1);
 
-    if (SHOW_THREAD_STATS || SHOW_RANGE_FACTORY_STATS) {
+    if (SHOW_BEST_POPS_STATS || SHOW_RANGE_FACTORY_STATS) {
       for (int t = 0; t < nTh; t++) {
-        if (SHOW_THREAD_STATS) {
+        if (SHOW_BEST_POPS_STATS) {
           logger.info("Thread[{}] done: {} processed targets", t, nTaskThreads[t]);
         }
 
@@ -1367,6 +1383,8 @@ public final class ObservabilityService {
 
     // Note: this method can be called by multiple threads (so ensure thread safety and interruption)
 
+    final long start = System.nanoTime();
+
     // local vars for performance:
     final boolean isDebug = isLogDebug;
     final Thread currentTh = Thread.currentThread(); // multi threading
@@ -1431,10 +1449,17 @@ public final class ObservabilityService {
     // flag to skip DL evaluation when the target is not observable for at least one DL
     boolean skip;
 
+    int nIter = 0;
+
     // For every Pop Combination :
     for (int i, k = 0; k < sizeCb; k++) {
       popComb = popCombs[k];
       popOffsets = popComb.getPopOffsets();
+
+      // fast interrupt (multi threading):
+      if (currentTh.isInterrupted()) {
+        return null;
+      }
 
       skip = false;
 
@@ -1442,11 +1467,6 @@ public final class ObservabilityService {
       for (i = 0; i < sizeBL; i++) {
         wRange = wRangeArray[i];
         offset = popOffsets[i];
-
-        // fast interrupt (multi threading):
-        if (currentTh.isInterrupted()) {
-          return null;
-        }
 
         // adjust w range with the current pop combination's Offset :
         wRangeWithOffset.set(wRange.getMin() + offset, wRange.getMax() + offset);
@@ -1465,6 +1485,11 @@ public final class ObservabilityService {
         // recycle memory (to avoid GC):
         obsCtxLocal.recycleAll(rangesBL);
       } else {
+
+        if (SHOW_BEST_POPS_STATS) {
+          nIter++;
+        }
+
         // note : rangesTarget contains both rise/set intervals + night limits in HA
         obsCtxLocal.resetAndAddInFlatRangeLimits(rangesTarget);
 
@@ -1478,6 +1503,10 @@ public final class ObservabilityService {
       }
 
       rangesBL.clear();
+    }
+
+    if (SHOW_BEST_POPS_STATS && nIter > 1) {
+      logger.info("getPopObservabilityData - iter = {} - size= {} : duration = {} ms.", nIter, popDataList.size(), 1e-6d * (System.nanoTime() - start));
     }
 
     if (popDataList.isEmpty()) {
@@ -2154,7 +2183,9 @@ public final class ObservabilityService {
         // lazy instanciation:
         if (sharedPopCombinations == null) {
 
-          logger.debug("computing pops combinations [{}]", cacheKey);
+          if (isLogDebug) {
+            logger.debug("computing pops combinations [{}]", cacheKey);
+          }
 
           // Generate all PoP combinations for the given number of beams :
           final List<Pop> pops = this.interferometer.getPops();
@@ -2164,9 +2195,8 @@ public final class ObservabilityService {
 
           sharedPopCombinations = new ArrayList<SharedPopCombination>(tuples.size());
 
-          Pop[] comb;
           for (int[] tuple : tuples) {
-            comb = new Pop[nBeams];
+            final Pop[] comb = new Pop[nBeams];
             for (int i = 0; i < nBeams; i++) {
               comb[i] = pops.get(tuple[i]);
             }
