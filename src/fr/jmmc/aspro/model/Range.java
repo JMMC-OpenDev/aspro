@@ -337,8 +337,8 @@ public final class Range {
 
     int n = 0;
     for (Range range : ranges) {
-      limits[n++] = new RangeLimit(range.getMin(), true);
-      limits[n++] = new RangeLimit(range.getMax(), false);
+      limits[n++] = new RangeLimit(range.getMin(), 1);
+      limits[n++] = new RangeLimit(range.getMax(), -1);
     }
 
     return intersectRanges(limits, n, nValid, results, rangeFactory);
@@ -369,11 +369,7 @@ public final class Range {
     for (int i = 0, s = 0, len = nLimits - nValid; i < len; i++) {
 
       // sum of flags :
-      if (limits[i].flag) {
-        s++;
-      } else {
-        s--;
-      }
+      s += limits[i].flag;
 
       if (s == nValid) {
         if (mRanges == null) {
@@ -406,12 +402,12 @@ public final class Range {
    *        not already known to be sorted ({@code lo <= start <= hi})
    */
   @SuppressWarnings("unchecked")
-  private static void binarySort(final Comparable[] a, final int lo, final int hi, int start) {
+  private static void binarySort(final RangeLimit[] a, final int lo, final int hi, int start) {
     if (start == lo) {
       start++;
     }
     int left, right, mid, n;
-    Comparable pivot;
+    RangeLimit pivot;
 
     for (; start < hi; start++) {
       pivot = a[start];
@@ -436,8 +432,7 @@ public final class Range {
       /*
        * The invariants still hold: pivot >= all in [lo, left) and
        * pivot < all in [left, start), so pivot belongs at left.  Note
-       * that if there are elements equal to pivot, left points to the
-       * first slot after them -- that's why this sort is stable.
+       * that if there are elements equal to pivot, left points to the       * first slot after them -- that's why this sort is stable.
        * Slide elements over to make room for pivot.
        */
       n = start - left;  // The number of elements to move
@@ -475,12 +470,12 @@ public final class Range {
    * @param a the array in which a run is to be counted and possibly reversed
    * @param lo index of the first element in the run
    * @param hi index after the last element that may be contained in the run.
-   It is required that {@code lo < hi}.
+   * It is required that {@code lo < hi}.
    * @return  the length of the run beginning at the specified position in
    *          the specified array
    */
   @SuppressWarnings("unchecked")
-  private static int countRunAndMakeAscending(final Comparable[] a, final int lo, final int hi) {
+  private static int countRunAndMakeAscending(final RangeLimit[] a, final int lo, final int hi) {
     int runHi = lo + 1;
     if (runHi == hi) {
       return 1;
@@ -511,9 +506,9 @@ public final class Range {
    * @param hi the index after the last element in the range to be reversed
    */
   @SuppressWarnings("unchecked")
-  private static void reverseRange(final Comparable[] a, int lo, int hi) {
+  private static void reverseRange(final RangeLimit[] a, int lo, int hi) {
     hi--;
-    Comparable<?> t;
+    RangeLimit t;
     while (lo < hi) {
       t = a[lo];
       a[lo++] = a[hi];

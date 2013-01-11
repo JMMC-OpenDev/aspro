@@ -11,8 +11,8 @@ public final class RangeLimit implements Comparable<RangeLimit> {
 
   /** position of the limit */
   double position;
-  /** boolean value to indicate the start [true] or end of the initial range [false] */
-  boolean flag;
+  /** int value to indicate the start [+1] or end of the initial range [-1] */
+  int flag;
 
   /**
    * Create a RangeLimit array filled with empty RangeLimit instances
@@ -36,9 +36,9 @@ public final class RangeLimit implements Comparable<RangeLimit> {
   /**
    * Constructor with given position and flag
    * @param position position of the limit
-   * @param flag flag indicating a starting [true] or ending [false] range
+   * @param flag int value to indicate the start [+1] or end of the initial range [-1]
    */
-  protected RangeLimit(final double position, final boolean flag) {
+  protected RangeLimit(final double position, final int flag) {
     this.position = position;
     this.flag = flag;
   }
@@ -48,16 +48,15 @@ public final class RangeLimit implements Comparable<RangeLimit> {
    * @param source range limit to copy
    */
   public void set(final RangeLimit source) {
-    this.position = source.position;
-    this.flag = source.flag;
+    set(source.position, source.flag);
   }
 
   /**
    * set the given position and flag
    * @param position position of the limit
-   * @param flag flag indicating a starting [true] or ending [false] range
+   * @param flag int value to indicate the start [+1] or end of the initial range [-1]
    */
-  public void set(final double position, final boolean flag) {
+  public void set(final double position, final int flag) {
     this.position = position;
     this.flag = flag;
   }

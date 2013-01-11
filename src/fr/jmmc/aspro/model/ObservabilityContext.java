@@ -75,8 +75,8 @@ public final class ObservabilityContext implements RangeFactory {
     for (int i = 0; i < padding.length; i++) {
       padding[i] = i;
     }
-    // minimal capacity = 2 rangeLimits per range * ( 3 ranges * nBaseLines + 2 rise/set range + 2 nightLimits range)
-    this.resizeFlatRangeLimits(2 * (3 * nBaseLines + 2 + 2));
+    // minimal capacity = 2 rangeLimits per range * ( 3 ranges * nBaseLines + 2 rise/set range + 2 nightLimits range) + 4 (cache line padding)
+    this.resizeFlatRangeLimits(2 * (3 * nBaseLines + 2 + 2 + 4));
   }
 
   /**
@@ -148,8 +148,8 @@ public final class ObservabilityContext implements RangeFactory {
     Range range;
     for (int i = 0; i < size; i++) {
       range = ranges.get(i);
-      limits[n++].set(range.getMin(), true);
-      limits[n++].set(range.getMax(), false);
+      limits[n++].set(range.getMin(), 1);
+      limits[n++].set(range.getMax(), -1);
     }
 
     this.nFlatRangeLimits = n;
