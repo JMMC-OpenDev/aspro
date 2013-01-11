@@ -18,8 +18,8 @@
     <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
   </company>
 
-  <program name="Aspro2" version="0.9.4 beta 4"/>
-  <compilation date="21/12/2012" compiler="JDK 1.5.0_16"/>
+  <program name="Aspro2" version="0.9.4 beta 5"/>
+  <compilation date="08/01/2013" compiler="JDK 1.5.0_16"/>
   
   <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
   <authors>the JMMC Technical Group</authors>
@@ -168,6 +168,10 @@
 
   <releasenotes>
     <release version="0.9.4">
+      <prerelease version="0.9.4 beta 5">
+        <change type="FEATURE">Enhanced parallelization of the Best PoPs algorithm</change>
+        <change type="BUGFIX">Fixed NPE exception in Best Pops algorithm when targets never rise</change>
+      </prerelease>
       <prerelease version="0.9.4 beta 4">
         <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/390">Fixed the color scale on UV coverage plot to use degrees instead of radians when representing the model phase</change>
         <change type="CHANGE" url="http://trac.jmmc.fr/jmmc-sw/ticket/402">Fixed OIFits viewer compatiblity with OpenJDK 1.6.24 and 1.7.x</change>
