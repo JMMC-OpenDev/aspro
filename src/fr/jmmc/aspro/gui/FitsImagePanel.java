@@ -70,7 +70,7 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1L;
-  /** Class logger */
+  /** Class _logger */
   private static final Logger logger = LoggerFactory.getLogger(FitsImagePanel.class.getName());
   /** image task prefix 'convertFitsImage-' */
   private static final String PREFIX_IMAGE_TASK = "convertFitsImage-";
@@ -491,7 +491,7 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
         return null;
       }
 
-      logger.info("compute[ImageChartData]: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
+      _logger.info("compute[ImageChartData]: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
 
       return new ImageChartData(fitsImage, colorModel, usedColorScale, min, max, image);
     }

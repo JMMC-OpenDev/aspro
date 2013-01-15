@@ -117,7 +117,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
-  /** Class logger */
+  /** Class _logger */
   private static final Logger logger = LoggerFactory.getLogger(ObservabilityPanel.class.getName());
   /** message indicating computations */
   private static final String MSG_COMPUTING = "computing observability ...";
@@ -841,12 +841,12 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
           }
         }
 
-        logger.info("compute[ObservabilityData]: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
+        _logger.info("compute[ObservabilityData]: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
 
         return obsDataList;
 
       } catch (InterruptedJobException ije) {
-        logger.debug("compute[ObservabilityData]: interrupted: ", ije);
+        _logger.debug("compute[ObservabilityData]: interrupted: ", ije);
       }
       return null;
     }
@@ -873,11 +873,11 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         final ObservationCollection lastObsCollection = om.getObservationCollection();
 
         if (taskObsCollection.getVersion().isSameMainVersion(lastObsCollection.getVersion())) {
-          if (logger.isDebugEnabled()) {
-            logger.debug("refreshUI: main version equals: {} :: {}", taskObsCollection.getVersion(), lastObsCollection.getVersion());
+          if (_logger.isDebugEnabled()) {
+            _logger.debug("refreshUI: main version equals: {} :: {}", taskObsCollection.getVersion(), lastObsCollection.getVersion());
           }
           if (DEBUG_VERSIONS) {
-            logger.warn("refreshUI: main version equals: {} :: {}", taskObsCollection.getVersion(), lastObsCollection.getVersion());
+            _logger.warn("refreshUI: main version equals: {} :: {}", taskObsCollection.getVersion(), lastObsCollection.getVersion());
           }
 
           // use latest observation collection to see possible UV widget changes :
@@ -886,11 +886,11 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
           om.fireObservabilityDone(lastObsCollection, obsDataList);
 
         } else {
-          if (logger.isDebugEnabled()) {
-            logger.debug("refreshUI: main version mismatch: {} :: {}", taskObsCollection.getVersion(), lastObsCollection.getVersion());
+          if (_logger.isDebugEnabled()) {
+            _logger.debug("refreshUI: main version mismatch: {} :: {}", taskObsCollection.getVersion(), lastObsCollection.getVersion());
           }
           if (DEBUG_VERSIONS) {
-            logger.warn("refreshUI: main version mismatch: {} :: {}", taskObsCollection.getVersion(), lastObsCollection.getVersion());
+            _logger.warn("refreshUI: main version mismatch: {} :: {}", taskObsCollection.getVersion(), lastObsCollection.getVersion());
           }
 
           // use consistent observation and observability data :

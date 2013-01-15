@@ -121,7 +121,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1L;
-  /** Class logger */
+  /** Class _logger */
   private static final Logger logger = LoggerFactory.getLogger(UVCoveragePanel.class.getName());
   /** message indicating computations */
   private static final String MSG_COMPUTING_COVERAGE = "computing uv coverage ...";
@@ -1589,7 +1589,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
                   && this.currentUVMapData.isValid(targetName, targetVersion, uvRect,
                   this.imageMode, this.imageSize, this.colorModel, this.colorScale, noiseService)) {
 
-            logger.debug("Reuse model image.");
+            _logger.debug("Reuse model image.");
 
             // reuse computed UV Map Data :
             uvDataCollection.setUvMapData(this.currentUVMapData);
@@ -1605,7 +1605,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
                 if (this.currentUVMapData != null
                         && this.currentUVMapData.isDataValid(targetName, targetVersion, uvRect, this.imageSize)) {
 
-                  logger.debug("Reuse model visiblity.");
+                  _logger.debug("Reuse model visiblity.");
 
                   // Compute only image using existing complex visibility data :
                   uvMapData = ModelUVMapService.computeUVMap(models,
@@ -1613,7 +1613,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
                           this.imageMode, this.imageSize, this.colorModel, this.colorScale, noiseService);
 
                 } else {
-                  logger.debug("Computing model image ...");
+                  _logger.debug("Computing model image ...");
 
                   // Compute Target Model for the UV coverage limits ONCE :
                   uvMapData = ModelUVMapService.computeUVMap(models, uvRect,
@@ -1631,7 +1631,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
                   if (this.currentUVMapData != null
                           && this.currentUVMapData.isDataValid(targetName, targetVersion, uvRect, this.imageSize)) {
 
-                    logger.debug("Reuse model visiblity.");
+                    _logger.debug("Reuse model visiblity.");
 
                     // Compute only image using existing complex visibility data :
                     uvMapData = UserModelService.computeUVMap(fitsImage,
@@ -1639,7 +1639,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
                             null, null, this.currentUVMapData.getData());
 
                   } else {
-                    logger.debug("Computing model image ...");
+                    _logger.debug("Computing model image ...");
 
                     try {
                       // Compute Target Model for the UV coverage limits ONCE :
@@ -1648,7 +1648,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
                               uvRect, this.imageMode, this.imageSize, this.colorModel, this.colorScale, noiseService);
 
                     } catch (IllegalArgumentException iae) {
-                      logger.warn("Incorrect fits image in file [{}]", target.getUserModel().getFile(), iae);
+                      _logger.warn("Incorrect fits image in file [{}]", target.getUserModel().getFile(), iae);
 
                       // disable model:
                       target.getUserModel().setFileValid(false);
@@ -1669,7 +1669,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
               }
 
             } catch (InterruptedJobException ije) {
-              logger.debug("Computing model image interrupted: ", ije);
+              _logger.debug("Computing model image interrupted: ", ije);
               return null;
             }
           }
@@ -1723,7 +1723,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
       uvDataCollection.setWarningContainer(mergedWarningContainer);
 
-      logger.info("compute[ObservationCollectionUVData]: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
+      _logger.info("compute[ObservationCollectionUVData]: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
 
       return uvDataCollection;
     }
@@ -2150,7 +2150,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
      */
     @Override
     public UVMapData computeInBackground() {
-      logger.debug("Computing model image ...");
+      _logger.debug("Computing model image ...");
       try {
         if (this.models != null) {
           // compute anyway the uv map data :
@@ -2167,7 +2167,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         }
 
       } catch (InterruptedJobException ije) {
-        logger.debug("Computing model image interrupted: ", ije);
+        _logger.debug("Computing model image interrupted: ", ije);
       }
       return null;
     }
@@ -2619,7 +2619,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
      */
     @Override
     public List<OIFitsFile> computeInBackground() {
-      logger.debug("Computing oifits data ...");
+      _logger.debug("Computing oifits data ...");
 
       List<OIFitsFile> result = null;
       try {
@@ -2635,10 +2635,10 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
         result = oiFitsList;
 
-        logger.info("compute[OIFitsFiles]: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
+        _logger.info("compute[OIFitsFiles]: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
 
       } catch (InterruptedJobException ije) {
-        logger.debug("Computing oifits data interrupted: ", ije);
+        _logger.debug("Computing oifits data interrupted: ", ije);
       }
       return result;
     }
