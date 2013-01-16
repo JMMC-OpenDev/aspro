@@ -4,6 +4,7 @@
 package fr.jmmc.aspro.model;
 
 import fr.jmmc.aspro.model.observability.PopCombination;
+import fr.jmmc.aspro.model.observability.PopObservabilityData;
 import fr.jmmc.aspro.service.DelayLineService;
 import fr.jmmc.aspro.service.pops.BestPopsEstimator;
 import java.util.ArrayList;
@@ -47,6 +48,8 @@ public final class ObservabilityContext implements RangeFactory {
   private int createdRanges = 0;
   /** created List<Range> instances */
   private int createdRangeLists = 0;
+  /** temporary PopObservabilityData list */
+  private List<PopObservabilityData> popDataList = null;
   /* arrays instead of list for traversal performance (read only) */
   /** pop combinations array */
   private PopCombination[] popCombs = null;
@@ -179,6 +182,19 @@ public final class ObservabilityContext implements RangeFactory {
     final List<Range> ranges = this.mergeRanges;
     ranges.clear();
     return ranges;
+  }
+
+  /**
+   * Return the temporary PopObservabilityData list
+   * @return temporary PopObservabilityData list
+   */
+  public List<PopObservabilityData> getPopDataList() {
+    if (popDataList == null) {
+      // lazily create a new list according to popCombs size:
+      final int capacity = (popCombs.length > 1) ? ((popCombs.length > 1000) ? 500 : 100) : 1;
+      popDataList = new ArrayList<PopObservabilityData>(capacity);
+    }
+    return popDataList;
   }
 
   /**
