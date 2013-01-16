@@ -37,6 +37,7 @@ import fr.jmmc.jmcs.gui.component.StatusBar;
 import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.jmcs.util.ObjectUtils;
 import fr.jmmc.jmcs.util.concurrent.InterruptedJobException;
+import fr.jmmc.jmcs.util.concurrent.ParallelJobExecutor;
 import fr.jmmc.oiexplorer.core.gui.PDFExportable;
 import fr.jmmc.oiexplorer.core.gui.chart.BoundedDateAxis;
 import fr.jmmc.oiexplorer.core.gui.chart.ChartUtils;
@@ -70,6 +71,7 @@ import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import javax.swing.BorderFactory;
 import javax.swing.BoundedRangeModel;
 import javax.swing.DefaultBoundedRangeModel;
@@ -118,7 +120,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
   /** Class _logger */
-  private static final Logger _logger = LoggerFactory.getLogger(ObservabilityPanel.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(ObservabilityPanel.class.getName());
   /** message indicating computations */
   private static final String MSG_COMPUTING = "computing observability ...";
   /** flag to log version checking */
@@ -292,7 +294,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
       @Override
       public void mouseWheelMoved(final MouseWheelEvent e) {
         if (scroller.isEnabled()) {
-          _logger.debug("mouseWheelMoved: {}", e);
+          logger.debug("mouseWheelMoved: {}", e);
 
           final DefaultBoundedRangeModel model = (DefaultBoundedRangeModel) scroller.getModel();
 
@@ -427,8 +429,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
    */
   @Override
   public void dispose() {
-    if (_logger.isDebugEnabled()) {
-      _logger.debug("dispose: {}", ObjectUtils.getObjectInfo(this));
+    if (logger.isDebugEnabled()) {
+      logger.debug("dispose: {}", ObjectUtils.getObjectInfo(this));
     }
 
     // unregister this instance as a Preference Observer :
@@ -445,7 +447,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
    */
   @Override
   public void update(final Observable o, final Object arg) {
-    _logger.debug("Preferences updated on : {}", this);
+    logger.debug("Preferences updated on : {}", this);
 
     boolean changed = false;
 
@@ -573,8 +575,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
       if (!doBaseLineLimits) {
         final int size = this.slidingXYPlotAdapter.getSize();
 
-        if (_logger.isDebugEnabled()) {
-          _logger.debug("row count: {}", size);
+        if (logger.isDebugEnabled()) {
+          logger.debug("row count: {}", size);
         }
 
         if (size > MAX_PRINTABLE_ITEMS_A3) {
@@ -652,8 +654,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
    * @param observation observation (unused)
    */
   private void onLoadObservation(final ObservationSetting observation) {
-    if (_logger.isDebugEnabled()) {
-      _logger.debug("onLoadObservation:\n{}", ObservationManager.toString(observation));
+    if (logger.isDebugEnabled()) {
+      logger.debug("onLoadObservation:\n{}", ObservationManager.toString(observation));
     }
     // disable the automatic refresh :
     final boolean prevAutoRefresh = this.setAutoRefresh(false);
@@ -677,8 +679,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
    */
   @Override
   public void onProcess(final ObservationEvent event) {
-    if (_logger.isDebugEnabled()) {
-      _logger.debug("event [{}] process IN", event.getType());
+    if (logger.isDebugEnabled()) {
+      logger.debug("event [{}] process IN", event.getType());
     }
     switch (event.getType()) {
       case LOADED:
@@ -689,8 +691,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         break;
       default:
     }
-    if (_logger.isDebugEnabled()) {
-      _logger.debug("event [{}] process OUT", event.getType());
+    if (logger.isDebugEnabled()) {
+      logger.debug("event [{}] process OUT", event.getType());
     }
   }
 
@@ -700,7 +702,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
    */
   private void refreshPlot() {
     if (this.doAutoRefresh) {
-      _logger.debug("refreshPlot");
+      logger.debug("refreshPlot");
 
       // use the latest observation collection used by computations :
       this.plot(ObservationManager.getInstance().getObservationCollection());
@@ -713,8 +715,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
    * @param obsCollection observation collection to use
    */
   private void plot(final ObservationCollection obsCollection) {
-    if (_logger.isDebugEnabled()) {
-      _logger.debug("plot: {}", ObservationManager.toString(obsCollection));
+    if (logger.isDebugEnabled()) {
+      logger.debug("plot: {}", ObservationManager.toString(obsCollection));
     }
 
     final boolean isSingle = obsCollection.isSingle();
@@ -761,6 +763,9 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
    * TaskSwingWorker child class to compute observability data and refresh the observability plot
    */
   private final static class ObservabilitySwingWorker extends ObservationCollectionTaskSwingWorker<List<ObservabilityData>> {
+
+    /** Jmcs Parallel Job executor */
+    private static final ParallelJobExecutor jobExecutor = ParallelJobExecutor.getInstance();
 
     /* members */
     /** observability panel used for refreshUI callback */
@@ -827,18 +832,51 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         // Start the computations :
         final long start = System.nanoTime();
 
-        final List<ObservabilityData> obsDataList = new ArrayList<ObservabilityData>(getObservationCollection().size());
+        final List<ObservationSetting> observations = getObservationCollection().getObservations();
 
-        for (ObservationSetting observation : getObservationCollection().getObservations()) {
-          // compute the observability data :
-          obsDataList.add(new ObservabilityService(observation, this.useLST, this.doDetailedOutput, this.doBaseLineLimits,
-                  this.doCenterMidnight, this.twilightNightLimit, this.bestPopsAlgorithm,
-                  this.bestPopEstimatorCriteriaSigma, this.bestPopEstimatorCriteriaAverageWeight).compute());
+        final int nObs = observations.size();
 
-          // fast interrupt :
-          if (Thread.currentThread().isInterrupted()) {
-            return null;
-          }
+        // computation tasks = 1 job per observation (work stealing):
+        final Callable<?>[] jobs = new Callable<?>[nObs];
+
+        // create observation tasks:
+        for (int i = 0; i < nObs; i++) {
+          final ObservationSetting observation = observations.get(i);
+
+          jobs[i] = new Callable<ObservabilityData>() {
+            /**
+             * Called by the ParallelJobExecutor to perform task computation
+             */
+            @Override
+            public ObservabilityData call() {
+
+              // compute the observability data :
+              final ObservabilityData obsData = new ObservabilityService(observation, useLST, doDetailedOutput, doBaseLineLimits,
+                      doCenterMidnight, twilightNightLimit, bestPopsAlgorithm,
+                      bestPopEstimatorCriteriaSigma, bestPopEstimatorCriteriaAverageWeight).compute();
+
+              // fast interrupt:
+              if (Thread.currentThread().isInterrupted()) {
+                return null;
+              }
+
+              return obsData;
+            }
+          };
+        }
+
+        // Is is better to use or not best Pops parallelism (use more threads ?) but compromise because best pops is only a part of observability (moon...)
+        // so fully parallel may be better !
+
+        final boolean useThreads = nObs > 1;
+
+        // execute jobs in parallel:
+        @SuppressWarnings("unchecked")
+        final List<ObservabilityData> obsDataList = (List<ObservabilityData>) jobExecutor.forkAndJoin("ObservabilitySwingWorker.computeInBackground", jobs, useThreads);
+
+        // fast interrupt :
+        if (Thread.currentThread().isInterrupted()) {
+          return null;
         }
 
         _logger.info("compute[ObservabilityData]: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
@@ -1415,9 +1453,9 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
       this.nightLower = nightMin;
       this.nightUpper = nightMax;
 
-      if (_logger.isDebugEnabled()) {
-        _logger.debug("nightLower: {}", new Date(this.nightLower));
-        _logger.debug("nightUpper: {}", new Date(this.nightUpper));
+      if (logger.isDebugEnabled()) {
+        logger.debug("nightLower: {}", new Date(this.nightLower));
+        logger.debug("nightUpper: {}", new Date(this.nightUpper));
       }
 
       if (this.jCheckBoxNightOnly.isEnabled() && this.jCheckBoxNightOnly.isSelected()) {
@@ -1465,8 +1503,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
             // roll +/- 1 day to be within plot range:
             final Date now = convertCalendarToDate(cal, obsData.getDateMin(), obsData.getDateMax());
 
-            if (_logger.isDebugEnabled()) {
-              _logger.debug("timeMarker set at: {}", now);
+            if (logger.isDebugEnabled()) {
+              logger.debug("timeMarker set at: {}", now);
             }
 
             final double timeValue = now.getTime();
@@ -1531,13 +1569,13 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
    */
   @Override
   public void chartProgress(final ChartProgressEvent event) {
-    if (_logger.isDebugEnabled()) {
+    if (logger.isDebugEnabled()) {
       switch (event.getType()) {
         case ChartProgressEvent.DRAWING_STARTED:
           this.chartDrawStartTime = System.nanoTime();
           break;
         case ChartProgressEvent.DRAWING_FINISHED:
-          _logger.debug("Drawing chart time = {} ms.", 1e-6d * (System.nanoTime() - this.chartDrawStartTime));
+          logger.debug("Drawing chart time = {} ms.", 1e-6d * (System.nanoTime() - this.chartDrawStartTime));
           this.chartDrawStartTime = 0l;
           break;
         default:
@@ -1583,9 +1621,9 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
       final ChartRenderingInfo info = this.chartPanel.getChartRenderingInfo();
       final PlotRenderingInfo pinfo = info.getPlotInfo();
 
-      if (_logger.isDebugEnabled()) {
-        _logger.debug("chartArea = {}", info.getChartArea());
-        _logger.debug("dataArea  = {}", pinfo.getDataArea());
+      if (logger.isDebugEnabled()) {
+        logger.debug("chartArea = {}", info.getChartArea());
+        logger.debug("dataArea  = {}", pinfo.getDataArea());
       }
 
       final int top = (int) Math.floor(pinfo.getDataArea().getY());
@@ -1639,8 +1677,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     // use non data height (title + axis + legend):
     final int maxViewItems = (height - this.plotNonDataHeight) / ITEM_SIZE;
 
-    if (_logger.isDebugEnabled()) {
-      _logger.debug("size = {} x {} => maxViewItems = {}", width, height, maxViewItems);
+    if (logger.isDebugEnabled()) {
+      logger.debug("size = {} x {} => maxViewItems = {}", width, height, maxViewItems);
     }
 
     if (maxViewItems != this.slidingXYPlotAdapter.getMaxViewItems()) {
@@ -1691,13 +1729,13 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
   private void enableTimelineRefreshTimer(final boolean enable) {
     if (enable) {
       if (!this.timerTimeRefresh.isRunning()) {
-        _logger.debug("Starting timer: {}", this.timerTimeRefresh);
+        logger.debug("Starting timer: {}", this.timerTimeRefresh);
 
         this.timerTimeRefresh.start();
       }
     } else {
       if (this.timerTimeRefresh.isRunning()) {
-        _logger.debug("Stopping timer: {}", this.timerTimeRefresh);
+        logger.debug("Stopping timer: {}", this.timerTimeRefresh);
 
         this.timerTimeRefresh.stop();
       }
