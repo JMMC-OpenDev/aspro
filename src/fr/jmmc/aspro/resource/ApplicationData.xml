@@ -19,7 +19,7 @@
   </company>
 
   <program name="Aspro2" version="0.9.4 beta 5"/>
-  <compilation date="08/01/2013" compiler="JDK 1.5.0_16"/>
+  <compilation date="16/01/2013" compiler="JDK 1.5.0_16"/>
   
   <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
   <authors>the JMMC Technical Group</authors>
@@ -169,6 +169,7 @@
   <releasenotes>
     <release version="0.9.4">
       <prerelease version="0.9.4 beta 5">
+        <change type="FEATURE">Enabled parallelization of the observability computation in multi configuration mode</change>
         <change type="FEATURE">Enhanced parallelization of the Best PoPs algorithm</change>
         <change type="BUGFIX">Fixed NPE exception in Best Pops algorithm when targets never rise</change>
       </prerelease>
