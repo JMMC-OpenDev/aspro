@@ -3,6 +3,7 @@
  ******************************************************************************/
 package fr.jmmc.aspro.service;
 
+import ch.qos.logback.classic.Level;
 import edu.dartmouth.AstroAlmanac;
 import edu.dartmouth.AstroAlmanacTime;
 import edu.dartmouth.AstroSkyCalc;
@@ -67,7 +68,9 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import javax.xml.datatype.XMLGregorianCalendar;
 import org.ivoa.util.CollectionUtils;
 import org.slf4j.Logger;
@@ -82,12 +85,16 @@ public final class ObservabilityService {
 
   /** Class logger */
   private static final Logger logger = LoggerFactory.getLogger(ObservabilityService.class.getName());
+  /** Class logger */
+  private static final Logger loggerTasks = LoggerFactory.getLogger(ObservabilityService.class.getName() + "Tasks");
   /** flag to slow down the service to detect concurrency problems */
   private final static boolean DEBUG_SLOW_SERVICE = false;
   /** flag to show range factory statistics */
   private final static boolean SHOW_RANGE_FACTORY_STATS = false;
   /** flag to show best pops statistics */
   private final static boolean SHOW_BEST_POPS_STATS = false;
+  /** flag to show task statistics */
+  private final static boolean SHOW_TASK_STATS = false;
   /** number of best Pops displayed in warnings */
   private final static int MAX_POPS_IN_WARNING = 15;
   /** jd step = 1 minute */
@@ -176,6 +183,12 @@ public final class ObservabilityService {
   private List<Range> azimuthRanges = null;
   /** optional moon pointing restrictions */
   private MoonPointingRestriction moonPointingRestriction = null;
+
+  static {
+    if (SHOW_TASK_STATS || SHOW_BEST_POPS_STATS) {
+      ((ch.qos.logback.classic.Logger) loggerTasks).setLevel(Level.DEBUG);
+    }
+  }
 
   /**
    * Constructor.
@@ -493,8 +506,8 @@ public final class ObservabilityService {
         // fast interrupt:
         checkInterrupted();
 
-        if (isLogDebug) {
-          logger.debug("findCompatiblePoPs : duration = {} ms.", 1e-6d * (System.nanoTime() - start));
+        if (loggerTasks.isDebugEnabled()) {
+          loggerTasks.debug("findCompatiblePoPs : duration = {} ms.", 1e-6d * (System.nanoTime() - start));
         }
 
         if (bestPopCombination == null) {
@@ -528,8 +541,8 @@ public final class ObservabilityService {
 
     } // for Target
 
-    if (isLogDebug) {
-      logger.debug("findObservability(targets) : duration = {} ms.", 1e-6d * (System.nanoTime() - start));
+    if (loggerTasks.isDebugEnabled()) {
+      loggerTasks.debug("findObservability(targets) : duration = {} ms.", 1e-6d * (System.nanoTime() - start));
     }
   }
 
@@ -540,74 +553,157 @@ public final class ObservabilityService {
    */
   @SuppressWarnings("unchecked")
   private PopCombination findCompatiblePoPs(final List<Target> targets) {
+    final int nTargets = targets.size();
 
+    // First filter targets that never rise:
+    final List<Target> riseTargets = new ArrayList<Target>(nTargets);
+    final List<double[]> infoTargets = new ArrayList<double[]>(nTargets); // Ra, Dec, HaElev
+
+    final double jdCenter = jdCenter();
+    double[] raDec;
+    double precRA, precDEC, haElev;
+
+    for (Target target : targets) {
+      // get Target coordinates precessed to jd :
+      raDec = this.sco.defineTarget(jdCenter, target.getRADeg(), target.getDECDeg());
+
+      // precessed target right ascension in decimal hours :
+      precRA = raDec[0];
+
+      // precessed target declination in degrees :
+      precDEC = raDec[1];
+
+      // Find LST range corresponding to the rise / set of the target :
+      haElev = this.sco.getHAForElevation(precDEC, this.minElev);
+
+      // target rise :
+      if (haElev > 0d) {
+        riseTargets.add(target);
+        infoTargets.add(new double[]{precRA, precDEC, haElev});
+      }
+
+      // reset current target :
+      this.sco.reset();
+    }
+
+    final int nRiseTargets = riseTargets.size();
+
+    if (nRiseTargets == 0) {
+      // no target observable !
+      return null;
+    }
+
+    if (isLogDebug) {
+      logger.debug("nRiseTargets: {}", nRiseTargets);
+    }
+
+    // Find Best Pops:
     final int sizeCb = this.popCombinations.size();
 
-    final Map<String, GroupedPopObservabilityData> popMap = new HashMap<String, GroupedPopObservabilityData>(Math.max(32, sizeCb / 5));
-
-    final int nTargets = targets.size();
+    final Map<String, GroupedPopObservabilityData> popMap = new HashMap<String, GroupedPopObservabilityData>(Math.max(128, sizeCb / 10));
 
     // enable parallel jobs if many targets and pop combinations:
     // 3T represents 125 pop combinations:
-    final int nTh = (sizeCb * nTargets >= 100) ? jobExecutor.getMaxParallelJob() : 1;
+    // note: in multi conf: disable parallelism because jobExecutor is used to compute Observability per configuration
+    final int nTh = (!jobExecutor.isWorkerThread() && (sizeCb * nRiseTargets >= 100)) ? jobExecutor.getMaxParallelJob() : 1;
 
     if (isLogDebug) {
-      logger.debug("findCompatiblePoPs: {} targets using {} threads", nTargets, nTh);
+      logger.debug("findCompatiblePoPs: {} rise targets using {} threads", nRiseTargets, nTh);
     }
 
     // Prepare thread context variables:
     final ObservabilityContext[] obsCtxThreads = new ObservabilityContext[nTh];
-    final AstroSkyCalcObservation[] scoThreads = new AstroSkyCalcObservation[nTh];
-    final int[] nTaskThreads = (SHOW_BEST_POPS_STATS) ? new int[nTh] : null;
+    final int[][] nTaskThreads = (SHOW_BEST_POPS_STATS) ? new int[nTh][16] : null; // cache line padding
 
     for (int t = 0; t < nTh; t++) {
       obsCtxThreads[t] = (t == 0) ? this.obsCtx : new ObservabilityContext(this.obsCtx);
-      scoThreads[t] = (t == 0) ? this.sco : new AstroSkyCalcObservation(this.sco);
+    }
+
+    // chunks:
+    /*
+     * 3T:   125 => 1 chunk
+     * 4T:   625 => 1 chunk
+     * 5T:  3125 => 1 chunk per thread
+     * 6T: 15625 => 1 chunk per thread
+     */
+    final int nChunks = (sizeCb > 10000) ? Math.min(8, nTh) : (sizeCb > 1000) ? Math.min(4, nTh) : 1;
+
+    final int[] fromThreads = new int[nChunks];
+    final int[] endThreads = new int[nChunks];
+    final int stepCb = sizeCb / nChunks;
+
+    for (int c = 0; c < nChunks; c++) {
+      fromThreads[c] = c * stepCb;
+      endThreads[c] = fromThreads[c] + stepCb;
+    }
+    endThreads[nChunks - 1] = sizeCb;
+
+    if (isLogDebug) {
+      logger.debug("findCompatiblePoPs: {} chunks - size = {}", nChunks, stepCb);
     }
 
     // computation tasks = 1 job per target (work stealing):
-    final Callable<?>[] jobs = new Callable<?>[nTargets];
+    final Callable<?>[] jobs = new Callable<?>[nRiseTargets * nChunks];
 
     // create estimate tasks:
-    for (int i = 0; i < nTargets; i++) {
-      // target index to be processed by this task:
-      final int targetIndex = i;
+    for (int c = 0, j = 0; c < nChunks; c++) {
+      // Pop combination chunks:
+      final int fromCb = fromThreads[c];
+      final int endCb = endThreads[c];
 
-      jobs[targetIndex] = new Callable<List<PopObservabilityData>>() {
-        /**
-         * Called by the ParallelJobExecutor to perform task computation
-         */
-        @Override
-        public List<PopObservabilityData> call() {
-          // Get thread index to get appropriate thread vars (could be thread local but requires cleanup !)
-          final int threadIndex = ParallelJobExecutor.currentThreadIndex(nTh);
+      for (int i = 0; i < nRiseTargets; i++) {
+        // target index to be processed by this task:
+        final int targetIndex = i;
 
-          // data partitioning so no synchronization required:
-          final List<PopObservabilityData> popDataList = findPoPsForTargetObservability(
-                  targets.get(targetIndex), obsCtxThreads[threadIndex], scoThreads[threadIndex]);
+        jobs[j++] = new Callable<List<PopObservabilityData>>() {
+          /**
+           * Called by the ParallelJobExecutor to perform task computation
+           */
+          @Override
+          public List<PopObservabilityData> call() {
 
-          // fast interrupt:
-          if (Thread.currentThread().isInterrupted()) {
-            return null;
+            // Get thread index to get appropriate thread vars:
+            final int threadIndex = ParallelJobExecutor.currentThreadIndex(nTh);
+
+            if (SHOW_TASK_STATS) {
+              loggerTasks.debug("Thread[{}]: target {} - from {} to {}", threadIndex, targetIndex, fromCb, endCb);
+            }
+
+            // If new threads are created, array access may be a problem (thread conflicts):
+            // ConcurrentLinkedQueue could be used to provide obs context switchs !!
+            // or thread local but initialization / cleanup is not simple
+            final ObservabilityContext obsCtxLocal = obsCtxThreads[threadIndex];
+
+            final Target target = riseTargets.get(targetIndex);
+            final double[] info = infoTargets.get(targetIndex); // Ra, Dec, HaElev
+
+            // data partitioning so no synchronization required:
+            final List<PopObservabilityData> popDataList = findPoPsForTargetObservability(
+                    target, obsCtxLocal, info[0], info[1], info[2], fromCb, endCb);
+
+            // fast interrupt (multi threading):
+            if (Thread.currentThread().isInterrupted()) {
+              return null;
+            }
+
+            if (SHOW_BEST_POPS_STATS) {
+              nTaskThreads[threadIndex][0]++;
+            }
+
+            return popDataList;
           }
-
-          if (SHOW_BEST_POPS_STATS) {
-            nTaskThreads[threadIndex]++;
-          }
-
-          return popDataList;
-        }
-      };
+        };
+      }
     }
 
     // execute jobs in parallel:
-    // results where Object is in fact  List<List<PopData>>
-    final List<Object> targetPopDataListResults = jobExecutor.forkAndJoin("ObservabilityService.findCompatiblePoPs", jobs, nTh > 1);
+    final List<List<PopObservabilityData>> targetPopDataListResults =
+            (List<List<PopObservabilityData>>) jobExecutor.forkAndJoin("ObservabilityService.findCompatiblePoPs", jobs, nTh > 1);
 
     if (SHOW_BEST_POPS_STATS || SHOW_RANGE_FACTORY_STATS) {
       for (int t = 0; t < nTh; t++) {
         if (SHOW_BEST_POPS_STATS) {
-          logger.info("Thread[{}] done: {} processed targets", t, nTaskThreads[t]);
+          logger.info("Thread[{}] done: {} processed targets", t, nTaskThreads[t][0]);
         }
 
         if (SHOW_RANGE_FACTORY_STATS) {
@@ -616,39 +712,33 @@ public final class ObservabilityService {
       }
     }
 
-    int nObsTarget = 0;
-
     // pop data per target
-    List<PopObservabilityData> targetPopDataList;
+    final Set<String> uniqueTargets = new HashSet<String>(nTargets);
     GroupedPopObservabilityData popMergeData;
     List<PopObservabilityData> flatPopDataList;
     String key;
 
-    for (final Object targetPopDataListResult : targetPopDataListResults) {
-      if (targetPopDataListResult != null) {
-        targetPopDataList = (List<PopObservabilityData>) targetPopDataListResult;
+    for (final List<PopObservabilityData> targetPopDataList : targetPopDataListResults) {
+      // targetPopDataList can be null if the target never rises or is incompatible (skip) :
+      if (targetPopDataList != null) {
+        uniqueTargets.add(targetPopDataList.get(0).getTargetName());
 
-        // targetPopDataList can be empty if the target never rises or is incompatible (skip) :
-        if (!targetPopDataList.isEmpty()) {
-          nObsTarget++;
+        // rearrange results :
+        for (PopObservabilityData popData : targetPopDataList) {
+          key = popData.getPopCombination().getIdentifier();
 
-          // rearrange results :
-          for (PopObservabilityData popData : targetPopDataList) {
-            key = popData.getPopCombination().getIdentifier();
+          popMergeData = popMap.get(key);
 
-            popMergeData = popMap.get(key);
-
-            if (popMergeData == null) {
-              flatPopDataList = new ArrayList<PopObservabilityData>(nTargets);
-              popMergeData = new GroupedPopObservabilityData(popData.getPopCombination(), flatPopDataList);
-              popMap.put(key, popMergeData);
-            } else {
-              flatPopDataList = popMergeData.getPopDataList();
-            }
-
-            // add result :
-            flatPopDataList.add(popData);
+          if (popMergeData == null) {
+            flatPopDataList = new ArrayList<PopObservabilityData>(nRiseTargets);
+            popMergeData = new GroupedPopObservabilityData(popData.getPopCombination(), flatPopDataList);
+            popMap.put(key, popMergeData);
+          } else {
+            flatPopDataList = popMergeData.getPopDataList();
           }
+
+          // add result :
+          flatPopDataList.add(popData);
         }
       }
     } // for Target result
@@ -660,6 +750,7 @@ public final class ObservabilityService {
 
     // Convert the map to a list :
     final List<GroupedPopObservabilityData> popMergeList = new ArrayList<GroupedPopObservabilityData>(popMap.values());
+    targetPopDataListResults.clear();
     popMap.clear();
 
     // merged results per PoP combination :
@@ -680,6 +771,8 @@ public final class ObservabilityService {
         maxObsTarget = targetSize;
       }
     }
+
+    final int nObsTarget = uniqueTargets.size();
 
     if (isLogDebug) {
       logger.debug("Observable targets : max: {} - total: {}", maxObsTarget, nObsTarget);
@@ -774,26 +867,20 @@ public final class ObservabilityService {
    *
    * @param target target to use
    * @param obsCtxLocal observability context (local context ie thread)
-   * @param scoLocal observation sky calc instance (local instance ie thread)
+   * @param precRA precessed RA in degrees
+   * @param precDEC precessed DEC in degrees
+   * @param haElev rise/set ha
+   * @param fromCb index of the first PopCombination to evaluate (inclusive)
+   * @param endCb index of the last PopCombination to evaluate (exclusive)
    * 
    * @return list of Pop observability data
    */
   private List<PopObservabilityData> findPoPsForTargetObservability(final Target target,
-          final ObservabilityContext obsCtxLocal, final AstroSkyCalcObservation scoLocal) {
+          final ObservabilityContext obsCtxLocal,
+          final double precRA, final double precDEC, final double haElev,
+          final int fromCb, final int endCb) {
 
     // Note: this method can be called by multiple threads (so ensure thread safety and interruption)
-
-    // get Target coordinates precessed to jd :
-    final double[] raDec = scoLocal.defineTarget(jdCenter(), target.getRADeg(), target.getDECDeg());
-
-    // precessed target right ascension in decimal hours :
-    final double precRA = raDec[0];
-
-    // precessed target declination in degrees :
-    final double precDEC = raDec[1];
-
-    // Find LST range corresponding to the rise / set of the target :
-    final double haElev = scoLocal.getHAForElevation(precDEC, this.minElev);
 
     // For all PoP combinations : find the HA interval merged with the HA Rise/set interval
     // list of observability data associated to a pop combination :
@@ -830,16 +917,13 @@ public final class ObservabilityService {
         rangesTarget.addAll(haNightLimits);
       }
 
-      popDataList = getPopObservabilityData(target.getName(), Math.toRadians(precDEC), rangesTarget, true, obsCtxLocal, true);
+      popDataList = getPopObservabilityData(target.getName(), Math.toRadians(precDEC), rangesTarget, true, obsCtxLocal, true, fromCb, endCb);
 
     } else {
       if (isLogDebug) {
         logger.debug("Target never rise: {}", target);
       }
     }
-
-    // reset current target :
-    scoLocal.reset();
 
     return popDataList;
   }
@@ -1380,6 +1464,30 @@ public final class ObservabilityService {
    */
   private List<PopObservabilityData> getPopObservabilityData(final String targetName, final double dec, final List<Range> rangesTarget,
           final boolean doSkipDL, final ObservabilityContext obsCtxLocal, final boolean clearRangesBL) {
+    return getPopObservabilityData(targetName, dec, rangesTarget, doSkipDL, obsCtxLocal, clearRangesBL, 0, obsCtxLocal.getPopCombs().length);
+  }
+
+  /**
+   * Return the list of Pop Observability Data i.e. for every PoP combination,
+   * give the intervals (hour angles) for all base lines compatible with wMin < w(h) < wMax,
+   * wMin and wMax are given by wRanges.
+   *
+   * This method is similar to DelayLineService.findHAIntervals(...) but it takes into account the PoPs i.e.
+   * it finds the best PoP combination to maximize the HA interval (delay line + rise/set)
+   *
+   * @param targetName name of the target
+   * @param dec target declination (rad)
+   * @param rangesTarget HA ranges for target rise/set and night limits
+   * @param doSkipDL skip pop combination if any DL is unobservable (useful for performance and detailed output)
+   * @param obsCtxLocal observability context (local context ie thread)
+   * @param clearRangesBL true to free rangesBL; false otherwise
+   * @param fromCb index of the first PopCombination to evaluate (inclusive)
+   * @param endCb index of the last PopCombination to evaluate (exclusive)
+   * @return list of Pop Observability Data or null if thread interrupted
+   */
+  private List<PopObservabilityData> getPopObservabilityData(final String targetName, final double dec, final List<Range> rangesTarget,
+          final boolean doSkipDL, final ObservabilityContext obsCtxLocal, final boolean clearRangesBL,
+          final int fromCb, final int endCb) {
 
     // Note: this method can be called by multiple threads (so ensure thread safety and interruption)
 
@@ -1389,6 +1497,8 @@ public final class ObservabilityService {
     final boolean isDebug = isLogDebug;
     final Thread currentTh = Thread.currentThread(); // multi threading
     final BestPopsEstimator estimator = obsCtxLocal.getPopEstimator();
+    // list of observability data associated to a pop combination :
+    final List<PopObservabilityData> popDataList = obsCtxLocal.getPopDataList();
 
     final double cosDec = Math.cos(dec);
     final double sinDec = Math.sin(dec);
@@ -1398,24 +1508,16 @@ public final class ObservabilityService {
     final BaseLine[] bls = obsCtxLocal.getBaseLines();
     final Range[] wRangeArray = obsCtxLocal.getWRanges();
 
-    final int sizeCb = popCombs.length;
     final int sizeBL = bls.length;
-
-    // For all PoP combinations : find the HA interval merged with the HA Rise/set interval
-    // list of observability data associated to a pop combination :
-    final List<PopObservabilityData> popDataList = new ArrayList<PopObservabilityData>((sizeCb > 1) ? ((sizeCb > 1000) ? 1000 : 100) : 1);
 
     // precompute W extrema per baseline:
     final double[][] wExtremas = new double[sizeBL][2];
 
-    BaseLine bl;
-    double[] wExtrema;
-
     // For every Base Line :
     for (int i = 0; i < sizeBL; i++) {
-      bl = bls[i];
+      final BaseLine bl = bls[i];
 
-      wExtrema = DelayLineService.findWExtrema(cosDec, sinDec, bl);
+      final double[] wExtrema = DelayLineService.findWExtrema(cosDec, sinDec, bl);
 
       if (isDebug) {
         logger.debug("wExtrema[{}] = {}", bl.getName(), Arrays.toString(wExtrema));
@@ -1423,6 +1525,13 @@ public final class ObservabilityService {
 
       wExtremas[i] = wExtrema;
     }
+
+    // fast interrupt (multi threading):
+    if (currentTh.isInterrupted()) {
+      return null;
+    }
+
+    // For all PoP combinations : find the HA interval merged with the HA Rise/set interval
 
     // Current pop observability :
     PopObservabilityData popData;
@@ -1451,8 +1560,8 @@ public final class ObservabilityService {
 
     int nIter = 0;
 
-    // For every Pop Combination :
-    for (int i, k = 0; k < sizeCb; k++) {
+    // For every Pop Combination in chunk[fromCb; endCb]:
+    for (int i, k = fromCb; k < endCb; k++) {
       popComb = popCombs[k];
       popOffsets = popComb.getPopOffsets();
 
@@ -1482,8 +1591,10 @@ public final class ObservabilityService {
       }
 
       if (skip) {
-        // recycle memory (to avoid GC):
-        obsCtxLocal.recycleAll(rangesBL);
+        if (!rangesBL.isEmpty()) {
+          // recycle memory (to avoid GC):
+          obsCtxLocal.recycleAll(rangesBL);
+        }
       } else {
 
         if (SHOW_BEST_POPS_STATS) {
@@ -1506,14 +1617,18 @@ public final class ObservabilityService {
     }
 
     if (SHOW_BEST_POPS_STATS && nIter > 1) {
-      logger.info("getPopObservabilityData - iter = {} - size= {} : duration = {} ms.", nIter, popDataList.size(), 1e-6d * (System.nanoTime() - start));
+      loggerTasks.info("getPopObservabilityData - iter = {} - size= {} : duration = {} ms.", nIter, popDataList.size(), 1e-6d * (System.nanoTime() - start));
     }
 
     if (popDataList.isEmpty()) {
       return null;
     }
 
-    return popDataList;
+    // as popDataList belongs to the observability context, return a list copy:
+    final List<PopObservabilityData> popDataListResult = new ArrayList<PopObservabilityData>(popDataList);
+    popDataList.clear();
+
+    return popDataListResult;
   }
 
   /**
