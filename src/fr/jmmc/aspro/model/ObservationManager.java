@@ -37,7 +37,7 @@ import fr.jmmc.jmal.model.ModelDefinition;
 import fr.jmmc.jmal.model.targetmodel.Model;
 import fr.jmmc.jmal.model.targetmodel.Parameter;
 import fr.jmmc.jmal.star.Star;
-import fr.jmmc.jmcs.gui.action.RecentFilesManager;
+import fr.jmmc.jmcs.util.RecentFilesManager;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
 import fr.jmmc.jmcs.util.FileUtils;
