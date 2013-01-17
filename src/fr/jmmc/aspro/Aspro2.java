@@ -174,7 +174,7 @@ public final class Aspro2 extends App {
    * to cancel exit.
    */
   @Override
-  protected boolean finish() {
+  public boolean shouldFinish() {
     logger.debug("AsproGui.finish() handler called.");
 
     // Ask the user if he wants to save modifications
@@ -340,7 +340,7 @@ public final class Aspro2 extends App {
     @Override
     public void windowClosing(final WindowEvent e) {
       // callback on exit :
-      App.quitAction().actionPerformed(null);
+      App.quit();
     }
   }
 }
