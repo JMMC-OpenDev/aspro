@@ -164,7 +164,7 @@ public final class Aspro2 extends App {
      * to cancel exit.
      */
     @Override
-    public boolean shouldFinish() {
+    public boolean canBeTerminatedNow() {
         logger.debug("AsproGui.finish() handler called.");
 
         // Ask the user if he wants to save modifications
