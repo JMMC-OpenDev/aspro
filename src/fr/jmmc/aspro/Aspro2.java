@@ -31,7 +31,7 @@ import fr.jmmc.jmcs.gui.task.TaskSwingWorkerExecutor;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
 import fr.jmmc.jmcs.resource.image.ResourceImage;
 import fr.jmmc.jmcs.util.concurrent.ParallelJobExecutor;
-import fr.jmmc.jmcs.util.logging.ApplicationLogSingleton;
+import fr.jmmc.jmcs.util.logging.LoggingService;
 import fr.jmmc.oiexplorer.core.model.OIFitsCollectionManager;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -135,7 +135,7 @@ public final class Aspro2 extends App {
         ParallelJobExecutor.getInstance();
 
         // Initialize warning log:
-        ApplicationLogSingleton.getInstance().addLogMapper("Warning messages", AsproConstants.ASPRO_WARNING_LOG, "WARNINGLOG");
+        LoggingService.getInstance().addLogMapper("Warning messages", AsproConstants.ASPRO_WARNING_LOG, "WARNINGLOG");
     }
 
     /**

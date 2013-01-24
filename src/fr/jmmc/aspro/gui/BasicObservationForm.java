@@ -34,7 +34,6 @@ import fr.jmmc.aspro.model.oi.Pop;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.jmal.star.Star;
-import fr.jmmc.jmcs.App;
 import fr.jmmc.jmcs.gui.component.GenericListModel;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
@@ -42,7 +41,8 @@ import fr.jmmc.jmcs.resource.image.ResourceImage;
 import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.jmcs.util.ObjectUtils;
 import fr.jmmc.jmcs.util.StringUtils;
-import fr.jmmc.jmcs.util.logging.ApplicationLogSingleton;
+import fr.jmmc.jmcs.util.logging.LoggingService;
+import fr.jmmc.jmcs.util.logging.LogbackGui;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
@@ -85,56 +85,56 @@ import org.slf4j.LoggerFactory;
  */
 public final class BasicObservationForm extends javax.swing.JPanel implements ChangeListener, ActionListener, Observer, ObservationListener {
 
-  /** default serial UID for Serializable interface */
-  private static final long serialVersionUID = 1;
-  /** Class logger */
-  private static final Logger logger = LoggerFactory.getLogger(BasicObservationForm.class.getName());
-  /** Logger */
-  private static final Logger _warningLogger = ApplicationLogSingleton.getInstance().getLogger(AsproConstants.ASPRO_WARNING_LOG);
-  /** flag to log a stack trace in method updateObservation() to detect multiple calls */
-  private final static boolean DEBUG_UPDATE_EVENT = false;
-  /** blanking value to indicate that PoPs are in use but in multi-configuration */
-  private final static String POPS_MULTI_CONF = "PoPs_MULTI_CONF";
-  /** blanking value to indicate that PoPs are defined manually by the user */
-  private final static String POPS_MANUAL = "[Manual]";
-  /** blanking value to indicate that PoPs are determined using best PoPs algorithm */
-  private final static String POPS_AUTO = "[Auto]";
-  /** configuration manager */
-  private final static ConfigurationManager cm = ConfigurationManager.getInstance();
-  /** observation manager */
-  private final static ObservationManager om = ObservationManager.getInstance();
+    /** default serial UID for Serializable interface */
+    private static final long serialVersionUID = 1;
+    /** Class logger */
+    private static final Logger logger = LoggerFactory.getLogger(BasicObservationForm.class.getName());
+    /** Logger */
+    private static final Logger _warningLogger = LoggingService.getInstance().getLogger(AsproConstants.ASPRO_WARNING_LOG);
+    /** flag to log a stack trace in method updateObservation() to detect multiple calls */
+    private final static boolean DEBUG_UPDATE_EVENT = false;
+    /** blanking value to indicate that PoPs are in use but in multi-configuration */
+    private final static String POPS_MULTI_CONF = "PoPs_MULTI_CONF";
+    /** blanking value to indicate that PoPs are defined manually by the user */
+    private final static String POPS_MANUAL = "[Manual]";
+    /** blanking value to indicate that PoPs are determined using best PoPs algorithm */
+    private final static String POPS_AUTO = "[Auto]";
+    /** configuration manager */
+    private final static ConfigurationManager cm = ConfigurationManager.getInstance();
+    /** observation manager */
+    private final static ObservationManager om = ObservationManager.getInstance();
 
-  /* members */
-  /** Warning image icon */
-  private ImageIcon warningIcon = null;
-  /** flag to enable / disable the automatic update of the observation when any swing component changes */
-  private boolean doAutoUpdateObservation = true;
-  /** flag to enable / disable the automatic selection check of the target list */
-  private boolean doAutoCheckTargets = true;
-  /** flag to enable / disable the automatic selection check of the instrument configuration */
-  private boolean doAutoCheckConfigurations = true;
-  /** current selected target to avoid empty list selection */
-  private Target currentTarget = null;
-  /** current selected instrument configuration to avoid empty list selection */
-  private String currentInstrumentConfiguration = null;
-  /** last Pop config given by the interferometer configuration */
-  private String lastConfPopConfig = null;
-  /** Wind widget */
-  private WindWidget windWidget = null;
+    /* members */
+    /** Warning image icon */
+    private ImageIcon warningIcon = null;
+    /** flag to enable / disable the automatic update of the observation when any swing component changes */
+    private boolean doAutoUpdateObservation = true;
+    /** flag to enable / disable the automatic selection check of the target list */
+    private boolean doAutoCheckTargets = true;
+    /** flag to enable / disable the automatic selection check of the instrument configuration */
+    private boolean doAutoCheckConfigurations = true;
+    /** current selected target to avoid empty list selection */
+    private Target currentTarget = null;
+    /** current selected instrument configuration to avoid empty list selection */
+    private String currentInstrumentConfiguration = null;
+    /** last Pop config given by the interferometer configuration */
+    private String lastConfPopConfig = null;
+    /** Wind widget */
+    private WindWidget windWidget = null;
 
-  /** Creates new form BasicObservationForm */
-  public BasicObservationForm() {
-    initComponents();
-    postInit();
-  }
+    /** Creates new form BasicObservationForm */
+    public BasicObservationForm() {
+        initComponents();
+        postInit();
+    }
 
-  /**
-   * This method is called from within the constructor to
-   * initialize the form.
-   * WARNING: Do NOT modify this code. The content of this method is
-   * always regenerated by the Form Editor.
-   */
-  @SuppressWarnings("unchecked")
+    /**
+     * This method is called from within the constructor to
+     * initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is
+     * always regenerated by the Form Editor.
+     */
+    @SuppressWarnings("unchecked")
   // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
   private void initComponents() {
     java.awt.GridBagConstraints gridBagConstraints;
@@ -563,1138 +563,1139 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
   }// </editor-fold>//GEN-END:initComponents
 
   private void jButtonSkyCalcActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSkyCalcActionPerformed
-    final Target selectedTarget = getSelectedTarget();
-    if (selectedTarget != null) {
-      final ObservationSetting observation = om.getMainObservation();
-      final InterferometerDescription interferometer = observation.getInterferometerConfiguration().getInterferometerConfiguration().getInterferometer();
+      final Target selectedTarget = getSelectedTarget();
+      if (selectedTarget != null) {
+          final ObservationSetting observation = om.getMainObservation();
+          final InterferometerDescription interferometer = observation.getInterferometerConfiguration().getInterferometerConfiguration().getInterferometer();
 
-      final Site site = AstroSkyCalc.createSite(interferometer.getName(), interferometer.getPosSph());
+          final Site site = AstroSkyCalc.createSite(interferometer.getName(), interferometer.getPosSph());
 
-      final List<Target> displayTargets = om.getDisplayTargets();
+          final List<Target> displayTargets = om.getDisplayTargets();
 
-      final int size = displayTargets.size();
-      final String[] name = new String[size];
-      final String[] ra = new String[size];
-      final String[] dec = new String[size];
+          final int size = displayTargets.size();
+          final String[] name = new String[size];
+          final String[] ra = new String[size];
+          final String[] dec = new String[size];
 
-      for (int i = 0; i < size; i++) {
-        final Target target = displayTargets.get(i);
-        name[i] = target.getName();
+          for (int i = 0; i < size; i++) {
+              final Target target = displayTargets.get(i);
+              name[i] = target.getName();
 
-        // convert RA/DEC in HH:MM:SS.sss or DD:MM:SS.sss :
-        final String[] raDec = AstroSkyCalcObservation.toString(target.getRADeg(), target.getDECDeg());
+              // convert RA/DEC in HH:MM:SS.sss or DD:MM:SS.sss :
+              final String[] raDec = AstroSkyCalcObservation.toString(target.getRADeg(), target.getDECDeg());
 
-        ra[i] = raDec[0];
-        dec[i] = raDec[1];
+              ra[i] = raDec[0];
+              dec[i] = raDec[1];
+          }
+
+          JSkyCalc.showJSkyCalc(site, name, ra, dec, selectedTarget.getName(), observation.getWhen().getDate());
       }
-
-      JSkyCalc.showJSkyCalc(site, name, ra, dec, selectedTarget.getName(), observation.getWhen().getDate());
-    }
   }//GEN-LAST:event_jButtonSkyCalcActionPerformed
 
-  /**
-   * Process the remove target action
-   * @param evt action event
-   */
-  private void jButtonDeleteTargetActionPerformed(java.awt.event.ActionEvent evt) {
+    /**
+     * Process the remove target action
+     * @param evt action event
+     */
+    private void jButtonDeleteTargetActionPerformed(java.awt.event.ActionEvent evt) {
 
-    // TODO : multi selection of targets to delete multiple targets at the same time :
+        // TODO : multi selection of targets to delete multiple targets at the same time :
 
-    final Target selectedTarget = getSelectedTarget();
+        final Target selectedTarget = getSelectedTarget();
 
-    if (selectedTarget != null) {
+        if (selectedTarget != null) {
 
-      if (om.isCalibrator(selectedTarget)) {
-        if (MessagePane.showConfirmMessage(this.jButtonDeleteTarget,
-                "Do you want to delete the calibrator target [" + selectedTarget.getName() + "] and all associations ?")) {
+            if (om.isCalibrator(selectedTarget)) {
+                if (MessagePane.showConfirmMessage(this.jButtonDeleteTarget,
+                        "Do you want to delete the calibrator target [" + selectedTarget.getName() + "] and all associations ?")) {
 
-          // update the data model and fire change events :
-          om.removeCalibrator(selectedTarget);
-        }
-      } else if (MessagePane.showConfirmMessage(this.jButtonDeleteTarget,
-              "Do you want to delete the science target [" + selectedTarget.getName() + "] ?")) {
+                    // update the data model and fire change events :
+                    om.removeCalibrator(selectedTarget);
+                }
+            } else if (MessagePane.showConfirmMessage(this.jButtonDeleteTarget,
+                    "Do you want to delete the science target [" + selectedTarget.getName() + "] ?")) {
 
-        // update the data model and fire change events :
-        om.removeTarget(selectedTarget);
-      }
-    }
-  }
-
-  /**
-   * Handle click on the target editor button: show the target editor
-   * @param ae unused
-   */
-  private void jButtonTargetEditorActionPerformed(ActionEvent ae) {
-    showTargetEditor();
-  }
-
-  /**
-   * Handle the instrument selection
-   * @param lse unused
-   */
-  private void jListInstrumentConfigurationsValueChanged(ListSelectionEvent lse) {
-    this.processInstrumentConfigurationValueChanged(lse);
-  }
-
-  /**
-   * Handle the (single) target selection
-   * @param lse unused
-   */
-  private void jListTargetsValueChanged(ListSelectionEvent lse) {
-    this.processTargetValueChanged(lse);
-  }
-
-  /**
-   * Handle click on the status panel: show warning log console
-   * @param me unused
-   */
-  private void jLabelStatusMouseClicked(MouseEvent me) {
-    App.showLogConsole(AsproConstants.ASPRO_WARNING_LOG);
-  }
-
-  /**
-   * Open the target editor using the selected target
-   */
-  public void showTargetEditor() {
-    if (isTargetEditable()) {
-      final Target target = getSelectedTarget();
-
-      if (target != null) {
-        final String selectedTab = (Aspro2.getInstance().getSettingPanel().isSelectedTabUsingTargetModel())
-                ? TargetEditorDialog.TAB_MODELS : TargetEditorDialog.TAB_TARGETS;
-
-        // show model editor :
-        TargetEditorDialog.showEditor(target.getName(), selectedTab);
-      }
-    }
-  }
-
-  /**
-   * Return the Pops custom formatter : number format that accepts null values
-   * @return number formatter
-   */
-  private static NumberFormatter getPopsFormatter() {
-    final NumberFormatter nf = new NumberFormatter(new DecimalFormat("######")) {
-      /** default serial UID for Serializable interface */
-      private static final long serialVersionUID = 1;
-
-      /**
-       * Hack to allow empty string
-       */
-      @Override
-      public Object stringToValue(final String text) throws ParseException {
-        if (text == null || text.length() == 0) {
-          return null;
-        }
-        return super.stringToValue(text);
-      }
-    };
-    nf.setValueClass(Integer.class);
-    // reject invalid characters (digits only)
-    nf.setAllowsInvalid(false);
-    nf.setCommitsOnValidEdit(false);
-    return nf;
-  }
-
-  /**
-   * This method is useful to set the models and specific features of initialized swing components.
-   * Add the star search field and refresh content of the combo boxes.
-   * Finally update the observation according to the form state
-   */
-  private void postInit() {
-
-    Preferences.getInstance().addObserver(this);
-
-    this.warningIcon = ResourceImage.WARNING_ICON.icon();
-
-    // add observer to the StarResolverWidget :
-    this.starSearchField.getStar().addObserver(this);
-
-    // update component models :
-    final DateEditor de = (DateEditor) this.jDateSpinner.getEditor();
-
-    // custom focus listener to let the user change the day field by default :
-    de.getTextField().addFocusListener(new FocusAdapter() {
-      @Override
-      public void focusGained(final FocusEvent fe) {
-        if (fe.getSource() instanceof JTextComponent) {
-          final JTextComponent textComponent = ((JTextComponent) fe.getSource());
-
-          SwingUtils.invokeLaterEDT(new Runnable() {
-            @Override
-            public void run() {
-              final int last = textComponent.getDocument().getLength();
-              // select the day field to force the spinner to use it
-              textComponent.setCaretPosition(last - 2);
-              textComponent.moveCaretPosition(last);
+                // update the data model and fire change events :
+                om.removeTarget(selectedTarget);
             }
-          });
         }
-      }
+    }
 
-      @Override
-      public void focusLost(final FocusEvent fe) {
-        // nothing to do
-      }
-    });
+    /**
+     * Handle click on the target editor button: show the target editor
+     * @param ae unused
+     */
+    private void jButtonTargetEditorActionPerformed(ActionEvent ae) {
+        showTargetEditor();
+    }
 
-    // define change listeners :
-    this.jDateSpinner.addChangeListener(this);
-    this.jComboBoxInterferometer.addActionListener(this);
-    this.jComboBoxInterferometerConfiguration.addActionListener(this);
-    this.jComboBoxInstrument.addActionListener(this);
-    this.jComboBoxPops.addActionListener(this);
+    /**
+     * Handle the instrument selection
+     * @param lse unused
+     */
+    private void jListInstrumentConfigurationsValueChanged(ListSelectionEvent lse) {
+        this.processInstrumentConfigurationValueChanged(lse);
+    }
 
-    this.jTextPoPs.addPropertyChangeListener("value", new PropertyChangeListener() {
-      @Override
-      public void propertyChange(final PropertyChangeEvent evt) {
-        jTextPoPsPropertyChange(evt);
-      }
-    });
+    /**
+     * Handle the (single) target selection
+     * @param lse unused
+     */
+    private void jListTargetsValueChanged(ListSelectionEvent lse) {
+        this.processTargetValueChanged(lse);
+    }
 
-    this.jFieldMinElev.addPropertyChangeListener("value", new PropertyChangeListener() {
-      @Override
-      public void propertyChange(final PropertyChangeEvent evt) {
-        final double minElevNew = ((Number) jFieldMinElev.getValue()).doubleValue();
+    /**
+     * Handle click on the status panel: show warning log console
+     * @param me unused
+     */
+    private void jLabelStatusMouseClicked(MouseEvent me) {
+        LogbackGui.showLogConsoleForLogger(AsproConstants.ASPRO_WARNING_LOG);
+    }
 
-        if (minElevNew < 0d || minElevNew >= 90d) {
-          // invalid value :
-          jFieldMinElev.setValue(Preferences.getInstance().getPreferenceAsDouble(Preferences.MIN_ELEVATION));
+    /**
+     * Open the target editor using the selected target
+     */
+    public void showTargetEditor() {
+        if (isTargetEditable()) {
+            final Target target = getSelectedTarget();
+
+            if (target != null) {
+                final String selectedTab = (Aspro2.getInstance().getSettingPanel().isSelectedTabUsingTargetModel())
+                        ? TargetEditorDialog.TAB_MODELS : TargetEditorDialog.TAB_TARGETS;
+
+                // show model editor :
+                TargetEditorDialog.showEditor(target.getName(), selectedTab);
+            }
         }
-        fireObservationUpdateEvent();
-      }
-    });
-
-    this.jCheckBoxNightLimit.addItemListener(new ItemListener() {
-      @Override
-      public void itemStateChanged(final ItemEvent e) {
-        updateWindRestriction();
-        fireObservationUpdateEvent();
-      }
-    });
-
-    // define interferometer names (constant) :
-    this.jComboBoxInterferometer.setModel(new DefaultComboBoxModel(cm.getInterferometerNames()));
-
-    // reset status :
-    this.resetStatus();
-
-    this.windWidget = WindWidget.create();
-
-    final GridBagConstraints gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 3;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.gridheight = 3;
-    gridBagConstraints.fill = GridBagConstraints.BOTH;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.insets = new Insets(2, 2, 2, 2);
-    gridBagConstraints.weightx = 0.9;
-    gridBagConstraints.weighty = 0.9;
-    this.jPanelOptions.add(this.windWidget, gridBagConstraints);
-
-    this.windWidget.addPropertyChangeListener(WindWidget.PROPERTY_VALUE, new PropertyChangeListener() {
-      public void propertyChange(final PropertyChangeEvent pe) {
-        fireObservationUpdateEvent();
-      }
-    });
-
-    this.jCheckBoxWind.addItemListener(new ItemListener() {
-      @Override
-      public void itemStateChanged(final ItemEvent e) {
-        windWidget.setEnabled(jCheckBoxWind.isSelected());
-        fireObservationUpdateEvent();
-      }
-    });
-
-    this.jCheckBoxWind.setSelected(false);
-    this.windWidget.setEnabled(false);
-  }
-
-  /**
-   * Process the date spinner change event.
-   * Update the observation according to the form state
-   * @param ce change event
-   */
-  @Override
-  public void stateChanged(final ChangeEvent ce) {
-    if (ce.getSource() == this.jDateSpinner) {
-      if (logger.isDebugEnabled()) {
-        logger.debug("Date changed: {}", this.jDateSpinner.getModel().getValue());
-      }
-      fireObservationUpdateEvent();
-    }
-  }
-
-  /**
-   * Refresh the list of interferometer configurations : depends on the chosen interferometer
-   */
-  private void updateComboInterferometerConfiguration() {
-    final Vector<String> v = cm.getInterferometerConfigurationNames((String) this.jComboBoxInterferometer.getSelectedItem());
-    this.jComboBoxInterferometerConfiguration.setModel(new DefaultComboBoxModel(v));
-    final boolean visible = (v.size() > 1);
-    this.jLabelPeriod.setVisible(visible);
-    this.jComboBoxInterferometerConfiguration.setVisible(visible);
-  }
-
-  /**
-   * Refresh the list of instruments : depends on the chosen interferometer configuration
-   */
-  private void updateComboInstrument() {
-    final Object oldValue = this.jComboBoxInstrument.getSelectedItem();
-
-    final Vector<String> v = cm.getInterferometerInstrumentNames((String) this.jComboBoxInterferometerConfiguration.getSelectedItem());
-    this.jComboBoxInstrument.setModel(new DefaultComboBoxModel(v));
-
-    // restore previous selected item :
-    if (oldValue != null) {
-      this.jComboBoxInstrument.setSelectedItem(oldValue);
-    }
-  }
-
-  /**
-   * Refresh the list of instrument configurations : depends on the chosen instrument (also the interferometer configuration)
-   */
-  private void updateComboInstrumentConfiguration() {
-    final Vector<String> v = cm.getInstrumentConfigurationNames((String) this.jComboBoxInterferometerConfiguration.getSelectedItem(),
-            (String) this.jComboBoxInstrument.getSelectedItem());
-
-    final Object[] oldValues = getInstrumentConfigurations();
-
-    // disable the automatic selection check of the instrument configuration :
-    final boolean prevAutoCheckConfigurations = this.setAutoCheckConfigurations(false);
-    try {
-      this.jListInstrumentConfigurations.setModel(new GenericListModel<String>(v));
-
-      // restore previous selected item(s) :
-      this.selectInstrumentConfigurations(oldValues);
-
-    } finally {
-      // restore the automatic selection check of the instrument configuration :
-      this.setAutoCheckConfigurations(prevAutoCheckConfigurations);
-    }
-    // ensure one configuration is selected :
-    this.checkInstrumentConfigurationSelection();
-  }
-
-  /**
-   * Return the list model of the instrument configuration list
-   * @return list model
-   */
-  @SuppressWarnings("unchecked")
-  private GenericListModel<String> getInstrumentConfigurationModel() {
-    return (GenericListModel<String>) this.jListInstrumentConfigurations.getModel();
-  }
-
-  /**
-   * Refresh the target list
-   */
-  private void updateListTargets() {
-    final Target selectedTarget = getSelectedTarget();
-
-    final List<Target> displayTargets = om.getDisplayTargets();
-    final TargetUserInformations targetUserInfos = om.getTargetUserInfos();
-
-    // disable the automatic selection check of the target list :
-    final boolean prevAutoCheckTargets = this.setAutoCheckTargets(false);
-    try {
-      this.jListTargets.setModel(new GenericListModel<Target>(displayTargets));
-      this.jListTargets.setCellRenderer(new TargetListRenderer(new TargetRenderer(targetUserInfos)));
-
-      // restore previous selected item :
-      if (selectedTarget != null) {
-        this.jListTargets.setSelectedValue(selectedTarget, true);
-      }
-
-      if (isTargetEditable()) {
-        // disable buttons if the target list is empty :
-        this.jButtonDeleteTarget.setEnabled(!displayTargets.isEmpty());
-        this.jButtonTargetEditor.setEnabled(!displayTargets.isEmpty());
-      }
-    } finally {
-      // restore the automatic selection check of the target list :
-      this.setAutoCheckTargets(prevAutoCheckTargets);
-    }
-    // ensure one target is selected :
-    this.checkTargetSelection();
-
-    if (logger.isDebugEnabled()) {
-      logger.debug("jListTargets updated: {}", getSelectedTarget());
-    }
-  }
-
-  /**
-   * Return the currently selected target
-   * @return target
-   */
-  public Target getSelectedTarget() {
-    // TODO : multi selection of targets to delete multiple targets at the same time :
-    return (Target) this.jListTargets.getSelectedValue();
-  }
-
-  /**
-   * Called whenever the target selection changes.
-   * @param e the event that characterizes the change.
-   */
-  private void processTargetValueChanged(final ListSelectionEvent e) {
-    // skip events when the user selection is adjusting :
-    if (e.getValueIsAdjusting()) {
-      return;
     }
 
-    // ensure at least one item is selected :
-    if (this.jListTargets.getSelectionModel().isSelectionEmpty()) {
-      this.checkTargetSelection();
-      return;
+    /**
+     * Return the Pops custom formatter : number format that accepts null values
+     * @return number formatter
+     */
+    private static NumberFormatter getPopsFormatter() {
+        final NumberFormatter nf = new NumberFormatter(new DecimalFormat("######")) {
+            /** default serial UID for Serializable interface */
+            private static final long serialVersionUID = 1;
+
+            /**
+             * Hack to allow empty string
+             */
+            @Override
+            public Object stringToValue(final String text) throws ParseException {
+                if (text == null || text.length() == 0) {
+                    return null;
+                }
+                return super.stringToValue(text);
+            }
+        };
+        nf.setValueClass(Integer.class);
+        // reject invalid characters (digits only)
+        nf.setAllowsInvalid(false);
+        nf.setCommitsOnValidEdit(false);
+        return nf;
     }
 
-    // check if selection changes :
-    if (this.currentTarget == null || this.currentTarget != getSelectedTarget()) {
-      // memorize the selected item :
-      this.currentTarget = getSelectedTarget();
+    /**
+     * This method is useful to set the models and specific features of initialized swing components.
+     * Add the star search field and refresh content of the combo boxes.
+     * Finally update the observation according to the form state
+     */
+    private void postInit() {
 
-      // handle single selection :
+        Preferences.getInstance().addObserver(this);
 
-      if (logger.isDebugEnabled()) {
-        logger.debug("Selected Target changed: {}", getSelectedTarget());
-      }
+        this.warningIcon = ResourceImage.WARNING_ICON.icon();
 
-      // update observation :
-      fireTargetSelectionChangeEvent();
+        // add observer to the StarResolverWidget :
+        this.starSearchField.getStar().addObserver(this);
+
+        // update component models :
+        final DateEditor de = (DateEditor) this.jDateSpinner.getEditor();
+
+        // custom focus listener to let the user change the day field by default :
+        de.getTextField().addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(final FocusEvent fe) {
+                if (fe.getSource() instanceof JTextComponent) {
+                    final JTextComponent textComponent = ((JTextComponent) fe.getSource());
+
+                    SwingUtils.invokeLaterEDT(new Runnable() {
+                        @Override
+                        public void run() {
+                            final int last = textComponent.getDocument().getLength();
+                            // select the day field to force the spinner to use it
+                            textComponent.setCaretPosition(last - 2);
+                            textComponent.moveCaretPosition(last);
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void focusLost(final FocusEvent fe) {
+                // nothing to do
+            }
+        });
+
+        // define change listeners :
+        this.jDateSpinner.addChangeListener(this);
+        this.jComboBoxInterferometer.addActionListener(this);
+        this.jComboBoxInterferometerConfiguration.addActionListener(this);
+        this.jComboBoxInstrument.addActionListener(this);
+        this.jComboBoxPops.addActionListener(this);
+
+        this.jTextPoPs.addPropertyChangeListener("value", new PropertyChangeListener() {
+            @Override
+            public void propertyChange(final PropertyChangeEvent evt) {
+                jTextPoPsPropertyChange(evt);
+            }
+        });
+
+        this.jFieldMinElev.addPropertyChangeListener("value", new PropertyChangeListener() {
+            @Override
+            public void propertyChange(final PropertyChangeEvent evt) {
+                final double minElevNew = ((Number) jFieldMinElev.getValue()).doubleValue();
+
+                if (minElevNew < 0d || minElevNew >= 90d) {
+                    // invalid value :
+                    jFieldMinElev.setValue(Preferences.getInstance().getPreferenceAsDouble(Preferences.MIN_ELEVATION));
+                }
+                fireObservationUpdateEvent();
+            }
+        });
+
+        this.jCheckBoxNightLimit.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(final ItemEvent e) {
+                updateWindRestriction();
+                fireObservationUpdateEvent();
+            }
+        });
+
+        // define interferometer names (constant) :
+        this.jComboBoxInterferometer.setModel(new DefaultComboBoxModel(cm.getInterferometerNames()));
+
+        // reset status :
+        this.resetStatus();
+
+        this.windWidget = WindWidget.create();
+
+        final GridBagConstraints gridBagConstraints = new GridBagConstraints();
+        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridheight = 3;
+        gridBagConstraints.fill = GridBagConstraints.BOTH;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.insets = new Insets(2, 2, 2, 2);
+        gridBagConstraints.weightx = 0.9;
+        gridBagConstraints.weighty = 0.9;
+        this.jPanelOptions.add(this.windWidget, gridBagConstraints);
+
+        this.windWidget.addPropertyChangeListener(WindWidget.PROPERTY_VALUE, new PropertyChangeListener() {
+            @Override
+            public void propertyChange(final PropertyChangeEvent pe) {
+                fireObservationUpdateEvent();
+            }
+        });
+
+        this.jCheckBoxWind.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(final ItemEvent e) {
+                windWidget.setEnabled(jCheckBoxWind.isSelected());
+                fireObservationUpdateEvent();
+            }
+        });
+
+        this.jCheckBoxWind.setSelected(false);
+        this.windWidget.setEnabled(false);
     }
-  }
 
-  /**
-   * Check if the selected target is empty, then restore the last selected target
-   * or select the first target
-   */
-  private void checkTargetSelection() {
-    // check if the automatic configuration check flag is enabled :
-    if (this.doAutoCheckTargets) {
-      checkListSelection(this.jListTargets, this.currentTarget);
+    /**
+     * Process the date spinner change event.
+     * Update the observation according to the form state
+     * @param ce change event
+     */
+    @Override
+    public void stateChanged(final ChangeEvent ce) {
+        if (ce.getSource() == this.jDateSpinner) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Date changed: {}", this.jDateSpinner.getModel().getValue());
+            }
+            fireObservationUpdateEvent();
+        }
     }
-  }
 
-  /**
-   * Process any comboBox change event (interferometer, interferometer configuration, instrument, instrument configuration).
-   * Refresh the dependent combo boxes and update the observation according to the form state
-   * @param e action event
-   */
-  @Override
-  public void actionPerformed(final ActionEvent e) {
-    // disable the automatic update observation :
-    final boolean prevAutoUpdateObservation = this.setAutoUpdateObservation(false);
-    try {
-      if (e.getSource() == this.jComboBoxInterferometer) {
+    /**
+     * Refresh the list of interferometer configurations : depends on the chosen interferometer
+     */
+    private void updateComboInterferometerConfiguration() {
+        final Vector<String> v = cm.getInterferometerConfigurationNames((String) this.jComboBoxInterferometer.getSelectedItem());
+        this.jComboBoxInterferometerConfiguration.setModel(new DefaultComboBoxModel(v));
+        final boolean visible = (v.size() > 1);
+        this.jLabelPeriod.setVisible(visible);
+        this.jComboBoxInterferometerConfiguration.setVisible(visible);
+    }
+
+    /**
+     * Refresh the list of instruments : depends on the chosen interferometer configuration
+     */
+    private void updateComboInstrument() {
+        final Object oldValue = this.jComboBoxInstrument.getSelectedItem();
+
+        final Vector<String> v = cm.getInterferometerInstrumentNames((String) this.jComboBoxInterferometerConfiguration.getSelectedItem());
+        this.jComboBoxInstrument.setModel(new DefaultComboBoxModel(v));
+
+        // restore previous selected item :
+        if (oldValue != null) {
+            this.jComboBoxInstrument.setSelectedItem(oldValue);
+        }
+    }
+
+    /**
+     * Refresh the list of instrument configurations : depends on the chosen instrument (also the interferometer configuration)
+     */
+    private void updateComboInstrumentConfiguration() {
+        final Vector<String> v = cm.getInstrumentConfigurationNames((String) this.jComboBoxInterferometerConfiguration.getSelectedItem(),
+                (String) this.jComboBoxInstrument.getSelectedItem());
+
+        final Object[] oldValues = getInstrumentConfigurations();
+
+        // disable the automatic selection check of the instrument configuration :
+        final boolean prevAutoCheckConfigurations = this.setAutoCheckConfigurations(false);
+        try {
+            this.jListInstrumentConfigurations.setModel(new GenericListModel<String>(v));
+
+            // restore previous selected item(s) :
+            this.selectInstrumentConfigurations(oldValues);
+
+        } finally {
+            // restore the automatic selection check of the instrument configuration :
+            this.setAutoCheckConfigurations(prevAutoCheckConfigurations);
+        }
+        // ensure one configuration is selected :
+        this.checkInstrumentConfigurationSelection();
+    }
+
+    /**
+     * Return the list model of the instrument configuration list
+     * @return list model
+     */
+    @SuppressWarnings("unchecked")
+    private GenericListModel<String> getInstrumentConfigurationModel() {
+        return (GenericListModel<String>) this.jListInstrumentConfigurations.getModel();
+    }
+
+    /**
+     * Refresh the target list
+     */
+    private void updateListTargets() {
+        final Target selectedTarget = getSelectedTarget();
+
+        final List<Target> displayTargets = om.getDisplayTargets();
+        final TargetUserInformations targetUserInfos = om.getTargetUserInfos();
+
+        // disable the automatic selection check of the target list :
+        final boolean prevAutoCheckTargets = this.setAutoCheckTargets(false);
+        try {
+            this.jListTargets.setModel(new GenericListModel<Target>(displayTargets));
+            this.jListTargets.setCellRenderer(new TargetListRenderer(new TargetRenderer(targetUserInfos)));
+
+            // restore previous selected item :
+            if (selectedTarget != null) {
+                this.jListTargets.setSelectedValue(selectedTarget, true);
+            }
+
+            if (isTargetEditable()) {
+                // disable buttons if the target list is empty :
+                this.jButtonDeleteTarget.setEnabled(!displayTargets.isEmpty());
+                this.jButtonTargetEditor.setEnabled(!displayTargets.isEmpty());
+            }
+        } finally {
+            // restore the automatic selection check of the target list :
+            this.setAutoCheckTargets(prevAutoCheckTargets);
+        }
+        // ensure one target is selected :
+        this.checkTargetSelection();
+
         if (logger.isDebugEnabled()) {
-          logger.debug("Interferometer changed: {}", this.jComboBoxInterferometer.getSelectedItem());
+            logger.debug("jListTargets updated: {}", getSelectedTarget());
         }
-        updateComboInterferometerConfiguration();
-        updateComboInstrument();
-        updateComboInstrumentConfiguration();
-        checkPops();
-        updateWindRestriction();
+    }
 
-      } else if (e.getSource() == this.jComboBoxInterferometerConfiguration) {
-        if (logger.isDebugEnabled()) {
-          logger.debug("Interferometer Configuration changed: {}", this.jComboBoxInterferometerConfiguration.getSelectedItem());
+    /**
+     * Return the currently selected target
+     * @return target
+     */
+    public Target getSelectedTarget() {
+        // TODO : multi selection of targets to delete multiple targets at the same time :
+        return (Target) this.jListTargets.getSelectedValue();
+    }
+
+    /**
+     * Called whenever the target selection changes.
+     * @param e the event that characterizes the change.
+     */
+    private void processTargetValueChanged(final ListSelectionEvent e) {
+        // skip events when the user selection is adjusting :
+        if (e.getValueIsAdjusting()) {
+            return;
         }
-        updateComboInstrument();
-        updateComboInstrumentConfiguration();
-        checkPops();
-      } else if (e.getSource() == this.jComboBoxInstrument) {
-        if (logger.isDebugEnabled()) {
-          logger.debug("Instrument changed: {}", this.jComboBoxInstrument.getSelectedItem());
+
+        // ensure at least one item is selected :
+        if (this.jListTargets.getSelectionModel().isSelectionEmpty()) {
+            this.checkTargetSelection();
+            return;
         }
-        updateComboInstrumentConfiguration();
-        checkPops();
-      } else if (e.getSource() == this.jComboBoxPops) {
-        final String selectedPops = this.jComboBoxPops.getSelectedItem().toString();
-        if (logger.isDebugEnabled()) {
-          logger.debug("Pops changed: {}", selectedPops);
+
+        // check if selection changes :
+        if (this.currentTarget == null || this.currentTarget != getSelectedTarget()) {
+            // memorize the selected item :
+            this.currentTarget = getSelectedTarget();
+
+            // handle single selection :
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("Selected Target changed: {}", getSelectedTarget());
+            }
+
+            // update observation :
+            fireTargetSelectionChangeEvent();
         }
-        // update pops field:
-        if (POPS_MANUAL.equals(selectedPops)) {
-          // manual combination:
-          this.updatePops(this.jTextPoPs.getText(), false);
+    }
+
+    /**
+     * Check if the selected target is empty, then restore the last selected target
+     * or select the first target
+     */
+    private void checkTargetSelection() {
+        // check if the automatic configuration check flag is enabled :
+        if (this.doAutoCheckTargets) {
+            checkListSelection(this.jListTargets, this.currentTarget);
+        }
+    }
+
+    /**
+     * Process any comboBox change event (interferometer, interferometer configuration, instrument, instrument configuration).
+     * Refresh the dependent combo boxes and update the observation according to the form state
+     * @param e action event
+     */
+    @Override
+    public void actionPerformed(final ActionEvent e) {
+        // disable the automatic update observation :
+        final boolean prevAutoUpdateObservation = this.setAutoUpdateObservation(false);
+        try {
+            if (e.getSource() == this.jComboBoxInterferometer) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Interferometer changed: {}", this.jComboBoxInterferometer.getSelectedItem());
+                }
+                updateComboInterferometerConfiguration();
+                updateComboInstrument();
+                updateComboInstrumentConfiguration();
+                checkPops();
+                updateWindRestriction();
+
+            } else if (e.getSource() == this.jComboBoxInterferometerConfiguration) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Interferometer Configuration changed: {}", this.jComboBoxInterferometerConfiguration.getSelectedItem());
+                }
+                updateComboInstrument();
+                updateComboInstrumentConfiguration();
+                checkPops();
+            } else if (e.getSource() == this.jComboBoxInstrument) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Instrument changed: {}", this.jComboBoxInstrument.getSelectedItem());
+                }
+                updateComboInstrumentConfiguration();
+                checkPops();
+            } else if (e.getSource() == this.jComboBoxPops) {
+                final String selectedPops = this.jComboBoxPops.getSelectedItem().toString();
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Pops changed: {}", selectedPops);
+                }
+                // update pops field:
+                if (POPS_MANUAL.equals(selectedPops)) {
+                    // manual combination:
+                    this.updatePops(this.jTextPoPs.getText(), false);
+                } else {
+                    // auto or specific Pops combination
+                    this.updatePops((POPS_AUTO.equals(selectedPops)) ? null : selectedPops, false);
+                }
+            } else {
+                logger.warn("Unsupported source component: {}", e.getSource());
+            }
+
+        } finally {
+            // restore the automatic update observation :
+            this.setAutoUpdateObservation(prevAutoUpdateObservation);
+        }
+        // group multiple calls into a single observation update event :
+        fireObservationUpdateEvent();
+    }
+
+    /**
+     * Called whenever the instrument configuration selection changes.
+     * @param e the event that characterizes the change.
+     */
+    private void processInstrumentConfigurationValueChanged(final ListSelectionEvent e) {
+        // skip events when the user selection is adjusting :
+        if (e.getValueIsAdjusting()) {
+            return;
+        }
+
+        final ListSelectionModel lsm = this.jListInstrumentConfigurations.getSelectionModel();
+
+        // ensure at least one item is selected :
+        if (lsm.isSelectionEmpty()) {
+            this.checkInstrumentConfigurationSelection();
+            return;
+        }
+
+        // memorize the first selected item :
+        this.currentInstrumentConfiguration = (String) this.jListInstrumentConfigurations.getSelectedValue();
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("Instrument Configuration changed: {}", Arrays.toString(getInstrumentConfigurations()));
+        }
+
+        // update PoPs text field if the selected instrument configurations have associated PoPs in the configuration:
+        resetPops();
+        updatePops();
+
+        // group multiple calls into a single observation update event :
+        fireObservationUpdateEvent();
+    }
+
+    /**
+     * Return the selected instrument configurations
+     * @return selected instrument configurations
+     */
+    private Object[] getInstrumentConfigurations() {
+        return this.jListInstrumentConfigurations.getSelectedValues();
+    }
+
+    /**
+     * Check if the selected instrument configuration is empty, then restore the last selected configuration
+     * or select the first configuration
+     */
+    private void checkInstrumentConfigurationSelection() {
+        // check if the automatic configuration check flag is enabled :
+        if (this.doAutoCheckConfigurations) {
+            checkListSelection(this.jListInstrumentConfigurations, this.currentInstrumentConfiguration);
+        }
+    }
+
+    /**
+     * Select all given values in the instrument configuration list
+     * @param values configurations to select
+     */
+    private void selectInstrumentConfigurations(final Object[] values) {
+        if (values != null && values.length > 0) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("selectInstrumentConfigurations: {}", Arrays.toString(values));
+            }
+
+            final GenericListModel<String> lm = getInstrumentConfigurationModel();
+            final DefaultListSelectionModel lsm = (DefaultListSelectionModel) this.jListInstrumentConfigurations.getSelectionModel();
+
+            int index = -1;
+            for (Object selection : values) {
+                index = lm.indexOf((String) selection);
+                if (index != -1) {
+                    lsm.addSelectionInterval(index, index);
+                    this.jListInstrumentConfigurations.ensureIndexIsVisible(index);
+                }
+            }
+            if (index != -1) {
+                // scroll to last selected value :
+                this.jListInstrumentConfigurations.ensureIndexIsVisible(index - 1);
+                this.jListInstrumentConfigurations.ensureIndexIsVisible(index);
+                this.jListInstrumentConfigurations.ensureIndexIsVisible(index + 1);
+            }
+            if (logger.isDebugEnabled()) {
+                logger.debug("selectInstrumentConfigurations : selectedValues: {}", Arrays.toString(getInstrumentConfigurations()));
+            }
+        }
+    }
+
+    /**
+     * Check if this interferometer has PoPs:
+     * enable or disable Pops field and combo box
+     * If false, reset the PoPs text field
+     */
+    private void checkPops() {
+        final boolean hasPops = cm.hasPoPs((String) this.jComboBoxInterferometer.getSelectedItem());
+
+        // note: label pops is only visible if the interferometer has Pops:
+        this.jLabelPops.setVisible(hasPops);
+        this.jTextPoPs.setVisible(hasPops);
+
+        this.jComboBoxPops.setVisible(hasPops);
+
+        // reset the pops configuration anyway because it can be invalid because of the chosen instrument:
+        resetPops();
+    }
+
+    /**
+     * Make both Pops field and combo box enabled
+     * @param enabled true to enable them; false otherwise
+     */
+    private void makePopsEditable(final boolean enabled) {
+        this.jTextPoPs.setEnabled(enabled);
+        this.jComboBoxPops.setEnabled(enabled);
+    }
+
+    /**
+     * Process the change event for the PoPs configuration text field.
+     * Validates the new input (digits corresponds to valid PoPs indices)
+     * @param evt property change event
+     */
+    public void jTextPoPsPropertyChange(final PropertyChangeEvent evt) {
+        final Object value = evt.getNewValue();
+
+        // skip repeated events:
+        logger.debug("jTextPoPsPropertyChange: value: {}", value);
+
+        List<Pop> listPoPs = null;
+
+        if (value != null) {
+            final String popConfig = value.toString();
+
+            // parse the configuration (instrument = number of channels) + (interferometer = pop indexes [1-5]) :
+            listPoPs = cm.parseInstrumentPoPs((String) this.jComboBoxInterferometerConfiguration.getSelectedItem(),
+                    (String) this.jComboBoxInstrument.getSelectedItem(), popConfig);
+        }
+
+        if (listPoPs == null && value != null) {
+            // invalid, reset the field to empty :
+            resetPops();
+        }
+
+        // update combo box:
+        this.updatePops(this.jTextPoPs.getText(), false);
+
+        // then update the observation :
+        fireObservationUpdateEvent();
+    }
+
+    /**
+     * Update the Pops field and combo box
+     * @param value String or Integer value
+     * @param notify true to notify changes (Integer value); false otherwise (String value)
+     */
+    private void updatePops(final Object value, final boolean notify) {
+        logger.debug("updatePops: {} ({})", value, notify);
+
+        if (notify) {
+            if (!ObjectUtils.areEquals(value, this.jTextPoPs.getValue())) {
+                // fire a property change event:
+                this.jTextPoPs.setValue(value);
+            }
+            return;
+        }
+
+        // note : setText() does not fire a property change event:
+        this.jTextPoPs.setText((value != null) ? value.toString() : null);
+
+        final String text = this.jTextPoPs.getText();
+
+        final String selected;
+
+        if (!(StringUtils.isEmpty(text))) {
+            // check if the combo box has this value:
+            final ComboBoxModel comboModel = this.jComboBoxPops.getModel();
+
+            boolean found = false;
+            for (int i = 0, len = comboModel.getSize(); i < len; i++) {
+                if (text.equals(comboModel.getElementAt(i))) {
+                    found = true;
+                    break;
+                }
+            }
+
+            selected = (found) ? text : POPS_MANUAL;
         } else {
-          // auto or specific Pops combination
-          this.updatePops((POPS_AUTO.equals(selectedPops)) ? null : selectedPops, false);
+            selected = POPS_AUTO;
         }
-      } else {
-        logger.warn("Unsupported source component: {}", e.getSource());
-      }
-
-    } finally {
-      // restore the automatic update observation :
-      this.setAutoUpdateObservation(prevAutoUpdateObservation);
-    }
-    // group multiple calls into a single observation update event :
-    fireObservationUpdateEvent();
-  }
-
-  /**
-   * Called whenever the instrument configuration selection changes.
-   * @param e the event that characterizes the change.
-   */
-  private void processInstrumentConfigurationValueChanged(final ListSelectionEvent e) {
-    // skip events when the user selection is adjusting :
-    if (e.getValueIsAdjusting()) {
-      return;
+        this.jComboBoxPops.setSelectedItem(selected);
     }
 
-    final ListSelectionModel lsm = this.jListInstrumentConfigurations.getSelectionModel();
+    /**
+     * Reset PoPs text field
+     */
+    private void resetPops() {
+        logger.debug("resetPops");
 
-    // ensure at least one item is selected :
-    if (lsm.isSelectionEmpty()) {
-      this.checkInstrumentConfigurationSelection();
-      return;
-    }
+        // disable the automatic update observation :
+        final boolean prevAutoUpdateObservation = this.setAutoUpdateObservation(false);
+        try {
+            // enable PoPs only if the interferometer support it:
+            if (this.jLabelPops.isVisible()) {
+                final String popConfig = getConfigurationPops();
+                final boolean popMulti = POPS_MULTI_CONF.equals(popConfig);
 
-    // memorize the first selected item :
-    this.currentInstrumentConfiguration = (String) this.jListInstrumentConfigurations.getSelectedValue();
+                final Integer value = (popConfig != null && !popMulti) ? NumberUtils.valueOf(popConfig) : null;
 
-    if (logger.isDebugEnabled()) {
-      logger.debug("Instrument Configuration changed: {}", Arrays.toString(getInstrumentConfigurations()));
-    }
+                // fire a property change event:
+                this.updatePops(value, true);
 
-    // update PoPs text field if the selected instrument configurations have associated PoPs in the configuration:
-    resetPops();
-    updatePops();
+                // allow user inputs when no PoPs are defined in the configuration and not in multi-conf:
+                makePopsEditable(isPopsEditable() && (value == null || popMulti));
+            } else {
+                // fire a property change event:
+                this.updatePops(null, true);
+                makePopsEditable(false);
+            }
+            this.lastConfPopConfig = null;
 
-    // group multiple calls into a single observation update event :
-    fireObservationUpdateEvent();
-  }
-
-  /**
-   * Return the selected instrument configurations
-   * @return selected instrument configurations
-   */
-  private Object[] getInstrumentConfigurations() {
-    return this.jListInstrumentConfigurations.getSelectedValues();
-  }
-
-  /**
-   * Check if the selected instrument configuration is empty, then restore the last selected configuration
-   * or select the first configuration
-   */
-  private void checkInstrumentConfigurationSelection() {
-    // check if the automatic configuration check flag is enabled :
-    if (this.doAutoCheckConfigurations) {
-      checkListSelection(this.jListInstrumentConfigurations, this.currentInstrumentConfiguration);
-    }
-  }
-
-  /**
-   * Select all given values in the instrument configuration list
-   * @param values configurations to select
-   */
-  private void selectInstrumentConfigurations(final Object[] values) {
-    if (values != null && values.length > 0) {
-      if (logger.isDebugEnabled()) {
-        logger.debug("selectInstrumentConfigurations: {}", Arrays.toString(values));
-      }
-
-      final GenericListModel<String> lm = getInstrumentConfigurationModel();
-      final DefaultListSelectionModel lsm = (DefaultListSelectionModel) this.jListInstrumentConfigurations.getSelectionModel();
-
-      int index = -1;
-      for (Object selection : values) {
-        index = lm.indexOf((String) selection);
-        if (index != -1) {
-          lsm.addSelectionInterval(index, index);
-          this.jListInstrumentConfigurations.ensureIndexIsVisible(index);
+        } finally {
+            // restore the automatic update observation :
+            this.setAutoUpdateObservation(prevAutoUpdateObservation);
         }
-      }
-      if (index != -1) {
-        // scroll to last selected value :
-        this.jListInstrumentConfigurations.ensureIndexIsVisible(index - 1);
-        this.jListInstrumentConfigurations.ensureIndexIsVisible(index);
-        this.jListInstrumentConfigurations.ensureIndexIsVisible(index + 1);
-      }
-      if (logger.isDebugEnabled()) {
-        logger.debug("selectInstrumentConfigurations : selectedValues: {}", Arrays.toString(getInstrumentConfigurations()));
-      }
-    }
-  }
-
-  /**
-   * Check if this interferometer has PoPs:
-   * enable or disable Pops field and combo box
-   * If false, reset the PoPs text field
-   */
-  private void checkPops() {
-    final boolean hasPops = cm.hasPoPs((String) this.jComboBoxInterferometer.getSelectedItem());
-
-    // note: label pops is only visible if the interferometer has Pops:
-    this.jLabelPops.setVisible(hasPops);
-    this.jTextPoPs.setVisible(hasPops);
-
-    this.jComboBoxPops.setVisible(hasPops);
-
-    // reset the pops configuration anyway because it can be invalid because of the chosen instrument:
-    resetPops();
-  }
-
-  /**
-   * Make both Pops field and combo box enabled
-   * @param enabled true to enable them; false otherwise
-   */
-  private void makePopsEditable(final boolean enabled) {
-    this.jTextPoPs.setEnabled(enabled);
-    this.jComboBoxPops.setEnabled(enabled);
-  }
-
-  /**
-   * Process the change event for the PoPs configuration text field.
-   * Validates the new input (digits corresponds to valid PoPs indices)
-   * @param evt property change event
-   */
-  public void jTextPoPsPropertyChange(final PropertyChangeEvent evt) {
-    final Object value = evt.getNewValue();
-
-    // skip repeated events:
-    logger.debug("jTextPoPsPropertyChange: value: {}", value);
-
-    List<Pop> listPoPs = null;
-
-    if (value != null) {
-      final String popConfig = value.toString();
-
-      // parse the configuration (instrument = number of channels) + (interferometer = pop indexes [1-5]) :
-      listPoPs = cm.parseInstrumentPoPs((String) this.jComboBoxInterferometerConfiguration.getSelectedItem(),
-              (String) this.jComboBoxInstrument.getSelectedItem(), popConfig);
     }
 
-    if (listPoPs == null && value != null) {
-      // invalid, reset the field to empty :
-      resetPops();
-    }
+    /**
+     * Update the PoPs text field using the PoPs defined in the current instrument configurations
+     * only if one and only one configuration is selected.
+     */
+    private void updatePops() {
+        // handle PoPs only if the interferometer support it:
+        if (this.jLabelPops.isVisible()) {
+            final String popConfig = getConfigurationPops();
 
-    // update combo box:
-    this.updatePops(this.jTextPoPs.getText(), false);
+            // get last Pops defined by the instrument configuration:
+            final String lastPopConfig = this.lastConfPopConfig;
+            this.lastConfPopConfig = null;
 
-    // then update the observation :
-    fireObservationUpdateEvent();
-  }
+            logger.debug("updatePops: {}, last: {}", popConfig, lastPopConfig);
 
-  /**
-   * Update the Pops field and combo box
-   * @param value String or Integer value
-   * @param notify true to notify changes (Integer value); false otherwise (String value)
-   */
-  private void updatePops(final Object value, final boolean notify) {
-    logger.debug("updatePops: {} ({})", value, notify);
-
-    if (notify) {
-      if (!ObjectUtils.areEquals(value, this.jTextPoPs.getValue())) {
-        // fire a property change event:
-        this.jTextPoPs.setValue(value);
-      }
-      return;
-    }
-
-    // note : setText() does not fire a property change event:
-    this.jTextPoPs.setText((value != null) ? value.toString() : null);
-
-    final String text = this.jTextPoPs.getText();
-
-    final String selected;
-
-    if (!(StringUtils.isEmpty(text))) {
-      // check if the combo box has this value:
-      final ComboBoxModel comboModel = this.jComboBoxPops.getModel();
-
-      boolean found = false;
-      for (int i = 0, len = comboModel.getSize(); i < len; i++) {
-        if (text.equals(comboModel.getElementAt(i))) {
-          found = true;
-          break;
+            if (popConfig != null) {
+                // update the selected pops (pops) :
+                if (POPS_MULTI_CONF.equals(popConfig)) {
+                    // fire a property change event:
+                    this.updatePops(null, true);
+                    makePopsEditable(isPopsEditable());
+                } else {
+                    updatePops(popConfig, false);
+                    makePopsEditable(false);
+                    this.lastConfPopConfig = popConfig;
+                }
+            } else {
+                // reset the predefined pops:
+                if (lastPopConfig != null) {
+                    // fire a property change event:
+                    this.updatePops(null, true);
+                    makePopsEditable(isPopsEditable());
+                }
+            }
         }
-      }
-
-      selected = (found) ? text : POPS_MANUAL;
-    } else {
-      selected = POPS_AUTO;
     }
-    this.jComboBoxPops.setSelectedItem(selected);
-  }
 
-  /**
-   * Reset PoPs text field
-   */
-  private void resetPops() {
-    logger.debug("resetPops");
-
-    // disable the automatic update observation :
-    final boolean prevAutoUpdateObservation = this.setAutoUpdateObservation(false);
-    try {
-      // enable PoPs only if the interferometer support it:
-      if (this.jLabelPops.isVisible()) {
-        final String popConfig = getConfigurationPops();
-        final boolean popMulti = POPS_MULTI_CONF.equals(popConfig);
-
-        final Integer value = (popConfig != null && !popMulti) ? NumberUtils.valueOf(popConfig) : null;
-
-        // fire a property change event:
-        this.updatePops(value, true);
-
-        // allow user inputs when no PoPs are defined in the configuration and not in multi-conf:
-        makePopsEditable(isPopsEditable() && (value == null || popMulti));
-      } else {
-        // fire a property change event:
-        this.updatePops(null, true);
-        makePopsEditable(false);
-      }
-      this.lastConfPopConfig = null;
-
-    } finally {
-      // restore the automatic update observation :
-      this.setAutoUpdateObservation(prevAutoUpdateObservation);
-    }
-  }
-
-  /**
-   * Update the PoPs text field using the PoPs defined in the current instrument configurations
-   * only if one and only one configuration is selected.
-   */
-  private void updatePops() {
-    // handle PoPs only if the interferometer support it:
-    if (this.jLabelPops.isVisible()) {
-      final String popConfig = getConfigurationPops();
-
-      // get last Pops defined by the instrument configuration:
-      final String lastPopConfig = this.lastConfPopConfig;
-      this.lastConfPopConfig = null;
-
-      logger.debug("updatePops: {}, last: {}", popConfig, lastPopConfig);
-
-      if (popConfig != null) {
-        // update the selected pops (pops) :
-        if (POPS_MULTI_CONF.equals(popConfig)) {
-          // fire a property change event:
-          this.updatePops(null, true);
-          makePopsEditable(isPopsEditable());
-        } else {
-          updatePops(popConfig, false);
-          makePopsEditable(false);
-          this.lastConfPopConfig = popConfig;
+    /**
+     * Return the PoP identifiers defined for the current instrument configuration
+     * only if one and only one configuration is selected.
+     * @return PoP identifiers or null or POPS_MULTI if PoPs are in use but in multi-configuration
+     */
+    private String getConfigurationPops() {
+        final Object[] instConfs = getInstrumentConfigurations();
+        if (instConfs.length > 1) {
+            // multi configuration:
+            return this.jLabelPops.isVisible() ? POPS_MULTI_CONF : null;
         }
-      } else {
-        // reset the predefined pops:
-        if (lastPopConfig != null) {
-          // fire a property change event:
-          this.updatePops(null, true);
-          makePopsEditable(isPopsEditable());
+        if (instConfs.length == 1) {
+            // determine if there are PoPs defined in the instrument configuration :
+            final String instrumentConfiguration = (String) instConfs[0];
+            final List<Pop> popList = cm.getInstrumentConfigurationPoPs((String) this.jComboBoxInterferometerConfiguration.getSelectedItem(),
+                    (String) this.jComboBoxInstrument.getSelectedItem(), instrumentConfiguration);
+
+            if (popList != null && !popList.isEmpty()) {
+                // PoPs are defined in the instrument configuration :
+                return Pop.toString(popList);
+            }
         }
-      }
-    }
-  }
-
-  /**
-   * Return the PoP identifiers defined for the current instrument configuration
-   * only if one and only one configuration is selected.
-   * @return PoP identifiers or null or POPS_MULTI if PoPs are in use but in multi-configuration
-   */
-  private String getConfigurationPops() {
-    final Object[] instConfs = getInstrumentConfigurations();
-    if (instConfs.length > 1) {
-      // multi configuration:
-      return this.jLabelPops.isVisible() ? POPS_MULTI_CONF : null;
-    }
-    if (instConfs.length == 1) {
-      // determine if there are PoPs defined in the instrument configuration :
-      final String instrumentConfiguration = (String) instConfs[0];
-      final List<Pop> popList = cm.getInstrumentConfigurationPoPs((String) this.jComboBoxInterferometerConfiguration.getSelectedItem(),
-              (String) this.jComboBoxInstrument.getSelectedItem(), instrumentConfiguration);
-
-      if (popList != null && !popList.isEmpty()) {
-        // PoPs are defined in the instrument configuration :
-        return Pop.toString(popList);
-      }
-    }
-    return null;
-  }
-
-  /**
-   * Enable or disable the wind restriction depending on the chosen interferometer
-   */
-  private void updateWindRestriction() {
-    final Double windRestriction = cm.getWindPointingRestriction((String) this.jComboBoxInterferometer.getSelectedItem());
-
-    // wind restriction is enabled only if night restriction are enabled and interferometer support it:
-    final boolean useWind = this.jCheckBoxNightLimit.isSelected()
-            && (windRestriction != null && windRestriction > 0d && windRestriction < 180d);
-
-    if (!useWind) {
-      // reset
-      this.jCheckBoxWind.setSelected(false);
+        return null;
     }
 
-    this.jCheckBoxWind.setEnabled(useWind);
-  }
+    /**
+     * Enable or disable the wind restriction depending on the chosen interferometer
+     */
+    private void updateWindRestriction() {
+        final Double windRestriction = cm.getWindPointingRestriction((String) this.jComboBoxInterferometer.getSelectedItem());
 
-  /**
-   * Observer implementation used for the StarResolver (called by EDT)
-   * Create a new Target object with the retrieved data from Simbad and
-   * fire an observation change event
-   * @param o Observable instance i.e. Star instance
-   * @param arg Star.Notification instance
-   */
-  @Override
-  public void update(final Observable o, final Object arg) {
-    if (o instanceof Star) {
-      final Star star = (Star) o;
+        // wind restriction is enabled only if night restriction are enabled and interferometer support it:
+        final boolean useWind = this.jCheckBoxNightLimit.isSelected()
+                && (windRestriction != null && windRestriction > 0d && windRestriction < 180d);
 
-      final Star.Notification notification = (Star.Notification) arg;
+        if (!useWind) {
+            // reset
+            this.jCheckBoxWind.setSelected(false);
+        }
 
-      if (notification == Star.Notification.QUERY_COMPLETE) {
-        logger.debug("Star resolved: \n{}", star);
+        this.jCheckBoxWind.setEnabled(useWind);
+    }
 
-        // update the data model and fire change events :
-        om.addTarget(Target.formatName(star.getName()), star);
-      }
-    } else if (o instanceof Preferences) {
-      // means Preferences:
+    /**
+     * Observer implementation used for the StarResolver (called by EDT)
+     * Create a new Target object with the retrieved data from Simbad and
+     * fire an observation change event
+     * @param o Observable instance i.e. Star instance
+     * @param arg Star.Notification instance
+     */
+    @Override
+    public void update(final Observable o, final Object arg) {
+        if (o instanceof Star) {
+            final Star star = (Star) o;
+
+            final Star.Notification notification = (Star.Notification) arg;
+
+            if (notification == Star.Notification.QUERY_COMPLETE) {
+                logger.debug("Star resolved: \n{}", star);
+
+                // update the data model and fire change events :
+                om.addTarget(Target.formatName(star.getName()), star);
+            }
+        } else if (o instanceof Preferences) {
+            // means Preferences:
 // disabled because it is also updated when any preference changes !!!
 //      this.jFieldMinElev.setValue(Preferences.getInstance().getPreferenceAsDouble(Preferences.MIN_ELEVATION));
-    }
-  }
-
-  /**
-   * Fire an Observation Change event when a Swing component changed
-   * ONLY if the automatic update flag is enabled
-   */
-  private void fireObservationUpdateEvent() {
-    // check if the automatic update flag is enabled :
-    if (this.doAutoUpdateObservation) {
-      logger.debug("fireObservationUpdateEvent");
-
-      if (DEBUG_UPDATE_EVENT) {
-        logger.warn("FIRE_UPDATE", new Throwable());
-      }
-
-      ObservationManager.getInstance().fireObservationUpdate();
-    }
-  }
-
-  /**
-   * Fire a Target Selection Change event when the target selection changes.
-   */
-  private void fireTargetSelectionChangeEvent() {
-
-    final Target selected = getSelectedTarget();
-
-    logger.debug("fireTargetSelectionChangeEvent : target = {}", selected);
-
-    ObservationManager.getInstance().fireTargetSelectionChanged(selected);
-  }
-
-  /**
-   * Update the UI widgets from the given loaded observation
-   *
-   * @param observation observation
-   */
-  private void onLoadObservation(final ObservationSetting observation) {
-    if (logger.isDebugEnabled()) {
-      logger.debug("onLoadObservation:\n{}", ObservationManager.toString(observation));
-    }
-    // disable the automatic update observation :
-    final boolean prevAutoUpdateObservation = this.setAutoUpdateObservation(false);
-    // disable the automatic selection check of the instrument configuration :
-    final boolean prevAutoCheckConfigurations = this.setAutoCheckConfigurations(false);
-    // disable the automatic selection check of the target list :
-    final boolean prevAutoCheckTargets = this.setAutoCheckTargets(false);
-    try {
-      // clear selected target :
-      this.jListTargets.clearSelection();
-      // reset cached values :
-      this.currentTarget = null;
-      this.currentInstrumentConfiguration = null;
-      this.lastConfPopConfig = null;
-
-      // use observation context to enable/disable POPS FIRST (event ordering issue):
-      makePopsEditable(isPopsEditable());
-
-      // observation :
-
-      // update the interferometer and interferometer configuration :
-      final InterferometerConfigurationChoice interferometerChoice = observation.getInterferometerConfiguration();
-
-      final InterferometerConfiguration ic = interferometerChoice.getInterferometerConfiguration();
-
-      if (ic != null) {
-        // update the selected interferometer :
-        this.jComboBoxInterferometer.setSelectedItem(ic.getInterferometer().getName());
-        // update the selected interferometer configuration :
-        this.jComboBoxInterferometerConfiguration.setSelectedItem(ic.getName());
-      }
-
-      final FocalInstrumentConfigurationChoice instrumentChoice = observation.getInstrumentConfiguration();
-
-      // update the selected instrument :
-      this.jComboBoxInstrument.setSelectedItem(instrumentChoice.getName());
-
-      // update the selected instrument configurations :
-      final List<ObservationVariant> obsVariants = observation.getVariants();
-      final int len = obsVariants.size();
-      final Object[] stationConfs = new Object[len];
-      for (int i = 0; i < len; i++) {
-        stationConfs[i] = obsVariants.get(i).getStations();
-      }
-
-      this.jListInstrumentConfigurations.clearSelection();
-      this.selectInstrumentConfigurations(stationConfs);
-
-      // update the selected pops (pops) :
-      updatePops(instrumentChoice.getPops(), false);
-
-      // constraints :
-      // update the night restriction :
-      this.jCheckBoxNightLimit.setSelected(observation.getWhen().isNightRestriction());
-
-      // update the date spinner :
-      final XMLGregorianCalendar date = observation.getWhen().getDate();
-      if (date != null) {
-        this.jDateSpinner.setValue(date.toGregorianCalendar().getTime());
-      }
-
-      // Update wind direction:
-      this.windWidget.setEnabled(true); // to update its value
-      final Double windAz = observation.getWhen().getWindAzimuth();
-      final boolean useWind = windAz != null;
-      this.windWidget.setValue((useWind) ? windAz.doubleValue() : 0d);
-      this.windWidget.setEnabled(useWind);
-      this.jCheckBoxWind.setSelected(useWind);
-
-      // update the min elevation :
-      this.jFieldMinElev.setValue(interferometerChoice.getMinElevation());
-
-    } finally {
-      // restore the automatic selection check of the target list :
-      this.setAutoCheckTargets(prevAutoCheckTargets);
-      // restore the automatic selection check of the instrument configuration :
-      this.setAutoCheckConfigurations(prevAutoCheckConfigurations);
-      // restore the automatic update observation :
-      this.setAutoUpdateObservation(prevAutoUpdateObservation);
-    }
-    // ensure one configuration is selected :
-    this.checkInstrumentConfigurationSelection();
-
-    // use observation context to enable/disable GUI features:
-    final ObservationContext ctx = getObservationContext();
-
-    if (ctx != null) {
-      // Main settings:
-      this.jComboBoxInterferometer.setEnabled(ctx.isInterferometerEditable());
-      this.jComboBoxInterferometerConfiguration.setEnabled(ctx.isPeriodEditable());
-      this.jComboBoxInstrument.setEnabled(ctx.isInstrumentEditable());
-
-      // Configuration(s):
-      this.jListInstrumentConfigurations.setEnabled(ctx.isConfigurationsEditable());
-
-      // Constraints:
-      this.jCheckBoxNightLimit.setEnabled(ctx.isNightEditable());
-      this.jDateSpinner.setEnabled(ctx.isDateEditable());
-      this.jFieldMinElev.setEnabled(ctx.isMinElevationEditable());
-
-    } else {
-      // reset GUI:
-
-      // Main settings:
-      this.jComboBoxInterferometer.setEnabled(true);
-      this.jComboBoxInterferometerConfiguration.setEnabled(true);
-      this.jComboBoxInstrument.setEnabled(true);
-
-      // Configuration(s):
-      this.jListInstrumentConfigurations.setEnabled(true);
-
-      // Constraints:
-      this.jCheckBoxNightLimit.setEnabled(true);
-      this.jDateSpinner.setEnabled(true);
-      this.jFieldMinElev.setEnabled(true);
-    }
-
-    // TARGETS:
-    final boolean targetEditable = isTargetEditable();
-
-    this.starSearchField.setEnabled(targetEditable);
-    this.jListTargets.setEnabled(targetEditable);
-    this.jButtonTargetEditor.setEnabled(targetEditable);
-    this.jButtonDeleteTarget.setEnabled(targetEditable);
-  }
-
-  /**
-   * @return true if the pops are editable
-   */
-  private boolean isPopsEditable() {
-    return (getObservationContext() != null) ? getObservationContext().isPopsEditable() : true;
-  }
-
-  /**
-   * @return true if the target(s) is editable
-   */
-  private boolean isTargetEditable() {
-    return (getObservationContext() != null) ? getObservationContext().isTargetsEditable() : true;
-  }
-
-  /**
-   * Update the current observation (via the ObservationManager) with state of UI widgets
-   * ONLY if the automatic update flag is enabled.
-   *
-   * If the observation changes, it updates the event's changed flag (MAIN | UV | NONE)
-   * to fire an observation refresh event.
-   *
-   * @param event update event
-   */
-  private void onUpdateObservation(final UpdateObservationEvent event) {
-    // check if the automatic update flag is enabled :
-    if (this.doAutoUpdateObservation) {
-      if (DEBUG_UPDATE_EVENT) {
-        logger.warn("UPDATE", new Throwable());
-      }
-
-      boolean changed = false;
-
-      // observation :
-      changed |= om.setInterferometerConfigurationName((String) this.jComboBoxInterferometerConfiguration.getSelectedItem());
-      changed |= om.setInstrumentConfigurationName((String) this.jComboBoxInstrument.getSelectedItem());
-
-      changed |= om.setInstrumentConfigurationStations(getInstrumentConfigurations());
-
-      changed |= om.setInstrumentConfigurationPoPs(this.jTextPoPs.getText());
-
-      // constraints :
-      changed |= om.setWhen((Date) this.jDateSpinner.getModel().getValue());
-      changed |= om.setMinElevation(((Number) this.jFieldMinElev.getValue()).doubleValue());
-      changed |= om.setNightRestriction(this.jCheckBoxNightLimit.isSelected());
-
-      if (this.jCheckBoxWind.isSelected()) {
-        changed |= om.setWindAzimuth(Double.valueOf(this.windWidget.getValue()));
-      } else {
-        changed |= om.setWindAzimuth(null);
-      }
-
-      if (changed) {
-        // update change flag to make the ObservationManager fire an observation refresh event later
-        event.setChanged(UpdateObservationEvent.ChangeType.MAIN);
-      }
-    }
-  }
-
-  /**
-   * Handle the given event on the given observation.
-   * Refresh the UI component according to the loaded observation settings
-   *
-   * @param event event
-   */
-  @Override
-  public void onProcess(final ObservationEvent event) {
-    if (logger.isDebugEnabled()) {
-      logger.debug("event [{}] process IN", event.getType());
-    }
-    switch (event.getType()) {
-      case LOADED:
-        this.onLoadObservation(event.getObservation());
-        break;
-      case TARGET_CHANGED:
-        this.updateListTargets();
-        break;
-      case DO_UPDATE:
-        if (event instanceof UpdateObservationEvent) {
-          this.onUpdateObservation((UpdateObservationEvent) event);
         }
-        break;
-      case REFRESH:
-        this.resetStatus();
-        break;
-      case REFRESH_UV:
-        this.resetStatus();
-        break;
-      case OBSERVABILITY_DONE:
-        if (event instanceof ObservabilityEvent) {
-          this.updateObservabilityData(((ObservabilityEvent) event).getObservabilityData());
-        }
-        break;
-      case WARNINGS_READY:
-        if (event instanceof WarningContainerEvent) {
-          this.updateStatus(((WarningContainerEvent) event).getWarningContainer());
-        }
-        break;
-      default:
     }
-    if (logger.isDebugEnabled()) {
-      logger.debug("event [{}] process OUT", event.getType());
-    }
-  }
 
-  /**
-   * Update the observability Data
-   * and update star data (HA min / max)
-   * @param obsDataList observability data
-   */
-  private void updateObservabilityData(final List<ObservabilityData> obsDataList) {
-    if (obsDataList.size() == 1) {
-      final List<PopCombination> bestPopList = obsDataList.get(0).getBestPopList();
-      final List<PopCombination> betterPopList = obsDataList.get(0).getBetterPopList();
+    /**
+     * Fire an Observation Change event when a Swing component changed
+     * ONLY if the automatic update flag is enabled
+     */
+    private void fireObservationUpdateEvent() {
+        // check if the automatic update flag is enabled :
+        if (this.doAutoUpdateObservation) {
+            logger.debug("fireObservationUpdateEvent");
 
-      if (bestPopList != null && betterPopList != null) {
-        final Vector<String> orderedPops = new Vector<String>(bestPopList.size() + betterPopList.size() + 1);
-        orderedPops.add(POPS_MANUAL);
-        orderedPops.add(POPS_AUTO);
+            if (DEBUG_UPDATE_EVENT) {
+                logger.warn("FIRE_UPDATE", new Throwable());
+            }
 
-        for (PopCombination p : bestPopList) {
-          orderedPops.add(p.toString());
+            ObservationManager.getInstance().fireObservationUpdate();
         }
-        for (PopCombination p : betterPopList) {
-          orderedPops.add(p.toString());
+    }
+
+    /**
+     * Fire a Target Selection Change event when the target selection changes.
+     */
+    private void fireTargetSelectionChangeEvent() {
+
+        final Target selected = getSelectedTarget();
+
+        logger.debug("fireTargetSelectionChangeEvent : target = {}", selected);
+
+        ObservationManager.getInstance().fireTargetSelectionChanged(selected);
+    }
+
+    /**
+     * Update the UI widgets from the given loaded observation
+     *
+     * @param observation observation
+     */
+    private void onLoadObservation(final ObservationSetting observation) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("onLoadObservation:\n{}", ObservationManager.toString(observation));
+        }
+        // disable the automatic update observation :
+        final boolean prevAutoUpdateObservation = this.setAutoUpdateObservation(false);
+        // disable the automatic selection check of the instrument configuration :
+        final boolean prevAutoCheckConfigurations = this.setAutoCheckConfigurations(false);
+        // disable the automatic selection check of the target list :
+        final boolean prevAutoCheckTargets = this.setAutoCheckTargets(false);
+        try {
+            // clear selected target :
+            this.jListTargets.clearSelection();
+            // reset cached values :
+            this.currentTarget = null;
+            this.currentInstrumentConfiguration = null;
+            this.lastConfPopConfig = null;
+
+            // use observation context to enable/disable POPS FIRST (event ordering issue):
+            makePopsEditable(isPopsEditable());
+
+            // observation :
+
+            // update the interferometer and interferometer configuration :
+            final InterferometerConfigurationChoice interferometerChoice = observation.getInterferometerConfiguration();
+
+            final InterferometerConfiguration ic = interferometerChoice.getInterferometerConfiguration();
+
+            if (ic != null) {
+                // update the selected interferometer :
+                this.jComboBoxInterferometer.setSelectedItem(ic.getInterferometer().getName());
+                // update the selected interferometer configuration :
+                this.jComboBoxInterferometerConfiguration.setSelectedItem(ic.getName());
+            }
+
+            final FocalInstrumentConfigurationChoice instrumentChoice = observation.getInstrumentConfiguration();
+
+            // update the selected instrument :
+            this.jComboBoxInstrument.setSelectedItem(instrumentChoice.getName());
+
+            // update the selected instrument configurations :
+            final List<ObservationVariant> obsVariants = observation.getVariants();
+            final int len = obsVariants.size();
+            final Object[] stationConfs = new Object[len];
+            for (int i = 0; i < len; i++) {
+                stationConfs[i] = obsVariants.get(i).getStations();
+            }
+
+            this.jListInstrumentConfigurations.clearSelection();
+            this.selectInstrumentConfigurations(stationConfs);
+
+            // update the selected pops (pops) :
+            updatePops(instrumentChoice.getPops(), false);
+
+            // constraints :
+            // update the night restriction :
+            this.jCheckBoxNightLimit.setSelected(observation.getWhen().isNightRestriction());
+
+            // update the date spinner :
+            final XMLGregorianCalendar date = observation.getWhen().getDate();
+            if (date != null) {
+                this.jDateSpinner.setValue(date.toGregorianCalendar().getTime());
+            }
+
+            // Update wind direction:
+            this.windWidget.setEnabled(true); // to update its value
+            final Double windAz = observation.getWhen().getWindAzimuth();
+            final boolean useWind = windAz != null;
+            this.windWidget.setValue((useWind) ? windAz.doubleValue() : 0d);
+            this.windWidget.setEnabled(useWind);
+            this.jCheckBoxWind.setSelected(useWind);
+
+            // update the min elevation :
+            this.jFieldMinElev.setValue(interferometerChoice.getMinElevation());
+
+        } finally {
+            // restore the automatic selection check of the target list :
+            this.setAutoCheckTargets(prevAutoCheckTargets);
+            // restore the automatic selection check of the instrument configuration :
+            this.setAutoCheckConfigurations(prevAutoCheckConfigurations);
+            // restore the automatic update observation :
+            this.setAutoUpdateObservation(prevAutoUpdateObservation);
+        }
+        // ensure one configuration is selected :
+        this.checkInstrumentConfigurationSelection();
+
+        // use observation context to enable/disable GUI features:
+        final ObservationContext ctx = getObservationContext();
+
+        if (ctx != null) {
+            // Main settings:
+            this.jComboBoxInterferometer.setEnabled(ctx.isInterferometerEditable());
+            this.jComboBoxInterferometerConfiguration.setEnabled(ctx.isPeriodEditable());
+            this.jComboBoxInstrument.setEnabled(ctx.isInstrumentEditable());
+
+            // Configuration(s):
+            this.jListInstrumentConfigurations.setEnabled(ctx.isConfigurationsEditable());
+
+            // Constraints:
+            this.jCheckBoxNightLimit.setEnabled(ctx.isNightEditable());
+            this.jDateSpinner.setEnabled(ctx.isDateEditable());
+            this.jFieldMinElev.setEnabled(ctx.isMinElevationEditable());
+
+        } else {
+            // reset GUI:
+
+            // Main settings:
+            this.jComboBoxInterferometer.setEnabled(true);
+            this.jComboBoxInterferometerConfiguration.setEnabled(true);
+            this.jComboBoxInstrument.setEnabled(true);
+
+            // Configuration(s):
+            this.jListInstrumentConfigurations.setEnabled(true);
+
+            // Constraints:
+            this.jCheckBoxNightLimit.setEnabled(true);
+            this.jDateSpinner.setEnabled(true);
+            this.jFieldMinElev.setEnabled(true);
         }
 
-        // TODO: add tooltip to see (total length ... estimation ...)
+        // TARGETS:
+        final boolean targetEditable = isTargetEditable();
 
-        // TODO: visibility rules ??
-
-        // single observation results:
-        this.jComboBoxPops.setModel(new DefaultComboBoxModel(orderedPops));
-        this.jComboBoxPops.setSelectedItem(POPS_AUTO);
-      }
+        this.starSearchField.setEnabled(targetEditable);
+        this.jListTargets.setEnabled(targetEditable);
+        this.jButtonTargetEditor.setEnabled(targetEditable);
+        this.jButtonDeleteTarget.setEnabled(targetEditable);
     }
-  }
 
-  /**
-   * Reset status panel
-   */
-  private void resetStatus() {
-    this.updateStatus(null);
-  }
-
-  /**
-   * Update status panel
-   * @param warningContainer warning container or null to reset content
-   */
-  private void updateStatus(final WarningContainer warningContainer) {
-    if (warningContainer == null || !warningContainer.hasWarningMessages()) {
-      // reset
-      if (this.jLabelStatus.getIcon() != null) {
-        this.jLabelStatus.setIcon(null);
-        this.jLabelStatus.setText("Ok");
-        this.jLabelStatus.setToolTipText(null);
-      }
-    } else {
-      this.jLabelStatus.setIcon(this.warningIcon);
-      this.jLabelStatus.setText("Warning");
-
-      final StringBuilder sb = new StringBuilder(256);
-      sb.append("<html>");
-      for (String msg : warningContainer.getWarningMessages()) {
-        sb.append(msg).append("<br>");
-
-        // add warning to the warning log:
-        _warningLogger.info(StringUtils.removeTags(msg));
-      }
-      sb.append("</html>");
-      this.jLabelStatus.setToolTipText(sb.toString());
+    /**
+     * @return true if the pops are editable
+     */
+    private boolean isPopsEditable() {
+        return (getObservationContext() != null) ? getObservationContext().isPopsEditable() : true;
     }
-  }
+
+    /**
+     * @return true if the target(s) is editable
+     */
+    private boolean isTargetEditable() {
+        return (getObservationContext() != null) ? getObservationContext().isTargetsEditable() : true;
+    }
+
+    /**
+     * Update the current observation (via the ObservationManager) with state of UI widgets
+     * ONLY if the automatic update flag is enabled.
+     *
+     * If the observation changes, it updates the event's changed flag (MAIN | UV | NONE)
+     * to fire an observation refresh event.
+     *
+     * @param event update event
+     */
+    private void onUpdateObservation(final UpdateObservationEvent event) {
+        // check if the automatic update flag is enabled :
+        if (this.doAutoUpdateObservation) {
+            if (DEBUG_UPDATE_EVENT) {
+                logger.warn("UPDATE", new Throwable());
+            }
+
+            boolean changed = false;
+
+            // observation :
+            changed |= om.setInterferometerConfigurationName((String) this.jComboBoxInterferometerConfiguration.getSelectedItem());
+            changed |= om.setInstrumentConfigurationName((String) this.jComboBoxInstrument.getSelectedItem());
+
+            changed |= om.setInstrumentConfigurationStations(getInstrumentConfigurations());
+
+            changed |= om.setInstrumentConfigurationPoPs(this.jTextPoPs.getText());
+
+            // constraints :
+            changed |= om.setWhen((Date) this.jDateSpinner.getModel().getValue());
+            changed |= om.setMinElevation(((Number) this.jFieldMinElev.getValue()).doubleValue());
+            changed |= om.setNightRestriction(this.jCheckBoxNightLimit.isSelected());
+
+            if (this.jCheckBoxWind.isSelected()) {
+                changed |= om.setWindAzimuth(Double.valueOf(this.windWidget.getValue()));
+            } else {
+                changed |= om.setWindAzimuth(null);
+            }
+
+            if (changed) {
+                // update change flag to make the ObservationManager fire an observation refresh event later
+                event.setChanged(UpdateObservationEvent.ChangeType.MAIN);
+            }
+        }
+    }
+
+    /**
+     * Handle the given event on the given observation.
+     * Refresh the UI component according to the loaded observation settings
+     *
+     * @param event event
+     */
+    @Override
+    public void onProcess(final ObservationEvent event) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("event [{}] process IN", event.getType());
+        }
+        switch (event.getType()) {
+            case LOADED:
+                this.onLoadObservation(event.getObservation());
+                break;
+            case TARGET_CHANGED:
+                this.updateListTargets();
+                break;
+            case DO_UPDATE:
+                if (event instanceof UpdateObservationEvent) {
+                    this.onUpdateObservation((UpdateObservationEvent) event);
+                }
+                break;
+            case REFRESH:
+                this.resetStatus();
+                break;
+            case REFRESH_UV:
+                this.resetStatus();
+                break;
+            case OBSERVABILITY_DONE:
+                if (event instanceof ObservabilityEvent) {
+                    this.updateObservabilityData(((ObservabilityEvent) event).getObservabilityData());
+                }
+                break;
+            case WARNINGS_READY:
+                if (event instanceof WarningContainerEvent) {
+                    this.updateStatus(((WarningContainerEvent) event).getWarningContainer());
+                }
+                break;
+            default:
+        }
+        if (logger.isDebugEnabled()) {
+            logger.debug("event [{}] process OUT", event.getType());
+        }
+    }
+
+    /**
+     * Update the observability Data
+     * and update star data (HA min / max)
+     * @param obsDataList observability data
+     */
+    private void updateObservabilityData(final List<ObservabilityData> obsDataList) {
+        if (obsDataList.size() == 1) {
+            final List<PopCombination> bestPopList = obsDataList.get(0).getBestPopList();
+            final List<PopCombination> betterPopList = obsDataList.get(0).getBetterPopList();
+
+            if (bestPopList != null && betterPopList != null) {
+                final Vector<String> orderedPops = new Vector<String>(bestPopList.size() + betterPopList.size() + 1);
+                orderedPops.add(POPS_MANUAL);
+                orderedPops.add(POPS_AUTO);
+
+                for (PopCombination p : bestPopList) {
+                    orderedPops.add(p.toString());
+                }
+                for (PopCombination p : betterPopList) {
+                    orderedPops.add(p.toString());
+                }
+
+                // TODO: add tooltip to see (total length ... estimation ...)
+
+                // TODO: visibility rules ??
+
+                // single observation results:
+                this.jComboBoxPops.setModel(new DefaultComboBoxModel(orderedPops));
+                this.jComboBoxPops.setSelectedItem(POPS_AUTO);
+            }
+        }
+    }
+
+    /**
+     * Reset status panel
+     */
+    private void resetStatus() {
+        this.updateStatus(null);
+    }
+
+    /**
+     * Update status panel
+     * @param warningContainer warning container or null to reset content
+     */
+    private void updateStatus(final WarningContainer warningContainer) {
+        if (warningContainer == null || !warningContainer.hasWarningMessages()) {
+            // reset
+            if (this.jLabelStatus.getIcon() != null) {
+                this.jLabelStatus.setIcon(null);
+                this.jLabelStatus.setText("Ok");
+                this.jLabelStatus.setToolTipText(null);
+            }
+        } else {
+            this.jLabelStatus.setIcon(this.warningIcon);
+            this.jLabelStatus.setText("Warning");
+
+            final StringBuilder sb = new StringBuilder(256);
+            sb.append("<html>");
+            for (String msg : warningContainer.getWarningMessages()) {
+                sb.append(msg).append("<br>");
+
+                // add warning to the warning log:
+                _warningLogger.info(StringUtils.removeTags(msg));
+            }
+            sb.append("</html>");
+            this.jLabelStatus.setToolTipText(sb.toString());
+        }
+    }
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JButton jButtonDeleteTarget;
   private javax.swing.JButton jButtonSkyCalc;
@@ -1735,165 +1736,165 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
   private fr.jmmc.jmal.star.EditableStarResolverWidget starSearchField;
   // End of variables declaration//GEN-END:variables
 
-  /**
-   * Create the custom JList to support tooltips for targets
-   * @return JList
-   */
-  private static JList createTargetList() {
-    final JList list = new JList() {
-      /** default serial UID for Serializable interface */
-      private static final long serialVersionUID = 1;
+    /**
+     * Create the custom JList to support tooltips for targets
+     * @return JList
+     */
+    private static JList createTargetList() {
+        final JList list = new JList() {
+            /** default serial UID for Serializable interface */
+            private static final long serialVersionUID = 1;
 
-      /** This method is called as the cursor moves within the list */
-      @Override
-      public String getToolTipText(final MouseEvent evt) {
-        logger.trace("getToolTipText: {}", evt);
+            /** This method is called as the cursor moves within the list */
+            @Override
+            public String getToolTipText(final MouseEvent evt) {
+                logger.trace("getToolTipText: {}", evt);
 
-        // Get item index :
-        final int index = locationToIndex(evt.getPoint());
-        if (index != -1) {
-          // Get target :
-          final Target target = (Target) getModel().getElementAt(index);
-          if (target != null) {
-            // Return the tool tip text :
-            return target.toHtml();
-          }
-        }
-        return getToolTipText();
-      }
-    };
+                // Get item index :
+                final int index = locationToIndex(evt.getPoint());
+                if (index != -1) {
+                    // Get target :
+                    final Target target = (Target) getModel().getElementAt(index);
+                    if (target != null) {
+                        // Return the tool tip text :
+                        return target.toHtml();
+                    }
+                }
+                return getToolTipText();
+            }
+        };
 
-    final Target defTarget = new Target();
-    defTarget.setName("HIP 1234");
+        final Target defTarget = new Target();
+        defTarget.setName("HIP 1234");
 
-    // Useful to define the empty list width and height :
-    list.setPrototypeCellValue(defTarget);
+        // Useful to define the empty list width and height :
+        list.setPrototypeCellValue(defTarget);
 
-    return list;
-  }
-
-  /**
-   * Check if the given list selection is empty, then restore the last selected item
-   * or select the first item (if exist)
-   * @param list JList to use
-   * @param lastValue last selected value for the given list
-   * @param <K> type of every list item
-   */
-  @SuppressWarnings("unchecked")
-  private static <K> void checkListSelection(final JList list, final K lastValue) {
-    // ensure at least one item is selected :
-    if (list.getSelectionModel().isSelectionEmpty()) {
-      // previously an item was selected - select it back (if possible) :
-      K selection = lastValue;
-
-      final GenericListModel<K> model = (GenericListModel<K>) list.getModel();
-
-      if (selection == null || !model.contains(selection)) {
-        // Select first item (if exist) :
-        selection = (model.isEmpty()) ? null : model.get(0);
-      }
-      if (selection != null) {
-        logger.debug("list selection empty - select: {}", selection);
-
-        list.setSelectedValue(selection, true);
-      } else {
-        logger.debug("list selection empty - nothing to select !");
-      }
+        return list;
     }
-  }
 
-  /**
-   * Enable / Disable the automatic update of the observation when any swing component changes.
-   * Return its previous value.
-   *
-   * Typical use is as following :
-   * // disable the automatic update observation :
-   * final boolean prevAutoUpdateObservation = this.setAutoUpdateObservation(false);
-   * try {
-   *   // operations ...
-   *
-   * } finally {
-   *   // restore the automatic update observation :
-   *   this.setAutoUpdateObservation(prevAutoUpdateObservation);
-   * }
-   *
-   * @param value new value
-   * @return previous value
-   */
-  private boolean setAutoUpdateObservation(final boolean value) {
-    // first backup the state of the automatic update observation :
-    final boolean previous = this.doAutoUpdateObservation;
+    /**
+     * Check if the given list selection is empty, then restore the last selected item
+     * or select the first item (if exist)
+     * @param list JList to use
+     * @param lastValue last selected value for the given list
+     * @param <K> type of every list item
+     */
+    @SuppressWarnings("unchecked")
+    private static <K> void checkListSelection(final JList list, final K lastValue) {
+        // ensure at least one item is selected :
+        if (list.getSelectionModel().isSelectionEmpty()) {
+            // previously an item was selected - select it back (if possible) :
+            K selection = lastValue;
 
-    // then change its state :
-    this.doAutoUpdateObservation = value;
+            final GenericListModel<K> model = (GenericListModel<K>) list.getModel();
 
-    // return previous state :
-    return previous;
-  }
+            if (selection == null || !model.contains(selection)) {
+                // Select first item (if exist) :
+                selection = (model.isEmpty()) ? null : model.get(0);
+            }
+            if (selection != null) {
+                logger.debug("list selection empty - select: {}", selection);
 
-  /**
-   * Enable / Disable the automatic automatic selection check of the instrument configuration.
-   * Return its previous value.
-   *
-   * Typical use is as following :
-   * // disable the automatic selection check of the instrument configuration :
-   * final boolean prevAutoCheckConfigurations = this.setAutoCheckConfigurations(false);
-   * try {
-   *   // operations ...
-   *
-   * } finally {
-   *   // restore the automatic selection check of the instrument configuration :
-   *   this.setAutoCheckConfigurations(prevAutoCheckConfiguration);
-   * }
-   *
-   * @param value new value
-   * @return previous value
-   */
-  private boolean setAutoCheckConfigurations(final boolean value) {
-    // first backup the state of the automatic selection check :
-    final boolean previous = this.doAutoCheckConfigurations;
+                list.setSelectedValue(selection, true);
+            } else {
+                logger.debug("list selection empty - nothing to select !");
+            }
+        }
+    }
 
-    // then change its state :
-    this.doAutoCheckConfigurations = value;
+    /**
+     * Enable / Disable the automatic update of the observation when any swing component changes.
+     * Return its previous value.
+     *
+     * Typical use is as following :
+     * // disable the automatic update observation :
+     * final boolean prevAutoUpdateObservation = this.setAutoUpdateObservation(false);
+     * try {
+     *   // operations ...
+     *
+     * } finally {
+     *   // restore the automatic update observation :
+     *   this.setAutoUpdateObservation(prevAutoUpdateObservation);
+     * }
+     *
+     * @param value new value
+     * @return previous value
+     */
+    private boolean setAutoUpdateObservation(final boolean value) {
+        // first backup the state of the automatic update observation :
+        final boolean previous = this.doAutoUpdateObservation;
 
-    // return previous state :
-    return previous;
-  }
+        // then change its state :
+        this.doAutoUpdateObservation = value;
 
-  /**
-   * Enable / Disable the automatic automatic selection check of the target list.
-   * Return its previous value.
-   *
-   * Typical use is as following :
-   * // disable the automatic selection check of the target list :
-   * final boolean prevAutoCheckTargets = this.setAutoCheckTargets(false);
-   * try {
-   *   // operations ...
-   *
-   * } finally {
-   *   // restore the automatic selection check of the target list :
-   *   this.setAutoCheckTargets(prevAutoCheckTargets);
-   * }
-   *
-   * @param value new value
-   * @return previous value
-   */
-  private boolean setAutoCheckTargets(final boolean value) {
-    // first backup the state of the automatic selection check :
-    final boolean previous = this.doAutoCheckTargets;
+        // return previous state :
+        return previous;
+    }
 
-    // then change its state :
-    this.doAutoCheckTargets = value;
+    /**
+     * Enable / Disable the automatic automatic selection check of the instrument configuration.
+     * Return its previous value.
+     *
+     * Typical use is as following :
+     * // disable the automatic selection check of the instrument configuration :
+     * final boolean prevAutoCheckConfigurations = this.setAutoCheckConfigurations(false);
+     * try {
+     *   // operations ...
+     *
+     * } finally {
+     *   // restore the automatic selection check of the instrument configuration :
+     *   this.setAutoCheckConfigurations(prevAutoCheckConfiguration);
+     * }
+     *
+     * @param value new value
+     * @return previous value
+     */
+    private boolean setAutoCheckConfigurations(final boolean value) {
+        // first backup the state of the automatic selection check :
+        final boolean previous = this.doAutoCheckConfigurations;
 
-    // return previous state :
-    return previous;
-  }
+        // then change its state :
+        this.doAutoCheckConfigurations = value;
 
-  /**
-   * Return the optional observation context of the main observation
-   * @return observation context or null
-   */
-  private ObservationContext getObservationContext() {
-    return om.getMainObservation().getContext();
-  }
+        // return previous state :
+        return previous;
+    }
+
+    /**
+     * Enable / Disable the automatic automatic selection check of the target list.
+     * Return its previous value.
+     *
+     * Typical use is as following :
+     * // disable the automatic selection check of the target list :
+     * final boolean prevAutoCheckTargets = this.setAutoCheckTargets(false);
+     * try {
+     *   // operations ...
+     *
+     * } finally {
+     *   // restore the automatic selection check of the target list :
+     *   this.setAutoCheckTargets(prevAutoCheckTargets);
+     * }
+     *
+     * @param value new value
+     * @return previous value
+     */
+    private boolean setAutoCheckTargets(final boolean value) {
+        // first backup the state of the automatic selection check :
+        final boolean previous = this.doAutoCheckTargets;
+
+        // then change its state :
+        this.doAutoCheckTargets = value;
+
+        // return previous state :
+        return previous;
+    }
+
+    /**
+     * Return the optional observation context of the main observation
+     * @return observation context or null
+     */
+    private ObservationContext getObservationContext() {
+        return om.getMainObservation().getContext();
+    }
 }
