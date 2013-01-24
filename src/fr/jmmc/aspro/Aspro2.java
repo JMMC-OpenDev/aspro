@@ -22,6 +22,7 @@ import fr.jmmc.aspro.model.ConfigurationManager;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.jmcs.App;
 import fr.jmmc.jmcs.Bootstrapper;
+import fr.jmmc.jmcs.data.ApplicationDescription;
 import fr.jmmc.jmcs.gui.component.ComponentResizeAdapter;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.gui.component.MessagePane.ConfirmSaveChanges;
@@ -217,7 +218,7 @@ public final class Aspro2 extends App {
     private void prepareFrame(final JFrame frame) {
         logger.debug("prepareFrame : enter");
 
-        frame.setTitle(App.getSharedApplicationDataModel().getProgramName());
+        frame.setTitle(ApplicationDescription.getInstance().getProgramName());
 
         // handle frame icon
         final Image jmmcFavImage = ResourceImage.JMMC_FAVICON.icon().getImage();
