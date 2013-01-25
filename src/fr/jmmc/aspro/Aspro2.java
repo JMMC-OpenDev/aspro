@@ -82,8 +82,14 @@ public final class Aspro2 extends App {
         super(args);
     }
 
+    /**
+     * Initialize services (main thread)
+     * @throws IllegalStateException if the configuration files are not found or IO failure
+     * @throws IllegalArgumentException if the load configuration failed
+     */
     @Override
     protected void initServices() throws IllegalStateException, IllegalArgumentException {
+        logger.debug("Aspro2.initServices: handler enter");
 
         // Preload configurations :
         ConfigurationManager.getInstance();
@@ -101,31 +107,25 @@ public final class Aspro2 extends App {
 
         // Initialize warning log:
         LoggingService.getInstance().addLogMapper("Warning messages", AsproConstants.ASPRO_WARNING_LOG, "WARNINGLOG");
+
+        logger.debug("Aspro2.initServices: handler exit");
     }
 
+    /**
+     * Setup GUI (Swing EDT)
+     * @throws RuntimeException 
+     */
     @Override
     protected void setupGui() throws RuntimeException {
-        logger.debug("AsproGui.init() handler : enter");
+        logger.debug("Aspro2.setupGui: handler enter");
 
-        this.initServices();
+        prepareFrame(getFrame());
 
-        // Using invokeAndWait to be in sync with this thread :
-        // note: invokeAndWaitEDT throws an IllegalStateException if any exception occurs
-        SwingUtils.invokeAndWaitEDT(new Runnable() {
-            /**
-             * Initializes the swing components with their actions in EDT
-             */
-            @Override
-            public void run() {
-                prepareFrame(getFrame());
+        // Create a new observation and update the GUI :
+        // even if opening a file in case the file can not be loaded:
+        ObservationManager.getInstance().reset();
 
-                // Create a new observation and update the GUI :
-                // even if opening a file in case the file can not be loaded:
-                ObservationManager.getInstance().reset();
-            }
-        });
-
-        logger.debug("AsproGui.init() handler : exit");
+        logger.debug("Aspro2.setupGui: handler exit");
     }
 
     /**
@@ -133,15 +133,13 @@ public final class Aspro2 extends App {
      */
     @Override
     protected void execute() {
-        logger.debug("AsproGui.execute() handler called.");
-
         SwingUtils.invokeLaterEDT(new Runnable() {
             /**
              * Show the application frame using EDT
              */
             @Override
             public void run() {
-                logger.debug("AsproGui.ready : handler called.");
+                logger.debug("Aspro2.execute: handler called.");
 
                 getFrame().setVisible(true);
             }
@@ -156,7 +154,7 @@ public final class Aspro2 extends App {
      */
     @Override
     public boolean canBeTerminatedNow() {
-        logger.debug("AsproGui.finish() handler called.");
+        logger.debug("Aspro2.canBeTerminatedNow: handler called.");
 
         // Ask the user if he wants to save modifications
         final ConfirmSaveChanges result = MessagePane.showConfirmSaveChangesBeforeClosing();
