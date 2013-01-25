@@ -11,12 +11,14 @@ import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.aspro.model.oi.UserModel;
+import fr.jmmc.aspro.service.UserModelData;
 import fr.jmmc.aspro.service.UserModelService;
 import fr.jmmc.jmal.model.ModelManager;
 import fr.jmmc.jmal.model.gui.ModelParameterTableModel;
 import fr.jmmc.jmal.model.gui.ModelParameterTableModel.EditMode;
 import fr.jmmc.jmal.model.gui.ModelParameterTableModel.Mode;
 import fr.jmmc.jmal.model.targetmodel.Model;
+import fr.jmmc.jmcs.gui.component.Disposable;
 import fr.jmmc.jmcs.gui.component.FileChooser;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.gui.component.NumericJTable;
@@ -37,6 +39,7 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
+import javax.swing.Timer;
 import javax.swing.border.Border;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -54,7 +57,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author bourgesl
  */
-public final class TargetModelForm extends javax.swing.JPanel implements ActionListener, TreeSelectionListener, ListSelectionListener {
+public final class TargetModelForm extends javax.swing.JPanel implements ActionListener, TreeSelectionListener, ListSelectionListener, Disposable {
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
@@ -62,10 +65,10 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
   private static final Logger logger = LoggerFactory.getLogger(TargetModelForm.class.getName());
   /** OIFits MimeType */
   private final static MimeType mimeType = MimeType.FITS_IMAGE;
+  /** default image refresh period = 3 seconds */
+  private static final int REFRESH_PERIOD = 1 * 1000;
 
   /* members */
-  /** fits image panel */
-  private FitsImagePanel fitsImagePanel = null;
   /** list of edited targets (clone) */
   private final List<Target> editTargets;
   /** edited target user informations (clone) */
@@ -74,6 +77,14 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
   private Target currentTarget = null;
   /** current model type to detect type changes to update the model description */
   private String currentModelType = null;
+  /** fits image panel */
+  private FitsImagePanel fitsImagePanel = null;
+  /** list of user model data of the selected target */
+  private List<UserModelData> targetModelDataList = null;
+  /** image refresh Swing timer */
+  private final Timer timerImageRefresh;
+  /** current image index */
+  private int imageIndex = 1;
 
   /**
    * Creates new form TargetModelForm (used by NetBeans editor only)
@@ -109,6 +120,17 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
     this.jRadioButtonXY.setSelected(preferXyMode);
 
     postInit();
+
+    // Create the timeline refresh timer:
+    this.timerImageRefresh = new Timer(REFRESH_PERIOD, new ActionListener() {
+      /**
+       * Invoked when the timer action occurs.
+       */
+      @Override
+      public void actionPerformed(final ActionEvent ae) {
+        updateModelImage();
+      }
+    });
   }
 
   /**
@@ -153,6 +175,22 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
   void initialize(final String targetName) {
     this.generateTree();
     this.selectTarget(Target.getTarget(targetName, this.editTargets));
+  }
+
+  void stopForm() {
+    this.enableImageRefreshTimer(false);
+  }
+
+  /**
+   * Free any resource or reference to this instance
+   */
+  public void dispose() {
+    if (this.fitsImagePanel != null) {
+      this.fitsImagePanel.dispose();
+    }
+
+    // disable image refresh timer:
+    enableImageRefreshTimer(false);
   }
 
   /* Tree related methods */
@@ -237,7 +275,6 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
     if (currentNode != null) {
       // Use invokeLater to selection change issues with editors :
       SwingUtils.invokeLaterEDT(new Runnable() {
-
         /**
          * Update tree selection
          */
@@ -288,6 +325,8 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
       this.jRadioButtonUserModel.setSelected(true);
     }
 
+    boolean enableTimer = false;
+
     // User model:
     final UserModel userModel = target.getUserModel();
     if (userModel != null) {
@@ -298,13 +337,23 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
       }
       this.jTextFieldFileReference.setText(userModel.getFile());
 
-      if (!isAnalytical && userModel.getFitsImage() != null) {
+      if (!isAnalytical && userModel.isModelDataReady()) {
         // update fits Image:
         if (fitsImagePanel == null) {
           fitsImagePanel = new FitsImagePanel(false, true); // do not show id but options
         }
-        // TODO: call FitsImagePanel.dispose()
-        fitsImagePanel.setFitsImage(userModel.getFitsImage());
+
+        final List<UserModelData> modelDataList = userModel.getModelDataList();
+
+        fitsImagePanel.setFitsImage(modelDataList.get(0).getFitsImage());
+
+        if (modelDataList.size() > 1) {
+          // enable image refresh timer:
+          enableTimer = true;
+
+          // cycle on images:
+          this.targetModelDataList = modelDataList;
+        }
 
         this.jPanelImage.add(fitsImagePanel);
       }
@@ -313,9 +362,17 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
       this.jRadioButtonInvalid.setSelected(true);
       this.jTextFieldFileReference.setText(null);
 
-      // remove any FitsImage:
+      // reset the FitsImage panel:
+      fitsImagePanel.setFitsImage(null);
+
+      this.targetModelDataList = null;
+
+      // remove the FitsImage panel:
       this.jPanelImage.removeAll();
     }
+
+    // anyway enable or disable timer:
+    enableImageRefreshTimer(enableTimer);
 
     // Analytical models:
     // reset text field name :
@@ -1151,7 +1208,6 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
    */
   private static JTable createJTable() {
     return new NumericJTable() {
-
       /** default serial UID for Serializable interface */
       private static final long serialVersionUID = 1;
 
@@ -1212,7 +1268,9 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
       UserModelService.prepareUserModel(userModel);
 
       // update checksum before validation:
-      userModel.setChecksum(userModel.getFitsImage().getChecksum());
+      // TODO: only possible with one Fits image or one Fits cube (single HDU):
+      // TODO: fix checksum for multiple fits HDU:
+      userModel.setChecksum(userModel.getModelDataList().get(0).getFitsImage().getChecksum());
 
       // validate image against the main observation:
       ObservationManager.getInstance().validateUserModel(userModel);
@@ -1229,6 +1287,51 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
     } finally {
       // anyway, update the valid flag:
       userModel.setFileValid(valid);
+    }
+  }
+
+  /**
+   * Start/Stop the internal timeline Refresh timer
+   * @param enable true to enable it, false otherwise
+   */
+  private void enableImageRefreshTimer(final boolean enable) {
+    if (enable) {
+      if (!this.timerImageRefresh.isRunning()) {
+        logger.debug("Starting timer: {}", this.timerImageRefresh);
+
+        // start from 1:
+        this.imageIndex = 1;
+
+        this.timerImageRefresh.start();
+      }
+    } else {
+      if (this.timerImageRefresh.isRunning()) {
+        logger.debug("Stopping timer: {}", this.timerImageRefresh);
+
+        // reset:
+        this.imageIndex = -1;
+
+        this.timerImageRefresh.stop();
+      }
+    }
+  }
+
+  private void updateModelImage() {
+    logger.info("updateModelImage: imageIndex = {}", imageIndex);
+
+    final List<UserModelData> modelDataList = this.targetModelDataList;
+
+    if (modelDataList != null) {
+      final int size = modelDataList.size();
+
+      if (this.imageIndex < 0 || this.imageIndex >= size) {
+        this.imageIndex = 0;
+      }
+
+      // use next image:
+      fitsImagePanel.setFitsImage(modelDataList.get(this.imageIndex).getFitsImage());
+
+      this.imageIndex++;
     }
   }
 }
