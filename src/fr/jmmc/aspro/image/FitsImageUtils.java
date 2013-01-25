@@ -164,11 +164,13 @@ public final class FitsImageUtils {
    * This methods updates dataMin/Max of each FitsImage
    *
    * @param absFilePath absolute File path on file system (not URL)
+   * @return FitsImageFile structure on success
+   * 
    * @throws FitsException if any FITS error occured
    * @throws IOException IO failure
-   * @return FitsImageFile structure on success
+   * @throws IllegalArgumentException if unsupported unit or unit conversion is not allowed
    */
-  public static FitsImageFile load(final String absFilePath) throws FitsException, IOException {
+  public static FitsImageFile load(final String absFilePath) throws FitsException, IOException, IllegalArgumentException {
     final FitsImageFile imgFitsFile = FitsImageLoader.load(absFilePath);
 
     for (FitsImage fitsImage : imgFitsFile.getFitsImages()) {
