@@ -3,28 +3,29 @@
  ******************************************************************************/
 package fr.jmmc.aspro.gui;
 
-import fr.jmmc.jmcs.gui.component.ComponentResizeAdapter;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.jmcs.App;
+import fr.jmmc.jmcs.gui.component.ComponentResizeAdapter;
+import fr.jmmc.jmcs.gui.component.Disposable;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.util.ArrayList;
 import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This dialog contains tabs to edit both target properties and models
  * @author bourgesl
  */
-public final class TargetEditorDialog extends javax.swing.JPanel {
+public final class TargetEditorDialog extends javax.swing.JPanel implements Disposable {
 
   /** default serial UID for Serializable interface */
   private static final long serialVersionUID = 1;
@@ -68,6 +69,7 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
     boolean result = false;
 
     JDialog dialog = null;
+    TargetEditorDialog form = null;
 
     try {
       // update flag to indicate that the editor is enabled :
@@ -82,7 +84,7 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
       final List<Target> targets = cloned.getTargets();
       final TargetUserInformations targetUserInfos = cloned.getOrCreateTargetUserInfos();
 
-      final TargetEditorDialog form = new TargetEditorDialog(targets, targetUserInfos, selectedTab);
+      form = new TargetEditorDialog(targets, targetUserInfos, selectedTab);
 
       // initialise the editor and select the target :
       form.initialize(targetName);
@@ -127,6 +129,11 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
       // update flag to indicate that the editor is disabled :
       targetEditorActive = false;
 
+      if (form != null) {
+        logger.debug("dispose TargetEditorDialog ...");
+
+        form.dispose();
+      }
       if (dialog != null) {
         logger.debug("dispose Model Editor ...");
 
@@ -173,7 +180,6 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
 
     // Register a change listener for the tabbed panel :
     this.jTabbedPane.addChangeListener(new ChangeListener() {
-
       /**
        * This method is called whenever the selected tab changes
        * @param evt change event
@@ -188,6 +194,7 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
           // and select the target :
           targetModelForm.initialize(targetForm.getCurrentTarget().getName());
         } else if (selected == targetForm) {
+          targetModelForm.stopForm();
           // select the target :
           targetForm.selectTarget(targetModelForm.getCurrentTarget());
         }
@@ -206,6 +213,13 @@ public final class TargetEditorDialog extends javax.swing.JPanel {
     this.targetModelForm.initialize(targetName);
 
     this.targetForm.initialize(targetName);
+  }
+
+  /**
+   * Free any resource or reference to this instance
+   */
+  public void dispose() {
+    this.targetModelForm.dispose();
   }
 
   /** This method is called from within the constructor to
