@@ -210,6 +210,8 @@ public final class UVCoverageService {
     final double cosDec = Math.cos(precDEC);
     final double sinDec = Math.sin(precDEC);
 
+    final double invLambda = 1d / this.lambda;
+
     final int sizeBL = this.baseLines.size();
     final List<UVBaseLineData> targetUVRiseSet = new ArrayList<UVBaseLineData>(sizeBL);
 
@@ -242,8 +244,8 @@ public final class UVCoverageService {
         // wavelength correction :
 
         // Spatial frequency (xLambda) :
-        u[j] /= this.lambda;
-        v[j] /= this.lambda;
+        u[j] *= invLambda;
+        v[j] *= invLambda;
 
         j++;
       }
@@ -348,6 +350,9 @@ public final class UVCoverageService {
       final double cosDec = Math.cos(precDEC);
       final double sinDec = Math.sin(precDEC);
 
+      final double invLambdaMin = 1d / this.lambdaMin;
+      final double invLambdaMax = 1d / this.lambdaMax;
+
       final int sizeBL = this.baseLines.size();
       final List<UVRangeBaseLineData> targetUVObservability = new ArrayList<UVRangeBaseLineData>(sizeBL);
 
@@ -388,11 +393,11 @@ public final class UVCoverageService {
           // wavelength correction :
 
           // Spatial frequency (rad-1) :
-          uWMin[j] = u[j] / this.lambdaMin;
-          vWMin[j] = v[j] / this.lambdaMin;
+          uWMin[j] = u[j] * invLambdaMin;
+          vWMin[j] = v[j] * invLambdaMin;
 
-          uWMax[j] = u[j] / this.lambdaMax;
-          vWMax[j] = v[j] / this.lambdaMax;
+          uWMax[j] = u[j] * invLambdaMax;
+          vWMax[j] = v[j] * invLambdaMax;
         }
 
         uvData.setNPoints(nPoints);
