@@ -161,44 +161,32 @@ public class UserModel
     this.fileValid = valid;
   }
   
-  /** Cached FFT ready fits image corresponding to the file reference (read only) */
+  /** Cached list of prepared model data corresponding to the file reference (read only) */
   @javax.xml.bind.annotation.XmlTransient
-  private fr.jmmc.oitools.image.FitsImage fitsImage = null;
-  
-  /**
-   * Return the Cached FFT ready fits image corresponding to the file reference (read only)
-   * @return Cached FFT ready fits image corresponding to the file reference (read only)
-   */
-  public fr.jmmc.oitools.image.FitsImage getFitsImage() {
-    return fitsImage;
-  }
+  private java.util.List<fr.jmmc.aspro.service.UserModelData> modelDataList = null;
 
   /**
-   * Define the Cached FFT ready fits image corresponding to the file reference (read only)
-   * @param fitsImage Cached FFT ready fits image corresponding to the file reference (read only)
+   * Return true if the Cached model data is not null nor empty
+   * @return true if the Cached model data is not null nor empty
    */
-  public void setFitsImage(final fr.jmmc.oitools.image.FitsImage fitsImage) {
-    this.fitsImage = fitsImage;
+  public boolean isModelDataReady() {
+    return modelDataList != null && !modelDataList.isEmpty();
   }
-  
-  /** Cached model data corresponding to the file reference (read only) */
-  @javax.xml.bind.annotation.XmlTransient
-  private fr.jmmc.aspro.service.UserModelData modelData = null;
 
   /**
    * Return the Cached model data corresponding to the file reference (read only)
    * @return Cached model data corresponding to the file reference (read only)
    */
-  public fr.jmmc.aspro.service.UserModelData getModelData() {
-    return modelData;
+  public java.util.List<fr.jmmc.aspro.service.UserModelData> getModelDataList() {
+    return modelDataList;
   }
 
   /**
    * Define the Cached model data corresponding to the file reference (read only)
    * @param modelData Cached model data corresponding to the file reference (read only)
    */
-  public void setModelData(fr.jmmc.aspro.service.UserModelData modelData) {
-    this.modelData = modelData;
+  public void setModelDataList(final java.util.List<fr.jmmc.aspro.service.UserModelData> modelData) {
+    this.modelDataList = modelData;
   }
   
   /**
@@ -209,7 +197,10 @@ public class UserModel
   public final Object clone() {
     final UserModel copy = (UserModel) super.clone();
 
-    // Note: fits image and modelData are shallow copies
+    // Note: modelData instances are shallow copies
+    if (copy.getModelDataList() != null) {
+      copy.setModelDataList(OIBase.copyList(copy.getModelDataList()));
+    }
 
     return copy;
   }
