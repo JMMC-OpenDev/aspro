@@ -90,6 +90,36 @@ public class ImageFitsTest {
     // display fits image:
     new PreferencesView().setVisible(true);
 
+    // Fits image with unit / lambda keywords tests:
+    if (false) {
+      String file = "/home/bourgesl/ASPRO2/fits/aspro_keywords.fits"; // BUNIT / CUNIT
+
+      try {
+        testFastMode(file, Boolean.FALSE);
+        testFastMode(file, Boolean.TRUE);
+
+      } catch (Exception e) {
+        logger.error("An exception occured while working on file: " + file, e);
+      }
+      return;
+    }
+
+    // Fits cube tests:
+    if (true) {
+      //String file = "/home/bourgesl/ASPRO2/fits/cube/chromatic_cube_aspro_jk.fits"; // 7 images but no WL keywords
+//      String file = "/home/bourgesl/ASPRO2/fits/cube/chromatic_cube_aspro_jk_with_Wlens.fits"; // 7 images with WL keywords      
+      
+      String file = "/home/bourgesl/ASPRO2/fits/cube/SPHERE_GEN_OBS021_0005.fits.gz";
+
+      try {
+        testFastMode(file, Boolean.FALSE);
+
+      } catch (Exception e) {
+        logger.error("An exception occured while working on file: " + file, e);
+      }
+      return;
+    }
+
     // fast mode tests:
 
     if (true) {
@@ -143,7 +173,7 @@ public class ImageFitsTest {
 
         UserModelService.prepareUserModel(model);
 
-        FitsImage fitsImage = model.getFitsImage();
+        FitsImage fitsImage = model.getModelDataList().get(0).getFitsImage();
 
         logger.info("Prepared FitsImage: " + fitsImage.toString(false));
 
@@ -168,7 +198,7 @@ public class ImageFitsTest {
             final UVMapData uvMap = UserModelService.computeUVMap(fitsImage, uvRect, ImageMode.AMP, imageSize,
                     ColorModels.getDefaultColorModel(), colorScale);
 
-            final float[][] visData = uvMap.getVisData();
+            final float[][] visData = uvMap.getData();
             final float[][] data = FFTUtils.convert(visData.length, visData, ImageMode.AMP, visData.length - 2);
 
             showImage("UVMapData-" + insName + "-" + imageSize, data);
@@ -189,7 +219,7 @@ public class ImageFitsTest {
             final UVMapData uvMap = UserModelService.computeUVMap(fitsImage, uvRect, ImageMode.AMP, imageSize,
                     ColorModels.getDefaultColorModel(), colorScale);
 
-            final float[][] visData = uvMap.getVisData();
+            final float[][] visData = uvMap.getData();
             final float[][] data = FFTUtils.convert(visData.length, visData, ImageMode.AMP, visData.length - 2);
 
             showImage("UVMapData-" + insName + "-" + imageSize, data);
@@ -210,7 +240,7 @@ public class ImageFitsTest {
             final UVMapData uvMap = UserModelService.computeUVMap(fitsImage, uvRect, ImageMode.AMP, imageSize,
                     ColorModels.getDefaultColorModel(), colorScale);
 
-            final float[][] visData = uvMap.getVisData();
+            final float[][] visData = uvMap.getData();
             final float[][] data = FFTUtils.convert(visData.length, visData, ImageMode.AMP, visData.length - 2);
 
             showImage("UVMapData-" + insName + "-" + imageSize, data);
@@ -270,7 +300,7 @@ public class ImageFitsTest {
 
               UserModelService.prepareUserModel(model);
 
-              FitsImage fitsImage = model.getFitsImage();
+              FitsImage fitsImage = model.getModelDataList().get(0).getFitsImage();
 
               logger.info("Prepared FitsImage: " + fitsImage.toString(false));
 
@@ -322,7 +352,7 @@ public class ImageFitsTest {
 
     UserModelService.prepareUserModel(model);
 
-    FitsImage fitsImage = model.getFitsImage();
+    FitsImage fitsImage = model.getModelDataList().get(0).getFitsImage();
 
     logger.info("Prepared FitsImage[" + fastMode + "]: " + fitsImage.toString(false));
 
@@ -332,7 +362,7 @@ public class ImageFitsTest {
      * VLTI AMBER
      */
     final String insName = "AMBER";
-    final double uvMax = 300d / 2e-6d;
+    final double uvMax = 200d / 2e-6d;
     final int imageSize = 1024;
 
     final Rectangle2D.Double uvRect = new Rectangle2D.Double();
@@ -341,7 +371,7 @@ public class ImageFitsTest {
     final UVMapData uvMap = UserModelService.computeUVMap(fitsImage, uvRect, ImageMode.AMP, imageSize,
             ColorModels.getDefaultColorModel(), ColorScale.LOGARITHMIC);
 
-    final float[][] visData = uvMap.getVisData();
+    final float[][] visData = uvMap.getData();
     final float[][] data = FFTUtils.convert(visData.length, visData, ImageMode.AMP, visData.length - 2);
 
     showImage("UVMapData-" + fastMode + "-" + insName + "-" + imageSize, data);
@@ -528,7 +558,7 @@ public class ImageFitsTest {
       // read all data and convert them to arrays[][] :
       array = data.getColumn(i);
       /*
-      array = data.getFlattenedColumn(i);
+       array = data.getFlattenedColumn(i);
        */
 
       sb.append("COLUMN ").append(hdu.getColumnName(i)).append(" [");
@@ -681,8 +711,8 @@ public class ImageFitsTest {
 
       /*
        * VLTI AMBER
-      For FFT size (pixels) = 32768.0
-      11:18:34.925 INFO  [main] fits.ImageFitsTest - UV plane size (pixels) = 537.68353
+       For FFT size (pixels) = 32768.0
+       11:18:34.925 INFO  [main] fits.ImageFitsTest - UV plane size (pixels) = 537.68353
        */
       if (false) {
         testFFT(inputSize, array, 8192, 134, true);
@@ -691,8 +721,8 @@ public class ImageFitsTest {
 
       /*
        * VLTI MIDI
-      14:42:31.437 INFO  [main] fits.ImageFitsTest - For FFT size (pixels) = 131072.0
-      14:42:31.437 INFO  [main] fits.ImageFitsTest - UV plane size (pixels) = 537.68353
+       14:42:31.437 INFO  [main] fits.ImageFitsTest - For FFT size (pixels) = 131072.0
+       14:42:31.437 INFO  [main] fits.ImageFitsTest - UV plane size (pixels) = 537.68353
        */
       if (false) {
         testFFT(inputSize, array, 32768, 134, true);
@@ -702,8 +732,8 @@ public class ImageFitsTest {
 
       /*
        * CHARA VEGA
-      15:03:21.094 INFO  [main] fits.ImageFitsTest - For FFT size (pixels) = 8192.0
-      15:03:21.094 INFO  [main] fits.ImageFitsTest - UV plane size (pixels) = 907.4215
+       15:03:21.094 INFO  [main] fits.ImageFitsTest - For FFT size (pixels) = 8192.0
+       15:03:21.094 INFO  [main] fits.ImageFitsTest - UV plane size (pixels) = 907.4215
        */
       if (false) {
         testFFT(inputSize, array, 2048, 228, true);
@@ -1062,25 +1092,25 @@ public class ImageFitsTest {
         }
         break;
       /*        
-      case BasicHDU.BITPIX_LONG:
-      final int[][] iArray = (int[][])array;
-      int[] iRow;
-      for (int j = 0; j < rows; j++) {
-      oRow = output[j];
-      iRow = iArray[j];
-      for (int i = 0; i < cols; i++) {
-      oRow[i] = (float)iRow[i];
-      }
-      }
-      break;
+       case BasicHDU.BITPIX_LONG:
+       final int[][] iArray = (int[][])array;
+       int[] iRow;
+       for (int j = 0; j < rows; j++) {
+       oRow = output[j];
+       iRow = iArray[j];
+       for (int i = 0; i < cols; i++) {
+       oRow[i] = (float)iRow[i];
+       }
+       }
+       break;
        * 
        */
 
       default:
     }
     /*    
-    public static final int BITPIX_LONG = 64;
-    public static final int BITPIX_DOUBLE = -64;
+     public static final int BITPIX_LONG = 64;
+     public static final int BITPIX_DOUBLE = -64;
      */
     return output;
   }
@@ -1115,19 +1145,19 @@ public class ImageFitsTest {
       return Arrays.toString((byte[]) o);
     } else {
       /*
-      if (oClass == String[].class) {
-      StringBuilder sb = new StringBuilder(128).append("[");
-      for (String val : (String[])o) {
-      sb.append("'").append(val).append("'").append("=[");
+       if (oClass == String[].class) {
+       StringBuilder sb = new StringBuilder(128).append("[");
+       for (String val : (String[])o) {
+       sb.append("'").append(val).append("'").append("=[");
       
-      for (char ch : val.toCharArray()) {
-      sb.append("0x").append(Integer.toHexString(ch)).append(' ');
-      }
+       for (char ch : val.toCharArray()) {
+       sb.append("0x").append(Integer.toHexString(ch)).append(' ');
+       }
       
-      sb.append("], ");
-      }
-      return sb.append("]").toString();
-      }
+       sb.append("], ");
+       }
+       return sb.append("]").toString();
+       }
        */
       // Non-primitive and multidimensional arrays can be
       // cast to Object[]
@@ -1172,7 +1202,6 @@ public class ImageFitsTest {
    */
   private static void showFitsPanel(final String name, final FitsImage fitsImage, final float[] minDataRange) {
     SwingUtils.invokeEDT(new Runnable() {
-
       @Override
       public void run() {
         final FitsImagePanel panel = new FitsImagePanel(true, false, minDataRange);
