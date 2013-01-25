@@ -82,13 +82,29 @@ public final class Aspro2 extends App {
         super(args);
     }
 
-    /**
-     * Initialize application objects
-     *
-     * @throws RuntimeException if the Aspro2 initialization failed
-     */
     @Override
-    protected void init() throws RuntimeException {
+    protected void initServices() throws IllegalStateException, IllegalArgumentException {
+
+        // Preload configurations :
+        ConfigurationManager.getInstance();
+
+        // Create OIFitsCollectionManager at startup (JAXB factory, event queues and PlotDefinitionFactory ...)
+        // to avoid OpenJDK classloader issues (ie use main thread):
+        OIFitsCollectionManager.getInstance();
+
+        // Initialize tasks and the task executor :
+        AsproTaskRegistry.getInstance();
+        TaskSwingWorkerExecutor.start();
+
+        // Initialize the parallel job executor:
+        ParallelJobExecutor.getInstance();
+
+        // Initialize warning log:
+        LoggingService.getInstance().addLogMapper("Warning messages", AsproConstants.ASPRO_WARNING_LOG, "WARNINGLOG");
+    }
+
+    @Override
+    protected void setupGui() throws RuntimeException {
         logger.debug("AsproGui.init() handler : enter");
 
         this.initServices();
@@ -110,32 +126,6 @@ public final class Aspro2 extends App {
         });
 
         logger.debug("AsproGui.init() handler : exit");
-    }
-
-    /**
-     * Initialize services before the GUI
-     *
-     * @throws IllegalStateException if the configuration files are not found or IO failure
-     * @throws IllegalArgumentException if the load configuration failed
-     */
-    private void initServices() throws IllegalStateException, IllegalArgumentException {
-
-        // Preload configurations :
-        ConfigurationManager.getInstance();
-
-        // Create OIFitsCollectionManager at startup (JAXB factory, event queues and PlotDefinitionFactory ...)
-        // to avoid OpenJDK classloader issues (ie use main thread):
-        OIFitsCollectionManager.getInstance();
-
-        // Initialize tasks and the task executor :
-        AsproTaskRegistry.getInstance();
-        TaskSwingWorkerExecutor.start();
-
-        // Initialize the parallel job executor:
-        ParallelJobExecutor.getInstance();
-
-        // Initialize warning log:
-        LoggingService.getInstance().addLogMapper("Warning messages", AsproConstants.ASPRO_WARNING_LOG, "WARNINGLOG");
     }
 
     /**
@@ -239,7 +229,7 @@ public final class Aspro2 extends App {
         frame.setPreferredSize(new Dimension(appWidth, appHeightPref));
         frame.addComponentListener(new ComponentResizeAdapter(dim));
 
-        // init the main panel :
+        // setupGui the main panel :
         createContent();
 
         // initialize the actions :
