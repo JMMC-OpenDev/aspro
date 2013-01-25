@@ -18,8 +18,8 @@
     <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
   </company>
 
-  <program name="Aspro2" version="0.9.4 beta 5"/>
-  <compilation date="16/01/2013" compiler="JDK 1.5.0_16"/>
+  <program name="Aspro2" version="0.9.4 beta 6"/>
+  <compilation date="25/01/2013" compiler="JDK 1.5.0_16"/>
   
   <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
   <authors>the JMMC Technical Group</authors>
@@ -106,6 +106,11 @@
              license="MPL/LGPL/GPL" />
     <!-- Mozilla Public License: http://www.mozilla.org/MPL/ -->
 
+    <package name="JODK"
+        description="Java Optimized Development Kit (JODK) is a performance-oriented Java general-purpose library, which treatments are extensions, additions (FastMath)"
+        link="http://code.google.com/p/jodk/"
+        license="APACHE_V2"/>
+
 
     <!-- 2. Swing -->
 
@@ -168,6 +173,13 @@
 
   <releasenotes>
     <release version="0.9.4">
+      <prerelease version="0.9.4 beta 6">
+        <change type="FEATURE">Improved Fits image panel to display all images loaded (animation)</change>
+        <change type="FEATURE">Added Fits cube loading support (AXIS3 represents wavelength axis)</change>
+        <change type="FEATURE">Added minimal Fits CUNIT keyword support to handle angle and wavelength conversions (deg, arcsec to rad) and (nm or micron to meter)</change>
+        <change type="CHANGE">Optimized OIFits computation from an user model (better parallelism)</change>
+        <change type="CHANGE">Improved general performance (Best Pops, model image) using JODK FastMath</change>
+      </prerelease>
       <prerelease version="0.9.4 beta 5">
         <change type="FEATURE">Enabled parallelization of the observability computation in multi configuration mode</change>
         <change type="FEATURE">Enhanced parallelization of the Best PoPs algorithm</change>
