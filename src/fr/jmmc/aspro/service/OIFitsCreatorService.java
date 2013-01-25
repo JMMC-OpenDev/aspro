@@ -46,7 +46,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.concurrent.Future;
+import org.ivoa.util.concurrent.ThreadExecutors;
+import org.ivoa.util.timer.TimerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,6 +63,8 @@ public final class OIFitsCreatorService {
   private final static short TARGET_ID = (short) 1;
   /** enable the OIFits validation */
   private final static boolean DO_VALIDATE = false;
+  /** flag to show compute task statistics */
+  private final static boolean SHOW_COMPUTE_STATS = false;
   /** threshold to use parallel jobs for user models (32 UV points) */
   private final static int JOB_THRESHOLD_USER_MODELS = 32;
   /** threshold to use parallel jobs for experimental noise sampling (2000 UV points) */
@@ -283,9 +286,7 @@ public final class OIFitsCreatorService {
       this.oiFitsFile.removeOiTable(vis);
     }
 
-    if (logger.isInfoEnabled()) {
-      logger.info("createOIFits: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
-    }
+    logger.info("createOIFits: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
 
     if (DO_VALIDATE) {
       final OIFitsChecker checker = new OIFitsChecker();
@@ -428,7 +429,7 @@ public final class OIFitsCreatorService {
     final float[] effBand = waves.getEffBand();
 
     // effective wavelength corresponds to the channel center:
-    double waveLength = this.lambdaMin + step / 2d;
+    double waveLength = this.lambdaMin + 0.5d * step;
 
     for (int i = 0; i < this.nWaveLengths; i++) {
       this.waveLengths[i] = waveLength;
@@ -453,150 +454,385 @@ public final class OIFitsCreatorService {
       /** Get the current thread to check if the computation is interrupted */
       final Thread currentThread = Thread.currentThread();
 
+      // local vars:
+      final int nWLen = nWaveLengths;
+      final int nBl = nBaseLines;
+      final int nHA = nHAPoints;
+      final NoiseService ns = noiseService;
+
       // TODO: compare directFT vs FFT + interpolation
 
       final long start = System.nanoTime();
 
       final boolean useAnalyticalModel = this.target.hasAnalyticalModel();
 
-      final ModelManager modelManager;
-      // model computation context
-      final ModelComputeContext context;
-
-      if (useAnalyticalModel) {
-        // Analytical model:
-        modelManager = ModelManager.getInstance();
-
-        // Clone models and normalize fluxes :
-        final List<Model> normModels = ModelManager.normalizeModels(this.target.getModels());
-
-        // prepare models once for all:
-        context = modelManager.prepareModels(normModels, this.nWaveLengths);
-
-      } else {
-        // User Model:
-        modelManager = null;
-
-        // Get prepared model data:
-        final UserModelData modelData = target.getUserModel().getModelData();
-
-        if (modelData == null) {
-          return;
-        }
-
-        // prepare models once for all:
-        context = UserModelService.prepareModel(modelData, this.nWaveLengths);
-      }
-
       // fast interrupt :
       if (currentThread.isInterrupted()) {
         return;
       }
 
-      final int nPoints = this.nHAPoints * this.nBaseLines * this.nWaveLengths;
+      final int nRows = nHA * nBl;
+      final int nPoints = nRows * nWLen;
 
-      if (logger.isInfoEnabled()) {
-        logger.info("computeModelVisibilities: {} points - please wait ...", nPoints);
-      }
+      logger.info("computeModelVisibilities: {} nRows - {} nWLen", nRows, nWLen);
+      logger.info("computeModelVisibilities: {} points - please wait ...", nPoints);
+
+      logger.info("computeModelVisibilities: {} bytes for 1 complex array", 2 * 8 * nPoints); // 1 complex (2 double)
 
       // Allocate data array for complex visibility and error :
-      final Complex[][] cVis = new Complex[this.nHAPoints * this.nBaseLines][this.nWaveLengths];
-      final Complex[][] cVisError = new Complex[this.nHAPoints * this.nBaseLines][this.nWaveLengths];
+      final MutableComplex[][] cmVis = new MutableComplex[nRows][];
 
-
-      // enable parallel jobs if many points using user model:
-      final int nJobs = (!useAnalyticalModel && nPoints > JOB_THRESHOLD_USER_MODELS) ? jobExecutor.getMaxParallelJob() : 1;
-
-      // computation tasks:
-      final Runnable[] jobs = new Runnable[nJobs];
-
-      // create tasks:
-      for (int i = 0; i < nJobs; i++) {
-        final int jobIndex = i;
-
-        final ModelComputeContext jobContext;
-        if (i == 0) {
-          jobContext = context;
-        } else {
-          jobContext = (useAnalyticalModel) ? ModelManager.cloneContext((ModelFunctionComputeContext) context)
-                  : UserModelService.cloneContext((UserModelComputeContext) context);
-        }
-
-        jobs[i] = new Runnable() {
-          @Override
-          public void run() {
-            // spatial frequencies for a single HA (spectral dispersion):
-            final double[] ufreq = new double[nWaveLengths];
-            final double[] vfreq = new double[nWaveLengths];
-
-            double u, v;
-
-            // Iterate on HA points :
-            for (int i = 0, j, k, l; i < nHAPoints; i++) {
-
-              j = 0;
-
-              // Iterate on baselines :
-              for (final UVRangeBaseLineData uvBL : targetUVObservability) {
-                k = nBaseLines * i + j;
-
-                // job parallelism:
-                if (k % nJobs == jobIndex) {
-
-                  // UV coords (m) :
-                  u = uvBL.getU()[i];
-                  v = uvBL.getV()[i];
-
-                  // Compute complex visibility using the target model:
-
-                  // prepare spatial frequencies :
-                  for (l = 0; l < nWaveLengths; l++) {
-                    ufreq[l] = u / waveLengths[l];
-                    vfreq[l] = v / waveLengths[l];
-                  }
-
-                  // compute complex visibilities :
-                  if (useAnalyticalModel) {
-                    cVis[k] = convertArray(modelManager.computeModels((ModelFunctionComputeContext) jobContext, ufreq, vfreq));
-                  } else {
-                    cVis[k] = convertArray(UserModelService.computeModel((UserModelComputeContext) jobContext, ufreq, vfreq));
-                  }
-
-                  if (cVis[k] == null || currentThread.isInterrupted()) {
-                    // fast interrupt :
-                    return;
-                  }
-
-                  // Iterate on wave lengths :
-                  for (l = 0; l < nWaveLengths; l++) {
-                    // complex visibility error or Complex.NaN:
-                    cVisError[k][l] = noiseService.computeVisComplexError(cVis[k][l].abs());
-                  }
-                }
-
-                // increment j:
-                j++;
-              } // baselines
-            } // HA
-          }
-        };
+      // Iterate on rows :
+      for (int k = 0; k < nRows; k++) {
+        cmVis[k] = createArray(nWLen + 4); // cache line padding (Complex = 2 double = 16 bytes) so 4 complex = complete cache line
       }
 
-      if (nJobs > 1) {
-        // execute jobs in parallel:
-        final Future<?>[] futures = jobExecutor.fork(jobs);
+      // Allocate data array for spatial frequencies:
+      final double[][] ufreq = new double[nRows][nWLen];
+      final double[][] vfreq = new double[nRows][nWLen];
 
-        logger.debug("wait for jobs to terminate ...");
+      logger.info("computeModelVisibilities: {} bytes for uv freq array", 2 * 8 * nPoints); // 2 double
 
-        jobExecutor.join("OIFitsCreatorService.computeModelVisibilities", futures);
+      // Iterate on baselines :
+      for (int i, j = 0, k, l; j < nBl; j++) {
+
+        final UVRangeBaseLineData uvBL = this.targetUVObservability.get(j);
+
+        // Iterate on HA points :
+        for (i = 0; i < nHA; i++) {
+
+          // UV coords (m) :
+          final double u = uvBL.getU()[i];
+          final double v = uvBL.getV()[i];
+
+          k = nBl * i + j;
+
+          final double[] uRow = ufreq[k];
+          final double[] vRow = vfreq[k];
+
+          // prepare spatial frequencies :
+          for (l = 0; l < nWLen; l++) {
+            uRow[l] = u / waveLengths[l];
+            vRow[l] = v / waveLengths[l];
+          }
+        }
+      }
+
+      // Compute complex visibility using the target model:
+
+      if (useAnalyticalModel) {
+        // Clone models and normalize fluxes :
+        final List<Model> normModels = ModelManager.normalizeModels(this.target.getModels());
+
+        // Analytical models: no parallelization:
+        final ModelManager modelManager = ModelManager.getInstance();
+
+        // model computation context
+        final ModelComputeContext context = modelManager.prepareModels(normModels, nWLen);
+
+        // Iterate on rows:
+        for (int k = 0; k < nRows; k++) {
+
+          // Compute complex visibility using the target model:
+          copyArray(modelManager.computeModels((ModelFunctionComputeContext) context, ufreq[k], vfreq[k]), cmVis[k]);
+
+          if (currentThread.isInterrupted()) {
+            // fast interrupt :
+            return;
+          }
+
+        } // rows
 
       } else {
-        // execute the single task using the current thread:
-        jobs[0].run();
+        // Get prepared user model data:
+        if (!target.getUserModel().isModelDataReady()) {
+          return;
+        }
+
+        // TODO: use all image collection not the first one only:
+        final UserModelData modelData = target.getUserModel().getModelDataList().get(0);
+
+        // TODO: determine which images to use according to wavelength range:
+
+
+        // TODO: use a preference
+
+        final UserModelService.MathMode mathMode = UserModelService.MathMode.FAST;
+
+        // Accuracy tests (see OIFitsWriterTest) on GRAVITY so VISAMPERR/VISPHIERR are only 'sampled':
+        // FAST provides good accuracy on complete OIFits:
+        /*                
+         WARNING: WARN:  Column[VISAMP]	    Max Absolute Error=3.122502256758253E-17	Max Relative Error=2.943534976436331E-14
+         WARNING: WARN:  Column[VISAMPERR]	Max Absolute Error=0.0013869817652312072	Max Relative Error=0.0997510362307679
+         WARNING: WARN:  Column[VISPHI]	    Max Absolute Error=1.8474111129762605E-12	Max Relative Error=3.3158630356109147E-12
+         WARNING: WARN:  Column[VISPHIERR]	Max Absolute Error=19.19686940833244	Max Relative Error=0.9113901536192872
+         WARNING: WARN:  Column[VIS2DATA]	  Max Absolute Error=1.5178830414797062E-18	Max Relative Error=5.915784768102743E-14
+         WARNING: WARN:  Column[VIS2ERR]	  Max Absolute Error=5.421010862427522E-20	Max Relative Error=4.471809116292319E-16
+         WARNING: WARN:  Column[T3AMP]	    Max Absolute Error=9.740878893424454E-21	Max Relative Error=3.613928543746403E-14
+         WARNING: WARN:  Column[T3AMPERR]	  Max Absolute Error=3.441071348220595E-22	Max Relative Error=3.6192130029721625E-14
+         WARNING: WARN:  Column[T3PHI]	    Max Absolute Error=1.8332002582610585E-12	Max Relative Error=1.6154567952731343E-13
+         */
+        // QUICK provides only a preview (not accurate on VISPHI / T3PHI:
+        /*
+         WARNING: WARN:  Column[VISDATA]	  Max Absolute Error=0.21170902252197266	Max Relative Error=155.32336222596265
+         WARNING: WARN:  Column[VISERR]	    Max Absolute Error=1.7113983631134033E-5	Max Relative Error=5.123198196063256E-4
+         WARNING: WARN:  Column[VISAMP]	    Max Absolute Error=0.012389325449663476	Max Relative Error=0.9827257597222762
+         WARNING: WARN:  Column[VISAMPERR]	Max Absolute Error=4.3704479622192665E-4	Max Relative Error=0.24928702639103537
+         WARNING: WARN:  Column[VISPHI]	    Max Absolute Error=357.76365704000574	Max Relative Error=132.85957062222084
+         WARNING: WARN:  Column[VISPHIERR]	Max Absolute Error=54.185925961293876	Max Relative Error=0.9643291278418655
+         WARNING: WARN:  Column[VIS2DATA]	  Max Absolute Error=4.3211132008532375E-4	Max Relative Error=3199.047758503112
+         WARNING: WARN:  Column[VIS2ERR]	  Max Absolute Error=7.815369519747367E-9	Max Relative Error=6.780968471059581E-5
+         WARNING: WARN:  Column[T3AMP]	    Max Absolute Error=1.8693429580914967E-7	Max Relative Error=0.11262751096020436
+         WARNING: WARN:  Column[T3AMPERR]	  Max Absolute Error=4.423268697588574E-11	Max Relative Error=0.0016543021640061009
+         WARNING: WARN:  Column[T3PHI]	    Max Absolute Error=6.734992735788779	Max Relative Error=6.813763216810152
+         */
+
+        logger.info("computeModelVisibilities: MathMode = {}.", mathMode);
+
+        /*
+         [bourgesl@jmmc-laurent ~]$ lscpu
+         Architecture:          x86_64
+         CPU(s):                4
+         Thread(s) par coeur :  2
+         Coeur(s) par support CPU :2
+         CPU MHz :              2800.000
+         L1d cache :            32K
+         L1i cache :            32K
+         L2 cache :             256K
+         L3 cache :             4096K
+         */
+
+        // enable parallel jobs if many points using user model:
+        final int nTh = (!jobExecutor.isWorkerThread() && (nPoints > JOB_THRESHOLD_USER_MODELS)) ? jobExecutor.getMaxParallelJob() : 1;
+
+        // Prepare thread context variables:
+        final int[][] nTaskThreads = (SHOW_COMPUTE_STATS) ? new int[nTh][16] : null; // cache line padding
+
+
+
+        // This will change for each image in the Fits cube:
+        final int n1D = modelData.getNData(); // data, xfreq, yfreq
+
+        logger.info("computeModelVisibilities: {} bytes for image arrays", 4 * n1D); // (float) array
+
+        final boolean doBench = false;
+
+        if (doBench) {
+          // timer warmup:
+          TimerFactory.resetTimers();
+        }
+
+        // evaluate chunk size:
+//        for (int n = 40000; n >= 5000; n -= 5000) {
+        for (int n = 600 * 1000; n > 4000; n = (3 * n) / 4) {
+          /*
+           * -open /home/bourgesl/ASPRO2/BENCH_MODEL_BIG.asprox
+           * java -server -Xms256m -Xmx256m -verbose:gc
+           Timer [chunk[600000] - ms] [6]	{num = 6 :	min = 6243.15402,	avg = 6384.94846,	max = 6645.87379,	acc = 38309.69081}
+           Timer [chunk[450000] - ms] [6]	{num = 6 :	min = 6203.26475,	avg = 6235.64234,	max = 6261.62575,	acc = 37413.85405}
+           Timer [chunk[337500] - ms] [6]	{num = 6 :	min = 6201.22245,	avg = 6246.97156,	max = 6315.11635,	acc = 37481.8294}
+           Timer [chunk[253125] - ms] [6]	{num = 6 :	min = 6230.08723,	avg = 6360.00076,	max = 6743.4357,	acc = 38160.00458}
+           Timer [chunk[189843] - ms] [6]	{num = 6 :	min = 6145.51441,	avg = 6178.14009,	max = 6240.0414,	acc = 37068.84055}
+           Timer [chunk[142382] - ms] [6]	{num = 6 :	min = 6153.0717,	avg = 6225.52145,	max = 6350.81124,	acc = 37353.12873}
+           Timer [chunk[106786] - ms] [6]	{num = 6 :	min = 6110.36145,	avg = 6132.26537,	max = 6146.3951,	acc = 36793.59222}
+           Timer [chunk[80089] - ms] [6]	{num = 6 :	min = 6113.14398,	avg = 6154.84745,	max = 6218.87338,	acc = 36929.08472}
+           Timer [chunk[60066] - ms] [6]	{num = 6 :	min = 6111.26703,	avg = 6162.30571,	max = 6219.9817,	acc = 36973.83429}
+           Timer [chunk[45049] - ms] [6]	{num = 6 :	min = 6137.05735,	avg = 6190.03549,	max = 6285.07611,	acc = 37140.21295}
+           Timer [chunk[33786] - ms] [6]	{num = 6 :	min = 6129.09484,	avg = 6167.5245,	max = 6235.43153,	acc = 37005.14704}
+           Timer [chunk[25339] - ms] [6]	{num = 6 :	min = 6115.01552,	avg = 6148.93023,	max = 6239.73482,	acc = 36893.58139}
+           Timer [chunk[19004] - ms] [6]	{num = 6 :	min = 6105.3263,	avg = 6150.67354,	max = 6275.43552,	acc = 36904.04126}
+           Timer [chunk[14253] - ms] [6]	{num = 6 :	min = 6115.31962,	avg = 6135.68165,	max = 6176.77583,	acc = 36814.08992}
+           Timer [chunk[10689] - ms] [6]	{num = 6 :	min = 6091.29831,	avg = 6201.2638,	max = 6406.23302,	acc = 37207.58283}
+           Timer [chunk[8016] - ms] [6]	{num = 6 :	min = 6093.65906,	avg = 6121.05512,	max = 6244.3136,	acc = 36726.33073}
+           Timer [chunk[6012] - ms] [6]	{num = 6 :	min = 6086.97264,	avg = 6135.02741,	max = 6323.50799,	acc = 36810.16451}
+           Timer [chunk[4509] - ms] [6]	{num = 6 :	min = 6088.02502,	avg = 6105.74722,	max = 6148.93475,	acc = 36634.48333}
+           * 
+           * java -client -Xms256m -Xmx256m -verbose:gc
+           Timer [chunk[600000] - ms] [6]	{num = 6 :	min = 6224.30511,	avg = 6606.00973,	max = 6955.55131,	acc = 39636.0584}
+           Timer [chunk[450000] - ms] [6]	{num = 6 :	min = 6168.78036,	avg = 6242.96843,	max = 6335.26505,	acc = 37457.81058}
+           Timer [chunk[337500] - ms] [6]	{num = 6 :	min = 6154.05134,	avg = 6250.50528,	max = 6489.83068,	acc = 37503.03168}
+           Timer [chunk[253125] - ms] [6]	{num = 6 :	min = 6126.73288,	avg = 6156.01418,	max = 6195.99444,	acc = 36936.08509}
+           Timer [chunk[189843] - ms] [6]	{num = 6 :	min = 6218.94806,	avg = 6453.99665,	max = 6619.456,	acc = 38723.97991}
+           Timer [chunk[142382] - ms] [6]	{num = 6 :	min = 6353.57777,	avg = 6402.73572,	max = 6464.20086,	acc = 38416.41431}
+           Timer [chunk[106786] - ms] [6]	{num = 6 :	min = 6355.4546,	avg = 6377.30765,	max = 6421.21122,	acc = 38263.8459}
+           Timer [chunk[80089] - ms] [6]	{num = 6 :	min = 6339.65153,	avg = 6392.74165,	max = 6482.51913,	acc = 38356.44995}
+           Timer [chunk[60066] - ms] [6]	{num = 6 :	min = 6286.62151,	avg = 6331.83599,	max = 6348.88081,	acc = 37991.01597}
+           Timer [chunk[45049] - ms] [6]	{num = 6 :	min = 6260.96024,	avg = 6328.66796,	max = 6417.38881,	acc = 37972.00781}
+           Timer [chunk[33786] - ms] [6]	{num = 6 :	min = 6283.12942,	avg = 6311.33091,	max = 6345.63726,	acc = 37867.98545}
+           Timer [chunk[25339] - ms] [6]	{num = 6 :	min = 6247.72033,	avg = 6287.26846,	max = 6312.76508,	acc = 37723.6108}
+           Timer [chunk[19004] - ms] [6]	{num = 6 :	min = 6235.30377,	avg = 6262.0295,	max = 6288.65923,	acc = 37572.17702}
+           Timer [chunk[14253] - ms] [6]	{num = 6 :	min = 6223.88945,	avg = 6294.78818,	max = 6373.82307,	acc = 37768.72909}
+           Timer [chunk[10689] - ms] [6]	{num = 6 :	min = 6220.66759,	avg = 6289.95525,	max = 6345.2369,	acc = 37739.73151}
+           */
+
+          if (doBench) {
+            TimerFactory.resetTimers();
+          }
+
+          for (int s = 0; s <= 5; s++) {
+//            {
+//              {
+            // best is:
+//            final int n = 20000;
+
+            if (doBench) {
+              // reset:
+              for (int k = 0; k < nRows; k++) {
+                cmVis[k] = createArray(nWLen + 4); // cache line padding (Complex = 2 double = 16 bytes) so 4 complex = complete cache line
+              }
+
+              if (SHOW_COMPUTE_STATS) {
+                for (int t = 0; t < nTh; t++) {
+                  nTaskThreads[t][0] = 0;
+                }
+              }
+
+              if (currentThread.isInterrupted()) {
+                // fast interrupt :
+                return;
+              }
+
+              System.gc();
+              if (!ThreadExecutors.sleep(100l)) {
+                // fast interrupt :
+                return;
+              }
+            }
+
+            final long start2 = System.nanoTime();
+
+            int chunk = n * 3;
+//        int chunk = 90 * 1000; // 6000 ok
+//        final int chunk = 45 * 1000; // 6000 ok
+//        final int chunk = 10 * 1000 * 1000; // 6000 ok
+//        final int chunk = 6000; // 6000 ok
+
+
+            final int nChunks = 1 + n1D / chunk;
+
+            logger.info("computeModelVisibilities: {} chunks", nChunks);
+
+            // note: chunk must a multiple of 3 !
+            chunk = 3 * ((n1D / nChunks) / 3);
+
+            logger.info("computeModelVisibilities: {} bytes for chunk", (chunk > n1D) ? 4 * n1D : 4 * chunk);// (float) array
+            logger.info("computeModelVisibilities: chunk = {}", chunk);
+
+            final int[] fromThreads = new int[nChunks];
+            final int[] endThreads = new int[nChunks];
+
+            for (int c = 0; c < nChunks; c++) {
+              fromThreads[c] = c * chunk;
+              endThreads[c] = fromThreads[c] + chunk;
+            }
+            endThreads[nChunks - 1] = n1D;
+
+
+//            logger.info("computeModelVisibilities: from {} - to {}", Arrays.toString(fromThreads), Arrays.toString(endThreads));
+
+            // computation tasks = 1 job per row and chunk (work stealing):
+            final Runnable[] jobs = new Runnable[nRows * nChunks];
+
+            // Important: have jobs a multiple of nTh to maximize parallelism !
+
+            logger.info("computeModelVisibilities: {} jobs", jobs.length);
+
+            // TODO: process wavelengths by chunks too:
+            final int from = 0;
+            final int end = nWLen;
+
+            // create tasks:
+            for (int c = 0, j = 0; c < nChunks; c++) {
+              // Image chunks:
+              final int fromData = fromThreads[c];
+              final int endData = endThreads[c];
+
+              for (int k = 0; k < nRows; k++) {
+                // rows index to be processed by this task:
+                final int rowIndex = k;
+                final float[] data1D = modelData.getData1D();
+                final double[] uRow = ufreq[rowIndex];
+                final double[] vRow = vfreq[rowIndex];
+                final MutableComplex[] cmVisRow = cmVis[rowIndex];
+
+                jobs[j++] = new Runnable() {
+                  /**
+                   * Called by the ParallelJobExecutor to perform task computation
+                   */
+                  @Override
+                  public void run() {
+
+//                    logger.info("Thread[{}]: row {} - data from {} to {} - lambda from {} to {}", ParallelJobExecutor.currentThreadIndex(nTh), rowIndex, fromData, endData, from, end);
+
+                    // Compute complex visibility using the target model:
+//                final long start = System.nanoTime();
+
+                    // compute complex visibilities :
+                    UserModelService.computeModel(data1D, fromData, endData, uRow, vRow, cmVisRow, from, end, mathMode);
+
+                    // fast interrupt:
+/*                
+                     if (Thread.currentThread().isInterrupted()) {
+                     return;
+                     }
+                     */
+                    if (SHOW_COMPUTE_STATS) {
+                      // Get thread index to get appropriate thread vars:
+                      final int threadIndex = ParallelJobExecutor.currentThreadIndex(nTh);
+                      nTaskThreads[threadIndex][0]++;
+                    }
+
+//                logger.info("Thread[{}]: row {} done in: duration = {} ms.", threadIndex, rowIndex, 1e-6d * (System.nanoTime() - start));
+                  }
+                };
+              }
+            }
+
+            // execute jobs in parallel or using current thread if only one job (throws InterruptedJobException if interrupted):
+            jobExecutor.forkAndJoin("OIFitsCreatorService.computeModelVisibilities", jobs);
+
+            TimerFactory.getSimpleTimer("chunk[" + n + "]", TimerFactory.UNIT.ms).addMilliSeconds(start2, System.nanoTime());
+
+            if (SHOW_COMPUTE_STATS) {
+              for (int t = 0; t < nTh; t++) {
+                logger.info("Thread[{}] done: {} processed jobs", t, nTaskThreads[t][0]);
+              }
+            }
+
+            if (!doBench) {
+              break;
+            }
+          }
+
+          if (doBench && !TimerFactory.isEmpty()) {
+            logger.info("computeModelVisibilities: FINAL statistics: {}", TimerFactory.dumpTimers());
+          }
+
+          if (!doBench) {
+            break;
+          }
+        }
       }
 
-      if (logger.isInfoEnabled()) {
-        logger.info("computeModelVisibilities: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
+      logger.info("computeModelVisibilities: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
+
+      if (currentThread.isInterrupted()) {
+        // fast interrupt :
+        return;
+      }
+
+      final Complex[][] cVisError = new Complex[nRows][nWLen];
+      final Complex[][] cVis = new Complex[nRows][];
+
+      // Iterate on rows :
+      for (int k = 0, l; k < nRows; k++) {
+        // Iterate on wave lengths :
+        for (l = 0; l < nWLen; l++) {
+          // complex visibility error or Complex.NaN:
+          cVisError[k][l] = ns.computeVisComplexError(cmVis[k][l].abs());
+        }
+
+        cVis[k] = convertArray(cmVis[k], nWLen); // immutable for safety
       }
 
       this.visComplex = cVis;
@@ -607,10 +843,13 @@ public final class OIFitsCreatorService {
   /**
    * Convert mutable complex array to immutable complex array for safety reasons
    * @param array mutable complex array
+   * @param length array length
    * @return immutable complex array
    */
-  private static Complex[] convertArray(final MutableComplex[] array) {
-    final int length = array.length;
+  private static Complex[] convertArray(final MutableComplex[] array, final int length) {
+    if (array == null) {
+      return null;
+    }
     final Complex[] result = new Complex[length];
 
     for (int i = length - 1; i >= 0; i--) {
@@ -620,10 +859,43 @@ public final class OIFitsCreatorService {
   }
 
   /**
+   * Copy mutable complex array
+   * @param array mutable complex array
+   * @param dest mutable complex array
+   */
+  private static void copyArray(final MutableComplex[] array, final MutableComplex[] dest) {
+    if (array == null) {
+      return;
+    }
+    final int length = array.length;
+
+    for (int i = length - 1; i >= 0; i--) {
+      dest[i].updateComplex(array[i]);
+    }
+  }
+
+  /**
+   * Create a mutable complex array
+   * @param length array length
+   * @return mutable complex array
+   */
+  private static MutableComplex[] createArray(final int length) {
+    final MutableComplex[] result = new MutableComplex[length];
+
+    for (int i = length - 1; i >= 0; i--) {
+      result[i] = new MutableComplex();
+    }
+    return result;
+  }
+
+  /**
    * Create the OI_VIS table using internal computed visComplex data
    */
   private void createOIVis() {
     final long start = System.nanoTime();
+
+    /** Get the current thread to check if the computation is interrupted */
+    final Thread currentThread = Thread.currentThread();
 
     // test if the instrument is AMBER to use dedicated diffVis algorithm :
     final boolean isAmber = AsproConstants.INS_AMBER.equals(this.instrumentName);
@@ -666,9 +938,7 @@ public final class OIFitsCreatorService {
     final boolean doNoiseSampling = (this.hasModel && this.errorValid && !isAmber && this.instrumentExperimental);
 
     if (doNoiseSampling) {
-      if (logger.isInfoEnabled()) {
-        logger.info("createOIVis: {} points - experimental instrument: VisAmp/Phi errors computed using {} random complex visiblities", nPoints, N_SAMPLES);
-      }
+      logger.info("createOIVis: {} points - experimental instrument: VisAmp/Phi errors computed using {} random complex visiblities", nPoints, N_SAMPLES);
     }
 
     // enable parallel jobs if many points using user model:
@@ -855,24 +1125,20 @@ public final class OIFitsCreatorService {
 
               // increment j:
               j++;
+
+              // fast interrupt :
+              if (currentThread.isInterrupted()) {
+                return;
+              }
+
             } // baselines
           } // HA
         }
       };
     }
 
-    if (nJobs > 1) {
-      // execute jobs in parallel:
-      final Future<?>[] futures = jobExecutor.fork(jobs);
-
-      logger.debug("wait for jobs to terminate ...");
-
-      jobExecutor.join("OIFitsCreatorService.createOIVis", futures);
-
-    } else {
-      // execute the single task using the current thread:
-      jobs[0].run();
-    }
+    // execute jobs in parallel or using current thread if only one job (throws InterruptedJobException if interrupted):
+    jobExecutor.forkAndJoin("OIFitsCreatorService.createOIVis", jobs);
 
     /* Compute visAmp / visPhi as amber does */
     if (isAmber && this.hasModel && this.errorValid) {
@@ -1295,6 +1561,8 @@ public final class OIFitsCreatorService {
     sb.append(day);
 
     return sb.toString();
+
+
   }
 
   /**

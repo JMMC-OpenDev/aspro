@@ -3,22 +3,23 @@
  ******************************************************************************/
 package fr.jmmc.aspro.service;
 
+import fr.jmmc.aspro.model.OIBase;
+import fr.jmmc.oitools.image.FitsImage;
+
 /**
- * This class gathers prepared user model data as 1D arrays (normalized flux and X/Y spatial coordinates) 
- * to compute direct Fourier transform
+ * This class gathers prepared user model data as FitsImage (FFT) and 1D arrays (exact FT) (normalized flux and X/Y spatial coordinates) 
  * @author bourgesl
  */
-public final class UserModelData {
+public final class UserModelData extends OIBase {
 
   /* members */
-  /** number of data points */
-  private int nData = 0;
-  /** flattened data points (1D) */
+  /** FFT ready fits image */
+  private FitsImage fitsImage = null;
+  /** 
+   * Flattened data points (1D) stored with col and row: [data col row] 
+   * spatial coordinates along the column and row axis (rad)
+   */
   private float[] data1D = null;
-  /** spatial coordinates along the column axis (rad) corresponding to data points */
-  private float[] colCoord1D = null;
-  /** spatial coordinates along the row axis (rad) corresponding to data points */
-  private float[] rowCoord1D = null;
 
   /**
    * Public constructor
@@ -28,51 +29,47 @@ public final class UserModelData {
   }
 
   /**
+   * Return the FFT ready fits image
+   * @return FFT ready fits image
+   */
+  public FitsImage getFitsImage() {
+    return fitsImage;
+  }
+
+  /**
+   * Define the FFT ready fits image
+   * @param fitsImage FFT ready fits image
+   */
+  public void setFitsImage(final FitsImage fitsImage) {
+    this.fitsImage = fitsImage;
+  }
+
+  /**
    * Define model data
-   *
-   * @param nData number of data points
    * @param data1D flattened data points (1D)
-   * @param colCoord1D spatial coordinates along the column axis (rad) corresponding to data points
-   * @param rowCoord1D spatial coordinates along the row axis (rad) corresponding to data points
    * @return this instance
    */
-  public UserModelData set(final int nData, final float[] data1D, final float[] colCoord1D, final float[] rowCoord1D) {
-    this.nData = nData;
+  public UserModelData set(final float[] data1D) {
     this.data1D = data1D;
-    this.colCoord1D = colCoord1D;
-    this.rowCoord1D = rowCoord1D;
     return this;
   }
 
   /**
    * Return the number of data points
+   * 
+   * TODO: x 3 or / 3: decide soon
+   * 
    * @return number of data points
    */
-  int getNData() {
-    return nData;
+  public int getNData() {
+    return this.data1D.length;
   }
 
   /**
-   * Return the flattened data points (1D)
-   * @return flattened data points (1D)
+   * Return the flattened data points (1D) [data col row]
+   * @return flattened data points (1D) [data col row]
    */
-  float[] getData1D() {
+  public float[] getData1D() {
     return data1D;
-  }
-
-  /**
-   * Return the spatial coordinates along the column axis (rad) corresponding to data points
-   * @return spatial coordinates along the column axis (rad) corresponding to data points
-   */
-  float[] getColCoord1D() {
-    return colCoord1D;
-  }
-
-  /**
-   * Return the spatial coordinates along the row axis (rad) corresponding to data points
-   * @return spatial coordinates along the row axis (rad) corresponding to data points
-   */
-  float[] getRowCoord1D() {
-    return rowCoord1D;
   }
 }

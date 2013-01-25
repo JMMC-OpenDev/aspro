@@ -7,8 +7,8 @@ import fr.jmmc.aspro.Preferences;
 import fr.jmmc.aspro.image.FitsImageUtils;
 import fr.jmmc.aspro.model.oi.UserModel;
 import fr.jmmc.jmal.complex.MutableComplex;
-import fr.jmmc.jmal.image.FFTUtils;
 import fr.jmmc.jmal.image.ColorScale;
+import fr.jmmc.jmal.image.FFTUtils;
 import fr.jmmc.jmal.image.ImageArrayUtils;
 import fr.jmmc.jmal.image.job.ImageFlipJob;
 import fr.jmmc.jmal.image.job.ImageLowerThresholdJob;
@@ -26,13 +26,70 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.IndexColorModel;
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import net.jodk.lang.DoubleWrapper;
+import net.jodk.lang.FastMath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * This stateless class generates UV Map Image for the given user model (fits image or cube) and UV area
  * based on FFT computation
+ * 
+ * Note on FastMath performance:
+ * FastMath: use two tables for cos/sin [2049 doubles] i.e. 2 x 2049 x 8 = 32784 bytes
+ * 
+ --- testing cos(double) ---
+ Loop on     Math.cos(double), values in [0,2*PI], took 0.607 s
+ Loop on FastMath.cos(double), values in [0,2*PI], took 0.136 s... max delta: 5.273559366969494E-16
+ Loop on     Math.cos(double), values in [-10,10], took 0.603 s
+ Loop on FastMath.cos(double), values in [-10,10], took 0.129 s... max delta: 5.273559366969494E-16
+ Loop on     Math.cos(double), values in [-100,100], took 0.664 s
+ Loop on FastMath.cos(double), values in [-100,100], took 0.129 s... max delta: 5.273559366969494E-16
+ Loop on     Math.cos(double), values in [-1000000.0,1000000.0], took 0.761 s
+ Loop on FastMath.cos(double), values in [-1000000.0,1000000.0], took 0.279 s... max delta: 1.2490009027033011E-15
+ Loop on     Math.cos(double), values in [-1.0E12,1.0E12], took 4.363 s
+ Loop on FastMath.cos(double), values in [-1.0E12,1.0E12], took 1.037 s... max delta: 1.2628786905111156E-15
+ Loop(/10) on     Math.cos(double), values of all magnitudes, took 0.242 s
+ Loop(/10) on FastMath.cos(double), values of all magnitudes, took 0.1 s... max delta: 1.304512053934559E-15
+ Result differences for special values:... 
+ Math.cos(-1.5707963267948966)=6.123233995736766E-17
+ FastMath.cos(-1.5707963267948966)=6.12323399538461E-17
+ Math.cos(1.5707963267948966)=6.123233995736766E-17
+ FastMath.cos(1.5707963267948966)=6.12323399538461E-17
+
+ --- testing cosQuick(double) ---
+ Loop on          Math.cos(double), values in [-1000000.0,1000000.0], took 0.726 s
+ Loop on FastMath.cosQuick(double), values in [-1000000.0,1000000.0], took 0.049 s... max delta: 0.0015332563467862492
+
+ --- testing sin(double) ---
+ Loop on     Math.sin(double), values in [0,2*PI], took 0.62 s
+ Loop on FastMath.sin(double), values in [0,2*PI], took 0.141 s... max delta: 4.996003610813204E-16
+ Loop on     Math.sin(double), values in [-10,10], took 0.581 s
+ Loop on FastMath.sin(double), values in [-10,10], took 0.176 s... max delta: 4.996003610813204E-16
+ Loop on     Math.sin(double), values in [-100,100], took 0.642 s
+ Loop on FastMath.sin(double), values in [-100,100], took 0.176 s... max delta: 4.996003610813204E-16
+ Loop on     Math.sin(double), values in [-1000000.0,1000000.0], took 0.716 s
+ Loop on FastMath.sin(double), values in [-1000000.0,1000000.0], took 0.351 s... max delta: 1.0928757898653885E-15
+ Loop on     Math.sin(double), values in [-1.0E12,1.0E12], took 4.326 s
+ Loop on FastMath.sin(double), values in [-1.0E12,1.0E12], took 1.106 s... max delta: 1.1102230246251565E-15
+ Loop(/10) on     Math.sin(double), values of all magnitudes, took 0.246 s
+ Loop(/10) on FastMath.sin(double), values of all magnitudes, took 0.1 s... max delta: 1.1102230246251565E-15
+ Result differences for special values:... 
+ Math.sin(-3.141592653589793)=-1.2246467991473532E-16
+ FastMath.sin(-3.141592653589793)=-1.224646799076922E-16
+ Math.sin(3.141592653589793)=1.2246467991473532E-16
+ FastMath.sin(3.141592653589793)=1.224646799076922E-16
+ Math.sin(-1.7976931348623157E308)=-0.004961954789184062
+ FastMath.sin(-1.7976931348623157E308)=-0.004961954789184255
+ Math.sin(1.7976931348623157E308)=0.004961954789184062
+ FastMath.sin(1.7976931348623157E308)=0.004961954789184255
+
+ --- testing sinQuick(double) ---
+ Loop on          Math.sin(double), values in [-1000000.0,1000000.0], took 0.751 s
+ Loop on FastMath.sinQuick(double), values in [-1000000.0,1000000.0], took 0.053 s... max delta: 0.0015336206540357174
  *
  * @author Laurent BOURGES.
  */
@@ -50,6 +107,39 @@ public final class UserModelService {
   public static final double TWO_PI = 6.28318530717958623199592693708837032d;
   /** formatter for frequencies */
   private final static DecimalFormat df = new DecimalFormat("0.00#E0");
+  /** number of floats per data point */
+  private final static int DATA_1D_POINT_SIZE = 3;
+  /** lock used by localDoubleWrappers */
+  private final static Object lockDoubleWrappers = new Object();
+  /**
+   * ThreadLocal giving DoubleWrapper instances
+   */
+  private static final ThreadLocal<DoubleWrapper[]> localDoubleWrappers = new ThreadLocal<DoubleWrapper[]>() {
+    @Override
+    protected DoubleWrapper[] initialValue() {
+      final int length = 8; // 4 x (8 Object + 8 double) = 64 (cache line padding)
+
+      // synchronize to allocate arrays and instances together and (hopefully) contiguous:
+      synchronized (lockDoubleWrappers) {
+        final DoubleWrapper[] array = new DoubleWrapper[length];
+        for (int i = 0; i < length; i++) {
+          array[i] = new DoubleWrapper();
+        }
+        return array;
+      }
+    }
+  };
+
+  /** FastMath mode (fast or quick) */
+  public enum MathMode {
+
+    /** default (JDK), slow but very accurate: more than 1e-15 */
+    DEFAULT,
+    /** fast but very accurate: up to 1e-15 */
+    FAST,
+    /** faster but not accurate: up to 1e-3 */
+    QUICK
+  }
 
   /**
    * Forbidden constructor
@@ -63,37 +153,44 @@ public final class UserModelService {
    * @param userModel user model to load and prepare
    * @throws FitsException if any FITS error occured
    * @throws IOException IO failure
+   * @throws IllegalArgumentException if unsupported unit or unit conversion is not allowed or image has invalid keyword(s) / data
    */
-  public static void prepareUserModel(final UserModel userModel) throws FitsException, IOException {
+  public static void prepareUserModel(final UserModel userModel) throws FitsException, IOException, IllegalArgumentException {
     // clear previously cached data:
-    userModel.setFitsImage(null);
-    userModel.setModelData(null);
+    userModel.setModelDataList(null);
 
-    // throws FitsException or IOException if the image can not be read properly:
+    // throws FitsException or IOException or IllegalArgumentException if the image can not be read properly:
     final FitsImageFile imgFitsFile = FitsImageUtils.load(userModel.getFile());
 
-    if (imgFitsFile.getImageCount() == 0) {
+    final int nImages = imgFitsFile.getImageCount();
+
+    if (nImages == 0) {
       throw new FitsException("The Fits file '" + userModel.getFile() + "' does not contain any supported Fits image !");
     }
 
     final boolean useFastMode = Preferences.getInstance().isFastUserModel();
     logger.info("useFastMode: {}", useFastMode);
 
+    final List<UserModelData> modelDataList = new ArrayList<UserModelData>(nImages);
+
     final long start = System.nanoTime();
 
-    final FitsImage fitsImage = imgFitsFile.getFirstFitsImage();
-    final UserModelData modelData = new UserModelData();
+    for (final FitsImage fitsImage : imgFitsFile.getFitsImages()) {
+      final UserModelData modelData = new UserModelData();
 
-    prepareImage(fitsImage, modelData, useFastMode);
+      // note: fits image instance can be modified by image preparation:
+      // can throw IllegalArgumentException if image has invalid keyword(s) / data:
+      prepareImage(fitsImage, modelData, useFastMode);
 
-    if (logger.isInfoEnabled()) {
-      logger.info("prepareFitsFile: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
       logger.info("Prepared FitsImage: {}", fitsImage.toString(false));
+
+      modelDataList.add(modelData);
     }
 
+    logger.info("prepareFitsFile: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
+
     // update cached data if no exception occured:
-    userModel.setFitsImage(fitsImage);
-    userModel.setModelData(modelData);
+    userModel.setModelDataList(modelDataList);
   }
 
   /**
@@ -108,16 +205,21 @@ public final class UserModelService {
     if (model == null) {
       throw new IllegalStateException("User model is empty !");
     }
-    if (model.getFitsImage() == null) {
-      throw new IllegalStateException("Fits image is empty !");
+    if (!model.isModelDataReady()) {
+      throw new IllegalStateException("Fits image(s) are not prepared !");
     }
 
-    final FitsImage fitsImage = model.getFitsImage();
-    // check CRC:
-    if (model.getChecksum() != fitsImage.getChecksum()) {
-      throw new IllegalArgumentException("Fits image checksum is incorrect; please verify your file (probably modified) !");
+    for (final UserModelData modelData : model.getModelDataList()) {
+      final FitsImage fitsImage = modelData.getFitsImage();
+
+      // TODO: only possible with one Fits image or one Fits cube (single HDU):
+      // TODO: fix checksum for multiple fits HDU:
+      // check CRC:
+      if (model.getChecksum() != fitsImage.getChecksum()) {
+        throw new IllegalArgumentException("Fits image checksum is incorrect; please verify your file (probably modified) !");
+      }
+      checkFitsImage(fitsImage, uvMax);
     }
-    checkFitsImage(fitsImage, uvMax);
   }
 
   /**
@@ -145,7 +247,7 @@ public final class UserModelService {
     if (fitsImage.getIncCol() != fitsImage.getIncRow()) {
       throw new IllegalArgumentException("Fits image increments along row and column axes must be equals !");
     }
-    // TODO: support different axis increments ?
+    // TODO: support different axis increments on row and column axes ?
 
     final double increment = fitsImage.getIncRow();
 
@@ -313,7 +415,7 @@ public final class UserModelService {
     }
 
 
-    // 2 - Extract the amplitude/phase to get the uv map :
+    // 2 - Extract the amplitude/phase/square amplitude to get the uv map :
 
     // data as float [rows][cols]:
     float[][] data = FFTUtils.convert(fftOutputSize, visData, mode, outputSize, noiseService);
@@ -334,9 +436,8 @@ public final class UserModelService {
     final UVMapData uvMapData = ModelUVMapService.computeImage(uvRect, refMin, refMax, mode, imageSize, colorModel, colorScale,
             dataSize, visData, data, uvMapRect, noiseService);
 
-    if (logger.isInfoEnabled()) {
-      logger.info("compute : duration = {} ms.", 1e-6d * (System.nanoTime() - start));
-    }
+    logger.info("compute : duration = {} ms.", 1e-6d * (System.nanoTime() - start));
+
     return uvMapData;
   }
 
@@ -427,7 +528,7 @@ public final class UserModelService {
     final int half = length / 2;
 
     for (int i = 0; i < length; i++) {
-      coords[i] = (float) (increment * (i - half)); //in sky (radians).
+      coords[i] = (float) increment * (i - half); //in sky (radians).
       // On peut aussi utiliser les
       // valeurs du header avec values = (i-xref-1)*xdelt+xval
       // (fits commence à 1)
@@ -437,114 +538,206 @@ public final class UserModelService {
   }
 
   /**
-   * Clone the given context
-   *
-   * @param context compute context
-   *
-   * @return new compute context
-   */
-  public static UserModelComputeContext cloneContext(final UserModelComputeContext context) {
-    return new UserModelComputeContext(context.getFreqCount(), context.getUserModelData());
-  }
-
-  /**
-   * Prepare the complex visiblity computation of given models
-   *
-   * @param modelData user model data
-   * @param freqCount uv frequencey count used to preallocate arrays
-   * @return new compute context
-   */
-  public static UserModelComputeContext prepareModel(final UserModelData modelData, final int freqCount) {
-    if (modelData == null || freqCount <= 0) {
-      return null;
-    }
-
-    logger.info("ModelData: nData: {}", modelData.getNData());
-
-    return new UserModelComputeContext(freqCount, modelData);
-  }
-
-  /**
    * Compute the complex visiblity of the given user model for the given Ufreq and Vfreq arrays
    *
-   * @param context compute context
-   * @param ufreq U frequencies in rad-1
-   * @param vfreq V frequencies in rad-1
-   * @return normalized complex visibility or null if thread interrupted
+   * @param data1D user model data as 1D array
+   * @param fromData index of the first data to process
+   * @param endData index of the last data to process (exclusive)
+   * @param ufreq U frequencies in rad-1 x 2 PI
+   * @param vfreq V frequencies in rad-1 x 2 PI
+   * @param vis complex visibility array
+   * @param from index of the first wavelength to compute
+   * @param end index of the last wavelength to compute (exclusive)
+   * @param mathMode Math mode to use to compute trigonometric functions
    */
-  public static MutableComplex[] computeModel(final UserModelComputeContext context, final double[] ufreq, final double[] vfreq) {
-    MutableComplex[] vis = null;
+  public static void computeModel(final float[] data1D, final int fromData, final int endData,
+          final double[] ufreq, final double[] vfreq, final MutableComplex[] vis, final int from, final int end,
+          final MathMode mathMode) {
 
-    if (ufreq != null && vfreq != null && context != null) {
+    if (data1D != null && ufreq != null && vfreq != null && vis != null) {
 
-      final int nVis = ufreq.length;
-
-      if (nVis != vfreq.length || nVis != context.getFreqCount()) {
-        throw new IllegalStateException("Incorrect array sizes (Ufreq, VFreq, freqCount) !");
+      if (ufreq.length != vfreq.length || vis.length < ufreq.length) {
+        throw new IllegalStateException("Incorrect array sizes (Ufreq, VFreq, Vis) !");
       }
 
-      // reset complex visiblities:
-      vis = context.resetAndGetVis();
-
       // compute complex visiblities using exact fourier transform (slow):
-      compute1D(context.getUserModelData(), ufreq, vfreq, nVis, vis);
+      compute1D(data1D, fromData, endData, ufreq, vfreq, vis, from, end, mathMode);
     }
-
-    return vis;
   }
 
   /**
    * Compute exact discrete fourier transform / complex visiblity of given user model for the given Ufreq and Vfreq arrays
-   * @param modelData user model data
-   * @param ufreq U frequencies in rad-1
-   * @param vfreq V frequencies in rad-1
-   * @param nVis number of visibility to compute
+   * @param data1D user model data as 1D array
+   * @param fromData index of the first data to process
+   * @param endData index of the last data to process (exclusive)
+   * @param ufreq U frequencies in rad-1 x 2 PI
+   * @param vfreq V frequencies in rad-1 x 2 PI
    * @param vis complex visibility array
+   * @param from index of the first wavelength to compute
+   * @param end index of the last wavelength to compute (exclusive)
+   * @param mathMode Math mode to use to compute trigonometric functions
    */
-  private static void compute1D(final UserModelData modelData,
-          final double[] ufreq, final double[] vfreq, final int nVis, final MutableComplex[] vis) {
-
-    final int n1D = modelData.getNData();
-    final float[] data1D = modelData.getData1D();
-    final float[] colCoord1D = modelData.getColCoord1D();
-    final float[] rowCoord1D = modelData.getRowCoord1D();
+  private static void compute1D(final float[] data1D, final int fromData, final int endData,
+          final double[] ufreq, final double[] vfreq, final MutableComplex[] vis, final int from, final int end,
+          final MathMode mathMode) {
 
     /** Get the current thread to check if the computation is interrupted */
     final Thread currentThread = Thread.currentThread();
 
-    double kwCol, kwRow, z, flux, re, im;
+    final int lenData = endData - DATA_1D_POINT_SIZE;
 
-    // iterate on ufreq / vfreq:
-    for (int i = 0, j; i < nVis; i++) {
+//    logger.info("from {} to {}", offset, len);
 
-      // divide by lambda ?
-      kwCol = TWO_PI * ufreq[i];
-      kwRow = TWO_PI * vfreq[i];
+    /*
+     * Performance:
+     * - QUICK:
+     Timer [chunk[600000] - ms] [6]	{num = 6 :	min = 2197.30994,	avg = 2320.72833,	max = 2758.09333,	acc = 13924.37}
+     Timer [chunk[450000] - ms] [6]	{num = 6 :	min = 2163.82152,	avg = 2187.24396,	max = 2250.24739,	acc = 13123.46377}
+     Timer [chunk[337500] - ms] [6]	{num = 6 :	min = 2149.31863,	avg = 2198.63036,	max = 2327.58621,	acc = 13191.7822}
+     Timer [chunk[253125] - ms] [6]	{num = 6 :	min = 2170.0252,	avg = 2179.62133,	max = 2207.19855,	acc = 13077.72801}
+     Timer [chunk[189843] - ms] [6]	{num = 6 :	min = 2163.19821,	avg = 2183.49676,	max = 2264.70316,	acc = 13100.98056}
+     Timer [chunk[142382] - ms] [6]	{num = 6 :	min = 2152.85887,	avg = 2187.79126,	max = 2248.17353,	acc = 13126.74756}
+     Timer [chunk[106786] - ms] [6]	{num = 6 :	min = 2153.87358,	avg = 2167.66898,	max = 2193.36412,	acc = 13006.01392}
+     Timer [chunk[80089] - ms] [6]	{num = 6 :	min = 2144.14673,	avg = 2161.44585,	max = 2180.06556,	acc = 12968.67514}
+     Timer [chunk[60066] - ms] [6]	{num = 6 :	min = 2154.52333,	avg = 2169.33297,	max = 2206.79534,	acc = 13015.99783}
+     Timer [chunk[45049] - ms] [6]	{num = 6 :	min = 2140.7008,	avg = 2146.16914,	max = 2150.53099,	acc = 12877.01488}
+     Timer [chunk[33786] - ms] [6]	{num = 6 :	min = 2148.31889,	avg = 2195.75968,	max = 2297.56219,	acc = 13174.55808}
+     Timer [chunk[25339] - ms] [6]	{num = 6 :	min = 2135.89435,	avg = 2169.17585,	max = 2243.99312,	acc = 13015.05512}
+     Timer [chunk[19004] - ms] [6]	{num = 6 :	min = 2132.60587,	avg = 2157.38175,	max = 2243.52941,	acc = 12944.29052}
+     Timer [chunk[14253] - ms] [6]	{num = 6 :	min = 2134.62622,	avg = 2155.90243,	max = 2204.15121,	acc = 12935.41462}
+     Timer [chunk[10689] - ms] [6]	{num = 6 :	min = 2133.48513,	avg = 2148.59266,	max = 2170.79936,	acc = 12891.556}
+     Timer [chunk[8016] - ms] [6]	{num = 6 :	min = 2132.62025,	avg = 2161.33295,	max = 2205.75479,	acc = 12967.99775}
+     Timer [chunk[6012] - ms] [6]	{num = 6 :	min = 2130.40955,	avg = 2139.03898,	max = 2151.91463,	acc = 12834.23392}
+     Timer [chunk[4509] - ms] [6]	{num = 6 :	min = 2131.51534,	avg = 2163.09447,	max = 2247.2551,	acc = 12978.56683}
+     * 
+     * - FAST:
+     * 
+     Timer [chunk[600000] - ms] [6]	{num = 6 :	min = 6057.139,	avg = 6293.27596,	max = 6642.10127,	acc = 37759.65577}
+     Timer [chunk[450000] - ms] [6]	{num = 6 :	min = 6016.35241,	avg = 6147.07046,	max = 6523.63,	acc = 36882.42277}
+     Timer [chunk[337500] - ms] [6]	{num = 6 :	min = 6022.16359,	avg = 6065.2004,	max = 6104.91548,	acc = 36391.20241}
+     Timer [chunk[253125] - ms] [6]	{num = 6 :	min = 6019.71289,	avg = 6031.6292,	max = 6046.49311,	acc = 36189.77521}
+     Timer [chunk[189843] - ms] [6]	{num = 6 :	min = 6022.26495,	avg = 6055.0051,	max = 6112.85134,	acc = 36330.03065}
+     Timer [chunk[142382] - ms] [6]	{num = 6 :	min = 6012.305,	avg = 6026.99833,	max = 6054.79236,	acc = 36161.98998}
+     Timer [chunk[106786] - ms] [6]	{num = 6 :	min = 5999.2643,	avg = 6091.08765,	max = 6275.80363,	acc = 36546.52591}
+     Timer [chunk[80089] - ms] [6]	{num = 6 :	min = 5975.87674,	avg = 5997.58693,	max = 6020.7726,	acc = 35985.52163}
+     Timer [chunk[60066] - ms] [6]	{num = 6 :	min = 5997.09171,	avg = 6117.68266,	max = 6541.92285,	acc = 36706.09601}
+     Timer [chunk[45049] - ms] [6]	{num = 6 :	min = 5976.74927,	avg = 6043.52729,	max = 6108.33167,	acc = 36261.16378}
+     Timer [chunk[33786] - ms] [6]	{num = 6 :	min = 5986.14369,	avg = 6040.79816,	max = 6138.52005,	acc = 36244.78897}
+     Timer [chunk[25339] - ms] [6]	{num = 6 :	min = 5985.55532,	avg = 6001.17616,	max = 6016.55492,	acc = 36007.057}
+     Timer [chunk[19004] - ms] [6]	{num = 6 :	min = 5970.343,	avg = 5984.99634,	max = 6024.19756,	acc = 35909.97805}
+     Timer [chunk[14253] - ms] [6]	{num = 6 :	min = 5969.17255,	avg = 6041.71992,	max = 6222.17572,	acc = 36250.31957}
+     Timer [chunk[10689] - ms] [6]	{num = 6 :	min = 5967.60576,	avg = 6018.68233,	max = 6109.34226,	acc = 36112.09402}
+     Timer [chunk[8016] - ms] [6]	{num = 6 :	min = 5962.58387,	avg = 6002.71542,	max = 6066.26941,	acc = 36016.29257}
+     Timer [chunk[6012] - ms] [6]	{num = 6 :	min = 5954.25996,	avg = 5961.66638,	max = 5980.68242,	acc = 35769.9983}
+     Timer [chunk[4509] - ms] [6]	{num = 6 :	min = 5954.44538,	avg = 6009.70111,	max = 6144.77561,	acc = 36058.20671}     * 
+     * - DEFAULT (JDK):
+     [SwingWorker-pool-1] fr.jmmc.aspro.service.OIFitsCreatorService - computeModelVisibilities: duration = 44020.670999999995 ms.
+     */
+    double kwCol, kwRow, re, im, flux, z;
 
-      // initialize:
-      re = 0d;
-      im = 0d;
+    if (mathMode == MathMode.QUICK) {
 
-      // iterate on data points:
-      for (j = n1D - 1; j >= 0; j--) {
-        flux = data1D[j];
+      // iterate on ufreq / vfreq / vis by wavelength:
+      for (int i = from, j; i < end; i++) {
+        // divide by model image frequency ?
+        kwCol = TWO_PI * ufreq[i];
+        kwRow = TWO_PI * vfreq[i];
 
-        z = kwCol * colCoord1D[j] + kwRow * rowCoord1D[j];
+        // reset:
+        re = 0d;
+        im = 0d;
 
-        re += flux * Math.cos(z);
-        im -= flux * Math.sin(z);
+        // iterate on data points:
+        for (j = fromData; j <= lenData; j += DATA_1D_POINT_SIZE) {
+          flux = data1D[j];
+          z = kwCol * data1D[j + 1] + kwRow * data1D[j + 2];
 
-      } // data1D
+          re += flux * FastMath.cosQuick(z);
+          im -= flux * FastMath.sinQuick(z);
 
-      // fast interrupt :
-      if (currentThread.isInterrupted()) {
-        return;
-      }
+        } // data1D
 
-      // update complex instance (mutable):
-      vis[i].updateComplex(re, im);
+        // update complex instance (mutable):
+        vis[i].add(re, im);
 
-    } // vis
+        // fast interrupt :
+        if (currentThread.isInterrupted()) {
+          return;
+        }
+      } // vis
+    } else if (mathMode == MathMode.FAST) {
+
+      // TODO: use context or thread local
+      final DoubleWrapper[] dw = localDoubleWrappers.get();
+      final DoubleWrapper sw = dw[0];
+      final DoubleWrapper cw = dw[1];
+
+      // iterate on ufreq / vfreq / vis by wavelength:
+      for (int i = from, j; i < end; i++) {
+        // divide by model image frequency ?
+        kwCol = TWO_PI * ufreq[i];
+        kwRow = TWO_PI * vfreq[i];
+
+        // reset:
+        re = 0d;
+        im = 0d;
+
+        // iterate on data points:
+        for (j = fromData; j <= lenData; j += DATA_1D_POINT_SIZE) {
+          flux = data1D[j];
+          z = kwCol * data1D[j + 1] + kwRow * data1D[j + 2];
+
+          FastMath.sinAndCos(z, sw, cw);
+
+          im -= flux * sw.value;
+          re += flux * cw.value;
+
+        } // data1D
+
+        // update complex instance (mutable):
+        vis[i].add(re, im);
+
+        // fast interrupt :
+        if (currentThread.isInterrupted()) {
+          return;
+        }
+      } // vis
+    } else {
+
+      // iterate on ufreq / vfreq / vis by wavelength:
+      for (int i = from, j; i < end; i++) {
+        // divide by model image frequency ?
+        kwCol = TWO_PI * ufreq[i];
+        kwRow = TWO_PI * vfreq[i];
+
+        // reset:
+        re = 0d;
+        im = 0d;
+
+        // iterate on data points:
+        for (j = fromData; j <= lenData; j += DATA_1D_POINT_SIZE) {
+          flux = data1D[j];
+          z = kwCol * data1D[j + 1] + kwRow * data1D[j + 2];
+
+          // Test without cos/sin:
+//          re += flux * z;
+//          im += flux * z;
+
+          // use Math or StrictMath ?
+          re += flux * Math.cos(z);
+          im -= flux * Math.sin(z);
+
+        } // data1D
+
+        // update complex instance (mutable):
+        vis[i].add(re, im);
+
+        // fast interrupt :
+        if (currentThread.isInterrupted()) {
+          return;
+        }
+      } // vis
+    } // math mode
   }
 
   /**
@@ -553,8 +746,10 @@ public final class UserModelService {
    * @param fitsImage FitsImage to process
    * @param modelData prepared model data for direct Fourier transform
    * @param useFastMode true to ignore useless data
+   * @throws IllegalArgumentException if image has invalid keyword(s) / data
    */
-  public static void prepareImage(final FitsImage fitsImage, final UserModelData modelData, final boolean useFastMode) {
+  public static void prepareImage(final FitsImage fitsImage, final UserModelData modelData, final boolean useFastMode) throws IllegalArgumentException {
+
     if (!fitsImage.isDataRangeDefined()) {
       // update boundaries excluding zero values:
       FitsImageUtils.updateDataRangeExcludingZero(fitsImage);
@@ -810,6 +1005,9 @@ public final class UserModelService {
       fitsImage.setSignedIncCol(-incCol);
     }
 
+    // Update FFT ready fits image in model data:
+    modelData.setFitsImage(fitsImage);
+
     // 7 - prepare model data to compute direct Fourier transform:
     prepareModelData(fitsImage, modelData, thresholdVis);
   }
@@ -864,9 +1062,6 @@ public final class UserModelService {
     Arrays.sort(data1D);
 
     logger.info("FitsImage: {} float sorted.", n1D);
-    if (false) {
-      logger.info("FitsImage: {} float sorted: ", n1D, Arrays.toString(data1D));
-    }
 
     return data1D;
   }
@@ -904,11 +1099,10 @@ public final class UserModelService {
 
 
     // prepare 1D data (eliminate values lower than threshold):
+
     float[] row;
     int nUsedData = 0;
-    final float[] data1D = new float[nData];
-    final float[] colCoord1D = new float[nData];
-    final float[] rowCoord1D = new float[nData];
+    final float[] data1D = new float[nData * DATA_1D_POINT_SIZE];
 
     double totalFlux = 0d;
     float flux, rowCoord;
@@ -927,9 +1121,10 @@ public final class UserModelService {
           // keep this data point:
           totalFlux += flux;
           data1D[nUsedData] = flux;
-          colCoord1D[nUsedData] = colCoords[c];
-          rowCoord1D[nUsedData] = rowCoord;
-          nUsedData++;
+          data1D[nUsedData + 1] = colCoords[c];
+          data1D[nUsedData + 2] = rowCoord;
+
+          nUsedData += DATA_1D_POINT_SIZE;
         }
       } // columns
 
@@ -939,7 +1134,7 @@ public final class UserModelService {
       }
     } // rows
 
-    logger.info("prepareModelData: used pixels = {} / {}", nUsedData, nPixels);
+    logger.info("prepareModelData: used pixels = {} / {}", nUsedData / DATA_1D_POINT_SIZE, nPixels);
 
 
     // normalize flux to 1.0:
@@ -948,30 +1143,26 @@ public final class UserModelService {
     if (threshold != 0f) {
       final double normFactor = 1d / totalFlux;
 
-      for (int i = nUsedData - 1; i >= 0; i--) {
+      for (int i = 0; i < nUsedData; i += DATA_1D_POINT_SIZE) {
         data1D[i] = (float) (normFactor * data1D[i]);
       }
 
       totalFlux = 0d;
-      for (int i = nUsedData - 1; i >= 0; i--) {
+      for (int i = 0; i < nUsedData; i += DATA_1D_POINT_SIZE) {
         totalFlux += data1D[i];
       }
       logger.info("prepareModelData: totalFlux after normalization: {}", totalFlux);
     }
 
     // trim array size:
-    if (nUsedData != nData) {
+    if (nUsedData != data1D.length) {
       final float[] mData1D = new float[nUsedData];
-      final float[] mColCoord1D = new float[nUsedData];
-      final float[] mRowCoord1D = new float[nUsedData];
 
       System.arraycopy(data1D, 0, mData1D, 0, nUsedData);
-      System.arraycopy(rowCoord1D, 0, mRowCoord1D, 0, nUsedData);
-      System.arraycopy(colCoord1D, 0, mColCoord1D, 0, nUsedData);
 
-      modelData.set(nUsedData, mData1D, mColCoord1D, mRowCoord1D);
+      modelData.set(mData1D);
     } else {
-      modelData.set(nUsedData, data1D, colCoord1D, rowCoord1D);
+      modelData.set(data1D);
     }
   }
 
