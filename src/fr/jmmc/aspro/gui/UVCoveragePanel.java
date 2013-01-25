@@ -1623,7 +1623,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
                 // User Model:
 
                 // Get preloaded and prepared fits image:
-                final FitsImage fitsImage = target.getUserModel().getFitsImage();
+                // TODO: use all image collection not the first one only:
+                final FitsImage fitsImage = target.getUserModel().getModelDataList().get(0).getFitsImage();
 
                 if (fitsImage != null) {
 
@@ -2031,7 +2032,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
             } else if (false) {
               // TODO: support custom rectangular area ie extract area in centered FFT
               // User model
-              new UVMapSwingWorker(this, target.getUserModel().getFitsImage(), uvRect, refMin, refMax,
+              // TODO: use all image collection not the first one only:
+              new UVMapSwingWorker(this, target.getUserModel().getModelDataList().get(0).getFitsImage(), uvRect, refMin, refMax,
                       imageMode, imageSize, colorModel, colorScale, noiseService).executeTask();
             }
           } else {
@@ -2180,7 +2182,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     @Override
     public void refreshUI(final UVMapData uvMapData) {
       // delegates to uv coverage panel :
-      this.uvPanel.updateUVMap(uvMapData.getUvMap(), uvMapData.getDataMin(), uvMapData.getDataMax());
+      this.uvPanel.updateUVMap(uvMapData.getUvMap(), uvMapData.getDataMin(), uvMapData.getDataMax(), uvMapData.getColorScale());
 
       // update the status bar:
       StatusBar.showIfPrevious(MSG_COMPUTING_MAP, "uv map done.");
@@ -2253,11 +2255,11 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
       final Image subUVMap = uvMapData.getUvMap().getSubimage(x, y, w, h);
 
       // update the background image only:
-      updateUVMap(subUVMap, null, null);
+      updateUVMap(subUVMap, null, null, null);
 
     } else {
       // restore the background image and legend scale:
-      updateUVMap(uvMapData.getUvMap(), uvMapData.getDataMin(), uvMapData.getDataMax());
+      updateUVMap(uvMapData.getUvMap(), uvMapData.getDataMin(), uvMapData.getDataMax(), uvMapData.getColorScale());
     }
 
     // TODO: adjust axis bounds to exact viewed rectangle (i.e. avoid rounding errors) !!
@@ -2324,7 +2326,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
       this.chart.addSubtitle(mapLegend);
 
-      updateUVMap(uvMapData.getUvMap(), uvMapData.getDataMin(), uvMapData.getDataMax());
+      updateUVMap(uvMapData.getUvMap(), uvMapData.getDataMin(), uvMapData.getDataMax(), colorScale);
 
     } else {
       resetUVMap();
@@ -2335,7 +2337,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
    * Reset the background image of the chart
    */
   private void resetUVMap() {
-    updateUVMap(null, null, null);
+    updateUVMap(null, null, null, null);
   }
 
   /**
@@ -2343,13 +2345,33 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
    * @param uvMap image or null
    * @param dataMin minimum value to update color scale bounds
    * @param dataMax maximum value to update color scale bounds
+   * @param colorScale color scaling method
    */
-  private void updateUVMap(final Image uvMap, final Float dataMin, final Float dataMax) {
+  private void updateUVMap(final Image uvMap, final Float dataMin, final Float dataMax, final ColorScale colorScale) {
     if (uvMap != null) {
       if (dataMin != null && dataMax != null
               && dataMin.floatValue() != dataMax.floatValue() && !Float.isInfinite(dataMin) && !Float.isInfinite(dataMax)) {
+        logger.debug("data min = {} - max = {}", dataMin, dataMax);
+
+        double min = dataMin.doubleValue();
+        double max = dataMax.doubleValue();
+
+        if (colorScale == ColorScale.LOGARITHMIC) {
+          final double log10Min = Math.log10(min);
+          final double log10Max = Math.log10(max);
+
+          if ((int) log10Max - (int) log10Min == 0) {
+            // fix data range to lower and upper pow(10):
+            min = Math.pow(10d, Math.floor(log10Min));
+            max = Math.pow(10d, Math.ceil(log10Max));
+          }
+        }
+        if (logger.isDebugEnabled()) {
+          logger.debug("min = {} - max = {}", min, max);
+        }
+
         // fix axis boundaries:
-        this.mapLegend.getAxis().setRange(dataMin, dataMax);
+        this.mapLegend.getAxis().setRange(min, max);
       }
 
       this.xyPlot.setBackgroundPaint(null);
@@ -2631,6 +2653,12 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         for (OIFitsCreatorService oiFitsCreator : this.oiFitsCreatorList) {
           // Create the OIFits structure :
           oiFitsList.add(oiFitsCreator.createOIFits());
+
+          // fast interrupt :
+          if (Thread.currentThread().isInterrupted()) {
+            return null;
+          }
+          
         }
 
         result = oiFitsList;
