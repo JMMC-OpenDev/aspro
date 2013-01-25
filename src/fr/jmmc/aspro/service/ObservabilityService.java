@@ -70,7 +70,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import javax.xml.datatype.XMLGregorianCalendar;
 import org.ivoa.util.CollectionUtils;
 import org.slf4j.Logger;
@@ -642,7 +641,7 @@ public final class ObservabilityService {
       logger.debug("findCompatiblePoPs: {} chunks - size = {}", nChunks, stepCb);
     }
 
-    // computation tasks = 1 job per target (work stealing):
+    // computation tasks = 1 job per target and chunk (work stealing):
     final Callable<?>[] jobs = new Callable<?>[nRiseTargets * nChunks];
 
     // create estimate tasks:
