@@ -71,7 +71,7 @@ public final class Aspro2 extends App {
      * @return Aspro GUI singleton
      */
     public static Aspro2 getInstance() {
-        return (Aspro2) App.getSharedInstance();
+        return (Aspro2) App.getInstance();
     }
 
     /**
