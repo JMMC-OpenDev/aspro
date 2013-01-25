@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import net.jodk.lang.FastMath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,6 +26,8 @@ public final class DelayLineService {
   private static final Logger logger = LoggerFactory.getLogger(DelayLineService.class.getName());
   /** cached log debug enabled */
   private static final boolean DEBUG = false;
+  /** enable / disable FastMath */
+  private static final boolean USE_FAST_MATH = true;
   /** Range List containing a single full range (-12; +12) */
   public static final List<Range> FULL_RANGE_LIST = Arrays.asList(new Range(AsproConstants.HA_MIN, AsproConstants.HA_MAX));
   /** Empty Range list */
@@ -252,18 +255,17 @@ public final class DelayLineService {
       // impossible case : sinDec = 1 <=> cosDec = 0 !
       return false;
 
-    } else {
-      final double coeff = (wThrow - sinDec * baseLine.getZ()) / cosDec;
-
-      // A = (C + X)
-      final double a = coeff + baseLine.getX();
-      // B = (2 Y)
-      final double b = 2d * baseLine.getY();
-      // C = (C - X)
-      final double c = coeff - baseLine.getX();
-
-      return solveWEquation(a, b, c, ha);
     }
+    final double coeff = (wThrow - sinDec * baseLine.getZ()) / cosDec;
+
+    // A = (C + X)
+    final double a = coeff + baseLine.getX();
+    // B = (2 Y)
+    final double b = 2d * baseLine.getY();
+    // C = (C - X)
+    final double c = coeff - baseLine.getX();
+
+    return solveWEquation(a, b, c, ha);
   }
 
   /**
@@ -298,23 +300,20 @@ public final class DelayLineService {
 
     final double[] w = new double[2];
 
-    // w contains ha solutions:
+    // note: w contains ha solutions:
     if (solveWEquation(a, b, c, w)) {
       // 2 solutions :
       // w=cos(D)(cos(H)*X-sin(H)*Y)+sin(D)*Z
 
-      final double w1 = CalcUVW.computeW(cosDec, sinDec, baseLine, w[0]);
-      final double w2 = CalcUVW.computeW(cosDec, sinDec, baseLine, w[1]);
+      w[0] = CalcUVW.computeW(cosDec, sinDec, baseLine, w[0]);
+      w[1] = CalcUVW.computeW(cosDec, sinDec, baseLine, w[1]);
 
       // Ensure lower < higher:
-      if (w1 < w2) {
-        // define results:
-        w[0] = w1;
-        w[1] = w2;
-      } else {
-        // define results:
-        w[0] = w2;
-        w[1] = w1;
+      if (w[0] > w[1]) {
+        // swap w values:
+        final double w0 = w[0];
+        w[0] = w[1];
+        w[1] = w0;
       }
       return w;
     }
@@ -346,38 +345,49 @@ public final class DelayLineService {
         return false;
       }
       // 1 solution :
-      final double ha0 = Math.atan(-c / b);
-
-      // define solutions:
-      ha[0] = ha0;
-      ha[1] = ha0;
+      ha[0] = (USE_FAST_MATH) ? FastMath.atan(-c / b) : Math.atan(-c / b);
+      ha[1] = ha[0];
     } else {
       final double disc = b * b - 4d * a * c;
       if (disc <= 0d) {
         // no solution or only 1 point so reject it
         return false;
       }
-      // 2 solutions :
+      // 2 solutions:
+      // note: sqrt uses hardware function (JIT):
       final double square = Math.sqrt(disc);
 
       // define solutions:
-      ha[0] = Math.atan2(-b - square, 2d * a);
-      ha[1] = Math.atan2(-b + square, 2d * a);
-    }
+      final double two_a = 2d * a;
 
-    for (int i = 0; i < 2; i++) {
-      ha[i] *= 2d;
-      if (ha[i] > PI) {
-        ha[i] -= TWO_PI;
-      } else if (ha[i] < MINUS_PI) {
-        ha[i] += TWO_PI;
+      if (USE_FAST_MATH) {
+        ha[0] = FastMath.atan2(-b - square, two_a);
+        ha[1] = FastMath.atan2(-b + square, two_a);
+      } else {
+        ha[0] = Math.atan2(-b - square, two_a);
+        ha[1] = Math.atan2(-b + square, two_a);
       }
     }
+
+    ha[0] *= 2d;
+    if (ha[0] > PI) {
+      ha[0] -= TWO_PI;
+    } else if (ha[0] < MINUS_PI) {
+      ha[0] += TWO_PI;
+    }
+    ha[1] *= 2d;
+    if (ha[1] > PI) {
+      ha[1] -= TWO_PI;
+    } else if (ha[1] < MINUS_PI) {
+      ha[1] += TWO_PI;
+    }
+
     // arrange (useful for findWExtrema method) :
     if (ha[0] > ha[1]) {
-      final double h = ha[0];
+      // swap ha values:
+      final double ha0 = ha[0];
       ha[0] = ha[1];
-      ha[1] = h;
+      ha[1] = ha0;
     } else if (ha[0] == ha[1]) {
       ha[1] = ha[0] + PI;
     }

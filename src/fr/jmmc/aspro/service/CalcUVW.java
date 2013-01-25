@@ -4,12 +4,16 @@
 package fr.jmmc.aspro.service;
 
 import fr.jmmc.aspro.model.BaseLine;
+import net.jodk.lang.FastMath;
 
 /**
  * This class contains static computation methods to get the UVW values for a given baseline and a target declination
  * @author bourgesl
  */
 public final class CalcUVW {
+
+  /** enable / disable FastMath */
+  private static final boolean USE_FAST_MATH = true;
 
   /**
    * Forbidden constructor
@@ -49,6 +53,9 @@ public final class CalcUVW {
    * @return W coordinate in interferometric plan
    */
   public static double computeW(final double cosDec, final double sinDec, final BaseLine baseLine, final double ha) {
+    if (USE_FAST_MATH) {
+      return cosDec * (FastMath.cos(ha) * baseLine.getX() - FastMath.sin(ha) * baseLine.getY()) + sinDec * baseLine.getZ();
+    }
     return cosDec * (Math.cos(ha) * baseLine.getX() - Math.sin(ha) * baseLine.getY()) + sinDec * baseLine.getZ();
   }
 }
