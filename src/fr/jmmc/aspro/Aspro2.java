@@ -63,7 +63,7 @@ public final class Aspro2 extends App {
      */
     public static void main(final String[] args) {
         // Start application with the command line arguments
-        Bootstrapper.launch(new Aspro2(args));
+        Bootstrapper.launchApp(new Aspro2(args));
     }
 
     /**
@@ -189,14 +189,6 @@ public final class Aspro2 extends App {
     public void cleanup() {
         // dispose Swing SettingPanel:
         getSettingPanel().dispose();
-
-        // stop the task executor :
-        TaskSwingWorkerExecutor.stop();
-
-        // stop the parallel job executor:
-        ParallelJobExecutor.shutdown();
-
-        super.cleanup();
     }
 
     /**
