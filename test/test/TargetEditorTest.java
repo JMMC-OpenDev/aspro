@@ -6,6 +6,7 @@ package test;
 import fr.jmmc.aspro.gui.TargetEditorDialog;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.jmcs.App;
+import fr.jmmc.jmcs.Bootstrapper;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
 import java.io.File;
 import java.util.Locale;
@@ -45,7 +46,7 @@ public class TargetEditorTest {
       public void run() {
 
         // invoke App method to initialize logback now:
-        App.isReady();
+        Bootstrapper.getApplicationState();
 
         try {
           ObservationManager.getInstance().load(new File("/home/bourgesl/ASPRO2/VLTI_FUN2.asprox"));

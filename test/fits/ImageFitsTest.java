@@ -19,6 +19,7 @@ import fr.jmmc.jmal.image.ImageArrayUtils;
 import fr.jmmc.jmal.model.ImageMode;
 import fr.jmmc.jmal.model.UVMapData;
 import fr.jmmc.jmcs.App;
+import fr.jmmc.jmcs.Bootstrapper;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
 import fr.jmmc.oitools.image.FitsImage;
 import fr.jmmc.oitools.image.FitsImageFile;
@@ -75,7 +76,7 @@ public class ImageFitsTest {
    */
   public static void main(String[] args) {
 
-    App.isReady();
+    Bootstrapper.getApplicationState();
 
     // Set the default locale to en-US locale (for Numerical Fields "." ",")
     Locale.setDefault(Locale.US);
