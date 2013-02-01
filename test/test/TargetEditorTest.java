@@ -46,7 +46,7 @@ public class TargetEditorTest {
       public void run() {
 
         // invoke App method to initialize logback now:
-        Bootstrapper.getApplicationState();
+        Bootstrapper.getState();
 
         try {
           ObservationManager.getInstance().load(new File("/home/bourgesl/ASPRO2/VLTI_FUN2.asprox"));

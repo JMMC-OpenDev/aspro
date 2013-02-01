@@ -76,7 +76,7 @@ public class ImageFitsTest {
    */
   public static void main(String[] args) {
 
-    Bootstrapper.getApplicationState();
+    Bootstrapper.getState();
 
     // Set the default locale to en-US locale (for Numerical Fields "." ",")
     Locale.setDefault(Locale.US);
