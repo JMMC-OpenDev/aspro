@@ -108,9 +108,7 @@ public class ImageFitsTest {
         // Fits cube tests:
         if (true) {
             //String file = "/home/bourgesl/ASPRO2/fits/cube/chromatic_cube_aspro_jk.fits"; // 7 images but no WL keywords
-//      String file = "/home/bourgesl/ASPRO2/fits/cube/chromatic_cube_aspro_jk_with_Wlens.fits"; // 7 images with WL keywords      
-
-            String file = "/home/bourgesl/ASPRO2/fits/cube/SPHERE_GEN_OBS021_0005.fits.gz";
+            String file = "/home/bourgesl/ASPRO2/fits/cube/chromatic_cube_aspro_jk_with_Wlens.fits"; // 7 images with WL keywords      
 
             try {
                 testFastMode(file, Boolean.FALSE);
