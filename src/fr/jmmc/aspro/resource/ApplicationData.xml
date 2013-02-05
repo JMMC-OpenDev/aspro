@@ -18,8 +18,8 @@
     <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
   </company>
 
-  <program name="Aspro2" version="0.9.4 beta 6"/>
-  <compilation date="25/01/2013" compiler="JDK 1.5.0_16"/>
+  <program name="Aspro2" version="0.9.4 beta 7"/>
+  <compilation date="05/02/2013" compiler="JDK 1.5.0_16"/>
   
   <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
   <authors>the JMMC Technical Group</authors>
@@ -173,8 +173,12 @@
 
   <releasenotes>
     <release version="0.9.4">
+      <prerelease version="0.9.4 beta 7">
+        <change type="FEATURE">Improved OIFits computation to interpret and use multiple model images (Fits cube) when computing complex visiblities</change>
+        <change type="FEATURE">Improved OIFits computation to perform super sampling on spectral channels (use n sub channels and integration)</change>
+      </prerelease>
       <prerelease version="0.9.4 beta 6">
-        <change type="FEATURE">Improved Fits image panel to display all images loaded (animation)</change>
+        <change type="FEATURE">Improved Fits image panel to display all images loaded (animation) with their image index and wavelength in the legend area</change>
         <change type="FEATURE">Added Fits cube loading support (AXIS3 represents wavelength axis)</change>
         <change type="FEATURE">Added minimal Fits CUNIT keyword support to handle angle and wavelength conversions (deg, arcsec to rad) and (nm or micron to meter)</change>
         <change type="CHANGE">Optimized OIFits computation from an user model (better parallelism)</change>
