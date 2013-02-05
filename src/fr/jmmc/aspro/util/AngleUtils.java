@@ -3,6 +3,8 @@
  ******************************************************************************/
 package fr.jmmc.aspro.util;
 
+import net.jodk.lang.FastMath;
+
 /**
  * This class has several utility methods to convert angles 
  * @author bourgesl
@@ -12,7 +14,7 @@ public final class AngleUtils {
   /** degrees to hour angle = 15 */
   public final static double HA_TO_DEG = 15d;
   /** radian to hour angle */
-  public final static double RAD_TO_HOUR = 180d / Math.PI / HA_TO_DEG;
+  public final static double RAD_TO_HOUR = (180d / Math.PI) / HA_TO_DEG;
 
   /**
    * Forbidden constructor
@@ -45,7 +47,7 @@ public final class AngleUtils {
    * @return angle in radians
    */
   public static double hours2rad(final double ha) {
-    return Math.toRadians(ha * HA_TO_DEG);
+    return FastMath.toRadians(ha * HA_TO_DEG);
   }
 
   /**
