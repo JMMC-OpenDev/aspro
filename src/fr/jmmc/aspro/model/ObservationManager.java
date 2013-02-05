@@ -1452,7 +1452,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
     // use default value for UVMax slider (see UVCoveragePanel):
     double uvMax = 1.05d * maxBaseLine;
 
-    // Get lower wavelength for the selected instrument (se UVCoverageService):
+    // Get lower wavelength for the selected instrument (see UVCoverageService):
     final double instrumentMinWaveLength = AsproConstants.MICRO_METER
             * observation.getInstrumentConfiguration().getInstrumentConfiguration().getFocalInstrument().getWaveLengthMin();
 
