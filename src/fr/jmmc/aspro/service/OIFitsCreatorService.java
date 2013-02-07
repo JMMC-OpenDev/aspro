@@ -15,6 +15,7 @@ import fr.jmmc.aspro.model.oi.Position3D;
 import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.Target;
 import fr.jmmc.aspro.model.oi.Telescope;
+import fr.jmmc.aspro.model.oi.UserModel;
 import fr.jmmc.aspro.model.uvcoverage.UVRangeBaseLineData;
 import fr.jmmc.aspro.service.UserModelService.MathMode;
 import fr.jmmc.aspro.util.ComplexUtils;
@@ -262,9 +263,10 @@ public final class OIFitsCreatorService {
         this.createOIWaveLength();
 
         // Compute complex visibilities:
-        
-        // TODO: handle invalid cases:
-        this.computeModelVisibilities();
+        if (!this.computeModelVisibilities()) {
+            // unable to compute complex visiblities so abort:
+            return null;
+        }
 
         // fast interrupt :
         if (Thread.currentThread().isInterrupted()) {
@@ -481,23 +483,37 @@ public final class OIFitsCreatorService {
     /**
      * Compute complex visibilities using the target model (analytical or user model)
      * and store this data in local reference table
+     * @return true if complex visibilities are computed; false otherwise
      */
-    private void computeModelVisibilities() {
+    private boolean computeModelVisibilities() {
+
+        boolean computed = false;
 
         if (this.hasModel) {
-
-            /** Get the current thread to check if the computation is interrupted */
-            final Thread currentThread = Thread.currentThread();
-
-            final long start = System.nanoTime();
-
-            final boolean useAnalyticalModel = this.target.hasAnalyticalModel();
 
             logger.info("Instrument wavelength range: {} - {} µm [{} channels] [band = {} µm]",
                     NumberUtils.trimTo5Digits(1e6d * this.lambdaMin),
                     NumberUtils.trimTo5Digits(1e6d * this.lambdaMax), this.nWaveLengths,
                     NumberUtils.trimTo5Digits(1e6d * this.waveBand));
 
+            /** Get the current thread to check if the computation is interrupted */
+            final Thread currentThread = Thread.currentThread();
+
+            final long start = System.nanoTime();
+
+            // Effective number of spectral channels on the detector:
+            final int nChannels = nWaveLengths;
+
+            final boolean useAnalyticalModel = this.target.hasAnalyticalModel();
+
+            // user model if defined:
+            final UserModel userModel = (!useAnalyticalModel) ? target.getUserModel() : null;
+            
+            // Test if user model data is valid:
+            if (!userModel.isModelDataReady()) {
+                return false;
+            }
+            
             // use the preference (QUICK, FAST, DEFAULT?) : QUICK = PREVIEW ie No super sampling
             final UserModelService.MathMode mathMode = this.mathModeOIFits;
 
@@ -506,27 +522,42 @@ public final class OIFitsCreatorService {
             // number of samples per spectral channel (1, 5, 9 ...) use the preference (SuperSampling)
             // should be an even number to keep wavelengths centered on each sub channels:
             // note: disable super sampling in high resolution:
-            final int nSamples = (this.nWaveLengths > 100 || mathMode == MathMode.QUICK) ? 1 : this.supersamplingOIFits;
+            int nSamples = (nChannels > 100 || mathMode == MathMode.QUICK) ? 1 : this.supersamplingOIFits;
 
-            logger.info("computeModelVisibilities: nSamples = {}.", nSamples);
-
-            final int nChannels = nWaveLengths;
-
+            double deltaLambda = this.waveBand / nSamples;
+            
             // If Fits cube: use all images at least i.e. adjust frequencies and nSamples
 
-            final double wlInc = (!useAnalyticalModel && target.getUserModel().isModelDataReady())
-                    ? target.getUserModel().getModelDataList().get(0).getIncWL() : Double.POSITIVE_INFINITY;
+            final double wlInc = (userModel.isModelDataReady()) ? userModel.getModelData(0).getIncWL() : Double.POSITIVE_INFINITY;
 
-            final double lambaInc = Math.min(this.waveBand, wlInc) / nSamples;
+            // Sub channel width:
+            if (wlInc < deltaLambda) {
+                // adjust nSamples to have deltaLambda < wlInc:
+                nSamples = (int)Math.ceil(nSamples * this.waveBand / wlInc);
+            }
 
+            // Prefer odd number of sub channels:
+            if (nSamples % 2 == 0) {
+                nSamples++;
+            }
+            
+            logger.info("computeModelVisibilities: nSamples = {}", nSamples);
+            
+            deltaLambda = this.waveBand / nSamples;
+
+            // TODO: determine when to use super sampling (model images increment or ...)
+            // note: integration must be adjusted to use wavelengths in each spectral channel !
+            
 //            logger.info("wlInc = {}", wlInc);
 //            logger.info("lambdaInc = {}", lambaInc);
 
-            final double[] sampleWaveLengths = (nSamples > 1) ? computeWaveLengths(this.lambdaMin, this.lambdaMax, lambaInc) : this.waveLengths;
+            final double[] sampleWaveLengths = (nSamples > 1) ? computeWaveLengths(this.lambdaMin, this.lambdaMax, deltaLambda) : this.waveLengths;
 
             // local vars:
             final int nWLen = sampleWaveLengths.length;
 
+            logger.info("computeModelVisibilities: nWLen = {} - nChannels = {}", nWLen, nChannels);
+            
             final int nBl = nBaseLines;
             final int nHA = nHAPoints;
             final NoiseService ns = noiseService;
@@ -535,7 +566,7 @@ public final class OIFitsCreatorService {
 
             // fast interrupt :
             if (currentThread.isInterrupted()) {
-                return;
+                return false;
             }
 
             final int nRows = nHA * nBl;
@@ -609,17 +640,12 @@ public final class OIFitsCreatorService {
 
                     if (currentThread.isInterrupted()) {
                         // fast interrupt :
-                        return;
+                        return false;
                     }
 
                 } // rows
 
             } else {
-                // Get prepared user model data:
-                if (!target.getUserModel().isModelDataReady()) {
-                    // TODO: handle this invalid case: throw illegal state exception ?
-                    return;
-                }
 
                 // Accuracy tests (see OIFitsWriterTest) on GRAVITY so VISAMPERR/VISPHIERR are only 'sampled':
                 // FAST provides good accuracy on complete OIFits:
@@ -674,7 +700,7 @@ public final class OIFitsCreatorService {
                 if (modelParts == null) {
                     // invalid wavelength range:
                     // TODO: handle such case: everything in NaN / flags = T
-                    return;
+                    return false;
                 }
 
                 // TODO: handle not computed wavelengths when image wavelengths are inside instrument wavelength range [NaN + flags]
@@ -813,7 +839,7 @@ public final class OIFitsCreatorService {
 
             if (currentThread.isInterrupted()) {
                 // fast interrupt :
-                return;
+                return false;
             }
 
             // Sampling integration on spectral channels:
@@ -821,7 +847,8 @@ public final class OIFitsCreatorService {
 
             final ImmutableComplex[][] cVis = new ImmutableComplex[nRows][nChannels];
 
-            if (nSamples <= 1) {
+            // Super sampling ?
+            if (sampleWaveLengths == this.waveLengths) {
                 // Simple convert array:
                 // Iterate on rows :
                 for (int k = 0; k < nRows; k++) {
@@ -829,8 +856,45 @@ public final class OIFitsCreatorService {
                     cVis[k] = convertArray(cmVis[k], nChannels);
                 }
             } else {
+                
+                // Prepare mapping of sampled channels:
+                final int[] fromWL = new int[nChannels];
+                final int[] endWL = new int[nChannels];
+
+                // Note: sometimes sub channels may overlap channel limits
+                final double halfBand = 0.5d * this.waveBand;
+                
+                for (int l = 0; l < nChannels; l++) {
+                    final double wlMin = this.waveLengths[l] - halfBand;
+                    final double wlMax = this.waveLengths[l] + halfBand;
+
+                    fromWL[l] = -1;
+                    endWL[l] = -1;
+                    
+                    for (int i = 0; i < nWLen; i++) {
+                        if (sampleWaveLengths[i] < wlMin) {
+                            continue;
+                        }
+                        if (sampleWaveLengths[i] > wlMax) {
+                            endWL[l] = i;
+                            break;
+                        }
+                        if (fromWL[l] == -1) {
+                            fromWL[l] = i;
+                        }
+                    }
+                    if (endWL[l] == -1) {
+                        endWL[l] = nWLen;
+                    }
+                }
+                
+                final double[] normFactorWL = new double[nChannels];
+
+                for (int l = 0; l < nChannels; l++) {
+                    normFactorWL[l] = 1d / (endWL[l] - fromWL[l]);
+                }
+                
                 final MutableComplex integrator = new MutableComplex();
-                final double normFactor = 1d / nSamples;
 
                 // Iterate on rows :
                 for (int i, k = 0, l; k < nRows; k++) {
@@ -842,11 +906,11 @@ public final class OIFitsCreatorService {
                         // reset
                         integrator.updateComplex(0d, 0d);
 
-                        for (i = 0; i < nSamples; i++) {
-                            integrator.add(cmVisRow[l * nSamples + i]);
+                        for (i = fromWL[l]; i < endWL[l]; i++) {
+                            integrator.add(cmVisRow[i]);
                         }
                         // normalize:
-                        integrator.multiply(normFactor);
+                        integrator.multiply(normFactorWL[l]);
 
                         cVisRow[l] = new ImmutableComplex(integrator); // immutable for safety
                     }
@@ -867,11 +931,13 @@ public final class OIFitsCreatorService {
                 }
             }
 
+            computed = true;
             this.visComplex = cVis;
             this.visError = cVisError;
 
             logger.info("computeModelVisibilities: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
         }
+        return computed;
     }
 
     private List<UserModelComputePart> mapUserModel(final List<UserModelData> modelDataList, final double[] sampleWaveLengths) {
