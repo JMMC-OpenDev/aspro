@@ -93,7 +93,8 @@ public class ImageFitsTest {
 
         // Fits image with unit / lambda keywords tests:
         if (false) {
-            String file = "/home/bourgesl/ASPRO2/fits/aspro_keywords.fits"; // BUNIT / CUNIT
+//            String file = "/home/bourgesl/ASPRO2/fits/aspro_keywords.fits"; // BUNIT / CUNIT
+            String file = "/home/bourgesl/ASPRO2/fits/tests/Microlensing.fits.gz"; // BUNIT / CUNIT
 
             try {
                 testFastMode(file, Boolean.FALSE);
@@ -106,7 +107,7 @@ public class ImageFitsTest {
         }
 
         // Fits cube tests:
-        if (true) {
+        if (false) {
             //String file = "/home/bourgesl/ASPRO2/fits/cube/chromatic_cube_aspro_jk.fits"; // 7 images but no WL keywords
             String file = "/home/bourgesl/ASPRO2/fits/cube/chromatic_cube_aspro_jk_with_Wlens.fits"; // 7 images with WL keywords      
 
@@ -121,7 +122,7 @@ public class ImageFitsTest {
 
         // fast mode tests:
 
-        if (true) {
+        if (false) {
             String file = "/home/bourgesl/ASPRO2/fits/58Eri_clumpy_K_1024.fits"; // diluted
 
             try {
@@ -134,7 +135,7 @@ public class ImageFitsTest {
             return;
         }
 
-        if (true) {
+        if (false) {
 //      String file = "/home/bourgesl/ASPRO2/fits/SG_surface2.fits";
 //      String file = "/home/bourgesl/ASPRO2/fits/tests/HighMass.fits.gz"; // spiral       
 //      String file = "/home/bourgesl/ASPRO2/fits/ellipsePlusPunct.fits";
@@ -172,7 +173,7 @@ public class ImageFitsTest {
 
                 UserModelService.prepareUserModel(model);
 
-                FitsImage fitsImage = model.getModelDataList().get(0).getFitsImage();
+                FitsImage fitsImage = model.getModelData(0).getFitsImage();
 
                 logger.info("Prepared FitsImage: " + fitsImage.toString(false));
 
@@ -278,7 +279,7 @@ public class ImageFitsTest {
             }
         }
 
-        if (false) {
+        if (true) {
             final File directory = new File("/home/bourgesl/ASPRO2/fits/tests/");
             if (directory.exists() && directory.isDirectory()) {
 
@@ -302,14 +303,14 @@ public class ImageFitsTest {
 
                             UserModelService.prepareUserModel(model);
 
-                            FitsImage fitsImage = model.getModelDataList().get(0).getFitsImage();
+                            FitsImage fitsImage = model.getModelData(0).getFitsImage();
 
                             logger.info("Prepared FitsImage: " + fitsImage.toString(false));
 
                             showFitsPanel(fitsImage.getFitsImageIdentifier(), fitsImage);
 
-                            if (false) {
-                                return;
+                            if (true) {
+                                continue;
                             }
 
                             file = directory.getAbsolutePath() + "/COPY_" + f.getName();
@@ -357,7 +358,7 @@ public class ImageFitsTest {
 
         UserModelService.prepareUserModel(model);
 
-        FitsImage fitsImage = model.getModelDataList().get(0).getFitsImage();
+        FitsImage fitsImage = model.getModelData(0).getFitsImage();
 
         logger.info("Prepared FitsImage[" + fastMode + "]: " + fitsImage.toString(false));
 
