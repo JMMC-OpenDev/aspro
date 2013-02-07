@@ -5,6 +5,7 @@ package fr.jmmc.aspro.service;
 
 import fr.jmmc.aspro.model.OIBase;
 import fr.jmmc.oitools.image.FitsImage;
+import fr.jmmc.oitools.image.FitsImageHDU;
 
 /**
  * This class gathers prepared user model data as FitsImage (FFT) and 1D arrays (exact FT) (normalized flux and X/Y spatial coordinates) 
@@ -34,6 +35,15 @@ public final class UserModelData extends OIBase {
      */
     public FitsImage getFitsImage() {
         return fitsImage;
+    }
+
+    /* image meta data */
+    /**
+     * Return the FITS image HDU
+     * @return FITS image HDU
+     */
+    public FitsImageHDU getFitsImageHDU() {
+        return fitsImage.getFitsImageHDU();
     }
 
     /**
