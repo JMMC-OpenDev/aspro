@@ -1182,7 +1182,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         // update checksum before validation:
         if (userModel.isModelDataReady()) {
             // note: only possible with one Fits image or one Fits cube (single HDU):
-            final FitsImageHDU fitsImageHDU = userModel.getModelDataList().get(0).getFitsImage().getFitsImageHDU();
+            final FitsImageHDU fitsImageHDU = userModel.getModelData(0).getFitsImageHDU();
 
             final String hduHeader = "ImageHDU#" + fitsImageHDU.getHduIndex() + " has "
                     + fitsImageHDU.getImageCount() + " images.\n\n" + fitsImageHDU.getHeaderCardsAsString("\n");
@@ -1298,7 +1298,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
             // update checksum before validation:
             if (userModel.isModelDataReady()) {
                 // note: only possible with one Fits image or one Fits cube (single HDU):
-                final FitsImageHDU fitsImageHDU = userModel.getModelDataList().get(0).getFitsImage().getFitsImageHDU();
+                final FitsImageHDU fitsImageHDU = userModel.getModelData(0).getFitsImageHDU();
 
                 userModel.setChecksum(fitsImageHDU.getChecksum());
             }
