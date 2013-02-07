@@ -172,6 +172,17 @@ public class UserModel
   public boolean isModelDataReady() {
     return modelDataList != null && !modelDataList.isEmpty();
   }
+  /**
+   * Return the Cached model data given its image index (read only)
+   * @param index image index [0; n[
+   * @return Cached model data (read only)
+   */
+  public fr.jmmc.aspro.service.UserModelData getModelData(final int index) {
+      if (isModelDataReady() && index < modelDataList.size()) {
+          return modelDataList.get(index);
+      }
+    return null;
+  }
 
   /**
    * Return the Cached model data corresponding to the file reference (read only)
