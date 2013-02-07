@@ -1541,7 +1541,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
    */
   private Date convertCalendarToDate(final Calendar cal, final Date min, final Date max) {
 
-    // TODO: check if it is correct: Calendar.roll vs Calendar.add !!
+    // Note: use Calendar.roll to only fix date field
 
     if (cal.getTimeInMillis() >= min.getTime()) {
 
