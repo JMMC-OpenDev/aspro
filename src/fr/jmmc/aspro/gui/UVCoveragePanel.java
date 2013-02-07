@@ -2712,17 +2712,22 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
                 final List<OIFitsFile> oiFitsList = new ArrayList<OIFitsFile>(this.oiFitsCreatorList.size());
 
                 for (OIFitsCreatorService oiFitsCreator : this.oiFitsCreatorList) {
-                    // Create the OIFits structure :
-                    oiFitsList.add(oiFitsCreator.createOIFits());
+                    // Create the OIFits structure and compute its values:
+                    final OIFitsFile oiFitsFile = oiFitsCreator.createOIFits();
+
+                    if (oiFitsFile != null) {
+                        oiFitsList.add(oiFitsFile);
+                    }
 
                     // fast interrupt :
                     if (Thread.currentThread().isInterrupted()) {
                         return null;
                     }
-
                 }
 
-                result = oiFitsList;
+                if (!oiFitsList.isEmpty()) {
+                    result = oiFitsList;
+                }
 
                 _logger.info("compute[OIFitsFiles]: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
 
