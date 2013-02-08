@@ -510,7 +510,7 @@ public final class OIFitsCreatorService {
             final UserModel userModel = (!useAnalyticalModel) ? target.getUserModel() : null;
             
             // Test if user model data is valid:
-            if (!userModel.isModelDataReady()) {
+            if (userModel != null && !userModel.isModelDataReady()) {
                 return false;
             }
             
@@ -528,7 +528,7 @@ public final class OIFitsCreatorService {
             
             // If Fits cube: use all images at least i.e. adjust frequencies and nSamples
 
-            final double wlInc = (userModel.isModelDataReady()) ? userModel.getModelData(0).getIncWL() : Double.POSITIVE_INFINITY;
+            final double wlInc = (userModel != null && userModel.isModelDataReady()) ? userModel.getModelData(0).getIncWL() : Double.POSITIVE_INFINITY;
 
             // Sub channel width:
             if (wlInc < deltaLambda) {
