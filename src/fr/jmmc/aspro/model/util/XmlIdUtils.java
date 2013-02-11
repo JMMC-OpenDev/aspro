@@ -27,7 +27,7 @@ public final class XmlIdUtils {
    */
   public static String convert(final String value) {
 
-    final int len = value.length();
+    final int len = (value != null) ? value.length() : 0;
     final StringBuilder sb = new StringBuilder(len);
 
     char ch;
