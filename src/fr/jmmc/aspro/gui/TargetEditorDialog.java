@@ -191,7 +191,7 @@ public final class TargetEditorDialog extends javax.swing.JPanel implements Disp
                 if (selected == targetModelForm) {
                     // refresh the tree according to the new target / calibrator list
                     // and select the target :
-                    targetModelForm.initialize(targetForm.getCurrentTarget().getName());
+                    targetModelForm.initialize((targetForm.getCurrentTarget() != null) ? targetForm.getCurrentTarget().getName() : null);
                 } else if (selected == targetForm) {
                     targetModelForm.disableForm();
                     // select the target :

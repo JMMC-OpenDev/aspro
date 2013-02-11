@@ -163,6 +163,35 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
     void initialize(final String targetName) {
         this.generateTree();
         this.selectTarget(Target.getTarget(targetName, this.editTargets));
+
+        if (targetName == null) {
+            // Use a new target to reset form fields:
+            processTargetSelection(new Target());
+            resetForm();
+        }
+    }
+
+    /**
+     * Reset and disable this form when no target is present
+     */
+    private void resetForm() {
+        // Use a new target to reset form fields:
+        processTargetSelection(new Target());
+
+        // disable buttons:
+        this.jRadioButtonAnalytical.setEnabled(false);
+        this.jRadioButtonUserModel.setEnabled(false);
+        this.jButtonAdd.setEnabled(false);
+
+        // disable fields:
+        this.jComboBoxModelType.setEnabled(false);
+
+        this.jRadioButtonXY.setEnabled(false);
+        this.jRadioButtonRhoTheta.setEnabled(false);
+        this.jButtonNormalizeFluxes.setEnabled(false);
+
+        // reset current target:
+        this.currentTarget = null;
     }
 
     /**
