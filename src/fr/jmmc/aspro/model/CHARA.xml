@@ -1176,11 +1176,11 @@ Configuration d’enregistrement
 
       <!-- Noise modelling parameters -->
         <!-- The transmission of interferometer+instrument at observed wavelength (typically 0.01) -->
-        <transmission>0.05</transmission>
+        <transmission>0.0025</transmission>
         <!-- The Detector individual integration time in seconds (typically less than 0.1s) -->
         <dit>0.01</dit>
         <!-- ron: The Detector readout noise (typically 10) -->
-        <ron>10</ron>
+        <ron>15</ron>
         <!-- detectorSaturation: The Detector is non-linear above (to avoid saturation/non-linearity) (typically more than 20000) -->
         <detectorSaturation>50000</detectorSaturation>
         <!-- instrumentVisibility: The instrumental visibility (multiplicative) [0.0 - 1.0] (typically 0.9) -->
@@ -1211,10 +1211,11 @@ Configuration d’enregistrement
           The number of spectral channels of this instrument mode (optional)
           <numberChannels>n</numberChannels>
         -->
+        <!-- 1.476 - 1.755 (8 channels) -->
         <!-- waveLengthMin: The lower wave length of this instrument mode -->
-        <waveLengthMin>1.45509384</waveLengthMin>
+        <waveLengthMin>1.4551</waveLengthMin>
         <!-- waveLengthMax: The upper wave length of this instrument mode -->
-        <waveLengthMax>1.77235691</waveLengthMax>
+        <waveLengthMax>1.7724</waveLengthMax>
       </mode>
       <mode>
         <name>Low_K</name>
@@ -1225,8 +1226,9 @@ Configuration d’enregistrement
       <mode>
         <name>Medium_H</name>
         <resolution>150</resolution>
-        <waveLengthMin>1.5</waveLengthMin>
-        <waveLengthMax>1.8</waveLengthMax>
+        <!-- 1.476 - 1.755 (26 channels) -->
+        <waveLengthMin>1.4704</waveLengthMin>
+        <waveLengthMax>1.7606</waveLengthMax>
       </mode>
       <mode>
         <name>Medium_K</name>
@@ -1237,8 +1239,9 @@ Configuration d’enregistrement
       <mode>
         <name>High_H</name>
         <resolution>400</resolution>
-        <waveLengthMin>1.5</waveLengthMin>
-        <waveLengthMax>1.8</waveLengthMax>
+        <!-- 1.476 - 1.755 (70 channels) -->
+        <waveLengthMin>1.4740</waveLengthMin>
+        <waveLengthMax>1.7570</waveLengthMax>
       </mode>
       <mode>
         <name>High_K</name>
@@ -1478,11 +1481,11 @@ Configuration d’enregistrement
 
       <!-- Noise modelling parameters -->
         <!-- The transmission of interferometer+instrument at observed wavelength (typically 0.01) -->
-        <transmission>0.05</transmission>
+        <transmission>0.0025</transmission>
         <!-- The Detector individual integration time in seconds (typically less than 0.1s) -->
         <dit>0.01</dit>
         <!-- ron: The Detector readout noise (typically 10) -->
-        <ron>10</ron>
+        <ron>15</ron>
         <!-- detectorSaturation: The Detector is non-linear above (to avoid saturation/non-linearity) (typically more than 20000) -->
         <detectorSaturation>50000</detectorSaturation>
         <!-- instrumentVisibility: The instrumental visibility (multiplicative) [0.0 - 1.0] (typically 0.9) -->
@@ -1513,22 +1516,24 @@ Configuration d’enregistrement
           The number of spectral channels of this instrument mode (optional)
           <numberChannels>n</numberChannels>
         -->
+        <!-- 1.476 - 1.755 (8 channels) -->
         <!-- waveLengthMin: The lower wave length of this instrument mode -->
-        <waveLengthMin>1.45509384</waveLengthMin>
+        <waveLengthMin>1.4551</waveLengthMin>
         <!-- waveLengthMax: The upper wave length of this instrument mode -->
-        <waveLengthMax>1.77235691</waveLengthMax>
+        <waveLengthMax>1.7724</waveLengthMax>
       </mode>
       <mode>
         <name>Low_K</name>
-        <resolution>45</resolution>
+        <resolution>40</resolution>
         <waveLengthMin>2.0</waveLengthMin>
         <waveLengthMax>2.5</waveLengthMax>
       </mode>
       <mode>
         <name>Medium_H</name>
         <resolution>150</resolution>
-        <waveLengthMin>1.5</waveLengthMin>
-        <waveLengthMax>1.8</waveLengthMax>
+        <!-- 1.476 - 1.755 (26 channels) -->
+        <waveLengthMin>1.4704</waveLengthMin>
+        <waveLengthMax>1.7606</waveLengthMax>
       </mode>
       <mode>
         <name>Medium_K</name>
@@ -1539,8 +1544,9 @@ Configuration d’enregistrement
       <mode>
         <name>High_H</name>
         <resolution>400</resolution>
-        <waveLengthMin>1.5</waveLengthMin>
-        <waveLengthMax>1.8</waveLengthMax>
+        <!-- 1.476 - 1.755 (70 channels) -->
+        <waveLengthMin>1.4740</waveLengthMin>
+        <waveLengthMax>1.7570</waveLengthMax>
       </mode>
       <mode>
         <name>High_K</name>
@@ -1565,11 +1571,11 @@ Configuration d’enregistrement
 
       <!-- Noise modelling parameters -->
         <!-- The transmission of interferometer+instrument at observed wavelength (typically 0.01) -->
-        <transmission>0.05</transmission>
+        <transmission>0.0025</transmission>
         <!-- The Detector individual integration time in seconds (typically less than 0.1s) -->
         <dit>0.01</dit>
         <!-- ron: The Detector readout noise (typically 10) -->
-        <ron>10</ron>
+        <ron>15</ron>
         <!-- detectorSaturation: The Detector is non-linear above (to avoid saturation/non-linearity) (typically more than 20000) -->
         <detectorSaturation>50000</detectorSaturation>
         <!-- instrumentVisibility: The instrumental visibility (multiplicative) [0.0 - 1.0] (typically 0.9) -->
@@ -1600,22 +1606,24 @@ Configuration d’enregistrement
           The number of spectral channels of this instrument mode (optional)
           <numberChannels>n</numberChannels>
         -->
+        <!-- 1.476 - 1.755 (8 channels) -->
         <!-- waveLengthMin: The lower wave length of this instrument mode -->
-        <waveLengthMin>1.45509384</waveLengthMin>
+        <waveLengthMin>1.4551</waveLengthMin>
         <!-- waveLengthMax: The upper wave length of this instrument mode -->
-        <waveLengthMax>1.77235691</waveLengthMax>
+        <waveLengthMax>1.7724</waveLengthMax>
       </mode>
       <mode>
         <name>Low_K</name>
-        <resolution>45</resolution>
+        <resolution>40</resolution>
         <waveLengthMin>2.0</waveLengthMin>
         <waveLengthMax>2.5</waveLengthMax>
       </mode>
       <mode>
         <name>Medium_H</name>
         <resolution>150</resolution>
-        <waveLengthMin>1.5</waveLengthMin>
-        <waveLengthMax>1.8</waveLengthMax>
+        <!-- 1.476 - 1.755 (26 channels) -->
+        <waveLengthMin>1.4704</waveLengthMin>
+        <waveLengthMax>1.7606</waveLengthMax>
       </mode>
       <mode>
         <name>Medium_K</name>
@@ -1626,8 +1634,9 @@ Configuration d’enregistrement
       <mode>
         <name>High_H</name>
         <resolution>400</resolution>
-        <waveLengthMin>1.5</waveLengthMin>
-        <waveLengthMax>1.8</waveLengthMax>
+        <!-- 1.476 - 1.755 (70 channels) -->
+        <waveLengthMin>1.4740</waveLengthMin>
+        <waveLengthMax>1.7570</waveLengthMax>
       </mode>
       <mode>
         <name>High_K</name>
