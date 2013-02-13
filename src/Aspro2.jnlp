@@ -25,7 +25,7 @@
     <jar href="jar/aspro.jar" />
 
     <!-- Configuration module -->
-    <extension href="../AsproConf/AsproConf.jnlp"/>
+    <extension href="../AsproConfig/AsproConfig.jnlp"/>
 
     <!-- JMMC modules -->
     <jar href="jar/jmcs.jar" />
