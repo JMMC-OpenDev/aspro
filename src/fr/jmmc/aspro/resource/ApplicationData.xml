@@ -18,8 +18,8 @@
     <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
   </company>
 
-  <program name="Aspro2" version="0.9.4 beta 7"/>
-  <compilation date="05/02/2013" compiler="JDK 1.5.0_16"/>
+  <program name="Aspro2" version="0.9.4 beta 8"/>
+  <compilation date="11/02/2013" compiler="JDK 1.5.0_16"/>
   
   <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
   <authors>the JMMC Technical Group</authors>
@@ -173,6 +173,13 @@
 
   <releasenotes>
     <release version="0.9.4">
+      <prerelease version="0.9.4 beta 8">
+        <change type="FEATURE">Extracted configuration (interferometers and their instruments) into the AsproConf module to have an independent life cycle (CfP)</change>
+        <change type="CHANGE">Minor changes to the main setting panel: 'Target editor' renamed 'Editor' and margins made smaller</change>
+        <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/398">Added a distance check before adding a new target to the target list 
+          to avoid duplicates (within 5 arcsec) and solve identifier issues</change>
+        <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/385">Added the 'delete target' action in the target editor too</change>
+      </prerelease>
       <prerelease version="0.9.4 beta 7">
         <change type="FEATURE">Improved OIFits computation to interpret and use multiple model images (Fits cube) when computing complex visiblities</change>
         <change type="FEATURE">Improved OIFits computation to perform super sampling on spectral channels (use n sub channels and integration)</change>
