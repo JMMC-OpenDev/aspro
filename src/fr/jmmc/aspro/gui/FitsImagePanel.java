@@ -219,20 +219,21 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
     }
 
     /**
-     * Return the PDF options
+     * Prepare the chart(s) before exporting them as a PDF document:
+     * Performs layout and return PDF options
      * @return PDF options
      */
-    @Override
-    public PDFOptions getPDFOptions() {
+    public PDFOptions preparePDFExport() {
         return PDFOptions.DEFAULT_PDF_OPTIONS;
     }
 
     /**
-     * Return the chart to export as a PDF document
+     * Return the chart to export on the given page index
+     * @param pageIndex page index (1..n)
      * @return chart
      */
     @Override
-    public JFreeChart prepareChart() {
+    public JFreeChart prepareChart(final int pageIndex) {
         return this.chart;
     }
 
@@ -584,7 +585,7 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
         if (this.showId && lFitsImage.getFitsImageIdentifier() != null) {
             ChartUtils.addSubtitle(this.chart, "Id: " + lFitsImage.getFitsImageIdentifier());
         }
-        
+
         final Title infoTitle;
 
         if (!(lFitsImage.isIncRowDefined() && lFitsImage.isIncColDefined())
