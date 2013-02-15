@@ -1313,7 +1313,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
      * Defines the OIFits structures (SHARED) for later reuse (OIFits Explorer)
      * Used by UVCoveragePanel.UVCoverageSwingWorker.refreshUI()
      *
-     * @param oiFitsList OIFits structures
+     * @param oiFitsList list of OIFits structures (or null)
      */
     public void setOIFitsList(final List<OIFitsFile> oiFitsList) {
         logger.debug("setOIFitsList: {}", oiFitsList);
@@ -1322,10 +1322,10 @@ public final class ObservationManager extends BaseOIManager implements Observer 
 
         // Use OIFitsCollectionManager ?
 
-        this.oiFitsList = oiFitsList;
+        this.oiFitsList = (oiFitsList == null || oiFitsList.isEmpty()) ? null : oiFitsList;
 
         // Fire OIFitsDone event to inform panels to be updated anyway:
-        this.fireOIFitsDone(oiFitsList);
+        this.fireOIFitsDone(this.oiFitsList);
     }
 
     /**
