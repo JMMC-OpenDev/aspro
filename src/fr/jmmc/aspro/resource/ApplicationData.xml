@@ -18,8 +18,8 @@
     <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
   </company>
 
-  <program name="Aspro2" version="0.9.4 beta 8"/>
-  <compilation date="11/02/2013" compiler="JDK 1.5.0_16"/>
+  <program name="Aspro2" version="0.9.4 beta 9"/>
+  <compilation date="15/02/2013" compiler="JDK 1.5.0_16"/>
   
   <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
   <authors>the JMMC Technical Group</authors>
@@ -173,6 +173,10 @@
 
   <releasenotes>
     <release version="0.9.4">
+      <prerelease version="0.9.4 beta 9">
+        <change type="FEATURE">Enhanced export to PDF with multiple pages for large target lists</change>
+        <change type="FEATURE">Added target selection handling on the observability plot to scroll to it and display it highlighted</change>
+      </prerelease>
       <prerelease version="0.9.4 beta 8">
         <change type="FEATURE">Extracted configuration (interferometers and their instruments) into the AsproConf module to have an independent life cycle (CfP)</change>
         <change type="CHANGE">Minor changes to the main setting panel: 'Target editor' renamed 'Editor' and margins made smaller</change>
