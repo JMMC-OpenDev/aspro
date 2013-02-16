@@ -19,7 +19,7 @@
   </company>
 
   <program name="Aspro2" version="0.9.4 beta 9"/>
-  <compilation date="15/02/2013" compiler="JDK 1.5.0_16"/>
+  <compilation date="16/02/2013" compiler="JDK 1.5.0_16"/>
   
   <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
   <authors>the JMMC Technical Group</authors>
@@ -158,6 +158,12 @@
     </menu>
 
     <menu label="Edit">
+        <menu label="Find">
+            <menu label="Find..." classpath="fr.jmmc.jmcs.gui.component.SearchPanel" action="_findAction" accelerator="shift F"/>
+            <menu label="Find Next" classpath="fr.jmmc.jmcs.gui.component.SearchPanel" action="_findNextAction" accelerator="G"/>
+            <menu label="Find Previous" classpath="fr.jmmc.jmcs.gui.component.SearchPanel" action="_findPreviousAction" accelerator="shift G"/>
+        </menu>
+        <menu/>
       <menu label="Target editor" classpath="fr.jmmc.aspro.gui.action.TargetEditorAction" action="targetEditor" accelerator="T"/>
     </menu>
 
@@ -174,8 +180,12 @@
   <releasenotes>
     <release version="0.9.4">
       <prerelease version="0.9.4 beta 9">
-        <change type="FEATURE">Enhanced export to PDF with multiple pages for large target lists</change>
+        <change type="FEATURE">Added a 'Find' feature (Previous / Next) to select a target in the target list by pattern matching on its name</change>
+        <change type="CHANGE">Modified warning messages (CHARA configuration and Pops settings) considered as information messages: 
+            status is then 'Information'</change>
+        <change type="FEATURE">Added filters on the observability plot (Hide calibrators and unobservable targets)</change>
         <change type="FEATURE">Added target selection handling on the observability plot to scroll to it and display it highlighted</change>
+        <change type="FEATURE">Enhanced export Observability plot to a multiple page PDF document for large target lists</change>
       </prerelease>
       <prerelease version="0.9.4 beta 8">
         <change type="FEATURE">Extracted configuration (interferometers and their instruments) into the AsproConf module to have an independent life cycle (CfP)</change>
