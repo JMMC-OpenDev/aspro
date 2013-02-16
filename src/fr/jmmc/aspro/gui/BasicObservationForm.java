@@ -16,6 +16,8 @@ import fr.jmmc.aspro.gui.util.WindWidget;
 import fr.jmmc.aspro.model.ConfigurationManager;
 import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.WarningContainer;
+import fr.jmmc.aspro.model.WarningMessage;
+import fr.jmmc.aspro.model.WarningMessage.Level;
 import fr.jmmc.aspro.model.event.ObservabilityEvent;
 import fr.jmmc.aspro.model.event.ObservationEvent;
 import fr.jmmc.aspro.model.event.ObservationListener;
@@ -36,6 +38,7 @@ import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.jmal.star.Star;
 import fr.jmmc.jmcs.gui.component.GenericListModel;
 import fr.jmmc.jmcs.gui.component.MessagePane;
+import fr.jmmc.jmcs.gui.component.SearchPanel;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
 import fr.jmmc.jmcs.resource.image.ResourceImage;
 import fr.jmmc.jmcs.util.NumberUtils;
@@ -65,7 +68,6 @@ import java.util.Vector;
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListSelectionModel;
-import javax.swing.ImageIcon;
 import javax.swing.JFormattedTextField;
 import javax.swing.JList;
 import javax.swing.JSpinner.DateEditor;
@@ -105,8 +107,6 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     private final static ObservationManager om = ObservationManager.getInstance();
 
     /* members */
-    /** Warning image icon */
-    private ImageIcon warningIcon = null;
     /** flag to enable / disable the automatic update of the observation when any swing component changes */
     private boolean doAutoUpdateObservation = true;
     /** flag to enable / disable the automatic selection check of the target list */
@@ -121,6 +121,8 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     private String lastConfPopConfig = null;
     /** Wind widget */
     private WindWidget windWidget = null;
+    /** Dedicated panel for target quick search */
+    private SearchPanel _searchPanel = null;
 
     /** Creates new form BasicObservationForm */
     public BasicObservationForm() {
@@ -736,7 +738,8 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
 
         Preferences.getInstance().addObserver(this);
 
-        this.warningIcon = ResourceImage.WARNING_ICON.icon();
+        // Search Panel
+        this._searchPanel = new SearchPanel(new TargetListSearchPanelDelegate(jListTargets));
 
         // add observer to the StarResolverWidget :
         this.starSearchField.getStar().addObserver(this);
@@ -942,6 +945,10 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
                 this.jButtonDeleteTarget.setEnabled(!displayTargets.isEmpty());
                 this.jButtonTargetEditor.setEnabled(!displayTargets.isEmpty());
             }
+
+            // (Dis)enable Find widgets according to data availability
+            _searchPanel.enableMenus(!displayTargets.isEmpty());
+
         } finally {
             // restore the automatic selection check of the target list :
             this.setAutoCheckTargets(prevAutoCheckTargets);
@@ -1714,18 +1721,31 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
                 this.jLabelStatus.setToolTipText(null);
             }
         } else {
-            this.jLabelStatus.setIcon(this.warningIcon);
-            this.jLabelStatus.setText("Warning");
+            final Level level = warningContainer.getLevel();
+
+            this.jLabelStatus.setIcon((level == Level.Warning) ? ResourceImage.WARNING_ICON.icon() : ResourceImage.INFO_ICON.icon());
+            this.jLabelStatus.setText(level.toString());
 
             final StringBuilder sb = new StringBuilder(256);
             sb.append("<html>");
-            for (String msg : warningContainer.getWarningMessages()) {
+
+            String msg;
+
+            for (WarningMessage message : warningContainer.getWarningMessages()) {
+                msg = message.getMessage();
+
                 sb.append(msg).append("<br>");
 
-                // add warning to the warning log:
-                _warningLogger.info(StringUtils.removeTags(msg));
+                // avoid redudant logs of the same message:
+                if (!message.isLogged()) {
+                    // add warning to the warning log:
+                    _warningLogger.info(StringUtils.removeTags(msg));
+                    // flag message:
+                    message.setLogged(true);
+                }
             }
             sb.append("</html>");
+
             this.jLabelStatus.setToolTipText(sb.toString());
         }
     }
