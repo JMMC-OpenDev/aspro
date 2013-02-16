@@ -3,6 +3,7 @@
  ******************************************************************************/
 package fr.jmmc.aspro.gui;
 
+import com.jidesoft.swing.CheckBoxList;
 import edu.dartmouth.AstroSkyCalc;
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.Preferences;
@@ -63,6 +64,7 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -82,11 +84,14 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollBar;
+import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.SwingConstants;
 import javax.swing.Timer;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.ChartRenderingInfo;
 import org.jfree.chart.JFreeChart;
@@ -157,6 +162,25 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     private final static int ITEM_SIZE = 40;
     /** default timeline refresh period = 1 minutes */
     private static final int REFRESH_PERIOD = 60 * 1000;
+    /* Filters */
+    /** calibrator filter */
+    private static final Filter CALIBRATOR_FILTER = new Filter("CalibratorFilter", "Hide calibrators") {
+        @Override
+        protected boolean apply(final Target target, final boolean calibrator, final StarObservabilityData so) {
+            // if calibrator, filter item:
+            return calibrator;
+        }
+    };
+    /** unobservable filter */
+    private static final Filter UNOBSERVABLE_FILTER = new Filter("UnobservableFilter", "Hide unobservable") {
+        @Override
+        protected boolean apply(final Target target, final boolean calibrator, final StarObservabilityData so) {
+            if (so != null && so.getVisible().isEmpty()) {
+                return true;
+            }
+            return false;
+        }
+    };
 
     /* default plot options */
     /** default value for the checkbox BaseLine Limits */
@@ -233,6 +257,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     private JCheckBox jCheckBoxBaseLineLimits;
     /** checkbox Detailed output */
     private JCheckBox jCheckBoxDetailedOutput;
+    /** checkbox list (JIDE) filters */
+    private CheckBoxList jCheckBoxListFilters;
 
     /**
      * Constructor
@@ -324,9 +350,9 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
         this.add(this.scrollerPanel, BorderLayout.EAST);
 
-        final JPanel panelOptions = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 1));
+        final JPanel panelOptions = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 1));
 
-        panelOptions.add(new JLabel("Time :"));
+        panelOptions.add(new JLabel("Time:"));
 
         this.jComboTimeRef = new JComboBox(AsproConstants.TIME_CHOICES);
         this.jComboTimeRef.setName("jComboTimeRef");
@@ -410,6 +436,22 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         });
 
         panelOptions.add(this.jCheckBoxDetailedOutput);
+
+        this.jCheckBoxListFilters = new CheckBoxList(new Object[]{CALIBRATOR_FILTER, UNOBSERVABLE_FILTER});
+        this.jCheckBoxListFilters.setName("jCheckBoxListFilters");
+        this.jCheckBoxListFilters.setVisibleRowCount(1); // 1 or 2 max
+
+        this.jCheckBoxListFilters.getCheckBoxListSelectionModel().addListSelectionListener(new ListSelectionListener() {
+            public void valueChanged(final ListSelectionEvent e) {
+                if (chartData != null) {
+                    updatePlot(chartData);
+                }
+            }
+        });
+
+        panelOptions.add(new JSeparator(SwingConstants.VERTICAL));
+        panelOptions.add(new JLabel("Filters:"));
+        panelOptions.add(new JScrollPane(this.jCheckBoxListFilters));
 
         this.jCheckBoxScrollView = new JCheckBox("Scroll view");
         this.jCheckBoxScrollView.setName("jCheckBoxScrollView");
@@ -1136,6 +1178,22 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
             annotations = new HashMap<Integer, List<XYAnnotation>>(obsLen * targets.size());
         }
 
+        // Get filters:
+        boolean hasFilters = (doBaseLineLimits) ? false : true; // disable filters for baseline limits
+        Filter[] selectedFilters = null;
+
+        if (hasFilters) {
+            selectedFilters = getSelectedFilters();
+
+            hasFilters = (selectedFilters.length != 0);
+
+            if (hasFilters) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("selectedFilters: {}", Arrays.toString(selectedFilters));
+                }
+            }
+        }
+
         // Prepare chart information used by SlidingXYPlotAdapter :
         final int initialSize = obsLen * targets.size();
         final TaskSeriesCollection taskSeriesCollection = new TaskSeriesCollection();
@@ -1164,8 +1222,27 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         // current StarObservabilityData used in loops :
         List<StarObservabilityData> soList;
 
+        boolean isCalibrator;
+        boolean filtered;
+
         // Iterate over objects targets :
         for (Target target : targets) {
+
+            isCalibrator = targetUserInfos.isCalibrator(target);
+
+            if (hasFilters) {
+                filtered = false;
+                for (Filter filter : selectedFilters) {
+                    if (filter.apply(target, isCalibrator, null)) {
+                        filtered = true;
+                        break;
+                    }
+                }
+                if (filtered) {
+                    // skip target
+                    continue;
+                }
+            }
 
             // Iterate over Observability data (multi conf) :
             for (int c = 0; c < obsLen; c++) {
@@ -1178,10 +1255,26 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
                     // Iterate over StarObservabilityData :
                     for (StarObservabilityData so : soList) {
+
+                        if (hasFilters) {
+                            filtered = false;
+                            for (Filter filter : selectedFilters) {
+                                if (filter.apply(target, isCalibrator, so)) {
+                                    filtered = true;
+                                    break;
+                                }
+                            }
+                            if (filtered) {
+                                // skip target
+                                continue;
+                            }
+                        }
+
                         if (doBaseLineLimits) {
                             name = so.getTargetName();
                             // note: targetlist is null in such case
                         } else {
+                            // TODO: compute name (outside loops)
                             // display name :
                             name = targetUserInfos.getTargetDisplayName(target);
 
@@ -1215,7 +1308,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                         colorIndex = so.getType();
                         calibrator = false;
 
-                        if (!doBaseLineLimits && colorIndex == StarObservabilityData.TYPE_STAR && targetUserInfos.isCalibrator(target)) {
+                        if (!doBaseLineLimits && colorIndex == StarObservabilityData.TYPE_STAR && isCalibrator) {
                             // use different color for calibrators :
                             colorIndex = StarObservabilityData.TYPE_CALIBRATOR;
                             calibrator = true;
@@ -1293,9 +1386,10 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                             }
 
                             // Observable range limits without HA restrictions:
+                            // TODO: rename WIND / MOON TOO:
                             if (so.getVisibleNoHaLimits() != null) {
                                 final Paint fillPaint = new Color(paint.getRed(), paint.getGreen(), paint.getBlue(), 48); // 80% transparent
-//                final Paint fillPaint = ImageUtils.createHatchedTexturePaint(15, new Color(0, true), paint, new BasicStroke(2.0f));
+                                // final Paint fillPaint = ImageUtils.createHatchedTexturePaint(15, new Color(0, true), paint, new BasicStroke(2.0f));
 
                                 for (DateTimeInterval interval : so.getVisibleNoHaLimits()) {
                                     addAnnotation(annotations, pos,
@@ -1305,10 +1399,10 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                             }
                         }
                         n++;
-                    }
-                }
-            }
-        }
+                    } // loop on StarObservabilityData
+                } // soList !== null
+            } // loop on Observability data (multi conf)
+        } // loop on targets (display targets or baseline limits)
 
         // update plot data :
         this.slidingXYPlotAdapter.setData(taskSeriesCollection, symbolList, colorList, annotations, targetList, labelList, soTargetList,
@@ -1360,7 +1454,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
             }
 
             // refresh scrollbar maximum value:
-            rangeModel.setRangeProperties((pos != -1) ? pos : 0, 0, 0, size - this.slidingXYPlotAdapter.getMaxViewItems(), false);
+            rangeModel.setRangeProperties((pos != -1) ? pos : lastPos, 0, 0, size - this.slidingXYPlotAdapter.getMaxViewItems(), false);
             this.scroller.setEnabled(true);
             useSubset = true;
         }
@@ -1394,8 +1488,10 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                 logger.debug("showSelectedTarget: target position: {}", pos);
             }
 
-            // update scroller model to update slidingXYPlotAdapter (may redraw plot):
-            this.scroller.getModel().setValue((pos != -1) ? pos : 0);
+            if (pos != -1) {
+                // update scroller model to update slidingXYPlotAdapter (may redraw plot):
+                this.scroller.getModel().setValue(pos);
+            }
         }
 
         // update current target:
@@ -1864,5 +1960,81 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
      */
     private void setCurrentTargetName(final String targetName) {
         this.currentTargetName = targetName;
+    }
+
+    /**
+     * Abstract Filter observability results
+     */
+    private static class Filter {
+
+        /** filter name */
+        private final String name;
+        /** filter label (JList) */
+        private final String label;
+
+        /**
+         * Filter constructor
+         * @param name filter name
+         * @param label filter label
+         */
+        Filter(final String name, final String label) {
+            this.name = name;
+            this.label = label;
+        }
+
+        /**
+         * Return the filter name
+         * @return filter name
+         */
+        public final String getName() {
+            return name;
+        }
+
+        /**
+         * Return the filter label
+         * @return filter label
+         */
+        public final String getLabel() {
+            return label;
+        }
+
+        /**
+         * Return the filter label (JList)
+         * @return filter label
+         */
+        @Override
+        public final String toString() {
+            return label;
+        }
+
+        /**
+         * Apply the filter on the given target, its calibrator flag and star observability data
+         * @param target target instance
+         * @param calibrator calibrator flag
+         * @param so star observability data
+         * @return true if that item should be filtered; false otherwise
+         */
+        protected boolean apply(final Target target, final boolean calibrator, final StarObservabilityData so) {
+            // default; do not filter
+            return false;
+        }
+    }
+
+    /**
+     * Get selected filters (ie enabled)
+     * @return Filter array
+     */
+    private Filter[] getSelectedFilters() {
+        final Object[] selectedValues = jCheckBoxListFilters.getCheckBoxListSelectedValues();
+
+        final int len = selectedValues.length;
+
+        final Filter[] filters = new Filter[len];
+
+        for (int i = 0; i < len; i++) {
+            filters[i] = (Filter) selectedValues[i];
+        }
+
+        return filters;
     }
 }
