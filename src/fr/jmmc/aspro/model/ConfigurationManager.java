@@ -22,6 +22,7 @@ import fr.jmmc.aspro.model.oi.Position3D;
 import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.StationLinks;
 import fr.jmmc.aspro.service.GeocentricCoords;
+import fr.jmmc.jmcs.data.ApplicationDescription;
 import fr.jmmc.oitools.util.CombUtils;
 import java.util.ArrayList;
 import java.util.List;
@@ -90,6 +91,11 @@ public final class ConfigurationManager extends BaseOIManager {
      */
     private void initialize()
             throws IllegalStateException, IllegalArgumentException {
+
+        // TODO: keep that description to get release notes ...
+        final ApplicationDescription asproConfDescription = ApplicationDescription.loadDescription("fr/jmmc/aspro/conf/resource/ApplicationData.xml");
+
+        logger.info("loading configuration '{}' ...", asproConfDescription.getProgramNameWithVersion());
 
         initializeConfiguration(initialConfiguration);
     }
