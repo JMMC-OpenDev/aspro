@@ -1746,8 +1746,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
             } else {
 
                 if (uvDataCollection.getFirstObservation().getWhen().isNightRestriction()) {
-                    mergedWarningContainer.addWarningMessage(
-                            "Multiple configurations cannot be done in one night (night restrictions are only valid for "
+                    mergedWarningContainer.addWarningMessage("Multiple configurations cannot be done in one night"
+                            + " (night restrictions are only valid for "
                             + uvDataCollection.getFirstObservation().getWhen().getDate().toString() + ")");
                 }
 

@@ -956,7 +956,7 @@ public final class OIFitsCreatorService {
         if (!isWL) {
             if (nImages > 1) {
                 // Fits cube without wavelengths:
-                addWarning("User model (Fits cube) without wavelength information: discard model");
+                addWarning("User model (Fits cube) without wavelength information is discarded");
                 //TODO: test such case
                 return null;
             }

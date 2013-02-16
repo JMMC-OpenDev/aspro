@@ -3,6 +3,7 @@
  ******************************************************************************/
 package fr.jmmc.aspro.model;
 
+import fr.jmmc.aspro.model.WarningMessage.Level;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,57 +13,81 @@ import java.util.List;
  */
 public final class WarningContainer {
 
-  /** warning messages */
-  private List<String> warningMessages = null;
+    /** warning messages */
+    private List<WarningMessage> warningMessages = null;
+    /** message level */
+    private Level level = null;
 
-  /**
-   * Public constructor
-   */
-  public WarningContainer() {
-    super();
-  }
+    /**
+     * Public constructor
+     */
+    public WarningContainer() {
+        super();
+    }
 
-  /**
-   * Add the given warning container to this warning container only if the new message does not already exist in this container
-   * @param container messages to add
-   */
-  public void addWarningMessages(final WarningContainer container) {
-    if (container.hasWarningMessages()) {
-      if (this.warningMessages == null) {
-        this.warningMessages = new ArrayList<String>(4);
-      }
-      for (String msg : container.getWarningMessages()) {
-        if (!this.warningMessages.contains(msg)) {
-          this.warningMessages.add(msg);
+    /**
+     * Add the given warning container to this warning container only if the new message does not already exist in this container
+     * @param container messages to add
+     */
+    public void addWarningMessages(final WarningContainer container) {
+        if (container.hasWarningMessages()) {
+            for (WarningMessage message : container.getWarningMessages()) {
+                addMessage(message);
+            }
         }
-      }
     }
-  }
 
-  /**
-   * Add the given message to the warning messages
-   * @param msg message to add
-   */
-  public void addWarningMessage(final String msg) {
-    if (this.warningMessages == null) {
-      this.warningMessages = new ArrayList<String>(4);
+    /**
+     * Add the given message to the warning messages
+     * @param msg message to add
+     */
+    public void addWarningMessage(final String msg) {
+        addMessage(new WarningMessage(msg));
     }
-    this.warningMessages.add(msg);
-  }
 
-  /**
-   * Return true if there are warning messages
-   * @return true if there are warning messages
-   */
-  public boolean hasWarningMessages() {
-    return this.warningMessages != null && !this.warningMessages.isEmpty();
-  }
+    /**
+     * Add the given message to the information messages
+     * @param msg message to add
+     */
+    public void addInformationMessage(final String msg) {
+        addMessage(new WarningMessage(msg, WarningMessage.Level.Information));
+    }
 
-  /**
-   * Return the list of warning messages
-   * @return warning messages or null
-   */
-  public List<String> getWarningMessages() {
-    return this.warningMessages;
-  }
+    /**
+     * Add the given message to the warning messages (if not already present)
+     * @param message WarningMessage to add
+     */
+    private void addMessage(final WarningMessage message) {
+        if (this.warningMessages == null) {
+            this.warningMessages = new ArrayList<WarningMessage>(4);
+        }
+        if (!this.warningMessages.contains(message)) {
+            this.warningMessages.add(message);
+            this.level = (this.level == Level.Warning || message.getLevel() == Level.Warning) ? Level.Warning : Level.Information;
+        }
+    }
+
+    /**
+     * Return true if there are warning messages
+     * @return true if there are warning messages
+     */
+    public boolean hasWarningMessages() {
+        return this.warningMessages != null && !this.warningMessages.isEmpty();
+    }
+
+    /**
+     * Return the highest level of warning messages (Warning > Information)
+     * @return highest level of warning messages (Warning > Information) or null if empty
+     */
+    public Level getLevel() {
+        return this.level;
+    }
+
+    /**
+     * Return the list of warning messages
+     * @return warning messages or null
+     */
+    public List<WarningMessage> getWarningMessages() {
+        return this.warningMessages;
+    }
 }
