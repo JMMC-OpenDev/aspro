@@ -68,7 +68,7 @@ public final class AnyVOTableHandler {
         final List<Target> targets = newObservation.getTargets();
 
         if (logger.isDebugEnabled()) {
-          logger.debug("targets :");
+          logger.debug("targets:");
           for (Target cal : targets) {
             logger.debug(cal.toString());
           }
@@ -108,7 +108,7 @@ public final class AnyVOTableHandler {
               final TargetUserInformations editTargetUserInfos = obsCloned.getOrCreateTargetUserInfos();
 
               if (logger.isDebugEnabled()) {
-                logger.debug("initial targets :");
+                logger.debug("initial targets:");
                 for (Target t : editTargets) {
                   logger.debug(t.toString());
                 }
@@ -117,7 +117,7 @@ public final class AnyVOTableHandler {
               final String report = mergeTargets(editTargets, targets);
 
               if (logger.isDebugEnabled()) {
-                logger.debug("updated targets :");
+                logger.debug("updated targets:");
                 for (Target t : editTargets) {
                   logger.debug(t.toString());
                 }

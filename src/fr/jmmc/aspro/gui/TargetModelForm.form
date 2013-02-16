@@ -454,7 +454,7 @@
         </Component>
         <Component class="javax.swing.JLabel" name="jLabelOffsetEditMode">
           <Properties>
-            <Property name="text" type="java.lang.String" value="edit positions :"/>
+            <Property name="text" type="java.lang.String" value="edit positions:"/>
           </Properties>
           <Constraints>
             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">

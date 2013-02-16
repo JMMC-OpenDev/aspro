@@ -858,7 +858,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
         gridBagConstraints.weighty = 0.05;
         jPanelTarget.add(jSeparator4, gridBagConstraints);
 
-        jLabelMag.setText("Magnitudes :");
+        jLabelMag.setText("Magnitudes:");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 4;

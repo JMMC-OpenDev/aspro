@@ -92,7 +92,7 @@ public final class SearchCalVOTableHandler {
         logger.debug("science target: {}", scienceTarget);
 
         if (logger.isDebugEnabled()) {
-          logger.debug("calibrators :");
+          logger.debug("calibrators:");
           for (Target cal : calibrators) {
             logger.debug(cal.toString());
           }
@@ -166,7 +166,7 @@ public final class SearchCalVOTableHandler {
           final TargetUserInformations editTargetUserInfos = obsCloned.getOrCreateTargetUserInfos();
 
           if (logger.isDebugEnabled()) {
-            logger.debug("initial targets :");
+            logger.debug("initial targets:");
             for (Target t : editTargets) {
               logger.debug(t.toString());
             }
@@ -184,7 +184,7 @@ public final class SearchCalVOTableHandler {
           final String report = mergeTargets(editTargets, editTargetUserInfos, targetName, calibrators);
 
           if (logger.isDebugEnabled()) {
-            logger.debug("updated targets :");
+            logger.debug("updated targets:");
             for (Target t : editTargets) {
               logger.debug(t.toString());
             }

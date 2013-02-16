@@ -932,7 +932,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         gridBagConstraints.weightx = 0.5;
         jPanelParameters.add(jRadioButtonRhoTheta, gridBagConstraints);
 
-        jLabelOffsetEditMode.setText("edit positions :");
+        jLabelOffsetEditMode.setText("edit positions:");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
