@@ -663,8 +663,11 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
         // Note: if scroll view is disabled, user can zoom on plot and export it as displayed (highlight is then present)
         // difficult to keep plot as displayed without hilight (requires plot update ie reset zoom ...)
+        final boolean needUpdatePlot = (this.slidingXYPlotAdapter.isUseSubset() != useSubset);
 
-        if (useSubset) {
+        // TODO: solution =  detect visible ranges (specific refresh keeping ranges ?)
+
+        if (useSubset || needUpdatePlot) {
             // disable highlight:
             this.slidingXYPlotAdapter.setSelectedPosition(-1);
 
@@ -673,7 +676,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         }
 
         // Adapt the chart to print all targets on 1 page or multiple pages:
-        if (this.slidingXYPlotAdapter.isUseSubset() != useSubset) {
+        if (needUpdatePlot) {
             this.slidingXYPlotAdapter.setUseSubset(useSubset);
         }
 
