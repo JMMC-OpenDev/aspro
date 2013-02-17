@@ -536,8 +536,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
         jToggleButtonCalibrator = new javax.swing.JToggleButton();
         jButtonRemoveCalibrator = new javax.swing.JButton();
         jButtonDeleteTarget = new javax.swing.JButton();
-        jSeparator6 = new javax.swing.JToolBar.Separator();
-        jPanel1 = new javax.swing.JPanel();
+        jPanelRight = new javax.swing.JPanel();
         jPanelTarget = new javax.swing.JPanel();
         jLabelName = new javax.swing.JLabel();
         jFieldName = new javax.swing.JTextField();
@@ -592,7 +591,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
         jPanelLeft.setLayout(new java.awt.GridBagLayout());
 
         jScrollPaneTreeTargets.setMinimumSize(new java.awt.Dimension(80, 100));
-        jScrollPaneTreeTargets.setPreferredSize(new java.awt.Dimension(130, 100));
+        jScrollPaneTreeTargets.setPreferredSize(new java.awt.Dimension(160, 100));
 
         jTreeTargets.setFont(new java.awt.Font("Dialog", 1, 12)); // NOI18N
         javax.swing.tree.DefaultMutableTreeNode treeNode1 = new javax.swing.tree.DefaultMutableTreeNode("Targets");
@@ -644,50 +643,71 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
         jButtonBefore.setToolTipText("");
         jButtonBefore.setFocusable(false);
         jButtonBefore.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        jButtonBefore.setMargin(new java.awt.Insets(0, 0, 0, 0));
         jButtonBefore.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         jButtonBefore.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonBeforeActionPerformed(evt);
             }
         });
-        jPanelActions.add(jButtonBefore, new java.awt.GridBagConstraints());
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelActions.add(jButtonBefore, gridBagConstraints);
 
         jButtonAfter.setIcon(ResourceImage.DOWN_ARROW.icon());
         jButtonAfter.setFocusable(false);
         jButtonAfter.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        jButtonAfter.setMargin(new java.awt.Insets(0, 0, 0, 0));
         jButtonAfter.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         jButtonAfter.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonAfterActionPerformed(evt);
             }
         });
-        jPanelActions.add(jButtonAfter, new java.awt.GridBagConstraints());
-        jPanelActions.add(jSeparator1, new java.awt.GridBagConstraints());
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelActions.add(jButtonAfter, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridy = 0;
+        jPanelActions.add(jSeparator1, gridBagConstraints);
 
         jButtonSortRA.setText("Sort by R.A.");
+        jButtonSortRA.setToolTipText("sort all targets by their right ascension");
         jButtonSortRA.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonSortRAActionPerformed(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 4;
+        gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelActions.add(jButtonSortRA, gridBagConstraints);
-        jPanelActions.add(jSeparator2, new java.awt.GridBagConstraints());
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 5;
+        gridBagConstraints.gridy = 0;
+        jPanelActions.add(jSeparator2, gridBagConstraints);
 
-        jToggleButtonCalibrator.setText("Flag as calibrator");
+        jToggleButtonCalibrator.setText("Flag calibrator");
+        jToggleButtonCalibrator.setToolTipText("(un)flag the selected target as calibrator");
         jToggleButtonCalibrator.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jToggleButtonCalibratorActionPerformed(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 6;
+        gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelActions.add(jToggleButtonCalibrator, gridBagConstraints);
 
         jButtonRemoveCalibrator.setText("Remove calibrator");
+        jButtonRemoveCalibrator.setToolTipText("Remove the selected calibrator from the target's calibrators");
         jButtonRemoveCalibrator.setFocusable(false);
         jButtonRemoveCalibrator.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         jButtonRemoveCalibrator.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
@@ -697,13 +717,17 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 7;
+        gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelActions.add(jButtonRemoveCalibrator, gridBagConstraints);
 
-        jButtonDeleteTarget.setText("Delete target");
+        jButtonDeleteTarget.setIcon(new javax.swing.ImageIcon(getClass().getResource("/fr/jmmc/aspro/gui/icons/delete.png"))); // NOI18N
+        jButtonDeleteTarget.setToolTipText("delete the selected target");
         jButtonDeleteTarget.setFocusable(false);
         jButtonDeleteTarget.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        jButtonDeleteTarget.setMargin(new java.awt.Insets(0, 0, 0, 0));
         jButtonDeleteTarget.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         jButtonDeleteTarget.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -711,21 +735,17 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 8;
+        gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelActions.add(jButtonDeleteTarget, gridBagConstraints);
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 7;
-        gridBagConstraints.gridy = 0;
-        jPanelActions.add(jSeparator6, gridBagConstraints);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 9;
+        gridBagConstraints.gridx = 8;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 1.0;
-        jPanelActions.add(jPanel1, gridBagConstraints);
+        jPanelActions.add(jPanelRight, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
@@ -1076,6 +1096,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
         jPanelTarget.add(jScrollPaneIds, gridBagConstraints);
 
         jButtonSimbad.setText("Simbad");
+        jButtonSimbad.setToolTipText("Open Simbad web page for this target");
         jButtonSimbad.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonSimbadActionPerformed(evt);
@@ -1167,17 +1188,17 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
 
             if (isCalibrator(selectedTarget)) {
                 if (MessagePane.showConfirmMessage(this.jButtonDeleteTarget,
-                        "Do you want to delete the calibrator target [" + selectedTarget.getName() + "] and all associations ?")) {
-
-                    // update the data model and reset form:
-                    deleteCalibrator(selectedTarget);
-                }
-            } else if (MessagePane.showConfirmMessage(this.jButtonDeleteTarget,
-                    "Do you want to delete the science target [" + selectedTarget.getName() + "] ?")) {
+                    "Do you want to delete the calibrator target [" + selectedTarget.getName() + "] and all associations ?")) {
 
                 // update the data model and reset form:
-                deleteTarget(selectedTarget);
+                deleteCalibrator(selectedTarget);
             }
+        } else if (MessagePane.showConfirmMessage(this.jButtonDeleteTarget,
+            "Do you want to delete the science target [" + selectedTarget.getName() + "] ?")) {
+
+        // update the data model and reset form:
+        deleteTarget(selectedTarget);
+        }
         }
     }//GEN-LAST:event_jButtonDeleteTargetActionPerformed
 
@@ -1210,7 +1231,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
 
                         // Remove calibrator from target :
                         this.getTreeTargets().removeCalibrator(currentNode, target,
-                                parentNode, parentTarget, true);
+                            parentNode, parentTarget, true);
                     }
                 }
             }
@@ -1230,7 +1251,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
             if (this.editTargetUserInfos.hasCalibrators(this.currentTarget)) {
 
                 MessagePane.showErrorMessage(
-                        "There are already calibrators associated to this target [" + this.currentTarget.getName() + "] !");
+                    "There are already calibrators associated to this target [" + this.currentTarget.getName() + "] !");
 
                 this.jToggleButtonCalibrator.setSelected(false);
                 return;
@@ -1257,40 +1278,40 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
             final DefaultMutableTreeNode calibratorNode = getTreeTargets().findTreeNode(this.currentTarget);
 
             if (calibratorNode == null || MessagePane.showConfirmMessage(this.jToggleButtonCalibrator,
-                    "Do you really want to remove associations with this calibrator [" + this.currentTarget.getName() + "] ?")) {
+                "Do you really want to remove associations with this calibrator [" + this.currentTarget.getName() + "] ?")) {
 
-                // remove the occurences of the calibrator and update the tree ...
-                removeCalibrator(this.currentTarget);
+            // remove the occurences of the calibrator and update the tree ...
+            removeCalibrator(this.currentTarget);
 
-                this.calibratorsModel.remove(this.currentTarget);
+            this.calibratorsModel.remove(this.currentTarget);
 
-                // Restore the calibrator node in the target tree :
-                final DefaultMutableTreeNode rootNode = this.getTreeTargets().getRootNode();
+            // Restore the calibrator node in the target tree :
+            final DefaultMutableTreeNode rootNode = this.getTreeTargets().getRootNode();
 
-                int nScienceTargets = 0;
+            int nScienceTargets = 0;
 
-                for (Target target : this.editTargets) {
-                    if (!isCalibrator(target)) {
-                        if (target == this.currentTarget) {
-                            // create node :
-                            final DefaultMutableTreeNode targetNode = new DefaultMutableTreeNode(target);
+            for (Target target : this.editTargets) {
+                if (!isCalibrator(target)) {
+                    if (target == this.currentTarget) {
+                        // create node :
+                        final DefaultMutableTreeNode targetNode = new DefaultMutableTreeNode(target);
 
-                            rootNode.insert(targetNode, nScienceTargets);
+                        rootNode.insert(targetNode, nScienceTargets);
 
-                            // fire node structure changed :
-                            this.getTreeTargets().fireNodeChanged(rootNode);
+                        // fire node structure changed :
+                        this.getTreeTargets().fireNodeChanged(rootNode);
 
-                            this.getTreeTargets().selectPath(new TreePath(targetNode.getPath()));
+                        this.getTreeTargets().selectPath(new TreePath(targetNode.getPath()));
 
-                            break;
-                        }
-                        nScienceTargets++;
+                        break;
                     }
+                    nScienceTargets++;
                 }
-
-            } else {
-                this.jToggleButtonCalibrator.setSelected(true);
             }
+
+        } else {
+            this.jToggleButtonCalibrator.setSelected(true);
+        }
         }
     }//GEN-LAST:event_jToggleButtonCalibratorActionPerformed
 
@@ -1680,11 +1701,11 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     private javax.swing.JLabel jLabelSpecTypes;
     private javax.swing.JLabel jLabelSysVel;
     private javax.swing.JList jListCalibrators;
-    private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanelActions;
     private javax.swing.JPanel jPanelCalibrators;
     private javax.swing.JPanel jPanelDescription;
     private javax.swing.JPanel jPanelLeft;
+    private javax.swing.JPanel jPanelRight;
     private javax.swing.JPanel jPanelTarget;
     private javax.swing.JScrollPane jScrollPaneCalibratorInfos;
     private javax.swing.JScrollPane jScrollPaneCalibrators;
@@ -1696,7 +1717,6 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
     private javax.swing.JSeparator jSeparator3;
     private javax.swing.JSeparator jSeparator4;
     private javax.swing.JSeparator jSeparator5;
-    private javax.swing.JToolBar.Separator jSeparator6;
     private javax.swing.JTable jTableCalibratorInfos;
     private javax.swing.JTextArea jTextAreaIds;
     private javax.swing.JTextArea jTextAreaTargetInfos;

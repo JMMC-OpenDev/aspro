@@ -636,7 +636,8 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
 
         setLayout(new java.awt.GridBagLayout());
 
-        jScrollPaneTreeModels.setMinimumSize(new java.awt.Dimension(100, 100));
+        jScrollPaneTreeModels.setMinimumSize(new java.awt.Dimension(80, 100));
+        jScrollPaneTreeModels.setName(""); // NOI18N
         jScrollPaneTreeModels.setPreferredSize(new java.awt.Dimension(100, 100));
 
         jTreeModels.setFont(new java.awt.Font("Dialog", 1, 12)); // NOI18N
@@ -860,7 +861,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weightx = 0.7;
+        gridBagConstraints.weightx = 0.6;
         gridBagConstraints.weighty = 0.2;
         add(jPanelModel, gridBagConstraints);
 
@@ -888,6 +889,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         gridBagConstraints.gridy = 1;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 1.0;
         gridBagConstraints.weighty = 0.2;
         add(jPanelDescription, gridBagConstraints);
 
