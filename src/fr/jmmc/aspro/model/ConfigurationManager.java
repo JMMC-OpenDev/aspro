@@ -23,6 +23,7 @@ import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.StationLinks;
 import fr.jmmc.aspro.service.GeocentricCoords;
 import fr.jmmc.jmcs.data.ApplicationDescription;
+import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.oitools.util.CombUtils;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,12 +40,16 @@ public final class ConfigurationManager extends BaseOIManager {
 
     /** Class logger */
     private static final Logger logger = LoggerFactory.getLogger(ConfigurationManager.class.getName());
+    /** debug configuration at startup */
+    private static final boolean DEBUG_CONF = false;
     /** Configurations file name */
     private static final String CONF_FILE = "AsproOIConfigurations.xml";
     /** singleton pattern */
     private static volatile ConfigurationManager instance = null;
 
     /* members */
+    /** aspro conf description (version and release notes) */
+    private ApplicationDescription asproConfDescription = null;
     /** Initial Configuration read from configuration files */
     private final Configuration initialConfiguration = new Configuration();
     /** Current Configuration (may be different from initial configuration): observation can override some elements */
@@ -81,6 +86,14 @@ public final class ConfigurationManager extends BaseOIManager {
     }
 
     /**
+     * Return the aspro conf description (version and release notes)
+     * @return aspro conf description (version and release notes)
+     */
+    public ApplicationDescription getConfDescription() {
+        return this.asproConfDescription;
+    }
+
+    /**
      * Initialize the configuration :
      * - load AsproOIConfigurations.xml to get configuration file paths
      * - load those files (InterferometerSetting)
@@ -92,10 +105,9 @@ public final class ConfigurationManager extends BaseOIManager {
     private void initialize()
             throws IllegalStateException, IllegalArgumentException {
 
-        // TODO: keep that description to get release notes ...
-        final ApplicationDescription asproConfDescription = ApplicationDescription.loadDescription("fr/jmmc/aspro/conf/resource/ApplicationData.xml");
+        this.asproConfDescription = ApplicationDescription.loadDescription("fr/jmmc/aspro/conf/resource/ApplicationData.xml");
 
-        logger.info("loading configuration '{}' ...", asproConfDescription.getProgramNameWithVersion());
+        logger.info("loading Aspro2 configuration '{}' ...", asproConfDescription.getProgramVersion());
 
         initializeConfiguration(initialConfiguration);
     }
@@ -172,25 +184,25 @@ public final class ConfigurationManager extends BaseOIManager {
 
         // check instrument modes (spectral channels):
         // TODO: handle properly spectral channels (rebinning):
-        for (FocalInstrument instrument : id.getFocalInstruments()) {
-            for (FocalInstrumentMode insMode : instrument.getModes()) {
+        if (DEBUG_CONF) {
+            for (FocalInstrument instrument : id.getFocalInstruments()) {
+                for (FocalInstrumentMode insMode : instrument.getModes()) {
 
-                /*
-                 logger.info("Instrument[{}][mode {}] wavelength range: {} - {} µm [{} channels] [resolution = {}]",
-                 instrument.getName(), insMode.getName(),
-                 NumberUtils.trimTo5Digits(insMode.getWaveLengthMin()),
-                 NumberUtils.trimTo5Digits(insMode.getWaveLengthMax()),
-                 insMode.getSpectralChannels(),
-                 insMode.getResolution());
-                 */
+                    logger.info("Instrument[{}][mode {}] wavelength range: {} - {} µm [{} channels] [resolution = {}]",
+                            instrument.getName(), insMode.getName(),
+                            NumberUtils.trimTo5Digits(insMode.getWaveLengthMin()),
+                            NumberUtils.trimTo5Digits(insMode.getWaveLengthMax()),
+                            insMode.getSpectralChannels(),
+                            insMode.getResolution());
 
-                if (insMode.getNumberChannels() != null) {
-                    if (insMode.getSpectralChannels() == insMode.getNumberChannels()) {
-                        logger.info("Instrument [{}] mode [{}] useless numberChannels: {}",
-                                instrument.getName(), insMode.getName(), insMode.getNumberChannels());
-                    } else {
-                        logger.info("Instrument [{}] mode [{}] channel configuration: {} / {}",
-                                instrument.getName(), insMode.getName(), insMode.getNumberChannels(), insMode.getSpectralChannels());
+                    if (insMode.getNumberChannels() != null) {
+                        if (insMode.getSpectralChannels() == insMode.getNumberChannels()) {
+                            logger.info("Instrument [{}] mode [{}] useless numberChannels: {}",
+                                    instrument.getName(), insMode.getName(), insMode.getNumberChannels());
+                        } else {
+                            logger.info("Instrument [{}] mode [{}] channel configuration: {} / {}",
+                                    instrument.getName(), insMode.getName(), insMode.getNumberChannels(), insMode.getSpectralChannels());
+                        }
                     }
                 }
             }

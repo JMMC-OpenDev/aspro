@@ -18,8 +18,8 @@
     <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
   </company>
 
-  <program name="Aspro2" version="0.9.4 beta 9"/>
-  <compilation date="16/02/2013" compiler="JDK 1.5.0_16"/>
+  <program name="Aspro2" version="0.9.4 beta 10"/>
+  <compilation date="19/02/2013" compiler="JDK 1.5.0_16"/>
   
   <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
   <authors>the JMMC Technical Group</authors>
@@ -175,10 +175,20 @@
       <menu label="Send StarList to PIVOT" classpath="fr.jmmc.aspro.interop.StarListSendAction" action="starListSendAction"
             description="Send back the star list to PIVOT (SAMP)"/>
     </menu>
+    
+    <menu label="Help">
+      <menu label="Show Configuration release notes" classpath="fr.jmmc.aspro.gui.action.ShowConfReleaseAction" action="showReleaseNotes"/>
+    </menu>
+    
   </menubar>
 
   <releasenotes>
     <release version="0.9.4">
+      <prerelease version="0.9.4 beta 10">
+        <change type="FEATURE">Added action 'Show Configuration release notes' in Help menu</change>
+        <change type="FEATURE">Enhanced target axis on the observability plot to adjust its font size according to the number of visible items</change>
+        <change type="CHANGE">Reduced margins (0.5 cm) on exported PDF documents</change>
+      </prerelease>
       <prerelease version="0.9.4 beta 9">
         <change type="FEATURE">Added a 'Find' feature (Previous / Next) to select a target in the target list by pattern matching on its name</change>
         <change type="CHANGE">Modified warning messages (CHARA configuration and Pops settings) considered as information messages: 
