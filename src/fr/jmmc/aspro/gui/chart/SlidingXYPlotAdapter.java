@@ -34,6 +34,7 @@ import org.jfree.data.gantt.XYTaskDataset;
 import org.jfree.data.time.TimePeriod;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.ui.Layer;
+import org.jfree.ui.RectangleInsets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,6 +46,14 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
 
     /** Class logger */
     private static final Logger logger = LoggerFactory.getLogger(SlidingXYPlotAdapter.class.getName());
+    /** max items printed before using A3 format */
+    public final static int MAX_PRINTABLE_ITEMS_A4 = 10;
+    /** max items printed before using A2 format */
+    public final static int MAX_PRINTABLE_ITEMS_A3 = MAX_PRINTABLE_ITEMS_A4 * 4;
+    /** max items displayed before scrolling */
+    public final static int MAX_VIEW_ITEMS = MAX_PRINTABLE_ITEMS_A4;
+    /** symbol label insets: 0.5 on top/bottom, 2 on left/right */
+    private final static RectangleInsets SYMBOL_LABEL_INSETS = new RectangleInsets(0.5d, 2d, 0.5d, 2d);
     /** observation manager */
     private final static ObservationManager om = ObservationManager.getInstance();
     /* members */
@@ -86,8 +95,6 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
     private int lastStart = -1;
     /** last used end position for the subset */
     private int lastEnd = -1;
-    /** last used selected position for the subset */
-    private int lastSelected = -1;
 
     /**
      * Constructor
@@ -152,10 +159,16 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
      * @param state state to copy
      */
     public void restoreState(final State state) {
+        final int oldSelectedPosition = this.state.selectedPosition;
+
+        // restore state from given state:
         this.state.copy(state);
 
-        // forced update plot:
+        // may update plot:
         updatePlot(false);
+
+        // may update series paint:
+        setSelectedPosition(this.state.selectedPosition, oldSelectedPosition);
     }
 
     /**
@@ -207,10 +220,23 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
      * @param selectedPosition selected position (highlight)
      */
     public void setSelectedPosition(final int selectedPosition) {
-        this.state.selectedPosition = selectedPosition;
+        // may update series paint:
+        setSelectedPosition(selectedPosition, this.state.selectedPosition);
+    }
 
-        // may update plot:
-        updatePlot(false);
+    /**
+     * Define the selected position (highlight) if different than given old value
+     * @param selectedPosition selected position (highlight)
+     * @param oldSelected old value
+     */
+    private void setSelectedPosition(final int selectedPosition, final int oldSelected) {
+        if (oldSelected != selectedPosition) {
+            this.state.selectedPosition = selectedPosition;
+
+            // may update renderer:
+            updateSeriesPaint(oldSelected);
+            updateSeriesPaint(this.state.selectedPosition);
+        }
     }
 
     /**
@@ -269,7 +295,7 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
             }
         }
 
-        if (!forceUpdate && start == this.lastStart && end == this.lastEnd && this.state.selectedPosition == this.lastSelected) {
+        if (!forceUpdate && start == this.lastStart && end == this.lastEnd) {
             if (logger.isDebugEnabled()) {
                 logger.debug("same positions : ignoring ({} to {})", start, end);
             }
@@ -279,7 +305,6 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
         // update memorized position to avoid redundant updates:
         this.lastStart = start;
         this.lastEnd = end;
-        this.lastSelected = this.state.selectedPosition;
 
         final int newSize = end - start;
 
@@ -313,8 +338,8 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
         final boolean savedNotify = this.chart.isNotify();
         this.chart.setNotify(false);
         this.xyPlot.setNotify(false);
-        try {
 
+        try {
             // reset colors :
             this.renderer.clearSeriesPaints(false);
             // side effect with chart theme :
@@ -325,21 +350,17 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
             final String[] subSymbols = new String[newSize];
 
             for (int i = start, n = 0; i < end; i++, n++) {
+
                 subTaskSeriesCollection.add(this.collection.getSeries(i));
 
                 subSymbols[n] = this.symbols.get(i);
 
-                final Paint color;
-                if (i == this.state.selectedPosition) {
-                    // use gradient (color to white) to highlight item:
-                    color = new GradientPaint(0f, 0f, Color.WHITE, 0f, 1f, this.colors.get(i));
-                } else {
-                    color = this.colors.get(i);
-                }
-
                 // color :
-                this.renderer.setSeriesPaint(n, color, false);
+                this.renderer.setSeriesPaint(n, this.colors.get(i), false);
             }
+
+            // update color for selected position:
+            updateSeriesPaint(this.state.selectedPosition);
 
             final XYTaskDataset dataset = new XYTaskDataset(subTaskSeriesCollection);
 
@@ -349,11 +370,12 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
             this.xyPlot.setDataset(dataset);
 
             // change the Domain axis (vertical) :
-            final BoundedSymbolAxis symbolAxis = new BoundedSymbolAxis(null, subSymbols);
+            final BoundedSymbolAxis symbolAxis = new AutoFitBoundedSymbolAxis(null, subSymbols);
             symbolAxis.setInverted(true);
             symbolAxis.setGridBandsVisible(false);
             symbolAxis.setBounds(new Range(rangeMin, rangeMax));
             symbolAxis.setRange(rangeMin, rangeMax);
+
             this.xyPlot.setDomainAxis(symbolAxis);
 
             // remove Annotations :
@@ -425,6 +447,9 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
             // update theme at end :
             ChartUtilities.applyCurrentTheme(this.chart);
 
+            // hack symbol axis tick margin:
+            this.xyPlot.getDomainAxis().setTickLabelInsets(SYMBOL_LABEL_INSETS); // margin set to 1
+
             if (hasBackground) {
                 // Set grid line colors:
                 this.xyPlot.setDomainGridlinePaint(Color.WHITE);
@@ -435,6 +460,31 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
             // restore chart & plot notifications:
             this.xyPlot.setNotify(savedNotify);
             this.chart.setNotify(savedNotify);
+        }
+    }
+
+    /**
+     * Update the series paint at given index (highlighted or not)
+     * @param index index to use
+     */
+    private void updateSeriesPaint(final int index) {
+        // ensure boundary checks in dataset:
+        if (index >= 0 && index < this.size) {
+            final int n = index - this.lastStart;
+            // ensure boundary checks in view:
+            if (n >= 0 && n < (this.lastEnd - this.lastStart)) {
+
+                final Paint color;
+                if (index == this.state.selectedPosition) {
+                    // use gradient (color to white) to highlight item:
+                    color = new GradientPaint(0f, 0f, Color.WHITE, 0f, 1f, this.colors.get(index));
+                } else {
+                    color = this.colors.get(index);
+                }
+
+                // color :
+                this.renderer.setSeriesPaint(n, color);
+            }
         }
     }
 
@@ -578,7 +628,7 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
         /** current position of the subset */
         int position = 0;
         /** selected position (highlight) */
-        int selectedPosition = 0;
+        int selectedPosition = -1;
 
         /**
          * Private constructor
