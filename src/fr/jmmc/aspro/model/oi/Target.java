@@ -899,8 +899,8 @@ public class Target
     if (prependMessage != null) {
       sb.append(prependMessage).append("<hr>");
     }
-    sb.append("<b>Name</b>: ").append(getName());
-    sb.append("<br><b>Coords</b>: ").append(getRA()).append(' ').append(getDEC());
+    sb.append("<b>Name: ").append(getName());
+    sb.append("</b><br><b>Coords</b>: ").append(getRA()).append(' ').append(getDEC());
     if (full && getPMRA() != null && getPMDEC() != null) {
       sb.append("<br><b>Proper motion</b> (mas/yr): ").append(getPMRA()).append(' ').append(getPMDEC());
     }
