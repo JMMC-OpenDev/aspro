@@ -11,7 +11,7 @@ import fr.jmmc.aspro.gui.action.ExportOIFitsAction;
 import fr.jmmc.aspro.gui.action.LoadObservationAction;
 import fr.jmmc.aspro.gui.action.NewObservationAction;
 import fr.jmmc.aspro.gui.action.SaveObservationAction;
-import fr.jmmc.aspro.gui.action.ShowConfReleaseAction;
+import fr.jmmc.jmcs.gui.action.ShowHtmlReleaseNotesAction;
 import fr.jmmc.aspro.gui.action.ShowPrefAction;
 import fr.jmmc.aspro.gui.action.TargetEditorAction;
 import fr.jmmc.aspro.gui.task.AsproTaskRegistry;
@@ -283,7 +283,8 @@ public final class Aspro2 extends App {
         new StarListSendAction();
         
         // Help menu:
-        new ShowConfReleaseAction();
+        new ShowHtmlReleaseNotesAction("showApp", "Aspro2 ", ApplicationDescription.getInstance());
+        new ShowHtmlReleaseNotesAction("showConf", "Aspro2 Configuration", ConfigurationManager.getInstance().getConfDescription());
     }
 
     /**

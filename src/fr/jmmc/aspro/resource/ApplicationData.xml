@@ -177,7 +177,8 @@
     </menu>
     
     <menu label="Help">
-      <menu label="Show Configuration release notes" classpath="fr.jmmc.aspro.gui.action.ShowConfReleaseAction" action="showReleaseNotes"/>
+      <menu label="Show Application release notes" classpath="fr.jmmc.jmcs.gui.action.ShowHtmlReleaseNotesAction" action="showApp"/>
+      <menu label="Show Configuration release notes" classpath="fr.jmmc.jmcs.gui.action.ShowHtmlReleaseNotesAction" action="showConf"/>
     </menu>
     
   </menubar>
