@@ -60,6 +60,7 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.text.DateFormat;
@@ -132,6 +133,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     private static final String MSG_COMPUTING = "computing observability ...";
     /** flag to log version checking */
     private final static boolean DEBUG_VERSIONS = false;
+    /** time marker label offset */
+    private final static RectangleInsets TIME_MARKER_LABEL_OFFSET = new RectangleInsets(1d, 0d, 1d, 0d);
     /** background color corresponding to the DAY zone */
     public static final Color DAY_COLOR = new Color(224, 224, 224);
     /** background color corresponding to the TWILIGHT zone */
@@ -152,19 +155,14 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     private final static TickUnitSource HA_TICK_UNITS = ChartUtils.createHourAngleTickUnits();
     /** hour:minute units */
     private final static TickUnitSource HH_MM_TICK_UNITS = ChartUtils.createTimeTickUnits();
-    /** max items printed before using A3 format */
-    private final static int MAX_PRINTABLE_ITEMS_A4 = 10;
-    /** max items printed before using A2 format */
-    private final static int MAX_PRINTABLE_ITEMS_A3 = MAX_PRINTABLE_ITEMS_A4 * 4;
-    /** max items displayed before scrolling */
-    private final static int MAX_VIEW_ITEMS = MAX_PRINTABLE_ITEMS_A4;
     /** default item size to determine the max view items dynamically */
     private final static int ITEM_SIZE = 40;
     /** default timeline refresh period = 1 minutes */
     private static final int REFRESH_PERIOD = 60 * 1000;
     /* Filters */
     /** calibrator filter */
-    private static final Filter CALIBRATOR_FILTER = new Filter("CalibratorFilter", "Hide calibrators") {
+    private static final Filter CALIBRATOR_FILTER = new Filter("CalibratorFilter", "Hide calibrators",
+            "hide all targets flagged as calibrator and orphaned calibrators") {
         @Override
         protected boolean apply(final Target target, final boolean calibrator, final StarObservabilityData so) {
             // if calibrator, filter item:
@@ -172,7 +170,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         }
     };
     /** unobservable filter */
-    private static final Filter UNOBSERVABLE_FILTER = new Filter("UnobservableFilter", "Hide unobservable") {
+    private static final Filter UNOBSERVABLE_FILTER = new Filter("UnobservableFilter", "Hide unobservable",
+            "hide all targets that are not observable or never rise") {
         @Override
         protected boolean apply(final Target target, final boolean calibrator, final StarObservabilityData so) {
             if (so != null && so.getVisible().isEmpty()) {
@@ -291,7 +290,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         this.aJMMC = ChartUtils.createJMMCAnnotation(AsproConstants.JMMC_ANNOTATION);
 
         // define sliding adapter :
-        this.slidingXYPlotAdapter = new SlidingXYPlotAdapter(this.chart, this.xyPlot, MAX_VIEW_ITEMS, this.aJMMC);
+        this.slidingXYPlotAdapter = new SlidingXYPlotAdapter(this.chart, this.xyPlot, SlidingXYPlotAdapter.MAX_VIEW_ITEMS, this.aJMMC);
 
         // add listener :
         this.chart.addProgressListener(this);
@@ -437,9 +436,29 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
         panelOptions.add(this.jCheckBoxDetailedOutput);
 
-        this.jCheckBoxListFilters = new CheckBoxList(new Object[]{CALIBRATOR_FILTER, UNOBSERVABLE_FILTER});
+        this.jCheckBoxListFilters = new CheckBoxList(new Object[]{CALIBRATOR_FILTER, UNOBSERVABLE_FILTER}) {
+            /** default serial UID for Serializable interface */
+            private static final long serialVersionUID = 1;
+
+            /** This method is called as the cursor moves within the list */
+            @Override
+            public String getToolTipText(final MouseEvent evt) {
+                // Get item index :
+                final int index = locationToIndex(evt.getPoint());
+                if (index != -1) {
+                    // Get filter:
+                    final Filter filter = (Filter) getModel().getElementAt(index);
+                    if (filter != null) {
+                        // Return the tool tip text :
+                        return filter.getTooltip();
+                    }
+                }
+                return getToolTipText();
+            }
+        };
+
         this.jCheckBoxListFilters.setName("jCheckBoxListFilters");
-        this.jCheckBoxListFilters.setVisibleRowCount(1); // 1 or 2 max
+        this.jCheckBoxListFilters.setVisibleRowCount(2); // note: only 1 is ugly on macOS X
 
         this.jCheckBoxListFilters.getCheckBoxListSelectionModel().addListSelectionListener(new ListSelectionListener() {
             public void valueChanged(final ListSelectionEvent e) {
@@ -455,6 +474,10 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
         this.jCheckBoxScrollView = new JCheckBox("Scroll view");
         this.jCheckBoxScrollView.setName("jCheckBoxScrollView");
+        this.jCheckBoxScrollView.setToolTipText("<html>If enabled, only few targets are displayed and the plot is scrollable (mousewheel supported)"
+                + "<br>but <b>the exported PDF always contains all targets</b> (multiple page if necessary)"
+                + "<br>If disabled, all targets are displayed and the plot can be zoomed in / out (mouse)"
+                + "<br>but <b>the exported PDF document contains targets as displayed (single page only)</b></html>");
 
         this.jCheckBoxScrollView.setSelected(true);
         this.jCheckBoxScrollView.addItemListener(new ItemListener() {
@@ -640,43 +663,55 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
             // baseline limits flag used by the plot :
             if (!this.getChartData().getFirstObsData().isDoBaseLineLimits()) {
 
-                final int size = this.slidingXYPlotAdapter.getSize();
+                // disable highlight:
+                this.slidingXYPlotAdapter.setSelectedPosition(-1);
+
+                // view size: current zoom area (size) or complete size: 
+                final int currentSize = this.slidingXYPlotAdapter.isUseSubset() ? this.slidingXYPlotAdapter.getSize()
+                        : (int) this.xyPlot.getDomainAxis().getRange().getLength();
 
                 if (logger.isDebugEnabled()) {
-                    logger.debug("row count: {}", size);
+                    logger.debug("current size: {}", currentSize);
                 }
 
-                if (this.slidingXYPlotAdapter.isUseSubset() && size > MAX_PRINTABLE_ITEMS_A3) {
+                // Too many items to fit in one A3 page:
+                if (this.slidingXYPlotAdapter.isUseSubset() && currentSize > SlidingXYPlotAdapter.MAX_PRINTABLE_ITEMS_A3) {
+
                     // multi page mode
                     useSubset = true;
+
+                    // complete size
+                    final int fullSize = this.slidingXYPlotAdapter.getSize();
+
+                    final int numberOfPages = 1 + fullSize / SlidingXYPlotAdapter.MAX_PRINTABLE_ITEMS_A3;
+                    final int maxViewsItemsPerPage = Math.round(0.5f + fullSize / numberOfPages);
+
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("numberOfPages: {}", numberOfPages);
+                        logger.debug("maxViewsItemsPerPage: {}", maxViewsItemsPerPage);
+                    }
+
                     // update max items:
-                    this.slidingXYPlotAdapter.setMaxViewItems(MAX_PRINTABLE_ITEMS_A3);
+                    this.slidingXYPlotAdapter.setMaxViewItems(maxViewsItemsPerPage);
 
 //                    options = new PDFOptions(PageSize.A2, Orientation.Portait);
-                    options = new PDFOptions(PageSize.A3, Orientation.Portait, 1 + size / MAX_PRINTABLE_ITEMS_A3);
+                    options = new PDFOptions(PageSize.A3, Orientation.Portait, numberOfPages);
 
-                } else if (size > MAX_PRINTABLE_ITEMS_A4) {
+                } else if (currentSize > SlidingXYPlotAdapter.MAX_PRINTABLE_ITEMS_A4) {
                     options = new PDFOptions(PageSize.A3, Orientation.Portait);
                 }
             }
         }
 
-        // Note: if scroll view is disabled, user can zoom on plot and export it as displayed (highlight is then present)
-        // difficult to keep plot as displayed without hilight (requires plot update ie reset zoom ...)
-        final boolean needUpdatePlot = (this.slidingXYPlotAdapter.isUseSubset() != useSubset);
+        final boolean changeSubset = (this.slidingXYPlotAdapter.isUseSubset() != useSubset);
 
-        // TODO: solution =  detect visible ranges (specific refresh keeping ranges ?)
-
-        if (useSubset || needUpdatePlot) {
-            // disable highlight:
-            this.slidingXYPlotAdapter.setSelectedPosition(-1);
-
+        if (useSubset || changeSubset) {
             // start at the beginning:
             this.slidingXYPlotAdapter.setPosition(0);
         }
 
         // Adapt the chart to print all targets on 1 page or multiple pages:
-        if (needUpdatePlot) {
+        if (changeSubset) {
             this.slidingXYPlotAdapter.setUseSubset(useSubset);
         }
 
@@ -1729,7 +1764,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                             this.timeMarker = new ValueMarker(timeValue, Color.RED, ChartUtils.THIN_STROKE, Color.GRAY, ChartUtils.THIN_STROKE, 1.0f);
                             this.timeMarker.setLabelFont(ChartUtils.DEFAULT_TEXT_SMALL_FONT);
                             this.timeMarker.setLabelPaint(Color.RED);
-                            this.timeMarker.setLabelOffset(new RectangleInsets(1d, 0d, 1d, 0d));
+                            this.timeMarker.setLabelOffset(TIME_MARKER_LABEL_OFFSET);
                             this.timeMarker.setLabelAnchor(RectangleAnchor.TOP);
                         } else {
                             this.timeMarker.setValue(timeValue);
@@ -1974,15 +2009,19 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         private final String name;
         /** filter label (JList) */
         private final String label;
+        /** filter tooltip (JList tooltip) */
+        private final String tooltip;
 
         /**
          * Filter constructor
          * @param name filter name
          * @param label filter label
+         * @param tooltip filter tooltip
          */
-        Filter(final String name, final String label) {
+        Filter(final String name, final String label, final String tooltip) {
             this.name = name;
             this.label = label;
+            this.tooltip = tooltip;
         }
 
         /**
@@ -1999,6 +2038,14 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
          */
         public final String getLabel() {
             return label;
+        }
+
+        /**
+         * Return the filter tooltip
+         * @return filter tooltip
+         */
+        private String getTooltip() {
+            return this.tooltip;
         }
 
         /**
