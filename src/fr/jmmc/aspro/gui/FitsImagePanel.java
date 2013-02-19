@@ -73,6 +73,8 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
     private static final long serialVersionUID = 1L;
     /** Class logger */
     private static final Logger logger = LoggerFactory.getLogger(FitsImagePanel.class.getName());
+    /** chart padding (right = 10px) */
+    private final static RectangleInsets CHART_PADDING = new RectangleInsets(0d, 0d, 0d, 10d);
     /** image task prefix 'convertFitsImage-' */
     private static final String PREFIX_IMAGE_TASK = "convertFitsImage-";
     /** global thread counter */
@@ -250,7 +252,7 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
      */
     private void postInit() {
         this.chart = ChartUtils.createSquareXYLineChart(null, null, false);
-        this.chart.setPadding(new RectangleInsets(0d, 0d, 0d, 10d));
+        this.chart.setPadding(CHART_PADDING);
 
         this.xyPlot = (SquareXYPlot) this.chart.getPlot();
 
