@@ -15,7 +15,6 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYBarRenderer;
 import org.jfree.chart.urls.StandardXYURLGenerator;
 import org.jfree.data.xy.IntervalXYDataset;
-import org.jfree.ui.RectangleInsets;
 
 /**
  * Several static methods related to the JFreeChart library
@@ -41,7 +40,7 @@ public final class AsproChartUtils {
     final XYPlot xyPlot = (XYPlot) chart.getPlot();
 
     // enlarge right margin to have last displayed hour (00:00)
-    xyPlot.setInsets(new RectangleInsets(2d, 10d, 2d, 20d));
+    xyPlot.setInsets(ChartUtils.NORMAL_PLOT_INSETS);
 
     // disable cross hairs (and distance computation):
     xyPlot.setDomainCrosshairVisible(false);
