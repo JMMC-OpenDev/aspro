@@ -15,38 +15,38 @@ import org.slf4j.LoggerFactory;
  */
 public final class ShowPrefAction extends RegisteredAction {
 
-  /** default serial UID for Serializable interface */
-  private static final long serialVersionUID = 1;
-  /** Class name. This name is used to register to the ActionRegistrar */
-  public final static String className = ShowPrefAction.class.getName();
-  /** Action name. This name is used to register to the ActionRegistrar */
-  public final static String actionName = "showPreferences";
-  /** Class logger */
-  private final static Logger logger = LoggerFactory.getLogger(className);
+    /** default serial UID for Serializable interface */
+    private static final long serialVersionUID = 1;
+    /** Class name. This name is used to register to the ActionRegistrar */
+    public final static String className = ShowPrefAction.class.getName();
+    /** Action name. This name is used to register to the ActionRegistrar */
+    public final static String actionName = "showPreferences";
+    /** Class logger */
+    private final static Logger logger = LoggerFactory.getLogger(className);
 
-  /**
-   * Public constructor that automatically register the action in RegisteredAction.
-   */
-  public ShowPrefAction() {
-    super(className, actionName);
-    flagAsPreferenceAction();
-  }
+    /**
+     * Public constructor that automatically register the action in RegisteredAction.
+     */
+    public ShowPrefAction() {
+        super(className, actionName);
+        flagAsPreferenceAction();
+    }
 
-  /**
-   * Handle the action event
-   * @param evt action event
-   */
-  @Override
-  public void actionPerformed(final ActionEvent evt) {
-    logger.debug("actionPerformed");
+    /**
+     * Handle the action event
+     * @param evt action event
+     */
+    @Override
+    public void actionPerformed(final ActionEvent evt) {
+        logger.debug("actionPerformed");
 
-    showPreferencesView();
-  }
+        showPreferencesView();
+    }
 
-  /**
-   * Show a new preferences view
-   */
-  public static void showPreferencesView() {
-    new PreferencesView().setVisible(true);
-  }
+    /**
+     * Show a new preferences view
+     */
+    public static void showPreferencesView() {
+        new PreferencesView().setVisible(true);
+    }
 }
