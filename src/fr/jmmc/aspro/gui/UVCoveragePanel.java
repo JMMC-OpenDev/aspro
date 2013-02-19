@@ -238,14 +238,14 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         jTargetHAMax = new javax.swing.JLabel();
         jFieldHAMax = new javax.swing.JFormattedTextField();
         jCheckBoxPlotUVSupport = new javax.swing.JCheckBox();
-        jSeparator1 = new javax.swing.JSeparator();
+        jSeparator2 = new javax.swing.JSeparator();
         jCheckBoxModelImage = new javax.swing.JCheckBox();
         jLabelImageMode = new javax.swing.JLabel();
         jComboBoxImageMode = new javax.swing.JComboBox();
-        jSeparator2 = new javax.swing.JSeparator();
+        jSeparator1 = new javax.swing.JSeparator();
+        jCheckBoxDoOIFits = new javax.swing.JCheckBox();
         jCheckBoxAddNoise = new javax.swing.JCheckBox();
         jPanelSpacer = new javax.swing.JPanel();
-        jCheckBoxDoOIFits = new javax.swing.JCheckBox();
 
         setLayout(new java.awt.BorderLayout());
 
@@ -266,7 +266,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 4;
         gridBagConstraints.gridwidth = 2;
-        gridBagConstraints.insets = new java.awt.Insets(6, 0, 0, 0);
+        gridBagConstraints.insets = new java.awt.Insets(2, 0, 0, 0);
         jPanelLeft.add(jLabelInstrumentMode, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -305,7 +305,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         gridBagConstraints.gridy = 9;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        gridBagConstraints.insets = new java.awt.Insets(1, 1, 0, 1);
         jPanelLeft.add(jComboBoxFTMode, gridBagConstraints);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -458,12 +458,12 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         jPanelLeft.add(jCheckBoxPlotUVSupport, gridBagConstraints);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 26;
+        gridBagConstraints.gridy = 23;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weighty = 0.1;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-        jPanelLeft.add(jSeparator1, gridBagConstraints);
+        jPanelLeft.add(jSeparator2, gridBagConstraints);
 
         jCheckBoxModelImage.setSelected(true);
         jCheckBoxModelImage.setText("<html>Underplot a model image</html>");
@@ -485,34 +485,16 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 25;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
+        gridBagConstraints.insets = new java.awt.Insets(1, 1, 0, 1);
         jPanelLeft.add(jComboBoxImageMode, gridBagConstraints);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 23;
+        gridBagConstraints.gridy = 26;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weighty = 0.1;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-        jPanelLeft.add(jSeparator2, gridBagConstraints);
-
-        jCheckBoxAddNoise.setSelected(true);
-        jCheckBoxAddNoise.setText("Add error noise to data");
-        jCheckBoxAddNoise.setName("jCheckBoxAddNoise"); // NOI18N
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 28;
-        gridBagConstraints.gridwidth = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
-        jPanelLeft.add(jCheckBoxAddNoise, gridBagConstraints);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 30;
-        gridBagConstraints.gridwidth = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weighty = 0.1;
-        jPanelLeft.add(jPanelSpacer, gridBagConstraints);
+        jPanelLeft.add(jSeparator1, gridBagConstraints);
 
         jCheckBoxDoOIFits.setSelected(true);
         jCheckBoxDoOIFits.setText("Compute OIFits data");
@@ -522,8 +504,27 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         gridBagConstraints.gridy = 27;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
         jPanelLeft.add(jCheckBoxDoOIFits, gridBagConstraints);
+
+        jCheckBoxAddNoise.setSelected(true);
+        jCheckBoxAddNoise.setText("Add error noise to data");
+        jCheckBoxAddNoise.setName("jCheckBoxAddNoise"); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 28;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        jPanelLeft.add(jCheckBoxAddNoise, gridBagConstraints);
+
+        jPanelSpacer.setMinimumSize(new java.awt.Dimension(1, 1));
+        jPanelSpacer.setPreferredSize(new java.awt.Dimension(1, 1));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 30;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weighty = 0.1;
+        jPanelLeft.add(jPanelSpacer, gridBagConstraints);
 
         jScrollPaneForm.setViewportView(jPanelLeft);
 
