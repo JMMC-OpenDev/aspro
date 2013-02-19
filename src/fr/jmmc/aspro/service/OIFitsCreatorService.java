@@ -10,6 +10,7 @@ import fr.jmmc.aspro.model.Beam;
 import fr.jmmc.aspro.model.WarningContainer;
 import fr.jmmc.aspro.model.oi.FocalInstrument;
 import fr.jmmc.aspro.model.oi.InterferometerConfiguration;
+import fr.jmmc.aspro.model.oi.InterferometerDescription;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Position3D;
 import fr.jmmc.aspro.model.oi.Station;
@@ -44,7 +45,7 @@ import fr.jmmc.oitools.util.CombUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -64,7 +65,7 @@ public final class OIFitsCreatorService {
     /** target Id */
     private final static short TARGET_ID = (short) 1;
     /** enable the OIFits validation */
-    private final static boolean DO_VALIDATE = false;
+    private final static boolean DO_VALIDATE_OIFITS = false;
     /** flag to show compute task statistics */
     private final static boolean SHOW_COMPUTE_STATS = false;
     /** threshold to use parallel jobs for user models (32 UV points) */
@@ -128,16 +129,22 @@ public final class OIFitsCreatorService {
     private final boolean errorValid;
     /** flag to add gaussian noise to OIFits data; true if parameter doDataNoise = true and noise parameters are valid */
     private final boolean doNoise;
-    /** interferometer name */
-    private String arrayName = null;
+    /** interferometer description */
+    private InterferometerDescription interferometer = null;
     /** instrument name */
     private String instrumentName = null;
+    /** arrname keyword value (interferometer name) */
+    private String arrNameKeyword = null;
+    /** insname keyword value (instrument_LAMBDA1_LAMBDA2) */
+    private String insNameKeyword = null;
     /** instrument experimental flag */
     private boolean instrumentExperimental = false;
     /** wavelengths */
     private double[] waveLengths;
     /** wave band */
     private double waveBand;
+    /** Station mapping */
+    private Map<Station, Short> stationMapping = null;
     /** beam mapping */
     private Map<Beam, Short> beamMapping = null;
     /** baseline mapping */
@@ -236,7 +243,11 @@ public final class OIFitsCreatorService {
         // create a new EMPTY OIFits structure :
         this.oiFitsFile = new OIFitsFile();
 
-        this.arrayName = this.observation.getInterferometerConfiguration().getName();
+        this.arrNameKeyword = this.observation.getInterferometerConfiguration().getName();
+
+        final InterferometerConfiguration intConf = this.observation.getInterferometerConfiguration().getInterferometerConfiguration();
+
+        this.interferometer = intConf.getInterferometer();
 
         final FocalInstrument instrument = this.observation.getInstrumentConfiguration().getInstrumentConfiguration().getFocalInstrument();
 
@@ -244,13 +255,16 @@ public final class OIFitsCreatorService {
         this.instrumentExperimental = (instrument.isExperimental() != null) ? instrument.isExperimental().booleanValue() : false;
 
         if (logger.isDebugEnabled()) {
-            logger.debug("arrName: {}", this.arrayName);
+            logger.debug("arrName: {}", this.arrNameKeyword);
             logger.debug("insName: {}", this.instrumentName);
             logger.debug("experimental: {}", this.instrumentExperimental);
         }
 
-        // Create beams and base line mappings :
-        this.beamMapping = createBeamMapping(this.beams);
+        // Create station mappings:
+        this.stationMapping = createStationMapping(this.interferometer.getStations());
+
+        // Create beam and base line mappings :
+        this.beamMapping = createBeamMapping(this.stationMapping, this.beams);
         this.baseLineMapping = createBaseLineMapping(this.beamMapping, this.baseLines);
 
         // OI_ARRAY :
@@ -310,7 +324,7 @@ public final class OIFitsCreatorService {
 
         logger.info("createOIFits: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
 
-        if (DO_VALIDATE) {
+        if (DO_VALIDATE_OIFITS) {
             final OIFitsChecker checker = new OIFitsChecker();
             this.oiFitsFile.check(checker);
 
@@ -325,6 +339,9 @@ public final class OIFitsCreatorService {
             return null;
         }
 
+        // Analyze the OIFits file to get its configuration:
+        this.oiFitsFile.analyze();
+
         return this.oiFitsFile;
     }
 
@@ -336,37 +353,33 @@ public final class OIFitsCreatorService {
     private void createOIArray() {
 
         // Create OI_ARRAY table :
-        final OIArray oiArray = new OIArray(this.oiFitsFile, this.nBeams);
+        final OIArray oiArray = new OIArray(this.oiFitsFile, this.interferometer.getStations().size());
 
         // Array Name :
-        oiArray.setArrName(this.arrayName);
+        oiArray.setArrName(this.arrNameKeyword);
 
         // Position :
         oiArray.setFrame(OIFitsConstants.KEYWORD_FRAME_GEOCENTRIC);
 
-        final InterferometerConfiguration ic = this.observation.getInterferometerConfiguration().getInterferometerConfiguration();
-        if (ic != null) {
-            final Position3D position = ic.getInterferometer().getPosition();
+        Position3D position = this.interferometer.getPosition();
 
-            oiArray.setArrayXYZ(new double[]{position.getPosX(), position.getPosY(), position.getPosZ()});
-        }
+        oiArray.setArrayXYZ(new double[]{position.getPosX(), position.getPosY(), position.getPosZ()});
 
         // Stations :
         int i = 0;
         Telescope tel;
-        Station station;
-        for (final Beam b : this.beams) {
-            station = b.getStation();
+
+        for (final Station station : this.interferometer.getStations()) {
 
             tel = station.getTelescope();
             oiArray.getTelName()[i] = tel.getName();
             oiArray.getDiameter()[i] = (float) tel.getDiameter();
 
             oiArray.getStaName()[i] = station.getName();
-            oiArray.getStaIndex()[i] = (short) (i + 1);
+            oiArray.getStaIndex()[i] = this.stationMapping.get(station).shortValue();
 
             // TODO : rotate the horizontal position to geocentric :
-            final Position3D position = station.getRelativePosition();
+            position = station.getRelativePosition();
 
             oiArray.getStaXYZ()[i] = new double[]{position.getPosX(), position.getPosY(), position.getPosZ()};
 
@@ -439,13 +452,18 @@ public final class OIFitsCreatorService {
      */
     private void createOIWaveLength() {
 
+        // TODO: fix wavelengths % user model Fits cube (wavelengths):
+        this.waveBand = (this.lambdaMax - this.lambdaMin) / this.nWaveLengths;
+        this.waveLengths = computeWaveLengths(this.lambdaMin, this.lambdaMax, this.waveBand);
+
+        this.insNameKeyword = this.instrumentName + '_' + NumberUtils.trimTo5Digits(1e6d * this.waveLengths[0])
+                + '_' + NumberUtils.trimTo5Digits(1e6d * this.waveLengths[this.waveLengths.length - 1]);
+
+        logger.debug("insNameKeyword: {}", insNameKeyword);
+
         // Create OI_WAVELENGTH table :
         final OIWavelength waves = new OIWavelength(this.oiFitsFile, this.nWaveLengths);
-        waves.setInsName(this.instrumentName);
-
-        this.waveBand = (this.lambdaMax - this.lambdaMin) / this.nWaveLengths;
-
-        this.waveLengths = computeWaveLengths(this.lambdaMin, this.lambdaMax, this.waveBand);
+        waves.setInsName(this.insNameKeyword);
 
         final float[] effWave = waves.getEffWave();
         final float[] effBand = waves.getEffBand();
@@ -508,12 +526,12 @@ public final class OIFitsCreatorService {
 
             // user model if defined:
             final UserModel userModel = (!useAnalyticalModel) ? target.getUserModel() : null;
-            
+
             // Test if user model data is valid:
             if (userModel != null && !userModel.isModelDataReady()) {
                 return false;
             }
-            
+
             // use the preference (QUICK, FAST, DEFAULT?) : QUICK = PREVIEW ie No super sampling
             final UserModelService.MathMode mathMode = this.mathModeOIFits;
 
@@ -525,7 +543,7 @@ public final class OIFitsCreatorService {
             int nSamples = (nChannels > 100 || mathMode == MathMode.QUICK) ? 1 : this.supersamplingOIFits;
 
             double deltaLambda = this.waveBand / nSamples;
-            
+
             // If Fits cube: use all images at least i.e. adjust frequencies and nSamples
 
             final double wlInc = (userModel != null && userModel.isModelDataReady()) ? userModel.getModelData(0).getIncWL() : Double.POSITIVE_INFINITY;
@@ -533,21 +551,21 @@ public final class OIFitsCreatorService {
             // Sub channel width:
             if (wlInc < deltaLambda) {
                 // adjust nSamples to have deltaLambda < wlInc:
-                nSamples = (int)Math.ceil(nSamples * this.waveBand / wlInc);
+                nSamples = (int) Math.ceil(nSamples * this.waveBand / wlInc);
             }
 
             // Prefer odd number of sub channels:
             if (nSamples % 2 == 0) {
                 nSamples++;
             }
-            
+
             logger.info("computeModelVisibilities: nSamples = {}", nSamples);
-            
+
             deltaLambda = this.waveBand / nSamples;
 
             // TODO: determine when to use super sampling (model images increment or ...)
             // note: integration must be adjusted to use wavelengths in each spectral channel !
-            
+
 //            logger.info("wlInc = {}", wlInc);
 //            logger.info("lambdaInc = {}", lambaInc);
 
@@ -557,7 +575,7 @@ public final class OIFitsCreatorService {
             final int nWLen = sampleWaveLengths.length;
 
             logger.info("computeModelVisibilities: nWLen = {} - nChannels = {}", nWLen, nChannels);
-            
+
             final int nBl = nBaseLines;
             final int nHA = nHAPoints;
             final NoiseService ns = noiseService;
@@ -856,21 +874,21 @@ public final class OIFitsCreatorService {
                     cVis[k] = convertArray(cmVis[k], nChannels);
                 }
             } else {
-                
+
                 // Prepare mapping of sampled channels:
                 final int[] fromWL = new int[nChannels];
                 final int[] endWL = new int[nChannels];
 
                 // Note: sometimes sub channels may overlap channel limits
                 final double halfBand = 0.5d * this.waveBand;
-                
+
                 for (int l = 0; l < nChannels; l++) {
                     final double wlMin = this.waveLengths[l] - halfBand;
                     final double wlMax = this.waveLengths[l] + halfBand;
 
                     fromWL[l] = -1;
                     endWL[l] = -1;
-                    
+
                     for (int i = 0; i < nWLen; i++) {
                         if (sampleWaveLengths[i] < wlMin) {
                             continue;
@@ -887,13 +905,13 @@ public final class OIFitsCreatorService {
                         endWL[l] = nWLen;
                     }
                 }
-                
+
                 final double[] normFactorWL = new double[nChannels];
 
                 for (int l = 0; l < nChannels; l++) {
                     normFactorWL[l] = 1d / (endWL[l] - fromWL[l]);
                 }
-                
+
                 final MutableComplex integrator = new MutableComplex();
 
                 // Iterate on rows :
@@ -1098,8 +1116,8 @@ public final class OIFitsCreatorService {
         final boolean isAmber = AsproConstants.INS_AMBER.equals(this.instrumentName);
 
         // Create OI_VIS table :
-        final OIVis vis = new OIVis(this.oiFitsFile, this.instrumentName, this.nHAPoints * this.nBaseLines);
-        vis.setArrName(this.arrayName);
+        final OIVis vis = new OIVis(this.oiFitsFile, this.insNameKeyword, this.nHAPoints * this.nBaseLines);
+        vis.setArrName(this.arrNameKeyword);
 
         // Compute UTC start date from first HA :
         final Calendar calObs = this.sc.toCalendar(this.sc.convertHAToJD(this.obsHa[0], this.precRA), false);
@@ -1362,8 +1380,8 @@ public final class OIFitsCreatorService {
         final int nRows = vis.getNbRows();
 
         // Create OI_VIS2 table :
-        final OIVis2 vis2 = new OIVis2(this.oiFitsFile, this.instrumentName, nRows);
-        vis2.setArrName(this.arrayName);
+        final OIVis2 vis2 = new OIVis2(this.oiFitsFile, this.insNameKeyword, nRows);
+        vis2.setArrName(this.arrNameKeyword);
         vis2.setDateObs(vis.getDateObs());
 
         // Columns :
@@ -1454,8 +1472,10 @@ public final class OIFitsCreatorService {
         }
 
         final List<Triplet> triplets = new ArrayList<Triplet>(nTriplets);
+        final short[][] orderedbaseLineIndexes = baseLineMapping.values().toArray(new short[baseLineMapping.size()][2]);
+
         for (int[] idx : iTriplets) {
-            triplets.add(Triplet.create(idx, this.baseLineMapping));
+            triplets.add(Triplet.create(idx, this.beams, this.stationMapping, orderedbaseLineIndexes));
         }
 
         if (logger.isDebugEnabled()) {
@@ -1466,8 +1486,8 @@ public final class OIFitsCreatorService {
         final OIVis vis = this.oiFitsFile.getOiVis()[0];
 
         // Create OI_T3 table :
-        final OIT3 t3 = new OIT3(this.oiFitsFile, this.instrumentName, this.nHAPoints * nTriplets);
-        t3.setArrName(this.arrayName);
+        final OIT3 t3 = new OIT3(this.oiFitsFile, this.insNameKeyword, this.nHAPoints * nTriplets);
+        t3.setArrName(this.arrNameKeyword);
         t3.setDateObs(vis.getDateObs());
 
         // OI_VIS Columns :
@@ -1675,20 +1695,42 @@ public final class OIFitsCreatorService {
     }
 
     /**
+     * Return the station mapping
+     * @param stations station list
+     * @return station mapping
+     */
+    private static Map<Station, Short> createStationMapping(final List<Station> stations) {
+        // Create Station - index mapping :
+        // Note : as Station.hashCode is not implemented, the map acts as an IdentityMap (pointer equality)
+        final Map<Station, Short> stationMapping = new IdentityHashMap<Station, Short>(stations.size());
+
+        int i = 0;
+        for (Station s : stations) {
+            stationMapping.put(s, Short.valueOf((short) (i + 1)));
+            i++;
+        }
+
+        logger.debug("stationMapping: {}", stationMapping);
+
+        return stationMapping;
+    }
+
+    /**
      * Return the beam mapping
+     * @param stationMapping station mapping
      * @param beams beam list
      * @return beam mapping
      */
-    private static Map<Beam, Short> createBeamMapping(final List<Beam> beams) {
+    private static Map<Beam, Short> createBeamMapping(final Map<Station, Short> stationMapping, final List<Beam> beams) {
         // Create Beam - index mapping :
-        final Map<Beam, Short> beamMapping = new HashMap<Beam, Short>(beams.size());
-
         // Note : as Beam.hashCode is not implemented, the map acts as an IdentityMap (pointer equality)
-        int i = 0;
+        final Map<Beam, Short> beamMapping = new IdentityHashMap<Beam, Short>(beams.size());
+
         for (Beam b : beams) {
-            beamMapping.put(b, Short.valueOf((short) (i + 1)));
-            i++;
+            beamMapping.put(b, stationMapping.get(b.getStation()));
         }
+
+        logger.debug("beamMapping: {}", beamMapping);
 
         return beamMapping;
     }
@@ -1701,6 +1743,7 @@ public final class OIFitsCreatorService {
      */
     private static Map<BaseLine, short[]> createBaseLineMapping(final Map<Beam, Short> beamMapping, final List<BaseLine> baseLines) {
         // Create BaseLine - indexes mapping :
+        // Note : as BaseLine.hashCode is not implemented, the map acts as an IdentityMap (pointer equality)
         final Map<BaseLine, short[]> baseLineIndexes = new LinkedHashMap<BaseLine, short[]>(baseLines.size());
 
         for (BaseLine bl : baseLines) {
@@ -1779,14 +1822,18 @@ public final class OIFitsCreatorService {
         /**
          * Triplet factory method
          * @param idx 0-based indexes
-         * @param baseLineMapping baseline mapping
+         * @param beams list of beams
+         * @param stationMapping station mapping
+         * @param orderedbaseLineIndexes ordered baseline arrays (OI_VIS)
          * @return triplet instance
          */
-        static Triplet create(final int[] idx, final Map<BaseLine, short[]> baseLineMapping) {
+        static Triplet create(final int[] idx, final List<Beam> beams, final Map<Station, Short> stationMapping, final short[][] orderedbaseLineIndexes) {
 
             final short[] tIndexes = new short[3];
+
             for (int i = 0; i < 3; i++) {
-                tIndexes[i] = (short) (idx[i] + 1);
+                final Beam b = beams.get(idx[i]);
+                tIndexes[i] = stationMapping.get(b.getStation()).shortValue();
             }
 
             // for tIndexes = [123] i.e. ABC
@@ -1809,10 +1856,9 @@ public final class OIFitsCreatorService {
             bIndexes[1] = bIndexes[2];
             bIndexes[2] = tmp;
 
-            // Find relative positions in baseline ordering :
+            // Find relative positions in baseline ordering:
             final int[] pos = new int[3];
 
-            final short[][] orderedbaseLineIndexes = baseLineMapping.values().toArray(new short[baseLineMapping.size()][2]);
             final int size = orderedbaseLineIndexes.length;
 
             short[] find, other;
@@ -1885,12 +1931,12 @@ public final class OIFitsCreatorService {
             sb.append("Triplet[");
 
             for (short s : this.tripletIndexes) {
-                sb.append(s);
+                sb.append(s).append(' ');
             }
             sb.append("]{ ");
 
             for (short[] b : this.baselineIndexes) {
-                sb.append(b[0]).append(b[1]).append(' ');
+                sb.append(b[0]).append('-').append(b[1]).append(' ');
             }
 
             sb.append("} = [ ");
