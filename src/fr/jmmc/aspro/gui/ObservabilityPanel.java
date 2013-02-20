@@ -39,6 +39,7 @@ import fr.jmmc.jmcs.gui.component.Disposable;
 import fr.jmmc.jmcs.gui.component.StatusBar;
 import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.jmcs.util.ObjectUtils;
+import fr.jmmc.jmcs.util.SpecialChars;
 import fr.jmmc.jmcs.util.concurrent.InterruptedJobException;
 import fr.jmmc.jmcs.util.concurrent.ParallelJobExecutor;
 import fr.jmmc.oiexplorer.core.gui.PDFExportable;
@@ -131,6 +132,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     private static final Logger logger = LoggerFactory.getLogger(ObservabilityPanel.class.getName());
     /** message indicating computations */
     private static final String MSG_COMPUTING = "computing observability ...";
+    /** suffix added to target having user information */
+    public static final String SUFFIX_INFO = " [" + SpecialChars.SYMBOL_INFO + "]";
     /** flag to log version checking */
     private final static boolean DEBUG_VERSIONS = false;
     /** time marker label offset */
@@ -1318,7 +1321,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
                             // add information character:
                             if (targetUserInfos.getDescription(target) != null) {
-                                name += " [\u2139]";
+                                name += SUFFIX_INFO;
                             }
 
                             targetList.add(target);
