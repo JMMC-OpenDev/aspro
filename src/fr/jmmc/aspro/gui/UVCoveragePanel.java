@@ -9,6 +9,7 @@ import fr.jmmc.aspro.Preferences;
 import fr.jmmc.aspro.gui.action.AsproExportPDFAction;
 import fr.jmmc.aspro.gui.action.ExportOBVLTIAction;
 import fr.jmmc.aspro.gui.action.ExportOBVegaAction;
+import fr.jmmc.aspro.gui.chart.AsproChartUtils;
 import fr.jmmc.aspro.gui.chart.ColorModelPaintScale;
 import fr.jmmc.aspro.gui.chart.PaintLogScaleLegend;
 import fr.jmmc.aspro.gui.task.AsproTaskRegistry;
@@ -653,7 +654,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         this.xyPlot.setBackgroundImageAlpha(1.0f);
 
         // create new JMMC annotation (moving position):
-        this.aJMMC = ChartUtils.createJMMCAnnotation(AsproConstants.JMMC_ANNOTATION);
+        this.aJMMC = AsproChartUtils.createJMMCAnnotation();
         this.xyPlot.getRenderer().addAnnotation(this.aJMMC, Layer.BACKGROUND);
 
         // add UV axes in meters:

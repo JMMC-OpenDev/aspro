@@ -3,9 +3,9 @@
  ******************************************************************************/
 package fr.jmmc.aspro.gui;
 
-import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.Preferences;
 import fr.jmmc.aspro.gui.action.AsproExportPDFAction;
+import fr.jmmc.aspro.gui.chart.AsproChartUtils;
 import fr.jmmc.aspro.gui.chart.ColorModelPaintScale;
 import fr.jmmc.aspro.gui.chart.PaintLogScaleLegend;
 import fr.jmmc.aspro.image.FitsImageUtils;
@@ -261,7 +261,7 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
         this.xyPlot.setBackgroundImageAlpha(1.0f);
 
         // create new JMMC annotation (moving position):
-        this.aJMMC = ChartUtils.createJMMCAnnotation(AsproConstants.JMMC_ANNOTATION);
+        this.aJMMC = AsproChartUtils.createJMMCAnnotation();
         this.xyPlot.getRenderer().addAnnotation(this.aJMMC, Layer.BACKGROUND);
 
         // add listener :
