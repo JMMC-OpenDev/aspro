@@ -45,9 +45,9 @@ public final class CalcUVW {
      */
     public static double computeV(final double cosDec, final double sinDec, final BaseLine baseLine, final double ha) {
         if (USE_FAST_MATH) {
-            return sinDec * (-FastMath.cos(ha) * baseLine.getX() + FastMath.sin(ha) * baseLine.getY()) + cosDec * baseLine.getZ();
+            return sinDec * (FastMath.sin(ha) * baseLine.getY() - FastMath.cos(ha) * baseLine.getX()) + cosDec * baseLine.getZ();
         }
-        return sinDec * (-Math.cos(ha) * baseLine.getX() + Math.sin(ha) * baseLine.getY()) + cosDec * baseLine.getZ();
+        return sinDec * (Math.sin(ha) * baseLine.getY() - Math.cos(ha) * baseLine.getX()) + cosDec * baseLine.getZ();
     }
 
     /**
