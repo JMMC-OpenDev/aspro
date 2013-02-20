@@ -135,7 +135,7 @@ public final class OIFitsCreatorService {
     private String instrumentName = null;
     /** arrname keyword value (interferometer name) */
     private String arrNameKeyword = null;
-    /** insname keyword value (instrument_LAMBDA1_LAMBDA2) */
+    /** insname keyword value (instrument_LAMBDA1-LAMBDA2-Nch) */
     private String insNameKeyword = null;
     /** instrument experimental flag */
     private boolean instrumentExperimental = false;
@@ -456,8 +456,9 @@ public final class OIFitsCreatorService {
         this.waveBand = (this.lambdaMax - this.lambdaMin) / this.nWaveLengths;
         this.waveLengths = computeWaveLengths(this.lambdaMin, this.lambdaMax, this.waveBand);
 
-        this.insNameKeyword = this.instrumentName + '_' + NumberUtils.trimTo5Digits(1e6d * this.waveLengths[0])
-                + '_' + NumberUtils.trimTo5Digits(1e6d * this.waveLengths[this.waveLengths.length - 1]);
+        this.insNameKeyword = this.instrumentName + '_' + NumberUtils.trimTo3Digits(1e6d * this.waveLengths[0])
+                + '-' + NumberUtils.trimTo3Digits(1e6d * this.waveLengths[this.waveLengths.length - 1])
+                + '-' + this.waveLengths.length + "ch";
 
         logger.debug("insNameKeyword: {}", insNameKeyword);
 
