@@ -444,11 +444,30 @@ public class InterferometerDescription
     }
     
 //--simple--preserve
+    /** flag indicating the checksum of the interferometer file is valid (read only) */
+    @javax.xml.bind.annotation.XmlTransient
+    private boolean checksumValid = false;
 
-  @Override
-  public final String toString() {
-    return "InterferometerDescription [" + ((this.name != null) ? this.name : "undefined") + "]";
-  }
+    /**
+     * Return the flag indicating the checksum of the interferometer file is valid (read only)
+     * @return true if valid; false otherwise
+     */
+    public boolean isChecksumValid() {
+        return checksumValid;
+    }
+
+    /**
+     * Define the flag indicating the checksum of the interferometer file is valid (read only)
+     * @param checksumValid true if valid; false otherwise
+     */
+    public void setChecksumValid(final boolean checksumValid) {
+        this.checksumValid = checksumValid;
+    }
+
+    @Override
+    public final String toString() {
+        return "InterferometerDescription [" + ((this.name != null) ? this.name : "undefined") + "]";
+    }
 //--simple--preserve
 
 }

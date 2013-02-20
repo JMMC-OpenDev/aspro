@@ -16,16 +16,16 @@ import fr.jmmc.aspro.model.OIBase;
  *         This type describes the list of interferometer files
  *       
  * 
- * <p>Java class for InterferometerFiles complex type.
+ * <p>Java class for InterferometerFileCollection complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="InterferometerFiles">
+ * &lt;complexType name="InterferometerFileCollection">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="file" type="{http://www.w3.org/2001/XMLSchema}string" maxOccurs="unbounded"/>
+ *         &lt;element name="interferometerFile" type="{http://www.jmmc.fr/aspro-oi/0.1}InterferometerFile" maxOccurs="unbounded"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -35,44 +35,44 @@ import fr.jmmc.aspro.model.OIBase;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "InterferometerFiles", propOrder = {
-    "files"
+@XmlType(name = "InterferometerFileCollection", propOrder = {
+    "interferometerFiles"
 })
 @XmlRootElement(name = "configurations")
 public class Configurations
     extends OIBase
 {
 
-    @XmlElement(name = "file", required = true)
-    protected List<String> files;
+    @XmlElement(name = "interferometerFile", required = true)
+    protected List<InterferometerFile> interferometerFiles;
 
     /**
-     * Gets the value of the files property.
+     * Gets the value of the interferometerFiles property.
      * 
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the files property.
+     * This is why there is not a <CODE>set</CODE> method for the interferometerFiles property.
      * 
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
-     *    getFiles().add(newItem);
+     *    getInterferometerFiles().add(newItem);
      * </pre>
      * 
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link String }
+     * {@link InterferometerFile }
      * 
      * 
      */
-    public List<String> getFiles() {
-        if (files == null) {
-            files = new ArrayList<String>();
+    public List<InterferometerFile> getInterferometerFiles() {
+        if (interferometerFiles == null) {
+            interferometerFiles = new ArrayList<InterferometerFile>();
         }
-        return this.files;
+        return this.interferometerFiles;
     }
 
 }
