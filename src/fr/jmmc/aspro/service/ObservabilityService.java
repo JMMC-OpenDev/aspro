@@ -51,6 +51,7 @@ import fr.jmmc.aspro.service.pops.BestPopsEstimatorFactory;
 import fr.jmmc.aspro.service.pops.BestPopsEstimatorFactory.Algorithm;
 import fr.jmmc.aspro.service.pops.Criteria;
 import fr.jmmc.aspro.util.TestUtils;
+import fr.jmmc.jmcs.util.SpecialChars;
 import fr.jmmc.jmcs.util.concurrent.InterruptedJobException;
 import fr.jmmc.jmcs.util.concurrent.ParallelJobExecutor;
 import fr.jmmc.oitools.util.CombUtils;
@@ -2737,7 +2738,7 @@ public final class ObservabilityService {
         for (int i = decMax; i >= decMin; i -= decStep) {
             t = new Target();
             // delta = n (deg)
-            t.setName("\u0394 = " + Integer.toString(i));
+            t.setName(SpecialChars.DELTA_UPPER + " = " + Integer.toString(i));
             // 12:00:00
             t.setRADeg(180d);
             t.setDECDeg(i);
