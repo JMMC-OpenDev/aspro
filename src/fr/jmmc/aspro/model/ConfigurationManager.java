@@ -4,6 +4,8 @@
 package fr.jmmc.aspro.model;
 
 import fr.jmmc.aspro.AsproConstants;
+import fr.jmmc.aspro.conf.AsproConf;
+import fr.jmmc.aspro.gui.chart.AsproChartUtils;
 import fr.jmmc.aspro.model.oi.AzEl;
 import fr.jmmc.aspro.model.oi.Channel;
 import fr.jmmc.aspro.model.oi.Configurations;
@@ -15,6 +17,7 @@ import fr.jmmc.aspro.model.oi.FringeTracker;
 import fr.jmmc.aspro.model.oi.HorizonProfile;
 import fr.jmmc.aspro.model.oi.InterferometerConfiguration;
 import fr.jmmc.aspro.model.oi.InterferometerDescription;
+import fr.jmmc.aspro.model.oi.InterferometerFile;
 import fr.jmmc.aspro.model.oi.InterferometerSetting;
 import fr.jmmc.aspro.model.oi.LonLatAlt;
 import fr.jmmc.aspro.model.oi.Pop;
@@ -23,8 +26,14 @@ import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.StationLinks;
 import fr.jmmc.aspro.service.GeocentricCoords;
 import fr.jmmc.jmcs.data.ApplicationDescription;
+import fr.jmmc.jmcs.gui.component.MessagePane;
+import fr.jmmc.jmcs.util.FileUtils;
 import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.oitools.util.CombUtils;
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -128,25 +137,84 @@ public final class ConfigurationManager extends BaseOIManager {
         // reset anyway:
         configuration.clear();
 
+        boolean isConfValid = true;
+
         final long start = System.nanoTime();
 
         final Configurations conf = (Configurations) loadObject(CONF_FILE);
 
         InterferometerSetting is;
-        for (String fileName : conf.getFiles()) {
-            logger.info("initializeConfiguration : loading configuration file = {}", fileName);
+        for (InterferometerFile file : conf.getInterferometerFiles()) {
+            final String fileName = file.getFile();
+
+            logger.info("initializeConfiguration: loading configuration file = {}", fileName);
 
             is = (InterferometerSetting) loadObject(fileName);
 
+            // test checksum:
+            final long checksumConf = file.getChecksum();
+            // compute checksum on file stream:
+            final long checksumFile = checksum(fileName);
+
+            final boolean isChecksumValid = (checksumFile == checksumConf);
+
+            if (!isChecksumValid) {
+                logger.info("initializeConfiguration: checksum[{}] is invalid !", fileName);
+            }
+
+            is.setChecksumValid(isChecksumValid);
+
             addInterferometerSetting(configuration, is);
+
+            isConfValid &= isChecksumValid;
         }
 
-        logger.info("initializeConfiguration : duration = {} ms.", 1e-6d * (System.nanoTime() - start));
+        logger.info("initializeConfiguration: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
 
         if (logger.isDebugEnabled()) {
-            logger.debug("descriptions   : {}", configuration.getInterferometerDescriptions());
-            logger.debug("configurations : {}", configuration.getInterferometerConfigurations());
+            logger.debug("descriptions: {}", configuration.getInterferometerDescriptions());
+            logger.debug("configurations: {}", configuration.getInterferometerConfigurations());
         }
+
+        // Warning:
+        if (!isConfValid) {
+            final StringBuilder msg = new StringBuilder(128);
+            msg.append("Aspro2 Configuration files have been modified for the interferometers:\n");
+
+            for (InterferometerDescription id : configuration.getInterferometerDescriptions().values()) {
+                if (!id.isChecksumValid()) {
+                    msg.append(id.getName()).append('\n');
+                }
+            }
+
+            msg.append("\nUSE THIS CONFIGURATION AT YOUR OWN RISKS.");
+
+            MessagePane.showWarning(msg.toString(), "Configuration modified");
+
+            AsproChartUtils.setWarningAnnotation(true);
+        }
+    }
+
+    /**
+     * Computes checksum of the given file name loaded in the configuration path
+     * @param fileName file name to load
+     * @return checksum
+     * @throws IllegalStateException if the file is not found or an I/O exception occured
+     */
+    static long checksum(final String fileName) {
+        final URL uri = FileUtils.getResource(BaseOIManager.CONF_CLASSLOADER_PATH + fileName);
+
+        InputStream in = null;
+        try {
+            in = new BufferedInputStream(uri.openStream());
+
+            return AsproConf.checksum(in);
+
+        } catch (IOException ioe) {
+            FileUtils.closeStream(in);
+        }
+
+        throw new IllegalStateException("Load failure on " + uri);
     }
 
     /**
@@ -158,7 +226,10 @@ public final class ConfigurationManager extends BaseOIManager {
     private static void addInterferometerSetting(final Configuration configuration, final InterferometerSetting is) {
 
         // process the InterferometerDescription:
-        addInterferometerDescription(configuration, is.getDescription());
+        final InterferometerDescription id = is.getDescription();
+        id.setChecksumValid(is.isChecksumValid());
+
+        addInterferometerDescription(configuration, id);
 
         // process the InterferometerConfiguration list:
         for (InterferometerConfiguration ic : is.getConfigurations()) {
@@ -401,7 +472,7 @@ public final class ConfigurationManager extends BaseOIManager {
                 for (AzEl point : station.getHorizon().getPoints()) {
                     if (point.getElevation() > maxElev) {
                         if (logger.isDebugEnabled()) {
-                            logger.debug("station: {} : fix point: {}", station, point);
+                            logger.debug("station: {}: fix point: {}", station, point);
                         }
                         point.setElevation(maxElev);
                     }

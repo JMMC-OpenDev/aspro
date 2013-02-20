@@ -19,7 +19,7 @@
   </company>
 
   <program name="Aspro2" version="0.9.4 beta 10"/>
-  <compilation date="19/02/2013" compiler="JDK 1.5.0_16"/>
+  <compilation date="20/02/2013" compiler="JDK 1.5.0_16"/>
   
   <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
   <authors>the JMMC Technical Group</authors>
@@ -185,6 +185,10 @@
 
   <releasenotes>
     <release version="0.9.4">
+      <prerelease version="0.9.4 beta 11">
+        <change type="FEATURE">Added configuration integrity checks (checksum): if file(s) modified then show a warning message at startup
+          and also in the JMMC legal notice on plots (Use at your own risks)</change>
+      </prerelease>
       <prerelease version="0.9.4 beta 10">
         <change type="FEATURE">Added action 'Show Configuration release notes' in Help menu</change>
         <change type="FEATURE">Enhanced target axis on the observability plot to adjust its font size according to the number of visible items</change>
@@ -199,7 +203,7 @@
         <change type="FEATURE">Enhanced export Observability plot to a multiple page PDF document for large target lists</change>
       </prerelease>
       <prerelease version="0.9.4 beta 8">
-        <change type="FEATURE">Extracted configuration (interferometers and their instruments) into the AsproConf module to have an independent life cycle (CfP)</change>
+        <change type="FEATURE">Extracted configuration (interferometers and their instruments) into the AsproConfig module to have an independent life cycle (CfP)</change>
         <change type="CHANGE">Minor changes to the main setting panel: 'Target editor' renamed 'Editor' and margins made smaller</change>
         <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/398">Added a distance check before adding a new target to the target list 
           to avoid duplicates (within 5 arcsec) and solve identifier issues</change>
@@ -250,7 +254,7 @@
       </prerelease>
     </release>
     <release version="0.9.3">
-      <pubDate>Web, 31 Oct 2012 13:00:00 GMT</pubDate>
+      <pubDate>Wed, 31 Oct 2012 13:00:00 GMT</pubDate>
       <prerelease version="0.9.3 beta 3">
         <change type="FEATURE">Fixed Red filter = 2.0 for the CHARA VEGA spectral calibration OB (R2720)</change>
         <change type="FEATURE">Updated CHARA VEGA spectral configuration due to new detector setup (OB / StarList export)</change>
