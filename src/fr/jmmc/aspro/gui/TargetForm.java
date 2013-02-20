@@ -1144,7 +1144,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
         gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
         add(jPanelTarget, gridBagConstraints);
 
-        jPanelDescription.setBorder(javax.swing.BorderFactory.createTitledBorder("Target notes [\u2139]"));
+        jPanelDescription.setBorder(javax.swing.BorderFactory.createTitledBorder("Target notes" + ObservabilityPanel.SUFFIX_INFO));
         jPanelDescription.setMinimumSize(new java.awt.Dimension(10, 50));
         jPanelDescription.setPreferredSize(new java.awt.Dimension(100, 80));
         jPanelDescription.setLayout(new java.awt.GridBagLayout());
