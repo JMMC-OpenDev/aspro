@@ -39,6 +39,8 @@ public class BaseOIManager {
 
   /** Class logger */
   private static final Logger logger = LoggerFactory.getLogger(BaseOIManager.class.getName());
+  /** classloader path to configuration files */
+  public static final String CONF_CLASSLOADER_PATH = "fr/jmmc/aspro/model/";
   /** JAXB property to define a custom namspace prefix mapper */
   public static final String JAXB_NAMESPACE_PREFIX_MAPPER = "com.sun.xml.bind.namespacePrefixMapper";
   /** package name for JAXB generated code */
@@ -81,13 +83,10 @@ public class BaseOIManager {
   protected final Object loadObject(final String uri)
           throws IllegalStateException, IllegalArgumentException, XmlBindException {
 
-    logger.info("loading file: {}", uri);
-
     Object result = null;
-
     try {
       // use the class loader resource resolver
-      final URL url = FileUtils.getResource("fr/jmmc/aspro/model/" + uri);
+      final URL url = FileUtils.getResource(CONF_CLASSLOADER_PATH + uri);
 
       logger.debug("BaseOIManager.loadObject: {}", url);
 
