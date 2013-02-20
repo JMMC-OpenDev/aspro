@@ -61,6 +61,7 @@ import fr.jmmc.jmcs.gui.task.TaskSwingWorker;
 import fr.jmmc.jmcs.gui.task.TaskSwingWorkerExecutor;
 import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.jmcs.util.ObjectUtils;
+import fr.jmmc.jmcs.util.SpecialChars;
 import fr.jmmc.jmcs.util.StringUtils;
 import fr.jmmc.jmcs.util.concurrent.InterruptedJobException;
 import fr.jmmc.oiexplorer.core.gui.PDFExportable;
@@ -645,7 +646,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
      */
     private void postInit() {
 
-        this.chart = ChartUtils.createSquareXYLineChart("U (M\u03BB)", "V (M\u03BB)", true);
+        this.chart = ChartUtils.createSquareXYLineChart("U (" + SpecialChars.UNIT_MEGA_LAMBDA + ")", "V (" + SpecialChars.UNIT_MEGA_LAMBDA + ")", true);
         this.xyPlot = (SquareXYPlot) this.chart.getPlot();
 
         // Adjust background settings :
@@ -2021,7 +2022,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
                 if (uvMapData != null && uvMapData.getWaveLength() != null && !Double.isNaN(uvMapData.getWaveLength())) {
                     // Polychromatic user model only:
-                    sb.append(" - Model \u03BB: ").append(NumberUtils.trimTo3Digits(1e6d * uvMapData.getWaveLength())).append(" \u00B5m");
+                    sb.append(" - Model ").append(SpecialChars.LAMBDA_LOWER).append(": ");
+                    sb.append(NumberUtils.trimTo3Digits(1e6d * uvMapData.getWaveLength())).append(" ").append(SpecialChars.UNIT_MICRO_METER);
                 }
                 ChartUtils.addSubtitle(this.chart, sb.toString());
 
