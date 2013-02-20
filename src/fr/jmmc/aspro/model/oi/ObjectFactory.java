@@ -110,6 +110,14 @@ public class ObjectFactory {
     }
 
     /**
+     * Create an instance of {@link InterferometerFile }
+     * 
+     */
+    public InterferometerFile createInterferometerFile() {
+        return new InterferometerFile();
+    }
+
+    /**
      * Create an instance of {@link ObservationCollection }
      * 
      */
@@ -342,19 +350,19 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link TargetConfiguration }
-     * 
-     */
-    public TargetConfiguration createTargetConfiguration() {
-        return new TargetConfiguration();
-    }
-
-    /**
      * Create an instance of {@link Telescope }
      * 
      */
     public Telescope createTelescope() {
         return new Telescope();
+    }
+
+    /**
+     * Create an instance of {@link TargetConfiguration }
+     * 
+     */
+    public TargetConfiguration createTargetConfiguration() {
+        return new TargetConfiguration();
     }
 
     /**
