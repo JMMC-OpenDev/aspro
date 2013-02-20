@@ -34,7 +34,7 @@
 
 
 <!-- Elements -->
-  <xsd:element name="configurations" type="InterferometerFiles">
+  <xsd:element name="configurations" type="InterferometerFileCollection">
     <xsd:annotation>
       <xsd:documentation>
         this element contains a list of interferometer files
@@ -71,22 +71,49 @@
 
 <!-- Class Types -->
 
-  <xsd:complexType name="InterferometerFiles">
+  <xsd:complexType name="InterferometerFileCollection">
     <xsd:annotation>
       <xsd:documentation>
         This type describes the list of interferometer files
       </xsd:documentation>
     </xsd:annotation>
     <xsd:sequence>
-      <xsd:element name="file" type="xsd:string" minOccurs="1" maxOccurs="unbounded">
+      <xsd:element name="interferometerFile" type="InterferometerFile" minOccurs="1" maxOccurs="unbounded">
         <xsd:annotation>
           <xsd:documentation>
-            this element contains the file name of an interferometer file
+            this element contains the interferometer file
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
     </xsd:sequence>
   </xsd:complexType>
+  
+  
+  
+  
+  <xsd:complexType name="InterferometerFile">
+    <xsd:annotation>
+      <xsd:documentation>
+        This type describes an interferometer file
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="file" type="xsd:string">
+        <xsd:annotation>
+          <xsd:documentation>
+            this element contains the file name of the interferometer settings
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="checksum" type="xsd:long">
+        <xsd:annotation>
+          <xsd:documentation>
+              Checksum of the file
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>  
 
 
 
