@@ -108,7 +108,7 @@ public final class UVCoverageService {
      * @param mathModeOIFits OIFits MathMode preference
      */
     public UVCoverageService(final ObservationSetting observation, final ObservabilityData obsData, final String targetName,
-            final double uvMax, final boolean doUVSupport, final boolean doDataNoise, 
+            final double uvMax, final boolean doUVSupport, final boolean doDataNoise,
             final int supersamplingOIFits, final MathMode mathModeOIFits) {
         this.observation = observation;
         this.obsData = obsData;
