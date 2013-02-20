@@ -5,6 +5,7 @@ package fr.jmmc.aspro.gui;
 
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.gui.action.AsproExportPDFAction;
+import fr.jmmc.aspro.gui.chart.AsproChartUtils;
 import fr.jmmc.aspro.gui.chart.NameLabelGenerator;
 import fr.jmmc.aspro.gui.chart.XYZNameDataSet;
 import fr.jmmc.aspro.model.InterferometerMapData;
@@ -174,7 +175,7 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
         renderer.setBaseItemLabelsVisible(true);
 
         // create new JMMC annotation (moving position):
-        this.aJMMC = ChartUtils.createJMMCAnnotation(AsproConstants.JMMC_ANNOTATION);
+        this.aJMMC = AsproChartUtils.createJMMCAnnotation();
         this.xyPlot.getRenderer().addAnnotation(this.aJMMC, Layer.BACKGROUND);
 
         // add listener :
