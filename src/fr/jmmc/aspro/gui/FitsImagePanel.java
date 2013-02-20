@@ -19,6 +19,7 @@ import fr.jmmc.jmcs.gui.task.TaskSwingWorker;
 import fr.jmmc.jmcs.gui.task.TaskSwingWorkerExecutor;
 import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.jmcs.util.ObjectUtils;
+import fr.jmmc.jmcs.util.SpecialChars;
 import fr.jmmc.oiexplorer.core.gui.PDFExportable;
 import fr.jmmc.oiexplorer.core.gui.chart.ChartUtils;
 import fr.jmmc.oiexplorer.core.gui.chart.PDFOptions;
@@ -611,8 +612,8 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
             }
 
             if (!Double.isNaN(lFitsImage.getWaveLength())) {
-                infoBlock.add(new TextTitle("\nModel \u03BB:", ChartUtils.DEFAULT_FONT));
-                infoBlock.add(new TextTitle(NumberUtils.trimTo3Digits(1e6d * lFitsImage.getWaveLength()) + " \u00B5m", ChartUtils.DEFAULT_FONT));
+                infoBlock.add(new TextTitle("\nModel " + SpecialChars.LAMBDA_LOWER + ":", ChartUtils.DEFAULT_FONT));
+                infoBlock.add(new TextTitle(NumberUtils.trimTo3Digits(1e6d * lFitsImage.getWaveLength()) + " " + SpecialChars.UNIT_MICRO_METER, ChartUtils.DEFAULT_FONT));
             }
 
             infoTitle = new CompositeTitle(infoBlock);
