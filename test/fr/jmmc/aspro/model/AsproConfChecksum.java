@@ -28,13 +28,16 @@ public final class AsproConfChecksum {
         // invoke Bootstrapper method to initialize logback now:
         Bootstrapper.getState();
 
+        _logger.info("\n\nUpdate checksums into AsproConfig file: AsproOIConfigurations.xml\n");
+
         // hard coded here to avoid using ConfigurationManager:
         final String[] files = new String[]{"VLTI.xml", "CHARA.xml", "SUSI.xml"};
 
         for (String fileName : files) {
             final long checksum = ConfigurationManager.checksum(fileName);
 
-            _logger.info("File [{}]:\n<checksum>{}</checksum>", fileName, checksum);
+            _logger.info("File[{}]:\n<interferometerFile>\n    <file>{}</file>\n"
+                    + "    <checksum>{}</checksum>\n</interferometerFile>\n", fileName, fileName, checksum);
         } // files
     }
 }
