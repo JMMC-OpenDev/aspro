@@ -26,9 +26,11 @@ import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.StationLinks;
 import fr.jmmc.aspro.service.GeocentricCoords;
 import fr.jmmc.jmcs.data.ApplicationDescription;
+import fr.jmmc.jmcs.gui.FeedbackReport;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.util.FileUtils;
 import fr.jmmc.jmcs.util.NumberUtils;
+import fr.jmmc.jmcs.util.StringUtils;
 import fr.jmmc.oitools.util.CombUtils;
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -143,10 +145,22 @@ public final class ConfigurationManager extends BaseOIManager {
 
         final Configurations conf = (Configurations) loadObject(CONF_FILE);
 
-        // test min version:
-        logger.info("initializeConfiguration: minimum required version = {}", conf.getMinVersion());
-        
-        // TODO: check versions
+        final String minVersion = conf.getMinVersion();
+
+        // check configuration's mininimum version vs application's version:
+        logger.info("initializeConfiguration: minimum required version = {}", minVersion);
+
+        final String appVersion = ApplicationDescription.getInstance().getProgramVersion();
+
+        final float min = parseVersion(minVersion);
+        final float current = parseVersion(appVersion);
+
+        if (min > current) {
+            FeedbackReport.openDialog(true,
+                    new IllegalStateException("The Aspro2 configuration requires a more recent Aspro2 application: "
+                    + minVersion + " > " + appVersion + ".\n\n Please use a public Aspro2 release available: "
+                    + ApplicationDescription.getInstance().getLinkValue()));
+        }
 
         InterferometerSetting is;
         for (InterferometerFile file : conf.getInterferometerFiles()) {
@@ -184,7 +198,7 @@ public final class ConfigurationManager extends BaseOIManager {
         // Warning:
         if (!isConfValid) {
             final StringBuilder msg = new StringBuilder(128);
-            msg.append("Aspro2 Configuration files have been modified for the interferometers:\n");
+            msg.append("Aspro2 configuration files have been modified for interferometers:\n");
 
             for (InterferometerDescription id : configuration.getInterferometerDescriptions().values()) {
                 if (!id.isChecksumValid()) {
@@ -1202,5 +1216,28 @@ public final class ConfigurationManager extends BaseOIManager {
             }
         }
         return null;
+    }
+
+    /**
+     * Parse the JMMC version string (0.9.4 beta 11 for example) as a float number to be comparable
+     * @param version version as string
+     * @return version number as float
+     */
+    private static float parseVersion(final String version) {
+        float res = 0f;
+
+        // Remove whitespace and '.' in "0.9.4 beta 11" => "094beta11":
+        String tmp = StringUtils.removeNonAlphaNumericChars(version);
+
+        // Replace chars by '.' in "094beta11" => "094.11":
+        tmp = StringUtils.replaceNonNumericChars(tmp, ".");
+
+        try {
+            // parse tmp => 94.11:
+            res = Float.parseFloat(tmp);
+        } catch (NumberFormatException nfe) {
+            logger.info("Unable to parse version: {}", version);
+        }
+        return res;
     }
 }
