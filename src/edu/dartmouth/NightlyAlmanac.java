@@ -228,7 +228,7 @@ public final class NightlyAlmanac {
       // if sun grazes horizon, small changes in DEC may affect whether it actually
       // rises or sets.  Since DEC is computed at midnight, put a little pad on to
       // avoid non-convergent calculations.
-      // sunrise = new WhenWhere(jdmid + hasunrise/24.,w.where);
+      // sunrise = new WhenWhere(jdmid + hasunrise/24d,w.where);
 
       dtrise = midnight.sun.topopos.alpha.value - hasunrise - midnight.sidereal;
 
@@ -248,8 +248,8 @@ public final class NightlyAlmanac {
         dtset += 24d;
       }
 
-//         System.out.printf("going to jd_sun_alt with est sunrise = %f%n",jdmid + dtrise/24.);
-      sunrise.changeWhen(jdmid + dtrise / 24d);
+//         System.out.printf("going to jd_sun_alt with est sunrise = %f%n",jdmid + dtrise/24d);
+      sunrise.changeWhen(jdmid + dtrise * Const.HOUR_IN_DAY);
       sunrise.updateLocalSun();
 //         System.out.printf("sunrise.when.jd %f, sunrise.altsun %f%n",sunrise.when.jd,
 //             sunrise.altsun);
@@ -257,8 +257,8 @@ public final class NightlyAlmanac {
 //         System.out.printf("out, sunrise = %f%n",jdtemp);
       sunrise.changeWhen(jdtemp);
 
-//         System.out.printf("going to jd_sun_alt with est sunset = %f%n",jdmid + dtset/24.);
-      sunset.changeWhen(jdmid + dtset / 24d);
+//         System.out.printf("going to jd_sun_alt with est sunset = %f%n",jdmid + dtset/24d);
+      sunset.changeWhen(jdmid + dtset * Const.HOUR_IN_DAY);
       sunset.updateLocalSun();
       jdtemp = jd_sun_alt(rise_set_alt, sunset);
 //         System.out.printf("out, sunset = %f%n",jdtemp);
@@ -304,12 +304,12 @@ public final class NightlyAlmanac {
         dtset += 24d;
       }
 
-      eveningTwilight18.changeWhen(jdmid + dtset / 24d);
+      eveningTwilight18.changeWhen(jdmid + dtset * Const.HOUR_IN_DAY);
       eveningTwilight18.updateLocalSun();
       jdtemp = jd_sun_alt(twilight_alt_18, eveningTwilight18);
       eveningTwilight18.changeWhen(jdtemp);
 
-      morningTwilight18.changeWhen(jdmid + dtrise / 24d);
+      morningTwilight18.changeWhen(jdmid + dtrise * Const.HOUR_IN_DAY);
       morningTwilight18.updateLocalSun();
       jdtemp = jd_sun_alt(twilight_alt_18, morningTwilight18);
       morningTwilight18.changeWhen(jdtemp);
@@ -353,12 +353,12 @@ public final class NightlyAlmanac {
         dtset += 24d;
       }
 
-      eveningTwilight12.changeWhen(jdmid + dtset / 24d);
+      eveningTwilight12.changeWhen(jdmid + dtset * Const.HOUR_IN_DAY);
       eveningTwilight12.updateLocalSun();
       jdtemp = jd_sun_alt(twilight_alt_12, eveningTwilight12);
       eveningTwilight12.changeWhen(jdtemp);
 
-      morningTwilight12.changeWhen(jdmid + dtrise / 24d);
+      morningTwilight12.changeWhen(jdmid + dtrise * Const.HOUR_IN_DAY);
       morningTwilight12.updateLocalSun();
       jdtemp = jd_sun_alt(twilight_alt_12, morningTwilight12);
       morningTwilight12.changeWhen(jdtemp);
@@ -402,12 +402,12 @@ public final class NightlyAlmanac {
         dtset += 24d;
       }
 
-      eveningTwilight06.changeWhen(jdmid + dtset / 24d);
+      eveningTwilight06.changeWhen(jdmid + dtset * Const.HOUR_IN_DAY);
       eveningTwilight06.updateLocalSun();
       jdtemp = jd_sun_alt(twilight_alt_06, eveningTwilight06);
       eveningTwilight06.changeWhen(jdtemp);
 
-      morningTwilight06.changeWhen(jdmid + dtrise / 24d);
+      morningTwilight06.changeWhen(jdmid + dtrise * Const.HOUR_IN_DAY);
       morningTwilight06.updateLocalSun();
       jdtemp = jd_sun_alt(twilight_alt_06, morningTwilight06);
       morningTwilight06.changeWhen(jdtemp);
@@ -460,12 +460,12 @@ public final class NightlyAlmanac {
        System.out.printf("dtrise %f dtset %f%n",dtrise,dtset);
        */
 
-      moonrise.changeWhen(jdmid + dtrise / 24d);
+      moonrise.changeWhen(jdmid + dtrise * Const.HOUR_IN_DAY);
       moonrise.updateLocalMoon();
       jdtemp = jd_moon_alt(rise_set_alt, moonrise);
       moonrise.changeWhen(jdtemp);
 
-      moonset.changeWhen(jdmid + dtset / 24d);
+      moonset.changeWhen(jdmid + dtset * Const.HOUR_IN_DAY);
       moonset.updateLocalMoon();
       jdtemp = jd_moon_alt(rise_set_alt, moonset);
       moonset.changeWhen(jdtemp);

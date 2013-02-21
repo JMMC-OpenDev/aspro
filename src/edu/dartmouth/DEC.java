@@ -47,7 +47,7 @@ public class DEC implements Cloneable {
   }
 
   public final double radians() {
-    return (value / Const.DEG_IN_RADIAN);
+    return (value * Const.RADIAN_IN_DEG);
   }
 
   public final double degrees() {

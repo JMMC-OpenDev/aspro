@@ -67,7 +67,7 @@ public final class RA implements Cloneable {
   }
 
   public double radians() {
-    return (value / Const.HRS_IN_RADIAN);
+    return (value* Const.RADIAN_IN_HRS);
   }
 
   public double degrees() {

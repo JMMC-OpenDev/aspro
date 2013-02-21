@@ -1,5 +1,7 @@
 package edu.dartmouth;
 
+import net.jafama.FastMath;
+
 /* JSkyCalc.java -- copyright 2007, John Thorstensen, Dartmouth College. */
 /** TERMS OF USE -- Anyone is free to use this software for any purpose, and to
 modify it for their own purposes, provided that credit is given to the author
@@ -49,43 +51,43 @@ public final class SkyIllum {
 
     all are in decimal degrees. */
 
-    final double rho_rad = rho / Const.DEG_IN_RADIAN;
+    final double rho_rad = rho * Const.RADIAN_IN_DEG;
     alpha = (180d - alpha);
-    final double Zmoon = (90d - altmoon) / Const.DEG_IN_RADIAN;
-    final double Z = (90d - alt) / Const.DEG_IN_RADIAN;
+    final double Zmoon = (90d - altmoon) * Const.RADIAN_IN_DEG;
+    final double Z = (90d - alt) * Const.RADIAN_IN_DEG;
     moondist = Const.EARTHRAD_IN_AU * moondist / (60.27d);
     /* distance arrives in AU, want it normalized to mean distance,
     60.27 earth radii. */
 
-    double istar = -0.4d * (3.84d + 0.026d * Math.abs(alpha) + 4.0e-9d * Math.pow(alpha, 4d)); /*eqn 20*/
-    istar = Math.pow(10d, istar) / (moondist * moondist);
+    double istar = -0.4d * (3.84d + 0.026d * Math.abs(alpha) + 4.0e-9d * FastMath.pow(alpha, 4d)); /*eqn 20*/
+    istar = FastMath.pow(10d, istar) / (moondist * moondist);
     if (Math.abs(alpha) < 7d) /* crude accounting for opposition effect */ {
       istar *= (1.35d - 0.05d * Math.abs(istar));
     }
     /* 35 per cent brighter at full, effect tapering linearly to
     zero at 7 degrees away from full. mentioned peripherally in
     Krisciunas and Scheafer, p. 1035. */
-    double fofrho = 229087d * (1.06d + Math.cos(rho_rad) * Math.cos(rho_rad));
+    double fofrho = 229087d * (1.06d + FastMath.cos(rho_rad) * FastMath.cos(rho_rad));
     if (Math.abs(rho) > 10d) {
-      fofrho += Math.pow(10d, (6.15d - rho / 40d));            /* eqn 21 */
+      fofrho += FastMath.pow(10d, (6.15d - rho / 40d));            /* eqn 21 */
     } else if (Math.abs(rho) > 0.25d) {
       fofrho += 6.2e7d / (rho * rho);   /* eqn 19 */
     } else {
       fofrho += 9.9e8d;  /*for 1/4 degree -- radius of moon! */
     }
-    double Xzm = Math.sqrt(1.0d - 0.96d * Math.sin(Zmoon) * Math.sin(Zmoon));
+    double Xzm = Math.sqrt(1.0d - 0.96d * FastMath.sin(Zmoon) * FastMath.sin(Zmoon));
     if (Xzm != 0d) {
       Xzm = 1d / Xzm;
     } else {
       Xzm = 10000d;
     }
-    double Xo = Math.sqrt(1.0d - 0.96d * Math.sin(Z) * Math.sin(Z));
+    double Xo = Math.sqrt(1.0d - 0.96d * FastMath.sin(Z) * FastMath.sin(Z));
     if (Xo != 0d) {
       Xo = 1d / Xo;
     } else {
       Xo = 10000d;
     }
-    final double Bmoon = fofrho * istar * Math.pow(10d, (-0.4d * kzen * Xzm)) * (1d - Math.pow(10d, (-0.4d * kzen * Xo)));   /* nanoLamberts */
+    final double Bmoon = fofrho * istar * FastMath.pow(10d, (-0.4d * kzen * Xzm)) * (1d - FastMath.pow(10d, (-0.4d * kzen * Xo)));   /* nanoLamberts */
     if (Bmoon > 0.001d) {
       return (22.50d - 1.08574d * Math.log(Bmoon / 34.08d)); /* V mag per sq arcs-eqn 1 */
     } else {

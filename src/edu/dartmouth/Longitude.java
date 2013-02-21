@@ -102,7 +102,7 @@ public final class Longitude implements Cloneable {
   }
 
   double radiansWest() {
-    return (value / Const.HRS_IN_RADIAN);
+    return (value* Const.RADIAN_IN_HRS);
   }
 
   double hoursWest() {

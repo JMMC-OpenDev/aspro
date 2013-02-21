@@ -44,7 +44,7 @@ public final class DeltaT {
 
     double delt = 0d;
 
-    final double year = 1900d + (jd - jd1900) / 365.25d;
+    final double year = 1900d + (jd - jd1900) * Const.DAY_IN_YEAR;
 
     if (year < 2014d && year >= 1900d) {
       final int i = (int) ((year - 1900d) / 5d);

@@ -10,13 +10,29 @@ public interface Const {
   /* some constants */
 
   public static final double J2000 = 2451545d; // the julian epoch 2000
+  
+  public static final double INV_CENTURY = 1d / 36525d; // 1/ (100 * DAY)
+  
+  public static final double DAY_IN_YEAR = 1d / 365.25d;
+  
+  public static final double HOUR_IN_DAY = 1d / 24d;
+  
   public static final double DEG_IN_RADIAN = 57.2957795130823d;
+  public static final double RADIAN_IN_DEG = 1d / DEG_IN_RADIAN;
+  
   public static final double HRS_IN_RADIAN = 3.81971863420549d;
+  public static final double RADIAN_IN_HRS = 1d / HRS_IN_RADIAN;
+  
   public static final double ARCSEC_IN_RADIAN = 206264.806247096d;
+  public static final double RADIAN_IN_ARCSEC = 1d / ARCSEC_IN_RADIAN;  
+  
   public static final double PI_OVER_2 = 1.5707963267949d;
   public static final double PI = 3.14159265358979d;
   public static final double TWOPI = 6.28318530717959d;
   public static final double EARTHRAD_IN_AU = 23454.7910556298d; // earth radii in 1 AU
+  
+  public static final double AU_IN_EARTHRAD = 1d / EARTHRAD_IN_AU;
+  
   public static final double EARTHRAD_IN_KM = 6378.1366d; // equatorial
   public static final double KMS_AUDAY = 1731.45683633d; // 1731 km/sec = 1 AU/d
   public static final double SPEED_OF_LIGHT = 299792.458d; // exact, km/s.

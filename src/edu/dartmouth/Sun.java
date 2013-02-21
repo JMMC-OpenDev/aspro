@@ -1,5 +1,7 @@
 package edu.dartmouth;
 
+import net.jafama.FastMath;
+
 /* JSkyCalc.java -- copyright 2007, John Thorstensen, Dartmouth College. */
 /** TERMS OF USE -- Anyone is free to use this software for any purpose, and to
 modify it for their own purposes, provided that credit is given to the author
@@ -85,39 +87,39 @@ public final class Sun implements Cloneable {
     // correct jd to ephemeris time once we have that done ...
 
     final double jd = jdIn + DeltaT.etcorr(jdIn) / 86400d;
-    final double T = (jd - 2415020d) / 36525d;  // Julian centuries since 1900
+    final double T = (jd - 2415020d) * Const.INV_CENTURY;  // Julian centuries since 1900
     final double Tsq = T * T;
     final double Tcb = T * Tsq;
 
     final double M = 358.47583d + 35999.04975d * T - 0.000150d * Tsq - 0.0000033d * Tcb;
     final double e = 0.01675104d - 0.0000418d * T - 0.000000126d * Tsq;
 
-    final double A = (153.23d + 22518.7541d * T) / Const.DEG_IN_RADIAN;  /* A, B due to Venus */
-    final double B = (216.57d + 45037.5082d * T) / Const.DEG_IN_RADIAN;
-    final double C = (312.69d + 32964.3577d * T) / Const.DEG_IN_RADIAN;  /* C due to Jupiter */
+    final double A = (153.23d + 22518.7541d * T) * Const.RADIAN_IN_DEG;  /* A, B due to Venus */
+    final double B = (216.57d + 45037.5082d * T) * Const.RADIAN_IN_DEG;
+    final double C = (312.69d + 32964.3577d * T) * Const.RADIAN_IN_DEG;  /* C due to Jupiter */
     /* D -- rough correction from earth-moon barycenter to center of earth. */
-    final double D = (350.74d + 445267.1142d * T - 0.00144d * Tsq) / Const.DEG_IN_RADIAN;
-    final double E = (231.19d + 20.20d * T) / Const.DEG_IN_RADIAN;
+    final double D = (350.74d + 445267.1142d * T - 0.00144d * Tsq) * Const.RADIAN_IN_DEG;
+    final double E = (231.19d + 20.20d * T) * Const.RADIAN_IN_DEG;
     /* "inequality of long period .. */
-    final double H = (353.40d + 65928.7155d * T) / Const.DEG_IN_RADIAN;  /* Jupiter. */
+    final double H = (353.40d + 65928.7155d * T) * Const.RADIAN_IN_DEG;  /* Jupiter. */
 
     final double L = 279.69668d + 36000.76892d * T + 0.0003025d * Tsq
-            + 0.00134d * Math.cos(A) + 0.00154d * Math.cos(B) + 0.00200d * Math.cos(C) + 0.00179d * Math.sin(D) + 0.00178d * Math.sin(E);
+            + 0.00134d * FastMath.cos(A) + 0.00154d * FastMath.cos(B) + 0.00200d * FastMath.cos(C) + 0.00179d * FastMath.sin(D) + 0.00178d * FastMath.sin(E);
 
-//    final double Lrad = L / Const.DEG_IN_RADIAN;
-    final double Mrad = M / Const.DEG_IN_RADIAN;
+//    final double Lrad = L * Const.RADIAN_IN_DEG;
+    final double Mrad = M * Const.RADIAN_IN_DEG;
 
-    final double Cent = (1.919460d - 0.004789d * T - 0.000014d * Tsq) * Math.sin(Mrad)
-            + (0.020094d - 0.000100d * T) * Math.sin(2d * Mrad)
-            + 0.000293d * Math.sin(3d * Mrad);
+    final double Cent = (1.919460d - 0.004789d * T - 0.000014d * Tsq) * FastMath.sin(Mrad)
+            + (0.020094d - 0.000100d * T) * FastMath.sin(2d * Mrad)
+            + 0.000293d * FastMath.sin(3d * Mrad);
 
     final double nu = M + Cent;
-    final double nurad = nu / Const.DEG_IN_RADIAN;
+    final double nurad = nu * Const.RADIAN_IN_DEG;
 
-    final double R = (1.0000002d * (1d - e * e)) / (1d + e * Math.cos(nurad))
-            + 0.00000543d * Math.sin(A) + 0.00001575d * Math.sin(B) + 0.00001627d * Math.sin(C) + 0.00003076d * Math.cos(D) + 0.00000927d * Math.sin(H);
+    final double R = (1.0000002d * (1d - e * e)) / (1d + e * FastMath.cos(nurad))
+            + 0.00000543d * FastMath.sin(A) + 0.00001575d * FastMath.sin(B) + 0.00001627d * FastMath.sin(C) + 0.00003076d * FastMath.cos(D) + 0.00000927d * FastMath.sin(H);
 
-    final double sunlong = (L + Cent) / Const.DEG_IN_RADIAN;
+    final double sunlong = (L + Cent) * Const.RADIAN_IN_DEG;
     /*      printf("solar Longitude: %10.5f  Radius vector %10.7f%n",sunlong,R);
     printf("eccentricity %10.7f  eqn of center %10.5f%n",e,Cent);   */
 
@@ -127,13 +129,13 @@ public final class Sun implements Cloneable {
     retvals[2] = R; // distance
 
     /* geocentric */
-    final double[] equatorial = Ecliptic.eclrot(jd, Math.cos(sunlong), Math.sin(sunlong), 0d);
+    final double[] equatorial = Ecliptic.eclrot(jd, FastMath.cos(sunlong), FastMath.sin(sunlong), 0d);
 
-    retvals[0] = Math.atan2(equatorial[1], equatorial[0]) * Const.HRS_IN_RADIAN;
+    retvals[0] = FastMath.atan2(equatorial[1], equatorial[0]) * Const.HRS_IN_RADIAN;
     while (retvals[0] < 0d) {
       retvals[0] += 24d;
     }
-    retvals[1] = Math.asin(equatorial[2]) * Const.DEG_IN_RADIAN;
+    retvals[1] = FastMath.asin(equatorial[2]) * Const.DEG_IN_RADIAN;
 
     retvals[3] = equatorial[0] * R;  // xyz
     retvals[4] = equatorial[1] * R;

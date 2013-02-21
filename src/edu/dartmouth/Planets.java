@@ -1,5 +1,7 @@
 package edu.dartmouth;
 
+import net.jafama.FastMath;
+
 /* JSkyCalc.java -- copyright 2007, John Thorstensen, Dartmouth College. */
 /** TERMS OF USE -- Anyone is free to use this software for any purpose, and to
 modify it for their own purposes, provided that credit is given to the author
@@ -69,7 +71,7 @@ public final class Planets {
 
     jd_el = jd_in;
     d = jd_el - 2415020.;    // 1900
-    T = d / 36525.;
+    T = d * Const.INV_CENTURY;
     Tsq = T * T;
     Tcb = Tsq * T;
 
@@ -83,7 +85,7 @@ public final class Planets {
     daily[0] = 4.0923388;
     ecc[0] = 0.20561421 + 0.00002046 * T;
     L_0[0] = 178.179078 + 4.0923770233 * d
-            + 0.0000226 * Math.pow((3.6525d * T), 2d);
+            + 0.0000226 * FastMath.pow2((3.6525d * T));
 
     // Venus = 1
     incl[1] = 3.39363 + 1.00583e-03 * T - 9.722e-7 * Tsq;
@@ -93,7 +95,7 @@ public final class Planets {
     daily[1] = 1.60213049;
     ecc[1] = 0.00682069 - 0.00004774 * T;
     L_0[1] = 342.767053 + 1.6021687039 * 36525 * T
-            + 0.000023212 * Math.pow((3.6525 * T), 2.);
+            + 0.000023212 * FastMath.pow2((3.6525 * T));
 
     // Earth = 2  ... elements from old Nautical Almanac
     ecc[2] = 0.01675104 - 0.00004180 * T + 0.000000126 * Tsq;
@@ -114,7 +116,7 @@ public final class Planets {
     daily[3] = 0.5240329502 + 1.285e-9 * T;
     ecc[3] = 0.09331290 - 0.000092064 * T - 0.000000077 * Tsq;
     L_0[3] = 293.747628 + 0.5240711638 * d
-            + 0.000023287 * Math.pow((3.6525 * T), 2.);
+            + 0.000023287 * FastMath.pow2((3.6525 * T));
 
     // Outer planets from Jean Meeus, Astronomical Formulae for
     // Calculators, 3rd Edn, Willman-Bell; p. 100
@@ -134,27 +136,27 @@ public final class Planets {
             - 1.65e-6 * Tcb;
 
     ups = 0.2 * T + 0.1;
-    P = (237.47555 + 3034.9061 * T) / Const.DEG_IN_RADIAN;
-    Q = (265.91650 + 1222.1139 * T) / Const.DEG_IN_RADIAN;
-    S = (243.51721 + 428.4677 * T) / Const.DEG_IN_RADIAN;
+    P = (237.47555 + 3034.9061 * T) * Const.RADIAN_IN_DEG;
+    Q = (265.91650 + 1222.1139 * T) * Const.RADIAN_IN_DEG;
+    S = (243.51721 + 428.4677 * T) * Const.RADIAN_IN_DEG;
     V = 5 * Q - 2 * P;
     W = 2 * P - 6 * Q + 3 * S;
     zeta = Q - P;
     /*    psi = S - Q; */
-    sinQ = Math.sin(Q);  // compute some of the more popular ones ...
-    cosQ = Math.cos(Q);
-    sin2Q = Math.sin(2. * Q);
-    cos2Q = Math.cos(2. * Q);
-    sinV = Math.sin(V);
-    cosV = Math.cos(V);
-    sinZeta = Math.sin(zeta);
-    cosZeta = Math.cos(zeta);
-    sin2Zeta = Math.sin(2 * zeta);
-    cos2Zeta = Math.cos(2 * zeta);
+    sinQ = FastMath.sin(Q);  // compute some of the more popular ones ...
+    cosQ = FastMath.cos(Q);
+    sin2Q = FastMath.sin(2. * Q);
+    cos2Q = FastMath.cos(2. * Q);
+    sinV = FastMath.sin(V);
+    cosV = FastMath.cos(V);
+    sinZeta = FastMath.sin(zeta);
+    cosZeta = FastMath.cos(zeta);
+    sin2Zeta = FastMath.sin(2 * zeta);
+    cos2Zeta = FastMath.cos(2 * zeta);
 
     L_0[4] = L_0[4] + (0.331364 - 0.010281 * ups - 0.004692 * ups * ups) * sinV + (0.003228 - 0.064436 * ups + 0.002075 * ups * ups) * cosV
-            - (0.003083 + 0.000275 * ups - 0.000489 * ups * ups) * Math.sin(2 * V) + 0.002472 * Math.sin(W) + 0.013619 * sinZeta
-            + 0.018472 * sin2Zeta + 0.006717 * Math.sin(3 * zeta) + (0.007275 - 0.001253 * ups) * sinZeta * sinQ + 0.006417 * sin2Zeta * sinQ
+            - (0.003083 + 0.000275 * ups - 0.000489 * ups * ups) * FastMath.sin(2 * V) + 0.002472 * FastMath.sin(W) + 0.013619 * sinZeta
+            + 0.018472 * sin2Zeta + 0.006717 * FastMath.sin(3 * zeta) + (0.007275 - 0.001253 * ups) * sinZeta * sinQ + 0.006417 * sin2Zeta * sinQ
             - (0.033839 + 0.001253 * ups) * cosZeta * sinQ - (0.035681 + 0.001208 * ups) * sinZeta * sinQ;
     /* only part of the terms, the ones first on the list and
     selected larger-amplitude terms from farther down. */
@@ -165,8 +167,8 @@ public final class Planets {
     omega[4] = omega[4] + (0.007192 - 0.003147 * ups) * sinV + (0.000197 * ups * ups - 0.00675 * ups - 0.020428) * cosV + 0.034036 * cosZeta * sinQ
             + 0.037761 * sinZeta * cosQ;
 
-    a[4] = a[4] + 1.0e-6 * (205 * cosZeta - 263 * cosV + 693 * cos2Zeta + 312 * Math.sin(3 * zeta) + 147 * Math.cos(4 * zeta) + 299 * sinZeta * sinQ
-            + 181 * cos2Zeta * sinQ + 181 * cos2Zeta * sinQ + 204 * sin2Zeta * cosQ + 111 * Math.sin(3 * zeta) * cosQ - 337 * cosZeta * cosQ
+    a[4] = a[4] + 1.0e-6 * (205 * cosZeta - 263 * cosV + 693 * cos2Zeta + 312 * FastMath.sin(3 * zeta) + 147 * FastMath.cos(4 * zeta) + 299 * sinZeta * sinQ
+            + 181 * cos2Zeta * sinQ + 181 * cos2Zeta * sinQ + 204 * sin2Zeta * cosQ + 111 * FastMath.sin(3 * zeta) * cosQ - 337 * cosZeta * cosQ
             - 111 * cos2Zeta * cosQ);
 
     // Saturn = 5
@@ -177,9 +179,9 @@ public final class Planets {
     daily[5] = 0.0334978749897;
     ecc[5] = 0.05589232 - 3.4550e-4 * T - 7.28e-7 * Tsq;
     L_0[5] = 266.564377 + 1223.509884 * T + 0.0003245 * Tsq - 5.8e-6 * Tcb + (0.018150 * ups - 0.814181 + 0.016714 * ups * ups) * sinV
-            + (0.160906 * ups - 0.010497 - 0.004100 * ups * ups) * cosV + 0.007581 * Math.sin(2 * V) - 0.007986 * Math.sin(W) - 0.148811 * sinZeta
-            - 0.040786 * sin2Zeta - 0.015208 * Math.sin(3 * zeta) - 0.006339 * Math.sin(4 * zeta) - 0.006244 * sinQ
-            + (0.008931 + 0.002728 * ups) * sinZeta * sinQ - 0.016500 * sin2Zeta * sinQ - 0.005775 * Math.sin(3 * zeta) * sinQ
+            + (0.160906 * ups - 0.010497 - 0.004100 * ups * ups) * cosV + 0.007581 * FastMath.sin(2 * V) - 0.007986 * FastMath.sin(W) - 0.148811 * sinZeta
+            - 0.040786 * sin2Zeta - 0.015208 * FastMath.sin(3 * zeta) - 0.006339 * FastMath.sin(4 * zeta) - 0.006244 * sinQ
+            + (0.008931 + 0.002728 * ups) * sinZeta * sinQ - 0.016500 * sin2Zeta * sinQ - 0.005775 * FastMath.sin(3 * zeta) * sinQ
             + (0.081344 + 0.003206 * ups) * cosZeta * sinQ + 0.015019 * cos2Zeta * sinQ + (0.085581 + 0.002494 * ups) * sinZeta * cosQ
             + (0.025328 - 0.003117 * ups) * cosZeta * cosQ + 0.014394 * cos2Zeta * cosQ;   /* truncated here -- no
     terms larger than 0.01 degrees, but errors may
@@ -193,7 +195,7 @@ public final class Planets {
             - 0.075825 * sinZeta * sinQ - 0.024839 * sin2Zeta * sinQ - 0.072582 * cosQ - 0.150383 * cosZeta * cosQ
             + 0.026897 * cos2Zeta * cosQ;  /* all terms with amplitudes
     greater than 0.02 degrees -- lots of others! */
-    a[5] = a[5] + 1.0e-6 * (2933. * cosV + 33629. * cosZeta - 3081. * cos2Zeta - 1423. * Math.cos(3 * zeta) + 1098. * sinQ - 2812. * sinZeta * sinQ
+    a[5] = a[5] + 1.0e-6 * (2933. * cosV + 33629. * cosZeta - 3081. * cos2Zeta - 1423. * FastMath.cos(3 * zeta) + 1098. * sinQ - 2812. * sinZeta * sinQ
             + 2138. * cosZeta * sinQ + 2206. * sinZeta * cosQ - 1590. * sin2Zeta * cosQ + 2885. * cosZeta * cosQ + 2172. * cos2Zeta * cosQ);
     /* terms with amplitudes greater
     than 1000 x 1e-6 */
@@ -208,13 +210,13 @@ public final class Planets {
     L_0[6] = 244.197470 + 429.863546 * T + 0.000316 * Tsq - 6e-7 * Tcb;
     /* stick in a little bit of perturbation -- this one really gets
     yanked around.... after Meeus p. 116*/
-    G = (83.76922 + 218.4901 * T) / Const.DEG_IN_RADIAN;
+    G = (83.76922 + 218.4901 * T) * Const.RADIAN_IN_DEG;
     H = 2 * G - S;
 
-    sinH = Math.sin(H);
-    sin2H = Math.sin(2. * H);
-    cosH = Math.cos(H);
-    cos2H = Math.cos(2. * H);
+    sinH = FastMath.sin(H);
+    sin2H = FastMath.sin(2. * H);
+    cosH = FastMath.cos(H);
+    cos2H = FastMath.cos(2. * H);
 
     L_0[6] = L_0[6] + (0.864319 - 0.001583 * ups) * sinH + (0.082222 - 0.006833 * ups) * cosH + 0.036017 * sin2H;
     omega[6] = omega[6] + 0.120303 * sinH + (0.019472 - 0.000947 * ups) * cosH + 0.006197 * sin2H;
@@ -256,28 +258,28 @@ public final class Planets {
 
     // 1992 Astronomical Almanac p. E4 has these formulae.
 
-    ii = incl[p] / Const.DEG_IN_RADIAN;
+    ii = incl[p] * Const.RADIAN_IN_DEG;
     e = ecc[p];
 
-    LL = (daily[p] * (jd - jd_el) + L_0[p]) / Const.DEG_IN_RADIAN;
-    Om = Omega[p] / Const.DEG_IN_RADIAN;
-    om = omega[p] / Const.DEG_IN_RADIAN;
+    LL = (daily[p] * (jd - jd_el) + L_0[p]) * Const.RADIAN_IN_DEG;
+    Om = Omega[p] * Const.RADIAN_IN_DEG;
+    om = omega[p] * Const.RADIAN_IN_DEG;
 
     M = LL - om;
     omnotil = om - Om;
     // approximate formula for Kepler equation solution ...
-    nu = M + (2. * e - 0.25 * Math.pow(e, 3.)) * Math.sin(M)
-            + 1.25 * e * e * Math.sin(2 * M)
-            + 1.08333333 * Math.pow(e, 3.) * Math.sin(3 * M);
-    r = a[p] * (1. - e * e) / (1 + e * Math.cos(nu));
+    nu = M + (2. * e - 0.25 * FastMath.pow3(e)) * FastMath.sin(M)
+            + 1.25 * e * e * FastMath.sin(2 * M)
+            + 1.08333333 * FastMath.pow3(e) * FastMath.sin(3 * M);
+    r = a[p] * (1. - e * e) / (1 + e * FastMath.cos(nu));
 
     retvals[0] = r
-            * (Math.cos(nu + omnotil) * Math.cos(Om) - Math.sin(nu + omnotil)
-            * Math.cos(ii) * Math.sin(Om));
+            * (FastMath.cos(nu + omnotil) * FastMath.cos(Om) - FastMath.sin(nu + omnotil)
+            * FastMath.cos(ii) * FastMath.sin(Om));
     retvals[1] = r
-            * (Math.cos(nu + omnotil) * Math.sin(Om) + Math.sin(nu + omnotil)
-            * Math.cos(ii) * Math.cos(Om));
-    retvals[2] = r * Math.sin(nu + omnotil) * Math.sin(ii);
+            * (FastMath.cos(nu + omnotil) * FastMath.sin(Om) + FastMath.sin(nu + omnotil)
+            * FastMath.cos(ii) * FastMath.cos(Om));
+    retvals[2] = r * FastMath.sin(nu + omnotil) * FastMath.sin(ii);
 
     return retvals;
 

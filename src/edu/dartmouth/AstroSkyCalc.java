@@ -14,6 +14,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Set;
+import net.jafama.FastMath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,15 +73,15 @@ public final class AstroSkyCalc {
      */
     public static Site createSite(final String name, final LonLatAlt position) {
         if (logger.isDebugEnabled()) {
-            logger.debug("Site Long : {}", Math.toDegrees(position.getLongitude()));
-            logger.debug("Site Lat  : {}", Math.toDegrees(position.getLatitude()));
+            logger.debug("Site Long : {}", FastMath.toDegrees(position.getLongitude()));
+            logger.debug("Site Lat  : {}", FastMath.toDegrees(position.getLatitude()));
         }
 
         // note : the given longitude is hours west in jSkyCalc :
         // stdz = longitude (dec hours) is also the GMT offset (UTC)
         final Site site = new Site(name,
                 -AngleUtils.rad2hours(position.getLongitude()),
-                Math.toDegrees(position.getLatitude()),
+                FastMath.toDegrees(position.getLatitude()),
                 position.getAltitude());
 
         if (logger.isDebugEnabled()) {
@@ -248,7 +249,7 @@ public final class AstroSkyCalc {
             }
 
             // adjust jd :
-            ww.changeWhen(ww.when.jd + sign * error / 24d);
+            ww.changeWhen(ww.when.jd + sign * error * Const.HOUR_IN_DAY);
 
 //      dumpWhen(ww, "When");
         }

@@ -6,6 +6,7 @@ package edu.dartmouth;
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.oi.AzEl;
 import fr.jmmc.aspro.util.AngleUtils;
+import net.jafama.FastMath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,8 +56,8 @@ public final class AstroSkyCalcObservation {
 
     // pre compute cosLat / sinLat used intensively by getTargetPosition():
     final double latRad = this.site.lat.radians();
-    this.cosLat = Math.cos(latRad);
-    this.sinLat = Math.sin(latRad);
+    this.cosLat = FastMath.cos(latRad);
+    this.sinLat = FastMath.sin(latRad);
   }
 
   /**

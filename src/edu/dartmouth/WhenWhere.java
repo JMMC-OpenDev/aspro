@@ -1,6 +1,7 @@
 package edu.dartmouth;
 
 import java.util.HashMap;
+import net.jafama.FastMath;
 
 /* JSkyCalc.java -- copyright 2007, John Thorstensen, Dartmouth College. */
 /** TERMS OF USE -- Anyone is free to use this software for any purpose, and to
@@ -151,11 +152,11 @@ public final class WhenWhere implements Cloneable {
       jdmid = jdintt + 0.5d;
       ut = jdfrac - 0.5d;
     }
-    final double tt = (jdmid - Const.J2000) / 36525d;
+    final double tt = (jdmid - Const.J2000) * Const.INV_CENTURY;
     double sid_g = (24110.54841d + 8640184.812866d * tt + 0.093104d * tt * tt - 6.2e-6d * tt * tt * tt) / 86400d;
     long sid_int = (long) sid_g;
     sid_g -= (double) sid_int;
-    sid_g += Const.SID_RATE * ut - longitin / 24d;
+    sid_g += Const.SID_RATE * ut - longitin * Const.HOUR_IN_DAY;
     sid_int = (long) sid_g;
     sid_g = (sid_g - (double) sid_int) * 24d;
     if (sid_g < 0d) {
@@ -259,7 +260,7 @@ public final class WhenWhere implements Cloneable {
     updateLocalMoon();
     final double[] retvals = Spherical.cuspPA(sun.topopos, moon.topopos);
     sunmoon = retvals[1];
-    moonillum = 0.5d * (1d - Math.cos(sunmoon));
+    moonillum = 0.5d * (1d - FastMath.cos(sunmoon));
     sunmoon *= Const.DEG_IN_RADIAN;
     cusppa = retvals[0];  // radians ...
   }
