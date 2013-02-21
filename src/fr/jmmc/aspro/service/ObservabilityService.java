@@ -102,6 +102,8 @@ public final class ObservabilityService {
     private final static int MAX_POPS_IN_WARNING = 15;
     /** jd step = 1 minute */
     private final double JD_STEP = (1d / 60d) / 24d;
+    /** Moon separation margin = 0.5 arcmin for uncertainty */
+    private final double MOON_SEPARATION_MARGIN = 0.5d / 60d;
     /** Jmcs Parallel Job executor */
     private static final ParallelJobExecutor jobExecutor = ParallelJobExecutor.getInstance();
     /** shared cache of Pop combinations keyed by 'interferometer_<nBL>' */
@@ -1862,16 +1864,13 @@ public final class ObservabilityService {
 
         if (doCheck) {
 
-            // keep only applied restrictions: test fli (global) then flux (target related)
+            // keep only the applicable rule: test fli (global) then flux (target related)
+            MoonRestriction appliedRule = null;
+
             final List<MoonRestriction> moonRestrictionList = this.moonPointingRestriction.getRestrictions();
-
-            int nMoonRestrictions = moonRestrictionList.size();
-
-            final List<MoonRestriction> appliedRestriction = new ArrayList<MoonRestriction>(nMoonRestrictions);
-
             MoonRestriction restriction;
 
-            for (int i = 0; i < nMoonRestrictions; i++) {
+            for (int i = 0, len = moonRestrictionList.size(); i < len; i++) {
                 restriction = moonRestrictionList.get(i);
 
                 final Double ruleFli = restriction.getFli();
@@ -1913,22 +1912,16 @@ public final class ObservabilityService {
                     }
                 }
 
-                // keep rule:
-                appliedRestriction.add(restriction);
+                // keep or overwrite applied rule:
+                if ((appliedRule == null) || (restriction.getSeparation() > appliedRule.getSeparation())) {
+                    appliedRule = restriction;
+                }
             }
 
-            logger.debug("appliedRestriction: {}", appliedRestriction);
+            logger.debug("appliedRule: {}", appliedRule);
 
-            nMoonRestrictions = appliedRestriction.size();
-
-            // get moon restriction rules as array:
-            final MoonRestriction[] moonRestrictions = appliedRestriction.toArray(new MoonRestriction[nMoonRestrictions]);
-
-
+            // Process Rise/Set HA range:
             ranges = new ArrayList<Range>(2);
-
-            // 0.5 arcmin for uncertainty:
-            final double margin = 0.5d / 60d;
 
             double minSeparation = Double.POSITIVE_INFINITY;
             double minJd = 0d;
@@ -1954,16 +1947,11 @@ public final class ObservabilityService {
                 }
 
                 // use uncertainty:
-                separation -= margin;
+                separation -= MOON_SEPARATION_MARGIN;
 
-                // evaluate applicable moon restriction rules:
-                for (int i = 0; i < nMoonRestrictions; i++) {
-                    restriction = moonRestrictions[i];
-
-                    if (separation < restriction.getSeparation()) {
-                        visible = false;
-                        break;
-                    }
+                // evaluate applied rule:
+                if ((appliedRule != null) && (separation < appliedRule.getSeparation())) {
+                    visible = false;
                 }
 
                 // manage intervals :
