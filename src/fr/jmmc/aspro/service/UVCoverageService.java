@@ -22,6 +22,7 @@ import fr.jmmc.aspro.util.AngleUtils;
 import fr.jmmc.aspro.util.TestUtils;
 import java.util.ArrayList;
 import java.util.List;
+import net.jafama.FastMath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -217,10 +218,10 @@ public final class UVCoverageService {
         final int nPoints = (int) Math.round(2d * haElev / step) + 1;
 
         // precessed target declination in rad :
-        final double precDEC = Math.toRadians(this.starData.getPrecDEC());
+        final double precDEC = FastMath.toRadians(this.starData.getPrecDEC());
 
-        final double cosDec = Math.cos(precDEC);
-        final double sinDec = Math.sin(precDEC);
+        final double cosDec = FastMath.cos(precDEC);
+        final double sinDec = FastMath.sin(precDEC);
 
         final double invLambda = 1d / this.lambda;
 
@@ -357,10 +358,10 @@ public final class UVCoverageService {
             // Second pass : extract UV values for HA points :
 
             // precessed target declination in rad :
-            final double precDEC = Math.toRadians(this.starData.getPrecDEC());
+            final double precDEC = FastMath.toRadians(this.starData.getPrecDEC());
 
-            final double cosDec = Math.cos(precDEC);
-            final double sinDec = Math.sin(precDEC);
+            final double cosDec = FastMath.cos(precDEC);
+            final double sinDec = FastMath.sin(precDEC);
 
             final double invLambdaMin = 1d / this.lambdaMin;
             final double invLambdaMax = 1d / this.lambdaMax;

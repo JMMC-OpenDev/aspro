@@ -4,16 +4,13 @@
 package fr.jmmc.aspro.service;
 
 import fr.jmmc.aspro.model.BaseLine;
-import net.jodk.lang.FastMath;
+import net.jafama.FastMath;
 
 /**
  * This class contains static computation methods to get the UVW values for a given baseline and a target declination
  * @author bourgesl
  */
 public final class CalcUVW {
-
-    /** enable / disable FastMath */
-    private static final boolean USE_FAST_MATH = true;
 
     /**
      * Forbidden constructor
@@ -29,10 +26,7 @@ public final class CalcUVW {
      * @return U coordinate in interferometric plan
      */
     public static double computeU(final BaseLine baseLine, final double ha) {
-        if (USE_FAST_MATH) {
-            return FastMath.sin(ha) * baseLine.getX() + FastMath.cos(ha) * baseLine.getY();
-        }
-        return Math.sin(ha) * baseLine.getX() + Math.cos(ha) * baseLine.getY();
+        return FastMath.sin(ha) * baseLine.getX() + FastMath.cos(ha) * baseLine.getY();
     }
 
     /**
@@ -44,10 +38,7 @@ public final class CalcUVW {
      * @return V coordinate in interferometric plan
      */
     public static double computeV(final double cosDec, final double sinDec, final BaseLine baseLine, final double ha) {
-        if (USE_FAST_MATH) {
-            return sinDec * (FastMath.sin(ha) * baseLine.getY() - FastMath.cos(ha) * baseLine.getX()) + cosDec * baseLine.getZ();
-        }
-        return sinDec * (Math.sin(ha) * baseLine.getY() - Math.cos(ha) * baseLine.getX()) + cosDec * baseLine.getZ();
+        return sinDec * (FastMath.sin(ha) * baseLine.getY() - FastMath.cos(ha) * baseLine.getX()) + cosDec * baseLine.getZ();
     }
 
     /**
@@ -59,9 +50,6 @@ public final class CalcUVW {
      * @return W coordinate in interferometric plan
      */
     public static double computeW(final double cosDec, final double sinDec, final BaseLine baseLine, final double ha) {
-        if (USE_FAST_MATH) {
-            return cosDec * (FastMath.cos(ha) * baseLine.getX() - FastMath.sin(ha) * baseLine.getY()) + sinDec * baseLine.getZ();
-        }
-        return cosDec * (Math.cos(ha) * baseLine.getX() - Math.sin(ha) * baseLine.getY()) + sinDec * baseLine.getZ();
+        return cosDec * (FastMath.cos(ha) * baseLine.getX() - FastMath.sin(ha) * baseLine.getY()) + sinDec * baseLine.getZ();
     }
 }

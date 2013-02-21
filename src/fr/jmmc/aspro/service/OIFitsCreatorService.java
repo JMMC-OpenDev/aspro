@@ -50,7 +50,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import net.jodk.lang.FastMath;
+import net.jafama.FastMath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -1423,7 +1423,7 @@ public final class OIFitsCreatorService {
                     visIm = this.visComplex[k][l].getImaginary();
 
                     // pure square visibility :
-                    v2 = Math.pow(visRe, 2d) + Math.pow(visIm, 2d);
+                    v2 = FastMath.pow2(visRe) + FastMath.pow2(visIm);
                     vis2Data[k][l] = v2;
 
                     // square visibility error :

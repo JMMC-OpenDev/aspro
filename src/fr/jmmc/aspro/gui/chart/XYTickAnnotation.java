@@ -61,7 +61,7 @@ import java.awt.Stroke;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.io.Serializable;
-
+import net.jafama.FastMath;
 import org.jfree.chart.annotations.XYTextAnnotation;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.plot.Plot;
@@ -267,8 +267,8 @@ public final class XYTickAnnotation extends XYTextAnnotation
       j2DY = temp;
     }
 
-    final double cosAngle = Math.cos(this.angle);
-    final double sinAngle = Math.sin(this.angle);
+    final double cosAngle = FastMath.cos(this.angle);
+    final double sinAngle = FastMath.sin(this.angle);
 
     final double startX = j2DX + cosAngle * baseRadiusScaled;
     final double startY = j2DY + sinAngle * baseRadiusScaled;

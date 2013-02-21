@@ -7,6 +7,7 @@ import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.oi.LonLatAlt;
 import fr.jmmc.aspro.model.oi.Position3D;
 import fr.jmmc.jmal.ALX;
+import net.jafama.FastMath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,11 +58,11 @@ public final class GeocentricCoords {
     double a;
     double b;
     if (rxy2 != 0d) {
-      a = Math.atan2(y, x);
-      b = Math.atan2(z, rxy);
+      a = FastMath.atan2(y, x);
+      b = FastMath.atan2(z, rxy);
     } else {
       a = 0d;
-      b = (z == 0d) ? 0d : Math.atan2(z, rxy);
+      b = (z == 0d) ? 0d : FastMath.atan2(z, rxy);
     }
     final double r = Math.sqrt(rxy2 + z * z);
 
@@ -85,7 +86,7 @@ public final class GeocentricCoords {
    * @return string representing the given coordinates
    */
   public static String toString(final double lon, final double lat, final double d) {
-    return ALX.toDMS(Math.toDegrees(lon)) + ", " + ALX.toDMS(Math.toDegrees(lat)) + ", " + d + " m";
+    return ALX.toDMS(FastMath.toDegrees(lon)) + ", " + ALX.toDMS(FastMath.toDegrees(lat)) + ", " + d + " m";
   }
 
   /**

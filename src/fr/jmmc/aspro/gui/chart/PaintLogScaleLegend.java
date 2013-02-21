@@ -6,6 +6,7 @@ package fr.jmmc.aspro.gui.chart;
 import java.awt.Graphics2D;
 import java.awt.Paint;
 import java.awt.geom.Rectangle2D;
+import net.jafama.FastMath;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.plot.Plot;
 import org.jfree.chart.plot.PlotOrientation;
@@ -68,8 +69,8 @@ public final class PaintLogScaleLegend extends PaintScaleLegend {
               this.getAxisLocation(), PlotOrientation.HORIZONTAL);
       if (axisEdge == RectangleEdge.TOP) {
         for (int i = 0; i < subdivisions; i++) {
-          final double v0 = Math.pow(10d, base + (i * increment));
-          final double v1 = Math.pow(10d, base + ((i + 1) * increment));
+          final double v0 = FastMath.pow(10d, base + (i * increment));
+          final double v1 = FastMath.pow(10d, base + ((i + 1) * increment));
           final Paint p = this.getScale().getPaint(v0);
           final double vv0 = getAxis().valueToJava2D(v0, target, RectangleEdge.TOP);
           final double vv1 = getAxis().valueToJava2D(v1, target, RectangleEdge.TOP);
@@ -87,8 +88,8 @@ public final class PaintLogScaleLegend extends PaintScaleLegend {
 
       } else if (axisEdge == RectangleEdge.BOTTOM) {
         for (int i = 0; i < subdivisions; i++) {
-          final double v0 = Math.pow(10d, base + (i * increment));
-          final double v1 = Math.pow(10d, base + ((i + 1) * increment));
+          final double v0 = FastMath.pow(10d, base + (i * increment));
+          final double v1 = FastMath.pow(10d, base + ((i + 1) * increment));
           final Paint p = this.getScale().getPaint(v0);
           final double vv0 = getAxis().valueToJava2D(v0, target, RectangleEdge.BOTTOM);
           final double vv1 = getAxis().valueToJava2D(v1, target, RectangleEdge.BOTTOM);
@@ -109,8 +110,8 @@ public final class PaintLogScaleLegend extends PaintScaleLegend {
               this.getAxisLocation(), PlotOrientation.VERTICAL);
       if (axisEdge == RectangleEdge.LEFT) {
         for (int i = 0; i < subdivisions; i++) {
-          final double v0 = Math.pow(10d, base + (i * increment));
-          final double v1 = Math.pow(10d, base + ((i + 1) * increment));
+          final double v0 = FastMath.pow(10d, base + (i * increment));
+          final double v1 = FastMath.pow(10d, base + ((i + 1) * increment));
           final Paint p = this.getScale().getPaint(v0);
           final double vv0 = getAxis().valueToJava2D(v0, target, RectangleEdge.LEFT);
           final double vv1 = getAxis().valueToJava2D(v1, target, RectangleEdge.LEFT);
@@ -127,8 +128,8 @@ public final class PaintLogScaleLegend extends PaintScaleLegend {
         getAxis().draw(g2, target.getMaxX() - stripWidth - this.getAxisOffset(), target, target, RectangleEdge.LEFT, null);
       } else if (axisEdge == RectangleEdge.RIGHT) {
         for (int i = 0; i < subdivisions; i++) {
-          final double v0 = Math.pow(10d, base + (i * increment));
-          final double v1 = Math.pow(10d, base + ((i + 1) * increment));
+          final double v0 = FastMath.pow(10d, base + (i * increment));
+          final double v1 = FastMath.pow(10d, base + ((i + 1) * increment));
           final Paint p = this.getScale().getPaint(v0);
           final double vv0 = getAxis().valueToJava2D(v0, target, RectangleEdge.RIGHT);
           final double vv1 = getAxis().valueToJava2D(v1, target, RectangleEdge.RIGHT);

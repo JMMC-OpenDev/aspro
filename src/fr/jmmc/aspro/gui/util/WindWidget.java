@@ -18,6 +18,7 @@ import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import net.jafama.FastMath;
 import org.apache.commons.lang.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -167,7 +168,7 @@ public abstract class WindWidget extends JPanel {
                         final double dy = (center.getY() - point.getY()) / (0.5d * bounds.getHeight());
 
                         // arctan gives angle in [-180; 180]:
-                        double angle = Math.toDegrees(Math.atan2(dx, dy));
+                        double angle = FastMath.toDegrees(FastMath.atan2(dx, dy));
 
                         // get azimuth in [0; 360]:
                         if (angle < 0d) {

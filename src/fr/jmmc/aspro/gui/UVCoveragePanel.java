@@ -100,6 +100,7 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JFormattedTextField;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import net.jafama.FastMath;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.annotations.XYTextAnnotation;
@@ -2428,8 +2429,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
                     if ((int) log10Max - (int) log10Min == 0) {
                         // fix data range to lower and upper pow(10):
-                        min = Math.pow(10d, Math.floor(log10Min));
-                        max = Math.pow(10d, Math.ceil(log10Max));
+                        min = FastMath.pow(10d, Math.floor(log10Min));
+                        max = FastMath.pow(10d, Math.ceil(log10Max));
                     }
                 }
                 if (logger.isDebugEnabled()) {

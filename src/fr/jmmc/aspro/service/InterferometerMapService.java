@@ -15,6 +15,7 @@ import fr.jmmc.oitools.util.CombUtils;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.List;
+import net.jafama.FastMath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,12 +60,12 @@ public final class InterferometerMapService {
 
       final LonLatAlt position = id.getPosSph();
       if (logger.isDebugEnabled()) {
-        logger.debug("Site Long: {}", Math.toDegrees(position.getLongitude()));
-        logger.debug("Site Lat : {}", Math.toDegrees(position.getLatitude()));
+        logger.debug("Site Long: {}", FastMath.toDegrees(position.getLongitude()));
+        logger.debug("Site Lat : {}", FastMath.toDegrees(position.getLatitude()));
       }
 
-      final double cosLat = Math.cos(position.getLatitude());
-      final double sinLat = Math.sin(position.getLatitude());
+      final double cosLat = FastMath.cos(position.getLatitude());
+      final double sinLat = FastMath.sin(position.getLatitude());
 
       final List<Station> stationList = id.getStations();
       final int size = stationList.size();

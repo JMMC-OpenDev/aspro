@@ -3,7 +3,7 @@
  ******************************************************************************/
 package fr.jmmc.aspro.util;
 
-import net.jodk.lang.FastMath;
+import net.jafama.FastMath;
 
 /**
  * This class has several utility methods to convert angles 

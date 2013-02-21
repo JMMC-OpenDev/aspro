@@ -32,6 +32,7 @@ import fr.jmmc.aspro.model.oi.AzEl;
 import fr.jmmc.aspro.model.oi.Channel;
 import fr.jmmc.aspro.model.oi.ChannelLink;
 import fr.jmmc.aspro.model.oi.DelayLine;
+import fr.jmmc.aspro.model.oi.FluxCondition;
 import fr.jmmc.aspro.model.oi.FocalInstrument;
 import fr.jmmc.aspro.model.oi.FocalInstrumentConfiguration;
 import fr.jmmc.aspro.model.oi.InterferometerConfiguration;
@@ -39,6 +40,7 @@ import fr.jmmc.aspro.model.oi.InterferometerDescription;
 import fr.jmmc.aspro.model.oi.MoonPointingRestriction;
 import fr.jmmc.aspro.model.oi.MoonRestriction;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
+import fr.jmmc.aspro.model.oi.Operator;
 import fr.jmmc.aspro.model.oi.Pop;
 import fr.jmmc.aspro.model.oi.PopLink;
 import fr.jmmc.aspro.model.oi.Station;
@@ -72,6 +74,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import javax.xml.datatype.XMLGregorianCalendar;
+import net.jafama.FastMath;
 import org.ivoa.util.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -917,7 +920,7 @@ public final class ObservabilityService {
                 rangesTarget.addAll(haNightLimits);
             }
 
-            popDataList = getPopObservabilityData(target.getName(), Math.toRadians(precDEC), rangesTarget, true, obsCtxLocal, true, fromCb, endCb);
+            popDataList = getPopObservabilityData(target.getName(), FastMath.toRadians(precDEC), rangesTarget, true, obsCtxLocal, true, fromCb, endCb);
 
         } else {
             if (isLogDebug) {
@@ -1017,11 +1020,11 @@ public final class ObservabilityService {
                     rangesTarget.addAll(haNightLimits);
                 }
 
-                rangesHABaseLines = findHAIntervalsWithPops(Math.toRadians(precDEC), rangesTarget, starObs);
+                rangesHABaseLines = findHAIntervalsWithPops(FastMath.toRadians(precDEC), rangesTarget, starObs);
 
             } else {
                 // Get intervals (HA) compatible with all base lines :
-                rangesHABaseLines = DelayLineService.findHAIntervals(Math.toRadians(precDEC), this.baseLines, this.wRanges, defaultRangeFactory);
+                rangesHABaseLines = DelayLineService.findHAIntervals(FastMath.toRadians(precDEC), this.baseLines, this.wRanges, defaultRangeFactory);
             }
 
             // rangesHABaseLines can be null if the thread was interrupted :
@@ -1048,7 +1051,7 @@ public final class ObservabilityService {
             boolean checkJDMoon = false;
             List<Range> rangesJDMoon = null;
             if (this.useNightLimit && this.moonPointingRestriction != null) {
-                rangesJDMoon = checkMoonRestriction(targetName, precDEC, rangeJDRiseSet);
+                rangesJDMoon = checkMoonRestriction(target, precDEC, rangeJDRiseSet);
 
                 if (isLogDebug) {
                     logger.debug("rangesJDMoon: {}", rangesJDMoon);
@@ -1500,8 +1503,8 @@ public final class ObservabilityService {
         // list of observability data associated to a pop combination :
         final List<PopObservabilityData> popDataList = obsCtxLocal.getPopDataList();
 
-        final double cosDec = Math.cos(dec);
-        final double sinDec = Math.sin(dec);
+        final double cosDec = FastMath.cos(dec);
+        final double sinDec = FastMath.sin(dec);
 
         // Use arrays instead of List for performance:
         final PopCombination[] popCombs = obsCtxLocal.getPopCombs();
@@ -1655,9 +1658,9 @@ public final class ObservabilityService {
         }
 
         // prepare cosDec/sinDec:
-        final double dec = Math.toRadians(precDEC);
-        final double cosDec = Math.cos(dec);
-        final double sinDec = Math.sin(dec);
+        final double dec = FastMath.toRadians(precDEC);
+        final double cosDec = FastMath.cos(dec);
+        final double sinDec = FastMath.sin(dec);
 
         final double jdMin = jdRiseSet.getMin();
         final double jdMax = jdRiseSet.getMax();
@@ -1736,9 +1739,9 @@ public final class ObservabilityService {
         final List<Range> ranges = new ArrayList<Range>(2);
 
         // prepare cosDec/sinDec:
-        final double dec = Math.toRadians(precDEC);
-        final double cosDec = Math.cos(dec);
-        final double sinDec = Math.sin(dec);
+        final double dec = FastMath.toRadians(precDEC);
+        final double cosDec = FastMath.cos(dec);
+        final double sinDec = FastMath.sin(dec);
 
         final double jdMin = jdRiseSet.getMin();
         final double jdMax = jdRiseSet.getMax();
@@ -1805,15 +1808,12 @@ public final class ObservabilityService {
 
     /**
      * Check the moon restriction given the target rise/set range (JD) (FLI threshold and object magnitude)
-     * @param targetName target name
+     * @param target target to test (name and flux V used)
      * @param precDEC precessed DEC in degrees
      * @param jdRiseSet target rise/set range (JD)
      * @return list of observable ranges (no restriction) or null if no restriction
      */
-    private List<Range> checkMoonRestriction(final String targetName, final double precDEC, final Range jdRiseSet) {
-        // get moon restriction rules as array:
-        final MoonRestriction[] moonRestrictions = new MoonRestriction[this.moonPointingRestriction.getRestrictions().size()];
-        this.moonPointingRestriction.getRestrictions().toArray(moonRestrictions);
+    private List<Range> checkMoonRestriction(final Target target, final double precDEC, final Range jdRiseSet) {
 
         // get FLI on current night:
         final double fli = this.data.getMoonIllumPercent();
@@ -1826,9 +1826,9 @@ public final class ObservabilityService {
         final List<Range> ranges;
 
         // prepare cosDec/sinDec:
-        final double dec = Math.toRadians(precDEC);
-        final double cosDec = Math.cos(dec);
-        final double sinDec = Math.sin(dec);
+        final double dec = FastMath.toRadians(precDEC);
+        final double cosDec = FastMath.cos(dec);
+        final double sinDec = FastMath.sin(dec);
 
         final double jdMin = jdRiseSet.getMin();
         final double jdMax = jdRiseSet.getMax();
@@ -1861,12 +1861,75 @@ public final class ObservabilityService {
         }
 
         if (doCheck) {
+
+            // keep only applied restrictions: test fli (global) then flux (target related)
+            final List<MoonRestriction> moonRestrictionList = this.moonPointingRestriction.getRestrictions();
+
+            int nMoonRestrictions = moonRestrictionList.size();
+
+            final List<MoonRestriction> appliedRestriction = new ArrayList<MoonRestriction>(nMoonRestrictions);
+
+            MoonRestriction restriction;
+
+            for (int i = 0; i < nMoonRestrictions; i++) {
+                restriction = moonRestrictionList.get(i);
+
+                final Double ruleFli = restriction.getFli();
+                if (ruleFli != null) {
+                    // inverse condition:
+                    if (fli < ruleFli.doubleValue()) {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("skip rule (fli = {} < {})", fli, ruleFli);
+                        }
+                        // skip rule
+                        continue;
+                    }
+                }
+                final FluxCondition fluxCond = restriction.getFlux();
+                if (fluxCond != null) {
+                    final Double flux = target.getFlux(fluxCond.getBand());
+
+                    final double fluxValue = (flux == null) ? Double.POSITIVE_INFINITY : flux; // consider FAINT target if undefined
+
+                    if (fluxCond.getOp() == Operator.LOWER) {
+                        // inverse condition:
+                        if (fluxValue > fluxCond.getValue()) {
+                            if (logger.isDebugEnabled()) {
+                                logger.debug("skip rule NOT(flux = {} LOWER  {})", fluxValue, fluxCond.getValue());
+                            }
+                            // skip rule
+                            continue;
+                        }
+                    } else {
+                        // Operator.HIGHER:
+                        // inverse condition:
+                        if (fluxValue <= fluxCond.getValue()) {
+                            if (logger.isDebugEnabled()) {
+                                logger.debug("skip rule NOT(flux = {} HIGHER {})", fluxValue, fluxCond.getValue());
+                            }
+                            // skip rule
+                            continue;
+                        }
+                    }
+                }
+
+                // keep rule:
+                appliedRestriction.add(restriction);
+            }
+
+            logger.debug("appliedRestriction: {}", appliedRestriction);
+
+            nMoonRestrictions = appliedRestriction.size();
+
+            // get moon restriction rules as array:
+            final MoonRestriction[] moonRestrictions = appliedRestriction.toArray(new MoonRestriction[nMoonRestrictions]);
+
+
             ranges = new ArrayList<Range>(2);
 
             // 0.5 arcmin for uncertainty:
             final double margin = 0.5d / 60d;
 
-            Double ruleFli;
             double minSeparation = Double.POSITIVE_INFINITY;
             double minJd = 0d;
 
@@ -1893,15 +1956,10 @@ public final class ObservabilityService {
                 // use uncertainty:
                 separation -= margin;
 
-                // evaluate moon restriction rules:
-                for (MoonRestriction restriction : moonRestrictions) {
-                    ruleFli = restriction.getFli();
-                    if (ruleFli != null) {
-                        if (fli < ruleFli.doubleValue()) {
-                            // skip rule
-                            continue;
-                        }
-                    }
+                // evaluate applicable moon restriction rules:
+                for (int i = 0; i < nMoonRestrictions; i++) {
+                    restriction = moonRestrictions[i];
+
                     if (separation < restriction.getSeparation()) {
                         visible = false;
                         break;
@@ -1937,7 +1995,7 @@ public final class ObservabilityService {
                 // add warning:
                 this.addWarning("Moon separation is " + df1.format(minSeparation)
                         + " deg at " + timeFormatter.format(convertJDToDate(minJd))
-                        + " for target [" + targetName + "]<br> Please check pointing restrictions.");
+                        + " for target [" + target.getName() + "]<br> Please check pointing restrictions.");
             }
 
         } else {
@@ -2723,7 +2781,7 @@ public final class ObservabilityService {
      */
     private List<Target> generateTargetsForBaseLineLimits() {
 
-        final double obsLat = Math.toDegrees(this.interferometer.getPosSph().getLatitude());
+        final double obsLat = FastMath.toDegrees(this.interferometer.getPosSph().getLatitude());
 
         final int decStep = 2;
 
@@ -2763,9 +2821,9 @@ public final class ObservabilityService {
         final Map<Date, TargetPositionDate> targetPositions = starObs.getTargetPositions();
 
         // prepare cosDec/sinDec:
-        final double dec = Math.toRadians(precDEC);
-        final double cosDec = Math.cos(dec);
-        final double sinDec = Math.sin(dec);
+        final double dec = FastMath.toRadians(precDEC);
+        final double cosDec = FastMath.cos(dec);
+        final double sinDec = FastMath.sin(dec);
 
         final AzEl azEl = new AzEl();
 

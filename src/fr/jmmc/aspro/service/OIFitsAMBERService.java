@@ -7,7 +7,7 @@ import fr.jmmc.jmal.complex.Complex;
 import fr.jmmc.jmal.complex.ImmutableComplex;
 import fr.jmmc.jmal.complex.MutableComplex;
 import fr.jmmc.oitools.model.OIVis;
-import net.jodk.lang.FastMath;
+import net.jafama.FastMath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,8 +17,6 @@ import org.slf4j.LoggerFactory;
  */
 public final class OIFitsAMBERService {
 
-    /** enable / disable FastMath */
-    private static final boolean USE_FAST_MATH = true;
     /** Class logger */
     private static final Logger logger = LoggerFactory.getLogger(OIFitsAMBERService.class.getName());
     /** constant used by abacusErrPhi */
@@ -112,8 +110,8 @@ public final class OIFitsAMBERService {
             for (lVis = 0; lVis < nbLVis; lVis++) {
 
                 sigma2_cpxVisTable[iRow][lVis] = new ImmutableComplex(
-                        Math.pow(visError[iRow][lVis].getReal(), 2d),
-                        Math.pow(visError[iRow][lVis].getImaginary(), 2d)); // immutable complex for safety
+                        FastMath.pow2(visError[iRow][lVis].getReal()),
+                        FastMath.pow2(visError[iRow][lVis].getImaginary())); // immutable complex for safety
             }
         }
 
@@ -194,21 +192,21 @@ public final class OIFitsAMBERService {
 
                 sigma2_w1[iRow][lVis] = new ImmutableComplex(
                         sigma2_cpxVisTable[iRow][lVis].getReal()
-                        * Math.pow(cRefTable[iRow][lVis].getReal(), 2d)
+                        * FastMath.pow2(cRefTable[iRow][lVis].getReal())
                         + sigma2_cRefTable[iRow][lVis].getReal()
-                        * Math.pow(cpxVisTable[iRow][lVis].getReal(), 2d)
+                        * FastMath.pow2(cpxVisTable[iRow][lVis].getReal())
                         + sigma2_cpxVisTable[iRow][lVis].getImaginary()
-                        * Math.pow(cRefTable[iRow][lVis].getImaginary(), 2d)
+                        * FastMath.pow2(cRefTable[iRow][lVis].getImaginary())
                         + sigma2_cRefTable[iRow][lVis].getImaginary()
-                        * Math.pow(cpxVisTable[iRow][lVis].getImaginary(), 2d),
+                        * FastMath.pow2(cpxVisTable[iRow][lVis].getImaginary()),
                         sigma2_cpxVisTable[iRow][lVis].getImaginary()
-                        * Math.pow(cRefTable[iRow][lVis].getReal(), 2d)
+                        * FastMath.pow2(cRefTable[iRow][lVis].getReal())
                         + sigma2_cRefTable[iRow][lVis].getImaginary()
-                        * Math.pow(cpxVisTable[iRow][lVis].getReal(), 2d)
+                        * FastMath.pow2(cpxVisTable[iRow][lVis].getReal())
                         + sigma2_cpxVisTable[iRow][lVis].getReal()
-                        * Math.pow(cRefTable[iRow][lVis].getImaginary(), 2d)
+                        * FastMath.pow2(cRefTable[iRow][lVis].getImaginary())
                         + sigma2_cRefTable[iRow][lVis].getReal()
-                        * Math.pow(cpxVisTable[iRow][lVis].getImaginary(), 2d)); // immutable complex for safety
+                        * FastMath.pow2(cpxVisTable[iRow][lVis].getImaginary())); // immutable complex for safety
 
 
                 /*Here there is no over-frame averaging. Compute 'averaged' values frame by frame */
@@ -247,11 +245,7 @@ public final class OIFitsAMBERService {
                 cpxVis = w1[iRow][lVis];
 
                 /*Here there is no over-frame averaging. Compute 'averaged' values frame by frame */
-                if (USE_FAST_MATH) {
-                    cpxVisVectR[iRow] = FastMath.cos(x) * cpxVis.getReal() + FastMath.sin(x) * cpxVis.getImaginary();
-                } else {
-                    cpxVisVectR[iRow] = Math.cos(x) * cpxVis.getReal() + Math.sin(x) * cpxVis.getImaginary();
-                }
+                cpxVisVectR[iRow] = FastMath.cos(x) * cpxVis.getReal() + FastMath.sin(x) * cpxVis.getImaginary();
 
                 visAmp[iRow][lVis] = cpxVisVectR[iRow];
                 visAmpErr[iRow][lVis] = Math.sqrt(sigma2_w1[iRow][lVis].getImaginary() + sigma2_w1[iRow][lVis].getReal());
@@ -319,11 +313,8 @@ public final class OIFitsAMBERService {
                     phasor = Complex.ONE;
                 } else {
                     x = ((2d * Math.PI) / waveLengths[lVis]) * pst[iRow];
-                    if (USE_FAST_MATH) {
-                        phasor = new ImmutableComplex(FastMath.cos(x), -FastMath.sin(x)); // immutable complex for safety
-                    } else {
-                        phasor = new ImmutableComplex(Math.cos(x), -Math.sin(x)); // immutable complex for safety
-                    }
+
+                    phasor = new ImmutableComplex(FastMath.cos(x), -FastMath.sin(x)); // immutable complex for safety
                 }
 
                 cpxVis = cpxVisTable[iRow][lVis];
@@ -421,6 +412,6 @@ public final class OIFitsAMBERService {
                 + abacusCoeff[5] * x2
                 + abacusCoeff[6] * x
                 + abacusCoeff[7];
-        return Math.pow(10d, z);
+        return FastMath.pow(10d, z);
     }
 }

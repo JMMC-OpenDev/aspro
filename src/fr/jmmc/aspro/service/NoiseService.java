@@ -24,6 +24,7 @@ import fr.jmmc.jmal.complex.ImmutableComplex;
 import fr.jmmc.jmal.model.VisNoiseService;
 import java.text.DecimalFormat;
 import java.util.List;
+import net.jafama.FastMath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -235,7 +236,7 @@ public final class NoiseService extends VisNoiseService {
         this.detectorSaturation = instrument.getDetectorSaturation();
         this.instrumentalVisibility = instrument.getInstrumentVisibility();
         this.instrumentalVisibilityBias = 0.01d * instrument.getInstrumentVisibilityBias(); // percents
-        this.instrumentalPhaseBias = Math.toRadians(instrument.getInstrumentPhaseBias()); // radians
+        this.instrumentalPhaseBias = FastMath.toRadians(instrument.getInstrumentPhaseBias()); // radians
         this.nbPixInterf = instrument.getNbPixInterferometry();
 
         // optional photometry parameters
@@ -401,11 +402,11 @@ public final class NoiseService extends VisNoiseService {
         }
 
         // nb of photons m^-2 m^-1 :
-        final double fzero = Math.pow(10d, band.getLogFluxZero()) * (lambda * AsproConstants.MICRO_METER) / (H_PLANCK * C_LIGHT);
+        final double fzero = FastMath.pow(10d, band.getLogFluxZero()) * (lambda * AsproConstants.MICRO_METER) / (H_PLANCK * C_LIGHT);
 
         // nbTotalPhot for the all spectra:
-        final double nbTotalPhotSpectra = fzero * nbTel * Math.PI * Math.pow(0.5d * telDiam, 2d)
-                * transmission * sr * Math.pow(10d, -0.4d * objectMag);
+        final double nbTotalPhotSpectra = fzero * nbTel * Math.PI * FastMath.pow2(0.5d * telDiam)
+                * transmission * sr * FastMath.pow(10d, -0.4d * objectMag);
 
         // nbTotalPhot per resolution element:
         final double nbTotalPhotPerS = nbTotalPhotSpectra * (deltalambda * AsproConstants.MICRO_METER);
@@ -702,10 +703,10 @@ public final class NoiseService extends VisNoiseService {
 
         if (usePhotometry) {
             // variance of the photometric flux in photometric channel:
-            final double varFluxPhot = nbPhotonInP + nbPixPhoto * Math.pow(ron, 2d);
+            final double varFluxPhot = nbPhotonInP + nbPixPhoto * FastMath.pow2(ron);
 
             // photometric error contribution on the square visiblity:
-            this.errV2Phot = 2d * varFluxPhot / Math.pow(nbPhotonInP, 2d);
+            this.errV2Phot = 2d * varFluxPhot / FastMath.pow2(nbPhotonInP);
 
             if (logger.isDebugEnabled()) {
                 logger.debug("varFluxPhot                   : {}", varFluxPhot);
@@ -716,14 +717,14 @@ public final class NoiseService extends VisNoiseService {
         }
 
         // squared correlated flux (include instrumental visibility loss) for vis2 = 1.0:
-        this.sqCorFluxCoef = Math.pow(nbPhotonInI * vinst / nbTel, 2d);
+        this.sqCorFluxCoef = FastMath.pow2(nbPhotonInI * vinst / nbTel);
 
         // variance of the squared correlated flux = sqCorFlux * coef + constant
-        this.varSqCorFluxCoef = 2d * nbPhotonInI + 4d + 2d * nbPixInterf * Math.pow(ron, 2d);
+        this.varSqCorFluxCoef = 2d * nbPhotonInI + 4d + 2d * nbPixInterf * FastMath.pow2(ron);
 
         this.varSqCorFluxConst = nbPhotonInI * (1d + nbPhotonInI)
-                + nbPixInterf * (nbPixInterf + 3d) * Math.pow(ron, 4d)
-                + 2d * nbPixInterf * Math.pow(ron, 2d) * nbPhotonInI;
+                + nbPixInterf * (nbPixInterf + 3d) * FastMath.pow(ron, 4d)
+                + 2d * nbPixInterf * FastMath.pow2(ron) * nbPhotonInI;
 
         if (logger.isDebugEnabled()) {
             logger.debug("sqCorFluxCoef                 : {}", sqCorFluxCoef);
@@ -756,7 +757,7 @@ public final class NoiseService extends VisNoiseService {
         // squared correlated flux (include instrumental visibility loss):
         double sqCorFlux = sqCorFluxCoef * vis2;
         /*
-         double sqCorFlux = Math.pow(nbPhotonInI * vinst / nbTel, 2d) * vis2;
+         double sqCorFlux = FastMath.pow2(nbPhotonInI * vinst / nbTel) * vis2;
          */
 
         // variance of the squared correlated flux:
@@ -766,7 +767,7 @@ public final class NoiseService extends VisNoiseService {
         /*
          final double varSqCorFlux = sqCorFlux * (2d * nbPhotonInI + 4d + 2d * nbPixInterf * ron * ron)
          + nbPhotonInI * (1d + nbPhotonInI)
-         + nbPixInterf * (nbPixInterf + 3d) * Math.pow(ron, 4d)
+         + nbPixInterf * (nbPixInterf + 3d) * FastMath.pow(ron, 4d)
          + 2d * nbPixInterf * ron * ron * nbPhotonInI;
          */
 
@@ -791,7 +792,7 @@ public final class NoiseService extends VisNoiseService {
                 return Math.max(errVis2, instrumentVis2CalibrationBias * vis2 + instrumentalVisibilityBias * instrumentalVisibilityBias);
             }
             // TODO: find correct coefficients for instruments AMBER, MIDI, VEGA and use instrumentVis2CalibrationBias in  estimation.
-//        return Math.max(svis2, Math.pow(instrumentalVisibilityBias, 2d));
+//        return Math.max(svis2, FastMath.pow2(instrumentalVisibilityBias));
             return Math.max(errVis2, instrumentalVisibilityBias);
         }
         return errVis2;
@@ -806,13 +807,13 @@ public final class NoiseService extends VisNoiseService {
 
         // photon noise on closure phase
         this.t3photCoef = nbTel / nbPhotonInI;
-        this.t3photCoef2 = Math.pow(nbTel / nbPhotonInI, 2d);
-        this.t3photCoef3 = Math.pow(nbTel / nbPhotonInI, 3d);
+        this.t3photCoef2 = FastMath.pow2(nbTel / nbPhotonInI);
+        this.t3photCoef3 = FastMath.pow3(nbTel / nbPhotonInI);
 
         // detector noise on closure phase
-        this.t3detConst = Math.pow(nbTel / nbPhotonInI, 6d) * (Math.pow(nbPixInterf, 3d) * Math.pow(ron, 6d) + 3 * Math.pow(nbPixInterf, 2d) * Math.pow(ron, 6d));
-        this.t3detCoef1 = Math.pow(nbTel / nbPhotonInI, 4d) * (3d * nbPixInterf * Math.pow(ron, 4d) + Math.pow(nbPixInterf, 2d) * Math.pow(ron, 4d));
-        this.t3detCoef2 = t3photCoef2 * nbPixInterf * Math.pow(ron, 2d);
+        this.t3detConst = FastMath.pow(nbTel / nbPhotonInI, 6d) * (FastMath.pow(nbPixInterf, 3d) * FastMath.pow(ron, 6d) + 3 * FastMath.pow2(nbPixInterf) * FastMath.pow(ron, 6d));
+        this.t3detCoef1 = FastMath.pow(nbTel / nbPhotonInI, 4d) * (3d * nbPixInterf * FastMath.pow(ron, 4d) + FastMath.pow2(nbPixInterf) * FastMath.pow(ron, 4d));
+        this.t3detCoef2 = t3photCoef2 * nbPixInterf * FastMath.pow2(ron);
 
         if (logger.isDebugEnabled()) {
             logger.debug("t3photCoef                    : {}", t3photCoef);

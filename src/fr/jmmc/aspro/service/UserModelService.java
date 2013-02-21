@@ -30,8 +30,8 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import net.jodk.lang.DoubleWrapper;
-import net.jodk.lang.FastMath;
+import net.jafama.DoubleWrapper;
+import net.jafama.FastMath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -639,8 +639,7 @@ public final class UserModelService {
 
             // TODO: use context or thread local
             final DoubleWrapper[] dw = localDoubleWrappers.get();
-            final DoubleWrapper sw = dw[0];
-            final DoubleWrapper cw = dw[1];
+            final DoubleWrapper cw = dw[0];
 
             // iterate on ufreq / vfreq / vis by wavelength:
             for (int i = from, j; i < end; i++) {
@@ -657,9 +656,7 @@ public final class UserModelService {
                     flux = data1D[j];
                     z = kwCol * data1D[j + 1] + kwRow * data1D[j + 2];
 
-                    FastMath.sinAndCos(z, sw, cw);
-
-                    im -= flux * sw.value;
+                    im -= flux * FastMath.sinAndCos(z, cw); // cw holds cosine
                     re += flux * cw.value;
 
                 } // data1D
@@ -690,10 +687,10 @@ public final class UserModelService {
                     z = kwCol * data1D[j + 1] + kwRow * data1D[j + 2];
 
                     // Test without cos/sin:
-//          re += flux * z;
-//          im += flux * z;
+                    // re += flux * z;
+                    // im += flux * z;
 
-                    // use Math or StrictMath ?
+                    // use Math (not StrictMath):
                     re += flux * Math.cos(z);
                     im -= flux * Math.sin(z);
 
