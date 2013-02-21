@@ -18,8 +18,8 @@
     <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
   </company>
 
-  <program name="Aspro2" version="0.9.4 beta 10"/>
-  <compilation date="20/02/2013" compiler="JDK 1.5.0_16"/>
+  <program name="Aspro2" version="0.9.4 beta 11"/>
+  <compilation date="21/02/2013" compiler="JDK 1.5.0_16"/>
   
   <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
   <authors>the JMMC Technical Group</authors>
@@ -106,9 +106,10 @@
              license="MPL/LGPL/GPL" />
     <!-- Mozilla Public License: http://www.mozilla.org/MPL/ -->
 
-    <package name="JODK"
-        description="Java Optimized Development Kit (JODK) is a performance-oriented Java general-purpose library, which treatments are extensions, additions (FastMath)"
-        link="http://code.google.com/p/jodk/"
+    <package name="Jafama"
+        description="Jafama (Java Fast Math) consists of fast counterparts of java.lang.Math treatments, plus additional ones. They are usually about 2-4 (up to 15) times faster, with about 1e-15 accuracy, and handle special cases (NaN, etc.)."
+        link="http://sourceforge.net/projects/jafama/"
+        jars="jafama.jar"
         license="APACHE_V2"/>
 
 
@@ -186,6 +187,7 @@
   <releasenotes>
     <release version="0.9.4">
       <prerelease version="0.9.4 beta 11">
+        <change type="FEATURE">Modified Moon avoidance rules for VLTI to use the target flux</change>
         <change type="FEATURE">Added configuration integrity checks (checksum): if file(s) modified then show a warning message at startup
           and also in the JMMC legal notice on plots (Use at your own risks)</change>
       </prerelease>
