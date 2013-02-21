@@ -191,8 +191,37 @@ public final class UserModelAnimator {
         }
     }
 
+    /**
+     * Compyte an user model key (key in context map)
+     * @param userModel user model to use
+     * @return user model key
+     */
     private String getUserModelKey(final UserModel userModel) {
         return userModel.getFile() + '#' + userModel.getChecksum();
+    }
+
+    /**
+     * Return true if the (internal) timer is running i.e. animator is running
+     * @return true if the (internal) timer is running 
+     */
+    public boolean isRunning() {
+        return this.timerImageRefresh.isRunning();
+    }
+
+    /**
+     * Return the (internal) timer delay, in milliseconds,
+     * @return timer delay, in milliseconds,
+     */
+    public int getDelay() {
+        return this.timerImageRefresh.getDelay();
+    }
+
+    /**
+     * Define the (internal) timer delay, in milliseconds,
+     * @param delay timer delay, in milliseconds,
+     */
+    public void setDelay(final int delay) {
+        this.timerImageRefresh.setDelay(delay);
     }
 
     /**

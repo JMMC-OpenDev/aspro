@@ -4,6 +4,7 @@
 package fr.jmmc.aspro.gui;
 
 import fr.jmmc.aspro.Preferences;
+import fr.jmmc.aspro.gui.util.AnimatorPanel;
 import fr.jmmc.aspro.gui.util.ModelJTree;
 import fr.jmmc.aspro.gui.util.TargetRenderer;
 import fr.jmmc.aspro.gui.util.TargetTreeCellRenderer;
@@ -82,6 +83,8 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
     private String currentModelType = null;
     /** fits image panel */
     private FitsImagePanel fitsImagePanel = null;
+    /** animator panel */
+    private AnimatorPanel animatorPanel = null;
     /** current user model to refresh images */
     private UserModel currentUserModel = null;
 
@@ -360,21 +363,21 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
 
             if (!isAnalytical && userModel.isModelDataReady()) {
                 // update fits Image:
-                if (fitsImagePanel == null) {
-                    fitsImagePanel = new FitsImagePanel(false, true); // do not show id but options
+                if (this.fitsImagePanel == null) {
+                    this.fitsImagePanel = new FitsImagePanel(false, true); // do not show id but options
                 }
 
                 final List<UserModelData> modelDataList = userModel.getModelDataList();
 
                 // use first image:
-                fitsImagePanel.setFitsImage(modelDataList.get(0).getFitsImage());
+                this.fitsImagePanel.setFitsImage(modelDataList.get(0).getFitsImage());
 
                 if (modelDataList.size() > 1) {
                     enableAnimator = true;
-                    currentUserModel = userModel;
+                    this.currentUserModel = userModel;
                 }
 
-                this.jPanelImage.add(fitsImagePanel);
+                this.jPanelImage.add(this.fitsImagePanel);
             }
 
         } else {
@@ -383,7 +386,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
 
             if (this.fitsImagePanel != null) {
                 // reset the FitsImage panel:
-                fitsImagePanel.setFitsImage(null);
+                this.fitsImagePanel.setFitsImage(null);
             }
 
             // remove the FitsImage panel:
@@ -392,10 +395,18 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
 
         // anyway enable or disable animator:
         if (enableAnimator) {
-            animator.register(userModel, this);
+            if (this.animatorPanel == null) {
+                this.animatorPanel = new AnimatorPanel(this, true);
+                this.fitsImagePanel.addOptionPanel(this.animatorPanel);
+            }
         } else {
-            currentUserModel = null;
-            animator.unregister(this);
+            this.currentUserModel = null;
+        }
+
+        // update user model in animator panel to enable/disable animator:
+        if (this.animatorPanel != null) {
+            this.animatorPanel.setUserModel(this.currentUserModel);
+            this.animatorPanel.setVisible(this.currentUserModel != null);
         }
 
         // Analytical models:
@@ -1360,7 +1371,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
     public void perform(final String userModelFile, final int imageIndex) {
         if (this.fitsImagePanel != null) {
             // show image at given index:
-            fitsImagePanel.setFitsImage(currentUserModel.getModelDataList().get(imageIndex).getFitsImage());
+            this.fitsImagePanel.setFitsImage(this.currentUserModel.getModelDataList().get(imageIndex).getFitsImage());
         }
     }
 }
