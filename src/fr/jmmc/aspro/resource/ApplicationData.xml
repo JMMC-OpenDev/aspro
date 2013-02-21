@@ -190,6 +190,7 @@
         <change type="FEATURE">Modified Moon avoidance rules for VLTI to use the target flux</change>
         <change type="FEATURE">Added configuration integrity checks (checksum): if file(s) modified then show a warning message at startup
           and also in the JMMC legal notice on plots (Use at your own risks)</change>
+        <change type="CHANGE">Improved global performance (Best Pops, model image, astronomical computations) using Java Fast Math library</change>
       </prerelease>
       <prerelease version="0.9.4 beta 10">
         <change type="FEATURE">Added action 'Show Configuration release notes' in Help menu</change>
@@ -220,7 +221,6 @@
         <change type="FEATURE">Added Fits cube loading support (AXIS3 represents wavelength axis)</change>
         <change type="FEATURE">Added minimal Fits CUNIT keyword support to handle angle and wavelength conversions (deg, arcsec to rad) and (nm or micron to meter)</change>
         <change type="CHANGE">Optimized OIFits computation from an user model (better parallelism)</change>
-        <change type="CHANGE">Improved general performance (Best Pops, model image) using JODK FastMath</change>
       </prerelease>
       <prerelease version="0.9.4 beta 5">
         <change type="FEATURE">Enabled parallelization of the observability computation in multi configuration mode</change>
