@@ -78,6 +78,13 @@
       </xsd:documentation>
     </xsd:annotation>
     <xsd:sequence>
+      <xsd:element name="minVersion" type="xsd:string">
+        <xsd:annotation>
+          <xsd:documentation>
+            this element contains the minimum version of the Aspro2 application
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
       <xsd:element name="interferometerFile" type="InterferometerFile" minOccurs="1" maxOccurs="unbounded">
         <xsd:annotation>
           <xsd:documentation>
@@ -1303,7 +1310,7 @@
       <xsd:element name="fringeTracker" type="FringeTracker" minOccurs="0" maxOccurs="unbounded">
         <xsd:annotation>
           <xsd:documentation>
-              The interferometer can have (optional) fringe tracker systems including fringe trackers associated to one specific instrument
+              The interferometer can have (optional) fringe tracker systems including fringe trackers associated to a specific instrument
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
@@ -1443,7 +1450,7 @@
   <xsd:complexType name="MoonRestriction">
     <xsd:annotation>
       <xsd:documentation>
-        This type describes one moon restriction rule (FLI, separation ...)
+        This type describes a moon restriction rule (FLI, separation ...)
       </xsd:documentation>
     </xsd:annotation>
     <xsd:sequence>
@@ -1454,10 +1461,52 @@
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
+      <xsd:element name="flux" type="FluxCondition" minOccurs="0">
+        <xsd:annotation>
+          <xsd:documentation>
+              The optional flux condition (higher or lower) to apply this rule
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
       <xsd:element name="separation" type="xsd:double">
         <xsd:annotation>
           <xsd:documentation>
               The lower angular separation threshold in degrees to apply this rule
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+
+
+
+
+  <!-- FluxCondition -->
+  <xsd:complexType name="FluxCondition">
+    <xsd:annotation>
+      <xsd:documentation>
+        This type describes a flux condition (band, operation and value)
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="band" type="SpectralBand">
+        <xsd:annotation>
+          <xsd:documentation>
+              Spectral Band to get the target flux
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="op" type="Operator">
+        <xsd:annotation>
+          <xsd:documentation>
+              Condition (lower or higher) to evaluate
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="value" type="xsd:double">
+        <xsd:annotation>
+          <xsd:documentation>
+              The flux value to apply this rule
           </xsd:documentation>
         </xsd:annotation>
       </xsd:element>
@@ -2139,6 +2188,30 @@
       <xsd:enumeration value="Awful">
         <xsd:annotation>
           <xsd:documentation>'Awful' means seeing = 1.8 arc sec</xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+    </xsd:restriction>
+  </xsd:simpleType>
+
+
+
+
+<!-- Operator -->
+  <xsd:simpleType name="Operator">
+    <xsd:annotation>
+      <xsd:documentation>
+        Possible values for the Operator: lower or higher
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:restriction base="xsd:string">
+      <xsd:enumeration value="lower">
+        <xsd:annotation>
+          <xsd:documentation>'lower' (&lt;=) operator</xsd:documentation>
+        </xsd:annotation>
+      </xsd:enumeration>
+      <xsd:enumeration value="higher">
+        <xsd:annotation>
+          <xsd:documentation>'higher' (&gt;) operator</xsd:documentation>
         </xsd:annotation>
       </xsd:enumeration>
     </xsd:restriction>

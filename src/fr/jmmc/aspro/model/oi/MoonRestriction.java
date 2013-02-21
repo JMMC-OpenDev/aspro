@@ -9,7 +9,7 @@ import fr.jmmc.aspro.model.OIBase;
 
 /**
  * 
- *         This type describes one moon restriction rule (FLI, separation ...)
+ *         This type describes a moon restriction rule (FLI, separation ...)
  *       
  * 
  * <p>Java class for MoonRestriction complex type.
@@ -22,6 +22,7 @@ import fr.jmmc.aspro.model.OIBase;
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
  *         &lt;element name="fli" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
+ *         &lt;element name="flux" type="{http://www.jmmc.fr/aspro-oi/0.1}FluxCondition" minOccurs="0"/>
  *         &lt;element name="separation" type="{http://www.w3.org/2001/XMLSchema}double"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
@@ -34,6 +35,7 @@ import fr.jmmc.aspro.model.OIBase;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "MoonRestriction", propOrder = {
     "fli",
+    "flux",
     "separation"
 })
 public class MoonRestriction
@@ -41,6 +43,7 @@ public class MoonRestriction
 {
 
     protected Double fli;
+    protected FluxCondition flux;
     protected double separation;
 
     /**
@@ -68,6 +71,30 @@ public class MoonRestriction
     }
 
     /**
+     * Gets the value of the flux property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link FluxCondition }
+     *     
+     */
+    public FluxCondition getFlux() {
+        return flux;
+    }
+
+    /**
+     * Sets the value of the flux property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link FluxCondition }
+     *     
+     */
+    public void setFlux(FluxCondition value) {
+        this.flux = value;
+    }
+
+    /**
      * Gets the value of the separation property.
      * 
      */
@@ -82,5 +109,14 @@ public class MoonRestriction
     public void setSeparation(double value) {
         this.separation = value;
     }
+    
+//--simple--preserve
+
+    @Override
+    public String toString() {
+        return "MoonRestriction{" + "fli=" + fli + ", flux=" + flux + ", separation=" + separation + '}';
+    }
+    
+//--simple--preserve
 
 }

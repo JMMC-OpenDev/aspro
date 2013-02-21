@@ -310,6 +310,14 @@ public class ObjectFactory {
     }
 
     /**
+     * Create an instance of {@link FluxCondition }
+     * 
+     */
+    public FluxCondition createFluxCondition() {
+        return new FluxCondition();
+    }
+
+    /**
      * Create an instance of {@link StringValue }
      * 
      */

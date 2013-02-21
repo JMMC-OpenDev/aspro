@@ -143,6 +143,11 @@ public final class ConfigurationManager extends BaseOIManager {
 
         final Configurations conf = (Configurations) loadObject(CONF_FILE);
 
+        // test min version:
+        logger.info("initializeConfiguration: minimum required version = {}", conf.getMinVersion());
+        
+        // TODO: check versions
+
         InterferometerSetting is;
         for (InterferometerFile file : conf.getInterferometerFiles()) {
             final String fileName = file.getFile();
