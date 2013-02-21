@@ -112,5 +112,14 @@ public class FluxCondition
     public void setValue(double value) {
         this.value = value;
     }
+    
+//--simple--preserve
+
+    @Override
+    public String toString() {
+        return "FluxCondition{" + "band=" + band + ", op=" + op + ", value=" + value + '}';
+    }
+    
+//--simple--preserve
 
 }
