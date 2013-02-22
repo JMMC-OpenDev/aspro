@@ -18,8 +18,8 @@
     <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
   </company>
 
-  <program name="Aspro2" version="0.9.4 beta 11"/>
-  <compilation date="21/02/2013" compiler="JDK 1.5.0_16"/>
+  <program name="Aspro2" version="0.9.4 beta 12"/>
+  <compilation date="22/02/2013" compiler="JDK 1.5.0_16"/>
   
   <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
   <authors>the JMMC Technical Group</authors>
@@ -186,15 +186,29 @@
 
   <releasenotes>
     <release version="0.9.4">
+      <prerelease version="0.9.4 beta 12">
+        <change type="FEATURE">Added a minimal plot editor on the OIFits viewer to choose among predefined plots</change>
+        <change type="FEATURE">Added the instrument spectral configuration in the status information to help creating polychromatic user models</change>
+        <change type="FEATURE">Defined default preference of the super sampling in spectral channels to 3 samples to see bandwidth smearing effects</change>
+        <change type="FEATURE">Added preferences in the Preference view (add error noise to data or model image, super sampling in spectral channels)</change>
+        <change type="FEATURE">Added minimal user model animator widget (FITS cube) on the Target Model editor and the UV coverage panel 
+          to enable / disable automatic image cycling and adjust the period</change>
+        <change type="FEATURE">Modified OIFits OI_VIS, OI_VIS2, OI_T3 tables to reference appropriate stations in STA_INDEX arrays (baseline or triplets)</change>
+        <change type="FEATURE">Modified OIFits OI_ARRAY table to contain all telescope stations</change>
+        <change type="FEATURE">Modified OIFits ARRNAME values to have the interferometer name only (VLTI, not VLTI Period ...)</change>
+        <change type="FEATURE">Modified OIFits INSNAME values to have a meaningfull instrument mode description: Instrument_lambdaFirst-lambdaLast-Nch;
+          lambdaFirst, lambdaLast, N are respectively the wavelength of the first and last spectral channels, the number of spectral channels 
+          (for example: AMBER_1.48347-2.52552-37ch)</change>
+        <change type="CHANGE">Improved global performance (Best Pops, model image, astronomical computations) using Java Fast Math library (jafama 2.0)</change>
+      </prerelease>
       <prerelease version="0.9.4 beta 11">
-        <change type="FEATURE">Modified Moon avoidance rules for VLTI to use the target flux</change>
+        <change type="FEATURE">Modified evaluation of moon avoidance rules to use target fluxes (V)</change>
         <change type="FEATURE">Added configuration integrity checks (checksum): if file(s) modified then show a warning message at startup
           and also in the JMMC legal notice on plots (Use at your own risks)</change>
-        <change type="CHANGE">Improved global performance (Best Pops, model image, astronomical computations) using Java Fast Math library</change>
       </prerelease>
       <prerelease version="0.9.4 beta 10">
-        <change type="FEATURE">Added action 'Show Configuration release notes' in Help menu</change>
-        <change type="FEATURE">Enhanced target axis on the observability plot to adjust its font size according to the number of visible items</change>
+        <change type="FEATURE">Added actions 'Show Application release notes' and 'Show Configuration release notes' in the Help menu</change>
+        <change type="FEATURE">Enhanced the target axis on the observability plot to adjust its font size according to the number of visible items (auto fit)</change>
         <change type="CHANGE">Reduced margins (0.5 cm) on exported PDF documents</change>
       </prerelease>
       <prerelease version="0.9.4 beta 9">
@@ -202,8 +216,8 @@
         <change type="CHANGE">Modified warning messages (CHARA configuration and Pops settings) considered as information messages: 
             status is then 'Information'</change>
         <change type="FEATURE">Added filters on the observability plot (Hide calibrators and unobservable targets)</change>
-        <change type="FEATURE">Added target selection handling on the observability plot to scroll to it and display it highlighted</change>
-        <change type="FEATURE">Enhanced export Observability plot to a multiple page PDF document for large target lists</change>
+        <change type="FEATURE">Added target selection handling in the observability plot to display it highlighted and scroll to it</change>
+        <change type="FEATURE">Enhanced export Observability plot to a multiple page PDF document for large target lists when the scroll view option is enabled</change>
       </prerelease>
       <prerelease version="0.9.4 beta 8">
         <change type="FEATURE">Extracted configuration (interferometers and their instruments) into the AsproConfig module to have an independent life cycle (CfP)</change>
@@ -214,11 +228,12 @@
       </prerelease>
       <prerelease version="0.9.4 beta 7">
         <change type="FEATURE">Improved OIFits computation to interpret and use multiple model images (Fits cube) when computing complex visiblities</change>
-        <change type="FEATURE">Improved OIFits computation to perform super sampling on spectral channels (use n sub channels and integration)</change>
+        <change type="FEATURE">Improved OIFits computation to perform super sampling in spectral channels: use multiples samples and perform integration</change>
       </prerelease>
       <prerelease version="0.9.4 beta 6">
         <change type="FEATURE">Improved Fits image panel to display all images loaded (animation) with their image index and wavelength in the legend area</change>
-        <change type="FEATURE">Added Fits cube loading support (AXIS3 represents wavelength axis)</change>
+        <change type="FEATURE">Added Polychromatic user model support as Fits cube: AXIS3 represents the wavelength axis; 
+            CRVAL3 (with CRPIX3) gives the wavelength reference, CDELT3 the wavelength increment and CUNIT3 the wavelength unit</change>
         <change type="FEATURE">Added minimal Fits CUNIT keyword support to handle angle and wavelength conversions (deg, arcsec to rad) and (nm or micron to meter)</change>
         <change type="CHANGE">Optimized OIFits computation from an user model (better parallelism)</change>
       </prerelease>
@@ -508,7 +523,7 @@
         <change>Added 'Send StarList to PIVOT' action (SAMP)</change>
       </prerelease>
       <prerelease version="0.8.1 beta 12">
-        <change type="FEATURE">Added one preliminary OIFits viewer: only square visiblity (VIS2) vs radius plot is available with error bars
+        <change type="FEATURE">Added the preliminary OIFits viewer: only square visiblity (VIS2) vs radius plot is available with error bars
           when the noise modeling is able to compute them
         </change>
         <change type="FEATURE">Fixed CHARA delay line configuration: E1 cart moves in range [-1.4 to +44.0] like others (july 2011)</change>
