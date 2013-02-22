@@ -282,10 +282,7 @@ public final class SettingPanel extends JPanel implements ObservationListener, D
                     // remove the uv panel :
                     this.jTabbedPane.removeTabAt(uvPanelIndex);
 
-                    // unregister the uv panel for the next event :
-                    ObservationManager.getInstance().unregister(this.uvCoveragePanel);
-
-                    // free uv coverage panel references :
+                    // free uv coverage panel references (listeners):
                     this.uvCoveragePanel.dispose();
                     this.uvCoveragePanel = null;
                 }
@@ -293,8 +290,9 @@ public final class SettingPanel extends JPanel implements ObservationListener, D
                     // remove the OIFits viewer panel :
                     this.jTabbedPane.remove(this.oiFitsViewPanel);
 
-                    // unregister the OIFits viewer panel for the next event :
-                    ObservationManager.getInstance().unregister(this.oiFitsViewPanel);
+                    // free OIFits viewer panel references (listeners):
+                    this.oiFitsViewPanel.dispose();
+                    this.oiFitsViewPanel = null;
 
                     this.oiFitsViewPanel = null;
                 }
