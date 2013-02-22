@@ -567,9 +567,8 @@ public final class UVCoverageService {
                 // TODO: create elsewhere the OIFitsCreatorService:
                 this.data.setOiFitsCreator(oiFitsCreator);
 
-                if (oiFitsCreator.isDoNoise()) {
-                    this.data.setNoiseService(oiFitsCreator.getNoiseService());
-                }
+                // get noise service to compute noise on model image (if enabled):
+                this.data.setNoiseService(oiFitsCreator.getNoiseService());
             }
         }
     }
