@@ -1822,7 +1822,7 @@ public final class ObservabilityService {
 
         // Add 5% margin for quick check:
         final double warningThreshold = this.moonPointingRestriction.getWarningThreshold();
-        final double threshold = warningThreshold * 1.05d;
+        final double testThreshold = warningThreshold * 1.05d;
 
         // output :
         final List<Range> ranges;
@@ -1844,19 +1844,19 @@ public final class ObservabilityService {
         // check at jd min:
         separation = getMoonSeparation(cosDec, sinDec, jdMin);
 
-        if (separation <= threshold) {
+        if (separation <= testThreshold) {
             doCheck = true;
         } else {
             // check at jd mid:
             separation = getMoonSeparation(cosDec, sinDec, jdMid);
 
-            if (separation <= threshold) {
+            if (separation <= testThreshold) {
                 doCheck = true;
             } else {
                 // check at jd max:
                 separation = getMoonSeparation(cosDec, sinDec, jdMax);
 
-                if (separation <= threshold) {
+                if (separation <= testThreshold) {
                     doCheck = true;
                 }
             }
@@ -1978,7 +1978,7 @@ public final class ObservabilityService {
                 ranges.add(range);
             }
 
-            // check again warning threshold:
+            // check again the true warning threshold:
             if (minSeparation < warningThreshold) {
                 // add warning:
                 this.addWarning("Moon separation is " + df1.format(minSeparation)
