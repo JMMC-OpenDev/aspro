@@ -52,10 +52,12 @@ public final class Preferences extends fr.jmmc.jmcs.data.preference.Preferences 
     public final static String BEST_POPS_CRITERIA_SIGMA = "bestPops.criteria.sigma";
     /** Preference : best Pops criteria on average weight */
     public final static String BEST_POPS_CRITERIA_AVERAGE_WEIGHT = "bestPops.criteria.averageWeight";
-    /** Preference : Number of complex visibility samples used to compute the complex visibility of each spectral channel (1, 5, 10 ...) */
-    public final static String OIFITS_SUPER_SAMPLING = "oifits.supersampling";
+    /** Preference : Add noise to OIFits data */
+    public final static String OIFITS_ADD_NOISE = "oifits.noise";
     /** Preference : MathMode used by OIFits computation (QUICK, FAST, DEFAULT) */
     public final static String OIFITS_MATH_MODE = "oifits.math.mode";
+    /** Preference : Number of complex visibility samples used to compute the complex visibility of each spectral channel (1, 5, 10 ...) */
+    public final static String OIFITS_SUPER_SAMPLING = "oifits.supersampling";
 
     /**
      * Private constructor that must be empty.
@@ -127,9 +129,10 @@ public final class Preferences extends fr.jmmc.jmcs.data.preference.Preferences 
         setDefaultPreference(BEST_POPS_ALGORITHM, Algorithm.HALimits.toString());
         setDefaultPreference(BEST_POPS_CRITERIA_SIGMA, Criteria.MEDIUM.toString());
         setDefaultPreference(BEST_POPS_CRITERIA_AVERAGE_WEIGHT, Criteria.LARGE.toString());
-        
+
         // OIFits computation:
-        setDefaultPreference(OIFITS_SUPER_SAMPLING, Integer.valueOf(1));
+        setDefaultPreference(OIFITS_ADD_NOISE, Boolean.TRUE);
+        setDefaultPreference(OIFITS_SUPER_SAMPLING, AsproConstants.DEFAULT_SUPER_SAMPLING);
         setDefaultPreference(OIFITS_MATH_MODE, MathMode.FAST.toString());
     }
 
@@ -238,7 +241,7 @@ public final class Preferences extends fr.jmmc.jmcs.data.preference.Preferences 
         }
         return def;
     }
-    
+
     /**
      * Return the MathMode used by OIFits computation (QUICK, FAST, DEFAULT)
      * @return MathMode used by OIFits computation (QUICK, FAST, DEFAULT)
