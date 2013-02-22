@@ -839,6 +839,10 @@ public final class PreferencesView extends JFrame implements Observer {
         this.jRadioButtonCenterNightYes.setSelected(preferCenterNight);
         this.jRadioButtonCenterNightNo.setSelected(!preferCenterNight);
 
+        final boolean preferNightOnly = this.myPreferences.getPreferenceAsBoolean(Preferences.ONLY_NIGHT);
+        this.jRadioButtonNightOnlyYes.setSelected(preferNightOnly);
+        this.jRadioButtonNightOnlyNo.setSelected(!preferNightOnly);
+
         this.jFieldMinElev.setValue(this.myPreferences.getPreferenceAsDouble(Preferences.MIN_ELEVATION));
 
         this.jComboBoxTwilight.setSelectedItem(getTwilight(this.myPreferences.getTwilightAsNightLimit()));
