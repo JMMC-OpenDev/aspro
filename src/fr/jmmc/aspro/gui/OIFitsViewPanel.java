@@ -4,11 +4,14 @@
 package fr.jmmc.aspro.gui;
 
 import fr.jmmc.aspro.gui.action.ExportOIFitsAction;
+import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.event.OIFitsEvent;
 import fr.jmmc.aspro.model.event.ObservationEvent;
 import fr.jmmc.aspro.model.event.ObservationListener;
+import fr.jmmc.jmcs.gui.component.Disposable;
 import fr.jmmc.oiexplorer.core.gui.PDFExportable;
 import fr.jmmc.oiexplorer.core.gui.PlotChartPanel;
+import fr.jmmc.oiexplorer.core.gui.PlotEditor;
 import fr.jmmc.oiexplorer.core.gui.chart.PDFOptions;
 import fr.jmmc.oiexplorer.core.model.OIFitsCollectionManager;
 import fr.jmmc.oiexplorer.core.model.PlotDefinitionFactory;
@@ -28,7 +31,7 @@ import org.slf4j.LoggerFactory;
  * This panel embeds the OIFitsExplorer into Aspro2
  * @author bourgesl
  */
-public final class OIFitsViewPanel extends javax.swing.JPanel implements ObservationListener, PDFExportable {
+public final class OIFitsViewPanel extends javax.swing.JPanel implements Disposable, ObservationListener, PDFExportable {
 
     /** default serial UID for Serializable interface */
     private static final long serialVersionUID = 1;
@@ -38,6 +41,8 @@ public final class OIFitsViewPanel extends javax.swing.JPanel implements Observa
     /* members */
     /** OIFitsCollectionManager singleton */
     private OIFitsCollectionManager ocm = OIFitsCollectionManager.getInstance();
+    /** Oifits explorer Plot editor */
+    private PlotEditor plotEditor;
     /** Oifits explorer Plot chart panel */
     private PlotChartPanel plotChartPanel;
 
@@ -48,6 +53,27 @@ public final class OIFitsViewPanel extends javax.swing.JPanel implements Observa
         initComponents();
 
         postInit();
+    }
+
+    /**
+     * Free any ressource or reference to this instance:
+     * remove the plot chart panel from OIFitsCollectionManager event notifiers 
+     * and this instance from ObservationManager listeners
+     * 
+     * @see PlotChartPanel#dispose() 
+     */
+    @Override
+    public void dispose() {
+        // forward dispose() to child components:
+        if (plotEditor != null) {
+            plotEditor.dispose();
+        }
+        if (plotChartPanel != null) {
+            plotChartPanel.dispose();
+        }
+
+        // unregister the OIFits viewer panel for the next event :
+        ObservationManager.getInstance().unregister(this);
     }
 
     /**
@@ -93,7 +119,6 @@ public final class OIFitsViewPanel extends javax.swing.JPanel implements Observa
         return this.plotChartPanel.getPDFDefaultFileName();
     }
 
-
     /**
      * Prepare the chart(s) before exporting them as a PDF document:
      * Performs layout and return PDF options
@@ -128,11 +153,17 @@ public final class OIFitsViewPanel extends javax.swing.JPanel implements Observa
         ocm.start();
 
         this.plotChartPanel = new PlotChartPanel();
+        this.plotEditor = new PlotEditor();
 
         this.jPanelCenter.add(this.plotChartPanel);
 
-        // precise which plot to use:
-        this.plotChartPanel.setPlotId(OIFitsCollectionManager.CURRENT_VIEW);
+        add(this.plotEditor, java.awt.BorderLayout.SOUTH);
+
+        // define which plot to use:
+        final String plotId = OIFitsCollectionManager.CURRENT_VIEW;
+
+        plotEditor.initialize(plotId);
+        this.plotChartPanel.setPlotId(plotId);
     }
 
     /**
@@ -236,6 +267,7 @@ public final class OIFitsViewPanel extends javax.swing.JPanel implements Observa
     private void showMessage(final boolean show) {
         this.jLabelMessage.setVisible(show);
         this.plotChartPanel.setVisible(!show);
+        this.plotEditor.setVisible(!show);
     }
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JLabel jLabelMessage;
