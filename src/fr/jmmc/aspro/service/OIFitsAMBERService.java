@@ -141,6 +141,8 @@ public final class OIFitsAMBERService {
         Complex cpxVis = new MutableComplex();
         Complex sigma2_cpxVis = new MutableComplex();
 
+        final double normFactorWL = 1d / (nbLVis - 1);
+
         /* Production of the reference channel: mean of all R and I parts
          * of all channels except the one considered ( eq 2.3) */
         for (iRow = 0; iRow < nRows; iRow++) {
@@ -162,16 +164,12 @@ public final class OIFitsAMBERService {
              * at that Wlen and make the arithmetic mean */
             for (lVis = 0; lVis < nbLVis; lVis++) {
                 cRefTable[iRow][lVis] = new ImmutableComplex(
-                        (cpxVis.getReal() - cNopTable[iRow][lVis].getReal())
-                        / (nbLVis - 1),
-                        (cpxVis.getImaginary() - cNopTable[iRow][lVis].getImaginary())
-                        / (nbLVis - 1)); // immutable complex for safety
+                        (cpxVis.getReal() - cNopTable[iRow][lVis].getReal()) * normFactorWL,
+                        (cpxVis.getImaginary() - cNopTable[iRow][lVis].getImaginary()) * normFactorWL); // immutable complex for safety
 
                 sigma2_cRefTable[iRow][lVis] = new ImmutableComplex(
-                        (sigma2_cpxVis.getReal() - sigma2_cpxVisTable[iRow][lVis].getReal())
-                        / (nbLVis - 1),
-                        (sigma2_cpxVis.getImaginary() - sigma2_cpxVisTable[iRow][lVis].getImaginary())
-                        / (nbLVis - 1)); // immutable complex for safety
+                        (sigma2_cpxVis.getReal() - sigma2_cpxVisTable[iRow][lVis].getReal()) * normFactorWL,
+                        (sigma2_cpxVis.getImaginary() - sigma2_cpxVisTable[iRow][lVis].getImaginary()) * normFactorWL); // immutable complex for safety
             }
         }
 
@@ -293,6 +291,8 @@ public final class OIFitsAMBERService {
         final MutableComplex cpxVisAvg = new MutableComplex();
         final Complex[][] tmpCpxVis = new Complex[nRows][nbLVis];
 
+        final double normFactorWL = 1d / nbLVis;
+
         for (iRow = 0; iRow < nRows; iRow++) {
 
             /*
@@ -338,7 +338,7 @@ public final class OIFitsAMBERService {
                  */
                 cpxVisAvg.add(cNopTable[iRow][lVis]);
             }
-            cpxVisAvg.multiply(1d / nbLVis);
+            cpxVisAvg.multiply(normFactorWL);
 
             // store immutable conjugate complex:
             cpxVisAvgConj = new ImmutableComplex(cpxVisAvg.conjugate());
