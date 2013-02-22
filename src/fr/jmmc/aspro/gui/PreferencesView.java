@@ -586,7 +586,7 @@ public final class PreferencesView extends JFrame implements Observer {
         jPanelOIFits.setBorder(javax.swing.BorderFactory.createTitledBorder("OIFits data"));
         jPanelOIFits.setLayout(new java.awt.GridBagLayout());
 
-        jLabelSuperSampling.setText("Supersampling model");
+        jLabelSuperSampling.setText("<html>Supersampling model<br>in spectral channels</html>");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 6);

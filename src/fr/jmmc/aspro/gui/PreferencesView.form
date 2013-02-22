@@ -564,7 +564,7 @@
               <SubComponents>
                 <Component class="javax.swing.JLabel" name="jLabelSuperSampling">
                   <Properties>
-                    <Property name="text" type="java.lang.String" value="Supersampling model"/>
+                    <Property name="text" type="java.lang.String" value="&lt;html&gt;Supersampling model&lt;br&gt;in spectral channels&lt;/html&gt;"/>
                   </Properties>
                   <Constraints>
                     <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
