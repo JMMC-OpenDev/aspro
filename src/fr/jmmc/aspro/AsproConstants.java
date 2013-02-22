@@ -58,6 +58,17 @@ public interface AsproConstants {
                 NumberUtils.valueOf(1024),
                 NumberUtils.valueOf(1536),
                 NumberUtils.valueOf(2048)}));
+    /** default super sampling = 3 */
+    public final static Integer DEFAULT_SUPER_SAMPLING = NumberUtils.valueOf(3);
+    /** supersampling choices */
+    public final static Vector<Integer> SUPER_SAMPLING = new Vector<Integer>(Arrays.asList(
+            new Integer[]{
+                NumberUtils.valueOf(1),
+                DEFAULT_SUPER_SAMPLING,
+                NumberUtils.valueOf(5),
+                NumberUtils.valueOf(9),
+                NumberUtils.valueOf(15),
+                NumberUtils.valueOf(25)}));
     /** no value for combo boxes */
     public static final String NONE = "None";
 
