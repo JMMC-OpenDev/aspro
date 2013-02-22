@@ -31,6 +31,7 @@ import fr.jmmc.jmal.model.VisNoiseService;
 import fr.jmmc.jmal.model.targetmodel.Model;
 import fr.jmmc.jmal.util.ThreadLocalRandom;
 import fr.jmmc.jmcs.util.NumberUtils;
+import fr.jmmc.jmcs.util.SpecialChars;
 import fr.jmmc.jmcs.util.concurrent.ParallelJobExecutor;
 import fr.jmmc.oitools.OIFitsConstants;
 import fr.jmmc.oitools.model.OIArray;
@@ -79,8 +80,6 @@ public final class OIFitsCreatorService {
 
     /* members */
     /* input */
-    /** observation settings used  (read-only copy of the modifiable observation) */
-    private final ObservationSetting observation;
     /** selected target */
     private final Target target;
     /** OIFits supersampling preference */
@@ -119,8 +118,6 @@ public final class OIFitsCreatorService {
     /* output */
     /** oifits structure */
     private OIFitsFile oiFitsFile = null;
-    /** warning container */
-    private final WarningContainer warningContainer;
 
     /* internal */
     /** target has model (analytical or user model) */
@@ -192,7 +189,7 @@ public final class OIFitsCreatorService {
             final double precRA,
             final AstroSkyCalc sc,
             final WarningContainer warningContainer) {
-        this.observation = observation;
+
         this.target = target;
         this.beams = beams;
         this.nBeams = this.beams.size();
@@ -206,18 +203,20 @@ public final class OIFitsCreatorService {
         this.targetUVObservability = targetUVObservability;
         this.precRA = precRA;
         this.sc = sc;
-        this.warningContainer = warningContainer;
 
         if (observation.getInstrumentConfiguration().getAcquisitionTime() != null) {
             this.integrationTime = observation.getInstrumentConfiguration().getAcquisitionTime().doubleValue();
         }
+
+        // Prepare with observation:
+        prepare(observation, warningContainer);
 
         // Prepare the noise service :
 
         // note: NoiseService parameter dependencies:
         // observation {target}
         // parameter: warningContainer
-        this.noiseService = new NoiseService(this.observation, target, warningContainer);
+        this.noiseService = new NoiseService(observation, target, warningContainer);
 
         this.hasModel = target.hasModel();
 
@@ -231,6 +230,52 @@ public final class OIFitsCreatorService {
         this.mathModeOIFits = mathModeOIFits;
     }
 
+    private void prepare(final ObservationSetting observation, final WarningContainer warningContainer) {
+
+        final InterferometerConfiguration intConf = observation.getInterferometerConfiguration().getInterferometerConfiguration();
+
+        this.interferometer = intConf.getInterferometer();
+
+        // Use interferometer name (VLTI, CHARA ...) and not 'VLTI Period 91':
+        this.arrNameKeyword = this.interferometer.getName();
+
+        final FocalInstrument instrument = observation.getInstrumentConfiguration().getInstrumentConfiguration().getFocalInstrument();
+
+        this.instrumentName = instrument.getName();
+        this.instrumentExperimental = (instrument.isExperimental() != null) ? instrument.isExperimental().booleanValue() : false;
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("arrNameKeyword: {}", this.arrNameKeyword);
+            logger.debug("instrumentName: {}", this.instrumentName);
+            logger.debug("instrumentExperimental: {}", this.instrumentExperimental);
+        }
+
+        prepareInstrumentMode(warningContainer);
+    }
+
+    private void prepareInstrumentMode(final WarningContainer warningContainer) {
+
+        // TODO: fix wavelengths % user model Fits cube (wavelengths):
+        this.waveBand = (this.lambdaMax - this.lambdaMin) / this.nWaveLengths;
+        this.waveLengths = computeWaveLengths(this.lambdaMin, this.lambdaMax, this.waveBand);
+
+
+        // Wavelength information:
+        final String firstChannel = Double.toString(NumberUtils.trimTo5Digits(1e6d * this.waveLengths[0]));
+        final String lastChannel = (this.waveLengths.length > 1) ? Double.toString(NumberUtils.trimTo5Digits(1e6d * this.waveLengths[this.waveLengths.length - 1])) : null;
+
+        addInformation(warningContainer, this.instrumentName + " instrument mode: "
+                + this.waveLengths.length + " channels "
+                + '[' + firstChannel + ((lastChannel != null) ? (" - " + lastChannel) : "") + ' ' + SpecialChars.UNIT_MICRO_METER + "] "
+                + "(increment: " + NumberUtils.trimTo5Digits(1e6d * this.waveBand) + ' ' + SpecialChars.UNIT_MICRO_METER + ')');
+
+        this.insNameKeyword = this.instrumentName + '_' + firstChannel + ((lastChannel != null) ? ("-" + lastChannel) : "") + '-' + this.waveLengths.length + "ch";
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("insNameKeyword: {}", insNameKeyword);
+        }
+    }
+
     /**
      * Create the OIFits structure with OI_ARRAY, OI_TARGET, OI_WAVELENGTH, OI_VIS tables
      * @return OIFits structure
@@ -242,23 +287,6 @@ public final class OIFitsCreatorService {
 
         // create a new EMPTY OIFits structure :
         this.oiFitsFile = new OIFitsFile();
-
-        this.arrNameKeyword = this.observation.getInterferometerConfiguration().getName();
-
-        final InterferometerConfiguration intConf = this.observation.getInterferometerConfiguration().getInterferometerConfiguration();
-
-        this.interferometer = intConf.getInterferometer();
-
-        final FocalInstrument instrument = this.observation.getInstrumentConfiguration().getInstrumentConfiguration().getFocalInstrument();
-
-        this.instrumentName = instrument.getName();
-        this.instrumentExperimental = (instrument.isExperimental() != null) ? instrument.isExperimental().booleanValue() : false;
-
-        if (logger.isDebugEnabled()) {
-            logger.debug("arrName: {}", this.arrNameKeyword);
-            logger.debug("insName: {}", this.instrumentName);
-            logger.debug("experimental: {}", this.instrumentExperimental);
-        }
 
         // Create station mappings:
         this.stationMapping = createStationMapping(this.interferometer.getStations());
@@ -451,16 +479,6 @@ public final class OIFitsCreatorService {
      * Create the OI_WAVELENGTH table
      */
     private void createOIWaveLength() {
-
-        // TODO: fix wavelengths % user model Fits cube (wavelengths):
-        this.waveBand = (this.lambdaMax - this.lambdaMin) / this.nWaveLengths;
-        this.waveLengths = computeWaveLengths(this.lambdaMin, this.lambdaMax, this.waveBand);
-
-        this.insNameKeyword = this.instrumentName + '_' + NumberUtils.trimTo3Digits(1e6d * this.waveLengths[0])
-                + '-' + NumberUtils.trimTo3Digits(1e6d * this.waveLengths[this.waveLengths.length - 1])
-                + '-' + this.waveLengths.length + "ch";
-
-        logger.debug("insNameKeyword: {}", insNameKeyword);
 
         // Create OI_WAVELENGTH table :
         final OIWavelength waves = new OIWavelength(this.oiFitsFile, this.nWaveLengths);
@@ -975,7 +993,8 @@ public final class OIFitsCreatorService {
         if (!isWL) {
             if (nImages > 1) {
                 // Fits cube without wavelengths:
-                addWarning("User model (Fits cube) without wavelength information is discarded");
+                // TODO: check wavelength
+//                addWarning("User model (Fits cube) without wavelength information is discarded");
                 //TODO: test such case
                 return null;
             }
@@ -1977,10 +1996,20 @@ public final class OIFitsCreatorService {
 
     /**
      * Add a warning message in the OIFits file
+     * @param warningContainer warning container to fill
      * @param msg message to add
      */
-    private void addWarning(final String msg) {
-        this.warningContainer.addWarningMessage(msg);
+    private static void addWarning(final WarningContainer warningContainer, final String msg) {
+        warningContainer.addWarningMessage(msg);
+    }
+
+    /**
+     * Add an information message in the OIFits file
+     * @param warningContainer warning container to fill
+     * @param msg message to add
+     */
+    private static void addInformation(final WarningContainer warningContainer, final String msg) {
+        warningContainer.addInformationMessage(msg);
     }
 
     /**
