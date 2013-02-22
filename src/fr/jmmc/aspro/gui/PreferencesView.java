@@ -28,786 +28,957 @@ import org.slf4j.LoggerFactory;
  */
 public final class PreferencesView extends JFrame implements Observer {
 
-  /** default serial UID for Serializable interface */
-  private static final long serialVersionUID = 1;
-  /** Class logger */
-  private static final Logger logger = LoggerFactory.getLogger(PreferencesView.class.getName());
-  /** twilight choices */
-  private final static String[] TWILIGHTS = new String[]{"Astronomical (-18°)", "Nautical (-12°)", "Civil (-6°)", "Sun (0°)"};
+    /** default serial UID for Serializable interface */
+    private static final long serialVersionUID = 1;
+    /** Class logger */
+    private static final Logger logger = LoggerFactory.getLogger(PreferencesView.class.getName());
+    /** twilight choices */
+    private final static String[] TWILIGHTS = new String[]{"Astronomical (-18°)", "Nautical (-12°)", "Civil (-6°)", "Sun (0°)"};
 
-  /* members */
-  /** preference singleton */
-  private final Preferences myPreferences = Preferences.getInstance();
+    /* members */
+    /** preference singleton */
+    private final Preferences myPreferences = Preferences.getInstance();
 
-  /**
-   * Creates a new PreferencesView
-   */
-  public PreferencesView() {
-    super();
-    initComponents();
+    /**
+     * Creates a new PreferencesView
+     */
+    public PreferencesView() {
+        super();
+        initComponents();
 
-    postInit();
-  }
+        postInit();
+    }
 
-  /**
-   * This method is useful to set the models and specific features of initialized swing components :
-   * Update the combo boxes with their models
-   */
-  private void postInit() {
-    // define custom models :
-    this.jComboBoxImageSize.setModel(new DefaultComboBoxModel(AsproConstants.IMAGE_SIZES));
-    this.jComboBoxLUT.setModel(new DefaultComboBoxModel(ColorModels.getColorModelNames()));
-    this.jComboBoxColorScale.setModel(new DefaultComboBoxModel(ColorScale.values()));
+    /**
+     * This method is useful to set the models and specific features of initialized swing components :
+     * Update the combo boxes with their models
+     */
+    private void postInit() {
+        // define custom models :
+        this.jComboBoxImageSize.setModel(new DefaultComboBoxModel(AsproConstants.IMAGE_SIZES));
+        this.jComboBoxLUT.setModel(new DefaultComboBoxModel(ColorModels.getColorModelNames()));
+        this.jComboBoxColorScale.setModel(new DefaultComboBoxModel(ColorScale.values()));
 
-    this.jComboBoxBestPopsAlgorithm.setModel(new DefaultComboBoxModel(Algorithm.values()));
-    this.jComboBoxBestPopsCriteriaSigma.setModel(new DefaultComboBoxModel(Criteria.values()));
-    this.jComboBoxBestPopsCriteriaAverageWeight.setModel(new DefaultComboBoxModel(Criteria.values()));
+        this.jComboBoxBestPopsAlgorithm.setModel(new DefaultComboBoxModel(Algorithm.values()));
+        this.jComboBoxBestPopsCriteriaSigma.setModel(new DefaultComboBoxModel(Criteria.values()));
+        this.jComboBoxBestPopsCriteriaAverageWeight.setModel(new DefaultComboBoxModel(Criteria.values()));
 
-    // register this instance as a Preference Observer :
-    this.myPreferences.addObserver(this);
+        this.jComboBoxSuperSampling.setModel(new DefaultComboBoxModel(AsproConstants.SUPER_SAMPLING));
 
-    // update GUI
-    update(null, null);
+        // register this instance as a Preference Observer :
+        this.myPreferences.addObserver(this);
 
-    this.jFieldMinElev.addPropertyChangeListener("value", new PropertyChangeListener() {
-      @Override
-      public void propertyChange(final PropertyChangeEvent evt) {
-        final double minElevNew = ((Number) jFieldMinElev.getValue()).doubleValue();
+        // update GUI
+        update(null, null);
 
-        if (minElevNew < 0d || minElevNew >= 90d) {
-          // invalid value :
-          jFieldMinElev.setValue(myPreferences.getPreferenceAsDouble(Preferences.MIN_ELEVATION));
-        }
-        try {
-          // will fire triggerObserversNotification so update() will be called
-          myPreferences.setPreference(Preferences.MIN_ELEVATION, Double.valueOf(((Number) jFieldMinElev.getValue()).doubleValue()));
-        } catch (PreferencesException pe) {
-          logger.error("property failure : ", pe);
-        }
-      }
-    });
+        this.jFieldMinElev.addPropertyChangeListener("value", new PropertyChangeListener() {
+            @Override
+            public void propertyChange(final PropertyChangeEvent evt) {
+                final double minElevNew = ((Number) jFieldMinElev.getValue()).doubleValue();
 
-    final Dimension dim = new Dimension(500, 500);
-    setMinimumSize(dim);
-    addComponentListener(new ComponentResizeAdapter(dim));
+                if (minElevNew < 0d || minElevNew >= 90d) {
+                    // invalid value :
+                    jFieldMinElev.setValue(myPreferences.getPreferenceAsDouble(Preferences.MIN_ELEVATION));
+                }
+                try {
+                    // will fire triggerObserversNotification so update() will be called
+                    myPreferences.setPreference(Preferences.MIN_ELEVATION, Double.valueOf(((Number) jFieldMinElev.getValue()).doubleValue()));
+                } catch (PreferencesException pe) {
+                    logger.error("property failure : ", pe);
+                }
+            }
+        });
 
-    // pack and center window
-    pack();
-    setLocationRelativeTo(null);
-  }
+        final Dimension dim = new Dimension(500, 500);
+        setMinimumSize(dim);
+        addComponentListener(new ComponentResizeAdapter(dim));
 
-  /**
-   * Free any ressource or reference to this instance :
-   * remove this instance form Preference Observers
-   */
-  @Override
-  public void dispose() {
-    logger.debug("dispose: {}", this);
+        // pack and center window
+        pack();
+        setLocationRelativeTo(null);
+    }
 
-    // unregister this instance as a Preference Observer :
-    this.myPreferences.deleteObserver(this);
+    /**
+     * Free any ressource or reference to this instance :
+     * remove this instance form Preference Observers
+     */
+    @Override
+    public void dispose() {
+        logger.debug("dispose: {}", this);
 
-    // dispose Frame :
-    super.dispose();
-  }
+        // unregister this instance as a Preference Observer :
+        this.myPreferences.deleteObserver(this);
 
-  /**
-   * Overriden method to give object identifier
-   * @return string identifier
-   */
-  @Override
-  public String toString() {
-    return "PreferencesView@" + Integer.toHexString(hashCode());
-  }
+        // dispose Frame :
+        super.dispose();
+    }
 
-  /**
-   * This method is called from within the constructor to
-   * initialize the form.
-   * WARNING: Do NOT modify this code. The content of this method is
-   * always regenerated by the Form Editor.
-   */
-  @SuppressWarnings("unchecked")
-  // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-  private void initComponents() {
-    java.awt.GridBagConstraints gridBagConstraints;
+    /**
+     * Overriden method to give object identifier
+     * @return string identifier
+     */
+    @Override
+    public String toString() {
+        return "PreferencesView@" + Integer.toHexString(hashCode());
+    }
 
-    buttonGroupPositionStyle = new javax.swing.ButtonGroup();
-    buttonGroupTimeRef = new javax.swing.ButtonGroup();
-    buttonGroupTimeAxis = new javax.swing.ButtonGroup();
-    buttonGroupFastUserModel = new javax.swing.ButtonGroup();
-    buttonGroupNightOnly = new javax.swing.ButtonGroup();
-    jScrollPaneView = new javax.swing.JScrollPane();
-    jPanelView = new javax.swing.JPanel();
-    jPanelObservability = new javax.swing.JPanel();
-    jLabelTimeRef = new javax.swing.JLabel();
-    jRadioButtonTimeLST = new javax.swing.JRadioButton();
-    jRadioButtonTimeUTC = new javax.swing.JRadioButton();
-    jLabelCenterNight = new javax.swing.JLabel();
-    jRadioButtonCenterNightYes = new javax.swing.JRadioButton();
-    jRadioButtonCenterNightNo = new javax.swing.JRadioButton();
-    jLabelNightOnly = new javax.swing.JLabel();
-    jRadioButtonNightOnlyYes = new javax.swing.JRadioButton();
-    jRadioButtonNightOnlyNo = new javax.swing.JRadioButton();
-    jLabelMinElev = new javax.swing.JLabel();
-    jFieldMinElev = new javax.swing.JFormattedTextField();
-    jLabelTwilight = new javax.swing.JLabel();
-    jComboBoxTwilight = new javax.swing.JComboBox();
-    jSeparator = new javax.swing.JSeparator();
-    jLabelBestPopsAlgorithm = new javax.swing.JLabel();
-    jComboBoxBestPopsAlgorithm = new javax.swing.JComboBox();
-    jLabelBestPopsCriteriaSigma = new javax.swing.JLabel();
-    jComboBoxBestPopsCriteriaSigma = new javax.swing.JComboBox();
-    jLabelBestPopsCriteriaAverageWeight = new javax.swing.JLabel();
-    jComboBoxBestPopsCriteriaAverageWeight = new javax.swing.JComboBox();
-    jPanelModelEditor = new javax.swing.JPanel();
-    jLabelPositionStyle = new javax.swing.JLabel();
-    jRadioButtonXY = new javax.swing.JRadioButton();
-    jRadioButtonRhoTheta = new javax.swing.JRadioButton();
-    jPanelModelImage = new javax.swing.JPanel();
-    jLabelLutTable = new javax.swing.JLabel();
-    jComboBoxLUT = new javax.swing.JComboBox();
-    jLabelImageSize = new javax.swing.JLabel();
-    jComboBoxImageSize = new javax.swing.JComboBox();
-    jLabelColorScale = new javax.swing.JLabel();
-    jComboBoxColorScale = new javax.swing.JComboBox();
-    jPanelUserModel = new javax.swing.JPanel();
-    jLabelFastUserModel = new javax.swing.JLabel();
-    jRadioButtonFastUserModelYes = new javax.swing.JRadioButton();
-    jRadioButtonFastUserModelNo = new javax.swing.JRadioButton();
-    jPanelButtons = new javax.swing.JPanel();
-    jButtonDefault = new javax.swing.JButton();
-    jButtonSave = new javax.swing.JButton();
+    /**
+     * This method is called from within the constructor to
+     * initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is
+     * always regenerated by the Form Editor.
+     */
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+        java.awt.GridBagConstraints gridBagConstraints;
 
-    setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-    setTitle("Preferences");
-    getContentPane().setLayout(new javax.swing.BoxLayout(getContentPane(), javax.swing.BoxLayout.LINE_AXIS));
+        buttonGroupPositionStyle = new javax.swing.ButtonGroup();
+        buttonGroupTimeRef = new javax.swing.ButtonGroup();
+        buttonGroupTimeAxis = new javax.swing.ButtonGroup();
+        buttonGroupFastUserModel = new javax.swing.ButtonGroup();
+        buttonGroupNightOnly = new javax.swing.ButtonGroup();
+        buttonGroupAddNoise = new javax.swing.ButtonGroup();
+        buttonGroupImageNoise = new javax.swing.ButtonGroup();
+        jScrollPaneView = new javax.swing.JScrollPane();
+        jPanelView = new javax.swing.JPanel();
+        jPanelObservability = new javax.swing.JPanel();
+        jLabelTimeRef = new javax.swing.JLabel();
+        jRadioButtonTimeLST = new javax.swing.JRadioButton();
+        jRadioButtonTimeUTC = new javax.swing.JRadioButton();
+        jLabelCenterNight = new javax.swing.JLabel();
+        jRadioButtonCenterNightYes = new javax.swing.JRadioButton();
+        jRadioButtonCenterNightNo = new javax.swing.JRadioButton();
+        jLabelNightOnly = new javax.swing.JLabel();
+        jRadioButtonNightOnlyYes = new javax.swing.JRadioButton();
+        jRadioButtonNightOnlyNo = new javax.swing.JRadioButton();
+        jLabelMinElev = new javax.swing.JLabel();
+        jFieldMinElev = new javax.swing.JFormattedTextField();
+        jLabelTwilight = new javax.swing.JLabel();
+        jComboBoxTwilight = new javax.swing.JComboBox();
+        jSeparator = new javax.swing.JSeparator();
+        jLabelBestPopsAlgorithm = new javax.swing.JLabel();
+        jComboBoxBestPopsAlgorithm = new javax.swing.JComboBox();
+        jLabelBestPopsCriteriaSigma = new javax.swing.JLabel();
+        jComboBoxBestPopsCriteriaSigma = new javax.swing.JComboBox();
+        jLabelBestPopsCriteriaAverageWeight = new javax.swing.JLabel();
+        jComboBoxBestPopsCriteriaAverageWeight = new javax.swing.JComboBox();
+        jPanelModelEditor = new javax.swing.JPanel();
+        jLabelPositionStyle = new javax.swing.JLabel();
+        jRadioButtonXY = new javax.swing.JRadioButton();
+        jRadioButtonRhoTheta = new javax.swing.JRadioButton();
+        jPanelModelImage = new javax.swing.JPanel();
+        jLabelLutTable = new javax.swing.JLabel();
+        jComboBoxLUT = new javax.swing.JComboBox();
+        jLabelImageSize = new javax.swing.JLabel();
+        jComboBoxImageSize = new javax.swing.JComboBox();
+        jLabelColorScale = new javax.swing.JLabel();
+        jComboBoxColorScale = new javax.swing.JComboBox();
+        jLabelImageNoise = new javax.swing.JLabel();
+        jRadioButtonImageNoiseYes = new javax.swing.JRadioButton();
+        jRadioButtonImageNoiseNo = new javax.swing.JRadioButton();
+        jPanelUserModel = new javax.swing.JPanel();
+        jLabelFastUserModel = new javax.swing.JLabel();
+        jRadioButtonFastUserModelYes = new javax.swing.JRadioButton();
+        jRadioButtonFastUserModelNo = new javax.swing.JRadioButton();
+        jPanelOIFits = new javax.swing.JPanel();
+        jLabelSuperSampling = new javax.swing.JLabel();
+        jComboBoxSuperSampling = new javax.swing.JComboBox();
+        jLabelAddNoise = new javax.swing.JLabel();
+        jRadioButtonAddNoiseYes = new javax.swing.JRadioButton();
+        jRadioButtonAddNoiseNo = new javax.swing.JRadioButton();
+        jPanelButtons = new javax.swing.JPanel();
+        jButtonDefault = new javax.swing.JButton();
+        jButtonSave = new javax.swing.JButton();
 
-    jPanelView.setLayout(new javax.swing.BoxLayout(jPanelView, javax.swing.BoxLayout.PAGE_AXIS));
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setTitle("Preferences");
+        getContentPane().setLayout(new javax.swing.BoxLayout(getContentPane(), javax.swing.BoxLayout.LINE_AXIS));
 
-    jPanelObservability.setBorder(javax.swing.BorderFactory.createTitledBorder("Observability"));
-    jPanelObservability.setLayout(new java.awt.GridBagLayout());
+        jPanelView.setLayout(new javax.swing.BoxLayout(jPanelView, javax.swing.BoxLayout.PAGE_AXIS));
 
-    jLabelTimeRef.setText("Time reference");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 6);
-    jPanelObservability.add(jLabelTimeRef, gridBagConstraints);
+        jPanelObservability.setBorder(javax.swing.BorderFactory.createTitledBorder("Observability"));
+        jPanelObservability.setLayout(new java.awt.GridBagLayout());
 
-    buttonGroupTimeRef.add(jRadioButtonTimeLST);
-    jRadioButtonTimeLST.setSelected(true);
-    jRadioButtonTimeLST.setText(AsproConstants.TIME_LST);
-    jRadioButtonTimeLST.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        jRadioButtonTimeRefActionPerformed(evt);
-      }
-    });
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-    jPanelObservability.add(jRadioButtonTimeLST, gridBagConstraints);
+        jLabelTimeRef.setText("Time reference");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 6);
+        jPanelObservability.add(jLabelTimeRef, gridBagConstraints);
 
-    buttonGroupTimeRef.add(jRadioButtonTimeUTC);
-    jRadioButtonTimeUTC.setText(AsproConstants.TIME_UTC);
-    jRadioButtonTimeUTC.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        jRadioButtonTimeRefActionPerformed(evt);
-      }
-    });
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-    jPanelObservability.add(jRadioButtonTimeUTC, gridBagConstraints);
+        buttonGroupTimeRef.add(jRadioButtonTimeLST);
+        jRadioButtonTimeLST.setText(AsproConstants.TIME_LST);
+        jRadioButtonTimeLST.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButtonTimeRefActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelObservability.add(jRadioButtonTimeLST, gridBagConstraints);
 
-    jLabelCenterNight.setText("Center plot around night");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 6);
-    jPanelObservability.add(jLabelCenterNight, gridBagConstraints);
+        buttonGroupTimeRef.add(jRadioButtonTimeUTC);
+        jRadioButtonTimeUTC.setText(AsproConstants.TIME_UTC);
+        jRadioButtonTimeUTC.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButtonTimeRefActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelObservability.add(jRadioButtonTimeUTC, gridBagConstraints);
 
-    buttonGroupTimeAxis.add(jRadioButtonCenterNightYes);
-    jRadioButtonCenterNightYes.setSelected(true);
-    jRadioButtonCenterNightYes.setText("yes");
-    jRadioButtonCenterNightYes.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        jRadioButtonCenterNightActionPerformed(evt);
-      }
-    });
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-    jPanelObservability.add(jRadioButtonCenterNightYes, gridBagConstraints);
+        jLabelCenterNight.setText("Center plot around night");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        gridBagConstraints.weightx = 0.2;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 6);
+        jPanelObservability.add(jLabelCenterNight, gridBagConstraints);
 
-    buttonGroupTimeAxis.add(jRadioButtonCenterNightNo);
-    jRadioButtonCenterNightNo.setText("no");
-    jRadioButtonCenterNightNo.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        jRadioButtonCenterNightActionPerformed(evt);
-      }
-    });
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 2;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-    jPanelObservability.add(jRadioButtonCenterNightNo, gridBagConstraints);
+        buttonGroupTimeAxis.add(jRadioButtonCenterNightYes);
+        jRadioButtonCenterNightYes.setText("yes");
+        jRadioButtonCenterNightYes.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButtonCenterNightActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.weightx = 0.4;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelObservability.add(jRadioButtonCenterNightYes, gridBagConstraints);
 
-    jLabelNightOnly.setText("Night only");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 2;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 6);
-    jPanelObservability.add(jLabelNightOnly, gridBagConstraints);
+        buttonGroupTimeAxis.add(jRadioButtonCenterNightNo);
+        jRadioButtonCenterNightNo.setText("no");
+        jRadioButtonCenterNightNo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButtonCenterNightActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.weightx = 0.4;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelObservability.add(jRadioButtonCenterNightNo, gridBagConstraints);
 
-    buttonGroupNightOnly.add(jRadioButtonNightOnlyYes);
-    jRadioButtonNightOnlyYes.setSelected(true);
-    jRadioButtonNightOnlyYes.setText("yes");
-    jRadioButtonNightOnlyYes.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        jRadioButtonNightOnlyActionPerformed(evt);
-      }
-    });
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 2;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-    jPanelObservability.add(jRadioButtonNightOnlyYes, gridBagConstraints);
+        jLabelNightOnly.setText("Night only");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 6);
+        jPanelObservability.add(jLabelNightOnly, gridBagConstraints);
 
-    buttonGroupNightOnly.add(jRadioButtonNightOnlyNo);
-    jRadioButtonNightOnlyNo.setText("no");
-    jRadioButtonNightOnlyNo.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        jRadioButtonNightOnlyActionPerformed(evt);
-      }
-    });
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 2;
-    gridBagConstraints.gridy = 2;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-    jPanelObservability.add(jRadioButtonNightOnlyNo, gridBagConstraints);
+        buttonGroupNightOnly.add(jRadioButtonNightOnlyYes);
+        jRadioButtonNightOnlyYes.setText("yes");
+        jRadioButtonNightOnlyYes.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButtonNightOnlyActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelObservability.add(jRadioButtonNightOnlyYes, gridBagConstraints);
 
-    jLabelMinElev.setText("Default min. Elevation");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 3;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 6);
-    jPanelObservability.add(jLabelMinElev, gridBagConstraints);
+        buttonGroupNightOnly.add(jRadioButtonNightOnlyNo);
+        jRadioButtonNightOnlyNo.setText("no");
+        jRadioButtonNightOnlyNo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButtonNightOnlyActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelObservability.add(jRadioButtonNightOnlyNo, gridBagConstraints);
 
-    jFieldMinElev.setColumns(2);
-    jFieldMinElev.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0"))));
-    jFieldMinElev.setName("jFieldMinElev"); // NOI18N
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 3;
-    gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 2);
-    jPanelObservability.add(jFieldMinElev, gridBagConstraints);
+        jLabelMinElev.setText("Default min. Elevation");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 6);
+        jPanelObservability.add(jLabelMinElev, gridBagConstraints);
 
-    jLabelTwilight.setText("Twilight used as Night limit");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 4;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 6);
-    jPanelObservability.add(jLabelTwilight, gridBagConstraints);
+        jFieldMinElev.setColumns(2);
+        jFieldMinElev.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0"))));
+        jFieldMinElev.setName("jFieldMinElev"); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 2);
+        jPanelObservability.add(jFieldMinElev, gridBagConstraints);
 
-    jComboBoxTwilight.setModel(new DefaultComboBoxModel(TWILIGHTS));
-    jComboBoxTwilight.setSelectedItem(TWILIGHTS[0]);
-    jComboBoxTwilight.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        jComboBoxTwilightActionPerformed(evt);
-      }
-    });
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 4;
-    gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 4, 2);
-    jPanelObservability.add(jComboBoxTwilight, gridBagConstraints);
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 5;
-    gridBagConstraints.gridwidth = 3;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    jPanelObservability.add(jSeparator, gridBagConstraints);
+        jLabelTwilight.setText("Twilight used as Night limit");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 6);
+        jPanelObservability.add(jLabelTwilight, gridBagConstraints);
 
-    jLabelBestPopsAlgorithm.setText("Best PoPs algorithm");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 6;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 6);
-    jPanelObservability.add(jLabelBestPopsAlgorithm, gridBagConstraints);
+        jComboBoxTwilight.setModel(new DefaultComboBoxModel(TWILIGHTS));
+        jComboBoxTwilight.setSelectedItem(TWILIGHTS[0]);
+        jComboBoxTwilight.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jComboBoxTwilightActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 4, 2);
+        jPanelObservability.add(jComboBoxTwilight, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 5;
+        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(0, 6, 0, 6);
+        jPanelObservability.add(jSeparator, gridBagConstraints);
 
-    jComboBoxBestPopsAlgorithm.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        jComboBoxBestPopsAlgorithmActionPerformed(evt);
-      }
-    });
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 6;
-    gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.insets = new java.awt.Insets(4, 2, 2, 2);
-    jPanelObservability.add(jComboBoxBestPopsAlgorithm, gridBagConstraints);
+        jLabelBestPopsAlgorithm.setText("Best PoPs algorithm");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 6;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 6);
+        jPanelObservability.add(jLabelBestPopsAlgorithm, gridBagConstraints);
 
-    jLabelBestPopsCriteriaSigma.setText("Gaussian sigma");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 7;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 6);
-    jPanelObservability.add(jLabelBestPopsCriteriaSigma, gridBagConstraints);
+        jComboBoxBestPopsAlgorithm.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jComboBoxBestPopsAlgorithmActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 6;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.insets = new java.awt.Insets(4, 2, 2, 2);
+        jPanelObservability.add(jComboBoxBestPopsAlgorithm, gridBagConstraints);
 
-    jComboBoxBestPopsCriteriaSigma.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        jComboBoxBestPopsCriteriaSigmaActionPerformed(evt);
-      }
-    });
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 7;
-    gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-    jPanelObservability.add(jComboBoxBestPopsCriteriaSigma, gridBagConstraints);
+        jLabelBestPopsCriteriaSigma.setText("Gaussian sigma");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 7;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 6);
+        jPanelObservability.add(jLabelBestPopsCriteriaSigma, gridBagConstraints);
 
-    jLabelBestPopsCriteriaAverageWeight.setText("Average weight % Min");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 8;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 6);
-    jPanelObservability.add(jLabelBestPopsCriteriaAverageWeight, gridBagConstraints);
+        jComboBoxBestPopsCriteriaSigma.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jComboBoxBestPopsCriteriaSigmaActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 7;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelObservability.add(jComboBoxBestPopsCriteriaSigma, gridBagConstraints);
 
-    jComboBoxBestPopsCriteriaAverageWeight.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        jComboBoxBestPopsCriteriaAverageWeightActionPerformed(evt);
-      }
-    });
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 8;
-    gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-    jPanelObservability.add(jComboBoxBestPopsCriteriaAverageWeight, gridBagConstraints);
+        jLabelBestPopsCriteriaAverageWeight.setText("Average weight % Min");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 8;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 6);
+        jPanelObservability.add(jLabelBestPopsCriteriaAverageWeight, gridBagConstraints);
 
-    jPanelView.add(jPanelObservability);
+        jComboBoxBestPopsCriteriaAverageWeight.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jComboBoxBestPopsCriteriaAverageWeightActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 8;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelObservability.add(jComboBoxBestPopsCriteriaAverageWeight, gridBagConstraints);
 
-    jPanelModelEditor.setBorder(javax.swing.BorderFactory.createTitledBorder("Model Editor"));
-    jPanelModelEditor.setLayout(new java.awt.GridBagLayout());
+        jPanelView.add(jPanelObservability);
 
-    jLabelPositionStyle.setText("<html>Default style to<br>edit model positions</html>");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 6);
-    jPanelModelEditor.add(jLabelPositionStyle, gridBagConstraints);
+        jPanelModelEditor.setBorder(javax.swing.BorderFactory.createTitledBorder("Model Editor"));
+        jPanelModelEditor.setLayout(new java.awt.GridBagLayout());
 
-    buttonGroupPositionStyle.add(jRadioButtonXY);
-    jRadioButtonXY.setText("x / y (mas)");
-    jRadioButtonXY.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        jRadioButtonPositionStyleActionPerformed(evt);
-      }
-    });
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-    jPanelModelEditor.add(jRadioButtonXY, gridBagConstraints);
+        jLabelPositionStyle.setText("<html>Default style to<br>edit model positions</html>");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
+        gridBagConstraints.weightx = 0.4;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 6);
+        jPanelModelEditor.add(jLabelPositionStyle, gridBagConstraints);
 
-    buttonGroupPositionStyle.add(jRadioButtonRhoTheta);
-    jRadioButtonRhoTheta.setText("rho (mas) / theta");
-    jRadioButtonRhoTheta.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        jRadioButtonPositionStyleActionPerformed(evt);
-      }
-    });
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-    jPanelModelEditor.add(jRadioButtonRhoTheta, gridBagConstraints);
+        buttonGroupPositionStyle.add(jRadioButtonXY);
+        jRadioButtonXY.setText("x / y (mas)");
+        jRadioButtonXY.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButtonPositionStyleActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.weightx = 0.2;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelModelEditor.add(jRadioButtonXY, gridBagConstraints);
 
-    jPanelView.add(jPanelModelEditor);
+        buttonGroupPositionStyle.add(jRadioButtonRhoTheta);
+        jRadioButtonRhoTheta.setText("rho (mas) / theta");
+        jRadioButtonRhoTheta.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButtonPositionStyleActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.weightx = 0.2;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelModelEditor.add(jRadioButtonRhoTheta, gridBagConstraints);
 
-    jPanelModelImage.setBorder(javax.swing.BorderFactory.createTitledBorder("Model Image"));
-    jPanelModelImage.setLayout(new java.awt.GridBagLayout());
+        jPanelView.add(jPanelModelEditor);
 
-    jLabelLutTable.setText("LUT table");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 6);
-    jPanelModelImage.add(jLabelLutTable, gridBagConstraints);
+        jPanelModelImage.setBorder(javax.swing.BorderFactory.createTitledBorder("Model Image"));
+        jPanelModelImage.setLayout(new java.awt.GridBagLayout());
 
-    jComboBoxLUT.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        jComboBoxLUTActionPerformed(evt);
-      }
-    });
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-    jPanelModelImage.add(jComboBoxLUT, gridBagConstraints);
+        jLabelLutTable.setText("LUT table");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 6);
+        jPanelModelImage.add(jLabelLutTable, gridBagConstraints);
 
-    jLabelImageSize.setText("Image size");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 6);
-    jPanelModelImage.add(jLabelImageSize, gridBagConstraints);
+        jComboBoxLUT.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jComboBoxLUTActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelModelImage.add(jComboBoxLUT, gridBagConstraints);
 
-    jComboBoxImageSize.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        jComboBoxImageSizeActionPerformed(evt);
-      }
-    });
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-    jPanelModelImage.add(jComboBoxImageSize, gridBagConstraints);
+        jLabelImageSize.setText("Image size");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 6);
+        jPanelModelImage.add(jLabelImageSize, gridBagConstraints);
 
-    jLabelColorScale.setText("Color scale");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 2;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 6);
-    jPanelModelImage.add(jLabelColorScale, gridBagConstraints);
+        jComboBoxImageSize.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jComboBoxImageSizeActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelModelImage.add(jComboBoxImageSize, gridBagConstraints);
 
-    jComboBoxColorScale.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        jComboBoxColorScaleActionPerformed(evt);
-      }
-    });
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 2;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-    jPanelModelImage.add(jComboBoxColorScale, gridBagConstraints);
+        jLabelColorScale.setText("Color scale");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 6);
+        jPanelModelImage.add(jLabelColorScale, gridBagConstraints);
 
-    jPanelView.add(jPanelModelImage);
+        jComboBoxColorScale.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jComboBoxColorScaleActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelModelImage.add(jComboBoxColorScale, gridBagConstraints);
 
-    jPanelUserModel.setBorder(javax.swing.BorderFactory.createTitledBorder("User Model"));
-    jPanelUserModel.setLayout(new java.awt.GridBagLayout());
+        jLabelImageNoise.setText("Add error noise to image");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        gridBagConstraints.weightx = 0.2;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 6);
+        jPanelModelImage.add(jLabelImageNoise, gridBagConstraints);
 
-    jLabelFastUserModel.setText("Fast mode (optimize image)");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.weightx = 0.2;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 6);
-    jPanelUserModel.add(jLabelFastUserModel, gridBagConstraints);
+        buttonGroupImageNoise.add(jRadioButtonImageNoiseYes);
+        jRadioButtonImageNoiseYes.setText("yes");
+        jRadioButtonImageNoiseYes.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButtonImageNoiseActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.weightx = 0.4;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelModelImage.add(jRadioButtonImageNoiseYes, gridBagConstraints);
 
-    buttonGroupFastUserModel.add(jRadioButtonFastUserModelYes);
-    jRadioButtonFastUserModelYes.setText("yes");
-    jRadioButtonFastUserModelYes.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        jRadioButtonFastUserModelActionPerformed(evt);
-      }
-    });
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.weightx = 0.4;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-    jPanelUserModel.add(jRadioButtonFastUserModelYes, gridBagConstraints);
+        buttonGroupImageNoise.add(jRadioButtonImageNoiseNo);
+        jRadioButtonImageNoiseNo.setText("no");
+        jRadioButtonImageNoiseNo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButtonImageNoiseActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.weightx = 0.4;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelModelImage.add(jRadioButtonImageNoiseNo, gridBagConstraints);
 
-    buttonGroupFastUserModel.add(jRadioButtonFastUserModelNo);
-    jRadioButtonFastUserModelNo.setText("no");
-    jRadioButtonFastUserModelNo.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        jRadioButtonFastUserModelActionPerformed(evt);
-      }
-    });
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.weightx = 0.4;
-    gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-    jPanelUserModel.add(jRadioButtonFastUserModelNo, gridBagConstraints);
+        jPanelView.add(jPanelModelImage);
 
-    jPanelView.add(jPanelUserModel);
+        jPanelUserModel.setBorder(javax.swing.BorderFactory.createTitledBorder("User Model"));
+        jPanelUserModel.setLayout(new java.awt.GridBagLayout());
 
-    jButtonDefault.setText("Restore Default Settings");
-    jButtonDefault.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        jButtonDefaultActionPerformed(evt);
-      }
-    });
-    jPanelButtons.add(jButtonDefault);
+        jLabelFastUserModel.setText("Fast mode (optimize image)");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.weightx = 0.2;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 6);
+        jPanelUserModel.add(jLabelFastUserModel, gridBagConstraints);
 
-    jButtonSave.setText("Save Modifications");
-    jButtonSave.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        jButtonSaveActionPerformed(evt);
-      }
-    });
-    jPanelButtons.add(jButtonSave);
+        buttonGroupFastUserModel.add(jRadioButtonFastUserModelYes);
+        jRadioButtonFastUserModelYes.setText("yes");
+        jRadioButtonFastUserModelYes.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButtonFastUserModelActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.weightx = 0.4;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelUserModel.add(jRadioButtonFastUserModelYes, gridBagConstraints);
 
-    jPanelView.add(jPanelButtons);
+        buttonGroupFastUserModel.add(jRadioButtonFastUserModelNo);
+        jRadioButtonFastUserModelNo.setText("no");
+        jRadioButtonFastUserModelNo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButtonFastUserModelActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.weightx = 0.4;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelUserModel.add(jRadioButtonFastUserModelNo, gridBagConstraints);
 
-    jScrollPaneView.setViewportView(jPanelView);
+        jPanelView.add(jPanelUserModel);
 
-    getContentPane().add(jScrollPaneView);
-  }// </editor-fold>//GEN-END:initComponents
+        jPanelOIFits.setBorder(javax.swing.BorderFactory.createTitledBorder("OIFits data"));
+        jPanelOIFits.setLayout(new java.awt.GridBagLayout());
+
+        jLabelSuperSampling.setText("Supersampling model");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 6);
+        jPanelOIFits.add(jLabelSuperSampling, gridBagConstraints);
+
+        jComboBoxSuperSampling.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jComboBoxSuperSamplingActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridwidth = 2;
+        jPanelOIFits.add(jComboBoxSuperSampling, gridBagConstraints);
+
+        jLabelAddNoise.setText("Add error noise to data");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        gridBagConstraints.weightx = 0.2;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 6);
+        jPanelOIFits.add(jLabelAddNoise, gridBagConstraints);
+
+        buttonGroupAddNoise.add(jRadioButtonAddNoiseYes);
+        jRadioButtonAddNoiseYes.setText("yes");
+        jRadioButtonAddNoiseYes.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButtonAddNoiseActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.weightx = 0.4;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelOIFits.add(jRadioButtonAddNoiseYes, gridBagConstraints);
+
+        buttonGroupAddNoise.add(jRadioButtonAddNoiseNo);
+        jRadioButtonAddNoiseNo.setText("no");
+        jRadioButtonAddNoiseNo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButtonAddNoiseActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.weightx = 0.4;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelOIFits.add(jRadioButtonAddNoiseNo, gridBagConstraints);
+
+        jPanelView.add(jPanelOIFits);
+
+        jButtonDefault.setText("Restore Default Settings");
+        jButtonDefault.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonDefaultActionPerformed(evt);
+            }
+        });
+        jPanelButtons.add(jButtonDefault);
+
+        jButtonSave.setText("Save Modifications");
+        jButtonSave.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonSaveActionPerformed(evt);
+            }
+        });
+        jPanelButtons.add(jButtonSave);
+
+        jPanelView.add(jPanelButtons);
+
+        jScrollPaneView.setViewportView(jPanelView);
+
+        getContentPane().add(jScrollPaneView);
+    }// </editor-fold>//GEN-END:initComponents
 
     private void jRadioButtonPositionStyleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonPositionStyleActionPerformed
-      try {
-        // will fire triggerObserversNotification so update() will be called
-        this.myPreferences.setPreference(Preferences.MODELEDITOR_PREFERXY, Boolean.valueOf(this.jRadioButtonXY.isSelected()));
-      } catch (PreferencesException pe) {
-        logger.error("property failure : ", pe);
-      }
+        try {
+            // will fire triggerObserversNotification so update() will be called
+            this.myPreferences.setPreference(Preferences.MODELEDITOR_PREFERXY, Boolean.valueOf(this.jRadioButtonXY.isSelected()));
+        } catch (PreferencesException pe) {
+            logger.error("property failure : ", pe);
+        }
     }//GEN-LAST:event_jRadioButtonPositionStyleActionPerformed
 
     private void jButtonSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSaveActionPerformed
-      try {
-        this.myPreferences.saveToFile();
-      } catch (PreferencesException pe) {
-        // this try catch should not be solved here
-        // one feedback report could be thrown on error into Preference code
-        logger.error("property failure : ", pe);
-      }
+        try {
+            this.myPreferences.saveToFile();
+        } catch (PreferencesException pe) {
+            // this try catch should not be solved here
+            // one feedback report could be thrown on error into Preference code
+            logger.error("property failure : ", pe);
+        }
     }//GEN-LAST:event_jButtonSaveActionPerformed
 
     private void jButtonDefaultActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDefaultActionPerformed
-      this.myPreferences.resetToDefaultPreferences();
+        this.myPreferences.resetToDefaultPreferences();
     }//GEN-LAST:event_jButtonDefaultActionPerformed
 
     private void jComboBoxImageSizeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxImageSizeActionPerformed
-      try {
-        // will fire triggerObserversNotification so update() will be called
-        this.myPreferences.setPreference(Preferences.MODEL_IMAGE_SIZE, this.jComboBoxImageSize.getSelectedItem());
-      } catch (PreferencesException pe) {
-        logger.error("property failure : ", pe);
-      }
+        try {
+            // will fire triggerObserversNotification so update() will be called
+            this.myPreferences.setPreference(Preferences.MODEL_IMAGE_SIZE, this.jComboBoxImageSize.getSelectedItem());
+        } catch (PreferencesException pe) {
+            logger.error("property failure : ", pe);
+        }
     }//GEN-LAST:event_jComboBoxImageSizeActionPerformed
 
     private void jComboBoxLUTActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxLUTActionPerformed
-      try {
-        // will fire triggerObserversNotification so update() will be called
-        this.myPreferences.setPreference(Preferences.MODEL_IMAGE_LUT, this.jComboBoxLUT.getSelectedItem());
-      } catch (PreferencesException pe) {
-        logger.error("property failure : ", pe);
-      }
+        try {
+            // will fire triggerObserversNotification so update() will be called
+            this.myPreferences.setPreference(Preferences.MODEL_IMAGE_LUT, this.jComboBoxLUT.getSelectedItem());
+        } catch (PreferencesException pe) {
+            logger.error("property failure : ", pe);
+        }
     }//GEN-LAST:event_jComboBoxLUTActionPerformed
 
     private void jRadioButtonTimeRefActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonTimeRefActionPerformed
-      try {
-        final String value;
-        if (this.jRadioButtonTimeUTC.isSelected()) {
-          value = AsproConstants.TIME_UTC;
-        } else {
-          value = AsproConstants.TIME_LST;
-        }
+        try {
+            final String value;
+            if (this.jRadioButtonTimeUTC.isSelected()) {
+                value = AsproConstants.TIME_UTC;
+            } else {
+                value = AsproConstants.TIME_LST;
+            }
 
-        // will fire triggerObserversNotification so update() will be called
-        this.myPreferences.setPreference(Preferences.TIME_REFERENCE, value);
-      } catch (PreferencesException pe) {
-        logger.error("property failure : ", pe);
-      }
+            // will fire triggerObserversNotification so update() will be called
+            this.myPreferences.setPreference(Preferences.TIME_REFERENCE, value);
+        } catch (PreferencesException pe) {
+            logger.error("property failure : ", pe);
+        }
     }//GEN-LAST:event_jRadioButtonTimeRefActionPerformed
 
     private void jRadioButtonCenterNightActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonCenterNightActionPerformed
-      try {
-        // will fire triggerObserversNotification so update() will be called
-        this.myPreferences.setPreference(Preferences.CENTER_NIGHT, Boolean.valueOf(this.jRadioButtonCenterNightYes.isSelected()));
-      } catch (PreferencesException pe) {
-        logger.error("property failure : ", pe);
-      }
+        try {
+            // will fire triggerObserversNotification so update() will be called
+            this.myPreferences.setPreference(Preferences.CENTER_NIGHT, Boolean.valueOf(this.jRadioButtonCenterNightYes.isSelected()));
+        } catch (PreferencesException pe) {
+            logger.error("property failure : ", pe);
+        }
     }//GEN-LAST:event_jRadioButtonCenterNightActionPerformed
 
     private void jComboBoxTwilightActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxTwilightActionPerformed
-      try {
-        // will fire triggerObserversNotification so update() will be called
-        this.myPreferences.setPreference(Preferences.TWILIGHT_NIGHT, getTwilight((String) this.jComboBoxTwilight.getSelectedItem()).toString());
-      } catch (PreferencesException pe) {
-        logger.error("property failure : ", pe);
-      }
+        try {
+            // will fire triggerObserversNotification so update() will be called
+            this.myPreferences.setPreference(Preferences.TWILIGHT_NIGHT, getTwilight((String) this.jComboBoxTwilight.getSelectedItem()).toString());
+        } catch (PreferencesException pe) {
+            logger.error("property failure : ", pe);
+        }
     }//GEN-LAST:event_jComboBoxTwilightActionPerformed
 
   private void jComboBoxColorScaleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxColorScaleActionPerformed
-    try {
-      // will fire triggerObserversNotification so update() will be called
-      this.myPreferences.setPreference(Preferences.MODEL_IMAGE_SCALE, this.jComboBoxColorScale.getSelectedItem().toString());
-    } catch (PreferencesException pe) {
-      logger.error("property failure : ", pe);
-    }
+      try {
+          // will fire triggerObserversNotification so update() will be called
+          this.myPreferences.setPreference(Preferences.MODEL_IMAGE_SCALE, this.jComboBoxColorScale.getSelectedItem().toString());
+      } catch (PreferencesException pe) {
+          logger.error("property failure : ", pe);
+      }
   }//GEN-LAST:event_jComboBoxColorScaleActionPerformed
 
   private void jRadioButtonFastUserModelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonFastUserModelActionPerformed
-    try {
-      // will fire triggerObserversNotification so update() will be called
-      this.myPreferences.setPreference(Preferences.MODEL_USER_FAST, Boolean.valueOf(this.jRadioButtonFastUserModelYes.isSelected()));
-    } catch (PreferencesException pe) {
-      logger.error("property failure : ", pe);
-    }
+      try {
+          // will fire triggerObserversNotification so update() will be called
+          this.myPreferences.setPreference(Preferences.MODEL_USER_FAST, Boolean.valueOf(this.jRadioButtonFastUserModelYes.isSelected()));
+      } catch (PreferencesException pe) {
+          logger.error("property failure : ", pe);
+      }
   }//GEN-LAST:event_jRadioButtonFastUserModelActionPerformed
 
   private void jRadioButtonNightOnlyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonNightOnlyActionPerformed
-    try {
-      // will fire triggerObserversNotification so update() will be called
-      this.myPreferences.setPreference(Preferences.ONLY_NIGHT, Boolean.valueOf(this.jRadioButtonNightOnlyYes.isSelected()));
-    } catch (PreferencesException pe) {
-      logger.error("property failure : ", pe);
-    }
+      try {
+          // will fire triggerObserversNotification so update() will be called
+          this.myPreferences.setPreference(Preferences.ONLY_NIGHT, Boolean.valueOf(this.jRadioButtonNightOnlyYes.isSelected()));
+      } catch (PreferencesException pe) {
+          logger.error("property failure : ", pe);
+      }
   }//GEN-LAST:event_jRadioButtonNightOnlyActionPerformed
 
   private void jComboBoxBestPopsAlgorithmActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxBestPopsAlgorithmActionPerformed
-    try {
-      // will fire triggerObserversNotification so update() will be called
-      this.myPreferences.setPreference(Preferences.BEST_POPS_ALGORITHM, this.jComboBoxBestPopsAlgorithm.getSelectedItem().toString());
-    } catch (PreferencesException pe) {
-      logger.error("property failure : ", pe);
-    }
+      try {
+          // will fire triggerObserversNotification so update() will be called
+          this.myPreferences.setPreference(Preferences.BEST_POPS_ALGORITHM, this.jComboBoxBestPopsAlgorithm.getSelectedItem().toString());
+      } catch (PreferencesException pe) {
+          logger.error("property failure : ", pe);
+      }
   }//GEN-LAST:event_jComboBoxBestPopsAlgorithmActionPerformed
 
   private void jComboBoxBestPopsCriteriaSigmaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxBestPopsCriteriaSigmaActionPerformed
-    try {
-      // will fire triggerObserversNotification so update() will be called
-      this.myPreferences.setPreference(Preferences.BEST_POPS_CRITERIA_SIGMA, this.jComboBoxBestPopsCriteriaSigma.getSelectedItem().toString());
-    } catch (PreferencesException pe) {
-      logger.error("property failure : ", pe);
-    }
+      try {
+          // will fire triggerObserversNotification so update() will be called
+          this.myPreferences.setPreference(Preferences.BEST_POPS_CRITERIA_SIGMA, this.jComboBoxBestPopsCriteriaSigma.getSelectedItem().toString());
+      } catch (PreferencesException pe) {
+          logger.error("property failure : ", pe);
+      }
   }//GEN-LAST:event_jComboBoxBestPopsCriteriaSigmaActionPerformed
 
   private void jComboBoxBestPopsCriteriaAverageWeightActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxBestPopsCriteriaAverageWeightActionPerformed
-    try {
-      // will fire triggerObserversNotification so update() will be called
-      this.myPreferences.setPreference(Preferences.BEST_POPS_CRITERIA_AVERAGE_WEIGHT, this.jComboBoxBestPopsCriteriaAverageWeight.getSelectedItem().toString());
-    } catch (PreferencesException pe) {
-      logger.error("property failure : ", pe);
-    }
+      try {
+          // will fire triggerObserversNotification so update() will be called
+          this.myPreferences.setPreference(Preferences.BEST_POPS_CRITERIA_AVERAGE_WEIGHT, this.jComboBoxBestPopsCriteriaAverageWeight.getSelectedItem().toString());
+      } catch (PreferencesException pe) {
+          logger.error("property failure : ", pe);
+      }
   }//GEN-LAST:event_jComboBoxBestPopsCriteriaAverageWeightActionPerformed
 
-  /**
-   * Listen to preferences changes
-   * @param o Preferences
-   * @param arg unused
-   */
-  @Override
-  public void update(final Observable o, final Object arg) {
-    logger.debug("Preferences updated on : {}", this);
+    private void jComboBoxSuperSamplingActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxSuperSamplingActionPerformed
+        try {
+            // will fire triggerObserversNotification so update() will be called
+            this.myPreferences.setPreference(Preferences.OIFITS_SUPER_SAMPLING, this.jComboBoxSuperSampling.getSelectedItem());
+        } catch (PreferencesException pe) {
+            logger.error("property failure : ", pe);
+        }
+    }//GEN-LAST:event_jComboBoxSuperSamplingActionPerformed
 
-    // read prefs to set states of GUI elements
-    final boolean preferXyMode = this.myPreferences.getPreferenceAsBoolean(Preferences.MODELEDITOR_PREFERXY);
-    this.jRadioButtonXY.setSelected(preferXyMode);
-    this.jRadioButtonRhoTheta.setSelected(!preferXyMode);
+    private void jRadioButtonAddNoiseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonAddNoiseActionPerformed
+        try {
+            // will fire triggerObserversNotification so update() will be called
+            this.myPreferences.setPreference(Preferences.OIFITS_ADD_NOISE, Boolean.valueOf(this.jRadioButtonAddNoiseYes.isSelected()));
+        } catch (PreferencesException pe) {
+            logger.error("property failure : ", pe);
+        }
+    }//GEN-LAST:event_jRadioButtonAddNoiseActionPerformed
 
-    this.jComboBoxImageSize.setSelectedItem(this.myPreferences.getPreferenceAsInt(Preferences.MODEL_IMAGE_SIZE));
-    this.jComboBoxLUT.setSelectedItem(this.myPreferences.getPreference(Preferences.MODEL_IMAGE_LUT));
-    this.jComboBoxColorScale.setSelectedItem(this.myPreferences.getImageColorScale());
+    private void jRadioButtonImageNoiseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonImageNoiseActionPerformed
+        try {
+            // will fire triggerObserversNotification so update() will be called
+            this.myPreferences.setPreference(Preferences.MODEL_IMAGE_NOISE, Boolean.valueOf(this.jRadioButtonImageNoiseYes.isSelected()));
+        } catch (PreferencesException pe) {
+            logger.error("property failure : ", pe);
+        }
+    }//GEN-LAST:event_jRadioButtonImageNoiseActionPerformed
 
-    final boolean preferTimeLst = AsproConstants.TIME_LST.equals(this.myPreferences.getPreference(Preferences.TIME_REFERENCE));
-    this.jRadioButtonTimeLST.setSelected(preferTimeLst);
-    this.jRadioButtonTimeUTC.setSelected(!preferTimeLst);
+    /**
+     * Listen to preferences changes
+     * @param o Preferences
+     * @param arg unused
+     */
+    @Override
+    public void update(final Observable o, final Object arg) {
+        logger.debug("Preferences updated on : {}", this);
 
-    final boolean preferCenterNight = this.myPreferences.getPreferenceAsBoolean(Preferences.CENTER_NIGHT);
-    this.jRadioButtonCenterNightYes.setSelected(preferCenterNight);
-    this.jRadioButtonCenterNightNo.setSelected(!preferCenterNight);
+        // read prefs to set states of GUI elements
 
-    this.jFieldMinElev.setValue(this.myPreferences.getPreferenceAsDouble(Preferences.MIN_ELEVATION));
+        // Observability:
+        final boolean preferTimeLst = AsproConstants.TIME_LST.equals(this.myPreferences.getPreference(Preferences.TIME_REFERENCE));
+        this.jRadioButtonTimeLST.setSelected(preferTimeLst);
+        this.jRadioButtonTimeUTC.setSelected(!preferTimeLst);
 
-    this.jComboBoxTwilight.setSelectedItem(getTwilight(this.myPreferences.getTwilightAsNightLimit()));
+        final boolean preferCenterNight = this.myPreferences.getPreferenceAsBoolean(Preferences.CENTER_NIGHT);
+        this.jRadioButtonCenterNightYes.setSelected(preferCenterNight);
+        this.jRadioButtonCenterNightNo.setSelected(!preferCenterNight);
 
-    final boolean useFastUserModel = this.myPreferences.isFastUserModel();
-    this.jRadioButtonFastUserModelYes.setSelected(useFastUserModel);
-    this.jRadioButtonFastUserModelNo.setSelected(!useFastUserModel);
+        this.jFieldMinElev.setValue(this.myPreferences.getPreferenceAsDouble(Preferences.MIN_ELEVATION));
 
-    this.jComboBoxBestPopsAlgorithm.setSelectedItem(this.myPreferences.getBestPopsAlgorithm());
-    this.jComboBoxBestPopsCriteriaSigma.setSelectedItem(this.myPreferences.getBestPopsCriteriaSigma());
-    this.jComboBoxBestPopsCriteriaAverageWeight.setSelectedItem(this.myPreferences.getBestPopsCriteriaAverageWeight());
-  }
-  // Variables declaration - do not modify//GEN-BEGIN:variables
-  private javax.swing.ButtonGroup buttonGroupFastUserModel;
-  private javax.swing.ButtonGroup buttonGroupNightOnly;
-  private javax.swing.ButtonGroup buttonGroupPositionStyle;
-  private javax.swing.ButtonGroup buttonGroupTimeAxis;
-  private javax.swing.ButtonGroup buttonGroupTimeRef;
-  private javax.swing.JButton jButtonDefault;
-  private javax.swing.JButton jButtonSave;
-  private javax.swing.JComboBox jComboBoxBestPopsAlgorithm;
-  private javax.swing.JComboBox jComboBoxBestPopsCriteriaAverageWeight;
-  private javax.swing.JComboBox jComboBoxBestPopsCriteriaSigma;
-  private javax.swing.JComboBox jComboBoxColorScale;
-  private javax.swing.JComboBox jComboBoxImageSize;
-  private javax.swing.JComboBox jComboBoxLUT;
-  private javax.swing.JComboBox jComboBoxTwilight;
-  private javax.swing.JFormattedTextField jFieldMinElev;
-  private javax.swing.JLabel jLabelBestPopsAlgorithm;
-  private javax.swing.JLabel jLabelBestPopsCriteriaAverageWeight;
-  private javax.swing.JLabel jLabelBestPopsCriteriaSigma;
-  private javax.swing.JLabel jLabelCenterNight;
-  private javax.swing.JLabel jLabelColorScale;
-  private javax.swing.JLabel jLabelFastUserModel;
-  private javax.swing.JLabel jLabelImageSize;
-  private javax.swing.JLabel jLabelLutTable;
-  private javax.swing.JLabel jLabelMinElev;
-  private javax.swing.JLabel jLabelNightOnly;
-  private javax.swing.JLabel jLabelPositionStyle;
-  private javax.swing.JLabel jLabelTimeRef;
-  private javax.swing.JLabel jLabelTwilight;
-  private javax.swing.JPanel jPanelButtons;
-  private javax.swing.JPanel jPanelModelEditor;
-  private javax.swing.JPanel jPanelModelImage;
-  private javax.swing.JPanel jPanelObservability;
-  private javax.swing.JPanel jPanelUserModel;
-  private javax.swing.JPanel jPanelView;
-  private javax.swing.JRadioButton jRadioButtonCenterNightNo;
-  private javax.swing.JRadioButton jRadioButtonCenterNightYes;
-  private javax.swing.JRadioButton jRadioButtonFastUserModelNo;
-  private javax.swing.JRadioButton jRadioButtonFastUserModelYes;
-  private javax.swing.JRadioButton jRadioButtonNightOnlyNo;
-  private javax.swing.JRadioButton jRadioButtonNightOnlyYes;
-  private javax.swing.JRadioButton jRadioButtonRhoTheta;
-  private javax.swing.JRadioButton jRadioButtonTimeLST;
-  private javax.swing.JRadioButton jRadioButtonTimeUTC;
-  private javax.swing.JRadioButton jRadioButtonXY;
-  private javax.swing.JScrollPane jScrollPaneView;
-  private javax.swing.JSeparator jSeparator;
-  // End of variables declaration//GEN-END:variables
+        this.jComboBoxTwilight.setSelectedItem(getTwilight(this.myPreferences.getTwilightAsNightLimit()));
 
-  /**
-   * Return the string choice corresponding to the given SunType instance
-   * @param type SunType instance
-   * @return string choice
-   */
-  private String getTwilight(final SunType type) {
-    switch (type) {
-      default:
-      case Night:
-        return TWILIGHTS[0];
-      case AstronomicalTwilight:
-        return TWILIGHTS[1];
-      case NauticalTwilight:
-        return TWILIGHTS[2];
-      case CivilTwilight:
-        return TWILIGHTS[3];
+        // Observability (best pops):
+        this.jComboBoxBestPopsAlgorithm.setSelectedItem(this.myPreferences.getBestPopsAlgorithm());
+        this.jComboBoxBestPopsCriteriaSigma.setSelectedItem(this.myPreferences.getBestPopsCriteriaSigma());
+        this.jComboBoxBestPopsCriteriaAverageWeight.setSelectedItem(this.myPreferences.getBestPopsCriteriaAverageWeight());
+
+        // Model editor:
+        final boolean preferXyMode = this.myPreferences.getPreferenceAsBoolean(Preferences.MODELEDITOR_PREFERXY);
+        this.jRadioButtonXY.setSelected(preferXyMode);
+        this.jRadioButtonRhoTheta.setSelected(!preferXyMode);
+
+        // Model image:
+        this.jComboBoxImageSize.setSelectedItem(this.myPreferences.getPreferenceAsInt(Preferences.MODEL_IMAGE_SIZE));
+        this.jComboBoxLUT.setSelectedItem(this.myPreferences.getPreference(Preferences.MODEL_IMAGE_LUT));
+        this.jComboBoxColorScale.setSelectedItem(this.myPreferences.getImageColorScale());
+
+        final boolean preferImageNoide = this.myPreferences.getPreferenceAsBoolean(Preferences.MODEL_IMAGE_NOISE);
+        this.jRadioButtonImageNoiseYes.setSelected(preferImageNoide);
+        this.jRadioButtonImageNoiseNo.setSelected(!preferImageNoide);
+
+        // User model:
+        final boolean useFastUserModel = this.myPreferences.isFastUserModel();
+        this.jRadioButtonFastUserModelYes.setSelected(useFastUserModel);
+        this.jRadioButtonFastUserModelNo.setSelected(!useFastUserModel);
+
+        // User model:
+        this.jComboBoxSuperSampling.setSelectedItem(this.myPreferences.getPreferenceAsInt(Preferences.OIFITS_SUPER_SAMPLING));
+
+        final boolean preferAddNoise = this.myPreferences.getPreferenceAsBoolean(Preferences.OIFITS_ADD_NOISE);
+        this.jRadioButtonAddNoiseYes.setSelected(preferAddNoise);
+        this.jRadioButtonAddNoiseNo.setSelected(!preferAddNoise);
     }
-  }
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.ButtonGroup buttonGroupAddNoise;
+    private javax.swing.ButtonGroup buttonGroupFastUserModel;
+    private javax.swing.ButtonGroup buttonGroupImageNoise;
+    private javax.swing.ButtonGroup buttonGroupNightOnly;
+    private javax.swing.ButtonGroup buttonGroupPositionStyle;
+    private javax.swing.ButtonGroup buttonGroupTimeAxis;
+    private javax.swing.ButtonGroup buttonGroupTimeRef;
+    private javax.swing.JButton jButtonDefault;
+    private javax.swing.JButton jButtonSave;
+    private javax.swing.JComboBox jComboBoxBestPopsAlgorithm;
+    private javax.swing.JComboBox jComboBoxBestPopsCriteriaAverageWeight;
+    private javax.swing.JComboBox jComboBoxBestPopsCriteriaSigma;
+    private javax.swing.JComboBox jComboBoxColorScale;
+    private javax.swing.JComboBox jComboBoxImageSize;
+    private javax.swing.JComboBox jComboBoxLUT;
+    private javax.swing.JComboBox jComboBoxSuperSampling;
+    private javax.swing.JComboBox jComboBoxTwilight;
+    private javax.swing.JFormattedTextField jFieldMinElev;
+    private javax.swing.JLabel jLabelAddNoise;
+    private javax.swing.JLabel jLabelBestPopsAlgorithm;
+    private javax.swing.JLabel jLabelBestPopsCriteriaAverageWeight;
+    private javax.swing.JLabel jLabelBestPopsCriteriaSigma;
+    private javax.swing.JLabel jLabelCenterNight;
+    private javax.swing.JLabel jLabelColorScale;
+    private javax.swing.JLabel jLabelFastUserModel;
+    private javax.swing.JLabel jLabelImageNoise;
+    private javax.swing.JLabel jLabelImageSize;
+    private javax.swing.JLabel jLabelLutTable;
+    private javax.swing.JLabel jLabelMinElev;
+    private javax.swing.JLabel jLabelNightOnly;
+    private javax.swing.JLabel jLabelPositionStyle;
+    private javax.swing.JLabel jLabelSuperSampling;
+    private javax.swing.JLabel jLabelTimeRef;
+    private javax.swing.JLabel jLabelTwilight;
+    private javax.swing.JPanel jPanelButtons;
+    private javax.swing.JPanel jPanelModelEditor;
+    private javax.swing.JPanel jPanelModelImage;
+    private javax.swing.JPanel jPanelOIFits;
+    private javax.swing.JPanel jPanelObservability;
+    private javax.swing.JPanel jPanelUserModel;
+    private javax.swing.JPanel jPanelView;
+    private javax.swing.JRadioButton jRadioButtonAddNoiseNo;
+    private javax.swing.JRadioButton jRadioButtonAddNoiseYes;
+    private javax.swing.JRadioButton jRadioButtonCenterNightNo;
+    private javax.swing.JRadioButton jRadioButtonCenterNightYes;
+    private javax.swing.JRadioButton jRadioButtonFastUserModelNo;
+    private javax.swing.JRadioButton jRadioButtonFastUserModelYes;
+    private javax.swing.JRadioButton jRadioButtonImageNoiseNo;
+    private javax.swing.JRadioButton jRadioButtonImageNoiseYes;
+    private javax.swing.JRadioButton jRadioButtonNightOnlyNo;
+    private javax.swing.JRadioButton jRadioButtonNightOnlyYes;
+    private javax.swing.JRadioButton jRadioButtonRhoTheta;
+    private javax.swing.JRadioButton jRadioButtonTimeLST;
+    private javax.swing.JRadioButton jRadioButtonTimeUTC;
+    private javax.swing.JRadioButton jRadioButtonXY;
+    private javax.swing.JScrollPane jScrollPaneView;
+    private javax.swing.JSeparator jSeparator;
+    // End of variables declaration//GEN-END:variables
 
-  /**
-   * Return the SunType instance corresponding to the given string choice
-   * @param choice string choice
-   * @return SunType instance
-   */
-  private SunType getTwilight(final String choice) {
-    int pos = -1;
-    for (int i = 0; i < TWILIGHTS.length; i++) {
-      if (TWILIGHTS[i].equals(choice)) {
-        pos = i;
-        break;
-      }
+    /**
+     * Return the string choice corresponding to the given SunType instance
+     * @param type SunType instance
+     * @return string choice
+     */
+    private String getTwilight(final SunType type) {
+        switch (type) {
+            default:
+            case Night:
+                return TWILIGHTS[0];
+            case AstronomicalTwilight:
+                return TWILIGHTS[1];
+            case NauticalTwilight:
+                return TWILIGHTS[2];
+            case CivilTwilight:
+                return TWILIGHTS[3];
+        }
     }
-    if (pos == -1) {
-      logger.warn("choice[{}] not found in {}", choice, Arrays.toString(TWILIGHTS));
+
+    /**
+     * Return the SunType instance corresponding to the given string choice
+     * @param choice string choice
+     * @return SunType instance
+     */
+    private SunType getTwilight(final String choice) {
+        int pos = -1;
+        for (int i = 0; i < TWILIGHTS.length; i++) {
+            if (TWILIGHTS[i].equals(choice)) {
+                pos = i;
+                break;
+            }
+        }
+        if (pos == -1) {
+            logger.warn("choice[{}] not found in {}", choice, Arrays.toString(TWILIGHTS));
+        }
+        switch (pos) {
+            default:
+            case 0:
+                return SunType.Night;
+            case 1:
+                return SunType.AstronomicalTwilight;
+            case 2:
+                return SunType.NauticalTwilight;
+            case 3:
+                return SunType.CivilTwilight;
+        }
     }
-    switch (pos) {
-      default:
-      case 0:
-        return SunType.Night;
-      case 1:
-        return SunType.AstronomicalTwilight;
-      case 2:
-        return SunType.NauticalTwilight;
-      case 3:
-        return SunType.CivilTwilight;
-    }
-  }
 }
