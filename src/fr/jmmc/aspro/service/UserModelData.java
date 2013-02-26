@@ -4,6 +4,7 @@
 package fr.jmmc.aspro.service;
 
 import fr.jmmc.aspro.model.OIBase;
+import fr.jmmc.aspro.model.Range;
 import fr.jmmc.oitools.image.FitsImage;
 import fr.jmmc.oitools.image.FitsImageHDU;
 
@@ -16,6 +17,8 @@ public final class UserModelData extends OIBase {
     /* members */
     /** FFT ready fits image */
     private FitsImage fitsImage = null;
+    /** wavelength range of the fits image (fits cube) */
+    private Range wavelengthRange = null;
     /** 
      * Flattened data points (1D) stored with col and row: [data col row] 
      * spatial coordinates along the column and row axis (rad)
@@ -47,19 +50,31 @@ public final class UserModelData extends OIBase {
     }
 
     /**
-     * Return the image wavelength in meters
+     * Return the wavelength increment along the wavelength axis (meter per pixel)
+     * @return wavelength increment along the wavelength axis (meter per pixel)
+     */
+    public double getWaveLengthIncrement() {
+        // TODO: remove
+        return fitsImage.getIncWL();
+    }
+
+    /**
+     * Return the image wavelength in meters or Double.NaN if undefined
      * @return image wavelength in meters or Double.NaN if undefined
      */
-    public Double getWaveLength() {
+    public double getWaveLength() {
         return fitsImage.getWaveLength();
     }
 
     /**
-     * Return the wavelength increment along the wavelength axis (meter per pixel)
-     * @return wavelength increment along the wavelength axis (meter per pixel)
+     * Return the image wavelength range in meters [wavelength - 1/2 increment_wavelength; wavelength + 1/2 increment_wavelength] or Double.NaN if wavelength is undefined
+     * @return the image wavelength range in meters
      */
-    public double getIncWL() {
-        return fitsImage.getIncWL();
+    public Range getWaveLengthRange() {
+        if (this.wavelengthRange == null) {
+            this.wavelengthRange = new Range(fitsImage.getWaveLengthMin(), fitsImage.getWaveLengthMax());
+        }
+        return this.wavelengthRange;
     }
 
     /**
