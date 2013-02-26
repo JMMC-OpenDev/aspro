@@ -57,6 +57,8 @@ public final class AstroSkyCalc {
     private double jdLst0;
     /** date correspondign to LST=00:00:00 */
     private Calendar dateLst0;
+    /** temporary WhenWhere instance used by calendar conversion */
+    private WhenWhere wwCal = null;
 
     /**
      * Public Constructor
@@ -288,7 +290,12 @@ public final class AstroSkyCalc {
      * @return Calendar object
      */
     public Calendar toCalendar(final double jd, final boolean useLst) {
-        final WhenWhere ww = new WhenWhere(jd, this.site, false);
+        // avoid new instances:
+        if (wwCal == null) {
+            wwCal = new WhenWhere(jd, this.site, false);
+        } else {
+            wwCal.changeWhen(jd);
+        }
 
         /* notes :
          * - month is in range [0;11] in java Calendar
@@ -298,7 +305,7 @@ public final class AstroSkyCalc {
         // The default TimeZone is already set to GMT :
         final Calendar calendar;
         if (useLst) {
-            final RA sidereal = ww.siderealobj;
+            final RA sidereal = wwCal.siderealobj;
 
             // use the observation date as the LST has only time :
             calendar = new GregorianCalendar(this.dateLst0.get(Calendar.YEAR), this.dateLst0.get(Calendar.MONTH), this.dateLst0.get(Calendar.DAY_OF_MONTH),
@@ -331,7 +338,7 @@ public final class AstroSkyCalc {
             }
 
         } else {
-            final GenericCalDat utDate = ww.when.UTDate;
+            final GenericCalDat utDate = wwCal.when.UTDate;
 
             calendar = new GregorianCalendar(utDate.year, utDate.month - 1, utDate.day,
                     utDate.timeofday.hour, utDate.timeofday.minute, (int) Math.round(utDate.timeofday.second));
@@ -518,16 +525,11 @@ public final class AstroSkyCalc {
             return 0d;
         }
         double maxIllum = 0d;
-        double jdMin, jdMax, jdMid;
 
         for (final Range range : moonRanges) {
-            jdMin = range.getMin();
-            jdMax = range.getMax();
-            jdMid = 0.5d * (jdMin + jdMax);
-
-            maxIllum = Math.max(maxIllum, moonIllum(jdMin));
-            maxIllum = Math.max(maxIllum, moonIllum(jdMid));
-            maxIllum = Math.max(maxIllum, moonIllum(jdMax));
+            maxIllum = Math.max(maxIllum, moonIllum(range.getMin()));
+            maxIllum = Math.max(maxIllum, moonIllum(range.getCenter()));
+            maxIllum = Math.max(maxIllum, moonIllum(range.getMax()));
         }
         return maxIllum;
     }

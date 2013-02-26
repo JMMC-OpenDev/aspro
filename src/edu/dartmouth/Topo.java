@@ -15,7 +15,7 @@ public final class Topo {
     static final double EQUAT_RAD = 6378137.;   // equatorial radius, meters
     static final double INV_EQUAT_RAD = 1d / EQUAT_RAD;
 
-    static double[] Geocent(final double longitin, final double latitin, final double height) {
+    static void Geocent(final double longitin, final double latitin, final double height, final double[] retVals) {
         // XYZ coordinates given geographic.  Declared static because it will often
         // be used with lst in place of Longitude.
         // input is decimal hours, decimal degrees, and meters.
@@ -35,14 +35,15 @@ public final class Topo {
         final double C_geo = 1d / Math.sqrt(denom) + height * INV_EQUAT_RAD;
         final double S_geo = (1d - FLATTEN) * (1d - FLATTEN) * C_geo + height * INV_EQUAT_RAD;
 
-        return new double[]{
-                    C_geo * coslat * coslong,
-                    C_geo * coslat * sinlong,
-                    S_geo * sinlat
-                };
+        // results:
+        retVals[0] = C_geo * coslat * coslong; 
+        retVals[1] = C_geo * coslat * sinlong; 
+        retVals[2] = S_geo * sinlat; 
     }
 
-    static Celest topocorr(final Celest geopos, final InstantInTime when, final Site where, final double sidereal) {
+    static void topocorr(final Celest geopos, final InstantInTime when, final Site where, final double sidereal,
+            final Celest topopos) {
+        
         // The geopos to which this is being applied needs to have its
         // distance set.
 
@@ -55,20 +56,21 @@ public final class Topo {
         double y = FastMath.sin(alphaRad) * cosdec * geopos.distance;
         double z = FastMath.sin(deltaRad) * geopos.distance;
 
-        final double[] retvals = Geocent(sidereal, where.lat.value, where.elevsea);
+        final double[] retvals = topopos.tmpVals();
+        Geocent(sidereal, where.lat.value, where.elevsea, retvals);
 
         x -= retvals[0] * Const.AU_IN_EARTHRAD;
         y -= retvals[1] * Const.AU_IN_EARTHRAD;
         z -= retvals[2] * Const.AU_IN_EARTHRAD;
 
-        final double topodist = Math.sqrt(x * x + y * y + z * z);
+        final double topodist = 1d / Math.sqrt(x * x + y * y + z * z);
 
-        x /= topodist;
-        y /= topodist;
-        z /= topodist;
+        x *= topodist;
+        y *= topodist;
+        z *= topodist;
 
-        return new Celest(FastMath.atan2(y, x) * Const.HRS_IN_RADIAN,
-                FastMath.asin(z) * Const.DEG_IN_RADIAN,
-                when.julianEpoch(), topodist);
+        // update topo position:
+        topopos.update(FastMath.atan2(y, x) * Const.HRS_IN_RADIAN, FastMath.asin(z) * Const.DEG_IN_RADIAN, 
+                when.julianEpoch(),topodist);
     }
 }

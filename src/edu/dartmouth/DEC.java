@@ -16,22 +16,24 @@ public class DEC implements Cloneable {
 
   // overloaded constructors are simply wrappers
   public DEC(final double inval) {
-    setDec(inval);
+    value = inval;
+    sex = new Sexagesimal(value);
   }
 
   public DEC(final String s) {
-    setDec(s);
+    sex = new Sexagesimal(s);
+    value = sex.value;
   }
   // no good way to adjust out-of-range decs (it
   // doesn't wrap) so this is simpler than HA and RA
 
   public final void setDec(final double inval) {
     value = inval;
-    sex = new Sexagesimal(value);
+    sex.tosex(value);
   }
 
   public final void setDec(final String s) {
-    sex = new Sexagesimal(s);
+    sex.parseSexString(s);
     value = sex.value;
   }
 

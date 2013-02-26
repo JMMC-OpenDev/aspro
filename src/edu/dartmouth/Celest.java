@@ -17,6 +17,7 @@ public final class Celest implements Cloneable {
     double equinox;
     double distance;  // not always used but sometimes useful
     double galat, galong;  //  galactic coords, in degrees.
+    double[] tmpVals = null; // LBO: temporary storage [3]
 
     // To do:  Add an elaborate input parsing mechanism and overload
     // constructors like crazy.
@@ -83,6 +84,16 @@ public final class Celest implements Cloneable {
         }
     }
 
+    // LBO: added update instance method:
+    void update(final double r, final double d, final double e, final double dist) {
+        // ra, DEC, and equinox decimal hours, degr; dist in
+        // undefined units.
+        alpha.setRA(r);
+        delta.setDec(d);
+        equinox = e;
+        distance = dist;
+    }
+
     void UpdateFromStrings(final String rastr, final String decstr, final String eqstr) {
         // updates a previously instantiated celest from three strings.
         alpha.setRA(rastr);
@@ -96,6 +107,7 @@ public final class Celest implements Cloneable {
             final Celest copy = (Celest) super.clone();
             copy.alpha = alpha.clone();
             copy.delta = delta.clone();
+            copy.tmpVals = null;
             return copy;
         } catch (CloneNotSupportedException e) {
             throw new Error("This should never happen!");
@@ -149,17 +161,20 @@ public final class Celest implements Cloneable {
 
     /** Given instance variables, returns UNIT VECTOR {x,y,z}. */
     double[] cel_unitXYZ() {
+        
+        // LBO: reuse tmpVals
+        final double[] retVals = tmpVals();
 
         final double alphaRad = this.alpha.radians();
         final double deltaRad = this.delta.radians();
 
         final double cosdec = FastMath.cos(deltaRad);
 
-        return new double[]{
-                    FastMath.cos(alphaRad) * cosdec,
-                    FastMath.sin(alphaRad) * cosdec,
-                    FastMath.sin(deltaRad)
-                };
+        retVals[0] = FastMath.cos(alphaRad) * cosdec; 
+        retVals[1] = FastMath.sin(alphaRad) * cosdec; 
+        retVals[2] = FastMath.sin(deltaRad); 
+        
+        return retVals;
     }
 
     /** generates a unit vector XYZ in equinox NewEquinox from the current
@@ -268,5 +283,12 @@ public final class Celest implements Cloneable {
             galong += 360d;
         }
         galat = temp[1];
+    }
+    
+    double[] tmpVals() {
+        if (tmpVals == null) {
+            tmpVals = new double[3];
+        }
+        return tmpVals;
     }
 }

@@ -12,6 +12,12 @@ public final class Ecliptic {
   /* Holds some static methods for rotating from ecliptic to equatorial and back ... */
 
   static double[] eclrot(final double jd, final double x, final double y, final double z) {
+      final double[] equVals = new double[3];
+      eclrot(jd, x, y, z, equVals);
+      return equVals;
+  }
+    
+  static void eclrot(final double jd, final double x, final double y, final double z, final double[] equVals) {
     /** rotates x,y,z coordinates to equatorial x,y,z; all are
     in equinox of date. Returns [0] = x, [1] = y, [2] = z */
     final double T = (jd - Const.J2000) * Const.INV_CENTURY;
@@ -23,11 +29,9 @@ public final class Ecliptic {
     final double cosIncl = FastMath.cos(incl);
     final double sinIncl = FastMath.sin(incl);
     
-    return new double[]{
-              x,
-              cosIncl * y - sinIncl * z,
-              sinIncl * y + cosIncl * z
-            };
+    equVals[0] = x;
+    equVals[1] = cosIncl * y - sinIncl * z;
+    equVals[2] = sinIncl * y + cosIncl * z;
   }
 
   static double[] Cel2Ecl(Observation o) {

@@ -11,10 +11,15 @@ import net.jafama.FastMath;
 /** container for several static spherical trig methods. */
 public final class Spherical {
 
+    // LBO: higher threshold to avoid too many precession calls:
+    private final static double THRESHOLD_PRECESS_IN_DAY = 0.5d / 365.25d; // 12H
+
     /** angle in radians between two positions. */
     static double subtend(final Celest a, final Celest b) {
         final Celest bprime;
-        if (Math.abs(a.equinox - b.equinox) > 0.001d) {
+
+        if (Math.abs(a.equinox - b.equinox) > THRESHOLD_PRECESS_IN_DAY) {
+            // System.out.println("moon/target delta equinox = " + Math.abs(a.equinox - b.equinox)); // moon
             bprime = b.precessed(a.equinox);
         } else {
             bprime = b;

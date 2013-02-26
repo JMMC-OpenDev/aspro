@@ -27,12 +27,21 @@ public final class Observation implements Cloneable {
 /*  double sunobj;  // angular sepn of sun from obj */
 
     Observation(final WhenWhere wIn, final Celest celIn) {
-        w = wIn.clone();
-        c = celIn.clone();
+        this(wIn, celIn, true);
+    }
+
+    /**
+     * LBO: special constructor without cloning given instances
+     * @param wIn
+     * @param celIn 
+     */
+    Observation(final WhenWhere wIn, final Celest celIn, final boolean doClone) {
+        w = (doClone) ? wIn.clone() : wIn;
+        c = (doClone) ? celIn.clone() : celIn;
         ha = new HA(0d);
         computeSky();
     }
-
+    
     void computeSky() {   // bare-bones updater
         // assumes WhenWhere w has been updated.
         current = c.precessed(w.when.julianEpoch());
@@ -96,7 +105,7 @@ public final class Observation implements Cloneable {
     void computeMoonSeparation() {
         // assumes WhenWhere w has been updated.
         // do not precess current coordinates as JD does not change much during night:
-        //  current = c.precessed(w.when.julianEpoch());
+        // current = c.precessed(w.when.julianEpoch());
 
         //System.out.printf("computeSunMoon %s (%f)%n",
         //       current.alpha.RoundedRAString(2," "),current.equinox);
