@@ -178,8 +178,7 @@
     </menu>
     
     <menu label="Help">
-      <menu label="Show Application release notes" classpath="fr.jmmc.jmcs.gui.action.ShowHtmlReleaseNotesAction" action="showApp"/>
-      <menu label="Show Configuration release notes" classpath="fr.jmmc.jmcs.gui.action.ShowHtmlReleaseNotesAction" action="showConf"/>
+      <menu label="Show Configuration release notes" classpath="fr.jmmc.jmcs.gui.action.ShowReleaseNotesAction" action="showConf"/>
     </menu>
     
   </menubar>
