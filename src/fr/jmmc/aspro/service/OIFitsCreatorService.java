@@ -122,6 +122,8 @@ public final class OIFitsCreatorService {
     /* internal */
     /** target has model (analytical or user model) */
     private final boolean hasModel;
+    /** flag indicating if the target model wavelengths are compatible with the instrument mode */
+    private boolean isModelWLValid = true;
     /** flag = true if returned errors are valid */
     private final boolean errorValid;
     /** flag to add gaussian noise to OIFits data; true if parameter doDataNoise = true and noise parameters are valid */
@@ -208,9 +210,6 @@ public final class OIFitsCreatorService {
             this.integrationTime = observation.getInstrumentConfiguration().getAcquisitionTime().doubleValue();
         }
 
-        // Prepare with observation:
-        prepare(observation, warningContainer);
-
         // Prepare the noise service :
 
         // note: NoiseService parameter dependencies:
@@ -228,8 +227,16 @@ public final class OIFitsCreatorService {
         // OIFits preferences:
         this.supersamplingOIFits = supersamplingOIFits;
         this.mathModeOIFits = mathModeOIFits;
+
+        // Prepare with observation:
+        prepare(observation, warningContainer);
     }
 
+    /**
+     * Prepare OIFits keywords and the instrumental spectral configuration and may add warning messages
+     * @param observation observation to use
+     * @param warningContainer warning container to use if needed
+     */
     private void prepare(final ObservationSetting observation, final WarningContainer warningContainer) {
 
         final InterferometerConfiguration intConf = observation.getInterferometerConfiguration().getInterferometerConfiguration();
@@ -253,22 +260,45 @@ public final class OIFitsCreatorService {
         prepareInstrumentMode(warningContainer);
     }
 
+    /**
+     * Prepare the instrumental spectral configuration: Wavelengths and may add warning messages
+     * @param warningContainer warning container to use if needed
+     */
     private void prepareInstrumentMode(final WarningContainer warningContainer) {
 
         // TODO: fix wavelengths % user model Fits cube (wavelengths):
         this.waveBand = (this.lambdaMax - this.lambdaMin) / this.nWaveLengths;
         this.waveLengths = computeWaveLengths(this.lambdaMin, this.lambdaMax, this.waveBand);
 
-
-        // Wavelength information:
-        final String firstChannel = Double.toString(NumberUtils.trimTo5Digits(1e6d * this.waveLengths[0]));
-        final String lastChannel = (this.waveLengths.length > 1) ? Double.toString(NumberUtils.trimTo5Digits(1e6d * this.waveLengths[this.waveLengths.length - 1])) : null;
+        // Initial Wavelength information:
+        String firstChannel = Double.toString(convertWL(this.waveLengths[0]));
+        String lastChannel = (this.waveLengths.length > 1) ? Double.toString(convertWL(this.waveLengths[this.waveLengths.length - 1])) : null;
 
         addInformation(warningContainer, this.instrumentName + " instrument mode: "
                 + this.waveLengths.length + " channels "
                 + '[' + firstChannel + ((lastChannel != null) ? (" - " + lastChannel) : "") + ' ' + SpecialChars.UNIT_MICRO_METER + "] "
-                + "(increment: " + NumberUtils.trimTo5Digits(1e6d * this.waveBand) + ' ' + SpecialChars.UNIT_MICRO_METER + ')');
+                + "(band: " + convertWL(this.waveBand) + ' ' + SpecialChars.UNIT_MICRO_METER + ')');
+        
+        
+        
+        // Keep only spectral channels where user model is defined:
+        // note: Instrument spectral channels(waveLengths, waveBand) can be modified by this method:
+        this.isModelWLValid = prepareUserModel(warningContainer);
 
+        
+        // TODO: adjust used spectral channels in information and log:
+
+        // Wavelength information:
+        firstChannel = Double.toString(convertWL(this.waveLengths[0]));
+        lastChannel = (this.waveLengths.length > 1) ? Double.toString(convertWL(this.waveLengths[this.waveLengths.length - 1])) : null;
+
+        /*
+        addInformation(warningContainer, this.instrumentName + " instrument mode: "
+                + this.waveLengths.length + " channels "
+                + '[' + firstChannel + ((lastChannel != null) ? (" - " + lastChannel) : "") + ' ' + SpecialChars.UNIT_MICRO_METER + "] "
+                + "(band: " + convertWL(this.waveBand) + ' ' + SpecialChars.UNIT_MICRO_METER + ')');
+*/
+        
         this.insNameKeyword = this.instrumentName + '_' + firstChannel + ((lastChannel != null) ? ("-" + lastChannel) : "") + '-' + this.waveLengths.length + "ch";
 
         if (logger.isDebugEnabled()) {
@@ -277,11 +307,102 @@ public final class OIFitsCreatorService {
     }
 
     /**
+     * Prepare the user model vs the instrumental spectral configuration
+     * @param warningContainer warning container to use if needed
+     * @return true if OK; false if user model is invalid (so discard computation)
+     */
+    private boolean prepareUserModel(final WarningContainer warningContainer) {
+        if (this.hasModel) {
+            logger.info("Instrument wavelength range: {} - {} µm [{} channels] [band = {} µm]",
+                    convertWL(this.lambdaMin), convertWL(this.lambdaMax), this.nWaveLengths, convertWL(this.waveBand));
+
+            if (!this.target.hasAnalyticalModel()) {
+                // user model if defined:
+                final UserModel userModel = target.getUserModel();
+
+                // Test if user model data is valid:
+                if (userModel != null && userModel.isModelDataReady()) {
+                    final List<UserModelData> modelDataList = target.getUserModel().getModelDataList();
+
+                    final int nImages = modelDataList.size();
+                    final UserModelData modelDataFirst = modelDataList.get(0);
+                    final UserModelData modelDataLast = modelDataList.get(nImages - 1);
+
+                    // first and last images have wavelength ?
+                    final boolean isWL = !Double.isNaN(modelDataFirst.getWaveLength()) && !Double.isNaN(modelDataLast.getWaveLength());
+
+                    if (!isWL && nImages > 1) {
+                        // Fits cube without wavelengths:
+                        addWarning(warningContainer, "User model (Fits cube) without wavelength information is discarded");
+                        return false;
+                    }
+
+                    if (isWL) {
+                        final double wlFirst = modelDataFirst.getWaveLength();
+
+                        if (nImages == 1) {
+
+                            // check image wavelength is in instrument range:
+                            if (wlFirst < this.lambdaMin || wlFirst > this.lambdaMax) {
+                                addWarning(warningContainer, "User model (Fits image) wavelength ("
+                                        + convertWL(wlFirst) + ' ' + SpecialChars.UNIT_MICRO_METER
+                                        + ") outside of instrumental wavelength range");
+                                return false;
+                            }
+
+                        } else {
+                            // Fits cube:
+                            final double wlLast = modelDataLast.getWaveLength();
+                            final double wlInc = modelDataFirst.getWaveLengthIncrement(); // constant in Fits cube
+
+                            logger.info("User model wavelength range: {} - {} µm  [{} images] - inc {} µm",
+                                    convertWL(wlFirst), convertWL(wlLast), nImages, convertWL(wlInc));
+
+                            addInformation(warningContainer, "User model [" + userModel.getName() + "]: " + nImages + " images "
+                                    + '[' + convertWL(wlFirst) + " - " + convertWL(wlLast) + ' ' + SpecialChars.UNIT_MICRO_METER + "] "
+                                    + "(increment: " + convertWL(wlInc) + ' ' + SpecialChars.UNIT_MICRO_METER + ')');
+
+                            // check image wavelengths are ovelarpping the instrument range:
+                            if (modelDataFirst.getWaveLengthRange().getMin() > this.lambdaMax) {
+                                addWarning(warningContainer, "Incorrect model lower wavelength [" + convertWL(wlFirst) + ' ' + SpecialChars.UNIT_MICRO_METER
+                                        + "] > upper instrument wavelength [" + convertWL(this.lambdaMax) + ' ' + SpecialChars.UNIT_MICRO_METER + "] !");
+                                return false;
+                            }
+                            if (modelDataLast.getWaveLengthRange().getMax() < this.lambdaMin) {
+                                addWarning(warningContainer, "Incorrect model upper wavelength [" + convertWL(wlLast) + ' ' + SpecialChars.UNIT_MICRO_METER
+                                        + "] < lower instrument wavelength [" + convertWL(this.lambdaMin) + ' ' + SpecialChars.UNIT_MICRO_METER + "] !");
+                                return false;
+                            }
+
+                            // navigate among spectral channels:
+                            final double insBand = this.waveBand;
+                            final double[] insWaves = this.waveLengths;
+
+                            // TODO: Use ranges for instruments ?
+
+                            // TODO: keep only channels where at least one image is present !!
+                            
+                            // TODO: use findUserModel ...
+
+                            // Test sub sampling (less than 1 IMAGE PER CHANNEL)
+
+                        }
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    /**
      * Create the OIFits structure with OI_ARRAY, OI_TARGET, OI_WAVELENGTH, OI_VIS tables
      * @return OIFits structure
      */
     public OIFitsFile createOIFits() {
-
+        if (!this.isModelWLValid) {
+            // invalid user model against instrumental spectral configuration:
+            return null;
+        }
         // Start the computations :
         final long start = System.nanoTime();
 
@@ -479,7 +600,6 @@ public final class OIFitsCreatorService {
      * Create the OI_WAVELENGTH table
      */
     private void createOIWaveLength() {
-
         // Create OI_WAVELENGTH table :
         final OIWavelength waves = new OIWavelength(this.oiFitsFile, this.nWaveLengths);
         waves.setInsName(this.insNameKeyword);
@@ -527,12 +647,6 @@ public final class OIFitsCreatorService {
         boolean computed = false;
 
         if (this.hasModel) {
-
-            logger.info("Instrument wavelength range: {} - {} µm [{} channels] [band = {} µm]",
-                    NumberUtils.trimTo5Digits(1e6d * this.lambdaMin),
-                    NumberUtils.trimTo5Digits(1e6d * this.lambdaMax), this.nWaveLengths,
-                    NumberUtils.trimTo5Digits(1e6d * this.waveBand));
-
             /** Get the current thread to check if the computation is interrupted */
             final Thread currentThread = Thread.currentThread();
 
@@ -565,7 +679,7 @@ public final class OIFitsCreatorService {
 
             // If Fits cube: use all images at least i.e. adjust frequencies and nSamples
 
-            final double wlInc = (userModel != null && userModel.isModelDataReady()) ? userModel.getModelData(0).getIncWL() : Double.POSITIVE_INFINITY;
+            final double wlInc = (userModel != null && userModel.isModelDataReady()) ? userModel.getModelData(0).getWaveLengthIncrement() : Double.POSITIVE_INFINITY;
 
             // Sub channel width:
             if (wlInc < deltaLambda) {
@@ -726,9 +840,7 @@ public final class OIFitsCreatorService {
                  L3 cache :             4096K
                  */
 
-                // TODO: define mapping between spectral channels and model images:
-                // add warnings if needed
-
+                // define mapping between spectral channels and model images:
                 final List<UserModelData> modelDataList = target.getUserModel().getModelDataList();
 
                 // TODO: determine which images to use according to wavelength range:
@@ -736,11 +848,8 @@ public final class OIFitsCreatorService {
 
                 if (modelParts == null) {
                     // invalid wavelength range:
-                    // TODO: handle such case: everything in NaN / flags = T
                     return false;
                 }
-
-                // TODO: handle not computed wavelengths when image wavelengths are inside instrument wavelength range [NaN + flags]
 
                 for (UserModelComputePart modelPart : modelParts) {
                     logger.info("modelPart: {}", modelPart);
@@ -977,27 +1086,27 @@ public final class OIFitsCreatorService {
         return computed;
     }
 
+    /**
+     * Map user model images on the instrumental spectral channeld
+     * @param modelDataList user model images
+     * @param sampleWaveLengths sampled instrument spectral channels
+     * @return UserModelComputePart list
+     */
     private List<UserModelComputePart> mapUserModel(final List<UserModelData> modelDataList, final double[] sampleWaveLengths) {
 
         final int nImages = modelDataList.size();
         final UserModelData modelDataFirst = modelDataList.get(0);
-        final UserModelData modelDataLast = modelDataList.get(nImages - 1);
 
         // images have wavelength ?
-        final boolean isWL = (modelDataFirst.getWaveLength() != null && !Double.isNaN(modelDataFirst.getWaveLength()));
+        final boolean isWL = !Double.isNaN(modelDataFirst.getWaveLength());
 
         final int nWLen = sampleWaveLengths.length;
 
         final List<UserModelComputePart> modelParts = new ArrayList<UserModelComputePart>(nWLen);
 
-        if (!isWL) {
-            if (nImages > 1) {
-                // Fits cube without wavelengths:
-                // TODO: check wavelength
-//                addWarning("User model (Fits cube) without wavelength information is discarded");
-                //TODO: test such case
-                return null;
-            }
+        if (!isWL && nImages > 1) {
+            // Fits cube without wavelengths => cancel OIFits computation:
+            return null;
         }
 
         if (!isWL || nImages == 1) {
@@ -1010,27 +1119,13 @@ public final class OIFitsCreatorService {
             modelParts.add(part);
 
         } else {
-            // Check wavelength range:
-            final double wlMin = modelDataFirst.getWaveLength().doubleValue();
-            final double wlMax = modelDataLast.getWaveLength().doubleValue();
-            final double wlInc = modelDataFirst.getIncWL(); // constant in Fits cube
-
-            logger.info("User model wavelength range: {} - {} µm  [{} images] - inc {} µm",
-                    NumberUtils.trimTo5Digits(1e6d * wlMin),
-                    NumberUtils.trimTo5Digits(1e6d * wlMax), nImages,
-                    NumberUtils.trimTo5Digits(1e6d * wlInc));
-
-            if (this.lambdaMin + waveBand < wlMin) {
-                logger.warn("Incorrect model lower wavelength [" + NumberUtils.trimTo5Digits(1e6d * wlMin) + "] > lower instrument wavelength [" + NumberUtils.trimTo5Digits(1e6d * this.lambdaMin) + "] !");
-            }
-            if (this.lambdaMax - waveBand > wlMax) {
-                logger.warn("Incorrect model upper wavelength [" + NumberUtils.trimTo5Digits(1e6d * wlMax) + "] < upper instrument wavelength [" + NumberUtils.trimTo5Digits(1e6d * this.lambdaMax) + "] !");
-            }
-
+            // Process wavelength ranges:
             UserModelComputePart current = null;
+            UserModelData modelData;
 
             for (int i = 0; i < nWLen; i++) {
-                final UserModelData modelData = findUserModel(sampleWaveLengths[i], modelDataList, wlMin, wlMax, wlInc);
+                modelData = findUserModel(sampleWaveLengths[i], modelDataList);
+
                 if (current == null || current.modelData != modelData) {
                     // different model image:
                     current = new UserModelComputePart();
@@ -1050,29 +1145,38 @@ public final class OIFitsCreatorService {
         return modelParts;
     }
 
-    private static UserModelData findUserModel(final double wavelength, final List<UserModelData> modelDataList,
-            final double wlMin, final double wlMax, final double wlInc) {
+    /**
+     * Find the user model data corresponding to the closest spectral channel
+     * @param wavelength spectral channel wavelength
+     * @param modelDataList user model data
+     * @return user model data corresponding to the closest spectral channel
+     */
+    private static UserModelData findUserModel(final double wavelength, final List<UserModelData> modelDataList) {
 
-        if (wavelength <= wlMin) {
-            return modelDataList.get(0);
+        UserModelData modelData = modelDataList.get(0);
+
+        // test first user model image:
+        if (wavelength <= modelData.getWaveLengthRange().getMax()) {
+            return modelData;
         }
 
         final int nImages = modelDataList.size();
-        if (wavelength >= wlMax) {
-            return modelDataList.get(nImages - 1);
+
+        modelData = modelDataList.get(nImages - 1);
+
+        if (wavelength >= modelData.getWaveLengthRange().getMin()) {
+            return modelData;
         }
 
-        final double halfInc = 0.5d * wlInc;
-
+        // suppose that model image wavelength ranges do not overlap (true for fitscube):
         for (int i = 0; i < nImages; i++) {
-            final UserModelData modelData = modelDataList.get(i);
-            final double wl = modelData.getWaveLength().doubleValue();
+            modelData = modelDataList.get(i);
 
-            if (Math.abs(wl - wavelength) <= halfInc) {
+            if (modelData.getWaveLengthRange().contains(wavelength)) {
                 return modelData;
             }
         }
-        throw new IllegalStateException("findUserModel: bad case: wavelength=" + wavelength + " - wlMin= " + wlMin + " - wlMax= " + wlMax + " - wlInc= " + wlInc);
+        throw new IllegalStateException("findUserModel: unable for find an user model at wavelength = " + convertWL(wavelength) + " µm !");
     }
 
     /**
@@ -2026,6 +2130,15 @@ public final class OIFitsCreatorService {
      */
     public MathMode getMathModeOIFits() {
         return mathModeOIFits;
+    }
+
+    /**
+     * Return the given wavelength rounded in microns
+     * @param wl wavelength to convert
+     * @return given wavelength rounded in microns
+     */
+    private static double convertWL(final double wl) {
+        return NumberUtils.trimTo5Digits(1e6d * wl);
     }
 
     /**
