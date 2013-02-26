@@ -1739,8 +1739,14 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
 
                 // avoid redudant logs of the same message:
                 if (!message.isLogged()) {
-                    // add warning to the warning log:
-                    _warningLogger.info(StringUtils.removeTags(msg));
+                    msg = StringUtils.removeTags(msg);
+
+                    // add message to the warning log:
+                    if (message.getLevel() == Level.Information) {
+                        _warningLogger.info(msg);
+                    } else {
+                        _warningLogger.warn(msg);
+                    }
                     // flag message:
                     message.setLogged(true);
                 }
