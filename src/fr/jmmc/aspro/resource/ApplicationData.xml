@@ -18,8 +18,8 @@
     <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
   </company>
 
-  <program name="Aspro2" version="0.9.4 beta 12"/>
-  <compilation date="22/02/2013" compiler="JDK 1.5.0_16"/>
+  <program name="Aspro2" version="0.9.4 beta 13"/>
+  <compilation date="04/03/2013" compiler="JDK 1.5.0_16"/>
   
   <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
   <authors>the JMMC Technical Group</authors>
@@ -178,13 +178,16 @@
     </menu>
     
     <menu label="Help">
-      <menu label="Show Configuration release notes" classpath="fr.jmmc.jmcs.gui.action.ShowReleaseNotesAction" action="showConf"/>
+      <menu label="Configuration Release notes" classpath="fr.jmmc.jmcs.gui.action.ShowReleaseNotesAction" action="showConf"/>
     </menu>
     
   </menubar>
 
   <releasenotes>
     <release version="0.9.4">
+      <prerelease version="0.9.4 beta 13">
+        <change type="CHANGE">Improved the look and feel of the release notes windows (application and configuration)</change>
+      </prerelease>
       <prerelease version="0.9.4 beta 12">
         <change type="FEATURE">Added a minimal plot editor on the OIFits viewer to choose among predefined plots</change>
         <change type="FEATURE">Added the instrument spectral configuration in the status information to help creating polychromatic user models</change>
