@@ -30,6 +30,7 @@ import fr.jmmc.jmcs.gui.FeedbackReport;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.util.FileUtils;
 import fr.jmmc.jmcs.util.NumberUtils;
+import fr.jmmc.jmcs.util.SpecialChars;
 import fr.jmmc.jmcs.util.StringUtils;
 import fr.jmmc.oitools.util.CombUtils;
 import java.io.BufferedInputStream;
@@ -278,10 +279,11 @@ public final class ConfigurationManager extends BaseOIManager {
             for (FocalInstrument instrument : id.getFocalInstruments()) {
                 for (FocalInstrumentMode insMode : instrument.getModes()) {
 
-                    logger.info("Instrument[{}][mode {}] wavelength range: {} - {} µm [{} channels] [resolution = {}]",
+                    logger.info("Instrument[{}][mode {}] wavelength range: {} - {} {} [{} channels] [resolution = {}]",
                             instrument.getName(), insMode.getName(),
                             NumberUtils.trimTo5Digits(insMode.getWaveLengthMin()),
                             NumberUtils.trimTo5Digits(insMode.getWaveLengthMax()),
+                            SpecialChars.UNIT_MICRO_METER,
                             insMode.getSpectralChannels(),
                             insMode.getResolution());
 
