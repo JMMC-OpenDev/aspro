@@ -186,6 +186,7 @@
   <releasenotes>
     <release version="0.9.4">
       <prerelease version="0.9.4 beta 13">
+        <change type="FEATURE">Improved OIFits computation to check user model vs instrument spectral configuration, detect sub sampling and show warning messages</change>
         <change type="CHANGE">Improved the look and feel of the release notes windows (application and configuration)</change>
       </prerelease>
       <prerelease version="0.9.4 beta 12">
@@ -209,7 +210,7 @@
           and also in the JMMC legal notice on plots (Use at your own risks)</change>
       </prerelease>
       <prerelease version="0.9.4 beta 10">
-        <change type="FEATURE">Added actions 'Show Application release notes' and 'Show Configuration release notes' in the Help menu</change>
+        <change type="FEATURE">Added action 'Configuration Release Notes' in the Help menu</change>
         <change type="FEATURE">Enhanced the target axis on the observability plot to adjust its font size according to the number of visible items (auto fit)</change>
         <change type="CHANGE">Reduced margins (0.5 cm) on exported PDF documents</change>
       </prerelease>

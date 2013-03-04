@@ -46,17 +46,32 @@ import fr.jmmc.oitools.util.CombUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import net.jafama.FastMath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * This class contains the code to create OIFits structure from the current observation and performs noise modeling
+ * 
+ * Cpu info on linux:
+ * [bourgesl@jmmc-laurent ~]$ lscpu
+ * Architecture:          x86_64
+ * CPU(s):                4
+ * Thread(s) par coeur :  2
+ * Coeur(s) par support CPU :2
+ * CPU MHz :              2800.000
+ * L1d cache :            32K
+ * L1i cache :            32K
+ * L2 cache :             256K
+ * L3 cache :             4096K
+ * 
  * @author bourgesl
  */
 public final class OIFitsCreatorService {
@@ -103,9 +118,9 @@ public final class OIFitsCreatorService {
 
     /* reused uv coverage data */
     /** minimal wavelength */
-    private final double lambdaMin;
+    private double lambdaMin;
     /** maximal wavelength */
-    private final double lambdaMax;
+    private double lambdaMax;
     /** number of wavelengths = number of spectral channels */
     private int nWaveLengths;
     /** observable decimal hour angles */
@@ -272,34 +287,34 @@ public final class OIFitsCreatorService {
 
         // Initial Wavelength information:
         String firstChannel = Double.toString(convertWL(this.waveLengths[0]));
-        String lastChannel = (this.waveLengths.length > 1) ? Double.toString(convertWL(this.waveLengths[this.waveLengths.length - 1])) : null;
+        String lastChannel = (this.nWaveLengths > 1) ? Double.toString(convertWL(this.waveLengths[this.nWaveLengths - 1])) : null;
 
         addInformation(warningContainer, this.instrumentName + " instrument mode: "
-                + this.waveLengths.length + " channels "
+                + this.nWaveLengths + " channels "
                 + '[' + firstChannel + ((lastChannel != null) ? (" - " + lastChannel) : "") + ' ' + SpecialChars.UNIT_MICRO_METER + "] "
                 + "(band: " + convertWL(this.waveBand) + ' ' + SpecialChars.UNIT_MICRO_METER + ')');
-        
-        
-        
+
+        // keep number of channels:
+        final int nChannels = this.nWaveLengths;
+
+
         // Keep only spectral channels where user model is defined:
-        // note: Instrument spectral channels(waveLengths, waveBand) can be modified by this method:
+        // note: Instrument spectral channels (waveLengths, nWaveLengths, waveBand, lambdaMin, lambdaMax) can be modified by this method:
         this.isModelWLValid = prepareUserModel(warningContainer);
 
-        
-        // TODO: adjust used spectral channels in information and log:
 
-        // Wavelength information:
-        firstChannel = Double.toString(convertWL(this.waveLengths[0]));
-        lastChannel = (this.waveLengths.length > 1) ? Double.toString(convertWL(this.waveLengths[this.waveLengths.length - 1])) : null;
+        // adjust used spectral channels in information and log:
+        if (this.nWaveLengths != nChannels) {
+            // Wavelength information:
+            firstChannel = Double.toString(convertWL(this.waveLengths[0]));
+            lastChannel = (this.nWaveLengths > 1) ? Double.toString(convertWL(this.waveLengths[this.nWaveLengths - 1])) : null;
 
-        /*
-        addInformation(warningContainer, this.instrumentName + " instrument mode: "
-                + this.waveLengths.length + " channels "
-                + '[' + firstChannel + ((lastChannel != null) ? (" - " + lastChannel) : "") + ' ' + SpecialChars.UNIT_MICRO_METER + "] "
-                + "(band: " + convertWL(this.waveBand) + ' ' + SpecialChars.UNIT_MICRO_METER + ')');
-*/
-        
-        this.insNameKeyword = this.instrumentName + '_' + firstChannel + ((lastChannel != null) ? ("-" + lastChannel) : "") + '-' + this.waveLengths.length + "ch";
+            addWarning(warningContainer, "Restricted instrument mode: "
+                    + this.waveLengths.length + " channels "
+                    + '[' + firstChannel + ((lastChannel != null) ? (" - " + lastChannel) : "") + ' ' + SpecialChars.UNIT_MICRO_METER + "] ");
+        }
+
+        this.insNameKeyword = this.instrumentName + '_' + firstChannel + ((lastChannel != null) ? ("-" + lastChannel) : "") + '-' + this.nWaveLengths + "ch";
 
         if (logger.isDebugEnabled()) {
             logger.debug("insNameKeyword: {}", insNameKeyword);
@@ -313,85 +328,191 @@ public final class OIFitsCreatorService {
      */
     private boolean prepareUserModel(final WarningContainer warningContainer) {
         if (this.hasModel) {
-            logger.info("Instrument wavelength range: {} - {} µm [{} channels] [band = {} µm]",
-                    convertWL(this.lambdaMin), convertWL(this.lambdaMax), this.nWaveLengths, convertWL(this.waveBand));
+            final boolean useAnalyticalModel = this.target.hasAnalyticalModel();
 
-            if (!this.target.hasAnalyticalModel()) {
-                // user model if defined:
-                final UserModel userModel = target.getUserModel();
+            // user model if defined:
+            final UserModel userModel = (!useAnalyticalModel) ? target.getUserModel() : null;
 
-                // Test if user model data is valid:
-                if (userModel != null && userModel.isModelDataReady()) {
-                    final List<UserModelData> modelDataList = target.getUserModel().getModelDataList();
+            // Test if user model data is valid:
+            if (userModel != null && userModel.isModelDataReady()) {
+                final List<UserModelData> modelDataList = target.getUserModel().getModelDataList();
 
-                    final int nImages = modelDataList.size();
-                    final UserModelData modelDataFirst = modelDataList.get(0);
-                    final UserModelData modelDataLast = modelDataList.get(nImages - 1);
+                final int nImages = modelDataList.size();
+                final UserModelData modelDataFirst = modelDataList.get(0);
+                final UserModelData modelDataLast = modelDataList.get(nImages - 1);
 
-                    // first and last images have wavelength ?
-                    final boolean isWL = !Double.isNaN(modelDataFirst.getWaveLength()) && !Double.isNaN(modelDataLast.getWaveLength());
+                // first and last images have wavelength ?
+                final boolean isWL = !Double.isNaN(modelDataFirst.getWaveLength()) && !Double.isNaN(modelDataLast.getWaveLength());
 
-                    if (!isWL && nImages > 1) {
-                        // Fits cube without wavelengths:
-                        addWarning(warningContainer, "User model (Fits cube) without wavelength information is discarded");
-                        return false;
-                    }
+                if (!isWL && nImages > 1) {
+                    // Fits cube without wavelengths:
+                    addWarning(warningContainer, "User model (Fits cube) without wavelength information is discarded");
+                    return false;
+                }
 
-                    if (isWL) {
-                        final double wlFirst = modelDataFirst.getWaveLength();
+                if (isWL) {
+                    final double wlFirst = modelDataFirst.getWaveLength();
 
-                        if (nImages == 1) {
+                    if (nImages == 1) {
 
-                            // check image wavelength is in instrument range:
-                            if (wlFirst < this.lambdaMin || wlFirst > this.lambdaMax) {
-                                addWarning(warningContainer, "User model (Fits image) wavelength ("
-                                        + convertWL(wlFirst) + ' ' + SpecialChars.UNIT_MICRO_METER
-                                        + ") outside of instrumental wavelength range");
-                                return false;
+                        // check image wavelength is in instrument range:
+                        if (wlFirst < this.lambdaMin || wlFirst > this.lambdaMax) {
+                            addWarning(warningContainer, "User model (Fits image) wavelength ("
+                                    + convertWL(wlFirst) + ' ' + SpecialChars.UNIT_MICRO_METER
+                                    + ") outside of instrumental wavelength range");
+                            return false;
+                        }
+
+                    } else {
+                        // Fits cube:
+                        final double wlLast = modelDataLast.getWaveLength();
+                        final double wlInc = modelDataFirst.getWaveLengthIncrement(); // constant in Fits cube
+
+                        addInformation(warningContainer, "User model [" + userModel.getName() + "]: " + nImages + " images "
+                                + '[' + convertWL(wlFirst) + " - " + convertWL(wlLast) + ' ' + SpecialChars.UNIT_MICRO_METER + "] "
+                                + "(increment: " + convertWL(wlInc) + ' ' + SpecialChars.UNIT_MICRO_METER + ')');
+
+                        // check image wavelengths are ovelarpping the instrument range:
+                        if (modelDataFirst.getWaveLengthRange().getMin() > this.lambdaMax) {
+                            addWarning(warningContainer, "Incorrect model min wavelength [" + convertWL(wlFirst) + ' ' + SpecialChars.UNIT_MICRO_METER
+                                    + "] higher than max instrument wavelength [" + convertWL(this.lambdaMax) + ' ' + SpecialChars.UNIT_MICRO_METER + ']');
+                            return false;
+                        }
+                        if (modelDataLast.getWaveLengthRange().getMax() < this.lambdaMin) {
+                            addWarning(warningContainer, "Incorrect model max wavelength [" + convertWL(wlLast) + ' ' + SpecialChars.UNIT_MICRO_METER
+                                    + "] lower than min instrument wavelength [" + convertWL(this.lambdaMin) + ' ' + SpecialChars.UNIT_MICRO_METER + ']');
+                            return false;
+                        }
+
+                        // navigate among spectral channels:
+                        final double insBand = this.waveBand;
+                        final double halfBand = 0.5d * insBand;
+
+                        final double[] insWaves = this.waveLengths;
+                        final int nWaves = insWaves.length;
+
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("nWaves: {}", nWaves);
+                            logger.debug("insWaves: {}", Arrays.toString(insWaves));
+                        }
+
+                        // note: hashset behaves like identity check:
+                        final Set<UserModelData> uniqueModelDatas = new HashSet<UserModelData>(nImages);
+
+                        final boolean[] hasUserModelPerChannel = new boolean[nWaves];
+
+                        double wl, wlLower, wlUpper;
+                        UserModelData modelWlLower, modelWlUpper;
+
+                        for (int i = 0; i < nWaves; i++) {
+                            wl = insWaves[i];
+                            wlLower = wl - halfBand;
+                            wlUpper = wl + halfBand;
+
+                            hasUserModelPerChannel[i] = false;
+
+                            modelWlLower = findUserModelData(wlLower, modelDataList);
+
+                            if (modelWlLower != null) {
+                                hasUserModelPerChannel[i] = true;
+                                uniqueModelDatas.add(modelWlLower);
                             }
 
-                        } else {
-                            // Fits cube:
-                            final double wlLast = modelDataLast.getWaveLength();
-                            final double wlInc = modelDataFirst.getWaveLengthIncrement(); // constant in Fits cube
+                            modelWlUpper = findUserModelData(wlUpper, modelDataList);
 
-                            logger.info("User model wavelength range: {} - {} µm  [{} images] - inc {} µm",
-                                    convertWL(wlFirst), convertWL(wlLast), nImages, convertWL(wlInc));
-
-                            addInformation(warningContainer, "User model [" + userModel.getName() + "]: " + nImages + " images "
-                                    + '[' + convertWL(wlFirst) + " - " + convertWL(wlLast) + ' ' + SpecialChars.UNIT_MICRO_METER + "] "
-                                    + "(increment: " + convertWL(wlInc) + ' ' + SpecialChars.UNIT_MICRO_METER + ')');
-
-                            // check image wavelengths are ovelarpping the instrument range:
-                            if (modelDataFirst.getWaveLengthRange().getMin() > this.lambdaMax) {
-                                addWarning(warningContainer, "Incorrect model lower wavelength [" + convertWL(wlFirst) + ' ' + SpecialChars.UNIT_MICRO_METER
-                                        + "] > upper instrument wavelength [" + convertWL(this.lambdaMax) + ' ' + SpecialChars.UNIT_MICRO_METER + "] !");
-                                return false;
+                            if (modelWlUpper != null) {
+                                hasUserModelPerChannel[i] = true;
+                                uniqueModelDatas.add(modelWlUpper);
                             }
-                            if (modelDataLast.getWaveLengthRange().getMax() < this.lambdaMin) {
-                                addWarning(warningContainer, "Incorrect model upper wavelength [" + convertWL(wlLast) + ' ' + SpecialChars.UNIT_MICRO_METER
-                                        + "] < lower instrument wavelength [" + convertWL(this.lambdaMin) + ' ' + SpecialChars.UNIT_MICRO_METER + "] !");
-                                return false;
+                        }
+
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("hasUserModelPerChannel: {}", Arrays.toString(hasUserModelPerChannel));
+                            logger.debug("nUniqueModelDatas: {}", uniqueModelDatas.size());
+                        }
+
+                        int firstChannel = -1;
+
+                        for (int i = 0; i < nWaves; i++) {
+                            if (hasUserModelPerChannel[i]) {
+                                firstChannel = i;
+                                break;
+                            }
+                        }
+
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("firstChannel: {}", firstChannel);
+                        }
+
+                        int lastChannel = -1;
+                        for (int i = nWaves - 1; i >= 0; i--) {
+                            if (hasUserModelPerChannel[i]) {
+                                lastChannel = i;
+                                break;
+                            }
+                        }
+
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("lastChannel: {}", lastChannel);
+                        }
+
+                        final int nChannels = lastChannel - firstChannel + 1;
+
+                        // Test sub sampling (less than 1 IMAGE PER CHANNEL)
+                        if (nChannels > uniqueModelDatas.size()) {
+                            addWarning(warningContainer, "Sub sampling detected: " + nChannels + " channels but only "
+                                    + uniqueModelDatas.size() + " user model images available");
+                        }
+
+                        // keep only channels where at least one image is present:
+                        if (nWaves > nChannels) {
+                            // only part of the instrument channels are used:
+
+                            // Fix wavelength/waveband:
+                            // skip waveband (constant) for now
+                            this.waveLengths = new double[nChannels];
+
+                            System.arraycopy(insWaves, firstChannel, this.waveLengths, 0, nChannels);
+
+                            if (logger.isDebugEnabled()) {
+                                logger.debug("waveLengths: {}", Arrays.toString(waveLengths));
                             }
 
-                            // navigate among spectral channels:
-                            final double insBand = this.waveBand;
-                            final double[] insWaves = this.waveLengths;
+                            // fix other related fields:
+                            this.nWaveLengths = this.waveLengths.length;
 
-                            // TODO: Use ranges for instruments ?
-
-                            // TODO: keep only channels where at least one image is present !!
-                            
-                            // TODO: use findUserModel ...
-
-                            // Test sub sampling (less than 1 IMAGE PER CHANNEL)
-
+                            this.lambdaMin = this.waveLengths[0] - halfBand;
+                            this.lambdaMax = this.waveLengths[this.nWaveLengths - 1] + halfBand;
                         }
                     }
                 }
             }
         }
         return true;
+    }
+
+    /**
+     * Find the user model data corresponding only to the given wavelength (within +/- 1/2 increment)
+     * @param wavelength spectral channel wavelength
+     * @param modelDataList user model data
+     * @return user model data corresponding to the given wavelength
+     */
+    private static UserModelData findUserModelData(final double wavelength, final List<UserModelData> modelDataList) {
+
+        final int nImages = modelDataList.size();
+
+        UserModelData modelData;
+
+        // suppose that model image wavelength ranges do not overlap (true for fitscube):
+        for (int i = 0; i < nImages; i++) {
+            modelData = modelDataList.get(i);
+
+            if (modelData.getWaveLengthRange().contains(wavelength)) {
+                return modelData;
+            }
+        }
+        // No user model found:
+        return null;
     }
 
     /**
@@ -665,10 +786,14 @@ public final class OIFitsCreatorService {
                 return false;
             }
 
+            // Determine nSamples per spectral channel:
+
+            // TODO: should work on spatial frequency (baseline vector (so HA), object size) instead to be more accurate
+
             // use the preference (QUICK, FAST, DEFAULT?) : QUICK = PREVIEW ie No super sampling
             final UserModelService.MathMode mathMode = this.mathModeOIFits;
 
-            // TODO: determine correclty deltaLambda (object size (FOV) and Bmax/lambda) ie when super sampling is surely necessary
+            // TODO: determine correctly deltaLambda (object size (FOV) and Bmax/lambda) ie when super sampling is surely necessary
 
             // number of samples per spectral channel (1, 5, 9 ...) use the preference (SuperSampling)
             // should be an even number to keep wavelengths centered on each sub channels:
@@ -677,8 +802,7 @@ public final class OIFitsCreatorService {
 
             double deltaLambda = this.waveBand / nSamples;
 
-            // If Fits cube: use all images at least i.e. adjust frequencies and nSamples
-
+            // If Fits cube: use all images at least i.e. adjust frequencies and nSamples:
             final double wlInc = (userModel != null && userModel.isModelDataReady()) ? userModel.getModelData(0).getWaveLengthIncrement() : Double.POSITIVE_INFINITY;
 
             // Sub channel width:
@@ -692,22 +816,24 @@ public final class OIFitsCreatorService {
                 nSamples++;
             }
 
-            logger.info("computeModelVisibilities: nSamples = {}", nSamples);
+            if (logger.isDebugEnabled()) {
+                logger.debug("computeModelVisibilities: adjusted nSamples = {}", nSamples);
+            }
 
             deltaLambda = this.waveBand / nSamples;
 
-            // TODO: determine when to use super sampling (model images increment or ...)
+
             // note: integration must be adjusted to use wavelengths in each spectral channel !
 
-//            logger.info("wlInc = {}", wlInc);
-//            logger.info("lambdaInc = {}", lambaInc);
-
+            // Only part of instrument spectral channels can be used (see prepare step):
             final double[] sampleWaveLengths = (nSamples > 1) ? computeWaveLengths(this.lambdaMin, this.lambdaMax, deltaLambda) : this.waveLengths;
 
             // local vars:
             final int nWLen = sampleWaveLengths.length;
 
-            logger.info("computeModelVisibilities: nWLen = {} - nChannels = {}", nWLen, nChannels);
+            if (logger.isDebugEnabled()) {
+                logger.debug("computeModelVisibilities: nWLen = {} - nChannels = {}", nWLen, nChannels);
+            }
 
             final int nBl = nBaseLines;
             final int nHA = nHAPoints;
@@ -723,7 +849,8 @@ public final class OIFitsCreatorService {
             final int nRows = nHA * nBl;
             final int nPoints = nRows * nWLen;
 
-            logger.info("computeModelVisibilities: {} points [{} rows - {} spectral channels]- please wait ...", nPoints, nRows, nWLen);
+            logger.info("computeModelVisibilities: {} points [{} rows - {} spectral channels - {} samples]- please wait ...",
+                    nPoints, nRows, nChannels, nSamples);
 
 //            logger.info("computeModelVisibilities: {} bytes for 1 complex array", 2 * 8 * nPoints); // 1 complex (2 double)
 
@@ -797,53 +924,42 @@ public final class OIFitsCreatorService {
                 } // rows
 
             } else {
-
                 // Accuracy tests (see OIFitsWriterTest) on GRAVITY so VISAMPERR/VISPHIERR are only 'sampled':
                 // FAST provides good accuracy on complete OIFits:
-        /*                
+                 /*                
                  WARNING: WARN:  Column[VISAMP]	    Max Absolute Error=3.122502256758253E-17	Max Relative Error=2.943534976436331E-14
                  WARNING: WARN:  Column[VISAMPERR]	Max Absolute Error=0.0013869817652312072	Max Relative Error=0.0997510362307679
                  WARNING: WARN:  Column[VISPHI]	    Max Absolute Error=1.8474111129762605E-12	Max Relative Error=3.3158630356109147E-12
-                 WARNING: WARN:  Column[VISPHIERR]	Max Absolute Error=19.19686940833244	Max Relative Error=0.9113901536192872
-                 WARNING: WARN:  Column[VIS2DATA]	  Max Absolute Error=1.5178830414797062E-18	Max Relative Error=5.915784768102743E-14
-                 WARNING: WARN:  Column[VIS2ERR]	  Max Absolute Error=5.421010862427522E-20	Max Relative Error=4.471809116292319E-16
+                 WARNING: WARN:  Column[VISPHIERR]	Max Absolute Error=19.19686940833244	    Max Relative Error=0.9113901536192872
+                 WARNING: WARN:  Column[VIS2DATA]	Max Absolute Error=1.5178830414797062E-18	Max Relative Error=5.915784768102743E-14
+                 WARNING: WARN:  Column[VIS2ERR]	Max Absolute Error=5.421010862427522E-20	Max Relative Error=4.471809116292319E-16
                  WARNING: WARN:  Column[T3AMP]	    Max Absolute Error=9.740878893424454E-21	Max Relative Error=3.613928543746403E-14
-                 WARNING: WARN:  Column[T3AMPERR]	  Max Absolute Error=3.441071348220595E-22	Max Relative Error=3.6192130029721625E-14
+                 WARNING: WARN:  Column[T3AMPERR]	Max Absolute Error=3.441071348220595E-22	Max Relative Error=3.6192130029721625E-14
                  WARNING: WARN:  Column[T3PHI]	    Max Absolute Error=1.8332002582610585E-12	Max Relative Error=1.6154567952731343E-13
                  */
                 // QUICK provides only a preview (not accurate on VISPHI / T3PHI:
-        /*
-                 WARNING: WARN:  Column[VISDATA]	  Max Absolute Error=0.21170902252197266	Max Relative Error=155.32336222596265
+                 /*
+                 WARNING: WARN:  Column[VISDATA]	Max Absolute Error=0.21170902252197266	    Max Relative Error=155.32336222596265
                  WARNING: WARN:  Column[VISERR]	    Max Absolute Error=1.7113983631134033E-5	Max Relative Error=5.123198196063256E-4
-                 WARNING: WARN:  Column[VISAMP]	    Max Absolute Error=0.012389325449663476	Max Relative Error=0.9827257597222762
+                 WARNING: WARN:  Column[VISAMP]	    Max Absolute Error=0.012389325449663476	    Max Relative Error=0.9827257597222762
                  WARNING: WARN:  Column[VISAMPERR]	Max Absolute Error=4.3704479622192665E-4	Max Relative Error=0.24928702639103537
-                 WARNING: WARN:  Column[VISPHI]	    Max Absolute Error=357.76365704000574	Max Relative Error=132.85957062222084
-                 WARNING: WARN:  Column[VISPHIERR]	Max Absolute Error=54.185925961293876	Max Relative Error=0.9643291278418655
-                 WARNING: WARN:  Column[VIS2DATA]	  Max Absolute Error=4.3211132008532375E-4	Max Relative Error=3199.047758503112
-                 WARNING: WARN:  Column[VIS2ERR]	  Max Absolute Error=7.815369519747367E-9	Max Relative Error=6.780968471059581E-5
+                 WARNING: WARN:  Column[VISPHI]	    Max Absolute Error=357.76365704000574	    Max Relative Error=132.85957062222084
+                 WARNING: WARN:  Column[VISPHIERR]	Max Absolute Error=54.185925961293876	    Max Relative Error=0.9643291278418655
+                 WARNING: WARN:  Column[VIS2DATA]	Max Absolute Error=4.3211132008532375E-4	Max Relative Error=3199.047758503112
+                 WARNING: WARN:  Column[VIS2ERR]	Max Absolute Error=7.815369519747367E-9	    Max Relative Error=6.780968471059581E-5
                  WARNING: WARN:  Column[T3AMP]	    Max Absolute Error=1.8693429580914967E-7	Max Relative Error=0.11262751096020436
-                 WARNING: WARN:  Column[T3AMPERR]	  Max Absolute Error=4.423268697588574E-11	Max Relative Error=0.0016543021640061009
-                 WARNING: WARN:  Column[T3PHI]	    Max Absolute Error=6.734992735788779	Max Relative Error=6.813763216810152
+                 WARNING: WARN:  Column[T3AMPERR]	Max Absolute Error=4.423268697588574E-11	Max Relative Error=0.0016543021640061009
+                 WARNING: WARN:  Column[T3PHI]	    Max Absolute Error=6.734992735788779	    Max Relative Error=6.813763216810152
                  */
 
-                logger.info("computeModelVisibilities: MathMode = {}.", mathMode);
-                /*
-                 [bourgesl@jmmc-laurent ~]$ lscpu
-                 Architecture:          x86_64
-                 CPU(s):                4
-                 Thread(s) par coeur :  2
-                 Coeur(s) par support CPU :2
-                 CPU MHz :              2800.000
-                 L1d cache :            32K
-                 L1i cache :            32K
-                 L2 cache :             256K
-                 L3 cache :             4096K
-                 */
+                if (logger.isDebugEnabled()) {
+                    logger.debug("computeModelVisibilities: MathMode = {}.", mathMode);
+                }
 
                 // define mapping between spectral channels and model images:
                 final List<UserModelData> modelDataList = target.getUserModel().getModelDataList();
 
-                // TODO: determine which images to use according to wavelength range:
+                // determine which images to use according to wavelength range:
                 final List<UserModelComputePart> modelParts = mapUserModel(modelDataList, sampleWaveLengths);
 
                 if (modelParts == null) {
@@ -851,11 +967,12 @@ public final class OIFitsCreatorService {
                     return false;
                 }
 
-                for (UserModelComputePart modelPart : modelParts) {
-                    logger.info("modelPart: {}", modelPart);
-
-                    logger.info("waveLength min: {}", sampleWaveLengths[modelPart.fromWL]);
-                    logger.info("waveLength max: {}", sampleWaveLengths[modelPart.endWL - 1]);
+                if (logger.isDebugEnabled()) {
+                    for (UserModelComputePart modelPart : modelParts) {
+                        logger.debug("modelPart: {}", modelPart);
+                        logger.debug("waveLength min: {}", sampleWaveLengths[modelPart.fromWL]);
+                        logger.debug("waveLength max: {}", sampleWaveLengths[modelPart.endWL - 1]);
+                    }
                 }
 
 
@@ -865,7 +982,7 @@ public final class OIFitsCreatorService {
                 // Prepare thread context variables:
                 final int[][] nTaskThreads = (SHOW_COMPUTE_STATS) ? new int[nTh][16] : null; // cache line padding
 
-                // TODO: adjust largest chunk size:
+                // adjust largest chunk size:
                 final int nPixels = 80000; // less than 1 Mb
 
 
@@ -874,13 +991,14 @@ public final class OIFitsCreatorService {
 
 
                 // Iterate on wavelength ranges i.e. UserModelComputePart:
-
                 for (UserModelComputePart modelPart : modelParts) {
 
                     // use image corresponding to the model part:
                     final UserModelData modelData = modelPart.modelData;
 
-//                    logger.info("computeModelVisibilities: model part: {}", modelPart);
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("computeModelVisibilities: model part: {}", modelPart);
+                    }
 
                     // process wavelengths:
                     final int from = modelPart.fromWL;
@@ -890,20 +1008,26 @@ public final class OIFitsCreatorService {
                     // This will change for each image in the Fits cube:
                     final int n1D = modelData.getNData(); // data, xfreq, yfreq
 
-//                    logger.info("computeModelVisibilities: {} bytes for image arrays", 4 * n1D); // (float) array
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("computeModelVisibilities: {} bytes for image arrays", 4 * n1D); // (float) array
+                    }
 
 
                     int chunk = nPixels * UserModelService.DATA_1D_POINT_SIZE;
 
                     final int nChunks = 1 + n1D / chunk;
 
-//                    logger.info("computeModelVisibilities: {} chunks", nChunks);
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("computeModelVisibilities: {} chunks", nChunks);
+                    }
 
                     // note: chunk must a multiple of 3: see UserModelService.DATA_1D_POINT_SIZE
                     chunk = UserModelService.DATA_1D_POINT_SIZE * ((n1D / nChunks) / UserModelService.DATA_1D_POINT_SIZE);
 
-//                    logger.info("computeModelVisibilities: {} bytes for chunk", (chunk > n1D) ? 4 * n1D : 4 * chunk);// (float) array
-                    //logger.info("computeModelVisibilities: chunk = {}", chunk);
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("computeModelVisibilities: {} bytes for chunk", (chunk > n1D) ? 4 * n1D : 4 * chunk);// (float) array
+                        logger.debug("computeModelVisibilities: chunk = {}", chunk);
+                    }
 
                     final int[] fromThreads = new int[nChunks];
                     final int[] endThreads = new int[nChunks];
@@ -913,8 +1037,6 @@ public final class OIFitsCreatorService {
                         endThreads[c] = fromThreads[c] + chunk;
                     }
                     endThreads[nChunks - 1] = n1D;
-
-//                    logger.info("computeModelVisibilities: from {} - to {}", Arrays.toString(fromThreads), Arrays.toString(endThreads));
 
 
                     // create tasks:
@@ -937,28 +1059,14 @@ public final class OIFitsCreatorService {
                                  */
                                 @Override
                                 public void run() {
-
-//                    logger.info("Thread[{}]: row {} - data from {} to {} - lambda from {} to {}", ParallelJobExecutor.currentThreadIndex(nTh), rowIndex, fromData, endData, from, end);
-
                                     // Compute complex visibility using the target model:
-//                final long start = System.nanoTime();
-
-                                    // compute complex visibilities :
                                     UserModelService.computeModel(data1D, fromData, endData, uRow, vRow, cmVisRow, from, end, mathMode);
 
-                                    // fast interrupt:
-/*                
-                                     if (Thread.currentThread().isInterrupted()) {
-                                     return;
-                                     }
-                                     */
                                     if (SHOW_COMPUTE_STATS) {
                                         // Get thread index to get appropriate thread vars:
                                         final int threadIndex = ParallelJobExecutor.currentThreadIndex(nTh);
                                         nTaskThreads[threadIndex][0]++;
                                     }
-
-//                logger.info("Thread[{}]: row {} done in: duration = {} ms.", threadIndex, rowIndex, 1e-6d * (System.nanoTime() - start));
                                 }
                             });
                         }
@@ -968,8 +1076,8 @@ public final class OIFitsCreatorService {
 
                 final int nJobs = jobList.size();
 
-                // TODO Important: have jobs a multiple of nTh to maximize parallelism !
-                logger.info("computeModelVisibilities: {} jobs", nJobs);
+                // note: have jobs a multiple of nTh to maximize parallelism !
+                logger.debug("computeModelVisibilities: {} jobs", nJobs);
 
                 final Runnable[] jobs = jobList.toArray(new Runnable[nJobs]);
 
@@ -1176,7 +1284,8 @@ public final class OIFitsCreatorService {
                 return modelData;
             }
         }
-        throw new IllegalStateException("findUserModel: unable for find an user model at wavelength = " + convertWL(wavelength) + " µm !");
+        throw new IllegalStateException("findUserModel: unable for find an user model at wavelength = "
+                + convertWL(wavelength) + ' ' + SpecialChars.UNIT_MICRO_METER);
     }
 
     /**
