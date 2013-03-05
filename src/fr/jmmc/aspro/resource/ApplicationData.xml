@@ -18,8 +18,8 @@
     <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
   </company>
 
-  <program name="Aspro2" version="0.9.4 beta 13"/>
-  <compilation date="04/03/2013" compiler="JDK 1.5.0_16"/>
+  <program name="Aspro2" version="0.9.4"/>
+  <compilation date="05/03/2013" compiler="JDK 1.5.0_16"/>
   
   <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
   <authors>the JMMC Technical Group</authors>
@@ -185,6 +185,7 @@
 
   <releasenotes>
     <release version="0.9.4">
+      <pubDate>Tue, 05 Mar 2013 09:15:00 GMT</pubDate>
       <prerelease version="0.9.4 beta 13">
         <change type="FEATURE">Improved OIFits computation to check user model vs instrument spectral configuration, detect sub sampling and show warning messages</change>
         <change type="CHANGE">Improved the look and feel of the release notes windows (application and configuration)</change>
