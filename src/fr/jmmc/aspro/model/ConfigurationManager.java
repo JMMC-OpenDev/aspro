@@ -30,6 +30,7 @@ import fr.jmmc.jmcs.gui.FeedbackReport;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.util.FileUtils;
 import fr.jmmc.jmcs.util.NumberUtils;
+import fr.jmmc.jmcs.util.ResourceUtils;
 import fr.jmmc.jmcs.util.SpecialChars;
 import fr.jmmc.jmcs.util.StringUtils;
 import fr.jmmc.oitools.util.CombUtils;
@@ -219,10 +220,10 @@ public final class ConfigurationManager extends BaseOIManager {
      * Computes checksum of the given file name loaded in the configuration path
      * @param fileName file name to load
      * @return checksum
-     * @throws IllegalStateException if the file is not found or an I/O exception occured
+     * @throws IllegalStateException if the file is not found or an I/O exception occurred
      */
     static long checksum(final String fileName) {
-        final URL uri = FileUtils.getResource(BaseOIManager.CONF_CLASSLOADER_PATH + fileName);
+        final URL uri = ResourceUtils.getResource(CONF_CLASSLOADER_PATH + fileName);
 
         InputStream in = null;
         try {
