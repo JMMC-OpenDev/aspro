@@ -178,8 +178,6 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
     // Capture SkyCalcWindow screenshot :
     saveScreenshot(skyCalcWin, "Aspro2-SkyCalcWindow.png");
 
-    skyCalcWin.button(JButtonMatcher.withText("Sky Display")).click();
-
     final FrameFixture skyDispWin = getFrame("Sky Display");
 
     // Capture SkyDisplay screenshot :
