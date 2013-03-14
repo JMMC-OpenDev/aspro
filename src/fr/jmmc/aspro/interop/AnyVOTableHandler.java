@@ -11,7 +11,7 @@ import fr.jmmc.aspro.model.oi.TargetUserInformations;
 import fr.jmmc.jmcs.App;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
-import fr.jmmc.jmcs.util.XmlFactory;
+import fr.jmmc.jmcs.util.XslTransform;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.List;
@@ -50,7 +50,7 @@ public final class AnyVOTableHandler {
     // use an XSLT to transform the SearchCal votable document to an Aspro 2 Observation :
     final long start = System.nanoTime();
 
-    final String document = XmlFactory.transform(votable, XSLT_FILE);
+    final String document = XslTransform.transform(votable, XSLT_FILE);
 
     logger.info("VOTable transformation (XSLT): {} ms.", 1e-6d * (System.nanoTime() - start));
 
