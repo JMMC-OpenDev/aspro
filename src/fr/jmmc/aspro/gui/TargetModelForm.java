@@ -26,7 +26,7 @@ import fr.jmmc.jmcs.gui.component.FileChooser;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.gui.component.NumericJTable;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
-import fr.jmmc.jmcs.util.MimeType;
+import fr.jmmc.jmcs.data.MimeType;
 import fr.jmmc.jmcs.util.StringUtils;
 import fr.jmmc.oitools.image.FitsImageHDU;
 import fr.nom.tam.fits.FitsException;

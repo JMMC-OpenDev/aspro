@@ -7,7 +7,7 @@ import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.jmcs.gui.component.FileChooser;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.gui.component.StatusBar;
-import fr.jmmc.jmcs.util.MimeType;
+import fr.jmmc.jmcs.data.MimeType;
 import fr.jmmc.jmcs.util.StringUtils;
 import fr.jmmc.oiexplorer.core.gui.action.WaitingTaskAction;
 import fr.jmmc.oitools.model.OIFitsFile;

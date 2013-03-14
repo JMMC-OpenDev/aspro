@@ -24,7 +24,7 @@ import fr.jmmc.aspro.model.util.SpectralBandUtils;
 import fr.jmmc.aspro.service.ObservabilityService;
 import fr.jmmc.jmal.Band;
 import fr.jmmc.jmcs.util.FileUtils;
-import fr.jmmc.jmcs.util.MimeType;
+import fr.jmmc.jmcs.data.MimeType;
 import fr.jmmc.jmcs.util.StringUtils;
 import java.io.File;
 import java.io.IOException;
