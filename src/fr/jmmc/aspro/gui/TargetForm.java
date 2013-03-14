@@ -17,8 +17,8 @@ import fr.jmmc.jmcs.gui.component.GenericJTree;
 import fr.jmmc.jmcs.gui.component.GenericListModel;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
-import fr.jmmc.jmcs.network.BrowserLauncher;
 import fr.jmmc.jmcs.resource.image.ResourceImage;
+import fr.jmmc.jmcs.service.BrowserLauncher;
 import fr.jmmc.jmcs.util.UrlUtils;
 import java.awt.Component;
 import java.beans.PropertyChangeEvent;
@@ -1188,17 +1188,17 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
 
             if (isCalibrator(selectedTarget)) {
                 if (MessagePane.showConfirmMessage(this.jButtonDeleteTarget,
-                    "Do you want to delete the calibrator target [" + selectedTarget.getName() + "] and all associations ?")) {
+                        "Do you want to delete the calibrator target [" + selectedTarget.getName() + "] and all associations ?")) {
+
+                    // update the data model and reset form:
+                    deleteCalibrator(selectedTarget);
+                }
+            } else if (MessagePane.showConfirmMessage(this.jButtonDeleteTarget,
+                    "Do you want to delete the science target [" + selectedTarget.getName() + "] ?")) {
 
                 // update the data model and reset form:
-                deleteCalibrator(selectedTarget);
+                deleteTarget(selectedTarget);
             }
-        } else if (MessagePane.showConfirmMessage(this.jButtonDeleteTarget,
-            "Do you want to delete the science target [" + selectedTarget.getName() + "] ?")) {
-
-        // update the data model and reset form:
-        deleteTarget(selectedTarget);
-        }
         }
     }//GEN-LAST:event_jButtonDeleteTargetActionPerformed
 
@@ -1231,7 +1231,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
 
                         // Remove calibrator from target :
                         this.getTreeTargets().removeCalibrator(currentNode, target,
-                            parentNode, parentTarget, true);
+                                parentNode, parentTarget, true);
                     }
                 }
             }
@@ -1251,7 +1251,7 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
             if (this.editTargetUserInfos.hasCalibrators(this.currentTarget)) {
 
                 MessagePane.showErrorMessage(
-                    "There are already calibrators associated to this target [" + this.currentTarget.getName() + "] !");
+                        "There are already calibrators associated to this target [" + this.currentTarget.getName() + "] !");
 
                 this.jToggleButtonCalibrator.setSelected(false);
                 return;
@@ -1278,40 +1278,40 @@ public final class TargetForm extends javax.swing.JPanel implements PropertyChan
             final DefaultMutableTreeNode calibratorNode = getTreeTargets().findTreeNode(this.currentTarget);
 
             if (calibratorNode == null || MessagePane.showConfirmMessage(this.jToggleButtonCalibrator,
-                "Do you really want to remove associations with this calibrator [" + this.currentTarget.getName() + "] ?")) {
+                    "Do you really want to remove associations with this calibrator [" + this.currentTarget.getName() + "] ?")) {
 
-            // remove the occurences of the calibrator and update the tree ...
-            removeCalibrator(this.currentTarget);
+                // remove the occurences of the calibrator and update the tree ...
+                removeCalibrator(this.currentTarget);
 
-            this.calibratorsModel.remove(this.currentTarget);
+                this.calibratorsModel.remove(this.currentTarget);
 
-            // Restore the calibrator node in the target tree :
-            final DefaultMutableTreeNode rootNode = this.getTreeTargets().getRootNode();
+                // Restore the calibrator node in the target tree :
+                final DefaultMutableTreeNode rootNode = this.getTreeTargets().getRootNode();
 
-            int nScienceTargets = 0;
+                int nScienceTargets = 0;
 
-            for (Target target : this.editTargets) {
-                if (!isCalibrator(target)) {
-                    if (target == this.currentTarget) {
-                        // create node :
-                        final DefaultMutableTreeNode targetNode = new DefaultMutableTreeNode(target);
+                for (Target target : this.editTargets) {
+                    if (!isCalibrator(target)) {
+                        if (target == this.currentTarget) {
+                            // create node :
+                            final DefaultMutableTreeNode targetNode = new DefaultMutableTreeNode(target);
 
-                        rootNode.insert(targetNode, nScienceTargets);
+                            rootNode.insert(targetNode, nScienceTargets);
 
-                        // fire node structure changed :
-                        this.getTreeTargets().fireNodeChanged(rootNode);
+                            // fire node structure changed :
+                            this.getTreeTargets().fireNodeChanged(rootNode);
 
-                        this.getTreeTargets().selectPath(new TreePath(targetNode.getPath()));
+                            this.getTreeTargets().selectPath(new TreePath(targetNode.getPath()));
 
-                        break;
+                            break;
+                        }
+                        nScienceTargets++;
                     }
-                    nScienceTargets++;
                 }
-            }
 
-        } else {
-            this.jToggleButtonCalibrator.setSelected(true);
-        }
+            } else {
+                this.jToggleButtonCalibrator.setSelected(true);
+            }
         }
     }//GEN-LAST:event_jToggleButtonCalibratorActionPerformed
 
