@@ -10,6 +10,7 @@ import fest.common.JmcsFestSwingJUnitTestCase;
 import fr.jmmc.aspro.Preferences;
 import fr.jmmc.aspro.gui.SettingPanel;
 import fr.jmmc.aspro.gui.util.WindWidget;
+import fr.jmmc.jmcs.Bootstrapper;
 import fr.jmmc.jmcs.data.preference.PreferencesException;
 import java.awt.Frame;
 import static java.awt.event.KeyEvent.*;
@@ -60,6 +61,9 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
 
     // disable dev LAF menu :
     System.setProperty("jmcs.laf.menu", "false");
+    
+    // Initialize logs first:
+    Bootstrapper.getState();
 
     // reset Preferences:
     Preferences.getInstance().resetToDefaultPreferences();
