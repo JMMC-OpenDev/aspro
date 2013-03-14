@@ -3,7 +3,7 @@
 <!-- application specific configuration -->
 <included>
   
-  <appender name="WARNINGLOG" class="fr.jmmc.jmcs.util.logging.ByteArrayOutputStreamAppender">
+  <appender name="WARNINGLOG" class="fr.jmmc.jmcs.logging.ByteArrayOutputStreamAppender">
       <encoder>
           <pattern>%d{HH:mm:ss.SSS} - %msg%n</pattern>
       </encoder>

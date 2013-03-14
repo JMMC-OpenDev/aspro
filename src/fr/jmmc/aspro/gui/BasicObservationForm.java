@@ -40,12 +40,12 @@ import fr.jmmc.jmcs.gui.component.GenericListModel;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.gui.component.SearchPanel;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
+import fr.jmmc.jmcs.logging.LogbackGui;
+import fr.jmmc.jmcs.logging.LoggingService;
 import fr.jmmc.jmcs.resource.image.ResourceImage;
 import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.jmcs.util.ObjectUtils;
 import fr.jmmc.jmcs.util.StringUtils;
-import fr.jmmc.jmcs.util.logging.LogbackGui;
-import fr.jmmc.jmcs.util.logging.LoggingService;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import java.awt.Toolkit;
@@ -999,7 +999,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
             if (logger.isDebugEnabled()) {
                 logger.debug("Selected Target changed: {}", getSelectedTarget());
             }
-            
+
             // fire a tooltip manager's key event (ESC) to hide the tooltip on target list:
             Toolkit.getDefaultToolkit().getSystemEventQueue().postEvent(new KeyEvent(this.jListTargets, KeyEvent.KEY_PRESSED, System.currentTimeMillis(), 0, KeyEvent.VK_ESCAPE, KeyEvent.CHAR_UNDEFINED));
 
