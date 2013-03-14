@@ -25,7 +25,7 @@ import fr.jmmc.aspro.model.oi.Position3D;
 import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.StationLinks;
 import fr.jmmc.aspro.service.GeocentricCoords;
-import fr.jmmc.jmcs.data.ApplicationDescription;
+import fr.jmmc.jmcs.data.app.ApplicationDescription;
 import fr.jmmc.jmcs.gui.FeedbackReport;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.util.FileUtils;
