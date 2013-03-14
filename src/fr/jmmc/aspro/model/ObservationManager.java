@@ -40,9 +40,9 @@ import fr.jmmc.jmal.model.targetmodel.Parameter;
 import fr.jmmc.jmal.star.Star;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
+import fr.jmmc.jmcs.service.RecentFilesManager;
 import fr.jmmc.jmcs.util.FileUtils;
 import fr.jmmc.jmcs.util.NumberUtils;
-import fr.jmmc.jmcs.util.RecentFilesManager;
 import fr.jmmc.oitools.model.OIFitsFile;
 import fr.nom.tam.fits.FitsException;
 import java.io.File;
@@ -1049,8 +1049,8 @@ public final class ObservationManager extends BaseOIManager implements Observer 
 
             if (distance < SAME_TARGET_DISTANCE) {
                 throw new IllegalArgumentException("Target[" + source.getName() + "](" + source.getRA() + ", " + source.getDEC()
-                        + ") too close to Target[" + target.getName() + "](" + target.getRA() + ", " + target.getDEC() 
-                        + "): " + NumberUtils.trimTo3Digits(distance * ALX.DEG_IN_ARCSEC)+ " arcsec !");
+                        + ") too close to Target[" + target.getName() + "](" + target.getRA() + ", " + target.getDEC()
+                        + "): " + NumberUtils.trimTo3Digits(distance * ALX.DEG_IN_ARCSEC) + " arcsec !");
             }
         }
     }
