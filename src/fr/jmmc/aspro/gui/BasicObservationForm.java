@@ -73,6 +73,7 @@ import javax.swing.DefaultListSelectionModel;
 import javax.swing.JFormattedTextField;
 import javax.swing.JList;
 import javax.swing.JSpinner.DateEditor;
+import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -1732,7 +1733,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
             this.jLabelStatus.setIcon((level == Level.Warning) ? ResourceImage.WARNING_ICON.icon() : ResourceImage.INFO_ICON.icon());
             this.jLabelStatus.setText(level.toString());
 
-            final StringBuilder sb = new StringBuilder(256);
+            final StringBuilder sb = new StringBuilder(100 * warningContainer.getWarningMessages().size());
             sb.append("<html>");
 
             String msg;
@@ -1810,21 +1811,45 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         final JList list = new JList() {
             /** default serial UID for Serializable interface */
             private static final long serialVersionUID = 1;
+            
+            /* members */
+            /** last item index at the mouse position */
+            private int lastIndex;
+            /** last tooltip at item index */
+            private String lastTooltip;
+
+            /** update list model and reset last tooltip */
+            @Override
+            public void setModel(final ListModel model) {
+                super.setModel(model);
+                
+                // reset last tooltip:
+                this.lastIndex = -1;
+                this.lastTooltip = null;
+            }
 
             /** This method is called as the cursor moves within the list */
             @Override
             public String getToolTipText(final MouseEvent evt) {
-                logger.trace("getToolTipText: {}", evt);
-
                 // Get item index :
                 final int index = locationToIndex(evt.getPoint());
                 if (index != -1) {
-                    // Get target :
-                    final Target target = (Target) getModel().getElementAt(index);
-                    if (target != null) {
-                        // Return the tool tip text :
-                        return target.toHtml();
+                    String tooltip = null;
+                    
+                    if (this.lastIndex == index) {
+                        // use last tooltip:
+                        tooltip = this.lastTooltip;
+                    } else {
+                        // Get target :
+                        final Target target = (Target) getModel().getElementAt(index);
+                        if (target != null) {
+                            // Return the tool tip text :
+                            tooltip = target.toHtml();
+                        }
+                        this.lastIndex = index;
+                        this.lastTooltip = tooltip;
                     }
+                    return tooltip;
                 }
                 return getToolTipText();
             }
