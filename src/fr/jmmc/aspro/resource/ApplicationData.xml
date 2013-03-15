@@ -140,11 +140,11 @@
   <menubar>
     <menu label="File">
       <menu label="New observation" classpath="fr.jmmc.aspro.gui.action.NewObservationAction" action="newObservation" accelerator="N"
-            icon="/fr/jmmc/aspro/gui/icons/filenew.png"/>
+            icon="fr/jmmc/aspro/gui/icons/filenew.png"/>
       <menu label="Open observation" classpath="fr.jmmc.aspro.gui.action.LoadObservationAction" action="loadObservation" accelerator="O"
-            icon="/fr/jmmc/aspro/gui/icons/fileopen.png" description="load an observation file"/>
+            icon="fr/jmmc/aspro/gui/icons/fileopen.png" description="load an observation file"/>
       <menu label="Save observation" classpath="fr.jmmc.aspro.gui.action.SaveObservationAction" action="saveObservation" accelerator="S"
-            icon="/fr/jmmc/aspro/gui/icons/filesaveas.png" description="save the current observation as an observation file"/>
+            icon="fr/jmmc/aspro/gui/icons/filesaveas.png" description="save the current observation as an observation file"/>
       <menu/> <!-- menu separator -->
       <menu label="Export to OIFits file(s)" classpath="fr.jmmc.aspro.gui.action.ExportOIFitsAction" action="exportOIFits" accelerator="F"
             description="Export your target observables to OIFits file(s)"/>
@@ -155,7 +155,7 @@
             description="Export your complete observation to Observing blocks"/>
       <menu/> <!-- menu separator -->
       <menu label="Export plot to PDF" classpath="fr.jmmc.oiexplorer.core.gui.action.ExportPDFAction" action="exportPDF" accelerator="P"
-            icon="/fr/jmmc/oiexplorer/core/resource/image/icon_pdf.gif" description="Export the current plot to a PDF document"/>
+            icon="fr/jmmc/oiexplorer/core/resource/image/icon_pdf.gif" description="Export the current plot to a PDF document"/>
     </menu>
 
     <menu label="Edit">
