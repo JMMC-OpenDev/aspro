@@ -894,7 +894,7 @@ public class Target
    * @return HTML representation
    */
   public final String toHtml(final String prependMessage, final String appendMessage, final boolean full) {
-    final StringBuilder sb = new StringBuilder(128);
+    final StringBuilder sb = new StringBuilder(512);
     sb.append("<html>");
     if (prependMessage != null) {
       sb.append(prependMessage).append("<hr>");
@@ -948,6 +948,7 @@ public class Target
       sb.append("<hr>").append(appendMessage);
     }
     sb.append("</html>");
+    
     return sb.toString();
   }
 
