@@ -3,7 +3,6 @@
  ******************************************************************************/
 package fr.jmmc.aspro.gui;
 
-import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.gui.action.AsproExportPDFAction;
 import fr.jmmc.aspro.gui.chart.AsproChartUtils;
 import fr.jmmc.aspro.gui.chart.NameLabelGenerator;
