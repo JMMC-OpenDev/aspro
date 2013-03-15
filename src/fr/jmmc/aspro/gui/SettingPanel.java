@@ -23,6 +23,7 @@ import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.Timer;
+import javax.swing.ToolTipManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import org.slf4j.Logger;
@@ -42,6 +43,8 @@ public final class SettingPanel extends JPanel implements ObservationListener, D
     private static final int REFRESH_PERIOD = 100;
     /** enable / disable OIFits info panel (HTML view) */
     private static final boolean ENABLE_OIFITS_HTML = false;
+    /** shared tooltip manager */
+    private final static ToolTipManager tm = ToolTipManager.sharedInstance();
 
     /* Tab names */
     /** name of the tab pane corresponding to the interferometer map */
@@ -340,9 +343,22 @@ public final class SettingPanel extends JPanel implements ObservationListener, D
                 }
             }
         }
+
+        // hide tooltip:
+        hideTooltip();
+
         if (logger.isDebugEnabled()) {
             logger.debug("event [{}] process OUT", event.getType());
         }
+    }
+
+    /**
+     * Hide any displayed tooltip
+     */
+    private void hideTooltip() {
+        // disable the tooltip manager temporarly to hide the tooltip on target list:
+        tm.setEnabled(false);
+        tm.setEnabled(true);
     }
 
     /**
