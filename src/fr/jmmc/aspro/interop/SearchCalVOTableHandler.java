@@ -176,7 +176,7 @@ public final class SearchCalVOTableHandler {
 
                     // check that science target is present :
                     if (om.getTarget(targetName) == null) {
-                        logger.info("Target '" + targetName + "' not found in targets; adding it (partial information).");
+                        logger.info("Target '{}' not found in targets; adding it (partial information).", targetName);
 
                         editTargets.add(scienceTarget);
                     }

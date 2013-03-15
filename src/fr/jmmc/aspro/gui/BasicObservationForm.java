@@ -1395,7 +1395,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
                     // update the data model and fire change events :
                     om.addTarget(Target.formatName(star.getName()), star);
                 } catch (IllegalArgumentException iae) {
-                    logger.info("addTarget failed: " + iae.getMessage());
+                    logger.info("addTarget failed: {}", iae.getMessage());
 
                     MessagePane.showWarning(iae.getMessage());
                 }
