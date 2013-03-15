@@ -5,7 +5,6 @@ package test;
 
 import fr.jmmc.aspro.gui.TargetEditorDialog;
 import fr.jmmc.aspro.model.ObservationManager;
-import fr.jmmc.jmcs.App;
 import fr.jmmc.jmcs.Bootstrapper;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
 import java.io.File;
