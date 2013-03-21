@@ -483,14 +483,14 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
 
     saveCroppedScreenshotOf("popsAuto.png", left, 0, width, height);
 
-    // set PoPs to '25' :
+    // set PoPs to '34' (manual):
     final JFormattedTextField jTextPoPs = (JFormattedTextField) form.textBox("jTextPoPs").component();
 
     GuiActionRunner.execute(new GuiTask() {
       @Override
       protected void executeInEDT() {
         // Integer field :
-        jTextPoPs.setValue(Integer.valueOf(25));
+        jTextPoPs.setValue(Integer.valueOf(34));
       }
     });
 
