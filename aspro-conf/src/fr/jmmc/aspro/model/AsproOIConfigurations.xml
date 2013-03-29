@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet href="AsproOIConfigurations.xsl" type="text/xsl"?>
+<!--
+*******************************************************************************
+* JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
+*******************************************************************************
+-->
+<!--
+    Document   : AsproOIConfigurations.xml
+    Created on : 14 octobre 2009, 14:31
+    Author     : bourgesl
+    Description:
+        This file lists all interferometer configuration files.
+-->
+
+<a:configurations
+    xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+    xmlns:a='http://www.jmmc.fr/aspro-oi/0.1'
+    xsi:schemaLocation='http://www.jmmc.fr/aspro-oi/0.1 AsproOIModel.xsd'>
+    
+    <!-- minimum version corresponds to Aspro2 0.9.4 (march 2013 / CfP 92) -->
+    <minVersion>0.9.4</minVersion>
+
+    <interferometerFile>
+        <file>VLTI.xml</file>
+        <checksum>47306286678933504</checksum>
+    </interferometerFile>
+    
+    <interferometerFile>
+        <file>CHARA.xml</file>
+        <checksum>7455996968599101440</checksum>
+    </interferometerFile>
+
+<!--
+    <interferometerFile>
+        <file>MROI.xml</file>
+    </interferometerFile>
+-->
+
+    <interferometerFile>
+        <file>SUSI.xml</file>
+        <checksum>7857653018039622656</checksum>
+    </interferometerFile>
+  
+</a:configurations>
