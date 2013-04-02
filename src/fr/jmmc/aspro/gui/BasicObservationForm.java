@@ -1692,10 +1692,6 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
                     orderedPops.add(p.toString());
                 }
 
-                // TODO: add tooltip to see (total length ... estimation ...)
-
-                // TODO: visibility rules ??
-
                 // single observation results:
                 this.jComboBoxPops.setModel(new DefaultComboBoxModel(orderedPops));
                 this.jComboBoxPops.setSelectedItem(POPS_AUTO);
@@ -1808,6 +1804,8 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
             private static final long serialVersionUID = 1;
             
             /* members */
+            /** tooltip buffer */
+            private final StringBuffer sbToolTip = new StringBuffer(512);
             /** last item index at the mouse position */
             private int lastIndex;
             /** last tooltip at item index */
@@ -1839,7 +1837,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
                         final Target target = (Target) getModel().getElementAt(index);
                         if (target != null) {
                             // Return the tool tip text :
-                            tooltip = target.toHtml();
+                            tooltip = target.toHtml(this.sbToolTip);
                         }
                         this.lastIndex = index;
                         this.lastTooltip = tooltip;
