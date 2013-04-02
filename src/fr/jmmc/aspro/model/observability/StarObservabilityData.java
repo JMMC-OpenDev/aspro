@@ -41,8 +41,8 @@ public final class StarObservabilityData {
   private final int type;
   /** visible date intervals */
   private final List<DateTimeInterval> visible = new ArrayList<DateTimeInterval>(3);
-  /** visible date intervals without HA limits */
-  private List<DateTimeInterval> visibleNoHALimits = null;
+  /** visible date intervals without soft limits (HA, moon, wind) */
+  private List<DateTimeInterval> visibleNoSoftLimits = null;
   /** transit date */
   private Date transitDate;
   /** sampled target positions (ha, az, el) keyed by date */
@@ -118,19 +118,19 @@ public final class StarObservabilityData {
   }
 
   /**
-   * Return the visible date intervals without HA limits
-   * @return visible date intervals without HA limits
+   * Return the visible date intervals without soft limits (HA, moon, wind)
+   * @return visible date intervals without soft limits (HA, moon, wind)
    */
-  public List<DateTimeInterval> getVisibleNoHaLimits() {
-    return visibleNoHALimits;
+  public List<DateTimeInterval> getVisibleNoSoftLimits() {
+    return visibleNoSoftLimits;
   }
 
   /**
-   * Return the visible date intervals without HA limits
-   * @param ranges visible date intervals without HA limits
+   * Return the visible date intervals without soft limits (HA, moon, wind)
+   * @param ranges visible date intervals without soft limits (HA, moon, wind)
    */
-  public void setVisibleNoHaLimits(final List<DateTimeInterval> ranges) {
-    visibleNoHALimits = ranges;
+  public void setVisibleNoSoftLimits(final List<DateTimeInterval> ranges) {
+    visibleNoSoftLimits = ranges;
   }
 
   /**

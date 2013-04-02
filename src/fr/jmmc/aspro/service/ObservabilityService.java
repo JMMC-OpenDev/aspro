@@ -1249,17 +1249,17 @@ public final class ObservabilityService {
                 // rise/set range WITHOUT HA Min/Max constraints:
                 final Range haLimits = getTargetHALimits(target);
 
-                final boolean doHARestriction = checkJDMoon || checkJDWind || rangeHARiseSet.contains(haLimits.getMin()) || rangeHARiseSet.contains(haLimits.getMax());
+                final boolean doSoftLimits = checkJDMoon || checkJDWind || rangeHARiseSet.contains(haLimits.getMin()) || rangeHARiseSet.contains(haLimits.getMax());
 
                 if (isLogDebug) {
                     logger.debug("checkJDMoon: {}", checkJDMoon);
                     logger.debug("checkJDWind: {}", checkJDWind);
-                    logger.debug("doHARestriction: {}", doHARestriction);
+                    logger.debug("doSoftLimits: {}", doSoftLimits);
                 }
 
                 final List<Range> finalRanges;
 
-                if (doHARestriction) {
+                if (doSoftLimits) {
                     // Restrict observability ranges:
                     nValid = 1;
                     obsRanges.clear();
@@ -1301,17 +1301,17 @@ public final class ObservabilityService {
                         }
 
                         // Keep observability ranges without HA restrictions:
-                        final List<DateTimeInterval> visibleNoHaLimits = new ArrayList<DateTimeInterval>(3);
+                        final List<DateTimeInterval> visibleNoSoftLimits = new ArrayList<DateTimeInterval>(3);
 
                         // convert JD ranges to date ranges :
                         for (Range range : finalRangesHardLimits) {
-                            convertRangeToDateInterval(range, visibleNoHaLimits);
+                            convertRangeToDateInterval(range, visibleNoSoftLimits);
                         }
-                        if (visibleNoHaLimits.size() > 1) {
+                        if (visibleNoSoftLimits.size() > 1) {
                             // merge contiguous date ranges :
-                            DateTimeInterval.merge(visibleNoHaLimits);
+                            DateTimeInterval.merge(visibleNoSoftLimits);
                         }
-                        starObs.setVisibleNoHaLimits(visibleNoHaLimits);
+                        starObs.setVisibleNoSoftLimits(visibleNoSoftLimits);
                     }
 
                 } else {
@@ -1981,6 +1981,8 @@ public final class ObservabilityService {
             // check again the true warning threshold:
             if (minSeparation < warningThreshold) {
                 // add warning:
+                
+                // TODO: use Format.format(val, StringBuffer) instead:
                 this.addWarning("Moon separation is " + df1.format(minSeparation)
                         + " deg at " + timeFormatter.format(convertJDToDate(minJd))
                         + " for target [" + target.getName() + "]<br> Please check pointing restrictions.");
