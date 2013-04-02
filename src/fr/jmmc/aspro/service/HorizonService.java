@@ -48,6 +48,9 @@ public final class HorizonService {
    * @return profile or null if there is no horizon profile for the given station
    */
   public HorizonShape getProfile(final String interferometerName, final Station station) {
+      
+      // TODO: avoid String concatenation: use composite key (string, string)
+      
     // profile key = '<interferometer> - <station>' :
     final String key = interferometerName + " - " + station.getName();
 
