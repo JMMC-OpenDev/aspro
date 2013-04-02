@@ -879,26 +879,24 @@ public class Target
   }
 
   /**
-   * Return an HTML representation of the target used by tooltips
-   * @return HTML representation
+   * Return an HTML representation of the target used by tooltips (full information)
+   * @param sb string buffer to use (cleared)
+   * @return HTML representation as String
    */
-  public final String toHtml() {
-    return toHtml(null, null, true);
+  public final String toHtml(final StringBuffer sb) {
+    sb.setLength(0); // clear
+    sb.append("<html>");
+    toHtml(sb, true);
+    sb.append("</html>");
+    return sb.toString();
   }
 
   /**
-   * Return an HTML representation of the target used by tooltips
-   * @param prependMessage optional message displayed at the beginning
-   * @param appendMessage optional message displayed at the end
+   * Return an HTML representation of the target used by tooltips in the given string buffer
+   * @param sb string buffer to fill
    * @param full flag to display full information
-   * @return HTML representation
    */
-  public final String toHtml(final String prependMessage, final String appendMessage, final boolean full) {
-    final StringBuilder sb = new StringBuilder(512);
-    sb.append("<html>");
-    if (prependMessage != null) {
-      sb.append(prependMessage).append("<hr>");
-    }
+  public final void toHtml(final StringBuffer sb, final boolean full) {
     sb.append("<b>Name: ").append(getName());
     sb.append("</b><br><b>Coords</b>: ").append(getRA()).append(' ').append(getDEC());
     if (full && getPMRA() != null && getPMDEC() != null) {
@@ -943,13 +941,6 @@ public class Target
       }
     }
     // Ids ?
-
-    if (appendMessage != null) {
-      sb.append("<hr>").append(appendMessage);
-    }
-    sb.append("</html>");
-    
-    return sb.toString();
   }
 
   /**
