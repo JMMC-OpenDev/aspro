@@ -15,6 +15,7 @@ import fr.jmmc.aspro.model.event.ObservationListener;
 import fr.jmmc.aspro.model.oi.ObservationCollection;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.service.InterferometerMapService;
+import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.oiexplorer.core.gui.PDFExportable;
 import fr.jmmc.oiexplorer.core.gui.chart.ChartUtils;
 import fr.jmmc.oiexplorer.core.gui.chart.ColorPalette;
@@ -382,7 +383,7 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
                 xySeries.add(blX2[i], blY2[i], false);
 
                 // add an invalid point to break the line between the 2 segments :
-                xySeries.add(Double.NaN, Double.NaN, false);
+                xySeries.add(NumberUtils.DBL_NAN, NumberUtils.DBL_NAN, false);
 
             } // BL
         }
