@@ -262,8 +262,6 @@ public final class InstantInTime implements Cloneable {
 
         useDST = use_dst;
 
-        // TODO: fix new GenericCalDat() calls
-
         if (is_ut) {
             jd = jdin;  // by definition, it's the JD
 
