@@ -112,6 +112,7 @@ import org.jfree.chart.block.BlockBorder;
 import org.jfree.chart.event.ChartProgressEvent;
 import org.jfree.chart.event.ChartProgressListener;
 import org.jfree.chart.renderer.AbstractRenderer;
+import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.chart.title.PaintScaleLegend;
 import org.jfree.data.xy.XYSeries;
@@ -658,7 +659,10 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
         this.chart = ChartUtils.createSquareXYLineChart("U (" + SpecialChars.UNIT_MEGA_LAMBDA + ")", "V (" + SpecialChars.UNIT_MEGA_LAMBDA + ")", true);
         this.xyPlot = (SquareXYPlot) this.chart.getPlot();
-
+/*
+        final XYLineAndShapeRenderer rendererOver = new XYLineAndShapeRenderer(true, false);
+        this.xyPlot.setRenderer(1, rendererOver);
+*/       
         // Adjust background settings :
         this.xyPlot.setBackgroundImageAlpha(1.0f);
 
@@ -2490,11 +2494,19 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
         // renderer :
         final AbstractRenderer renderer = (AbstractRenderer) this.xyPlot.getRenderer();
-
+        
         // reset colors :
         renderer.clearSeriesPaints(false);
         // side effect with chart theme :
         renderer.setAutoPopulateSeriesPaint(false);
+/*        
+        final AbstractRenderer rendererOver = (AbstractRenderer) this.xyPlot.getRenderer(1);
+        // force to use the base stroke :
+        rendererOver.setBaseSeriesVisibleInLegend(true);
+        rendererOver.setAutoPopulateSeriesStroke(false);
+        rendererOver.setBaseStroke(ChartUtils.VERY_LARGE_STROKE);
+        rendererOver.setPaint(new Color(0,0,0,100));
+*/        
 
         // Create dataset with UV coverage data :
         final XYSeriesCollection dataset = prepareDataset(chartData);
@@ -2513,6 +2525,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
         // set the main data set :
         this.xyPlot.setDataset(dataset);
+//        this.xyPlot.setDataset(1, dataset);
     }
 
     /**
@@ -2623,14 +2636,14 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
                         xySeries.add(x2, y2, false);
 
                         // add an invalid point to break the line between the 2 segments :
-                        xySeries.add(Double.NaN, Double.NaN, false);
+                        xySeries.add(NumberUtils.DBL_NAN, NumberUtils.DBL_NAN, false);
 
                         // second symetric segment :
                         xySeries.add(-x1, -y1, false);
                         xySeries.add(-x2, -y2, false);
 
                         // add an invalid point to break the line between the 2 segments :
-                        xySeries.add(Double.NaN, Double.NaN, false);
+                        xySeries.add(NumberUtils.DBL_NAN, NumberUtils.DBL_NAN, false);
 
                     } // points
                 } // BL
@@ -2670,6 +2683,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
                     xySeries = dataset.getSeries(chartData.getConfigurationNames().get(c));
                 }
 
+                // TODO: adjust capacity of xySeries !
+                
                 for (UVBaseLineData uvBL : targetUVRiseSet) {
 
                     if (single) {
@@ -2689,7 +2704,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
                     } // points
 
                     // add an invalid point to break the line between the 2 segments :
-                    xySeries.add(Double.NaN, Double.NaN, false);
+                    xySeries.add(NumberUtils.DBL_NAN, NumberUtils.DBL_NAN, false);
 
                     // second symetric ellipse line :
                     for (int i = 0, size = uvBL.getNPoints(); i < size; i++) {
@@ -2700,7 +2715,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
                     } // points
 
                     // add an invalid point to break the line between the 2 segments :
-                    xySeries.add(Double.NaN, Double.NaN, false);
+                    xySeries.add(NumberUtils.DBL_NAN, NumberUtils.DBL_NAN, false);
 
                 } // BL
             }
