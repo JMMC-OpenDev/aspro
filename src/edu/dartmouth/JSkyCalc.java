@@ -4507,7 +4507,7 @@ class JSkyCalcWindow {
             Color gridcolor = new Color(153, 0, 0);  // dark red
 
             float[] dot1 = {1.0f, 4.0f};
-            BasicStroke dotted = new BasicStroke(1.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 1.0f, dot1, 0.0f);
+            BasicStroke dotted = new BasicStroke(1.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 1.0f, dot1, 0.0f);
 
             smallfontmetrics = g2.getFontMetrics(smallfont);
             mediumfontmetrics = g2.getFontMetrics(mediumfont);
