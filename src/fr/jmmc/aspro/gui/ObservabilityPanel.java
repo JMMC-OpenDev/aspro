@@ -37,6 +37,7 @@ import fr.jmmc.aspro.service.pops.BestPopsEstimatorFactory.Algorithm;
 import fr.jmmc.aspro.service.pops.Criteria;
 import fr.jmmc.jmcs.gui.component.Disposable;
 import fr.jmmc.jmcs.gui.component.StatusBar;
+import fr.jmmc.jmcs.util.FormatterUtils;
 import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.jmcs.util.ObjectUtils;
 import fr.jmmc.jmcs.util.SpecialChars;
@@ -288,6 +289,9 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
         this.chart = AsproChartUtils.createXYBarChart();
         this.xyPlot = (XYPlot) this.chart.getPlot();
+
+        // change the Range axis (horizontal):
+        this.xyPlot.setRangeAxis(new BoundedDateAxis(""));
 
         // create new JMMC annotation (moving position):
         this.aJMMC = AsproChartUtils.createJMMCAnnotation();
@@ -1412,27 +1416,26 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                             }
 
                             // time annotations at range boundaries:
+
                             for (DateTimeInterval interval : so.getVisible()) {
                                 if (checkDateAxisLimits(interval.getStartDate(), min, max)) {
-                                    final XYTextAnnotation aStart = AsproChartUtils.createFitXYTextAnnotation(this.timeFormatter.format(interval.getStartDate()), n, interval.getStartDate().getTime());
+                                    final XYTextAnnotation aStart = AsproChartUtils.createFitXYTextAnnotation(FormatterUtils.format(this.timeFormatter, interval.getStartDate()), n, interval.getStartDate().getTime());
                                     aStart.setRotationAngle(HALF_PI);
                                     addAnnotation(annotations, pos, aStart);
                                 }
 
                                 if (checkDateAxisLimits(interval.getEndDate(), min, max)) {
-                                    final XYTextAnnotation aEnd = AsproChartUtils.createFitXYTextAnnotation(this.timeFormatter.format(interval.getEndDate()), n, interval.getEndDate().getTime());
+                                    final XYTextAnnotation aEnd = AsproChartUtils.createFitXYTextAnnotation(FormatterUtils.format(this.timeFormatter, interval.getEndDate()), n, interval.getEndDate().getTime());
                                     aEnd.setRotationAngle(HALF_PI);
                                     addAnnotation(annotations, pos, aEnd);
                                 }
                             }
 
                             // Observable range limits without HA restrictions:
-                            // TODO: rename WIND / MOON TOO:
-                            if (so.getVisibleNoHaLimits() != null) {
+                            if (so.getVisibleNoSoftLimits() != null) {
                                 final Paint fillPaint = new Color(paint.getRed(), paint.getGreen(), paint.getBlue(), 48); // 80% transparent
-                                // final Paint fillPaint = ImageUtils.createHatchedTexturePaint(15, new Color(0, true), paint, new BasicStroke(2.0f));
 
-                                for (DateTimeInterval interval : so.getVisibleNoHaLimits()) {
+                                for (DateTimeInterval interval : so.getVisibleNoSoftLimits()) {
                                     addAnnotation(annotations, pos,
                                             new EnhancedXYBoxAnnotation(n, interval.getStartDate().getTime(), n, interval.getEndDate().getTime(),
                                             ChartUtils.DOTTED_STROKE, Color.BLACK, fillPaint));
@@ -1599,8 +1602,10 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
      * @param doBaseLineLimits flag to plot baseline limits
      */
     private void updateDateAxis(final String label, final Date from, final Date to, final boolean doBaseLineLimits) {
-        // change the Range axis (horizontal) :
-        final BoundedDateAxis dateAxis = new BoundedDateAxis(label);
+        // update the Range axis (horizontal):
+        final BoundedDateAxis dateAxis = (BoundedDateAxis) this.xyPlot.getRangeAxis();
+
+        dateAxis.setLabel(label);
 
         if (doBaseLineLimits) {
             dateAxis.setStandardTickUnits(HA_TICK_UNITS);
@@ -1608,8 +1613,6 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
             dateAxis.setStandardTickUnits(HH_MM_TICK_UNITS);
         }
         dateAxis.setTickLabelInsets(ChartUtils.TICK_LABEL_INSETS);
-
-        this.xyPlot.setRangeAxis(dateAxis);
 
         // use the range [0;24]:
         updateDateAxisBounds(from.getTime(), to.getTime());
@@ -1773,7 +1776,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                             this.timeMarker.setValue(timeValue);
                         }
                         // update displayed time:
-                        this.timeMarker.setLabel(this.timeFormatter.format(now));
+                        this.timeMarker.setLabel(FormatterUtils.format(this.timeFormatter, now));
 
                         this.xyPlot.addRangeMarker(this.timeMarker, Layer.BACKGROUND);
                     }
@@ -1835,12 +1838,12 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
             }
         }
 
-        // Perform custom operations before/after chart rendering:
-        // move JMMC annotation:
-        this.aJMMC.setX(this.xyPlot.getDomainAxis().getUpperBound());
-        this.aJMMC.setY(this.xyPlot.getRangeAxis().getUpperBound()); // upper bound instead of other plots
-
         if (event.getType() == ChartProgressEvent.DRAWING_STARTED) {
+            // Perform custom operations before chart rendering:
+            // move JMMC annotation:
+            this.aJMMC.setX(this.xyPlot.getDomainAxis().getUpperBound());
+            this.aJMMC.setY(this.xyPlot.getRangeAxis().getUpperBound()); // upper bound instead of other plots
+            
             if (isTimelineEnabled()) {
                 // set time marker label anchor:
                 final BoundedDateAxis dateAxis = (BoundedDateAxis) this.xyPlot.getRangeAxis();
