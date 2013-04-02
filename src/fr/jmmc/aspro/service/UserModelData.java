@@ -54,7 +54,6 @@ public final class UserModelData extends OIBase {
      * @return wavelength increment along the wavelength axis (meter per pixel)
      */
     public double getWaveLengthIncrement() {
-        // TODO: remove
         return fitsImage.getIncWL();
     }
 
@@ -96,11 +95,9 @@ public final class UserModelData extends OIBase {
     }
 
     /**
-     * Return the number of data points
+     * Return the number of data1D elements (3 x data points)
      * 
-     * TODO: x 3 or / 3: decide soon
-     * 
-     * @return number of data points
+     * @return number of data1D elements
      */
     public int getNData() {
         return this.data1D.length;
