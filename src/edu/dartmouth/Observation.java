@@ -72,7 +72,6 @@ public final class Observation implements Cloneable {
 
         ha.setHA(w.sidereal - current.alpha.value);
 
-        // TODO: use fastMath:
         altAz(cosLat, sinLat, cosDec, sinDec, ha.value, altazpar);
 
         altitude = altazpar[0];
