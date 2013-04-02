@@ -59,6 +59,8 @@ public final class AstroSkyCalc {
     private Calendar dateLst0;
     /** temporary WhenWhere instance used by calendar conversion */
     private WhenWhere wwCal = null;
+    /** temporary Calendar instance used by calendar conversion */
+    private final Calendar tmpCal = new GregorianCalendar();
 
     /**
      * Public Constructor
@@ -279,7 +281,8 @@ public final class AstroSkyCalc {
      * @return Date object
      */
     public Date toDate(final double jd, final boolean useLst) {
-        final Calendar cal = toCalendar(jd, useLst);
+        // use temporary GregorianCalendar instance:
+        final Calendar cal = toCalendar(jd, useLst, tmpCal);
         return cal.getTime();
     }
 
@@ -290,6 +293,17 @@ public final class AstroSkyCalc {
      * @return Calendar object
      */
     public Calendar toCalendar(final double jd, final boolean useLst) {
+        return toCalendar(jd, useLst, null);
+    }
+
+    /**
+     * Convert a julian date to a gregorian calendar (precise up to the second) in LST or UTC
+     * @param jd julian date
+     * @param useLst flag to select LST (true) or UTC conversion (false)
+     * @param cal calendar instance to use
+     * @return Calendar object
+     */
+    public Calendar toCalendar(final double jd, final boolean useLst, final Calendar cal) {
         // avoid new instances:
         if (wwCal == null) {
             wwCal = new WhenWhere(jd, this.site, false);
@@ -307,9 +321,18 @@ public final class AstroSkyCalc {
         if (useLst) {
             final RA sidereal = wwCal.siderealobj;
 
-            // use the observation date as the LST has only time :
-            calendar = new GregorianCalendar(this.dateLst0.get(Calendar.YEAR), this.dateLst0.get(Calendar.MONTH), this.dateLst0.get(Calendar.DAY_OF_MONTH),
-                    sidereal.sex.hour, sidereal.sex.minute, (int) Math.round(sidereal.sex.second));
+            // use the observation date as the LST has only time:
+            if (cal == null) {
+                calendar = new GregorianCalendar(this.dateLst0.get(Calendar.YEAR), this.dateLst0.get(Calendar.MONTH), this.dateLst0.get(Calendar.DAY_OF_MONTH),
+                        sidereal.sex.hour, sidereal.sex.minute, (int) Math.round(sidereal.sex.second));
+            } else {
+                // use given calendar instance:
+                cal.clear();
+                cal.set(this.dateLst0.get(Calendar.YEAR), this.dateLst0.get(Calendar.MONTH), this.dateLst0.get(Calendar.DAY_OF_MONTH),
+                        sidereal.sex.hour, sidereal.sex.minute, (int) Math.round(sidereal.sex.second));
+
+                calendar = cal;
+            }
 
             double days = (jd - this.jdLst0) * Const.SID_RATE;
 
@@ -340,8 +363,17 @@ public final class AstroSkyCalc {
         } else {
             final GenericCalDat utDate = wwCal.when.UTDate;
 
-            calendar = new GregorianCalendar(utDate.year, utDate.month - 1, utDate.day,
-                    utDate.timeofday.hour, utDate.timeofday.minute, (int) Math.round(utDate.timeofday.second));
+            if (cal == null) {
+                calendar = new GregorianCalendar(utDate.year, utDate.month - 1, utDate.day,
+                        utDate.timeofday.hour, utDate.timeofday.minute, (int) Math.round(utDate.timeofday.second));
+            } else {
+                // use given calendar instance:
+                cal.clear();
+                cal.set(utDate.year, utDate.month - 1, utDate.day,
+                        utDate.timeofday.hour, utDate.timeofday.minute, (int) Math.round(utDate.timeofday.second));
+
+                calendar = cal;
+            }
         }
 
         return calendar;
