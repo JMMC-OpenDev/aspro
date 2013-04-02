@@ -7,6 +7,7 @@ import fr.jmmc.aspro.model.ObservationManager;
 import fr.jmmc.aspro.model.observability.StarObservabilityData;
 import fr.jmmc.aspro.model.observability.TargetPositionDate;
 import fr.jmmc.aspro.model.oi.Target;
+import fr.jmmc.jmcs.util.FormatterUtils;
 import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.jmcs.util.StringUtils;
 import fr.jmmc.oiexplorer.core.gui.chart.BoundedSymbolAxis;
@@ -95,6 +96,8 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
     private int lastStart = -1;
     /** last used end position for the subset */
     private int lastEnd = -1;
+    /** tooltip buffer */
+    private final StringBuffer sbToolTip = new StringBuffer(512);
 
     /**
      * Constructor
@@ -369,14 +372,19 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
             // update dataset :
             this.xyPlot.setDataset(dataset);
 
-            // change the Domain axis (vertical) :
-            final BoundedSymbolAxis symbolAxis = new AutoFitBoundedSymbolAxis(null, subSymbols);
-            symbolAxis.setInverted(true);
-            symbolAxis.setGridBandsVisible(false);
+            // change the Domain axis (vertical):
+            if (!(this.xyPlot.getDomainAxis() instanceof AutoFitBoundedSymbolAxis)) {
+                final BoundedSymbolAxis symbolAxis = new AutoFitBoundedSymbolAxis(null, subSymbols);
+                symbolAxis.setInverted(true);
+                symbolAxis.setGridBandsVisible(false);
+                this.xyPlot.setDomainAxis(symbolAxis);
+            }
+
+            // adjust symbols and range:
+            final BoundedSymbolAxis symbolAxis = (AutoFitBoundedSymbolAxis) this.xyPlot.getDomainAxis();
+            symbolAxis.setSymbols(subSymbols);
             symbolAxis.setBounds(new Range(rangeMin, rangeMax));
             symbolAxis.setRange(rangeMin, rangeMax);
-
-            this.xyPlot.setDomainAxis(symbolAxis);
 
             // remove Annotations :
             this.renderer.removeAnnotations();
@@ -506,12 +514,11 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
 
                 final Target target = this.targetList.get(index);
 
-                logger.debug("target= {}", target);
+                logger.debug("target: {}", target);
 
-                final String label = labels.get(index);
-
-                final StringBuilder sb = new StringBuilder(255);
-                sb.append("<b>").append(label).append(" Observability</b>");
+                final StringBuffer sb = this.sbToolTip;
+                sb.setLength(0); // clear
+                sb.append("<html><b>").append(labels.get(index)).append(" Observability</b>");
 
                 final TaskSeries taskSeries = this.collection.getSeries(index);
 
@@ -519,8 +526,8 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
                 final TimePeriod period = taskSeries.get(item).getDuration();
 
                 final StarObservabilityData starObs = this.soTargetList.get(index);
-                if (starObs != null) {
 
+                if (starObs != null) {
                     // note: often the start or end TargetPositionDate can not be found
                     // when the interval has been splitted due to night overlaps (RA)
 
@@ -528,8 +535,10 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
                     TargetPositionDate pos = starObs.getTargetPosition(date);
 
                     if (pos != null) {
-                        sb.append("<br><b>Start</b>: ").append(this.timeFormatter.format(date));
-                        sb.append(" - <b>HA</b>: ").append(this.df1.format(pos.getHa()));
+                        sb.append("<br><b>Start</b>: ");
+                        FormatterUtils.format(this.timeFormatter, sb, date);
+                        sb.append(" - <b>HA</b>: ");
+                        FormatterUtils.format(this.df1, sb, pos.getHa());
                         sb.append(" (az ").append(pos.getAzimuth());
                         sb.append(", el ").append(pos.getElevation()).append(")");
                     }
@@ -538,37 +547,41 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
                     pos = starObs.getTargetPosition(date);
 
                     if (pos != null) {
-                        sb.append("<br><b>End</b>: ").append(this.timeFormatter.format(date));
-                        sb.append(" - <b>HA</b>: ").append(this.df1.format(pos.getHa()));
+                        sb.append("<br><b>End</b>: ");
+                        FormatterUtils.format(this.timeFormatter, sb, date);
+                        sb.append(" - <b>HA</b>: ");
+                        FormatterUtils.format(this.df1, sb, pos.getHa());
                         sb.append(" (az ").append(pos.getAzimuth());
                         sb.append(", el ").append(pos.getElevation()).append(")");
                     }
 
                     date = starObs.getTransitDate();
-                    pos = starObs.getTargetPosition(date);
+                    if (date != null) {
+                        sb.append("<br><b>Transit</b>: ");
+                        FormatterUtils.format(this.timeFormatter, sb, date);
 
-                    if (pos != null) {
-                        sb.append("<br><b>Transit</b>: ").append(this.timeFormatter.format(date));
-                        sb.append(" - <b>HA</b>: ").append(this.df1.format(pos.getHa()));
-                        sb.append(" (az ").append(pos.getAzimuth());
-                        sb.append(", el ").append(pos.getElevation()).append(")");
+                        // if target not rise at transit: no az/el:
+                        pos = starObs.getTargetPosition(date);
+
+                        if (pos != null) {
+                            sb.append(" (az ").append(pos.getAzimuth());
+                            sb.append(", el ").append(pos.getElevation()).append(")");
+                        }
                     }
+
+                    sb.append("<hr>");
                 }
 
-                final String prependMessage = sb.toString();
-                final String appendMessage;
+                target.toHtml(sb, false);
 
                 // Target user info:
                 final String userDescription = om.getTargetUserInfos().getDescription(target);
 
                 if (userDescription != null) {
-                    sb.setLength(0);
-                    appendMessage = sb.append("<b>Notes</b>:<br>").append(StringUtils.replaceCR(userDescription, "<br>")).toString();
-                } else {
-                    appendMessage = null;
+                    sb.append("<hr><b>Notes</b>:<br>").append(StringUtils.replaceCR(userDescription, "<br>"));
                 }
 
-                return target.toHtml(prependMessage, appendMessage, false);
+                return sb.toString();
             }
         }
         return null;
