@@ -99,7 +99,8 @@ public abstract class WindWidget extends JPanel {
         /** store value to fix Compass.getValue() implementation */
         private double azValue = 0d;
         /** compass */
-        private eu.hansolo.steelseries.extras.Compass compass = null;
+//        private eu.hansolo.steelseries.extras.Compass compass = null;        
+        private fr.jmmc.aspro.gui.util.CustomCompass compass = null;
 
         /**
          * Constructor
@@ -150,7 +151,8 @@ public abstract class WindWidget extends JPanel {
 
         @Override
         protected void initComponents() {
-            this.compass = new eu.hansolo.steelseries.extras.Compass();
+//            this.compass = new eu.hansolo.steelseries.extras.Compass();
+            this.compass = new fr.jmmc.aspro.gui.util.CustomCompass();
             this.compass.setNiceScale(true);
             this.compass.setThreshold(5d);
             this.compass.setMinimumSize(new Dimension(16, 16));
