@@ -19,7 +19,7 @@
     <all-permissions/>
   </security>
   <resources>
-    <j2se version="1.5+" initial-heap-size="256m" max-heap-size="1024m"/>
+    <j2se version="1.6+" initial-heap-size="256m" max-heap-size="1024m"/>
 
     <!-- Application module first (main class) -->
     <jar href="jar/aspro.jar" />
