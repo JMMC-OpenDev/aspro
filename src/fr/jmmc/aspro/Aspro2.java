@@ -120,7 +120,7 @@ public final class Aspro2 extends App {
     protected void setupGui() throws RuntimeException {
         logger.debug("Aspro2.setupGui: handler enter");
 
-        prepareFrame(getFrame());
+        prepareFrame();
 
         // Create a new observation and update the GUI :
         // even if opening a file in case the file can not be loaded:
@@ -196,8 +196,9 @@ public final class Aspro2 extends App {
      * Prepare the frame widgets and define its minimum size
      * @param frame
      */
-    private void prepareFrame(final JFrame frame) {
+    private void prepareFrame() {
         logger.debug("prepareFrame : enter");
+        final JFrame frame = new JFrame();
 
         frame.setTitle(ApplicationDescription.getInstance().getProgramName());
 
