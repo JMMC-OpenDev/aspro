@@ -4,7 +4,7 @@
 package fr.jmmc.aspro.gui.action;
 
 import fr.jmmc.aspro.model.ObservationManager;
-import fr.jmmc.jmcs.data.preference.FileChooserPreferences;
+import fr.jmmc.jmcs.data.preference.SessionPersistencePreferences;
 import fr.jmmc.jmcs.gui.action.ActionRegistrar;
 import fr.jmmc.jmcs.gui.action.RegisteredAction;
 import fr.jmmc.jmcs.gui.component.FileChooser;
@@ -65,7 +65,7 @@ public final class LoadObservationAction extends RegisteredAction {
 
       if (file != null) {
         // update current directory for Observation settings:
-        FileChooserPreferences.setCurrentDirectoryForMimeType(mimeType, file.getParent());
+        SessionPersistencePreferences.setCurrentDirectoryForMimeType(mimeType, file.getParent());
       }
 
     } else {
