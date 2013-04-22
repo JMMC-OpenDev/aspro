@@ -35,6 +35,7 @@ import fr.jmmc.jmcs.resource.image.ResourceImage;
 import fr.jmmc.jmcs.util.concurrent.ParallelJobExecutor;
 import fr.jmmc.oiexplorer.core.model.OIFitsCollectionManager;
 import java.awt.BorderLayout;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.Toolkit;
@@ -222,13 +223,14 @@ public final class Aspro2 extends App {
         frame.addComponentListener(new ComponentResizeAdapter(dim));
 
         // setupGui the main panel :
-        createContent();
+        final Container container = frame.getContentPane();
+        createContent(container);
 
         // initialize the actions :
         registerActions();
 
         // Handle status bar
-        getFramePanel().add(new StatusBar(), BorderLayout.SOUTH);
+        container.add(new StatusBar(), BorderLayout.SOUTH);
 
         StatusBar.show("application started.");
 
@@ -240,12 +242,12 @@ public final class Aspro2 extends App {
     /**
      * Create the main content i.e. the setting panel
      */
-    private void createContent() {
+    private void createContent(final Container container) {
         this.settingPanel = new SettingPanel();
         this.settingPanel.setName("settingPanel");
 
         // adds the panel in scrollPane
-        getFramePanel().add(new JScrollPane(this.settingPanel), BorderLayout.CENTER);
+        container.add(new JScrollPane(this.settingPanel), BorderLayout.CENTER);
     }
 
     /**
