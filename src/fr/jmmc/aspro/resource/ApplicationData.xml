@@ -17,8 +17,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="0.9.5 beta 1"/>
-    <compilation date="15/03/2013" compiler="JDK 1.5.0_16"/>
+    <program name="Aspro2" version="0.9.5 beta 2"/>
+    <compilation date="02/05/2013" compiler="JDK 1.5.0_16"/>
   
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -184,6 +184,10 @@
 
     <releasenotes>
         <release version="0.9.5">
+            <prerelease version="0.9.5 beta 2">
+                <change type="FEATURE">Improved performance related to clipping / zoom issues with dotted outline (optional constraints)</change>
+                <change type="FEATURE">Improved UV Coverage plot to draw outlines arround UV segments and tracks (shadows)</change>
+            </prerelease>
             <prerelease version="0.9.5 beta 1">
                 <change type="BUGFIX">Enhanced tooltip management to hide any displayed tooltip when user changes something to avoid misunderstanding</change>
                 <change type="BUGFIX">Fixed the symbol [i] badly displayed depending on platform and font settings</change>
