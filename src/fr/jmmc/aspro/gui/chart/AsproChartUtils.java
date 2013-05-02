@@ -166,13 +166,14 @@ public final class AsproChartUtils {
      * @param text  the text (<code>null</code> not permitted).
      * @param x  the x-coordinate (in data space).
      * @param y  the y-coordinate (in data space).
-     * @param angle  the angle of the arrow's line (in radians).
+     * @param cosAngle  cosinus of the angle of the arrow's line (in radians).
+     * @param sinAngle  sinus of the angle of the arrow's line (in radians).
      * @return new annotation
      */
     public static XYTickAnnotation createXYTickAnnotation(final String text, final double x, final double y,
-            final double angle) {
+            final double cosAngle, final double sinAngle) {
 
-        final XYTickAnnotation a = new XYTickAnnotation(text, x, y, angle);
+        final XYTickAnnotation a = new XYTickAnnotation(text, x, y, cosAngle, sinAngle);
         a.setFont(ChartUtils.SMALL_TEXT_ANNOTATION_FONT);
         // default color is BLACK
 
