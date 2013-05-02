@@ -44,6 +44,7 @@ import java.awt.Paint;
 import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
+import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.io.Serializable;
 import org.jfree.chart.annotations.AbstractXYAnnotation;
@@ -62,16 +63,18 @@ import org.jfree.util.PublicCloneable;
 public final class XYDiamondAnnotation extends AbstractXYAnnotation implements
         Cloneable, PublicCloneable, Serializable {
 
-    /**
-     * Una Annotazione a forma di rombo può essere aggiunta su un {@link org.jfree.chart.plot.XYPlot}.
-     */
+    /** Serializable */
     private static final long serialVersionUID = -2184152269531019722L;
     /** outline color */
     public static final Paint DEFAULT_OUTLINE_PAINT = Color.BLACK;
     /** Colore di default. */
     public static final Paint DEFAULT_PAINT = Color.YELLOW;
     /** margin in pixels */
-    private final static int MARGIN = 1;
+    private final static double MARGIN = 1d;
+    /** diamond standard size */
+    private final static double STANDARD_SIZE = 10d;
+    /** shared drawing state */
+    private final static XYDiamondState state = new XYDiamondState();
     /* members */
     /** Coordinata x (in data space). */
     private double x;
@@ -224,50 +227,38 @@ public final class XYDiamondAnnotation extends AbstractXYAnnotation implements
 
         final double size = this.displaySize * drawScaleFactor;
 
-        final AffineTransform savedTransform = g2.getTransform();
+        // update state area:
+        final Rectangle2D.Double bbox = state.area;
+        bbox.setRect(j2DX - 0.5d * size, j2DY - 0.5d * size, size, size);
 
-        final Rectangle2D drawArea = new Rectangle2D.Double(0d, 0d, size, size);
+        // clipping checks:
+        if (bbox.intersects(dataArea)) {
+            // copy current affine transform:
+            final AffineTransform savedTransform = g2.getTransform();
 
-        g2.translate(j2DX - 0.5d * size, j2DY - 0.5d * size);
+            final double scale = size / STANDARD_SIZE;
+            g2.translate(j2DX, j2DY);
+            g2.scale(scale, scale);
 
-        drawDiamond(g2, drawArea);
+            // Fill paint:
+            g2.setPaint(getPaint());
+            g2.setStroke(getStroke());
+            g2.fill(state.diamond);
 
-        g2.setTransform(savedTransform);
+            // Outline paint :
+            g2.setPaint(DEFAULT_OUTLINE_PAINT);
+            g2.draw(state.diamond);
 
-        final String toolTip = getToolTipText();
-        final String url = getURL();
-        if (toolTip != null || url != null) {
-            final Rectangle2D displayArea = new Rectangle2D.Double(j2DX - 0.5d * size, j2DY - 0.5d * size, size, size);
+            // restore current affine transform:
+            g2.setTransform(savedTransform);
 
-            addEntity(info, displayArea, rendererIndex, toolTip, url);
+            final String toolTip = getToolTipText();
+            final String url = getURL();
+            if (toolTip != null || url != null) {
+                // clone shared bbox stored in XYAnnotationEntity.area:
+                addEntity(info, bbox.getBounds2D(), rendererIndex, toolTip, url);
+            }
         }
-    }
-
-    /**
-     * @param g2 Dispositivo di disegno
-     * @param drawArea Area in cui disegnare il diamante.
-     */
-    private void drawDiamond(final Graphics2D g2, final Rectangle2D drawArea) {
-        // use float (java 1.5 support):
-        final float offset = (float) (0.5d * drawArea.getWidth());
-        final float coordX = (float) drawArea.getCenterX();
-        final float coordY = (float) drawArea.getCenterY();
-
-        final GeneralPath diamond = new GeneralPath(GeneralPath.WIND_NON_ZERO, 6);
-        diamond.moveTo(coordX, coordY - offset);
-        diamond.lineTo(coordX - offset, coordY);
-        diamond.lineTo(coordX - offset, coordY);
-        diamond.lineTo(coordX, coordY + offset);
-        diamond.lineTo(coordX + offset, coordY);
-        diamond.lineTo(coordX, coordY - offset);
-
-        g2.setPaint(getPaint());
-        g2.setStroke(getStroke());
-        g2.fill(diamond);
-
-        // Outline paint :
-        g2.setPaint(DEFAULT_OUTLINE_PAINT);
-        g2.draw(diamond);
     }
 
     /**
@@ -305,5 +296,26 @@ public final class XYDiamondAnnotation extends AbstractXYAnnotation implements
     @Override
     public Object clone() throws CloneNotSupportedException {
         return super.clone();
+    }
+
+    final static class XYDiamondState {
+
+        /** diamond bounding box */
+        final Rectangle2D.Double area = new Rectangle2D.Double();
+        /** diamond shape at standard size */
+        final Path2D.Double diamond;
+
+        XYDiamondState() {
+            final double offset = 0.5d * STANDARD_SIZE;
+
+            final Path2D.Double d = new Path2D.Double(GeneralPath.WIND_NON_ZERO, 5);
+            d.moveTo(0d, -offset);
+            d.lineTo(-offset, 0d);
+            d.lineTo(0d, offset);
+            d.lineTo(offset, 0d);
+            d.lineTo(0d, -offset);
+
+            diamond = d;
+        }
     }
 }
