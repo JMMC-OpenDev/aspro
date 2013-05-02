@@ -1402,12 +1402,12 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                                 XYTickAnnotation a;
                                 for (TargetPositionDate ed : so.getTargetPositions().values()) {
                                     if (checkDateAxisLimits(ed.getDate(), min, max)) {
-                                        a = AsproChartUtils.createXYTickAnnotation(Integer.toString(ed.getAzimuth()), n, ed.getDate().getTime(), -HALF_PI);
+                                        a = AsproChartUtils.createXYTickAnnotation(Integer.toString(ed.getAzimuth()), n, ed.getDate().getTime(), 0d, -1d);
                                         a.setTextAnchor(TextAnchor.BOTTOM_CENTER);
                                         a.setRotationAnchor(TextAnchor.BOTTOM_CENTER);
                                         addAnnotation(annotations, pos, a);
 
-                                        a = AsproChartUtils.createXYTickAnnotation(Integer.toString(ed.getElevation()), n, ed.getDate().getTime(), HALF_PI);
+                                        a = AsproChartUtils.createXYTickAnnotation(Integer.toString(ed.getElevation()), n, ed.getDate().getTime(), 0d, 1d);
                                         a.setTextAnchor(TextAnchor.TOP_CENTER);
                                         a.setRotationAnchor(TextAnchor.TOP_CENTER);
                                         addAnnotation(annotations, pos, a);
