@@ -61,7 +61,6 @@ import java.awt.Stroke;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.io.Serializable;
-import net.jafama.FastMath;
 import org.jfree.chart.annotations.XYTextAnnotation;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.plot.Plot;
@@ -89,223 +88,217 @@ import org.jfree.util.PublicCloneable;
 public final class XYTickAnnotation extends XYTextAnnotation
         implements Cloneable, PublicCloneable, Serializable {
 
-  /** For serialization. */
-  private static final long serialVersionUID = -4031161445009858551L;
-  /** The default label margin (in Java2D units). */
-  public static final double DEFAULT_LABEL_MARGIN = -1d;
+    /** For serialization. */
+    private static final long serialVersionUID = -4031161445009858551L;
+    /** The default label margin (in Java2D units). */
+    public static final double DEFAULT_LABEL_MARGIN = -1d;
+    /** shared drawing line */
+    private static final Line2D.Double drawLine = new Line2D.Double();
 
-  /* members */
-  /** The angle of the arrow's line (in radians). */
-  private double angle;
-  /** The line stroke. */
-  private transient Stroke lineStroke;
-  /** The line paint. */
-  private transient Paint linePaint;
+    /* members */
+    /** cosinus of the angle of the arrow's line */
+    private final double cosAngle;
+    /** sinus of the angle of the arrow's line */
+    private final double sinAngle;
+    /** The line stroke. */
+    private transient Stroke lineStroke;
+    /** The line paint. */
+    private transient Paint linePaint;
 
-  /**
-   * Creates a new label and arrow annotation.
-   *
-   * @param label  the label (<code>null</code> permitted).
-   * @param x  the x-coordinate (measured against the chart's domain axis).
-   * @param y  the y-coordinate (measured against the chart's range axis).
-   * @param angle  the angle of the arrow's line (in radians).
-   */
-  public XYTickAnnotation(final String label, final double x, final double y, final double angle) {
-    super(label, x, y);
+    /**
+     * Creates a new label and arrow annotation.
+     *
+     * @param label  the label (<code>null</code> permitted).
+     * @param x  the x-coordinate (measured against the chart's domain axis).
+     * @param y  the y-coordinate (measured against the chart's range axis).
+     * @param cosAngle  cosinus of the angle of the arrow's line (in radians).
+     * @param sinAngle  sinus of the angle of the arrow's line (in radians).
+     */
+    public XYTickAnnotation(final String label, final double x, final double y,
+            final double cosAngle, final double sinAngle) {
 
-    this.angle = angle;
+        super(label, x, y);
 
-    this.lineStroke = ChartUtils.DEFAULT_STROKE;
-    this.linePaint = Color.BLACK;
+        this.cosAngle = cosAngle;
+        this.sinAngle = sinAngle;
 
-    setTextAnchor(TextAnchor.TOP_CENTER);
-    setRotationAnchor(TextAnchor.TOP_CENTER);
+        this.lineStroke = ChartUtils.DEFAULT_STROKE;
+        this.linePaint = Color.BLACK;
 
-    setOutlineVisible(false);
-  }
+        setTextAnchor(TextAnchor.TOP_CENTER);
+        setRotationAnchor(TextAnchor.TOP_CENTER);
 
-  /**
-   * Returns the angle of the arrow.
-   *
-   * @return The angle (in radians).
-   *
-   * @see #setAngle(double)
-   */
-  public double getAngle() {
-    return this.angle;
-  }
-
-  /**
-   * Sets the angle of the arrow.
-   *
-   * @param angle  the angle (in radians).
-   *
-   * @see #getAngle()
-   */
-  public void setAngle(final double angle) {
-    this.angle = angle;
-  }
-
-  /**
-   * Returns the stroke used to draw the arrow line.
-   *
-   * @return The arrow stroke (never <code>null</code>).
-   *
-   * @see #setLineStroke(Stroke)
-   */
-  public Stroke getLineStroke() {
-    return this.lineStroke;
-  }
-
-  /**
-   * Sets the stroke used to draw the arrow line.
-   *
-   * @param stroke  the stroke (<code>null</code> not permitted).
-   *
-   * @see #getLineStroke()
-   */
-  public void setLineStroke(final Stroke stroke) {
-    if (stroke == null) {
-      throw new IllegalArgumentException("Null 'stroke' not permitted.");
-    }
-    this.lineStroke = stroke;
-  }
-
-  /**
-   * Returns the paint used for the arrow.
-   *
-   * @return The arrow paint (never <code>null</code>).
-   *
-   * @see #setLinePaint(Paint)
-   */
-  public Paint getLinePaint() {
-    return this.linePaint;
-  }
-
-  /**
-   * Sets the paint used for the arrow.
-   *
-   * @param paint  the arrow paint (<code>null</code> not permitted).
-   *
-   * @see #getLinePaint()
-   */
-  public void setLinePaint(final Paint paint) {
-    if (paint == null) {
-      throw new IllegalArgumentException("Null 'paint' argument.");
-    }
-    this.linePaint = paint;
-  }
-
-  /**
-   * Draws the annotation.
-   *
-   * @param g2d  the graphics device.
-   * @param plot  the plot.
-   * @param dataArea  the data area.
-   * @param domainAxis  the domain axis.
-   * @param rangeAxis  the range axis.
-   * @param rendererIndex  the renderer index.
-   * @param info  the plot rendering info.
-   */
-  @Override
-  public void draw(final Graphics2D g2d, final XYPlot plot, final Rectangle2D dataArea,
-                   final ValueAxis domainAxis, final ValueAxis rangeAxis,
-                   final int rendererIndex, final PlotRenderingInfo info) {
-
-    final PlotOrientation orientation = plot.getOrientation();
-
-    final RectangleEdge domainEdge = Plot.resolveDomainAxisLocation(plot.getDomainAxisLocation(), orientation);
-    final RectangleEdge rangeEdge = Plot.resolveRangeAxisLocation(plot.getRangeAxisLocation(), orientation);
-
-    double j2DX = domainAxis.valueToJava2D(getX(), dataArea, domainEdge);
-    double j2DY = rangeAxis.valueToJava2D(getY(), dataArea, rangeEdge);
-
-    // Use Observability Plot Context to determine once for all the appropriate font size
-    // that best fits the bar width; if too large, do not render the annotation
-
-    final ObservabilityPlotContext renderContext = ObservabilityPlotContext.getInstance();
-
-    // convert the tip radius in data units (equals to bar width / 2) i.e. domain axis :
-    final double j2Radius = domainAxis.lengthToJava2D(renderContext.getTipRadius(), dataArea, domainEdge);
-
-    Font bestFont;
-    double halfTickLength;
-
-    if (renderContext.autoFitTipDone()) {
-      halfTickLength = renderContext.autoFitTickLength();
-      bestFont = renderContext.autoFitTipFont();
-    } else {
-      // first time, perform fit:
-
-      // convert the max tip height in data units (equals to margin) i.e. domain axis :
-      final double j2MaxHeight = domainAxis.lengthToJava2D(renderContext.getMaxTipHeight(), dataArea, domainEdge);
-
-      halfTickLength = renderContext.autoFitTickLength(Math.min(j2Radius, j2MaxHeight));
-
-      final double j2MaxTextHeight = j2MaxHeight - (halfTickLength + 2d * DEFAULT_LABEL_MARGIN);
-
-      bestFont = renderContext.autoFitTipFont(g2d, j2MaxTextHeight);
+        setOutlineVisible(false);
     }
 
-    // Dont render if the tick is too small:
-    if (halfTickLength == 0d) {
-      return;
+    /**
+     * Returns the stroke used to draw the arrow line.
+     *
+     * @return The arrow stroke (never <code>null</code>).
+     *
+     * @see #setLineStroke(Stroke)
+     */
+    public Stroke getLineStroke() {
+        return this.lineStroke;
     }
 
-    // Dont render if the text do not fit in block size:
-    if (bestFont == null) {
-      return;
-    }
-    setFont(bestFont);
-
-    final double baseRadiusScaled = j2Radius - halfTickLength;
-    final double tipRadiusScaled = j2Radius + halfTickLength;
-
-    if (orientation == PlotOrientation.HORIZONTAL) {
-      final double temp = j2DX;
-      j2DX = j2DY;
-      j2DY = temp;
-    }
-
-    final double cosAngle = FastMath.cos(this.angle);
-    final double sinAngle = FastMath.sin(this.angle);
-
-    final double startX = j2DX + cosAngle * baseRadiusScaled;
-    final double startY = j2DY + sinAngle * baseRadiusScaled;
-
-    final double endX = j2DX + cosAngle * tipRadiusScaled;
-    final double endY = j2DY + sinAngle * tipRadiusScaled;
-
-    g2d.setStroke(this.lineStroke);
-    g2d.setPaint(this.linePaint);
-    g2d.draw(new Line2D.Double(startX, startY, endX, endY));
-
-    // draw the label
-    final float labelX = (float) (j2DX + cosAngle * (tipRadiusScaled + DEFAULT_LABEL_MARGIN));
-    final float labelY = (float) (j2DY + sinAngle * (tipRadiusScaled + DEFAULT_LABEL_MARGIN));
-    g2d.setFont(getFont());
-
-    final Shape hotspot = TextUtilities.calculateRotatedStringBounds(getText(), g2d, labelX, labelY,
-            getTextAnchor(), getRotationAngle(), getRotationAnchor());
-
-    if (getBackgroundPaint() != null) {
-      g2d.setPaint(getBackgroundPaint());
-      g2d.fill(hotspot);
+    /**
+     * Sets the stroke used to draw the arrow line.
+     *
+     * @param stroke  the stroke (<code>null</code> not permitted).
+     *
+     * @see #getLineStroke()
+     */
+    public void setLineStroke(final Stroke stroke) {
+        if (stroke == null) {
+            throw new IllegalArgumentException("Null 'stroke' not permitted.");
+        }
+        this.lineStroke = stroke;
     }
 
-    g2d.setPaint(getPaint());
-    TextUtilities.drawRotatedString(getText(), g2d, labelX, labelY, getTextAnchor(), getRotationAngle(), getRotationAnchor());
-
-    if (isOutlineVisible()) {
-      g2d.setStroke(getOutlineStroke());
-      g2d.setPaint(getOutlinePaint());
-      g2d.draw(hotspot);
+    /**
+     * Returns the paint used for the arrow.
+     *
+     * @return The arrow paint (never <code>null</code>).
+     *
+     * @see #setLinePaint(Paint)
+     */
+    public Paint getLinePaint() {
+        return this.linePaint;
     }
 
-    final String toolTip = getToolTipText();
-    final String url = getURL();
-    if (toolTip != null || url != null) {
-      addEntity(info, hotspot, rendererIndex, toolTip, url);
+    /**
+     * Sets the paint used for the arrow.
+     *
+     * @param paint  the arrow paint (<code>null</code> not permitted).
+     *
+     * @see #getLinePaint()
+     */
+    public void setLinePaint(final Paint paint) {
+        if (paint == null) {
+            throw new IllegalArgumentException("Null 'paint' argument.");
+        }
+        this.linePaint = paint;
     }
-  }
+
+    /**
+     * Draws the annotation.
+     *
+     * @param g2d  the graphics device.
+     * @param plot  the plot.
+     * @param dataArea  the data area.
+     * @param domainAxis  the domain axis.
+     * @param rangeAxis  the range axis.
+     * @param rendererIndex  the renderer index.
+     * @param info  the plot rendering info.
+     */
+    @Override
+    public void draw(final Graphics2D g2d, final XYPlot plot, final Rectangle2D dataArea,
+            final ValueAxis domainAxis, final ValueAxis rangeAxis,
+            final int rendererIndex, final PlotRenderingInfo info) {
+
+        final PlotOrientation orientation = plot.getOrientation();
+
+        final RectangleEdge domainEdge = Plot.resolveDomainAxisLocation(plot.getDomainAxisLocation(), orientation);
+        final RectangleEdge rangeEdge = Plot.resolveRangeAxisLocation(plot.getRangeAxisLocation(), orientation);
+
+        double j2DX = domainAxis.valueToJava2D(getX(), dataArea, domainEdge);
+        double j2DY = rangeAxis.valueToJava2D(getY(), dataArea, rangeEdge);
+
+        // Use Observability Plot Context to determine once for all the appropriate font size
+        // that best fits the bar width; if too large, do not render the annotation
+
+        final ObservabilityPlotContext renderContext = ObservabilityPlotContext.getInstance();
+
+        // convert the tip radius in data units (equals to bar width / 2) i.e. domain axis :
+        final double j2Radius = domainAxis.lengthToJava2D(renderContext.getTipRadius(), dataArea, domainEdge);
+
+        Font bestFont;
+        double halfTickLength;
+
+        if (renderContext.autoFitTipDone()) {
+            halfTickLength = renderContext.autoFitTickLength();
+            bestFont = renderContext.autoFitTipFont();
+        } else {
+            // first time, perform fit:
+
+            // convert the max tip height in data units (equals to margin) i.e. domain axis :
+            final double j2MaxHeight = domainAxis.lengthToJava2D(renderContext.getMaxTipHeight(), dataArea, domainEdge);
+
+            halfTickLength = renderContext.autoFitTickLength(Math.min(j2Radius, j2MaxHeight));
+
+            final double j2MaxTextHeight = j2MaxHeight - (halfTickLength + 2d * DEFAULT_LABEL_MARGIN);
+
+            bestFont = renderContext.autoFitTipFont(g2d, j2MaxTextHeight);
+        }
+
+        // Dont render if the tick is too small:
+        if (halfTickLength == 0d) {
+            return;
+        }
+
+        // Dont render if the text do not fit in block size:
+        if (bestFont == null) {
+            return;
+        }
+        setFont(bestFont);
+
+        final double baseRadiusScaled = j2Radius - halfTickLength;
+        final double tipRadiusScaled = j2Radius + halfTickLength;
+
+        if (orientation == PlotOrientation.HORIZONTAL) {
+            final double temp = j2DX;
+            j2DX = j2DY;
+            j2DY = temp;
+        }
+
+        final double startX = j2DX + cosAngle * baseRadiusScaled;
+        final double startY = j2DY + sinAngle * baseRadiusScaled;
+
+        final double endX = j2DX + cosAngle * tipRadiusScaled;
+        final double endY = j2DY + sinAngle * tipRadiusScaled;
+
+        drawLine.setLine(startX, startY, endX, endY);
+
+        // clipping checks:
+        if (drawLine.intersects(dataArea)) {
+            g2d.setStroke(this.lineStroke);
+            g2d.setPaint(this.linePaint);
+            g2d.draw(drawLine);
+
+            // draw the label
+            final float labelX = (float) (j2DX + cosAngle * (tipRadiusScaled + DEFAULT_LABEL_MARGIN));
+            final float labelY = (float) (j2DY + sinAngle * (tipRadiusScaled + DEFAULT_LABEL_MARGIN));
+            g2d.setFont(getFont());
+
+            final Paint background = getBackgroundPaint();
+            final boolean drawOutline = isOutlineVisible();
+            final String toolTip = getToolTipText();
+            final String url = getURL();
+
+            // only compute text area if needed:
+            final Shape hotspot = (background != null || drawOutline || toolTip != null || url != null)
+                    ? TextUtilities.calculateRotatedStringBounds(getText(), g2d, labelX, labelY,
+                    getTextAnchor(), getRotationAngle(), getRotationAnchor())
+                    : null;
+
+            if (background != null) {
+                g2d.setPaint(getBackgroundPaint());
+                g2d.fill(hotspot);
+            }
+
+            g2d.setPaint(getPaint());
+            TextUtilities.drawRotatedString(getText(), g2d, labelX, labelY, getTextAnchor(), getRotationAngle(), getRotationAnchor());
+
+            if (drawOutline) {
+                g2d.setStroke(getOutlineStroke());
+                g2d.setPaint(getOutlinePaint());
+                g2d.draw(hotspot);
+            }
+
+            if (toolTip != null || url != null) {
+                addEntity(info, hotspot, rendererIndex, toolTip, url);
+            }
+        }
+    }
 }
