@@ -19,6 +19,7 @@ import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.oiexplorer.core.gui.PDFExportable;
 import fr.jmmc.oiexplorer.core.gui.chart.ChartUtils;
 import fr.jmmc.oiexplorer.core.gui.chart.ColorPalette;
+import fr.jmmc.oiexplorer.core.gui.chart.FastXYBubbleRenderer;
 import fr.jmmc.oiexplorer.core.gui.chart.PDFOptions;
 import fr.jmmc.oiexplorer.core.gui.chart.SquareChartPanel;
 import fr.jmmc.oiexplorer.core.gui.chart.SquareXYPlot;
@@ -33,7 +34,6 @@ import org.jfree.chart.event.ChartProgressEvent;
 import org.jfree.chart.event.ChartProgressListener;
 import org.jfree.chart.labels.ItemLabelAnchor;
 import org.jfree.chart.labels.ItemLabelPosition;
-import org.jfree.chart.renderer.xy.XYBubbleRenderer;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.XYSeries;
@@ -158,7 +158,7 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
         final XYItemRenderer lineRenderer = this.xyPlot.getRenderer();
 
         // Use Bubble Renderer for the first dataset :
-        this.xyPlot.setRenderer(0, new XYBubbleRenderer());
+        this.xyPlot.setRenderer(0, new FastXYBubbleRenderer());
 
         // Use Line Renderer for the second dataset :
         this.xyPlot.setRenderer(1, lineRenderer);
