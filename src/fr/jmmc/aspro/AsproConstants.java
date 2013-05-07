@@ -3,6 +3,7 @@
  ******************************************************************************/
 package fr.jmmc.aspro;
 
+import fr.jmmc.jmal.image.ColorModels;
 import fr.jmmc.jmcs.util.NumberUtils;
 import java.util.Arrays;
 import java.util.Vector;
@@ -45,7 +46,7 @@ public interface AsproConstants {
     /** default value for checkbox Night Limit = true */
     public static final boolean DEFAULT_USE_NIGHT_LIMITS = true;
     /** default image LUT */
-    public final static String DEFAULT_IMAGE_LUT = "aspro";
+    public final static String DEFAULT_IMAGE_LUT = ColorModels.COLOR_MODEL_ASPRO_ISOPHOT;
     /** default image size */
     public final static Integer DEFAULT_IMAGE_SIZE = NumberUtils.valueOf(512);
     /** image size choices */
