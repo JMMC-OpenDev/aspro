@@ -184,6 +184,7 @@
 
     <releasenotes>
         <release version="0.9.5">
+            <pubDate>Tue, 07 May 2013 16:05:00 GMT</pubDate>
             <prerelease version="0.9.5 beta 2">
                 <change type="FEATURE">Improved UV Coverage plot to draw outlines arround UV segments and tracks (shadows)</change>
                 <change type="FEATURE">Added LUT aspro-isophot (new default one) which draws white lines every 10%</change>
