@@ -147,7 +147,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     /** scaling factor to Mega Lambda for U,V points */
     private final static double MEGA_LAMBDA_SCALE = 1e-6d;
     /** shadow color */
-    private final static Color SHADOW_COLOR = new Color(0,0,0, 128);
+    private final static Color SHADOW_COLOR = new Color(0, 0, 0, 128);
     /** dataset index for UV points */
     private final static int DATASET_UV_POINTS = 0;
     /** dataset index for UV points shadows */
@@ -668,7 +668,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
         this.chart = ChartUtils.createSquareXYLineChart("U (" + SpecialChars.UNIT_MEGA_LAMBDA + ")", "V (" + SpecialChars.UNIT_MEGA_LAMBDA + ")", true);
         this.xyPlot = (SquareXYPlot) this.chart.getPlot();
-        
+
         final XYLineAndShapeRenderer rendererPoints = (XYLineAndShapeRenderer) this.xyPlot.getRenderer(); // DATASET_UV_POINTS
 
         final XYLineAndShapeRenderer rendererPointsShadow = new XYLineAndShapeRenderer(true, false); // DATASET_UV_POINTS_SHADOW
@@ -676,7 +676,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         rendererPointsShadow.setAutoPopulateSeriesStroke(false);
         rendererPointsShadow.setBaseStroke(ChartUtils.VERY_LARGE_STROKE);
         this.xyPlot.setRenderer(DATASET_UV_POINTS_SHADOW, rendererPointsShadow);
-        
+
         final XYLineAndShapeRenderer rendererTracks = new XYLineAndShapeRenderer(true, false); // DATASET_UV_TRACKS
         // force to use the large stroke :
         rendererTracks.setAutoPopulateSeriesStroke(false);
@@ -689,9 +689,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         rendererTracksShadow.setBaseStroke(ChartUtils.VERY_LARGE_STROKE);
         this.xyPlot.setRenderer(DATASET_UV_TRACKS_SHADOW, rendererTracksShadow);
 
-        // note: use setDrawSeriesLineAsPath(true) because ellipse paths looks better:
-//        rendererTracks.setDrawSeriesLineAsPath(true);
-        
         // Adjust background settings :
         this.xyPlot.setBackgroundImageAlpha(1.0f);
 
@@ -1507,7 +1504,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
             // Use model image Preferences :
             final int imageSize = this.myPreferences.getPreferenceAsInt(Preferences.MODEL_IMAGE_SIZE);
-            final IndexColorModel colorModel = ColorModels.getColorModel(this.myPreferences.getPreference(Preferences.MODEL_IMAGE_LUT));
+            final String modelImageLut = this.myPreferences.getPreference(Preferences.MODEL_IMAGE_LUT);
+            final IndexColorModel colorModel =
+                    (imageMode != ImageMode.PHASE) ? ColorModels.getColorModel(modelImageLut) : ColorModels.getCyclicColorModel(modelImageLut);
             final ColorScale colorScale = this.myPreferences.getImageColorScale();
             final boolean doImageNoise = this.myPreferences.getPreferenceAsBoolean(Preferences.MODEL_IMAGE_NOISE);
 
@@ -2004,7 +2003,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
             // reset bounds to [-1;1] (before setDataset) :
             this.xyPlot.defineBounds(1d);
-            
+
             // reset datasets:
             this.xyPlot.setDataset(DATASET_UV_POINTS, null);
             this.xyPlot.setDataset(DATASET_UV_POINTS_SHADOW, null);
@@ -2540,7 +2539,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         rendererTracks.setAutoPopulateSeriesPaint(false);
         // reset colors :
         rendererTracks.clearSeriesPaints(false);
-        
+
         // points shadow renderer:
         final AbstractRenderer rendererPointsShadow = (AbstractRenderer) this.xyPlot.getRenderer(DATASET_UV_POINTS_SHADOW);
         // force to use the very large stroke :
@@ -2556,7 +2555,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         // side effect with chart theme :
         rendererTracksShadow.setAutoPopulateSeriesPaint(false);
         rendererTracksShadow.setBasePaint(SHADOW_COLOR);
-        
+
         // Create dataset with UV coverage data :
         final XYSeriesCollection datasetPoints = prepareDataset(chartData, rendererPoints);
         this.updateUVTracks(datasetPoints, chartData);
@@ -2739,7 +2738,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
                 }
 
                 // TODO: adjust capacity of xySeries !
-                
+
                 for (UVBaseLineData uvBL : targetUVRiseSet) {
 
                     if (single) {
