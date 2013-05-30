@@ -17,23 +17,23 @@ public final class NormalLawBestPopsEstimator implements BestPopsEstimator {
   /* members */
   /** normal distribution mean */
   private final double mean;
-  /** normal distribution variance */
-  private final double variance;
-  /** normalized weight given to average value */
+  /** normal distribution weight */
+  private final double normalWeight;
+  /** normalized getNormalWeight given to average value */
   private final double avgWeight;
-  /** normalized weight given to minimum value */
+  /** normalized getNormalWeight given to minimum value */
   private final double minWeight;
 
   /**
-   * Protected constructor with given normal distribution parameters and average weight
+   * Protected constructor with given normal distribution parameters and average getNormalWeight
    * 
    * @param mean normal distribution mean
    * @param sigma normal distribution sigma
-   * @param avgWeight average weight [0.0 .. 1.0]
+   * @param avgWeight average getNormalWeight [0.0 .. 1.0]
    */
   NormalLawBestPopsEstimator(final double mean, final double sigma, final double avgWeight) {
     this.mean = mean;
-    this.variance = sigma * sigma;
+    this.normalWeight = Probability.getNormalWeight(sigma * sigma);
 
     if (avgWeight >= 1d) {
       this.avgWeight = 1d;
@@ -51,8 +51,9 @@ public final class NormalLawBestPopsEstimator implements BestPopsEstimator {
    * @param range HA range [-12; 12]
    * @return normal probability density integral between min / max
    */
+  @Override
   public double compute(final Range range) {
-    return Probability.normal(mean, variance, range.getMax()) - Probability.normal(mean, variance, range.getMin());
+    return Probability.normalWeighted(mean, normalWeight, range.getMax()) - Probability.normalWeighted(mean, normalWeight, range.getMin());
   }
 
   /**
@@ -62,6 +63,7 @@ public final class NormalLawBestPopsEstimator implements BestPopsEstimator {
    * @param minimum minimum value of all observability range estimations
    * @return estimation = average x minimum
    */
+  @Override
   public double compute(final double average, final double minimum) {
     return this.avgWeight * average + this.minWeight * minimum;
   }
