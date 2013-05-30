@@ -103,6 +103,16 @@ public final class Range {
     }
 
     /**
+     * Return true if this range contains the given value (including bounds and given precision error)
+     * @param value value to check
+     * @param err precision error against range boundaries
+     * @return true if this range contains the given value
+     */
+    public boolean contains(final double value, final double err) {
+        return value >= (this.min - err) && value <= (this.max + err);
+    }
+
+    /**
      * Returns true if this range equals the given range
      * @param obj another object instance
      * @return true if this range equals the given range
@@ -193,6 +203,24 @@ public final class Range {
             final Range range = ranges.get(i);
 
             if (range.contains(value)) {
+                return range;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Find the range containing the given value
+     * @param ranges list of ranges
+     * @param value value to test
+     * @param err precision error against range boundaries
+     * @return range containing the given value or null
+     */
+    public static Range find(final List<Range> ranges, final double value, final double err) {
+        for (int i = 0, len = ranges.size(); i < len; i++) {
+            final Range range = ranges.get(i);
+
+            if (range.contains(value, err)) {
                 return range;
             }
         }
