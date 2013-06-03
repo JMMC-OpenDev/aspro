@@ -22,11 +22,12 @@ public final class CalcUVW {
     /**
      * Compute U(H) = sin(H)*X+cos(H)*Y
      * @param baseLine baseline vector to use
-     * @param ha hour angle in radians
+     * @param cosHa cosinus of hour angle
+     * @param sinHa sinus of hour angle
      * @return U coordinate in interferometric plan
      */
-    public static double computeU(final BaseLine baseLine, final double ha) {
-        return FastMath.sin(ha) * baseLine.getX() + FastMath.cos(ha) * baseLine.getY();
+    public static double computeU(final BaseLine baseLine, final double cosHa, final double sinHa) {
+        return sinHa * baseLine.getX() + cosHa * baseLine.getY();
     }
 
     /**
@@ -34,11 +35,12 @@ public final class CalcUVW {
      * @param cosDec cosinus of target declination
      * @param sinDec sinus of target declination
      * @param baseLine baseline vector to use
-     * @param ha hour angle in radians
+     * @param cosHa cosinus of hour angle
+     * @param sinHa sinus of hour angle
      * @return V coordinate in interferometric plan
      */
-    public static double computeV(final double cosDec, final double sinDec, final BaseLine baseLine, final double ha) {
-        return sinDec * (FastMath.sin(ha) * baseLine.getY() - FastMath.cos(ha) * baseLine.getX()) + cosDec * baseLine.getZ();
+    public static double computeV(final double cosDec, final double sinDec, final BaseLine baseLine, final double cosHa, final double sinHa) {
+        return sinDec * (sinHa * baseLine.getY() - cosHa * baseLine.getX()) + cosDec * baseLine.getZ();
     }
 
     /**
