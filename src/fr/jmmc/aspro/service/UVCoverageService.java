@@ -22,6 +22,7 @@ import fr.jmmc.aspro.util.AngleUtils;
 import fr.jmmc.aspro.util.TestUtils;
 import java.util.ArrayList;
 import java.util.List;
+import net.jafama.DoubleWrapper;
 import net.jafama.FastMath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,12 +65,15 @@ public final class UVCoverageService {
     private final int supersamplingOIFits;
     /** OIFits MathMode preference */
     private final MathMode mathModeOIFits;
-
+    /** cosinus wrapper used by FastMath.sinAndCos() */
+    private final DoubleWrapper cw = new DoubleWrapper();
     /* internal */
     /** Get the current thread to check if the computation is interrupted */
     private final Thread currentThread = Thread.currentThread();
     /** hour angle step (see samplingPeriod) */
     private double haStep;
+    /** observation time expressed in hour angle (see acquisitionTime) */
+    private double haObsTime;
     /** lower wavelength of the selected instrument (meter) */
     private double instrumentMinWaveLength;
     /** minimal wavelength of the selected instrument mode (meter) */
@@ -234,7 +238,7 @@ public final class UVCoverageService {
         double[] u;
         double[] v;
 
-        double haRad;
+        double cosHa, sinHa;
 
         for (int i = 0, j; i < sizeBL; i++) {
             baseLine = this.baseLines.get(i);
@@ -248,11 +252,12 @@ public final class UVCoverageService {
 
             for (double ha = -haElev; ha <= haElev; ha += step) {
 
-                haRad = AngleUtils.hours2rad(ha);
+                sinHa = FastMath.sinAndCos(AngleUtils.hours2rad(ha), cw); // cw holds cosine
+                cosHa = cw.value;
 
                 // Baseline projected vector (m) :
-                u[j] = CalcUVW.computeU(baseLine, haRad);
-                v[j] = CalcUVW.computeV(cosDec, sinDec, baseLine, haRad);
+                u[j] = CalcUVW.computeU(baseLine, cosHa, sinHa);
+                v[j] = CalcUVW.computeV(cosDec, sinDec, baseLine, cosHa, sinHa);
 
                 // wavelength correction :
 
@@ -306,13 +311,13 @@ public final class UVCoverageService {
         }
 
         if (obsRangesHA != null) {
-            final double haElev = this.starData.getHaElev();
-
-            final double haLower = checkHA(this.haMin, haElev);
-            final double haUpper = checkHA(this.haMax, haElev);
+            // use observable HA bounds:
+            final Double haLower = Range.getMinimum(obsRangesHA);
+            final Double haUpper = Range.getMaximum(obsRangesHA);
 
             if (logger.isDebugEnabled()) {
                 logger.debug("HA min/Max: {} - {}", haLower, haUpper);
+                logger.debug("HA ObsTime: {}", haObsTime);
             }
 
             final double step = this.haStep;
@@ -325,18 +330,24 @@ public final class UVCoverageService {
             // use safety limit to avoid out of memory errors :
             final double[] haValues = new double[(capacity > MAX_HA_POINTS) ? MAX_HA_POINTS : capacity];
 
+            Range obsRange;
             int j = 0;
             for (double ha = haLower; ha <= haUpper; ha += step) {
 
-                // check HA :
-                if (checkObservability(ha, obsRangesHA)) {
-                    haValues[j] = ha;
-                    j++;
+                // check HA start:
+                if ((obsRange = Range.find(obsRangesHA, ha, HA_PRECISION)) != null) {
+                    // check HA end:
+                    if (obsRange.contains(ha + haObsTime, HA_PRECISION)) {
+                        haValues[j] = ha;
+                        j++;
 
-                    // check safety limit :
-                    if (j >= MAX_HA_POINTS) {
-                        addWarning("Too many HA points (" + capacity + "), check your sampling periodicity. Only " + MAX_HA_POINTS + " samples computed");
-                        break;
+                        // check safety limit :
+                        if (j >= MAX_HA_POINTS) {
+                            addWarning("Too many HA points (" + capacity + "), check your sampling periodicity. Only " + MAX_HA_POINTS + " samples computed");
+                            break;
+                        }
+                    } else if (logger.isDebugEnabled()) {
+                        logger.debug("Observation HA range [{}; {}]end exceed observable range: {}", ha, ha + haObsTime, obsRange);
                     }
                 }
             }
@@ -382,7 +393,7 @@ public final class UVCoverageService {
             double[] uWMax;
             double[] vWMax;
 
-            double haRad;
+            double cosHa, sinHa;
 
             for (int i = 0; i < sizeBL; i++) {
                 baseLine = this.baseLines.get(i);
@@ -397,11 +408,13 @@ public final class UVCoverageService {
                 vWMax = new double[nPoints];
 
                 for (j = 0; j < nPoints; j++) {
-                    haRad = AngleUtils.hours2rad(HA[j]);
+
+                    sinHa = FastMath.sinAndCos(AngleUtils.hours2rad(HA[j]), cw); // cw holds cosine
+                    cosHa = cw.value;
 
                     // Baseline projected vector (m) :
-                    u[j] = CalcUVW.computeU(baseLine, haRad);
-                    v[j] = CalcUVW.computeV(cosDec, sinDec, baseLine, haRad);
+                    u[j] = CalcUVW.computeU(baseLine, cosHa, sinHa);
+                    v[j] = CalcUVW.computeV(cosDec, sinDec, baseLine, cosHa, sinHa);
 
                     // wavelength correction :
 
@@ -431,22 +444,6 @@ public final class UVCoverageService {
 
             this.data.setTargetUVObservability(targetUVObservability);
         }
-    }
-
-    /**
-     * Check if the given hour angle is observable
-     * @param ha decimal hour angle
-     * @param obsRangesHA observable ranges
-     * @return true if observable
-     */
-    private boolean checkObservability(final double ha, final List<Range> obsRangesHA) {
-        // Use 1s precision on HA:
-        for (Range range : obsRangesHA) {
-            if (ha >= (range.getMin() - HA_PRECISION) && ha <= (range.getMax() + HA_PRECISION)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**
@@ -522,6 +519,9 @@ public final class UVCoverageService {
         if (logger.isDebugEnabled()) {
             logger.debug("ha step: {}", this.haStep);
         }
+
+        // get acquisition time to ensure sampled HA intervals [HA; HA+obsTime] is within observable range
+        haObsTime = observation.getInstrumentConfiguration().getAcquisitionTime().doubleValue() / 3600d;
 
         // Adjust the user uv Max = max base line / minimum wave length
         // note : use the minimum wave length of the instrument to
