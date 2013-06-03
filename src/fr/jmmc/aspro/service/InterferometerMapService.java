@@ -11,6 +11,7 @@ import fr.jmmc.aspro.model.oi.InterferometerDescription;
 import fr.jmmc.aspro.model.oi.LonLatAlt;
 import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Station;
+import fr.jmmc.jmal.util.MathUtils;
 import fr.jmmc.jmcs.util.FormatterUtils;
 import fr.jmmc.oitools.util.CombUtils;
 import java.text.DecimalFormat;
@@ -29,7 +30,7 @@ public final class InterferometerMapService {
     /** Class logger */
     private static final Logger logger = LoggerFactory.getLogger(InterferometerMapService.class.getName());
     /** double formatter for baseline length */
-    protected final static NumberFormat df2 = new DecimalFormat("0.00");
+    private final static NumberFormat df2 = new DecimalFormat("0.00");
 
     /**
      * Forbidden constructor
@@ -161,7 +162,7 @@ public final class InterferometerMapService {
                     y = s2.getRelativePosition().getPosY() - s1.getRelativePosition().getPosY();
                     z = s2.getRelativePosition().getPosZ() - s1.getRelativePosition().getPosZ();
 
-                    dist = Math.sqrt(x * x + y * y + z * z);
+                    dist = MathUtils.carthesianNorm(x, y, z);
 
                     if (i1 != -1 && i2 != -1) {
                         sb.setLength(0);
@@ -195,7 +196,7 @@ public final class InterferometerMapService {
      * @param values array to use
      * @return minimum value
      */
-    private static final double getMin(final double[] values) {
+    private static double getMin(final double[] values) {
         double min = Double.POSITIVE_INFINITY;
         for (double v : values) {
             if (min > v) {
@@ -210,7 +211,7 @@ public final class InterferometerMapService {
      * @param values array to use
      * @return maximum value
      */
-    private static final double getMax(final double[] values) {
+    private static double getMax(final double[] values) {
         double max = Double.NEGATIVE_INFINITY;
         for (double v : values) {
             if (max < v) {
@@ -225,7 +226,7 @@ public final class InterferometerMapService {
      * @param values values to relocate
      * @param center center or mean value
      */
-    private static final void relocate(final double[] values, final double center) {
+    private static void relocate(final double[] values, final double center) {
         for (int i = 0, len = values.length; i < len; i++) {
             values[i] -= center;
         }
