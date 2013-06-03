@@ -17,8 +17,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="0.9.5 beta 2"/>
-    <compilation date="07/05/2013" compiler="JDK 1.6.0_24"/>
+    <program name="Aspro2" version="0.9.5 beta 3"/>
+    <compilation date="03/06/2013" compiler="JDK 1.6.0_24"/>
   
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -169,11 +169,13 @@
 
         <menu label="Interop">
             <menu label="Search calibrators" classpath="fr.jmmc.aspro.interop.SearchCalQueryAction" action="searchCalStartQuery"
-            description="use SearchCal to search calibrators for the current selected target (SAMP)"/>
+                description="use SearchCal to search calibrators for the current selected target (SAMP)"/>
             <menu label="Perform model fitting" classpath="fr.jmmc.aspro.interop.BroadcastToModelFittingAction" action="broadcastToModelFittingAction"
-            description="use LITpro to prepare your model fitting and inspect your OIFits files (SAMP)"/>
+                description="use LITpro to prepare your model fitting and inspect your OIFits files (SAMP)"/>
             <menu label="Send StarList to PIVOT" classpath="fr.jmmc.aspro.interop.StarListSendAction" action="starListSendAction"
-            description="Send back the star list to PIVOT (SAMP)"/>
+                description="send back the star list to PIVOT (SAMP)"/>
+            <menu label="Send OIFits data" classpath="fr.jmmc.aspro.interop.SendOIFitsAction" action="sendOIFitsAction"
+                description="send simulated OIFits data file(s) to OIFitsExplorer or other VO Tools (SAMP)"/>
         </menu>
     
         <menu label="Help">
@@ -184,8 +186,16 @@
 
     <releasenotes>
         <release version="0.9.5">
-            <pubDate>Tue, 07 May 2013 16:05:00 GMT</pubDate>
+            <prerelease version="0.9.5 beta 3">
+                <change type="FEATURE">Updated embedded OIFits explorer to use customizable plot</change>
+                <change type="FEATURE">Added OIFits Explorer interoperability (or topcat) i.e. send OIFits data files to any VO Tools supporting FITS files</change>
+                <change type="BUGFIX">Improved HA sampling to start at the beginning of each observability intervals and 
+                    ensure integration time is within the observability range</change>
+                <change type="FEATURE">Improved model image of the phase using cyclic LUT</change>
+                <change type="FEATURE">Modified color palette used in interferometer map and UV Coverage plot to use transparency (75% opacity)</change>
+            </prerelease>
             <prerelease version="0.9.5 beta 2">
+                <pubDate>Tue, 07 May 2013 16:05:00 GMT</pubDate>
                 <change type="FEATURE">Improved UV Coverage plot to draw outlines arround UV segments and tracks (shadows)</change>
                 <change type="FEATURE">Added LUT aspro-isophot (new default one) which draws white lines every 10%</change>
                 <change type="FEATURE">Improved performance related to clipping / zoom issues with dotted outline (optional constraints)</change>
