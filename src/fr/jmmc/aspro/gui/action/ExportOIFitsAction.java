@@ -37,6 +37,8 @@ public final class ExportOIFitsAction extends WaitingTaskAction {
     private static final Logger logger = LoggerFactory.getLogger(className);
     /** OIFits MimeType */
     private final static MimeType mimeType = MimeType.OIFITS;
+    /** fits extension including '.' (dot) character ie '.fits' */
+    public final static String OIFITS_EXTENSION = "."  + mimeType.getExtension();
 
     /**
      * Public constructor that automatically register the action in RegisteredAction.
@@ -114,8 +116,18 @@ public final class ExportOIFitsAction extends WaitingTaskAction {
      * @return default name [Aspro2_<TARGET>_<INSTRUMENT>_<CONFIGURATION>_<DATE>]
      */
     public static String getDefaultFileName(final OIFitsFile oiFitsFile) {
+        return getDefaultFileName(oiFitsFile, true);
+    }
 
-        final StringBuilder sb = new StringBuilder(32).append("Aspro2_");
+    /**
+     * Generate a default name for the given OIFits structure
+     * @param oiFitsFile OIFits structure
+     * @param addExtension true to add oifits extension into the returned file name; false otherwise
+     * @return default name [Aspro2_<TARGET>_<INSTRUMENT>_<CONFIGURATION>_<DATE>]
+     */
+    public static String getDefaultFileName(final OIFitsFile oiFitsFile, final boolean addExtension) {
+
+        final StringBuilder sb = new StringBuilder(128).append("Aspro2_");
 
         final String altName = StringUtils.replaceNonAlphaNumericCharsByUnderscore(oiFitsFile.getOiTarget().getTarget()[0]);
 
@@ -139,7 +151,9 @@ public final class ExportOIFitsAction extends WaitingTaskAction {
 
         sb.append(dateObs);
 
-        sb.append('.').append(mimeType.getExtension());
+        if (addExtension) {
+            sb.append(OIFITS_EXTENSION);
+        }
 
         return sb.toString();
     }
