@@ -16,6 +16,7 @@ import fr.jmmc.aspro.gui.action.TargetEditorAction;
 import fr.jmmc.aspro.gui.task.AsproTaskRegistry;
 import fr.jmmc.aspro.interop.BroadcastToModelFittingAction;
 import fr.jmmc.aspro.interop.SearchCalQueryAction;
+import fr.jmmc.aspro.interop.SendOIFitsAction;
 import fr.jmmc.aspro.interop.StarListSendAction;
 import fr.jmmc.aspro.interop.VotableSampMessageHandler;
 import fr.jmmc.aspro.model.ConfigurationManager;
@@ -119,7 +120,7 @@ public final class Aspro2 extends App {
      */
     @Override
     protected void setupGui() throws RuntimeException {
-        logger.debug("Aspro2.setupGui: handler enter");
+        logger.debug("Aspro2.setupGui() handler enter");
 
         prepareFrame();
 
@@ -127,7 +128,7 @@ public final class Aspro2 extends App {
         // even if opening a file in case the file can not be loaded:
         ObservationManager.getInstance().reset();
 
-        logger.debug("Aspro2.setupGui: handler exit");
+        logger.debug("Aspro2.setupGui() handler exit");
     }
 
     /**
@@ -141,7 +142,7 @@ public final class Aspro2 extends App {
              */
             @Override
             public void run() {
-                logger.debug("Aspro2.execute: handler called.");
+                logger.debug("Aspro2.execute() handler called.");
 
                 getFrame().setVisible(true);
             }
@@ -156,7 +157,7 @@ public final class Aspro2 extends App {
      */
     @Override
     public boolean canBeTerminatedNow() {
-        logger.debug("Aspro2.canBeTerminatedNow: handler called.");
+        logger.debug("Aspro2.canBeTerminatedNow() handler called.");
 
         // Ask the user if he wants to save modifications
         final ConfirmSaveChanges result = MessagePane.showConfirmSaveChangesBeforeClosing();
@@ -285,6 +286,9 @@ public final class Aspro2 extends App {
         // PIVOT starlist (SAMP) :
         new StarListSendAction();
 
+        // Send OIFits (SAMP) :
+        new SendOIFitsAction();
+        
         // Help menu:
         new ShowReleaseNotesAction("showConf", "Aspro2 Configuration " + ConfigurationManager.getInstance().getConfDescription().getProgramVersion(), ConfigurationManager.getInstance().getConfDescription());
     }
