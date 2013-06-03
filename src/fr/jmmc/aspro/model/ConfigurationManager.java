@@ -25,6 +25,7 @@ import fr.jmmc.aspro.model.oi.Position3D;
 import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.StationLinks;
 import fr.jmmc.aspro.service.GeocentricCoords;
+import fr.jmmc.jmal.util.MathUtils;
 import fr.jmmc.jmcs.data.app.ApplicationDescription;
 import fr.jmmc.jmcs.gui.FeedbackReport;
 import fr.jmmc.jmcs.gui.component.MessagePane;
@@ -418,13 +419,14 @@ public final class ConfigurationManager extends BaseOIManager {
         Station s1, s2;
         for (int i = 0; i < size; i++) {
             s1 = stations.get(i);
+            
             for (int j = i + 1; j < size; j++) {
                 s2 = stations.get(j);
 
                 x = s2.getRelativePosition().getPosX() - s1.getRelativePosition().getPosX();
                 y = s2.getRelativePosition().getPosY() - s1.getRelativePosition().getPosY();
 
-                distXY = Math.sqrt(x * x + y * y);
+                distXY = MathUtils.carthesianNorm(x, y);
 
                 minUV = Math.min(minUV, distXY);
                 maxUV = Math.max(maxUV, distXY);
@@ -462,7 +464,7 @@ public final class ConfigurationManager extends BaseOIManager {
                 y = s2.getRelativePosition().getPosY() - s1.getRelativePosition().getPosY();
                 z = s2.getRelativePosition().getPosZ() - s1.getRelativePosition().getPosZ();
 
-                distXYZ = Math.sqrt(x * x + y * y + z * z);
+                distXYZ = MathUtils.carthesianNorm(x, y, z);
 
                 minUV = Math.min(minUV, distXYZ);
                 maxUV = Math.max(maxUV, distXYZ);
