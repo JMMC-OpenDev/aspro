@@ -24,6 +24,11 @@
     <logger name="fr.jmmc.oitools" level="INFO"/>
     -->
 
+    <!-- OIFitsExplorer core -->
+    <!--    
+    <logger name="fr.jmmc.oiexplorer.core" level="INFO"/>
+    <logger name="fr.jmmc.oiexplorer.core.gui.PlotChartPanel" level=""/>
+    -->
 
     <!-- JSkyCalc -->
     <logger name="edu.dartmouth" level="INFO"/>
