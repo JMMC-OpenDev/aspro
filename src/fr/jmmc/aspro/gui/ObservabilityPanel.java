@@ -12,7 +12,7 @@ import fr.jmmc.aspro.gui.chart.AsproChartUtils;
 import fr.jmmc.aspro.gui.chart.EnhancedXYBoxAnnotation;
 import fr.jmmc.aspro.gui.chart.ObservabilityPlotContext;
 import fr.jmmc.aspro.gui.chart.SlidingXYPlotAdapter;
-import fr.jmmc.aspro.gui.chart.SlidingXYPlotAdapter.State;
+import fr.jmmc.aspro.gui.chart.SlidingXYPlotState;
 import fr.jmmc.aspro.gui.chart.XYDiamondAnnotation;
 import fr.jmmc.aspro.gui.chart.XYTickAnnotation;
 import fr.jmmc.aspro.gui.task.AsproTaskRegistry;
@@ -225,7 +225,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     /** flag to indicate that the plot is rendered for PDF output */
     private boolean renderingPDF = false;
     /** backup state of slidingXYAdapter before PDF */
-    private State stateBeforePDF = null;
+    private SlidingXYPlotState stateBeforePDF = null;
     /** timeline refresh Swing timer */
     private final Timer timerTimeRefresh;
     /** current target name (selected target or given by scroller position) */
@@ -236,8 +236,6 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     /* plot data */
     /** chart data */
     private ObservationCollectionObsData chartData = null;
-    /** sky calc instance */
-    private AstroSkyCalc sc = null;
     /** night lower bound */
     private long nightLower = 0l;
     /** night upper bound */
@@ -301,7 +299,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
         // add listener :
         this.chart.addProgressListener(this);
-        this.chartPanel = ChartUtils.createChartPanel(this.chart, true);
+        this.chartPanel = ChartUtils.createChartPanel(this.chart, true); // show tooltips
 
         // intercept component resize events:
         this.chartPanel.addComponentListener(new PanelResizeAdapter());
@@ -648,6 +646,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
      * Performs layout and return PDF options
      * @return PDF options
      */
+    @Override
     public PDFOptions preparePDFExport() {
         // Enable the PDF rendering flag:
         this.renderingPDF = true;
@@ -730,6 +729,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
      * @param pageIndex page index (1..n)
      * @return chart
      */
+    @Override
     public JFreeChart prepareChart(final int pageIndex) {
         if (logger.isDebugEnabled()) {
             logger.debug("prepareChart: page {}", pageIndex);
@@ -1099,9 +1099,6 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
      */
     private void setChartData(final ObservationCollectionObsData chartData) {
         this.chartData = chartData;
-
-        // Get AstroSkyCalc instance :
-        this.sc = this.chartData.getFirstObsData().getDateCalc();
     }
 
     /**
@@ -1742,11 +1739,14 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
             if (!doBaseLineLimits) {
 
-                if (this.sc != null) {
+                // Get AstroSkyCalc instance :
+                final AstroSkyCalc sc = obsData.getDateCalc();
+
+                if (sc != null) {
                     final boolean useLST = obsData.isUseLST();
 
                     // Get jd of current date/time:
-                    final double jd = this.sc.getCurrentJd();
+                    final double jd = sc.getCurrentJd();
 
                     // check if the current jd is within the good night:
                     if (jd >= obsData.getJdMin() && jd <= obsData.getJdMax()) {
@@ -1754,7 +1754,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                         enableTimer = true;
 
                         // convert JD to LST/UT date/time:
-                        final Calendar cal = this.sc.toCalendar(jd, useLST);
+                        final Calendar cal = sc.toCalendar(jd, useLST);
 
                         // roll +/- 1 day to be within plot range:
                         final Date now = convertCalendarToDate(cal, obsData.getDateMin(), obsData.getDateMax());
@@ -1795,7 +1795,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
      * @param max upper date of plot
      * @return date
      */
-    private Date convertCalendarToDate(final Calendar cal, final Date min, final Date max) {
+    private static Date convertCalendarToDate(final Calendar cal, final Date min, final Date max) {
 
         // Note: use Calendar.roll to only fix date field
 
@@ -1843,7 +1843,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
             // move JMMC annotation:
             this.aJMMC.setX(this.xyPlot.getDomainAxis().getUpperBound());
             this.aJMMC.setY(this.xyPlot.getRangeAxis().getUpperBound()); // upper bound instead of other plots
-            
+
             if (isTimelineEnabled()) {
                 // set time marker label anchor:
                 final BoundedDateAxis dateAxis = (BoundedDateAxis) this.xyPlot.getRangeAxis();
