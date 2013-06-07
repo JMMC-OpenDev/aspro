@@ -3,6 +3,7 @@
  ******************************************************************************/
 package fr.jmmc.aspro.gui;
 
+import edu.dartmouth.AstroSkyCalc;
 import fr.jmmc.aspro.Aspro2;
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.Preferences;
@@ -11,6 +12,7 @@ import fr.jmmc.aspro.gui.action.ExportOBVLTIAction;
 import fr.jmmc.aspro.gui.action.ExportOBVegaAction;
 import fr.jmmc.aspro.gui.chart.AsproChartUtils;
 import fr.jmmc.aspro.gui.chart.ColorModelPaintScale;
+import fr.jmmc.aspro.gui.chart.EnhancedXYLineAnnotation;
 import fr.jmmc.aspro.gui.chart.PaintLogScaleLegend;
 import fr.jmmc.aspro.gui.task.AsproTaskRegistry;
 import fr.jmmc.aspro.gui.task.ObservationCollectionTaskSwingWorker;
@@ -56,11 +58,13 @@ import fr.jmmc.jmal.model.ModelUVMapService;
 import fr.jmmc.jmal.model.UVMapData;
 import fr.jmmc.jmal.model.VisNoiseService;
 import fr.jmmc.jmal.model.targetmodel.Model;
+import fr.jmmc.jmal.util.MathUtils;
 import fr.jmmc.jmcs.gui.component.Disposable;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.gui.component.StatusBar;
 import fr.jmmc.jmcs.gui.task.TaskSwingWorker;
 import fr.jmmc.jmcs.gui.task.TaskSwingWorkerExecutor;
+import fr.jmmc.jmcs.util.FormatterUtils;
 import fr.jmmc.jmcs.util.NumberUtils;
 import fr.jmmc.jmcs.util.ObjectUtils;
 import fr.jmmc.jmcs.util.SpecialChars;
@@ -70,6 +74,7 @@ import fr.jmmc.oiexplorer.core.gui.PDFExportable;
 import fr.jmmc.oiexplorer.core.gui.chart.BoundedNumberAxis;
 import fr.jmmc.oiexplorer.core.gui.chart.ChartUtils;
 import fr.jmmc.oiexplorer.core.gui.chart.ColorPalette;
+import fr.jmmc.oiexplorer.core.gui.chart.FastXYLineAndShapeRenderer;
 import fr.jmmc.oiexplorer.core.gui.chart.PDFOptions;
 import fr.jmmc.oiexplorer.core.gui.chart.SquareChartPanel;
 import fr.jmmc.oiexplorer.core.gui.chart.SquareXYPlot;
@@ -89,16 +94,25 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.IndexColorModel;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Vector;
 import java.util.concurrent.ExecutionException;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JFormattedTextField;
+import javax.swing.Timer;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import net.jafama.FastMath;
@@ -111,13 +125,16 @@ import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.block.BlockBorder;
 import org.jfree.chart.event.ChartProgressEvent;
 import org.jfree.chart.event.ChartProgressListener;
+import org.jfree.chart.labels.XYToolTipGenerator;
 import org.jfree.chart.renderer.AbstractRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.chart.title.PaintScaleLegend;
+import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 import org.jfree.ui.Layer;
 import org.jfree.ui.RectangleEdge;
+import org.jfree.ui.TextAnchor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -125,7 +142,7 @@ import org.slf4j.LoggerFactory;
  * This panel presents the UV coverage plot with its parameters (target, instrument mode ...)
  * @author bourgesl
  */
-public final class UVCoveragePanel extends javax.swing.JPanel implements ChartProgressListener, ZoomEventListener,
+public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolTipGenerator, ChartProgressListener, ZoomEventListener,
         ActionListener, ChangeListener, ObservationListener, Observer, UserModelAnimator.UserModelAnimatorListener, PDFExportable, Disposable {
 
     /** default serial UID for Serializable interface */
@@ -160,6 +177,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     private final static ObservationManager om = ObservationManager.getInstance();
     /** user model animator singleton */
     private final static UserModelAnimator animator = UserModelAnimator.getInstance();
+    /** default timeline refresh period = 1 minutes */
+    private static final int REFRESH_PERIOD = 60 * 1000;
     /* members */
     /** preference singleton */
     private final Preferences myPreferences = Preferences.getInstance();
@@ -175,6 +194,18 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     private double uvPlotScalingFactor = MEGA_LAMBDA_SCALE;
     /** current image index (user model only) */
     private int imageIndex = -1;
+    /** precomputed tooltips for uv observable ranges */
+    private final Map<String, Map<Integer, String>> seriesTooltips = new HashMap<String, Map<Integer, String>>(32);
+    /** tooltip buffer */
+    private final StringBuffer sbToolTip = new StringBuffer(144);
+    /** 24h date formatter like in france */
+    private final DateFormat timeFormatter = DateFormat.getTimeInstance(DateFormat.SHORT, Locale.FRANCE);
+    /** double formatter for HA */
+    private final NumberFormat df1 = new DecimalFormat("0.0");
+    /** timeline refresh Swing timer */
+    private final Timer timerTimeRefresh;
+    /** flag to indicate that the plot is rendered for PDF output */
+    private boolean renderingPDF = false;
 
     /* cached data */
     /** current interferometer configuration name to track changes */
@@ -213,6 +244,17 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         initComponents();
 
         postInit();
+
+        // Create the timeline refresh timer:
+        this.timerTimeRefresh = new Timer(REFRESH_PERIOD, new ActionListener() {
+            /**
+             * Invoked when the timer action occurs.
+             */
+            @Override
+            public void actionPerformed(final ActionEvent ae) {
+                updateTimeAnnotations();
+            }
+        });
     }
 
     /**
@@ -639,7 +681,14 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
      * Performs layout and return PDF options
      * @return PDF options
      */
+    @Override
     public PDFOptions preparePDFExport() {
+        // Enable the PDF rendering flag:
+        this.renderingPDF = true;
+
+        // update the time annotations to disable it:
+        updateTimeAnnotations();
+
         return PDFOptions.DEFAULT_PDF_OPTIONS;
     }
 
@@ -658,7 +707,11 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
      */
     @Override
     public void postPDFExport() {
-        // no-op
+        // Disable the PDF rendering flag:
+        this.renderingPDF = false;
+
+        // update the time annotations to enable it:
+        updateTimeAnnotations();
     }
 
     /**
@@ -669,7 +722,13 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         this.chart = ChartUtils.createSquareXYLineChart("U (" + SpecialChars.UNIT_MEGA_LAMBDA + ")", "V (" + SpecialChars.UNIT_MEGA_LAMBDA + ")", true);
         this.xyPlot = (SquareXYPlot) this.chart.getPlot();
 
-        final XYLineAndShapeRenderer rendererPoints = (XYLineAndShapeRenderer) this.xyPlot.getRenderer(); // DATASET_UV_POINTS
+        // Use FastXYLineAndShapeRenderer to have tooltip on line segments:
+        final FastXYLineAndShapeRenderer rendererPoints = new FastXYLineAndShapeRenderer(true, false); // DATASET_UV_POINTS
+        // force to use the large stroke :
+        rendererPoints.setAutoPopulateSeriesStroke(false);
+        rendererPoints.setBaseStroke(ChartUtils.LARGE_STROKE);
+        rendererPoints.setBaseToolTipGenerator(this);
+        this.xyPlot.setRenderer(DATASET_UV_POINTS, rendererPoints);
 
         final XYLineAndShapeRenderer rendererPointsShadow = new XYLineAndShapeRenderer(true, false); // DATASET_UV_POINTS_SHADOW
         // force to use the very large stroke :
@@ -678,12 +737,14 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
         this.xyPlot.setRenderer(DATASET_UV_POINTS_SHADOW, rendererPointsShadow);
 
         final XYLineAndShapeRenderer rendererTracks = new XYLineAndShapeRenderer(true, false); // DATASET_UV_TRACKS
+        rendererTracks.setDrawSeriesLineAsPath(true);
         // force to use the large stroke :
         rendererTracks.setAutoPopulateSeriesStroke(false);
         rendererTracks.setBaseStroke(ChartUtils.LARGE_STROKE);
         this.xyPlot.setRenderer(DATASET_UV_TRACKS, rendererTracks);
 
         final XYLineAndShapeRenderer rendererTracksShadow = new XYLineAndShapeRenderer(true, false); // DATASET_UV_TRACKS_SHADOW
+        rendererTracksShadow.setDrawSeriesLineAsPath(true);
         // force to use the very large stroke :
         rendererTracksShadow.setAutoPopulateSeriesStroke(false);
         rendererTracksShadow.setBaseStroke(ChartUtils.VERY_LARGE_STROKE);
@@ -709,7 +770,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
         // add listener :
         this.chart.addProgressListener(this);
-        this.chartPanel = ChartUtils.createSquareChartPanel(this.chart);
+        this.chartPanel = ChartUtils.createSquareChartPanel(this.chart, true); // show tooltips
 
         // zoom options :
         this.chartPanel.setDomainZoomable(Constants.ENABLE_ZOOM);
@@ -2018,6 +2079,12 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
             this.xyPlot.setBackgroundPaint(Color.WHITE);
 
+            // reset cached tooltips:
+            this.seriesTooltips.clear();
+
+            // remove annotations anyway:
+            this.xyPlot.clearAnnotations();
+
         } finally {
             // restore chart & plot notifications:
             this.xyPlot.setNotify(true);
@@ -2108,6 +2175,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
                 // update theme at end :
                 ChartUtilities.applyCurrentTheme(this.chart);
+
+                // update the time annotations:
+                updateTimeAnnotations();
 
             } finally {
                 // restore chart & plot notifications:
@@ -2558,7 +2628,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
         // Create dataset with UV coverage data :
         final XYSeriesCollection datasetPoints = prepareDataset(chartData, rendererPoints);
-        this.updateUVTracks(datasetPoints, chartData);
+        this.updateUVObservableRanges(datasetPoints, chartData);
 
         final XYSeriesCollection datasetTracks = prepareDataset(chartData, rendererTracks);
         this.updateUVTracksRiseSet(datasetTracks, chartData);
@@ -2587,7 +2657,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
      * @return dataset
      */
     private static XYSeriesCollection prepareDataset(final ObservationCollectionUVData chartData, final AbstractRenderer renderer) {
-        final ColorPalette palette = ColorPalette.getDefaultColorPaletteAlpha();
+        final ColorPalette palette = ColorPalette.getDefaultColorPalette();
 
         final XYSeriesCollection dataset = new XYSeriesCollection();
 
@@ -2633,21 +2703,32 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
     }
 
     /**
-     * Update the dataset with UV observable tracks
+     * Update the dataset with UV observable ranges
      * @param dataset dataset to use
      * @param chartData chart data
      */
-    private void updateUVTracks(final XYSeriesCollection dataset, final ObservationCollectionUVData chartData) {
+    private void updateUVObservableRanges(final XYSeriesCollection dataset, final ObservationCollectionUVData chartData) {
 
         List<UVRangeBaseLineData> targetUVObservability;
+        double[] haValues;
+        Date[] dateValues;
 
         XYSeries xySeries = null;
+        String serieKey;
+        Map<Integer, String> tooltipMap = null;
 
+        double[] u;
+        double[] v;
         double[] uWMin;
         double[] vWMin;
         double[] uWMax;
         double[] vWMax;
         double x1, y1, x2, y2;
+
+        double ha;
+        Date date;
+
+        final String timeRef = chartData.getFirstObsData().isUseLST() ? AsproConstants.TIME_LST : AsproConstants.TIME_UTC;
 
         final boolean single = chartData.isSingle();
 
@@ -2659,26 +2740,51 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
             targetUVObservability = uvData.getTargetUVObservability();
 
             if (targetUVObservability != null) {
-                // target is observable :
+                // target is observable:
+
+                haValues = uvData.getHA();
+                dateValues = uvData.getDates();
 
                 if (!single) {
+                    serieKey = chartData.getConfigurationNames().get(c);
+
                     // 1 color per configuration (i.e. per XYSeries) :
-                    xySeries = dataset.getSeries(chartData.getConfigurationNames().get(c));
+                    xySeries = dataset.getSeries(serieKey);
+
+                    tooltipMap = this.seriesTooltips.get(serieKey);
+                    if (tooltipMap == null) {
+                        tooltipMap = new HashMap<Integer, String>(2 * haValues.length * targetUVObservability.size());
+                        this.seriesTooltips.put(serieKey, tooltipMap);
+                    }
                 }
 
                 for (UVRangeBaseLineData uvBL : targetUVObservability) {
 
                     if (single) {
+                        serieKey = uvBL.getName();
+
                         // 1 color per base line (i.e. per XYSeries) :
-                        xySeries = dataset.getSeries(uvBL.getName());
+                        xySeries = dataset.getSeries(serieKey);
+
+                        tooltipMap = this.seriesTooltips.get(serieKey);
+                        if (tooltipMap == null) {
+                            tooltipMap = new HashMap<Integer, String>(2 * haValues.length);
+                            this.seriesTooltips.put(serieKey, tooltipMap);
+                        }
                     }
 
+                    u = uvBL.getU();
+                    v = uvBL.getV();
                     uWMin = uvBL.getUWMin();
                     vWMin = uvBL.getVWMin();
                     uWMax = uvBL.getUWMax();
                     vWMax = uvBL.getVWMax();
 
                     for (int i = 0, size = uvBL.getNPoints(); i < size; i++) {
+
+                        ha = haValues[i];
+                        date = dateValues[i];
+
                         x1 = toUVPlotScale(uWMax[i]);
                         y1 = toUVPlotScale(vWMax[i]);
 
@@ -2687,6 +2793,11 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
                         // first segment :
                         xySeries.add(x1, y1, false);
+
+                        // line tooltip use index of (x2, y2) point:
+                        tooltipMap.put(NumberUtils.valueOf(xySeries.getItemCount()),
+                                generateTooltip(uvBL.getName(), ha, date, timeRef, u[i], v[i]));
+
                         xySeries.add(x2, y2, false);
 
                         // add an invalid point to break the line between the 2 segments :
@@ -2694,6 +2805,11 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
 
                         // second symetric segment :
                         xySeries.add(-x1, -y1, false);
+
+                        // line tooltip use index of (x2, y2) point:
+                        tooltipMap.put(NumberUtils.valueOf(xySeries.getItemCount()),
+                                generateTooltip(uvBL.getName(), ha, date, timeRef, -u[i], -v[i]));
+
                         xySeries.add(-x2, -y2, false);
 
                         // add an invalid point to break the line between the 2 segments :
@@ -2920,6 +3036,17 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
             }
         }
 
+        switch (event.getType()) {
+            case ChartProgressEvent.DRAWING_STARTED:
+                this.chartDrawStartTime = System.nanoTime();
+                break;
+            case ChartProgressEvent.DRAWING_FINISHED:
+                logger.info("Drawing chart time = {} ms.", 1e-6d * (System.nanoTime() - this.chartDrawStartTime));
+                this.chartDrawStartTime = 0l;
+                break;
+            default:
+        }
+
         // Perform custom operations before/after chart rendering:
         // move JMMC annotation:
         this.aJMMC.setX(this.xyPlot.getDomainAxis().getUpperBound());
@@ -2934,10 +3061,12 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
      */
     private static String format(final JFormattedTextField field, final Double value) {
         String res = "";
-        try {
-            res = field.getFormatter().valueToString(value);
-        } catch (ParseException pe) {
-            logger.error("parsing exception", pe);
+        if (value != null) {
+            try {
+                res = field.getFormatter().valueToString(value);
+            } catch (ParseException pe) {
+                logger.error("parsing exception", pe);
+            }
         }
         return res;
     }
@@ -3059,6 +3188,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
      * @param userModelFile user model file to use
      * @param imageIndex image index to display
      */
+    @Override
     public void perform(final String userModelFile, final int imageIndex) {
         // Ensure this panel is visible and no swing task is running:
         // note: FitsImagePanel can start swing worker tasks but UV Coverage panel should be the first listener called !
@@ -3071,5 +3201,221 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements ChartPr
             // use the latest observation for computations :
             plot(om.getObservationCollection());
         }
+    }
+
+    /**
+     * Generates the tooltip text for the specified item.
+     *
+     * @param dataset  the dataset (<code>null</code> not permitted).
+     * @param series  the series index (zero-based).
+     * @param item  the item index (zero-based).
+     *
+     * @return The tooltip text (possibly <code>null</code>).
+     */
+    @Override
+    public String generateToolTip(final XYDataset dataset, final int series, final int item) {
+        // note: series corresponds to the baseline or configuration, item to its UV segment (or symetric one)
+        final String serieKey = (String) dataset.getSeriesKey(series);
+
+        final Map<Integer, String> tooltipMap = this.seriesTooltips.get(serieKey);
+
+        if (tooltipMap == null) {
+            return null;
+        }
+
+        return tooltipMap.get(NumberUtils.valueOf(item));
+    }
+
+    /**
+     * Generate the tooltip's text for an UV point 
+     * @param baseline corresponding base line
+     * @param ha hour angle
+     * @param date time expressed in LST or UTC
+     * @param timeRef time reference LST or UTC
+     * @param u u coordinate in meters
+     * @param v v coordinate in meters
+     * @return tooltip's text for an UV point
+     */
+    public String generateTooltip(final String baseline, double ha, final Date date, final String timeRef,
+            final double u, final double v) {
+
+        final StringBuffer sb = this.sbToolTip;
+        sb.setLength(0); // clear
+
+        sb.append("<html><b>").append(baseline).append("</b>");
+
+        sb.append("<br><b>Time</b>: ");
+        FormatterUtils.format(this.timeFormatter, sb, date);
+        sb.append(" [").append(timeRef).append("] - <b>HA</b>: ");
+        FormatterUtils.format(this.df1, sb, ha);
+
+        // use U and V to display radius and position angle:
+        sb.append("<br><b>Radius</b>: ");
+        FormatterUtils.format(this.df1, sb, MathUtils.carthesianNorm(u, v));
+        sb.append(" m<br><b>Pos. angle</b>: ");
+        FormatterUtils.format(this.df1, sb, FastMath.toDegrees(FastMath.atan2(u, v)));
+        sb.append(" deg</html>");
+
+        return sb.toString();
+    }
+
+    /**
+     * Add UV Points at current time (timeline marker in red) as annotations
+     */
+    private void updateTimeAnnotations() {
+
+        // remove annotations anyway:
+        this.xyPlot.clearAnnotations();
+
+        boolean enableTimer = false;
+
+        // do not export time marker in PDF output:
+        if (!this.renderingPDF && chartData.isSingle()) {
+
+            final ObservabilityData obsData = chartData.getFirstObsData();
+
+            // Get AstroSkyCalc instance :
+            final AstroSkyCalc sc = this.chartData.getFirstObsData().getDateCalc();
+
+            if (sc != null) {
+                final boolean useLST = obsData.isUseLST();
+
+                // Get jd of current date/time:
+                final double jd = sc.getCurrentJd();
+
+                // check if the current jd is within the good night:
+                if (jd >= obsData.getJdMin() && jd <= obsData.getJdMax()) {
+                    // enable timeline refresh timer:
+                    enableTimer = true;
+
+                    // convert JD to LST/UT date/time:
+                    final Calendar cal = sc.toCalendar(jd, useLST);
+
+                    // roll +/- 1 day to be within plot range:
+                    final Date now = convertCalendarToDate(cal, obsData.getDateMin(), obsData.getDateMax());
+
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("time set at: {}", now);
+                    }
+
+                    // Compute UV Points:
+
+                    // Get starData for the selected target name :
+                    final StarData starData = obsData.getStarData(getSelectedTargetName());
+
+                    final double ha = sc.convertJDToHA(jd, starData.getPrecRA());
+
+                    final List<UVRangeBaseLineData> targetUVPoints =
+                            UVCoverageService.computeUVPoints(chartData.getFirstObservation(), obsData, starData, ha);
+
+                    if (targetUVPoints != null) {
+                        final String textNow = FormatterUtils.format(this.timeFormatter, now);
+
+                        double u1, v1, u2, v2;
+
+                        for (UVRangeBaseLineData uvBL : targetUVPoints) {
+
+                            u1 = toUVPlotScale(uvBL.getUWMax()[0]);
+                            v1 = toUVPlotScale(uvBL.getVWMax()[0]);
+
+                            u2 = toUVPlotScale(uvBL.getUWMin()[0]);
+                            v2 = toUVPlotScale(uvBL.getVWMin()[0]);
+
+                            this.xyPlot.addAnnotation(new EnhancedXYLineAnnotation(u1, v1, u2, v2, ChartUtils.THIN_STROKE, Color.RED), false);
+
+                            this.xyPlot.addAnnotation(createTimeAnnotation(textNow, u2, v2), false);
+
+                            this.xyPlot.addAnnotation(new EnhancedXYLineAnnotation(-u1, -v1, -u2, -v2, ChartUtils.THIN_STROKE, Color.RED), false);
+
+                            this.xyPlot.addAnnotation(createTimeAnnotation(textNow, -u2, -v2), false);
+                        }
+                    }
+                }
+            }
+        }
+        // anyway enable or disable timer:
+        enableTimelineRefreshTimer(enableTimer);
+    }
+
+    /**
+     * Create time annotation with correct text anchor 
+     * @param text time to display
+     * @param u u coordinate in mega lambda
+     * @param v v coordinate in mega lambda
+     * @return xy text annotation
+     */
+    public static XYTextAnnotation createTimeAnnotation(final String text, final double u, final double v) {
+        final XYTextAnnotation annotation = new XYTextAnnotation(text, u, v);
+        annotation.setFont(ChartUtils.DEFAULT_TEXT_SMALL_FONT);
+        annotation.setPaint(Color.RED);
+
+        if (v >= 0.0) {
+            if (u >= 0.0) {
+                annotation.setTextAnchor(TextAnchor.BOTTOM_LEFT);
+            } else {
+                // u negative:
+                annotation.setTextAnchor(TextAnchor.BOTTOM_RIGHT);
+            }
+        } else {
+            // v negative:
+            if (u >= 0.0) {
+                annotation.setTextAnchor(TextAnchor.TOP_LEFT);
+            } else {
+                // u negative:
+                annotation.setTextAnchor(TextAnchor.TOP_RIGHT);
+            }
+        }
+
+        return annotation;
+    }
+
+    /**
+     * Start/Stop the internal timeline Refresh timer
+     * @param enable true to enable it, false otherwise
+     */
+    private void enableTimelineRefreshTimer(final boolean enable) {
+        if (enable) {
+            if (!this.timerTimeRefresh.isRunning()) {
+                logger.debug("Starting timer: {}", this.timerTimeRefresh);
+
+                this.timerTimeRefresh.start();
+            }
+        } else {
+            if (this.timerTimeRefresh.isRunning()) {
+                logger.debug("Stopping timer: {}", this.timerTimeRefresh);
+
+                this.timerTimeRefresh.stop();
+            }
+        }
+    }
+
+    /**
+     * Convert the given calendar to a date within LST/UT range [0;24]
+     *
+     * @param cal date to convert
+     * @param min lower date of plot
+     * @param max upper date of plot
+     * @return date
+     */
+    private static Date convertCalendarToDate(final Calendar cal, final Date min, final Date max) {
+
+        // Note: use Calendar.roll to only fix date field
+
+        if (cal.getTimeInMillis() >= min.getTime()) {
+
+            if (cal.getTimeInMillis() > max.getTime()) {
+                // after date max :
+
+                // return [cal - 1 day]
+                cal.roll(Calendar.DATE, false);
+            }
+
+        } else {
+            // before date min:
+
+            // return [cal + 1 day]
+            cal.roll(Calendar.DATE, true);
+        }
+        return cal.getTime();
     }
 }
