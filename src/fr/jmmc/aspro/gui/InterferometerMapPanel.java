@@ -334,7 +334,7 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
         // side effect with chart theme :
         renderer.setAutoPopulateSeriesPaint(false);
 
-        final ColorPalette palette = ColorPalette.getDefaultColorPaletteAlpha();
+        final ColorPalette palette = ColorPalette.getDefaultColorPalette();
 
         final XYSeriesCollection dataset = new XYSeriesCollection();
 
