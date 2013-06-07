@@ -1347,7 +1347,9 @@ public final class ObservabilityService {
                 if (isLogDebug) {
                     logger.debug("HA observability: {}", haObsRanges);
                 }
-                starData.setObsRangesHA(haObsRanges);
+                if (!haObsRanges.isEmpty()) {
+                    starData.setObsRangesHA(haObsRanges);
+                }
             } else {
                 if (isLogDebug) {
                     logger.debug("Target not observable: {}", target);
@@ -2328,7 +2330,7 @@ public final class ObservabilityService {
         // Get chosen PoPs :
         final List<Pop> userPoPs = this.observation.getInstrumentConfiguration().getPopList();
 
-        if (userPoPs == null) {
+        if (userPoPs == null || userPoPs.size() != nBeams) {
             // Compute key:
             final StringBuilder sb = new StringBuilder(16);
             sb.append(this.interferometer.getName()).append('_').append(nBeams);
