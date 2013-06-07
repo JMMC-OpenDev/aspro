@@ -186,7 +186,7 @@ public final class EnhancedXYBoxAnnotation extends AbstractXYAnnotation
          */
 
         // Perform manual clipping because dashed stroke causes a major performance penalty
-        // for large rectangle (no clipping in Java2D rendering)
+        // for large shapes (no clipping in Java2D rendering)
 
         // margin arround clipping bounds:
         final double margin = 1d + 0.5d * this.stroke.getLineWidth();
