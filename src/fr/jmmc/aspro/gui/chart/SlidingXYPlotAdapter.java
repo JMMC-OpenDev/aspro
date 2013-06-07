@@ -90,7 +90,7 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
     /** double formatter for HA */
     private final NumberFormat df1 = new DecimalFormat("0.0");
     /** internal state */
-    private final State state = new State();
+    private final SlidingXYPlotState state = new SlidingXYPlotState();
     /* previous state */
     /** last used start position for the subset */
     private int lastStart = -1;
@@ -153,15 +153,15 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
      * Return a state copy
      * @return state copy
      */
-    public State backupState() {
-        return new State(this.state);
+    public SlidingXYPlotState backupState() {
+        return new SlidingXYPlotState(this.state);
     }
 
     /**
      * Copy the state from the given state
      * @param state state to copy
      */
-    public void restoreState(final State state) {
+    public void restoreState(final SlidingXYPlotState state) {
         final int oldSelectedPosition = this.state.selectedPosition;
 
         // restore state from given state:
@@ -505,6 +505,7 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
      *
      * @return The tooltip text (possibly <code>null</code>).
      */
+    @Override
     public String generateToolTip(final XYDataset dataset, final int series, final int item) {
         // note: series corresponds to the target, item to its observability ranges
         if (this.targetList != null) {
@@ -518,6 +519,7 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
 
                 final StringBuffer sb = this.sbToolTip;
                 sb.setLength(0); // clear
+                
                 sb.append("<html><b>").append(labels.get(index)).append(" Observability</b>");
 
                 final TaskSeries taskSeries = this.collection.getSeries(index);
@@ -580,6 +582,7 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
                 if (userDescription != null) {
                     sb.append("<hr><b>Notes</b>:<br>").append(StringUtils.replaceCR(userDescription, "<br>"));
                 }
+                sb.append("</html>");
 
                 return sb.toString();
             }
@@ -628,46 +631,5 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
             targetName = this.targetList.get(pos).getName();
         }
         return targetName;
-    }
-
-    /** Sliding XYPlot adapter state */
-    public final static class State {
-
-        /** members */
-        /** max items in the chart view if the useSubset mode is enabled */
-        int maxViewItems;
-        /** flag to enable/disable the subset mode */
-        boolean useSubset = false;
-        /** current position of the subset */
-        int position = 0;
-        /** selected position (highlight) */
-        int selectedPosition = -1;
-
-        /**
-         * Private constructor
-         */
-        private State() {
-            super();
-        }
-
-        /**
-         * Private copy constructor
-         * @param state state to copy
-         */
-        private State(final State state) {
-            super();
-            copy(state);
-        }
-
-        /**
-         * Copy the given state
-         * @param state state to copy
-         */
-        private void copy(final State state) {
-            this.maxViewItems = state.maxViewItems;
-            this.useSubset = state.useSubset;
-            this.position = state.position;
-            this.selectedPosition = state.selectedPosition;
-        }
     }
 }
