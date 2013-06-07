@@ -12,59 +12,59 @@ import fr.jmmc.aspro.model.BaseLine;
  */
 public final class UVRangeBaseLineData extends UVBaseLineData {
 
-  /** base line (used by OIFits) */
-  private final BaseLine bl;
-  /** u coordinates for the minimal wavelength */
-  private double[] uWMin = null;
-  /** v coordinates for the minimal wavelength */
-  private double[] vWMin = null;
-  /** u coordinates for the maximal wavelength */
-  private double[] uWMax = null;
-  /** v coordinates for the maximal wavelength */
-  private double[] vWMax = null;
+    /** base line (used by OIFits) */
+    private final BaseLine bl;
+    /** u coordinates for the minimal wavelength */
+    private double[] uWMin = null;
+    /** v coordinates for the minimal wavelength */
+    private double[] vWMin = null;
+    /** u coordinates for the maximal wavelength */
+    private double[] uWMax = null;
+    /** v coordinates for the maximal wavelength */
+    private double[] vWMax = null;
 
-  /**
-   * Constructor
-   * @param bl baseline
-   */
-  public UVRangeBaseLineData(final BaseLine bl) {
-    super(bl.getName());
-    this.bl = bl;
-  }
+    /**
+     * Constructor
+     * @param bl baseline
+     */
+    public UVRangeBaseLineData(final BaseLine bl) {
+        super(bl.getName());
+        this.bl = bl;
+    }
 
-  public BaseLine getBaseLine() {
-    return this.bl;
-  }
+    public BaseLine getBaseLine() {
+        return this.bl;
+    }
 
-  public double[] getUWMin() {
-    return uWMin;
-  }
+    public double[] getUWMin() {
+        return uWMin;
+    }
 
-  public void setUWMin(double[] uWMin) {
-    this.uWMin = uWMin;
-  }
+    public void setUWMin(double[] uWMin) {
+        this.uWMin = uWMin;
+    }
 
-  public double[] getVWMin() {
-    return this.vWMin;
-  }
+    public double[] getVWMin() {
+        return this.vWMin;
+    }
 
-  public void setVWMin(final double[] vWMin) {
-    this.vWMin = vWMin;
-  }
+    public void setVWMin(final double[] vWMin) {
+        this.vWMin = vWMin;
+    }
 
-  public double[] getUWMax() {
-    return this.uWMax;
-  }
+    public double[] getUWMax() {
+        return this.uWMax;
+    }
 
-  public void setUWMax(final double[] uWMax) {
-    this.uWMax = uWMax;
-  }
+    public void setUWMax(final double[] uWMax) {
+        this.uWMax = uWMax;
+    }
 
-  public double[] getVWMax() {
-    return this.vWMax;
-  }
+    public double[] getVWMax() {
+        return this.vWMax;
+    }
 
-  public void setVWMax(final double[] vWMax) {
-    this.vWMax = vWMax;
-  }
+    public void setVWMax(final double[] vWMax) {
+        this.vWMax = vWMax;
+    }
 }
