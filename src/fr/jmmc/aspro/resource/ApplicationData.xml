@@ -189,6 +189,7 @@
             <prerelease version="0.9.5 beta 4">
                 <change type="FEATURE">Added 'live' time annotations on the UV Coverage plot to see current UV points (useful during real observations)</change>
                 <change type="FEATURE">Added tooltips on the UV Coverage plot (configuration, baseline, time, HA, radius and position angle)</change>
+                <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/501">Fixed NPE occuring when changing CHARA instrument and the PoPs text field is not empty</change>
             </prerelease>
             <prerelease version="0.9.5 beta 3">
                 <change type="FEATURE">Updated embedded OIFits explorer to use customizable plot</change>
