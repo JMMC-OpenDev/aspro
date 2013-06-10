@@ -17,8 +17,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="0.9.5 beta 3"/>
-    <compilation date="03/06/2013" compiler="JDK 1.6.0_24"/>
+    <program name="Aspro2" version="0.9.5 beta 4"/>
+    <compilation date="10/06/2013" compiler="JDK 1.6.0_24"/>
   
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -186,6 +186,10 @@
 
     <releasenotes>
         <release version="0.9.5">
+            <prerelease version="0.9.5 beta 4">
+                <change type="FEATURE">Added 'live' time annotations on the UV Coverage plot to see current UV points (useful during real observations)</change>
+                <change type="FEATURE">Added tooltips on the UV Coverage plot (configuration, baseline, time, HA, radius and position angle)</change>
+            </prerelease>
             <prerelease version="0.9.5 beta 3">
                 <change type="FEATURE">Updated embedded OIFits explorer to use customizable plot</change>
                 <change type="FEATURE">Added OIFits Explorer interoperability (or topcat) i.e. send OIFits data files to any VO Tools supporting FITS files</change>
