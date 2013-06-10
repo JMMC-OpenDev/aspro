@@ -287,6 +287,23 @@ public final class AstroSkyCalc {
     }
 
     /**
+     * Convert a julian date to a gregorian date (precise up to the second) in LST or UTC
+     * and adjust the date field to be within range [dateMin; dateMax]
+     * @param jd julian date
+     * @param useLst flag to select LST (true) or UTC conversion (false)
+     * @param dateMin lower date/time
+     * @param dateMax upper date/time
+     * @return Date object within range [dateMin; dateMax]
+     */
+    public Date toDate(final double jd, final boolean useLst, final Date dateMin, final Date dateMax) {
+        // convert JD to LST/UT date/time:
+        final Calendar cal = toCalendar(jd, useLst);
+
+        // roll +/- 1 day to be within plot range:
+        return convertCalendarToDate(cal, dateMin, dateMax);
+    }
+
+    /**
      * Convert a julian date to a gregorian calendar (precise up to the second) in LST or UTC
      * @param jd julian date
      * @param useLst flag to select LST (true) or UTC conversion (false)
@@ -684,6 +701,22 @@ public final class AstroSkyCalc {
         return lst - precRA;
     }
 
+    /**
+     * Check and return an hour angle within boundaries [-12;12]
+     * @param haIn input hour angle
+     * @return hour angle within boundaries [-12;12]
+     */
+    public static double checkHA(double haIn) {
+        double ha = haIn;
+        while (ha < AsproConstants.HA_MIN) {
+            ha += 24.0;
+        }
+        while (ha > AsproConstants.HA_MAX) {
+            ha -= 24.0;
+        }
+        return ha;
+    }
+
     // static methods :
     /**
      * Convert lst hours to jd hours
@@ -710,5 +743,33 @@ public final class AstroSkyCalc {
      */
     public static double mjd(final double jd) {
         return jd - MJD_REF;
+    }
+
+    /**
+     * Convert the given calendar to a date within range [dateMin; dateMax]
+     * @param cal date/time to convert
+     * @param dateMin lower date/time
+     * @param dateMax upper date/time
+     * @return date/time within range [dateMin; dateMax]
+     */
+    private static Date convertCalendarToDate(final Calendar cal, final Date dateMin, final Date dateMax) {
+        // Note: use Calendar.roll to only fix date field
+
+        if (cal.getTimeInMillis() >= dateMin.getTime()) {
+
+            if (cal.getTimeInMillis() > dateMax.getTime()) {
+                // after date max :
+
+                // return [cal - 1 day]
+                cal.roll(Calendar.DATE, false);
+            }
+
+        } else {
+            // before date min:
+
+            // return [cal + 1 day]
+            cal.roll(Calendar.DATE, true);
+        }
+        return cal.getTime();
     }
 }
