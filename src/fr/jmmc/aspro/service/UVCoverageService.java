@@ -220,6 +220,7 @@ public final class UVCoverageService {
         // precessed target declination in rad :
         final double precDEC = FastMath.toRadians(this.starData.getPrecDEC());
 
+        // compute once cos/sin DEC:
         final double cosDec = FastMath.cos(precDEC);
         final double sinDec = FastMath.sin(precDEC);
 
@@ -295,7 +296,7 @@ public final class UVCoverageService {
             // use observable HA bounds:
             final Double haLower = Range.getMinimum(obsRangesHA);
             final Double haUpper = Range.getMaximum(obsRangesHA);
-            
+
             if (haLower != null && haUpper != null) {
 
                 final double haMin = haLower.doubleValue();
@@ -363,6 +364,7 @@ public final class UVCoverageService {
                 // precessed target declination in rad :
                 final double precDEC = FastMath.toRadians(this.starData.getPrecDEC());
 
+                // compute once cos/sin DEC:
                 final double cosDec = FastMath.cos(precDEC);
                 final double sinDec = FastMath.sin(precDEC);
 
@@ -573,29 +575,6 @@ public final class UVCoverageService {
             final ObservabilityData obsData, final StarData starData,
             final double ha) throws IllegalStateException {
 
-        // Prepare informations:
-
-        // Get baselines :
-        final List<BaseLine> baseLines = obsData.getBaseLines();
-
-        final FocalInstrumentMode insMode = observation.getInstrumentConfiguration().getFocalInstrumentMode();
-        if (insMode == null) {
-            throw new IllegalStateException("The instrumentMode is empty !");
-        }
-
-        if (logger.isDebugEnabled()) {
-            logger.debug("instrumentMode: {}", insMode.getName());
-        }
-
-        // Get wavelength range for the selected instrument mode :
-        final double lambdaMin = AsproConstants.MICRO_METER * insMode.getWaveLengthMin();
-        final double lambdaMax = AsproConstants.MICRO_METER * insMode.getWaveLengthMax();
-
-        if (logger.isDebugEnabled()) {
-            logger.debug("lambdaMin: {}", lambdaMin);
-            logger.debug("lambdaMax: {}", lambdaMax);
-        }
-
         // Compute UV points at given HA:
         final List<Range> obsRangesHA = starData.getObsRangesHA();
 
@@ -608,11 +587,35 @@ public final class UVCoverageService {
 
         if (obsRangesHA != null && (obsRange = Range.find(obsRangesHA, ha, HA_PRECISION)) != null) {
 
+            // Prepare informations:
+
+            // Get baselines :
+            final List<BaseLine> baseLines = obsData.getBaseLines();
+
+            final FocalInstrumentMode insMode = observation.getInstrumentConfiguration().getFocalInstrumentMode();
+            if (insMode == null) {
+                throw new IllegalStateException("The instrumentMode is empty !");
+            }
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("instrumentMode: {}", insMode.getName());
+            }
+
+            // Get wavelength range for the selected instrument mode :
+            final double lambdaMin = AsproConstants.MICRO_METER * insMode.getWaveLengthMin();
+            final double lambdaMax = AsproConstants.MICRO_METER * insMode.getWaveLengthMax();
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("lambdaMin: {}", lambdaMin);
+                logger.debug("lambdaMax: {}", lambdaMax);
+            }
+
             // extract UV values for HA point:
 
             // precessed target declination in rad :
             final double precDEC = FastMath.toRadians(starData.getPrecDEC());
 
+            // compute once cos/sin DEC:
             final double cosDec = FastMath.cos(precDEC);
             final double sinDec = FastMath.sin(precDEC);
 
@@ -635,8 +638,10 @@ public final class UVCoverageService {
             double[] uWMax;
             double[] vWMax;
 
-            double haRad;
-            double cosHa, sinHa;
+            // compute once cos/sin HA:
+            final double haRad = AngleUtils.hours2rad(ha);
+            final double sinHa = FastMath.sin(haRad);
+            final double cosHa = FastMath.cos(haRad);
 
             for (int i = 0; i < sizeBL; i++) {
                 baseLine = baseLines.get(i);
@@ -649,10 +654,6 @@ public final class UVCoverageService {
                 vWMin = new double[1];
                 uWMax = new double[1];
                 vWMax = new double[1];
-
-                haRad = AngleUtils.hours2rad(ha);
-                sinHa = FastMath.sin(haRad);
-                cosHa = FastMath.cos(haRad);
 
                 // Baseline projected vector (m) :
                 u[0] = CalcUVW.computeU(baseLine, cosHa, sinHa);
