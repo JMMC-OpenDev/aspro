@@ -100,7 +100,6 @@ import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -197,7 +196,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
     /** precomputed tooltips for uv observable ranges */
     private final Map<String, Map<Integer, String>> seriesTooltips = new HashMap<String, Map<Integer, String>>(32);
     /** tooltip buffer */
-    private final StringBuffer sbToolTip = new StringBuffer(144);
+    private final StringBuffer sbToolTip = new StringBuffer(200);
     /** 24h date formatter like in france */
     private final DateFormat timeFormatter = DateFormat.getTimeInstance(DateFormat.SHORT, Locale.FRANCE);
     /** double formatter for HA */
@@ -761,13 +760,15 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         final BoundedNumberAxis uAxisMeter = new BoundedNumberAxis("U (m)");
         uAxisMeter.setAutoRangeIncludesZero(false);
         uAxisMeter.setTickLabelFont(ChartUtils.DEFAULT_TITLE_FONT);
+        uAxisMeter.setTickMarkPaint(Color.BLACK);
         this.xyPlot.setDomainAxis(1, uAxisMeter);
 
         final BoundedNumberAxis vAxisMeter = new BoundedNumberAxis("V (m)");
         vAxisMeter.setAutoRangeIncludesZero(false);
         vAxisMeter.setTickLabelFont(ChartUtils.DEFAULT_TITLE_FONT);
+        vAxisMeter.setTickMarkPaint(Color.BLACK);
         this.xyPlot.setRangeAxis(1, vAxisMeter);
-
+        
         // add listener :
         this.chart.addProgressListener(this);
         this.chartPanel = ChartUtils.createSquareChartPanel(this.chart, true); // show tooltips
@@ -2657,7 +2658,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
      * @return dataset
      */
     private static XYSeriesCollection prepareDataset(final ObservationCollectionUVData chartData, final AbstractRenderer renderer) {
-        final ColorPalette palette = ColorPalette.getDefaultColorPalette();
+        final ColorPalette palette = ColorPalette.getDefaultColorPaletteAlpha();
 
         final XYSeriesCollection dataset = new XYSeriesCollection();
 
@@ -2714,7 +2715,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         Date[] dateValues;
 
         XYSeries xySeries = null;
-        String serieKey;
+        String serieKey, blName, confName;
         Map<Integer, String> tooltipMap = null;
 
         double[] u;
@@ -2745,8 +2746,10 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                 haValues = uvData.getHA();
                 dateValues = uvData.getDates();
 
+                confName = chartData.getConfigurationNames().get(c);
+
                 if (!single) {
-                    serieKey = chartData.getConfigurationNames().get(c);
+                    serieKey = confName;
 
                     // 1 color per configuration (i.e. per XYSeries) :
                     xySeries = dataset.getSeries(serieKey);
@@ -2760,8 +2763,10 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
                 for (UVRangeBaseLineData uvBL : targetUVObservability) {
 
+                    blName = uvBL.getName();
+
                     if (single) {
-                        serieKey = uvBL.getName();
+                        serieKey = blName;
 
                         // 1 color per base line (i.e. per XYSeries) :
                         xySeries = dataset.getSeries(serieKey);
@@ -2796,7 +2801,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
                         // line tooltip use index of (x2, y2) point:
                         tooltipMap.put(NumberUtils.valueOf(xySeries.getItemCount()),
-                                generateTooltip(uvBL.getName(), ha, date, timeRef, u[i], v[i]));
+                                generateTooltip(blName, confName, ha, date, timeRef, u[i], v[i]));
 
                         xySeries.add(x2, y2, false);
 
@@ -2808,7 +2813,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
                         // line tooltip use index of (x2, y2) point:
                         tooltipMap.put(NumberUtils.valueOf(xySeries.getItemCount()),
-                                generateTooltip(uvBL.getName(), ha, date, timeRef, -u[i], -v[i]));
+                                generateTooltip(blName, confName, ha, date, timeRef, -u[i], -v[i]));
 
                         xySeries.add(-x2, -y2, false);
 
@@ -3229,6 +3234,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
     /**
      * Generate the tooltip's text for an UV point 
      * @param baseline corresponding base line
+     * @param confName configuration name
      * @param ha hour angle
      * @param date time expressed in LST or UTC
      * @param timeRef time reference LST or UTC
@@ -3236,15 +3242,16 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
      * @param v v coordinate in meters
      * @return tooltip's text for an UV point
      */
-    public String generateTooltip(final String baseline, double ha, final Date date, final String timeRef,
+    public String generateTooltip(final String baseline, final String confName, double ha, final Date date, final String timeRef,
             final double u, final double v) {
 
         final StringBuffer sb = this.sbToolTip;
         sb.setLength(0); // clear
 
-        sb.append("<html><b>").append(baseline).append("</b>");
+        sb.append("<html><b>").append(confName);
+        sb.append("<br>Base line: ").append(baseline);
 
-        sb.append("<br><b>Time</b>: ");
+        sb.append("<br>Time</b>: ");
         FormatterUtils.format(this.timeFormatter, sb, date);
         sb.append(" [").append(timeRef).append("] - <b>HA</b>: ");
         FormatterUtils.format(this.df1, sb, ha);
@@ -3263,72 +3270,65 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
      * Add UV Points at current time (timeline marker in red) as annotations
      */
     private void updateTimeAnnotations() {
-
         // remove annotations anyway:
         this.xyPlot.clearAnnotations();
 
         boolean enableTimer = false;
 
         // do not export time marker in PDF output:
-        if (!this.renderingPDF && chartData.isSingle()) {
+        if (!this.renderingPDF && getChartData() != null && getChartData().isSingle()) {
 
-            final ObservabilityData obsData = chartData.getFirstObsData();
+            final ObservabilityData obsData = getChartData().getFirstObsData();
 
             // Get AstroSkyCalc instance :
-            final AstroSkyCalc sc = this.chartData.getFirstObsData().getDateCalc();
+            final AstroSkyCalc sc = obsData.getDateCalc();
 
-            if (sc != null) {
-                final boolean useLST = obsData.isUseLST();
+            // Get jd of current date/time:
+            final double jd = sc.getCurrentJd();
 
-                // Get jd of current date/time:
-                final double jd = sc.getCurrentJd();
+            // check if the current jd is within the good night:
+            if (jd >= obsData.getJdMin() && jd <= obsData.getJdMax()) {
+                // enable timeline refresh timer:
+                enableTimer = true;
 
-                // check if the current jd is within the good night:
-                if (jd >= obsData.getJdMin() && jd <= obsData.getJdMax()) {
-                    // enable timeline refresh timer:
-                    enableTimer = true;
+                // convert JD to LST/UT date/time and
+                // roll +/- 1 day to be within plot range:
+                final Date now = sc.toDate(jd, obsData.isUseLST(), obsData.getDateMin(), obsData.getDateMax());
 
-                    // convert JD to LST/UT date/time:
-                    final Calendar cal = sc.toCalendar(jd, useLST);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("current date/time is: {}", now);
+                }
 
-                    // roll +/- 1 day to be within plot range:
-                    final Date now = convertCalendarToDate(cal, obsData.getDateMin(), obsData.getDateMax());
+                // Compute UV Points:
 
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("time set at: {}", now);
-                    }
+                // Get starData for the selected target name :
+                final StarData starData = obsData.getStarData(getSelectedTargetName());
 
-                    // Compute UV Points:
+                final double ha = AstroSkyCalc.checkHA(sc.convertJDToHA(jd, starData.getPrecRA()));
 
-                    // Get starData for the selected target name :
-                    final StarData starData = obsData.getStarData(getSelectedTargetName());
+                final List<UVRangeBaseLineData> targetUVPoints =
+                        UVCoverageService.computeUVPoints(getChartData().getFirstObservation(), obsData, starData, ha);
 
-                    final double ha = sc.convertJDToHA(jd, starData.getPrecRA());
+                if (targetUVPoints != null) {
+                    final String textNow = FormatterUtils.format(this.timeFormatter, now);
 
-                    final List<UVRangeBaseLineData> targetUVPoints =
-                            UVCoverageService.computeUVPoints(chartData.getFirstObservation(), obsData, starData, ha);
+                    double u1, v1, u2, v2;
 
-                    if (targetUVPoints != null) {
-                        final String textNow = FormatterUtils.format(this.timeFormatter, now);
+                    for (UVRangeBaseLineData uvBL : targetUVPoints) {
 
-                        double u1, v1, u2, v2;
+                        u1 = toUVPlotScale(uvBL.getUWMax()[0]);
+                        v1 = toUVPlotScale(uvBL.getVWMax()[0]);
 
-                        for (UVRangeBaseLineData uvBL : targetUVPoints) {
+                        u2 = toUVPlotScale(uvBL.getUWMin()[0]);
+                        v2 = toUVPlotScale(uvBL.getVWMin()[0]);
 
-                            u1 = toUVPlotScale(uvBL.getUWMax()[0]);
-                            v1 = toUVPlotScale(uvBL.getVWMax()[0]);
+                        // uv point:
+                        this.xyPlot.addAnnotation(new EnhancedXYLineAnnotation(u1, v1, u2, v2, ChartUtils.THIN_STROKE, Color.RED), false);
+                        this.xyPlot.addAnnotation(createTimeAnnotation(textNow, u2, v2), false);
 
-                            u2 = toUVPlotScale(uvBL.getUWMin()[0]);
-                            v2 = toUVPlotScale(uvBL.getVWMin()[0]);
-
-                            this.xyPlot.addAnnotation(new EnhancedXYLineAnnotation(u1, v1, u2, v2, ChartUtils.THIN_STROKE, Color.RED), false);
-
-                            this.xyPlot.addAnnotation(createTimeAnnotation(textNow, u2, v2), false);
-
-                            this.xyPlot.addAnnotation(new EnhancedXYLineAnnotation(-u1, -v1, -u2, -v2, ChartUtils.THIN_STROKE, Color.RED), false);
-
-                            this.xyPlot.addAnnotation(createTimeAnnotation(textNow, -u2, -v2), false);
-                        }
+                        // symetric uv point:
+                        this.xyPlot.addAnnotation(new EnhancedXYLineAnnotation(-u1, -v1, -u2, -v2, ChartUtils.THIN_STROKE, Color.RED), false);
+                        this.xyPlot.addAnnotation(createTimeAnnotation(textNow, -u2, -v2), false);
                     }
                 }
             }
@@ -3387,35 +3387,5 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                 this.timerTimeRefresh.stop();
             }
         }
-    }
-
-    /**
-     * Convert the given calendar to a date within LST/UT range [0;24]
-     *
-     * @param cal date to convert
-     * @param min lower date of plot
-     * @param max upper date of plot
-     * @return date
-     */
-    private static Date convertCalendarToDate(final Calendar cal, final Date min, final Date max) {
-
-        // Note: use Calendar.roll to only fix date field
-
-        if (cal.getTimeInMillis() >= min.getTime()) {
-
-            if (cal.getTimeInMillis() > max.getTime()) {
-                // after date max :
-
-                // return [cal - 1 day]
-                cal.roll(Calendar.DATE, false);
-            }
-
-        } else {
-            // before date min:
-
-            // return [cal + 1 day]
-            cal.roll(Calendar.DATE, true);
-        }
-        return cal.getTime();
     }
 }
