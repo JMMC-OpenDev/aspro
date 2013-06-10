@@ -68,7 +68,6 @@ import java.awt.event.MouseWheelListener;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -467,8 +466,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
         this.jCheckBoxListFilters.getCheckBoxListSelectionModel().addListSelectionListener(new ListSelectionListener() {
             public void valueChanged(final ListSelectionEvent e) {
-                if (chartData != null) {
-                    updatePlot(chartData);
+                if (getChartData() != null) {
+                    updatePlot(getChartData());
                 }
             }
         });
@@ -557,8 +556,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                 this.jCheckBoxNightOnly.setSelected(nightOnly);
             }
 
-            if (chartData != null
-                    && !chartData.getFirstObservation().getInterferometerConfiguration().getInterferometerConfiguration().getInterferometer().getPops().isEmpty()) {
+            if (getChartData() != null
+                    && !getChartData().getFirstObservation().getInterferometerConfiguration().getInterferometerConfiguration().getInterferometer().getPops().isEmpty()) {
 
                 // Best Pops algorithm
                 final Algorithm bestPopsAlgorithm = myPreferences.getBestPopsAlgorithm();
@@ -1722,7 +1721,6 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
      * Create or update the timeline marker (red)
      */
     private void updateTimeMarker() {
-
         // remove time marker anyway:
         if (this.timeMarker != null) {
             this.xyPlot.removeRangeMarker(this.timeMarker, Layer.BACKGROUND);
@@ -1731,90 +1729,52 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         boolean enableTimer = false;
 
         // do not export time marker in PDF output:
-        if (!this.renderingPDF) {
+        if (!this.renderingPDF && getChartData() != null) {
 
-            final ObservabilityData obsData = chartData.getFirstObsData();
+            final ObservabilityData obsData = getChartData().getFirstObsData();
 
-            final boolean doBaseLineLimits = obsData.isDoBaseLineLimits();
-
-            if (!doBaseLineLimits) {
+            if (!obsData.isDoBaseLineLimits()) {
 
                 // Get AstroSkyCalc instance :
                 final AstroSkyCalc sc = obsData.getDateCalc();
 
-                if (sc != null) {
-                    final boolean useLST = obsData.isUseLST();
+                // Get jd of current date/time:
+                final double jd = sc.getCurrentJd();
 
-                    // Get jd of current date/time:
-                    final double jd = sc.getCurrentJd();
+                // check if the current jd is within the good night:
+                if (jd >= obsData.getJdMin() && jd <= obsData.getJdMax()) {
+                    // enable timeline refresh timer:
+                    enableTimer = true;
 
-                    // check if the current jd is within the good night:
-                    if (jd >= obsData.getJdMin() && jd <= obsData.getJdMax()) {
-                        // enable timeline refresh timer:
-                        enableTimer = true;
+                    // convert JD to LST/UT date/time and
+                    // roll +/- 1 day to be within plot range:
+                    final Date now = sc.toDate(jd, obsData.isUseLST(), obsData.getDateMin(), obsData.getDateMax());
 
-                        // convert JD to LST/UT date/time:
-                        final Calendar cal = sc.toCalendar(jd, useLST);
-
-                        // roll +/- 1 day to be within plot range:
-                        final Date now = convertCalendarToDate(cal, obsData.getDateMin(), obsData.getDateMax());
-
-                        if (logger.isDebugEnabled()) {
-                            logger.debug("timeMarker set at: {}", now);
-                        }
-
-                        final double timeValue = now.getTime();
-
-                        if (timeMarker == null) {
-                            // force Alpha to 1.0 to avoid PDF rendering problems (alpha layer ordering) :
-                            this.timeMarker = new ValueMarker(timeValue, Color.RED, ChartUtils.THIN_STROKE, Color.GRAY, ChartUtils.THIN_STROKE, 1.0f);
-                            this.timeMarker.setLabelFont(ChartUtils.DEFAULT_TEXT_SMALL_FONT);
-                            this.timeMarker.setLabelPaint(Color.RED);
-                            this.timeMarker.setLabelOffset(TIME_MARKER_LABEL_OFFSET);
-                            this.timeMarker.setLabelAnchor(RectangleAnchor.TOP);
-                        } else {
-                            this.timeMarker.setValue(timeValue);
-                        }
-                        // update displayed time:
-                        this.timeMarker.setLabel(FormatterUtils.format(this.timeFormatter, now));
-
-                        this.xyPlot.addRangeMarker(this.timeMarker, Layer.BACKGROUND);
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("current date/time is: {}", now);
                     }
+
+                    final double timeValue = now.getTime();
+
+                    if (timeMarker == null) {
+                        // force Alpha to 1.0 to avoid PDF rendering problems (alpha layer ordering) :
+                        this.timeMarker = new ValueMarker(timeValue, Color.RED, ChartUtils.THIN_STROKE, Color.GRAY, ChartUtils.THIN_STROKE, 1.0f);
+                        this.timeMarker.setLabelFont(ChartUtils.DEFAULT_TEXT_SMALL_FONT);
+                        this.timeMarker.setLabelPaint(Color.RED);
+                        this.timeMarker.setLabelOffset(TIME_MARKER_LABEL_OFFSET);
+                        this.timeMarker.setLabelAnchor(RectangleAnchor.TOP);
+                    } else {
+                        this.timeMarker.setValue(timeValue);
+                    }
+                    // update displayed time:
+                    this.timeMarker.setLabel(FormatterUtils.format(this.timeFormatter, now));
+
+                    this.xyPlot.addRangeMarker(this.timeMarker, Layer.BACKGROUND);
                 }
             }
         }
         // anyway enable or disable timer:
         enableTimelineRefreshTimer(enableTimer);
-    }
-
-    /**
-     * Convert the given calendar to a date within LST/UT range [0;24]
-     *
-     * @param cal date to convert
-     * @param min lower date of plot
-     * @param max upper date of plot
-     * @return date
-     */
-    private static Date convertCalendarToDate(final Calendar cal, final Date min, final Date max) {
-
-        // Note: use Calendar.roll to only fix date field
-
-        if (cal.getTimeInMillis() >= min.getTime()) {
-
-            if (cal.getTimeInMillis() > max.getTime()) {
-                // after date max :
-
-                // return [cal - 1 day]
-                cal.roll(Calendar.DATE, false);
-            }
-
-        } else {
-            // before date min:
-
-            // return [cal + 1 day]
-            cal.roll(Calendar.DATE, true);
-        }
-        return cal.getTime();
     }
     /** drawing started time value */
     private long chartDrawStartTime = 0l;
