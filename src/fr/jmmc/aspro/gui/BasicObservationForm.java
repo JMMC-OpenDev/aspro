@@ -641,13 +641,13 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         if (selectedTarget != null) {
 
             if (om.isCalibrator(selectedTarget)) {
-                if (MessagePane.showConfirmMessage(this.jButtonDeleteTarget,
+                if (MessagePane.showConfirmMessage(jButtonDeleteTarget,
                         "Do you want to delete the calibrator target [" + selectedTarget.getName() + "] and all associations ?")) {
 
                     // update the data model and fire change events :
                     om.removeCalibrator(selectedTarget);
                 }
-            } else if (MessagePane.showConfirmMessage(this.jButtonDeleteTarget,
+            } else if (MessagePane.showConfirmMessage(jButtonDeleteTarget,
                     "Do you want to delete the science target [" + selectedTarget.getName() + "] ?")) {
 
                 // update the data model and fire change events :
@@ -669,7 +669,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
      * @param lse unused
      */
     private void jListInstrumentConfigurationsValueChanged(ListSelectionEvent lse) {
-        this.processInstrumentConfigurationValueChanged(lse);
+        processInstrumentConfigurationValueChanged(lse);
     }
 
     /**
@@ -677,7 +677,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
      * @param lse unused
      */
     private void jListTargetsValueChanged(ListSelectionEvent lse) {
-        this.processTargetValueChanged(lse);
+        processTargetValueChanged(lse);
     }
 
     /**
@@ -742,13 +742,13 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         Preferences.getInstance().addObserver(this);
 
         // Search Panel
-        this._searchPanel = new SearchPanel(new TargetListSearchPanelDelegate(jListTargets));
+        _searchPanel = new SearchPanel(new TargetListSearchPanelDelegate(jListTargets));
 
         // add observer to the StarResolverWidget :
-        this.starSearchField.getStar().addObserver(this);
+        starSearchField.getStar().addObserver(this);
 
         // update component models :
-        final DateEditor de = (DateEditor) this.jDateSpinner.getEditor();
+        final DateEditor de = (DateEditor) jDateSpinner.getEditor();
 
         // custom focus listener to let the user change the day field by default :
         de.getTextField().addFocusListener(new FocusAdapter() {
@@ -776,20 +776,20 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         });
 
         // define change listeners :
-        this.jDateSpinner.addChangeListener(this);
-        this.jComboBoxInterferometer.addActionListener(this);
-        this.jComboBoxInterferometerConfiguration.addActionListener(this);
-        this.jComboBoxInstrument.addActionListener(this);
-        this.jComboBoxPops.addActionListener(this);
+        jDateSpinner.addChangeListener(this);
+        jComboBoxInterferometer.addActionListener(this);
+        jComboBoxInterferometerConfiguration.addActionListener(this);
+        jComboBoxInstrument.addActionListener(this);
+        jComboBoxPops.addActionListener(this);
 
-        this.jTextPoPs.addPropertyChangeListener("value", new PropertyChangeListener() {
+        jTextPoPs.addPropertyChangeListener("value", new PropertyChangeListener() {
             @Override
             public void propertyChange(final PropertyChangeEvent evt) {
                 jTextPoPsPropertyChange(evt);
             }
         });
 
-        this.jFieldMinElev.addPropertyChangeListener("value", new PropertyChangeListener() {
+        jFieldMinElev.addPropertyChangeListener("value", new PropertyChangeListener() {
             @Override
             public void propertyChange(final PropertyChangeEvent evt) {
                 final double minElevNew = ((Number) jFieldMinElev.getValue()).doubleValue();
@@ -802,7 +802,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
             }
         });
 
-        this.jCheckBoxNightLimit.addItemListener(new ItemListener() {
+        jCheckBoxNightLimit.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(final ItemEvent e) {
                 updateWindRestriction();
@@ -811,12 +811,12 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         });
 
         // define interferometer names (constant) :
-        this.jComboBoxInterferometer.setModel(new DefaultComboBoxModel(cm.getInterferometerNames()));
+        jComboBoxInterferometer.setModel(new DefaultComboBoxModel(cm.getInterferometerNames()));
 
         // reset status :
-        this.resetStatus();
+        resetStatus();
 
-        this.windWidget = WindWidget.create();
+        windWidget = WindWidget.create();
 
         final GridBagConstraints gridBagConstraints = new GridBagConstraints();
         gridBagConstraints.gridx = 3;
@@ -826,16 +826,16 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         gridBagConstraints.insets = new Insets(2, 2, 2, 2);
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.weighty = 1.0;
-        this.jPanelOptions.add(this.windWidget, gridBagConstraints);
+        jPanelOptions.add(windWidget, gridBagConstraints);
 
-        this.windWidget.addPropertyChangeListener(WindWidget.PROPERTY_VALUE, new PropertyChangeListener() {
+        windWidget.addPropertyChangeListener(WindWidget.PROPERTY_VALUE, new PropertyChangeListener() {
             @Override
             public void propertyChange(final PropertyChangeEvent pe) {
                 fireObservationUpdateEvent();
             }
         });
 
-        this.jCheckBoxWind.addItemListener(new ItemListener() {
+        jCheckBoxWind.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(final ItemEvent e) {
                 windWidget.setEnabled(jCheckBoxWind.isSelected());
@@ -843,8 +843,8 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
             }
         });
 
-        this.jCheckBoxWind.setSelected(false);
-        this.windWidget.setEnabled(false);
+        jCheckBoxWind.setSelected(false);
+        windWidget.setEnabled(false);
     }
 
     /**
@@ -854,9 +854,9 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
      */
     @Override
     public void stateChanged(final ChangeEvent ce) {
-        if (ce.getSource() == this.jDateSpinner) {
+        if (ce.getSource() == jDateSpinner) {
             if (logger.isDebugEnabled()) {
-                logger.debug("Date changed: {}", this.jDateSpinner.getModel().getValue());
+                logger.debug("Date changed: {}", jDateSpinner.getModel().getValue());
             }
             fireObservationUpdateEvent();
         }
@@ -866,25 +866,25 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
      * Refresh the list of interferometer configurations : depends on the chosen interferometer
      */
     private void updateComboInterferometerConfiguration() {
-        final Vector<String> v = cm.getInterferometerConfigurationNames((String) this.jComboBoxInterferometer.getSelectedItem());
-        this.jComboBoxInterferometerConfiguration.setModel(new DefaultComboBoxModel(v));
+        final Vector<String> v = cm.getInterferometerConfigurationNames((String) jComboBoxInterferometer.getSelectedItem());
+        jComboBoxInterferometerConfiguration.setModel(new DefaultComboBoxModel(v));
         final boolean visible = (v.size() > 1);
-        this.jLabelPeriod.setVisible(visible);
-        this.jComboBoxInterferometerConfiguration.setVisible(visible);
+        jLabelPeriod.setVisible(visible);
+        jComboBoxInterferometerConfiguration.setVisible(visible);
     }
 
     /**
      * Refresh the list of instruments : depends on the chosen interferometer configuration
      */
     private void updateComboInstrument() {
-        final Object oldValue = this.jComboBoxInstrument.getSelectedItem();
+        final Object oldValue = jComboBoxInstrument.getSelectedItem();
 
-        final Vector<String> v = cm.getInterferometerInstrumentNames((String) this.jComboBoxInterferometerConfiguration.getSelectedItem());
-        this.jComboBoxInstrument.setModel(new DefaultComboBoxModel(v));
+        final Vector<String> v = cm.getInterferometerInstrumentNames((String) jComboBoxInterferometerConfiguration.getSelectedItem());
+        jComboBoxInstrument.setModel(new DefaultComboBoxModel(v));
 
         // restore previous selected item :
         if (oldValue != null) {
-            this.jComboBoxInstrument.setSelectedItem(oldValue);
+            jComboBoxInstrument.setSelectedItem(oldValue);
         }
     }
 
@@ -892,25 +892,25 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
      * Refresh the list of instrument configurations : depends on the chosen instrument (also the interferometer configuration)
      */
     private void updateComboInstrumentConfiguration() {
-        final Vector<String> v = cm.getInstrumentConfigurationNames((String) this.jComboBoxInterferometerConfiguration.getSelectedItem(),
-                (String) this.jComboBoxInstrument.getSelectedItem());
+        final Vector<String> v = cm.getInstrumentConfigurationNames((String) jComboBoxInterferometerConfiguration.getSelectedItem(),
+                (String) jComboBoxInstrument.getSelectedItem());
 
         final Object[] oldValues = getInstrumentConfigurations();
 
         // disable the automatic selection check of the instrument configuration :
-        final boolean prevAutoCheckConfigurations = this.setAutoCheckConfigurations(false);
+        final boolean prevAutoCheckConfigurations = setAutoCheckConfigurations(false);
         try {
-            this.jListInstrumentConfigurations.setModel(new GenericListModel<String>(v));
+            jListInstrumentConfigurations.setModel(new GenericListModel<String>(v));
 
             // restore previous selected item(s) :
-            this.selectInstrumentConfigurations(oldValues);
+            selectInstrumentConfigurations(oldValues);
 
         } finally {
             // restore the automatic selection check of the instrument configuration :
-            this.setAutoCheckConfigurations(prevAutoCheckConfigurations);
+            setAutoCheckConfigurations(prevAutoCheckConfigurations);
         }
         // ensure one configuration is selected :
-        this.checkInstrumentConfigurationSelection();
+        checkInstrumentConfigurationSelection();
     }
 
     /**
@@ -919,7 +919,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
      */
     @SuppressWarnings("unchecked")
     private GenericListModel<String> getInstrumentConfigurationModel() {
-        return (GenericListModel<String>) this.jListInstrumentConfigurations.getModel();
+        return (GenericListModel<String>) jListInstrumentConfigurations.getModel();
     }
 
     /**
@@ -932,20 +932,20 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         final TargetUserInformations targetUserInfos = om.getTargetUserInfos();
 
         // disable the automatic selection check of the target list :
-        final boolean prevAutoCheckTargets = this.setAutoCheckTargets(false);
+        final boolean prevAutoCheckTargets = setAutoCheckTargets(false);
         try {
-            this.jListTargets.setModel(new GenericListModel<Target>(displayTargets));
-            this.jListTargets.setCellRenderer(new TargetListRenderer(new TargetRenderer(targetUserInfos)));
+            jListTargets.setModel(new GenericListModel<Target>(displayTargets));
+            jListTargets.setCellRenderer(new TargetListRenderer(new TargetRenderer(targetUserInfos)));
 
             // restore previous selected item :
             if (selectedTarget != null) {
-                this.jListTargets.setSelectedValue(selectedTarget, true);
+                jListTargets.setSelectedValue(selectedTarget, true);
             }
 
             if (isTargetEditable()) {
                 // disable buttons if the target list is empty :
-                this.jButtonDeleteTarget.setEnabled(!displayTargets.isEmpty());
-                this.jButtonTargetEditor.setEnabled(!displayTargets.isEmpty());
+                jButtonDeleteTarget.setEnabled(!displayTargets.isEmpty());
+                jButtonTargetEditor.setEnabled(!displayTargets.isEmpty());
             }
 
             // (Dis)enable Find widgets according to data availability
@@ -953,10 +953,10 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
 
         } finally {
             // restore the automatic selection check of the target list :
-            this.setAutoCheckTargets(prevAutoCheckTargets);
+            setAutoCheckTargets(prevAutoCheckTargets);
         }
         // ensure one target is selected :
-        this.checkTargetSelection();
+        checkTargetSelection();
 
         if (logger.isDebugEnabled()) {
             logger.debug("jListTargets updated: {}", getSelectedTarget());
@@ -969,7 +969,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
      */
     public Target getSelectedTarget() {
         // TODO : multi selection of targets to delete multiple targets at the same time :
-        return (Target) this.jListTargets.getSelectedValue();
+        return (Target) jListTargets.getSelectedValue();
     }
 
     /**
@@ -983,15 +983,15 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         }
 
         // ensure at least one item is selected :
-        if (this.jListTargets.getSelectionModel().isSelectionEmpty()) {
-            this.checkTargetSelection();
+        if (jListTargets.getSelectionModel().isSelectionEmpty()) {
+            checkTargetSelection();
             return;
         }
 
         // check if selection changes :
-        if (this.currentTarget == null || this.currentTarget != getSelectedTarget()) {
+        if (currentTarget == null || currentTarget != getSelectedTarget()) {
             // memorize the selected item :
-            this.currentTarget = getSelectedTarget();
+            currentTarget = getSelectedTarget();
 
             // handle single selection :
 
@@ -1010,8 +1010,8 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
      */
     private void checkTargetSelection() {
         // check if the automatic configuration check flag is enabled :
-        if (this.doAutoCheckTargets) {
-            checkListSelection(this.jListTargets, this.currentTarget);
+        if (doAutoCheckTargets) {
+            checkListSelection(jListTargets, currentTarget);
         }
     }
 
@@ -1023,43 +1023,43 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     @Override
     public void actionPerformed(final ActionEvent e) {
         // disable the automatic update observation :
-        final boolean prevAutoUpdateObservation = this.setAutoUpdateObservation(false);
+        final boolean prevAutoUpdateObservation = setAutoUpdateObservation(false);
         try {
-            if (e.getSource() == this.jComboBoxInterferometer) {
+            if (e.getSource() == jComboBoxInterferometer) {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Interferometer changed: {}", this.jComboBoxInterferometer.getSelectedItem());
+                    logger.debug("Interferometer changed: {}", jComboBoxInterferometer.getSelectedItem());
                 }
                 updateComboInterferometerConfiguration();
                 updateComboInstrument();
                 updateComboInstrumentConfiguration();
                 checkPops();
+                synchronizePops(false);
                 updateWindRestriction();
 
-            } else if (e.getSource() == this.jComboBoxInterferometerConfiguration) {
+            } else if (e.getSource() == jComboBoxInterferometerConfiguration) {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Interferometer Configuration changed: {}", this.jComboBoxInterferometerConfiguration.getSelectedItem());
+                    logger.debug("Interferometer Configuration changed: {}", jComboBoxInterferometerConfiguration.getSelectedItem());
                 }
                 updateComboInstrument();
                 updateComboInstrumentConfiguration();
-                checkPops();
-            } else if (e.getSource() == this.jComboBoxInstrument) {
+            } else if (e.getSource() == jComboBoxInstrument) {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Instrument changed: {}", this.jComboBoxInstrument.getSelectedItem());
+                    logger.debug("Instrument changed: {}", jComboBoxInstrument.getSelectedItem());
                 }
                 updateComboInstrumentConfiguration();
-                checkPops();
-            } else if (e.getSource() == this.jComboBoxPops) {
-                final String selectedPops = this.jComboBoxPops.getSelectedItem().toString();
+                validateCurrentPoPs();
+            } else if (e.getSource() == jComboBoxPops) {
+                final String selectedPops = jComboBoxPops.getSelectedItem().toString();
                 if (logger.isDebugEnabled()) {
                     logger.debug("Pops changed: {}", selectedPops);
                 }
                 // update pops field:
                 if (POPS_MANUAL.equals(selectedPops)) {
                     // manual combination:
-                    this.updatePops(this.jTextPoPs.getText(), false);
+                    updatePops(jTextPoPs.getText(), false);
                 } else {
                     // auto or specific Pops combination
-                    this.updatePops((POPS_AUTO.equals(selectedPops)) ? null : selectedPops, false);
+                    updatePops((POPS_AUTO.equals(selectedPops)) ? null : selectedPops, false);
                 }
             } else {
                 logger.warn("Unsupported source component: {}", e.getSource());
@@ -1067,7 +1067,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
 
         } finally {
             // restore the automatic update observation :
-            this.setAutoUpdateObservation(prevAutoUpdateObservation);
+            setAutoUpdateObservation(prevAutoUpdateObservation);
         }
         // group multiple calls into a single observation update event :
         fireObservationUpdateEvent();
@@ -1083,23 +1083,22 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
             return;
         }
 
-        final ListSelectionModel lsm = this.jListInstrumentConfigurations.getSelectionModel();
+        final ListSelectionModel lsm = jListInstrumentConfigurations.getSelectionModel();
 
         // ensure at least one item is selected :
         if (lsm.isSelectionEmpty()) {
-            this.checkInstrumentConfigurationSelection();
+            checkInstrumentConfigurationSelection();
             return;
         }
 
         // memorize the first selected item :
-        this.currentInstrumentConfiguration = (String) this.jListInstrumentConfigurations.getSelectedValue();
+        currentInstrumentConfiguration = (String) jListInstrumentConfigurations.getSelectedValue();
 
         if (logger.isDebugEnabled()) {
             logger.debug("Instrument Configuration changed: {}", Arrays.toString(getInstrumentConfigurations()));
         }
 
         // update PoPs text field if the selected instrument configurations have associated PoPs in the configuration:
-        resetPops();
         updatePops();
 
         // group multiple calls into a single observation update event :
@@ -1111,7 +1110,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
      * @return selected instrument configurations
      */
     private Object[] getInstrumentConfigurations() {
-        return this.jListInstrumentConfigurations.getSelectedValues();
+        return jListInstrumentConfigurations.getSelectedValues();
     }
 
     /**
@@ -1120,8 +1119,8 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
      */
     private void checkInstrumentConfigurationSelection() {
         // check if the automatic configuration check flag is enabled :
-        if (this.doAutoCheckConfigurations) {
-            checkListSelection(this.jListInstrumentConfigurations, this.currentInstrumentConfiguration);
+        if (doAutoCheckConfigurations) {
+            checkListSelection(jListInstrumentConfigurations, currentInstrumentConfiguration);
         }
     }
 
@@ -1136,21 +1135,21 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
             }
 
             final GenericListModel<String> lm = getInstrumentConfigurationModel();
-            final DefaultListSelectionModel lsm = (DefaultListSelectionModel) this.jListInstrumentConfigurations.getSelectionModel();
+            final DefaultListSelectionModel lsm = (DefaultListSelectionModel) jListInstrumentConfigurations.getSelectionModel();
 
             int index = -1;
             for (Object selection : values) {
                 index = lm.indexOf((String) selection);
                 if (index != -1) {
                     lsm.addSelectionInterval(index, index);
-                    this.jListInstrumentConfigurations.ensureIndexIsVisible(index);
+                    jListInstrumentConfigurations.ensureIndexIsVisible(index);
                 }
             }
             if (index != -1) {
                 // scroll to last selected value :
-                this.jListInstrumentConfigurations.ensureIndexIsVisible(index - 1);
-                this.jListInstrumentConfigurations.ensureIndexIsVisible(index);
-                this.jListInstrumentConfigurations.ensureIndexIsVisible(index + 1);
+                jListInstrumentConfigurations.ensureIndexIsVisible(index - 1);
+                jListInstrumentConfigurations.ensureIndexIsVisible(index);
+                jListInstrumentConfigurations.ensureIndexIsVisible(index + 1);
             }
             if (logger.isDebugEnabled()) {
                 logger.debug("selectInstrumentConfigurations : selectedValues: {}", Arrays.toString(getInstrumentConfigurations()));
@@ -1164,16 +1163,12 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
      * If false, reset the PoPs text field
      */
     private void checkPops() {
-        final boolean hasPops = cm.hasPoPs((String) this.jComboBoxInterferometer.getSelectedItem());
+        final boolean hasPops = cm.hasPoPs((String) jComboBoxInterferometer.getSelectedItem());
 
         // note: label pops is only visible if the interferometer has Pops:
-        this.jLabelPops.setVisible(hasPops);
-        this.jTextPoPs.setVisible(hasPops);
-
-        this.jComboBoxPops.setVisible(hasPops);
-
-        // reset the pops configuration anyway because it can be invalid because of the chosen instrument:
-        resetPops();
+        jLabelPops.setVisible(hasPops);
+        jTextPoPs.setVisible(hasPops);
+        jComboBoxPops.setVisible(hasPops);
     }
 
     /**
@@ -1181,8 +1176,8 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
      * @param enabled true to enable them; false otherwise
      */
     private void makePopsEditable(final boolean enabled) {
-        this.jTextPoPs.setEnabled(enabled);
-        this.jComboBoxPops.setEnabled(enabled);
+        jTextPoPs.setEnabled(enabled);
+        jComboBoxPops.setEnabled(enabled);
     }
 
     /**
@@ -1193,29 +1188,34 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     public void jTextPoPsPropertyChange(final PropertyChangeEvent evt) {
         final Object value = evt.getNewValue();
 
-        // skip repeated events:
         logger.debug("jTextPoPsPropertyChange: value: {}", value);
 
-        List<Pop> listPoPs = null;
+        validateTextPoPs((value != null) ? value.toString() : null);
 
+        // then update the observation :
+        fireObservationUpdateEvent();
+    }
+
+    private void validateCurrentPoPs() {
+        validateTextPoPs(jTextPoPs.getText());
+    }
+
+    private void validateTextPoPs(final String value) {
         if (value != null) {
             final String popConfig = value.toString();
 
             // parse the configuration (instrument = number of channels) + (interferometer = pop indexes [1-5]) :
-            listPoPs = cm.parseInstrumentPoPs((String) this.jComboBoxInterferometerConfiguration.getSelectedItem(),
-                    (String) this.jComboBoxInstrument.getSelectedItem(), popConfig);
-        }
+            final List<Pop> listPoPs = cm.parseInstrumentPoPs((String) jComboBoxInterferometerConfiguration.getSelectedItem(),
+                    (String) jComboBoxInstrument.getSelectedItem(), popConfig);
 
-        if (listPoPs == null && value != null) {
-            // invalid, reset the field to empty :
-            resetPops();
+            if (listPoPs == null) {
+                // invalid, reset the field to empty :
+                synchronizePops(true);
+            }
         }
 
         // update combo box:
-        this.updatePops(this.jTextPoPs.getText(), false);
-
-        // then update the observation :
-        fireObservationUpdateEvent();
+        updatePops(jTextPoPs.getText(), false);
     }
 
     /**
@@ -1227,23 +1227,28 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         logger.debug("updatePops: {} ({})", value, notify);
 
         if (notify) {
-            if (!ObjectUtils.areEquals(value, this.jTextPoPs.getValue())) {
+            // 2 cases: value == null or value == integer value (pop config):
+            // test against PoPs integer value:
+            if (!ObjectUtils.areEquals(value, jTextPoPs.getValue())) {
                 // fire a property change event:
-                this.jTextPoPs.setValue(value);
+                jTextPoPs.setValue(value);
+            } else if (value == null) {
+                // clear text value:
+                jTextPoPs.setText(null);
             }
             return;
         }
 
         // note : setText() does not fire a property change event:
-        this.jTextPoPs.setText((value != null) ? value.toString() : null);
+        jTextPoPs.setText((value != null) ? value.toString() : null);
 
-        final String text = this.jTextPoPs.getText();
+        final String text = jTextPoPs.getText();
 
         final String selected;
 
         if (!(StringUtils.isEmpty(text))) {
             // check if the combo box has this value:
-            final ComboBoxModel comboModel = this.jComboBoxPops.getModel();
+            final ComboBoxModel comboModel = jComboBoxPops.getModel();
 
             boolean found = false;
             for (int i = 0, len = comboModel.getSize(); i < len; i++) {
@@ -1257,40 +1262,47 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         } else {
             selected = POPS_AUTO;
         }
-        this.jComboBoxPops.setSelectedItem(selected);
+        // avoid firing multiple actionPerformed:
+        if (!ObjectUtils.areEquals(selected, jComboBoxPops.getSelectedItem())) {
+            jComboBoxPops.setSelectedItem(selected);
+        }
     }
 
     /**
-     * Reset PoPs text field
+     * Synchronize Pops (text field / Combo box) with configuration pops 
+     * and optionally reset PoPs text field
+     * @param forceReset true to force clearing pops
      */
-    private void resetPops() {
-        logger.debug("resetPops");
+    private void synchronizePops(final boolean forceReset) {
+        logger.debug("synchronizePops: forceReset = {}", forceReset);
 
         // disable the automatic update observation :
-        final boolean prevAutoUpdateObservation = this.setAutoUpdateObservation(false);
+        final boolean prevAutoUpdateObservation = setAutoUpdateObservation(false);
         try {
             // enable PoPs only if the interferometer support it:
-            if (this.jLabelPops.isVisible()) {
+            if (jLabelPops.isVisible()) {
                 final String popConfig = getConfigurationPops();
                 final boolean popMulti = POPS_MULTI_CONF.equals(popConfig);
 
                 final Integer value = (popConfig != null && !popMulti) ? NumberUtils.valueOf(popConfig) : null;
 
-                // fire a property change event:
-                this.updatePops(value, true);
+                if (value != null || forceReset) {
+                    // fire a property change event:
+                    updatePops(value, true);
+                }
 
                 // allow user inputs when no PoPs are defined in the configuration and not in multi-conf:
                 makePopsEditable(isPopsEditable() && (value == null || popMulti));
             } else {
                 // fire a property change event:
-                this.updatePops(null, true);
+                updatePops(null, true);
                 makePopsEditable(false);
             }
-            this.lastConfPopConfig = null;
+            lastConfPopConfig = null;
 
         } finally {
             // restore the automatic update observation :
-            this.setAutoUpdateObservation(prevAutoUpdateObservation);
+            setAutoUpdateObservation(prevAutoUpdateObservation);
         }
     }
 
@@ -1300,12 +1312,12 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
      */
     private void updatePops() {
         // handle PoPs only if the interferometer support it:
-        if (this.jLabelPops.isVisible()) {
+        if (jLabelPops.isVisible()) {
             final String popConfig = getConfigurationPops();
 
             // get last Pops defined by the instrument configuration:
-            final String lastPopConfig = this.lastConfPopConfig;
-            this.lastConfPopConfig = null;
+            final String lastPopConfig = lastConfPopConfig;
+            lastConfPopConfig = null;
 
             logger.debug("updatePops: {}, last: {}", popConfig, lastPopConfig);
 
@@ -1313,20 +1325,18 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
                 // update the selected pops (pops) :
                 if (POPS_MULTI_CONF.equals(popConfig)) {
                     // fire a property change event:
-                    this.updatePops(null, true);
+                    updatePops(null, true);
                     makePopsEditable(isPopsEditable());
                 } else {
                     updatePops(popConfig, false);
                     makePopsEditable(false);
-                    this.lastConfPopConfig = popConfig;
+                    lastConfPopConfig = popConfig;
                 }
-            } else {
-                // reset the predefined pops:
-                if (lastPopConfig != null) {
-                    // fire a property change event:
-                    this.updatePops(null, true);
-                    makePopsEditable(isPopsEditable());
-                }
+            } else if (lastPopConfig != null) {
+                // reset the predefined pops
+                // fire a property change event:
+                updatePops(null, true);
+                makePopsEditable(isPopsEditable());
             }
         }
     }
@@ -1340,13 +1350,13 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         final Object[] instConfs = getInstrumentConfigurations();
         if (instConfs.length > 1) {
             // multi configuration:
-            return this.jLabelPops.isVisible() ? POPS_MULTI_CONF : null;
+            return jLabelPops.isVisible() ? POPS_MULTI_CONF : null;
         }
         if (instConfs.length == 1) {
             // determine if there are PoPs defined in the instrument configuration :
             final String instrumentConfiguration = (String) instConfs[0];
-            final List<Pop> popList = cm.getInstrumentConfigurationPoPs((String) this.jComboBoxInterferometerConfiguration.getSelectedItem(),
-                    (String) this.jComboBoxInstrument.getSelectedItem(), instrumentConfiguration);
+            final List<Pop> popList = cm.getInstrumentConfigurationPoPs((String) jComboBoxInterferometerConfiguration.getSelectedItem(),
+                    (String) jComboBoxInstrument.getSelectedItem(), instrumentConfiguration);
 
             if (popList != null && !popList.isEmpty()) {
                 // PoPs are defined in the instrument configuration :
@@ -1360,18 +1370,18 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
      * Enable or disable the wind restriction depending on the chosen interferometer
      */
     private void updateWindRestriction() {
-        final Double windRestriction = cm.getWindPointingRestriction((String) this.jComboBoxInterferometer.getSelectedItem());
+        final Double windRestriction = cm.getWindPointingRestriction((String) jComboBoxInterferometer.getSelectedItem());
 
         // wind restriction is enabled only if night restriction are enabled and interferometer support it:
-        final boolean useWind = this.jCheckBoxNightLimit.isSelected()
+        final boolean useWind = jCheckBoxNightLimit.isSelected()
                 && (windRestriction != null && windRestriction > 0d && windRestriction < 180d);
 
         if (!useWind) {
             // reset
-            this.jCheckBoxWind.setSelected(false);
+            jCheckBoxWind.setSelected(false);
         }
 
-        this.jCheckBoxWind.setEnabled(useWind);
+        jCheckBoxWind.setEnabled(useWind);
     }
 
     /**
@@ -1409,7 +1419,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
      */
     private void fireObservationUpdateEvent() {
         // check if the automatic update flag is enabled :
-        if (this.doAutoUpdateObservation) {
+        if (doAutoUpdateObservation) {
             logger.debug("fireObservationUpdateEvent");
 
             if (DEBUG_UPDATE_EVENT) {
@@ -1442,18 +1452,18 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
             logger.debug("onLoadObservation:\n{}", ObservationManager.toString(observation));
         }
         // disable the automatic update observation :
-        final boolean prevAutoUpdateObservation = this.setAutoUpdateObservation(false);
+        final boolean prevAutoUpdateObservation = setAutoUpdateObservation(false);
         // disable the automatic selection check of the instrument configuration :
-        final boolean prevAutoCheckConfigurations = this.setAutoCheckConfigurations(false);
+        final boolean prevAutoCheckConfigurations = setAutoCheckConfigurations(false);
         // disable the automatic selection check of the target list :
-        final boolean prevAutoCheckTargets = this.setAutoCheckTargets(false);
+        final boolean prevAutoCheckTargets = setAutoCheckTargets(false);
         try {
             // clear selected target :
-            this.jListTargets.clearSelection();
+            jListTargets.clearSelection();
             // reset cached values :
-            this.currentTarget = null;
-            this.currentInstrumentConfiguration = null;
-            this.lastConfPopConfig = null;
+            currentTarget = null;
+            currentInstrumentConfiguration = null;
+            lastConfPopConfig = null;
 
             // use observation context to enable/disable POPS FIRST (event ordering issue):
             makePopsEditable(isPopsEditable());
@@ -1467,15 +1477,15 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
 
             if (ic != null) {
                 // update the selected interferometer :
-                this.jComboBoxInterferometer.setSelectedItem(ic.getInterferometer().getName());
+                jComboBoxInterferometer.setSelectedItem(ic.getInterferometer().getName());
                 // update the selected interferometer configuration :
-                this.jComboBoxInterferometerConfiguration.setSelectedItem(ic.getName());
+                jComboBoxInterferometerConfiguration.setSelectedItem(ic.getName());
             }
 
             final FocalInstrumentConfigurationChoice instrumentChoice = observation.getInstrumentConfiguration();
 
             // update the selected instrument :
-            this.jComboBoxInstrument.setSelectedItem(instrumentChoice.getName());
+            jComboBoxInstrument.setSelectedItem(instrumentChoice.getName());
 
             // update the selected instrument configurations :
             final List<ObservationVariant> obsVariants = observation.getVariants();
@@ -1485,85 +1495,85 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
                 stationConfs[i] = obsVariants.get(i).getStations();
             }
 
-            this.jListInstrumentConfigurations.clearSelection();
-            this.selectInstrumentConfigurations(stationConfs);
+            jListInstrumentConfigurations.clearSelection();
+            selectInstrumentConfigurations(stationConfs);
 
             // update the selected pops (pops) :
             updatePops(instrumentChoice.getPops(), false);
 
             // constraints :
             // update the night restriction :
-            this.jCheckBoxNightLimit.setSelected(observation.getWhen().isNightRestriction());
+            jCheckBoxNightLimit.setSelected(observation.getWhen().isNightRestriction());
 
             // update the date spinner :
             final XMLGregorianCalendar date = observation.getWhen().getDate();
             if (date != null) {
-                this.jDateSpinner.setValue(date.toGregorianCalendar().getTime());
+                jDateSpinner.setValue(date.toGregorianCalendar().getTime());
             }
 
             // Update wind direction:
-            this.windWidget.setEnabled(true); // to update its value
+            windWidget.setEnabled(true); // to update its value
             final Double windAz = observation.getWhen().getWindAzimuth();
             final boolean useWind = windAz != null;
-            this.windWidget.setValue((useWind) ? windAz.doubleValue() : 0d);
-            this.windWidget.setEnabled(useWind);
-            this.jCheckBoxWind.setSelected(useWind);
+            windWidget.setValue((useWind) ? windAz.doubleValue() : 0d);
+            windWidget.setEnabled(useWind);
+            jCheckBoxWind.setSelected(useWind);
 
             // update the min elevation :
-            this.jFieldMinElev.setValue(interferometerChoice.getMinElevation());
+            jFieldMinElev.setValue(interferometerChoice.getMinElevation());
 
         } finally {
             // restore the automatic selection check of the target list :
-            this.setAutoCheckTargets(prevAutoCheckTargets);
+            setAutoCheckTargets(prevAutoCheckTargets);
             // restore the automatic selection check of the instrument configuration :
-            this.setAutoCheckConfigurations(prevAutoCheckConfigurations);
+            setAutoCheckConfigurations(prevAutoCheckConfigurations);
             // restore the automatic update observation :
-            this.setAutoUpdateObservation(prevAutoUpdateObservation);
+            setAutoUpdateObservation(prevAutoUpdateObservation);
         }
         // ensure one configuration is selected :
-        this.checkInstrumentConfigurationSelection();
+        checkInstrumentConfigurationSelection();
 
         // use observation context to enable/disable GUI features:
         final ObservationContext ctx = getObservationContext();
 
         if (ctx != null) {
             // Main settings:
-            this.jComboBoxInterferometer.setEnabled(ctx.isInterferometerEditable());
-            this.jComboBoxInterferometerConfiguration.setEnabled(ctx.isPeriodEditable());
-            this.jComboBoxInstrument.setEnabled(ctx.isInstrumentEditable());
+            jComboBoxInterferometer.setEnabled(ctx.isInterferometerEditable());
+            jComboBoxInterferometerConfiguration.setEnabled(ctx.isPeriodEditable());
+            jComboBoxInstrument.setEnabled(ctx.isInstrumentEditable());
 
             // Configuration(s):
-            this.jListInstrumentConfigurations.setEnabled(ctx.isConfigurationsEditable());
+            jListInstrumentConfigurations.setEnabled(ctx.isConfigurationsEditable());
 
             // Constraints:
-            this.jCheckBoxNightLimit.setEnabled(ctx.isNightEditable());
-            this.jDateSpinner.setEnabled(ctx.isDateEditable());
-            this.jFieldMinElev.setEnabled(ctx.isMinElevationEditable());
+            jCheckBoxNightLimit.setEnabled(ctx.isNightEditable());
+            jDateSpinner.setEnabled(ctx.isDateEditable());
+            jFieldMinElev.setEnabled(ctx.isMinElevationEditable());
 
         } else {
             // reset GUI:
 
             // Main settings:
-            this.jComboBoxInterferometer.setEnabled(true);
-            this.jComboBoxInterferometerConfiguration.setEnabled(true);
-            this.jComboBoxInstrument.setEnabled(true);
+            jComboBoxInterferometer.setEnabled(true);
+            jComboBoxInterferometerConfiguration.setEnabled(true);
+            jComboBoxInstrument.setEnabled(true);
 
             // Configuration(s):
-            this.jListInstrumentConfigurations.setEnabled(true);
+            jListInstrumentConfigurations.setEnabled(true);
 
             // Constraints:
-            this.jCheckBoxNightLimit.setEnabled(true);
-            this.jDateSpinner.setEnabled(true);
-            this.jFieldMinElev.setEnabled(true);
+            jCheckBoxNightLimit.setEnabled(true);
+            jDateSpinner.setEnabled(true);
+            jFieldMinElev.setEnabled(true);
         }
 
         // TARGETS:
         final boolean targetEditable = isTargetEditable();
 
-        this.starSearchField.setEnabled(targetEditable);
-        this.jListTargets.setEnabled(targetEditable);
-        this.jButtonTargetEditor.setEnabled(targetEditable);
-        this.jButtonDeleteTarget.setEnabled(targetEditable);
+        starSearchField.setEnabled(targetEditable);
+        jListTargets.setEnabled(targetEditable);
+        jButtonTargetEditor.setEnabled(targetEditable);
+        jButtonDeleteTarget.setEnabled(targetEditable);
     }
 
     /**
@@ -1591,7 +1601,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
      */
     private void onUpdateObservation(final UpdateObservationEvent event) {
         // check if the automatic update flag is enabled :
-        if (this.doAutoUpdateObservation) {
+        if (doAutoUpdateObservation) {
             if (DEBUG_UPDATE_EVENT) {
                 logger.warn("UPDATE", new Throwable());
             }
@@ -1599,23 +1609,25 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
             boolean changed = false;
 
             // observation :
-            changed |= om.setInterferometerConfigurationName((String) this.jComboBoxInterferometerConfiguration.getSelectedItem());
-            changed |= om.setInstrumentConfigurationName((String) this.jComboBoxInstrument.getSelectedItem());
+            changed |= om.setInterferometerConfigurationName((String) jComboBoxInterferometerConfiguration.getSelectedItem());
+            changed |= om.setInstrumentConfigurationName((String) jComboBoxInstrument.getSelectedItem());
 
             changed |= om.setInstrumentConfigurationStations(getInstrumentConfigurations());
 
-            changed |= om.setInstrumentConfigurationPoPs(this.jTextPoPs.getText());
+            changed |= om.setInstrumentConfigurationPoPs(jTextPoPs.getText());
 
             // constraints :
-            changed |= om.setWhen((Date) this.jDateSpinner.getModel().getValue());
-            changed |= om.setMinElevation(((Number) this.jFieldMinElev.getValue()).doubleValue());
-            changed |= om.setNightRestriction(this.jCheckBoxNightLimit.isSelected());
+            changed |= om.setWhen((Date) jDateSpinner.getModel().getValue());
+            changed |= om.setMinElevation(((Number) jFieldMinElev.getValue()).doubleValue());
+            changed |= om.setNightRestriction(jCheckBoxNightLimit.isSelected());
 
-            if (this.jCheckBoxWind.isSelected()) {
-                changed |= om.setWindAzimuth(Double.valueOf(this.windWidget.getValue()));
+            if (jCheckBoxWind.isSelected()) {
+                changed |= om.setWindAzimuth(Double.valueOf(windWidget.getValue()));
             } else {
                 changed |= om.setWindAzimuth(null);
             }
+
+            logger.debug("onUpdateObservation: changed: {}", changed);
 
             if (changed) {
                 // update change flag to make the ObservationManager fire an observation refresh event later
@@ -1637,30 +1649,30 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         }
         switch (event.getType()) {
             case LOADED:
-                this.onLoadObservation(event.getObservation());
+                onLoadObservation(event.getObservation());
                 break;
             case TARGET_CHANGED:
-                this.updateListTargets();
+                updateListTargets();
                 break;
             case DO_UPDATE:
                 if (event instanceof UpdateObservationEvent) {
-                    this.onUpdateObservation((UpdateObservationEvent) event);
+                    onUpdateObservation((UpdateObservationEvent) event);
                 }
                 break;
             case REFRESH:
-                this.resetStatus();
+                resetStatus();
                 break;
             case REFRESH_UV:
-                this.resetStatus();
+                resetStatus();
                 break;
             case OBSERVABILITY_DONE:
                 if (event instanceof ObservabilityEvent) {
-                    this.updateObservabilityData(((ObservabilityEvent) event).getObservabilityData());
+                    updateObservabilityData(((ObservabilityEvent) event).getObservabilityData());
                 }
                 break;
             case WARNINGS_READY:
                 if (event instanceof WarningContainerEvent) {
-                    this.updateStatus(((WarningContainerEvent) event).getWarningContainer());
+                    updateStatus(((WarningContainerEvent) event).getWarningContainer());
                 }
                 break;
             default:
@@ -1676,7 +1688,11 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
      * @param obsDataList observability data
      */
     private void updateObservabilityData(final List<ObservabilityData> obsDataList) {
-        if (obsDataList.size() == 1) {
+        final int nObs = obsDataList.size();
+
+        DefaultComboBoxModel comboPopsModel = null;
+
+        if (nObs == 1) {
             final List<PopCombination> bestPopList = obsDataList.get(0).getBestPopList();
             final List<PopCombination> betterPopList = obsDataList.get(0).getBetterPopList();
 
@@ -1693,9 +1709,17 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
                 }
 
                 // single observation results:
-                this.jComboBoxPops.setModel(new DefaultComboBoxModel(orderedPops));
-                this.jComboBoxPops.setSelectedItem(POPS_AUTO);
+                comboPopsModel = new DefaultComboBoxModel(orderedPops);
+                comboPopsModel.setSelectedItem(POPS_AUTO);
             }
+        } else if (nObs > 1) {
+            // multiple observation results:
+            comboPopsModel = new DefaultComboBoxModel(new String[]{POPS_MANUAL, POPS_AUTO});
+            // restore auto or manual mode:
+            comboPopsModel.setSelectedItem((obsDataList.get(0).getBestPopList() != null) ? POPS_AUTO : POPS_MANUAL);
+        }
+        if (comboPopsModel != null) {
+            jComboBoxPops.setModel(comboPopsModel);
         }
     }
 
@@ -1703,7 +1727,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
      * Reset status panel
      */
     private void resetStatus() {
-        this.updateStatus(null);
+        updateStatus(null);
     }
 
     /**
@@ -1713,16 +1737,16 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
     private void updateStatus(final WarningContainer warningContainer) {
         if (warningContainer == null || !warningContainer.hasWarningMessages()) {
             // reset
-            if (this.jLabelStatus.getIcon() != null) {
-                this.jLabelStatus.setIcon(null);
-                this.jLabelStatus.setText("Ok");
-                this.jLabelStatus.setToolTipText(null);
+            if (jLabelStatus.getIcon() != null) {
+                jLabelStatus.setIcon(null);
+                jLabelStatus.setText("Ok");
+                jLabelStatus.setToolTipText(null);
             }
         } else {
             final Level level = warningContainer.getLevel();
 
-            this.jLabelStatus.setIcon((level == Level.Warning) ? ResourceImage.WARNING_ICON.icon() : ResourceImage.INFO_ICON.icon());
-            this.jLabelStatus.setText(level.toString());
+            jLabelStatus.setIcon((level == Level.Warning) ? ResourceImage.WARNING_ICON.icon() : ResourceImage.INFO_ICON.icon());
+            jLabelStatus.setText(level.toString());
 
             final StringBuilder sb = new StringBuilder(100 * warningContainer.getWarningMessages().size());
             sb.append("<html>");
@@ -1750,7 +1774,7 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
             }
             sb.append("</html>");
 
-            this.jLabelStatus.setToolTipText(sb.toString());
+            jLabelStatus.setToolTipText(sb.toString());
         }
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -1802,7 +1826,6 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
         final JList list = new JList() {
             /** default serial UID for Serializable interface */
             private static final long serialVersionUID = 1;
-            
             /* members */
             /** tooltip buffer */
             private final StringBuffer sbToolTip = new StringBuffer(512);
@@ -1815,10 +1838,10 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
             @Override
             public void setModel(final ListModel model) {
                 super.setModel(model);
-                
+
                 // reset last tooltip:
-                this.lastIndex = -1;
-                this.lastTooltip = null;
+                lastIndex = -1;
+                lastTooltip = null;
             }
 
             /** This method is called as the cursor moves within the list */
@@ -1828,19 +1851,19 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
                 final int index = locationToIndex(evt.getPoint());
                 if (index != -1) {
                     String tooltip = null;
-                    
-                    if (this.lastIndex == index) {
+
+                    if (lastIndex == index) {
                         // use last tooltip:
-                        tooltip = this.lastTooltip;
+                        tooltip = lastTooltip;
                     } else {
                         // Get target :
                         final Target target = (Target) getModel().getElementAt(index);
                         if (target != null) {
                             // Return the tool tip text :
-                            tooltip = target.toHtml(this.sbToolTip);
+                            tooltip = target.toHtml(sbToolTip);
                         }
-                        this.lastIndex = index;
-                        this.lastTooltip = tooltip;
+                        lastIndex = index;
+                        lastTooltip = tooltip;
                     }
                     return tooltip;
                 }
@@ -1893,13 +1916,13 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
      *
      * Typical use is as following :
      * // disable the automatic update observation :
-     * final boolean prevAutoUpdateObservation = this.setAutoUpdateObservation(false);
+     * final boolean prevAutoUpdateObservation = setAutoUpdateObservation(false);
      * try {
      *   // operations ...
      *
      * } finally {
      *   // restore the automatic update observation :
-     *   this.setAutoUpdateObservation(prevAutoUpdateObservation);
+     *   setAutoUpdateObservation(prevAutoUpdateObservation);
      * }
      *
      * @param value new value
@@ -1907,10 +1930,10 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
      */
     private boolean setAutoUpdateObservation(final boolean value) {
         // first backup the state of the automatic update observation :
-        final boolean previous = this.doAutoUpdateObservation;
+        final boolean previous = doAutoUpdateObservation;
 
         // then change its state :
-        this.doAutoUpdateObservation = value;
+        doAutoUpdateObservation = value;
 
         // return previous state :
         return previous;
@@ -1922,13 +1945,13 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
      *
      * Typical use is as following :
      * // disable the automatic selection check of the instrument configuration :
-     * final boolean prevAutoCheckConfigurations = this.setAutoCheckConfigurations(false);
+     * final boolean prevAutoCheckConfigurations = setAutoCheckConfigurations(false);
      * try {
      *   // operations ...
      *
      * } finally {
      *   // restore the automatic selection check of the instrument configuration :
-     *   this.setAutoCheckConfigurations(prevAutoCheckConfiguration);
+     *   setAutoCheckConfigurations(prevAutoCheckConfiguration);
      * }
      *
      * @param value new value
@@ -1936,10 +1959,10 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
      */
     private boolean setAutoCheckConfigurations(final boolean value) {
         // first backup the state of the automatic selection check :
-        final boolean previous = this.doAutoCheckConfigurations;
+        final boolean previous = doAutoCheckConfigurations;
 
         // then change its state :
-        this.doAutoCheckConfigurations = value;
+        doAutoCheckConfigurations = value;
 
         // return previous state :
         return previous;
@@ -1951,13 +1974,13 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
      *
      * Typical use is as following :
      * // disable the automatic selection check of the target list :
-     * final boolean prevAutoCheckTargets = this.setAutoCheckTargets(false);
+     * final boolean prevAutoCheckTargets = setAutoCheckTargets(false);
      * try {
      *   // operations ...
      *
      * } finally {
      *   // restore the automatic selection check of the target list :
-     *   this.setAutoCheckTargets(prevAutoCheckTargets);
+     *   setAutoCheckTargets(prevAutoCheckTargets);
      * }
      *
      * @param value new value
@@ -1965,10 +1988,10 @@ public final class BasicObservationForm extends javax.swing.JPanel implements Ch
      */
     private boolean setAutoCheckTargets(final boolean value) {
         // first backup the state of the automatic selection check :
-        final boolean previous = this.doAutoCheckTargets;
+        final boolean previous = doAutoCheckTargets;
 
         // then change its state :
-        this.doAutoCheckTargets = value;
+        doAutoCheckTargets = value;
 
         // return previous state :
         return previous;
