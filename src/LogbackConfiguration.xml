@@ -41,10 +41,9 @@
         <appender-ref ref="WARNINGLOG" />
     </logger>
 
-    <logger name="fr.jmmc.aspro.model.ConfigurationManager" level="INFO"/>
-
     <!--
     <logger name="fr.jmmc.aspro.gui" level="INFO"/>
+    <logger name="fr.jmmc.aspro.gui.BasicObservationForm" level="DEBUG"/>
     <logger name="fr.jmmc.aspro.gui.InterferometerMapPanel" level="INFO"/>
     <logger name="fr.jmmc.aspro.gui.ObservabilityPanel" level="INFO"/>
     <logger name="fr.jmmc.aspro.gui.UVCoveragePanel" level="INFO"/>
@@ -55,6 +54,7 @@
     <logger name="fr.jmmc.aspro.interop" level="INFO"/>
   
     <logger name="fr.jmmc.aspro.model" level="INFO"/>
+    <logger name="fr.jmmc.aspro.model.ConfigurationManager" level="INFO"/>
 
     <logger name="fr.jmmc.aspro.ob" level="INFO"/>
 
