@@ -38,8 +38,10 @@ public final class AsproGenConfig {
     VLTI,
     /** CHARA array */
     CHARA,
-    /** SUSI (future) */
+    /** SUSI */
     SUSI,
+    /** NPOI (experimental) */
+    NPOI,
     /** MROI (future) */
     MROI
   };
@@ -979,6 +981,181 @@ public final class AsproGenConfig {
     return new double[]{lonDeg, latDeg};
   }
 
+
+  /**
+   * Load the NPOI config file (NPOI.txt)
+   * @param absFileName absolute file path to NPOI config file
+   * @return susi station config
+   *
+   */
+  private static Map<String, Map<String, Double>> loadNPOIConfig(final String absFileName) {
+
+    logger.info("loadNPOIConfig : " + absFileName);
+
+    final List<String> labels = Arrays.asList(new String[]{
+              "AC", "AE", "AW", "AN", 
+              "W7", "E6"
+            });
+    
+    final String[] columns = new String[]{
+      "XOFFSET", "YOFFSET", "ZOFFSET"
+    };
+
+    final Map<String, Map<String, Double>> stationConfigs = new LinkedHashMap<String, Map<String, Double>>();
+
+    // load data from file :
+    BufferedReader reader = null;
+    try {
+      final File data = new File(absFileName);
+
+      reader = new BufferedReader(new FileReader(data));
+
+      // column separator :
+      final String delimiter = " ";
+
+      String name = null;
+      String key = null;
+      Double value = null;
+      Map<String, Double> current = null;
+
+      StringTokenizer tok;
+      String line;
+      while ((line = reader.readLine()) != null) {
+
+        line = line.replaceAll("\\s+", " ").trim();
+
+        // Parse values :
+        logger.info("line = " + line);
+
+        tok = new StringTokenizer(line, delimiter);
+
+        if (tok.hasMoreTokens()) {
+          // key
+          key = tok.nextToken();
+
+          if (labels.contains(key)) {
+            name = key;
+
+            logger.info("new station : " + name);
+            current = new LinkedHashMap<String, Double>();
+
+            int i = 0;
+            // value (only first used) :
+            while (tok.hasMoreTokens()) {
+              key = columns[i];
+              value = Double.valueOf(tok.nextToken());
+
+              logger.info("value : " + value);
+
+              current.put(key, value);
+              i++;
+            }
+
+            // end station block :
+            stationConfigs.put(name, current);
+
+            logger.info("end station : " + name + " =\n" + current);
+          }
+        }
+      }
+
+    } catch (FileNotFoundException fnfe) {
+      logger.error("File not found", fnfe);
+    } catch (IOException ioe) {
+      logger.error("IO failure", ioe);
+    } finally {
+      if (reader != null) {
+        try {
+          reader.close();
+        } catch (IOException ioe) {
+          logger.error("IO failure", ioe);
+        }
+      }
+    }
+    return stationConfigs;
+  }
+
+  /**
+   * Convert SUSI station configs to ASPRO station configurations
+   * @param stationConfigs station configs
+   * @param sb buffer
+   */
+  private static void convertNPOIStations(final Map<String, Map<String, Double>> stationConfigs, final StringBuilder sb) {
+
+    final double[] lonlat = NPOIposition(sb);
+
+    final double lat = Math.toRadians(lonlat[1]);
+
+    double x, y, z, offset;
+    String station;
+    Map<String, Double> config;
+    for (Map.Entry<String, Map<String, Double>> e : stationConfigs.entrySet()) {
+      station = e.getKey();
+      config = e.getValue();
+
+      sb.append("    <station>\n");
+      sb.append("      <name>").append(station).append("</name>\n");
+      sb.append("      <telescope>T</telescope>\n");
+
+      x = config.get("XOFFSET");
+      y = config.get("YOFFSET");
+      z = config.get("ZOFFSET");
+
+      convertHorizToEquatorial(station, lat, 1e6d * x, 1e6d * y, 1e6d * z, sb);
+
+      // norm of baseline vector:
+      offset = Math.sqrt(x * x + y * y + z * z);
+/*
+      if (station.startsWith("N")) {
+        offset -= 2.5d;
+      } else {
+        offset += 2.5d;
+      }
+*/
+      sb.append("      <delayLineFixedOffset>").append((int) Math.round(10d * offset) / 10d).append("</delayLineFixedOffset>\n");
+      sb.append("    </station>\n\n");
+    }
+  }
+  
+  /**
+   * Compute the NPOI position
+   */
+  private static double[] NPOIposition(final StringBuilder sb) {
+
+    final double lonDeg = -111.535d;
+    logger.info("NPOI longitude (deg) : " + lonDeg);
+
+    final double latDeg = 35.09666d;
+    logger.info("NPOI latitude (deg) : " + latDeg);
+
+    final double alt = 2200.66d;
+    computeInterferometerPosition(lonDeg, latDeg, alt, sb);
+
+    logger.info("Generated NPOI position:\n" + sb.toString());
+
+    return new double[]{lonDeg, latDeg};
+  }
+
+  /**
+   * Convert the NPOI config file (NPOI.txt)
+   * @param absFileName absolute file path to NPOI config file
+   */
+  private static void convertNPOIConfig(final String absFileName) {
+
+    final Map<String, Map<String, Double>> stationConfigs = loadNPOIConfig(absFileName);
+
+    final StringBuilder sb = new StringBuilder(12 * 1024);
+
+    sb.append("<a:interferometerSetting>\n\n");
+    sb.append("  <description>\n\n    <name>NPOI</name>\n\n");
+
+    convertNPOIStations(stationConfigs, sb);
+
+    sb.append("  </description>\n\n</a:interferometerSetting>\n");
+
+    logger.info("Generated NPOI Configuration : " + sb.length() + "\n" + sb.toString());
+  }
+  
   /**
    * Main entry point to generate configuration parts (xml)
    * @param args unused
@@ -986,7 +1163,7 @@ public final class AsproGenConfig {
   public static void main(final String[] args) {
     final String asproPath = "/home/bourgesl/dev/aspro1/etc/";
 
-    final INTERFEROMETER selected = INTERFEROMETER.SUSI;
+    final INTERFEROMETER selected = INTERFEROMETER.NPOI;
 
     switch (selected) {
       case VLTI:
@@ -1009,13 +1186,16 @@ public final class AsproGenConfig {
       case CHARA:
         convertCHARAConfig("/home/bourgesl/dev/aspro/test/telescopes.chara");
         break;
+      case SUSI:
+        convertSUSIConfig("/home/bourgesl/dev/aspro/test/SUSI.txt");
+        break;
+      case NPOI:
+        convertNPOIConfig("/home/bourgesl/dev/aspro/test/NPOI.txt");
+        break;
       case MROI:
         MROIposition();
 
         convertStationFile(asproPath + "MROI.stations");
-        break;
-      case SUSI:
-        convertSUSIConfig("/home/bourgesl/dev/aspro/test/SUSI.txt");
         break;
 
       default:
