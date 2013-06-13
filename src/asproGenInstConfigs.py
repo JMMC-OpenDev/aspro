@@ -13,6 +13,13 @@
 # SUSI:
 a=["N1","N3","N4","S1","S2","S3","S4"]
 
+# NPOI:
+#a=["E2","E3","E5","E6","AE","AC","AN","AW","W3","W5","W6","W7"]
+a=["E6","AE","AC","AN","AW","W7"]
+# naming convention: east -> AE -> AC -> AN-> north -> AW -> west
+# to avoid too many configuration => only E6 AE AC AN AW W7
+
+
 nbStations=len(a)
 
 print("<root>")
