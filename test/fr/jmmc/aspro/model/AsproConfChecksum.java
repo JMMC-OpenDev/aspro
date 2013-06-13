@@ -31,7 +31,7 @@ public final class AsproConfChecksum {
         _logger.info("\n\nUpdate checksums into AsproConfig file: AsproOIConfigurations.xml\n");
 
         // hard coded here to avoid using ConfigurationManager:
-        final String[] files = new String[]{"VLTI.xml", "CHARA.xml", "SUSI.xml"};
+        final String[] files = new String[]{"VLTI.xml", "CHARA.xml", "SUSI.xml", "NPOI.xml"};
 
         for (String fileName : files) {
             final long checksum = ConfigurationManager.checksum(fileName);
