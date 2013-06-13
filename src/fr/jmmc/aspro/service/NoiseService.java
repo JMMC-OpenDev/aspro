@@ -200,6 +200,10 @@ public final class NoiseService extends VisNoiseService {
         if (ao != null) {
             this.aoBand = ao.getBand();
             this.nbOfActuators = ao.getNumberActuators();
+        } else {
+            // by default: compute strehl ratio on V band with only 1 actuator ?
+            this.aoBand = SpectralBand.V;
+            this.nbOfActuators = 1;
         }
 
         // Seeing :
