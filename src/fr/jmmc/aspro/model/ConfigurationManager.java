@@ -339,6 +339,11 @@ public final class ConfigurationManager extends BaseOIManager {
 
         if (logger.isDebugEnabled()) {
             GeocentricCoords.dump(id.getName(), posSph);
+            
+            for (Station s : id.getStations()) {
+                Position3D pos = s.getRelativePosition();
+                logger.debug("Station[{}] norm(relativePosition) = {}", s.getName(), MathUtils.carthesianNorm(pos.getPosX(), pos.getPosY(), pos.getPosZ()));
+            }
         }
     }
 
