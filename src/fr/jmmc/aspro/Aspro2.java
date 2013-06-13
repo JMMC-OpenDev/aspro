@@ -196,7 +196,6 @@ public final class Aspro2 extends App {
 
     /**
      * Prepare the frame widgets and define its minimum size
-     * @param frame
      */
     private void prepareFrame() {
         logger.debug("prepareFrame : enter");
