@@ -53,6 +53,7 @@ import fr.jmmc.aspro.service.pops.BestPopsEstimatorFactory;
 import fr.jmmc.aspro.service.pops.BestPopsEstimatorFactory.Algorithm;
 import fr.jmmc.aspro.service.pops.Criteria;
 import fr.jmmc.aspro.util.TestUtils;
+import fr.jmmc.jmcs.logging.LoggingService;
 import fr.jmmc.jmcs.util.SpecialChars;
 import fr.jmmc.jmcs.util.concurrent.InterruptedJobException;
 import fr.jmmc.jmcs.util.concurrent.ParallelJobExecutor;
@@ -191,7 +192,7 @@ public final class ObservabilityService {
 
     static {
         if (SHOW_TASK_STATS || SHOW_BEST_POPS_STATS) {
-            ((ch.qos.logback.classic.Logger) loggerTasks).setLevel(Level.DEBUG);
+            LoggingService.setLoggerLevel(loggerTasks, Level.DEBUG);
         }
     }
 
