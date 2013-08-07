@@ -123,13 +123,15 @@ public final class SearchCalVOTableHandler {
                     }
                 }
 
-                // Add the SearchCalVersion parameter to calibrators :
+                // Add the SearchCalGuiVersion parameter to calibrators if missing:
                 final StringValue paramSearchCalVersion = new StringValue();
                 paramSearchCalVersion.setName(CalibratorInformations.PARAMETER_SCL_GUI_VERSION);
                 paramSearchCalVersion.setValue(searchCalVersion);
 
                 for (Target cal : calibrators) {
-                    cal.getCalibratorInfos().getParameters().add(paramSearchCalVersion);
+                    if (cal.getCalibratorInfos().getParameter(CalibratorInformations.PARAMETER_SCL_GUI_VERSION) == null) {
+                        cal.getCalibratorInfos().getParameters().add(paramSearchCalVersion);
+                    }
                 }
             }
 
