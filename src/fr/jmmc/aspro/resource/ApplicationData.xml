@@ -18,7 +18,7 @@
     </company>
 
     <program name="Aspro2" version="0.9.5 beta 5"/>
-    <compilation date="13/06/2013" compiler="JDK 1.6.0_24"/>
+    <compilation date="09/08/2013" compiler="JDK 1.6.0_24"/>
   
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
