@@ -17,8 +17,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="0.9.5 beta 5"/>
-    <compilation date="09/08/2013" compiler="JDK 1.6.0_24"/>
+    <program name="Aspro2" version="0.9.5 beta 6"/>
+    <compilation date="02/09/2013" compiler="JDK 1.6.0_24"/>
   
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -186,6 +186,11 @@
 
     <releasenotes>
         <release version="0.9.5">
+            <prerelease version="0.9.5 beta 6">
+                <change type="FEATURE">Updated CHARA VEGA setup</change>
+                <change type="FEATURE">Added VLTI Period 93</change>
+                <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/527">Fixed macos Java 1.7.0_25 issue related to the Preference window (eAWT)</change>
+            </prerelease>
             <prerelease version="0.9.5 beta 5">
                 <change type="FEATURE">Added NPOI interferometer (preliminary)</change>
             </prerelease>

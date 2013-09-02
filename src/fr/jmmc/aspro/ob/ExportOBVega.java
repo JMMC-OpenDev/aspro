@@ -383,7 +383,7 @@ public final class ExportOBVega {
     // 1. CALI
     // 2. SPEC
     sb.append(OB_CAL).append(SEPARATOR);
-
+    
     // 3. Name of observation: réseau (1800=R1, 300=R2, 100=R3)et la longueur d’onde centrale = mode name
     sb.append(insMode.getName()).append(SEPARATOR);
 
@@ -392,7 +392,12 @@ public final class ExportOBVega {
     // 5. Grating selection = 300
     sb.append(getInstrumentModeParameter(insMode, PARAM_GRATING)).append(SEPARATOR);
     // 6. Camera = RB
-    sb.append(getInstrumentModeParameter(insMode, PARAM_CAMERA)).append(SEPARATOR);
+    // 02/09/2013: R instead of RB for R2720 ONLY (HACK):
+    String camera = getInstrumentModeParameter(insMode, PARAM_CAMERA);
+    if ("R2720".equals(insMode.getName())) {
+      camera = "R";
+    }
+    sb.append(camera).append(SEPARATOR);
     // 7. Lambda = 656.0
     sb.append(getInstrumentModeParameter(insMode, PARAM_LAMBDA)).append(SEPARATOR);
     // 8. polar choice (Off, ) = OFF
