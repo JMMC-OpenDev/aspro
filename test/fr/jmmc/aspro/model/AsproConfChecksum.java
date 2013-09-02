@@ -31,10 +31,14 @@ public final class AsproConfChecksum {
         _logger.info("\n\nUpdate checksums into AsproConfig file: AsproOIConfigurations.xml\n");
 
         // hard coded here to avoid using ConfigurationManager:
-        final String[] files = new String[]{"VLTI.xml", "CHARA.xml", "SUSI.xml", "NPOI.xml"};
+        final String[] files = new String[]{"VLTI.xml", "CHARA.xml", "SUSI.xml", "NPOI.xml", "DEMO.xml"};
 
         for (String fileName : files) {
             final long checksum = ConfigurationManager.checksum(fileName);
+            
+            if (checksum == 0l) {
+                _logger.warn("checksum = 0 (should not happen): please modify your file to have a checksum <> 0 !");
+            }
 
             _logger.info("File[{}]:\n<interferometerFile>\n    <file>{}</file>\n"
                     + "    <checksum>{}</checksum>\n</interferometerFile>\n", fileName, fileName, checksum);
