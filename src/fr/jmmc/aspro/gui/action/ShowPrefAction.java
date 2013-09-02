@@ -5,6 +5,7 @@ package fr.jmmc.aspro.gui.action;
 
 import fr.jmmc.aspro.gui.PreferencesView;
 import fr.jmmc.jmcs.gui.action.RegisteredAction;
+import fr.jmmc.jmcs.gui.util.WindowUtils;
 import java.awt.event.ActionEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,12 +25,18 @@ public final class ShowPrefAction extends RegisteredAction {
     /** Class logger */
     private final static Logger logger = LoggerFactory.getLogger(className);
 
+    /** Preferences view */
+    final PreferencesView preferencesView;    
+    
     /**
      * Public constructor that automatically register the action in RegisteredAction.
      */
     public ShowPrefAction() {
         super(className, actionName);
         flagAsPreferenceAction();
+        
+        preferencesView = new PreferencesView();
+        WindowUtils.centerOnMainScreen(preferencesView);        
     }
 
     /**
@@ -46,7 +53,7 @@ public final class ShowPrefAction extends RegisteredAction {
     /**
      * Show a new preferences view
      */
-    public static void showPreferencesView() {
-        new PreferencesView().setVisible(true);
+    public void showPreferencesView() {
+        preferencesView.setVisible(true);
     }
 }

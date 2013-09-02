@@ -95,7 +95,7 @@ public final class PreferencesView extends JFrame implements Observer {
 
         // pack and center window
         pack();
-        setLocationRelativeTo(null);
+//        setLocationRelativeTo(null);
     }
 
     /**
@@ -191,7 +191,6 @@ public final class PreferencesView extends JFrame implements Observer {
         jButtonDefault = new javax.swing.JButton();
         jButtonSave = new javax.swing.JButton();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Preferences");
         getContentPane().setLayout(new javax.swing.BoxLayout(getContentPane(), javax.swing.BoxLayout.LINE_AXIS));
 
