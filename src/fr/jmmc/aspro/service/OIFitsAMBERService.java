@@ -72,7 +72,7 @@ public final class OIFitsAMBERService {
         // number of wavelengths :
         final int nbLVis = waveLengths.length;
 
-        int lVis = 0;
+        int lVis;
 
         /* We try to follow the paper's notations */
         final Complex[][] cpxVisTable = visComplex;
@@ -139,7 +139,7 @@ public final class OIFitsAMBERService {
 
         // Use mutable complex carefully:
         Complex cpxVis = new MutableComplex();
-        Complex sigma2_cpxVis = new MutableComplex();
+        final Complex sigma2_cpxVis = new MutableComplex();
 
         final double normFactorWL = 1d / (nbLVis - 1);
 
