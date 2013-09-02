@@ -25,7 +25,7 @@ public final class ShowPrefAction extends RegisteredAction {
     /** Class logger */
     private final static Logger logger = LoggerFactory.getLogger(className);
 
-    /** Preferences view */
+    /** Preferences view singleton */
     final PreferencesView preferencesView;    
     
     /**
@@ -35,7 +35,9 @@ public final class ShowPrefAction extends RegisteredAction {
         super(className, actionName);
         flagAsPreferenceAction();
         
+        // create Preference view in Main thread (apple eAWT issues):
         preferencesView = new PreferencesView();
+        
         WindowUtils.centerOnMainScreen(preferencesView);        
     }
 
