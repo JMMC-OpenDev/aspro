@@ -1264,7 +1264,7 @@ public final class AsproGenConfig {
     public static void main(final String[] args) {
         final String asproPath = "/home/bourgesl/dev/aspro1/etc/";
 
-        final INTERFEROMETER selected = INTERFEROMETER.NPOI;
+        final INTERFEROMETER selected = INTERFEROMETER.CHARA;
 
         switch (selected) {
             case VLTI:
