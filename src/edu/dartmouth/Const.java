@@ -11,7 +11,7 @@ public interface Const {
 
   public static final double J2000 = 2451545d; // the julian epoch 2000
   
-  public static final double INV_CENTURY = 1d / 36525d; // 1/ (100 * DAY)
+  public static final double INV_CENTURY = 1d / 36525d; // 1/ (100 * YEAR)
   
   public static final double DAY_IN_YEAR = 1d / 365.25d;
   
