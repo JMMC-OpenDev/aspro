@@ -1,0 +1,487 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ *******************************************************************************
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
+ *******************************************************************************
+ -->
+<!--
+    Document   : NPOI.xml
+    Created on : 12 june 2013
+    Author     : bourges laurent
+    Description:
+        NPOI interferometer.
+-->
+
+<a:interferometerSetting
+   xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+   xmlns:a='http://www.jmmc.fr/aspro-oi/0.1'
+   xsi:schemaLocation='http://www.jmmc.fr/aspro-oi/0.1 AsproOIModel.xsd'>
+
+  <description>
+    <name>NPOI</name>
+
+    <description>NPOI interferometer: Navy [Prototype / Precise] Optical Interferometer</description>
+
+    <!--
+        latitude = 35.09666 deg
+        longitude = -111.535 deg
+        altitude = 2200.66 meters.
+        
+        Computed by AsproGenConfig:
+    <position>
+      <posX>-1912993.479684375</posX>
+      <posY>-4847730.565702087</posY>
+      <posZ>3662270.1634623334</posZ>
+    </position>        
+
+        The Earth centered positions I get by using AIPS are:
+        Array BX=  -1918330.53593    BY=  -4861255.23840    BZ=   3647911.86843
+        which take into account the fact that the Earth is not spherical.
+    -->
+    <position>
+      <posX>-1918330.53593</posX>
+      <posY>-4861255.23840</posY>
+      <posZ>3647911.86843</posZ>
+    </position>
+<!--
+From BeautyContest/2004-data1.fits:    
+<keyword><name>ARRAYX</name><value>-1916207.2</value><description>[m] array center X-coordinate</description><type>D</type><unit>m|meter|meters</unit></keyword>
+<keyword><name>ARRAYY</name><value>-4855874.4</value><description>[m] array center Y-coordinate</description><type>D</type><unit>m|meter|meters</unit></keyword>
+<keyword><name>ARRAYZ</name><value>3668423.4</value><description>[m] array center Z-coordinate</description><type>D</type><unit>m|meter|meters</unit></keyword>
+
+BeautyContest/2004-data2.fits
+<keyword><name>ARRAYX</name><value>-1916206.6</value><description>[m] array center X-coordinate</description><type>D</type><unit>m|meter|meters</unit></keyword>
+<keyword><name>ARRAYY</name><value>-4855874.4</value><description>[m] array center Y-coordinate</description><type>D</type><unit>m|meter|meters</unit></keyword>
+<keyword><name>ARRAYZ</name><value>3668423.7</value><description>[m] array center Z-coordinate</description><type>D</type><unit>m|meter|meters</unit></keyword>
+    -->
+    
+    <!-- All the siderostats use an aperture with a diameter of 12cm -->
+    
+    <!-- astrometric station -->
+    <telescope>
+      <name>AS</name>
+      <diameter>0.12</diameter>
+      <!-- no zenithal limit -->
+      <maxElevation>90.0</maxElevation>
+
+      <adaptiveOptics>
+        <band>V</band>
+        <!-- tip tilt -->
+        <numberActuators>2</numberActuators>
+      </adaptiveOptics>
+
+      <!--
+        Moon Pointing Restrictions on NPOI:
+        default as 5 deg
+      -->
+      <moonPointingRestriction>
+        <warningThreshold>10</warningThreshold>
+        <restriction>
+          <separation>5.0</separation>
+        </restriction>
+      </moonPointingRestriction>
+    </telescope>
+
+    <!-- imaging station -->
+    <telescope>
+      <name>IS</name>
+      <diameter>0.12</diameter>
+      <!-- no zenithal limit -->
+      <maxElevation>90.0</maxElevation>
+
+
+      <adaptiveOptics>
+        <band>V</band>
+        <!-- tip tilt -->
+        <numberActuators>2</numberActuators>
+      </adaptiveOptics>
+
+      <!--
+        Moon Pointing Restrictions on NPOI:
+        default as 5 deg
+      -->
+      <moonPointingRestriction>
+        <warningThreshold>10</warningThreshold>
+        <restriction>
+          <separation>5.0</separation>
+        </restriction>
+      </moonPointingRestriction>
+    </telescope>
+
+<!-- 
+station x(E-W direction) y(N-S direction) z(elevation)
+AC0 -0.4866225, -5.6261545, 0.0095949
+AE0 17.0027065,-12.8829861, 0.0092909
+AW0 -20.3769427,-15.4831804, 0.0081096
+W07 -44.1908188,-32.9754257,-0.0706610
+AN0 -0.6132186, 17.2268933, 0.0017019
+E06 32.8518190,-13.7440581, 0.0124705
+
+From BeautyContest/2004-data1.fits:    
+<th>TEL_NAME</th><th>STA_NAME</th><th>STA_INDEX</th><th>DIAMETER</th><th>STAXYZ</th></tr>
+<tr><td>E02</td><td>E02</td><td>0</td><td>0.12</td><td>1.0395319503252458 5.599513 -1.4598945512114878</td></tr>
+<tr><td>AC0</td><td>AC0</td><td>1</td><td>0.12</td><td>3.2427611631967475 -0.5 -4.6145530702835</td></tr>
+<tr><td>AE0</td><td>AE0</td><td>2</td><td>0.12</td><td>7.414088447352563 16.989338 -10.55213604888239</td></tr>
+<tr><td>AW0</td><td>AW0</td><td>3</td><td>0.12</td><td>8.909948202284827 -20.389907 -12.680246297382215</td></tr>
+<tr><td>W07</td><td>W07</td><td>4</td><td>0.12</td><td>18.900290231014377 -44.203123 -27.0373448621005</td></tr>
+<tr><td>AN0</td><td>AN0</td><td>5</td><td>0.12</td><td>-9.903440183719736 -0.627131 14.078174323868035</td></tr>
+
+From BeautyContest/2004-data2.fits:
+<tr><td>E03</td><td>E03</td><td>0</td><td>0.12</td><td>1.8801114354868964 8.97 -2.6754590241959235</td></tr>
+<tr><td>E05</td><td>E05</td><td>1</td><td>0.12</td><td>4.674405495568339 20.04 -6.6518293170375715</td></tr>
+<tr><td>E06</td><td>E06</td><td>2</td><td>0.12</td><td>7.888418622287527 32.77 -11.225473336993293</td></tr>
+<tr><td>W03</td><td>W03</td><td>3</td><td>0.12</td><td>2.5585614336136664 -5.35 -3.6409151858323727</td></tr>
+<tr><td>W05</td><td>W05</td><td>4</td><td>0.12</td><td>6.882242777607997 -15.58 -9.793652758295169</td></tr>
+<tr><td>W06</td><td>W06</td><td>5</td><td>0.12</td><td>11.614144035729453 -26.79 -16.52730039411549</td></tr>
+-->
+
+
+
+<!-- compute fixed optical paths from stations to optical lab (difference between beams / stations / pops are important) -->
+
+<!-- in comments: derived from horizontal to equatorial local and offset = norm to center -->
+
+<!--
+initializeConfiguration: loading configuration file = NPOI.xml
+Station[AC0] norm(relativePosition) = 5.662119744406683
+Station[AE0] norm(relativePosition) = 21.329648107212975
+Station[AW0] norm(relativePosition) = 25.611015805670867
+Station[AN0] norm(relativePosition) = 17.22400688158516
+Station[E02] norm(relativePosition) = 5.879325183520044
+Station[E03] norm(relativePosition) = 9.547449921314069
+Station[E05] norm(relativePosition) = 21.626338108889353
+Station[E06] norm(relativePosition) = 35.52620582049257
+Station[W03] norm(relativePosition) = 6.958807369082722
+Station[W05] norm(relativePosition) = 19.64732297286325
+Station[W06] norm(relativePosition) = 33.552110216795604
+Station[W07] norm(relativePosition) = 55.1381189313489
+-->
+
+<!-- astrometric stations -->
+    <station>
+      <name>AC0</name> <!-- C means center ? -->
+      <telescope>AS</telescope>
+      <relativePosition>
+        <posX>3.2427611631967475</posX>
+        <posY>-0.5</posY>
+        <posZ>-4.6145530702835</posZ>
+<!--          
+        <posX>3.2426504377271326</posX>
+        <posY>-0.48662249999999996</posY>
+        <posZ>-4.597708631338474</posZ>
+-->
+      </relativePosition>
+      <!-- distance to center vector projected on east arm -->
+      <delayLineFixedOffset>12.74</delayLineFixedOffset>
+<!-- TODO: configure pop links -->
+<!--
+      <popLink>
+        <pop>PoP1</pop>
+        <opticalLength>0.0</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>PoP2</pop>
+        <opticalLength>36.563466066</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>PoP3</pop>
+        <opticalLength>73.12818008599999</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>PoP4</pop>
+        <opticalLength>109.72473292</opticalLength>
+      </popLink>
+      <popLink>
+        <pop>PoP5</pop>
+        <opticalLength>143.03583087799998</opticalLength>
+      </popLink>
+-->      
+    </station>
+
+    <station>
+      <name>AE0</name>
+      <telescope>AS</telescope>
+      <relativePosition>
+        <posX>7.414088447352563</posX>
+        <posY>16.989338</posY>
+        <posZ>-10.55213604888239</posZ>
+<!--          
+        <posX>7.414771884481971</posX>
+        <posY>17.0027065</posY>
+        <posZ>-10.53530137559964</posZ>
+-->
+      </relativePosition>
+      <!-- distance to center vector projected on east arm -->
+      <delayLineFixedOffset>21.477</delayLineFixedOffset>
+    </station>
+
+    <station>
+      <name>AW0</name>
+      <telescope>AS</telescope>
+      <relativePosition>
+        <posX>8.909948202284827</posX>
+        <posY>-20.389907</posY>
+        <posZ>-12.680246297382215</posZ>
+<!--          
+        <posX>8.908806729287235</posX>
+        <posY>-20.376942699999997</posY>
+        <posZ>-12.663415957977643</posZ>
+-->        
+      </relativePosition>
+      <delayLineFixedOffset>25.59</delayLineFixedOffset>
+    </station>
+
+    <station>
+      <name>AN0</name>
+      <telescope>AS</telescope>
+      <relativePosition>
+        <posX>-9.903440183719736</posX>
+        <posY>-0.627131</posY>
+        <posZ>14.078174323868035</posZ>
+<!--          
+        <posX>-9.903340035047238</posX>
+        <posY>-0.6132186</posY>
+        <posZ>14.095733816168604</posZ>
+-->
+      </relativePosition>
+      <delayLineFixedOffset>17.24</delayLineFixedOffset>
+    </station>
+
+<!-- imaging station -->
+
+<!-- East stations -->
+
+    <station>
+      <name>E02</name>
+      <telescope>IS</telescope>
+      <relativePosition>
+        <posX>1.0395319503252458</posX>
+        <posY>5.599513</posY>
+        <posZ>-1.4598945512114878</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>5.88</delayLineFixedOffset>
+    </station>
+
+    <station>
+      <name>E03</name>
+      <telescope>IS</telescope>
+      <relativePosition>
+        <posX>1.8801114354868964</posX>
+        <posY>8.97</posY>
+        <posZ>-2.6754590241959235</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>9.55</delayLineFixedOffset>
+    </station>
+        
+    <station>
+      <name>E05</name>
+      <telescope>IS</telescope>
+      <relativePosition>
+        <posX>4.674405495568339</posX>
+        <posY>20.04</posY>
+        <posZ>-6.6518293170375715</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>21.62</delayLineFixedOffset>
+    </station>
+
+    <station>
+      <name>E06</name>
+      <telescope>IS</telescope>
+      <relativePosition>
+        <posX>7.888418622287527</posX>
+        <posY>32.77</posY>
+        <posZ>-11.225473336993293</posZ>
+<!--          
+        <posX>7.91245323414948</posX>
+        <posY>32.851819</posY>
+        <posZ>-11.237987915411871</posZ>
+-->        
+      </relativePosition>
+      <delayLineFixedOffset>35.6</delayLineFixedOffset>
+    </station>
+
+<!-- West stations -->
+
+    <station>
+      <name>W03</name>
+      <telescope>IS</telescope>
+      <relativePosition>
+        <posX>2.5585614336136664</posX>
+        <posY>-5.35</posY>
+        <posZ>-3.6409151858323727</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>6.96</delayLineFixedOffset>
+    </station>
+
+    <station>
+      <name>W05</name>
+      <telescope>IS</telescope>
+      <relativePosition>
+        <posX>6.882242777607997</posX>
+        <posY>-15.58</posY>
+        <posZ>-9.793652758295169</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>19.65</delayLineFixedOffset>
+    </station>
+
+    <station>
+      <name>W06</name>
+      <telescope>IS</telescope>
+      <relativePosition>
+        <posX>11.614144035729453</posX>
+        <posY>-26.79</posY>
+        <posZ>-16.52730039411549</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>33.55</delayLineFixedOffset>
+    </station>
+
+    <station>
+      <name>W07</name>
+      <telescope>IS</telescope>
+      <relativePosition>
+        <posX>18.901656583911606</posX>
+        <posY>-44.1908188</posY>
+        <posZ>-27.02056756356189</posZ>
+      </relativePosition>
+      <delayLineFixedOffset>55.14</delayLineFixedOffset>
+    </station>
+    
+<!-- North stations: missing -->
+
+    
+    <!-- add all other possible stations (i.e. positions) -->
+
+    <!-- 6 or 9 channels: 3 east, 3 west, 3 north ? -->
+    <channel>
+      <name>Channel1</name>
+    </channel>
+    <channel>
+      <name>Channel2</name>
+    </channel>
+    <channel>
+      <name>Channel3</name>
+    </channel>
+    <channel>
+      <name>Channel4</name>
+    </channel>
+    <channel>
+      <name>Channel5</name>
+    </channel>
+    <channel>
+      <name>Channel6</name>
+    </channel>
+
+<!-- The maximum delay we have in the FDL tanks is 35m (2X17.5m). -->
+    <delayLine>
+      <name>DL1</name>
+      <maximumThrow>35</maximumThrow>
+    </delayLine>
+    <delayLine>
+      <name>DL2</name>
+      <maximumThrow>35</maximumThrow>
+    </delayLine>
+    <delayLine>
+      <name>DL3</name>
+      <maximumThrow>35</maximumThrow>
+    </delayLine>
+    <delayLine>
+      <name>DL4</name>
+      <maximumThrow>35</maximumThrow>
+    </delayLine>
+    <delayLine>
+      <name>DL5</name>
+      <maximumThrow>35</maximumThrow>
+    </delayLine>
+    <delayLine>
+      <name>DL6</name>
+      <maximumThrow>35</maximumThrow>
+    </delayLine>
+
+    <!-- TODO: pops on NPOI -->
+    <!-- how many (6) + 6 optical path length (per beam ?) -->
+<!--
+    <pop>
+      <name>PoP1</name>
+      <index>1</index>
+    </pop>
+    <pop>
+      <name>PoP2</name>
+      <index>2</index>
+    </pop>
+    <pop>
+      <name>PoP3</name>
+      <index>3</index>
+    </pop>
+    <pop>
+      <name>PoP4</name>
+      <index>4</index>
+    </pop>
+    <pop>
+      <name>PoP5</name>
+      <index>5</index>
+    </pop>
+    <pop>
+      <name>PoP6</name>
+      <index>5</index>
+    </pop>
+-->
+
+<!-- instruments (4T) -->
+
+    <focalInstrument>
+      <name>CLASSIC_4T</name>
+      <description>Classic instrument (4T)</description>
+      <numberChannels>4</numberChannels>
+      <defaultSamplingTime>30</defaultSamplingTime>
+
+      <!-- noise parameters -->
+      <transmission>0.01</transmission>
+      <dit>0.01</dit>
+      <ron>10</ron>
+      <detectorSaturation>50000</detectorSaturation>
+      <instrumentVisibility>0.9</instrumentVisibility>
+      <instrumentVisibilityBias>0.1</instrumentVisibilityBias>
+      <instrumentPhaseBias>0.01</instrumentPhaseBias>
+      <nbPixInterferometry>4</nbPixInterferometry>
+      <nbPixPhotometry>4</nbPixPhotometry>
+      <fracFluxInInterferometry>0.8</fracFluxInInterferometry>
+
+      <mode>
+        <name>R</name>
+        <resolution>50</resolution>
+        <waveLengthMin>0.560</waveLengthMin>
+        <waveLengthMax>0.850</waveLengthMax>
+      </mode>
+    </focalInstrument>
+
+  </description>
+
+  <configuration>
+    <interferometer>NPOI</interferometer>
+
+<!-- instruments (4T) -->
+
+    <instrument>
+      <focalInstrument>CLASSIC_4T</focalInstrument>
+
+<configuration><stations>E06 AE0 AC0 AN0</stations></configuration>
+<configuration><stations>E06 AE0 AC0 AW0</stations></configuration>
+<configuration><stations>E06 AE0 AC0 W07</stations></configuration>
+<configuration><stations>E06 AE0 AN0 AW0</stations></configuration>
+<configuration><stations>E06 AE0 AN0 W07</stations></configuration>
+<configuration><stations>E06 AE0 AW0 W07</stations></configuration>
+<configuration><stations>E06 AC0 AN0 AW0</stations></configuration>
+<configuration><stations>E06 AC0 AN0 W07</stations></configuration>
+<configuration><stations>E06 AC0 AW0 W07</stations></configuration>
+<configuration><stations>E06 AN0 AW0 W07</stations></configuration>
+<configuration><stations>AE0 AC0 AN0 AW0</stations></configuration>
+<configuration><stations>AE0 AC0 AN0 W07</stations></configuration>
+<configuration><stations>AE0 AC0 AW0 W07</stations></configuration>
+<configuration><stations>AE0 AN0 AW0 W07</stations></configuration>
+<configuration><stations>AC0 AN0 AW0 W07</stations></configuration>
+
+    </instrument>
+
+  </configuration>
+
+</a:interferometerSetting>
