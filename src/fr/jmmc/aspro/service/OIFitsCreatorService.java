@@ -1456,8 +1456,8 @@ public final class OIFitsCreatorService {
                                 uCoords[k] = u;
                                 vCoords[k] = v;
 
-                                // if target has models and errors are valid, then complex visibility are computed :
-                                if (!hasModel || !errorValid) {
+                                // if target has a model, then complex visibility are computed :
+                                if (!hasModel) {
                                     // Invalid => NaN value :
 
                                     // Iterate on wave lengths :
@@ -1517,41 +1517,48 @@ public final class OIFitsCreatorService {
                                         if (!isAmber) {
                                             if (instrumentExperimental) {
 
-                                                // For experimental instruments: VisAmp/Phi are only amplitude and phase of complex visibility and errors are undefined:
+                                                // For experimental instruments: VisAmp/Phi are only amplitude and phase of complex visibility:
                                                 visAmp[k][l] = visComplexNoisy[k][l].abs();
                                                 visPhi[k][l] = FastMath.toDegrees(visComplexNoisy[k][l].getArgument());
 
-                                                // use NSamples random visComplex realisations to compute standard deviation for both visAmp / visPhi:
+                                                if (!errorValid) {
+                                                    // errors are undefined:
+                                                    visAmpErr[k][l] = Double.NaN;
+                                                    visPhiErr[k][l] = Double.NaN;
 
-                                                // pure visibility phase :
-                                                vPhi = visComplex[k][l].getArgument();
+                                                } else {
+                                                    // use NSamples random visComplex realisations to compute standard deviation for both visAmp / visPhi:
 
-                                                // howto ensure that errors on Im / Re are inside error disk ?
-                                                ampSquareDiffAcc = 0d;
-                                                phiSquareDiffAcc = 0d;
+                                                    // pure visibility phase :
+                                                    vPhi = visComplex[k][l].getArgument();
 
-                                                for (n = 0; n < N_SAMPLES; n++) {
-                                                    // update nth sample:
-                                                    visComplexSample.updateComplex(
-                                                            visRe + VisNoiseService.gaussianNoise(threadRandom, visErrRe),
-                                                            visIm + VisNoiseService.gaussianNoise(threadRandom, visErrIm));
+                                                    // howto ensure that errors on Im / Re are inside error disk ?
+                                                    ampSquareDiffAcc = 0d;
+                                                    phiSquareDiffAcc = 0d;
 
-                                                    // compute square distance to visAmp mean:
-                                                    diff = visComplexSample.abs() - vAmp;
+                                                    for (n = 0; n < N_SAMPLES; n++) {
+                                                        // update nth sample:
+                                                        visComplexSample.updateComplex(
+                                                                visRe + VisNoiseService.gaussianNoise(threadRandom, visErrRe),
+                                                                visIm + VisNoiseService.gaussianNoise(threadRandom, visErrIm));
 
-                                                    ampSquareDiffAcc += diff * diff;
+                                                        // compute square distance to visAmp mean:
+                                                        diff = visComplexSample.abs() - vAmp;
 
-                                                    // compute square distance to visPhi mean:
-                                                    diff = visComplexSample.getArgument() - vPhi;
+                                                        ampSquareDiffAcc += diff * diff;
 
-                                                    phiSquareDiffAcc += diff * diff;
+                                                        // compute square distance to visPhi mean:
+                                                        diff = visComplexSample.getArgument() - vPhi;
+
+                                                        phiSquareDiffAcc += diff * diff;
+                                                    }
+
+                                                    // standard deviation on vis amplitude:
+                                                    visAmpErr[k][l] = Math.sqrt(normSampleFactor * ampSquareDiffAcc);
+
+                                                    // standard deviation on vis phase:
+                                                    visPhiErr[k][l] = FastMath.toDegrees(Math.sqrt(normSampleFactor * phiSquareDiffAcc));
                                                 }
-
-                                                // standard deviation on vis amplitude:
-                                                visAmpErr[k][l] = Math.sqrt(normSampleFactor * ampSquareDiffAcc);
-
-                                                // standard deviation on vis phase:
-                                                visPhiErr[k][l] = FastMath.toDegrees(Math.sqrt(normSampleFactor * phiSquareDiffAcc));
 
                                             } else {
                                                 // Waiting for explanations on every instrument processing to compute VisAmp/Phi :
@@ -1981,9 +1988,9 @@ public final class OIFitsCreatorService {
 
         for (BaseLine bl : baseLines) {
             baseLineIndexes.put(bl, new short[]{
-                        beamMapping.get(bl.getBeam1()).shortValue(),
-                        beamMapping.get(bl.getBeam2()).shortValue()
-                    });
+                beamMapping.get(bl.getBeam1()).shortValue(),
+                beamMapping.get(bl.getBeam2()).shortValue()
+            });
         }
 
         if (logger.isDebugEnabled()) {
