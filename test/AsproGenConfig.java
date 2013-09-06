@@ -299,7 +299,7 @@ public final class AsproGenConfig {
         logger.info(station + " = " + delay);
 
         sb.append("      <delayLineFixedOffset>").append(delay).append("</delayLineFixedOffset>\n");
-    }
+        }
 
     /**
      * Compute CHARA PoP delay (POPX)
@@ -430,7 +430,7 @@ public final class AsproGenConfig {
 
             for (int i = 0; i < 6; i++) {
                 values[i] = config.get("BEAM" + (i + 1)) * 1e-6d;
-            }
+                }
 
             convertCHARASwitchyardStation(station, values, sb);
         }
@@ -612,7 +612,7 @@ public final class AsproGenConfig {
 //       LAT     34 13 34.110
 //    #  Geodetic height of the CHARA reference plane [meters]:
 //       HEIGHT  1725.21
-
+        
         // S1 from telescopes.chara:
 //    LONG    -118 3 25.31272
 //    LAT       34 13 27.78130
@@ -624,8 +624,22 @@ public final class AsproGenConfig {
 
         final double alt = 1725.21d;
 
-        computeInterferometerPosition(lonDeg, latDeg, alt, sb);
+        final double[] pos = computeInterferometerPosition(lonDeg, latDeg, alt, sb);
 
+        final Position3D position = new Position3D();
+        position.setPosX(pos[0]);
+        position.setPosY(pos[1]);
+        position.setPosZ(pos[2]);
+
+        final LonLatAlt coords = GeocentricCoords.getLonLatAlt(position);
+
+        logger.info("CHARA position : " + coords.toString());
+
+/*
+14:50:36.296 [main] INFO  AsproGenConfig - CHARA latitude (deg)  : 34.22438369444445
+14:50:36.297 [main] INFO  AsproGenConfig - position (x,y,z) : -2476998.047780274, -4647390.089884061, 3582240.6122966344
+14:50:37.077 [main] INFO  AsproGenConfig - CHARA position : [-118:03:25,313, 34:13:27,781, 1725.2099999999627 m]
+ */        
         return new double[]{lonDeg, latDeg};
     }
 
@@ -1194,13 +1208,13 @@ public final class AsproGenConfig {
         double dist = norm3D(crossproduct(vec_p2_p1, vec_p1_p)) / norm3D(vec_p2_p1);
 
         logger.info("distance to east arm: {}", dist);
-        
+
         final Position3D vec_p2_p1_ortho = getPoint3D(-vec_p2_p1.getPosY(), vec_p2_p1.getPosX(), vec_p2_p1.getPosZ());
 
         double dist2 = norm3D(crossproduct(vec_p2_p1_ortho, vec_p1_p)) / norm3D(vec_p2_p1_ortho);
 
         logger.info("distance ortho to east arm: {}", dist2);
-        
+
         return dist + dist2;
     }
 
