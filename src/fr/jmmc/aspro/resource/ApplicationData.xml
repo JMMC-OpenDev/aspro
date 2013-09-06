@@ -17,8 +17,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="0.9.5 beta 6"/>
-    <compilation date="02/09/2013" compiler="JDK 1.6.0_24"/>
+    <program name="Aspro2" version="0.9.5"/>
+    <compilation date="06/09/2013" compiler="JDK 1.6.0_24"/>
   
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -186,6 +186,7 @@
 
     <releasenotes>
         <release version="0.9.5">
+            <pubDate>Fri, 06 Sep 2013 16:00:00 GMT</pubDate>
             <prerelease version="0.9.5 beta 6">
                 <change type="FEATURE">Updated CHARA VEGA setup</change>
                 <change type="FEATURE">Added VLTI Period 93</change>
@@ -208,7 +209,6 @@
                 <change type="FEATURE">Modified color palette used in interferometer map and UV Coverage plot to use transparency (75% opacity)</change>
             </prerelease>
             <prerelease version="0.9.5 beta 2">
-                <pubDate>Tue, 07 May 2013 16:05:00 GMT</pubDate>
                 <change type="FEATURE">Improved UV Coverage plot to draw outlines arround UV segments and tracks (shadows)</change>
                 <change type="FEATURE">Added LUT aspro-isophot (new default one) which draws white lines every 10%</change>
                 <change type="FEATURE">Improved performance related to clipping / zoom issues with dotted outline (optional constraints)</change>
