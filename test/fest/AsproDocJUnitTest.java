@@ -33,6 +33,7 @@ import org.fest.swing.edt.GuiTask;
 import org.fest.swing.fixture.DialogFixture;
 import org.fest.swing.fixture.FrameFixture;
 import org.fest.swing.fixture.JPanelFixture;
+import org.fest.swing.fixture.JTabbedPaneFixture;
 import org.fest.swing.fixture.JTextComponentFixture;
 import org.fest.swing.util.Platform;
 import org.junit.Test;
@@ -131,7 +132,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
     AsproTestUtils.checkRunningTasks();
 
     // Capture observability plot :
-    window.tabbedPane().selectTab(SettingPanel.TAB_OBSERVABILITY);
+    getMainTabbedPane().selectTab(SettingPanel.TAB_OBSERVABILITY);
     saveScreenshot(window, "Aspro2-wind-obs.png");
 
     final JPanelFixture panel = window.panel("observabilityPanel");
@@ -145,12 +146,12 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
     panel.scrollBar("scroller").scrollToMaximum(); // see HD 1234
 
     // Capture observability plot of detailed plot :
-    saveScreenshot(window.tabbedPane(), "Aspro2-wind-obs-det.png");
+    saveScreenshot(getMainTabbedPane(), "Aspro2-wind-obs-det.png");
 
     panel.scrollBar("scroller").scrollTo(8); // see ETA TAU (moon) [0 to 14]
 
     // Capture observability plot of detailed plot :
-    saveScreenshot(window.tabbedPane(), "Aspro2-moon-obs-det.png");
+    saveScreenshot(getMainTabbedPane(), "Aspro2-moon-obs-det.png");
 
 
     // disable detailed plot :
@@ -199,7 +200,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
   public void shouldShowObservability() {
 
     // Capture observability plot :
-    window.tabbedPane().selectTab(SettingPanel.TAB_OBSERVABILITY);
+    getMainTabbedPane().selectTab(SettingPanel.TAB_OBSERVABILITY);
 
     enableTooltips(true);
     
@@ -226,7 +227,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
     AsproTestUtils.checkRunningTasks();
 
     // Capture observability plot of  baseline limits :
-    saveScreenshot(window.tabbedPane(), "Aspro2-obs-bl.png");
+    saveScreenshot(getMainTabbedPane(), "Aspro2-obs-bl.png");
 
     // disable baseline limits :
     panel.checkBox("jCheckBoxBaseLineLimits").uncheck();
@@ -238,7 +239,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
     AsproTestUtils.checkRunningTasks();
 
     // Capture observability plot of detailed plot :
-    saveScreenshot(window.tabbedPane(), "Aspro2-obs-det.png");
+    saveScreenshot(getMainTabbedPane(), "Aspro2-obs-det.png");
 
     // disable detailed plot :
     panel.checkBox("jCheckBoxDetailedOutput").uncheck();
@@ -306,7 +307,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
     AsproTestUtils.checkRunningTasks();
 
     // select UV tab like before OIFits viewer:
-    window.tabbedPane().selectTab(SettingPanel.TAB_UV_COVERAGE);
+    getMainTabbedPane().selectTab(SettingPanel.TAB_UV_COVERAGE);
   }
 
   /**
@@ -424,7 +425,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
   @GUITest
   public void shouldCallLITpro() {
     // select tab to let menu lost focus:
-    window.tabbedPane().selectTab(SettingPanel.TAB_UV_COVERAGE);
+    getMainTabbedPane().selectTab(SettingPanel.TAB_UV_COVERAGE);
 
     window.list("jListTargets").selectItem("HD 1234");
 
@@ -462,7 +463,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
   public void shouldShowCharaPoPs() {
 
     // show observability plot :
-    window.tabbedPane().selectTab(SettingPanel.TAB_OBSERVABILITY);
+    getMainTabbedPane().selectTab(SettingPanel.TAB_OBSERVABILITY);
 
     window.list("jListTargets").selectItem("HIP1234");
 
@@ -498,7 +499,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
     AsproTestUtils.checkRunningTasks();
 
     // show observability plot (force plot refresh) :
-    window.tabbedPane().selectTab(SettingPanel.TAB_OBSERVABILITY);
+    getMainTabbedPane().selectTab(SettingPanel.TAB_OBSERVABILITY);
 
     saveCroppedScreenshotOf("popsUser.png", left, 0, width, height);
   }
@@ -626,7 +627,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
     window.list("jListTargets").selectItem("HD 1234");
 
     // select UV tab:
-    window.tabbedPane().selectTab(SettingPanel.TAB_UV_COVERAGE);
+    getMainTabbedPane().selectTab(SettingPanel.TAB_UV_COVERAGE);
 
     final JPanelFixture panel = window.panel("uvCoveragePanel");
 
@@ -637,7 +638,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
     panel.textBox("jFieldUVMax").setText("20.00");
 
     // select UV tab to let fields lost focus (trigger change listeners):
-    window.tabbedPane().selectTab(SettingPanel.TAB_UV_COVERAGE);
+    getMainTabbedPane().selectTab(SettingPanel.TAB_UV_COVERAGE);
 
     // waits for computation to finish :
     AsproTestUtils.checkRunningTasks();
@@ -748,7 +749,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
    */
   private BufferedImage showPlotTab(final String tabName) {
     // select tab :
-    window.tabbedPane().selectTab(tabName);
+    getMainTabbedPane().selectTab(tabName);
 
     final BufferedImage image = takeScreenshotOf(window);
 
@@ -765,7 +766,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
    */
   private void showPlotTab(final String tabName, final String fileName) {
     // select tab :
-    window.tabbedPane().selectTab(tabName);
+    getMainTabbedPane().selectTab(tabName);
 
     // Capture window screenshot :
     saveScreenshot(window, fileName);
@@ -779,10 +780,18 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
    * @param tabName tab name
    */
   private void selectTab(final String tabName) {
-    window.tabbedPane().selectTab(tabName);
+    getMainTabbedPane().selectTab(tabName);
 
     // export PDF :
     exportPDF();
+  }
+  
+  /**
+   * Return the main Aspro tabbed pane
+   * @return Aspro tabbed pane
+   */
+  private JTabbedPaneFixture getMainTabbedPane() {
+      return window.tabbedPane("AsproTab");
   }
 
   /**
