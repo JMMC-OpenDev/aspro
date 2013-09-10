@@ -190,8 +190,10 @@ public final class Aspro2 extends App {
      */
     @Override
     public void cleanup() {
-        // dispose Swing SettingPanel:
-        getSettingPanel().dispose();
+        if (getSettingPanel() != null) {
+            // dispose Swing SettingPanel:
+            getSettingPanel().dispose();
+        }
     }
 
     /**
@@ -287,7 +289,7 @@ public final class Aspro2 extends App {
 
         // Send OIFits (SAMP) :
         new SendOIFitsAction();
-        
+
         // Help menu:
         new ShowReleaseNotesAction("showConf", "Aspro2 Configuration " + ConfigurationManager.getInstance().getConfDescription().getProgramVersion(), ConfigurationManager.getInstance().getConfDescription());
     }
