@@ -29,6 +29,14 @@ import org.slf4j.LoggerFactory;
  * @author bourgesl
  */
 public final class AsproGenConfig {
+    
+    /** refractive index in air (from http://refractiveindex.info/?group=GASES&material=Air) */
+    public final static double N_AIR = 1.00027316d;
+    /** EARTH FLATTENING f = 1/(298.257,223,563) */
+    public final static double EARTH_FLATTENING = 1.0 / 298.257223563;
+    /** Earth square excentricity e^2 = 2 x f - f^2 */
+    public final static double EARTH_SQUARE_EXCENTRICITY = 2.0 * EARTH_FLATTENING - EARTH_FLATTENING * EARTH_FLATTENING;
+    
 
     /** Class logger */
     private static final Logger logger = LoggerFactory.getLogger(AsproGenConfig.class.getName());
@@ -238,6 +246,18 @@ public final class AsproGenConfig {
         sb.append("</station>\n");
 
     }
+    
+    private static final double geocentricLatitude(final double geodeticLatitude) {
+        // geocentricLatitude = tan-1( (1-e^2) * tan geodeticLatitude)
+        // e^2 = 2 x f - f^2
+        // f = 1/(298.257,223,563)
+        
+        final double geocentricLatitude = Math.atan((1.0 - EARTH_SQUARE_EXCENTRICITY) * Math.tan(geodeticLatitude));
+
+        logger.info("geodeticLatitude: {} => geocentricLatitude: {}", Math.toDegrees(geodeticLatitude), Math.toDegrees(geocentricLatitude));
+        
+        return geocentricLatitude;
+    }
 
     /**
      * Convert horizontal coordinates to equatorial coordinates
@@ -247,19 +267,24 @@ public final class AsproGenConfig {
      * # ZOFFSET - vertical (+ is up) offset in microns from S1
      *
      * @param station station name
-     * @param latitude latitude of the interferometer (rad)
+     * @param geodeticLatitude latitude of the interferometer (rad)
      * @param xOffset East offset in microns from S1
      * @param yOffset North offset in microns from S1
      * @param zOffset vertical (+ is up) offset in microns from S1
      * @param sb output buffer for xml output
      */
-    private static Position3D convertHorizToEquatorial(final String station, final double latitude,
+    private static Position3D convertHorizToEquatorial(final String station, final double geodeticLatitude,
             final double xOffset, final double yOffset, final double zOffset,
             final StringBuilder sb) {
 
         final double x = xOffset * 1e-6d;
         final double y = yOffset * 1e-6d;
         final double z = zOffset * 1e-6d;
+
+        // Should convert from horizontal (local plane) to equatorial using ellipsoid correction ?
+        
+        final double latitude = geodeticLatitude;
+//        final double latitude = geocentricLatitude(geodeticLatitude);
 
         final double xx = -Math.sin(latitude) * y + Math.cos(latitude) * z;
         final double yy = x;
@@ -281,25 +306,23 @@ public final class AsproGenConfig {
      *
      # AIRPATH - amount of airpath  in microns using default beam
      #	    Note that this assumes the default Beam dn default Pop are used
-     # INTERNAL- Pathlength (with default beam) for internal fringes
      # LIGHT	  - length of light pipe in microns
      #	    Note that this assumes the default Beam dn default Pop are used
      *
      * @param station station name
      * @param light length of light pipe in microns
      * @param airPath amount of airpath  in microns using default beam
-     * @param internal Pathlength (with default beam) for internal fringes
      * @param sb output buffer for xml output
      */
-    public static void convertCHARAAirPath(final String station, final double light, final double airPath, final double internal,
+    public static void convertCHARAAirPath(final String station, final double light, final double airPath,
             final StringBuilder sb) {
 
-        final double delay = (light + airPath + internal) * 1e-6d;
+        final double delay = (light + airPath * N_AIR) * 1e-6d;
 
         logger.info(station + " = " + delay);
 
         sb.append("      <delayLineFixedOffset>").append(delay).append("</delayLineFixedOffset>\n");
-        }
+    }
 
     /**
      * Compute CHARA PoP delay (POPX)
@@ -343,7 +366,7 @@ public final class AsproGenConfig {
 
             convertHorizToEquatorial(station, lat, config.get("XOFFSET"), config.get("YOFFSET"), config.get("ZOFFSET"), sb);
 
-            convertCHARAAirPath(station, config.get("LIGHT"), config.get("AIRPATH"), config.get("INTERNAL"), sb);
+            convertCHARAAirPath(station, config.get("LIGHT"), config.get("AIRPATH"), sb);
 
             sb.append("\n");
 
@@ -429,8 +452,8 @@ public final class AsproGenConfig {
             config = e.getValue();
 
             for (int i = 0; i < 6; i++) {
-                values[i] = config.get("BEAM" + (i + 1)) * 1e-6d;
-                }
+                values[i] = config.get("BEAM" + (i + 1)) * N_AIR * 1e-6d;
+            }
 
             convertCHARASwitchyardStation(station, values, sb);
         }
@@ -612,14 +635,21 @@ public final class AsproGenConfig {
 //       LAT     34 13 34.110
 //    #  Geodetic height of the CHARA reference plane [meters]:
 //       HEIGHT  1725.21
-        
+
         // S1 from telescopes.chara:
 //    LONG    -118 3 25.31272
 //    LAT       34 13 27.78130
-        final double lonDeg = -(118d + 3d / 60d + 25.31272d / 3600d);
+
+
+//    theo: I checked and there is even a *third* definition, the one actually used by the software:
+
+//    #define CHARA_LONGITUDE string_to_angle("-118 3 25.6858")
+//    #define CHARA_LATITUDE  string_to_angle("34 13 33.3065") 
+
+        final double lonDeg = -(118d + 3d / 60d + 25.6858d / 3600d);
         logger.info("CHARA longitude (deg) : " + lonDeg);
 
-        final double latDeg = 34d + 13d / 60d + 27.78130d / 3600d;
+        final double latDeg = 34d + 13d / 60d + 33.3065d / 3600d;
         logger.info("CHARA latitude (deg)  : " + latDeg);
 
         final double alt = 1725.21d;
@@ -635,11 +665,12 @@ public final class AsproGenConfig {
 
         logger.info("CHARA position : " + coords.toString());
 
-/*
-14:50:36.296 [main] INFO  AsproGenConfig - CHARA latitude (deg)  : 34.22438369444445
-14:50:36.297 [main] INFO  AsproGenConfig - position (x,y,z) : -2476998.047780274, -4647390.089884061, 3582240.6122966344
-14:50:37.077 [main] INFO  AsproGenConfig - CHARA position : [-118:03:25,313, 34:13:27,781, 1725.2099999999627 m]
- */        
+        /*
+         11:22:36.933 [main] INFO  AsproGenConfig - CHARA longitude (deg) : -118.05713494444444
+         11:22:36.933 [main] INFO  AsproGenConfig - CHARA latitude (deg)  : 34.225918472222226
+         11:22:36.933 [main] INFO  AsproGenConfig - position (x,y,z) : -2476961.3191738687, -4647300.927731647, 3582381.678585947
+         11:22:37.347 [main] INFO  AsproGenConfig - CHARA position : [-118:03:25,686, 34:13:33,307, 1725.210000000894 m]
+         */
         return new double[]{lonDeg, latDeg};
     }
 
