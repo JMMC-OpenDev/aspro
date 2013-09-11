@@ -6,6 +6,7 @@ package edu.dartmouth;
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.oi.AzEl;
 import fr.jmmc.aspro.util.AngleUtils;
+import fr.jmmc.jmal.ALX;
 import net.jafama.FastMath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,11 +67,40 @@ public final class AstroSkyCalcObservation {
      * @param jd julian date used to precess the target
      * @param ra right ascension (deg)
      * @param dec declination (deg)
+     * @param pmRa proper motion in RA given divided by cos(DE) in mas/yr
+     * @param pmDec proper motion in DE in mas/yr
      * @return double[] containing precessed ra (dec hours) and dec (deg) for the given jd date
      */
-    public double[] defineTarget(final double jd, final double ra, final double dec) {
-        // RA (decimal hours), DEC (degrees)
-        final Celest target = new Celest(AngleUtils.deg2hours(ra), dec, AsproConstants.EPOCH_J2000);
+    public double[] defineTarget(final double jd, final double ra, final double dec, final Double pmRa, final Double pmDec) {
+
+        // Proper motion handling:
+        final Celest target;
+
+        if (pmRa != null && pmDec != null) {
+            final double years = (jd - Const.J2000) * Const.DAY_IN_YEAR;
+
+            if (isLogDebug) {
+                logger.debug("Target PM[RA/DEC]: {}, {} mas/yr - years = {}", pmRa, pmDec, years);
+            }
+
+            // pmRA is given in RA*cos(DE) cf ASCC (Proper Motion in RA*cos(DE)):
+
+            // RAJ2000_ep2000 "RAJ2000+(2000-1991.25)*pmRA/cos(DEJ2000*PI/180)/1000/3600"
+            final double deltaRa = years * (pmRa / FastMath.cos(FastMath.toRadians(dec))) * 1e-3d * ALX.ARCSEC_IN_DEGREES;
+
+            // DEJ2000_ep2000 "DEJ2000+(2000-1991.25)*pmDE/1000/3600"        
+            final double deltaDec = years * pmDec * 1e-3d * ALX.ARCSEC_IN_DEGREES;
+
+            if (isLogDebug) {
+                logger.debug("Target delta[RA/DEC]: {} {} arcsec", deltaRa * ALX.DEG_IN_ARCSEC, deltaDec * ALX.DEG_IN_ARCSEC);
+            }
+
+            // RA (decimal hours), DEC (degrees)
+            target = new Celest(AngleUtils.deg2hours(ra + deltaRa), dec + deltaDec, AsproConstants.EPOCH_J2000);
+        } else {
+            // RA (decimal hours), DEC (degrees)
+            target = new Celest(AngleUtils.deg2hours(ra), dec, AsproConstants.EPOCH_J2000);
+        }
 
         if (isLogDebug) {
             logger.debug("Target [RA/DEC/EPOCH]: {} {}",
@@ -237,8 +267,8 @@ public final class AstroSkyCalcObservation {
         final Celest target = new Celest(AngleUtils.deg2hours(ra), dec, AsproConstants.EPOCH_J2000);
 
         return new String[]{
-                    target.alpha.roundedRAString(raDigits, ":"),
-                    target.delta.roundedDecString(decDigits, ":")
-                };
+            target.alpha.roundedRAString(raDigits, ":"),
+            target.delta.roundedDecString(decDigits, ":")
+        };
     }
 }

@@ -571,7 +571,7 @@ public final class ObservabilityService {
 
         for (Target target : targets) {
             // get Target coordinates precessed to jd :
-            raDec = this.sco.defineTarget(jdCenter, target.getRADeg(), target.getDECDeg());
+            raDec = this.sco.defineTarget(jdCenter, target.getRADeg(), target.getDECDeg(), target.getPMRA(), target.getPMDEC());
 
             // precessed target right ascension in decimal hours :
             precRA = raDec[0];
@@ -958,7 +958,7 @@ public final class ObservabilityService {
         this.data.addStarData(starData);
 
         // get Target coordinates precessed to JD CENTER and define target to get later az/alt positions from JSkyCalc :
-        final double[] raDec = this.sco.defineTarget(jdCenter(), target.getRADeg(), target.getDECDeg());
+        final double[] raDec = this.sco.defineTarget(jdCenter(), target.getRADeg(), target.getDECDeg(), target.getPMRA(), target.getPMDEC());
 
         // precessed target right ascension in decimal hours :
         final double precRA = raDec[0];
@@ -1984,7 +1984,7 @@ public final class ObservabilityService {
             // check again the true warning threshold:
             if (minSeparation < warningThreshold) {
                 // add warning:
-                
+
                 // TODO: use Format.format(val, StringBuffer) instead:
                 this.addWarning("Moon separation is " + df1.format(minSeparation)
                         + " deg at " + timeFormatter.format(convertJDToDate(minJd))
@@ -2306,7 +2306,7 @@ public final class ObservabilityService {
             // dump beam information:
             int i = 0;
             for (Beam b : this.beams) {
-                logger.debug("beam [{}]: ", i, b.toString());
+                logger.debug("beam [{}]: {}", i, b.toString());
                 i++;
             }
         }
