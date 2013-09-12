@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ *******************************************************************************
+ * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
+ *******************************************************************************
+ -->
+
+<project name="ASPRO 2" default="about" basedir=".">
+
+  <description>
+  	Aspro ant build file
+  </description>
+
+
+	<!--
+    Get build properties (general).
+	  Should only contain the location of the JMCS module where JAXB libraries can be found.
+	-->
+  <property file="build.properties" />
+
+  <!-- define folder properties -->
+  <property name="root" location=".."/>
+
+  <!-- JAXB library must be present in the jmcs module nearby -->
+  <property name="jaxb.libs" location="${jmcs.path}/lib"/>
+
+  <!-- Aspro src folder -->
+  <property name="sources" location="${root}/src"/>
+
+  <!-- Aspro test folder -->
+  <property name="test" location="${root}/test"/>
+
+
+  <!-- custom macro to enhance XJC -->
+  <macrodef name="xjc">
+    <attribute name="destdir"/>
+    <attribute name="schema"/>
+
+    <sequential>
+      <java jar="${jaxb.libs}/jaxb-xjc.jar">
+        <arg value="-classpath"/>
+        <arg value="${jaxb.libs}/simple-regenerator-1.0.jar"/>
+
+        <arg value="-no-header"/>
+
+        <arg value="-extension"/>
+        <!-- preserve code extension -->
+        <arg value="-simple-preserve"/>
+
+        <arg value="-d"/>
+        <arg value="@{destdir}"/>
+
+        <arg value="@{schema}"/>
+      </java>
+
+      <delete dir="@{destdir}">
+        <include name="**/*.java.backup"/>
+      </delete>
+    </sequential>
+  </macrodef>
+
+
+
+
+  <!-- targets -->
+
+  <!-- target about : -->
+  <target name="about" description="show information for public targets">
+    <echo>available ant targets : </echo>
+    <echo>-------------------------------------------------------------------------------</echo>
+    <echo>  - genXsdCode         : generates the java code from xml schema (xsd)</echo>
+    <echo>-------------------------------------------------------------------------------</echo>
+    <echo> jaxb libraries : ${jaxb.libs}</echo>
+  </target>
+
+
+
+
+  <target name="genXsdCode" description="generate java classes from XSD schemas">
+
+    <echo>generating java code for AsproOIModel.xsd</echo>
+    <mkdir dir="${sources}/fr/jmmc/aspro/model/oi" />
+
+    <xjc destdir="${sources}"
+         schema="${sources}/fr/jmmc/aspro/model/AsproOIModel.xsd" />
+
+    <!-- remove generated classes for jmal package (target model) -->
+    
+    <delete dir="${sources}/fr/jmmc/jmal/" />
+
+  </target>
+
+
+
+
+  <target name="oifits2html" description="convert OIFits xml representation to HTML">
+
+		<xslt  in="${test}/oifits/sample.xml"
+          out="${test}/oifits/sample.html"
+          style="${sources}/fr/jmmc/aspro/gui/oiview.xsl"
+          force="true"/>
+
+    <echo>XSLT done : ${test}/oifits/sample.html</echo>
+    
+  </target>
+
+</project>
