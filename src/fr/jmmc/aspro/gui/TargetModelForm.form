@@ -440,12 +440,12 @@
             </Constraint>
           </Constraints>
         </Component>
-        <Component class="javax.swing.JRadioButton" name="jRadioButtonRhoTheta">
+        <Component class="javax.swing.JRadioButton" name="jRadioButtonSepPosAngle">
           <Properties>
             <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
               <ComponentRef name="buttonGroupEditMode"/>
             </Property>
-            <Property name="text" type="java.lang.String" value="rho (mas) / theta [-180&#xb0;; 180&#xb0;]"/>
+            <Property name="text" type="java.lang.String" value="sep. (mas) / pos. angle [-180&#xb0;; 180&#xb0;]"/>
           </Properties>
           <Constraints>
             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">

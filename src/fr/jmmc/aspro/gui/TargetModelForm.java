@@ -115,10 +115,11 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         if (preferXyMode) {
             getModelParameterTableModel().setEditMode(ModelParameterTableModel.EditMode.X_Y);
         } else {
-            getModelParameterTableModel().setEditMode(ModelParameterTableModel.EditMode.RHO_THETA);
+            /* use separation / position angle editor instead of rho / theta editor to respect astronomical conventions */
+            getModelParameterTableModel().setEditMode(ModelParameterTableModel.EditMode.SEP_POS_ANGLE);
         }
         // and set coherent state of edit mode radio buttons
-        this.jRadioButtonRhoTheta.setSelected(!preferXyMode);
+        this.jRadioButtonSepPosAngle.setSelected(!preferXyMode);
         this.jRadioButtonXY.setSelected(preferXyMode);
 
         postInit();
@@ -153,7 +154,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
 
         // edit mode :
         this.jRadioButtonXY.addActionListener(this);
-        this.jRadioButtonRhoTheta.addActionListener(this);
+        this.jRadioButtonSepPosAngle.addActionListener(this);
 
         // disable column reordering :
         this.jTableModelParameters.getTableHeader().setReorderingAllowed(false);
@@ -190,7 +191,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         this.jComboBoxModelType.setEnabled(false);
 
         this.jRadioButtonXY.setEnabled(false);
-        this.jRadioButtonRhoTheta.setEnabled(false);
+        this.jRadioButtonSepPosAngle.setEnabled(false);
         this.jButtonNormalizeFluxes.setEnabled(false);
 
         // reset current target:
@@ -208,6 +209,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
     /**
      * Free any resource or reference to this instance
      */
+    @Override
     public void dispose() {
         if (this.fitsImagePanel != null) {
             this.fitsImagePanel.dispose();
@@ -509,12 +511,12 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
             }
             // change edit mode to X/Y :
             this.defineModels(this.currentTarget, EditMode.X_Y);
-        } else if (e.getSource() == this.jRadioButtonRhoTheta) {
+        } else if (e.getSource() == this.jRadioButtonSepPosAngle) {
             if (logger.isDebugEnabled()) {
-                logger.debug("edit mode Rho/Theta: {}", this.jRadioButtonRhoTheta.isSelected());
+                logger.debug("edit mode Sep/PosAngle: {}", this.jRadioButtonSepPosAngle.isSelected());
             }
-            // change edit mode to Rho/Theta :
-            this.defineModels(this.currentTarget, EditMode.RHO_THETA);
+            // change edit mode to Sep/PosAngle:
+            this.defineModels(this.currentTarget, EditMode.SEP_POS_ANGLE);
         } else if (e.getSource() == this.jRadioButtonAnalytical) {
             if (logger.isDebugEnabled()) {
                 logger.debug("mode Analytical: {}", this.jRadioButtonAnalytical.isSelected());
@@ -640,7 +642,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         jScrollPaneTableModelParameters = new javax.swing.JScrollPane();
         jTableModelParameters = createJTable();
         jRadioButtonXY = new javax.swing.JRadioButton();
-        jRadioButtonRhoTheta = new javax.swing.JRadioButton();
+        jRadioButtonSepPosAngle = new javax.swing.JRadioButton();
         jLabelOffsetEditMode = new javax.swing.JLabel();
         jButtonNormalizeFluxes = new javax.swing.JButton();
         jPanelImage = new javax.swing.JPanel();
@@ -936,14 +938,14 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
         gridBagConstraints.weightx = 0.5;
         jPanelParameters.add(jRadioButtonXY, gridBagConstraints);
 
-        buttonGroupEditMode.add(jRadioButtonRhoTheta);
-        jRadioButtonRhoTheta.setText("rho (mas) / theta [-180°; 180°]");
+        buttonGroupEditMode.add(jRadioButtonSepPosAngle);
+        jRadioButtonSepPosAngle.setText("sep. (mas) / pos. angle [-180°; 180°]");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 0.5;
-        jPanelParameters.add(jRadioButtonRhoTheta, gridBagConstraints);
+        jPanelParameters.add(jRadioButtonSepPosAngle, gridBagConstraints);
 
         jLabelOffsetEditMode.setText("edit positions:");
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -1258,7 +1260,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
     private javax.swing.JPanel jPanelUserModel;
     private javax.swing.JRadioButton jRadioButtonAnalytical;
     private javax.swing.JRadioButton jRadioButtonInvalid;
-    private javax.swing.JRadioButton jRadioButtonRhoTheta;
+    private javax.swing.JRadioButton jRadioButtonSepPosAngle;
     private javax.swing.JRadioButton jRadioButtonUserModel;
     private javax.swing.JRadioButton jRadioButtonValid;
     private javax.swing.JRadioButton jRadioButtonXY;
@@ -1368,6 +1370,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
      * @param userModelFile user model file to use
      * @param imageIndex image index to display
      */
+    @Override
     public void perform(final String userModelFile, final int imageIndex) {
         if (this.fitsImagePanel != null) {
             // show image at given index:

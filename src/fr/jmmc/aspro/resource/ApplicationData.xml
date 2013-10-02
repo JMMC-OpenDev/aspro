@@ -17,8 +17,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="0.9.5.1"/>
-    <compilation date="12/09/2013" compiler="JDK 1.6.0_24"/>
+    <program name="Aspro2" version="0.9.6 beta 1"/>
+    <compilation date="03/10/2013" compiler="JDK 1.6.0_24"/>
   
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -185,6 +185,11 @@
     </menubar>
 
     <releasenotes>
+        <release version="0.9.6">
+            <prerelease version="0.9.6 beta 1">
+                <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/533">Modified position editor (rho / theta) to use astronomical convention (separation / position angle)</change>
+            </prerelease>
+        </release>
         <release version="0.9.5.1">
             <pubDate>Thu, 12 Sep 2013 12:00:00 GMT</pubDate>
             <prerelease version="0.9.5.1 beta 1">

@@ -347,12 +347,12 @@
                     </Constraint>
                   </Constraints>
                 </Component>
-                <Component class="javax.swing.JRadioButton" name="jRadioButtonRhoTheta">
+                <Component class="javax.swing.JRadioButton" name="jRadioButtonSepPosAngle">
                   <Properties>
                     <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
                       <ComponentRef name="buttonGroupPositionStyle"/>
                     </Property>
-                    <Property name="text" type="java.lang.String" value="rho (mas) / theta"/>
+                    <Property name="text" type="java.lang.String" value="sep. (mas) / pos. angle"/>
                   </Properties>
                   <Events>
                     <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jRadioButtonPositionStyleActionPerformed"/>

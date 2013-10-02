@@ -166,7 +166,7 @@ public final class PreferencesView extends JFrame implements Observer {
         jPanelModelEditor = new javax.swing.JPanel();
         jLabelPositionStyle = new javax.swing.JLabel();
         jRadioButtonXY = new javax.swing.JRadioButton();
-        jRadioButtonRhoTheta = new javax.swing.JRadioButton();
+        jRadioButtonSepPosAngle = new javax.swing.JRadioButton();
         jPanelModelImage = new javax.swing.JPanel();
         jLabelLutTable = new javax.swing.JLabel();
         jComboBoxLUT = new javax.swing.JComboBox();
@@ -431,9 +431,9 @@ public final class PreferencesView extends JFrame implements Observer {
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelModelEditor.add(jRadioButtonXY, gridBagConstraints);
 
-        buttonGroupPositionStyle.add(jRadioButtonRhoTheta);
-        jRadioButtonRhoTheta.setText("rho (mas) / theta");
-        jRadioButtonRhoTheta.addActionListener(new java.awt.event.ActionListener() {
+        buttonGroupPositionStyle.add(jRadioButtonSepPosAngle);
+        jRadioButtonSepPosAngle.setText("sep. (mas) / pos. angle");
+        jRadioButtonSepPosAngle.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jRadioButtonPositionStyleActionPerformed(evt);
             }
@@ -441,7 +441,7 @@ public final class PreferencesView extends JFrame implements Observer {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.weightx = 0.2;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-        jPanelModelEditor.add(jRadioButtonRhoTheta, gridBagConstraints);
+        jPanelModelEditor.add(jRadioButtonSepPosAngle, gridBagConstraints);
 
         jPanelView.add(jPanelModelEditor);
 
@@ -854,7 +854,7 @@ public final class PreferencesView extends JFrame implements Observer {
         // Model editor:
         final boolean preferXyMode = this.myPreferences.getPreferenceAsBoolean(Preferences.MODELEDITOR_PREFERXY);
         this.jRadioButtonXY.setSelected(preferXyMode);
-        this.jRadioButtonRhoTheta.setSelected(!preferXyMode);
+        this.jRadioButtonSepPosAngle.setSelected(!preferXyMode);
 
         // Model image:
         this.jComboBoxImageSize.setSelectedItem(this.myPreferences.getPreferenceAsInt(Preferences.MODEL_IMAGE_SIZE));
@@ -929,7 +929,7 @@ public final class PreferencesView extends JFrame implements Observer {
     private javax.swing.JRadioButton jRadioButtonImageNoiseYes;
     private javax.swing.JRadioButton jRadioButtonNightOnlyNo;
     private javax.swing.JRadioButton jRadioButtonNightOnlyYes;
-    private javax.swing.JRadioButton jRadioButtonRhoTheta;
+    private javax.swing.JRadioButton jRadioButtonSepPosAngle;
     private javax.swing.JRadioButton jRadioButtonTimeLST;
     private javax.swing.JRadioButton jRadioButtonTimeUTC;
     private javax.swing.JRadioButton jRadioButtonXY;
