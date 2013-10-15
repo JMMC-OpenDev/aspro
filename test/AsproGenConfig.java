@@ -29,15 +29,13 @@ import org.slf4j.LoggerFactory;
  * @author bourgesl
  */
 public final class AsproGenConfig {
-    
+
     /** refractive index in air (from http://refractiveindex.info/?group=GASES&material=Air) */
-    public final static double N_AIR = 1.00027316d;
+    public final static double N_AIR = 1.00027316;
     /** EARTH FLATTENING f = 1/(298.257,223,563) */
     public final static double EARTH_FLATTENING = 1.0 / 298.257223563;
     /** Earth square excentricity e^2 = 2 x f - f^2 */
     public final static double EARTH_SQUARE_EXCENTRICITY = 2.0 * EARTH_FLATTENING - EARTH_FLATTENING * EARTH_FLATTENING;
-    
-
     /** Class logger */
     private static final Logger logger = LoggerFactory.getLogger(AsproGenConfig.class.getName());
 
@@ -87,11 +85,11 @@ public final class AsproGenConfig {
 
             reader = new BufferedReader(new FileReader(data));
 
-            int i = 0;
+            int i;
             String line;
             StringTokenizer tok;
             // outputs :
-            String station = null;
+            String station;
             double[] values = new double[maxCols];
 
             while ((line = reader.readLine()) != null) {
@@ -198,7 +196,7 @@ public final class AsproGenConfig {
 
             reader = new BufferedReader(new FileReader(data));
 
-            int i = 0;
+            int i;
             String line;
             StringTokenizer tok;
             // outputs :
@@ -246,16 +244,16 @@ public final class AsproGenConfig {
         sb.append("</station>\n");
 
     }
-    
-    private static final double geocentricLatitude(final double geodeticLatitude) {
+
+    private static double geocentricLatitude(final double geodeticLatitude) {
         // geocentricLatitude = tan-1( (1-e^2) * tan geodeticLatitude)
         // e^2 = 2 x f - f^2
         // f = 1/(298.257,223,563)
-        
+
         final double geocentricLatitude = Math.atan((1.0 - EARTH_SQUARE_EXCENTRICITY) * Math.tan(geodeticLatitude));
 
         logger.info("geodeticLatitude: {} => geocentricLatitude: {}", Math.toDegrees(geodeticLatitude), Math.toDegrees(geocentricLatitude));
-        
+
         return geocentricLatitude;
     }
 
@@ -267,23 +265,23 @@ public final class AsproGenConfig {
      * # ZOFFSET - vertical (+ is up) offset in microns from S1
      *
      * @param station station name
-     * @param geodeticLatitude latitude of the interferometer (rad)
+     * @param latitude latitude of the interferometer (rad)
      * @param xOffset East offset in microns from S1
      * @param yOffset North offset in microns from S1
      * @param zOffset vertical (+ is up) offset in microns from S1
      * @param sb output buffer for xml output
+     * @return equatorial coordinates
      */
-    private static Position3D convertHorizToEquatorial(final String station, final double geodeticLatitude,
+    private static Position3D convertHorizToEquatorial(final String station, final double latitude,
             final double xOffset, final double yOffset, final double zOffset,
             final StringBuilder sb) {
 
-        final double x = xOffset * 1e-6d;
-        final double y = yOffset * 1e-6d;
-        final double z = zOffset * 1e-6d;
+        final double x = xOffset * 1e-6;
+        final double y = yOffset * 1e-6;
+        final double z = zOffset * 1e-6;
 
         // Should convert from horizontal (local plane) to equatorial using ellipsoid correction ?
-        
-        final double latitude = geodeticLatitude;
+
 //        final double latitude = geocentricLatitude(geodeticLatitude);
 
         final double xx = -Math.sin(latitude) * y + Math.cos(latitude) * z;
@@ -317,7 +315,7 @@ public final class AsproGenConfig {
     public static void convertCHARAAirPath(final String station, final double light, final double airPath,
             final StringBuilder sb) {
 
-        final double delay = (light + airPath * N_AIR) * 1e-6d;
+        final double delay = (light + airPath * N_AIR) * 1e-6;
 
         logger.info(station + " = " + delay);
 
@@ -338,7 +336,7 @@ public final class AsproGenConfig {
         for (int i = 1; i <= 5; i++) {
             sb.append("      <popLink>\n");
             sb.append("        <pop>PoP").append(i).append("</pop>\n");
-            sb.append("        <opticalLength>").append(config.get("POP" + i) * 1e-6d).append("</opticalLength>\n");
+            sb.append("        <opticalLength>").append(config.get("POP" + i) * 1e-6).append("</opticalLength>\n");
             sb.append("      </popLink>\n");
         }
     }
@@ -452,7 +450,7 @@ public final class AsproGenConfig {
             config = e.getValue();
 
             for (int i = 0; i < 6; i++) {
-                values[i] = config.get("BEAM" + (i + 1)) * N_AIR * 1e-6d;
+                values[i] = config.get("BEAM" + (i + 1)) * N_AIR * 1e-6;
             }
 
             convertCHARASwitchyardStation(station, values, sb);
@@ -519,7 +517,7 @@ public final class AsproGenConfig {
             "POP1", "POP2", "POP3", "POP4", "POP5"
         });
 
-        final Map<String, Map<String, Double>> stationConfigs = new LinkedHashMap<String, Map<String, Double>>();
+        final Map<String, Map<String, Double>> stationConfigs = new LinkedHashMap<String, Map<String, Double>>(16);
 
         // load data from file :
         BufferedReader reader = null;
@@ -531,9 +529,8 @@ public final class AsproGenConfig {
             // column separator :
             final String delimiter = " ";
 
-            String name = null;
-            String key = null;
-            Double value = null;
+            String name = null, key;
+            Double value;
             Map<String, Double> current = null;
 
             StringTokenizer tok;
@@ -545,7 +542,7 @@ public final class AsproGenConfig {
                     if (name == null) {
                         // start station block :
                         name = line;
-                        current = new LinkedHashMap<String, Double>();
+                        current = new LinkedHashMap<String, Double>(16);
 
 //            logger.info("new station : " + name);
 
@@ -629,10 +626,6 @@ public final class AsproGenConfig {
      * @return long and lat in degrees
      */
     private static double[] CHARAposition(final StringBuilder sb) {
-        // mean coordinates from CHARA_plan (system.chara):
-//    #  CHARA mean longitude and latitude from GPS
-//       LONG  -118 03 26.574
-//       LAT     34 13 34.110
 //    #  Geodetic height of the CHARA reference plane [meters]:
 //       HEIGHT  1725.21
 
@@ -640,19 +633,13 @@ public final class AsproGenConfig {
 //    LONG    -118 3 25.31272
 //    LAT       34 13 27.78130
 
-
-//    theo: I checked and there is even a *third* definition, the one actually used by the software:
-
-//    #define CHARA_LONGITUDE string_to_angle("-118 3 25.6858")
-//    #define CHARA_LATITUDE  string_to_angle("34 13 33.3065") 
-
-        final double lonDeg = -(118d + 3d / 60d + 25.6858d / 3600d);
+        final double lonDeg = -(118.0 + 3.0 / 60.0 + 25.31272 / 3600.0);
         logger.info("CHARA longitude (deg) : " + lonDeg);
 
-        final double latDeg = 34d + 13d / 60d + 33.3065d / 3600d;
+        final double latDeg = 34.0 + 13.0 / 60.0 + 27.78130 / 3600.0;
         logger.info("CHARA latitude (deg)  : " + latDeg);
 
-        final double alt = 1725.21d;
+        final double alt = 1725.21;
 
         final double[] pos = computeInterferometerPosition(lonDeg, latDeg, alt, sb);
 
@@ -666,10 +653,10 @@ public final class AsproGenConfig {
         logger.info("CHARA position : " + coords.toString());
 
         /*
-         11:22:36.933 [main] INFO  AsproGenConfig - CHARA longitude (deg) : -118.05713494444444
-         11:22:36.933 [main] INFO  AsproGenConfig - CHARA latitude (deg)  : 34.225918472222226
-         11:22:36.933 [main] INFO  AsproGenConfig - position (x,y,z) : -2476961.3191738687, -4647300.927731647, 3582381.678585947
-         11:22:37.347 [main] INFO  AsproGenConfig - CHARA position : [-118:03:25,686, 34:13:33,307, 1725.210000000894 m]
+         15:59:20.578 [main] INFO  AsproGenConfig - CHARA longitude (deg) : -118.0570313111111
+         15:59:20.578 [main] INFO  AsproGenConfig - CHARA latitude (deg)  : 34.22438369444445
+         15:59:20.578 [main] INFO  AsproGenConfig - position (x,y,z) : -2476998.047780274, -4647390.089884061, 3582240.6122966344
+         15:59:20.784 [main] INFO  AsproGenConfig - CHARA position : [-118:03:25,313, 34:13:27,781, 1725.2099999999627 m]
          */
         return new double[]{lonDeg, latDeg};
     }
@@ -679,11 +666,11 @@ public final class AsproGenConfig {
         final StringBuilder sb = new StringBuilder(128);
 
         // ASPRO1: 17/04/2012:
-        final double lonDeg = -70.40498688D;
-        final double latDeg = -24.62743941D;
+        final double lonDeg = -70.40498688;
+        final double latDeg = -24.62743941;
         logger.info("VLTI longitude / latitude (deg) : " + lonDeg + " - " + latDeg);
 
-        final double alt = 2681d;
+        final double alt = 2681.0;
         final double[] pos = computeInterferometerPosition(lonDeg, latDeg, alt, sb);
 
         final Position3D position = new Position3D();
@@ -707,13 +694,13 @@ public final class AsproGenConfig {
 
         final StringBuilder sb = new StringBuilder(128);
 
-        final double lonDeg = -(107d + 11d / 60d + 05.12d / 3600d);
+        final double lonDeg = -(107.0 + 11.0 / 60.0 + 05.12 / 3600.0);
         logger.info("MROI longitude (deg) : " + lonDeg);
 
-        final double latDeg = 33d + 58d / 60d + 47.6d / 3600d;
+        final double latDeg = 33.0 + 58.0 / 60.0 + 47.6 / 3600.0;
         logger.info("MROI latitude (deg) : " + latDeg);
 
-        final double alt = 3200d;
+        final double alt = 3200.0;
         computeInterferometerPosition(lonDeg, latDeg, alt, sb);
 
         logger.info("Generated MROI position:\n" + sb.toString());
@@ -729,7 +716,7 @@ public final class AsproGenConfig {
      */
     private static double[] computeInterferometerPosition(final double lon, final double lat, final double alt, final StringBuilder sb) {
 
-        final double theta = Math.toRadians(90d - lat);
+        final double theta = Math.toRadians(90.0 - lat);
         final double phi = Math.toRadians(lon);
 
         final double r = AsproConstants.EARTH_RADIUS + alt;
@@ -777,11 +764,11 @@ public final class AsproGenConfig {
 
             reader = new BufferedReader(new FileReader(data));
 
-            int i = 0;
+            int i;
             String line;
             StringTokenizer tok;
             // outputs :
-            String station = null;
+            String station;
             double[] values = new double[maxCols];
 
             while ((line = reader.readLine()) != null) {
@@ -874,7 +861,7 @@ public final class AsproGenConfig {
             "index", "XOFFSET", "YOFFSET", "ZOFFSET", "WEIGHT", "DIAMETER"
         };
 
-        final Map<String, Map<String, Double>> stationConfigs = new LinkedHashMap<String, Map<String, Double>>();
+        final Map<String, Map<String, Double>> stationConfigs = new LinkedHashMap<String, Map<String, Double>>(16);
 
         // load data from file :
         BufferedReader reader = null;
@@ -886,10 +873,9 @@ public final class AsproGenConfig {
             // column separator :
             final String delimiter = " ";
 
-            String name = null;
-            String key = null;
-            Double value = null;
-            Map<String, Double> current = null;
+            String name, key;
+            Double value;
+            Map<String, Double> current;
 
             StringTokenizer tok;
             String line;
@@ -910,7 +896,7 @@ public final class AsproGenConfig {
                         name = key;
 
                         logger.info("new station : " + name);
-                        current = new LinkedHashMap<String, Double>();
+                        current = new LinkedHashMap<String, Double>(16);
 
                         int i = 0;
                         // value (only first used) :
@@ -974,18 +960,18 @@ public final class AsproGenConfig {
             y = config.get("YOFFSET");
             z = config.get("ZOFFSET");
 
-            convertHorizToEquatorial(station, lat, 1e6d * x, 1e6d * y, 1e6d * z, sb);
+            convertHorizToEquatorial(station, lat, 1e6 * x, 1e6 * y, 1e6 * z, sb);
 
             // norm of baseline vector:
             offset = Math.sqrt(x * x + y * y + z * z);
 
             if (station.startsWith("N")) {
-                offset -= 2.5d;
+                offset -= 2.5;
             } else {
-                offset += 2.5d;
+                offset += 2.5;
             }
 
-            sb.append("      <delayLineFixedOffset>").append((int) Math.round(10d * offset) / 10d).append("</delayLineFixedOffset>\n");
+            sb.append("      <delayLineFixedOffset>").append((int) Math.round(10.0 * offset) / 10.0).append("</delayLineFixedOffset>\n");
             sb.append("    </station>\n\n");
         }
     }
@@ -1016,13 +1002,13 @@ public final class AsproGenConfig {
      * @return long and lat in degrees
      */
     private static double[] SUSIposition(final StringBuilder sb) {
-        final double lonDeg = 149.548224972222d;
+        final double lonDeg = 149.548224972222;
         logger.info("SUSI longitude (deg) : " + lonDeg);
 
-        final double latDeg = -30.322273888889d;
+        final double latDeg = -30.322273888889;
         logger.info("SUSI latitude (deg) : " + latDeg);
 
-        final double alt = 210d;
+        final double alt = 210.0;
         computeInterferometerPosition(lonDeg, latDeg, alt, sb);
 
         logger.info("Generated SUSI position:\n" + sb.toString());
@@ -1031,7 +1017,7 @@ public final class AsproGenConfig {
     }
 
     /**
-     * Load the NPOI config file (NPOI.txt)
+     * Load the NPOI config file (stations.npoi)
      * @param absFileName absolute file path to NPOI config file
      * @return susi station config
      *
@@ -1040,16 +1026,11 @@ public final class AsproGenConfig {
 
         logger.info("loadNPOIConfig : " + absFileName);
 
-        final List<String> labels = Arrays.asList(new String[]{
-            "AC", "AE", "AW", "AN",
-            "W7", "E6"
-        });
-
         final String[] columns = new String[]{
-            "XOFFSET", "YOFFSET", "ZOFFSET"
+            "XOFFSET", "YOFFSET", "ZOFFSET", "DELAY"
         };
 
-        final Map<String, Map<String, Double>> stationConfigs = new LinkedHashMap<String, Map<String, Double>>();
+        final Map<String, Map<String, Double>> stationConfigs = new LinkedHashMap<String, Map<String, Double>>(16);
 
         // load data from file :
         BufferedReader reader = null;
@@ -1061,10 +1042,9 @@ public final class AsproGenConfig {
             // column separator :
             final String delimiter = " ";
 
-            String name = null;
-            String key = null;
-            Double value = null;
-            Map<String, Double> current = null;
+            String name, key;
+            Double value;
+            Map<String, Double> current;
 
             StringTokenizer tok;
             String line;
@@ -1072,20 +1052,19 @@ public final class AsproGenConfig {
 
                 line = line.replaceAll("\\s+", " ").trim();
 
-                // Parse values :
-                logger.info("line = " + line);
+                if (!line.startsWith("!")) {
 
-                tok = new StringTokenizer(line, delimiter);
+                    // Parse values :
+                    logger.info("line = " + line);
 
-                if (tok.hasMoreTokens()) {
-                    // key
-                    key = tok.nextToken();
+                    tok = new StringTokenizer(line, delimiter);
 
-                    if (labels.contains(key)) {
-                        name = key;
+                    if (tok.hasMoreTokens()) {
+                        // key
+                        name = tok.nextToken();
 
                         logger.info("new station : " + name);
-                        current = new LinkedHashMap<String, Double>();
+                        current = new LinkedHashMap<String, Double>(16);
 
                         int i = 0;
                         // value (only first used) :
@@ -1124,33 +1103,17 @@ public final class AsproGenConfig {
     }
 
     /**
-     * Convert SUSI station configs to ASPRO station configurations
+     * Convert NPOI station configs to ASPRO station configurations
      * @param stationConfigs station configs
      * @param sb buffer
      */
     private static void convertNPOIStations(final Map<String, Map<String, Double>> stationConfigs, final StringBuilder sb) {
 
-        // Prepare line equations 'East'
-        // Line West: E2 to E6
-        /*
-         <name>E2</name>
-         <posX>1.0395319503252458</posX>
-         <posY>5.599513</posY>
-         <posZ>-1.4598945512114878</posZ>
-         * 
-         <name>E6</name>
-         <posX>7.888418622287527</posX>
-         <posY>32.77</posY>
-         <posZ>-11.225473336993293</posZ>
-         */
-        final Position3D e2 = getPoint3D(1.0395319503252458, 5.599513, -1.4598945512114878);
-        final Position3D e6 = getPoint3D(7.888418622287527, 32.77, -11.225473336993293);
-
         final double[] lonlat = NPOIposition(sb);
 
         final double lat = Math.toRadians(lonlat[1]);
 
-        double x, y, z, offset, eastArmDistance;
+        double x, y, z, offset;
         String station;
         Map<String, Double> config;
         Position3D p;
@@ -1161,38 +1124,17 @@ public final class AsproGenConfig {
 
             sb.append("    <station>\n");
             sb.append("      <name>").append(station).append("</name>\n");
-            sb.append("      <telescope>T</telescope>\n");
+            sb.append("      <telescope>").append(station.startsWith("A") ? "AS" : "IS").append("</telescope>\n");
 
             x = config.get("XOFFSET");
             y = config.get("YOFFSET");
             z = config.get("ZOFFSET");
 
-            p = convertHorizToEquatorial(station, lat, 1e6d * x, 1e6d * y, 1e6d * z, sb);
+            p = convertHorizToEquatorial(station, lat, 1e6 * x, 1e6 * y, 1e6 * z, sb);
 
-            offset = 0.0;
+            offset = config.get("DELAY");
 
-            if (station.charAt(0) != 'W') {
-                offset = sumProjectedDistanceToLineEquation3D(e2, e6, p);
-
-                logger.info("distance from({}) to east arm: {}", station, offset);
-
-                if (!("AE".equals(station) || "AC".equals(station))) {
-                    offset = 0.0;
-                }
-            }
-
-            if (offset == 0.0) {
-                // norm of baseline vector:
-                offset = Math.sqrt(x * x + y * y + z * z);
-            }
-            /*
-             if (station.startsWith("N")) {
-             offset -= 2.5d;
-             } else {
-             offset += 2.5d;
-             }
-             */
-            sb.append("      <delayLineFixedOffset>").append(NumberUtils.trimTo3Digits(offset)).append("</delayLineFixedOffset>\n");
+            sb.append("      <delayLineFixedOffset>").append(offset).append("</delayLineFixedOffset>\n");
             sb.append("    </station>\n\n");
         }
     }
@@ -1205,80 +1147,34 @@ public final class AsproGenConfig {
         return p;
     }
 
-    private static Position3D getPoint3D(final Map<String, Double> config) {
-        final Position3D p = new Position3D();
-        p.setPosX(config.get("XOFFSET"));
-        p.setPosY(config.get("YOFFSET"));
-        p.setPosZ(config.get("ZOFFSET"));
-        return p;
-    }
-
-    private static Position3D getVect3D(final Position3D p2, final Position3D p1) {
-        final Position3D vec_p2_p1 = new Position3D();
-        vec_p2_p1.setPosX(p2.getPosX() - p1.getPosX());
-        vec_p2_p1.setPosY(p2.getPosY() - p1.getPosY());
-        vec_p2_p1.setPosZ(p2.getPosZ() - p1.getPosZ());
-        return vec_p2_p1;
-    }
-
-    private static double sumProjectedDistanceToLineEquation3D(final Position3D p1, final Position3D p2, final Position3D p) {
-        // http://cs.fit.edu/~wds/classes/cse5255/thesis/lineEqn/lineEqn.html
-
-        // direction vector = P2 - P1:
-        final Position3D vec_p2_p1 = getVect3D(p2, p1);
-
-        // Equ L1: (x,y,z) = p1(x,y,z) + m * dir(x,y,z)
-
-        // vector = P1 - P:
-        final Position3D vec_p1_p = getVect3D(p1, p);
-
-        // http://mathworld.wolfram.com/Point-LineDistance3-Dimensional.html
-        // distance = | (p2-p1) x (p1-p) | / | p2 - p1 |
-        // x = cross product ie:
-        // (x,y,z) = (UyVz - UzVy, UzVx - UxVz, UxVy - UyVx)
-        double dist = norm3D(crossproduct(vec_p2_p1, vec_p1_p)) / norm3D(vec_p2_p1);
-
-        logger.info("distance to east arm: {}", dist);
-
-        final Position3D vec_p2_p1_ortho = getPoint3D(-vec_p2_p1.getPosY(), vec_p2_p1.getPosX(), vec_p2_p1.getPosZ());
-
-        double dist2 = norm3D(crossproduct(vec_p2_p1_ortho, vec_p1_p)) / norm3D(vec_p2_p1_ortho);
-
-        logger.info("distance ortho to east arm: {}", dist2);
-
-        return dist + dist2;
-    }
-
-    private static double norm3D(final Position3D vec) {
-        return MathUtils.carthesianNorm(vec.getPosX(), vec.getPosY(), vec.getPosZ());
-    }
-
-    private static Position3D crossproduct(final Position3D u, final Position3D v) {
-        // (x,y,z) = (UyVz - UzVy, UzVx - UxVz, UxVy - UyVx)
-
-        final Position3D cp = new Position3D();
-        cp.setPosX(u.getPosY() * v.getPosZ() - u.getPosZ() * v.getPosY());
-        cp.setPosY(u.getPosZ() * v.getPosX() - u.getPosX() * v.getPosZ());
-        cp.setPosZ(u.getPosX() * v.getPosY() - u.getPosY() * v.getPosX());
-        return cp;
-    }
-
     /**
      * Compute the NPOI position
+     * @param sb string buffer
+     * @return [longitude, latitude]
      */
     private static double[] NPOIposition(final StringBuilder sb) {
 
-        final double lonDeg = -111.535d;
+        /*
+         * ! Array center on Anderson Mesa
+         ! Latitude =   35 05 48.0
+         ! Longitude= -111 32 06.0
+         ! Height   = 2200.66 m
+         */
+        final double lonDeg = -(111.0 + 32.0 / 60.0 + 06.0 / 3600.0);
         logger.info("NPOI longitude (deg) : " + lonDeg);
 
-        final double latDeg = 35.09666d;
-        logger.info("NPOI latitude (deg) : " + latDeg);
+        final double latDeg = 35.0 + 05.0 / 60.0 + 48.0 / 3600.0;
+        logger.info("NPOI latitude (deg)  : " + latDeg);
 
         final double alt = 2200.66d;
         computeInterferometerPosition(lonDeg, latDeg, alt, sb);
 
         logger.info("Generated NPOI position:\n" + sb.toString());
-
+        /*
+         10:31:05.158 [main] INFO  AsproGenConfig - NPOI longitude (deg) : -111.535
+         10:31:05.158 [main] INFO  AsproGenConfig - NPOI latitude (deg)  : 35.09666666666667
+         10:31:05.158 [main] INFO  AsproGenConfig - position (x,y,z) : -1912993.323267053, -4847730.169323824, 3662270.769851256
+         */
         return new double[]{lonDeg, latDeg};
     }
 
@@ -1290,7 +1186,7 @@ public final class AsproGenConfig {
 
         final Map<String, Map<String, Double>> stationConfigs = loadNPOIConfig(absFileName);
 
-        final StringBuilder sb = new StringBuilder(12 * 1024);
+        final StringBuilder sb = new StringBuilder(16 * 1024);
 
         sb.append("<a:interferometerSetting>\n\n");
         sb.append("  <description>\n\n    <name>NPOI</name>\n\n");
@@ -1309,7 +1205,7 @@ public final class AsproGenConfig {
     public static void main(final String[] args) {
         final String asproPath = "/home/bourgesl/dev/aspro1/etc/";
 
-        final INTERFEROMETER selected = INTERFEROMETER.CHARA;
+        final INTERFEROMETER selected = INTERFEROMETER.NPOI;
 
         switch (selected) {
             case VLTI:
@@ -1336,7 +1232,7 @@ public final class AsproGenConfig {
                 convertSUSIConfig("/home/bourgesl/dev/aspro/test/SUSI.txt");
                 break;
             case NPOI:
-                convertNPOIConfig("/home/bourgesl/dev/aspro/test/NPOI.txt");
+                convertNPOIConfig("/home/bourgesl/dev/aspro/test/stations.npoi");
                 break;
             case MROI:
                 MROIposition();
