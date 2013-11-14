@@ -4,7 +4,7 @@
 package fr.jmmc.aspro.interop;
 
 import fr.jmmc.jmcs.gui.component.MessagePane;
-import fr.jmmc.jmcs.network.Http;
+import fr.jmmc.jmcs.network.http.Http;
 import fr.jmmc.jmcs.network.interop.SampCapability;
 import fr.jmmc.jmcs.network.interop.SampManager;
 import fr.jmmc.jmcs.network.interop.SampMessageHandler;
@@ -28,132 +28,132 @@ import org.astrogrid.samp.client.SampException;
  */
 public final class VotableSampMessageHandler extends SampMessageHandler {
 
-  /** Class logger */
-  private static final Logger logger = LoggerFactory.getLogger(VotableSampMessageHandler.class.getName());
-  /** threshold to ask user confirmation */
-  public final static int THRESHOLD_TARGETS = 50;
-  /** maximum targets accepted at once */
-  public final static int MAX_TARGETS = 1000;
+    /** Class logger */
+    private static final Logger logger = LoggerFactory.getLogger(VotableSampMessageHandler.class.getName());
+    /** threshold to ask user confirmation */
+    public final static int THRESHOLD_TARGETS = 50;
+    /** maximum targets accepted at once */
+    public final static int MAX_TARGETS = 1000;
 
-  /**
-   * Public constructor
-   */
-  public VotableSampMessageHandler() {
-    super(SampCapability.LOAD_VO_TABLE);
-  }
-
-  /**
-   * Implements message processing
-   *
-   * @param senderId public ID of sender client
-   * @param message message with MType this handler is subscribed to
-   * @throws SampException if any error occured while message processing
-   */
-  @Override
-  protected void processMessage(final String senderId, final Message message) throws SampException {
-    if (logger.isDebugEnabled()) {
-      logger.debug("\tReceived '{}' message from '{}' : '{}'.", this.handledMType(), senderId, message);
+    /**
+     * Public constructor
+     */
+    public VotableSampMessageHandler() {
+        super(SampCapability.LOAD_VO_TABLE);
     }
 
-    // get url of votable (locally stored) :
-    final String voTableURL = (String) message.getRequiredParam("url");
-
-    logger.debug("processMessage: VOTable URL = {}", voTableURL);
-
-    if (voTableURL == null) {
-      throw new SampException("Can not get the url of the votable");
-    }
-
-    final URI voTableURI;
-    try {
-      voTableURI = new URI(voTableURL);
-    } catch (URISyntaxException use) {
-      logger.error("invalid URI", use);
-
-      throw new SampException("Can not read the votable : " + voTableURL, use);
-    }
-
-    File voTableFile = null;
-
-    try {
-      final String scheme = voTableURI.getScheme();
-
-      if (scheme.equalsIgnoreCase("file")) {
-        voTableFile = new File(voTableURI);
-
-      } else if (scheme.equalsIgnoreCase("http")) {
-        final File file = FileUtils.getTempFile("votable-", ".vot");
-
-        if (Http.download(voTableURI, file, true)) {
-          voTableFile = file;
+    /**
+     * Implements message processing
+     *
+     * @param senderId public ID of sender client
+     * @param message message with MType this handler is subscribed to
+     * @throws SampException if any error occured while message processing
+     */
+    @Override
+    protected void processMessage(final String senderId, final Message message) throws SampException {
+        if (logger.isDebugEnabled()) {
+            logger.debug("\tReceived '{}' message from '{}' : '{}'.", this.handledMType(), senderId, message);
         }
-      }
 
-      if (voTableFile == null) {
-        throw new SampException("Not supported URI scheme : " + voTableURL);
-      }
+        // get url of votable (locally stored) :
+        final String voTableURL = (String) message.getRequiredParam("url");
 
-      final String votable = FileUtils.readFile(voTableFile);
+        logger.debug("processMessage: VOTable URL = {}", voTableURL);
 
-      logger.debug("votable :\n{}", votable);
-
-      String searchCalVersion = null;
-
-      // Note: Getting SearchCal version in sender meta data is not robust:
-      // do not work with AppLauncher as senderMetadata corresponds to AppLauncher.metadata and not SearchCal !
-      // TODO: use VOTABLE information instead !
-
-      // Note: can be null if the client map is not up to date or the client disconnected:
-      final Metadata senderMetadata = SampManager.getMetaData(senderId);
-
-      if (senderMetadata != null) {
-        logger.debug("senderMetadata: {}", senderMetadata);
-
-        if ("searchcal".equalsIgnoreCase(senderMetadata.getName())) {
-          // SearchCal release > 4.4.1:
-          searchCalVersion = senderMetadata.getString(SampMetaData.RELEASE_VERSION.id());
-
-          if (searchCalVersion == null) {
-            // SearchCal release <= 4.4.1:
-            searchCalVersion = senderMetadata.getString("searchcal.version");
-          }
+        if (voTableURL == null) {
+            throw new SampException("Can not get the url of the votable");
         }
-      }
 
-      logger.debug("SearchCal version = {}", searchCalVersion);
+        final URI voTableURI;
+        try {
+            voTableURI = new URI(voTableURL);
+        } catch (URISyntaxException use) {
+            logger.error("invalid URI", use);
 
-      if (searchCalVersion == null) {
-        // try to interpret votable as SearchCal one then as one generic votable (target):
-
-        // TODO: use 'undefined' as SearchCal version temporarly:
-        if (!SearchCalVOTableHandler.processMessage(votable, "undefined")) {
-          AnyVOTableHandler.processMessage(votable);
+            throw new SampException("Can not read the votable : " + voTableURL, use);
         }
-      } else {
-        SearchCalVOTableHandler.processMessage(votable, searchCalVersion);
-      }
 
-    } catch (IOException ioe) {
-      MessagePane.showErrorMessage("Can not read the votable :\n\n" + voTableURL);
+        File voTableFile = null;
 
-      throw new SampException("Can not read the votable : " + voTableURL, ioe);
+        try {
+            final String scheme = voTableURI.getScheme();
+
+            if (scheme.equalsIgnoreCase("file")) {
+                voTableFile = new File(voTableURI);
+
+            } else if (scheme.equalsIgnoreCase("http")) {
+                final File file = FileUtils.getTempFile("votable-", ".vot");
+
+                if (Http.download(voTableURI, file, true)) {
+                    voTableFile = file;
+                }
+            }
+
+            if (voTableFile == null) {
+                throw new SampException("Not supported URI scheme : " + voTableURL);
+            }
+
+            final String votable = FileUtils.readFile(voTableFile);
+
+            logger.debug("votable :\n{}", votable);
+
+            String searchCalVersion = null;
+
+            // Note: Getting SearchCal version in sender meta data is not robust:
+            // do not work with AppLauncher as senderMetadata corresponds to AppLauncher.metadata and not SearchCal !
+            // TODO: use VOTABLE information instead !
+
+            // Note: can be null if the client map is not up to date or the client disconnected:
+            final Metadata senderMetadata = SampManager.getMetaData(senderId);
+
+            if (senderMetadata != null) {
+                logger.debug("senderMetadata: {}", senderMetadata);
+
+                if ("searchcal".equalsIgnoreCase(senderMetadata.getName())) {
+                    // SearchCal release > 4.4.1:
+                    searchCalVersion = senderMetadata.getString(SampMetaData.RELEASE_VERSION.id());
+
+                    if (searchCalVersion == null) {
+                        // SearchCal release <= 4.4.1:
+                        searchCalVersion = senderMetadata.getString("searchcal.version");
+                    }
+                }
+            }
+
+            logger.debug("SearchCal version = {}", searchCalVersion);
+
+            if (searchCalVersion == null) {
+                // try to interpret votable as SearchCal one then as one generic votable (target):
+
+                // TODO: use 'undefined' as SearchCal version temporarly:
+                if (!SearchCalVOTableHandler.processMessage(votable, "undefined")) {
+                    AnyVOTableHandler.processMessage(votable);
+                }
+            } else {
+                SearchCalVOTableHandler.processMessage(votable, searchCalVersion);
+            }
+
+        } catch (IOException ioe) {
+            MessagePane.showErrorMessage("Can not read the votable :\n\n" + voTableURL);
+
+            throw new SampException("Can not read the votable : " + voTableURL, ioe);
+        }
     }
-  }
 
-  /**
-   * Displays one confirmation message if there is more than 50 targets to import
-   * @param size size of the target list to import
-   * @return true if there is less than 50 targets or the user confirms.
-   */
-  static boolean confirmImport(final int size) {
-    if (size > MAX_TARGETS) {
-      MessagePane.showErrorMessage("Too many targets to import (" + size + " / " + MAX_TARGETS + ") !");
-      return false;
-    }
-    if (size > THRESHOLD_TARGETS) {
-      return MessagePane.showConfirmMessage("Are you sure you want to import " + size + " targets to your current observation ?");
-    }
+    /**
+     * Displays one confirmation message if there is more than 50 targets to import
+     * @param size size of the target list to import
+     * @return true if there is less than 50 targets or the user confirms.
+     */
+    static boolean confirmImport(final int size) {
+        if (size > MAX_TARGETS) {
+            MessagePane.showErrorMessage("Too many targets to import (" + size + " / " + MAX_TARGETS + ") !");
+            return false;
+        }
+        if (size > THRESHOLD_TARGETS) {
+            return MessagePane.showConfirmMessage("Are you sure you want to import " + size + " targets to your current observation ?");
+        }
 
-    return true;
-  }
+        return true;
+    }
 }
