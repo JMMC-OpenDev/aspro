@@ -1,9 +1,9 @@
-Implementation-Title: Aspro2
-Implementation-Version: ${program.version}
-Specification-Vendor: www.jmmc.fr
 Built-By: JMMC (jmmc-tech-group@ujf-grenoble.fr)
-Created-By: 1.6.0_24 (Sun Microsystems Inc.)
 Built-Date: ${build.date}
-Application-Name: Aspro2
+Implementation-Title: Aspro 2
+Implementation-Version: ${program.version}
+Implementation-Vendor: www.jmmc.fr
+Implementation-URL: http://www.jmmc.fr/aspro
+Application-Name: Aspro 2
 Permissions: all-permissions
 Codebase: http://apps.jmmc.fr
