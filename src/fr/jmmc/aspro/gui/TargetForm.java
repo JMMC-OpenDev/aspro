@@ -17,7 +17,7 @@ import fr.jmmc.jmcs.gui.component.GenericJTree;
 import fr.jmmc.jmcs.gui.component.GenericListModel;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
-import fr.jmmc.jmcs.resource.image.ResourceImage;
+import fr.jmmc.jmcs.gui.util.ResourceImage;
 import fr.jmmc.jmcs.service.BrowserLauncher;
 import fr.jmmc.jmcs.util.UrlUtils;
 import java.awt.Component;
