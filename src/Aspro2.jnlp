@@ -2,13 +2,14 @@
 <jnlp spec="1.0+" codebase="@GENERATED@" href="@GENERATED@">
     <information>
         <title>Aspro 2</title>
-        <vendor>JMMC</vendor>
+        <vendor>JMMC (Jean-Marie MARIOTTI Center)</vendor>
         <homepage href="http://www.jmmc.fr/aspro2"/>
         <description>This application is the new version of the ASPRO tool to prepare your interferometric observations</description>
-        <icon href="http://apps.jmmc.fr/~swmgr/Aspro2/Aspro2.jpg"/>
+        <description kind="tooltip">Aspro 2</description>
+        <icon href="@GENERATED@/Aspro2.jpg"/>
         <offline-allowed/>
         <association mime-type="application/x-aspro+xml" extensions="asprox">
-            <icon href="http://apps.jmmc.fr/~swmgr/Aspro2/Aspro2.jpg"/>
+            <icon href="@GENERATED@/Aspro2.jpg"/>
             <description>Aspro 2 Observation files</description>
         </association>
         <shortcut>
