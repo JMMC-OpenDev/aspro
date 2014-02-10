@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema targetNamespace="http://www.ivoa.net/xml/Observation/Observation.xsd" xmlns="http://www.ivoa.net/xml/Observation/Observation.xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:jxb="http://java.sun.com/xml/ns/jaxb" xmlns:cha="http://www.ivoa.net/xml/Characterisation/Characterisation-v1.9.xsd" xmlns:vr="http://www.ivoa.net/xml/VOResource/v1.0" xmlns:xlink="http://www.w3.org/1999/xlink" elementFormDefault="qualified" jxb:version="1.0">
+	<xs:import namespace="http://www.ivoa.net/xml/Characterisation/Characterisation-v1.9.xsd" schemaLocation="Characterisation-v1.9.xsd"/>
+	<xs:import namespace="http://www.ivoa.net/xml/VOResource/v1.0" schemaLocation="http://www.ivoa.net/xml/VOResource/VOResource-v1.0.xsd"></xs:import>
+	<!-- A simple sketch for the Observation DM schema-->
+	<xs:element name="Observation" type="ObservationType"/>
+	<xs:complexType name="ObservationType" mixed="false">
+		<xs:complexContent>
+		<xs:extension base="Group">
+				<xs:sequence>
+					<xs:element name="Curation" type="curationType" minOccurs="0"/>
+					<xs:element name="DataID" type="dataIDType" minOccurs="0"/>
+                                                       <xs:element name="Dataset" type="datasetType" minOccurs="0" />
+					<xs:element name="Access" type="accessType" minOccurs="0"/>
+					<xs:element name="Provenance" type="provenanceType" minOccurs="0"/>
+                                        <!-- Probably include an stc AstroCoordSys type element
+                                        <xs:element name="CoordSys" type="stc:astroCoordSystemType" /> -->
+                                                       <xs:element name="char" type="cha:CharacterisationType" minOccurs="0"/>
+					<xs:element name="Mapping" type="mappingType" minOccurs="0"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<!-- A set of useful types to add UCDs and units to base types; like BasicQuantity -->
+	<xs:complexType name="Group">
+		<xs:attribute name="id" type="xs:ID" use="optional"/>
+		<xs:attribute name="idref" type="xs:IDREF" use="optional"/>
+	</xs:complexType>
+	<xs:complexType name="textParamType">
+		<xs:simpleContent>
+			<xs:extension base="paramType"/>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:complexType name="paramType">
+		<xs:simpleContent>
+			<xs:extension base="xs:string">
+				<xs:attribute name="name" type="xs:string"/>
+				<xs:attribute name="ucd" type="xs:string"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:complexType name="dateParamType">
+		<xs:simpleContent>
+			<xs:extension base="paramType"/>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:complexType name="positionParamType">
+		<xs:sequence>
+			<xs:element name="value" type="doubleParamType" minOccurs="2" maxOccurs="2"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="doubleParamType">
+		<xs:simpleContent>
+			<xs:extension base="paramType">
+				<xs:attribute name="unit" type="xs:string"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:complexType name="timeParamType">
+		<xs:simpleContent>
+			<xs:extension base="paramType">
+				<xs:attribute name="unit" type="xs:string"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:complexType name="intParamType">
+		<xs:simpleContent>
+			<xs:extension base="paramType">
+				<xs:attribute name="unit" type="xs:string"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<!-- Now we define the higher level metadata -->
+	<xs:complexType name="contactType" mixed="false">
+		<xs:complexContent mixed="false">
+			<xs:extension base="Group">
+				<xs:sequence>
+					<xs:element name="Name" type="textParamType" minOccurs="0"/>
+					<xs:element name="Email" type="textParamType" minOccurs="0"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="accessType" mixed="false">
+		<xs:complexContent mixed="false">
+			<xs:extension base="Group">
+				<xs:sequence>
+					<xs:element name="acref" type="textParamType" minOccurs="0"/>
+					<xs:element name="format" type="textParamType" minOccurs="0"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+    
+	<xs:complexType name="curationType" mixed="false">
+               <xs:annotation>
+                      <xs:documentation>
+                            Sould we replace all this by vr:curation type ?
+                             Probably yes
+                      </xs:documentation>
+              </xs:annotation>
+		<xs:complexContent mixed="false">
+			<xs:extension base="Group">
+				<xs:sequence>
+					<xs:element name="Publisher" type="textParamType" minOccurs="0"/>
+					<!-- <xs:element name="PublisherID" type="textParamType" minOccurs="0"/> -->
+					<xs:element name="PublisherID" type="vr:IdentifierURI" minOccurs="0" />
+					<xs:element name="Reference" type="textParamType" minOccurs="0"/>
+					<xs:element name="Version" type="textParamType" minOccurs="0"/>
+					<xs:element name="Contact" type="contactType" minOccurs="0"/>
+					<xs:element name="Rights" type="textParamType" minOccurs="0"/>
+					<xs:element name="Date" type="dateParamType" minOccurs="0"/>
+					<xs:element name="PublisherDID" type="textParamType" minOccurs="0"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType> 
+	<xs:complexType name="dataIDType" mixed="false">
+		<xs:complexContent mixed="false">
+			<xs:extension base="Group">
+				<xs:sequence>
+					<xs:element name="Title" type="textParamType" minOccurs="0"/>
+					<xs:element name="Creator" type="textParamType" minOccurs="0"/>
+					<xs:element name="Collection" type="textParamType" minOccurs="0" maxOccurs="unbounded"/>
+                                         <!-- Probably use below a vr:IdentifierURI type-->
+					<!-- <xs:element name="DatasetID" type="textParamType" minOccurs="0"/> --> 
+					<xs:element name="DatasetID" type="vr:IdentifierURI" minOccurs="0"	/> 
+					<xs:element name="Date" type="dateParamType" minOccurs="0"/>
+					<xs:element name="Version" type="textParamType" minOccurs="0"/>
+					<xs:element name="Instrument" type="textParamType" minOccurs="0"/>
+					<xs:element name="CreationType" type="textParamType" minOccurs="0"/>
+					<xs:element name="Bandpass" type="textParamType" minOccurs="0"/>
+                                         <!-- Probably use below a vr:IdentifierURI type-->
+					<!-- <xs:element name="CreatorDID" type="textParamType" minOccurs="0"/> -->
+					<xs:element name="CreatorDID" type="vr:IdentifierURI" minOccurs="0"	/>			
+					<xs:element name="Contributor" type="textParamType" minOccurs="0" maxOccurs="unbounded"/>
+					<xs:element name="Logo" type="textParamType" minOccurs="0"/>
+					<xs:element name="DataSource" type="textParamType" minOccurs="0"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="targetType" mixed="false">
+		<xs:complexContent mixed="false">
+			<xs:extension base="Group">
+				<xs:sequence>
+					<xs:element name="Name" type="textParamType" minOccurs="0"/>
+					<xs:element name="Description" type="textParamType" minOccurs="0"/>
+					<xs:element name="TargetClass" type="textParamType" minOccurs="0"/>
+					<xs:element name="SpectralClass" type="textParamType" minOccurs="0"/>
+					<xs:element name="Redshift" type="doubleParamType" minOccurs="0"/>
+					<xs:element name="Pos" type="positionParamType" minOccurs="0"/>
+					<xs:element name="VarAmpl" type="doubleParamType" minOccurs="0"/>
+					<xs:element name="CustomParams" type="arrayOfParamType" minOccurs="0"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+        <xs:complexType name="mappingType" mixed="false">
+     		<xs:complexContent mixed="false">
+			<xs:extension base="Group">
+				<xs:sequence>
+                                         <xs:element name="SpatialAxis" type="axisMappingType" minOccurs="0" />
+                                         <xs:element name="SpectralAxis" type="axisMappingType" minOccurs="0" />
+                                         <xs:element name="TimeAxis" type="axisMappingType" minOccurs="0" />
+                                         <xs:element name="AxisMapping" type="axisMappingType" minOccurs="0" maxOccurs="unbounded" />
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+        </xs:complexType>
+      <xs:complexType name="axisMappingType" mixed="false">
+     		<xs:complexContent mixed="false">
+			<xs:extension base="Group">
+				<xs:sequence>
+                                         <xs:element name="coordsys" type="xs:IDREF" />
+                                         <xs:element name="projection" type="textParamType" minOccurs="0" />
+                                         <xs:element name="Coord" type="textParamType" minOccurs="0" />
+                                         <xs:element name="crval" type="arrayOfParamType" minOccurs="0" />
+                                         <xs:element name="crpix" type="arrayOfParamType" minOccurs="0" />
+                                         <xs:element name="cdmatrix" type="arrayOfParamType" minOccurs="0" />
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+        </xs:complexType>
+       <xs:complexType name="provenanceType" mixed="false">
+     		<xs:complexContent mixed="false">
+			<xs:extension base="Group">
+			<xs:sequence>
+                                       <xs:element  name="ObsConfig" type="obsConfigType" minOccurs="0" />
+          			</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+        </xs:complexType>
+        <xs:complexType name="obsConfigType" mixed="false">
+    		<xs:complexContent mixed="false">
+			<xs:extension base="Group">
+			<xs:sequence>
+                                       <xs:element  name="Instrument" type="textParamType" minOccurs="0" />
+                                       <xs:element  name="Bandpass" type="textParamType" minOccurs="0" />
+                                       <xs:element  name="DataSource" type="textParamType" minOccurs="0" />
+          			</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+        </xs:complexType>
+       <xs:complexType name="datasetType" mixed="false">
+     		<xs:complexContent mixed="false">
+			<xs:extension base="Group">
+				<xs:sequence>
+                                         <xs:element name="ContentType" type="textParamType" minOccurs="0" />
+                                         <xs:element name="Length" type="intParamType" minOccurs="0" />
+                                         <xs:element name="DataModel" type="textParamType" minOccurs="0" />    
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+        </xs:complexType>
+	<xs:complexType name="arrayOfParamType">
+		<xs:sequence>
+			<xs:element name="Param" type="paramType" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+</xs:schema>
