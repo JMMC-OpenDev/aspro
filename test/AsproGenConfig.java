@@ -3,23 +3,37 @@
  * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
  ******************************************************************************/
 import fr.jmmc.aspro.AsproConstants;
+import fr.jmmc.aspro.model.oi.Channel;
+import fr.jmmc.aspro.model.oi.ChannelLink;
+import fr.jmmc.aspro.model.oi.FocalInstrumentConfiguration;
+import fr.jmmc.aspro.model.oi.FocalInstrumentConfigurationItem;
+import fr.jmmc.aspro.model.oi.InterferometerConfiguration;
+import fr.jmmc.aspro.model.oi.InterferometerSetting;
 import fr.jmmc.aspro.model.oi.LonLatAlt;
 import fr.jmmc.aspro.model.oi.Position3D;
+import fr.jmmc.aspro.model.oi.Station;
+import fr.jmmc.aspro.model.oi.StationLinks;
+import fr.jmmc.aspro.model.oi.SwitchYard;
 import fr.jmmc.aspro.service.GeocentricCoords;
-import fr.jmmc.jmcs.util.NumberUtils;
-import fr.jmmc.oitools.util.MathUtils;
+import fr.jmmc.jmcs.util.ResourceUtils;
+import fr.jmmc.jmcs.util.jaxb.JAXBFactory;
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.URL;
 import java.text.NumberFormat;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.StringTokenizer;
+import javax.xml.bind.JAXBException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -117,7 +131,7 @@ public final class AsproGenConfig {
                      <stationLinks>
                      <station>U1</station>
                      <channelLink>
-                     <channel>Channel1</channel>
+                     <channel>IP1</channel>
                      <opticalLength>165.8497</opticalLength>
                      </channelLink>
                      ...
@@ -136,7 +150,7 @@ public final class AsproGenConfig {
                         // skip blanking value (-1000000) :
                         if (value != -1000000) {
                             sb.append("<channelLink>\n");
-                            sb.append("<channel>Channel").append(i + 1).append("</channel>\n");
+                            sb.append("<channel>IP").append(i + 1).append("</channel>\n"); /* Channel names are IPn */
                             sb.append("<opticalLength>").append(value).append("</opticalLength>\n");
                             sb.append("</channelLink>\n");
                         }
@@ -242,6 +256,255 @@ public final class AsproGenConfig {
 
         sb.append("</horizon>\n");
         sb.append("</station>\n");
+
+    }
+
+    /**
+     * Load and parse the vlti array list
+     * @param absFileName 
+     * @param period
+     */
+    private static void convertArrayList(final String absFileName, final String period) {
+
+        /** package name for JAXB generated code */
+        final String OI_JAXB_PATH = "fr.jmmc.aspro.model.oi";
+        final String CONF_CLASSLOADER_PATH = "fr/jmmc/aspro/model/";
+
+        final String uri = "VLTI.xml";
+
+        final JAXBFactory jf = JAXBFactory.getInstance(OI_JAXB_PATH);
+
+        Object result = null;
+        try {
+            // use the class loader resource resolver
+            final URL url = ResourceUtils.getResource(CONF_CLASSLOADER_PATH + uri);
+
+            // Note : use input stream to avoid JNLP offline bug with URL (Unknown host exception)
+            result = jf.createUnMarshaller().unmarshal(new BufferedInputStream(url.openStream()));
+
+        } catch (IOException ioe) {
+            throw new IllegalStateException("Load failure on " + uri, ioe);
+        } catch (JAXBException je) {
+            throw new IllegalArgumentException("Load failure on " + uri, je);
+        }
+
+        final InterferometerSetting is = (InterferometerSetting) result;
+
+        final SwitchYard sw = is.getDescription().getSwitchyard();
+        if (sw == null) {
+            throw new IllegalStateException("No switchyard found in " + uri + " !");
+        }
+
+        final Map<String, Channel> channels = new HashMap<String, Channel>(16);
+
+        for (Channel ch : is.getDescription().getChannels()) {
+            channels.put(ch.getName(), ch);
+        }
+
+        InterferometerConfiguration icFound = null;
+
+        for (InterferometerConfiguration ic : is.getConfigurations()) {
+            if (period.equalsIgnoreCase(ic.getVersion())) {
+                icFound = ic;
+                break;
+            }
+        }
+
+        if (icFound == null) {
+            throw new IllegalStateException("Configuration '" + period + "' not found in " + uri + " !");
+        }
+
+        logger.info("Configuration '" + period + "' found in " + uri + " ...");
+
+        // load data from file :
+        BufferedReader reader = null;
+        try {
+            final File data = new File(absFileName);
+
+            reader = new BufferedReader(new FileReader(data));
+
+            // station separator:
+            final String delimiter = "-";
+
+            int pos, idx, nTel;
+            boolean match = false;
+            Channel ch;
+            List<Channel> confChannels;
+
+            StringTokenizer tok;
+            String line, config;
+
+            // mapping 0 = station, 1 = channel (IP):
+            final String[][] mappings = new String[4][2]; // max 4T
+
+            while ((line = reader.readLine()) != null) {
+                line = line.replaceAll("\\s+", " ").trim();
+
+                if (line.length() > 0) {
+                    /* (50) A1DL5IP1-G1DL6IP3-K0DL4IP5-I1DL3IP7 */
+
+                    pos = line.indexOf(')');
+
+                    if (pos != -1) {
+                        line = line.substring(pos + 2);
+
+                        logger.info("line: {}", line);
+
+                        // Parse values :
+                        tok = new StringTokenizer(line, delimiter);
+
+                        idx = 0;
+
+                        while (tok.hasMoreTokens()) {
+                            config = tok.nextToken();
+//                            logger.info("config: {}", config);
+
+                            mappings[idx][0] = config.substring(0, 2); // first 2 chars (A1)
+
+                            // Fix Ux = UTx
+
+                            if (mappings[idx][0].startsWith("U")) {
+                                mappings[idx][0] = "UT" + mappings[idx][0].substring(1, 2);
+                            }
+
+                            mappings[idx][1] = config.substring(5, 8); // last char (IP1)
+//                            logger.info("station: {} - channel: {}", mappings[idx][0], mappings[idx][1]);
+
+                            idx++;
+                        }
+                        nTel = idx;
+
+                        // Check switchyard:
+                        /*
+                         <switchyard>
+                         <stationLinks>
+                         <station>UT1</station>
+                         <channelLink>
+                         <channel>IP1</channel>
+                         <opticalLength>165.8497</opticalLength>
+                         </channelLink>
+                         ...
+                         */
+                        match = false;
+
+                        for (pos = 0; pos < nTel; pos++) {
+                            match = false;
+                            for (StationLinks sl : sw.getStationLinks()) {
+                                if (sl.getStation().getName().equalsIgnoreCase(mappings[pos][0])) {
+                                    // station found in switchyard:
+                                    for (ChannelLink cl : sl.getChannelLinks()) {
+                                        if (cl.getChannel().getName().equalsIgnoreCase(mappings[pos][1])) {
+                                            match = true;
+                                            break;
+                                        }
+                                    }
+                                    break;
+                                }
+                            }
+
+                            if (!match) {
+                                logger.error("channel [{}] not defined in switchyard for station: [{}]", mappings[pos][1], mappings[pos][0]);
+//                                break;
+                            }
+                        }
+
+                        if (!match) {
+//                            break;
+                        }
+
+                        // Find configuration:
+                        match = false;
+
+                        for (FocalInstrumentConfiguration insConf : icFound.getInstruments()) {
+                            if (nTel == insConf.getFocalInstrument().getNumberChannels()) {
+//                                logger.info("checking instrument [{}]", insConf.getFocalInstrument().getName());
+
+                                for (FocalInstrumentConfigurationItem conf : insConf.getConfigurations()) {
+
+                                    // Find matching stations:
+                                    idx = 0;
+                                    for (pos = 0; pos < nTel; pos++) {
+                                        for (Station sta : conf.getStations()) {
+                                            if (sta.getName().equalsIgnoreCase(mappings[pos][0])) {
+                                                idx++;
+                                            }
+                                        }
+                                    }
+
+                                    if (idx == nTel) {
+                                        // matching:
+                                        match = true;
+                                        logger.info("conf match: [{}]: {}", conf.getName(), line);
+
+                                        // Update channels in conf:
+                                        confChannels = conf.getChannels();
+
+                                        if (!confChannels.isEmpty()) {
+                                            confChannels.clear();
+                                        }
+
+                                        // for all stations in conf:
+                                        for (Station sta : conf.getStations()) {
+                                            ch = null;
+                                            for (pos = 0; pos < nTel; pos++) {
+                                                if (sta.getName().equalsIgnoreCase(mappings[pos][0])) {
+                                                    ch = channels.get(mappings[pos][1]);
+                                                    break;
+                                                }
+                                            }
+                                            // add channel:
+                                            if (ch == null) {
+                                                logger.error("no channel found for station: {}", sta.getName());
+                                            } else {
+                                                confChannels.add(ch);
+                                            }
+                                        }
+                                        if (confChannels.size() != nTel) {
+                                            logger.error("Missing channel : [{}] for stations [{}]", confChannels, conf.getStations());
+                                        }
+                                        logger.info("channels: [{}] for stations [{}]", confChannels, conf.getStations());
+                                    }
+                                }
+                            }
+                        }
+
+                        if (!match) {
+                            logger.error("no conf match: {}", line);
+                            break;
+                        }
+                    }
+                }
+            } // line
+
+            if (match) {
+                // Dump updated VLTI configuration with channels:
+                try {
+                    final ByteArrayOutputStream bo = new ByteArrayOutputStream(300 * 1000);
+
+                    jf.createMarshaller().marshal(is, bo);
+
+                    final String vltiConfig = bo.toString("UTF-8");
+
+                    logger.info("Updated VLTI configuration:\n{}", vltiConfig);
+
+                } catch (JAXBException je) {
+                    throw new IllegalArgumentException("Load failure on " + uri, je);
+                }
+            }
+
+        } catch (FileNotFoundException fnfe) {
+            logger.error("File not found", fnfe);
+        } catch (IOException ioe) {
+            logger.error("IO failure", ioe);
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException ioe) {
+                    logger.error("IO failure", ioe);
+                }
+            }
+        }
 
     }
 
@@ -1205,7 +1468,7 @@ public final class AsproGenConfig {
     public static void main(final String[] args) {
         final String asproPath = "/home/bourgesl/dev/aspro1/etc/";
 
-        final INTERFEROMETER selected = INTERFEROMETER.NPOI;
+        final INTERFEROMETER selected = INTERFEROMETER.VLTI;
 
         switch (selected) {
             case VLTI:
@@ -1224,6 +1487,10 @@ public final class AsproGenConfig {
                     convertHorizon(station, asproPath + station + ".horizon", sb);
                 }
                 logger.info("convertHorizons : \n" + sb.toString());
+
+                // convert arrayList to get DLx and channels (IPn)
+                convertArrayList("/home/bourgesl/dev/aspro/test/vlti_arrayList_20131006.txt", "Period 93");
+
                 break;
             case CHARA:
                 convertCHARAConfig("/home/bourgesl/dev/aspro/test/telescopes.chara");
