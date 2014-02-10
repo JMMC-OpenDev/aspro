@@ -48,6 +48,8 @@ public final class UserModelService {
 
     /** Class logger */
     private static final Logger logger = LoggerFactory.getLogger(UserModelService.class.getName());
+    /** dev flag: do apodisation */
+    private static final boolean DO_APODISE_DEV = false;
     /** minimum visiblity threshold (1e-2) for direct fourier transform */
     public static final double MIN_VISIBILITY_DATA = 1e-2d;
     /** ratio to ignore data values i.e. data value < LIMIT_RATIO * dataLowThreshold */
@@ -315,7 +317,6 @@ public final class UserModelService {
                 Math.abs(uvRect.getY() + uvRect.getHeight()));
 
         // todo enhance image size to fit sub image!
-
         logger.debug("UserModelService.computeUVMap: uvMax (rad-1): {}", uvMax);
 
         // throws exceptions:
@@ -363,7 +364,6 @@ public final class UserModelService {
             throw new InterruptedJobException("UserModelService.computeUVMap: interrupted");
         }
 
-
         // fft data as float [rows][cols] packed:
         final float[][] visData;
 
@@ -372,7 +372,6 @@ public final class UserModelService {
 
             // 1 - compute FFT
             // TODO: cache the FFT in the Target object or save it to disk (temp) ...
-
             visData = FFTUtils.computeFFT(inputSize, fitsImage.getData(), fftSize, fftOutputSize);
 
             // fast interrupt :
@@ -384,9 +383,7 @@ public final class UserModelService {
             visData = refVisData;
         }
 
-
         // 2 - Extract the amplitude/phase/square amplitude to get the uv map :
-
         // data as float [rows][cols]:
         float[][] data = FFTUtils.convert(fftOutputSize, visData, mode, outputSize, noiseService);
 
@@ -397,9 +394,7 @@ public final class UserModelService {
             throw new InterruptedJobException("UserModelService.computeUVMap: interrupted");
         }
 
-
         // 3 - Get the image with the given color model and color scale :
-
         final Rectangle2D.Double uvMapRect = new Rectangle2D.Double();
         uvMapRect.setFrameFromDiagonal(-mapUvMax, -mapUvMax, mapUvMax, mapUvMax);
 
@@ -689,7 +684,6 @@ public final class UserModelService {
                     // Test without cos/sin:
                     // re += flux * z;
                     // im += flux * z;
-
                     // use Math (not StrictMath):
                     re += flux * Math.cos(z);
                     im -= flux * Math.sin(z);
@@ -729,7 +723,6 @@ public final class UserModelService {
 
         logger.info("Image size: {} x {}", nbRows, nbCols);
 
-
         // 1 - Ignore negative values:
         if (fitsImage.getDataMax() <= 0d) {
             throw new IllegalArgumentException("Fits image [" + fitsImage.getFitsImageIdentifier() + "] has only negative data !");
@@ -748,6 +741,14 @@ public final class UserModelService {
             FitsImageUtils.updateDataRangeExcludingZero(fitsImage);
         }
 
+        if (DO_APODISE_DEV) {
+            // NEW: multiply by 2D gaussian function (fwhm = 1.22 x lambda / diameter)
+            // TEST ONLY
+            apodise(fitsImage);
+
+            // update boundaries excluding zero values:
+            FitsImageUtils.updateDataRangeExcludingZero(fitsImage);
+        }
 
         // 2 - Normalize data (total flux):
         if (fitsImage.getSum() != 1d) {
@@ -761,7 +762,6 @@ public final class UserModelService {
             // update boundaries excluding zero values:
             FitsImageUtils.updateDataRangeExcludingZero(fitsImage);
         }
-
 
         // 2.1 - Determine flux threshold to ignore useless values:
         final float thresholdImage;
@@ -826,7 +826,6 @@ public final class UserModelService {
             thresholdVis = 0f;
         }
 
-
         // 2.2 - Skip too small data values i.e. lower than thresholdImage / 10^6:
         if (useFastMode) {
             final float smallThreshold = LIMIT_RATIO * thresholdImage;
@@ -845,13 +844,11 @@ public final class UserModelService {
             }
         }
 
-
         // 3 - Locate useful data values inside image:
         final ImageRegionThresholdJob regionJob = new ImageRegionThresholdJob(data, nbCols, nbRows, thresholdImage);
 
         logger.info("ImageRegionThresholdJob: thresholdImage: {}", thresholdImage);
         regionJob.forkAndJoin();
-
 
         // 4 - Extract ROI:
         // keep the center of the ROI and keep the image square (width = height = even number):
@@ -923,7 +920,6 @@ public final class UserModelService {
             logger.info("ROI size = {} x {}", nbRows, nbCols);
         }
 
-
         // 5 - Make sure the image is square i.e. padding (width = height = even number):
         final int newSize = Math.max(
                 (nbRows % 2 != 0) ? nbRows + 1 : nbRows,
@@ -944,7 +940,6 @@ public final class UserModelService {
 
             logger.info("Square size = {} x {}", nbRows, nbCols);
         }
-
 
         // 6 - flip axes to have positive increments (left to right for the column axis and bottom to top for the row axis)
         // note: flip operation requires image size to be an even number
@@ -1064,9 +1059,7 @@ public final class UserModelService {
         final float[] rowCoords = UserModelService.computeSpatialCoords(nbRows, fitsImage.getSignedIncRow());
         final float[] colCoords = UserModelService.computeSpatialCoords(nbCols, fitsImage.getSignedIncCol());
 
-
         // prepare 1D data (eliminate values lower than threshold):
-
         float[] row;
         int nUsedData = 0;
         final float[] data1D = new float[nData * DATA_1D_POINT_SIZE];
@@ -1102,7 +1095,6 @@ public final class UserModelService {
         } // rows
 
         logger.info("prepareModelData: used pixels = {} / {}", nUsedData / DATA_1D_POINT_SIZE, nPixels);
-
 
         // normalize flux to 1.0:
         logger.info("prepareModelData: totalFlux: {}", totalFlux);
@@ -1172,4 +1164,91 @@ public final class UserModelService {
         }
         return -1;
     }
+
+    /**
+     * Make apodisation (telescope airy disk) (DEVELOPMENT ONLY)
+     * @param fitsImage 
+    */
+    private static void apodise(FitsImage fitsImage) {
+
+        /** Get the current thread to check if the computation is interrupted */
+        final Thread currentThread = Thread.currentThread();
+
+        // Start the computations :
+        final long start = System.nanoTime();
+
+        // other idea: spatial resolution = theta = lambda / baseline
+        /*
+         * CHARA samples:
+         B = 330m, θ(λ=0.5μm) = 0.3mas, θ(λ=2.2μm) = 1.4mas
+         B = 34m, θ(λ=0.5μm) = 3.0mas, θ(λ=2.2μm) = 13.4mas
+         */
+        // gaussian = max spatial frequency (diameter, lambda)
+        // VLTI / AMBER:
+        final double lambda = 2e-06d; // R: 0.7µm H: 2µm
+        final double diameter = 1.8d; // VLTI: UT: 8.2, AT: 1.8
+        final double fwhm = 1.22d * lambda / diameter; // max spatial frequence
+
+        logger.info("apodise: lambda   = {}", lambda);
+        logger.info("apodise: diameter = {}", diameter);
+        logger.info("apodise: fwhm     = {}", fwhm);
+
+        logger.info("apodise: fwhm (angle) = {}", FitsImage.getAngleAsString(fwhm));
+
+        logger.info("apodise: row increment (angle) = {}", FitsImage.getAngleAsString(fitsImage.getIncRow()));
+        logger.info("apodise: col increment (angle) = {}", FitsImage.getAngleAsString(fitsImage.getIncCol()));
+
+        logger.info("fitsImage: {}", fitsImage);
+
+        /*
+         FitsImage[HighMass.fits.gz#0][1/1][2048 x 2048] RefPix (1024.0, 1024.0) RefVal (0.0, 0.0) 
+         * Increments (-4.848137E-10, 4.848137E-10) 
+         * Max view angle (0.20480000797990483 arcsec) 
+         * Area java.awt.geom.Rectangle2D$Double[x=-4.959644151E-7,y=-4.959644151E-7,w=9.928984576E-7,h=9.928984576E-7] Lambda { RefPix 1.0 RefVal NaN Increment NaN} = NaN m.
+         */
+        /*
+         * Gaussian function:
+         * g(x,y) = exp(-( (x - x0)^2 + (y - y0)^2 ) / (2 x sigma2) )
+         */
+        // precompute normalization factor:
+        final float coeff = (float) (-1d / (2d * fwhm * fwhm));
+
+        final int nbRows = fitsImage.getNbRows();
+        final int nbCols = fitsImage.getNbCols();
+
+        // prepare spatial coordinates:
+        final float[] rowCoords = UserModelService.computeSpatialCoords(nbRows, fitsImage.getSignedIncRow());
+        final float[] colCoords = UserModelService.computeSpatialCoords(nbCols, fitsImage.getSignedIncCol());
+
+        final float[][] data = fitsImage.getData();
+
+        float[] row;
+        float rowCoord, colCoord, weight;
+
+        // iterate on rows:
+        for (int r = 0, c; r < nbRows; r++) {
+            row = data[r];
+            rowCoord = rowCoords[r];
+
+            // iterate on columns:
+            for (c = 0; c < nbCols; c++) {
+                colCoord = colCoords[c];
+
+                weight = (float) FastMath.exp(coeff * (rowCoord * rowCoord + colCoord * colCoord));
+
+//                logger.info("weight: {}", weight);
+                // multiply by gaussian:
+                row[c] *= weight;
+
+            } // columns
+
+            // fast interrupt :
+            if (currentThread.isInterrupted()) {
+                return;
+            }
+        } // rows
+
+        logger.info("apodise: duration = {} ms.", 1e-6d * (System.nanoTime() - start));
+    }
+
 }
