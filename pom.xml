@@ -3,13 +3,13 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-   <parent>
-      <groupId>fr.jmmc</groupId>
-      <artifactId>jmmc</artifactId>
-      <version>TRUNK</version>
-      <!--  please install first parent pom from jMCS/parent-pom directory -->
+    <parent>
+        <groupId>fr.jmmc</groupId>
+        <artifactId>jmmc</artifactId>
+        <version>TRUNK</version>
+        <!--  please install first parent pom from jMCS/parent-pom directory -->
     </parent>
-    
+
     <groupId>fr.jmmc.aspro</groupId>
     <artifactId>aspro2</artifactId>
 
@@ -17,20 +17,20 @@
     <name>Aspro2</name>
 
     <properties>
-	<!-- do make assembly and copy dependencies (JNLP) -->
-	<assembly.skipAssembly>false</assembly.skipAssembly>
-	<mdep.skip>false</mdep.skip>
+        <!-- do make assembly and copy dependencies (JNLP) -->
+        <assembly.skipAssembly>false</assembly.skipAssembly>
+        <mdep.skip>false</mdep.skip>
 
-	<!-- disable tests (fest fails for now) -->
+        <!-- disable tests (fest fails for now) -->
         <maven.test.skip>true</maven.test.skip>
     </properties>
 
     <dependencies>
 
         <dependency>
-	    <groupId>fr.jmmc.aspro</groupId>
-	    <artifactId>aspro-conf</artifactId>
-            <version>2014.0117</version>
+            <groupId>fr.jmmc.aspro</groupId>
+            <artifactId>aspro-conf</artifactId>
+            <version>2014.0219</version>
         </dependency>
 
         <dependency>
@@ -39,12 +39,12 @@
             <version>TRUNK</version>
         </dependency>
 
-	<dependency>
-		<groupId>eu.hansolo</groupId>
-		<artifactId>SteelSeries</artifactId>
-		<version>3.9.26</version>
-	</dependency>
-            
+        <dependency>
+            <groupId>eu.hansolo</groupId>
+            <artifactId>SteelSeries</artifactId>
+            <version>3.9.26</version>
+        </dependency>
+
         <dependency>
             <groupId>fr.jmmc.testgui</groupId>
             <artifactId>testgui</artifactId>
