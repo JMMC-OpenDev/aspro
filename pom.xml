@@ -30,7 +30,7 @@
         <dependency>
             <groupId>fr.jmmc.aspro</groupId>
             <artifactId>aspro-conf</artifactId>
-            <version>2014.0219</version>
+            <version>TRUNK</version>
         </dependency>
 
         <dependency>
