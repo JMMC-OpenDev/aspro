@@ -40,7 +40,7 @@
         <!-- Librairies -->
         <!-- SteelSeries Compass -->
         <jar href="@SHARED@/SteelSeries-3.9.26.jar" />
-        <jar href="@SHARED@/trident.jar" />
+        <jar href="@SHARED@/trident-6.3.jar" />
 
     </resources>
     <application-desc main-class="fr.jmmc.aspro.Aspro2"/>
