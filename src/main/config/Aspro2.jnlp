@@ -29,13 +29,14 @@
 
 
         <!-- Configuration module -->
-        <extension href="../AsproConfig/AsproConfig.jnlp"/>
+        <extension href="../../AsproConfig/aspro-conf/AsproConfig.jnlp"/>
 
 
         <!-- JMMC modules -->
         <extension href="../jmcs/Jmcs.jnlp"/>
         <extension href="../jmal/Jmal.jnlp"/>
         <extension href="../oiexplorer-core/OIExplorerCore.jnlp"/>
+
 
         <!-- Librairies -->
         <!-- SteelSeries Compass -->
