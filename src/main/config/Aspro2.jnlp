@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<jnlp spec="1.0+" codebase="@GENERATED@" href="@GENERATED@">
+<jnlp spec="1.0+" codebase="@GENERATED@" href="Aspro2.jnlp">
     <information>
         <title>Aspro 2</title>
         <vendor>JMMC (Jean-Marie MARIOTTI Center)</vendor>
@@ -22,23 +22,22 @@
     <resources>
         <j2se version="1.6+" initial-heap-size="256m" max-heap-size="1024m"/>
 
+        <!-- MANUALLY EDITED - Should be generated with maven ASAP ! -->
+
         <!-- Application module first (main class) -->
-        <jar href="jar/aspro.jar" />
+        <jar href="jar/aspro2-TRUNK.jar" />
+
 
         <!-- Configuration module -->
         <extension href="../AsproConfig/AsproConfig.jnlp"/>
 
+
         <!-- JMMC modules -->
-        <jar href="jar/jmcs.jar" />
-        <jar href="jar/jmal.jar" />
-        <jar href="jar/oitools.jar" />
-        <jar href="jar/oiexplorer_core.jar" />
+        <extension href="../jmcs/Jmcs.jnlp"/>
+        <extension href="../jmal/Jmal.jnlp"/>
+        <extension href="../oiexplorer-core/OIExplorerCore.jnlp"/>
 
-        <!-- JMMC libs -->
-        <extension href="../JmcsLibs/JmcsLibs.jnlp"/>
-        <extension href="../JmalLibs/JmalLibs.jnlp"/>
-        <extension href="../OIExplorerCoreLibs/OIExplorerCoreLibs.jnlp"/>
-
+        <!-- Librairies -->
         <!-- SteelSeries Compass -->
         <jar href="@SHARED@/SteelSeries-3.9.26.jar" />
         <jar href="@SHARED@/trident.jar" />
