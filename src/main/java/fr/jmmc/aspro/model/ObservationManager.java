@@ -34,6 +34,7 @@ import fr.jmmc.aspro.model.util.SpectralBandUtils;
 import fr.jmmc.aspro.service.UserModelService;
 import fr.jmmc.jmal.ALX;
 import fr.jmmc.jmal.Band;
+import fr.jmmc.jmal.CoordUtils;
 import fr.jmmc.jmal.model.ModelDefinition;
 import fr.jmmc.jmal.model.targetmodel.Model;
 import fr.jmmc.jmal.model.targetmodel.Parameter;
@@ -1045,7 +1046,7 @@ public final class ObservationManager extends BaseOIManager implements Observer 
         double distance;
 
         for (Target target : targets) {
-            distance = ALX.computeDistanceInDegrees(srcRaDeg, srcDecDeg, target.getRADeg(), target.getDECDeg());
+            distance = CoordUtils.computeDistanceInDegrees(srcRaDeg, srcDecDeg, target.getRADeg(), target.getDECDeg());
 
             if (distance < SAME_TARGET_DISTANCE) {
                 throw new IllegalArgumentException("Target[" + source.getName() + "](" + source.getRA() + ", " + source.getDEC()
