@@ -151,6 +151,7 @@ public final class AsproGenConfig {
                         if (value != -1000000) {
                             sb.append("<channelLink>\n");
                             sb.append("<channel>IP").append(i + 1).append("</channel>\n"); /* Channel names are IPn */
+
                             sb.append("<opticalLength>").append(value).append("</opticalLength>\n");
                             sb.append("</channelLink>\n");
                         }
@@ -219,7 +220,6 @@ public final class AsproGenConfig {
             while ((line = reader.readLine()) != null) {
 
                 // replace multiple delimiters :
-
                 tok = new StringTokenizer(line, delimiter);
 
                 i = 0;
@@ -362,7 +362,6 @@ public final class AsproGenConfig {
                             mappings[idx][0] = config.substring(0, 2); // first 2 chars (A1)
 
                             // Fix Ux = UTx
-
                             if (mappings[idx][0].startsWith("U")) {
                                 mappings[idx][0] = "UT" + mappings[idx][0].substring(1, 2);
                             }
@@ -536,17 +535,15 @@ public final class AsproGenConfig {
      * @return equatorial coordinates
      */
     private static Position3D convertHorizToEquatorial(final String station, final double latitude,
-            final double xOffset, final double yOffset, final double zOffset,
-            final StringBuilder sb) {
+                                                       final double xOffset, final double yOffset, final double zOffset,
+                                                       final StringBuilder sb) {
 
         final double x = xOffset * 1e-6;
         final double y = yOffset * 1e-6;
         final double z = zOffset * 1e-6;
 
         // Should convert from horizontal (local plane) to equatorial using ellipsoid correction ?
-
 //        final double latitude = geocentricLatitude(geodeticLatitude);
-
         final double xx = -Math.sin(latitude) * y + Math.cos(latitude) * z;
         final double yy = x;
         final double zz = Math.cos(latitude) * y + Math.sin(latitude) * z;
@@ -576,7 +573,7 @@ public final class AsproGenConfig {
      * @param sb output buffer for xml output
      */
     public static void convertCHARAAirPath(final String station, final double light, final double airPath,
-            final StringBuilder sb) {
+                                           final StringBuilder sb) {
 
         final double delay = (light + airPath * N_AIR) * 1e-6;
 
@@ -594,7 +591,7 @@ public final class AsproGenConfig {
      * @param sb output buffer for xml output
      */
     public static void convertCHARAPoP(final Map<String, Double> config,
-            final StringBuilder sb) {
+                                       final StringBuilder sb) {
 
         for (int i = 1; i <= 5; i++) {
             sb.append("      <popLink>\n");
@@ -729,7 +726,7 @@ public final class AsproGenConfig {
      * @param sb output buffer for xml output
      */
     private static void convertCHARASwitchyardStation(final String station, final double[] values,
-            final StringBuilder sb) {
+                                                      final StringBuilder sb) {
 
         sb.append("      <stationLinks>\n");
         sb.append("        <station>").append(station).append("</station>\n");
@@ -808,7 +805,6 @@ public final class AsproGenConfig {
                         current = new LinkedHashMap<String, Double>(16);
 
 //            logger.info("new station : " + name);
-
                         continue;
                     }
 
@@ -826,7 +822,6 @@ public final class AsproGenConfig {
 
                     // Parse values :
 //          logger.info("line = " + line);
-
                     tok = new StringTokenizer(line, delimiter);
 
                     if (tok.hasMoreTokens()) {
@@ -895,7 +890,6 @@ public final class AsproGenConfig {
         // S1 from telescopes.chara:
 //    LONG    -118 3 25.31272
 //    LAT       34 13 27.78130
-
         final double lonDeg = -(118.0 + 3.0 / 60.0 + 25.31272 / 3600.0);
         logger.info("CHARA longitude (deg) : " + lonDeg);
 
@@ -1466,7 +1460,9 @@ public final class AsproGenConfig {
      * @param args unused
      */
     public static void main(final String[] args) {
-        final String asproPath = "/home/bourgesl/dev/aspro1/etc/";
+        final String userHome = System.getProperty("user.home");
+        final String aspro1Path = userHome + "/dev/aspro1/etc/";
+        final String asproTestPath = userHome + "/dev/aspro/src/test/resources/";
 
         final INTERFEROMETER selected = INTERFEROMETER.VLTI;
 
@@ -1474,7 +1470,7 @@ public final class AsproGenConfig {
             case VLTI:
                 VLTIPosition();
 
-                convertSwitchYard(asproPath + "VLT.switchyard");
+                convertSwitchYard(aspro1Path + "VLT.switchyard");
 
                 final String[] vltStations = {
                     "U1", "U2", "U3", "U4", "A0", "A1", "B0", "B1", "B2", "B3", "B4", "B5",
@@ -1484,27 +1480,27 @@ public final class AsproGenConfig {
                 final StringBuilder sb = new StringBuilder(65535);
 
                 for (String station : vltStations) {
-                    convertHorizon(station, asproPath + station + ".horizon", sb);
+                    convertHorizon(station, aspro1Path + station + ".horizon", sb);
                 }
                 logger.info("convertHorizons : \n" + sb.toString());
 
                 // convert arrayList to get DLx and channels (IPn)
-                convertArrayList("/home/bourgesl/dev/aspro/test/vlti_arrayList_20131006.txt", "Period 93");
+                convertArrayList(asproTestPath + "vlti_arrayList_20131006.txt", "Period 93");
 
                 break;
             case CHARA:
-                convertCHARAConfig("/home/bourgesl/dev/aspro/test/telescopes.chara");
+                convertCHARAConfig(asproTestPath + "telescopes.chara");
                 break;
             case SUSI:
-                convertSUSIConfig("/home/bourgesl/dev/aspro/test/SUSI.txt");
+                convertSUSIConfig(asproTestPath + "SUSI.txt");
                 break;
             case NPOI:
-                convertNPOIConfig("/home/bourgesl/dev/aspro/test/stations.npoi");
+                convertNPOIConfig(asproTestPath + "stations.npoi");
                 break;
             case MROI:
                 MROIposition();
 
-                convertStationFile(asproPath + "MROI.stations");
+                convertStationFile(aspro1Path + "MROI.stations");
                 break;
 
             default:
