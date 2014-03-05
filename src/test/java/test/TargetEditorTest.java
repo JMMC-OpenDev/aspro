@@ -18,45 +18,47 @@ import org.slf4j.LoggerFactory;
  */
 public class TargetEditorTest {
 
-  /** Class logger */
-  private static final Logger logger = LoggerFactory.getLogger(TargetEditorTest.class.getName());
+    /** Class logger */
+    private static final Logger logger = LoggerFactory.getLogger(TargetEditorTest.class.getName());
 
-  /**
-   * Private constructor
-   */
-  private TargetEditorTest() {
-    super();
-  }
+    /**
+     * Private constructor
+     */
+    private TargetEditorTest() {
+        super();
+    }
 
-  /**
-   * Simple GUI test
-   * @param args unused
-   */
-  public static void main(String[] args) {
-    // Set the default locale to en-US locale (for Numerical Fields "." ",")
-    Locale.setDefault(Locale.US);
+    /**
+     * Simple GUI test
+     * @param args unused
+     */
+    public static void main(String[] args) {
+        // Set the default locale to en-US locale (for Numerical Fields "." ",")
+        Locale.setDefault(Locale.US);
 
-    SwingUtils.invokeLaterEDT(new Runnable() {
+        SwingUtils.invokeLaterEDT(new Runnable() {
 
-      /**
-       * Create the Gui using EDT
-       */
-      @Override
-      public void run() {
+            /**
+             * Create the Gui using EDT
+             */
+            @Override
+            public void run() {
 
-        // invoke App method to initialize logback now:
-        Bootstrapper.getState();
+                // invoke App method to initialize logback now:
+                Bootstrapper.getState();
 
-        try {
-          ObservationManager.getInstance().load(new File("/home/bourgesl/ASPRO2/VLTI_FUN2.asprox"));
+                try {
+                    final String userHome = System.getProperty("user.home");
 
-          logger.info("result = " + TargetEditorDialog.showEditor("HIP32768", TargetEditorDialog.TAB_TARGETS));
+                    ObservationManager.getInstance().load(new File(userHome + "/ASPRO2/VLTI_FUN2.asprox"));
 
-          System.exit(0);
-        } catch (Exception e) { // main (test)
-          logger.error("runtime exception", e);
-        }
-      }
-    });
-  }
+                    logger.info("result = " + TargetEditorDialog.showEditor("HIP32768", TargetEditorDialog.TAB_TARGETS));
+
+                    System.exit(0);
+                } catch (Exception e) { // main (test)
+                    logger.error("runtime exception", e);
+                }
+            }
+        });
+    }
 }

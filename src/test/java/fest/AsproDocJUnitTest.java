@@ -47,7 +47,8 @@ import org.junit.Test;
 public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
 
     /** absolute path to test folder to load observations */
-    private final static String TEST_FOLDER = "/home/bourgesl/dev/aspro/test/";
+    private final static String USER_HOME = System.getProperty("user.home");
+    private final static String TEST_FOLDER = USER_HOME + "/dev/aspro/src/test/resources/";
     private final static String MY_EMAIL = "laurent.bourges@obs.ujf-grenoble.fr";
 
     /**
@@ -60,7 +61,6 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
             logger.warning("Please use a JVM 1.6 (Sun) before running tests (fonts and LAF may be wrong) !");
             System.exit(1);
         }
-
 
         // disable dev LAF menu :
         System.setProperty("jmcs.laf.menu", "false");
@@ -162,7 +162,6 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
         // Capture observability plot of detailed plot :
         saveScreenshot(getMainTabbedPane(), "Aspro2-moon-obs-det.png");
 
-
         // disable detailed plot :
         panel.checkBox("jCheckBoxDetailedOutput").uncheck();
 
@@ -223,7 +222,6 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
 
         enableTooltips(false);
 
-
         // export PDF :
         exportPDF();
 
@@ -268,7 +266,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
         getMainTabbedPane().selectTab(SettingPanel.TAB_UV_COVERAGE);
 
         BufferedImage image = takeScreenshotOf(window);
-        
+
         enableTooltips(true);
 
         // move the mouse on the first observability interval (top right corner):
@@ -287,7 +285,6 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
         exportPDF();
 
         // TODO : refactor that code :
-
         // miniature for aspro web page : 350px width :
         final int width = 350;
         final int height = Math.round(1f * width * image.getHeight() / image.getWidth());
@@ -299,7 +296,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
         final BufferedImage rescaledImage = resampleOp.filter(image, null);
 
         saveImage(rescaledImage, "Aspro2-screen-small.png");
-        
+
         // Export OIFits / OB :
         exportOIFits();
         exportOB();

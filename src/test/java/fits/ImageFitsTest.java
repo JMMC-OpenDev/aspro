@@ -91,10 +91,12 @@ public class ImageFitsTest {
         // display fits image:
         new PreferencesView().setVisible(true);
 
+        final String userHome = System.getProperty("user.home");
+
         // Fits image with unit / lambda keywords tests:
         if (false) {
-//            String file = "/home/bourgesl/ASPRO2/fits/aspro_keywords.fits"; // BUNIT / CUNIT
-            String file = "/home/bourgesl/ASPRO2/fits/tests/Microlensing.fits.gz"; // BUNIT / CUNIT
+//            String file = userHome + "/ASPRO2/fits/aspro_keywords.fits"; // BUNIT / CUNIT
+            String file = userHome + "/ASPRO2/fits/tests/Microlensing.fits.gz"; // BUNIT / CUNIT
 
             try {
                 testFastMode(file, Boolean.FALSE);
@@ -108,8 +110,8 @@ public class ImageFitsTest {
 
         // Fits cube tests:
         if (false) {
-            //String file = "/home/bourgesl/ASPRO2/fits/cube/chromatic_cube_aspro_jk.fits"; // 7 images but no WL keywords
-            String file = "/home/bourgesl/ASPRO2/fits/cube/chromatic_cube_aspro_jk_with_Wlens.fits"; // 7 images with WL keywords      
+            //String file = userHome + "/ASPRO2/fits/cube/chromatic_cube_aspro_jk.fits"; // 7 images but no WL keywords
+            String file = userHome + "/ASPRO2/fits/cube/chromatic_cube_aspro_jk_with_Wlens.fits"; // 7 images with WL keywords      
 
             try {
                 testFastMode(file, Boolean.FALSE);
@@ -121,9 +123,8 @@ public class ImageFitsTest {
         }
 
         // fast mode tests:
-
         if (false) {
-            String file = "/home/bourgesl/ASPRO2/fits/58Eri_clumpy_K_1024.fits"; // diluted
+            String file = userHome + "/ASPRO2/fits/58Eri_clumpy_K_1024.fits"; // diluted
 
             try {
                 testFastMode(file, Boolean.FALSE);
@@ -136,36 +137,30 @@ public class ImageFitsTest {
         }
 
         if (false) {
-//      String file = "/home/bourgesl/ASPRO2/fits/SG_surface2.fits";
-//      String file = "/home/bourgesl/ASPRO2/fits/tests/HighMass.fits.gz"; // spiral       
-//      String file = "/home/bourgesl/ASPRO2/fits/ellipsePlusPunct.fits";
+//      String file = userHome + "/ASPRO2/fits/SG_surface2.fits";
+//      String file = userHome + "/ASPRO2/fits/tests/HighMass.fits.gz"; // spiral       
+//      String file = userHome + "/ASPRO2/fits/ellipsePlusPunct.fits";
 
-//      String file = "/home/bourgesl/ASPRO2/fits/tests/3c273_all_pl27.fits.gz";
-//      String file = "/home/bourgesl/ASPRO2/fits/tests/58Eri_clumpy_K_1024.fits.gz"; // diluted
-            String file = "/home/bourgesl/ASPRO2/fits/58Eri_clumpy_K_1024.fits"; // diluted
+//      String file = userHome + "/ASPRO2/fits/tests/3c273_all_pl27.fits.gz";
+//      String file = userHome + "/ASPRO2/fits/tests/58Eri_clumpy_K_1024.fits.gz"; // diluted
+            String file = userHome + "/ASPRO2/fits/58Eri_clumpy_K_1024.fits"; // diluted
 
-//      String file = "/home/bourgesl/ASPRO2/fits/tests/AGN.fits.gz";      
-
-//      String file = "/home/bourgesl/ASPRO2/fits/tests/ch4_i_60_big.fits.gz";
-//      String file = "/home/bourgesl/ASPRO2/fits/tests/ch4_i_60_big.fits";      
-//      String file = "/home/bourgesl/ASPRO2/fits/tests/ch4_i_00_big2.fits.gz";
-
-//      String file = "/home/bourgesl/ASPRO2/fits/tests/EvolvedStar.fits.gz";      
-
-//      String file = "/home/bourgesl/ASPRO2/fits/tests/flux_bf_intens_continuum_002_extended.fits.gz";      
-
+//      String file = userHome + "/ASPRO2/fits/tests/AGN.fits.gz";      
+//      String file = userHome + "/ASPRO2/fits/tests/ch4_i_60_big.fits.gz";
+//      String file = userHome + "/ASPRO2/fits/tests/ch4_i_60_big.fits";      
+//      String file = userHome + "/ASPRO2/fits/tests/ch4_i_00_big2.fits.gz";
+//      String file = userHome + "/ASPRO2/fits/tests/EvolvedStar.fits.gz";      
+//      String file = userHome + "/ASPRO2/fits/tests/flux_bf_intens_continuum_002_extended.fits.gz";      
 //java.lang.ClassCastException: [[[[I cannot be cast to [[I      
-//      String file = "/home/bourgesl/ASPRO2/fits/tests/isella_large_grain_inc000.fits.gz";  
-//      String file = "/home/bourgesl/ASPRO2/fits/tests/isella_large_grain_inc060.fits.gz";  
-//      String file = "/home/bourgesl/ASPRO2/fits/tests/isella_small_grain_inc060.fits.gz";  
-
-//      String file = "/home/bourgesl/ASPRO2/fits/tests/Microlensing.fits.gz";  
-//      String file = "/home/bourgesl/ASPRO2/fits/tests/Microquasar_grs1915a.fits.gz";  
-//      String file = "/home/bourgesl/ASPRO2/fits/tests/NGC1365.i60.K.ima279.fits.gz";  
-//      String file = "/home/bourgesl/ASPRO2/fits/tests/SG_surface2.fits.gz";  
-//      String file = "/home/bourgesl/ASPRO2/fits/tests/SG_surface.fits.gz";  
-//      String file = "/home/bourgesl/ASPRO2/fits/tests/YSO_disk.fits.gz";  
-
+//      String file = userHome + "/ASPRO2/fits/tests/isella_large_grain_inc000.fits.gz";  
+//      String file = userHome + "/ASPRO2/fits/tests/isella_large_grain_inc060.fits.gz";  
+//      String file = userHome + "/ASPRO2/fits/tests/isella_small_grain_inc060.fits.gz";  
+//      String file = userHome + "/ASPRO2/fits/tests/Microlensing.fits.gz";  
+//      String file = userHome + "/ASPRO2/fits/tests/Microquasar_grs1915a.fits.gz";  
+//      String file = userHome + "/ASPRO2/fits/tests/NGC1365.i60.K.ima279.fits.gz";  
+//      String file = userHome + "/ASPRO2/fits/tests/SG_surface2.fits.gz";  
+//      String file = userHome + "/ASPRO2/fits/tests/SG_surface.fits.gz";  
+//      String file = userHome + "/ASPRO2/fits/tests/YSO_disk.fits.gz";  
             try {
                 // load and prepare images:
                 final UserModel model = new UserModel();
@@ -247,12 +242,11 @@ public class ImageFitsTest {
                     }
                 }
 
-
                 if (false) {
                     return;
                 }
 
-                file = "/home/bourgesl/ASPRO2/fits/SG_surface2_copy.fits";
+                file = userHome + "/ASPRO2/fits/SG_surface2_copy.fits";
 
                 logger.info("writing: " + file);
 
@@ -264,8 +258,7 @@ public class ImageFitsTest {
 
                 FitsImageWriter.write(file, imgFitsFile);
 
-//        file = "/home/bourgesl/ASPRO2/fits/SG_surface2.fits";
-
+//        file = userHome + "/ASPRO2/fits/SG_surface2.fits";
                 imgFitsFile = FitsImageLoader.load(file, true);
 
                 logger.info("loaded FitsImageFile: " + imgFitsFile);
@@ -280,7 +273,7 @@ public class ImageFitsTest {
         }
 
         if (true) {
-            final File directory = new File("/home/bourgesl/ASPRO2/fits/tests/");
+            final File directory = new File(userHome + "/ASPRO2/fits/tests/");
             if (directory.exists() && directory.isDirectory()) {
 
                 // display fits image:
@@ -628,7 +621,6 @@ public class ImageFitsTest {
             // use raw array[1D] ??
             // convert automatically:
             // look at     Object o = ArrayFuncs.newInstance(base, dims);
-
             // read all data and convert them to arrays[][] :
             final float[][] array = getImageData(height, width, hdu.getBitPix(), data.getData());
 
@@ -644,7 +636,6 @@ public class ImageFitsTest {
 
             if (false) {
                 final int paddedSize = 4096;
-
 
                 // direct full FFT:
                 final FloatFFT_2D fft2d = new FloatFFT_2D(paddedSize, paddedSize);
@@ -702,7 +693,6 @@ public class ImageFitsTest {
                 return;
             }
 
-
             if (false) {
                 // test equivalence realForward / realForwardSubset:
                 testFFT(inputSize, array, 1024, 1024, false);
@@ -747,9 +737,7 @@ public class ImageFitsTest {
                 testFFT(inputSize, array, 8192, 908, true);
             }
 
-
             final int nThreads = ConcurrencyUtils.getNumberOfThreads();
-
 
             final boolean testFullFFT = false;
             final boolean testConcurrency = false;
@@ -827,7 +815,6 @@ public class ImageFitsTest {
         final boolean doPhiFull = false;
         final boolean doInverseFT = false;
 
-
         final int NFFTPass = 1;
 
         final int fftSubSize;
@@ -836,7 +823,6 @@ public class ImageFitsTest {
 
         long start, time;
         long acc = 0l;
-
 
         logger.info("testFFT: image size = " + inputSize + " - FFT size = " + fftSize
                 + " [fftSubset = " + fftSubset + "] - output size = " + outputSize);
