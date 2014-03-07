@@ -77,6 +77,7 @@ import java.util.concurrent.Callable;
 import javax.xml.datatype.XMLGregorianCalendar;
 import net.jafama.FastMath;
 import fr.jmmc.jmcs.util.CollectionUtils;
+import fr.jmmc.jmcs.util.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -107,7 +108,7 @@ public final class ObservabilityService {
     private final double MOON_SEPARATION_MARGIN = 0.5d / 60d;
     /** Jmcs Parallel Job executor */
     private static final ParallelJobExecutor jobExecutor = ParallelJobExecutor.getInstance();
-    /** shared cache of Pop combinations keyed by 'interferometer_<nBL>' */
+    /** shared cache of Pop combinations keyed by 'interferometer_nBL' */
     private static final Map<String, List<SharedPopCombination>> popCombinationCache = new HashMap<String, List<SharedPopCombination>>(16);
     /** simple RangeFactory (stateless) */
     private static final RangeFactory defaultRangeFactory = new SimpleRangeFactory();
@@ -211,10 +212,10 @@ public final class ObservabilityService {
      * @param bestPopEstimatorCriteriaAverageWeight optional Best Pops criteria on average weight
      */
     public ObservabilityService(final ObservationSetting observation,
-            final boolean useLST, final boolean doDetailedOutput, final boolean doBaseLineLimits,
-            final boolean doCenterMidnight, final SunType twilightNightLimit,
-            final Algorithm bestPopsAlgorithm,
-            final Criteria bestPopEstimatorCriteriaSigma, final Criteria bestPopEstimatorCriteriaAverageWeight) {
+                                final boolean useLST, final boolean doDetailedOutput, final boolean doBaseLineLimits,
+                                final boolean doCenterMidnight, final SunType twilightNightLimit,
+                                final Algorithm bestPopsAlgorithm,
+                                final Criteria bestPopEstimatorCriteriaSigma, final Criteria bestPopEstimatorCriteriaAverageWeight) {
 
         // Inputs :
         this.observation = observation;
@@ -316,7 +317,6 @@ public final class ObservabilityService {
         checkInterrupted();
 
         // 2 - Observability per target :
-
         if (targets == null || targets.isEmpty()) {
             logger.debug("No target defined.");
         } else {
@@ -703,8 +703,8 @@ public final class ObservabilityService {
         }
 
         // execute jobs in parallel:
-        final List<List<PopObservabilityData>> targetPopDataListResults =
-                (List<List<PopObservabilityData>>) jobExecutor.forkAndJoin("ObservabilityService.findCompatiblePoPs", jobs, nTh > 1);
+        final List<List<PopObservabilityData>> targetPopDataListResults
+                                               = (List<List<PopObservabilityData>>) jobExecutor.forkAndJoin("ObservabilityService.findCompatiblePoPs", jobs, nTh > 1);
 
         if (SHOW_BEST_POPS_STATS || SHOW_RANGE_FACTORY_STATS) {
             for (int t = 0; t < nTh; t++) {
@@ -882,12 +882,11 @@ public final class ObservabilityService {
      * @return list of Pop observability data
      */
     private List<PopObservabilityData> findPoPsForTargetObservability(final Target target,
-            final ObservabilityContext obsCtxLocal,
-            final double precRA, final double precDEC, final double haElev,
-            final int fromCb, final int endCb) {
+                                                                      final ObservabilityContext obsCtxLocal,
+                                                                      final double precRA, final double precDEC, final double haElev,
+                                                                      final int fromCb, final int endCb) {
 
         // Note: this method can be called by multiple threads (so ensure thread safety and interruption)
-
         // For all PoP combinations : find the HA interval merged with the HA Rise/set interval
         // list of observability data associated to a pop combination :
         List<PopObservabilityData> popDataList = null;
@@ -1002,7 +1001,6 @@ public final class ObservabilityService {
 
                 // handle here all possible combinations for POPs :
                 // keep only the POPs that maximize the DL+rise intersection ...
-
                 final List<Range> rangesTarget = new ArrayList<Range>(4);
                 rangesTarget.add(rangeHARiseSet);
 
@@ -1205,7 +1203,6 @@ public final class ObservabilityService {
             }
 
             // Merge then all JD intervals :
-
             // nValid = nBL [dl] + 1 [rise or horizon] + 1 if night limits
             int nValid = this.baseLines.size() + 1;
 
@@ -1471,7 +1468,7 @@ public final class ObservabilityService {
      * @return list of Pop Observability Data or null if thread interrupted
      */
     private List<PopObservabilityData> getPopObservabilityData(final String targetName, final double dec, final List<Range> rangesTarget,
-            final boolean doSkipDL, final ObservabilityContext obsCtxLocal, final boolean clearRangesBL) {
+                                                               final boolean doSkipDL, final ObservabilityContext obsCtxLocal, final boolean clearRangesBL) {
         return getPopObservabilityData(targetName, dec, rangesTarget, doSkipDL, obsCtxLocal, clearRangesBL, 0, obsCtxLocal.getPopCombs().length);
     }
 
@@ -1494,11 +1491,10 @@ public final class ObservabilityService {
      * @return list of Pop Observability Data or null if thread interrupted
      */
     private List<PopObservabilityData> getPopObservabilityData(final String targetName, final double dec, final List<Range> rangesTarget,
-            final boolean doSkipDL, final ObservabilityContext obsCtxLocal, final boolean clearRangesBL,
-            final int fromCb, final int endCb) {
+                                                               final boolean doSkipDL, final ObservabilityContext obsCtxLocal, final boolean clearRangesBL,
+                                                               final int fromCb, final int endCb) {
 
         // Note: this method can be called by multiple threads (so ensure thread safety and interruption)
-
         final long start = System.nanoTime();
 
         // local vars for performance:
@@ -1540,7 +1536,6 @@ public final class ObservabilityService {
         }
 
         // For all PoP combinations : find the HA interval merged with the HA Rise/set interval
-
         // Current pop observability :
         PopObservabilityData popData;
 
@@ -2152,7 +2147,33 @@ public final class ObservabilityService {
             throw new IllegalStateException("The number of associated channels does not match the station list : " + stations + " <> " + relatedChannels);
         }
 
+        // find the optional delay lines associated to the stations in the instrument configuration :
+        // VLTI : predefined delay line per station for a specific base line :
+        final List<DelayLine> relatedDLs = ConfigurationManager.getInstance().getInstrumentConfigurationDelayLines(
+                this.observation.getInterferometerConfiguration().getName(),
+                this.observation.getInstrumentConfiguration().getName(),
+                this.observation.getInstrumentConfiguration().getStations());
+
+        if (isLogDebug) {
+            logger.debug("relatedDelayLines: {}", relatedDLs);
+        }
+
+        final int nRelDLs = relatedDLs.size();
+        final boolean useRelatedDLs = nRelDLs > 0;
+
+        if (useRelatedDLs && nBeams != nRelDLs) {
+            throw new IllegalStateException("The number of associated delay lines does not match the station list : " + stations + " <> " + relatedDLs);
+        }
+
         this.beams = new ArrayList<Beam>(nBeams);
+
+        // used delay lines:
+        final HashSet<DelayLine> dlSet = new HashSet<DelayLine>(nBeams);
+        // used channels:
+        final HashSet<Channel> channelSet = new HashSet<Channel>(nBeams);
+
+        Channel selectedChannel;
+        DelayLine selectedDelayLine;
 
         // Beams are defined in the same ordering than stations :
         for (int i = 0; i < nBeams; i++) {
@@ -2161,7 +2182,22 @@ public final class ObservabilityService {
 
             // predefined Channel (CHARA) :
             if (useRelatedChannels && i < nRelChannels) {
-                beam.setChannel(relatedChannels.get(i));
+                selectedChannel = relatedChannels.get(i);
+                /* check that given channel is not already used by another beam */
+                if (!channelSet.contains(selectedChannel)) {
+                    channelSet.add(selectedChannel);
+                    beam.setChannel(selectedChannel);
+                }
+            }
+
+            // predefined DL (VLTI) :
+            if (useRelatedDLs && i < nRelDLs) {
+                selectedDelayLine = relatedDLs.get(i);
+                /* check that given DL is not already used by another beam */
+                if (!dlSet.contains(selectedDelayLine)) {
+                    dlSet.add(selectedDelayLine);
+                    beam.setDelayLine(selectedDelayLine);
+                }
             }
 
             this.beams.add(beam);
@@ -2171,10 +2207,10 @@ public final class ObservabilityService {
             }
         }
 
-        // Get channels :
+        // Get all possible channels:
         final List<Channel> channels = this.interferometer.getChannels();
 
-        // Get delay Lines :
+        // Get all possible delay Lines:
         final List<DelayLine> delayLines = this.interferometer.getDelayLines();
 
         final int nDelayLines = delayLines.size();
@@ -2185,27 +2221,39 @@ public final class ObservabilityService {
 
             // 2 cases ;
             // CHARA : predefined channel per station for a specific base line
-            // VLTI : find an available channel for every station
-
-            // used channels :
-            final HashSet<Channel> channelSet = new HashSet<Channel>(nBeams);
-
+            // VLTI : find any available channel for every station
+            //        OR predefined channel and delay line per station for a specific base line (Period >= 94)
+            // 1- Associate a channel / DL to the beam :
             StationLinks sl;
             for (Beam b : this.beams) {
 
-                // for each station, get the possible channels in the switchyard configuration :
+                // for each station, get the possible channels in the switchyard configuration:
                 sl = ConfigurationManager.getInstance().getStationLinks(this.interferometer, b.getStation());
 
-                // VLTI : find an available channel for every station :
-                if (!useRelatedChannels) {
+                // VLTI : find an available channel for every station:
+                if (!useRelatedChannels || b.getChannel() == null) {
                     for (ChannelLink cl : sl.getChannelLinks()) {
 
                         if (!channelSet.contains(cl.getChannel())) {
-                            channelSet.add(cl.getChannel());
+                            // check that optional associated DL is not used:
+                            if ((cl.getDelayLine() == null)
+                                    || (b.getDelayLine() == null && !dlSet.contains(cl.getDelayLine()))
+                                    || (cl.getDelayLine().equals(b.getDelayLine()))) {
 
-                            // use this channel for the beam :
-                            b.setChannel(cl.getChannel());
-                            break;
+                                if (cl.getDelayLine() != null) {
+                                    // set DL if not defined:
+                                    dlSet.add(cl.getDelayLine());
+                                    b.setDelayLine(cl.getDelayLine());
+                                    
+                                    // set the DL maximum throw (VCM soft limit):
+                                    b.setMaximumThrow(cl.getMaximumThrow());
+                                }
+                                channelSet.add(cl.getChannel());
+
+                                // use this channel for the beam :
+                                b.setChannel(cl.getChannel());
+                                break;
+                            }
                         }
                     }
                 }
@@ -2213,10 +2261,15 @@ public final class ObservabilityService {
                     throw new IllegalStateException("Unable to associate a channel to every station [" + stations + "].");
                 }
 
-                // Use the channel link corresponding to the beam channel :
+                // Use the channel link corresponding to the beam channel:
                 for (ChannelLink cl : sl.getChannelLinks()) {
 
                     if (cl.getChannel().equals(b.getChannel())) {
+
+                        if ((cl.getDelayLine() != null) && (!cl.getDelayLine().equals(b.getDelayLine()))) {
+                            /* DL does not match, try another channel link */
+                            continue;
+                        }
                         // optical path = switchyard + station fixed offset
                         b.addOpticalLength(cl.getOpticalLength());
 
@@ -2235,47 +2288,42 @@ public final class ObservabilityService {
                 }
             } // for loop on beams
 
-            // Associate a delay line to the beam :
-
+            // 2- Associate a delay line to the beam if missing:
             // Use any Delay line available except if the delay line has a prefered station (CHARA E1 shorter than others)
-
-            // used delay lines :
-            final HashSet<DelayLine> dlSet = new HashSet<DelayLine>(nBeams);
-
             for (Beam b : this.beams) {
+                /* check if DL is empty (VLTI can have DL set from baseline or channel links) */
+                if (b.getDelayLine() == null) {
+                    // first find the delay line dedicated to one station (CHARA):
+                    Station beamStation = b.getStation();
 
-                // first find the delay line dedicated to the beam station:
-                Station beamStation = b.getStation();
+                    selectedDelayLine = null;
 
-                DelayLine selectedDelayLine = null;
-
-                for (DelayLine dl : delayLines) {
-                    if (beamStation.equals(dl.getStation())) {
-                        if (!dlSet.contains(dl)) {
-                            selectedDelayLine = dl;
-                        }
-                        break;
-                    }
-                }
-
-                // If undefined, use any available delay line:
-                if (selectedDelayLine == null) {
                     for (DelayLine dl : delayLines) {
-                        if (!dlSet.contains(dl)) {
-                            selectedDelayLine = dl;
+                        if (beamStation.equals(dl.getStation())) {
+                            if (!dlSet.contains(dl)) {
+                                selectedDelayLine = dl;
+                            }
                             break;
                         }
                     }
-                }
 
-                if (selectedDelayLine != null) {
-                    dlSet.add(selectedDelayLine);
+                    // If undefined, use any available delay line (VLTI):
+                    if (selectedDelayLine == null) {
+                        for (DelayLine dl : delayLines) {
+                            if (!dlSet.contains(dl)) {
+                                selectedDelayLine = dl;
+                                break;
+                            }
+                        }
+                    }
 
-                    b.setDelayLine(selectedDelayLine);
-
-                } else {
-                    // To be checked
-                    throw new IllegalStateException("Impossible to associate a delay line to the beam [" + b + "].");
+                    if (selectedDelayLine != null) {
+                        dlSet.add(selectedDelayLine);
+                        b.setDelayLine(selectedDelayLine);
+                    } else {
+                        // To be checked
+                        throw new IllegalStateException("Impossible to associate a delay line to the beam [" + b + "].");
+                    }
                 }
             }
 
@@ -2309,6 +2357,13 @@ public final class ObservabilityService {
                 logger.debug("beam [{}]: {}", i, b.toString());
                 i++;
             }
+        }
+
+        // TODO: KILL
+        int i = 0;
+        for (Beam b : this.beams) {
+            logger.info("beam [{}]: {}", i, b.toString());
+            i++;
         }
 
         this.data.setBeams(this.beams);
@@ -2432,7 +2487,6 @@ public final class ObservabilityService {
                     p2 = pops[j];
 
                     // Note : the beams are in the same order as the stations :
-
                     // optical path difference = difference of pops delays :
                     t = getPopOpticalLength(b1.getStation(), p1) - getPopOpticalLength(b2.getStation(), p2);
 
@@ -2526,12 +2580,13 @@ public final class ObservabilityService {
 
                 // 2 DL for 2 telescopes => double throw :
                 // note : for now, all DLs are equivalent (same throw) :
-
                 wMin = t - b2.getDelayLine().getMaximumThrow();
                 wMax = t + b1.getDelayLine().getMaximumThrow();
 
                 // the range contains the w delay limits for the corresponding base line :
                 this.wRanges.add(new Range(wMin, wMax));
+                
+                /* TODO: VCM limit in term of wSoftRange (soft limit) */
             }
         }
 
@@ -2809,8 +2864,8 @@ public final class ObservabilityService {
      * @param doDetails flag to enable detailled (ticks and transit information)
      */
     private void getTargetPosition(final StarObservabilityData starObs, final List<Range> obsRangeJD,
-            final double precRA, final double precDEC,
-            final boolean doDetails) {
+                                   final double precRA, final double precDEC,
+                                   final boolean doDetails) {
         final Map<Date, TargetPositionDate> targetPositions = starObs.getTargetPositions();
 
         // prepare cosDec/sinDec:
