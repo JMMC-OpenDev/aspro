@@ -5,10 +5,10 @@
 *******************************************************************************
 -->
 
-<ApplicationData link="http://www.jmmc.fr/aspro2" 
-                 faqlink="http://www.jmmc.fr/aspro2/faq/" 
+<ApplicationData link="http://www.jmmc.fr/aspro2"
+                 faqlink="http://www.jmmc.fr/aspro2/faq/"
                  rsslink="http://www.jmmc.fr/aspro2/aspro2.rss">
-  
+
     <company>
         <short_name>JMMC</short_name>
         <legal_name>Jean-Marie Mariotti Center</legal_name>
@@ -17,9 +17,9 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="0.9.6 beta 1"/>
-    <compilation date="03/10/2013" compiler="JDK 1.6.0_24"/>
-  
+    <program name="Aspro2" version="0.9.6 beta 2"/>
+    <compilation date="07/03/2014" compiler="JDK 1.6.0_24"/>
+
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
     <jnlp>http://apps.jmmc.fr/~swmgr/Aspro2/Aspro2.jnlp</jnlp>
@@ -31,24 +31,24 @@
 
         <!-- Java Mariotti Astronomical library -->
         <package name="jMAL"
-             description="JMMC library to provide common astronomical computations (coordinate conversion, SIMBAD star resolver and analytical object models in interferometry)"
-             link="https://www.jmmc.fr/dev/jmal/"
-             jars="jmal.jar"
-             license="CECILL-B ???"/>
+                 description="JMMC library to provide common astronomical computations (coordinate conversion, SIMBAD star resolver and analytical object models in interferometry)"
+                 link="https://www.jmmc.fr/dev/jmal/"
+                 jars="jmal.jar"
+                 license="CECILL-B ???"/>
 
         <!-- Java Mariotti OIfitsExplorer-core -->
         <package name="OIFits Explorer core"
-             description="OIFits Explorer core is the JMMC library dedicated to share OIFits GUI components (plots)"
-             link="http://www.jmmc.fr/dev/oiexplorer-core/"
-             jars="oiexplorer-core.jar"
-             license="CECILL-B ???"/>
+                 description="OIFits Explorer core is the JMMC library dedicated to share OIFits GUI components (plots)"
+                 link="http://www.jmmc.fr/dev/oiexplorer-core/"
+                 jars="oiexplorer-core.jar"
+                 license="CECILL-B ???"/>
 
         <!-- Java Mariotti OITools -->
         <package name="OITools"
-             description="OITools is the JMMC library dedicated to OIFits manipulation (load, save and validation)"
-             link="https://www.jmmc.fr/dev/oitools/"
-             jars="oitools.jar"
-             license="CECILL-B ???"/>
+                 description="OITools is the JMMC library dedicated to OIFits manipulation (load, save and validation)"
+                 link="https://www.jmmc.fr/dev/oitools/"
+                 jars="oitools.jar"
+                 license="CECILL-B ???"/>
 
 
         <!-- 1. Science / VO libraries (always on top for better visibility) -->
@@ -56,16 +56,16 @@
         <!-- Aspro2 dependencies -->
 
         <package name="JSkyCalc"
-             description="Observability constraints and Sky Display based on JSkyCalc by J. R. Thorstensen, Dartmouth College"
-             link="http://www.dartmouth.edu/~physics/faculty/skycalc/flyer.html"
-             license="redistribution allowed including this acknowledgment 'Observability constraints and Sky Display based on JSkyCalc by J. R. Thorstensen, Dartmouth College'" />
+                 description="Observability constraints and Sky Display based on JSkyCalc by J. R. Thorstensen, Dartmouth College"
+                 link="http://www.dartmouth.edu/~physics/faculty/skycalc/flyer.html"
+                 license="redistribution allowed including this acknowledgment 'Observability constraints and Sky Display based on JSkyCalc by J. R. Thorstensen, Dartmouth College'" />
 
         <!-- OITools dependencies -->
 
         <package name="nom.tam.fits"
-             description="The Java FITS library (nom.tam.fits) has been developed which provides efficient I/O for FITS images and binary tables. Made by Dr Thomas A. McGlynn, HEASARC"
-             link="http://heasarc.gsfc.nasa.gov/docs/heasarc/fits/java/v1.0/"
-             license="Copyright: Thomas McGlynn 1997-1999." />
+                 description="The Java FITS library (nom.tam.fits) has been developed which provides efficient I/O for FITS images and binary tables. Made by Dr Thomas A. McGlynn, HEASARC"
+                 link="http://heasarc.gsfc.nasa.gov/docs/heasarc/fits/java/v1.0/"
+                 license="Copyright: Thomas McGlynn 1997-1999." />
         <!--
           Copyright: Thomas McGlynn 1997-1999.
           This code may be used for any purpose, non-commercial
@@ -78,19 +78,19 @@
 
         <!-- VO interoperability -->
         <package name="JSAMP"
-             description="JSAMP is a Java toolkit for use with the Simple Applications Messaging Protocol. Made by Mark Taylor, Bristol University."
-             link="http://software.astrogrid.org/doc/jsamp/"
-             jars="jsamp-1.3-2.jar"
-             license="AFL v2.1"/>
+                 description="JSAMP is a Java toolkit for use with the Simple Applications Messaging Protocol. Made by Mark Taylor, Bristol University."
+                 link="http://software.astrogrid.org/doc/jsamp/"
+                 jars="jsamp-1.3-2.jar"
+                 license="AFL v2.1"/>
 
         <!-- jMAL dependencies -->
 
         <!-- Model computations (bessel functions) -->
         <package name="CERN colt"
-             description="provides a set of Open Source Libraries for High Performance Scientific and Technical Computing in Java"
-             link="http://acs.lbl.gov/software/colt/"
-             jars="colt.jar"
-             license="Copyright (c) 1999 CERN - European Organization for Nuclear Research"/>
+                 description="provides a set of Open Source Libraries for High Performance Scientific and Technical Computing in Java"
+                 link="http://acs.lbl.gov/software/colt/"
+                 jars="colt.jar"
+                 license="Copyright (c) 1999 CERN - European Organization for Nuclear Research"/>
         <!--
           Copyright (c) 1999 CERN - European Organization for Nuclear Research.
           Permission to use, copy, modify, distribute and sell this software and its documentation for any purpose is
@@ -100,16 +100,16 @@
         -->
 
         <package name="JTransforms"
-             description="JTransforms is the first, open source, multithreaded FFT library written in pure Java. Made by Dr Piotr Wendykier, Wolfram Research, Inc."
-             link="http://sourceforge.net/projects/jtransforms/"
-             license="MPL/LGPL/GPL" />
+                 description="JTransforms is the first, open source, multithreaded FFT library written in pure Java. Made by Dr Piotr Wendykier, Wolfram Research, Inc."
+                 link="http://sourceforge.net/projects/jtransforms/"
+                 license="MPL/LGPL/GPL" />
         <!-- Mozilla Public License: http://www.mozilla.org/MPL/ -->
 
         <package name="Jafama"
-             description="Jafama (Java Fast Math) consists of fast counterparts of java.lang.Math treatments, plus additional ones. They are usually about 2-4 (up to 15) times faster, with about 1e-15 accuracy, and handle special cases (NaN, etc.)."
-             link="http://sourceforge.net/projects/jafama/"
-             jars="jafama.jar"
-             license="APACHE_V2"/>
+                 description="Jafama (Java Fast Math) consists of fast counterparts of java.lang.Math treatments, plus additional ones. They are usually about 2-4 (up to 15) times faster, with about 1e-15 accuracy, and handle special cases (NaN, etc.)."
+                 link="http://sourceforge.net/projects/jafama/"
+                 jars="jafama.jar"
+                 license="APACHE_V2"/>
 
 
         <!-- 2. Swing -->
@@ -117,44 +117,44 @@
         <!-- Aspro2 dependencies -->
 
         <package name="JFreeChart"
-             description="JFreeChart is a free 100% Java chart library that makes it easy for developers to display professional quality charts in their applications"
-             link="http://www.jfree.org/jfreechart/"
-             jars="jfreechart-1.0.13.jar jcommon-1.0.16.jar"
-             license="LGPL" />
+                 description="JFreeChart is a free 100% Java chart library that makes it easy for developers to display professional quality charts in their applications"
+                 link="http://www.jfree.org/jfreechart/"
+                 jars="jfreechart-1.0.13.jar jcommon-1.0.16.jar"
+                 license="LGPL" />
 
         <package name="iText"
-             description="iText is a library that allows you to generate PDF files on the fly"
-             link="http://itextpdf.com/"
-             jars="iText-2.1.5.jar"
-             license="AGPL (http://itextpdf.com/terms-of-use/agpl.php)" />
+                 description="iText is a library that allows you to generate PDF files on the fly"
+                 link="http://itextpdf.com/"
+                 jars="iText-2.1.5.jar"
+                 license="AGPL (http://itextpdf.com/terms-of-use/agpl.php)" />
 
         <package name="SteelSeries"
-             description="SteelSeries is library of gauges for Java applications"
-             link="http://kenai.com/projects/steelseries"
-             jars="SteelSeries-3.9.26.jar trident.jar"
-             license="BSD" />
+                 description="SteelSeries is library of gauges for Java applications"
+                 link="http://kenai.com/projects/steelseries"
+                 jars="SteelSeries-3.9.26.jar trident.jar"
+                 license="BSD" />
 
     </dependences>
 
     <menubar>
         <menu label="File">
             <menu label="New observation" classpath="fr.jmmc.aspro.gui.action.NewObservationAction" action="newObservation" accelerator="N"
-            icon="fr/jmmc/aspro/gui/icons/filenew.png"/>
+                  icon="fr/jmmc/aspro/gui/icons/filenew.png"/>
             <menu label="Open observation" classpath="fr.jmmc.aspro.gui.action.LoadObservationAction" action="loadObservation" accelerator="O"
-            icon="fr/jmmc/aspro/gui/icons/fileopen.png" description="load an observation file"/>
+                  icon="fr/jmmc/aspro/gui/icons/fileopen.png" description="load an observation file"/>
             <menu label="Save observation" classpath="fr.jmmc.aspro.gui.action.SaveObservationAction" action="saveObservation" accelerator="S"
-            icon="fr/jmmc/aspro/gui/icons/filesaveas.png" description="save the current observation as an observation file"/>
+                  icon="fr/jmmc/aspro/gui/icons/filesaveas.png" description="save the current observation as an observation file"/>
             <menu/> <!-- menu separator -->
             <menu label="Export to OIFits file(s)" classpath="fr.jmmc.aspro.gui.action.ExportOIFitsAction" action="exportOIFits" accelerator="F"
-            description="Export your target observables to OIFits file(s)"/>
+                  description="Export your target observables to OIFits file(s)"/>
             <menu/> <!-- menu separator -->
             <menu label="Export to an Observing Block" classpath="fr.jmmc.aspro.gui.action.ExportOBAction" action="exportOB" accelerator="B"
-            description="Export your observation of the selected target to an Observing block"/>
+                  description="Export your observation of the selected target to an Observing block"/>
             <menu label="Export targets to Observing Blocks" classpath="fr.jmmc.aspro.gui.action.ExportAllOBAction" action="exportAllOB"
-            description="Export your complete observation to Observing blocks"/>
+                  description="Export your complete observation to Observing blocks"/>
             <menu/> <!-- menu separator -->
             <menu label="Export plot to PDF" classpath="fr.jmmc.oiexplorer.core.gui.action.ExportPDFAction" action="exportPDF" accelerator="P"
-            icon="fr/jmmc/oiexplorer/core/resource/image/icon_pdf.gif" description="Export the current plot to a PDF document"/>
+                  icon="fr/jmmc/oiexplorer/core/resource/image/icon_pdf.gif" description="Export the current plot to a PDF document"/>
         </menu>
 
         <menu label="Edit">
@@ -169,23 +169,26 @@
 
         <menu label="Interop">
             <menu label="Search calibrators" classpath="fr.jmmc.aspro.interop.SearchCalQueryAction" action="searchCalStartQuery"
-                description="use SearchCal to search calibrators for the current selected target (SAMP)"/>
+                  description="use SearchCal to search calibrators for the current selected target (SAMP)"/>
             <menu label="Perform model fitting" classpath="fr.jmmc.aspro.interop.BroadcastToModelFittingAction" action="broadcastToModelFittingAction"
-                description="use LITpro to prepare your model fitting and inspect your OIFits files (SAMP)"/>
+                  description="use LITpro to prepare your model fitting and inspect your OIFits files (SAMP)"/>
             <menu label="Send StarList to PIVOT" classpath="fr.jmmc.aspro.interop.StarListSendAction" action="starListSendAction"
-                description="send back the star list to PIVOT (SAMP)"/>
+                  description="send back the star list to PIVOT (SAMP)"/>
             <menu label="Send OIFits data" classpath="fr.jmmc.aspro.interop.SendOIFitsAction" action="sendOIFitsAction"
-                description="send simulated OIFits data file(s) to OIFitsExplorer or other VO Tools (SAMP)"/>
+                  description="send simulated OIFits data file(s) to OIFitsExplorer or other VO Tools (SAMP)"/>
         </menu>
-    
+
         <menu label="Help">
             <menu label="Configuration Release notes" classpath="fr.jmmc.jmcs.gui.action.ShowReleaseNotesAction" action="showConf"/>
         </menu>
-    
+
     </menubar>
 
     <releasenotes>
         <release version="0.9.6">
+            <prerelease version="0.9.6 beta 2">
+                <change type="FEATURE">Improved Aspro configuration to associate a delay line and a channel to each station and describe VLTI setup more accurately</change>
+            </prerelease>
             <prerelease version="0.9.6 beta 1">
                 <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/533">Modified position editor (rho / theta) to use astronomical convention (separation / position angle)</change>
             </prerelease>
@@ -215,7 +218,7 @@
             <prerelease version="0.9.5 beta 3">
                 <change type="FEATURE">Updated embedded OIFits explorer to use customizable plot</change>
                 <change type="FEATURE">Added OIFits Explorer interoperability (or topcat) i.e. send OIFits data files to any VO Tools supporting FITS files</change>
-                <change type="BUGFIX">Improved HA sampling to start at the beginning of each observability intervals and 
+                <change type="BUGFIX">Improved HA sampling to start at the beginning of each observability intervals and
                     ensure integration time is within the observability range</change>
                 <change type="FEATURE">Improved model image of the phase using cyclic LUT</change>
                 <change type="FEATURE">Modified color palette used in interferometer map and UV Coverage plot to use transparency (75% opacity)</change>
@@ -241,13 +244,13 @@
                 <change type="FEATURE">Added the instrument spectral configuration in the status information to help creating polychromatic user models</change>
                 <change type="FEATURE">Defined default preference of the super sampling in spectral channels to 3 samples to see bandwidth smearing effects</change>
                 <change type="FEATURE">Added preferences in the Preference view (add error noise to data or model image, super sampling in spectral channels)</change>
-                <change type="FEATURE">Added minimal user model animator widget (FITS cube) on the Target Model editor and the UV coverage panel 
+                <change type="FEATURE">Added minimal user model animator widget (FITS cube) on the Target Model editor and the UV coverage panel
                     to enable / disable automatic image cycling and adjust the period</change>
                 <change type="FEATURE">Modified OIFits OI_VIS, OI_VIS2, OI_T3 tables to reference appropriate stations in STA_INDEX arrays (baseline or triplets)</change>
                 <change type="FEATURE">Modified OIFits OI_ARRAY table to contain all telescope stations</change>
                 <change type="FEATURE">Modified OIFits ARRNAME values to have the interferometer name only (VLTI, not VLTI Period ...)</change>
                 <change type="FEATURE">Modified OIFits INSNAME values to have a meaningfull instrument mode description: Instrument_lambdaFirst-lambdaLast-Nch;
-                    lambdaFirst, lambdaLast, N are respectively the wavelength of the first and last spectral channels, the number of spectral channels 
+                    lambdaFirst, lambdaLast, N are respectively the wavelength of the first and last spectral channels, the number of spectral channels
                     (for example: AMBER_1.48347-2.52552-37ch)</change>
                 <change type="CHANGE">Improved global performance (Best Pops, model image, astronomical computations) using Java Fast Math library (jafama 2.0)</change>
             </prerelease>
@@ -263,7 +266,7 @@
             </prerelease>
             <prerelease version="0.9.4 beta 9">
                 <change type="FEATURE">Added a 'Find' feature (Previous / Next) to select a target in the target list by pattern matching on its name</change>
-                <change type="CHANGE">Modified warning messages (CHARA configuration and Pops settings) considered as information messages: 
+                <change type="CHANGE">Modified warning messages (CHARA configuration and Pops settings) considered as information messages:
                     status is then 'Information'</change>
                 <change type="FEATURE">Added filters on the observability plot (Hide calibrators and unobservable targets)</change>
                 <change type="FEATURE">Added target selection handling in the observability plot to display it highlighted and scroll to it</change>
@@ -272,7 +275,7 @@
             <prerelease version="0.9.4 beta 8">
                 <change type="FEATURE">Extracted configuration (interferometers and their instruments) into the AsproConfig module to have an independent life cycle (CfP)</change>
                 <change type="CHANGE">Minor changes to the main setting panel: 'Target editor' renamed 'Editor' and margins made smaller</change>
-                <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/398">Added a distance check before adding a new target to the target list 
+                <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/398">Added a distance check before adding a new target to the target list
                     to avoid duplicates (within 5 arcsec) and solve identifier issues</change>
                 <change type="BUGFIX" url="http://trac.jmmc.fr/jmmc-sw/ticket/385">Added the 'delete target' action in the target editor too</change>
             </prerelease>
@@ -282,7 +285,7 @@
             </prerelease>
             <prerelease version="0.9.4 beta 6">
                 <change type="FEATURE">Improved Fits image panel to display all images loaded (animation) with their image index and wavelength in the legend area</change>
-                <change type="FEATURE">Added Polychromatic user model support as Fits cube: AXIS3 represents the wavelength axis; 
+                <change type="FEATURE">Added Polychromatic user model support as Fits cube: AXIS3 represents the wavelength axis;
                     CRVAL3 (with CRPIX3) gives the wavelength reference, CDELT3 the wavelength increment and CUNIT3 the wavelength unit</change>
                 <change type="FEATURE">Added minimal Fits CUNIT keyword support to handle angle and wavelength conversions (deg, arcsec to rad) and (nm or micron to meter)</change>
                 <change type="CHANGE">Optimized OIFits computation from an user model (better parallelism)</change>
@@ -306,7 +309,7 @@
             <prerelease version="0.9.4 beta 2">
                 <change type="FEATURE">Added HA constraints (per target) in the observability computation displayed using translucent area and dotted outline</change>
                 <change type="FEATURE">Added a combo box in the main settings to see estimated best Pops combinations and their effect on observability</change>
-                <change type="FEATURE">Enhanced the Best PoPs algorithm to take new rules into account (transit distance and HA constraints); 
+                <change type="FEATURE">Enhanced the Best PoPs algorithm to take new rules into account (transit distance and HA constraints);
                     it is based on a normal law estimator that allows more control (gaussian variance and average estimation versus min estimation)</change>
                 <change type="CHANGE">Optimized Best PoPs algorithm (multithreading)</change>
                 <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/390">Made the color scale on UV coverage plot interactive to show only effective data range (even when zooming in/out)</change>
@@ -356,7 +359,7 @@
             <prerelease version="0.9.2 beta 4">
                 <change type="FEATURE">Fixed SUSI station positions, baselines (North - South) and delay line maximum throw</change>
                 <change type="FEATURE">Added preliminary support for the Sydney University Stellar Interferometer (SUSI) with PAVO instrument (2T)</change>
-                <change type="FEATURE">Enhanced JSkyCalc interoperability to provide complete target list as an object list 
+                <change type="FEATURE">Enhanced JSkyCalc interoperability to provide complete target list as an object list
                     that are all plotted on the sky display and airmass plots</change>
             </prerelease>
             <prerelease version="0.9.2 beta 3">
