@@ -2359,13 +2359,6 @@ public final class ObservabilityService {
             }
         }
 
-        // TODO: KILL
-        int i = 0;
-        for (Beam b : this.beams) {
-            logger.info("beam [{}]: {}", i, b.toString());
-            i++;
-        }
-
         this.data.setBeams(this.beams);
 
         if (isLogDebug) {
