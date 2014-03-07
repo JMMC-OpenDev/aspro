@@ -201,9 +201,7 @@ public final class Aspro2 extends App {
      */
     private void prepareFrame() {
         logger.debug("prepareFrame : enter");
-        final JFrame frame = new JFrame();
-
-        frame.setTitle(ApplicationDescription.getInstance().getProgramName());
+        final JFrame frame = new JFrame(ApplicationDescription.getInstance().getProgramName());
 
         // handle frame icon
         final Image jmmcFavImage = ResourceImage.JMMC_FAVICON.icon().getImage();
