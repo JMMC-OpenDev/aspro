@@ -8,27 +8,35 @@
 <project name="ASPRO 2" default="about" basedir=".">
 
   <description>
-  	Aspro ant build file
+  	Aspro ant build file.
+	
+	To generate JAXB code from xsd:
+		ant -f build-java.xml genXsdCode
   </description>
 
 
-	<!--
-    Get build properties (general).
-	  Should only contain the location of the JMCS module where JAXB libraries can be found.
-	-->
+  <!--
+  Get build properties (general).
+  Should only contain the location of the JMCS module where JAXB libraries can be found.
+  -->
   <property file="build.properties" />
 
   <!-- define folder properties -->
   <property name="root" location=".."/>
 
   <!-- JAXB library must be present in the jmcs module nearby -->
-  <property name="jaxb.libs" location="${jmcs.path}/lib"/>
+  <property name="jaxb.version" value="2.2.7"/>
+  <property name="jaxb.libs" location="${jmcs.path}/tools/xjc"/>
+  <property name="mvn.libs" location="${root}/target/runtime-libs/"/>
 
   <!-- Aspro src folder -->
-  <property name="sources" location="${root}/src"/>
+  <property name="resources" location="${root}/src/main/resources"/>
+  <property name="sources"   location="${root}/src/main/java"/>
+
+  <property name="output" location="${sources}"/>
 
   <!-- Aspro test folder -->
-  <property name="test" location="${root}/test"/>
+  <property name="test" location="${root}/src/test/java"/>
 
 
   <!-- custom macro to enhance XJC -->
@@ -37,7 +45,8 @@
     <attribute name="schema"/>
 
     <sequential>
-      <java jar="${jaxb.libs}/jaxb-xjc.jar">
+      <java classname="com.sun.tools.xjc.XJCFacade" classpath="${jaxb.libs}/jaxb-xjc-${jaxb.version}.jar:${mvn.libs}/jaxb-api-${jaxb.version}.jar:${mvn.libs}/jaxb-core-${jaxb.version}.jar:${mvn.libs}/jaxb-impl-${jaxb.version}.jar" fork="true" failonerror="true" maxmemory="256m">
+
         <arg value="-classpath"/>
         <arg value="${jaxb.libs}/simple-regenerator-1.0.jar"/>
 
@@ -51,6 +60,7 @@
         <arg value="@{destdir}"/>
 
         <arg value="@{schema}"/>
+	<env key="LANG" value="en_US"/>
       </java>
 
       <delete dir="@{destdir}">
@@ -79,14 +89,15 @@
   <target name="genXsdCode" description="generate java classes from XSD schemas">
 
     <echo>generating java code for AsproOIModel.xsd</echo>
-    <mkdir dir="${sources}/fr/jmmc/aspro/model/oi" />
+    <mkdir dir="${output}/fr/jmmc/aspro/model/oi" />
 
-    <xjc destdir="${sources}"
-         schema="${sources}/fr/jmmc/aspro/model/AsproOIModel.xsd" />
+<!-- test -->
+    <xjc destdir="${output}"
+         schema="${resources}/fr/jmmc/aspro/model/AsproOIModel.xsd" />
 
     <!-- remove generated classes for jmal package (target model) -->
     
-    <delete dir="${sources}/fr/jmmc/jmal/" />
+    <delete dir="${output}/fr/jmmc/jmal/" />
 
   </target>
 
@@ -95,7 +106,7 @@
 
   <target name="oifits2html" description="convert OIFits xml representation to HTML">
 
-		<xslt  in="${test}/oifits/sample.xml"
+    <xslt  in="${test}/oifits/sample.xml"
           out="${test}/oifits/sample.html"
           style="${sources}/fr/jmmc/aspro/gui/oiview.xsl"
           force="true"/>
