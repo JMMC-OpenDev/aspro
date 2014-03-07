@@ -9,6 +9,7 @@ import fr.jmmc.aspro.gui.chart.AsproChartUtils;
 import fr.jmmc.aspro.model.oi.AzEl;
 import fr.jmmc.aspro.model.oi.Channel;
 import fr.jmmc.aspro.model.oi.Configurations;
+import fr.jmmc.aspro.model.oi.DelayLine;
 import fr.jmmc.aspro.model.oi.FocalInstrument;
 import fr.jmmc.aspro.model.oi.FocalInstrumentConfiguration;
 import fr.jmmc.aspro.model.oi.FocalInstrumentConfigurationItem;
@@ -1017,6 +1018,24 @@ public final class ConfigurationManager extends BaseOIManager {
             final FocalInstrumentConfigurationItem c = getInstrumentConfiguration(ic, instrumentConfigurationName);
             if (c != null) {
                 return c.getChannels();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Return the (optional) list of delay lines for the given interferometer configuration, instrument name and instrument configuration
+     * @param configurationName name of the interferometer configuration
+     * @param instrumentName name of the instrument
+     * @param instrumentConfigurationName name of the instrument configuration
+     * @return list of delay lines or null if undefined
+     */
+    public List<DelayLine> getInstrumentConfigurationDelayLines(final String configurationName, final String instrumentName, final String instrumentConfigurationName) {
+        final FocalInstrumentConfiguration ic = getInterferometerInstrumentConfiguration(configurationName, instrumentName);
+        if (ic != null) {
+            final FocalInstrumentConfigurationItem c = getInstrumentConfiguration(ic, instrumentConfigurationName);
+            if (c != null) {
+                return c.getDelayLines();
             }
         }
         return null;
