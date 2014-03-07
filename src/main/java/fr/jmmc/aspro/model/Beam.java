@@ -13,85 +13,103 @@ import fr.jmmc.aspro.model.oi.Station;
  */
 public final class Beam {
 
-  /** station */
-  private final Station station;
-  /** channel */
-  private Channel channel;
-  /** channel */
-  private DelayLine delayLine;
-  /** fixed optical length (m) from the interferometer switchyard */
-  private double opticalLength = 0d;
+    /** station */
+    private final Station station;
+    /** channel */
+    private Channel channel;
+    /** channel */
+    private DelayLine delayLine;
+    /** fixed optical length (m) from the interferometer switchyard */
+    private double opticalLength = 0d;
+    /** optional delay line position limit expressed in throw (m) */
+    private Double maximumThrow = null;
 
-  /**
-   * Constructor for a given station
-   * @param station station
-   */
-  public Beam(final Station station) {
-    this.station = station;
-  }
+    /**
+     * Constructor for a given station
+     * @param station station
+     */
+    public Beam(final Station station) {
+        this.station = station;
+    }
 
-  /**
-   * Return the station
-   * @return station
-   */
-  public Station getStation() {
-    return station;
-  }
+    /**
+     * Return the station
+     * @return station
+     */
+    public Station getStation() {
+        return station;
+    }
 
-  /**
-   * Return the channel
-   * @return channel
-   */
-  public Channel getChannel() {
-    return channel;
-  }
+    /**
+     * Return the channel
+     * @return channel
+     */
+    public Channel getChannel() {
+        return channel;
+    }
 
-  /**
-   * Set the channel
-   * @param channel channel to use
-   */
-  public void setChannel(final Channel channel) {
-    this.channel = channel;
-  }
+    /**
+     * Set the channel
+     * @param channel channel to use
+     */
+    public void setChannel(final Channel channel) {
+        this.channel = channel;
+    }
 
-  /**
-   * Return the delay line
-   * @return delay line
-   */
-  public DelayLine getDelayLine() {
-    return delayLine;
-  }
+    /**
+     * Return the delay line
+     * @return delay line
+     */
+    public DelayLine getDelayLine() {
+        return delayLine;
+    }
 
-  /**
-   * Set the delay line
-   * @param delayLine delay line
-   */
-  public void setDelayLine(final DelayLine delayLine) {
-    this.delayLine = delayLine;
-  }
+    /**
+     * Set the delay line
+     * @param delayLine delay line
+     */
+    public void setDelayLine(final DelayLine delayLine) {
+        this.delayLine = delayLine;
+    }
 
-  /**
-   * Return the fixed optical length (m)
-   * @return fixed optical length
-   */
-  public double getOpticalLength() {
-    return opticalLength;
-  }
+    /**
+     * Return the fixed optical length (m)
+     * @return fixed optical length
+     */
+    public double getOpticalLength() {
+        return opticalLength;
+    }
 
-  /**
-   * Add the given value to the fixed optical length (m)
-   * @param opticalLength length (m) to add
-   */
-  public void addOpticalLength(final double opticalLength) {
-    this.opticalLength += opticalLength;
-  }
+    /**
+     * Add the given value to the fixed optical length (m)
+     * @param opticalLength length (m) to add
+     */
+    public void addOpticalLength(final double opticalLength) {
+        this.opticalLength += opticalLength;
+    }
 
-  /**
-   * Return a string representation of the Beam object
-   * @return string representation of the Beam object
-   */
-  @Override
-  public String toString() {
-    return "Beam : " + this.station + " - " + this.channel + " - " + this.delayLine + " = " + this.opticalLength + " m";
-  }
+    /**
+     * Return the optional delay line position limit expressed in throw (m)
+     * @return optional delay line position limit expressed in throw (m)
+     */
+    public Double getMaximumThrow() {
+        return maximumThrow;
+    }
+
+    /**
+     * Define the optional delay line position limit expressed in throw (m)
+     * @param maximumThrow optional delay line position limit expressed in throw (m)
+     */
+    public void setMaximumThrow(final Double maximumThrow) {
+        this.maximumThrow = maximumThrow;
+    }
+
+    /**
+     * Return a string representation of the Beam object
+     * @return string representation of the Beam object
+     */
+    @Override
+    public String toString() {
+        return "Beam : " + this.station + " - " + this.channel + " - " + this.delayLine + " = " + this.opticalLength + " m [ maxThrow = " + this.maximumThrow + " m ]";
+    }
 }
