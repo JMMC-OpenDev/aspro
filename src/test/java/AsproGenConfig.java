@@ -1,10 +1,13 @@
 
-/*******************************************************************************
+/**
+ * *****************************************************************************
  * JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
- ******************************************************************************/
+ * ****************************************************************************
+ */
 import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.oi.Channel;
 import fr.jmmc.aspro.model.oi.ChannelLink;
+import fr.jmmc.aspro.model.oi.DelayLine;
 import fr.jmmc.aspro.model.oi.FocalInstrumentConfiguration;
 import fr.jmmc.aspro.model.oi.FocalInstrumentConfigurationItem;
 import fr.jmmc.aspro.model.oi.InterferometerConfiguration;
@@ -26,12 +29,15 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.StringTokenizer;
 import javax.xml.bind.JAXBException;
 import org.slf4j.Logger;
@@ -39,32 +45,52 @@ import org.slf4j.LoggerFactory;
 
 /**
  * This class converts the VLT switchyard to an XML fragment compliant with the aspro DM
- * 
+ *
  * @author bourgesl
  */
 public final class AsproGenConfig {
 
-    /** refractive index in air (from http://refractiveindex.info/?group=GASES&material=Air) */
+    /**
+     * refractive index in air (from http://refractiveindex.info/?group=GASES&material=Air)
+     */
     public final static double N_AIR = 1.00027316;
-    /** EARTH FLATTENING f = 1/(298.257,223,563) */
+    /**
+     * EARTH FLATTENING f = 1/(298.257,223,563)
+     */
     public final static double EARTH_FLATTENING = 1.0 / 298.257223563;
-    /** Earth square excentricity e^2 = 2 x f - f^2 */
+    /**
+     * Earth square excentricity e^2 = 2 x f - f^2
+     */
     public final static double EARTH_SQUARE_EXCENTRICITY = 2.0 * EARTH_FLATTENING - EARTH_FLATTENING * EARTH_FLATTENING;
-    /** Class logger */
+    /**
+     * Class logger
+     */
     private static final Logger logger = LoggerFactory.getLogger(AsproGenConfig.class.getName());
 
-    /** interferometer enum */
+    /**
+     * interferometer enum
+     */
     private enum INTERFEROMETER {
 
-        /** VLTI (eso) */
+        /**
+         * VLTI (eso)
+         */
         VLTI,
-        /** CHARA array */
+        /**
+         * CHARA array
+         */
         CHARA,
-        /** SUSI */
+        /**
+         * SUSI
+         */
         SUSI,
-        /** NPOI (experimental) */
+        /**
+         * NPOI (experimental)
+         */
         NPOI,
-        /** MROI (future) */
+        /**
+         * MROI (future)
+         */
         MROI
     };
 
@@ -76,57 +102,88 @@ public final class AsproGenConfig {
     }
 
     /**
-     * Convert the ASPRO 1 VLTI switchyard :
-     * 165.8497 167.1097 -1000000 -1000000 173.8097 175.0697 -1000000 -1000000 U1
-     * @param absFileName absolute file path to ASPRO 1 VLTI switchyard file
+     * Generate the new VLTI switchyard using files: - vlti_opl.txt: [Tel OPL] = station | optical path length (m) -
+     * vlti_vcm_limit.txt: [Tel DL1 DL2 DL3 DL4 LD5 DL6] = station | DL pos (m) in range [0;60]
+     *
+     * @param absFileOPL absolute file path to the VLTI OPL file
+     * @param absFileVCM absolute file path to the VLTI VCM file
      */
-    private static void convertSwitchYard(final String absFileName) {
-
-        logger.info("convertSwitchYard : " + absFileName);
+    private static void generateSwitchYard(final String absFileOPL, final String absFileVCM) {
+        logger.info("convertSwitchYard: " + absFileOPL + ", " + absFileVCM);
 
         final StringBuilder sb = new StringBuilder(16384);
         sb.append("<switchyard>\n");
 
-        // number of columns filled with double values :
-        final int maxCols = 8;
         // column separator :
         final String delimiter = " ";
 
+        final Set<String> channelSet = new LinkedHashSet<String>(6 * 8);
+
+        final int maxDL = 6;
+        final double maximumThrow = 100d; /* 100m */
+
         // load data from file :
-        BufferedReader reader = null;
+        BufferedReader readerOPL = null;
+        BufferedReader readerVCM = null;
         try {
-            final File data = new File(absFileName);
+            readerOPL = new BufferedReader(new FileReader(new File(absFileOPL)));
+            readerVCM = new BufferedReader(new FileReader(new File(absFileVCM)));
 
-            reader = new BufferedReader(new FileReader(data));
-
-            int i;
-            String line;
+            int i, ip;
+            String lineOPL, lineVCM;
             StringTokenizer tok;
             // outputs :
-            String station;
-            double[] values = new double[maxCols];
+            String station, stationVCM, channel;
+            double oplFixed, maxDLPupilPos, maxDLThrowPupil;
+            final double[] oplDL = new double[maxDL];
+            final double[] maxDLPupilPositions = new double[maxDL];
+            double opl;
 
-            while ((line = reader.readLine()) != null) {
-                tok = new StringTokenizer(line, delimiter);
+            while ((lineOPL = readerOPL.readLine()) != null && (lineVCM = readerVCM.readLine()) != null) {
 
-                i = 0;
+                if (lineOPL.startsWith("#") || lineVCM.startsWith("#")) {
+                    continue;
+                }
+
+                /* parse OPL */
                 station = null;
+
+                tok = new StringTokenizer(lineOPL, delimiter);
+                i = 0;
                 while (tok.hasMoreTokens()) {
-                    if (i < maxCols) {
-                        values[i] = Double.parseDouble(tok.nextToken());
-                    } else {
+                    if (i == 0) {
                         // station name :
                         station = tok.nextToken();
-                        break;
+                    } else {
+                        if (i > maxDL) {
+                            break;
+                        }
+                        oplDL[i - 1] = Double.parseDouble(tok.nextToken());
+                    }
+                    i++;
+                }
+
+                /* parse VCM */
+                tok = new StringTokenizer(lineVCM, delimiter);
+                i = 0;
+                while (tok.hasMoreTokens()) {
+                    if (i == 0) {
+                        // station name :
+                        stationVCM = tok.nextToken();
+                        if (!stationVCM.equals(station)) {
+                            throw new IllegalStateException("station mismatch [" + stationVCM + " <> " + station + "] !");
+                        }
+                    } else {
+                        if (i > maxDL) {
+                            break;
+                        }
+                        maxDLPupilPositions[i - 1] = Double.parseDouble(tok.nextToken());
                     }
                     i++;
                 }
 
                 if (station != null) {
-                    /*
-                     System.out.println("station : " + station);
-                     System.out.println("values : " + Arrays.toString(values));
-                     */
+//          System.out.println("station: [" + station + "] oplFixed: [" + oplFixed + "] maxDLPupilPos: " + Arrays.toString(maxDLPupilPositions));
                     /*
                      <stationLinks>
                      <station>U1</station>
@@ -140,22 +197,46 @@ public final class AsproGenConfig {
 
                     // output :
                     sb.append("<stationLinks>\n");
-                    sb.append("<station>").append(station).append("</station>\n");
+                    sb.append("<station>").append(fixStationName(station)).append("</station>\n");
 
-                    double value;
-                    for (i = 0; i < maxCols; i++) {
+                    for (i = 0; i < maxDL; i++) {
+                        oplFixed = oplDL[i];
+                        maxDLPupilPos = maxDLPupilPositions[i];
 
-                        value = values[i];
+                        // skip blanking value for DL (-10000 or 0) :
+                        if ((oplFixed > 0.0) && (maxDLPupilPos > 0.0)) {
 
-                        // skip blanking value (-1000000) :
-                        if (value != -1000000) {
-                            sb.append("<channelLink>\n");
-                            sb.append("<channel>IP").append(i + 1).append("</channel>\n"); /* Channel names are IPn */
+                            /* convert position [0; 60] into maximum throw - DL offset (5.5m) */
+                            maxDLThrowPupil = 2.0 * (maxDLPupilPos - 5.5);
 
-                            sb.append("<opticalLength>").append(value).append("</opticalLength>\n");
-                            sb.append("</channelLink>\n");
+                            if (maxDLThrowPupil < 0.0) {
+                                maxDLThrowPupil = 0.0;
+                            }
+
+                            if (maxDLThrowPupil > maximumThrow) {
+                                maxDLThrowPupil = maximumThrow;
+                            }
+
+                            /* only generate IP[1,3,5,7], others are unused */
+                            for (ip = 0; ip < 8; ip += 2) {
+
+                                /* corrected fixed OPL with IP switchyard: (ip-1)*0.12 for ip >= 1 */
+                                opl = oplFixed + 0.12d * ip;
+
+                                sb.append("<channelLink>\n");
+
+                                /* Channel names are IPn */
+                                channel = "IP" + (ip + 1);
+                                channelSet.add(channel);
+
+                                sb.append("<channel>").append(channel).append("</channel>\n");
+                                sb.append("<opticalLength>").append(trimTo4Digits(opl)).append("</opticalLength>\n");
+                                /* delay line maximum throw to keep pupil due to VCM */
+                                sb.append("<delayLine>DL").append((i + 1)).append("</delayLine>\n");
+                                sb.append("<maximumThrow>").append(trimTo4Digits(maxDLThrowPupil)).append("</maximumThrow>\n");
+                                sb.append("</channelLink>\n");
+                            }
                         }
-
                     }
 
                     sb.append("</stationLinks>\n");
@@ -167,9 +248,16 @@ public final class AsproGenConfig {
         } catch (IOException ioe) {
             logger.error("IO failure", ioe);
         } finally {
-            if (reader != null) {
+            if (readerOPL != null) {
                 try {
-                    reader.close();
+                    readerOPL.close();
+                } catch (IOException ioe) {
+                    logger.error("IO failure", ioe);
+                }
+            }
+            if (readerVCM != null) {
+                try {
+                    readerVCM.close();
                 } catch (IOException ioe) {
                     logger.error("IO failure", ioe);
                 }
@@ -178,17 +266,37 @@ public final class AsproGenConfig {
 
         sb.append("</switchyard>\n");
 
-        logger.info("convertSwitchYard : output :\n" + sb.toString());
+        final StringBuilder sb1 = new StringBuilder(16384);
+
+        /* channels */
+        for (String ch : channelSet) {
+            sb1.append("<channel>\n  <name>").append(ch).append("</name>\n</channel>\n");
+        }
+        sb1.append("\n\n");
+
+        /* dl */
+        for (int i = 0; i < maxDL; i++) {
+            sb1.append("<delayLine>\n  <name>DL").append(i + 1).append("</name>\n")
+                    .append("  <maximumThrow>").append(maximumThrow).append("</maximumThrow>\n</delayLine>\n");
+        }
+        sb1.append("\n\n");
+
+        logger.info("convertSwitchYard : output :\n" + sb1.toString() + sb.toString());
+    }
+
+    private static String fixStationName(final String name) {
+        // Fix Ux = UTx
+        if (name.startsWith("U") && !name.startsWith("UT")) {
+            return "UT" + name.substring(1, 2);
+        }
+        return name;
     }
 
     /**
-     * Convert ASPRO 1 VLTI horizons for the given station :
-     360.000000000000       0.000000000000000E+000
-     235.000000000000       0.000000000000000E+000
-     235.000000000000        8.00000000000000
-     224.000000000000        8.00000000000000
-     224.000000000000       0.000000000000000E+000
-     ...
+     * Convert ASPRO 1 VLTI horizons for the given station : 360.000000000000 0.000000000000000E+000 235.000000000000
+     * 0.000000000000000E+000 235.000000000000 8.00000000000000 224.000000000000 8.00000000000000 224.000000000000
+     * 0.000000000000000E+000 ...
+     *
      * @param station station name
      * @param absFileName absolute file path of the ASPRO 1 station profile
      * @param sb output buffer for xml output
@@ -261,12 +369,15 @@ public final class AsproGenConfig {
 
     /**
      * Load and parse the vlti array list
-     * @param absFileName 
+     *
+     * @param absFileName
      * @param period
      */
     private static void convertArrayList(final String absFileName, final String period) {
 
-        /** package name for JAXB generated code */
+        /**
+         * package name for JAXB generated code
+         */
         final String OI_JAXB_PATH = "fr.jmmc.aspro.model.oi";
         final String CONF_CLASSLOADER_PATH = "fr/jmmc/aspro/model/";
 
@@ -295,26 +406,37 @@ public final class AsproGenConfig {
             throw new IllegalStateException("No switchyard found in " + uri + " !");
         }
 
-        final Map<String, Channel> channels = new HashMap<String, Channel>(16);
+        final Map<String, Channel> channels = new HashMap<String, Channel>(8);
 
         for (Channel ch : is.getDescription().getChannels()) {
             channels.put(ch.getName(), ch);
         }
 
-        InterferometerConfiguration icFound = null;
+        final Map<String, DelayLine> delayLines = new HashMap<String, DelayLine>(8);
 
-        for (InterferometerConfiguration ic : is.getConfigurations()) {
-            if (period.equalsIgnoreCase(ic.getVersion())) {
-                icFound = ic;
-                break;
+        for (DelayLine dl : is.getDescription().getDelayLines()) {
+            delayLines.put(dl.getName(), dl);
+        }
+
+        /* Process a single period or update all periods */
+        List<InterferometerConfiguration> confToProcess = null;
+        if (period == null) {
+            confToProcess = new ArrayList<InterferometerConfiguration>(is.getConfigurations());
+        } else {
+            confToProcess = new ArrayList<InterferometerConfiguration>(1);
+            for (InterferometerConfiguration ic : is.getConfigurations()) {
+                if (period.equalsIgnoreCase(ic.getVersion())) {
+                    confToProcess.add(ic);
+                    break;
+                }
             }
-        }
 
-        if (icFound == null) {
-            throw new IllegalStateException("Configuration '" + period + "' not found in " + uri + " !");
-        }
+            if (confToProcess.isEmpty()) {
+                throw new IllegalStateException("Configuration '" + period + "' not found in " + uri + " !");
+            }
 
-        logger.info("Configuration '" + period + "' found in " + uri + " ...");
+            logger.info("Configuration '" + period + "' found in " + uri + " ...");
+        }
 
         // load data from file :
         BufferedReader reader = null;
@@ -329,13 +451,18 @@ public final class AsproGenConfig {
             int pos, idx, nTel;
             boolean match = false;
             Channel ch;
-            List<Channel> confChannels;
+            List<Channel> confIPs;
+            DelayLine dl;
+            List<DelayLine> confDLs;
 
             StringTokenizer tok;
             String line, config;
 
-            // mapping 0 = station, 1 = channel (IP):
-            final String[][] mappings = new String[4][2]; // max 4T
+            // mapping 0 = station, 1 = delayLine (DL), 2 = channel (IP):
+            final int STA = 0;
+            final int DL = 1;
+            final int IP = 2;
+            final String[][] mappings = new String[4][3]; // max 4T
 
             while ((line = reader.readLine()) != null) {
                 line = line.replaceAll("\\s+", " ").trim();
@@ -347,8 +474,7 @@ public final class AsproGenConfig {
 
                     if (pos != -1) {
                         line = line.substring(pos + 2);
-
-                        logger.info("line: {}", line);
+//                        logger.info("line: {}", line);
 
                         // Parse values :
                         tok = new StringTokenizer(line, delimiter);
@@ -359,15 +485,11 @@ public final class AsproGenConfig {
                             config = tok.nextToken();
 //                            logger.info("config: {}", config);
 
-                            mappings[idx][0] = config.substring(0, 2); // first 2 chars (A1)
-
                             // Fix Ux = UTx
-                            if (mappings[idx][0].startsWith("U")) {
-                                mappings[idx][0] = "UT" + mappings[idx][0].substring(1, 2);
-                            }
-
-                            mappings[idx][1] = config.substring(5, 8); // last char (IP1)
-//                            logger.info("station: {} - channel: {}", mappings[idx][0], mappings[idx][1]);
+                            mappings[idx][STA] = fixStationName(config.substring(0, 2)); // first 2 chars (A1)
+                            mappings[idx][DL] = config.substring(2, 5); // middle chars (DL3)
+                            mappings[idx][IP] = config.substring(5, 8); // last char (IP5)
+//                            logger.info("station: {} - DL: {} - IP: {}", mappings[idx][STA], mappings[idx][DL], mappings[idx][IP]);
 
                             idx++;
                         }
@@ -377,24 +499,29 @@ public final class AsproGenConfig {
                         /*
                          <switchyard>
                          <stationLinks>
-                         <station>UT1</station>
+                         <station>A0</station>
                          <channelLink>
                          <channel>IP1</channel>
-                         <opticalLength>165.8497</opticalLength>
+                         <delayLine>DL1</delayLine>
+                         <opticalLength>134.8395</opticalLength>
+                         <maximumThrow>39.4</maximumThrow>
                          </channelLink>
                          ...
                          */
-                        match = false;
-
                         for (pos = 0; pos < nTel; pos++) {
                             match = false;
                             for (StationLinks sl : sw.getStationLinks()) {
-                                if (sl.getStation().getName().equalsIgnoreCase(mappings[pos][0])) {
+                                if (sl.getStation().getName().equalsIgnoreCase(mappings[pos][STA])) {
                                     // station found in switchyard:
                                     for (ChannelLink cl : sl.getChannelLinks()) {
-                                        if (cl.getChannel().getName().equalsIgnoreCase(mappings[pos][1])) {
+                                        if (cl.getChannel().getName().equalsIgnoreCase(mappings[pos][IP])) {
                                             match = true;
-                                            break;
+                                            if ((cl.getDelayLine() != null) && (!cl.getDelayLine().getName().equalsIgnoreCase(mappings[pos][DL]))) {
+                                                match = false;
+                                            }
+                                            if (match) {
+                                                break;
+                                            }
                                         }
                                     }
                                     break;
@@ -402,66 +529,81 @@ public final class AsproGenConfig {
                             }
 
                             if (!match) {
-                                logger.error("channel [{}] not defined in switchyard for station: [{}]", mappings[pos][1], mappings[pos][0]);
-//                                break;
+                                logger.error("IP [{}] or DL [{}] not defined in switchyard for station: [{}]",
+                                        mappings[pos][IP], mappings[pos][DL], mappings[pos][STA]);
                             }
-                        }
-
-                        if (!match) {
-//                            break;
                         }
 
                         // Find configuration:
                         match = false;
 
-                        for (FocalInstrumentConfiguration insConf : icFound.getInstruments()) {
-                            if (nTel == insConf.getFocalInstrument().getNumberChannels()) {
-//                                logger.info("checking instrument [{}]", insConf.getFocalInstrument().getName());
+                        for (InterferometerConfiguration ic : confToProcess) {
 
-                                for (FocalInstrumentConfigurationItem conf : insConf.getConfigurations()) {
+                            for (FocalInstrumentConfiguration insConf : ic.getInstruments()) {
+                                if (nTel == insConf.getFocalInstrument().getNumberChannels()) {
+                                    // logger.info("checking instrument [{}]", insConf.getFocalInstrument().getName());
 
-                                    // Find matching stations:
-                                    idx = 0;
-                                    for (pos = 0; pos < nTel; pos++) {
-                                        for (Station sta : conf.getStations()) {
-                                            if (sta.getName().equalsIgnoreCase(mappings[pos][0])) {
-                                                idx++;
-                                            }
-                                        }
-                                    }
+                                    for (FocalInstrumentConfigurationItem conf : insConf.getConfigurations()) {
 
-                                    if (idx == nTel) {
-                                        // matching:
-                                        match = true;
-                                        logger.info("conf match: [{}]: {}", conf.getName(), line);
-
-                                        // Update channels in conf:
-                                        confChannels = conf.getChannels();
-
-                                        if (!confChannels.isEmpty()) {
-                                            confChannels.clear();
-                                        }
-
-                                        // for all stations in conf:
-                                        for (Station sta : conf.getStations()) {
-                                            ch = null;
-                                            for (pos = 0; pos < nTel; pos++) {
-                                                if (sta.getName().equalsIgnoreCase(mappings[pos][0])) {
-                                                    ch = channels.get(mappings[pos][1]);
-                                                    break;
+                                        // Find matching stations:
+                                        idx = 0;
+                                        for (pos = 0; pos < nTel; pos++) {
+                                            for (Station sta : conf.getStations()) {
+                                                if (sta.getName().equalsIgnoreCase(mappings[pos][STA])) {
+                                                    idx++;
                                                 }
                                             }
-                                            // add channel:
-                                            if (ch == null) {
-                                                logger.error("no channel found for station: {}", sta.getName());
+                                        }
+
+                                        if (idx == nTel) {
+                                            // matching:
+                                            match = true;
+    //                                        logger.info("conf match: [{}]: {}", conf.getName(), line);
+
+                                            // Update channels in conf:
+                                            confIPs = conf.getChannels();
+                                            confIPs.clear(); // reset
+
+                                            // Update delay lines in conf:
+                                            confDLs = conf.getDelayLines();
+                                            confDLs.clear(); // reset
+
+                                            // for all stations in conf:
+                                            for (Station sta : conf.getStations()) {
+                                                ch = null;
+                                                dl = null;
+                                                /* find again if order is different */
+                                                for (pos = 0; pos < nTel; pos++) {
+                                                    if (sta.getName().equalsIgnoreCase(mappings[pos][STA])) {
+                                                        dl = delayLines.get(mappings[pos][DL]);
+                                                        ch = channels.get(mappings[pos][IP]);
+                                                        break;
+                                                    }
+                                                }
+                                                // add channel:
+                                                if (ch == null) {
+                                                    logger.error("no channel found for station: {}", sta.getName());
+                                                } else {
+                                                    confIPs.add(ch);
+                                                }
+                                                // add DL:
+                                                if (dl == null) {
+                                                    logger.error("no DL found for station: {}", sta.getName());
+                                                } else {
+                                                    confDLs.add(dl);
+                                                }
+                                            }
+                                            if (confIPs.size() != nTel) {
+                                                logger.error("Missing channel : [{}] for stations [{}]", confIPs, conf.getStations());
                                             } else {
-                                                confChannels.add(ch);
+                                                // logger.info("channels: [{}] for stations [{}]", confIPs, conf.getStations());
+                                            }
+                                            if (confDLs.size() != nTel) {
+                                                logger.error("Missing DL : [{}] for stations [{}]", confDLs, conf.getStations());
+                                            } else {
+                                                // logger.info("DL: [{}] for stations [{}]", confDLs, conf.getStations());
                                             }
                                         }
-                                        if (confChannels.size() != nTel) {
-                                            logger.error("Missing channel : [{}] for stations [{}]", confChannels, conf.getStations());
-                                        }
-                                        logger.info("channels: [{}] for stations [{}]", confChannels, conf.getStations());
                                     }
                                 }
                             }
@@ -478,7 +620,7 @@ public final class AsproGenConfig {
             if (match) {
                 // Dump updated VLTI configuration with channels:
                 try {
-                    final ByteArrayOutputStream bo = new ByteArrayOutputStream(300 * 1000);
+                    final ByteArrayOutputStream bo = new ByteArrayOutputStream(512 * 1024);
 
                     jf.createMarshaller().marshal(is, bo);
 
@@ -504,7 +646,6 @@ public final class AsproGenConfig {
                 }
             }
         }
-
     }
 
     private static double geocentricLatitude(final double geodeticLatitude) {
@@ -522,9 +663,8 @@ public final class AsproGenConfig {
     /**
      * Convert horizontal coordinates to equatorial coordinates
      *
-     * # XOFFSET - East offset in microns from S1
-     * # YOFFSET - North offset in microns from S1
-     * # ZOFFSET - vertical (+ is up) offset in microns from S1
+     * # XOFFSET - East offset in microns from S1 # YOFFSET - North offset in microns from S1 # ZOFFSET - vertical (+ is
+     * up) offset in microns from S1
      *
      * @param station station name
      * @param latitude latitude of the interferometer (rad)
@@ -562,14 +702,13 @@ public final class AsproGenConfig {
     /**
      * Compute CHARA fixed delay (AIRPATH + LIGHT)
      *
-     # AIRPATH - amount of airpath  in microns using default beam
-     #	    Note that this assumes the default Beam dn default Pop are used
-     # LIGHT	  - length of light pipe in microns
-     #	    Note that this assumes the default Beam dn default Pop are used
+     * # AIRPATH - amount of airpath in microns using default beam #	Note that this assumes the default Beam dn default
+     * Pop are used # LIGHT	- length of light pipe in microns #	Note that this assumes the default Beam dn default Pop are
+     * used
      *
      * @param station station name
      * @param light length of light pipe in microns
-     * @param airPath amount of airpath  in microns using default beam
+     * @param airPath amount of airpath in microns using default beam
      * @param sb output buffer for xml output
      */
     public static void convertCHARAAirPath(final String station, final double light, final double airPath,
@@ -585,7 +724,7 @@ public final class AsproGenConfig {
     /**
      * Compute CHARA PoP delay (POPX)
      *
-     # POPX	  - Extra airpath to add when using POP X on this scope
+     * # POPX	- Extra airpath to add when using POP X on this scope
      *
      * @param config station config
      * @param sb output buffer for xml output
@@ -603,6 +742,7 @@ public final class AsproGenConfig {
 
     /**
      * Convert CHARA station configs to ASPRO station configurations
+     *
      * @param stationConfigs station configs
      * @param sb buffer
      */
@@ -694,6 +834,7 @@ public final class AsproGenConfig {
 
     /**
      * Convert CHARA station configs to ASPRO switchyard
+     *
      * @param stationConfigs station configs
      * @param sb buffer
      */
@@ -721,6 +862,7 @@ public final class AsproGenConfig {
 
     /**
      * Convert CHARA station config to ASPRO stationLinks
+     *
      * @param station station config
      * @param values values for beams
      * @param sb output buffer for xml output
@@ -749,23 +891,19 @@ public final class AsproGenConfig {
 
     /**
      * Load the CHARA config file (telescopes.chara)
+     *
      * @param absFileName absolute file path to CHARA config file
      * @return chara station config
      *
-     # The USED labels and their data fields are:
-     #
-     # XOFFSET - East offset in microns from S1
-     # YOFFSET - North offset in microns from S1
-     # ZOFFSET - vertical (+ is up) offset in microns from S1
-  
-     # AIRPATH - amount of airpath  in microns using default beam
-     #	    Note that this assumes the default Beam dn default Pop are used
-     # INTERNAL- Pathlength (with default beam) for internal fringes
-     # LIGHT	  - length of light pipe in microns
-     #	    Note that this assumes the default Beam dn default Pop are used
-  
-     # BEAMX   - Extra airpath to add when using beam X on this scope
-     # POPX	  - Extra airpath to add when using POP X on this scope
+     * # The USED labels and their data fields are: # # XOFFSET - East offset in microns from S1 # YOFFSET - North offset
+     * in microns from S1 # ZOFFSET - vertical (+ is up) offset in microns from S1
+     *
+     * # AIRPATH - amount of airpath in microns using default beam #	Note that this assumes the default Beam dn default
+     * Pop are used # INTERNAL- Pathlength (with default beam) for internal fringes # LIGHT	- length of light pipe in
+     * microns #	Note that this assumes the default Beam dn default Pop are used
+     *
+     * # BEAMX - Extra airpath to add when using beam X on this scope # POPX	- Extra airpath to add when using POP X on
+     * this scope
      */
     private static Map<String, Map<String, Double>> loadCHARAConfig(final String absFileName) {
 
@@ -858,6 +996,7 @@ public final class AsproGenConfig {
 
     /**
      * Convert the CHARA config file (telescopes.chara)
+     *
      * @param absFileName absolute file path to CHARA config file
      */
     private static void convertCHARAConfig(final String absFileName) {
@@ -880,6 +1019,7 @@ public final class AsproGenConfig {
 
     /**
      * Compute the CHARA position (S1 coordinates)
+     *
      * @param sb buffer
      * @return long and lat in degrees
      */
@@ -965,6 +1105,7 @@ public final class AsproGenConfig {
 
     /**
      * Convert geodetic long/lat/alt to geocentric coordinates
+     *
      * @param lon longitude in degrees
      * @param lat latitude in degrees
      * @param alt altitude in meters
@@ -994,13 +1135,12 @@ public final class AsproGenConfig {
     }
 
     /**
-     * Convert the ASPRO 1 station file :
-     *  W0  0			 0		 0		   0
-     *  W1 -1.058755762353468	-7.2772199998144 1.570859050973913  7.52
-     *  W2 -2.1386491936416	-14.937289999797 3.173079724470378  15.42
-     *  W3 -3.163870843607306	-22.209509999956 4.694184747335298  22.92
+     * Convert the ASPRO 1 station file : W0 0	0	0	0 W1 -1.058755762353468	-7.2772199998144 1.570859050973913 7.52 W2
+     * -2.1386491936416	-14.937289999797 3.173079724470378 15.42 W3 -3.163870843607306	-22.209509999956 4.694184747335298
+     * 22.92
      *
      * 165.8497 167.1097 -1000000 -1000000 173.8097 175.0697 -1000000 -1000000 U1
+     *
      * @param absFileName absolute file path to ASPRO 1 VLTI switchyard file
      */
     private static void convertStationFile(final String absFileName) {
@@ -1101,6 +1241,7 @@ public final class AsproGenConfig {
 
     /**
      * Load the SUSI config file (SUSI.txt)
+     *
      * @param absFileName absolute file path to SUSI config file
      * @return susi station config
      *
@@ -1193,6 +1334,7 @@ public final class AsproGenConfig {
 
     /**
      * Convert SUSI station configs to ASPRO station configurations
+     *
      * @param stationConfigs station configs
      * @param sb buffer
      */
@@ -1235,6 +1377,7 @@ public final class AsproGenConfig {
 
     /**
      * Convert the SUSI config file (SUSI.txt)
+     *
      * @param absFileName absolute file path to SUSI config file
      */
     private static void convertSUSIConfig(final String absFileName) {
@@ -1255,6 +1398,7 @@ public final class AsproGenConfig {
 
     /**
      * Compute the SUSI position (S1 coordinates)
+     *
      * @param sb buffer
      * @return long and lat in degrees
      */
@@ -1275,6 +1419,7 @@ public final class AsproGenConfig {
 
     /**
      * Load the NPOI config file (stations.npoi)
+     *
      * @param absFileName absolute file path to NPOI config file
      * @return susi station config
      *
@@ -1361,6 +1506,7 @@ public final class AsproGenConfig {
 
     /**
      * Convert NPOI station configs to ASPRO station configurations
+     *
      * @param stationConfigs station configs
      * @param sb buffer
      */
@@ -1406,6 +1552,7 @@ public final class AsproGenConfig {
 
     /**
      * Compute the NPOI position
+     *
      * @param sb string buffer
      * @return [longitude, latitude]
      */
@@ -1437,6 +1584,7 @@ public final class AsproGenConfig {
 
     /**
      * Convert the NPOI config file (NPOI.txt)
+     *
      * @param absFileName absolute file path to NPOI config file
      */
     private static void convertNPOIConfig(final String absFileName) {
@@ -1455,8 +1603,13 @@ public final class AsproGenConfig {
         logger.info("Generated NPOI Configuration : " + sb.length() + "\n" + sb.toString());
     }
 
+    public static double trimTo4Digits(final double value) {
+        return (Math.round(1e4d * value)) / 1e4d;
+    }
+
     /**
      * Main entry point to generate configuration parts (xml)
+     *
      * @param args unused
      */
     public static void main(final String[] args) {
@@ -1470,7 +1623,7 @@ public final class AsproGenConfig {
             case VLTI:
                 VLTIPosition();
 
-                convertSwitchYard(aspro1Path + "VLT.switchyard");
+                generateSwitchYard(asproTestPath + "vlti_opl.txt", asproTestPath + "vlti_vcm_limit.txt");
 
                 final String[] vltStations = {
                     "U1", "U2", "U3", "U4", "A0", "A1", "B0", "B1", "B2", "B3", "B4", "B5",
@@ -1485,7 +1638,7 @@ public final class AsproGenConfig {
                 logger.info("convertHorizons : \n" + sb.toString());
 
                 // convert arrayList to get DLx and channels (IPn)
-                convertArrayList(asproTestPath + "vlti_arrayList_20131006.txt", "Period 93");
+                convertArrayList(asproTestPath + "vlti_arrayList_20131006.txt", null); // "Period 93");
 
                 break;
             case CHARA:
