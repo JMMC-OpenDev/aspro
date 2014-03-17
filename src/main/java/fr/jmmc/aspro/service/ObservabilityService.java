@@ -319,7 +319,6 @@ public final class ObservabilityService {
         if (targets == null || targets.isEmpty()) {
             logger.debug("No target defined.");
         } else {
-
             // Prepare the beams (station / channel / delay line) :
             prepareBeams();
 
@@ -2758,25 +2757,17 @@ public final class ObservabilityService {
      */
     private double getJDInLstRange(final double jd) {
         if (jd >= this.jdLower) {
-
             if (jd <= this.jdUpper) {
-
                 // JD in [jdLst0;jdLst24]
                 return jd;
-
-            } else {
-                // over LST 24 :
-
-                // return [jd - day]
-                return jd - AstroSkyCalc.LST_DAY_IN_JD;
             }
-
-        } else {
-            // start occurs before LST 0h :
-
-            // return [jd + day]
-            return jd + AstroSkyCalc.LST_DAY_IN_JD;
+            // over LST 24 :
+            // return [jd - day]
+            return jd - AstroSkyCalc.LST_DAY_IN_JD;
         }
+        // start occurs before LST 0h :
+        // return [jd + day]
+        return jd + AstroSkyCalc.LST_DAY_IN_JD;
     }
 
     /**
@@ -2801,12 +2792,11 @@ public final class ObservabilityService {
         // adjust range limits :
         if (jd <= this.jdLower) {
             return this.data.getDateMin();
-        } else {
-            if (jd >= this.jdUpper) {
-                return this.data.getDateMax();
-            }
-            return jdToDate(jd);
         }
+        if (jd >= this.jdUpper) {
+            return this.data.getDateMax();
+        }
+        return jdToDate(jd);
     }
 
     /**
