@@ -77,7 +77,6 @@ import java.util.concurrent.Callable;
 import javax.xml.datatype.XMLGregorianCalendar;
 import net.jafama.FastMath;
 import fr.jmmc.jmcs.util.CollectionUtils;
-import fr.jmmc.jmcs.util.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -480,26 +479,33 @@ public final class ObservabilityService {
      * @param targets target list
      */
     private void findObservability(final List<Target> targets) {
-        if (this.hasPops) {
-            // show baseline and beams in warnings:
-            final StringBuilder sbConf = new StringBuilder(64);
-            sbConf.append("Baseline: ");
-            for (Beam b : this.beams) {
-                sbConf.append(b.getStation().getName()).append(" ");
-            }
+        // display baseline, (beams), (pops), DL as information:
+        final StringBuilder sbConf = new StringBuilder(64);
+        sbConf.append("Baseline: ");
+        for (Beam b : this.beams) {
+            sbConf.append(b.getStation().getName()).append(' ');
+        }
 
+        if (!this.interferometer.getChannels().isEmpty() && this.interferometer.getSwitchyard() != null) {
             sbConf.append("- Beams: ");
             for (Beam b : this.beams) {
-                sbConf.append(b.getChannel().getName()).append(" ");
+                sbConf.append(b.getChannel().getName()).append(' ');
             }
+        }
 
-            if (this.popCombinations.size() == 1) {
-                // user defined Pop combination:
-                sbConf.append("- PoPs: ").append(this.popCombinations.get(0).getIdentifier());
-            }
+        if (this.hasPops && (this.popCombinations.size() == 1)) {
+            // user defined Pop combination:
+            sbConf.append("- PoPs: ").append(this.popCombinations.get(0).getIdentifier()).append(' ');
+        }
 
-            addInformation(sbConf.toString());
+        sbConf.append("- Delaylines: ");
+        for (Beam b : this.beams) {
+            sbConf.append(b.getDelayLine().getName()).append(' ');
+        }
 
+        addInformation(sbConf.toString());
+
+        if (this.hasPops) {
             // PoPs : Compatible Mode if no user defined Pop Combination :
             if (targets.size() > 1 && this.popCombinations.size() > 1) {
                 // Objective : find the pop combination that maximize the observability of the complete list of target
@@ -841,10 +847,10 @@ public final class ObservabilityService {
                 for (int i = end, n = 0; i >= 0 && n < MAX_POPS_IN_WARNING; i--, n++) {
                     final GroupedPopObservabilityData pm = popMergeList.get(i);
                     if (popBestData.getEstimation() == pm.getEstimation()) {
-                        sbBestPops.append(pm.getPopCombination().getIdentifier()).append(" ");
+                        sbBestPops.append(pm.getPopCombination().getIdentifier()).append(' ');
                         bestPoPList.add(pm.getPopCombination());
                     } else {
-                        sbBetterPops.append(pm.getPopCombination().getIdentifier()).append(" ");
+                        sbBetterPops.append(pm.getPopCombination().getIdentifier()).append(' ');
                         betterPoPList.add(pm.getPopCombination());
                     }
                 }
@@ -1423,10 +1429,10 @@ public final class ObservabilityService {
                 for (int i = end, n = 0; i >= 0 && n < MAX_POPS_IN_WARNING; i--, n++) {
                     popData = popDataList.get(i);
                     if (popBestData.getMaxLength() == popData.getMaxLength()) {
-                        sbBestPops.append(popData.getPopCombination().getIdentifier()).append(" ");
+                        sbBestPops.append(popData.getPopCombination().getIdentifier()).append(' ');
                         bestPoPList.add(popData.getPopCombination());
                     } else {
-                        sbBetterPops.append(popData.getPopCombination().getIdentifier()).append(" ");
+                        sbBetterPops.append(popData.getPopCombination().getIdentifier()).append(' ');
                         betterPoPList.add(popData.getPopCombination());
                     }
                 }
@@ -2207,16 +2213,13 @@ public final class ObservabilityService {
             }
         }
 
-        // Get all possible channels:
-        final List<Channel> channels = this.interferometer.getChannels();
-
         // Get all possible delay Lines:
         final List<DelayLine> delayLines = this.interferometer.getDelayLines();
 
         final int nDelayLines = delayLines.size();
 
         // Has switchyard ?
-        if (!channels.isEmpty() && this.interferometer.getSwitchyard() != null) {
+        if (!this.interferometer.getChannels().isEmpty() && this.interferometer.getSwitchyard() != null) {
             // Case Interferometer with a switchyard (VLTI and CHARA) :
 
             // 2 cases ;
@@ -2244,7 +2247,7 @@ public final class ObservabilityService {
                                     // set DL if not defined:
                                     dlSet.add(cl.getDelayLine());
                                     b.setDelayLine(cl.getDelayLine());
-                                    
+
                                     // set the DL maximum throw (VCM soft limit):
                                     b.setMaximumThrow(cl.getMaximumThrow());
                                 }
@@ -2578,7 +2581,7 @@ public final class ObservabilityService {
 
                 // the range contains the w delay limits for the corresponding base line :
                 this.wRanges.add(new Range(wMin, wMax));
-                
+
                 /* TODO: VCM limit in term of wSoftRange (soft limit) */
             }
         }
@@ -3125,13 +3128,13 @@ public final class ObservabilityService {
     }
 
     /**
-     * Simple RangeFactory implementation that estimate new Range or List<Range> instances
+     * Simple RangeFactory implementation that estimate new Range or List[Range] instances
      */
     private final static class SimpleRangeFactory implements RangeFactory {
 
         /** created range instances */
         private int createdRanges = 0;
-        /** created List<Range> instances */
+        /** created List[Range] instances */
         private int createdRangeLists = 0;
 
         /**
@@ -3140,15 +3143,17 @@ public final class ObservabilityService {
          * @param max maximum value
          * @return Range instance
          */
+        @Override
         public Range valueOf(final double min, final double max) {
             ++createdRanges;
             return new Range(min, max);
         }
 
         /**
-         * Return a List<Range> instance
-         * @return List<Range> instance
+         * Return a List[Range] instance
+         * @return List[Range] instance
          */
+        @Override
         public List<Range> getList() {
             ++createdRangeLists;
             return new ArrayList<Range>(3); // max 3 intervals per BL
@@ -3157,6 +3162,7 @@ public final class ObservabilityService {
         /**
          * Reset the factory state
          */
+        @Override
         public void reset() {
             createdRanges = 0;
             createdRangeLists = 0;
@@ -3165,6 +3171,7 @@ public final class ObservabilityService {
         /**
          * Dump the factory statistics
          */
+        @Override
         public void dumpStats() {
             logger.info("RangeFactory: {} created ranges - {} created lists.", createdRanges, createdRangeLists);
         }

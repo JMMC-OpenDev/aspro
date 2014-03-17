@@ -2161,7 +2161,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                 if (uvMapData != null && uvMapData.getWaveLength() != null && !Double.isNaN(uvMapData.getWaveLength())) {
                     // Polychromatic user model only:
                     sb.append(" - Model ").append(SpecialChars.LAMBDA_LOWER).append(": ");
-                    sb.append(NumberUtils.trimTo3Digits(1e6d * uvMapData.getWaveLength())).append(" ").append(SpecialChars.UNIT_MICRO_METER);
+                    sb.append(NumberUtils.trimTo3Digits(1e6d * uvMapData.getWaveLength())).append(' ').append(SpecialChars.UNIT_MICRO_METER);
                 }
                 ChartUtils.addSubtitle(this.chart, sb.toString());
 
