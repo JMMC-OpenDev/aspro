@@ -12,10 +12,10 @@ import fr.jmmc.aspro.model.OIBase;
 
 /**
  * 
- *         This type describes a focal instrument mode (AMBER : "Low_HK" ... "Medium_K_1_2300" ... "High_K_1_2481").
- *         It has a wavelength range (waveLengthMin - waveLengthMax), a spectral resolution (resolution)
- *         and optionaly a number of channels (numberChannels)
- *       
+ *                 This type describes a focal instrument mode (AMBER : "Low_HK" ... "Medium_K_1_2300" ... "High_K_1_2481").
+ *                 It has a wavelength range (waveLengthMin - waveLengthMax), a spectral resolution (resolution)
+ *                 and optionaly a number of channels (numberChannels)
+ *             
  * 
  * <p>Java class for FocalInstrumentMode complex type.
  * 

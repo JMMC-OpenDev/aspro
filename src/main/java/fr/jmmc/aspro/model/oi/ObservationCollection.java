@@ -13,8 +13,8 @@ import fr.jmmc.aspro.model.OIBase;
 
 /**
  * 
- *         This type describes a observation collection
- *       
+ *                 This type describes a observation collection
+ *             
  * 
  * <p>Java class for ObservationCollection complex type.
  * 

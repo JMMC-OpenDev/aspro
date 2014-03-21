@@ -9,8 +9,8 @@ import fr.jmmc.aspro.model.OIBase;
 
 /**
  * 
- *         This data type describes a geographic position (longitude,latitude,altitude)
- *       
+ *                 This data type describes a geographic position (longitude,latitude,altitude)
+ *             
  * 
  * <p>Java class for LonLatAlt complex type.
  * 

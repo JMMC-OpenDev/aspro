@@ -13,8 +13,8 @@ import fr.jmmc.aspro.model.OIBase;
 
 /**
  * 
- *         This type describes the interferometer and its configurations
- *       
+ *                 This type describes the interferometer and its configurations
+ *             
  * 
  * <p>Java class for InterferometerSetting complex type.
  * 

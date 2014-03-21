@@ -9,8 +9,8 @@ import fr.jmmc.aspro.model.OIBase;
 
 /**
  * 
- *         This type describes a moon restriction rule (FLI, separation ...)
- *       
+ *                 This type describes a moon restriction rule (FLI, separation ...)
+ *             
  * 
  * <p>Java class for MoonRestriction complex type.
  * 

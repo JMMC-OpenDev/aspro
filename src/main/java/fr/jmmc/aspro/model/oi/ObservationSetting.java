@@ -13,8 +13,8 @@ import fr.jmmc.aspro.model.OIBase;
 
 /**
  * 
- *         This type describes the observation settings (when, where, what, how)
- *       
+ *                 This type describes the observation settings (when, where, what, how)
+ *             
  * 
  * <p>Java class for ObservationSetting complex type.
  * 

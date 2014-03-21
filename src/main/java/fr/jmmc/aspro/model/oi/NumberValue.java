@@ -9,8 +9,8 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * 
- *         A number value
- *       
+ *                 A number value
+ *             
  * 
  * <p>Java class for NumberValue complex type.
  * 

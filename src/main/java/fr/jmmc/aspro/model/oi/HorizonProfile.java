@@ -12,12 +12,12 @@ import fr.jmmc.aspro.model.OIBase;
 
 /**
  * 
- *         This type describes the profile of the horizon seen from a station.
- *         The profile is described as a polygon (list of points) defined
- *         in azimuth [0..360 deg] and elevation [0..90 deg]
+ *                 This type describes the profile of the horizon seen from a station.
+ *                 The profile is described as a polygon (list of points) defined
+ *                 in azimuth [0..360 deg] and elevation [0..90 deg]
  * 
- *         cf : http://www.eso.org/sci/facilities/paranal/telescopes/vlti/pointing/index.html
- *       
+ *                 cf : http://www.eso.org/sci/facilities/paranal/telescopes/vlti/pointing/index.html
+ *             
  * 
  * <p>Java class for HorizonProfile complex type.
  * 

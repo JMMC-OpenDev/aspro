@@ -10,8 +10,8 @@ import fr.jmmc.aspro.model.OIBase;
 
 /**
  * 
- *         A common representation of any generic parameters: name and value as string
- *       
+ *                 A common representation of any generic parameters: name and value as string
+ *             
  * 
  * <p>Java class for Parameter complex type.
  * 

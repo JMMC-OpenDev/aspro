@@ -16,8 +16,8 @@ import fr.jmmc.aspro.model.OIBase;
 
 /**
  * 
- *         This type describes a Fringe Tracker system
- *       
+ *                 This type describes a Fringe Tracker system
+ *             
  * 
  * <p>Java class for FringeTracker complex type.
  * 

@@ -16,8 +16,8 @@ import fr.jmmc.aspro.model.OIBase;
 
 /**
  * 
- *         This type describes the interferometer site
- *       
+ *                 This type describes the interferometer site
+ *             
  * 
  * <p>Java class for InterferometerDescription complex type.
  * 
