@@ -18,6 +18,7 @@ import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.StationLinks;
 import fr.jmmc.aspro.model.oi.SwitchYard;
 import fr.jmmc.aspro.service.GeocentricCoords;
+import fr.jmmc.jmcs.util.FileUtils;
 import fr.jmmc.jmcs.util.ResourceUtils;
 import fr.jmmc.jmcs.util.jaxb.JAXBFactory;
 import java.io.BufferedInputStream;
@@ -106,10 +107,11 @@ public final class AsproGenConfig {
      * vlti_vcm_limit.txt: [Tel DL1 DL2 DL3 DL4 LD5 DL6] = station | DL pos (m) in range [0;60]
      *
      * @param absFileOPL absolute file path to the VLTI OPL file
-     * @param absFileVCM absolute file path to the VLTI VCM file
+     * @param absFileVcmLow absolute file path to the VLTI VCM file for weak constraint (2.5 bar)
+     * @param absFileVcmHigh absolute file path to the VLTI VCM file for soft constraint (3.0 bar)
      */
-    private static void generateSwitchYard(final String absFileOPL, final String absFileVCM) {
-        logger.info("convertSwitchYard: " + absFileOPL + ", " + absFileVCM);
+    private static void generateSwitchYard(final String absFileOPL, final String absFileVcmLow, final String absFileVcmHigh) {
+        logger.info("convertSwitchYard: " + absFileOPL + ", " + absFileVcmLow + ", " + absFileVcmHigh);
 
         final StringBuilder sb = new StringBuilder(16384);
         sb.append("<switchyard>\n");
@@ -120,28 +122,36 @@ public final class AsproGenConfig {
         final Set<String> channelSet = new LinkedHashSet<String>(6 * 8);
 
         final int maxDL = 6;
+        final int maxIP = 4;
         final double maximumThrow = 100d; /* 100m */
 
         // load data from file :
         BufferedReader readerOPL = null;
-        BufferedReader readerVCM = null;
+        BufferedReader readerVcmLow = null;
+        BufferedReader readerVcmHigh = null;
         try {
             readerOPL = new BufferedReader(new FileReader(new File(absFileOPL)));
-            readerVCM = new BufferedReader(new FileReader(new File(absFileVCM)));
+            readerVcmLow = new BufferedReader(new FileReader(new File(absFileVcmLow)));
+            readerVcmHigh = new BufferedReader(new FileReader(new File(absFileVcmHigh)));
 
-            int i, ip;
-            String lineOPL, lineVCM;
+            int i, ip, idx;
+            String lineOPL, lineVcmLow, lineVcmHigh;
             StringTokenizer tok;
             // outputs :
-            String station, stationVCM, channel;
-            double oplFixed, maxDLPupilPos, maxDLThrowPupil;
+            String station, stationVcm, channel;
+            double oplFixed, maxDLPupilThrowLow, maxDLPupilThrowHigh;
             final double[] oplDL = new double[maxDL];
-            final double[] maxDLPupilPositions = new double[maxDL];
+            final double[] maxDLThrowVcmLow = new double[maxDL * maxIP];
+            final double[] maxDLThrowVcmHigh = new double[maxDL * maxIP];
             double opl;
 
-            while ((lineOPL = readerOPL.readLine()) != null && (lineVCM = readerVCM.readLine()) != null) {
+            while ((lineOPL = readerOPL.readLine()) != null
+                    && (lineVcmLow = readerVcmLow.readLine()) != null
+                    && (lineVcmHigh = readerVcmHigh.readLine()) != null) {
 
-                if (lineOPL.startsWith("#") || lineVCM.startsWith("#")) {
+                if (lineOPL.startsWith("#")
+                        || lineVcmLow.startsWith("#")
+                        || lineVcmHigh.startsWith("#")) {
                     continue;
                 }
 
@@ -163,27 +173,46 @@ public final class AsproGenConfig {
                     i++;
                 }
 
-                /* parse VCM */
-                tok = new StringTokenizer(lineVCM, delimiter);
+                /* parse VCM Low threshold */
+                tok = new StringTokenizer(lineVcmLow, delimiter);
                 i = 0;
                 while (tok.hasMoreTokens()) {
                     if (i == 0) {
                         // station name :
-                        stationVCM = tok.nextToken();
-                        if (!stationVCM.equals(station)) {
-                            throw new IllegalStateException("station mismatch [" + stationVCM + " <> " + station + "] !");
+                        stationVcm = tok.nextToken();
+                        if (!stationVcm.equals(station)) {
+                            throw new IllegalStateException("station mismatch [" + stationVcm + " <> " + station + "] !");
                         }
                     } else {
-                        if (i > maxDL) {
+                        if (i > maxDLThrowVcmLow.length) {
                             break;
                         }
-                        maxDLPupilPositions[i - 1] = Double.parseDouble(tok.nextToken());
+                        maxDLThrowVcmLow[i - 1] = Double.parseDouble(tok.nextToken());
+                    }
+                    i++;
+                }
+
+                /* parse VCM High threshold */
+                tok = new StringTokenizer(lineVcmHigh, delimiter);
+                i = 0;
+                while (tok.hasMoreTokens()) {
+                    if (i == 0) {
+                        // station name :
+                        stationVcm = tok.nextToken();
+                        if (!stationVcm.equals(station)) {
+                            throw new IllegalStateException("station mismatch [" + stationVcm + " <> " + station + "] !");
+                        }
+                    } else {
+                        if (i > maxDLThrowVcmHigh.length) {
+                            break;
+                        }
+                        maxDLThrowVcmHigh[i - 1] = Double.parseDouble(tok.nextToken());
                     }
                     i++;
                 }
 
                 if (station != null) {
-//          System.out.println("station: [" + station + "] oplFixed: [" + oplFixed + "] maxDLPupilPos: " + Arrays.toString(maxDLPupilPositions));
+                    // System.out.println("station: [" + station + "] oplFixed: [" + oplFixed + "] maxDLPupilPos: " + Arrays.toString(maxDLPupilPositions));
                     /*
                      <stationLinks>
                      <station>U1</station>
@@ -201,40 +230,44 @@ public final class AsproGenConfig {
 
                     for (i = 0; i < maxDL; i++) {
                         oplFixed = oplDL[i];
-                        maxDLPupilPos = maxDLPupilPositions[i];
 
-                        // skip blanking value for DL (-10000 or 0) :
-                        if ((oplFixed > 0.0) && (maxDLPupilPos > 0.0)) {
-
-                            /* convert position [0; 60] into maximum throw - DL offset (5.5m) */
-                            maxDLThrowPupil = 2.0 * (maxDLPupilPos - 5.5);
-
-                            if (maxDLThrowPupil < 0.0) {
-                                maxDLThrowPupil = 0.0;
-                            }
-
-                            if (maxDLThrowPupil > maximumThrow) {
-                                maxDLThrowPupil = maximumThrow;
-                            }
+                        if (oplFixed > 0.0) {
 
                             /* only generate IP[1,3,5,7], others are unused */
                             for (ip = 0; ip < 8; ip += 2) {
 
-                                /* corrected fixed OPL with IP switchyard: (ip-1)*0.12 for ip >= 1 */
-                                opl = oplFixed + 0.12d * ip;
+                                idx = (i * maxIP) + (ip >> 1);
 
-                                sb.append("<channelLink>\n");
+                                maxDLPupilThrowLow = maxDLThrowVcmLow[idx];
+                                maxDLPupilThrowHigh = maxDLThrowVcmHigh[idx];
 
-                                /* Channel names are IPn */
-                                channel = "IP" + (ip + 1);
-                                channelSet.add(channel);
+                                // skip blanking value for DL (-10000 or 0) :
+                                if ((maxDLPupilThrowLow > 0.0) && (maxDLPupilThrowHigh > 0.0)) {
 
-                                sb.append("<channel>").append(channel).append("</channel>\n");
-                                sb.append("<opticalLength>").append(trimTo4Digits(opl)).append("</opticalLength>\n");
-                                /* delay line maximum throw to keep pupil due to VCM */
-                                sb.append("<delayLine>DL").append((i + 1)).append("</delayLine>\n");
-                                sb.append("<maximumThrow>").append(trimTo4Digits(maxDLThrowPupil)).append("</maximumThrow>\n");
-                                sb.append("</channelLink>\n");
+                                    /* corrected fixed OPL with IP switchyard: (ip-1)*0.12 for ip >= 1 */
+                                    opl = oplFixed + 0.12d * ip;
+
+                                    sb.append("<channelLink>\n");
+
+                                    /* Channel names are IPn */
+                                    channel = "IP" + (ip + 1);
+                                    channelSet.add(channel);
+
+                                    sb.append("<channel>").append(channel).append("</channel>\n");
+                                    sb.append("<opticalLength>").append(trimTo4Digits(opl)).append("</opticalLength>\n");
+
+                                    /* delay line maximum throw to let VCM handle pupil */
+                                    sb.append("<delayLine>DL").append((i + 1)).append("</delayLine>\n");
+
+                                    // skip blanking value for DL (10000 ie no constraint) :
+                                    if (maxDLPupilThrowLow < maximumThrow) {
+                                        sb.append("<maximumThrowLow>").append(trimTo4Digits(maxDLPupilThrowLow)).append("</maximumThrowLow>\n");
+                                    }
+                                    if (maxDLPupilThrowHigh < maximumThrow) {
+                                        sb.append("<maximumThrowHigh>").append(trimTo4Digits(maxDLPupilThrowHigh)).append("</maximumThrowHigh>\n");
+                                    }
+                                    sb.append("</channelLink>\n");
+                                }
                             }
                         }
                     }
@@ -248,20 +281,9 @@ public final class AsproGenConfig {
         } catch (IOException ioe) {
             logger.error("IO failure", ioe);
         } finally {
-            if (readerOPL != null) {
-                try {
-                    readerOPL.close();
-                } catch (IOException ioe) {
-                    logger.error("IO failure", ioe);
-                }
-            }
-            if (readerVCM != null) {
-                try {
-                    readerVCM.close();
-                } catch (IOException ioe) {
-                    logger.error("IO failure", ioe);
-                }
-            }
+            FileUtils.closeFile(readerOPL);
+            FileUtils.closeFile(readerVcmLow);
+            FileUtils.closeFile(readerVcmHigh);
         }
 
         sb.append("</switchyard>\n");
@@ -353,13 +375,7 @@ public final class AsproGenConfig {
         } catch (IOException ioe) {
             logger.error("IO failure", ioe);
         } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException ioe) {
-                    logger.error("IO failure", ioe);
-                }
-            }
+            FileUtils.closeFile(reader);
         }
 
         sb.append("</horizon>\n");
@@ -419,7 +435,7 @@ public final class AsproGenConfig {
         }
 
         /* Process a single period or update all periods */
-        List<InterferometerConfiguration> confToProcess = null;
+        List<InterferometerConfiguration> confToProcess;
         if (period == null) {
             confToProcess = new ArrayList<InterferometerConfiguration>(is.getConfigurations());
         } else {
@@ -638,13 +654,7 @@ public final class AsproGenConfig {
         } catch (IOException ioe) {
             logger.error("IO failure", ioe);
         } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException ioe) {
-                    logger.error("IO failure", ioe);
-                }
-            }
+            FileUtils.closeFile(reader);
         }
     }
 
@@ -983,13 +993,7 @@ public final class AsproGenConfig {
         } catch (IOException ioe) {
             logger.error("IO failure", ioe);
         } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException ioe) {
-                    logger.error("IO failure", ioe);
-                }
-            }
+            FileUtils.closeFile(reader);
         }
         return stationConfigs;
     }
@@ -1227,13 +1231,7 @@ public final class AsproGenConfig {
         } catch (IOException ioe) {
             logger.error("IO failure", ioe);
         } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException ioe) {
-                    logger.error("IO failure", ioe);
-                }
-            }
+            FileUtils.closeFile(reader);
         }
 
         logger.info("convertStationFile : output :\n" + sb.toString());
@@ -1321,13 +1319,7 @@ public final class AsproGenConfig {
         } catch (IOException ioe) {
             logger.error("IO failure", ioe);
         } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException ioe) {
-                    logger.error("IO failure", ioe);
-                }
-            }
+            FileUtils.closeFile(reader);
         }
         return stationConfigs;
     }
@@ -1493,13 +1485,7 @@ public final class AsproGenConfig {
         } catch (IOException ioe) {
             logger.error("IO failure", ioe);
         } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException ioe) {
-                    logger.error("IO failure", ioe);
-                }
-            }
+            FileUtils.closeFile(reader);
         }
         return stationConfigs;
     }
@@ -1603,7 +1589,7 @@ public final class AsproGenConfig {
         logger.info("Generated NPOI Configuration : " + sb.length() + "\n" + sb.toString());
     }
 
-    public static double trimTo4Digits(final double value) {
+    static double trimTo4Digits(final double value) {
         return (Math.round(1e4d * value)) / 1e4d;
     }
 
@@ -1623,7 +1609,9 @@ public final class AsproGenConfig {
             case VLTI:
                 VLTIPosition();
 
-                generateSwitchYard(asproTestPath + "vlti_opl.txt", asproTestPath + "vlti_vcm_limit.txt");
+                generateSwitchYard(asproTestPath + "vlti_opl.txt",
+                        asproTestPath + "vlti_vcm_limit_2.5bar.txt",
+                        asproTestPath + "vlti_vcm_limit_3.0bar.txt");
 
                 final String[] vltStations = {
                     "U1", "U2", "U3", "U4", "A0", "A1", "B0", "B1", "B2", "B3", "B4", "B5",
