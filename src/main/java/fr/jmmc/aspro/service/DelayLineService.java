@@ -53,11 +53,11 @@ public final class DelayLineService {
      * @param dec target declination (rad)
      * @param baseLines base line list
      * @param wRanges [wMin - wMax] ranges per base line
-     * @param rangeFactory Factory used to create Range and List<Range> instances
+     * @param rangeFactory Factory used to create Range and List[Range] instances
      * @return intervals (hour angles)
      */
     public static List<List<Range>> findHAIntervals(final double dec, final List<BaseLine> baseLines, final List<Range> wRanges,
-            final RangeFactory rangeFactory) {
+                                                    final RangeFactory rangeFactory) {
 
         final double cosDec = FastMath.cos(dec);
         final double sinDec = FastMath.sin(dec);
@@ -99,13 +99,13 @@ public final class DelayLineService {
      * @param wRange [wMin - wMax] range
      * @param ha double[2] array to avoid array allocations
      * @param haValues double[6] array to avoid array allocations
-     * @param rangeFactory Factory used to create Range and List<Range> instances
+     * @param rangeFactory Factory used to create Range and List[Range] instances
      * @return intervals (hour angles) in dec hours.
      */
     public static List<Range> findHAIntervalsForBaseLine(final double cosDec, final double sinDec, final BaseLine baseLine,
-            final double[] wExtrema, final Range wRange,
-            final double[] ha, final double[] haValues,
-            final RangeFactory rangeFactory) {
+                                                         final double[] wExtrema, final Range wRange,
+                                                         final double[] ha, final double[] haValues,
+                                                         final RangeFactory rangeFactory) {
 
         if (wExtrema == null) {
             // no solution :
@@ -170,13 +170,13 @@ public final class DelayLineService {
 
         // Look if midpoints values are or not in the HMAX-HMIN interval
         // to find which intervals are correct :
-        double haLow, haUp, haMid, wMid;
+        double haLo, haUp, haMid, wMid;
 
         for (int i = 0, size = nHA - 1; i < size; i++) {
-            haLow = haValues[i];
+            haLo = haValues[i];
             haUp = haValues[i + 1];
 
-            haMid = 0.5d * (haLow + haUp);
+            haMid = 0.5d * (haLo + haUp);
 
             wMid = CalcUVW.computeW(cosDec, sinDec, baseLine, haMid);
 
@@ -184,9 +184,9 @@ public final class DelayLineService {
                 logger.info("W({}) = {}", haMid, wMid);
             }
 
-            if (wMid >= wMin && wMid <= wMax) {
+            if ((wMid >= wMin) && (wMid <= wMax)) {
                 // this ha interval is valid :
-                ranges.add(rangeFactory.valueOf(AngleUtils.rad2hours(haLow), AngleUtils.rad2hours(haUp)));
+                ranges.add(rangeFactory.valueOf(AngleUtils.rad2hours(haLo), AngleUtils.rad2hours(haUp)));
             }
         }
 
@@ -212,7 +212,7 @@ public final class DelayLineService {
      * where H is the hour angle and D the declination of the source
      * To insure that w=cos(D)(cos(H)*X-sin(H)*Y)+sin(D)*Z is between 0 and
      * THROW,
-     * we have to solve w =throw, i.e. w-throw=0 ,i.e.,
+     * we have to solve w=throw, i.e. w-throw=0 ,i.e.,
      * cos(D)(cos(H)*X-sin(H)*Y)+sin(D)*Z-THROW = 0
      *
      * if cos(D)=0 this equation becomes Z=THROW, that is,
@@ -240,8 +240,6 @@ public final class DelayLineService {
      * @return true if ha solutions found; false otherwise
      */
     private static boolean solveDelays(final double cosDec, final double sinDec, final BaseLine baseLine, final double wThrow, final double[] ha) {
-        // w=cos(D)(cos(H)*X-sin(H)*Y)+sin(D)*Z
-
         if (cosDec == 0d) {
             final double w = sinDec * baseLine.getZ();
             if (w == wThrow) {
@@ -252,7 +250,6 @@ public final class DelayLineService {
             }
             // impossible case : sinDec = 1 <=> cosDec = 0 !
             return false;
-
         }
         final double coeff = (wThrow - sinDec * baseLine.getZ()) / cosDec;
 
@@ -363,12 +360,12 @@ public final class DelayLineService {
         }
 
         ha[0] *= 2d;
+        ha[1] *= 2d;
         if (ha[0] > PI) {
             ha[0] -= TWO_PI;
         } else if (ha[0] < MINUS_PI) {
             ha[0] += TWO_PI;
         }
-        ha[1] *= 2d;
         if (ha[1] > PI) {
             ha[1] -= TWO_PI;
         } else if (ha[1] < MINUS_PI) {
