@@ -20,9 +20,11 @@ public final class Beam {
     /** channel */
     private DelayLine delayLine;
     /** fixed optical length (m) from the interferometer switchyard */
-    private double opticalLength = 0d;
-    /** optional delay line position limit expressed in throw (m) */
-    private Double maximumThrow = null;
+    private double opticalPathLength = 0d;
+    /** optional delay line / VCM low constraint expressed in throw (m) */
+    private Double maximumThrowLow = null;
+    /** optional delay line / VCM high constraint expressed in throw (m) */
+    private Double maximumThrowHigh = null;
 
     /**
      * Constructor for a given station
@@ -73,35 +75,51 @@ public final class Beam {
     }
 
     /**
-     * Return the fixed optical length (m)
-     * @return fixed optical length
+     * Return the fixed optical path length (m)
+     * @return fixed optical path length
      */
-    public double getOpticalLength() {
-        return opticalLength;
+    public double getOpticalPathLength() {
+        return opticalPathLength;
     }
 
     /**
-     * Add the given value to the fixed optical length (m)
-     * @param opticalLength length (m) to add
+     * Add the given value to the fixed optical path length (m)
+     * @param opticalPathLength length (m) to add to the fixed optical path length
      */
-    public void addOpticalLength(final double opticalLength) {
-        this.opticalLength += opticalLength;
+    public void addToOpticalPathLength(final double opticalPathLength) {
+        this.opticalPathLength += opticalPathLength;
     }
 
     /**
-     * Return the optional delay line position limit expressed in throw (m)
-     * @return optional delay line position limit expressed in throw (m)
+     * Return the optional delay line / VCM low constraint expressed in throw (m)
+     * @return optional delay line / VCM low constraint expressed in throw (m)
      */
-    public Double getMaximumThrow() {
-        return maximumThrow;
+    public Double getMaximumThrowLow() {
+        return maximumThrowLow;
     }
 
     /**
-     * Define the optional delay line position limit expressed in throw (m)
-     * @param maximumThrow optional delay line position limit expressed in throw (m)
+     * Define the optional delay line / VCM low constraint expressed in throw (m)
+     * @param maximumThrowLow optional delay line / VCM low constraint expressed in throw (m)
      */
-    public void setMaximumThrow(final Double maximumThrow) {
-        this.maximumThrow = maximumThrow;
+    public void setMaximumThrowLow(final Double maximumThrowLow) {
+        this.maximumThrowLow = maximumThrowLow;
+    }
+
+    /**
+     * Return the optional delay line / VCM high constraint expressed in throw (m)
+     * @return optional delay line / VCM high constraint expressed in throw (m)
+     */
+    public Double getMaximumThrowHigh() {
+        return maximumThrowHigh;
+    }
+
+    /**
+     * Define the optional delay line / VCM high constraint expressed in throw (m)
+     * @param maximumThrowHigh optional delay line / VCM high constraint expressed in throw (m)
+     */
+    public void setMaximumThrowHigh(final Double maximumThrowHigh) {
+        this.maximumThrowHigh = maximumThrowHigh;
     }
 
     /**
@@ -110,6 +128,7 @@ public final class Beam {
      */
     @Override
     public String toString() {
-        return "Beam : " + this.station + " - " + this.channel + " - " + this.delayLine + " = " + this.opticalLength + " m [ maxThrow = " + this.maximumThrow + " m ]";
+        return "Beam : " + this.station + " - " + this.channel + " - " + this.delayLine + " = " + this.opticalPathLength
+                + " m [ maxThrow Low = " + this.maximumThrowLow + " High = " + this.maximumThrowHigh + " m ]";
     }
 }

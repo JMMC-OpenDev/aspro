@@ -62,6 +62,8 @@ public final class UserModelService {
     private final static DecimalFormat df = new DecimalFormat("0.00#E0");
     /** number of floats per data point */
     public final static int DATA_1D_POINT_SIZE = 3;
+    /** shared InterruptedJobException instance */
+    private static final InterruptedJobException ije = new InterruptedJobException("UserModelService.computeUVMap: interrupted");
     /** lock used by localDoubleWrappers */
     private final static Object lockDoubleWrappers = new Object();
     /**
@@ -361,7 +363,7 @@ public final class UserModelService {
 
         // fast interrupt :
         if (currentThread.isInterrupted()) {
-            throw new InterruptedJobException("UserModelService.computeUVMap: interrupted");
+            throw ije;
         }
 
         // fft data as float [rows][cols] packed:
@@ -376,7 +378,7 @@ public final class UserModelService {
 
             // fast interrupt :
             if (currentThread.isInterrupted()) {
-                throw new InterruptedJobException("UserModelService.computeUVMap: interrupted");
+                throw ije;
             }
         } else {
             // use reference complex visibility data:
@@ -391,7 +393,7 @@ public final class UserModelService {
 
         // fast interrupt :
         if (currentThread.isInterrupted()) {
-            throw new InterruptedJobException("UserModelService.computeUVMap: interrupted");
+            throw ije;
         }
 
         // 3 - Get the image with the given color model and color scale :

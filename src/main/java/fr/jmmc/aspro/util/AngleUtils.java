@@ -13,6 +13,8 @@ public final class AngleUtils {
 
   /** degrees to hour angle = 15 */
   public final static double HA_TO_DEG = 15d;
+  /** hour angle to degrees = 1/15 */
+  public final static double DEG_TO_HA = 1d / 15d;
   /** radian to hour angle */
   public final static double RAD_TO_HOUR = (180d / Math.PI) / HA_TO_DEG;
 
@@ -38,7 +40,7 @@ public final class AngleUtils {
    * @return angle in decimal hours
    */
   public static double deg2hours(final double angdeg) {
-    return angdeg / HA_TO_DEG;
+    return angdeg * DEG_TO_HA;
   }
 
   /**
