@@ -124,7 +124,7 @@ import org.slf4j.LoggerFactory;
  * @author bourgesl
  */
 public final class ObservabilityPanel extends javax.swing.JPanel implements ChartProgressListener,
-        ObservationListener, Observer, PDFExportable, Disposable {
+                                                                            ObservationListener, Observer, PDFExportable, Disposable {
 
     /** default serial UID for Serializable interface */
     private static final long serialVersionUID = 1;
@@ -148,6 +148,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     public static final Color ASTRO_TWILIGHT_COLOR = new Color(170, 170, 170);
     /** background color corresponding to the NIGHT zone */
     public static final Color NIGHT_COLOR = new Color(150, 150, 150);
+    /** transparent color corresponding to the Vcm overlay area */
+    public static final Color VCM_OVERLAY_COLOR = new Color(128, 128, 128, 96); // 38% transparent
     /** annotation rotation angle = 90 degrees */
     private static final double HALF_PI = Math.PI / 2d;
     /** milliseconds threshold to consider the date too close to date axis limits = 3 minutes */
@@ -166,23 +168,20 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     /** calibrator filter */
     private static final Filter CALIBRATOR_FILTER = new Filter("CalibratorFilter", "Hide calibrators",
             "hide all targets flagged as calibrator and orphaned calibrators") {
-        @Override
-        protected boolean apply(final Target target, final boolean calibrator, final StarObservabilityData so) {
-            // if calibrator, filter item:
-            return calibrator;
-        }
-    };
+                @Override
+                protected boolean apply(final Target target, final boolean calibrator, final StarObservabilityData so) {
+                    // if calibrator, filter item:
+                    return calibrator;
+                }
+            };
     /** unobservable filter */
     private static final Filter UNOBSERVABLE_FILTER = new Filter("UnobservableFilter", "Hide unobservable",
             "hide all targets that are not observable or never rise") {
-        @Override
-        protected boolean apply(final Target target, final boolean calibrator, final StarObservabilityData so) {
-            if (so != null && so.getVisible().isEmpty()) {
-                return true;
-            }
-            return false;
-        }
-    };
+                @Override
+                protected boolean apply(final Target target, final boolean calibrator, final StarObservabilityData so) {
+                    return so != null && so.getVisible().isEmpty();
+                }
+            };
 
     /* default plot options */
     /** default value for the checkbox BaseLine Limits */
@@ -465,6 +464,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         this.jCheckBoxListFilters.setVisibleRowCount(2); // note: only 1 is ugly on macOS X
 
         this.jCheckBoxListFilters.getCheckBoxListSelectionModel().addListSelectionListener(new ListSelectionListener() {
+            @Override
             public void valueChanged(final ListSelectionEvent e) {
                 if (getChartData() != null) {
                     updatePlot(getChartData());
@@ -735,7 +735,6 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         }
 
         // If only one page: export as displayed
-
         if (pageIndex > 1) {
             final int maxViewItems = this.slidingXYPlotAdapter.getMaxViewItems();
             final int pos = (pageIndex - 1) * maxViewItems;
@@ -880,7 +879,6 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         }
 
         /* get plot options from swing components */
-
         // indicates if the timestamps are expressed in LST or in UTC:
         final boolean useLST = AsproConstants.TIME_LST.equals(this.jComboTimeRef.getSelectedItem());
 
@@ -944,10 +942,10 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
          * @param bestPopEstimatorCriteriaAverageWeight optional Best Pops criteria on average weight
          */
         private ObservabilitySwingWorker(final ObservabilityPanel obsPanel, final ObservationCollection obsCollection,
-                final boolean useLST, final boolean doDetailedOutput, final boolean doBaseLineLimits,
-                final boolean doCenterMidnight, final SunType twilightNightLimit,
-                final Algorithm bestPopsAlgorithm,
-                final Criteria bestPopEstimatorCriteriaSigma, final Criteria bestPopEstimatorCriteriaAverageWeight) {
+                                         final boolean useLST, final boolean doDetailedOutput, final boolean doBaseLineLimits,
+                                         final boolean doCenterMidnight, final SunType twilightNightLimit,
+                                         final Algorithm bestPopsAlgorithm,
+                                         final Criteria bestPopEstimatorCriteriaSigma, final Criteria bestPopEstimatorCriteriaAverageWeight) {
 
             // get current observation version :
             super(AsproTaskRegistry.TASK_OBSERVABILITY, obsCollection);
@@ -1009,7 +1007,6 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
                 // Is is better to use or not best Pops parallelism (use more threads ?) but compromise because best pops is only a part of observability (moon...)
                 // so fully parallel may be better !
-
                 final boolean useThreads = nObs > 1;
 
                 // execute jobs in parallel:
@@ -1042,7 +1039,6 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
             final ObservationCollection taskObsCollection = this.getObservationCollection();
 
             // TODO : if do baseline limits => compute also observation observability ...
-
             // skip baseline limits case :
             if (!this.doBaseLineLimits) {
                 // Fire the event ObservabilityDone and call UVCoveragePanel to refresh the UV Coverage plot :
@@ -1062,7 +1058,6 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
                     // use latest observation collection to see possible UV widget changes :
                     // note: observability data is also valid for any UV version :
-
                     om.fireObservabilityDone(lastObsCollection, obsDataList);
 
                 } else {
@@ -1193,11 +1188,11 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
      */
     @SuppressWarnings("unchecked")
     private void updateChart(final List<Target> displayTargets,
-            final Set<Target> orphanCalibrators,
-            final TargetUserInformations targetUserInfos,
-            final ObservationCollectionObsData chartData,
-            final Date min, final Date max,
-            final boolean doBaseLineLimits) {
+                             final Set<Target> orphanCalibrators,
+                             final TargetUserInformations targetUserInfos,
+                             final ObservationCollectionObsData chartData,
+                             final Date min, final Date max,
+                             final boolean doBaseLineLimits) {
 
         final ColorPalette palette = ColorPalette.getDefaultColorPalette();
 
@@ -1206,21 +1201,19 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         final boolean single = chartData.isSingle();
         final int obsLen = chartData.size();
 
-        final Map<Integer, List<XYAnnotation>> annotations;
         // Target list :
         final List<Target> targets;
         if (doBaseLineLimits) {
             // Use generated targets for baseline limits :
             targets = chartData.getFirstObsData().getTargets();
-            annotations = null;
         } else {
             // Use display target to get correct ordering and calibrator associations :
             targets = displayTargets;
-            annotations = new HashMap<Integer, List<XYAnnotation>>(obsLen * targets.size());
         }
+        final Map<Integer, List<XYAnnotation>> annotations = new HashMap<Integer, List<XYAnnotation>>(obsLen * targets.size());
 
         // Get filters:
-        boolean hasFilters = (doBaseLineLimits) ? false : true; // disable filters for baseline limits
+        boolean hasFilters = !(doBaseLineLimits); // disable filters for baseline limits
         Filter[] selectedFilters = null;
 
         if (hasFilters) {
@@ -1378,6 +1371,41 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                         if (doBaseLineLimits) {
                             // no tooltip:
                             labelList.add(null);
+
+                            // add the Annotations :
+                            pos = NumberUtils.valueOf(n);
+
+                            // Observable range limits without HA restrictions:
+                            if (so.getVisibleNoSoftLimits() != null) {
+                                final Paint fillPaint = new Color(paint.getRed(), paint.getGreen(), paint.getBlue(), 48); // 80% transparent
+
+                                for (DateTimeInterval interval : so.getVisibleNoSoftLimits()) {
+                                    addAnnotation(annotations, pos,
+                                            new EnhancedXYBoxAnnotation(n, interval.getStartDate().getTime(), n, interval.getEndDate().getTime(),
+                                                    ChartUtils.DOTTED_STROKE, Color.BLACK, fillPaint));
+                                }
+                            }
+
+                            // Observable range limits with VCM Low restrictions:
+                            if (so.getVisibleVcmLowLimits() != null) {
+                                for (DateTimeInterval interval : so.getVisibleVcmLowLimits()) {
+                                    addAnnotation(annotations, pos,
+                                            new EnhancedXYBoxAnnotation(n, interval.getStartDate().getTime(), n, interval.getEndDate().getTime(),
+                                                    ChartUtils.DEFAULT_STROKE, null, VCM_OVERLAY_COLOR, Layer.FOREGROUND)); /* no outline (transparent) */
+
+                                }
+                            }
+
+                            // Observable range limits with VCM High restrictions:
+                            if (so.getVisibleVcmHighLimits() != null) {
+                                for (DateTimeInterval interval : so.getVisibleVcmHighLimits()) {
+                                    addAnnotation(annotations, pos,
+                                            new EnhancedXYBoxAnnotation(n, interval.getStartDate().getTime(), n, interval.getEndDate().getTime(),
+                                                    ChartUtils.DEFAULT_STROKE, null, VCM_OVERLAY_COLOR, Layer.FOREGROUND)); /* no outline (transparent) */
+
+                                }
+                            }
+
                         } else {
                             // add legend to tooltip:
                             labelList.add(legendLabel);
@@ -1387,7 +1415,6 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
                             // add the Annotations :
                             // 24h date formatter like in france :
-
                             pos = NumberUtils.valueOf(n);
 
                             // transit annotation :
@@ -1412,7 +1439,6 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                             }
 
                             // time annotations at range boundaries:
-
                             for (DateTimeInterval interval : so.getVisible()) {
                                 if (checkDateAxisLimits(interval.getStartDate(), min, max)) {
                                     final XYTextAnnotation aStart = AsproChartUtils.createFitXYTextAnnotation(FormatterUtils.format(this.timeFormatter, interval.getStartDate()), n, interval.getStartDate().getTime());
@@ -1434,7 +1460,57 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
                                 for (DateTimeInterval interval : so.getVisibleNoSoftLimits()) {
                                     addAnnotation(annotations, pos,
                                             new EnhancedXYBoxAnnotation(n, interval.getStartDate().getTime(), n, interval.getEndDate().getTime(),
-                                            ChartUtils.DOTTED_STROKE, Color.BLACK, fillPaint));
+                                                    ChartUtils.DOTTED_STROKE, Color.BLACK, fillPaint));
+                                }
+                            }
+
+                            // Observable range limits with VCM Low restrictions:
+                            if (so.getVisibleVcmLowLimits() != null) {
+                                for (DateTimeInterval interval : so.getVisibleVcmLowLimits()) {
+                                    addAnnotation(annotations, pos,
+                                            new EnhancedXYBoxAnnotation(n, interval.getStartDate().getTime(), n, interval.getEndDate().getTime(),
+                                                    ChartUtils.DEFAULT_STROKE, null, VCM_OVERLAY_COLOR, Layer.FOREGROUND)); /* no outline (transparent) */
+
+                                }
+
+                                // time annotations at range boundaries:
+                                for (DateTimeInterval interval : so.getVisibleVcmLowLimits()) {
+                                    if (checkDateAxisLimits(interval.getStartDate(), min, max)) {
+                                        final XYTextAnnotation aStart = AsproChartUtils.createFitXYTextAnnotation(FormatterUtils.format(this.timeFormatter, interval.getStartDate()), n, interval.getStartDate().getTime());
+                                        aStart.setRotationAngle(HALF_PI);
+                                        addAnnotation(annotations, pos, aStart);
+                                    }
+
+                                    if (checkDateAxisLimits(interval.getEndDate(), min, max)) {
+                                        final XYTextAnnotation aEnd = AsproChartUtils.createFitXYTextAnnotation(FormatterUtils.format(this.timeFormatter, interval.getEndDate()), n, interval.getEndDate().getTime());
+                                        aEnd.setRotationAngle(HALF_PI);
+                                        addAnnotation(annotations, pos, aEnd);
+                                    }
+                                }
+                            }
+
+                            // Observable range limits with VCM High restrictions:
+                            if (so.getVisibleVcmHighLimits() != null) {
+                                for (DateTimeInterval interval : so.getVisibleVcmHighLimits()) {
+                                    addAnnotation(annotations, pos,
+                                            new EnhancedXYBoxAnnotation(n, interval.getStartDate().getTime(), n, interval.getEndDate().getTime(),
+                                                    ChartUtils.DEFAULT_STROKE, null, VCM_OVERLAY_COLOR, Layer.FOREGROUND)); /* no outline (transparent) */
+
+                                }
+
+                                // time annotations at range boundaries:
+                                for (DateTimeInterval interval : so.getVisibleVcmHighLimits()) {
+                                    if (checkDateAxisLimits(interval.getStartDate(), min, max)) {
+                                        final XYTextAnnotation aStart = AsproChartUtils.createFitXYTextAnnotation(FormatterUtils.format(this.timeFormatter, interval.getStartDate()), n, interval.getStartDate().getTime());
+                                        aStart.setRotationAngle(HALF_PI);
+                                        addAnnotation(annotations, pos, aStart);
+                                    }
+
+                                    if (checkDateAxisLimits(interval.getEndDate(), min, max)) {
+                                        final XYTextAnnotation aEnd = AsproChartUtils.createFitXYTextAnnotation(FormatterUtils.format(this.timeFormatter, interval.getEndDate()), n, interval.getEndDate().getTime());
+                                        aEnd.setRotationAngle(HALF_PI);
+                                        addAnnotation(annotations, pos, aEnd);
+                                    }
                                 }
                             }
                         }
@@ -1467,8 +1543,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
      */
     private void updateSliderProperties(final boolean forceRefresh) {
         // baseline limits flag used by the plot :
-        final boolean doBaseLineLimits =
-                (this.getChartData() != null) ? this.getChartData().getFirstObsData().isDoBaseLineLimits() : false;
+        final boolean doBaseLineLimits
+                      = (this.getChartData() != null) ? this.getChartData().getFirstObsData().isDoBaseLineLimits() : false;
 
         final int size = this.slidingXYPlotAdapter.getSize();
 
@@ -1485,8 +1561,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
             final int lastPos = rangeModel.getValue();
 
             // find target to find first target occurence in slidingXYPlotAdapter:
-            final int pos =
-                    (this.currentTargetName != null && this.currentTargetName.equals(slidingXYPlotAdapter.getTargetName(lastPos))) ? lastPos
+            final int pos
+                      = (this.currentTargetName != null && this.currentTargetName.equals(slidingXYPlotAdapter.getTargetName(lastPos))) ? lastPos
                     : slidingXYPlotAdapter.findTargetPosition(this.currentTargetName);
 
             if (logger.isDebugEnabled()) {
@@ -1583,11 +1659,7 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
         if (date.getTime() - min.getTime() < DATE_LIMIT_THRESHOLD) {
             return false;
         }
-        // if date is too close to date min:
-        if (max.getTime() - date.getTime() < DATE_LIMIT_THRESHOLD) {
-            return false;
-        }
-        return true;
+        return (max.getTime() - date.getTime() >= DATE_LIMIT_THRESHOLD);
     }
 
     /**

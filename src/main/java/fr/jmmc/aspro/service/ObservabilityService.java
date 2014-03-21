@@ -43,6 +43,7 @@ import fr.jmmc.aspro.model.oi.ObservationSetting;
 import fr.jmmc.aspro.model.oi.Operator;
 import fr.jmmc.aspro.model.oi.Pop;
 import fr.jmmc.aspro.model.oi.PopLink;
+import fr.jmmc.aspro.model.oi.Position3D;
 import fr.jmmc.aspro.model.oi.Station;
 import fr.jmmc.aspro.model.oi.StationLinks;
 import fr.jmmc.aspro.model.oi.Target;
@@ -52,6 +53,7 @@ import fr.jmmc.aspro.service.pops.BestPopsEstimator;
 import fr.jmmc.aspro.service.pops.BestPopsEstimatorFactory;
 import fr.jmmc.aspro.service.pops.BestPopsEstimatorFactory.Algorithm;
 import fr.jmmc.aspro.service.pops.Criteria;
+import fr.jmmc.aspro.util.AngleUtils;
 import fr.jmmc.aspro.util.TestUtils;
 import fr.jmmc.jmcs.logging.LoggingService;
 import fr.jmmc.jmcs.util.SpecialChars;
@@ -111,6 +113,8 @@ public final class ObservabilityService {
     private static final Map<String, List<SharedPopCombination>> popCombinationCache = new HashMap<String, List<SharedPopCombination>>(16);
     /** simple RangeFactory (stateless) */
     private static final RangeFactory defaultRangeFactory = new SimpleRangeFactory();
+    /** shared InterruptedJobException instance */
+    private static final InterruptedJobException ije = new InterruptedJobException("ObservabilityService.compute: interrupted");
 
     /* members */
     /** cached log debug enabled */
@@ -171,12 +175,18 @@ public final class ObservabilityService {
     private boolean hasPops = false;
     /** flag to indicate that wind restriction is used */
     private boolean hasWindRestriction = false;
+    /** flag to indicate that delay lines may have custom maximum throw in switchyard (ie per station ~ VLTI VCM limits) */
+    private boolean hasSwitchyardDelayLineMaxThrow = false;
     /** beam list */
     private List<Beam> beams = null;
     /** base line list */
     private List<BaseLine> baseLines = null;
     /** W ranges corresponding to the base line list */
     private List<Range> wRanges = null;
+    /** W ranges Low (VCM Low limit) corresponding to the base line list */
+    private List<Range> wRangesVcmLow = null;
+    /** W ranges High (Vcm High limit) corresponding to the base line list */
+    private List<Range> wRangesVcmHigh = null;
     /** list of Pop combinations with pop delays per baseline */
     private List<PopCombination> popCombinations = null;
     /** flag to disable the observability restriction due to the night */
@@ -267,7 +277,7 @@ public final class ObservabilityService {
      */
     private void checkInterrupted() throws InterruptedJobException {
         if (this.currentThread.isInterrupted()) {
-            throw new InterruptedJobException("ObservabilityService.compute: interrupted");
+            throw ije;
         }
     }
 
@@ -950,7 +960,9 @@ public final class ObservabilityService {
             logger.debug("findTargetObservability: target '{}'", targetName);
         }
 
-        final int listSize = (this.doDetailedOutput) ? (4 + this.baseLines.size()) : 1;
+        final int sizeBL = this.baseLines.size();
+
+        final int listSize = (this.doDetailedOutput) ? (4 + sizeBL) : 1;
         final List<StarObservabilityData> starVisList = new ArrayList<StarObservabilityData>(listSize);
         this.data.addStarVisibilities(targetName, starVisList);
 
@@ -996,8 +1008,13 @@ public final class ObservabilityService {
                 logger.debug("rangeHARiseSet: {}", rangeHARiseSet);
             }
 
-            // HA intervals for every base line :
-            List<List<Range>> rangesHABaseLines;
+            // HA intervals for every base line:
+            final List<List<Range>> rangesHABaseLines;
+
+            // HA intervals for every base line taking into account the custom maximum throw in switchyard (ie per station ~ VLTI VCM limits):
+            boolean checkDLMaxThrow = false;
+            List<List<Range>> rangesHABaseLinesVcmLow = null;
+            List<List<Range>> rangesHABaseLinesVcmHigh = null;
 
             if (this.hasPops) {
 
@@ -1028,12 +1045,159 @@ public final class ObservabilityService {
 
                 rangesHABaseLines = findHAIntervalsWithPops(FastMath.toRadians(precDEC), rangesTarget, starObs);
 
+                /* TODO: handle Pupil handling limits (DL / VCM) for CHARA ? */
             } else {
-                // Get intervals (HA) compatible with all base lines :
-                rangesHABaseLines = DelayLineService.findHAIntervals(FastMath.toRadians(precDEC), this.baseLines, this.wRanges, defaultRangeFactory);
+                // Get intervals (HA) compatible with all base lines:
+                rangesHABaseLines = DelayLineService.findHAIntervals(FastMath.toRadians(precDEC),
+                        this.baseLines, this.wRanges, defaultRangeFactory);
+
+                if (this.hasSwitchyardDelayLineMaxThrow) {
+                    // rangesHABaseLines can be null if the thread was interrupted :
+                    checkInterrupted();
+
+                    // Get intervals (HA) compatible with all base lines using the DL throw for the VCM low limit:
+                    rangesHABaseLinesVcmLow = DelayLineService.findHAIntervals(FastMath.toRadians(precDEC),
+                            this.baseLines, this.wRangesVcmLow, defaultRangeFactory);
+
+                    // rangesHABaseLinesVcmLow can be null if the thread was interrupted :
+                    checkInterrupted();
+
+                    // Get intervals (HA) compatible with all base lines using the DL throw for the VCM high limit:
+                    rangesHABaseLinesVcmHigh = DelayLineService.findHAIntervals(FastMath.toRadians(precDEC),
+                            this.baseLines, this.wRangesVcmHigh, defaultRangeFactory);
+
+                    // rangesHABaseLinesVcmLow can be null if the thread was interrupted :
+                    checkInterrupted();
+                    
+                    // Only do checks if some ranges are different for at least 1 delay line:
+                    checkDLMaxThrow = false;
+
+                    List<Range> ranges, rangesVcm;
+
+                    for (int i = 0; i < sizeBL; i++) {
+                        ranges = rangesHABaseLines.get(i);
+                        rangesVcm = rangesHABaseLinesVcmLow.get(i);
+
+                        if (!Range.equals(ranges, rangesVcm)) {
+                            this.addWarning("Pupil correction limit exceeded: VLTI VCM pressure limit is 2.5 bar max for safety reasons.");
+
+                            checkDLMaxThrow = true;
+                            break;
+                        }
+                    }
+
+                    if (isLogDebug) {
+                        /* TODO: remove code once VCM handling is OK */
+
+                        final double cosDec = FastMath.cos(FastMath.toRadians(precDEC));
+                        final double sinDec = FastMath.sin(FastMath.toRadians(precDEC));
+
+                        for (int i = 0; i < sizeBL; i++) {
+                            ranges = rangesHABaseLines.get(i);
+                            rangesVcm = rangesHABaseLinesVcmLow.get(i);
+
+                            BaseLine baseLine = this.baseLines.get(i);
+
+                            logger.info("baseline: {}, w range: {}, dl throws: {} - {} m", baseLine.getName(), wRangesVcmLow.get(i),
+                                    baseLine.getBeam1().getMaximumThrowLow(),
+                                    baseLine.getBeam2().getMaximumThrowLow()
+                            );
+
+                            /* optical path difference */
+                            final double opd = baseLine.getBeam1().getOpticalPathLength() - baseLine.getBeam2().getOpticalPathLength();
+
+                            for (Range range : rangesVcm) {
+                                logger.info("ha range: {}", range);
+
+                                double wMin = CalcUVW.computeW(cosDec, sinDec, baseLine, AngleUtils.hours2rad(range.getMin()));
+                                double wMax = CalcUVW.computeW(cosDec, sinDec, baseLine, AngleUtils.hours2rad(range.getMax()));
+
+                                if (wMin > wMax) {
+                                    double tmp = wMin;
+                                    wMin = wMax;
+                                    wMax = tmp;
+                                }
+
+                                logger.info("w range: [{} - {}]", wMin, wMax);
+
+                                String throwName = baseLine.getBeam2().getStation().getName() + " % " + baseLine.getBeam1().getStation().getName();
+
+                                double haMin = AngleUtils.hours2rad(range.getMin());
+                                double haMax = AngleUtils.hours2rad(range.getMax());
+                                double haStep = 0.2 * (haMax - haMin);
+
+                                for (double ha = haMin, haEnd = haMax + 1e-3d; ha < haEnd; ha += haStep) {
+                                    double w = CalcUVW.computeW(cosDec, sinDec, baseLine, ha);
+                                    double throw_DL = (opd - w);
+
+                                    logger.info("w: {} - throw[{}]: {}]", w, throwName, throw_DL);
+                                }
+                            }
+                        }
+
+                        final List<Range> dlRanges = new ArrayList<Range>(13);
+                        dlRanges.add(rangeHARiseSet);
+
+                        for (int i = 0; i < sizeBL; i++) {
+                            rangesVcm = rangesHABaseLinesVcmLow.get(i);
+
+                            for (Range range : rangesVcm) {
+                                dlRanges.add(range);
+                            }
+                        }
+
+                        final List<Range> finalRangesDL = Range.intersectRanges(dlRanges, 1 + sizeBL, defaultRangeFactory);
+
+                        logger.info("--- FinalRangesDL: {}", finalRangesDL);
+
+                        if (finalRangesDL != null) {
+                            for (Range range : finalRangesDL) {
+                                logger.info("range: {}", range);
+
+                                for (int i = 0; i < sizeBL; i++) {
+                                    BaseLine baseLine = this.baseLines.get(i);
+
+                                    logger.info("baseline: {}, w range: {}, dl throws: {} - {} m", baseLine.getName(), wRangesVcmLow.get(i),
+                                            baseLine.getBeam1().getMaximumThrowLow(),
+                                            baseLine.getBeam2().getMaximumThrowLow()
+                                    );
+
+                                    /* optical path difference */
+                                    final double opd = baseLine.getBeam1().getOpticalPathLength() - baseLine.getBeam2().getOpticalPathLength();
+
+                                    logger.info("ha range: {}", range);
+
+                                    double wMin = CalcUVW.computeW(cosDec, sinDec, baseLine, AngleUtils.hours2rad(range.getMin()));
+                                    double wMax = CalcUVW.computeW(cosDec, sinDec, baseLine, AngleUtils.hours2rad(range.getMax()));
+
+                                    if (wMin > wMax) {
+                                        double tmp = wMin;
+                                        wMin = wMax;
+                                        wMax = tmp;
+                                    }
+
+                                    logger.info("w range: [{} - {}]", wMin, wMax);
+
+                                    String throwName = baseLine.getBeam2().getStation().getName() + " % " + baseLine.getBeam1().getStation().getName();
+
+                                    double haMin = AngleUtils.hours2rad(range.getMin());
+                                    double haMax = AngleUtils.hours2rad(range.getMax());
+                                    double haStep = 0.2 * (haMax - haMin);
+
+                                    for (double ha = haMin, haEnd = haMax + 1e-3d; ha < haEnd; ha += haStep) {
+                                        double w = CalcUVW.computeW(cosDec, sinDec, baseLine, ha);
+                                        double throw_DL = (opd - w);
+
+                                        logger.info("w: {} - throw[{}]: {}]", w, throwName, throw_DL);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
 
-            // rangesHABaseLines can be null if the thread was interrupted :
+            // rangesHABaseLines / rangesHABaseLinesVcmLow / rangesHABaseLinesVcmHigh can be null if the thread was interrupted :
             checkInterrupted();
 
             // convert HA range to JD range in range [LST0 - 12; LST0 + 12]
@@ -1053,7 +1217,7 @@ public final class ObservabilityService {
                 checkInterrupted();
             }
 
-            // Check Moon restriction:
+            // Check Moon restriction
             boolean checkJDMoon = false;
             List<Range> rangesJDMoon = null;
             if (this.useNightLimit && this.moonPointingRestriction != null) {
@@ -1100,7 +1264,6 @@ public final class ObservabilityService {
             final List<Range> obsRanges = new ArrayList<Range>(13);
 
             if (this.doDetailedOutput) {
-
                 // Add Rise/Set :
                 final StarObservabilityData soRiseSet = new StarObservabilityData(targetName, "Rise/Set", StarObservabilityData.TYPE_RISE_SET);
                 // get target position (ha, az, el) at range boundaries:
@@ -1170,7 +1333,8 @@ public final class ObservabilityService {
                     BaseLine baseLine;
                     List<Range> ranges;
                     StarObservabilityData soBl;
-                    for (int i = 0, size = this.baseLines.size(); i < size; i++) {
+
+                    for (int i = 0; i < sizeBL; i++) {
                         baseLine = this.baseLines.get(i);
                         ranges = rangesHABaseLines.get(i);
 
@@ -1203,13 +1367,81 @@ public final class ObservabilityService {
                         }
 
                         obsRanges.clear();
+
+                        if (checkDLMaxThrow) {
+                            // Vcm Low:
+                            ranges = rangesHABaseLinesVcmLow.get(i);
+
+                            if (ranges != null) {
+                                for (Range range : ranges) {
+                                    obsRanges.add(this.sc.convertHAToJDRange(range, precRA));
+                                }
+                            }
+                            if (isLogDebug) {
+                                logger.debug("baseLine: {}", baseLine);
+                                logger.debug("JD ranges: {}", obsRanges);
+                            }
+
+                            soBl = new StarObservabilityData(targetName, baseLine.getName() + " [VCM 2.5 bar]", StarObservabilityData.TYPE_BASE_LINE + i);
+                            // get target position (ha, az, el) at range boundaries:
+                            getTargetPosition(soBl, obsRanges, precRA, precDEC, false);
+                            starVisList.add(soBl);
+
+                            // convert JD ranges to date ranges :
+                            for (Range range : obsRanges) {
+                                convertRangeToDateInterval(range, soBl.getVisible());
+                            }
+                            if (soBl.getVisible().size() > 1) {
+                                // merge contiguous date ranges :
+                                DateTimeInterval.merge(soBl.getVisible());
+                            }
+
+                            if (isLogDebug) {
+                                logger.debug("Date ranges: {}", soBl.getVisible());
+                            }
+
+                            obsRanges.clear();
+                            
+                            // Vcm High:
+                            ranges = rangesHABaseLinesVcmHigh.get(i);
+
+                            if (ranges != null) {
+                                for (Range range : ranges) {
+                                    obsRanges.add(this.sc.convertHAToJDRange(range, precRA));
+                                }
+                            }
+                            if (isLogDebug) {
+                                logger.debug("baseLine: {}", baseLine);
+                                logger.debug("JD ranges: {}", obsRanges);
+                            }
+
+                            soBl = new StarObservabilityData(targetName, baseLine.getName() + " [VCM 3.0 bar]", StarObservabilityData.TYPE_BASE_LINE + i);
+                            // get target position (ha, az, el) at range boundaries:
+                            getTargetPosition(soBl, obsRanges, precRA, precDEC, false);
+                            starVisList.add(soBl);
+
+                            // convert JD ranges to date ranges :
+                            for (Range range : obsRanges) {
+                                convertRangeToDateInterval(range, soBl.getVisible());
+                            }
+                            if (soBl.getVisible().size() > 1) {
+                                // merge contiguous date ranges :
+                                DateTimeInterval.merge(soBl.getVisible());
+                            }
+
+                            if (isLogDebug) {
+                                logger.debug("Date ranges: {}", soBl.getVisible());
+                            }
+
+                            obsRanges.clear();
+                        }
                     }
                 }
             }
 
             // Merge then all JD intervals :
             // nValid = nBL [dl] + 1 [rise or horizon] + 1 if night limits
-            int nValid = this.baseLines.size() + 1;
+            int nValid = sizeBL + 1;
 
             // flatten and convert HA ranges to JD range :
             for (List<Range> ranges : rangesHABaseLines) {
@@ -1227,7 +1459,7 @@ public final class ObservabilityService {
                 obsRanges.add(rangeJDRiseSet);
             }
 
-            // Intersect with night limits :
+            // Intersect with night limits:
             if (this.useNightLimit) {
                 obsRanges.addAll(this.nightLimits);
                 nValid++;
@@ -1249,6 +1481,119 @@ public final class ObservabilityService {
 
             // store merge result as date intervals :
             if (finalRangesHardLimits != null) {
+
+                // Show VCM limits as overlay:
+                if (checkDLMaxThrow) {
+                    List<Range> vcmCompatibleRanges, vcmOnlyRangesLow, vcmOnlyRangesHigh;
+
+                    // Vcm Low:
+                    // Restrict observability ranges:
+                    nValid = 1;
+                    obsRanges.clear();
+                    obsRanges.addAll(finalRangesHardLimits);
+
+                    // flatten and convert HA ranges to JD range:
+                    for (List<Range> ranges : rangesHABaseLinesVcmLow) {
+                        if (ranges != null) {
+                            for (Range range : ranges) {
+                                obsRanges.add(this.sc.convertHAToJDRange(range, precRA));
+                            }
+                        }
+                    }
+                    nValid += sizeBL;
+
+                    vcmCompatibleRanges = Range.intersectRanges(obsRanges, nValid, defaultRangeFactory);
+
+                    if (isLogDebug) {
+                        logger.debug("vcmCompatibleRanges: {}", vcmCompatibleRanges);
+                    }
+
+                    if (vcmCompatibleRanges != null) {
+                        /* Find observability complement ie substract vcm ranges to observability ranges */
+                        nValid = 1;
+                        obsRanges.clear();
+                        obsRanges.addAll(finalRangesHardLimits);
+                        obsRanges.addAll(vcmCompatibleRanges);
+
+                        vcmOnlyRangesLow = Range.intersectRanges(obsRanges, nValid, defaultRangeFactory);
+                    } else {
+                        /* no compatible range ie use full ranges */
+                        vcmOnlyRangesLow = finalRangesHardLimits;
+                    }
+
+                    if (isLogDebug) {
+                        logger.debug("vcmOnlyRangesLow: {}", vcmOnlyRangesLow);
+                    }
+
+                    // Keep observability ranges with VCM Low restrictions:
+                    final List<DateTimeInterval> visibleVcmLowLimits = new ArrayList<DateTimeInterval>(3);
+
+                    // convert JD ranges to date ranges :
+                    for (Range range : vcmOnlyRangesLow) {
+                        convertRangeToDateInterval(range, visibleVcmLowLimits);
+                    }
+                    if (visibleVcmLowLimits.size() > 1) {
+                        // merge contiguous date ranges :
+                        DateTimeInterval.merge(visibleVcmLowLimits);
+                    }
+                    starObs.setVisibleVcmLowLimits(visibleVcmLowLimits);
+
+                    // Vcm High:
+                    // Restrict observability ranges:
+                    nValid = 1;
+                    obsRanges.clear();
+                    obsRanges.addAll(finalRangesHardLimits);
+
+                    // flatten and convert HA ranges to JD range:
+                    for (List<Range> ranges : rangesHABaseLinesVcmHigh) {
+                        if (ranges != null) {
+                            for (Range range : ranges) {
+                                obsRanges.add(this.sc.convertHAToJDRange(range, precRA));
+                            }
+                        }
+                    }
+                    nValid += sizeBL;
+
+                    vcmCompatibleRanges = Range.intersectRanges(obsRanges, nValid, defaultRangeFactory);
+
+                    if (isLogDebug) {
+                        logger.debug("vcmCompatibleRanges: {}", vcmCompatibleRanges);
+                    }
+
+                    if (vcmCompatibleRanges != null) {
+                        /* Find observability complement ie substract vcm ranges to observability ranges */
+                        nValid = 1;
+                        obsRanges.clear();
+                        obsRanges.addAll(finalRangesHardLimits);
+                        obsRanges.addAll(vcmCompatibleRanges);
+
+                        vcmOnlyRangesHigh = Range.intersectRanges(obsRanges, nValid, defaultRangeFactory);
+                    } else {
+                        /* no compatible range ie use full ranges */
+                        vcmOnlyRangesHigh = finalRangesHardLimits;
+                    }
+
+                    if (isLogDebug) {
+                        logger.debug("vcmOnlyRangesHigh: {}", vcmOnlyRangesHigh);
+                    }
+
+                    // Keep observability ranges with VCM Low restrictions:
+                    final List<DateTimeInterval> visibleVcmHighLimits = new ArrayList<DateTimeInterval>(3);
+
+                    // convert JD ranges to date ranges :
+                    for (Range range : vcmOnlyRangesHigh) {
+                        convertRangeToDateInterval(range, visibleVcmHighLimits);
+                    }
+                    if (visibleVcmHighLimits.size() > 1) {
+                        // merge contiguous date ranges :
+                        DateTimeInterval.merge(visibleVcmHighLimits);
+                    }
+                    starObs.setVisibleVcmHighLimits(visibleVcmHighLimits);
+                }
+
+                // fast interrupt:
+                checkInterrupted();
+
                 // rise/set range WITHOUT HA Min/Max constraints:
                 final Range haLimits = getTargetHALimits(target);
 
@@ -1880,7 +2225,7 @@ public final class ObservabilityService {
                 if (ruleFli != null) {
                     // inverse condition:
                     if (fli < ruleFli.doubleValue()) {
-                        if (logger.isDebugEnabled()) {
+                        if (isLogDebug) {
                             logger.debug("skip rule (fli = {} < {})", fli, ruleFli);
                         }
                         // skip rule
@@ -1896,7 +2241,7 @@ public final class ObservabilityService {
                     if (fluxCond.getOp() == Operator.LOWER) {
                         // inverse condition:
                         if (fluxValue > fluxCond.getValue()) {
-                            if (logger.isDebugEnabled()) {
+                            if (isLogDebug) {
                                 logger.debug("skip rule NOT(flux = {} LOWER  {})", fluxValue, fluxCond.getValue());
                             }
                             // skip rule
@@ -1906,7 +2251,7 @@ public final class ObservabilityService {
                         // Operator.HIGHER:
                         // inverse condition:
                         if (fluxValue <= fluxCond.getValue()) {
-                            if (logger.isDebugEnabled()) {
+                            if (isLogDebug) {
                                 logger.debug("skip rule NOT(flux = {} HIGHER {})", fluxValue, fluxCond.getValue());
                             }
                             // skip rule
@@ -2246,9 +2591,6 @@ public final class ObservabilityService {
                                     // set DL if not defined:
                                     dlSet.add(cl.getDelayLine());
                                     b.setDelayLine(cl.getDelayLine());
-
-                                    // set the DL maximum throw (VCM soft limit):
-                                    b.setMaximumThrow(cl.getMaximumThrow());
                                 }
                                 channelSet.add(cl.getChannel());
 
@@ -2273,17 +2615,29 @@ public final class ObservabilityService {
                             continue;
                         }
                         // optical path = switchyard + station fixed offset
-                        b.addOpticalLength(cl.getOpticalLength());
+                        b.addToOpticalPathLength(cl.getOpticalLength());
 
                         // fixed offset (CHARA) :
                         if (b.getStation().getDelayLineFixedOffset() != null) {
-                            b.addOpticalLength(b.getStation().getDelayLineFixedOffset());
+                            b.addToOpticalPathLength(b.getStation().getDelayLineFixedOffset());
+                        }
+
+                        // set the optional DL maximum throw (Low limit) from switchyard (VLTI VCM limits):
+                        if (cl.getMaximumThrowLow() != null) {
+                            this.hasSwitchyardDelayLineMaxThrow = true;
+                            b.setMaximumThrowLow(cl.getMaximumThrowLow());
+                        }
+
+                        // set the optional DL maximum throw (Low limit) from switchyard (VLTI VCM limits):
+                        if (cl.getMaximumThrowHigh() != null) {
+                            this.hasSwitchyardDelayLineMaxThrow = true;
+                            b.setMaximumThrowHigh(cl.getMaximumThrowHigh());
                         }
 
                         if (isLogDebug) {
                             logger.debug("station = {} - channel = {}", b.getStation(), b.getChannel().getName());
                             logger.debug("switchyard = {} - fixed offset = {}", cl.getOpticalLength(), b.getStation().getDelayLineFixedOffset());
-                            logger.debug("total: {}", b.getOpticalLength());
+                            logger.debug("total OPL: {}", b.getOpticalPathLength());
                         }
                         break;
                     }
@@ -2342,7 +2696,7 @@ public final class ObservabilityService {
                     if (b.getStation().getDelayLineFixedOffset() == null) {
                         throw new IllegalStateException("Missing fixed offset for station [" + b.getStation() + "].");
                     }
-                    b.addOpticalLength(b.getStation().getDelayLineFixedOffset());
+                    b.addToOpticalPathLength(b.getStation().getDelayLineFixedOffset());
                 } else {
                     // no delay line ?
                     throw new IllegalStateException("Impossible to associate a delay line to the beam [" + b + "].");
@@ -2550,38 +2904,67 @@ public final class ObservabilityService {
 
         final int nBeams = this.beams.size();
 
-        // baseline count :
+        // baseline count:
         final int blen = CombUtils.comb(nBeams, 2);
 
         this.baseLines = new ArrayList<BaseLine>(blen);
         this.wRanges = new ArrayList<Range>(blen);
+        this.wRangesVcmLow = (this.hasSwitchyardDelayLineMaxThrow) ? new ArrayList<Range>(blen) : null;
+        this.wRangesVcmHigh = (this.hasSwitchyardDelayLineMaxThrow) ? new ArrayList<Range>(blen) : null;
 
         Beam b1, b2;
+        Position3D pos1, pos2;
 
-        double x, y, z, t, wMin, wMax;
+        double x, y, z, opd, wMin, wMax;
         for (int i = 0; i < nBeams; i++) {
             for (int j = i + 1; j < nBeams; j++) {
                 b1 = this.beams.get(i);
                 b2 = this.beams.get(j);
 
-                x = b1.getStation().getRelativePosition().getPosX() - b2.getStation().getRelativePosition().getPosX();
-                y = b1.getStation().getRelativePosition().getPosY() - b2.getStation().getRelativePosition().getPosY();
-                z = b1.getStation().getRelativePosition().getPosZ() - b2.getStation().getRelativePosition().getPosZ();
+                pos1 = b1.getStation().getRelativePosition();
+                pos2 = b2.getStation().getRelativePosition();
+
+                x = pos1.getPosX() - pos2.getPosX();
+                y = pos1.getPosY() - pos2.getPosY();
+                z = pos1.getPosZ() - pos2.getPosZ();
 
                 // a Base line defines only the geometry :
                 this.baseLines.add(new BaseLine(b1, b2, x, y, z));
 
-                t = b1.getOpticalLength() - b2.getOpticalLength();
+                /* optical path difference */
+                opd = b1.getOpticalPathLength() - b2.getOpticalPathLength();
 
-                // 2 DL for 2 telescopes => double throw :
-                // note : for now, all DLs are equivalent (same throw) :
-                wMin = t - b2.getDelayLine().getMaximumThrow();
-                wMax = t + b1.getDelayLine().getMaximumThrow();
+                // 2 DL for 2 telescopes => double throw but in reality one DL is forced to "zero" or to a minimum value (reference station):
+                // note : DLs may be not equivalent (different throw):
+                wMin = opd - b2.getDelayLine().getMaximumThrow();
+                wMax = opd + b1.getDelayLine().getMaximumThrow();
 
-                // the range contains the w delay limits for the corresponding base line :
+                // the W range contains the W limits 
                 this.wRanges.add(new Range(wMin, wMax));
 
-                /* TODO: VCM limit in term of wSoftRange (soft limit) */
+                if (this.hasSwitchyardDelayLineMaxThrow) {
+                    // W range contains the W low limits (VCM low limit) for the corresponding base line:
+                    wMin = opd - ((b2.getMaximumThrowLow() != null) ? b2.getMaximumThrowLow().doubleValue() : b2.getDelayLine().getMaximumThrow());
+                    wMax = opd + ((b1.getMaximumThrowLow() != null) ? b1.getMaximumThrowLow().doubleValue() : b1.getDelayLine().getMaximumThrow());
+
+                    if (isLogDebug) {
+                        logger.debug("baseline: {}-{}", b1.getStation().getName(), b2.getStation().getName());
+                        logger.debug("opd: {}", opd);
+                        logger.debug("w range Vcm Low: [{} - {}]", wMin, wMax);
+                    }
+                    this.wRangesVcmLow.add(new Range(wMin, wMax));
+                    
+                    // W range contains the W high limits (VCM high limit) for the corresponding base line:
+                    wMin = opd - ((b2.getMaximumThrowHigh() != null) ? b2.getMaximumThrowHigh().doubleValue() : b2.getDelayLine().getMaximumThrow());
+                    wMax = opd + ((b1.getMaximumThrowHigh() != null) ? b1.getMaximumThrowHigh().doubleValue() : b1.getDelayLine().getMaximumThrow());
+
+                    if (isLogDebug) {
+                        logger.debug("baseline: {}-{}", b1.getStation().getName(), b2.getStation().getName());
+                        logger.debug("opd: {}", opd);
+                        logger.debug("w range Vcm High: [{} - {}]", wMin, wMax);
+                    }
+                    this.wRangesVcmHigh.add(new Range(wMin, wMax));
+                }
             }
         }
 

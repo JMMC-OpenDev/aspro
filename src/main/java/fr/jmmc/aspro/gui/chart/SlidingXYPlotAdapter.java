@@ -437,8 +437,8 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
                                 a.setX0(n - halfBarWidth);
                                 a.setX1(n + halfBarWidth);
 
-                                // note: use background layer:
-                                this.renderer.addAnnotation(a, Layer.BACKGROUND);
+                                // note: use layer according to the annotation layer:
+                                this.renderer.addAnnotation(a, a.getLayer());
                             }
                         }
                     }

@@ -58,6 +58,7 @@ import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.PlotRenderingInfo;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.io.SerialUtilities;
+import org.jfree.ui.Layer;
 import org.jfree.ui.RectangleEdge;
 import org.jfree.util.ObjectUtilities;
 import org.jfree.util.PaintUtilities;
@@ -91,6 +92,8 @@ public final class EnhancedXYBoxAnnotation extends AbstractXYAnnotation
     private transient Paint outlinePaint;
     /** The paint used to fill the box. */
     private transient Paint fillPaint;
+    /** layer to draw this annotation = foreground or background (default) */
+    private transient Layer layer;
 
     /**
      * Creates a new annotation (where, by default, the box is drawn
@@ -117,7 +120,7 @@ public final class EnhancedXYBoxAnnotation extends AbstractXYAnnotation
      * @param outlinePaint  the shape color (<code>null</code> permitted).
      */
     public EnhancedXYBoxAnnotation(final double x0, final double y0, final double x1, final double y1,
-            final BasicStroke stroke, final Paint outlinePaint) {
+                                   final BasicStroke stroke, final Paint outlinePaint) {
         this(x0, y0, x1, y1, stroke, outlinePaint, null);
     }
 
@@ -134,7 +137,25 @@ public final class EnhancedXYBoxAnnotation extends AbstractXYAnnotation
      *                   permitted).
      */
     public EnhancedXYBoxAnnotation(final double x0, final double y0, final double x1, final double y1,
-            final BasicStroke stroke, final Paint outlinePaint, final Paint fillPaint) {
+                                   final BasicStroke stroke, final Paint outlinePaint, final Paint fillPaint) {
+        this(x0, y0, x1, y1, stroke, outlinePaint, fillPaint, Layer.BACKGROUND);
+    }
+
+    /**
+     * Creates a new annotation.
+     *
+     * @param x0  the lower x-coordinate of the box (in data space).
+     * @param y0  the lower y-coordinate of the box (in data space).
+     * @param x1  the upper x-coordinate of the box (in data space).
+     * @param y1  the upper y-coordinate of the box (in data space).
+     * @param stroke  the shape stroke (<code>null</code> permitted).
+     * @param outlinePaint  the shape color (<code>null</code> permitted).
+     * @param fillPaint  the paint used to fill the shape (<code>null</code>
+     *                   permitted).
+     * @param layer layer to draw this annotation = foreground or background (default)
+     */
+    public EnhancedXYBoxAnnotation(final double x0, final double y0, final double x1, final double y1,
+                                   final BasicStroke stroke, final Paint outlinePaint, final Paint fillPaint, final Layer layer) {
         this.x0 = x0;
         this.y0 = y0;
         this.x1 = x1;
@@ -142,6 +163,7 @@ public final class EnhancedXYBoxAnnotation extends AbstractXYAnnotation
         this.stroke = stroke;
         this.outlinePaint = outlinePaint;
         this.fillPaint = fillPaint;
+        this.layer = layer;
     }
 
     /**
@@ -158,8 +180,8 @@ public final class EnhancedXYBoxAnnotation extends AbstractXYAnnotation
      */
     @Override
     public void draw(final Graphics2D g2, final XYPlot plot, final Rectangle2D dataArea,
-            final ValueAxis domainAxis, final ValueAxis rangeAxis,
-            final int rendererIndex, final PlotRenderingInfo info) {
+                     final ValueAxis domainAxis, final ValueAxis rangeAxis,
+                     final int rendererIndex, final PlotRenderingInfo info) {
 
         final PlotOrientation orientation = plot.getOrientation();
 
@@ -187,7 +209,6 @@ public final class EnhancedXYBoxAnnotation extends AbstractXYAnnotation
 
         // Perform manual clipping because dashed stroke causes a major performance penalty
         // for large shapes (no clipping in Java2D rendering)
-
         // margin arround clipping bounds:
         final double margin = 1d + 0.5d * this.stroke.getLineWidth();
 
@@ -289,8 +310,7 @@ public final class EnhancedXYBoxAnnotation extends AbstractXYAnnotation
         if (!PaintUtilities.equal(this.fillPaint, that.getFillPaint())) {
             return false;
         }
-        // seem to be the same
-        return true;
+        return ObjectUtilities.equal(this.layer, that.getLayer());
     }
 
     /**
@@ -444,4 +464,21 @@ public final class EnhancedXYBoxAnnotation extends AbstractXYAnnotation
     public Paint getFillPaint() {
         return fillPaint;
     }
+
+    /**
+     * Return the layer to draw this annotation = foreground or background (default)
+     * @return layer to draw this annotation = foreground or background (default)
+     */
+    public Layer getLayer() {
+        return layer;
+    }
+
+    /**
+     * Define the layer to draw this annotation = foreground or background (default)
+     * @param layer layer to draw this annotation = foreground or background (default)
+     */
+    public void setLayer(Layer layer) {
+        this.layer = layer;
+    }
+
 }
