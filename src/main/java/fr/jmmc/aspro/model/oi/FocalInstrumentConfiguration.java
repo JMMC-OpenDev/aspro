@@ -14,8 +14,8 @@ import fr.jmmc.aspro.model.OIBase;
 
 /**
  * 
- *         This type describes a focal instrument configuration (AMBER : UT1-UT2-UT4, A0-K0-G1, MIDI : UT1-UT3-102m, E0-I1-68.8m)
- *       
+ *                 This type describes a focal instrument configuration (AMBER : UT1-UT2-UT4, A0-K0-G1, MIDI : UT1-UT3-102m, E0-I1-68.8m)
+ *             
  * 
  * <p>Java class for FocalInstrumentConfiguration complex type.
  * 

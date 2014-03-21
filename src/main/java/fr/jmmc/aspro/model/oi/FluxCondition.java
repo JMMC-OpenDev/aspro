@@ -10,8 +10,8 @@ import fr.jmmc.aspro.model.OIBase;
 
 /**
  * 
- *         This type describes a flux condition (band, operation and value)
- *       
+ *                 This type describes a flux condition (band, operation and value)
+ *             
  * 
  * <p>Java class for FluxCondition complex type.
  * 

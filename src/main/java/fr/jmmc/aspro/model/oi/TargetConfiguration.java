@@ -10,8 +10,8 @@ import fr.jmmc.aspro.model.OIBase;
 
 /**
  * 
- *         This type describes the configuration used during the observation of the target.
- *       
+ *                 This type describes the configuration used during the observation of the target.
+ *             
  * 
  * <p>Java class for TargetConfiguration complex type.
  * 

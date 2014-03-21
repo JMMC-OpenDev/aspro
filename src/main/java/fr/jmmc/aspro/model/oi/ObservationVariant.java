@@ -10,9 +10,9 @@ import fr.jmmc.aspro.model.OIBase;
 
 /**
  * 
- *         This type describes the overriden observation settings to form an observation variant i.e. multi configuration support :
- *         - list of stations (U1 U2 U4)
- *       
+ *                 This type describes the overriden observation settings to form an observation variant i.e. multi configuration support :
+ *                 - list of stations (U1 U2 U4)
+ *             
  * 
  * <p>Java class for ObservationVariant complex type.
  * 

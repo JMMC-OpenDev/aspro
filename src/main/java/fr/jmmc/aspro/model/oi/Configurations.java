@@ -13,8 +13,8 @@ import fr.jmmc.aspro.model.OIBase;
 
 /**
  * 
- *         This type describes the list of interferometer files
- *       
+ *                 This type describes the list of interferometer files
+ *             
  * 
  * <p>Java class for InterferometerFileCollection complex type.
  * 

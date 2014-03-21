@@ -15,8 +15,8 @@ import fr.jmmc.aspro.model.OIBase;
 
 /**
  * 
- *         This type describes the user information related to all targets.
- *       
+ *                 This type describes the user information related to all targets.
+ *             
  * 
  * <p>Java class for TargetUserInformations complex type.
  * 

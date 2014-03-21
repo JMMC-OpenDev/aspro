@@ -12,10 +12,10 @@ import fr.jmmc.aspro.model.OIBase;
 
 /**
  * 
- *         This type describes a possible switchyard for the interferometer
- *         i.e. the fixed distance between a station and a channel in the focal plane
- *         (opd = 0, time reference)
- *       
+ *                 This type describes a possible switchyard for the interferometer
+ *                 i.e. the fixed distance between a station and a channel in the focal plane
+ *                 (opd = 0, time reference)
+ *             
  * 
  * <p>Java class for SwitchYard complex type.
  * 

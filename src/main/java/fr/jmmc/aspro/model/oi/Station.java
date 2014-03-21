@@ -17,8 +17,8 @@ import fr.jmmc.aspro.model.OIBase;
 
 /**
  * 
- *         This type describes a station for a given telescope
- *       
+ *                 This type describes a station for a given telescope
+ *             
  * 
  * <p>Java class for Station complex type.
  * 

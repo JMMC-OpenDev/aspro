@@ -15,8 +15,8 @@ import fr.jmmc.aspro.model.OIBase;
 
 /**
  * 
- *         This type describes the list of calibrators associated to a target
- *       
+ *                 This type describes the list of calibrators associated to a target
+ *             
  * 
  * <p>Java class for TargetInformation complex type.
  * 

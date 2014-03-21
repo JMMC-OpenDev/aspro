@@ -14,8 +14,8 @@ import fr.jmmc.aspro.model.OIBase;
 
 /**
  * 
- *         This type describes a telescope or a telescope family ...
- *       
+ *                 This type describes a telescope or a telescope family ...
+ *             
  * 
  * <p>Java class for Telescope complex type.
  * 

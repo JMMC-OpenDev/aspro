@@ -12,8 +12,8 @@ import fr.jmmc.aspro.model.OIBase;
 
 /**
  * 
- *         This type describes when the observation will happen
- *       
+ *                 This type describes when the observation will happen
+ *             
  * 
  * <p>Java class for WhenSetting complex type.
  * 

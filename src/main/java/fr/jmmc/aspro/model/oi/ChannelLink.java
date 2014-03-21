@@ -12,8 +12,8 @@ import fr.jmmc.aspro.model.OIBase;
 
 /**
  * 
- *         This type describes a link to a channel with its optical length
- *       
+ *                 This type describes a link to a channel with its optical length
+ *             
  * 
  * <p>Java class for ChannelLink complex type.
  * 
@@ -27,7 +27,8 @@ import fr.jmmc.aspro.model.OIBase;
  *         &lt;element name="channel" type="{http://www.w3.org/2001/XMLSchema}IDREF"/>
  *         &lt;element name="opticalLength" type="{http://www.w3.org/2001/XMLSchema}double"/>
  *         &lt;element name="delayLine" type="{http://www.w3.org/2001/XMLSchema}IDREF" minOccurs="0"/>
- *         &lt;element name="maximumThrow" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
+ *         &lt;element name="maximumThrowLow" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
+ *         &lt;element name="maximumThrowHigh" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -41,7 +42,8 @@ import fr.jmmc.aspro.model.OIBase;
     "channel",
     "opticalLength",
     "delayLine",
-    "maximumThrow"
+    "maximumThrowLow",
+    "maximumThrowHigh"
 })
 public class ChannelLink
     extends OIBase
@@ -56,7 +58,8 @@ public class ChannelLink
     @XmlIDREF
     @XmlSchemaType(name = "IDREF")
     protected DelayLine delayLine;
-    protected Double maximumThrow;
+    protected Double maximumThrowLow;
+    protected Double maximumThrowHigh;
 
     /**
      * Gets the value of the channel property.
@@ -123,27 +126,51 @@ public class ChannelLink
     }
 
     /**
-     * Gets the value of the maximumThrow property.
+     * Gets the value of the maximumThrowLow property.
      * 
      * @return
      *     possible object is
      *     {@link Double }
      *     
      */
-    public Double getMaximumThrow() {
-        return maximumThrow;
+    public Double getMaximumThrowLow() {
+        return maximumThrowLow;
     }
 
     /**
-     * Sets the value of the maximumThrow property.
+     * Sets the value of the maximumThrowLow property.
      * 
      * @param value
      *     allowed object is
      *     {@link Double }
      *     
      */
-    public void setMaximumThrow(Double value) {
-        this.maximumThrow = value;
+    public void setMaximumThrowLow(Double value) {
+        this.maximumThrowLow = value;
+    }
+
+    /**
+     * Gets the value of the maximumThrowHigh property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Double }
+     *     
+     */
+    public Double getMaximumThrowHigh() {
+        return maximumThrowHigh;
+    }
+
+    /**
+     * Sets the value of the maximumThrowHigh property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Double }
+     *     
+     */
+    public void setMaximumThrowHigh(Double value) {
+        this.maximumThrowHigh = value;
     }
 
 }

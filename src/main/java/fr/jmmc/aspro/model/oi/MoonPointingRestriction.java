@@ -12,8 +12,8 @@ import fr.jmmc.aspro.model.OIBase;
 
 /**
  * 
- *         This type describes the Moon Pointing Restrictions (angular separation depending on FLI ...)
- *       
+ *                 This type describes the Moon Pointing Restrictions (angular separation depending on FLI ...)
+ *             
  * 
  * <p>Java class for MoonPointingRestriction complex type.
  * 

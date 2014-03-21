@@ -10,8 +10,8 @@ import fr.jmmc.aspro.model.OIBase;
 
 /**
  * 
- *         This type describes the runtime context containing PIVOT parameters
- *       
+ *                 This type describes the runtime context containing PIVOT parameters
+ *             
  * 
  * <p>Java class for ObservationContext complex type.
  * 

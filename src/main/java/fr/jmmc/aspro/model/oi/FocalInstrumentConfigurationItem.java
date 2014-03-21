@@ -15,8 +15,8 @@ import fr.jmmc.aspro.model.OIBase;
 
 /**
  * 
- *         This type describes a focal instrument configuration item (AMBER : U1-U2-U4)
- *       
+ *                 This type describes a focal instrument configuration item (AMBER : U1-U2-U4)
+ *             
  * 
  * <p>Java class for FocalInstrumentConfigurationItem complex type.
  * 

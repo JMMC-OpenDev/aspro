@@ -9,8 +9,8 @@ import fr.jmmc.aspro.model.OIBase;
 
 /**
  * 
- *         This data type describes a carthesian position (x,y,z) in meters
- *       
+ *                 This data type describes a carthesian position (x,y,z) in meters
+ *             
  * 
  * <p>Java class for Position3D complex type.
  * 

@@ -10,8 +10,8 @@ import fr.jmmc.aspro.model.OIBase;
 
 /**
  * 
- *         This type describes an user model (FITS image or cube).
- *       
+ *                 This type describes an user model (FITS image or cube).
+ *             
  * 
  * <p>Java class for UserModel complex type.
  * 

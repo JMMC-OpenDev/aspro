@@ -10,8 +10,8 @@ import fr.jmmc.aspro.model.OIBase;
 
 /**
  * 
- *         This type describes the chosen interferometer and its parameters
- *       
+ *                 This type describes the chosen interferometer and its parameters
+ *             
  * 
  * <p>Java class for InterferometerConfigurationChoice complex type.
  * 

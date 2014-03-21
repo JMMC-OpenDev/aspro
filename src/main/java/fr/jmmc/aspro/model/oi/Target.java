@@ -18,8 +18,8 @@ import fr.jmmc.jmal.model.targetmodel.Model;
 
 /**
  * 
- *         This type describes a target
- *       
+ *                 This type describes a target
+ *             
  * 
  * <p>Java class for Target complex type.
  * 
@@ -645,8 +645,8 @@ public class Target
 
     /**
      * 
-     *             Optional list of analytical models
-     *           Gets the value of the models property.
+     *                         Optional list of analytical models
+     *                     Gets the value of the models property.
      * 
      * <p>
      * This accessor method returns a reference to the live list,

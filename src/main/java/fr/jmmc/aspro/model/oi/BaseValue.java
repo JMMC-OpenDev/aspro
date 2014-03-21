@@ -11,8 +11,8 @@ import fr.jmmc.aspro.model.OIBase;
 
 /**
  * 
- *         A generic value type
- *       
+ *                 A generic value type
+ *             
  * 
  * <p>Java class for BaseValue complex type.
  * 

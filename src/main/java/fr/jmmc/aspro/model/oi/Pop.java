@@ -14,10 +14,10 @@ import fr.jmmc.aspro.model.OIBase;
 
 /**
  * 
- *         This type describes a Pipe of Pan (PoP) present in the interferometer.
- *         This only defines the identifier / name of the PoP that is then used in
- *         the station definition to give the fixed delay due to the PoP.
- *       
+ *                 This type describes a Pipe of Pan (PoP) present in the interferometer.
+ *                 This only defines the identifier / name of the PoP that is then used in
+ *                 the station definition to give the fixed delay due to the PoP.
+ *             
  * 
  * <p>Java class for Pop complex type.
  * 

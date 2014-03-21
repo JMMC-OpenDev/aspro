@@ -14,8 +14,8 @@ import fr.jmmc.aspro.model.OIBase;
 
 /**
  * 
- *         This type describes the links between a station and the channels
- *       
+ *                 This type describes the links between a station and the channels
+ *             
  * 
  * <p>Java class for StationLinks complex type.
  * 

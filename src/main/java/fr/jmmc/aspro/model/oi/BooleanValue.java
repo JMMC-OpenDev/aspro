@@ -9,8 +9,8 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * 
- *         A boolean value
- *       
+ *                 A boolean value
+ *             
  * 
  * <p>Java class for BooleanValue complex type.
  * 

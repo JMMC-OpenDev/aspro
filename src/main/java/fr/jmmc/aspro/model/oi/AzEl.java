@@ -9,8 +9,8 @@ import fr.jmmc.aspro.model.OIBase;
 
 /**
  * 
- *         This data type describes a position in the horizontal frame (azimuth, elevation)
- *       
+ *                 This data type describes a position in the horizontal frame (azimuth, elevation)
+ *             
  * 
  * <p>Java class for AzEl complex type.
  * 

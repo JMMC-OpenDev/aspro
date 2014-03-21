@@ -17,8 +17,8 @@ import fr.jmmc.aspro.model.OIBase;
 
 /**
  * 
- *         This type describes a focal instrument (AMBER, MIDI ...)
- *       
+ *                 This type describes a focal instrument (AMBER, MIDI ...)
+ *             
  * 
  * <p>Java class for FocalInstrument complex type.
  * 

@@ -10,8 +10,8 @@ import fr.jmmc.aspro.model.OIBase;
 
 /**
  * 
- *         This type describes the chosen instrument, stations and its parameters
- *       
+ *                 This type describes the chosen instrument, stations and its parameters
+ *             
  * 
  * <p>Java class for FocalInstrumentConfigurationChoice complex type.
  * 

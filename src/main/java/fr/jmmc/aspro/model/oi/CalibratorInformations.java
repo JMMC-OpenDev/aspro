@@ -12,8 +12,8 @@ import fr.jmmc.aspro.model.OIBase;
 
 /**
  * 
- *         This type describes the optional calibrator information (uniform disk diameters).
- *       
+ *                 This type describes the optional calibrator information (uniform disk diameters).
+ *             
  * 
  * <p>Java class for CalibratorInformations complex type.
  * 

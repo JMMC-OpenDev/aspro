@@ -14,9 +14,9 @@ import fr.jmmc.aspro.model.OIBase;
 
 /**
  * 
- *         This type describes an interferometer channel
- *         corresponding to a beam arriving in the interferometer focal plane
- *       
+ *                 This type describes an interferometer channel
+ *                 corresponding to a beam arriving in the interferometer focal plane
+ *             
  * 
  * <p>Java class for Channel complex type.
  * 

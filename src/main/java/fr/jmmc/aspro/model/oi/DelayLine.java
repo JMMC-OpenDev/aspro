@@ -15,8 +15,8 @@ import fr.jmmc.aspro.model.OIBase;
 
 /**
  * 
- *         This type describes a delay line (DL) present in the interferometer
- *       
+ *                 This type describes a delay line (DL) present in the interferometer
+ *             
  * 
  * <p>Java class for DelayLine complex type.
  * 

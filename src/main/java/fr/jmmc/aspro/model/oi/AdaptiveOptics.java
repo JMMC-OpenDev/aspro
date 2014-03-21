@@ -10,8 +10,8 @@ import fr.jmmc.aspro.model.OIBase;
 
 /**
  * 
- *         This type describes an Adaptive Optics system
- *       
+ *                 This type describes an Adaptive Optics system
+ *             
  * 
  * <p>Java class for AdaptiveOptics complex type.
  * 

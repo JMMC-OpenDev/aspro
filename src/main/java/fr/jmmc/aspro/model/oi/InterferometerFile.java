@@ -10,8 +10,8 @@ import fr.jmmc.aspro.model.OIBase;
 
 /**
  * 
- *         This type describes an interferometer file
- *       
+ *                 This type describes an interferometer file
+ *             
  * 
  * <p>Java class for InterferometerFile complex type.
  * 
