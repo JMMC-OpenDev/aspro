@@ -137,11 +137,9 @@ public final class AstroSkyCalc {
 
         // Find the julian date corresponding to the LST origin LST=00:00:00 before the given midnight:
         // note: lst0 is in range [-24 (lst); -0] relative to midnight to have LST[0-24]:
-
         // TODO : explain why:
         // case 1: JD in [LST0; LST24] frame => LST[-12;36] (target HA in [-12; +12])
         // case 2: JD in [Midnight - 12 (midday 1); Midnight + 12 (midday2)] frame ...
-
         final InstantInTime lst0 = findLst0(this.jdMidnight - HALF_LST_DAY_IN_JD);
 
         this.jdLst0 = lst0.jd;
@@ -332,7 +330,6 @@ public final class AstroSkyCalc {
          * - month is in range [0;11] in java Calendar
          * - milliseconds are set to 0 to be able to compare date instances
          */
-
         // The default TimeZone is already set to GMT :
         final Calendar calendar;
         if (useLst) {
@@ -434,10 +431,8 @@ public final class AstroSkyCalc {
         // 3. HA are in range [-12;12]
         // LST frame is in range [-12;36]
         // For midnight : in range [-24;48]
-
         // As target azEl is determined using JD and not LST (angle / decimal hours), it
         // requires to have bigger LST range.
-
         // Translates sun times (-1,1,2 days) only:
         final AstroAlmanac almanac = new AstroAlmanac();
 
@@ -456,12 +451,9 @@ public final class AstroSkyCalc {
         // MIDNIGHT + 2DAY :
         AstroAlmanac.translate(2d * LST_DAY_IN_JD, refTimes, sunTimes);
 
-
         // Hack on moon to have still fake moon ranges (rise / set):
         // findMoonRiseSet returns ranges if (rise / set) couples are present!
-
         // note: will be helpful as moon distance check is implemented to avoid calculations when moon is set !
-
         // MOON:
         refTimes = almanacNight.getMoonTimes();
         final Set<AstroAlmanacTime> moonTimes = almanac.getMoonTimes();
@@ -518,7 +510,6 @@ public final class AstroSkyCalc {
      * @return list of jd ranges when moon is over the horizon
      */
     public List<Range> findMoonRiseSet(final AstroAlmanac almanac, final double jdLower, final double jdUpper) {
-
         final double jd0 = jdLower - HALF_LST_DAY_IN_JD;
         final double jd1 = jdUpper + HALF_LST_DAY_IN_JD;
 
@@ -602,6 +593,34 @@ public final class AstroSkyCalc {
     }
 
     /**
+     * Convert HA ranges to JD ranges from the given list into the destination list
+     * @param ranges HA range list to convert
+     * @param destRanges JD range list to append into
+     * @param precRA precessed target right ascension in decimal hours
+     */
+    public void convertHAToJDRanges(final List<Range> ranges, final List<Range> destRanges, final double precRA) {
+        if (ranges != null) {
+            for (int i = 0, size = ranges.size(); i < size; i++) {
+                destRanges.add(convertHAToJDRange(ranges.get(i), precRA));
+            }
+        }
+    }
+
+    /**
+     * Convert HA ranges to JD ranges from the given list of ranges list into the destination list
+     * @param rangesList list of HA ranges list to convert
+     * @param destRanges JD range list to append into
+     * @param precRA precessed target right ascension in decimal hours
+     */
+    public void convertHAToJDRangesList(final List<List<Range>> rangesList, final List<Range> destRanges, final double precRA) {
+        if (rangesList != null) {
+            for (int i = 0, size = rangesList.size(); i < size; i++) {
+                convertHAToJDRanges(rangesList.get(i), destRanges, precRA);
+            }
+        }
+    }
+
+    /**
      * Convert an HA range to a JD range.
      * Returned JD values are in range [LST0 - 12; LST0 + 12]
      *
@@ -630,13 +649,30 @@ public final class AstroSkyCalc {
     }
 
     /**
+     * Convert JD ranges to HA ranges from the given list into the destination list
+     * @param ranges JD range list to convert
+     * @param destRanges HA range list to append into
+     * @param precRA precessed target right ascension in decimal hours
+     */
+    public void convertJDToHARanges(final List<Range> ranges, final List<Range> destRanges, final double precRA) {
+        if (ranges != null) {
+            Range rangeHA;
+            for (int i = 0, size = ranges.size(); i < size; i++) {
+                rangeHA = convertJDToHARange(ranges.get(i), precRA);
+                if (rangeHA != null) {
+                    destRanges.add(rangeHA);
+                }
+            }
+        }
+    }
+
+    /**
      * Convert a JD range to an HA range but keep only ranges with an HA in [-12;12]
      * @param rangeJD JD range
      * @param precRA precessed target right ascension in decimal hours
      * @return HA range in [-12;12]
      */
     public Range convertJDToHARange(final Range rangeJD, final double precRA) {
-
         final double jd1 = rangeJD.getMin();
         final double jd2 = rangeJD.getMax();
 
@@ -649,7 +685,6 @@ public final class AstroSkyCalc {
         double ha2 = convertJDToHA(jd2, precRA);
 
         // TODO: check modulo 24H ???
-
         if (ha1 < AsproConstants.HA_MIN) {
             ha1 = AsproConstants.HA_MIN;
         }
