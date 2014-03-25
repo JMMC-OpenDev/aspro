@@ -19,6 +19,8 @@ a=["E6","AE","AC","AN","AW","W7"]
 # naming convention: east -> AE -> AC -> AN-> north -> AW -> west
 # to avoid too many configuration => only E6 AE AC AN AW W7
 
+#VLTI:
+#a=["A0", "A1", "B0", "B1", "B2", "B3", "B4", "B5", "C0", "C1", "C2", "C3", "D0", "D1", "D2", "E0", "G0", "G1", "G2", "H0", "I1", "J1", "J2", "J3", "J4", "J5", "J6", "K0", "L0", "M0", "U1", "U2", "U3", "U4"]
 
 nbStations=len(a)
 
