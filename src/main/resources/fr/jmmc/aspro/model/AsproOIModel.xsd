@@ -1303,6 +1303,14 @@
                 </xsd:annotation>
             </xsd:element>
 
+            <xsd:element name="delayLineRestriction" type="DelayLineRestriction" minOccurs="0" maxOccurs="unbounded">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        The optional delay line constraints for this interferometer (VLTI VCM restrictions)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
             <xsd:element name="switchyard" type="SwitchYard" minOccurs="0">
                 <xsd:annotation>
                     <xsd:documentation>
@@ -1767,19 +1775,11 @@
                     </xsd:appinfo>
                 </xsd:annotation>
             </xsd:element>
-            <xsd:element name="maximumThrowLow" type="xsd:double" minOccurs="0">
+            <xsd:element name="delayLineThrow" type="DelayLineRestrictionThrow" minOccurs="0" maxOccurs="unbounded">
                 <xsd:annotation>
                     <xsd:documentation>
                         Optional maximum throw in m (optical round drip i.e. 2 times the delay line position)
-                        corresponding to the lower constraint on this link (VCM on VLTI)
-                    </xsd:documentation>
-                </xsd:annotation>
-            </xsd:element>
-            <xsd:element name="maximumThrowHigh" type="xsd:double" minOccurs="0">
-                <xsd:annotation>
-                    <xsd:documentation>
-                        Optional maximum throw in m (optical round drip i.e. 2 times the delay line position)
-                        corresponding to the upper constraint on this link (VCM on VLTI)
+                        corresponding to a delay line restriction for this channel link (VCM on VLTI)
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
@@ -1825,6 +1825,67 @@
                 </xsd:annotation>
             </xsd:element>
         </xsd:sequence>
+    </xsd:complexType>
+
+
+
+
+    <!-- DelayLineRestriction -->
+    <xsd:complexType name="DelayLineRestriction">
+        <xsd:annotation>
+            <xsd:documentation>
+                This type describes a delay line constraint of the interferometer
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:sequence>
+            <xsd:element name="name" type="xsd:ID">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Delay line restriction identifier ('VCM_2_5' ...)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element name="description" type="xsd:string">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Short description related to this delay line restriction (VLTI VCM pressure value)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
+
+
+
+
+    <!-- DelayLineRestrictionThrow -->
+    <xsd:complexType name="DelayLineRestrictionThrow">
+        <xsd:annotation>
+            <xsd:documentation>
+                This type describes the specific delay line throw associated to a delay line restriction
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:simpleContent>
+            <xsd:extension base="xsd:double">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Maximum throw in m (optical round drip i.e. 2 times the delay line position)
+                    </xsd:documentation>
+                </xsd:annotation>
+                <xsd:attribute name="restriction" use="required" type="xsd:IDREF">
+                    <xsd:annotation>
+                        <xsd:documentation>
+                            The delay line restriction associated to this delay line throw
+                        </xsd:documentation>
+                        <xsd:appinfo>
+                            <jaxb:property>
+                                <jaxb:baseType name="DelayLineRestriction" />
+                            </jaxb:property>
+                        </xsd:appinfo>
+                    </xsd:annotation>
+                </xsd:attribute>
+            </xsd:extension>
+        </xsd:simpleContent>
     </xsd:complexType>
 
 

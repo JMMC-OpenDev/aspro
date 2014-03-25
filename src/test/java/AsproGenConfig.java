@@ -107,11 +107,14 @@ public final class AsproGenConfig {
      * vlti_vcm_limit.txt: [Tel DL1 DL2 DL3 DL4 LD5 DL6] = station | DL pos (m) in range [0;60]
      *
      * @param absFileOPL absolute file path to the VLTI OPL file
-     * @param absFileVcmLow absolute file path to the VLTI VCM file for weak constraint (2.5 bar)
-     * @param absFileVcmHigh absolute file path to the VLTI VCM file for soft constraint (3.0 bar)
+     * @param absFileVcm1 absolute file path to the VLTI VCM file for low value (2.5 bar)
+     * @param absFileVcm2 absolute file path to the VLTI VCM file for med. value (2.75 bar)
+     * @param absFileVcm3 absolute file path to the VLTI VCM file for high value (3.0 bar)
      */
-    private static void generateSwitchYard(final String absFileOPL, final String absFileVcmLow, final String absFileVcmHigh) {
-        logger.info("convertSwitchYard: " + absFileOPL + ", " + absFileVcmLow + ", " + absFileVcmHigh);
+    private static void generateSwitchYard(final String absFileOPL,
+                                           final String absFileVcm1, final String absFileVcm2, final String absFileVcm3) {
+
+        logger.info("convertSwitchYard: " + absFileOPL + ", " + absFileVcm1 + ", " + absFileVcm3);
 
         final StringBuilder sb = new StringBuilder(16384);
         sb.append("<switchyard>\n");
@@ -127,31 +130,36 @@ public final class AsproGenConfig {
 
         // load data from file :
         BufferedReader readerOPL = null;
-        BufferedReader readerVcmLow = null;
-        BufferedReader readerVcmHigh = null;
+        BufferedReader readerVcm1 = null;
+        BufferedReader readerVcm2 = null;
+        BufferedReader readerVcm3 = null;
         try {
             readerOPL = new BufferedReader(new FileReader(new File(absFileOPL)));
-            readerVcmLow = new BufferedReader(new FileReader(new File(absFileVcmLow)));
-            readerVcmHigh = new BufferedReader(new FileReader(new File(absFileVcmHigh)));
+            readerVcm1 = new BufferedReader(new FileReader(new File(absFileVcm1)));
+            readerVcm2 = new BufferedReader(new FileReader(new File(absFileVcm2)));
+            readerVcm3 = new BufferedReader(new FileReader(new File(absFileVcm3)));
 
             int i, ip, idx;
-            String lineOPL, lineVcmLow, lineVcmHigh;
+            String lineOPL, lineVcm1, lineVcm2, lineVcm3;
             StringTokenizer tok;
             // outputs :
             String station, stationVcm, channel;
-            double oplFixed, maxDLPupilThrowLow, maxDLPupilThrowHigh;
+            double oplFixed, maxDLPupilThrow;
             final double[] oplDL = new double[maxDL];
-            final double[] maxDLThrowVcmLow = new double[maxDL * maxIP];
-            final double[] maxDLThrowVcmHigh = new double[maxDL * maxIP];
+            final double[] maxDLThrowVcm1 = new double[maxDL * maxIP];
+            final double[] maxDLThrowVcm2 = new double[maxDL * maxIP];
+            final double[] maxDLThrowVcm3 = new double[maxDL * maxIP];
             double opl;
 
             while ((lineOPL = readerOPL.readLine()) != null
-                    && (lineVcmLow = readerVcmLow.readLine()) != null
-                    && (lineVcmHigh = readerVcmHigh.readLine()) != null) {
+                    && (lineVcm1 = readerVcm1.readLine()) != null
+                    && (lineVcm2 = readerVcm2.readLine()) != null
+                    && (lineVcm3 = readerVcm3.readLine()) != null) {
 
                 if (lineOPL.startsWith("#")
-                        || lineVcmLow.startsWith("#")
-                        || lineVcmHigh.startsWith("#")) {
+                        || lineVcm1.startsWith("#")
+                        || lineVcm2.startsWith("#")
+                        || lineVcm3.startsWith("#")) {
                     continue;
                 }
 
@@ -173,8 +181,8 @@ public final class AsproGenConfig {
                     i++;
                 }
 
-                /* parse VCM Low threshold */
-                tok = new StringTokenizer(lineVcmLow, delimiter);
+                /* parse VCM threshold 1 */
+                tok = new StringTokenizer(lineVcm1, delimiter);
                 i = 0;
                 while (tok.hasMoreTokens()) {
                     if (i == 0) {
@@ -184,16 +192,16 @@ public final class AsproGenConfig {
                             throw new IllegalStateException("station mismatch [" + stationVcm + " <> " + station + "] !");
                         }
                     } else {
-                        if (i > maxDLThrowVcmLow.length) {
+                        if (i > maxDLThrowVcm1.length) {
                             break;
                         }
-                        maxDLThrowVcmLow[i - 1] = Double.parseDouble(tok.nextToken());
+                        maxDLThrowVcm1[i - 1] = Double.parseDouble(tok.nextToken());
                     }
                     i++;
                 }
 
-                /* parse VCM High threshold */
-                tok = new StringTokenizer(lineVcmHigh, delimiter);
+                /* parse VCM threshold 2 */
+                tok = new StringTokenizer(lineVcm2, delimiter);
                 i = 0;
                 while (tok.hasMoreTokens()) {
                     if (i == 0) {
@@ -203,10 +211,29 @@ public final class AsproGenConfig {
                             throw new IllegalStateException("station mismatch [" + stationVcm + " <> " + station + "] !");
                         }
                     } else {
-                        if (i > maxDLThrowVcmHigh.length) {
+                        if (i > maxDLThrowVcm2.length) {
                             break;
                         }
-                        maxDLThrowVcmHigh[i - 1] = Double.parseDouble(tok.nextToken());
+                        maxDLThrowVcm2[i - 1] = Double.parseDouble(tok.nextToken());
+                    }
+                    i++;
+                }
+
+                /* parse VCM threshold 3 */
+                tok = new StringTokenizer(lineVcm3, delimiter);
+                i = 0;
+                while (tok.hasMoreTokens()) {
+                    if (i == 0) {
+                        // station name :
+                        stationVcm = tok.nextToken();
+                        if (!stationVcm.equals(station)) {
+                            throw new IllegalStateException("station mismatch [" + stationVcm + " <> " + station + "] !");
+                        }
+                    } else {
+                        if (i > maxDLThrowVcm3.length) {
+                            break;
+                        }
+                        maxDLThrowVcm3[i - 1] = Double.parseDouble(tok.nextToken());
                     }
                     i++;
                 }
@@ -238,36 +265,47 @@ public final class AsproGenConfig {
 
                                 idx = (i * maxIP) + (ip >> 1);
 
-                                maxDLPupilThrowLow = maxDLThrowVcmLow[idx];
-                                maxDLPupilThrowHigh = maxDLThrowVcmHigh[idx];
+                                /* corrected fixed OPL with IP switchyard: (ip-1)*0.12 for ip >= 1 */
+                                opl = oplFixed + 0.12d * ip;
 
-                                // skip blanking value for DL (-10000 or 0) :
-                                if ((maxDLPupilThrowLow > 0.0) && (maxDLPupilThrowHigh > 0.0)) {
+                                sb.append("<channelLink>\n");
 
-                                    /* corrected fixed OPL with IP switchyard: (ip-1)*0.12 for ip >= 1 */
-                                    opl = oplFixed + 0.12d * ip;
+                                /* Channel names are IPn */
+                                channel = "IP" + (ip + 1);
+                                channelSet.add(channel);
 
-                                    sb.append("<channelLink>\n");
+                                sb.append("<channel>").append(channel).append("</channel>\n");
+                                sb.append("<opticalLength>").append(trimTo4Digits(opl)).append("</opticalLength>\n");
 
-                                    /* Channel names are IPn */
-                                    channel = "IP" + (ip + 1);
-                                    channelSet.add(channel);
+                                /* delay line maximum throw to let VCM handle pupil */
+                                sb.append("<delayLine>DL").append((i + 1)).append("</delayLine>\n");
 
-                                    sb.append("<channel>").append(channel).append("</channel>\n");
-                                    sb.append("<opticalLength>").append(trimTo4Digits(opl)).append("</opticalLength>\n");
-
-                                    /* delay line maximum throw to let VCM handle pupil */
-                                    sb.append("<delayLine>DL").append((i + 1)).append("</delayLine>\n");
-
-                                    // skip blanking value for DL (10000 ie no constraint) :
-                                    if (maxDLPupilThrowLow < maximumThrow) {
-                                        sb.append("<maximumThrowLow>").append(trimTo4Digits(maxDLPupilThrowLow)).append("</maximumThrowLow>\n");
-                                    }
-                                    if (maxDLPupilThrowHigh < maximumThrow) {
-                                        sb.append("<maximumThrowHigh>").append(trimTo4Digits(maxDLPupilThrowHigh)).append("</maximumThrowHigh>\n");
-                                    }
-                                    sb.append("</channelLink>\n");
+                                // skip blanking values for IP/DL (10000 ie no constraint; -10000 ie invalid):
+                                maxDLPupilThrow = maxDLThrowVcm1[idx];
+                                if (maxDLPupilThrow >= maximumThrow) {
+                                    maxDLPupilThrow = maximumThrow;
                                 }
+                                if (maxDLPupilThrow > 0.0) {
+                                    sb.append("<delayLineThrow restriction=\"vcm1\">").append(trimTo4Digits(maxDLPupilThrow)).append("</delayLineThrow>\n");
+                                }
+
+                                maxDLPupilThrow = maxDLThrowVcm2[idx];
+                                if (maxDLPupilThrow >= maximumThrow) {
+                                    maxDLPupilThrow = maximumThrow;
+                                }
+                                if (maxDLPupilThrow > 0.0) {
+                                    sb.append("<delayLineThrow restriction=\"vcm2\">").append(trimTo4Digits(maxDLPupilThrow)).append("</delayLineThrow>\n");
+                                }
+
+                                maxDLPupilThrow = maxDLThrowVcm3[idx];
+                                if (maxDLPupilThrow >= maximumThrow) {
+                                    maxDLPupilThrow = maximumThrow;
+                                }
+                                if (maxDLPupilThrow > 0.0) {
+                                    sb.append("<delayLineThrow restriction=\"vcm3\">").append(trimTo4Digits(maxDLPupilThrow)).append("</delayLineThrow>\n");
+                                }
+
+                                sb.append("</channelLink>\n");
                             }
                         }
                     }
@@ -282,8 +320,9 @@ public final class AsproGenConfig {
             logger.error("IO failure", ioe);
         } finally {
             FileUtils.closeFile(readerOPL);
-            FileUtils.closeFile(readerVcmLow);
-            FileUtils.closeFile(readerVcmHigh);
+            FileUtils.closeFile(readerVcm1);
+            FileUtils.closeFile(readerVcm2);
+            FileUtils.closeFile(readerVcm3);
         }
 
         sb.append("</switchyard>\n");
@@ -1590,6 +1629,9 @@ public final class AsproGenConfig {
     }
 
     static double trimTo4Digits(final double value) {
+        if (Double.isNaN(value)) {
+            return value;
+        }
         return (Math.round(1e4d * value)) / 1e4d;
     }
 
@@ -1609,8 +1651,10 @@ public final class AsproGenConfig {
             case VLTI:
                 VLTIPosition();
 
-                generateSwitchYard(asproTestPath + "vlti_opl.txt",
+                generateSwitchYard(
+                        asproTestPath + "vlti_opl.txt",
                         asproTestPath + "vlti_vcm_limit_2.5bar.txt",
+                        asproTestPath + "vlti_vcm_limit_2.75bar.txt",
                         asproTestPath + "vlti_vcm_limit_3.0bar.txt");
 
                 final String[] vltStations = {
