@@ -150,43 +150,11 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link ChannelLink }
-     * 
-     */
-    public ChannelLink createChannelLink() {
-        return new ChannelLink();
-    }
-
-    /**
      * Create an instance of {@link FringeTracker }
      * 
      */
     public FringeTracker createFringeTracker() {
         return new FringeTracker();
-    }
-
-    /**
-     * Create an instance of {@link CalibratorInformations }
-     * 
-     */
-    public CalibratorInformations createCalibratorInformations() {
-        return new CalibratorInformations();
-    }
-
-    /**
-     * Create an instance of {@link BaseValue }
-     * 
-     */
-    public BaseValue createBaseValue() {
-        return new BaseValue();
-    }
-
-    /**
-     * Create an instance of {@link StationLinks }
-     * 
-     */
-    public StationLinks createStationLinks() {
-        return new StationLinks();
     }
 
     /**
@@ -198,27 +166,19 @@ public class ObjectFactory {
     }
 
     /**
+     * Create an instance of {@link StationLinks }
+     * 
+     */
+    public StationLinks createStationLinks() {
+        return new StationLinks();
+    }
+
+    /**
      * Create an instance of {@link HorizonProfile }
      * 
      */
     public HorizonProfile createHorizonProfile() {
         return new HorizonProfile();
-    }
-
-    /**
-     * Create an instance of {@link UserModel }
-     * 
-     */
-    public UserModel createUserModel() {
-        return new UserModel();
-    }
-
-    /**
-     * Create an instance of {@link Station }
-     * 
-     */
-    public Station createStation() {
-        return new Station();
     }
 
     /**
@@ -246,30 +206,6 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link TargetInformation }
-     * 
-     */
-    public TargetInformation createTargetInformation() {
-        return new TargetInformation();
-    }
-
-    /**
-     * Create an instance of {@link AzEl }
-     * 
-     */
-    public AzEl createAzEl() {
-        return new AzEl();
-    }
-
-    /**
-     * Create an instance of {@link Parameter }
-     * 
-     */
-    public Parameter createParameter() {
-        return new Parameter();
-    }
-
-    /**
      * Create an instance of {@link MoonPointingRestriction }
      * 
      */
@@ -294,14 +230,6 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link AdaptiveOptics }
-     * 
-     */
-    public AdaptiveOptics createAdaptiveOptics() {
-        return new AdaptiveOptics();
-    }
-
-    /**
      * Create an instance of {@link PopLink }
      * 
      */
@@ -315,22 +243,6 @@ public class ObjectFactory {
      */
     public FluxCondition createFluxCondition() {
         return new FluxCondition();
-    }
-
-    /**
-     * Create an instance of {@link StringValue }
-     * 
-     */
-    public StringValue createStringValue() {
-        return new StringValue();
-    }
-
-    /**
-     * Create an instance of {@link Position3D }
-     * 
-     */
-    public Position3D createPosition3D() {
-        return new Position3D();
     }
 
     /**
@@ -350,19 +262,123 @@ public class ObjectFactory {
     }
 
     /**
+     * Create an instance of {@link DelayLineRestrictionThrow }
+     * 
+     */
+    public DelayLineRestrictionThrow createDelayLineRestrictionThrow() {
+        return new DelayLineRestrictionThrow();
+    }
+
+    /**
+     * Create an instance of {@link DelayLine }
+     * 
+     */
+    public DelayLine createDelayLine() {
+        return new DelayLine();
+    }
+
+    /**
+     * Create an instance of {@link ChannelLink }
+     * 
+     */
+    public ChannelLink createChannelLink() {
+        return new ChannelLink();
+    }
+
+    /**
+     * Create an instance of {@link CalibratorInformations }
+     * 
+     */
+    public CalibratorInformations createCalibratorInformations() {
+        return new CalibratorInformations();
+    }
+
+    /**
+     * Create an instance of {@link BaseValue }
+     * 
+     */
+    public BaseValue createBaseValue() {
+        return new BaseValue();
+    }
+
+    /**
+     * Create an instance of {@link UserModel }
+     * 
+     */
+    public UserModel createUserModel() {
+        return new UserModel();
+    }
+
+    /**
+     * Create an instance of {@link DelayLineRestriction }
+     * 
+     */
+    public DelayLineRestriction createDelayLineRestriction() {
+        return new DelayLineRestriction();
+    }
+
+    /**
+     * Create an instance of {@link Station }
+     * 
+     */
+    public Station createStation() {
+        return new Station();
+    }
+
+    /**
+     * Create an instance of {@link TargetInformation }
+     * 
+     */
+    public TargetInformation createTargetInformation() {
+        return new TargetInformation();
+    }
+
+    /**
+     * Create an instance of {@link AzEl }
+     * 
+     */
+    public AzEl createAzEl() {
+        return new AzEl();
+    }
+
+    /**
+     * Create an instance of {@link Parameter }
+     * 
+     */
+    public Parameter createParameter() {
+        return new Parameter();
+    }
+
+    /**
+     * Create an instance of {@link AdaptiveOptics }
+     * 
+     */
+    public AdaptiveOptics createAdaptiveOptics() {
+        return new AdaptiveOptics();
+    }
+
+    /**
+     * Create an instance of {@link StringValue }
+     * 
+     */
+    public StringValue createStringValue() {
+        return new StringValue();
+    }
+
+    /**
+     * Create an instance of {@link Position3D }
+     * 
+     */
+    public Position3D createPosition3D() {
+        return new Position3D();
+    }
+
+    /**
      * Create an instance of {@link Pop }
      * 
      */
     public Pop createPop() {
         return new Pop();
-    }
-
-    /**
-     * Create an instance of {@link Telescope }
-     * 
-     */
-    public Telescope createTelescope() {
-        return new Telescope();
     }
 
     /**
@@ -374,19 +390,19 @@ public class ObjectFactory {
     }
 
     /**
+     * Create an instance of {@link Telescope }
+     * 
+     */
+    public Telescope createTelescope() {
+        return new Telescope();
+    }
+
+    /**
      * Create an instance of {@link FocalInstrument }
      * 
      */
     public FocalInstrument createFocalInstrument() {
         return new FocalInstrument();
-    }
-
-    /**
-     * Create an instance of {@link DelayLine }
-     * 
-     */
-    public DelayLine createDelayLine() {
-        return new DelayLine();
     }
 
 }

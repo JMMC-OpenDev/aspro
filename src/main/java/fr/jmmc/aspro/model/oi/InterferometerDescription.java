@@ -37,6 +37,7 @@ import fr.jmmc.aspro.model.OIBase;
  *         &lt;element name="station" type="{http://www.jmmc.fr/aspro-oi/0.1}Station" maxOccurs="unbounded"/>
  *         &lt;element name="channel" type="{http://www.jmmc.fr/aspro-oi/0.1}Channel" maxOccurs="unbounded" minOccurs="0"/>
  *         &lt;element name="delayLine" type="{http://www.jmmc.fr/aspro-oi/0.1}DelayLine" maxOccurs="unbounded"/>
+ *         &lt;element name="delayLineRestriction" type="{http://www.jmmc.fr/aspro-oi/0.1}DelayLineRestriction" maxOccurs="unbounded" minOccurs="0"/>
  *         &lt;element name="switchyard" type="{http://www.jmmc.fr/aspro-oi/0.1}SwitchYard" minOccurs="0"/>
  *         &lt;element name="pop" type="{http://www.jmmc.fr/aspro-oi/0.1}Pop" maxOccurs="unbounded" minOccurs="0"/>
  *         &lt;element name="fringeTracker" type="{http://www.jmmc.fr/aspro-oi/0.1}FringeTracker" maxOccurs="unbounded" minOccurs="0"/>
@@ -60,6 +61,7 @@ import fr.jmmc.aspro.model.OIBase;
     "stations",
     "channels",
     "delayLines",
+    "delayLineRestrictions",
     "switchyard",
     "pops",
     "fringeTrackers",
@@ -88,6 +90,8 @@ public class InterferometerDescription
     protected List<Channel> channels;
     @XmlElement(name = "delayLine", required = true)
     protected List<DelayLine> delayLines;
+    @XmlElement(name = "delayLineRestriction")
+    protected List<DelayLineRestriction> delayLineRestrictions;
     protected SwitchYard switchyard;
     @XmlElement(name = "pop")
     protected List<Pop> pops;
@@ -330,6 +334,35 @@ public class InterferometerDescription
             delayLines = new ArrayList<DelayLine>();
         }
         return this.delayLines;
+    }
+
+    /**
+     * Gets the value of the delayLineRestrictions property.
+     * 
+     * <p>
+     * This accessor method returns a reference to the live list,
+     * not a snapshot. Therefore any modification you make to the
+     * returned list will be present inside the JAXB object.
+     * This is why there is not a <CODE>set</CODE> method for the delayLineRestrictions property.
+     * 
+     * <p>
+     * For example, to add a new item, do as follows:
+     * <pre>
+     *    getDelayLineRestrictions().add(newItem);
+     * </pre>
+     * 
+     * 
+     * <p>
+     * Objects of the following type(s) are allowed in the list
+     * {@link DelayLineRestriction }
+     * 
+     * 
+     */
+    public List<DelayLineRestriction> getDelayLineRestrictions() {
+        if (delayLineRestrictions == null) {
+            delayLineRestrictions = new ArrayList<DelayLineRestriction>();
+        }
+        return this.delayLineRestrictions;
     }
 
     /**

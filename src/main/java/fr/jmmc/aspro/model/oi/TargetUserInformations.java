@@ -134,7 +134,6 @@ public class TargetUserInformations
    * @return display name
    */
   public final String getTargetDisplayName(final Target target) {
-
     String sValue = target.getName();
 
     if (isCalibrator(target)) {
@@ -301,7 +300,6 @@ public class TargetUserInformations
    * @param mapIDTargets Map<ID, Target> index
    */
   protected final void updateTargetReferences(final java.util.Map<String, Target> mapIDTargets) {
-
     // create the Map<ID, Target> index for calibrators :
     final java.util.Map<String, Target> mapIDCalibrators = new java.util.HashMap<String, Target>();
 
@@ -384,10 +382,7 @@ public class TargetUserInformations
     if (this.calibrators != null && !this.calibrators.isEmpty()) {
       return false;
     }
-    if (this.targetInfos != null && !this.targetInfos.isEmpty()) {
-      return false;
-    }
-    return true;
+    return this.targetInfos == null || this.targetInfos.isEmpty();
   }
 //--simple--preserve
 
