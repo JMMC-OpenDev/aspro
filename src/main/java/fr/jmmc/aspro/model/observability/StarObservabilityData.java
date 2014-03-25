@@ -43,10 +43,8 @@ public final class StarObservabilityData {
     private final List<DateTimeInterval> visible = new ArrayList<DateTimeInterval>(3);
     /** visible date intervals without soft limits (HA, moon, wind) */
     private List<DateTimeInterval> visibleNoSoftLimits = null;
-    /** visible date intervals with Vcm Low limits */
-    private List<DateTimeInterval> visibleVcmLowLimits = null;
-    /** visible date intervals with Vcm High limits */
-    private List<DateTimeInterval> visibleVcmHighLimits = null;
+    /** list of visible date intervals for every Vcm limits */
+    private List<List<DateTimeInterval>> visibleVcmLimits = null;
     /** transit date */
     private Date transitDate;
     /** sampled target positions (ha, az, el) keyed by date */
@@ -138,35 +136,19 @@ public final class StarObservabilityData {
     }
 
     /**
-     * Return the visible date intervals with Vcm Low limits
-     * @return visible date intervals with Vcm Low limits
+     * Return the list of visible date intervals for every Vcm limits
+     * @return list of visible date intervals for every Vcm limits
      */
-    public List<DateTimeInterval> getVisibleVcmLowLimits() {
-        return visibleVcmLowLimits;
+    public List<List<DateTimeInterval>> getVisibleVcmLimits() {
+        return visibleVcmLimits;
     }
 
     /**
-     * Return the visible date intervals with Vcm Low limits
-     * @param ranges visible date intervals with Vcm Low limits
+     * Return the list of visible date intervals for every Vcm limits
+     * @param rangesList list of visible date intervals for every Vcm limits
      */
-    public void setVisibleVcmLowLimits(final List<DateTimeInterval> ranges) {
-        visibleVcmLowLimits = ranges;
-    }
-
-    /**
-     * Return the visible date intervals with Vcm High limits
-     * @return visible date intervals with Vcm High limits
-     */
-    public List<DateTimeInterval> getVisibleVcmHighLimits() {
-        return visibleVcmHighLimits;
-    }
-
-    /**
-     * Return the visible date intervals with Vcm High limits
-     * @param ranges visible date intervals with Vcm High limits
-     */
-    public void setVisibleVcmHighLimits(final List<DateTimeInterval> ranges) {
-        visibleVcmHighLimits = ranges;
+    public void setVisibleVcmLimits(final List<List<DateTimeInterval>> rangesList) {
+        visibleVcmLimits = rangesList;
     }
 
     /**
