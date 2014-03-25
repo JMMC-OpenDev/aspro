@@ -401,7 +401,8 @@ public final class Range {
             final List<Range> results, final RangeFactory rangeFactory) {
 
         // use customized binary sort to be in-place (no memory usage):
-        // inspired from Arrays.sort but do not use tim sort as it makes array copies:
+        // inspired from Arrays.sort but do not use tim sort as it makes array copies 
+        // when size > threshold (~ 20 or 40 depending on JDK):
         binarySort(limits, 0, nLimits, countRunAndMakeAscending(limits, 0, nLimits));
 
         //  Explore range: when the running sum of flag is equal to the
@@ -415,11 +416,14 @@ public final class Range {
             s += limits[i].flag;
 
             if (s == nValid) {
-                if (mRanges == null) {
-                    // lazy instanciation (statically 1 range only) :
-                    mRanges = new ArrayList<Range>(1);
+                // ensure interval is not empty when finding intervals complement (nValid less than maximum)
+                if ((limits[i + 1].position - limits[i].position) > 0.0) {
+                    if (mRanges == null) {
+                        // lazy instanciation (statically 1 range only) :
+                        mRanges = new ArrayList<Range>(1);
+                    }
+                    mRanges.add(rangeFactory.valueOf(limits[i].position, limits[i + 1].position));
                 }
-                mRanges.add(rangeFactory.valueOf(limits[i].position, limits[i + 1].position));
             }
         }
 
