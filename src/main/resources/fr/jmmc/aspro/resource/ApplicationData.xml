@@ -17,8 +17,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="0.9.6 beta 3"/>
-    <compilation date="21/03/2014" compiler="JDK 1.6.0_24"/>
+    <program name="Aspro2" version="0.9.6 beta 4"/>
+    <compilation date="25/03/2014" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -186,9 +186,11 @@
 
     <releasenotes>
         <release version="0.9.6">
+            <prerelease version="0.9.6 beta 4">
+                <change type="FEATURE">Added proper handling of the VLTI VCM pressure constraint on the Observability plot using transparent overlays representing 2.5, 2.75 and 3.0 bar.
+                    It only indicates that the pupil may be not well corrected (flux / FoV loss); see Observability "Details" for more information</change>
+            </prerelease>
             <prerelease version="0.9.6 beta 3">
-                <change type="FEATURE">Added proper handling of the VLTI VCM pressure limit on observability plots using transparent overlays representing 2.5 and 3.0 bar
-                    to indicate that the pupil may be not well corrected (flux / FoV loss); see Observability "Details" for more information</change>
                 <change type="FEATURE">Added a new warning indicating that the VLTI VCM pressure is higher than 2.5 bar</change>
             </prerelease>
             <prerelease version="0.9.6 beta 2">
