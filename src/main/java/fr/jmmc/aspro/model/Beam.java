@@ -112,7 +112,7 @@ public final class Beam {
      */
     @Override
     public String toString() {
-        return "Beam : " + this.station + " - " + this.channel + " - " + this.delayLine + " = " + this.opticalPathLength
-                + " m - delayLineThrows = " + this.delayLineThrows;
+        return "Beam: " + this.station + " - " + this.channel + " - " + this.delayLine + " - OPL= " + this.opticalPathLength
+                + " - delayLineThrows = " + this.delayLineThrows;
     }
 }

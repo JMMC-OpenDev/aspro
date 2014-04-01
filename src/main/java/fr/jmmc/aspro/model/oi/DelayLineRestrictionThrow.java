@@ -91,4 +91,11 @@ public class DelayLineRestrictionThrow
         this.restriction = value;
     }
 
+//--simple--preserve
+  @Override
+  public final String toString() {
+    return "DLRestThrow : " + value;
+  }
+//--simple--preserve
+
 }
