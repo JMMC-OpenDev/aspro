@@ -3041,15 +3041,17 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
             }
         }
 
-        switch (event.getType()) {
-            case ChartProgressEvent.DRAWING_STARTED:
-                this.chartDrawStartTime = System.nanoTime();
-                break;
-            case ChartProgressEvent.DRAWING_FINISHED:
-                logger.info("Drawing chart time = {} ms.", 1e-6d * (System.nanoTime() - this.chartDrawStartTime));
-                this.chartDrawStartTime = 0l;
-                break;
-            default:
+        if (false) {
+            switch (event.getType()) {
+                case ChartProgressEvent.DRAWING_STARTED:
+                    this.chartDrawStartTime = System.nanoTime();
+                    break;
+                case ChartProgressEvent.DRAWING_FINISHED:
+                    logger.info("Drawing chart time = {} ms.", 1e-6d * (System.nanoTime() - this.chartDrawStartTime));
+                    this.chartDrawStartTime = 0l;
+                    break;
+                default:
+            }
         }
 
         // Perform custom operations before/after chart rendering:
