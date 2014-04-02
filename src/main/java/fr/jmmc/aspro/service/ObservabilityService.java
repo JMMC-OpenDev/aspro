@@ -162,7 +162,9 @@ public final class ObservabilityService {
     private double jdUpper;
     /** flag to enable the observability restriction due to the night */
     private boolean useNightLimit;
-    /** Night ranges defined in julian day */
+    /** Night ranges defined in julian day corresponding to the given date [0;24H] */
+    private List<Range> nightOnlyRanges = null;
+    /** Night ranges defined in julian day between [-12; +36H] */
     private List<Range> nightLimits = null;
     /** minimum of elevation to observe any target (deg) */
     private double minElev = Double.NaN;
@@ -413,6 +415,7 @@ public final class ObservabilityService {
         if (this.useNightLimit) {
             // initialize night limits anyway:
             this.nightLimits = new ArrayList<Range>(2);
+            this.nightOnlyRanges = new ArrayList<Range>(2);
 
             if (this.doCenterMidnight) {
                 final double jdMidnight = this.sc.getJdMidnight();
@@ -460,7 +463,7 @@ public final class ObservabilityService {
 
             // compute moon illumination over night:
             final List<Range> obsMoonRanges = new ArrayList<Range>(6);
-            obsMoonRanges.addAll(this.nightLimits);
+            obsMoonRanges.addAll(this.nightOnlyRanges);
             obsMoonRanges.addAll(moonRiseRanges);
 
             final List<Range> moonRanges = Range.intersectRanges(obsMoonRanges, 2, defaultRangeFactory);
@@ -470,7 +473,7 @@ public final class ObservabilityService {
             }
 
             // Moon filters:
-            // 1- use ranges in  [LST0 -12; LST0 + 36] over night ranges
+            // 1- use ranges in [LST0; LST0 + 24] over night ranges
             // 2- moon Illum in jdLower / jdUpper
             final double moonIllum = this.sc.getMaxMoonIllum(moonRanges);
 
@@ -2857,6 +2860,11 @@ public final class ObservabilityService {
                     if ((jdFrom >= jdLstLower && jdFrom <= jdLstUpper) || (jdTo >= jdLstLower && jdTo <= jdLstUpper)) {
                         this.nightLimits.add(new Range(jdFrom, jdTo));
                     }
+                    
+                    // Keep the night part inside or overlapping the range [jdLower; jdUpper] range used to compute moon illumination: */
+                    if ((jdFrom >= this.jdLower && jdFrom <= this.jdUpper) || (jdTo >= this.jdLower && jdTo <= this.jdUpper)) {
+                        this.nightOnlyRanges.add(new Range(Math.max(jdFrom, this.jdLower), Math.min(jdTo, this.jdUpper)));
+                    }
                 }
 
                 // Keep intervals that are inside or overlapping the range [jdLower; jdUpper] range :
@@ -2879,9 +2887,11 @@ public final class ObservabilityService {
 
             // merge contiguous intervals (already ordered):
             Range.union(this.nightLimits);
+            Range.union(this.nightOnlyRanges);
 
             if (isDebug) {
                 logger.debug("nightLimits: {}", this.nightLimits);
+                logger.debug("nightOnlyRanges: {}", this.nightOnlyRanges);
             }
         }
 

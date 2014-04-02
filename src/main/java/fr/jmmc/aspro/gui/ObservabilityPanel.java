@@ -66,6 +66,8 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -216,6 +218,8 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
     private int plotNonDataHeight = 100;
     /** 24h date formatter like in france */
     private final DateFormat timeFormatter = DateFormat.getTimeInstance(DateFormat.SHORT, Locale.FRANCE);
+    /** double formatter for Moon illumination */
+    private final NumberFormat df1 = new DecimalFormat("0.0");
     /** timeline marker */
     private ValueMarker timeMarker = null;
     /** flag to enable / disable the automatic refresh of the plot when any swing component changes */
@@ -1132,10 +1136,12 @@ public final class ObservabilityPanel extends javax.swing.JPanel implements Char
 
             if (!doBaseLineLimits && (observation.getWhen().isNightRestriction() || !useLST)) {
                 // date and moon FLI :
-                ChartUtils.addSubtitle(this.chart, "Day: " + observation.getWhen().getDate().toString()
-                        + (observation.getWhen().isNightRestriction()
-                        ? " - Moon = " + (int) Math.round(obsData.getMoonIllumPercent()) + "%"
-                        : ""));
+                sb.setLength(0);
+                sb.append("Day: ").append(observation.getWhen().getDate().toString());
+                if (observation.getWhen().isNightRestriction()) {
+                    sb.append(" - Moon = ").append(FormatterUtils.format(this.df1, obsData.getMoonIllumPercent())).append('%');
+                }
+                ChartUtils.addSubtitle(this.chart, sb.toString());
             }
 
             final String dateAxisLabel;
