@@ -1929,6 +1929,8 @@ public final class ObservabilityService {
      */
     private List<Range> checkMoonRestriction(final Target target, final double precDEC, final Range jdRiseSet) {
 
+        // Note: as JD ranges are in [LST0 -12; LST0 + 36], the moon position can correspond to the previous or following night !
+        
         // get FLI on current night:
         final double fli = this.data.getMoonIllumPercent();
 
