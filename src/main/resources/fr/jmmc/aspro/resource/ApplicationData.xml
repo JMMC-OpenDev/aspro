@@ -17,8 +17,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="0.9.6 beta 4"/>
-    <compilation date="25/03/2014" compiler="JDK 1.6.0_24"/>
+    <program name="Aspro2" version="0.9.6 beta 5"/>
+    <compilation date="03/04/2014" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -186,15 +186,23 @@
 
     <releasenotes>
         <release version="0.9.6">
+            <prerelease version="0.9.6 beta 5">
+                <change type="FEATURE">Added the 'use inst. &amp; cal. error bias' checkbox on the UV coverage panel to enable or disable
+                    using instrumental visibility / phase &amp; calibration bias in noise modelling (OIFits data);
+                    if disabled, only the theoretical instrumental noise is estimated</change>
+                <change type="BUGFIX">Fixed Noise modeling: visibility and calibration bias (percents) are interpreted as peak to peak values (4 sigma):
+                    minimal vis2 error is divided by 4 and the vis2 dispersion (with added error noise) is compatible with bias values</change>
+                <change type="BUGFIX">Fixed the Moon illumination fraction (FLI) according to the coming night</change>
+            </prerelease>
             <prerelease version="0.9.6 beta 4">
-                <change type="FEATURE">Added proper handling of the VLTI VCM pressure constraint on the Observability plot using transparent overlays representing 2.5, 2.75 and 3.0 bar.
+                <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/500">Added proper handling of the VLTI VCM pressure constraint on the Observability plot using transparent overlays representing 2.5, 2.75 and 3.0 bar.
                     It only indicates that the pupil may be not well corrected (flux / FoV loss); see Observability "Details" for more information</change>
             </prerelease>
             <prerelease version="0.9.6 beta 3">
                 <change type="FEATURE">Added a new warning indicating that the VLTI VCM pressure is higher than 2.5 bar</change>
             </prerelease>
             <prerelease version="0.9.6 beta 2">
-                <change type="FEATURE">Improved Aspro configuration to associate a delay line and a channel to each station and describe VLTI setup more accurately</change>
+                <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/538">Improved the interferometer configuration to associate a delay line and a channel to each station and describe VLTI setup more accurately (switchyard)</change>
             </prerelease>
             <prerelease version="0.9.6 beta 1">
                 <change type="FEATURE" url="http://trac.jmmc.fr/jmmc-sw/ticket/533">Modified position editor (rho / theta) to use astronomical convention (separation / position angle)</change>
