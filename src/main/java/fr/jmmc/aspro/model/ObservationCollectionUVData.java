@@ -32,7 +32,7 @@ public final class ObservationCollectionUVData extends ObservationCollectionObsD
      * @param uvDataList UV Coverage data
      */
     public ObservationCollectionUVData(final ObservationCollection obsCollection,
-            final List<ObservabilityData> obsDataList, final List<UVCoverageData> uvDataList) {
+                                       final List<ObservabilityData> obsDataList, final List<UVCoverageData> uvDataList) {
         super(obsCollection, obsDataList);
         this.uvDataList = uvDataList;
     }
@@ -119,7 +119,7 @@ public final class ObservationCollectionUVData extends ObservationCollectionObsD
         // note: OIFitsCreatorService parameter dependencies:
         // observation {target, instrumentMode {lambdaMin, lambdaMax, nSpectralChannels}}
         // obsData {beams, baseLines, starData, sc (DateCalc)}
-        // parameter: doDataNoise
+        // parameter: supersamplingOIFits, doDataNoise, useInstrumentBias
         // results: computeObservableUV {HA, targetUVObservability} {obsData + observation{haMin/haMax, instrumentMode {lambdaMin, lambdaMax}}}
         // and warning container
 
@@ -127,8 +127,9 @@ public final class ObservationCollectionUVData extends ObservationCollectionObsD
         // - check same target
         // - check observation (target and UV version includes main version)
         // - check obsData (main version)
+        // - check supersamplingOIFits
         // - check doNoise: noiseService.isDoNoise()
-
+        // - check useInstrumentBias: noiseService.isUseInstrumentBias()
         if (!getTargetName().equals(uvDataCollection.getTargetName())) {
             return false;
         }
@@ -147,13 +148,16 @@ public final class ObservationCollectionUVData extends ObservationCollectionObsD
         final OIFitsCreatorService other = uvDataCollection.getFirstUVData().getOiFitsCreator();
 
         if (current != null && other != null) {
-            if (current.isDoNoise() != other.isDoNoise()) {
-                return false;
-            }
             if (current.getSupersamplingOIFits() != other.getSupersamplingOIFits()) {
                 return false;
             }
             if (current.getMathModeOIFits() != other.getMathModeOIFits()) {
+                return false;
+            }
+            if (current.isDoNoise() != other.isDoNoise()) {
+                return false;
+            }
+            if (current.isUseInstrumentBias() != other.isUseInstrumentBias()) {
                 return false;
             }
         }

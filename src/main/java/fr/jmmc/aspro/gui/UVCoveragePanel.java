@@ -142,7 +142,7 @@ import org.slf4j.LoggerFactory;
  * @author bourgesl
  */
 public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolTipGenerator, ChartProgressListener, ZoomEventListener,
-        ActionListener, ChangeListener, ObservationListener, Observer, UserModelAnimator.UserModelAnimatorListener, PDFExportable, Disposable {
+                                                                         ActionListener, ChangeListener, ObservationListener, Observer, UserModelAnimator.UserModelAnimatorListener, PDFExportable, Disposable {
 
     /** default serial UID for Serializable interface */
     private static final long serialVersionUID = 1L;
@@ -300,8 +300,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         animatorPanel = new AnimatorPanel(this, false);
         jSeparator1 = new javax.swing.JSeparator();
         jCheckBoxDoOIFits = new javax.swing.JCheckBox();
-        jCheckBoxAddNoise = new javax.swing.JCheckBox();
         jPanelSpacer = new javax.swing.JPanel();
+        jCheckBoxAddNoise = new javax.swing.JCheckBox();
+        jCheckBoxUseBias = new javax.swing.JCheckBox();
 
         setLayout(new java.awt.BorderLayout());
 
@@ -568,8 +569,19 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         jPanelLeft.add(jCheckBoxDoOIFits, gridBagConstraints);
 
+        jPanelSpacer.setMinimumSize(new java.awt.Dimension(1, 1));
+        jPanelSpacer.setPreferredSize(new java.awt.Dimension(1, 1));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 30;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weighty = 0.1;
+        jPanelLeft.add(jPanelSpacer, gridBagConstraints);
+
         jCheckBoxAddNoise.setSelected(true);
         jCheckBoxAddNoise.setText("Add error noise to data");
+        jCheckBoxAddNoise.setToolTipText("add gaussian noise to simulated data according to the estimated error");
         jCheckBoxAddNoise.setName("jCheckBoxAddNoise"); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -578,15 +590,16 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         jPanelLeft.add(jCheckBoxAddNoise, gridBagConstraints);
 
-        jPanelSpacer.setMinimumSize(new java.awt.Dimension(1, 1));
-        jPanelSpacer.setPreferredSize(new java.awt.Dimension(1, 1));
+        jCheckBoxUseBias.setSelected(true);
+        jCheckBoxUseBias.setText("Use inst. & cal. error bias");
+        jCheckBoxUseBias.setToolTipText("if enabled, correct error with both instrumental visibility / phase biases and calibration bias");
+        jCheckBoxUseBias.setName("jCheckBoxUseBias"); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 29;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weighty = 0.1;
-        jPanelLeft.add(jPanelSpacer, gridBagConstraints);
+        jPanelLeft.add(jCheckBoxUseBias, gridBagConstraints);
 
         jScrollPaneForm.setViewportView(jPanelLeft);
 
@@ -768,7 +781,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         vAxisMeter.setTickLabelFont(ChartUtils.DEFAULT_TITLE_FONT);
         vAxisMeter.setTickMarkPaint(Color.BLACK);
         this.xyPlot.setRangeAxis(1, vAxisMeter);
-        
+
         // add listener :
         this.chart.addProgressListener(this);
         this.chartPanel = ChartUtils.createSquareChartPanel(this.chart, true); // show tooltips
@@ -871,6 +884,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         this.jCheckBoxAddNoise.setSelected(this.myPreferences.getPreferenceAsBoolean(Preferences.OIFITS_ADD_NOISE));
         this.jCheckBoxAddNoise.addActionListener(this);
 
+        this.jCheckBoxUseBias.addActionListener(this);
+        
         // hide animator panel at startup:
         this.animatorPanel.setVisible(false);
 
@@ -1148,11 +1163,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                 logger.debug("image mode changed: {}", this.jComboBoxImageMode.getSelectedItem());
             }
             refreshPlot();
-        } else if (e.getSource() == this.jCheckBoxAddNoise) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("do noise: {}", this.jCheckBoxAddNoise.isSelected());
-            }
-            refreshPlot();
         } else if (e.getSource() == this.jCheckBoxDoOIFits) {
             if (logger.isDebugEnabled()) {
                 logger.debug("do OIFits: {}", this.jCheckBoxDoOIFits.isSelected());
@@ -1171,6 +1181,16 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                     }
                 }
             }
+        } else if (e.getSource() == this.jCheckBoxAddNoise) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("do noise: {}", this.jCheckBoxAddNoise.isSelected());
+            }
+            refreshPlot();
+        } else if (e.getSource() == this.jCheckBoxUseBias) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("use bias: {}", this.jCheckBoxUseBias.isSelected());
+            }
+            refreshPlot();
         }
     }
 
@@ -1334,7 +1354,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         }
 
         // Refresh the UI widgets related to Observation Main changes :
-
         // disable the automatic update observation :
         final boolean prevAutoUpdateObservation = this.setAutoUpdateObservation(false);
         // disable the automatic refresh :
@@ -1355,7 +1374,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         }
 
         // Update Observation :
-
         // check if the automatic update flag is enabled :
         if (this.doAutoUpdateObservation) {
             if (DEBUG_UPDATE_EVENT) {
@@ -1509,7 +1527,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
             // avoid to mix inconsistent observation and observability data :
             // Next plot (observability done event) will take into account UI widget changes.
-
             if (obsData.getVersion().isSameMainVersion(obsCollection.getVersion())) {
                 if (logger.isDebugEnabled()) {
                     logger.debug("refreshPlot: main version equals: {} :: {}", obsData.getVersion(), obsCollection.getVersion());
@@ -1547,17 +1564,16 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         }
 
         // Note : version checks are already done in refreshPlot(observation) :
-
         // check if observability data are available :
         if (this.getObservabilityData() != null) {
 
             /* get plot options from swing components */
-
             final String targetName = getSelectedTargetName();
 
             final double uvMax = this.uvMaxAdapter.getValue();
             final boolean doUVSupport = this.jCheckBoxPlotUVSupport.isSelected();
             final boolean doOIFits = this.jCheckBoxDoOIFits.isSelected();
+            final boolean useInstrumentBias = this.jCheckBoxUseBias.isSelected();
             final boolean doDataNoise = this.jCheckBoxAddNoise.isSelected();
             final boolean doModelImage = this.jCheckBoxModelImage.isSelected();
 
@@ -1567,8 +1583,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
             // Use model image Preferences :
             final int imageSize = this.myPreferences.getPreferenceAsInt(Preferences.MODEL_IMAGE_SIZE);
             final String modelImageLut = this.myPreferences.getPreference(Preferences.MODEL_IMAGE_LUT);
-            final IndexColorModel colorModel =
-                    (imageMode != ImageMode.PHASE) ? ColorModels.getColorModel(modelImageLut) : ColorModels.getCyclicColorModel(modelImageLut);
+            final IndexColorModel colorModel = (imageMode != ImageMode.PHASE) ? ColorModels.getColorModel(modelImageLut)
+                    : ColorModels.getCyclicColorModel(modelImageLut);
             final ColorScale colorScale = this.myPreferences.getImageColorScale();
             final boolean doImageNoise = this.myPreferences.getPreferenceAsBoolean(Preferences.MODEL_IMAGE_NOISE);
 
@@ -1584,8 +1600,9 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
             // Create uv coverage task worker :
             // Cancel other tasks and execute this new task :
-            new UVCoverageSwingWorker(this, obsCollection, this.getObservabilityData(), targetName,
-                    uvMax, doUVSupport, doOIFits, doDataNoise, doModelImage, imageMode, imageSize, colorModel, colorScale, doImageNoise,
+            new UVCoverageSwingWorker(this, obsCollection, this.getObservabilityData(), targetName, uvMax, 
+                    doUVSupport, doOIFits, useInstrumentBias, doDataNoise, 
+                    doModelImage, imageMode, imageSize, colorModel, colorScale, doImageNoise,
                     this.imageIndex, supersamplingOIFits, mathModeOIFits, currentUVMapData).executeTask();
 
         } // observability data check
@@ -1609,6 +1626,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         private final boolean doUVSupport;
         /** flag to compute OIFits */
         private final boolean doOIFits;
+        /** true to use instrument bias; false to compute only theoretical error */
+        private final boolean useInstrumentBias;
         /** flag to add gaussian noise to OIFits data */
         private final boolean doDataNoise;
         /** flag to compute the model image */
@@ -1642,6 +1661,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
          * @param uvMax U-V max in meter
          * @param doUVSupport flag to compute the UV support
          * @param doOIFits flag to compute OIFits
+         * @param useInstrumentBias true to use instrument bias; false to compute only theoretical error
          * @param doDataNoise enable data noise
          * @param doModelImage flag to compute the model image
          * @param imageMode image mode (amplitude or phase)
@@ -1655,12 +1675,14 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
          * @param currentUVMapData previously computed UV Map Data
          */
         private UVCoverageSwingWorker(final UVCoveragePanel uvPanel, final ObservationCollection obsCollection,
-                final List<ObservabilityData> obsDataList, final String targetName,
-                final double uvMax, final boolean doUVSupport, final boolean doOIFits, final boolean doDataNoise,
-                final boolean doModelImage, final ImageMode imageMode, final int imageSize,
-                final IndexColorModel colorModel, final ColorScale colorScale, final boolean doImageNoise,
-                final int imageIndex, final int supersamplingOIFits, final UserModelService.MathMode mathModeOIFits,
-                final UVMapData currentUVMapData) {
+                                      final List<ObservabilityData> obsDataList, final String targetName,
+                                      final double uvMax, final boolean doUVSupport, final boolean doOIFits,
+                                      final boolean useInstrumentBias, final boolean doDataNoise,
+                                      final boolean doModelImage, final ImageMode imageMode, final int imageSize,
+                                      final IndexColorModel colorModel, final ColorScale colorScale, final boolean doImageNoise,
+                                      final int imageIndex, final int supersamplingOIFits, final UserModelService.MathMode mathModeOIFits,
+                                      final UVMapData currentUVMapData) {
+
             // get current observation version :
             super(AsproTaskRegistry.TASK_UV_COVERAGE, obsCollection);
             this.uvPanel = uvPanel;
@@ -1669,6 +1691,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
             this.uvMax = uvMax;
             this.doUVSupport = doUVSupport;
             this.doOIFits = doOIFits;
+            this.useInstrumentBias = useInstrumentBias;
             this.doDataNoise = doDataNoise;
             this.doModelImage = doModelImage;
             this.imageMode = imageMode;
@@ -1691,7 +1714,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         public ObservationCollectionUVData computeInBackground() {
 
             // TODO: externalize NoiseService and OIFitsCreatorService from UVCoverageService (IMPORTANT)
-
             // Start the computations :
             final long start = System.nanoTime();
 
@@ -1710,7 +1732,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
                 // compute the uv coverage data :
                 uvDataList.add(new UVCoverageService(observation, obsData, targetName, this.uvMax, this.doUVSupport,
-                        this.doDataNoise, this.supersamplingOIFits, this.mathModeOIFits).compute());
+                        this.useInstrumentBias, this.doDataNoise, this.supersamplingOIFits, this.mathModeOIFits).compute());
 
                 // fast interrupt :
                 if (Thread.currentThread().isInterrupted()) {
@@ -1754,7 +1776,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                     // Check if the previously computed UV Map Data is still valid :
                     if (this.currentUVMapData != null
                             && this.currentUVMapData.isValid(targetName, targetVersion, uvRect,
-                            this.imageMode, this.imageSize, this.colorModel, this.colorScale, imageIdx, noiseService)) {
+                                    this.imageMode, this.imageSize, this.colorModel, this.colorScale, imageIdx, noiseService)) {
 
                         _logger.debug("Reuse model image.");
 
@@ -1988,15 +2010,16 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                 // note: OIFitsCreatorService parameter dependencies:
                 // observation {target, instrumentMode {lambdaMin, lambdaMax, nSpectralChannels}}
                 // obsData {beams, baseLines, starData, sc (DateCalc)}
-                // parameter: doDataNoise
+                // parameter: supersamplingOIFits, doDataNoise, useInstrumentBias
                 // results: computeObservableUV {HA, targetUVObservability} {obsData + observation{haMin/haMax, instrumentMode {lambdaMin, lambdaMax}}}
                 // and warning container
 
                 // check if computation needed:
                 // - check observation (UV version includes main version)
                 // - check obsData (main version)
+                // - check supersamplingOIFits
                 // - check doNoise: noiseService.isDoNoise()
-
+                // - check useInstrumentBias: noiseService.isUseInstrumentBias()
                 if (currentUVData.isOIFitsValid(uvDataCollection)) {
                     // means no reset and current OIFits data are correct:
                     return true;
@@ -2005,7 +2028,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         }
 
         // Note : the main observation can have changed while computation
-
         final ObservationCollection taskObsCollection = uvDataCollection;
 
         // use the latest observation for computations to check versions :
@@ -2013,7 +2035,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
         // avoid to mix inconsistent observation and uv coverage data :
         // Next plot (uv coverage done event) will take into account UI widget changes.
-
         if (taskObsCollection.getVersion().isSameUVVersion(lastObsCollection.getVersion())) {
             if (logger.isDebugEnabled()) {
                 logger.debug("computeOIFits: uv version equals: {} :: {}", taskObsCollection.getVersion(), lastObsCollection.getVersion());
@@ -2237,7 +2258,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
                             // Create uv map task worker :
                             // Cancel other tasks and execute this new task :
-
                             new UVMapSwingWorker(this, target.getModels(), uvRect, refMin, refMax,
                                     imageMode, imageSize, colorModel, colorScale, noiseService).executeTask();
 
@@ -2298,11 +2318,11 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
          * @param noiseService optional Complex visibility Noise Service ready to use to compute noise on model images
          */
         private UVMapSwingWorker(final UVCoveragePanel uvPanel, final List<Model> models,
-                final Rectangle2D.Double uvRect,
-                final Float refMin, final Float refMax,
-                final ImageMode imageMode, final int imageSize,
-                final IndexColorModel colorModel, final ColorScale colorScale,
-                final VisNoiseService noiseService) {
+                                 final Rectangle2D.Double uvRect,
+                                 final Float refMin, final Float refMax,
+                                 final ImageMode imageMode, final int imageSize,
+                                 final IndexColorModel colorModel, final ColorScale colorScale,
+                                 final VisNoiseService noiseService) {
             super(AsproTaskRegistry.TASK_UV_MAP);
             this.uvPanel = uvPanel;
             this.models = models;
@@ -2332,11 +2352,11 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
          * @param noiseService optional Complex visibility Noise Service ready to use to compute noise on model images
          */
         private UVMapSwingWorker(final UVCoveragePanel uvPanel, final FitsImage fitsImage,
-                final Rectangle2D.Double uvRect,
-                final Float refMin, final Float refMax,
-                final ImageMode imageMode, final int imageSize,
-                final IndexColorModel colorModel, final ColorScale colorScale,
-                final VisNoiseService noiseService) {
+                                 final Rectangle2D.Double uvRect,
+                                 final Float refMin, final Float refMax,
+                                 final ImageMode imageMode, final int imageSize,
+                                 final IndexColorModel colorModel, final ColorScale colorScale,
+                                 final VisNoiseService noiseService) {
             super(AsproTaskRegistry.TASK_UV_MAP);
             this.uvPanel = uvPanel;
             this.models = null;
@@ -2438,7 +2458,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
         // Note : the image is produced from an array where 0,0 corresponds to the upper left corner
         // whereas it corresponds in UV to the lower U and Upper V coordinates => inverse the V axis
-
         // Inverse V axis issue :
         y = imageSize - y - h;
 
@@ -2455,7 +2474,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         }
 
         // crop a small sub image displayed while the correct model image is computed:
-
         // check reset zoom to avoid computing sub image == ref image:
         if (doCrop) {
             final Image subUVMap = uvMapData.getUvMap().getSubimage(x, y, w, h);
@@ -2469,7 +2487,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         }
 
         // TODO: adjust axis bounds to exact viewed rectangle (i.e. avoid rounding errors) !!
-
         return doCrop;
     }
 
@@ -2859,7 +2876,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                 }
 
                 // TODO: adjust capacity of xySeries !
-
                 for (UVBaseLineData uvBL : targetUVRiseSet) {
 
                     if (single) {
@@ -2988,6 +3004,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
     private javax.swing.JCheckBox jCheckBoxDoOIFits;
     private javax.swing.JCheckBox jCheckBoxModelImage;
     private javax.swing.JCheckBox jCheckBoxPlotUVSupport;
+    private javax.swing.JCheckBox jCheckBoxUseBias;
     private javax.swing.JComboBox jComboBoxAtmQual;
     private javax.swing.JComboBox jComboBoxFTMode;
     private javax.swing.JComboBox jComboBoxImageMode;
@@ -3245,7 +3262,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
      * @return tooltip's text for an UV point
      */
     public String generateTooltip(final String baseline, final String confName, double ha, final Date date, final String timeRef,
-            final double u, final double v) {
+                                  final double u, final double v) {
 
         final StringBuffer sb = this.sbToolTip;
         sb.setLength(0); // clear
@@ -3302,14 +3319,13 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                 }
 
                 // Compute UV Points:
-
                 // Get starData for the selected target name :
                 final StarData starData = obsData.getStarData(getSelectedTargetName());
 
                 final double ha = AstroSkyCalc.checkHA(sc.convertJDToHA(jd, starData.getPrecRA()));
 
-                final List<UVRangeBaseLineData> targetUVPoints =
-                        UVCoverageService.computeUVPoints(getChartData().getFirstObservation(), obsData, starData, ha);
+                final List<UVRangeBaseLineData> targetUVPoints
+                                                = UVCoverageService.computeUVPoints(getChartData().getFirstObservation(), obsData, starData, ha);
 
                 if (targetUVPoints != null) {
                     final String textNow = FormatterUtils.format(this.timeFormatter, now);

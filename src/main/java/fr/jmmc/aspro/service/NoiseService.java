@@ -88,14 +88,17 @@ public final class NoiseService extends VisNoiseService {
     private SpectralBand insBand;
 
     /* bias */
-    /** Typical Visibility Bias (absolute) */
-    private double instrumentalVisibilityBias = 0d;
+    /** true to use instrument bias; false to compute only theoretical error */
+    private final boolean useInstrumentBias;
+    /** Typical Vis2 Bias (absolute) */
+    private double instrumentalVis2Bias = 0d;
     /** Typical Phase/Phase Closure Bias (rad) */
     private double instrumentalPhaseBias = 0d;
     /** flag to use the Vis2 Calibration Bias */
     private boolean useVis2CalibrationBias = false;
     /** Vis2 Calibration Bias (proportional to square visibility) */
     private double instrumentVis2CalibrationBias = 0d;
+
     /* instrument mode parameters */
     /** Observation central wavelength (microns) */
     private double lambda = 2.2d;
@@ -126,7 +129,7 @@ public final class NoiseService extends VisNoiseService {
 
     /* internal */
     /** container for warning messages */
-    private WarningContainer warningContainer;
+    private final WarningContainer warningContainer;
     /** flag to indicate that a parameter is invalid in order the code to return errors as NaN values */
     private boolean invalidParameters = false;
     /** number of photons in interferometer channel */
@@ -164,10 +167,14 @@ public final class NoiseService extends VisNoiseService {
      * Protected constructor
      * @param observation observation settings used (read-only copy of the modifiable observation)
      * @param target target to use
+     * @param useInstrumentBias true to use instrument bias; false to compute only theoretical error
      * @param warningContainer container for warning messages
      */
-    protected NoiseService(final ObservationSetting observation, final Target target,
-            final WarningContainer warningContainer) {
+    protected NoiseService(final ObservationSetting observation,
+                           final Target target, final boolean useInstrumentBias,
+                           final WarningContainer warningContainer) {
+
+        this.useInstrumentBias = useInstrumentBias;
         this.warningContainer = warningContainer;
 
         // extract parameters in observation and configuration :
@@ -239,8 +246,6 @@ public final class NoiseService extends VisNoiseService {
         this.ron = instrument.getRon();
         this.detectorSaturation = instrument.getDetectorSaturation();
         this.instrumentalVisibility = instrument.getInstrumentVisibility();
-        this.instrumentalVisibilityBias = 0.01d * instrument.getInstrumentVisibilityBias(); // percents
-        this.instrumentalPhaseBias = FastMath.toRadians(instrument.getInstrumentPhaseBias()); // radians
         this.nbPixInterf = instrument.getNbPixInterferometry();
 
         // optional photometry parameters
@@ -249,13 +254,33 @@ public final class NoiseService extends VisNoiseService {
 
         this.usePhotometry = (fracFluxInInterferometry < 1.0d && nbPixPhoto > 0);
 
-        final Double vis2CalibrationBias = instrument.getInstrumentVis2CalibrationBias(); // percents
-        if (vis2CalibrationBias == null) {
-            this.useVis2CalibrationBias = false;
-            this.instrumentVis2CalibrationBias = 0d;
+        if (this.useInstrumentBias) {
+            /* Convert Phase bias to radians */
+            this.instrumentalPhaseBias = FastMath.toRadians(instrument.getInstrumentPhaseBias());
+
+            /* Get Vis bias (percents) */
+            final double instrumentalVisBias = getPercents(instrument.getInstrumentVisibilityBias());
+
+            final Double vis2CalibrationBias = instrument.getInstrumentVis2CalibrationBias();
+            if (vis2CalibrationBias == null) {
+                this.useVis2CalibrationBias = false;
+                this.instrumentVis2CalibrationBias = 0d;
+
+                /* note: instrumentalVis2Bias = instrumentalVisBias (few percents) as there is no specific calibration bias */
+                /* Correct Vis2 bias = 1/4 * visBias (peak to peak ~ 4 sigma) */
+                this.instrumentalVis2Bias = 0.25d * instrumentalVisBias;
+            } else {
+                this.useVis2CalibrationBias = true;
+
+                /* Get Vis2 calibration bias (percents) (peak to peak ~ 4 sigma) */
+                this.instrumentVis2CalibrationBias = 0.25d * getPercents(vis2CalibrationBias.doubleValue());
+
+                /* Correct Vis2 bias = 1/4 * visBias^2 (peak to peak ~ 4 sigma) */
+                this.instrumentalVis2Bias = 0.25d * instrumentalVisBias * instrumentalVisBias;
+            }
         } else {
-            this.useVis2CalibrationBias = true;
-            this.instrumentVis2CalibrationBias = 0.01d * vis2CalibrationBias.doubleValue();
+            // disable instrumental bias:
+            this.useVis2CalibrationBias = false;
         }
 
         final FocalInstrumentMode insMode = observation.getInstrumentConfiguration().getFocalInstrumentMode();
@@ -271,7 +296,8 @@ public final class NoiseService extends VisNoiseService {
             logger.debug("ron                           : {}", ron);
             logger.debug("detectorSaturation            : {}", detectorSaturation);
             logger.debug("instrumentalVisibility        : {}", instrumentalVisibility);
-            logger.debug("instrumentalVisibilityBias    : {}", instrumentalVisibilityBias);
+            logger.debug("useInstrumentBias             : {}", useInstrumentBias);
+            logger.debug("instrumentalVisibilityBias    : {}", instrumentalVis2Bias);
             logger.debug("instrumentalPhaseBias         : {}", instrumentalPhaseBias);
             logger.debug("useVis2CalibrationBias        : {}", useVis2CalibrationBias);
             logger.debug("instrumentVis2CalibrationBias : {}", instrumentVis2CalibrationBias);
@@ -339,7 +365,6 @@ public final class NoiseService extends VisNoiseService {
 
         // If a flux / magnitude is missing => user message
         // and it is impossible to compute any error
-
         flux = target.getFlux(insBand);
         this.objectMag = (flux != null) ? flux.doubleValue() : Double.NaN;
         if (logger.isDebugEnabled()) {
@@ -498,7 +523,6 @@ public final class NoiseService extends VisNoiseService {
         }
 
         // give back the two useful values for the noise estimate :
-
         // number of photons in interferometric channel :
         this.nbPhotonInI = nbTotalPhot * fracFluxInInterferometry;
         // number of photons in photometric channel (photometric flux):
@@ -552,6 +576,10 @@ public final class NoiseService extends VisNoiseService {
         }
         final DecimalFormat df = new DecimalFormat("##0.##");
         return df.format(val) + unit;
+    }
+
+    private static double getPercents(final double bias) {
+        return 0.01d * bias; // percents
     }
 
     /**
@@ -625,9 +653,7 @@ public final class NoiseService extends VisNoiseService {
 
         // Distribute the error on RE/IM parts for an uniform error distribution :
         // see These Martin Vannier (2003) p 76
-
         // sigma2(visRe) = 1/2 ( sigma2(visRe) + sigma2(visIm) = sigma2(vis) / 2
-
         // complex visibility error : visErrRe = visErrIm = visAmpErr / SQRT(2) :
         return visAmpErr * VIS_AMP_TO_VIS_CPX_ERR;
     }
@@ -774,7 +800,6 @@ public final class NoiseService extends VisNoiseService {
          + nbPixInterf * (nbPixInterf + 3d) * FastMath.pow(ron, 4d)
          + 2d * nbPixInterf * ron * ron * nbPhotonInI;
          */
-
         // protect zero divide: TODO: why 1e-3d ?
         sqCorFlux = Math.max(sqCorFlux, 1e-20d);
 
@@ -793,11 +818,10 @@ public final class NoiseService extends VisNoiseService {
             // Note: bias are normally not one gaussian distribution (mean = 0) so should not be used to compute gaussian noise !!
             if (useVis2CalibrationBias) {
                 // JBLB: bias estimation (first order for PIONIER):
-                return Math.max(errVis2, instrumentVis2CalibrationBias * vis2 + instrumentalVisibilityBias * instrumentalVisibilityBias);
+                return Math.max(errVis2, instrumentVis2CalibrationBias * vis2 + instrumentalVis2Bias);
             }
-            // TODO: find correct coefficients for instruments AMBER, MIDI, VEGA and use instrumentVis2CalibrationBias in  estimation.
-//        return Math.max(svis2, FastMath.pow2(instrumentalVisibilityBias));
-            return Math.max(errVis2, instrumentalVisibilityBias);
+            // TODO: find correct coefficients for instruments AMBER, MIDI, VEGA and use instrumentVis2CalibrationBias in estimation.
+            return Math.max(errVis2, instrumentalVis2Bias);
         }
         return errVis2;
     }

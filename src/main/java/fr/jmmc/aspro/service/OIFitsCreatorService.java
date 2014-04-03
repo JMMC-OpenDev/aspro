@@ -143,6 +143,8 @@ public final class OIFitsCreatorService {
     private final boolean errorValid;
     /** flag to add gaussian noise to OIFits data; true if parameter doDataNoise = true and noise parameters are valid */
     private final boolean doNoise;
+    /** true to use instrument bias; false to compute only theoretical error */
+    private final boolean useInstrumentBias;
     /** interferometer description */
     private InterferometerDescription interferometer = null;
     /** instrument name */
@@ -183,6 +185,7 @@ public final class OIFitsCreatorService {
      * @param lambdaMin minimal wavelength (m)
      * @param lambdaMax maximal wavelength (m)
      * @param nSpectralChannels number of spectral channels
+     * @param useInstrumentBias true to use instrument bias; false to compute only theoretical error
      * @param doDataNoise flag to add gaussian noise to OIFits data
      * @param supersamplingOIFits OIFits supersampling preference
      * @param mathModeOIFits OIFits MathMode preference
@@ -193,19 +196,20 @@ public final class OIFitsCreatorService {
      * @param warningContainer container for warning messages
      */
     protected OIFitsCreatorService(final ObservationSetting observation,
-            final Target target,
-            final List<Beam> beams,
-            final List<BaseLine> baseLines,
-            final double lambdaMin, final double lambdaMax,
-            final int nSpectralChannels,
-            final boolean doDataNoise,
-            final int supersamplingOIFits,
-            final UserModelService.MathMode mathModeOIFits,
-            final double[] obsHa,
-            final List<UVRangeBaseLineData> targetUVObservability,
-            final double precRA,
-            final AstroSkyCalc sc,
-            final WarningContainer warningContainer) {
+                                   final Target target,
+                                   final List<Beam> beams,
+                                   final List<BaseLine> baseLines,
+                                   final double lambdaMin, final double lambdaMax,
+                                   final int nSpectralChannels,
+                                   final boolean useInstrumentBias,
+                                   final boolean doDataNoise,
+                                   final int supersamplingOIFits,
+                                   final UserModelService.MathMode mathModeOIFits,
+                                   final double[] obsHa,
+                                   final List<UVRangeBaseLineData> targetUVObservability,
+                                   final double precRA,
+                                   final AstroSkyCalc sc,
+                                   final WarningContainer warningContainer) {
 
         this.target = target;
         this.beams = beams;
@@ -226,11 +230,10 @@ public final class OIFitsCreatorService {
         }
 
         // Prepare the noise service :
-
         // note: NoiseService parameter dependencies:
         // observation {target}
         // parameter: warningContainer
-        this.noiseService = new NoiseService(observation, target, warningContainer);
+        this.noiseService = new NoiseService(observation, target, useInstrumentBias, warningContainer);
 
         this.hasModel = target.hasModel();
 
@@ -238,6 +241,9 @@ public final class OIFitsCreatorService {
 
         // do noise :
         this.doNoise = (doDataNoise && this.errorValid);
+
+        // use Bias:
+        this.useInstrumentBias = useInstrumentBias;
 
         // OIFits preferences:
         this.supersamplingOIFits = supersamplingOIFits;
@@ -297,11 +303,9 @@ public final class OIFitsCreatorService {
         // keep number of channels:
         final int nChannels = this.nWaveLengths;
 
-
         // Keep only spectral channels where user model is defined:
         // note: Instrument spectral channels (waveLengths, nWaveLengths, waveBand, lambdaMin, lambdaMax) can be modified by this method:
         this.isModelWLValid = prepareUserModel(warningContainer);
-
 
         // adjust used spectral channels in information and log:
         if (this.nWaveLengths != nChannels) {
@@ -787,14 +791,11 @@ public final class OIFitsCreatorService {
             }
 
             // Determine nSamples per spectral channel:
-
             // TODO: should work on spatial frequency (baseline vector (so HA), object size) instead to be more accurate
-
             // use the preference (QUICK, FAST, DEFAULT?) : QUICK = PREVIEW ie No super sampling
             final UserModelService.MathMode mathMode = this.mathModeOIFits;
 
             // TODO: determine correctly deltaLambda (object size (FOV) and Bmax/lambda) ie when super sampling is surely necessary
-
             // number of samples per spectral channel (1, 5, 9 ...) use the preference (SuperSampling)
             // should be an even number to keep wavelengths centered on each sub channels:
             // note: disable super sampling in high resolution:
@@ -822,9 +823,7 @@ public final class OIFitsCreatorService {
 
             deltaLambda = this.waveBand / nSamples;
 
-
             // note: integration must be adjusted to use wavelengths in each spectral channel !
-
             // Only part of instrument spectral channels can be used (see prepare step):
             final double[] sampleWaveLengths = (nSamples > 1) ? computeWaveLengths(this.lambdaMin, this.lambdaMax, deltaLambda) : this.waveLengths;
 
@@ -840,7 +839,6 @@ public final class OIFitsCreatorService {
             final NoiseService ns = noiseService;
 
             // TODO: compare directFT vs FFT + interpolation
-
             // fast interrupt :
             if (currentThread.isInterrupted()) {
                 return false;
@@ -853,7 +851,6 @@ public final class OIFitsCreatorService {
                     nPoints, nRows, nChannels, nSamples);
 
 //            logger.info("computeModelVisibilities: {} bytes for 1 complex array", 2 * 8 * nPoints); // 1 complex (2 double)
-
             // Allocate data array for complex visibility and error :
             final MutableComplex[][] cmVis = new MutableComplex[nRows][];
 
@@ -873,7 +870,6 @@ public final class OIFitsCreatorService {
             }
 
 //            logger.info("computeModelVisibilities: {} bytes for uv freq array", 2 * 8 * nPoints); // 2 double
-
             // Iterate on baselines :
             for (int i, j = 0, k, l; j < nBl; j++) {
 
@@ -899,7 +895,6 @@ public final class OIFitsCreatorService {
             }
 
             // Compute complex visibility using the target model:
-
             if (useAnalyticalModel) {
                 // Clone models and normalize fluxes :
                 final List<Model> normModels = ModelManager.normalizeModels(this.target.getModels());
@@ -975,7 +970,6 @@ public final class OIFitsCreatorService {
                     }
                 }
 
-
                 // enable parallel jobs if many points using user model:
                 final int nTh = (!jobExecutor.isWorkerThread() && (nPoints > JOB_THRESHOLD_USER_MODELS)) ? jobExecutor.getMaxParallelJob() : 1;
 
@@ -985,10 +979,8 @@ public final class OIFitsCreatorService {
                 // adjust largest chunk size:
                 final int nPixels = 80000; // less than 1 Mb
 
-
                 // computation tasks = 1 job per row and chunk (work stealing):
                 final List<Runnable> jobList = new ArrayList<Runnable>(nRows * 2 * modelParts.size()); // 2 chunks by default
-
 
                 // Iterate on wavelength ranges i.e. UserModelComputePart:
                 for (UserModelComputePart modelPart : modelParts) {
@@ -1004,14 +996,12 @@ public final class OIFitsCreatorService {
                     final int from = modelPart.fromWL;
                     final int end = modelPart.endWL;
 
-
                     // This will change for each image in the Fits cube:
                     final int n1D = modelData.getNData(); // data, xfreq, yfreq
 
                     if (logger.isDebugEnabled()) {
                         logger.debug("computeModelVisibilities: {} bytes for image arrays", 4 * n1D); // (float) array
                     }
-
 
                     int chunk = nPixels * UserModelService.DATA_1D_POINT_SIZE;
 
@@ -1037,7 +1027,6 @@ public final class OIFitsCreatorService {
                         endThreads[c] = fromThreads[c] + chunk;
                     }
                     endThreads[nChunks - 1] = n1D;
-
 
                     // create tasks:
                     for (int c = 0; c < nChunks; c++) {
@@ -1098,7 +1087,6 @@ public final class OIFitsCreatorService {
 
             // Sampling integration on spectral channels:
             // use integration of several samples
-
             final ImmutableComplex[][] cVis = new ImmutableComplex[nRows][nChannels];
 
             // Super sampling ?
@@ -1762,10 +1750,8 @@ public final class OIFitsCreatorService {
         final boolean[][] flags = t3.getFlag();
 
         // The following code use some hypothesis on the OI_VIS table as defined in createOIVis()
-
         // 1 - the number of rows per HA point corresponds to the number of baselines.
         // 2 - OI_VIS rows have the same ordering than the list of baselines per HA points.
-
         // vars :
         Complex[] visData12, visData23, visData13;
         Complex vis12, vis23, vis31;
@@ -2044,7 +2030,6 @@ public final class OIFitsCreatorService {
 
         return sb.toString();
 
-
     }
 
     /**
@@ -2078,7 +2063,6 @@ public final class OIFitsCreatorService {
 
             // for tIndexes = [123] i.e. ABC
             // couples gives { 12 13 23 } i.e. AB AC BC
-
             // 3 couples :
             final short[][] bIndexes = new short[3][2];
 
@@ -2196,6 +2180,14 @@ public final class OIFitsCreatorService {
      */
     public boolean isDoNoise() {
         return doNoise;
+    }
+
+    /**
+     * Return true to use instrument bias; false to compute only theoretical error
+     * @return true to use instrument bias; false to compute only theoretical error
+     */
+    public boolean isUseInstrumentBias() {
+        return useInstrumentBias;
     }
 
     /**

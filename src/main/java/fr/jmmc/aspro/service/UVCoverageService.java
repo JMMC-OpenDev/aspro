@@ -59,6 +59,8 @@ public final class UVCoverageService {
     private double uvMax;
     /** flag to compute the UV support */
     private final boolean doUVSupport;
+    /** true to use instrument bias; false to compute only theoretical error */
+    private final boolean useInstrumentBias;
     /** flag to add gaussian noise to OIFits data */
     private final boolean doDataNoise;
     /** OIFits supersampling preference */
@@ -104,18 +106,21 @@ public final class UVCoverageService {
      * @param targetName target name
      * @param uvMax U-V max in meter
      * @param doUVSupport flag to compute the UV support
+     * @param useInstrumentBias true to use instrument bias; false to compute only theoretical error
      * @param doDataNoise enable data noise
      * @param supersamplingOIFits OIFits supersampling preference
      * @param mathModeOIFits OIFits MathMode preference
      */
     public UVCoverageService(final ObservationSetting observation, final ObservabilityData obsData, final String targetName,
-            final double uvMax, final boolean doUVSupport, final boolean doDataNoise,
-            final int supersamplingOIFits, final MathMode mathModeOIFits) {
+                             final double uvMax, final boolean doUVSupport, final boolean useInstrumentBias, final boolean doDataNoise,
+                             final int supersamplingOIFits, final MathMode mathModeOIFits) {
+
         this.observation = observation;
         this.obsData = obsData;
         this.targetName = targetName;
         this.uvMax = uvMax;
         this.doUVSupport = doUVSupport;
+        this.useInstrumentBias = useInstrumentBias;
         this.doDataNoise = doDataNoise;
         this.supersamplingOIFits = supersamplingOIFits;
         this.mathModeOIFits = mathModeOIFits;
@@ -257,7 +262,6 @@ public final class UVCoverageService {
                 v[j] = CalcUVW.computeV(cosDec, sinDec, baseLine, cosHa, sinHa);
 
                 // wavelength correction :
-
                 // Spatial frequency (xLambda) :
                 u[j] *= invLambda;
                 v[j] *= invLambda;
@@ -315,7 +319,6 @@ public final class UVCoverageService {
                 final int capacity = (int) Math.round((haMax - haMin) / step) + 1;
 
                 // First pass : find observable HA values :
-
                 // use safety limit to avoid out of memory errors :
                 final int haLen = (capacity > MAX_HA_POINTS) ? MAX_HA_POINTS : capacity;
                 final double[] haValues = new double[haLen];
@@ -360,7 +363,6 @@ public final class UVCoverageService {
                 this.data.setDates(dateValues);
 
                 // Second pass : extract UV values for HA points :
-
                 // precessed target declination in rad :
                 final double precDEC = FastMath.toRadians(this.starData.getPrecDEC());
 
@@ -411,7 +413,6 @@ public final class UVCoverageService {
                         v[j] = CalcUVW.computeV(cosDec, sinDec, baseLine, cosHa, sinHa);
 
                         // wavelength correction :
-
                         // Spatial frequency (rad-1) :
                         uWMin[j] = u[j] * invLambdaMin;
                         vWMin[j] = v[j] * invLambdaMin;
@@ -534,12 +535,12 @@ public final class UVCoverageService {
                 // note: OIFitsCreatorService parameter dependencies:
                 // observation {target, instrumentMode {lambdaMin, lambdaMax, nSpectralChannels}}
                 // obsData {beams, baseLines, starData, sc (DateCalc)}
-                // parameter: doDataNoise
+                // parameter: supersamplingOIFits, doDataNoise, useInstrumentBias
                 // results: computeObservableUV {HA, targetUVObservability} {obsData + observation{haMin/haMax, instrumentMode {lambdaMin, lambdaMax}}}
                 // and warning container
-
                 final OIFitsCreatorService oiFitsCreator = new OIFitsCreatorService(this.observation, target,
-                        this.beams, this.baseLines, this.lambdaMin, this.lambdaMax, this.nSpectralChannels, this.doDataNoise,
+                        this.beams, this.baseLines, this.lambdaMin, this.lambdaMax, this.nSpectralChannels,
+                        this.useInstrumentBias, this.doDataNoise,
                         this.supersamplingOIFits, this.mathModeOIFits,
                         this.data.getHA(), targetUVObservability, this.starData.getPrecRA(), this.sc,
                         this.data.getWarningContainer());
@@ -572,8 +573,8 @@ public final class UVCoverageService {
      * @throws IllegalStateException if the instrument mode is undefined
      */
     public static List<UVRangeBaseLineData> computeUVPoints(final ObservationSetting observation,
-            final ObservabilityData obsData, final StarData starData,
-            final double ha) throws IllegalStateException {
+                                                            final ObservabilityData obsData, final StarData starData,
+                                                            final double ha) throws IllegalStateException {
 
         // Compute UV points at given HA:
         final List<Range> obsRangesHA = starData.getObsRangesHA();
@@ -588,7 +589,6 @@ public final class UVCoverageService {
         if (obsRangesHA != null && (obsRange = Range.find(obsRangesHA, ha, HA_PRECISION)) != null) {
 
             // Prepare informations:
-
             // Get baselines :
             final List<BaseLine> baseLines = obsData.getBaseLines();
 
@@ -611,7 +611,6 @@ public final class UVCoverageService {
             }
 
             // extract UV values for HA point:
-
             // precessed target declination in rad :
             final double precDEC = FastMath.toRadians(starData.getPrecDEC());
 
@@ -660,7 +659,6 @@ public final class UVCoverageService {
                 v[0] = CalcUVW.computeV(cosDec, sinDec, baseLine, cosHa, sinHa);
 
                 // wavelength correction :
-
                 // Spatial frequency (rad-1) :
                 uWMin[0] = u[0] * invLambdaMin;
                 vWMin[0] = v[0] * invLambdaMin;
