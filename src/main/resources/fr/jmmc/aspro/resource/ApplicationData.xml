@@ -186,6 +186,7 @@
 
     <releasenotes>
         <release version="0.9.6">
+            <pubDate>Thu, 03 Apr 2014 16:00:00 GMT</pubDate>
             <prerelease version="0.9.6 beta 5">
                 <change type="FEATURE">Added the 'use inst. &amp; cal. error bias' checkbox on the UV coverage panel to enable or disable
                     using instrumental visibility / phase &amp; calibration bias in noise modelling (OIFits data);
