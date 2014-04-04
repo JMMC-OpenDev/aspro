@@ -879,6 +879,10 @@ public final class OIFitsCreatorService {
                 for (i = 0; i < nHA; i++) {
                     k = nBl * i + j;
 
+                    // TODO: ensure jd is within the current night [0;24] and not [-12; +36]
+                    // ie precompute jd corresponding to HA and reorder them to be continuous in [0;24] range !
+                    // then u/v freqs ...
+
                     final double[] uRow = ufreq[k];
                     final double[] vRow = vfreq[k];
 
@@ -1403,6 +1407,10 @@ public final class OIFitsCreatorService {
                     double diff, ampSquareDiffAcc, phiSquareDiffAcc;
                     final MutableComplex visComplexSample = new MutableComplex();
 
+                    // TODO: ensure jd is within the current night [0;24] and not [-12; +36]
+                    // ie precompute jd corresponding to HA and reorder them to be continuous in [0;24] range !
+                    // then fix time / mjd columns
+                    
                     // Iterate on HA points :
                     for (int i = 0, j, k, l, n; i < nHAPoints; i++) {
 
