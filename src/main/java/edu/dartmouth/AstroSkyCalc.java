@@ -593,7 +593,7 @@ public final class AstroSkyCalc {
     }
 
     /**
-     * Convert HA ranges to JD ranges from the given list into the destination list
+     * Convert HA ranges to JD ranges in range [LST0 - 12; LST0 + 36] from the given list into the destination list
      * @param ranges HA range list to convert
      * @param destRanges JD range list to append into
      * @param precRA precessed target right ascension in decimal hours
@@ -607,7 +607,7 @@ public final class AstroSkyCalc {
     }
 
     /**
-     * Convert HA ranges to JD ranges from the given list of ranges list into the destination list
+     * Convert HA ranges to JD ranges in range [LST0 - 12; LST0 + 36] from the given list of ranges list into the destination list
      * @param rangesList list of HA ranges list to convert
      * @param destRanges JD range list to append into
      * @param precRA precessed target right ascension in decimal hours
@@ -622,7 +622,7 @@ public final class AstroSkyCalc {
 
     /**
      * Convert an HA range to a JD range.
-     * Returned JD values are in range [LST0 - 12; LST0 + 12]
+     * Returned JD values are in range [LST0 - 12; LST0 + 36]
      *
      * @param rangeHA given in hour angle (dec hours)
      * @param precRA precessed target right ascension in decimal hours
