@@ -80,6 +80,7 @@ import java.util.concurrent.Callable;
 import javax.xml.datatype.XMLGregorianCalendar;
 import net.jafama.FastMath;
 import fr.jmmc.jmcs.util.CollectionUtils;
+import fr.jmmc.jmcs.util.FormatterUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -120,6 +121,8 @@ public final class ObservabilityService {
     /* members */
     /** cached log debug enabled */
     private final boolean isLogDebug = logger.isDebugEnabled();
+    /** reused string buffer instance */
+    private final StringBuffer shared_sb = new StringBuffer(128);
 
     /* output */
     /** observability data */
@@ -491,30 +494,26 @@ public final class ObservabilityService {
      */
     private void findObservability(final List<Target> targets) {
         // display baseline, (beams), (pops), DL as information:
-        final StringBuilder sbConf = new StringBuilder(64);
-        sbConf.append("Baseline: ");
+        final StringBuffer sb = getBuffer();
+        sb.append("Baseline: ");
         for (Beam b : this.beams) {
-            sbConf.append(b.getStation().getName()).append(' ');
+            sb.append(b.getStation().getName()).append(' ');
         }
-
         if (!this.interferometer.getChannels().isEmpty() && this.interferometer.getSwitchyard() != null) {
-            sbConf.append("- Beams: ");
+            sb.append("- Beams: ");
             for (Beam b : this.beams) {
-                sbConf.append(b.getChannel().getName()).append(' ');
+                sb.append(b.getChannel().getName()).append(' ');
             }
         }
-
         if (this.hasPops && (this.popCombinations.size() == 1)) {
             // user defined Pop combination:
-            sbConf.append("- PoPs: ").append(this.popCombinations.get(0).getIdentifier()).append(' ');
+            sb.append("- PoPs: ").append(this.popCombinations.get(0).getIdentifier()).append(' ');
         }
-
-        sbConf.append("- Delaylines: ");
+        sb.append("- Delaylines: ");
         for (Beam b : this.beams) {
-            sbConf.append(b.getDelayLine().getName()).append(' ');
+            sb.append(b.getDelayLine().getName()).append(' ');
         }
-
-        addInformation(sbConf.toString());
+        addInformation(sb.toString());
 
         if (this.hasPops) {
             // PoPs : Compatible Mode if no user defined Pop Combination :
@@ -804,7 +803,10 @@ public final class ObservabilityService {
         }
 
         if (maxObsTarget != nObsTarget) {
-            addWarning("Impossible to find a PoPs combination compatible with all observable targets (" + maxObsTarget + " / " + nObsTarget + ")");
+            final StringBuffer sb = getBuffer();
+            sb.append("Impossible to find a PoPs combination compatible with all observable targets (").append(maxObsTarget);
+            sb.append(" / ").append(nObsTarget).append(")");
+            addWarning(sb.toString());
         }
 
         // filter to keep only results for all valid targets :
@@ -985,7 +987,7 @@ public final class ObservabilityService {
                     AstroSkyCalcObservation.asString(15d * precRA, precDEC));
         }
 
-        // define transit date (HA = 0) :
+        // define transit date (HA = 0):
         starObs.setTransitDate(convertJDToDate(this.sc.convertHAToJD(0d, precRA)));
 
         // Find LST range corresponding to the rise / set of the target :
@@ -1100,7 +1102,7 @@ public final class ObservabilityService {
             // rangesHABaseLines / rangesHABaseLinesVcmLow / rangesHABaseLinesVcmHigh can be null if the thread was interrupted :
             checkInterrupted();
 
-            // convert HA range to JD range in range [LST0 - 12; LST0 + 12]
+            // convert HA range to JD range in range [LST0 - 12; LST0 + 36]
             final Range rangeJDRiseSet = this.sc.convertHAToJDRange(rangeHARiseSet, precRA);
             // rise/set range as list:
             final List<Range> rangesJDRiseSet = Arrays.asList(new Range[]{rangeJDRiseSet});
@@ -1395,7 +1397,7 @@ public final class ObservabilityService {
                     obsRanges.clear();
                     obsRanges.addAll(finalRangesHardLimits);
 
-                    // convert HA Limits to JD range in range [LST0 - 12; LST0 + 12]
+                    // convert HA Limits to JD range in range [LST0 - 12; LST0 + 36]
                     final Range rangeJDHALimits = this.sc.convertHAToJDRange(haLimits, precRA);
                     obsRanges.add(rangeJDHALimits);
                     nValid++;
@@ -1467,14 +1469,18 @@ public final class ObservabilityService {
                 if (isLogDebug) {
                     logger.debug("Target not observable: {}", target);
                 }
-                addInformation("Target [" + targetName + "] is not observable");
+                final StringBuffer sb = getBuffer();
+                sb.append("Target [").append(targetName).append("] is not observable");
+                addInformation(sb.toString());
             }
 
         } else {
             if (isLogDebug) {
                 logger.debug("Target never rise: {}", target);
             }
-            addInformation("Target [" + targetName + "] is not observable (never rise)");
+            final StringBuffer sb = getBuffer();
+            sb.append("Target [").append(targetName).append("] is not observable (never rise)");
+            addInformation(sb.toString());
         }
 
         // reset current target :
@@ -1755,6 +1761,9 @@ public final class ObservabilityService {
      * @return list of observable ranges (no obstruction)
      */
     private List<Range> checkHorizonProfile(final double precDEC, final Range jdRiseSet) {
+
+        // Note: as JD ranges are in [LST0 -12; LST0 + 36], sampled jds are fixed by getJDInLstRange(jd) 
+        // in LST range [0; 24] in order to have accurate target position
         final boolean isDebug = isLogDebug; // local var
 
         // output :
@@ -1849,6 +1858,9 @@ public final class ObservabilityService {
      * @return list of observable ranges (no obstruction) or null if no restriction
      */
     private List<Range> checkWindRestriction(final double precDEC, final Range jdRiseSet) {
+
+        // Note: as JD ranges are in [LST0 -12; LST0 + 36], sampled jds are fixed by getJDInLstRange(jd) 
+        // in LST range [0; 24] in order to have accurate target position
         // output :
         final List<Range> ranges = new ArrayList<Range>(2);
 
@@ -1929,9 +1941,9 @@ public final class ObservabilityService {
      */
     private List<Range> checkMoonRestriction(final Target target, final double precDEC, final Range jdRiseSet) {
 
-        // Note: as JD ranges are in [LST0 -12; LST0 + 36], the moon position can correspond to the previous or following night !
-        
-        // get FLI on current night:
+        // Note: as JD ranges are in [LST0 -12; LST0 + 36], sampled jds are fixed by getJDInLstRange(jd) 
+        // in LST range [0; 24] in order to have accurate moon position
+        // get FLI on the coming night (only):
         final double fli = this.data.getMoonIllumPercent();
 
         // Add 5% margin for quick check:
@@ -2052,7 +2064,7 @@ public final class ObservabilityService {
 
                 visible = true;
 
-                // check at jd:
+                // check at jd (internally fix JD in LST range [0; 24]):
                 separation = getMoonSeparation(cosDec, sinDec, jd);
 
                 if (separation < minSeparation) {
@@ -2095,11 +2107,13 @@ public final class ObservabilityService {
             // check again the true warning threshold:
             if (minSeparation < warningThreshold) {
                 // add warning:
+                final StringBuffer sb = getBuffer();
+                sb.append("Moon separation is ");
+                FormatterUtils.format(df1, sb, minSeparation).append(" deg at ");
+                FormatterUtils.format(timeFormatter, sb, convertJDToDate(minJd));
+                sb.append(" for target [").append(target.getName()).append("]<br> Please check pointing restrictions.");
 
-                // TODO: use Format.format(val, StringBuffer) instead:
-                this.addWarning("Moon separation is " + df1.format(minSeparation)
-                        + " deg at " + timeFormatter.format(convertJDToDate(minJd))
-                        + " for target [" + target.getName() + "]<br> Please check pointing restrictions.");
+                this.addWarning(sb.toString());
             }
 
         } else {
@@ -2118,9 +2132,8 @@ public final class ObservabilityService {
      * @return moon separation in degrees or +INFINITY if moon is not visible
      */
     private double getMoonSeparation(final double cosDec, final double sinDec, final double jd) {
-        // fix JD in LST range [0; 24] in order to have accurate target position:
+        // fix JD in LST range [0; 24] in order to have accurate moon position:
         final double jdIn = getJDInLstRange(jd);
-
         return this.sco.getMoonSeparation(cosDec, sinDec, jdIn);
     }
 
@@ -2862,7 +2875,7 @@ public final class ObservabilityService {
                     if ((jdFrom >= jdLstLower && jdFrom <= jdLstUpper) || (jdTo >= jdLstLower && jdTo <= jdLstUpper)) {
                         this.nightLimits.add(new Range(jdFrom, jdTo));
                     }
-                    
+
                     // Keep the night part inside or overlapping the range [jdLower; jdUpper] range used to compute moon illumination: */
                     if ((jdFrom >= this.jdLower && jdFrom <= this.jdUpper) || (jdTo >= this.jdLower && jdTo <= this.jdUpper)) {
                         this.nightOnlyRanges.add(new Range(Math.max(jdFrom, this.jdLower), Math.min(jdTo, this.jdUpper)));
@@ -3005,6 +3018,7 @@ public final class ObservabilityService {
      * @return date
      */
     private Date convertJDToDate(final double jd) {
+        // fix JD in LST range [0; 24] in order to have accurate date:
         return jdToDateInDateRange(getJDInLstRange(jd));
     }
 
@@ -3053,12 +3067,18 @@ public final class ObservabilityService {
         int decMax = decStep * (int) Math.round((obsLat + 90 - this.minElev) / decStep);
         decMax = Math.min(decMax, 90);
 
+        final StringBuffer sb = getBuffer();
+
         final List<Target> targets = new ArrayList<Target>((decMax - decMin) / decStep + 1);
         Target t;
         for (int i = decMax; i >= decMin; i -= decStep) {
             t = new Target();
+
             // delta = n (deg)
-            t.setName(SpecialChars.DELTA_UPPER + " = " + Integer.toString(i));
+            sb.append(SpecialChars.DELTA_UPPER).append(" = ").append(i);
+            t.setName(sb.toString());
+            sb.setLength(0); // recycle 
+
             // 12:00:00
             t.setRADeg(180d);
             t.setDECDeg(i);
@@ -3080,6 +3100,9 @@ public final class ObservabilityService {
     private void getTargetPosition(final StarObservabilityData starObs, final List<Range> obsRangeJD,
                                    final double precRA, final double precDEC,
                                    final boolean doDetails) {
+
+        // Note: as JD ranges are in [LST0 -12; LST0 + 36], jds are fixed by getJDInLstRange(jd) 
+        // in LST range [0; 24] in order to have accurate target position
         final Map<Date, TargetPositionDate> targetPositions = starObs.getTargetPositions();
 
         // prepare cosDec/sinDec:
@@ -3145,10 +3168,8 @@ public final class ObservabilityService {
     private void addTargetPosition(final Map<Date, TargetPositionDate> targetPositions, final double cosDec, final double sinDec, final AzEl azEl, final double jd) {
         // fix JD in LST range [0; 24] in order to have accurate target position:
         final double jdIn = getJDInLstRange(jd);
-
         final double ha = this.sco.getTargetPosition(cosDec, sinDec, jdIn, azEl);
-
-        final Date date = convertJDToDate(jd);
+        final Date date = jdToDateInDateRange(jdIn);
         targetPositions.put(date, new TargetPositionDate(date, ha, (int) Math.round(azEl.getAzimuth()), (int) Math.round(azEl.getElevation())));
     }
 
@@ -3337,6 +3358,12 @@ public final class ObservabilityService {
                 break;
         }
         return bestPopsEstimator;
+    }
+
+    private StringBuffer getBuffer() {
+        final StringBuffer sb = this.shared_sb;
+        sb.setLength(0);
+        return sb;
     }
 
     /**
