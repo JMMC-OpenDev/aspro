@@ -2654,13 +2654,13 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         // define bounds to the uv maximum value (before setDataset which calls restoreAxisBounds()) :
         final UVCoverageData uvData = chartData.getFirstUVData();
 
+        // Get the correct uv max from the model image because FFTs have gridding issue => smaller max frequency
         final double uvMaxInLambda = (uvMapData != null) ? -uvMapData.getUvMapRect().getMinX() : uvData.getUvMax();
-        final double boxSize = toUVPlotScale(uvMaxInLambda);
-        this.xyPlot.defineBounds(boxSize);
-
-        // uv in meters (not corrected by uv map area):
-        this.xyPlot.defineAxisBounds(1, uvData.getUvMaxInMeter());
-
+        // uv in megalambda:
+        this.xyPlot.defineBounds(toUVPlotScale(uvMaxInLambda));
+        // uv in meters (megalambda to meter conversion):
+        this.xyPlot.defineAxisBounds(1, uvMaxInLambda * uvData.getLambda());
+        
         // set the main data set :
         this.xyPlot.setDataset(DATASET_UV_POINTS, datasetPoints);
         this.xyPlot.setDataset(DATASET_UV_POINTS_SHADOW, datasetPoints);
