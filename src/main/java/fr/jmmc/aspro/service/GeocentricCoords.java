@@ -7,6 +7,7 @@ import fr.jmmc.aspro.AsproConstants;
 import fr.jmmc.aspro.model.oi.LonLatAlt;
 import fr.jmmc.aspro.model.oi.Position3D;
 import fr.jmmc.jmal.ALX;
+import fr.jmmc.jmcs.util.NumberUtils;
 import net.jafama.FastMath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,7 +87,9 @@ public final class GeocentricCoords {
    * @return string representing the given coordinates
    */
   public static String toString(final double lon, final double lat, final double d) {
-    return ALX.toDMS(FastMath.toDegrees(lon)) + ", " + ALX.toDMS(FastMath.toDegrees(lat)) + ", " + d + " m";
+    return ALX.toDMS(new StringBuilder(16), FastMath.toDegrees(lon), 360d) 
+            + ", " + ALX.toDMS(FastMath.toDegrees(lat)) 
+            + ", " + NumberUtils.trimTo3Digits(d) + " m";
   }
 
   /**
