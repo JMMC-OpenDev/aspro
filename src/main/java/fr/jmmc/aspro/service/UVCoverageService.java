@@ -55,8 +55,11 @@ public final class UVCoverageService {
     private final ObservabilityData obsData;
     /** target to use */
     private final String targetName;
-    /** maximum U or V coordinate (corrected by the minimal wavelength) */
+    /** maximum U or V coordinate in rad-1 (corrected by the minimal wavelength) */
     private double uvMax;
+    /** scaling factor to convert U or V coordinate in meters 
+     (correction to the central wavelength / lower wavelength of the selected instrument) */
+    private double uvScaleInMeters;
     /** flag to compute the UV support */
     private final boolean doUVSupport;
     /** true to use instrument bias; false to compute only theoretical error */
@@ -127,8 +130,6 @@ public final class UVCoverageService {
 
         // create the uv coverage data corresponding to the observation version :
         this.data = new UVCoverageData(observation.getVersion());
-
-        this.data.setUvMaxInMeter(uvMax);
     }
 
     /**
@@ -231,7 +232,8 @@ public final class UVCoverageService {
 
         final double invLambda = 1d / this.lambda;
 
-        final int sizeBL = this.baseLines.size();
+        final List<BaseLine> _baseLines = this.baseLines;
+        final int sizeBL = _baseLines.size();
         final List<UVBaseLineData> targetUVRiseSet = new ArrayList<UVBaseLineData>(sizeBL);
 
         UVBaseLineData uvData;
@@ -240,10 +242,11 @@ public final class UVCoverageService {
         double[] u;
         double[] v;
 
+        final DoubleWrapper _cw = cw;
         double cosHa, sinHa;
 
         for (int i = 0, j; i < sizeBL; i++) {
-            baseLine = this.baseLines.get(i);
+            baseLine = _baseLines.get(i);
 
             uvData = new UVBaseLineData(baseLine.getName());
 
@@ -254,8 +257,8 @@ public final class UVCoverageService {
 
             for (double ha = -haElev; ha <= haElev; ha += step) {
 
-                sinHa = FastMath.sinAndCos(AngleUtils.hours2rad(ha), cw); // cw holds cosine
-                cosHa = cw.value;
+                sinHa = FastMath.sinAndCos(AngleUtils.hours2rad(ha), _cw); // cw holds cosine
+                cosHa = _cw.value;
 
                 // Baseline projected vector (m) :
                 u[j] = CalcUVW.computeU(baseLine, cosHa, sinHa);
@@ -373,7 +376,8 @@ public final class UVCoverageService {
                 final double invLambdaMin = 1d / this.lambdaMin;
                 final double invLambdaMax = 1d / this.lambdaMax;
 
-                final int sizeBL = this.baseLines.size();
+                final List<BaseLine> _baseLines = this.baseLines;
+                final int sizeBL = _baseLines.size();
                 final List<UVRangeBaseLineData> targetUVObservability = new ArrayList<UVRangeBaseLineData>(sizeBL);
 
                 UVRangeBaseLineData uvData;
@@ -389,10 +393,11 @@ public final class UVCoverageService {
                 double[] uWMax;
                 double[] vWMax;
 
+                final DoubleWrapper _cw = cw;
                 double cosHa, sinHa;
 
                 for (int i = 0; i < sizeBL; i++) {
-                    baseLine = this.baseLines.get(i);
+                    baseLine = _baseLines.get(i);
 
                     uvData = new UVRangeBaseLineData(baseLine);
 
@@ -405,8 +410,8 @@ public final class UVCoverageService {
 
                     for (j = 0; j < nPoints; j++) {
 
-                        sinHa = FastMath.sinAndCos(AngleUtils.hours2rad(HA[j]), cw); // cw holds cosine
-                        cosHa = cw.value;
+                        sinHa = FastMath.sinAndCos(AngleUtils.hours2rad(HA[j]), _cw); // cw holds cosine
+                        cosHa = _cw.value;
 
                         // Baseline projected vector (m) :
                         u[j] = CalcUVW.computeU(baseLine, cosHa, sinHa);
@@ -484,7 +489,7 @@ public final class UVCoverageService {
         this.lambda = AsproConstants.MICRO_METER * insMode.getWaveLength();
 
         // TODO: handle properly spectral channels (rebinning):
-//    this.nSpectralChannels = insMode.getEffectiveNumberOfChannels();
+        // this.nSpectralChannels = insMode.getEffectiveNumberOfChannels();
         this.nSpectralChannels = insMode.getSpectralChannels();
 
         if (logger.isDebugEnabled()) {
@@ -504,8 +509,8 @@ public final class UVCoverageService {
         // get acquisition time to ensure sampled HA intervals [HA; HA+obsTime] is within observable range
         haObsTime = observation.getInstrumentConfiguration().getAcquisitionTime().doubleValue() / 3600d;
 
-        // Adjust the user uv Max = max base line / minimum wave length
-        // note : use the minimum wave length of the instrument to
+        // Adjust the user uv Max = max base line / lower wavelength of the selected instrument
+        // note : use the lower wave length of the instrument to
         // - make all uv segment visible
         // - avoid to much model computations (when the instrument mode changes)
         this.uvMax /= this.instrumentMinWaveLength;
