@@ -2720,6 +2720,7 @@ public final class ObservabilityService {
         DelayLineRestrictionThrow throw1, throw2;
 
         double x, y, z, opd, wMin, wMax;
+        BaseLine bl;
 
         for (int i = 0; i < nBeams; i++) {
             for (int j = i + 1; j < nBeams; j++) {
@@ -2733,8 +2734,9 @@ public final class ObservabilityService {
                 y = pos1.getPosY() - pos2.getPosY();
                 z = pos1.getPosZ() - pos2.getPosZ();
 
-                // a Base line defines only the geometry :
-                this.baseLines.add(new BaseLine(b1, b2, x, y, z));
+                // a Base line defines only the geometry:
+                bl = new BaseLine(b1, b2, x, y, z);
+                this.baseLines.add(bl);
 
                 // optical path difference:
                 opd = b1.getOpticalPathLength() - b2.getOpticalPathLength();
@@ -2745,6 +2747,12 @@ public final class ObservabilityService {
 
                 // the W range contains the W limits 
                 this.wRanges.add(new Range(wMin, wMax));
+
+                if (isLogDebug) {
+                    logger.debug("baseline: {}", bl);
+                    logger.debug("opd: {}", opd);
+                    logger.debug("wRanges: [{} - {}]", wMin, wMax);
+                }
 
                 if (this.hasSwitchyardDelayLineMaxThrow) {
                     // beam delayLineThrows may be null but have the same ordering 
@@ -2772,12 +2780,11 @@ public final class ObservabilityService {
                             wMin = opd - throw2.getValue();
                             wMax = opd + throw1.getValue();
 
-                            if (isLogDebug) {
-                                logger.debug("baseline: {}-{}", b1.getStation().getName(), b2.getStation().getName());
-                                logger.debug("opd: {}", opd);
-                                logger.debug("w range [{}]: [{} - {}]", throw1.getRestriction().getName(), wMin, wMax);
-                            }
                             this.wRangesVcms.get(k).add(new Range(wMin, wMax));
+
+                            if (isLogDebug) {
+                                logger.debug("wRangesVcms [{}]: [{} - {}]", throw1.getRestriction().getName(), wMin, wMax);
+                            }
                         }
                     }
                 }
