@@ -162,8 +162,8 @@ public final class ConfigurationManager extends BaseOIManager {
         if (min > current) {
             FeedbackReport.openDialog(true,
                     new IllegalStateException("The Aspro2 configuration requires a more recent Aspro2 application: "
-                    + minVersion + " > " + appVersion + ".\n\n Please use a public Aspro2 release available: "
-                    + ApplicationDescription.getInstance().getLinkValue()));
+                            + minVersion + " > " + appVersion + ".\n\n Please use a public Aspro2 release available: "
+                            + ApplicationDescription.getInstance().getLinkValue()));
         }
 
         InterferometerSetting is;
@@ -336,11 +336,15 @@ public final class ConfigurationManager extends BaseOIManager {
         final Position3D center = id.getPosition();
         final LonLatAlt posSph = GeocentricCoords.getLonLatAlt(center);
 
+        if (logger.isDebugEnabled()) {
+            logger.debug("Interferometer[{}] position: {}", id.getName(), posSph);
+        }
+
         id.setPosSph(posSph);
 
         if (logger.isDebugEnabled()) {
             GeocentricCoords.dump(id.getName(), posSph);
-            
+
             for (Station s : id.getStations()) {
                 Position3D pos = s.getRelativePosition();
                 logger.debug("Station[{}] norm(relativePosition) = {}", s.getName(), MathUtils.carthesianNorm(pos.getPosX(), pos.getPosY(), pos.getPosZ()));
@@ -425,7 +429,7 @@ public final class ConfigurationManager extends BaseOIManager {
         Station s1, s2;
         for (int i = 0; i < size; i++) {
             s1 = stations.get(i);
-            
+
             for (int j = i + 1; j < size; j++) {
                 s2 = stations.get(j);
 
@@ -588,7 +592,6 @@ public final class ConfigurationManager extends BaseOIManager {
 
                     // note: do not modify extendedConfiguration as it belongs to ObservationSetting used when marshalling to XML.
                     // note: do not modify ic as it belongs to initial configuration.
-
                     final InterferometerConfiguration mergedConfiguration = mergeConfiguration(ic, extendedConfiguration);
 
                     // add merged configuration:
@@ -622,7 +625,7 @@ public final class ConfigurationManager extends BaseOIManager {
      * @return new merged interferometer configuration
      */
     private static InterferometerConfiguration mergeConfiguration(final InterferometerConfiguration initial,
-            final InterferometerConfiguration extended) {
+                                                                  final InterferometerConfiguration extended) {
 
         // duplicate initial configuration but copy list of instrument configuration:
         final InterferometerConfiguration merged = (InterferometerConfiguration) initial.clone();
