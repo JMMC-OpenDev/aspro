@@ -22,6 +22,7 @@ import fr.jmmc.jmcs.util.StringUtils;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.List;
+import org.apache.commons.lang.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +48,7 @@ public final class ExportOBVega {
   /** field separator ( )*/
   public final static String SEPARATOR = " ";
   /** end of line character (\n) */
-  public final static String END_OF_LINE = System.getProperty("line.separator");
+  public final static String END_OF_LINE = SystemUtils.LINE_SEPARATOR;
   /** line separator (****) */
   public final static String LINE_SEPARATOR = "****" + END_OF_LINE;
   /** file separator (####) */
