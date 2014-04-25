@@ -69,8 +69,8 @@ import org.slf4j.LoggerFactory;
  * This panel represents a FitsImage plot
  * @author bourgesl
  */
-public final class FitsImagePanel extends javax.swing.JPanel implements ChartProgressListener, ZoomEventListener,
-        Observer, PDFExportable, Disposable {
+public class FitsImagePanel extends javax.swing.JPanel implements ChartProgressListener, ZoomEventListener,
+                                                                  Observer, PDFExportable, Disposable {
 
     /** default serial UID for Serializable interface */
     private static final long serialVersionUID = 1L;
@@ -452,7 +452,7 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
          * @param colorScale color scaling method
          */
         private ConvertFitsImageSwingWorker(final FitsImagePanel fitsPanel, final FitsImage fitsImage, final float[] minDataRange,
-                final IndexColorModel colorModel, final ColorScale colorScale) {
+                                            final IndexColorModel colorModel, final ColorScale colorScale) {
             // get current observation version :
             super(fitsPanel.task);
             this.fitsPanel = fitsPanel;
@@ -575,22 +575,21 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
     }
 
     /**
-     * Reset the plot in case of model exception
+     * Reset the plot in case of model or image processing exception
      */
-    private void resetPlot() {
-
+    protected void resetPlot() {
         ChartUtils.clearTextSubTitle(this.chart);
 
         this.lastZoomEvent = null;
         this.chartData = null;
 
+        // update the background image :
+        this.updatePlotImage(null);
+
         // reset bounds to [-1;1] (before setDataset) :
         this.xyPlot.defineBounds(1d);
         // reset dataset for baseline limits :
         this.xyPlot.setDataset(null);
-
-        // update the background image :
-        this.updatePlotImage(null);
 
         // update theme at end :
         ChartUtilities.applyCurrentTheme(this.chart);
@@ -745,7 +744,6 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
 
         // Note : the image is produced from an array where 0,0 corresponds to the upper left corner
         // whereas it corresponds in Fits image to the lower left corner => inverse the Y axis
-
         if (!imageData.getFitsImage().isIncColPositive()) {
             // Inverse X axis issue :
             x = imageWidth - x - w;
@@ -769,12 +767,10 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
         doCrop = ((x != 0) || (y != 0) || (w != imageWidth) || (h != imageHeight));
 
         // crop a small sub image:
-
         // check reset zoom to avoid computing sub image == ref image:
         final Image subImage = (doCrop) ? image.getSubimage(x, y, w, h) : image;
 
         // TODO: adjust axis bounds to exact viewed rectangle (i.e. avoid rounding errors) !!
-
         // update the background image :
         updatePlotImage(subImage);
 
@@ -955,8 +951,8 @@ public final class FitsImagePanel extends javax.swing.JPanel implements ChartPro
          * @param image java2D image 
          */
         ImageChartData(final FitsImage fitsImage, final IndexColorModel colorModel, final ColorScale colorScale,
-                final float min, final float max,
-                final BufferedImage image) {
+                       final float min, final float max,
+                       final BufferedImage image) {
             this.fitsImage = fitsImage;
             this.colorModel = colorModel;
             this.colorScale = colorScale;

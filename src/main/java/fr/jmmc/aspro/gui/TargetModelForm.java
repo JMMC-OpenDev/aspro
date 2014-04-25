@@ -61,7 +61,7 @@ import org.slf4j.LoggerFactory;
  * @author bourgesl
  */
 public final class TargetModelForm extends javax.swing.JPanel implements ActionListener, TreeSelectionListener, ListSelectionListener,
-        UserModelAnimatorListener, Disposable {
+                                                                         UserModelAnimatorListener, Disposable {
 
     /** default serial UID for Serializable interface */
     private static final long serialVersionUID = 1;
@@ -199,11 +199,18 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
     }
 
     /**
+     * Disable model animation
+     */
+    void disableAnimator() {
+        // disable model animation:
+        animator.unregister(this);
+    }
+
+    /**
      * Disable form when not displayed in tabbed pane
      */
     void disableForm() {
-        // disable model animation:
-        animator.unregister(this);
+        disableAnimator();
     }
 
     /**
@@ -211,12 +218,11 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
      */
     @Override
     public void dispose() {
+        disableAnimator();
+
         if (this.fitsImagePanel != null) {
             this.fitsImagePanel.dispose();
         }
-
-        // disable model animation:
-        animator.unregister(this);
     }
 
     /* Tree related methods */
@@ -366,7 +372,19 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
             if (!isAnalytical && userModel.isModelDataReady()) {
                 // update fits Image:
                 if (this.fitsImagePanel == null) {
-                    this.fitsImagePanel = new FitsImagePanel(false, true); // do not show id but options
+                    // do not show id but options:
+                    this.fitsImagePanel = new FitsImagePanel(false, true) {
+                        private static final long serialVersionUID = 1L;
+
+                        @Override
+                        protected void resetPlot() {
+                            try {
+                                super.resetPlot();
+                            } finally {
+                                disableAnimator();
+                            }
+                        }
+                    };
                 }
 
                 final List<UserModelData> modelDataList = userModel.getModelDataList();
@@ -1091,7 +1109,6 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
               final Model model = (Model) currentNode.getUserObject();
 
               // Parent can be a target or a model :
-
               final DefaultMutableTreeNode parentNode = this.getTreeModels().getParentNode(currentNode);
 
               if (parentNode.getUserObject() instanceof Target) {
@@ -1143,7 +1160,6 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
               final DefaultMutableTreeNode parentNode = this.getTreeModels().getParentNode(currentNode);
 
               // Parent can be a target or a model :
-
               if (parentNode.getUserObject() instanceof Target) {
                   targetNode = parentNode;
                   target = (Target) parentNode.getUserObject();
@@ -1206,8 +1222,7 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
 
       // If a file was defined (No cancel in the dialog)
       if (file != null) {
-          // disable model animator:
-          animator.unregister(this);
+          disableAnimator();
 
           userModel.setFile(file.getAbsolutePath());
           userModel.setName(file.getName());
