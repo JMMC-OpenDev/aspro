@@ -230,7 +230,7 @@ public final class Aspro2 extends App {
         registerActions();
 
         // Handle status bar
-        container.add(new StatusBar(), BorderLayout.SOUTH);
+        container.add(StatusBar.getInstance(), BorderLayout.SOUTH);
 
         StatusBar.show("application started.");
 
