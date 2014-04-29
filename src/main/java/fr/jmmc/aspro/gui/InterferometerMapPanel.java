@@ -48,7 +48,7 @@ import org.slf4j.LoggerFactory;
  * @author bourgesl
  */
 public final class InterferometerMapPanel extends javax.swing.JPanel implements ChartProgressListener,
-        ObservationListener, PDFExportable {
+                                                                                ObservationListener, PDFExportable {
 
     /** default serial UID for Serializable interface */
     private static final long serialVersionUID = 1;
@@ -229,6 +229,12 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
         obsCollection.getAllConfigurations(sb, "|");
         final String config = sb.toString();
 
+        // check target versions to avoid keeping old user model references (large memory overhead due to UserModelData):
+        if (getChartData() != null && !obsCollection.getVersion().isSameTargetVersion(getChartData().getVersion())) {
+            logger.debug("plot : force refresh (different target versions)");
+            this.configuration = null;
+        }
+
         if (!config.equals(this.configuration)) {
             // refresh the plot :
             this.configuration = config;
@@ -311,7 +317,6 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
         final InterferometerMapData mapData1 = chartData.getFirstMapData();
 
         // 1 - Stations :
-
         // define bounds to the maximum value + 10% (before setDataset) :
         final double boxSize = mapData1.getMaxXY() * 1.10d;
         this.xyPlot.defineBounds(boxSize);
@@ -325,7 +330,6 @@ public final class InterferometerMapPanel extends javax.swing.JPanel implements 
         this.xyPlot.setDataset(stationDataSet);
 
         // 2 - Baselines :
-
         // renderer for base lines :
         final XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) this.xyPlot.getRenderer(1);
 
