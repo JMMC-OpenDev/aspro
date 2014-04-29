@@ -400,6 +400,12 @@ public final class Range {
     public static List<Range> intersectRanges(final RangeLimit[] limits, final int nLimits, final int nValid,
             final List<Range> results, final RangeFactory rangeFactory) {
 
+        // check if limits has enough elements
+        if ((nLimits == 0) || (limits.length < nLimits))
+        {
+            return results;
+        }
+        
         // use customized binary sort to be in-place (no memory usage):
         // inspired from Arrays.sort but do not use tim sort as it makes array copies 
         // when size > threshold (~ 20 or 40 depending on JDK):
