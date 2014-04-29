@@ -18,6 +18,7 @@ import fr.jmmc.jmal.model.ImageMode;
 import fr.jmmc.jmal.model.ModelUVMapService;
 import fr.jmmc.jmal.model.UVMapData;
 import fr.jmmc.jmal.model.VisNoiseService;
+import fr.jmmc.jmcs.gui.util.SwingUtils;
 import fr.jmmc.jmcs.util.concurrent.InterruptedJobException;
 import fr.jmmc.oitools.image.FitsImage;
 import fr.jmmc.oitools.image.FitsImageFile;
@@ -26,6 +27,7 @@ import fr.nom.tam.fits.FitsException;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.IndexColorModel;
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -44,6 +46,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Laurent BOURGES.
  */
+@SuppressWarnings("ArrayHashCode")
 public final class UserModelService {
 
     /** Class logger */
@@ -250,11 +253,11 @@ public final class UserModelService {
      * @throws RuntimeException if any exception occured during the computation
      */
     public static UVMapData computeUVMap(final FitsImage fitsImage,
-            final Rectangle2D.Double uvRect,
-            final ImageMode mode,
-            final int imageSize,
-            final IndexColorModel colorModel,
-            final ColorScale colorScale) {
+                                         final Rectangle2D.Double uvRect,
+                                         final ImageMode mode,
+                                         final int imageSize,
+                                         final IndexColorModel colorModel,
+                                         final ColorScale colorScale) {
         return computeUVMap(fitsImage, uvRect, mode, imageSize, colorModel, colorScale, null, null, null, null);
     }
 
@@ -275,12 +278,12 @@ public final class UserModelService {
      * @throws RuntimeException if any exception occured during the computation
      */
     public static UVMapData computeUVMap(final FitsImage fitsImage,
-            final Rectangle2D.Double uvRect,
-            final ImageMode mode,
-            final int imageSize,
-            final IndexColorModel colorModel,
-            final ColorScale colorScale,
-            final VisNoiseService noiseService) {
+                                         final Rectangle2D.Double uvRect,
+                                         final ImageMode mode,
+                                         final int imageSize,
+                                         final IndexColorModel colorModel,
+                                         final ColorScale colorScale,
+                                         final VisNoiseService noiseService) {
         return computeUVMap(fitsImage, uvRect, mode, imageSize, colorModel, colorScale, noiseService, null, null, null);
     }
 
@@ -304,14 +307,14 @@ public final class UserModelService {
      * @throws RuntimeException if any exception occured during the computation
      */
     public static UVMapData computeUVMap(final FitsImage fitsImage,
-            final Rectangle2D.Double uvRect,
-            final ImageMode mode,
-            final int imageSize,
-            final IndexColorModel colorModel,
-            final ColorScale colorScale,
-            final VisNoiseService noiseService,
-            final Float refMin, final Float refMax,
-            final float[][] refVisData) {
+                                         final Rectangle2D.Double uvRect,
+                                         final ImageMode mode,
+                                         final int imageSize,
+                                         final IndexColorModel colorModel,
+                                         final ColorScale colorScale,
+                                         final VisNoiseService noiseService,
+                                         final Float refMin, final Float refMax,
+                                         final float[][] refVisData) {
 
         // Get corrected uvMax from uv rectangle (-this.uvMax, -this.uvMax, this.uvMax, this.uvMax):
         final double uvMax = Math.max(Math.max(Math.max(Math.abs(uvRect.getX()), Math.abs(uvRect.getY())),
@@ -518,8 +521,8 @@ public final class UserModelService {
      * @param mathMode Math mode to use to compute trigonometric functions
      */
     public static void computeModel(final float[] data1D, final int fromData, final int endData,
-            final double[] ufreq, final double[] vfreq, final MutableComplex[] vis, final int from, final int end,
-            final MathMode mathMode) {
+                                    final double[] ufreq, final double[] vfreq, final MutableComplex[] vis, final int from, final int end,
+                                    final MathMode mathMode) {
 
         if (data1D != null && ufreq != null && vfreq != null && vis != null) {
 
@@ -545,8 +548,8 @@ public final class UserModelService {
      * @param mathMode Math mode to use to compute trigonometric functions
      */
     private static void compute1D(final float[] data1D, final int fromData, final int endData,
-            final double[] ufreq, final double[] vfreq, final MutableComplex[] vis, final int from, final int end,
-            final MathMode mathMode) {
+                                  final double[] ufreq, final double[] vfreq, final MutableComplex[] vis, final int from, final int end,
+                                  final MathMode mathMode) {
 
         /** Get the current thread to check if the computation is interrupted */
         final Thread currentThread = Thread.currentThread();
@@ -1030,6 +1033,33 @@ public final class UserModelService {
         return data1D;
     }
 
+    /** weak reference on a recycled single float array for prepareModelData() */
+    private static WeakReference<float[]> recycled_array = null;
+
+    private static float[] getArray(final int length) {
+        float[] array;
+        if (SwingUtils.isEDT() && (recycled_array != null)) {
+            array = recycled_array.get();
+            if (array != null && array.length >= length) {
+                recycled_array = null; // free reference
+                if (logger.isDebugEnabled()) {
+                    logger.debug("get array: {} @ {}", array.length, array.hashCode());
+                }
+                return array;
+            }
+        }
+        return new float[length * 11 / 10]; // 10% more
+    }
+
+    private static void putArray(final float[] array) {
+        if (SwingUtils.isEDT()) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("put array: {} @ {}", array.length, array.hashCode());
+            }
+            recycled_array = new WeakReference<float[]>(array);
+        }
+    }
+
     /**
      * Prepare the user model data to compute direct Fourier transform
      *
@@ -1064,7 +1094,9 @@ public final class UserModelService {
         // prepare 1D data (eliminate values lower than threshold):
         float[] row;
         int nUsedData = 0;
-        final float[] data1D = new float[nData * DATA_1D_POINT_SIZE];
+
+        // Recycle large data arrays (weak reference cache) for fits cubes (many spectral channels having roughly same nData)
+        final float[] data1D = getArray(nData * DATA_1D_POINT_SIZE);
 
         double totalFlux = 0d;
         float flux, rowCoord;
@@ -1121,6 +1153,9 @@ public final class UserModelService {
 
             System.arraycopy(data1D, 0, mData1D, 0, nUsedData);
 
+            // recycle data1D array:
+            putArray(data1D);
+
             modelData.set(mData1D);
         } else {
             modelData.set(data1D);
@@ -1170,7 +1205,7 @@ public final class UserModelService {
     /**
      * Make apodisation (telescope airy disk) (DEVELOPMENT ONLY)
      * @param fitsImage 
-    */
+     */
     private static void apodise(FitsImage fitsImage) {
 
         /** Get the current thread to check if the computation is interrupted */
