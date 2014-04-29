@@ -219,9 +219,11 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
     @Override
     public void dispose() {
         disableAnimator();
+        this.animatorPanel = null;
 
         if (this.fitsImagePanel != null) {
             this.fitsImagePanel.dispose();
+            this.fitsImagePanel = null; // GC
         }
     }
 
@@ -557,7 +559,13 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
             if (userModel == null) {
                 this.jRadioButtonInvalid.setSelected(true);
             } else {
-                prepareAndValidateUserModel(userModel);
+                try {
+                    prepareAndValidateUserModel(userModel);
+                } finally {
+                  if (!userModel.isFileValid()) {
+                      this.jRadioButtonInvalid.setSelected(true);
+                  }
+                }
 
                 // reselect target to update image:
                 processTargetSelection(currentTarget);
@@ -1227,7 +1235,13 @@ public final class TargetModelForm extends javax.swing.JPanel implements ActionL
           userModel.setFile(file.getAbsolutePath());
           userModel.setName(file.getName());
 
-          prepareAndValidateUserModel(userModel);
+          try {
+            prepareAndValidateUserModel(userModel);
+          } finally {
+            if (!userModel.isFileValid()) {
+                this.jRadioButtonInvalid.setSelected(true);
+            }
+          }
 
           // reselect target to update image:
           processTargetSelection(currentTarget);
