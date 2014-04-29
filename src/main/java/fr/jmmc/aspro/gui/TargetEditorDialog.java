@@ -65,7 +65,7 @@ public final class TargetEditorDialog extends javax.swing.JPanel implements Disp
      */
     public static boolean showEditor(final String targetName, final String selectedTab) {
         logger.debug("showing Editor : {}", targetName);
-
+        
         boolean result = false;
 
         JDialog dialog = null;
@@ -219,8 +219,13 @@ public final class TargetEditorDialog extends javax.swing.JPanel implements Disp
     /**
      * Free any resource or reference to this instance
      */
+    @Override
     public void dispose() {
+        this.jTabbedPane.removeAll();
         this.targetModelForm.dispose();
+        // GC
+        this.targetForm = null;
+        this.targetModelForm = null;
     }
 
     /** This method is called from within the constructor to
