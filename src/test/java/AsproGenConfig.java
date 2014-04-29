@@ -41,6 +41,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 import javax.xml.bind.JAXBException;
+import org.apache.commons.lang.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -819,6 +820,8 @@ public final class AsproGenConfig {
 
             convertCHARAPoP(config, sb);
 
+            convertCHARAHorizon(station, sb);
+
             sb.append("    </station>\n\n");
         }
 
@@ -1099,6 +1102,132 @@ public final class AsproGenConfig {
          15:59:20.784 [main] INFO  AsproGenConfig - CHARA position : [-118:03:25,313, 34:13:27,781, 1725.2099999999627 m]
          */
         return new double[]{lonDeg, latDeg};
+    }
+
+    private static void convertCHARAHorizon(final String station, final StringBuilder sb) {
+
+        final double[] az;
+        final double[] el;
+
+        if ("S2".equals(station)) {
+            /*
+             ;S2
+             s2az_clr=[0,65,65,70,80,90,100,110,120,130,235,238,243,244,246,248,250,253,258,275,288,290,292,294,300,303,305,310,315,318,320,323,324,328,330,335,340,344,345,348,350,353,355,355,360]
+             s2el_clr=[0,0,20,21,30,31,31,30,22,20,20,25,25.5,26,25.5,25,25,24,21,20,30,30,33,37,41,41,40,44,46,47,48,48,49,48,47,46,34,30,30,27,27,23,20,0,0]
+             */
+            az = new double[]{0, 65, 65, 70, 80, 90, 100, 110, 120, 130, 235, 238, 243, 244, 246, 248, 250, 253, 258, 275, 288, 290, 292, 294, 300, 303, 305, 310, 315, 318, 320, 323, 324, 328, 330, 335, 340, 344, 345, 348, 350, 353, 355, 355, 360};
+            el = new double[]{0, 0, 20, 21, 30, 31, 31, 30, 22, 20, 20, 25, 25.5, 26, 25.5, 25, 25, 24, 21, 20, 30, 30, 33, 37, 41, 41, 40, 44, 46, 47, 48, 48, 49, 48, 47, 46, 34, 30, 30, 27, 27, 23, 20, 0, 0};
+        } else if ("W1".equals(station)) {
+            /*
+             ;W1
+             w1az_clr=[0,25,25,30,33,40,45,48,50,55,58,60,65,67,70,73,80,85,90,92,95,97,100,105,110,115,117,120,125,130,132,134,136,138,140,140,360]
+             w1el_clr=[0,0,20,21,23,22.6,27,30,32,36.2,37,37,37,37.2,38,38,36,35.2,38.2,39.2,38.4,38.6,38,37,34,31,31,31,30.2,29.2,30,29.6,28.4,27.2,27.6,0,0]
+             */
+            az = new double[]{0, 25, 25, 30, 33, 40, 45, 48, 50, 55, 58, 60, 65, 67, 70, 73, 80, 85, 90, 92, 95, 97, 100, 105, 110, 115, 117, 120, 125, 130, 132, 134, 136, 138, 140, 140, 360};
+            el = new double[]{0, 0, 20, 21, 23, 22.6, 27, 30, 32, 36.2, 37, 37, 37, 37.2, 38, 38, 36, 35.2, 38.2, 39.2, 38.4, 38.6, 38, 37, 34, 31, 31, 31, 30.2, 29.2, 30, 29.6, 28.4, 27.2, 27.6, 0, 0};
+        } else if ("W2".equals(station)) {
+            /*
+             ;W2
+             ;clear (latest from Judit)
+             w2az_clr=[0,0,0.0,20.0,40.0,60.0,75.0,77.0,77.8,80.0,84.0,87.0,89.0,91.0,93.0,96.0,98.0,100.0,105.0,107.0,109.0,109.8,110.0,113.0,115.5,118.0,120.0,123.0,125.0,125.0,126.0,127.0,128.0,129.0,150.0,160.0,185.0,200.0,250.0,280.0,310.0,358.0,358,360]
+             w2el_clr=[0,0,20,20,20,20,20,20,20,21,21.5,22,23,25,25,24,22,23,21,20,20,22.5,22.5,22.5,26,24.2,25,24,20,25,23,22,22,20,20,20,20,20,20,20,20,20,0,0]
+             */
+            // LBO: FIX min(el)=20 for az=0=360
+            az = new double[]{0.0, 20.0, 40.0, 60.0, 75.0, 77.0, 77.8, 80.0, 84.0, 87.0, 89.0, 91.0, 93.0, 96.0, 98.0, 100.0, 105.0, 107.0, 109.0, 109.8, 110.0, 113.0, 115.5, 118.0, 120.0, 123.0, 125.0, 125.0, 126.0, 127.0, 128.0, 129.0, 150.0, 160.0, 185.0, 200.0, 250.0, 280.0, 310.0, 358.0, 360};
+            el = new double[]{20, 20, 20, 20, 20, 20, 20, 21, 21.5, 22, 23, 25, 25, 24, 22, 23, 21, 20, 20, 22.5, 22.5, 22.5, 26, 24.2, 25, 24, 20, 25, 23, 22, 22, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20};
+        } else if ("E1".equals(station)) {
+            /*
+             ;E1
+             ;clear (latest from Judit)
+             e1az_clr=[0,0,2,4,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,42,44,46,48,70,90,123,176,190,220,250,270,272,273,275,277,279,280,281,283,285,287,288,290,292,292,292,292,294,294,296,300,305,310,314,317,318,319,320,321,322,325,337,340,342,344,346,348,350,352,354,356,358,359.6,360,360]
+             e1el_clr=[0,29,30,28,29,26,28,38,38,36,35,33,34,34,31.5,30.5,28.5,30,29,28.5,29,28,27,24,20,20,20,20,20,20,20,20,20,22,22,22,22,24,25,25,26,27,27,27,30,30,30,30,30,30,30,31,32,32,28,30,28.5,29,27,28,25,20,20,20,24,24,26,27.5,27.5,27,27.5,27.2,27,28,28.5,29,0]
+             */
+            // LBO: FIX min(el)=29 for az=0=360
+            az = new double[]{0, 2, 4, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 70, 90, 123, 176, 190, 220, 250, 270, 272, 273, 275, 277, 279, 280, 281, 283, 285, 287, 288, 290, 292, 292, 292, 292, 294, 294, 296, 300, 305, 310, 314, 317, 318, 319, 320, 321, 322, 325, 337, 340, 342, 344, 346, 348, 350, 352, 354, 356, 358, 359.6, 360};
+            el = new double[]{29, 30, 28, 29, 26, 28, 38, 38, 36, 35, 33, 34, 34, 31.5, 30.5, 28.5, 30, 29, 28.5, 29, 28, 27, 24, 20, 20, 20, 20, 20, 20, 20, 20, 20, 22, 22, 22, 22, 24, 25, 25, 26, 27, 27, 27, 30, 30, 30, 30, 30, 30, 30, 31, 32, 32, 28, 30, 28.5, 29, 27, 28, 25, 20, 20, 20, 24, 24, 26, 27.5, 27.5, 27, 27.5, 27.2, 27, 28, 28.5, 29};
+        } else if ("E2".equals(station)) {
+            /*
+             ;E2
+             ;clear (latest from Judit)
+             e2az_clr=[0,24,25,27,30,33,36,38,39,40,90,180,200,203,220,248,250,252,254,256,258,260,262,320,358,360]
+             e2el_clr=[20,30,22,25,26,28,23,22,20,20,20,20,20,20,20,20,20,22,24,26,23,21,20,20,20,0]
+             */
+            // LBO: FIX min(el)=20 for az=0=360
+            az = new double[]{0, 24, 25, 27, 30, 33, 36, 38, 39, 40, 90, 180, 200, 203, 220, 248, 250, 252, 254, 256, 258, 260, 262, 320, 358, 360};
+            el = new double[]{20, 30, 22, 25, 26, 28, 23, 22, 20, 20, 20, 20, 20, 20, 20, 20, 20, 22, 24, 26, 23, 21, 20, 20, 20, 20};
+        } else {
+            // missing S1
+            az = el = null;
+        }
+
+        if ((az != null) && (el != null)) {
+            if (az.length != el.length) {
+                throw new IllegalStateException("Inconsistent length for azimuth and elevation arrays !");
+            }
+            final int len = az.length -1;
+            // check az=0 and az=360:
+            if (az[0] != 0d || az[len] != 360d) {
+                throw new IllegalStateException("Invalid azimuth array [except 0 and 360 range] !");
+            }
+            
+            // Fix start and end of az/el arrays (ie use max(elevation) for az=0 and az=360:
+            int a = 0;
+            for (int i = 0; i <= len; i++) {
+                if (az[i] == 0d) {
+                    a = i;
+                    System.out.println("el = " + el[a]);
+                } else {
+                    break;
+                }
+            }
+            System.out.println("a = " + Arrays.toString(Arrays.copyOfRange(az, 0, a + 1)));
+            
+            int b = 0;
+            for (int i = len; i >= 0; i--) {
+                if (az[i] == 360d) {
+                    b = i;
+                    System.out.println("el = " + el[a]);
+                } else {
+                    break;
+                }
+            }
+            System.out.println("b = " + Arrays.toString(Arrays.copyOfRange(az, b, len + 1)));
+            
+            
+            // Fix elevation for az=0 and az=360 ie take max:
+            double max = 0d;
+            for (int i = 0; i <= a; i++) {
+                max = Math.max(max, el[i]);
+            }
+            for (int i = b; i <= len; i++) {
+                max = Math.max(max, el[i]);
+            }
+            System.out.println("max = " + max);
+            el[a] = el[b] = max;
+
+            sb.append("      <horizon>\n"
+                    + "        ");
+
+            for (int i = a; i <= b; i++) {
+                // output :
+                sb.append("<point>");
+                sb.append("<azimuth>").append(az[i]).append("</azimuth>");
+                sb.append("<elevation>").append(el[i]).append("</elevation>");
+                sb.append("</point>");
+            }
+            // close polygon:
+            sb.append("<point>");
+            sb.append("<azimuth>").append(360.0).append("</azimuth>");
+            sb.append("<elevation>").append(90.0).append("</elevation>");
+            sb.append("</point>");
+
+            sb.append("<point>");
+            sb.append("<azimuth>").append(0.0).append("</azimuth>");
+            sb.append("<elevation>").append(90.0).append("</elevation>");
+            sb.append("</point>");
+
+            sb.append("\n      </horizon>\n");
+        }
     }
 
     private static void VLTIPosition() {
@@ -1641,11 +1770,11 @@ public final class AsproGenConfig {
      * @param args unused
      */
     public static void main(final String[] args) {
-        final String userHome = System.getProperty("user.home");
+        final String userHome = SystemUtils.USER_HOME;
         final String aspro1Path = userHome + "/dev/aspro1/etc/";
         final String asproTestPath = userHome + "/dev/aspro/src/test/resources/";
 
-        final INTERFEROMETER selected = INTERFEROMETER.VLTI;
+        final INTERFEROMETER selected = INTERFEROMETER.CHARA;
 
         switch (selected) {
             case VLTI:
