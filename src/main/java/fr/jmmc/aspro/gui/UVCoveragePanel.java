@@ -53,6 +53,7 @@ import fr.jmmc.aspro.service.UserModelService;
 import fr.jmmc.aspro.service.UserModelService.MathMode;
 import fr.jmmc.jmal.image.ColorModels;
 import fr.jmmc.jmal.image.ColorScale;
+import fr.jmmc.jmal.image.ImageUtils;
 import fr.jmmc.jmal.model.ImageMode;
 import fr.jmmc.jmal.model.ModelUVMapService;
 import fr.jmmc.jmal.model.UVMapData;
@@ -91,6 +92,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
 import java.awt.image.IndexColorModel;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -121,6 +123,7 @@ import org.jfree.chart.annotations.XYTextAnnotation;
 import org.jfree.chart.axis.AxisLocation;
 import org.jfree.chart.axis.LogarithmicAxis;
 import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.block.BlockBorder;
 import org.jfree.chart.event.ChartProgressEvent;
 import org.jfree.chart.event.ChartProgressListener;
@@ -184,7 +187,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
     /** jFreeChart instance */
     private JFreeChart chart;
     /** xy plot instance */
-    private SquareXYPlot xyPlot;
+    protected SquareXYPlot xyPlot;
     /** JMMC annotation */
     private XYTextAnnotation aJMMC = null;
     /** uv map image scale legend */
@@ -885,7 +888,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         this.jCheckBoxAddNoise.addActionListener(this);
 
         this.jCheckBoxUseBias.addActionListener(this);
-        
+
         // hide animator panel at startup:
         this.animatorPanel.setVisible(false);
 
@@ -1600,8 +1603,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
             // Create uv coverage task worker :
             // Cancel other tasks and execute this new task :
-            new UVCoverageSwingWorker(this, obsCollection, this.getObservabilityData(), targetName, uvMax, 
-                    doUVSupport, doOIFits, useInstrumentBias, doDataNoise, 
+            new UVCoverageSwingWorker(this, obsCollection, this.getObservabilityData(), targetName, uvMax,
+                    doUVSupport, doOIFits, useInstrumentBias, doDataNoise,
                     doModelImage, imageMode, imageSize, colorModel, colorScale, doImageNoise,
                     this.imageIndex, supersamplingOIFits, mathModeOIFits, currentUVMapData).executeTask();
 
@@ -2407,11 +2410,19 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
          */
         @Override
         public void refreshUI(final UVMapData uvMapData) {
-            // delegates to uv coverage panel :
-            this.uvPanel.updateUVMap(uvMapData.getUvMap(), uvMapData.getDataMin(), uvMapData.getDataMax(), uvMapData.getColorScale());
+            // check that rectangle area corresponds to the current UV area:
+            // It may happen that GUI changed while the asynchronously computed image is ready !
+            final Rectangle2D.Double uvRectCurrent = this.uvPanel.getCurrentUVRect();
+            if (this.uvRect.equals(uvRectCurrent)) {
 
-            // update the status bar:
-            StatusBar.showIfPrevious(MSG_COMPUTING_MAP, "uv map done.");
+                // delegates to uv coverage panel :
+                this.uvPanel.updateUVMap(uvMapData.getUvMap(), uvMapData.getDataMin(), uvMapData.getDataMax(), uvMapData.getColorScale());
+
+                // update the status bar:
+                StatusBar.showIfPrevious(MSG_COMPUTING_MAP, "uv map done.");
+            } else {
+                logger.debug("Incompatible uv rectangles: {} vs {}", uvRect, uvRectCurrent);
+            }
         }
 
         /**
@@ -2429,6 +2440,18 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                 super.handleException(ee);
             }
         }
+    }
+
+    private Rectangle2D.Double getCurrentUVRect() {
+        final ValueAxis domainAxis = this.xyPlot.getDomainAxis();
+        final ValueAxis rangeAxis = this.xyPlot.getRangeAxis();
+
+        final Rectangle2D.Double uvRect = new Rectangle2D.Double();
+        uvRect.setFrameFromDiagonal(
+                fromUVPlotScale(domainAxis.getLowerBound()), fromUVPlotScale(rangeAxis.getLowerBound()),
+                fromUVPlotScale(domainAxis.getUpperBound()), fromUVPlotScale(rangeAxis.getUpperBound()));
+
+        return uvRect;
     }
 
     /**
@@ -2565,40 +2588,60 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
     /**
      * Update the background image of the chart with the UV Map
-     * @param uvMap image or null
+     * @param image image or null
      * @param dataMin minimum value to update color scale bounds
      * @param dataMax maximum value to update color scale bounds
      * @param colorScale color scaling method
      */
-    private void updateUVMap(final Image uvMap, final Float dataMin, final Float dataMax, final ColorScale colorScale) {
-        if (uvMap != null) {
-            if (dataMin != null && dataMax != null
-                    && dataMin.floatValue() != dataMax.floatValue() && !Float.isInfinite(dataMin) && !Float.isInfinite(dataMax)) {
-                logger.debug("data min = {} - max = {}", dataMin, dataMax);
+    private void updateUVMap(final Image image, final Float dataMin, final Float dataMax, final ColorScale colorScale) {
+        if (image != null) {
+            // check that the uvMap is different than currently displayed one:
+            final Image bckgImg = this.xyPlot.getBackgroundImage();
+            if (image != bckgImg) {
+                if (dataMin != null && dataMax != null
+                        && dataMin.floatValue() != dataMax.floatValue() && !Float.isInfinite(dataMin) && !Float.isInfinite(dataMax)) {
+                    logger.debug("data min = {} - max = {}", dataMin, dataMax);
 
-                double min = dataMin.doubleValue();
-                double max = dataMax.doubleValue();
+                    double min = dataMin.doubleValue();
+                    double max = dataMax.doubleValue();
 
-                if (colorScale == ColorScale.LOGARITHMIC) {
-                    final double log10Min = Math.log10(min);
-                    final double log10Max = Math.log10(max);
+                    if (colorScale == ColorScale.LOGARITHMIC) {
+                        final double log10Min = Math.log10(min);
+                        final double log10Max = Math.log10(max);
 
-                    if ((int) log10Max - (int) log10Min == 0) {
-                        // fix data range to lower and upper pow(10):
-                        min = FastMath.pow(10d, Math.floor(log10Min));
-                        max = FastMath.pow(10d, Math.ceil(log10Max));
+                        if ((int) log10Max - (int) log10Min == 0) {
+                            // fix data range to lower and upper pow(10):
+                            min = FastMath.pow(10d, Math.floor(log10Min));
+                            max = FastMath.pow(10d, Math.ceil(log10Max));
+                        }
+                    }
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("min = {} - max = {}", min, max);
+                    }
+
+                    // fix axis boundaries:
+                    this.mapLegend.getAxis().setRange(min, max);
+                }
+                // Recycle previous image:
+                if (bckgImg instanceof BufferedImage) {
+                    final BufferedImage bi = (BufferedImage) bckgImg;
+                    // avoid sub images (child raster):
+                    if (bi.getRaster().getParent() == null
+                            && this.chartData != null && this.chartData.getUVMapData() != null) {
+                        // check if this is the reference image:
+                        if (bckgImg != this.chartData.getUVMapData().getUvMap()) {
+                            // recycle previous images:
+                            ImageUtils.recycleImage(bi);
+                        }
                     }
                 }
-                if (logger.isDebugEnabled()) {
-                    logger.debug("min = {} - max = {}", min, max);
+                if (logger.isDebugEnabled() && image instanceof BufferedImage) {
+                    final BufferedImage bi = (BufferedImage) image;
+                    logger.debug("display Image[{} x {}] @ {}", bi.getWidth(), bi.getHeight(), bi.hashCode());
                 }
-
-                // fix axis boundaries:
-                this.mapLegend.getAxis().setRange(min, max);
+                this.xyPlot.setBackgroundPaint(null);
+                this.xyPlot.setBackgroundImage(image);
             }
-
-            this.xyPlot.setBackgroundPaint(null);
-            this.xyPlot.setBackgroundImage(uvMap);
         } else {
             this.xyPlot.setBackgroundPaint(Color.lightGray);
             this.xyPlot.setBackgroundImage(null);
@@ -2660,7 +2703,7 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
         this.xyPlot.defineBounds(toUVPlotScale(uvMaxInLambda));
         // uv in meters (megalambda to meter conversion):
         this.xyPlot.defineAxisBounds(1, uvMaxInLambda * uvData.getLambda());
-        
+
         // set the main data set :
         this.xyPlot.setDataset(DATASET_UV_POINTS, datasetPoints);
         this.xyPlot.setDataset(DATASET_UV_POINTS_SHADOW, datasetPoints);

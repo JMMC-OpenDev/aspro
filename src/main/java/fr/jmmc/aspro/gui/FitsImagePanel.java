@@ -852,8 +852,29 @@ public class FitsImagePanel extends javax.swing.JPanel implements ChartProgressL
      */
     private void updatePlotImage(final Image image) {
         if (image != null) {
-            this.xyPlot.setBackgroundPaint(null);
-            this.xyPlot.setBackgroundImage(image);
+            // check that the uvMap is different than currently displayed one:
+            final Image bckgImg = this.xyPlot.getBackgroundImage();
+            if (image != bckgImg) {
+                // Recycle previous image:
+                if (bckgImg instanceof BufferedImage) {
+                    final BufferedImage bi = (BufferedImage) bckgImg;
+                    // avoid sub images (child raster):
+                    if (bi.getRaster().getParent() == null
+                            && this.chartData != null && this.chartData.getImage() != null) {
+                        // check if this is the reference image:
+                        if (bckgImg != this.chartData.getImage()) {
+                            // recycle previous images:
+                            ImageUtils.recycleImage(bi);
+                        }
+                    }
+                }
+                if (logger.isDebugEnabled() && image instanceof BufferedImage) {
+                    final BufferedImage bi = (BufferedImage) image;
+                    logger.debug("display Image[{} x {}] @ {}", bi.getWidth(), bi.getHeight(), bi.hashCode());
+                }
+                this.xyPlot.setBackgroundPaint(null);
+                this.xyPlot.setBackgroundImage(image);
+            }
         } else {
             this.xyPlot.setBackgroundPaint(Color.lightGray);
             this.xyPlot.setBackgroundImage(null);
