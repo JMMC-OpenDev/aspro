@@ -9,6 +9,7 @@ import fr.jmmc.jmcs.Bootstrapper;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
 import java.io.File;
 import java.util.Locale;
+import org.apache.commons.lang.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +49,7 @@ public class TargetEditorTest {
                 Bootstrapper.getState();
 
                 try {
-                    final String userHome = System.getProperty("user.home");
+                    final String userHome = SystemUtils.USER_HOME;
 
                     ObservationManager.getInstance().load(new File(userHome + "/ASPRO2/VLTI_FUN2.asprox"));
 

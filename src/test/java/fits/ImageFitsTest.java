@@ -291,6 +291,8 @@ public class ImageFitsTest {
 
                         file = f.getAbsolutePath();
                         try {
+                            logger.info("Loading file: " + file);
+                            
                             // load and prepare images:
                             model.setFile(file);
 
