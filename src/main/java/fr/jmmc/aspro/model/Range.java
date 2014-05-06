@@ -369,8 +369,14 @@ public final class Range {
      * @return new list of ranges or null
      */
     public static List<Range> intersectRanges(final List<Range> ranges, final int nValid,
-            final List<Range> results, final RangeFactory rangeFactory) {
+                                              final List<Range> results, final RangeFactory rangeFactory) {
+
         final int len = ranges.size();
+
+        // check if ranges has enough elements to satisfy the valid range condition:
+        if (len < nValid) {
+            return results;
+        }
 
         // table of start/end time :
         final RangeLimit[] limits = new RangeLimit[2 * len];
@@ -398,14 +404,13 @@ public final class Range {
      * @return new list of ranges or null
      */
     public static List<Range> intersectRanges(final RangeLimit[] limits, final int nLimits, final int nValid,
-            final List<Range> results, final RangeFactory rangeFactory) {
+                                              final List<Range> results, final RangeFactory rangeFactory) {
 
-        // check if limits has enough elements
-        if ((nLimits == 0) || (limits.length < nLimits))
-        {
+        // check if limits has enough elements to satisfy the valid range condition:
+        if (nLimits < (nValid >> 1)) {
             return results;
         }
-        
+
         // use customized binary sort to be in-place (no memory usage):
         // inspired from Arrays.sort but do not use tim sort as it makes array copies 
         // when size > threshold (~ 20 or 40 depending on JDK):
@@ -413,7 +418,6 @@ public final class Range {
 
         //  Explore range: when the running sum of flag is equal to the
         //  number nValid, we are in a valid range
-
         List<Range> mRanges = results;
 
         for (int i = 0, s = 0, len = nLimits - nValid; i < len; i++) {

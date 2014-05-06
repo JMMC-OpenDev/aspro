@@ -1278,35 +1278,43 @@ public final class ObservabilityService {
                 }
             }
 
-            // Merge then all JD intervals :
-            // nValid = nBL [dl] + 1 [rise or horizon] + 1 if night limits
-            int nValid = sizeBL + 1;
+            int nValid;
+            final List<Range> finalRangesHardLimits;
+            
+            if (!rangesHABaseLines.isEmpty()) {
+                // Merge then all JD intervals :
+                // nValid = nBL [dl] + 1 [rise or horizon] + 1 if night limits
+                nValid = sizeBL + 1;
 
-            // flatten and convert HA ranges to JD range :
-            this.sc.convertHAToJDRangesList(rangesHABaseLines, obsRanges, precRA);
+                // flatten and convert HA ranges to JD range :
+                this.sc.convertHAToJDRangesList(rangesHABaseLines, obsRanges, precRA);
 
-            if (rangesJDHorizon != null) {
-                obsRanges.addAll(rangesJDHorizon);
+                if (rangesJDHorizon != null) {
+                    obsRanges.addAll(rangesJDHorizon);
+                } else {
+                    // Check Shadowing for every stations ?
+                    obsRanges.add(rangeJDRiseSet);
+                }
+
+                // Intersect with night limits:
+                if (this.useNightLimit) {
+                    obsRanges.addAll(this.nightLimits);
+                    nValid++;
+                }
+
+                if (isLogDebug) {
+                    logger.debug("obsRanges: {}", obsRanges);
+                }
+
+                // fast interrupt:
+                checkInterrupted();
+
+                // finally : merge intervals :
+                finalRangesHardLimits = Range.intersectRanges(obsRanges, nValid, defaultRangeFactory);
+                
             } else {
-                // Check Shadowing for every stations ?
-                obsRanges.add(rangeJDRiseSet);
+                finalRangesHardLimits = null;
             }
-
-            // Intersect with night limits:
-            if (this.useNightLimit) {
-                obsRanges.addAll(this.nightLimits);
-                nValid++;
-            }
-
-            if (isLogDebug) {
-                logger.debug("obsRanges: {}", obsRanges);
-            }
-
-            // fast interrupt:
-            checkInterrupted();
-
-            // finally : merge intervals :
-            final List<Range> finalRangesHardLimits = Range.intersectRanges(obsRanges, nValid, defaultRangeFactory);
 
             if (isLogDebug) {
                 logger.debug("finalRangesHardLimits: {}", finalRangesHardLimits);
@@ -2716,7 +2724,7 @@ public final class ObservabilityService {
 
         Beam b1, b2;
         Position3D pos1, pos2;
-        final boolean[] ignoreRestrictions = new boolean[sizeBL];
+        final boolean[] ignoreRestrictions = new boolean[nDLRestrictions];
         DelayLineRestrictionThrow throw1, throw2;
 
         double x, y, z, opd, wMin, wMax;
