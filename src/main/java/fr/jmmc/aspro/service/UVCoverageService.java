@@ -57,9 +57,6 @@ public final class UVCoverageService {
     private final String targetName;
     /** maximum U or V coordinate in rad-1 (corrected by the minimal wavelength) */
     private double uvMax;
-    /** scaling factor to convert U or V coordinate in meters 
-     (correction to the central wavelength / lower wavelength of the selected instrument) */
-    private double uvScaleInMeters;
     /** flag to compute the UV support */
     private final boolean doUVSupport;
     /** true to use instrument bias; false to compute only theoretical error */
