@@ -9,6 +9,7 @@ import fr.jmmc.aspro.model.oi.UserModel;
 import fr.jmmc.jmal.complex.MutableComplex;
 import fr.jmmc.jmal.image.ColorScale;
 import fr.jmmc.jmal.image.FFTUtils;
+import fr.jmmc.jmal.image.FloatArrayCache;
 import fr.jmmc.jmal.image.ImageArrayUtils;
 import fr.jmmc.jmal.image.job.ImageFlipJob;
 import fr.jmmc.jmal.image.job.ImageLowerThresholdJob;
@@ -370,45 +371,60 @@ public final class UserModelService {
         }
 
         // fft data as float [rows][cols] packed:
-        final float[][] visData;
+        float[][] visData = null;
+        float[][] imgData = null;
 
-        if (refVisData == null || fftOutputSize != refVisData.length) {
-            // use single precision for FFT performance (image needs not double precision) :
+        try {
+            if (refVisData == null || fftOutputSize != refVisData.length) {
+                // use single precision for FFT performance (image needs not double precision) :
 
-            // 1 - compute FFT
-            // TODO: cache the FFT in the Target object or save it to disk (temp) ...
-            visData = FFTUtils.computeFFT(inputSize, fitsImage.getData(), fftSize, fftOutputSize);
+                // 1 - compute FFT
+                // TODO: cache the FFT in the Target object or save it to disk (temp) ...
+                visData = FFTUtils.computeFFT(inputSize, fitsImage.getData(), fftSize, fftOutputSize);
+
+                // fast interrupt :
+                if (currentThread.isInterrupted()) {
+                    throw ije;
+                }
+            } else {
+                // use reference complex visibility data:
+                visData = refVisData;
+            }
+
+            // 2 - Extract the amplitude/phase/square amplitude to get the uv map :
+            // data as float [rows][cols]:
+            imgData = FFTUtils.convert(fftOutputSize, visData, mode, outputSize, noiseService);
+
+            final int dataSize = outputSize;
 
             // fast interrupt :
             if (currentThread.isInterrupted()) {
                 throw ije;
             }
-        } else {
-            // use reference complex visibility data:
-            visData = refVisData;
+
+            // 3 - Get the image with the given color model and color scale :
+            final Rectangle2D.Double uvMapRect = new Rectangle2D.Double();
+            uvMapRect.setFrameFromDiagonal(-mapUvMax, -mapUvMax, mapUvMax, mapUvMax);
+
+            final UVMapData uvMapData = ModelUVMapService.computeImage(uvRect, refMin, refMax, mode, imageSize, colorModel, colorScale,
+                    dataSize, visData, imgData, uvMapRect, noiseService);
+
+            logger.info("compute : duration = {} ms.", 1e-6d * (System.nanoTime() - start));
+
+            return uvMapData;
+
+        } catch (RuntimeException re) {
+            logger.debug("recycleArrays <= interrupted job:");
+            // recycle arrays:
+            if (visData != refVisData) {
+                FloatArrayCache.recycleArray(visData);
+            }
+            // rethrow exception:
+            throw re;
+        } finally {
+            // recycle arrays:
+            FloatArrayCache.recycleArray(imgData);
         }
-
-        // 2 - Extract the amplitude/phase/square amplitude to get the uv map :
-        // data as float [rows][cols]:
-        float[][] data = FFTUtils.convert(fftOutputSize, visData, mode, outputSize, noiseService);
-
-        final int dataSize = outputSize;
-
-        // fast interrupt :
-        if (currentThread.isInterrupted()) {
-            throw ije;
-        }
-
-        // 3 - Get the image with the given color model and color scale :
-        final Rectangle2D.Double uvMapRect = new Rectangle2D.Double();
-        uvMapRect.setFrameFromDiagonal(-mapUvMax, -mapUvMax, mapUvMax, mapUvMax);
-
-        final UVMapData uvMapData = ModelUVMapService.computeImage(uvRect, refMin, refMax, mode, imageSize, colorModel, colorScale,
-                dataSize, visData, data, uvMapRect, noiseService);
-
-        logger.info("compute : duration = {} ms.", 1e-6d * (System.nanoTime() - start));
-
-        return uvMapData;
     }
 
     /**

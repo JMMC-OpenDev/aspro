@@ -53,6 +53,7 @@ import fr.jmmc.aspro.service.UserModelService;
 import fr.jmmc.aspro.service.UserModelService.MathMode;
 import fr.jmmc.jmal.image.ColorModels;
 import fr.jmmc.jmal.image.ColorScale;
+import fr.jmmc.jmal.image.FloatArrayCache;
 import fr.jmmc.jmal.image.ImageUtils;
 import fr.jmmc.jmal.model.ImageMode;
 import fr.jmmc.jmal.model.ModelUVMapService;
@@ -1783,12 +1784,17 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
                         _logger.debug("Reuse model image.");
 
+                        // User Model:
+                        if (modelDataList != null) {
+                            // flag indicating not to recycle currentUVMapData.getData():
+                            this.currentUVMapData.setDataReused(true);
+                        }
+
                         // reuse computed UV Map Data :
                         uvDataCollection.setUvMapData(this.currentUVMapData);
                     } else {
+                        UVMapData uvMapData = null;
                         try {
-                            UVMapData uvMapData = null;
-
                             if (target.hasAnalyticalModel()) {
                                 // Analytical model:
                                 final List<Model> models = target.getModels();
@@ -1818,12 +1824,14 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                                     final FitsImage fitsImage = modelDataList.get(imageIdx).getFitsImage();
 
                                     if (fitsImage != null) {
-
                                         // Check if the previously computed visiblity Data is still valid :
                                         if (this.currentUVMapData != null
                                                 && this.currentUVMapData.isDataValid(targetName, targetVersion, uvRect, this.imageSize, imageIdx)) {
 
                                             _logger.debug("Reuse model visiblity.");
+
+                                            // flag indicating not to recycle currentUVMapData.getData():
+                                            this.currentUVMapData.setDataReused(true);
 
                                             // Compute only image using existing complex visibility data :
                                             uvMapData = UserModelService.computeUVMap(fitsImage,
@@ -1870,6 +1878,14 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
 
                         } catch (InterruptedJobException ije) {
                             _logger.debug("Computing model image interrupted: ", ije);
+                            // recycle arrays:
+                            if ((uvMapData != null)
+                                    && !target.hasAnalyticalModel()
+                                    && ((this.currentUVMapData == null)
+                                    || (this.currentUVMapData.getData() != uvMapData.getData()))) {
+                                // recycle array:
+                                FloatArrayCache.recycleArray(uvMapData.getData());
+                            }
                             return null;
                         }
                     }
@@ -1892,7 +1908,6 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
                 mergedWarningContainer.addWarningMessages(uvDataFirst.getWarningContainer());
 
             } else {
-
                 if (uvDataCollection.getFirstObservation().getWhen().isNightRestriction()) {
                     mergedWarningContainer.addWarningMessage("Multiple configurations cannot be done in one night"
                             + " (night restrictions are only valid for "
@@ -2132,6 +2147,46 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
      * @param chartData chart data
      */
     private void setChartData(final ObservationCollectionUVData chartData) {
+        if (this.chartData != null) {
+            // recycle old uv map data:
+            final UVMapData uvMapData = this.chartData.getUVMapData();
+            if (uvMapData != null && uvMapData.getUserModel() != null) {
+                boolean same = false;
+
+                if (chartData.getUVMapData() != null) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("new uvMapData: {}", chartData.getUVMapData().hashCode());
+                    }
+                    if (chartData.getUVMapData().getData() != null) {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("new uvMapData.data: {}", chartData.getUVMapData().getData().hashCode());
+                        }
+
+                        same = (chartData.getUVMapData().getData() == uvMapData.getData());
+
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("same = {}", same);
+                        }
+                    }
+                }
+                if (logger.isDebugEnabled()) {
+                    logger.debug("old uvMapData: {}", uvMapData.hashCode());
+                }
+
+                if (uvMapData.isDataReused()) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("visData in use");
+                    }
+                } else if (!same) {
+                    // recycle arrays:
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("old uvMapData.data: {}", uvMapData.getData().hashCode());
+                    }
+                    FloatArrayCache.recycleArray(uvMapData.getData());
+                }
+            }
+        }
+
         this.chartData = chartData;
     }
 
