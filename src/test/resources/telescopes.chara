@@ -29,7 +29,10 @@
 # HSA2	  - Harmonic sin(2*Az) in microns
 # WLF	  - white light fringe position in microns
 # AIRPATH - amount of airpath  in microns using default beam
-#	    Note that this assumes the default Beam dn default Pop are used
+#	    The numbers here represent the differential airpath in the
+#	    beam combining lab. They do not include path within the scopes
+#	    and in the beam combining lab, which are assumed to be the same.
+#	    Note that this assumes the default Beam and default Pop are used
 # INTERNAL- Pathlength (with default beam) for internal fringes
 # LIGHT	  - length of light pipe in microns
 #	    Note that this assumes the default Beam dn default Pop are used
@@ -95,7 +98,12 @@ SAS	        0.000
 SAC	        0.000
 HSA2	        0.000
 WLF             0.000
-AIRPATH         584200.0
+# This is the old number from the 2012 solution
+#AIRPATH         584200.0
+# This number includes the extra path from the new WFS optical table
+#AIRPATH		990200.000
+# This has the extra 0.7097m*2 offset added by the LABAO.
+AIRPATH 	2409600.000
 INTERNAL        375290
 DEFBEAM 	6
 BEAM1		416200.000
@@ -167,7 +175,7 @@ SAS	         0.000
 SAC	         0.000
 HSA2	         0.000
 WLF              0.000
-AIRPATH   3670300.0
+AIRPATH   	3670300.0
 INTERNAL 	372598.020
 DEFBEAM 	5
 BEAM1		416200.000
