@@ -414,7 +414,8 @@ public final class Range {
         // use customized binary sort to be in-place (no memory usage):
         // inspired from Arrays.sort but do not use tim sort as it makes array copies 
         // when size > threshold (~ 20 or 40 depending on JDK):
-        binarySort(limits, 0, nLimits, countRunAndMakeAscending(limits, 0, nLimits));
+//        binarySort(limits, 0, nLimits, countRunAndMakeAscending(limits, 0, nLimits));
+        sort1(limits, 0, nLimits);
 
         //  Explore range: when the running sum of flag is equal to the
         //  number nValid, we are in a valid range
@@ -440,136 +441,99 @@ public final class Range {
         return mRanges;
     }
 
-    // --- Customized BinarySort from Arrays.sort() -----------------------------
+    // --- Customized QuickSort from Arrays.sort(double[]) OpenJDK 1.8 --------
     /**
-     * Sorts the specified portion of the specified array using a binary
-     * insertion sort.  This is the best method for sorting small numbers
-     * of elements.  It requires O(n log n) compares, but O(n^2) data
-     * movement (worst case).
-     *
-     * If the initial part of the specified range is already sorted,
-     * this method can take advantage of it: the method assumes that the
-     * elements from index {@code lo}, inclusive, to {@code start},
-     * exclusive are already sorted.
-     *
-     * @param a the array in which a range is to be sorted
-     * @param lo the index of the first element in the range to be sorted
-     * @param hi the index after the last element in the range to be sorted
-     * @param start the index of the first element in the range that is
-     *        not already known to be sorted ({@code lo <= start <= hi})
+     * Sorts the specified sub-array of doubles into ascending order.
      */
-    @SuppressWarnings("unchecked")
-    private static void binarySort(final RangeLimit[] a, final int lo, final int hi, int start) {
-        if (start == lo) {
-            start++;
-        }
-        int left, right, mid, n;
-        RangeLimit pivot;
-
-        for (; start < hi; start++) {
-            pivot = a[start];
-
-            // Set left (and right) to the index where a[start] (pivot) belongs
-            left = lo;
-            right = start;
-            /*
-             * Invariants:
-             *   pivot >= all in [lo, left).
-             *   pivot <  all in [right, start).
-             */
-            while (left < right) {
-                mid = (left + right) >>> 1;
-                if (pivot.compareTo(a[mid]) < 0) {
-                    right = mid;
-                } else {
-                    left = mid + 1;
+    private static void sort1(final RangeLimit[] limits, final int off, final int len) {
+        // Insertion sort on smallest arrays
+        if (len < 20) { // 7 in JDK for double[]
+            for (int i = off; i < len + off; i++) {
+                for (int j = i; j > off && limits[j - 1].position > limits[j].position; j--) {
+                    swap(limits, j, j - 1);
                 }
             }
+            return;
+        }
 
-            /*
-             * The invariants still hold: pivot >= all in [lo, left) and
-             * pivot < all in [left, start), so pivot belongs at left.  Note
-             * that if there are elements equal to pivot, left points to the       * first slot after them -- that's why this sort is stable.
-             * Slide elements over to make room for pivot.
-             */
-            n = start - left;  // The number of elements to move
-            // Switch is just an optimization for arraycopy in default case
-            switch (n) {
-                case 2:
-                    a[left + 2] = a[left + 1];
-                case 1:
-                    a[left + 1] = a[left];
-                    break;
-                default:
-                    System.arraycopy(a, left, a, left + 1, n);
+        // Choose a partition element, v
+        int m = off + (len >> 1);       // Small arrays, middle element
+        if (len > 7) {
+            int l = off;
+            int n = off + len - 1;
+            if (len > 40) {        // Big arrays, pseudomedian of 9
+                int s = len / 8;
+                l = med3(limits, l, l + s, l + 2 * s);
+                m = med3(limits, m - s, m, m + s);
+                n = med3(limits, n - 2 * s, n - s, n);
             }
-            a[left] = pivot;
+            m = med3(limits, l, m, n); // Mid-size, med of 3
+        }
+        final double v = limits[m].position;
+
+        // Establish Invariant: v* (<v)* (>v)* v*
+        int a = off, b = a, c = off + len - 1, d = c;
+        while (true) {
+            while (b <= c && limits[b].position <= v) {
+                if (limits[b].position == v) {
+                    swap(limits, a++, b);
+                }
+                b++;
+            }
+            while (c >= b && limits[c].position >= v) {
+                if (limits[c].position == v) {
+                    swap(limits, c, d--);
+                }
+                c--;
+            }
+            if (b > c) {
+                break;
+            }
+            swap(limits, b++, c--);
+        }
+
+        // Swap partition elements back to middle
+        int s;
+        final int n = off + len;
+        s = Math.min(a - off, b - a);
+        vecswap(limits, off, b - s, s);
+        s = Math.min(d - c, n - d - 1);
+        vecswap(limits, b, n - s, s);
+
+        // Recursively sort non-partition-elements
+        if ((s = b - a) > 1) {
+            sort1(limits, off, s);
+        }
+        if ((s = d - c) > 1) {
+            sort1(limits, n - s, s);
         }
     }
 
     /**
-     * Returns the length of the run beginning at the specified position in
-     * the specified array and reverses the run if it is descending (ensuring
-     * that the run will always be ascending when the method returns).
-     *
-     * A run is the longest ascending sequence with:
-     *
-     *    a[lo] <= a[lo + 1] <= a[lo + 2] <= ...
-     *
-     * or the longest descending sequence with:
-     *
-     *    a[lo] >  a[lo + 1] >  a[lo + 2] >  ...
-     *
-     * For its intended use in a stable mergesort, the strictness of the
-     * definition of "descending" is needed so that the call can safely
-     * reverse a descending sequence without violating stability.
-     *
-     * @param a the array in which a run is to be counted and possibly reversed
-     * @param lo index of the first element in the run
-     * @param hi index after the last element that may be contained in the run.
-     * It is required that {@code lo < hi}.
-     * @return  the length of the run beginning at the specified position in
-     *          the specified array
+     * Swaps x[a] with x[b].
      */
-    @SuppressWarnings("unchecked")
-    private static int countRunAndMakeAscending(final RangeLimit[] a, final int lo, final int hi) {
-        int runHi = lo + 1;
-        if (runHi == hi) {
-            return 1;
-        }
-
-        // Find end of run, and reverse range if descending
-        if (a[runHi++].compareTo(a[lo]) < 0) {
-            // Descending
-            while (runHi < hi && a[runHi].compareTo(a[runHi - 1]) < 0) {
-                runHi++;
-            }
-            reverseRange(a, lo, runHi);
-        } else {
-            // Ascending
-            while (runHi < hi && a[runHi].compareTo(a[runHi - 1]) >= 0) {
-                runHi++;
-            }
-        }
-
-        return runHi - lo;
+    private static void swap(final RangeLimit[] x, final int a, final int b) {
+        final RangeLimit t = x[a];
+        x[a] = x[b];
+        x[b] = t;
     }
 
     /**
-     * Reverse the specified range of the specified array.
-     *
-     * @param a the array in which a range is to be reversed
-     * @param lo the index of the first element in the range to be reversed
-     * @param hi the index after the last element in the range to be reversed
+     * Swaps x[a .. (a+n-1)] with x[b .. (b+n-1)].
      */
-    @SuppressWarnings("unchecked")
-    private static void reverseRange(final RangeLimit[] a, int lo, int hi) {
-        hi--;
-        RangeLimit t;
-        while (lo < hi) {
-            t = a[lo];
-            a[lo++] = a[hi];
-            a[hi--] = t;
+    private static void vecswap(final RangeLimit[] x, int a, int b, final int n) {
+        for (int i = 0; i < n; i++, a++, b++) {
+            swap(x, a, b);
         }
     }
+
+    /**
+     * Returns the index of the median of the three indexed doubles.
+     */
+    private static int med3(final RangeLimit[] x, final int a, final int b, final int c) {
+        return (x[a].position < x[b].position
+                ? (x[b].position < x[c].position ? b : x[a].position < x[c].position ? c : a)
+                : (x[b].position > x[c].position ? b : x[a].position > x[c].position ? c : a));
+    }
+
 }
