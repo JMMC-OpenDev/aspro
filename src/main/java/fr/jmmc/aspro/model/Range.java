@@ -414,8 +414,7 @@ public final class Range {
         // use customized binary sort to be in-place (no memory usage):
         // inspired from Arrays.sort but do not use tim sort as it makes array copies 
         // when size > threshold (~ 20 or 40 depending on JDK):
-//        binarySort(limits, 0, nLimits, countRunAndMakeAscending(limits, 0, nLimits));
-        sort1(limits, 0, nLimits);
+        quickSort(limits, 0, nLimits);
 
         //  Explore range: when the running sum of flag is equal to the
         //  number nValid, we are in a valid range
@@ -443,11 +442,24 @@ public final class Range {
 
     // --- Customized QuickSort from Arrays.sort(double[]) OpenJDK 1.8 --------
     /**
-     * Sorts the specified sub-array of doubles into ascending order.
+     * Tuning parameter: list size at or below which insertion sort will be
+     * used in preference to mergesort or quicksort.
      */
-    private static void sort1(final RangeLimit[] limits, final int off, final int len) {
+    private final static int INSERTIONSORT_THRESHOLD = 16;
+
+    /**
+     * Sorts the specified array of ints into ascending numerical order.
+     * The sorting algorithm is a tuned quicksort, adapted from Jon
+     * L. Bentley and M. Douglas McIlroy's "Engineering a Sort Function",
+     * Software-Practice and Experience, Vol. 23(11) P. 1249-1265 (November
+     * 1993).  This algorithm offers n*log(n) performance on many data sets
+     * that cause other quicksorts to degrade to quadratic performance.
+     *
+     * @param limits the array to be sorted
+     */
+    private static void quickSort(final RangeLimit[] limits, final int off, final int len) {
         // Insertion sort on smallest arrays
-        if (len < 20) { // 7 in JDK for double[]
+        if (len < INSERTIONSORT_THRESHOLD) { // 7 in JDK for int[]
             for (int i = off; i < len + off; i++) {
                 for (int j = i; j > off && limits[j - 1].position > limits[j].position; j--) {
                     swap(limits, j, j - 1);
@@ -458,7 +470,7 @@ public final class Range {
 
         // Choose a partition element, v
         int m = off + (len >> 1);       // Small arrays, middle element
-        if (len > 7) {
+        if (len > INSERTIONSORT_THRESHOLD) { // 7 in JDK for int[]
             int l = off;
             int n = off + len - 1;
             if (len > 40) {        // Big arrays, pseudomedian of 9
@@ -502,10 +514,10 @@ public final class Range {
 
         // Recursively sort non-partition-elements
         if ((s = b - a) > 1) {
-            sort1(limits, off, s);
+            quickSort(limits, off, s);
         }
         if ((s = d - c) > 1) {
-            sort1(limits, n - s, s);
+            quickSort(limits, n - s, s);
         }
     }
 

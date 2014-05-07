@@ -17,8 +17,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="Aspro2" version="0.9.6 beta 6"/>
-    <compilation date="24/04/2014" compiler="JDK 1.6.0_24"/>
+    <program name="Aspro2" version="0.9.6 beta 7"/>
+    <compilation date="07/05/2014" compiler="JDK 1.6.0_24"/>
 
     <text>ASPRO 2 from JMMC is the new version of the ASPRO tool to prepare your interferometric observations with the VLTI or other interferometers.</text>
     <authors>the JMMC Technical Group</authors>
@@ -187,6 +187,11 @@
     <releasenotes>
         <release version="0.9.6">
             <pubDate>Thu, 24 Apr 2014 18:00:00 GMT</pubDate>
+            <prerelease version="0.9.6 beta 7">
+                <change type="FEATURE">Improved the memory footprint for user models (fits cubes): efficient checksum computation
+                    and optimized memory used by model image / FFT computations</change>
+                <change type="FEATURE">Improved quick sort used by the Best Pops algorithm</change>
+            </prerelease>
             <prerelease version="0.9.6 beta 6">
                 <change type="BUGFIX">Fix the uv axis scale (meters) on the UV Coverage plot</change>
             </prerelease>
