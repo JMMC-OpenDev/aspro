@@ -3,19 +3,22 @@
  ******************************************************************************/
 package fest;
 
-import fest.common.JmcsApplicationSetup;
 
 import fest.common.JmcsFestSwingJUnitTestCase;
+import fr.jmmc.jmcs.Bootstrapper;
+import fr.jmmc.jmcs.util.JVMUtils;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import javax.swing.JFormattedTextField;
+import org.apache.commons.lang.SystemUtils;
 
 import org.fest.swing.annotation.GUITest;
 import org.fest.swing.edt.GuiActionRunner;
 import org.fest.swing.edt.GuiTask;
 import org.fest.swing.fixture.JPanelFixture;
 import org.fest.swing.fixture.JSpinnerFixture;
+import org.junit.BeforeClass;
 
 import org.junit.Test;
 
@@ -26,6 +29,10 @@ import org.junit.Test;
  */
 public final class AsproNightBoundsTest extends JmcsFestSwingJUnitTestCase {
 
+    /** absolute path to test folder to load observations */
+    private final static String USER_HOME = SystemUtils.USER_HOME;
+    private final static String TEST_FOLDER = USER_HOME + "/dev/aspro/src/test/resources/";
+
     /** name of the tab pane corresponding to the observability panel */
     private static final String TAB_OBSERVABILITY = "Observability";
     /** initial year */
@@ -34,17 +41,12 @@ public final class AsproNightBoundsTest extends JmcsFestSwingJUnitTestCase {
     private static final int DAYS = 10 * 365;
 
     /**
-     * Define the application
+     * Initialize system properties & static variables and finally starts the application
      */
-    static {
+    @BeforeClass
+    public static void intializeAndStartApplication() {
         // disable dev LAF menu :
-        System.setProperty("jmcs.laf.menu", "false");
-
-        final String userHome = System.getProperty("user.home");
-
-        JmcsApplicationSetup.define(
-                fr.jmmc.aspro.Aspro2.class,
-                "-open", userHome + "/dev/aspro/test/TEST_RA_LIMITS.asprox");
+        System.setProperty(JVMUtils.SYSTEM_PROPERTY_LAF_MENU, "false");
 
         // define robot delays :
         defineRobotDelayBetweenEvents(SHORT_DELAY);
@@ -52,11 +54,19 @@ public final class AsproNightBoundsTest extends JmcsFestSwingJUnitTestCase {
         // define delay before taking screenshot :
         defineScreenshotDelay(SHORT_DELAY);
 
+        // invoke Bootstrapper method to initialize logback now:
+        Bootstrapper.getState();
+        
         // disable tooltips :
         enableTooltips(false);
 
         // customize PDF action to avoid use StatusBar :
         fr.jmmc.aspro.gui.action.AsproExportPDFAction.setAvoidUseStatusBar(true);
+
+        // Start application:
+        JmcsFestSwingJUnitTestCase.startApplication(
+                fr.jmmc.aspro.Aspro2.class,
+                "-open", TEST_FOLDER + "TEST_RA_LIMITS.asprox");
     }
 
     /**
@@ -160,7 +170,7 @@ public final class AsproNightBoundsTest extends JmcsFestSwingJUnitTestCase {
     @Test
     @GUITest
     public void shouldExit() {
-        logger.severe("shouldExit test");
+        logger.info("shouldExit test");
 
         window.close();
 

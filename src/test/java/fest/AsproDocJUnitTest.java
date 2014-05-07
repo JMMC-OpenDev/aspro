@@ -5,7 +5,6 @@ package fest;
 
 import com.mortennobel.imagescaling.AdvancedResizeOp;
 import com.mortennobel.imagescaling.ResampleOp;
-import fest.common.JmcsApplicationSetup;
 import fest.common.JmcsFestSwingJUnitTestCase;
 import fr.jmmc.aspro.Preferences;
 import fr.jmmc.aspro.gui.SettingPanel;
@@ -13,11 +12,11 @@ import fr.jmmc.aspro.gui.util.WindWidget;
 import fr.jmmc.jmcs.Bootstrapper;
 import fr.jmmc.jmcs.data.preference.CommonPreferences;
 import fr.jmmc.jmcs.data.preference.PreferencesException;
+import fr.jmmc.jmcs.gui.component.MessagePane;
 import java.awt.Frame;
 import static java.awt.event.KeyEvent.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.util.logging.Level;
 import javax.swing.JComponent;
 import javax.swing.JFormattedTextField;
 import javax.swing.JList;
@@ -37,6 +36,7 @@ import org.fest.swing.fixture.JPanelFixture;
 import org.fest.swing.fixture.JTabbedPaneFixture;
 import org.fest.swing.fixture.JTextComponentFixture;
 import org.fest.swing.util.Platform;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -47,40 +47,34 @@ import org.junit.Test;
 public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
 
     /** absolute path to test folder to load observations */
-    private final static String USER_HOME = System.getProperty("user.home");
+    private final static String USER_HOME = SystemUtils.USER_HOME;
     private final static String TEST_FOLDER = USER_HOME + "/dev/aspro/src/test/resources/";
     private final static String MY_EMAIL = "laurent.bourges@obs.ujf-grenoble.fr";
 
     /**
-     * Define the application
+     * Initialize system properties & static variables and finally starts the application
      */
-    static {
-        // Test JDK 1.6
+    @BeforeClass
+    public static void intializeAndStartApplication() {
 
-        if (!SystemUtils.IS_JAVA_1_6) {
-            logger.warning("Please use a JVM 1.6 (Sun) before running tests (fonts and LAF may be wrong) !");
-            System.exit(1);
-        }
-
-        // disable dev LAF menu :
-        System.setProperty("jmcs.laf.menu", "false");
-
-        // Initialize logs first:
+        // invoke Bootstrapper method to initialize logback now:
         Bootstrapper.getState();
 
+        // Test JDK 1.6
+        if (!SystemUtils.IS_JAVA_1_6) {
+            MessagePane.showErrorMessage("Please use a JVM 1.6 (Sun) before running tests (fonts and LAF may be wrong) !");
+            Bootstrapper.stopApp(1);
+        }
+
         // reset Preferences:
-        new File(System.getProperty("user.home") + "/.fr.jmmc.jmcs.session_settings.jmmc.aspro2.properties").delete();
+        new File(USER_HOME + "/.fr.jmmc.jmcs.session_settings.jmmc.aspro2.properties").delete();
 
         try {
             CommonPreferences.getInstance().setPreference(CommonPreferences.FEEDBACK_REPORT_USER_EMAIL, MY_EMAIL);
         } catch (PreferencesException pe) {
-            logger.log(Level.WARNING, "Preference exception", pe);
+            logger.error("setPreference failed", pe);
         }
         Preferences.getInstance().resetToDefaultPreferences();
-
-        JmcsApplicationSetup.define(
-                fr.jmmc.aspro.Aspro2.class,
-                "-open", TEST_FOLDER + "Aspro2_sample.asprox");
 
         // define robot delays :
         defineRobotDelayBetweenEvents(SHORT_DELAY);
@@ -93,6 +87,11 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
 
         // customize PDF action to avoid use StatusBar :
         fr.jmmc.aspro.gui.action.AsproExportPDFAction.setAvoidUseStatusBar(true);
+
+        // Start application:
+        JmcsFestSwingJUnitTestCase.startApplication(
+                fr.jmmc.aspro.Aspro2.class,
+                "-open", TEST_FOLDER + "Aspro2_sample.asprox");
     }
 
     /**
@@ -619,7 +618,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
             Preferences.getInstance().setPreference(Preferences.MODEL_IMAGE_LUT, "heat");
             Preferences.getInstance().setPreference(Preferences.MODEL_IMAGE_SIZE, Integer.valueOf(1024));
         } catch (PreferencesException pe) {
-            logger.log(Level.SEVERE, "setPreference failed", pe);
+            logger.error("setPreference failed", pe);
         }
 
         // hack to solve focus trouble in menu items :
@@ -706,7 +705,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
     @Test
     @GUITest
     public void shouldExit() {
-        logger.severe("shouldExit test");
+        logger.info("shouldExit test");
 
         window.close();
 
