@@ -395,7 +395,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
 
         window.menuItemWithPath("Interop", "Show Hub Status").click();
 
-        final Frame hubFrame = robot().finder().find(FrameMatcher.withTitle("SAMP Status"));
+        final Frame hubFrame = robot().finder().find(FrameMatcher.withTitle("SAMP Hub"));
 
         if (hubFrame != null) {
             final FrameFixture frame = new FrameFixture(robot(), hubFrame);
@@ -536,8 +536,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
         window.menuItemWithPath("File").focus();
         window.menuItemWithPath("File", "Open observation").click();
 
-        window.fileChooser().selectFile(new File(TEST_FOLDER + "Aspro2_sample_with_calibrators.asprox"));
-        window.fileChooser().approve();
+        window.fileChooser().selectFile(new File(TEST_FOLDER + "Aspro2_sample_with_calibrators.asprox")).approve();
 
         window.list("jListTargets").selectItem("HD 3546 (cal)");
 
@@ -589,8 +588,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
         window.menuItemWithPath("File").focus();
         window.menuItemWithPath("File", "Open observation").click();
 
-        window.fileChooser().selectFile(new File(TEST_FOLDER + "Aspro2_sample_multi.asprox"));
-        window.fileChooser().approve();
+        window.fileChooser().selectFile(new File(TEST_FOLDER + "Aspro2_sample_multi.asprox")).approve();        
 
         // waits for computation to finish :
         AsproTestUtils.checkRunningTasks();
@@ -625,8 +623,7 @@ public final class AsproDocJUnitTest extends JmcsFestSwingJUnitTestCase {
         window.menuItemWithPath("File").focus();
         window.menuItemWithPath("File", "Open observation").click();
 
-        window.fileChooser().selectFile(new File(TEST_FOLDER + "Aspro2_sample_spiral.asprox"));
-        window.fileChooser().approve();
+        window.fileChooser().selectFile(new File(TEST_FOLDER + "Aspro2_sample_spiral.asprox")).approve();
 
         // target editor with calibrators :
         window.button("jButtonTargetEditor").click();
