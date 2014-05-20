@@ -3,7 +3,7 @@
  ******************************************************************************/
 package fr.jmmc.aspro.model.observability;
 
-import fr.jmmc.aspro.model.ObservabilityContext;
+import fr.jmmc.aspro.model.BestPoPsObservabilityContext;
 import fr.jmmc.aspro.model.Range;
 import fr.jmmc.aspro.service.pops.BestPopsEstimator;
 import fr.jmmc.jmcs.util.NumberUtils;
@@ -42,7 +42,7 @@ public final class PopObservabilityData implements Comparable<PopObservabilityDa
    * @return PopObservabilityData instance or null if intersection is empty (unobservable)
    */
   public static PopObservabilityData estimate(final String targetName, final PopCombination popCombination, final List<List<Range>> rangesBL,
-          final int nValid, final ObservabilityContext obsCtx, final BestPopsEstimator estimator,
+          final int nValid, final BestPoPsObservabilityContext obsCtx, final BestPopsEstimator estimator,
           final boolean doSkipDL, final boolean clearRangesBL) {
 
     // Estimate data first:
@@ -61,11 +61,9 @@ public final class PopObservabilityData implements Comparable<PopObservabilityDa
       obsCtx.recycleAll(rangesBL);
     }
 
-    // merged ranges (temporary use) = empty list with 3 buckets
-    final List<Range> mergeRanges = obsCtx.getMergeRanges();
-
-    // Merge HA ranges (BL) with HA Rise/set ranges (and optionally night limits) :
-    Range.intersectRanges(obsCtx.getFlatRangeLimits(), obsCtx.getSizeFlatRangeLimits(), nValid, mergeRanges, obsCtx);
+    // clear and get merged ranges (temporary use) = empty list with 3 buckets
+    // Merge HA ranges (BL) with HA Rise/set ranges (and optionally night limits):
+    final List<Range> mergeRanges = obsCtx.intersectAndGetMergeRanges(nValid);
 
     // find the maximum length of HA observable intervals:
     Range maxRange = null;

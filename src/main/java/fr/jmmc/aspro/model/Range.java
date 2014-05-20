@@ -430,7 +430,7 @@ public final class Range {
                 if ((limits[i + 1].position - limits[i].position) > 0.0) {
                     if (mRanges == null) {
                         // lazy instanciation (statically 1 range only) :
-                        mRanges = new ArrayList<Range>(1);
+                        mRanges = rangeFactory.getList();
                     }
                     mRanges.add(rangeFactory.valueOf(limits[i].position, limits[i + 1].position));
                 }

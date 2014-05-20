@@ -3,6 +3,7 @@
  ******************************************************************************/
 package fr.jmmc.aspro.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -23,7 +24,7 @@ public interface RangeFactory {
    * Return a List<Range> instance
    * @return List<Range> instance
    */
-  public List<Range> getList();
+  public ArrayList<Range> getList();
 
   /**
    * Reset the factory state
