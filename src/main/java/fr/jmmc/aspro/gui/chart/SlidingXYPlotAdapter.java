@@ -106,7 +106,8 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
      * @param maxElements max items in the chart view
      * @param aJMMC JMMC annotation instance to be added to renderer's annotations
      */
-    public SlidingXYPlotAdapter(final JFreeChart chart, final XYPlot plot, final int maxElements, final XYTextAnnotation aJMMC) {
+    public SlidingXYPlotAdapter(final JFreeChart chart, final XYPlot plot, final int maxElements,
+                                final XYTextAnnotation aJMMC) {
         this.chart = chart;
         this.xyPlot = plot;
         this.state.maxViewItems = maxElements;
@@ -127,9 +128,9 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
      * @param hasBackground true to indicate to change grid line colors; false otherwise
      */
     public void setData(final TaskSeriesCollection collection, final List<String> symbols, final List<Color> colors,
-            final Map<Integer, List<XYAnnotation>> annotations,
-            final List<Target> targetList, final List<String> labels,
-            final List<StarObservabilityData> soTargetList, final boolean hasBackground) {
+                        final Map<Integer, List<XYAnnotation>> annotations,
+                        final List<Target> targetList, final List<String> labels,
+                        final List<StarObservabilityData> soTargetList, final boolean hasBackground) {
         this.size = symbols.size();
         this.collection = collection;
         this.symbols = symbols;
@@ -341,6 +342,9 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
         final boolean savedNotify = this.chart.isNotify();
         this.chart.setNotify(false);
         this.xyPlot.setNotify(false);
+        if (this.renderer instanceof EnhancedXYBarRenderer) {
+            ((EnhancedXYBarRenderer)this.renderer).setNotify(false);
+        }
 
         try {
             // reset colors :
@@ -409,7 +413,6 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
                 renderContext.setMaxTipHeight(0.5d * (1d - barWidth));
 
                 // Redefine the x-position of annotations (corresponding to visible targets) :
-
                 List<XYAnnotation> list;
                 Integer pos;
                 for (int i = start, n = 0; i < end; i++, n++) {
@@ -420,10 +423,9 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
                     if (list != null) {
 
                         for (XYAnnotation annotation : list) {
-
-                            if (annotation instanceof XYTextAnnotation) {
-                                // Applies to XYTickAnnotation also :
-                                final XYTextAnnotation a = (XYTextAnnotation) annotation;
+                            if (annotation instanceof ExtendedXYTextAnnotation) { // TODO
+                                // Applies to XYTickAnnotation / FitXYTextAnnotation :
+                                final ExtendedXYTextAnnotation a = (ExtendedXYTextAnnotation) annotation;
                                 a.setX(n);
                                 this.renderer.addAnnotation(a);
 
@@ -439,6 +441,13 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
 
                                 // note: use layer according to the annotation layer:
                                 this.renderer.addAnnotation(a, a.getLayer());
+                            } else if (annotation instanceof XYTextAnnotation) {
+                                // Applies to XYTickAnnotation also :
+                                final XYTextAnnotation a = (XYTextAnnotation) annotation;
+                                a.setX(n);
+                                this.renderer.addAnnotation(a);
+                            } else {
+                                logger.info("unsupported annotation type: {}", annotation.getClass().getName());
                             }
                         }
                     }
@@ -466,6 +475,9 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
 
         } finally {
             // restore chart & plot notifications:
+            if (this.renderer instanceof EnhancedXYBarRenderer) {
+                ((EnhancedXYBarRenderer)this.renderer).setNotify(savedNotify);
+            }
             this.xyPlot.setNotify(savedNotify);
             this.chart.setNotify(savedNotify);
         }
@@ -514,80 +526,99 @@ public final class SlidingXYPlotAdapter implements XYToolTipGenerator {
             if (index < this.targetList.size()) {
 
                 final Target target = this.targetList.get(index);
-
                 logger.debug("target: {}", target);
 
-                final StringBuffer sb = this.sbToolTip;
-                sb.setLength(0); // clear
-                
-                sb.append("<html><b>").append(labels.get(index)).append(" Observability</b>");
-
-                final TaskSeries taskSeries = this.collection.getSeries(index);
-
                 // use interval or star data:
+                final TaskSeries taskSeries = this.collection.getSeries(index);
                 final TimePeriod period = taskSeries.get(item).getDuration();
-
                 final StarObservabilityData starObs = this.soTargetList.get(index);
 
-                if (starObs != null) {
-                    // note: often the start or end TargetPositionDate can not be found
-                    // when the interval has been splitted due to night overlaps (RA)
-
-                    Date date = period.getStart();
-                    TargetPositionDate pos = starObs.getTargetPosition(date);
-
-                    if (pos != null) {
-                        sb.append("<br><b>Start</b>: ");
-                        FormatterUtils.format(this.timeFormatter, sb, date);
-                        sb.append(" - <b>HA</b>: ");
-                        FormatterUtils.format(this.df1, sb, pos.getHa());
-                        sb.append(" (az ").append(pos.getAzimuth());
-                        sb.append(", el ").append(pos.getElevation()).append(")");
-                    }
-
-                    date = period.getEnd();
-                    pos = starObs.getTargetPosition(date);
-
-                    if (pos != null) {
-                        sb.append("<br><b>End</b>: ");
-                        FormatterUtils.format(this.timeFormatter, sb, date);
-                        sb.append(" - <b>HA</b>: ");
-                        FormatterUtils.format(this.df1, sb, pos.getHa());
-                        sb.append(" (az ").append(pos.getAzimuth());
-                        sb.append(", el ").append(pos.getElevation()).append(")");
-                    }
-
-                    date = starObs.getTransitDate();
-                    if (date != null) {
-                        sb.append("<br><b>Transit</b>: ");
-                        FormatterUtils.format(this.timeFormatter, sb, date);
-
-                        // if target not rise at transit: no az/el:
-                        pos = starObs.getTargetPosition(date);
-
-                        if (pos != null) {
-                            sb.append(" (az ").append(pos.getAzimuth());
-                            sb.append(", el ").append(pos.getElevation()).append(")");
-                        }
-                    }
-
-                    sb.append("<hr>");
-                }
-
-                target.toHtml(sb, false);
-
-                // Target user info:
-                final String userDescription = om.getTargetUserInfos().getDescription(target);
-
-                if (userDescription != null) {
-                    sb.append("<hr><b>Notes</b>:<br>").append(StringUtils.replaceCR(userDescription, "<br>"));
-                }
-                sb.append("</html>");
-
-                return sb.toString();
+                return generateToolTip(target, labels.get(index), null, starObs, period.getStart(), period.getEnd());
             }
         }
         return null;
+    }
+
+    /**
+     * Generates the tooltip text for the given values.
+     *
+     * @param target target to get its tooltip text
+     * @param legendLabel legend label
+     * @param description constraint's description
+     * @param starObs StarObservabilityData corresponding to the given target
+     * @param startDate start date of the time interval
+     * @param endDate end date of the time interval
+     *
+     * @return The tooltip text (possibly <code>null</code>).
+     */
+    public String generateToolTip(final Target target, final String legendLabel,
+                                  final String description,
+                                  final StarObservabilityData starObs,
+                                  final Date startDate, final Date endDate) {
+
+        final StringBuffer sb = this.sbToolTip;
+        sb.setLength(0); // clear
+
+        sb.append("<html><b>").append(legendLabel).append(" Observability");
+        if (description != null) {
+            sb.append(" [").append(description).append(']');
+        }
+        sb.append("</b>");
+
+        if (starObs != null) {
+            // note: often the start or end TargetPositionDate can not be found
+            // when the interval has been splitted due to night overlaps (RA)
+
+            Date date = startDate;
+            sb.append("<br><b>Start</b>: ");
+            FormatterUtils.format(this.timeFormatter, sb, date);
+
+            TargetPositionDate pos = starObs.getTargetPosition(date);
+            if (pos != null) {
+                sb.append(" - <b>HA</b>: ");
+                FormatterUtils.format(this.df1, sb, pos.getHa());
+                sb.append(" (az ").append(pos.getAzimuth());
+                sb.append(", el ").append(pos.getElevation()).append(")");
+            }
+
+            date = endDate;
+            sb.append("<br><b>End</b>: ");
+            FormatterUtils.format(this.timeFormatter, sb, date);
+
+            pos = starObs.getTargetPosition(date);
+            if (pos != null) {
+                sb.append(" - <b>HA</b>: ");
+                FormatterUtils.format(this.df1, sb, pos.getHa());
+                sb.append(" (az ").append(pos.getAzimuth());
+                sb.append(", el ").append(pos.getElevation()).append(")");
+            }
+
+            date = starObs.getTransitDate();
+            if (date != null) {
+                sb.append("<br><b>Transit</b>: ");
+                FormatterUtils.format(this.timeFormatter, sb, date);
+
+                // if target not rise at transit: no az/el:
+                pos = starObs.getTargetPosition(date);
+                if (pos != null) {
+                    sb.append(" (az ").append(pos.getAzimuth());
+                    sb.append(", el ").append(pos.getElevation()).append(")");
+                }
+            }
+            sb.append("<hr>");
+        }
+
+        target.toHtml(sb, false);
+
+        // Target user info:
+        final String userDescription = om.getTargetUserInfos().getDescription(target);
+
+        if (userDescription != null) {
+            sb.append("<hr><b>Notes</b>:<br>").append(StringUtils.replaceCR(userDescription, "<br>"));
+        }
+        sb.append("</html>");
+
+        return sb.toString();
     }
 
     /**
