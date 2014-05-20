@@ -13,6 +13,7 @@ import fr.jmmc.aspro.gui.action.ExportOBVegaAction;
 import fr.jmmc.aspro.gui.chart.AsproChartUtils;
 import fr.jmmc.aspro.gui.chart.ColorModelPaintScale;
 import fr.jmmc.aspro.gui.chart.EnhancedXYLineAnnotation;
+import fr.jmmc.aspro.gui.chart.ExtendedXYTextAnnotation;
 import fr.jmmc.aspro.gui.chart.PaintLogScaleLegend;
 import fr.jmmc.aspro.gui.task.AsproTaskRegistry;
 import fr.jmmc.aspro.gui.task.ObservationCollectionTaskSwingWorker;
@@ -3460,8 +3461,8 @@ public final class UVCoveragePanel extends javax.swing.JPanel implements XYToolT
      * @param v v coordinate in mega lambda
      * @return xy text annotation
      */
-    public static XYTextAnnotation createTimeAnnotation(final String text, final double u, final double v) {
-        final XYTextAnnotation annotation = new XYTextAnnotation(text, u, v);
+    public static ExtendedXYTextAnnotation createTimeAnnotation(final String text, final double u, final double v) {
+        final ExtendedXYTextAnnotation annotation = new ExtendedXYTextAnnotation(text, u, v);
         annotation.setFont(ChartUtils.DEFAULT_TEXT_SMALL_FONT);
         annotation.setPaint(Color.RED);
 
