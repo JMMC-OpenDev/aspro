@@ -45,6 +45,8 @@ public final class StarObservabilityData {
     private List<DateTimeInterval> visibleNoSoftLimits = null;
     /** list of visible date intervals for every Vcm limits */
     private List<List<DateTimeInterval>> visibleVcmLimits = null;
+    /** list of every Vcm limits (description) */
+    private List<String> vcmLimits = null;
     /** transit date */
     private Date transitDate;
     /** sampled target positions (ha, az, el) keyed by date */
@@ -136,6 +138,14 @@ public final class StarObservabilityData {
     }
 
     /**
+     * Return the list of every Vcm limits (description)
+     * @return list of every Vcm limits (description)
+     */
+    public List<String> getVcmLimits() {
+        return vcmLimits;
+    }
+
+    /**
      * Return the list of visible date intervals for every Vcm limits
      * @return list of visible date intervals for every Vcm limits
      */
@@ -144,11 +154,13 @@ public final class StarObservabilityData {
     }
 
     /**
-     * Return the list of visible date intervals for every Vcm limits
+     * Define the list of visible date intervals for every Vcm limits
+     * @param vcmLimits list of every Vcm limits (description)
      * @param rangesList list of visible date intervals for every Vcm limits
      */
-    public void setVisibleVcmLimits(final List<List<DateTimeInterval>> rangesList) {
-        visibleVcmLimits = rangesList;
+    public void setVisibleVcmLimits(final List<String> vcmLimits, final List<List<DateTimeInterval>> rangesList) {
+        this.vcmLimits = vcmLimits;
+        this.visibleVcmLimits = rangesList;
     }
 
     /**
