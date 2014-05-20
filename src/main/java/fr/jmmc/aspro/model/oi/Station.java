@@ -222,11 +222,27 @@ public class Station
     }
     
 //--simple--preserve
-    
-  @Override
-  public final String toString() {
-    return "Station : " + ((this.name != null) ? this.name : "undefined");
-  }
+    /** cached unique station identifier (used for its horizon profile) */
+    @javax.xml.bind.annotation.XmlTransient
+    private String key = null;
+
+    /**
+     * Return the (cached) station key
+     * @param interferometerName interferometer name used to compute a cache key (interferometer name - station name)
+     * @return "interferometer name - station name"
+     */
+    public final String getKey(final String interferometerName) {
+        if (this.key == null) {
+            // profile key = '<interferometer> - <station>' :
+            this.key = interferometerName + " - " + this.name;
+        }
+        return this.key;
+    }
+
+    @Override
+    public final String toString() {
+        return "Station : " + ((this.name != null) ? this.name : "undefined");
+    }
 
 //--simple--preserve
 
