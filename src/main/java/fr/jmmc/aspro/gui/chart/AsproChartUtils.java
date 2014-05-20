@@ -120,7 +120,7 @@ public final class AsproChartUtils {
         }
         final ValueAxis valueAxis = new NumberAxis(yAxisLabel);
 
-        final XYBarRenderer renderer = new XYBarRenderer();
+        final XYBarRenderer renderer = new EnhancedXYBarRenderer();
         if (tooltips) {
             XYToolTipGenerator tt;
             if (dateAxis) {
